@@ -32,7 +32,6 @@ import { initInfraServer } from './infra_server';
 import { InfraServerPluginSetupDeps, InfraServerPluginStartDeps } from './lib/adapters/framework';
 import { KibanaFramework } from './lib/adapters/framework/kibana_framework_adapter';
 import { KibanaMetricsAdapter } from './lib/adapters/metrics/kibana_metrics_adapter';
-import { InfraElasticsearchSourceStatusAdapter } from './lib/adapters/source_status';
 import { registerRuleTypes } from './lib/alerting';
 import {
   LOGS_RULES_ALERT_CONTEXT,
@@ -40,7 +39,6 @@ import {
 } from './lib/alerting/register_rule_types';
 import { InfraMetricsDomain } from './lib/domains/metrics_domain';
 import { InfraBackendLibs, InfraDomainLibs } from './lib/infra_types';
-import { InfraSourceStatus } from './lib/source_status';
 import { inventoryViewSavedObjectType, metricsExplorerViewSavedObjectType } from './saved_objects';
 import { InventoryViewsService } from './services/inventory_views';
 import { MetricsExplorerViewsService } from './services/metrics_explorer_views';
@@ -155,11 +153,6 @@ export class InfraServerPlugin
     const framework = new KibanaFramework(core, this.config, plugins);
     const sources = plugins.metricsData.getClient();
 
-    const sourceStatus = new InfraSourceStatus(
-      new InfraElasticsearchSourceStatusAdapter(framework),
-      { sources }
-    );
-
     // Setup infra services
     const inventoryViews = this.inventoryViews.setup();
     const metricsExplorerViews = this.metricsExplorerViews.setup();
@@ -180,7 +173,6 @@ export class InfraServerPlugin
       configuration: this.config,
       framework,
       sources,
-      sourceStatus,
       ...domainLibs,
       handleEsError,
       logsRules: this.logsRules.setup(core, plugins),

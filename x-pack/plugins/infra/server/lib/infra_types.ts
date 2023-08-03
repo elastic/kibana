@@ -17,7 +17,6 @@ import { RulesServiceSetup } from '../services/rules';
 import { InfraConfig, InfraPluginStartServicesAccessor } from '../types';
 import { KibanaFramework } from './adapters/framework/kibana_framework_adapter';
 import { InfraMetricsDomain } from './domains/metrics_domain';
-import { InfraSourceStatus } from './source_status';
 
 export interface InfraDomainLibs {
   logEntries: ILogsSharedLogEntriesDomain;
@@ -31,7 +30,6 @@ export interface InfraBackendLibs extends InfraDomainLibs {
   logsRules: RulesServiceSetup;
   metricsRules: RulesServiceSetup;
   sources: InfraSources;
-  sourceStatus: InfraSourceStatus;
   getAlertDetailsConfig: () => ObservabilityConfig['unsafe']['alertDetails'];
   getStartServices: InfraPluginStartServicesAccessor;
   handleEsError: typeof handleEsError;
