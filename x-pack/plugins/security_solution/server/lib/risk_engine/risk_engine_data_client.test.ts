@@ -68,7 +68,7 @@ jest.mock('./utils/create_datastream', () => ({
 describe('RiskEngineDataClient', () => {
   let riskEngineDataClient: RiskEngineDataClient;
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
-  const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+  const esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
   const mockSavedObjectClient = savedObjectsClientMock.create();
   const totalFieldsLimit = 1000;
 
@@ -77,7 +77,7 @@ describe('RiskEngineDataClient', () => {
     const options = {
       logger,
       kibanaVersion: '8.9.0',
-      elasticsearchClientPromise: Promise.resolve(esClient),
+      esClient,
     };
     riskEngineDataClient = new RiskEngineDataClient(options);
   });
