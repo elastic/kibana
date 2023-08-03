@@ -34,6 +34,7 @@ import type { EventSummaryField, EnrichedFieldInfo } from './types';
 import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy/timeline';
 
 import { isAlertFromEndpointEvent } from '../../utils/endpoint_alert_check';
+import { useCustomHighlightedFields } from './custom_highlighted_fields';
 
 const THRESHOLD_TERMS_FIELD = `${ALERT_THRESHOLD_RESULT}.terms.field`;
 const THRESHOLD_TERMS_VALUE = `${ALERT_THRESHOLD_RESULT}.terms.value`;
@@ -302,10 +303,25 @@ export const getSummaryRows = ({
     ? eventRuleTypeField?.originalValue?.[0]
     : eventRuleTypeField?.originalValue;
 
+  const customRuleHighlightedFieldsField = find(
+    { category: 'kibana', field: ALERT_RULE_CUSTOM_HIGHLIGHTED_FIELDS },
+    data
+  );
+  const customRuleHighlightedFields = customRuleHighlightedFieldsField?.originalValue;
+
+  const customHighlightedFields = [
+    ...useCustomHighlightedFields(),
+    ...(customRuleHighlightedFields ?? []),
+  ];
+  const eventSummaryCustoms: EventSummaryField[] = customHighlightedFields.map(
+    (custom: string) => ({ id: custom })
+  );
+
   const tableFields = getEventFieldsToDisplay({
     eventCategories,
     eventCode,
     eventRuleType,
+    eventSummaryCustoms,
   });
 
   return data != null

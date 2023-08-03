@@ -200,6 +200,7 @@ export const getAboutStepsData = (rule: Rule, detailsView: boolean): AboutStepRu
     severity,
     false_positives: falsePositives,
     risk_score: riskScore,
+    custom_highlighted_fields: customHighlightedFields,
     tags,
     threat,
     threat_indicator_path: threatIndicatorPath,
@@ -230,6 +231,7 @@ export const getAboutStepsData = (rule: Rule, detailsView: boolean): AboutStepRu
       isMappingChecked: riskScoreMapping.length > 0,
     },
     falsePositives,
+    customHighlightedFields,
     threat: threat as Threats,
     threatIndicatorPath,
   };

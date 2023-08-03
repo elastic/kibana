@@ -28,6 +28,7 @@ export const FieldComponent: React.FC<FieldProps> = ({
   selectedField,
   acceptsCustomOptions = false,
   showMappingConflicts = false,
+  acceptsMultiSelection = false,
 }): JSX.Element => {
   const {
     isInvalid,
@@ -48,6 +49,24 @@ export const FieldComponent: React.FC<FieldProps> = ({
     showMappingConflicts,
     onChange,
   });
+
+  if (acceptsMultiSelection) {
+    <EuiComboBox
+      placeholder={placeholder}
+      options={comboOptions}
+      selectedOptions={selectedComboOptions}
+      onChange={handleValuesChange}
+      isLoading={isLoading}
+      isDisabled={isDisabled}
+      isClearable={isClearable}
+      isInvalid={isInvalid}
+      onFocus={handleTouch}
+      data-test-subj="fieldAutocompleteComboBox"
+      style={fieldWidth}
+      fullWidth
+      renderOption={renderFields}
+    />;
+  }
 
   if (acceptsCustomOptions) {
     return (

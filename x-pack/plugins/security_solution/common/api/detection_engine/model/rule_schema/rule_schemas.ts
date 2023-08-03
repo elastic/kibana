@@ -51,6 +51,7 @@ import {
   IsRuleImmutable,
   MaxSignals,
   RuleAuthorArray,
+  RuleCustomHighlightedFieldArray,
   RuleDescription,
   RuleFalsePositiveArray,
   RuleFilterArray,
@@ -119,6 +120,7 @@ export const baseSchema = buildRuleSchemas({
     output_index: AlertsIndex,
     namespace: AlertsIndexNamespace,
     meta: RuleMetadata,
+    custom_highlighted_fields: RuleCustomHighlightedFieldArray,
     // Throttle
     throttle: RuleActionThrottle,
   },

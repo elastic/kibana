@@ -92,6 +92,8 @@ const ALERT_EVALUATION_VALUES = `${ALERT_NAMESPACE}.evaluation.values` as const;
 // Fields pertaining to the rule associated with the alert
 const ALERT_RULE_EXCEPTIONS_LIST = `${ALERT_RULE_NAMESPACE}.exceptions_list` as const;
 const ALERT_RULE_NAMESPACE_FIELD = `${ALERT_RULE_NAMESPACE}.namespace` as const;
+const ALERT_RULE_CUSTOM_HIGHLIGHTED_FIELDS =
+  `${ALERT_RULE_NAMESPACE}.custom_highlighted_fields` as const;
 
 // Fields pertaining to the threat tactic associated with the rule
 const ALERT_THREAT_FRAMEWORK = `${ALERT_RULE_THREAT_NAMESPACE}.framework` as const;
@@ -161,6 +163,7 @@ const fields = {
   ALERT_RULE_TYPE_ID,
   ALERT_RULE_UPDATED_AT,
   ALERT_RULE_UPDATED_BY,
+  ALERT_RULE_CUSTOM_HIGHLIGHTED_FIELDS,
   ALERT_RULE_VERSION,
   ALERT_START,
   ALERT_TIME_RANGE,
@@ -198,6 +201,7 @@ export {
   ALERT_BUILDING_BLOCK_TYPE,
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
+  ALERT_RULE_CUSTOM_HIGHLIGHTED_FIELDS,
   ALERT_CONTEXT,
   ALERT_EVALUATION_VALUES,
   ALERT_RULE_EXCEPTIONS_LIST,

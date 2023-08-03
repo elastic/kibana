@@ -219,6 +219,7 @@ export class EndpointRuleAlertGenerator extends BaseDataGenerator {
         'kibana.alert.rule.consumer': 'siem',
         'kibana.alert.rule.created_at': '2022-10-26T21:02:00.237Z',
         'kibana.alert.rule.created_by': 'some_user',
+        'kibana.alert.rule.custom_highlighted_fields': [],
         'kibana.alert.rule.description':
           'Generates a detection alert each time an Elastic Endpoint Security alert is received. Enabling this rule allows you to immediately begin investigating your Endpoint alerts.',
         'kibana.alert.rule.enabled': true,

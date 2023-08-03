@@ -27,6 +27,8 @@ export const ALERT_ORIGINAL_EVENT_MODULE = `${ALERT_ORIGINAL_EVENT}.module` as c
 export const ALERT_RULE_ACTIONS = `${ALERT_RULE_NAMESPACE}.actions` as const;
 export const ALERT_RULE_EXCEPTIONS_LIST = `${ALERT_RULE_NAMESPACE}.exceptions_list` as const;
 export const ALERT_RULE_FALSE_POSITIVES = `${ALERT_RULE_NAMESPACE}.false_positives` as const;
+export const ALERT_RULE_CUSTOM_HIGHLIGHTED_FIELDS =
+  `${ALERT_RULE_NAMESPACE}.custom_highlighted_fields` as const;
 export const ALERT_RULE_IMMUTABLE = `${ALERT_RULE_NAMESPACE}.immutable` as const;
 export const ALERT_RULE_MAX_SIGNALS = `${ALERT_RULE_NAMESPACE}.max_signals` as const;
 export const ALERT_RULE_META = `${ALERT_RULE_NAMESPACE}.meta` as const;

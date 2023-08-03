@@ -17,6 +17,7 @@ export interface FieldProps extends FieldBaseProps {
   placeholder: string;
   acceptsCustomOptions?: boolean;
   showMappingConflicts?: boolean;
+  acceptsMultiSelection?: boolean;
 }
 export interface FieldBaseProps {
   indexPattern: DataViewBase | undefined;

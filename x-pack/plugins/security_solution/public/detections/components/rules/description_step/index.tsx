@@ -242,6 +242,9 @@ export const getDescriptionItem = (
   } else if (field === 'falsePositives') {
     const values: string[] = get(field, data);
     return buildUnorderedListArrayDescription(label, field, values);
+  } else if (field === 'customHighlightedFields') {
+    const values: string[] = get(field, data);
+    return buildUnorderedListArrayDescription(label, field, values);
   } else if (field === 'riskScore') {
     const values: AboutStepRiskScore = get(field, data);
     return buildRiskScoreDescription(values);
