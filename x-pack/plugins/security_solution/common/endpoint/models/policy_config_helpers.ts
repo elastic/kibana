@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import type { PolicyConfig } from '../types';
+import { set } from 'lodash';
 import { ProtectionModes } from '../types';
+import type { PolicyConfig } from '../types';
 
 /**
  * Returns a copy of the passed `PolicyConfig` with all protections set to disabled.
@@ -106,3 +107,15 @@ const getDisabledWindowsSpecificPopups = (policy: PolicyConfig) => ({
     enabled: false,
   },
 });
+
+/**
+ * Returns the provided with only event collection turned enabled
+ * @param policy
+ */
+export const setPolicyToEventCollectionOnly = (policy: PolicyConfig): PolicyConfig => {
+  const updatedPolicy = disableProtections(policy);
+
+  set(updatedPolicy, 'windows.antivirus_registration.enabled', false);
+
+  return updatedPolicy;
+};

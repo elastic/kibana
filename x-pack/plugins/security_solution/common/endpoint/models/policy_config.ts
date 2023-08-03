@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { set } from 'lodash';
 import type { PolicyConfig } from '../types';
-import { PolicyOperatingSystem, ProtectionModes } from '../types';
+import { ProtectionModes } from '../types';
 
 /**
  * Return a new default `PolicyConfig` for platinum and above licenses
@@ -351,55 +350,3 @@ export const policyFactoryWithSupportedFeatures = (
  */
 export const DefaultPolicyNotificationMessage = 'Elastic Security {action} {filename}';
 export const DefaultPolicyRuleNotificationMessage = 'Elastic Security {action} {rule}';
-
-/**
- * Mutates the given `policy` on input and turns off all protections
- * @param policy
- */
-export const disableAllPolicyProtections = (policy: PolicyConfig): PolicyConfig => {
-  const allOsValues = [
-    PolicyOperatingSystem.mac,
-    PolicyOperatingSystem.linux,
-    PolicyOperatingSystem.windows,
-  ];
-  const updates = [
-    {
-      key: 'malware.mode',
-      value: ProtectionModes.off,
-      osList: allOsValues,
-    },
-    {
-      key: 'ransomware.mode',
-      value: ProtectionModes.off,
-      osList: [PolicyOperatingSystem.windows],
-    },
-    {
-      key: 'memory_protection.mode',
-      value: ProtectionModes.off,
-      osList: allOsValues,
-    },
-    {
-      key: 'behaviour_protection.mode',
-      value: ProtectionModes.off,
-      osList: [],
-    },
-    {
-      key: 'attack_surface_reduction.credential_hardening.enabled',
-      value: false,
-      osList: allOsValues,
-    },
-    {
-      key: 'antivirus_registration.enabled',
-      value: false,
-      osList: [PolicyOperatingSystem.windows],
-    },
-  ];
-
-  for (const { key, value, osList } of updates) {
-    for (const os of osList) {
-      set(policy, `${os}.${key}`, value);
-    }
-  }
-
-  return policy;
-};
