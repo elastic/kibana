@@ -43,5 +43,19 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
 
       await expect(await browser.getCurrentUrl()).contain('app/security/dashboards');
     });
+
+    it('shows cases in sidebar navigation', async () => {
+      await svlSecLandingPage.assertSvlSecSideNavExists();
+      await svlCommonNavigation.expectExists();
+
+      expect(await testSubjects.existOrFail('solutionSideNavItemLink-cases'));
+    });
+
+    it('navigates to cases app', async () => {
+      await testSubjects.click('solutionSideNavItemLink-cases');
+
+      expect(await browser.getCurrentUrl()).contain('/app/security/cases');
+      await testSubjects.existOrFail('cases-all-title');
+    });
   });
 }
