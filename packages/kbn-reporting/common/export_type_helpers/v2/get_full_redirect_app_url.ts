@@ -7,7 +7,7 @@
  */
 
 import { format } from 'url';
-import { getRedirectAppPath, ReportingConfigType, ReportingServerInfo } from '@kbn/reporting-common';
+import { getRedirectAppPath, ReportingConfigType, ReportingServerInfo } from '../..';
 import { buildKibanaPath } from './build_kibana_path';
 
 export function getFullRedirectAppUrl(
