@@ -733,6 +733,8 @@ describe('<CspPolicyTemplateForm />', () => {
         shared_credential_file: { value: undefined },
       });
 
+      console.log(policy);
+
       expect(onChange).toHaveBeenCalledWith({
         isValid: true,
         updatedPolicy: policy,
