@@ -16,28 +16,10 @@ import { Doc, DocProps } from './doc';
 import { SEARCH_FIELDS_FROM_SOURCE as mockSearchFieldsFromSource } from '@kbn/discover-utils';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { setDocViewsRegistry } from '@kbn/unified-doc-viewer-plugin/public';
+import { DocViewsRegistry } from '@kbn/unified-doc-viewer';
 
 const mockSearchApi = jest.fn();
-
-jest.mock('../../../kibana_services', () => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let registry: any[] = [];
-
-  return {
-    getDocViewsRegistry: () => ({
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      addDocView(view: any) {
-        registry.push(view);
-      },
-      getDocViewsSorted() {
-        return registry;
-      },
-      resetRegistry: () => {
-        registry = [];
-      },
-    }),
-  };
-});
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -120,6 +102,7 @@ describe('Test of <Doc /> of Discover', () => {
   });
 
   test('renders elasticsearch hit ', async () => {
+    setDocViewsRegistry(new DocViewsRegistry());
     mockSearchApi.mockImplementation(() =>
       of({ rawResponse: { hits: { total: 1, hits: [{ _id: 1, _source: { test: 1 } }] } } })
     );
