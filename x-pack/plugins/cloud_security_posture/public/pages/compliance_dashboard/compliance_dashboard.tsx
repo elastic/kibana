@@ -186,7 +186,7 @@ const IntegrationPostureDashboard = ({
   );
 };
 
-const getDefaultTab = (
+export const getDefaultTab = (
   pluginStatus?: BaseCspSetupStatus,
   cspmStats?: ComplianceDashboardData,
   kspmStats?: ComplianceDashboardData
@@ -251,9 +251,8 @@ const TabContent = ({ posturetype }: { posturetype: PosturePolicyTemplate }) => 
     refetchInterval: determineDashboardDataRefetchInterval,
   });
   const setupStatus = getSetupStatus?.[posturetype]?.status;
-  const setupStatusHandledInDashboard =
-    setupStatus === 'indexed' || setupStatus === 'not-installed';
-  const shouldRenderNoFindings = !isCloudSecurityPostureInstalled || !setupStatusHandledInDashboard;
+  const isStatusManagedInDashboard = setupStatus === 'indexed' || setupStatus === 'not-installed';
+  const shouldRenderNoFindings = !isCloudSecurityPostureInstalled || !isStatusManagedInDashboard;
   const cspmIntegrationLink = useCspIntegrationLink(CSPM_POLICY_TEMPLATE);
   const kspmIntegrationLink = useCspIntegrationLink(KSPM_POLICY_TEMPLATE);
   let integrationLink;
