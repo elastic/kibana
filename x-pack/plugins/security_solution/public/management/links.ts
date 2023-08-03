@@ -218,8 +218,7 @@ export const getManagementFilteredLinks = async (
     fleetAuthz && currentUser
       ? calculateEndpointAuthz(licenseService, fleetAuthz, currentUser.roles)
       : getEndpointAuthzInitialState();
-  const isPlatinumOrTrialLicense =
-    licenseService.isPlatinumPlus() || licenseService.getLicenseInformation()?.type === 'trial';
+  const showEntityAnalytics = licenseService.isPlatinumPlus();
   const showHostIsolationExceptions =
     canAccessHostIsolationExceptions || // access host isolation exceptions is a paid feature, always show the link.
     // read host isolation exceptions is not a paid feature, to allow deleting exceptions after a downgrade scenario.
@@ -257,7 +256,7 @@ export const getManagementFilteredLinks = async (
     linksToExclude.push(SecurityPageName.blocklist);
   }
 
-  if (!isPlatinumOrTrialLicense) {
+  if (!showEntityAnalytics) {
     linksToExclude.push(SecurityPageName.entityAnalyticsManagement);
   }
 
