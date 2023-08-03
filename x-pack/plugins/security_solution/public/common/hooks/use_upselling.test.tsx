@@ -62,7 +62,9 @@ describe('use_upselling', () => {
     const emptyMessages = {};
     mockUpselling.registerMessages(emptyMessages);
 
-    const { result } = renderHook(() => useUpsellingMessage('investigation_guide'));
+    const { result } = renderHook(() =>
+      useUpsellingMessage('my_fake_message_id' as 'investigation_guide')
+    );
     expect(result.current).toBe(null);
   });
 });
