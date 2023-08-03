@@ -7,6 +7,7 @@
 
 import { useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
+import type React from 'react';
 import { useUpsellingService } from '../components/upselling_provider';
 import type { UpsellingSectionId } from '../lib/upsellings';
 import type { SecurityPageName } from '../../../common';
@@ -20,7 +21,7 @@ export const useUpsellingComponent = (id: UpsellingSectionId): React.ComponentTy
 };
 
 export const useUpsellingMessage = (id: UpsellingMessageId): string | null => {
-  const { upselling } = useKibana().services;
+  const upselling = useUpsellingService();
   const upsellingMessages = useObservable(upselling.messages$);
 
   return useMemo(() => upsellingMessages?.get(id) ?? null, [id, upsellingMessages]);

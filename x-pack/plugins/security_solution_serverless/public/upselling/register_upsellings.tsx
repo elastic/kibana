@@ -11,6 +11,10 @@ import type {
   SectionUpsellings,
   UpsellingSectionId,
 } from '@kbn/security-solution-plugin/public';
+import type {
+  MessageUpsellings,
+  UpsellingMessageId,
+} from '@kbn/security-solution-plugin/public/common/lib/upsellings/types';
 import React, { lazy } from 'react';
 import { EndpointPolicyProtectionsLazy } from './sections/endpoint_management';
 import type { SecurityProductTypes } from '../../common/config';
