@@ -18,22 +18,14 @@ import {
   RISK_SCORE_STATUS,
 } from '../../screens/entity_analytics_management';
 
-import {
-  deleteRiskScore,
-  interceptInstallRiskScoreModule,
-  waitForInstallRiskScoreModule,
-} from '../../tasks/api_calls/risk_scores';
-import { clickEnableRiskScore } from '../../tasks/risk_scores';
+import { deleteRiskScore, installRiskScoreModule } from '../../tasks/api_calls/risk_scores';
 import { RiskScoreEntity } from '../../tasks/risk_scores/common';
 import { login, visit, visitWithoutDateRange } from '../../tasks/login';
 import { cleanKibana } from '../../tasks/common';
-import {
-  ENTITY_ANALYTICS_MANAGEMENT_URL,
-  ALERTS_URL,
-  ENTITY_ANALYTICS_URL,
-} from '../../urls/navigation';
+import { ENTITY_ANALYTICS_MANAGEMENT_URL, ALERTS_URL } from '../../urls/navigation';
 import { getNewRule } from '../../objects/rule';
 import { createRule } from '../../tasks/api_calls/rules';
+import { deleteConfiguration } from '../../tasks/api_calls/risk_engine';
 import { updateDateRangeInLocalDatePickers } from '../../tasks/date_picker';
 import { fillLocalSearchBar, submitLocalSearch } from '../../tasks/search_bar';
 import {
@@ -55,6 +47,7 @@ describe(
       login();
       visitWithoutDateRange(ALERTS_URL);
       createRule(getNewRule({ query: 'user.name:* or host.name:*', risk_score: 70 }));
+      deleteConfiguration();
       visit(ENTITY_ANALYTICS_MANAGEMENT_URL);
     });
 
@@ -140,16 +133,14 @@ describe(
           statusCode: 500,
         });
 
-        cy.get(RISK_SCORE_STATUS).should('have.text', 'On');
+        // init
+        riskEngineStatusChange();
 
-        cy.get(RISK_SCORE_ERROR_PANEL).contains('Error enabling risk engine');
+        cy.get(RISK_SCORE_ERROR_PANEL).contains('Sorry, there was an error');
       });
 
       it('should update if there legacy risk score installed', () => {
-        visit(ENTITY_ANALYTICS_URL);
-        interceptInstallRiskScoreModule();
-        clickEnableRiskScore(RiskScoreEntity.host);
-        waitForInstallRiskScoreModule();
+        installRiskScoreModule();
         visit(ENTITY_ANALYTICS_MANAGEMENT_URL);
 
         cy.get(RISK_SCORE_STATUS).should('not.exist');
