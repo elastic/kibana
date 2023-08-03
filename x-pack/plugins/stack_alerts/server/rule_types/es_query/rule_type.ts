@@ -9,19 +9,14 @@ import { i18n } from '@kbn/i18n';
 import { CoreSetup } from '@kbn/core/server';
 import { extractReferences, injectReferences } from '@kbn/data-plugin/common';
 import { IRuleTypeAlerts } from '@kbn/alerting-plugin/server';
-import { ALERT_RULE_NAME, ALERT_URL } from '@kbn/rule-data-utils';
-import { RuleAlertData } from '@kbn/alerting-plugin/common';
 import {
-  ALERT_CONDITIONS,
-  ALERT_CONDITIONS_MET_VALUE,
-  ALERT_HITS_COUNT,
-  ALERT_HITS_HITS,
-  ALERT_MESSAGE,
-  ALERT_STATE_DATE_END,
-  ALERT_STATE_DATE_START,
-  ALERT_STATE_LAST_TIMESTAMP,
-  ALERT_TITLE,
-} from './fields';
+  ALERT_EVALUATION_CONDITIONS,
+  ALERT_EVALUATION_VALUE,
+  ALERT_REASON,
+  ALERT_URL,
+} from '@kbn/rule-data-utils';
+import { RuleAlertData } from '@kbn/alerting-plugin/common';
+import { ALERT_TITLE } from './fields';
 import { RuleType } from '../../types';
 import { ActionContext } from './action_context';
 import {
@@ -155,17 +150,11 @@ export function getRuleType(
     context: 'stack.esquery',
     mappings: {
       fieldMap: {
-        [ALERT_RULE_NAME]: { type: 'keyword', array: false, required: false },
         [ALERT_URL]: { type: 'text', array: false, required: false },
-        [ALERT_HITS_COUNT]: { type: 'long', array: false, required: false },
-        [ALERT_HITS_HITS]: { type: 'object', array: true, required: false },
-        [ALERT_MESSAGE]: { type: 'text', array: false, required: false },
         [ALERT_TITLE]: { type: 'keyword', array: false, required: false },
-        [ALERT_CONDITIONS]: { type: 'keyword', array: false, required: false },
-        [ALERT_CONDITIONS_MET_VALUE]: { type: 'keyword', array: false, required: false },
-        [ALERT_STATE_LAST_TIMESTAMP]: { type: 'keyword', array: false, required: false },
-        [ALERT_STATE_DATE_START]: { type: 'keyword', array: false, required: false },
-        [ALERT_STATE_DATE_END]: { type: 'keyword', array: false, required: false },
+        [ALERT_REASON]: { type: 'keyword', array: false, required: false },
+        [ALERT_EVALUATION_CONDITIONS]: { type: 'keyword', array: false, required: false },
+        [ALERT_EVALUATION_VALUE]: { type: 'keyword', array: false, required: false },
       },
     },
     shouldWrite: true,
