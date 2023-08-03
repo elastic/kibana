@@ -226,9 +226,6 @@ describe('<ThresholdWatchEditPage /> create route', () => {
 
           component.update();
 
-          // eslint-disable-next-line no-console
-          console.log(component.debug());
-
           // Set up valid fields needed for actions component to render
           await act(async () => {
             form.setInputValue('nameInput', WATCH_NAME);
