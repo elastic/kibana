@@ -203,8 +203,6 @@ export class UptimePlugin
   }
 
   public start(coreStart: CoreStart, pluginsStart: ClientPluginsStart): void {
-    const { triggersActionsUi } = pluginsStart;
-
     const { registerExtension } = pluginsStart.fleet;
     setStartServices(coreStart);
     registerUptimeFleetExtensions(registerExtension);
