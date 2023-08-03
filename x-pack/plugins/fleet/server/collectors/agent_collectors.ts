@@ -125,11 +125,14 @@ export const getAgentData = async (
           },
           os: {
             multi_terms: {
-              terms: [{ 
-                field: 'local_metadata.os.name.keyword' 
-              }, {
-                field: 'local_metadata.os.version.keyword' 
-              }],
+              terms: [
+                {
+                  field: 'local_metadata.os.name.keyword',
+                },
+                {
+                  field: 'local_metadata.os.version.keyword',
+                },
+              ],
             },
           },
         },
