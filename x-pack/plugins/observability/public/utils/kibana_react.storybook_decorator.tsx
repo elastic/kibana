@@ -36,13 +36,8 @@ export function KibanaReactStorybookDecorator(Story: ComponentType) {
       thresholdRule: { enabled: false },
     },
     compositeSlo: { enabled: false },
-    aiAssistant: {
-      enabled: false,
-      feedback: {
-        enabled: false,
-      },
-    },
   };
+
   const mockTheme: CoreTheme = {
     darkMode: false,
   };

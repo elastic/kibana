@@ -13,7 +13,7 @@ import { css } from '@emotion/react';
 import { findInventoryModel } from '../../../../../common/inventory_models';
 import { useMetadata } from '../../hooks/use_metadata';
 import { useSourceContext } from '../../../../containers/metrics_source';
-import { MetadataSummary } from './metadata_summary';
+import { MetadataSummaryList } from './metadata_summary/metadata_summary_list';
 import { AlertsSummaryContent } from './alerts';
 import { KPIGrid } from './kpis/kpi_grid';
 import { MetricsGrid } from './metrics/metrics_grid';
@@ -71,7 +71,7 @@ export const Overview = () => {
             />
           </EuiCallOut>
         ) : (
-          <MetadataSummary metadata={metadata} metadataLoading={metadataLoading} />
+          <MetadataSummaryList metadata={metadata} metadataLoading={metadataLoading} />
         )}
         <SectionSeparator />
       </EuiFlexItem>
