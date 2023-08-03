@@ -22,3 +22,13 @@ export interface StorageExplorerHostBreakdownSizeChart {
     y?: number | null;
   }>;
 }
+
+export interface HostDetails {
+  hostId: string;
+  hostName: string;
+  projectId: string;
+  probabilisticValues: number[];
+  totalEventsSize: number;
+  totalMetricsSize: number;
+  totalSize: number;
+}
