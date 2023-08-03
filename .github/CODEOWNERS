@@ -560,9 +560,9 @@ packages/kbn-repo-source-classifier-cli @elastic/kibana-operations
 packages/kbn-reporting/common @elastic/appex-sharedux
 x-pack/examples/reporting_example @elastic/appex-sharedux
 packages/kbn-reporting/export_types/csv @elastic/appex-sharedux
-packages/kbn-reporting/export_types/png @elastic/appex-sharedux
-packages/kbn-reporting/export_types/pdf @elastic/appex-sharedux
 packages/kbn-reporting/export_types/deprecated @elastic/appex-sharedux
+packages/kbn-reporting/export_types/printable_pdf_v2 @elastic/appex-sharedux
+packages/kbn-reporting/export_types/png @elastic/appex-sharedux
 x-pack/plugins/reporting @elastic/appex-sharedux
 x-pack/test/plugin_functional/plugins/resolver_test @elastic/security-solution
 examples/response_stream @elastic/ml-ui

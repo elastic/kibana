@@ -40,6 +40,9 @@
     "@kbn/saved-search-plugin",
     "@kbn/reporting-export-types-csv",
     "@kbn/core-http-router-server-internal",
+    "@kbn/reporting-export-types-pdf",
+    "@kbn/reporting-export-types-deprecated",
+    "@kbn/reporting-export-types-png",
   ],
   "exclude": [
     "target/**/*",

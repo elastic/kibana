@@ -38,5 +38,5 @@ export {
   getFullUrls,
   getAbsoluteUrlFactory,
   generatePngObservable,
-  buildKibanaPath
+  buildKibanaPath,
 } from './export_type_helpers';
