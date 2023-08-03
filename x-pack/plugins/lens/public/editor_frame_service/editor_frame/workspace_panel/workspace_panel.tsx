@@ -138,6 +138,10 @@ export const WorkspacePanel = React.memo(function WorkspacePanel(props: Workspac
   );
 });
 
+const log = (...messages: Array<string | number>) => {
+  // console.log(...messages);
+};
+
 // Exported for testing purposes only.
 export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   framePublicAPI,
@@ -204,10 +208,10 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
       if (!initialVisualizationRenderComplete.current) {
         initialVisualizationRenderComplete.current = true;
         // NOTE: this metric is only repored for an initial editor load of a pre-existing visualization
-        // console.log(
-        //   'initial visualization took to render after data received',
-        //   performance.now() - dataReceivedTime.current
-        // );
+        log(
+          'initial visualization took to render after data received',
+          performance.now() - dataReceivedTime.current
+        );
       }
       const datasourceEvents = Object.values(renderDeps.current.datasourceMap).reduce<string[]>(
         (acc, datasource) => {
@@ -250,10 +254,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
         dataReceivedTime.current = performance.now();
         if (!initialVisualizationRenderComplete.current) {
           // NOTE: this metric is only repored for an initial editor load of a pre-existing visualization
-          // console.log(
-          //   'initial data took to arrive',
-          //   dataReceivedTime.current - initialRenderTime.current
-          // );
+          log('initial data took to arrive', dataReceivedTime.current - initialRenderTime.current);
         }
 
         const [defaultLayerId] = Object.keys(renderDeps.current.datasourceLayers);
