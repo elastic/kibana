@@ -8,7 +8,6 @@
 import React, { ChangeEvent, useCallback, useEffect, useMemo, useState } from 'react';
 import { debounce } from 'lodash';
 import {
-  EuiAccordion,
   EuiButtonEmpty,
   EuiCallOut,
   EuiCheckbox,
@@ -18,7 +17,6 @@ import {
   EuiIcon,
   EuiLink,
   EuiLoadingSpinner,
-  EuiPanel,
   EuiSpacer,
   EuiText,
   EuiToolTip,
@@ -37,7 +35,7 @@ import {
 } from '@kbn/triggers-actions-ui-plugin/public';
 
 import { useKibana } from '../../utils/kibana_react';
-import { Aggregators, Comparator, QUERY_INVALID } from '../../../common/threshold_rule/types';
+import { Aggregators, Comparator } from '../../../common/threshold_rule/types';
 import { TimeUnitChar } from '../../../common/utils/formatters/duration';
 import { AlertContextMeta, AlertParams, MetricExpression } from './types';
 import { ExpressionChart } from './components/expression_chart';
@@ -45,7 +43,6 @@ import { ExpressionRow } from './components/expression_row';
 import { MetricsExplorerKueryBar } from './components/kuery_bar';
 import { MetricsExplorerGroupBy } from './components/group_by';
 import { MetricsExplorerOptions } from './hooks/use_metrics_explorer_options';
-import { convertKueryToElasticSearchQuery } from './helpers/kuery';
 
 const FILTER_TYPING_DEBOUNCE_MS = 500;
 
@@ -172,17 +169,9 @@ export default function Expressions(props: Props) {
 
   const onFilterChange = useCallback(
     (filter: any) => {
-      setRuleParams('filterQueryText', filter);
-      try {
-        setRuleParams(
-          'filterQuery',
-          convertKueryToElasticSearchQuery(filter, derivedIndexPattern, false) || ''
-        );
-      } catch (e) {
-        setRuleParams('filterQuery', QUERY_INVALID);
-      }
+      setRuleParams('filterQuery', filter);
     },
-    [setRuleParams, derivedIndexPattern]
+    [setRuleParams]
   );
 
   /* eslint-disable-next-line react-hooks/exhaustive-deps */
@@ -252,23 +241,15 @@ export default function Expressions(props: Props) {
   const preFillAlertFilter = useCallback(() => {
     const md = metadata;
     if (md && md.currentOptions?.filterQuery) {
-      setRuleParams('filterQueryText', md.currentOptions.filterQuery);
-      setRuleParams(
-        'filterQuery',
-        convertKueryToElasticSearchQuery(md.currentOptions.filterQuery, derivedIndexPattern) || ''
-      );
+      setRuleParams('filterQuery', md.currentOptions.filterQuery);
     } else if (md && md.currentOptions?.groupBy && md.series) {
       const { groupBy } = md.currentOptions;
       const filter = Array.isArray(groupBy)
         ? groupBy.map((field, index) => `${field}: "${md.series?.keys?.[index]}"`).join(' and ')
         : `${groupBy}: "${md.series.id}"`;
-      setRuleParams('filterQueryText', filter);
-      setRuleParams(
-        'filterQuery',
-        convertKueryToElasticSearchQuery(filter, derivedIndexPattern) || ''
-      );
+      setRuleParams('filterQuery', filter);
     }
-  }, [metadata, derivedIndexPattern, setRuleParams]);
+  }, [metadata, setRuleParams]);
 
   const preFillAlertGroupBy = useCallback(() => {
     const md = metadata;
@@ -400,7 +381,7 @@ export default function Expressions(props: Props) {
               <ExpressionChart
                 expression={e}
                 derivedIndexPattern={derivedIndexPattern}
-                filterQuery={ruleParams.filterQueryText}
+                filterQuery={ruleParams.filterQuery}
                 groupBy={ruleParams.groupBy}
                 timeFieldName={dataView?.timeFieldName}
               />
@@ -433,46 +414,6 @@ export default function Expressions(props: Props) {
         </EuiButtonEmpty>
       </div>
       <EuiSpacer size={'m'} />
-      <EuiAccordion
-        id="advanced-options-accordion"
-        buttonContent={i18n.translate(
-          'xpack.observability.threshold.rule.alertFlyout.advancedOptions',
-          {
-            defaultMessage: 'Advanced options',
-          }
-        )}
-      >
-        <EuiPanel color="subdued">
-          <EuiCheckbox
-            disabled={disableNoData}
-            id="metrics-alert-no-data-toggle"
-            label={
-              <>
-                {i18n.translate('xpack.observability.threshold.rule.alertFlyout.alertOnNoData', {
-                  defaultMessage: "Alert me if there's no data",
-                })}{' '}
-                <EuiToolTip
-                  content={
-                    (disableNoData ? `${docCountNoDataDisabledHelpText} ` : '') +
-                    i18n.translate(
-                      'xpack.observability.threshold.rule.alertFlyout.noDataHelpText',
-                      {
-                        defaultMessage:
-                          'Enable this to trigger the action if the metric(s) do not report any data over the expected time period, or if the alert fails to query Elasticsearch',
-                      }
-                    )
-                  }
-                >
-                  <EuiIcon type="questionInCircle" color="subdued" />
-                </EuiToolTip>
-              </>
-            }
-            checked={ruleParams.alertOnNoData}
-            onChange={(e) => setRuleParams('alertOnNoData', e.target.checked)}
-          />
-        </EuiPanel>
-      </EuiAccordion>
-      <EuiSpacer size={'m'} />
       <EuiFormRow
         label={i18n.translate('xpack.observability.threshold.rule.alertFlyout.filterLabel', {
           defaultMessage: 'Filter (optional)',
@@ -482,20 +423,22 @@ export default function Expressions(props: Props) {
         })}
         fullWidth
         display="rowCompressed"
+        isInvalid={!!errors.filterQuery}
       >
         {(metadata && derivedIndexPattern && (
           <MetricsExplorerKueryBar
             derivedIndexPattern={derivedIndexPattern}
             onChange={debouncedOnFilterChange}
             onSubmit={onFilterChange}
-            value={ruleParams.filterQueryText}
+            value={ruleParams.filterQuery}
           />
         )) || (
           <EuiFieldSearch
             data-test-subj="thresholdRuleExpressionsFieldSearch"
             onChange={handleFieldSearchChange}
-            value={ruleParams.filterQueryText}
+            value={ruleParams.filterQuery}
             fullWidth
+            isInvalid={!!errors.filterQuery}
           />
         )}
       </EuiFormRow>

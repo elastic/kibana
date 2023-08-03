@@ -19,6 +19,7 @@ import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin
 import pMap from 'p-map';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
+import { registerCleanUpTask } from './private_location/clean_up_task';
 import { SyntheticsServerSetup } from '../types';
 import { syntheticsMonitorType, syntheticsParamType } from '../../common/types/saved_objects';
 import { sendErrorTelemetryEvents } from '../routes/telemetry/monitor_upgrade_sender';
@@ -92,6 +93,7 @@ export class SyntheticsService {
 
   public async setup(taskManager: TaskManagerSetupContract) {
     this.registerSyncTask(taskManager);
+    registerCleanUpTask(taskManager, this.server);
 
     await this.registerServiceLocations();
 
@@ -418,12 +420,15 @@ export class SyntheticsService {
     await this.getMonitorConfigs(subject);
   }
 
-  async runOnceConfigs(configs: ConfigData) {
-    const license = await this.getLicense();
+  async runOnceConfigs(configs?: ConfigData) {
+    if (!configs) {
+      return;
+    }
     const monitors = this.formatConfigs(configs);
     if (monitors.length === 0) {
       return;
     }
+    const license = await this.getLicense();
 
     const output = await this.getOutput();
     if (!output) {
