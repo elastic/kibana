@@ -126,7 +126,7 @@ export class SharePlugin implements Plugin<SharePluginSetup, SharePluginStart> {
       this.url!,
       this.shareMenuRegistry.start(),
       allowEmbed,
-      this.anonymousAccessServiceProvider,
+      this.anonymousAccessServiceProvider
     );
 
     return {
