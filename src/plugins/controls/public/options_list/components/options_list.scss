@@ -81,8 +81,10 @@
     border-color: darken($euiColorLightestShade, 2%);
 
     .optionsList__sortButton {
-      box-shadow: inset 0 0 0 $euiBorderWidthThin $euiBorderColor;
+      box-shadow: inset 0 0 0 $euiBorderWidthThin $euiFormBorderColor;
+      background-color: $euiFormBackgroundColor;
     }
+
     .optionsList__actionsRow {
       margin: ($euiSizeS / 2) 0 !important;
 
