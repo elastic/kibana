@@ -75,7 +75,7 @@ export const EndpointEventCollectionPreset = memo<EndpointEventCollectionPresetP
     }, [newPolicy, onChange, policyInputs]);
 
     return (
-      <div>
+      <div data-test-subj="endpointDataCollectionOnlyPreset">
         <EuiSpacer size="m" />
         <EuiFormRow
           fullWidth
