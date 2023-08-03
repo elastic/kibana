@@ -31,7 +31,7 @@ export async function getTotalCount(
       init_script: 'state.types = [:]',
       map_script: `
         String actionType = doc['action.actionTypeId'].value;
-        if (actionType =~ /.gen-ai/) {
+        if (actionType =~ /\.gen-ai/) {
           String genAiActionType = actionType +"__"+ doc['apiProvider'].value;
           state.types.put(genAiActionType, state.types.containsKey(genAiActionType) ? state.types.get(genAiActionType) + 1 : 1);
         } else {
@@ -71,7 +71,7 @@ export async function getTotalCount(
           script: {
             // add apiProvider to the doc so we can use it in the scripted_metric
             source: `
-            if (doc['action.actionTypeId'].value =~ /.gen-ai/) {
+            if (doc['action.actionTypeId'].value =~ /\.gen-ai/) {
               emit(params._source["action"]["config"]["apiProvider"])
             }
             `,
