@@ -116,7 +116,6 @@ export interface SearchServiceStartDependencies {
   fieldFormats: FieldFormatsStart;
   indexPatterns: DataViewsServerPluginStart;
   taskManager?: TaskManagerStartContract;
-  rollupsEnabled?: boolean;
 }
 
 /** @internal */

@@ -107,10 +107,7 @@ export class RollupPlugin implements Plugin<void, void, any, any> {
     data.search.enableRollups();
   }
 
-  start() {
-    // So plugins can check whether this plugin is enabled via plugin contract
-    return {};
-  }
+  start() {}
 
   stop() {}
 }

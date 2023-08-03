@@ -93,8 +93,4 @@ export interface DataViewsServerPluginStartDependencies {
    * Logger
    */
   logger: Logger;
-  /**
-   * Rollup - only checking for presence of rollup plugin
-   */
-  rollup: {};
 }
