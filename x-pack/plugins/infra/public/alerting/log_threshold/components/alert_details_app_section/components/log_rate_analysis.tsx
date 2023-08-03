@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC, useEffect, useMemo, useState } from 'react';
 import { pick, orderBy } from 'lodash';
 import moment from 'moment';
 
@@ -13,12 +13,22 @@ import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DataView } from '@kbn/data-views-plugin/common';
-import { LogRateAnalysisContent, type LogRateAnalysisResultsData } from '@kbn/aiops-plugin/public';
+import {
+  LogRateAnalysisContent,
+  LOG_RATE_ANALYSIS_TYPE,
+  type LogRateAnalysisResultsData,
+  type LogRateAnalysisType,
+} from '@kbn/aiops-plugin/public';
 import { Rule } from '@kbn/alerting-plugin/common';
-import { CoPilotPrompt, TopAlert, useCoPilot } from '@kbn/observability-plugin/public';
+import { TopAlert } from '@kbn/observability-plugin/public';
+import {
+  ContextualInsight,
+  useObservabilityAIAssistant,
+  type Message,
+  MessageRole,
+} from '@kbn/observability-ai-assistant-plugin/public';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
-import { CoPilotPromptId } from '@kbn/observability-plugin/common';
 import { ALERT_END } from '@kbn/rule-data-utils';
 import { Color, colorTransformer } from '../../../../../../common/color_palette';
 import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
@@ -30,7 +40,7 @@ import {
   ruleParamsRT,
 } from '../../../../../../common/alerting/logs/log_threshold';
 import { decodeOrThrow } from '../../../../../../common/runtime_types';
-import { getESQueryForLogSpike } from '../log_rate_spike_query';
+import { getESQueryForLogRateAnalysis } from '../log_rate_analysis_query';
 
 export interface AlertDetailsLogRateAnalysisSectionProps {
   rule: Rule<PartialRuleParams>;
@@ -49,14 +59,19 @@ export const LogRateAnalysis: FC<AlertDetailsLogRateAnalysisSectionProps> = ({ r
   const { dataViews, logsShared } = services;
   const [dataView, setDataView] = useState<DataView | undefined>();
   const [esSearchQuery, setEsSearchQuery] = useState<QueryDslQueryContainer | undefined>();
-  const [logSpikeParams, setLogSpikeParams] = useState<
+  const [logRateAnalysisParams, setLogRateAnalysisParams] = useState<
     { significantFieldValues: SignificantFieldValue[] } | undefined
   >();
+  const [logRateAnalysisType, setLogRateAnalysisType] = useState<LogRateAnalysisType | undefined>(
+    undefined
+  );
+
+  const validatedParams = useMemo(() => decodeOrThrow(ruleParamsRT)(rule.params), [rule]);
 
   useEffect(() => {
     const getDataView = async () => {
       const { timestampField, dataViewReference } =
-        await logsShared.logViews.client.getResolvedLogView(rule.params.logView);
+        await logsShared.logViews.client.getResolvedLogView(validatedParams.logView);
 
       if (dataViewReference.id) {
         const logDataView = await dataViews.get(dataViewReference.id);
@@ -66,11 +81,11 @@ export const LogRateAnalysis: FC<AlertDetailsLogRateAnalysisSectionProps> = ({ r
     };
 
     const getQuery = (timestampField: string) => {
-      const esSearchRequest = getESQueryForLogSpike(
+      const esSearchRequest = getESQueryForLogRateAnalysis(
         validatedParams as CountRuleParams,
         timestampField,
         alert,
-        rule.params.groupBy
+        validatedParams.groupBy
       ) as QueryDslQueryContainer;
 
       if (esSearchRequest) {
@@ -78,16 +93,23 @@ export const LogRateAnalysis: FC<AlertDetailsLogRateAnalysisSectionProps> = ({ r
       }
     };
 
-    const validatedParams = decodeOrThrow(ruleParamsRT)(rule.params);
-
-    if (
-      !isRatioRuleParams(validatedParams) &&
-      (validatedParams.count.comparator === Comparator.GT ||
-        validatedParams.count.comparator === Comparator.GT_OR_EQ)
-    ) {
+    if (!isRatioRuleParams(validatedParams)) {
       getDataView();
+
+      switch (validatedParams.count.comparator) {
+        case Comparator.GT:
+        case Comparator.GT_OR_EQ:
+          setLogRateAnalysisType(LOG_RATE_ANALYSIS_TYPE.SPIKE);
+          break;
+        case Comparator.LT:
+        case Comparator.LT_OR_EQ:
+          setLogRateAnalysisType(LOG_RATE_ANALYSIS_TYPE.DIP);
+          break;
+        default:
+          setLogRateAnalysisType(undefined);
+      }
     }
-  }, [rule, alert, dataViews, logsShared]);
+  }, [validatedParams, alert, dataViews, logsShared]);
 
   // Identify `intervalFactor` to adjust time ranges based on alert settings.
   // The default time ranges for `initialAnalysisStart` are suitable for a `1m` lookback.
@@ -148,8 +170,8 @@ export const LogRateAnalysis: FC<AlertDetailsLogRateAnalysisSectionProps> = ({ r
     deviationMax: getDeviationMax(),
   };
 
-  const explainLogSpikeTitle = i18n.translate(
-    'xpack.infra.logs.alertDetails.explainLogSpikeTitle',
+  const logRateAnalysisTitle = i18n.translate(
+    'xpack.infra.logs.alertDetails.logRateAnalysisTitle',
     {
       defaultMessage: 'Possible causes and remediations',
     }
@@ -166,11 +188,70 @@ export const LogRateAnalysis: FC<AlertDetailsLogRateAnalysisSectionProps> = ({ r
       ['pValue', 'docCount'],
       ['asc', 'asc']
     ).slice(0, 50);
-    setLogSpikeParams(significantFieldValues ? { significantFieldValues } : undefined);
+    setLogRateAnalysisParams(significantFieldValues ? { significantFieldValues } : undefined);
   };
 
-  const coPilotService = useCoPilot();
-  const hasLogSpikeParams = logSpikeParams && logSpikeParams.significantFieldValues?.length > 0;
+  const aiAssistant = useObservabilityAIAssistant();
+
+  const messages = useMemo<Message[] | undefined>(() => {
+    const hasLogRateAnalysisParams =
+      logRateAnalysisParams && logRateAnalysisParams.significantFieldValues?.length > 0;
+
+    if (!hasLogRateAnalysisParams) {
+      return undefined;
+    }
+
+    const header = 'Field name,Field value,Doc count,p-value';
+    const rows = logRateAnalysisParams.significantFieldValues
+      .map((item) => Object.values(item).join(','))
+      .join('\n');
+
+    const content = `You are an observability expert using Elastic Observability Suite on call being consulted about a log threshold alert that got triggered by a ${logRateAnalysisType} in log messages. Your job is to take immediate action and proceed with both urgency and precision.
+      "Log Rate Analysis" is an AIOps feature that uses advanced statistical methods to identify reasons for increases and decreases in log rates. It makes it easy to find and investigate causes of unusual spikes or dips by using the analysis workflow view.
+      You are using "Log Rate Analysis" and ran the statistical analysis on the log messages which occured during the alert.
+      You received the following analysis results from "Log Rate Analysis" which list statistically significant co-occuring field/value combinations sorted from most significant (lower p-values) to least significant (higher p-values) that ${
+        logRateAnalysisType === 'spike'
+          ? 'contribute to the log rate spike'
+          : 'are less or not present in the log rate dip'
+      }:
+
+      ${header}
+      ${rows}
+
+      Based on the above analysis results and your observability expert knowledge, output the following:
+      Analyse the type of these logs and explain their usual purpose (1 paragraph).
+      ${
+        logRateAnalysisType === 'spike'
+          ? 'Based on the type of these logs do a root cause analysis on why the field and value combinations from the analysis results are causing this log rate spike (2 parapraphs)'
+          : 'Based on the type of these logs do a concise analysis why the statistically significant field and value combinations are less present or missing from the log rate dip with concrete examples based on the analysis results data. Do not guess, just output what you are sure of (2 paragraphs)'
+      }.
+      ${
+        logRateAnalysisType === 'spike'
+          ? 'Recommend concrete remediations to resolve the root cause (3 bullet points).'
+          : ''
+      }
+      Do not repeat the given instructions in your output.`;
+
+    const now = new Date().toString();
+
+    return [
+      {
+        '@timestamp': now,
+        message: {
+          role: MessageRole.System,
+          content: `You are logs-gpt, a helpful assistant for logs-based observability. Answer as
+          concisely as possible.`,
+        },
+      },
+      {
+        '@timestamp': now,
+        message: {
+          content,
+          role: MessageRole.User,
+        },
+      },
+    ];
+  }, [logRateAnalysisParams, logRateAnalysisType]);
 
   if (!dataView || !esSearchQuery) return null;
 
@@ -190,6 +271,7 @@ export const LogRateAnalysis: FC<AlertDetailsLogRateAnalysisSectionProps> = ({ r
         <EuiFlexItem>
           <LogRateAnalysisContent
             dataView={dataView}
+            analysisType={logRateAnalysisType}
             timeRange={timeRange}
             esSearchQuery={esSearchQuery}
             initialAnalysisStart={initialAnalysisStart}
@@ -215,15 +297,9 @@ export const LogRateAnalysis: FC<AlertDetailsLogRateAnalysisSectionProps> = ({ r
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiFlexGroup direction="column" gutterSize="m">
-        {coPilotService?.isEnabled() && hasLogSpikeParams ? (
+        {aiAssistant.isEnabled() && messages ? (
           <EuiFlexItem grow={false}>
-            <CoPilotPrompt
-              coPilot={coPilotService}
-              title={explainLogSpikeTitle}
-              params={logSpikeParams}
-              promptId={CoPilotPromptId.ExplainLogSpike}
-              feedbackEnabled={false}
-            />
+            <ContextualInsight title={logRateAnalysisTitle} messages={messages} />
           </EuiFlexItem>
         ) : null}
       </EuiFlexGroup>

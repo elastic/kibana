@@ -214,7 +214,7 @@ export const ConfigSchema = schema.object({
   ),
   session: schema.object({
     idleTimeout: schema.oneOf([schema.duration(), schema.literal(null)], {
-      defaultValue: schema.duration().validate('8h'),
+      defaultValue: schema.duration().validate('3d'),
     }),
     lifespan: schema.oneOf([schema.duration(), schema.literal(null)], {
       defaultValue: schema.duration().validate('30d'),

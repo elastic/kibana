@@ -99,6 +99,11 @@ export const addExceptionEntryFieldValue = (field: string, index = 0) => {
   cy.get(EXCEPTION_FLYOUT_TITLE).click();
 };
 
+export const addExceptionEntryFieldValueAndSelectSuggestion = (field: string, index = 0) => {
+  cy.get(FIELD_INPUT).eq(index).type(`${field}`);
+  cy.get(`button[title="${field}"]`).click();
+};
+
 export const addExceptionEntryOperatorValue = (operator: string, index = 0) => {
   cy.get(OPERATOR_INPUT).eq(index).type(`${operator}{enter}`);
   cy.get(EXCEPTION_FLYOUT_TITLE).click();
@@ -171,6 +176,7 @@ export const validateEmptyExceptionConditionField = () => {
   cy.get(FIELD_INPUT).should('be.empty');
 };
 export const submitNewExceptionItem = () => {
+  cy.get(CONFIRM_BTN).should('exist');
   cy.get(CONFIRM_BTN).click();
   cy.get(CONFIRM_BTN).should('not.exist');
 };

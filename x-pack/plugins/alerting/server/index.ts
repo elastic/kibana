@@ -28,7 +28,6 @@ export type {
   AlertInstanceContext,
   AlertingApiRequestHandlerContext,
   RuleParamsAndRefs,
-  GetSummarizedAlertsFnOpts,
   SummarizedAlertsChunk,
   ExecutorType,
   IRuleTypeAlerts,
