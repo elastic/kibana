@@ -107,9 +107,7 @@ describe('Cases Ui Plugin', () => {
     });
 
     it('should not register kibana feature when stack is disabled', async () => {
-      context = coreMock.createPluginInitializerContext(
-        getConfig({ stack: { enabled: false } })
-      );
+      context = coreMock.createPluginInitializerContext(getConfig({ stack: { enabled: false } }));
       const pluginWithStackDisabled = new CasesUiPlugin(context);
 
       pluginWithStackDisabled.setup(coreSetup, pluginsSetup);
@@ -127,30 +125,30 @@ describe('Cases Ui Plugin', () => {
       expect(pluginStart).toStrictEqual({
         api: {
           cases: {
-            bulkGet: expect.any(Function), 
-            find: expect.any(Function), 
+            bulkGet: expect.any(Function),
+            find: expect.any(Function),
             getCasesMetrics: expect.any(Function),
-            getCasesStatus: expect.any(Function)
+            getCasesStatus: expect.any(Function),
           },
-          getRelatedCases: expect.any(Function)
+          getRelatedCases: expect.any(Function),
         },
         helpers: {
           canUseCases: expect.any(Function),
-          getRuleIdFromEvent: expect.any(Function), 
+          getRuleIdFromEvent: expect.any(Function),
           getUICapabilities: expect.any(Function),
-          groupAlertsByRule: expect.any(Function)
+          groupAlertsByRule: expect.any(Function),
         },
         hooks: {
-          useCasesAddToExistingCaseModal: expect.any(Function), 
-          useCasesAddToNewCaseFlyout: expect.any(Function)
+          useCasesAddToExistingCaseModal: expect.any(Function),
+          useCasesAddToNewCaseFlyout: expect.any(Function),
         },
         ui: {
           getAllCasesSelectorModal: expect.any(Function),
           getCases: expect.any(Function),
-          getCasesContext: expect.any(Function), 
-          getRecentCases: expect.any(Function)
-        }
-        });
+          getCasesContext: expect.any(Function),
+          getRecentCases: expect.any(Function),
+        },
+      });
     });
   });
 });
