@@ -22,7 +22,8 @@ const transformRuleLastRun = (lastRun: RuleLastRun): RuleResponseV1['last_run'] 
 const transformRuleActions = (actions: Rule['actions']): RuleResponseV1['actions'] => {
   return actions.map((action) => {
     if (action.type === RuleActionTypes.SYSTEM) {
-      return { ...action, connector_type_id: action.actionTypeId };
+      const { actionTypeId, ...restAction } = action;
+      return { ...restAction, connector_type_id: actionTypeId };
     }
 
     const { group, id, actionTypeId, params, frequency, uuid, alertsFilter } = action;

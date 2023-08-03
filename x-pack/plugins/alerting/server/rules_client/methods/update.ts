@@ -14,7 +14,6 @@ import {
   RuleTypeParams,
   RuleNotifyWhenType,
   IntervalSchedule,
-  RuleSystemAction,
   RuleActionTypes,
 } from '../../types';
 import { validateRuleTypeParams, getRuleNotifyWhenType } from '../../lib';
@@ -24,7 +23,7 @@ import { retryIfConflicts } from '../../lib/retry_if_conflicts';
 import { bulkMarkApiKeysForInvalidation } from '../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
 import { getMappedParams } from '../common/mapped_params_utils';
-import { NormalizedAlertAction, RulesClientContext } from '../types';
+import { NormalizedAlertAction, NormalizedSystemAction, RulesClientContext } from '../types';
 import {
   validateActions,
   extractReferences,
@@ -190,13 +189,13 @@ async function updateAlert<Params extends RuleTypeParams>(
   const ruleType = context.ruleTypeRegistry.get(attributes.alertTypeId);
   const actionsClient = await context.getActionsClient();
   const systemActions = initialData.actions.filter(
-    (action): action is RuleSystemAction => action.type === RuleActionTypes.SYSTEM
+    (action): action is NormalizedSystemAction => action.type === RuleActionTypes.SYSTEM
   );
 
   // Validate
   const validatedAlertTypeParams = validateRuleTypeParams(data.params, ruleType.validate.params);
 
-  validateSystemActions({
+  await validateSystemActions({
     actionsClient,
     connectorAdapterRegistry: context.connectorAdapterRegistry,
     systemActions,

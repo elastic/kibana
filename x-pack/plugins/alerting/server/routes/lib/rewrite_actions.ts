@@ -52,7 +52,8 @@ export const rewriteActionsRes = (actions?: RuleAction[]) => {
 
   return actions.map((action) => {
     if (isSystemAction(action)) {
-      return { ...action, connector_type_id: action.actionTypeId };
+      const { actionTypeId, ...restAction } = action;
+      return { ...restAction, connector_type_id: actionTypeId };
     }
 
     const { actionTypeId, frequency, alertsFilter, ...restAction } = action;

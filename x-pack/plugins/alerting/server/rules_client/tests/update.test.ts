@@ -14,7 +14,7 @@ import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
 import { alertingAuthorizationMock } from '../../authorization/alerting_authorization.mock';
 import { IntervalSchedule, RuleNotifyWhen } from '../../types';
-import { RecoveredActionGroup } from '../../../common';
+import { RecoveredActionGroup, RuleActionTypes } from '../../../common';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
 import { AlertingAuthorization } from '../../authorization/alerting_authorization';
@@ -761,7 +761,7 @@ describe('update()', () => {
       },
       {
         id: 'system_action-id',
-        actionTypeId: 'test',
+        actionTypeId: 'test-system',
         config: {},
         isMissingSecrets: false,
         name: 'system action connector',
@@ -770,10 +770,18 @@ describe('update()', () => {
         isSystemAction: true,
       },
     ]);
+
     actionsClient.isSystemAction.mockReset();
+    // Needed for validateSystemActions
+    actionsClient.isSystemAction.mockReturnValueOnce(true);
+    /**
+     * Needed for denormalizeActions
+     * The first one is for the default action
+     * and the second one is for the system action
+     */
     actionsClient.isSystemAction.mockReturnValueOnce(false);
     actionsClient.isSystemAction.mockReturnValueOnce(true);
-    actionsClient.isSystemAction.mockReturnValueOnce(true);
+
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
@@ -793,16 +801,11 @@ describe('update()', () => {
             },
           },
           {
-            group: 'default',
+            uuid: 'system-action-uuid',
             actionRef: 'system_action:system_action-id',
-            actionTypeId: 'test',
-            params: {},
-          },
-          {
-            group: 'custom',
-            actionRef: 'system_action:system_action-id',
-            actionTypeId: 'test',
-            params: {},
+            actionTypeId: 'test-system',
+            params: { myNewParam: 'test' },
+            type: RuleActionTypes.SYSTEM,
           },
         ],
         notifyWhen: 'onActiveAlert',
@@ -824,6 +827,7 @@ describe('update()', () => {
         },
       ],
     });
+
     const result = await rulesClient.update({
       id: '1',
       data: {
@@ -844,14 +848,12 @@ describe('update()', () => {
             },
           },
           {
-            group: 'default',
             id: 'system_action-id',
-            params: {},
-          },
-          {
-            group: 'custom',
-            id: 'system_action-id',
-            params: {},
+            params: {
+              myNewParam: 'test',
+            },
+            type: RuleActionTypes.SYSTEM,
+            uuid: 'system-action-uuid',
           },
         ],
       },
@@ -872,18 +874,11 @@ describe('update()', () => {
             uuid: '106',
           },
           {
-            group: 'default',
             actionRef: 'system_action:system_action-id',
-            actionTypeId: 'test',
-            params: {},
-            uuid: '107',
-          },
-          {
-            group: 'custom',
-            actionRef: 'system_action:system_action-id',
-            actionTypeId: 'test',
-            params: {},
-            uuid: '108',
+            actionTypeId: 'test-system',
+            params: { myNewParam: 'test' },
+            uuid: 'system-action-uuid',
+            type: RuleActionTypes.SYSTEM,
           },
         ],
         alertTypeId: 'myType',
@@ -924,16 +919,13 @@ describe('update()', () => {
             },
           },
           Object {
-            "actionTypeId": "test",
-            "group": "default",
+            "actionTypeId": "test-system",
             "id": "system_action-id",
-            "params": Object {},
-          },
-          Object {
-            "actionTypeId": "test",
-            "group": "custom",
-            "id": "system_action-id",
-            "params": Object {},
+            "params": Object {
+              "myNewParam": "test",
+            },
+            "type": "system",
+            "uuid": "system-action-uuid",
           },
         ],
         "createdAt": 2019-02-12T21:01:22.479Z,
@@ -956,6 +948,40 @@ describe('update()', () => {
     });
     expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
     expect(actionsClient.isSystemAction).toHaveBeenCalledTimes(3);
+  });
+
+  test('should throw if it is not a system action even if it is defined as one', async () => {
+    actionsClient.isSystemAction.mockReset();
+    // Needed for validateSystemActions
+    actionsClient.isSystemAction.mockReturnValueOnce(false);
+
+    await expect(() =>
+      rulesClient.update({
+        id: '1',
+        data: {
+          schedule: { interval: '1m' },
+          name: 'abc',
+          tags: ['foo'],
+          params: {
+            bar: true,
+          },
+          throttle: null,
+          notifyWhen: 'onActiveAlert',
+          actions: [
+            {
+              id: 'system_action-id',
+              params: {
+                myNewParam: 'test',
+              },
+              type: RuleActionTypes.SYSTEM,
+              uuid: 'system-action-uuid',
+            },
+          ],
+        },
+      })
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Action system_action-id of type undefined is not a system action"`
+    );
   });
 
   test('should call useSavedObjectReferences.extractReferences and useSavedObjectReferences.injectReferences if defined for rule type', async () => {
@@ -1070,7 +1096,7 @@ describe('update()', () => {
             actionTypeId: 'test',
             group: 'default',
             params: { foo: true },
-            uuid: '109',
+            uuid: '107',
           },
         ],
         alertTypeId: 'myType',
@@ -1250,7 +1276,7 @@ describe('update()', () => {
             "params": Object {
               "foo": true,
             },
-            "uuid": "110",
+            "uuid": "108",
           },
         ],
         "alertTypeId": "myType",
@@ -1403,7 +1429,7 @@ describe('update()', () => {
             "params": Object {
               "foo": true,
             },
-            "uuid": "111",
+            "uuid": "109",
           },
         ],
         "alertTypeId": "myType",
@@ -2427,7 +2453,7 @@ describe('update()', () => {
             params: {
               foo: true,
             },
-            uuid: '147',
+            uuid: '145',
           },
         ],
         alertTypeId: 'myType',
@@ -2978,7 +3004,7 @@ describe('update()', () => {
             frequency: { notifyWhen: 'onActiveAlert', summary: false, throttle: null },
             group: 'default',
             params: { foo: true },
-            uuid: '154',
+            uuid: '152',
           },
         ],
         alertTypeId: 'myType',
@@ -3182,7 +3208,7 @@ describe('update()', () => {
             "params": Object {
               "foo": true,
             },
-            "uuid": "155",
+            "uuid": "153",
           },
         ],
         "alertTypeId": "myType",

@@ -16,6 +16,14 @@ export const systemActionSchema = schema.object({
   type: schema.literal(RuleActionTypes.SYSTEM),
 });
 
+export const systemActionSchemaAsApiContract = schema.object({
+  id: schema.string(),
+  connector_type_id: schema.string(),
+  params: schema.recordOf(schema.string(), schema.maybe(schema.any()), { defaultValue: {} }),
+  uuid: schema.string(),
+  type: schema.literal(RuleActionTypes.SYSTEM),
+});
+
 /**
  * actionTypeId is missing
  */

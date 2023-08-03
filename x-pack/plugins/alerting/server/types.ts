@@ -56,6 +56,7 @@ import {
   AlertsFilter,
   AlertsFilterTimeframe,
   RuleAlertData,
+  RuleActionTypes,
 } from '../common';
 import { PublicAlertFactory } from './alert/create_alert_factory';
 import { RulesSettingsFlappingProperties } from '../common/rules_settings';
@@ -418,6 +419,7 @@ export interface RawDefaultAction {
     throttle: string | null;
   };
   alertsFilter?: RawRuleAlertsFilter;
+  type?: RuleActionTypes.DEFAULT;
 }
 
 interface RawSystemAction {
@@ -425,6 +427,7 @@ interface RawSystemAction {
   actionRef: string;
   actionTypeId: string;
   params: RuleActionParams;
+  type: RuleActionTypes.SYSTEM;
 }
 
 export type RawRuleAction = RawDefaultAction | RawSystemAction;

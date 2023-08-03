@@ -27,6 +27,7 @@ export async function denormalizeActions(
       ids: actionIds,
       throwIfSystemAction: false,
     });
+    // console.log(actionResults, actionIds);
 
     const actionTypeIds = [...new Set(actionResults.map((action) => action.actionTypeId))];
     actionTypeIds.forEach((id) => {

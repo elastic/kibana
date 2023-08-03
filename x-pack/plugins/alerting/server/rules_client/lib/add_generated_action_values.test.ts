@@ -6,14 +6,14 @@
  */
 
 import { addGeneratedActionValues } from './add_generated_action_values';
-import { RuleAction, RuleDefaultAction } from '../../../common';
+import { RuleActionTypes, RuleDefaultAction, RuleSystemAction } from '../../../common';
 
 jest.mock('uuid', () => ({
   v4: () => '111-222',
 }));
 
 describe('addGeneratedActionValues()', () => {
-  const mockAction: RuleAction = {
+  const mockAction: RuleDefaultAction = {
     id: '1',
     group: 'default',
     actionTypeId: 'slack',
@@ -41,9 +41,22 @@ describe('addGeneratedActionValues()', () => {
     },
   };
 
+  const systemAction: RuleSystemAction = {
+    id: '1',
+    actionTypeId: '.test',
+    params: {},
+    uuid: 'my-uid',
+    type: RuleActionTypes.SYSTEM,
+  };
+
   test('adds uuid', async () => {
     const actionWithGeneratedValues = addGeneratedActionValues([mockAction]);
     expect(actionWithGeneratedValues[0].uuid).toBe('111-222');
+  });
+
+  test('does not overrides the uuid of a system action', async () => {
+    const actionWithGeneratedValues = addGeneratedActionValues([systemAction]);
+    expect(actionWithGeneratedValues[0].uuid).toBe('my-uid');
   });
 
   test('adds DSL', async () => {

@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { systemActionSchema } from '../../../../system_actions/v1';
+import { systemActionSchemaAsApiContract } from '../../../../system_actions/v1';
 import { RuleActionTypes } from '../../../../rule';
 import {
   ruleNotifyWhen as ruleNotifyWhenV1,
@@ -235,7 +235,7 @@ export const ruleResponseSchema = schema.object({
   rule_type_id: schema.string(),
   consumer: schema.string(),
   schedule: intervalScheduleSchema,
-  actions: schema.arrayOf(schema.oneOf([defaultActionSchema, systemActionSchema])),
+  actions: schema.arrayOf(schema.oneOf([defaultActionSchema, systemActionSchemaAsApiContract])),
   params: ruleParamsSchema,
   mapped_params: schema.maybe(mappedParamsSchema),
   scheduled_task_id: schema.maybe(schema.string()),

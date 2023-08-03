@@ -73,7 +73,7 @@ export async function createRule<Params extends RuleParams = never>(
     throw Boom.badRequest(`Error validating create data - ${error.message}`);
   }
 
-  validateSystemActions({
+  await validateSystemActions({
     actionsClient,
     connectorAdapterRegistry: context.connectorAdapterRegistry,
     systemActions,

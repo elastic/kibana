@@ -595,7 +595,7 @@ async function getUpdatedAttributesFromOperations<Params extends RuleParams>({
           (action): action is RuleSystemAction => action.type === RuleActionTypes.SYSTEM
         );
 
-        validateSystemActions({
+        await validateSystemActions({
           actionsClient,
           connectorAdapterRegistry: context.connectorAdapterRegistry,
           systemActions,

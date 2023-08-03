@@ -9,31 +9,47 @@ import Boom from '@hapi/boom';
 import { ActionsClient } from '@kbn/actions-plugin/server';
 import { ConnectorAdapterRegistry } from '../connector_adapters/connector_adapter_registry';
 import { bulkValidateConnectorAdapterActionParams } from '../connector_adapters/validate_rule_action_params';
+import { NormalizedSystemAction } from '../rules_client';
 import { RuleSystemAction } from '../types';
-
 interface Params {
   actionsClient: ActionsClient;
   connectorAdapterRegistry: ConnectorAdapterRegistry;
-  systemActions: RuleSystemAction[];
+  systemActions: Array<RuleSystemAction | NormalizedSystemAction>;
 }
 
-export const validateSystemActions = ({
+export const validateSystemActions = async ({
   actionsClient,
   connectorAdapterRegistry,
   systemActions,
 }: Params) => {
-  for (const action of systemActions) {
-    const isSystemAction = actionsClient.isSystemAction(action.id);
+  /**
+   * When updating a rule the actions do not contain
+   * the actionTypeId. We need to getBulk using the
+   * actionsClient to get actionTypeId of each action.
+   * The actionTypeId is needed to get the schema of
+   * the action params using the connector adapter registry
+   */
+  const actionIds: string[] = systemActions.map((action) => action.id);
 
-    if (!isSystemAction) {
-      throw Boom.badRequest(
-        `Action ${action.id} of type ${action.actionTypeId} is not a system action`
-      );
+  const actionResults = await actionsClient.getBulk({ ids: actionIds, throwIfSystemAction: false });
+  const systemActionsWithActionTypeId: RuleSystemAction[] = [];
+
+  for (const systemAction of systemActions) {
+    const isSystemAction = actionsClient.isSystemAction(systemAction.id);
+    const foundAction = actionResults.find((actionRes) => actionRes.id === systemAction.id);
+
+    if (!isSystemAction || !foundAction) {
+      throw Boom.badRequest(`Action ${systemAction.id} is not a system action`);
     }
+
+    systemActionsWithActionTypeId.push({
+      ...systemAction,
+      actionTypeId: foundAction.actionTypeId,
+    });
   }
 
   bulkValidateConnectorAdapterActionParams({
     connectorAdapterRegistry,
-    actions: systemActions,
+    actions: systemActionsWithActionTypeId,
   });
 };

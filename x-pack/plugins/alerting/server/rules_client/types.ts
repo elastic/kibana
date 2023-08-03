@@ -75,6 +75,7 @@ export interface RulesClientContext {
 }
 
 export type NormalizedAlertAction = DistributiveOmit<RuleAction, 'actionTypeId'>;
+export type NormalizedSystemAction = Omit<RuleSystemAction, 'actionTypeId'>;
 
 export type NormalizedAlertActionWithGeneratedValues =
   | (Omit<RuleDefaultAction, 'uuid' | 'alertsFilter' | 'actionTypeId'> & {
