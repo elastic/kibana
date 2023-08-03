@@ -23,13 +23,8 @@ import { OnlyEsQueryRuleParams, OnlySearchSourceRuleParams } from './types';
 import { searchSourceInstanceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import { Comparator } from '../../../common/comparator_types';
 import { DEFAULT_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common/rules_settings';
-import {
-  ALERT_EVALUATION_CONDITIONS,
-  ALERT_EVALUATION_VALUE,
-  ALERT_REASON,
-  ALERT_URL,
-} from '@kbn/rule-data-utils';
-import { ALERT_TITLE } from './fields';
+import { ALERT_EVALUATION_VALUE, ALERT_REASON, ALERT_URL } from '@kbn/rule-data-utils';
+import { ALERT_TITLE, ALERT_EVALUATION_CONDITIONS } from './fields';
 
 const logger = loggingSystemMock.create().get();
 const coreSetup = coreMock.createSetup();

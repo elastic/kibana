@@ -9,14 +9,9 @@ import { i18n } from '@kbn/i18n';
 import { CoreSetup } from '@kbn/core/server';
 import { parseDuration } from '@kbn/alerting-plugin/server';
 import { isGroupAggregation, UngroupedGroupId } from '@kbn/triggers-actions-ui-plugin/common';
-import {
-  ALERT_EVALUATION_CONDITIONS,
-  ALERT_EVALUATION_VALUE,
-  ALERT_REASON,
-  ALERT_URL,
-} from '@kbn/rule-data-utils';
+import { ALERT_EVALUATION_VALUE, ALERT_REASON, ALERT_URL } from '@kbn/rule-data-utils';
 
-import { ALERT_TITLE } from './fields';
+import { ALERT_TITLE, ALERT_EVALUATION_CONDITIONS } from './fields';
 import { ComparatorFns } from '../../../common';
 import {
   addMessages,

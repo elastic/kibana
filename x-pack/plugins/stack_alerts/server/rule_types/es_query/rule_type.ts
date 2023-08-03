@@ -9,14 +9,9 @@ import { i18n } from '@kbn/i18n';
 import { CoreSetup } from '@kbn/core/server';
 import { extractReferences, injectReferences } from '@kbn/data-plugin/common';
 import { IRuleTypeAlerts } from '@kbn/alerting-plugin/server';
-import {
-  ALERT_EVALUATION_CONDITIONS,
-  ALERT_EVALUATION_VALUE,
-  ALERT_REASON,
-  ALERT_URL,
-} from '@kbn/rule-data-utils';
+import { ALERT_EVALUATION_VALUE, ALERT_REASON, ALERT_URL } from '@kbn/rule-data-utils';
 import { RuleAlertData } from '@kbn/alerting-plugin/common';
-import { ALERT_TITLE } from './fields';
+import { ALERT_TITLE, ALERT_EVALUATION_CONDITIONS } from './fields';
 import { RuleType } from '../../types';
 import { ActionContext } from './action_context';
 import {
