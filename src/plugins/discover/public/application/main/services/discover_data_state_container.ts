@@ -14,19 +14,20 @@ import { AggregateQuery, Query } from '@kbn/es-query';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
+import { SEARCH_FIELDS_FROM_SOURCE, SEARCH_ON_PAGE_LOAD_SETTING } from '@kbn/discover-utils';
 import { getDataViewByTextBasedQueryLang } from '../utils/get_data_view_by_text_based_query_lang';
 import { isTextBasedQuery } from '../utils/is_text_based_query';
 import { getRawRecordType } from '../utils/get_raw_record_type';
 import { DiscoverAppState } from './discover_app_state_container';
 import { DiscoverServices } from '../../../build_services';
 import { DiscoverSearchSessionManager } from './discover_search_session';
-import { SEARCH_FIELDS_FROM_SOURCE, SEARCH_ON_PAGE_LOAD_SETTING } from '../../../../common';
 import { FetchStatus } from '../../types';
 import { validateTimeRange } from '../utils/validate_time_range';
 import { fetchAll } from '../utils/fetch_all';
 import { sendResetMsg } from '../hooks/use_saved_search_messages';
 import { getFetch$ } from '../utils/get_fetch_observable';
-import { DataTableRecord } from '../../../types';
+import { InternalState } from './discover_internal_state_container';
 
 export interface SavedSearchData {
   main$: DataMain$;
@@ -132,12 +133,14 @@ export function getDataStateContainer({
   services,
   searchSessionManager,
   getAppState,
+  getInternalState,
   getSavedSearch,
   setDataView,
 }: {
   services: DiscoverServices;
   searchSessionManager: DiscoverSearchSessionManager;
   getAppState: () => DiscoverAppState;
+  getInternalState: () => InternalState;
   getSavedSearch: () => SavedSearch;
   setDataView: (dataView: DataView) => void;
 }): DiscoverDataStateContainer {
@@ -213,6 +216,7 @@ export function getDataStateContainer({
         searchSessionId,
         services,
         getAppState,
+        getInternalState,
         savedSearch: getSavedSearch(),
         useNewFieldsApi: !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE),
       });

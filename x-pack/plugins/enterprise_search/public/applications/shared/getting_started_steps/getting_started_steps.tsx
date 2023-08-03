@@ -29,7 +29,7 @@ export const GettingStartedSteps: React.FC<GettingStartedStepsProps> = ({ step =
             {
               title: i18n.translate(
                 'xpack.enterpriseSearch.overview.gettingStartedSteps.addData.title',
-                { defaultMessage: 'Add your documents to Enterprise Search' }
+                { defaultMessage: 'Add your documents to Search' }
               ),
               children: (
                 <>
@@ -39,7 +39,7 @@ export const GettingStartedSteps: React.FC<GettingStartedStepsProps> = ({ step =
                         'xpack.enterpriseSearch.overview.gettingStartedSteps.addData.message',
                         {
                           defaultMessage:
-                            'Add your data to Enterprise Search. You can crawl website content with the Elastic web crawler, connect your existing application with Elasticsearch API endpoints, or use connectors to directly add third party content from providers like Google Drive, Microsoft Sharepoint and more.',
+                            'Add your data to Search. You can crawl website content with the Elastic web crawler, connect your existing application with Elasticsearch API endpoints, or use connectors to directly add third party content from providers like Google Drive, Microsoft Sharepoint and more.',
                         }
                       )}
                     </p>

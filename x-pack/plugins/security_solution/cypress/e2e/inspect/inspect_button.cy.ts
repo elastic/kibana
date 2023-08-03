@@ -22,15 +22,14 @@ import {
   waitForPageToBeLoaded,
   waitForWelcomePanelToBeLoaded,
 } from '../../tasks/common';
-import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
 import { selectDataView } from '../../tasks/sourcerer';
 
 const DATA_VIEW = 'auditbeat-*';
 
 describe('Inspect Explore pages', () => {
   before(() => {
-    esArchiverLoad('risk_users');
-    esArchiverLoad('risk_hosts');
+    cy.task('esArchiverLoad', 'risk_users');
+    cy.task('esArchiverLoad', 'risk_hosts');
 
     login();
     // Create and select data view
@@ -38,8 +37,8 @@ describe('Inspect Explore pages', () => {
   });
 
   after(() => {
-    esArchiverUnload('risk_users');
-    esArchiverUnload('risk_hosts');
+    cy.task('esArchiverUnload', 'risk_users');
+    cy.task('esArchiverUnload', 'risk_hosts');
   });
 
   INSPECT_BUTTONS_IN_SECURITY.forEach(({ pageName, url, lensVisualizations, tables }) => {

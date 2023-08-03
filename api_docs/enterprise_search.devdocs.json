@@ -128,7 +128,7 @@
         "label": "CURRENT_CONNECTORS_JOB_INDEX",
         "description": [],
         "signature": [
-          "\".elastic-connectors-v1\""
+          "\".elastic-connectors-sync-jobs-v1\""
         ],
         "path": "x-pack/plugins/enterprise_search/server/index.ts",
         "deprecated": false,

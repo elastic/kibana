@@ -22,7 +22,7 @@ const ruleDescription = {
   category: 'kibana',
   field: 'kibana.alert.rule.description',
   values: [
-    'This is a very long description of the rule. In theory. this description is long enough that it should be cut off when displayed in collapsed mode.',
+    `This is a very long description of the rule. In theory. this description is long enough that it should be cut off when displayed in collapsed mode. If it isn't then there is a problem`,
   ],
   originalValue: ['description'],
   isObjectArray: false,
@@ -33,40 +33,23 @@ export default {
   title: 'Flyout/Description',
 };
 
-export const RuleExpand: Story<void> = () => {
+const wrapper = (children: React.ReactNode, panelContextValue: RightPanelContext) => (
+  <RightPanelContext.Provider value={panelContextValue}>
+    <div
+      css={css`
+        width: 500px;
+      `}
+    >
+      {children}
+    </div>
+  </RightPanelContext.Provider>
+);
+export const Rule: Story<void> = () => {
   const panelContextValue = {
     dataFormattedForFieldBrowser: [ruleUuid, ruleDescription],
   } as unknown as RightPanelContext;
 
-  return (
-    <RightPanelContext.Provider value={panelContextValue}>
-      <div
-        css={css`
-          width: 500px;
-        `}
-      >
-        <Description />
-      </div>
-    </RightPanelContext.Provider>
-  );
-};
-
-export const RuleCollapse: Story<void> = () => {
-  const panelContextValue = {
-    dataFormattedForFieldBrowser: [ruleUuid, ruleDescription],
-  } as unknown as RightPanelContext;
-
-  return (
-    <RightPanelContext.Provider value={panelContextValue}>
-      <div
-        css={css`
-          width: 500px;
-        `}
-      >
-        <Description expanded={true} />
-      </div>
-    </RightPanelContext.Provider>
-  );
+  return wrapper(<Description />, panelContextValue);
 };
 
 export const Document: Story<void> = () => {
@@ -82,17 +65,7 @@ export const Document: Story<void> = () => {
     ],
   } as unknown as RightPanelContext;
 
-  return (
-    <RightPanelContext.Provider value={panelContextValue}>
-      <div
-        css={css`
-          width: 500px;
-        `}
-      >
-        <Description />
-      </div>
-    </RightPanelContext.Provider>
-  );
+  return wrapper(<Description />, panelContextValue);
 };
 
 export const EmptyDescription: Story<void> = () => {
@@ -108,30 +81,12 @@ export const EmptyDescription: Story<void> = () => {
       },
     ],
   } as unknown as RightPanelContext;
-  return (
-    <RightPanelContext.Provider value={panelContextValue}>
-      <div
-        css={css`
-          width: 500px;
-        `}
-      >
-        <Description expanded={true} />
-      </div>
-    </RightPanelContext.Provider>
-  );
+
+  return wrapper(<Description />, panelContextValue);
 };
 
 export const Empty: Story<void> = () => {
   const panelContextValue = {} as unknown as RightPanelContext;
-  return (
-    <RightPanelContext.Provider value={panelContextValue}>
-      <div
-        css={css`
-          width: 500px;
-        `}
-      >
-        <Description expanded={true} />
-      </div>
-    </RightPanelContext.Provider>
-  );
+
+  return wrapper(<Description />, panelContextValue);
 };

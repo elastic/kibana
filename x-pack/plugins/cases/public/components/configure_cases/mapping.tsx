@@ -10,7 +10,7 @@ import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiTextColor } from '@elastic/eui';
 
 import type { TextColor } from '@elastic/eui/src/components/text/text_color';
-import { ConnectorTypes } from '../../../common/api';
+import { ConnectorTypes } from '../../../common/types/domain';
 import * as i18n from './translations';
 
 import { FieldMapping } from './field_mapping';

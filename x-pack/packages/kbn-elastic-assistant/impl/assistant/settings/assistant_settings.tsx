@@ -23,6 +23,7 @@ import {
 // eslint-disable-next-line @kbn/eslint/module_migration
 import styled from 'styled-components';
 import { css } from '@emotion/react';
+import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/gen_ai/constants';
 import { Conversation, Prompt, QuickPrompt } from '../../..';
 import * as i18n from './translations';
 import { useAssistantContext } from '../../assistant_context';
@@ -54,6 +55,8 @@ export type SettingsTabs =
   | typeof FUNCTIONS_TAB
   | typeof ADVANCED_TAB;
 interface Props {
+  defaultConnectorId?: string;
+  defaultProvider?: OpenAiProviderType;
   onClose: (
     event?: React.KeyboardEvent<HTMLDivElement> | React.MouseEvent<HTMLButtonElement>
   ) => void;
@@ -68,6 +71,8 @@ interface Props {
  */
 export const AssistantSettings: React.FC<Props> = React.memo(
   ({
+    defaultConnectorId,
+    defaultProvider,
     onClose,
     onSave,
     selectedConversation: defaultSelectedConversation,
@@ -244,6 +249,8 @@ export const AssistantSettings: React.FC<Props> = React.memo(
               >
                 {selectedSettingsTab === CONVERSATIONS_TAB && (
                   <ConversationSettings
+                    defaultConnectorId={defaultConnectorId}
+                    defaultProvider={defaultProvider}
                     conversationSettings={conversationSettings}
                     setUpdatedConversationSettings={setUpdatedConversationSettings}
                     allSystemPrompts={systemPromptSettings}

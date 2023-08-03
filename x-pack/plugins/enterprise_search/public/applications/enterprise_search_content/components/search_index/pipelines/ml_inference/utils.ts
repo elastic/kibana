@@ -71,16 +71,9 @@ export const validateInferencePipelineFields = (
   config: InferencePipelineConfiguration
 ): AddInferencePipelineFormErrors => {
   const errors: AddInferencePipelineFormErrors = {};
-
-  // If there are field mappings, we don't need to validate the single source field
-  if (config.fieldMappings && Object.keys(config.fieldMappings).length > 0) {
-    return errors;
+  if ((config.fieldMappings ?? []).length === 0) {
+    errors.fieldMappings = FIELD_REQUIRED_ERROR;
   }
-
-  if (config.sourceField.trim().length === 0) {
-    errors.sourceField = FIELD_REQUIRED_ERROR;
-  }
-
   return errors;
 };
 

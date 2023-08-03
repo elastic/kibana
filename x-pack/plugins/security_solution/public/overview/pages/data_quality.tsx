@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CommentType } from '@kbn/cases-plugin/common';
+import { AttachmentType } from '@kbn/cases-plugin/common';
 import {
   DataQualityPanel,
   DATA_QUALITY_SUBTITLE,
@@ -193,10 +193,10 @@ const DataQualityComponent: React.FC = () => {
     ({ comments, headerContent }: { comments: string[]; headerContent?: React.ReactNode }) => {
       const attachments: Array<{
         comment: string;
-        type: CommentType.user;
+        type: AttachmentType.user;
       }> = comments.map((x) => ({
         comment: x,
-        type: CommentType.user,
+        type: AttachmentType.user,
       }));
 
       createCaseFlyout.open({ attachments, headerContent });

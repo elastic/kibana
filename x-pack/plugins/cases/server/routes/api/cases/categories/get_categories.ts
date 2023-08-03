@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import type { AllCategoriesFindRequest } from '../../../../../common/api';
-
 import { INTERNAL_GET_CASE_CATEGORIES_URL } from '../../../../../common/constants';
 import { createCaseError } from '../../../../common/error';
 import { createCasesRoute } from '../../create_cases_route';
+import type { caseApiV1 } from '../../../../../common/types/api';
 
 export const getCategoriesRoute = createCasesRoute({
   method: 'get',
@@ -18,9 +17,11 @@ export const getCategoriesRoute = createCasesRoute({
     try {
       const caseContext = await context.cases;
       const client = await caseContext.getCasesClient();
-      const options = request.query as AllCategoriesFindRequest;
+      const options = request.query as caseApiV1.AllCategoriesFindRequest;
 
-      return response.ok({ body: await client.cases.getCategories(options) });
+      const res: caseApiV1.GetCategoriesResponse = await client.cases.getCategories(options);
+
+      return response.ok({ body: res });
     } catch (error) {
       throw createCaseError({
         message: `Failed to retrieve categories in route: ${error}`,

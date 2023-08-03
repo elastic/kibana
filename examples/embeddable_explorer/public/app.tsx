@@ -11,20 +11,12 @@ import ReactDOM from 'react-dom';
 import { BrowserRouter as Router, withRouter, RouteComponentProps } from 'react-router-dom';
 import { Route } from '@kbn/shared-ux-router';
 import { EuiPageTemplate, EuiSideNav } from '@elastic/eui';
-
 import { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { Start as InspectorStartContract } from '@kbn/inspector-plugin/public';
-import {
-  AppMountParameters,
-  CoreStart,
-  SavedObjectsStart,
-  IUiSettingsClient,
-  OverlayStart,
-} from '@kbn/core/public';
+import { AppMountParameters, CoreStart, IUiSettingsClient, OverlayStart } from '@kbn/core/public';
 import { EmbeddableExamplesStart } from '@kbn/embeddable-examples-plugin/public/plugin';
 import { HelloWorldEmbeddableExample } from './hello_world_embeddable_example';
-import { TodoEmbeddableExample } from './todo_embeddable_example';
 import { ListContainerExample } from './list_container_example';
 import { EmbeddablePanelExample } from './embeddable_panel_example';
 
@@ -68,7 +60,6 @@ interface Props {
   overlays: OverlayStart;
   notifications: CoreStart['notifications'];
   inspector: InspectorStartContract;
-  savedObject: SavedObjectsStart;
   uiSettingsClient: IUiSettingsClient;
   embeddableExamples: EmbeddableExamplesStart;
 }
@@ -90,15 +81,6 @@ const EmbeddableExplorerApp = ({
       ),
     },
     {
-      title: 'Update embeddable state',
-      id: 'todoEmbeddableSection',
-      component: (
-        <TodoEmbeddableExample
-          todoEmbeddableFactory={embeddableExamples.factories.getTodoEmbeddableFactory()}
-        />
-      ),
-    },
-    {
       title: 'Groups of embeddables',
       id: 'listContainerSection',
       component: (
@@ -112,8 +94,7 @@ const EmbeddableExplorerApp = ({
       id: 'embeddablePanelExample',
       component: (
         <EmbeddablePanelExample
-          embeddableServices={embeddableApi}
-          searchListContainerFactory={embeddableExamples.factories.getSearchableListContainerEmbeddableFactory()}
+          helloWorldFactory={embeddableExamples.factories.getHelloWorldEmbeddableFactory()}
         />
       ),
     },

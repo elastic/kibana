@@ -138,7 +138,7 @@ exports[`ScreenCapturePanelContent properly renders a view with "canvas" layout 
     >
       <div>
         <div
-          class=" emotion-euiAccordion__children"
+          class="euiAccordion__children emotion-euiAccordion__children"
         >
           <div
             class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
@@ -332,7 +332,7 @@ exports[`ScreenCapturePanelContent properly renders a view with "print" layout o
     >
       <div>
         <div
-          class=" emotion-euiAccordion__children"
+          class="euiAccordion__children emotion-euiAccordion__children"
         >
           <div
             class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
@@ -467,7 +467,7 @@ exports[`ScreenCapturePanelContent renders the default view properly 1`] = `
     >
       <div>
         <div
-          class=" emotion-euiAccordion__children"
+          class="euiAccordion__children emotion-euiAccordion__children"
         >
           <div
             class="euiSpacer euiSpacer--s emotion-euiSpacer-s"

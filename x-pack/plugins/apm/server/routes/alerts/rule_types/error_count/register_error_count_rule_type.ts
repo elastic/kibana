@@ -83,6 +83,7 @@ export function registerErrorCountRuleType({
           apmActionVariables.serviceName,
           apmActionVariables.transactionName,
           apmActionVariables.errorGroupingKey,
+          apmActionVariables.errorGroupingName,
           apmActionVariables.threshold,
           apmActionVariables.triggerValue,
           apmActionVariables.viewInAppUrl,

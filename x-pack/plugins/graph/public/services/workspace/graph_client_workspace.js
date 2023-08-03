@@ -9,6 +9,7 @@ import $ from 'jquery';
 
 // Kibana wrapper
 import d3 from 'd3';
+import { getIcon } from '../../helpers/style_choices';
 
 // Pluggable function to handle the comms with a server. Default impl here is
 // for use outside of Kibana server with direct access to elasticsearch
@@ -849,7 +850,7 @@ function GraphWorkspace(options) {
         id: dedupedNode.id,
         label: label,
         color: dedupedNode.color,
-        icon: dedupedNode.icon,
+        icon: getIcon(dedupedNode.icon),
         data: dedupedNode,
       };
       //        node.scaledSize = sizeScale(node.data.weight);
@@ -1047,7 +1048,7 @@ function GraphWorkspace(options) {
         targetFields.some((fieldDef) => {
           if (node.field === fieldDef.name) {
             node.color = fieldDef.color;
-            node.icon = fieldDef.icon;
+            node.icon = getIcon(fieldDef.icon);
             node.fieldDef = fieldDef;
             return true;
           }
@@ -1563,7 +1564,7 @@ function GraphWorkspace(options) {
         self.options.vertex_fields.some((fieldDef) => {
           if (node.field === fieldDef.name) {
             node.color = fieldDef.color;
-            node.icon = fieldDef.icon;
+            node.icon = getIcon(fieldDef.icon);
             node.fieldDef = fieldDef;
             return true;
           }

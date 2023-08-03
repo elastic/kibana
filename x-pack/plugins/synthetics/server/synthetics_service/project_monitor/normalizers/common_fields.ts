@@ -8,13 +8,13 @@
 import { omit } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { isValidNamespace } from '@kbn/fleet-plugin/common';
+import { PrivateLocationAttributes } from '../../../runtime_types/private_locations';
 import { formatLocation } from '../../../../common/utils/location_formatter';
 import {
   BrowserFields,
   ConfigKey,
   CommonFields,
   DataStream,
-  PrivateLocation,
   Locations,
   ProjectMonitor,
   ScheduleUnit,
@@ -26,7 +26,7 @@ import { formatKibanaNamespace } from '../../formatters/private_formatters';
 
 export interface NormalizedProjectProps {
   locations: Locations;
-  privateLocations: PrivateLocation[];
+  privateLocations: PrivateLocationAttributes[];
   monitor: ProjectMonitor;
   projectId: string;
   namespace: string;
@@ -131,7 +131,7 @@ export const getMonitorLocations = ({
   monitor,
 }: {
   monitor: ProjectMonitor;
-  privateLocations: PrivateLocation[];
+  privateLocations: PrivateLocationAttributes[];
   publicLocations: Locations;
 }) => {
   const publicLocs =

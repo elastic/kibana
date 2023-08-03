@@ -94,11 +94,11 @@ export interface GroupDefinition<
   /**
    * Flag to indicate if the group is initially collapsed or not.
    *
+   * `undefined`: (Recommended) the group will be opened if any of its children nodes matches the current URL.
+   *
    * `false`: the group will be opened event if none of its children nodes matches the current URL.
    *
    * `true`: the group will be collapsed event if any of its children nodes matches the current URL.
-   *
-   * `undefined`: the group will be opened if any of its children nodes matches the current URL.
    */
   defaultIsCollapsed?: boolean;
   preset?: NavigationGroupPreset;

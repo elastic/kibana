@@ -30,15 +30,17 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { debounce } from 'lodash';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { getFieldIconType } from '@kbn/unified-field-list/src/utils/field_types/get_field_icon_type';
+import {
+  SHOW_MULTIFIELDS,
+  formatFieldValue,
+  getIgnoredReason,
+  getShouldShowFieldHandler,
+  isNestedFieldParent,
+  usePager,
+} from '@kbn/discover-utils';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
-import { usePager } from '../../../../hooks/use_pager';
 import { FieldName } from '../../../../components/field_name/field_name';
-import { SHOW_MULTIFIELDS } from '../../../../../common';
 import { DocViewRenderProps, FieldRecordLegacy } from '../../doc_views_types';
-import { getShouldShowFieldHandler } from '../../../../utils/get_should_show_field_handler';
-import { getIgnoredReason } from '../../../../utils/get_ignored_reason';
-import { formatFieldValue } from '../../../../utils/format_value';
-import { isNestedFieldParent } from '../../../../application/main/utils/nested_fields';
 import { TableFieldValue } from './table_cell_value';
 import { TableActions } from './table_cell_actions';
 

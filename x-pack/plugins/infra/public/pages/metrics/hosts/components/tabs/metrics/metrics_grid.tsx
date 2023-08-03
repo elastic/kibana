@@ -10,7 +10,7 @@ import { EuiFlexGrid, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer } from '@elastic/eui';
 import { hostLensFormulas, type XYLayerOptions } from '../../../../../../common/visualizations';
-import { HostMetricsDocsLink } from '../../../../../../common/visualizations/metric_explanation/host_metrics_docs_link';
+import { HostMetricsDocsLink } from '../../../../../../components/lens';
 import { MetricChart, MetricChartProps } from './metric_chart';
 
 const DEFAULT_BREAKDOWN_SIZE = 20;
@@ -214,7 +214,7 @@ export const MetricsGrid = React.memo(() => {
       <EuiSpacer size="s" />
       <EuiFlexGrid columns={2} gutterSize="s" data-test-subj="hostsView-metricChart">
         {CHARTS_IN_ORDER.map((chartProp, index) => (
-          <EuiFlexItem key={index}>
+          <EuiFlexItem key={index} grow={false}>
             <MetricChart {...chartProp} />
           </EuiFlexItem>
         ))}

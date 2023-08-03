@@ -5,9 +5,54 @@
  * 2.0.
  */
 import { ReactNode } from 'react';
-import { CoreStart } from '@kbn/core/public';
+import type {
+  UsageCollectionSetup,
+  UsageCollectionStart,
+} from '@kbn/usage-collection-plugin/public';
 
-export type SessionViewServices = CoreStart;
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface SessionViewPluginSetup {}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface SessionViewPluginStart {}
+
+export interface SessionViewPluginStartDeps {
+  usageCollection?: UsageCollectionStart;
+}
+
+export interface SessionViewPluginSetupDeps {
+  usageCollection?: UsageCollectionSetup;
+}
+
+// the following are all the reportUiCounter click tracking events we send up.
+export type SessionViewTelemetryKey =
+  | 'loaded_from_cloud_defend_log'
+  | 'loaded_from_cloud_defend_alert'
+  | 'loaded_from_endpoint_log'
+  | 'loaded_from_endpoint_alert'
+  | 'loaded_from_unknown_log'
+  | 'loaded_from_unknown_alert'
+  | 'refresh_clicked'
+  | 'process_selected'
+  | 'collapse_tree'
+  | 'children_opened'
+  | 'children_closed'
+  | 'alerts_opened'
+  | 'alerts_closed'
+  | 'details_opened'
+  | 'details_closed'
+  | 'output_clicked'
+  | 'alert_details_loaded'
+  | 'disabled_tty_clicked' // tty button clicked when disabled (no data or not enabled)
+  | 'tty_loaded' // tty player succesfully loaded
+  | 'tty_playback_started'
+  | 'tty_playback_stopped'
+  | 'verbose_mode_enabled'
+  | 'verbose_mode_disabled'
+  | 'timestamp_enabled'
+  | 'timestamp_disabled'
+  | 'search_performed'
+  | 'search_next'
+  | 'search_previous';
 
 export interface SessionViewDeps {
   // we pass in the index of the session leader that spawned session_view, this avoids having to query multiple cross cluster indices
