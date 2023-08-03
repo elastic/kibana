@@ -69,12 +69,16 @@ export class DataViewEditorPlugin
       },
       /**
        * Helper method to generate a new data view editor service.
-       * @param requireTimestampField - whether service requires requireTimestampField
-       * @param initialValues - initial type, indexPattern, and name to populate service
        * @returns DataViewEditorService
        */
       dataViewEditorServiceFactory: ({
+        /**
+         * @param requireTimestampField - whether service requires requireTimestampField
+         */
         requireTimestampField,
+        /**
+         * @param initialValues - initial type, indexPattern, and name to populate service
+         */
         initialValues,
       }: Omit<DataViewEditorServiceConstructorArgs, 'services'>) =>
         new DataViewEditorService({

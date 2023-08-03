@@ -84,6 +84,12 @@ export interface PluginStart {
   userPermissions: {
     editDataView: () => boolean;
   };
+  /**
+   * Helper method to generate a new data view editor service.
+   * @param requireTimestampField - whether service requires requireTimestampField
+   * @param initialValues - initial type, indexPattern, and name to populate service
+   * @returns DataViewEditorService
+   */
   dataViewEditorServiceFactory: ({
     requireTimestampField,
     initialValues,
