@@ -170,7 +170,10 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     errors: [],
   });
 
-  const initialRenderComplete = useRef<boolean>();
+  const initialVisualizationRenderComplete = useRef<boolean>(false);
+
+  // NOTE: This does not reflect the actual visualization render
+  const initialWorkspaceRenderComplete = useRef<boolean>();
 
   const renderDeps = useRef<{
     datasourceMap: DatasourceMap;
@@ -198,10 +201,14 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
 
   const onRender$ = useCallback(() => {
     if (renderDeps.current) {
-      // console.log(
-      //   'visualization took to render after data received',
-      //   performance.now() - dataReceivedTime.current
-      // );
+      if (!initialVisualizationRenderComplete.current) {
+        initialVisualizationRenderComplete.current = true;
+        // NOTE: this metric is only repored for an initial editor load of a pre-existing visualization
+        // console.log(
+        //   'initial visualization took to render after data received',
+        //   performance.now() - dataReceivedTime.current
+        // );
+      }
       const datasourceEvents = Object.values(renderDeps.current.datasourceMap).reduce<string[]>(
         (acc, datasource) => {
           if (!renderDeps.current!.datasourceStates[datasource.id]) return [];
@@ -241,8 +248,13 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     (_data: unknown, adapters?: Partial<DefaultInspectorAdapters>) => {
       if (renderDeps.current) {
         dataReceivedTime.current = performance.now();
-        // NOTE: this metric is only valid for an initial editor load of a pre-existing visualization
-        // console.log('data took to arrive', dataReceivedTime.current - initialRenderTime.current);
+        if (!initialVisualizationRenderComplete.current) {
+          // NOTE: this metric is only repored for an initial editor load of a pre-existing visualization
+          // console.log(
+          //   'initial data took to arrive',
+          //   dataReceivedTime.current - initialRenderTime.current
+          // );
+        }
 
         const [defaultLayerId] = Object.keys(renderDeps.current.datasourceLayers);
         const datasource = Object.values(renderDeps.current.datasourceMap)[0];
@@ -288,7 +300,8 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     [addUserMessages, dispatchLens, plugins.data.search]
   );
 
-  const shouldApplyExpression = autoApplyEnabled || !initialRenderComplete.current || triggerApply;
+  const shouldApplyExpression =
+    autoApplyEnabled || !initialWorkspaceRenderComplete.current || triggerApply;
   const activeVisualization = visualization.activeId
     ? visualizationMap[visualization.activeId]
     : null;
@@ -401,9 +414,9 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     // null signals an empty workspace which should count as an initial render
     if (
       (expressionExists || localState.expressionToRender === null) &&
-      !initialRenderComplete.current
+      !initialWorkspaceRenderComplete.current
     ) {
-      initialRenderComplete.current = true;
+      initialWorkspaceRenderComplete.current = true;
     }
   }, [expressionExists, localState.expressionToRender]);
 

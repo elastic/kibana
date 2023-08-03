@@ -364,12 +364,14 @@ export function SuggestionPanel({
   }, [existsStagedPreview]);
 
   const startTime = useRef<number>(0);
+  const initialRenderComplete = useRef<boolean>(false);
   const suggestionsRendered = useRef<boolean[]>([]);
   const totalSuggestions = suggestions.length + 1;
 
   const onSuggestionRender = useCallback((suggestionIndex: number) => {
     suggestionsRendered.current[suggestionIndex] = true;
-    if (suggestionsRendered.current.every(Boolean)) {
+    if (initialRenderComplete.current === false && suggestionsRendered.current.every(Boolean)) {
+      initialRenderComplete.current = true;
       // console.log(
       //   'time to fetch data and perform initial render for all suggestions',
       //   performance.now() - startTime.current
