@@ -12,6 +12,7 @@ import type {
   ConversationCreateRequest,
   ConversationUpdateRequest,
   FunctionDefinition,
+  KnowledgeBaseEntry,
   Message,
 } from '../../common/types';
 
@@ -26,6 +27,9 @@ export interface IObservabilityAIAssistantClient {
   create: (conversation: ConversationCreateRequest) => Promise<Conversation>;
   update: (conversation: ConversationUpdateRequest) => Promise<Conversation>;
   delete: (conversationId: string) => Promise<void>;
+  recall: (query: string) => Promise<{ entries: KnowledgeBaseEntry[] }>;
+  summarise: (options: { entry: Omit<KnowledgeBaseEntry, '@timestamp'> }) => Promise<void>;
+  setupKnowledgeBase: () => Promise<void>;
 }
 
 export interface IObservabilityAIAssistantService {
@@ -37,17 +41,24 @@ export interface IObservabilityAIAssistantService {
 export interface ObservabilityAIAssistantResourceNames {
   componentTemplate: {
     conversations: string;
+    kb: string;
   };
   indexTemplate: {
     conversations: string;
+    kb: string;
   };
   ilmPolicy: {
     conversations: string;
   };
   aliases: {
     conversations: string;
+    kb: string;
   };
   indexPatterns: {
     conversations: string;
+    kb: string;
+  };
+  pipelines: {
+    kb: string;
   };
 }

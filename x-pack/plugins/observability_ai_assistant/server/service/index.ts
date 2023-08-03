@@ -14,6 +14,7 @@ import { getSpaceIdFromPath } from '@kbn/spaces-plugin/common';
 import { once } from 'lodash';
 import { ObservabilityAIAssistantClient } from './client';
 import { conversationComponentTemplate } from './conversation_component_template';
+import { kbComponentTemplate } from './kb_component_template';
 import type {
   IObservabilityAIAssistantClient,
   IObservabilityAIAssistantService,
@@ -31,18 +32,25 @@ export class ObservabilityAIAssistantService implements IObservabilityAIAssistan
   private readonly resourceNames: ObservabilityAIAssistantResourceNames = {
     componentTemplate: {
       conversations: getResourceName('component-template-conversations'),
+      kb: getResourceName('component-template-kb'),
     },
     aliases: {
       conversations: getResourceName('conversations'),
+      kb: getResourceName('kb'),
     },
     indexPatterns: {
       conversations: getResourceName('conversations*'),
+      kb: getResourceName('kb*'),
     },
     indexTemplate: {
       conversations: getResourceName('index-template-conversations'),
+      kb: getResourceName('index-template-kb'),
     },
     ilmPolicy: {
       conversations: getResourceName('ilm-policy-conversations'),
+    },
+    pipelines: {
+      kb: getResourceName('kb-ingest-pipeline'),
     },
   };
 
@@ -94,20 +102,78 @@ export class ObservabilityAIAssistantService implements IObservabilityAIAssistan
         },
       });
 
-      const aliasName = this.resourceNames.aliases.conversations;
+      const conversationAliasName = this.resourceNames.aliases.conversations;
 
       await createConcreteWriteIndex({
         esClient,
         logger: this.logger,
         totalFieldsLimit: 10000,
         indexPatterns: {
-          alias: aliasName,
-          pattern: `${aliasName}*`,
-          basePattern: `${aliasName}*`,
-          name: `${aliasName}-000001`,
+          alias: conversationAliasName,
+          pattern: `${conversationAliasName}*`,
+          basePattern: `${conversationAliasName}*`,
+          name: `${conversationAliasName}-000001`,
           template: this.resourceNames.indexTemplate.conversations,
         },
       });
+
+      await esClient.cluster.putComponentTemplate({
+        create: false,
+        name: this.resourceNames.componentTemplate.kb,
+        template: kbComponentTemplate,
+      });
+
+      await esClient.ingest.putPipeline({
+        id: this.resourceNames.pipelines.kb,
+        processors: [
+          {
+            inference: {
+              model_id: '.elser_model_1',
+              target_field: 'ml',
+              field_map: {
+                text: 'text_field',
+              },
+              inference_config: {
+                // @ts-expect-error
+                text_expansion: {
+                  results_field: 'tokens',
+                },
+              },
+            },
+          },
+        ],
+      });
+
+      await esClient.indices.putIndexTemplate({
+        name: this.resourceNames.indexTemplate.kb,
+        composed_of: [this.resourceNames.componentTemplate.kb],
+        create: false,
+        index_patterns: [this.resourceNames.indexPatterns.kb],
+        template: {
+          settings: {
+            number_of_shards: 1,
+            auto_expand_replicas: '0-1',
+            refresh_interval: '1s',
+          },
+        },
+      });
+
+      const kbAliasName = this.resourceNames.aliases.kb;
+
+      await createConcreteWriteIndex({
+        esClient,
+        logger: this.logger,
+        totalFieldsLimit: 10000,
+        indexPatterns: {
+          alias: kbAliasName,
+          pattern: `${kbAliasName}*`,
+          basePattern: `${kbAliasName}*`,
+          name: `${kbAliasName}-000001`,
+          template: this.resourceNames.indexTemplate.kb,
+        },
+      });
+
+      this.logger.info('Successfully set up index assets');
     } catch (error) {
       this.logger.error(`Failed to initialize service: ${error.message}`);
       this.logger.debug(error);

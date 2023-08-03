@@ -8,6 +8,7 @@
 import { ComponentStory } from '@storybook/react';
 import React from 'react';
 import { Observable } from 'rxjs';
+import { getSystemMessage } from '../../service/get_system_message';
 import { ObservabilityAIAssistantService } from '../../types';
 import { ChatBody as Component } from './chat_body';
 
@@ -34,7 +35,8 @@ const defaultProps: ChatBodyProps = {
     },
     labels: {},
     numeric_labels: {},
-    messages: [],
+    messages: [getSystemMessage()],
+    public: false,
   },
   connectors: {
     connectors: [

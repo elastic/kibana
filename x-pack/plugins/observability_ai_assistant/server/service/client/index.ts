@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
-import { internal, notFound } from '@hapi/boom';
+import { errors } from '@elastic/elasticsearch';
+import type { SearchHit, QueryDslTextExpansionQuery } from '@elastic/elasticsearch/lib/api/types';
+import { internal, notFound, serverUnavailable } from '@hapi/boom';
 import type { ActionsClient } from '@kbn/actions-plugin/server/actions_client';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
@@ -20,17 +21,24 @@ import type {
 } from 'openai';
 import { v4 } from 'uuid';
 import {
-  type FunctionDefinition,
+  KnowledgeBaseEntry,
   MessageRole,
   type Conversation,
   type ConversationCreateRequest,
   type ConversationUpdateRequest,
+  type FunctionDefinition,
   type Message,
 } from '../../../common/types';
 import type {
   IObservabilityAIAssistantClient,
   ObservabilityAIAssistantResourceNames,
 } from '../types';
+
+const ELSER_MODEL_ID = '.elser_model_1';
+
+function throwKnowledgeBaseNotReady(body: any) {
+  throw serverUnavailable(`Knowledge base is not ready yet`, body);
+}
 
 export class ObservabilityAIAssistantClient implements IObservabilityAIAssistantClient {
   constructor(
@@ -53,8 +61,20 @@ export class ObservabilityAIAssistantClient implements IObservabilityAIAssistant
         bool: {
           filter: [
             {
-              term: {
-                'user.name': this.dependencies.user.name,
+              bool: {
+                should: [
+                  {
+                    term: {
+                      'user.name': this.dependencies.user.name,
+                    },
+                  },
+                  {
+                    term: {
+                      public: true,
+                    },
+                  },
+                ],
+                minimum_should_match: 1,
               },
             },
             {
@@ -152,7 +172,7 @@ export class ObservabilityAIAssistantClient implements IObservabilityAIAssistant
       messages: messagesForOpenAI,
       stream: true,
       functions: functionsForOpenAI,
-      temperature: 0.1,
+      temperature: 0,
     };
 
     const executeResult = await this.dependencies.actionsClient.execute({
@@ -234,5 +254,106 @@ export class ObservabilityAIAssistantClient implements IObservabilityAIAssistant
     });
 
     return createdConversation;
+  };
+
+  recall = async (query: string): Promise<{ entries: KnowledgeBaseEntry[] }> => {
+    try {
+      const response = await this.dependencies.esClient.search<KnowledgeBaseEntry>({
+        index: this.dependencies.resources.aliases.kb,
+        query: {
+          bool: {
+            should: [
+              {
+                text_expansion: {
+                  'ml.tokens': {
+                    model_text: query,
+                    model_id: '.elser_model_1',
+                  },
+                } as unknown as QueryDslTextExpansionQuery,
+              },
+            ],
+            filter: [...this.getAccessQuery()],
+          },
+        },
+        _source: {
+          excludes: ['ml.tokens'],
+        },
+      });
+
+      return { entries: response.hits.hits.map((hit) => hit._source!) };
+    } catch (error) {
+      if (
+        (error instanceof errors.ResponseError &&
+          error.body.error.type === 'resource_not_found_exception') ||
+        error.body.error.type === 'status_exception'
+      ) {
+        throwKnowledgeBaseNotReady(error.body);
+      }
+      throw error;
+    }
+  };
+
+  summarise = async ({
+    entry: { id, ...document },
+  }: {
+    entry: Omit<KnowledgeBaseEntry, '@timestamp'>;
+  }): Promise<void> => {
+    try {
+      await this.dependencies.esClient.index({
+        index: this.dependencies.resources.aliases.kb,
+        id,
+        document: {
+          '@timestamp': new Date().toISOString(),
+          ...document,
+          user: this.dependencies.user,
+          namespace: this.dependencies.namespace,
+        },
+        pipeline: this.dependencies.resources.pipelines.kb,
+      });
+    } catch (error) {
+      if (error instanceof errors.ResponseError && error.body.error.type === 'status_exception') {
+        throwKnowledgeBaseNotReady(error.body);
+      }
+      throw error;
+    }
+  };
+
+  setupKnowledgeBase = async () => {
+    // if this fails, it's fine to propagate the error to the user
+    await this.dependencies.esClient.ml.putTrainedModel({
+      model_id: ELSER_MODEL_ID,
+      input: {
+        field_names: ['text_field'],
+      },
+    });
+
+    try {
+      await this.dependencies.esClient.ml.startTrainedModelDeployment({
+        model_id: ELSER_MODEL_ID,
+      });
+
+      const modelStats = await this.dependencies.esClient.ml.getTrainedModelsStats({
+        model_id: ELSER_MODEL_ID,
+      });
+
+      const elserModelStats = modelStats.trained_model_stats[0];
+
+      if (elserModelStats?.deployment_stats?.state !== 'started') {
+        throwKnowledgeBaseNotReady({
+          message: `Deployment has not started`,
+          deployment_stats: elserModelStats.deployment_stats,
+        });
+      }
+      return;
+    } catch (error) {
+      if (
+        (error instanceof errors.ResponseError &&
+          error.body.error.type === 'resource_not_found_exception') ||
+        error.body.error.type === 'status_exception'
+      ) {
+        throwKnowledgeBaseNotReady(error.body);
+      }
+      throw error;
+    }
   };
 }

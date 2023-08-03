@@ -15,16 +15,18 @@ import type { ChatTimelineProps } from '../components/chat/chat_timeline';
 import type { ObservabilityAIAssistantService, PendingMessage } from '../types';
 import { getTimelineItemsfromConversation } from '../utils/get_timeline_items_from_conversation';
 import type { UseGenAIConnectorsResult } from './use_genai_connectors';
+import { getSystemMessage } from '../service/get_system_message';
 
 export function createNewConversation(): ConversationCreateRequest {
   return {
     '@timestamp': new Date().toISOString(),
-    messages: [],
+    messages: [getSystemMessage()],
     conversation: {
       title: '',
     },
     labels: {},
     numeric_labels: {},
+    public: false,
   };
 }
 
@@ -120,26 +122,39 @@ export function useTimeline({
         if (nextMessage?.message.function_call?.name) {
           const name = nextMessage.message.function_call.name;
 
-          const message = await service.executeFunction(
-            name,
-            nextMessage.message.function_call.arguments,
-            controller.signal
-          );
+          try {
+            const message = await service.executeFunction(
+              name,
+              nextMessage.message.function_call.arguments,
+              controller.signal
+            );
 
-          await chat(
-            nextMessages.concat({
-              '@timestamp': new Date().toISOString(),
-              message: {
-                role: MessageRole.System,
-                name,
-                content: `The following data was returned by the function: 
-                \`\`\`
-                ${JSON.stringify(message.content, null, 4)}
-                \`\`\``,
-                data: JSON.stringify(message.data),
-              },
-            })
-          );
+            await chat(
+              nextMessages.concat({
+                '@timestamp': new Date().toISOString(),
+                message: {
+                  role: MessageRole.User,
+                  name,
+                  content: JSON.stringify(message.content),
+                  data: JSON.stringify(message.data),
+                },
+              })
+            );
+          } catch (error) {
+            await chat(
+              nextMessages.concat({
+                '@timestamp': new Date().toISOString(),
+                message: {
+                  role: MessageRole.User,
+                  name,
+                  content: JSON.stringify({
+                    message: error.toString(),
+                    ...error.body,
+                  }),
+                },
+              })
+            );
+          }
         }
       })
       .catch((err) => {});

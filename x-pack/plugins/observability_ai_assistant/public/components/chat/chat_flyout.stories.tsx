@@ -7,6 +7,7 @@
 
 import { ComponentStory } from '@storybook/react';
 import React from 'react';
+import { getSystemMessage } from '../../service/get_system_message';
 import { KibanaReactStorybookDecorator } from '../../utils/storybook_decorator';
 import { ChatFlyout as Component } from './chat_flyout';
 
@@ -33,9 +34,10 @@ const defaultProps: ChatFlyoutProps = {
     conversation: {
       title: 'How is this working',
     },
-    messages: [],
+    messages: [getSystemMessage()],
     labels: {},
     numeric_labels: {},
+    public: false,
   },
   onClose: () => {},
 };

@@ -70,6 +70,7 @@ function ChatContent({ messages, connectorId }: { messages: Message[]; connector
       },
       labels: {},
       numeric_labels: {},
+      public: false,
     };
   }, [pendingMessage, messages]);
 
