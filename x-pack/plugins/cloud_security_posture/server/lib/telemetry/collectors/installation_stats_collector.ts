@@ -22,7 +22,9 @@ const getEnabledInputStreamVars = (packagePolicy: PackagePolicy) => {
   return enabledInput?.streams[0].vars;
 };
 
-const getCspmTelemetryFields = (packagePolicy: PackagePolicy) => {
+const getCspmTelemetryFields = (
+  packagePolicy: PackagePolicy
+): CloudSecurityInstallationStats['cspm'] => {
   if (packagePolicy.vars?.posture.value !== 'cspm') return;
 
   const provider = packagePolicy.vars?.deployment?.value;
