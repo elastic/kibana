@@ -13,6 +13,7 @@ import { stat } from 'fs/promises';
 import {
   DOCKER_IMG,
   maybeCreateDockerNetwork,
+  maybePullDockerImage,
   resolveDockerCmd,
   resolveDockerImage,
   resolveEsArgs,
@@ -217,6 +218,17 @@ describe('maybeCreateDockerNetwork()', () => {
   });
 });
 
+describe('maybePullDockerImage()', () => {
+  test('should pull the correct image passed', async () => {
+    execa.mockImplementationOnce(() => Promise.resolve({ exitCode: 0 }));
+
+    await maybePullDockerImage(log, DOCKER_IMG);
+
+    expect(execa.mock.calls[0][0]).toEqual('docker');
+    expect(execa.mock.calls[0][1]).toEqual(expect.arrayContaining(['pull', DOCKER_IMG]));
+  });
+});
+
 describe('resolveEsArgs()', () => {
   const defaultEsArgs: Array<[string, string]> = [
     ['foo', 'bar'],
@@ -360,8 +372,8 @@ describe('runServerlessCluster()', () => {
 
     await runServerlessCluster(log, { basePath: baseEsPath });
 
-    // Verify Docker and network then run three nodes
-    expect(execa.mock.calls).toHaveLength(5);
+    // setupDocker execa calls then run three nodes
+    expect(execa.mock.calls).toHaveLength(6);
   });
 });
 
@@ -391,7 +403,7 @@ describe('runDockerContainer()', () => {
     execa.mockImplementation(() => Promise.resolve({ stdout: '' }));
 
     await expect(runDockerContainer(log, {})).resolves.toEqual({ stdout: '' });
-    // Verify Docker and network then run container
-    expect(execa.mock.calls).toHaveLength(3);
+    // setupDocker execa calls then run container
+    expect(execa.mock.calls).toHaveLength(4);
   });
 });
