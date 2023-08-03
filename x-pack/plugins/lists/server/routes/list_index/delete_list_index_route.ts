@@ -116,7 +116,9 @@ const deleteDataStreams = async (
   listDataStreamExists: boolean,
   listItemDataStreamExists: boolean
 ): Promise<void> => {
-  await lists.deleteListDataStream();
+  if (listDataStreamExists) {
+    await lists.deleteListDataStream();
+  }
   if (listItemDataStreamExists) {
     await lists.deleteListItemDataStream();
   }

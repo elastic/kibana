@@ -21,6 +21,7 @@ import {
   getTemplateExists,
   migrateToDataStream,
   putMappings,
+  removePolicyFromIndex,
   setIndexTemplate,
   setPolicy,
 } from '@kbn/securitysolution-es-utils';
@@ -314,7 +315,7 @@ export class ListClient {
    * update list index mappings with @timestamp and migrates it to data stream
    * @returns
    */
-  public migrateListIndexToDataStream = async (): Promise<unknown> => {
+  public migrateListIndexToDataStream = async (): Promise<void> => {
     const { esClient } = this;
     const listName = this.getListName();
     // first need to update mapping of existing index to add @timestamp
@@ -323,14 +324,18 @@ export class ListClient {
       listName,
       listMappings.properties as Record<string, MappingProperty>
     );
-    return migrateToDataStream(esClient, listName);
+    await migrateToDataStream(esClient, listName);
+    await removePolicyFromIndex(esClient, listName);
+    if (await this.getListPolicyExists()) {
+      await this.deleteListPolicy();
+    }
   };
 
   /**
    * update list items index mappings with @timestamp and migrates it to data stream
    * @returns
    */
-  public migrateListItemIndexToDataStream = async (): Promise<unknown> => {
+  public migrateListItemIndexToDataStream = async (): Promise<void> => {
     const { esClient } = this;
     const listItemName = this.getListItemName();
     // first need to update mapping of existing index to add @timestamp
@@ -339,7 +344,11 @@ export class ListClient {
       listItemName,
       listItemMappings.properties as Record<string, MappingProperty>
     );
-    return migrateToDataStream(esClient, listItemName);
+    await migrateToDataStream(esClient, listItemName);
+    await removePolicyFromIndex(esClient, listItemName);
+    if (await this.getListItemPolicyExists()) {
+      await this.deleteListItemPolicy();
+    }
   };
 
   /**
@@ -466,6 +475,7 @@ export class ListClient {
   /**
    * Sets the list policy
    * @returns The contents of the list policy set
+   * @deprecated after moving to data streams there should not be need to use it
    */
   public setListPolicy = async (): Promise<unknown> => {
     const { esClient } = this;
@@ -476,6 +486,7 @@ export class ListClient {
   /**
    * Sets the list item policy
    * @returns The contents of the list policy set
+   * @deprecated after moving to data streams there should not be need to use it
    */
   public setListItemPolicy = async (): Promise<unknown> => {
     const { esClient } = this;
