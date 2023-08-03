@@ -33400,8 +33400,6 @@
     "xpack.securitySolution.flyout.documentDetails.collapseDetailButton": "折叠告警详情",
     "xpack.securitySolution.flyout.documentDetails.correlationsButton": "相关性",
     "xpack.securitySolution.flyout.documentDetails.correlationsTitle": "相关性",
-    "xpack.securitySolution.flyout.documentDetails.documentDescriptionCollapseButton": "折叠",
-    "xpack.securitySolution.flyout.documentDetails.documentDescriptionExpandButton": "展开",
     "xpack.securitySolution.flyout.documentDetails.documentDescriptionTitle": "文档描述",
     "xpack.securitySolution.flyout.documentDetails.documentReasonTitle": "文档原因",
     "xpack.securitySolution.flyout.documentDetails.entitiesButton": "实体",
