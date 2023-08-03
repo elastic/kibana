@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 
-import { SourceResponse } from '@kbn/infra-plugin/server/lib/sources';
+import { SourceResponse } from '@kbn/metrics-data-plugin/server/lib/sources';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {

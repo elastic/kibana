@@ -9,10 +9,10 @@ import expect from '@kbn/expect';
 import { defaultLogViewId, LogViewAttributes } from '@kbn/logs-shared-plugin/common/log_views';
 import {
   defaultSourceConfiguration,
-  infraSourceConfigurationSavedObjectName,
   mergeSourceConfiguration,
-} from '@kbn/infra-plugin/server/lib/sources';
-import { extractSavedObjectReferences } from '@kbn/infra-plugin/server/lib/sources/saved_object_references';
+} from '@kbn/metrics-data-plugin/server/lib/sources';
+import { infraSourceConfigurationSavedObjectName } from '@kbn/metrics-data-plugin/server/saved_objects';
+import { extractSavedObjectReferences } from '@kbn/metrics-data-plugin/server/lib/sources/saved_object_references';
 import { logViewSavedObjectName } from '@kbn/logs-shared-plugin/server';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
