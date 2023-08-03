@@ -92,6 +92,7 @@ interface StepDefineRuleProps extends RuleStepProps {
   indicesConfig: string[];
   threatIndicesConfig: string[];
   defaultSavedQuery?: SavedQuery;
+  failedToLoadSavedQuery?: boolean;
   form: FormHook<DefineStepRule>;
   optionsSelected: EqlOptionsSelected;
   setOptionsSelected: React.Dispatch<React.SetStateAction<EqlOptionsSelected>>;
@@ -149,6 +150,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   indicesConfig,
   threatIndicesConfig,
   defaultSavedQuery,
+  failedToLoadSavedQuery,
   form,
   optionsSelected,
   setOptionsSelected,
@@ -173,7 +175,16 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const [threatIndexModified, setThreatIndexModified] = useState(false);
   const license = useLicense();
 
-  const { getFields, reset, setFieldValue } = form;
+  const { getFields, reset, setFieldValue, validateFields } = form;
+
+  useEffect(() => {
+    // Since we do not do fields validation on loading anymore after this refactoring https://github.com/elastic/kibana/pull/157749,
+    // to make sure that we show an error for the failed saved query we should enforce validation for 'queryBar' field.
+    // Here we check whether the loading of saved query has failed and query bar state does not indicate that.
+    if (failedToLoadSavedQuery && isQueryBarValid) {
+      validateFields(['queryBar']);
+    }
+  }, [failedToLoadSavedQuery, isQueryBarValid, validateFields]);
 
   const setRuleTypeCallback = useSetFieldValueWithCallback({
     field: 'ruleType',
