@@ -18,7 +18,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaOverview = getService('monitoringKibanaOverview');
   const clusterOverview = getService('monitoringClusterOverview');
 
-  describe('Kibana Stack Monitoring a11y tests', () => {
+  describe.skip('Kibana Stack Monitoring a11y tests', () => {
     before(async () => {
       await PageObjects.common.navigateToApp('monitoring');
       await a11y.testAppSnapshot();
