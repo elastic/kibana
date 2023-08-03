@@ -16,9 +16,6 @@ export const riskEngineConfigurationTypeMappings: SavedObjectsType['mappings'] =
     enabled: {
       type: 'boolean',
     },
-    last_updated_by: {
-      type: 'keyword',
-    },
   },
 };
 

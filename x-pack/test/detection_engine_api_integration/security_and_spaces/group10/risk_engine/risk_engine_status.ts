@@ -286,7 +286,6 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(response?.saved_objects?.[0]?.attributes).to.eql({
           enabled: true,
-          last_updated_by: 'elastic',
         });
       });
 
@@ -339,7 +338,6 @@ export default ({ getService }: FtrProviderContext) => {
         expect(status1.body).to.eql({
           risk_engine_status: 'NOT_INSTALLED',
           legacy_risk_engine_status: 'NOT_INSTALLED',
-          last_updated_by: '',
         });
 
         await initRiskEngine();
@@ -349,7 +347,6 @@ export default ({ getService }: FtrProviderContext) => {
         expect(status2.body).to.eql({
           risk_engine_status: 'ENABLED',
           legacy_risk_engine_status: 'NOT_INSTALLED',
-          last_updated_by: 'elastic',
         });
 
         await disableRiskEngine();
@@ -358,7 +355,6 @@ export default ({ getService }: FtrProviderContext) => {
         expect(status3.body).to.eql({
           risk_engine_status: 'DISABLED',
           legacy_risk_engine_status: 'NOT_INSTALLED',
-          last_updated_by: 'elastic',
         });
 
         await enableRiskEngine();
@@ -367,7 +363,6 @@ export default ({ getService }: FtrProviderContext) => {
         expect(status4.body).to.eql({
           risk_engine_status: 'ENABLED',
           legacy_risk_engine_status: 'NOT_INSTALLED',
-          last_updated_by: 'elastic',
         });
       });
 
@@ -378,7 +373,6 @@ export default ({ getService }: FtrProviderContext) => {
         expect(status1.body).to.eql({
           risk_engine_status: 'NOT_INSTALLED',
           legacy_risk_engine_status: 'ENABLED',
-          last_updated_by: '',
         });
 
         await initRiskEngine();
@@ -388,7 +382,6 @@ export default ({ getService }: FtrProviderContext) => {
         expect(status2.body).to.eql({
           risk_engine_status: 'ENABLED',
           legacy_risk_engine_status: 'NOT_INSTALLED',
-          last_updated_by: 'elastic',
         });
       });
     });

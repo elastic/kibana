@@ -49,7 +49,6 @@ export const updateSavedObjectAttribute = async ({
     savedObjectConfiguration.id,
     {
       ...attributes,
-      last_updated_by: user?.username ?? '',
     },
     {
       refresh: 'wait_for',
@@ -66,7 +65,6 @@ export const initSavedObjects = async ({ savedObjectsClient, user }: UpdateConfi
   }
   const result = await savedObjectsClient.create(riskEngineConfigurationTypeName, {
     enabled: false,
-    last_updated_by: user?.username ?? '',
   });
   return result;
 };

@@ -129,8 +129,7 @@ export class RiskEngineDataClient {
   }) {
     const riskEngineStatus = await this.getCurrentStatus({ savedObjectsClient });
     const legacyRiskEngineStatus = await this.getLegacyStatus({ namespace });
-    const lastUpdatedBy = await this.getLastUpdatedBy({ savedObjectsClient });
-    return { riskEngineStatus, legacyRiskEngineStatus, lastUpdatedBy };
+    return { riskEngineStatus, legacyRiskEngineStatus };
   }
 
   public async enableRiskEngine({ savedObjectsClient, user }: UpdateConfigOpts) {
@@ -173,16 +172,6 @@ export class RiskEngineDataClient {
     const newlegacyRiskEngineStatus = await this.getLegacyStatus({ namespace });
 
     return newlegacyRiskEngineStatus === RiskEngineStatus.NOT_INSTALLED;
-  }
-
-  private async getLastUpdatedBy({ savedObjectsClient }: SavedObjectsClients) {
-    const configuration = await getConfiguration({ savedObjectsClient });
-
-    if (configuration) {
-      return configuration.last_updated_by;
-    }
-
-    return '';
   }
 
   private async getCurrentStatus({ savedObjectsClient }: SavedObjectsClients) {

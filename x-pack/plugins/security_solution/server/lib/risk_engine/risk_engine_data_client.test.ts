@@ -31,7 +31,6 @@ const getSavedObjectConfiguration = (attributes = {}) => ({
       namespaces: ['default'],
       attributes: {
         enabled: false,
-        last_updated_by: 'elastic',
         ...attributes,
       },
       references: [],
@@ -476,7 +475,6 @@ describe('RiskEngineDataClient', () => {
         'de8ca330-2d26-11ee-bc86-f95bf6192ee6',
         {
           enabled: true,
-          last_updated_by: 'elastic',
         },
         {
           refresh: 'wait_for',
@@ -522,7 +520,6 @@ describe('RiskEngineDataClient', () => {
         'de8ca330-2d26-11ee-bc86-f95bf6192ee6',
         {
           enabled: false,
-          last_updated_by: 'elastic',
         },
         {
           refresh: 'wait_for',

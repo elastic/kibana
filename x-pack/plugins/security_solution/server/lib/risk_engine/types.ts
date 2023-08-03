@@ -164,5 +164,4 @@ export interface RiskScoreBucket {
 
 export interface RiskEngineConfiguration {
   enabled: boolean;
-  last_updated_by: string;
 }

@@ -38,7 +38,6 @@ export const riskEngineStatusRoute = (router: SecuritySolutionPluginRouter, logg
           body: {
             risk_engine_status: result.riskEngineStatus,
             legacy_risk_engine_status: result.legacyRiskEngineStatus,
-            last_updated_by: result.lastUpdatedBy,
           },
         });
       } catch (e) {

@@ -2943,9 +2943,6 @@
     "properties": {
       "enabled": {
         "type": "boolean"
-      },
-      "last_updated_by": {
-        "type": "keyword"
       }
     }
   },
