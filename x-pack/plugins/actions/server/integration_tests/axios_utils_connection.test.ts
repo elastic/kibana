@@ -289,7 +289,7 @@ describe('axios connections', () => {
       await expect(fn()).rejects.toThrow('mac verify');
     });
 
-    test('it fails with a certificate issued by an invalid ca', async () => {
+    test('it fails with a client-side certificate issued by an invalid ca', async () => {
       const { url, server } = await createServer({ useHttps: true, requestCert: true });
       testServer = server;
 
