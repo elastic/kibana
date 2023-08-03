@@ -192,6 +192,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     dataViews,
   };
 
+  // NOTE: initialRenderTime is only set once when the component mounts
   const initialRenderTime = useRef<number>(performance.now());
   const dataReceivedTime = useRef<number>(0);
 
@@ -240,6 +241,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     (_data: unknown, adapters?: Partial<DefaultInspectorAdapters>) => {
       if (renderDeps.current) {
         dataReceivedTime.current = performance.now();
+        // NOTE: this metric is only valid for an initial editor load of a pre-existing visualization
         // console.log('data took to arrive', dataReceivedTime.current - initialRenderTime.current);
 
         const [defaultLayerId] = Object.keys(renderDeps.current.datasourceLayers);

@@ -31,8 +31,6 @@ import {
   ReactExpressionRendererProps,
   ReactExpressionRendererType,
 } from '@kbn/expressions-plugin/public';
-import fastIsEqual from 'fast-deep-equal';
-import { useWhatChanged } from '@simbathesailor/use-what-changed';
 import { css } from '@emotion/react';
 import { DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS } from '../../utils';
 import {
@@ -374,7 +372,10 @@ export function SuggestionPanel({
   const onSuggestionRender = useCallback(() => {
     suggestionsRendered.current++;
     if (suggestionsRendered.current === totalSuggestions) {
-      console.log('suggestions finished rendering', performance.now() - startTime.current);
+      // console.log(
+      //   'suggestions took to fetch data and render',
+      //   performance.now() - startTime.current
+      // );
     }
   }, [totalSuggestions]);
 
