@@ -13,27 +13,12 @@ import { ES_CLIENT_HEADERS } from '../../client_headers';
 // eslint-disable-next-line @kbn/imports/no_boundary_crossing
 import { cpuCount } from '../../../../../test/api_integration/apis/local_and_ess_is_es_archiver_slow/utils';
 
-// So the axiom held up in ci
-// https://ci.ml-qa.com/blue/organizations/jenkins/dev%2Fes-archiver-benchmark/detail/es-archiver-benchmark/47/pipeline/45/
-// But the sample size is small not highly varied compared to what's available in all the myriad
-// FTR tests.
-// So, soon I'll run a test on all the archives.
-// const isSame = (a) => (b) => {
-//   return a === b;
-// };
-
 export function indexDocs(stats: Stats, client: Client, useCreate: boolean = false) {
   return async (
     jsonStanzasWithinArchive: any[],
     callerName: 'write' | 'writev' = 'write'
   ): Promise<void> => {
-    // const length = jsonStanzasWithinArchive.length;
-    // console.log(
-    //   `\nλjs jsonStanzasWithinArchives size, passed from "%s": \n\t${length}`,
-    //   callerName
-    // );
     const operation = useCreate ? 'create' : 'index';
-    // const isSameAsOperation = isSame(operation);
     const ops = new WeakMap<any, any>();
     const errors: string[] = [];
 
@@ -51,16 +36,14 @@ interface TypeBase {
   source: any;
   id: any;
 }
-
 interface DataStreamType {
   data_stream: any;
 }
-
 interface IndexType {
   index: any;
 }
-
 type IndexOrDataStreamTypeButNotBoth = TypeBase & (DataStreamType | IndexType);
+
 const doStuff = async (client, jsonStanzasWithinArchive, ops, operation, errors): Promise<void> => {
   await client.helpers.bulk(
     {
@@ -70,19 +53,13 @@ const doStuff = async (client, jsonStanzasWithinArchive, ops, operation, errors)
       retries: 3,
       datasource: jsonStanzasWithinArchive.map((doc) => {
         const body = doc.source;
-        // const op = doc.data_stream ? BulkOperation.Create : operation;
-        // console.log(`\nλjs op: \n${JSON.stringify(op, null, 2)}`);
-        // const isSameAsOp = isSameAsOperation(op);
-        // console.log(`\nλjs isSameAsOp: \n\t${isSameAsOp}`);
         const index = doc.data_stream || doc.index;
         ops.set(body, {
-          // [op]:
           [operation]: {
             _index: index,
             _id: doc.id,
           },
         });
-        // console.log(`\nλjs op: \n${JSON.stringify(op, null, 2)}`);
         return body;
       }),
       onDocument(doc: any) {
@@ -103,9 +80,9 @@ const doStuff = async (client, jsonStanzasWithinArchive, ops, operation, errors)
 type WorkType = 'write' | 'writev';
 export const writeOrWriteV =
   (workType: WorkType) =>
-  (indexHof) =>
-  (callback) =>
-  (progress) =>
+  (indexHof: (arg0: any, arg1: string | undefined) => any) =>
+  (callback: (arg0: null) => void) =>
+  (progress: { addToComplete: (arg0: number) => any }) =>
   async (xs): Promise<void> => {
     try {
       workType === 'write'
@@ -121,3 +98,8 @@ export const writeOrWriteV =
       callback(err);
     }
   };
+
+// So the axiom held up in ci
+// https://ci.ml-qa.com/blue/organizations/jenkins/dev%2Fes-archiver-benchmark/detail/es-archiver-benchmark/47/pipeline/45/
+// But the sample size is small not highly varied compared to what's available in all the myriad
+// FTR tests.
