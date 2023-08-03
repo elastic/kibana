@@ -259,13 +259,13 @@ const getDataComparisonQuery = ({
     }
   }
 
-  const refDataQuery: NonNullable<estypes.SearchRequest['body']> = {
+  const queryAndRuntimeMappings: NonNullable<estypes.SearchRequest['body']> = {
     query,
   };
   if (runtimeFields) {
-    refDataQuery.runtime_mappings = runtimeFields;
+    queryAndRuntimeMappings.runtime_mappings = runtimeFields;
   }
-  return refDataQuery;
+  return queryAndRuntimeMappings;
 };
 
 const fetchReferenceBaselineData = async ({
