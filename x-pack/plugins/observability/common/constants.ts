@@ -65,4 +65,5 @@ export const observabilityRuleCreationValidConsumers: RuleCreationValidConsumer[
   AlertConsumers.LOGS,
   AlertConsumers.UPTIME,
   AlertConsumers.SLO,
+  'stackAlerts',
 ];

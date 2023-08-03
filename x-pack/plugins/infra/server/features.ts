@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { logViewSavedObjectName } from '@kbn/logs-shared-plugin/server';
 import { LOG_DOCUMENT_COUNT_RULE_TYPE_ID } from '../common/alerting/logs/log_threshold/types';
+import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID, ES_QUERY_RULE_TYPE_ID } from '@kbn/observability-plugin/common/constants';
 import {
   METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
   METRIC_THRESHOLD_ALERT_TYPE_ID,
@@ -31,8 +32,8 @@ export const METRICS_FEATURE = {
   alerting: [
     METRIC_THRESHOLD_ALERT_TYPE_ID,
     METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
-    '.es-query',
-    'observability.rules.threshold',
+    ES_QUERY_RULE_TYPE_ID,
+    OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
   ],
   privileges: {
     all: {
@@ -48,16 +49,16 @@ export const METRICS_FEATURE = {
           all: [
             METRIC_THRESHOLD_ALERT_TYPE_ID,
             METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
-            '.es-query',
-            'observability.rules.threshold',
+            ES_QUERY_RULE_TYPE_ID,
+            OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
           ],
         },
         alert: {
           all: [
             METRIC_THRESHOLD_ALERT_TYPE_ID,
             METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
-            '.es-query',
-            'observability.rules.threshold',
+            ES_QUERY_RULE_TYPE_ID,
+            OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
           ],
         },
       },
@@ -79,16 +80,16 @@ export const METRICS_FEATURE = {
           read: [
             METRIC_THRESHOLD_ALERT_TYPE_ID,
             METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
-            '.es-query',
-            'observability.rules.threshold',
+            ES_QUERY_RULE_TYPE_ID,
+            OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
           ],
         },
         alert: {
           read: [
             METRIC_THRESHOLD_ALERT_TYPE_ID,
             METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
-            '.es-query',
-            'observability.rules.threshold',
+            ES_QUERY_RULE_TYPE_ID,
+            OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
           ],
         },
       },
@@ -112,7 +113,7 @@ export const LOGS_FEATURE = {
   management: {
     insightsAndAlerting: ['triggersActions'],
   },
-  alerting: [LOG_DOCUMENT_COUNT_RULE_TYPE_ID, '.es-query', 'observability.rules.threshold'],
+  alerting: [LOG_DOCUMENT_COUNT_RULE_TYPE_ID, ES_QUERY_RULE_TYPE_ID, OBSERVABILITY_THRESHOLD_RULE_TYPE_ID],
   privileges: {
     all: {
       app: ['infra', 'logs', 'kibana'],
@@ -124,10 +125,10 @@ export const LOGS_FEATURE = {
       },
       alerting: {
         rule: {
-          all: [LOG_DOCUMENT_COUNT_RULE_TYPE_ID, '.es-query', 'observability.rules.threshold'],
+          all: [LOG_DOCUMENT_COUNT_RULE_TYPE_ID, ES_QUERY_RULE_TYPE_ID, OBSERVABILITY_THRESHOLD_RULE_TYPE_ID],
         },
         alert: {
-          all: [LOG_DOCUMENT_COUNT_RULE_TYPE_ID, '.es-query', 'observability.rules.threshold'],
+          all: [LOG_DOCUMENT_COUNT_RULE_TYPE_ID, ES_QUERY_RULE_TYPE_ID, OBSERVABILITY_THRESHOLD_RULE_TYPE_ID],
         },
       },
       management: {
@@ -141,10 +142,10 @@ export const LOGS_FEATURE = {
       api: ['infra', 'rac', 'ai_assistant'],
       alerting: {
         rule: {
-          read: [LOG_DOCUMENT_COUNT_RULE_TYPE_ID, '.es-query', 'observability.rules.threshold'],
+          read: [LOG_DOCUMENT_COUNT_RULE_TYPE_ID, ES_QUERY_RULE_TYPE_ID, OBSERVABILITY_THRESHOLD_RULE_TYPE_ID],
         },
         alert: {
-          read: [LOG_DOCUMENT_COUNT_RULE_TYPE_ID, '.es-query', 'observability.rules.threshold'],
+          read: [LOG_DOCUMENT_COUNT_RULE_TYPE_ID, ES_QUERY_RULE_TYPE_ID, OBSERVABILITY_THRESHOLD_RULE_TYPE_ID],
         },
       },
       management: {
