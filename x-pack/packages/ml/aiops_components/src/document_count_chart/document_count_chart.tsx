@@ -99,7 +99,13 @@ export interface DocumentCountChartProps {
     fieldFormats: FieldFormatsStart;
     uiSettings: IUiSettingsClient;
   };
-  /** Optional callback function which gets called the brush selection has changed */
+  /**
+   * Optional callback function which gets called the brush selection has changed
+   *
+   * @param windowParameters Baseline and deviation time ranges.
+   * @param force Force update
+   * @param logRateAnalysisType `spike` or `dip` based on median log rate bucket size
+   */
   brushSelectionUpdateHandler?: (
     windowParameters: WindowParameters,
     force: boolean,
@@ -171,42 +177,30 @@ function getBaselineBadgeOverflow(
 /**
  * Document count chart with draggable brushes to select time ranges
  * by default use `Baseline` and `Deviation` for the badge names
- * @param dependencies - List of Kibana services that are required as dependencies
- * @param brushSelectionUpdateHandler - Optional callback function which gets called when the brush selection has changed
- * @param width - Optional width
- * @param chartPoints - Data chart points
- * @param chartPointsSplit - Data chart points split
- * @param timeRangeEarliest - Start time range for the chart
- * @param timeRangeLatest - Ending time range for the chart
- * @param interval - Time interval for the document count buckets
- * @param chartPointsSplitLabel - Label to name the adjustedChartPointsSplit histogram
- * @param isBrushCleared - Whether or not brush has been reset
- * @param autoAnalysisStart - Timestamp for start of initial analysis
- * @param barColorOverride - Optional color override for the default bar color for charts
- * @param barStyleAccessor - Optional style to override bar chart
- * @param barHighlightColorOverride - Optional color override for the highlighted bar color for charts
- * @param deviationBrush - Optional settings override for the 'deviation' brush
- * @param baselineBrush - Optional settings override for the 'baseline' brush
- * @constructor
+ *
+ * @param props DocumentCountChart component props
+ * @returns The DocumentCountChart component.
  */
-export const DocumentCountChart: FC<DocumentCountChartProps> = ({
-  dependencies,
-  brushSelectionUpdateHandler,
-  width,
-  chartPoints,
-  chartPointsSplit,
-  timeRangeEarliest,
-  timeRangeLatest,
-  interval,
-  chartPointsSplitLabel,
-  isBrushCleared,
-  autoAnalysisStart,
-  barColorOverride,
-  barStyleAccessor,
-  barHighlightColorOverride,
-  deviationBrush = {},
-  baselineBrush = {},
-}) => {
+export const DocumentCountChart: FC<DocumentCountChartProps> = (props) => {
+  const {
+    dependencies,
+    brushSelectionUpdateHandler,
+    width,
+    chartPoints,
+    chartPointsSplit,
+    timeRangeEarliest,
+    timeRangeLatest,
+    interval,
+    chartPointsSplitLabel,
+    isBrushCleared,
+    autoAnalysisStart,
+    barColorOverride,
+    barStyleAccessor,
+    barHighlightColorOverride,
+    deviationBrush = {},
+    baselineBrush = {},
+  } = props;
+
   const { data, uiSettings, fieldFormats, charts } = dependencies;
 
   const chartTheme = charts.theme.useChartsTheme();
