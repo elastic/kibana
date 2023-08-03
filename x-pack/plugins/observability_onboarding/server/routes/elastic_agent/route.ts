@@ -12,7 +12,7 @@ import { getFallbackESUrl } from '../../lib/get_fallback_urls';
 import { getObservabilityOnboardingFlow } from '../../lib/state';
 import { createObservabilityOnboardingServerRoute } from '../create_observability_onboarding_server_route';
 import { generateCustomLogsYml } from './custom_logs/generate_custom_logs_yml';
-import { generateSystemLogsYml } from './system_logs/generate_system_logs_yaml';
+import { generateSystemLogsYml } from './system_logs/generate_system_logs_yml';
 
 const generateConfig = createObservabilityOnboardingServerRoute({
   endpoint: 'GET /internal/observability_onboarding/elastic_agent/config',
