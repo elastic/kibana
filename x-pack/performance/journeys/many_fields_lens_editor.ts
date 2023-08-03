@@ -7,7 +7,6 @@
 
 import { Journey } from '@kbn/journeys';
 import { subj } from '@kbn/test-subj-selector';
-import { waitForCharts } from '../utils';
 
 export const journey = new Journey({
   kbnArchives: ['x-pack/performance/kbn_archives/lens_many_fields'],
@@ -21,8 +20,7 @@ export const journey = new Journey({
     );
     await page.waitForSelector('#visualizeListingHeading');
   })
-  .step('Open existing Lens', async ({ page, log }) => {
+  .step('Open existing Lens', async ({ page, kibanaPage }) => {
     await page.click(subj('visListingTitleLink-Lens-Stress-Test'));
-    await page.waitForTimeout(10000);
-    await waitForCharts(page, log, 6);
+    await kibanaPage.waitForCharts(6);
   });
