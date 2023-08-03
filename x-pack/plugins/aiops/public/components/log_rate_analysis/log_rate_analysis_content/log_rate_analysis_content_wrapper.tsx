@@ -20,6 +20,7 @@ import { DatePickerContextProvider } from '@kbn/ml-date-picker';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
 
+import { LOG_RATE_ANALYSIS_TYPE, type LogRateAnalysisType } from '../../../../common/constants';
 import { timeSeriesDataViewWarning } from '../../../application/utils/time_series_dataview_check';
 import { AiopsAppContext, type AiopsAppDependencies } from '../../../hooks/use_aiops_app_context';
 import { DataSourceContext } from '../../../hooks/use_data_source';
@@ -31,9 +32,14 @@ import type { LogRateAnalysisResultsData } from '../log_rate_analysis_results';
 
 const localStorage = new Storage(window.localStorage);
 
+/**
+ * Props for the LogRateAnalysisContentWrapper component.
+ */
 export interface LogRateAnalysisContentWrapperProps {
   /** The data view to analyze. */
   dataView: DataView;
+  /** The type of analysis, whether it's a spike or dip */
+  analysisType?: LogRateAnalysisType;
   /** Option to make main histogram sticky */
   stickyHistogram?: boolean;
   /** App dependencies */
@@ -42,6 +48,7 @@ export interface LogRateAnalysisContentWrapperProps {
   setGlobalState?: any;
   /** Timestamp for start of initial analysis */
   initialAnalysisStart?: number | WindowParameters;
+  /** Optional time range */
   timeRange?: { min: Moment; max: Moment };
   /** Elasticsearch query to pass to analysis endpoint */
   esSearchQuery?: estypes.QueryDslQueryContainer;
@@ -49,12 +56,16 @@ export interface LogRateAnalysisContentWrapperProps {
   barColorOverride?: string;
   /** Optional color override for the highlighted bar color for charts */
   barHighlightColorOverride?: string;
-  /** Optional callback that exposes data of the completed analysis */
+  /**
+   * Optional callback that exposes data of the completed analysis
+   * @param d Log rate analysis results data
+   */
   onAnalysisCompleted?: (d: LogRateAnalysisResultsData) => void;
 }
 
 export const LogRateAnalysisContentWrapper: FC<LogRateAnalysisContentWrapperProps> = ({
   dataView,
+  analysisType = LOG_RATE_ANALYSIS_TYPE.SPIKE,
   appDependencies,
   setGlobalState,
   initialAnalysisStart,
@@ -89,6 +100,7 @@ export const LogRateAnalysisContentWrapper: FC<LogRateAnalysisContentWrapperProp
               <DatePickerContextProvider {...datePickerDeps}>
                 <LogRateAnalysisContent
                   dataView={dataView}
+                  analysisType={analysisType}
                   setGlobalState={setGlobalState}
                   initialAnalysisStart={initialAnalysisStart}
                   timeRange={timeRange}
