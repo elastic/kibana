@@ -10793,7 +10793,7 @@
             "label": "params",
             "description": [],
             "signature": [
-              "{ decimals: number; suffix?: string | undefined; } | undefined"
+              "{ decimals: number; suffix?: string | undefined; fromUnit?: string | undefined; toUnit?: string | undefined; } | undefined"
             ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/common.ts",
             "deprecated": false,
