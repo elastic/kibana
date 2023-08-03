@@ -315,6 +315,11 @@ export function useOnSubmit({
       } else {
         setFormState(agentCount ? 'SUBMITTED' : 'SUBMITTED_NO_AGENTS');
       }
+      if (hasGoogleCloudShell) {
+        setFormState(agentCount ? 'SUBMITTED' : 'SUBMITTED_GOOGLE_CLOUD_SHELL');
+      } else {
+        setFormState(agentCount ? 'SUBMITTED' : 'SUBMITTED_NO_AGENTS');
+      }
       if (!error) {
         setSavedPackagePolicy(data!.item);
 
