@@ -130,6 +130,11 @@ describe('fleet usage telemetry', () => {
           last_checkin: '2022-11-21T12:26:24Z',
           active: true,
           policy_id: 'policy1',
+          local_metadata: {
+            os: {
+              full: "Ubuntu jammy(22.04.2 LTS (Jammy Jellyfish))",
+            },
+          },
         },
         {
           create: {
@@ -158,6 +163,11 @@ describe('fleet usage telemetry', () => {
           last_checkin: '2021-11-21T12:27:24Z',
           active: false,
           policy_id: 'policy1',
+          local_metadata: {
+            os: {
+              full: "Ubuntu focal(20.04.5 LTS (Focal Fossa))",
+            },
+          },
         },
       ],
       refresh: 'wait_for',
@@ -374,6 +384,16 @@ describe('fleet usage telemetry', () => {
         ],
         agent_checkin_status: { error: 1, degraded: 1 },
         agents_per_policy: [2],
+        agents_per_os: [
+          {
+            os: 'Ubuntu jammy(22.04.2 LTS (Jammy Jellyfish))',
+            count: 1,
+          },
+          {
+            os: 'Ubuntu focal(20.04.5 LTS (Focal Fossa))',
+            count: 1,
+          },
+        ],
         fleet_server_config: {
           policies: [
             {
