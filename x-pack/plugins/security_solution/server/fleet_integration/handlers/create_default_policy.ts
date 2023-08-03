@@ -44,15 +44,22 @@ export const createDefaultPolicy = (
     : factoryPolicy.meta.cluster_uuid;
   factoryPolicy.meta.license_uid = licenseService.getLicenseUID();
 
-  const defaultPolicyPerType =
+  let defaultPolicyPerType: PolicyConfig =
     config?.type === 'cloud'
       ? getCloudPolicyConfig(factoryPolicy)
       : getEndpointPolicyWithIntegrationConfig(factoryPolicy, config);
 
+  if (!licenseService.isPlatinumPlus()) {
+    defaultPolicyPerType = policyConfigFactoryWithoutPaidFeatures(defaultPolicyPerType);
+  }
+
+  // If no Policy Protection allowed (ex. serverless)
+  if (true) {
+    // implement
+  }
+
   // Apply license limitations in the final step, so it's not overriden (see malware popup)
-  return licenseService.isPlatinumPlus()
-    ? defaultPolicyPerType
-    : policyConfigFactoryWithoutPaidFeatures(defaultPolicyPerType);
+  return defaultPolicyPerType;
 };
 
 /**
