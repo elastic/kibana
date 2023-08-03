@@ -6,7 +6,7 @@
  */
 
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
-import { orderBy } from 'lodash';
+import { orderBy, isEqual } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import {
@@ -336,18 +336,34 @@ export const LogRateAnalysisResultsTable: FC<LogRateAnalysisResultsTableProps> =
     };
   }, [pageIndex, pageSize, sortField, sortDirection, significantTerms]);
 
-  // If no row is hovered or pinned, fall back to set the first row
-  // into a hovered state to make the main document count chart
-  // show a comparison view by default.
   useEffect(() => {
+    // If no row is hovered or pinned or the user switched to a new page,
+    // fall back to set the first row into a hovered state to make the
+    // main document count chart show a comparison view by default.
     if (
-      selectedSignificantTerm === null &&
+      (selectedSignificantTerm === null ||
+        !pageOfItems.some((item) => isEqual(item, selectedSignificantTerm))) &&
       pinnedSignificantTerm === null &&
       pageOfItems.length > 0
     ) {
       setSelectedSignificantTerm(pageOfItems[0]);
     }
-  }, [selectedSignificantTerm, setSelectedSignificantTerm, pageOfItems, pinnedSignificantTerm]);
+
+    // If a user switched pages and a pinned row is no longer visible
+    // on the current page, set the status of pinned rows back to `null`.
+    if (
+      pinnedSignificantTerm !== null &&
+      !pageOfItems.some((item) => isEqual(item, pinnedSignificantTerm))
+    ) {
+      setPinnedSignificantTerm(null);
+    }
+  }, [
+    selectedSignificantTerm,
+    setSelectedSignificantTerm,
+    setPinnedSignificantTerm,
+    pageOfItems,
+    pinnedSignificantTerm,
+  ]);
 
   // When the analysis results table unmounts,
   // make sure to reset any hovered or pinned rows.
