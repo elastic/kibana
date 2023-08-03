@@ -303,6 +303,15 @@ describe('axios connections', () => {
         await request({ axios, url, logger, configurationUtilities, sslOverrides });
       await expect(fn()).rejects.toThrow('certificate');
     });
+
+    test('it fails when requesting a client-side cert and none is provided', async () => {
+      const { url, server } = await createServer({ useHttps: true, requestCert: true });
+      testServer = server;
+
+      const configurationUtilities = getACUfromConfig();
+      const fn = async () => await request({ axios, url, logger, configurationUtilities });
+      await expect(fn()).rejects.toThrow('certificate');
+    });
   });
 
   // targetHttps, proxyHttps, and proxyAuth should all range over [false, true], but
