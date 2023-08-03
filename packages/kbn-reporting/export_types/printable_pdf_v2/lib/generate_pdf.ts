@@ -8,7 +8,7 @@
 
 import * as Rx from 'rxjs';
 import { mergeMap, tap } from 'rxjs/operators';
-import { PdfScreenshotOptions, PdfScreenshotResult } from '@kbn/screenshotting-plugin/server';
+import type { PdfScreenshotOptions, PdfScreenshotResult } from '@kbn/screenshotting-plugin/server';
 import { getFullRedirectAppUrl } from '@kbn/reporting-common';
 import type {
   LocatorParams,
@@ -18,7 +18,7 @@ import type {
 import { PdfMetrics } from '@kbn/reporting-common/metrics';
 import { TaskPayloadPDFV2 } from '@kbn/reporting-common/types';
 import { getTracker } from '@kbn/reporting-common/export_type_helpers/pdf_tracker';
-import { UrlOrUrlWithContext } from '@kbn/screenshotting-plugin/server/screenshots';
+import type { UrlOrUrlWithContext } from '@kbn/screenshotting-plugin/server/screenshots';
 
 interface PdfResult {
   buffer: Uint8Array | null;
