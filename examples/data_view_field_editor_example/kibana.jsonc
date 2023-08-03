@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/data-view-field-editor-example-plugin",
-  "owner": "@elastic/kibana-app-services",
+  "owner": "@elastic/kibana-data-discovery",
   "description": "Data view field editor example app",
   "plugin": {
     "id": "dataViewFieldEditorExample",

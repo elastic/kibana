@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/index-patterns-test-plugin",
-  "owner": "@elastic/kibana-app-services",
+  "owner": "@elastic/kibana-data-discovery",
   "description": "Index pattern test plugin",
   "plugin": {
     "id": "indexPatternsTestPlugin",
