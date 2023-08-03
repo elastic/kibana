@@ -306,8 +306,33 @@ export function transformOutputToFullPolicyOutput(
       channel_buffer_size,
       required_acks,
     } = output;
-    /* eslint-enable @typescript-eslint/naming-convention */
 
+    const transferPartition = () => {
+      if (!partition) return {};
+      switch (partition) {
+        case 'random':
+          return {
+            random: {
+              ...(random?.group_events
+                ? { group_events: random.group_events }
+                : { group_events: 1 }),
+            },
+          };
+        case 'round_robin':
+          return {
+            round_robin: {
+              ...(round_robin?.group_events
+                ? { group_events: round_robin.group_events }
+                : { group_events: 1 }),
+            },
+          };
+        case 'hash':
+        default:
+          return { hash: { ...(hash?.hash ? { hash: hash.hash } : { hash: '' }) } };
+      }
+    };
+
+    /* eslint-enable @typescript-eslint/naming-convention */
     kafkaData = {
       client_id,
       version,
@@ -318,11 +343,23 @@ export function transformOutputToFullPolicyOutput(
       username,
       password,
       sasl,
-      partition,
-      random,
-      round_robin,
-      hash,
-      topics,
+      partition: transferPartition(),
+      topics: (topics ?? []).map((topic) => {
+        const { topic: topicName, ...rest } = topic;
+        const whenKeys = Object.keys(rest);
+
+        if (whenKeys.length === 0) {
+          return { topic: topicName };
+        }
+        if (rest.when) {
+          return {
+            topic: topicName,
+            [rest.when.type as string]: {
+              message: rest.when.condition,
+            },
+          };
+        }
+      }),
       headers,
       timeout,
       broker_timeout,
