@@ -13,10 +13,19 @@ const COMMON_REQUEST_HEADERS = {
   'kbn-xsrf': 'some-xsrf-token',
 };
 
+const INTERNAL_REQUEST_HEADERS = {
+  ...COMMON_REQUEST_HEADERS,
+  'x-elastic-internal-origin': 'kibana',
+};
+
 export function SvlCommonApiServiceProvider({}: FtrProviderContext) {
   return {
     getCommonRequestHeader() {
       return COMMON_REQUEST_HEADERS;
+    },
+
+    getInternalRequestHeader() {
+      return INTERNAL_REQUEST_HEADERS;
     },
 
     assertResponseStatusCode(expectedStatus: number, actualStatus: number, responseBody: object) {
