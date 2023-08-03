@@ -1,0 +1,11 @@
+{
+  "synonym_rule.put": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "_synonyms/{synonyms_set}/{synonym_rule}"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/put-synonym-rule.html"
+  }
+}
