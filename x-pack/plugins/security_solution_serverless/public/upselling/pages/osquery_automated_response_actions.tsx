@@ -5,9 +5,43 @@
  * 2.0.
  */
 
-import { lazy } from 'react';
+import { EuiEmptyPrompt, EuiIcon } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React from 'react';
+import type { AppFeatureKey } from '@kbn/security-solution-plugin/common';
+import { getProductTypeByPLI } from '../hooks/use_product_type_by_pli';
 
-// will be replaced with a proper osquery section component when we get the mocks
-export const OsqueryResponseActionsUpsellingSectionlLazy = lazy(
-  () => import('./generic_upselling_section')
+const OsqueryResponseActionsUpsellingSection: React.FC<{ requiredPLI: AppFeatureKey }> = React.memo(
+  ({ requiredPLI }) => {
+    const productTypeRequired = getProductTypeByPLI(requiredPLI);
+
+    return (
+      <EuiEmptyPrompt
+        icon={<EuiIcon type="logoSecurity" size="xl" />}
+        color="subdued"
+        title={
+          <h2>
+            <FormattedMessage
+              id="xpack.securitySolutionServerless.osquery.paywall.title"
+              defaultMessage="Do more with Security!"
+            />
+          </h2>
+        }
+        body={
+          <p>
+            <FormattedMessage
+              id="xpack.securitySolutionServerless.osquery.paywall.body"
+              defaultMessage="Upgrade your license to {productTypeRequired} to use Osquery Response Actions."
+              values={{ productTypeRequired }}
+            />
+          </p>
+        }
+      />
+    );
+  }
 );
+
+OsqueryResponseActionsUpsellingSection.displayName = 'OsqueryResponseActionsUpsellingSection';
+
+// eslint-disable-next-line import/no-default-export
+export { OsqueryResponseActionsUpsellingSection as default };

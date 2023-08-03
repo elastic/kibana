@@ -16,11 +16,14 @@ import type {
   MessageUpsellings,
   UpsellingMessageId,
 } from '@kbn/security-solution-plugin/public/common/lib/upsellings/types';
-import { OsqueryResponseActionsUpsellingSectionlLazy } from './pages/osquery_automated_response_actions';
 import type { SecurityProductTypes } from '../../common/config';
 import { getProductAppFeatures } from '../../common/pli/pli_features';
 import investigationGuideUpselling from './pages/investigation_guide_upselling';
 const ThreatIntelligencePaywallLazy = lazy(() => import('./pages/threat_intelligence_paywall'));
+
+export const OsqueryResponseActionsUpsellingSectionlLazy = lazy(
+  () => import('./pages/osquery_automated_response_actions')
+);
 
 interface UpsellingsConfig {
   pli: AppFeatureKey;
