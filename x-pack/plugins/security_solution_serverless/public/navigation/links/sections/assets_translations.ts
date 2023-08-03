@@ -7,9 +7,71 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const DEV_TOOLS_TITLE = i18n.translate(
-  'xpack.securitySolutionServerless.navLinks.devTools.title',
+export const ASSETS_TITLE = i18n.translate(
+  'xpack.securitySolutionServerless.navLinks.assets.title',
   {
-    defaultMessage: 'Dev Tools',
+    defaultMessage: 'Assets',
+  }
+);
+
+export const CLOUD_DEFEND_TITLE = i18n.translate(
+  'xpack.securitySolutionServerless.navLinks.assets.cloud_defend.title',
+  {
+    defaultMessage: 'Cloud',
+  }
+);
+export const CLOUD_DEFEND_DESCRIPTION = i18n.translate(
+  'xpack.securitySolutionServerless.navLinks.assets.cloud_defend.description',
+  {
+    defaultMessage: 'Cloud hosts running Elastic Defend',
+  }
+);
+
+export const FLEET_TITLE = i18n.translate(
+  'xpack.securitySolutionServerless.navLinks.assets.fleet.title',
+  {
+    defaultMessage: 'Fleet',
+  }
+);
+export const FLEET_DESCRIPTION = i18n.translate(
+  'xpack.securitySolutionServerless.navLinks.assets.fleet.description',
+  {
+    defaultMessage: 'Centralized management for Elastic Agents',
+  }
+);
+export const FLEET_AGENTS_TITLE = i18n.translate(
+  'xpack.securitySolutionServerless.navLinks.assets.fleet.agents.title',
+  {
+    defaultMessage: 'Agents',
+  }
+);
+export const FLEET_POLICIES_TITLE = i18n.translate(
+  'xpack.securitySolutionServerless.navLinks.assets.fleet.policies.title',
+  {
+    defaultMessage: 'Policies',
+  }
+);
+export const FLEET_ENROLLMENT_TOKENS_TITLE = i18n.translate(
+  'xpack.securitySolutionServerless.navLinks.assets.fleet.enrollmentTokens.title',
+  {
+    defaultMessage: 'Enrollment Tokens',
+  }
+);
+export const FLEET_UNINSTALL_TOKENS_TITLE = i18n.translate(
+  'xpack.securitySolutionServerless.navLinks.assets.fleet.uninstallTokens.title',
+  {
+    defaultMessage: 'Uninstall Tokens',
+  }
+);
+export const FLEET_DATA_STREAMS_TITLE = i18n.translate(
+  'xpack.securitySolutionServerless.navLinks.assets.fleet.dataStreams.title',
+  {
+    defaultMessage: 'Data Streams',
+  }
+);
+export const FLEET_SETTINGS_TITLE = i18n.translate(
+  'xpack.securitySolutionServerless.navLinks.assets.fleet.settings.title',
+  {
+    defaultMessage: 'Settings',
   }
 );

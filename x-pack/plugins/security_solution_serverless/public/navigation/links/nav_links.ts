@@ -11,7 +11,7 @@ import { SecurityPageName, type NavigationLink } from '@kbn/security-solution-na
 import { isExternalId } from '@kbn/security-solution-navigation/links';
 import { mlNavCategories, mlNavLinks } from './sections/ml_links';
 import { devToolsNavLink } from './sections/dev_tools_links';
-import { assetsFleetNavLinks } from './sections/assets_links';
+import { assetsNavLinks } from './sections/assets_links';
 import type { ProjectNavigationLink } from './types';
 import { getNavLinkIdFromProjectPageName } from './util';
 
@@ -59,7 +59,7 @@ const processNavLinks = (
     const assetsNavLink = projectNavLinks[assetsLinkIndex];
     projectNavLinks[assetsLinkIndex] = {
       ...assetsNavLink,
-      links: [assetsFleetNavLinks, ...(assetsNavLink.links ?? [])],
+      links: [...assetsNavLinks, ...(assetsNavLink.links ?? [])], // adds fleet to the existing (endpoints and cloud) links
     };
   }
 

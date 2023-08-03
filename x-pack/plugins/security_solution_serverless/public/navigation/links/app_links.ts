@@ -31,5 +31,7 @@ export const projectAppLinksSwitcher: AppLinksSwitcher = (appLinks) => {
   // Add ML link
   projectAppLinks.push(mlAppLink);
 
+  // TODO: Project Settings
+
   return projectAppLinks;
 };
