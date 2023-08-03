@@ -7,7 +7,7 @@ should perform a check whether an end-user has access to the data.
 The Kibana Platform introduced a handler interface on the server-side to perform that association
 internally. Core services, that require impersonation with an incoming
 request, are exposed via `context` argument of
-[the request handler interface](https://github.com/elastic/kibana/blob/main/packages/core/http/core-http-server/src/router/request_handler.ts).
+https://github.com/elastic/kibana/blob/main/packages/core/http/core-http-server/src/router/request_handler.ts[the request handler interface].
 
 [source,js]
 ----
@@ -16,11 +16,11 @@ async function handler(context, req, res) {
 }
 ----
 
-The [request handler context]((https://github.com/elastic/kibana/blob/main/packages/core/http/core-http-server/src/router/request_handler.ts)) exposes the following scoped *core* services:
+The https://github.com/elastic/kibana/blob/main/packages/core/http/core-http-server/src/router/request_handler.ts[request handler context] exposes the following scoped *core* services:
 
-* [`context.savedObjects.client`](https://github.com/elastic/kibana/blob/main/packages/core/saved-objects/core-saved-objects-api-server/src/saved_objects_client.ts)
-* [`context.elasticsearch.client`](https://github.com/elastic/kibana/blob/main/packages/core/elasticsearch/core-elasticsearch-server/src/client/scoped_cluster_client.ts)
-* [`context.uiSettings.client`](https://github.com/elastic/kibana/blob/main/packages/core/ui-settings/core-ui-settings-server/src/ui_settings_client.ts)
+* https://github.com/elastic/kibana/blob/main/packages/core/saved-objects/core-saved-objects-api-server/src/saved_objects_client.ts[`context.savedObjects.client`]
+* https://github.com/elastic/kibana/blob/main/packages/core/elasticsearch/core-elasticsearch-server/src/client/scoped_cluster_client.ts[`context.elasticsearch.client`]
+* https://github.com/elastic/kibana/blob/main/packages/core/ui-settings/core-ui-settings-server/src/ui_settings_client.ts[`context.uiSettings.client`]
 
 ==== Declare a custom scoped service
 
