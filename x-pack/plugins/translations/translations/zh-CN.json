@@ -13576,6 +13576,7 @@
     "xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.model.redactedValue": "此模型在 Kibana 工作区不可用",
     "xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.modelLabel": "选择已训练 ML 模型",
     "xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.nameLabel": "名称",
+    "xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.namePlaceholder": "为此管道输入唯一名称",
     "xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.pipelineNameExistsError": "名称已由其他管道使用。",
     "xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.title": "创建或选择管道",
     "xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.titleSelectTrainedModel": "选择已训练 ML 模型",

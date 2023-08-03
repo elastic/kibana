@@ -241,6 +241,12 @@ export const ConfigurePipeline: React.FC = () => {
                     disabled={inputsDisabled}
                     fullWidth
                     prepend="ml-inference-"
+                    placeholder={i18n.translate(
+                      'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.namePlaceholder',
+                      {
+                        defaultMessage: 'Enter a unique name for this pipeline',
+                      }
+                    )}
                     value={pipelineName}
                     onChange={(e) =>
                       setInferencePipelineConfiguration({
