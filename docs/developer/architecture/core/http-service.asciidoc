@@ -12,7 +12,7 @@ The service allows plugins to:
 * to execute custom logic on an incoming request or server response.
 * implement custom authentication and authorization strategy.
 
-See {kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.httpservicesetup.md[HTTP service API docs]
+See [HTTP service types](https://github.com/elastic/kibana/blob/main/packages/core/http/core-http-server-internal/src/types.ts)
 
 [source,typescript]
 ----
@@ -64,4 +64,4 @@ async function fetchData<ResponseType>(core: CoreStart) {
   ); 
 }
 ----
-See {kib-repo}blob/{branch}/docs/development/core/public/kibana-plugin-core-public.httpsetup.md[for all available API].
+See [for the client-side APIs](https://github.com/elastic/kibana/blob/main/packages/core/http/core-http-browser/src/types.ts).

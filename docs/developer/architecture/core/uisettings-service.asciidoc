@@ -38,9 +38,9 @@ uiSettings:
 
 [[client-side-usage]]
 === Client side usage
-On the client, the `uiSettings` service is exposed directly from `core` and the {kib-repo}blob/{branch}/docs/development/core/public/kibana-plugin-core-public.iuisettingsclient.md[client] provides plugins access to the `config` entries stored in {es}.
+On the client, the `uiSettings` service is exposed directly from `core` and the [client](https://github.com/elastic/kibana/blob/main/packages/core/ui-settings/core-ui-settings-server/src/ui_settings_client.ts) provides plugins access to the `config` entries stored in {es}
 
-In the interest of performance, `uiSettings` are cached. Any changes that require cache refreshes should register an instruction to reload the page when settings are configured in Advanced Settings using the `requiresPageReload` {kib-repo}blob/{branch}/docs/development/core/public/kibana-plugin-core-public.uisettingsparams.md[parameter].
+In the interest of performance, `uiSettings` are cached. Any changes that require cache refreshes should register an instruction to reload the page when settings are configured in Advanced Settings using the `requiresPageReload` [parameter](https://github.com/elastic/kibana/blob/main/packages/core/ui-settings/core-ui-settings-common/src/ui_settings.ts).
 
 [source,typescript]
 ----
@@ -77,7 +77,7 @@ export class MyPlugin implements Plugin<MyPluginSetup, MyPluginStart> {
 === Server side usage
 On the server, `uiSettings` are exposed directly from `core`.
 
-The following example shows how to {kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.uisettingsservicesetup.register.md[register] a new `custom` setting with a default value of '42'. When registering a new setting, you must provide a schema against which validations are performed on read and write. All the other {kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.uisettingsparams.md[parameters] are optional.
+The following example shows how to register a new `custom` setting with a default value of '42'. When registering a new setting, you must provide a schema against which validations are performed on read and write. All the other [parameters](https://github.com/elastic/kibana/blob/main/packages/core/ui-settings/core-ui-settings-common/src/ui_settings.ts) are optional.
 
 [source,typescript]
 ----
