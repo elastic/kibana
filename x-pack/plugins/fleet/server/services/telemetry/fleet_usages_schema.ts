@@ -263,10 +263,16 @@ export const fleetUsagesSchema: RootSchema<any> = {
   },
   agents_per_os: {
     properties: {
-      os: {
+      name: {
         type: 'keyword',
         _meta: {
           description: 'Agent OS enrolled to this kibana',
+        },
+      },
+      version: {
+        type: 'keyword',
+        _meta: {
+          description: 'Agent OS version enrolled to this kibana',
         },
       },
       count: {
