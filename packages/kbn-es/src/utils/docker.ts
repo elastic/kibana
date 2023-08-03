@@ -361,10 +361,7 @@ export async function runServerlessEsNode(
   log.info(chalk.bold(`Running Serverless ES node: ${name}`));
   log.indent(4, () => log.info(chalk.dim(`docker ${dockerCmd.join(' ')}`)));
 
-  const { stdout } = await execa('docker', dockerCmd, {
-    // inherit is required to show Docker pull output and Java console output
-    stdio: ['ignore', 'inherit', 'inherit'],
-  });
+  const { stdout } = await execa('docker', dockerCmd);
 
   log.indent(4, () =>
     log.info(`${name} is running.
