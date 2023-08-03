@@ -7,15 +7,14 @@
 
 import { Journey } from '@kbn/journeys';
 import { subj } from '@kbn/test-subj-selector';
-import { waitForChrome } from '../utils';
 
 export const journey = new Journey({
   kbnArchives: ['test/functional/fixtures/kbn_archiver/many_fields_data_view'],
   esArchives: ['test/functional/fixtures/es_archiver/many_fields'],
 })
-  .step('Go to Discover Page', async ({ page, kbnUrl }) => {
+  .step('Go to Discover Page', async ({ page, kbnUrl, kibanaPage }) => {
     await page.goto(kbnUrl.get(`/app/discover`));
-    await waitForChrome(page);
+    await kibanaPage.waitForHeader();
     await page.waitForSelector('[data-test-subj="discoverDocTable"][data-render-complete="true"]');
     await page.waitForSelector(subj('globalLoadingIndicator-hidden'));
   })
