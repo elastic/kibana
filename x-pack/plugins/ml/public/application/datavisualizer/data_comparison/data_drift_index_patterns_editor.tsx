@@ -245,11 +245,12 @@ export function DataDriftIndexPatternsEditor({
         </>
       </EuiFormRow>
 
-      <EuiFormRow id="addControl">
+      <EuiFormRow id="analyzeDriftData">
         <EuiButton
+          disabled={!productionIndexPattern || !referenceIndexPattern || timeField.length === 0}
           fill
           onClick={createDataViewAndRedirectToDataComparisonPage}
-          iconType="plusInCircle"
+          iconType="visTagCloud"
           data-test-subj="analyzeDataDriftButton"
           aria-label={i18n.translate(
             'xpack.ml.dataDrift.indexPatternsEditor.analyzeDataDriftLabel',
