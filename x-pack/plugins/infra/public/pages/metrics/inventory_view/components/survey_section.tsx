@@ -6,14 +6,27 @@
  */
 
 import React from 'react';
+import { FeatureFeedbackButton } from '../../../../components/feature_feedback_button';
 
 import { useWaffleOptionsContext } from '../hooks/use_waffle_options';
-import { SurveyInventory } from './survey_inventory';
 import { SurveyKubernetes } from './survey_kubernetes';
+
+const INVENTORY_FEEDBACK_LINK = 'https://ela.st/survey-infra-inventory?usp=pp_url';
 
 export const SurveySection = () => {
   const { nodeType } = useWaffleOptionsContext();
   const podNodeType: typeof nodeType = 'pod';
 
-  return <>{nodeType === podNodeType ? <SurveyKubernetes /> : <SurveyInventory />}</>;
+  return (
+    <>
+      {nodeType === podNodeType ? (
+        <SurveyKubernetes />
+      ) : (
+        <FeatureFeedbackButton
+          featureTestSubject="infra-inventory-feedback-link"
+          featureUrl={INVENTORY_FEEDBACK_LINK}
+        />
+      )}
+    </>
+  );
 };
