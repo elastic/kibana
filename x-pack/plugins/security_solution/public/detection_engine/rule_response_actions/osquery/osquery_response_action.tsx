@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { EuiCode, EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useIsMounted } from '@kbn/securitysolution-hook-utils';
@@ -25,10 +25,6 @@ const GhostFormField = () => <></>;
 
 export const OsqueryResponseAction = React.memo((props: OsqueryResponseActionProps) => {
   const { osquery, application } = useKibana().services;
-  const OsqueryForm = useMemo(
-    () => osquery?.OsqueryResponseActionTypeForm,
-    [osquery?.OsqueryResponseActionTypeForm]
-  );
   const isMounted = useIsMounted();
 
   // serverless component that is returned when users do not have Endpoint.Complete tier
@@ -85,8 +81,7 @@ export const OsqueryResponseAction = React.memo((props: OsqueryResponseActionPro
       );
     }
 
-    // @ts-expect-error ts upgrade v4.7.4
-    if (isMounted() && OsqueryForm) {
+    if (isMounted()) {
       return (
         <UseField
           path={`${props.item.path}.params`}
