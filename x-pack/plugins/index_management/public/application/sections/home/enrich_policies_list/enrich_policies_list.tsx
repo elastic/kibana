@@ -5,14 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
-import { RouteComponentProps } from 'react-router-dom';
+import React, { useState} from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
-  EuiInMemoryTable,
-  EuiBasicTableColumn,
-  EuiSearchBarProps,
-  EuiButton,
   EuiSpacer,
   EuiText,
   EuiLink,
@@ -24,6 +19,7 @@ import { useAppContext } from '../../../app_context';
 import { useLoadEnrichPolicies } from '../../../services/api';
 import { PageLoading, PageError } from '../../../../shared_imports';
 import { PoliciesTable } from './policies_table';
+import { DeletePolicyModal } from './confirm_modals';
 
 type policyType = 'match' | 'geo_match' | 'range' | '';
 
@@ -34,7 +30,7 @@ interface BaseTypes {
   enrichFields: string[];
 }
 
-interface EnrichPolicy extends BaseTypes {
+export interface EnrichPolicy extends BaseTypes {
   type: policyType
 };
 
@@ -76,65 +72,7 @@ const serializeEnrichmentPolicies = (policies: BaseEnrichPolicy[]) => {
   });
 };
 
-const columns: Array<EuiBasicTableColumn<EnrichPolicy>> = [
-  {
-    field: 'name',
-    name: 'Name',
-    sortable: true,
-    truncateText: true,
-  },
-  {
-    field: 'type',
-    name: 'Type',
-    sortable: true,
-  },
-  {
-    field: 'sourceIndices',
-    name: 'Source indices',
-    truncateText: true,
-    render: (indices: string[]) => indices.join(', '),
-  },
-  {
-    field: 'matchField',
-    name: 'Match field',
-    truncateText: true,
-  },
-  {
-    field: 'enrichFields',
-    name: 'Enrich fields',
-    truncateText: false,
-    render: (fields: string[]) => fields.join(', '),
-  },
-  {
-    name: 'Actions',
-    actions: [
-      {
-        isPrimary: true,
-        name: 'Execute',
-        description: 'Execute this enrich policy',
-        type: 'icon',
-        icon: 'play',
-        onClick: () => {},
-      },
-      {
-        isPrimary: true,
-        name: 'Delete',
-        description: 'Delete this enrich policy',
-        type: 'icon',
-        icon: 'trash',
-        color: 'danger',
-        onClick: () => {},
-      },
-    ]
-  },
-];
-
-const pagination = {
-  initialPageSize: 5,
-  pageSizeOptions: [3, 5, 8],
-};
-
-export const EnrichPoliciesList: React.FunctionComponent<RouteComponentProps> = ({ history }) => {
+export const EnrichPoliciesList = () => {
   const {
     core: { executionContext },
   } = useAppContext();
@@ -144,19 +82,14 @@ export const EnrichPoliciesList: React.FunctionComponent<RouteComponentProps> = 
     page: 'indexManagementEnrichPoliciesTab',
   });
 
+  const [policyToDelete, setPolicyToDelete] = useState<string | undefined>();
+
   const {
     error,
     isLoading,
     data,
     resendRequest: reload,
   } = useLoadEnrichPolicies();
-
-  console.log('==========');
-  console.log({
-    error,
-    isLoading,
-    data,
-  });
 
   if (isLoading) {
     return (
@@ -183,33 +116,6 @@ export const EnrichPoliciesList: React.FunctionComponent<RouteComponentProps> = 
     );
   }
 
-  const renderToolsRight = () => {
-    return [
-      <EuiButton
-        key="reloadPolicies"
-        iconType="refresh"
-        color="success"
-        onClick={reload}
-      >
-        Reload
-      </EuiButton>,
-      <EuiButton
-        key="createPolicy"
-        fill
-        iconType="plusInCircle"
-      >
-        Create enrich policy
-      </EuiButton>,
-    ];
-  };
-
-  const search: EuiSearchBarProps = {
-    toolsRight: renderToolsRight(),
-    box: {
-      incremental: true,
-    },
-  };
-
   return (
     <div className={`${APP_WRAPPER_CLASS} im-snapshotTestSubject`} data-test-subj="indicesList">
       <EuiText color="subdued">
@@ -231,15 +137,17 @@ export const EnrichPoliciesList: React.FunctionComponent<RouteComponentProps> = 
       </EuiText>
       <EuiSpacer size="l" />
 
-      <EuiInMemoryTable
-        items={serializeEnrichmentPolicies(data.policies)}
-        itemId="name"
-        columns={columns}
-        search={search}
-        pagination={pagination}
-        sorting={true}
-        isSelectable={false}
+      <PoliciesTable
+        policies={serializeEnrichmentPolicies(data.policies)}
+        onReloadClick={reload}
+        onDeletePolicyClick={setPolicyToDelete}
       />
+
+      {policyToDelete ? (
+        <DeletePolicyModal
+          policyToDelete={policyToDelete}
+        />
+      ) : null}
     </div>
   );
 };
