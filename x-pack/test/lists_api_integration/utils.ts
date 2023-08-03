@@ -333,7 +333,7 @@ export const waitForListItem = async (
       const { status, body } = await supertest
         .get(`${LIST_ITEM_URL}?list_id=${fileName}&value=${itemValue}`)
         .send();
-      log.warning('HERE status: ', status, 'fileName: ', fileName, 'itemValue: ', itemValue);
+      log.error(`HERE status: ${status}, 'fileName: ', ${fileName}, 'itemValue: ', ${itemValue}`);
       if (status !== 200) {
         log.debug(
           `Did not get an expected 200 "ok" when waiting for a list item (waitForListItem) yet. Retrying until we get a 200 "ok". body: ${JSON.stringify(
