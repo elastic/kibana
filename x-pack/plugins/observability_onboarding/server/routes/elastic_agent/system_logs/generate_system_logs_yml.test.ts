@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import { v4 as uuidv4 } from 'uuid';
 import { generateSystemLogsYml } from './generate_system_logs_yml';
 
 const baseMockConfig = {
   namespace: 'default',
   apiKey: 'elastic:changeme',
   esHost: ['http://localhost:9200'],
-  uuid: uuidv4(),
+  uuid: '8df0ff52-6f3b-4b5a-a2da-f06c55d111d1',
 };
 
 describe('generateSystemLogsYml', () => {
