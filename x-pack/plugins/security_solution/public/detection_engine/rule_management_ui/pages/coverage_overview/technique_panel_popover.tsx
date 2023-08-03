@@ -28,6 +28,7 @@ import { getNumOfCoveredSubtechniques } from './helpers';
 import { CoverageOverviewRuleListHeader } from './shared_components/popover_list_header';
 import { CoverageOverviewMitreTechniquePanel } from './technique_panel';
 import * as i18n from './translations';
+import { RuleLink } from '../../components/rules_table/use_columns';
 
 export interface CoverageOverviewMitreTechniquePanelPopoverProps {
   technique: CoverageOverviewMitreTechnique;
@@ -79,9 +80,8 @@ const CoverageOverviewMitreTechniquePanelPopoverComponent = ({
   const enabledRuleListItems: EuiListGroupItemProps[] = useMemo(
     () =>
       technique.enabledRules.map((rule) => ({
-        label: rule.name,
+        label: <RuleLink name={rule.name} id={rule.id} />,
         color: 'primary',
-        showToolTip: true,
       })),
     [technique.enabledRules]
   );
@@ -89,9 +89,8 @@ const CoverageOverviewMitreTechniquePanelPopoverComponent = ({
   const disabledRuleListItems: EuiListGroupItemProps[] = useMemo(
     () =>
       technique.disabledRules.map((rule) => ({
-        label: rule.name,
+        label: <RuleLink name={rule.name} id={rule.id} />,
         color: 'primary',
-        showToolTip: true,
       })),
     [technique.disabledRules]
   );
