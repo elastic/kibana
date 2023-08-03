@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CaseMetricsFeature, CasesMetricsResponse } from '../../../common/api';
+import type { CaseMetricsFeature, CasesMetricsResponse } from '../../../common/types/api';
 import { BaseHandler } from './base_handler';
 import type { AllCasesBaseHandlerCommonOptions } from './types';
 
