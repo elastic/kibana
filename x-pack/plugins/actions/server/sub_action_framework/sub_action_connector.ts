@@ -145,7 +145,7 @@ export abstract class SubActionConnector<Config, Secrets> {
         let responseBody = '';
 
         // The error response body may also be a stream, e.g. for the GenAI connector
-        if (error.response?.config.responseType === 'stream' && error.response?.data) {
+        if (error.response?.config?.responseType === 'stream' && error.response?.data) {
           const incomingMessage = error.response.data as IncomingMessage;
 
           incomingMessage.on('data', (chunk) => {
