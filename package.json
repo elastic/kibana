@@ -443,7 +443,7 @@
     "@elastic/eslint-plugin-eui": "0.0.2",
     "@elastic/github-checks-reporter": "0.0.20b3",
     "@elastic/makelogs": "^6.1.1",
-    "@elastic/synthetics": "^1.0.0-beta.12",
+    "@elastic/synthetics": "~1.0.0-beta.13",
     "@emotion/babel-preset-css-prop": "^11.11.0",
     "@emotion/jest": "^11.3.0",
     "@istanbuljs/schema": "^0.1.2",
