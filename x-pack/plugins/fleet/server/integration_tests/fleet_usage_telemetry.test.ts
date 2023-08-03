@@ -149,6 +149,11 @@ describe('fleet usage telemetry', () => {
           last_checkin: '2022-11-21T12:27:24Z',
           active: true,
           policy_id: 'policy1',
+          local_metadata: {
+            os: {
+              full: 'Ubuntu focal(20.04.5 LTS (Focal Fossa))',
+            },
+          },
         },
         {
           create: {
