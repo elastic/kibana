@@ -20,7 +20,8 @@ import {
   DASHBOARD_CONTAINER,
   KUBERNETES_DASHBOARD_CONTAINER,
   KUBERNETES_DASHBOARD_TAB,
-  CLOUD_DASHBOARD_TAB, CLOUD_POSTURE_DASHBOARD_PAGE_HEADER,
+  CLOUD_DASHBOARD_TAB,
+  CLOUD_POSTURE_DASHBOARD_PAGE_HEADER,
 } from './test_subjects';
 import { mockDashboardData } from './mock';
 import { createReactQueryResponse } from '../../test/fixtures/react_query';
@@ -28,7 +29,8 @@ import { NO_FINDINGS_STATUS_TEST_SUBJ } from '../../components/test_subjects';
 import { expectIdsInDoc } from '../../test/utils';
 import {
   CSPM_INTEGRATION_NOT_INSTALLED_TEST_SUBJECT,
-  KSPM_INTEGRATION_NOT_INSTALLED_TEST_SUBJECT, PACKAGE_NOT_INSTALLED_TEST_SUBJECT,
+  KSPM_INTEGRATION_NOT_INSTALLED_TEST_SUBJECT,
+  PACKAGE_NOT_INSTALLED_TEST_SUBJECT,
 } from '../../components/cloud_posture_page';
 import { BaseCspSetupStatus, ComplianceDashboardData, CspStatusCode } from '../../../common/types';
 
@@ -132,7 +134,7 @@ describe('<ComplianceDashboard />', () => {
         NO_FINDINGS_STATUS_TEST_SUBJ.INDEX_TIMEOUT,
         NO_FINDINGS_STATUS_TEST_SUBJ.UNPRIVILEGED,
         CLOUD_DASHBOARD_CONTAINER,
-        KUBERNETES_DASHBOARD_CONTAINER
+        KUBERNETES_DASHBOARD_CONTAINER,
       ],
     });
   });
