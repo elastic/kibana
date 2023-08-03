@@ -47,7 +47,7 @@ interface ProgressControlProps {
  * by default use `Baseline` and `Deviation` for the badge name
  * @type {FC<ProgressControlProps>}
  * @param children - List of Kibana services that are required as dependencies
- * @param brushSelectionUpdateHandler - Optional callback function which gets called the brush selection has changed
+ * @param brushSelectionUpdateHandler - Optional callback function which gets called when the brush selection has changed
  * @param width - Optional width
  * @param chartPoints - Data chart points
  * @param chartPointsSplit - Data chart points split

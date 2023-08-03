@@ -23,9 +23,9 @@ import { TotalCountHeader } from '../total_count_header';
 
 export interface DocumentCountContentProps {
   brushSelectionUpdateHandler: (
-    logRateAnalysisType: LogRateAnalysisType,
-    d: WindowParameters,
-    force: boolean
+    windowParameters: WindowParameters,
+    force: boolean,
+    logRateAnalysisType: LogRateAnalysisType
   ) => void;
   documentCountStats?: DocumentCountStats;
   documentCountStatsSplit?: DocumentCountStats;

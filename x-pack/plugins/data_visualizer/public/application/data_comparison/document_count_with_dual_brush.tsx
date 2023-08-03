@@ -26,7 +26,7 @@ export interface DocumentCountContentProps
     | 'interval'
     | 'chartPointsSplitLabel'
   > {
-  brushSelectionUpdateHandler: (d: WindowParameters, force: boolean) => void;
+  brushSelectionUpdateHandler: (windowParameters: WindowParameters, force: boolean) => void;
   documentCountStats?: DocumentCountStats;
   documentCountStatsSplit?: DocumentCountStats;
   documentCountStatsSplitLabel?: string;

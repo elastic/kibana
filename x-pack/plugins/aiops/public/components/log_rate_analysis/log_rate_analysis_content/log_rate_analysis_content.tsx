@@ -114,12 +114,12 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
     documentStats;
 
   function brushSelectionUpdate(
-    logRateAnalysisTypeUpdate: LogRateAnalysisType,
-    d: WindowParameters,
-    force: boolean
+    windowParametersUpdate: WindowParameters,
+    force: boolean,
+    logRateAnalysisTypeUpdate: LogRateAnalysisType
   ) {
     if (!isBrushCleared || force) {
-      setWindowParameters(d);
+      setWindowParameters(windowParametersUpdate);
     }
     if (force) {
       setIsBrushCleared(false);

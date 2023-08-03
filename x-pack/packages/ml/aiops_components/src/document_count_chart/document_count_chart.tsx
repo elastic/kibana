@@ -102,9 +102,9 @@ export interface DocumentCountChartProps {
   };
   /** Optional callback function which gets called the brush selection has changed */
   brushSelectionUpdateHandler?: (
-    logRateAnalysisType: LogRateAnalysisType,
     windowParameters: WindowParameters,
-    force: boolean
+    force: boolean,
+    logRateAnalysisType: LogRateAnalysisType
   ) => void;
   /** Optional width */
   width?: number;
@@ -188,7 +188,7 @@ function getLogRateAnalysisType(
  * Document count chart with draggable brushes to select time ranges
  * by default use `Baseline` and `Deviation` for the badge names
  * @param dependencies - List of Kibana services that are required as dependencies
- * @param brushSelectionUpdateHandler - Optional callback function which gets called the brush selection has changed
+ * @param brushSelectionUpdateHandler - Optional callback function which gets called when the brush selection has changed
  * @param width - Optional width
  * @param chartPoints - Data chart points
  * @param chartPointsSplit - Data chart points split
@@ -361,9 +361,9 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
 
           if (brushSelectionUpdateHandler !== undefined) {
             brushSelectionUpdateHandler(
-              getLogRateAnalysisType(adjustedChartPoints, wpSnap),
               wpSnap,
-              true
+              true,
+              getLogRateAnalysisType(adjustedChartPoints, wpSnap)
             );
           }
         }
@@ -415,7 +415,7 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
     }
     setWindowParameters(wp);
     setWindowParametersAsPixels(wpPx);
-    brushSelectionUpdateHandler(getLogRateAnalysisType(adjustedChartPoints, wp), wp, false);
+    brushSelectionUpdateHandler(wp, false, getLogRateAnalysisType(adjustedChartPoints, wp));
   }
 
   const [mlBrushWidth, setMlBrushWidth] = useState<number>();
