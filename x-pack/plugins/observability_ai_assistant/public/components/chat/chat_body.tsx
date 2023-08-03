@@ -114,17 +114,19 @@ export function ChatBody({
   return (
     <EuiFlexGroup direction="column" gutterSize="none" className={containerClassName}>
       <EuiFlexItem grow={false}>
-        <EuiPanel
-          hasShadow={false}
-          hasBorder={false}
-          borderRadius="none"
-          css={{ borderBottom: `solid 1px ${euiTheme.border.color}` }}
-        >
-          <HideExpandConversationListButton
-            isExpanded={Boolean(isConversationListExpanded)}
-            onClick={onToggleExpandConversationList}
-          />
-        </EuiPanel>
+        {onToggleExpandConversationList ? (
+          <EuiPanel
+            hasShadow={false}
+            hasBorder={false}
+            borderRadius="none"
+            css={{ borderBottom: `solid 1px ${euiTheme.border.color}` }}
+          >
+            <HideExpandConversationListButton
+              isExpanded={Boolean(isConversationListExpanded)}
+              onClick={onToggleExpandConversationList}
+            />
+          </EuiPanel>
+        ) : null}
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiPanel hasBorder={false} hasShadow={false} paddingSize="m">

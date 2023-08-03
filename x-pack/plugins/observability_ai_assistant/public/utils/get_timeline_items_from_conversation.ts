@@ -39,12 +39,12 @@ export function getTimelineItemsfromConversation({
 
       let title: string;
       if (hasFunction) {
-        title = i18n.translate('xpkac.observabilityAiAssistant.suggestedFunctionEvent', {
+        title = i18n.translate('xpack.observabilityAiAssistant.suggestedFunctionEvent', {
           defaultMessage: 'suggested a function',
         });
       } else if (isSystemPrompt) {
         title = i18n.translate('xpack.observabilityAiAssistant.addedSystemPromptEvent', {
-          defaultMessage: 'added a prompt',
+          defaultMessage: 'returned data',
         });
       } else {
         title = '';
@@ -58,7 +58,15 @@ export function getTimelineItemsfromConversation({
         canGiveFeedback: message.message.role === MessageRole.Assistant,
         loading: false,
         title,
-        content: message.message.content,
+        content: hasFunction
+          ? `I have requested your system performs the function _${
+              message.message.function_call?.name
+            }_ with the payload 
+          \`\`\`
+          ${JSON.stringify(JSON.parse(message.message.function_call?.arguments || ''), null, 4)}
+          \`\`\`
+          and return its results for me to look at.`
+          : message.message.content,
         currentUser,
       };
 
