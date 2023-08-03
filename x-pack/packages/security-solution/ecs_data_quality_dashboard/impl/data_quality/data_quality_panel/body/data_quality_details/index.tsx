@@ -21,7 +21,7 @@ import React, { useCallback, useState } from 'react';
 import { IlmPhasesEmptyPrompt } from '../../../ilm_phases_empty_prompt';
 import { IndicesDetails } from './indices_details';
 import { StorageDetails } from './storage_details';
-import { DataQualityCheckedParams, PatternRollup, SelectedIndex } from '../../../types';
+import { PatternRollup, ReportDataQualityChecked, SelectedIndex } from '../../../types';
 
 export interface Props {
   addSuccessToast: (toast: { title: string }) => void;
@@ -53,7 +53,7 @@ export interface Props {
   patternIndexNames: Record<string, string[]>;
   patternRollups: Record<string, PatternRollup>;
   patterns: string[];
-  reportDataQualityChecked: (params: DataQualityCheckedParams) => void;
+  reportDataQualityChecked: ReportDataQualityChecked;
   theme?: PartialTheme;
   baseTheme: Theme;
   updatePatternIndexNames: ({

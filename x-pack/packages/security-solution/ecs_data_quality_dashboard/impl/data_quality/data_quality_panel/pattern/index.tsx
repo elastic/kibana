@@ -46,7 +46,7 @@ import { RemoteClustersCallout } from '../remote_clusters_callout';
 import { SummaryTable } from '../summary_table';
 import { getSummaryTableColumns } from '../summary_table/helpers';
 import * as i18n from './translations';
-import type { PatternRollup, SelectedIndex, SortConfig } from '../../types';
+import type { PatternRollup, ReportDataQualityChecked, SelectedIndex, SortConfig } from '../../types';
 import { useIlmExplain } from '../../use_ilm_explain';
 import { useStats } from '../../use_stats';
 
@@ -87,6 +87,7 @@ interface Props {
   }) => void;
   pattern: string;
   patternRollup: PatternRollup | undefined;
+  reportDataQualityChecked: ReportDataQualityChecked;
   selectedIndex: SelectedIndex | null;
   setSelectedIndex: (selectedIndex: SelectedIndex | null) => void;
   theme?: PartialTheme;
@@ -98,7 +99,7 @@ interface Props {
     indexNames: string[];
     pattern: string;
   }) => void;
-  updatePatternRollup: (patternRollup: PatternRollup) => void;
+  updatePatternRollup: (patternRollup: PatternRollup, requestTime?: number) => void;
 }
 
 const PatternComponent: React.FC<Props> = ({
@@ -160,6 +161,7 @@ const PatternComponent: React.FC<Props> = ({
                 openCreateCaseFlyout={openCreateCaseFlyout}
                 pattern={pattern}
                 patternRollup={patternRollup}
+                reportDataQualityChecked={reportDataQualityChecked}
                 theme={theme}
                 baseTheme={baseTheme}
                 updatePatternRollup={updatePatternRollup}
@@ -170,18 +172,19 @@ const PatternComponent: React.FC<Props> = ({
       }
     },
     [
+      itemIdToExpandedRowMap,
       addSuccessToast,
       canUserCreateAndReadCases,
       formatBytes,
       formatNumber,
+      stats,
       getGroupByFieldsOnClick,
       ilmExplain,
       isAssistantEnabled,
-      itemIdToExpandedRowMap,
       openCreateCaseFlyout,
       pattern,
       patternRollup,
-      stats,
+      reportDataQualityChecked,
       theme,
       baseTheme,
       updatePatternRollup,
@@ -240,22 +243,6 @@ const PatternComponent: React.FC<Props> = ({
         }),
         stats,
       });
-
-      reportDataQualityChecked({
-        error,
-        incompatibleFields: [],
-        numberOfDocuments: getTotalDocsCount({
-          indexNames: getIndexNames({ stats, ilmExplain, ilmPhases }),
-          stats,
-        }),
-        numberOfIncompatibleFields: 0,
-        numberOfIndices: getIndexNames({ stats, ilmExplain, ilmPhases }).length,
-        sizeInBytes: getTotalSizeInBytes({
-          indexNames: getIndexNames({ stats, ilmExplain, ilmPhases }),
-          stats,
-        }),
-        timeConsumedMs: 0,
-      });
     }
   }, [
     error,
@@ -265,7 +252,6 @@ const PatternComponent: React.FC<Props> = ({
     indexNames,
     pattern,
     patternRollup,
-    reportDataQualityChecked,
     stats,
     updatePatternIndexNames,
     updatePatternRollup,

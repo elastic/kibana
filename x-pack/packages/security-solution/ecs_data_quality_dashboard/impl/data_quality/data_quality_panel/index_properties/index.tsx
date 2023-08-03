@@ -29,14 +29,21 @@ import {
   INCOMPATIBLE_TAB_ID,
 } from './helpers';
 import { LoadingEmptyPrompt } from '../loading_empty_prompt';
-import { getIndexPropertiesContainerId } from '../pattern/helpers';
+import { getIndexIncompatible, getIndexPropertiesContainerId } from '../pattern/helpers';
 import { getTabs } from '../tabs/helpers';
 import { getAllIncompatibleMarkdownComments } from '../tabs/incompatible_tab/helpers';
 import * as i18n from './translations';
-import type { EcsMetadata, IlmPhase, PartitionedFieldMetadata, PatternRollup } from '../../types';
+import type {
+  EcsMetadata,
+  IlmPhase,
+  PartitionedFieldMetadata,
+  PatternRollup,
+  ReportDataQualityChecked,
+} from '../../types';
 import { useAddToNewCase } from '../../use_add_to_new_case';
 import { useMappings } from '../../use_mappings';
 import { useUnallowedValues } from '../../use_unallowed_values';
+import { getDocsCount, getSizeInBytes } from '../../helpers';
 
 const EMPTY_MARKDOWN_COMMENTS: string[] = [];
 
@@ -71,6 +78,7 @@ export interface Props {
   }) => void;
   pattern: string;
   patternRollup: PatternRollup | undefined;
+  reportDataQualityChecked: ReportDataQualityChecked;
   theme?: PartialTheme;
   baseTheme: Theme;
   updatePatternRollup: (patternRollup: PatternRollup) => void;
@@ -89,6 +97,7 @@ const IndexPropertiesComponent: React.FC<Props> = ({
   openCreateCaseFlyout,
   pattern,
   patternRollup,
+  reportDataQualityChecked,
   theme,
   baseTheme,
   updatePatternRollup,
@@ -104,11 +113,33 @@ const IndexPropertiesComponent: React.FC<Props> = ({
     [indexName]
   );
 
+  const telemetryReportDataQualityChecked = useCallback(
+    ({ requestTime, error }: { requestTime: number; error?: string }) => {
+      if (!patternRollup?.stats || !patternRollup?.results) {
+        return;
+      }
+      reportDataQualityChecked({
+        error,
+        pattern,
+        indexName,
+        numberOfDocuments: getDocsCount({ indexName, stats: patternRollup.stats }),
+        numberOfIncompatibleFields: getIndexIncompatible({
+          indexName,
+          results: patternRollup.results,
+        }),
+        numberOfIndices: patternRollup.indices,
+        sizeInBytes: getSizeInBytes({ stats: patternRollup.stats, indexName }),
+        timeConsumedMs: requestTime,
+      });
+    },
+    [indexName, pattern, patternRollup, reportDataQualityChecked]
+  );
+
   const {
     error: unallowedValuesError,
     loading: loadingUnallowedValues,
     unallowedValues,
-  } = useUnallowedValues({ indexName, requestItems });
+  } = useUnallowedValues({ indexName, requestItems, onLoad: telemetryReportDataQualityChecked });
 
   const mappingsProperties = useMemo(
     () =>

@@ -21,6 +21,7 @@ import React from 'react';
 import { DataQualityDetails } from './data_quality_details';
 import { DataQualitySummary } from '../data_quality_summary';
 import { useResultsRollup } from '../../use_results_rollup';
+import { ReportDataQualityChecked } from '../../types';
 
 interface Props {
   addSuccessToast: (toast: { title: string }) => void;
@@ -51,7 +52,7 @@ interface Props {
     headerContent?: React.ReactNode;
   }) => void;
   patterns: string[];
-  reportDataQualityChecked: (params: DataQualityCheckedParams) => void;
+  reportDataQualityChecked: ReportDataQualityChecked;
   setLastChecked: (lastChecked: string) => void;
   theme?: PartialTheme;
   baseTheme: Theme;

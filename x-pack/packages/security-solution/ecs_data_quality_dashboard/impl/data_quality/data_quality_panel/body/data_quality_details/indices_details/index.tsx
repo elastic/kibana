@@ -19,7 +19,7 @@ import { EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import React from 'react';
 
 import { Pattern } from '../../../pattern';
-import { PatternRollup, SelectedIndex } from '../../../../types';
+import { PatternRollup, SelectedIndex, ReportDataQualityChecked } from '../../../../types';
 
 export interface Props {
   addSuccessToast: (toast: { title: string }) => void;
@@ -51,6 +51,7 @@ export interface Props {
   patternIndexNames: Record<string, string[]>;
   patternRollups: Record<string, PatternRollup>;
   patterns: string[];
+  reportDataQualityChecked: ReportDataQualityChecked;
   selectedIndex: SelectedIndex | null;
   setSelectedIndex: (selectedIndex: SelectedIndex | null) => void;
   theme?: PartialTheme;

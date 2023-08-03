@@ -9,13 +9,15 @@ import type { RootSchema } from '@kbn/analytics-client';
 import type { TelemetryEventTypes } from '../../constants';
 
 export interface DataQualityCheckedParams {
-  numberOfIndices: number;
-  timeConsumedMs: number;
-  error: string | undefined;
-  numberOfIncompatibleFields: number;
-  incompatibleFields: Array<{ type?: string; field?: string; value?: string }> | undefined;
-  numberOfDocuments: number;
-  sizeInBytes: number;
+  error?: string;
+  indexName: string;
+  incompatibleFields?: Array<{ type?: string; field?: string; value?: string }>;
+  numberOfDocuments?: number;
+  numberOfIncompatibleFields?: number;
+  numberOfIndices?: number;
+  pattern: string;
+  sizeInBytes?: number;
+  timeConsumedMs?: number;
 }
 
 export interface DataQualityTelemetryEvent {

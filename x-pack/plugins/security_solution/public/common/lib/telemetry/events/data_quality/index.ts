@@ -11,18 +11,32 @@ import type { TelemetryEvent } from '../../types';
 export const dataQualityCheckedEvent: TelemetryEvent = {
   eventType: TelemetryEventTypes.DataQualityChecked,
   schema: {
+    pattern: {
+      type: 'keyword',
+      _meta: {
+        description: 'Index pattern',
+        optional: false,
+      },
+    },
+    indexName: {
+      type: 'keyword',
+      _meta: {
+        description: 'Index name',
+        optional: false,
+      },
+    },
     numberOfIndices: {
       type: 'integer',
       _meta: {
         description: 'Number of indices checked',
-        optional: false,
+        optional: true,
       },
     },
     timeConsumedMs: {
       type: 'integer',
       _meta: {
         description: 'Time consumed in milliseconds',
-        optional: false,
+        optional: true,
       },
     },
     error: {
@@ -36,7 +50,7 @@ export const dataQualityCheckedEvent: TelemetryEvent = {
       type: 'integer',
       _meta: {
         description: 'Number of incompatible fields',
-        optional: false,
+        optional: true,
       },
     },
     incompatibleFields: {
@@ -75,14 +89,14 @@ export const dataQualityCheckedEvent: TelemetryEvent = {
       type: 'integer',
       _meta: {
         description: 'Number of documents',
-        optional: false,
+        optional: true,
       },
     },
     sizeInBytes: {
       type: 'integer',
       _meta: {
         description: 'Size in bytes',
-        optional: false,
+        optional: true,
       },
     },
   },
