@@ -6,9 +6,8 @@
  */
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
-import type { BulkResponse } from '@elastic/elasticsearch/lib/api/types';
 
-import { keyBy, partition } from 'lodash';
+import { keyBy } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
 
 import { packageHasNoPolicyTemplates } from '../../common/services/policy_template';
@@ -37,9 +36,11 @@ import type {
 } from '../types';
 
 import { FleetError } from '../errors';
-import { SECRETS_INDEX } from '../constants';
+import { SECRETS_ENDPOINT_PATH } from '../constants';
 
-import { auditLoggingService } from './audit_logging';
+import { retryTransientEsErrors } from './epm/elasticsearch/retry';
+
+// import { auditLoggingService } from './audit_logging';
 
 import { appContextService } from './app_context';
 import { packagePolicyService } from './package_policy';
@@ -49,60 +50,33 @@ interface SecretPath {
   value: PackagePolicyConfigRecordEntry;
 }
 
-// This will be removed once the secrets index PR is merged into elasticsearch
-function getSecretsIndex() {
-  const testIndex = appContextService.getConfig()?.developer?.testSecretsIndex;
-  if (testIndex) {
-    return testIndex;
-  }
-  return SECRETS_INDEX;
-}
-
 export async function createSecrets(opts: {
   esClient: ElasticsearchClient;
   values: string[];
 }): Promise<Secret[]> {
   const { esClient, values } = opts;
   const logger = appContextService.getLogger();
-  const body = values.flatMap((value) => [
-    {
-      create: { _index: getSecretsIndex() },
-    },
-    { value },
-  ]);
-  let res: BulkResponse;
-  try {
-    res = await esClient.bulk({
-      body,
-    });
 
-    const [errorItems, successItems] = partition(res.items, (a) => a.create?.error);
-
-    successItems.forEach((item) => {
-      auditLoggingService.writeCustomAuditLog({
-        message: `secret created: ${item.create!._id}`,
-        event: {
-          action: 'secret_create',
-          category: ['database'],
-          type: ['access'],
-          outcome: 'success',
-        },
-      });
-    });
-
-    if (errorItems.length) {
-      throw new Error(JSON.stringify(errorItems));
-    }
-
-    return res.items.map((item, i) => ({
-      id: item.create!._id as string,
-      value: values[i],
-    }));
-  } catch (e) {
-    const msg = `Error creating secrets in ${getSecretsIndex()} index: ${e}`;
-    logger.error(msg);
-    throw new FleetError(msg);
-  }
+  const secretsResponse: PolicySecretReference[] = await Promise.all(
+    values.map(async (value) => {
+      try {
+        return await retryTransientEsErrors(
+          () =>
+            esClient.transport.request({
+              method: 'POST',
+              path: SECRETS_ENDPOINT_PATH,
+              body: { value },
+            }),
+          { logger }
+        );
+      } catch (err) {
+        const msg = `Error creating secrets: ${err}`;
+        logger.error(msg);
+        throw new FleetError(msg);
+      }
+    })
+  );
+  return secretsResponse;
 }
 
 export async function deleteSecretsIfNotReferenced(opts: {
@@ -190,41 +164,38 @@ export async function _deleteSecrets(opts: {
 }): Promise<void> {
   const { esClient, ids } = opts;
   const logger = appContextService.getLogger();
-  const body = ids.flatMap((id) => [
-    {
-      delete: { _index: getSecretsIndex(), _id: id },
-    },
-  ]);
 
-  let res: BulkResponse;
-
-  try {
-    res = await esClient.bulk({
-      body,
-    });
-
-    const [errorItems, successItems] = partition(res.items, (a) => a.delete?.error);
-
-    successItems.forEach((item) => {
-      auditLoggingService.writeCustomAuditLog({
-        message: `secret deleted: ${item.delete!._id}`,
-        event: {
-          action: 'secret_delete',
-          category: ['database'],
-          type: ['access'],
-          outcome: 'success',
-        },
-      });
-    });
-
-    if (errorItems.length) {
-      throw new Error(JSON.stringify(errorItems));
-    }
-  } catch (e) {
-    const msg = `Error deleting secrets from ${getSecretsIndex()} index: ${e}`;
-    logger.error(msg);
-    throw new FleetError(msg);
-  }
+  await Promise.all(
+    ids.map(async (secretId) => {
+      try {
+        return await retryTransientEsErrors(
+          () =>
+            esClient.transport.request({
+              method: 'DELETE',
+              path: `${SECRETS_ENDPOINT_PATH}${secretId}`,
+            }),
+          { logger }
+        );
+      } catch (err) {
+        const msg = `Error deleting secrets: ${err}`;
+        logger.error(msg);
+        throw new FleetError(msg);
+      }
+      // TODO: audit logging
+      //   const [errorItems, successItems] = partition(res.items, (a) => a.delete?.error);
+      //   successItems.forEach((item) => {
+      //     auditLoggingService.writeCustomAuditLog({
+      //       message: `secret deleted: ${item.delete!._id}`,
+      //       event: {
+      //         action: 'secret_delete',
+      //         category: ['database'],
+      //         type: ['access'],
+      //         outcome: 'success',
+      //       },
+      //     });
+      //   });
+    })
+  );
 }
 
 export async function extractAndWriteSecrets(opts: {
@@ -255,6 +226,7 @@ export async function extractAndWriteSecrets(opts: {
   };
 }
 
+// createSecrets won't return secrets anymore, only ids
 export async function extractAndUpdateSecrets(opts: {
   oldPackagePolicy: PackagePolicy;
   packagePolicyUpdate: UpdatePackagePolicy;

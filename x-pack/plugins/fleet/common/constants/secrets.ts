@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export const SECRETS_INDEX = '.fleet-secrets';
+export const SECRETS_ENDPOINT_PATH = '/_fleet/secret';

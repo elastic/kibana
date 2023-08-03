@@ -7,7 +7,6 @@
 
 export interface Secret {
   id: string;
-  value: string;
 }
 
 export interface SecretElasticDoc {
