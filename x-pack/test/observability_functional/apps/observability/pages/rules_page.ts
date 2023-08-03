@@ -142,19 +142,6 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
 
         await testSubjects.click('saveRuleButton');
 
-        await retry.waitFor('consumer select modal is visible', async () => {
-          return await testSubjects.exists('ruleFormConsumerSelect');
-        });
-
-        const consumerSelect = await testSubjects.find('ruleFormConsumerSelect');
-        const consumerOptions = await consumerSelect.findAllByTagName('option');
-
-        // There seems to be an extra option, so assert options + 1
-        expect(consumerOptions.length).eql(2);
-        expect(await consumerOptions[1].getAttribute('value')).eql('infrastructure');
-
-        await testSubjects.click('confirmModalConfirmButton');
-
         await PageObjects.header.waitUntilLoadingHasFinished();
 
         const tableRows = await find.allByCssSelector('.euiTableRow');
@@ -174,6 +161,27 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
 
         await testSubjects.click('saveRuleButton');
 
+        await PageObjects.header.waitUntilLoadingHasFinished();
+
+        const tableRows = await find.allByCssSelector('.euiTableRow');
+        const rows = await getRulesList(tableRows);
+        expect(rows.length).to.be(1);
+        expect(rows[0].name).to.contain(ruleName);
+      });
+
+      it('Should allow the user to select consumers when creating ES query rules', async () => {
+        await observability.users.setTestUserRole(
+          observability.users.defineBasicObservabilityRole({
+            logs: ['all'],
+            infrastructure: ['all'],
+          })
+        );
+
+        await navigateAndOpenCreateRuleFlyout();
+        await selectAndFillInEsQueryRule(ruleName);
+
+        await testSubjects.click('saveRuleButton');
+
         await retry.waitFor('consumer select modal is visible', async () => {
           return await testSubjects.exists('ruleFormConsumerSelect');
         });
@@ -182,17 +190,9 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         const consumerOptions = await consumerSelect.findAllByTagName('option');
 
         // There seems to be an extra option, so assert options + 1
-        expect(consumerOptions.length).eql(2);
-        expect(await consumerOptions[1].getAttribute('value')).eql('logs');
-
-        await testSubjects.click('confirmModalConfirmButton');
-
-        await PageObjects.header.waitUntilLoadingHasFinished();
-
-        const tableRows = await find.allByCssSelector('.euiTableRow');
-        const rows = await getRulesList(tableRows);
-        expect(rows.length).to.be(1);
-        expect(rows[0].name).to.contain(ruleName);
+        expect(consumerOptions.length).eql(3);
+        expect(await consumerOptions[1].getAttribute('value')).eql('infrastructure');
+        expect(await consumerOptions[2].getAttribute('value')).eql('logs');
       });
     });
 

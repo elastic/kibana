@@ -204,6 +204,7 @@ describe('rule_add', () => {
         ruleTypeRegistry={ruleTypeRegistry}
         metadata={{ test: 'some value', fields: ['test'] }}
         ruleTypeId={ruleTypeId}
+        validConsumers={validConsumers}
       />
     );
 
@@ -380,7 +381,8 @@ describe('rule_add', () => {
             ml: { read: true, all: true },
             monitoring: { read: true, all: true },
             siem: { read: true, all: true },
-            slo: { read: true, all: true },
+            // Setting SLO all to false, this shouldn't show up
+            slo: { read: true, all: false },
             stackAlerts: { read: true, all: true },
             uptime: { read: true, all: true },
           },
@@ -427,8 +429,6 @@ describe('rule_add', () => {
       'apm',
       'infrastructure',
       'logs',
-      'slo',
-      'stackAlerts',
       'uptime',
     ]);
 
@@ -443,6 +443,93 @@ describe('rule_add', () => {
       expect.objectContaining({
         rule: expect.objectContaining({
           consumer: 'apm',
+        }),
+      })
+    );
+  });
+
+  it('should set consumer automatically if only 1 authorized consumer exists', async () => {
+    (triggersActionsUiConfig as jest.Mock).mockResolvedValue({
+      minimumScheduleInterval: { value: '1m', enforce: false },
+    });
+    const onClose = jest.fn();
+    await setup({
+      initialValues: {
+        name: 'Simple rule',
+        consumer: 'alerts',
+        ruleTypeId: 'observability.rules.threshold',
+        tags: ['uptime', 'logs'],
+        schedule: {
+          interval: '1h',
+        },
+      },
+      onClose,
+      ruleTypesOverwrite: [
+        {
+          id: 'observability.rules.threshold',
+          name: 'Threshold Rule',
+          actionGroups: [
+            {
+              id: 'testActionGroup',
+              name: 'Test Action Group',
+            },
+          ],
+          enabledInLicense: true,
+          defaultActionGroupId: 'threshold.fired',
+          minimumLicenseRequired: 'basic',
+          recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
+          producer: ALERTS_FEATURE_ID,
+          authorizedConsumers: {
+            logs: { read: true, all: true },
+          },
+          actionVariables: {
+            context: [],
+            state: [],
+            params: [],
+          },
+        },
+      ],
+      ruleTypeModelOverwrite: {
+        id: 'observability.rules.threshold',
+        iconClass: 'test',
+        description: 'test',
+        documentationUrl: null,
+        validate: (): ValidationResult => {
+          return { errors: {} };
+        },
+        ruleParamsExpression: TestExpression,
+        requiresAppContext: false,
+      },
+      validConsumers: [
+        AlertConsumers.APM,
+        AlertConsumers.INFRASTRUCTURE,
+        AlertConsumers.LOGS,
+        AlertConsumers.UPTIME,
+        AlertConsumers.SLO,
+      ],
+    });
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    expect(wrapper.find('[data-test-subj="addRuleFlyoutTitle"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="saveRuleButton"]').exists()).toBeTruthy();
+
+    wrapper.find('[data-test-subj="saveRuleButton"]').last().simulate('click');
+
+    expect(wrapper.find('[data-test-subj="ruleFormConsumerSelectionModal"]').exists()).toBeFalsy();
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    expect(createRule).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        rule: expect.objectContaining({
+          consumer: 'logs',
         }),
       })
     );

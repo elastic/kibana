@@ -84,6 +84,12 @@ const featureNameMap: Record<string, string> = {
       defaultMessage: 'Stack Rules',
     }
   ),
+  discover: i18n.translate(
+    'xpack.triggersActionsUI.sections.ruleFormConsumerSelectionModal.discover',
+    {
+      defaultMessage: 'Discover',
+    }
+  ),
 };
 
 export const VALID_CONSUMERS = [
@@ -93,6 +99,8 @@ export const VALID_CONSUMERS = [
   AlertConsumers.UPTIME,
   AlertConsumers.SLO,
   'stackAlerts',
+  // We need to include discover because discover is a valid consumer for the esquery rule
+  'discover',
 ];
 
 export interface RuleFormConsumerSelectionModalProps {
