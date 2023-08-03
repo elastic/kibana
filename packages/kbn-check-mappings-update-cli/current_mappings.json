@@ -42,6 +42,25 @@
       }
     }
   },
+  "url": {
+    "dynamic": false,
+    "properties": {
+      "slug": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword"
+          }
+        }
+      },
+      "accessDate": {
+        "type": "date"
+      },
+      "createDate": {
+        "type": "date"
+      }
+    }
+  },
   "usage-counters": {
     "dynamic": false,
     "properties": {
@@ -127,25 +146,6 @@
     "dynamic": false,
     "properties": {
       "lastUpdatedAt": {
-        "type": "date"
-      }
-    }
-  },
-  "url": {
-    "dynamic": false,
-    "properties": {
-      "slug": {
-        "type": "text",
-        "fields": {
-          "keyword": {
-            "type": "keyword"
-          }
-        }
-      },
-      "accessDate": {
-        "type": "date"
-      },
-      "createDate": {
         "type": "date"
       }
     }
@@ -1011,6 +1011,11 @@
       },
       "controlGroupInput": {
         "properties": {
+          "version": {
+            "type": "keyword",
+            "index": false,
+            "doc_values": false
+          },
           "controlStyle": {
             "type": "keyword",
             "index": false,
@@ -1406,6 +1411,14 @@
   "cases-telemetry": {
     "dynamic": false,
     "properties": {}
+  },
+  "infrastructure-monitoring-log-view": {
+    "dynamic": false,
+    "properties": {
+      "name": {
+        "type": "text"
+      }
+    }
   },
   "canvas-element": {
     "dynamic": false,
@@ -2259,14 +2272,6 @@
       "progress": {
         "type": "object",
         "dynamic": false
-      }
-    }
-  },
-  "infrastructure-monitoring-log-view": {
-    "dynamic": false,
-    "properties": {
-      "name": {
-        "type": "text"
       }
     }
   },
