@@ -11,7 +11,7 @@ import {
   useGetLinkUrl,
   useGetLinkProps,
   withLink,
-  isExternalId,
+  isSecurityId,
   getAppIdsFromId,
   formatPath,
   isModified,
@@ -102,23 +102,23 @@ describe('links', () => {
     });
   });
 
-  describe('isExternalId', () => {
-    it('should return true for an external id', () => {
+  describe('isSecurityId', () => {
+    it('should return false for an external id', () => {
       const id = 'externalAppId:12345';
-      const result = isExternalId(id);
-      expect(result).toBe(true);
-    });
-
-    it('should return false for an internal id', () => {
-      const id = 'internalId';
-      const result = isExternalId(id);
+      const result = isSecurityId(id);
       expect(result).toBe(false);
     });
 
-    it('should return true for a root external id', () => {
-      const id = 'externalAppId:';
-      const result = isExternalId(id);
+    it('should return true for an internal id', () => {
+      const id = 'internalId';
+      const result = isSecurityId(id);
       expect(result).toBe(true);
+    });
+
+    it('should return false for a root external id', () => {
+      const id = 'externalAppId:';
+      const result = isSecurityId(id);
+      expect(result).toBe(false);
     });
   });
 

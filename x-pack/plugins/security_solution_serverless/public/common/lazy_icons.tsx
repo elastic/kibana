@@ -31,3 +31,5 @@ export const IconFleetLazy = withSuspenseIcon(React.lazy(() => import('./icons/f
 export const IconAuditbeatLazy = withSuspenseIcon(React.lazy(() => import('./icons/auditbeat')));
 export const IconSiemLazy = withSuspenseIcon(React.lazy(() => import('./icons/siem')));
 export const IconEcctlLazy = withSuspenseIcon(React.lazy(() => import('./icons/ecctl')));
+export const IconGraphLazy = withSuspenseIcon(React.lazy(() => import('./icons/graph')));
+export const IconLoggingLazy = withSuspenseIcon(React.lazy(() => import('./icons/logging')));

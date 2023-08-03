@@ -4,13 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useMemo } from 'react';
+import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, EuiTitle, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { LinkAnchor } from '../links';
 import type { NavigationLink } from '../types';
 import { BetaBadge } from './beta_badge';
-import { getWrappedLinkProps } from './utils';
+import { getKibanaLinkProps } from './utils';
 
 export interface LandingLinksIconsProps {
   items: NavigationLink[];
@@ -37,17 +37,16 @@ const useLinkIconStyles = () => {
   };
 };
 
-export const LandingLinkIcon: React.FC<LandingLinkIconProps> = ({
-  item: { id, title, description, landingIcon, isBeta, betaOptions, skipUrlState },
+export const LandingLinkIcon: React.FC<LandingLinkIconProps> = React.memo(function LandingLinkIcon({
+  item,
   urlState,
   onLinkClick,
   children,
-}) => {
+}) {
   const styles = useLinkIconStyles();
-  const linkProps = useMemo(
-    () => getWrappedLinkProps({ id, urlState, onLinkClick, skipUrlState }),
-    [id, urlState, onLinkClick, skipUrlState]
-  );
+  const linkProps = getKibanaLinkProps({ item, urlState, onLinkClick });
+  const { title, description, landingIcon, isBeta, betaOptions } = item;
+
   return (
     <EuiFlexGroup
       direction="column"
@@ -85,7 +84,7 @@ export const LandingLinkIcon: React.FC<LandingLinkIconProps> = ({
       <EuiFlexItem>{children}</EuiFlexItem>
     </EuiFlexGroup>
   );
-};
+});
 
 const useLinksIconsStyles = () => {
   return {

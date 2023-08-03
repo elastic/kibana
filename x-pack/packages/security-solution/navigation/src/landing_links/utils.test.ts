@@ -4,19 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { getWrappedLinkProps } from './utils';
+import { getKibanaLinkProps } from './utils';
 import * as links from '../links';
 
 describe('getWrappedLinkProps', () => {
-  let isExternalIdSpy: jest.SpyInstance;
+  let isSecurityIdSpy: jest.SpyInstance;
 
   beforeEach(() => {
-    // Create a spy on the isExternalId function before each test
-    isExternalIdSpy = jest.spyOn(links, 'isExternalId');
+    // Create a spy on the isSecurityId function before each test
+    isSecurityIdSpy = jest.spyOn(links, 'isSecurityId');
   });
 
   afterEach(() => {
-    isExternalIdSpy.mockRestore();
+    isSecurityIdSpy.mockRestore();
   });
 
   it('returns the correct WrappedLinkProps when id is not external and skipUrlState is false', () => {
@@ -24,7 +24,7 @@ describe('getWrappedLinkProps', () => {
     const urlState = 'example-url-state';
     const onLinkClick = jest.fn();
 
-    const result = getWrappedLinkProps({
+    const result = getKibanaLinkProps({
       id,
       skipUrlState: false,
       urlState,
@@ -37,7 +37,7 @@ describe('getWrappedLinkProps', () => {
       onClick: expect.any(Function),
     });
 
-    expect(isExternalIdSpy).toHaveBeenCalledWith(id);
+    expect(isSecurityIdSpy).toHaveBeenCalledWith(id);
     expect(onLinkClick).not.toHaveBeenCalled();
 
     result.onClick?.({} as unknown as React.MouseEvent<HTMLAnchorElement>);
@@ -46,17 +46,17 @@ describe('getWrappedLinkProps', () => {
 
   it('returns the correct WrappedLinkProps when id is external', () => {
     const id = 'external:id';
-    const result = getWrappedLinkProps({ id });
+    const result = getKibanaLinkProps({ id });
 
     expect(result).toEqual({ id });
-    expect(isExternalIdSpy).toHaveBeenCalledWith(id);
+    expect(isSecurityIdSpy).toHaveBeenCalledWith(id);
   });
 
   it('returns the correct WrappedLinkProps when skipUrlState is true', () => {
     const id = 'internal-id';
-    const result = getWrappedLinkProps({ id, skipUrlState: true });
+    const result = getKibanaLinkProps({ id, skipUrlState: true });
 
     expect(result).toEqual({ id });
-    expect(isExternalIdSpy).toHaveBeenCalledWith(id);
+    expect(isSecurityIdSpy).toHaveBeenCalledWith(id);
   });
 });

@@ -4,21 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { isSecurityId, type WrappedLinkProps } from '../links';
+import type { NavigationLink } from '../types';
 
-import { isExternalId, type WrappedLinkProps } from '../links';
-
-export const getWrappedLinkProps = ({
-  id,
-  skipUrlState,
+export const getKibanaLinkProps = ({
+  item,
   urlState,
   onLinkClick,
 }: {
-  id: string;
-  skipUrlState?: boolean;
+  item: NavigationLink;
   urlState?: string;
   onLinkClick?: (id: string) => void;
 }): WrappedLinkProps => ({
-  id,
-  ...(!isExternalId(id) && !skipUrlState && { urlState }),
-  ...(onLinkClick && { onClick: () => onLinkClick(id) }),
+  id: item.id,
+  ...(isSecurityId(item.id) && !item.skipUrlState && { urlState }),
+  ...(onLinkClick && { onClick: () => onLinkClick(item.id) }),
 });

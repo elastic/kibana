@@ -87,7 +87,7 @@ export const getFormatChromeProjectNavNodes = (services: Services) => {
     if (id === SecurityPageName.mlLanding) {
       return processDefaultNav(mlDefaultNav.children, link.path);
     }
-    if (id === ExternalPageName.devToolsRoot) {
+    if (id === ExternalPageName.devTools) {
       return processDefaultNav(devToolsDefaultNav.children, link.path);
     }
     return undefined;

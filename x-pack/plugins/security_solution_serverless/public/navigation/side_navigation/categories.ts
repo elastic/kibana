@@ -39,6 +39,6 @@ export const CATEGORIES: SeparatorLinkCategory[] = [
   },
   {
     type: LinkCategoryType.separator,
-    linkIds: [SecurityPageName.mlLanding, ExternalPageName.devToolsRoot],
+    linkIds: [SecurityPageName.mlLanding],
   },
 ];

@@ -103,7 +103,7 @@ describe('SecuritySideNavigation', () => {
 
     expect(mockSolutionSideNav).toHaveBeenCalledWith(
       expect.objectContaining({
-        selectedId: ExternalPageName.devToolsRoot,
+        selectedId: ExternalPageName.devTools,
       })
     );
   });

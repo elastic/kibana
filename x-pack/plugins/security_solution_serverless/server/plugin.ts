@@ -38,20 +38,19 @@ export class SecuritySolutionServerlessPlugin
     this.config = this.initializerContext.config.get<ServerlessSecurityConfig>();
   }
 
-  public setup(_coreSetup: CoreSetup, pluginsSetup: SecuritySolutionServerlessPluginSetupDeps) {
+  public setup(coreSetup: CoreSetup, pluginsSetup: SecuritySolutionServerlessPluginSetupDeps) {
     // securitySolutionEss plugin should always be disabled when securitySolutionServerless is enabled.
     // This check is an additional layer of security to prevent double registrations when
     // `plugins.forceEnableAllPlugins` flag is enabled).
-
     const shouldRegister = pluginsSetup.securitySolutionEss == null;
-
     if (shouldRegister) {
       pluginsSetup.securitySolution.setAppFeatures(getProductAppFeatures(this.config.productTypes));
     }
+
     pluginsSetup.ml.setFeaturesEnabled({ ad: true, dfa: true, nlp: false });
 
     this.cspmUsageReportingTask = new SecurityUsageReportingTask({
-      core: _coreSetup,
+      core: coreSetup,
       logFactory: this.initializerContext.logger,
       taskManager: pluginsSetup.taskManager,
       cloudSetup: pluginsSetup.cloudSetup,
@@ -62,7 +61,7 @@ export class SecuritySolutionServerlessPlugin
     });
 
     this.endpointUsageReportingTask = new SecurityUsageReportingTask({
-      core: _coreSetup,
+      core: coreSetup,
       logFactory: this.initializerContext.logger,
       taskType: ENDPOINT_METERING_TASK.TYPE,
       taskTitle: ENDPOINT_METERING_TASK.TITLE,

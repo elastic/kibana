@@ -8,16 +8,19 @@
 import { map, combineLatest, skipWhile, debounceTime, type Observable } from 'rxjs';
 import type { ChromeNavLinks, CoreStart } from '@kbn/core/public';
 import { SecurityPageName, type NavigationLink } from '@kbn/security-solution-navigation';
-import { isExternalId } from '@kbn/security-solution-navigation/links';
+import { isSecurityId } from '@kbn/security-solution-navigation/links';
+import type { CloudStart } from '@kbn/cloud-plugin/public';
 import { mlNavCategories, mlNavLinks } from './sections/ml_links';
 import { devToolsNavLink } from './sections/dev_tools_links';
 import { assetsNavLinks } from './sections/assets_links';
+import { projectSettingsNavLinks } from './sections/project_settings';
 import type { ProjectNavigationLink } from './types';
-import { getNavLinkIdFromProjectPageName } from './util';
+import { getCloudLinkKey, getCloudUrl, getNavLinkIdFromProjectPageName, isCloudLink } from './util';
 
 export const getProjectNavLinks$ = (
   securityNavLinks$: Observable<Array<NavigationLink<SecurityPageName>>>,
-  core: CoreStart
+  core: CoreStart,
+  cloud: CloudStart
 ): Observable<ProjectNavigationLink[]> => {
   const { chrome } = core;
   return combineLatest([securityNavLinks$, chrome.navLinks.getNavLinks$()]).pipe(
@@ -26,7 +29,7 @@ export const getProjectNavLinks$ = (
       ([securityNavLinks, chromeNavLinks]) =>
         securityNavLinks.length === 0 || chromeNavLinks.length === 0 // skip if not initialized
     ),
-    map(([securityNavLinks]) => processNavLinks(securityNavLinks, chrome.navLinks))
+    map(([securityNavLinks]) => processNavLinks(securityNavLinks, chrome.navLinks, cloud))
   );
 };
 
@@ -36,7 +39,8 @@ export const getProjectNavLinks$ = (
  */
 const processNavLinks = (
   securityNavLinks: Array<NavigationLink<SecurityPageName>>,
-  chromeNavLinks: ChromeNavLinks
+  chromeNavLinks: ChromeNavLinks,
+  cloud: CloudStart
 ): ProjectNavigationLink[] => {
   const projectNavLinks: ProjectNavigationLink[] = [...securityNavLinks];
 
@@ -50,9 +54,6 @@ const processNavLinks = (
     };
   }
 
-  // Dev Tools. just pushing it
-  projectNavLinks.push(devToolsNavLink);
-
   // Assets, adding fleet external sub-links
   const assetsLinkIndex = projectNavLinks.findIndex(({ id }) => id === SecurityPageName.assets);
   if (assetsLinkIndex !== -1) {
@@ -63,13 +64,26 @@ const processNavLinks = (
     };
   }
 
-  // TODO: Project Settings
+  // Project Settings, adding all external sub-links
+  const projectSettingsLinkIndex = projectNavLinks.findIndex(
+    ({ id }) => id === SecurityPageName.projectSettings
+  );
+  if (projectSettingsLinkIndex !== -1) {
+    const projectSettingsNavLink = projectNavLinks[projectSettingsLinkIndex];
+    projectNavLinks[projectSettingsLinkIndex] = {
+      ...projectSettingsNavLink,
+      links: [...projectSettingsNavLinks, ...(projectSettingsNavLink.links ?? [])],
+    };
+  }
 
-  return filterDisabled(projectNavLinks, chromeNavLinks);
+  // Dev Tools. just pushing it
+  projectNavLinks.push(devToolsNavLink);
+
+  return processCloudLinks(filterDisabled(projectNavLinks, chromeNavLinks), cloud);
 };
 
 /**
- * Filters out the disabled external nav links from the project nav links.
+ * Filters out the disabled external kibana nav links from the project nav links.
  * Internal Security links are already filtered by the security_solution plugin appLinks.
  */
 const filterDisabled = (
@@ -78,7 +92,7 @@ const filterDisabled = (
 ): ProjectNavigationLink[] => {
   return projectNavLinks.reduce<ProjectNavigationLink[]>((filteredNavLinks, navLink) => {
     const { id, links } = navLink;
-    if (isExternalId(id)) {
+    if (!isSecurityId(id) && !isCloudLink(id)) {
       const navLinkId = getNavLinkIdFromProjectPageName(id);
       if (!chromeNavLinks.has(navLinkId)) {
         return filteredNavLinks;
@@ -91,4 +105,24 @@ const filterDisabled = (
     }
     return filteredNavLinks;
   }, []);
+};
+
+const processCloudLinks = (
+  links: ProjectNavigationLink[],
+  cloud: CloudStart
+): ProjectNavigationLink[] => {
+  return links.map((link) => {
+    const extraProps: Partial<ProjectNavigationLink> = {};
+    if (isCloudLink(link.id)) {
+      const externalUrl = getCloudUrl(getCloudLinkKey(link.id), cloud);
+      extraProps.externalUrl = externalUrl ?? '#'; // TODO: disable the link if the url is not defined
+    }
+    if (link.links) {
+      extraProps.links = processCloudLinks(link.links, cloud);
+    }
+    return {
+      ...link,
+      ...extraProps,
+    };
+  });
 };

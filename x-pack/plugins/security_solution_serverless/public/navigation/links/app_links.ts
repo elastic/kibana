@@ -13,6 +13,7 @@ import { SecurityPageName } from '@kbn/security-solution-navigation';
 import { cloneDeep, remove } from 'lodash';
 import { mlAppLink } from './sections/ml_links';
 import { createAssetsLinkFromManage } from './sections/assets_links';
+import { createProjectSettingsLinkFromManage } from './sections/project_settings';
 
 // This function is called by the security_solution plugin to alter the app links
 // that will be registered to the Security Solution application on Serverless projects.
@@ -31,7 +32,10 @@ export const projectAppLinksSwitcher: AppLinksSwitcher = (appLinks) => {
   // Add ML link
   projectAppLinks.push(mlAppLink);
 
-  // TODO: Project Settings
+  if (manageLinkItem) {
+    // Add assets link
+    projectAppLinks.push(createProjectSettingsLinkFromManage(manageLinkItem));
+  }
 
   return projectAppLinks;
 };

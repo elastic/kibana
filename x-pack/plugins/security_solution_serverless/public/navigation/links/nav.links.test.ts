@@ -43,7 +43,7 @@ const linkMlLanding: NavigationLink<SecurityPageName> = {
   links: [],
 };
 const projectLinkDevTools: ProjectNavigationLink = {
-  id: ExternalPageName.devToolsRoot,
+  id: ExternalPageName.devTools,
   title: 'Dev Tools',
 };
 

@@ -14,7 +14,7 @@ export const createServices = (
   core: CoreStart,
   pluginsStart: SecuritySolutionServerlessPluginStartDeps
 ): Services => {
-  const { securitySolution } = pluginsStart;
-  const projectNavLinks$ = getProjectNavLinks$(securitySolution.getNavLinks$(), core);
+  const { securitySolution, cloud } = pluginsStart;
+  const projectNavLinks$ = getProjectNavLinks$(securitySolution.getNavLinks$(), core, cloud);
   return { ...core, ...pluginsStart, getProjectNavLinks$: () => projectNavLinks$ };
 };

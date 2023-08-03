@@ -40,9 +40,10 @@ export const useGetLinkUrl = () => {
   const { getAppUrl } = useGetAppUrl();
 
   const getLinkUrl = useCallback<GetLinkUrl>(
-    ({ id, path = '', absolute = false, urlState }) => {
+    ({ id, path: explicitPath = '', absolute = false, urlState }) => {
+      const { appId, deepLinkId, path: idPath = '' } = getAppIdsFromId(id);
+      const path = mergePaths(idPath, explicitPath);
       const formattedPath = urlState ? formatPath(path, urlState) : path;
-      const { appId, deepLinkId } = getAppIdsFromId(id);
       return getAppUrl({ deepLinkId, appId, path: formattedPath, absolute });
     },
     [getAppUrl]
@@ -109,16 +110,25 @@ export const LinkAnchor = withLink<EuiLinkProps>(EuiLink);
 
 // Utils
 
-// External IDs are in the format `appId:deepLinkId` to match the Chrome NavLinks format.
-// Internal Security Solution links are in the format `deepLinkId`, the appId is omitted for convenience.
-export const isExternalId = (id: string): boolean => id.includes(':');
-
-export const getAppIdsFromId = (id: string): { appId?: string; deepLinkId?: string } => {
-  if (isExternalId(id)) {
-    const [appId, deepLinkId] = id.split(':');
-    return { appId, deepLinkId };
+// External IDs are in the format `appId:deepLinkId/path` to match the Chrome NavLinks format.
+// Internal Security Solution ids are in the format `deepLinkId/path`, the appId is omitted for convenience.
+export const isSecurityId = (id: string): boolean => !id.includes(':');
+export const getAppIdsFromId = (
+  id: string
+): { appId?: string; deepLinkId?: string; path?: string } => {
+  const [appAndDeepLinkId, path] = id.split(/-(.*)/);
+  if (!isSecurityId(appAndDeepLinkId)) {
+    const [appId, deepLinkId] = appAndDeepLinkId.split(':');
+    return { appId, deepLinkId, path };
   }
-  return { deepLinkId: id }; // undefined `appId` for internal Security Solution links
+  return { deepLinkId: appAndDeepLinkId, path }; // undefined `appId` for internal Security Solution links
+};
+
+export const mergePaths = (path: string | undefined, subPath: string | undefined) => {
+  if (path && subPath) {
+    return `${path.replace(/\/$/, '')}/${subPath.replace(/^\//, '')}`;
+  }
+  return path ?? subPath ?? '';
 };
 
 export const formatPath = (path: string, urlState: string) => {

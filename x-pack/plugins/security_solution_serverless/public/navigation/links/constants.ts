@@ -12,9 +12,22 @@ export const SecurityPagePath = {
   [SecurityPageName.mlLanding]: '/ml',
   [SecurityPageName.assets]: '/assets',
   [SecurityPageName.cloudDefend]: '/cloud_defend',
+  [SecurityPageName.projectSettings]: '/project_settings',
 } as const;
 
-// External (non-Security) page names that need to be linked in the Security nav for serverless
+/**
+ * External (non-Security) page names that need to be linked in the Security nav for serverless
+ * Format: `<pluginId>:<deepLinkId>/<path>`.
+ *
+ * `pluginId`: is the id of the plugin that owns the deep link
+ *
+ * `deepLinkId`: is the id of the deep link inside the plugin.
+ * Keep empty for the root page of the plugin, e.g. `ml:`
+ *
+ * `path`: is the path to append to the plugin and deep link.
+ * This is optional and only needed if the path is not registered in the plugin's `deepLinks`. e.g. `integrations:/browse/security`
+ * The path should not be used for links displayed in the main left navigation, since highlighting won't work.
+ **/
 export enum ExternalPageName {
   // Machine Learning
   // Ref: packages/default-nav/ml/default_navigation.ts
@@ -36,7 +49,7 @@ export enum ExternalPageName {
   mlChangePointDetections = 'ml:changePointDetections',
   // Dev Tools
   // Ref: packages/default-nav/devtools/default_navigation.ts
-  devToolsRoot = 'dev_tools:',
+  devTools = 'dev_tools:',
   // Fleet
   // Ref: x-pack/plugins/fleet/public/deep_links.ts
   fleet = 'fleet:',
@@ -46,4 +59,9 @@ export enum ExternalPageName {
   fleetUninstallTokens = 'fleet:uninstall_tokens',
   fleetDataStreams = 'fleet:data_streams',
   fleetSettings = 'fleet:settings',
+  // Integrations
+  integrationsSecurity = 'integrations:/browse/security',
+  // Cloud UI
+  cloudUsersAndRoles = 'cloud:usersAndRoles',
+  cloudBilling = 'cloud:billing',
 }
