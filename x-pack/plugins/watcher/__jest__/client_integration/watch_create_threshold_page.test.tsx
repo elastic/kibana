@@ -86,7 +86,7 @@ describe('<ThresholdWatchEditPage /> create route', () => {
   let testBed: WatchCreateThresholdTestBed;
 
   beforeAll(() => {
-    jest.useFakeTimers({ legacyFakeTimers: true });
+    jest.useFakeTimers();
   });
 
   afterAll(() => {
@@ -225,6 +225,9 @@ describe('<ThresholdWatchEditPage /> create route', () => {
           const { form, find, component } = testBed;
 
           component.update();
+
+          // eslint-disable-next-line no-console
+          console.log(component.debug());
 
           // Set up valid fields needed for actions component to render
           await act(async () => {
