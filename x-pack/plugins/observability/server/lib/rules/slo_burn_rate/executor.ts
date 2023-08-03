@@ -53,7 +53,7 @@ async function evaluateWindow(slo: SLO, summaryClient: DefaultSLIClient, windowD
     toDurationUnit(windowDef.shortWindow.unit)
   );
 
-  const sliData = await summaryClient.fetchSLIDataFrom(slo, [
+  const sliData = await summaryClient.fetchSLIDataFrom(slo, undefined, [
     { name: LONG_WINDOW, duration: longWindowDuration.add(slo.settings.syncDelay) },
     { name: SHORT_WINDOW, duration: shortWindowDuration.add(slo.settings.syncDelay) },
   ]);
