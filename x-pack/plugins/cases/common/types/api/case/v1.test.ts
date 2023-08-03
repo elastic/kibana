@@ -10,6 +10,12 @@ import {
   MAX_TAGS_FILTER_LENGTH,
   MAX_ASSIGNEES_FILTER_LENGTH,
   MAX_REPORTERS_FILTER_LENGTH,
+  MAX_ASSIGNEES_PER_CASE,
+  MAX_DESCRIPTION_LENGTH,
+  MAX_TAGS_PER_CASE,
+  MAX_LENGTH_PER_TAG,
+  MAX_TITLE_LENGTH,
+  MAX_CATEGORY_LENGTH,
 } from '../../../constants';
 import { PathReporter } from 'io-ts/lib/PathReporter';
 import { AttachmentType } from '../../domain/attachment/v1';
@@ -192,6 +198,66 @@ describe('Status', () => {
         _tag: 'Right',
         right: defaultRequest,
       });
+    });
+
+    it(`throws an error when the assignees are more than ${MAX_ASSIGNEES_PER_CASE}`, async () => {
+      const assignees = Array(MAX_ASSIGNEES_PER_CASE + 1).fill({ uid: 'foobar' });
+
+      expect(
+        PathReporter.report(CasePostRequestRt.decode({ ...defaultRequest, assignees }))
+      ).toContain('The length of the field assignees is too long. Array must be of length <= 10.');
+    });
+
+    it('does not throw an error with empty assignees', async () => {
+      expect(
+        PathReporter.report(CasePostRequestRt.decode({ ...defaultRequest, assignees: [] }))
+      ).toContain('No errors!');
+    });
+
+    it('does not throw an error with undefined assignees', async () => {
+      const { assignees, ...rest } = defaultRequest;
+
+      expect(PathReporter.report(CasePostRequestRt.decode(rest))).toContain('No errors!');
+    });
+
+    it(`throws an error when the description contains more than ${MAX_DESCRIPTION_LENGTH} characters`, async () => {
+      const description = 'a'.repeat(MAX_DESCRIPTION_LENGTH + 1);
+
+      expect(
+        PathReporter.report(CasePostRequestRt.decode({ ...defaultRequest, description }))
+      ).toContain('The length of the description is too long. The maximum length is 30000.');
+    });
+
+    it(`throws an error when there are more than ${MAX_TAGS_PER_CASE} tags`, async () => {
+      const tags = Array(MAX_TAGS_PER_CASE + 1).fill('foobar');
+
+      expect(PathReporter.report(CasePostRequestRt.decode({ ...defaultRequest, tags }))).toContain(
+        'The length of the field tags is too long. Array must be of length <= 200.'
+      );
+    });
+
+    it(`throws an error when the a tag is more than ${MAX_LENGTH_PER_TAG} characters`, async () => {
+      const tag = 'a'.repeat(MAX_LENGTH_PER_TAG + 1);
+
+      expect(
+        PathReporter.report(CasePostRequestRt.decode({ ...defaultRequest, tags: [tag] }))
+      ).toContain('The length of the tag is too long. The maximum length is 256.');
+    });
+
+    it(`throws an error when the title contains more than ${MAX_TITLE_LENGTH} characters`, async () => {
+      const title = 'a'.repeat(MAX_TITLE_LENGTH + 1);
+
+      expect(PathReporter.report(CasePostRequestRt.decode({ ...defaultRequest, title }))).toContain(
+        'The length of the title is too long. The maximum length is 160.'
+      );
+    });
+
+    it(`throws an error when the category contains more than ${MAX_CATEGORY_LENGTH} characters`, async () => {
+      const category = 'a'.repeat(MAX_CATEGORY_LENGTH + 1);
+
+      expect(
+        PathReporter.report(CasePostRequestRt.decode({ ...defaultRequest, category }))
+      ).toContain('The length of the category is too long. The maximum length is 50.');
     });
   });
 
@@ -431,6 +497,64 @@ describe('CasePatchRequestRt', () => {
       right: defaultRequest,
     });
   });
+
+  it(`throws an error when the assignees are more than ${MAX_ASSIGNEES_PER_CASE}`, async () => {
+    const assignees = Array(MAX_ASSIGNEES_PER_CASE + 1).fill({ uid: 'foobar' });
+
+    expect(
+      PathReporter.report(CasePatchRequestRt.decode({ ...defaultRequest, assignees }))
+    ).toContain('The length of the field assignees is too long. Array must be of length <= 10.');
+  });
+
+  it('does not throw an error with empty assignees', async () => {
+    expect(
+      PathReporter.report(CasePatchRequestRt.decode({ ...defaultRequest, assignees: [] }))
+    ).toContain('No errors!');
+  });
+
+  it('does not throw an error with undefined assignees', async () => {
+    expect(PathReporter.report(CasePatchRequestRt.decode(defaultRequest))).toContain('No errors!');
+  });
+
+  it(`throws an error when the description contains more than ${MAX_DESCRIPTION_LENGTH} characters`, async () => {
+    const description = 'a'.repeat(MAX_DESCRIPTION_LENGTH + 1);
+
+    expect(
+      PathReporter.report(CasePatchRequestRt.decode({ ...defaultRequest, description }))
+    ).toContain('The length of the description is too long. The maximum length is 30000.');
+  });
+
+  it(`throws an error when there are more than ${MAX_TAGS_PER_CASE} tags`, async () => {
+    const tags = Array(MAX_TAGS_PER_CASE + 1).fill('foobar');
+
+    expect(PathReporter.report(CasePatchRequestRt.decode({ ...defaultRequest, tags }))).toContain(
+      'The length of the field tags is too long. Array must be of length <= 200.'
+    );
+  });
+
+  it(`throws an error when the a tag is more than ${MAX_LENGTH_PER_TAG} characters`, async () => {
+    const tag = 'a'.repeat(MAX_LENGTH_PER_TAG + 1);
+
+    expect(
+      PathReporter.report(CasePatchRequestRt.decode({ ...defaultRequest, tags: [tag] }))
+    ).toContain('The length of the tag is too long. The maximum length is 256.');
+  });
+
+  it(`throws an error when the title contains more than ${MAX_TITLE_LENGTH} characters`, async () => {
+    const title = 'a'.repeat(MAX_TITLE_LENGTH + 1);
+
+    expect(PathReporter.report(CasePatchRequestRt.decode({ ...defaultRequest, title }))).toContain(
+      'The length of the title is too long. The maximum length is 160.'
+    );
+  });
+
+  it(`throws an error when the category contains more than ${MAX_CATEGORY_LENGTH} characters`, async () => {
+    const category = 'a'.repeat(MAX_CATEGORY_LENGTH + 1);
+
+    expect(
+      PathReporter.report(CasePatchRequestRt.decode({ ...defaultRequest, category }))
+    ).toContain('The length of the category is too long. The maximum length is 50.');
+  });
 });
 
 describe('CasesPatchRequestRt', () => {
@@ -460,6 +584,24 @@ describe('CasesPatchRequestRt', () => {
       _tag: 'Right',
       right: defaultRequest,
     });
+  });
+
+  it(`throws an error when the assignees are more than ${MAX_ASSIGNEES_PER_CASE}`, async () => {
+    const assignees = Array(MAX_ASSIGNEES_PER_CASE + 1).fill({ uid: 'foobar' });
+
+    expect(
+      PathReporter.report(
+        CasesPatchRequestRt.decode({
+          cases: [
+            {
+              id: 'basic-case-id',
+              version: 'WzQ3LDFd',
+              assignees,
+            },
+          ],
+        })
+      )
+    ).toContain('The length of the field assignees is too long. Array must be of length <= 10.');
   });
 });
 
