@@ -130,9 +130,12 @@ export function useTimeline({
             nextMessages.concat({
               '@timestamp': new Date().toISOString(),
               message: {
-                role: MessageRole.User,
+                role: MessageRole.System,
                 name,
-                content: JSON.stringify(message.content),
+                content: `The following data was returned by the function: 
+                \`\`\`
+                ${JSON.stringify(message.content, null, 4)}
+                \`\`\``,
                 data: JSON.stringify(message.data),
               },
             })

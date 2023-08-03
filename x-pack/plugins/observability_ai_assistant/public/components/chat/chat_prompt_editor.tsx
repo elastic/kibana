@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Ref, useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   EuiButtonIcon,
   EuiButtonEmpty,
@@ -206,7 +206,9 @@ export function ChatPromptEditor({ onSubmit, disabled, loading }: ChatPromptEdit
           aria-label="Submit"
           isLoading={loading}
           disabled={selectedFunction ? false : !prompt || loading || disabled}
-          display={prompt ? 'fill' : 'base'}
+          display={
+            selectedFunction ? (functionPayload ? 'fill' : 'base') : prompt ? 'fill' : 'base'
+          }
           iconType="kqlFunction"
           size="m"
           onClick={handleSubmit}

@@ -11,6 +11,7 @@ import { css } from '@emotion/css';
 import type { Parent, Text, InlineCode, Code } from 'mdast';
 import ReactMarkdown from 'react-markdown';
 import { EuiText } from '@elastic/eui';
+import { euiThemeVars } from '@kbn/ui-theme';
 
 interface Props {
   content: string;
@@ -19,6 +20,15 @@ interface Props {
 
 const containerClassName = css`
   overflow-wrap: break-word;
+
+  code {
+    display: block;
+    background: ${euiThemeVars.euiColorLightestShade};
+    white-space: pre;
+    margin-top: 8px;
+    margin-bottom: 8px;
+    padding: 8px;
+  }
 `;
 
 const cursorCss = css`
