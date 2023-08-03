@@ -30,6 +30,7 @@ import { getPosturePolicy, NewPackagePolicyPostureInput } from './utils';
 import { MIN_VERSION_GCP_CIS } from '../../common/constants';
 
 export const CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS = {
+  GOOGLE_CLOUD_SHELL_SETUP: 'google_cloud_shell_setup_test_id',
   PROJECT_ID: 'project_id_test_id',
   CREDENTIALS_TYPE: 'credentials_type_test_id',
   CREDENTIALS_FILE: 'credentials_file_test_id',
@@ -79,7 +80,11 @@ const DocsLink = (
 const GoogleCloudShellSetup = () => {
   return (
     <>
-      <EuiText color="subdued" size="s">
+      <EuiText
+        color="subdued"
+        size="s"
+        data-test-subj={CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.GOOGLE_CLOUD_SHELL_SETUP}
+      >
         <ol
           css={css`
             list-style: auto;
@@ -245,6 +250,7 @@ export const GcpCredentialsForm = ({
   const getFieldById = (id: keyof GcpInputFields['fields']) => {
     return fields.find((element) => element.id === id);
   };
+
   const onSetupFormatChange = (newSetupFormat: SetupFormatGCP) => {
     if (newSetupFormat === 'google_cloud_shell') {
       // We need to store the current manual fields to restore them later
