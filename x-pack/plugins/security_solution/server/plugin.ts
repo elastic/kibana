@@ -32,6 +32,7 @@ import { initRoutes } from './routes';
 import { registerLimitedConcurrencyRoutes } from './routes/limited_concurrency';
 import { ManifestTask } from './endpoint/lib/artifacts';
 import { CheckMetadataTransformsTask } from './endpoint/lib/metadata';
+import { RiskScoringTask } from './lib/risk_engine/tasks';
 import { initSavedObjects } from './saved_objects';
 import { AppClientFactory } from './client';
 import type { ConfigType } from './config';
@@ -169,6 +170,10 @@ export class Plugin implements ISecuritySolutionPlugin {
         .getStartServices()
         .then(([{ elasticsearch }]) => elasticsearch.client.asInternalUser),
     });
+
+    if (experimentalFeatures.riskScoringPersistence && plugins.taskManager) {
+      new RiskScoringTask({ logger: this.logger }).register(plugins.taskManager);
+    }
 
     const requestContextFactory = new RequestContextFactory({
       config,
