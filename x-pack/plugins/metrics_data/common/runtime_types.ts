@@ -10,8 +10,6 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { Context, Errors, IntersectionType, Type, UnionType, ValidationError } from 'io-ts';
 import type { RouteValidationFunction } from '@kbn/core/server';
 
-type ErrorFactory = (message: string) => Error;
-
 const getErrorPath = ([first, ...rest]: Context): string[] => {
   if (typeof first === 'undefined') {
     return [];
