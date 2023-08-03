@@ -1,9 +1,0 @@
-type: object
-properties:
-  round_robin:
-    type: object
-    properties:
-      group_events:
-        type: number
-required:
-  - round_robin

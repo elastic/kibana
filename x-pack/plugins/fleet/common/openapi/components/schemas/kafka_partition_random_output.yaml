@@ -1,9 +1,0 @@
-type: object
-properties:
-  random:
-    type: object
-    properties:
-      group_events:
-        type: number
-required:
-  - random

@@ -25,7 +25,11 @@ import type {
 } from '../../common/types/models/package_policy';
 import type { PolicySecretReference } from '../../common/types/models/secret';
 import type { KafkaAuthType, KafkaCompressionType } from '../../common/types';
-import type { KafkaSaslMechanism, KafkaTopicWhenType } from '../../common/types';
+import type {
+  KafkaPartitionType,
+  KafkaSaslMechanism,
+  KafkaTopicWhenType,
+} from '../../common/types';
 
 export type AgentPolicyStatus = typeof agentPolicyStatuses;
 
@@ -147,29 +151,6 @@ interface OutputSoLogstashAttributes extends OutputSoBaseAttributes {
   type: OutputType['Logstash'];
 }
 
-export interface OutputSOKafkaPartitionRandom {
-  random: {
-    group_events: number;
-  };
-}
-
-export interface OutputSOKafkaPartitionRoundRobin {
-  round_robin: {
-    group_events: number;
-  };
-}
-
-export interface OutputSOKafkaPartitionHash {
-  hash: {
-    hash: string;
-  };
-}
-
-export type OutputSOKafkaPartition =
-  | OutputSOKafkaPartitionRandom
-  | OutputSOKafkaPartitionRoundRobin
-  | OutputSOKafkaPartitionHash;
-
 export interface OutputSoKafkaAttributes extends OutputSoBaseAttributes {
   type: OutputType['Kafka'];
   client_id?: string;
@@ -183,7 +164,17 @@ export interface OutputSoKafkaAttributes extends OutputSoBaseAttributes {
   sasl?: {
     mechanism?: ValueOf<KafkaSaslMechanism>;
   };
-  partition?: OutputSOKafkaPartition;
+  partition?: ValueOf<KafkaPartitionType>;
+  random?: {
+    group_events?: number;
+  };
+  round_robin?: {
+    group_events?: number;
+  };
+  hash?: {
+    hash?: string;
+    random?: boolean;
+  };
   topics?: Array<{
     topic: string;
     when?: {

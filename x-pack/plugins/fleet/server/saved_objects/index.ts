@@ -185,29 +185,7 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
             mechanism: { type: 'text' },
           },
         },
-        partition: {
-          dynamic: false,
-          properties: {
-            hash: {
-              dynamic: false,
-              properties: {
-                hash: { type: 'text' },
-              },
-            },
-            random: {
-              dynamic: false,
-              properties: {
-                group_events: { type: 'integer' },
-              },
-            },
-            round_robin: {
-              dynamic: false,
-              properties: {
-                group_events: { type: 'integer' },
-              },
-            },
-          },
-        },
+        partition: { type: 'keyword' },
         random: {
           dynamic: false,
           properties: {
@@ -260,13 +238,7 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
         changes: [
           {
             type: 'mappings_deprecation',
-            deprecatedMappings: [
-              'broker_ack_reliability',
-              'broker_buffer_size',
-              'random',
-              'round_robin',
-              'hash',
-            ],
+            deprecatedMappings: ['broker_ack_reliability', 'broker_buffer_size'],
           },
         ],
       },

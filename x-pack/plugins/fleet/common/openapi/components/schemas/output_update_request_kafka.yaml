@@ -76,10 +76,17 @@ properties:
       mechanism:
         type: string
   partition:
-    oneOf:
-      - $ref: './kafka_partition_random_output.yaml'
-      - $ref: './kafka_partition_round_robin_output.yaml'
-      - $ref: './kafka_partition_hash_output.yaml'
+    type: string
+  random:
+    type: object
+    properties:
+      group_events:
+        type: number
+  round_robin:
+    type: object
+    properties:
+      group_events:
+        type: number
   topics:
     type: array
     items:

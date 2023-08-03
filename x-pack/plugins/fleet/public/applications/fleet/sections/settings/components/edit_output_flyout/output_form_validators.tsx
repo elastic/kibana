@@ -170,36 +170,6 @@ export function validateKafkaPassword(value: string) {
   }
 }
 
-export function validatePartitionRandomGroupEvents(value: string) {
-  if (!value || value === '') {
-    return [
-      i18n.translate('xpack.fleet.settings.outputForm.kafkaPartitionRandomGroupEventsIsRequired', {
-        defaultMessage: 'Number of events is required',
-      }),
-    ];
-  }
-}
-
-export function validatePartitionHashHash(value: string) {
-  if (!value || value === '') {
-    return [
-      i18n.translate('xpack.fleet.settings.outputForm.kafkaPartitionHashHashsIsRequired', {
-        defaultMessage: 'List of fields is required',
-      }),
-    ];
-  }
-}
-
-export function validatePartitionRoundRobinEvents(value: string) {
-  if (!value || value === '') {
-    return [
-      i18n.translate('xpack.fleet.settings.outputForm.kafkaPartitionRoundRobinIsRequired', {
-        defaultMessage: 'Number of events is required',
-      }),
-    ];
-  }
-}
-
 export function validateCATrustedFingerPrint(value: string) {
   if (value !== '' && !value.match(/^[a-zA-Z0-9]+$/)) {
     return [

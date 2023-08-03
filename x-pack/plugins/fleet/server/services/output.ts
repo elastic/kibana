@@ -36,6 +36,7 @@ import {
   SO_SEARCH_LIMIT,
   outputType,
   kafkaSaslMechanism,
+  kafkaPartitionType,
   kafkaCompressionType,
   kafkaAcknowledgeReliabilityLevel,
 } from '../../common/constants';
@@ -500,7 +501,17 @@ class OutputService {
         };
       }
       if (!output.partition) {
-        data.partition = { hash: { hash: '' } };
+        data.partition = kafkaPartitionType.Hash;
+      }
+      if (output.partition === kafkaPartitionType.Random && !output.random?.group_events) {
+        data.random = {
+          group_events: 1,
+        };
+      }
+      if (output.partition === kafkaPartitionType.RoundRobin && !output.round_robin?.group_events) {
+        data.round_robin = {
+          group_events: 1,
+        };
       }
       if (!output.timeout) {
         data.timeout = 30;
@@ -708,6 +719,9 @@ class OutputService {
       target.password = null;
       target.sasl = null;
       target.partition = null;
+      target.random = null;
+      target.round_robin = null;
+      target.hash = null;
       target.topics = null;
       target.headers = null;
       target.timeout = null;
@@ -761,7 +775,17 @@ class OutputService {
           };
         }
         if (!data.partition) {
-          updateData.partition = { hash: { hash: '' } };
+          updateData.partition = kafkaPartitionType.Hash;
+        }
+        if (data.partition === kafkaPartitionType.Random && !data.random?.group_events) {
+          updateData.random = {
+            group_events: 1,
+          };
+        }
+        if (data.partition === kafkaPartitionType.RoundRobin && !data.round_robin?.group_events) {
+          updateData.round_robin = {
+            group_events: 1,
+          };
         }
         if (!data.timeout) {
           updateData.timeout = 30;

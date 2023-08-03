@@ -4920,36 +4920,6 @@ components:
               type: boolean
       required:
         - name
-    kafka_partition_random_output:
-      type: object
-      properties:
-        random:
-          type: object
-          properties:
-            group_events:
-              type: number
-      required:
-        - random
-    kafka_partition_round_robin_output:
-      type: object
-      properties:
-        round_robin:
-          type: object
-          properties:
-            group_events:
-              type: number
-      required:
-        - round_robin
-    kafka_partition_hash_output:
-      type: object
-      properties:
-        hash:
-          type: object
-          properties:
-            hash:
-              type: string
-      required:
-        - hash
     output_create_request_kafka:
       title: kafka
       type: object
@@ -5030,10 +5000,17 @@ components:
             mechanism:
               type: string
         partition:
-          oneOf:
-            - $ref: '#/components/schemas/kafka_partition_random_output'
-            - $ref: '#/components/schemas/kafka_partition_round_robin_output'
-            - $ref: '#/components/schemas/kafka_partition_hash_output'
+          type: string
+        random:
+          type: object
+          properties:
+            group_events:
+              type: number
+        round_robin:
+          type: object
+          properties:
+            group_events:
+              type: number
         topics:
           type: array
           items:
@@ -5287,10 +5264,17 @@ components:
             mechanism:
               type: string
         partition:
-          oneOf:
-            - $ref: '#/components/schemas/kafka_partition_random_output'
-            - $ref: '#/components/schemas/kafka_partition_round_robin_output'
-            - $ref: '#/components/schemas/kafka_partition_hash_output'
+          type: string
+        random:
+          type: object
+          properties:
+            group_events:
+              type: number
+        round_robin:
+          type: object
+          properties:
+            group_events:
+              type: number
         topics:
           type: array
           items:

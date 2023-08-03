@@ -1,9 +1,0 @@
-type: object
-properties:
-  hash:
-    type: object
-    properties:
-      hash:
-        type: string
-required:
-  - hash

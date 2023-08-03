@@ -67,29 +67,6 @@ export interface ShipperOutput {
   max_batch_bytes?: number | null;
 }
 
-export interface KafkaPartitionRandomOutput {
-  random: {
-    group_events: number;
-  };
-}
-
-export interface KafkaPartitionRoundRobinOutput {
-  round_robin: {
-    group_events: number;
-  };
-}
-
-export interface KafkaPartitionHashOutput {
-  hash: {
-    hash: string;
-  };
-}
-
-export type KafkaPartitionOutput =
-  | KafkaPartitionRandomOutput
-  | KafkaPartitionRoundRobinOutput
-  | KafkaPartitionHashOutput;
-
 export interface KafkaOutput extends NewBaseOutput {
   type: OutputType['Kafka'];
   hosts?: string[];
@@ -104,7 +81,17 @@ export interface KafkaOutput extends NewBaseOutput {
   sasl?: {
     mechanism?: ValueOf<KafkaSaslMechanism>;
   };
-  partition?: KafkaPartitionOutput;
+  partition?: ValueOf<KafkaPartitionType>;
+  random?: {
+    group_events?: number;
+  };
+  round_robin?: {
+    group_events?: number;
+  };
+  hash?: {
+    hash?: string;
+    random?: boolean;
+  };
   topics?: Array<{
     topic: string;
     when?: {

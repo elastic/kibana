@@ -10,6 +10,7 @@ import { schema } from '@kbn/config-schema';
 import {
   kafkaAuthType,
   kafkaCompressionType,
+  kafkaPartitionType,
   kafkaSaslMechanism,
   kafkaTopicWhenType,
   outputType,
@@ -137,24 +138,6 @@ const KafkaTopicsSchema = schema.arrayOf(
   { minSize: 1 }
 );
 
-const KafkaPartitionSchemaRandom = schema.object({
-  random: schema.object({
-    group_events: schema.number(),
-  }),
-});
-
-const KafkaPartitionSchemaHash = schema.object({
-  hash: schema.object({
-    hash: schema.string(),
-  }),
-});
-
-const KafkaPartitionSchemaRoundRobin = schema.object({
-  round_robin: schema.object({
-    group_events: schema.number(),
-  }),
-});
-
 export const KafkaSchema = {
   ...BaseSchema,
   type: schema.literal(outputType.Kafka),
@@ -207,10 +190,15 @@ export const KafkaSchema = {
   ),
   partition: schema.maybe(
     schema.oneOf([
-      KafkaPartitionSchemaRandom,
-      KafkaPartitionSchemaHash,
-      KafkaPartitionSchemaRoundRobin,
+      schema.literal(kafkaPartitionType.Random),
+      schema.literal(kafkaPartitionType.RoundRobin),
+      schema.literal(kafkaPartitionType.Hash),
     ])
+  ),
+  random: schema.maybe(schema.object({ group_events: schema.maybe(schema.number()) })),
+  round_robin: schema.maybe(schema.object({ group_events: schema.maybe(schema.number()) })),
+  hash: schema.maybe(
+    schema.object({ hash: schema.maybe(schema.string()), random: schema.maybe(schema.boolean()) })
   ),
   topics: KafkaTopicsSchema,
   headers: schema.maybe(
