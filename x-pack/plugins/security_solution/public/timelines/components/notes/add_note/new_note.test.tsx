@@ -10,6 +10,10 @@ import React from 'react';
 
 import { NewNote } from './new_note';
 
+jest.mock('../../../../common/hooks/use_upselling', () => ({
+  useUpsellingMessage: jest.fn(),
+}));
+
 describe('NewNote', () => {
   const note = 'The contents of a new note';
 

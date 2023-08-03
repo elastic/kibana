@@ -29,6 +29,9 @@ import { timeSeriesDataViewWarning } from '../../application/utils/time_series_d
 
 const localStorage = new Storage(window.localStorage);
 
+/**
+ * Props for the LogRateAnalysisAppState component.
+ */
 export interface LogRateAnalysisAppStateProps {
   /** The data view to analyze. */
   dataView: DataView;
