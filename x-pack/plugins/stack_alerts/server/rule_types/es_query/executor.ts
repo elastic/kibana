@@ -9,19 +9,14 @@ import { i18n } from '@kbn/i18n';
 import { CoreSetup } from '@kbn/core/server';
 import { parseDuration } from '@kbn/alerting-plugin/server';
 import { isGroupAggregation, UngroupedGroupId } from '@kbn/triggers-actions-ui-plugin/common';
-import { ALERT_URL } from '@kbn/rule-data-utils';
-
 import {
-  ALERT_HITS_COUNT,
-  ALERT_HITS_HITS,
-  ALERT_MESSAGE,
-  ALERT_TITLE,
-  ALERT_CONDITIONS,
-  ALERT_CONDITIONS_MET_VALUE,
-  ALERT_STATE_LAST_TIMESTAMP,
-  ALERT_STATE_DATE_START,
-  ALERT_STATE_DATE_END,
-} from './fields';
+  ALERT_EVALUATION_CONDITIONS,
+  ALERT_EVALUATION_VALUE,
+  ALERT_REASON,
+  ALERT_URL,
+} from '@kbn/rule-data-utils';
+
+import { ALERT_TITLE } from './fields';
 import { ComparatorFns } from '../../../common';
 import {
   addMessages,
@@ -121,6 +116,7 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
         ...(isGroupAgg ? { group: alertId } : {}),
       }),
     } as EsQueryRuleActionContext;
+
     const actionContext = addMessages({
       ruleName: name,
       baseContext: baseActiveContext,
@@ -137,15 +133,10 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
       context: actionContext,
       payload: {
         [ALERT_URL]: actionContext.link,
-        [ALERT_HITS_COUNT]: actionContext.hits.length,
-        [ALERT_HITS_HITS]: actionContext.hits,
-        [ALERT_MESSAGE]: actionContext.message,
+        [ALERT_REASON]: actionContext.message,
         [ALERT_TITLE]: actionContext.title,
-        [ALERT_CONDITIONS]: actionContext.conditions,
-        [ALERT_CONDITIONS_MET_VALUE]: actionContext.value,
-        [ALERT_STATE_LAST_TIMESTAMP]: latestTimestamp,
-        [ALERT_STATE_DATE_START]: dateStart,
-        [ALERT_STATE_DATE_END]: dateEnd,
+        [ALERT_EVALUATION_CONDITIONS]: actionContext.conditions,
+        [ALERT_EVALUATION_VALUE]: actionContext.value,
       },
     });
     if (!isGroupAgg) {

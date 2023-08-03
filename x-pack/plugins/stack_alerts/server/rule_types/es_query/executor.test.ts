@@ -260,19 +260,15 @@ describe('es_query executor', () => {
           latestTimestamp: undefined,
         },
         payload: {
-          'kibana.alert.conditions': 'Number of matching documents is greater than or equal to 200',
-          'kibana.alert.conditions_met_value': 491,
-          'kibana.alert.hits.count': 0,
-          'kibana.alert.hits.hits': [],
-          'kibana.alert.message': `rule 'test-rule-name' is active:
+          'kibana.alert.evaluation.conditions':
+            'Number of matching documents is greater than or equal to 200',
+          'kibana.alert.evaluation.value': 491,
+          'kibana.alert.reason': `rule 'test-rule-name' is active:
 
 - Value: 491
 - Conditions Met: Number of matching documents is greater than or equal to 200 over 5m
 - Timestamp: ${new Date(mockNow).toISOString()}
 - Link: https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id`,
-          'kibana.alert.state.date_end': new Date(mockNow).toISOString(),
-          'kibana.alert.state.date_start': new Date(mockNow).toISOString(),
-          'kibana.alert.state.latest_timestamp': undefined,
           'kibana.alert.title': "rule 'test-rule-name' matched query",
           'kibana.alert.url':
             'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
@@ -346,20 +342,15 @@ describe('es_query executor', () => {
           latestTimestamp: undefined,
         },
         payload: {
-          'kibana.alert.conditions':
+          'kibana.alert.evaluation.conditions':
             'Number of matching documents for group "host-1" is greater than or equal to 200',
-          'kibana.alert.conditions_met_value': 291,
-          'kibana.alert.hits.count': 0,
-          'kibana.alert.hits.hits': [],
-          'kibana.alert.message': `rule 'test-rule-name' is active:
+          'kibana.alert.evaluation.value': 291,
+          'kibana.alert.reason': `rule 'test-rule-name' is active:
 
 - Value: 291
 - Conditions Met: Number of matching documents for group "host-1" is greater than or equal to 200 over 5m
 - Timestamp: ${new Date(mockNow).toISOString()}
 - Link: https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id`,
-          'kibana.alert.state.date_end': new Date(mockNow).toISOString(),
-          'kibana.alert.state.date_start': new Date(mockNow).toISOString(),
-          'kibana.alert.state.latest_timestamp': undefined,
           'kibana.alert.title': "rule 'test-rule-name' matched query for group host-1",
           'kibana.alert.url':
             'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
@@ -389,20 +380,15 @@ describe('es_query executor', () => {
           latestTimestamp: undefined,
         },
         payload: {
-          'kibana.alert.conditions':
+          'kibana.alert.evaluation.conditions':
             'Number of matching documents for group "host-2" is greater than or equal to 200',
-          'kibana.alert.conditions_met_value': 477,
-          'kibana.alert.hits.count': 0,
-          'kibana.alert.hits.hits': [],
-          'kibana.alert.message': `rule 'test-rule-name' is active:
+          'kibana.alert.evaluation.value': 477,
+          'kibana.alert.reason': `rule 'test-rule-name' is active:
 
 - Value: 477
 - Conditions Met: Number of matching documents for group "host-2" is greater than or equal to 200 over 5m
 - Timestamp: ${new Date(mockNow).toISOString()}
 - Link: https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id`,
-          'kibana.alert.state.date_end': new Date(mockNow).toISOString(),
-          'kibana.alert.state.date_start': new Date(mockNow).toISOString(),
-          'kibana.alert.state.latest_timestamp': undefined,
           'kibana.alert.title': "rule 'test-rule-name' matched query for group host-2",
           'kibana.alert.url':
             'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
@@ -432,20 +418,15 @@ describe('es_query executor', () => {
           latestTimestamp: undefined,
         },
         payload: {
-          'kibana.alert.conditions':
+          'kibana.alert.evaluation.conditions':
             'Number of matching documents for group "host-3" is greater than or equal to 200',
-          'kibana.alert.conditions_met_value': 999,
-          'kibana.alert.hits.count': 0,
-          'kibana.alert.hits.hits': [],
-          'kibana.alert.message': `rule 'test-rule-name' is active:
+          'kibana.alert.evaluation.value': 999,
+          'kibana.alert.reason': `rule 'test-rule-name' is active:
 
 - Value: 999
 - Conditions Met: Number of matching documents for group \"host-3\" is greater than or equal to 200 over 5m
 - Timestamp: ${new Date(mockNow).toISOString()}
 - Link: https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id`,
-          'kibana.alert.state.date_end': new Date(mockNow).toISOString(),
-          'kibana.alert.state.date_start': new Date(mockNow).toISOString(),
-          'kibana.alert.state.latest_timestamp': undefined,
           'kibana.alert.title': "rule 'test-rule-name' matched query for group host-3",
           'kibana.alert.url':
             'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',

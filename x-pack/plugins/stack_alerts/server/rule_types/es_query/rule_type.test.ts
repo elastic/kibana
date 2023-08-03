@@ -23,16 +23,13 @@ import { OnlyEsQueryRuleParams, OnlySearchSourceRuleParams } from './types';
 import { searchSourceInstanceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import { Comparator } from '../../../common/comparator_types';
 import { DEFAULT_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common/rules_settings';
-import { ALERT_URL } from '@kbn/rule-data-utils';
 import {
-  ALERT_CONDITIONS,
-  ALERT_CONDITIONS_MET_VALUE,
-  ALERT_HITS_COUNT,
-  ALERT_HITS_HITS,
-  ALERT_MESSAGE,
-  ALERT_STATE_LAST_TIMESTAMP,
-  ALERT_TITLE,
-} from './fields';
+  ALERT_EVALUATION_CONDITIONS,
+  ALERT_EVALUATION_VALUE,
+  ALERT_REASON,
+  ALERT_URL,
+} from '@kbn/rule-data-utils';
+import { ALERT_TITLE } from './fields';
 
 const logger = loggingSystemMock.create().get();
 const coreSetup = coreMock.createSetup();
@@ -705,13 +702,11 @@ describe('ruleType', () => {
           id: 'query matched',
           payload: expect.objectContaining({
             [ALERT_URL]: expect.any(String),
-            [ALERT_HITS_COUNT]: 3,
-            [ALERT_HITS_HITS]: [{}, {}, {}],
-            [ALERT_MESSAGE]: expect.any(String),
+            [ALERT_REASON]: expect.any(String),
             [ALERT_TITLE]: "rule 'rule-name' matched query",
-            [ALERT_CONDITIONS]: 'Number of matching documents is greater than or equal to 3',
-            [ALERT_CONDITIONS_MET_VALUE]: 3,
-            [ALERT_STATE_LAST_TIMESTAMP]: new Date(mockNow).toISOString(),
+            [ALERT_EVALUATION_CONDITIONS]:
+              'Number of matching documents is greater than or equal to 3',
+            [ALERT_EVALUATION_VALUE]: 3,
           }),
         })
       );
