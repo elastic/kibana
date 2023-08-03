@@ -12,7 +12,7 @@ import {
   SingleCaseMetricsResponseRt,
   CasesMetricsResponseRt,
   CaseMetricsFeature,
-} from './case';
+} from './v1';
 
 describe('Metrics case', () => {
   describe('SingleCaseMetricsRequestRt', () => {
