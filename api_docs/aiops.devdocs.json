@@ -858,8 +858,40 @@
       }
     ],
     "enums": [],
-    "misc": [],
-    "objects": []
+    "misc": [
+      {
+        "parentPluginId": "aiops",
+        "id": "def-public.LogRateAnalysisType",
+        "type": "Type",
+        "tags": [],
+        "label": "LogRateAnalysisType",
+        "description": [],
+        "signature": [
+          "\"spike\" | \"dip\""
+        ],
+        "path": "x-pack/plugins/aiops/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "aiops",
+        "id": "def-public.LOG_RATE_ANALYSIS_TYPE",
+        "type": "Object",
+        "tags": [],
+        "label": "LOG_RATE_ANALYSIS_TYPE",
+        "description": [],
+        "signature": [
+          "{ readonly SPIKE: \"spike\"; readonly DIP: \"dip\"; }"
+        ],
+        "path": "x-pack/plugins/aiops/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ]
   },
   "server": {
     "classes": [],
