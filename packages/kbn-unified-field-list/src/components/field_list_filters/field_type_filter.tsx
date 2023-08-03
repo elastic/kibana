@@ -47,7 +47,8 @@ const popoverTitleStyle = css`
   padding: ${EQUAL_HEIGHT_OFFSET}px 0;
 `;
 const filterButtonStyle = css`
-  .euiFilterButton__textShift {
+  &,
+  & .euiFilterButton__textShift {
     min-width: 0;
     line-height: 1;
   }
@@ -105,7 +106,12 @@ export function FieldTypeFilter<T extends FieldListItem = DataViewField>({
   const itemStyle = useMemo(
     () => css`
       font-size: ${euiTheme.size.m};
-      padding: ${euiTheme.size.s} ${euiTheme.size.m};
+
+      // Specificity needed to override Sass styles
+      // EUI TODO: Remove this selector once EuiContextMenu has been converted to Emotion
+      &.euiContextMenuItem {
+        padding: ${euiTheme.size.s} ${euiTheme.size.m};
+      }
 
       & + & {
         border-top: 1px solid ${euiTheme.colors.lightestShade};
@@ -149,7 +155,7 @@ export function FieldTypeFilter<T extends FieldListItem = DataViewField>({
   return (
     <EuiPopover
       id="unifiedFieldTypeFilter"
-      panelClassName="euiFilterGroup__popoverPanel"
+      panelProps={{ css: { width: euiTheme.base * 18 } }}
       panelPaddingSize="none"
       anchorPosition="rightUp"
       display="block"

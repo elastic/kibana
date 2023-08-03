@@ -6,6 +6,7 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
+import type { IKibanaResponse } from '@kbn/core/server';
 
 import type { GetRuleHealthResponse } from '../../../../../../../common/api/detection_engine/rule_monitoring';
 import {
@@ -36,9 +37,10 @@ export const getRuleHealthRoute = (router: SecuritySolutionPluginRouter) => {
       },
       options: {
         tags: ['access:securitySolution'],
+        access: 'public', // must be public to enable "system" users to collect data
       },
     },
-    async (context, request, response) => {
+    async (context, request, response): Promise<IKibanaResponse<GetRuleHealthResponse>> => {
       const siemResponse = buildSiemResponse(response);
 
       try {

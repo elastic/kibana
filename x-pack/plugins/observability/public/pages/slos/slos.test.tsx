@@ -69,6 +69,20 @@ const mockKibana = () => {
     services: {
       application: { navigateToUrl: mockNavigate },
       charts: chartPluginMock.createSetupContract(),
+      data: {
+        dataViews: {
+          find: jest.fn().mockReturnValue([]),
+          get: jest.fn().mockReturnValue([]),
+        },
+      },
+      dataViews: {
+        create: jest.fn().mockResolvedValue(42),
+      },
+      docLinks: {
+        links: {
+          query: {},
+        },
+      },
       http: {
         basePath: {
           prepend: (url: string) => url,
@@ -87,12 +101,20 @@ const mockKibana = () => {
           },
         },
       },
+      storage: {
+        get: () => {},
+      },
       triggersActionsUi: { getAddRuleFlyout: mockGetAddRuleFlyout },
       uiSettings: {
         get: (settings: string) => {
           if (settings === 'dateFormat') return 'YYYY-MM-DD';
           if (settings === 'format:percent:defaultPattern') return '0.0%';
           return '';
+        },
+      },
+      unifiedSearch: {
+        autocomplete: {
+          hasQuerySuggestions: () => {},
         },
       },
     },

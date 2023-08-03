@@ -13,7 +13,6 @@ import { KibanaAssetType } from '../../../types';
 import type { AssetType, Installable, Installation } from '../../../types';
 
 export { bulkInstallPackages, isBulkInstallError } from './bulk_install_packages';
-export type { SearchParams } from './get';
 export {
   getCategories,
   getFile,
