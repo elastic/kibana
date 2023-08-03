@@ -17,7 +17,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { HistoricalSummaryResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { ALL_VALUE, HistoricalSummaryResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import { useQueryClient } from '@tanstack/react-query';
 import React, { useState } from 'react';
@@ -85,7 +85,7 @@ export function SloListItem({
       basePath.prepend(
         paths.observability.sloDetails(
           slo.id,
-          slo.groupBy !== '*' && slo.instanceId ? slo.instanceId : undefined
+          slo.groupBy !== ALL_VALUE && slo.instanceId ? slo.instanceId : undefined
         )
       )
     );

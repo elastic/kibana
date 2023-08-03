@@ -9,6 +9,7 @@ import { ElasticsearchClientMock, elasticsearchServiceMock } from '@kbn/core/ser
 import { createSLO } from './fixtures/slo';
 import { GetSLOInstances, SLORepository } from '.';
 import { createSLORepositoryMock } from './mocks';
+import { ALL_VALUE } from '@kbn/slo-schema';
 
 describe('Get SLO Instances', () => {
   let repositoryMock: jest.Mocked<SLORepository>;
@@ -20,14 +21,14 @@ describe('Get SLO Instances', () => {
   });
 
   it("returns an empty response when the SLO has no 'groupBy' defined", async () => {
-    const slo = createSLO({ groupBy: '*' });
+    const slo = createSLO({ groupBy: ALL_VALUE });
     repositoryMock.findById.mockResolvedValue(slo);
 
     const service = new GetSLOInstances(repositoryMock, esClientMock);
 
     const result = await service.execute(slo.id);
 
-    expect(result).toEqual({ groupBy: '*', instances: [] });
+    expect(result).toEqual({ groupBy: ALL_VALUE, instances: [] });
   });
 
   it("returns all instances of a SLO defined with a 'groupBy'", async () => {

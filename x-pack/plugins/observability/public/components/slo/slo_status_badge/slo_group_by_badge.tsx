@@ -7,7 +7,7 @@
 
 import { EuiBadge, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { euiLightVars } from '@kbn/ui-theme';
 import React from 'react';
 
@@ -16,7 +16,7 @@ export interface Props {
 }
 
 export function SloGroupByBadge({ slo }: Props) {
-  if (!slo.groupBy || slo.groupBy === '*') {
+  if (!slo.groupBy || slo.groupBy === ALL_VALUE) {
     return null;
   }
 

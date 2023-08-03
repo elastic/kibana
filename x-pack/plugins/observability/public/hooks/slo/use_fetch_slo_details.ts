@@ -11,7 +11,7 @@ import {
   RefetchQueryFilters,
   useQuery,
 } from '@tanstack/react-query';
-import { GetSLOResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { ALL_VALUE, GetSLOResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { useKibana } from '../../utils/kibana_react';
 import { sloKeys } from './query_key_factory';
 
@@ -47,7 +47,7 @@ export function useFetchSloDetails({
         try {
           const response = await http.get<GetSLOResponse>(`/api/observability/slos/${sloId}`, {
             query: {
-              ...(!!instanceId && instanceId !== '*' && { instanceId }),
+              ...(!!instanceId && instanceId !== ALL_VALUE && { instanceId }),
             },
             signal,
           });

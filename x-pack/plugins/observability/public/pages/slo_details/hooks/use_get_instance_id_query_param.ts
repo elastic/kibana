@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ALL_VALUE } from '@kbn/slo-schema';
 import { useLocation } from 'react-router-dom';
 
 export const INSTANCE_SEARCH_PARAM = 'instanceId';
@@ -15,5 +16,5 @@ export function useGetInstanceIdQueryParam(): string | undefined {
 
   const instanceId = searchParams.get(INSTANCE_SEARCH_PARAM);
 
-  return !!instanceId && instanceId !== '*' ? instanceId : undefined;
+  return !!instanceId && instanceId !== ALL_VALUE ? instanceId : undefined;
 }
