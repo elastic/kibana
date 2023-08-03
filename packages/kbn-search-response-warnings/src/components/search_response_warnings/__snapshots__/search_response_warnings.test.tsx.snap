@@ -336,32 +336,24 @@ exports[`SearchResponseWarnings renders "empty_prompt" correctly 1`] = `
     class="euiEmptyPrompt__main"
   >
     <div
+      class="euiEmptyPrompt__icon"
+    >
+      <span
+        color="warning"
+        data-euiicon-type="warning"
+      />
+    </div>
+    <div
       class="euiEmptyPrompt__content"
     >
       <div
         class="euiEmptyPrompt__contentInner"
       >
-        <div
-          class="euiFlexGroup euiTitle emotion-euiFlexGroup-s-flexStart-center-row-euiTitle-m"
+        <h2
+          class="euiTitle emotion-euiTitle-m"
         >
-          <div
-            class="euiFlexItem emotion-euiFlexItem-growZero"
-          >
-            <span
-              color="warning"
-              data-euiicon-type="warning"
-            />
-          </div>
-          <div
-            class="euiFlexItem emotion-euiFlexItem-grow-1"
-          >
-            <h2
-              css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
-            >
-              No results found
-            </h2>
-          </div>
-        </div>
+          No results found
+        </h2>
         <div
           class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
         />
