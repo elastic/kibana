@@ -49,7 +49,12 @@ export const checkResults = () => {
 export const typeInECSFieldInput = (text: string, index = 0) =>
   cy.getBySel('ECS-field-input').eq(index).type(text);
 export const typeInOsqueryFieldInput = (text: string, index = 0) =>
-  cy.react('OsqueryColumnFieldComponent').eq(index).react('ResultComboBox').type(text);
+  cy
+    .react('OsqueryColumnFieldComponent')
+    .eq(index)
+    .within(() => {
+      cy.getBySel('comboBoxInput').type(text);
+    });
 
 export const getOsqueryFieldTypes = (value: 'Osquery value' | 'Static value', index = 0) => {
   cy.getBySel(`osquery-result-type-select-${index}`).click();

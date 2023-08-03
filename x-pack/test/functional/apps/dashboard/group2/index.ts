@@ -13,6 +13,7 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./_async_dashboard'));
     loadTestFile(require.resolve('./dashboard_lens_by_value'));
     loadTestFile(require.resolve('./dashboard_maps_by_value'));
+    loadTestFile(require.resolve('./dashboard_search_by_value'));
     loadTestFile(require.resolve('./panel_titles'));
     loadTestFile(require.resolve('./panel_time_range'));
 
