@@ -157,12 +157,19 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
                   message: 'something important happened!',
                 },
               },
+              {
+                id: 'system-connector-test.system-action',
+                group: 'default',
+                params: {},
+              },
             ],
           })
         );
 
       expect(response.status).to.eql(200);
+
       objectRemover.add(Spaces.space1.id, response.body.id, 'rule', 'alerting');
+
       expect(response.body).to.eql({
         id: response.body.id,
         name: 'abc',
@@ -183,6 +190,13 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
               message: 'something important happened!',
             },
             uuid: response.body.actions[1].uuid,
+          },
+          {
+            id: 'system-connector-test.system-action',
+            group: 'default',
+            connector_type_id: 'test.system-action',
+            params: {},
+            uuid: response.body.actions[2].uuid,
           },
         ],
         enabled: true,
@@ -238,9 +252,17 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
           },
           uuid: rawActions[1].uuid,
         },
+        {
+          actionRef: 'system_action:system-connector-test.system-action',
+          actionTypeId: 'test.system-action',
+          group: 'default',
+          params: {},
+          uuid: rawActions[2].uuid,
+        },
       ]);
 
       const references = esResponse.body._source?.references ?? [];
+
       expect(references.length).to.eql(1);
       expect(references[0]).to.eql({
         id: createdAction.id,
