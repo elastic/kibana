@@ -119,3 +119,10 @@ export const setPolicyToEventCollectionOnly = (policy: PolicyConfig): PolicyConf
 
   return updatedPolicy;
 };
+
+/**
+ * Checks to see if the provided policy is set to Event Collection only
+ */
+export const isPolicySetToEventCollectionOnly = (policy: PolicyConfig): boolean => {
+  // FIXME:PT implement
+};
