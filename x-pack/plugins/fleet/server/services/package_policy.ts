@@ -117,6 +117,7 @@ import {
   extractAndUpdateSecrets,
   extractAndWriteSecrets,
   deleteSecretsIfNotReferenced as deleteSecrets,
+  isSecretStorageEnabled,
 } from './secrets';
 
 export type InputsOverride = Partial<NewPackagePolicyInput> & {
@@ -243,8 +244,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       }
       validatePackagePolicyOrThrow(enrichedPackagePolicy, pkgInfo);
 
-      const { secretsStorage: secretsStorageEnabled } = appContextService.getExperimentalFeatures();
-      if (secretsStorageEnabled) {
+      if (await isSecretStorageEnabled(esClient, soClient)) {
         const secretsRes = await extractAndWriteSecrets({
           packagePolicy: { ...enrichedPackagePolicy, inputs },
           packageInfo: pkgInfo,
@@ -747,8 +747,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       });
       validatePackagePolicyOrThrow(packagePolicy, pkgInfo);
 
-      const { secretsStorage: secretsStorageEnabled } = appContextService.getExperimentalFeatures();
-      if (secretsStorageEnabled) {
+      if (await isSecretStorageEnabled(esClient, soClient)) {
         const secretsRes = await extractAndUpdateSecrets({
           oldPackagePolicy,
           packagePolicyUpdate: { ...restOfPackagePolicy, inputs },
@@ -914,9 +913,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           );
           if (pkgInfo) {
             validatePackagePolicyOrThrow(packagePolicy, pkgInfo);
-            const { secretsStorage: secretsStorageEnabled } =
-              appContextService.getExperimentalFeatures();
-            if (secretsStorageEnabled) {
+            if (await isSecretStorageEnabled(esClient, soClient)) {
               const secretsRes = await extractAndUpdateSecrets({
                 oldPackagePolicy,
                 packagePolicyUpdate: { ...restOfPackagePolicy, inputs },
