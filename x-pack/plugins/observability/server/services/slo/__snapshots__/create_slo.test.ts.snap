@@ -18,6 +18,7 @@ Array [
       "slo": Object {
         "budgetingMethod": "occurrences",
         "description": "irrelevant",
+        "groupBy": "*",
         "id": "unique-id",
         "indicator": Object {
           "type": "sli.apm.transactionErrorRate",

@@ -35,8 +35,10 @@ import type {
   GetCaseUsersResponse,
   UserActionFindRequestTypes,
   UserActionFindResponse,
+  CaseMetricsFeature,
+  CasesMetricsResponse,
+  SingleCaseMetricsResponse,
 } from '../types/api';
-import type { CaseMetricsFeature, CasesMetricsResponse, SingleCaseMetricsResponse } from '../api';
 
 type DeepRequired<T> = { [K in keyof T]: DeepRequired<T[K]> } & Required<T>;
 
