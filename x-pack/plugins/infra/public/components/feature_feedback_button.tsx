@@ -12,7 +12,7 @@ import { useKibanaContextForPlugin } from '../hooks/use_kibana';
 
 const KIBANA_VERSION_QUERY_PARAM = 'entry.548460210';
 
-const getSurveyFeedbackURL = (kibanaVersion?: string, featureUrl: string) => {
+const getSurveyFeedbackURL = (featureUrl: string, kibanaVersion?: string) => {
   const url = new URL(featureUrl);
   if (kibanaVersion) {
     url.searchParams.append(KIBANA_VERSION_QUERY_PARAM, kibanaVersion);
@@ -35,7 +35,7 @@ export const FeatureFeedbackButton = ({
   } = useKibanaContextForPlugin();
   return (
     <EuiButton
-      href={getSurveyFeedbackURL(kibanaVersion, featureUrl)}
+      href={getSurveyFeedbackURL(featureUrl, kibanaVersion)}
       target="_blank"
       color="warning"
       iconType="editorComment"
