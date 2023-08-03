@@ -94,13 +94,15 @@ const createFlowRoute = createObservabilityOnboardingServerRoute({
       name
     );
 
+    const generatedState =
+      type === 'systemLogs' ? { namespace: 'default' } : state;
     const savedObjectsClient = coreStart.savedObjects.getScopedClient(request);
 
     const { id } = await saveObservabilityOnboardingFlow({
       savedObjectsClient,
       observabilityOnboardingState: {
         type,
-        state: state as ObservabilityOnboardingFlow['state'],
+        state: generatedState as ObservabilityOnboardingFlow['state'],
         progress: {},
       },
     });
