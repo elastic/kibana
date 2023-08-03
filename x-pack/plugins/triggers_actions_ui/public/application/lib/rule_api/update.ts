@@ -20,12 +20,16 @@ const rewriteBodyRequest: RewriteResponseCase<RuleUpdatesBody> = ({ actions, ...
   ...res,
   actions: actions.map((action) => {
     if (isSystemAction(action)) {
-      return action;
+      const { actionTypeId, ...restSystemAction } = action;
+
+      return { ...restSystemAction, connector_type_id: actionTypeId };
     }
 
-    const { group, id, params, frequency, uuid, alertsFilter } = action;
+    const { group, id, params, frequency, uuid, alertsFilter, actionTypeId, ...restAction } =
+      action;
 
     return {
+      ...restAction,
       group,
       id,
       params,
@@ -35,6 +39,7 @@ const rewriteBodyRequest: RewriteResponseCase<RuleUpdatesBody> = ({ actions, ...
         summary: frequency!.summary,
       },
       alerts_filter: alertsFilter,
+      connector_type_id: actionTypeId,
       ...(uuid && { uuid }),
     };
   }),

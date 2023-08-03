@@ -71,7 +71,11 @@ function removePreconfiguredConnectorsFromReferences(
     // the corresponding action so it directly references the preconfigured connector id
     connectorReferences.forEach((connectorRef: SavedObjectReference) => {
       // Look for the corresponding entry in the actions array
-      const correspondingAction = getCorrespondingAction(actions, connectorRef.name);
+      const correspondingAction = getCorrespondingAction(
+        actions as RawDefaultAction[],
+        connectorRef.name
+      );
+
       if (correspondingAction) {
         if (isPreconfigured(connectorRef.id)) {
           updatedActions.push({

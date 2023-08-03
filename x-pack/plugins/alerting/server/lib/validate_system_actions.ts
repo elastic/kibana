@@ -22,6 +22,10 @@ export const validateSystemActions = async ({
   connectorAdapterRegistry,
   systemActions,
 }: Params) => {
+  if (systemActions.length === 0) {
+    return;
+  }
+
   /**
    * When updating a rule the actions do not contain
    * the actionTypeId. We need to getBulk using the

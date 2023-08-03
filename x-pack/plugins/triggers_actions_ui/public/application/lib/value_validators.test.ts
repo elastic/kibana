@@ -11,9 +11,11 @@ import {
   isValidUrl,
   getConnectorWithInvalidatedFields,
   getRuleWithInvalidatedFields,
+  validateActionFilterQuery,
 } from './value_validators';
 import { v4 as uuidv4 } from 'uuid';
 import { Rule, IErrorObject, UserConfiguredActionConnector } from '../../types';
+import { RuleActionTypes, RuleSystemAction } from '@kbn/alerting-plugin/common';
 
 describe('throwIfAbsent', () => {
   test('throws if value is absent', () => {
@@ -439,5 +441,19 @@ describe('getRuleWithInvalidatedFields', () => {
     getRuleWithInvalidatedFields(rule, paramsErrors, baseAlertErrors, actionsErrors);
     expect((rule.actions[0].params as any).incident.field.name).toBeNull();
     expect((rule.actions[1].params as any).incident.field.name).toEqual('myIncident');
+  });
+});
+
+describe('validateActionFilterQuery', () => {
+  const systemAction: RuleSystemAction = {
+    id: 'system-action',
+    uuid: '123',
+    actionTypeId: '.test',
+    params: {},
+    type: RuleActionTypes.SYSTEM,
+  };
+
+  test('return null if system action', () => {
+    expect(validateActionFilterQuery(systemAction)).toBe(null);
   });
 });

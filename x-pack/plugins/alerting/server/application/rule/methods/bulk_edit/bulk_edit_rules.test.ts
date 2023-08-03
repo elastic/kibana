@@ -908,11 +908,11 @@ describe('bulkEdit()', () => {
       });
     });
 
-    it('should throw if the action is not a system action', async () => {
+    it('should validate system actions correctly', async () => {
       const action: RuleSystemAction = {
-        id: '1',
+        id: 'system_action-id',
         uuid: '123',
-        params: { 'not-exist': 'test' },
+        params: {},
         actionTypeId: '.test',
         type: RuleActionTypes.SYSTEM,
       };
@@ -933,7 +933,7 @@ describe('bulkEdit()', () => {
       expect(result).toEqual({
         errors: [
           {
-            message: 'Action 1 of type .test is not a system action',
+            message: 'Action system_action-id is not a system action',
             rule: { id: '1', name: 'my rule name' },
           },
         ],
@@ -941,41 +941,10 @@ describe('bulkEdit()', () => {
         skipped: [],
         total: 1,
       });
-    });
 
-    it('should throw if the system actions params are invalid', async () => {
-      const action: RuleSystemAction = {
-        id: '1',
-        uuid: '123',
-        params: { 'not-exist': 'test' },
-        actionTypeId: '.test',
-        type: RuleActionTypes.SYSTEM,
-      };
-
-      actionsClient.isSystemAction.mockReturnValue(true);
-
-      const result = await rulesClient.bulkEdit({
-        filter: '',
-        operations: [
-          {
-            field: 'actions',
-            operation: 'add',
-            value: [action],
-          },
-        ],
-      });
-
-      expect(result).toEqual({
-        errors: [
-          {
-            message:
-              'Invalid system action params. System action type: .test - [foo]: expected value of type [string] but got [undefined]',
-            rule: { id: '1', name: 'my rule name' },
-          },
-        ],
-        rules: [],
-        skipped: [],
-        total: 1,
+      expect(actionsClient.getBulk).toBeCalledWith({
+        ids: ['system_action-id'],
+        throwIfSystemAction: false,
       });
     });
   });

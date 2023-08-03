@@ -41,6 +41,18 @@ describe('validateSystemActions', () => {
     ]);
   });
 
+  it('should not validate with empty system actions', async () => {
+    const res = await validateSystemActions({
+      connectorAdapterRegistry: registry,
+      systemActions: [],
+      actionsClient,
+    });
+
+    expect(res).toBe(undefined);
+    expect(actionsClient.getBulk).not.toBeCalled();
+    expect(actionsClient.isSystemAction).not.toBeCalled();
+  });
+
   it('should throw an error if the action is not a system action even if it is declared as one', async () => {
     const systemActions: RuleSystemAction[] = [
       {

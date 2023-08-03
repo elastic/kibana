@@ -30,12 +30,15 @@ const rewriteBodyRequest: RewriteResponseCase<RuleCreateBody> = ({
   rule_type_id: ruleTypeId,
   actions: actions.map((action) => {
     if (isSystemAction(action)) {
-      return action;
+      const { actionTypeId, ...restSystemAction } = action;
+
+      return { ...restSystemAction, connector_type_id: actionTypeId };
     }
 
-    const { group, id, params, frequency, alertsFilter } = action;
+    const { group, id, params, frequency, alertsFilter, actionTypeId, ...restAction } = action;
 
     return {
+      ...restAction,
       group,
       id,
       params,
@@ -45,6 +48,7 @@ const rewriteBodyRequest: RewriteResponseCase<RuleCreateBody> = ({
         summary: frequency!.summary,
       },
       alerts_filter: alertsFilter,
+      connector_type_id: actionTypeId,
     };
   }),
 });
@@ -59,5 +63,6 @@ export async function createRule({
   const res = await http.post<AsApiContract<Rule>>(`${BASE_ALERTING_API_PATH}/rule`, {
     body: JSON.stringify(rewriteBodyRequest(rule)),
   });
+
   return transformRule(res);
 }

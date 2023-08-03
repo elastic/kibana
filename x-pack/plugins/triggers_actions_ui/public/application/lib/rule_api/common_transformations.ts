@@ -11,25 +11,38 @@ import { isSystemAction } from '../is_system_action';
 
 const transformAction: RewriteRequestCase<RuleAction> = (action) => {
   if (isSystemAction(action)) {
-    return { ...action, actionTypeId: action.connector_type_id };
+    const { connector_type_id: actionTypeId, ...restSystemAction } = action;
+    return { ...restSystemAction, actionTypeId };
   }
 
+  const {
+    uuid,
+    group,
+    id,
+    connector_type_id: actionTypeId,
+    params,
+    frequency,
+    alerts_filter: alertsFilter,
+    ...restAction
+  } = action;
+
   return {
-    group: action.group,
-    id: action.id,
-    params: action.params,
-    actionTypeId: action.connector_type_id,
-    ...(action.frequency
+    ...restAction,
+    group,
+    id,
+    params,
+    actionTypeId,
+    ...(frequency
       ? {
           frequency: {
-            summary: action.frequency.summary,
-            notifyWhen: action.frequency.notify_when,
-            throttle: action.frequency.throttle,
+            summary: frequency.summary,
+            notifyWhen: frequency.notify_when,
+            throttle: frequency.throttle,
           },
         }
       : {}),
-    ...(action.alerts_filter ? { alertsFilter: action.alerts_filter } : {}),
-    ...(action.uuid && { uuid: action.uuid }),
+    ...(alertsFilter ? { alertsFilter } : {}),
+    ...(uuid && { uuid }),
   };
 };
 

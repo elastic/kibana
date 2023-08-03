@@ -81,7 +81,6 @@ describe('getAlertFromRaw()', () => {
   };
 
   const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
-    getSummarizedAlerts: jest.fn(),
     id: 'test',
     name: 'My test rule',
     actionGroups: [{ id: 'default', name: 'Default' }, RecoveredActionGroup],

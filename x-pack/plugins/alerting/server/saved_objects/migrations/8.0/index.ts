@@ -89,7 +89,7 @@ function fixInventoryThresholdGroupId(
     } = doc;
 
     const updatedActions = actions
-      ? actions.map<RawDefaultAction>((action) => {
+      ? actions.map((action) => {
           // Wrong spelling
           if ((action as RawDefaultAction).group === 'metrics.invenotry_threshold.fired') {
             return {

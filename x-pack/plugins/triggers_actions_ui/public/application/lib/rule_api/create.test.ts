@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { RuleActionTypes } from '@kbn/alerting-plugin/common';
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { RuleUpdates } from '../../../types';
 import { createRule } from './create';
@@ -47,12 +48,20 @@ describe('createRule', () => {
             summary: false,
           },
         },
+        {
+          id: 'system-action',
+          uuid: '123',
+          connector_type_id: '.test',
+          params: {},
+          type: RuleActionTypes.SYSTEM,
+        },
       ],
       scheduled_task_id: '1',
       execution_status: { status: 'pending', last_execution_date: '2021-04-01T21:33:13.250Z' },
       create_at: '2021-04-01T21:33:13.247Z',
       updated_at: '2021-04-01T21:33:13.247Z',
     };
+
     const ruleToCreate: Omit<
       RuleUpdates,
       'createdBy' | 'updatedBy' | 'muteAll' | 'mutedInstanceIds' | 'executionStatus'
@@ -91,15 +100,28 @@ describe('createRule', () => {
             summary: false,
           },
         },
+        {
+          id: 'system-action',
+          uuid: '123',
+          actionTypeId: '.test',
+          params: {},
+          type: RuleActionTypes.SYSTEM,
+        },
       ],
       createdAt: new Date('2021-04-01T21:33:13.247Z'),
       updatedAt: new Date('2021-04-01T21:33:13.247Z'),
       apiKeyOwner: '',
       revision: 0,
     };
+
     http.post.mockResolvedValueOnce(resolvedValue);
 
     const result = await createRule({ http, rule: ruleToCreate });
+
+    expect(http.post).toHaveBeenCalledWith('/api/alerting/rule', {
+      body: '{"params":{"aggType":"count","termSize":5,"thresholdComparator":">","timeWindowSize":5,"timeWindowUnit":"m","groupBy":"all","threshold":[1000],"index":[".kibana"],"timeField":"alert.executionStatus.lastExecutionDate"},"consumer":"alerts","schedule":{"interval":"1m"},"tags":[],"name":"test","enabled":true,"throttle":null,"createdAt":"2021-04-01T21:33:13.247Z","updatedAt":"2021-04-01T21:33:13.247Z","apiKeyOwner":"","revision":0,"rule_type_id":".index-threshold","actions":[{"group":"threshold met","id":"83d4d860-9316-11eb-a145-93ab369a4461","params":{"level":"info","message":"Rule \'{{rule.name}}\' is active for group \'{{context.group}}\':\\n\\n- Value: {{context.value}}\\n- Conditions Met: {{context.conditions}} over {{rule.params.timeWindowSize}}{{rule.params.timeWindowUnit}}\\n- Timestamp: {{context.date}}"},"frequency":{"notify_when":"onActionGroupChange","throttle":null,"summary":false},"connector_type_id":".server-log"},{"id":"system-action","uuid":"123","params":{},"type":"system","connector_type_id":".test"}]}',
+    });
+
     expect(result).toEqual({
       actions: [
         {
@@ -115,6 +137,13 @@ describe('createRule', () => {
             throttle: null,
             summary: false,
           },
+        },
+        {
+          id: 'system-action',
+          uuid: '123',
+          actionTypeId: '.test',
+          params: {},
+          type: RuleActionTypes.SYSTEM,
         },
       ],
       ruleTypeId: '.index-threshold',

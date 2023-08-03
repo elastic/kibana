@@ -93,7 +93,7 @@ export const isSummaryActionThrottled = ({
 
 export const generateActionHash = (action?: RuleAction) => {
   if (action != null && isSystemAction(action)) {
-    return `${action?.actionTypeId || 'no-action-type-id'}:summary`;
+    return `system-action:${action?.actionTypeId || 'no-action-type-id'}:summary`;
   }
 
   return `${action?.actionTypeId || 'no-action-type-id'}:${

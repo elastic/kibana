@@ -71,7 +71,7 @@ export interface RulesClientContext {
   readonly fieldsToExcludeFromPublicApi: Array<keyof SanitizedRule>;
   readonly isAuthenticationTypeAPIKey: () => boolean;
   readonly getAuthenticationAPIKey: (name: string) => CreateAPIKeyResult;
-  connectorAdapterRegistry: ConnectorAdapterRegistry;
+  readonly connectorAdapterRegistry: ConnectorAdapterRegistry;
 }
 
 export type NormalizedAlertAction = DistributiveOmit<RuleAction, 'actionTypeId'>;

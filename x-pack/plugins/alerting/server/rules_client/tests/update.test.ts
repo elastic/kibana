@@ -950,10 +950,40 @@ describe('update()', () => {
     expect(actionsClient.isSystemAction).toHaveBeenCalledTimes(3);
   });
 
-  test('should throw if it is not a system action even if it is defined as one', async () => {
+  test('should validate system actions correctly', async () => {
     actionsClient.isSystemAction.mockReset();
     // Needed for validateSystemActions
     actionsClient.isSystemAction.mockReturnValueOnce(false);
+
+    actionsClient.getBulk.mockResolvedValue([
+      {
+        id: '1',
+        actionTypeId: 'test',
+        config: {
+          from: 'me@me.com',
+          hasAuth: false,
+          host: 'hello',
+          port: 22,
+          secure: null,
+          service: null,
+        },
+        isMissingSecrets: false,
+        name: 'email connector',
+        isPreconfigured: false,
+        isDeprecated: false,
+        isSystemAction: false,
+      },
+      {
+        id: 'system_action-id',
+        actionTypeId: 'test-system',
+        config: {},
+        isMissingSecrets: false,
+        name: 'system action connector',
+        isPreconfigured: false,
+        isDeprecated: false,
+        isSystemAction: true,
+      },
+    ]);
 
     await expect(() =>
       rulesClient.update({
@@ -969,6 +999,13 @@ describe('update()', () => {
           notifyWhen: 'onActiveAlert',
           actions: [
             {
+              group: 'default',
+              id: '1',
+              params: {
+                foo: true,
+              },
+            },
+            {
               id: 'system_action-id',
               params: {
                 myNewParam: 'test',
@@ -980,8 +1017,13 @@ describe('update()', () => {
         },
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Action system_action-id of type undefined is not a system action"`
+      `"Action system_action-id is not a system action"`
     );
+
+    expect(actionsClient.getBulk).toBeCalledWith({
+      ids: ['system_action-id'],
+      throwIfSystemAction: false,
+    });
   });
 
   test('should call useSavedObjectReferences.extractReferences and useSavedObjectReferences.injectReferences if defined for rule type', async () => {
@@ -1096,7 +1138,7 @@ describe('update()', () => {
             actionTypeId: 'test',
             group: 'default',
             params: { foo: true },
-            uuid: '107',
+            uuid: '108',
           },
         ],
         alertTypeId: 'myType',
@@ -1276,7 +1318,7 @@ describe('update()', () => {
             "params": Object {
               "foo": true,
             },
-            "uuid": "108",
+            "uuid": "109",
           },
         ],
         "alertTypeId": "myType",
@@ -1429,7 +1471,7 @@ describe('update()', () => {
             "params": Object {
               "foo": true,
             },
-            "uuid": "109",
+            "uuid": "110",
           },
         ],
         "alertTypeId": "myType",
@@ -2453,7 +2495,7 @@ describe('update()', () => {
             params: {
               foo: true,
             },
-            uuid: '145',
+            uuid: '146',
           },
         ],
         alertTypeId: 'myType',
@@ -3004,7 +3046,7 @@ describe('update()', () => {
             frequency: { notifyWhen: 'onActiveAlert', summary: false, throttle: null },
             group: 'default',
             params: { foo: true },
-            uuid: '152',
+            uuid: '153',
           },
         ],
         alertTypeId: 'myType',
@@ -3208,7 +3250,7 @@ describe('update()', () => {
             "params": Object {
               "foo": true,
             },
-            "uuid": "153",
+            "uuid": "154",
           },
         ],
         "alertTypeId": "myType",
