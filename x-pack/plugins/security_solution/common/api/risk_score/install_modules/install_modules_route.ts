@@ -6,12 +6,13 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { RiskScoreEntity } from '../../../search_strategy';
 
-export const ReadConsoleRequestSchema = {
-  params: schema.object({
-    console_id: schema.oneOf([
-      schema.literal('enable_host_risk_score'),
-      schema.literal('enable_user_risk_score'),
+export const onboardingRiskScoreRequestBody = {
+  body: schema.object({
+    riskScoreEntity: schema.oneOf([
+      schema.literal(RiskScoreEntity.host),
+      schema.literal(RiskScoreEntity.user),
     ]),
   }),
 };

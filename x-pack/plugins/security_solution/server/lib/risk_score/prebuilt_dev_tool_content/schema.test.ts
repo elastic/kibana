@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ReadConsoleRequestSchema } from './schema';
+import { ReadConsoleRequestSchema } from '../../../../common/api/risk_score/read_prebuilt_dev_tool_content/read_prebuilt_dev_tool_content_route';
 
 describe('ReadConsoleRequestSchema', () => {
   it('should throw error', () => {
