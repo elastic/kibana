@@ -2356,7 +2356,7 @@
     "unifiedDocViewer.docViews.table.ignored.singleValueLabel": "被忽略的值",
     "unifiedDocViewer.docViews.table.pinFieldAriaLabel": "固定字段",
     "unifiedDocViewer.docViews.table.pinFieldLabel": "固定字段",
-    "unifiedDocViewer.docViews.table.scoreSortWarningTooltip": "要检索 _score 的值，必须按其筛选。",
+    "discover.docViews.table.scoreSortWarningTooltip": "要检索 _score 的值，必须按其筛选。",
     "unifiedDocViewer.docViews.table.tableTitle": "表",
     "unifiedDocViewer.docViews.table.toggleColumnInTableButtonAriaLabel": "在表中切换列",
     "unifiedDocViewer.docViews.table.toggleColumnInTableButtonTooltip": "在表中切换列",
