@@ -54,7 +54,9 @@ export const RangeSliderControl: FC = () => {
     [rangeSlider.dispatch]
   );
 
-  // derive field formatter from fieldSpec and dataViewId
+  /**
+   * derive field formatter from fieldSpec and dataViewId
+   */
   useEffect(() => {
     (async () => {
       if (!dataViewId || !fieldSpec) return;
@@ -68,11 +70,13 @@ export const RangeSliderControl: FC = () => {
     })();
   }, [fieldSpec, dataViewId, getDataViewById]);
 
+  /**
+   * This will recalculate the displayed min/max of the range slider to allow for selections smaller
+   * than the `min` and larger than the `max`
+   */
   const recalculateMinMax = useCallback(
-    (selectedValue) => {
+    (selectedValue: [string, string]) => {
       if (min === undefined || max === undefined) return;
-
-      console.log('recalculateMinMax');
       const [selectedMin, selectedMax] = [
         selectedValue[0] === '' ? min : parseFloat(selectedValue[0]),
         selectedValue[1] === '' ? max : parseFloat(selectedValue[1]),
@@ -85,7 +89,7 @@ export const RangeSliderControl: FC = () => {
 
   /**
    * The following `useEffect` ensures that the changes to min, max, and value that come from the embeddable (for example,
-   * from the `reset` button on the dashboard or via chaining) are reflected in the displayed value
+   * from the `reset` button on the dashboard or via chaining) are reflected in the displayed value, min, and max
    */
   useEffect(() => {
     setDisplayedValue(value ?? ['', '']);
@@ -148,13 +152,15 @@ export const RangeSliderControl: FC = () => {
         id={id}
         fullWidth
         showTicks
-        // isDraggable
         ticks={ticks}
         levels={levels}
         min={displayedMin}
         max={displayedMax}
         isLoading={isLoading}
         onMouseUp={() => {
+          // when the pin is dropped (on mouse up), cancel any pending debounced changes and force the change
+          // in value to happen instantly (which, in turn, will re-calculate the min/max for the slider due to
+          // the `useEffect` above.
           debouncedOnChange.cancel();
           rangeSlider.dispatch.setSelectedRange(displayedValue);
         }}
