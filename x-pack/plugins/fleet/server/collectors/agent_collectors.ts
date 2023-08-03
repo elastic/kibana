@@ -71,7 +71,8 @@ export interface AgentData {
   };
   agents_per_policy: number[];
   agents_per_os: Array<{
-    os: string;
+    name: string;
+    version: string;
     count: number;
   }>;
 }
@@ -123,7 +124,13 @@ export const getAgentData = async (
             terms: { field: 'policy_id' },
           },
           os: {
-            terms: { field: 'local_metadata.os.full.keyword' },
+            multi_terms: {
+              terms: [{ 
+                field: 'local_metadata.os.name.keyword' 
+              }, {
+                field: 'local_metadata.os.version.keyword' 
+              }],
+            },
           },
         },
       },
@@ -175,7 +182,8 @@ export const getAgentData = async (
     );
 
     const agentsPerOS = ((response?.aggregations?.os as any).buckets ?? []).map((bucket: any) => ({
-      os: bucket.key,
+      name: bucket.key[0],
+      version: bucket.key[1],
       count: bucket.doc_count,
     }));
 
