@@ -178,6 +178,7 @@ export const links: LinkItem = {
       path: ENTITY_ANALYTICS_MANAGEMENT_PATH,
       skipUrlState: true,
       hideTimeline: true,
+      capabilities: [`'entity-analytics'`],
       experimentalKey: 'riskScoringRoutesEnabled',
     },
     {
@@ -219,8 +220,7 @@ export const getManagementFilteredLinks = async (
     fleetAuthz && currentUser
       ? calculateEndpointAuthz(licenseService, fleetAuthz, currentUser.roles)
       : getEndpointAuthzInitialState();
-  const hasEntityAnalyticsCapability = useHasSecurityCapability('entity-analytics');
-  const isPlatinumOrTrialLicense = useMlCapabilities().isPlatinumOrTrialLicense;
+  const isPlatinumOrTrialLicense = licenseService.isPlatinumPlus() || licenseService.isTrial();
 
   const showHostIsolationExceptions =
     canAccessHostIsolationExceptions || // access host isolation exceptions is a paid feature, always show the link.
@@ -259,7 +259,7 @@ export const getManagementFilteredLinks = async (
     linksToExclude.push(SecurityPageName.blocklist);
   }
 
-  if (!(hasEntityAnalyticsCapability && isPlatinumOrTrialLicense)) {
+  if (!isPlatinumOrTrialLicense) {
     linksToExclude.push(SecurityPageName.entityAnalyticsManagement);
   }
 
