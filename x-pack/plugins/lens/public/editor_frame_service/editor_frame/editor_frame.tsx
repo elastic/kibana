@@ -185,6 +185,7 @@ export function EditorFrame(props: EditorFrameProps) {
                 frame={framePublicAPI}
                 getUserMessages={props.getUserMessages}
                 nowProvider={props.plugins.data.nowProvider}
+                core={props.core}
               />
             </ErrorBoundary>
           )

@@ -35,6 +35,7 @@ import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 import type { Datatable } from '@kbn/expressions-plugin/public';
 import { DropIllustration } from '@kbn/chart-icons';
 import { DragDrop, useDragDropContext, DragDropIdentifier } from '@kbn/dom-drag-drop';
+import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { trackUiCounterEvents } from '../../../lens_ui_telemetry';
 import { getSearchWarningMessages } from '../../../utils';
 import {
@@ -197,10 +198,10 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
 
   const onRender$ = useCallback(() => {
     if (renderDeps.current) {
-      console.log(
-        'visualization took to render after data received',
-        performance.now() - dataReceivedTime.current
-      );
+      reportPerformanceMetricEvent(core.analytics, {
+        eventName: 'lensVisualizationRenderTime',
+        duration: performance.now() - dataReceivedTime.current,
+      });
       const datasourceEvents = Object.values(renderDeps.current.datasourceMap).reduce<string[]>(
         (acc, datasource) => {
           if (!renderDeps.current!.datasourceStates[datasource.id]) return [];
@@ -231,7 +232,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
 
       trackUiCounterEvents(events);
     }
-  }, []);
+  }, [core.analytics]);
 
   const removeSearchWarningMessagesRef = useRef<() => void>();
   const removeExpressionBuildErrorsRef = useRef<() => void>();
@@ -240,7 +241,10 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     (_data: unknown, adapters?: Partial<DefaultInspectorAdapters>) => {
       if (renderDeps.current) {
         dataReceivedTime.current = performance.now();
-        console.log('data took to arrive', dataReceivedTime.current - initialRenderTime.current);
+        reportPerformanceMetricEvent(core.analytics, {
+          eventName: 'lensTimeToData',
+          duration: dataReceivedTime.current - initialRenderTime.current,
+        });
 
         const [defaultLayerId] = Object.keys(renderDeps.current.datasourceLayers);
         const datasource = Object.values(renderDeps.current.datasourceMap)[0];
@@ -283,7 +287,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
         }
       }
     },
-    [addUserMessages, dispatchLens, plugins.data.search]
+    [addUserMessages, dispatchLens, plugins.data.search, core.analytics]
   );
 
   const shouldApplyExpression = autoApplyEnabled || !initialRenderComplete.current || triggerApply;

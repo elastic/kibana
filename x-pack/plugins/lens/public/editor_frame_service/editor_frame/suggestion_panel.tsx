@@ -10,6 +10,7 @@ import './suggestion_panel.scss';
 import { camelCase, pick } from 'lodash';
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { CoreStart } from '@kbn/core/public';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import {
   EuiIcon,
@@ -31,9 +32,8 @@ import {
   ReactExpressionRendererProps,
   ReactExpressionRendererType,
 } from '@kbn/expressions-plugin/public';
-import fastIsEqual from 'fast-deep-equal';
-import { useWhatChanged } from '@simbathesailor/use-what-changed';
 import { css } from '@emotion/react';
+import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS } from '../../utils';
 import {
   Datasource,
@@ -104,6 +104,7 @@ export interface SuggestionPanelProps {
   frame: FramePublicAPI;
   getUserMessages: UserMessagesGetter;
   nowProvider: DataPublicPluginStart['nowProvider'];
+  core: CoreStart;
 }
 
 const PreviewRenderer = ({
@@ -230,6 +231,7 @@ export function SuggestionPanel({
   ExpressionRenderer: ExpressionRendererComponent,
   getUserMessages,
   nowProvider,
+  core,
 }: SuggestionPanelProps) {
   const dispatchLens = useLensDispatch();
   const activeDatasourceId = useLensSelector(selectActiveDatasourceId);
@@ -374,9 +376,12 @@ export function SuggestionPanel({
   const onSuggestionRender = useCallback(() => {
     suggestionsRendered.current++;
     if (suggestionsRendered.current === totalSuggestions) {
-      console.log('suggestions finished rendering', performance.now() - startTime.current);
+      reportPerformanceMetricEvent(core.analytics, {
+        eventName: 'lensSuggestionsRenderTime',
+        duration: performance.now() - startTime.current,
+      });
     }
-  }, [totalSuggestions]);
+  }, [totalSuggestions, core.analytics]);
 
   const rollbackToCurrentVisualization = useCallback(() => {
     if (lastSelectedSuggestion !== -1) {
