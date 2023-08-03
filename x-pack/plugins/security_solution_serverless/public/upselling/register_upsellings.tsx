@@ -12,6 +12,7 @@ import type {
   UpsellingSectionId,
 } from '@kbn/security-solution-plugin/public';
 import React, { lazy } from 'react';
+import { OsqueryResponseActionsUpsellingSectionlLazy } from './pages/osquery_automated_response_actions';
 import type { SecurityProductTypes } from '../../common/config';
 import { getProductAppFeatures } from '../../common/pli/pli_features';
 
@@ -81,4 +82,13 @@ export const upsellingSections: UpsellingSections = [
   //   pli: AppFeatureKey.advancedInsights,
   //   component: () => <GenericUpsellingSectionLazy requiredPLI={AppFeatureKey.advancedInsights} />,
   // },
+  {
+    id: 'osquery_automated_response_actions',
+    pli: AppFeatureKey.osqueryAutomatedResponseActions,
+    component: () => (
+      <OsqueryResponseActionsUpsellingSectionlLazy
+        requiredPLI={AppFeatureKey.osqueryAutomatedResponseActions}
+      />
+    ),
+  },
 ];
