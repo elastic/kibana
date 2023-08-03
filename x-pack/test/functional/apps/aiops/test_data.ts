@@ -5,10 +5,13 @@
  * 2.0.
  */
 
+import { LOG_RATE_ANALYSIS_TYPE, type LogRateAnalysisType } from '@kbn/aiops-utils';
+
 import type { TestData } from './types';
 
 export const kibanaLogsDataViewTestData: TestData = {
   suiteTitle: 'kibana sample data logs',
+  analysisType: LOG_RATE_ANALYSIS_TYPE.SPIKE,
   dataGenerator: 'kibana_sample_data_logs',
   isSavedSearch: false,
   sourceIndexOrSavedSearch: 'kibana_sample_data_logs',
@@ -114,6 +117,7 @@ export const kibanaLogsDataViewTestData: TestData = {
 
 export const farequoteDataViewTestData: TestData = {
   suiteTitle: 'farequote with spike',
+  analysisType: LOG_RATE_ANALYSIS_TYPE.SPIKE,
   dataGenerator: 'farequote_with_spike',
   isSavedSearch: false,
   sourceIndexOrSavedSearch: 'ft_farequote',
@@ -131,6 +135,7 @@ export const farequoteDataViewTestData: TestData = {
 
 export const farequoteDataViewTestDataWithQuery: TestData = {
   suiteTitle: 'farequote with spike',
+  analysisType: LOG_RATE_ANALYSIS_TYPE.SPIKE,
   dataGenerator: 'farequote_with_spike',
   isSavedSearch: false,
   sourceIndexOrSavedSearch: 'ft_farequote',
@@ -171,8 +176,9 @@ const DAY_MS = 86400000;
 const DEVIATION_TS = REFERENCE_TS - DAY_MS * 2;
 const BASELINE_TS = DEVIATION_TS - DAY_MS * 1;
 
-const getArtificialLogDataViewTestData = (analysisType: 'spike' | 'dip'): TestData => ({
+const getArtificialLogDataViewTestData = (analysisType: LogRateAnalysisType): TestData => ({
   suiteTitle: `artificial logs with ${analysisType}`,
+  analysisType,
   dataGenerator: `artificial_logs_with_${analysisType}`,
   isSavedSearch: false,
   sourceIndexOrSavedSearch: `artificial_logs_with_${analysisType}`,
@@ -230,6 +236,6 @@ export const logRateAnalysisTestData: TestData[] = [
   kibanaLogsDataViewTestData,
   farequoteDataViewTestData,
   farequoteDataViewTestDataWithQuery,
-  getArtificialLogDataViewTestData('spike'),
-  getArtificialLogDataViewTestData('dip'),
+  getArtificialLogDataViewTestData(LOG_RATE_ANALYSIS_TYPE.SPIKE),
+  getArtificialLogDataViewTestData(LOG_RATE_ANALYSIS_TYPE.DIP),
 ];

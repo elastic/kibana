@@ -7,6 +7,8 @@
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
+import { LOG_RATE_ANALYSIS_TYPE } from '@kbn/aiops-utils';
+
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export interface GeneratedDoc {
@@ -81,7 +83,9 @@ function getArtificialLogsWithDeviation(index: string, deviationType: string) {
           response_code: responseCode,
           url,
           version: 'v1.0.0',
-          '@timestamp': (deviationType === 'spike' ? DEVIATION_TS : BASELINE_TS) + tsOffset,
+          '@timestamp':
+            (deviationType === LOG_RATE_ANALYSIS_TYPE.SPIKE ? DEVIATION_TS : BASELINE_TS) +
+            tsOffset,
           should_ignore_this_field: 'should_ignore_this_field',
         });
       });
@@ -104,7 +108,9 @@ function getArtificialLogsWithDeviation(index: string, deviationType: string) {
           response_code: '500',
           url,
           version: 'v1.0.0',
-          '@timestamp': (deviationType === 'spike' ? DEVIATION_TS : BASELINE_TS) + tsOffset,
+          '@timestamp':
+            (deviationType === LOG_RATE_ANALYSIS_TYPE.SPIKE ? DEVIATION_TS : BASELINE_TS) +
+            tsOffset,
           should_ignore_this_field: 'should_ignore_this_field',
         });
       });
@@ -187,7 +193,7 @@ export function LogRateAnalysisDataGeneratorProvider({ getService }: FtrProvider
             refresh: 'wait_for',
             body: getArtificialLogsWithDeviation(
               dataGenerator,
-              dataGenerator.split('_').pop() ?? 'spike'
+              dataGenerator.split('_').pop() ?? LOG_RATE_ANALYSIS_TYPE.SPIKE
             ),
           });
           break;
