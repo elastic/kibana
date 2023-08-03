@@ -91,11 +91,13 @@ export const cli = () => {
       let files = retrieveIntegrations(spec ? [spec] : cypressConfigFile?.e2e?.specPattern);
 
       if (argv.changedSpecsOnly) {
-        files = findChangedFiles('main', false).filter(
-          minimatch.filter(path.join(basePath, cypressConfigFile?.e2e?.specPattern), {
-            matchBase: true,
-          })
-        );
+        files = findChangedFiles('main', false)
+          .filter(
+            minimatch.filter(path.join(basePath, cypressConfigFile?.e2e?.specPattern), {
+              matchBase: true,
+            })
+          )
+          .map((filePath: string) => filePath.replace(basePath, '.'));
       }
 
       if (!files?.length) {
