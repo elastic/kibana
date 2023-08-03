@@ -54,7 +54,15 @@ export const DiscoverContainerInternal = ({
   const [initialized, setInitialized] = useState(false);
 
   useEffect(() => {
-    getDiscoverServices().then((svcs) => setDiscoverServices(svcs));
+    let ignore = false;
+    getDiscoverServices().then((svcs) => {
+      if (!ignore) {
+        setDiscoverServices(svcs);
+      }
+    });
+    return () => {
+      ignore = true;
+    };
   }, [getDiscoverServices]);
 
   useEffect(() => {
