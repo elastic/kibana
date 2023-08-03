@@ -52,16 +52,22 @@ export const TableActions = ({
 
   // Filters pair
   const filtersPairDisabled = !fieldMapping || !fieldMapping.filterable || ignoredValue;
-  const filterAddLabel = i18n.translate('unifiedDocViewer.docViews.table.filterForValueButtonTooltip', {
-    defaultMessage: 'Filter for value',
-  });
+  const filterAddLabel = i18n.translate(
+    'unifiedDocViewer.docViews.table.filterForValueButtonTooltip',
+    {
+      defaultMessage: 'Filter for value',
+    }
+  );
   const filterAddAriaLabel = i18n.translate(
     'unifiedDocViewer.docViews.table.filterForValueButtonAriaLabel',
     { defaultMessage: 'Filter for value' }
   );
-  const filterOutLabel = i18n.translate('unifiedDocViewer.docViews.table.filterOutValueButtonTooltip', {
-    defaultMessage: 'Filter out value',
-  });
+  const filterOutLabel = i18n.translate(
+    'unifiedDocViewer.docViews.table.filterOutValueButtonTooltip',
+    {
+      defaultMessage: 'Filter out value',
+    }
+  );
   const filterOutAriaLabel = i18n.translate(
     'unifiedDocViewer.docViews.table.filterOutValueButtonAriaLabel',
     { defaultMessage: 'Filter out value' }
@@ -92,9 +98,12 @@ export const TableActions = ({
               defaultMessage: 'Unable to filter for presence of scripted fields',
             }
           )
-        : i18n.translate('unifiedDocViewer.docViews.table.unableToFilterForPresenceOfMetaFieldsTooltip', {
-            defaultMessage: 'Unable to filter for presence of meta fields',
-          }))) ||
+        : i18n.translate(
+            'unifiedDocViewer.docViews.table.unableToFilterForPresenceOfMetaFieldsTooltip',
+            {
+              defaultMessage: 'Unable to filter for presence of meta fields',
+            }
+          ))) ||
     undefined;
 
   // Toggle columns
@@ -109,13 +118,19 @@ export const TableActions = ({
 
   // Pinned
   const pinnedLabel = pinned
-    ? i18n.translate('unifiedDocViewer.docViews.table.unpinFieldLabel', { defaultMessage: 'Unpin field' })
-    : i18n.translate('unifiedDocViewer.docViews.table.pinFieldLabel', { defaultMessage: 'Pin field' });
+    ? i18n.translate('unifiedDocViewer.docViews.table.unpinFieldLabel', {
+        defaultMessage: 'Unpin field',
+      })
+    : i18n.translate('unifiedDocViewer.docViews.table.pinFieldLabel', {
+        defaultMessage: 'Pin field',
+      });
   const pinnedAriaLabel = pinned
     ? i18n.translate('unifiedDocViewer.docViews.table.unpinFieldAriaLabel', {
         defaultMessage: 'Unpin field',
       })
-    : i18n.translate('unifiedDocViewer.docViews.table.pinFieldAriaLabel', { defaultMessage: 'Pin field' });
+    : i18n.translate('unifiedDocViewer.docViews.table.pinFieldAriaLabel', {
+        defaultMessage: 'Pin field',
+      });
   const pinnedIconType = pinned ? 'pinFilled' : 'pin';
 
   const toggleOpenPopover = useCallback(() => setIsOpen((current) => !current), []);

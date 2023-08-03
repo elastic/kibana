@@ -32,9 +32,12 @@ export function DocViewTableRowBtnFilterRemove({ onClick, disabled = false }: Pr
   return (
     <EuiToolTip content={tooltipContent}>
       <EuiButtonIcon
-        aria-label={i18n.translate('unifiedDocViewer.docViews.table.filterOutValueButtonAriaLabel', {
-          defaultMessage: 'Filter out value',
-        })}
+        aria-label={i18n.translate(
+          'unifiedDocViewer.docViews.table.filterOutValueButtonAriaLabel',
+          {
+            defaultMessage: 'Filter out value',
+          }
+        )}
         className="kbnDocViewer__actionButton"
         data-test-subj="removeInclusiveFilterButton"
         disabled={disabled}
