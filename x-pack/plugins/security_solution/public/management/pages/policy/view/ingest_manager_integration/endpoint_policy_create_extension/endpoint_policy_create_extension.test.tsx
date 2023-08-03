@@ -220,5 +220,46 @@ describe('Onboarding Component new section', () => {
         },
       });
     });
+
+    it('should still be able to select cloud configuration', () => {
+      render();
+      userEvent.selectOptions(screen.getByTestId('selectIntegrationTypeId'), ['cloud']);
+
+      expect(onChange).toHaveBeenLastCalledWith({
+        isValid: true,
+        updatedPolicy: {
+          enabled: true,
+          id: 'someid',
+          inputs: [
+            {
+              config: {
+                _config: {
+                  value: {
+                    eventFilters: {
+                      nonInteractiveSession: true,
+                    },
+                    type: 'cloud',
+                  },
+                },
+              },
+              enabled: true,
+              streams: [
+                {
+                  data_stream: {
+                    dataset: 'someDataset',
+                    type: 'someType',
+                  },
+                  enabled: true,
+                },
+              ],
+              type: 'someType',
+            },
+          ],
+          name: 'someName',
+          namespace: 'someNamespace',
+          policy_id: 'somePolicyid',
+        },
+      });
+    });
   });
 });

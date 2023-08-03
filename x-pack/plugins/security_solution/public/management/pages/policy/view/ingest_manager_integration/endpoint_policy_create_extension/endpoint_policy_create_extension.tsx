@@ -81,7 +81,10 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
     useEffect(() => {
       // When ONLY Data collection is allowed, the updates to the policy are handled by the
       // EndpointEventCollectionPreset component
-      if (!showEndpointEventCollectionOnlyPreset) {
+      if (
+        !showEndpointEventCollectionOnlyPreset ||
+        (showEndpointEventCollectionOnlyPreset && selectedEnvironment === 'cloud')
+      ) {
         if (newPolicy.inputs.length === 0) {
           onChange({
             isValid: false,
