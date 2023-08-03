@@ -28,7 +28,7 @@ import {
 } from '../../../types';
 import { RequestHandler } from './request_handler';
 import { JobParamsPDFDeprecated } from '@kbn/reporting-export-types-deprecated/printable_pdf';
-import { TaskPayloadPDFV2 } from '@kbn/reporting-export-types-pdf/types';
+import { TaskPayloadPDFV2 } from '@kbn/reporting-common/types';
 
 jest.mock('@kbn/reporting-common/crypto', () => ({
   cryptoFactory: () => ({

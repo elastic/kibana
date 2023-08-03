@@ -8,13 +8,13 @@
 import { setupServer } from '@kbn/core-test-helpers-test-utils';
 import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
+import { PdfExportType } from '@kbn/reporting-export-types-pdf';
 import rison from '@kbn/rison';
 import { IUsageCounter } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counter';
 import { BehaviorSubject } from 'rxjs';
 import supertest from 'supertest';
 import { ReportingCore } from '../../../..';
 import { INTERNAL_ROUTES } from '../../../../../common/constants';
-import { PdfExportType } from '../../../../export_types/printable_pdf_v2';
 import { ReportingStore } from '../../../../lib';
 import { ExportTypesRegistry } from '../../../../lib/export_types_registry';
 import { Report } from '../../../../lib/store';

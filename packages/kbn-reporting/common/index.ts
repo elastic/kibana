@@ -38,4 +38,5 @@ export {
   getFullUrls,
   getAbsoluteUrlFactory,
   generatePngObservable,
+  buildKibanaPath
 } from './export_type_helpers';

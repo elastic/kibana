@@ -16,4 +16,4 @@ export { getFullUrls } from './get_full_urls';
 export { getAbsoluteUrlFactory } from './get_absolute_url';
 export { generatePngObservable } from './generate_png';
 export { generatePdfObservableV2 } from './generate_pdf_v2';
-
+export { buildKibanaPath } from './v2/build_kibana_path'
