@@ -7,8 +7,6 @@
 
 import { median } from 'd3-array';
 
-import type { DocumentCountChartPoint } from '@kbn/aiops-components';
-
 import type { WindowParameters } from './window_parameters';
 
 /**
@@ -27,6 +25,20 @@ export type LogRateAnalysisType =
   typeof LOG_RATE_ANALYSIS_TYPE[keyof typeof LOG_RATE_ANALYSIS_TYPE];
 
 /**
+ * Log rate histogram item
+ */
+export interface LogRateHistogramItem {
+  /**
+   * Time of bucket
+   */
+  time: number | string;
+  /**
+   * Number of doc count for that time bucket
+   */
+  value: number;
+}
+
+/**
  * Identify the log rate analysis type based on the baseline/deviation
  * time ranges on a given log rate histogram.
  *
@@ -35,15 +47,15 @@ export type LogRateAnalysisType =
  * @returns The log rate analysis type.
  */
 export function getLogRateAnalysisType(
-  documentCountChartPoints: DocumentCountChartPoint[],
+  logRateHistogram: LogRateHistogramItem[],
   { baselineMin, baselineMax, deviationMin, deviationMax }: WindowParameters
 ): LogRateAnalysisType {
-  const baselineItems = documentCountChartPoints.filter(
+  const baselineItems = logRateHistogram.filter(
     (d) => d.time >= baselineMin && d.time < baselineMax
   );
   const baselineMedian = median(baselineItems.map((d) => d.value)) ?? 0;
 
-  const deviationItems = documentCountChartPoints.filter(
+  const deviationItems = logRateHistogram.filter(
     (d) => d.time >= deviationMin && d.time < deviationMax
   );
   const deviationMedian = median(deviationItems.map((d) => d.value)) ?? 0;

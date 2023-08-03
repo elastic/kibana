@@ -14,4 +14,5 @@ export {
   getLogRateAnalysisType,
   LOG_RATE_ANALYSIS_TYPE,
   type LogRateAnalysisType,
+  type LogRateHistogramItem,
 } from './src/log_rate_analysis_type';

@@ -13,8 +13,8 @@ import {
   RectAnnotationSpec,
 } from '@elastic/charts/dist/chart_types/xy_chart/utils/specs';
 
-import type { LogRateAnalysisType, WindowParameters } from '@kbn/aiops-utils';
-import { DocumentCountChart, type DocumentCountChartPoint } from '@kbn/aiops-components';
+import type { LogRateAnalysisType, LogRateHistogramItem, WindowParameters } from '@kbn/aiops-utils';
+import { DocumentCountChart } from '@kbn/aiops-components';
 
 import { useAiopsAppContext } from '../../../hooks/use_aiops_app_context';
 import { DocumentCountStats } from '../../../get_document_stats';
@@ -82,14 +82,14 @@ export const DocumentCountContent: FC<DocumentCountContentProps> = ({
     ) : null;
   }
 
-  const chartPoints: DocumentCountChartPoint[] = Object.entries(documentCountStats.buckets).map(
+  const chartPoints: LogRateHistogramItem[] = Object.entries(documentCountStats.buckets).map(
     ([time, value]) => ({
       time: +time,
       value,
     })
   );
 
-  let chartPointsSplit: DocumentCountChartPoint[] | undefined;
+  let chartPointsSplit: LogRateHistogramItem[] | undefined;
   if (documentCountStatsSplit?.buckets !== undefined) {
     chartPointsSplit = Object.entries(documentCountStatsSplit?.buckets).map(([time, value]) => ({
       time: +time,

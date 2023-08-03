@@ -15,7 +15,6 @@
   ],
   "kbn_references": [
     "@kbn/ml-is-populated-object",
-    "@kbn/aiops-components",
   ],
   "exclude": [
     "target/**/*",

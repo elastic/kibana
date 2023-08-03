@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import type { DocumentCountChartPoint } from '@kbn/aiops-components';
-
-import { getLogRateAnalysisType } from './log_rate_analysis_type';
+import { getLogRateAnalysisType, type LogRateHistogramItem } from './log_rate_analysis_type';
 
 describe('getLogRateAnalysisType', () => {
-  const documentCountChartPointsMock: DocumentCountChartPoint[] = [
+  const LogRateHistogramMock: LogRateHistogramItem[] = [
     { time: 0, value: 10 },
     { time: 1, value: 10 },
     { time: 2, value: 10 },
@@ -25,7 +23,7 @@ describe('getLogRateAnalysisType', () => {
 
   test('returns "spike" for the given parameters', () => {
     expect(
-      getLogRateAnalysisType(documentCountChartPointsMock, {
+      getLogRateAnalysisType(LogRateHistogramMock, {
         baselineMin: 4,
         baselineMax: 6,
         deviationMin: 7,
@@ -36,7 +34,7 @@ describe('getLogRateAnalysisType', () => {
 
   test('returns "dip" for the given parameters', () => {
     expect(
-      getLogRateAnalysisType(documentCountChartPointsMock, {
+      getLogRateAnalysisType(LogRateHistogramMock, {
         baselineMin: 0,
         baselineMax: 2,
         deviationMin: 3,
@@ -47,7 +45,7 @@ describe('getLogRateAnalysisType', () => {
 
   test('falls back to "spike" if both time range have the same median', () => {
     expect(
-      getLogRateAnalysisType(documentCountChartPointsMock, {
+      getLogRateAnalysisType(LogRateHistogramMock, {
         baselineMin: 0,
         baselineMax: 2,
         deviationMin: 4,

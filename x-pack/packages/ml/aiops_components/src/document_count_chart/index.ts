@@ -6,8 +6,4 @@
  */
 
 export { DocumentCountChart } from './document_count_chart';
-export type {
-  BrushSettings,
-  DocumentCountChartPoint,
-  DocumentCountChartProps,
-} from './document_count_chart';
+export type { BrushSettings, DocumentCountChartProps } from './document_count_chart';

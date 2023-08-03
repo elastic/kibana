@@ -32,6 +32,7 @@ import {
   getSnappedWindowParameters,
   getWindowParameters,
   type LogRateAnalysisType,
+  type LogRateHistogramItem,
   type WindowParameters,
 } from '@kbn/aiops-utils';
 import { MULTILAYER_TIME_AXIS_STYLE } from '@kbn/charts-plugin/common';
@@ -54,20 +55,6 @@ declare global {
 interface TimeFilterRange {
   from: number;
   to: number;
-}
-
-/**
- * Datum for the bar chart
- */
-export interface DocumentCountChartPoint {
-  /**
-   * Time of bucket
-   */
-  time: number | string;
-  /**
-   * Number of doc count for that time bucket
-   */
-  value: number;
 }
 
 /**
@@ -114,9 +101,9 @@ export interface DocumentCountChartProps {
   /** Optional width */
   width?: number;
   /** Data chart points */
-  chartPoints: DocumentCountChartPoint[];
+  chartPoints: LogRateHistogramItem[];
   /** Data chart points split */
-  chartPointsSplit?: DocumentCountChartPoint[];
+  chartPointsSplit?: LogRateHistogramItem[];
   /** Start time range for the chart */
   timeRangeEarliest: number;
   /** Ending time range for the chart */
