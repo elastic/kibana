@@ -11,7 +11,8 @@ import { getProductTypeByPLI } from '../hooks/use_product_type_by_pli';
 
 export const UPGRADE_INVESTIGATION_GUIDE = (productTypeRequired: string) =>
   i18n.translate('xpack.securitySolutionServerless.markdown.insight.upsell', {
-    defaultMessage: 'Upgrade to {productTypeRequired} make use of insights in investigation guides',
+    defaultMessage:
+      'Upgrade to {productTypeRequired} to make use of insights in investigation guides',
     values: {
       productTypeRequired,
     },
