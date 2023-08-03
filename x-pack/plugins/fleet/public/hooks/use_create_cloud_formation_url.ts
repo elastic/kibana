@@ -17,7 +17,7 @@ type AwsAccountType = 'single_account' | 'organization_account';
 const CLOUDBEAT_AWS = 'cloudbeat/cis_aws';
 
 const getAwsAccountType = (input?: PackagePolicyInput): AwsAccountType | undefined =>
-  input?.streams[0].vars?.['aws.account_type'].value;
+  input?.streams[0].vars?.['aws.account_type']?.value;
 
 export const useCreateCloudFormationUrl = ({
   enrollmentAPIKey,
