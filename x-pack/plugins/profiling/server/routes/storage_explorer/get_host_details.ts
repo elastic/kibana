@@ -7,14 +7,14 @@
 
 import { kqlQuery } from '@kbn/observability-plugin/server';
 import { ProfilingESField } from '../../../common/elasticsearch';
-import { computeBucketWidthFromTimeRangeAndBucketCount } from '../../../common/histogram';
-import { StorageExplorerHostBreakdownSizeChart } from '../../../common/storage_explorer';
 import { ProfilingESClient } from '../../utils/create_profiling_es_client';
 import { getEstimatedSizeForDocumentsInIndex } from './get_daily_data_generation.size';
 import { getTotalIndicesStats } from './get_indices_stats';
 import { getProfilingHostsDetailsById } from './get_profiling_hosts_details_by_id';
 
-export async function getHostBreakdownSizeTimeseries({
+const perIndexInitialSize = { events: 0, metrics: 0 };
+
+export async function getHostDetails({
   client,
   timeFrom,
   timeTo,
@@ -24,12 +24,10 @@ export async function getHostBreakdownSizeTimeseries({
   timeFrom: number;
   timeTo: number;
   kuery: string;
-}): Promise<StorageExplorerHostBreakdownSizeChart[]> {
-  const bucketWidth = computeBucketWidthFromTimeRangeAndBucketCount(timeFrom, timeTo, 50);
-
+}) {
   const [{ indices: allIndicesStats }, response] = await Promise.all([
     getTotalIndicesStats({ client: client.getEsClient() }),
-    client.search('profiling_events_metrics_size', {
+    client.search('profiling_events_metrics_details', {
       index: ['profiling-events-*', 'profiling-metrics'],
       body: {
         query: {
@@ -52,10 +50,9 @@ export async function getHostBreakdownSizeTimeseries({
               field: ProfilingESField.HostID,
             },
             aggs: {
-              storageTimeseries: {
-                date_histogram: {
-                  field: ProfilingESField.Timestamp,
-                  fixed_interval: `${bucketWidth}s`,
+              projectIds: {
+                terms: {
+                  field: 'profiling.project.id',
                 },
                 aggs: {
                   indices: {
@@ -78,35 +75,47 @@ export async function getHostBreakdownSizeTimeseries({
     ? await getProfilingHostsDetailsById({ client, timeFrom, timeTo, kuery, hostIds })
     : {};
 
-  return (
-    response.aggregations?.hosts.buckets.map((bucket) => {
-      const hostId = bucket.key as string;
-      const hostDetails = hostsDetailsMap[hostId];
-      const timeseries = bucket.storageTimeseries.buckets.map((dateHistogramBucket) => {
-        const estimatedSize = allIndicesStats
-          ? dateHistogramBucket.indices.buckets.reduce((prev, curr) => {
-              return (
-                prev +
-                getEstimatedSizeForDocumentsInIndex({
-                  allIndicesStats,
-                  indexName: curr.key as string,
-                  numberOfDocs: curr.doc_count,
-                })
-              );
-            }, 0)
-          : 0;
+  interface HostDetails {
+    hostId: string;
+    hostName: string;
+    projectId: string;
+    probabilisticValues: number[];
+    totalEventsSize: number;
+    totalMetricsSize: number;
+    totalSize: number;
+  }
 
-        return {
-          x: dateHistogramBucket.key,
-          y: estimatedSize,
-        };
-      });
+  return response.aggregations?.hosts.buckets.flatMap((bucket) => {
+    const hostId = bucket.key as string;
+    const { hostName, probabilisticValues } = hostsDetailsMap[hostId];
+
+    return bucket.projectIds.buckets.map((projectBucket): HostDetails => {
+      const totalPerIndex = allIndicesStats
+        ? projectBucket.indices.buckets.reduce((acc, indexBucket) => {
+            const indexName = indexBucket.key as string;
+            const estimatedSize = getEstimatedSizeForDocumentsInIndex({
+              allIndicesStats,
+              indexName,
+              numberOfDocs: indexBucket.doc_count,
+            });
+            return {
+              ...acc,
+              ...(indexName.indexOf('metrics') > 0
+                ? { metrics: acc.metrics + estimatedSize }
+                : { events: acc.events + estimatedSize }),
+            };
+          }, perIndexInitialSize)
+        : perIndexInitialSize;
 
       return {
         hostId,
-        hostName: hostDetails.hostName,
-        timeseries,
+        hostName,
+        probabilisticValues,
+        projectId: projectBucket.key as string,
+        totalEventsSize: totalPerIndex.events,
+        totalMetricsSize: totalPerIndex.metrics,
+        totalSize: totalPerIndex.events + totalPerIndex.metrics,
       };
-    }) || []
-  );
+    });
+  });
 }

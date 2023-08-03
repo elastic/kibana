@@ -31,6 +31,7 @@ export function getRoutePaths() {
     SetupDataCollectionInstructions: `${BASE_ROUTE_PATH}/setup/instructions`,
     StorageExplorerSummary: `${BASE_ROUTE_PATH}/storage_explorer/summary`,
     StorageExplorerHostBreakdownSizeChart: `${BASE_ROUTE_PATH}/storage_explorer/host_breakdown_chart`,
+    StorageExplorerHostDetails: `${BASE_ROUTE_PATH}/storage_explorer/host_details`,
   };
 }
 

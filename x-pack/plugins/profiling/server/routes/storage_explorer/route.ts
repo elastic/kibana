@@ -12,6 +12,7 @@ import { StorageExplorerSummary } from '../../../common/storage_explorer';
 import { getClient } from '../compat';
 import { getDailyDataGenerationSize } from './get_daily_data_generation.size';
 import { getHostBreakdownSizeTimeseries } from './get_host_breakdown_size_timeseries';
+import { getHostDetails } from './get_host_details';
 import { getHostAndDistinctProbabilisticCount } from './get_host_distinct_probabilistic_count';
 import { getNodesStats, getTotalIndicesStats, getTotalSymbolsStats } from './get_indices_stats';
 
@@ -118,6 +119,33 @@ export function registerStorageExplorerRoute({
         kuery,
       });
       return response.ok({ body: hostBreakdownTimeseries });
+    }
+  );
+
+  router.get(
+    {
+      path: paths.StorageExplorerHostDetails,
+      options: { tags: ['access:profiling'] },
+      validate: {
+        query: schema.object({
+          timeFrom: schema.number(),
+          timeTo: schema.number(),
+          kuery: schema.string(),
+        }),
+      },
+    },
+    async (context, request, response) => {
+      const client = await getClient(context);
+      const profilingClient = createProfilingEsClient({ request, esClient: client });
+
+      const { timeFrom, timeTo, kuery } = request.query;
+      const hostDetails = await getHostDetails({
+        client: profilingClient,
+        timeFrom,
+        timeTo,
+        kuery,
+      });
+      return response.ok({ body: hostDetails });
     }
   );
 }
