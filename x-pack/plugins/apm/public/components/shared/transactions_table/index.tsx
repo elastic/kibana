@@ -171,7 +171,7 @@ export function TransactionsTable({
               start,
               end,
               transactionType,
-              useDurationSummary: shouldUseDurationSummary,
+              useDurationSummary: !!shouldUseDurationSummary,
               latencyAggregationType:
                 latencyAggregationType as LatencyAggregationType,
               documentType: preferred.source.documentType,
@@ -256,7 +256,7 @@ export function TransactionsTable({
                 transactionType,
                 documentType: preferred.source.documentType,
                 rollupInterval: preferred.source.rollupInterval,
-                useDurationSummary: shouldUseDurationSummary,
+                useDurationSummary: !!shouldUseDurationSummary,
                 latencyAggregationType:
                   latencyAggregationType as LatencyAggregationType,
                 transactionNames: JSON.stringify(
