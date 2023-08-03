@@ -17,7 +17,9 @@ import { decodeOrThrow } from '@kbn/io-ts-utils';
 
 type InfraLogsDashboardAppName = 'infra_logs';
 
-const LOG_DATA_INDICES = 'logs-*-*';
+// check log data streams that match the naming convention, except for the APM
+// error stream, because its presence would always mask the "APM only" case
+const LOG_DATA_INDICES = 'logs-*-*,-logs-apm.error*';
 
 export function createObservabilityDashboardRegistration({
   search,
