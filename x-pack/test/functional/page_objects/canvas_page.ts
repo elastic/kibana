@@ -191,5 +191,28 @@ export function CanvasPageProvider({ getService, getPageObjects }: FtrProviderCo
       log.debug('CanvasPage.saveDatasourceChanges');
       await testSubjects.click('canvasSaveDatasourceButton');
     },
+
+    async goToPreviousPage() {
+      log.debug('CanvasPage.goToPreviousPage');
+      await testSubjects.click('previousPageButton');
+    },
+
+    async goToNextPage() {
+      log.debug('CanvasPage.goToNextPage');
+      await testSubjects.click('nextPageButton');
+    },
+
+    async openPageManager() {
+      log.debug('CanvasPage.openPageManager');
+      await testSubjects.click('canvasPageManagerButton');
+    },
+
+    async addNewPage() {
+      log.debug('CanvasPage.addNewPage');
+      if (!(await testSubjects.exists('canvasAddPageButton'))) {
+        await this.openPageManager();
+      }
+      await testSubjects.click('canvasAddPageButton');
+    },
   };
 }

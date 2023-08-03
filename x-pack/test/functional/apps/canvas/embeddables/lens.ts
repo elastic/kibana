@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function canvasLensTest({ getService, getPageObjects }: FtrProviderContext) {
-  const retry = getService('retry');
   const PageObjects = getPageObjects(['canvas', 'common', 'header', 'lens']);
   const esArchiver = getService('esArchiver');
   const dashboardAddPanel = getService('dashboardAddPanel');
@@ -48,9 +46,7 @@ export default function canvasLensTest({ getService, getPageObjects }: FtrProvid
       });
 
       it('adds existing lens embeddable from the visualize library', async () => {
-        await PageObjects.canvas.goToListingPageViaBreadcrumbs();
-        await PageObjects.canvas.createNewWorkpad();
-        await PageObjects.canvas.setWorkpadName('lens tests');
+        await PageObjects.canvas.addNewPage();
         await PageObjects.canvas.clickAddFromLibrary();
         await dashboardAddPanel.addEmbeddable('Artistpreviouslyknownaslens', 'lens');
         await testSubjects.existOrFail('embeddablePanelHeading-Artistpreviouslyknownaslens');
@@ -65,8 +61,7 @@ export default function canvasLensTest({ getService, getPageObjects }: FtrProvid
 
     describe('by-value', () => {
       it('creates new lens embeddable', async () => {
-        await PageObjects.canvas.deleteSelectedElement();
-        const originalEmbeddableCount = await PageObjects.canvas.getEmbeddableCount();
+        await PageObjects.canvas.addNewPage();
         await PageObjects.canvas.createNewVis('lens');
         await PageObjects.lens.goToTimeRange();
         await PageObjects.lens.configureDimension({
@@ -80,21 +75,26 @@ export default function canvasLensTest({ getService, getPageObjects }: FtrProvid
           field: 'bytes',
         });
         await PageObjects.lens.saveAndReturn();
-        await retry.try(async () => {
-          const embeddableCount = await PageObjects.canvas.getEmbeddableCount();
-          expect(embeddableCount).to.eql(originalEmbeddableCount + 1);
-        });
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await testSubjects.exists('xyVisChart');
       });
 
       it('edits lens by-value embeddable', async () => {
-        const originalEmbeddableCount = await PageObjects.canvas.getEmbeddableCount();
+        await PageObjects.header.waitUntilLoadingHasFinished();
         await dashboardPanelActions.openContextMenu();
         await dashboardPanelActions.clickEdit();
         await PageObjects.lens.saveAndReturn();
-        await retry.try(async () => {
-          const embeddableCount = await PageObjects.canvas.getEmbeddableCount();
-          expect(embeddableCount).to.eql(originalEmbeddableCount);
-        });
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await testSubjects.exists('xyVisChart');
+      });
+    });
+
+    describe('switch page smoke test', async () => {
+      it('loads embeddables on page change', async () => {
+        await PageObjects.canvas.goToPreviousPage();
+        await PageObjects.canvas.goToPreviousPage();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.lens.assertLegacyMetric('Maximum of bytes', '16,788');
       });
     });
   });
