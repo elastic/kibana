@@ -16,7 +16,6 @@ import {
   logDeprecatedEndpoint,
   wrapError,
 } from './utils';
-import { ConfigSchema } from '../../config';
 
 const getEndpoint = (method: string, path: string): string => `${method.toUpperCase()} ${path}`;
 
@@ -72,7 +71,9 @@ const logAndIncreaseDeprecationTelemetryCounters = ({
 };
 
 export const registerRoutes = (deps: RegisterRoutesDeps) => {
-  const { router, routes, logger, kibanaVersion, telemetryUsageCounter } = deps;
+  const { router, routes, logger, kibanaVersion, telemetryUsageCounter, configSchema } = deps;
+
+ 
 
   routes.forEach((route) => {
     const { method, path, params, options, routerOptions, handler } = route;
@@ -90,7 +91,6 @@ export const registerRoutes = (deps: RegisterRoutesDeps) => {
       async (context, request, response) => {
         let responseHeaders = {};
         const isKibanaRequest = getIsKibanaRequest(request.headers);
-        const caseConfigSchema = ConfigSchema.validate({});
 
         const hasCasesOwnerInQuery =
           request.query?.owner === 'cases' || request.query?.owners?.includes('cases');
@@ -102,8 +102,8 @@ export const registerRoutes = (deps: RegisterRoutesDeps) => {
           return response.badRequest({ body: 'RouteHandlerContext is not registered for cases' });
         }
 
-        if (!caseConfigSchema.stack.enabled && (hasCasesOwnerInBody || hasCasesOwnerInQuery)) {
-          return response.badRequest({ body: 'Cases as owner is not registered' });
+        if (!configSchema?.stack.enabled && (hasCasesOwnerInBody || hasCasesOwnerInQuery)) {
+          return response.badRequest({ body: 'Owner as cases is not allowed' });
         }
 
         try {
