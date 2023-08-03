@@ -11,11 +11,9 @@ import {
   AggregationsSumAggregate,
   AggregationsValueCountAggregate,
   MsearchMultisearchBody,
-  QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ElasticsearchClient } from '@kbn/core/server';
 import {
-  ALL_VALUE,
   occurrencesBudgetingMethodSchema,
   timeslicesBudgetingMethodSchema,
   toMomentUnitOfTime,
@@ -86,25 +84,20 @@ function commonQuery(
   instanceId: string | undefined,
   dateRange: DateRange
 ): Pick<MsearchMultisearchBody, 'size' | 'query'> {
-  const filter: QueryDslQueryContainer[] = [
-    { term: { 'slo.id': slo.id } },
-    { term: { 'slo.revision': slo.revision } },
-    {
-      range: {
-        '@timestamp': { gte: dateRange.from.toISOString(), lt: dateRange.to.toISOString() },
-      },
-    },
-  ];
-
-  if (instanceId && instanceId !== ALL_VALUE) {
-    filter.push({ term: { 'slo.instanceId': instanceId } });
-  }
-
   return {
     size: 0,
     query: {
       bool: {
-        filter,
+        filter: [
+          { term: { 'slo.id': slo.id } },
+          { term: { 'slo.revision': slo.revision } },
+          { term: { 'slo.instanceId': instanceId } },
+          {
+            range: {
+              '@timestamp': { gte: dateRange.from.toISOString(), lt: dateRange.to.toISOString() },
+            },
+          },
+        ],
       },
     },
   };
