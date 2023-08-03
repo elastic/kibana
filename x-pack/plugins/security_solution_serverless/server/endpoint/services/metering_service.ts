@@ -17,13 +17,13 @@ const SAMPLE_PERIOD_SECONDS = 3600;
 // const THRESHOLD_MINUTES = 30;
 
 export class EndpointMeteringService {
-  public async getUsageRecords({
+  public getUsageRecords = async ({
     taskId,
     cloudSetup,
     esClient,
     abortController,
     lastSuccessfulReport,
-  }: MeteringCallbackInput): Promise<UsageRecord[]> {
+  }: MeteringCallbackInput): Promise<UsageRecord[]> => {
     const heartbeatsResponse = await this.getHeartbeatsSince(
       esClient,
       abortController,
@@ -45,7 +45,7 @@ export class EndpointMeteringService {
 
       return [...acc, record];
     }, [] as UsageRecord[]);
-  }
+  };
 
   private async getHeartbeatsSince(
     esClient: ElasticsearchClient,
@@ -114,7 +114,7 @@ export class EndpointMeteringService {
       usage: {
         type: 'security_solution_endpoint',
         // TODO: get actual sub_type
-        sub_type: 'essential',
+        sub_type: 'essentials',
         period_seconds: SAMPLE_PERIOD_SECONDS,
         quantity: 1,
       },
