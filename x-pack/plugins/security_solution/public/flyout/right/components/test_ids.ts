@@ -35,8 +35,6 @@ export const RULE_SUMMARY_BUTTON_TEST_ID = 'securitySolutionDocumentDetailsFlyou
 export const DESCRIPTION_TITLE_TEST_ID = 'securitySolutionDocumentDetailsFlyoutDescriptionTitle';
 export const DESCRIPTION_DETAILS_TEST_ID =
   'securitySolutionDocumentDetailsFlyoutDescriptionDetails';
-export const DESCRIPTION_EXPAND_BUTTON_TEST_ID =
-  'securitySolutionDocumentDetailsFlyoutDescriptionExpandButton';
 export const REASON_TITLE_TEST_ID = 'securitySolutionDocumentDetailsFlyoutReasonTitle';
 export const REASON_DETAILS_TEST_ID = 'securitySolutionDocumentDetailsFlyoutReasonDetails';
 export const MITRE_ATTACK_TITLE_TEST_ID = 'securitySolutionAlertDetailsFlyoutMitreAttackTitle';
@@ -53,7 +51,15 @@ export const HIGHLIGHTED_FIELDS_TITLE_TEST_ID =
   'securitySolutionDocumentDetailsFlyoutHighlightedFieldsTitle';
 export const HIGHLIGHTED_FIELDS_DETAILS_TEST_ID =
   'securitySolutionDocumentDetailsFlyoutHighlightedFieldsDetails';
-export const HIGHLIGHTED_FIELDS_GO_TO_TABLE_LINK = 'summary-view-go-to-table-link';
+export const HIGHLIGHTED_FIELDS_CELL_TEST_ID =
+  'securitySolutionDocumentDetailsFlyoutHighlightedFieldsCell';
+export const HIGHLIGHTED_FIELDS_BASIC_CELL_TEST_ID =
+  'securitySolutionDocumentDetailsFlyoutHighlightedFieldsBasicCell';
+export const HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID =
+  'securitySolutionDocumentDetailsFlyoutHighlightedFieldsLinkedCell';
+export const HIGHLIGHTED_FIELDS_AGENT_STATUS_CELL_TEST_ID =
+  'securitySolutionDocumentDetailsFlyoutHighlightedFieldsAgentStatusCell';
+
 export const INVESTIGATION_GUIDE_BUTTON_TEST_ID =
   'securitySolutionDocumentDetailsFlyoutInvestigationGuideButton';
 
