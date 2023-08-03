@@ -1047,7 +1047,6 @@
     "core.ui.overlays.banner.attentionTitle": "注意",
     "core.ui.overlays.banner.closeButtonLabel": "关闭",
     "core.ui.primaryNav.addData": "添加集成",
-    "core.ui.primaryNav.cloud.linkToDeployments": "我的部署",
     "core.ui.primaryNav.goToHome.ariaLabel": "前往主页",
     "core.ui.primaryNav.pinnedLinksAriaLabel": "置顶链接",
     "core.ui.primaryNav.screenReaderLabel": "主分片",
