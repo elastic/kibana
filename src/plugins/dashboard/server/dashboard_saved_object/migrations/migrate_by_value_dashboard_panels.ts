@@ -74,12 +74,13 @@ export const migrateByValueDashboardPanels =
           type: originalPanelState.type,
         });
         // Convert the embeddable state back into the panel shape
-        newPanels.push(
-          convertPanelStateToSavedDashboardPanel({
+        newPanels.push({
+          ...convertPanelStateToSavedDashboardPanel({
             ...originalPanelState,
             explicitInput: { ...migratedInput, id: migratedInput.id as string },
-          })
-        );
+          }),
+          version,
+        });
       } else {
         newPanels.push(panel);
       }
