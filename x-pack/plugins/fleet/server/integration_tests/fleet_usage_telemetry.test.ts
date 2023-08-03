@@ -395,12 +395,12 @@ describe('fleet usage telemetry', () => {
         agents_per_os: [
           {
             name: 'Ubuntu',
-            version: '22.04.2 LTS (Jammy Jellyfish)',
+            version: '20.04.5 LTS (Focal Fossa)',
             count: 1,
           },
           {
             name: 'Ubuntu',
-            version: '20.04.5 LTS (Focal Fossa)',
+            version: '22.04.2 LTS (Jammy Jellyfish)',
             count: 1,
           },
         ],
