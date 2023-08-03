@@ -1,0 +1,11 @@
+{
+  "synonym_rule.delete": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "_synonyms/{synonyms_set}/{synonym_rule}"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/delete-synonym-rule.html"
+  }
+}
