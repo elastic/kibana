@@ -82,7 +82,7 @@ $controlMinWidth: $euiSize * 14;
     max-width: 40%;
   }
 
-  &.controlFrameWrapper-isEditable {
+  &-isEditable {
     .controlFrame__formControlLayoutLabel {
       padding-left: 0;
     }
@@ -140,7 +140,7 @@ $controlMinWidth: $euiSize * 14;
     min-width: $smallControl;
 
     .controlFrame__labelToolTip {
-      max-width: 20%;
+      min-width: Min(calc(#{$smallControl} / 6), calc(40%));
     }
   }
 
