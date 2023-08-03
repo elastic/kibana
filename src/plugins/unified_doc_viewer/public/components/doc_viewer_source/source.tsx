@@ -96,26 +96,26 @@ export const DocViewerSource = ({
     <div className="sourceViewer__loading">
       <EuiLoadingSpinner className="sourceViewer__loadingSpinner" />
       <EuiText size="xs" color="subdued">
-        <FormattedMessage id="discover.loadingJSON" defaultMessage="Loading JSON" />
+        <FormattedMessage id="unifiedDocViewer.loadingJSON" defaultMessage="Loading JSON" />
       </EuiText>
     </div>
   );
 
   const errorMessageTitle = (
     <h2>
-      {i18n.translate('discover.sourceViewer.errorMessageTitle', {
+      {i18n.translate('unifiedDocViewer.sourceViewer.errorMessageTitle', {
         defaultMessage: 'An Error Occurred',
       })}
     </h2>
   );
   const errorMessage = (
     <div>
-      {i18n.translate('discover.sourceViewer.errorMessage', {
+      {i18n.translate('unifiedDocViewer.sourceViewer.errorMessage', {
         defaultMessage: 'Could not fetch data at this time. Refresh the tab to try again.',
       })}
       <EuiSpacer size="s" />
       <EuiButton iconType="refresh" onClick={onRefresh}>
-        {i18n.translate('discover.sourceViewer.refresh', {
+        {i18n.translate('unifiedDocViewer.sourceViewer.refresh', {
           defaultMessage: 'Refresh',
         })}
       </EuiButton>

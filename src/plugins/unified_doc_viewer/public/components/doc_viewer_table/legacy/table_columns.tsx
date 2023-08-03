@@ -23,7 +23,7 @@ export const ACTIONS_COLUMN: EuiBasicTableColumn<FieldRecordLegacy> = {
     <EuiText size="xs">
       <strong>
         <FormattedMessage
-          id="discover.fieldChooser.discoverField.actions"
+          id="unifiedDocViewer.fieldChooser.discoverField.actions"
           defaultMessage="Actions"
         />
       </strong>
@@ -55,7 +55,7 @@ export const MAIN_COLUMNS: Array<EuiBasicTableColumn<FieldRecordLegacy>> = [
     name: (
       <EuiText size="xs">
         <strong>
-          <FormattedMessage id="discover.fieldChooser.discoverField.name" defaultMessage="Field" />
+          <FormattedMessage id="unifiedDocViewer.fieldChooser.discoverField.name" defaultMessage="Field" />
         </strong>
       </EuiText>
     ),
@@ -85,7 +85,7 @@ export const MAIN_COLUMNS: Array<EuiBasicTableColumn<FieldRecordLegacy>> = [
     name: (
       <EuiText size="xs">
         <strong>
-          <FormattedMessage id="discover.fieldChooser.discoverField.value" defaultMessage="Value" />
+          <FormattedMessage id="unifiedDocViewer.fieldChooser.discoverField.value" defaultMessage="Value" />
         </strong>
       </EuiText>
     ),

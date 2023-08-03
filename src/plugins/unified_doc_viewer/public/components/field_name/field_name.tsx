@@ -62,7 +62,7 @@ export function FieldName({
             position="top"
             delay="long"
             content={i18n.translate(
-              'discover.fieldChooser.discoverField.multiFieldTooltipContent',
+              'unifiedDocViewer.fieldChooser.discoverField.multiFieldTooltipContent',
               {
                 defaultMessage: 'Multi-fields can have multiple values per field',
               }
@@ -75,7 +75,7 @@ export function FieldName({
               data-test-subj={`tableDocViewRow-${fieldName}-multifieldBadge`}
             >
               <FormattedMessage
-                id="discover.fieldChooser.discoverField.multiField"
+                id="unifiedDocViewer.fieldChooser.discoverField.multiField"
                 defaultMessage="multi-field"
               />
             </EuiBadge>

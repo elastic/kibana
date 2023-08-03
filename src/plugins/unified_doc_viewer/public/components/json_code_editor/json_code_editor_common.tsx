@@ -14,10 +14,10 @@ import { monaco, XJsonLang } from '@kbn/monaco';
 import { EuiButtonEmpty, EuiCopy, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { CodeEditor } from '@kbn/kibana-react-plugin/public';
 
-const codeEditorAriaLabel = i18n.translate('discover.json.codeEditorAriaLabel', {
+const codeEditorAriaLabel = i18n.translate('unifiedDocViewer.json.codeEditorAriaLabel', {
   defaultMessage: 'Read only JSON view of an elasticsearch document',
 });
-const copyToClipboardLabel = i18n.translate('discover.json.copyToClipboardLabel', {
+const copyToClipboardLabel = i18n.translate('unifiedDocViewer.json.copyToClipboardLabel', {
   defaultMessage: 'Copy to clipboard',
 });
 
