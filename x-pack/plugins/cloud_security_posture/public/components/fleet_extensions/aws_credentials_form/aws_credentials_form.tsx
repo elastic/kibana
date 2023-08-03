@@ -19,7 +19,7 @@ import {
   EuiConfirmModal,
 } from '@elastic/eui';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
-import { PackageInfo } from '@kbn/fleet-plugin/common';
+import { PackageInfo, NewPackagePolicyInput } from '@kbn/fleet-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
