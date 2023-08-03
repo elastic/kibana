@@ -96,17 +96,17 @@ const getEndpointListColumns = ({
 
   return [
     {
-      field: 'metadata',
+      field: 'metadata.host.hostname',
       width: '15%',
       name: i18n.translate('xpack.securitySolution.endpoint.list.hostname', {
         defaultMessage: 'Endpoint',
       }),
-      render: ({ host: { hostname }, agent: { id } }: HostInfo['metadata']) => {
+      render: (hostname: HostInfo['metadata']['host']['hostname'], item: HostInfo) => {
         const toRoutePath = getEndpointDetailsPath(
           {
             ...queryParams,
             name: 'endpointDetails',
-            selected_endpoint: id,
+            selected_endpoint: item.metadata.host.id,
           },
           search
         );
@@ -140,16 +140,21 @@ const getEndpointListColumns = ({
       },
     },
     {
-      field: 'metadata.Endpoint.policy.applied',
+      field: 'metadata.Endpoint.policy.applied.name',
       width: '15%',
       name: i18n.translate('xpack.securitySolution.endpoint.list.policy', {
         defaultMessage: 'Policy',
       }),
       truncateText: true,
-      render: (policy: HostInfo['metadata']['Endpoint']['policy']['applied'], item: HostInfo) => {
+      render: (
+        policyName: HostInfo['metadata']['Endpoint']['policy']['applied']['name'],
+        item: HostInfo
+      ) => {
+        const policy = item.metadata.Endpoint.policy.applied;
+
         return (
           <>
-            <EuiToolTip content={policy.name} anchorClassName="eui-textTruncate">
+            <EuiToolTip content={policyName} anchorClassName="eui-textTruncate">
               {canReadPolicyManagement ? (
                 <EndpointPolicyLink
                   policyId={policy.id}
@@ -157,10 +162,10 @@ const getEndpointListColumns = ({
                   data-test-subj="policyNameCellLink"
                   backLink={backToEndpointList}
                 >
-                  {policy.name}
+                  {policyName}
                 </EndpointPolicyLink>
               ) : (
-                <>{policy.name}</>
+                <>{policyName}</>
               )}
             </EuiToolTip>
             {policy.endpoint_policy_version && (
@@ -186,12 +191,15 @@ const getEndpointListColumns = ({
       },
     },
     {
-      field: 'metadata.Endpoint.policy.applied',
+      field: 'metadata.Endpoint.policy.applied.status',
       width: '9%',
       name: i18n.translate('xpack.securitySolution.endpoint.list.policyStatus', {
         defaultMessage: 'Policy status',
       }),
-      render: (policy: HostInfo['metadata']['Endpoint']['policy']['applied'], item: HostInfo) => {
+      render: (
+        status: HostInfo['metadata']['Endpoint']['policy']['applied']['status'],
+        item: HostInfo
+      ) => {
         const toRoutePath = getEndpointDetailsPath({
           name: 'endpointPolicyResponse',
           ...queryParams,
@@ -199,17 +207,14 @@ const getEndpointListColumns = ({
         });
         const toRouteUrl = getAppUrl({ path: toRoutePath });
         return (
-          <EuiToolTip
-            content={POLICY_STATUS_TO_TEXT[policy.status]}
-            anchorClassName="eui-textTruncate"
-          >
+          <EuiToolTip content={POLICY_STATUS_TO_TEXT[status]} anchorClassName="eui-textTruncate">
             <EuiHealth
-              color={POLICY_STATUS_TO_HEALTH_COLOR[policy.status]}
+              color={POLICY_STATUS_TO_HEALTH_COLOR[status]}
               className="eui-textTruncate eui-fullWidth"
               data-test-subj="rowPolicyStatus"
             >
               <EndpointListNavLink
-                name={POLICY_STATUS_TO_TEXT[policy.status]}
+                name={POLICY_STATUS_TO_TEXT[status]}
                 href={toRouteUrl}
                 route={toRoutePath}
                 dataTestSubj="policyStatusCellLink"
