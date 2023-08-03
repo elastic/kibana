@@ -96,6 +96,7 @@ export const formatHeartbeatRequest = (
   const heartbeatIdT = heartbeatId ?? monitor[ConfigKey.MONITOR_QUERY_ID];
 
   const paramsString = params ?? (monitor as BrowserFields)[ConfigKey.PARAMS];
+  const processors = (monitor as BrowserFields)[ConfigKey.PROCESSORS];
 
   return {
     ...monitor,
@@ -109,6 +110,7 @@ export const formatHeartbeatRequest = (
     },
     fields_under_root: true,
     params: monitor.type === 'browser' ? paramsString : '',
+    processors,
   };
 };
 

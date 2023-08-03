@@ -75,6 +75,7 @@ export type ResponseBodyIndexFieldProps = Omit<
 export type RequestBodyFieldProps = Omit<DefaultRequestBodyFieldProps, ControlledFieldProp>;
 export type CodeEditorProps = Omit<DefaultCodeEditorProps, ControlledFieldProp>;
 export type JSONCodeEditorProps = Omit<DefaultCodeEditorProps, ControlledFieldProp | 'languageId'>;
+export type ProcessorsEditorProps = Omit<DefaultCodeEditorProps, 'languageId'>;
 export type FormattedComboBoxProps = Omit<DefaultFormattedComboBoxProps, ControlledFieldProp>;
 
 export const FieldText = React.forwardRef<HTMLInputElement, EuiFieldTextProps>(
