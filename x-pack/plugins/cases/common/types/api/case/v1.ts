@@ -19,6 +19,7 @@ import {
   MAX_TAGS_FILTER_LENGTH,
   MAX_CASES_TO_UPDATE,
   MAX_BULK_GET_CASES,
+  MAX_CATEGORY_FILTER_LENGTH,
 } from '../../../constants';
 import {
   limitedStringSchema,
@@ -214,7 +215,15 @@ export const CasesFindRequestRt = rt.intersection([
       /**
        * The category of the case.
        */
-      category: rt.union([rt.array(rt.string), rt.string]),
+      category: rt.union([
+        limitedArraySchema({
+          codec: rt.string,
+          fieldName: 'category',
+          min: 0,
+          max: MAX_CATEGORY_FILTER_LENGTH,
+        }),
+        rt.string,
+      ]),
     })
   ),
   paginationSchema({ maxPerPage: MAX_CASES_PER_PAGE }),

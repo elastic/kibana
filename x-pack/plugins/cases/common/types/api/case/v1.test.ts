@@ -5,6 +5,12 @@
  * 2.0.
  */
 
+import {
+  MAX_CATEGORY_FILTER_LENGTH,
+  MAX_TAGS_FILTER_LENGTH,
+  MAX_ASSIGNEES_FILTER_LENGTH,
+  MAX_REPORTERS_FILTER_LENGTH,
+} from '../../../constants';
 import { PathReporter } from 'io-ts/lib/PathReporter';
 import { AttachmentType } from '../../domain/attachment/v1';
 import { CaseSeverity, CaseStatuses } from '../../domain/case/v1';
@@ -274,6 +280,38 @@ describe('Status', () => {
       it('succeeds when valid parameters passed', () => {
         expect(PathReporter.report(CasesFindRequestRt.decode(defaultRequest))).toContain(
           'No errors!'
+        );
+      });
+
+      it(`throws an error when the category array has ${MAX_CATEGORY_FILTER_LENGTH} items`, async () => {
+        const category = Array(MAX_CATEGORY_FILTER_LENGTH + 1).fill('foobar');
+
+        expect(PathReporter.report(CasesFindRequestRt.decode({ category }))).toContain(
+          'The length of the field category is too long. Array must be of length <= 100.'
+        );
+      });
+
+      it(`throws an error when the tags array has ${MAX_TAGS_FILTER_LENGTH} items`, async () => {
+        const tags = Array(MAX_TAGS_FILTER_LENGTH + 1).fill('foobar');
+
+        expect(PathReporter.report(CasesFindRequestRt.decode({ tags }))).toContain(
+          'The length of the field tags is too long. Array must be of length <= 100.'
+        );
+      });
+
+      it(`throws an error when the assignees array has ${MAX_ASSIGNEES_FILTER_LENGTH} items`, async () => {
+        const assignees = Array(MAX_ASSIGNEES_FILTER_LENGTH + 1).fill('foobar');
+
+        expect(PathReporter.report(CasesFindRequestRt.decode({ assignees }))).toContain(
+          'The length of the field assignees is too long. Array must be of length <= 100.'
+        );
+      });
+
+      it(`throws an error when the reporters array has ${MAX_REPORTERS_FILTER_LENGTH} items`, async () => {
+        const reporters = Array(MAX_REPORTERS_FILTER_LENGTH + 1).fill('foobar');
+
+        expect(PathReporter.report(CasesFindRequestRt.decode({ reporters }))).toContain(
+          'The length of the field reporters is too long. Array must be of length <= 100.'
         );
       });
     });
