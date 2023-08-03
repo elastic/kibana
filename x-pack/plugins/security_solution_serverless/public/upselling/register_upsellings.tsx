@@ -12,18 +12,30 @@ import type {
   UpsellingSectionId,
 } from '@kbn/security-solution-plugin/public';
 import React, { lazy } from 'react';
+import type {
+  MessageUpsellings,
+  UpsellingMessageId,
+} from '@kbn/security-solution-plugin/public/common/lib/upsellings/types';
 import { OsqueryResponseActionsUpsellingSectionlLazy } from './pages/osquery_automated_response_actions';
 import type { SecurityProductTypes } from '../../common/config';
 import { getProductAppFeatures } from '../../common/pli/pli_features';
-
+import investigationGuideUpselling from './pages/investigation_guide_upselling';
 const ThreatIntelligencePaywallLazy = lazy(() => import('./pages/threat_intelligence_paywall'));
+
 interface UpsellingsConfig {
   pli: AppFeatureKey;
   component: React.ComponentType;
 }
 
+interface UpsellingsMessageConfig {
+  pli: AppFeatureKey;
+  message: string;
+  id: UpsellingMessageId;
+}
+
 type UpsellingPages = Array<UpsellingsConfig & { pageName: SecurityPageName }>;
 type UpsellingSections = Array<UpsellingsConfig & { id: UpsellingSectionId }>;
+type UpsellingMessages = UpsellingsMessageConfig[];
 
 export const registerUpsellings = (
   upselling: UpsellingService,
@@ -51,8 +63,19 @@ export const registerUpsellings = (
     {}
   );
 
+  const upsellingMessagesToRegister = upsellingMessages.reduce<MessageUpsellings>(
+    (messagesUpsellings, { id, pli, message }) => {
+      if (!enabledPLIsSet.has(pli)) {
+        messagesUpsellings[id] = message;
+      }
+      return messagesUpsellings;
+    },
+    {}
+  );
+
   upselling.registerPages(upsellingPagesToRegister);
   upselling.registerSections(upsellingSectionsToRegister);
+  upselling.registerMessages(upsellingMessagesToRegister);
 };
 
 // Upsellings for entire pages, linked to a SecurityPageName
@@ -90,5 +113,14 @@ export const upsellingSections: UpsellingSections = [
         requiredPLI={AppFeatureKey.osqueryAutomatedResponseActions}
       />
     ),
+  },
+];
+
+// Upsellings for sections, linked by arbitrary ids
+export const upsellingMessages: UpsellingMessages = [
+  {
+    id: 'investigation_guide',
+    pli: AppFeatureKey.investigationGuide,
+    message: investigationGuideUpselling(AppFeatureKey.investigationGuide),
   },
 ];
