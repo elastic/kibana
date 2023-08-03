@@ -69,12 +69,12 @@ describe('injectActionParams', () => {
       spaceIdSegment: '/s/mary',
       relativePath: '/app/management/insightsAndAlerting/triggersActions/rule/1',
     };
-    // result.kibanaFooterLink.path should not include /kibana since it is part of kibanaBaseUrl already
     const result = injectActionParams({
       actionParams,
       actionTypeId: '.email',
       ruleUrl,
     });
+    // path in the snapshot should not include /kibana since it is part of kibanaBaseUrl already
     expect(result).toMatchInlineSnapshot(`
       Object {
         "body": Object {

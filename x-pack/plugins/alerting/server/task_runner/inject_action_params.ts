@@ -23,6 +23,7 @@ export function injectActionParams({
   // Inject kibanaFooterLink if action type is email. This is used by the email action type
   // to inject a "View alert in Kibana" with a URL in the email's footer.
   if (actionTypeId === '.email') {
+    // path should not include basePathname since it is part of kibanaBaseUrl already
     const path = [ruleUrl.spaceIdSegment ?? '', ruleUrl.relativePath ?? ''].join('');
     return {
       ...actionParams,
