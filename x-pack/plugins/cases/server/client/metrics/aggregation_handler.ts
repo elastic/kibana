@@ -6,7 +6,7 @@
  */
 
 import { merge } from 'lodash';
-import type { CaseMetricsFeature } from '../../../common/api';
+import type { CaseMetricsFeature } from '../../../common/types/api';
 import { BaseHandler } from './base_handler';
 import type { AggregationBuilder, AggregationResponse, BaseHandlerCommonOptions } from './types';
 

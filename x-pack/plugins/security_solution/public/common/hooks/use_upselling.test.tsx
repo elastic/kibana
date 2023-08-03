@@ -9,7 +9,7 @@ import { renderHook } from '@testing-library/react-hooks';
 import React from 'react';
 import { SecurityPageName } from '../../../common';
 import { UpsellingService } from '../lib/upsellings';
-import { useUpsellingComponent, useUpsellingPage } from './use_upselling';
+import { useUpsellingComponent, useUpsellingMessage, useUpsellingPage } from './use_upselling';
 import { UpsellingProvider } from '../components/upselling_provider';
 
 const mockUpselling = new UpsellingService();
@@ -54,5 +54,25 @@ describe('use_upselling', () => {
       wrapper: RenderWrapper,
     });
     expect(result.current).toBe(TestComponent);
+  });
+
+  test('useUpsellingMessage returns pages', () => {
+    const testMessage = 'test message';
+    mockUpselling.registerMessages({
+      investigation_guide: testMessage,
+    });
+
+    const { result } = renderHook(() => useUpsellingMessage('investigation_guide'));
+    expect(result.current).toBe(testMessage);
+  });
+
+  test('useUpsellingMessage returns null when upsellingMessageId not found', () => {
+    const emptyMessages = {};
+    mockUpselling.registerMessages(emptyMessages);
+
+    const { result } = renderHook(() =>
+      useUpsellingMessage('my_fake_message_id' as 'investigation_guide')
+    );
+    expect(result.current).toBe(null);
   });
 });
