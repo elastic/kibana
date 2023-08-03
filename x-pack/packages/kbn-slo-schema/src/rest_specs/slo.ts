@@ -159,11 +159,15 @@ const findSLOResponseSchema = t.type({
 });
 
 const fetchHistoricalSummaryParamsSchema = t.type({
-  body: t.type({ sloIds: t.array(sloIdSchema) }),
+  body: t.type({ list: t.array(t.type({ sloId: sloIdSchema, instanceId: allOrAnyString })) }),
 });
-const fetchHistoricalSummaryResponseSchema = t.record(
-  sloIdSchema,
-  t.array(historicalSummarySchema)
+
+const fetchHistoricalSummaryResponseSchema = t.array(
+  t.type({
+    sloId: sloIdSchema,
+    instanceId: allOrAnyString,
+    data: t.array(historicalSummarySchema),
+  })
 );
 
 const getSLODiagnosisParamsSchema = t.type({
