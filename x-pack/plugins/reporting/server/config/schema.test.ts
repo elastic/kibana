@@ -113,9 +113,13 @@ describe('Reporting Config Schema', () => {
     ).not.toThrow();
   });
 
-  it('should have roles enabled set to false for serverless by default', () => {
-    expect(() =>
-      ConfigSchema.validate({ roles: { enabled: false } }, { serverless: true })
-    ).not.toThrow();
+  describe('roles', () => {
+    it('should have roles enabled set to false for serverless by default', () => {
+      expect(ConfigSchema.validate({}, { serverless: true }).roles.enabled).toBe(false);
+    });
+
+    it('should have roles enabled set to true for non-serverless by default', () => {
+      expect(ConfigSchema.validate({}).roles.enabled).toBe(true);
+    });
   });
 });
