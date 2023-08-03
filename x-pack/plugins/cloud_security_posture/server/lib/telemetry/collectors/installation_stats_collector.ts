@@ -33,6 +33,14 @@ const getCspmTelemetryFields = (
 
   if (!accountType) return;
 
+  // If the account_type field is not present, we can assume that AWS integrations without it are single accounts,
+  // as this field did not exist before organization accounts were introduced.
+  if (!accountType && provider === 'aws') {
+    return {
+      account_type: 'single-account',
+    };
+  }
+
   return {
     account_type: accountType,
   };
