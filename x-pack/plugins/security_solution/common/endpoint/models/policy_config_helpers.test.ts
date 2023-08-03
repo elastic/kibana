@@ -8,12 +8,12 @@
 import type { PolicyConfig } from '../types';
 import { ProtectionModes } from '../types';
 import { policyFactory } from './policy_config';
-import { disableProtections } from './policy_config_helpers';
+import { disableProtections, setPolicyToEventCollectionOnly } from './policy_config_helpers';
 
 describe('Policy Config helpers', () => {
   describe('disableProtections', () => {
     it('disables all the protections in the default policy', () => {
-      expect(disableProtections(policyFactory())).toEqual<PolicyConfig>(eventsOnlyPolicy);
+      expect(disableProtections(policyFactory())).toEqual<PolicyConfig>(eventsOnlyPolicy());
     });
 
     it('does not enable supported fields', () => {
@@ -51,20 +51,20 @@ describe('Policy Config helpers', () => {
       };
 
       const expectedPolicyWithoutSupportedProtections: PolicyConfig = {
-        ...eventsOnlyPolicy,
+        ...eventsOnlyPolicy(),
         windows: {
-          ...eventsOnlyPolicy.windows,
+          ...eventsOnlyPolicy().windows,
           memory_protection: notSupported,
           behavior_protection: notSupportedBehaviorProtection,
           ransomware: notSupported,
         },
         mac: {
-          ...eventsOnlyPolicy.mac,
+          ...eventsOnlyPolicy().mac,
           memory_protection: notSupported,
           behavior_protection: notSupportedBehaviorProtection,
         },
         linux: {
-          ...eventsOnlyPolicy.linux,
+          ...eventsOnlyPolicy().linux,
           memory_protection: notSupported,
           behavior_protection: notSupportedBehaviorProtection,
         },
@@ -104,10 +104,10 @@ describe('Policy Config helpers', () => {
       };
 
       const expectedPolicy: PolicyConfig = {
-        ...eventsOnlyPolicy,
-        windows: { ...eventsOnlyPolicy.windows, events: { ...windowsEvents } },
-        mac: { ...eventsOnlyPolicy.mac, events: { ...macEvents } },
-        linux: { ...eventsOnlyPolicy.linux, events: { ...linuxEvents } },
+        ...eventsOnlyPolicy(),
+        windows: { ...eventsOnlyPolicy().windows, events: { ...windowsEvents } },
+        mac: { ...eventsOnlyPolicy().mac, events: { ...macEvents } },
+        linux: { ...eventsOnlyPolicy().linux, events: { ...linuxEvents } },
       };
 
       const inputPolicy = {
@@ -120,11 +120,166 @@ describe('Policy Config helpers', () => {
       expect(disableProtections(inputPolicy)).toEqual<PolicyConfig>(expectedPolicy);
     });
   });
+
+  describe('setPolicyToEventCollectionOnly()', () => {
+    it('should set the policy to event collection only', () => {
+      expect(setPolicyToEventCollectionOnly(policyFactory())).toEqual({
+        linux: {
+          advanced: {
+            capture_env_vars: 'LD_PRELOAD,LD_LIBRARY_PATH',
+          },
+          behavior_protection: {
+            mode: 'off',
+            reputation_service: false,
+            supported: true,
+          },
+          events: {
+            file: true,
+            network: true,
+            process: true,
+            session_data: false,
+            tty_io: false,
+          },
+          logging: {
+            file: 'info',
+          },
+          malware: {
+            blocklist: false,
+            mode: 'off',
+          },
+          memory_protection: {
+            mode: 'off',
+            supported: true,
+          },
+          popup: {
+            behavior_protection: {
+              enabled: false,
+              message: '',
+            },
+            malware: {
+              enabled: false,
+              message: '',
+            },
+            memory_protection: {
+              enabled: false,
+              message: '',
+            },
+          },
+        },
+        mac: {
+          advanced: {
+            capture_env_vars:
+              'DYLD_INSERT_LIBRARIES,DYLD_FRAMEWORK_PATH,DYLD_LIBRARY_PATH,LD_PRELOAD',
+          },
+          behavior_protection: {
+            mode: 'off',
+            reputation_service: false,
+            supported: true,
+          },
+          events: {
+            file: true,
+            network: true,
+            process: true,
+          },
+          logging: {
+            file: 'info',
+          },
+          malware: {
+            blocklist: false,
+            mode: 'off',
+          },
+          memory_protection: {
+            mode: 'off',
+            supported: true,
+          },
+          popup: {
+            behavior_protection: {
+              enabled: false,
+              message: '',
+            },
+            malware: {
+              enabled: false,
+              message: '',
+            },
+            memory_protection: {
+              enabled: false,
+              message: '',
+            },
+          },
+        },
+        meta: {
+          cloud: false,
+          cluster_name: '',
+          cluster_uuid: '',
+          license: '',
+          license_uid: '',
+        },
+        windows: {
+          antivirus_registration: {
+            enabled: false,
+          },
+          attack_surface_reduction: {
+            credential_hardening: {
+              enabled: false,
+            },
+          },
+          behavior_protection: {
+            mode: 'off',
+            reputation_service: false,
+            supported: true,
+          },
+          malware: {
+            blocklist: false,
+            mode: 'off',
+          },
+          memory_protection: {
+            mode: 'off',
+            supported: true,
+          },
+          ransomware: {
+            mode: 'off',
+            supported: true,
+          },
+          events: {
+            credential_access: true,
+            dll_and_driver_load: true,
+            dns: true,
+            file: true,
+            network: true,
+            process: true,
+            registry: true,
+            security: true,
+          },
+          logging: {
+            file: 'info',
+          },
+          popup: {
+            behavior_protection: {
+              enabled: false,
+              message: '',
+            },
+            malware: {
+              enabled: false,
+              message: '',
+            },
+            memory_protection: {
+              enabled: false,
+              message: '',
+            },
+            ransomware: {
+              enabled: false,
+              message: '',
+            },
+          },
+        },
+      });
+    });
+  });
 });
 
 // This constant makes sure that if the type `PolicyConfig` is ever modified,
 // the logic for disabling protections is also modified due to type check.
-export const eventsOnlyPolicy: PolicyConfig = {
+export const eventsOnlyPolicy = (): PolicyConfig => ({
   meta: { license: '', cloud: false, license_uid: '', cluster_name: '', cluster_uuid: '' },
   windows: {
     events: {
@@ -187,4 +342,4 @@ export const eventsOnlyPolicy: PolicyConfig = {
       capture_env_vars: 'LD_PRELOAD,LD_LIBRARY_PATH',
     },
   },
-};
+});
