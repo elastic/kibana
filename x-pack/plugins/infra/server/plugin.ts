@@ -12,6 +12,7 @@ import {
   Plugin,
   PluginConfigDescriptor,
   PluginInitializerContext,
+  SavedObjectsClientContract,
 } from '@kbn/core/server';
 import { handleEsError } from '@kbn/es-ui-shared-plugin/server';
 import { i18n } from '@kbn/i18n';
@@ -25,10 +26,9 @@ import {
   METRICS_FEATURE_ID,
 } from '../common/constants';
 import { publicConfigKeys } from '../common/plugin_config_types';
-import { configDeprecations, getInfraDeprecationsFactory } from './deprecations';
+import { configDeprecations } from './deprecations';
 import { LOGS_FEATURE, METRICS_FEATURE } from './features';
 import { initInfraServer } from './infra_server';
-import { FrameworkFieldsAdapter } from './lib/adapters/fields/framework_fields_adapter';
 import { InfraServerPluginSetupDeps, InfraServerPluginStartDeps } from './lib/adapters/framework';
 import { KibanaFramework } from './lib/adapters/framework/kibana_framework_adapter';
 import { KibanaMetricsAdapter } from './lib/adapters/metrics/kibana_metrics_adapter';
@@ -38,11 +38,8 @@ import {
   LOGS_RULES_ALERT_CONTEXT,
   METRICS_RULES_ALERT_CONTEXT,
 } from './lib/alerting/register_rule_types';
-import { InfraFieldsDomain } from './lib/domains/fields_domain';
 import { InfraMetricsDomain } from './lib/domains/metrics_domain';
 import { InfraBackendLibs, InfraDomainLibs } from './lib/infra_types';
-import { makeGetMetricIndices } from './lib/metrics/make_get_metric_indices';
-import { infraSourceConfigurationSavedObjectType, InfraSources } from './lib/sources';
 import { InfraSourceStatus } from './lib/source_status';
 import { inventoryViewSavedObjectType, metricsExplorerViewSavedObjectType } from './saved_objects';
 import { InventoryViewsService } from './services/inventory_views';
@@ -156,9 +153,8 @@ export class InfraServerPlugin
 
   setup(core: InfraPluginCoreSetup, plugins: InfraServerPluginSetupDeps) {
     const framework = new KibanaFramework(core, this.config, plugins);
-    const sources = new InfraSources({
-      config: this.config,
-    });
+    const sources = plugins.metricsData.getClient();
+
     const sourceStatus = new InfraSourceStatus(
       new InfraElasticsearchSourceStatusAdapter(framework),
       { sources }
@@ -169,7 +165,6 @@ export class InfraServerPlugin
     const metricsExplorerViews = this.metricsExplorerViews.setup();
 
     // Register saved object types
-    core.savedObjects.registerType(infraSourceConfigurationSavedObjectType);
     core.savedObjects.registerType(inventoryViewSavedObjectType);
     core.savedObjects.registerType(metricsExplorerViewSavedObjectType);
 
@@ -177,9 +172,6 @@ export class InfraServerPlugin
     // and make them available via the request context so we can do away with
     // the wrapper classes
     const domainLibs: InfraDomainLibs = {
-      fields: new InfraFieldsDomain(new FrameworkFieldsAdapter(framework), {
-        sources,
-      }),
       logEntries: plugins.logsShared.logEntries,
       metrics: new InfraMetricsDomain(new KibanaMetricsAdapter(framework)),
     };
@@ -247,11 +239,6 @@ export class InfraServerPlugin
     // Telemetry
     UsageCollector.registerUsageCollector(plugins.usageCollection);
 
-    // register deprecated source configuration fields
-    core.deprecations.registerDeprecations({
-      getDeprecations: getInfraDeprecationsFactory(sources),
-    });
-
     return {
       defineInternalSourceConfiguration: sources.defineInternalSourceConfiguration.bind(sources),
       inventoryViews,
@@ -273,7 +260,13 @@ export class InfraServerPlugin
     return {
       inventoryViews,
       metricsExplorerViews,
-      getMetricIndices: makeGetMetricIndices(this.libs.sources),
+      getMetricIndices: async (
+        savedObjectsClient: SavedObjectsClientContract,
+        sourceId: string = 'default'
+      ) => {
+        const source = await this.libs.sources.getSourceConfiguration(savedObjectsClient, sourceId);
+        return source.configuration.metricAlias;
+      },
     };
   }
 

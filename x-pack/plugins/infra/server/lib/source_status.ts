@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { InfraSources } from '@kbn/metrics-data-plugin/server/lib/sources';
 import type { InfraPluginRequestHandlerContext } from '../types';
-import { InfraSources } from './sources';
 
 export class InfraSourceStatus {
   constructor(

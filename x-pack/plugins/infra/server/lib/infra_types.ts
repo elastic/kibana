@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { InfraSources } from '@kbn/metrics-data-plugin/server/lib/sources';
 import type { Logger } from '@kbn/logging';
 import type { IBasePath } from '@kbn/core/server';
 import type { handleEsError } from '@kbn/es-ui-shared-plugin/server';
@@ -15,13 +16,10 @@ import type { ILogsSharedLogEntriesDomain } from '@kbn/logs-shared-plugin/server
 import { RulesServiceSetup } from '../services/rules';
 import { InfraConfig, InfraPluginStartServicesAccessor } from '../types';
 import { KibanaFramework } from './adapters/framework/kibana_framework_adapter';
-import { InfraFieldsDomain } from './domains/fields_domain';
 import { InfraMetricsDomain } from './domains/metrics_domain';
-import { InfraSources } from './sources';
 import { InfraSourceStatus } from './source_status';
 
 export interface InfraDomainLibs {
-  fields: InfraFieldsDomain;
   logEntries: ILogsSharedLogEntriesDomain;
   metrics: InfraMetricsDomain;
 }

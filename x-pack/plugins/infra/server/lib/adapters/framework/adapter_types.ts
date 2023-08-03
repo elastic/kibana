@@ -26,6 +26,7 @@ import { RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/serve
 import { ObservabilityPluginSetup } from '@kbn/observability-plugin/server';
 import { LogsSharedPluginSetup, LogsSharedPluginStart } from '@kbn/logs-shared-plugin/server';
 import { VersionedRouteConfig } from '@kbn/core-http-server';
+import { MetricsDataPluginSetup } from '@kbn/metrics-data-plugin/server';
 
 export interface InfraServerPluginSetupDeps {
   alerting: AlertingPluginContract;
@@ -40,6 +41,7 @@ export interface InfraServerPluginSetupDeps {
   visTypeTimeseries: VisTypeTimeseriesSetup;
   ml?: MlPluginSetup;
   logsShared: LogsSharedPluginSetup;
+  metricsData: MetricsDataPluginSetup;
 }
 
 export interface InfraServerPluginStartDeps {

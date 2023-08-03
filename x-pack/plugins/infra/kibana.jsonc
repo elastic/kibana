@@ -21,6 +21,7 @@
       "fieldFormats",
       "lens",
       "logsShared",
+      "metricsData",
       "observability",
       "observabilityShared",
       "ruleRegistry",

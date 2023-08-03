@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { InfraSources } from '@kbn/metrics-data-plugin/server/lib/sources';
 import type {
   KibanaRequest,
   SavedObjectsClientContract,
@@ -15,7 +16,6 @@ import type {
   UpdateInventoryViewAttributesRequestPayload,
 } from '../../../common/http_api/latest';
 import type { InventoryView } from '../../../common/inventory_views';
-import type { InfraSources } from '../../lib/sources';
 
 export interface InventoryViewsServiceStartDeps {
   infraSources: InfraSources;

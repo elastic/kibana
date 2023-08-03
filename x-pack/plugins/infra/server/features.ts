@@ -14,7 +14,6 @@ import {
   METRIC_THRESHOLD_ALERT_TYPE_ID,
 } from '../common/alerting/metrics';
 import { LOGS_FEATURE_ID, METRICS_FEATURE_ID } from '../common/constants';
-import { infraSourceConfigurationSavedObjectName } from './lib/sources/saved_object_type';
 
 export const METRICS_FEATURE = {
   id: METRICS_FEATURE_ID,
@@ -94,7 +93,7 @@ export const LOGS_FEATURE = {
       catalogue: ['infralogging', 'logs'],
       api: ['infra', 'rac', 'ai_assistant'],
       savedObject: {
-        all: [infraSourceConfigurationSavedObjectName, logViewSavedObjectName],
+        all: [logViewSavedObjectName],
         read: [],
       },
       alerting: {
@@ -127,7 +126,7 @@ export const LOGS_FEATURE = {
       },
       savedObject: {
         all: [],
-        read: [infraSourceConfigurationSavedObjectName, logViewSavedObjectName],
+        read: [logViewSavedObjectName],
       },
       ui: ['show'],
     },
