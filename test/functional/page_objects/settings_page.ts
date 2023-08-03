@@ -755,13 +755,10 @@ export class SettingsPageObject extends FtrService {
   }
 
   async editFieldFilter(name: string, newName: string) {
-    // await this.testSubjects.click('tab-sourceFilters');
     await this.testSubjects.click(`edit_filter-${name}`);
     await this.testSubjects.setValue(`filter_input_${name}`, newName);
     await this.testSubjects.click(`save_filter-${name}`);
-    // click edit
-    // set value
-    // save
+
     const table = await this.find.byClassName('euiTable');
     await this.retry.waitFor('field filter to be changed', async () => {
       const tableCells = await table.findAllByCssSelector('td');
