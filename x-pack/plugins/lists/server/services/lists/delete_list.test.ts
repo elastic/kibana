@@ -12,6 +12,10 @@ import { getList } from './get_list';
 import { deleteList } from './delete_list';
 import { getDeleteListOptionsMock } from './delete_list.mock';
 
+jest.mock('../utils', () => ({
+  waitUntilDocumentIndexed: jest.fn(),
+}));
+
 jest.mock('./get_list', () => ({
   getList: jest.fn(),
 }));
@@ -36,34 +40,45 @@ describe('delete_list', () => {
     const list = getListResponseMock();
     (getList as unknown as jest.Mock).mockResolvedValueOnce(list);
     const options = getDeleteListOptionsMock();
+    options.esClient.deleteByQuery = jest.fn().mockResolvedValue({ deleted: 1 });
     const deletedList = await deleteList(options);
     expect(deletedList).toEqual(list);
   });
 
-  test('Delete calls "deleteByQuery" and "delete" if a list is returned from getList', async () => {
+  test('Delete calls "deleteByQuery" for list items if a list is returned from getList', async () => {
     const list = getListResponseMock();
     (getList as unknown as jest.Mock).mockResolvedValueOnce(list);
     const options = getDeleteListOptionsMock();
+    options.esClient.deleteByQuery = jest.fn().mockResolvedValue({ deleted: 1 });
     await deleteList(options);
     const deleteByQuery = {
       body: { query: { term: { list_id: LIST_ID } } },
+      conflicts: 'proceed',
       index: LIST_ITEM_INDEX,
       refresh: false,
     };
-    expect(options.esClient.deleteByQuery).toBeCalledWith(deleteByQuery);
+    expect(options.esClient.deleteByQuery).toHaveBeenNthCalledWith(1, deleteByQuery);
   });
 
-  test('Delete calls "delete" second if a list is returned from getList', async () => {
+  test('Delete calls "deleteByQuery" for list if a list is returned from getList', async () => {
     const list = getListResponseMock();
     (getList as unknown as jest.Mock).mockResolvedValueOnce(list);
     const options = getDeleteListOptionsMock();
+    options.esClient.deleteByQuery = jest.fn().mockResolvedValue({ deleted: 1 });
     await deleteList(options);
-    const deleteQuery = {
-      id: LIST_ID,
+    const deleteByQuery = {
+      body: {
+        query: {
+          ids: {
+            values: [LIST_ID],
+          },
+        },
+      },
+      conflicts: 'proceed',
       index: LIST_INDEX,
-      refresh: 'wait_for',
+      refresh: false,
     };
-    expect(options.esClient.delete).toHaveBeenNthCalledWith(1, deleteQuery);
+    expect(options.esClient.deleteByQuery).toHaveBeenCalledWith(deleteByQuery);
   });
 
   test('Delete does not call data client if the list returns null', async () => {
@@ -71,5 +86,14 @@ describe('delete_list', () => {
     const options = getDeleteListOptionsMock();
     await deleteList(options);
     expect(options.esClient.delete).not.toHaveBeenCalled();
+  });
+
+  test('throw error if no list was deleted', async () => {
+    const list = getListResponseMock();
+    (getList as unknown as jest.Mock).mockResolvedValueOnce(list);
+    const options = getDeleteListOptionsMock();
+    options.esClient.deleteByQuery = jest.fn().mockResolvedValue({ deleted: 0 });
+
+    await expect(deleteList(options)).rejects.toThrow('No list has been deleted');
   });
 });

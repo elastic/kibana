@@ -9,9 +9,8 @@ import { readPrivileges, transformError } from '@kbn/securitysolution-es-utils';
 import { merge } from 'lodash/fp';
 import { LIST_PRIVILEGES_URL } from '@kbn/securitysolution-list-constants';
 
-import type { ListsPluginRouter } from '../types';
-
-import { buildSiemResponse, getListClient } from './utils';
+import type { ListsPluginRouter } from '../../types';
+import { buildSiemResponse, getListClient } from '../utils';
 
 export const readPrivilegesRoute = (router: ListsPluginRouter): void => {
   router.get(
@@ -27,8 +26,8 @@ export const readPrivilegesRoute = (router: ListsPluginRouter): void => {
       try {
         const esClient = (await context.core).elasticsearch.client.asCurrentUser;
         const lists = await getListClient(context);
-        const clusterPrivilegesLists = await readPrivileges(esClient, lists.getListIndex());
-        const clusterPrivilegesListItems = await readPrivileges(esClient, lists.getListItemIndex());
+        const clusterPrivilegesLists = await readPrivileges(esClient, lists.getListName());
+        const clusterPrivilegesListItems = await readPrivileges(esClient, lists.getListItemName());
         const privileges = merge(
           {
             listItems: clusterPrivilegesListItems,

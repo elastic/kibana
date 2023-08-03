@@ -32,7 +32,7 @@ export const patchListItemRoute = (router: ListsPluginRouter): void => {
       try {
         const { value, id, meta, _version } = request.body;
         const lists = await getListClient(context);
-        const listItem = await lists.updateListItem({
+        const listItem = await lists.patchListItem({
           _version,
           id,
           meta,

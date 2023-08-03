@@ -13,6 +13,7 @@ import { deserializerOrUndefined } from '../../common/deserializer';
 import { metaOrUndefined } from '../../common/meta';
 import { serializerOrUndefined } from '../../common/serializer';
 import { created_at } from '../../common/created_at';
+import { timestampOrUndefined } from '../../common/timestamp';
 import { created_by } from '../../common/created_by';
 import { description } from '../../common/description';
 import { id } from '../../common/id';
@@ -26,6 +27,7 @@ import { updated_by } from '../../common/updated_by';
 export const listSchema = t.exact(
   t.type({
     _version: _versionOrUndefined,
+    '@timestamp': timestampOrUndefined,
     created_at,
     created_by,
     description,

@@ -8,17 +8,16 @@
 import { validate } from '@kbn/securitysolution-io-ts-utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import {
-  FIND_LISTS_BY_SIZE,
+  INTERNAL_FIND_LISTS_BY_SIZE,
   MAXIMUM_SMALL_IP_RANGE_VALUE_LIST_DASH_SIZE,
   MAXIMUM_SMALL_VALUE_LIST_SIZE,
 } from '@kbn/securitysolution-list-constants';
 import { chunk } from 'lodash';
 
-import type { ListsPluginRouter } from '../types';
-import { decodeCursor } from '../services/utils';
-import { findListsBySizeRequestQuery, findListsBySizeResponse } from '../../common/api';
-
-import { buildRouteValidation, buildSiemResponse, getListClient } from './utils';
+import type { ListsPluginRouter } from '../../types';
+import { decodeCursor } from '../../services/utils';
+import { findListsBySizeRequestQuery, findListsBySizeResponse } from '../../../common/api';
+import { buildRouteValidation, buildSiemResponse, getListClient } from '../utils';
 
 export const findListsBySizeRoute = (router: ListsPluginRouter): void => {
   router.get(
@@ -26,7 +25,7 @@ export const findListsBySizeRoute = (router: ListsPluginRouter): void => {
       options: {
         tags: ['access:lists-read'],
       },
-      path: `${FIND_LISTS_BY_SIZE}`,
+      path: INTERNAL_FIND_LISTS_BY_SIZE,
       validate: {
         query: buildRouteValidation(findListsBySizeRequestQuery),
       },
