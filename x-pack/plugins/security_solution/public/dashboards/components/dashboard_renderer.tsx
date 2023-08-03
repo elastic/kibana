@@ -49,6 +49,8 @@ const DashboardRendererComponent = ({
   const getCreationOptions = useCallback(
     () =>
       Promise.resolve({
+        useSessionStorageIntegration: true,
+        useControlGroupIntegration: true,
         getInitialInput: () => ({ timeRange, viewMode, query, filters }),
         getIncomingEmbeddable: () =>
           embeddable.getStateTransfer().getIncomingEmbeddablePackage(APP_UI_ID, true),
