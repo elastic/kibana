@@ -99,6 +99,8 @@ export const failedFleetActionErrorCode = '424';
 
 export const ENDPOINT_DEFAULT_PAGE = 0;
 export const ENDPOINT_DEFAULT_PAGE_SIZE = 10;
+export const ENDPOINT_DEFAULT_SORT_FIELD = 'united.agent.enrolled_at';
+export const ENDPOINT_DEFAULT_SORT_DIRECTION = 'desc';
 
 export const ENDPOINT_ERROR_CODES: Record<string, number> = {
   ES_CONNECTION_ERROR: -272,

@@ -12,6 +12,8 @@ import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-ser
 import {
   ENDPOINT_DEFAULT_PAGE,
   ENDPOINT_DEFAULT_PAGE_SIZE,
+  ENDPOINT_DEFAULT_SORT_DIRECTION,
+  ENDPOINT_DEFAULT_SORT_FIELD,
   metadataCurrentIndexPattern,
   METADATA_UNITED_INDEX,
 } from '../../../../common/endpoint/constants';
@@ -55,9 +57,22 @@ export const MetadataSortMethod: estypes.SortCombinations[] = [
   },
 ];
 
-const UnitedMetadataSortMethod: estypes.SortCombinations[] = [
-  { 'united.agent.enrolled_at': { order: 'desc', unmapped_type: 'date' } },
-];
+const getUnitedMetadataSortMethod = (
+  sortField: string,
+  sortDirection: 'asc' | 'desc'
+): estypes.SortCombinations[] => {
+  const DATE_FIELDS = ['united.endpoint.@timestamp', 'united.agent.enrolled_at'];
+
+  const unitedMetadataSortField = sortField.replace('metadata.', 'united.endpoint.');
+
+  if (sortField === 'host_status') {
+    return [{ status: sortDirection }];
+  } else if (DATE_FIELDS.includes(unitedMetadataSortField)) {
+    return [{ [unitedMetadataSortField]: { order: sortDirection, unmapped_type: 'date' } }];
+  } else {
+    return [{ [unitedMetadataSortField]: sortDirection }];
+  }
+};
 
 export function getESQueryHostMetadataByID(agentID: string): estypes.SearchRequest {
   return {
@@ -151,6 +166,8 @@ export async function buildUnitedIndexQuery(
     pageSize = ENDPOINT_DEFAULT_PAGE_SIZE,
     hostStatuses = [],
     kuery = '',
+    sortField = ENDPOINT_DEFAULT_SORT_FIELD,
+    sortDirection = ENDPOINT_DEFAULT_SORT_DIRECTION,
   } = queryOptions || {};
 
   const statusesKuery = buildStatusesKuery(hostStatuses);
@@ -210,7 +227,7 @@ export async function buildUnitedIndexQuery(
     body: {
       query,
       track_total_hits: true,
-      sort: UnitedMetadataSortMethod,
+      sort: getUnitedMetadataSortMethod(sortField, sortDirection),
       fields,
       runtime_mappings: runtimeMappings,
     },

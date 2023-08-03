@@ -1333,6 +1333,8 @@ interface BaseListResponse<D = unknown> {
   page: number;
   pageSize: number;
   total: number;
+  sortField: string;
+  sortDirection: 'asc' | 'desc';
 }
 
 export interface AdditionalOnSwitchChangeParams {

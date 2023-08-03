@@ -16,6 +16,8 @@ export const GetMetadataListRequestSchema = {
       page: schema.number({ defaultValue: ENDPOINT_DEFAULT_PAGE, min: 0 }),
       pageSize: schema.number({ defaultValue: ENDPOINT_DEFAULT_PAGE_SIZE, min: 1, max: 10000 }),
       kuery: schema.maybe(schema.string()),
+      sortField: schema.maybe(schema.string()),
+      sortDirection: schema.maybe(schema.oneOf([schema.literal('asc'), schema.literal('desc')])),
       hostStatuses: schema.maybe(
         schema.arrayOf(
           schema.oneOf([

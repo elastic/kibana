@@ -19,6 +19,8 @@ import type {
 import {
   ENDPOINT_DEFAULT_PAGE,
   ENDPOINT_DEFAULT_PAGE_SIZE,
+  ENDPOINT_DEFAULT_SORT_DIRECTION,
+  ENDPOINT_DEFAULT_SORT_FIELD,
   METADATA_TRANSFORMS_PATTERN,
 } from '../../../../common/endpoint/constants';
 
@@ -54,6 +56,8 @@ export function getMetadataListRequestHandler(
         total,
         page: request.query.page || ENDPOINT_DEFAULT_PAGE,
         pageSize: request.query.pageSize || ENDPOINT_DEFAULT_PAGE_SIZE,
+        sortField: request.query.sortField || ENDPOINT_DEFAULT_SORT_FIELD,
+        sortDirection: request.query.sortDirection || ENDPOINT_DEFAULT_SORT_DIRECTION,
       };
 
       return response.ok({ body });
