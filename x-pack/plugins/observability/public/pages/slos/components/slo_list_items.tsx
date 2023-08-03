@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React from 'react';
 import { useFetchActiveAlerts } from '../../../hooks/slo/use_fetch_active_alerts';
 import { useFetchHistoricalSummary } from '../../../hooks/slo/use_fetch_historical_summary';
@@ -38,7 +38,7 @@ export function SloListItems({ sloList, loading, error }: Props) {
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
       {sloList.map((slo) => (
-        <EuiFlexItem key={slo.id}>
+        <EuiFlexItem key={`${slo.id}-${slo.instanceId ?? ALL_VALUE}`}>
           <SloListItem
             activeAlerts={activeAlertsBySlo[slo.id]}
             rules={rulesBySlo?.[slo.id]}
