@@ -12,8 +12,8 @@ import { useKibanaContextForPlugin } from '../hooks/use_kibana';
 
 const KIBANA_VERSION_QUERY_PARAM = 'entry.548460210';
 
-const getSurveyFeedbackURL = (featureUrl: string, kibanaVersion?: string) => {
-  const url = new URL(featureUrl);
+const getSurveyFeedbackURL = (formUrl: string, kibanaVersion?: string) => {
+  const url = new URL(formUrl);
   if (kibanaVersion) {
     url.searchParams.append(KIBANA_VERSION_QUERY_PARAM, kibanaVersion);
   }
@@ -22,24 +22,24 @@ const getSurveyFeedbackURL = (featureUrl: string, kibanaVersion?: string) => {
 };
 
 interface FeatureFeedbackButtonProps {
-  featureUrl: string;
-  featureTestSubject: string;
+  formUrl: string;
+  'data-test-subj': string;
 }
 
 export const FeatureFeedbackButton = ({
-  featureUrl,
-  featureTestSubject,
+  formUrl,
+  'data-test-subj': dts,
 }: FeatureFeedbackButtonProps) => {
   const {
     services: { kibanaVersion },
   } = useKibanaContextForPlugin();
   return (
     <EuiButton
-      href={getSurveyFeedbackURL(featureUrl, kibanaVersion)}
+      href={getSurveyFeedbackURL(formUrl, kibanaVersion)}
       target="_blank"
       color="warning"
       iconType="editorComment"
-      data-test-subj={featureTestSubject}
+      data-test-subj={dts}
     >
       <FormattedMessage
         id="xpack.infra.homePage.tellUsWhatYouThinkLink"

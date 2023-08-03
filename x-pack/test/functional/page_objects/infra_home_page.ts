@@ -395,7 +395,7 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
     },
 
     async ensureInventoryFeedbackLinkIsVisible() {
-      await testSubjects.existOrFail('infra-inventory-feedback-link');
+      await testSubjects.existOrFail('infraInventoryFeedbackLink');
     },
 
     async ensureKubernetesTourIsVisible() {

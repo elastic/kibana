@@ -15,16 +15,15 @@ const INVENTORY_FEEDBACK_LINK = 'https://ela.st/survey-infra-inventory?usp=pp_ur
 
 export const SurveySection = () => {
   const { nodeType } = useWaffleOptionsContext();
-  const podNodeType: typeof nodeType = 'pod';
 
   return (
     <>
-      {nodeType === podNodeType ? (
+      {nodeType === 'pod' ? (
         <SurveyKubernetes />
       ) : (
         <FeatureFeedbackButton
-          featureTestSubject="infra-inventory-feedback-link"
-          featureUrl={INVENTORY_FEEDBACK_LINK}
+          data-test-subj="infraInventoryFeedbackLink"
+          formUrl={INVENTORY_FEEDBACK_LINK}
         />
       )}
     </>
