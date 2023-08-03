@@ -204,18 +204,13 @@ export const useColumns = ({
     if (didDefaultColumnChange && defaultColumnsRef.current) {
       defaultColumnsRef.current = defaultColumns;
       setColumnsPopulated(false);
-      // storageAlertsTable = storageData ?? defaultColumns
+      // storageAlertTable already account for the changes in defaultColumns
+      // Technically storageAlertsTable = localStorageData ?? defaultColumns
       setColumns(storageAlertsTable.current.columns);
       setVisibleColumns(storageAlertsTable.current.visibleColumns ?? visibleColumns);
       return;
     }
-  }, [
-    didDefaultColumnChange,
-    storageAlertsTable,
-    defaultColumns,
-    setColumnsByColumnIds,
-    visibleColumns,
-  ]);
+  }, [didDefaultColumnChange, storageAlertsTable, defaultColumns, visibleColumns]);
 
   useEffect(() => {
     if (isEmpty(browserFields) || isColumnsPopulated) return;
@@ -224,14 +219,7 @@ export const useColumns = ({
 
     setColumnsPopulated(true);
     setColumns(populatedColumns);
-  }, [
-    browserFields,
-    defaultColumns,
-    isBrowserFieldDataLoading,
-    isColumnsPopulated,
-    columns,
-    setColumnsByColumnIds,
-  ]);
+  }, [browserFields, defaultColumns, isBrowserFieldDataLoading, isColumnsPopulated, columns]);
 
   const setColumnsAndSave = useCallback(
     (newColumns: EuiDataGridColumn[], newVisibleColumns: string[]) => {
