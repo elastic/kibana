@@ -14,7 +14,7 @@ import { useCasesFeatures } from './use_cases_features';
 import { TestProviders } from './mock/test_providers';
 import type { LicenseType } from '@kbn/licensing-plugin/common/types';
 import { LICENSE_TYPE } from '@kbn/licensing-plugin/common/types';
-import { CaseMetricsFeature } from '../../common/api/metrics/case';
+import { CaseMetricsFeature } from '../../common/types/api';
 
 describe('useCasesFeatures', () => {
   // isAlertsEnabled, isSyncAlertsEnabled, alerts
