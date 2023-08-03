@@ -293,14 +293,20 @@ export const DocViewerTable = ({
     <EuiTableHeaderCell key="header-cell-name" align="left" width="30%" isSorted={false}>
       <EuiText size="xs">
         <strong>
-          <FormattedMessage id="unifiedDocViewer.fieldChooser.discoverField.name" defaultMessage="Field" />
+          <FormattedMessage
+            id="unifiedDocViewer.fieldChooser.discoverField.name"
+            defaultMessage="Field"
+          />
         </strong>
       </EuiText>
     </EuiTableHeaderCell>,
     <EuiTableHeaderCell key="header-cell-value" align="left" isSorted={false}>
       <EuiText size="xs">
         <strong>
-          <FormattedMessage id="unifiedDocViewer.fieldChooser.discoverField.value" defaultMessage="Value" />
+          <FormattedMessage
+            id="unifiedDocViewer.fieldChooser.discoverField.value"
+            defaultMessage="Value"
+          />
         </strong>
       </EuiText>
     </EuiTableHeaderCell>,
@@ -401,7 +407,10 @@ export const DocViewerTable = ({
       {rowElements.length === 0 ? (
         <EuiSelectableMessage style={{ minHeight: 300 }}>
           <p>
-            <EuiI18n token="unifiedDocViewer.docViews.table.noFieldFound" default="No fields found" />
+            <EuiI18n
+              token="unifiedDocViewer.docViews.table.noFieldFound"
+              default="No fields found"
+            />
           </p>
         </EuiSelectableMessage>
       ) : (

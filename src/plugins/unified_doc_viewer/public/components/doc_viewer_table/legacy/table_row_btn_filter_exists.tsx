@@ -44,9 +44,12 @@ export function DocViewTableRowBtnFilterExists({
   return (
     <EuiToolTip content={tooltipContent}>
       <EuiButtonIcon
-        aria-label={i18n.translate('unifiedDocViewer.docViews.table.filterForFieldPresentButtonAriaLabel', {
-          defaultMessage: 'Filter for field present',
-        })}
+        aria-label={i18n.translate(
+          'unifiedDocViewer.docViews.table.filterForFieldPresentButtonAriaLabel',
+          {
+            defaultMessage: 'Filter for field present',
+          }
+        )}
         onClick={onClick}
         className="kbnDocViewer__actionButton"
         data-test-subj="addExistsFilterButton"
