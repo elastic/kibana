@@ -14,6 +14,7 @@ import {
   getPreviewDataParamsSchema,
   getSLOBurnRatesParamsSchema,
   getSLODiagnosisParamsSchema,
+  getSLOInstancesParamsSchema,
   getSLOParamsSchema,
   manageSLOParamsSchema,
   updateSLOParamsSchema,
@@ -33,6 +34,7 @@ import { FetchHistoricalSummary } from '../../services/slo/fetch_historical_summ
 import { getBurnRates } from '../../services/slo/get_burn_rates';
 import { getGlobalDiagnosis, getSloDiagnosis } from '../../services/slo/get_diagnosis';
 import { GetPreviewData } from '../../services/slo/get_preview_data';
+import { GetSLOInstances } from '../../services/slo/get_slo_instances';
 import { DefaultHistoricalSummaryClient } from '../../services/slo/historical_summary_client';
 import { ManageSLO } from '../../services/slo/manage_slo';
 import { DefaultSummarySearchClient } from '../../services/slo/summary_search_client';
@@ -63,7 +65,7 @@ const isLicenseAtLeastPlatinum = async (context: ObservabilityRequestHandlerCont
 const createSLORoute = createObservabilityServerRoute({
   endpoint: 'POST /api/observability/slos 2023-10-31',
   options: {
-    tags: ['access:slo_write'],
+    tags: ['access:public', 'access:slo_write'],
   },
   params: createSLOParamsSchema,
   handler: async ({ context, params, logger }) => {
@@ -88,7 +90,7 @@ const createSLORoute = createObservabilityServerRoute({
 const updateSLORoute = createObservabilityServerRoute({
   endpoint: 'PUT /api/observability/slos/{id} 2023-10-31',
   options: {
-    tags: ['access:slo_write'],
+    tags: ['access:public', 'access:slo_write'],
   },
   params: updateSLOParamsSchema,
   handler: async ({ context, params, logger }) => {
@@ -114,7 +116,7 @@ const updateSLORoute = createObservabilityServerRoute({
 const deleteSLORoute = createObservabilityServerRoute({
   endpoint: 'DELETE /api/observability/slos/{id} 2023-10-31',
   options: {
-    tags: ['access:slo_write'],
+    tags: ['access:public', 'access:slo_write'],
   },
   params: deleteSLOParamsSchema,
   handler: async ({
@@ -146,7 +148,7 @@ const deleteSLORoute = createObservabilityServerRoute({
 const getSLORoute = createObservabilityServerRoute({
   endpoint: 'GET /api/observability/slos/{id} 2023-10-31',
   options: {
-    tags: ['access:slo_read'],
+    tags: ['access:public', 'access:slo_read'],
   },
   params: getSLOParamsSchema,
   handler: async ({ context, params }) => {
@@ -162,7 +164,7 @@ const getSLORoute = createObservabilityServerRoute({
     const summaryClient = new DefaultSummaryClient(esClient);
     const getSLO = new GetSLO(repository, summaryClient);
 
-    const response = await getSLO.execute(params.path.id);
+    const response = await getSLO.execute(params.path.id, params.query);
 
     return response;
   },
@@ -171,7 +173,7 @@ const getSLORoute = createObservabilityServerRoute({
 const enableSLORoute = createObservabilityServerRoute({
   endpoint: 'POST /api/observability/slos/{id}/enable 2023-10-31',
   options: {
-    tags: ['access:slo_write'],
+    tags: ['access:public', 'access:slo_write'],
   },
   params: manageSLOParamsSchema,
   handler: async ({ context, params, logger }) => {
@@ -197,7 +199,7 @@ const enableSLORoute = createObservabilityServerRoute({
 const disableSLORoute = createObservabilityServerRoute({
   endpoint: 'POST /api/observability/slos/{id}/disable 2023-10-31',
   options: {
-    tags: ['access:slo_write'],
+    tags: ['access:public', 'access:slo_write'],
   },
   params: manageSLOParamsSchema,
   handler: async ({ context, params, logger }) => {
@@ -223,7 +225,7 @@ const disableSLORoute = createObservabilityServerRoute({
 const findSLORoute = createObservabilityServerRoute({
   endpoint: 'GET /api/observability/slos 2023-10-31',
   options: {
-    tags: ['access:slo_read'],
+    tags: ['access:public', 'access:slo_read'],
   },
   params: findSLOParamsSchema,
   handler: async ({ context, params, logger }) => {
@@ -266,6 +268,31 @@ const fetchHistoricalSummary = createObservabilityServerRoute({
     const fetchSummaryData = new FetchHistoricalSummary(repository, historicalSummaryClient);
 
     const response = await fetchSummaryData.execute(params.body);
+
+    return response;
+  },
+});
+
+const getSLOInstancesRoute = createObservabilityServerRoute({
+  endpoint: 'GET /internal/observability/slos/{id}/_instances',
+  options: {
+    tags: ['access:slo_read'],
+  },
+  params: getSLOInstancesParamsSchema,
+  handler: async ({ context, params }) => {
+    const hasCorrectLicense = await isLicenseAtLeastPlatinum(context);
+
+    if (!hasCorrectLicense) {
+      throw forbidden('Platinum license or higher is needed to make use of this feature.');
+    }
+
+    const soClient = (await context.core).savedObjects.client;
+    const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+    const repository = new KibanaSavedObjectsSLORepository(soClient);
+
+    const getSLOInstances = new GetSLOInstances(repository, esClient);
+
+    const response = await getSLOInstances.execute(params.path.id);
 
     return response;
   },
@@ -363,4 +390,5 @@ export const sloRouteRepository = {
   ...getSloDiagnosisRoute,
   ...getSloBurnRates,
   ...getPreviewData,
+  ...getSLOInstancesRoute,
 };

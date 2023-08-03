@@ -17,6 +17,11 @@ export enum AppFeatureSecurityKey {
   assistant = 'assistant',
 
   /**
+   * Enables Investigation guide in Timeline
+   */
+  investigationGuide = 'investigation_guide',
+
+  /**
    * Enables access to the Endpoint List and associated views that allows management of hosts
    * running endpoint security
    */
