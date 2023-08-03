@@ -223,6 +223,14 @@ const getDefaultTab = (
   return preferredDashboard;
 };
 
+const determineDashboardDataRefetchInterval = (data: ComplianceDashboardData | undefined) => {
+  if (data?.stats.totalFindings === 0) {
+    return REFETCH_INTERVAL_MS;
+  }
+
+  return false;
+};
+
 const TabContent = ({ posturetype }: { posturetype: PosturePolicyTemplate }) => {
   const { data: getSetupStatus } = useCspSetupStatusApi({
     refetchInterval: (data) => {
@@ -236,23 +244,11 @@ const TabContent = ({ posturetype }: { posturetype: PosturePolicyTemplate }) => 
   const isCloudSecurityPostureInstalled = !!getSetupStatus?.installedPackageVersion;
   const getCspmDashboardData = useCspmStatsApi({
     enabled: isCloudSecurityPostureInstalled && posturetype === POSTURE_TYPE_CSPM,
-    refetchInterval: (data) => {
-      if (data?.stats.totalFindings === 0) {
-        return REFETCH_INTERVAL_MS;
-      }
-
-      return false;
-    },
+    refetchInterval: determineDashboardDataRefetchInterval,
   });
   const getKspmDashboardData = useKspmStatsApi({
     enabled: isCloudSecurityPostureInstalled && posturetype === POSTURE_TYPE_KSPM,
-    refetchInterval: (data) => {
-      if (data?.stats.totalFindings === 0) {
-        return REFETCH_INTERVAL_MS;
-      }
-
-      return false;
-    },
+    refetchInterval: determineDashboardDataRefetchInterval,
   });
   const setupStatus = getSetupStatus?.[posturetype]?.status;
   const setupStatusHandledInDashboard =
