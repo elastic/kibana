@@ -11,8 +11,7 @@ import React, { useCallback } from 'react';
 import {
   EuiPage,
   EuiPageBody,
-  EuiPageContent_Deprecated as EuiPageContent,
-  EuiPageContentBody_Deprecated as EuiPageContentBody,
+  EuiPageSection,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
@@ -95,8 +94,8 @@ export const App = () => {
       <EuiPage className="prfDevTool__page appRoot">
         <EuiPageBody className="prfDevTool__page__pageBody">
           {renderLicenseWarning()}
-          <EuiPageContent className="prfDevTool__page__pageBodyContent">
-            <EuiPageContentBody className="prfDevTool__page__pageBodyContentBody">
+          <EuiPageSection className="prfDevTool__page__pageBodyContent">
+            <EuiPageSection className="prfDevTool__page__pageBodyContentBody">
               <EuiFlexGroup
                 responsive={false}
                 gutterSize="s"
@@ -126,8 +125,8 @@ export const App = () => {
                   onClose={() => dispatch({ type: 'setHighlightDetails', value: null })}
                 />
               ) : null}
-            </EuiPageContentBody>
-          </EuiPageContent>
+            </EuiPageSection>
+          </EuiPageSection>
         </EuiPageBody>
       </EuiPage>
     </>
