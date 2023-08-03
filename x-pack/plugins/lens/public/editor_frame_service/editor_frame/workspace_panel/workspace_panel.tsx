@@ -207,7 +207,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     if (renderDeps.current) {
       if (!initialVisualizationRenderComplete.current) {
         initialVisualizationRenderComplete.current = true;
-        // NOTE: this metric is only repored for an initial editor load of a pre-existing visualization
+        // NOTE: this metric is only reported for an initial editor load of a pre-existing visualization
         log(
           'initial visualization took to render after data received',
           performance.now() - dataReceivedTime.current
@@ -253,7 +253,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
       if (renderDeps.current) {
         dataReceivedTime.current = performance.now();
         if (!initialVisualizationRenderComplete.current) {
-          // NOTE: this metric is only repored for an initial editor load of a pre-existing visualization
+          // NOTE: this metric is only reported for an initial editor load of a pre-existing visualization
           log('initial data took to arrive', dataReceivedTime.current - initialRenderTime.current);
         }
 
