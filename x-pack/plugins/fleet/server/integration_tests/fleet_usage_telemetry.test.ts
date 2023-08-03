@@ -132,7 +132,8 @@ describe('fleet usage telemetry', () => {
           policy_id: 'policy1',
           local_metadata: {
             os: {
-              full: 'Ubuntu jammy(22.04.2 LTS (Jammy Jellyfish))',
+              name: 'Ubuntu',
+              version: '22.04.2 LTS (Jammy Jellyfish)',
             },
           },
         },
@@ -151,7 +152,8 @@ describe('fleet usage telemetry', () => {
           policy_id: 'policy1',
           local_metadata: {
             os: {
-              full: 'Ubuntu focal(20.04.5 LTS (Focal Fossa))',
+              name: 'Ubuntu',
+              version: '20.04.5 LTS (Focal Fossa)',
             },
           },
         },
@@ -170,7 +172,8 @@ describe('fleet usage telemetry', () => {
           policy_id: 'policy1',
           local_metadata: {
             os: {
-              full: 'Ubuntu focal(20.04.5 LTS (Focal Fossa))',
+              name: 'Ubuntu',
+              version: '20.04.5 LTS (Focal Fossa)',
             },
           },
         },
