@@ -8,5 +8,28 @@
     "@kbn/core",
     "@kbn/data-plugin"
   ],
-  "exclude": ["target/**/*"]
+  "exclude": ["target/**/*"],
+  "kbn_references": [
+    "@kbn/io-ts-utils",
+    "@kbn/core",
+    "@kbn/i18n",
+    "@kbn/data-plugin",
+    "@kbn/share-plugin",
+    "@kbn/usage-collection-plugin",
+    "@kbn/utility-types",
+    "@kbn/data-views-plugin",
+    "@kbn/home-plugin",
+    "@kbn/vis-type-timeseries-plugin",
+    "@kbn/features-plugin",
+    "@kbn/spaces-plugin",
+    "@kbn/alerting-plugin",
+    "@kbn/ml-plugin",
+    "@kbn/rule-registry-plugin",
+    "@kbn/observability-plugin",
+    "@kbn/logs-shared-plugin",
+    "@kbn/core-http-server",
+    "@kbn/logging",
+    "@kbn/config-schema",
+    "@kbn/alerts-as-data-utils",
+  ]
 }

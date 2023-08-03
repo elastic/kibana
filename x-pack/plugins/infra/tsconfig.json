@@ -68,6 +68,7 @@
     "@kbn/core-http-server",
     "@kbn/logs-shared-plugin",
     "@kbn/licensing-plugin",
+    "@kbn/metrics-data-plugin",
   ],
   "exclude": ["target/**/*"]
 }
