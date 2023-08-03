@@ -129,7 +129,8 @@ describe('ingest_integration tests ', () => {
         endpointAppContextMock.alerting,
         licenseService,
         exceptionListClient,
-        cloudService
+        cloudService,
+        endpointAppContextMock.appFeatures
       );
 
       return callback(
