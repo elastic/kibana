@@ -125,24 +125,14 @@ export const SearchResponseWarnings = ({
   if (variant === 'empty_prompt') {
     return (
       <EuiEmptyPrompt
+        iconType="warning"
         color="warning"
         title={
-          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiIcon type="warning" color="warning" size="l" />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <h2
-                css={css`
-                  text-align: left;
-                `}
-              >
-                {i18n.translate('searchResponseWarnings.noResultsTitle', {
-                  defaultMessage: 'No results found',
-                })}
-              </h2>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <h2>
+            {i18n.translate('searchResponseWarnings.noResultsTitle', {
+              defaultMessage: 'No results found',
+            })}
+          </h2>
         }
         body={
           <ul
