@@ -137,6 +137,7 @@
     "@kbn/uptime-plugin",
     "@kbn/ml-category-validator",
     "@kbn/observability-ai-assistant-plugin",
-    "@kbn/stack-connectors-plugin"
+    "@kbn/stack-connectors-plugin",
+    "@kbn/metrics-data-plugin"
   ]
 }
