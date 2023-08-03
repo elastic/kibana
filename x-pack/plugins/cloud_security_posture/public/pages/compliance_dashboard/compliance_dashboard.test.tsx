@@ -10,7 +10,7 @@ import React from 'react';
 import { coreMock } from '@kbn/core/public/mocks';
 import { render, screen } from '@testing-library/react';
 import { TestProvider } from '../../test/test_provider';
-import { ComplianceDashboard } from '.';
+import { ComplianceDashboard, getDefaultTab } from '.';
 import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
 import { useLicenseManagementLocatorApi } from '../../common/api/use_license_management_locator_api';
 import { useSubscriptionStatus } from '../../common/hooks/use_subscription_status';
@@ -30,6 +30,7 @@ import {
   CSPM_INTEGRATION_NOT_INSTALLED_TEST_SUBJECT,
   KSPM_INTEGRATION_NOT_INSTALLED_TEST_SUBJECT,
 } from '../../components/cloud_posture_page';
+import { BaseCspSetupStatus, ComplianceDashboardData, CspStatusCode } from '../../../common/types';
 
 jest.mock('../../common/api/use_setup_status_api');
 jest.mock('../../common/api/use_stats_api');
@@ -605,6 +606,77 @@ describe('<ComplianceDashboard />', () => {
         NO_FINDINGS_STATUS_TEST_SUBJ.INDEXING,
         NO_FINDINGS_STATUS_TEST_SUBJ.UNPRIVILEGED,
       ],
+    });
+  });
+});
+
+describe('getDefaultTab', () => {
+  const getPluginStatusMock = (cspmStatus: CspStatusCode, kspmStatus: CspStatusCode) => {
+    return {
+      cspm: { status: cspmStatus },
+      kspm: { status: kspmStatus },
+    };
+  };
+  const getStatsMock = (findings: number) => {
+    return {
+      stats: {
+        totalFindings: findings,
+      },
+    };
+  };
+
+  it('returns CSPM tab if only CSPM has findings', () => {
+    const pluginStatus = getPluginStatusMock('indexed', 'indexed') as BaseCspSetupStatus;
+    const cspmStats = getStatsMock(1) as ComplianceDashboardData;
+    const kspmStats = getStatsMock(0) as ComplianceDashboardData;
+
+    expect(getDefaultTab(pluginStatus, cspmStats, kspmStats)).toEqual('cspm');
+  });
+
+  it('returns CSPM tab if both CSPM and KSPM has findings', () => {
+    const pluginStatus = getPluginStatusMock('indexed', 'indexed') as BaseCspSetupStatus;
+    const cspmStats = getStatsMock(1) as ComplianceDashboardData;
+    const kspmStats = getStatsMock(1) as ComplianceDashboardData;
+
+    expect(getDefaultTab(pluginStatus, cspmStats, kspmStats)).toEqual('cspm');
+  });
+
+  it('returns KSPM tab if only KSPM has findings', () => {
+    const pluginStatus = getPluginStatusMock('indexed', 'indexed') as BaseCspSetupStatus;
+    const cspmStats = getStatsMock(0) as ComplianceDashboardData;
+    const kspmStats = getStatsMock(1) as ComplianceDashboardData;
+
+    expect(getDefaultTab(pluginStatus, cspmStats, kspmStats)).toEqual('kspm');
+  });
+
+  it('when no findings preffers CSPM tab unless not-installed or unprivileged', () => {
+    const cspmStats = getStatsMock(0) as ComplianceDashboardData;
+    const kspmStats = getStatsMock(0) as ComplianceDashboardData;
+    const CspStatusCodeArray: CspStatusCode[] = [
+      'indexed',
+      'indexing',
+      'unprivileged',
+      'index-timeout',
+      'not-deployed',
+      'not-installed',
+      'waiting_for_results',
+    ];
+
+    CspStatusCodeArray.forEach((cspmStatus) => {
+      CspStatusCodeArray.forEach((kspmStatus) => {
+        let expectedTab = 'cspm';
+        const pluginStatus = getPluginStatusMock(cspmStatus, kspmStatus) as BaseCspSetupStatus;
+
+        if (
+          (cspmStatus === 'not-installed' || cspmStatus === 'unprivileged') &&
+          kspmStatus !== 'not-installed' &&
+          kspmStatus !== 'unprivileged'
+        ) {
+          expectedTab = 'kspm';
+        }
+
+        expect(getDefaultTab(pluginStatus, cspmStats, kspmStats)).toEqual(expectedTab);
+      });
     });
   });
 });
