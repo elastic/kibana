@@ -304,7 +304,6 @@ export function transformOutputToFullPolicyOutput(
       required_acks,
     } = output;
     /* eslint-enable @typescript-eslint/naming-convention */
-
     kafkaData = {
       client_id,
       version,
@@ -316,7 +315,22 @@ export function transformOutputToFullPolicyOutput(
       password,
       sasl,
       partition,
-      topics,
+      topics: (topics ?? []).map((topic) => {
+        const { topic: topicName, ...rest } = topic;
+        const whenKeys = Object.keys(rest);
+
+        if (whenKeys.length === 0) {
+          return { topic: topicName };
+        }
+        if (rest.when) {
+          return {
+            topic: topicName,
+            [rest.when.type as string]: {
+              message: rest.when.condition,
+            },
+          };
+        }
+      }),
       headers,
       timeout,
       broker_timeout,
