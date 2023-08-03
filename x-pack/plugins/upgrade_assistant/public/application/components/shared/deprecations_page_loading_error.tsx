@@ -6,7 +6,7 @@
  */
 
 import React, { FunctionComponent } from 'react';
-import { EuiPageContent_Deprecated as EuiPageContent, EuiEmptyPrompt } from '@elastic/eui';
+import { EuiPageSection, EuiEmptyPrompt } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { DeprecationSource } from '../../../../common/types';
@@ -20,12 +20,7 @@ export const DeprecationsPageLoadingError: FunctionComponent<Props> = ({
   deprecationSource,
   message,
 }) => (
-  <EuiPageContent
-    verticalPosition="center"
-    horizontalPosition="center"
-    color="danger"
-    data-test-subj="deprecationsPageLoadingError"
-  >
+  <EuiPageSection alignment="center" color="danger" data-test-subj="deprecationsPageLoadingError">
     <EuiEmptyPrompt
       iconType="warning"
       title={
@@ -38,5 +33,5 @@ export const DeprecationsPageLoadingError: FunctionComponent<Props> = ({
       }
       body={message}
     />
-  </EuiPageContent>
+  </EuiPageSection>
 );

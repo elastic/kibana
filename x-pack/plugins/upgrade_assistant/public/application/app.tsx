@@ -11,11 +11,7 @@ import { Redirect } from 'react-router-dom';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  EuiEmptyPrompt,
-  EuiPageContent_Deprecated as EuiPageContent,
-  EuiLoadingSpinner,
-} from '@elastic/eui';
+import { EuiEmptyPrompt, EuiPageSection, EuiLoadingSpinner } from '@elastic/eui';
 import { ScopedHistory } from '@kbn/core/public';
 
 import { API_BASE_PATH } from '../../common/constants';
@@ -52,9 +48,8 @@ const AppHandlingClusterUpgradeState: React.FunctionComponent = () => {
 
   if (missingManageSpacesPrivilege) {
     return (
-      <EuiPageContent
-        verticalPosition="center"
-        horizontalPosition="center"
+      <EuiPageSection
+        alignment="center"
         color="subdued"
         data-test-subj="missingKibanaPrivilegesMessage"
       >
@@ -72,19 +67,13 @@ const AppHandlingClusterUpgradeState: React.FunctionComponent = () => {
             />
           }
         />
-      </EuiPageContent>
+      </EuiPageSection>
     );
   }
 
   if (clusterUpgradeState === 'isUpgrading') {
     return (
-      <EuiPageContent
-        hasShadow={false}
-        paddingSize="none"
-        verticalPosition="center"
-        horizontalPosition="center"
-        data-test-subj="isUpgradingMessage"
-      >
+      <EuiPageSection paddingSize="none" alignment="center" data-test-subj="isUpgradingMessage">
         <EuiEmptyPrompt
           iconType="logoElasticsearch"
           title={
@@ -106,17 +95,15 @@ const AppHandlingClusterUpgradeState: React.FunctionComponent = () => {
           }
           data-test-subj="emptyPrompt"
         />
-      </EuiPageContent>
+      </EuiPageSection>
     );
   }
 
   if (clusterUpgradeState === 'isUpgradeComplete') {
     return (
-      <EuiPageContent
-        hasShadow={false}
+      <EuiPageSection
         paddingSize="none"
-        verticalPosition="center"
-        horizontalPosition="center"
+        alignment="center"
         data-test-subj="isUpgradeCompleteMessage"
       >
         <EuiEmptyPrompt
@@ -139,7 +126,7 @@ const AppHandlingClusterUpgradeState: React.FunctionComponent = () => {
           }
           data-test-subj="emptyPrompt"
         />
-      </EuiPageContent>
+      </EuiPageSection>
     );
   }
 
@@ -171,14 +158,9 @@ export const App = ({ history }: { history: ScopedHistory }) => {
   // Prevent flicker of the underlying UI while we wait for the status to fetch.
   if (isLoading && isInitialRequest) {
     return (
-      <EuiPageContent
-        hasShadow={false}
-        paddingSize="none"
-        verticalPosition="center"
-        horizontalPosition="center"
-      >
+      <EuiPageSection paddingSize="none" alignment="center">
         <EuiEmptyPrompt body={<EuiLoadingSpinner size="l" />} />
-      </EuiPageContent>
+      </EuiPageSection>
     );
   }
 

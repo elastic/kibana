@@ -8,13 +8,7 @@
 import React, { useEffect, useMemo } from 'react';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
 
-import {
-  EuiPageHeader,
-  EuiSpacer,
-  EuiPageContent_Deprecated as EuiPageContent,
-  EuiLink,
-  EuiCallOut,
-} from '@elastic/eui';
+import { EuiPageHeader, EuiSpacer, EuiPageSection, EuiLink, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DocLinksStart } from '@kbn/core/public';
@@ -156,20 +150,20 @@ export const EsDeprecations = withRouter(({ history }: RouteComponentProps) => {
 
   if (isLoading) {
     return (
-      <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
+      <EuiPageSection alignment="center" color="subdued">
         <SectionLoading>{i18nTexts.isLoading}</SectionLoading>
-      </EuiPageContent>
+      </EuiPageSection>
     );
   }
 
   if (esDeprecations?.deprecations?.length === 0) {
     return (
-      <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
+      <EuiPageSection alignment="center" color="subdued">
         <NoDeprecationsPrompt
           deprecationType="Elasticsearch"
           navigateToOverviewPage={() => history.push('/overview')}
         />
-      </EuiPageContent>
+      </EuiPageSection>
     );
   }
 
