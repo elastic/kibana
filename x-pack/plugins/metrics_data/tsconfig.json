@@ -30,6 +30,5 @@
     "@kbn/core-http-server",
     "@kbn/logging",
     "@kbn/config-schema",
-    "@kbn/alerts-as-data-utils",
   ]
 }
