@@ -11,14 +11,14 @@ import { DatasetsProvider, useDatasetsContext } from '../hooks/use_datasets';
 import { IntegrationsProvider, useIntegrationsContext } from '../hooks/use_integrations';
 import { IDatasetsClient } from '../services/datasets';
 import { LogExplorerProfileStateService } from '../state_machines/log_explorer_profile';
-import { useLogExplorerProfile } from '../hooks/use_log_explorer_profile';
+import { useDatasetSelection } from '../hooks/use_dataset_selection';
 
 interface CustomDatasetSelectorProps {
   logExplorerProfileStateService: LogExplorerProfileStateService;
 }
 
 export const CustomDatasetSelector = withProviders(({ logExplorerProfileStateService }) => {
-  const { datasetSelection, handleDatasetSelectionChange } = useLogExplorerProfile(
+  const { datasetSelection, handleDatasetSelectionChange } = useDatasetSelection(
     logExplorerProfileStateService
   );
 
