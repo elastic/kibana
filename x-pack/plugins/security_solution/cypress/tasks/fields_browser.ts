@@ -12,13 +12,14 @@ import {
   FIELDS_BROWSER_MESSAGE_CHECKBOX,
   FIELDS_BROWSER_RESET_FIELDS,
   FIELDS_BROWSER_CHECKBOX,
-  CLOSE_BTN,
+  FIELD_BROWSER_CLOSE_BTN,
   FIELDS_BROWSER_CATEGORIES_FILTER_BUTTON,
   FIELDS_BROWSER_CATEGORY_FILTER_OPTION,
   FIELDS_BROWSER_CATEGORIES_FILTER_SEARCH,
   FIELDS_BROWSER_VIEW_ALL,
   FIELDS_BROWSER_VIEW_BUTTON,
   FIELDS_BROWSER_VIEW_SELECTED,
+  GET_FIELD_CHECKBOX,
 } from '../screens/fields_browser';
 
 export const addsFields = (fields: string[]) => {
@@ -50,7 +51,7 @@ export const clearFieldsBrowser = () => {
 };
 
 export const closeFieldsBrowser = () => {
-  cy.get(CLOSE_BTN).click({ force: true });
+  cy.get(FIELD_BROWSER_CLOSE_BTN).click({ force: true });
   cy.get(FIELDS_BROWSER_FILTER_INPUT).should('not.exist');
 };
 
@@ -81,6 +82,10 @@ export const removesMessageField = () => {
   cy.get(FIELDS_BROWSER_MESSAGE_CHECKBOX).uncheck({
     force: true,
   });
+};
+
+export const removeField = (fieldName: string) => {
+  cy.get(GET_FIELD_CHECKBOX(fieldName)).uncheck({ force: true });
 };
 
 export const resetFields = () => {

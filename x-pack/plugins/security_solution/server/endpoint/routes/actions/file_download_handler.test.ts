@@ -11,13 +11,13 @@ import {
 } from './file_download_handler';
 import type { HttpApiTestSetupMock } from '../../mocks';
 import { createHttpApiTestSetupMock } from '../../mocks';
-import type { EndpointActionFileDownloadParams } from '../../../../common/endpoint/schema/actions';
 import { validateActionId as _validateActionId } from '../../services';
 import { EndpointAuthorizationError, NotFoundError } from '../../errors';
 import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
 import { ACTION_AGENT_FILE_DOWNLOAD_ROUTE } from '../../../../common/endpoint/constants';
 import { getEndpointAuthzInitialStateMock } from '../../../../common/endpoint/service/authz/mocks';
 import type { FleetFromHostFileClientInterface } from '@kbn/fleet-plugin/server';
+import type { EndpointActionFileDownloadParams } from '../../../../common/api/endpoint';
 
 jest.mock('../../services');
 
