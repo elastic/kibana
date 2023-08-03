@@ -201,3 +201,22 @@ export const MIXED_ALERT_TAG = '[data-test-subj="mixed-alert-tag"]';
 export const UNSELECTED_ALERT_TAG = '[data-test-subj="unselected-alert-tag"]';
 
 export const ALERTS_TABLE_ROW_LOADER = '[data-test-subj="row-loader"]';
+
+export const ALERT_TABLE_SUMMARY_VIEW_SELECTABLE = '[data-test-subj="summary-view-selector"]';
+
+export const ALERT_TABLE_GRID_VIEW_OPTION = '[data-test-subj="gridView"]';
+
+export const EVENT_SUMMARY_COLUMN = '[data-gridcell-column-id="eventSummary"]';
+
+export const EVENT_SUMMARY_ALERT_RENDERER_CONTENT = '[data-test-subj="alertRenderer"]';
+
+export const ALERT_TABLE_EVENT_RENDERED_VIEW_OPTION = '[data-test-subj="eventRenderedView"]';
+
+export const ALERT_TABLE_ADDITIONAL_CONTROLS = '[data-test-subj="additionalFilters-popover"]';
+
+export const ALERT_RENDERER_CONTENT = '[data-test-subj="alertRenderer"]';
+
+export const ALERT_RENDERER_HOST_NAME =
+  '[data-test-subj="alertFieldBadge"] [data-test-subj="render-content-host.name"]';
+
+export const HOVER_ACTIONS_CONTAINER = getDataTestSubjectSelector('hover-actions-container');

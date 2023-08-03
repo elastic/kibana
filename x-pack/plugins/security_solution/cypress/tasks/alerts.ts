@@ -49,6 +49,11 @@ import {
   ALERT_TAGGING_CONTEXT_MENU_ITEM,
   ALERT_TAGGING_CONTEXT_MENU,
   ALERT_TAGGING_UPDATE_BUTTON,
+  ALERTS_HISTOGRAM_PANEL_LOADER,
+  ALERT_TABLE_SUMMARY_VIEW_SELECTABLE,
+  ALERT_TABLE_EVENT_RENDERED_VIEW_OPTION,
+  HOVER_ACTIONS_CONTAINER,
+  ALERT_TABLE_GRID_VIEW_OPTION,
 } from '../screens/alerts';
 import { LOADING_INDICATOR, REFRESH_BUTTON } from '../screens/security_header';
 import { TIMELINE_COLUMN_SPINNER } from '../screens/timeline';
@@ -470,4 +475,24 @@ export const clickAlertTag = (tag: string) => {
 
 export const updateAlertTags = () => {
   cy.get(ALERT_TAGGING_UPDATE_BUTTON).click();
+};
+
+export const showHoverActionsEventRenderedView = (fieldSelector: string) => {
+  cy.get(fieldSelector).first().trigger('mouseover');
+  cy.get(HOVER_ACTIONS_CONTAINER).should('be.visible');
+};
+
+export const waitForTopNHistogramToLoad = () => {
+  cy.get(ALERTS_HISTOGRAM_PANEL_LOADER).should('exist');
+  cy.get(ALERTS_HISTOGRAM_PANEL_LOADER).should('not.exist');
+};
+
+export const switchAlertTableToEventRenderedView = () => {
+  cy.get(ALERT_TABLE_SUMMARY_VIEW_SELECTABLE).should('be.visible').trigger('click');
+  cy.get(ALERT_TABLE_EVENT_RENDERED_VIEW_OPTION).should('be.visible').trigger('click');
+};
+
+export const switchAlertTableToGridView = () => {
+  cy.get(ALERT_TABLE_SUMMARY_VIEW_SELECTABLE).should('be.visible').trigger('click');
+  cy.get(ALERT_TABLE_GRID_VIEW_OPTION).should('be.visible').trigger('click');
 };
