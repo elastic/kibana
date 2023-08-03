@@ -1,0 +1,11 @@
+{
+  "synonyms.delete": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "_synonyms/{synonyms_set}"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/delete-synonyms.html"
+  }
+}
