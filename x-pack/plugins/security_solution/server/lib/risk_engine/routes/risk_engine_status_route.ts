@@ -25,13 +25,11 @@ export const riskEngineStatusRoute = (router: SecuritySolutionPluginRouter, logg
       const siemResponse = buildSiemResponse(response);
 
       const securitySolution = await context.securitySolution;
-      const soClient = (await context.core).savedObjects.client;
       const riskEngineClient = securitySolution.getRiskEngineDataClient();
       const spaceId = securitySolution.getSpaceId();
 
       try {
         const result = await riskEngineClient.getStatus({
-          savedObjectsClient: soClient,
           namespace: spaceId,
         });
         return response.ok({

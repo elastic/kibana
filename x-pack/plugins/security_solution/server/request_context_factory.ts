@@ -137,6 +137,8 @@ export class RequestContextFactory implements IRequestContextFactory {
             logger: options.logger,
             kibanaVersion: options.kibanaVersion,
             esClient: coreContext.elasticsearch.client.asCurrentUser,
+            soClient: coreContext.savedObjects.client,
+            namespace: getSpaceId(),
           })
       ),
     };

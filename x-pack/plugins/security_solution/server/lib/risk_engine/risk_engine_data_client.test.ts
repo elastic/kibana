@@ -15,7 +15,6 @@ import {
   elasticsearchServiceMock,
   savedObjectsClientMock,
 } from '@kbn/core/server/mocks';
-import type { AuthenticatedUser } from '@kbn/security-plugin/common/model';
 import { RiskEngineDataClient } from './risk_engine_data_client';
 import { createDataStream } from './utils/create_datastream';
 import * as savedObjectConfig from './utils/saved_object_configuration';
@@ -71,17 +70,20 @@ jest.mock('../risk_score/transform/helpers/transforms', () => ({
 
 describe('RiskEngineDataClient', () => {
   let riskEngineDataClient: RiskEngineDataClient;
+  let mockSavedObjectClient: ReturnType<typeof savedObjectsClientMock.create>;
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
   const esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
-  const mockSavedObjectClient = savedObjectsClientMock.create();
   const totalFieldsLimit = 1000;
 
   beforeEach(() => {
     logger = loggingSystemMock.createLogger();
+    mockSavedObjectClient = savedObjectsClientMock.create();
     const options = {
       logger,
       kibanaVersion: '8.9.0',
       esClient,
+      soClient: mockSavedObjectClient,
+      namespace: 'default',
     };
     riskEngineDataClient = new RiskEngineDataClient(options);
   });
@@ -358,7 +360,6 @@ describe('RiskEngineDataClient', () => {
     it('should return initial status', async () => {
       const status = await riskEngineDataClient.getStatus({
         namespace: 'default',
-        savedObjectsClient: mockSavedObjectClient,
       });
       expect(status).toEqual({
         riskEngineStatus: 'NOT_INSTALLED',
@@ -384,7 +385,6 @@ describe('RiskEngineDataClient', () => {
 
         const status = await riskEngineDataClient.getStatus({
           namespace: 'default',
-          savedObjectsClient: mockSavedObjectClient,
         });
         expect(status).toEqual({
           riskEngineStatus: 'ENABLED',
@@ -397,7 +397,6 @@ describe('RiskEngineDataClient', () => {
 
         const status = await riskEngineDataClient.getStatus({
           namespace: 'default',
-          savedObjectsClient: mockSavedObjectClient,
         });
         expect(status).toEqual({
           riskEngineStatus: 'DISABLED',
@@ -410,7 +409,6 @@ describe('RiskEngineDataClient', () => {
       it('should fetch transforms', async () => {
         await riskEngineDataClient.getStatus({
           namespace: 'default',
-          savedObjectsClient: mockSavedObjectClient,
         });
 
         expect(esClient.transform.getTransform).toHaveBeenCalledTimes(4);
@@ -433,7 +431,6 @@ describe('RiskEngineDataClient', () => {
 
         const status = await riskEngineDataClient.getStatus({
           namespace: 'default',
-          savedObjectsClient: mockSavedObjectClient,
         });
 
         expect(status).toEqual({
@@ -461,10 +458,7 @@ describe('RiskEngineDataClient', () => {
 
       expect.assertions(1);
       try {
-        await riskEngineDataClient.enableRiskEngine({
-          savedObjectsClient: mockSavedObjectClient,
-          user: { username: 'elastic' } as AuthenticatedUser,
-        });
+        await riskEngineDataClient.enableRiskEngine();
       } catch (e) {
         expect(e.message).toEqual('There no saved object configuration for risk engine');
       }
@@ -473,10 +467,7 @@ describe('RiskEngineDataClient', () => {
     it('should update saved object attrubute', async () => {
       mockSavedObjectClient.find.mockResolvedValueOnce(getSavedObjectConfiguration());
 
-      await riskEngineDataClient.enableRiskEngine({
-        savedObjectsClient: mockSavedObjectClient,
-        user: { username: 'elastic' } as AuthenticatedUser,
-      });
+      await riskEngineDataClient.enableRiskEngine();
 
       expect(mockSavedObjectClient.update).toHaveBeenCalledWith(
         'risk-engine-configuration',
@@ -506,10 +497,7 @@ describe('RiskEngineDataClient', () => {
 
       expect.assertions(1);
       try {
-        await riskEngineDataClient.disableRiskEngine({
-          savedObjectsClient: mockSavedObjectClient,
-          user: { username: 'elastic' } as AuthenticatedUser,
-        });
+        await riskEngineDataClient.disableRiskEngine();
       } catch (e) {
         expect(e.message).toEqual('There no saved object configuration for risk engine');
       }
@@ -518,10 +506,7 @@ describe('RiskEngineDataClient', () => {
     it('should update saved object attrubute', async () => {
       mockSavedObjectClient.find.mockResolvedValueOnce(getSavedObjectConfiguration());
 
-      await riskEngineDataClient.disableRiskEngine({
-        savedObjectsClient: mockSavedObjectClient,
-        user: { username: 'elastic' } as AuthenticatedUser,
-      });
+      await riskEngineDataClient.disableRiskEngine();
 
       expect(mockSavedObjectClient.update).toHaveBeenCalledWith(
         'risk-engine-configuration',
@@ -571,10 +556,7 @@ describe('RiskEngineDataClient', () => {
 
     it('success', async () => {
       const initResult = await riskEngineDataClient.init({
-        savedObjectsClient: mockSavedObjectClient,
         namespace: 'default',
-        user: { username: 'elastic' } as AuthenticatedUser,
-        esClient,
       });
 
       expect(initResult).toEqual({
@@ -591,10 +573,7 @@ describe('RiskEngineDataClient', () => {
         throw new Error('Error disableLegacyRiskEngineMock');
       });
       const initResult = await riskEngineDataClient.init({
-        savedObjectsClient: mockSavedObjectClient,
         namespace: 'default',
-        user: { username: 'elastic' } as AuthenticatedUser,
-        esClient,
       });
 
       expect(initResult).toEqual({
@@ -612,10 +591,7 @@ describe('RiskEngineDataClient', () => {
       });
 
       const initResult = await riskEngineDataClient.init({
-        savedObjectsClient: mockSavedObjectClient,
         namespace: 'default',
-        user: { username: 'elastic' } as AuthenticatedUser,
-        esClient,
       });
 
       expect(initResult).toEqual({
@@ -633,10 +609,7 @@ describe('RiskEngineDataClient', () => {
       });
 
       const initResult = await riskEngineDataClient.init({
-        savedObjectsClient: mockSavedObjectClient,
         namespace: 'default',
-        user: { username: 'elastic' } as AuthenticatedUser,
-        esClient,
       });
 
       expect(initResult).toEqual({
@@ -654,10 +627,7 @@ describe('RiskEngineDataClient', () => {
       });
 
       const initResult = await riskEngineDataClient.init({
-        savedObjectsClient: mockSavedObjectClient,
         namespace: 'default',
-        user: { username: 'elastic' } as AuthenticatedUser,
-        esClient,
       });
 
       expect(initResult).toEqual({
@@ -675,10 +645,7 @@ describe('RiskEngineDataClient', () => {
       });
 
       const initResult = await riskEngineDataClient.init({
-        savedObjectsClient: mockSavedObjectClient,
         namespace: 'default',
-        user: { username: 'elastic' } as AuthenticatedUser,
-        esClient,
       });
 
       expect(initResult).toEqual({
