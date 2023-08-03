@@ -59,6 +59,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const results = await PageObjects.navigationalSearch.getDisplayedResults();
         expect(results[0].label).to.eql('Discover / Logs Explorer');
       });
+
+      it('should render a filter controls section as part of the unified search bar', async () => {
+        // Assert does not render on discover app
+        await PageObjects.common.navigateToApp('discover');
+        await testSubjects.missingOrFail('datasetFiltersCustomization');
+
+        // Assert it renders on log-explorer profile
+        await PageObjects.common.navigateToApp('discover', { hash: '/p/log-explorer' });
+        await testSubjects.existOrFail('datasetFiltersCustomization');
+      });
     });
   });
 }
