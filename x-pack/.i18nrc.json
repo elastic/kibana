@@ -49,6 +49,7 @@
     "xpack.logstash": ["plugins/logstash"],
     "xpack.main": "legacy/plugins/xpack_main",
     "xpack.maps": ["plugins/maps"],
+    "xpack.metricsData": "plugins/metrics_data",
     "xpack.ml": [
       "packages/ml/anomaly_utils",
       "packages/ml/data_grid",
