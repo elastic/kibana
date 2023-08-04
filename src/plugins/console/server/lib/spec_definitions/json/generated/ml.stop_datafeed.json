@@ -1,10 +1,17 @@
 {
   "ml.stop_datafeed": {
     "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
       "allow_no_match": "__flag__",
-      "allow_no_datafeeds": "__flag__",
       "force": "__flag__",
-      "timeout": ""
+      "timeout": [
+        "20s",
+        "-1",
+        "0"
+      ]
     },
     "methods": [
       "POST"
@@ -12,6 +19,10 @@
     "patterns": [
       "_ml/datafeeds/{datafeed_id}/_stop"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/ml-stop-datafeed.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/ml-stop-datafeed.html",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
   }
 }

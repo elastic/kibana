@@ -1,8 +1,18 @@
 {
   "eql.get": {
     "url_params": {
-      "wait_for_completion_timeout": "",
-      "keep_alive": ""
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "keep_alive": [
+        "-1",
+        "0"
+      ],
+      "wait_for_completion_timeout": [
+        "-1",
+        "0"
+      ]
     },
     "methods": [
       "GET"
@@ -10,6 +20,10 @@
     "patterns": [
       "_eql/search/{id}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/eql-search-api.html"
+    "documentation": " https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/get-async-eql-search-api.html",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
   }
 }

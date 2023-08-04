@@ -1,11 +1,39 @@
 {
   "shutdown.delete_node": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "master_timeout": [
+        "nanos",
+        "micros",
+        "ms",
+        "s",
+        "m",
+        "h",
+        "d"
+      ],
+      "timeout": [
+        "nanos",
+        "micros",
+        "ms",
+        "s",
+        "m",
+        "h",
+        "d"
+      ]
+    },
     "methods": [
       "DELETE"
     ],
     "patterns": [
       "_nodes/{node_id}/shutdown"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
   }
 }

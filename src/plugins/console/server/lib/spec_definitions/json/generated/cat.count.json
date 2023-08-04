@@ -1,11 +1,23 @@
 {
   "cat.count": {
     "url_params": {
-      "format": "",
+      "format": [
+        "text"
+      ],
       "h": [],
       "help": "__flag__",
+      "local": "__flag__",
+      "master_timeout": [
+        "30s",
+        "-1",
+        "0"
+      ],
       "s": [],
-      "v": "__flag__"
+      "v": "__flag__",
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__"
     },
     "methods": [
       "GET"
@@ -14,6 +26,10 @@
       "_cat/count",
       "_cat/count/{index}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/cat-count.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/cat-count.html",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
   }
 }

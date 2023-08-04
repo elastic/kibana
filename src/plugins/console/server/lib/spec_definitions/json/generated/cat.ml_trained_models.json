@@ -1,36 +1,64 @@
 {
   "cat.ml_trained_models": {
     "url_params": {
+      "format": [
+        "text"
+      ],
+      "h": [
+        "create_time",
+        "created_by",
+        "data_frame_analytics_id",
+        "description",
+        "heap_size",
+        "id",
+        "ingest.count",
+        "ingest.current",
+        "ingest.failed",
+        "ingest.pipelines",
+        "ingest.time",
+        "license",
+        "operations",
+        "version"
+      ],
+      "help": "__flag__",
+      "local": "__flag__",
+      "master_timeout": [
+        "30s",
+        "-1",
+        "0"
+      ],
+      "s": [
+        "create_time",
+        "created_by",
+        "data_frame_analytics_id",
+        "description",
+        "heap_size",
+        "id",
+        "ingest.count",
+        "ingest.current",
+        "ingest.failed",
+        "ingest.pipelines",
+        "ingest.time",
+        "license",
+        "operations",
+        "version"
+      ],
+      "v": "__flag__",
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
       "allow_no_match": "__flag__",
-      "from": 0,
-      "size": 0,
       "bytes": [
         "b",
-        "k",
         "kb",
-        "m",
         "mb",
-        "g",
         "gb",
-        "t",
         "tb",
-        "p",
         "pb"
       ],
-      "format": "",
-      "h": [],
-      "help": "__flag__",
-      "s": [],
-      "time": [
-        "d",
-        "h",
-        "m",
-        "s",
-        "ms",
-        "micros",
-        "nanos"
-      ],
-      "v": "__flag__"
+      "from": "",
+      "size": ""
     },
     "methods": [
       "GET"
@@ -39,6 +67,10 @@
       "_cat/ml/trained_models",
       "_cat/ml/trained_models/{model_id}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/cat-trained-model.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/cat-trained-model.html",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
   }
 }

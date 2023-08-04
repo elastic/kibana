@@ -1,9 +1,15 @@
 {
   "ml.get_data_frame_analytics_stats": {
     "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
       "allow_no_match": "__flag__",
-      "from": 0,
-      "size": 0,
+      "from": "",
+      "size": [
+        "100"
+      ],
       "verbose": "__flag__"
     },
     "methods": [
@@ -13,6 +19,10 @@
       "_ml/data_frame/analytics/_stats",
       "_ml/data_frame/analytics/{id}/_stats"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/get-dfanalytics-stats.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/get-dfanalytics-stats.html",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
   }
 }

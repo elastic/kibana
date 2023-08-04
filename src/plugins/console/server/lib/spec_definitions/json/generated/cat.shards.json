@@ -1,34 +1,31 @@
 {
   "cat.shards": {
     "url_params": {
-      "format": "",
-      "bytes": [
-        "b",
-        "k",
-        "kb",
-        "m",
-        "mb",
-        "g",
-        "gb",
-        "t",
-        "tb",
-        "p",
-        "pb"
+      "format": [
+        "text"
       ],
-      "master_timeout": "",
       "h": [],
       "help": "__flag__",
-      "s": [],
-      "time": [
-        "d",
-        "h",
-        "m",
-        "s",
-        "ms",
-        "micros",
-        "nanos"
+      "local": "__flag__",
+      "master_timeout": [
+        "30s",
+        "-1",
+        "0"
       ],
-      "v": "__flag__"
+      "s": [],
+      "v": "__flag__",
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "bytes": [
+        "b",
+        "kb",
+        "mb",
+        "gb",
+        "tb",
+        "pb"
+      ]
     },
     "methods": [
       "GET"
@@ -37,6 +34,10 @@
       "_cat/shards",
       "_cat/shards/{index}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/cat-shards.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/cat-shards.html",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
   }
 }

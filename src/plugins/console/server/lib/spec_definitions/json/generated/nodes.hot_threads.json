@@ -1,21 +1,46 @@
 {
   "nodes.hot_threads": {
     "url_params": {
-      "interval": "",
-      "snapshots": "10",
-      "threads": "3",
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
       "ignore_idle_threads": "__flag__",
+      "interval": [
+        "500ms",
+        "-1",
+        "0"
+      ],
+      "snapshots": [
+        "10"
+      ],
+      "master_timeout": [
+        "30s",
+        "-1",
+        "0"
+      ],
+      "threads": [
+        "3"
+      ],
+      "timeout": [
+        "30s",
+        "-1",
+        "0"
+      ],
       "type": [
         "cpu",
         "wait",
         "block",
+        "gpu",
         "mem"
       ],
       "sort": [
         "cpu",
-        "total"
-      ],
-      "timeout": ""
+        "wait",
+        "block",
+        "gpu",
+        "mem"
+      ]
     },
     "methods": [
       "GET"
@@ -24,6 +49,10 @@
       "_nodes/hot_threads",
       "_nodes/{node_id}/hot_threads"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/cluster-nodes-hot-threads.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/cluster-nodes-hot-threads.html",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
   }
 }

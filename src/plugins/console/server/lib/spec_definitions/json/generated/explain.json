@@ -1,21 +1,25 @@
 {
   "explain": {
     "url_params": {
-      "analyze_wildcard": "__flag__",
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
       "analyzer": "",
+      "analyze_wildcard": "__flag__",
       "default_operator": [
-        "AND",
-        "OR"
+        "and",
+        "or"
       ],
-      "df": "_all",
-      "stored_fields": [],
+      "df": "",
       "lenient": "__flag__",
-      "preference": "random",
-      "q": "",
+      "preference": "",
       "routing": "",
-      "_source": [],
+      "_source": "__flag__",
       "_source_excludes": [],
-      "_source_includes": []
+      "_source_includes": [],
+      "stored_fields": [],
+      "q": ""
     },
     "methods": [
       "GET",
@@ -24,6 +28,10 @@
     "patterns": [
       "{index}/_explain/{id}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/search-explain.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/search-explain.html",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
   }
 }

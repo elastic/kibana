@@ -1,10 +1,22 @@
 {
   "sql.get_async": {
     "url_params": {
-      "delimiter": "",
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "delimiter": [
+        ","
+      ],
       "format": "",
-      "keep_alive": "",
-      "wait_for_completion_timeout": ""
+      "keep_alive": [
+        "-1",
+        "0"
+      ],
+      "wait_for_completion_timeout": [
+        "-1",
+        "0"
+      ]
     },
     "methods": [
       "GET"
@@ -12,6 +24,10 @@
     "patterns": [
       "_sql/async/{id}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/get-async-sql-search-api.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/get-async-sql-search-api.html",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
   }
 }

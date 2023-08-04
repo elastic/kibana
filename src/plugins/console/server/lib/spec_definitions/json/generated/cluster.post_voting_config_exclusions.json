@@ -1,10 +1,17 @@
 {
   "cluster.post_voting_config_exclusions": {
     "url_params": {
-      "node_ids": "",
-      "node_names": "",
-      "timeout": "",
-      "master_timeout": ""
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "node_names": [],
+      "node_ids": [],
+      "timeout": [
+        "30s",
+        "-1",
+        "0"
+      ]
     },
     "methods": [
       "POST"
@@ -12,6 +19,10 @@
     "patterns": [
       "_cluster/voting_config_exclusions"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/voting-config-exclusions.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/voting-config-exclusions.html",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
   }
 }
