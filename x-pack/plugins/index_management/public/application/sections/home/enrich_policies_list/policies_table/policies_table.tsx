@@ -5,13 +5,8 @@
  * 2.0.
  */
 
-import React, { FunctionComponent} from 'react';
-import {
-  EuiInMemoryTable,
-  EuiBasicTableColumn,
-  EuiSearchBarProps,
-  EuiButton,
-} from '@elastic/eui';
+import React, { FunctionComponent } from 'react';
+import { EuiInMemoryTable, EuiBasicTableColumn, EuiSearchBarProps, EuiButton } from '@elastic/eui';
 import type { EnrichPolicy } from '../enrich_policies_list';
 
 export interface Props {
@@ -34,19 +29,10 @@ export const PoliciesTable: FunctionComponent<Props> = ({
 }) => {
   const renderToolsRight = () => {
     return [
-      <EuiButton
-        key="reloadPolicies"
-        iconType="refresh"
-        color="success"
-        onClick={onReloadClick}
-      >
+      <EuiButton key="reloadPolicies" iconType="refresh" color="success" onClick={onReloadClick}>
         Reload
       </EuiButton>,
-      <EuiButton
-        key="createPolicy"
-        fill
-        iconType="plusInCircle"
-      >
+      <EuiButton key="createPolicy" fill iconType="plusInCircle">
         Create enrich policy
       </EuiButton>,
     ];
@@ -108,7 +94,7 @@ export const PoliciesTable: FunctionComponent<Props> = ({
           color: 'danger',
           onClick: ({ name }) => onDeletePolicyClick(name),
         },
-      ]
+      ],
     },
   ];
 

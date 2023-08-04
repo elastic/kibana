@@ -9,10 +9,7 @@ import { IScopedClusterClient } from '@kbn/core/server';
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '..';
 
-export function registerListRoute({
-  router,
-  lib: { handleEsError },
-}: RouteDependencies) {
+export function registerListRoute({ router, lib: { handleEsError } }: RouteDependencies) {
   router.get(
     { path: addBasePath('/enrich_policies'), validate: false },
     async (context, request, response) => {

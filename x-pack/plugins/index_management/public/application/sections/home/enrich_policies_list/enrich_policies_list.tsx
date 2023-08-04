@@ -5,13 +5,9 @@
  * 2.0.
  */
 
-import React, { useState} from 'react';
+import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  EuiSpacer,
-  EuiText,
-  EuiLink,
-} from '@elastic/eui';
+import { EuiSpacer, EuiText, EuiLink } from '@elastic/eui';
 
 import { APP_WRAPPER_CLASS, useExecutionContext } from '../../../../shared_imports';
 import { useAppContext } from '../../../app_context';
@@ -21,7 +17,7 @@ import { PageLoading, PageError } from '../../../../shared_imports';
 import { PoliciesTable } from './policies_table';
 import { DeletePolicyModal, ExecutePolicyModal } from './confirm_modals';
 
-type policyType = 'match' | 'geo_match' | 'range' | '';
+type PolicyType = 'match' | 'geo_match' | 'range' | '';
 
 interface BaseTypes {
   name: string;
@@ -31,18 +27,18 @@ interface BaseTypes {
 }
 
 export interface EnrichPolicy extends BaseTypes {
-  type: policyType
-};
+  type: PolicyType;
+}
 
 interface BaseEnrichPolicy {
   config: {
-    match?: BaseTypes
-    geo_match?: BaseTypes
-    range?: BaseTypes
-  }
+    match?: BaseTypes;
+    geo_match?: BaseTypes;
+    range?: BaseTypes;
+  };
 }
 
-const getPolicyType = (policy: BaseEnrichPolicy): policyType => {
+const getPolicyType = (policy: BaseEnrichPolicy): PolicyType => {
   if (policy.config.match) {
     return 'match';
   }
@@ -85,12 +81,7 @@ export const EnrichPoliciesList = () => {
   const [policyToDelete, setPolicyToDelete] = useState<string | undefined>();
   const [policyToExecute, setPolicyToExecute] = useState<string | undefined>();
 
-  const {
-    error,
-    isLoading,
-    data,
-    resendRequest: reload,
-  } = useLoadEnrichPolicies();
+  const { error, isLoading, data, resendRequest: reload } = useLoadEnrichPolicies();
 
   if (isLoading) {
     return (
@@ -125,11 +116,7 @@ export const EnrichPoliciesList = () => {
           defaultMessage="Enrich policies allow you to enrich your data by adding context via additional data. {learnMoreLink}"
           values={{
             learnMoreLink: (
-              <EuiLink
-                href={'/todo'}
-                target="_blank"
-                external
-              >
+              <EuiLink href={'/todo'} target="_blank" external>
                 Learn more
               </EuiLink>
             ),

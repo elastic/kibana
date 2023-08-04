@@ -149,11 +149,7 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
           ]}
           component={ComponentTemplateList}
         />
-        <Route
-          exact
-          path={`/${Section.EnrichPolicies}`}
-          component={EnrichPoliciesList}
-        />
+        <Route exact path={`/${Section.EnrichPolicies}`} component={EnrichPoliciesList} />
       </Routes>
     </>
   );

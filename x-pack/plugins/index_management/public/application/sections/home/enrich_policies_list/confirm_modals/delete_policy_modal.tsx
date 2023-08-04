@@ -21,28 +21,30 @@ export const DeletePolicyModal = ({
   const { toasts } = useAppContext();
 
   const handleDeletePolicy = () => {
-    deleteEnrichPolicy(policyToDelete)
-      .then(({ data, error}) => {
-        if (data) {
-          const successMessage = i18n.translate(
-            'xpack.index_management.enrich_policies.deleteModal.successDeleteNotificationMessage',
-            { defaultMessage: 'Deleted {policyToDelete}', values: { policyToDelete } }
-          );
-          toasts.addSuccess(successMessage);
+    deleteEnrichPolicy(policyToDelete).then(({ data, error }) => {
+      if (data) {
+        const successMessage = i18n.translate(
+          'xpack.index_management.enrich_policies.deleteModal.successDeleteNotificationMessage',
+          { defaultMessage: 'Deleted {policyToDelete}', values: { policyToDelete } }
+        );
+        toasts.addSuccess(successMessage);
 
-          return callback({ hasDeletedPolicy: true });
-        }
+        return callback({ hasDeletedPolicy: true });
+      }
 
-        if (error) {
-          const errorMessage = i18n.translate('xpack.index_management.enrich_policies.deleteModal.errorDeleteNotificationMessage', {
+      if (error) {
+        const errorMessage = i18n.translate(
+          'xpack.index_management.enrich_policies.deleteModal.errorDeleteNotificationMessage',
+          {
             defaultMessage: "Error deleting enrich policy: '{error}'",
             values: { error: error.message },
-          });
-          toasts.addDanger(errorMessage);
-        }
+          }
+        );
+        toasts.addDanger(errorMessage);
+      }
 
-        callback();
-      });
+      callback();
+    });
   };
 
   const handleOnCancel = () => {
@@ -59,7 +61,8 @@ export const DeletePolicyModal = ({
       confirmButtonText="Delete"
     >
       <p>
-        You are about to delete the enrich policy <strong>{policyToDelete}</strong>. This action is irreverisble.
+        You are about to delete the enrich policy <strong>{policyToDelete}</strong>. This action is
+        irreverisble.
       </p>
     </EuiConfirmModal>
   );
