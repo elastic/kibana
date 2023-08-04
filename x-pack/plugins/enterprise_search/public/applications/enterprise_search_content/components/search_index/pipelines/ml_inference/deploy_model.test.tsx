@@ -12,16 +12,6 @@ import { EuiButton } from '@elastic/eui';
 import { TextExpansionDismissButton } from './text_expansion_callout';
 import { DeployModel } from './deploy_model';
 
-jest.mock('./text_expansion_callout_data', () => ({
-  useTextExpansionCallOutData: jest.fn(() => ({
-    dismiss: jest.fn(),
-    isCreateButtonDisabled: false,
-    isDismissable: false,
-    isStartButtonDisabled: false,
-    show: true,
-  })),
-}));
-
 const DEFAULT_VALUES = {
   startTextExpansionModelError: undefined,
   isCreateButtonDisabled: false,
