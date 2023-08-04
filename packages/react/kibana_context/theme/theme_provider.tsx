@@ -10,12 +10,13 @@ import React, { useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 
 import { EuiThemeProvider, EuiThemeProviderProps } from '@elastic/eui';
+
 // @ts-ignore EUI exports this component internally, but Kibana isn't picking it up its types
 import { useIsNestedEuiProvider } from '@elastic/eui/lib/components/provider/nested';
 // @ts-ignore EUI exports this component internally, but Kibana isn't picking it up its types
 import { emitEuiProviderWarning } from '@elastic/eui/lib/services/theme/warning';
 
-import { KibanaEuiProvider } from '@kbn/react-kibana-context-root/eui_provider';
+import { KibanaEuiProvider } from '@kbn/react-kibana-context-root';
 
 import {
   getColorMode,
@@ -46,7 +47,7 @@ export interface KibanaThemeProviderProps extends EuiProps {
  * TODO: Restore this to the main `KibanaThemeProvider` once all theme providers can be guaranteed
  * to have a parent `EuiProvider`
  */
-export const KibanaThemeProviderOnly = ({
+const KibanaThemeProviderOnly = ({
   theme: { theme$ },
   euiTheme: theme,
   children,
@@ -62,11 +63,11 @@ export const KibanaThemeProviderOnly = ({
  * Unfortunately, a lot of plugins are using `KibanaThemeProvider` without a parent
  * `EuiProvider` which provides very necessary setup (e.g. Emotion cache, breakpoints).
  *
- * If so, we need to render an EuiProvider first (but without global styles, since those
- * are already handled by `KibanaRootContextProvider`)
+ * If a render call is using the deprecated context, we need to render an EuiProvider first
+ * (but without global styles, since those are already handled by `KibanaRootContextProvider`)
  *
- * TODO: We can hopefully remove this and revert to only exporting the above component once
- * all plugins are on `KibanaRootContextProvider`?
+ * TODO: clintandrewhall - We can remove this and revert to only exporting the above component
+ * once all out-of-band renders are using `KibanaRenderContextProvider`.
  */
 const KibanaThemeProviderCheck = ({ theme, children, ...props }: KibanaThemeProviderProps) => {
   const hasEuiProvider = useIsNestedEuiProvider();
@@ -79,7 +80,7 @@ const KibanaThemeProviderCheck = ({ theme, children, ...props }: KibanaThemeProv
     );
   } else {
     emitEuiProviderWarning(
-      'Your plugin used an KibanaThemeProvider without a required parent KibanaRootContextProvider.'
+      'KibanaThemeProvider requires a parent KibanaRenderContextProvider.  Check your React tree and ensure that they are wrapped in a KibanaRenderContextProvider.'
     );
     return (
       <KibanaEuiProvider theme={theme} globalStyles={false}>
