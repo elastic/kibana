@@ -1545,10 +1545,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.0.2.tgz#56b9ef03984a05cc213772ae3713ea8ef47b0314"
   integrity sha512-IoxURM5zraoQ7C8f+mJb9HYSENiZGgRVcG4tLQxE61yHNNRDXtGDWTZh8N1KIHcsqN1CEPETjuzBXkJYF/fDiQ==
 
-"@elastic/eui@85.0.1":
-  version "85.0.1"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-85.0.1.tgz#835b77f20670918d0f30ccfa47f0f94cb1fdc9e8"
-  integrity sha512-OZ8XClOdiRTyhAcipaw3wGgA8HogNqNESJZ8jqUTGbVxN+hsLjAA64rKcqkTndid+7mbxV3+UePieRVnOkzMEg==
+"@elastic/eui@85.1.0":
+  version "85.1.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-85.1.0.tgz#cad3113223992b3a857b8054440ce4f499eaf897"
+  integrity sha512-G2pBPJrNbO92/ttRowlxGczuAQEkcXlco4LJWWesWBqKxOW6ypF8LJxlC7J7tIBWAOUEQFSVUGELqPnynMVoew==
   dependencies:
     "@types/chroma-js" "^2.0.0"
     "@types/lodash" "^4.14.194"
@@ -30125,10 +30125,10 @@ xpath@0.0.32:
   resolved "https://registry.yarnpkg.com/xpath/-/xpath-0.0.32.tgz#1b73d3351af736e17ec078d6da4b8175405c48af"
   integrity sha512-rxMJhSIoiO8vXcWvSifKqhvV96GjiD5wYb8/QHdoRyQvraTpp4IEv944nhGausZZ3u7dhQXteZuZbaqfpB7uYw==
 
-xstate@^4.38.1:
-  version "4.38.1"
-  resolved "https://registry.yarnpkg.com/xstate/-/xstate-4.38.1.tgz#9be54c2dfc44d1d566c697393921edaf6d3c9998"
-  integrity sha512-1gBUcFWBj/rv/pRcP2Bedl5sNRGX2d36CaOx9z7fE9uSiHaOEHIWzLg1B853q2xdUHUA9pEiWKjLZ3can4SJaQ==
+xstate@^4.38.2:
+  version "4.38.2"
+  resolved "https://registry.yarnpkg.com/xstate/-/xstate-4.38.2.tgz#1b74544fc9c8c6c713ba77f81c6017e65aa89804"
+  integrity sha512-Fba/DwEPDLneHT3tbJ9F3zafbQXszOlyCJyQqqdzmtlY/cwE2th462KK48yaANf98jHlP6lJvxfNtN0LFKXPQg==
 
 "xtend@>=4.0.0 <4.1.0-0", xtend@^4.0.0, xtend@^4.0.1, xtend@^4.0.2, xtend@~4.0.1:
   version "4.0.2"
