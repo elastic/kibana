@@ -55,8 +55,8 @@ export function InstallElasticAgent() {
   function onBack() {
     navigateToKibanaUrl('/app/observabilityOnboarding');
   }
-  function onContinue() {
-    locator?.navigate(getDiscoverNavigationParams(datasetName));
+  async function onContinue() {
+    await locator?.navigate(getDiscoverNavigationParams(datasetName));
   }
 
   function onAutoDownloadConfig() {
