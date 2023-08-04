@@ -33,7 +33,12 @@ export const SearchControls = ({ search, onSearch, onSort, isLoading }: SearchCo
   };
 
   return (
-    <EuiPanel paddingSize="s" hasShadow={false} css={{ width: DATA_VIEW_POPOVER_CONTENT_WIDTH }}>
+    <EuiPanel
+      paddingSize="s"
+      hasShadow={false}
+      css={{ width: DATA_VIEW_POPOVER_CONTENT_WIDTH }}
+      data-test-subj="datasetSelectorSearchControls"
+    >
       <EuiFlexGroup gutterSize="xs" responsive={false}>
         <EuiFlexItem>
           <EuiFieldSearch

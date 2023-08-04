@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 interface IntegrationPackage {
@@ -155,6 +156,13 @@ const packages: IntegrationPackage[] = [
 ];
 
 const initialPackages = packages.slice(0, 3);
+const initialPackageMap = {
+  apache: 'Apache HTTP Server',
+  aws: 'AWS',
+  system: 'System',
+};
+const initialPackagesTexts = Object.values(initialPackageMap);
+
 const additionalPackages = packages.slice(3);
 
 export default function (providerContext: FtrProviderContext) {
@@ -162,8 +170,11 @@ export default function (providerContext: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const logger = getService('log');
+  const retry = getService('retry');
+  const PageObjects = getPageObjects(['common', 'discoverLogExplorer']);
 
   const supertest = getService('supertest');
+  const browser = getService('browser');
 
   const uninstallPackage = ({ name, version }: IntegrationPackage) => {
     return supertest.delete(`/api/fleet/epm/packages/${name}/${version}`).set('kbn-xsrf', 'xxxx');
@@ -184,6 +195,7 @@ export default function (providerContext: FtrProviderContext) {
       );
       logger.info(`Installing ${initialPackages.length} integration packages.`);
       await Promise.all(initialPackages.map(installPackage));
+      await PageObjects.common.navigateToApp('discover', { hash: '/p/log-explorer' });
     });
 
     after('clean up archives', async () => {
@@ -194,6 +206,138 @@ export default function (providerContext: FtrProviderContext) {
 
       logger.info(`Uninstalling ${initialPackages.length} integration packages.`);
       await Promise.all(initialPackages.map(uninstallPackage));
+    });
+
+    describe('when open on the first navigation level', () => {
+      beforeEach(async () => {
+        await PageObjects.discoverLogExplorer.openDatasetSelector();
+        await PageObjects.discoverLogExplorer.clearSearchField();
+      });
+
+      afterEach(async () => {
+        await PageObjects.discoverLogExplorer.clearSearchField();
+        await PageObjects.discoverLogExplorer.closeDatasetSelector();
+      });
+
+      it('should always display the all log datasets entry as first item', async () => {
+        const allLogDatasetButton = await PageObjects.discoverLogExplorer.getAllLogDatasetsButton();
+        const menuEntries = await PageObjects.discoverLogExplorer.getCurrentPanelEntries();
+
+        const allLogDatasetTitle = await allLogDatasetButton.getVisibleText();
+        const firstEntryTitle = await menuEntries[0].getVisibleText();
+
+        expect(allLogDatasetTitle).to.be('All log datasets');
+        expect(allLogDatasetTitle).to.be(firstEntryTitle);
+      });
+
+      it('should always display the unmanaged datasets entry as second item', async () => {
+        const unamanagedDatasetButton =
+          await PageObjects.discoverLogExplorer.getUnmanagedDatasetsButton();
+        const menuEntries = await PageObjects.discoverLogExplorer.getCurrentPanelEntries();
+
+        const unmanagedDatasetTitle = await unamanagedDatasetButton.getVisibleText();
+        const secondEntryTitle = await menuEntries[1].getVisibleText();
+
+        expect(unmanagedDatasetTitle).to.be('Uncategorized');
+        expect(unmanagedDatasetTitle).to.be(secondEntryTitle);
+      });
+
+      it('should display a list of installed integrations', async () => {
+        const { integrations } = await PageObjects.discoverLogExplorer.getIntegrations();
+
+        expect(integrations.length).to.be(3);
+        expect(integrations).to.eql(initialPackagesTexts);
+      });
+
+      it('should sort the integrations list by the clicked sorting option', async () => {
+        // Test ascending order
+        await PageObjects.discoverLogExplorer.clickSortButtonBy('asc');
+
+        await retry.try(async () => {
+          const { integrations } = await PageObjects.discoverLogExplorer.getIntegrations();
+          expect(integrations).to.eql(initialPackagesTexts);
+        });
+
+        // Test descending order
+        await PageObjects.discoverLogExplorer.clickSortButtonBy('desc');
+
+        await retry.try(async () => {
+          const { integrations } = await PageObjects.discoverLogExplorer.getIntegrations();
+          expect(integrations).to.eql(initialPackagesTexts.slice().reverse());
+        });
+
+        // Test back ascending order
+        await PageObjects.discoverLogExplorer.clickSortButtonBy('asc');
+
+        await retry.try(async () => {
+          const { integrations } = await PageObjects.discoverLogExplorer.getIntegrations();
+          expect(integrations).to.eql(initialPackagesTexts);
+        });
+      });
+
+      it('should filter the integrations list by the typed integration name', async () => {
+        await PageObjects.discoverLogExplorer.typeSearchFieldWith('system');
+
+        await retry.try(async () => {
+          const { integrations } = await PageObjects.discoverLogExplorer.getIntegrations();
+          expect(integrations).to.eql([initialPackageMap.system]);
+        });
+
+        await PageObjects.discoverLogExplorer.typeSearchFieldWith('a');
+
+        await retry.try(async () => {
+          const { integrations } = await PageObjects.discoverLogExplorer.getIntegrations();
+          expect(integrations).to.eql([initialPackageMap.apache, initialPackageMap.aws]);
+        });
+      });
+
+      it('should display an empty prompt when the search does not match any result', async () => {
+        await PageObjects.discoverLogExplorer.typeSearchFieldWith('no result search text');
+
+        await retry.try(async () => {
+          const { integrations } = await PageObjects.discoverLogExplorer.getIntegrations();
+          expect(integrations.length).to.be(0);
+        });
+
+        await PageObjects.discoverLogExplorer.assertNoIntegrationsPromptExists();
+      });
+    });
+
+    // describe('when click on an integration and moves into the second navigation level', () => {});
+
+    describe('when open/close the selector', () => {
+      it('should remember the latest navigation panel and restore it', async () => {
+        await PageObjects.discoverLogExplorer.openDatasetSelector();
+        await PageObjects.discoverLogExplorer.clearSearchField();
+
+        await retry.try(async () => {
+          const { nodes } = await PageObjects.discoverLogExplorer.getIntegrations();
+          await nodes[0].click();
+        });
+
+        await retry.try(async () => {
+          const panelTitleNode =
+            await PageObjects.discoverLogExplorer.getDatasetSelectorContextMenuPanelTitle();
+          const menuEntries = await PageObjects.discoverLogExplorer.getCurrentPanelEntries();
+
+          expect(await panelTitleNode.getVisibleText()).to.be('Apache HTTP Server');
+          expect(await menuEntries[0].getVisibleText()).to.be('access');
+          expect(await menuEntries[1].getVisibleText()).to.be('error');
+        });
+
+        await PageObjects.discoverLogExplorer.closeDatasetSelector();
+        await PageObjects.discoverLogExplorer.openDatasetSelector();
+
+        await retry.try(async () => {
+          const panelTitleNode =
+            await PageObjects.discoverLogExplorer.getDatasetSelectorContextMenuPanelTitle();
+          const menuEntries = await PageObjects.discoverLogExplorer.getCurrentPanelEntries();
+
+          expect(await panelTitleNode.getVisibleText()).to.be('Apache HTTP Server');
+          expect(await menuEntries[0].getVisibleText()).to.be('access');
+          expect(await menuEntries[1].getVisibleText()).to.be('error');
+        });
+      });
     });
   });
 }
