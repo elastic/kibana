@@ -43,13 +43,33 @@ export const importListItemRoute = (router: ListsPluginRouter, config: ConfigTyp
         const stream = createStreamFromBuffer(request.body);
         const { deserializer, list_id: listId, serializer, type } = request.query;
         const lists = await getListClient(context);
-        const listExists = await lists.getListDataStreamExists();
-        if (!listExists) {
-          return siemResponse.error({
-            body: `To import a list item, the data steam must exist first. Data stream "${lists.getListName()}" does not exist`,
-            statusCode: 400,
-          });
+
+        const listDataExists = await lists.getListDataStreamExists();
+        if (!listDataExists) {
+          const listIndexExists = await lists.getListIndexExists();
+          if (!listIndexExists) {
+            return siemResponse.error({
+              body: `To import a list item, the data steam must exist first. Data stream "${lists.getListName()}" does not exist`,
+              statusCode: 400,
+            });
+          }
+          // otherwise migration is needed
+          await lists.migrateListIndexToDataStream();
         }
+
+        const listItemDataExists = await lists.getListItemDataStreamExists();
+        if (!listItemDataExists) {
+          const listItemIndexExists = await lists.getListItemIndexExists();
+          if (!listItemIndexExists) {
+            return siemResponse.error({
+              body: `To import a list item, the data steam must exist first. Data stream "${lists.getListItemName()}" does not exist`,
+              statusCode: 400,
+            });
+          }
+          // otherwise migration is needed
+          await lists.migrateListItemIndexToDataStream();
+        }
+
         if (listId != null) {
           const list = await lists.getList({ id: listId });
           if (list == null) {
