@@ -206,6 +206,12 @@ export const LogRateAnalysis: FC<AlertDetailsLogRateAnalysisSectionProps> = ({ r
           : 'are less or not present in the log rate dip'
       }:
 
+      ${
+        logRateAnalysisType === LOG_RATE_ANALYSIS_TYPE.SPIKE
+          ? 'The median log rate in the selected deviation time range is higher than the baseline. Therefore, the results shows statistically significant items within the deviation time range that are contributors to the spike. The "doc count" column refers to the amount of documents in the deviation time range.'
+          : 'The median log rate in the selected deviation time range is lower than the baseline. Therefore, the analysis results table shows statistically significant items within the baseline time range that are less present or missing within the deviation time range. The "doc count" column refers to the amount of documents in the baseline time range.'
+      }
+
       ${header}
       ${rows}
 
@@ -214,14 +220,15 @@ export const LogRateAnalysis: FC<AlertDetailsLogRateAnalysisSectionProps> = ({ r
       ${
         logRateAnalysisType === LOG_RATE_ANALYSIS_TYPE.SPIKE
           ? 'Based on the type of these logs do a root cause analysis on why the field and value combinations from the analysis results are causing this log rate spike (2 parapraphs)'
-          : 'Based on the type of these logs do a concise analysis why the statistically significant field and value combinations are less present or missing from the log rate dip with concrete examples based on the analysis results data. Do not guess, just output what you are sure of (2 paragraphs)'
+          : 'Based on the type of these logs explain why the statistically significant field and value combinations are less present or missing from the log rate dip with concrete examples based on the analysis results data which contains items that are present in the baseline time range and are missing or less present in the deviation time range (2 paragraphs)'
       }.
       ${
         logRateAnalysisType === LOG_RATE_ANALYSIS_TYPE.SPIKE
           ? 'Recommend concrete remediations to resolve the root cause (3 bullet points).'
           : ''
       }
-      Do not repeat the given instructions in your output.`;
+
+      Do not mention indidivual p-values from the analysis results. Do not guess, just say what you are sure of. Do not repeat the given instructions in your output.`;
 
     const now = new Date().toString();
 
