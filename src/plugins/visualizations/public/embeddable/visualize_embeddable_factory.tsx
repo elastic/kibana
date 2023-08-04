@@ -57,6 +57,7 @@ import { createVisEmbeddableFromObject } from './create_vis_embeddable_from_obje
 import type { VisualizationsStartDeps } from '../plugin';
 
 interface VisualizationAttributes extends SavedObjectAttributes {
+  title: string;
   visState: string;
 }
 

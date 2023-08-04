@@ -37,7 +37,7 @@ export const EventAnnotationGroupSavedObjectFinder = ({
     id: string;
     type: string;
     fullName: string;
-    savedObject: SavedObjectCommon<unknown>;
+    savedObject: SavedObjectCommon;
   }) => void;
   onCreateNew: () => void;
 }) => {

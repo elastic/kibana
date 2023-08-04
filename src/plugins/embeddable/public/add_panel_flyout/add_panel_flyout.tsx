@@ -85,7 +85,7 @@ export const AddPanelFlyout = ({
           (embeddableFactory) =>
             Boolean(embeddableFactory.savedObjectMetaData) && !embeddableFactory.isContainerType
         )
-        .map(({ savedObjectMetaData }) => savedObjectMetaData as SavedObjectMetaData<unknown>),
+        .map(({ savedObjectMetaData }) => savedObjectMetaData as SavedObjectMetaData),
     [factoriesBySavedObjectType]
   );
 

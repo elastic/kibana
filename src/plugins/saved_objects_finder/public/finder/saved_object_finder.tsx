@@ -32,7 +32,7 @@ import { i18n } from '@kbn/i18n';
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import { FinderAttributes, SavedObjectCommon } from '../../common';
 
-export interface SavedObjectMetaData<T = unknown> {
+export interface SavedObjectMetaData<T extends FinderAttributes = FinderAttributes> {
   type: string;
   name: string;
   getIconForSavedObject(savedObject: SavedObjectCommon<T>): IconType;
@@ -246,7 +246,7 @@ export class SavedObjectFinderUi extends React.Component<
                 currentSavedObjectMetaData ||
                 ({
                   getIconForSavedObject: () => 'document',
-                } as Pick<SavedObjectMetaData<{ title: string }>, 'getIconForSavedObject'>)
+                } as Pick<SavedObjectMetaData, 'getIconForSavedObject'>)
               ).getIconForSavedObject(item.simple);
 
               return (
