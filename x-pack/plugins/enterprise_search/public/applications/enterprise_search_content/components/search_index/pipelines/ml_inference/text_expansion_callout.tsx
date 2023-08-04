@@ -27,6 +27,7 @@ import { useTextExpansionCallOutData } from './text_expansion_callout_data';
 import { getTextExpansionError, TextExpansionCalloutLogic } from './text_expansion_callout_logic';
 import { TextExpansionErrors } from './text_expansion_errors';
 import { DeployModel } from './deploy_model';
+import { ModelDeploymentInProgress } from './model_deployment_in_progress';
 
 export interface TextExpansionCallOutState {
   dismiss: () => void;
@@ -78,51 +79,6 @@ export const FineTuneModelsButton: React.FC = () => (
       }
     )}
   </EuiButtonEmpty>
-);
-
-export const ModelDeploymentInProgress = ({
-  dismiss,
-  isDismissable,
-}: Pick<TextExpansionCallOutState, 'dismiss' | 'isDismissable'>) => (
-  <EuiCallOut color="success">
-    <EuiFlexGroup direction="column" gutterSize="s">
-      <EuiFlexItem grow>
-        <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiIcon color="success" type="clock" />
-          </EuiFlexItem>
-          <EuiFlexItem grow>
-            <EuiText color="success" size="xs">
-              <h3>
-                {i18n.translate(
-                  'xpack.enterpriseSearch.content.index.pipelines.textExpansionCallOut.deployingTitle',
-                  { defaultMessage: 'Your ELSER model is deploying.' }
-                )}
-              </h3>
-            </EuiText>
-          </EuiFlexItem>
-          {isDismissable && (
-            <EuiFlexItem grow={false}>
-              <TextExpansionDismissButton dismiss={dismiss} />
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
-      </EuiFlexItem>
-      <EuiFlexItem grow>
-        <EuiText size="s">
-          <p>
-            {i18n.translate(
-              'xpack.enterpriseSearch.content.index.pipelines.textExpansionCallOut.deployingBody',
-              {
-                defaultMessage:
-                  'You can continue creating your pipeline with other uploaded models in the meantime.',
-              }
-            )}
-          </p>
-        </EuiText>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  </EuiCallOut>
 );
 
 export const ModelDeployed = ({

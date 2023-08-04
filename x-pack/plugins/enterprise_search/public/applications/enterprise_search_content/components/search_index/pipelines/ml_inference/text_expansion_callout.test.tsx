@@ -12,7 +12,6 @@ import { EuiButton, EuiText } from '@elastic/eui';
 import { HttpError } from '../../../../../../../common/types/api';
 import {
   TextExpansionCallOut,
-  ModelDeploymentInProgress,
   ModelDeployed,
   TextExpansionDismissButton,
   ModelStarted,
@@ -20,6 +19,7 @@ import {
 } from './text_expansion_callout';
 import { DeployModel } from './deploy_model';
 import { TextExpansionErrors } from './text_expansion_errors';
+import { ModelDeploymentInProgress } from './model_deployment_in_progress';
 
 jest.mock('./text_expansion_callout_data', () => ({
   useTextExpansionCallOutData: jest.fn(() => ({
@@ -138,19 +138,6 @@ describe('TextExpansionCallOut', () => {
           isCreateButtonDisabled={false}
           isDismissable={false}
         />
-      );
-      expect(wrapper.find(TextExpansionDismissButton).length).toBe(0);
-    });
-  });
-
-  describe('ModelDeploymentInProgress', () => {
-    it('renders dismiss button if it is set to dismissable', () => {
-      const wrapper = shallow(<ModelDeploymentInProgress dismiss={() => {}} isDismissable />);
-      expect(wrapper.find(TextExpansionDismissButton).length).toBe(1);
-    });
-    it('does not render dismiss button if it is set to non-dismissable', () => {
-      const wrapper = shallow(
-        <ModelDeploymentInProgress dismiss={() => {}} isDismissable={false} />
       );
       expect(wrapper.find(TextExpansionDismissButton).length).toBe(0);
     });
