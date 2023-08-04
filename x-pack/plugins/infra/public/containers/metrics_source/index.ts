@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export * from './source';
-export * from './types';
+export * from '@kbn/metrics-data-plugin/public/containers/metrics_source';
