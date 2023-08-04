@@ -7,7 +7,7 @@
 
 import { getOr } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
-import { useCallback, useState, useEffect, useRef } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { getTimelineQueryTypes } from '../helpers';
@@ -111,12 +111,7 @@ export const useGetAllTimeline = (): AllTimelinesArgs => {
     templateTimelineCount: 0,
     favoriteCount: 0,
   });
-  const isMounted = useRef(true);
-  useEffect(() => {
-    return () => {
-      isMounted.current = false;
-    };
-  }, []);
+
   const fetchAllTimeline = useCallback(
     async ({
       onlyUserFavorite,
@@ -154,7 +149,7 @@ export const useGetAllTimeline = (): AllTimelinesArgs => {
             getAllTimelineResponse?.elasticTemplateTimelineCount ?? 0;
           const templateTimelineCount = getAllTimelineResponse?.templateTimelineCount ?? 0;
           const favoriteCount = getAllTimelineResponse?.favoriteCount ?? 0;
-          if (!didCancel && isMounted.current) {
+          if (!didCancel) {
             dispatch(
               inputsActions.setQuery({
                 inputId: InputsModelId.global,
@@ -176,7 +171,7 @@ export const useGetAllTimeline = (): AllTimelinesArgs => {
             });
           }
         } catch (error) {
-          if (!didCancel && isMounted.current) {
+          if (!didCancel) {
             errorToToaster({
               title: i18n.ERROR_FETCHING_TIMELINES_TITLE,
               error: error.body && error.body.message ? new Error(error.body.message) : error,
