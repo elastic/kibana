@@ -318,6 +318,7 @@ describe(
 
       // TODO work on getting proper data to make the prevalence section work here
       //  we need to generate enough data to have at least one field with prevalence
+      //
       it.skip('should display prevalence section', () => {
         toggleOverviewTabAboutSection();
         toggleOverviewTabInsightsSection();
