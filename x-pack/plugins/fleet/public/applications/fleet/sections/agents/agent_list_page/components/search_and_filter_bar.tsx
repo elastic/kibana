@@ -17,6 +17,7 @@ import {
   EuiIcon,
   EuiPopover,
   EuiToolTip,
+  useEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import styled from 'styled-components';
@@ -91,6 +92,7 @@ export const SearchAndFilterBar: React.FunctionComponent<SearchAndFilterBarProps
   onClickAgentActivity,
   showAgentActivityTour,
 }) => {
+  const { euiTheme } = useEuiTheme();
   const { isFleetServerStandalone } = useFleetServerStandalone();
   const showAddFleetServerBtn = !isFleetServerStandalone;
 
@@ -218,7 +220,10 @@ export const SearchAndFilterBar: React.FunctionComponent<SearchAndFilterBarProps
                   closePopover={() => setIsTagsFilterOpen(false)}
                   panelPaddingSize="none"
                 >
-                  <div className="euiFilterSelect__items">
+                  {/* EUI NOTE: Please use EuiSelectable (which already has height/scrolling built in)
+                      instead of EuiFilterSelectItem (which is pending deprecation).
+                      @see https://elastic.github.io/eui/#/forms/filter-group#multi-select */}
+                  <div className="eui-yScroll" css={{ maxHeight: euiTheme.base * 30 }}>
                     <>
                       {tags.map((tag, index) => (
                         <EuiFilterSelectItem
@@ -283,7 +288,10 @@ export const SearchAndFilterBar: React.FunctionComponent<SearchAndFilterBarProps
                   closePopover={() => setIsAgentPoliciesFilterOpen(false)}
                   panelPaddingSize="none"
                 >
-                  <div className="euiFilterSelect__items">
+                  {/* EUI NOTE: Please use EuiSelectable (which already has height/scrolling built in)
+                      instead of EuiFilterSelectItem (which is pending deprecation).
+                      @see https://elastic.github.io/eui/#/forms/filter-group#multi-select */}
+                  <div className="eui-yScroll" css={{ maxHeight: euiTheme.base * 30 }}>
                     {agentPolicies.map((agentPolicy, index) => (
                       <EuiFilterSelectItem
                         checked={selectedAgentPolicies.includes(agentPolicy.id) ? 'on' : undefined}
