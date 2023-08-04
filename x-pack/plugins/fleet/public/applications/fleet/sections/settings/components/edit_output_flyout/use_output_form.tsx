@@ -58,6 +58,7 @@ import {
   validateKafkaDefaultTopic,
   validateKafkaTopics,
   validateKafkaClientId,
+  validateKafkaHosts,
 } from './output_form_validators';
 import { confirmUpdate } from './confirm_update';
 
@@ -278,7 +279,7 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
   const kafkaHostsInput = useComboInput(
     'kafkaHostsComboBox',
     output?.hosts ?? [],
-    validateESHosts,
+    validateKafkaHosts,
     isDisabled('hosts')
   );
 

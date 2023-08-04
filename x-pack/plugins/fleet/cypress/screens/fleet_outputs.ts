@@ -57,7 +57,7 @@ export const kafkaOutputBody = {
   name: 'kafka_test1',
   type: 'kafka',
   is_default: false,
-  hosts: ['https://example.com'],
+  hosts: ['example.com:2000'],
   topics: [{ topic: 'test' }],
   auth_type: 'user_pass',
   username: 'kafka',
@@ -182,7 +182,7 @@ export const resetKafkaOutputForm = () => {
 
 export const fillInKafkaOutputForm = () => {
   cy.getBySel(kafkaOutputFormValues.name.selector).type(kafkaOutputFormValues.name.value);
-  cy.get('[placeholder="Specify host"').clear().type('http://localhost:5000');
+  cy.get('[placeholder="Specify host"').clear().type('localhost:5000');
   cy.getBySel(kafkaOutputFormValues.username.selector).type(kafkaOutputFormValues.username.value);
   cy.getBySel(kafkaOutputFormValues.password.selector).type(kafkaOutputFormValues.password.value);
 

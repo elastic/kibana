@@ -181,7 +181,7 @@ describe('Outputs', () => {
           cy.getBySel(SETTINGS_SAVE_BTN).click();
 
           cy.contains('Name is required');
-          cy.contains('URL is required');
+          cy.contains('Host is required');
           cy.contains('Username is required');
           cy.contains('Password is required');
           cy.contains('Default topic is required');
@@ -326,6 +326,7 @@ describe('Outputs', () => {
           visit(`/app/fleet/settings/outputs/${kafkaOutputToESId}`);
           cy.getBySel(SETTINGS_OUTPUTS.TYPE_INPUT).select('elasticsearch');
           cy.getBySel(kafkaOutputFormValues.name.selector).clear().type('kafka_to_es');
+          cy.get('[placeholder="Specify host URL"').clear().type('https://localhost:5000');
 
           cy.intercept('PUT', '**/api/fleet/outputs/**').as('saveOutput');
 

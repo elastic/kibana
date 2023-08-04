@@ -197,7 +197,7 @@ export default function (providerContext: FtrProviderContext) {
           .send({
             name: 'My Kafka Output',
             type: 'kafka',
-            hosts: ['https://test.fr'],
+            hosts: ['test.fr:2000'],
             auth_type: 'user_pass',
             username: 'user',
             password: 'pass',
@@ -565,7 +565,7 @@ export default function (providerContext: FtrProviderContext) {
           .send({
             name: 'My Kafka Output',
             type: 'kafka',
-            hosts: ['https://test.fr'],
+            hosts: ['test.fr:2000'],
             auth_type: 'user_pass',
             username: 'user',
             password: 'pass',
@@ -579,7 +579,7 @@ export default function (providerContext: FtrProviderContext) {
           is_default_monitoring: false,
           name: 'My Kafka Output',
           type: 'kafka',
-          hosts: ['https://test.fr'],
+          hosts: ['test.fr:2000'],
           auth_type: 'user_pass',
           username: 'user',
           password: 'pass',
@@ -605,7 +605,7 @@ export default function (providerContext: FtrProviderContext) {
           .send({
             name: 'Default Kafka Output',
             type: 'kafka',
-            hosts: ['https://test.fr'],
+            hosts: ['test.fr:2000'],
             auth_type: 'user_pass',
             username: 'user',
             password: 'pass',
@@ -618,7 +618,7 @@ export default function (providerContext: FtrProviderContext) {
         expect(itemWithoutId).to.eql({
           name: 'Default Kafka Output',
           type: 'kafka',
-          hosts: ['https://test.fr'],
+          hosts: ['test.fr:2000'],
           auth_type: 'user_pass',
           username: 'user',
           password: 'pass',
@@ -845,7 +845,7 @@ export default function (providerContext: FtrProviderContext) {
           .send({
             name: 'Kafka Output',
             type: 'kafka',
-            hosts: ['https://test.fr'],
+            hosts: ['test.fr:2000'],
             auth_type: 'user_pass',
             username: 'user',
             password: 'pass',
@@ -958,7 +958,7 @@ export default function (providerContext: FtrProviderContext) {
         const kafkaOutputPayload = {
           name: 'Output to delete test',
           type: 'kafka',
-          hosts: ['https://test.fr'],
+          hosts: ['test.fr:2000'],
           auth_type: 'user_pass',
           username: 'user',
           password: 'pass',

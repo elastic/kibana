@@ -1306,13 +1306,13 @@ describe('Output Service', () => {
 
       await outputService.update(soClient, esClientMock, 'output-test', {
         type: 'kafka',
-        hosts: ['http://test:4343'],
+        hosts: ['test:4343'],
         is_default: true,
       });
 
       expect(soClient.update).toBeCalledWith(expect.anything(), expect.anything(), {
         type: 'kafka',
-        hosts: ['http://test:4343'],
+        hosts: ['test:4343'],
         is_default: true,
         ca_sha256: null,
         ca_trusted_fingerprint: null,
@@ -1349,7 +1349,7 @@ describe('Output Service', () => {
         'output-test',
         {
           type: 'kafka',
-          hosts: ['http://test:4343'],
+          hosts: ['test:4343'],
           is_default: true,
         },
         {
@@ -1359,7 +1359,7 @@ describe('Output Service', () => {
 
       expect(soClient.update).toBeCalledWith(expect.anything(), expect.anything(), {
         type: 'kafka',
-        hosts: ['http://test:4343'],
+        hosts: ['test:4343'],
         is_default: true,
         ca_sha256: null,
         ca_trusted_fingerprint: null,
@@ -1390,13 +1390,13 @@ describe('Output Service', () => {
 
       await outputService.update(soClient, esClientMock, 'output-test', {
         type: 'kafka',
-        hosts: ['http://test:4343'],
+        hosts: ['test:4343'],
         is_default: true,
       });
 
       expect(soClient.update).toBeCalledWith(expect.anything(), expect.anything(), {
         type: 'kafka',
-        hosts: ['http://test:4343'],
+        hosts: ['test:4343'],
         is_default: true,
         ca_sha256: null,
         ca_trusted_fingerprint: null,
@@ -1431,7 +1431,7 @@ describe('Output Service', () => {
         'output-test',
         {
           type: 'kafka',
-          hosts: ['http://test:4343'],
+          hosts: ['test:4343'],
           is_default: true,
         },
         {
@@ -1441,7 +1441,7 @@ describe('Output Service', () => {
 
       expect(soClient.update).toBeCalledWith(expect.anything(), expect.anything(), {
         type: 'kafka',
-        hosts: ['http://test:4343'],
+        hosts: ['test:4343'],
         is_default: true,
         ca_sha256: null,
         ca_trusted_fingerprint: null,

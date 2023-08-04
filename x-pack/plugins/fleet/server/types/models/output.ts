@@ -32,6 +32,21 @@ export function validateLogstashHost(val: string) {
   }
 }
 
+export const validateKafkaHost = (input: string): string | undefined => {
+  const parts = input.split(':');
+
+  if (parts.length !== 2 || !parts[0] || parts[0].includes('://')) {
+    return 'Invalid format. Expected "host:port" without protocol';
+  }
+
+  const port = parseInt(parts[1], 10);
+  if (isNaN(port) || port < 1 || port > 65535) {
+    return 'Invalid port number. Expected a number between 1 and 65535';
+  }
+
+  return undefined;
+};
+
 /**
  * Base schemas
  */
@@ -141,7 +156,7 @@ const KafkaTopicsSchema = schema.arrayOf(
 export const KafkaSchema = {
   ...BaseSchema,
   type: schema.literal(outputType.Kafka),
-  hosts: schema.arrayOf(schema.uri({ scheme: ['http', 'https'] }), { minSize: 1 }),
+  hosts: schema.arrayOf(schema.string({ validate: validateKafkaHost }), { minSize: 1 }),
   version: schema.maybe(schema.string()),
   key: schema.maybe(schema.string()),
   compression: schema.maybe(
@@ -215,7 +230,9 @@ const KafkaUpdateSchema = {
   ...UpdateSchema,
   ...KafkaSchema,
   type: schema.maybe(schema.literal(outputType.Kafka)),
-  hosts: schema.maybe(schema.arrayOf(schema.uri({ scheme: ['http', 'https'] }), { minSize: 1 })),
+  hosts: schema.maybe(
+    schema.arrayOf(schema.string({ validate: validateKafkaHost }), { minSize: 1 })
+  ),
   auth_type: schema.maybe(
     schema.oneOf([
       schema.literal(kafkaAuthType.None),
