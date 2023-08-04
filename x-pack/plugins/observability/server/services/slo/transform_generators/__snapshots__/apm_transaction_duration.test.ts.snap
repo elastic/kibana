@@ -200,6 +200,11 @@ Object {
       "field": "slo.description",
     },
   },
+  "slo.groupBy": Object {
+    "terms": Object {
+      "field": "slo.groupBy",
+    },
+  },
   "slo.id": Object {
     "terms": Object {
       "field": "slo.id",
@@ -309,6 +314,11 @@ Object {
       "field": "slo.description",
     },
   },
+  "slo.groupBy": Object {
+    "terms": Object {
+      "field": "slo.groupBy",
+    },
+  },
   "slo.id": Object {
     "terms": Object {
       "field": "slo.id",
@@ -411,6 +421,11 @@ Object {
   "slo.description": Object {
     "terms": Object {
       "field": "slo.description",
+    },
+  },
+  "slo.groupBy": Object {
+    "terms": Object {
+      "field": "slo.groupBy",
     },
   },
   "slo.id": Object {
@@ -520,6 +535,11 @@ Object {
   "slo.description": Object {
     "terms": Object {
       "field": "slo.description",
+    },
+  },
+  "slo.groupBy": Object {
+    "terms": Object {
+      "field": "slo.groupBy",
     },
   },
   "slo.id": Object {
@@ -650,6 +670,11 @@ Object {
           "field": "slo.description",
         },
       },
+      "slo.groupBy": Object {
+        "terms": Object {
+          "field": "slo.groupBy",
+        },
+      },
       "slo.id": Object {
         "terms": Object {
           "field": "slo.id",
@@ -777,6 +802,12 @@ Object {
       "slo.description": Object {
         "script": Object {
           "source": "emit('irrelevant')",
+        },
+        "type": "keyword",
+      },
+      "slo.groupBy": Object {
+        "script": Object {
+          "source": "emit('*')",
         },
         "type": "keyword",
       },
@@ -918,6 +949,11 @@ Object {
           "field": "slo.description",
         },
       },
+      "slo.groupBy": Object {
+        "terms": Object {
+          "field": "slo.groupBy",
+        },
+      },
       "slo.id": Object {
         "terms": Object {
           "field": "slo.id",
@@ -1040,6 +1076,12 @@ Object {
       "slo.description": Object {
         "script": Object {
           "source": "emit('irrelevant')",
+        },
+        "type": "keyword",
+      },
+      "slo.groupBy": Object {
+        "script": Object {
+          "source": "emit('*')",
         },
         "type": "keyword",
       },

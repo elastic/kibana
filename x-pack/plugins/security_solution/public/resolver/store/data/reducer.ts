@@ -39,7 +39,7 @@ export const dataReducer = reducerWithInitialState(initialAnalyzerState)
         draft,
         { id, resolverComponentInstanceID, locationSearch, databaseDocumentID, indices, filters }
       ) => {
-        const state: Draft<DataState> = draft.analyzerById[id]?.data;
+        const state: Draft<DataState> = draft[id]?.data;
         state.tree = {
           ...state.tree,
           currentParameters: {
@@ -68,7 +68,7 @@ export const dataReducer = reducerWithInitialState(initialAnalyzerState)
   )
   .withHandling(
     immerCase(appRequestedResolverData, (draft, { id, parameters }) => {
-      const state: Draft<DataState> = draft.analyzerById[id].data;
+      const state: Draft<DataState> = draft[id].data;
       // keep track of what we're requesting, this way we know when to request and when not to.
       state.tree = {
         ...state.tree,
@@ -83,7 +83,7 @@ export const dataReducer = reducerWithInitialState(initialAnalyzerState)
   )
   .withHandling(
     immerCase(appAbortedResolverDataRequest, (draft, { id, parameters }) => {
-      const state: Draft<DataState> = draft.analyzerById[id].data;
+      const state: Draft<DataState> = draft[id].data;
       if (treeFetcherParameters.equal(parameters, state.tree?.pendingRequestParameters)) {
         // the request we were awaiting was aborted
         state.tree = {
@@ -98,7 +98,7 @@ export const dataReducer = reducerWithInitialState(initialAnalyzerState)
     immerCase(
       serverReturnedResolverData,
       (draft, { id, result, dataSource, schema, parameters, detectedBounds }) => {
-        const state: Draft<DataState> = draft.analyzerById[id].data;
+        const state: Draft<DataState> = draft[id].data;
         /** Only handle this if we are expecting a response */
         state.tree = {
           ...state.tree,
@@ -124,7 +124,7 @@ export const dataReducer = reducerWithInitialState(initialAnalyzerState)
   .withHandling(
     immerCase(serverFailedToReturnResolverData, (draft, { id }) => {
       /** Only handle this if we are expecting a response */
-      const state: Draft<DataState> = draft.analyzerById[id].data;
+      const state: Draft<DataState> = draft[id].data;
       if (state.tree?.pendingRequestParameters !== undefined) {
         state.tree = {
           ...state.tree,
@@ -143,7 +143,7 @@ export const dataReducer = reducerWithInitialState(initialAnalyzerState)
       serverReturnedNodeEventsInCategory,
       (draft, { id, events, cursor, nodeID, eventCategory }) => {
         // The data in the action could be irrelevant if the panel view or parameters have changed since the corresponding request was made. In that case, ignore this action.
-        const state: Draft<DataState> = draft.analyzerById[id].data;
+        const state: Draft<DataState> = draft[id].data;
         if (
           nodeEventsInCategoryModel.isRelevantToPanelViewAndParameters(
             { events, cursor, nodeID, eventCategory },
@@ -179,7 +179,7 @@ export const dataReducer = reducerWithInitialState(initialAnalyzerState)
   )
   .withHandling(
     immerCase(userRequestedAdditionalRelatedEvents, (draft, { id }) => {
-      const state: Draft<DataState> = draft.analyzerById[id].data;
+      const state: Draft<DataState> = draft[id].data;
       if (state.nodeEventsInCategory) {
         state.nodeEventsInCategory.lastCursorRequested = state.nodeEventsInCategory?.cursor;
       }
@@ -188,7 +188,7 @@ export const dataReducer = reducerWithInitialState(initialAnalyzerState)
   )
   .withHandling(
     immerCase(serverFailedToReturnNodeEventsInCategory, (draft, { id }) => {
-      const state: Draft<DataState> = draft.analyzerById[id].data;
+      const state: Draft<DataState> = draft[id].data;
       if (state.nodeEventsInCategory) {
         state.nodeEventsInCategory = {
           ...state.nodeEventsInCategory,
@@ -202,7 +202,7 @@ export const dataReducer = reducerWithInitialState(initialAnalyzerState)
     immerCase(
       serverReturnedNodeData,
       (draft, { id, nodeData, requestedIDs, numberOfRequestedEvents }) => {
-        const state: Draft<DataState> = draft.analyzerById[id].data;
+        const state: Draft<DataState> = draft[id].data;
         const updatedNodeData = nodeDataModel.updateWithReceivedNodes({
           storedNodeInfo: state.nodeData,
           receivedEvents: nodeData,
@@ -216,7 +216,7 @@ export const dataReducer = reducerWithInitialState(initialAnalyzerState)
   )
   .withHandling(
     immerCase(userReloadedResolverNode, (draft, { id, nodeID }) => {
-      const state: Draft<DataState> = draft.analyzerById[id].data;
+      const state: Draft<DataState> = draft[id].data;
       const updatedNodeData = nodeDataModel.setReloadedNodes(state.nodeData, nodeID);
       state.nodeData = updatedNodeData;
       return draft;
@@ -224,7 +224,7 @@ export const dataReducer = reducerWithInitialState(initialAnalyzerState)
   )
   .withHandling(
     immerCase(appRequestingNodeData, (draft, { id, requestedIDs }) => {
-      const state: Draft<DataState> = draft.analyzerById[id].data;
+      const state: Draft<DataState> = draft[id].data;
       const updatedNodeData = nodeDataModel.setRequestedNodes(state.nodeData, requestedIDs);
       state.nodeData = updatedNodeData;
       return draft;
@@ -232,7 +232,7 @@ export const dataReducer = reducerWithInitialState(initialAnalyzerState)
   )
   .withHandling(
     immerCase(serverFailedToReturnNodeData, (draft, { id, requestedIDs }) => {
-      const state: Draft<DataState> = draft.analyzerById[id].data;
+      const state: Draft<DataState> = draft[id].data;
       const updatedData = nodeDataModel.setErrorNodes(state.nodeData, requestedIDs);
       state.nodeData = updatedData;
       return draft;
@@ -240,7 +240,7 @@ export const dataReducer = reducerWithInitialState(initialAnalyzerState)
   )
   .withHandling(
     immerCase(appRequestedCurrentRelatedEventData, (draft, { id }) => {
-      draft.analyzerById[id].data.currentRelatedEvent = {
+      draft[id].data.currentRelatedEvent = {
         loading: true,
         data: null,
       };
@@ -249,7 +249,7 @@ export const dataReducer = reducerWithInitialState(initialAnalyzerState)
   )
   .withHandling(
     immerCase(serverReturnedCurrentRelatedEventData, (draft, { id, relatedEvent }) => {
-      draft.analyzerById[id].data.currentRelatedEvent = {
+      draft[id].data.currentRelatedEvent = {
         loading: false,
         data: {
           ...relatedEvent,
@@ -260,7 +260,7 @@ export const dataReducer = reducerWithInitialState(initialAnalyzerState)
   )
   .withHandling(
     immerCase(serverFailedToReturnCurrentRelatedEventData, (draft, { id }) => {
-      draft.analyzerById[id].data.currentRelatedEvent = {
+      draft[id].data.currentRelatedEvent = {
         loading: false,
         data: null,
       };
