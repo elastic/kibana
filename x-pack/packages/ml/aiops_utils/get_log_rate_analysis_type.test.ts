@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { getLogRateAnalysisType, type LogRateHistogramItem } from './log_rate_analysis_type';
+import type { LogRateHistogramItem } from './log_rate_histogram_item';
+import { getLogRateAnalysisType } from './get_log_rate_analysis_type';
 
 describe('getLogRateAnalysisType', () => {
   const LogRateHistogramMock: LogRateHistogramItem[] = [

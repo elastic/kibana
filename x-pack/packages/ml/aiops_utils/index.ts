@@ -5,14 +5,11 @@
  * 2.0.
  */
 
+export { getLogRateAnalysisType } from './get_log_rate_analysis_type';
+export { LOG_RATE_ANALYSIS_TYPE, type LogRateAnalysisType } from './log_rate_analysis_type';
+export { type LogRateHistogramItem } from './log_rate_histogram_item';
 export {
   getSnappedWindowParameters,
   getWindowParameters,
   type WindowParameters,
 } from './window_parameters';
-export {
-  getLogRateAnalysisType,
-  LOG_RATE_ANALYSIS_TYPE,
-  type LogRateAnalysisType,
-  type LogRateHistogramItem,
-} from './log_rate_analysis_type';
