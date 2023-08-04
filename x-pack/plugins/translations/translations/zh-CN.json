@@ -39098,7 +39098,7 @@
     "xpack.triggersActionsUI.sections.rulesList.rulesListNotifyBadge.snoozedIndefinitelyTooltip": "通知已无期限暂停",
     "xpack.triggersActionsUI.sections.rulesList.rulesListNotifyBadge.timeRemaining": "剩余时间",
     "xpack.triggersActionsUI.sections.rulesList.rulesListSnoozePanel.snoozeFailed": "无法更改规则暂停设置",
-    "xpack.triggersActionsUI.sections.rulesList.rulesListSnoozePanel.snoozeSuccess": "{snoozeDuration} 成功採用規則通知。",
+    "xpack.triggersActionsUI.sections.rulesList.rulesListSnoozePanel.snoozeSuccess": "已成功暂停规则",
     "xpack.triggersActionsUI.sections.rulesList.rulesListSnoozePanel.unsnoozeSuccess": "已成功取消暂停规则",
     "xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.apiKeyOwnerTitle": "API 密钥所有者",
     "xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.deleteAriaLabel": "删除",
