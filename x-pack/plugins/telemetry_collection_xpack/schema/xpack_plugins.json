@@ -2782,13 +2782,19 @@
                     "version": {
                       "type": "array",
                       "items": {
-                        "type": "keyword"
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "An array of the top 3 agent versions within the last day"
+                        }
                       }
                     },
                     "activation_method": {
                       "type": "array",
                       "items": {
-                        "type": "keyword"
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "An array of the top 3 agent activation methods within the last day"
+                        }
                       }
                     }
                   }
@@ -2800,19 +2806,28 @@
                         "name": {
                           "type": "array",
                           "items": {
-                            "type": "keyword"
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service framework name  within the last day"
+                            }
                           }
                         },
                         "version": {
                           "type": "array",
                           "items": {
-                            "type": "keyword"
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service framework version within the last day"
+                            }
                           }
                         },
                         "composite": {
                           "type": "array",
                           "items": {
-                            "type": "keyword"
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service framework and version sorted by doc count"
+                            }
                           }
                         }
                       }
@@ -2822,19 +2837,28 @@
                         "name": {
                           "type": "array",
                           "items": {
-                            "type": "keyword"
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service language name within the last day"
+                            }
                           }
                         },
                         "version": {
                           "type": "array",
                           "items": {
-                            "type": "keyword"
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service language version within the last day"
+                            }
                           }
                         },
                         "composite": {
                           "type": "array",
                           "items": {
-                            "type": "keyword"
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service language name and version sorted by doc count."
+                            }
                           }
                         }
                       }
@@ -2844,19 +2868,28 @@
                         "name": {
                           "type": "array",
                           "items": {
-                            "type": "keyword"
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service runtime name within the last day"
+                            }
                           }
                         },
                         "version": {
                           "type": "array",
                           "items": {
-                            "type": "keyword"
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service runtime version within the last day"
+                            }
                           }
                         },
                         "composite": {
                           "type": "array",
                           "items": {
-                            "type": "keyword"
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service runtime name and version sorted by doc count."
+                            }
                           }
                         }
                       }
@@ -2872,13 +2905,19 @@
                     "version": {
                       "type": "array",
                       "items": {
-                        "type": "keyword"
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "An array of the top 3 agent versions within the last day"
+                        }
                       }
                     },
                     "activation_method": {
                       "type": "array",
                       "items": {
-                        "type": "keyword"
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "An array of the top 3 agent activation methods within the last day"
+                        }
                       }
                     }
                   }
@@ -2890,19 +2929,28 @@
                         "name": {
                           "type": "array",
                           "items": {
-                            "type": "keyword"
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service framework name  within the last day"
+                            }
                           }
                         },
                         "version": {
                           "type": "array",
                           "items": {
-                            "type": "keyword"
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service framework version within the last day"
+                            }
                           }
                         },
                         "composite": {
                           "type": "array",
                           "items": {
-                            "type": "keyword"
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service framework and version sorted by doc count"
+                            }
                           }
                         }
                       }
@@ -2912,19 +2960,28 @@
                         "name": {
                           "type": "array",
                           "items": {
-                            "type": "keyword"
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service language name within the last day"
+                            }
                           }
                         },
                         "version": {
                           "type": "array",
                           "items": {
-                            "type": "keyword"
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service language version within the last day"
+                            }
                           }
                         },
                         "composite": {
                           "type": "array",
                           "items": {
-                            "type": "keyword"
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service language name and version sorted by doc count."
+                            }
                           }
                         }
                       }
@@ -2934,19 +2991,28 @@
                         "name": {
                           "type": "array",
                           "items": {
-                            "type": "keyword"
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service runtime name within the last day"
+                            }
                           }
                         },
                         "version": {
                           "type": "array",
                           "items": {
-                            "type": "keyword"
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service runtime version within the last day"
+                            }
                           }
                         },
                         "composite": {
                           "type": "array",
                           "items": {
-                            "type": "keyword"
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service runtime name and version sorted by doc count."
+                            }
                           }
                         }
                       }
@@ -2962,13 +3028,19 @@
                     "version": {
                       "type": "array",
                       "items": {
-                        "type": "keyword"
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "An array of the top 3 agent versions within the last day"
+                        }
                       }
                     },
                     "activation_method": {
                       "type": "array",
                       "items": {
-                        "type": "keyword"
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "An array of the top 3 agent activation methods within the last day"
+                        }
                       }
                     }
                   }
@@ -2980,19 +3052,28 @@
                         "name": {
                           "type": "array",
                           "items": {
-                            "type": "keyword"
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service framework name  within the last day"
+                            }
                           }
                         },
                         "version": {
                           "type": "array",
                           "items": {
-                            "type": "keyword"
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service framework version within the last day"
+                            }
                           }
                         },
                         "composite": {
                           "type": "array",
                           "items": {
-                            "type": "keyword"
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service framework and version sorted by doc count"
+                            }
                           }
                         }
                       }
@@ -3002,19 +3083,28 @@
                         "name": {
                           "type": "array",
                           "items": {
-                            "type": "keyword"
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service language name within the last day"
+                            }
                           }
                         },
                         "version": {
                           "type": "array",
                           "items": {
-                            "type": "keyword"
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service language version within the last day"
+                            }
                           }
                         },
                         "composite": {
                           "type": "array",
                           "items": {
-                            "type": "keyword"
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service language name and version sorted by doc count."
+                            }
                           }
                         }
                       }
@@ -3024,19 +3114,28 @@
                         "name": {
                           "type": "array",
                           "items": {
-                            "type": "keyword"
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service runtime name within the last day"
+                            }
                           }
                         },
                         "version": {
                           "type": "array",
                           "items": {
-                            "type": "keyword"
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service runtime version within the last day"
+                            }
                           }
                         },
                         "composite": {
                           "type": "array",
                           "items": {
-                            "type": "keyword"
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service runtime name and version sorted by doc count."
+                            }
                           }
                         }
                       }
@@ -3052,13 +3151,19 @@
                     "version": {
                       "type": "array",
                       "items": {
-                        "type": "keyword"
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "An array of the top 3 agent versions within the last day"
+                        }
                       }
                     },
                     "activation_method": {
                       "type": "array",
                       "items": {
-                        "type": "keyword"
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "An array of the top 3 agent activation methods within the last day"
+                        }
                       }
                     }
                   }
@@ -3070,19 +3175,28 @@
                         "name": {
                           "type": "array",
                           "items": {
-                            "type": "keyword"
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service framework name  within the last day"
+                            }
                           }
                         },
                         "version": {
                           "type": "array",
                           "items": {
-                            "type": "keyword"
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service framework version within the last day"
+                            }
                           }
                         },
                         "composite": {
                           "type": "array",
                           "items": {
-                            "type": "keyword"
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service framework and version sorted by doc count"
+                            }
                           }
                         }
                       }
@@ -3092,19 +3206,28 @@
                         "name": {
                           "type": "array",
                           "items": {
-                            "type": "keyword"
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service language name within the last day"
+                            }
                           }
                         },
                         "version": {
                           "type": "array",
                           "items": {
-                            "type": "keyword"
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service language version within the last day"
+                            }
                           }
                         },
                         "composite": {
                           "type": "array",
                           "items": {
-                            "type": "keyword"
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service language name and version sorted by doc count."
+                            }
                           }
                         }
                       }
@@ -3114,19 +3237,28 @@
                         "name": {
                           "type": "array",
                           "items": {
-                            "type": "keyword"
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service runtime name within the last day"
+                            }
                           }
                         },
                         "version": {
                           "type": "array",
                           "items": {
-                            "type": "keyword"
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service runtime version within the last day"
+                            }
                           }
                         },
                         "composite": {
                           "type": "array",
                           "items": {
-                            "type": "keyword"
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service runtime name and version sorted by doc count."
+                            }
                           }
                         }
                       }
@@ -3142,13 +3274,19 @@
                     "version": {
                       "type": "array",
                       "items": {
-                        "type": "keyword"
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "An array of the top 3 agent versions within the last day"
+                        }
                       }
                     },
                     "activation_method": {
                       "type": "array",
                       "items": {
-                        "type": "keyword"
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "An array of the top 3 agent activation methods within the last day"
+                        }
                       }
                     }
                   }
@@ -3160,19 +3298,28 @@
                         "name": {
                           "type": "array",
                           "items": {
-                            "type": "keyword"
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service framework name  within the last day"
+                            }
                           }
                         },
                         "version": {
                           "type": "array",
                           "items": {
-                            "type": "keyword"
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service framework version within the last day"
+                            }
                           }
                         },
                         "composite": {
                           "type": "array",
                           "items": {
-                            "type": "keyword"
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service framework and version sorted by doc count"
+                            }
                           }
                         }
                       }
@@ -3182,19 +3329,28 @@
                         "name": {
                           "type": "array",
                           "items": {
-                            "type": "keyword"
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service language name within the last day"
+                            }
                           }
                         },
                         "version": {
                           "type": "array",
                           "items": {
-                            "type": "keyword"
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service language version within the last day"
+                            }
                           }
                         },
                         "composite": {
                           "type": "array",
                           "items": {
-                            "type": "keyword"
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service language name and version sorted by doc count."
+                            }
                           }
                         }
                       }
@@ -3204,19 +3360,28 @@
                         "name": {
                           "type": "array",
                           "items": {
-                            "type": "keyword"
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service runtime name within the last day"
+                            }
                           }
                         },
                         "version": {
                           "type": "array",
                           "items": {
-                            "type": "keyword"
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service runtime version within the last day"
+                            }
                           }
                         },
                         "composite": {
                           "type": "array",
                           "items": {
-                            "type": "keyword"
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service runtime name and version sorted by doc count."
+                            }
                           }
                         }
                       }
@@ -3232,13 +3397,19 @@
                     "version": {
                       "type": "array",
                       "items": {
-                        "type": "keyword"
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "An array of the top 3 agent versions within the last day"
+                        }
                       }
                     },
                     "activation_method": {
                       "type": "array",
                       "items": {
-                        "type": "keyword"
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "An array of the top 3 agent activation methods within the last day"
+                        }
                       }
                     }
                   }
@@ -3250,19 +3421,28 @@
                         "name": {
                           "type": "array",
                           "items": {
-                            "type": "keyword"
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service framework name  within the last day"
+                            }
                           }
                         },
                         "version": {
                           "type": "array",
                           "items": {
-                            "type": "keyword"
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service framework version within the last day"
+                            }
                           }
                         },
                         "composite": {
                           "type": "array",
                           "items": {
-                            "type": "keyword"
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service framework and version sorted by doc count"
+                            }
                           }
                         }
                       }
@@ -3272,19 +3452,28 @@
                         "name": {
                           "type": "array",
                           "items": {
-                            "type": "keyword"
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service language name within the last day"
+                            }
                           }
                         },
                         "version": {
                           "type": "array",
                           "items": {
-                            "type": "keyword"
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service language version within the last day"
+                            }
                           }
                         },
                         "composite": {
                           "type": "array",
                           "items": {
-                            "type": "keyword"
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service language name and version sorted by doc count."
+                            }
                           }
                         }
                       }
@@ -3294,19 +3483,28 @@
                         "name": {
                           "type": "array",
                           "items": {
-                            "type": "keyword"
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service runtime name within the last day"
+                            }
                           }
                         },
                         "version": {
                           "type": "array",
                           "items": {
-                            "type": "keyword"
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service runtime version within the last day"
+                            }
                           }
                         },
                         "composite": {
                           "type": "array",
                           "items": {
-                            "type": "keyword"
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service runtime name and version sorted by doc count."
+                            }
                           }
                         }
                       }
@@ -3322,13 +3520,19 @@
                     "version": {
                       "type": "array",
                       "items": {
-                        "type": "keyword"
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "An array of the top 3 agent versions within the last day"
+                        }
                       }
                     },
                     "activation_method": {
                       "type": "array",
                       "items": {
-                        "type": "keyword"
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "An array of the top 3 agent activation methods within the last day"
+                        }
                       }
                     }
                   }
@@ -3340,19 +3544,28 @@
                         "name": {
                           "type": "array",
                           "items": {
-                            "type": "keyword"
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service framework name  within the last day"
+                            }
                           }
                         },
                         "version": {
                           "type": "array",
                           "items": {
-                            "type": "keyword"
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service framework version within the last day"
+                            }
                           }
                         },
                         "composite": {
                           "type": "array",
                           "items": {
-                            "type": "keyword"
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service framework and version sorted by doc count"
+                            }
                           }
                         }
                       }
@@ -3362,19 +3575,28 @@
                         "name": {
                           "type": "array",
                           "items": {
-                            "type": "keyword"
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service language name within the last day"
+                            }
                           }
                         },
                         "version": {
                           "type": "array",
                           "items": {
-                            "type": "keyword"
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service language version within the last day"
+                            }
                           }
                         },
                         "composite": {
                           "type": "array",
                           "items": {
-                            "type": "keyword"
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service language name and version sorted by doc count."
+                            }
                           }
                         }
                       }
@@ -3384,19 +3606,28 @@
                         "name": {
                           "type": "array",
                           "items": {
-                            "type": "keyword"
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service runtime name within the last day"
+                            }
                           }
                         },
                         "version": {
                           "type": "array",
                           "items": {
-                            "type": "keyword"
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service runtime version within the last day"
+                            }
                           }
                         },
                         "composite": {
                           "type": "array",
                           "items": {
-                            "type": "keyword"
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service runtime name and version sorted by doc count."
+                            }
                           }
                         }
                       }
@@ -3412,13 +3643,19 @@
                     "version": {
                       "type": "array",
                       "items": {
-                        "type": "keyword"
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "An array of the top 3 agent versions within the last day"
+                        }
                       }
                     },
                     "activation_method": {
                       "type": "array",
                       "items": {
-                        "type": "keyword"
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "An array of the top 3 agent activation methods within the last day"
+                        }
                       }
                     }
                   }
@@ -3430,19 +3667,28 @@
                         "name": {
                           "type": "array",
                           "items": {
-                            "type": "keyword"
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service framework name  within the last day"
+                            }
                           }
                         },
                         "version": {
                           "type": "array",
                           "items": {
-                            "type": "keyword"
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service framework version within the last day"
+                            }
                           }
                         },
                         "composite": {
                           "type": "array",
                           "items": {
-                            "type": "keyword"
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service framework and version sorted by doc count"
+                            }
                           }
                         }
                       }
@@ -3452,19 +3698,28 @@
                         "name": {
                           "type": "array",
                           "items": {
-                            "type": "keyword"
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service language name within the last day"
+                            }
                           }
                         },
                         "version": {
                           "type": "array",
                           "items": {
-                            "type": "keyword"
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service language version within the last day"
+                            }
                           }
                         },
                         "composite": {
                           "type": "array",
                           "items": {
-                            "type": "keyword"
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service language name and version sorted by doc count."
+                            }
                           }
                         }
                       }
@@ -3474,19 +3729,28 @@
                         "name": {
                           "type": "array",
                           "items": {
-                            "type": "keyword"
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service runtime name within the last day"
+                            }
                           }
                         },
                         "version": {
                           "type": "array",
                           "items": {
-                            "type": "keyword"
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service runtime version within the last day"
+                            }
                           }
                         },
                         "composite": {
                           "type": "array",
                           "items": {
-                            "type": "keyword"
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service runtime name and version sorted by doc count."
+                            }
                           }
                         }
                       }
@@ -3502,13 +3766,19 @@
                     "version": {
                       "type": "array",
                       "items": {
-                        "type": "keyword"
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "An array of the top 3 agent versions within the last day"
+                        }
                       }
                     },
                     "activation_method": {
                       "type": "array",
                       "items": {
-                        "type": "keyword"
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "An array of the top 3 agent activation methods within the last day"
+                        }
                       }
                     }
                   }
@@ -3520,19 +3790,28 @@
                         "name": {
                           "type": "array",
                           "items": {
-                            "type": "keyword"
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service framework name  within the last day"
+                            }
                           }
                         },
                         "version": {
                           "type": "array",
                           "items": {
-                            "type": "keyword"
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service framework version within the last day"
+                            }
                           }
                         },
                         "composite": {
                           "type": "array",
                           "items": {
-                            "type": "keyword"
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service framework and version sorted by doc count"
+                            }
                           }
                         }
                       }
@@ -3542,19 +3821,28 @@
                         "name": {
                           "type": "array",
                           "items": {
-                            "type": "keyword"
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service language name within the last day"
+                            }
                           }
                         },
                         "version": {
                           "type": "array",
                           "items": {
-                            "type": "keyword"
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service language version within the last day"
+                            }
                           }
                         },
                         "composite": {
                           "type": "array",
                           "items": {
-                            "type": "keyword"
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service language name and version sorted by doc count."
+                            }
                           }
                         }
                       }
@@ -3564,19 +3852,28 @@
                         "name": {
                           "type": "array",
                           "items": {
-                            "type": "keyword"
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service runtime name within the last day"
+                            }
                           }
                         },
                         "version": {
                           "type": "array",
                           "items": {
-                            "type": "keyword"
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service runtime version within the last day"
+                            }
                           }
                         },
                         "composite": {
                           "type": "array",
                           "items": {
-                            "type": "keyword"
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service runtime name and version sorted by doc count."
+                            }
                           }
                         }
                       }
@@ -3592,13 +3889,19 @@
                     "version": {
                       "type": "array",
                       "items": {
-                        "type": "keyword"
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "An array of the top 3 agent versions within the last day"
+                        }
                       }
                     },
                     "activation_method": {
                       "type": "array",
                       "items": {
-                        "type": "keyword"
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "An array of the top 3 agent activation methods within the last day"
+                        }
                       }
                     }
                   }
@@ -3610,19 +3913,28 @@
                         "name": {
                           "type": "array",
                           "items": {
-                            "type": "keyword"
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service framework name  within the last day"
+                            }
                           }
                         },
                         "version": {
                           "type": "array",
                           "items": {
-                            "type": "keyword"
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service framework version within the last day"
+                            }
                           }
                         },
                         "composite": {
                           "type": "array",
                           "items": {
-                            "type": "keyword"
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service framework and version sorted by doc count"
+                            }
                           }
                         }
                       }
@@ -3632,19 +3944,28 @@
                         "name": {
                           "type": "array",
                           "items": {
-                            "type": "keyword"
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service language name within the last day"
+                            }
                           }
                         },
                         "version": {
                           "type": "array",
                           "items": {
-                            "type": "keyword"
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service language version within the last day"
+                            }
                           }
                         },
                         "composite": {
                           "type": "array",
                           "items": {
-                            "type": "keyword"
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service language name and version sorted by doc count."
+                            }
                           }
                         }
                       }
@@ -3654,19 +3975,28 @@
                         "name": {
                           "type": "array",
                           "items": {
-                            "type": "keyword"
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service runtime name within the last day"
+                            }
                           }
                         },
                         "version": {
                           "type": "array",
                           "items": {
-                            "type": "keyword"
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service runtime version within the last day"
+                            }
                           }
                         },
                         "composite": {
                           "type": "array",
                           "items": {
-                            "type": "keyword"
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service runtime name and version sorted by doc count."
+                            }
                           }
                         }
                       }
@@ -3682,13 +4012,19 @@
                     "version": {
                       "type": "array",
                       "items": {
-                        "type": "keyword"
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "An array of the top 3 agent versions within the last day"
+                        }
                       }
                     },
                     "activation_method": {
                       "type": "array",
                       "items": {
-                        "type": "keyword"
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "An array of the top 3 agent activation methods within the last day"
+                        }
                       }
                     }
                   }
@@ -3700,19 +4036,28 @@
                         "name": {
                           "type": "array",
                           "items": {
-                            "type": "keyword"
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service framework name  within the last day"
+                            }
                           }
                         },
                         "version": {
                           "type": "array",
                           "items": {
-                            "type": "keyword"
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service framework version within the last day"
+                            }
                           }
                         },
                         "composite": {
                           "type": "array",
                           "items": {
-                            "type": "keyword"
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service framework and version sorted by doc count"
+                            }
                           }
                         }
                       }
@@ -3722,19 +4067,28 @@
                         "name": {
                           "type": "array",
                           "items": {
-                            "type": "keyword"
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service language name within the last day"
+                            }
                           }
                         },
                         "version": {
                           "type": "array",
                           "items": {
-                            "type": "keyword"
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service language version within the last day"
+                            }
                           }
                         },
                         "composite": {
                           "type": "array",
                           "items": {
-                            "type": "keyword"
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service language name and version sorted by doc count."
+                            }
                           }
                         }
                       }
@@ -3744,19 +4098,28 @@
                         "name": {
                           "type": "array",
                           "items": {
-                            "type": "keyword"
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service runtime name within the last day"
+                            }
                           }
                         },
                         "version": {
                           "type": "array",
                           "items": {
-                            "type": "keyword"
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service runtime version within the last day"
+                            }
                           }
                         },
                         "composite": {
                           "type": "array",
                           "items": {
-                            "type": "keyword"
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service runtime name and version sorted by doc count."
+                            }
                           }
                         }
                       }
@@ -3770,7 +4133,7 @@
         "has_any_services": {
           "type": "boolean",
           "_meta": {
-            "description": "Indicates whether any service is being monitored. This is determined by checking all agents."
+            "description": "Indicates whether any service is being monitored. This is determined by checking all agents within the last day"
           }
         },
         "version": {
@@ -3804,13 +4167,13 @@
             "services_without_environment": {
               "type": "long",
               "_meta": {
-                "description": "Number of services without an assigned environment. This is determined by checking the \"service.environment\" field and counting instances where it is null"
+                "description": "Number of services without an assigned environment within the last day. This is determined by checking the \"service.environment\" field and counting instances where it is null"
               }
             },
             "services_with_multiple_environments": {
               "type": "long",
               "_meta": {
-                "description": "Number of services with more than one assigned environment"
+                "description": "Number of services with more than one assigned environment within the last day"
               }
             },
             "top_environments": {
@@ -3818,7 +4181,7 @@
               "items": {
                 "type": "keyword",
                 "_meta": {
-                  "description": "An array of the top 5 environments in terms of document count"
+                  "description": "An array of the top 5 environments in terms of document count within tha last day"
                 }
               }
             }
@@ -3895,7 +4258,7 @@
               "items": {
                 "type": "keyword",
                 "_meta": {
-                  "description": "An array of the top 10 cloud availability zones in terms of document count. Example: [us-east1-c, us-east1-b]"
+                  "description": "An array of the top 10 cloud availability zones in terms of document count overall. Example: [us-east1-c, us-east1-b]"
                 }
               }
             },
@@ -3904,7 +4267,7 @@
               "items": {
                 "type": "keyword",
                 "_meta": {
-                  "description": "An array of the top 10 cloud providers in terms of document count. Example: [azure]"
+                  "description": "An array of the top 10 cloud providers in terms of document count overall. Example: [azure]"
                 }
               }
             },
@@ -3913,7 +4276,7 @@
               "items": {
                 "type": "keyword",
                 "_meta": {
-                  "description": "An array of the top 10 cloud regions in terms of document count. Example: [us-west1, us-central1]"
+                  "description": "An array of the top 10 cloud regions in terms of document count overall. Example: [us-west1, us-central1]"
                 }
               }
             }
@@ -3928,7 +4291,7 @@
                   "items": {
                     "type": "keyword",
                     "_meta": {
-                      "description": "An array of the top 10 operating system platforms in terms of document count. Example: [linux, win32]"
+                      "description": "An array of the top 10 operating system platforms in terms of document count within an hour. Example: [linux, win32]"
                     }
                   }
                 }
@@ -4033,7 +4396,7 @@
                 "1d": {
                   "type": "long",
                   "_meta": {
-                    "description": "Total number of distinct transaction groups for the top service for the last last 24 hours"
+                    "description": "Total number of distinct transaction groups for the top service for the last 24 hours"
                   }
                 }
               }
@@ -4043,7 +4406,7 @@
                 "1d": {
                   "type": "long",
                   "_meta": {
-                    "description": "Total number of distinct error groups for the top service for the last last 24 hours"
+                    "description": "Total number of distinct error groups for the top service for the last 24 hours"
                   }
                 }
               }
@@ -4109,7 +4472,7 @@
                             "1d": {
                               "type": "long",
                               "_meta": {
-                                "description": "Unique country iso code captured for the agents js-base, rum-js and opentelemetry/webjs."
+                                "description": "Unique country iso code captured for the agents js-base, rum-js and opentelemetry/webjs within the last day"
                               }
                             }
                           }
@@ -4127,14 +4490,20 @@
                     "all_agents": {
                       "properties": {
                         "1d": {
-                          "type": "long"
+                          "type": "long",
+                          "_meta": {
+                            "description": "Unique user agent for all agents within the last day"
+                          }
                         }
                       }
                     },
                     "rum": {
                       "properties": {
                         "1d": {
-                          "type": "long"
+                          "type": "long",
+                          "_meta": {
+                            "description": "Unique user agent for rum agent within the last day"
+                          }
                         }
                       }
                     }
@@ -4149,14 +4518,20 @@
                     "all_agents": {
                       "properties": {
                         "1d": {
-                          "type": "long"
+                          "type": "long",
+                          "_meta": {
+                            "description": "Unique transaction names for all agents within the last day"
+                          }
                         }
                       }
                     },
                     "rum": {
                       "properties": {
                         "1d": {
-                          "type": "long"
+                          "type": "long",
+                          "_meta": {
+                            "description": "Unique transaction names for rum agent within the last day"
+                          }
                         }
                       }
                     }
@@ -4276,7 +4651,7 @@
                     "total": {
                       "type": "long",
                       "_meta": {
-                        "description": "Total number of shards"
+                        "description": "Total number of shards overall"
                       }
                     }
                   }
@@ -4300,7 +4675,7 @@
                             "size_in_bytes": {
                               "type": "long",
                               "_meta": {
-                                "description": "Size of the index in byte units."
+                                "description": "Size of the index in byte units overall."
                               }
                             }
                           }
@@ -4316,7 +4691,7 @@
                 "total": {
                   "type": "long",
                   "_meta": {
-                    "description": "Total number of shards"
+                    "description": "Total number of shards overall"
                   }
                 }
               }
@@ -4340,7 +4715,7 @@
                         "size_in_bytes": {
                           "type": "long",
                           "_meta": {
-                            "description": "Size of the index in byte units."
+                            "description": "Size of the index in byte units overall."
                           }
                         }
                       }
@@ -4358,7 +4733,7 @@
               "items": {
                 "type": "keyword",
                 "_meta": {
-                  "description": "An array of up to 500 unique fields used to create the service groups. Example  [service.language.name, service.name] "
+                  "description": "An array of up to 500 unique fields used to create the service groups across all spaces. Example  [service.language.name, service.name] "
                 }
               }
             },
@@ -4383,13 +4758,13 @@
               "num_service_nodes": {
                 "type": "long",
                 "_meta": {
-                  "description": "Total number of the unique service instances that served the transaction"
+                  "description": "Total number of the unique service instances that served the transaction within an hour"
                 }
               },
               "num_transaction_types": {
                 "type": "long",
                 "_meta": {
-                  "description": "Total number of the unique transaction types"
+                  "description": "Total number of the unique transaction types within an hour"
                 }
               },
               "timed_out": {
@@ -4405,7 +4780,7 @@
                     "items": {
                       "type": "keyword",
                       "_meta": {
-                        "description": "An array of the top 5 cloud availability zones. Example [ca-central-1a, ca-central-1b]"
+                        "description": "An array of the top 5 cloud availability zones within an hour. Example [ca-central-1a, ca-central-1b]"
                       }
                     }
                   },
@@ -4414,7 +4789,7 @@
                     "items": {
                       "type": "keyword",
                       "_meta": {
-                        "description": "An array of the top 5 cloud regions. Example [ca-central-1]"
+                        "description": "An array of the top 5 cloud regions within an hour. Example [ca-central-1]"
                       }
                     }
                   },
@@ -4423,7 +4798,7 @@
                     "items": {
                       "type": "keyword",
                       "_meta": {
-                        "description": "An array of the top 3 cloud provider. Example [aws]"
+                        "description": "An array of the top 3 cloud provider within an hour. Example [aws]"
                       }
                     }
                   }
@@ -4438,7 +4813,7 @@
                         "items": {
                           "type": "keyword",
                           "_meta": {
-                            "description": "An array of the top 5 faas trigger types. Example [http, timer, pubsub]"
+                            "description": "An array of the top 5 faas trigger types within an hour. Example [http, timer, pubsub]"
                           }
                         }
                       }
@@ -4451,19 +4826,19 @@
                   "name": {
                     "type": "keyword",
                     "_meta": {
-                      "description": "The top value of agent name for the service from transaction documents. Sorted by _score"
+                      "description": "The top value of agent name for the service from transaction documents within an hour. Sorted by _score"
                     }
                   },
                   "version": {
                     "type": "keyword",
                     "_meta": {
-                      "description": "The top value of agent version for the service from transaction documents. Sorted by _score"
+                      "description": "The top value of agent version for the service from transaction documents within an hour. Sorted by _score"
                     }
                   },
                   "activation_method": {
                     "type": "keyword",
                     "_meta": {
-                      "description": "The top value of agent activation method for the service from transaction documents. Sorted by _score"
+                      "description": "The top value of agent activation method for the service from transaction documents within an hour. Sorted by _score"
                     }
                   }
                 }
@@ -4475,13 +4850,13 @@
                       "name": {
                         "type": "keyword",
                         "_meta": {
-                          "description": "The top value of language name for the service from transaction documents. Sorted by _score"
+                          "description": "The top value of language name for the service from transaction documents within an hour. Sorted by _score"
                         }
                       },
                       "version": {
                         "type": "keyword",
                         "_meta": {
-                          "description": "The top value of language version for the service from transaction documents. Sorted by _score"
+                          "description": "The top value of language version for the service from transaction documents within an hour. Sorted by _score"
                         }
                       }
                     }
@@ -4491,13 +4866,13 @@
                       "name": {
                         "type": "keyword",
                         "_meta": {
-                          "description": "The top value of service framework name from transaction documents. Sorted by _score. Example AWS Lambda"
+                          "description": "The top value of service framework name from transaction documents within an hour. Sorted by _score. Example AWS Lambda"
                         }
                       },
                       "version": {
                         "type": "keyword",
                         "_meta": {
-                          "description": "The top value of service framework version from transaction documents. Sorted by _score"
+                          "description": "The top value of service framework version from transaction documents within an hour. Sorted by _score"
                         }
                       }
                     }
@@ -4507,13 +4882,13 @@
                       "name": {
                         "type": "keyword",
                         "_meta": {
-                          "description": "The top value of service runtime name from transaction documents. Sorted by _score"
+                          "description": "The top value of service runtime name from transaction documents within an hour. Sorted by _score"
                         }
                       },
                       "version": {
                         "type": "keyword",
                         "_meta": {
-                          "description": "The top value of service runtime version version from transaction documents. Sorted by _score"
+                          "description": "The top value of service runtime version version from transaction documents within an hour. Sorted by _score"
                         }
                       }
                     }
