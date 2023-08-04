@@ -12,7 +12,6 @@ import {
   EuiFieldNumber,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiForm,
   EuiFormFieldset,
   EuiFormRow,
   EuiHorizontalRule,
@@ -22,7 +21,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { FormikProvider, useFormik } from 'formik';
+import { Form, FormikProvider, useFormik } from 'formik';
 import moment from 'moment-timezone';
 import type { FunctionComponent } from 'react';
 import React, { useEffect } from 'react';
@@ -64,7 +63,7 @@ export interface ApiKeyFormValues {
 }
 
 interface CommonApiKeyFlyoutProps {
-  defaultValues?: ApiKeyFormValues;
+  initialValues?: ApiKeyFormValues;
   onCancel: FormFlyoutProps['onCancel'];
   canManageCrossClusterApiKeys?: boolean;
   readOnly?: boolean;
@@ -81,7 +80,7 @@ interface UpdateApiKeyFlyoutProps extends CommonApiKeyFlyoutProps {
 
 export type ApiKeyFlyoutProps = ExclusiveUnion<CreateApiKeyFlyoutProps, UpdateApiKeyFlyoutProps>;
 
-const defaultDefaultValues: ApiKeyFormValues = {
+const defaultInitialValues: ApiKeyFormValues = {
   name: '',
   type: 'rest',
   customExpiration: false,
@@ -142,7 +141,7 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
         throw error;
       }
     },
-    initialValues: apiKey ? mapApiKeyFormValues(apiKey) : defaultDefaultValues,
+    initialValues: apiKey ? mapApiKeyFormValues(apiKey) : defaultInitialValues,
   });
 
   useEffect(() => {
@@ -217,12 +216,17 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
         ownFocus
       >
         <EuiSkeletonText isLoading={isLoading}>
-          {apiKey ? (
+          {apiKey && !readOnly ? (
             !isOwner ? (
               <>
                 <EuiCallOut
                   iconType="lock"
-                  title="You cannot update this API key, since it is owned by another user."
+                  title={
+                    <FormattedMessage
+                      id="xpack.security.accountManagement.apiKeyFlyout.readonlyOwnedByOtherUserWarning"
+                      defaultMessage="You cannot update this API key, since it is owned by another user."
+                    />
+                  }
                 />
                 <EuiSpacer />
               </>
@@ -230,13 +234,19 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
               <>
                 <EuiCallOut
                   iconType="lock"
-                  title="You cannot update this API key, since it has already expired."
+                  title={
+                    <FormattedMessage
+                      id="xpack.security.accountManagement.apiKeyFlyout.readonlyExpiredWarning"
+                      defaultMessage="You cannot update this API key, since it has already expired."
+                    />
+                  }
                 />
                 <EuiSpacer />
               </>
             ) : null
           ) : null}
-          <EuiForm>
+
+          <Form>
             <FormRow
               label={
                 <FormattedMessage
@@ -641,10 +651,7 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
                 </>
               )}
             </EuiFormFieldset>
-
-            {/* Hidden submit button is required for enter key to trigger form submission */}
-            <input type="submit" hidden />
-          </EuiForm>
+          </Form>
         </EuiSkeletonText>
       </FormFlyout>
     </FormikProvider>

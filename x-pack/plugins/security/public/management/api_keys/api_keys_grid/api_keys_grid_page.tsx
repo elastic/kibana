@@ -183,21 +183,14 @@ export const APIKeysGridPage: FunctionComponent = () => {
               </>
             )}
 
-            {!state.value.canManageApiKeys ? (
+            {!state.value.canManageApiKeys && !readOnly ? (
               <>
                 <EuiCallOut
                   title={
-                    readOnly ? (
-                      <FormattedMessage
-                        id="xpack.security.management.apiKeys.table.readOnlyOwnKeysWarning"
-                        defaultMessage="You only have permission to view your own API keys."
-                      />
-                    ) : (
-                      <FormattedMessage
-                        id="xpack.security.management.apiKeys.table.manageOwnKeysWarning"
-                        defaultMessage="You only have permission to manage your own API keys."
-                      />
-                    )
+                    <FormattedMessage
+                      id="xpack.security.management.apiKeys.table.manageOwnKeysWarning"
+                      defaultMessage="You only have permission to manage your own API keys."
+                    />
                   }
                 />
                 <EuiSpacer />
