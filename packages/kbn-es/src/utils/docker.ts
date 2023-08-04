@@ -253,14 +253,8 @@ export async function maybePullDockerImage(log: ToolingLog, image: string) {
     // inherit is required to show Docker output
     stdio: ['ignore', 'inherit', 'inherit'],
   });
-  // .catch(({ message }) => {
-  //   if (message.includes('network with name elastic already exists')) {
-  //     log.info('Using existing network.');
-  //   } else {
-  //     throw createCliError(message);
-  //   }
-  // });
 
+  // TODO: adjust log output (shows pulled image when already exists), return promise
   if (process?.exitCode === 0) {
     log.success('Pulled Image.');
   }
