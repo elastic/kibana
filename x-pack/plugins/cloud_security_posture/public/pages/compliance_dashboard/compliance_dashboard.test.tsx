@@ -99,9 +99,7 @@ describe('<ComplianceDashboard />', () => {
   };
 
   const renderComplianceDashboardPage = () => {
-    return render(
-      <ComplianceDashboardWithTestProviders />
-    );
+    return render(<ComplianceDashboardWithTestProviders />);
   };
 
   it('shows package not installed page instead of tabs', () => {
