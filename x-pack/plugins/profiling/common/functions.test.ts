@@ -27,7 +27,7 @@ describe('TopN function operations', () => {
         startIndex: 0,
         endIndex: maxTopN,
         samplingRate,
-        totalSeconds: 900,
+        totalSeconds: seconds,
       });
       const exclusiveCounts = topNFunctions.TopN.map((value) => value.CountExclusive);
 

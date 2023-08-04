@@ -23,12 +23,12 @@ describe('Flamegraph operations', () => {
       totalFrames,
       samplingRate
     );
-    const baseFlamegraph = createBaseFlameGraph(tree, samplingRate, 60);
+    const baseFlamegraph = createBaseFlameGraph(tree, samplingRate, seconds);
     const flamegraph = createFlameGraph(baseFlamegraph);
 
     describe(`stacktraces from ${seconds} seconds and upsampled by ${upsampledBy}`, () => {
       test('base flamegraph has non-zero total seconds', () => {
-        expect(baseFlamegraph.TotalSeconds).toEqual(60);
+        expect(baseFlamegraph.TotalSeconds).toEqual(seconds);
       });
 
       test('base flamegraph has one more node than the number of edges', () => {
