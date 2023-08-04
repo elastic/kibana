@@ -49,5 +49,3 @@ describe('convertDateToISOString', () => {
     }).toThrowErrorMatchingInlineSnapshot(`"Could not convert string \\"hi mom\\" to ISO string"`);
   });
 });
-
-describe('')

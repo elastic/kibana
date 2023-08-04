@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-export * from './after_keys';
-export * from './risk_weights';
-export * from './identifier_types';
-export * from './range';
+import * as t from 'io-ts';
+
+export const rangeSchema = t.type({
+  start: t.string,
+  end: t.string,
+});
+export type RangeSchema = t.TypeOf<typeof rangeSchema>;
+export type Range = RangeSchema;

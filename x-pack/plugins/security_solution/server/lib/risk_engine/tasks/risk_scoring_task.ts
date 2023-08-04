@@ -21,6 +21,8 @@ import {
   type LatestTaskStateSchema as RiskScoringTaskState,
 } from './state';
 import { INTERVAL, SCOPE, TIMEOUT, TYPE, VERSION } from './constants';
+import { convertRangeToISO } from './helpers';
+import { isRiskScoreCalculationComplete } from '../helpers';
 
 export class RiskScoringTask {
   private readonly logger: Logger;
@@ -102,31 +104,44 @@ export class RiskScoringTask {
       return { state: updatedState };
     }
 
-    const isRiskEngineEnabled = true; // TODO get from config
-    if (!isRiskEngineEnabled) {
-      this.log('risk engine is not enabled, exiting task');
-      return { state: updatedState };
-    }
-
     if (!this.riskScoreService) {
       this.log('risk score service is not available; exiting task');
       return { state: updatedState };
     }
 
-    let scoresToCalculateRemain = true;
-    while (scoresToCalculateRemain) {
+    const configuration = await this.riskScoreService.getConfiguration();
+    if (configuration == null) {
+      this.log(
+        'risk engine configuration not found; exiting task. Please re-enable the risk engine and try again'
+      );
+      return { state: updatedState };
+    }
+
+    const { dataViewId, enabled, filter, range: configuredRange, pageSize } = configuration;
+    if (!enabled) {
+      this.log('risk engine is not enabled, exiting task');
+      return { state: updatedState };
+    }
+
+    const range = convertRangeToISO(configuredRange);
+    const { index, runtimeMappings } = await this.riskScoreService.getRiskInputsIndex({
+      dataViewId,
+    });
+
+    let isWorkComplete = false;
+    while (!isWorkComplete) {
       const result = await this.riskScoreService.calculateAndPersistScores({
-        afterKeys: {}, // TODO
-        index: '', // TODO
-        filter: {}, // TODO
+        afterKeys,
+        index,
+        filter,
         identifierType: 'user', // TODO
-        pageSize: 1000, // TODO
-        range: { start: 'now-30d', end: 'now' }, // TODO get from config, convert to moment
-        runtimeMappings: {}, // TODO get from dataview
+        pageSize,
+        range,
+        runtimeMappings,
         weights: [],
       });
 
-      scoresToCalculateRemain = result.after_keys.user != null || result.after_keys.host != null;
+      isWorkComplete = isRiskScoreCalculationComplete(result);
       afterKeys = result.after_keys;
       scoresWritten += result.scores_written;
     }

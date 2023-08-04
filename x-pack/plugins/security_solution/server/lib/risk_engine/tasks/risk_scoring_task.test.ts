@@ -20,6 +20,8 @@ import { RiskScoringTask } from './risk_scoring_task';
 import { riskScoreServiceMock } from '../risk_score_service.mock';
 import { riskScoringTaskMock } from './risk_scoring_task.mock';
 
+const ISO_8601_PATTERN = /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
+
 describe('Risk Scoring Task', () => {
   let task: RiskScoringTask;
   let mockRiskScoreService: ReturnType<typeof riskScoreServiceMock.create>;
@@ -41,10 +43,6 @@ describe('Risk Scoring Task', () => {
     });
   });
 
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
-
   describe('#register', () => {
     it('registers the task with TaskManager', () => {
       expect(mockTaskManagerSetup.registerTaskDefinitions).not.toHaveBeenCalled();
@@ -59,6 +57,7 @@ describe('Risk Scoring Task', () => {
         taskManager: mockTaskManagerStart,
         riskScoreService: mockRiskScoreService,
       });
+
       expect(mockTaskManagerStart.ensureScheduled).toHaveBeenCalledWith(
         expect.objectContaining({
           schedule: { interval: '1h' },
@@ -77,6 +76,17 @@ describe('Risk Scoring Task', () => {
         riskScoreService: mockRiskScoreService,
       });
       riskScoringTaskInstanceMock = riskScoringTaskMock.createInstance();
+      mockRiskScoreService.getRiskInputsIndex.mockResolvedValueOnce({
+        index: 'index',
+        runtimeMappings: {},
+      });
+      mockRiskScoreService.getConfiguration.mockResolvedValue({
+        dataViewId: 'data_view_id',
+        enabled: true,
+        filter: {},
+        pageSize: 10_000,
+        range: { start: 'now-30d', end: 'now' },
+      });
     });
 
     describe('when there are no scores to calculate', () => {
@@ -111,13 +121,54 @@ describe('Risk Scoring Task', () => {
           });
       });
 
-      it.todo('retrieves configuration from the saved object');
-      it.todo('invokes the risk score service with the persisted configuration');
+      it('retrieves configuration from the saved object', async () => {
+        await task.runTask(riskScoringTaskInstanceMock);
+        expect(mockRiskScoreService.getConfiguration).toHaveBeenCalledTimes(1);
+      });
+
       it('invokes the risk score service once for each page of scores', async () => {
         await task.runTask(riskScoringTaskInstanceMock);
         expect(mockRiskScoreService.calculateAndPersistScores).toHaveBeenCalledTimes(2);
       });
+
+      it('invokes the risk score service with the persisted configuration', async () => {
+        mockRiskScoreService.getConfiguration.mockResolvedValueOnce({
+          dataViewId: 'data_view_id',
+          enabled: true,
+          filter: {
+            term: { 'host.name': 'SUSPICIOUS' },
+          },
+          pageSize: 11_111,
+          range: { start: 'now-30d', end: 'now' },
+        });
+        await task.runTask(riskScoringTaskInstanceMock);
+
+        expect(mockRiskScoreService.calculateAndPersistScores).toHaveBeenCalledWith(
+          expect.objectContaining({
+            filter: {
+              term: { 'host.name': 'SUSPICIOUS' },
+            },
+            pageSize: 11_111,
+            range: {
+              start: expect.stringMatching(ISO_8601_PATTERN),
+              end: expect.stringMatching(ISO_8601_PATTERN),
+            },
+          })
+        );
+      });
+
       it.todo('updates the task state');
+
+      describe('short-circuiting', () => {
+        it.todo('does not execute if the risk engine is not enabled');
+        it.todo('does not execute if the configuration is not found');
+        it.todo('does not execute if the riskScoreService is not available');
+      });
+
+      describe('failure conditions', () => {
+        it.todo('logs an error and does not execute if the configured range is invalid');
+        it.todo('logs an error if the configured filter is invalid');
+      });
     });
   });
 });

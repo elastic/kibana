@@ -35,6 +35,7 @@ import {
   getConfiguration,
   initSavedObjects,
 } from './utils/saved_object_configuration';
+import { getRiskInputsIndex } from './get_risk_inputs_index';
 
 interface InitOpts {
   namespace: string;
@@ -120,6 +121,18 @@ export class RiskEngineDataClient {
     return writer;
   }
 
+  public getConfiguration = () =>
+    getConfiguration({
+      savedObjectsClient: this.options.soClient,
+    });
+
+  public getRiskInputsIndex = ({ dataViewId }: { dataViewId: string }) =>
+    getRiskInputsIndex({
+      dataViewId,
+      logger: this.options.logger,
+      soClient: this.options.soClient,
+    });
+
   public async getStatus({ namespace }: { namespace: string }) {
     const riskEngineStatus = await this.getCurrentStatus();
     const legacyRiskEngineStatus = await this.getLegacyStatus({ namespace });
@@ -166,7 +179,7 @@ export class RiskEngineDataClient {
   }
 
   private async getCurrentStatus() {
-    const configuration = await getConfiguration({ savedObjectsClient: this.options.soClient });
+    const configuration = await this.getConfiguration();
 
     if (configuration) {
       return configuration.enabled ? RiskEngineStatus.ENABLED : RiskEngineStatus.DISABLED;

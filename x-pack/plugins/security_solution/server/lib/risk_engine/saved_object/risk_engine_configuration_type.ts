@@ -13,8 +13,28 @@ export const riskEngineConfigurationTypeName = 'risk-engine-configuration';
 export const riskEngineConfigurationTypeMappings: SavedObjectsType['mappings'] = {
   dynamic: false,
   properties: {
+    dataViewId: {
+      type: 'keyword',
+    },
     enabled: {
       type: 'boolean',
+    },
+    filter: {
+      dynamic: false,
+      properties: {},
+    },
+    pageSize: {
+      type: 'integer',
+    },
+    range: {
+      properties: {
+        start: {
+          type: 'keyword',
+        },
+        end: {
+          type: 'keyword',
+        },
+      },
     },
   },
 };

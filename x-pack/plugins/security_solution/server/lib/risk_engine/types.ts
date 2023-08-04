@@ -13,6 +13,7 @@ import type {
   IdentifierType,
   RiskCategories,
   RiskWeights,
+  Range,
 } from '../../../common/risk_engine';
 import type { RiskEngineStatus } from '../../../common/risk_engine/types';
 
@@ -35,7 +36,7 @@ export interface CalculateAndPersistScoresParams {
   filter?: unknown;
   identifierType: IdentifierType;
   pageSize: number;
-  range: { start: string; end: string };
+  range: Range;
   runtimeMappings: MappingRuntimeFields;
   weights?: RiskWeights;
 }
@@ -163,5 +164,9 @@ export interface RiskScoreBucket {
 }
 
 export interface RiskEngineConfiguration {
+  dataViewId: string;
   enabled: boolean;
+  filter: unknown;
+  pageSize: number;
+  range: Range;
 }

@@ -6,6 +6,7 @@
  */
 
 import type { AfterKey, AfterKeys, IdentifierType } from '../../../common/risk_engine';
+import type { CalculateAndPersistScoresResponse } from './types';
 
 export const getFieldForIdentifierAgg = (identifierType: IdentifierType): string =>
   identifierType === 'host' ? 'host.name' : 'user.name';
@@ -17,3 +18,9 @@ export const getAfterKeyForIdentifierType = ({
   afterKeys: AfterKeys;
   identifierType: IdentifierType;
 }): AfterKey | undefined => afterKeys[identifierType];
+
+export const isRiskScoreCalculationComplete = (
+  result: CalculateAndPersistScoresResponse
+): boolean =>
+  Object.keys(result.after_keys.host ?? {}).length === 0 &&
+  Object.keys(result.after_keys.user ?? {}).length === 0;

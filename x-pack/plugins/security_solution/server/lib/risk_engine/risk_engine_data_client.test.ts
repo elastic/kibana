@@ -431,6 +431,20 @@ describe('RiskEngineDataClient', () => {
     });
   });
 
+  describe('#getConfiguration', () => {
+    it('retrieves configuration from the saved object', async () => {
+      mockSavedObjectClient.find.mockResolvedValueOnce(getSavedObjectConfiguration());
+
+      const configuration = await riskEngineDataClient.getConfiguration();
+
+      expect(mockSavedObjectClient.find).toHaveBeenCalledTimes(1);
+
+      expect(configuration).toEqual({
+        enabled: false,
+      });
+    });
+  });
+
   describe('enableRiskEngine', () => {
     afterEach(() => {
       mockSavedObjectClient.find.mockReset();
