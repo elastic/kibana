@@ -19,7 +19,7 @@ type InfraLogsDashboardAppName = 'infra_logs';
 
 // check log data streams that match the naming convention, except for the APM
 // error stream, because its presence would always mask the "APM only" case
-const LOG_DATA_INDICES = 'logs-*-*,-logs-apm.error*';
+const LOG_DATA_INDICES = 'logs-*-*,-logs-apm.error-*';
 
 export function createObservabilityDashboardRegistration({
   search,
