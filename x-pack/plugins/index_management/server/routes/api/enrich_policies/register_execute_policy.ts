@@ -15,8 +15,8 @@ const paramsSchema = schema.object({
   name: schema.string(),
 });
 
-export function registerDeleteRoute({ router, lib: { handleEsError } }: RouteDependencies) {
-  router.delete(
+export function registerExecuteRoute({ router, lib: { handleEsError } }: RouteDependencies) {
+  router.put(
     {
       path: addBasePath('/enrich_policies/{name}'),
       validate: { params: paramsSchema },
@@ -26,7 +26,7 @@ export function registerDeleteRoute({ router, lib: { handleEsError } }: RouteDep
       const client = (await context.core).elasticsearch.client as IScopedClusterClient;
 
       try {
-        const res = await client.asCurrentUser.enrich.deletePolicy({ name });
+        const res = await client.asCurrentUser.enrich.executePolicy({ name });
         return response.ok({ body: res });
       } catch (error) {
         return handleEsError({ error, response });

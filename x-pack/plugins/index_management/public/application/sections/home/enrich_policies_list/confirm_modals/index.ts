@@ -6,3 +6,4 @@
  */
 
 export { DeletePolicyModal } from './delete_policy_modal';
+export { ExecutePolicyModal } from './execute_policy_modal';

@@ -8,34 +8,34 @@
 import React from 'react';
 import { EuiConfirmModal } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { deleteEnrichPolicy } from '../../../../services/api';
+import { executeEnrichPolicy } from '../../../../services/api';
 import { useAppContext } from '../../../../app_context';
 
-export const DeletePolicyModal = ({
-  policyToDelete,
+export const ExecutePolicyModal = ({
+  policyToExecute,
   callback,
 }: {
-  policyToDelete: string;
-  callback: (data?: { hasDeletedPolicy: boolean }) => void;
+  policyToExecute: string;
+  callback: (data?: { hasExecutedPolicy: boolean }) => void;
 }) => {
   const { toasts } = useAppContext();
 
-  const handleDeletePolicy = () => {
-    deleteEnrichPolicy(policyToDelete)
+  const handleExecutePolicy = () => {
+    executeEnrichPolicy(policyToExecute)
       .then(({ data, error}) => {
         if (data) {
           const successMessage = i18n.translate(
-            'xpack.index_management.enrich_policies.deleteModal.successDeleteNotificationMessage',
-            { defaultMessage: 'Deleted {policyToDelete}', values: { policyToDelete } }
+            'xpack.index_management.enrich_policies.executeModal.successDeleteNotificationMessage',
+            { defaultMessage: 'Executed {policyToExecute}', values: { policyToExecute } }
           );
           toasts.addSuccess(successMessage);
 
-          return callback({ hasDeletedPolicy: true });
+          return callback({ hasExecutedPolicy: true });
         }
 
         if (error) {
-          const errorMessage = i18n.translate('xpack.index_management.enrich_policies.deleteModal.errorDeleteNotificationMessage', {
-            defaultMessage: "Error deleting enrich policy: '{error}'",
+          const errorMessage = i18n.translate('xpack.index_management.enrich_policies.executeModal.errorDeleteNotificationMessage', {
+            defaultMessage: "Error executing enrich policy: '{error}'",
             values: { error: error.message },
           });
           toasts.addDanger(errorMessage);
@@ -51,15 +51,14 @@ export const DeletePolicyModal = ({
 
   return (
     <EuiConfirmModal
-      buttonColor="danger"
-      title="Delete enrich policy"
+      title="Execute enrich policy"
       onCancel={handleOnCancel}
-      onConfirm={handleDeletePolicy}
+      onConfirm={handleExecutePolicy}
       cancelButtonText="Cancel"
-      confirmButtonText="Delete"
+      confirmButtonText="Execute"
     >
       <p>
-        You are about to delete the enrich policy <strong>{policyToDelete}</strong>. This action is irreverisble.
+        You are about to execute the enrich policy <strong>{policyToExecute}</strong>.
       </p>
     </EuiConfirmModal>
   );

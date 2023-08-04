@@ -19,7 +19,7 @@ import { useAppContext } from '../../../app_context';
 import { useLoadEnrichPolicies } from '../../../services/api';
 import { PageLoading, PageError } from '../../../../shared_imports';
 import { PoliciesTable } from './policies_table';
-import { DeletePolicyModal } from './confirm_modals';
+import { DeletePolicyModal, ExecutePolicyModal } from './confirm_modals';
 
 type policyType = 'match' | 'geo_match' | 'range' | '';
 
@@ -83,6 +83,7 @@ export const EnrichPoliciesList = () => {
   });
 
   const [policyToDelete, setPolicyToDelete] = useState<string | undefined>();
+  const [policyToExecute, setPolicyToExecute] = useState<string | undefined>();
 
   const {
     error,
@@ -141,9 +142,10 @@ export const EnrichPoliciesList = () => {
         policies={serializeEnrichmentPolicies(data.policies)}
         onReloadClick={reload}
         onDeletePolicyClick={setPolicyToDelete}
+        onExecutePolicyClick={setPolicyToExecute}
       />
 
-      {policyToDelete ? (
+      {policyToDelete && (
         <DeletePolicyModal
           policyToDelete={policyToDelete}
           callback={(deleteResponse) => {
@@ -154,7 +156,20 @@ export const EnrichPoliciesList = () => {
             setPolicyToDelete(undefined);
           }}
         />
-      ) : null}
+      )}
+
+      {policyToExecute && (
+        <ExecutePolicyModal
+          policyToExecute={policyToExecute}
+          callback={(executeResponse) => {
+            if (executeResponse?.hasExecutedPolicy) {
+              // reload policies list
+              reload();
+            }
+            setPolicyToExecute(undefined);
+          }}
+        />
+      )}
     </div>
   );
 };

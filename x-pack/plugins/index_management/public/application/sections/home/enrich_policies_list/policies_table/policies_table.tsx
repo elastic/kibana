@@ -18,6 +18,7 @@ export interface Props {
   policies: EnrichPolicy[];
   onReloadClick: () => void;
   onDeletePolicyClick: (policyName: string) => void;
+  onExecutePolicyClick: (policyName: string) => void;
 }
 
 const pagination = {
@@ -29,6 +30,7 @@ export const PoliciesTable: FunctionComponent<Props> = ({
   policies,
   onReloadClick,
   onDeletePolicyClick,
+  onExecutePolicyClick,
 }) => {
   const renderToolsRight = () => {
     return [
@@ -95,7 +97,7 @@ export const PoliciesTable: FunctionComponent<Props> = ({
           description: 'Execute this enrich policy',
           type: 'icon',
           icon: 'play',
-          onClick: () => {},
+          onClick: ({ name }) => onExecutePolicyClick(name),
         },
         {
           isPrimary: true,

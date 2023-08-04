@@ -327,3 +327,12 @@ export async function deleteEnrichPolicy(policyName: string) {
 
   return result;
 }
+
+export async function executeEnrichPolicy(policyName: string) {
+  const result = sendRequest({
+    path: `${API_BASE_PATH}/enrich_policies/${policyName}`,
+    method: 'put',
+  });
+
+  return result;
+}
