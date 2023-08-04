@@ -142,7 +142,7 @@ GET /_some_endpoint?expand_wildcards=hi
 ```
 "hidden" is displayed for autocompletion. 
 
-Dynamic parameters such as `{index}` or `{fields}` are accepted both as an url parameter and its value in the configuration object. See the [Dynamic parameters](#dynamic) section below for more information.
+Dynamic parameters such as `{index}` or `{fields}` are accepted both as an url parameter and its value in the configuration object. See the [Dynamic parameters](#dynamic-parameters) section below for more information.
 
 ### Request body parameters
 Request body parameters are configured in form of an object, for example: 
