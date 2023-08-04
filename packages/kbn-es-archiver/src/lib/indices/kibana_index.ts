@@ -18,7 +18,7 @@ import { ES_CLIENT_HEADERS } from '../../client_headers';
 import {
   ALL_SAVED_OBJECT_INDICES,
   MAIN_SAVED_OBJECT_INDEX,
-  TASK_MANAGER_SAVED_OBJECT_INDEX
+  TASK_MANAGER_SAVED_OBJECT_INDEX,
 } from './constants';
 
 /**
