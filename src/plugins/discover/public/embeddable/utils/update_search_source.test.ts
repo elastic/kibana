@@ -20,7 +20,6 @@ jest
 describe('updateSearchSource', () => {
   const defaults = {
     sampleSize: 50,
-    defaultSort: 'asc',
   };
 
   it('updates a given search source', async () => {

@@ -18,7 +18,6 @@ export const updateSearchSource = (
   useNewFieldsApi: boolean,
   defaults: {
     sampleSize: number;
-    defaultSort: string; // TODO: remove
   },
   uiSettings: IUiSettingsClient
 ) => {
