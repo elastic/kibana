@@ -241,25 +241,19 @@ export async function maybeCreateDockerNetwork(log: ToolingLog) {
 
 /**
  *
- * Pull a Docker image if needed.
+ * Pull a Docker image if needed. Ensures latest image.
  * Stops serverless from pulling the same image in each node's promise and
  * gives better control of log output, instead of falling back to docker run.
  */
 export async function maybePullDockerImage(log: ToolingLog, image: string) {
-  log.info(chalk.bold(`Checking for local image: ${image}`));
-  log.indent(4);
+  log.info(chalk.bold(`Checking for image: ${image}`));
 
-  const process = await execa('docker', ['pull', image], {
+  await execa('docker', ['pull', image], {
     // inherit is required to show Docker output
     stdio: ['ignore', 'inherit', 'inherit'],
+  }).catch(({ message }) => {
+    throw createCliError(message);
   });
-
-  // TODO: adjust log output (shows pulled image when already exists), return promise
-  if (process?.exitCode === 0) {
-    log.success('Pulled Image.');
-  }
-
-  log.indent(-4);
 }
 
 /**
