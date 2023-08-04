@@ -20,6 +20,7 @@ import { useFetchIndexPatternFields } from '../../../../hooks/slo/use_fetch_inde
 import { createOptionsFromFields } from '../../helpers/create_options';
 import { CreateSLOForm } from '../../types';
 import { DataPreviewChart } from '../common/data_preview_chart';
+import { GroupByFieldSelector } from '../common/group_by_field_selector';
 import { QueryBuilder } from '../common/query_builder';
 import { IndexSelection } from '../custom_common/index_selection';
 
@@ -81,7 +82,7 @@ export function CustomKqlIndicatorTypeForm() {
                       ? [{ value: field.value, label: field.value }]
                       : []
                   }
-                  singleSelection={{ asPlainText: true }}
+                  singleSelection
                 />
               )}
             />
@@ -174,6 +175,8 @@ export function CustomKqlIndicatorTypeForm() {
           }
         />
       </EuiFlexItem>
+
+      <GroupByFieldSelector index={index} />
 
       <DataPreviewChart />
     </EuiFlexGroup>

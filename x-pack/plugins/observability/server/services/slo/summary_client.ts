@@ -20,8 +20,6 @@ import { DateRange, SLO, Summary } from '../../domain/models';
 import { computeSLI, computeSummaryStatus, toErrorBudget } from '../../domain/services';
 import { toDateRange } from '../../domain/services/date_range';
 
-// TODO: Change name of this service...
-// It does compute a summary but from the rollup data.
 export interface SummaryClient {
   computeSummary(slo: SLO, instanceId?: string): Promise<Summary>;
 }
