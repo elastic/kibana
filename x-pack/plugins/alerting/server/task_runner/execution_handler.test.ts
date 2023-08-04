@@ -1647,7 +1647,13 @@ describe('Execution Handler', () => {
               "val": "rule url: http://localhost:12345/s/test1/app/management/insightsAndAlerting/triggersActions/rule/1",
             },
             "actionTypeId": "test",
-            "ruleUrl": "http://localhost:12345/s/test1/app/management/insightsAndAlerting/triggersActions/rule/1",
+            "ruleUrl": Object {
+              "absoluteUrl": "http://localhost:12345/s/test1/app/management/insightsAndAlerting/triggersActions/rule/1",
+              "basePathname": "",
+              "kibanaBaseUrl": "http://localhost:12345",
+              "relativePath": "/app/management/insightsAndAlerting/triggersActions/rule/1",
+              "spaceIdSegment": "/s/test1",
+            },
           },
         ]
       `);
@@ -1699,7 +1705,7 @@ describe('Execution Handler', () => {
         rule: summaryRuleWithUrl,
         taskRunnerContext: {
           ...defaultExecutionParams.taskRunnerContext,
-          kibanaBaseUrl: 'http://localhost:12345',
+          kibanaBaseUrl: 'http://localhost:12345/basePath',
         },
       };
 
@@ -1710,10 +1716,16 @@ describe('Execution Handler', () => {
         Array [
           Object {
             "actionParams": Object {
-              "val": "rule url: http://localhost:12345/s/test1/app/test/rule/1?start=30000&end=90000",
+              "val": "rule url: http://localhost:12345/basePath/s/test1/app/test/rule/1?start=30000&end=90000",
             },
             "actionTypeId": "test",
-            "ruleUrl": "http://localhost:12345/s/test1/app/test/rule/1?start=30000&end=90000",
+            "ruleUrl": Object {
+              "absoluteUrl": "http://localhost:12345/basePath/s/test1/app/test/rule/1?start=30000&end=90000",
+              "basePathname": "/basePath",
+              "kibanaBaseUrl": "http://localhost:12345/basePath",
+              "relativePath": "/app/test/rule/1?start=30000&end=90000",
+              "spaceIdSegment": "/s/test1",
+            },
           },
         ]
       `);
@@ -1742,7 +1754,13 @@ describe('Execution Handler', () => {
               "val": "rule url: http://localhost:12345/app/management/insightsAndAlerting/triggersActions/rule/1",
             },
             "actionTypeId": "test",
-            "ruleUrl": "http://localhost:12345/app/management/insightsAndAlerting/triggersActions/rule/1",
+            "ruleUrl": Object {
+              "absoluteUrl": "http://localhost:12345/app/management/insightsAndAlerting/triggersActions/rule/1",
+              "basePathname": "",
+              "kibanaBaseUrl": "http://localhost:12345",
+              "relativePath": "/app/management/insightsAndAlerting/triggersActions/rule/1",
+              "spaceIdSegment": "",
+            },
           },
         ]
       `);
@@ -1768,7 +1786,13 @@ describe('Execution Handler', () => {
               "val": "rule url: http://localhost:12345/s/test1/app/management/insightsAndAlerting/triggersActions/rule/1",
             },
             "actionTypeId": "test",
-            "ruleUrl": "http://localhost:12345/s/test1/app/management/insightsAndAlerting/triggersActions/rule/1",
+            "ruleUrl": Object {
+              "absoluteUrl": "http://localhost:12345/s/test1/app/management/insightsAndAlerting/triggersActions/rule/1",
+              "basePathname": "",
+              "kibanaBaseUrl": "http://localhost:12345/",
+              "relativePath": "/app/management/insightsAndAlerting/triggersActions/rule/1",
+              "spaceIdSegment": "/s/test1",
+            },
           },
         ]
       `);
@@ -1884,7 +1908,13 @@ describe('Execution Handler', () => {
               "val": "rule url: http://localhost:12345/s/test1/app/management/some/other/place",
             },
             "actionTypeId": "test",
-            "ruleUrl": "http://localhost:12345/s/test1/app/management/some/other/place",
+            "ruleUrl": Object {
+              "absoluteUrl": "http://localhost:12345/s/test1/app/management/some/other/place",
+              "basePathname": "",
+              "kibanaBaseUrl": "http://localhost:12345",
+              "relativePath": "/app/management/some/other/place",
+              "spaceIdSegment": "/s/test1",
+            },
           },
         ]
       `);

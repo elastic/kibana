@@ -6531,10 +6531,6 @@
               },
               {
                 "plugin": "reporting",
-                "path": "x-pack/plugins/reporting/server/routes/internal/diagnostic/screenshot.ts"
-              },
-              {
-                "plugin": "reporting",
                 "path": "x-pack/plugins/reporting/server/routes/internal/generate/csv_searchsource_immediate.ts"
               },
               {
