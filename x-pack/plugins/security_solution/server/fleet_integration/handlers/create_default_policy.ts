@@ -7,6 +7,7 @@
 
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { InfoResponse } from '@elastic/elasticsearch/lib/api/types';
+import { AppFeatureSecurityKey } from '../../../common/types/app_features';
 import type { AppFeatures } from '../../lib/app_features';
 import {
   policyFactory as policyConfigFactory,
@@ -59,7 +60,7 @@ export const createDefaultPolicy = (
   }
 
   // If no Policy Protection allowed (ex. serverless)
-  if (!appFeatures.isEnabled('endpointPolicyProtections')) {
+  if (!appFeatures.isEnabled(AppFeatureSecurityKey.endpointPolicyProtections)) {
     defaultPolicyPerType = setPolicyToEventCollectionOnly(defaultPolicyPerType);
   }
 

@@ -22,6 +22,7 @@ import type {
 } from '@kbn/fleet-plugin/common';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { InfoResponse } from '@elastic/elasticsearch/lib/api/types';
+import { AppFeatureSecurityKey } from '../../common/types/app_features';
 import {
   isPolicySetToEventCollectionOnly,
   setPolicyToEventCollectionOnly,
@@ -235,11 +236,11 @@ export const getPackagePolicyUpdateCallback = (
     // If no Policy Protection allowed (ex. serverless)
     const eventsOnlyPolicy = isPolicySetToEventCollectionOnly(newEndpointPackagePolicy);
     if (
-      !appFeatures.isEnabled('endpointPolicyProtections') &&
+      !appFeatures.isEnabled(AppFeatureSecurityKey.endpointPolicyProtections) &&
       !eventsOnlyPolicy.isOnlyCollectingEvents
     ) {
-      logger.info(
-        `Endpoint integration policy [${endpointIntegrationData.id}][${endpointIntegrationData.name}] adjusted due to [endpointPolicyProtections] appFeature not being enabled. ${eventsOnlyPolicy.message}`
+      logger.warn(
+        `Endpoint integration policy [${endpointIntegrationData.id}][${endpointIntegrationData.name}] adjusted due to [endpointPolicyProtections] appFeature not being enabled. Trigger [${eventsOnlyPolicy.message}]`
       );
 
       endpointIntegrationData.inputs[0].config.policy.value =
