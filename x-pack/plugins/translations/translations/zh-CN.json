@@ -29341,7 +29341,6 @@
     "xpack.security.management.apiKeys.table.loadingApiKeysDescription": "正在加载 API 密钥……",
     "xpack.security.management.apiKeys.table.manageOwnKeysWarning": "您仅有权管理自己的 API 密钥。",
     "xpack.security.management.apiKeys.table.nameColumnName": "名称",
-    "xpack.security.management.apiKeys.table.readOnlyOwnKeysWarning": "您仅有权查看自己的 API 密钥。",
     "xpack.security.management.apiKeys.table.statusActive": "活动",
     "xpack.security.management.apiKeys.table.statusColumnName": "状态",
     "xpack.security.management.apiKeys.table.statusExpired": "已过期",
