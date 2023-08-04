@@ -90,7 +90,6 @@ export function getSessionIndexSettings({
   indexName: string;
   aliasName: string;
 }): IndicesCreateRequest {
-  // @ts-expect-error ts upgrade to v4.7.4
   return Object.freeze({
     index: indexName,
     settings: {
@@ -107,16 +106,16 @@ export function getSessionIndexSettings({
       },
     },
     mappings: {
-      dynamic: 'strict',
+      dynamic: 'strict' as const,
       _meta: { [SESSION_INDEX_MAPPINGS_VERSION_META_FIELD_NAME]: SESSION_INDEX_MAPPINGS_VERSION },
       properties: {
-        usernameHash: { type: 'keyword' },
-        provider: { properties: { name: { type: 'keyword' }, type: { type: 'keyword' } } },
-        idleTimeoutExpiration: { type: 'date' },
-        createdAt: { type: 'date' },
-        lifespanExpiration: { type: 'date' },
-        accessAgreementAcknowledged: { type: 'boolean' },
-        content: { type: 'binary' },
+        usernameHash: { type: 'keyword' as const },
+        provider: { properties: { name: { type: 'keyword' as const }, type: { type: 'keyword'as const } } },
+        idleTimeoutExpiration: { type: 'date' as const },
+        createdAt: { type: 'date' as const },
+        lifespanExpiration: { type: 'date' as const },
+        accessAgreementAcknowledged: { type: 'boolean' as const },
+        content: { type: 'binary' as const },
       },
     },
   });
