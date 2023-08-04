@@ -17,7 +17,6 @@ import {
   createAndSyncRuleAndAlertsFactory,
   deleteAllRiskScores,
   readRiskScores,
-  normalizeScores,
   waitForRiskScoresToBePresent,
 } from './utils';
 
