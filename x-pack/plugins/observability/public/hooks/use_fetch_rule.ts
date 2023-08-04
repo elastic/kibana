@@ -61,7 +61,7 @@ export function useFetchRule({ ruleId }: { ruleId?: string }): UseFetchRuleRespo
       onError: (error: Error) => {
         toasts.addError(error, {
           title: i18n.translate('xpack.observability.ruleDetails.ruleLoadError', {
-            defaultMessage: 'Unable to load rule. Reason: {message}',
+            defaultMessage: 'Unable to load rule',
             values: {
               message:
                 error instanceof Error ? error.message : typeof error === 'string' ? error : '',
