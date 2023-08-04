@@ -21,6 +21,7 @@ import type { ContextShape } from '@elastic/eui/src/components/markdown_editor/m
 import { useLicense } from '../../hooks/use_license';
 
 import { uiPlugins, parsingPlugins, processingPlugins } from './plugins';
+import { useUpsellingMessage } from '../../hooks/use_upselling';
 
 interface MarkdownEditorProps {
   onChange: (content: string) => void;
@@ -73,9 +74,10 @@ const MarkdownEditorComponent = forwardRef<MarkdownEditorRef, MarkdownEditorProp
 
     const licenseIsPlatinum = useLicense().isPlatinumPlus();
 
+    const insightsUpsellingMessage = useUpsellingMessage('investigation_guide');
     const uiPluginsWithState = useMemo(() => {
-      return uiPlugins({ licenseIsPlatinum });
-    }, [licenseIsPlatinum]);
+      return uiPlugins({ licenseIsPlatinum, insightsUpsellingMessage });
+    }, [licenseIsPlatinum, insightsUpsellingMessage]);
 
     // @ts-expect-error update types
     useImperativeHandle(ref, () => {

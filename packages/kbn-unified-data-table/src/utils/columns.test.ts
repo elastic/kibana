@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { dataViewWithTimefieldMock } from '../../__mocks__/data_view_with_timefield';
 import { getDisplayedColumns } from './columns';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 

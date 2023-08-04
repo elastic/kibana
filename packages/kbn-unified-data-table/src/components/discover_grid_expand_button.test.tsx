@@ -13,7 +13,7 @@ import { ExpandButton } from './discover_grid_expand_button';
 import { UnifiedDataTableContext } from '../table_context';
 import { dataTableContextMock } from '../../__mocks__/table_context';
 
-describe('Discover grid view button ', function () {
+describe('Data table view button ', function () {
   it('when no document is expanded, setExpanded is called with current document', async () => {
     const contextMock = {
       ...dataTableContextMock,
