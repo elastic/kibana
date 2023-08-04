@@ -15,7 +15,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
   const log = getService('log');
   const testSubjects = getService('testSubjects');
 
-  describe.only('Finder demo', () => {
+  describe('Finder demo', () => {
     before(async () => {
       await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
         useActualUrl: true,
