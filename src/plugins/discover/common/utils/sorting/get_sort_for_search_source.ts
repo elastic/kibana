@@ -21,11 +21,15 @@ import { getESQuerySortForTimeField } from './get_es_query_sort';
  *   the addon of the numeric_type guarantees the right sort order
  *   when there are indices with date and indices with date_nanos field
  */
-export function getSortForSearchSource(
-  sort: SortOrder[] | undefined,
-  dataView: DataView | undefined,
-  uiSettings: Pick<IUiSettingsClient, 'get'>
-): EsQuerySortValue[] {
+export function getSortForSearchSource({
+  sort,
+  dataView,
+  uiSettings,
+}: {
+  sort: SortOrder[] | undefined;
+  dataView: DataView | undefined;
+  uiSettings: Pick<IUiSettingsClient, 'get'>;
+}): EsQuerySortValue[] {
   const defaultDirection = uiSettings.get(SORT_DEFAULT_ORDER_SETTING) || 'desc';
 
   if (!sort || !dataView || (Array.isArray(sort) && sort.length === 0)) {

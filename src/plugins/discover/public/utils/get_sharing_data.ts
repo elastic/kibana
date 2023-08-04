@@ -31,12 +31,15 @@ export async function getSharingData(
   services: { uiSettings: IUiSettingsClient; data: DataPublicPluginStart },
   isPlainRecord?: boolean
 ) {
-  const { uiSettings: config, data } = services;
+  const { uiSettings, data } = services;
   const searchSource = currentSearchSource.createCopy();
   const index = searchSource.getField('index')!;
   let existingFilter = searchSource.getField('filter') as Filter[] | Filter | undefined;
 
-  searchSource.setField('sort', getSortForSearchSource(state.sort as SortOrder[], index, config));
+  searchSource.setField(
+    'sort',
+    getSortForSearchSource({ sort: state.sort as SortOrder[], dataView: index, uiSettings })
+  );
 
   searchSource.removeField('filter');
   searchSource.removeField('highlight');
@@ -50,7 +53,7 @@ export async function getSharingData(
   if (columns && columns.length > 0) {
     // conditionally add the time field column:
     let timeFieldName: string | undefined;
-    const hideTimeColumn = config.get(DOC_HIDE_TIME_COLUMN_SETTING);
+    const hideTimeColumn = uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING);
     if (!hideTimeColumn && index && index.timeFieldName && !isPlainRecord) {
       timeFieldName = index.timeFieldName;
     }
@@ -91,7 +94,7 @@ export async function getSharingData(
        * Otherwise, the requests will ask for all fields, even if only a few are really needed.
        * Discover does not set fields, since having all fields is needed for the UI.
        */
-      const useFieldsApi = !config.get(SEARCH_FIELDS_FROM_SOURCE);
+      const useFieldsApi = !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE);
       if (useFieldsApi) {
         searchSource.removeField('fieldsFromSource');
         const fields = columns.length

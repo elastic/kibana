@@ -34,7 +34,7 @@ export function updateVolatileSearchSource(
   const { uiSettings, data } = services;
   const useNewFieldsApi = !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE);
 
-  const usedSort = getSortForSearchSource(sort, dataView, uiSettings);
+  const usedSort = getSortForSearchSource({ sort, dataView, uiSettings });
   searchSource.setField('sort', usedSort);
 
   searchSource.setField('trackTotalHits', true);
