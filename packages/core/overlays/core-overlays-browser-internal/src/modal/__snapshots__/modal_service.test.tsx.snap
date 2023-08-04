@@ -18,14 +18,16 @@ Array [
             "calls": Array [
               Array [
                 Object {
-                  "children": <EuiModal
-                    onClose={[Function]}
-                  >
-                    <MountWrapper
-                      className="kbnOverlayMountWrapper"
-                      mount={[Function]}
-                    />
-                  </EuiModal>,
+                  "children": <EuiErrorBoundary>
+                    <EuiModal
+                      onClose={[Function]}
+                    >
+                      <MountWrapper
+                        className="kbnOverlayMountWrapper"
+                        mount={[Function]}
+                      />
+                    </EuiModal>
+                  </EuiErrorBoundary>,
                 },
                 Object {},
               ],
@@ -33,14 +35,16 @@ Array [
             "results": Array [
               Object {
                 "type": "return",
-                "value": <EuiModal
-                  onClose={[Function]}
-                >
-                  <MountWrapper
-                    className="kbnOverlayMountWrapper"
-                    mount={[Function]}
-                  />
-                </EuiModal>,
+                "value": <EuiErrorBoundary>
+                  <EuiModal
+                    onClose={[Function]}
+                  >
+                    <MountWrapper
+                      className="kbnOverlayMountWrapper"
+                      mount={[Function]}
+                    />
+                  </EuiModal>
+                </EuiErrorBoundary>,
               },
             ],
           },
@@ -159,20 +163,56 @@ Array [
             "calls": Array [
               Array [
                 Object {
-                  "children": <EuiModal
+                  "children": <EuiErrorBoundary>
+                    <EuiModal
+                      onClose={[Function]}
+                    >
+                      <MountWrapper
+                        className="kbnOverlayMountWrapper"
+                        mount={[Function]}
+                      />
+                    </EuiModal>
+                  </EuiErrorBoundary>,
+                },
+                Object {},
+              ],
+              Array [
+                Object {
+                  "children": <EuiErrorBoundary>
+                    <EuiConfirmModal
+                      cancelButtonText="Cancel"
+                      confirmButtonText="Confirm"
+                      onCancel={[Function]}
+                      onConfirm={[Function]}
+                    >
+                      <MountWrapper
+                        className="kbnOverlayMountWrapper"
+                        mount={[Function]}
+                      />
+                    </EuiConfirmModal>
+                  </EuiErrorBoundary>,
+                },
+                Object {},
+              ],
+            ],
+            "results": Array [
+              Object {
+                "type": "return",
+                "value": <EuiErrorBoundary>
+                  <EuiModal
                     onClose={[Function]}
                   >
                     <MountWrapper
                       className="kbnOverlayMountWrapper"
                       mount={[Function]}
                     />
-                  </EuiModal>,
-                },
-                Object {},
-              ],
-              Array [
-                Object {
-                  "children": <EuiConfirmModal
+                  </EuiModal>
+                </EuiErrorBoundary>,
+              },
+              Object {
+                "type": "return",
+                "value": <EuiErrorBoundary>
+                  <EuiConfirmModal
                     cancelButtonText="Cancel"
                     confirmButtonText="Confirm"
                     onCancel={[Function]}
@@ -182,36 +222,8 @@ Array [
                       className="kbnOverlayMountWrapper"
                       mount={[Function]}
                     />
-                  </EuiConfirmModal>,
-                },
-                Object {},
-              ],
-            ],
-            "results": Array [
-              Object {
-                "type": "return",
-                "value": <EuiModal
-                  onClose={[Function]}
-                >
-                  <MountWrapper
-                    className="kbnOverlayMountWrapper"
-                    mount={[Function]}
-                  />
-                </EuiModal>,
-              },
-              Object {
-                "type": "return",
-                "value": <EuiConfirmModal
-                  cancelButtonText="Cancel"
-                  confirmButtonText="Confirm"
-                  onCancel={[Function]}
-                  onConfirm={[Function]}
-                >
-                  <MountWrapper
-                    className="kbnOverlayMountWrapper"
-                    mount={[Function]}
-                  />
-                </EuiConfirmModal>,
+                  </EuiConfirmModal>
+                </EuiErrorBoundary>,
               },
             ],
           },
@@ -323,43 +335,49 @@ Array [
             "calls": Array [
               Array [
                 Object {
-                  "children": <EuiModal
-                    onClose={[Function]}
-                  >
-                    <MountWrapper
-                      className="kbnOverlayMountWrapper"
-                      mount={[Function]}
-                    />
-                  </EuiModal>,
+                  "children": <EuiErrorBoundary>
+                    <EuiModal
+                      onClose={[Function]}
+                    >
+                      <MountWrapper
+                        className="kbnOverlayMountWrapper"
+                        mount={[Function]}
+                      />
+                    </EuiModal>
+                  </EuiErrorBoundary>,
                 },
                 Object {},
               ],
               Array [
                 Object {
-                  "children": <EuiConfirmModal
-                    cancelButtonText="Cancel"
-                    confirmButtonText="Confirm"
-                    onCancel={[Function]}
-                    onConfirm={[Function]}
-                  >
-                    <MountWrapper
-                      className="kbnOverlayMountWrapper"
-                      mount={[Function]}
-                    />
-                  </EuiConfirmModal>,
+                  "children": <EuiErrorBoundary>
+                    <EuiConfirmModal
+                      cancelButtonText="Cancel"
+                      confirmButtonText="Confirm"
+                      onCancel={[Function]}
+                      onConfirm={[Function]}
+                    >
+                      <MountWrapper
+                        className="kbnOverlayMountWrapper"
+                        mount={[Function]}
+                      />
+                    </EuiConfirmModal>
+                  </EuiErrorBoundary>,
                 },
                 Object {},
               ],
               Array [
                 Object {
-                  "children": <EuiConfirmModal
-                    cancelButtonText="Cancel"
-                    confirmButtonText="Confirm"
-                    onCancel={[Function]}
-                    onConfirm={[Function]}
-                  >
-                    Some message
-                  </EuiConfirmModal>,
+                  "children": <EuiErrorBoundary>
+                    <EuiConfirmModal
+                      cancelButtonText="Cancel"
+                      confirmButtonText="Confirm"
+                      onCancel={[Function]}
+                      onConfirm={[Function]}
+                    >
+                      Some message
+                    </EuiConfirmModal>
+                  </EuiErrorBoundary>,
                 },
                 Object {},
               ],
@@ -367,39 +385,45 @@ Array [
             "results": Array [
               Object {
                 "type": "return",
-                "value": <EuiModal
-                  onClose={[Function]}
-                >
-                  <MountWrapper
-                    className="kbnOverlayMountWrapper"
-                    mount={[Function]}
-                  />
-                </EuiModal>,
+                "value": <EuiErrorBoundary>
+                  <EuiModal
+                    onClose={[Function]}
+                  >
+                    <MountWrapper
+                      className="kbnOverlayMountWrapper"
+                      mount={[Function]}
+                    />
+                  </EuiModal>
+                </EuiErrorBoundary>,
               },
               Object {
                 "type": "return",
-                "value": <EuiConfirmModal
-                  cancelButtonText="Cancel"
-                  confirmButtonText="Confirm"
-                  onCancel={[Function]}
-                  onConfirm={[Function]}
-                >
-                  <MountWrapper
-                    className="kbnOverlayMountWrapper"
-                    mount={[Function]}
-                  />
-                </EuiConfirmModal>,
+                "value": <EuiErrorBoundary>
+                  <EuiConfirmModal
+                    cancelButtonText="Cancel"
+                    confirmButtonText="Confirm"
+                    onCancel={[Function]}
+                    onConfirm={[Function]}
+                  >
+                    <MountWrapper
+                      className="kbnOverlayMountWrapper"
+                      mount={[Function]}
+                    />
+                  </EuiConfirmModal>
+                </EuiErrorBoundary>,
               },
               Object {
                 "type": "return",
-                "value": <EuiConfirmModal
-                  cancelButtonText="Cancel"
-                  confirmButtonText="Confirm"
-                  onCancel={[Function]}
-                  onConfirm={[Function]}
-                >
-                  Some message
-                </EuiConfirmModal>,
+                "value": <EuiErrorBoundary>
+                  <EuiConfirmModal
+                    cancelButtonText="Cancel"
+                    confirmButtonText="Confirm"
+                    onCancel={[Function]}
+                    onConfirm={[Function]}
+                  >
+                    Some message
+                  </EuiConfirmModal>
+                </EuiErrorBoundary>,
               },
             ],
           },
@@ -432,43 +456,49 @@ Array [
             "calls": Array [
               Array [
                 Object {
-                  "children": <EuiModal
-                    onClose={[Function]}
-                  >
-                    <MountWrapper
-                      className="kbnOverlayMountWrapper"
-                      mount={[Function]}
-                    />
-                  </EuiModal>,
+                  "children": <EuiErrorBoundary>
+                    <EuiModal
+                      onClose={[Function]}
+                    >
+                      <MountWrapper
+                        className="kbnOverlayMountWrapper"
+                        mount={[Function]}
+                      />
+                    </EuiModal>
+                  </EuiErrorBoundary>,
                 },
                 Object {},
               ],
               Array [
                 Object {
-                  "children": <EuiConfirmModal
-                    cancelButtonText="Cancel"
-                    confirmButtonText="Confirm"
-                    onCancel={[Function]}
-                    onConfirm={[Function]}
-                  >
-                    <MountWrapper
-                      className="kbnOverlayMountWrapper"
-                      mount={[Function]}
-                    />
-                  </EuiConfirmModal>,
+                  "children": <EuiErrorBoundary>
+                    <EuiConfirmModal
+                      cancelButtonText="Cancel"
+                      confirmButtonText="Confirm"
+                      onCancel={[Function]}
+                      onConfirm={[Function]}
+                    >
+                      <MountWrapper
+                        className="kbnOverlayMountWrapper"
+                        mount={[Function]}
+                      />
+                    </EuiConfirmModal>
+                  </EuiErrorBoundary>,
                 },
                 Object {},
               ],
               Array [
                 Object {
-                  "children": <EuiConfirmModal
-                    cancelButtonText="Cancel"
-                    confirmButtonText="Confirm"
-                    onCancel={[Function]}
-                    onConfirm={[Function]}
-                  >
-                    Some message
-                  </EuiConfirmModal>,
+                  "children": <EuiErrorBoundary>
+                    <EuiConfirmModal
+                      cancelButtonText="Cancel"
+                      confirmButtonText="Confirm"
+                      onCancel={[Function]}
+                      onConfirm={[Function]}
+                    >
+                      Some message
+                    </EuiConfirmModal>
+                  </EuiErrorBoundary>,
                 },
                 Object {},
               ],
@@ -476,39 +506,45 @@ Array [
             "results": Array [
               Object {
                 "type": "return",
-                "value": <EuiModal
-                  onClose={[Function]}
-                >
-                  <MountWrapper
-                    className="kbnOverlayMountWrapper"
-                    mount={[Function]}
-                  />
-                </EuiModal>,
+                "value": <EuiErrorBoundary>
+                  <EuiModal
+                    onClose={[Function]}
+                  >
+                    <MountWrapper
+                      className="kbnOverlayMountWrapper"
+                      mount={[Function]}
+                    />
+                  </EuiModal>
+                </EuiErrorBoundary>,
               },
               Object {
                 "type": "return",
-                "value": <EuiConfirmModal
-                  cancelButtonText="Cancel"
-                  confirmButtonText="Confirm"
-                  onCancel={[Function]}
-                  onConfirm={[Function]}
-                >
-                  <MountWrapper
-                    className="kbnOverlayMountWrapper"
-                    mount={[Function]}
-                  />
-                </EuiConfirmModal>,
+                "value": <EuiErrorBoundary>
+                  <EuiConfirmModal
+                    cancelButtonText="Cancel"
+                    confirmButtonText="Confirm"
+                    onCancel={[Function]}
+                    onConfirm={[Function]}
+                  >
+                    <MountWrapper
+                      className="kbnOverlayMountWrapper"
+                      mount={[Function]}
+                    />
+                  </EuiConfirmModal>
+                </EuiErrorBoundary>,
               },
               Object {
                 "type": "return",
-                "value": <EuiConfirmModal
-                  cancelButtonText="Cancel"
-                  confirmButtonText="Confirm"
-                  onCancel={[Function]}
-                  onConfirm={[Function]}
-                >
-                  Some message
-                </EuiConfirmModal>,
+                "value": <EuiErrorBoundary>
+                  <EuiConfirmModal
+                    cancelButtonText="Cancel"
+                    confirmButtonText="Confirm"
+                    onCancel={[Function]}
+                    onConfirm={[Function]}
+                  >
+                    Some message
+                  </EuiConfirmModal>
+                </EuiErrorBoundary>,
               },
             ],
           },
@@ -546,43 +582,49 @@ Array [
             "calls": Array [
               Array [
                 Object {
-                  "children": <EuiModal
-                    onClose={[Function]}
-                  >
-                    <MountWrapper
-                      className="kbnOverlayMountWrapper"
-                      mount={[Function]}
-                    />
-                  </EuiModal>,
+                  "children": <EuiErrorBoundary>
+                    <EuiModal
+                      onClose={[Function]}
+                    >
+                      <MountWrapper
+                        className="kbnOverlayMountWrapper"
+                        mount={[Function]}
+                      />
+                    </EuiModal>
+                  </EuiErrorBoundary>,
                 },
                 Object {},
               ],
               Array [
                 Object {
-                  "children": <EuiConfirmModal
-                    cancelButtonText="Cancel"
-                    confirmButtonText="Confirm"
-                    onCancel={[Function]}
-                    onConfirm={[Function]}
-                  >
-                    <MountWrapper
-                      className="kbnOverlayMountWrapper"
-                      mount={[Function]}
-                    />
-                  </EuiConfirmModal>,
+                  "children": <EuiErrorBoundary>
+                    <EuiConfirmModal
+                      cancelButtonText="Cancel"
+                      confirmButtonText="Confirm"
+                      onCancel={[Function]}
+                      onConfirm={[Function]}
+                    >
+                      <MountWrapper
+                        className="kbnOverlayMountWrapper"
+                        mount={[Function]}
+                      />
+                    </EuiConfirmModal>
+                  </EuiErrorBoundary>,
                 },
                 Object {},
               ],
               Array [
                 Object {
-                  "children": <EuiConfirmModal
-                    cancelButtonText="Cancel"
-                    confirmButtonText="Confirm"
-                    onCancel={[Function]}
-                    onConfirm={[Function]}
-                  >
-                    Some message
-                  </EuiConfirmModal>,
+                  "children": <EuiErrorBoundary>
+                    <EuiConfirmModal
+                      cancelButtonText="Cancel"
+                      confirmButtonText="Confirm"
+                      onCancel={[Function]}
+                      onConfirm={[Function]}
+                    >
+                      Some message
+                    </EuiConfirmModal>
+                  </EuiErrorBoundary>,
                 },
                 Object {},
               ],
@@ -590,39 +632,45 @@ Array [
             "results": Array [
               Object {
                 "type": "return",
-                "value": <EuiModal
-                  onClose={[Function]}
-                >
-                  <MountWrapper
-                    className="kbnOverlayMountWrapper"
-                    mount={[Function]}
-                  />
-                </EuiModal>,
+                "value": <EuiErrorBoundary>
+                  <EuiModal
+                    onClose={[Function]}
+                  >
+                    <MountWrapper
+                      className="kbnOverlayMountWrapper"
+                      mount={[Function]}
+                    />
+                  </EuiModal>
+                </EuiErrorBoundary>,
               },
               Object {
                 "type": "return",
-                "value": <EuiConfirmModal
-                  cancelButtonText="Cancel"
-                  confirmButtonText="Confirm"
-                  onCancel={[Function]}
-                  onConfirm={[Function]}
-                >
-                  <MountWrapper
-                    className="kbnOverlayMountWrapper"
-                    mount={[Function]}
-                  />
-                </EuiConfirmModal>,
+                "value": <EuiErrorBoundary>
+                  <EuiConfirmModal
+                    cancelButtonText="Cancel"
+                    confirmButtonText="Confirm"
+                    onCancel={[Function]}
+                    onConfirm={[Function]}
+                  >
+                    <MountWrapper
+                      className="kbnOverlayMountWrapper"
+                      mount={[Function]}
+                    />
+                  </EuiConfirmModal>
+                </EuiErrorBoundary>,
               },
               Object {
                 "type": "return",
-                "value": <EuiConfirmModal
-                  cancelButtonText="Cancel"
-                  confirmButtonText="Confirm"
-                  onCancel={[Function]}
-                  onConfirm={[Function]}
-                >
-                  Some message
-                </EuiConfirmModal>,
+                "value": <EuiErrorBoundary>
+                  <EuiConfirmModal
+                    cancelButtonText="Cancel"
+                    confirmButtonText="Confirm"
+                    onCancel={[Function]}
+                    onConfirm={[Function]}
+                  >
+                    Some message
+                  </EuiConfirmModal>
+                </EuiErrorBoundary>,
               },
             ],
           },
@@ -655,43 +703,49 @@ Array [
             "calls": Array [
               Array [
                 Object {
-                  "children": <EuiModal
-                    onClose={[Function]}
-                  >
-                    <MountWrapper
-                      className="kbnOverlayMountWrapper"
-                      mount={[Function]}
-                    />
-                  </EuiModal>,
+                  "children": <EuiErrorBoundary>
+                    <EuiModal
+                      onClose={[Function]}
+                    >
+                      <MountWrapper
+                        className="kbnOverlayMountWrapper"
+                        mount={[Function]}
+                      />
+                    </EuiModal>
+                  </EuiErrorBoundary>,
                 },
                 Object {},
               ],
               Array [
                 Object {
-                  "children": <EuiConfirmModal
-                    cancelButtonText="Cancel"
-                    confirmButtonText="Confirm"
-                    onCancel={[Function]}
-                    onConfirm={[Function]}
-                  >
-                    <MountWrapper
-                      className="kbnOverlayMountWrapper"
-                      mount={[Function]}
-                    />
-                  </EuiConfirmModal>,
+                  "children": <EuiErrorBoundary>
+                    <EuiConfirmModal
+                      cancelButtonText="Cancel"
+                      confirmButtonText="Confirm"
+                      onCancel={[Function]}
+                      onConfirm={[Function]}
+                    >
+                      <MountWrapper
+                        className="kbnOverlayMountWrapper"
+                        mount={[Function]}
+                      />
+                    </EuiConfirmModal>
+                  </EuiErrorBoundary>,
                 },
                 Object {},
               ],
               Array [
                 Object {
-                  "children": <EuiConfirmModal
-                    cancelButtonText="Cancel"
-                    confirmButtonText="Confirm"
-                    onCancel={[Function]}
-                    onConfirm={[Function]}
-                  >
-                    Some message
-                  </EuiConfirmModal>,
+                  "children": <EuiErrorBoundary>
+                    <EuiConfirmModal
+                      cancelButtonText="Cancel"
+                      confirmButtonText="Confirm"
+                      onCancel={[Function]}
+                      onConfirm={[Function]}
+                    >
+                      Some message
+                    </EuiConfirmModal>
+                  </EuiErrorBoundary>,
                 },
                 Object {},
               ],
@@ -699,39 +753,45 @@ Array [
             "results": Array [
               Object {
                 "type": "return",
-                "value": <EuiModal
-                  onClose={[Function]}
-                >
-                  <MountWrapper
-                    className="kbnOverlayMountWrapper"
-                    mount={[Function]}
-                  />
-                </EuiModal>,
+                "value": <EuiErrorBoundary>
+                  <EuiModal
+                    onClose={[Function]}
+                  >
+                    <MountWrapper
+                      className="kbnOverlayMountWrapper"
+                      mount={[Function]}
+                    />
+                  </EuiModal>
+                </EuiErrorBoundary>,
               },
               Object {
                 "type": "return",
-                "value": <EuiConfirmModal
-                  cancelButtonText="Cancel"
-                  confirmButtonText="Confirm"
-                  onCancel={[Function]}
-                  onConfirm={[Function]}
-                >
-                  <MountWrapper
-                    className="kbnOverlayMountWrapper"
-                    mount={[Function]}
-                  />
-                </EuiConfirmModal>,
+                "value": <EuiErrorBoundary>
+                  <EuiConfirmModal
+                    cancelButtonText="Cancel"
+                    confirmButtonText="Confirm"
+                    onCancel={[Function]}
+                    onConfirm={[Function]}
+                  >
+                    <MountWrapper
+                      className="kbnOverlayMountWrapper"
+                      mount={[Function]}
+                    />
+                  </EuiConfirmModal>
+                </EuiErrorBoundary>,
               },
               Object {
                 "type": "return",
-                "value": <EuiConfirmModal
-                  cancelButtonText="Cancel"
-                  confirmButtonText="Confirm"
-                  onCancel={[Function]}
-                  onConfirm={[Function]}
-                >
-                  Some message
-                </EuiConfirmModal>,
+                "value": <EuiErrorBoundary>
+                  <EuiConfirmModal
+                    cancelButtonText="Cancel"
+                    confirmButtonText="Confirm"
+                    onCancel={[Function]}
+                    onConfirm={[Function]}
+                  >
+                    Some message
+                  </EuiConfirmModal>
+                </EuiErrorBoundary>,
               },
             ],
           },
@@ -831,14 +891,16 @@ Array [
             "calls": Array [
               Array [
                 Object {
-                  "children": <EuiModal
-                    onClose={[Function]}
-                  >
-                    <MountWrapper
-                      className="kbnOverlayMountWrapper"
-                      mount={[Function]}
-                    />
-                  </EuiModal>,
+                  "children": <EuiErrorBoundary>
+                    <EuiModal
+                      onClose={[Function]}
+                    >
+                      <MountWrapper
+                        className="kbnOverlayMountWrapper"
+                        mount={[Function]}
+                      />
+                    </EuiModal>
+                  </EuiErrorBoundary>,
                 },
                 Object {},
               ],
@@ -846,14 +908,16 @@ Array [
             "results": Array [
               Object {
                 "type": "return",
-                "value": <EuiModal
-                  onClose={[Function]}
-                >
-                  <MountWrapper
-                    className="kbnOverlayMountWrapper"
-                    mount={[Function]}
-                  />
-                </EuiModal>,
+                "value": <EuiErrorBoundary>
+                  <EuiModal
+                    onClose={[Function]}
+                  >
+                    <MountWrapper
+                      className="kbnOverlayMountWrapper"
+                      mount={[Function]}
+                    />
+                  </EuiModal>
+                </EuiErrorBoundary>,
               },
             ],
           },
@@ -886,14 +950,16 @@ Array [
             "calls": Array [
               Array [
                 Object {
-                  "children": <EuiModal
-                    onClose={[Function]}
-                  >
-                    <MountWrapper
-                      className="kbnOverlayMountWrapper"
-                      mount={[Function]}
-                    />
-                  </EuiModal>,
+                  "children": <EuiErrorBoundary>
+                    <EuiModal
+                      onClose={[Function]}
+                    >
+                      <MountWrapper
+                        className="kbnOverlayMountWrapper"
+                        mount={[Function]}
+                      />
+                    </EuiModal>
+                  </EuiErrorBoundary>,
                 },
                 Object {},
               ],
@@ -901,14 +967,16 @@ Array [
             "results": Array [
               Object {
                 "type": "return",
-                "value": <EuiModal
-                  onClose={[Function]}
-                >
-                  <MountWrapper
-                    className="kbnOverlayMountWrapper"
-                    mount={[Function]}
-                  />
-                </EuiModal>,
+                "value": <EuiErrorBoundary>
+                  <EuiModal
+                    onClose={[Function]}
+                  >
+                    <MountWrapper
+                      className="kbnOverlayMountWrapper"
+                      mount={[Function]}
+                    />
+                  </EuiModal>
+                </EuiErrorBoundary>,
               },
             ],
           },
@@ -946,14 +1014,16 @@ Array [
             "calls": Array [
               Array [
                 Object {
-                  "children": <EuiModal
-                    onClose={[Function]}
-                  >
-                    <MountWrapper
-                      className="kbnOverlayMountWrapper"
-                      mount={[Function]}
-                    />
-                  </EuiModal>,
+                  "children": <EuiErrorBoundary>
+                    <EuiModal
+                      onClose={[Function]}
+                    >
+                      <MountWrapper
+                        className="kbnOverlayMountWrapper"
+                        mount={[Function]}
+                      />
+                    </EuiModal>
+                  </EuiErrorBoundary>,
                 },
                 Object {},
               ],
@@ -961,14 +1031,16 @@ Array [
             "results": Array [
               Object {
                 "type": "return",
-                "value": <EuiModal
-                  onClose={[Function]}
-                >
-                  <MountWrapper
-                    className="kbnOverlayMountWrapper"
-                    mount={[Function]}
-                  />
-                </EuiModal>,
+                "value": <EuiErrorBoundary>
+                  <EuiModal
+                    onClose={[Function]}
+                  >
+                    <MountWrapper
+                      className="kbnOverlayMountWrapper"
+                      mount={[Function]}
+                    />
+                  </EuiModal>
+                </EuiErrorBoundary>,
               },
             ],
           },
@@ -1001,14 +1073,16 @@ Array [
             "calls": Array [
               Array [
                 Object {
-                  "children": <EuiModal
-                    onClose={[Function]}
-                  >
-                    <MountWrapper
-                      className="kbnOverlayMountWrapper"
-                      mount={[Function]}
-                    />
-                  </EuiModal>,
+                  "children": <EuiErrorBoundary>
+                    <EuiModal
+                      onClose={[Function]}
+                    >
+                      <MountWrapper
+                        className="kbnOverlayMountWrapper"
+                        mount={[Function]}
+                      />
+                    </EuiModal>
+                  </EuiErrorBoundary>,
                 },
                 Object {},
               ],
@@ -1016,14 +1090,16 @@ Array [
             "results": Array [
               Object {
                 "type": "return",
-                "value": <EuiModal
-                  onClose={[Function]}
-                >
-                  <MountWrapper
-                    className="kbnOverlayMountWrapper"
-                    mount={[Function]}
-                  />
-                </EuiModal>,
+                "value": <EuiErrorBoundary>
+                  <EuiModal
+                    onClose={[Function]}
+                  >
+                    <MountWrapper
+                      className="kbnOverlayMountWrapper"
+                      mount={[Function]}
+                    />
+                  </EuiModal>
+                </EuiErrorBoundary>,
               },
             ],
           },

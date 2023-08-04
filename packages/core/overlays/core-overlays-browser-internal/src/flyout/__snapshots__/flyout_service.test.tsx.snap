@@ -51,14 +51,16 @@ Array [
             "calls": Array [
               Array [
                 Object {
-                  "children": <EuiFlyout
-                    onClose={[Function]}
-                  >
-                    <MountWrapper
-                      className="kbnOverlayMountWrapper"
-                      mount={[Function]}
-                    />
-                  </EuiFlyout>,
+                  "children": <EuiErrorBoundary>
+                    <EuiFlyout
+                      onClose={[Function]}
+                    >
+                      <MountWrapper
+                        className="kbnOverlayMountWrapper"
+                        mount={[Function]}
+                      />
+                    </EuiFlyout>
+                  </EuiErrorBoundary>,
                 },
                 Object {},
               ],
@@ -66,14 +68,16 @@ Array [
             "results": Array [
               Object {
                 "type": "return",
-                "value": <EuiFlyout
-                  onClose={[Function]}
-                >
-                  <MountWrapper
-                    className="kbnOverlayMountWrapper"
-                    mount={[Function]}
-                  />
-                </EuiFlyout>,
+                "value": <EuiErrorBoundary>
+                  <EuiFlyout
+                    onClose={[Function]}
+                  >
+                    <MountWrapper
+                      className="kbnOverlayMountWrapper"
+                      mount={[Function]}
+                    />
+                  </EuiFlyout>
+                </EuiErrorBoundary>,
               },
             ],
           },
@@ -106,14 +110,16 @@ Array [
             "calls": Array [
               Array [
                 Object {
-                  "children": <EuiFlyout
-                    onClose={[Function]}
-                  >
-                    <MountWrapper
-                      className="kbnOverlayMountWrapper"
-                      mount={[Function]}
-                    />
-                  </EuiFlyout>,
+                  "children": <EuiErrorBoundary>
+                    <EuiFlyout
+                      onClose={[Function]}
+                    >
+                      <MountWrapper
+                        className="kbnOverlayMountWrapper"
+                        mount={[Function]}
+                      />
+                    </EuiFlyout>
+                  </EuiErrorBoundary>,
                 },
                 Object {},
               ],
@@ -121,14 +127,16 @@ Array [
             "results": Array [
               Object {
                 "type": "return",
-                "value": <EuiFlyout
-                  onClose={[Function]}
-                >
-                  <MountWrapper
-                    className="kbnOverlayMountWrapper"
-                    mount={[Function]}
-                  />
-                </EuiFlyout>,
+                "value": <EuiErrorBoundary>
+                  <EuiFlyout
+                    onClose={[Function]}
+                  >
+                    <MountWrapper
+                      className="kbnOverlayMountWrapper"
+                      mount={[Function]}
+                    />
+                  </EuiFlyout>
+                </EuiErrorBoundary>,
               },
             ],
           },
