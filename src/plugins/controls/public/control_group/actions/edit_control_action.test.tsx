@@ -48,8 +48,7 @@ test('Action is incompatible with embeddables that are not editable', async () =
 
 test('Action is compatible with embeddables that are editable', async () => {
   const mockEmbeddableFactory = new OptionsListEmbeddableFactory();
-  (mockEmbeddableFactory as unknown as EmbeddableFactory).createSkipMigrations =
-    mockEmbeddableFactory.create;
+  (mockEmbeddableFactory as unknown as EmbeddableFactory).create = mockEmbeddableFactory.create;
   const mockGetFactory = jest.fn().mockReturnValue(mockEmbeddableFactory);
   pluginServices.getServices().controls.getControlFactory = mockGetFactory;
   pluginServices.getServices().embeddable.getEmbeddableFactory = mockGetFactory;

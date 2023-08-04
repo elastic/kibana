@@ -512,6 +512,7 @@ describe('dashboard', () => {
           "panelIndex": "ad30af17-3897-4988-8dd9-1d4ccec60324",
           "panelRefName": "panel_0",
           "title": "Custom title",
+          "version": "7.9.3",
         }
       `);
     });
@@ -534,6 +535,7 @@ describe('dashboard', () => {
           "panelIndex": "1132db5f-6fe9-4762-8199-3017bb6ed936",
           "panelRefName": "panel_1",
           "title": "",
+          "version": "7.9.3",
         }
       `);
       expect(newPanels[2]).toMatchInlineSnapshot(`
@@ -551,6 +553,7 @@ describe('dashboard', () => {
           "panelIndex": "9f0cc291-de38-42f4-b565-e13678cb5a88",
           "panelRefName": "panel_2",
           "title": "",
+          "version": "7.9.3",
         }
       `);
     });
@@ -570,6 +573,7 @@ describe('dashboard', () => {
           },
           "panelIndex": "94b09a97-8775-4886-be22-c1ad53a7e361",
           "panelRefName": "panel_3",
+          "version": "7.9.3",
         }
       `);
     });
@@ -613,7 +617,7 @@ describe('dashboard', () => {
               "searchSourceJSON": "{\\"query\\":{\\"language\\":\\"kuery\\",\\"query\\":\\"\\"},\\"filter\\":[{\\"query\\":{\\"match_phrase\\":{\\"machine.os.keyword\\":\\"osx\\"}},\\"$state\\":{\\"store\\":\\"appState\\"},\\"meta\\":{\\"type\\":\\"phrase\\",\\"key\\":\\"machine.os.keyword\\",\\"params\\":{\\"query\\":\\"osx\\"},\\"disabled\\":false,\\"negate\\":false,\\"alias\\":null,\\"indexRefName\\":\\"kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index\\"}}]}",
             },
             "optionsJSON": "{\\"useMargins\\":true,\\"hidePanelTitles\\":false}",
-            "panelsJSON": "[{\\"gridData\\":{\\"x\\":0,\\"y\\":0,\\"w\\":24,\\"h\\":15,\\"i\\":\\"82fa0882-9f9e-476a-bbb9-03555e5ced91\\"},\\"panelIndex\\":\\"82fa0882-9f9e-476a-bbb9-03555e5ced91\\",\\"embeddableConfig\\":{\\"enhancements\\":{\\"dynamicActions\\":{\\"events\\":[]}}},\\"panelRefName\\":\\"panel_0\\"}]",
+            "panelsJSON": "[{\\"version\\":\\"7.9.3\\",\\"type\\":\\"visualization\\",\\"gridData\\":{\\"x\\":0,\\"y\\":0,\\"w\\":24,\\"h\\":15,\\"i\\":\\"82fa0882-9f9e-476a-bbb9-03555e5ced91\\"},\\"panelIndex\\":\\"82fa0882-9f9e-476a-bbb9-03555e5ced91\\",\\"embeddableConfig\\":{\\"enhancements\\":{\\"dynamicActions\\":{\\"events\\":[]}}},\\"panelRefName\\":\\"panel_82fa0882-9f9e-476a-bbb9-03555e5ced91\\"}]",
             "timeRestore": false,
             "title": "Dashboard A",
             "version": 1,
@@ -627,7 +631,7 @@ describe('dashboard', () => {
             },
             Object {
               "id": "14e2e710-4258-11e8-b3aa-73fdaf54bfc9",
-              "name": "panel_0",
+              "name": "82fa0882-9f9e-476a-bbb9-03555e5ced91:panel_82fa0882-9f9e-476a-bbb9-03555e5ced91",
               "type": "visualization",
             },
           ],
@@ -705,7 +709,7 @@ describe('dashboard', () => {
         contextMock
       );
       expect(migratedDoc.attributes.panelsJSON).toMatchInlineSnapshot(
-        `"[{\\"version\\":\\"7.9.3\\",\\"gridData\\":{\\"x\\":0,\\"y\\":0,\\"w\\":24,\\"h\\":15,\\"i\\":\\"0\\"},\\"panelIndex\\":\\"0\\",\\"embeddableConfig\\":{}},{\\"gridData\\":{\\"x\\":24,\\"y\\":0,\\"w\\":24,\\"h\\":15,\\"i\\":\\"1\\"},\\"panelIndex\\":\\"1\\",\\"embeddableConfig\\":{\\"attributes\\":{\\"byValueThing\\":\\"ThisIsByValue\\"},\\"superCoolKey\\":\\"ONLY 4 BY VALUE EMBEDDABLES THANK YOU VERY MUCH\\"}}]"`
+        `"[{\\"version\\":\\"7.9.3\\",\\"gridData\\":{\\"x\\":0,\\"y\\":0,\\"w\\":24,\\"h\\":15,\\"i\\":\\"0\\"},\\"panelIndex\\":\\"0\\",\\"embeddableConfig\\":{}},{\\"version\\":\\"7.13.0\\",\\"gridData\\":{\\"x\\":24,\\"y\\":0,\\"w\\":24,\\"h\\":15,\\"i\\":\\"1\\"},\\"panelIndex\\":\\"1\\",\\"embeddableConfig\\":{\\"attributes\\":{\\"byValueThing\\":\\"ThisIsByValue\\"},\\"superCoolKey\\":\\"ONLY 4 BY VALUE EMBEDDABLES THANK YOU VERY MUCH\\"}}]"`
       );
     });
   });

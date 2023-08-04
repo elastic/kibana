@@ -475,7 +475,7 @@ export abstract class Container<
       // TODO: lets get rid of this distinction with factories, I don't think it will be needed after this change.
       embeddable = isSavedObjectEmbeddableInput(inputForChild)
         ? await factory.createFromSavedObject(inputForChild.savedObjectId, inputForChild, this)
-        : await factory.createSkipMigrations(inputForChild, this); // skipping migrations here because embeddable containers are required to run migrations earlier in the process.
+        : await factory.create(inputForChild, this); // skipping migrations here because embeddable containers are required to run migrations earlier in the process.
     } catch (e) {
       embeddable = new ErrorEmbeddable(e, { id: panel.explicitInput.id }, this);
     }

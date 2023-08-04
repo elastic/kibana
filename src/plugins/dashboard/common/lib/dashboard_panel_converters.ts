@@ -41,6 +41,13 @@ export function convertPanelStateToSavedDashboardPanel(
 ): SavedDashboardPanel {
   const savedObjectId = (panelState.explicitInput as SavedObjectEmbeddableInput).savedObjectId;
   return {
+    /**
+     * Version information used to be stored in the panel until 8.11 when it was moved to live inside the
+     * explicit Embeddable Input. If removeLegacyVersion is not passed, we'd like to keep this information for
+     * the time being.
+     */
+    ...(!removeLegacyVersion ? { version: panelState.version } : {}),
+
     type: panelState.type,
     gridData: panelState.gridData,
     panelIndex: panelState.explicitInput.id,
@@ -48,13 +55,6 @@ export function convertPanelStateToSavedDashboardPanel(
     ...(panelState.explicitInput.title !== undefined && { title: panelState.explicitInput.title }),
     ...(savedObjectId !== undefined && { id: savedObjectId }),
     ...(panelState.panelRefName !== undefined && { panelRefName: panelState.panelRefName }),
-
-    /**
-     * Version information used to be stored in the panel until 8.11 when it was moved to live inside the
-     * explicit Embeddable Input. If version information is given here, we'd like to keep it.
-     * It will be removed on Dashboard save
-     */
-    ...(!removeLegacyVersion ? { version: panelState.version } : {}),
   };
 }
 

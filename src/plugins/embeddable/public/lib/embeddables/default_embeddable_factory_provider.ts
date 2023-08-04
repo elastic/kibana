@@ -36,13 +36,13 @@ export const defaultEmbeddableFactoryProvider = <
       : (savedObjectId: string, input: Partial<I>, parent?: IContainer) => {
           throw new Error(`Creation from saved object not supported by type ${def.type}`);
         },
-    create: (...args) => {
+    create: def.create.bind(def),
+    createWithMigrations: (...args) => {
       const [initialInput, ...otherArgs] = args;
       const { input } = runEmbeddableFactoryMigrations(initialInput, def);
       const createdEmbeddable = def.create.bind(def)(input as I, ...otherArgs);
       return createdEmbeddable;
     },
-    createSkipMigrations: def.create.bind(def),
     type: def.type,
     isEditable: def.isEditable.bind(def),
     getDisplayName: def.getDisplayName.bind(def),

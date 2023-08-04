@@ -151,7 +151,7 @@ describe('legacy extract references', () => {
           "kibanaSavedObjectMeta": Object {
             "searchSourceJSON": "",
           },
-          "panelsJSON": "[{\\"version\\":\\"7.9.1\\",\\"type\\":\\"visualization\\",\\"embeddableConfig\\":{},\\"title\\":\\"Title 1\\"}]",
+          "panelsJSON": "[{\\"type\\":\\"visualization\\",\\"embeddableConfig\\":{},\\"title\\":\\"Title 1\\",\\"version\\":\\"7.9.1\\"}]",
           "timeRestore": false,
           "title": "",
           "version": 1,
@@ -271,7 +271,7 @@ describe('extractReferences', () => {
           "kibanaSavedObjectMeta": Object {
             "searchSourceJSON": "",
           },
-          "panelsJSON": "[{\\"version\\":\\"7.9.1\\",\\"type\\":\\"visualization\\",\\"panelIndex\\":\\"panel-1\\",\\"embeddableConfig\\":{},\\"title\\":\\"Title 1\\",\\"panelRefName\\":\\"panel_panel-1\\"},{\\"version\\":\\"7.9.1\\",\\"type\\":\\"visualization\\",\\"panelIndex\\":\\"panel-2\\",\\"embeddableConfig\\":{},\\"title\\":\\"Title 2\\",\\"panelRefName\\":\\"panel_panel-2\\"}]",
+          "panelsJSON": "[{\\"type\\":\\"visualization\\",\\"panelIndex\\":\\"panel-1\\",\\"embeddableConfig\\":{},\\"title\\":\\"Title 1\\",\\"panelRefName\\":\\"panel_panel-1\\",\\"version\\":\\"7.9.1\\"},{\\"type\\":\\"visualization\\",\\"panelIndex\\":\\"panel-2\\",\\"embeddableConfig\\":{},\\"title\\":\\"Title 2\\",\\"panelRefName\\":\\"panel_panel-2\\",\\"version\\":\\"7.9.1\\"}]",
           "timeRestore": false,
           "title": "",
           "version": 1,
@@ -337,7 +337,7 @@ describe('extractReferences', () => {
           "kibanaSavedObjectMeta": Object {
             "searchSourceJSON": "",
           },
-          "panelsJSON": "[{\\"version\\":\\"7.9.1\\",\\"type\\":\\"visualization\\",\\"embeddableConfig\\":{},\\"title\\":\\"Title 1\\"}]",
+          "panelsJSON": "[{\\"type\\":\\"visualization\\",\\"embeddableConfig\\":{},\\"title\\":\\"Title 1\\",\\"version\\":\\"7.9.1\\"}]",
           "timeRestore": false,
           "title": "",
           "version": 1,
@@ -388,7 +388,7 @@ describe('injectReferences', () => {
         "kibanaSavedObjectMeta": Object {
           "searchSourceJSON": "",
         },
-        "panelsJSON": "[{\\"version\\":\\"7.9.0\\",\\"type\\":\\"visualization\\",\\"embeddableConfig\\":{},\\"title\\":\\"Title 1\\",\\"id\\":\\"1\\"},{\\"version\\":\\"7.9.0\\",\\"type\\":\\"visualization\\",\\"embeddableConfig\\":{},\\"title\\":\\"Title 2\\",\\"id\\":\\"2\\"}]",
+        "panelsJSON": "[{\\"type\\":\\"visualization\\",\\"embeddableConfig\\":{},\\"title\\":\\"Title 1\\",\\"id\\":\\"1\\",\\"version\\":\\"7.9.0\\"},{\\"type\\":\\"visualization\\",\\"embeddableConfig\\":{},\\"title\\":\\"Title 2\\",\\"id\\":\\"2\\",\\"version\\":\\"7.9.0\\"}]",
         "timeRestore": false,
         "title": "test",
         "version": 1,
