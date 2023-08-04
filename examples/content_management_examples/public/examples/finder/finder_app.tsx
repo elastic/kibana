@@ -41,6 +41,26 @@ export const FinderApp = (props: {
               getIconForSavedObject: () => 'indexPatternApp',
               name: 'Data view',
             },
+            {
+              type: `visualization`,
+              getIconForSavedObject: () => 'visualizeApp',
+              name: 'Visualization',
+            },
+            {
+              type: 'lens',
+              getIconForSavedObject: () => 'lensApp',
+              name: 'Lens',
+            },
+            {
+              type: 'map',
+              getIconForSavedObject: () => 'logoMaps',
+              name: 'Map',
+            },
+            {
+              type: 'event-annotation-group',
+              getIconForSavedObject: () => 'annotation',
+              name: 'Annotation',
+            },
           ]}
         />
       </I18nProvider>

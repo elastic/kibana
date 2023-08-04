@@ -12,9 +12,10 @@ import { PluginFunctionalProviderContext } from '../../plugin_functional/service
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService, getPageObjects }: PluginFunctionalProviderContext) {
   const PageObjects = getPageObjects(['common', 'home', 'header']);
-  const listingTable = getService('listingTable');
+  const log = getService('log');
+  const testSubjects = getService('testSubjects');
 
-  describe('MSearch demo', () => {
+  describe.only('Finder demo', () => {
     before(async () => {
       await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
         useActualUrl: true,
@@ -30,25 +31,32 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
       await PageObjects.home.removeSampleDataSet('flights');
     });
 
-    it('MSearch demo works', async () => {
+    it('Finder demo works', async () => {
       const appId = 'contentManagementExamples';
       await PageObjects.common.navigateToApp(appId, {
-        path: 'msearch',
+        path: 'finder',
       });
 
-      await listingTable.waitUntilTableIsLoaded();
-      const items = await listingTable.getAllItemsNames();
+      await testSubjects.existOrFail(`savedObjectsFinderTable`);
+      await testSubjects.existOrFail(`savedObjectFinderTitle`);
+
+      const titles: string[] = [];
+      const titlesElements = await testSubjects.findAll(`savedObjectFinderTitle`);
+      for (let i = 0; i < titlesElements.length; i++) {
+        titles.push(await (await titlesElements[i].findByClassName(`euiLink`)).getVisibleText());
+      }
+
       const expectExists = [
-        `kibana_sample_data_flights`,
+        `Kibana Sample Data Flights`,
         `[Flights] Airport Connections (Hover Over Airport)`,
         `[Flights] Departures Count Map`,
-        `[Flights] Global Flight Dashboard`,
         `[Flights] Origin Time Delayed`,
         `[Flights] Flight Log`,
       ];
 
       expectExists.forEach((item) => {
-        expect(items.includes(item)).to.be(true);
+        log.debug(`Checking for ${item}`);
+        expect(titles.includes(item)).to.be(true);
       });
     });
   });
