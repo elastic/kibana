@@ -9,8 +9,8 @@ import { EuiBadge, EuiSkeletonText, EuiTabs, EuiTab } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { Assistant } from '@kbn/elastic-assistant';
 import { isEmpty } from 'lodash/fp';
-import type { Ref, ReactElement, ComponentType } from 'react';
-import React, { lazy, memo, Suspense, useCallback, useEffect, useMemo } from 'react';
+import type { Ref, ReactElement, ComponentType, Dispatch, SetStateAction } from 'react';
+import React, { lazy, memo, Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
@@ -104,13 +104,22 @@ const AssistantTab: React.FC<{
   rowRenderers: RowRenderer[];
   timelineId: TimelineId;
   shouldRefocusPrompt: boolean;
+  setConversationId: Dispatch<SetStateAction<string>>;
 }> = memo(
-  ({ isAssistantEnabled, renderCellValue, rowRenderers, timelineId, shouldRefocusPrompt }) => (
+  ({
+    isAssistantEnabled,
+    renderCellValue,
+    rowRenderers,
+    timelineId,
+    shouldRefocusPrompt,
+    setConversationId,
+  }) => (
     <Suspense fallback={<EuiSkeletonText lines={10} />}>
       <AssistantTabContainer>
         <Assistant
           isAssistantEnabled={isAssistantEnabled}
           conversationId={TIMELINE_CONVERSATION_TITLE}
+          setConversationId={setConversationId}
           shouldRefocusPrompt={shouldRefocusPrompt}
         />
       </AssistantTabContainer>
@@ -123,6 +132,7 @@ AssistantTab.displayName = 'AssistantTab';
 type ActiveTimelineTabProps = BasicTimelineTab & {
   activeTimelineTab: TimelineTabs;
   showTimeline: boolean;
+  setConversationId: Dispatch<SetStateAction<string>>;
 };
 
 const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
@@ -132,6 +142,7 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
     rowRenderers,
     timelineId,
     timelineType,
+    setConversationId,
     showTimeline,
   }) => {
     const isDiscoverInTimelineEnabled = useIsExperimentalFeatureEnabled('discoverInTimeline');
@@ -227,6 +238,7 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
                 renderCellValue={renderCellValue}
                 rowRenderers={rowRenderers}
                 timelineId={timelineId}
+                setConversationId={setConversationId}
                 shouldRefocusPrompt={
                   showTimeline && activeTimelineTab === TimelineTabs.securityAssistant
                 }
@@ -305,6 +317,7 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
 
   const isEnterprisePlus = useLicense().isEnterprise();
 
+  const [conversationId, setConversationId] = useState<string>(TIMELINE_CONVERSATION_TITLE);
   const { reportAssistantInvoked } = useAssistantTelemetry();
 
   const allTimelineNoteIds = useMemo(() => {
@@ -357,7 +370,7 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
     setActiveTab(TimelineTabs.securityAssistant);
     if (activeTab !== TimelineTabs.securityAssistant) {
       reportAssistantInvoked({
-        conversationId: TIMELINE_CONVERSATION_TITLE,
+        conversationId,
         invokedBy: TIMELINE_CONVERSATION_TITLE,
       });
     }
@@ -479,6 +492,7 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
         timelineId={timelineId}
         timelineType={timelineType}
         timelineDescription={timelineDescription}
+        setConversationId={setConversationId}
         showTimeline={showTimeline}
       />
     </>
