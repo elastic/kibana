@@ -34,12 +34,12 @@ export async function getSetupInstructions({
 }): Promise<SetupDataCollectionInstructions> {
   const profilerAgent = await fetchFindLatestPackageOrThrow('profiler_agent', { prerelease: true });
   const collectorPolicy = await getCollectorPolicy({ packagePolicyClient, soClient });
-  const symbolizerPolicy = await getSymbolizerPolicy({ packagePolicyClient, soClient });
 
   if (!collectorPolicy) {
     throw new Error('Could not find Collector policy');
   }
 
+  const symbolizerPolicy = await getSymbolizerPolicy({ packagePolicyClient, soClient });
   if (!symbolizerPolicy) {
     throw new Error('Could not find Symbolizer policy');
   }
