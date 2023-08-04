@@ -6,7 +6,7 @@
  */
 
 import { SAVED_QUERY_ID } from '../../../public/saved_queries/constants';
-import { ROLE, login } from '../../tasks/login';
+import { ROLE } from '../../tasks/login';
 import { navigateTo } from '../../tasks/navigation';
 import {
   checkActionItemsInResults,
@@ -45,7 +45,7 @@ describe('T1 Analyst - READ + runSavedQueries ', () => {
   });
 
   beforeEach(() => {
-    login(ROLE.t1_analyst);
+    cy.loginKibana(ROLE.t1_analyst);
   });
 
   after(() => {

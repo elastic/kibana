@@ -6,7 +6,7 @@
  */
 
 import { getAdvancedButton } from '../../screens/integrations';
-import { ROLE, login } from '../../tasks/login';
+import { ROLE } from '../../tasks/login';
 import { navigateTo } from '../../tasks/navigation';
 import {
   checkResults,
@@ -20,7 +20,7 @@ import {
 
 describe('EcsMapping', () => {
   beforeEach(() => {
-    login(ROLE.soc_manager);
+    cy.loginKibana(ROLE.soc_manager);
   });
 
   it('should properly show static values in form and results', () => {

@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import { ROLE } from '../../tasks/login';
 import { navigateTo } from '../../tasks/navigation';
 import { checkResults, inputQuery, selectAllAgents, submitQuery } from '../../tasks/live_query';
 
 describe('Admin', () => {
   beforeEach(() => {
-    cy.task('login', ROLE.admin);
+    cy.loginKibana();
     navigateTo('/app/osquery');
   });
 

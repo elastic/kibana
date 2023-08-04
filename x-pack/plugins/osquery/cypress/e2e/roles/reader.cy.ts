@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ROLE, login } from '../../tasks/login';
+import { ROLE } from '../../tasks/login';
 import { navigateTo } from '../../tasks/navigation';
 import {
   cleanupPack,
@@ -37,7 +37,7 @@ describe('Reader - only READ', () => {
   });
 
   beforeEach(() => {
-    login(ROLE.reader);
+    cy.loginKibana(ROLE.reader);
   });
 
   after(() => {
