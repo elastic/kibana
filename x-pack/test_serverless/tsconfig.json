@@ -44,6 +44,6 @@
     "@kbn/fleet-plugin",
     "@kbn/cases-plugin",
     "@kbn/test-subj-selector",
-    "@kbn/files-plugin",
+    "@kbn/core-saved-objects-server",
   ]
 }
