@@ -27,11 +27,15 @@ import { InputsModelId } from '../../common/store/inputs/constants';
 import { FiltersGlobal } from '../../common/components/filters_global';
 import { useRiskEngineStatus } from '../../entity_analytics/api/hooks/use_risk_engine_status';
 import { RiskScoreUpdatePanel } from '../../entity_analytics/components/risk_score_update_panel';
+import { useHasSecurityCapability } from '../../helper_hooks';
 
 const EntityAnalyticsComponent = () => {
   const { data: riskScoreEngineStatus } = useRiskEngineStatus();
   const { indicesExist, loading: isSourcererLoading, indexPattern } = useSourcererDataView();
   const { isPlatinumOrTrialLicense, capabilitiesFetched } = useMlCapabilities();
+  const hasEntityAnalyticsCapability = useHasSecurityCapability('entity-analytics');
+  const isRiskScoreModuleLicenseAvailable =
+    isPlatinumOrTrialLicense && hasEntityAnalyticsCapability;
 
   return (
     <>
@@ -51,7 +55,7 @@ const EntityAnalyticsComponent = () => {
               <EuiLoadingSpinner size="l" data-test-subj="entityAnalyticsLoader" />
             ) : (
               <EuiFlexGroup direction="column" data-test-subj="entityAnalyticsSections">
-                {riskScoreEngineStatus?.isUpdateAvailable && (
+                {riskScoreEngineStatus?.isUpdateAvailable && isRiskScoreModuleLicenseAvailable && (
                   <EuiFlexItem>
                     <RiskScoreUpdatePanel />
                   </EuiFlexItem>
