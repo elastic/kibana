@@ -5,9 +5,63 @@
  * 2.0.
  */
 
-import { set } from 'lodash';
-import { ProtectionModes } from '../types';
+import { get, set } from 'lodash';
+import { ProtectionModes, PolicyOperatingSystem } from '../types';
 import type { PolicyConfig } from '../types';
+
+interface PolicyProtectionReference {
+  keyPath: string;
+  osList: PolicyOperatingSystem[];
+  enableValue: unknown;
+  disableValue: unknown;
+}
+
+const getPolicyProtectionsReference = (): PolicyProtectionReference[] => {
+  const allOsValues = [
+    PolicyOperatingSystem.mac,
+    PolicyOperatingSystem.linux,
+    PolicyOperatingSystem.windows,
+  ];
+
+  return [
+    {
+      keyPath: 'malware.mode',
+      osList: [...allOsValues],
+      disableValue: ProtectionModes.off,
+      enableValue: ProtectionModes.prevent,
+    },
+    {
+      keyPath: 'ransomware.mode',
+      osList: [PolicyOperatingSystem.windows],
+      disableValue: ProtectionModes.off,
+      enableValue: ProtectionModes.prevent,
+    },
+    {
+      keyPath: 'memory_protection.mode',
+      osList: [...allOsValues],
+      disableValue: ProtectionModes.off,
+      enableValue: ProtectionModes.prevent,
+    },
+    {
+      keyPath: 'behaviour_protection.mode',
+      osList: [...allOsValues],
+      disableValue: ProtectionModes.off,
+      enableValue: ProtectionModes.prevent,
+    },
+    {
+      keyPath: 'attack_surface_reduction.credential_hardening.enabled',
+      osList: [...allOsValues],
+      disableValue: false,
+      enableValue: true,
+    },
+    {
+      keyPath: 'antivirus_registration.enabled',
+      osList: [PolicyOperatingSystem.windows],
+      disableValue: false,
+      enableValue: true,
+    },
+  ];
+};
 
 /**
  * Returns a copy of the passed `PolicyConfig` with all protections set to disabled.
@@ -124,5 +178,13 @@ export const setPolicyToEventCollectionOnly = (policy: PolicyConfig): PolicyConf
  * Checks to see if the provided policy is set to Event Collection only
  */
 export const isPolicySetToEventCollectionOnly = (policy: PolicyConfig): boolean => {
-  // FIXME:PT implement
+  const protectionsRef = getPolicyProtectionsReference();
+
+  return protectionsRef.some(({ keyPath, osList, disableValue }) => {
+    return (
+      osList.some((osValue) => {
+        return get(policy, `${osValue}.${keyPath}`) !== disableValue;
+      }) === false
+    );
+  });
 };

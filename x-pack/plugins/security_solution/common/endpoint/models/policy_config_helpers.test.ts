@@ -6,9 +6,14 @@
  */
 
 import type { PolicyConfig } from '../types';
-import { ProtectionModes } from '../types';
+import { PolicyOperatingSystem, ProtectionModes } from '../types';
 import { policyFactory } from './policy_config';
-import { disableProtections, setPolicyToEventCollectionOnly } from './policy_config_helpers';
+import {
+  disableProtections,
+  isPolicySetToEventCollectionOnly,
+  setPolicyToEventCollectionOnly,
+} from './policy_config_helpers';
+import { set } from 'lodash';
 
 describe('Policy Config helpers', () => {
   describe('disableProtections', () => {
@@ -274,6 +279,59 @@ describe('Policy Config helpers', () => {
         },
       });
     });
+  });
+
+  describe('isPolicySetToEventCollectionOnly', () => {
+    let policy: PolicyConfig;
+
+    beforeEach(() => {
+      policy = setPolicyToEventCollectionOnly(policyFactory());
+    });
+
+    it.each([
+      {
+        keyPath: `${PolicyOperatingSystem.windows}.malware.mode`,
+        keyValue: ProtectionModes.prevent,
+        expectedResult: true,
+      },
+      {
+        keyPath: `${PolicyOperatingSystem.mac}.malware.mode`,
+        keyValue: ProtectionModes.off,
+        expectedResult: false,
+      },
+      {
+        keyPath: `${PolicyOperatingSystem.windows}.ransomware.mode`,
+        keyValue: ProtectionModes.prevent,
+        expectedResult: true,
+      },
+      {
+        keyPath: `${PolicyOperatingSystem.linux}.memory_protection.mode`,
+        keyValue: ProtectionModes.off,
+        expectedResult: false,
+      },
+      {
+        keyPath: `${PolicyOperatingSystem.mac}.behaviour_protection.mode`,
+        keyValue: ProtectionModes.detect,
+        expectedResult: true,
+      },
+      {
+        keyPath: `${PolicyOperatingSystem.linux}.attack_surface_reduction.credential_hardening.enabled`,
+        keyValue: true,
+        expectedResult: true,
+      },
+      {
+        keyPath: `${PolicyOperatingSystem.windows}.antivirus_registration.enabled`,
+        keyValue: true,
+        expectedResult: true,
+      },
+    ])(
+      'should return `$expectedResult` if `$keyPath` is set to `$keyValue`',
+      ({ keyPath, keyValue, expectedResult }) => {
+        set(policy, keyPath, keyValue);
+
+        expect(isPolicySetToEventCollectionOnly(policy)).toBe(expectedResult);
+      }
+    );
   });
 });
 
