@@ -36,7 +36,7 @@ export function SloSummary({ slo, historicalSummary = [], historicalSummaryLoadi
 
   return (
     <EuiFlexGroup direction="row" justifyContent="spaceBetween" gutterSize="l" responsive={false}>
-      <EuiFlexItem grow={false} style={{ width: 200 }}>
+      <EuiFlexItem grow={false} style={{ maxWidth: 200 }}>
         <EuiFlexGroup
           direction="row"
           responsive={false}
@@ -73,7 +73,7 @@ export function SloSummary({ slo, historicalSummary = [], historicalSummaryLoadi
         </EuiFlexGroup>
       </EuiFlexItem>
 
-      <EuiFlexItem grow={false} style={{ width: 220 }}>
+      <EuiFlexItem grow={false} style={{ maxWidth: 200 }}>
         <EuiFlexGroup
           direction="row"
           responsive={false}

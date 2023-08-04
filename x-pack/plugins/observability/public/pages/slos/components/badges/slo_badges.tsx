@@ -29,7 +29,7 @@ export interface Props {
 
 export function SloBadges({ activeAlerts, isLoading, rules, slo, onClickRuleBadge }: Props) {
   return (
-    <EuiFlexGroup direction="row" responsive={false} gutterSize="s" alignItems="center">
+    <EuiFlexGroup direction="row" responsive={false} gutterSize="s" alignItems="center" wrap>
       {isLoading ? (
         <>
           <EuiSkeletonRectangle
