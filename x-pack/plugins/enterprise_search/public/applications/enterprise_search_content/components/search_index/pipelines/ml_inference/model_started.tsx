@@ -21,8 +21,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { KibanaLogic } from '../../../../../shared/kibana';
-
-const TRAINED_MODELS_PATH = '/app/ml/trained_models';
+import { TRAINED_MODELS_PATH } from './utils';
 
 export const ModelStarted = ({
   dismiss,
