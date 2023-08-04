@@ -8,13 +8,7 @@
 import React, { Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import {
-  EuiButton,
-  EuiEmptyPrompt,
-  EuiSpacer,
-  EuiPageHeader,
-  EuiPageContent_Deprecated as EuiPageContent,
-} from '@elastic/eui';
+import { EuiButton, EuiEmptyPrompt, EuiSpacer, EuiPageHeader, EuiPageSection } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { PolicyFromES } from '../../../../common/types';
@@ -46,7 +40,7 @@ export const PolicyList: React.FunctionComponent<Props> = ({ policies, updatePol
 
   if (policies.length === 0) {
     return (
-      <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
+      <EuiPageSection alignment="center" color="subdued">
         <EuiEmptyPrompt
           iconType="managementApp"
           title={
@@ -69,7 +63,7 @@ export const PolicyList: React.FunctionComponent<Props> = ({ policies, updatePol
           }
           actions={createPolicyButton}
         />
-      </EuiPageContent>
+      </EuiPageSection>
     );
   }
 

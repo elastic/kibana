@@ -6,12 +6,7 @@
  */
 
 import React, { useEffect } from 'react';
-import {
-  EuiButton,
-  EuiEmptyPrompt,
-  EuiLoadingSpinner,
-  EuiPageContent_Deprecated as EuiPageContent,
-} from '@elastic/eui';
+import { EuiButton, EuiEmptyPrompt, EuiLoadingSpinner, EuiPageSection } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { PolicyList as PresentationComponent } from './policy_list';
 import { useKibana } from '../../../shared_imports';
@@ -30,7 +25,7 @@ export const PolicyList: React.FunctionComponent = () => {
 
   if (isLoading) {
     return (
-      <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
+      <EuiPageSection alignment="center" color="subdued">
         <EuiEmptyPrompt
           title={<EuiLoadingSpinner size="xl" />}
           body={
@@ -40,13 +35,13 @@ export const PolicyList: React.FunctionComponent = () => {
             />
           }
         />
-      </EuiPageContent>
+      </EuiPageSection>
     );
   }
   if (error) {
     const { statusCode, message } = error ? error : { statusCode: '', message: '' };
     return (
-      <EuiPageContent verticalPosition="center" horizontalPosition="center" color="danger">
+      <EuiPageSection alignment="center" color="danger">
         <EuiEmptyPrompt
           title={
             <h2>
@@ -70,7 +65,7 @@ export const PolicyList: React.FunctionComponent = () => {
             </EuiButton>
           }
         />
-      </EuiPageContent>
+      </EuiPageSection>
     );
   }
 
