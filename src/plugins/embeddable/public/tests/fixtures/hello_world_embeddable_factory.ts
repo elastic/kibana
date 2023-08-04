@@ -12,7 +12,6 @@ import { HelloWorldEmbeddable, HELLO_WORLD_EMBEDDABLE } from './hello_world_embe
 
 export type HelloWorldEmbeddableFactory = EmbeddableFactory;
 export class HelloWorldEmbeddableFactoryDefinition implements EmbeddableFactoryDefinition {
-  public latestVersion = '1.0.0';
   public readonly type = HELLO_WORLD_EMBEDDABLE;
 
   /**

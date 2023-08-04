@@ -46,6 +46,7 @@ export class DashboardStorage extends SOContentStorage<DashboardCrudTypes> {
         'optionsJSON',
         'panelsJSON',
         'timeFrom',
+        'version',
         'timeTo',
         'title',
       ],

@@ -16,7 +16,10 @@ import { type DashboardEmbeddableService } from '../../embeddable/types';
 import { DashboardContainerInput, DashboardPanelState } from '../../../../common';
 
 /**
- * Run Dashboard migrations clientside.
+ * Run Dashboard migrations clientside. We pre-emptively run all migrations for all content on this Dashboard so that
+ * we can ensure the `last saved state` which eventually resides in the Dashboard public state is fully migrated.
+ * This prevents the reset button from un-migrating the panels on the Dashboard. This also means that the migrations may
+ * get skipped at Embeddable create time - unless states with older versions are saved in the URL or session storage.
  */
 export const migrateDashboardInput = (
   dashboardInput: DashboardContainerInput,

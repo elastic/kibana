@@ -182,7 +182,6 @@ describe('createStore', () => {
       TestEmbeddable
     >({
       type: 'test',
-      latestVersion: '1.0.0',
       getDisplayName: () => 'Test',
       isEditable: async () => true,
       create: async (data, parent) => new TestEmbeddable(data, {}, parent),

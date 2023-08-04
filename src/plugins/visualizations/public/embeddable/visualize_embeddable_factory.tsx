@@ -78,7 +78,6 @@ export class VisualizeEmbeddableFactory
       VisualizationAttributes
     >
 {
-  public latestVersion = '1.0.0';
   public readonly type = VISUALIZE_EMBEDDABLE_TYPE;
 
   private attributeService?: AttributeService<

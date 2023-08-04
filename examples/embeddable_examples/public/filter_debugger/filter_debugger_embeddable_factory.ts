@@ -23,7 +23,6 @@ export interface FilterDebuggerEmbeddableInput extends EmbeddableInput {
 
 export type FilterDebuggerEmbeddableFactory = EmbeddableFactory;
 export class FilterDebuggerEmbeddableFactoryDefinition implements EmbeddableFactoryDefinition {
-  public latestVersion = '1.0.0';
   public readonly type = FILTER_DEBUGGER_EMBEDDABLE;
 
   public async isEditable() {

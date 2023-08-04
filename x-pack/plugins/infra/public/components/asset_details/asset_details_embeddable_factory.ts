@@ -17,7 +17,6 @@ import {
 export class AssetDetailsEmbeddableFactoryDefinition
   implements EmbeddableFactoryDefinition<AssetDetailsEmbeddableInput>
 {
-  public latestVersion = '1.0.0';
   public readonly type = ASSET_DETAILS_EMBEDDABLE;
 
   constructor(private getStartServices: InfraClientStartServicesAccessor) {}

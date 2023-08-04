@@ -46,7 +46,6 @@ export interface ImageEmbeddableInput extends EmbeddableInput {
 export class ImageEmbeddableFactoryDefinition
   implements EmbeddableFactoryDefinition<ImageEmbeddableInput>
 {
-  public latestVersion = '1.0.0';
   public readonly type = IMAGE_EMBEDDABLE_TYPE;
 
   constructor(private deps: ImageEmbeddableFactoryDeps) {}

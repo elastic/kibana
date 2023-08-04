@@ -39,8 +39,10 @@ export interface EmbeddableFactory<
   /**
    * The version of this Embeddable factory. This will be used in the client side migration system
    * to ensure that input from any source is compatible with the latest version of this embeddable.
+   * If the latest version is not defined, all clientside migrations will be skipped. If migrations
+   * are added to this factory but a latestVersion is not set, an error will be thrown on server start
    */
-  readonly latestVersion: string;
+  readonly latestVersion?: string;
 
   // A unique identified for this factory, which will be used to map an embeddable spec to
   // a factory that can generate an instance of it.
@@ -119,20 +121,12 @@ export interface EmbeddableFactory<
     input: Partial<TEmbeddableInput>,
     parent?: IContainer
   ): Promise<TEmbeddable | ErrorEmbeddable>;
-  /**
-   * Creates an Embeddable instance, skipping all migrations. This should be used only in cases where the migrations are definitely run beforehand.
-   * Resolves to undefined if a new Embeddable cannot be directly created and the user will instead be redirected elsewhere.
-   */
-  create(
-    initialInput: TEmbeddableInput,
-    parent?: IContainer
-  ): Promise<TEmbeddable | ErrorEmbeddable | undefined>;
 
   /**
    * Creates an Embeddable instance, running the inital input through all registered migrations. Resolves to undefined if a new Embeddable
    * cannot be directly created and the user will instead be redirected elsewhere.
    */
-  createWithMigrations(
+  create(
     initialInput: TEmbeddableInput,
     parent?: IContainer
   ): Promise<TEmbeddable | ErrorEmbeddable | undefined>;

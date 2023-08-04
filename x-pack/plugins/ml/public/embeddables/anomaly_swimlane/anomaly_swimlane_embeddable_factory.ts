@@ -23,7 +23,6 @@ import {
 export class AnomalySwimlaneEmbeddableFactory
   implements EmbeddableFactoryDefinition<AnomalySwimlaneEmbeddableInput>
 {
-  public latestVersion = '1.0.0';
   public readonly type = ANOMALY_SWIMLANE_EMBEDDABLE_TYPE;
 
   public readonly grouping = [

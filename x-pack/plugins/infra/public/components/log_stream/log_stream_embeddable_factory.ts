@@ -17,7 +17,6 @@ import {
 export class LogStreamEmbeddableFactoryDefinition
   implements EmbeddableFactoryDefinition<LogStreamEmbeddableInput>
 {
-  public latestVersion = '1.0.0';
   public readonly type = LOG_STREAM_EMBEDDABLE;
 
   constructor(private getStartServices: InfraClientStartServicesAccessor) {}

@@ -18,12 +18,17 @@ import { EmbeddableFactory, EmbeddableInput } from '../embeddables';
  */
 export const runEmbeddableFactoryMigrations = <ToType extends EmbeddableInput>(
   initialInput: { version?: string },
-  factory: { migrations?: EmbeddableFactory['migrations']; latestVersion: string }
+  factory: { migrations?: EmbeddableFactory['migrations']; latestVersion?: string }
 ): { input: ToType; migrationRun: boolean } => {
+  if (!factory.latestVersion) {
+    return { input: initialInput as unknown as ToType, migrationRun: false };
+  }
+
+  // any embeddable with no version set is considered to require all clientside migrations so we default to 0.0.0
   const inputVersion = initialInput.version ?? '0.0.0';
   const migrationRun = compare(inputVersion, factory.latestVersion, true) !== 0;
 
-  // return early to avoid cloning the input when there are no migrations to run.
+  // return early to avoid extra operations when there are no migrations to run.
   if (!migrationRun) return { input: initialInput as unknown as ToType, migrationRun };
 
   const factoryMigrations =
@@ -32,7 +37,6 @@ export const runEmbeddableFactoryMigrations = <ToType extends EmbeddableInput>(
     factoryMigrations ?? {},
     {
       state: cloneDeep(initialInput),
-      // any embeddable with no version set is considered to require all clientside migrations
       version: inputVersion,
     },
     true

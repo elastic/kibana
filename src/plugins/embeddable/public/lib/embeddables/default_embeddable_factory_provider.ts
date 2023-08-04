@@ -23,6 +23,12 @@ export const defaultEmbeddableFactoryProvider = <
 >(
   def: EmbeddableFactoryDefinition<I, O, E, T>
 ): EmbeddableFactory<I, O, E, T> => {
+  if (def.migrations && !def.latestVersion) {
+    throw new Error(
+      'To run clientside Embeddable migrations a latest version key is required on the factory'
+    );
+  }
+
   const factory: EmbeddableFactory<I, O, E, T> = {
     latestVersion: def.latestVersion,
     isContainerType: def.isContainerType ?? false,
@@ -36,8 +42,7 @@ export const defaultEmbeddableFactoryProvider = <
       : (savedObjectId: string, input: Partial<I>, parent?: IContainer) => {
           throw new Error(`Creation from saved object not supported by type ${def.type}`);
         },
-    create: def.create.bind(def),
-    createWithMigrations: (...args) => {
+    create: (...args) => {
       const [initialInput, ...otherArgs] = args;
       const { input } = runEmbeddableFactoryMigrations(initialInput, def);
       const createdEmbeddable = def.create.bind(def)(input as I, ...otherArgs);

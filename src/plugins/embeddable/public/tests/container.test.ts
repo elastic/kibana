@@ -330,17 +330,12 @@ test('Container.input$', async () => {
 
   const changes = jest.fn();
   const input = container.getInput();
-  expect(input.panels[embeddable.id].explicitInput).toEqual({
-    firstName: 'Susy',
-    id: 'Susy',
-    version: '1.0.0',
-  });
+  expect(input.panels[embeddable.id].explicitInput).toEqual({ firstName: 'Susy', id: 'Susy' });
 
   const subscription = container.getInput$().subscribe(changes);
   embeddable.updateInput({ nameTitle: 'Dr.' });
   expect(container.getInput().panels[embeddable.id].explicitInput).toEqual({
     nameTitle: 'Dr.',
-    version: '1.0.0',
     firstName: 'Susy',
     id: 'Susy',
   });
@@ -363,7 +358,6 @@ test('Container.getInput$ not triggered if state is the same', async () => {
   expect(input.panels[embeddable.id].explicitInput).toEqual({
     id: 'Susy',
     firstName: 'Susy',
-    version: '1.0.0',
   });
   const subscription = container.getInput$().subscribe(changes);
   embeddable.updateInput({ nameTitle: 'Dr.' });

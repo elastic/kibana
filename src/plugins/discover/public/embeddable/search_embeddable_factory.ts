@@ -28,7 +28,6 @@ export interface StartServices {
 export class SearchEmbeddableFactory
   implements EmbeddableFactoryDefinition<SearchInput, SearchOutput, SavedSearchEmbeddable>
 {
-  public latestVersion = '1.0.0';
   public readonly type = SEARCH_EMBEDDABLE_TYPE;
   public readonly savedObjectMetaData = {
     name: i18n.translate('discover.savedSearch.savedObjectName', {

@@ -32,6 +32,7 @@ import { DASHBOARD_CONTENT_ID } from '../../../dashboard_constants';
 import { LATEST_DASHBOARD_CONTAINER_VERSION } from '../../../dashboard_container';
 import { DashboardCrudTypes, DashboardAttributes } from '../../../../common/content_management';
 import { dashboardSaveToastStrings } from '../../../dashboard_container/_dashboard_container_strings';
+import { convertDashboardVersionToNumber } from './dashboard_versioning';
 
 export const serializeControlGroupInput = (
   controlGroupInput: DashboardContainerInput['controlGroupInput']
@@ -147,6 +148,7 @@ export const saveDashboardState = async ({
     : undefined;
 
   const rawDashboardAttributes: DashboardAttributes = {
+    version: convertDashboardVersionToNumber(version ?? LATEST_DASHBOARD_CONTAINER_VERSION),
     controlGroupInput: serializeControlGroupInput(controlGroupInput),
     kibanaSavedObjectMeta: { searchSourceJSON },
     description: description ?? '',
@@ -157,7 +159,6 @@ export const saveDashboardState = async ({
     timeFrom,
     title,
     timeTo,
-    version: +(version ?? LATEST_DASHBOARD_CONTAINER_VERSION),
   };
 
   /**

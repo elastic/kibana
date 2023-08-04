@@ -57,7 +57,6 @@ export const createDashboardSavedObjectType = ({
       },
       controlGroupInput: {
         properties: {
-          version: { type: 'keyword', index: false, doc_values: false },
           controlStyle: { type: 'keyword', index: false, doc_values: false },
           chainingSystem: { type: 'keyword', index: false, doc_values: false },
           panelsJSON: { type: 'text', index: false },
@@ -98,7 +97,6 @@ export const createDashboardSavedObjectType = ({
       // Dashboard Content
       controlGroupInput: schema.maybe(
         schema.object({
-          version: schema.maybe(schema.string()),
           panelsJSON: schema.maybe(schema.string()),
           controlStyle: schema.maybe(schema.string()),
           chainingSystem: schema.maybe(schema.string()),

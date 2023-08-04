@@ -22,7 +22,6 @@ export const CONTACT_CARD_EMBEDDABLE = 'CONTACT_CARD_EMBEDDABLE';
 export class ContactCardEmbeddableFactory
   implements EmbeddableFactoryDefinition<ContactCardEmbeddableInput>
 {
-  public latestVersion = '1.0.0';
   public readonly type = CONTACT_CARD_EMBEDDABLE;
   savedObjectMetaData = {
     name: 'Contact card',

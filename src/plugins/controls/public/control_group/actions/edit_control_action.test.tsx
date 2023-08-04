@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { EmbeddableFactory, ErrorEmbeddable } from '@kbn/embeddable-plugin/public';
+import { ErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 
 import { ControlOutput } from '../../types';
 import { ControlGroupInput } from '../types';
@@ -48,7 +48,6 @@ test('Action is incompatible with embeddables that are not editable', async () =
 
 test('Action is compatible with embeddables that are editable', async () => {
   const mockEmbeddableFactory = new OptionsListEmbeddableFactory();
-  (mockEmbeddableFactory as unknown as EmbeddableFactory).create = mockEmbeddableFactory.create;
   const mockGetFactory = jest.fn().mockReturnValue(mockEmbeddableFactory);
   pluginServices.getServices().controls.getControlFactory = mockGetFactory;
   pluginServices.getServices().embeddable.getEmbeddableFactory = mockGetFactory;

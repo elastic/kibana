@@ -26,7 +26,6 @@ import { ControlEmbeddable, IEditableControlFactory } from '../../types';
 export class RangeSliderEmbeddableFactory
   implements EmbeddableFactoryDefinition, IEditableControlFactory<RangeSliderEmbeddableInput>
 {
-  public latestVersion = '1.0.0';
   public type = RANGE_SLIDER_CONTROL;
 
   public getDisplayName = () =>

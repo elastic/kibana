@@ -18,7 +18,6 @@ import { IContainer } from '../../containers';
 export class FilterableEmbeddableFactory
   implements EmbeddableFactoryDefinition<FilterableEmbeddableInput>
 {
-  public latestVersion = '1.0.0';
   public readonly type = FILTERABLE_EMBEDDABLE;
 
   public async isEditable() {

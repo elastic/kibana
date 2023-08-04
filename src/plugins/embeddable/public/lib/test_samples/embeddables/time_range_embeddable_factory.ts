@@ -16,7 +16,6 @@ import {
 export class TimeRangeEmbeddableFactory
   implements EmbeddableFactoryDefinition<EmbeddableTimeRangeInput>
 {
-  public latestVersion = '1.0.0';
   public readonly type = TIME_RANGE_EMBEDDABLE;
 
   public async isEditable() {

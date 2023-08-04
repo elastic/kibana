@@ -14,7 +14,6 @@ import { MapByReferenceInput, MapEmbeddableInput } from './types';
 import { getApplication, getMapsCapabilities, getUsageCollection } from '../kibana_services';
 
 export class MapEmbeddableFactory implements EmbeddableFactoryDefinition {
-  public latestVersion = '1.0.0';
   type = MAP_SAVED_OBJECT_TYPE;
   savedObjectMetaData = {
     name: i18n.translate('xpack.maps.mapSavedObjectLabel', {
