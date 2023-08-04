@@ -64,12 +64,17 @@ export const renderApp = (
     executionContext,
   };
 
+  const appContextDependencies = {
+    ...dependencies,
+    toasts: notifications.toasts,
+  };
+
   render(
     <I18nContext>
       <KibanaThemeProvider theme$={theme$}>
         <KibanaReactContextProvider>
           <Provider store={indexManagementStore(services)}>
-            <AppContextProvider value={dependencies}>
+            <AppContextProvider value={appContextDependencies}>
               <MappingsEditorProvider>
                 <ComponentTemplatesProvider value={componentTemplateProviderValues}>
                   <GlobalFlyoutProvider>

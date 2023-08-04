@@ -18,6 +18,7 @@ import {
   DocLinksStart,
   IUiSettingsClient,
   ExecutionContextStart,
+  NotificationsSetup,
 } from '@kbn/core/public';
 import { SharePluginStart } from '@kbn/share-plugin/public';
 
@@ -53,6 +54,7 @@ export interface AppDependencies {
   kibanaVersion: SemVer;
   theme$: Observable<CoreTheme>;
   enableIndexActions: boolean;
+  toasts: NotificationsSetup['toasts'];
 }
 
 export const AppContextProvider = ({

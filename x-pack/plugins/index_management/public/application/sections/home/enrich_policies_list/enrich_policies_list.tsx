@@ -146,6 +146,13 @@ export const EnrichPoliciesList = () => {
       {policyToDelete ? (
         <DeletePolicyModal
           policyToDelete={policyToDelete}
+          callback={(deleteResponse) => {
+            if (deleteResponse?.hasDeletedPolicy) {
+              // reload policies list
+              reload();
+            }
+            setPolicyToDelete(undefined);
+          }}
         />
       ) : null}
     </div>
