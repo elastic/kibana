@@ -6,15 +6,10 @@
  */
 
 import { setMockValues } from '../../../../../__mocks__/kea_logic';
-
 import React from 'react';
-
 import { shallow } from 'enzyme';
-
 import { EuiButton } from '@elastic/eui';
-
 import { TextExpansionDismissButton } from './text_expansion_callout';
-
 import { DeployModel } from './deploy_model';
 
 jest.mock('./text_expansion_callout_data', () => ({
