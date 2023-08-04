@@ -15,7 +15,7 @@ import type {
 } from '@kbn/field-formats-plugin/common';
 import { castEsToKbnFieldTypeName, ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import { CharacterNotAllowedInField } from '@kbn/kibana-utils-plugin/common';
-import { cloneDeep, each, reject } from 'lodash';
+import { cloneDeep, each, mapValues, omit, pickBy, reject } from 'lodash';
 import type { DataViewAttributes, FieldAttrs, FieldAttrSet } from '..';
 import type { DataViewField, IIndexPatternFieldList } from '../fields';
 import { fieldList } from '../fields';
@@ -330,6 +330,28 @@ export class DataView implements DataViewBase {
 
     // Filter undefined values from the spec
     return Object.fromEntries(Object.entries(spec).filter(([, v]) => typeof v !== 'undefined'));
+  }
+
+  /**
+   * Creates a minimal static representation of the data view. Fields and popularity scores will be omitted.
+   */
+  public toMinimalSpec(): Omit<DataViewSpec, 'fields'> {
+    // removes `fields`
+    const dataViewSpec = this.toSpec(false);
+
+    if (dataViewSpec.fieldAttrs) {
+      // removes `count` props (popularity scores) from `fieldAttrs`
+      dataViewSpec.fieldAttrs = pickBy(
+        mapValues(dataViewSpec.fieldAttrs, (fieldAttrs) => omit(fieldAttrs, 'count')),
+        (trimmedFieldAttrs) => Object.keys(trimmedFieldAttrs).length > 0
+      );
+
+      if (Object.keys(dataViewSpec.fieldAttrs).length === 0) {
+        dataViewSpec.fieldAttrs = undefined;
+      }
+    }
+
+    return dataViewSpec;
   }
 
   /**
