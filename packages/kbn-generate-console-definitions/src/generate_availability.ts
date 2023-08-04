@@ -9,15 +9,20 @@
 import type { EndpointDescription } from '@kbn/console-plugin/common/types';
 import type { SpecificationTypes } from './types';
 
-const DEFAULT_ENDPOINT_AVAILABILITY = true;
+const DEFAULT_STACK_ENDPOINT_AVAILABILITY = true;
+const DEFAULT_SERVERLESS_ENDPOINT_AVAILABILITY = false;
 
 export const generateAvailability = (
   endpoint: SpecificationTypes.Endpoint
 ): EndpointDescription['availability'] => {
   const availability: EndpointDescription['availability'] = {
-    stack: DEFAULT_ENDPOINT_AVAILABILITY,
-    serverless: DEFAULT_ENDPOINT_AVAILABILITY,
+    stack: DEFAULT_STACK_ENDPOINT_AVAILABILITY,
+    serverless: DEFAULT_SERVERLESS_ENDPOINT_AVAILABILITY,
   };
+  // if no availability property at all, use defaults
+  if (!endpoint.availability) {
+    return availability;
+  }
   if (endpoint.availability.stack?.visibility) {
     availability.stack = endpoint.availability.stack?.visibility === 'public';
   }

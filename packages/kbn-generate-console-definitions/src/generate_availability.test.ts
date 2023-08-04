@@ -21,13 +21,13 @@ describe('generateAvailability', () => {
     urls: [],
   };
 
-  it('converts empty availability to true', () => {
+  it('converts empty availability to true for stack, false for serverless', () => {
     const endpoint = mockEndpoint;
 
     const availability = generateAvailability(endpoint);
     expect(availability).toEqual({
       stack: true,
-      serverless: true,
+      serverless: false,
     });
   });
 
@@ -45,7 +45,7 @@ describe('generateAvailability', () => {
       const availability = generateAvailability(endpoint);
       expect(availability).toEqual({
         stack: true,
-        serverless: true,
+        serverless: false,
       });
     });
 
@@ -62,7 +62,7 @@ describe('generateAvailability', () => {
       const availability = generateAvailability(endpoint);
       expect(availability).toEqual({
         stack: false,
-        serverless: true,
+        serverless: false,
       });
     });
 
@@ -79,7 +79,7 @@ describe('generateAvailability', () => {
       const availability = generateAvailability(endpoint);
       expect(availability).toEqual({
         stack: false,
-        serverless: true,
+        serverless: false,
       });
     });
 
@@ -94,7 +94,7 @@ describe('generateAvailability', () => {
       const availability = generateAvailability(endpoint);
       expect(availability).toEqual({
         stack: true,
-        serverless: true,
+        serverless: false,
       });
     });
   });
@@ -151,7 +151,7 @@ describe('generateAvailability', () => {
       });
     });
 
-    it('missing visibility to true', () => {
+    it('missing visibility to true for stack, false for serverless', () => {
       const endpoint = {
         ...mockEndpoint,
         availability: {
@@ -162,7 +162,7 @@ describe('generateAvailability', () => {
       const availability = generateAvailability(endpoint);
       expect(availability).toEqual({
         stack: true,
-        serverless: true,
+        serverless: false,
       });
     });
   });
