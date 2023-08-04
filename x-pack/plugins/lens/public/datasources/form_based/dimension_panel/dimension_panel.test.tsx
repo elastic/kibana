@@ -351,7 +351,7 @@ describe('FormBasedDimensionEditor', () => {
     expect(options).toHaveLength(3);
 
     expect(options![0].label).toEqual('Records');
-    expect(options![1].options!.map(({ label }) => label)).toEqual([
+    expect(options![1].options!.map(({ label }: { label: string }) => label)).toEqual([
       'timestampLabel',
       'bytes',
       'memory',
@@ -359,7 +359,7 @@ describe('FormBasedDimensionEditor', () => {
     ]);
 
     // these fields are generated to test the issue #148062 about fields that are using JS Object method names
-    expect(options![2].options!.map(({ label }) => label)).toEqual(
+    expect(options![2].options!.map(({ label }: { label: string }) => label)).toEqual(
       Object.getOwnPropertyNames(Object.getPrototypeOf({})).sort()
     );
   });
@@ -380,7 +380,10 @@ describe('FormBasedDimensionEditor', () => {
       .filter('[data-test-subj="indexPattern-dimension-field"]')
       .prop('options');
 
-    expect(options![1].options!.map(({ label }) => label)).toEqual(['timestampLabel', 'source']);
+    expect(options![1].options!.map(({ label }: { label: string }) => label)).toEqual([
+      'timestampLabel',
+      'source',
+    ]);
   });
 
   it('should indicate fields which are incompatible for the operation of the current column', () => {
@@ -399,10 +402,14 @@ describe('FormBasedDimensionEditor', () => {
     expect(options![0]['data-test-subj']).toEqual('lns-fieldOptionIncompatible-___records___');
 
     expect(
-      options![1].options!.filter(({ label }) => label === 'timestampLabel')[0]['data-test-subj']
+      options![1].options!.filter(({ label }: { label: string }) => label === 'timestampLabel')[0][
+        'data-test-subj'
+      ]
     ).toContain('Incompatible');
     expect(
-      options![1].options!.filter(({ label }) => label === 'memory')[0]['data-test-subj']
+      options![1].options!.filter(({ label }: { label: string }) => label === 'memory')[0][
+        'data-test-subj'
+      ]
     ).not.toContain('Incompatible');
   });
 
@@ -557,7 +564,9 @@ describe('FormBasedDimensionEditor', () => {
     const comboBox = wrapper
       .find(EuiComboBox)
       .filter('[data-test-subj="indexPattern-dimension-field"]')!;
-    const option = comboBox.prop('options')![1].options!.find(({ label }) => label === 'memory')!;
+    const option = comboBox
+      .prop('options')![1]
+      .options!.find(({ label }: { label: string }) => label === 'memory')!;
 
     await act(async () => {
       await comboBox.prop('onChange')!([option]);
@@ -592,7 +601,9 @@ describe('FormBasedDimensionEditor', () => {
     const comboBox = wrapper
       .find(EuiComboBox)
       .filter('[data-test-subj="indexPattern-dimension-field"]')!;
-    const option = comboBox.prop('options')![1].options!.find(({ label }) => label === 'source')!;
+    const option = comboBox
+      .prop('options')![1]
+      .options!.find(({ label }: { label: string }) => label === 'source')!;
 
     await act(async () => {
       await comboBox.prop('onChange')!([option]);
@@ -939,10 +950,14 @@ describe('FormBasedDimensionEditor', () => {
       expect(options![0]['data-test-subj']).toContain('Incompatible');
 
       expect(
-        options![1].options!.filter(({ label }) => label === 'timestampLabel')[0]['data-test-subj']
+        options![1].options!.filter(
+          ({ label }: { label: string }) => label === 'timestampLabel'
+        )[0]['data-test-subj']
       ).toContain('Incompatible');
       expect(
-        options![1].options!.filter(({ label }) => label === 'source')[0]['data-test-subj']
+        options![1].options!.filter(({ label }: { label: string }) => label === 'source')[0][
+          'data-test-subj'
+        ]
       ).not.toContain('Incompatible');
     });
 
@@ -1091,10 +1106,14 @@ describe('FormBasedDimensionEditor', () => {
         .prop('options');
       expect(options![0]['data-test-subj']).toContain('Incompatible');
       expect(
-        options![1].options!.filter(({ label }) => label === 'timestampLabel')[0]['data-test-subj']
+        options![1].options!.filter(
+          ({ label }: { label: string }) => label === 'timestampLabel'
+        )[0]['data-test-subj']
       ).toContain('Incompatible');
       expect(
-        options![1].options!.filter(({ label }) => label === 'source')[0]['data-test-subj']
+        options![1].options!.filter(({ label }: { label: string }) => label === 'source')[0][
+          'data-test-subj'
+        ]
       ).not.toContain('Incompatible');
     });
 
@@ -1108,7 +1127,9 @@ describe('FormBasedDimensionEditor', () => {
       const comboBox = wrapper
         .find(EuiComboBox)
         .filter('[data-test-subj="indexPattern-dimension-field"]')!;
-      const option = comboBox.prop('options')![1].options!.find(({ label }) => label === 'source')!;
+      const option = comboBox
+        .prop('options')![1]
+        .options!.find(({ label }: { label: string }) => label === 'source')!;
       await act(async () => {
         await comboBox.prop('onChange')!([option]);
       });
@@ -2005,13 +2026,19 @@ describe('FormBasedDimensionEditor', () => {
     expect(options![0]['data-test-subj']).toContain('Incompatible');
 
     expect(
-      options![1].options!.filter(({ label }) => label === 'timestampLabel')[0]['data-test-subj']
+      options![1].options!.filter(({ label }: { label: string }) => label === 'timestampLabel')[0][
+        'data-test-subj'
+      ]
     ).toContain('Incompatible');
     expect(
-      options![1].options!.filter(({ label }) => label === 'bytes')[0]['data-test-subj']
+      options![1].options!.filter(({ label }: { label: string }) => label === 'bytes')[0][
+        'data-test-subj'
+      ]
     ).not.toContain('Incompatible');
     expect(
-      options![1].options!.filter(({ label }) => label === 'memory')[0]['data-test-subj']
+      options![1].options!.filter(({ label }: { label: string }) => label === 'memory')[0][
+        'data-test-subj'
+      ]
     ).not.toContain('Incompatible');
   });
 
@@ -2049,7 +2076,7 @@ describe('FormBasedDimensionEditor', () => {
 
     const option = comboBox
       .prop('options')![1]
-      .options!.find(({ label }) => label === 'timestampLabel')!;
+      .options!.find(({ label }: { label: string }) => label === 'timestampLabel')!;
 
     await act(async () => {
       await comboBox.prop('onChange')!([option]);
