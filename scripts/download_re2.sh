@@ -18,8 +18,8 @@ archs=(
 node_api_versions=( 108 115 )
 formats=( "br" "gz" )
 
-echo "Downloading builds of re2 version ${re2_version} to the re2 sub-directory"
-mkdir re2
+echo "Downloading builds of re2 version ${re2_version} to /tmp/re2"
+mkdir /tmp/re2
 
 for node_api_version in "${node_api_versions[@]}"; do
   echo "  Node.js API version ${node_api_version}"
@@ -28,7 +28,7 @@ for node_api_version in "${node_api_versions[@]}"; do
     for format in "${formats[@]}"; do
       url="https://github.com/uhop/node-re2/releases/download/${re2_version}/${arch}-${node_api_version}.${format}"
       echo "    ${url}"
-      (cd re2 && curl -s -L -O "${url}")
+      (cd /tmp/re2 && curl -s -L -O "${url}")
     done
   done
 done
@@ -36,4 +36,4 @@ done
 echo
 echo "Calculating shasums for downloaded artifacts..."
 echo
-shasum -a 256 re2/*
+shasum -a 256 /tmp/re2/*
