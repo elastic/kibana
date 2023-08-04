@@ -70,6 +70,7 @@ export type {
   InstallSource,
   InstallResult,
   GetCategoriesRequest,
+  GetPackagesRequest,
   DataType,
   FleetServerEnrollmentAPIKey,
   FleetServerAgent,
@@ -78,7 +79,6 @@ export type {
   FullAgentPolicyInputStream,
   DownloadSourceBase,
   DownloadSource,
-  DownloadSourceAttributes,
   PackageVerificationStatus,
   BulkInstallPackageInfo,
   PackageAssetReference,
@@ -87,6 +87,11 @@ export type {
   SecretElasticDoc,
   VarSecretReference,
   PolicySecretReference,
+  PackageListItem,
+  PackageList,
+  InstallationInfo,
+  ActionStatusOptions,
+  PackageSpecTags,
 } from '../../common/types';
 export { ElasticsearchAssetType, KibanaAssetType, KibanaSavedObjectType } from '../../common/types';
 export { dataTypes } from '../../common/constants';

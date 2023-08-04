@@ -22,6 +22,8 @@ import type { BulkResponseItem } from '@elastic/elasticsearch/lib/api/typesWithB
 
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 
+import { populateAssignedAgentsCount } from '../routes/agent_policy/handlers';
+
 import type { HTTPAuthorizationHeader } from '../../common/http_authorization_header';
 
 import {
@@ -46,6 +48,7 @@ import {
   packageToPackagePolicy,
   policyHasFleetServer,
   policyHasAPMIntegration,
+  policyHasSyntheticsIntegration,
 } from '../../common/services';
 import {
   agentPolicyStatuses,
@@ -209,6 +212,10 @@ class AgentPolicyService {
     return policyHasFleetServer(agentPolicy);
   }
 
+  public hasSyntheticsIntegration(agentPolicy: AgentPolicy) {
+    return policyHasSyntheticsIntegration(agentPolicy);
+  }
+
   public async create(
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
@@ -370,6 +377,8 @@ class AgentPolicyService {
     options: ListWithKuery & {
       withPackagePolicies?: boolean;
       fields?: string[];
+      esClient?: ElasticsearchClient;
+      withAgentCount?: boolean;
     }
   ): Promise<{
     items: AgentPolicy[];
@@ -385,6 +394,8 @@ class AgentPolicyService {
       kuery,
       withPackagePolicies = false,
       fields,
+      esClient,
+      withAgentCount = false,
     } = options;
 
     const baseFindParams = {
@@ -424,14 +435,8 @@ class AgentPolicyService {
           ...agentPolicySO.attributes,
         };
         if (withPackagePolicies) {
-          const agentPolicyWithPackagePolicies = await this.get(
-            soClient,
-            agentPolicySO.id,
-            withPackagePolicies
-          );
-          if (agentPolicyWithPackagePolicies) {
-            agentPolicy.package_policies = agentPolicyWithPackagePolicies.package_policies;
-          }
+          agentPolicy.package_policies =
+            (await packagePolicyService.findAllForAgentPolicy(soClient, agentPolicySO.id)) || [];
         }
         return agentPolicy;
       },
@@ -444,6 +449,11 @@ class AgentPolicyService {
         id: agentPolicy.id,
         savedObjectType: AGENT_POLICY_SAVED_OBJECT_TYPE,
       });
+    }
+    if (esClient && withAgentCount) {
+      await populateAssignedAgentsCount(esClient, soClient, agentPolicies);
+    } else {
+      agentPolicies.forEach((item) => (item.agents = 0));
     }
 
     return {

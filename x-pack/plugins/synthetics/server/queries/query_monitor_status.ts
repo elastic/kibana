@@ -10,13 +10,13 @@ import times from 'lodash/times';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { cloneDeep, intersection } from 'lodash';
 import { SUMMARY_FILTER } from '../../common/constants/client_defaults';
-import { createEsParams, UptimeEsClient } from '../legacy_uptime/lib/lib';
 import {
   OverviewPendingStatusMetaData,
   OverviewPing,
   OverviewStatus,
   OverviewStatusMetaData,
 } from '../../common/runtime_types';
+import { createEsParams, UptimeEsClient } from '../lib';
 
 const DEFAULT_MAX_ES_BUCKET_SIZE = 10000;
 

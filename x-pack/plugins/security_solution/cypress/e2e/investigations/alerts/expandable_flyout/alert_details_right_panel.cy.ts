@@ -5,26 +5,59 @@
  * 2.0.
  */
 
+import { upperFirst } from 'lodash';
+import {
+  DOCUMENT_DETAILS_FLYOUT_FOOTER_ADD_TO_NEW_CASE_CREATE_BUTTON,
+  DOCUMENT_DETAILS_FLYOUT_FOOTER_ADD_TO_NEW_CASE_DESCRIPTION_INPUT,
+  DOCUMENT_DETAILS_FLYOUT_FOOTER_ADD_TO_NEW_CASE_NAME_INPUT,
+  EXISTING_CASE_SELECT_BUTTON,
+  VIEW_CASE_TOASTER_LINK,
+} from '../../../../screens/expandable_flyout/common';
+import {
+  createNewCaseFromCases,
+  expandFirstAlertExpandableFlyout,
+  navigateToAlertsPage,
+  navigateToCasesPage,
+} from '../../../../tasks/expandable_flyout/common';
+import { ALERT_CHECKBOX } from '../../../../screens/alerts';
+import { CASE_DETAILS_PAGE_TITLE } from '../../../../screens/case_details';
 import {
   DOCUMENT_DETAILS_FLYOUT_COLLAPSE_DETAILS_BUTTON,
   DOCUMENT_DETAILS_FLYOUT_EXPAND_DETAILS_BUTTON,
+  DOCUMENT_DETAILS_FLYOUT_FOOTER,
+  DOCUMENT_DETAILS_FLYOUT_FOOTER_ADD_ENDPOINT_EXCEPTION,
+  DOCUMENT_DETAILS_FLYOUT_FOOTER_ADD_MARK_AS_ACKNOWLEDGED,
+  DOCUMENT_DETAILS_FLYOUT_FOOTER_ADD_RULE_EXCEPTION,
+  DOCUMENT_DETAILS_FLYOUT_FOOTER_ADD_RULE_EXCEPTION_FLYOUT_CANCEL_BUTTON,
+  DOCUMENT_DETAILS_FLYOUT_FOOTER_ADD_RULE_EXCEPTION_FLYOUT_HEADER,
+  DOCUMENT_DETAILS_FLYOUT_FOOTER_ADD_TO_EXISTING_CASE,
+  DOCUMENT_DETAILS_FLYOUT_FOOTER_ADD_TO_NEW_CASE,
+  DOCUMENT_DETAILS_FLYOUT_FOOTER_INVESTIGATE_IN_TIMELINE,
+  DOCUMENT_DETAILS_FLYOUT_FOOTER_INVESTIGATE_IN_TIMELINE_ENTRY,
+  DOCUMENT_DETAILS_FLYOUT_FOOTER_INVESTIGATE_IN_TIMELINE_SECTION,
+  DOCUMENT_DETAILS_FLYOUT_FOOTER_MARK_AS_CLOSED,
+  DOCUMENT_DETAILS_FLYOUT_FOOTER_RESPOND,
+  DOCUMENT_DETAILS_FLYOUT_FOOTER_TAKE_ACTION_BUTTON,
+  DOCUMENT_DETAILS_FLYOUT_HEADER_CHAT_BUTTON,
+  DOCUMENT_DETAILS_FLYOUT_HEADER_RISK_SCORE,
+  DOCUMENT_DETAILS_FLYOUT_HEADER_RISK_SCORE_VALUE,
+  DOCUMENT_DETAILS_FLYOUT_HEADER_SEVERITY,
+  DOCUMENT_DETAILS_FLYOUT_HEADER_SEVERITY_VALUE,
+  DOCUMENT_DETAILS_FLYOUT_HEADER_STATUS,
   DOCUMENT_DETAILS_FLYOUT_HEADER_TITLE,
   DOCUMENT_DETAILS_FLYOUT_JSON_TAB,
-  DOCUMENT_DETAILS_FLYOUT_JSON_TAB_CONTENT,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB,
   DOCUMENT_DETAILS_FLYOUT_TABLE_TAB,
-  DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_CONTENT,
-  DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_EVENT_TYPE_ROW,
-} from '../../../../screens/document_expandable_flyout';
+} from '../../../../screens/expandable_flyout/alert_details_right_panel';
 import {
   collapseDocumentDetailsExpandableFlyoutLeftSection,
   expandDocumentDetailsExpandableFlyoutLeftSection,
-  expandFirstAlertExpandableFlyout,
   openJsonTab,
-  openOverviewTab,
   openTableTab,
-  scrollWithinDocumentDetailsExpandableFlyoutRightSection,
-} from '../../../../tasks/document_expandable_flyout';
+  openTakeActionButton,
+  openTakeActionButtonAndSelectItem,
+  selectTakeActionItem,
+} from '../../../../tasks/expandable_flyout/alert_details_right_panel';
 import { cleanKibana } from '../../../../tasks/common';
 import { login, visit } from '../../../../tasks/login';
 import { createRule } from '../../../../tasks/api_calls/rules';
@@ -32,28 +65,49 @@ import { getNewRule } from '../../../../objects/rule';
 import { ALERTS_URL } from '../../../../urls/navigation';
 import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
 
-// Skipping these for now as the feature is protected behind a feature flag set to false by default
-// To run the tests locally, add 'securityFlyoutEnabled' in the Cypress config.ts here https://github.com/elastic/kibana/blob/main/x-pack/test/security_solution_cypress/config.ts#L50
-describe.skip(
+describe(
   'Alert details expandable flyout right panel',
   { env: { ftrConfig: { enableExperimental: ['securityFlyoutEnabled'] } } },
   () => {
     const rule = getNewRule();
 
-    before(() => {
+    beforeEach(() => {
       cleanKibana();
       login();
       createRule(rule);
       visit(ALERTS_URL);
       waitForAlertsToPopulate();
+    });
+
+    it('should display header and footer basics', () => {
       expandFirstAlertExpandableFlyout();
-    });
 
-    it('should display title in the header', () => {
       cy.get(DOCUMENT_DETAILS_FLYOUT_HEADER_TITLE).should('be.visible').and('have.text', rule.name);
-    });
 
-    it('should toggle expand detail button in the header', () => {
+      cy.get(DOCUMENT_DETAILS_FLYOUT_HEADER_CHAT_BUTTON).should('be.visible');
+
+      cy.get(DOCUMENT_DETAILS_FLYOUT_HEADER_STATUS).should('be.visible');
+
+      cy.get(DOCUMENT_DETAILS_FLYOUT_HEADER_RISK_SCORE).should('be.visible');
+      cy.get(DOCUMENT_DETAILS_FLYOUT_HEADER_RISK_SCORE_VALUE)
+        .should('be.visible')
+        .and('have.text', rule.risk_score);
+
+      cy.get(DOCUMENT_DETAILS_FLYOUT_HEADER_SEVERITY).should('be.visible');
+      cy.get(DOCUMENT_DETAILS_FLYOUT_HEADER_SEVERITY_VALUE)
+        .should('be.visible')
+        .and('have.text', upperFirst(rule.severity));
+
+      cy.log('Verify all 3 tabs are visible');
+
+      cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB)
+        .should('be.visible')
+        .and('have.text', 'Overview');
+      cy.get(DOCUMENT_DETAILS_FLYOUT_TABLE_TAB).should('be.visible').and('have.text', 'Table');
+      cy.get(DOCUMENT_DETAILS_FLYOUT_JSON_TAB).should('be.visible').and('have.text', 'JSON');
+
+      cy.log('Verify the expand/collapse button is visible and functionality works');
+
       expandDocumentDetailsExpandableFlyoutLeftSection();
       cy.get(DOCUMENT_DETAILS_FLYOUT_COLLAPSE_DETAILS_BUTTON)
         .should('be.visible')
@@ -63,34 +117,121 @@ describe.skip(
       cy.get(DOCUMENT_DETAILS_FLYOUT_EXPAND_DETAILS_BUTTON)
         .should('be.visible')
         .and('have.text', 'Expand alert details');
-    });
 
-    it('should display 3 tabs in the right section', () => {
-      cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB)
-        .should('be.visible')
-        .and('have.text', 'Overview');
-      cy.get(DOCUMENT_DETAILS_FLYOUT_TABLE_TAB).should('be.visible').and('have.text', 'Table');
-      cy.get(DOCUMENT_DETAILS_FLYOUT_JSON_TAB).should('be.visible').and('have.text', 'JSON');
-    });
+      cy.log('Verify the take action button is visible on all tabs');
 
-    it('should display tab content when switching tabs in the right section', () => {
-      openOverviewTab();
-      // we shouldn't need to test anything here as it's covered with the new overview_tab file
+      cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER).scrollIntoView();
+      cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER).should('be.visible');
+      cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER_TAKE_ACTION_BUTTON).should('be.visible');
 
       openTableTab();
-      // the table component is rendered within a dom element with overflow, so Cypress isn't finding it
-      // this next line is a hack that scrolls to a specific element in the table to ensure Cypress finds it
-      cy.get(DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_EVENT_TYPE_ROW).scrollIntoView();
-      cy.get(DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_CONTENT).should('be.visible');
-
-      // scroll back up to the top to open the json tab
-      cy.get(DOCUMENT_DETAILS_FLYOUT_JSON_TAB).scrollIntoView();
+      cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER).scrollIntoView();
+      cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER).should('be.visible');
+      cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER_TAKE_ACTION_BUTTON).should('be.visible');
 
       openJsonTab();
-      // the json component is rendered within a dom element with overflow, so Cypress isn't finding it
-      // this next line is a hack that vertically scrolls down to ensure Cypress finds it
-      scrollWithinDocumentDetailsExpandableFlyoutRightSection(0, 6500);
-      cy.get(DOCUMENT_DETAILS_FLYOUT_JSON_TAB_CONTENT).should('be.visible');
+      cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER).scrollIntoView();
+      cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER).should('be.visible');
+      cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER_TAKE_ACTION_BUTTON).should('be.visible');
+    });
+
+    // TODO this will change when add to existing case is improved
+    //  https://github.com/elastic/security-team/issues/6298
+    it('should add to existing case', () => {
+      navigateToCasesPage();
+      createNewCaseFromCases();
+
+      cy.get(CASE_DETAILS_PAGE_TITLE).should('be.visible').and('have.text', 'case');
+      navigateToAlertsPage();
+      expandFirstAlertExpandableFlyout();
+      openTakeActionButtonAndSelectItem(DOCUMENT_DETAILS_FLYOUT_FOOTER_ADD_TO_EXISTING_CASE);
+
+      cy.get(EXISTING_CASE_SELECT_BUTTON).should('be.visible').contains('Select').click();
+      cy.get(VIEW_CASE_TOASTER_LINK).should('be.visible').and('contain.text', 'View case');
+    });
+
+    // TODO this will change when add to new case is improved
+    //  https://github.com/elastic/security-team/issues/6298
+    it('should add to new case', () => {
+      expandFirstAlertExpandableFlyout();
+      openTakeActionButtonAndSelectItem(DOCUMENT_DETAILS_FLYOUT_FOOTER_ADD_TO_NEW_CASE);
+
+      cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER_ADD_TO_NEW_CASE_NAME_INPUT).type('case');
+      cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER_ADD_TO_NEW_CASE_DESCRIPTION_INPUT).type(
+        'case description'
+      );
+      cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER_ADD_TO_NEW_CASE_CREATE_BUTTON).click();
+
+      cy.get(VIEW_CASE_TOASTER_LINK).should('be.visible').and('contain.text', 'View case');
+    });
+
+    it('should mark as acknowledged', () => {
+      cy.get(ALERT_CHECKBOX).should('have.length', 2);
+
+      expandFirstAlertExpandableFlyout();
+      openTakeActionButtonAndSelectItem(DOCUMENT_DETAILS_FLYOUT_FOOTER_ADD_MARK_AS_ACKNOWLEDGED);
+
+      // TODO figure out how to verify the toasts pops up
+      // cy.get(KIBANA_TOAST)
+      //   .should('be.visible')
+      //   .and('have.text', 'Successfully marked 1 alert as acknowledged.');
+      cy.get(ALERT_CHECKBOX).should('have.length', 1);
+    });
+
+    it('should mark as closed', () => {
+      cy.get(ALERT_CHECKBOX).should('have.length', 2);
+
+      expandFirstAlertExpandableFlyout();
+      openTakeActionButtonAndSelectItem(DOCUMENT_DETAILS_FLYOUT_FOOTER_MARK_AS_CLOSED);
+
+      // TODO figure out how to verify the toasts pops up
+      // cy.get(KIBANA_TOAST).should('be.visible').and('have.text', 'Successfully closed 1 alert.');
+      cy.get(ALERT_CHECKBOX).should('have.length', 1);
+    });
+
+    // these actions are now grouped together as we're not really testing their functionality but just the existence of the option in the dropdown
+    it('should test other action within take action dropdown', () => {
+      expandFirstAlertExpandableFlyout();
+
+      cy.log('should add endpoint exception');
+
+      // TODO figure out why this option is disabled in Cypress but not running the app locally
+      //  https://github.com/elastic/security-team/issues/6300
+      openTakeActionButton();
+      cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER_ADD_ENDPOINT_EXCEPTION).should('be.disabled');
+
+      cy.log('should add rule exception');
+
+      // TODO this isn't fully testing the add rule exception yet
+      //  https://github.com/elastic/security-team/issues/6301
+      selectTakeActionItem(DOCUMENT_DETAILS_FLYOUT_FOOTER_ADD_RULE_EXCEPTION);
+      cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER_ADD_RULE_EXCEPTION_FLYOUT_HEADER).should('be.visible');
+      cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER_ADD_RULE_EXCEPTION_FLYOUT_CANCEL_BUTTON)
+        .should('be.visible')
+        .click();
+
+      // cy.log('should isolate host');
+
+      // TODO figure out why isolate host isn't showing up in the dropdown
+      //  https://github.com/elastic/security-team/issues/6302
+      // openTakeActionButton();
+      // cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER_ISOLATE_HOST).should('be.visible');
+
+      cy.log('should respond');
+
+      // TODO this will change when respond is improved
+      //  https://github.com/elastic/security-team/issues/6303
+      openTakeActionButton();
+      cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER_RESPOND).should('be.disabled');
+
+      cy.log('should investigate in timeline');
+
+      selectTakeActionItem(DOCUMENT_DETAILS_FLYOUT_FOOTER_INVESTIGATE_IN_TIMELINE);
+      cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER_INVESTIGATE_IN_TIMELINE_SECTION)
+        .first()
+        .within(() =>
+          cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER_INVESTIGATE_IN_TIMELINE_ENTRY).should('be.visible')
+        );
     });
   }
 );

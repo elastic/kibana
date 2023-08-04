@@ -7,14 +7,23 @@
 
 import rison from '@kbn/rison';
 import type { Query } from '@kbn/es-query';
-import { Filter } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import type { TimefilterContract } from '@kbn/data-plugin/public';
+import type { DashboardStart } from '@kbn/dashboard-plugin/public';
+import type { MlApiServices } from '../../../services/ml_api_service';
 import { QuickGeoJobCreator } from './quick_create_job';
-import { ml } from '../../../services/ml_api_service';
 
-import { getUiSettings, getTimefilter, getShare } from '../../../util/dependency_cache';
 import { getDefaultQuery } from '../utils/new_job_utils';
 
+interface Dependencies {
+  kibanaConfig: IUiSettingsClient;
+  timeFilter: TimefilterContract;
+  dashboardService: DashboardStart;
+  mlApiServices: MlApiServices;
+}
 export async function resolver(
+  deps: Dependencies,
   dashboard: string,
   dataViewId: string,
   embeddable: string,
@@ -24,6 +33,7 @@ export async function resolver(
   toRisonString: string,
   layer?: string
 ) {
+  const { kibanaConfig, timeFilter, dashboardService, mlApiServices } = deps;
   let decodedDashboard;
   let decodedEmbeddable;
   let decodedLayer;
@@ -75,7 +85,12 @@ export async function resolver(
     to = '';
   }
 
-  const jobCreator = new QuickGeoJobCreator(getUiSettings(), getTimefilter(), getShare(), ml);
+  const jobCreator = new QuickGeoJobCreator(
+    kibanaConfig,
+    timeFilter,
+    dashboardService,
+    mlApiServices
+  );
 
   await jobCreator.createAndStashGeoJob(
     dvId,

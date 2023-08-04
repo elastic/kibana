@@ -36,7 +36,7 @@ describe('NewChatById', () => {
 
     const newChatButton = screen.getByTestId('newChatById');
 
-    expect(newChatButton.textContent).toContain('New chat');
+    expect(newChatButton.textContent).toContain('Chat');
   });
 
   it('renders custom children', async () => {

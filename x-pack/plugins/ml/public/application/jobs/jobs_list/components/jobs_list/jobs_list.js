@@ -7,15 +7,17 @@
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-
 import { sortBy } from 'lodash';
 import moment from 'moment';
 
+import { TIME_FORMAT } from '@kbn/ml-date-utils';
+
 import { toLocaleString } from '../../../../util/string_utils';
-import { ResultLinks, actionsMenuContent } from '../job_actions';
-import { JobDescription } from './job_description';
 import { JobIcon } from '../../../../components/job_message_icon';
-import { TIME_FORMAT } from '../../../../../../common/constants/time_format';
+
+import { ResultLinks, actionsMenuContent } from '../job_actions';
+
+import { JobDescription } from './job_description';
 
 import {
   EuiBasicTable,

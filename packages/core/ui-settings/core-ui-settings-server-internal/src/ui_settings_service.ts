@@ -10,6 +10,7 @@ import { firstValueFrom, Observable } from 'rxjs';
 import { mapToObject } from '@kbn/std';
 
 import type { Logger } from '@kbn/logging';
+import { stripVersionQualifier } from '@kbn/std';
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
 import type { InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
@@ -24,7 +25,7 @@ import type {
 } from './types';
 import type { InternalUiSettingsRequestHandlerContext } from './internal_types';
 import { uiSettingsType, uiSettingsGlobalType } from './saved_objects';
-import { registerRoutes } from './routes';
+import { registerRoutes, registerInternalRoutes } from './routes';
 import { getCoreSettings } from './settings';
 import { UiSettingsDefaultsClient } from './clients/ui_settings_defaults_client';
 
@@ -32,6 +33,7 @@ export interface SetupDeps {
   http: InternalHttpServiceSetup;
   savedObjects: InternalSavedObjectsServiceSetup;
 }
+
 type ClientType<T> = T extends 'global'
   ? UiSettingsGlobalClient
   : T extends 'namespace'
@@ -76,12 +78,18 @@ export class UiSettingsService
   public async setup({ http, savedObjects }: SetupDeps): Promise<InternalUiSettingsServiceSetup> {
     this.log.debug('Setting up ui settings service');
 
-    savedObjects.registerType(uiSettingsType);
-    savedObjects.registerType(uiSettingsGlobalType);
-    registerRoutes(http.createRouter<InternalUiSettingsRequestHandlerContext>(''));
-
     const config = await firstValueFrom(this.config$);
     this.overrides = config.overrides;
+    savedObjects.registerType(uiSettingsType);
+    savedObjects.registerType(uiSettingsGlobalType);
+
+    const router = http.createRouter<InternalUiSettingsRequestHandlerContext>('');
+    registerInternalRoutes(router);
+
+    // Register public routes by default unless the publicApiEnabled config setting is set to false
+    if (!config.hasOwnProperty('publicApiEnabled') || config.publicApiEnabled === true) {
+      registerRoutes(router);
+    }
 
     return {
       register: this.register,
@@ -109,7 +117,7 @@ export class UiSettingsService
       const isNamespaceScope = scope === 'namespace';
       const options = {
         type: (isNamespaceScope ? 'config' : 'config-global') as 'config' | 'config-global',
-        id: version,
+        id: stripVersionQualifier(version),
         buildNum,
         savedObjectsClient,
         defaults: isNamespaceScope

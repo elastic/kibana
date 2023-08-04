@@ -3387,6 +3387,225 @@ exports[`CronEditor is rendered with a MINUTE frequency 1`] = `
       </div>
     </div>
   </EuiFormRow>
+  <CronMinutely
+    minute="10"
+    minuteOptions={
+      Array [
+        Object {
+          "text": "5",
+          "value": "0,5,10,15,20,25,30,35,40,45,50,55",
+        },
+        Object {
+          "text": "10",
+          "value": "0,10,20,30,40,50",
+        },
+        Object {
+          "text": "15",
+          "value": "0,15,30,45",
+        },
+        Object {
+          "text": "30",
+          "value": "0,30",
+        },
+      ]
+    }
+    onChange={[Function]}
+  >
+    <EuiFormRow
+      data-test-subj="cronFrequencyConfiguration"
+      describedByIds={Array []}
+      display="row"
+      fullWidth={true}
+      hasChildLabel={true}
+      hasEmptyLabelSpace={false}
+      label={
+        <FormattedMessage
+          defaultMessage="Minute"
+          id="xpack.enterpriseSearch.cronEditor.cronMinutely.fieldTimeLabel"
+          values={Object {}}
+        />
+      }
+      labelType="label"
+    >
+      <div
+        className="euiFormRow euiFormRow--fullWidth euiFormRow--hasLabel"
+        data-test-subj="cronFrequencyConfiguration"
+        id="generated-id-row"
+      >
+        <div
+          className="euiFormRow__labelWrapper"
+        >
+          <EuiFormLabel
+            className="euiFormRow__label"
+            htmlFor="generated-id"
+            id="generated-id-label"
+            isFocused={false}
+            type="label"
+          >
+            <label
+              className="euiFormLabel euiFormRow__label"
+              htmlFor="generated-id"
+              id="generated-id-label"
+            >
+              <FormattedMessage
+                defaultMessage="Minute"
+                id="xpack.enterpriseSearch.cronEditor.cronMinutely.fieldTimeLabel"
+                values={Object {}}
+              >
+                Minute
+              </FormattedMessage>
+            </label>
+          </EuiFormLabel>
+        </div>
+        <div
+          className="euiFormRow__fieldWrapper"
+        >
+          <EuiSelect
+            append="minutes"
+            data-test-subj="cronFrequencyMinutelyMinuteSelect"
+            fullWidth={true}
+            id="generated-id"
+            onBlur={[Function]}
+            onChange={[Function]}
+            onFocus={[Function]}
+            options={
+              Array [
+                Object {
+                  "text": "5",
+                  "value": "0,5,10,15,20,25,30,35,40,45,50,55",
+                },
+                Object {
+                  "text": "10",
+                  "value": "0,10,20,30,40,50",
+                },
+                Object {
+                  "text": "15",
+                  "value": "0,15,30,45",
+                },
+                Object {
+                  "text": "30",
+                  "value": "0,30",
+                },
+              ]
+            }
+            prepend="Every"
+            value="10"
+          >
+            <EuiFormControlLayout
+              append="minutes"
+              compressed={false}
+              fullWidth={true}
+              inputId="generated-id"
+              isDropdown={true}
+              isLoading={false}
+              prepend="Every"
+            >
+              <div
+                className="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--group"
+              >
+                <EuiFormLabel
+                  className="euiFormControlLayout__prepend"
+                  htmlFor="generated-id"
+                >
+                  <label
+                    className="euiFormLabel euiFormControlLayout__prepend"
+                    htmlFor="generated-id"
+                  >
+                    Every
+                  </label>
+                </EuiFormLabel>
+                <div
+                  className="euiFormControlLayout__childrenWrapper"
+                >
+                  <EuiValidatableControl>
+                    <select
+                      className="euiSelect euiFormControlLayout--1icons euiSelect--fullWidth euiSelect--inGroup"
+                      data-test-subj="cronFrequencyMinutelyMinuteSelect"
+                      id="generated-id"
+                      onBlur={[Function]}
+                      onChange={[Function]}
+                      onFocus={[Function]}
+                      onMouseUp={[Function]}
+                      value="10"
+                    >
+                      <option
+                        key="0"
+                        value="0,5,10,15,20,25,30,35,40,45,50,55"
+                      >
+                        5
+                      </option>
+                      <option
+                        key="1"
+                        value="0,10,20,30,40,50"
+                      >
+                        10
+                      </option>
+                      <option
+                        key="2"
+                        value="0,15,30,45"
+                      >
+                        15
+                      </option>
+                      <option
+                        key="3"
+                        value="0,30"
+                      >
+                        30
+                      </option>
+                    </select>
+                  </EuiValidatableControl>
+                  <EuiFormControlLayoutIcons
+                    compressed={false}
+                    isDropdown={true}
+                    isLoading={false}
+                    side="right"
+                  >
+                    <div
+                      className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
+                    >
+                      <EuiFormControlLayoutCustomIcon
+                        size="m"
+                        type="arrowDown"
+                      >
+                        <span
+                          className="euiFormControlLayoutCustomIcon"
+                        >
+                          <EuiIcon
+                            aria-hidden="true"
+                            className="euiFormControlLayoutCustomIcon__icon"
+                            size="m"
+                            type="arrowDown"
+                          >
+                            <span
+                              aria-hidden="true"
+                              className="euiFormControlLayoutCustomIcon__icon"
+                              data-euiicon-type="arrowDown"
+                              size="m"
+                            />
+                          </EuiIcon>
+                        </span>
+                      </EuiFormControlLayoutCustomIcon>
+                    </div>
+                  </EuiFormControlLayoutIcons>
+                </div>
+                <EuiFormLabel
+                  className="euiFormControlLayout__append"
+                  htmlFor="generated-id"
+                >
+                  <label
+                    className="euiFormLabel euiFormControlLayout__append"
+                    htmlFor="generated-id"
+                  >
+                    minutes
+                  </label>
+                </EuiFormLabel>
+              </div>
+            </EuiFormControlLayout>
+          </EuiSelect>
+        </div>
+      </div>
+    </EuiFormRow>
+  </CronMinutely>
 </CronEditor>
 `;
 

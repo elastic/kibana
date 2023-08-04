@@ -425,7 +425,7 @@ describe('buildGeoShapeFilter', () => {
             {
               geo_shape: {
                 'geo.coordinates': {
-                  relation: 'INTERSECTS',
+                  relation: 'intersects',
                   shape: {
                     coordinates: [
                       [
@@ -487,7 +487,7 @@ describe('buildGeoShapeFilter', () => {
                   {
                     geo_shape: {
                       'geo.coordinates': {
-                        relation: 'INTERSECTS',
+                        relation: 'intersects',
                         shape: {
                           coordinates: [
                             [
@@ -518,7 +518,7 @@ describe('buildGeoShapeFilter', () => {
                   {
                     geo_shape: {
                       location: {
-                        relation: 'INTERSECTS',
+                        relation: 'intersects',
                         shape: {
                           coordinates: [
                             [

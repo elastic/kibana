@@ -42,6 +42,7 @@ export const SECURITY_DETECTIONS_RULES_URL = '/app/security/detections/rules';
 export const SECURITY_DETECTIONS_RULES_MANAGEMENT_URL = '/app/security/detections/rules/management';
 export const SECURITY_DETECTIONS_RULES_MONITORING_URL = '/app/security/detections/rules/monitoring';
 export const SECURITY_DETECTIONS_RULES_CREATION_URL = '/app/security/detections/rules/create';
+export const ENTITY_ANALYTICS_MANAGEMENT_URL = '/app/security/entity_analytics_management';
 
 export const HOSTS_PAGE_TAB_URLS = {
   allHosts: '/app/security/hosts/allHosts',

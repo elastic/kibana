@@ -22,13 +22,26 @@ import {
   EuiLoadingSpinner,
   EuiIcon,
   EuiDataGridRefProps,
+  EuiDataGridInMemory,
 } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
+import {
+  useDataGridColumnsCellActions,
+  type UseDataGridColumnsCellActionsProps,
+} from '@kbn/cell-actions';
 import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { ToastsStart, IUiSettingsClient, HttpStart, CoreStart } from '@kbn/core/public';
 import { DataViewFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
+import { Serializable } from '@kbn/utility-types';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
+import { getShouldShowFieldHandler } from '@kbn/discover-utils';
+import {
+  DOC_HIDE_TIME_COLUMN_SETTING,
+  MAX_DOC_FIELDS_DISPLAYED,
+  SHOW_MULTIFIELDS,
+} from '@kbn/discover-utils';
 import { DocViewFilterFn } from '../../services/doc_views/doc_views_types';
 import { getSchemaDetectors } from './discover_grid_schema';
 import { DiscoverGridFlyout } from './discover_grid_flyout';
@@ -42,14 +55,8 @@ import {
 } from './discover_grid_columns';
 import { GRID_STYLE, toolbarVisibility as toolbarVisibilityDefaults } from './constants';
 import { getDisplayedColumns } from '../../utils/columns';
-import {
-  DOC_HIDE_TIME_COLUMN_SETTING,
-  MAX_DOC_FIELDS_DISPLAYED,
-  SHOW_MULTIFIELDS,
-} from '../../../common';
 import { DiscoverGridDocumentToolbarBtn } from './discover_grid_document_selection';
-import { getShouldShowFieldHandler } from '../../utils/get_should_show_field_handler';
-import type { DataTableRecord, ValueToStringConverter } from '../../types';
+import type { ValueToStringConverter } from '../../types';
 import { useRowHeightsOptions } from '../../hooks/use_row_heights_options';
 import { convertValueToString } from '../../utils/convert_value_to_string';
 import { getRowsPerPageOptions, getDefaultRowsPerPage } from '../../utils/rows_per_page';
@@ -204,6 +211,10 @@ export interface DiscoverGridProps {
    */
   DocumentView?: typeof DiscoverGridFlyout;
   /**
+   * Optional triggerId to retrieve the column cell actions that will override the default ones
+   */
+  cellActionsTriggerId?: string;
+  /**
    * Service dependencies
    */
   services: {
@@ -215,7 +226,6 @@ export interface DiscoverGridProps {
     toastNotifications: ToastsStart;
   };
 }
-
 export const EuiDataGridMemoized = React.memo(EuiDataGrid);
 
 const CONTROL_COLUMN_IDS_DEFAULT = ['openDetails', 'select'];
@@ -248,6 +258,7 @@ export const DiscoverGrid = ({
   isSortEnabled = true,
   isPaginationEnabled = true,
   controlColumnIds = CONTROL_COLUMN_IDS_DEFAULT,
+  cellActionsTriggerId,
   className,
   rowHeightState,
   onUpdateRowHeight,
@@ -432,14 +443,48 @@ export const DiscoverGrid = ({
     [dataView, onFieldEdited, services.dataViewFieldEditor]
   );
 
+  const visibleColumns = useMemo(
+    () => getVisibleColumns(displayedColumns, dataView, showTimeCol) as string[],
+    [dataView, displayedColumns, showTimeCol]
+  );
+
+  const getCellValue = useCallback<UseDataGridColumnsCellActionsProps['getCellValue']>(
+    (fieldName, rowIndex) =>
+      displayedRows[rowIndex % displayedRows.length].flattened[fieldName] as Serializable,
+    [displayedRows]
+  );
+
+  const cellActionsFields = useMemo<UseDataGridColumnsCellActionsProps['fields']>(
+    () =>
+      cellActionsTriggerId && !isPlainRecord
+        ? visibleColumns.map(
+            (columnName) =>
+              dataView.getFieldByName(columnName)?.toSpec() ?? {
+                name: '',
+                type: '',
+                aggregatable: false,
+                searchable: false,
+              }
+          )
+        : undefined,
+    [cellActionsTriggerId, isPlainRecord, visibleColumns, dataView]
+  );
+
+  const columnsCellActions = useDataGridColumnsCellActions({
+    fields: cellActionsFields,
+    getCellValue,
+    triggerId: cellActionsTriggerId,
+    dataGridRef,
+  });
+
   const euiGridColumns = useMemo(
     () =>
       getEuiGridColumns({
-        columns: displayedColumns,
+        columns: visibleColumns,
+        columnsCellActions,
         rowsCount: displayedRows.length,
         settings,
         dataView,
-        showTimeCol,
         defaultColumns,
         isSortEnabled,
         isPlainRecord,
@@ -454,10 +499,10 @@ export const DiscoverGrid = ({
       }),
     [
       onFilter,
-      displayedColumns,
+      visibleColumns,
+      columnsCellActions,
       displayedRows,
       dataView,
-      showTimeCol,
       settings,
       defaultColumns,
       isSortEnabled,
@@ -477,12 +522,12 @@ export const DiscoverGrid = ({
   const schemaDetectors = useMemo(() => getSchemaDetectors(), []);
   const columnsVisibility = useMemo(
     () => ({
-      visibleColumns: getVisibleColumns(displayedColumns, dataView, showTimeCol) as string[],
+      visibleColumns,
       setVisibleColumns: (newColumns: string[]) => {
         onSetColumns(newColumns, hideTimeColumn);
       },
     }),
-    [displayedColumns, dataView, showTimeCol, hideTimeColumn, onSetColumns]
+    [visibleColumns, hideTimeColumn, onSetColumns]
   );
   const sorting = useMemo(() => {
     if (isSortEnabled) {
@@ -526,6 +571,10 @@ export const DiscoverGrid = ({
         : undefined,
     [onUpdateRowHeight]
   );
+
+  const inMemory = useMemo(() => {
+    return isPlainRecord ? ({ level: 'sorting' } as EuiDataGridInMemory) : undefined;
+  }, [isPlainRecord]);
 
   const toolbarVisibility = useMemo(
     () =>
@@ -629,7 +678,7 @@ export const DiscoverGrid = ({
             sorting={sorting as EuiDataGridSorting}
             toolbarVisibility={toolbarVisibility}
             rowHeightsOptions={rowHeightsOptions}
-            inMemory={isPlainRecord ? { level: 'sorting' } : undefined}
+            inMemory={inMemory}
             gridStyle={GRID_STYLE}
           />
         </div>

@@ -31,12 +31,8 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--xpack.fleet.packages.0.version=latest`,
         // this will be removed in 8.7 when the file upload feature is released
         `--xpack.fleet.enableExperimental.0=diagnosticFileUploadEnabled`,
-        // this will be removed in 8.7 when the artifacts RBAC is released
-        `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-          'endpointRbacEnabled',
-          'responseActionGetFileEnabled',
-          'responseActionExecuteEnabled',
-        ])}`,
+        // set any experimental feature flags for testing
+        `--xpack.securitySolution.enableExperimental=${JSON.stringify([])}`,
       ],
     },
   };

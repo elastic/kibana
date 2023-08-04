@@ -21,7 +21,7 @@ import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DataViewField, DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 
-import { ControlInput } from '../common/types';
+import { ControlInput, ControlWidth, DataControlInput } from '../common/types';
 import { ControlsServiceType } from './services/controls/types';
 
 export interface CommonControlOutput {
@@ -44,6 +44,14 @@ export type ControlEmbeddable<
 > = IEmbeddable<TControlEmbeddableInput, TControlEmbeddableOutput> & {
   isChained?: () => boolean;
   renderPrepend?: () => ReactNode | undefined;
+};
+
+export interface IClearableControl extends ControlEmbeddable {
+  clearSelections: () => void;
+}
+
+export const isClearableControl = (control: ControlEmbeddable): control is IClearableControl => {
+  return Boolean((control as IClearableControl).clearSelections);
 };
 
 /**
@@ -72,6 +80,12 @@ export interface DataControlField {
 
 export interface DataControlFieldRegistry {
   [fieldName: string]: DataControlField;
+}
+
+export interface DataControlEditorChanges {
+  input: Partial<DataControlInput>;
+  width?: ControlWidth;
+  grow?: boolean;
 }
 
 /**

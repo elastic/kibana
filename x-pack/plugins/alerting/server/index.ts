@@ -28,22 +28,16 @@ export type {
   AlertInstanceContext,
   AlertingApiRequestHandlerContext,
   RuleParamsAndRefs,
-  GetSummarizedAlertsFnOpts,
   SummarizedAlertsChunk,
   ExecutorType,
   IRuleTypeAlerts,
+  GetViewInAppRelativeUrlFnOpts,
 } from './types';
 export { RuleNotifyWhen } from '../common';
 export { DEFAULT_MAX_EPHEMERAL_ACTIONS_PER_ALERT } from './config';
 export type { PluginSetupContract, PluginStartContract } from './plugin';
-export type {
-  FindResult,
-  BulkEditOperation,
-  BulkOperationError,
-  BulkEditOptions,
-  BulkEditOptionsFilter,
-  BulkEditOptionsIds,
-} from './rules_client';
+export type { FindResult, BulkEditOperation, BulkOperationError } from './rules_client';
+export type { Rule } from './application/rule/types';
 export type { PublicAlert as Alert } from './alert';
 export { parseDuration, isRuleSnoozed } from './lib';
 export { getEsErrorMessage } from './lib/errors';

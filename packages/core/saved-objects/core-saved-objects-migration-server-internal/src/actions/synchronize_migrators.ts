@@ -17,24 +17,28 @@ export interface SynchronizationFailed {
 }
 
 /** @internal */
-export interface SynchronizeMigratorsParams<T, U> {
+export interface SynchronizationSuccessful<T> {
+  type: 'synchronization_successful';
+  data: T[];
+}
+
+/** @internal */
+export interface SynchronizeMigratorsParams<T> {
   waitGroup: WaitGroup<T>;
-  thenHook?: (res: any) => Either.Right<U>;
   payload?: T;
 }
 
-export function synchronizeMigrators<T, U>({
+export function synchronizeMigrators<T>({
   waitGroup,
   payload,
-  thenHook = () =>
-    Either.right(
-      'synchronized_successfully' as const
-    ) as Either.Right<'synchronized_successfully'> as unknown as Either.Right<U>,
-}: SynchronizeMigratorsParams<T, U>): TaskEither.TaskEither<SynchronizationFailed, U> {
+}: SynchronizeMigratorsParams<T>): TaskEither.TaskEither<
+  SynchronizationFailed,
+  SynchronizationSuccessful<T>
+> {
   return () => {
     waitGroup.resolve(payload);
     return waitGroup.promise
-      .then((res) => (thenHook ? thenHook(res) : res))
+      .then((data: T[]) => Either.right({ type: 'synchronization_successful' as const, data }))
       .catch((error) => Either.left({ type: 'synchronization_failed' as const, error }));
   };
 }

@@ -8,16 +8,24 @@
 
 import { CoreStart } from '@kbn/core/public';
 import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
-import { EventAnnotationServiceType } from './types';
+import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
+import { EventAnnotationServiceType } from '@kbn/event-annotation-components';
+export type { EventAnnotationServiceType };
 
 export class EventAnnotationService {
   private eventAnnotationService?: EventAnnotationServiceType;
 
   private core: CoreStart;
   private savedObjectsManagement: SavedObjectsManagementPluginStart;
+  private contentManagement: ContentManagementPublicStart;
 
-  constructor(core: CoreStart, savedObjectsManagement: SavedObjectsManagementPluginStart) {
+  constructor(
+    core: CoreStart,
+    contentManagement: ContentManagementPublicStart,
+    savedObjectsManagement: SavedObjectsManagementPluginStart
+  ) {
     this.core = core;
+    this.contentManagement = contentManagement;
     this.savedObjectsManagement = savedObjectsManagement;
   }
 
@@ -26,6 +34,7 @@ export class EventAnnotationService {
       const { getEventAnnotationService } = await import('./service');
       this.eventAnnotationService = getEventAnnotationService(
         this.core,
+        this.contentManagement,
         this.savedObjectsManagement
       );
     }

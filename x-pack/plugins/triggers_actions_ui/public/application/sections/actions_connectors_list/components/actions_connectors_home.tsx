@@ -6,8 +6,8 @@
  */
 
 import React, { lazy, useCallback, useEffect } from 'react';
-import { RouteComponentProps, Switch } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
+import { RouteComponentProps } from 'react-router-dom';
+import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -121,14 +121,14 @@ export const ActionsConnectorsHome: React.FunctionComponent<RouteComponentProps<
 
       <HealthContextProvider>
         <HealthCheck waitForCheck={true}>
-          <Switch>
+          <Routes>
             <Route exact path={routeToLogs} component={renderLogsList} />
             <Route
               exact
               path={routeToConnectors}
               component={suspendedComponentWithProps(ConnectorsList, 'xl')}
             />
-          </Switch>
+          </Routes>
         </HealthCheck>
       </HealthContextProvider>
     </>

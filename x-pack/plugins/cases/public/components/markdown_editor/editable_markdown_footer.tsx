@@ -8,21 +8,19 @@
 import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiButton } from '@elastic/eui';
 import React from 'react';
 
-import { useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-
 import * as i18n from '../case_view/translations';
 
 interface EditableMarkdownFooterProps {
   handleSaveAction: () => Promise<void>;
   handleCancelAction: () => void;
+  isSaveDisabled: boolean;
 }
 
 const EditableMarkdownFooterComponent: React.FC<EditableMarkdownFooterProps> = ({
   handleSaveAction,
   handleCancelAction,
+  isSaveDisabled,
 }) => {
-  const [{ content }] = useFormData<{ content: string }>({ watch: ['content'] });
-
   return (
     <EuiFlexGroup gutterSize="s" justifyContent="flexEnd" responsive={false}>
       <EuiFlexItem grow={false}>
@@ -42,7 +40,7 @@ const EditableMarkdownFooterComponent: React.FC<EditableMarkdownFooterProps> = (
           fill
           iconType="save"
           onClick={handleSaveAction}
-          disabled={!content}
+          disabled={isSaveDisabled}
           size="s"
         >
           {i18n.SAVE}

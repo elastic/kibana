@@ -21,9 +21,6 @@ export interface Verbs {
 
 /**
  * Read operations for the cases APIs.
- *
- * NOTE: If you add a value here you'll likely also need to make changes here:
- * x-pack/plugins/security/server/authorization/privileges/feature_privilege_builder/cases.ts
  */
 export enum ReadOperations {
   GetCase = 'getCase',
@@ -37,6 +34,7 @@ export enum ReadOperations {
   GetAllComments = 'getAllComments',
   FindComments = 'findComments',
   GetTags = 'getTags',
+  GetCategories = 'getCategories',
   GetReporters = 'getReporters',
   FindConfigurations = 'findConfigurations',
   FindUserActions = 'findUserActions',
@@ -52,9 +50,6 @@ export enum ReadOperations {
 
 /**
  * Write operations for the cases APIs.
- *
- * NOTE: If you add a value here you'll likely also need to make changes here:
- * x-pack/plugins/security/server/authorization/privileges/feature_privilege_builder/cases.ts
  */
 export enum WriteOperations {
   CreateCase = 'createCase',
@@ -81,6 +76,9 @@ export interface OperationDetails {
   /**
    * The name of the operation to authorize against for the privilege check.
    * These values need to match one of the operation strings defined here: x-pack/plugins/security/server/authorization/privileges/feature_privilege_builder/cases.ts
+   *
+   * To avoid the authorization strings getting too large, new operations should generally fit within one of the
+   * CasesSupportedOperations. In the situation where a new one is needed we'll have to add it to the security plugin.
    */
   name: CasesSupportedOperations;
   /**

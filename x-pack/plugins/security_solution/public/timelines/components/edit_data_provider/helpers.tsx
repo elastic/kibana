@@ -8,7 +8,7 @@
 import { findIndex } from 'lodash/fp';
 
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { DataProviderType } from '@kbn/timelines-plugin/common';
+import { DataProviderType } from '../../../../common/api/timeline';
 
 import type { BrowserField, BrowserFields } from '../../../common/containers/source';
 import { getAllFieldsByName } from '../../../common/containers/source';

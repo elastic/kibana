@@ -215,6 +215,7 @@ export class EndpointMetadataGenerator extends BaseDataGenerator {
           },
         },
       },
+      last_checkin: new Date().toISOString(),
     };
     return merge(hostInfo, overrides);
   }

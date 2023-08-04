@@ -50,6 +50,7 @@ class OptionsListService implements ControlsOptionsListService {
       searchString,
       runPastTimeout,
       selectedOptions,
+      searchTechnique,
       field: { name: fieldName },
       dataView: { title: dataViewTitle },
     } = request;
@@ -60,6 +61,7 @@ class OptionsListService implements ControlsOptionsListService {
       JSON.stringify(filters),
       JSON.stringify(query),
       JSON.stringify(sort),
+      searchTechnique,
       runPastTimeout,
       dataViewTitle,
       searchString,

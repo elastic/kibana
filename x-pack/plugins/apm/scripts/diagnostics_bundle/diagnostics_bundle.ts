@@ -21,11 +21,17 @@ export async function initDiagnosticsBundle({
   kbHost,
   username,
   password,
+  start,
+  end,
+  kuery,
 }: {
   esHost: string;
   kbHost: string;
   username: string;
   password: string;
+  start: number | undefined;
+  end: number | undefined;
+  kuery: string | undefined;
 }) {
   const esClient = new Client({ node: esHost, auth: { username, password } });
 
@@ -34,7 +40,13 @@ export async function initDiagnosticsBundle({
     auth: { username, password },
   });
   const apmIndices = await getApmIndices(kibanaClient);
-  const bundle = await getDiagnosticsBundle(esClient, apmIndices);
+  const bundle = await getDiagnosticsBundle({
+    esClient,
+    apmIndices,
+    start,
+    end,
+    kuery,
+  });
   const fleetPackageInfo = await getFleetPackageInfo(kibanaClient);
   const kibanaVersion = await getKibanaVersion(kibanaClient);
 

@@ -28,7 +28,22 @@ import {
   EXCEPTION_FIELD_MAPPING_CONFLICTS_TOOLTIP,
   EXCEPTION_FIELD_MAPPING_CONFLICTS_ACCORDION_ICON,
   EXCEPTION_FIELD_MAPPING_CONFLICTS_DESCRIPTION,
+  EXCEPTION_COMMENT_TEXT_AREA,
+  EXCEPTION_COMMENTS_ACCORDION_BTN,
+  EXCEPTION_ITEM_VIEWER_CONTAINER_SHOW_COMMENTS_BTN,
+  EXCEPTION_ITEM_COMMENTS_CONTAINER,
+  EXCEPTION_ITEM_COMMENT_COPY_BTN,
+  VALUES_MATCH_INCLUDED_INPUT,
   EXCEPTION_ITEM_VIEWER_CONTAINER,
+  EXCEPTION_CARD_ITEM_AFFECTED_RULES,
+  EXCEPTION_CARD_ITEM_AFFECTED_RULES_MENU_ITEM,
+  ADD_AND_BTN,
+  ADD_OR_BTN,
+  RULE_ACTION_LINK_RULE_SWITCH,
+  LINK_TO_SHARED_LIST_RADIO,
+  EXCEPTION_ITEM_HEADER_ACTION_MENU,
+  EXCEPTION_ITEM_OVERFLOW_ACTION_EDIT,
+  EXCEPTION_ITEM_OVERFLOW_ACTION_DELETE,
 } from '../screens/exceptions';
 
 export const assertNumberOfExceptionItemsExists = (numberOfItems: number) => {
@@ -84,6 +99,11 @@ export const addExceptionEntryFieldValue = (field: string, index = 0) => {
   cy.get(EXCEPTION_FLYOUT_TITLE).click();
 };
 
+export const addExceptionEntryFieldValueAndSelectSuggestion = (field: string, index = 0) => {
+  cy.get(FIELD_INPUT).eq(index).type(`${field}`);
+  cy.get(`button[title="${field}"]`).click();
+};
+
 export const addExceptionEntryOperatorValue = (operator: string, index = 0) => {
   cy.get(OPERATOR_INPUT).eq(index).type(`${operator}{enter}`);
   cy.get(EXCEPTION_FLYOUT_TITLE).click();
@@ -96,6 +116,10 @@ export const addExceptionEntryFieldValueValue = (value: string, index = 0) => {
 
 export const addExceptionEntryFieldMatchAnyValue = (value: string, index = 0) => {
   cy.get(VALUES_MATCH_ANY_INPUT).eq(index).type(`${value}{enter}`);
+  cy.get(EXCEPTION_FLYOUT_TITLE).click();
+};
+export const addExceptionEntryFieldMatchIncludedValue = (value: string, index = 0) => {
+  cy.get(VALUES_MATCH_INCLUDED_INPUT).eq(index).type(`${value}{enter}`);
   cy.get(EXCEPTION_FLYOUT_TITLE).click();
 };
 
@@ -145,7 +169,14 @@ export const addExceptionConditions = (exception: Exception) => {
   });
 };
 
+export const validateExceptionConditionField = (value: string) => {
+  cy.get(EXCEPTION_ITEM_CONTAINER).contains('span', value);
+};
+export const validateEmptyExceptionConditionField = () => {
+  cy.get(FIELD_INPUT).should('be.empty');
+};
 export const submitNewExceptionItem = () => {
+  cy.get(CONFIRM_BTN).should('exist');
   cy.get(CONFIRM_BTN).click();
   cy.get(CONFIRM_BTN).should('not.exist');
 };
@@ -169,4 +200,96 @@ export const selectSharedListToAddExceptionTo = (numListsToCheck = 1) => {
 export const selectOs = (os: string) => {
   cy.get(OS_SELECTION_SECTION).should('exist');
   cy.get(OS_INPUT).type(`${os}{downArrow}{enter}`);
+};
+
+export const addExceptionComment = (comment: string) => {
+  cy.get(EXCEPTION_COMMENTS_ACCORDION_BTN).click();
+  cy.get(EXCEPTION_COMMENT_TEXT_AREA).type(`${comment}`);
+  cy.get(EXCEPTION_COMMENT_TEXT_AREA).should('have.value', comment);
+};
+
+export const validateExceptionCommentCountAndText = (count: number, comment: string) => {
+  cy.get(EXCEPTION_COMMENTS_ACCORDION_BTN).contains('h3', count);
+  cy.get(EXCEPTION_COMMENT_TEXT_AREA).contains('textarea', comment);
+};
+export const clickOnShowComments = () => {
+  cy.get(EXCEPTION_ITEM_VIEWER_CONTAINER_SHOW_COMMENTS_BTN).click();
+};
+
+export const clickCopyCommentToClipboard = () => {
+  // Disable window prompt which is used in link creation by copy-to-clipboard library
+  // as this prompt pauses test execution during `cypress open`
+  cy.window().then((win) => {
+    cy.stub(win, 'prompt').returns('DISABLED WINDOW PROMPT');
+  });
+  cy.get(EXCEPTION_ITEM_COMMENTS_CONTAINER).first().find(EXCEPTION_ITEM_COMMENT_COPY_BTN).click();
+};
+
+export const validateExceptionItemAffectsTheCorrectRulesInRulePage = (rulesCount: number) => {
+  cy.get(EXCEPTION_ITEM_VIEWER_CONTAINER).should('have.length', rulesCount);
+  cy.get(EXCEPTION_CARD_ITEM_AFFECTED_RULES).should('have.text', `Affects ${rulesCount} rule`);
+};
+export const validateExceptionItemFirstAffectedRuleNameInRulePage = (ruleName: string) => {
+  cy.get(EXCEPTION_CARD_ITEM_AFFECTED_RULES).click();
+
+  cy.get(EXCEPTION_CARD_ITEM_AFFECTED_RULES_MENU_ITEM).first().should('have.text', ruleName);
+};
+
+export const addTwoAndedConditions = (
+  firstEntryField: string,
+  firstEntryFieldValue: string,
+  secondEntryField: string,
+  secondEntryFieldValue: string
+) => {
+  addExceptionEntryFieldValue(firstEntryField, 0);
+  addExceptionEntryFieldValueValue(firstEntryFieldValue, 0);
+
+  cy.get(ADD_AND_BTN).click();
+
+  addExceptionEntryFieldValue(secondEntryField, 1);
+  addExceptionEntryFieldValueValue(secondEntryFieldValue, 1);
+};
+
+export const addTwoORedConditions = (
+  firstEntryField: string,
+  firstEntryFieldValue: string,
+  secondEntryField: string,
+  secondEntryFieldValue: string
+) => {
+  addExceptionEntryFieldValue(firstEntryField, 0);
+  addExceptionEntryFieldValueValue(firstEntryFieldValue, 0);
+
+  cy.get(ADD_OR_BTN).click();
+
+  addExceptionEntryFieldValue(secondEntryField, 1);
+  addExceptionEntryFieldValueValue(secondEntryFieldValue, 1);
+};
+
+export const linkFirstRuleOnExceptionFlyout = () => {
+  cy.get(RULE_ACTION_LINK_RULE_SWITCH).find('button').click();
+};
+
+export const linkFirstSharedListOnExceptionFlyout = () => {
+  cy.get(LINK_TO_SHARED_LIST_RADIO).click();
+  cy.get(RULE_ACTION_LINK_RULE_SWITCH).find('button').click();
+};
+
+export const editFirstExceptionItemInListDetailPage = () => {
+  // Click on the first exception overflow menu items
+  cy.get(EXCEPTION_ITEM_HEADER_ACTION_MENU).click();
+
+  // Open the edit modal
+  cy.get(EXCEPTION_ITEM_OVERFLOW_ACTION_EDIT).click();
+};
+export const deleteFirstExceptionItemInListDetailPage = () => {
+  // Click on the first exception overflow menu items
+  cy.get(EXCEPTION_ITEM_HEADER_ACTION_MENU).click();
+
+  // Delete exception
+  cy.get(EXCEPTION_ITEM_OVERFLOW_ACTION_DELETE).click();
+};
+export const validateHighlightedFieldsPopulatedAsExceptionConditions = (
+  highlightedFields: string[]
+) => {
+  return highlightedFields.every((field) => validateExceptionConditionField(field));
 };

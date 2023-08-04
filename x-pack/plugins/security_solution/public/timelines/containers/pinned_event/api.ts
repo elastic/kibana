@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { PINNED_EVENT_URL } from '../../../../common/constants';
-import type { PinnedEvent } from '../../../../common/types/timeline/pinned_event';
+import type { PinnedEvent } from '../../../../common/api/timeline';
 import { KibanaServices } from '../../../common/lib/kibana';
 
 export const persistPinnedEvent = async ({

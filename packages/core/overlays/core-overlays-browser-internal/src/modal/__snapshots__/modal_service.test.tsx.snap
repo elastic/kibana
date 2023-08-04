@@ -11,21 +11,50 @@ Array [
 exports[`ModalService openConfirm() renders a mountpoint confirm message 1`] = `
 Array [
   Array [
-    <CoreContextProvider
+    <KibanaRenderContextProvider
       i18n={
         Object {
           "Context": [MockFunction] {
             "calls": Array [
               Array [
                 Object {
-                  "children": <CoreThemeProvider
-                    globalStyles={false}
-                    theme$={
-                      Observable {
-                        "_subscribe": [Function],
+                  "children": <KibanaThemeProvider
+                    theme={
+                      Object {
+                        "theme$": Observable {
+                          "_subscribe": [Function],
+                        },
                       }
                     }
                   >
+                    <EuiErrorBoundary>
+                      <EuiModal
+                        onClose={[Function]}
+                      >
+                        <MountWrapper
+                          className="kbnOverlayMountWrapper"
+                          mount={[Function]}
+                        />
+                      </EuiModal>
+                    </EuiErrorBoundary>
+                  </KibanaThemeProvider>,
+                },
+                Object {},
+              ],
+            ],
+            "results": Array [
+              Object {
+                "type": "return",
+                "value": <KibanaThemeProvider
+                  theme={
+                    Object {
+                      "theme$": Observable {
+                        "_subscribe": [Function],
+                      },
+                    }
+                  }
+                >
+                  <EuiErrorBoundary>
                     <EuiModal
                       onClose={[Function]}
                     >
@@ -34,31 +63,8 @@ Array [
                         mount={[Function]}
                       />
                     </EuiModal>
-                  </CoreThemeProvider>,
-                },
-                Object {},
-              ],
-            ],
-            "results": Array [
-              Object {
-                "type": "return",
-                "value": <CoreThemeProvider
-                  globalStyles={false}
-                  theme$={
-                    Observable {
-                      "_subscribe": [Function],
-                    }
-                  }
-                >
-                  <EuiModal
-                    onClose={[Function]}
-                  >
-                    <MountWrapper
-                      className="kbnOverlayMountWrapper"
-                      mount={[Function]}
-                    />
-                  </EuiModal>
-                </CoreThemeProvider>,
+                  </EuiErrorBoundary>
+                </KibanaThemeProvider>,
               },
             ],
           },
@@ -83,7 +89,7 @@ Array [
           mount={[Function]}
         />
       </EuiConfirmModal>
-    </CoreContextProvider>,
+    </KibanaRenderContextProvider>,
     <div />,
   ],
 ]
@@ -99,7 +105,7 @@ exports[`ModalService openConfirm() renders a mountpoint confirm message 2`] = `
   >
     <button
       aria-label="Closes this modal window"
-      class="euiButtonIcon euiButtonIcon--xSmall euiModal__closeIcon emotion-euiButtonIcon-empty-text-hoverStyles-euiModal__closeIcon"
+      class="euiButtonIcon euiModal__closeIcon emotion-euiButtonIcon-xs-empty-text-euiModal__closeIcon"
       type="button"
     >
       <span
@@ -133,22 +139,22 @@ exports[`ModalService openConfirm() renders a mountpoint confirm message 2`] = `
       class="euiModalFooter emotion-euiModalFooter"
     >
       <button
-        class="euiButtonEmpty css-9t7nyf-empty-primary"
+        class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-m-empty-primary"
         data-test-subj="confirmModalCancelButton"
         type="button"
       >
         <span
-          class="euiButtonContent euiButtonEmpty__content"
+          class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
         >
           <span
-            class="euiButtonEmpty__text"
+            class="eui-textTruncate euiButtonEmpty__text"
           >
             Cancel
           </span>
         </span>
       </button>
       <button
-        class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-fill-primary"
+        class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary"
         data-test-subj="confirmModalConfirmButton"
         type="button"
       >
@@ -170,21 +176,78 @@ exports[`ModalService openConfirm() renders a mountpoint confirm message 2`] = `
 exports[`ModalService openConfirm() renders a string confirm message 1`] = `
 Array [
   Array [
-    <CoreContextProvider
+    <KibanaRenderContextProvider
       i18n={
         Object {
           "Context": [MockFunction] {
             "calls": Array [
               Array [
                 Object {
-                  "children": <CoreThemeProvider
-                    globalStyles={false}
-                    theme$={
-                      Observable {
-                        "_subscribe": [Function],
+                  "children": <KibanaThemeProvider
+                    theme={
+                      Object {
+                        "theme$": Observable {
+                          "_subscribe": [Function],
+                        },
                       }
                     }
                   >
+                    <EuiErrorBoundary>
+                      <EuiModal
+                        onClose={[Function]}
+                      >
+                        <MountWrapper
+                          className="kbnOverlayMountWrapper"
+                          mount={[Function]}
+                        />
+                      </EuiModal>
+                    </EuiErrorBoundary>
+                  </KibanaThemeProvider>,
+                },
+                Object {},
+              ],
+              Array [
+                Object {
+                  "children": <KibanaThemeProvider
+                    theme={
+                      Object {
+                        "theme$": Observable {
+                          "_subscribe": [Function],
+                        },
+                      }
+                    }
+                  >
+                    <EuiErrorBoundary>
+                      <EuiConfirmModal
+                        cancelButtonText="Cancel"
+                        confirmButtonText="Confirm"
+                        onCancel={[Function]}
+                        onConfirm={[Function]}
+                      >
+                        <MountWrapper
+                          className="kbnOverlayMountWrapper"
+                          mount={[Function]}
+                        />
+                      </EuiConfirmModal>
+                    </EuiErrorBoundary>
+                  </KibanaThemeProvider>,
+                },
+                Object {},
+              ],
+            ],
+            "results": Array [
+              Object {
+                "type": "return",
+                "value": <KibanaThemeProvider
+                  theme={
+                    Object {
+                      "theme$": Observable {
+                        "_subscribe": [Function],
+                      },
+                    }
+                  }
+                >
+                  <EuiErrorBoundary>
                     <EuiModal
                       onClose={[Function]}
                     >
@@ -193,20 +256,21 @@ Array [
                         mount={[Function]}
                       />
                     </EuiModal>
-                  </CoreThemeProvider>,
-                },
-                Object {},
-              ],
-              Array [
-                Object {
-                  "children": <CoreThemeProvider
-                    globalStyles={false}
-                    theme$={
-                      Observable {
+                  </EuiErrorBoundary>
+                </KibanaThemeProvider>,
+              },
+              Object {
+                "type": "return",
+                "value": <KibanaThemeProvider
+                  theme={
+                    Object {
+                      "theme$": Observable {
                         "_subscribe": [Function],
-                      }
+                      },
                     }
-                  >
+                  }
+                >
+                  <EuiErrorBoundary>
                     <EuiConfirmModal
                       cancelButtonText="Cancel"
                       confirmButtonText="Confirm"
@@ -218,54 +282,8 @@ Array [
                         mount={[Function]}
                       />
                     </EuiConfirmModal>
-                  </CoreThemeProvider>,
-                },
-                Object {},
-              ],
-            ],
-            "results": Array [
-              Object {
-                "type": "return",
-                "value": <CoreThemeProvider
-                  globalStyles={false}
-                  theme$={
-                    Observable {
-                      "_subscribe": [Function],
-                    }
-                  }
-                >
-                  <EuiModal
-                    onClose={[Function]}
-                  >
-                    <MountWrapper
-                      className="kbnOverlayMountWrapper"
-                      mount={[Function]}
-                    />
-                  </EuiModal>
-                </CoreThemeProvider>,
-              },
-              Object {
-                "type": "return",
-                "value": <CoreThemeProvider
-                  globalStyles={false}
-                  theme$={
-                    Observable {
-                      "_subscribe": [Function],
-                    }
-                  }
-                >
-                  <EuiConfirmModal
-                    cancelButtonText="Cancel"
-                    confirmButtonText="Confirm"
-                    onCancel={[Function]}
-                    onConfirm={[Function]}
-                  >
-                    <MountWrapper
-                      className="kbnOverlayMountWrapper"
-                      mount={[Function]}
-                    />
-                  </EuiConfirmModal>
-                </CoreThemeProvider>,
+                  </EuiErrorBoundary>
+                </KibanaThemeProvider>,
               },
             ],
           },
@@ -287,7 +305,7 @@ Array [
       >
         Some message
       </EuiConfirmModal>
-    </CoreContextProvider>,
+    </KibanaRenderContextProvider>,
     <div />,
   ],
 ]
@@ -303,7 +321,7 @@ exports[`ModalService openConfirm() renders a string confirm message 2`] = `
   >
     <button
       aria-label="Closes this modal window"
-      class="euiButtonIcon euiButtonIcon--xSmall euiModal__closeIcon emotion-euiButtonIcon-empty-text-hoverStyles-euiModal__closeIcon"
+      class="euiButtonIcon euiModal__closeIcon emotion-euiButtonIcon-xs-empty-text-euiModal__closeIcon"
       type="button"
     >
       <span
@@ -333,22 +351,22 @@ exports[`ModalService openConfirm() renders a string confirm message 2`] = `
       class="euiModalFooter emotion-euiModalFooter"
     >
       <button
-        class="euiButtonEmpty css-9t7nyf-empty-primary"
+        class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-m-empty-primary"
         data-test-subj="confirmModalCancelButton"
         type="button"
       >
         <span
-          class="euiButtonContent euiButtonEmpty__content"
+          class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
         >
           <span
-            class="euiButtonEmpty__text"
+            class="eui-textTruncate euiButtonEmpty__text"
           >
             Cancel
           </span>
         </span>
       </button>
       <button
-        class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-fill-primary"
+        class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary"
         data-test-subj="confirmModalConfirmButton"
         type="button"
       >
@@ -370,21 +388,103 @@ exports[`ModalService openConfirm() renders a string confirm message 2`] = `
 exports[`ModalService openConfirm() with a currently active confirm replaces the current confirm with the new one 1`] = `
 Array [
   Array [
-    <CoreContextProvider
+    <KibanaRenderContextProvider
       i18n={
         Object {
           "Context": [MockFunction] {
             "calls": Array [
               Array [
                 Object {
-                  "children": <CoreThemeProvider
-                    globalStyles={false}
-                    theme$={
-                      Observable {
-                        "_subscribe": [Function],
+                  "children": <KibanaThemeProvider
+                    theme={
+                      Object {
+                        "theme$": Observable {
+                          "_subscribe": [Function],
+                        },
                       }
                     }
                   >
+                    <EuiErrorBoundary>
+                      <EuiModal
+                        onClose={[Function]}
+                      >
+                        <MountWrapper
+                          className="kbnOverlayMountWrapper"
+                          mount={[Function]}
+                        />
+                      </EuiModal>
+                    </EuiErrorBoundary>
+                  </KibanaThemeProvider>,
+                },
+                Object {},
+              ],
+              Array [
+                Object {
+                  "children": <KibanaThemeProvider
+                    theme={
+                      Object {
+                        "theme$": Observable {
+                          "_subscribe": [Function],
+                        },
+                      }
+                    }
+                  >
+                    <EuiErrorBoundary>
+                      <EuiConfirmModal
+                        cancelButtonText="Cancel"
+                        confirmButtonText="Confirm"
+                        onCancel={[Function]}
+                        onConfirm={[Function]}
+                      >
+                        <MountWrapper
+                          className="kbnOverlayMountWrapper"
+                          mount={[Function]}
+                        />
+                      </EuiConfirmModal>
+                    </EuiErrorBoundary>
+                  </KibanaThemeProvider>,
+                },
+                Object {},
+              ],
+              Array [
+                Object {
+                  "children": <KibanaThemeProvider
+                    theme={
+                      Object {
+                        "theme$": Observable {
+                          "_subscribe": [Function],
+                        },
+                      }
+                    }
+                  >
+                    <EuiErrorBoundary>
+                      <EuiConfirmModal
+                        cancelButtonText="Cancel"
+                        confirmButtonText="Confirm"
+                        onCancel={[Function]}
+                        onConfirm={[Function]}
+                      >
+                        Some message
+                      </EuiConfirmModal>
+                    </EuiErrorBoundary>
+                  </KibanaThemeProvider>,
+                },
+                Object {},
+              ],
+            ],
+            "results": Array [
+              Object {
+                "type": "return",
+                "value": <KibanaThemeProvider
+                  theme={
+                    Object {
+                      "theme$": Observable {
+                        "_subscribe": [Function],
+                      },
+                    }
+                  }
+                >
+                  <EuiErrorBoundary>
                     <EuiModal
                       onClose={[Function]}
                     >
@@ -393,20 +493,21 @@ Array [
                         mount={[Function]}
                       />
                     </EuiModal>
-                  </CoreThemeProvider>,
-                },
-                Object {},
-              ],
-              Array [
-                Object {
-                  "children": <CoreThemeProvider
-                    globalStyles={false}
-                    theme$={
-                      Observable {
+                  </EuiErrorBoundary>
+                </KibanaThemeProvider>,
+              },
+              Object {
+                "type": "return",
+                "value": <KibanaThemeProvider
+                  theme={
+                    Object {
+                      "theme$": Observable {
                         "_subscribe": [Function],
-                      }
+                      },
                     }
-                  >
+                  }
+                >
+                  <EuiErrorBoundary>
                     <EuiConfirmModal
                       cancelButtonText="Cancel"
                       confirmButtonText="Confirm"
@@ -418,20 +519,21 @@ Array [
                         mount={[Function]}
                       />
                     </EuiConfirmModal>
-                  </CoreThemeProvider>,
-                },
-                Object {},
-              ],
-              Array [
-                Object {
-                  "children": <CoreThemeProvider
-                    globalStyles={false}
-                    theme$={
-                      Observable {
+                  </EuiErrorBoundary>
+                </KibanaThemeProvider>,
+              },
+              Object {
+                "type": "return",
+                "value": <KibanaThemeProvider
+                  theme={
+                    Object {
+                      "theme$": Observable {
                         "_subscribe": [Function],
-                      }
+                      },
                     }
-                  >
+                  }
+                >
+                  <EuiErrorBoundary>
                     <EuiConfirmModal
                       cancelButtonText="Cancel"
                       confirmButtonText="Confirm"
@@ -440,74 +542,8 @@ Array [
                     >
                       Some message
                     </EuiConfirmModal>
-                  </CoreThemeProvider>,
-                },
-                Object {},
-              ],
-            ],
-            "results": Array [
-              Object {
-                "type": "return",
-                "value": <CoreThemeProvider
-                  globalStyles={false}
-                  theme$={
-                    Observable {
-                      "_subscribe": [Function],
-                    }
-                  }
-                >
-                  <EuiModal
-                    onClose={[Function]}
-                  >
-                    <MountWrapper
-                      className="kbnOverlayMountWrapper"
-                      mount={[Function]}
-                    />
-                  </EuiModal>
-                </CoreThemeProvider>,
-              },
-              Object {
-                "type": "return",
-                "value": <CoreThemeProvider
-                  globalStyles={false}
-                  theme$={
-                    Observable {
-                      "_subscribe": [Function],
-                    }
-                  }
-                >
-                  <EuiConfirmModal
-                    cancelButtonText="Cancel"
-                    confirmButtonText="Confirm"
-                    onCancel={[Function]}
-                    onConfirm={[Function]}
-                  >
-                    <MountWrapper
-                      className="kbnOverlayMountWrapper"
-                      mount={[Function]}
-                    />
-                  </EuiConfirmModal>
-                </CoreThemeProvider>,
-              },
-              Object {
-                "type": "return",
-                "value": <CoreThemeProvider
-                  globalStyles={false}
-                  theme$={
-                    Observable {
-                      "_subscribe": [Function],
-                    }
-                  }
-                >
-                  <EuiConfirmModal
-                    cancelButtonText="Cancel"
-                    confirmButtonText="Confirm"
-                    onCancel={[Function]}
-                    onConfirm={[Function]}
-                  >
-                    Some message
-                  </EuiConfirmModal>
-                </CoreThemeProvider>,
+                  </EuiErrorBoundary>
+                </KibanaThemeProvider>,
               },
             ],
           },
@@ -529,25 +565,107 @@ Array [
       >
         confirm 1
       </EuiConfirmModal>
-    </CoreContextProvider>,
+    </KibanaRenderContextProvider>,
     <div />,
   ],
   Array [
-    <CoreContextProvider
+    <KibanaRenderContextProvider
       i18n={
         Object {
           "Context": [MockFunction] {
             "calls": Array [
               Array [
                 Object {
-                  "children": <CoreThemeProvider
-                    globalStyles={false}
-                    theme$={
-                      Observable {
-                        "_subscribe": [Function],
+                  "children": <KibanaThemeProvider
+                    theme={
+                      Object {
+                        "theme$": Observable {
+                          "_subscribe": [Function],
+                        },
                       }
                     }
                   >
+                    <EuiErrorBoundary>
+                      <EuiModal
+                        onClose={[Function]}
+                      >
+                        <MountWrapper
+                          className="kbnOverlayMountWrapper"
+                          mount={[Function]}
+                        />
+                      </EuiModal>
+                    </EuiErrorBoundary>
+                  </KibanaThemeProvider>,
+                },
+                Object {},
+              ],
+              Array [
+                Object {
+                  "children": <KibanaThemeProvider
+                    theme={
+                      Object {
+                        "theme$": Observable {
+                          "_subscribe": [Function],
+                        },
+                      }
+                    }
+                  >
+                    <EuiErrorBoundary>
+                      <EuiConfirmModal
+                        cancelButtonText="Cancel"
+                        confirmButtonText="Confirm"
+                        onCancel={[Function]}
+                        onConfirm={[Function]}
+                      >
+                        <MountWrapper
+                          className="kbnOverlayMountWrapper"
+                          mount={[Function]}
+                        />
+                      </EuiConfirmModal>
+                    </EuiErrorBoundary>
+                  </KibanaThemeProvider>,
+                },
+                Object {},
+              ],
+              Array [
+                Object {
+                  "children": <KibanaThemeProvider
+                    theme={
+                      Object {
+                        "theme$": Observable {
+                          "_subscribe": [Function],
+                        },
+                      }
+                    }
+                  >
+                    <EuiErrorBoundary>
+                      <EuiConfirmModal
+                        cancelButtonText="Cancel"
+                        confirmButtonText="Confirm"
+                        onCancel={[Function]}
+                        onConfirm={[Function]}
+                      >
+                        Some message
+                      </EuiConfirmModal>
+                    </EuiErrorBoundary>
+                  </KibanaThemeProvider>,
+                },
+                Object {},
+              ],
+            ],
+            "results": Array [
+              Object {
+                "type": "return",
+                "value": <KibanaThemeProvider
+                  theme={
+                    Object {
+                      "theme$": Observable {
+                        "_subscribe": [Function],
+                      },
+                    }
+                  }
+                >
+                  <EuiErrorBoundary>
                     <EuiModal
                       onClose={[Function]}
                     >
@@ -556,20 +674,21 @@ Array [
                         mount={[Function]}
                       />
                     </EuiModal>
-                  </CoreThemeProvider>,
-                },
-                Object {},
-              ],
-              Array [
-                Object {
-                  "children": <CoreThemeProvider
-                    globalStyles={false}
-                    theme$={
-                      Observable {
+                  </EuiErrorBoundary>
+                </KibanaThemeProvider>,
+              },
+              Object {
+                "type": "return",
+                "value": <KibanaThemeProvider
+                  theme={
+                    Object {
+                      "theme$": Observable {
                         "_subscribe": [Function],
-                      }
+                      },
                     }
-                  >
+                  }
+                >
+                  <EuiErrorBoundary>
                     <EuiConfirmModal
                       cancelButtonText="Cancel"
                       confirmButtonText="Confirm"
@@ -581,20 +700,21 @@ Array [
                         mount={[Function]}
                       />
                     </EuiConfirmModal>
-                  </CoreThemeProvider>,
-                },
-                Object {},
-              ],
-              Array [
-                Object {
-                  "children": <CoreThemeProvider
-                    globalStyles={false}
-                    theme$={
-                      Observable {
+                  </EuiErrorBoundary>
+                </KibanaThemeProvider>,
+              },
+              Object {
+                "type": "return",
+                "value": <KibanaThemeProvider
+                  theme={
+                    Object {
+                      "theme$": Observable {
                         "_subscribe": [Function],
-                      }
+                      },
                     }
-                  >
+                  }
+                >
+                  <EuiErrorBoundary>
                     <EuiConfirmModal
                       cancelButtonText="Cancel"
                       confirmButtonText="Confirm"
@@ -603,74 +723,8 @@ Array [
                     >
                       Some message
                     </EuiConfirmModal>
-                  </CoreThemeProvider>,
-                },
-                Object {},
-              ],
-            ],
-            "results": Array [
-              Object {
-                "type": "return",
-                "value": <CoreThemeProvider
-                  globalStyles={false}
-                  theme$={
-                    Observable {
-                      "_subscribe": [Function],
-                    }
-                  }
-                >
-                  <EuiModal
-                    onClose={[Function]}
-                  >
-                    <MountWrapper
-                      className="kbnOverlayMountWrapper"
-                      mount={[Function]}
-                    />
-                  </EuiModal>
-                </CoreThemeProvider>,
-              },
-              Object {
-                "type": "return",
-                "value": <CoreThemeProvider
-                  globalStyles={false}
-                  theme$={
-                    Observable {
-                      "_subscribe": [Function],
-                    }
-                  }
-                >
-                  <EuiConfirmModal
-                    cancelButtonText="Cancel"
-                    confirmButtonText="Confirm"
-                    onCancel={[Function]}
-                    onConfirm={[Function]}
-                  >
-                    <MountWrapper
-                      className="kbnOverlayMountWrapper"
-                      mount={[Function]}
-                    />
-                  </EuiConfirmModal>
-                </CoreThemeProvider>,
-              },
-              Object {
-                "type": "return",
-                "value": <CoreThemeProvider
-                  globalStyles={false}
-                  theme$={
-                    Observable {
-                      "_subscribe": [Function],
-                    }
-                  }
-                >
-                  <EuiConfirmModal
-                    cancelButtonText="Cancel"
-                    confirmButtonText="Confirm"
-                    onCancel={[Function]}
-                    onConfirm={[Function]}
-                  >
-                    Some message
-                  </EuiConfirmModal>
-                </CoreThemeProvider>,
+                  </EuiErrorBoundary>
+                </KibanaThemeProvider>,
               },
             ],
           },
@@ -692,7 +746,7 @@ Array [
       >
         some confirm
       </EuiConfirmModal>
-    </CoreContextProvider>,
+    </KibanaRenderContextProvider>,
     <div />,
   ],
 ]
@@ -701,21 +755,103 @@ Array [
 exports[`ModalService openConfirm() with a currently active modal replaces the current modal with the new confirm 1`] = `
 Array [
   Array [
-    <CoreContextProvider
+    <KibanaRenderContextProvider
       i18n={
         Object {
           "Context": [MockFunction] {
             "calls": Array [
               Array [
                 Object {
-                  "children": <CoreThemeProvider
-                    globalStyles={false}
-                    theme$={
-                      Observable {
-                        "_subscribe": [Function],
+                  "children": <KibanaThemeProvider
+                    theme={
+                      Object {
+                        "theme$": Observable {
+                          "_subscribe": [Function],
+                        },
                       }
                     }
                   >
+                    <EuiErrorBoundary>
+                      <EuiModal
+                        onClose={[Function]}
+                      >
+                        <MountWrapper
+                          className="kbnOverlayMountWrapper"
+                          mount={[Function]}
+                        />
+                      </EuiModal>
+                    </EuiErrorBoundary>
+                  </KibanaThemeProvider>,
+                },
+                Object {},
+              ],
+              Array [
+                Object {
+                  "children": <KibanaThemeProvider
+                    theme={
+                      Object {
+                        "theme$": Observable {
+                          "_subscribe": [Function],
+                        },
+                      }
+                    }
+                  >
+                    <EuiErrorBoundary>
+                      <EuiConfirmModal
+                        cancelButtonText="Cancel"
+                        confirmButtonText="Confirm"
+                        onCancel={[Function]}
+                        onConfirm={[Function]}
+                      >
+                        <MountWrapper
+                          className="kbnOverlayMountWrapper"
+                          mount={[Function]}
+                        />
+                      </EuiConfirmModal>
+                    </EuiErrorBoundary>
+                  </KibanaThemeProvider>,
+                },
+                Object {},
+              ],
+              Array [
+                Object {
+                  "children": <KibanaThemeProvider
+                    theme={
+                      Object {
+                        "theme$": Observable {
+                          "_subscribe": [Function],
+                        },
+                      }
+                    }
+                  >
+                    <EuiErrorBoundary>
+                      <EuiConfirmModal
+                        cancelButtonText="Cancel"
+                        confirmButtonText="Confirm"
+                        onCancel={[Function]}
+                        onConfirm={[Function]}
+                      >
+                        Some message
+                      </EuiConfirmModal>
+                    </EuiErrorBoundary>
+                  </KibanaThemeProvider>,
+                },
+                Object {},
+              ],
+            ],
+            "results": Array [
+              Object {
+                "type": "return",
+                "value": <KibanaThemeProvider
+                  theme={
+                    Object {
+                      "theme$": Observable {
+                        "_subscribe": [Function],
+                      },
+                    }
+                  }
+                >
+                  <EuiErrorBoundary>
                     <EuiModal
                       onClose={[Function]}
                     >
@@ -724,20 +860,21 @@ Array [
                         mount={[Function]}
                       />
                     </EuiModal>
-                  </CoreThemeProvider>,
-                },
-                Object {},
-              ],
-              Array [
-                Object {
-                  "children": <CoreThemeProvider
-                    globalStyles={false}
-                    theme$={
-                      Observable {
+                  </EuiErrorBoundary>
+                </KibanaThemeProvider>,
+              },
+              Object {
+                "type": "return",
+                "value": <KibanaThemeProvider
+                  theme={
+                    Object {
+                      "theme$": Observable {
                         "_subscribe": [Function],
-                      }
+                      },
                     }
-                  >
+                  }
+                >
+                  <EuiErrorBoundary>
                     <EuiConfirmModal
                       cancelButtonText="Cancel"
                       confirmButtonText="Confirm"
@@ -749,20 +886,21 @@ Array [
                         mount={[Function]}
                       />
                     </EuiConfirmModal>
-                  </CoreThemeProvider>,
-                },
-                Object {},
-              ],
-              Array [
-                Object {
-                  "children": <CoreThemeProvider
-                    globalStyles={false}
-                    theme$={
-                      Observable {
+                  </EuiErrorBoundary>
+                </KibanaThemeProvider>,
+              },
+              Object {
+                "type": "return",
+                "value": <KibanaThemeProvider
+                  theme={
+                    Object {
+                      "theme$": Observable {
                         "_subscribe": [Function],
-                      }
+                      },
                     }
-                  >
+                  }
+                >
+                  <EuiErrorBoundary>
                     <EuiConfirmModal
                       cancelButtonText="Cancel"
                       confirmButtonText="Confirm"
@@ -771,74 +909,8 @@ Array [
                     >
                       Some message
                     </EuiConfirmModal>
-                  </CoreThemeProvider>,
-                },
-                Object {},
-              ],
-            ],
-            "results": Array [
-              Object {
-                "type": "return",
-                "value": <CoreThemeProvider
-                  globalStyles={false}
-                  theme$={
-                    Observable {
-                      "_subscribe": [Function],
-                    }
-                  }
-                >
-                  <EuiModal
-                    onClose={[Function]}
-                  >
-                    <MountWrapper
-                      className="kbnOverlayMountWrapper"
-                      mount={[Function]}
-                    />
-                  </EuiModal>
-                </CoreThemeProvider>,
-              },
-              Object {
-                "type": "return",
-                "value": <CoreThemeProvider
-                  globalStyles={false}
-                  theme$={
-                    Observable {
-                      "_subscribe": [Function],
-                    }
-                  }
-                >
-                  <EuiConfirmModal
-                    cancelButtonText="Cancel"
-                    confirmButtonText="Confirm"
-                    onCancel={[Function]}
-                    onConfirm={[Function]}
-                  >
-                    <MountWrapper
-                      className="kbnOverlayMountWrapper"
-                      mount={[Function]}
-                    />
-                  </EuiConfirmModal>
-                </CoreThemeProvider>,
-              },
-              Object {
-                "type": "return",
-                "value": <CoreThemeProvider
-                  globalStyles={false}
-                  theme$={
-                    Observable {
-                      "_subscribe": [Function],
-                    }
-                  }
-                >
-                  <EuiConfirmModal
-                    cancelButtonText="Cancel"
-                    confirmButtonText="Confirm"
-                    onCancel={[Function]}
-                    onConfirm={[Function]}
-                  >
-                    Some message
-                  </EuiConfirmModal>
-                </CoreThemeProvider>,
+                  </EuiErrorBoundary>
+                </KibanaThemeProvider>,
               },
             ],
           },
@@ -860,25 +932,107 @@ Array [
           mount={[Function]}
         />
       </EuiModal>
-    </CoreContextProvider>,
+    </KibanaRenderContextProvider>,
     <div />,
   ],
   Array [
-    <CoreContextProvider
+    <KibanaRenderContextProvider
       i18n={
         Object {
           "Context": [MockFunction] {
             "calls": Array [
               Array [
                 Object {
-                  "children": <CoreThemeProvider
-                    globalStyles={false}
-                    theme$={
-                      Observable {
-                        "_subscribe": [Function],
+                  "children": <KibanaThemeProvider
+                    theme={
+                      Object {
+                        "theme$": Observable {
+                          "_subscribe": [Function],
+                        },
                       }
                     }
                   >
+                    <EuiErrorBoundary>
+                      <EuiModal
+                        onClose={[Function]}
+                      >
+                        <MountWrapper
+                          className="kbnOverlayMountWrapper"
+                          mount={[Function]}
+                        />
+                      </EuiModal>
+                    </EuiErrorBoundary>
+                  </KibanaThemeProvider>,
+                },
+                Object {},
+              ],
+              Array [
+                Object {
+                  "children": <KibanaThemeProvider
+                    theme={
+                      Object {
+                        "theme$": Observable {
+                          "_subscribe": [Function],
+                        },
+                      }
+                    }
+                  >
+                    <EuiErrorBoundary>
+                      <EuiConfirmModal
+                        cancelButtonText="Cancel"
+                        confirmButtonText="Confirm"
+                        onCancel={[Function]}
+                        onConfirm={[Function]}
+                      >
+                        <MountWrapper
+                          className="kbnOverlayMountWrapper"
+                          mount={[Function]}
+                        />
+                      </EuiConfirmModal>
+                    </EuiErrorBoundary>
+                  </KibanaThemeProvider>,
+                },
+                Object {},
+              ],
+              Array [
+                Object {
+                  "children": <KibanaThemeProvider
+                    theme={
+                      Object {
+                        "theme$": Observable {
+                          "_subscribe": [Function],
+                        },
+                      }
+                    }
+                  >
+                    <EuiErrorBoundary>
+                      <EuiConfirmModal
+                        cancelButtonText="Cancel"
+                        confirmButtonText="Confirm"
+                        onCancel={[Function]}
+                        onConfirm={[Function]}
+                      >
+                        Some message
+                      </EuiConfirmModal>
+                    </EuiErrorBoundary>
+                  </KibanaThemeProvider>,
+                },
+                Object {},
+              ],
+            ],
+            "results": Array [
+              Object {
+                "type": "return",
+                "value": <KibanaThemeProvider
+                  theme={
+                    Object {
+                      "theme$": Observable {
+                        "_subscribe": [Function],
+                      },
+                    }
+                  }
+                >
+                  <EuiErrorBoundary>
                     <EuiModal
                       onClose={[Function]}
                     >
@@ -887,20 +1041,21 @@ Array [
                         mount={[Function]}
                       />
                     </EuiModal>
-                  </CoreThemeProvider>,
-                },
-                Object {},
-              ],
-              Array [
-                Object {
-                  "children": <CoreThemeProvider
-                    globalStyles={false}
-                    theme$={
-                      Observable {
+                  </EuiErrorBoundary>
+                </KibanaThemeProvider>,
+              },
+              Object {
+                "type": "return",
+                "value": <KibanaThemeProvider
+                  theme={
+                    Object {
+                      "theme$": Observable {
                         "_subscribe": [Function],
-                      }
+                      },
                     }
-                  >
+                  }
+                >
+                  <EuiErrorBoundary>
                     <EuiConfirmModal
                       cancelButtonText="Cancel"
                       confirmButtonText="Confirm"
@@ -912,20 +1067,21 @@ Array [
                         mount={[Function]}
                       />
                     </EuiConfirmModal>
-                  </CoreThemeProvider>,
-                },
-                Object {},
-              ],
-              Array [
-                Object {
-                  "children": <CoreThemeProvider
-                    globalStyles={false}
-                    theme$={
-                      Observable {
+                  </EuiErrorBoundary>
+                </KibanaThemeProvider>,
+              },
+              Object {
+                "type": "return",
+                "value": <KibanaThemeProvider
+                  theme={
+                    Object {
+                      "theme$": Observable {
                         "_subscribe": [Function],
-                      }
+                      },
                     }
-                  >
+                  }
+                >
+                  <EuiErrorBoundary>
                     <EuiConfirmModal
                       cancelButtonText="Cancel"
                       confirmButtonText="Confirm"
@@ -934,74 +1090,8 @@ Array [
                     >
                       Some message
                     </EuiConfirmModal>
-                  </CoreThemeProvider>,
-                },
-                Object {},
-              ],
-            ],
-            "results": Array [
-              Object {
-                "type": "return",
-                "value": <CoreThemeProvider
-                  globalStyles={false}
-                  theme$={
-                    Observable {
-                      "_subscribe": [Function],
-                    }
-                  }
-                >
-                  <EuiModal
-                    onClose={[Function]}
-                  >
-                    <MountWrapper
-                      className="kbnOverlayMountWrapper"
-                      mount={[Function]}
-                    />
-                  </EuiModal>
-                </CoreThemeProvider>,
-              },
-              Object {
-                "type": "return",
-                "value": <CoreThemeProvider
-                  globalStyles={false}
-                  theme$={
-                    Observable {
-                      "_subscribe": [Function],
-                    }
-                  }
-                >
-                  <EuiConfirmModal
-                    cancelButtonText="Cancel"
-                    confirmButtonText="Confirm"
-                    onCancel={[Function]}
-                    onConfirm={[Function]}
-                  >
-                    <MountWrapper
-                      className="kbnOverlayMountWrapper"
-                      mount={[Function]}
-                    />
-                  </EuiConfirmModal>
-                </CoreThemeProvider>,
-              },
-              Object {
-                "type": "return",
-                "value": <CoreThemeProvider
-                  globalStyles={false}
-                  theme$={
-                    Observable {
-                      "_subscribe": [Function],
-                    }
-                  }
-                >
-                  <EuiConfirmModal
-                    cancelButtonText="Cancel"
-                    confirmButtonText="Confirm"
-                    onCancel={[Function]}
-                    onConfirm={[Function]}
-                  >
-                    Some message
-                  </EuiConfirmModal>
-                </CoreThemeProvider>,
+                  </EuiErrorBoundary>
+                </KibanaThemeProvider>,
               },
             ],
           },
@@ -1023,7 +1113,7 @@ Array [
       >
         some confirm
       </EuiConfirmModal>
-    </CoreContextProvider>,
+    </KibanaRenderContextProvider>,
     <div />,
   ],
 ]
@@ -1032,7 +1122,7 @@ Array [
 exports[`ModalService openModal() renders a modal to the DOM 1`] = `
 Array [
   Array [
-    <CoreContextProvider
+    <KibanaRenderContextProvider
       i18n={
         Object {
           "Context": [MockFunction],
@@ -1054,7 +1144,7 @@ Array [
           mount={[Function]}
         />
       </EuiModal>
-    </CoreContextProvider>,
+    </KibanaRenderContextProvider>,
     <div />,
   ],
 ]
@@ -1070,7 +1160,7 @@ exports[`ModalService openModal() renders a modal to the DOM 2`] = `
   >
     <button
       aria-label="Closes this modal window"
-      class="euiButtonIcon euiButtonIcon--xSmall euiModal__closeIcon emotion-euiButtonIcon-empty-text-hoverStyles-euiModal__closeIcon"
+      class="euiButtonIcon euiModal__closeIcon emotion-euiButtonIcon-xs-empty-text-euiModal__closeIcon"
       type="button"
     >
       <span
@@ -1094,21 +1184,50 @@ exports[`ModalService openModal() renders a modal to the DOM 2`] = `
 exports[`ModalService openModal() with a currently active confirm replaces the current confirm with the new one 1`] = `
 Array [
   Array [
-    <CoreContextProvider
+    <KibanaRenderContextProvider
       i18n={
         Object {
           "Context": [MockFunction] {
             "calls": Array [
               Array [
                 Object {
-                  "children": <CoreThemeProvider
-                    globalStyles={false}
-                    theme$={
-                      Observable {
-                        "_subscribe": [Function],
+                  "children": <KibanaThemeProvider
+                    theme={
+                      Object {
+                        "theme$": Observable {
+                          "_subscribe": [Function],
+                        },
                       }
                     }
                   >
+                    <EuiErrorBoundary>
+                      <EuiModal
+                        onClose={[Function]}
+                      >
+                        <MountWrapper
+                          className="kbnOverlayMountWrapper"
+                          mount={[Function]}
+                        />
+                      </EuiModal>
+                    </EuiErrorBoundary>
+                  </KibanaThemeProvider>,
+                },
+                Object {},
+              ],
+            ],
+            "results": Array [
+              Object {
+                "type": "return",
+                "value": <KibanaThemeProvider
+                  theme={
+                    Object {
+                      "theme$": Observable {
+                        "_subscribe": [Function],
+                      },
+                    }
+                  }
+                >
+                  <EuiErrorBoundary>
                     <EuiModal
                       onClose={[Function]}
                     >
@@ -1117,31 +1236,8 @@ Array [
                         mount={[Function]}
                       />
                     </EuiModal>
-                  </CoreThemeProvider>,
-                },
-                Object {},
-              ],
-            ],
-            "results": Array [
-              Object {
-                "type": "return",
-                "value": <CoreThemeProvider
-                  globalStyles={false}
-                  theme$={
-                    Observable {
-                      "_subscribe": [Function],
-                    }
-                  }
-                >
-                  <EuiModal
-                    onClose={[Function]}
-                  >
-                    <MountWrapper
-                      className="kbnOverlayMountWrapper"
-                      mount={[Function]}
-                    />
-                  </EuiModal>
-                </CoreThemeProvider>,
+                  </EuiErrorBoundary>
+                </KibanaThemeProvider>,
               },
             ],
           },
@@ -1163,25 +1259,54 @@ Array [
       >
         confirm 1
       </EuiConfirmModal>
-    </CoreContextProvider>,
+    </KibanaRenderContextProvider>,
     <div />,
   ],
   Array [
-    <CoreContextProvider
+    <KibanaRenderContextProvider
       i18n={
         Object {
           "Context": [MockFunction] {
             "calls": Array [
               Array [
                 Object {
-                  "children": <CoreThemeProvider
-                    globalStyles={false}
-                    theme$={
-                      Observable {
-                        "_subscribe": [Function],
+                  "children": <KibanaThemeProvider
+                    theme={
+                      Object {
+                        "theme$": Observable {
+                          "_subscribe": [Function],
+                        },
                       }
                     }
                   >
+                    <EuiErrorBoundary>
+                      <EuiModal
+                        onClose={[Function]}
+                      >
+                        <MountWrapper
+                          className="kbnOverlayMountWrapper"
+                          mount={[Function]}
+                        />
+                      </EuiModal>
+                    </EuiErrorBoundary>
+                  </KibanaThemeProvider>,
+                },
+                Object {},
+              ],
+            ],
+            "results": Array [
+              Object {
+                "type": "return",
+                "value": <KibanaThemeProvider
+                  theme={
+                    Object {
+                      "theme$": Observable {
+                        "_subscribe": [Function],
+                      },
+                    }
+                  }
+                >
+                  <EuiErrorBoundary>
                     <EuiModal
                       onClose={[Function]}
                     >
@@ -1190,31 +1315,8 @@ Array [
                         mount={[Function]}
                       />
                     </EuiModal>
-                  </CoreThemeProvider>,
-                },
-                Object {},
-              ],
-            ],
-            "results": Array [
-              Object {
-                "type": "return",
-                "value": <CoreThemeProvider
-                  globalStyles={false}
-                  theme$={
-                    Observable {
-                      "_subscribe": [Function],
-                    }
-                  }
-                >
-                  <EuiModal
-                    onClose={[Function]}
-                  >
-                    <MountWrapper
-                      className="kbnOverlayMountWrapper"
-                      mount={[Function]}
-                    />
-                  </EuiModal>
-                </CoreThemeProvider>,
+                  </EuiErrorBoundary>
+                </KibanaThemeProvider>,
               },
             ],
           },
@@ -1236,7 +1338,7 @@ Array [
       >
         some confirm
       </EuiConfirmModal>
-    </CoreContextProvider>,
+    </KibanaRenderContextProvider>,
     <div />,
   ],
 ]
@@ -1245,21 +1347,50 @@ Array [
 exports[`ModalService openModal() with a currently active modal replaces the current modal with a new one 1`] = `
 Array [
   Array [
-    <CoreContextProvider
+    <KibanaRenderContextProvider
       i18n={
         Object {
           "Context": [MockFunction] {
             "calls": Array [
               Array [
                 Object {
-                  "children": <CoreThemeProvider
-                    globalStyles={false}
-                    theme$={
-                      Observable {
-                        "_subscribe": [Function],
+                  "children": <KibanaThemeProvider
+                    theme={
+                      Object {
+                        "theme$": Observable {
+                          "_subscribe": [Function],
+                        },
                       }
                     }
                   >
+                    <EuiErrorBoundary>
+                      <EuiModal
+                        onClose={[Function]}
+                      >
+                        <MountWrapper
+                          className="kbnOverlayMountWrapper"
+                          mount={[Function]}
+                        />
+                      </EuiModal>
+                    </EuiErrorBoundary>
+                  </KibanaThemeProvider>,
+                },
+                Object {},
+              ],
+            ],
+            "results": Array [
+              Object {
+                "type": "return",
+                "value": <KibanaThemeProvider
+                  theme={
+                    Object {
+                      "theme$": Observable {
+                        "_subscribe": [Function],
+                      },
+                    }
+                  }
+                >
+                  <EuiErrorBoundary>
                     <EuiModal
                       onClose={[Function]}
                     >
@@ -1268,31 +1399,8 @@ Array [
                         mount={[Function]}
                       />
                     </EuiModal>
-                  </CoreThemeProvider>,
-                },
-                Object {},
-              ],
-            ],
-            "results": Array [
-              Object {
-                "type": "return",
-                "value": <CoreThemeProvider
-                  globalStyles={false}
-                  theme$={
-                    Observable {
-                      "_subscribe": [Function],
-                    }
-                  }
-                >
-                  <EuiModal
-                    onClose={[Function]}
-                  >
-                    <MountWrapper
-                      className="kbnOverlayMountWrapper"
-                      mount={[Function]}
-                    />
-                  </EuiModal>
-                </CoreThemeProvider>,
+                  </EuiErrorBoundary>
+                </KibanaThemeProvider>,
               },
             ],
           },
@@ -1314,25 +1422,54 @@ Array [
           mount={[Function]}
         />
       </EuiModal>
-    </CoreContextProvider>,
+    </KibanaRenderContextProvider>,
     <div />,
   ],
   Array [
-    <CoreContextProvider
+    <KibanaRenderContextProvider
       i18n={
         Object {
           "Context": [MockFunction] {
             "calls": Array [
               Array [
                 Object {
-                  "children": <CoreThemeProvider
-                    globalStyles={false}
-                    theme$={
-                      Observable {
-                        "_subscribe": [Function],
+                  "children": <KibanaThemeProvider
+                    theme={
+                      Object {
+                        "theme$": Observable {
+                          "_subscribe": [Function],
+                        },
                       }
                     }
                   >
+                    <EuiErrorBoundary>
+                      <EuiModal
+                        onClose={[Function]}
+                      >
+                        <MountWrapper
+                          className="kbnOverlayMountWrapper"
+                          mount={[Function]}
+                        />
+                      </EuiModal>
+                    </EuiErrorBoundary>
+                  </KibanaThemeProvider>,
+                },
+                Object {},
+              ],
+            ],
+            "results": Array [
+              Object {
+                "type": "return",
+                "value": <KibanaThemeProvider
+                  theme={
+                    Object {
+                      "theme$": Observable {
+                        "_subscribe": [Function],
+                      },
+                    }
+                  }
+                >
+                  <EuiErrorBoundary>
                     <EuiModal
                       onClose={[Function]}
                     >
@@ -1341,31 +1478,8 @@ Array [
                         mount={[Function]}
                       />
                     </EuiModal>
-                  </CoreThemeProvider>,
-                },
-                Object {},
-              ],
-            ],
-            "results": Array [
-              Object {
-                "type": "return",
-                "value": <CoreThemeProvider
-                  globalStyles={false}
-                  theme$={
-                    Observable {
-                      "_subscribe": [Function],
-                    }
-                  }
-                >
-                  <EuiModal
-                    onClose={[Function]}
-                  >
-                    <MountWrapper
-                      className="kbnOverlayMountWrapper"
-                      mount={[Function]}
-                    />
-                  </EuiModal>
-                </CoreThemeProvider>,
+                  </EuiErrorBoundary>
+                </KibanaThemeProvider>,
               },
             ],
           },
@@ -1387,7 +1501,7 @@ Array [
           mount={[Function]}
         />
       </EuiModal>
-    </CoreContextProvider>,
+    </KibanaRenderContextProvider>,
     <div />,
   ],
 ]

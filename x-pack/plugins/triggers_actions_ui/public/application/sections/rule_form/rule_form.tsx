@@ -659,8 +659,11 @@ export const RuleForm = ({
             setHasActionsWithBrokenConnector={setHasActionsWithBrokenConnector}
             messageVariables={selectedRuleType.actionVariables}
             defaultActionGroupId={defaultActionGroupId}
-            hasSummary={selectedRuleType.hasGetSummarizedAlerts}
+            hasAlertsMappings={selectedRuleType.hasAlertsMappings}
             featureId={connectorFeatureId}
+            producerId={selectedRuleType.producer}
+            hasFieldsForAAD={selectedRuleType.hasFieldsForAAD}
+            ruleTypeId={rule.ruleTypeId}
             isActionGroupDisabledForActionType={(actionGroupId: string, actionTypeId: string) =>
               isActionGroupDisabledForActionType(selectedRuleType, actionGroupId, actionTypeId)
             }

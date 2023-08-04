@@ -29,9 +29,7 @@ export const INTEGRATION_CATEGORY_DISPLAY: {
   config_management: { title: 'Config management', parent_id: undefined },
   connector: { title: 'Connector', parent_id: 'enterprise_search' },
   connector_client: { title: 'Connector Client', parent_id: 'enterprise_search' },
-  connector_package: { title: 'Connector Package', parent_id: 'enterprise_search' },
   containers: { title: 'Containers', parent_id: undefined },
-  content_source: { title: 'Content Source', parent_id: 'enterprise_search' },
   crawler: { title: 'Crawler', parent_id: 'enterprise_search' },
   credential_management: { title: 'Credential Management', parent_id: 'security' },
   crm: { title: 'CRM', parent_id: undefined },
@@ -44,7 +42,7 @@ export const INTEGRATION_CATEGORY_DISPLAY: {
   elasticsearch_sdk: { title: 'Elasticsearch SDK', parent_id: undefined },
   elastic_stack: { title: 'Elastic Stack', parent_id: undefined },
   email_security: { title: 'Email', parent_id: 'security' },
-  enterprise_search: { title: 'Enterprise Search', parent_id: undefined },
+  enterprise_search: { title: 'Search', parent_id: undefined },
   firewall_security: { title: 'Firewall', parent_id: 'security' },
   google_cloud: { title: 'Google Cloud', parent_id: undefined },
   iam: { title: 'Identity and Access Management', parent_id: 'security' },
@@ -80,8 +78,10 @@ export const INTEGRATION_CATEGORY_DISPLAY: {
   web: { title: 'Web Server', parent_id: 'observability' },
   web_application_firewall: { title: 'Web Application Firewall', parent_id: 'security' },
   websphere: { title: 'WebSphere Application Server', parent_id: 'observability' },
-  workplace_search: { title: 'Workplace Search', parent_id: 'enterprise_search' },
-
+  workplace_search_content_source: {
+    title: 'Workplace Search Content Source',
+    parent_id: 'enterprise_search',
+  },
   // Kibana added
   apm: { title: 'APM', parent_id: undefined },
 };
@@ -119,7 +119,7 @@ export interface IntegrationCategoryCount {
 // TODO: consider i18n
 export const SHIPPER_DISPLAY = {
   beats: 'Beats',
-  enterprise_search: 'Enterprise Search',
+  enterprise_search: 'Search',
   language_clients: 'Language clients',
   other: 'Other',
   sample_data: 'Sample data',

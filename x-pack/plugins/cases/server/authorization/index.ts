@@ -367,4 +367,12 @@ export const Operations: Record<ReadOperations | WriteOperations, OperationDetai
     docType: 'user actions',
     savedObjectType: CASE_USER_ACTION_SAVED_OBJECT,
   },
+  [ReadOperations.GetCategories]: {
+    ecsType: EVENT_TYPES.access,
+    name: ACCESS_CASE_OPERATION,
+    action: 'case_categories_get',
+    verbs: accessVerbs,
+    docType: 'cases',
+    savedObjectType: CASE_SAVED_OBJECT,
+  },
 };

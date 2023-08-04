@@ -12,6 +12,7 @@ import {
   SolutionSideNav as SolutionSideNavComponent,
   type SolutionSideNavProps,
   type SolutionSideNavItem,
+  SolutionSideNavItemPosition,
 } from '..';
 
 const items: SolutionSideNavItem[] = [
@@ -34,7 +35,8 @@ const items: SolutionSideNavItem[] = [
       },
       {
         id: 'panelLink2',
-        label: 'I am the second nested',
+        label: 'I have an icon',
+        iconType: 'logoVulnerabilityManagement',
         href: '#',
         description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
       },
@@ -92,26 +94,41 @@ const items: SolutionSideNavItem[] = [
       },
     ],
   },
-  { id: 'linkTruncated', href: '#', label: 'I have truncated text because I am too long' },
-  { id: 'linkSmall', href: '#', label: 'I am smaller', labelSize: 'xs' },
-];
-const footerItems: SolutionSideNavItem[] = [
-  { id: 'footerLink', href: '#', label: 'I am a footer link' },
+  { id: 'linkWrapped', href: '#', label: 'I have wrapped text because I am too long' },
   {
-    id: 'footerLinkPanel',
+    id: 'bottomLink',
+    href: '#',
+    label: 'I am a bottom link',
+    position: SolutionSideNavItemPosition.bottom,
+  },
+  {
+    id: 'bottomLinkPanel',
     href: '#',
     label: 'I also have panel',
+    position: SolutionSideNavItemPosition.bottom,
     items: [
       {
-        id: 'footerLinkPanel1',
-        label: 'I am a footer nested link',
+        id: 'bottomLinkPanel1',
+        label: 'I am a bottom nested link',
         href: '#',
         description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
       },
     ],
   },
-  { id: 'footerLinkSeparator', href: '#', label: 'I have a separator', appendSeparator: true },
-  { id: 'footerLinkIcon', href: '#', label: 'I have an icon', iconType: 'heart' },
+  {
+    id: 'bottomLinkSeparator',
+    href: '#',
+    label: 'I have a separator',
+    appendSeparator: true,
+    position: SolutionSideNavItemPosition.bottom,
+  },
+  {
+    id: 'bottomLinkIcon',
+    href: '#',
+    label: 'I have an icon',
+    iconType: 'heart',
+    position: SolutionSideNavItemPosition.bottom,
+  },
 ];
 
 export default {
@@ -136,9 +153,7 @@ export default {
   ],
 };
 
-type Params = Pick<SolutionSideNavProps, 'selectedId' | 'panelTopOffset' | 'panelBottomOffset'>;
-
-export const SolutionSideNav = (params: Params) => (
+export const SolutionSideNav = (params: SolutionSideNavProps) => (
   <>
     <SolutionNav
       name={'Security'}
@@ -148,9 +163,9 @@ export const SolutionSideNav = (params: Params) => (
       // eslint-disable-next-line react/no-children-prop
       children={
         <SolutionSideNavComponent
-          items={items}
-          footerItems={footerItems}
+          items={params.items}
           selectedId={params.selectedId}
+          categories={params.categories}
           panelBottomOffset={params.panelBottomOffset || undefined}
           panelTopOffset={params.panelTopOffset || undefined}
         />
@@ -168,8 +183,29 @@ export const SolutionSideNav = (params: Params) => (
 SolutionSideNav.argTypes = {
   selectedId: {
     control: { type: 'radio' },
-    options: [...items, ...footerItems].map(({ id }) => id),
+    options: items.map(({ id }) => id),
     defaultValue: 'simpleLink',
+  },
+  items: {
+    control: 'object',
+    defaultValue: items,
+  },
+  categories: {
+    control: 'object',
+    defaultValue: [
+      {
+        type: 'separator',
+        linkIds: ['simpleLink', 'panelLink', 'categoriesPanelLink'],
+      },
+      {
+        type: 'separator',
+        linkIds: ['linkWrapped'],
+      },
+      {
+        type: 'separator',
+        linkIds: ['bottomLink', 'bottomLinkPanel', 'bottomLinkSeparator', 'bottomLinkIcon'],
+      },
+    ],
   },
   panelTopOffset: {
     control: 'text',

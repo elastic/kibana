@@ -6,11 +6,8 @@
  */
 
 import Boom from '@hapi/boom';
-import {
-  getLogEntryAnomaliesDatasetsRequestPayloadRT,
-  getLogEntryAnomaliesDatasetsSuccessReponsePayloadRT,
-  LOG_ANALYSIS_GET_LOG_ENTRY_ANOMALIES_DATASETS_PATH,
-} from '../../../../common/http_api/log_analysis';
+
+import { logAnalysisResultsV1 } from '../../../../common/http_api';
 import { createValidationFunction } from '../../../../common/runtime_types';
 import type { InfraBackendLibs } from '../../../lib/infra_types';
 import { getLogEntryAnomaliesDatasets } from '../../../lib/log_analysis';
@@ -18,61 +15,70 @@ import { assertHasInfraMlPlugins } from '../../../utils/request_context';
 import { isMlPrivilegesError } from '../../../lib/log_analysis/errors';
 
 export const initGetLogEntryAnomaliesDatasetsRoute = ({ framework }: InfraBackendLibs) => {
-  framework.registerRoute(
-    {
+  framework
+    .registerVersionedRoute({
+      access: 'internal',
       method: 'post',
-      path: LOG_ANALYSIS_GET_LOG_ENTRY_ANOMALIES_DATASETS_PATH,
-      validate: {
-        body: createValidationFunction(getLogEntryAnomaliesDatasetsRequestPayloadRT),
-      },
-    },
-    framework.router.handleLegacyErrors(async (requestContext, request, response) => {
-      const {
-        data: {
-          logView,
-          timeRange: { startTime, endTime },
+      path: logAnalysisResultsV1.LOG_ANALYSIS_GET_LOG_ENTRY_ANOMALIES_DATASETS_PATH,
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            body: createValidationFunction(
+              logAnalysisResultsV1.getLogEntryAnomaliesDatasetsRequestPayloadRT
+            ),
+          },
         },
-      } = request.body;
+      },
+      framework.router.handleLegacyErrors(async (requestContext, request, response) => {
+        const {
+          data: {
+            logView,
+            timeRange: { startTime, endTime },
+          },
+        } = request.body;
 
-      try {
-        const infraMlContext = await assertHasInfraMlPlugins(requestContext);
+        try {
+          const infraMlContext = await assertHasInfraMlPlugins(requestContext);
 
-        const { datasets, timing } = await getLogEntryAnomaliesDatasets(
-          { infra: await infraMlContext.infra },
-          logView,
-          startTime,
-          endTime
-        );
+          const { datasets, timing } = await getLogEntryAnomaliesDatasets(
+            { infra: await infraMlContext.infra },
+            logView,
+            startTime,
+            endTime
+          );
 
-        return response.ok({
-          body: getLogEntryAnomaliesDatasetsSuccessReponsePayloadRT.encode({
-            data: {
-              datasets,
-            },
-            timing,
-          }),
-        });
-      } catch (error) {
-        if (Boom.isBoom(error)) {
-          throw error;
-        }
+          return response.ok({
+            body: logAnalysisResultsV1.getLogEntryAnomaliesDatasetsSuccessReponsePayloadRT.encode({
+              data: {
+                datasets,
+              },
+              timing,
+            }),
+          });
+        } catch (error) {
+          if (Boom.isBoom(error)) {
+            throw error;
+          }
 
-        if (isMlPrivilegesError(error)) {
+          if (isMlPrivilegesError(error)) {
+            return response.customError({
+              statusCode: 403,
+              body: {
+                message: error.message,
+              },
+            });
+          }
+
           return response.customError({
-            statusCode: 403,
+            statusCode: error.statusCode ?? 500,
             body: {
-              message: error.message,
+              message: error.message ?? 'An unexpected error occurred',
             },
           });
         }
-
-        return response.customError({
-          statusCode: error.statusCode ?? 500,
-          body: {
-            message: error.message ?? 'An unexpected error occurred',
-          },
-        });
-      }
-    })
-  );
+      })
+    );
 };

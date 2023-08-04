@@ -309,7 +309,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await PageObjects.dashboardControls.optionsListOpenPopover(optionsListControl);
           await PageObjects.dashboardControls.optionsListPopoverSelectOption('CN');
           await PageObjects.dashboardControls.optionsListPopoverSelectOption('US');
-          await PageObjects.dashboardControls.rangeSliderWaitForLoading(); // wait for range slider to respond to options list selections before proceeding
+          await PageObjects.dashboardControls.rangeSliderWaitForLoading(rangeSliderControl); // wait for range slider to respond to options list selections before proceeding
           await PageObjects.dashboardControls.rangeSliderSetLowerBound(rangeSliderControl, '1000');
           await PageObjects.dashboardControls.rangeSliderSetUpperBound(rangeSliderControl, '15000');
           await PageObjects.dashboard.clickQuickSave();

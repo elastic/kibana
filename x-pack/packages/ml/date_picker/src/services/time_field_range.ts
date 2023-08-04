@@ -54,5 +54,6 @@ export async function getTimeFieldRange(options: GetTimeFieldRangeOptions) {
     path,
     method: 'POST',
     body: JSON.stringify(body),
+    version: '1',
   });
 }

@@ -11,8 +11,8 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import { ES_GEO_FIELD_TYPE, LayerDescriptor } from '@kbn/maps-plugin/common';
 import type { MapsStartApi } from '@kbn/maps-plugin/public';
 import type { Query } from '@kbn/es-query';
+import type { Field, SplitField } from '@kbn/ml-anomaly-utils';
 import { ChartLoader } from '../chart_loader';
-import { Field, SplitField } from '../../../../../../common/types/fields';
 const eq = (newArgs: any[], lastArgs: any[]) => isEqual(newArgs, lastArgs);
 
 export class MapLoader extends ChartLoader {

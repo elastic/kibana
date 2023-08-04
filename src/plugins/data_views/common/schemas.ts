@@ -14,6 +14,90 @@ export const serializedFieldFormatSchema = schema.object({
   params: schema.maybe(schema.any()),
 });
 
+export const RUNTIME_FIELD_TYPES2 = [
+  'keyword',
+  'long',
+  'double',
+  'date',
+  'ip',
+  'boolean',
+  'geo_point',
+] as const;
+
+export const runtimeFieldNonCompositeFieldsSpecTypeSchema = schema.oneOf(
+  RUNTIME_FIELD_TYPES2.map((runtimeFieldType) => schema.literal(runtimeFieldType)) as [
+    Type<RuntimeType>
+  ]
+);
+
+const primitiveRuntimeFieldSchemaShared = {
+  script: schema.maybe(
+    schema.object({
+      source: schema.string(),
+    })
+  ),
+  format: schema.maybe(serializedFieldFormatSchema),
+  customLabel: schema.maybe(schema.string()),
+  popularity: schema.maybe(
+    schema.number({
+      min: 0,
+    })
+  ),
+};
+
+export const primitiveRuntimeFieldSchema = schema.object({
+  type: runtimeFieldNonCompositeFieldsSpecTypeSchema,
+  ...primitiveRuntimeFieldSchemaShared,
+});
+
+const primitiveRuntimeFieldSchemaUpdate = schema.object({
+  type: schema.maybe(runtimeFieldNonCompositeFieldsSpecTypeSchema),
+  ...primitiveRuntimeFieldSchemaShared,
+});
+
+const compositeRuntimeFieldSchemaShared = {
+  script: schema.maybe(
+    schema.object({
+      source: schema.string(),
+    })
+  ),
+  fields: schema.maybe(
+    schema.recordOf(
+      schema.string(),
+      schema.object({
+        type: runtimeFieldNonCompositeFieldsSpecTypeSchema,
+        format: schema.maybe(serializedFieldFormatSchema),
+        customLabel: schema.maybe(schema.string()),
+        popularity: schema.maybe(
+          schema.number({
+            min: 0,
+          })
+        ),
+      })
+    )
+  ),
+};
+
+export const compositeRuntimeFieldSchema = schema.object({
+  type: schema.literal('composite') as Type<RuntimeType>,
+  ...compositeRuntimeFieldSchemaShared,
+});
+
+const compositeRuntimeFieldSchemaUpdate = schema.object({
+  type: schema.maybe(schema.literal('composite') as Type<RuntimeType>),
+  ...compositeRuntimeFieldSchemaShared,
+});
+
+export const runtimeFieldSchema = schema.oneOf([
+  primitiveRuntimeFieldSchema,
+  compositeRuntimeFieldSchema,
+]);
+
+export const runtimeFieldSchemaUpdate = schema.oneOf([
+  primitiveRuntimeFieldSchemaUpdate,
+  compositeRuntimeFieldSchemaUpdate,
+]);
+
 export const fieldSpecSchemaFields = {
   name: schema.string({
     maxLength: 1000,
@@ -51,6 +135,10 @@ export const fieldSpecSchemaFields = {
   ),
   customLabel: schema.maybe(schema.string()),
   shortDotsEnable: schema.maybe(schema.boolean()),
+  searchable: schema.maybe(schema.boolean()),
+  aggregatable: schema.maybe(schema.boolean()),
+  readFromDocValues: schema.maybe(schema.boolean()),
+  runtimeField: schema.maybe(runtimeFieldSchema),
 };
 
 export const fieldSpecSchema = schema.object(fieldSpecSchemaFields, {
@@ -59,64 +147,3 @@ export const fieldSpecSchema = schema.object(fieldSpecSchemaFields, {
   // this allows to retrieve an index pattern and then to re-create by using the retrieved payload
   unknowns: 'ignore',
 });
-
-export const RUNTIME_FIELD_TYPES2 = [
-  'keyword',
-  'long',
-  'double',
-  'date',
-  'ip',
-  'boolean',
-  'geo_point',
-] as const;
-
-export const runtimeFieldNonCompositeFieldsSpecTypeSchema = schema.oneOf(
-  RUNTIME_FIELD_TYPES2.map((runtimeFieldType) => schema.literal(runtimeFieldType)) as [
-    Type<RuntimeType>
-  ]
-);
-
-export const primitiveRuntimeFieldSchema = schema.object({
-  type: runtimeFieldNonCompositeFieldsSpecTypeSchema,
-  script: schema.maybe(
-    schema.object({
-      source: schema.string(),
-    })
-  ),
-  format: schema.maybe(serializedFieldFormatSchema),
-  customLabel: schema.maybe(schema.string()),
-  popularity: schema.maybe(
-    schema.number({
-      min: 0,
-    })
-  ),
-});
-
-export const compositeRuntimeFieldSchema = schema.object({
-  type: schema.literal('composite') as Type<RuntimeType>,
-  script: schema.maybe(
-    schema.object({
-      source: schema.string(),
-    })
-  ),
-  fields: schema.maybe(
-    schema.recordOf(
-      schema.string(),
-      schema.object({
-        type: runtimeFieldNonCompositeFieldsSpecTypeSchema,
-        format: schema.maybe(serializedFieldFormatSchema),
-        customLabel: schema.maybe(schema.string()),
-        popularity: schema.maybe(
-          schema.number({
-            min: 0,
-          })
-        ),
-      })
-    )
-  ),
-});
-
-export const runtimeFieldSchema = schema.oneOf([
-  primitiveRuntimeFieldSchema,
-  compositeRuntimeFieldSchema,
-]);

@@ -15,7 +15,6 @@ import {
   EuiSpacer,
   EuiButtonIcon,
   EuiToolTip,
-  EuiLoadingSpinner,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -49,25 +48,11 @@ function renderExpandButton({
     defaultMessage: 'Expand layers panel',
   });
 
-  if (isLoading) {
-    // Can not use EuiButtonIcon with spinner because spinner is a class and not an icon
-    return (
-      <button
-        className="euiButtonIcon euiButtonIcon--text mapLayerControl__openLayerTOCButton"
-        type="button"
-        onClick={onClick}
-        aria-label={expandLabel}
-        data-test-subj="mapExpandLayerControlButton"
-      >
-        <EuiLoadingSpinner size="m" />
-      </button>
-    );
-  }
-
   return (
     <EuiButtonIcon
       className="mapLayerControl__openLayerTOCButton"
       color="text"
+      isLoading={isLoading}
       onClick={onClick}
       iconType={hasErrors ? 'warning' : 'menuLeft'}
       aria-label={expandLabel}
@@ -96,7 +81,7 @@ export function LayerControl({
       return layer.hasErrors();
     });
     const isLoading = layerList.some((layer) => {
-      return layer.isVisible() && layer.showAtZoomLevel(zoom) && layer.isLayerLoading();
+      return layer.isLayerLoading(zoom);
     });
 
     return (

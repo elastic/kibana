@@ -35,7 +35,7 @@ import { IndexPattern } from '../../../../../types';
 import { cloneDeep } from 'lodash';
 import { IncludeExcludeRow } from './include_exclude_options';
 
-jest.mock('@kbn/unified-field-list-plugin/public/services/field_stats', () => ({
+jest.mock('@kbn/unified-field-list/src/services/field_stats', () => ({
   loadFieldStats: jest.fn().mockResolvedValue({
     topValues: {
       buckets: [
@@ -50,7 +50,7 @@ jest.mock('@kbn/unified-field-list-plugin/public/services/field_stats', () => ({
   }),
 }));
 
-jest.mock('@kbn/unified-field-list-plugin/public/hooks/use_existing_fields', () => ({
+jest.mock('@kbn/unified-field-list/src/hooks/use_existing_fields', () => ({
   useExistingFieldsReader: jest.fn(() => {
     return {
       hasFieldData: (dataViewId: string, fieldName: string) => {
@@ -257,6 +257,39 @@ describe('terms', () => {
           arguments: expect.objectContaining({
             field: ['source'],
             max_doc_count: [3],
+          }),
+        })
+      );
+    });
+
+    it('should return significant terms expression when ordered by significance', () => {
+      const termsColumn = layer.columns.col1 as TermsIndexPatternColumn;
+      const esAggsFn = termsOperation.toEsAggsFn(
+        {
+          ...termsColumn,
+          params: {
+            ...termsColumn.params,
+            accuracyMode: true,
+            include: ['C.'],
+            exclude: ['U.'],
+            orderBy: { type: 'significant' },
+          },
+        },
+        'col1',
+        {} as IndexPattern,
+        layer,
+        uiSettingsMock,
+        []
+      );
+      expect(esAggsFn).toEqual(
+        expect.objectContaining({
+          function: 'aggSignificantTerms',
+          arguments: expect.objectContaining({
+            field: ['source'],
+            size: [3],
+            shardSize: [1000],
+            include: ['C.'],
+            exclude: ['U.'],
           }),
         })
       );
@@ -639,6 +672,20 @@ describe('terms', () => {
           name: 'test',
           displayName: 'test',
           type: 'string',
+        })
+      ).toEqual(undefined);
+    });
+
+    it('should not return an operation if type is not supported', () => {
+      expect(
+        termsOperation.getPossibleOperationForField({
+          aggregatable: true,
+          searchable: true,
+          name: 'test',
+          displayName: 'test',
+          type: 'number',
+          aggregationRestrictions: {},
+          timeSeriesMetric: 'counter',
         })
       ).toEqual(undefined);
     });
@@ -1973,6 +2020,37 @@ describe('terms', () => {
       expect(select2.prop('disabled')).toEqual(true);
     });
 
+    it('should disable missing bucket and other bucket setting when ordered by significance', () => {
+      const updateLayerSpy = jest.fn();
+      const instance = shallow(
+        <InlineOptions
+          {...defaultProps}
+          layer={layer}
+          paramEditorUpdater={updateLayerSpy}
+          columnId="col1"
+          currentColumn={{
+            ...(layer.columns.col1 as TermsIndexPatternColumn),
+            params: {
+              ...(layer.columns.col1 as TermsIndexPatternColumn).params,
+              orderBy: { type: 'significant' },
+            },
+          }}
+        />
+      );
+
+      const select1 = instance
+        .find('[data-test-subj="indexPattern-terms-missing-bucket"]')
+        .find(EuiSwitch);
+
+      expect(select1.prop('disabled')).toEqual(true);
+
+      const select2 = instance
+        .find('[data-test-subj="indexPattern-terms-other-bucket"]')
+        .find(EuiSwitch);
+
+      expect(select2.prop('disabled')).toEqual(true);
+    });
+
     describe('accuracy mode', () => {
       const renderWithAccuracy = (accuracy: boolean, rareTerms: boolean) =>
         shallow(
@@ -2180,6 +2258,7 @@ describe('terms', () => {
         'column$$$col2',
         'alphabetical',
         'rare',
+        'significant',
         'custom',
       ]);
     });
@@ -2917,6 +2996,49 @@ describe('terms', () => {
         })
       ).toEqual(true);
     });
+
+    it('should reject if the passed field is a timeSeries counter field', () => {
+      const indexPattern = createMockedIndexPattern({}, [
+        {
+          name: 'bytes_counter',
+          displayName: 'bytes_counter',
+          type: 'number',
+          aggregatable: true,
+          searchable: true,
+          timeSeriesMetric: 'counter',
+        },
+      ]);
+      const field = indexPattern.getFieldByName('bytes_counter')!;
+
+      expect(
+        termsOperation.canAddNewField?.({
+          targetColumn: createMultiTermsColumn('source'),
+          field,
+          indexPattern,
+        })
+      ).toEqual(false);
+    });
+
+    it('should reject if the passed columns has a timeSeries counter field', () => {
+      const indexPattern = createMockedIndexPattern({}, [
+        {
+          name: 'bytes_counter',
+          displayName: 'bytes_counter',
+          type: 'number',
+          aggregatable: true,
+          searchable: true,
+          timeSeriesMetric: 'counter',
+        },
+      ]);
+
+      expect(
+        termsOperation.canAddNewField?.({
+          targetColumn: createMultiTermsColumn('source'),
+          sourceColumn: createMultiTermsColumn(['bytes_counter']),
+          indexPattern,
+        })
+      ).toEqual(false);
+    });
   });
 
   describe('getParamsForMultipleFields', () => {
@@ -3035,6 +3157,28 @@ describe('terms', () => {
         secondaryFields: expect.arrayContaining(['dest']),
         parentFormat: { id: 'multi_terms' },
       });
+    });
+
+    it('should not append timeSeries counter field to multiterms', () => {
+      const indexPattern = createMockedIndexPattern({}, [
+        {
+          name: 'bytes_counter',
+          displayName: 'bytes_counter',
+          type: 'number',
+          aggregatable: true,
+          searchable: true,
+          timeSeriesMetric: 'counter',
+        },
+      ]);
+      const field = indexPattern.getFieldByName('bytes_counter')!;
+
+      expect(
+        termsOperation.getParamsForMultipleFields?.({
+          targetColumn: createMultiTermsColumn('source'),
+          field,
+          indexPattern,
+        })
+      ).toEqual({ secondaryFields: [], parentFormat: { id: 'terms' } });
     });
   });
 

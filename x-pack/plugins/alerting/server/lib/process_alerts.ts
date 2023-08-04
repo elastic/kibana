@@ -124,11 +124,12 @@ function processAlertsHelper<
           // this alert did exist in previous run
           // calculate duration to date for active alerts
           const state = existingAlerts[id].getState();
+          const currentState = activeAlerts[id].getState();
           const durationInMs =
             new Date(currentTime).valueOf() - new Date(state.start as string).valueOf();
           const duration = state.start ? millisToNanos(durationInMs) : undefined;
           activeAlerts[id].replaceState({
-            ...state,
+            ...currentState,
             ...(state.start ? { start: state.start } : {}),
             ...(duration !== undefined ? { duration } : {}),
           });

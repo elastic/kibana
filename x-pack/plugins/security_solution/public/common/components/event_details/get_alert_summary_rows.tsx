@@ -216,9 +216,16 @@ function getFieldsByRuleType(ruleType?: string): EventSummaryField[] {
 }
 
 /**
+  This function is exported because it is used in the Exception Component to
+  populate the conditions with the Highlighted Fields. Additionally, the new
+  Alert Summary Flyout also requires access to these fields.
+  As the Alert Summary components will undergo changes soon we will go with
+  exporting the function only for now.
+ */
+/**
  * Assembles a list of fields to display based on the event
  */
-function getEventFieldsToDisplay({
+export function getEventFieldsToDisplay({
   eventCategories,
   eventCode,
   eventRuleType,
@@ -248,7 +255,7 @@ interface EventCategories {
  * @param data The event details
  * @returns The event's primary category and all other categories in case there is more than one
  */
-function getEventCategoriesFromData(data: TimelineEventsDetailsItem[]): EventCategories {
+export function getEventCategoriesFromData(data: TimelineEventsDetailsItem[]): EventCategories {
   const eventCategoryField = find({ category: 'event', field: 'event.category' }, data);
 
   let primaryEventCategory: string | undefined;

@@ -6,7 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { pipe } from 'fp-ts/lib/pipeable';
 import * as Option from 'fp-ts/lib/Option';
+import * as TaskEither from 'fp-ts/lib/TaskEither';
 import { omit } from 'lodash';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { WaitGroup } from './kibana_migrator_utils';
@@ -206,6 +208,7 @@ export const nextActionMap = (
         index: state.targetIndex,
         mappings: omit(state.targetIndexMappings, ['_meta']), // ._meta property will be updated on a later step
         batchSize: state.batchSize,
+        query: Option.toUndefined(state.updatedTypesQuery),
       }),
     UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK: (
       state: UpdateTargetMappingsPropertiesWaitForTaskState
@@ -257,11 +260,18 @@ export const nextActionMap = (
     MARK_VERSION_INDEX_READY: (state: MarkVersionIndexReady) =>
       Actions.updateAliases({ client, aliasActions: state.versionIndexReadyActions.value }),
     MARK_VERSION_INDEX_READY_SYNC: (state: MarkVersionIndexReady) =>
-      Actions.synchronizeMigrators({
-        waitGroup: updateRelocationAliases,
-        payload: state.versionIndexReadyActions.value,
-        thenHook: (res) => res,
-      }),
+      pipe(
+        // First, we wait for all the migrators involved in a relocation to reach this point.
+        Actions.synchronizeMigrators<Actions.AliasAction[]>({
+          waitGroup: updateRelocationAliases,
+          payload: state.versionIndexReadyActions.value,
+        }),
+        // Then, all migrators will try to update all aliases (from all indices). Only the first one will succeed.
+        // The others will receive alias_not_found_exception and cause MARK_VERSION_INDEX_READY_CONFLICT (that's acceptable).
+        TaskEither.chainW(({ data }) =>
+          Actions.updateAliases({ client, aliasActions: data.flat() })
+        )
+      ),
     MARK_VERSION_INDEX_READY_CONFLICT: (state: MarkVersionIndexReadyConflict) =>
       Actions.fetchIndices({ client, indices: [state.currentAlias, state.versionAlias] }),
     LEGACY_SET_WRITE_BLOCK: (state: LegacySetWriteBlockState) =>

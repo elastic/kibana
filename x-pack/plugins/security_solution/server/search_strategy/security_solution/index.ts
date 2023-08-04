@@ -15,7 +15,6 @@ import type {
   FactoryQueryTypes,
   StrategyResponseType,
   StrategyRequestType,
-  StrategyParseResponseType,
 } from '../../../common/search_strategy/security_solution';
 import { securitySolutionFactory } from './factory';
 import type { SecuritySolutionFactory } from './factory/types';
@@ -38,9 +37,7 @@ export const securitySolutionSearchStrategyProvider = <T extends FactoryQueryTyp
   getSpaceId?: (request: KibanaRequest) => string,
   ruleDataClient?: IRuleDataClient | null
 ): ISearchStrategy<StrategyRequestType<T>, StrategyResponseType<T>> => {
-  const es = data.search.getSearchStrategy(
-    ENHANCED_ES_SEARCH_STRATEGY
-  ) as unknown as ISearchStrategy<StrategyRequestType<T>, StrategyParseResponseType<T>>;
+  const es = data.search.getSearchStrategy(ENHANCED_ES_SEARCH_STRATEGY);
 
   return {
     search: (request, options, deps) => {

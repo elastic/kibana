@@ -13,11 +13,15 @@ import {
   MsearchMultisearchBody,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ElasticsearchClient } from '@kbn/core/server';
-import { occurrencesBudgetingMethodSchema, timeslicesBudgetingMethodSchema } from '@kbn/slo-schema';
+import {
+  occurrencesBudgetingMethodSchema,
+  timeslicesBudgetingMethodSchema,
+  toMomentUnitOfTime,
+} from '@kbn/slo-schema';
 import { assertNever } from '@kbn/std';
+import moment from 'moment';
 import { SLO_DESTINATION_INDEX_PATTERN } from '../../assets/constants';
 import { DateRange, Duration, IndicatorData, SLO } from '../../domain/models';
-import { toDateRange } from '../../domain/services/date_range';
 import { InternalQueryError } from '../../errors';
 
 export interface SLIClient {
@@ -47,10 +51,7 @@ export class DefaultSLIClient implements SLIClient {
       a.duration.isShorterThan(b.duration) ? 1 : -1
     );
     const longestLookbackWindow = sortedLookbackWindows[0];
-    const longestDateRange = toDateRange({
-      duration: longestLookbackWindow.duration,
-      isRolling: true,
-    });
+    const longestDateRange = getLookbackDateRange(longestLookbackWindow.duration);
 
     if (occurrencesBudgetingMethodSchema.is(slo.budgetingMethod)) {
       const result = await this.esClient.search<unknown, EsAggregations>({
@@ -178,4 +179,16 @@ function handleWindowedResult(
   }
 
   return indicatorDataPerLookbackWindow;
+}
+
+function getLookbackDateRange(duration: Duration): { from: Date; to: Date } {
+  const unit = toMomentUnitOfTime(duration.unit);
+  const now = moment.utc().startOf('minute');
+  const from = now.clone().subtract(duration.value, unit);
+  const to = now.clone();
+
+  return {
+    from: from.toDate(),
+    to: to.toDate(),
+  };
 }

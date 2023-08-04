@@ -58,9 +58,9 @@ describe('<CloudSummarySection />', () => {
     expect(screen.getByTestId(DASHBOARD_COUNTER_CARDS.FAILING_FINDINGS)).toHaveTextContent('1M');
   });
 
-  it('renders 0 as empty state', () => {
+  it('renders N/A as an empty state', () => {
     renderCloudSummarySection({ stats: { totalFailed: undefined } });
 
-    expect(screen.getByTestId(DASHBOARD_COUNTER_CARDS.FAILING_FINDINGS)).toHaveTextContent('0');
+    expect(screen.getByTestId(DASHBOARD_COUNTER_CARDS.FAILING_FINDINGS)).toHaveTextContent('N/A');
   });
 });

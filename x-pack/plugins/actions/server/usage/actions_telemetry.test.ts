@@ -104,17 +104,17 @@ describe('actions telemetry', () => {
     expect(mockEsClient.search).toHaveBeenCalledTimes(1);
 
     expect(telemetry).toMatchInlineSnapshot(`
-Object {
-  "countByType": Object {
-    "__index": 1,
-    "__server-log": 1,
-    "another.type__": 1,
-    "some.type": 1,
-  },
-  "countTotal": 4,
-  "hasErrors": false,
-}
-`);
+      Object {
+        "countByType": Object {
+          "__index": 1,
+          "__server-log": 1,
+          "another.type__": 1,
+          "some.type": 1,
+        },
+        "countTotal": 4,
+        "hasErrors": false,
+      }
+    `);
   });
 
   test('getTotalCount should return empty results if query throws error', async () => {
@@ -128,13 +128,13 @@ Object {
       `Error executing actions telemetry task: getTotalCount - {}`
     );
     expect(telemetry).toMatchInlineSnapshot(`
-Object {
-  "countByType": Object {},
-  "countTotal": 0,
-  "errorMessage": "oh no",
-  "hasErrors": true,
-}
-`);
+      Object {
+        "countByType": Object {},
+        "countTotal": 0,
+        "errorMessage": "oh no",
+        "hasErrors": true,
+      }
+    `);
   });
 
   test('getInUseTotalCount', async () => {
@@ -188,18 +188,18 @@ Object {
 
     expect(mockEsClient.search).toHaveBeenCalledTimes(2);
     expect(telemetry).toMatchInlineSnapshot(`
-Object {
-  "countByAlertHistoryConnectorType": 0,
-  "countByType": Object {
-    "__server-log": 1,
-    "__slack": 1,
-  },
-  "countEmailByService": Object {},
-  "countNamespaces": 1,
-  "countTotal": 2,
-  "hasErrors": false,
-}
-`);
+      Object {
+        "countByAlertHistoryConnectorType": 0,
+        "countByType": Object {
+          "__server-log": 1,
+          "__slack": 1,
+        },
+        "countEmailByService": Object {},
+        "countNamespaces": 1,
+        "countTotal": 2,
+        "hasErrors": false,
+      }
+    `);
   });
 
   test('getInUseTotalCount should count preconfigured alert history connector usage', async () => {
@@ -269,6 +269,7 @@ Object {
         name: 'test',
         isPreconfigured: true,
         isDeprecated: false,
+        isSystemAction: false,
         config: {
           tenantId: 'sdsd',
           clientId: 'sdfsdf',
@@ -283,25 +284,27 @@ Object {
         name: 'test',
         isPreconfigured: true,
         isDeprecated: false,
+        isSystemAction: false,
         secrets: {},
+        config: {},
       },
     ]);
 
     expect(mockEsClient.search).toHaveBeenCalledTimes(2);
     expect(telemetry).toMatchInlineSnapshot(`
-Object {
-  "countByAlertHistoryConnectorType": 1,
-  "countByType": Object {
-    "__index": 1,
-    "__server-log": 1,
-    "__slack": 1,
-  },
-  "countEmailByService": Object {},
-  "countNamespaces": 1,
-  "countTotal": 4,
-  "hasErrors": false,
-}
-`);
+      Object {
+        "countByAlertHistoryConnectorType": 1,
+        "countByType": Object {
+          "__index": 1,
+          "__server-log": 1,
+          "__slack": 1,
+        },
+        "countEmailByService": Object {},
+        "countNamespaces": 1,
+        "countTotal": 4,
+        "hasErrors": false,
+      }
+    `);
   });
 
   test('getInUseTotalCount should return empty results if query throws error', async () => {
@@ -315,16 +318,16 @@ Object {
       `Error executing actions telemetry task: getInUseTotalCount - {}`
     );
     expect(telemetry).toMatchInlineSnapshot(`
-Object {
-  "countByAlertHistoryConnectorType": 0,
-  "countByType": Object {},
-  "countEmailByService": Object {},
-  "countNamespaces": 0,
-  "countTotal": 0,
-  "errorMessage": "oh no",
-  "hasErrors": true,
-}
-`);
+      Object {
+        "countByAlertHistoryConnectorType": 0,
+        "countByType": Object {},
+        "countEmailByService": Object {},
+        "countNamespaces": 0,
+        "countTotal": 0,
+        "errorMessage": "oh no",
+        "hasErrors": true,
+      }
+    `);
   });
 
   test('getTotalCount accounts for preconfigured connectors', async () => {
@@ -421,7 +424,9 @@ Object {
         name: 'test',
         isPreconfigured: true,
         isDeprecated: false,
+        isSystemAction: false,
         secrets: {},
+        config: {},
       },
       {
         id: 'anotherServerLog',
@@ -429,25 +434,70 @@ Object {
         name: 'test',
         isPreconfigured: true,
         isDeprecated: false,
+        isSystemAction: false,
         secrets: {},
+        config: {},
       },
     ]);
 
     expect(mockEsClient.search).toHaveBeenCalledTimes(1);
 
     expect(telemetry).toMatchInlineSnapshot(`
-Object {
-  "countByType": Object {
-    "__index": 1,
-    "__server-log": 2,
-    "__test": 1,
-    "another.type__": 1,
-    "some.type": 1,
-  },
-  "countTotal": 6,
-  "hasErrors": false,
-}
-`);
+      Object {
+        "countByType": Object {
+          "__index": 1,
+          "__server-log": 2,
+          "__test": 1,
+          "another.type__": 1,
+          "some.type": 1,
+        },
+        "countTotal": 6,
+        "hasErrors": false,
+      }
+    `);
+  });
+
+  test('getTotalCount accounts for system connectors', async () => {
+    const mockEsClient = elasticsearchClientMock.createClusterClient().asScoped().asInternalUser;
+    mockEsClient.search.mockResponse(
+      // @ts-expect-error not full search response
+      {
+        aggregations: {
+          byActionTypeId: {
+            value: {
+              types: {},
+            },
+          },
+        },
+        hits: {
+          hits: [],
+        },
+      }
+    );
+    const telemetry = await getTotalCount(mockEsClient, 'test', mockLogger, [
+      {
+        id: 'system_action:system-connector-test.system-action',
+        actionTypeId: 'test.system-action',
+        name: 'System connector',
+        isPreconfigured: false,
+        isDeprecated: false,
+        isSystemAction: true,
+        secrets: {},
+        config: {},
+      },
+    ]);
+
+    expect(mockEsClient.search).toHaveBeenCalledTimes(1);
+
+    expect(telemetry).toMatchInlineSnapshot(`
+      Object {
+        "countByType": Object {
+          "test.system-action": 1,
+        },
+        "countTotal": 1,
+        "hasErrors": false,
+      }
+    `);
   });
 
   test('getInUseTotalCount() accounts for preconfigured connectors', async () => {
@@ -535,28 +585,113 @@ Object {
         name: 'test',
         isPreconfigured: true,
         isDeprecated: false,
+        isSystemAction: false,
         secrets: {},
+        config: {},
       },
     ]);
 
     expect(mockEsClient.search).toHaveBeenCalledTimes(2);
     expect(telemetry).toMatchInlineSnapshot(`
-Object {
-  "countByAlertHistoryConnectorType": 1,
-  "countByType": Object {
-    "__email": 3,
-    "__index": 1,
-    "__server-log": 1,
-    "__slack": 1,
-  },
-  "countEmailByService": Object {
-    "other": 3,
-  },
-  "countNamespaces": 1,
-  "countTotal": 6,
-  "hasErrors": false,
-}
-`);
+      Object {
+        "countByAlertHistoryConnectorType": 1,
+        "countByType": Object {
+          "__email": 3,
+          "__index": 1,
+          "__server-log": 1,
+          "__slack": 1,
+        },
+        "countEmailByService": Object {
+          "other": 3,
+        },
+        "countNamespaces": 1,
+        "countTotal": 6,
+        "hasErrors": false,
+      }
+    `);
+  });
+
+  test('getInUseTotalCount() accounts for system connectors', async () => {
+    const mockEsClient = elasticsearchClientMock.createClusterClient().asScoped().asInternalUser;
+    mockEsClient.search.mockResponseOnce(
+      // @ts-expect-error not full search response
+      {
+        aggregations: {
+          refs: {
+            actionRefIds: {
+              value: {
+                connectorIds: {
+                  '1': 'action-0',
+                  '2': 'action-1',
+                },
+                total: 3,
+              },
+            },
+          },
+          system_actions: {
+            systemActionRefIds: {
+              value: {
+                total: 2,
+                actionRefs: {
+                  'system_action:system-connector-test.system-action': {
+                    actionRef: 'system_action:system-connector-test.system-action',
+                    actionTypeId: 'test.system-action',
+                  },
+                  'system_action:system-connector-test.system-action-2': {
+                    actionRef: 'system_action:system-connector-test.system-action-2',
+                    actionTypeId: 'test.system-action-2',
+                  },
+                },
+              },
+            },
+          },
+        },
+      }
+    );
+    mockEsClient.search.mockResponseOnce({
+      hits: {
+        hits: [
+          // @ts-expect-error not full search response
+          {
+            _source: {
+              action: {
+                id: '1',
+                actionTypeId: '.index',
+              },
+              namespaces: ['default'],
+            },
+          },
+          // @ts-expect-error not full search response
+          {
+            _source: {
+              action: {
+                id: '2',
+                actionTypeId: '.index',
+              },
+              namespaces: ['default'],
+            },
+          },
+        ],
+      },
+    });
+
+    const telemetry = await getInUseTotalCount(mockEsClient, 'test', mockLogger, undefined, []);
+
+    expect(mockEsClient.search).toHaveBeenCalledTimes(2);
+    expect(telemetry).toMatchInlineSnapshot(`
+      Object {
+        "countByAlertHistoryConnectorType": 0,
+        "countByType": Object {
+          "__index": 2,
+          "test.system-action": 1,
+          "test.system-action-2": 1,
+        },
+        "countEmailByService": Object {},
+        "countNamespaces": 1,
+        "countTotal": 5,
+        "hasErrors": false,
+      }
+    `);
   });
 
   test('getInUseTotalCount() accounts for actions namespaces', async () => {
@@ -641,22 +776,22 @@ Object {
 
     expect(mockEsClient.search).toHaveBeenCalledTimes(2);
     expect(telemetry).toMatchInlineSnapshot(`
-Object {
-  "countByAlertHistoryConnectorType": 1,
-  "countByType": Object {
-    "__email": 3,
-    "__index": 1,
-    "__server-log": 1,
-    "__slack": 1,
-  },
-  "countEmailByService": Object {
-    "other": 1,
-  },
-  "countNamespaces": 3,
-  "countTotal": 6,
-  "hasErrors": false,
-}
-`);
+      Object {
+        "countByAlertHistoryConnectorType": 1,
+        "countByType": Object {
+          "__email": 3,
+          "__index": 1,
+          "__server-log": 1,
+          "__slack": 1,
+        },
+        "countEmailByService": Object {
+          "other": 1,
+        },
+        "countNamespaces": 3,
+        "countTotal": 6,
+        "hasErrors": false,
+      }
+    `);
   });
 
   test('getExecutionsTotalCount', async () => {
@@ -809,17 +944,17 @@ Object {
       `Error executing actions telemetry task: getExecutionsPerDayCount - {}`
     );
     expect(telemetry).toMatchInlineSnapshot(`
-Object {
-  "avgExecutionTime": 0,
-  "avgExecutionTimeByType": Object {},
-  "countByType": Object {},
-  "countFailed": 0,
-  "countFailedByType": Object {},
-  "countRunOutcomeByConnectorType": Object {},
-  "countTotal": 0,
-  "errorMessage": "oh no",
-  "hasErrors": true,
-}
-`);
+      Object {
+        "avgExecutionTime": 0,
+        "avgExecutionTimeByType": Object {},
+        "countByType": Object {},
+        "countFailed": 0,
+        "countFailedByType": Object {},
+        "countRunOutcomeByConnectorType": Object {},
+        "countTotal": 0,
+        "errorMessage": "oh no",
+        "hasErrors": true,
+      }
+    `);
   });
 });

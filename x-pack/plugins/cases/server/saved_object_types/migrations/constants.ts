@@ -12,3 +12,5 @@ export const GENERATED_ALERT = 'generated_alert';
 export const COMMENT_ASSOCIATION_TYPE = 'case';
 export const CASE_TYPE_INDIVIDUAL = 'individual';
 export const SUB_CASE_SAVED_OBJECT = 'cases-sub-case';
+
+export const MIN_COMMENTS_DEFERRED_KIBANA_VERSION = '8.9.0';

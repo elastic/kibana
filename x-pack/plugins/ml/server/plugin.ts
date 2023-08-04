@@ -26,7 +26,7 @@ import { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
 import { jsonSchemaRoutes } from './routes/json_schema';
 import { notificationsRoutes } from './routes/notifications';
-import type { PluginsSetup, PluginsStart, RouteInitialization } from './types';
+import type { MlFeatures, PluginsSetup, PluginsStart, RouteInitialization } from './types';
 import { PLUGIN_ID } from '../common/constants/app';
 import type { MlCapabilities } from '../common/types/capabilities';
 
@@ -73,7 +73,13 @@ import {
   CASE_ATTACHMENT_TYPE_ID_ANOMALY_EXPLORER_CHARTS,
 } from '../common/constants/cases';
 
-export type MlPluginSetup = SharedServices;
+type SetFeaturesEnabled = (features: MlFeatures) => void;
+
+interface MlSetup {
+  setFeaturesEnabled: SetFeaturesEnabled;
+}
+
+export type MlPluginSetup = SharedServices & MlSetup;
 export type MlPluginStart = void;
 
 export class MlServerPlugin
@@ -93,6 +99,11 @@ export class MlServerPlugin
   private isMlReady: Promise<void>;
   private setMlReady: () => void = () => {};
   private savedObjectsSyncService: SavedObjectsSyncService;
+  private enabledFeatures: MlFeatures = {
+    ad: true,
+    dfa: true,
+    nlp: true,
+  };
 
   constructor(ctx: PluginInitializerContext) {
     this.log = ctx.logger.get();
@@ -149,7 +160,12 @@ export class MlServerPlugin
     registerKibanaSettings(coreSetup);
 
     // initialize capabilities switcher to add license filter to ml capabilities
-    setupCapabilitiesSwitcher(coreSetup, plugins.licensing.license$, this.log);
+    setupCapabilitiesSwitcher(
+      coreSetup,
+      plugins.licensing.license$,
+      this.enabledFeatures,
+      this.log
+    );
     setupSavedObjects(coreSetup.savedObjects);
     this.savedObjectsSyncService.registerSyncTask(
       plugins.taskManager,
@@ -208,6 +224,7 @@ export class MlServerPlugin
         coreSetup.getStartServices
       ),
       mlLicense: this.mlLicense,
+      enabledFeatures: this.enabledFeatures,
     };
 
     annotationRoutes(routeInit, plugins.security);
@@ -269,7 +286,19 @@ export class MlServerPlugin
       });
     }
 
-    return sharedServicesProviders;
+    const setFeaturesEnabled = (features: MlFeatures) => {
+      if (features.ad !== undefined) {
+        this.enabledFeatures.ad = features.ad;
+      }
+      if (features.dfa !== undefined) {
+        this.enabledFeatures.dfa = features.dfa;
+      }
+      if (features.nlp !== undefined) {
+        this.enabledFeatures.nlp = features.nlp;
+      }
+    };
+
+    return { ...sharedServicesProviders, setFeaturesEnabled };
   }
 
   public start(coreStart: CoreStart, plugins: PluginsStart): MlPluginStart {
@@ -280,9 +309,13 @@ export class MlServerPlugin
     this.savedObjectsStart = coreStart.savedObjects;
     this.dataViews = plugins.dataViews;
 
-    this.mlLicense.setup(plugins.licensing.license$, (mlLicense: MlLicense) => {
+    this.mlLicense.setup(plugins.licensing.license$, async (mlLicense: MlLicense) => {
       if (mlLicense.isMlEnabled() === false || mlLicense.isFullLicense() === false) {
-        this.savedObjectsSyncService.unscheduleSyncTask(plugins.taskManager);
+        try {
+          await this.savedObjectsSyncService.unscheduleSyncTask(plugins.taskManager);
+        } catch (e) {
+          this.log.debug(`Error unscheduling saved objects sync task`, e);
+        }
         return;
       }
 

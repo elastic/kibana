@@ -120,7 +120,7 @@ export const ChangePointDetectionContextProvider: FC = ({ children }) => {
   >({});
   const [bucketInterval, setBucketInterval] = useState<TimeBucketsInterval>();
 
-  const timeRange = useTimeRangeUpdates();
+  const timeRange = useTimeRangeUpdates(true);
 
   useEffect(function updateIntervalOnTimeBoundsChange() {
     const timeUpdateSubscription = timefilter

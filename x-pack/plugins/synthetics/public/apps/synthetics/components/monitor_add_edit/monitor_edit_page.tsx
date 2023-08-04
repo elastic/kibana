@@ -54,8 +54,8 @@ export const MonitorEditPage: React.FC = () => {
     return <EditMonitorNotFound />;
   }
 
-  const isReadOnly = data?.attributes[ConfigKey.MONITOR_SOURCE_TYPE] === SourceType.PROJECT;
-  const projectId = data?.attributes[ConfigKey.PROJECT_ID];
+  const isReadOnly = data?.[ConfigKey.MONITOR_SOURCE_TYPE] === SourceType.PROJECT;
+  const projectId = data?.[ConfigKey.PROJECT_ID];
 
   if (locationsError) {
     return <LocationsLoadingError />;
@@ -86,10 +86,8 @@ export const MonitorEditPage: React.FC = () => {
 
   return data && locationsLoaded && !loading && !error ? (
     <>
-      <AlertingCallout
-        isAlertingEnabled={data.attributes[ConfigKey.ALERT_CONFIG]?.status?.enabled}
-      />
-      <MonitorForm defaultValues={data?.attributes} readOnly={isReadOnly}>
+      <AlertingCallout isAlertingEnabled={data[ConfigKey.ALERT_CONFIG]?.status?.enabled} />
+      <MonitorForm defaultValues={data} readOnly={isReadOnly}>
         <MonitorSteps
           stepMap={EDIT_MONITOR_STEPS(isReadOnly)}
           isEditFlow={true}
@@ -97,8 +95,8 @@ export const MonitorEditPage: React.FC = () => {
           projectId={projectId}
         />
         <MonitorDetailsLinkPortal
-          configId={data?.attributes[ConfigKey.CONFIG_ID]}
-          name={data?.attributes.name}
+          configId={data?.[ConfigKey.CONFIG_ID]}
+          name={data?.name}
           updateUrl={false}
         />
       </MonitorForm>

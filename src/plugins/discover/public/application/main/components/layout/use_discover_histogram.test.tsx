@@ -49,8 +49,10 @@ jest.mock('../../../../hooks/use_discover_services', () => {
   };
 });
 
-jest.mock('@kbn/unified-field-list-plugin/public', () => {
-  const originalModule = jest.requireActual('@kbn/unified-field-list-plugin/public');
+jest.mock('@kbn/unified-field-list/src/hooks/use_query_subscriber', () => {
+  const originalModule = jest.requireActual(
+    '@kbn/unified-field-list/src/hooks/use_query_subscriber'
+  );
   return {
     ...originalModule,
     useQuerySubscriber: jest.fn(() => ({
@@ -152,7 +154,7 @@ describe('useDiscoverHistogram', () => {
       act(() => {
         hook.result.current.ref(api);
       });
-      expect(api.state$.subscribe).toHaveBeenCalledTimes(3);
+      expect(api.state$.subscribe).toHaveBeenCalledTimes(2);
     });
 
     it('should sync Unified Histogram state with the state container', async () => {

@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 
 import { AuthorizationContext } from '../../../../lib/authorization';
 import { TransformListAction, TransformListRow } from '../../../../common';
-import { SECTION_SLUG } from '../../../../constants';
+import { SECTION_SLUG } from '../../../../common/constants';
 import { useSearchItems } from '../../../../hooks/use_search_items';
 import { useAppDependencies, useToastNotifications } from '../../../../app_dependencies';
 

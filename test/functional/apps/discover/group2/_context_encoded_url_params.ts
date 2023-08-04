@@ -10,7 +10,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 const customDataViewIdParam = 'context-enc:oded-param';
-const customDocIdParam = '1+1=2';
+const customDocIdParam = '1+1=2/&?#';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dataGrid = getService('dataGrid');
@@ -24,12 +24,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await security.testUser.setRoles(['kibana_admin', 'context_encoded_param']);
       await PageObjects.common.navigateToApp('settings');
       await es.transport.request({
-        path: `/context_encoded_param/_doc/${customDocIdParam}`,
+        path: `/_bulk`,
         method: 'PUT',
-        body: {
-          username: 'Dmitry',
-          '@timestamp': '2015-09-21T09:30:23',
-        },
+        bulkBody: [
+          { index: { _index: 'context_encoded_param', _id: customDocIdParam } },
+          { '@timestamp': '2015-09-21T09:30:23', name: 'Dmitry' },
+        ],
       });
       await PageObjects.settings.createIndexPattern(
         'context_encoded_param',
@@ -57,7 +57,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       const headerElement = await testSubjects.find('contextDocumentSurroundingHeader');
 
-      expect(await headerElement.getVisibleText()).to.be('Documents surrounding #1+1=2');
+      expect(await headerElement.getVisibleText()).to.be(
+        `Documents surrounding #${customDocIdParam}`
+      );
     });
   });
 }

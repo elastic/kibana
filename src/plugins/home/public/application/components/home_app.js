@@ -12,8 +12,9 @@ import PropTypes from 'prop-types';
 import { Home } from './home';
 import { TutorialDirectory } from './tutorial_directory';
 import { Tutorial } from './tutorial/tutorial';
-// eslint-disable-next-line no-restricted-imports
-import { HashRouter as Router, Switch, Route, Redirect } from 'react-router-dom';
+import { Redirect } from 'react-router-dom';
+import { HashRouter as Router, Routes, Route } from '@kbn/shared-ux-router';
+
 import { getTutorial } from '../load_tutorials';
 import { replaceTemplateStrings } from './tutorial/replace_template_strings';
 import { getServices } from '../kibana_services';
@@ -67,7 +68,7 @@ export function HomeApp({ directories, solutions }) {
   return (
     <I18nProvider>
       <Router>
-        <Switch>
+        <Routes>
           <Route path="/tutorial/:id" render={renderTutorial} />
           <Route path="/tutorial_directory/:tab?" render={renderTutorialDirectory} />
           {guidedOnboardingService.isEnabled && (
@@ -87,7 +88,7 @@ export function HomeApp({ directories, solutions }) {
             />
           </Route>
           <Redirect to="/" />
-        </Switch>
+        </Routes>
       </Router>
     </I18nProvider>
   );

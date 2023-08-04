@@ -8,7 +8,7 @@
 import React, { FC } from 'react';
 import { Redirect } from 'react-router-dom';
 
-import { SECTION_SLUG } from '../constants';
+import { SECTION_SLUG } from './constants';
 
 export const RedirectToTransformManagement: FC = () => <Redirect to={`/${SECTION_SLUG.HOME}`} />;
 

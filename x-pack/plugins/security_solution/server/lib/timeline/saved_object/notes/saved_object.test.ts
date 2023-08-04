@@ -6,13 +6,13 @@
  */
 
 import type { AuthenticatedUser } from '@kbn/security-plugin/common/model';
-import type { NoteSavedObject } from '../../../../../common/types/timeline/note';
+import type { Note } from '../../../../../common/api/timeline';
 
 import { pickSavedNote } from './saved_object';
 
 describe('saved_object', () => {
   const mockDateNow = new Date('2020-04-03T23:00:00.000Z').valueOf();
-  const getMockSavedNote = (): NoteSavedObject => ({
+  const getMockSavedNote = (): Note => ({
     noteId: '7ba7a520-03f4-11eb-9d9d-ffba20fabba8',
     version: 'WzQ0ODEsMV0=',
     note: '789',

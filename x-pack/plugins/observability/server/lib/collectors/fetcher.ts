@@ -47,14 +47,14 @@ export const fetcher = async (context: CollectorFetchContext) => {
         },
         by_rolling_duration: {
           ...acc.by_rolling_duration,
-          ...('isRolling' in so.attributes.timeWindow && {
+          ...(so.attributes.timeWindow.type === 'rolling' && {
             [so.attributes.timeWindow.duration]:
               (acc.by_rolling_duration[so.attributes.timeWindow.duration] ?? 0) + 1,
           }),
         },
         by_calendar_aligned_duration: {
           ...acc.by_calendar_aligned_duration,
-          ...('isCalendar' in so.attributes.timeWindow && {
+          ...(so.attributes.timeWindow.type === 'calendarAligned' && {
             [so.attributes.timeWindow.duration]:
               (acc.by_calendar_aligned_duration[so.attributes.timeWindow.duration] ?? 0) + 1,
           }),

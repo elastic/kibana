@@ -48,7 +48,7 @@ import type {
   VisParams,
 } from '..';
 
-import type { SavedVisState } from '../types';
+import type { ListingViewRegistry, SavedVisState } from '../types';
 import type { createVisEmbeddableFromObject } from '../embeddable';
 import type { VisEditorsRegistry } from '../vis_editors_registry';
 
@@ -113,6 +113,7 @@ export interface VisualizeServices extends CoreStart {
   spaces?: SpacesPluginStart;
   theme: ThemeServiceStart;
   visEditorsRegistry: VisEditorsRegistry;
+  listingViewRegistry: ListingViewRegistry;
   unifiedSearch: UnifiedSearchPublicPluginStart;
 }
 

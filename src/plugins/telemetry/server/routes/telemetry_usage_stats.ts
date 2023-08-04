@@ -46,7 +46,8 @@ export function registerTelemetryUsageStatsRoutes(
       }
 
       const security = getSecurity();
-      if (security && unencrypted) {
+      // We need to check useRbacForRequest to figure out if ES has security enabled before making the privileges check
+      if (security && unencrypted && security.authz.mode.useRbacForRequest(req)) {
         // Normally we would use `options: { tags: ['access:decryptedTelemetry'] }` in the route definition to check authorization for an
         // API action, however, we want to check this conditionally based on the `unencrypted` parameter. In this case we need to use the
         // security API directly to check privileges for this action. Note that the 'decryptedTelemetry' API privilege string is only

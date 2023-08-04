@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="25" height="24" viewBox="0 0 25 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <g id="icon-logging-32-color" clip-path="url(#clip0_2762_20222)">
+        <g id="Group 6">
+            <path id="Fill 1" fill-rule="evenodd" clip-rule="evenodd" d="M7.5 15H16.5V13.5H7.5V15Z" fill="#1A1C21"/>
+            <path id="Fill 2" fill-rule="evenodd" clip-rule="evenodd" d="M7.5 11.25H16.5V9.75H7.5V11.25Z" fill="#1A1C21"/>
+            <path id="Fill 3" fill-rule="evenodd" clip-rule="evenodd" d="M7.5 7.5H16.5V6H7.5V7.5Z" fill="#1A1C21"/>
+            <path id="Fill 4" fill-rule="evenodd" clip-rule="evenodd" d="M23.25 4.5H20.25V3.75C20.25 2.92275 20.9228 2.25 21.75 2.25C22.5772 2.25 23.25 2.92275 23.25 3.75V4.5ZM17.25 21.75C16.4227 21.75 15.75 21.0772 15.75 20.25V18H5.25V3.75C5.25 2.92275 5.92275 2.25 6.75 2.25H19.167C18.909 2.69325 18.75 3.20175 18.75 3.75V20.25C18.75 21.0772 18.0772 21.75 17.25 21.75ZM3.75 21.75C2.92275 21.75 2.25 21.0772 2.25 20.25V19.5H14.25V20.25C14.25 20.796 14.3963 21.3083 14.6528 21.75H3.75ZM21.75 0.75H6.75C5.0955 0.75 3.75 2.0955 3.75 3.75V18H0.75V20.25C0.75 21.9045 2.0955 23.25 3.75 23.25H17.25C18.9045 23.25 20.25 21.9045 20.25 20.25V6H24.75V3.75C24.75 2.0955 23.4045 0.75 21.75 0.75Z" fill="#1A1C21"/>
+        </g>
+    </g>
+    <defs>
+        <clipPath id="clip0_2762_20222">
+            <rect width="24" height="24" fill="white" transform="translate(0.75)"/>
+        </clipPath>
+    </defs>
+</svg>

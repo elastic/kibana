@@ -8,6 +8,7 @@
 import { SavedObjectsType } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import type { SavedObjectMigrationFn } from '@kbn/core/server';
+import { schema } from '@kbn/config-schema';
 import { APM_SERVICE_GROUP_SAVED_OBJECT_TYPE } from '../../common/service_groups';
 
 interface ApmServiceGroupsPre850 {
@@ -57,6 +58,19 @@ export const apmServiceGroups: SavedObjectsType = {
       i18n.translate('xpack.apm.apmServiceGroups.title', {
         defaultMessage: 'APM Service Groups',
       }),
+  },
+  modelVersions: {
+    '1': {
+      changes: [],
+      schemas: {
+        create: schema.object({
+          groupName: schema.string(),
+          kuery: schema.string(),
+          description: schema.maybe(schema.string()),
+          color: schema.maybe(schema.string()),
+        }),
+      },
+    },
   },
   migrations: {
     '8.5.0': migrateApmServiceGroups850,

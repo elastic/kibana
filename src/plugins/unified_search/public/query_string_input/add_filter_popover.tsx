@@ -24,6 +24,7 @@ import {
   withCloseFilterEditorConfirmModal,
   WithCloseFilterEditorConfirmModalProps,
 } from '../filter_bar/filter_editor';
+import { SuggestionsAbstraction } from '../typeahead/suggestions_component';
 
 export const strings = {
   getAddFilterButtonLabel: () =>
@@ -40,6 +41,7 @@ interface AddFilterPopoverProps extends WithCloseFilterEditorConfirmModalProps {
   onFiltersUpdated?: (filters: Filter[]) => void;
   isDisabled?: boolean;
   buttonProps?: Partial<EuiButtonIconProps>;
+  suggestionsAbstraction?: SuggestionsAbstraction;
 }
 
 const AddFilterPopoverComponent = React.memo(function AddFilterPopover({
@@ -53,6 +55,7 @@ const AddFilterPopoverComponent = React.memo(function AddFilterPopover({
   onCloseFilterPopover,
   onLocalFilterUpdate,
   onLocalFilterCreate,
+  suggestionsAbstraction,
 }: AddFilterPopoverProps) {
   const euiTheme = useEuiTheme();
   const [showAddFilterPopover, setShowAddFilterPopover] = useState(false);
@@ -108,6 +111,7 @@ const AddFilterPopoverComponent = React.memo(function AddFilterPopover({
           closePopoverOnCancel={() => {
             setShowAddFilterPopover(false);
           }}
+          suggestionsAbstraction={suggestionsAbstraction}
         />
       </EuiPopover>
     </EuiFlexItem>

@@ -19,21 +19,19 @@ import { SloList } from './components/slo_list';
 import { AutoRefreshButton } from './components/auto_refresh_button';
 import { HeaderTitle } from './components/header_title';
 import { FeedbackButton } from '../../components/slo/feedback_button/feedback_button';
-import { paths } from '../../config/paths';
-import type { ObservabilityAppServices } from '../../application/types';
+import { paths } from '../../../common/locators/paths';
 
 export function SlosPage() {
   const {
     application: { navigateToUrl },
     http: { basePath },
-  } = useKibana<ObservabilityAppServices>().services;
+  } = useKibana().services;
   const { ObservabilityPageTemplate } = usePluginContext();
   const { hasWriteCapabilities } = useCapabilities();
   const { hasAtLeast } = useLicense();
 
   const { isInitialLoading, isLoading, isError, sloList } = useFetchSloList();
-
-  const { total } = sloList || {};
+  const { total } = sloList || { total: 0 };
 
   const [isAutoRefreshing, setIsAutoRefreshing] = useState<boolean>(true);
 

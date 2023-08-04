@@ -14,7 +14,7 @@ import {
 import type { Filter } from '@kbn/es-query';
 import { tableDefaults } from '@kbn/securitysolution-data-table';
 import type { SubsetDataTableModel } from '@kbn/securitysolution-data-table';
-import type { Status } from '../../../../common/detection_engine/schemas/common/schemas';
+import type { Status } from '../../../../common/api/detection_engine';
 import {
   getColumns,
   getRulePreviewColumns,
@@ -176,6 +176,7 @@ export const getAlertsPreviewDefaultModel = (license?: LicenseService): SubsetDa
 export const requiredFieldsForActions = [
   '@timestamp',
   'kibana.alert.workflow_status',
+  'kibana.alert.workflow_tags',
   'kibana.alert.group.id',
   'kibana.alert.original_time',
   'kibana.alert.building_block_type',

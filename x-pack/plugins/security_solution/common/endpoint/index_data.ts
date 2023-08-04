@@ -9,6 +9,7 @@ import type { Client } from '@elastic/elasticsearch';
 import seedrandom from 'seedrandom';
 import type { KbnClient } from '@kbn/test';
 import type { CreatePackagePolicyResponse } from '@kbn/fleet-plugin/common';
+import { ToolingLog } from '@kbn/tooling-log';
 import type { TreeOptions } from './generate_data';
 import { EndpointDocGenerator } from './generate_data';
 import type {
@@ -49,6 +50,9 @@ export type IndexedHostsAndAlertsResponse = IndexedHostsResponse;
  * @param options
  * @param DocGenerator
  * @param withResponseActions
+ * @param numResponseActions
+ * @param alertIds
+ * @param logger_
  */
 export async function indexHostsAndAlerts(
   client: Client,
@@ -65,9 +69,12 @@ export async function indexHostsAndAlerts(
   options: TreeOptions = {},
   DocGenerator: typeof EndpointDocGenerator = EndpointDocGenerator,
   withResponseActions = true,
-  numResponseActions?: number
+  numResponseActions?: number,
+  alertIds?: string[],
+  logger_?: ToolingLog
 ): Promise<IndexedHostsAndAlertsResponse> {
   const random = seedrandom(seed);
+  const logger = logger_ ?? new ToolingLog({ level: 'info', writeTo: process.stdout });
   const epmEndpointPackage = await getEndpointPackageInfo(kbnClient);
   const response: IndexedHostsAndAlertsResponse = {
     hosts: [],
@@ -89,7 +96,7 @@ export async function indexHostsAndAlerts(
   };
 
   // Ensure fleet is setup and endpoint package installed
-  await setupFleetForEndpoint(kbnClient);
+  await setupFleetForEndpoint(kbnClient, logger);
 
   // If `fleet` integration is true, then ensure a (fake) fleet-server is connected
   if (fleet) {
@@ -119,6 +126,7 @@ export async function indexHostsAndAlerts(
       generator,
       withResponseActions,
       numResponseActions,
+      alertIds,
     });
 
     mergeAndAppendArrays(response, indexedHosts);

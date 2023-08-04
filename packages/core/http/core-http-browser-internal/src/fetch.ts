@@ -90,6 +90,7 @@ export class Fetch {
           controller
         );
         const initialResponse = this.fetchResponse(interceptedOptions);
+
         const interceptedResponse = await interceptResponse(
           interceptedOptions,
           initialResponse,
@@ -115,6 +116,7 @@ export class Fetch {
   private createRequest(options: HttpFetchOptionsWithPath): Request {
     const context = this.params.executionContext.withGlobalContext(options.context);
     const { version } = options;
+
     // Merge and destructure options out that are not applicable to the Fetch API.
     const {
       query,
@@ -168,7 +170,9 @@ export class Fetch {
     const contentType = response.headers.get('Content-Type') || '';
 
     try {
-      if (NDJSON_CONTENT.test(contentType) || ZIP_CONTENT.test(contentType)) {
+      if (fetchOptions.rawResponse) {
+        body = null;
+      } else if (NDJSON_CONTENT.test(contentType) || ZIP_CONTENT.test(contentType)) {
         body = await response.blob();
       } else if (JSON_CONTENT.test(contentType)) {
         body = await response.json();
@@ -224,6 +228,12 @@ const validateFetchArguments = (
   } else {
     throw new Error(
       `Invalid fetch arguments, must either be (string, object) or (object, undefined), received (${typeof pathOrOptions}, ${typeof options})`
+    );
+  }
+
+  if (fullOptions.rawResponse && !fullOptions.asResponse) {
+    throw new Error(
+      'Invalid fetch arguments, rawResponse = true is only supported when asResponse = true'
     );
   }
 

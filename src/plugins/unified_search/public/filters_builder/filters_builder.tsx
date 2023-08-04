@@ -16,6 +16,7 @@ import { FiltersBuilderReducer } from './reducer';
 import { getPathInArray } from './utils';
 import { FilterLocation } from './types';
 import { filtersBuilderCss } from './filters_builder.styles';
+import { SuggestionsAbstraction } from '../typeahead/suggestions_component';
 
 export interface FiltersBuilderProps {
   filters: Filter[];
@@ -26,6 +27,7 @@ export interface FiltersBuilderProps {
   maxDepth?: number;
   hideOr?: boolean;
   disabled?: boolean;
+  suggestionsAbstraction?: SuggestionsAbstraction;
 }
 
 const rootLevelConditionType = BooleanRelation.AND;
@@ -40,6 +42,7 @@ function FiltersBuilder({
   maxDepth = DEFAULT_MAX_DEPTH,
   hideOr = false,
   disabled = false,
+  suggestionsAbstraction,
 }: FiltersBuilderProps) {
   const filtersRef = useRef(filters);
   const [state, dispatch] = useReducer(FiltersBuilderReducer, { filters });
@@ -128,6 +131,7 @@ function FiltersBuilder({
           timeRangeForSuggestionsOverride,
           filtersForSuggestions,
           disabled,
+          suggestionsAbstraction,
         }}
       >
         <EuiDragDropContext onDragEnd={onDragEnd} onDragUpdate={onDragActive}>

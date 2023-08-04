@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import SlackParamsFields from './slack_params';
 import type { UseSubActionParams } from '@kbn/triggers-actions-ui-plugin/public/application/hooks/use_sub_action';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -156,28 +156,33 @@ describe('SlackParamsFields renders', () => {
   });
 
   test('all params fields is rendered for getChannels call', async () => {
-    render(
-      <IntlProvider locale="en">
-        <SlackParamsFields
-          actionParams={{
-            subAction: 'postMessage',
-            subActionParams: { channels: [], text: 'some text' },
-          }}
-          errors={{ message: [] }}
-          editAction={() => {}}
-          index={0}
-          defaultMessage="default message"
-          messageVariables={[]}
-        />
-      </IntlProvider>
-    );
+    const WrappedComponent = () => {
+      return (
+        <IntlProvider locale="en">
+          <SlackParamsFields
+            actionParams={{
+              subAction: 'postMessage',
+              subActionParams: { channels: [], text: 'some text' },
+            }}
+            errors={{ message: [] }}
+            editAction={() => {}}
+            index={0}
+            defaultMessage="default message"
+            messageVariables={[]}
+          />
+        </IntlProvider>
+      );
+    };
+    const { getByTestId } = render(<WrappedComponent />);
 
-    expect(screen.getByTestId('slackChannelsButton')).toHaveTextContent('Channels');
-    fireEvent.click(screen.getByTestId('slackChannelsButton'));
-    expect(screen.getByTestId('slackChannelsSelectableList')).toBeInTheDocument();
-    expect(screen.getByTestId('slackChannelsSelectableList')).toHaveTextContent('general');
-    fireEvent.click(screen.getByText('general'));
-    expect(screen.getByTitle('general').getAttribute('aria-checked')).toEqual('true');
+    getByTestId('slackChannelsComboBox').click();
+    getByTestId('comboBoxSearchInput').focus();
+
+    const options = getByTestId(
+      'comboBoxOptionsList slackChannelsComboBox-optionsList'
+    ).querySelectorAll('.euiComboBoxOption__content');
+    expect(options).toHaveLength(1);
+    expect(options[0].textContent).toBe('general');
   });
 
   test('show error message when no channel is selected', async () => {

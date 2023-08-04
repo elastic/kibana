@@ -184,7 +184,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visEditor.clickGo(true);
         await PageObjects.header.waitUntilLoadingHasFinished();
 
-        const expectedEntries = ['503', '404', '200']; // sorting aligned with rendered geometries
+        const expectedEntries = ['200', '404', '503']; // sorting order aligned with reading direction top-bottom
 
         const legendEntries = await PageObjects.visChart.getLegendEntriesXYCharts(xyChartSelector);
         expect(legendEntries).to.eql(expectedEntries);
@@ -212,21 +212,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.header.waitUntilLoadingHasFinished();
 
         const expectedEntries = [
-          '404 - win xp',
-          '404 - win 8',
-          '404 - win 7',
-          '404 - osx',
-          '503 - win xp',
-          '503 - win 8',
-          '503 - win 7',
-          '503 - osx',
-          '503 - ios',
-          '404 - ios',
-          '200 - win 7',
-          '200 - osx',
-          '200 - ios',
-          '200 - win xp',
           '200 - win 8',
+          '200 - win xp',
+          '200 - ios',
+          '200 - osx',
+          '200 - win 7',
+          '404 - ios',
+          '503 - ios',
+          '503 - osx',
+          '503 - win 7',
+          '503 - win 8',
+          '503 - win xp',
+          '404 - osx',
+          '404 - win 7',
+          '404 - win 8',
+          '404 - win xp',
         ];
         const legendEntries = await PageObjects.visChart.getLegendEntriesXYCharts(xyChartSelector);
         expect(legendEntries).to.eql(expectedEntries);
@@ -237,7 +237,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visEditor.clickGo(true);
         await PageObjects.header.waitUntilLoadingHasFinished();
 
-        const expectedEntries = ['win 7', 'osx', 'ios', 'win xp', 'win 8'];
+        const expectedEntries = ['win 8', 'win xp', 'ios', 'osx', 'win 7'];
         const legendEntries = await PageObjects.visChart.getLegendEntriesXYCharts(xyChartSelector);
         expect(legendEntries).to.eql(expectedEntries);
       });

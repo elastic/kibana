@@ -23,6 +23,11 @@ import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 
 import type { File } from '@kbn/files-plugin/common';
 
+import {
+  FILE_STORAGE_TO_HOST_DATA_INDEX_PATTERN,
+  FILE_STORAGE_TO_HOST_METADATA_INDEX_PATTERN,
+} from '../../../common/constants';
+
 import { getFileDataIndexName, getFileMetadataIndexName } from '../../../common';
 
 import type { HapiReadableStream } from '../..';
@@ -55,8 +60,8 @@ describe('FleetToHostFilesClient', () => {
     return new FleetToHostFilesClient(
       esClientMock,
       loggerMock,
-      getFileMetadataIndexName('foo'),
-      getFileDataIndexName('foo'),
+      getFileMetadataIndexName('foo', true),
+      getFileDataIndexName('foo', true),
       12345
     );
   };
@@ -97,11 +102,19 @@ describe('FleetToHostFilesClient', () => {
 
     esClientMock.search.mockImplementation(async (searchRequest = {}) => {
       // File metadata
-      if ((searchRequest.index as string).startsWith('.fleet-files-')) {
+      if (
+        (searchRequest.index as string).startsWith(
+          FILE_STORAGE_TO_HOST_METADATA_INDEX_PATTERN.replace('*', '')
+        )
+      ) {
         return fleetFilesIndexSearchResponse;
       }
 
-      if ((searchRequest.index as string).startsWith('.fleet-file-data-')) {
+      if (
+        (searchRequest.index as string).startsWith(
+          FILE_STORAGE_TO_HOST_DATA_INDEX_PATTERN.replace('*', '')
+        )
+      ) {
         return fleetFileDataIndexSearchResponse;
       }
 
@@ -117,9 +130,8 @@ describe('FleetToHostFilesClient', () => {
     expect(createEsFileClientMock).toHaveBeenCalledWith({
       elasticsearchClient: esClientMock,
       logger: loggerMock,
-      // FIXME:PT adjust indexes once new index patterns are added to ES
-      metadataIndex: '.fleet-files-foo',
-      blobStorageIndex: '.fleet-file-data-foo',
+      metadataIndex: '.fleet-fileds-tohost-meta-foo',
+      blobStorageIndex: '.fleet-fileds-tohost-data-foo',
       maxSizeBytes: 12345,
       indexIsAlias: true,
     });

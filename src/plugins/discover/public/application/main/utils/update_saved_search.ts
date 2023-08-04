@@ -5,12 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
-import { DataView } from '@kbn/data-views-plugin/common';
+import type { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { cloneDeep } from 'lodash';
 import { isTextBasedQuery } from './is_text_based_query';
-import { DiscoverAppState } from '../services/discover_app_state_container';
-import { DiscoverServices } from '../../../build_services';
+import type { DiscoverAppState } from '../services/discover_app_state_container';
+import type { DiscoverServices } from '../../../build_services';
+import type { DiscoverGlobalStateContainer } from '../services/discover_global_state_container';
 
 /**
  * Updates the saved search with a given data view & Appstate
@@ -22,20 +23,21 @@ import { DiscoverServices } from '../../../build_services';
  * @param services
  * @param useFilterAndQueryServices - when true data services are being used for updating filter + query
  */
-export function updateSavedSearch(
-  {
-    savedSearch,
-    dataView,
-    state,
-    services,
-  }: {
-    savedSearch: SavedSearch;
-    dataView?: DataView;
-    state?: DiscoverAppState;
-    services: DiscoverServices;
-  },
-  useFilterAndQueryServices: boolean = false
-) {
+export function updateSavedSearch({
+  savedSearch,
+  dataView,
+  state,
+  globalStateContainer,
+  services,
+  useFilterAndQueryServices = false,
+}: {
+  savedSearch: SavedSearch;
+  dataView?: DataView;
+  state?: DiscoverAppState;
+  globalStateContainer: DiscoverGlobalStateContainer;
+  services: DiscoverServices;
+  useFilterAndQueryServices?: boolean;
+}) {
   if (dataView) {
     savedSearch.searchSource.setField('index', dataView);
     savedSearch.usesAdHocDataView = !dataView.isPersisted();
@@ -45,9 +47,12 @@ export function updateSavedSearch(
       .setField('query', services.data.query.queryString.getQuery())
       .setField('filter', services.data.query.filterManager.getFilters());
   } else if (state) {
+    const appFilters = state.filters ? cloneDeep(state.filters) : [];
+    const globalFilters = globalStateContainer.get()?.filters ?? [];
+
     savedSearch.searchSource
       .setField('query', state.query ?? undefined)
-      .setField('filter', state.filters ? cloneDeep(state.filters) : []);
+      .setField('filter', [...appFilters, ...globalFilters]);
   }
   if (state) {
     savedSearch.columns = state.columns || [];

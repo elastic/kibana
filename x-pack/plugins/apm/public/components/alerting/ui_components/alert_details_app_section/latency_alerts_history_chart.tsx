@@ -96,6 +96,9 @@ export function LatencyAlertsHistoryChart({
                 bucketSizeInSeconds: preferred.bucketSizeInSeconds,
                 documentType: preferred.source.documentType,
                 rollupInterval: preferred.source.rollupInterval,
+                useDurationSummary:
+                  preferred.source.hasDurationSummaryField &&
+                  latencyAggregationType === LatencyAggregationType.avg,
               },
             },
           }

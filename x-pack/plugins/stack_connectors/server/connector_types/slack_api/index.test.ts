@@ -8,7 +8,7 @@
 import axios from 'axios';
 import { Logger } from '@kbn/core/server';
 import { Services } from '@kbn/actions-plugin/server/types';
-import { validateParams, validateSecrets } from '@kbn/actions-plugin/server/lib';
+import { validateConfig, validateParams, validateSecrets } from '@kbn/actions-plugin/server/lib';
 import { getConnectorType } from '.';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
@@ -45,6 +45,22 @@ describe('connector registration', () => {
   test('returns connector type', () => {
     expect(connectorType.id).toEqual(SLACK_API_CONNECTOR_ID);
     expect(connectorType.name).toEqual(SLACK_CONNECTOR_NAME);
+  });
+});
+
+describe('validate config', () => {
+  test('should throw error when config are invalid', () => {
+    expect(() => {
+      validateConfig(connectorType, { message: 1 }, { configurationUtilities });
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"error validating action type config: [message]: definition for this key is missing"`
+    );
+  });
+
+  test('should validate when config are valid', () => {
+    expect(() => {
+      validateConfig(connectorType, {}, { configurationUtilities });
+    }).not.toThrow();
   });
 });
 
@@ -280,7 +296,7 @@ describe('execute', () => {
       configurationUtilities,
       logger: mockedLogger,
       method: 'get',
-      url: 'conversations.list?types=public_channel,private_channel',
+      url: 'conversations.list?exclude_archived=true&types=public_channel,private_channel&limit=1000',
     });
 
     expect(response).toEqual({

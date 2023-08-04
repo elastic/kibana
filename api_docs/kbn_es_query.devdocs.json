@@ -2049,6 +2049,41 @@
       },
       {
         "parentPluginId": "@kbn/es-query",
+        "id": "def-common.escapeQuotes",
+        "type": "Function",
+        "tags": [],
+        "label": "escapeQuotes",
+        "description": [
+          "\nEscapes backslashes and double-quotes. (Useful when putting a string in quotes to use as a value\nin a KQL expression. See the QuotedCharacter rule in kuery.peg.)"
+        ],
+        "signature": [
+          "(str: string) => string"
+        ],
+        "path": "packages/kbn-es-query/src/kuery/utils/escape_kuery.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/es-query",
+            "id": "def-common.escapeQuotes.$1",
+            "type": "string",
+            "tags": [],
+            "label": "str",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-es-query/src/kuery/utils/escape_kuery.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/es-query",
         "id": "def-common.extractTimeFilter",
         "type": "Function",
         "tags": [],
@@ -4038,6 +4073,55 @@
       },
       {
         "parentPluginId": "@kbn/es-query",
+        "id": "def-common.toKqlExpression",
+        "type": "Function",
+        "tags": [],
+        "label": "toKqlExpression",
+        "description": [
+          "\nGiven a KQL AST node, generate the corresponding KQL expression."
+        ],
+        "signature": [
+          "(node: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.KueryNode",
+            "text": "KueryNode"
+          },
+          ") => string"
+        ],
+        "path": "packages/kbn-es-query/src/kuery/ast/ast.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/es-query",
+            "id": "def-common.toKqlExpression.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "node",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.KueryNode",
+                "text": "KueryNode"
+              }
+            ],
+            "path": "packages/kbn-es-query/src/kuery/ast/ast.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/es-query",
         "id": "def-common.uniqFilters",
         "type": "Function",
         "tags": [],
@@ -4243,6 +4327,8 @@
           "FilterMetaParams",
           " | undefined; from?: string | number | undefined; to?: string | number | undefined; gt?: string | number | undefined; lt?: string | number | undefined; gte?: string | number | undefined; lte?: string | number | undefined; format?: string | undefined; } | { query: ",
           "FilterMetaParams",
+          " | undefined; length: number; toString(): string; toLocaleString(): string; pop(): number | undefined; push(...items: number[]): number; concat(...items: ConcatArray<number>[]): number[]; concat(...items: (number | ConcatArray<number>)[]): number[]; join(separator?: string | undefined): string; reverse(): number[]; shift(): number | undefined; slice(start?: number | undefined, end?: number | undefined): number[]; sort(compareFn?: ((a: number, b: number) => number) | undefined): number[]; splice(start: number, deleteCount?: number | undefined): number[]; splice(start: number, deleteCount: number, ...items: number[]): number[]; unshift(...items: number[]): number; indexOf(searchElement: number, fromIndex?: number | undefined): number; lastIndexOf(searchElement: number, fromIndex?: number | undefined): number; every<S extends number>(predicate: (value: number, index: number, array: number[]) => value is S, thisArg?: any): this is S[]; every(predicate: (value: number, index: number, array: number[]) => unknown, thisArg?: any): boolean; some(predicate: (value: number, index: number, array: number[]) => unknown, thisArg?: any): boolean; forEach(callbackfn: (value: number, index: number, array: number[]) => void, thisArg?: any): void; map<U>(callbackfn: (value: number, index: number, array: number[]) => U, thisArg?: any): U[]; filter<S extends number>(predicate: (value: number, index: number, array: number[]) => value is S, thisArg?: any): S[]; filter(predicate: (value: number, index: number, array: number[]) => unknown, thisArg?: any): number[]; reduce(callbackfn: (previousValue: number, currentValue: number, currentIndex: number, array: number[]) => number): number; reduce(callbackfn: (previousValue: number, currentValue: number, currentIndex: number, array: number[]) => number, initialValue: number): number; reduce<U>(callbackfn: (previousValue: U, currentValue: number, currentIndex: number, array: number[]) => U, initialValue: U): U; reduceRight(callbackfn: (previousValue: number, currentValue: number, currentIndex: number, array: number[]) => number): number; reduceRight(callbackfn: (previousValue: number, currentValue: number, currentIndex: number, array: number[]) => number, initialValue: number): number; reduceRight<U>(callbackfn: (previousValue: U, currentValue: number, currentIndex: number, array: number[]) => U, initialValue: U): U; find<S extends number>(predicate: (this: void, value: number, index: number, obj: number[]) => value is S, thisArg?: any): S | undefined; find(predicate: (value: number, index: number, obj: number[]) => unknown, thisArg?: any): number | undefined; findIndex(predicate: (value: number, index: number, obj: number[]) => unknown, thisArg?: any): number; fill(value: number, start?: number | undefined, end?: number | undefined): number[]; copyWithin(target: number, start: number, end?: number | undefined): number[]; entries(): IterableIterator<[number, number]>; keys(): IterableIterator<number>; values(): IterableIterator<number>; includes(searchElement: number, fromIndex?: number | undefined): boolean; flatMap<U, This = undefined>(callback: (this: This, value: number, index: number, array: number[]) => U | readonly U[], thisArg?: This | undefined): U[]; flat<A, D extends number = 1>(this: A, depth?: D | undefined): FlatArray<A, D>[]; [Symbol.iterator](): IterableIterator<number>; [Symbol.unscopables](): { copyWithin: boolean; entries: boolean; fill: boolean; find: boolean; findIndex: boolean; keys: boolean; values: boolean; }; at(index: number): number | undefined; } | { query: ",
+          "FilterMetaParams",
           " | undefined; $state?: { store: ",
           {
             "pluginId": "@kbn/es-query",
@@ -4260,8 +4346,6 @@
             "text": "FilterMeta"
           },
           "; } | { query: ",
-          "FilterMetaParams",
-          " | undefined; length: number; toString(): string; toLocaleString(): string; pop(): number | undefined; push(...items: number[]): number; concat(...items: ConcatArray<number>[]): number[]; concat(...items: (number | ConcatArray<number>)[]): number[]; join(separator?: string | undefined): string; reverse(): number[]; shift(): number | undefined; slice(start?: number | undefined, end?: number | undefined): number[]; sort(compareFn?: ((a: number, b: number) => number) | undefined): number[]; splice(start: number, deleteCount?: number | undefined): number[]; splice(start: number, deleteCount: number, ...items: number[]): number[]; unshift(...items: number[]): number; indexOf(searchElement: number, fromIndex?: number | undefined): number; lastIndexOf(searchElement: number, fromIndex?: number | undefined): number; every<S extends number>(predicate: (value: number, index: number, array: number[]) => value is S, thisArg?: any): this is S[]; every(predicate: (value: number, index: number, array: number[]) => unknown, thisArg?: any): boolean; some(predicate: (value: number, index: number, array: number[]) => unknown, thisArg?: any): boolean; forEach(callbackfn: (value: number, index: number, array: number[]) => void, thisArg?: any): void; map<U>(callbackfn: (value: number, index: number, array: number[]) => U, thisArg?: any): U[]; filter<S extends number>(predicate: (value: number, index: number, array: number[]) => value is S, thisArg?: any): S[]; filter(predicate: (value: number, index: number, array: number[]) => unknown, thisArg?: any): number[]; reduce(callbackfn: (previousValue: number, currentValue: number, currentIndex: number, array: number[]) => number): number; reduce(callbackfn: (previousValue: number, currentValue: number, currentIndex: number, array: number[]) => number, initialValue: number): number; reduce<U>(callbackfn: (previousValue: U, currentValue: number, currentIndex: number, array: number[]) => U, initialValue: U): U; reduceRight(callbackfn: (previousValue: number, currentValue: number, currentIndex: number, array: number[]) => number): number; reduceRight(callbackfn: (previousValue: number, currentValue: number, currentIndex: number, array: number[]) => number, initialValue: number): number; reduceRight<U>(callbackfn: (previousValue: U, currentValue: number, currentIndex: number, array: number[]) => U, initialValue: U): U; find<S extends number>(predicate: (this: void, value: number, index: number, obj: number[]) => value is S, thisArg?: any): S | undefined; find(predicate: (value: number, index: number, obj: number[]) => unknown, thisArg?: any): number | undefined; findIndex(predicate: (value: number, index: number, obj: number[]) => unknown, thisArg?: any): number; fill(value: number, start?: number | undefined, end?: number | undefined): number[]; copyWithin(target: number, start: number, end?: number | undefined): number[]; entries(): IterableIterator<[number, number]>; keys(): IterableIterator<number>; values(): IterableIterator<number>; includes(searchElement: number, fromIndex?: number | undefined): boolean; flatMap<U, This = undefined>(callback: (this: This, value: number, index: number, array: number[]) => U | readonly U[], thisArg?: This | undefined): U[]; flat<A, D extends number = 1>(this: A, depth?: D | undefined): FlatArray<A, D>[]; [Symbol.iterator](): IterableIterator<number>; [Symbol.unscopables](): { copyWithin: boolean; entries: boolean; fill: boolean; find: boolean; findIndex: boolean; keys: boolean; values: boolean; }; at(index: number): number | undefined; } | { query: ",
           "FilterMetaParams",
           " | undefined; alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type: \"range\"; key?: string | undefined; params?: (",
           "FilterMetaParams",
@@ -5289,62 +5373,6 @@
               "boolean | undefined"
             ],
             "path": "packages/kbn-es-query/src/filters/helpers/compare_filters.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/es-query",
-        "id": "def-common.FunctionTypeBuildNode",
-        "type": "Interface",
-        "tags": [],
-        "label": "FunctionTypeBuildNode",
-        "description": [],
-        "path": "packages/kbn-es-query/src/kuery/node_types/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/es-query",
-            "id": "def-common.FunctionTypeBuildNode.type",
-            "type": "string",
-            "tags": [],
-            "label": "type",
-            "description": [],
-            "signature": [
-              "\"function\""
-            ],
-            "path": "packages/kbn-es-query/src/kuery/node_types/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/es-query",
-            "id": "def-common.FunctionTypeBuildNode.function",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "function",
-            "description": [],
-            "signature": [
-              "\"nested\" | \"is\" | \"exists\" | \"range\" | \"and\" | \"or\" | \"not\""
-            ],
-            "path": "packages/kbn-es-query/src/kuery/node_types/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/es-query",
-            "id": "def-common.FunctionTypeBuildNode.arguments",
-            "type": "Array",
-            "tags": [],
-            "label": "arguments",
-            "description": [],
-            "signature": [
-              "any[]"
-            ],
-            "path": "packages/kbn-es-query/src/kuery/node_types/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }

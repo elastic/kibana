@@ -13,6 +13,7 @@ import { Either } from 'fp-ts/lib/Either';
  * Types the IsoDateString as:
  *   - A string that is an ISOString
  */
+export type IsoDateString = t.TypeOf<typeof IsoDateString>;
 export const IsoDateString = new t.Type<string, string, unknown>(
   'IsoDateString',
   t.string.is,

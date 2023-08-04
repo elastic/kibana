@@ -7,7 +7,7 @@
 import { renderHook, act } from '@testing-library/react-hooks';
 import { sessionViewIOEventsMock } from '../../../common/mocks/responses/session_view_io_events.mock';
 import { useIOLines, useXtermPlayer, XtermPlayerDeps } from './hooks';
-import { ProcessEventsPage } from '../../../common/types/process_tree';
+import type { ProcessEventsPage } from '../../../common';
 import { DEFAULT_TTY_FONT_SIZE, DEFAULT_TTY_PLAYSPEED_MS } from '../../../common/constants';
 
 const VIM_LINE_START = 22;

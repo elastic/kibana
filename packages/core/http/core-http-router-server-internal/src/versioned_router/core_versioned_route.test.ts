@@ -116,7 +116,7 @@ describe('Versioned route', () => {
     ).not.toThrow();
   });
 
-  it('only allows versions date strings for public APIs', () => {
+  it('only allows correctly formatted version date strings for public APIs', () => {
     const versionedRouter = CoreVersionedRouter.from({ router });
     expect(() =>
       versionedRouter
@@ -136,80 +136,10 @@ describe('Versioned route', () => {
     expect(() =>
       versionedRouter
         .get({ path: '/test/{id}', access: 'public' })
-        .addVersion({ version: '2020-02-02', validate: false }, handlerFn)
+        .addVersion({ version: '2023-10-31', validate: false }, handlerFn)
     ).not.toThrow();
   });
 
-  it('runs request and response validations', async () => {
-    let handler: RequestHandler;
-
-    let validatedBody = false;
-    let validatedParams = false;
-    let validatedQuery = false;
-    let validatedOutputBody = false;
-
-    (router.post as jest.Mock).mockImplementation((opts: unknown, fn) => (handler = fn));
-    const versionedRouter = CoreVersionedRouter.from({ router, isDev: true });
-    versionedRouter.post({ path: '/test/{id}', access: 'internal' }).addVersion(
-      {
-        version: '1',
-        validate: {
-          request: {
-            body: schema.object({
-              foo: schema.number({
-                validate: () => {
-                  validatedBody = true;
-                },
-              }),
-            }),
-            params: schema.object({
-              foo: schema.number({
-                validate: () => {
-                  validatedParams = true;
-                },
-              }),
-            }),
-            query: schema.object({
-              foo: schema.number({
-                validate: () => {
-                  validatedQuery = true;
-                },
-              }),
-            }),
-          },
-          response: {
-            200: {
-              body: schema.object({
-                foo: schema.number({
-                  validate: () => {
-                    validatedOutputBody = true;
-                  },
-                }),
-              }),
-            },
-          },
-        },
-      },
-      handlerFn
-    );
-
-    const kibanaResponse = await handler!(
-      {} as any,
-      createRequest({
-        version: '1',
-        body: { foo: 1 },
-        params: { foo: 1 },
-        query: { foo: 1 },
-      }),
-      responseFactory
-    );
-
-    expect(kibanaResponse.status).toBe(200);
-    expect(validatedBody).toBe(true);
-    expect(validatedParams).toBe(true);
-    expect(validatedQuery).toBe(true);
-    expect(validatedOutputBody).toBe(true);
-  });
   it('passes through the expected values to the IRouter registrar', () => {
     const versionedRouter = CoreVersionedRouter.from({ router });
     const opts: Parameters<typeof versionedRouter.post>[0] = {
@@ -237,5 +167,95 @@ describe('Versioned route', () => {
       expect.objectContaining(expectedRouteConfig),
       expect.any(Function)
     );
+  });
+
+  it('allows public versions other than "2023-10-31"', () => {
+    expect(() =>
+      CoreVersionedRouter.from({ router, isDev: false })
+        .get({ access: 'public', path: '/foo' })
+        .addVersion({ version: '2023-01-31', validate: false }, (ctx, req, res) => res.ok())
+    ).not.toThrow();
+  });
+
+  describe('when in dev', () => {
+    // NOTE: Temporary test to ensure single public API version is enforced
+    it('only allows "2023-10-31" as public route versions', () => {
+      expect(() =>
+        CoreVersionedRouter.from({ router, isDev: true })
+          .get({ access: 'public', path: '/foo' })
+          .addVersion({ version: '2023-01-31', validate: false }, (ctx, req, res) => res.ok())
+      ).toThrow(/Invalid public version/);
+    });
+
+    it('runs request AND response validations', async () => {
+      let handler: RequestHandler;
+
+      let validatedBody = false;
+      let validatedParams = false;
+      let validatedQuery = false;
+      let validatedOutputBody = false;
+
+      (router.post as jest.Mock).mockImplementation((opts: unknown, fn) => (handler = fn));
+      const versionedRouter = CoreVersionedRouter.from({ router, isDev: true });
+      versionedRouter.post({ path: '/test/{id}', access: 'internal' }).addVersion(
+        {
+          version: '1',
+          validate: {
+            request: {
+              body: schema.object({
+                foo: schema.number({
+                  validate: () => {
+                    validatedBody = true;
+                  },
+                }),
+              }),
+              params: schema.object({
+                foo: schema.number({
+                  validate: () => {
+                    validatedParams = true;
+                  },
+                }),
+              }),
+              query: schema.object({
+                foo: schema.number({
+                  validate: () => {
+                    validatedQuery = true;
+                  },
+                }),
+              }),
+            },
+            response: {
+              200: {
+                body: schema.object({
+                  foo: schema.number({
+                    validate: () => {
+                      validatedOutputBody = true;
+                    },
+                  }),
+                }),
+              },
+            },
+          },
+        },
+        handlerFn
+      );
+
+      const kibanaResponse = await handler!(
+        {} as any,
+        createRequest({
+          version: '1',
+          body: { foo: 1 },
+          params: { foo: 1 },
+          query: { foo: 1 },
+        }),
+        responseFactory
+      );
+
+      expect(kibanaResponse.status).toBe(200);
+      expect(validatedBody).toBe(true);
+      expect(validatedParams).toBe(true);
+      expect(validatedQuery).toBe(true);
+      expect(validatedOutputBody).toBe(true);
+    });
   });
 });

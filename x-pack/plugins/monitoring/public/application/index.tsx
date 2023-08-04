@@ -10,8 +10,8 @@ import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import React, { useMemo } from 'react';
 import ReactDOM from 'react-dom';
-import { Redirect, Router, Switch } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
+import { Redirect } from 'react-router-dom';
+import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import useObservable from 'react-use/lib/useObservable';
 import { Observable } from 'rxjs';
 import {
@@ -121,7 +121,7 @@ const MonitoringApp: React.FC<{
                 <MonitoringTimeContainer>
                   <BreadcrumbContainer history={history}>
                     <Router history={history}>
-                      <Switch>
+                      <Routes>
                         <Route path="/access-denied" component={AccessDeniedPage} />
                         <Route path="/no-data" component={NoDataPage} />
                         <Route path="/loading" component={LoadingPage} />
@@ -345,7 +345,7 @@ const MonitoringApp: React.FC<{
                             search: history.location.search,
                           }}
                         />
-                      </Switch>
+                      </Routes>
                     </Router>
                   </BreadcrumbContainer>
                 </MonitoringTimeContainer>

@@ -316,7 +316,7 @@ const mockOptions = (algorithm: 'v2' | 'zdt' = 'v2') => {
       retryAttempts: 20,
       zdt: {
         metaPickupSyncDelaySec: 120,
-        runOnNonMigratorNodes: false,
+        runOnRoles: ['migrator'],
       },
     },
     client: mockedClient,

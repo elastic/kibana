@@ -34,5 +34,6 @@ export const createStartMock = (extensionsStorage: UIExtensionsStorage = {}): Mo
         writeIntegrationPolicies: true,
       },
     },
+    hooks: { epm: { getBulkAssets: jest.fn() } },
   };
 };

@@ -28,7 +28,7 @@ import {
   isIntegrationPolicyTemplate,
 } from '../../../../../../../../common/services';
 
-import type { IntegrationCardItem } from '../../../../../../../../common/types/models';
+import type { IntegrationCardItem } from '..';
 
 import { ALL_CATEGORY } from '../category_facets';
 import type { CategoryFacet } from '../category_facets';

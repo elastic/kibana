@@ -14,7 +14,9 @@ import {
   useDebouncedValue,
   IconSelectSetting,
   ColorPicker,
-} from '@kbn/visualization-ui-components/public';
+  LineStyleSettings,
+  TextDecorationSetting,
+} from '@kbn/visualization-ui-components';
 import type { VisualizationDimensionEditorProps } from '../../../../types';
 import { State, XYState, XYReferenceLineLayerConfig, YConfig } from '../../types';
 import { FormatFactory } from '../../../../../common/types';
@@ -22,11 +24,7 @@ import { FormatFactory } from '../../../../../common/types';
 import { updateLayer } from '..';
 import { idPrefix } from '../dimension_editor';
 import { isHorizontalChart } from '../../state_helpers';
-import {
-  MarkerDecorationPosition,
-  TextDecorationSetting,
-} from '../shared/marker_decoration_settings';
-import { LineStyleSettings } from '../shared/line_style_settings';
+import { MarkerDecorationPosition } from '../shared/marker_decoration_settings';
 import { referenceLineIconsSet } from './icon_set';
 import { defaultReferenceLineColor } from '../../color_assignment';
 
@@ -77,7 +75,11 @@ export const ReferenceLinePanel = (
 
   return (
     <>
-      <TextDecorationSetting setConfig={setConfig} currentConfig={localConfig} />
+      <TextDecorationSetting
+        idPrefix={idPrefix}
+        setConfig={setConfig}
+        currentConfig={localConfig}
+      />
       <IconSelectSetting
         setIcon={(icon) => setConfig({ icon })}
         currentIcon={localConfig?.icon}
@@ -88,11 +90,7 @@ export const ReferenceLinePanel = (
         setConfig={setConfig}
         currentConfig={localConfig}
       />
-      <LineStyleSettings
-        isHorizontal={isHorizontal}
-        setConfig={setConfig}
-        currentConfig={localConfig}
-      />
+      <LineStyleSettings idPrefix={idPrefix} setConfig={setConfig} currentConfig={localConfig} />
       <FillSetting isHorizontal={isHorizontal} setConfig={setConfig} currentConfig={localConfig} />
       <ColorPicker
         {...props}

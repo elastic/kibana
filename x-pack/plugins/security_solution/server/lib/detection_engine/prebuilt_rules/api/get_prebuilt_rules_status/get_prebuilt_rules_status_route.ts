@@ -6,8 +6,8 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { GET_PREBUILT_RULES_STATUS_URL } from '../../../../../../common/detection_engine/prebuilt_rules';
-import type { GetPrebuiltRulesStatusResponseBody } from '../../../../../../common/detection_engine/prebuilt_rules/api/get_prebuilt_rules_status/response_schema';
+import { GET_PREBUILT_RULES_STATUS_URL } from '../../../../../../common/api/detection_engine/prebuilt_rules';
+import type { GetPrebuiltRulesStatusResponseBody } from '../../../../../../common/api/detection_engine/prebuilt_rules';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import { buildSiemResponse } from '../../../routes/utils';
 import { createPrebuiltRuleAssetsClient } from '../../logic/rule_assets/prebuilt_rule_assets_client';
@@ -38,7 +38,7 @@ export const getPrebuiltRulesStatusRoute = (router: SecuritySolutionPluginRouter
           ruleAssetsClient,
           ruleObjectsClient,
         });
-        const { currentRules, installableRules, upgradeableRules } =
+        const { currentRules, installableRules, upgradeableRules, totalAvailableRules } =
           getVersionBuckets(ruleVersionsMap);
 
         const body: GetPrebuiltRulesStatusResponseBody = {
@@ -46,6 +46,7 @@ export const getPrebuiltRulesStatusRoute = (router: SecuritySolutionPluginRouter
             num_prebuilt_rules_installed: currentRules.length,
             num_prebuilt_rules_to_install: installableRules.length,
             num_prebuilt_rules_to_upgrade: upgradeableRules.length,
+            num_prebuilt_rules_total_in_package: totalAvailableRules.length,
           },
         };
 

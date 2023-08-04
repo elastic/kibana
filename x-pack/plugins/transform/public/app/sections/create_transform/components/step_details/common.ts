@@ -31,7 +31,7 @@ export interface StepDetailsExposedState {
   transformId: TransformId;
   transformDescription: string;
   transformFrequency: string;
-  transformSettingsMaxPageSearchSize: number;
+  transformSettingsMaxPageSearchSize?: number;
   transformSettingsDocsPerSecond: number | null;
   transformSettingsNumFailureRetries?: number;
   valid: boolean;

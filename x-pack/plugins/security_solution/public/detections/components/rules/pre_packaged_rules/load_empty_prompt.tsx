@@ -8,12 +8,8 @@
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { memo } from 'react';
 import styled from 'styled-components';
-import { SecurityPageName } from '../../../../app/types';
-import { SecuritySolutionLinkButton } from '../../../../common/components/links';
-import { hasUserCRUDPermission } from '../../../../common/utils/privileges';
 import { useUserData } from '../../user_info';
-import { LoadPrePackagedRules } from './load_prepackaged_rules';
-import { LoadPrePackagedRulesButton } from './load_prepackaged_rules_button';
+import { AddElasticRulesButton } from './add_elastic_rules_button';
 import * as i18n from './translations';
 
 const EmptyPrompt = styled(EuiEmptyPrompt)`
@@ -23,9 +19,7 @@ const EmptyPrompt = styled(EuiEmptyPrompt)`
 EmptyPrompt.displayName = 'EmptyPrompt';
 
 const PrePackagedRulesPromptComponent = () => {
-  const [{ canUserCRUD }] = useUserData();
-  const hasPermissions = hasUserCRUDPermission(canUserCRUD);
-
+  const [{ loading, canUserCRUD }] = useUserData();
   return (
     <EmptyPrompt
       data-test-subj="rulesEmptyPrompt"
@@ -34,24 +28,12 @@ const PrePackagedRulesPromptComponent = () => {
       actions={
         <EuiFlexGroup justifyContent="center">
           <EuiFlexItem grow={false}>
-            <LoadPrePackagedRules>
-              {(renderProps) => (
-                <LoadPrePackagedRulesButton
-                  fill
-                  data-test-subj="load-prebuilt-rules"
-                  {...renderProps}
-                />
-              )}
-            </LoadPrePackagedRules>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <SecuritySolutionLinkButton
-              isDisabled={!hasPermissions}
-              iconType="plusInCircle"
-              deepLinkId={SecurityPageName.rulesCreate}
-            >
-              {i18n.CREATE_RULE_ACTION}
-            </SecuritySolutionLinkButton>
+            <AddElasticRulesButton
+              isDisabled={!canUserCRUD || loading}
+              fill={true}
+              data-test-subj="add-elastc-rules-empty-empty-prompt-button"
+              showBadge={false}
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
       }

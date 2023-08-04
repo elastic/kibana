@@ -1,5 +1,9 @@
 [[rule-action-variables]]
 == Rule action variables
+:frontmatter-description: A summary of common variables for use in {kib} alerting rule actions.
+:frontmatter-tags-products: [alerting] 
+:frontmatter-tags-content-type: [reference] 
+:frontmatter-tags-user-goals: [configure]
 
 Alerting rules can use the https://mustache.github.io/mustache.5.html[Mustache] template syntax
 (`{{variable name}}`) to pass values when the actions run.
@@ -30,9 +34,10 @@ All rule types pass the following variables:
 
 `date`:: The date the rule scheduled the action, in ISO format.
 `kibanaBaseUrl`:: The configured <<server-publicBaseUrl,`server.publicBaseUrl`>>. If not configured, this will be empty.
-`rule.id`:: The ID of the rule.
-`rule.name`:: The name of the rule.
-`rule.spaceId`:: The ID of the space for the rule.
+`rule.id`:: The rule identifier.
+`rule.name`:: The rule name.
+`rule.params`:: The rule parameters, which vary by rule type.
+`rule.spaceId`:: The space identifier for the rule.
 `rule.tags`:: The list of tags applied to the rule.
 
 [float]
@@ -116,14 +121,14 @@ For diagnostic or exploratory purposes, action variables whose values are object
 
 For situations where your rule response returns arrays of data, you can loop through the `context`:
 
-[source]
+[source,sh]
 --------------------------------------------------
 {{#context}}{{.}}{{/context}}
 --------------------------------------------------
 
 For example, looping through search result hits:
 
-[source]
+[source,sh]
 --------------------------------------------------
 triggering data was:
 {{#context.hits}} - {{_source.message}}
@@ -154,7 +159,7 @@ The following capabilities are available:
 Mustache lambdas provide additional rendering capabilities for Mustache templates.
 A Mustache lambda is formatted like a Mustache section. For example:
 
-[source]
+[source,sh]
 ----
 {{#EvalMath}} round(context.value, 1) {{/EvalMath}}
 ----
@@ -169,7 +174,7 @@ The EvalMath lambda will evaluate the text passed to it as <<canvas-tinymath-fun
 
 For example, when the Mustache variable `context.value` is `3.1234`, the following template will render as `3.1`:
 
-[source]
+[source,sh]
 ----
 {{#EvalMath}} round(context.value, 1) {{/EvalMath}}
 ----
@@ -178,7 +183,7 @@ This lambda can access Mustache variables without having to wrap them in `{{}}`.
 However, if the value is in a string form (for example, an Elasticsearch numeric field whose source was indexed as a string), or could be escaped, escaping the value with triple quotes should allow this to work.
 For example, if the Mustache variable `context.value` is `"3.1234"`, the following template will render as `3.1`:
 
-[source]
+[source,sh]
 ----
 {{#EvalMath}} round( {{{context.value}}} , 1) {{/EvalMath}}
 ----
@@ -200,7 +205,7 @@ https://hjson.github.io/[Hjson] is a syntax extension to JSON. It has the follow
 To use it, surround your Hjson content with `{{#ParseHjson}}...{{/ParseHjson}}`.
 For example:
  
-[source]
+[source,sh]
 ----
 {{#ParseHjson}}
 {
@@ -234,7 +239,7 @@ The `<date>` parameter is required; the `<time zone>` and `<date format>` parame
 The default time zone is `"UTC"` and the default date format is `"YYYY-MM-DD hh:mma"`.
 For example, the following templates all render the same value:
  
-[source]
+[source,sh]
 ----
     {{#FormatDate}} {{{timestamp}}} {{/FormatDate}}
     {{#FormatDate}} {{{timestamp}}} ; UTC {{/FormatDate}}
@@ -248,6 +253,78 @@ The `<date format>` parameter must be a valid date format string as described in
 For example, the date format `"YYYY-MM-DD hh:mma"` will render in the following format: `"2023-04-24 11:21pm"`.
 
 The date value itself should usually be referenced with triple braces since some characters in date strings may contain values that are escaped, which would prevent them from being parsed as dates.
+
+[discrete]
+===== FormatNumber
+
+The FormatNumber lambda provides number formatting capabilities using the https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat[`Intl.NumberFormat` object].
+
+Numbers can be formatted with the following `Intl.NumberFormat` options:
+
+- `compactDisplay`
+- `currencyDisplay`
+- `currencySign`
+- `notation`
+- `signDisplay`
+- `unitDisplay`
+- `unit`
+- `useGrouping` - but only values true and false
+- `minimumIntegerDigits`
+- `minimumFractionDigits`
+- `maximumFractionDigits`
+- `minimumSignificantDigits`
+- `maximumSignificantDigits`
+
+To use the lambda, surround the number and formatting options with `{{#FormatNumber}}...{{/FormatNumber}}`.
+
+The format of the text passed to the lambda is: `<number>; <locales>; <options>`, where semicolons (`;`) separate each parameter.
+The `<number>` parameter is required; it is the value to be formatted.
+The `<locales>` and `<options>` parameters are optional, but the semicolons must be provided; the values may be empty strings.
+The `<locales>` parameter is a list of locales separated by commas (`,`).
+The `<options>` parameter is a list of key value pairs separated by commas (`,`).
+The key value pairs are strings separated by colons (`:`) where the key is the name of the option and the value is the value of the option.
+The default locale is `en-US` and no options are set by default.
+
+For more information on locale strings, refer to https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl#locales_argument[the `locales` argument documentation from the `Intl` reference].
+
+The options and values that can be used with them are listed under `options` in the https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat/NumberFormat[Intl.NumberFormat() constructor documentation].
+
+For example:
+
+[source,sh]
+----
+    original value: {{{context.value.condition0}}}
+    formatted value: {{#FormatNumber}}
+        {{{context.value.condition0}}} ; de-DE ; style: currency, currency: EUR
+    {{/FormatNumber}}
+----
+
+If the context variable `context.value.condition0` has a value of `628.4`, it results in the following text:
+
+[source,sh]
+----
+    original value: 628.4
+    formatted value: 628,40 €
+----
+
+The `{{FormatNumber}}` and `{{EvalMath}}` lambdas can be used together to perform calculations on numbers and then format them. For example:
+
+[source,sh]
+----
+    original value: {{{context.value.condition0}}}
+    formatted value: {{#FormatNumber}}
+      {{#EvalMath}} {{context.value.condition0}} * 0.1 {{/EvalMath}}
+      ; de-DE ; style: currency, currency: EUR
+    {{/FormatNumber}}
+----
+
+If the context variable `context.value.condition0` has a value of `628.4`, it results in the following text:
+
+[source,sh]
+----
+    original value: 628.4
+    formatted value: 62,84 €
+----
 
 [discrete]
 [[mustache-examples]]

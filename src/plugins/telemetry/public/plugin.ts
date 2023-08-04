@@ -17,7 +17,10 @@ import type {
   DocLinksStart,
   HttpSetup,
 } from '@kbn/core/public';
-import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/public';
+import type {
+  ScreenshotModePluginSetup,
+  ScreenshotModePluginStart,
+} from '@kbn/screenshot-mode-plugin/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { ElasticV3BrowserShipper } from '@kbn/analytics-shippers-elastic-v3-browser';
 
@@ -83,6 +86,10 @@ interface TelemetryPluginSetupDependencies {
   home?: HomePublicPluginSetup;
 }
 
+interface TelemetryPluginStartDependencies {
+  screenshotMode: ScreenshotModePluginStart;
+}
+
 declare global {
   interface Window {
     elasticApm?: ApmBase;
@@ -111,6 +118,8 @@ export interface TelemetryPluginConfig {
   hidePrivacyStatement?: boolean;
   /** Extra labels to add to the telemetry context */
   labels: Record<string, unknown>;
+  /** Whether to use Serverless-specific channels when reporting Snapshot Telemetry */
+  appendServerlessChannelsSuffix: boolean;
 }
 
 function getTelemetryConstants(docLinks: DocLinksStart): TelemetryConstants {
@@ -119,7 +128,15 @@ function getTelemetryConstants(docLinks: DocLinksStart): TelemetryConstants {
   };
 }
 
-export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPluginStart> {
+export class TelemetryPlugin
+  implements
+    Plugin<
+      TelemetryPluginSetup,
+      TelemetryPluginStart,
+      TelemetryPluginSetupDependencies,
+      TelemetryPluginStartDependencies
+    >
+{
   private readonly currentKibanaVersion: string;
   private readonly config: TelemetryPluginConfig;
   private readonly telemetryLabels$: BehaviorSubject<TelemetryConfigLabels>;
@@ -182,7 +199,9 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
 
     this.telemetrySender = new TelemetrySender(this.telemetryService, async () => {
       await this.refreshConfig(http);
-      analytics.optIn({ global: { enabled: this.telemetryService!.isOptedIn } });
+      analytics.optIn({
+        global: { enabled: this.telemetryService!.isOptedIn && !screenshotMode.isScreenshotMode() },
+      });
     });
 
     if (home && !this.config.hidePrivacyStatement) {
@@ -206,14 +225,10 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
     };
   }
 
-  public start({
-    analytics,
-    http,
-    overlays,
-    theme,
-    application,
-    docLinks,
-  }: CoreStart): TelemetryPluginStart {
+  public start(
+    { analytics, http, overlays, theme, application, docLinks }: CoreStart,
+    { screenshotMode }: TelemetryPluginStartDependencies
+  ): TelemetryPluginStart {
     if (!this.telemetryService) {
       throw Error('Telemetry plugin failed to initialize properly.');
     }
@@ -234,7 +249,10 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
     application.currentAppId$.subscribe(async () => {
       // Refresh and get telemetry config
       const updatedConfig = await this.refreshConfig(http);
-      analytics.optIn({ global: { enabled: this.telemetryService!.isOptedIn } });
+
+      analytics.optIn({
+        global: { enabled: this.telemetryService!.isOptedIn && !screenshotMode.isScreenshotMode() },
+      });
 
       const isUnauthenticated = this.getIsUnauthenticated(http);
       if (isUnauthenticated) {

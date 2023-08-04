@@ -4,79 +4,73 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
 
+import { EuiLoadingSpinner } from '@elastic/eui';
+import { FILE_ATTACHMENT_TYPE } from '../../../common/constants';
 import type {
+  AttachmentViewObject,
   ExternalReferenceAttachmentType,
   ExternalReferenceAttachmentViewProps,
 } from '../../client/attachment_framework/types';
-import type { DownloadableFile } from './types';
 
 import { AttachmentActionType } from '../../client/attachment_framework/types';
-import { FILE_ATTACHMENT_TYPE } from '../../../common/api';
-import { FileDownloadButton } from './file_download_button';
-import { FileNameLink } from './file_name_link';
-import { FilePreview } from './file_preview';
 import * as i18n from './translations';
 import { isImage, isValidFileExternalReferenceMetadata } from './utils';
-import { useFilePreview } from './use_file_preview';
-import { FileDeleteButton } from './file_delete_button';
 
-interface FileAttachmentEventProps {
-  file: DownloadableFile;
-}
-
-const FileAttachmentEvent = ({ file }: FileAttachmentEventProps) => {
-  const { isPreviewVisible, showPreview, closePreview } = useFilePreview();
-
-  return (
-    <>
-      {i18n.ADDED}
-      <FileNameLink file={file} showPreview={showPreview} />
-      {isPreviewVisible && <FilePreview closePreview={closePreview} selectedFile={file} />}
-    </>
-  );
-};
-
-FileAttachmentEvent.displayName = 'FileAttachmentEvent';
+const FileAttachmentEvent = lazy(() =>
+  import('./file_attachment_event').then((module) => ({ default: module.FileAttachmentEvent }))
+);
+const FileDeleteButton = lazy(() =>
+  import('./file_delete_button').then((module) => ({ default: module.FileDeleteButton }))
+);
+const FileDownloadButton = lazy(() =>
+  import('./file_download_button').then((module) => ({ default: module.FileDownloadButton }))
+);
 
 function getFileDownloadButton(fileId: string) {
-  return <FileDownloadButton fileId={fileId} isIcon={false} />;
+  return (
+    <Suspense fallback={<EuiLoadingSpinner />}>
+      <FileDownloadButton fileId={fileId} isIcon={false} />
+    </Suspense>
+  );
 }
 
 function getFileDeleteButton(caseId: string, fileId: string) {
-  return <FileDeleteButton caseId={caseId} fileId={fileId} isIcon={false} />;
+  return (
+    <Suspense fallback={<EuiLoadingSpinner />}>
+      <FileDeleteButton caseId={caseId} fileId={fileId} isIcon={false} />
+    </Suspense>
+  );
 }
 
 const getFileAttachmentActions = ({ caseId, fileId }: { caseId: string; fileId: string }) => [
   {
     type: AttachmentActionType.CUSTOM as const,
     render: () => getFileDownloadButton(fileId),
-    label: i18n.DOWNLOAD_FILE,
     isPrimary: false,
   },
   {
     type: AttachmentActionType.CUSTOM as const,
     render: () => getFileDeleteButton(caseId, fileId),
-    label: i18n.DELETE_FILE,
     isPrimary: false,
   },
 ];
 
-const getFileAttachmentViewObject = (props: ExternalReferenceAttachmentViewProps) => {
+const getFileAttachmentViewObject = (
+  props: ExternalReferenceAttachmentViewProps
+): AttachmentViewObject<ExternalReferenceAttachmentViewProps> => {
   const caseId = props.caseData.id;
   const fileId = props.externalReferenceId;
 
   if (!isValidFileExternalReferenceMetadata(props.externalReferenceMetadata)) {
     return {
-      type: 'regular',
       event: i18n.ADDED_UNKNOWN_FILE,
       timelineAvatar: 'document',
       getActions: () => [
         {
-          type: AttachmentActionType.CUSTOM as const,
+          type: AttachmentActionType.CUSTOM,
           render: () => getFileDeleteButton(caseId, fileId),
-          label: i18n.DELETE_FILE,
           isPrimary: false,
         },
       ],
@@ -91,7 +85,11 @@ const getFileAttachmentViewObject = (props: ExternalReferenceAttachmentViewProps
   };
 
   return {
-    event: <FileAttachmentEvent file={file} />,
+    event: (
+      <Suspense fallback={<EuiLoadingSpinner />}>
+        <FileAttachmentEvent file={file} />
+      </Suspense>
+    ),
     timelineAvatar: isImage(file) ? 'image' : 'document',
     getActions: () => getFileAttachmentActions({ caseId, fileId }),
     hideDefaultActions: true,
@@ -101,7 +99,7 @@ const getFileAttachmentViewObject = (props: ExternalReferenceAttachmentViewProps
 export const getFileType = (): ExternalReferenceAttachmentType => ({
   id: FILE_ATTACHMENT_TYPE,
   icon: 'document',
-  displayName: 'File Attachment Type',
+  displayName: 'Files',
   getAttachmentViewObject: getFileAttachmentViewObject,
   getAttachmentRemovalObject: () => ({ event: i18n.REMOVED_FILE }),
 });

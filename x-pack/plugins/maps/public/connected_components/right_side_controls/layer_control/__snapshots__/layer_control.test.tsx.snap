@@ -127,6 +127,7 @@ exports[`LayerControl isLayerTOCOpen Should render expand button 1`] = `
     color="text"
     data-test-subj="mapExpandLayerControlButton"
     iconType="menuLeft"
+    isLoading={false}
     onClick={[Function]}
   />
 </EuiToolTip>
@@ -145,12 +146,13 @@ exports[`LayerControl isLayerTOCOpen Should render expand button with error icon
     color="text"
     data-test-subj="mapExpandLayerControlButton"
     iconType="warning"
+    isLoading={false}
     onClick={[Function]}
   />
 </EuiToolTip>
 `;
 
-exports[`LayerControl isLayerTOCOpen spinner icon Should not render expand button with loading icon when layer is invisible 1`] = `
+exports[`LayerControl isLayerTOCOpen Should render expand button with loading icon when layer is loading 1`] = `
 <EuiToolTip
   content="Expand layers panel"
   delay="long"
@@ -163,29 +165,9 @@ exports[`LayerControl isLayerTOCOpen spinner icon Should not render expand butto
     color="text"
     data-test-subj="mapExpandLayerControlButton"
     iconType="menuLeft"
+    isLoading={true}
     onClick={[Function]}
   />
-</EuiToolTip>
-`;
-
-exports[`LayerControl isLayerTOCOpen spinner icon Should render expand button with loading icon when layer is loading 1`] = `
-<EuiToolTip
-  content="Expand layers panel"
-  delay="long"
-  display="inlineBlock"
-  position="left"
->
-  <button
-    aria-label="Expand layers panel"
-    className="euiButtonIcon euiButtonIcon--text mapLayerControl__openLayerTOCButton"
-    data-test-subj="mapExpandLayerControlButton"
-    onClick={[Function]}
-    type="button"
-  >
-    <EuiLoadingSpinner
-      size="m"
-    />
-  </button>
 </EuiToolTip>
 `;
 

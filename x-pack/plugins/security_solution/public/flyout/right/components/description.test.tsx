@@ -7,15 +7,15 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { DESCRIPTION_EXPAND_BUTTON_TEST_ID, DESCRIPTION_TITLE_TEST_ID } from './test_ids';
-import {
-  DOCUMENT_DESCRIPTION_COLLAPSE_BUTTON,
-  DOCUMENT_DESCRIPTION_EXPAND_BUTTON,
-  DOCUMENT_DESCRIPTION_TITLE,
-  RULE_DESCRIPTION_TITLE,
-} from './translations';
+import { DESCRIPTION_TITLE_TEST_ID, RULE_SUMMARY_BUTTON_TEST_ID } from './test_ids';
+import { DOCUMENT_DESCRIPTION_TITLE, RULE_DESCRIPTION_TITLE } from './translations';
 import { Description } from './description';
+import { TestProviders } from '../../../common/mock';
 import { RightPanelContext } from '../context';
+import { ThemeProvider } from 'styled-components';
+import { getMockTheme } from '../../../common/lib/kibana/kibana_react.mock';
+
+const mockTheme = getMockTheme({ eui: { euiColorMediumShade: '#ece' } });
 
 const ruleUuid = {
   category: 'kibana',
@@ -33,64 +33,56 @@ const ruleDescription = {
   originalValue: ['description'],
   isObjectArray: false,
 };
+const ruleName = {
+  category: 'kibana',
+  field: 'kibana.alert.rule.name',
+  values: ['rule-name'],
+  originalValue: ['rule-name'],
+  isObjectArray: false,
+};
+
+jest.mock('../../../common/lib/kibana');
+jest.mock('../../../common/components/link_to');
 
 describe('<Description />', () => {
-  it('should render the component collapsed', () => {
+  it('should render the component', () => {
     const panelContextValue = {
-      dataFormattedForFieldBrowser: [ruleUuid, ruleDescription],
+      dataFormattedForFieldBrowser: [ruleUuid, ruleDescription, ruleName],
     } as unknown as RightPanelContext;
 
     const { getByTestId } = render(
-      <RightPanelContext.Provider value={panelContextValue}>
-        <Description />
-      </RightPanelContext.Provider>
+      <TestProviders>
+        <RightPanelContext.Provider value={panelContextValue}>
+          <ThemeProvider theme={mockTheme}>
+            <Description />
+          </ThemeProvider>
+        </RightPanelContext.Provider>
+      </TestProviders>
     );
 
     expect(getByTestId(DESCRIPTION_TITLE_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(DESCRIPTION_TITLE_TEST_ID)).toHaveTextContent(RULE_DESCRIPTION_TITLE);
-    expect(getByTestId(DESCRIPTION_EXPAND_BUTTON_TEST_ID)).toBeInTheDocument();
-    expect(getByTestId(DESCRIPTION_EXPAND_BUTTON_TEST_ID)).toHaveTextContent(
-      DOCUMENT_DESCRIPTION_EXPAND_BUTTON
-    );
+    expect(getByTestId(RULE_SUMMARY_BUTTON_TEST_ID)).toBeInTheDocument();
   });
 
-  it('should render the component expanded', () => {
+  it('should not render rule preview button if rule name is not available', () => {
     const panelContextValue = {
       dataFormattedForFieldBrowser: [ruleUuid, ruleDescription],
     } as unknown as RightPanelContext;
 
-    const { getByTestId } = render(
-      <RightPanelContext.Provider value={panelContextValue}>
-        <Description expanded={true} />
-      </RightPanelContext.Provider>
+    const { getByTestId, queryByTestId } = render(
+      <TestProviders>
+        <RightPanelContext.Provider value={panelContextValue}>
+          <ThemeProvider theme={mockTheme}>
+            <Description />
+          </ThemeProvider>
+        </RightPanelContext.Provider>
+      </TestProviders>
     );
 
     expect(getByTestId(DESCRIPTION_TITLE_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(DESCRIPTION_TITLE_TEST_ID)).toHaveTextContent(RULE_DESCRIPTION_TITLE);
-    expect(getByTestId(DESCRIPTION_EXPAND_BUTTON_TEST_ID)).toBeInTheDocument();
-    expect(getByTestId(DESCRIPTION_EXPAND_BUTTON_TEST_ID)).toHaveTextContent(
-      DOCUMENT_DESCRIPTION_COLLAPSE_BUTTON
-    );
-  });
-
-  it('should render expand and collapse when clicking on the button', () => {
-    const panelContextValue = {
-      dataFormattedForFieldBrowser: [ruleUuid, ruleDescription],
-    } as unknown as RightPanelContext;
-
-    const { getByTestId } = render(
-      <RightPanelContext.Provider value={panelContextValue}>
-        <Description />
-      </RightPanelContext.Provider>
-    );
-
-    expect(getByTestId(DESCRIPTION_EXPAND_BUTTON_TEST_ID)).toHaveTextContent(
-      DOCUMENT_DESCRIPTION_EXPAND_BUTTON
-    );
-    getByTestId(DESCRIPTION_EXPAND_BUTTON_TEST_ID).click();
-    expect(getByTestId(DESCRIPTION_EXPAND_BUTTON_TEST_ID)).toHaveTextContent(
-      DOCUMENT_DESCRIPTION_COLLAPSE_BUTTON
-    );
+    expect(queryByTestId(RULE_SUMMARY_BUTTON_TEST_ID)).not.toBeInTheDocument();
   });
 
   it('should render document title if document is not an alert', () => {
@@ -99,9 +91,13 @@ describe('<Description />', () => {
     } as unknown as RightPanelContext;
 
     const { getByTestId } = render(
-      <RightPanelContext.Provider value={panelContextValue}>
-        <Description />
-      </RightPanelContext.Provider>
+      <TestProviders>
+        <RightPanelContext.Provider value={panelContextValue}>
+          <ThemeProvider theme={mockTheme}>
+            <Description />
+          </ThemeProvider>
+        </RightPanelContext.Provider>
+      </TestProviders>
     );
 
     expect(getByTestId(DESCRIPTION_TITLE_TEST_ID)).toBeInTheDocument();

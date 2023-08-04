@@ -39,7 +39,7 @@ import { useTourContext } from '../guided_onboarding_tour';
 import { AlertsCasesTourSteps, SecurityStepId } from '../guided_onboarding_tour/tour_config';
 import { isDetectionsAlertsTable } from '../top_n/helpers';
 import { GuidedOnboardingTourStep } from '../guided_onboarding_tour/tour_step';
-import { DEFAULT_ACTION_BUTTON_WIDTH, isAlert, getSessionViewProcessIndex } from './helpers';
+import { DEFAULT_ACTION_BUTTON_WIDTH, isAlert } from './helpers';
 
 const ActionsContainer = styled.div`
   align-items: center;
@@ -152,13 +152,9 @@ const ActionsComponent: React.FC<ActionProps> = ({
     const { process, _id, _index, timestamp, kibana } = ecsData;
     const sessionEntityId = process?.entry_leader?.entity_id?.[0];
     const sessionStartTime = process?.entry_leader?.start?.[0];
-    const processIndex = getSessionViewProcessIndex(kibana?.alert?.ancestors?.index?.[0] || _index);
+    const index = kibana?.alert?.ancestors?.index?.[0] || _index;
 
-    if (
-      processIndex === undefined ||
-      sessionEntityId === undefined ||
-      sessionStartTime === undefined
-    ) {
+    if (index === undefined || sessionEntityId === undefined || sessionStartTime === undefined) {
       return null;
     }
 
@@ -168,7 +164,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
       (investigatedAlertId && ecsData.kibana?.alert.original_time?.[0]) || timestamp;
 
     return {
-      processIndex,
+      index,
       sessionEntityId,
       sessionStartTime,
       jumpToEntityId,

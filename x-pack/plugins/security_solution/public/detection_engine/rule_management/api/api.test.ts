@@ -8,17 +8,17 @@
 import { buildEsQuery } from '@kbn/es-query';
 import { KibanaServices } from '../../../common/lib/kibana';
 
-import { DETECTION_ENGINE_RULES_EXCEPTIONS_REFERENCE_URL } from '../../../../common/detection_engine/rule_exceptions';
-import { getPatchRulesSchemaMock } from '../../../../common/detection_engine/rule_management/mocks';
+import { DETECTION_ENGINE_RULES_EXCEPTIONS_REFERENCE_URL } from '../../../../common/api/detection_engine/rule_exceptions';
+import { getPatchRulesSchemaMock } from '../../../../common/api/detection_engine/rule_management/mocks';
 import {
   getCreateRulesSchemaMock,
   getUpdateRulesSchemaMock,
   getRulesSchemaMock,
-} from '../../../../common/detection_engine/rule_schema/mocks';
+} from '../../../../common/api/detection_engine/model/rule_schema/mocks';
 import {
   BulkActionType,
   BulkActionEditType,
-} from '../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
+} from '../../../../common/api/detection_engine/rule_management/bulk_actions/bulk_actions_route';
 import { rulesMock } from '../logic/mock';
 import type { FindRulesReferencedByExceptionsListProp } from '../logic/types';
 
@@ -28,7 +28,6 @@ import {
   patchRule,
   fetchRules,
   fetchRuleById,
-  createPrepackagedRules,
   importRules,
   exportRules,
   getPrePackagedRulesStatus,
@@ -185,7 +184,7 @@ describe('Detections Rules API', () => {
         method: 'GET',
         query: {
           filter:
-            '(alert.attributes.name: "\\" OR (foo:bar)" OR alert.attributes.params.index: "\\" OR (foo:bar)" OR alert.attributes.params.threat.tactic.id: "\\" OR (foo:bar)" OR alert.attributes.params.threat.tactic.name: "\\" OR (foo:bar)" OR alert.attributes.params.threat.technique.id: "\\" OR (foo:bar)" OR alert.attributes.params.threat.technique.name: "\\" OR (foo:bar)" OR alert.attributes.params.threat.technique.subtechnique.id: "\\" OR (foo:bar)" OR alert.attributes.params.threat.technique.subtechnique.name: "\\" OR (foo:bar)")',
+            '(alert.attributes.name: "\\" \\OR \\(foo\\:bar\\)" OR alert.attributes.params.index: "\\" \\OR \\(foo\\:bar\\)" OR alert.attributes.params.threat.tactic.id: "\\" \\OR \\(foo\\:bar\\)" OR alert.attributes.params.threat.tactic.name: "\\" \\OR \\(foo\\:bar\\)" OR alert.attributes.params.threat.technique.id: "\\" \\OR \\(foo\\:bar\\)" OR alert.attributes.params.threat.technique.name: "\\" \\OR \\(foo\\:bar\\)" OR alert.attributes.params.threat.technique.subtechnique.id: "\\" \\OR \\(foo\\:bar\\)" OR alert.attributes.params.threat.technique.subtechnique.name: "\\" \\OR \\(foo\\:bar\\)")',
           page: 1,
           per_page: 20,
           sort_field: 'enabled',
@@ -396,7 +395,7 @@ describe('Detections Rules API', () => {
         method: 'GET',
         query: {
           filter:
-            'alert.attributes.tags:("hello" AND "world") AND (alert.attributes.name: "ruleName" OR alert.attributes.params.index: "ruleName" OR alert.attributes.params.threat.tactic.id: "ruleName" OR alert.attributes.params.threat.tactic.name: "ruleName" OR alert.attributes.params.threat.technique.id: "ruleName" OR alert.attributes.params.threat.technique.name: "ruleName" OR alert.attributes.params.threat.technique.subtechnique.id: "ruleName" OR alert.attributes.params.threat.technique.subtechnique.name: "ruleName")',
+            '(alert.attributes.name: "ruleName" OR alert.attributes.params.index: "ruleName" OR alert.attributes.params.threat.tactic.id: "ruleName" OR alert.attributes.params.threat.tactic.name: "ruleName" OR alert.attributes.params.threat.technique.id: "ruleName" OR alert.attributes.params.threat.technique.name: "ruleName" OR alert.attributes.params.threat.technique.subtechnique.id: "ruleName" OR alert.attributes.params.threat.technique.subtechnique.name: "ruleName") AND alert.attributes.tags:("hello" AND "world")',
           page: 1,
           per_page: 20,
           sort_field: 'enabled',
@@ -435,34 +434,6 @@ describe('Detections Rules API', () => {
     });
   });
 
-  describe('createPrepackagedRules', () => {
-    beforeEach(() => {
-      fetchMock.mockClear();
-      fetchMock.mockResolvedValue({
-        rules_installed: 0,
-        rules_updated: 0,
-        timelines_installed: 0,
-        timelines_updated: 0,
-      });
-    });
-
-    test('check parameter url when creating pre-packaged rules', async () => {
-      await createPrepackagedRules();
-      expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/rules/prepackaged', {
-        method: 'PUT',
-      });
-    });
-    test('happy path', async () => {
-      const resp = await createPrepackagedRules();
-      expect(resp).toEqual({
-        rules_installed: 0,
-        rules_updated: 0,
-        timelines_installed: 0,
-        timelines_updated: 0,
-      });
-    });
-  });
-
   describe('importRules', () => {
     const fileToImport: File = {
       lastModified: 33,
@@ -474,7 +445,7 @@ describe('Detections Rules API', () => {
       slice: jest.fn(),
       stream: jest.fn(),
       text: jest.fn(),
-    } as File;
+    } as unknown as File;
     const formData = new FormData();
     formData.append('file', fileToImport);
 
@@ -556,7 +527,7 @@ describe('Detections Rules API', () => {
       slice: jest.fn(),
       stream: jest.fn(),
       text: jest.fn(),
-    } as Blob;
+    } as unknown as Blob;
 
     beforeEach(() => {
       fetchMock.mockClear();

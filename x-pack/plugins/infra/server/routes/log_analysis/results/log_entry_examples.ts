@@ -6,11 +6,8 @@
  */
 
 import Boom from '@hapi/boom';
-import {
-  getLogEntryExamplesRequestPayloadRT,
-  getLogEntryExamplesSuccessReponsePayloadRT,
-  LOG_ANALYSIS_GET_LOG_ENTRY_RATE_EXAMPLES_PATH,
-} from '../../../../common/http_api/log_analysis';
+import { logAnalysisResultsV1 } from '../../../../common/http_api';
+
 import { createValidationFunction } from '../../../../common/runtime_types';
 import { InfraBackendLibs } from '../../../lib/infra_types';
 import { getLogEntryExamples } from '../../../lib/log_analysis';
@@ -21,72 +18,83 @@ export const initGetLogEntryExamplesRoute = ({
   framework,
   getStartServices,
 }: Pick<InfraBackendLibs, 'framework' | 'getStartServices'>) => {
-  framework.registerRoute(
-    {
+  framework
+    .registerVersionedRoute({
+      access: 'internal',
       method: 'post',
-      path: LOG_ANALYSIS_GET_LOG_ENTRY_RATE_EXAMPLES_PATH,
-      validate: {
-        body: createValidationFunction(getLogEntryExamplesRequestPayloadRT),
-      },
-    },
-    framework.router.handleLegacyErrors(async (requestContext, request, response) => {
-      const {
-        data: {
-          dataset,
-          exampleCount,
-          logView,
-          timeRange: { startTime, endTime },
-          categoryId,
+      path: logAnalysisResultsV1.LOG_ANALYSIS_GET_LOG_ENTRY_RATE_EXAMPLES_PATH,
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            body: createValidationFunction(
+              logAnalysisResultsV1.getLogEntryExamplesRequestPayloadRT
+            ),
+          },
         },
-      } = request.body;
+      },
+      framework.router.handleLegacyErrors(async (requestContext, request, response) => {
+        const {
+          data: {
+            dataset,
+            exampleCount,
+            logView,
+            timeRange: { startTime, endTime },
+            categoryId,
+          },
+        } = request.body;
 
-      const [, , { logViews }] = await getStartServices();
-      const resolvedLogView = await logViews.getScopedClient(request).getResolvedLogView(logView);
+        const [, { logsShared }] = await getStartServices();
+        const resolvedLogView = await logsShared.logViews
+          .getScopedClient(request)
+          .getResolvedLogView(logView);
 
-      try {
-        const infraMlContext = await assertHasInfraMlPlugins(requestContext);
+        try {
+          const infraMlContext = await assertHasInfraMlPlugins(requestContext);
 
-        const { data: logEntryExamples, timing } = await getLogEntryExamples(
-          infraMlContext,
-          logView,
-          startTime,
-          endTime,
-          dataset,
-          exampleCount,
-          resolvedLogView,
-          framework.callWithRequest,
-          categoryId
-        );
+          const { data: logEntryExamples, timing } = await getLogEntryExamples(
+            infraMlContext,
+            logView,
+            startTime,
+            endTime,
+            dataset,
+            exampleCount,
+            resolvedLogView,
+            framework.callWithRequest,
+            categoryId
+          );
 
-        return response.ok({
-          body: getLogEntryExamplesSuccessReponsePayloadRT.encode({
-            data: {
-              examples: logEntryExamples,
-            },
-            timing,
-          }),
-        });
-      } catch (error) {
-        if (Boom.isBoom(error)) {
-          throw error;
-        }
+          return response.ok({
+            body: logAnalysisResultsV1.getLogEntryExamplesSuccessResponsePayloadRT.encode({
+              data: {
+                examples: logEntryExamples,
+              },
+              timing,
+            }),
+          });
+        } catch (error) {
+          if (Boom.isBoom(error)) {
+            throw error;
+          }
 
-        if (isMlPrivilegesError(error)) {
+          if (isMlPrivilegesError(error)) {
+            return response.customError({
+              statusCode: 403,
+              body: {
+                message: error.message,
+              },
+            });
+          }
+
           return response.customError({
-            statusCode: 403,
+            statusCode: error.statusCode ?? 500,
             body: {
-              message: error.message,
+              message: error.message ?? 'An unexpected error occurred',
             },
           });
         }
-
-        return response.customError({
-          statusCode: error.statusCode ?? 500,
-          body: {
-            message: error.message ?? 'An unexpected error occurred',
-          },
-        });
-      }
-    })
-  );
+      })
+    );
 };

@@ -17,7 +17,7 @@ These files must be updated when upgrading Node.js:
   - {kib-repo}blob/{branch}/WORKSPACE.bazel[`WORKSPACE.bazel`] - The version is specified in the `node_version` property.
     Besides this property, the list of files under `node_repositories` must be updated along with their respective SHA256 hashes.
     These can be found on the https://nodejs.org[nodejs.org] website.
-    Example for Node.js v16.19.1: https://nodejs.org/dist/v16.19.1/SHASUMS256.txt.asc
+    Example for Node.js v18.17.0: https://nodejs.org/dist/v18.17.0/SHASUMS256.txt.asc
 
 See PR {kib-repo}pull/128123[#128123] for an example of how the Node.js version has been upgraded previously.
 
@@ -29,6 +29,13 @@ When upgrading to a new major version of Node.js, the following extra steps must
     As an example, here's the https://github.com/nodejs/node/blob/v18.x/BUILDING.md#platform-list[Node.js 18 supported platform list].
     You can change which Node.js major version to view, by changing the selected branch.
     If Node.js has dropped support for platform still supported by Kibana, appropriate steps must be taken as soon as possible to deprecate support for this platform. This way support for it can be dropped before the currently used major version of Node.js https://github.com/nodejs/release#release-schedule[reaches End-of-Life].
+
+[[custom-nodejs-builds]]
+=== Custom builds of Node.js
+
+Due to Node.js 16 coming to an https://nodejs.org/en/blog/announcements/nodejs16-eol[early End-of-Life] and Node.js 18 no longer supporting the same platforms that {kib} supports (most notably CentOS7/RHEL7), we cannot bundle the official Node.js binaries with the Linux distributable of {kib}.
+To keep support for these older platforms, we're bundling the Linux distributable of {kib} with a https://github.com/elastic/kibana-custom-nodejs-builds[custom build of Node.js] with extended backwards compatibility.
+The only difference between the offical Node.js build and our custom build, is the version of `glibc` that it's compiled against.
 
 === Backporting
 

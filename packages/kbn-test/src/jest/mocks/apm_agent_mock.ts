@@ -34,6 +34,7 @@ const agent: jest.Mocked<Agent> = {
   currentSpan: null,
   setGlobalLabel: jest.fn().mockReturnValue(true),
   setLabel: jest.fn().mockReturnValue(false),
+  setGlobalLabel: jest.fn(),
   addLabels: jest.fn().mockReturnValue(false),
   setUserContext: jest.fn(),
   setCustomContext: jest.fn(),

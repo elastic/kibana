@@ -25,7 +25,7 @@ const getTotalFromFileList = (data: { files: FileJSON[]; total: number }): { tot
   total: data.total,
 });
 
-export interface GetCaseFileStatsParams {
+interface GetCaseFileStatsParams {
   caseId: string;
 }
 

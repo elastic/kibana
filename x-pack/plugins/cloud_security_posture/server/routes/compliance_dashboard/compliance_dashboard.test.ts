@@ -17,7 +17,10 @@ describe('compliance dashboard permissions API', () => {
     const router = httpServiceMock.createRouter();
 
     defineGetComplianceDashboardRoute(router);
-    const [_, handler] = router.get.mock.calls[0];
+
+    const versionedRouter = router.versioned.get.mock.results[0].value;
+
+    const handler = versionedRouter.addVersion.mock.calls[0][1];
 
     const mockContext = createCspRequestHandlerContextMock();
     const mockResponse = httpServerMock.createResponseFactory();
@@ -33,7 +36,10 @@ describe('compliance dashboard permissions API', () => {
     const router = httpServiceMock.createRouter();
 
     defineGetComplianceDashboardRoute(router);
-    const [_, handler] = router.get.mock.calls[0];
+
+    const versionedRouter = router.versioned.get.mock.results[0].value;
+
+    const handler = versionedRouter.addVersion.mock.calls[0][1];
 
     const mockContext = createCspRequestHandlerContextMock();
     const mockResponse = httpServerMock.createResponseFactory();

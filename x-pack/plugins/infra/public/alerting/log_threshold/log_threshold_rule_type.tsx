@@ -7,22 +7,53 @@
 
 import { i18n } from '@kbn/i18n';
 import { ObservabilityRuleTypeModel } from '@kbn/observability-plugin/public';
-import { lazy } from 'react';
+import type { LocatorPublic } from '@kbn/share-plugin/public';
+import type { LogsLocatorParams } from '../../../common/locators';
 import {
   LOG_DOCUMENT_COUNT_RULE_TYPE_ID,
   PartialRuleParams,
 } from '../../../common/alerting/logs/log_threshold';
 import { createLazyComponentWithKibanaContext } from '../../hooks/use_kibana';
 import { InfraClientCoreSetup } from '../../types';
-import { formatRuleData } from './rule_data_formatters';
+import { createRuleFormatter } from './rule_data_formatters';
 import { validateExpression } from './validation';
 
+const logThresholdDefaultActionMessage = i18n.translate(
+  'xpack.infra.logs.alerting.threshold.defaultActionMessage',
+  {
+    defaultMessage: `\\{\\{context.reason\\}\\}
+
+\\{\\{rule.name\\}\\} is active.
+
+\\{\\{^context.isRatio\\}\\}\\{\\{#context.group\\}\\}\\{\\{context.group\\}\\} - \\{\\{/context.group\\}\\}\\{\\{context.matchingDocuments\\}\\} log entries have matched the following conditions: \\{\\{context.conditions\\}\\}\\{\\{/context.isRatio\\}\\}
+\\{\\{#context.isRatio\\}\\}\\{\\{#context.group\\}\\}\\{\\{context.group\\}\\} - \\{\\{/context.group\\}\\} Ratio of the count of log entries matching \\{\\{context.numeratorConditions\\}\\} to the count of log entries matching \\{\\{context.denominatorConditions\\}\\} was \\{\\{context.ratio\\}\\}\\{\\{/context.isRatio\\}\\}
+
+[View alert details](\\{\\{context.alertDetailsUrl\\}\\})
+`,
+  }
+);
+const logThresholdDefaultRecoveryMessage = i18n.translate(
+  'xpack.infra.logs.alerting.threshold.defaultRecoveryMessage',
+  {
+    defaultMessage: `\\{\\{rule.name\\}\\} has recovered.
+
+[View alert details](\\{\\{context.alertDetailsUrl\\}\\})
+`,
+  }
+);
+
 export function createLogThresholdRuleType(
-  core: InfraClientCoreSetup
+  core: InfraClientCoreSetup,
+  logsLocator: LocatorPublic<LogsLocatorParams>
 ): ObservabilityRuleTypeModel<PartialRuleParams> {
   const ruleParamsExpression = createLazyComponentWithKibanaContext(
     core,
     () => import('./components/expression_editor/editor')
+  );
+
+  const alertDetailsAppSection = createLazyComponentWithKibanaContext(
+    core,
+    () => import('./components/alert_details_app_section')
   );
 
   return {
@@ -34,16 +65,12 @@ export function createLogThresholdRuleType(
     documentationUrl(docLinks) {
       return `${docLinks.links.observability.logsThreshold}`;
     },
-    alertDetailsAppSection: lazy(() => import('./components/alert_details_app_section')),
+    alertDetailsAppSection,
     ruleParamsExpression,
     validate: validateExpression,
-    defaultActionMessage: i18n.translate(
-      'xpack.infra.logs.alerting.threshold.defaultActionMessage',
-      {
-        defaultMessage: `\\{\\{^context.isRatio\\}\\}\\{\\{#context.group\\}\\}\\{\\{context.group\\}\\} - \\{\\{/context.group\\}\\}\\{\\{context.matchingDocuments\\}\\} log entries have matched the following conditions: \\{\\{context.conditions\\}\\}\\{\\{/context.isRatio\\}\\}\\{\\{#context.isRatio\\}\\}\\{\\{#context.group\\}\\}\\{\\{context.group\\}\\} - \\{\\{/context.group\\}\\} Ratio of the count of log entries matching \\{\\{context.numeratorConditions\\}\\} to the count of log entries matching \\{\\{context.denominatorConditions\\}\\} was \\{\\{context.ratio\\}\\}\\{\\{/context.isRatio\\}\\}`,
-      }
-    ),
+    defaultActionMessage: logThresholdDefaultActionMessage,
+    defaultRecoveryMessage: logThresholdDefaultRecoveryMessage,
     requiresAppContext: false,
-    format: formatRuleData,
+    format: createRuleFormatter(logsLocator),
   };
 }

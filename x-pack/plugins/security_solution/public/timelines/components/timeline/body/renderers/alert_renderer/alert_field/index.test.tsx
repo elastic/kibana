@@ -10,7 +10,7 @@ import React from 'react';
 
 import { TestProviders } from '../../../../../../../common/mock';
 import { AlertField } from '.';
-import { TimelineId } from '../../../../../../../../common/types';
+import { TimelineId } from '../../../../../../../../common/types/timeline';
 
 const contextId = 'test';
 const eventId = 'abcd';

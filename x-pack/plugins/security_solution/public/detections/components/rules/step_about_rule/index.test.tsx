@@ -13,6 +13,7 @@ import { stubIndexPattern } from '@kbn/data-plugin/common/stubs';
 import { StepAboutRule, StepAboutRuleReadOnly } from '.';
 import { useFetchIndex } from '../../../../common/containers/source';
 import { useGetInstalledJob } from '../../../../common/components/ml/hooks/use_get_jobs';
+import { useSecurityJobs } from '../../../../common/components/ml_popover/hooks/use_security_jobs';
 import { mockAboutStepRule } from '../../../../detection_engine/rule_management_ui/components/rules_table/__mocks__/mock';
 import { StepRuleDescription } from '../description_step';
 import { stepAboutDefaultValue } from './default_value';
@@ -31,6 +32,7 @@ import type { FormHook } from '../../../../shared_imports';
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../common/containers/source');
 jest.mock('../../../../common/components/ml/hooks/use_get_jobs');
+jest.mock('../../../../common/components/ml_popover/hooks/use_security_jobs');
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
   return {
@@ -45,7 +47,7 @@ jest.mock('@elastic/eui', () => {
 
 export const stepDefineStepMLRule: DefineStepRule = {
   ruleType: 'machine_learning',
-  index: [],
+  index: ['default-index-*'],
   queryBar: { query: { query: '', language: '' }, filters: [], saved_id: null },
   machineLearningJobId: ['auth_high_count_logon_events_for_a_source_ip'],
   anomalyThreshold: 50,
@@ -71,6 +73,7 @@ export const stepDefineStepMLRule: DefineStepRule = {
 
 describe('StepAboutRuleComponent', () => {
   let useGetInstalledJobMock: jest.Mock;
+  let useSecurityJobsMock: jest.Mock;
   const TestComp = ({
     setFormRef,
     defineStepDefaultOverride,
@@ -90,9 +93,13 @@ describe('StepAboutRuleComponent', () => {
 
     return (
       <StepAboutRule
-        defaultValues={stepAboutDefaultValue}
-        defineRuleData={defineStepDefault}
+        ruleType={defineStepDefault.ruleType}
+        machineLearningJobId={defineStepDefault.machineLearningJobId}
+        index={defineStepDefault.index}
+        dataViewId={defineStepDefault.dataViewId}
+        timestampOverride={stepAboutDefaultValue.timestampOverride}
         isLoading={false}
+        isActive={true}
         form={aboutStepForm}
       />
     );
@@ -108,6 +115,7 @@ describe('StepAboutRuleComponent', () => {
     useGetInstalledJobMock = (useGetInstalledJob as jest.Mock).mockImplementation(() => ({
       jobs: [],
     }));
+    useSecurityJobsMock = (useSecurityJobs as jest.Mock).mockImplementation(() => ({ jobs: [] }));
   });
 
   it('it renders StepRuleDescription if isReadOnlyView is true and "name" property exists', () => {
@@ -374,8 +382,14 @@ describe('StepAboutRuleComponent', () => {
     });
   });
 
-  it('should use index based on ML jobs when editing ML rule', async () => {
+  it('should use index based on ML jobs when creating/editing ML rule', async () => {
     (useFetchIndex as jest.Mock).mockClear();
+    useSecurityJobsMock.mockImplementation(() => {
+      return {
+        jobs: [{ id: 'auth_high_count_logon_events_for_a_source_ip', isInstalled: true }],
+        loading: false,
+      };
+    });
     useGetInstalledJobMock.mockImplementation((jobIds: string[]) => {
       expect(jobIds).toEqual(['auth_high_count_logon_events_for_a_source_ip']);
       return { jobs: [{ results_index_name: 'shared' }] };
@@ -387,5 +401,25 @@ describe('StepAboutRuleComponent', () => {
 
     const indexNames = ['.ml-anomalies-shared'];
     expect(useFetchIndex).lastCalledWith(indexNames);
+  });
+
+  it('should use default rule index if selected ML jobs are not installed when creating/editing ML rule', async () => {
+    (useFetchIndex as jest.Mock).mockClear();
+    useSecurityJobsMock.mockImplementation(() => {
+      return {
+        jobs: [{ id: 'auth_high_count_logon_events_for_a_source_ip', isInstalled: false }],
+        loading: false,
+      };
+    });
+    useGetInstalledJobMock.mockImplementation((jobIds: string[]) => {
+      expect(jobIds).toEqual([]);
+      return { jobs: [] };
+    });
+
+    mount(<TestComp setFormRef={() => {}} defineStepDefaultOverride={stepDefineStepMLRule} />, {
+      wrappingComponent: TestProviders,
+    });
+
+    expect(useFetchIndex).lastCalledWith(stepDefineStepMLRule.index);
   });
 });

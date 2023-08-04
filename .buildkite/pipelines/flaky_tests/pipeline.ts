@@ -153,18 +153,17 @@ for (const testSuite of testSuites) {
     continue;
   }
 
-  const keyParts = testSuite.key.split('/');
-  switch (keyParts[0]) {
+  const [category, suiteName] = testSuite.key.split('/');
+  switch (category) {
     case 'cypress':
-      const CYPRESS_SUITE = keyParts[1];
-      const group = groups.find((g) => g.key.includes(CYPRESS_SUITE));
+      const group = groups.find((g) => g.key === testSuite.key);
       if (!group) {
         throw new Error(
-          `Group configuration was not found in groups.json for the following cypress suite: {${CYPRESS_SUITE}}.`
+          `Group configuration was not found in groups.json for the following cypress suite: {${suiteName}}.`
         );
       }
       steps.push({
-        command: `.buildkite/scripts/steps/functional/${CYPRESS_SUITE}.sh`,
+        command: `.buildkite/scripts/steps/functional/${suiteName}.sh`,
         label: group.name,
         agents: { queue: 'n2-4-spot' },
         depends_on: 'build',
@@ -177,6 +176,9 @@ for (const testSuite of testSuites) {
           // by setting chunks vars to value 1, which means all test will run in one job
           CLI_NUMBER: 1,
           CLI_COUNT: 1,
+          // The security solution cypress tests don't recognize CLI_NUMBER and CLI_COUNT, they use `BUILDKITE_PARALLEL_JOB_COUNT` and `BUILDKITE_PARALLEL_JOB`, which cannot be overridden here.
+          // Use `RUN_ALL_TESTS` to make Security Solution Cypress tests run all tests instead of a subset.
+          RUN_ALL_TESTS: 'true',
         },
       });
       break;

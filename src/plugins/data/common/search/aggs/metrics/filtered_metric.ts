@@ -51,16 +51,18 @@ export const getFilteredMetricAgg = ({ getConfig }: FiltersMetricAggDependencies
     hasNoDslParams: true,
     getSerializedFormat,
     createFilter: (agg, inputState) => {
+      const indexPattern = agg.getIndexPattern();
+      if (
+        agg.params.customMetric.type.name === 'top_hits' ||
+        agg.params.customMetric.type.name === 'top_metrics'
+      ) {
+        return agg.params.customMetric.createFilter(inputState);
+      }
       if (!agg.params.customBucket.params.filter) return;
       const esQueryConfigs = getEsQueryConfig({ get: getConfig });
       return buildQueryFilter(
-        buildEsQuery(
-          agg.getIndexPattern(),
-          [agg.params.customBucket.params.filter],
-          [],
-          esQueryConfigs
-        ),
-        agg.getIndexPattern().id!,
+        buildEsQuery(indexPattern, [agg.params.customBucket.params.filter], [], esQueryConfigs),
+        indexPattern.id!,
         agg.params.customBucket.params.filter.query
       );
     },

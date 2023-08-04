@@ -10,7 +10,6 @@ import {
   userActions,
   commentAlert,
   commentAlertMultipleIds,
-  mappings,
   isolateCommentActions,
   releaseCommentActions,
   isolateCommentActionsMultipleTargets,
@@ -29,12 +28,12 @@ import {
   formatComments,
   addKibanaInformationToDescription,
 } from './utils';
-import { Actions, CaseStatuses } from '../../../common/api';
+import { CaseStatuses, UserActionActions } from '../../../common/types/domain';
 import { flattenCaseSavedObject } from '../../common/utils';
 import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { casesConnectors } from '../../connectors';
 import { userProfiles, userProfilesMap } from '../user_profiles.mock';
-import { mockCases } from '../../mocks';
+import { mappings, mockCases } from '../../mocks';
 
 const allComments = [
   commentObj,
@@ -86,6 +85,7 @@ describe('utils', () => {
       },
       isPreconfigured: false,
       isDeprecated: false,
+      isSystemAction: false,
     };
 
     it('creates an external incident correctly for Jira', async () => {
@@ -979,7 +979,7 @@ describe('utils', () => {
         ...userActions.slice(0, 3),
         {
           type: 'pushed',
-          action: Actions.push_to_service,
+          action: UserActionActions.push_to_service,
           created_at: '2021-02-03T17:45:29.400Z',
           created_by: {
             email: 'elastic@elastic.co',

@@ -39,6 +39,10 @@
     "@kbn/core-custom-branding-browser-mocks",
     "@kbn/core-custom-branding-browser",
     "@kbn/core-custom-branding-common",
+    "@kbn/core-analytics-browser-mocks",
+    "@kbn/core-analytics-browser",
+    "@kbn/shared-ux-router",
+    "@kbn/shared-ux-link-redirect-app",
   ],
   "exclude": [
     "target/**/*",

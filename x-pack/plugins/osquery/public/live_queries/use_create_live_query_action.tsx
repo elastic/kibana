@@ -7,7 +7,8 @@
 
 import { useMutation } from '@tanstack/react-query';
 import type { AgentSelection } from '@kbn/osquery-io-ts-types';
-import type { CreateLiveQueryRequestBodySchema } from '../../common/schemas/routes/live_query';
+import type { CreateLiveQueryRequestBodySchema } from '../../common/api';
+import { API_VERSIONS } from '../../common/constants';
 import { useKibana } from '../common/lib/kibana';
 import { useErrorToast } from '../common/hooks/use_error_toast';
 import type { LiveQueryDetailsItem } from '../actions/use_live_query_details';
@@ -36,6 +37,7 @@ export const useCreateLiveQuery = ({ onSuccess }: UseLiveQueryProps) => {
       const response = await http.post<{ data: LiveQueryDetailsItem }>(
         '/api/osquery/live_queries',
         {
+          version: API_VERSIONS.public.v1,
           body: JSON.stringify({
             ...payload,
             agent_all: agentSelection.allAgentsSelected,

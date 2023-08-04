@@ -6,7 +6,7 @@
  */
 
 import type { Duration } from 'moment';
-import type { RuleExecutionStatus } from '../../../../../../../common/detection_engine/rule_monitoring';
+import type { RuleExecutionStatus } from '../../../../../../../common/api/detection_engine/rule_monitoring';
 
 /**
  * Used from rule executors to log various information about the rule execution:

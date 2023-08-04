@@ -11,14 +11,17 @@ import { ES_FIELD_TYPES } from '@kbn/field-types';
 import type { Query } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { addExcludeFrozenToQuery } from '@kbn/ml-query-utils';
-import { MlUrlConfig } from '@kbn/ml-anomaly-utils';
+import {
+  type Aggregation,
+  type Field,
+  type MlUrlConfig,
+  ML_JOB_AGGREGATION,
+  mlJobAggregations,
+  mlJobAggregationsWithoutEsEquivalent,
+} from '@kbn/ml-anomaly-utils';
+import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { IndexPatternTitle } from '../../../../../../common/types/kibana';
-import {
-  ML_JOB_AGGREGATION,
-  aggregations,
-  mlOnlyAggregations,
-} from '../../../../../../common/constants/aggregation_types';
 import { getQueryFromSavedSearchObject } from '../../../../util/index_utils';
 import type {
   Job,
@@ -29,7 +32,6 @@ import type {
   BucketSpan,
   CustomSettings,
 } from '../../../../../../common/types/anomaly_detection_jobs';
-import type { Aggregation, Field, RuntimeMappings } from '../../../../../../common/types/fields';
 import { combineFieldsAndAggs } from '../../../../../../common/util/fields_utils';
 import { createEmptyJob, createEmptyDatafeed } from './util/default_configs';
 import { mlJobService } from '../../../../services/job_service';
@@ -803,7 +805,7 @@ export class JobCreator {
           } as Field)
       );
 
-      const aggs = cloneDeep([...aggregations, ...mlOnlyAggregations]);
+      const aggs = cloneDeep([...mlJobAggregations, ...mlJobAggregationsWithoutEsEquivalent]);
       this._runtimeFields = combineFieldsAndAggs(tempRuntimeFields, aggs, {}).fields;
     }
   }

@@ -12,28 +12,28 @@ import { SavedObjectReference } from '@kbn/core/server';
 import type {
   GridData,
   DashboardAttributes as CurrentDashboardAttributes, // Dashboard attributes from common are the source of truth for the current version.
-} from '../../../../common';
+} from '../../../../common/content_management';
 
-interface SavedObjectAttributes {
+interface KibanaAttributes {
   kibanaSavedObjectMeta: {
     searchSourceJSON: string;
   };
 }
 
-interface Doc<Attributes extends SavedObjectAttributes = SavedObjectAttributes> {
+interface Doc<Attributes extends KibanaAttributes = KibanaAttributes> {
   references: SavedObjectReference[];
   attributes: Attributes;
   id: string;
   type: string;
 }
 
-interface DocPre700<Attributes extends SavedObjectAttributes = SavedObjectAttributes> {
+interface DocPre700<Attributes extends KibanaAttributes = KibanaAttributes> {
   attributes: Attributes;
   id: string;
   type: string;
 }
 
-interface DashboardAttributesTo720 extends SavedObjectAttributes {
+interface DashboardAttributesTo720 extends KibanaAttributes {
   panelsJSON: string;
   description: string;
   uiStateJSON?: string;

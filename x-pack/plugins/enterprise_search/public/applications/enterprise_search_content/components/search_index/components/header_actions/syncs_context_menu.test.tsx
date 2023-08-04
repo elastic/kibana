@@ -27,14 +27,22 @@ import { SyncsContextMenu } from './syncs_context_menu';
 
 describe('SyncsContextMenu', () => {
   const startSync = jest.fn();
+  const startIncrementalSync = jest.fn();
+  const startAccessControlSync = jest.fn();
   const cancelSyncs = jest.fn();
 
   const mockValues = {
+    hasDocumentLevelSecurityFeature: false,
+    hasIncrementalSyncFeature: false,
     ingestionMethod: IngestionMethod.CONNECTOR,
     ingestionStatus: IngestionStatus.CONNECTED,
     isCanceling: false,
     isSyncing: false,
     isWaitingForSync: false,
+    productFeatures: {
+      hasDocumentLevelSecurityEnabled: true,
+      hasIncrementalSyncEnabled: true,
+    },
     status: Status.SUCCESS,
   };
 
@@ -42,6 +50,8 @@ describe('SyncsContextMenu', () => {
     setMockValues(mockValues);
     setMockActions({
       cancelSyncs,
+      startAccessControlSync,
+      startIncrementalSync,
       startSync,
     });
   });
@@ -69,15 +79,12 @@ describe('SyncsContextMenu', () => {
       .find(EuiContextMenuItem);
     expect(menuItems).toHaveLength(1);
 
-    const firstButton = menuItems.get(0);
+    const lastButton = menuItems.last();
 
-    expect(firstButton.props).toEqual(
-      expect.objectContaining({
-        children: 'Cancel Syncs',
-        disabled: false,
-      })
-    );
-    menuItems.first().simulate('click');
+    expect(lastButton.prop('disabled')).toEqual(false);
+    expect(lastButton.text()).toEqual('Cancel Syncs');
+
+    menuItems.last().simulate('click');
     expect(cancelSyncs).toHaveBeenCalled();
   });
 
@@ -99,11 +106,11 @@ describe('SyncsContextMenu', () => {
 
     expect(firstButton.props).toEqual(
       expect.objectContaining({
-        children: 'Sync',
+        children: 'Full Content',
         disabled: false,
       })
     );
-    menuItems.first().simulate('click');
+    menuItems.at(0).simulate('click');
     expect(startSync).toHaveBeenCalled();
   });
 });

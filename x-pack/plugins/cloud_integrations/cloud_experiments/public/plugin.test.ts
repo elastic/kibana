@@ -131,7 +131,7 @@ describe('Cloud Experiments public plugin', () => {
           isElasticStaff: true,
           kibanaVersion: 'version',
           trialEndDate: '2020-10-01T14:13:12.000Z',
-          userId: '1c2412b751f056aef6e340efa5637d137442d489a4b1e3117071e7c87f8523f2',
+          userId: 'mock-deployment-id',
         });
       });
     });

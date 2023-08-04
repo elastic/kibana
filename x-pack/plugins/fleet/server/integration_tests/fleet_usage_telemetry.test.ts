@@ -130,6 +130,12 @@ describe('fleet usage telemetry', () => {
           last_checkin: '2022-11-21T12:26:24Z',
           active: true,
           policy_id: 'policy1',
+          local_metadata: {
+            os: {
+              name: 'Ubuntu',
+              version: '22.04.2 LTS (Jammy Jellyfish)',
+            },
+          },
         },
         {
           create: {
@@ -144,6 +150,12 @@ describe('fleet usage telemetry', () => {
           last_checkin: '2022-11-21T12:27:24Z',
           active: true,
           policy_id: 'policy1',
+          local_metadata: {
+            os: {
+              name: 'Ubuntu',
+              version: '20.04.5 LTS (Focal Fossa)',
+            },
+          },
         },
         {
           create: {
@@ -158,6 +170,12 @@ describe('fleet usage telemetry', () => {
           last_checkin: '2021-11-21T12:27:24Z',
           active: false,
           policy_id: 'policy1',
+          local_metadata: {
+            os: {
+              name: 'Ubuntu',
+              version: '20.04.5 LTS (Focal Fossa)',
+            },
+          },
         },
       ],
       refresh: 'wait_for',
@@ -351,11 +369,41 @@ describe('fleet usage telemetry', () => {
         },
         packages: [],
         agents_per_version: [
-          { version: '8.5.1', count: 1 },
-          { version: '8.6.0', count: 1 },
+          {
+            version: '8.5.1',
+            count: 1,
+            healthy: 0,
+            inactive: 0,
+            offline: 1,
+            unenrolled: 1,
+            unhealthy: 0,
+            updating: 0,
+          },
+          {
+            version: '8.6.0',
+            count: 1,
+            healthy: 0,
+            inactive: 0,
+            offline: 1,
+            unenrolled: 0,
+            unhealthy: 0,
+            updating: 0,
+          },
         ],
         agent_checkin_status: { error: 1, degraded: 1 },
         agents_per_policy: [2],
+        agents_per_os: [
+          {
+            name: 'Ubuntu',
+            version: '20.04.5 LTS (Focal Fossa)',
+            count: 1,
+          },
+          {
+            name: 'Ubuntu',
+            version: '22.04.2 LTS (Jammy Jellyfish)',
+            count: 1,
+          },
+        ],
         fleet_server_config: {
           policies: [
             {
@@ -382,8 +430,12 @@ describe('fleet usage telemetry', () => {
             message: 'stderr panic some other panic',
           },
         ],
-        // agent_logs_top_errors: ['stderr panic close of closed channel'],
-        // fleet_server_logs_top_errors: ['failed to unenroll offline agents'],
+        agent_logs_top_errors: [
+          'stderr panic some other panic',
+          'stderr panic close of closed channel',
+          'this should not be included in metrics',
+        ],
+        fleet_server_logs_top_errors: ['failed to unenroll offline agents'],
       })
     );
   });

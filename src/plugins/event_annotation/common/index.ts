@@ -24,16 +24,7 @@ export { eventAnnotationGroup } from './event_annotation_group';
 export type { EventAnnotationGroupArgs } from './event_annotation_group';
 
 export type { FetchEventAnnotationsArgs } from './fetch_event_annotations/types';
-export type {
-  EventAnnotationConfig,
-  EventAnnotationGroupConfig,
-  EventAnnotationArgs,
-  RangeEventAnnotationConfig,
-  PointInTimeEventAnnotationConfig,
-  QueryPointEventAnnotationConfig,
-  AvailableAnnotationIcon,
-  EventAnnotationOutput,
-  EventAnnotationGroupAttributes,
-} from './types';
+export type { EventAnnotationArgs, EventAnnotationOutput } from './types';
 
-export { EVENT_ANNOTATION_GROUP_TYPE } from './constants';
+export type { EventAnnotationGroupSavedObjectAttributes } from './content_management';
+export { ANNOTATIONS_LISTING_VIEW_ID } from './constants';

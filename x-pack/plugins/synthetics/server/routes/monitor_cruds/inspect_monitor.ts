@@ -6,27 +6,22 @@
  */
 import { v4 as uuidV4 } from 'uuid';
 import { schema } from '@kbn/config-schema';
+import { PrivateLocationAttributes } from '../../runtime_types/private_locations';
+import { SyntheticsRestApiRouteFactory } from '../types';
 import { unzipFile } from '../../common/unzipt_project_code';
-import {
-  ConfigKey,
-  MonitorFields,
-  SyntheticsMonitor,
-  PrivateLocation,
-} from '../../../common/runtime_types';
-import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes/types';
-import { API_URLS } from '../../../common/constants';
+import { ConfigKey, MonitorFields, SyntheticsMonitor } from '../../../common/runtime_types';
+import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { DEFAULT_FIELDS } from '../../../common/constants/monitor_defaults';
 import { validateMonitor } from './monitor_validation';
-import { getPrivateLocations, hydrateMonitorFields } from './add_monitor';
+import { getPrivateLocationsForMonitor, hydrateMonitorFields } from './add_monitor';
 
 export const inspectSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'POST',
-  path: API_URLS.SYNTHETICS_MONITOR_INSPECT,
+  path: SYNTHETICS_API_URLS.SYNTHETICS_MONITOR_INSPECT,
   validate: {
     body: schema.any(),
     query: schema.object({
       id: schema.maybe(schema.string()),
-      preserve_namespace: schema.maybe(schema.boolean()),
       hideParams: schema.maybe(schema.boolean()),
     }),
   },
@@ -53,7 +48,7 @@ export const inspectSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () =
 
     const normalizedMonitor = validationResult.decodedMonitor;
 
-    const privateLocations: PrivateLocation[] = await getPrivateLocations(
+    const privateLocations: PrivateLocationAttributes[] = await getPrivateLocationsForMonitor(
       savedObjectsClient,
       normalizedMonitor
     );
@@ -73,8 +68,6 @@ export const inspectSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () =
 
       const result = await syntheticsMonitorClient.inspectMonitor(
         { monitor: monitorWithNamespace as MonitorFields, id: newMonitorId },
-        request,
-        savedObjectsClient,
         privateLocations,
         spaceId,
         hideParams,

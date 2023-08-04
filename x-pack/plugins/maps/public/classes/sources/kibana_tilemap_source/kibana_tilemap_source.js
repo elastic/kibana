@@ -11,7 +11,6 @@ import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
 import _ from 'lodash';
 import { SOURCE_TYPES } from '../../../../common/constants';
-import { registerSource } from '../source_registry';
 import { extractAttributions } from './extract_attributions';
 
 export const sourceTitle = i18n.translate('xpack.maps.source.kbnTMSTitle', {
@@ -87,8 +86,3 @@ export class KibanaTilemapSource extends AbstractSource {
     }
   }
 }
-
-registerSource({
-  ConstructorFunction: KibanaTilemapSource,
-  type: SOURCE_TYPES.KIBANA_TILEMAP,
-});

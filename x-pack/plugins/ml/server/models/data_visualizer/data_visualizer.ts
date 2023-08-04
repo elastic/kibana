@@ -16,8 +16,8 @@ import {
 import type { AggCardinality, FieldsForHistograms } from '@kbn/ml-agg-utils';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { buildBaseFilterCriteria, getSafeAggregationName } from '@kbn/ml-query-utils';
-import { ML_JOB_FIELD_TYPES } from '../../../common/constants/field_types';
-import { RuntimeMappings } from '../../../common/types/fields';
+import { ML_JOB_FIELD_TYPES } from '@kbn/ml-anomaly-utils';
+import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
 import { getDatafeedAggregations } from '../../../common/util/datafeed_utils';
 import { Datafeed } from '../../../common/types/anomaly_detection_jobs';
 

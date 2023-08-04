@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { API_URLS } from '../../../../../common/constants';
+import { SYNTHETICS_API_URLS } from '../../../../../common/constants';
 import {
   MonitorManagementEnablementResult,
   MonitorManagementEnablementResultCodec,
@@ -15,7 +15,7 @@ import { apiService } from '../../../../utils/api_service';
 export const fetchGetSyntheticsEnablement =
   async (): Promise<MonitorManagementEnablementResult> => {
     return await apiService.put(
-      API_URLS.SYNTHETICS_ENABLEMENT,
+      SYNTHETICS_API_URLS.SYNTHETICS_ENABLEMENT,
       undefined,
       MonitorManagementEnablementResultCodec
     );

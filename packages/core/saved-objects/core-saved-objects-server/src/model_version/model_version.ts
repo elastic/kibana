@@ -22,8 +22,10 @@ export interface SavedObjectsModelVersion {
    * The list of changes associated with this version.
    *
    * Model version changes are defined via low-level components, allowing to use composition
-   * to describe the list of changes bound to a given version. Composition also allows to more
-   * easily merge changes from multiple source when needed.
+   * to describe the list of changes bound to a given version.
+   *
+   * @remark Having multiple changes of the same type in a version's list of change is supported
+   *         by design to allow merging different sources.
    *
    * @example Adding a new indexed field with a default value
    * ```ts
@@ -37,9 +39,28 @@ export interface SavedObjectsModelVersion {
    *     },
    *     {
    *       type: 'data_backfill',
-   *       transform: (doc) => {
-   *         doc.attributes.someNewField = 'some default value';
-   *         return { document: doc };
+   *       backfillFn: (doc) => {
+   *         return { attributes: { someNewField: 'some default value' } };
+   *       },
+   *     },
+   *   ],
+   * };
+   * ```
+   *
+   * @example A version with multiple mappings addition coming from different changes
+   * ```ts
+   * const version1: SavedObjectsModelVersion = {
+   *   changes: [
+   *     {
+   *       type: 'mappings_addition',
+   *       addedMappings: {
+   *         someNewField: { type: 'text' },
+   *       },
+   *     },
+   *    {
+   *       type: 'mappings_addition',
+   *       addedMappings: {
+   *         anotherNewField: { type: 'text' },
    *       },
    *     },
    *   ],
