@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RuleAlertData } from '@kbn/alerting-plugin/common';
+import { StackEsqueryAlert } from '@kbn/alerts-as-data-utils';
 import { RuleExecutorOptions, RuleTypeParams } from '../../types';
 import { ActionContext } from './action_context';
 import { EsQueryRuleParams, EsQueryRuleState } from './rule_type_params';
@@ -26,5 +26,5 @@ export type ExecutorOptions<P extends RuleTypeParams> = RuleExecutorOptions<
   {},
   ActionContext,
   typeof ActionGroupId,
-  RuleAlertData
+  StackEsqueryAlert
 >;

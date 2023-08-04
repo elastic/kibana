@@ -11,6 +11,7 @@ import { parseDuration } from '@kbn/alerting-plugin/server';
 import { isGroupAggregation, UngroupedGroupId } from '@kbn/triggers-actions-ui-plugin/common';
 import { ALERT_EVALUATION_VALUE, ALERT_REASON, ALERT_URL } from '@kbn/rule-data-utils';
 
+import { expandFlattenedAlert } from '@kbn/alerting-plugin/server/alerts_client/lib';
 import { ALERT_TITLE, ALERT_EVALUATION_CONDITIONS } from './fields';
 import { ComparatorFns } from '../../../common';
 import {
@@ -126,13 +127,13 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
       actionGroup: ActionGroupId,
       state: { latestTimestamp, dateStart, dateEnd },
       context: actionContext,
-      payload: {
+      payload: expandFlattenedAlert({
         [ALERT_URL]: actionContext.link,
         [ALERT_REASON]: actionContext.message,
         [ALERT_TITLE]: actionContext.title,
         [ALERT_EVALUATION_CONDITIONS]: actionContext.conditions,
         [ALERT_EVALUATION_VALUE]: actionContext.value,
-      },
+      }),
     });
     if (!isGroupAgg) {
       // update the timestamp based on the current search results
@@ -174,6 +175,13 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
     alertsClient?.setAlertData({
       id: alertId,
       context: recoveryContext,
+      payload: expandFlattenedAlert({
+        [ALERT_URL]: recoveryContext.link,
+        [ALERT_REASON]: recoveryContext.message,
+        [ALERT_TITLE]: recoveryContext.title,
+        [ALERT_EVALUATION_CONDITIONS]: recoveryContext.conditions,
+        [ALERT_EVALUATION_VALUE]: recoveryContext.value,
+      }),
     });
   }
   return { state: { latestTimestamp } };

@@ -23,8 +23,6 @@ import { OnlyEsQueryRuleParams, OnlySearchSourceRuleParams } from './types';
 import { searchSourceInstanceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import { Comparator } from '../../../common/comparator_types';
 import { DEFAULT_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common/rules_settings';
-import { ALERT_EVALUATION_VALUE, ALERT_REASON, ALERT_URL } from '@kbn/rule-data-utils';
-import { ALERT_TITLE, ALERT_EVALUATION_CONDITIONS } from './fields';
 
 const logger = loggingSystemMock.create().get();
 const coreSetup = coreMock.createSetup();
@@ -696,12 +694,17 @@ describe('ruleType', () => {
           actionGroup: 'query matched',
           id: 'query matched',
           payload: expect.objectContaining({
-            [ALERT_URL]: expect.any(String),
-            [ALERT_REASON]: expect.any(String),
-            [ALERT_TITLE]: "rule 'rule-name' matched query",
-            [ALERT_EVALUATION_CONDITIONS]:
-              'Number of matching documents is greater than or equal to 3',
-            [ALERT_EVALUATION_VALUE]: 3,
+            kibana: {
+              alert: {
+                url: expect.any(String),
+                reason: expect.any(String),
+                title: "rule 'rule-name' matched query",
+                evaluation: {
+                  conditions: 'Number of matching documents is greater than or equal to 3',
+                  value: 3,
+                },
+              },
+            },
           }),
         })
       );
