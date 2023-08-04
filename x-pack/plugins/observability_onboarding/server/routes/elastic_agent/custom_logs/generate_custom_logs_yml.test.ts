@@ -6,7 +6,7 @@
  */
 
 import { dump } from 'js-yaml';
-import { generateYml } from './generate_yml';
+import { generateCustomLogsYml } from './generate_custom_logs_yml';
 
 const baseMockConfig = {
   datasetName: 'my-dataset',
@@ -17,9 +17,9 @@ const baseMockConfig = {
   logfileId: 'my-logs-id',
 };
 
-describe('generateYml', () => {
+describe('generateCustomLogsYml', () => {
   it('should return a basic yml configuration', () => {
-    const result = generateYml(baseMockConfig);
+    const result = generateCustomLogsYml(baseMockConfig);
     expect(result).toMatchSnapshot();
   });
 
@@ -29,7 +29,7 @@ describe('generateYml', () => {
       logFilePaths: ['/my-service-1.logs', '/my-service-2.logs'],
     };
 
-    const result = generateYml(mockConfig);
+    const result = generateCustomLogsYml(mockConfig);
     expect(result).toMatchSnapshot();
   });
 
@@ -39,7 +39,7 @@ describe('generateYml', () => {
       serviceName: 'my-service',
     };
 
-    const result = generateYml(mockConfig);
+    const result = generateCustomLogsYml(mockConfig);
     expect(result).toMatchSnapshot();
   });
 
@@ -57,7 +57,7 @@ describe('generateYml', () => {
       }),
     };
 
-    const result = generateYml(mockConfig);
+    const result = generateCustomLogsYml(mockConfig);
     expect(result).toMatchSnapshot();
   });
 });
