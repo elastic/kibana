@@ -27,6 +27,7 @@ import { DataPreviewChart } from '../common/data_preview_chart';
 import { QueryBuilder } from '../common/query_builder';
 import { IndexSelection } from '../custom_common/index_selection';
 import { HistogramIndicator } from './histogram_indicator';
+import { GroupByFieldSelector } from '../common/group_by_field_selector';
 
 export function HistogramIndicatorTypeForm() {
   const { control, watch, getFieldState } = useFormContext<CreateSLOForm>();
@@ -163,6 +164,9 @@ export function HistogramIndicatorTypeForm() {
         <EuiFlexItem>
           <EuiHorizontalRule margin="none" />
         </EuiFlexItem>
+
+        <GroupByFieldSelector index={index} />
+
         <DataPreviewChart />
       </EuiFlexGroup>
     </>
