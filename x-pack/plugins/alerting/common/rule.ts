@@ -107,6 +107,12 @@ export interface AlertsFilter {
 
 export type RuleActionAlertsFilterProperty = AlertsFilterTimeframe | RuleActionParam;
 
+/**
+ * This enum is being used in versioned
+ * route and rule client schemas. Renaming
+ * or removing a type will introduce a
+ * breaking change
+ */
 export enum RuleActionTypes {
   DEFAULT = 'default',
   SYSTEM = 'system',

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { RuleActionTypes } from '../../../../../../../common';
 import type {
   CreateRuleActionV1,
   CreateRuleRequestBodyV1,
@@ -15,12 +16,25 @@ import type { RuleParams } from '../../../../../../application/rule/types';
 const transformCreateBodyActions = (actions: CreateRuleActionV1[]): CreateRuleData['actions'] => {
   if (!actions) return [];
 
-  return actions.map(({ frequency, alerts_filter: alertsFilter, ...action }) => {
+  return actions.map((action) => {
+    if (action.type === RuleActionTypes.SYSTEM) {
+      return {
+        id: action.id,
+        uuid: action.uuid,
+        params: action.params,
+        actionTypeId: action.actionTypeId,
+        type: action.type,
+      };
+    }
+
+    const { frequency, alerts_filter: alertsFilter } = action;
+
     return {
       group: action.group,
       id: action.id,
       params: action.params,
       actionTypeId: action.actionTypeId,
+      type: action.type,
       ...(action.uuid ? { uuid: action.uuid } : {}),
       ...(frequency
         ? {

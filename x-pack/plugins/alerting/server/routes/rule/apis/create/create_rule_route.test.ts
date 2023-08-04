@@ -126,7 +126,7 @@ describe('createRuleRoute', () => {
         },
         connector_type_id: 'test',
         uuid: '123-456',
-      },
+      } as AsApiContract<RuleDefaultAction>,
     ],
   };
 
