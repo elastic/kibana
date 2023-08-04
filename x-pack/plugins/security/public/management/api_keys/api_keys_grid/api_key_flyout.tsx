@@ -326,80 +326,86 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
                     </EuiFormRow>
                   </EuiFlexItem>
                 </EuiFlexGroup>
-                <EuiHorizontalRule />
               </>
             ) : canManageCrossClusterApiKeys ? (
-              <>
-                <FormRow
-                  name="type"
-                  label={
-                    <FormattedMessage
-                      id="xpack.security.accountManagement.apiKeyFlyout.typeLabel"
-                      defaultMessage="Type"
+              <FormRow
+                name="type"
+                label={
+                  <FormattedMessage
+                    id="xpack.security.accountManagement.apiKeyFlyout.typeLabel"
+                    defaultMessage="Type"
+                  />
+                }
+                fullWidth
+              >
+                <EuiFlexGroup gutterSize="m">
+                  <EuiFlexItem>
+                    <EuiCheckableCard
+                      id="rest"
+                      label={
+                        <>
+                          <EuiTitle size="xxs">
+                            <h2>
+                              <FormattedMessage
+                                id="xpack.security.accountManagement.apiKeyFlyout.restTypeLabel"
+                                defaultMessage="Personal API key"
+                              />
+                            </h2>
+                          </EuiTitle>
+                          <EuiSpacer size="xs" />
+                          <EuiText size="s">
+                            <FormattedMessage
+                              id="xpack.security.accountManagement.apiKeyFlyout.restTypeDescription"
+                              defaultMessage="Allow external services to access the Elastic Stack on your behalf."
+                            />
+                          </EuiText>
+                        </>
+                      }
+                      onChange={() => formik.setFieldValue('type', 'rest')}
+                      checked={formik.values.type === 'rest'}
                     />
-                  }
-                  fullWidth
-                >
-                  <EuiFlexGroup gutterSize="m">
-                    <EuiFlexItem>
-                      <EuiCheckableCard
-                        id="rest"
-                        label={
-                          <>
-                            <EuiTitle size="xxs">
-                              <h2>
-                                <FormattedMessage
-                                  id="xpack.security.accountManagement.apiKeyFlyout.restTypeLabel"
-                                  defaultMessage="Personal API key"
-                                />
-                              </h2>
-                            </EuiTitle>
-                            <EuiSpacer size="xs" />
-                            <EuiText size="s">
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiCheckableCard
+                      id="cross_cluster"
+                      label={
+                        <>
+                          <EuiTitle size="xxs">
+                            <h2>
                               <FormattedMessage
-                                id="xpack.security.accountManagement.apiKeyFlyout.restTypeDescription"
-                                defaultMessage="Allow external services to access the Elastic Stack on your behalf."
+                                id="xpack.security.accountManagement.apiKeyFlyout.crossClusterTypeLabel"
+                                defaultMessage="Cross-Cluster API key"
                               />
-                            </EuiText>
-                          </>
-                        }
-                        onChange={() => formik.setFieldValue('type', 'rest')}
-                        checked={formik.values.type === 'rest'}
-                      />
-                    </EuiFlexItem>
-                    <EuiFlexItem>
-                      <EuiCheckableCard
-                        id="cross_cluster"
-                        label={
-                          <>
-                            <EuiTitle size="xxs">
-                              <h2>
-                                <FormattedMessage
-                                  id="xpack.security.accountManagement.apiKeyFlyout.crossClusterTypeLabel"
-                                  defaultMessage="Cross-Cluster API key"
-                                />
-                              </h2>
-                            </EuiTitle>
-                            <EuiSpacer size="xs" />
-                            <EuiText size="s">
-                              <FormattedMessage
-                                id="xpack.security.accountManagement.apiKeyFlyout.crossClusterTypeDescription"
-                                defaultMessage="Allow remote clusters to connect to your local cluster."
-                              />
-                            </EuiText>
-                          </>
-                        }
-                        onChange={() => formik.setFieldValue('type', 'cross_cluster')}
-                        checked={formik.values.type === 'cross_cluster'}
-                      />
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </FormRow>
-                <EuiHorizontalRule />
-              </>
+                            </h2>
+                          </EuiTitle>
+                          <EuiSpacer size="xs" />
+                          <EuiText size="s">
+                            <FormattedMessage
+                              id="xpack.security.accountManagement.apiKeyFlyout.crossClusterTypeDescription"
+                              defaultMessage="Allow remote clusters to connect to your local cluster."
+                            />
+                          </EuiText>
+                        </>
+                      }
+                      onChange={() => formik.setFieldValue('type', 'cross_cluster')}
+                      checked={formik.values.type === 'cross_cluster'}
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </FormRow>
             ) : (
-              <EuiSpacer />
+              <EuiFormRow
+                label={
+                  <FormattedMessage
+                    id="xpack.security.accountManagement.apiKeyFlyout.typeLabel"
+                    defaultMessage="Type"
+                  />
+                }
+              >
+                <ApiKeyBadge type="rest" />
+              </EuiFormRow>
             )}
+            <EuiHorizontalRule />
 
             {formik.values.type === 'cross_cluster' ? (
               <FormRow
