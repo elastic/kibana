@@ -134,7 +134,7 @@ export class RiskScoringTask {
         afterKeys,
         index,
         filter,
-        identifierType: 'user', // TODO
+        identifierType: 'host', // TODO
         pageSize,
         range,
         runtimeMappings,

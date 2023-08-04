@@ -123,15 +123,21 @@ export const readRiskScores = async (
   return results.hits.hits.map((hit) => hit._source as EcsRiskScore);
 };
 
-export const waitForRiskScoresToBePresent = async (
-  es: Client,
-  log: ToolingLog,
-  index: string[] = ['risk-score.risk-score-default']
-): Promise<void> => {
+export const waitForRiskScoresToBePresent = async ({
+  es,
+  log,
+  index = ['risk-score.risk-score-default'],
+  scoreCount = 0,
+}: {
+  es: Client;
+  log: ToolingLog;
+  index?: string[];
+  scoreCount?: number;
+}): Promise<void> => {
   await waitFor(
     async () => {
       const riskScores = await readRiskScores(es, index);
-      return riskScores.length > 0;
+      return riskScores.length > scoreCount;
     },
     'waitForRiskScoresToBePresent',
     log

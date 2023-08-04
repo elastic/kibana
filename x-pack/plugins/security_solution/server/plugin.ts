@@ -161,9 +161,9 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     this.ruleMonitoringService.setup(core, plugins);
 
-    if (experimentalFeatures.riskScoringPersistence && plugins.taskManager) {
-      new RiskScoringTask({ logger: this.logger }).register(plugins.taskManager);
-    }
+    // if (experimentalFeatures.riskScoringPersistence && plugins.taskManager) {
+    //   new RiskScoringTask({ logger: this.logger }).register(plugins.taskManager);
+    // }
 
     const requestContextFactory = new RequestContextFactory({
       config,

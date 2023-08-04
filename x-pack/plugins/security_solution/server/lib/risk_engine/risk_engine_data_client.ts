@@ -15,6 +15,7 @@ import {
 import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import type { Logger, ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 
 import {
   riskScoreFieldMap,
@@ -36,9 +37,13 @@ import {
   initSavedObjects,
 } from './utils/saved_object_configuration';
 import { getRiskInputsIndex } from './get_risk_inputs_index';
+import { RiskScoringTask } from './tasks';
+import type { RiskScoreService } from './risk_score_service';
 
 interface InitOpts {
   namespace: string;
+  taskManager: TaskManagerStartContract;
+  riskScoreService: RiskScoreService;
 }
 
 interface InitializeRiskEngineResourcesOpts {
@@ -57,7 +62,7 @@ export class RiskEngineDataClient {
   private writerCache: Map<string, Writer> = new Map();
   constructor(private readonly options: RiskEngineDataClientOpts) {}
 
-  public async init({ namespace }: InitOpts) {
+  public async init({ namespace, riskScoreService, taskManager }: InitOpts) {
     const result: InitRiskEngineResult = {
       legacyRiskEngineDisabled: false,
       riskEngineResourcesInstalled: false,
@@ -93,7 +98,7 @@ export class RiskEngineDataClient {
     }
 
     try {
-      await this.enableRiskEngine();
+      await this.enableRiskEngine({ riskScoreService, taskManager });
       result.riskEngineEnabled = true;
     } catch (e) {
       result.errors.push(e.message);
@@ -142,8 +147,17 @@ export class RiskEngineDataClient {
     return { riskEngineStatus, legacyRiskEngineStatus };
   }
 
-  public async enableRiskEngine() {
-    // code to run task
+  public async enableRiskEngine({
+    taskManager,
+    riskScoreService,
+  }: {
+    taskManager: TaskManagerStartContract;
+    riskScoreService: RiskScoreService;
+  }) {
+    new RiskScoringTask({ logger: this.options.logger }).start({
+      taskManager,
+      riskScoreService,
+    });
 
     return updateSavedObjectAttribute({
       savedObjectsClient: this.options.soClient,

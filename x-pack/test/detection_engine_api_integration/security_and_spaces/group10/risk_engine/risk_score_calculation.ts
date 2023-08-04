@@ -106,7 +106,7 @@ export default ({ getService }: FtrProviderContext): void => {
           scores_written: 1,
         });
 
-        await waitForRiskScoresToBePresent(es, log);
+        await waitForRiskScoresToBePresent({ es, log });
         const scores = await readRiskScores(es);
 
         expect(scores.length).to.eql(1);
@@ -163,7 +163,7 @@ export default ({ getService }: FtrProviderContext): void => {
             scores_written: 10,
           });
 
-          await waitForRiskScoresToBePresent(es, log);
+          await waitForRiskScoresToBePresent({ es, log });
           const scores = await readRiskScores(es);
 
           expect(scores.length).to.eql(10);
@@ -212,7 +212,7 @@ export default ({ getService }: FtrProviderContext): void => {
             scores_written: 5,
           });
 
-          await waitForRiskScoresToBePresent(es, log);
+          await waitForRiskScoresToBePresent({ es, log });
           const scores = await readRiskScores(es);
 
           expect(scores.length).to.eql(10);
@@ -258,7 +258,7 @@ export default ({ getService }: FtrProviderContext): void => {
             scores_written: 0,
           });
 
-          await waitForRiskScoresToBePresent(es, log);
+          await waitForRiskScoresToBePresent({ es, log });
           const scores = await readRiskScores(es);
 
           expect(scores.length).to.eql(10);
