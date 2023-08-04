@@ -295,6 +295,7 @@ const TabContent = ({ posturetype }: { posturetype: PosturePolicyTemplate }) => 
 
 export const ComplianceDashboard = () => {
   const [selectedTab, setSelectedTab] = useState(POSTURE_TYPE_CSPM);
+  const [hasUserSelectedTab, setHasUserSelectedTab] = useState(false);
   const { data: getSetupStatus } = useCspSetupStatusApi();
   const isCloudSecurityPostureInstalled = !!getSetupStatus?.installedPackageVersion;
   const getCspmDashboardData = useCspmStatsApi({
@@ -305,6 +306,10 @@ export const ComplianceDashboard = () => {
   });
 
   useEffect(() => {
+    if (hasUserSelectedTab) {
+      return;
+    }
+
     const preferredDashboard = getDefaultTab(
       getSetupStatus,
       getCspmDashboardData.data,
@@ -319,6 +324,7 @@ export const ComplianceDashboard = () => {
     getSetupStatus,
     getSetupStatus?.cspm?.status,
     getSetupStatus?.kspm?.status,
+    hasUserSelectedTab,
   ]);
 
   const tabs = useMemo(
@@ -331,7 +337,10 @@ export const ComplianceDashboard = () => {
               }),
               'data-test-subj': CLOUD_DASHBOARD_TAB,
               isSelected: selectedTab === POSTURE_TYPE_CSPM,
-              onClick: () => setSelectedTab(POSTURE_TYPE_CSPM),
+              onClick: () => {
+                setSelectedTab(POSTURE_TYPE_CSPM);
+                setHasUserSelectedTab(true);
+              },
               content: <TabContent posturetype={POSTURE_TYPE_CSPM} />,
             },
             {
@@ -340,7 +349,10 @@ export const ComplianceDashboard = () => {
               }),
               'data-test-subj': KUBERNETES_DASHBOARD_TAB,
               isSelected: selectedTab === POSTURE_TYPE_KSPM,
-              onClick: () => setSelectedTab(POSTURE_TYPE_KSPM),
+              onClick: () => {
+                setSelectedTab(POSTURE_TYPE_KSPM);
+                setHasUserSelectedTab(true);
+              },
               content: <TabContent posturetype={POSTURE_TYPE_KSPM} />,
             },
           ]

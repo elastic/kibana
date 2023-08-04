@@ -76,10 +76,10 @@ describe('<ComplianceDashboard />', () => {
     );
   });
 
-  const renderComplianceDashboardPage = () => {
+  const ComplianceDashboardWithTestProviders = () => {
     const mockCore = coreMock.createStart();
 
-    render(
+    return (
       <TestProvider
         core={{
           ...mockCore,
@@ -95,6 +95,12 @@ describe('<ComplianceDashboard />', () => {
       >
         <ComplianceDashboard />
       </TestProvider>
+    );
+  };
+
+  const renderComplianceDashboardPage = () => {
+    return render(
+      <ComplianceDashboardWithTestProviders />
     );
   };
 
@@ -642,9 +648,11 @@ describe('<ComplianceDashboard />', () => {
       data: { stats: { totalFindings: 0 } },
     }));
 
-    renderComplianceDashboardPage();
+    const { rerender } = renderComplianceDashboardPage();
 
     screen.getByTestId(CLOUD_DASHBOARD_TAB).click();
+
+    rerender(<ComplianceDashboardWithTestProviders />);
 
     expectIdsInDoc({
       be: [CSPM_INTEGRATION_NOT_INSTALLED_TEST_SUBJECT],
@@ -687,6 +695,61 @@ describe('<ComplianceDashboard />', () => {
     renderComplianceDashboardPage();
 
     screen.getByTestId(KUBERNETES_DASHBOARD_TAB).click();
+
+    expectIdsInDoc({
+      be: [KSPM_INTEGRATION_NOT_INSTALLED_TEST_SUBJECT],
+      notToBe: [
+        CLOUD_DASHBOARD_CONTAINER,
+        NO_FINDINGS_STATUS_TEST_SUBJ.INDEX_TIMEOUT,
+        NO_FINDINGS_STATUS_TEST_SUBJ.NO_AGENTS_DEPLOYED,
+        NO_FINDINGS_STATUS_TEST_SUBJ.INDEXING,
+        NO_FINDINGS_STATUS_TEST_SUBJ.UNPRIVILEGED,
+      ],
+    });
+  });
+
+  it('should not select default tab is user has already selected one themselves', () => {
+    (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
+      createReactQueryResponse({
+        status: 'success',
+        data: {
+          kspm: { status: 'not-installed' },
+          cspm: { status: 'indexed' },
+          installedPackageVersion: '1.2.13',
+          indicesDetails: [
+            { index: 'logs-cloud_security_posture.findings_latest-default', status: 'not-empty' },
+            { index: 'logs-cloud_security_posture.findings-default*', status: 'empty' },
+          ],
+        },
+      })
+    );
+    (useKspmStatsApi as jest.Mock).mockImplementation(() => ({
+      isSuccess: true,
+      isLoading: false,
+      data: { stats: { totalFindings: 0 } },
+    }));
+    (useCspmStatsApi as jest.Mock).mockImplementation(() => ({
+      isSuccess: true,
+      isLoading: false,
+      data: mockDashboardData,
+    }));
+
+    const { rerender } = renderComplianceDashboardPage();
+
+    expectIdsInDoc({
+      be: [CLOUD_DASHBOARD_CONTAINER],
+      notToBe: [
+        KUBERNETES_DASHBOARD_CONTAINER,
+        NO_FINDINGS_STATUS_TEST_SUBJ.INDEX_TIMEOUT,
+        NO_FINDINGS_STATUS_TEST_SUBJ.NO_AGENTS_DEPLOYED,
+        NO_FINDINGS_STATUS_TEST_SUBJ.INDEXING,
+        NO_FINDINGS_STATUS_TEST_SUBJ.UNPRIVILEGED,
+      ],
+    });
+
+    screen.getByTestId(KUBERNETES_DASHBOARD_TAB).click();
+
+    rerender(<ComplianceDashboardWithTestProviders />);
 
     expectIdsInDoc({
       be: [KSPM_INTEGRATION_NOT_INSTALLED_TEST_SUBJECT],
