@@ -109,7 +109,7 @@ const getEndpointListColumns = ({
           {
             ...queryParams,
             name: 'endpointDetails',
-            selected_endpoint: item.metadata.host.id,
+            selected_endpoint: item.metadata.agent.id,
           },
           search
         );
