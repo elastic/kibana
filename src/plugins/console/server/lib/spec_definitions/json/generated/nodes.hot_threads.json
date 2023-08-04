@@ -22,7 +22,7 @@
     ],
     "patterns": [
       "_nodes/hot_threads",
-      "_nodes/{nodes}/hot_threads"
+      "_nodes/{node_id}/hot_threads"
     ],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/cluster-nodes-hot-threads.html"
   }
