@@ -24,7 +24,7 @@ export const ExecutePolicyModal = ({
     executeEnrichPolicy(policyToExecute).then(({ data, error }) => {
       if (data) {
         const successMessage = i18n.translate(
-          'xpack.index_management.enrich_policies.executeModal.successDeleteNotificationMessage',
+          'xpack.idxMgmt.enrich_policies.executeModal.successDeleteNotificationMessage',
           { defaultMessage: 'Executed {policyToExecute}', values: { policyToExecute } }
         );
         toasts.addSuccess(successMessage);
@@ -34,7 +34,7 @@ export const ExecutePolicyModal = ({
 
       if (error) {
         const errorMessage = i18n.translate(
-          'xpack.index_management.enrich_policies.executeModal.errorDeleteNotificationMessage',
+          'xpack.idxMgmt.enrich_policies.executeModal.errorDeleteNotificationMessage',
           {
             defaultMessage: "Error executing enrich policy: '{error}'",
             values: { error: error.message },
