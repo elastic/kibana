@@ -11,7 +11,7 @@ import classNames from 'classnames';
 import { debounce, isEmpty } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import { EuiFilterButton, EuiFilterGroup, EuiPopover, useResizeObserver } from '@elastic/eui';
+import { EuiFilterButton, EuiFilterGroup, EuiInputPopover, useResizeObserver } from '@elastic/eui';
 
 import { MAX_OPTIONS_LIST_REQUEST_SIZE } from '../types';
 import { OptionsListStrings } from './options_list_strings';
@@ -149,9 +149,9 @@ export const OptionsListControl = ({
   return error ? (
     <ControlError error={error} />
   ) : (
-    <EuiPopover
+    <EuiInputPopover
       ownFocus
-      button={button}
+      input={button}
       repositionOnScroll
       isOpen={isPopoverOpen}
       panelPaddingSize="none"
@@ -167,6 +167,6 @@ export const OptionsListControl = ({
         updateSearchString={updateSearchString}
         loadMoreSuggestions={loadMoreSuggestions}
       />
-    </EuiPopover>
+    </EuiInputPopover>
   );
 };
