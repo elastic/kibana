@@ -89,7 +89,8 @@ const agentSchema: MakeSchemaFrom<APMUsage>['agents'][ElasticAgentName] = {
         items: {
           type: 'keyword',
           _meta: {
-            description: '',
+            description:
+              'Composite field containing service framework and version sorted by doc count',
           },
         },
       },
@@ -120,7 +121,8 @@ const agentSchema: MakeSchemaFrom<APMUsage>['agents'][ElasticAgentName] = {
         items: {
           type: 'keyword',
           _meta: {
-            description: '',
+            description:
+              'Composite field containing service language name and version sorted by doc count.',
           },
         },
       },
@@ -151,7 +153,8 @@ const agentSchema: MakeSchemaFrom<APMUsage>['agents'][ElasticAgentName] = {
         items: {
           type: 'keyword',
           _meta: {
-            description: '',
+            description:
+              'Composite field containing service runtime name and version sorted by doc count.',
           },
         },
       },
