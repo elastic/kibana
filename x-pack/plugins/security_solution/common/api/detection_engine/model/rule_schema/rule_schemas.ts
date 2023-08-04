@@ -50,6 +50,8 @@ import {
   IsRuleEnabled,
   IsRuleImmutable,
   MaxSignals,
+  RelatedIntegrationArray,
+  RequiredFieldArray,
   RuleAuthorArray,
   RuleDescription,
   RuleFalsePositiveArray,
@@ -57,28 +59,23 @@ import {
   RuleLicense,
   RuleMetadata,
   RuleName,
+  RuleNameOverride,
   RuleObjectId,
   RuleQuery,
   RuleReferenceArray,
   RuleSignatureId,
   RuleTagArray,
   RuleVersion,
-  SetupGuide,
-  ThreatArray,
-} from './common_attributes/misc_attributes';
-import {
-  RuleNameOverride,
-  TimestampOverride,
-  TimestampOverrideFallbackDisabled,
-} from './common_attributes/field_overrides';
-import {
   SavedObjectResolveAliasPurpose,
   SavedObjectResolveAliasTargetId,
   SavedObjectResolveOutcome,
-} from './common_attributes/saved_objects';
-import { RelatedIntegrationArray } from './common_attributes/related_integrations';
-import { RequiredFieldArray } from './common_attributes/required_fields';
-import { TimelineTemplateId, TimelineTemplateTitle } from './common_attributes/timeline_template';
+  SetupGuide,
+  ThreatArray,
+  TimelineTemplateId,
+  TimelineTemplateTitle,
+  TimestampOverride,
+  TimestampOverrideFallbackDisabled,
+} from './common_attributes';
 import {
   EventCategoryOverride,
   TiebreakerField,
@@ -535,7 +532,7 @@ export const TypeSpecificResponse = t.union([
 // Final combined schemas
 
 export type RuleCreateProps = t.TypeOf<typeof RuleCreateProps>;
-export const RuleCreateProps = t.intersection([SharedCreateProps, TypeSpecificCreateProps]);
+export const RuleCreateProps = t.intersection([TypeSpecificCreateProps, SharedCreateProps]);
 
 export type RuleUpdateProps = t.TypeOf<typeof RuleUpdateProps>;
 export const RuleUpdateProps = t.intersection([TypeSpecificCreateProps, SharedUpdateProps]);
