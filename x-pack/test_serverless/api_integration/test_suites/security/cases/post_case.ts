@@ -1,0 +1,81 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import expect from '@kbn/expect';
+
+import { ConnectorTypes } from '@kbn/cases-plugin/common/types/domain';
+import { getPostCaseRequest, postCaseResp } from './helpers/mock';
+import {
+  deleteCasesByESQuery,
+  createCase,
+} from './helpers/api';
+import { removeServerGeneratedPropertiesFromCase } from './helpers/omit';
+
+import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+
+// eslint-disable-next-line import/no-default-export
+export default ({ getService }: FtrProviderContext): void => {
+  const es = getService('es');
+  const supertest = getService('supertest');
+
+  describe('post_case', () => {
+    afterEach(async () => {
+      await deleteCasesByESQuery(es);
+    });
+
+    it('should create a case', async () => {
+      const postedCase = await createCase(
+        supertest,
+        getPostCaseRequest({
+          connector: {
+            id: '123',
+            name: 'Jira',
+            type: ConnectorTypes.jira,
+            fields: { issueType: 'Task', priority: 'High', parent: null },
+          },
+        })
+      );
+      const data = removeServerGeneratedPropertiesFromCase(postedCase);
+
+      expect(data).to.eql(
+        postCaseResp(
+          null,
+          getPostCaseRequest({
+            connector: {
+              id: '123',
+              name: 'Jira',
+              type: ConnectorTypes.jira,
+              fields: { issueType: 'Task', priority: 'High', parent: null },
+            },
+          })
+        )
+      );
+    });
+
+    it('should throw 403 when create a case with observability as owner', async () => {
+      expect(
+        await createCase(
+        supertest,
+        getPostCaseRequest({
+          owner: 'observability'
+        }),
+        403
+      ));
+    });
+
+    it('should throw 400 when create a case with cases as owner', async () => {
+      expect(
+        await createCase(
+        supertest,
+        getPostCaseRequest({
+          owner: 'cases'
+        }),
+        400
+      ));
+    });
+  });
+};

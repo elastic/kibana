@@ -101,7 +101,7 @@ export const registerRoutes = (deps: RegisterRoutesDeps) => {
         }
 
         if (!configSchema?.stack.enabled && (hasCasesOwnerInBody || hasCasesOwnerInQuery)) {
-          return response.badRequest({ body: 'Owner as cases is not allowed' });
+          return response.badRequest({ body: 'cases as owner is not allowed' });
         }
 
         try {

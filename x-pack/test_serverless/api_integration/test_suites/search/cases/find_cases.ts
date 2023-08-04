@@ -14,8 +14,11 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
 
   describe('find_cases', () => {
-    it('400s when find cases', async () => {
-      await supertest.get(`${CASES_URL}/_find`).expect(400);
+    it('403 when find cases', async () => {
+      await supertest.get(`${CASES_URL}/_find`)
+        .set('kbn-xsrf', 'foo')
+        .set('x-elastic-internal-origin', 'foo')
+        .expect(403);
     });
   });
 };
