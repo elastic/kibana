@@ -31,7 +31,8 @@ export const sloKeys = {
   activeAlerts: () => [...sloKeys.all, 'activeAlerts'] as const,
   activeAlert: (sloIds: string[]) => [...sloKeys.activeAlerts(), sloIds] as const,
   historicalSummaries: () => [...sloKeys.all, 'historicalSummary'] as const,
-  historicalSummary: (sloIds: string[]) => [...sloKeys.historicalSummaries(), sloIds] as const,
+  historicalSummary: (list: Array<{ sloId: string; instanceId: string }>) =>
+    [...sloKeys.historicalSummaries(), list] as const,
   globalDiagnosis: () => [...sloKeys.all, 'globalDiagnosis'] as const,
   burnRates: (sloId: string) => [...sloKeys.all, 'burnRates', sloId] as const,
   preview: (indicator?: Indicator) => [...sloKeys.all, 'preview', indicator] as const,
