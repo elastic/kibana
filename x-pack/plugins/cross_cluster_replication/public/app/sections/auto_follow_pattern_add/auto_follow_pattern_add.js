@@ -8,10 +8,7 @@
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  EuiPageContentBody_Deprecated as EuiPageContentBody,
-  EuiPageContent_Deprecated as EuiPageContent,
-} from '@elastic/eui';
+import { EuiPageSection } from '@elastic/eui';
 
 import { listBreadcrumb, addBreadcrumb, setBreadcrumbs } from '../../services/breadcrumbs';
 import {
@@ -50,9 +47,8 @@ export class AutoFollowPatternAdd extends PureComponent {
         {({ isLoading, error, remoteClusters }) => {
           if (isLoading) {
             return (
-              <EuiPageContent
-                verticalPosition="center"
-                horizontalPosition="center"
+              <EuiPageSection
+                alignment="center"
                 color="subdued"
                 data-test-subj="remoteClustersLoading"
               >
@@ -62,12 +58,12 @@ export class AutoFollowPatternAdd extends PureComponent {
                     defaultMessage="Loading remote clusters…"
                   />
                 </SectionLoading>
-              </EuiPageContent>
+              </EuiPageSection>
             );
           }
 
           return (
-            <EuiPageContentBody restrictWidth style={{ width: '100%' }}>
+            <EuiPageSection restrictWidth style={{ width: '100%' }}>
               <AutoFollowPatternPageTitle
                 title={
                   <FormattedMessage
@@ -90,7 +86,7 @@ export class AutoFollowPatternAdd extends PureComponent {
                   />
                 }
               />
-            </EuiPageContentBody>
+            </EuiPageSection>
           );
         }}
       </RemoteClustersProvider>

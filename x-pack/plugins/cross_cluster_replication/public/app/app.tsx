@@ -13,7 +13,7 @@ import { ScopedHistory, ApplicationStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { EuiEmptyPrompt, EuiPageContent_Deprecated as EuiPageContent } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiPageSection } from '@elastic/eui';
 
 import { getFatalErrors } from './services/notifications';
 import { routing } from './services/routing';
@@ -109,14 +109,14 @@ class AppComponent extends Component<AppProps, AppState> {
 
     if (isFetchingPermissions) {
       return (
-        <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
+        <EuiPageSection alignment="center" color="subdued">
           <SectionLoading>
             <FormattedMessage
               id="xpack.crossClusterReplication.app.permissionCheckTitle"
               defaultMessage="Checking permissions…"
             />
           </SectionLoading>
-        </EuiPageContent>
+        </EuiPageSection>
       );
     }
 
@@ -136,7 +136,7 @@ class AppComponent extends Component<AppProps, AppState> {
 
     if (!hasPermission) {
       return (
-        <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
+        <EuiPageSection alignment="center" color="subdued">
           <EuiEmptyPrompt
             iconType="securityApp"
             title={
@@ -161,7 +161,7 @@ class AppComponent extends Component<AppProps, AppState> {
               </p>
             }
           />
-        </EuiPageContent>
+        </EuiPageSection>
       );
     }
 

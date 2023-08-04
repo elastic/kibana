@@ -9,13 +9,7 @@ import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  EuiPageContent_Deprecated as EuiPageContent,
-  EuiButton,
-  EuiEmptyPrompt,
-  EuiText,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiPageSection, EuiButton, EuiEmptyPrompt, EuiText, EuiSpacer } from '@elastic/eui';
 
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { extractQueryParams, PageLoading, PageError } from '../../../../shared_imports';
@@ -94,12 +88,7 @@ export class FollowerIndicesList extends PureComponent {
 
   renderEmpty() {
     return (
-      <EuiPageContent
-        hasShadow={false}
-        paddingSize="none"
-        verticalPosition="center"
-        horizontalPosition="center"
-      >
+      <EuiPageSection paddingSize="none" alignment="center">
         <EuiEmptyPrompt
           iconType="managementApp"
           data-test-subj="emptyPrompt"
@@ -133,7 +122,7 @@ export class FollowerIndicesList extends PureComponent {
             </EuiButton>
           }
         />
-      </EuiPageContent>
+      </EuiPageSection>
     );
   }
 
