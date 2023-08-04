@@ -7,10 +7,9 @@
 
 import { PayloadAction } from '@reduxjs/toolkit';
 import { call, put, takeEvery, select, takeLatest, debounce } from 'redux-saga/effects';
-import { SavedObject } from '@kbn/core-saved-objects-common';
 import { quietFetchOverviewStatusAction } from '../overview_status';
 import { enableDefaultAlertingAction } from '../alert_rules';
-import { ConfigKey, SyntheticsMonitor } from '../../../../../common/runtime_types';
+import { ConfigKey, EncryptedSyntheticsSavedMonitor } from '../../../../../common/runtime_types';
 import { kibanaService } from '../../../../utils/kibana_service';
 import { MonitorOverviewPageState } from '../overview';
 import { quietFetchOverviewAction } from '../overview/actions';
@@ -28,6 +27,7 @@ import {
   fetchMonitorFiltersAction,
 } from './actions';
 import { fetchMonitorManagementList, fetchUpsertMonitor, fetchMonitorFilters } from './api';
+
 import { toastTitle } from './toast_title';
 import { UpsertMonitorRequest } from './models';
 
@@ -49,11 +49,10 @@ export function* enableMonitorAlertEffect() {
     function* (action: PayloadAction<UpsertMonitorRequest>): Generator {
       try {
         const response = yield call(fetchUpsertMonitor, action.payload);
-        yield put(enableMonitorAlertAction.success(response as SavedObject<SyntheticsMonitor>));
+        yield put(enableMonitorAlertAction.success(response as EncryptedSyntheticsSavedMonitor));
         sendSuccessToast(action.payload.success);
         if (
-          (response as SavedObject<SyntheticsMonitor>).attributes[ConfigKey.ALERT_CONFIG]?.status
-            ?.enabled
+          (response as EncryptedSyntheticsSavedMonitor)[ConfigKey.ALERT_CONFIG]?.status?.enabled
         ) {
           yield put(enableDefaultAlertingAction.get());
         }
@@ -76,9 +75,7 @@ export function* upsertMonitorEffect() {
     function* (action: PayloadAction<UpsertMonitorRequest>): Generator {
       try {
         const response = yield call(fetchUpsertMonitor, action.payload);
-        yield put(
-          fetchUpsertSuccessAction(response as { id: string; attributes: { enabled: boolean } })
-        );
+        yield put(fetchUpsertSuccessAction(response as EncryptedSyntheticsSavedMonitor));
         kibanaService.toasts.addSuccess({
           title: toastTitle({
             title: action.payload.success.message,

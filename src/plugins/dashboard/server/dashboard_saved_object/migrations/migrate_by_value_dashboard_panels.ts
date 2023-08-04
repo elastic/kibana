@@ -19,8 +19,8 @@ import { SavedObjectEmbeddableInput } from '@kbn/embeddable-plugin/common';
 import {
   convertPanelStateToSavedDashboardPanel,
   convertSavedDashboardPanelToPanelState,
-  SavedDashboardPanel,
 } from '../../../common';
+import { SavedDashboardPanel } from '../../../common/content_management';
 
 type ValueOrReferenceInput = SavedObjectEmbeddableInput & {
   attributes?: Serializable;

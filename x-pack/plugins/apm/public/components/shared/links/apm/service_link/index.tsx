@@ -19,10 +19,7 @@ import { ApmRoutes } from '../../../../routing/apm_route_config';
 import { AgentIcon } from '../../../agent_icon';
 import { PopoverTooltip } from '../../../popover_tooltip';
 import { TruncateWithTooltip } from '../../../truncate_with_tooltip';
-import {
-  OTHER_SERVICE_NAME,
-  ServiceMaxGroupsMessage,
-} from './service_max_groups_message';
+import { OTHER_SERVICE_NAME, MaxGroupsMessage } from '../max_groups_message';
 
 const StyledLink = euiStyled(EuiLink)`${truncate('100%')};`;
 
@@ -69,7 +66,7 @@ export function ServiceLink({
             iconType="warning"
           >
             <EuiText style={{ width: `${unit * 28}px` }} size="s">
-              <ServiceMaxGroupsMessage />
+              <MaxGroupsMessage />
             </EuiText>
           </PopoverTooltip>
         </EuiFlexItem>

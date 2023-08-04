@@ -6,10 +6,9 @@
  */
 
 import { isEmpty } from 'lodash';
-import type { EuiAccordionProps } from '@elastic/eui';
+import type { EuiAccordionProps, UseEuiTheme } from '@elastic/eui';
 import { EuiCodeBlock, EuiFormRow, EuiAccordion, EuiSpacer } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
-import styled from 'styled-components';
 import { useController, useFormContext } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
 import type { LiveQueryFormFields } from '.';
@@ -19,19 +18,18 @@ import { ECSMappingEditorField } from '../../packs/queries/lazy_ecs_mapping_edit
 import type { SavedQueriesDropdownProps } from '../../saved_queries/saved_queries_dropdown';
 import { SavedQueriesDropdown } from '../../saved_queries/saved_queries_dropdown';
 
-const StyledEuiAccordion = styled(EuiAccordion)`
-  ${({ isDisabled }: { isDisabled?: boolean }) => isDisabled && 'display: none;'}
-  .euiAccordion__button {
-    color: ${({ theme }) => theme.eui.euiColorPrimary};
-  }
-  .euiAccordion__childWrapper {
-    -webkit-transition: none;
-  }
-`;
+const euiCodeBlockCss = {
+  minHeight: '100px',
+};
 
-const StyledEuiCodeBlock = styled(EuiCodeBlock)`
-  min-height: 100px;
-`;
+const euiAccordionCss = ({ euiTheme }: UseEuiTheme) => ({
+  '.euiAccordion__button': {
+    color: euiTheme.colors.primary,
+  },
+  '.euiAccordion__childWrapper': {
+    '-webkit-transition': 'none',
+  },
+});
 
 export interface LiveQueryQueryFieldProps {
   handleSubmitForm?: () => void;
@@ -112,7 +110,6 @@ const LiveQueryQueryFieldComponent: React.FC<LiveQueryQueryFieldProps> = ({
         ? [
             {
               name: 'submitOnCmdEnter',
-              bindKey: { win: 'ctrl+enter', mac: 'cmd+enter' },
               exec: handleSubmitForm,
             },
           ]
@@ -132,14 +129,15 @@ const LiveQueryQueryFieldComponent: React.FC<LiveQueryQueryFieldProps> = ({
         isDisabled={!permissions.writeLiveQueries || disabled}
       >
         {!permissions.writeLiveQueries || disabled ? (
-          <StyledEuiCodeBlock
+          <EuiCodeBlock
+            css={euiCodeBlockCss}
             language="sql"
             fontSize="m"
             paddingSize="m"
             transparentBackground={!value.length}
           >
             {value}
-          </StyledEuiCodeBlock>
+          </EuiCodeBlock>
         ) : (
           <OsqueryEditor defaultValue={value} onChange={onChange} commands={commands} />
         )}
@@ -148,7 +146,8 @@ const LiveQueryQueryFieldComponent: React.FC<LiveQueryQueryFieldProps> = ({
       <EuiSpacer size="m" />
 
       {!isAdvancedToggleHidden && (
-        <StyledEuiAccordion
+        <EuiAccordion
+          css={euiAccordionCss}
           id="advanced"
           forceState={advancedContentState}
           onToggle={handleToggle}
@@ -157,7 +156,7 @@ const LiveQueryQueryFieldComponent: React.FC<LiveQueryQueryFieldProps> = ({
         >
           <EuiSpacer size="xs" />
           <ECSMappingEditorField euiFieldProps={ecsFieldProps} />
-        </StyledEuiAccordion>
+        </EuiAccordion>
       )}
     </>
   );

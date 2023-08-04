@@ -6,15 +6,18 @@
  */
 
 import {
-  DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_USER_DETAILS,
+  DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_ENTITIES_BUTTON,
   DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_HOST_DETAILS,
-} from '../../../../screens/document_expandable_flyout';
+  DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_USER_DETAILS,
+} from '../../../../screens/expandable_flyout/alert_details_left_panel_entities_tab';
 import {
-  expandFirstAlertExpandableFlyout,
-  openInsightsTab,
-  openEntities,
-  expandDocumentDetailsExpandableFlyoutLeftSection,
-} from '../../../../tasks/document_expandable_flyout';
+  DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB,
+  DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_BUTTON_GROUP,
+} from '../../../../screens/expandable_flyout/alert_details_left_panel';
+import { openEntitiesTab } from '../../../../tasks/expandable_flyout/alert_details_left_panel_entities_tab';
+import { openInsightsTab } from '../../../../tasks/expandable_flyout/alert_details_left_panel';
+import { expandDocumentDetailsExpandableFlyoutLeftSection } from '../../../../tasks/expandable_flyout/alert_details_right_panel';
+import { expandFirstAlertExpandableFlyout } from '../../../../tasks/expandable_flyout/common';
 import { cleanKibana } from '../../../../tasks/common';
 import { login, visit } from '../../../../tasks/login';
 import { createRule } from '../../../../tasks/api_calls/rules';
@@ -22,13 +25,11 @@ import { getNewRule } from '../../../../objects/rule';
 import { ALERTS_URL } from '../../../../urls/navigation';
 import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
 
-// Skipping these for now as the feature is protected behind a feature flag set to false by default
-// To run the tests locally, add 'securityFlyoutEnabled' in the Cypress config.ts here https://github.com/elastic/kibana/blob/main/x-pack/test/security_solution_cypress/config.ts#L50
-describe.skip(
+describe(
   'Alert details expandable flyout left panel entities',
   { env: { ftrConfig: { enableExperimental: ['securityFlyoutEnabled'] } } },
   () => {
-    before(() => {
+    beforeEach(() => {
       cleanKibana();
       login();
       createRule(getNewRule());
@@ -37,18 +38,25 @@ describe.skip(
       expandFirstAlertExpandableFlyout();
       expandDocumentDetailsExpandableFlyoutLeftSection();
       openInsightsTab();
-      openEntities();
+      openEntitiesTab();
     });
 
-    it('should display analyzer graph and node list', () => {
-      // eslint-disable-next-line cypress/unsafe-to-chain-command
-      cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_USER_DETAILS)
-        .scrollIntoView()
-        .should('be.visible');
-      // eslint-disable-next-line cypress/unsafe-to-chain-command
-      cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_HOST_DETAILS)
-        .scrollIntoView()
-        .should('be.visible');
+    it('should display analyzer graph and node list under Insights Entities', () => {
+      cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB)
+        .should('be.visible')
+        .and('have.text', 'Insights');
+
+      cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_BUTTON_GROUP).should('be.visible');
+
+      cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_ENTITIES_BUTTON)
+        .should('be.visible')
+        .and('have.text', 'Entities');
+
+      cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_HOST_DETAILS).scrollIntoView();
+      cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_HOST_DETAILS).should('be.visible');
+
+      cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_USER_DETAILS).scrollIntoView();
+      cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_USER_DETAILS).should('be.visible');
     });
   }
 );

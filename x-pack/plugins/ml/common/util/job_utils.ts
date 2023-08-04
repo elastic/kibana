@@ -17,7 +17,12 @@ import type { SerializableRecord } from '@kbn/utility-types';
 import { FilterStateStore } from '@kbn/es-query';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { isDefined } from '@kbn/ml-is-defined';
-import type { MlEntityField } from '@kbn/ml-anomaly-utils';
+import {
+  type MlEntityField,
+  ES_AGGREGATION,
+  ML_JOB_AGGREGATION,
+  MLCATEGORY,
+} from '@kbn/ml-anomaly-utils';
 import { ALLOWED_DATA_UNITS, JOB_ID_MAX_LENGTH } from '../constants/validation';
 import { parseInterval } from './parse_interval';
 import { maxLengthValidator } from './validators';
@@ -31,8 +36,6 @@ import type {
 } from '../types/anomaly_detection_jobs';
 import type { MlServerLimits } from '../types/ml_server_info';
 import type { JobValidationMessage, JobValidationMessageId } from '../constants/messages';
-import { ES_AGGREGATION, ML_JOB_AGGREGATION } from '../constants/aggregation_types';
-import { MLCATEGORY } from '../constants/field_types';
 import { getAggregations, getDatafeedAggregations } from './datafeed_utils';
 import { findAggField } from './validation_utils';
 import { getFirstKeyInObject } from './object_utils';

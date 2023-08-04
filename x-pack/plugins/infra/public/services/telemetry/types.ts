@@ -21,10 +21,10 @@ export enum InfraTelemetryEventTypes {
 }
 
 export interface HostsViewQuerySubmittedParams {
-  control_filters: string[];
-  filters: string[];
+  control_filter_fields: string[];
+  filter_fields: string[];
   interval: string;
-  query: string | { [key: string]: any };
+  with_query: boolean;
   limit: number;
 }
 

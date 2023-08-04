@@ -5,17 +5,19 @@
  * 2.0.
  */
 
-import React, { useMemo, useState, useEffect, useContext } from 'react';
-import { EuiButtonEmpty } from '@elastic/eui';
+import React, { useMemo, useState, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import {
   DragDrop,
   DragDropIdentifier,
-  DragContext,
+  useDragDropContext,
   DropType,
   DropTargetSwapDuplicateCombine,
 } from '@kbn/dom-drag-drop';
+import { EmptyDimensionButton as EmptyDimensionButtonInner } from '@kbn/visualization-ui-components';
+import { css } from '@emotion/react';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { isDraggedField } from '../../../../utils';
 import { generateId } from '../../../../id_generator';
 
@@ -56,49 +58,32 @@ const defaultButtonLabels = {
 const DefaultEmptyButton = ({ columnId, group, onClick }: EmptyButtonProps) => {
   const { buttonAriaLabel, buttonLabel } = group.labels || {};
   return (
-    <EuiButtonEmpty
-      className="lnsLayerPanel__triggerText"
-      color="text"
-      size="s"
-      iconType="plus"
-      contentProps={{
-        className: 'lnsLayerPanel__triggerTextContent',
-      }}
-      aria-label={buttonAriaLabel || defaultButtonLabels.ariaLabel(group.groupLabel)}
-      data-test-subj="lns-empty-dimension"
-      onClick={() => {
-        onClick(columnId);
-      }}
-    >
-      {buttonLabel || defaultButtonLabels.label}
-    </EuiButtonEmpty>
+    <EmptyDimensionButtonInner
+      label={buttonLabel || defaultButtonLabels.label}
+      ariaLabel={buttonAriaLabel || defaultButtonLabels.ariaLabel(group.groupLabel)}
+      dataTestSubj="lns-empty-dimension"
+      onClick={() => onClick(columnId)}
+    />
   );
 };
 
 const SuggestedValueButton = ({ columnId, group, onClick }: EmptyButtonProps) => (
-  <EuiButtonEmpty
-    className="lnsLayerPanel__triggerText"
-    color="text"
-    size="s"
-    iconType="plusInCircleFilled"
-    contentProps={{
-      className: 'lnsLayerPanel__triggerTextContent',
-    }}
-    aria-label={i18n.translate('xpack.lens.indexPattern.suggestedValueAriaLabel', {
+  <EmptyDimensionButtonInner
+    label={
+      <FormattedMessage
+        id="xpack.lens.configure.suggestedValuee"
+        defaultMessage="Suggested value: {value}"
+        values={{ value: group.suggestedValue?.() }}
+      />
+    }
+    ariaLabel={i18n.translate('xpack.lens.indexPattern.suggestedValueAriaLabel', {
       defaultMessage: 'Suggested value: {value} for {groupLabel}',
       values: { value: group.suggestedValue?.(), groupLabel: group.groupLabel },
     })}
-    data-test-subj="lns-empty-dimension-suggested-value"
-    onClick={() => {
-      onClick(columnId);
-    }}
-  >
-    <FormattedMessage
-      id="xpack.lens.configure.suggestedValuee"
-      defaultMessage="Suggested value: {value}"
-      values={{ value: group.suggestedValue?.() }}
-    />
-  </EuiButtonEmpty>
+    dataTestSubj="lns-empty-dimension-suggested-value"
+    iconType="plusInCircleFilled"
+    onClick={() => onClick(columnId)}
+  />
 );
 
 export function EmptyDimensionButton({
@@ -131,7 +116,7 @@ export function EmptyDimensionButton({
     };
   };
 }) {
-  const { dragging } = useContext(DragContext);
+  const [{ dragging }] = useDragDropContext();
 
   let getDropProps;
 
@@ -205,7 +190,11 @@ export function EmptyDimensionButton({
         onDrop={handleOnDrop}
         dropTypes={dropTypes}
       >
-        <div className="lnsLayerPanel__dimension lnsLayerPanel__dimension--empty">
+        <div
+          css={css`
+            border-radius: ${euiThemeVars.euiBorderRadius};
+          `}
+        >
           {typeof group.suggestedValue?.() === 'number' ? (
             <SuggestedValueButton {...buttonProps} />
           ) : (

@@ -14,7 +14,7 @@ import {
   FieldsBucketContainer,
   NewBucketButton,
   DraggableBucketContainer,
-} from '@kbn/visualization-ui-components/public';
+} from '@kbn/visualization-ui-components';
 import { IndexPattern } from '../../../../../types';
 import { FieldSelect } from '../../../dimension_panel/field_select';
 import type { TermsIndexPatternColumn } from './types';
@@ -179,7 +179,9 @@ export function FieldInputs({
           defaultMessage: 'Add field',
         })}
         isDisabled={
-          column.params.orderBy.type === 'rare' || localValues.length > MAX_MULTI_FIELDS_SIZE
+          column.params.orderBy.type === 'rare' ||
+          column.params.orderBy.type === 'significant' ||
+          localValues.length > MAX_MULTI_FIELDS_SIZE
         }
       />
     </>

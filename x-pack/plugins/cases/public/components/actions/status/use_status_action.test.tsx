@@ -12,7 +12,7 @@ import { useStatusAction } from './use_status_action';
 
 import * as api from '../../../containers/api';
 import { basicCase } from '../../../containers/mock';
-import { CaseStatuses } from '../../../../common';
+import { CaseStatuses } from '../../../../common/types/domain';
 
 jest.mock('../../../containers/api');
 
@@ -94,10 +94,9 @@ describe('useStatusAction', () => {
       await waitFor(() => {
         expect(onAction).toHaveBeenCalled();
         expect(onActionSuccess).toHaveBeenCalled();
-        expect(updateSpy).toHaveBeenCalledWith(
-          [{ status, id: basicCase.id, version: basicCase.version }],
-          expect.anything()
-        );
+        expect(updateSpy).toHaveBeenCalledWith({
+          cases: [{ status, id: basicCase.id, version: basicCase.version }],
+        });
       });
     }
   });

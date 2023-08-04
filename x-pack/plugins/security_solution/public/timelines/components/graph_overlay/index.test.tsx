@@ -253,7 +253,7 @@ describe('GraphOverlay', () => {
                   [timelineId]: {
                     ...mockGlobalState.timeline.timelineById[timelineId],
                     sessionViewConfig: {
-                      processIndex: 'logs-endpoint.events.process*',
+                      index: 'logs-endpoint.events.process*',
                       sessionEntityId: 'testId',
                       sessionStartTime: '2021-10-14T08:05:34.853Z',
                     },

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export type { EmailService, EmailServiceStart, PlainTextEmail } from './types';
+export type { EmailService, EmailServiceStart, PlainTextEmail, HTMLEmail } from './types';
 export type {
   EmailServiceSetupDeps,
   EmailServiceStartDeps,

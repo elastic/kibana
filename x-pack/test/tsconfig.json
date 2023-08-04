@@ -125,8 +125,18 @@
     "@kbn/observability-shared-plugin",
     "@kbn/maps-vector-tile-utils",
     "@kbn/server-route-repository",
-    "@kbn/core-saved-objects-common",
     "@kbn/core-http-common",
-    "@kbn/slo-schema"
+    "@kbn/slo-schema",
+    "@kbn/lens-plugin",
+    "@kbn/notifications-plugin",
+    "@kbn/logs-shared-plugin",
+    "@kbn/telemetry-tools",
+    "@kbn/profiling-plugin",
+    "@kbn/observability-onboarding-plugin",
+    "@kbn/bfetch-plugin",
+    "@kbn/uptime-plugin",
+    "@kbn/ml-category-validator",
+    "@kbn/observability-ai-assistant-plugin",
+    "@kbn/stack-connectors-plugin"
   ]
 }

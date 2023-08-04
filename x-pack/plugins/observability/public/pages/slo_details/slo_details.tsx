@@ -23,28 +23,30 @@ import PageNotFound from '../404';
 import { SloDetails } from './components/slo_details';
 import { HeaderTitle } from './components/header_title';
 import { HeaderControl } from './components/header_control';
-import { paths } from '../../config/paths';
+import { paths } from '../../routes/paths';
 import type { SloDetailsPathParams } from './types';
-import type { ObservabilityAppServices } from '../../application/types';
 import { AutoRefreshButton } from '../slos/components/auto_refresh_button';
 import { FeedbackButton } from '../../components/slo/feedback_button/feedback_button';
+import { useGetInstanceIdQueryParam } from './hooks/use_get_instance_id_query_param';
 
 export function SloDetailsPage() {
   const {
     application: { navigateToUrl },
     http: { basePath },
-  } = useKibana<ObservabilityAppServices>().services;
+  } = useKibana().services;
   const { ObservabilityPageTemplate } = usePluginContext();
 
   const { hasAtLeast } = useLicense();
   const hasRightLicense = hasAtLeast('platinum');
 
   const { sloId } = useParams<SloDetailsPathParams>();
-
+  const sloInstanceId = useGetInstanceIdQueryParam();
   const [isAutoRefreshing, setIsAutoRefreshing] = useState(true);
-
-  const { isLoading, slo } = useFetchSloDetails({ sloId, shouldRefetch: isAutoRefreshing });
-
+  const { isLoading, slo } = useFetchSloDetails({
+    sloId,
+    instanceId: sloInstanceId,
+    shouldRefetch: isAutoRefreshing,
+  });
   const isCloningOrDeleting = Boolean(useIsMutating());
 
   useBreadcrumbs(getBreadcrumbs(basePath, slo));

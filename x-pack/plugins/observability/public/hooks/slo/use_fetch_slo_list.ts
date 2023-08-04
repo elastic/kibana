@@ -17,12 +17,13 @@ import { i18n } from '@kbn/i18n';
 import { FindSLOResponse } from '@kbn/slo-schema';
 
 import { useKibana } from '../../utils/kibana_react';
+import { sloKeys } from './query_key_factory';
 
 interface SLOListParams {
-  name?: string;
+  kqlQuery?: string;
   page?: number;
   sortBy?: string;
-  indicatorTypes?: string[];
+  sortDirection?: 'asc' | 'desc';
   shouldRefetch?: boolean;
 }
 
@@ -42,10 +43,10 @@ const SHORT_REFETCH_INTERVAL = 1000 * 5; // 5 seconds
 const LONG_REFETCH_INTERVAL = 1000 * 60; // 1 minute
 
 export function useFetchSloList({
-  name = '',
+  kqlQuery = '',
   page = 1,
-  sortBy = 'creationTime',
-  indicatorTypes = [],
+  sortBy = 'status',
+  sortDirection = 'desc',
   shouldRefetch,
 }: SLOListParams | undefined = {}): UseFetchSloListResponse {
   const {
@@ -60,18 +61,15 @@ export function useFetchSloList({
 
   const { isInitialLoading, isLoading, isError, isSuccess, isRefetching, data, refetch } = useQuery(
     {
-      queryKey: ['fetchSloList', { name, page, sortBy, indicatorTypes }],
+      queryKey: sloKeys.list({ kqlQuery, page, sortBy, sortDirection }),
       queryFn: async ({ signal }) => {
         try {
           const response = await http.get<FindSLOResponse>(`/api/observability/slos`, {
             query: {
-              ...(page && { page }),
-              ...(name && { name }),
+              ...(kqlQuery && { kqlQuery }),
               ...(sortBy && { sortBy }),
-              ...(indicatorTypes &&
-                indicatorTypes.length > 0 && {
-                  indicatorTypes: indicatorTypes.join(','),
-                }),
+              ...(sortDirection && { sortDirection }),
+              ...(page && { page }),
             },
             signal,
           });
@@ -92,6 +90,10 @@ export function useFetchSloList({
         return failureCount < 4;
       },
       onSuccess: ({ results }: FindSLOResponse) => {
+        queryClient.invalidateQueries({ queryKey: sloKeys.historicalSummaries(), exact: false });
+        queryClient.invalidateQueries({ queryKey: sloKeys.activeAlerts(), exact: false });
+        queryClient.invalidateQueries({ queryKey: sloKeys.rules(), exact: false });
+
         if (!shouldRefetch) {
           return;
         }
@@ -101,18 +103,6 @@ export function useFetchSloList({
         } else {
           setStateRefetchInterval(LONG_REFETCH_INTERVAL);
         }
-
-        queryClient.invalidateQueries(['fetchHistoricalSummary'], {
-          exact: false,
-        });
-
-        queryClient.invalidateQueries(['fetchActiveAlerts'], {
-          exact: false,
-        });
-
-        queryClient.invalidateQueries(['fetchRulesForSlo'], {
-          exact: false,
-        });
       },
       onError: (error: Error) => {
         toasts.addError(error, {

@@ -72,7 +72,7 @@ describe('Storage Explorer', () => {
     });
 
     it('has no detectable a11y violations on load', () => {
-      cy.contains('h1', 'Storage explorer');
+      cy.contains('h1', 'Storage Explorer');
       // set skipFailures to true to not fail the test when there are accessibility failures
       checkA11y({ skipFailures: true });
     });

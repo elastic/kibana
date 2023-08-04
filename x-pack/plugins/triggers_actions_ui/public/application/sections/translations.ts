@@ -10,3 +10,10 @@ import { i18n } from '@kbn/i18n';
 export const CASES = i18n.translate('xpack.triggersActionsUI.cases.label', {
   defaultMessage: 'Cases',
 });
+
+export const MAINTENANCE_WINDOWS = i18n.translate(
+  'xpack.triggersActionsUI.maintenanceWindows.label',
+  {
+    defaultMessage: 'Maintenance Windows',
+  }
+);

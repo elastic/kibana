@@ -41,6 +41,7 @@ describe('createActionRoute', () => {
       isPreconfigured: false,
       isDeprecated: false,
       isMissingSecrets: false,
+      isSystemAction: false,
     };
 
     const createApiResult = {
@@ -49,11 +50,13 @@ describe('createActionRoute', () => {
         'isPreconfigured',
         'isDeprecated',
         'isMissingSecrets',
+        'isSystemAction',
       ]),
       connector_type_id: createResult.actionTypeId,
       is_preconfigured: createResult.isPreconfigured,
       is_deprecated: createResult.isDeprecated,
       is_missing_secrets: createResult.isMissingSecrets,
+      is_system_action: createResult.isSystemAction,
     };
 
     const actionsClient = actionsClientMock.create();
@@ -113,6 +116,7 @@ describe('createActionRoute', () => {
       config: { foo: true },
       isPreconfigured: false,
       isDeprecated: false,
+      isSystemAction: false,
     });
 
     const [context, req, res] = mockHandlerArguments(
@@ -153,6 +157,7 @@ describe('createActionRoute', () => {
       isMissingSecrets: false,
       isPreconfigured: false,
       isDeprecated: false,
+      isSystemAction: false,
     });
 
     const [context, req, res] = mockHandlerArguments(

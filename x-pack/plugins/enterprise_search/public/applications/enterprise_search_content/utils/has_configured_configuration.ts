@@ -5,9 +5,12 @@
  * 2.0.
  */
 
+import { isConfigEntry } from '../../../../common/connectors/is_category_entry';
 import { ConnectorConfiguration } from '../../../../common/types/connectors';
 
 export const hasConfiguredConfiguration = (configuration: ConnectorConfiguration) => {
-  // debugger;
-  return !!Object.entries(configuration).find(([, pair]) => !!pair?.value);
+  return !Object.entries(configuration).find(
+    ([, pair]) =>
+      isConfigEntry(pair) && pair.required && (pair.value === undefined || pair.value === null)
+  );
 };

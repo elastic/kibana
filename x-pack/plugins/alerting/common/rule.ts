@@ -170,7 +170,7 @@ export interface Rule<Params extends RuleTypeParams = never> {
   actions: RuleAction[];
   params: Params;
   mapped_params?: MappedParams;
-  scheduledTaskId?: string;
+  scheduledTaskId?: string | null;
   createdBy: string | null;
   updatedBy: string | null;
   createdAt: Date;

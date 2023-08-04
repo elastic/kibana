@@ -63,6 +63,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await aiops.changePointDetectionPage.clickUseFullDataButton();
       await aiops.changePointDetectionPage.selectMetricField(0, 'products.discount_amount');
       await aiops.changePointDetectionPage.selectSplitField(0, 'geoip.city_name');
+      await aiops.changePointDetectionPage.getTable(0).waitForTableToLoad();
       const result = await aiops.changePointDetectionPage.getTable(0).parseTable();
       expect(result.length).to.eql(5);
       // assert asc sorting by p_value is applied

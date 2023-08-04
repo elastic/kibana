@@ -5,10 +5,32 @@
  * 2.0.
  */
 
-import { SavedObjectsType } from '@kbn/core-saved-objects-server';
+import { SavedObjectMigrationFn, SavedObjectsType } from '@kbn/core-saved-objects-server';
 import { SavedObject } from '@kbn/core/server';
 
 import { StoredSLO } from '../domain/models';
+
+type StoredSLOBefore890 = StoredSLO & {
+  timeWindow: {
+    duration: string;
+    isRolling?: boolean;
+    isCalendar?: boolean;
+  };
+};
+
+const migrateSlo890: SavedObjectMigrationFn<StoredSLOBefore890, StoredSLO> = (doc) => {
+  const { timeWindow, ...other } = doc.attributes;
+  return {
+    ...doc,
+    attributes: {
+      ...other,
+      timeWindow: {
+        duration: timeWindow.duration,
+        type: timeWindow.isCalendar ? 'calendarAligned' : 'rolling',
+      },
+    },
+  };
+};
 
 export const SO_SLO_TYPE = 'slo';
 
@@ -39,5 +61,8 @@ export const slo: SavedObjectsType = {
     getTitle(sloSavedObject: SavedObject<StoredSLO>) {
       return `SLO: [${sloSavedObject.attributes.name}]`;
     },
+  },
+  migrations: {
+    '8.9.0': migrateSlo890,
   },
 };

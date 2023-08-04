@@ -172,7 +172,7 @@ describe('ALL - Live Query', () => {
       .should('be.visible')
       .click();
 
-    cy.react('ReactAce', { props: { value: 'select * from users;' } }).should('exist');
+    cy.get(LIVE_QUERY_EDITOR).contains('select * from users;');
   });
 
   it('should open query details by clicking the details icon', () => {
@@ -239,25 +239,22 @@ describe('ALL - Live Query', () => {
       "where pos.remote_port !='0' {shift+enter}" +
       'limit 1000;';
     cy.contains('New live query').click();
-    cy.react('ReactAce').invoke('height').and('be.gt', 99).and('be.lt', 110);
+    cy.get(LIVE_QUERY_EDITOR).invoke('height').and('be.gt', 99).and('be.lt', 110);
     cy.get(LIVE_QUERY_EDITOR).click().invoke('val', multilineQuery);
 
     inputQuery(multilineQuery);
-    cy.wait(2000);
-    cy.react('ReactAce').invoke('height').should('be.gt', 220).and('be.lt', 300);
+    cy.get(LIVE_QUERY_EDITOR).invoke('height').should('be.gt', 220).and('be.lt', 300);
     selectAllAgents();
     submitQuery();
-    checkResults();
+    cy.getBySel('osqueryResultsPanel');
 
     // check if it get's bigger when we add more lines
-    cy.react('ReactAce').invoke('height').should('be.gt', 220).and('be.lt', 300);
+    cy.get(LIVE_QUERY_EDITOR).invoke('height').should('be.gt', 220).and('be.lt', 300);
     inputQuery(multilineQuery);
-    cy.wait(2000);
-    cy.react('ReactAce').invoke('height').should('be.gt', 350).and('be.lt', 500);
+    cy.get(LIVE_QUERY_EDITOR).invoke('height').should('be.gt', 350).and('be.lt', 550);
 
     inputQuery('{selectall}{backspace}{selectall}{backspace}');
-    cy.wait(2000);
     // not sure if this is how it used to work when I implemented the functionality, but let's leave it like this for now
-    cy.react('ReactAce').invoke('height').should('be.gt', 350).and('be.lt', 500);
+    cy.get(LIVE_QUERY_EDITOR).invoke('height').should('be.gt', 200).and('be.lt', 350);
   });
 });

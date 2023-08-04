@@ -44,7 +44,7 @@ import {
   BurnRateRuleParams,
   AlertStates,
 } from './types';
-import { SLO_ID_FIELD, SLO_REVISION_FIELD } from '../../../../common/field_names/infra_metrics';
+import { SLO_ID_FIELD, SLO_REVISION_FIELD } from '../../../../common/field_names/slo';
 import { SLONotFound } from '../../../errors';
 import { SO_SLO_TYPE } from '../../../saved_objects';
 import { sloSchema } from '@kbn/slo-schema';
@@ -123,6 +123,7 @@ describe('BurnRateRuleExecutor', () => {
       alertWithLifecycle: alertWithLifecycleMock,
       savedObjectsClient: soClientMock,
       scopedClusterClient: { asCurrentUser: esClientMock, asInternalUser: esClientMock },
+      alertsClient: null,
       alertFactory: alertFactoryMock,
       searchSourceClient: searchSourceClientMock,
       uiSettingsClient: uiSettingsClientMock,

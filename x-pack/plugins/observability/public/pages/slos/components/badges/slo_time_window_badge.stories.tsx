@@ -26,21 +26,21 @@ const Template: ComponentStory<typeof Component> = (props: Props) => (
 );
 
 export const With7DaysRolling = Template.bind({});
-With7DaysRolling.args = { slo: buildSlo({ timeWindow: { duration: '7d', isRolling: true } }) };
+With7DaysRolling.args = { slo: buildSlo({ timeWindow: { duration: '7d', type: 'rolling' } }) };
 
 export const With30DaysRolling = Template.bind({});
-With30DaysRolling.args = { slo: buildSlo({ timeWindow: { duration: '30d', isRolling: true } }) };
+With30DaysRolling.args = { slo: buildSlo({ timeWindow: { duration: '30d', type: 'rolling' } }) };
 
 export const WithWeeklyCalendar = Template.bind({});
 WithWeeklyCalendar.args = {
   slo: buildSlo({
-    timeWindow: { duration: '1w', isCalendar: true },
+    timeWindow: { duration: '1w', type: 'calendarAligned' },
   }),
 };
 
 export const WithMonthlyCalendar = Template.bind({});
 WithMonthlyCalendar.args = {
   slo: buildSlo({
-    timeWindow: { duration: '1M', isCalendar: true },
+    timeWindow: { duration: '1M', type: 'calendarAligned' },
   }),
 };

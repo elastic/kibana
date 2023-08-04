@@ -89,6 +89,12 @@ export const GetInfoRequestSchema = {
   }),
 };
 
+export const GetBulkAssetsRequestSchema = {
+  body: schema.object({
+    assetIds: schema.arrayOf(schema.object({ id: schema.string(), type: schema.string() })),
+  }),
+};
+
 export const GetInfoRequestSchemaDeprecated = {
   params: schema.object({
     pkgkey: schema.string(),
@@ -186,6 +192,25 @@ export const BulkInstallPackagesFromRegistryRequestSchema = {
 
 export const InstallPackageByUploadRequestSchema = {
   body: schema.buffer(),
+};
+
+export const CreateCustomIntegrationRequestSchema = {
+  body: schema.object({
+    integrationName: schema.string(),
+    datasets: schema.arrayOf(
+      schema.object({
+        name: schema.string(),
+        type: schema.oneOf([
+          schema.literal('logs'),
+          schema.literal('metrics'),
+          schema.literal('traces'),
+          schema.literal('synthetics'),
+          schema.literal('profiling'),
+        ]),
+      })
+    ),
+    force: schema.maybe(schema.boolean()),
+  }),
 };
 
 export const DeletePackageRequestSchema = {

@@ -371,20 +371,20 @@ describe('initializeEs', () => {
     expect(esContext.esAdapter.createIndexTemplate).not.toHaveBeenCalled();
   });
 
-  test(`should create initial index if it doesn't exist`, async () => {
-    esContext.esAdapter.doesAliasExist.mockResolvedValue(false);
+  test(`should create data stream if it doesn't exist`, async () => {
+    esContext.esAdapter.doesDataStreamExist.mockResolvedValue(false);
 
     await initializeEs(esContext);
-    expect(esContext.esAdapter.doesAliasExist).toHaveBeenCalled();
-    expect(esContext.esAdapter.createIndex).toHaveBeenCalled();
+    expect(esContext.esAdapter.doesDataStreamExist).toHaveBeenCalled();
+    expect(esContext.esAdapter.createDataStream).toHaveBeenCalled();
   });
 
-  test(`shouldn't create initial index if it already exists`, async () => {
-    esContext.esAdapter.doesAliasExist.mockResolvedValue(true);
+  test(`shouldn't create data stream if it already exists`, async () => {
+    esContext.esAdapter.doesDataStreamExist.mockResolvedValue(true);
 
     await initializeEs(esContext);
-    expect(esContext.esAdapter.doesAliasExist).toHaveBeenCalled();
-    expect(esContext.esAdapter.createIndex).not.toHaveBeenCalled();
+    expect(esContext.esAdapter.doesDataStreamExist).toHaveBeenCalled();
+    expect(esContext.esAdapter.createDataStream).not.toHaveBeenCalled();
   });
 });
 
@@ -465,7 +465,7 @@ describe('retries', () => {
     esContext.esAdapter.getExistingIndexAliases.mockResolvedValue({});
     esContext.esAdapter.doesIlmPolicyExist.mockResolvedValue(true);
     esContext.esAdapter.doesIndexTemplateExist.mockResolvedValue(true);
-    esContext.esAdapter.doesAliasExist.mockResolvedValue(true);
+    esContext.esAdapter.doesDataStreamExist.mockResolvedValue(true);
   });
 
   test('createIlmPolicyIfNotExists with 1 retry', async () => {
@@ -473,14 +473,14 @@ describe('retries', () => {
 
     const timeStart = performance.now();
     await initializeEs(esContext);
-    const timeElapsed = performance.now() - timeStart;
+    const timeElapsed = Math.ceil(performance.now() - timeStart);
 
     expect(timeElapsed).toBeGreaterThanOrEqual(MOCK_RETRY_DELAY);
 
     expect(esContext.esAdapter.getExistingLegacyIndexTemplates).toHaveBeenCalledTimes(1);
     expect(esContext.esAdapter.doesIlmPolicyExist).toHaveBeenCalledTimes(2);
     expect(esContext.esAdapter.doesIndexTemplateExist).toHaveBeenCalledTimes(1);
-    expect(esContext.esAdapter.doesAliasExist).toHaveBeenCalledTimes(1);
+    expect(esContext.esAdapter.doesDataStreamExist).toHaveBeenCalledTimes(1);
 
     const prefix = `eventLog initialization operation failed and will be retried: createIlmPolicyIfNotExists`;
     expect(esContext.logger.warn).toHaveBeenCalledTimes(1);
@@ -500,7 +500,7 @@ describe('retries', () => {
     expect(esContext.esAdapter.getExistingLegacyIndexTemplates).toHaveBeenCalledTimes(1);
     expect(esContext.esAdapter.doesIlmPolicyExist).toHaveBeenCalledTimes(1);
     expect(esContext.esAdapter.doesIndexTemplateExist).toHaveBeenCalledTimes(3);
-    expect(esContext.esAdapter.doesAliasExist).toHaveBeenCalledTimes(1);
+    expect(esContext.esAdapter.doesDataStreamExist).toHaveBeenCalledTimes(1);
 
     const prefix = `eventLog initialization operation failed and will be retried: createIndexTemplateIfNotExists`;
     expect(esContext.logger.warn).toHaveBeenCalledTimes(2);
@@ -508,14 +508,14 @@ describe('retries', () => {
     expect(esContext.logger.warn).toHaveBeenCalledWith(`${prefix}; 3 more times; error: retry 2b`);
   });
 
-  test('createInitialIndexIfNotExists', async () => {
-    esContext.esAdapter.doesAliasExist.mockRejectedValueOnce(new Error('retry 5a'));
-    esContext.esAdapter.doesAliasExist.mockRejectedValueOnce(new Error('retry 5b'));
-    esContext.esAdapter.doesAliasExist.mockRejectedValueOnce(new Error('retry 5c'));
-    esContext.esAdapter.doesAliasExist.mockRejectedValueOnce(new Error('retry 5d'));
-    esContext.esAdapter.doesAliasExist.mockRejectedValueOnce(new Error('retry 5e'));
+  test('createDataStreamIfNotExists retry error', async () => {
+    esContext.esAdapter.doesDataStreamExist.mockRejectedValueOnce(new Error('retry 5a'));
+    esContext.esAdapter.doesDataStreamExist.mockRejectedValueOnce(new Error('retry 5b'));
+    esContext.esAdapter.doesDataStreamExist.mockRejectedValueOnce(new Error('retry 5c'));
+    esContext.esAdapter.doesDataStreamExist.mockRejectedValueOnce(new Error('retry 5d'));
+    esContext.esAdapter.doesDataStreamExist.mockRejectedValueOnce(new Error('retry 5e'));
     // make sure it only tries 5 times - this one should not be reported
-    esContext.esAdapter.doesAliasExist.mockRejectedValueOnce(new Error('retry 5f'));
+    esContext.esAdapter.doesDataStreamExist.mockRejectedValueOnce(new Error('retry 5f'));
 
     const timeStart = performance.now();
     await initializeEs(esContext);
@@ -526,9 +526,10 @@ describe('retries', () => {
     expect(esContext.esAdapter.getExistingLegacyIndexTemplates).toHaveBeenCalledTimes(1);
     expect(esContext.esAdapter.doesIlmPolicyExist).toHaveBeenCalledTimes(1);
     expect(esContext.esAdapter.doesIndexTemplateExist).toHaveBeenCalledTimes(1);
-    expect(esContext.esAdapter.doesAliasExist).toHaveBeenCalledTimes(5);
+    expect(esContext.esAdapter.doesDataStreamExist).toHaveBeenCalledTimes(5);
+    expect(esContext.esAdapter.createDataStream).toHaveBeenCalledTimes(0);
 
-    const prefix = `eventLog initialization operation failed and will be retried: createInitialIndexIfNotExists`;
+    const prefix = `eventLog initialization operation failed and will be retried: createDataStreamIfNotExists`;
     expect(esContext.logger.warn).toHaveBeenCalledTimes(5);
     expect(esContext.logger.warn).toHaveBeenCalledWith(`${prefix}; 4 more times; error: retry 5a`);
     expect(esContext.logger.warn).toHaveBeenCalledWith(`${prefix}; 3 more times; error: retry 5b`);

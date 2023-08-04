@@ -11,14 +11,21 @@ import mappings from '../../generated/mappings.json';
 // returns the body of an index template used in an ES indices.putTemplate call
 export function getIndexTemplate(esNames: EsNames) {
   const indexTemplateBody = {
-    index_patterns: [esNames.indexPatternWithVersion],
+    _meta: {
+      description: 'index template for the Kibana event log',
+      managed: true,
+    },
+    index_patterns: [esNames.dataStream],
+    data_stream: {
+      hidden: true,
+    },
+    priority: 50,
     template: {
       settings: {
+        hidden: true,
         number_of_shards: 1,
         auto_expand_replicas: '0-1',
         'index.lifecycle.name': esNames.ilmPolicy,
-        'index.lifecycle.rollover_alias': esNames.alias,
-        'index.hidden': true,
       },
       mappings,
     },
@@ -31,6 +38,11 @@ export function getIndexTemplate(esNames: EsNames) {
 export function getIlmPolicy() {
   return {
     policy: {
+      _meta: {
+        description:
+          'ilm policy the Kibana event log, created initially by Kibana, but updated by the user, not Kibana',
+        managed: false,
+      },
       phases: {
         hot: {
           actions: {

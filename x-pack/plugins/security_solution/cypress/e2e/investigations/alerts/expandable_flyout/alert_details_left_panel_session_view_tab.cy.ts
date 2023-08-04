@@ -5,11 +5,16 @@
  * 2.0.
  */
 
-import { DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB_SESSION_VIEW_NO_DATA } from '../../../../screens/document_expandable_flyout';
 import {
-  expandFirstAlertExpandableFlyout,
-  expandDocumentDetailsExpandableFlyoutLeftSection,
-} from '../../../../tasks/document_expandable_flyout';
+  DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB_SESSION_VIEW_BUTTON,
+  DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB_SESSION_VIEW_ERROR,
+} from '../../../../screens/expandable_flyout/alert_details_left_panel_session_view_tab';
+import {
+  DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB,
+  DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB_BUTTON_GROUP,
+} from '../../../../screens/expandable_flyout/alert_details_left_panel';
+import { expandDocumentDetailsExpandableFlyoutLeftSection } from '../../../../tasks/expandable_flyout/alert_details_right_panel';
+import { expandFirstAlertExpandableFlyout } from '../../../../tasks/expandable_flyout/common';
 import { cleanKibana } from '../../../../tasks/common';
 import { login, visit } from '../../../../tasks/login';
 import { createRule } from '../../../../tasks/api_calls/rules';
@@ -17,13 +22,11 @@ import { getNewRule } from '../../../../objects/rule';
 import { ALERTS_URL } from '../../../../urls/navigation';
 import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
 
-// Skipping these for now as the feature is protected behind a feature flag set to false by default
-// To run the tests locally, add 'securityFlyoutEnabled' in the Cypress config.ts here https://github.com/elastic/kibana/blob/main/x-pack/test/security_solution_cypress/config.ts#L50
-describe.skip(
+describe(
   'Alert details expandable flyout left panel session view',
   { env: { ftrConfig: { enableExperimental: ['securityFlyoutEnabled'] } } },
   () => {
-    before(() => {
+    beforeEach(() => {
       cleanKibana();
       login();
       createRule(getNewRule());
@@ -33,13 +36,22 @@ describe.skip(
       expandDocumentDetailsExpandableFlyoutLeftSection();
     });
 
-    it('should display session view no data message', () => {
-      cy.get(DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB_SESSION_VIEW_NO_DATA)
+    it('should display session view under visualize', () => {
+      cy.get(DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB)
         .should('be.visible')
-        .and('contain.text', 'No data to render')
-        .and('contain.text', 'No process events found for this query');
-    });
+        .and('have.text', 'Visualize');
 
-    // it('should display session view component', () => {});
+      cy.get(DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB_BUTTON_GROUP).should('be.visible');
+
+      cy.get(DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB_SESSION_VIEW_BUTTON)
+        .should('be.visible')
+        .and('have.text', 'Session View');
+
+      // TODO ideally we would have a test for the session view component instead
+      cy.get(DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB_SESSION_VIEW_ERROR)
+        .should('be.visible')
+        .and('contain.text', 'Unable to display session view')
+        .and('contain.text', 'There was an error displaying session view');
+    });
   }
 );

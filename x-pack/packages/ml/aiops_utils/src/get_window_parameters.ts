@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+
 /**
- * Time range definition for baseline and deviation to be used by spike log analysis.
+ * Time range definition for baseline and deviation to be used by log rate analysis.
  *
  * @export
  * @interface WindowParameters
@@ -36,18 +38,28 @@ export interface WindowParameters {
 }
 
 /**
+ * Type guard for WindowParameters
+ *
+ * @param {unknown} arg - The argument to be checked.
+ * @returns {arg is WindowParameters}
+ */
+export const isWindowParameters = (arg: unknown): arg is WindowParameters =>
+  isPopulatedObject(arg, ['baselineMin', 'baselineMax', 'deviationMin', 'deviationMax']) &&
+  Object.values(arg).every((d) => typeof d === 'number');
+
+/**
  * Given a point in time (e.g. where a user clicks), use simple heuristics to compute:
  *
  * 1. The time window around the click to evaluate for changes
  * 2. The historical time window prior to the click to use as a baseline.
  *
  * The philosophy here is that charts are displayed with different granularities according to their
- * overall time window. We select the log spike and historical time windows inline with the
+ * overall time window. We select the log deviation and historical time windows inline with the
  * overall time window.
  *
  * The algorithm for doing this is based on the typical granularities that exist in machine data.
  *
- * @param clickTime timestamp of the clicked log rate spike.
+ * @param clickTime timestamp of the clicked log rate deviation.
  * @param minTime minimum timestamp of the time window to be analysed
  * @param maxTime maximum timestamp of the time window to be analysed
  * @returns WindowParameters
@@ -91,7 +103,7 @@ export const getWindowParameters = (
  * Converts window paramaters from the brushes to “snap” the brushes to the chart histogram bar width and ensure timestamps
  * correspond to bucket timestamps
  *
- * @param windowParameters time range definition for baseline and deviation to be used by spike log analysis
+ * @param windowParameters time range definition for baseline and deviation to be used by log rate analysis
  * @param snapTimestamps time range definition that always corresponds to histogram bucket timestamps
  * @returns WindowParameters
  */

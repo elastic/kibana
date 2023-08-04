@@ -31,8 +31,9 @@ import {
   ACTIONS_NOTIFY_CUSTOM_FREQUENCY_BUTTON,
   actionFormSelector,
   ACTIONS_NOTIFY_PER_RULE_RUN_BUTTON,
+  INDEX_CONNECTOR_COMBO_BOX_INPUT,
 } from '../../screens/common/rule_actions';
-import { COMBO_BOX_INPUT, COMBO_BOX_SELECTION } from '../../screens/common/controls';
+import { COMBO_BOX_SELECTION } from '../../screens/common/controls';
 import type { EmailConnector, IndexConnector } from '../../objects/connector';
 import { getEmailConnector, getIndexConnector } from '../../objects/connector';
 
@@ -82,7 +83,7 @@ export const assertEmailRuleAction = (email: string, subject: string) => {
 
 export const fillIndexConnectorForm = (connector: IndexConnector = getIndexConnector()) => {
   cy.get(CONNECTOR_NAME_INPUT).type(connector.name);
-  cy.get(COMBO_BOX_INPUT).type(connector.index);
+  cy.get(INDEX_CONNECTOR_COMBO_BOX_INPUT).type(connector.index);
 
   cy.get(COMBO_BOX_SELECTION).click({ force: true });
 

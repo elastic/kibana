@@ -12,13 +12,12 @@ import { get } from 'lodash';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-
+import { ML_JOB_AGGREGATION, isRuleSupported, isMultiBucketAnomaly } from '@kbn/ml-anomaly-utils';
 import {
   formatHumanReadableDate,
   formatHumanReadableDateTime,
   formatHumanReadableDateTimeSeconds,
-} from '../../../../common/util/date_utils';
-import { ML_JOB_AGGREGATION } from '../../../../common/constants/aggregation_types';
+} from '@kbn/ml-date-utils';
 
 import { DescriptionCell } from './description_cell';
 import { DetectorCell } from './detector_cell';
@@ -27,7 +26,6 @@ import { InfluencersCell } from './influencers_cell';
 import { LinksMenu } from './links_menu';
 import { checkPermission } from '../../capabilities/check_capabilities';
 import { mlFieldFormatService } from '../../services/field_format_service';
-import { isRuleSupported, isMultiBucketAnomaly } from '@kbn/ml-anomaly-utils';
 import { formatValue } from '../../formatters/format_value';
 import { INFLUENCERS_LIMIT, ANOMALIES_TABLE_TABS } from './anomalies_table_constants';
 import { SeverityCell } from './severity_cell';

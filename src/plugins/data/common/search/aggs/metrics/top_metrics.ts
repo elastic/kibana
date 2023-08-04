@@ -14,6 +14,7 @@ import { IMetricAggConfig, MetricAggType } from './metric_agg_type';
 import { METRIC_TYPES } from './metric_agg_types';
 import { DataViewField, KBN_FIELD_TYPES } from '../../..';
 import { BaseAggParams } from '../types';
+import { createTopHitFilter } from './lib/create_filter';
 
 export interface BaseAggParamsTopMetrics extends BaseAggParams {
   field: string;
@@ -162,5 +163,6 @@ export const getTopMetricsMetricAgg = () => {
       if (results.length === 1) return results[0];
       return results;
     },
+    createFilter: createTopHitFilter,
   });
 };

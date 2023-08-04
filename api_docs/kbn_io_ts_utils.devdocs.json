@@ -210,17 +210,7 @@
         "signature": [
           "(start: number, end: number) => ",
           "Type",
-          "<",
-          "Branded",
-          "<number, ",
-          {
-            "pluginId": "@kbn/io-ts-utils",
-            "scope": "common",
-            "docId": "kibKbnIoTsUtilsPluginApi",
-            "section": "def-common.InRangeBrand",
-            "text": "InRangeBrand"
-          },
-          ">, unknown, unknown>"
+          "<number, number, unknown>"
         ],
         "path": "packages/kbn-io-ts-utils/src/in_range_rt/index.ts",
         "deprecated": false,
@@ -269,18 +259,8 @@
         "description": [],
         "signature": [
           "(start: number, end: number) => ",
-          "BrandC",
-          "<",
-          "NumberC",
-          ", ",
-          {
-            "pluginId": "@kbn/io-ts-utils",
-            "scope": "common",
-            "docId": "kibKbnIoTsUtilsPluginApi",
-            "section": "def-common.InRangeBrand",
-            "text": "InRangeBrand"
-          },
-          ">"
+          "Type",
+          "<number, number, unknown>"
         ],
         "path": "packages/kbn-io-ts-utils/src/in_range_rt/index.ts",
         "deprecated": false,
@@ -644,10 +624,10 @@
     "misc": [
       {
         "parentPluginId": "@kbn/io-ts-utils",
-        "id": "def-common.IndexPatternType",
+        "id": "def-common.IndexPattern",
         "type": "Type",
         "tags": [],
-        "label": "IndexPatternType",
+        "label": "IndexPattern",
         "description": [],
         "signature": [
           "string & ",
@@ -877,7 +857,7 @@
         "description": [],
         "signature": [
           "Type",
-          "<number, unknown, unknown>"
+          "<number, number, unknown>"
         ],
         "path": "packages/kbn-io-ts-utils/src/to_number_rt/index.ts",
         "deprecated": false,

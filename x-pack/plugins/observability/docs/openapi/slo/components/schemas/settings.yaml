@@ -1,5 +1,5 @@
-title: Settings definition
-description: Defines properties for settings.
+title: Settings
+description: Defines properties for SLO settings.
 type: object
 properties:
   syncDelay:

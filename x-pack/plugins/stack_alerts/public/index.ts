@@ -7,4 +7,6 @@
 
 import { StackAlertsPublicPlugin } from './plugin';
 
+export { DataViewSelectPopover } from './rule_types/components/data_view_select_popover';
+
 export const plugin = () => new StackAlertsPublicPlugin();

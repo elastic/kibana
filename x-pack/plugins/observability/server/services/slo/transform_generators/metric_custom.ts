@@ -17,10 +17,7 @@ import {
   getSLOTransformId,
 } from '../../../assets/constants';
 import { MetricCustomIndicator, SLO } from '../../../domain/models';
-
-type MetricCustomMetricDef =
-  | MetricCustomIndicator['params']['good']
-  | MetricCustomIndicator['params']['total'];
+import { GetCustomMetricIndicatorAggregation } from '../aggregations';
 
 export const INVALID_EQUATION_REGEX = /[^A-Z|+|\-|\s|\d+|\.|\(|\)|\/|\*|>|<|=|\?|\:|&|\!|\|]+/g;
 
@@ -35,7 +32,7 @@ export class MetricCustomTransformGenerator extends TransformGenerator {
       this.buildDescription(slo),
       this.buildSource(slo, slo.indicator),
       this.buildDestination(),
-      this.buildGroupBy(slo, slo.indicator.params.timestampField),
+      this.buildCommonGroupBy(slo, slo.indicator.params.timestampField),
       this.buildAggregations(slo, slo.indicator),
       this.buildSettings(slo, slo.indicator.params.timestampField)
     );
@@ -61,41 +58,6 @@ export class MetricCustomTransformGenerator extends TransformGenerator {
     };
   }
 
-  private buildMetricAggregations(type: 'good' | 'total', metricDef: MetricCustomMetricDef) {
-    return metricDef.metrics.reduce(
-      (acc, metric) => ({
-        ...acc,
-        [`_${type}_${metric.name}`]: {
-          [metric.aggregation]: { field: metric.field },
-        },
-      }),
-      {}
-    );
-  }
-
-  private convertEquationToPainless(bucketsPath: Record<string, string>, equation: string) {
-    const workingEquation = equation || Object.keys(bucketsPath).join(' + ');
-    return Object.keys(bucketsPath).reduce((acc, key) => {
-      return acc.replace(key, `params.${key}`);
-    }, workingEquation);
-  }
-
-  private buildMetricEquation(type: 'good' | 'total', metricDef: MetricCustomMetricDef) {
-    const bucketsPath = metricDef.metrics.reduce(
-      (acc, metric) => ({ ...acc, [metric.name]: `_${type}_${metric.name}` }),
-      {}
-    );
-    return {
-      bucket_script: {
-        buckets_path: bucketsPath,
-        script: {
-          source: this.convertEquationToPainless(bucketsPath, metricDef.equation),
-          lang: 'painless',
-        },
-      },
-    };
-  }
-
   private buildAggregations(slo: SLO, indicator: MetricCustomIndicator) {
     if (indicator.params.good.equation.match(INVALID_EQUATION_REGEX)) {
       throw new Error(`Invalid equation: ${indicator.params.good.equation}`);
@@ -105,20 +67,22 @@ export class MetricCustomTransformGenerator extends TransformGenerator {
       throw new Error(`Invalid equation: ${indicator.params.total.equation}`);
     }
 
-    const goodAggregations = this.buildMetricAggregations('good', indicator.params.good);
-    const totalAggregations = this.buildMetricAggregations('total', indicator.params.total);
-
+    const getCustomMetricIndicatorAggregation = new GetCustomMetricIndicatorAggregation(indicator);
     return {
-      ...goodAggregations,
-      ...totalAggregations,
-      'slo.numerator': this.buildMetricEquation('good', indicator.params.good),
-      'slo.denominator': this.buildMetricEquation('total', indicator.params.total),
+      ...getCustomMetricIndicatorAggregation.execute({
+        type: 'good',
+        aggregationKey: 'slo.numerator',
+      }),
+      ...getCustomMetricIndicatorAggregation.execute({
+        type: 'total',
+        aggregationKey: 'slo.denominator',
+      }),
       ...(timeslicesBudgetingMethodSchema.is(slo.budgetingMethod) && {
         'slo.isGoodSlice': {
           bucket_script: {
             buckets_path: {
-              goodEvents: 'slo.numerator',
-              totalEvents: 'slo.denominator',
+              goodEvents: 'slo.numerator>value',
+              totalEvents: 'slo.denominator>value',
             },
             script: `params.goodEvents / params.totalEvents >= ${slo.objective.timesliceTarget} ? 1 : 0`,
           },

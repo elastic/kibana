@@ -45,7 +45,8 @@ export default function listRuleTypes({ getService }: FtrProviderContext) {
         minimum_license_required: 'basic',
         is_exportable: true,
         enabled_in_license: true,
-        has_get_summarized_alerts: false,
+        has_fields_for_a_a_d: false,
+        has_alerts_mappings: false,
         rule_task_timeout: '5m',
       });
       expect(Object.keys(authorizedConsumers)).to.contain('alertsFixture');
@@ -133,7 +134,8 @@ export default function listRuleTypes({ getService }: FtrProviderContext) {
           minimumLicenseRequired: 'basic',
           isExportable: true,
           enabledInLicense: true,
-          hasGetSummarizedAlerts: false,
+          hasFieldsForAAD: false,
+          hasAlertsMappings: false,
           ruleTaskTimeout: '5m',
         });
         expect(Object.keys(authorizedConsumers)).to.contain('alertsFixture');

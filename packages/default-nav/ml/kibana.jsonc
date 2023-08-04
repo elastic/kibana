@@ -1,0 +1,5 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/default-nav-ml",
+  "owner": "@elastic/ml-ui"
+}

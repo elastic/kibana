@@ -7,11 +7,14 @@
 
 import { cpu } from './snapshot/cpu';
 import { diskLatency } from './snapshot/disk_latency';
+import { diskSpaceUsage } from './snapshot/disk_space_usage';
 import { count } from '../../shared/metrics/snapshot/count';
 import { load } from './snapshot/load';
 import { logRate } from './snapshot/log_rate';
 import { memory } from './snapshot/memory';
+import { memoryFree } from './snapshot/memory_free';
 import { memoryTotal } from './snapshot/memory_total';
+import { normalizedLoad1m } from './snapshot/normalized_load_1m';
 import { rx } from './snapshot/rx';
 import { tx } from './snapshot/tx';
 
@@ -38,10 +41,13 @@ import { InventoryMetrics } from '../../types';
 const exposedHostSnapshotMetrics = {
   cpu,
   diskLatency,
+  diskSpaceUsage,
   load,
   logRate,
   memory,
+  memoryFree,
   memoryTotal,
+  normalizedLoad1m,
   rx,
   tx,
 };

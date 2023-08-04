@@ -16,10 +16,24 @@ import { InheritedFtrProviderContext } from './ftr_provider_context';
 
 export async function bootstrapApmSynthtrace(
   context: InheritedFtrProviderContext,
-  kibanaServerUrl: string
+  kibanaClient: ApmSynthtraceKibanaClient
 ) {
   const es = context.getService('es');
 
+  const kibanaVersion = await kibanaClient.fetchLatestApmPackageVersion();
+  await kibanaClient.installApmPackage(kibanaVersion);
+
+  const esClient = new ApmSynthtraceEsClient({
+    client: es,
+    logger: createLogger(LogLevel.info),
+    version: kibanaVersion,
+    refreshAfterIndex: true,
+  });
+
+  return esClient;
+}
+
+export function getApmSynthtraceKibanaClient(kibanaServerUrl: string) {
   const kibanaServerUrlWithAuth = url
     .format({
       ...url.parse(kibanaServerUrl),
@@ -32,16 +46,5 @@ export async function bootstrapApmSynthtrace(
     logger: createLogger(LogLevel.debug),
   });
 
-  const kibanaVersion = await kibanaClient.fetchLatestApmPackageVersion();
-
-  await kibanaClient.installApmPackage(kibanaVersion);
-
-  const esClient = new ApmSynthtraceEsClient({
-    client: es,
-    logger: createLogger(LogLevel.info),
-    version: kibanaVersion,
-    refreshAfterIndex: true,
-  });
-
-  return esClient;
+  return kibanaClient;
 }

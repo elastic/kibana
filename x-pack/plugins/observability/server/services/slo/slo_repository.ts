@@ -5,62 +5,21 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
-import { fold } from 'fp-ts/lib/Either';
-import { pipe } from 'fp-ts/lib/pipeable';
-
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { sloSchema } from '@kbn/slo-schema';
-
-import { StoredSLO, SLO } from '../../domain/models';
-import { SO_SLO_TYPE } from '../../saved_objects';
+import { fold } from 'fp-ts/lib/Either';
+import { pipe } from 'fp-ts/lib/pipeable';
+import * as t from 'io-ts';
+import { SLO, StoredSLO } from '../../domain/models';
 import { SLOIdConflict, SLONotFound } from '../../errors';
-
-type ObjectValues<T> = T[keyof T];
-
-export interface Criteria {
-  name?: string;
-  indicatorTypes?: string[];
-}
-
-export interface Pagination {
-  page: number;
-  perPage: number;
-}
-
-export const SortDirection = {
-  Asc: 'Asc',
-  Desc: 'Desc',
-} as const;
-
-type SortDirection = ObjectValues<typeof SortDirection>;
-
-export const SortField = {
-  CreationTime: 'CreationTime',
-  IndicatorType: 'IndicatorType',
-};
-
-type SortField = ObjectValues<typeof SortField>;
-
-export interface Sort {
-  field: SortField;
-  direction: SortDirection;
-}
-
-export interface Paginated<T> {
-  page: number;
-  perPage: number;
-  total: number;
-  results: T[];
-}
+import { SO_SLO_TYPE } from '../../saved_objects';
 
 export interface SLORepository {
   save(slo: SLO, options?: { throwOnConflict: boolean }): Promise<SLO>;
   findAllByIds(ids: string[]): Promise<SLO[]>;
   findById(id: string): Promise<SLO>;
   deleteById(id: string): Promise<void>;
-  find(criteria: Criteria, sort: Sort, pagination: Pagination): Promise<Paginated<SLO>>;
 }
 
 export class KibanaSavedObjectsSLORepository implements SLORepository {
@@ -120,29 +79,6 @@ export class KibanaSavedObjectsSLORepository implements SLORepository {
     await this.soClient.delete(SO_SLO_TYPE, response.saved_objects[0].id);
   }
 
-  async find(criteria: Criteria, sort: Sort, pagination: Pagination): Promise<Paginated<SLO>> {
-    const { search, searchFields } = buildSearch(criteria);
-    const filterKuery = buildFilterKuery(criteria);
-    const { sortField, sortOrder } = buildSortQuery(sort);
-    const response = await this.soClient.find<StoredSLO>({
-      type: SO_SLO_TYPE,
-      page: pagination.page,
-      perPage: pagination.perPage,
-      search,
-      searchFields,
-      filter: filterKuery,
-      sortField,
-      sortOrder,
-    });
-
-    return {
-      total: response.total,
-      page: response.page,
-      perPage: response.per_page,
-      results: response.saved_objects.map((slo) => toSLO(slo.attributes)),
-    };
-  }
-
   async findAllByIds(ids: string[]): Promise<SLO[]> {
     if (ids.length === 0) return [];
 
@@ -163,47 +99,6 @@ export class KibanaSavedObjectsSLORepository implements SLORepository {
   }
 }
 
-function buildSearch(criteria: Criteria): {
-  search: string | undefined;
-  searchFields: string[] | undefined;
-} {
-  if (!criteria.name) {
-    return { search: undefined, searchFields: undefined };
-  }
-
-  return { search: addWildcardsIfAbsent(criteria.name), searchFields: ['name'] };
-}
-
-function buildFilterKuery(criteria: Criteria): string | undefined {
-  const filters: string[] = [];
-  if (!!criteria.indicatorTypes) {
-    const indicatorTypesFilter: string[] = criteria.indicatorTypes.map(
-      (indicatorType) => `slo.attributes.indicator.type: ${indicatorType}`
-    );
-    filters.push(`(${indicatorTypesFilter.join(' or ')})`);
-  }
-
-  return filters.length > 0 ? filters.join(' and ') : undefined;
-}
-
-function buildSortQuery(sort: Sort): { sortField: string; sortOrder: 'asc' | 'desc' } {
-  let sortField: string;
-  switch (sort.field) {
-    case SortField.IndicatorType:
-      sortField = 'indicator.type';
-      break;
-    case SortField.CreationTime:
-    default:
-      sortField = 'created_at';
-      break;
-  }
-
-  return {
-    sortField,
-    sortOrder: sort.direction === SortDirection.Desc ? 'desc' : 'asc',
-  };
-}
-
 function toStoredSLO(slo: SLO): StoredSLO {
   return sloSchema.encode(slo);
 }
@@ -215,18 +110,4 @@ function toSLO(storedSLO: StoredSLO): SLO {
       throw new Error('Invalid Stored SLO');
     }, t.identity)
   );
-}
-
-const WILDCARD_CHAR = '*';
-function addWildcardsIfAbsent(value: string): string {
-  let updatedValue = value;
-  if (updatedValue.substring(0, 1) !== WILDCARD_CHAR) {
-    updatedValue = `${WILDCARD_CHAR}${updatedValue}`;
-  }
-
-  if (value.substring(value.length - 1) !== WILDCARD_CHAR) {
-    updatedValue = `${updatedValue}${WILDCARD_CHAR}`;
-  }
-
-  return updatedValue;
 }

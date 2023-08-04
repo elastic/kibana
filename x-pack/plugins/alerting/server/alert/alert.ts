@@ -39,6 +39,7 @@ export type PublicAlert<
   | 'getContext'
   | 'getState'
   | 'getUuid'
+  | 'getStart'
   | 'hasContext'
   | 'replaceState'
   | 'scheduleActions'
@@ -74,6 +75,10 @@ export class Alert<
 
   getUuid() {
     return this.meta.uuid!;
+  }
+
+  getStart(): string | null {
+    return this.state.start ? `${this.state.start}` : null;
   }
 
   hasScheduledActions() {

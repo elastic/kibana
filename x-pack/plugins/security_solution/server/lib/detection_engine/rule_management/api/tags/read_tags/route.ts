@@ -5,11 +5,12 @@
  * 2.0.
  */
 
+import type { IKibanaResponse } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import type { SecuritySolutionPluginRouter } from '../../../../../../types';
+import type { ReadTagsResponse } from '../../../../../../../common/api/detection_engine';
 import { DETECTION_ENGINE_TAGS_URL } from '../../../../../../../common/constants';
+import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 import { buildSiemResponse } from '../../../../routes/utils';
-
 import { readTags } from './read_tags';
 
 export const readTagsRoute = (router: SecuritySolutionPluginRouter) => {
@@ -21,7 +22,7 @@ export const readTagsRoute = (router: SecuritySolutionPluginRouter) => {
         tags: ['access:securitySolution'],
       },
     },
-    async (context, request, response) => {
+    async (context, request, response): Promise<IKibanaResponse<ReadTagsResponse>> => {
       const siemResponse = buildSiemResponse(response);
       const rulesClient = (await context.alerting)?.getRulesClient();
 

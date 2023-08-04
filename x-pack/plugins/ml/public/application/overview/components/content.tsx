@@ -13,6 +13,7 @@ import { AnalyticsPanel } from './analytics_panel';
 import { AnomalyTimelineService } from '../../services/anomaly_timeline_service';
 import { mlResultsServiceProvider } from '../../services/results_service';
 import { useMlKibana } from '../../contexts/kibana';
+import { usePermissionCheck } from '../../capabilities/check_capabilities';
 
 interface Props {
   createAnomalyDetectionJobDisabled: boolean;
@@ -32,6 +33,8 @@ export const OverviewContent: FC<Props> = ({
     },
   } = useMlKibana();
 
+  const [isADEnabled, isDFAEnabled] = usePermissionCheck(['isADEnabled', 'isDFAEnabled']);
+
   const timefilter = useTimefilter();
 
   const [anomalyTimelineService, setAnomalyTimelineService] = useState<AnomalyTimelineService>();
@@ -49,13 +52,17 @@ export const OverviewContent: FC<Props> = ({
 
   return (
     <>
-      <AnomalyDetectionPanel
-        anomalyTimelineService={anomalyTimelineService}
-        jobCreationDisabled={createAnomalyDetectionJobDisabled}
-        setLazyJobCount={setAdLazyJobCount}
-      />
-      <EuiSpacer size="m" />
-      <AnalyticsPanel setLazyJobCount={setDfaLazyJobCount} />
+      {isADEnabled ? (
+        <>
+          <AnomalyDetectionPanel
+            anomalyTimelineService={anomalyTimelineService}
+            setLazyJobCount={setAdLazyJobCount}
+          />
+          <EuiSpacer size="m" />
+        </>
+      ) : null}
+
+      {isDFAEnabled ? <AnalyticsPanel setLazyJobCount={setDfaLazyJobCount} /> : null}
     </>
   );
 };

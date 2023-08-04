@@ -6,78 +6,40 @@
  */
 
 import React from 'react';
-import { EuiButton, EuiSpacer, EuiCallOut, EuiSkeletonText, EuiText } from '@elastic/eui';
+import { EuiButton, EuiSpacer, EuiCallOut, EuiSkeletonText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
-import { useGetSettings, useKibanaVersion } from '../../hooks';
+import type { PackagePolicy } from '../../../common';
+
+import { useCreateCloudFormationUrl } from '../../hooks';
+import { CloudFormationGuide } from '../cloud_formation_guide';
 
 interface Props {
   enrollmentAPIKey?: string;
   cloudFormationTemplateUrl: string;
+  packagePolicy?: PackagePolicy;
 }
-
-const createCloudFormationUrl = (
-  templateURL: string,
-  enrollmentToken: string,
-  fleetUrl: string,
-  kibanaVersion: string
-) => {
-  const cloudFormationUrl = templateURL
-    .replace('FLEET_ENROLLMENT_TOKEN', enrollmentToken)
-    .replace('FLEET_URL', fleetUrl)
-    .replace('KIBANA_VERSION', kibanaVersion);
-
-  return new URL(cloudFormationUrl).toString();
-};
 
 export const CloudFormationInstructions: React.FunctionComponent<Props> = ({
   enrollmentAPIKey,
   cloudFormationTemplateUrl,
+  packagePolicy,
 }) => {
-  const { data, isLoading } = useGetSettings();
-
-  const kibanaVersion = useKibanaVersion();
-
-  // Default fleet server host
-  const fleetServerHost = data?.item.fleet_server_hosts?.[0];
-
-  if (!isLoading && !fleetServerHost) {
-    return (
-      <>
-        <EuiSpacer size="m" />
-        <EuiCallOut
-          title={i18n.translate('xpack.fleet.agentEnrollment.cloudFormation.noFleetServer', {
-            defaultMessage: 'Fleet Server host not found',
-          })}
-          color="danger"
-          iconType="error"
-        />
-      </>
-    );
-  }
-
-  if (!enrollmentAPIKey) {
-    return (
-      <>
-        <EuiSpacer size="m" />
-        <EuiCallOut
-          title={i18n.translate('xpack.fleet.agentEnrollment.cloudFormation.noApiKey', {
-            defaultMessage: 'Enrollment token not found',
-          })}
-          color="danger"
-          iconType="error"
-        />
-      </>
-    );
-  }
-
-  const cloudFormationUrl = createCloudFormationUrl(
-    cloudFormationTemplateUrl,
+  const { isLoading, cloudFormationUrl, error, isError } = useCreateCloudFormationUrl({
     enrollmentAPIKey,
-    fleetServerHost || '',
-    kibanaVersion
-  );
+    cloudFormationTemplateUrl,
+    packagePolicy,
+  });
+
+  if (error && isError) {
+    return (
+      <>
+        <EuiSpacer size="m" />
+        <EuiCallOut title={error} color="danger" iconType="error" />
+      </>
+    );
+  }
 
   return (
     <EuiSkeletonText
@@ -91,19 +53,15 @@ export const CloudFormationInstructions: React.FunctionComponent<Props> = ({
         }
       )}
     >
-      <EuiText>
-        <FormattedMessage
-          id="xpack.fleet.agentEnrollment.cloudFormation.instructions"
-          defaultMessage="Sign in to your AWS cloud provider account, and switch to the region that you want to scan, then click Launch CloudFormation."
-        />
-      </EuiText>
+      <CloudFormationGuide />
       <EuiSpacer size="m" />
       <EuiButton
         color="primary"
         fill
         target="_blank"
-        iconSide="right"
-        iconType="popout"
+        iconSide="left"
+        iconType="launch"
+        fullWidth
         href={cloudFormationUrl}
       >
         <FormattedMessage

@@ -18,14 +18,12 @@ import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { SAVED_QUERY_LOAD_ERROR_TOAST } from './translations';
 
 interface UseGetSavedQuerySettings {
+  savedQueryId: string | undefined;
   onError?: (e: unknown) => void;
   ruleType: Type | undefined;
 }
 
-export const useGetSavedQuery = (
-  savedQueryId: string | undefined,
-  { ruleType, onError }: UseGetSavedQuerySettings
-) => {
+export const useGetSavedQuery = ({ savedQueryId, ruleType, onError }: UseGetSavedQuerySettings) => {
   const savedQueryServices = useSavedQueryServices();
   const { addError } = useAppToasts();
 
@@ -48,6 +46,7 @@ export const useGetSavedQuery = (
     {
       onError: onError ?? defaultErrorHandler,
       retry: false,
+      refetchOnWindowFocus: false,
     }
   );
 

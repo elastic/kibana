@@ -9,34 +9,39 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { IEventLogClient, IValidatedEvent } from '@kbn/event-log-plugin/server';
 import { MAX_EXECUTION_EVENTS_DISPLAYED } from '@kbn/securitysolution-rules';
 
-import { assertUnreachable } from '../../../../../../../common/utility_types';
-import { invariant } from '../../../../../../../common/utils/invariant';
-import { withSecuritySpan } from '../../../../../../utils/with_security_span';
-
 import type {
-  RuleExecutionEvent,
   GetRuleExecutionEventsResponse,
   GetRuleExecutionResultsResponse,
-} from '../../../../../../../common/detection_engine/rule_monitoring';
+  RuleExecutionEvent,
+} from '../../../../../../../common/api/detection_engine/rule_monitoring';
 import {
   LogLevel,
   logLevelFromString,
   RuleExecutionEventType,
   ruleExecutionEventTypeFromString,
-} from '../../../../../../../common/detection_engine/rule_monitoring';
+} from '../../../../../../../common/api/detection_engine/rule_monitoring';
+
+import { assertUnreachable } from '../../../../../../../common/utility_types';
+import { invariant } from '../../../../../../../common/utils/invariant';
+import { withSecuritySpan } from '../../../../../../utils/with_security_span';
+import { kqlAnd, kqlOr } from '../../utils/kql';
+
 import type {
   GetExecutionEventsArgs,
   GetExecutionResultsArgs,
 } from '../client_for_routes/client_interface';
-
-import { RULE_SAVED_OBJECT_TYPE, RULE_EXECUTION_LOG_PROVIDER } from './constants';
 import {
   formatExecutionEventResponse,
   getExecutionEventAggregation,
   mapRuleExecutionStatusToPlatformStatus,
-} from './get_execution_event_aggregation';
-import type { ExecutionUuidAggResult } from './get_execution_event_aggregation/types';
-import { EXECUTION_UUID_FIELD } from './get_execution_event_aggregation/types';
+} from './aggregations/execution_results';
+import type { ExecutionUuidAggResult } from './aggregations/execution_results/types';
+
+import * as f from '../../event_log/event_log_fields';
+import {
+  RULE_EXECUTION_LOG_PROVIDER,
+  RULE_SAVED_OBJECT_TYPE,
+} from '../../event_log/event_log_constants';
 
 export interface IEventLogReader {
   getExecutionEvents(args: GetExecutionEventsArgs): Promise<GetRuleExecutionEventsResponse>;
@@ -54,17 +59,17 @@ export const createEventLogReader = (eventLog: IEventLogClient): IEventLogReader
 
       // TODO: include Framework events
       const kqlFilter = kqlAnd([
-        `event.provider:${RULE_EXECUTION_LOG_PROVIDER}`,
-        eventTypes.length > 0 ? `event.action:(${kqlOr(eventTypes)})` : '',
-        logLevels.length > 0 ? `log.level:(${kqlOr(logLevels)})` : '',
+        `${f.EVENT_PROVIDER}:${RULE_EXECUTION_LOG_PROVIDER}`,
+        eventTypes.length > 0 ? `${f.EVENT_ACTION}:(${kqlOr(eventTypes)})` : '',
+        logLevels.length > 0 ? `${f.LOG_LEVEL}:(${kqlOr(logLevels)})` : '',
       ]);
 
       const findResult = await withSecuritySpan('findEventsBySavedObjectIds', () => {
         return eventLog.findEventsBySavedObjectIds(soType, soIds, {
           filter: kqlFilter,
           sort: [
-            { sort_field: '@timestamp', sort_order: sortOrder },
-            { sort_field: 'event.sequence', sort_order: sortOrder },
+            { sort_field: f.TIMESTAMP, sort_order: sortOrder },
+            { sort_field: f.EVENT_SEQUENCE, sort_order: sortOrder },
           ],
           page,
           per_page: perPage,
@@ -102,25 +107,23 @@ export const createEventLogReader = (eventLog: IEventLogClient): IEventLogReader
           start,
           end,
           // Also query for `event.outcome` to catch executions that only contain platform events
-          filter: `kibana.alert.rule.execution.status:(${statusFilters.join(
-            ' OR '
-          )}) ${outcomeFilter}`,
+          filter: `${f.RULE_EXECUTION_STATUS}:(${statusFilters.join(' OR ')}) ${outcomeFilter}`,
           aggs: {
             totalExecutions: {
               cardinality: {
-                field: EXECUTION_UUID_FIELD,
+                field: f.RULE_EXECUTION_UUID,
               },
             },
             filteredExecutionUUIDs: {
               terms: {
-                field: EXECUTION_UUID_FIELD,
+                field: f.RULE_EXECUTION_UUID,
                 order: { executeStartTime: 'desc' },
                 size: MAX_EXECUTION_EVENTS_DISPLAYED,
               },
               aggs: {
                 executeStartTime: {
                   min: {
-                    field: '@timestamp',
+                    field: f.TIMESTAMP,
                   },
                 },
               },
@@ -144,7 +147,7 @@ export const createEventLogReader = (eventLog: IEventLogClient): IEventLogReader
 
       // Now query for aggregate events, and pass any ID's as filters as determined from the above status/queryText results
       const idsFilter = statusIds.length
-        ? `kibana.alert.rule.execution.uuid:(${statusIds.join(' OR ')})`
+        ? `${f.RULE_EXECUTION_UUID}:(${statusIds.join(' OR ')})`
         : '';
       const results = await eventLog.aggregateEventsBySavedObjectIds(soType, soIds, {
         start,
@@ -161,14 +164,6 @@ export const createEventLogReader = (eventLog: IEventLogClient): IEventLogReader
       return formatExecutionEventResponse(results, totalExecutions);
     },
   };
-};
-
-const kqlAnd = <T>(items: T[]): string => {
-  return items.filter(Boolean).map(String).join(' and ');
-};
-
-const kqlOr = <T>(items: T[]): string => {
-  return items.filter(Boolean).map(String).join(' or ');
 };
 
 const normalizeEvent = (rawEvent: IValidatedEvent): RuleExecutionEvent => {

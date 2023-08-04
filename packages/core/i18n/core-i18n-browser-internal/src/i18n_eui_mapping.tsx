@@ -812,6 +812,22 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiImageButton.closeFullScreen': i18n.translate('core.euiImageButton.closeFullScreen', {
       defaultMessage: 'Press Escape or click to close image fullscreen mode',
     }),
+    'euiInlineEditForm.activateEditModeDescription': i18n.translate(
+      'core.euiInlineEditForm.activateEditModeDescription',
+      { defaultMessage: 'Click to edit this text inline.' }
+    ),
+    'euiInlineEditForm.inputKeyboardInstructions': i18n.translate(
+      'core.euiInlineEditForm.inputKeyboardInstructions',
+      { defaultMessage: 'Press Enter to save your edited text. Press Escape to cancel your edit.' }
+    ),
+    'euiInlineEditForm.cancelButtonAriaLabel': i18n.translate(
+      'core.euiInlineEditForm.cancelButtonAriaLabel',
+      { defaultMessage: 'Cancel edit' }
+    ),
+    'euiInlineEditForm.saveButtonAriaLabel': i18n.translate(
+      'core.euiInlineEditForm.saveButtonAriaLabel',
+      { defaultMessage: 'Save edit' }
+    ),
     'euiLink.external.ariaLabel': i18n.translate('core.euiLink.external.ariaLabel', {
       defaultMessage: 'External link',
     }),

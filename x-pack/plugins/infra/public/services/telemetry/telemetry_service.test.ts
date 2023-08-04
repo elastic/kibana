@@ -103,10 +103,10 @@ describe('TelemetryService', () => {
       const telemetry = service.start();
 
       telemetry.reportHostsViewQuerySubmitted({
-        control_filters: ['test-filter'],
-        filters: [],
+        control_filter_fields: ['host.os.name'],
+        filter_fields: [],
         interval: 'interval(now-1h)',
-        query: '',
+        with_query: false,
         limit: 100,
       });
 
@@ -114,10 +114,10 @@ describe('TelemetryService', () => {
       expect(setupParams.analytics.reportEvent).toHaveBeenCalledWith(
         InfraTelemetryEventTypes.HOSTS_VIEW_QUERY_SUBMITTED,
         {
-          control_filters: ['test-filter'],
-          filters: [],
+          control_filter_fields: ['host.os.name'],
+          filter_fields: [],
           interval: 'interval(now-1h)',
-          query: '',
+          with_query: false,
           limit: 100,
         }
       );

@@ -28,6 +28,7 @@ import {
   enableCriticalPath,
   enableInfrastructureHostsView,
   syntheticsThrottlingEnabled,
+  enableLegacyUptimeApp,
 } from '../common/ui_settings_keys';
 
 const betaLabel = i18n.translate('xpack.observability.uiSettings.betaLabel', {
@@ -38,13 +39,6 @@ const technicalPreviewLabel = i18n.translate(
   'xpack.observability.uiSettings.technicalPreviewLabel',
   { defaultMessage: 'technical preview' }
 );
-
-function feedbackLink({ href }: { href: string }) {
-  return `<a href="${href}" target="_blank" rel="noopener noreferrer">${i18n.translate(
-    'xpack.observability.uiSettings.giveFeedBackLabel',
-    { defaultMessage: 'Give feedback' }
-  )}</a>`;
-}
 
 type UiSettings = UiSettingsParams<boolean | number | string | object> & { showInLabs?: boolean };
 
@@ -82,7 +76,8 @@ export const uiSettings: Record<string, UiSettings> = {
     }),
     value: true,
     description: i18n.translate('xpack.observability.enableComparisonByDefaultDescription', {
-      defaultMessage: 'Enable the comparison feature in APM app',
+      defaultMessage:
+        'Determines whether the comparison feature is enabled or disabled by default in the APM app.',
     }),
     schema: schema.boolean(),
   },
@@ -161,10 +156,9 @@ export const uiSettings: Record<string, UiSettings> = {
       'xpack.observability.apmServiceInventoryOptimizedSortingDescription',
       {
         defaultMessage:
-          '{technicalPreviewLabel} Default APM Service Inventory and Storage Explorer pages sort (for Services without Machine Learning applied) to sort by Service Name. {feedbackLink}.',
+          '{technicalPreviewLabel} Default APM Service Inventory and Storage Explorer pages sort (for Services without Machine Learning applied) to sort by Service Name.',
         values: {
           technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>`,
-          feedbackLink: feedbackLink({ href: 'https://ela.st/feedback-apm-page-performance' }),
         },
       }
     ),
@@ -192,14 +186,16 @@ export const uiSettings: Record<string, UiSettings> = {
     }),
     description: i18n.translate('xpack.observability.apmTraceExplorerTabDescription', {
       defaultMessage:
-        '{technicalPreviewLabel} Enable the APM Trace Explorer feature, that allows you to search and inspect traces with KQL or EQL. {feedbackLink}.',
+        '{technicalPreviewLabel} Enable the APM Trace Explorer feature, that allows you to search and inspect traces with KQL or EQL. {link}',
       values: {
         technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>`,
-        feedbackLink: feedbackLink({ href: 'https://ela.st/feedback-trace-explorer' }),
+        link: traceExplorerDocsLink({
+          href: 'https://www.elastic.co/guide/en/kibana/master/traces.html#trace-explorer',
+        }),
       },
     }),
     schema: schema.boolean(),
-    value: false,
+    value: true,
     requiresPageReload: true,
     type: 'boolean',
     showInLabs: true,
@@ -223,13 +219,11 @@ export const uiSettings: Record<string, UiSettings> = {
     name: i18n.translate('xpack.observability.enableInfrastructureHostsView', {
       defaultMessage: 'Infrastructure Hosts view',
     }),
-    value: false,
+    value: true,
     description: i18n.translate('xpack.observability.enableInfrastructureHostsViewDescription', {
-      defaultMessage:
-        '{technicalPreviewLabel} Enable the Hosts view in the Infrastructure app. {feedbackLink}.',
+      defaultMessage: '{betaLabel} Enable the Hosts view in the Infrastructure app.',
       values: {
-        technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>`,
-        feedbackLink: feedbackLink({ href: 'https://ela.st/feedback-host-observability' }),
+        betaLabel: `<em>[${betaLabel}]</em>`,
       },
     }),
     schema: schema.boolean(),
@@ -241,10 +235,9 @@ export const uiSettings: Record<string, UiSettings> = {
     }),
     description: i18n.translate('xpack.observability.enableAwsLambdaMetricsDescription', {
       defaultMessage:
-        '{technicalPreviewLabel} Display Amazon Lambda metrics in the service metrics tab. {feedbackLink}',
+        '{technicalPreviewLabel} Display Amazon Lambda metrics in the service metrics tab.',
       values: {
         technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>`,
-        feedbackLink: feedbackLink({ href: 'https://ela.st/feedback-aws-lambda' }),
       },
     }),
     schema: schema.boolean(),
@@ -358,11 +351,31 @@ export const uiSettings: Record<string, UiSettings> = {
     schema: schema.boolean(),
     requiresPageReload: true,
   },
+  [enableLegacyUptimeApp]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.enableLegacyUptimeApp', {
+      defaultMessage: 'Always show legacy Uptime app',
+    }),
+    value: false,
+    description: i18n.translate('xpack.observability.enableLegacyUptimeAppDescription', {
+      defaultMessage:
+        "By default, the legacy Uptime app is hidden from the interface when it doesn't have any data for more than a week. Enable this option to always show it.",
+    }),
+    schema: schema.boolean(),
+    requiresPageReload: true,
+  },
 };
 
 function throttlingDocsLink({ href }: { href: string }) {
   return `<a href="${href}" target="_blank" rel="noopener noreferrer">${i18n.translate(
     'xpack.observability.uiSettings.throttlingDocsLinkText',
     { defaultMessage: 'read notice here.' }
+  )}</a>`;
+}
+
+function traceExplorerDocsLink({ href }: { href: string }) {
+  return `<a href="${href}" target="_blank">${i18n.translate(
+    'xpack.observability.uiSettings.traceExplorerDocsLinkText',
+    { defaultMessage: 'Learn more.' }
   )}</a>`;
 }

@@ -16,7 +16,10 @@ import {
 } from '../../types';
 import { onSave, SaveModal } from './save_action';
 import { shallowWithIntl } from '@kbn/test-jest-helpers';
-import { PointInTimeEventAnnotationConfig } from '@kbn/event-annotation-plugin/common';
+import {
+  EventAnnotationGroupConfig,
+  PointInTimeEventAnnotationConfig,
+} from '@kbn/event-annotation-common';
 import { SavedObjectSaveModal } from '@kbn/saved-objects-plugin/public';
 import { taggingApiMock } from '@kbn/saved-objects-tagging-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
@@ -113,7 +116,7 @@ describe('annotation group save action', () => {
   describe('save routine', () => {
     const layerId = 'mylayerid';
 
-    const layer: XYByValueAnnotationLayerConfig = {
+    const byValueLayer: XYByValueAnnotationLayerConfig = {
       layerId,
       layerType: 'annotations',
       indexPatternId: 'some-index-pattern',
@@ -144,16 +147,18 @@ describe('annotation group save action', () => {
           legend: { isVisible: true, position: 'bottom' },
           layers: [{ layerId } as XYAnnotationLayerConfig],
         } as XYState,
-        layer,
+        layer: byValueLayer,
+        registerLibraryAnnotationGroup: jest.fn(),
         setState: jest.fn(),
         eventAnnotationService: {
           createAnnotationGroup: jest.fn(() => Promise.resolve({ id: savedId })),
+          groupExistsWithTitle: jest.fn(() => Promise.resolve(false)),
           updateAnnotationGroup: jest.fn(),
           loadAnnotationGroup: jest.fn(),
           toExpression: jest.fn(),
           toFetchExpression: jest.fn(),
           renderEventAnnotationGroupSavedObjectFinder: jest.fn(),
-        } as EventAnnotationServiceType,
+        } as Partial<EventAnnotationServiceType> as EventAnnotationServiceType,
         toasts: toastsServiceMock.createStartContract(),
         modalOnSaveProps: {
           newTitle: 'my title',
@@ -162,9 +167,10 @@ describe('annotation group save action', () => {
           newTags: ['my-tag'],
           newCopyOnSave: false,
           isTitleDuplicateConfirmed: false,
-          onTitleDuplicate: () => {},
+          onTitleDuplicate: jest.fn(),
         },
         dataViews,
+        goToAnnotationLibrary: () => Promise.resolve(),
       };
     };
 
@@ -176,13 +182,22 @@ describe('annotation group save action', () => {
     test('successful initial save', async () => {
       await onSave(props);
 
-      expect(props.eventAnnotationService.createAnnotationGroup).toHaveBeenCalledWith({
+      const expectedConfig: EventAnnotationGroupConfig = {
         annotations: props.layer.annotations,
         indexPatternId: props.layer.indexPatternId,
         ignoreGlobalFilters: props.layer.ignoreGlobalFilters,
         title: props.modalOnSaveProps.newTitle,
         description: props.modalOnSaveProps.newDescription,
         tags: props.modalOnSaveProps.newTags,
+      };
+
+      expect(props.eventAnnotationService.createAnnotationGroup).toHaveBeenCalledWith(
+        expectedConfig
+      );
+
+      expect(props.registerLibraryAnnotationGroup).toHaveBeenCalledWith({
+        id: savedId,
+        group: expectedConfig,
       });
 
       expect(props.modalOnSaveProps.closeModal).toHaveBeenCalled();
@@ -204,7 +219,7 @@ describe('annotation group save action', () => {
 
       await onSave(props);
 
-      expect(props.eventAnnotationService.createAnnotationGroup).toHaveBeenCalledWith({
+      const expectedConfig: EventAnnotationGroupConfig = {
         annotations: props.layer.annotations,
         indexPatternId: props.layer.indexPatternId,
         ignoreGlobalFilters: props.layer.ignoreGlobalFilters,
@@ -212,6 +227,15 @@ describe('annotation group save action', () => {
         description: props.modalOnSaveProps.newDescription,
         tags: props.modalOnSaveProps.newTags,
         dataViewSpec,
+      };
+
+      expect(props.eventAnnotationService.createAnnotationGroup).toHaveBeenCalledWith(
+        expectedConfig
+      );
+
+      expect(props.registerLibraryAnnotationGroup).toHaveBeenCalledWith({
+        id: savedId,
+        group: expectedConfig,
       });
 
       expect(props.modalOnSaveProps.closeModal).toHaveBeenCalled();
@@ -238,6 +262,8 @@ describe('annotation group save action', () => {
       });
 
       expect(props.toasts.addError).toHaveBeenCalledTimes(1);
+
+      expect(props.registerLibraryAnnotationGroup).not.toHaveBeenCalled();
 
       expect(props.modalOnSaveProps.closeModal).not.toHaveBeenCalled();
 
@@ -305,13 +331,22 @@ describe('annotation group save action', () => {
 
       expect(props.eventAnnotationService.updateAnnotationGroup).not.toHaveBeenCalled();
 
-      expect(props.eventAnnotationService.createAnnotationGroup).toHaveBeenCalledWith({
+      const expectedConfig: EventAnnotationGroupConfig = {
         annotations: props.layer.annotations,
         indexPatternId: props.layer.indexPatternId,
         ignoreGlobalFilters: props.layer.ignoreGlobalFilters,
         title: props.modalOnSaveProps.newTitle,
         description: props.modalOnSaveProps.newDescription,
         tags: props.modalOnSaveProps.newTags,
+      };
+
+      expect(props.eventAnnotationService.createAnnotationGroup).toHaveBeenCalledWith(
+        expectedConfig
+      );
+
+      expect(props.registerLibraryAnnotationGroup).toHaveBeenCalledWith({
+        id: savedId,
+        group: expectedConfig,
       });
 
       expect(props.modalOnSaveProps.closeModal).toHaveBeenCalled();
@@ -320,5 +355,78 @@ describe('annotation group save action', () => {
 
       expect(props.toasts.addSuccess).toHaveBeenCalledTimes(1);
     });
+
+    it.each`
+      existingGroup | newCopyOnSave | titleChanged | isTitleDuplicateConfirmed | expectPreventSave
+      ${false}      | ${false}      | ${false}     | ${false}                  | ${true}
+      ${false}      | ${false}      | ${false}     | ${true}                   | ${false}
+      ${true}       | ${false}      | ${false}     | ${false}                  | ${false}
+      ${true}       | ${true}       | ${false}     | ${false}                  | ${true}
+      ${true}       | ${true}       | ${false}     | ${true}                   | ${false}
+    `(
+      'checks duplicate title when saving group',
+      async ({
+        existingGroup,
+        newCopyOnSave,
+        titleChanged,
+        isTitleDuplicateConfirmed,
+        expectPreventSave,
+      }) => {
+        (props.eventAnnotationService.groupExistsWithTitle as jest.Mock).mockResolvedValueOnce(
+          true
+        );
+
+        const oldTitle = 'old title';
+        let layer: XYAnnotationLayerConfig = byValueLayer;
+        if (existingGroup) {
+          const byReferenceLayer: XYByReferenceAnnotationLayerConfig = {
+            ...props.layer,
+            annotationGroupId: 'my-group-id',
+            __lastSaved: {
+              ...props.layer,
+              title: oldTitle,
+              description: 'description',
+              tags: [],
+            },
+          };
+          layer = byReferenceLayer;
+        }
+
+        const newTitle = titleChanged ? 'my changed title' : oldTitle;
+
+        await onSave({
+          ...props,
+          layer,
+          modalOnSaveProps: {
+            ...props.modalOnSaveProps,
+            newTitle,
+            isTitleDuplicateConfirmed,
+            newCopyOnSave,
+          },
+        });
+
+        if (expectPreventSave) {
+          expect(props.eventAnnotationService.updateAnnotationGroup).not.toHaveBeenCalled();
+
+          expect(props.eventAnnotationService.createAnnotationGroup).not.toHaveBeenCalled();
+
+          expect(props.modalOnSaveProps.closeModal).not.toHaveBeenCalled();
+
+          expect(props.setState).not.toHaveBeenCalled();
+
+          expect(props.toasts.addSuccess).not.toHaveBeenCalled();
+
+          expect(props.modalOnSaveProps.onTitleDuplicate).toHaveBeenCalled();
+        } else {
+          expect(props.modalOnSaveProps.onTitleDuplicate).not.toHaveBeenCalled();
+
+          expect(props.modalOnSaveProps.closeModal).toHaveBeenCalled();
+
+          expect(props.setState).toHaveBeenCalled();
+
+          expect(props.toasts.addSuccess).toHaveBeenCalledTimes(1);
+        }
+      }
+    );
   });
 });

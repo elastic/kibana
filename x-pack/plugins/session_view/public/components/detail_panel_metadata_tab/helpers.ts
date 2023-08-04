@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import {
+import type {
   ProcessEventHost,
   ProcessEventContainer,
   ProcessEventOrchestrator,
   ProcessEventCloud,
-} from '../../../common/types/process_tree';
+} from '../../../common';
 import { DASH } from '../../constants';
 import {
   DetailPanelHost,

@@ -8,13 +8,10 @@
 import React from 'react';
 import { EuiFlyout, EuiFlyoutHeader, EuiFlyoutBody } from '@elastic/eui';
 import type { AssetDetailsProps, RenderMode } from './types';
-import type { InventoryItemType } from '../../../common/inventory_models/types';
-import { TabContent } from './tab_content/tab_content';
+import { Content } from './content/content';
 import { Header } from './header/header';
 import { TabSwitcherProvider } from './hooks/use_tab_switcher';
-
-// Setting host as default as it will be the only supported type for now
-const NODE_TYPE = 'host' as InventoryItemType;
+import { AssetDetailsStateProvider } from './hooks/use_asset_details_state';
 
 interface ContentTemplateProps {
   header: React.ReactElement;
@@ -38,44 +35,29 @@ const ContentTemplate = ({ header, body, renderMode }: ContentTemplateProps) => 
 
 export const AssetDetails = ({
   node,
-  currentTimeRange,
+  dateRange,
   activeTabId,
   overrides,
   onTabsStateChange,
-  tabs,
-  links,
-  nodeType = NODE_TYPE,
+  tabs = [],
+  links = [],
+  nodeType = 'host',
   renderMode = {
     showInFlyout: false,
   },
 }: AssetDetailsProps) => {
   return (
-    <TabSwitcherProvider
-      initialActiveTabId={tabs.length > 0 ? activeTabId ?? tabs[0].id : undefined}
-    >
-      <ContentTemplate
-        header={
-          <Header
-            node={node}
-            nodeType={nodeType}
-            compact={renderMode.showInFlyout}
-            tabs={tabs}
-            links={links}
-            onTabsStateChange={onTabsStateChange}
-          />
-        }
-        body={
-          <TabContent
-            node={node}
-            nodeType={nodeType}
-            currentTimeRange={currentTimeRange}
-            overrides={overrides}
-            onTabsStateChange={onTabsStateChange}
-          />
-        }
-        renderMode={renderMode}
-      />
-    </TabSwitcherProvider>
+    <AssetDetailsStateProvider state={{ node, nodeType, overrides, onTabsStateChange, dateRange }}>
+      <TabSwitcherProvider
+        initialActiveTabId={tabs.length > 0 ? activeTabId ?? tabs[0].id : undefined}
+      >
+        <ContentTemplate
+          header={<Header compact={renderMode.showInFlyout} tabs={tabs} links={links} />}
+          body={<Content />}
+          renderMode={renderMode}
+        />
+      </TabSwitcherProvider>
+    </AssetDetailsStateProvider>
   );
 };
 

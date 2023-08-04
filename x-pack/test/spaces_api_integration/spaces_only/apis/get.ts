@@ -17,8 +17,7 @@ export default function getSpaceTestSuite({ getService }: FtrProviderContext) {
   const { getTest, createExpectResults, createExpectNotFoundResult, nonExistantSpaceId } =
     getTestSuiteFactory(esArchiver, supertestWithoutAuth);
 
-  // Failing: See https://github.com/elastic/kibana/issues/155723
-  describe.skip('get', () => {
+  describe('get', () => {
     // valid spaces
     [
       {

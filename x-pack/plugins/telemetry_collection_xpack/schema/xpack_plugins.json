@@ -4073,6 +4073,26 @@
                   "type": "long"
                 }
               }
+            },
+            "environments": {
+              "properties": {
+                "1d": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Total number of unique environments within the last day"
+                  }
+                }
+              }
+            },
+            "span_destination_service_resource": {
+              "properties": {
+                "1d": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Total number of unique values of span.destination.service.resource within the last day"
+                  }
+                }
+              }
             }
           }
         },
@@ -5631,6 +5651,293 @@
         }
       }
     },
+    "cloud_defend": {
+      "properties": {
+        "indices": {
+          "properties": {
+            "alerts": {
+              "properties": {
+                "doc_count": {
+                  "type": "long"
+                },
+                "deleted": {
+                  "type": "long"
+                },
+                "size_in_bytes": {
+                  "type": "long"
+                },
+                "last_doc_timestamp": {
+                  "type": "date"
+                }
+              }
+            },
+            "file": {
+              "properties": {
+                "doc_count": {
+                  "type": "long"
+                },
+                "deleted": {
+                  "type": "long"
+                },
+                "size_in_bytes": {
+                  "type": "long"
+                },
+                "last_doc_timestamp": {
+                  "type": "date"
+                }
+              }
+            },
+            "process": {
+              "properties": {
+                "doc_count": {
+                  "type": "long"
+                },
+                "deleted": {
+                  "type": "long"
+                },
+                "size_in_bytes": {
+                  "type": "long"
+                },
+                "last_doc_timestamp": {
+                  "type": "date"
+                }
+              }
+            },
+            "latestPackageVersion": {
+              "type": "keyword"
+            },
+            "packageStatus": {
+              "properties": {
+                "status": {
+                  "type": "keyword"
+                },
+                "installedPackagePolicies": {
+                  "type": "long"
+                },
+                "healthyAgents": {
+                  "type": "long"
+                }
+              }
+            }
+          }
+        },
+        "pods_stats": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "account_id": {
+                "type": "keyword"
+              },
+              "container_image_name": {
+                "type": "keyword"
+              },
+              "container_image_tag": {
+                "type": "keyword"
+              },
+              "pod_name": {
+                "type": "keyword"
+              },
+              "total_doc_count": {
+                "type": "long"
+              },
+              "process_doc_count": {
+                "type": "long"
+              },
+              "file_doc_count": {
+                "type": "long"
+              },
+              "alert_doc_count": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "accounts_stats": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "account_id": {
+                "type": "keyword"
+              },
+              "cloud_provider": {
+                "type": "keyword"
+              },
+              "kubernetes_version": {
+                "type": "keyword"
+              },
+              "total_doc_count": {
+                "type": "long"
+              },
+              "file_doc_count": {
+                "type": "long"
+              },
+              "process_doc_count": {
+                "type": "long"
+              },
+              "alert_doc_count": {
+                "type": "long"
+              },
+              "agents_count": {
+                "type": "short"
+              },
+              "nodes_count": {
+                "type": "short"
+              },
+              "pods_count": {
+                "type": "short"
+              }
+            }
+          }
+        },
+        "installation_stats": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "package_policy_id": {
+                "type": "keyword"
+              },
+              "package_version": {
+                "type": "keyword"
+              },
+              "agent_policy_id": {
+                "type": "keyword"
+              },
+              "created_at": {
+                "type": "date"
+              },
+              "agent_count": {
+                "type": "long"
+              },
+              "policy_yaml": {
+                "type": "keyword"
+              },
+              "selectors": {
+                "type": "array",
+                "items": {
+                  "properties": {
+                    "type": {
+                      "type": "keyword"
+                    },
+                    "name": {
+                      "type": "keyword"
+                    },
+                    "operation": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
+                    },
+                    "containerImageFullName": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
+                    },
+                    "containerImageName": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
+                    },
+                    "containerImageTag": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
+                    },
+                    "kubernetesClusterId": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
+                    },
+                    "kubernetesClusterName": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
+                    },
+                    "kubernetesNamespace": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
+                    },
+                    "kubernetesPodLabel": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
+                    },
+                    "kubernetesPodName": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
+                    },
+                    "targetFilePath": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
+                    },
+                    "ignoreVolumeFiles": {
+                      "type": "boolean"
+                    },
+                    "ignoreVolumeMounts": {
+                      "type": "boolean"
+                    },
+                    "processExecutable": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
+                    },
+                    "processName": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
+                    },
+                    "sessionLeaderInteractive": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              },
+              "responses": {
+                "type": "array",
+                "items": {
+                  "properties": {
+                    "type": {
+                      "type": "keyword"
+                    },
+                    "match": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
+                    },
+                    "exclude": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
+                    },
+                    "actions": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "cloud_security_posture": {
       "properties": {
         "indices": {
@@ -5868,6 +6175,34 @@
                 "type": "long"
               },
               "failed_findings_count": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "installation_stats": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "package_policy_id": {
+                "type": "keyword"
+              },
+              "feature": {
+                "type": "keyword"
+              },
+              "package_version": {
+                "type": "keyword"
+              },
+              "agent_policy_id": {
+                "type": "keyword"
+              },
+              "deployment_mode": {
+                "type": "keyword"
+              },
+              "created_at": {
+                "type": "date"
+              },
+              "agent_count": {
                 "type": "long"
               }
             }
@@ -14611,6 +14946,40 @@
         }
       }
     },
+    "transform": {
+      "properties": {
+        "alertRules": {
+          "properties": {
+            "transform_health": {
+              "properties": {
+                "count_by_check_type": {
+                  "properties": {
+                    "notStarted": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "total number of alerting rules performing the not started health check"
+                      }
+                    },
+                    "errorMessages": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "total number of alerting rules performing the error message health check"
+                      }
+                    },
+                    "healthCheck": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "total number of alerting rules performing the health check with the stats API"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "upgrade-assistant-telemetry": {
       "properties": {
         "features": {
@@ -14621,147 +14990,6 @@
                   "type": "boolean",
                   "_meta": {
                     "description": "Whether user has enabled Elasticsearch deprecation logging"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "uptime": {
-      "properties": {
-        "last_24_hours": {
-          "properties": {
-            "hits": {
-              "properties": {
-                "autoRefreshEnabled": {
-                  "type": "boolean"
-                },
-                "autorefreshInterval": {
-                  "type": "array",
-                  "items": {
-                    "type": "long"
-                  }
-                },
-                "dateRangeEnd": {
-                  "type": "array",
-                  "items": {
-                    "type": "date"
-                  }
-                },
-                "dateRangeStart": {
-                  "type": "array",
-                  "items": {
-                    "type": "date"
-                  }
-                },
-                "monitor_frequency": {
-                  "type": "array",
-                  "items": {
-                    "type": "long"
-                  }
-                },
-                "monitor_name_stats": {
-                  "properties": {
-                    "avg_length": {
-                      "type": "float",
-                      "_meta": {
-                        "description": "This field represents the average length of monitor names"
-                      }
-                    },
-                    "max_length": {
-                      "type": "long",
-                      "_meta": {
-                        "description": "This field represents the max length of monitor names"
-                      }
-                    },
-                    "min_length": {
-                      "type": "long",
-                      "_meta": {
-                        "description": "This field represents the min length of monitor names"
-                      }
-                    }
-                  }
-                },
-                "monitor_page": {
-                  "type": "long"
-                },
-                "no_of_unique_monitors": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "This field represents the number of unique configured monitors"
-                  }
-                },
-                "no_of_unique_observer_locations": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "This field represents the number of unique monitor observer locations"
-                  }
-                },
-                "observer_location_name_stats": {
-                  "properties": {
-                    "avg_length": {
-                      "type": "float",
-                      "_meta": {
-                        "description": "This field represents the average length of monitor observer location names"
-                      }
-                    },
-                    "max_length": {
-                      "type": "long",
-                      "_meta": {
-                        "description": "This field represents the max length of monitor observer location names"
-                      }
-                    },
-                    "min_length": {
-                      "type": "long",
-                      "_meta": {
-                        "description": "This field represents the min length of monitor observer location names"
-                      }
-                    }
-                  }
-                },
-                "overview_page": {
-                  "type": "long"
-                },
-                "settings_page": {
-                  "type": "long"
-                },
-                "fleet_monitor_name_stats": {
-                  "properties": {
-                    "avg_length": {
-                      "type": "float",
-                      "_meta": {
-                        "description": "This field represents the average length of fleet managed monitor names"
-                      }
-                    },
-                    "max_length": {
-                      "type": "long",
-                      "_meta": {
-                        "description": "This field represents the max length of fleet managed monitor names"
-                      }
-                    },
-                    "min_length": {
-                      "type": "long",
-                      "_meta": {
-                        "description": "This field represents the min length of fleet managed monitor names"
-                      }
-                    }
-                  }
-                },
-                "fleet_monitor_frequency": {
-                  "type": "array",
-                  "items": {
-                    "type": "long",
-                    "_meta": {
-                      "description": "This field represents the average the monitor frequency of fleet managed monitors"
-                    }
-                  }
-                },
-                "fleet_no_of_unique_monitors": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "This field represents the number of unique configured fleet managed monitors"
                   }
                 }
               }

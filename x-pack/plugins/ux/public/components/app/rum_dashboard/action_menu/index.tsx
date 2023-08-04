@@ -27,7 +27,7 @@ const ANALYZE_MESSAGE = i18n.translate(
   'xpack.ux.analyzeDataButtonLabel.message',
   {
     defaultMessage:
-      'Explore Data allows you to select and filter result data in any dimension and look for the cause or impact of performance problems.',
+      'Go to Explore Data, where you can select and filter result data in any dimension and look for the cause or impact of performance problems.',
   }
 );
 
@@ -78,7 +78,7 @@ export function UXActionMenu({
           color="primary"
           iconType="indexOpen"
           iconSide="left"
-          href={application.getUrlForApp('/home#/tutorial/apm')}
+          href={application.getUrlForApp('/apm/tutorial')}
         >
           {i18n.translate('xpack.ux.addDataButtonLabel', {
             defaultMessage: 'Add data',

@@ -117,3 +117,6 @@ export const _VERSION = 'WzI5NywxXQ==';
 export const VERSION = 1;
 export const IMMUTABLE = false;
 export const IMPORT_TIMEOUT = moment.duration(5, 'minutes');
+
+/** Added in 8.7 */
+export const EXPIRE_TIME = '2023-04-24T19:00:00.000Z';

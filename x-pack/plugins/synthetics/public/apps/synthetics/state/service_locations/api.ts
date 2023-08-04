@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { API_URLS } from '../../../../../common/constants';
+import { SYNTHETICS_API_URLS } from '../../../../../common/constants';
 import {
   ServiceLocations,
   ServiceLocationsApiResponseCodec,
@@ -18,7 +18,7 @@ export const fetchServiceLocations = async (): Promise<{
   locations: ServiceLocations;
 }> => {
   const { throttling, locations } = await apiService.get(
-    API_URLS.SERVICE_LOCATIONS,
+    SYNTHETICS_API_URLS.SERVICE_LOCATIONS,
     undefined,
     ServiceLocationsApiResponseCodec
   );

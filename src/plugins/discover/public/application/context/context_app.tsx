@@ -16,7 +16,8 @@ import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { generateFilters } from '@kbn/data-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { DOC_TABLE_LEGACY, SEARCH_FIELDS_FROM_SOURCE } from '../../../common';
+import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
+import { DOC_TABLE_LEGACY, SEARCH_FIELDS_FROM_SOURCE } from '@kbn/discover-utils';
 import { ContextErrorMessage } from './components/context_error_message';
 import { LoadingStatus } from './services/context_query_state';
 import { AppState, GlobalState, isEqualFilters } from './services/context_state';
@@ -40,8 +41,16 @@ export interface ContextAppProps {
 
 export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) => {
   const services = useDiscoverServices();
-  const { locator, uiSettings, capabilities, dataViews, navigation, filterManager, core } =
-    services;
+  const {
+    analytics,
+    locator,
+    uiSettings,
+    capabilities,
+    dataViews,
+    navigation,
+    filterManager,
+    core,
+  } = services;
 
   const isLegacy = useMemo(() => uiSettings.get(DOC_TABLE_LEGACY), [uiSettings]);
   const useNewFieldsApi = useMemo(() => !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE), [uiSettings]);
@@ -69,14 +78,14 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
 
   useEffect(() => {
     services.chrome.setBreadcrumbs([
-      ...getRootBreadcrumbs(referrer),
+      ...getRootBreadcrumbs({ breadcrumb: referrer, services }),
       {
         text: i18n.translate('discover.context.breadcrumb', {
           defaultMessage: 'Surrounding documents',
         }),
       },
     ]);
-  }, [locator, referrer, services.chrome]);
+  }, [locator, referrer, services]);
 
   useExecutionContext(core.executionContext, {
     type: 'application',
@@ -109,22 +118,42 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
    * Fetch docs on ui changes
    */
   useEffect(() => {
-    if (!prevAppState.current) {
-      fetchAllRows();
-    } else if (prevAppState.current.predecessorCount !== appState.predecessorCount) {
-      fetchSurroundingRows(SurrDocType.PREDECESSORS);
-    } else if (prevAppState.current.successorCount !== appState.successorCount) {
-      fetchSurroundingRows(SurrDocType.SUCCESSORS);
-    } else if (
-      !isEqualFilters(prevAppState.current.filters, appState.filters) ||
-      !isEqualFilters(prevGlobalState.current.filters, globalState.filters)
-    ) {
-      fetchContextRows();
-    }
+    const doFetch = async () => {
+      const startTime = window.performance.now();
+      let fetchType = '';
+      if (!prevAppState.current) {
+        fetchType = 'all';
+        await fetchAllRows();
+      } else if (prevAppState.current.predecessorCount !== appState.predecessorCount) {
+        fetchType = 'predecessors';
+        await fetchSurroundingRows(SurrDocType.PREDECESSORS);
+      } else if (prevAppState.current.successorCount !== appState.successorCount) {
+        fetchType = 'successors';
+        await fetchSurroundingRows(SurrDocType.SUCCESSORS);
+      } else if (
+        !isEqualFilters(prevAppState.current.filters, appState.filters) ||
+        !isEqualFilters(prevGlobalState.current.filters, globalState.filters)
+      ) {
+        fetchType = 'context';
+        await fetchContextRows();
+      }
+
+      if (analytics) {
+        const fetchDuration = window.performance.now() - startTime;
+        reportPerformanceMetricEvent(analytics, {
+          eventName: 'discoverSurroundingDocsFetch',
+          duration: fetchDuration,
+          meta: { fetchType },
+        });
+      }
+    };
+
+    doFetch();
 
     prevAppState.current = cloneDeep(appState);
     prevGlobalState.current = cloneDeep(globalState);
   }, [
+    analytics,
     appState,
     globalState,
     anchorId,

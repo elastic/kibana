@@ -10,6 +10,7 @@ import React, { useState, useEffect } from 'react';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import {
   AwaitingDashboardAPI,
+  DashboardCreationOptions,
   DashboardRenderer,
 } from '@kbn/dashboard-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/common';
@@ -74,7 +75,7 @@ export function JsonMetricsDashboard(dashboardProps: MetricsDashboardProps) {
 async function getCreationOptions(
   dashboardProps: MetricsDashboardProps,
   notifications: NotificationsStart
-) {
+): Promise<DashboardCreationOptions> {
   try {
     const builder = controlGroupInputBuilder;
     const controlGroupInput = getDefaultControlGroupInput();
@@ -94,11 +95,11 @@ async function getCreationOptions(
 
     return {
       useControlGroupIntegration: true,
-      initialInput: {
+      getInitialInput: () => ({
         viewMode: ViewMode.VIEW,
         panels,
         controlGroupInput,
-      },
+      }),
     };
   } catch (error) {
     notifications.toasts.addDanger(

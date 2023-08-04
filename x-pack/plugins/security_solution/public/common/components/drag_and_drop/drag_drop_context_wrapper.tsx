@@ -26,7 +26,8 @@ import {
   ADDED_TO_TIMELINE_TEMPLATE_MESSAGE,
 } from '../../hooks/translations';
 import { displaySuccessToast, useStateToaster } from '../toasters';
-import { TimelineId, TimelineType } from '../../../../common/types/timeline';
+import { TimelineId } from '../../../../common/types/timeline';
+import { TimelineType } from '../../../../common/api/timeline';
 import {
   addProviderToTimeline,
   fieldWasDroppedOnTimelineColumns,

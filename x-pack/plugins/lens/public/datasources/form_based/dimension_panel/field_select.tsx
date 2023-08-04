@@ -10,12 +10,8 @@ import { partition } from 'lodash';
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiComboBoxOptionOption, EuiComboBoxProps } from '@elastic/eui';
-import { useExistingFieldsReader } from '@kbn/unified-field-list-plugin/public';
-import {
-  FieldOption,
-  FieldOptionValue,
-  FieldPicker,
-} from '@kbn/visualization-ui-components/public';
+import { useExistingFieldsReader } from '@kbn/unified-field-list/src/hooks/use_existing_fields';
+import { FieldOption, FieldOptionValue, FieldPicker } from '@kbn/visualization-ui-components';
 import type { OperationType } from '../form_based';
 import type { OperationSupportMatrix } from './operation_support';
 import { fieldContainsData } from '../../../shared_components';

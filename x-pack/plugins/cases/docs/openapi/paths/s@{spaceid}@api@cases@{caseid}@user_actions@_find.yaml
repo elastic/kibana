@@ -14,30 +14,7 @@ get:
       example: "1"
     - $ref: '../components/parameters/page_size.yaml'
     - $ref: '../components/parameters/sort_order.yaml'
-    - name: types
-      in: query
-      description: Determines the types of user actions to return.
-      schema:
-        type: array
-        items:
-          type: string
-          enum:
-            - action
-            - alert
-            - assignees
-            - attachment
-            - comment
-            - connector
-            - create_case
-            - description
-            - pushed
-            - settings
-            - severity
-            - status
-            - tags
-            - title
-            - user
-      example: create_case
+    - $ref: '../components/parameters/user_action_types.yaml'
   responses:
     '200':
       description: Indicates a successful call.

@@ -5,19 +5,20 @@
  * 2.0.
  */
 
-/* eslint-disable react/display-name */
-
 import React, { useEffect, useState, useCallback } from 'react';
-import { Router } from 'react-router-dom';
+import { Router } from '@kbn/shared-ux-router';
 import { I18nProvider } from '@kbn/i18n-react';
 import { Provider } from 'react-redux';
-import type { Store } from 'redux';
+import type { Store, AnyAction } from 'redux';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
-import type { ResolverState, SideEffectSimulator, ResolverProps } from '../../types';
-import type { ResolverAction } from '../../store/actions';
+import { enableMapSet } from 'immer';
+import type { SideEffectSimulator, ResolverProps } from '../../types';
 import { ResolverWithoutProviders } from '../../view/resolver_without_providers';
 import { SideEffectContext } from '../../view/side_effect_context';
+import type { State } from '../../../common/store/types';
+
+enableMapSet();
 
 type MockResolverProps = {
   /**
@@ -37,7 +38,7 @@ type MockResolverProps = {
    */
   history: React.ComponentProps<typeof Router>['history'];
   /** Pass a resolver store. See `storeFactory` and `mockDataAccessLayer` */
-  store: Store<ResolverState, ResolverAction>;
+  store: Store<State, AnyAction>;
   /**
    * Pass the side effect simulator which handles animations and resizing. See `sideEffectSimulatorFactory`
    */
@@ -61,6 +62,7 @@ type MockResolverProps = {
  * trigger a simulated resize on the root node reference any time it changes. This simulates the layout process a real
  * browser would do when an element is attached to the DOM.
  */
+// eslint-disable-next-line react/display-name
 export const MockResolver = React.memo((props: MockResolverProps) => {
   const [resolverElement, setResolverElement] = useState<HTMLDivElement | null>(null);
 

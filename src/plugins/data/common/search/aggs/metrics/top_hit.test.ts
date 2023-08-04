@@ -12,7 +12,7 @@ import { AggConfigs } from '../agg_configs';
 import { mockAggTypesRegistry } from '../test_helpers';
 import { IMetricAggConfig } from './metric_agg_type';
 import { KBN_FIELD_TYPES } from '../../..';
-import * as tabifyModule from '../../tabify/tabify_docs';
+import * as tabifyModule from '@kbn/data-service/src/search/tabify/tabify_docs';
 
 describe('Top hit metric', () => {
   let aggDsl: Record<string, any>;
@@ -400,6 +400,11 @@ describe('Top hit metric', () => {
           init({ fieldName: 'bytes', aggregate: agg.type });
           expect(getTopHitMetricAgg().getValue(aggConfig, bucket)).toEqual(agg.result);
         });
+      });
+    });
+    it('returns phrase filter', () => {
+      expect(getTopHitMetricAgg().createFilter!(aggConfig, '10').query.match_phrase).toEqual({
+        bytes: 10,
       });
     });
   });

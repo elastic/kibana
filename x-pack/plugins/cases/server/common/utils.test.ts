@@ -8,14 +8,6 @@
 import type { SavedObject, SavedObjectsFindResponse } from '@kbn/core/server';
 import { makeLensEmbeddableFactory } from '@kbn/lens-plugin/server/embeddable/make_lens_embeddable_factory';
 import { OWNER_INFO, SECURITY_SOLUTION_OWNER } from '../../common/constants';
-import type {
-  CaseConnector,
-  Case,
-  CommentAttributes,
-  CommentRequest,
-  CommentRequestUserType,
-} from '../../common/api';
-import { CaseSeverity, CommentType, ConnectorTypes } from '../../common/api';
 import {
   flattenCaseSavedObject,
   transformNewComment,
@@ -33,20 +25,37 @@ import {
   getApplicationRoute,
   getCaseViewPath,
   isSOError,
+  countUserAttachments,
+  isPersistableStateOrExternalReference,
 } from './utils';
 import { newCase } from '../routes/api/__mocks__/request_responses';
 import { CASE_VIEW_PAGE_TABS } from '../../common/types';
 import { mockCases, mockCaseComments } from '../mocks';
+import { createAlertAttachment, createUserAttachment } from '../services/attachments/test_utils';
+import type {
+  AttachmentAttributes,
+  Case,
+  CaseConnector,
+  UserCommentAttachmentPayload,
+} from '../../common/types/domain';
+import { ConnectorTypes, CaseSeverity, AttachmentType } from '../../common/types/domain';
+import type { AttachmentRequest } from '../../common/types/api';
+import {
+  createAlertRequests,
+  createExternalReferenceRequests,
+  createPersistableStateRequests,
+  createUserRequests,
+} from './limiter_checker/test_utils';
 
 interface CommentReference {
   ids: string[];
-  comments: CommentRequest[];
+  comments: AttachmentRequest[];
 }
 
 function createCommentFindResponse(
   commentRequests: CommentReference[]
-): SavedObjectsFindResponse<CommentAttributes> {
-  const resp: SavedObjectsFindResponse<CommentAttributes> = {
+): SavedObjectsFindResponse<AttachmentAttributes> {
+  const resp: SavedObjectsFindResponse<AttachmentAttributes> = {
     page: 0,
     per_page: 0,
     total: 0,
@@ -106,6 +115,7 @@ describe('common utils', () => {
       expect(res).toMatchInlineSnapshot(`
         Object {
           "assignees": Array [],
+          "category": null,
           "closed_at": null,
           "closed_by": null,
           "connector": Object {
@@ -159,6 +169,7 @@ describe('common utils', () => {
       expect(res).toMatchInlineSnapshot(`
         Object {
           "assignees": Array [],
+          "category": null,
           "closed_at": null,
           "closed_by": null,
           "connector": Object {
@@ -216,6 +227,7 @@ describe('common utils', () => {
               "uid": "1",
             },
           ],
+          "category": null,
           "closed_at": null,
           "closed_by": null,
           "connector": Object {
@@ -276,6 +288,7 @@ describe('common utils', () => {
           "cases": Array [
             Object {
               "assignees": Array [],
+              "category": null,
               "closed_at": null,
               "closed_by": null,
               "comments": Array [],
@@ -317,6 +330,7 @@ describe('common utils', () => {
             },
             Object {
               "assignees": Array [],
+              "category": null,
               "closed_at": null,
               "closed_by": null,
               "comments": Array [],
@@ -358,6 +372,7 @@ describe('common utils', () => {
             },
             Object {
               "assignees": Array [],
+              "category": null,
               "closed_at": null,
               "closed_by": null,
               "comments": Array [],
@@ -403,6 +418,7 @@ describe('common utils', () => {
             },
             Object {
               "assignees": Array [],
+              "category": null,
               "closed_at": "2019-11-25T22:32:17.947Z",
               "closed_by": Object {
                 "email": "testemail@elastic.co",
@@ -473,6 +489,7 @@ describe('common utils', () => {
       expect(res).toMatchInlineSnapshot(`
         Object {
           "assignees": Array [],
+          "category": null,
           "closed_at": null,
           "closed_by": null,
           "comments": Array [],
@@ -530,6 +547,7 @@ describe('common utils', () => {
       expect(res).toMatchInlineSnapshot(`
         Object {
           "assignees": Array [],
+          "category": null,
           "closed_at": null,
           "closed_by": null,
           "comments": Array [],
@@ -588,6 +606,7 @@ describe('common utils', () => {
       expect(res).toMatchInlineSnapshot(`
         Object {
           "assignees": Array [],
+          "category": null,
           "closed_at": null,
           "closed_by": null,
           "comments": Array [
@@ -669,6 +688,7 @@ describe('common utils', () => {
       expect(res).toMatchInlineSnapshot(`
         Object {
           "assignees": Array [],
+          "category": null,
           "closed_at": null,
           "closed_by": null,
           "comments": Array [],
@@ -769,7 +789,7 @@ describe('common utils', () => {
     it('transforms correctly', () => {
       const comment = {
         comment: 'A comment',
-        type: CommentType.user as const,
+        type: AttachmentType.user as const,
         createdDate: '2020-04-09T09:43:51.778Z',
         email: 'elastic@elastic.co',
         full_name: 'Elastic',
@@ -801,7 +821,7 @@ describe('common utils', () => {
     it('transform correctly without optional fields', () => {
       const comment = {
         comment: 'A comment',
-        type: CommentType.user as const,
+        type: AttachmentType.user as const,
         createdDate: '2020-04-09T09:43:51.778Z',
         owner: SECURITY_SOLUTION_OWNER,
       };
@@ -831,7 +851,7 @@ describe('common utils', () => {
     it('transform correctly with optional fields as null', () => {
       const comment = {
         comment: 'A comment',
-        type: CommentType.user as const,
+        type: AttachmentType.user as const,
         createdDate: '2020-04-09T09:43:51.778Z',
         email: null,
         full_name: null,
@@ -869,7 +889,9 @@ describe('common utils', () => {
           createCommentFindResponse([
             {
               ids: ['1'],
-              comments: [{ comment: '', type: CommentType.user, owner: SECURITY_SOLUTION_OWNER }],
+              comments: [
+                { comment: '', type: AttachmentType.user, owner: SECURITY_SOLUTION_OWNER },
+              ],
             },
           ]).saved_objects[0]
         )
@@ -886,7 +908,7 @@ describe('common utils', () => {
                 {
                   alertId: ['a', 'b', 'c'],
                   index: '',
-                  type: CommentType.alert,
+                  type: AttachmentType.alert,
                   rule: {
                     id: 'rule-id-1',
                     name: 'rule-name-1',
@@ -913,7 +935,7 @@ describe('common utils', () => {
                   alertId: ['a', 'b'],
                   index: '',
                   owner: SECURITY_SOLUTION_OWNER,
-                  type: CommentType.alert,
+                  type: AttachmentType.alert,
                   rule: {
                     id: 'rule-id-1',
                     name: 'rule-name-1',
@@ -922,7 +944,7 @@ describe('common utils', () => {
                 {
                   comment: '',
                   owner: SECURITY_SOLUTION_OWNER,
-                  type: CommentType.user,
+                  type: AttachmentType.user,
                 },
               ],
             },
@@ -942,7 +964,7 @@ describe('common utils', () => {
                   owner: SECURITY_SOLUTION_OWNER,
                   alertId: ['a', 'b'],
                   index: '',
-                  type: CommentType.alert,
+                  type: AttachmentType.alert,
                   rule: {
                     id: 'rule-id-1',
                     name: 'rule-name-1',
@@ -956,7 +978,7 @@ describe('common utils', () => {
                 {
                   owner: SECURITY_SOLUTION_OWNER,
                   comment: '',
-                  type: CommentType.user,
+                  type: AttachmentType.user,
                 },
               ],
             },
@@ -981,7 +1003,7 @@ describe('common utils', () => {
                   owner: SECURITY_SOLUTION_OWNER,
                   alertId: ['a', 'b'],
                   index: '',
-                  type: CommentType.alert,
+                  type: AttachmentType.alert,
                   rule: {
                     id: 'rule-id-1',
                     name: 'rule-name-1',
@@ -1013,7 +1035,7 @@ describe('common utils', () => {
                   owner: SECURITY_SOLUTION_OWNER,
                   alertId: ['a', 'b'],
                   index: '',
-                  type: CommentType.alert,
+                  type: AttachmentType.alert,
                   rule: {
                     id: 'rule-id-1',
                     name: 'rule-name-1',
@@ -1152,7 +1174,7 @@ describe('common utils', () => {
           attributes: {
             comment: currentCommentString,
           },
-        } as SavedObject<CommentRequestUserType>
+        } as SavedObject<UserCommentAttachmentPayload>
       );
 
       const expectedReferences = [
@@ -1319,6 +1341,45 @@ describe('common utils', () => {
 
     it('returns false if the SO is not an error', () => {
       expect(isSOError({})).toBe(false);
+    });
+  });
+
+  describe('countUserAttachments', () => {
+    it('returns 0 for an empty array', () => {
+      expect(countUserAttachments([])).toBe(0);
+    });
+
+    it('returns 1 when there is only 1 user attachment', () => {
+      const attachments = [createUserAttachment(), createAlertAttachment()];
+
+      expect(countUserAttachments(attachments)).toBe(1);
+    });
+
+    it('returns 0 when there is only alert attachments', () => {
+      const attachments = [createAlertAttachment()];
+
+      expect(countUserAttachments(attachments)).toBe(0);
+    });
+  });
+
+  describe('isPersistableStateOrExternalReference', () => {
+    it('returns true for persistable state request', () => {
+      expect(isPersistableStateOrExternalReference(createPersistableStateRequests(1)[0])).toBe(
+        true
+      );
+    });
+
+    it('returns true for external reference request', () => {
+      expect(isPersistableStateOrExternalReference(createExternalReferenceRequests(1)[0])).toBe(
+        true
+      );
+    });
+
+    it('returns false for other request types', () => {
+      expect(isPersistableStateOrExternalReference(createUserRequests(1)[0])).toBe(false);
+      expect(isPersistableStateOrExternalReference(createAlertRequests(1, 'alert-id')[0])).toBe(
+        false
+      );
     });
   });
 });

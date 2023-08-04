@@ -5,19 +5,18 @@
  * 2.0.
  */
 
-import { ProcessEventAlertCategory } from '../types/process_tree';
 import { getAlertIconTooltipContent } from './alert_icon_tooltip_content';
 
 describe('getAlertTypeTooltipContent(category)', () => {
   it('should display `File alert` for tooltip content', () => {
-    expect(getAlertIconTooltipContent(ProcessEventAlertCategory.file)).toEqual('File alert');
+    expect(getAlertIconTooltipContent('file')).toEqual('File alert');
   });
 
   it('should display `Process alert` for tooltip content', () => {
-    expect(getAlertIconTooltipContent(ProcessEventAlertCategory.process)).toEqual('Process alert');
+    expect(getAlertIconTooltipContent('process')).toEqual('Process alert');
   });
 
   it('should display `Network alert` for tooltip content', () => {
-    expect(getAlertIconTooltipContent(ProcessEventAlertCategory.network)).toEqual('Network alert');
+    expect(getAlertIconTooltipContent('network')).toEqual('Network alert');
   });
 });

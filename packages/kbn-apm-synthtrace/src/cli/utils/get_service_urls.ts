@@ -45,7 +45,10 @@ async function getKibanaUrl({ target, logger }: { target: string; logger: Logger
     });
 
     const discoveredKibanaUrl =
-      unredirectedResponse.headers.get('location')?.replace('/spaces/enter', '') || target;
+      unredirectedResponse.headers
+        .get('location')
+        ?.replace('/spaces/enter', '')
+        ?.replace('spaces/space_selector', '') || target;
 
     const parsedTarget = parse(target);
 

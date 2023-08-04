@@ -8,10 +8,12 @@
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { IRouter, Logger } from '@kbn/core/server';
+import { ProfilingConfig } from '..';
 import {
   ProfilingPluginSetupDeps,
   ProfilingPluginStartDeps,
   ProfilingRequestHandlerContext,
+  TelemetryUsageCounter,
 } from '../types';
 import { ProfilingESClient } from '../utils/create_profiling_es_client';
 import { registerFlameChartSearchRoute } from './flamechart';
@@ -31,6 +33,8 @@ export interface RouteRegisterParameters {
   dependencies: {
     start: ProfilingPluginStartDeps;
     setup: ProfilingPluginSetupDeps;
+    config: ProfilingConfig;
+    telemetryUsageCounter?: TelemetryUsageCounter;
   };
   services: {
     createProfilingEsClient: (params: {

@@ -6,16 +6,32 @@
  */
 
 import { ALERT_REASON, ALERT_START } from '@kbn/rule-data-utils';
-import { ObservabilityRuleTypeFormatter } from '@kbn/observability-plugin/public';
-import { getLogsAppAlertUrl } from '../../../common/formatters/alert_link';
+import type { ObservabilityRuleTypeFormatter } from '@kbn/observability-plugin/public';
+import type { LocatorPublic } from '@kbn/share-plugin/public';
+import type { LogsLocatorParams } from '../../../common/locators';
 
-export const formatRuleData: ObservabilityRuleTypeFormatter = ({ fields }) => {
-  const reason = fields[ALERT_REASON] ?? '';
-  const alertStartDate = fields[ALERT_START];
-  const timestamp = alertStartDate != null ? new Date(alertStartDate).valueOf() : null;
+export const createRuleFormatter: (
+  logsLocator: LocatorPublic<LogsLocatorParams>
+) => ObservabilityRuleTypeFormatter =
+  (logsLocator) =>
+  ({ fields }) => {
+    const reason = fields[ALERT_REASON] ?? '';
+    const alertStartDate = fields[ALERT_START];
+    const time = alertStartDate != null ? new Date(alertStartDate).valueOf() : undefined;
+    const url = logsLocator.getRedirectUrl({ time });
 
-  return {
-    reason,
-    link: getLogsAppAlertUrl(timestamp), // TODO: refactor to URL generators
+    // the alerts UI already prepends the url to the baseUrl so we need to remove it here
+    const link = removeBaseUrl(url);
+
+    return {
+      reason,
+      link,
+    };
   };
+
+const removeBaseUrl = (url: string): string => {
+  const substring = '/app/';
+  const substringIndex = url.indexOf(substring);
+
+  return url.substring(substringIndex);
 };

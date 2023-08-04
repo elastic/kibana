@@ -24,6 +24,7 @@ properties:
   description:
     description: The description for the case.
     type: string
+    maxLength: 30000
   owner:
     $ref: 'owners.yaml'
   settings:
@@ -33,8 +34,15 @@ properties:
   tags:
     description: The words and phrases that help categorize cases. It can be an empty array.
     type: array
+    maxItems: 200
     items:
       type: string
+      maxLength: 256
+  category:
+    description: Category for the case. It could be a word or a phrase to categorize the case.
+    type: string
+    maxLength: 50
   title:
     description: A title for the case.
     type: string
+    maxLength: 160

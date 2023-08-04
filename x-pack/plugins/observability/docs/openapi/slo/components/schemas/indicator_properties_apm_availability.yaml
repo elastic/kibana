@@ -1,4 +1,4 @@
-title: APM availability indicator type definition
+title: APM availability
 required:
   - type
   - params

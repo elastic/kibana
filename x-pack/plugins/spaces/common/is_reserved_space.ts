@@ -7,7 +7,7 @@
 
 import { get } from 'lodash';
 
-import type { Space } from './types';
+import type { Space } from '.';
 
 /**
  * Returns whether the given Space is reserved or not.

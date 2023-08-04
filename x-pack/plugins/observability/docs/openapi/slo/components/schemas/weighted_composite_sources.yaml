@@ -1,4 +1,4 @@
-title: Weighted composite sources
+title: Weighted sources
 description: An array of source SLO to use for the weighted average composite.
 type: "array"
 items:

@@ -6,11 +6,5 @@
  * Side Public License, v 1.
  */
 
-export * from './trigger';
-export * from './trigger_contract';
-export * from './trigger_internal';
-export * from './row_click_trigger';
-export * from './visualize_field_trigger';
-export * from './visualize_geo_field_trigger';
-export * from './default_trigger';
-export * from './categorize_field_trigger';
+export { TriggerContract } from './trigger_contract';
+export { TriggerInternal } from './trigger_internal';

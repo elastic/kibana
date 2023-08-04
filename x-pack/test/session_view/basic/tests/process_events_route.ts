@@ -6,7 +6,10 @@
  */
 
 import expect from '@kbn/expect';
-import { PROCESS_EVENTS_ROUTE } from '@kbn/session-view-plugin/common/constants';
+import {
+  PROCESS_EVENTS_ROUTE,
+  CURRENT_API_VERSION,
+} from '@kbn/session-view-plugin/common/constants';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { User } from '../../../rule_registry/common/lib/authentication/types';
 
@@ -44,6 +47,13 @@ export default function processEventsTests({ getService }: FtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
 
+  function getTestRoute() {
+    return supertest
+      .get(PROCESS_EVENTS_ROUTE)
+      .set('kbn-xsrf', 'foo')
+      .set('Elastic-Api-Version', CURRENT_API_VERSION);
+  }
+
   describe(`Session view - ${PROCESS_EVENTS_ROUTE} - with a basic license`, () => {
     describe(`using typical process event data`, () => {
       before(async () => {
@@ -58,8 +68,21 @@ export default function processEventsTests({ getService }: FtrProviderContext) {
         await esArchiver.unload('x-pack/test/functional/es_archives/session_view/io_events');
       });
 
+      it(`${PROCESS_EVENTS_ROUTE} fails when an invalid api version is specified`, async () => {
+        const response = await supertest
+          .get(PROCESS_EVENTS_ROUTE)
+          .set('kbn-xsrf', 'foo')
+          .set('Elastic-Api-Version', '999999')
+          .query({
+            index: MOCK_INDEX,
+            sessionEntityId: MOCK_SESSION_ENTITY_ID,
+            sessionStartTime: MOCK_SESSION_START_TIME,
+          });
+        expect(response.status).to.be(400);
+      });
+
       it(`${PROCESS_EVENTS_ROUTE} returns a page of process events`, async () => {
-        const response = await supertest.get(PROCESS_EVENTS_ROUTE).set('kbn-xsrf', 'foo').query({
+        const response = await getTestRoute().query({
           index: MOCK_INDEX,
           sessionEntityId: MOCK_SESSION_ENTITY_ID,
           sessionStartTime: MOCK_SESSION_START_TIME,
@@ -71,7 +94,7 @@ export default function processEventsTests({ getService }: FtrProviderContext) {
       });
 
       it(`${PROCESS_EVENTS_ROUTE} returns a page of process events (w alerts) (paging forward)`, async () => {
-        const response = await supertest.get(PROCESS_EVENTS_ROUTE).set('kbn-xsrf', 'foo').query({
+        const response = await getTestRoute().query({
           index: MOCK_INDEX,
           sessionEntityId: MOCK_SESSION_ENTITY_ID,
           sessionStartTime: MOCK_SESSION_START_TIME,
@@ -88,7 +111,7 @@ export default function processEventsTests({ getService }: FtrProviderContext) {
       });
 
       it(`${PROCESS_EVENTS_ROUTE} returns a page of process events (w alerts) (paging backwards)`, async () => {
-        const response = await supertest.get(PROCESS_EVENTS_ROUTE).set('kbn-xsrf', 'foo').query({
+        const response = await getTestRoute().query({
           index: MOCK_INDEX,
           sessionEntityId: MOCK_SESSION_ENTITY_ID,
           sessionStartTime: MOCK_SESSION_START_TIME,
@@ -120,6 +143,7 @@ export default function processEventsTests({ getService }: FtrProviderContext) {
               .get(`${PROCESS_EVENTS_ROUTE}`)
               .auth(username, password)
               .set('kbn-xsrf', 'true')
+              .set('Elastic-Api-Version', CURRENT_API_VERSION)
               .query({
                 index: MOCK_INDEX,
                 sessionEntityId: MOCK_SESSION_ENTITY_ID,
@@ -143,6 +167,7 @@ export default function processEventsTests({ getService }: FtrProviderContext) {
               .get(`${PROCESS_EVENTS_ROUTE}`)
               .auth(username, password)
               .set('kbn-xsrf', 'true')
+              .set('Elastic-Api-Version', CURRENT_API_VERSION)
               .query({
                 index: MOCK_INDEX,
                 sessionEntityId: MOCK_SESSION_ENTITY_ID,
@@ -196,7 +221,7 @@ export default function processEventsTests({ getService }: FtrProviderContext) {
       });
 
       it(`${PROCESS_EVENTS_ROUTE} returns a page of process events`, async () => {
-        const response = await supertest.get(PROCESS_EVENTS_ROUTE).set('kbn-xsrf', 'foo').query({
+        const response = await getTestRoute().query({
           index: MOCK_INDEX,
           sessionEntityId: MOCK_SESSION_ENTITY_ID,
           sessionStartTime: MOCK_SESSION_START_TIME,

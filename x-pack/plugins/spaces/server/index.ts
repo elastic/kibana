@@ -31,6 +31,11 @@ export type { Space, GetAllSpacesOptions, GetAllSpacesPurpose, GetSpaceResult } 
 
 export const config: PluginConfigDescriptor = {
   schema: ConfigSchema,
+  exposeToBrowser: {
+    maxSpaces: true,
+    allowFeatureVisibility: true,
+  },
 };
+
 export const plugin = (initializerContext: PluginInitializerContext) =>
   new SpacesPlugin(initializerContext);

@@ -99,7 +99,6 @@ import {
   NEW_TERMS_HISTORY_SIZE,
   NEW_TERMS_HISTORY_TIME_TYPE,
   NEW_TERMS_INPUT_AREA,
-  CONTINUE_BUTTON,
   CREATE_WITHOUT_ENABLING_BTN,
   RULE_INDICES,
   ALERTS_INDEX_BUTTON,
@@ -124,7 +123,7 @@ import type {
   RuleCreateProps,
   ThreatMatchRuleCreateProps,
   ThresholdRuleCreateProps,
-} from '../../common/detection_engine/rule_schema';
+} from '../../common/api/detection_engine/model';
 import { waitForAlerts } from './alerts';
 import { refreshPage } from './security_header';
 import { EMPTY_ALERT_TABLE } from '../screens/alerts';
@@ -373,10 +372,6 @@ export const removeAlertsIndex = () => {
   });
 };
 
-export const continueWithNextSection = () => {
-  cy.get(CONTINUE_BUTTON).should('exist').click();
-};
-
 export const fillDefineCustomRuleAndContinue = (rule: QueryRuleCreateProps) => {
   if (rule.data_view_id !== undefined) {
     cy.get(DATA_VIEW_OPTION).click();
@@ -386,7 +381,6 @@ export const fillDefineCustomRuleAndContinue = (rule: QueryRuleCreateProps) => {
     .first()
     .type(rule.query || '');
   cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click({ force: true });
-  cy.get(CUSTOM_QUERY_INPUT).should('not.exist');
 };
 
 export const fillScheduleRuleAndContinue = (rule: RuleCreateProps) => {
@@ -458,8 +452,6 @@ export const fillDefineThresholdRuleAndContinue = (rule: ThresholdRuleCreateProp
       cy.wrap(inputs[threshold]).type(`${rule.threshold.value}`);
     });
   cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click({ force: true });
-
-  cy.get(CUSTOM_QUERY_INPUT).should('not.exist');
 };
 
 export const fillDefineEqlRuleAndContinue = (rule: EqlRuleCreateProps) => {
@@ -480,7 +472,6 @@ export const fillDefineEqlRuleAndContinue = (rule: EqlRuleCreateProps) => {
   cy.get(TOAST_ERROR).should('not.exist');
 
   cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click({ force: true });
-  cy.get(`${RULES_CREATION_FORM} ${EQL_QUERY_INPUT}`).should('not.exist');
 };
 
 export const fillDefineNewTermsRuleAndContinue = (rule: NewTermsRuleCreateProps) => {
@@ -499,8 +490,6 @@ export const fillDefineNewTermsRuleAndContinue = (rule: NewTermsRuleCreateProps)
   cy.get(NEW_TERMS_INPUT_AREA).find(NEW_TERMS_HISTORY_SIZE).type(historySizeNumber);
   cy.get(NEW_TERMS_INPUT_AREA).find(NEW_TERMS_HISTORY_TIME_TYPE).select(historySizeType);
   cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click({ force: true });
-
-  cy.get(CUSTOM_QUERY_INPUT).should('not.exist');
 };
 
 /**
@@ -632,7 +621,6 @@ export const fillDefineIndicatorMatchRuleAndContinue = (rule: ThreatMatchRuleCre
   });
   getCustomIndicatorQueryInput().type('{selectall}{enter}*:*');
   getDefineContinueButton().should('exist').click({ force: true });
-  cy.get(CUSTOM_QUERY_INPUT).should('not.exist');
 };
 
 export const fillDefineMachineLearningRuleAndContinue = (rule: MachineLearningRuleCreateProps) => {

@@ -7,6 +7,7 @@
 
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 import { infraPluginMock } from '@kbn/infra-plugin/server/mocks';
+import { logsSharedPluginMock } from '@kbn/logs-shared-plugin/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/server/mocks';
 import { configSchema, createConfig } from '../../../config';
@@ -38,6 +39,7 @@ const mockReq = (
             usageCollection: usageCollectionSetup,
             features: featuresPluginMock.createSetup(),
             infra: infraPluginMock.createSetupContract(),
+            logsShared: logsSharedPluginMock.createSetupContract(),
           },
         },
       },

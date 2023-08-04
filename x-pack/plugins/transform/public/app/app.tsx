@@ -7,8 +7,7 @@
 
 import React, { useContext, FC } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { Router, Switch } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
+import { Router, Routes, Route } from '@kbn/shared-ux-router';
 
 import { ScopedHistory } from '@kbn/core/public';
 
@@ -21,7 +20,7 @@ import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-pl
 import { addInternalBasePath } from '../../common/constants';
 
 import { SectionError } from './components';
-import { SECTION_SLUG } from './constants';
+import { SECTION_SLUG } from './common/constants';
 import { AuthorizationContext, AuthorizationProvider } from './lib/authorization';
 import { AppDependencies } from './app_dependencies';
 
@@ -47,7 +46,7 @@ export const App: FC<{ history: ScopedHistory }> = ({ history }) => {
 
   return (
     <Router history={history}>
-      <Switch>
+      <Routes>
         <Route
           path={`/${SECTION_SLUG.CLONE_TRANSFORM}/:transformId`}
           component={CloneTransformSection}
@@ -57,7 +56,7 @@ export const App: FC<{ history: ScopedHistory }> = ({ history }) => {
           component={CreateTransformSection}
         />
         <Route path={`/`} component={TransformManagementSection} />
-      </Switch>
+      </Routes>
     </Router>
   );
 };

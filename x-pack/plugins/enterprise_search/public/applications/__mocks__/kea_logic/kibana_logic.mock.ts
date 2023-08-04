@@ -14,6 +14,7 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 
 import { LensPublicStart } from '@kbn/lens-plugin/public';
 import { securityMock } from '@kbn/security-plugin/public/mocks';
+import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 
 import { mockHistory } from '../react_router/state.mock';
 
@@ -48,6 +49,8 @@ export const mockKibanaValues = {
     hasWorkplaceSearchAccess: true,
   },
   productFeatures: {
+    hasDocumentLevelSecurityEnabled: true,
+    hasIncrementalSyncEnabled: true,
     hasNativeConnectors: true,
     hasWebCrawler: true,
   },
@@ -56,6 +59,7 @@ export const mockKibanaValues = {
   setBreadcrumbs: jest.fn(),
   setChromeIsVisible: jest.fn(),
   setDocTitle: jest.fn(),
+  share: sharePluginMock.createStartContract(),
   uiSettings: uiSettingsServiceMock.createStartContract(),
 };
 

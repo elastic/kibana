@@ -6,10 +6,17 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/public';
+import {
+  type Aggregation,
+  type AggFieldPair,
+  type Field,
+  DOC_COUNT,
+  ML_JOB_AGGREGATION,
+  ES_AGGREGATION,
+} from '@kbn/ml-anomaly-utils';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { parseInterval } from '../../../../../../common/util/parse_interval';
 import { JobCreator } from './job_creator';
-import { Field, Aggregation, AggFieldPair } from '../../../../../../common/types/fields';
 import {
   Job,
   Datafeed,
@@ -17,12 +24,7 @@ import {
   BucketSpan,
 } from '../../../../../../common/types/anomaly_detection_jobs';
 import { createBasicDetector } from './util/default_configs';
-import {
-  ML_JOB_AGGREGATION,
-  ES_AGGREGATION,
-} from '../../../../../../common/constants/aggregation_types';
 import { JOB_TYPE, CREATED_BY_LABEL } from '../../../../../../common/constants/new_job';
-import { DOC_COUNT } from '../../../../../../common/constants/field_types';
 import { getRichDetectors } from './util/general';
 import { isSparseDataJob } from './util/general';
 

@@ -143,4 +143,16 @@ export const cspmUsageSchema: MakeSchemaFrom<CspmUsage> = {
       failed_findings_count: { type: 'long' },
     },
   },
+  installation_stats: {
+    type: 'array',
+    items: {
+      package_policy_id: { type: 'keyword' },
+      feature: { type: 'keyword' },
+      package_version: { type: 'keyword' },
+      agent_policy_id: { type: 'keyword' },
+      deployment_mode: { type: 'keyword' },
+      created_at: { type: 'date' },
+      agent_count: { type: 'long' },
+    },
+  },
 };

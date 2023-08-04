@@ -48,6 +48,7 @@ describe('Expandable Host Component', () => {
   const mockProps = {
     contextID: 'text-context',
     hostName: 'testHostName',
+    scopeId: 'testScopeId',
   };
 
   describe('ExpandableHostDetails: rendering', () => {

@@ -6,6 +6,8 @@
  */
 
 import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
+import { appIds } from '@kbn/management-cards-navigation';
 import { createServerlessSearchSideNavComponent as createComponent } from './layout/nav';
 import { docLinks } from '../common/doc_links';
 import {
@@ -30,10 +32,29 @@ export class ServerlessSearchPlugin
   ): ServerlessSearchPluginSetup {
     core.application.register({
       id: 'serverlessElasticsearch',
-      title: 'Elasticsearch',
+      title: i18n.translate('xpack.serverlessSearch.app.elasticsearch.title', {
+        defaultMessage: 'Elasticsearch',
+      }),
       appRoute: '/app/elasticsearch',
       async mount({ element }: AppMountParameters) {
-        const { renderApp } = await import('./application');
+        const { renderApp } = await import('./application/elasticsearch');
+        const [coreStart, services] = await core.getStartServices();
+        const { security } = services;
+        docLinks.setDocLinks(coreStart.docLinks.links);
+
+        const userProfile = await security.userProfiles.getCurrent();
+
+        return await renderApp(element, coreStart, { userProfile, ...services });
+      },
+    });
+    core.application.register({
+      id: 'serverlessIndexingApi',
+      title: i18n.translate('xpack.serverlessSearch.app.indexingApi.title', {
+        defaultMessage: 'Indexing API',
+      }),
+      appRoute: '/app/indexing_api',
+      async mount({ element }: AppMountParameters) {
+        const { renderApp } = await import('./application/indexing_api');
         const [coreStart, services] = await core.getStartServices();
         const { security } = services;
         docLinks.setDocLinks(coreStart.docLinks.links);
@@ -48,9 +69,14 @@ export class ServerlessSearchPlugin
 
   public start(
     core: CoreStart,
-    { serverless }: ServerlessSearchPluginStartDependencies
+    { serverless, management, cloud }: ServerlessSearchPluginStartDependencies
   ): ServerlessSearchPluginStart {
-    serverless.setSideNavComponent(createComponent(core, { serverless }));
+    serverless.setProjectHome('/app/elasticsearch');
+    serverless.setSideNavComponent(createComponent(core, { serverless, cloud }));
+    management.setupCardsNavigation({
+      enabled: true,
+      hideLinksTo: [appIds.MAINTENANCE_WINDOWS],
+    });
     return {};
   }
 

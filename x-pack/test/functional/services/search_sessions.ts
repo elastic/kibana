@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
+import { INITIAL_SEARCH_SESSION_REST_VERSION } from '@kbn/data-plugin/server';
 import expect from '@kbn/expect';
 import { SavedObjectsFindResponse } from '@kbn/core/server';
 import { WebElementWrapper } from '../../../../test/functional/services/lib/web_element_wrapper';
@@ -145,6 +147,7 @@ export class SearchSessionsService extends FtrService {
     await this.retry.tryForTime(10000, async () => {
       const { body } = await this.security.testUserSupertest
         .post('/internal/session/_find')
+        .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_SEARCH_SESSION_REST_VERSION)
         .set('kbn-xsrf', 'anything')
         .set('kbn-system-request', 'true')
         .send({
@@ -169,6 +172,7 @@ export class SearchSessionsService extends FtrService {
           this.log.debug(`Deleting search session: ${so.id}`);
           await this.security.testUserSupertest
             .delete(`/internal/session/${so.id}`)
+            .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_SEARCH_SESSION_REST_VERSION)
             .set(`kbn-xsrf`, `anything`)
             .expect(200);
         })

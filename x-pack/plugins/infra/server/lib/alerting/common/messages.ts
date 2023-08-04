@@ -180,7 +180,7 @@ export const alertDetailUrlActionVariableDescription = i18n.translate(
   'xpack.infra.metrics.alerting.alertDetailUrlActionVariableDescription',
   {
     defaultMessage:
-      'Link to the view within Elastic that shows further details and context surrounding this alert',
+      'Link to the alert troubleshooting view for further context and details. This will be an empty string if the server.publicBaseUrl is not configured.',
   }
 );
 
@@ -225,8 +225,7 @@ export const thresholdActionVariableDescription = i18n.translate(
 export const viewInAppUrlActionVariableDescription = i18n.translate(
   'xpack.infra.metrics.alerting.viewInAppUrlActionVariableDescription',
   {
-    defaultMessage:
-      'Link to the view or feature within Elastic that can assist with further investigation',
+    defaultMessage: 'Link to the alert source',
   }
 );
 

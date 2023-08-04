@@ -9,13 +9,15 @@ import type { ReactNode } from 'react';
 import React, { memo, useMemo } from 'react';
 import { Provider } from 'react-redux';
 import { I18nProvider } from '@kbn/i18n-react';
-import { Router } from 'react-router-dom';
+import { Router } from '@kbn/shared-ux-router';
 import type { History } from 'history';
 import useObservable from 'react-use/lib/useObservable';
 import type { Store } from 'redux';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
+import { NavigationProvider } from '@kbn/security-solution-navigation';
+import { MockAssistantProvider } from '../mock_assistant_provider';
 import { RouteCapture } from '../../components/endpoint/route_capture';
 import type { StartPlugins } from '../../../types';
 
@@ -28,33 +30,30 @@ export const AppRootProvider = memo<{
   coreStart: CoreStart;
   depsStart: Pick<StartPlugins, 'data' | 'fleet'>;
   children: ReactNode | ReactNode[];
-}>(
-  ({
-    store,
-    history,
-    coreStart: { http, notifications, uiSettings, application },
-    depsStart: { data },
-    children,
-  }) => {
-    const isDarkMode = useObservable<boolean>(uiSettings.get$('theme:darkMode'));
-    const services = useMemo(
-      () => ({ http, notifications, application, data }),
-      [application, data, http, notifications]
-    );
-    return (
-      <Provider store={store}>
-        <I18nProvider>
-          <KibanaContextProvider services={services}>
-            <EuiThemeProvider darkMode={isDarkMode}>
-              <Router history={history}>
-                <RouteCapture>{children}</RouteCapture>
-              </Router>
-            </EuiThemeProvider>
-          </KibanaContextProvider>
-        </I18nProvider>
-      </Provider>
-    );
-  }
-);
+}>(({ store, history, coreStart, depsStart: { data }, children }) => {
+  const { http, notifications, uiSettings, application } = coreStart;
+  const isDarkMode = useObservable<boolean>(uiSettings.get$('theme:darkMode'));
+  const services = useMemo(
+    () => ({ http, notifications, application, data }),
+    [application, data, http, notifications]
+  );
+  return (
+    <Provider store={store}>
+      <I18nProvider>
+        <KibanaContextProvider services={services}>
+          <EuiThemeProvider darkMode={isDarkMode}>
+            <MockAssistantProvider>
+              <NavigationProvider core={coreStart}>
+                <Router history={history}>
+                  <RouteCapture>{children}</RouteCapture>
+                </Router>
+              </NavigationProvider>
+            </MockAssistantProvider>
+          </EuiThemeProvider>
+        </KibanaContextProvider>
+      </I18nProvider>
+    </Provider>
+  );
+});
 
 AppRootProvider.displayName = 'AppRootProvider';

@@ -30,7 +30,10 @@ export const useGetActionDetails = <
     ...options,
     queryFn: () => {
       return http.get<ActionDetailsApiResponse<TOutputType, TParameters>>(
-        resolvePathVariables(ACTION_DETAILS_ROUTE, { action_id: actionId.trim() || 'undefined' })
+        resolvePathVariables(ACTION_DETAILS_ROUTE, { action_id: actionId.trim() || 'undefined' }),
+        {
+          version: '2023-10-31',
+        }
       );
     },
   });

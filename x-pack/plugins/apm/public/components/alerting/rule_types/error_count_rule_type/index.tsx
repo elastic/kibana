@@ -18,7 +18,11 @@ import { EuiFormRow } from '@elastic/eui';
 import { EuiSpacer } from '@elastic/eui';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 import { asInteger } from '../../../../../common/utils/formatters';
-import { useFetcher } from '../../../../hooks/use_fetcher';
+import {
+  FETCH_STATUS,
+  isPending,
+  useFetcher,
+} from '../../../../hooks/use_fetcher';
 import { createCallApmApi } from '../../../../services/rest/create_call_apm_api';
 import { ChartPreview } from '../../ui_components/chart_preview';
 import {
@@ -35,7 +39,13 @@ import {
   SERVICE_NAME,
   TRANSACTION_NAME,
   ERROR_GROUP_ID,
+  ERROR_GROUP_NAME,
 } from '../../../../../common/es_fields/apm';
+import {
+  ErrorState,
+  LoadingState,
+  NoDataState,
+} from '../../ui_components/chart_preview/chart_preview_helper';
 
 export interface RuleParams {
   windowSize?: number;
@@ -72,13 +82,13 @@ export function ErrorCountRuleType(props: Props) {
     }
   );
 
-  const { data } = useFetcher(
+  const { data, status } = useFetcher(
     (callApmApi) => {
       const { interval, start, end } = getIntervalAndTimeRange({
         windowSize: params.windowSize,
         windowUnit: params.windowUnit,
       });
-      if (interval && start && end) {
+      if (params.windowSize && start && end) {
         return callApmApi(
           'GET /internal/apm/rule_types/error_count/chart_preview',
           {
@@ -90,6 +100,7 @@ export function ErrorCountRuleType(props: Props) {
                 interval,
                 start,
                 end,
+                groupBy: params.groupBy,
               },
             },
           }
@@ -102,6 +113,7 @@ export function ErrorCountRuleType(props: Props) {
       params.environment,
       params.serviceName,
       params.errorGroupingKey,
+      params.groupBy,
     ]
   );
 
@@ -162,16 +174,28 @@ export function ErrorCountRuleType(props: Props) {
     />,
   ];
 
-  // hide preview chart until https://github.com/elastic/kibana/pull/156625 gets merged
-  const showChartPreview = false;
-  const chartPreview = showChartPreview ? (
+  const errorCountChartPreview = data?.errorCountChartPreview;
+  const series = errorCountChartPreview?.series ?? [];
+  const hasData = series.length > 0;
+  const totalGroups = errorCountChartPreview?.totalGroups ?? 0;
+
+  const chartPreview = isPending(status) ? (
+    <LoadingState />
+  ) : !hasData ? (
+    <NoDataState />
+  ) : status === FETCH_STATUS.SUCCESS ? (
     <ChartPreview
-      series={[{ data: data?.errorCountChartPreview ?? [] }]}
+      series={series}
       threshold={params.threshold}
       yTickFormat={asInteger}
       uiSettings={services.uiSettings}
+      timeSize={params.windowSize}
+      timeUnit={params.windowUnit}
+      totalGroups={totalGroups}
     />
-  ) : null;
+  ) : (
+    <ErrorState />
+  );
 
   const groupAlertsBy = (
     <>
@@ -195,7 +219,7 @@ export function ErrorCountRuleType(props: Props) {
         <APMRuleGroupBy
           onChange={onGroupByChange}
           options={{ groupBy: ruleParams.groupBy }}
-          fields={[TRANSACTION_NAME, ERROR_GROUP_ID]}
+          fields={[TRANSACTION_NAME, ERROR_GROUP_ID, ERROR_GROUP_NAME]}
           preSelectedOptions={[SERVICE_NAME, SERVICE_ENVIRONMENT]}
         />
       </EuiFormRow>

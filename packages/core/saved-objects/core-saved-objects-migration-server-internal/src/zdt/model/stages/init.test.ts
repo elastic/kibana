@@ -191,7 +191,7 @@ describe('Stage: init', () => {
       buildIndexMappingsMock.mockReturnValue({});
     });
 
-    it('adds a log entry about the algo check', () => {
+    it('calls buildIndexMappings with the correct parameters', () => {
       const state = createState();
       const res: StateActionResponse<'INIT'> = Either.right(createResponse());
 
@@ -203,7 +203,7 @@ describe('Stage: init', () => {
       });
     });
 
-    it('calls buildIndexMappings with the correct parameters', () => {
+    it('adds a log entry about the algo check', () => {
       const state = createState();
       const res: StateActionResponse<'INIT'> = Either.right(createResponse());
 
@@ -230,7 +230,47 @@ describe('Stage: init', () => {
           currentIndex,
           previousMappings: fetchIndexResponse[currentIndex].mappings,
           additiveMappingChanges: mockMappings.properties,
+          previousAlgorithm: 'v2',
           skipDocumentMigration: false,
+        })
+      );
+    });
+  });
+
+  describe('when checkIndexCurrentAlgorithm returns `v2-partially-migrated`', () => {
+    beforeEach(() => {
+      checkIndexCurrentAlgorithmMock.mockReset().mockReturnValue('v2-partially-migrated');
+      buildIndexMappingsMock.mockReturnValue({});
+      checkVersionCompatibilityMock.mockReturnValue({ status: 'greater' });
+    });
+
+    it('adds a log entry about the algo check', () => {
+      const state = createState();
+      const res: StateActionResponse<'INIT'> = Either.right(createResponse());
+
+      const newState = init(state, res, context);
+
+      expect(newState.logs.map((entry) => entry.message)).toContain(
+        `INIT: current algo check result: v2-partially-migrated`
+      );
+    });
+
+    it('INIT -> UPDATE_INDEX_MAPPINGS', () => {
+      const state = createState();
+      const fetchIndexResponse = createResponse();
+      const res: StateActionResponse<'INIT'> = Either.right(fetchIndexResponse);
+
+      const mockMappings = { properties: { someMappings: 'string' } };
+      buildIndexMappingsMock.mockReturnValue(mockMappings);
+
+      const newState = init(state, res, context);
+
+      expect(newState).toEqual(
+        expect.objectContaining({
+          controlState: 'UPDATE_INDEX_MAPPINGS',
+          currentIndex,
+          previousMappings: fetchIndexResponse[currentIndex].mappings,
+          previousAlgorithm: 'v2',
         })
       );
     });
@@ -329,6 +369,7 @@ describe('Stage: init', () => {
             previousMappings: fetchIndexResponse[currentIndex].mappings,
             additiveMappingChanges: { someToken: {} },
             skipDocumentMigration: false,
+            previousAlgorithm: 'zdt',
           })
         );
       });
@@ -368,6 +409,7 @@ describe('Stage: init', () => {
             currentIndex,
             previousMappings: fetchIndexResponse[currentIndex].mappings,
             skipDocumentMigration: false,
+            previousAlgorithm: 'zdt',
           })
         );
       });
@@ -390,6 +432,7 @@ describe('Stage: init', () => {
             currentIndex,
             previousMappings: fetchIndexResponse[currentIndex].mappings,
             skipDocumentMigration: false,
+            previousAlgorithm: 'zdt',
           })
         );
       });

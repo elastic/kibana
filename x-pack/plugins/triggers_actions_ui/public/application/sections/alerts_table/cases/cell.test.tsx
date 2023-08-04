@@ -11,6 +11,7 @@ import { CasesCell } from './cell';
 import { CellComponentProps } from '../types';
 import { Alert } from '../../../../types';
 import { getCasesMockMap } from './index.mock';
+import { getMaintenanceWindowMockMap } from '../maintenance_windows/index.mock';
 import userEvent from '@testing-library/user-event';
 import { AppMockRenderer, createAppMockRenderer } from '../../test_utils';
 import { useCaseViewNavigation } from './use_case_view_navigation';
@@ -22,6 +23,7 @@ const useCaseViewNavigationMock = useCaseViewNavigation as jest.Mock;
 
 describe('CasesCell', () => {
   const casesMap = getCasesMockMap();
+  const maintenanceWindowsMap = getMaintenanceWindowMockMap();
   const alert = {
     _id: 'alert-id',
     _index: 'alert-index',
@@ -32,6 +34,7 @@ describe('CasesCell', () => {
     isLoading: false,
     alert,
     cases: casesMap,
+    maintenanceWindows: maintenanceWindowsMap,
     columnId: 'kibana.alert.case_ids',
     showAlertStatusWithFlapping: false,
   };

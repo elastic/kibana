@@ -196,6 +196,7 @@ export default function ({ getService, getPageObjects }) {
 
       it('should show a toast when alerts are created successfully', async () => {
         await clusterList.acceptAlertsModal();
+        await clusterList.confirmWatcherMigrationDone();
         expect(await testSubjects.exists('alertsCreatedToast', { timeout: 10000 })).to.be(true);
       });
     });

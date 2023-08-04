@@ -24,7 +24,7 @@ interface UrlParamsActionsLogFilters {
   endDate: string;
   users: string;
   withOutputs: string;
-  withAutomatedActions: boolean;
+  types: string;
 }
 
 interface ActionsLogFiltersFromUrlParams {
@@ -34,27 +34,20 @@ interface ActionsLogFiltersFromUrlParams {
   statuses?: ResponseActionStatus[];
   startDate?: string;
   endDate?: string;
-  withAutomatedActions?: boolean;
+  types?: string[];
   setUrlActionsFilters: (commands: UrlParamsActionsLogFilters['commands']) => void;
   setUrlDateRangeFilters: ({ startDate, endDate }: { startDate: string; endDate: string }) => void;
   setUrlHostsFilters: (agentIds: UrlParamsActionsLogFilters['hosts']) => void;
   setUrlStatusesFilters: (statuses: UrlParamsActionsLogFilters['statuses']) => void;
   setUrlUsersFilters: (users: UrlParamsActionsLogFilters['users']) => void;
   setUrlWithOutputs: (outputs: UrlParamsActionsLogFilters['withOutputs']) => void;
-  setUrlWithAutomatedActions: (outputs: UrlParamsActionsLogFilters['withAutomatedActions']) => void;
+  setUrlTypeFilters: (outputs: UrlParamsActionsLogFilters['types']) => void;
   users?: string[];
 }
 
 type FiltersFromUrl = Pick<
   ActionsLogFiltersFromUrlParams,
-  | 'commands'
-  | 'hosts'
-  | 'withOutputs'
-  | 'statuses'
-  | 'users'
-  | 'startDate'
-  | 'endDate'
-  | 'withAutomatedActions'
+  'commands' | 'hosts' | 'withOutputs' | 'statuses' | 'users' | 'startDate' | 'endDate' | 'types'
 >;
 
 export const actionsLogFiltersFromUrlParams = (
@@ -68,7 +61,7 @@ export const actionsLogFiltersFromUrlParams = (
     endDate: DEFAULT_DATE_RANGE_OPTIONS.endDate,
     users: [],
     withOutputs: [],
-    withAutomatedActions: undefined,
+    types: [],
   };
 
   const urlCommands = urlParams.commands
@@ -87,6 +80,7 @@ export const actionsLogFiltersFromUrlParams = (
     : [];
 
   const urlHosts = urlParams.hosts ? String(urlParams.hosts).split(',').sort() : [];
+  const urlTypes = urlParams.types ? String(urlParams.types).split(',').sort() : [];
 
   const urlWithOutputs = urlParams.withOutputs
     ? String(urlParams.withOutputs).split(',').sort()
@@ -112,7 +106,7 @@ export const actionsLogFiltersFromUrlParams = (
   actionsLogFilters.endDate = urlParams.endDate ? String(urlParams.endDate) : undefined;
   actionsLogFilters.users = urlUsers.length ? urlUsers : undefined;
   actionsLogFilters.withOutputs = urlWithOutputs.length ? urlWithOutputs : undefined;
-  actionsLogFilters.withAutomatedActions = urlParams.withAutomatedActions ? true : undefined;
+  actionsLogFilters.types = urlTypes.length ? urlTypes : undefined;
 
   return actionsLogFilters;
 };
@@ -180,6 +174,18 @@ export const useActionHistoryUrlParams = (): ActionsLogFiltersFromUrlParams => {
     },
     [history, location, toUrlParams, urlParams]
   );
+  const setUrlTypeFilters = useCallback(
+    (types: string) => {
+      history.push({
+        ...location,
+        search: toUrlParams({
+          ...urlParams,
+          types: types.length ? types : undefined,
+        }),
+      });
+    },
+    [history, location, toUrlParams, urlParams]
+  );
 
   const setUrlUsersFilters = useCallback(
     (users: string) => {
@@ -208,19 +214,6 @@ export const useActionHistoryUrlParams = (): ActionsLogFiltersFromUrlParams => {
     [history, location, toUrlParams, urlParams]
   );
 
-  const setUrlWithAutomatedActions = useCallback(
-    (rule: boolean) => {
-      history.push({
-        ...location,
-        search: toUrlParams({
-          ...urlParams,
-          withAutomatedActions: rule ? 'true' : undefined,
-        }),
-      });
-    },
-    [history, location, toUrlParams, urlParams]
-  );
-
   useEffect(() => {
     setActionsLogFilters((prevState) => {
       return {
@@ -238,6 +231,6 @@ export const useActionHistoryUrlParams = (): ActionsLogFiltersFromUrlParams => {
     setUrlWithOutputs,
     setUrlStatusesFilters,
     setUrlUsersFilters,
-    setUrlWithAutomatedActions,
+    setUrlTypeFilters,
   };
 };

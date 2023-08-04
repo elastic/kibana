@@ -10,7 +10,7 @@ import userEvent from '@testing-library/user-event';
 import { TestProvider } from '../../test/test_provider';
 import { getCloudDefendNewPolicyMock } from '../../test/mocks';
 import { PolicySettings } from '.';
-import { getInputFromPolicy } from '../../common/utils';
+import { getInputFromPolicy } from '../../../common/utils/helpers';
 import { INPUT_CONTROL } from '../../../common/constants';
 
 describe('<PolicySettings />', () => {

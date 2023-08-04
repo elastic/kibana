@@ -27,9 +27,10 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import useDebounce from 'react-use/lib/useDebounce';
 import useObservable from 'react-use/lib/useObservable';
 import type { Query } from '@kbn/es-query';
+import { formatHumanReadableDateTime } from '@kbn/ml-date-utils';
 import { isDefined } from '@kbn/ml-is-defined';
 import { useTimeRangeUpdates } from '@kbn/ml-date-picker';
-import { SEARCH_QUERY_LANGUAGE } from '../../../common/constants/search';
+import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
 import { useCasesModal } from '../contexts/kibana/use_cases_modal';
 import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '../..';
 import {
@@ -52,7 +53,6 @@ import { SwimlaneAnnotationContainer, Y_AXIS_LABEL_WIDTH } from './swimlane_anno
 import { AnomalyTimelineService } from '../services/anomaly_timeline_service';
 import { useAnomalyExplorerContext } from './anomaly_explorer_context';
 import { useTimeBuckets } from '../components/custom_hooks/use_time_buckets';
-import { formatHumanReadableDateTime } from '../../../common/util/date_utils';
 import { getTimeBoundsFromSelection } from './hooks/use_selected_cells';
 
 function mapSwimlaneOptionsToEuiOptions(options: string[]) {

@@ -16,6 +16,7 @@ import {
   EuiForm,
   EuiFormRow,
   EuiHorizontalRule,
+  EuiIconTip,
   EuiLink,
   EuiSpacer,
   EuiText,
@@ -25,6 +26,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { isEmpty } from 'lodash';
 import React, { useState } from 'react';
 import { useWizard } from '.';
 import { OptionalFormRow } from '../../../shared/optional_form_row';
@@ -33,15 +35,18 @@ import {
   StepPanelContent,
   StepPanelFooter,
 } from '../../../shared/step_panel';
+import { BackButton } from './back_button';
 import { getFilename, replaceSpecialChars } from './get_filename';
 
 export function ConfigureLogs() {
+  const [datasetNameTouched, setDatasetNameTouched] = useState(false);
   const { euiTheme } = useEuiTheme();
   const xsFontSize = useEuiFontSize('xs').fontSize;
 
   const { goToStep, goBack, getState, setState } = useWizard();
   const wizardState = getState();
   const [datasetName, setDatasetName] = useState(wizardState.datasetName);
+  const [serviceName, setServiceName] = useState(wizardState.serviceName);
   const [logFilePaths, setLogFilePaths] = useState(wizardState.logFilePaths);
   const [namespace, setNamespace] = useState(wizardState.namespace);
   const [customConfigurations, setCustomConfigurations] = useState(
@@ -50,18 +55,15 @@ export function ConfigureLogs() {
 
   const logFilePathNotConfigured = logFilePaths.every((filepath) => !filepath);
 
-  function onBack() {
-    goBack();
-  }
-
   function onContinue() {
-    setState({
-      ...getState(),
+    setState((state) => ({
+      ...state,
       datasetName,
+      serviceName,
       logFilePaths: logFilePaths.filter((filepath) => !!filepath),
       namespace,
       customConfigurations,
-    });
+    }));
     goToStep('installElasticAgent');
   }
 
@@ -87,22 +89,19 @@ export function ConfigureLogs() {
     }
   }
 
+  const isDatasetNameInvalid = datasetNameTouched && isEmpty(datasetName);
+
+  const datasetNameError = i18n.translate(
+    'xpack.observability_onboarding.configureLogs.dataset.error',
+    { defaultMessage: 'A dataset name is required.' }
+  );
+
   return (
     <StepPanel
-      title={i18n.translate(
-        'xpack.observability_onboarding.configureLogs.title',
-        {
-          defaultMessage: 'Stream log files to Elastic',
-        }
-      )}
       panelFooter={
         <StepPanelFooter
           items={[
-            <EuiButton color="ghost" fill onClick={onBack}>
-              {i18n.translate('xpack.observability_onboarding.steps.back', {
-                defaultMessage: 'Back',
-              })}
-            </EuiButton>,
+            <BackButton onBack={goBack} />,
             <EuiButton
               color="primary"
               fill
@@ -194,8 +193,117 @@ export function ConfigureLogs() {
                 )}
               </EuiButtonEmpty>
             </EuiFlexItem>
-            <EuiHorizontalRule margin="m" />
-            <EuiFlexItem grow={false}>
+          </EuiFlexGroup>
+          <EuiSpacer size="s" />
+          <EuiFormRow
+            label={
+              <EuiFlexGroup
+                alignItems="center"
+                gutterSize="xs"
+                responsive={false}
+              >
+                <EuiFlexItem grow={false}>
+                  {i18n.translate(
+                    'xpack.observability_onboarding.configureLogs.dataset.name',
+                    {
+                      defaultMessage: 'Dataset name',
+                    }
+                  )}
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiIconTip
+                    content={i18n.translate(
+                      'xpack.observability_onboarding.configureLogs.dataset.name.tooltip',
+                      {
+                        defaultMessage:
+                          'Provide a dataset name to help identify the source of your logs in future uses. Defaults to the name of the log file.',
+                      }
+                    )}
+                    position="right"
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            }
+            helpText={i18n.translate(
+              'xpack.observability_onboarding.configureLogs.dataset.helper',
+              {
+                defaultMessage:
+                  "All lowercase, max 100 chars, special characters will be replaced with '_'.",
+              }
+            )}
+            isInvalid={isDatasetNameInvalid}
+            error={datasetNameError}
+          >
+            <EuiFieldText
+              placeholder={i18n.translate(
+                'xpack.observability_onboarding.configureLogs.dataset.placeholder',
+                {
+                  defaultMessage: 'Give your logs a name',
+                }
+              )}
+              value={datasetName}
+              onChange={(event) =>
+                setDatasetName(replaceSpecialChars(event.target.value))
+              }
+              isInvalid={isDatasetNameInvalid}
+              onInput={() => setDatasetNameTouched(true)}
+            />
+          </EuiFormRow>
+          <EuiSpacer size="m" />
+          <OptionalFormRow
+            label={
+              <EuiFlexGroup
+                alignItems="center"
+                gutterSize="xs"
+                responsive={false}
+              >
+                <EuiFlexItem grow={false}>
+                  {i18n.translate(
+                    'xpack.observability_onboarding.configureLogs.serviceName',
+                    {
+                      defaultMessage: 'Service name',
+                    }
+                  )}
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiIconTip
+                    content={i18n.translate(
+                      'xpack.observability_onboarding.configureLogs.serviceName.tooltip',
+                      {
+                        defaultMessage:
+                          'Provide a service name to allow for distributed services running on multiple hosts to correlate the related instances.',
+                      }
+                    )}
+                    position="right"
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            }
+            helpText={
+              <FormattedMessage
+                id="xpack.observability_onboarding.configureLogs.serviceName.helper"
+                defaultMessage="Name the service your data is collected from."
+              />
+            }
+          >
+            <EuiFieldText
+              placeholder={i18n.translate(
+                'xpack.observability_onboarding.configureLogs.serviceName.placeholder',
+                {
+                  defaultMessage: 'Give your service a name',
+                }
+              )}
+              value={serviceName}
+              onChange={(event) => setServiceName(event.target.value)}
+            />
+          </OptionalFormRow>
+          <EuiHorizontalRule margin="m" />
+          <EuiFlexGroup
+            alignItems="flexStart"
+            direction="column"
+            gutterSize="xs"
+          >
+            <EuiFlexItem style={{ width: '100%' }}>
               <EuiAccordion
                 id="advancedSettingsAccordion"
                 css={{
@@ -218,41 +326,34 @@ export function ConfigureLogs() {
               >
                 <EuiSpacer size="l" />
                 <EuiFormRow
-                  label={i18n.translate(
-                    'xpack.observability_onboarding.configureLogs.dataset.name',
-                    {
-                      defaultMessage: 'Dataset name',
-                    }
-                  )}
-                  helpText={i18n.translate(
-                    'xpack.observability_onboarding.configureLogs.dataset.helper',
-                    {
-                      defaultMessage:
-                        "Pick a name for your logs. All lowercase, max 100 chars, special characters will be replaced with '_'.",
-                    }
-                  )}
-                >
-                  <EuiFieldText
-                    placeholder={i18n.translate(
-                      'xpack.observability_onboarding.configureLogs.dataset.placeholder',
-                      {
-                        defaultMessage: 'Dataset name',
-                      }
-                    )}
-                    value={datasetName}
-                    onChange={(event) =>
-                      setDatasetName(replaceSpecialChars(event.target.value))
-                    }
-                  />
-                </EuiFormRow>
-                <EuiSpacer size="l" />
-                <EuiFormRow
-                  label={i18n.translate(
-                    'xpack.observability_onboarding.configureLogs.namespace',
-                    {
-                      defaultMessage: 'Namespace',
-                    }
-                  )}
+                  label={
+                    <EuiFlexGroup
+                      alignItems="center"
+                      gutterSize="xs"
+                      responsive={false}
+                    >
+                      <EuiFlexItem grow={false}>
+                        {i18n.translate(
+                          'xpack.observability_onboarding.configureLogs.namespace',
+                          {
+                            defaultMessage: 'Namespace',
+                          }
+                        )}
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiIconTip
+                          content={i18n.translate(
+                            'xpack.observability_onboarding.configureLogs.namespace.tooltip',
+                            {
+                              defaultMessage:
+                                'Provide a namespace to customize the grouping of your logs. Defaults to the default namespace.',
+                            }
+                          )}
+                          position="right"
+                        />
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  }
                   helpText={
                     <FormattedMessage
                       id="xpack.observability_onboarding.configureLogs.namespace.helper"

@@ -9,6 +9,7 @@ import type {
   FlameElementEvent,
   HeatmapElementEvent,
   MetricElementEvent,
+  PartialTheme,
   PartitionElementEvent,
   Theme,
   WordCloudElementEvent,
@@ -88,7 +89,8 @@ interface Props {
   patternRollup: PatternRollup | undefined;
   selectedIndex: SelectedIndex | null;
   setSelectedIndex: (selectedIndex: SelectedIndex | null) => void;
-  theme: Theme;
+  theme?: PartialTheme;
+  baseTheme: Theme;
   updatePatternIndexNames: ({
     indexNames,
     pattern,
@@ -114,6 +116,7 @@ const PatternComponent: React.FC<Props> = ({
   selectedIndex,
   setSelectedIndex,
   theme,
+  baseTheme,
   updatePatternIndexNames,
   updatePatternRollup,
 }) => {
@@ -157,6 +160,7 @@ const PatternComponent: React.FC<Props> = ({
                 pattern={pattern}
                 patternRollup={patternRollup}
                 theme={theme}
+                baseTheme={baseTheme}
                 updatePatternRollup={updatePatternRollup}
               />
             </IndexPropertiesContainer>
@@ -178,6 +182,7 @@ const PatternComponent: React.FC<Props> = ({
       patternRollup,
       stats,
       theme,
+      baseTheme,
       updatePatternRollup,
     ]
   );

@@ -31,7 +31,7 @@ import { useKibanaNavigation } from '../../../../hooks/use_kibana_navigation';
 
 export function SelectLogs() {
   const { navigateToKibanaUrl, navigateToAppUrl } = useKibanaNavigation();
-  const { goToStep, getState, setState } = useWizard();
+  const { goToStep, setState } = useWizard();
 
   function onBack() {
     navigateToKibanaUrl('/app/observabilityOnboarding');
@@ -48,7 +48,7 @@ export function SelectLogs() {
       panelFooter={
         <StepPanelFooter
           items={[
-            <EuiButton color="ghost" fill onClick={onBack}>
+            <EuiButton color="text" onClick={onBack}>
               {i18n.translate('xpack.observability_onboarding.steps.back', {
                 defaultMessage: 'Back',
               })}
@@ -70,7 +70,7 @@ export function SelectLogs() {
               )}
               iconType="desktop"
               onClick={() => {
-                setState({ ...getState(), logsType: 'log-file' });
+                setState((state) => ({ ...state, logsType: 'log-file' }));
                 goToStep('configureLogs');
               }}
               description={i18n.translate(

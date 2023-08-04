@@ -78,7 +78,9 @@ export function FailedTransactionRateChart({
     end,
     numBuckets: 100,
     kuery,
-    type: ApmDocumentType.ServiceTransactionMetric,
+    type: transactionName
+      ? ApmDocumentType.TransactionMetric
+      : ApmDocumentType.ServiceTransactionMetric,
   });
 
   const { environment } = useEnvironmentsContext();

@@ -36,13 +36,9 @@ import type {
   PostFleetServerHostsResponse,
 } from '@kbn/fleet-plugin/common/types/rest_spec/fleet_server_hosts';
 import chalk from 'chalk';
+import { isLocalhost } from '../common/is_localhost';
 import { dump } from './utils';
-import { isLocalhost } from '../common/localhost_services';
-import {
-  fetchFleetAgents,
-  fetchFleetServerUrl,
-  waitForHostToEnroll,
-} from '../common/fleet_services';
+import { fetchFleetServerUrl, waitForHostToEnroll } from '../common/fleet_services';
 import { getRuntimeServices } from './runtime';
 
 export const runFleetServerIfNeeded = async (): Promise<
@@ -58,14 +54,6 @@ export const runFleetServerIfNeeded = async (): Promise<
 
   log.info(`Setting up fleet server (if necessary)`);
   log.indent(4);
-
-  const fleetServerAlreadyEnrolled = await isFleetServerEnrolled();
-
-  if (fleetServerAlreadyEnrolled) {
-    log.info(`Fleet server is already enrolled with Fleet. Nothing to do.`);
-    log.indent(-4);
-    return;
-  }
 
   try {
     fleetServerAgentPolicyId = await getOrCreateFleetServerAgentPolicyId();
@@ -88,23 +76,6 @@ export const runFleetServerIfNeeded = async (): Promise<
   log.indent(-4);
 
   return { fleetServerContainerId, fleetServerAgentPolicyId };
-};
-
-const isFleetServerEnrolled = async () => {
-  const { kbnClient } = getRuntimeServices();
-  const policyId = (await getFleetServerPackagePolicy())?.policy_id;
-
-  if (!policyId) {
-    return false;
-  }
-
-  const fleetAgentsResponse = await fetchFleetAgents(kbnClient, {
-    kuery: `(policy_id: "${policyId}" and active : true) and (status:online)`,
-    showInactive: false,
-    perPage: 1,
-  });
-
-  return Boolean(fleetAgentsResponse.total);
 };
 
 const getFleetServerPackagePolicy = async (): Promise<PackagePolicy | undefined> => {
@@ -207,7 +178,7 @@ export const startFleetServerWithDocker = async ({
   log.indent(4);
 
   const esURL = new URL(elasticUrl);
-  const containerName = `dev-fleet-server.${esURL.hostname}`;
+  const containerName = `dev-fleet-server.${fleetServerPort}`;
   let esUrlWithRealIp: string = elasticUrl;
 
   if (isElasticOnLocalhost) {

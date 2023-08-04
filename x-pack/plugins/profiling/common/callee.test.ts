@@ -12,7 +12,7 @@ import { events, stackTraces, stackFrames, executables } from './__fixtures__/st
 
 const totalSamples = sum([...events.values()]);
 const totalFrames = sum([...stackTraces.values()].map((trace) => trace.FrameIDs.length));
-const tree = createCalleeTree(events, stackTraces, stackFrames, executables, totalFrames);
+const tree = createCalleeTree(events, stackTraces, stackFrames, executables, totalFrames, 1.0);
 
 describe('Callee operations', () => {
   test('inclusive count of root equals total sampled stacktraces', () => {

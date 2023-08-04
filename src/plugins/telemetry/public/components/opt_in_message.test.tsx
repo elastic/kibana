@@ -37,7 +37,7 @@ describe('OptInMessage', () => {
     });
 
     it('claims that telemetry is enabled', () => {
-      expect(dom.text()).toContain('Usage collection (also known as Telemetry) is enabled.');
+      expect(dom.text()).toContain('Usage collection is enabled.');
     });
 
     it('offers the link to disable it', () => {
@@ -65,7 +65,7 @@ describe('OptInMessage', () => {
     });
 
     it('claims that telemetry is disabled', () => {
-      expect(dom.text()).toContain('Usage collection (also known as Telemetry) is disabled.');
+      expect(dom.text()).toContain('Usage collection is disabled.');
     });
 
     it('offers the link to enable it', () => {
@@ -93,7 +93,7 @@ describe('OptInMessage', () => {
     });
 
     it('claims that telemetry is disabled', () => {
-      expect(dom.text()).toContain('Usage collection (also known as Telemetry) is disabled.');
+      expect(dom.text()).toContain('Usage collection is disabled.');
     });
 
     it('offers the link to enable it', () => {

@@ -8,8 +8,8 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Router, Switch, Redirect, RouteChildrenProps } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
+import { Redirect, RouteChildrenProps } from 'react-router-dom';
+import { Router, Routes, Route } from '@kbn/shared-ux-router';
 
 import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -42,10 +42,9 @@ const readOnlyBadge = {
   iconType: 'glasses',
 };
 
-const redirectUrl = ({
-  match,
-  location,
-}: RouteChildrenProps<{ [QUERY]: string }>): LocationDescriptor => {
+type RedirectUrlProps = RouteChildrenProps<{ [QUERY]: string }>;
+
+const redirectUrl = ({ match, location }: RedirectUrlProps): LocationDescriptor => {
   const search = url.addQueryParam(location.search, QUERY, match?.params[QUERY]);
 
   return {
@@ -78,9 +77,11 @@ export async function mountManagementSection(
     <KibanaThemeProvider theme$={params.theme$}>
       <I18nProvider>
         <Router history={params.history}>
-          <Switch>
+          <Routes>
             {/* TODO: remove route param (`query`) in 7.13 */}
-            <Route path={`/:${QUERY}`}>{(props) => <Redirect to={redirectUrl(props)} />}</Route>
+            <Route path={`/:${QUERY}`}>
+              {(props: RedirectUrlProps) => <Redirect to={redirectUrl(props)} />}
+            </Route>
             <Route path="/">
               <Settings
                 history={params.history}
@@ -97,7 +98,7 @@ export async function mountManagementSection(
                 trackUiMetric={trackUiMetric}
               />
             </Route>
-          </Switch>
+          </Routes>
         </Router>
       </I18nProvider>
     </KibanaThemeProvider>,

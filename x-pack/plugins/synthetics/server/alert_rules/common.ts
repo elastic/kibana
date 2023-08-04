@@ -8,9 +8,20 @@ import moment, { Moment } from 'moment';
 import { isRight } from 'fp-ts/lib/Either';
 import Mustache from 'mustache';
 import { IBasePath } from '@kbn/core/server';
-import { RuleExecutorServices } from '@kbn/alerting-plugin/server';
+import { IRuleTypeAlerts, RuleExecutorServices } from '@kbn/alerting-plugin/server';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import { i18n } from '@kbn/i18n';
+import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+import { legacyExperimentalFieldMap } from '@kbn/alerts-as-data-utils';
+import { combineFiltersAndUserSearch, stringifyKueries } from '../../common/lib';
+import { SYNTHETICS_RULE_TYPES_ALERT_CONTEXT } from '../../common/constants/synthetics_alerts';
+import { uptimeRuleFieldMap } from '../../common/rules/uptime_rule_field_map';
+import {
+  getUptimeIndexPattern,
+  IndexPatternTitleAndFields,
+} from '../legacy_uptime/lib/requests/get_index_pattern';
+import { StatusCheckFilters } from '../../common/runtime_types';
+import { UptimeEsClient } from '../lib';
 import { getMonitorSummary } from './status_rule/message_utils';
 import {
   SyntheticsCommonState,
@@ -286,3 +297,53 @@ export const setRecoveredAlertsContext = ({
 export const RECOVERED_LABEL = i18n.translate('xpack.synthetics.monitorStatus.recoveredLabel', {
   defaultMessage: 'recovered',
 });
+
+export const formatFilterString = async (
+  uptimeEsClient: UptimeEsClient,
+  filters?: StatusCheckFilters,
+  search?: string
+) =>
+  await generateFilterDSL(
+    () =>
+      getUptimeIndexPattern({
+        uptimeEsClient,
+      }),
+    filters,
+    search
+  );
+
+export const hasFilters = (filters?: StatusCheckFilters) => {
+  if (!filters) return false;
+  for (const list of Object.values(filters)) {
+    if (list.length > 0) {
+      return true;
+    }
+  }
+  return false;
+};
+
+export const generateFilterDSL = async (
+  getIndexPattern: () => Promise<IndexPatternTitleAndFields | undefined>,
+  filters?: StatusCheckFilters,
+  search?: string
+) => {
+  const filtersExist = hasFilters(filters);
+  if (!filtersExist && !search) return undefined;
+
+  let filterString = '';
+  if (filtersExist) {
+    filterString = stringifyKueries(new Map(Object.entries(filters ?? {})));
+  }
+
+  const combinedString = combineFiltersAndUserSearch(filterString, search);
+
+  return toElasticsearchQuery(fromKueryExpression(combinedString ?? ''), await getIndexPattern());
+};
+
+export const uptimeRuleTypeFieldMap = { ...uptimeRuleFieldMap, ...legacyExperimentalFieldMap };
+
+export const UptimeRuleTypeAlertDefinition: IRuleTypeAlerts = {
+  context: SYNTHETICS_RULE_TYPES_ALERT_CONTEXT,
+  mappings: { fieldMap: uptimeRuleTypeFieldMap },
+  useLegacyAlerts: true,
+};

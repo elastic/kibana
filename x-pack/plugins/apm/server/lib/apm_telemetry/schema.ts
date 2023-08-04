@@ -604,6 +604,24 @@ export const apmSchema: MakeSchemaFrom<APMUsage> = {
     },
     // No tasks found
     services: timeframeMapSchema,
+    environments: {
+      '1d': {
+        ...long,
+        _meta: {
+          description:
+            'Total number of unique environments within the last day',
+        },
+      },
+    },
+    span_destination_service_resource: {
+      '1d': {
+        ...long,
+        _meta: {
+          description:
+            'Total number of unique values of span.destination.service.resource within the last day',
+        },
+      },
+    },
   },
   // FIXME cardinality types seem to be wrong
   cardinality: {

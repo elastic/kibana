@@ -18,7 +18,7 @@ import { defaultHeaders } from '../../mock/header';
 import { mockGlobalState } from '../../mock/global_state';
 import { mockTimelineData } from '../../mock/mock_timeline_data';
 import { TestProviders } from '../../mock/test_providers';
-import { CellValueElementProps } from '@kbn/timelines-plugin/common';
+import { DeprecatedCellValueElementProps } from '@kbn/timelines-plugin/common';
 import { mockBrowserFields } from '../../mock/mock_source';
 import { getMappedNonEcsValue } from './utils';
 
@@ -48,13 +48,6 @@ jest.mock('../../hooks/use_selector', () => ({
   useDeepEqualSelector: () => mockGlobalState.dataTable.tableById['table-test'],
 }));
 
-jest.mock(
-  'react-visibility-sensor',
-  () =>
-    ({ children }: { children: (args: { isVisible: boolean }) => React.ReactNode }) =>
-      children({ isVisible: true })
-);
-
 window.matchMedia = jest.fn().mockImplementation((query) => {
   return {
     matches: false,
@@ -65,7 +58,7 @@ window.matchMedia = jest.fn().mockImplementation((query) => {
   };
 });
 
-export const TestCellRenderer: React.FC<CellValueElementProps> = ({ columnId, data }) => (
+export const TestCellRenderer: React.FC<DeprecatedCellValueElementProps> = ({ columnId, data }) => (
   <>
     {getMappedNonEcsValue({
       data,
@@ -78,6 +71,7 @@ describe('DataTable', () => {
   const mount = useMountAppended();
   const props: DataTableProps = {
     browserFields: mockBrowserFields,
+    getFieldSpec: () => undefined,
     data: mockTimelineData,
     id: TableId.test,
     loadPage: jest.fn(),
@@ -165,11 +159,21 @@ describe('DataTable', () => {
   describe('cellActions', () => {
     test('calls useDataGridColumnsCellActions properly', () => {
       const data = mockTimelineData.slice(0, 1);
+      const timestampFieldSpec = {
+        name: '@timestamp',
+        type: 'date',
+        aggregatable: true,
+        esTypes: ['date'],
+        searchable: true,
+      };
       const wrapper = mount(
         <TestProviders>
           <DataTableComponent
             cellActionsTriggerId="mockCellActionsTrigger"
             {...props}
+            getFieldSpec={(name) =>
+              timestampFieldSpec.name === name ? timestampFieldSpec : undefined
+            }
             data={data}
           />
         </TestProviders>
@@ -178,14 +182,8 @@ describe('DataTable', () => {
 
       expect(mockUseDataGridColumnsCellActions).toHaveBeenCalledWith({
         triggerId: 'mockCellActionsTrigger',
-        fields: [
-          {
-            name: '@timestamp',
-            values: [data[0]?.data[0]?.value],
-            type: 'date',
-            aggregatable: true,
-          },
-        ],
+        fields: [timestampFieldSpec],
+        getCellValue: expect.any(Function),
         metadata: {
           scopeId: 'table-test',
         },
@@ -203,7 +201,8 @@ describe('DataTable', () => {
 
       expect(mockUseDataGridColumnsCellActions).toHaveBeenCalledWith(
         expect.objectContaining({
-          fields: [],
+          triggerId: undefined,
+          fields: undefined,
         })
       );
     });

@@ -5,32 +5,19 @@
  * 2.0.
  */
 
-import { LOADING_INDICATOR } from '../../../screens/security_header';
 import { getNewRule } from '../../../objects/rule';
 import { ALERTS_COUNT, EMPTY_ALERT_TABLE } from '../../../screens/alerts';
 import { createRule } from '../../../tasks/api_calls/rules';
 import { goToRuleDetails } from '../../../tasks/alerts_detection_rules';
 import {
-  addExceptionFromFirstAlert,
   goToClosedAlertsOnRuleDetailsPage,
   goToOpenedAlertsOnRuleDetailsPage,
 } from '../../../tasks/alerts';
 import {
-  addExceptionEntryFieldValue,
-  addExceptionEntryFieldValueValue,
-  addExceptionEntryOperatorValue,
-  addExceptionFlyoutItemName,
   editException,
   editExceptionFlyoutItemName,
-  selectBulkCloseAlerts,
   submitEditedExceptionItem,
-  submitNewExceptionItem,
 } from '../../../tasks/exceptions';
-import {
-  esArchiverLoad,
-  esArchiverUnload,
-  esArchiverResetKibana,
-} from '../../../tasks/es_archiver';
 import { login, visitWithoutDateRange } from '../../../tasks/login';
 import {
   addFirstExceptionFromRuleDetails,
@@ -59,14 +46,14 @@ describe('Add exception using data views from rule details', () => {
   const ITEM_NAME = 'Sample Exception List Item';
 
   before(() => {
-    esArchiverResetKibana();
-    esArchiverLoad('exceptions');
+    cy.task('esArchiverResetKibana');
+    cy.task('esArchiverLoad', 'exceptions');
     login();
     postDataView('exceptions-*');
   });
 
   after(() => {
-    esArchiverUnload('exceptions');
+    cy.task('esArchiverUnload', 'exceptions');
   });
 
   beforeEach(() => {
@@ -86,52 +73,10 @@ describe('Add exception using data views from rule details', () => {
   });
 
   afterEach(() => {
-    esArchiverUnload('exceptions_2');
+    cy.task('esArchiverUnload', 'exceptions_2');
   });
 
-  it('Creates an exception item from alert actions overflow menu', () => {
-    cy.get(LOADING_INDICATOR).should('not.exist');
-    addExceptionFromFirstAlert();
-
-    addExceptionEntryFieldValue('agent.name', 0);
-    addExceptionEntryOperatorValue('is', 0);
-    addExceptionEntryFieldValueValue('foo', 0);
-
-    addExceptionFlyoutItemName(ITEM_NAME);
-    selectBulkCloseAlerts();
-    submitNewExceptionItem();
-
-    // Alerts table should now be empty from having added exception and closed
-    // matching alert
-    cy.get(EMPTY_ALERT_TABLE).should('exist');
-
-    // Closed alert should appear in table
-    goToClosedAlertsOnRuleDetailsPage();
-    cy.get(ALERTS_COUNT).should('exist');
-    cy.get(ALERTS_COUNT).should('have.text', `${NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS}`);
-
-    // Remove the exception and load an event that would have matched that exception
-    // to show that said exception now starts to show up again
-    goToExceptionsTab();
-
-    // when removing exception and again, no more exist, empty screen shows again
-    removeException();
-    cy.get(NO_EXCEPTIONS_EXIST_PROMPT).should('exist');
-
-    // load more docs
-    esArchiverLoad('exceptions_2');
-
-    // now that there are no more exceptions, the docs should match and populate alerts
-    goToAlertsTab();
-    goToOpenedAlertsOnRuleDetailsPage();
-    waitForTheRuleToBeExecuted();
-    waitForAlertsToPopulate();
-
-    cy.get(ALERTS_COUNT).should('exist');
-    cy.get(ALERTS_COUNT).should('have.text', '2 alerts');
-  });
-
-  it('Creates an exception item', () => {
+  it('Creates an exception item and close all matching alerts', () => {
     goToExceptionsTab();
     // when no exceptions exist, empty component shows with action to add exception
     cy.get(NO_EXCEPTIONS_EXIST_PROMPT).should('exist');
@@ -169,7 +114,7 @@ describe('Add exception using data views from rule details', () => {
     cy.get(NO_EXCEPTIONS_EXIST_PROMPT).should('exist');
 
     // load more docs
-    esArchiverLoad('exceptions_2');
+    cy.task('esArchiverLoad', 'exceptions_2');
 
     // now that there are no more exceptions, the docs should match and populate alerts
     goToAlertsTab();

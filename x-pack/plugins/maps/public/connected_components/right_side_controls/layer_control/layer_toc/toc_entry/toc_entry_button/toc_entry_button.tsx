@@ -110,7 +110,7 @@ export class TOCEntryButton extends Component<Props, State> {
       };
     }
 
-    if (this.props.layer.isLayerLoading()) {
+    if (this.props.layer.isLayerLoading(this.props.zoom)) {
       return {
         icon: <EuiLoadingSpinner size="m" />,
         tooltipContent: '',

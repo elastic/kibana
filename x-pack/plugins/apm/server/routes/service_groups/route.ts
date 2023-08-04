@@ -6,6 +6,7 @@
  */
 
 import * as t from 'io-ts';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import Boom from '@hapi/boom';
 import datemath from '@kbn/datemath';
 import { apmServiceGroupMaxNumberOfServices } from '@kbn/observability-plugin/common';
@@ -186,7 +187,7 @@ const serviceGroupCountsRoute = createApmServerRoute({
         apmAlertsClient,
         context,
         logger,
-        spaceId: activeSpace?.id,
+        spaceId: activeSpace?.id ?? DEFAULT_SPACE_ID,
       }),
     ]);
     const serviceGroupCounts = serviceGroups.reduce<ServiceGroupCounts>(

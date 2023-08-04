@@ -16,6 +16,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'error', 'timePicker', 'security']);
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
+  const observability = getService('observability');
 
   const testData = {
     correlationsTab: 'Failed transaction correlations',
@@ -25,8 +26,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   };
 
   describe('failed transactions correlations', () => {
-    // FLAKY: https://github.com/elastic/kibana/issues/127416
-    describe.skip('space with no features disabled', () => {
+    describe('space with no features disabled', () => {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/infra/8.0.0/metrics_and_apm');
         await spacesService.create({
@@ -64,7 +64,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         const fromTime = 'Jul 29, 2019 @ 00:00:00.000';
         const toTime = 'Jul 30, 2019 @ 00:00:00.000';
-        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime, true);
 
         await retry.try(async () => {
           const apmMainContainerText = await testSubjects.getVisibleTextAll('apmMainContainer');
@@ -146,8 +146,20 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           // Assert that results for the given service didn't find any correlations
           const apmCorrelationsTable = await testSubjects.getVisibleText('apmCorrelationsTable');
           expect(apmCorrelationsTable).to.be(
-            'No significant correlations\nCorrelations will only be identified if they have significant impact.\nTry selecting another time range or remove any added filter.'
+            'No significant correlations\nCorrelations are only identified if they have significant impact.\nTry selecting another time range or removing any added filters.'
           );
+        });
+      });
+
+      it('navigates to the alerts tab', async function () {
+        await find.clickByCssSelector(`[data-test-subj="alertsTab"]`);
+
+        await PageObjects.timePicker.timePickerExists();
+        await PageObjects.timePicker.setCommonlyUsedTime('Last_15 minutes');
+
+        // Should show no data message
+        await retry.try(async () => {
+          await observability.overview.common.getAlertsTableNoDataOrFail();
         });
       });
     });

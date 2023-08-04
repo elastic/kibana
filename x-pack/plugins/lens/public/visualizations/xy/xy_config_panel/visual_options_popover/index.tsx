@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { TooltipWrapper } from '@kbn/visualization-ui-components/public';
+import { TooltipWrapper } from '@kbn/visualization-ui-components';
 import { ToolbarPopover, ValueLabelsSettings } from '../../../../shared_components';
 import { MissingValuesOptions } from './missing_values_option';
 import { LineCurveOption } from './line_curve_option';
@@ -88,12 +88,12 @@ export const VisualOptionsPopover: React.FC<VisualOptionsPopoverProps> = ({
         isDisabled={isDisabled}
       >
         <LineCurveOption
-          isCurveTypeEnabled={isCurveTypeEnabled}
+          enabled={isCurveTypeEnabled}
           value={state?.curveType}
-          onChange={(id) => {
+          onChange={(curveType) => {
             setState({
               ...state,
-              curveType: id,
+              curveType,
             });
           }}
         />

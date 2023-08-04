@@ -470,7 +470,6 @@ This can ne achieved in two ways by implementing one of the following:
 The plugin provides a set of ready-to-use React components that abstract rendering of an embeddable behind a React component:
 
 - `EmbeddablePanel` provides a way to render an embeddable inside a rectangular panel. This also provides error handling and a basic user interface over some of the embeddable properties.
-- `EmbeddableChildPanel` is a higher-order component for the `EmbeddablePanel` that provides a way to render that inside a container.
 - `EmbeddableRoot` is the most straightforward wrapper performing rendering of an embeddable.
 - `EmbeddableRenderer` is a helper component to render an embeddable or an embeddable factory.
 

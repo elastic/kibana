@@ -14,6 +14,7 @@ import {
   notificationServiceMock,
   docLinksServiceMock,
   uiSettingsServiceMock,
+  themeServiceMock,
   executionContextServiceMock,
 } from '@kbn/core/public/mocks';
 import { GlobalFlyout } from '@kbn/es-ui-shared-plugin/public';
@@ -62,6 +63,7 @@ export const kibanaVersion = new SemVer(MAJOR_VERSION);
 const { Provider: KibanaReactContextProvider } = createKibanaReactContext({
   uiSettings: uiSettingsServiceMock.createSetupContract(),
   settings: settingsServiceMock.createStartContract(),
+  theme: themeServiceMock.createStartContract(),
   kibanaVersion: {
     get: () => kibanaVersion,
   },

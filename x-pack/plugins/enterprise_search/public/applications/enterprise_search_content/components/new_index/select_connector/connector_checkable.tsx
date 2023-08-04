@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 
 import {
   EuiBadge,
+  EuiButtonIcon,
   EuiCheckableCard,
   EuiCheckableCardProps,
   EuiFlexGroup,
@@ -24,6 +25,7 @@ import { i18n } from '@kbn/i18n';
 import { BETA_LABEL, NATIVE_LABEL } from '../../../../shared/constants';
 
 import './connector_checkable.scss';
+import { PlatinumLicensePopover } from '../../shared/platinum_license_popover/platinum_license_popover';
 
 export type ConnectorCheckableProps = Omit<
   EuiCheckableCardProps,
@@ -39,6 +41,7 @@ export type ConnectorCheckableProps = Omit<
 };
 
 export const ConnectorCheckable: React.FC<ConnectorCheckableProps> = ({
+  disabled,
   documentationUrl,
   icon,
   isBeta,
@@ -48,9 +51,11 @@ export const ConnectorCheckable: React.FC<ConnectorCheckableProps> = ({
   serviceType,
   ...props
 }) => {
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   return (
     <EuiCheckableCard
       {...props}
+      disabled={disabled}
       id={`checkableCard-${serviceType}`}
       className="connectorCheckable"
       data-telemetry-id={`entSearchContent-connector-selectConnector-${serviceType}-select`}
@@ -62,10 +67,36 @@ export const ConnectorCheckable: React.FC<ConnectorCheckableProps> = ({
             </EuiFlexItem>
           )}
           <EuiFlexItem grow={false}>
-            <EuiTitle size="xs">
-              <h2>{name}</h2>
-            </EuiTitle>
+            {disabled ? (
+              <EuiText color="disabledText" size="xs">
+                <h3>{name}</h3>
+              </EuiText>
+            ) : (
+              <EuiTitle size="xs">
+                <h2>{name}</h2>
+              </EuiTitle>
+            )}
           </EuiFlexItem>
+          {disabled && (
+            <EuiFlexItem grow={false}>
+              <PlatinumLicensePopover
+                button={
+                  <EuiButtonIcon
+                    aria-label={i18n.translate(
+                      'xpack.enterpriseSearch.content.newIndex.selectConnector.openPopoverLabel',
+                      {
+                        defaultMessage: 'Open licensing popover',
+                      }
+                    )}
+                    iconType="questionInCircle"
+                    onClick={() => setIsPopoverOpen(!isPopoverOpen)}
+                  />
+                }
+                closePopover={() => setIsPopoverOpen(false)}
+                isPopoverOpen={isPopoverOpen}
+              />
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
       }
       name={name}
@@ -93,21 +124,21 @@ export const ConnectorCheckable: React.FC<ConnectorCheckableProps> = ({
           >
             {showNativeBadge && (
               <EuiFlexItem grow={false}>
-                <EuiBadge color="hollow">
+                <EuiBadge isDisabled={disabled}>
                   <EuiText size="xs">{NATIVE_LABEL}</EuiText>
                 </EuiBadge>
               </EuiFlexItem>
             )}
             {isBeta && (
               <EuiFlexItem grow={false}>
-                <EuiBadge color="hollow">
+                <EuiBadge color="hollow" isDisabled={disabled}>
                   <EuiText size="xs">{BETA_LABEL}</EuiText>
                 </EuiBadge>
               </EuiFlexItem>
             )}
             {isTechPreview && (
               <EuiFlexItem grow={false}>
-                <EuiBadge color="hollow" iconType="beaker">
+                <EuiBadge color="hollow" iconType="beaker" isDisabled={disabled}>
                   <EuiText size="xs">
                     {i18n.translate(
                       'xpack.enterpriseSearch.content.indices.selectConnector.connectorCheckable.techPreviewLabel',

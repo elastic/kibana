@@ -23,7 +23,7 @@ import {
  */
 export const mockState: SyntheticsAppState = {
   ui: {
-    alertFlyoutVisible: false,
+    alertFlyoutVisible: null,
     basePath: 'yyz',
     esKuery: '',
     integrationsPopoverOpen: null,
@@ -152,6 +152,16 @@ export const mockState: SyntheticsAppState = {
   globalParams: {
     addError: null,
     editError: null,
+  },
+  certificates: {
+    total: 0,
+  },
+  certsList: {
+    error: null,
+    data: {
+      total: 0,
+      certs: [],
+    },
   },
 };
 

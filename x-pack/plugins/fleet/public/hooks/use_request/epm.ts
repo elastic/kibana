@@ -24,6 +24,8 @@ import type {
   DeletePackageResponse,
   UpdatePackageRequest,
   UpdatePackageResponse,
+  GetBulkAssetsRequest,
+  GetBulkAssetsResponse,
   GetVerificationKeyIdResponse,
 } from '../../types';
 import type { FleetErrorResponse, GetStatsResponse } from '../../../common/types';
@@ -263,6 +265,14 @@ export const sendUpdatePackage = (
   return sendRequest<UpdatePackageResponse>({
     path: epmRouteService.getUpdatePath(pkgName, pkgVersion),
     method: 'put',
+    body,
+  });
+};
+
+export const sendGetBulkAssets = (body: GetBulkAssetsRequest['body']) => {
+  return sendRequest<GetBulkAssetsResponse>({
+    path: epmRouteService.getBulkAssetsPath(),
+    method: 'post',
     body,
   });
 };

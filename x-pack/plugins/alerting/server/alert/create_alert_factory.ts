@@ -18,6 +18,7 @@ export interface AlertFactory<
   ActionGroupIds extends string
 > {
   create: (id: string) => PublicAlert<State, Context, ActionGroupIds>;
+  get: (id: string) => PublicAlert<State, Context, ActionGroupIds> | null;
   alertLimit: {
     getValue: () => number;
     setLimitReached: (reached: boolean) => void;
@@ -100,6 +101,9 @@ export function createAlertFactory<
       }
 
       return alerts[id];
+    },
+    get: (id: string): PublicAlert<State, Context, ActionGroupIds> | null => {
+      return alerts[id] ? alerts[id] : null;
     },
     // namespace alert limit services for rule type executors to use
     alertLimit: {

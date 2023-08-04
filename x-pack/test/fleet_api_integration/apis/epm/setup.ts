@@ -58,7 +58,7 @@ export default function (providerContext: FtrProviderContext) {
           .get(`/api/fleet/epm/packages/endpoint/${latestEndpointVersion}`)
           .expect(200));
         expect(body.item).to.have.property('savedObject');
-        expect((body.item as InstalledRegistry).savedObject.attributes.install_version).to.eql(
+        expect((body.item as InstalledRegistry).savedObject?.attributes.install_version).to.eql(
           latestEndpointVersion
         );
       });

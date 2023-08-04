@@ -8,8 +8,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import type { LeftPanelContext } from '../context';
-import { LeftFlyoutContext } from '../context';
+import { LeftPanelContext } from '../context';
 import { TestProviders } from '../../../common/mock';
 import { SESSION_VIEW_ERROR_TEST_ID, SESSION_VIEW_TEST_ID } from './test_ids';
 import {
@@ -56,9 +55,9 @@ describe('<SessionView />', () => {
 
     const wrapper = render(
       <TestProviders>
-        <LeftFlyoutContext.Provider value={contextValue}>
+        <LeftPanelContext.Provider value={contextValue}>
           <SessionView />
-        </LeftFlyoutContext.Provider>
+        </LeftPanelContext.Provider>
       </TestProviders>
     );
     expect(wrapper.getByTestId(SESSION_VIEW_TEST_ID)).toBeInTheDocument();
@@ -72,9 +71,9 @@ describe('<SessionView />', () => {
 
     const wrapper = render(
       <TestProviders>
-        <LeftFlyoutContext.Provider value={contextValue}>
+        <LeftPanelContext.Provider value={contextValue}>
           <SessionView />
-        </LeftFlyoutContext.Provider>
+        </LeftPanelContext.Provider>
       </TestProviders>
     );
     expect(wrapper.getByTestId(SESSION_VIEW_TEST_ID)).toBeInTheDocument();
@@ -87,9 +86,9 @@ describe('<SessionView />', () => {
 
     const wrapper = render(
       <TestProviders>
-        <LeftFlyoutContext.Provider value={contextValue}>
+        <LeftPanelContext.Provider value={contextValue}>
           <SessionView />
-        </LeftFlyoutContext.Provider>
+        </LeftPanelContext.Provider>
       </TestProviders>
     );
     expect(wrapper.getByTestId(SESSION_VIEW_ERROR_TEST_ID)).toBeInTheDocument();
