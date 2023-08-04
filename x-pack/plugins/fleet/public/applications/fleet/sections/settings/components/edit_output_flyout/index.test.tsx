@@ -50,7 +50,6 @@ const kafkaInputsLabels = [
   'Value',
   'Broker timeout',
   'Broker reachability timeout',
-  'Channel buffer size',
   'ACK Reliability',
   'Key (optional)',
 ];

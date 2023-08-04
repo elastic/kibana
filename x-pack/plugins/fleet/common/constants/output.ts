@@ -61,12 +61,6 @@ export const kafkaTopicWhenType = {
   Equals: 'equals',
   Contains: 'contains',
   Regexp: 'regexp',
-  Range: 'range',
-  Network: 'network',
-  HasFields: 'has_fields',
-  Or: 'or',
-  And: 'and',
-  Not: 'not',
 } as const;
 
 export const kafkaAcknowledgeReliabilityLevel = {

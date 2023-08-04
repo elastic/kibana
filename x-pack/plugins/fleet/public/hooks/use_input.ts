@@ -148,11 +148,15 @@ export function useSwitchInput(defaultValue = false, disabled = false) {
 function useCustomInput<T>(
   id: string,
   defaultValue: T,
-  validate?: (value: T) => Array<{ message: string; index?: number }> | undefined,
+  validate?: (
+    value: T
+  ) => Array<{ message: string; index?: number; condition?: boolean }> | undefined,
   disabled = false
 ) {
   const [value, setValue] = useState<T>(defaultValue);
-  const [errors, setErrors] = useState<Array<{ message: string; index?: number }> | undefined>();
+  const [errors, setErrors] = useState<
+    Array<{ message: string; index?: number; condition?: boolean }> | undefined
+  >();
   const [hasChanged, setHasChanged] = useState(false);
 
   useEffect(() => {
@@ -248,7 +252,9 @@ type Topic = Array<{
 export function useTopicsInput(
   id: string,
   defaultValue: Topic = [],
-  validate?: (value: Topic) => Array<{ message: string; index: number }> | undefined,
+  validate?: (
+    value: Topic
+  ) => Array<{ message: string; index: number; condition?: boolean }> | undefined,
   disabled = false
 ) {
   return useCustomInput<Topic>(id, defaultValue, validate, disabled);

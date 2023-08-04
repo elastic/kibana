@@ -111,7 +111,7 @@ export const kafkaOutputFormValues = {
   },
   firstTopicCondition: {
     selector: SETTINGS_OUTPUTS_KAFKA.TOPICS_CONDITION_INPUT,
-    value: 'testCondition',
+    value: 'testCondition: abc',
   },
   firstTopicWhen: {
     selector: SETTINGS_OUTPUTS_KAFKA.TOPICS_WHEN_INPUT,
@@ -123,7 +123,7 @@ export const kafkaOutputFormValues = {
   },
   secondTopicCondition: {
     selector: getSpecificSelectorId(SETTINGS_OUTPUTS_KAFKA.TOPICS_CONDITION_INPUT, 1),
-    value: 'testCondition1',
+    value: 'testCondition1: dca',
   },
   secondTopicWhen: {
     selector: getSpecificSelectorId(SETTINGS_OUTPUTS_KAFKA.TOPICS_WHEN_INPUT, 1),

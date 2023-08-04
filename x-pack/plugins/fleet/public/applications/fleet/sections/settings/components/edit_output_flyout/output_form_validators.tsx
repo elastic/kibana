@@ -293,11 +293,16 @@ export function validateKafkaClientId(value: string) {
 export function validateKafkaTopics(
   topics: Array<{
     topic: string;
+    when?: {
+      condition?: string;
+      type?: string;
+    };
   }>
 ) {
   const errors: Array<{
     message: string;
     index: number;
+    condition?: boolean;
   }> = [];
 
   topics.forEach((topic, index) => {
@@ -307,6 +312,19 @@ export function validateKafkaTopics(
           defaultMessage: 'Topic is required',
         }),
         index,
+      });
+    }
+    if (
+      !topic.when?.condition ||
+      topic.when.condition === '' ||
+      topic.when.condition.split(':').length - 1 !== 1
+    ) {
+      errors.push({
+        message: i18n.translate('xpack.fleet.settings.outputForm.kafkaTopicConditionRequired', {
+          defaultMessage: 'Must be a key, value pair i.e. "http.response.code: 200"',
+        }),
+        index,
+        condition: true,
       });
     }
   });

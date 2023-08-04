@@ -135,15 +135,9 @@ const KafkaTopicsSchema = schema.arrayOf(
       schema.object({
         type: schema.maybe(
           schema.oneOf([
-            schema.literal(kafkaTopicWhenType.And),
-            schema.literal(kafkaTopicWhenType.Not),
-            schema.literal(kafkaTopicWhenType.Or),
             schema.literal(kafkaTopicWhenType.Equals),
             schema.literal(kafkaTopicWhenType.Contains),
             schema.literal(kafkaTopicWhenType.Regexp),
-            schema.literal(kafkaTopicWhenType.HasFields),
-            schema.literal(kafkaTopicWhenType.Network),
-            schema.literal(kafkaTopicWhenType.Range),
           ])
         ),
         condition: schema.maybe(schema.string()),

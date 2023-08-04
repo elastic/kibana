@@ -350,12 +350,14 @@ export function transformOutputToFullPolicyOutput(
         if (whenKeys.length === 0) {
           return { topic: topicName };
         }
-        if (rest.when) {
+        if (rest.when && rest.when.condition) {
+          const [keyName, value] = rest.when.condition.split(':');
+
           return {
             topic: topicName,
             when: {
               [rest.when.type as string]: {
-                message: rest.when.condition,
+                [keyName.replace(/\s/g, '')]: value.replace(/\s/g, ''),
               },
             },
           };

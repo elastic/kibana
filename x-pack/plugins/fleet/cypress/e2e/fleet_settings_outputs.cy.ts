@@ -178,6 +178,7 @@ describe('Outputs', () => {
         it('displays proper error messages', () => {
           selectKafkaOutput();
           cy.getBySel(SETTINGS_OUTPUTS_KAFKA.HEADERS_CLIENT_ID_INPUT).clear();
+          cy.getBySel(SETTINGS_OUTPUTS_KAFKA.TOPICS_ADD_ROW_BUTTON).click();
           cy.getBySel(SETTINGS_SAVE_BTN).click();
 
           cy.contains('Name is required');
@@ -185,13 +186,17 @@ describe('Outputs', () => {
           cy.contains('Username is required');
           cy.contains('Password is required');
           cy.contains('Default topic is required');
+          cy.contains('Topic is required');
           cy.contains(
             'Client ID is invalid. Only letters, numbers, dots, underscores, and dashes are allowed.'
           );
+          cy.contains('Must be a key, value pair i.e. "http.response.code: 200"');
           shouldDisplayError(SETTINGS_OUTPUTS.NAME_INPUT);
           shouldDisplayError(SETTINGS_OUTPUTS_KAFKA.AUTHENTICATION_USERNAME_INPUT);
           shouldDisplayError(SETTINGS_OUTPUTS_KAFKA.AUTHENTICATION_PASSWORD_INPUT);
           shouldDisplayError(SETTINGS_OUTPUTS_KAFKA.TOPICS_DEFAULT_TOPIC_INPUT);
+          shouldDisplayError(SETTINGS_OUTPUTS_KAFKA.TOPICS_CONDITION_INPUT);
+          shouldDisplayError(SETTINGS_OUTPUTS_KAFKA.TOPICS_TOPIC_INPUT);
           shouldDisplayError(SETTINGS_OUTPUTS_KAFKA.HEADERS_CLIENT_ID_INPUT);
         });
       });
