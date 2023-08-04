@@ -112,12 +112,10 @@ describe('useFetchOrCreateRuleExceptionList', () => {
   });
 
   it('initializes hook', async () => {
-    await act(async () => {
-      const { result, waitForNextUpdate } = render();
-      await waitForNextUpdate();
-      await waitForNextUpdate();
-      expect(result.current).toEqual([false, detectionExceptionList]);
-    });
+    const { result, waitForNextUpdate } = render();
+    expect(result.current).toEqual([true, null]);
+    await waitForNextUpdate();
+    expect(result.current).toEqual([false, detectionExceptionList]);
   });
 
   it('fetches the rule with the given ruleId', async () => {
