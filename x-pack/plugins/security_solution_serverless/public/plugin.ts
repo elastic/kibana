@@ -57,7 +57,7 @@ export class SecuritySolutionServerlessPlugin
 
     securitySolution.setGetStartedPage(getSecurityGetStartedComponent(services, productTypes));
 
-    configureNavigation(services);
+    configureNavigation(services, this.config);
     setRoutes(services);
 
     return {};

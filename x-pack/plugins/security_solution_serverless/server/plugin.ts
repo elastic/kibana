@@ -5,8 +5,13 @@
  * 2.0.
  */
 
-import type { PluginInitializerContext, Plugin, CoreSetup, CoreStart } from '@kbn/core/server';
-
+import type {
+  PluginInitializerContext,
+  Plugin,
+  CoreSetup,
+  CoreStart,
+  Logger,
+} from '@kbn/core/server';
 import { getProductAppFeatures } from '../common/pli/pli_features';
 import { METERING_TASK as ENDPOINT_METERING_TASK } from './endpoint/constants/metering';
 import { endpointMeteringService } from './endpoint/services';
@@ -19,7 +24,7 @@ import type {
   SecuritySolutionServerlessPluginStartDeps,
 } from './types';
 import { SecurityUsageReportingTask } from './task_manager/usage_reporting_task';
-import { cloudSecurityMetringTaskProperties } from './cloud_security/metering_tasks_configs';
+import { cloudSecurityMetringTaskProperties } from './cloud_security/cloud_security_metering_task_config';
 
 export class SecuritySolutionServerlessPlugin
   implements
@@ -33,9 +38,11 @@ export class SecuritySolutionServerlessPlugin
   private config: ServerlessSecurityConfig;
   private cspmUsageReportingTask: SecurityUsageReportingTask | undefined;
   private endpointUsageReportingTask: SecurityUsageReportingTask | undefined;
+  private readonly logger: Logger;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config = this.initializerContext.config.get<ServerlessSecurityConfig>();
+    this.logger = this.initializerContext.logger.get();
   }
 
   public setup(coreSetup: CoreSetup, pluginsSetup: SecuritySolutionServerlessPluginSetupDeps) {
@@ -44,6 +51,8 @@ export class SecuritySolutionServerlessPlugin
     // `plugins.forceEnableAllPlugins` flag is enabled).
     const shouldRegister = pluginsSetup.securitySolutionEss == null;
     if (shouldRegister) {
+      const productTypesStr = JSON.stringify(this.config.productTypes, null, 2);
+      this.logger.info(`Security Solution running with product types:\n${productTypesStr}`);
       pluginsSetup.securitySolution.setAppFeatures(getProductAppFeatures(this.config.productTypes));
     }
 

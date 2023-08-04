@@ -6,6 +6,7 @@
  */
 
 import { APP_PATH, SecurityPageName } from '@kbn/security-solution-plugin/common';
+import type { ServerlessSecurityPublicConfig } from '../types';
 import type { Services } from '../common/services';
 import { subscribeBreadcrumbs } from './breadcrumbs';
 import { SecurityPagePath } from './links/constants';
@@ -14,10 +15,16 @@ import { getSecuritySideNavComponent } from './side_navigation';
 
 const SECURITY_MANAGEMENT_PATH = `${APP_PATH}${SecurityPagePath[SecurityPageName.projectSettings]}`;
 
-export const configureNavigation = (services: Services) => {
+export const configureNavigation = (
+  services: Services,
+  serverConfig: ServerlessSecurityPublicConfig
+) => {
   const { serverless, securitySolution, management } = services;
   securitySolution.setIsSidebarEnabled(false);
-  management.setLandingPageRedirect(SECURITY_MANAGEMENT_PATH);
+
+  if (!serverConfig.developer.disableManagementUrlRedirect) {
+    management.setLandingPageRedirect(SECURITY_MANAGEMENT_PATH);
+  }
 
   serverless.setProjectHome(APP_PATH);
   serverless.setSideNavComponent(getSecuritySideNavComponent(services));

@@ -70,7 +70,7 @@ export enum SecurityPageName {
    * Warning: Computed values are not permitted in an enum with string valued members
    * All threat intelligence page names must match `TIPageId` in x-pack/plugins/threat_intelligence/public/common/navigation/types.ts
    */
-  threatIntelligenceIndicators = 'threat_intelligence-indicators',
+  threatIntelligence = 'threat_intelligence',
   timelines = 'timelines',
   timelinesTemplates = 'timelines-templates',
   trustedApps = 'trusted_apps',

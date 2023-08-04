@@ -20,6 +20,7 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { FilterManager, NowProvider, QueryService } from '@kbn/data-plugin/public';
 import { DEFAULT_APP_CATEGORIES, AppNavLinkStatus } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
+import type { FleetUiExtensionGetterOptions } from './management/pages/policy/view/ingest_manager_integration/types';
 import type {
   PluginSetup,
   PluginStart,
@@ -276,23 +277,30 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
     if (plugins.fleet) {
       const { registerExtension } = plugins.fleet;
+      const registerOptions: FleetUiExtensionGetterOptions = {
+        coreStart: core,
+        depsStart: plugins,
+        services: {
+          upsellingService: this.contract.upsellingService,
+        },
+      };
 
       registerExtension({
         package: 'endpoint',
         view: 'package-policy-edit',
-        Component: getLazyEndpointPolicyEditExtension(core, plugins),
+        Component: getLazyEndpointPolicyEditExtension(registerOptions),
       });
 
       registerExtension({
         package: 'endpoint',
         view: 'package-policy-response',
-        Component: getLazyEndpointPolicyResponseExtension(core, plugins),
+        Component: getLazyEndpointPolicyResponseExtension(registerOptions),
       });
 
       registerExtension({
         package: 'endpoint',
         view: 'package-generic-errors-list',
-        Component: getLazyEndpointGenericErrorsListExtension(core, plugins),
+        Component: getLazyEndpointGenericErrorsListExtension(registerOptions),
       });
 
       registerExtension({
@@ -310,7 +318,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       registerExtension({
         package: 'endpoint',
         view: 'package-detail-custom',
-        Component: getLazyEndpointPackageCustomExtension(core, plugins),
+        Component: getLazyEndpointPackageCustomExtension(registerOptions),
       });
 
       registerExtension({

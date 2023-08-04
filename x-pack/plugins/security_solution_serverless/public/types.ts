@@ -13,7 +13,7 @@ import type {
 import type { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/public';
 import type { ManagementSetup, ManagementStart } from '@kbn/management-plugin/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
-import type { SecurityProductTypes } from '../common/config';
+import type { SecurityProductTypes, DeveloperConfig } from '../common/config';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SecuritySolutionServerlessPluginSetup {}
@@ -38,4 +38,5 @@ export interface SecuritySolutionServerlessPluginStartDeps {
 
 export interface ServerlessSecurityPublicConfig {
   productTypes: SecurityProductTypes;
+  developer: DeveloperConfig;
 }

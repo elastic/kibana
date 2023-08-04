@@ -9,12 +9,11 @@ import React, { useState } from 'react';
 import { EuiButton } from '@elastic/eui';
 import type { Meta, Story } from '@storybook/react/types-6-0';
 import { i18n } from '@kbn/i18n';
-import type { DataViewField } from '@kbn/data-views-plugin/public';
-import type { DataView } from '@kbn/data-views-plugin/public';
 import { AssetDetails } from './asset_details';
 import { decorateWithGlobalStorybookThemeProviders } from '../../test_utils/use_global_storybook_theme';
 import { FlyoutTabIds, Tab, type AssetDetailsProps } from './types';
 import { DecorateWithKibanaContext } from './__stories__/decorator';
+import { assetDetailsState } from './__stories__/context/fixtures';
 
 const links: AssetDetailsProps['links'] = ['alertRule', 'nodeDetails', 'apmServices'];
 const tabs: Tab[] = [
@@ -75,31 +74,7 @@ const stories: Meta<AssetDetailsProps> = {
     },
   },
   args: {
-    node: {
-      name: 'host1',
-      id: 'host1-macOS',
-      ip: '192.168.0.1',
-    },
-    overrides: {
-      overview: {
-        metricsDataView: {
-          id: 'default',
-          getFieldByName: () => 'hostname' as unknown as DataViewField,
-        } as unknown as DataView,
-        logsDataView: {
-          id: 'default',
-          getFieldByName: () => 'hostname' as unknown as DataViewField,
-        } as unknown as DataView,
-      },
-      metadata: {
-        showActionsColumn: true,
-      },
-    },
-    nodeType: 'host',
-    dateRange: {
-      from: '2023-04-09T11:07:49Z',
-      to: '2023-04-09T11:23:49Z',
-    },
+    ...assetDetailsState,
     tabs,
     links,
   },

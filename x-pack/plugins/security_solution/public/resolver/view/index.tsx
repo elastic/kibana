@@ -16,9 +16,7 @@ import type { State } from '../../common/store/types';
  */
 // eslint-disable-next-line react/display-name
 export const Resolver = React.memo((props: ResolverProps) => {
-  const store = useSelector(
-    (state: State) => state.analyzer.analyzerById[props.resolverComponentInstanceID]
-  );
+  const store = useSelector((state: State) => state.analyzer[props.resolverComponentInstanceID]);
 
   const dispatch = useDispatch();
   if (!store) {

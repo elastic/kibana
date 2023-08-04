@@ -210,7 +210,7 @@
         "signature": [
           "(start: number, end: number) => ",
           "Type",
-          "<number, unknown, unknown>"
+          "<number, number, unknown>"
         ],
         "path": "packages/kbn-io-ts-utils/src/in_range_rt/index.ts",
         "deprecated": false,
@@ -857,7 +857,7 @@
         "description": [],
         "signature": [
           "Type",
-          "<number, unknown, unknown>"
+          "<number, number, unknown>"
         ],
         "path": "packages/kbn-io-ts-utils/src/to_number_rt/index.ts",
         "deprecated": false,

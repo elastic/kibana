@@ -49,7 +49,6 @@ import { IconPipeline } from '../common/icons/pipeline';
 import { IconSavedObject } from '../common/icons/saved_object';
 import { IconDashboards } from '../common/icons/dashboards';
 import { IconEntityAnalytics } from '../common/icons/entity_analytics';
-
 import { HostIsolationExceptionsApiClient } from './pages/host_isolation_exceptions/host_isolation_exceptions_api_client';
 
 const categories = [
@@ -177,6 +176,7 @@ export const links: LinkItem = {
       path: ENTITY_ANALYTICS_MANAGEMENT_PATH,
       skipUrlState: true,
       hideTimeline: true,
+      capabilities: [`${SERVER_APP_ID}.entity-analytics`],
       experimentalKey: 'riskScoringRoutesEnabled',
     },
     {
@@ -218,7 +218,7 @@ export const getManagementFilteredLinks = async (
     fleetAuthz && currentUser
       ? calculateEndpointAuthz(licenseService, fleetAuthz, currentUser.roles)
       : getEndpointAuthzInitialState();
-
+  const showEntityAnalytics = licenseService.isPlatinumPlus();
   const showHostIsolationExceptions =
     canAccessHostIsolationExceptions || // access host isolation exceptions is a paid feature, always show the link.
     // read host isolation exceptions is not a paid feature, to allow deleting exceptions after a downgrade scenario.
@@ -254,6 +254,10 @@ export const getManagementFilteredLinks = async (
 
   if (!canReadBlocklist) {
     linksToExclude.push(SecurityPageName.blocklist);
+  }
+
+  if (!showEntityAnalytics) {
+    linksToExclude.push(SecurityPageName.entityAnalyticsManagement);
   }
 
   return excludeLinks(linksToExclude);
