@@ -202,7 +202,7 @@ export function CanvasPageProvider({ getService, getPageObjects }: FtrProviderCo
       await testSubjects.click('nextPageButton');
     },
 
-    async openPageManager() {
+    async togglePageManager() {
       log.debug('CanvasPage.openPageManager');
       await testSubjects.click('canvasPageManagerButton');
     },
@@ -210,9 +210,10 @@ export function CanvasPageProvider({ getService, getPageObjects }: FtrProviderCo
     async addNewPage() {
       log.debug('CanvasPage.addNewPage');
       if (!(await testSubjects.exists('canvasAddPageButton'))) {
-        await this.openPageManager();
+        await this.togglePageManager();
       }
       await testSubjects.click('canvasAddPageButton');
+      await this.togglePageManager();
     },
   };
 }

@@ -112,13 +112,7 @@ const fetchContextFn = ({ dispatch, getState }, index, element, fullRefresh = fa
     });
 };
 
-// It is necessary to debounce fetching of the context in the situations
-// when the components of the arguments update the expression. For example, suppose there are
-// multiple datacolumns that change the column to the first one from the list after datasource update.
-// In that case, it is necessary to fetch the context only for the last version of the expression.
-const fetchContextFnDebounced = debounce(fetchContextFn, 100);
-
-export const fetchContext = createThunk('fetchContext', fetchContextFnDebounced);
+export const fetchContext = createThunk('fetchContext', fetchContextFn);
 
 const fetchRenderableWithContextFn = ({ dispatch, getState }, element, ast, context) => {
   const argumentPath = [element.id, 'expressionRenderable'];
