@@ -18,7 +18,7 @@
       "GET"
     ],
     "patterns": [
-      "{indices}/_mvt/{field}/{zoom}/{x}/{y}"
+      "{index}/_mvt/{field}/{zoom}/{x}/{y}"
     ],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/search-vector-tile-api.html"
   }
