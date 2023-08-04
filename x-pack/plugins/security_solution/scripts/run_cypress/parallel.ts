@@ -87,10 +87,10 @@ export const cli = () => {
       const cypressConfigFilePath = require.resolve(`../../${argv.configFile}`) as string;
       const cypressConfigFile = await import(require.resolve(`../../${argv.configFile}`));
       const spec: string | undefined = argv?.spec as string;
-      const basePath = process.cwd().split('kibana/')[1];
       let files = retrieveIntegrations(spec ? [spec] : cypressConfigFile?.e2e?.specPattern);
 
       if (argv.changedSpecsOnly) {
+        const basePath = process.cwd().split('kibana/')[1];
         files = findChangedFiles('main', false)
           .filter(
             minimatch.filter(path.join(basePath, cypressConfigFile?.e2e?.specPattern), {
@@ -383,10 +383,10 @@ ${JSON.stringify(config.getAll(), null, 2)}
             // Normalized the set of available env vars in cypress
             const cyCustomEnv = {
               ...ftrEnv,
-              burn: argv.burn,
+              ...argv.env,
 
               // NOTE:
-              // ELASTICSEARCH_URL needs to be crated here with auth because SIEM cypress setup depends on it. At some
+              // ELASTICSEARCH_URL needs to be created here with auth because SIEM cypress setup depends on it. At some
               // points we should probably try to refactor that code to use `ELASTICSEARCH_URL_WITH_AUTH` instead
               ELASTICSEARCH_URL:
                 ftrEnv.ELASTICSEARCH_URL ?? createUrlFromFtrConfig('elasticsearch', true),
