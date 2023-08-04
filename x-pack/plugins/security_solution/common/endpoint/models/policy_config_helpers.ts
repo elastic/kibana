@@ -6,8 +6,8 @@
  */
 
 import { get, set } from 'lodash';
-import { ProtectionModes, PolicyOperatingSystem } from '../types';
 import type { PolicyConfig } from '../types';
+import { PolicyOperatingSystem, ProtectionModes } from '../types';
 
 interface PolicyProtectionReference {
   keyPath: string;
@@ -43,14 +43,14 @@ const getPolicyProtectionsReference = (): PolicyProtectionReference[] => {
       enableValue: ProtectionModes.prevent,
     },
     {
-      keyPath: 'behaviour_protection.mode',
+      keyPath: 'behavior_protection.mode',
       osList: [...allOsValues],
       disableValue: ProtectionModes.off,
       enableValue: ProtectionModes.prevent,
     },
     {
       keyPath: 'attack_surface_reduction.credential_hardening.enabled',
-      osList: [...allOsValues],
+      osList: [PolicyOperatingSystem.windows],
       disableValue: false,
       enableValue: true,
     },
@@ -177,14 +177,30 @@ export const setPolicyToEventCollectionOnly = (policy: PolicyConfig): PolicyConf
 /**
  * Checks to see if the provided policy is set to Event Collection only
  */
-export const isPolicySetToEventCollectionOnly = (policy: PolicyConfig): boolean => {
+export const isPolicySetToEventCollectionOnly = (
+  policy: PolicyConfig
+): { isOnlyCollectingEvents: boolean; message?: string } => {
   const protectionsRef = getPolicyProtectionsReference();
+  let message: string | undefined;
 
-  return protectionsRef.some(({ keyPath, osList, disableValue }) => {
-    return (
-      osList.some((osValue) => {
-        return get(policy, `${osValue}.${keyPath}`) !== disableValue;
-      }) === false
-    );
+  const hasEnabledProtection = protectionsRef.some(({ keyPath, osList, disableValue }) => {
+    const hasOsPropertyEnabled = osList.some((osValue) => {
+      const fullKeyPathForOs = `${osValue}.${keyPath}`;
+      const currentValue = get(policy, fullKeyPathForOs);
+      const isEnabled = currentValue !== disableValue;
+
+      if (isEnabled) {
+        message = `property [${fullKeyPathForOs}] is set to [${currentValue}]`;
+      }
+
+      return isEnabled;
+    });
+
+    return hasOsPropertyEnabled;
   });
+
+  return {
+    isOnlyCollectingEvents: !hasEnabledProtection,
+    message,
+  };
 };

@@ -233,12 +233,13 @@ export const getPackagePolicyUpdateCallback = (
     }
 
     // If no Policy Protection allowed (ex. serverless)
+    const eventsOnlyPolicy = isPolicySetToEventCollectionOnly(newEndpointPackagePolicy);
     if (
       !appFeatures.isEnabled('endpointPolicyProtections') &&
-      !isPolicySetToEventCollectionOnly(newEndpointPackagePolicy)
+      !eventsOnlyPolicy.isOnlyCollectingEvents
     ) {
       logger.info(
-        `Endpoint integration policy [${endpointIntegrationData.id}][${endpointIntegrationData.name}] adjusted due to [endpointPolicyProtections] appFeature not being enabled`
+        `Endpoint integration policy [${endpointIntegrationData.id}][${endpointIntegrationData.name}] adjusted due to [endpointPolicyProtections] appFeature not being enabled. ${eventsOnlyPolicy.message}`
       );
 
       endpointIntegrationData.inputs[0].config.policy.value =

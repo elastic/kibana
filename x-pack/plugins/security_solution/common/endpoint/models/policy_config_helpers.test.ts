@@ -292,44 +292,47 @@ describe('Policy Config helpers', () => {
       {
         keyPath: `${PolicyOperatingSystem.windows}.malware.mode`,
         keyValue: ProtectionModes.prevent,
-        expectedResult: true,
+        expectedResult: false,
       },
       {
         keyPath: `${PolicyOperatingSystem.mac}.malware.mode`,
         keyValue: ProtectionModes.off,
-        expectedResult: false,
+        expectedResult: true,
       },
       {
         keyPath: `${PolicyOperatingSystem.windows}.ransomware.mode`,
         keyValue: ProtectionModes.prevent,
-        expectedResult: true,
+        expectedResult: false,
       },
       {
         keyPath: `${PolicyOperatingSystem.linux}.memory_protection.mode`,
         keyValue: ProtectionModes.off,
+        expectedResult: true,
+      },
+      {
+        keyPath: `${PolicyOperatingSystem.mac}.behavior_protection.mode`,
+        keyValue: ProtectionModes.detect,
         expectedResult: false,
       },
       {
-        keyPath: `${PolicyOperatingSystem.mac}.behaviour_protection.mode`,
-        keyValue: ProtectionModes.detect,
-        expectedResult: true,
-      },
-      {
-        keyPath: `${PolicyOperatingSystem.linux}.attack_surface_reduction.credential_hardening.enabled`,
+        keyPath: `${PolicyOperatingSystem.windows}.attack_surface_reduction.credential_hardening.enabled`,
         keyValue: true,
-        expectedResult: true,
+        expectedResult: false,
       },
       {
         keyPath: `${PolicyOperatingSystem.windows}.antivirus_registration.enabled`,
         keyValue: true,
-        expectedResult: true,
+        expectedResult: false,
       },
     ])(
       'should return `$expectedResult` if `$keyPath` is set to `$keyValue`',
       ({ keyPath, keyValue, expectedResult }) => {
         set(policy, keyPath, keyValue);
 
-        expect(isPolicySetToEventCollectionOnly(policy)).toBe(expectedResult);
+        expect(isPolicySetToEventCollectionOnly(policy)).toEqual({
+          isOnlyCollectingEvents: expectedResult,
+          message: expectedResult ? undefined : `property [${keyPath}] is set to [${keyValue}]`,
+        });
       }
     );
   });
