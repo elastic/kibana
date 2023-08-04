@@ -8,10 +8,10 @@
 
 import React from 'react';
 import {
-  KibanaThemeProvider as KbnThemeProvider,
   KibanaThemeProviderProps as KbnThemeProviderProps,
   wrapWithTheme as kbnWrapWithTheme,
 } from '@kbn/react-kibana-context-theme';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 
 /** @deprecated Use `KibanaThemeProviderProps` from `@kbn/react-kibana-context-theme`  */
 export type KibanaThemeProviderProps = Pick<KbnThemeProviderProps, 'children' | 'modify'> &
@@ -19,9 +19,9 @@ export type KibanaThemeProviderProps = Pick<KbnThemeProviderProps, 'children' | 
 
 /** @deprecated Use `KibanaThemeProvider` from `@kbn/react-kibana-context-theme`  */
 export const KibanaThemeProvider = ({ children, theme$, modify }: KibanaThemeProviderProps) => (
-  <KbnThemeProvider theme={{ theme$ }} {...modify}>
+  <KibanaRenderContextProvider theme={{ theme$ }} {...modify}>
     {children}
-  </KbnThemeProvider>
+  </KibanaRenderContextProvider>
 );
 
 type Theme = KbnThemeProviderProps['theme']['theme$'];

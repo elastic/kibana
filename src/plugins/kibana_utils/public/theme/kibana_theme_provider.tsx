@@ -11,7 +11,7 @@ import { Observable } from 'rxjs';
 
 import { EuiProviderProps } from '@elastic/eui';
 import { CoreTheme } from '@kbn/core-theme-browser';
-import { KibanaThemeProvider as KbnThemeProvider } from '@kbn/react-kibana-context-theme';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 
 export interface KibanaThemeProviderProps {
   theme$: Observable<CoreTheme>;
@@ -20,5 +20,7 @@ export interface KibanaThemeProviderProps {
 
 /** @deprecated use `KibanaThemeProvider` from `@kbn/react-kibana-context-theme */
 export const KibanaThemeProvider: FC<KibanaThemeProviderProps> = ({ theme$, modify, children }) => (
-  <KbnThemeProvider {...{ theme: { theme$ }, modify }}>{children}</KbnThemeProvider>
+  <KibanaRenderContextProvider {...{ theme: { theme$ }, modify }}>
+    {children}
+  </KibanaRenderContextProvider>
 );

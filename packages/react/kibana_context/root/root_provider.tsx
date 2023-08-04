@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { EuiErrorBoundary } from '@elastic/eui';
 import { I18nStart } from '@kbn/core-i18n-browser';
 import React, { FC } from 'react';
 
@@ -13,10 +14,13 @@ import { KibanaEuiProvider, type KibanaEuiProviderProps } from './eui_provider';
 
 /** Props for the KibanaRootContextProvider */
 export interface KibanaRootContextProviderProps extends KibanaEuiProviderProps {
+  // TODO: clintandrewhall - this should *not* be optional, but must be for now to avoid breaking
+  // components using `KibanaThemeProvider` as a rendering context.
   /** The `I18nStart` API from `CoreStart`. */
-  i18n: I18nStart;
+  i18n?: I18nStart;
 }
 
+const EmptyContext = ({ children }: { children: React.ReactNode }) => <>{children}</>;
 /**
  * The `KibanaRootContextProvider` provides the necessary context at the root of Kibana, including
  * initialization and the theme and i18n contexts.  This context should only be used _once_, and
@@ -35,8 +39,14 @@ export const KibanaRootContextProvider: FC<KibanaRootContextProviderProps> = ({
   children,
   i18n,
   ...props
-}) => (
-  <KibanaEuiProvider {...props}>
-    <i18n.Context>{children}</i18n.Context>
-  </KibanaEuiProvider>
-);
+}) => {
+  const I18nContext = i18n ? i18n.Context : EmptyContext;
+
+  return (
+    <KibanaEuiProvider {...props}>
+      <I18nContext>
+        <EuiErrorBoundary>{children}</EuiErrorBoundary>
+      </I18nContext>
+    </KibanaEuiProvider>
+  );
+};
