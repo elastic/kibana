@@ -46,11 +46,11 @@ export function getSortForSearchSource({
 
   const sortForSearchSource = sortPairs.map((sortPair: Record<string, string>) => {
     if (timeFieldName && sortPair[timeFieldName]) {
-      return getESQuerySortForTimeField(
+      return getESQuerySortForTimeField({
+        sortDir: sortPair[timeFieldName] as SortDirection,
         timeFieldName,
-        sortPair[timeFieldName] as SortDirection,
-        dataView.isTimeNanosBased()
-      );
+        isTimeNanosBased: dataView.isTimeNanosBased(),
+      });
     }
     return sortPair as EsQuerySortValue;
   });
@@ -65,7 +65,7 @@ export function getSortForSearchSource({
   //     ? firstSortPair[1]
   //     : Object.values(firstSortPair)[0];
   //   sortForSearchSource.push(
-  //     getESQuerySortForTieBreaker(getTieBreakerField(dataView, uiSettings), firstPairSortDir)
+  //     getESQuerySortForTieBreaker(getTieBreakerFieldName(dataView, uiSettings), firstPairSortDir)
   //   );
   // }
 

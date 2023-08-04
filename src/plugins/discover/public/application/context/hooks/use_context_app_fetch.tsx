@@ -22,7 +22,7 @@ import {
 import { AppState } from '../services/context_state';
 import { useDiscoverServices } from '../../../hooks/use_discover_services';
 import {
-  getTieBreakerField,
+  getTieBreakerFieldName,
   getEsQuerySort,
 } from '../../../../common/utils/sorting/get_es_query_sort';
 
@@ -55,7 +55,10 @@ export function useContextAppFetch({
   const searchSource = useMemo(() => {
     return data.search.searchSource.createEmpty();
   }, [data.search.searchSource]);
-  const tieBreakerField = useMemo(() => getTieBreakerField(dataView, config), [config, dataView]);
+  const tieBreakerFieldName = useMemo(
+    () => getTieBreakerFieldName(dataView, config),
+    [config, dataView]
+  );
 
   const [fetchedState, setFetchedState] = useState<ContextFetchState>(
     getInitialContextQueryState()
@@ -70,7 +73,7 @@ export function useContextAppFetch({
       defaultMessage: 'Unable to load the anchor document',
     });
 
-    if (!tieBreakerField) {
+    if (!tieBreakerFieldName) {
       setState(createError('anchorStatus', FailureReason.INVALID_TIEBREAKER));
       toastNotifications.addDanger({
         title: errorTitle,
@@ -90,12 +93,12 @@ export function useContextAppFetch({
 
     try {
       setState({ anchorStatus: { value: LoadingStatus.LOADING } });
-      const sort = getEsQuerySort(
-        dataView.timeFieldName!,
-        tieBreakerField,
-        SortDirection.desc,
-        dataView.isTimeNanosBased()
-      );
+      const sort = getEsQuerySort({
+        sortDir: SortDirection.desc,
+        timeFieldName: dataView.timeFieldName!,
+        tieBreakerFieldName,
+        isTimeNanosBased: dataView.isTimeNanosBased(),
+      });
       const anchor = await fetchAnchor(anchorId, dataView, searchSource, sort, useNewFieldsApi);
       setState({ anchor, anchorStatus: { value: LoadingStatus.LOADED } });
       return anchor;
@@ -107,7 +110,7 @@ export function useContextAppFetch({
       });
     }
   }, [
-    tieBreakerField,
+    tieBreakerFieldName,
     setState,
     toastNotifications,
     dataView,
@@ -136,7 +139,7 @@ export function useContextAppFetch({
               type,
               dataView,
               anchor,
-              tieBreakerField,
+              tieBreakerFieldName,
               SortDirection.desc,
               count,
               filters,
@@ -159,7 +162,7 @@ export function useContextAppFetch({
       filterManager,
       appState,
       fetchedState.anchor,
-      tieBreakerField,
+      tieBreakerFieldName,
       setState,
       dataView,
       toastNotifications,

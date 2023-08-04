@@ -14,30 +14,39 @@ import { CONTEXT_TIE_BREAKER_FIELDS_SETTING } from '@kbn/discover-utils';
 /**
  * Returns `EsQuerySort` which is used to sort records in the ES query
  * https://www.elastic.co/guide/en/elasticsearch/reference/current/search-request-sort.html
- * @param timeField
- * @param tieBreakerField
  * @param sortDir
+ * @param timeFieldName
+ * @param tieBreakerFieldName
  * @param isTimeNanosBased
  */
-export function getEsQuerySort(
-  timeField: string,
-  tieBreakerField: string,
-  sortDir: SortDirection,
-  isTimeNanosBased: boolean
-): [EsQuerySortValue, EsQuerySortValue] {
+export function getEsQuerySort({
+  sortDir,
+  timeFieldName,
+  tieBreakerFieldName,
+  isTimeNanosBased,
+}: {
+  sortDir: SortDirection;
+  timeFieldName: string;
+  tieBreakerFieldName: string;
+  isTimeNanosBased: boolean;
+}): [EsQuerySortValue, EsQuerySortValue] {
   return [
-    getESQuerySortForTimeField(timeField, sortDir, isTimeNanosBased),
-    getESQuerySortForTieBreaker(tieBreakerField, sortDir),
+    getESQuerySortForTimeField({ sortDir, timeFieldName, isTimeNanosBased }),
+    getESQuerySortForTieBreaker({ sortDir, tieBreakerFieldName }),
   ];
 }
 
-export function getESQuerySortForTimeField(
-  timeField: string,
-  sortDir: SortDirection,
-  isTimeNanosBased: boolean
-): EsQuerySortValue {
+export function getESQuerySortForTimeField({
+  sortDir,
+  timeFieldName,
+  isTimeNanosBased,
+}: {
+  sortDir: SortDirection;
+  timeFieldName: string;
+  isTimeNanosBased: boolean;
+}): EsQuerySortValue {
   return {
-    [timeField]: {
+    [timeFieldName]: {
       order: sortDir,
       ...(isTimeNanosBased
         ? {
@@ -49,11 +58,14 @@ export function getESQuerySortForTimeField(
   };
 }
 
-export function getESQuerySortForTieBreaker(
-  tieBreakerField: string,
-  sortDir: SortDirection
-): EsQuerySortValue {
-  return { [tieBreakerField]: sortDir };
+export function getESQuerySortForTieBreaker({
+  sortDir,
+  tieBreakerFieldName,
+}: {
+  sortDir: SortDirection;
+  tieBreakerFieldName: string;
+}): EsQuerySortValue {
+  return { [tieBreakerFieldName]: sortDir };
 }
 
 /**
@@ -66,7 +78,7 @@ const META_FIELD_NAMES: string[] = ['_seq_no', '_doc', '_uid'];
  * Returns a field from the intersection of the set of sortable fields in the
  * given data view and a given set of candidate field names.
  */
-export function getTieBreakerField(dataView: DataView, uiSettings: IUiSettingsClient) {
+export function getTieBreakerFieldName(dataView: DataView, uiSettings: IUiSettingsClient) {
   const sortableFields = uiSettings
     .get(CONTEXT_TIE_BREAKER_FIELDS_SETTING)
     .filter(
