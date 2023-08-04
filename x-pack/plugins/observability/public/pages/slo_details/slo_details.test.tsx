@@ -158,7 +158,7 @@ describe('SLO Details Page', () => {
     useLicenseMock.mockReturnValue({ hasAtLeast: () => true });
     useFetchHistoricalSummaryMock.mockReturnValue({
       isLoading: true,
-      data: {},
+      data: [],
     });
 
     render(<SloDetailsPage />);
@@ -237,7 +237,17 @@ describe('SLO Details Page', () => {
 
     fireEvent.click(button!);
 
-    const { id, createdAt, enabled, revision, summary, settings, updatedAt, ...newSlo } = slo;
+    const {
+      id,
+      createdAt,
+      enabled,
+      revision,
+      summary,
+      settings,
+      updatedAt,
+      instanceId,
+      ...newSlo
+    } = slo;
 
     expect(mockClone).toBeCalledWith({
       originalSloId: slo.id,
