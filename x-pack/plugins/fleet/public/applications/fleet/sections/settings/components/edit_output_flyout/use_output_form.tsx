@@ -589,6 +589,9 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
 
         switch (typeInput.value) {
           case outputType.Kafka:
+            const definedCA = kafkaSslCertificateAuthoritiesInput.value.filter(
+              (val) => val !== ''
+            ).length;
             return {
               name: nameInput.value,
               type: outputType.Kafka,
@@ -596,6 +599,15 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
               is_default: defaultOutputInput.value,
               is_default_monitoring: defaultMonitoringOutputInput.value,
               config_yaml: additionalYamlConfigInput.value,
+              ...(definedCA
+                ? {
+                    ssl: {
+                      certificate_authorities: kafkaSslCertificateAuthoritiesInput.value.filter(
+                        (val) => val !== ''
+                      ),
+                    },
+                  }
+                : {}),
               ...(kafkaAuthMethodInput.value === kafkaAuthType.Ssl
                 ? {
                     ssl: {
@@ -607,7 +619,6 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
                     },
                   }
                 : {}),
-
               proxy_id: proxyIdValue,
 
               client_id: kafkaClientIdInput.value || undefined,

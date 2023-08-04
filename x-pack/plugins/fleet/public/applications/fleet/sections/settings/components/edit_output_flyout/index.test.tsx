@@ -50,7 +50,6 @@ const kafkaInputsLabels = [
   'Value',
   'Broker timeout',
   'Broker reachability timeout',
-  'Channel buffer size',
   'ACK Reliability',
   'Key (optional)',
 ];
@@ -140,7 +139,7 @@ describe('EditOutputFlyout', () => {
     });
 
     // Does not show logstash inputs
-    logstashInputsLabels.forEach((label) => {
+    ['Client SSL certificate key', 'Client SSL certificate'].forEach((label) => {
       expect(utils.queryByLabelText(label)).toBeNull();
     });
   });

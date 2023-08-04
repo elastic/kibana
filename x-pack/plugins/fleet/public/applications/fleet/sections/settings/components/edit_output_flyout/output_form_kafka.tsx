@@ -107,6 +107,26 @@ export const OutputFormKafkaSection: React.FunctionComponent<Props> = (props) =>
       <OutputFormKafkaAuthentication inputs={inputs} />
       <EuiSpacer size="m" />
 
+      <MultiRowInput
+        placeholder={i18n.translate(
+          'xpack.fleet.settings.editOutputFlyout.sslCertificateAuthoritiesInputPlaceholder',
+          {
+            defaultMessage: 'Specify certificate authority',
+          }
+        )}
+        label={i18n.translate(
+          'xpack.fleet.settings.editOutputFlyout.sslCertificateAuthoritiesInputLabel',
+          {
+            defaultMessage: 'Server SSL certificate authorities (optional)',
+          }
+        )}
+        multiline={true}
+        sortable={false}
+        {...inputs.kafkaSslCertificateAuthoritiesInput.props}
+      />
+
+      <EuiSpacer size="m" />
+
       <OutputFormKafkaPartitioning inputs={inputs} />
       <EuiSpacer size="m" />
 

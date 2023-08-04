@@ -20,7 +20,6 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { MultiRowInput } from '../multi_row_input';
 import { kafkaAuthType, kafkaSaslMechanism } from '../../../../../../../common/constants';
 
 import type { OutputFormInputsType } from './use_output_form';
@@ -73,23 +72,6 @@ export const OutputFormKafkaAuthentication: React.FunctionComponent<{
       case kafkaAuthType.Ssl:
         return (
           <>
-            <MultiRowInput
-              placeholder={i18n.translate(
-                'xpack.fleet.settings.editOutputFlyout.sslCertificateAuthoritiesInputPlaceholder',
-                {
-                  defaultMessage: 'Specify certificate authority',
-                }
-              )}
-              label={i18n.translate(
-                'xpack.fleet.settings.editOutputFlyout.sslCertificateAuthoritiesInputLabel',
-                {
-                  defaultMessage: 'Server SSL certificate authorities (optional)',
-                }
-              )}
-              multiline={true}
-              sortable={false}
-              {...inputs.kafkaSslCertificateAuthoritiesInput.props}
-            />
             <EuiFormRow
               fullWidth
               label={
@@ -125,7 +107,7 @@ export const OutputFormKafkaAuthentication: React.FunctionComponent<{
               <EuiTextArea
                 fullWidth
                 rows={5}
-                {...inputs.sslKeyInput.props}
+                {...inputs.kafkaSslKeyInput.props}
                 placeholder={i18n.translate(
                   'xpack.fleet.settings.editOutputFlyout.sslKeyInputPlaceholder',
                   {
