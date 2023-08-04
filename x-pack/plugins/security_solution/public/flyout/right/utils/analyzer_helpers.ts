@@ -52,7 +52,7 @@ export const getAncestorTreeNodes = (
  * Helper function to recursively create descendant tree nodes
  * @param statsNodes array of all statsNodes
  * @param node current node which we populate the children for
- * @param childrenCountLimit number of children displayed, default to 3
+ * @param childCountLimit number of children displayed, default to 3
  * @param descendantLevel number of level of descendants to reach
  * @param idx current level number for comparison to descendatLevel
  * @return a node list for EuiTreeView
@@ -64,9 +64,9 @@ export const getDescendantTreeNodes = (
   descendantLevel: number,
   idx: number
 ): Node[] | undefined => {
-  const decendantNodes = statsNodes.filter((child) => child.parent === node.id);
+  const descendantNodes = statsNodes.filter((child) => child.parent === node.id);
 
-  if (idx === descendantLevel && decendantNodes.length > 0) {
+  if (idx === descendantLevel && descendantNodes.length > 0) {
     return [{ id: `descendant`, label: '...', isExpanded: false }];
   }
 
@@ -75,21 +75,21 @@ export const getDescendantTreeNodes = (
     descendantLevel < 0 ||
     idx < 0 ||
     idx >= descendantLevel ||
-    !decendantNodes ||
-    decendantNodes.length === 0
+    !descendantNodes ||
+    descendantNodes.length === 0
   ) {
     return undefined;
   }
 
-  const decendantTreeNodes: Node[] = [];
-  decendantNodes.forEach((decendant, i) => {
+  const descendantTreeNodes: Node[] = [];
+  descendantNodes.forEach((descendant, i) => {
     if (i < childCountLimit) {
-      decendantTreeNodes.push({
-        id: decendant.id,
-        label: decendant.name,
+      descendantTreeNodes.push({
+        id: descendant.id,
+        label: descendant.name,
         children: getDescendantTreeNodes(
           statsNodes,
-          decendant,
+          descendant,
           childCountLimit,
           descendantLevel,
           idx + 1
@@ -98,16 +98,16 @@ export const getDescendantTreeNodes = (
       });
     }
     if (i === childCountLimit) {
-      decendantTreeNodes.push({ id: `more-child`, label: '...' });
+      descendantTreeNodes.push({ id: `more-child`, label: '...' });
     }
   });
-  return decendantTreeNodes;
+  return descendantTreeNodes;
 };
 
 /**
  * Helper function to create tree nodes based on statsNode list from resolver api
  * @param statsNodes type StatsNode[]
- * @param childrenCountLimit optional parameter to limit the number of children displayed, default to 3
+ * @param childCountLimit optional parameter to limit the number of children displayed, default to 3
  * @param ancestorLevel optional parameter to limit the number of level of ancestors
  * @param descendantLevel optional parameter to limit the number of level of descendants
  * @return a node list for EuiTreeView
