@@ -43,9 +43,10 @@ import { NavControlsService } from './nav_controls';
 import { NavLinksService } from './nav_links';
 import { ProjectNavigationService } from './project_navigation';
 import { RecentlyAccessedService } from './recently_accessed';
-import { Header, ProjectHeader, ProjectSideNavigation } from './ui';
+import { Header, LoadingIndicator, ProjectHeader, ProjectSideNavigation } from './ui';
 import { registerAnalyticsContextProvider } from './register_analytics_context_provider';
 import type { InternalChromeStart } from './types';
+import { HeaderTopBanner } from './ui/header/header_top_banner';
 
 const IS_LOCKED_KEY = 'core.chrome.isLocked';
 const SNAPSHOT_REGEX = /-snapshot/i;
@@ -265,89 +266,102 @@ export class ChromeService {
     }
 
     const getHeaderComponent = () => {
-      if (chromeStyle$.getValue() === 'project') {
-        const projectNavigationComponent$ = projectNavigation.getProjectSideNavComponent$();
-        const projectBreadcrumbs$ = projectNavigation
-          .getProjectBreadcrumbs$()
-          .pipe(takeUntil(this.stop$));
-        const activeNodes$ = projectNavigation.getActiveNodes$();
+      const HeaderComponent = () => {
+        const isVisible = useObservable(this.isVisible$);
 
-        const ProjectHeaderWithNavigation = () => {
-          const CustomSideNavComponent = useObservable(projectNavigationComponent$, undefined);
-          const activeNodes = useObservable(activeNodes$, []);
-
-          const currentProjectBreadcrumbs$ = projectBreadcrumbs$;
-
-          let SideNavComponent: ISideNavComponent = () => null;
-
-          if (CustomSideNavComponent !== undefined) {
-            // We have the state from the Observable
-            SideNavComponent =
-              CustomSideNavComponent.current !== null
-                ? CustomSideNavComponent.current
-                : ProjectSideNavigation;
-          }
-
+        if (!isVisible) {
           return (
-            <ProjectHeader
-              {...{
-                application,
-                globalHelpExtensionMenuLinks$,
-              }}
-              actionMenu$={application.currentActionMenu$}
-              breadcrumbs$={currentProjectBreadcrumbs$}
-              helpExtension$={helpExtension$.pipe(takeUntil(this.stop$))}
-              helpSupportUrl$={helpSupportUrl$.pipe(takeUntil(this.stop$))}
-              helpMenuLinks$={helpMenuLinks$}
-              navControlsLeft$={navControls.getLeft$()}
-              navControlsCenter$={navControls.getCenter$()}
-              navControlsRight$={navControls.getRight$()}
-              loadingCount$={http.getLoadingCount$()}
-              headerBanner$={headerBanner$.pipe(takeUntil(this.stop$))}
-              homeHref$={projectNavigation.getProjectHome$()}
-              docLinks={docLinks}
-              kibanaVersion={injectedMetadata.getKibanaVersion()}
-              prependBasePath={http.basePath.prepend}
-            >
-              <SideNavComponent activeNodes={activeNodes} />
-            </ProjectHeader>
+            <div data-test-subj="kibanaHeaderChromeless">
+              <LoadingIndicator loadingCount$={http.getLoadingCount$()} showAsBar />
+              <HeaderTopBanner headerBanner$={headerBanner$.pipe(takeUntil(this.stop$))} />
+            </div>
           );
-        };
+        }
 
-        return <ProjectHeaderWithNavigation />;
-      }
+        // render header
+        if (chromeStyle$.getValue() === 'project') {
+          const projectNavigationComponent$ = projectNavigation.getProjectSideNavComponent$();
+          const projectBreadcrumbs$ = projectNavigation
+            .getProjectBreadcrumbs$()
+            .pipe(takeUntil(this.stop$));
+          const activeNodes$ = projectNavigation.getActiveNodes$();
 
-      return (
-        <Header
-          loadingCount$={http.getLoadingCount$()}
-          application={application}
-          headerBanner$={headerBanner$.pipe(takeUntil(this.stop$))}
-          badge$={badge$.pipe(takeUntil(this.stop$))}
-          basePath={http.basePath}
-          breadcrumbs$={breadcrumbs$.pipe(takeUntil(this.stop$))}
-          breadcrumbsAppendExtension$={breadcrumbsAppendExtension$.pipe(takeUntil(this.stop$))}
-          customNavLink$={customNavLink$.pipe(takeUntil(this.stop$))}
-          kibanaDocLink={docLinks.links.kibana.guide}
-          docLinks={docLinks}
-          forceAppSwitcherNavigation$={navLinks.getForceAppSwitcherNavigation$()}
-          globalHelpExtensionMenuLinks$={globalHelpExtensionMenuLinks$}
-          helpExtension$={helpExtension$.pipe(takeUntil(this.stop$))}
-          helpSupportUrl$={helpSupportUrl$.pipe(takeUntil(this.stop$))}
-          helpMenuLinks$={helpMenuLinks$}
-          homeHref={http.basePath.prepend('/app/home')}
-          isVisible$={this.isVisible$}
-          kibanaVersion={injectedMetadata.getKibanaVersion()}
-          navLinks$={navLinks.getNavLinks$()}
-          recentlyAccessed$={recentlyAccessed.get$()}
-          navControlsLeft$={navControls.getLeft$()}
-          navControlsCenter$={navControls.getCenter$()}
-          navControlsRight$={navControls.getRight$()}
-          navControlsExtension$={navControls.getExtension$()}
-          onIsLockedUpdate={setIsNavDrawerLocked}
-          isLocked$={getIsNavDrawerLocked$}
-          customBranding$={customBranding$}
-        />
-      );
+          const ProjectHeaderWithNavigationComponent = () => {
+            const CustomSideNavComponent = useObservable(projectNavigationComponent$, undefined);
+            const activeNodes = useObservable(activeNodes$, []);
+
+            const currentProjectBreadcrumbs$ = projectBreadcrumbs$;
+
+            let SideNavComponent: ISideNavComponent = () => null;
+
+            if (CustomSideNavComponent !== undefined) {
+              // We have the state from the Observable
+              SideNavComponent =
+                CustomSideNavComponent.current !== null
+                  ? CustomSideNavComponent.current
+                  : ProjectSideNavigation;
+            }
+
+            return (
+              <ProjectHeader
+                application={application}
+                globalHelpExtensionMenuLinks$={globalHelpExtensionMenuLinks$}
+                actionMenu$={application.currentActionMenu$}
+                breadcrumbs$={currentProjectBreadcrumbs$}
+                helpExtension$={helpExtension$.pipe(takeUntil(this.stop$))}
+                helpSupportUrl$={helpSupportUrl$.pipe(takeUntil(this.stop$))}
+                helpMenuLinks$={helpMenuLinks$}
+                navControlsLeft$={navControls.getLeft$()}
+                navControlsCenter$={navControls.getCenter$()}
+                navControlsRight$={navControls.getRight$()}
+                loadingCount$={http.getLoadingCount$()}
+                headerBanner$={headerBanner$.pipe(takeUntil(this.stop$))}
+                homeHref$={projectNavigation.getProjectHome$()}
+                docLinks={docLinks}
+                kibanaVersion={injectedMetadata.getKibanaVersion()}
+                prependBasePath={http.basePath.prepend}
+              >
+                <SideNavComponent activeNodes={activeNodes} />
+              </ProjectHeader>
+            );
+          };
+
+          return <ProjectHeaderWithNavigationComponent />;
+        }
+
+        return (
+          <Header
+            loadingCount$={http.getLoadingCount$()}
+            application={application}
+            headerBanner$={headerBanner$.pipe(takeUntil(this.stop$))}
+            badge$={badge$.pipe(takeUntil(this.stop$))}
+            basePath={http.basePath}
+            breadcrumbs$={breadcrumbs$.pipe(takeUntil(this.stop$))}
+            breadcrumbsAppendExtension$={breadcrumbsAppendExtension$.pipe(takeUntil(this.stop$))}
+            customNavLink$={customNavLink$.pipe(takeUntil(this.stop$))}
+            kibanaDocLink={docLinks.links.kibana.guide}
+            docLinks={docLinks}
+            forceAppSwitcherNavigation$={navLinks.getForceAppSwitcherNavigation$()}
+            globalHelpExtensionMenuLinks$={globalHelpExtensionMenuLinks$}
+            helpExtension$={helpExtension$.pipe(takeUntil(this.stop$))}
+            helpSupportUrl$={helpSupportUrl$.pipe(takeUntil(this.stop$))}
+            helpMenuLinks$={helpMenuLinks$}
+            homeHref={http.basePath.prepend('/app/home')}
+            kibanaVersion={injectedMetadata.getKibanaVersion()}
+            navLinks$={navLinks.getNavLinks$()}
+            recentlyAccessed$={recentlyAccessed.get$()}
+            navControlsLeft$={navControls.getLeft$()}
+            navControlsCenter$={navControls.getCenter$()}
+            navControlsRight$={navControls.getRight$()}
+            navControlsExtension$={navControls.getExtension$()}
+            onIsLockedUpdate={setIsNavDrawerLocked}
+            isLocked$={getIsNavDrawerLocked$}
+            customBranding$={customBranding$}
+          />
+        );
+      };
+
+      return <HeaderComponent />;
     };
 
     return {

@@ -151,6 +151,16 @@ export const getSecurityAppFeaturesConfig = (
         },
       },
     },
+    [AppFeatureSecurityKey.investigationGuide]: {
+      privileges: {
+        all: {
+          ui: ['investigation-guide'],
+        },
+        read: {
+          ui: ['investigation-guide'],
+        },
+      },
+    },
 
     [AppFeatureSecurityKey.threatIntelligence]: {
       privileges: {
