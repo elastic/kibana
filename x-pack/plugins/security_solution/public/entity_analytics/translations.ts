@@ -163,7 +163,7 @@ export const UPDATE_RISK_ENGINE_MODAL_EXISTING_USER_HOST_1 = i18n.translate(
 export const UPDATE_RISK_ENGINE_MODAL_EXISTING_USER_HOST_2 = i18n.translate(
   'xpack.securitySolution.riskScore.updateRiskEngineModal.existingUserHost_2',
   {
-    defaultMessage: ', they are no longer required.',
+    defaultMessage: ', as they are no longer required.',
   }
 );
 
