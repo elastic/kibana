@@ -14,6 +14,18 @@ interface IntegrationPackage {
 
 const packages: IntegrationPackage[] = [
   {
+    name: 'apache',
+    version: '1.14.0',
+  },
+  {
+    name: 'aws',
+    version: '1.51.0',
+  },
+  {
+    name: 'system',
+    version: '1.38.1',
+  },
+  {
     name: '1password',
     version: '1.18.0',
   },
@@ -28,10 +40,6 @@ const packages: IntegrationPackage[] = [
   {
     name: 'akamai',
     version: '2.14.0',
-  },
-  {
-    name: 'apache',
-    version: '1.14.0',
   },
   {
     name: 'apache_spark',
@@ -72,10 +80,6 @@ const packages: IntegrationPackage[] = [
   {
     name: 'auth0',
     version: '1.10.0',
-  },
-  {
-    name: 'aws',
-    version: '1.51.0',
   },
   {
     name: 'aws_logs',
@@ -149,11 +153,10 @@ const packages: IntegrationPackage[] = [
     name: 'carbon_black_cloud',
     version: '1.13.0',
   },
-  {
-    name: 'system',
-    version: '1.38.1',
-  },
 ];
+
+const initialPackages = packages.slice(0, 3);
+const additionalPackages = packages.slice(3);
 
 export default function (providerContext: FtrProviderContext) {
   const { getService, getPageObjects } = providerContext;
@@ -180,8 +183,8 @@ export default function (providerContext: FtrProviderContext) {
       await esArchiver.load(
         'x-pack/test/functional/es_archives/discover_log_explorer/data_streams'
       );
-      logger.info(`Installing ${packages.length} integration packages.`);
-      await Promise.all(packages.map(installPackage));
+      logger.info(`Installing ${initialPackages.length} integration packages.`);
+      await Promise.all(initialPackages.map(installPackage));
     });
 
     after('clean up archives', async () => {
@@ -190,8 +193,8 @@ export default function (providerContext: FtrProviderContext) {
         'x-pack/test/functional/es_archives/discover_log_explorer/data_streams'
       );
 
-      logger.info(`Uninstalling ${packages.length} integration packages.`);
-      await Promise.all(packages.map(uninstallPackage));
+      logger.info(`Uninstalling ${initialPackages.length} integration packages.`);
+      await Promise.all(initialPackages.map(uninstallPackage));
     });
   });
 }
