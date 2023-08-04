@@ -82,7 +82,10 @@ export class RiskEngineDataClient {
     }
 
     try {
-      await initSavedObjects({ savedObjectsClient: this.options.soClient });
+      await initSavedObjects({
+        savedObjectsClient: this.options.soClient,
+        namespace,
+      });
       result.riskEngineConfigurationCreated = true;
     } catch (e) {
       result.errors.push(e.message);
