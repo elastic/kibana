@@ -110,7 +110,9 @@ export function getSessionIndexSettings({
       _meta: { [SESSION_INDEX_MAPPINGS_VERSION_META_FIELD_NAME]: SESSION_INDEX_MAPPINGS_VERSION },
       properties: {
         usernameHash: { type: 'keyword' as const },
-        provider: { properties: { name: { type: 'keyword' as const }, type: { type: 'keyword'as const } } },
+        provider: {
+          properties: { name: { type: 'keyword' as const }, type: { type: 'keyword' as const } },
+        },
         idleTimeoutExpiration: { type: 'date' as const },
         createdAt: { type: 'date' as const },
         lifespanExpiration: { type: 'date' as const },
