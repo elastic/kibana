@@ -10,9 +10,6 @@ import {
   EuiButton,
   EuiCallOut,
   EuiEmptyPrompt,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
   EuiLink,
   EuiModal,
   EuiModalBody,
@@ -104,36 +101,31 @@ export const ErrorCallout = ({
         />
       ) : (
         <EuiEmptyPrompt
+          iconType="error"
           color="danger"
-          title={
-            <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiIcon type="error" color="danger" size="l" />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <h2 data-test-subj="discoverErrorCalloutTitle">{formattedTitle}</h2>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          }
+          title={<h2 data-test-subj="discoverErrorCalloutTitle">{formattedTitle}</h2>}
           body={
-            overrideDisplay?.body ?? (
-              <>
-                <p
-                  css={css`
-                    white-space: break-spaces;
-                    font-family: ${euiTheme.font.familyCode};
-                  `}
-                  data-test-subj="discoverErrorCalloutMessage"
-                >
-                  {error.message}
-                </p>
-                <EuiButton onClick={showError}>{showErrorMessage}</EuiButton>
-              </>
-            )
+            <div
+              css={css`
+                text-align: left;
+              `}
+            >
+              {overrideDisplay?.body ?? (
+                <>
+                  <p
+                    css={css`
+                      white-space: break-spaces;
+                      font-family: ${euiTheme.font.familyCode};
+                    `}
+                    data-test-subj="discoverErrorCalloutMessage"
+                  >
+                    {error.message}
+                  </p>
+                  <EuiButton onClick={showError}>{showErrorMessage}</EuiButton>
+                </>
+              )}
+            </div>
           }
-          css={css`
-            text-align: left;
-          `}
           data-test-subj={dataTestSubj}
         />
       )}
