@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 
 import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
+import { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
 import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import { IndexPatternSavedObject } from '../types';
 
@@ -37,7 +38,8 @@ export function SourcePicker({ contentManagement, onIndexPatternSelected }: Sour
           name: i18n.translate('xpack.graph.sourceModal.savedObjectType.dataView', {
             defaultMessage: 'Data view',
           }),
-          showSavedObject: (indexPattern) => !indexPattern.attributes.type,
+          showSavedObject: (indexPattern: SavedObjectCommon<{ type?: string; title: string }>) =>
+            !indexPattern.attributes.type,
           includeFields: ['type'],
         },
       ]}
