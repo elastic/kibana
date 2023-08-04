@@ -29,8 +29,8 @@
       "POST"
     ],
     "patterns": [
-      "{indices}/_doc/{id}",
-      "{indices}/_doc"
+      "{index}/_doc/{id}",
+      "{index}/_doc"
     ],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/docs-index_.html"
   }
