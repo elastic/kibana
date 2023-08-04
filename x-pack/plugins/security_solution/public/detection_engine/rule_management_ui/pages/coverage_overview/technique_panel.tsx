@@ -10,7 +10,7 @@ import { css } from '@emotion/css';
 import React, { memo, useCallback, useMemo } from 'react';
 import type { CoverageOverviewMitreTechnique } from '../../../rule_management/model/coverage_overview/mitre_technique';
 import { coverageOverviewPanelWidth } from './constants';
-import { getTechniqueBackgroundColor } from './helpers';
+import { getCardBackgroundColor } from './helpers';
 import { CoverageOverviewPanelMetadata } from './shared_components/panel_metadata';
 import * as i18n from './translations';
 
@@ -30,8 +30,8 @@ const CoverageOverviewMitreTechniquePanelComponent = ({
   isExpanded,
 }: CoverageOverviewMitreTechniquePanelProps) => {
   const techniqueBackgroundColor = useMemo(
-    () => getTechniqueBackgroundColor(technique),
-    [technique]
+    () => getCardBackgroundColor(technique.enabledRules.length),
+    [technique.enabledRules.length]
   );
 
   const handlePanelOnClick = useCallback(

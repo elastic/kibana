@@ -7,7 +7,7 @@
 
 import type { CoverageOverviewMitreTactic } from '../../../rule_management/model/coverage_overview/mitre_tactic';
 import type { CoverageOverviewMitreTechnique } from '../../../rule_management/model/coverage_overview/mitre_technique';
-import { coverageOverviewPaletteColors } from './constants';
+import { coverageOverviewCardColorThresholds } from './constants';
 
 export const getNumOfCoveredTechniques = (tactic: CoverageOverviewMitreTactic): number =>
   tactic.techniques.filter((technique) => technique.enabledRules.length !== 0).length;
@@ -15,14 +15,10 @@ export const getNumOfCoveredTechniques = (tactic: CoverageOverviewMitreTactic): 
 export const getNumOfCoveredSubtechniques = (technique: CoverageOverviewMitreTechnique): number =>
   technique.subtechniques.filter((subtechnique) => subtechnique.enabledRules.length !== 0).length;
 
-export const getTechniqueBackgroundColor = (technique: CoverageOverviewMitreTechnique) => {
-  if (technique.enabledRules.length >= 10) {
-    return coverageOverviewPaletteColors[3];
-  } else if (technique.enabledRules.length >= 7) {
-    return coverageOverviewPaletteColors[2];
-  } else if (technique.enabledRules.length >= 3) {
-    return coverageOverviewPaletteColors[1];
-  } else if (technique.enabledRules.length >= 1) {
-    return coverageOverviewPaletteColors[0];
+export const getCardBackgroundColor = (value: number) => {
+  for (const { threshold, color } of coverageOverviewCardColorThresholds) {
+    if (value >= threshold) {
+      return color;
+    }
   }
 };

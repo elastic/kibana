@@ -13,8 +13,8 @@ import {
   EuiText,
   EuiSpacer,
 } from '@elastic/eui';
-import React from 'react';
-import { coverageOverviewLegendWidth, coverageOverviewPaletteColors } from '../constants';
+import React, { useMemo } from 'react';
+import { coverageOverviewCardColorThresholds, coverageOverviewLegendWidth } from '../constants';
 import * as i18n from '../translations';
 
 const LegendLabel = ({ label, color }: { label: string; color?: string }) => (
@@ -35,40 +35,39 @@ const LegendLabel = ({ label, color }: { label: string; color?: string }) => (
   </EuiFacetButton>
 );
 
-export const CoverageOverviewLegend = () => (
-  <EuiPanel css={{ maxWidth: `${coverageOverviewLegendWidth}px` }} hasBorder>
-    <EuiFlexGroup gutterSize="xs">
-      <EuiText size="s">
-        <h4>{i18n.CoverageOverviewLegendTitle}</h4>
-      </EuiText>
-      <EuiText size="s">
-        <small>{i18n.CoverageOverviewLegendSubtitle}</small>
-      </EuiText>
-    </EuiFlexGroup>
+export const CoverageOverviewLegend = () => {
+  const thresholds = useMemo(
+    () =>
+      coverageOverviewCardColorThresholds.map(({ threshold, color }, index, thresholdsMap) => (
+        <LegendLabel
+          label={`${
+            index === 0
+              ? `\u003E${threshold}`
+              : `${threshold}-${thresholdsMap[index - 1].threshold}`
+          } ${i18n.CoverageOverviewLegendRulesLabel}`}
+          color={color}
+        />
+      )),
+    []
+  );
 
-    <EuiSpacer size="s" />
-    <EuiFlexGroup gutterSize="xs" wrap>
-      <LegendLabel
-        label={`\u003E10 ${i18n.CoverageOverviewLegendRulesLabel}`}
-        color={coverageOverviewPaletteColors[3]}
-      />
+  return (
+    <EuiPanel css={{ maxWidth: `${coverageOverviewLegendWidth}px` }} hasBorder>
+      <EuiFlexGroup gutterSize="xs">
+        <EuiText size="s">
+          <h4>{i18n.CoverageOverviewLegendTitle}</h4>
+        </EuiText>
+        <EuiText size="s">
+          <small>{i18n.CoverageOverviewLegendSubtitle}</small>
+        </EuiText>
+      </EuiFlexGroup>
 
-      <LegendLabel
-        label={`7-10 ${i18n.CoverageOverviewLegendRulesLabel}`}
-        color={coverageOverviewPaletteColors[2]}
-      />
+      <EuiSpacer size="s" />
+      <EuiFlexGroup gutterSize="xs" wrap>
+        {thresholds}
 
-      <LegendLabel
-        label={`3-6 ${i18n.CoverageOverviewLegendRulesLabel}`}
-        color={coverageOverviewPaletteColors[1]}
-      />
-
-      <LegendLabel
-        label={`1-2 ${i18n.CoverageOverviewLegendRulesLabel}`}
-        color={coverageOverviewPaletteColors[0]}
-      />
-
-      <LegendLabel label={`0 ${i18n.CoverageOverviewLegendRulesLabel}`} />
-    </EuiFlexGroup>
-  </EuiPanel>
-);
+        <LegendLabel label={`0 ${i18n.CoverageOverviewLegendRulesLabel}`} />
+      </EuiFlexGroup>
+    </EuiPanel>
+  );
+};

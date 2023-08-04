@@ -12,3 +12,10 @@ export const coverageOverviewPaletteColors = euiPalettePositive(5);
 export const coverageOverviewPanelWidth = 160;
 
 export const coverageOverviewLegendWidth = 380;
+
+export const coverageOverviewCardColorThresholds = [
+  { threshold: 10, color: coverageOverviewPaletteColors[3] },
+  { threshold: 7, color: coverageOverviewPaletteColors[2] },
+  { threshold: 3, color: coverageOverviewPaletteColors[1] },
+  { threshold: 1, color: coverageOverviewPaletteColors[0] },
+];
