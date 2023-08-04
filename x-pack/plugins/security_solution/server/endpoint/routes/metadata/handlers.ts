@@ -21,6 +21,7 @@ import {
   ENDPOINT_DEFAULT_PAGE_SIZE,
   METADATA_TRANSFORMS_PATTERN,
 } from '../../../../common/endpoint/constants';
+import { EndpointHostNotFoundError } from '../../services/metadata';
 
 export const getLogger = (endpointAppContext: EndpointAppContext): Logger => {
   return endpointAppContext.logFactory.get('metadata');
@@ -85,6 +86,10 @@ export const getMetadataRequestHandler = function (
         ),
       });
     } catch (error) {
+      if (error instanceof EndpointHostNotFoundError) {
+        logger?.debug(`agent with id ${request.params.id} not found`);
+        return response.notFound({ body: error });
+      }
       return errorHandler(logger, response, error);
     }
   };
