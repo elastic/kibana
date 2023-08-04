@@ -15,6 +15,7 @@ import { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { extractContainerType, extractVisualizationType } from '@kbn/chart-expressions-common';
 import { I18nProvider } from '@kbn/i18n-react';
+import { MultiFilterEvent } from '../../common/types';
 import { ExpressionHeatmapPluginStart } from '../plugin';
 import {
   EXPRESSION_HEATMAP_NAME,
@@ -53,6 +54,9 @@ export const heatmapRenderer: (
     };
     const onSelectRange = (data: BrushEvent['data']) => {
       handlers.event({ name: 'brush', data });
+    };
+    const onClickMultiValue = (data: MultiFilterEvent['data']) => {
+      handlers.event({ name: 'multiFilter', data });
     };
 
     const renderComplete = () => {
@@ -97,6 +101,7 @@ export const heatmapRenderer: (
               chartsActiveCursorService={plugins.charts.activeCursor}
               syncTooltips={config.syncTooltips}
               syncCursor={config.syncCursor}
+              onClickMultiValue={onClickMultiValue}
             />
           </div>
         </I18nProvider>

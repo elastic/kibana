@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import type { Filter } from '@kbn/es-query';
 import { Datatable } from '@kbn/expressions-plugin/public';
 import { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
-import { FilterManager } from '../query';
+import { BooleanRelation, extractTimeFilter, convertRangeFilterToTimeRange } from '@kbn/es-query';
+import { QueryStart } from '../query';
 import { createFiltersFromMultiValueClickAction } from './filters/create_filters_from_multi_value_click';
 
 export type MultiValueClickActionContext = MultiValueClickContext;
@@ -20,18 +20,21 @@ export interface MultiValueClickContext {
   // Apps using this property will need to cast to `IEmbeddable`.
   embeddable?: unknown;
   data: {
-    data: {
+    data: Array<{
+      cells: Array<{
+        column: number;
+        row: number;
+      }>;
       table: Pick<Datatable, 'rows' | 'columns' | 'meta'>;
-      column: number;
-      value: any[];
-    };
+      relation?: BooleanRelation;
+    }>;
     timeFieldName?: string;
     negate?: boolean;
   };
 }
 
 export function createMultiValueClickActionDefinition(
-  getStartServices: () => { filterManager: FilterManager }
+  getStartServices: () => { query: QueryStart }
 ): UiActionsActionDefinition<MultiValueClickContext> {
   return {
     type: ACTION_MULTI_VALUE_CLICK,
@@ -41,9 +44,23 @@ export function createMultiValueClickActionDefinition(
       const filters = await createFiltersFromMultiValueClickAction(context.data);
       return Boolean(filters);
     },
-    execute: async (context: MultiValueClickActionContext) => {
-      const filter = (await createFiltersFromMultiValueClickAction(context.data)) as Filter;
-      getStartServices().filterManager.addFilters(filter);
+    execute: async ({ data }: MultiValueClickActionContext) => {
+      const filters = await createFiltersFromMultiValueClickAction(data);
+      if (!filters || filters?.length === 0) return;
+      const {
+        filterManager,
+        timefilter: { timefilter },
+      } = getStartServices().query;
+
+      if (data.timeFieldName) {
+        const { timeRangeFilter, restOfFilters } = extractTimeFilter(data.timeFieldName, filters);
+        filterManager.addFilters(restOfFilters);
+        if (timeRangeFilter) {
+          timefilter.setTime(convertRangeFilterToTimeRange(timeRangeFilter));
+        }
+      } else {
+        filterManager.addFilters(filters);
+      }
     },
   };
 }

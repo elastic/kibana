@@ -1331,6 +1331,12 @@ export interface LensTableRowContextMenuEvent {
   data: RowClickContext['data'];
 }
 
+export type TriggerEvent =
+  | BrushTriggerEvent
+  | ClickTriggerEvent
+  | MultiClickTriggerEvent
+  | LensTableRowContextMenuEvent;
+
 export function isLensFilterEvent(event: ExpressionRendererEvent): event is ClickTriggerEvent {
   return event.name === 'filter';
 }
