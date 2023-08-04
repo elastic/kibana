@@ -9,7 +9,6 @@ import type { FtrProviderContext } from '../ftr_provider_context';
 import { readLogFile, assertLogContains } from '../test_utils';
 
 export default function ({ getService }: FtrProviderContext) {
-  const retry = getService('retry');
   const supertest = getService('supertest');
 
   describe('Log Correlation', () => {

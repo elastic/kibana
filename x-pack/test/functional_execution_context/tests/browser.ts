@@ -206,8 +206,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           });
         });
 
-        describe('lnsMetric', () => {
-          it.skip('propagates to Elasticsearch via "x-opaque-id" header', async () => {
+        describe.skip('lnsMetric', () => {
+          it('propagates to Elasticsearch via "x-opaque-id" header', async () => {
             await assertLogContains({
               description: 'execution context propagates to Elasticsearch via "x-opaque-id" header',
               predicate: checkHttpRequestId(
@@ -217,7 +217,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             });
           });
 
-          it.skip('propagates to Kibana logs', async () => {
+          it('propagates to Kibana logs', async () => {
             await assertLogContains({
               description: 'execution context propagates to Kibana logs',
               predicate: checkExecutionContextEntry({

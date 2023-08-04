@@ -52,7 +52,7 @@ export function assertLogContains({
 }
 
 /**
- * Truncates the log file to avoid tests looking at the logs from previous executions.
+ * Reads the log file and parses the JSON objects that it contains.
  */
 export async function readLogFile(): Promise<Ecs[]> {
   await forceSyncLogFile();
