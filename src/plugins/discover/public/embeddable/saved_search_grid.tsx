@@ -29,6 +29,7 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
     >
       <DataGridMemoized
         {...props}
+        totalHits={props.totalHitCount}
         setExpandedDoc={setExpandedDoc}
         expandedDoc={expandedDoc}
         DocumentView={DiscoverGridFlyout}

@@ -696,17 +696,18 @@ export const DiscoverGrid = ({
             gridStyle={GRID_STYLE}
           />
         </div>
-        {!isLoading && typeof isLoadingMore === 'boolean' && (
-          <DiscoverGridFooter
-            isLoadingMore={isLoadingMore}
-            rowCount={rowCount}
-            sampleSize={sampleSize}
-            pageCount={pageCount}
-            pageIndex={paginationObj?.pageIndex}
-            totalHits={totalHits}
-            onFetchMoreRecords={onFetchMoreRecords}
-          />
-        )}
+        {!isLoading &&
+          isPaginationEnabled && ( // we hide the footer for Surrounding Documents page
+            <DiscoverGridFooter
+              isLoadingMore={isLoadingMore}
+              rowCount={rowCount}
+              sampleSize={sampleSize}
+              pageCount={pageCount}
+              pageIndex={paginationObj?.pageIndex}
+              totalHits={totalHits}
+              onFetchMoreRecords={onFetchMoreRecords}
+            />
+          )}
         {searchTitle && (
           <EuiScreenReaderOnly>
             <p id={String(randomId)}>

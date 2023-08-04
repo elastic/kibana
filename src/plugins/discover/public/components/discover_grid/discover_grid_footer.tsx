@@ -15,7 +15,7 @@ import { MAX_LOADED_GRID_ROWS } from '../../../common/constants';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 
 export interface DiscoverGridFooterProps {
-  isLoadingMore: boolean;
+  isLoadingMore?: boolean;
   rowCount: number;
   sampleSize: number;
   pageIndex?: number;
@@ -58,7 +58,7 @@ export const DiscoverGridFooter: React.FC<DiscoverGridFooterProps> = (props) => 
   }
 
   // allow to fetch more records on Discover page
-  if (onFetchMoreRecords) {
+  if (onFetchMoreRecords && typeof isLoadingMore === 'boolean') {
     if (rowCount <= MAX_LOADED_GRID_ROWS - sampleSize) {
       return (
         <DiscoverGridFooterContainer hasButton={true} {...props}>
