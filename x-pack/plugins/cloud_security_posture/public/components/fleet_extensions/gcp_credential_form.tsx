@@ -355,7 +355,7 @@ export const GcpCredentialsForm = ({
       );
     }
   };
-
+  // Integration is Invalid IF Version is not at least 1.5.0 OR Setup Access is manual but Project ID is empty
   useEffect(() => {
     const isProjectIdEmpty = setupFormat === 'manual' && !getFieldById('project_id')?.value;
     const isInvalidPolicy = isInvalid || isProjectIdEmpty;
