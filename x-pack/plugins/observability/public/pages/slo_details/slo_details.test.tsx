@@ -158,7 +158,7 @@ describe('SLO Details Page', () => {
     useLicenseMock.mockReturnValue({ hasAtLeast: () => true });
     useFetchHistoricalSummaryMock.mockReturnValue({
       isLoading: true,
-      data: {},
+      data: [],
     });
 
     render(<SloDetailsPage />);
