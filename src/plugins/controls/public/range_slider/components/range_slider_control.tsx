@@ -7,9 +7,9 @@
  */
 
 import { debounce } from 'lodash';
-import React, { FC, useState, useMemo, useEffect, useCallback } from 'react';
+import React, { FC, useState, useMemo, useEffect, useCallback, useRef } from 'react';
 
-import { EuiDualRange, EuiRangeTick } from '@elastic/eui';
+import { EuiRangeTick, EuiDualRange, EuiDualRangeProps } from '@elastic/eui';
 
 import { pluginServices } from '../../services';
 import { RangeValue } from '../../../common/range_slider/types';
@@ -24,6 +24,7 @@ export const RangeSliderControl: FC = () => {
     dataViews: { get: getDataViewById },
   } = pluginServices.getServices();
   const rangeSlider = useRangeSlider();
+  const rangeSliderRef = useRef<EuiDualRangeProps | null>(null);
 
   // Embeddable explicit input
   const id = rangeSlider.select((state) => state.explicitInput.id);
@@ -41,8 +42,6 @@ export const RangeSliderControl: FC = () => {
   const dataViewId = rangeSlider.select((state) => state.output.dataViewId);
 
   // React component state
-  const [displayedMax, setDisplayedMax] = useState<number>(max ?? Infinity);
-  const [displayedMin, setDisplayedMin] = useState<number>(min ?? -Infinity);
   const [displayedValue, setDisplayedValue] = useState<RangeValue>(value ?? ['', '']);
   const [fieldFormatter, setFieldFormatter] = useState(() => (toFormat: string) => toFormat);
 
@@ -74,27 +73,23 @@ export const RangeSliderControl: FC = () => {
    * This will recalculate the displayed min/max of the range slider to allow for selections smaller
    * than the `min` and larger than the `max`
    */
-  const recalculateMinMax = useCallback(
-    (selectedValue: [string, string]) => {
-      if (min === undefined || max === undefined) return;
-      const [selectedMin, selectedMax] = [
-        selectedValue[0] === '' ? min : parseFloat(selectedValue[0]),
-        selectedValue[1] === '' ? max : parseFloat(selectedValue[1]),
-      ];
-      setDisplayedMin(Math.min(selectedMin, min));
-      setDisplayedMax(Math.max(selectedMax, max));
-    },
-    [min, max]
-  );
+  const [displayedMin, displayedMax] = useMemo((): [number, number] => {
+    if (min === undefined || max === undefined) return [-Infinity, Infinity];
+    const selectedValue = value ?? ['', ''];
+    const [selectedMin, selectedMax] = [
+      selectedValue[0] === '' ? min : parseFloat(selectedValue[0]),
+      selectedValue[1] === '' ? max : parseFloat(selectedValue[1]),
+    ];
+    return [Math.min(selectedMin, min), Math.max(selectedMax, max ?? Infinity)];
+  }, [min, max, value]);
 
   /**
-   * The following `useEffect` ensures that the changes to min, max, and value that come from the embeddable (for example,
-   * from the `reset` button on the dashboard or via chaining) are reflected in the displayed value, min, and max
+   * The following `useEffect` ensures that the changes to the value that come from the embeddable (for example,
+   * from the `reset` button on the dashboard or via chaining) are reflected in the displayed value
    */
   useEffect(() => {
     setDisplayedValue(value ?? ['', '']);
-    recalculateMinMax(value ?? ['', '']);
-  }, [value, recalculateMinMax]);
+  }, [value]);
 
   const ticks: EuiRangeTick[] = useMemo(() => {
     return [
@@ -149,6 +144,7 @@ export const RangeSliderControl: FC = () => {
   ) : (
     <span className="rangeSliderAnchor__button" data-test-subj={`range-slider-control-${id}`}>
       <EuiDualRange
+        ref={rangeSliderRef}
         id={id}
         fullWidth
         showTicks
@@ -170,12 +166,12 @@ export const RangeSliderControl: FC = () => {
         minInputProps={getCommonInputProps({
           inputValue: displayedValue[0],
           testSubj: 'lowerBoundFieldNumber',
-          placeholder: String(min),
+          placeholder: String(min ?? -Infinity),
         })}
         maxInputProps={getCommonInputProps({
           inputValue: displayedValue[1],
           testSubj: 'upperBoundFieldNumber',
-          placeholder: String(max),
+          placeholder: String(max ?? Infinity),
         })}
         value={[displayedValue[0] || displayedMin, displayedValue[1] || displayedMax]}
         onChange={([minSelection, maxSelection]: [number | string, number | string]) => {
