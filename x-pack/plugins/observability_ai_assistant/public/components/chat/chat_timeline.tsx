@@ -17,11 +17,13 @@ export interface ChatTimelineItem
   id: string;
   title: string;
   loading: boolean;
-  error?: any;
+  canCopy: boolean;
   canEdit: boolean;
-  canRegenerate: boolean;
+  canExpand: boolean;
   canGiveFeedback: boolean;
+  canRegenerate: boolean;
   currentUser?: Pick<AuthenticatedUser, 'username' | 'full_name'>;
+  error?: any;
 }
 
 export interface ChatTimelineProps {
@@ -45,14 +47,14 @@ export function ChatTimeline({
         <ChatItem
           key={item.id}
           {...item}
+          onEditSubmit={(content) => {
+            onEdit(item, content);
+          }}
           onFeedbackClick={(feedback) => {
             onFeedback(item, feedback);
           }}
           onRegenerateClick={() => {
             onRegenerate(item);
-          }}
-          onEditSubmit={(content) => {
-            onEdit(item, content);
           }}
           onStopGeneratingClick={onStopGenerating}
         />

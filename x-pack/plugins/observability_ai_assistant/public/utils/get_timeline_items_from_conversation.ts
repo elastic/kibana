@@ -27,7 +27,9 @@ export function getTimelineItemsfromConversation({
       title: i18n.translate('xpack.observabilityAiAssistant.conversationStartTitle', {
         defaultMessage: 'started a conversation',
       }),
+      canCopy: false,
       canEdit: false,
+      canExpand: false,
       canGiveFeedback: false,
       canRegenerate: false,
       loading: false,
@@ -53,7 +55,9 @@ export function getTimelineItemsfromConversation({
       const props = {
         id: v4(),
         role: message.message.role,
+        canCopy: true,
         canEdit: hasConnector && (message.message.role === MessageRole.User || hasFunction),
+        canExpand: message.message.role === MessageRole.System,
         canRegenerate: hasConnector && message.message.role === MessageRole.Assistant,
         canGiveFeedback: message.message.role === MessageRole.Assistant,
         loading: false,
@@ -62,10 +66,10 @@ export function getTimelineItemsfromConversation({
           ? `I have requested your system performs the function _${
               message.message.function_call?.name
             }_ with the payload 
-          \`\`\`
-          ${JSON.stringify(JSON.parse(message.message.function_call?.arguments || ''), null, 4)}
-          \`\`\`
-          and return its results for me to look at.`
+\`\`\`
+${JSON.stringify(JSON.parse(message.message.function_call?.arguments || ''), null, 4)}
+\`\`\`
+and return its results for me to look at.`
           : message.message.content,
         currentUser,
       };

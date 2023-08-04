@@ -9,18 +9,16 @@ import { euiThemeVars } from '@kbn/ui-theme';
 import React, { ReactNode } from 'react';
 
 interface ChatItemTitleProps {
-  actionsTrigger?: ReactNode;
+  actions?: ReactNode;
   title: string;
 }
 
-export function ChatItemTitle({ actionsTrigger, title }: ChatItemTitleProps) {
+export function ChatItemTitle({ actions, title }: ChatItemTitleProps) {
   return (
     <>
       {title}
-      {actionsTrigger ? (
-        <div css={{ position: 'absolute', top: 2, right: euiThemeVars.euiSizeS }}>
-          {actionsTrigger}
-        </div>
+      {actions ? (
+        <div css={{ position: 'absolute', top: 4, right: euiThemeVars.euiSizeS }}>{actions}</div>
       ) : null}
     </>
   );

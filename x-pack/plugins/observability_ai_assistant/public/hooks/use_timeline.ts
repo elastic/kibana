@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import type { Subscription } from 'rxjs';
 import { AbortError } from '@kbn/kibana-utils-plugin/common';
 import { MessageRole, type ConversationCreateRequest, type Message } from '../../common/types';
@@ -133,9 +133,9 @@ export function useTimeline({
                 role: MessageRole.System,
                 name,
                 content: `The following data was returned by the function: 
-                \`\`\`
-                ${JSON.stringify(message.content, null, 4)}
-                \`\`\``,
+\`\`\`
+${JSON.stringify(message.content, null, 2).trim()}
+\`\`\``,
                 data: JSON.stringify(message.data),
               },
             })
@@ -149,7 +149,9 @@ export function useTimeline({
     if (pendingMessage) {
       return conversationItems.concat({
         id: '',
+        canCopy: true,
         canEdit: false,
+        canExpand: pendingMessage.message.role === MessageRole.System,
         canRegenerate: pendingMessage.aborted || !!pendingMessage.error,
         canGiveFeedback: false,
         title: '',
