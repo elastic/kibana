@@ -139,7 +139,7 @@ describe('EditOutputFlyout', () => {
     });
 
     // Does not show logstash inputs
-    logstashInputsLabels.forEach((label) => {
+    ['Client SSL certificate key', 'Client SSL certificate'].forEach((label) => {
       expect(utils.queryByLabelText(label)).toBeNull();
     });
   });
