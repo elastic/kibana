@@ -9,11 +9,7 @@ import React, { useEffect, useState, Fragment } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  EuiPageContentBody_Deprecated as EuiPageContentBody,
-  EuiSpacer,
-  EuiCallOut,
-} from '@elastic/eui';
+import { EuiPageSection, EuiSpacer, EuiCallOut } from '@elastic/eui';
 import { ScopedHistory } from '@kbn/core/public';
 
 import { TemplateDeserialized } from '../../../../common';
@@ -125,7 +121,7 @@ export const TemplateEdit: React.FunctionComponent<RouteComponentProps<MatchPara
   }
 
   return (
-    <EuiPageContentBody restrictWidth style={{ width: '100%' }}>
+    <EuiPageSection restrictWidth style={{ width: '100%' }}>
       {isSystemTemplate && (
         <Fragment>
           <EuiCallOut
@@ -165,6 +161,6 @@ export const TemplateEdit: React.FunctionComponent<RouteComponentProps<MatchPara
         isLegacy={isLegacy}
         history={history as ScopedHistory}
       />
-    </EuiPageContentBody>
+    </EuiPageSection>
   );
 };

@@ -8,7 +8,7 @@
 import React, { useEffect, useState } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiPageContentBody_Deprecated as EuiPageContentBody } from '@elastic/eui';
+import { EuiPageSection } from '@elastic/eui';
 import { useLocation } from 'react-router-dom';
 import { parse } from 'query-string';
 import { ScopedHistory } from '@kbn/core/public';
@@ -52,7 +52,7 @@ export const TemplateCreate: React.FunctionComponent<RouteComponentProps> = ({ h
   }, []);
 
   return (
-    <EuiPageContentBody restrictWidth style={{ width: '100%' }}>
+    <EuiPageSection restrictWidth style={{ width: '100%' }}>
       <TemplateForm
         title={
           isLegacy ? (
@@ -74,6 +74,6 @@ export const TemplateCreate: React.FunctionComponent<RouteComponentProps> = ({ h
         isLegacy={isLegacy}
         history={history as ScopedHistory}
       />
-    </EuiPageContentBody>
+    </EuiPageSection>
   );
 };

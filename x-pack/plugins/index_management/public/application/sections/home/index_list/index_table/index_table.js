@@ -19,7 +19,7 @@ import {
   EuiCheckbox,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPageContent_Deprecated as EuiPageContent,
+  EuiPageSection,
   EuiScreenReaderOnly,
   EuiSpacer,
   EuiSearchBar,
@@ -476,14 +476,9 @@ export class IndexTable extends Component {
       };
 
       return (
-        <EuiPageContent
-          hasShadow={false}
-          paddingSize="none"
-          verticalPosition="center"
-          horizontalPosition="center"
-        >
+        <EuiPageSection paddingSize="none" alignment="center">
           {renderNoContent()}
-        </EuiPageContent>
+        </EuiPageSection>
       );
     }
 
@@ -496,7 +491,7 @@ export class IndexTable extends Component {
           const { extensionsService } = services;
 
           return (
-            <EuiPageContent hasShadow={false} paddingSize="none">
+            <EuiPageSection paddingSize="none">
               <EuiFlexGroup alignItems="center">
                 <EuiFlexItem grow={true}>
                   <EuiText color="subdued">
@@ -665,7 +660,7 @@ export class IndexTable extends Component {
               <EuiSpacer size="m" />
 
               {indices.length > 0 ? this.renderPager() : null}
-            </EuiPageContent>
+            </EuiPageSection>
           );
         }}
       </AppContextConsumer>
