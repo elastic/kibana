@@ -79,7 +79,10 @@ import {
   createProfileRegistry,
 } from './customizations/profile_registry';
 import { SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER } from './embeddable/constants';
-import { DiscoverContainerInternal, DiscoverContainerProps } from './components/discover_container';
+import {
+  DiscoverContainerInternal,
+  type DiscoverContainerProps,
+} from './components/discover_container';
 
 const DocViewerLegacyTable = React.lazy(
   () => import('./services/doc_views/components/doc_viewer_table/legacy')
@@ -432,20 +435,18 @@ export class DiscoverPlugin
     injectTruncateStyles(core.uiSettings.get(TRUNCATE_MAX_HEIGHT));
 
     const isDev = this.initializerContext.env.mode.dev;
-
     const getDiscoverServicesInternal = () => {
       return this.getDiscoverServices(core, plugins);
     };
 
     return {
       locator: this.locator,
-      DiscoverContainer: ({ overrideServices, ...restProps }: DiscoverContainerProps) => {
+      DiscoverContainer: (props: DiscoverContainerProps) => {
         return (
           <DiscoverContainerInternal
-            overrideServices={overrideServices}
             getDiscoverServices={getDiscoverServicesInternal}
             isDev={isDev}
-            {...restProps}
+            {...props}
           />
         );
       },

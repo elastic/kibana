@@ -17,6 +17,7 @@ export const PLI_APP_FEATURES: PliAppFeatures = {
     essentials: [],
     complete: [
       AppFeatureKey.advancedInsights,
+      AppFeatureKey.investigationGuide,
       AppFeatureKey.threatIntelligence,
       AppFeatureKey.casesConnectors,
     ],
