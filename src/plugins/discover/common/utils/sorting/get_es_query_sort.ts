@@ -78,13 +78,14 @@ const META_FIELD_NAMES: string[] = ['_seq_no', '_doc', '_uid'];
  * Returns a field from the intersection of the set of sortable fields in the
  * given data view and a given set of candidate field names.
  */
-export function getTieBreakerFieldName(dataView: DataView, uiSettings: IUiSettingsClient) {
-  const sortableFields = uiSettings
-    .get(CONTEXT_TIE_BREAKER_FIELDS_SETTING)
-    .filter(
-      (fieldName: string) =>
-        META_FIELD_NAMES.includes(fieldName) ||
-        (dataView.fields.getByName(fieldName) || { sortable: false }).sortable
-    );
+export function getTieBreakerFieldName(
+  dataView: DataView,
+  uiSettings: Pick<IUiSettingsClient, 'get'>
+) {
+  const sortableFields = (uiSettings.get(CONTEXT_TIE_BREAKER_FIELDS_SETTING) || []).filter(
+    (fieldName: string) =>
+      META_FIELD_NAMES.includes(fieldName) ||
+      (dataView.fields.getByName(fieldName) || { sortable: false }).sortable
+  );
   return sortableFields[0];
 }
