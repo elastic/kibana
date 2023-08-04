@@ -130,13 +130,14 @@ export const apmPerServiceSchema: MakeSchemaFrom<APMPerService> = {
     ...long,
     _meta: {
       description:
-        'Total number of the unique service instances that served the transaction',
+        'Total number of the unique service instances that served the transaction within an hour',
     },
   },
   num_transaction_types: {
     ...long,
     _meta: {
-      description: 'Total number of the unique transaction types',
+      description:
+        'Total number of the unique transaction types within an hour',
     },
   },
   timed_out: {
@@ -152,7 +153,7 @@ export const apmPerServiceSchema: MakeSchemaFrom<APMPerService> = {
         type: 'keyword',
         _meta: {
           description:
-            'An array of the top 5 cloud availability zones. Example [ca-central-1a, ca-central-1b]',
+            'An array of the top 5 cloud availability zones within an hour. Example [ca-central-1a, ca-central-1b]',
         },
       },
     },
@@ -162,7 +163,7 @@ export const apmPerServiceSchema: MakeSchemaFrom<APMPerService> = {
         type: 'keyword',
         _meta: {
           description:
-            'An array of the top 5 cloud regions. Example [ca-central-1]',
+            'An array of the top 5 cloud regions within an hour. Example [ca-central-1]',
         },
       },
     },
@@ -171,7 +172,8 @@ export const apmPerServiceSchema: MakeSchemaFrom<APMPerService> = {
       items: {
         type: 'keyword',
         _meta: {
-          description: 'An array of the top 3 cloud provider. Example [aws]',
+          description:
+            'An array of the top 3 cloud provider within an hour. Example [aws]',
         },
       },
     },
@@ -184,7 +186,7 @@ export const apmPerServiceSchema: MakeSchemaFrom<APMPerService> = {
           type: 'keyword',
           _meta: {
             description:
-              'An array of the top 5 faas trigger types. Example [http, timer, pubsub]',
+              'An array of the top 5 faas trigger types within an hour. Example [http, timer, pubsub]',
           },
         },
       },
@@ -195,21 +197,21 @@ export const apmPerServiceSchema: MakeSchemaFrom<APMPerService> = {
       ...keyword,
       _meta: {
         description:
-          'The top value of agent name for the service from transaction documents. Sorted by _score',
+          'The top value of agent name for the service from transaction documents within an hour. Sorted by _score',
       },
     },
     version: {
       ...keyword,
       _meta: {
         description:
-          'The top value of agent version for the service from transaction documents. Sorted by _score',
+          'The top value of agent version for the service from transaction documents within an hour. Sorted by _score',
       },
     },
     activation_method: {
       ...keyword,
       _meta: {
         description:
-          'The top value of agent activation method for the service from transaction documents. Sorted by _score',
+          'The top value of agent activation method for the service from transaction documents within an hour. Sorted by _score',
       },
     },
   },
@@ -219,14 +221,14 @@ export const apmPerServiceSchema: MakeSchemaFrom<APMPerService> = {
         ...keyword,
         _meta: {
           description:
-            'The top value of language name for the service from transaction documents. Sorted by _score',
+            'The top value of language name for the service from transaction documents within an hour. Sorted by _score',
         },
       },
       version: {
         ...keyword,
         _meta: {
           description:
-            'The top value of language version for the service from transaction documents. Sorted by _score',
+            'The top value of language version for the service from transaction documents within an hour. Sorted by _score',
         },
       },
     },
@@ -235,14 +237,14 @@ export const apmPerServiceSchema: MakeSchemaFrom<APMPerService> = {
         ...keyword,
         _meta: {
           description:
-            'The top value of service framework name from transaction documents. Sorted by _score. Example AWS Lambda',
+            'The top value of service framework name from transaction documents within an hour. Sorted by _score. Example AWS Lambda',
         },
       },
       version: {
         ...keyword,
         _meta: {
           description:
-            'The top value of service framework version from transaction documents. Sorted by _score',
+            'The top value of service framework version from transaction documents within an hour. Sorted by _score',
         },
       },
     },
@@ -251,14 +253,14 @@ export const apmPerServiceSchema: MakeSchemaFrom<APMPerService> = {
         ...keyword,
         _meta: {
           description:
-            'The top value of service runtime name from transaction documents. Sorted by _score',
+            'The top value of service runtime name from transaction documents within an hour. Sorted by _score',
         },
       },
       version: {
         ...keyword,
         _meta: {
           description:
-            'The top value of service runtime version version from transaction documents. Sorted by _score',
+            'The top value of service runtime version version from transaction documents within an hour. Sorted by _score',
         },
       },
     },
@@ -281,7 +283,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage> = {
     type: 'boolean',
     _meta: {
       description:
-        'Indicates whether any service is being monitored. This is determined by checking all agents.',
+        'Indicates whether any service is being monitored. This is determined by checking all agents within the last day',
     },
   },
   version: {
@@ -311,14 +313,14 @@ export const apmSchema: MakeSchemaFrom<APMUsage> = {
       ...long,
       _meta: {
         description:
-          'Number of services without an assigned environment. This is determined by checking the "service.environment" field and counting instances where it is null',
+          'Number of services without an assigned environment within the last day. This is determined by checking the "service.environment" field and counting instances where it is null',
       },
     },
     services_with_multiple_environments: {
       ...long,
       _meta: {
         description:
-          'Number of services with more than one assigned environment',
+          'Number of services with more than one assigned environment within the last day',
       },
     },
     top_environments: {
@@ -327,7 +329,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage> = {
         type: 'keyword',
         _meta: {
           description:
-            'An array of the top 5 environments in terms of document count',
+            'An array of the top 5 environments in terms of document count within tha last day',
         },
       },
     },
@@ -348,7 +350,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage> = {
         type: 'keyword',
         _meta: {
           description:
-            'An array of the top 10 cloud availability zones in terms of document count. Example: [us-east1-c, us-east1-b]',
+            'An array of the top 10 cloud availability zones in terms of document count overall. Example: [us-east1-c, us-east1-b]',
         },
       },
     },
@@ -358,7 +360,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage> = {
         type: 'keyword',
         _meta: {
           description:
-            'An array of the top 10 cloud providers in terms of document count. Example: [azure]',
+            'An array of the top 10 cloud providers in terms of document count overall. Example: [azure]',
         },
       },
     },
@@ -368,7 +370,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage> = {
         type: 'keyword',
         _meta: {
           description:
-            'An array of the top 10 cloud regions in terms of document count. Example: [us-west1, us-central1]',
+            'An array of the top 10 cloud regions in terms of document count overall. Example: [us-west1, us-central1]',
         },
       },
     },
@@ -381,7 +383,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage> = {
           type: 'keyword',
           _meta: {
             description:
-              'An array of the top 10 operating system platforms in terms of document count. Example: [linux, win32]',
+              'An array of the top 10 operating system platforms in terms of document count within an hour. Example: [linux, win32]',
           },
         },
       },
@@ -474,7 +476,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage> = {
         ...long,
         _meta: {
           description:
-            'Total number of distinct transaction groups for the top service for the last last 24 hours',
+            'Total number of distinct transaction groups for the top service for the last 24 hours',
         },
       },
     },
@@ -483,7 +485,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage> = {
         ...long,
         _meta: {
           description:
-            'Total number of distinct error groups for the top service for the last last 24 hours',
+            'Total number of distinct error groups for the top service for the last 24 hours',
         },
       },
     },
@@ -514,7 +516,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage> = {
               ...long,
               _meta: {
                 description:
-                  'Unique country iso code captured for the agents js-base, rum-js and opentelemetry/webjs.',
+                  'Unique country iso code captured for the agents js-base, rum-js and opentelemetry/webjs within the last day',
               },
             },
           },
@@ -534,6 +536,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage> = {
       },
     },
   },
+  // Check 1d, and all schema
   retainment: {
     span: {
       ms: {
@@ -610,7 +613,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage> = {
         total: {
           ...long,
           _meta: {
-            description: 'Total number of shards',
+            description: 'Total number of shards overall',
           },
         },
       },
@@ -629,7 +632,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage> = {
             size_in_bytes: {
               ...long,
               _meta: {
-                description: 'Size of the index in byte units.',
+                description: 'Size of the index in byte units overall.',
               },
             },
           },
@@ -640,7 +643,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage> = {
       total: {
         ...long,
         _meta: {
-          description: 'Total number of shards',
+          description: 'Total number of shards overall',
         },
       },
     },
@@ -658,7 +661,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage> = {
           size_in_bytes: {
             ...long,
             _meta: {
-              description: 'Size of the index in byte units.',
+              description: 'Size of the index in byte units overall.',
             },
           },
         },
@@ -672,7 +675,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage> = {
         type: 'keyword',
         _meta: {
           description:
-            'An array of up to 500 unique fields used to create the service groups. Example  [service.language.name, service.name] ',
+            'An array of up to 500 unique fields used to create the service groups across all spaces. Example  [service.language.name, service.name] ',
         },
       },
     },
