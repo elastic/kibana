@@ -1409,7 +1409,7 @@
         "tags": [],
         "label": "CaseMetricsFeature",
         "description": [],
-        "path": "x-pack/plugins/cases/common/api/metrics/case.ts",
+        "path": "x-pack/plugins/cases/common/types/api/metrics/v1.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2373,6 +2373,21 @@
       },
       {
         "parentPluginId": "cases",
+        "id": "def-common.CasesMetricsResponse",
+        "type": "Type",
+        "tags": [],
+        "label": "CasesMetricsResponse",
+        "description": [],
+        "signature": [
+          "{ mttr?: number | null | undefined; }"
+        ],
+        "path": "x-pack/plugins/cases/common/types/api/metrics/v1.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cases",
         "id": "def-common.CasesStatus",
         "type": "Type",
         "tags": [],
@@ -2791,6 +2806,21 @@
           "\"securitySolution\""
         ],
         "path": "x-pack/plugins/cases/common/constants/owners.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cases",
+        "id": "def-common.SingleCaseMetricsResponse",
+        "type": "Type",
+        "tags": [],
+        "label": "SingleCaseMetricsResponse",
+        "description": [],
+        "signature": [
+          "{ alerts?: { count?: number | undefined; hosts?: { total: number; values: { name: string | undefined; id: string; count: number; }[]; } | undefined; users?: { total: number; values: { name: string; count: number; }[]; } | undefined; } | undefined; connectors?: { total: number; } | undefined; actions?: { isolateHost?: { isolate: { total: number; }; unisolate: { total: number; }; } | undefined; } | undefined; lifespan?: { creationDate: string; closeDate: string | null; statusInfo: { openDuration: number; inProgressDuration: number; reopenDates: string[]; }; } | undefined; }"
+        ],
+        "path": "x-pack/plugins/cases/common/types/api/metrics/v1.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
