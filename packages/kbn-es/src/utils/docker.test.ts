@@ -219,7 +219,7 @@ describe('maybeCreateDockerNetwork()', () => {
 });
 
 describe('maybePullDockerImage()', () => {
-  test('should pull the correct image passed', async () => {
+  test('should pull the passed image', async () => {
     execa.mockImplementationOnce(() => Promise.resolve({ exitCode: 0 }));
 
     await maybePullDockerImage(log, DOCKER_IMG);

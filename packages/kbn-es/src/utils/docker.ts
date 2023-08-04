@@ -302,7 +302,7 @@ export function resolveEsArgs(
 export async function setupServerlessVolumes(log: ToolingLog, options: ServerlessOptions) {
   const volumePath = resolve(options.basePath, 'stateless');
 
-  log.info(chalk.bold(`Checking for local Serverless ES object store at ${volumePath}`));
+  log.info(chalk.bold(`Checking for local serverless ES object store at ${volumePath}`));
   log.indent(4);
 
   if (options.clean && fs.existsSync(volumePath)) {
@@ -352,7 +352,7 @@ export async function runServerlessEsNode(
     image
   );
 
-  log.info(chalk.bold(`Running Serverless ES node: ${name}`));
+  log.info(chalk.bold(`Running serverless ES node: ${name}`));
   log.indent(4, () => log.info(chalk.dim(`docker ${dockerCmd.join(' ')}`)));
 
   const { stdout } = await execa('docker', dockerCmd);
@@ -400,7 +400,7 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
 }
 
 export async function killServerlessCluster(log: ToolingLog, nodes: string[]) {
-  log.info('Stopping Serverless ES cluster.');
+  log.info('Stopping serverless ES cluster.');
 
   await execa('docker', ['container', 'stop'].concat(nodes));
 }
@@ -443,7 +443,7 @@ export async function runDockerContainer(log: ToolingLog, options: DockerOptions
 
   log.info(chalk.dim(`docker ${dockerCmd.join(' ')}`));
   return await execa('docker', dockerCmd, {
-    // inherit is required to show Docker pull output and Java console output for pw, enrollment token, etc
+    // inherit is required to show Docker output and Java console output for pw, enrollment token, etc
     stdio: ['ignore', 'inherit', 'inherit'],
   });
 }
