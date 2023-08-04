@@ -57,17 +57,6 @@ export function CheckSetup({ children }: { children: React.ReactElement }) {
     );
   }
 
-  const displaySetupScreen =
-    (status === AsyncStatus.Settled && data?.has_setup !== true) || !!error;
-
-  const displayAddDataInstructions =
-    status === AsyncStatus.Settled && data?.has_setup === true && data?.has_data === false;
-
-  const displayUi =
-    // Display UI if there's data or if the user is opening the add data instruction page.
-    // does not use profiling router because that breaks as at this point the route might not have all required params
-    data?.has_data === true || history.location.pathname === '/add-data-instructions';
-
   const displayLoadingScreen = status !== AsyncStatus.Settled;
 
   if (displayLoadingScreen) {
@@ -89,18 +78,8 @@ export function CheckSetup({ children }: { children: React.ReactElement }) {
     );
   }
 
-  if (displayUi) {
-    return children;
-  }
-
-  if (displayAddDataInstructions) {
-    // when there's no data redirect the user to the add data instructions page
-    router.push('/add-data-instructions', {
-      path: {},
-      query: { selectedTab: NoDataTabs.Kubernetes },
-    });
-    return null;
-  }
+  const displaySetupScreen =
+    (status === AsyncStatus.Settled && data?.has_setup !== true) || !!error;
 
   if (displaySetupScreen) {
     return (
@@ -119,7 +98,7 @@ export function CheckSetup({ children }: { children: React.ReactElement }) {
                   <EuiText>
                     {i18n.translate('xpack.profiling.noDataConfig.action.title', {
                       defaultMessage: `Universal Profiling provides fleet-wide, whole-system, continuous profiling with zero instrumentation.
-              Understand what lines of code are consuming compute resources, at all times, and across your entire infrastructure.`,
+                Understand what lines of code are consuming compute resources, at all times, and across your entire infrastructure.`,
                     })}
                   </EuiText>
                   <EuiCallOut
@@ -223,6 +202,27 @@ export function CheckSetup({ children }: { children: React.ReactElement }) {
         <></>
       </ProfilingAppPageTemplate>
     );
+  }
+
+  const displayAddDataInstructions =
+    status === AsyncStatus.Settled && data?.has_setup === true && data?.has_data === false;
+
+  const displayUi =
+    // Display UI if there's data or if the user is opening the add data instruction page.
+    // does not use profiling router because that breaks as at this point the route might not have all required params
+    data?.has_data === true || history.location.pathname === '/add-data-instructions';
+
+  if (displayUi) {
+    return children;
+  }
+
+  if (displayAddDataInstructions) {
+    // when there's no data redirect the user to the add data instructions page
+    router.push('/add-data-instructions', {
+      path: {},
+      query: { selectedTab: NoDataTabs.Kubernetes },
+    });
+    return null;
   }
 
   throw new Error('Invalid state');
