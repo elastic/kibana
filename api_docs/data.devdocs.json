@@ -13361,10 +13361,6 @@
                 "path": "x-pack/plugins/lists/public/exceptions/components/builder/helpers.test.ts"
               },
               {
-                "plugin": "lists",
-                "path": "x-pack/plugins/lists/public/exceptions/components/builder/helpers.test.ts"
-              },
-              {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/public/flyout/left/hooks/use_threat_intelligence_details.test.ts"
               },
@@ -21010,10 +21006,6 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/public/common/mock/index_pattern.ts"
-              },
-              {
-                "plugin": "lists",
-                "path": "x-pack/plugins/lists/public/exceptions/components/builder/helpers.test.ts"
               },
               {
                 "plugin": "lists",
@@ -28822,7 +28814,7 @@
         "label": "SourceFilter",
         "description": [],
         "signature": [
-          "{ value: string; }"
+          "{ value: string; clientId?: string | number | undefined; }"
         ],
         "path": "src/plugins/data_views/common/types.ts",
         "deprecated": false,
