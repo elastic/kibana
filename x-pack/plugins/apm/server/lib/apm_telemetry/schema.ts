@@ -41,24 +41,120 @@ const timeframeMapSchema: MakeSchemaFrom<TimeframeMap> = {
 
 const agentSchema: MakeSchemaFrom<APMUsage>['agents'][ElasticAgentName] = {
   agent: {
-    version: { type: 'array', items: { type: 'keyword' } },
-    activation_method: { type: 'array', items: { type: 'keyword' } },
+    version: {
+      type: 'array',
+      items: {
+        type: 'keyword',
+        _meta: {
+          description:
+            'An array of the top 3 agent versions within the last day',
+        },
+      },
+    },
+    activation_method: {
+      type: 'array',
+      items: {
+        type: 'keyword',
+        _meta: {
+          description:
+            'An array of the top 3 agent activation methods within the last day',
+        },
+      },
+    },
   },
   service: {
     framework: {
-      name: { type: 'array', items: { type: 'keyword' } },
-      version: { type: 'array', items: { type: 'keyword' } },
-      composite: { type: 'array', items: { type: 'keyword' } },
+      name: {
+        type: 'array',
+        items: {
+          type: 'keyword',
+          _meta: {
+            description:
+              'An array of the top 3 service framework name  within the last day',
+          },
+        },
+      },
+      version: {
+        type: 'array',
+        items: {
+          type: 'keyword',
+          _meta: {
+            description:
+              'An array of the top 3 service framework version within the last day',
+          },
+        },
+      },
+      composite: {
+        type: 'array',
+        items: {
+          type: 'keyword',
+          _meta: {
+            description: '',
+          },
+        },
+      },
     },
     language: {
-      name: { type: 'array', items: { type: 'keyword' } },
-      version: { type: 'array', items: { type: 'keyword' } },
-      composite: { type: 'array', items: { type: 'keyword' } },
+      name: {
+        type: 'array',
+        items: {
+          type: 'keyword',
+          _meta: {
+            description:
+              'An array of the top 3 service language name within the last day',
+          },
+        },
+      },
+      version: {
+        type: 'array',
+        items: {
+          type: 'keyword',
+          _meta: {
+            description:
+              'An array of the top 3 service language version within the last day',
+          },
+        },
+      },
+      composite: {
+        type: 'array',
+        items: {
+          type: 'keyword',
+          _meta: {
+            description: '',
+          },
+        },
+      },
     },
     runtime: {
-      name: { type: 'array', items: { type: 'keyword' } },
-      version: { type: 'array', items: { type: 'keyword' } },
-      composite: { type: 'array', items: { type: 'keyword' } },
+      name: {
+        type: 'array',
+        items: {
+          type: 'keyword',
+          _meta: {
+            description:
+              'An array of the top 3 service runtime name within the last day',
+          },
+        },
+      },
+      version: {
+        type: 'array',
+        items: {
+          type: 'keyword',
+          _meta: {
+            description:
+              'An array of the top 3 service runtime version within the last day',
+          },
+        },
+      },
+      composite: {
+        type: 'array',
+        items: {
+          type: 'keyword',
+          _meta: {
+            description: '',
+          },
+        },
+      },
     },
   },
 };
@@ -525,14 +621,46 @@ export const apmSchema: MakeSchemaFrom<APMUsage> = {
     },
     user_agent: {
       original: {
-        all_agents: timeframeMap1dSchema,
-        rum: timeframeMap1dSchema,
+        all_agents: {
+          '1d': {
+            ...long,
+            _meta: {
+              description:
+                'Unique user agent for all agents within the last day',
+            },
+          },
+        },
+        rum: {
+          '1d': {
+            ...long,
+            _meta: {
+              description:
+                'Unique user agent for rum agent within the last day',
+            },
+          },
+        },
       },
     },
     transaction: {
       name: {
-        all_agents: timeframeMap1dSchema,
-        rum: timeframeMap1dSchema,
+        all_agents: {
+          '1d': {
+            ...long,
+            _meta: {
+              description:
+                'Unique transaction names for all agents within the last day',
+            },
+          },
+        },
+        rum: {
+          '1d': {
+            ...long,
+            _meta: {
+              description:
+                'Unique transaction names for rum agent within the last day',
+            },
+          },
+        },
       },
     },
   },
