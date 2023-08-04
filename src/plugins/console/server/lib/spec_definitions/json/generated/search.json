@@ -69,7 +69,7 @@
     ],
     "patterns": [
       "_search",
-      "{indices}/_search"
+      "{index}/_search"
     ],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/search-search.html"
   }

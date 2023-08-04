@@ -9,6 +9,7 @@ import createContainer from 'constate';
 import { useMemo } from 'react';
 import { parseDateRange } from '../../../utils/datemath';
 import type { AssetDetailsProps } from '../types';
+import { toTimestampRange } from '../utils';
 
 const DEFAULT_DATE_RANGE = {
   from: 'now-15m',
@@ -32,10 +33,13 @@ export function useAssetDetailsState({ state }: UseAssetDetailsStateProps) {
     return { from, to };
   }, [rawDateRange]);
 
+  const dateRangeTs = toTimestampRange(dateRange);
+
   return {
     node,
     nodeType,
     dateRange,
+    dateRangeTs,
     onTabsStateChange,
     overrides,
   };
