@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { EMSSettings } from '../../common/ems_settings';
 import {
   DEFAULT_EMS_FILE_API_URL,
@@ -58,6 +59,20 @@ describe('createEMSClient', () => {
         expect(service?.manifest.match(minorKbnVersion));
       });
     });
+
+    test('fetch function should not include the serverless header', async () => {
+      global.fetch = jest.fn((_, { headers }: { headers: Headers }) => {
+        expect(headers.has(ELASTIC_HTTP_VERSION_HEADER)).toBeFalsy();
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({ layers: [{ layer_id: 'mock_1' }] }),
+        });
+      }) as jest.Mock;
+
+      const mocked = await emsClient.getFileLayers();
+      // Ensure we ran the mocked function
+      expect(mocked[0].getId()).toBe('mock_1');
+    });
   });
 
   describe('Override settings for serverless', () => {
@@ -82,6 +97,20 @@ describe('createEMSClient', () => {
         const service = services.find((s) => s.type === type);
         expect(service?.manifest.match(LATEST_API_URL_PATH));
       });
+    });
+
+    test('fetch function should include the serverless header', async () => {
+      global.fetch = jest.fn((_, { headers }: { headers: Headers }) => {
+        expect(headers.get(ELASTIC_HTTP_VERSION_HEADER)).toBe(DEFAULT_EMS_REST_VERSION);
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({ layers: [{ layer_id: 'mock_2' }] }),
+        });
+      }) as jest.Mock;
+
+      const mocked = await emsClient.getFileLayers();
+      // Ensure we ran the mocked function
+      expect(mocked[0].getId()).toBe('mock_2');
     });
   });
 });
