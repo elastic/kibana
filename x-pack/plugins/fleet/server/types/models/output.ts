@@ -206,7 +206,6 @@ export const KafkaSchema = {
   ),
   timeout: schema.maybe(schema.number()),
   broker_timeout: schema.maybe(schema.number()),
-  channel_buffer_size: schema.maybe(schema.number()),
   required_acks: schema.maybe(
     schema.oneOf([schema.literal(1), schema.literal(0), schema.literal(-1)])
   ),

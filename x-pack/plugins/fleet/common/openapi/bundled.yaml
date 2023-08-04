@@ -5038,8 +5038,6 @@ components:
           type: number
         broker_timeout:
           type: number
-        channel_buffer_size:
-          type: number
         required_acks:
           type: number
       required:
@@ -5303,8 +5301,6 @@ components:
         broker_timeout:
           type: number
         required_acks:
-          type: number
-        channel_buffer_size:
           type: number
       required:
         - name

@@ -157,10 +157,6 @@ export const kafkaOutputFormValues = {
     selector: SETTINGS_OUTPUTS_KAFKA.BROKER_ACK_RELIABILITY_SELECT,
     value: '0',
   },
-  brokerChannelBufferSize: {
-    selector: SETTINGS_OUTPUTS_KAFKA.BROKER_CHANNEL_BUFFER_SIZE_SELECT,
-    value: '512',
-  },
   brokerTimeout: {
     selector: SETTINGS_OUTPUTS_KAFKA.BROKER_TIMEOUT_SELECT,
     value: '10',
@@ -249,9 +245,6 @@ export const fillInKafkaOutputForm = () => {
 
   cy.getBySel(kafkaOutputFormValues.brokerAckReliability.selector).select(
     kafkaOutputFormValues.brokerAckReliability.value
-  );
-  cy.getBySel(kafkaOutputFormValues.brokerChannelBufferSize.selector).select(
-    kafkaOutputFormValues.brokerChannelBufferSize.value
   );
   cy.getBySel(kafkaOutputFormValues.brokerTimeout.selector).select(
     kafkaOutputFormValues.brokerTimeout.value

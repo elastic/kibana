@@ -188,7 +188,6 @@ export interface OutputSoKafkaAttributes extends OutputSoBaseAttributes {
   }>;
   timeout?: number;
   broker_timeout?: number;
-  channel_buffer_size?: number;
   required_acks?: ValueOf<KafkaAcknowledgeReliabilityLevel>;
 }
 

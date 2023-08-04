@@ -106,5 +106,4 @@ export interface KafkaOutput extends NewBaseOutput {
   timeout?: number;
   broker_timeout?: number;
   required_acks?: ValueOf<KafkaAcknowledgeReliabilityLevel>;
-  channel_buffer_size?: number;
 }

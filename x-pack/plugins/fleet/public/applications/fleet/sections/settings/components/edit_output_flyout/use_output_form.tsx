@@ -105,7 +105,6 @@ export interface OutputFormInputsType {
   kafkaCompressionCodecInput: ReturnType<typeof useInput>;
   kafkaBrokerTimeoutInput: ReturnType<typeof useInput>;
   kafkaBrokerReachabilityTimeoutInput: ReturnType<typeof useInput>;
-  kafkaBrokerChannelBufferSizeInput: ReturnType<typeof useInput>;
   kafkaBrokerAckReliabilityInput: ReturnType<typeof useInput>;
   kafkaKeyInput: ReturnType<typeof useInput>;
   kafkaSslCertificateInput: ReturnType<typeof useInput>;
@@ -393,12 +392,6 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     isDisabled('timeout')
   );
 
-  const kafkaBrokerChannelBufferSizeInput = useInput(
-    `${kafkaOutput?.channel_buffer_size ?? 256}`,
-    undefined,
-    isDisabled('channel_buffer_size')
-  );
-
   const kafkaBrokerAckReliabilityInput = useInput(
     `${kafkaOutput?.required_acks ?? kafkaAcknowledgeReliabilityLevel.Commit}`,
     undefined,
@@ -450,7 +443,6 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     kafkaCompressionCodecInput,
     kafkaBrokerTimeoutInput,
     kafkaBrokerReachabilityTimeoutInput,
-    kafkaBrokerChannelBufferSizeInput,
     kafkaBrokerAckReliabilityInput,
     kafkaKeyInput,
     kafkaSslCertificateAuthoritiesInput,
@@ -676,9 +668,6 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
                 kafkaBrokerReachabilityTimeoutInput.value
               ),
               required_acks: parseIntegerIfStringDefined(kafkaBrokerAckReliabilityInput.value),
-              channel_buffer_size: parseIntegerIfStringDefined(
-                kafkaBrokerChannelBufferSizeInput.value
-              ),
               ...shipperParams,
             } as KafkaOutput;
           case outputType.Logstash:
@@ -789,7 +778,6 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     kafkaBrokerTimeoutInput.value,
     kafkaBrokerReachabilityTimeoutInput.value,
     kafkaBrokerAckReliabilityInput.value,
-    kafkaBrokerChannelBufferSizeInput.value,
     logstashHostsInput.value,
     sslCertificateInput.value,
     sslKeyInput.value,

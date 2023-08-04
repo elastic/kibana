@@ -116,7 +116,5 @@ properties:
     type: number
   required_acks:
     type: number
-  channel_buffer_size:
-    type: number
 required:
   - name

@@ -238,7 +238,11 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
         changes: [
           {
             type: 'mappings_deprecation',
-            deprecatedMappings: ['broker_ack_reliability', 'broker_buffer_size'],
+            deprecatedMappings: [
+              'broker_ack_reliability',
+              'broker_buffer_size',
+              'channel_buffer_size',
+            ],
           },
         ],
       },

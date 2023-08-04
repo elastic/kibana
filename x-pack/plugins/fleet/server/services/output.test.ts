@@ -918,7 +918,6 @@ describe('Output Service', () => {
         auth_type: null,
         broker_timeout: null,
         required_acks: null,
-        channel_buffer_size: null,
         client_id: null,
         compression: null,
         compression_level: null,
@@ -1035,7 +1034,6 @@ describe('Output Service', () => {
         auth_type: null,
         broker_timeout: null,
         required_acks: null,
-        channel_buffer_size: null,
         client_id: null,
         compression: null,
         compression_level: null,
@@ -1259,7 +1257,6 @@ describe('Output Service', () => {
         ca_trusted_fingerprint: null,
         broker_timeout: 10,
         required_acks: 1,
-        channel_buffer_size: 256,
         client_id: 'Elastic',
         compression: 'gzip',
         compression_level: 4,
@@ -1286,7 +1283,6 @@ describe('Output Service', () => {
         hosts: ['test:4343'],
         broker_timeout: 10,
         required_acks: 1,
-        channel_buffer_size: 256,
         ca_sha256: null,
         ca_trusted_fingerprint: null,
         client_id: 'Elastic',
@@ -1328,7 +1324,6 @@ describe('Output Service', () => {
         version: '1.0.0',
         broker_timeout: 10,
         required_acks: 1,
-        channel_buffer_size: 256,
       });
       expect(mockedAgentPolicyService.update).toBeCalledWith(
         expect.anything(),
@@ -1376,7 +1371,6 @@ describe('Output Service', () => {
         version: '1.0.0',
         broker_timeout: 10,
         required_acks: 1,
-        channel_buffer_size: 256,
       });
       expect(mockedAgentPolicyService.update).toBeCalledWith(
         expect.anything(),
@@ -1414,7 +1408,6 @@ describe('Output Service', () => {
         version: '1.0.0',
         broker_timeout: 10,
         required_acks: 1,
-        channel_buffer_size: 256,
       });
       expect(mockedAgentPolicyService.update).toBeCalledWith(
         expect.anything(),
@@ -1460,7 +1453,6 @@ describe('Output Service', () => {
         version: '1.0.0',
         broker_timeout: 10,
         required_acks: 1,
-        channel_buffer_size: 256,
       });
       expect(mockedAgentPolicyService.update).toBeCalledWith(
         expect.anything(),

@@ -303,7 +303,6 @@ export function transformOutputToFullPolicyOutput(
       headers,
       timeout,
       broker_timeout,
-      channel_buffer_size,
       required_acks,
     } = output;
 
@@ -365,7 +364,6 @@ export function transformOutputToFullPolicyOutput(
       headers,
       timeout,
       broker_timeout,
-      channel_buffer_size,
       required_acks,
     };
   }

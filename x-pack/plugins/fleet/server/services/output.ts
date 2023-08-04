@@ -523,9 +523,6 @@ class OutputService {
         // required_acks can be 0
         data.required_acks = kafkaAcknowledgeReliabilityLevel.Commit;
       }
-      if (!output.channel_buffer_size) {
-        data.channel_buffer_size = 256;
-      }
     }
 
     const id = options?.id ? outputIdToUuid(options.id) : SavedObjectsUtils.generateId();
@@ -727,7 +724,6 @@ class OutputService {
       target.timeout = null;
       target.broker_timeout = null;
       target.required_acks = null;
-      target.channel_buffer_size = null;
     };
 
     // If the output type changed
@@ -796,9 +792,6 @@ class OutputService {
         if (updateData.required_acks === null || updateData.required_acks === undefined) {
           // required_acks can be 0
           updateData.required_acks = kafkaAcknowledgeReliabilityLevel.Commit;
-        }
-        if (!data.channel_buffer_size) {
-          updateData.channel_buffer_size = 256;
         }
       }
     }

@@ -27,15 +27,6 @@ export const OutputFormKafkaBroker: React.FunctionComponent<{ inputs: OutputForm
     []
   );
 
-  const kafkaBrokerChannelBufferSizeOptions = useMemo(
-    () =>
-      Array.from({ length: 4 }, (_, i) => Math.pow(2, i + 7)).map((buffer) => ({
-        text: buffer,
-        label: `${buffer}`,
-      })),
-    []
-  );
-
   const getAckReliabilityLabel = (value: number) => {
     switch (value) {
       case kafkaAcknowledgeReliabilityLevel.DoNotWait:
@@ -122,28 +113,6 @@ export const OutputFormKafkaBroker: React.FunctionComponent<{ inputs: OutputForm
           data-test-subj="settingsOutputsFlyout.kafkaBrokerReachabilityTimeoutInput"
           {...inputs.kafkaBrokerReachabilityTimeoutInput.props}
           options={kafkaBrokerTimeoutOptions}
-        />
-      </EuiFormRow>
-      <EuiFormRow
-        fullWidth
-        label={
-          <FormattedMessage
-            id="xpack.fleet.settings.editOutputFlyout.kafkaBrokerChannelBufferSizeInputLabel"
-            defaultMessage="Channel buffer size"
-          />
-        }
-        helpText={
-          <FormattedMessage
-            id="xpack.fleet.settings.editOutputFlyout.kafkaBrokerChannelBufferSizeInputHelpText"
-            defaultMessage="Define the number of messages buffered in output pipeline."
-          />
-        }
-      >
-        <EuiSelect
-          fullWidth
-          data-test-subj="settingsOutputsFlyout.kafkaBrokerChannelBufferSizeInput"
-          {...inputs.kafkaBrokerChannelBufferSizeInput.props}
-          options={kafkaBrokerChannelBufferSizeOptions}
         />
       </EuiFormRow>
       <EuiFormRow

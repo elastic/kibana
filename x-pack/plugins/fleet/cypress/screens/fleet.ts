@@ -174,7 +174,6 @@ export const SETTINGS_OUTPUTS_KAFKA = {
   BROKER_PANEL: 'settingsOutputsFlyout.kafkaBrokerSettingsPanel',
   BROKER_TIMEOUT_SELECT: 'settingsOutputsFlyout.kafkaBrokerTimeoutInput',
   BROKER_REACHABILITY_TIMEOUT_SELECT: 'settingsOutputsFlyout.kafkaBrokerReachabilityTimeoutInput',
-  BROKER_CHANNEL_BUFFER_SIZE_SELECT: 'settingsOutputsFlyout.kafkaBrokerChannelBufferSizeInput',
   BROKER_ACK_RELIABILITY_SELECT: 'settingsOutputsFlyout.kafkaBrokerAckReliabilityInputLabel',
   KEY_INPUT: 'settingsOutputsFlyout.kafkaKeyInput',
 };
