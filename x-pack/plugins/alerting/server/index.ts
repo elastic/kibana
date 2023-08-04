@@ -31,6 +31,7 @@ export type {
   SummarizedAlertsChunk,
   ExecutorType,
   IRuleTypeAlerts,
+  GetViewInAppRelativeUrlFnOpts,
 } from './types';
 export { RuleNotifyWhen } from '../common';
 export { DEFAULT_MAX_EPHEMERAL_ACTIONS_PER_ALERT } from './config';
