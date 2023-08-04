@@ -64,7 +64,7 @@ export const Metadata = () => {
         })}
         color="danger"
         iconType="error"
-        data-test-subj="infraMetadataErrorCallout"
+        data-test-subj="infraAssetDetailsMetadataErrorCallout"
       >
         <FormattedMessage
           id="xpack.infra.metadataEmbeddable.errorMessage"

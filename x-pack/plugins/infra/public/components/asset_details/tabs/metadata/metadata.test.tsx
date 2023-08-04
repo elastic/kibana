@@ -68,30 +68,30 @@ describe('Single Host Metadata (Hosts View)', () => {
     mockUseMetadata({ error: 'Internal server error' });
     const result = renderHostMetadata();
 
-    expect(result.queryByTestId('infraMetadataErrorCallout')).toBeInTheDocument();
+    expect(result.queryByTestId('infraAssetDetailsMetadataErrorCallout')).toBeInTheDocument();
   });
 
   it('should show an no data message if fetching the metadata returns an empty array', async () => {
     mockUseMetadata({ metadata: [] });
     const result = renderHostMetadata();
 
-    expect(result.queryByTestId('infraHostMetadataSearchBarInput')).toBeInTheDocument();
-    expect(result.queryByTestId('infraHostMetadataNoData')).toBeInTheDocument();
+    expect(result.queryByTestId('infraAssetDetailsMetadataSearchBarInput')).toBeInTheDocument();
+    expect(result.queryByTestId('infraAssetDetailsMetadataNoData')).toBeInTheDocument();
   });
 
   it('should show the metadata table if metadata is returned', async () => {
     mockUseMetadata({ metadata: [{ name: 'host.os.name', value: 'Ubuntu' }] });
     const result = renderHostMetadata();
 
-    expect(result.queryByTestId('infraHostMetadataSearchBarInput')).toBeInTheDocument();
-    expect(result.queryByTestId('infraMetadataTable')).toBeInTheDocument();
+    expect(result.queryByTestId('infraAssetDetailsMetadataSearchBarInput')).toBeInTheDocument();
+    expect(result.queryByTestId('infraAssetDetailsMetadataTable')).toBeInTheDocument();
   });
 
   it('should return loading text if loading', async () => {
     mockUseMetadata({ loading: true });
     const result = renderHostMetadata();
 
-    expect(result.queryByTestId('infraHostMetadataSearchBarInput')).toBeInTheDocument();
-    expect(result.queryByTestId('infraHostMetadataLoading')).toBeInTheDocument();
+    expect(result.queryByTestId('infraAssetDetailsMetadataSearchBarInput')).toBeInTheDocument();
+    expect(result.queryByTestId('infraAssetDetailsMetadataLoading')).toBeInTheDocument();
   });
 });
