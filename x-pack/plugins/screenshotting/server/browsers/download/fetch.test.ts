@@ -38,7 +38,8 @@ describe('fetch', () => {
   test('downloads the url to the path', async () => {
     await fetch('url', TEMP_FILE);
 
-    expect(readFileSync(TEMP_FILE, 'utf8')).toEqual('foobar');
+    // Hack: We can't use `readFileSync(TEMP_FILE, 'utf8')` because of https://github.com/tschaub/mock-fs/issues/377
+    expect(readFileSync(TEMP_FILE).toString()).toEqual('foobar');
   });
 
   test('returns the md5 hex hash of the http body', async () => {
