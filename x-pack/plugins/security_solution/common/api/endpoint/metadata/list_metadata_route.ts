@@ -16,7 +16,20 @@ export const GetMetadataListRequestSchema = {
       page: schema.number({ defaultValue: ENDPOINT_DEFAULT_PAGE, min: 0 }),
       pageSize: schema.number({ defaultValue: ENDPOINT_DEFAULT_PAGE_SIZE, min: 1, max: 10000 }),
       kuery: schema.maybe(schema.string()),
-      sortField: schema.maybe(schema.string()),
+      sortField: schema.maybe(
+        schema.oneOf([
+          // allowed fields for sorting - these are the column fields in the EndpointList table, based on the
+          // returned `HostInfoInterface` data type, and not on the internal data structure
+          schema.literal('metadata.host.hostname'),
+          schema.literal('host_status'),
+          schema.literal('metadata.Endpoint.policy.applied.name'),
+          schema.literal('metadata.Endpoint.policy.applied.status'),
+          schema.literal('metadata.host.os.name'),
+          schema.literal('metadata.host.ip'),
+          schema.literal('metadata.agent.version'),
+          schema.literal('metadata.@timestamp'),
+        ])
+      ),
       sortDirection: schema.maybe(schema.oneOf([schema.literal('asc'), schema.literal('desc')])),
       hostStatuses: schema.maybe(
         schema.arrayOf(
