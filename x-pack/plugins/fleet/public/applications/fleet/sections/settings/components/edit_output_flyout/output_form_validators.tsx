@@ -211,6 +211,18 @@ export function validateKafkaDefaultTopic(value: string) {
   }
 }
 
+export function validateKafkaClientId(value: string) {
+  const regex = /^[A-Za-z0-9._-]+$/;
+  return regex.test(value)
+    ? undefined
+    : [
+        i18n.translate('xpack.fleet.settings.outputForm.kafkaClientIdFormattingMessage', {
+          defaultMessage:
+            'Client ID is invalid. Only letters, numbers, dots, underscores, and dashes are allowed.',
+        }),
+      ];
+}
+
 export function validateKafkaTopics(
   topics: Array<{
     topic: string;

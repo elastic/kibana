@@ -493,7 +493,7 @@ class OutputService {
         data.compression_level = 4;
       }
       if (!output.client_id) {
-        data.client_id = 'Elastic Agent';
+        data.client_id = 'Elastic';
       }
       if (output.username && output.password && !output.sasl?.mechanism) {
         data.sasl = {
@@ -767,7 +767,7 @@ class OutputService {
           updateData.compression_level = 4;
         }
         if (!data.client_id) {
-          updateData.client_id = 'Elastic Agent';
+          updateData.client_id = 'Elastic';
         }
         if (data.username && data.password && !data.sasl?.mechanism) {
           updateData.sasl = {

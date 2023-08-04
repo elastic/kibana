@@ -587,7 +587,7 @@ export default function (providerContext: FtrProviderContext) {
           broker_timeout: 10,
           required_acks: 1,
           channel_buffer_size: 256,
-          client_id: 'Elastic Agent',
+          client_id: 'Elastic',
           compression: 'gzip',
           compression_level: 4,
           sasl: {
@@ -629,7 +629,7 @@ export default function (providerContext: FtrProviderContext) {
           broker_timeout: 10,
           required_acks: 1,
           channel_buffer_size: 256,
-          client_id: 'Elastic Agent',
+          client_id: 'Elastic',
           compression: 'gzip',
           compression_level: 4,
           sasl: {

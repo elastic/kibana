@@ -57,6 +57,7 @@ import {
   validateKafkaHeaders,
   validateKafkaDefaultTopic,
   validateKafkaTopics,
+  validateKafkaClientId,
 } from './output_form_validators';
 import { confirmUpdate } from './confirm_update';
 
@@ -360,8 +361,8 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
   );
 
   const kafkaClientIdInput = useInput(
-    kafkaOutput?.client_id ?? 'Elastic agent',
-    undefined,
+    kafkaOutput?.client_id ?? 'Elastic',
+    validateKafkaClientId,
     isDisabled('client_id')
   );
 
@@ -467,6 +468,7 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     const kafkaHostsValid = kafkaHostsInput.validate();
     const kafkaUsernameValid = kafkaAuthUsernameInput.validate();
     const kafkaPasswordValid = kafkaAuthPasswordInput.validate();
+    const kafkaClientIDValid = kafkaClientIdInput.validate();
     const kafkaSslCertificateValid = kafkaSslCertificateInput.validate();
     const kafkaSslKeyValid = kafkaSslKeyInput.validate();
     const kafkaDefaultTopicValid = kafkaDefaultTopicInput.validate();
@@ -501,7 +503,8 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
         kafkaHeadersValid &&
         kafkaDefaultTopicValid &&
         kafkaTopicsValid &&
-        additionalYamlConfigValid
+        additionalYamlConfigValid &&
+        kafkaClientIDValid
       );
     } else {
       // validate ES
@@ -519,6 +522,7 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     kafkaHostsInput,
     kafkaAuthUsernameInput,
     kafkaAuthPasswordInput,
+    kafkaClientIdInput,
     kafkaSslCertificateInput,
     kafkaSslKeyInput,
     kafkaDefaultTopicInput,

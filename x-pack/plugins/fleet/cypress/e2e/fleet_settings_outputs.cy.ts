@@ -53,7 +53,7 @@ describe('Outputs', () => {
       });
     } else {
       describe('Form validation', () => {
-        it('renders all form fields', () => {
+        it.only('renders all form fields', () => {
           selectKafkaOutput();
 
           cy.getBySel(SETTINGS_OUTPUTS.NAME_INPUT);
@@ -134,7 +134,10 @@ describe('Outputs', () => {
             cy.getBySel(SETTINGS_OUTPUTS_KAFKA.HEADERS_VALUE_INPUT);
             cy.getBySel(SETTINGS_OUTPUTS_KAFKA.HEADERS_ADD_ROW_BUTTON).should('be.disabled');
             cy.getBySel(SETTINGS_OUTPUTS_KAFKA.HEADERS_REMOVE_ROW_BUTTON).should('be.disabled');
-            cy.getBySel(SETTINGS_OUTPUTS_KAFKA.HEADERS_CLIENT_ID_INPUT);
+            cy.getBySel(SETTINGS_OUTPUTS_KAFKA.HEADERS_CLIENT_ID_INPUT).should(
+              'have.value',
+              'Elastic'
+            );
           });
 
           // Verify add header
@@ -175,6 +178,7 @@ describe('Outputs', () => {
 
         it('displays proper error messages', () => {
           selectKafkaOutput();
+          cy.getBySel(SETTINGS_OUTPUTS_KAFKA.HEADERS_CLIENT_ID_INPUT).clear();
           cy.getBySel(SETTINGS_SAVE_BTN).click();
 
           cy.contains('Name is required');
@@ -182,10 +186,14 @@ describe('Outputs', () => {
           cy.contains('Username is required');
           cy.contains('Password is required');
           cy.contains('Default topic is required');
+          cy.contains(
+            'Client ID is invalid. Only letters, numbers, dots, underscores, and dashes are allowed.'
+          );
           shouldDisplayError(SETTINGS_OUTPUTS.NAME_INPUT);
           shouldDisplayError(SETTINGS_OUTPUTS_KAFKA.AUTHENTICATION_USERNAME_INPUT);
           shouldDisplayError(SETTINGS_OUTPUTS_KAFKA.AUTHENTICATION_PASSWORD_INPUT);
           shouldDisplayError(SETTINGS_OUTPUTS_KAFKA.TOPICS_DEFAULT_TOPIC_INPUT);
+          shouldDisplayError(SETTINGS_OUTPUTS_KAFKA.HEADERS_CLIENT_ID_INPUT);
         });
       });
 

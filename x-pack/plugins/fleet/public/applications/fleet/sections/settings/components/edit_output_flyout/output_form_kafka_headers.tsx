@@ -198,6 +198,7 @@ export const OutputFormKafkaHeaders: React.FunctionComponent<{ inputs: OutputFor
             defaultMessage="Client ID"
           />
         }
+        {...inputs.kafkaClientIdInput.formRowProps}
       >
         <EuiFieldText
           data-test-subj="settingsOutputsFlyout.kafkaClientIdInput"
