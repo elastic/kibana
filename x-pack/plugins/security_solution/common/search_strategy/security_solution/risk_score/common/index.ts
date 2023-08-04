@@ -14,10 +14,12 @@ import { RiskScoreEntity } from '../../../../risk_engine/types';
  * prebuilt_dev_tool_content/console_templates/enable_host_risk_score.console
  */
 export const getHostRiskIndex = (spaceId: string, onlyLatest: boolean = true): string => {
+  return 'risk-score.risk_score_latest_default';
   return `${RISKY_HOSTS_INDEX_PREFIX}${onlyLatest ? 'latest_' : ''}${spaceId}`;
 };
 
 export const getUserRiskIndex = (spaceId: string, onlyLatest: boolean = true): string => {
+  return 'risk-score.risk_score_latest_default';
   return `${RISKY_USERS_INDEX_PREFIX}${onlyLatest ? 'latest_' : ''}${spaceId}`;
 };
 

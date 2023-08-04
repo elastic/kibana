@@ -56,6 +56,11 @@ const commonRiskFields: FieldMap = {
     array: false,
     required: false,
   },
+  category_1_count: {
+    type: 'float',
+    array: false,
+    required: false,
+  },
   inputs: {
     type: 'object',
     array: true,
@@ -145,3 +150,9 @@ export const getIndexPattern = (namespace: string): IIndexPatternString => ({
   template: `.${riskScoreBaseIndexName}.${riskScoreBaseIndexName}-${namespace}-index-template`,
   alias: `${riskScoreBaseIndexName}.${riskScoreBaseIndexName}-${namespace}`,
 });
+
+export const getLatestTransformId = (namespace: string): string =>
+  `${riskScoreBaseIndexName}_latest_transform_${namespace}`;
+
+export const getLatestTransformIndex = (spaceId = 'default') =>
+  `${riskScoreBaseIndexName}.risk_score_latest_${spaceId}`;

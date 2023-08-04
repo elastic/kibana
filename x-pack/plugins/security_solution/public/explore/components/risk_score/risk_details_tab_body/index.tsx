@@ -8,6 +8,7 @@
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
+
 import { RISKY_HOSTS_DASHBOARD_TITLE, RISKY_USERS_DASHBOARD_TITLE } from '../constants';
 import { EnableRiskScore } from '../enable_risk_score';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
@@ -20,6 +21,7 @@ import * as i18n from './translations';
 import { useQueryInspector } from '../../../../common/components/page/manage_query';
 import { RiskScoreOverTime } from '../risk_score_over_time';
 import { TopRiskScoreContributors } from '../top_risk_score_contributors';
+import { TopRiskScoreContributorsAlerts } from '../top_risk_score_contributors_alerts';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import {
   HostRiskScoreQueryId,
@@ -155,7 +157,7 @@ const RiskDetailsTabBodyComponent: React.FC<
   if (isModuleEnabled && severitySelectionRedux.length === 0 && data && data.length === 0) {
     return <RiskScoresNoDataDetected entityType={riskEntity} refetch={refetch} />;
   }
-
+  console.log('data', data)
   return (
     <>
       <EuiFlexGroup direction="row">
@@ -197,8 +199,20 @@ const RiskDetailsTabBodyComponent: React.FC<
             {i18n.VIEW_DASHBOARD_BUTTON}
           </EuiButton>
         </EuiFlexItem>
+
         <EuiFlexItem grow={false}>
           <RiskInformationButtonEmpty riskEntity={riskEntity} />
+        </EuiFlexItem>
+      </StyledEuiFlexGroup>
+      <StyledEuiFlexGroup gutterSize="s">
+        <EuiFlexItem>
+          <TopRiskScoreContributorsAlerts
+            toggleStatus={contributorsToggleStatus}
+            toggleQuery={toggleContributorsQuery}
+            loading={loading}
+            riskScore={data?.[0]}
+            riskEntity={riskEntity}
+          />
         </EuiFlexItem>
       </StyledEuiFlexGroup>
     </>
