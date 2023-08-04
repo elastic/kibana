@@ -135,6 +135,7 @@
     "@kbn/alerting-fixture-plugin": "link:x-pack/test/functional_with_es_ssl/plugins/alerts",
     "@kbn/alerting-plugin": "link:x-pack/plugins/alerting",
     "@kbn/alerting-state-types": "link:x-pack/packages/kbn-alerting-state-types",
+    "@kbn/alerting_oas": "link:packages/kbn-generate-oas-cli/plugins/alerting_oas",
     "@kbn/alerts": "link:packages/kbn-alerts",
     "@kbn/alerts-as-data-utils": "link:packages/kbn-alerts-as-data-utils",
     "@kbn/alerts-restricted-fixtures-plugin": "link:x-pack/test/alerting_api_integration/common/plugins/alerts_restricted",

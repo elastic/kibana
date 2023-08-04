@@ -222,8 +222,6 @@ function getOpenApiPathsObject(
   for (const route of routes) {
     if (!route.options.isZod) continue;
 
-    console.log(route);
-
     const pathParams = getPathParameters(route.path);
     const hasBody = Boolean(route.options.body);
 

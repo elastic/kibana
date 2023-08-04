@@ -20,6 +20,7 @@ import {
   RuleTypeState,
   AlertInstanceState,
   AlertInstanceContext,
+  RuleTypeParamsValidator,
 } from './types';
 import {
   RecoveredActionGroup,
@@ -63,6 +64,9 @@ export interface RegistryRuleType
   > {
   id: string;
   enabledInLicense: boolean;
+  validate?: {
+    params: RuleTypeParamsValidator<RuleTypeParams>;
+  };
 }
 
 /**
@@ -341,7 +345,9 @@ export class RuleTypeRegistry {
     >;
   }
 
-  public list(): Set<RegistryRuleType> {
+  public list({
+    addParamsValidationSchemas,
+  }: { addParamsValidationSchemas?: boolean } = {}): Set<RegistryRuleType> {
     return new Set(
       Array.from(this.ruleTypes).map(
         ([
@@ -360,6 +366,7 @@ export class RuleTypeRegistry {
             doesSetRecoveryContext,
             alerts,
             getSummarizedAlerts,
+            validate,
           },
         ]: [string, UntypedNormalizedRuleType]) => ({
           id,
@@ -381,6 +388,7 @@ export class RuleTypeRegistry {
           ).isValid,
           hasGetSummarizedAlerts: !!getSummarizedAlerts,
           ...(alerts ? { alerts } : {}),
+          ...(addParamsValidationSchemas ? { validate } : {}),
         })
       )
     );

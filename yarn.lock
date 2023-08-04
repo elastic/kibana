@@ -2802,6 +2802,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/alerting_oas@link:packages/kbn-generate-oas-cli/plugins/alerting_oas":
+  version "0.0.0"
+  uid ""
+
 "@kbn/alerts-as-data-utils@link:packages/kbn-alerts-as-data-utils":
   version "0.0.0"
   uid ""

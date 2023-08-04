@@ -20,6 +20,8 @@
       "@kbn/aiops-plugin/*": ["x-pack/plugins/aiops/*"],
       "@kbn/aiops-utils": ["x-pack/packages/ml/aiops_utils"],
       "@kbn/aiops-utils/*": ["x-pack/packages/ml/aiops_utils/*"],
+      "@kbn/alerting_oas": ["packages/kbn-generate-oas-cli/plugins/alerting_oas"],
+      "@kbn/alerting_oas/*": ["packages/kbn-generate-oas-cli/plugins/alerting_oas/*"],
       "@kbn/alerting-api-integration-helpers": ["x-pack/test/alerting_api_integration/packages/helpers"],
       "@kbn/alerting-api-integration-helpers/*": ["x-pack/test/alerting_api_integration/packages/helpers/*"],
       "@kbn/alerting-api-integration-test-plugin": ["x-pack/test/alerting_api_integration/common/plugins/alerts"],

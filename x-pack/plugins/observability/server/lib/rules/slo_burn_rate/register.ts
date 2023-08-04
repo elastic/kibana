@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+// import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 import { i18n } from '@kbn/i18n';
 import { LicenseType } from '@kbn/licensing-plugin/server';
 import { createLifecycleExecutor } from '@kbn/rule-registry-plugin/server';
@@ -18,9 +19,9 @@ import { SLO_BURN_RATE_RULE_ID } from '../../../../common/constants';
 import { ALERT_ACTION, getRuleExecutor } from './executor';
 import { sloRuleFieldMap } from './field_map';
 
-const durationSchema = schema.object({
-  value: schema.number(),
-  unit: schema.string(),
+const durationSchema = z.object({
+  value: z.number(),
+  unit: z.string(),
 });
 
 type CreateLifecycleExecutor = ReturnType<typeof createLifecycleExecutor>;
@@ -35,10 +36,10 @@ export function sloBurnRateRuleType(
       defaultMessage: 'SLO burn rate',
     }),
     validate: {
-      params: schema.object({
-        sloId: schema.string(),
-        burnRateThreshold: schema.number(),
-        maxBurnRateThreshold: schema.number(),
+      params: z.object({
+        sloId: z.string(),
+        burnRateThreshold: z.number(),
+        maxBurnRateThreshold: z.number(),
         longWindow: durationSchema,
         shortWindow: durationSchema,
       }),

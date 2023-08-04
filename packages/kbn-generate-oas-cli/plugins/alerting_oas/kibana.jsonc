@@ -1,0 +1,13 @@
+{
+  "type": "plugin",
+  "id": "@kbn/alerting_oas",
+  "owner": "@elastic/response-ops",
+  "plugin": {
+    "id": "alertingOas",
+    "server": true,
+    "browser": false,
+    "requiredPlugins": [
+      "alerting"
+    ]
+  }
+}
