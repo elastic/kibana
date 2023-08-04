@@ -9,10 +9,10 @@ export {
   getSnappedWindowParameters,
   getWindowParameters,
   type WindowParameters,
-} from './src/window_parameters';
+} from './window_parameters';
 export {
   getLogRateAnalysisType,
   LOG_RATE_ANALYSIS_TYPE,
   type LogRateAnalysisType,
   type LogRateHistogramItem,
-} from './src/log_rate_analysis_type';
+} from './log_rate_analysis_type';
