@@ -361,8 +361,11 @@ export class SyntheticsMonitorClient {
     const heartbeatConfigs: HeartbeatConfig[] = [];
 
     for (const monitor of monitors) {
-      const attributes = monitor.attributes as unknown as MonitorFields;
-      const { str: paramsString } = mixParamsWithGlobalParams(paramsBySpace[spaceId], attributes);
+      const normalizedMonitor = normalizeSecrets(monitor).attributes as MonitorFields;
+      const { str: paramsString } = mixParamsWithGlobalParams(
+        paramsBySpace[spaceId],
+        normalizedMonitor
+      );
 
       heartbeatConfigs.push(
         formatHeartbeatRequest(
