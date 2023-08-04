@@ -42,14 +42,15 @@ export interface LogRateHistogramItem {
  * Identify the log rate analysis type based on the baseline/deviation
  * time ranges on a given log rate histogram.
  *
- * @param documentCountChartPoints The log rate histogram.
+ * @param logRateHistogram The log rate histogram.
  * @param windowParameters The window parameters with baseline and deviation time range.
  * @returns The log rate analysis type.
  */
 export function getLogRateAnalysisType(
   logRateHistogram: LogRateHistogramItem[],
-  { baselineMin, baselineMax, deviationMin, deviationMax }: WindowParameters
+  windowParameters: WindowParameters
 ): LogRateAnalysisType {
+  const { baselineMin, baselineMax, deviationMin, deviationMax } = windowParameters;
   const baselineItems = logRateHistogram.filter(
     (d) => d.time >= baselineMin && d.time < baselineMax
   );
