@@ -14,7 +14,7 @@ import { fromSavedSearchAttributes as fromSavedSearchAttributesCommon } from '..
 export { getSavedSearchUrl, getSavedSearchFullPathUrl } from '..';
 
 export const fromSavedSearchAttributes = (
-  id: string,
+  id: string | undefined,
   attributes: SavedSearchAttributes,
   tags: string[] | undefined,
   references: SavedObjectReference[] | undefined,

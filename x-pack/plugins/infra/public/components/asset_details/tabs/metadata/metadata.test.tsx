@@ -6,31 +6,41 @@
  */
 
 import React from 'react';
-import { Metadata, type MetadataProps } from './metadata';
+import { Metadata } from './metadata';
 
 import { useMetadata } from '../../hooks/use_metadata';
 import { useSourceContext } from '../../../../containers/metrics_source';
 import { render } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
+import { AssetDetailsStateProvider } from '../../hooks/use_asset_details_state';
 
 jest.mock('../../../../containers/metrics_source');
 jest.mock('../../hooks/use_metadata');
 
-const metadataProps: MetadataProps = {
-  dateRange: {
-    from: '2023-04-09T11:07:49Z',
-    to: '2023-04-09T11:23:49Z',
-  },
-  nodeType: 'host',
-  nodeName: 'host-1',
-  showActionsColumn: true,
-};
-
 const renderHostMetadata = () =>
   render(
     <I18nProvider>
-      <Metadata {...metadataProps} />
+      <AssetDetailsStateProvider
+        state={{
+          dateRange: {
+            from: '2023-04-09T11:07:49Z',
+            to: '2023-04-09T11:23:49Z',
+          },
+          nodeType: 'host',
+          node: {
+            id: 'host-1',
+            name: 'host-1',
+          },
+          overrides: {
+            metadata: {
+              showActionsColumn: true,
+            },
+          },
+        }}
+      >
+        <Metadata />
+      </AssetDetailsStateProvider>
     </I18nProvider>,
     { wrapper: EuiThemeProvider }
   );
