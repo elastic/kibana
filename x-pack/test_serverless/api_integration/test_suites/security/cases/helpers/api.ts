@@ -112,7 +112,6 @@ export const deleteMappings = async (es: Client): Promise<void> => {
   });
 };
 
-
 export const defaultUser = { email: null, full_name: null, username: 'elastic' };
 /**
  * A null filled user will occur when the security plugin is disabled
@@ -177,7 +176,6 @@ export const findCasesResp: CasesFindResponse = {
   ...findCommon,
   cases: [],
 };
-
 
 export const createCase = async (
   supertest: SuperTest.SuperTest<SuperTest.Test>,

@@ -8,7 +8,13 @@
 import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { findCases, createCase, deleteAllCaseItems, postCaseReq, findCasesResp } from './helpers/api';
+import {
+  findCases,
+  createCase,
+  deleteAllCaseItems,
+  postCaseReq,
+  findCasesResp,
+} from './helpers/api';
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');

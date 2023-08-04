@@ -8,7 +8,13 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
-import { getCase, createCase, deleteCasesByESQuery, getPostCaseRequest, postCaseResp } from './helpers/api';
+import {
+  getCase,
+  createCase,
+  deleteCasesByESQuery,
+  getPostCaseRequest,
+  postCaseResp,
+} from './helpers/api';
 import { removeServerGeneratedPropertiesFromCase } from './helpers/omit';
 
 export default ({ getService }: FtrProviderContext): void => {
