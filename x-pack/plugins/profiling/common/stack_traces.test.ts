@@ -5,8 +5,12 @@
  * 2.0.
  */
 
-import { decodeStackTraceResponse, makeFrameID } from './search_stacktraces';
-import { StackTraceResponse } from '../../common/stack_traces';
+import {
+  DecodedStackTraceResponse,
+  decodeStackTraceResponse,
+  makeFrameID,
+  StackTraceResponse,
+} from './stack_traces';
 
 describe('Stack trace response operations', () => {
   test('empty stack trace response', () => {
@@ -15,12 +19,13 @@ describe('Stack trace response operations', () => {
       sampling_rate: 1.0,
     };
 
-    const expected = {
-      stackTraceEvents: new Map(),
+    const expected: DecodedStackTraceResponse = {
+      events: new Map(),
       stackTraces: new Map(),
       stackFrames: new Map(),
       executables: new Map(),
       totalFrames: 0,
+      samplingRate: 1.0,
     };
 
     const decoded = decodeStackTraceResponse(original);
@@ -34,8 +39,8 @@ describe('Stack trace response operations', () => {
     expect(decoded.stackTraces.size).toEqual(expected.stackTraces.size);
     expect(decoded.stackTraces.size).toEqual(0);
 
-    expect(decoded.stackTraceEvents.size).toEqual(expected.stackTraceEvents.size);
-    expect(decoded.stackTraceEvents.size).toEqual(0);
+    expect(decoded.events.size).toEqual(expected.events.size);
+    expect(decoded.events.size).toEqual(0);
 
     expect(decoded.totalFrames).toEqual(expected.totalFrames);
     expect(decoded.totalFrames).toEqual(0);
@@ -76,8 +81,8 @@ describe('Stack trace response operations', () => {
       sampling_rate: 1.0,
     };
 
-    const expected = {
-      stackTraceEvents: new Map([['a', 1]]),
+    const expected: DecodedStackTraceResponse = {
+      events: new Map([['a', 1]]),
       stackTraces: new Map([
         [
           'a',
@@ -97,6 +102,7 @@ describe('Stack trace response operations', () => {
             FunctionName: 'pthread_create',
             FunctionOffset: 0,
             LineNumber: 0,
+            Inline: false,
           },
         ],
         [
@@ -106,6 +112,7 @@ describe('Stack trace response operations', () => {
             FunctionName: 'main',
             FunctionOffset: 1,
             LineNumber: 3,
+            Inline: false,
           },
         ],
         [
@@ -115,6 +122,7 @@ describe('Stack trace response operations', () => {
             FunctionName: 'inlined',
             FunctionOffset: 2,
             LineNumber: 4,
+            Inline: false,
           },
         ],
       ]),
@@ -137,8 +145,8 @@ describe('Stack trace response operations', () => {
     expect(decoded.stackTraces.size).toEqual(expected.stackTraces.size);
     expect(decoded.stackTraces.size).toEqual(1);
 
-    expect(decoded.stackTraceEvents.size).toEqual(expected.stackTraceEvents.size);
-    expect(decoded.stackTraceEvents.size).toEqual(1);
+    expect(decoded.events.size).toEqual(expected.events.size);
+    expect(decoded.events.size).toEqual(1);
 
     expect(decoded.totalFrames).toEqual(expected.totalFrames);
     expect(decoded.totalFrames).toEqual(1);
@@ -172,8 +180,8 @@ describe('Stack trace response operations', () => {
       total_frames: 1,
     };
 
-    const expected = {
-      stackTraceEvents: new Map([['a', 1]]),
+    const expected: DecodedStackTraceResponse = {
+      events: new Map([['a', 1]]),
       stackTraces: new Map([
         [
           'a',
@@ -189,15 +197,17 @@ describe('Stack trace response operations', () => {
         [
           'abc',
           {
-            FileName: null,
+            FileName: '',
             FunctionName: 'pthread_create',
-            FunctionOffset: null,
-            LineNumber: null,
+            FunctionOffset: 0,
+            LineNumber: 0,
+            Inline: false,
           },
         ],
       ]),
       executables: new Map([['abc', { FileName: 'pthread.c' }]]),
       totalFrames: 1,
+      samplingRate: 1.0,
     };
 
     const decoded = decodeStackTraceResponse(original);
@@ -211,8 +221,8 @@ describe('Stack trace response operations', () => {
     expect(decoded.stackTraces.size).toEqual(expected.stackTraces.size);
     expect(decoded.stackTraces.size).toEqual(1);
 
-    expect(decoded.stackTraceEvents.size).toEqual(expected.stackTraceEvents.size);
-    expect(decoded.stackTraceEvents.size).toEqual(1);
+    expect(decoded.events.size).toEqual(expected.events.size);
+    expect(decoded.events.size).toEqual(1);
 
     expect(decoded.totalFrames).toEqual(expected.totalFrames);
     expect(decoded.totalFrames).toEqual(1);

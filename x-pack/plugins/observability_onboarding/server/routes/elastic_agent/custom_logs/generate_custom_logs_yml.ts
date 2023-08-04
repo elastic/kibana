@@ -7,7 +7,7 @@
 
 import { dump, load } from 'js-yaml';
 
-export const generateYml = ({
+export const generateCustomLogsYml = ({
   datasetName = '',
   serviceName,
   namespace = '',
