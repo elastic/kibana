@@ -63,6 +63,7 @@ export const secAll: Role = {
       {
         feature: {
           siem: ['all'],
+          securitySolutionAssistant: ['all'],
           securitySolutionCases: ['all'],
           actions: ['all'],
           actionsSimulators: ['all'],
@@ -94,6 +95,7 @@ export const secReadCasesAll: Role = {
       {
         feature: {
           siem: ['read'],
+          securitySolutionAssistant: ['all'],
           securitySolutionCases: ['all'],
           actions: ['all'],
           actionsSimulators: ['all'],
@@ -125,6 +127,7 @@ export const secAllCasesOnlyReadDelete: Role = {
       {
         feature: {
           siem: ['all'],
+          securitySolutionAssistant: ['all'],
           securitySolutionCases: ['cases_read', 'cases_delete'],
           actions: ['all'],
           actionsSimulators: ['all'],
@@ -156,6 +159,7 @@ export const secAllCasesNoDelete: Role = {
       {
         feature: {
           siem: ['all'],
+          securitySolutionAssistant: ['all'],
           securitySolutionCases: ['minimal_all'],
           actions: ['all'],
           actionsSimulators: ['all'],

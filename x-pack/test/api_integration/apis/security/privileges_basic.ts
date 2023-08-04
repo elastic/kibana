@@ -41,6 +41,13 @@ export default function ({ getService }: FtrProviderContext) {
             osquery: ['all', 'read', 'minimal_all', 'minimal_read'],
             ml: ['all', 'read', 'minimal_all', 'minimal_read'],
             siem: ['all', 'read', 'minimal_all', 'minimal_read'],
+            securitySolutionAssistant: [
+              'all',
+              'read',
+              'minimal_all',
+              'minimal_read',
+              'create_conversation',
+            ],
             securitySolutionCases: ['all', 'read', 'minimal_all', 'minimal_read'],
             fleetv2: ['all', 'read', 'minimal_all', 'minimal_read'],
             fleet: ['all', 'read', 'minimal_all', 'minimal_read'],

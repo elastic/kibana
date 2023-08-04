@@ -124,6 +124,7 @@ export default function ({ getService }: FtrProviderContext) {
             'uptime',
             'siem',
             'slo',
+            'securitySolutionAssistant',
             'securitySolutionCases',
             'fleet',
             'fleetv2',

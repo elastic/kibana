@@ -25,6 +25,7 @@ export const getAssistantBaseKibanaFeature = (): BaseKibanaFeatureConfig => ({
   category: DEFAULT_APP_CATEGORIES.security,
   app: [ASSISTANT_FEATURE_ID, 'kibana'],
   catalogue: [APP_ID],
+  minimumLicense: 'enterprise',
   privileges: {
     all: {
       api: [],

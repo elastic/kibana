@@ -184,6 +184,7 @@ export const createStartServicesMock = (
         [SERVER_APP_ID]: {
           crud: true,
           read: true,
+          isAssistantEnabled: true,
         },
       },
     },

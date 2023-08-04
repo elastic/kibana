@@ -33,7 +33,7 @@ import {
 import type { FieldHook } from '../../shared_imports';
 import { SUB_PLUGINS_REDUCER } from './utils';
 import { createSecuritySolutionStorageMock, localStorageMock } from './mock_local_storage';
-import { CASES_FEATURE_ID } from '../../../common/constants';
+import { ASSISTANT_FEATURE_ID, CASES_FEATURE_ID } from '../../../common/constants';
 import { UserPrivilegesProvider } from '../components/user_privileges/user_privileges_context';
 
 const state: State = mockGlobalState;
@@ -114,6 +114,7 @@ const TestProvidersWithPrivilegesComponent: React.FC<Props> = ({
                   {
                     siem: { show: true, crud: true },
                     [CASES_FEATURE_ID]: { read_cases: true, crud_cases: false },
+                    [ASSISTANT_FEATURE_ID]: { isAssistantEnabled: true },
                   } as unknown as Capabilities
                 }
               >
