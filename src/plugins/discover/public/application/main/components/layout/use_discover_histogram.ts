@@ -299,6 +299,8 @@ export const useDiscoverHistogram = ({
 
   const dataView = useInternalStateSelector((state) => state.dataView!);
 
+  console.log({ histogramServices: services });
+
   return {
     ref,
     getCreationOptions,

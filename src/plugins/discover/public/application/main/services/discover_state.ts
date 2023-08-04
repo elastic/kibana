@@ -343,7 +343,6 @@ export function getDiscoverStateContainer({
    */
   const initializeAndSync = () => {
     // initialize app state container, syncing with _g and _a part of the URL
-    debugger;
     const appStateInitAndSyncUnsubscribe = appStateContainer.initAndSync(
       savedSearchContainer.getState()
     );

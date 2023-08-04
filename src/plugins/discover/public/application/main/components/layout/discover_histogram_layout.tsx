@@ -64,6 +64,10 @@ export const DiscoverHistogramLayout = ({
     [dataService.query.timefilter.timefilter]
   );
 
+  const onFilter: UnifiedHistogramContainerProps['onFilter'] = useCallback((data) => {
+    console.log({ data });
+  }, []);
+
   // Initialized when the first search has been requested or
   // when in text-based mode since search sessions are not supported
   if (!searchSessionId && !isPlainRecord) {
@@ -83,6 +87,7 @@ export const DiscoverHistogramLayout = ({
       }
       css={histogramLayoutCss}
       onBrushEnd={onBrushEnd}
+      onFilter={onFilter}
     >
       <DiscoverMainContent
         {...mainContentProps}

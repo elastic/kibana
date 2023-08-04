@@ -5,26 +5,19 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import type { CustomizationCallback } from '@kbn/discover-plugin/public/customizations/types';
 import styled, { createGlobalStyle } from 'styled-components';
 import type { ScopedHistory } from '@kbn/core/public';
-import { useDispatch, useSelector } from 'react-redux';
 import type { DiscoverStateContainer } from '@kbn/discover-plugin/public';
 import type { Subscription } from 'rxjs';
-import { isEqual } from 'lodash';
-import type { DiscoverAppState } from '@kbn/discover-plugin/public/application/main/services/discover_app_state_container';
-import type { InternalState } from '@kbn/discover-plugin/public/application/main/services/discover_internal_state_container';
-import type { SavedSearch } from '@kbn/saved-search-plugin/common';
-import {
-  updateDiscoverAppState,
-  updateDiscoverInternalState,
-  updateDiscoverSavedSearchState,
-} from '../../../../common/store/discover/actions';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { useKibana } from '../../../../common/lib/kibana';
-import { useGetStatefulQueryBar } from './use_get_stateful_query_bar';
-import type { State } from '../../../../common/store';
+import { useDiscoverState } from './use_discover_state';
+import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
+import { useSetDiscoverCustomizationCallbacks } from './customizations/use_set_discover_customizations';
 
 const HideSearchSessionIndicatorBreadcrumbIcon = createGlobalStyle`
   [data-test-subj='searchSessionIndicator'] {
@@ -43,40 +36,37 @@ const EmbeddedDiscoverContainer = styled.div`
 export const DiscoverTabContent = () => {
   const history = useHistory();
   const {
-    services: { customDataService: discoverDataService, discover },
+    services: { customDataService: discoverDataService, discover, dataViews: dataViewService },
   } = useKibana();
 
-  const dispatch = useDispatch();
+  const { dataViewId } = useSourcererDataView(SourcererScopeName.detections);
 
-  const { CustomStatefulTopNavKqlQueryBar } = useGetStatefulQueryBar();
+  const [dataView, setDataView] = useState<DataView | undefined>();
 
   const stateContainerRef = useRef<DiscoverStateContainer>();
-  const discoverAppStateSubscription = useRef<Subscription>();
 
+  const discoverAppStateSubscription = useRef<Subscription>();
   const discoverInternalStateSubscription = useRef<Subscription>();
   const discoverSavedSearchStateSubscription = useRef<Subscription>();
 
-  const discoverAppState = useSelector<State, DiscoverAppState | undefined>((state) => {
-    const result = state.discover.app;
-    return result;
-  });
-  const discoverInternalState = useSelector<State, InternalState | undefined>((state) => {
-    const result = state.discover.internal;
-    return result;
-  });
-  const discoverSavedSearchState = useSelector<State, SavedSearch | undefined>((state) => {
-    const result = state.discover.savedSearch;
-    return result;
-  });
+  const discoverCustomizationCallbacks = useSetDiscoverCustomizationCallbacks();
+
+  const {
+    discoverAppState,
+    discoverInternalState,
+    discoverSavedSearchState,
+    setDiscoverSavedSearchState,
+    setDiscoverInternalState,
+    setDiscoverAppState,
+  } = useDiscoverState();
 
   useEffect(() => {
-    if (discoverAppState && !isEqual(stateContainerRef.current?.appState.get(), discoverAppState)) {
-      stateContainerRef?.current?.appState.set(discoverAppState);
-    }
-  }, [discoverAppState]);
+    if (!dataViewId) return;
+    dataViewService.get(dataViewId).then(setDataView);
+  }, [dataViewId, dataViewService]);
 
   useEffect(() => {
-    return () => {
+    const unSubscribeAll = () => {
       [
         discoverAppStateSubscription.current,
         discoverInternalStateSubscription.current,
@@ -85,53 +75,36 @@ export const DiscoverTabContent = () => {
         if (sub) sub.unsubscribe();
       });
     };
+
+    return unSubscribeAll;
   }, []);
 
-  const customize: CustomizationCallback = useCallback(
-    ({ customizations, stateContainer }) => {
-      customizations.set({
-        id: 'search_bar',
-        CustomSearchBar: CustomStatefulTopNavKqlQueryBar,
-      });
-
+  const initialDiscoverCustomizationCallback: CustomizationCallback = useCallback(
+    ({ stateContainer }) => {
       stateContainerRef.current = stateContainer;
 
       if (discoverAppState && discoverInternalState && discoverSavedSearchState) {
+        stateContainer.appState.set(discoverAppState);
         stateContainer.internalState.set(discoverInternalState);
         stateContainer.savedSearchState.set(discoverSavedSearchState);
-        debugger;
-        console.log(`setting appstate to saved app state, `, { discoverAppState });
-        stateContainer.appState.set(discoverAppState);
+      } else {
+        // set initial dataView Id
+        if (dataView) stateContainer.actions.setDataView(dataView);
       }
 
       const unsubscribeState = stateContainer.appState.state$.subscribe({
-        next: (state) => {
-          dispatch(
-            updateDiscoverAppState({
-              newState: state,
-            })
-          );
-        },
+        next: setDiscoverAppState,
       });
 
       const internalStateSubscription = stateContainer.internalState.state$.subscribe({
-        next: (state) => {
-          dispatch(
-            updateDiscoverInternalState({
-              newState: state,
-            })
-          );
-        },
+        next: setDiscoverInternalState,
       });
 
       const savedSearchStateSub = stateContainer.savedSearchState.getHasChanged$().subscribe({
         next: (hasChanged) => {
           if (hasChanged) {
-            dispatch(
-              updateDiscoverSavedSearchState({
-                newState: stateContainer.savedSearchState.getState(),
-              })
-            );
+            const latestSavedSearchState = stateContainer.savedSearchState.getState();
+            setDiscoverSavedSearchState(latestSavedSearchState);
           }
         },
       });
@@ -141,12 +114,19 @@ export const DiscoverTabContent = () => {
       discoverSavedSearchStateSubscription.current = savedSearchStateSub;
     },
     [
-      CustomStatefulTopNavKqlQueryBar,
-      dispatch,
       discoverAppState,
       discoverInternalState,
       discoverSavedSearchState,
+      setDiscoverSavedSearchState,
+      setDiscoverInternalState,
+      setDiscoverAppState,
+      dataView,
     ]
+  );
+
+  const customizationsCallbacks = useMemo(
+    () => [initialDiscoverCustomizationCallback, ...discoverCustomizationCallbacks],
+    [initialDiscoverCustomizationCallback, discoverCustomizationCallbacks]
   );
 
   const services = useMemo(
@@ -159,13 +139,16 @@ export const DiscoverTabContent = () => {
 
   const DiscoverContainer = discover.DiscoverContainer;
 
+  const isLoading = !dataView;
+
   return (
     <EmbeddedDiscoverContainer data-test-subj="timeline-embedded-discover">
       <HideSearchSessionIndicatorBreadcrumbIcon />
       <DiscoverContainer
         overrideServices={services}
         scopedHistory={history as ScopedHistory}
-        customize={customize}
+        customizationCallbacks={customizationsCallbacks}
+        isLoading={isLoading}
       />
     </EmbeddedDiscoverContainer>
   );

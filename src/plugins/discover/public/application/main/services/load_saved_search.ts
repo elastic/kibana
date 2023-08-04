@@ -46,7 +46,7 @@ export const loadSavedSearch = async (
   const { savedSearchId } = params ?? {};
   const { appStateContainer, internalStateContainer, savedSearchContainer, services } = deps;
   const appStateExists = !appStateContainer.isEmptyURL();
-  const appState = appStateExists ? appStateContainer.getState() : undefined;
+  const appState = appStateContainer.getState();
 
   // Loading the saved search or creating a new one
   let nextSavedSearch = savedSearchId

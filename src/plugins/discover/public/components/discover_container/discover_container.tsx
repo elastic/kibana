@@ -27,8 +27,9 @@ export interface DiscoverContainerInternalProps {
   overrideServices: Partial<DiscoverServices>;
   getDiscoverServices: () => Promise<DiscoverServices>;
   scopedHistory: ScopedHistory;
-  customize: CustomizationCallback;
+  customizationCallbacks: CustomizationCallback[];
   isDev: boolean;
+  isLoading?: boolean;
 }
 
 const DiscoverContainerWrapper = euiStyled(EuiFlexGroup)`
@@ -45,12 +46,12 @@ const DiscoverContainerWrapper = euiStyled(EuiFlexGroup)`
 export const DiscoverContainerInternal = ({
   overrideServices,
   scopedHistory,
-  customize,
+  customizationCallbacks,
   isDev,
   getDiscoverServices,
+  isLoading = false,
 }: DiscoverContainerInternalProps) => {
   const [discoverServices, setDiscoverServices] = useState<DiscoverServices | undefined>();
-  const customizationCallbacks = useMemo(() => [customize], [customize]);
   const [initialized, setInitialized] = useState(false);
 
   useEffect(() => {
@@ -68,7 +69,7 @@ export const DiscoverContainerInternal = ({
     return { ...discoverServices, ...overrideServices };
   }, [discoverServices, overrideServices]);
 
-  if (!initialized || !services) {
+  if (!initialized || !services || isLoading) {
     return (
       <DiscoverContainerWrapper>
         <LoadingIndicator type="spinner" />

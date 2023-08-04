@@ -6,7 +6,6 @@
  */
 
 import { fillAddFilterForm } from '../../../../tasks/search_bar';
-import { openTimeline } from '../../../../tasks/timelines';
 import {
   addDiscoverKqlQuery,
   openAddDiscoverFilterPopover,
@@ -22,7 +21,11 @@ import {
 } from '../../../../screens/discover';
 import { updateDateRangeInLocalDatePickers } from '../../../../tasks/date_picker';
 import { login, visit } from '../../../../tasks/login';
-import { createNewTimeline, gotToDiscoverTab } from '../../../../tasks/timeline';
+import {
+  createNewTimeline,
+  gotToDiscoverTab,
+  openActiveTimeline,
+} from '../../../../tasks/timeline';
 import { ALERTS_URL } from '../../../../urls/navigation';
 import { CSP_FINDINGS, TIMELINES } from '../../../../screens/security_header';
 
@@ -43,7 +46,7 @@ describe('Discover State', () => {
     submitDiscoverSearchBar();
     navigateFromHeaderTo(CSP_FINDINGS);
     navigateFromHeaderTo(TIMELINES);
-    openTimeline();
+    openActiveTimeline();
     gotToDiscoverTab();
     cy.get(DISCOVER_QUERY_INPUT).should('have.text', kqlQuery);
   });
@@ -55,7 +58,7 @@ describe('Discover State', () => {
     });
     navigateFromHeaderTo(CSP_FINDINGS);
     navigateFromHeaderTo(TIMELINES);
-    openTimeline();
+    openActiveTimeline();
     gotToDiscoverTab();
     cy.get(DISCOVER_FILTER_BADGES).should('have.length', 1);
   });
@@ -64,7 +67,7 @@ describe('Discover State', () => {
     switchDataViewTo(dataviewName);
     navigateFromHeaderTo(CSP_FINDINGS);
     navigateFromHeaderTo(TIMELINES);
-    openTimeline();
+    openActiveTimeline();
     gotToDiscoverTab();
     cy.get(DISCOVER_DATA_VIEW_SWITCHER.BTN).should('contain.text', dataviewName);
   });

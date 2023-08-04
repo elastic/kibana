@@ -56,6 +56,7 @@ export type UnifiedHistogramContainerProps = {
   | 'appendHitsCounter'
   | 'children'
   | 'onBrushEnd'
+  | 'onFilter'
 >;
 
 /**

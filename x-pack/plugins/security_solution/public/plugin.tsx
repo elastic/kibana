@@ -16,6 +16,8 @@ import type {
   PluginInitializerContext,
   Plugin as IPlugin,
 } from '@kbn/core/public';
+
+import { createFilterAction } from '@kbn/unified-search-plugin/public/actions/apply_filter_action';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { NowProvider, QueryService } from '@kbn/data-plugin/public';
 import { DEFAULT_APP_CATEGORIES, AppNavLinkStatus } from '@kbn/core/public';
@@ -171,9 +173,13 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       const customDataService: DataPublicPluginStart = {
         ...startPlugins.data,
         query,
+        // @ts-expect-error
+        _name: 'custom',
       };
 
-      customDataService.query.filterManager._name = 'customFilter';
+      startPluginsDeps.uiActions.registerAction(
+        createFilterAction(query.filterManager, query.timefilter.timefilter, core.theme)
+      );
 
       const services: StartServices = {
         ...coreStart,
