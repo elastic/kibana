@@ -13,6 +13,11 @@ export const coverageOverviewPanelWidth = 160;
 
 export const coverageOverviewLegendWidth = 380;
 
+/**
+ * Rules count -> color map
+ *
+ * A corresponding color is applied if rules count >= a specific threshold
+ */
 export const coverageOverviewCardColorThresholds = [
   { threshold: 10, color: coverageOverviewPaletteColors[3] },
   { threshold: 7, color: coverageOverviewPaletteColors[2] },
