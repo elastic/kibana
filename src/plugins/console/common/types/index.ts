@@ -8,3 +8,4 @@
 
 export * from './models';
 export * from './plugin_config';
+export * from './autocomplete_definitions';
