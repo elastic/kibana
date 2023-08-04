@@ -20570,7 +20570,6 @@
     "xpack.ingestPipelines.testPipelineFlyout.successNotificationText": "管道已执行",
     "xpack.ingestPipelines.testPipelineFlyout.title": "测试管道",
     "xpack.kubernetesSecurity.treeNavigation.loadMore": "显示更多 {name}",
-    "xpack.kubernetesSecurity.beta": "公测版",
     "xpack.kubernetesSecurity.chartsToggle.hide": "隐藏图表",
     "xpack.kubernetesSecurity.chartsToggle.show": "显示图表",
     "xpack.kubernetesSecurity.containerNameWidget.containerImage": "容器映像",
