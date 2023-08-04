@@ -49,6 +49,16 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     serviceType: 'jira',
   },
   {
+    iconPath: 'github.svg',
+    isBeta: true,
+    isNative: false,
+    keywords: ['github', 'cloud', 'connector'],
+    name: i18n.translate('xpack.enterpriseSearch.content.nativeConnectors.github.name', {
+      defaultMessage: 'GitHub & GitHub Enterprise Server',
+    }),
+    serviceType: 'github',
+  },
+  {
     iconPath: 'google_cloud_storage.svg',
     isBeta: true,
     isNative: false,
@@ -132,7 +142,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
   {
     iconPath: 'dropbox.svg',
     isBeta: true,
-    isNative: false,
+    isNative: true,
     isTechPreview: false,
     keywords: ['dropbox', 'connector'],
     name: i18n.translate('xpack.enterpriseSearch.content.nativeConnectors.dropbox.name', {
@@ -163,7 +173,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
   {
     iconPath: 'servicenow.svg',
     isBeta: true,
-    isNative: false,
+    isNative: true,
     isTechPreview: false,
     keywords: ['servicenow', 'cloud', 'connector'],
     name: i18n.translate('xpack.enterpriseSearch.content.nativeConnectors.serviceNow.name', {

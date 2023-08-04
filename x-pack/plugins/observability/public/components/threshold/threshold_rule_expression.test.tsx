@@ -42,7 +42,7 @@ describe('Expression', () => {
     const ruleParams = {
       criteria: [],
       groupBy: undefined,
-      filterQueryText: '',
+      filterQuery: '',
       sourceId: 'default',
       searchConfiguration: {},
     };
@@ -86,7 +86,7 @@ describe('Expression', () => {
     };
     const { ruleParams } = await setup(currentOptions);
     expect(ruleParams.groupBy).toBe('host.hostname');
-    expect(ruleParams.filterQueryText).toBe('foo');
+    expect(ruleParams.filterQuery).toBe('foo');
     expect(ruleParams.criteria).toEqual([
       {
         metric: 'system.load.1',

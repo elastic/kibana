@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Subject } from 'rxjs';
+import { combineLatest, Subject } from 'rxjs';
 import type * as H from 'history';
 import type {
   AppMountParameters,
@@ -20,6 +20,7 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { FilterManager, NowProvider, QueryService } from '@kbn/data-plugin/public';
 import { DEFAULT_APP_CATEGORIES, AppNavLinkStatus } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
+import type { FleetUiExtensionGetterOptions } from './management/pages/policy/view/ingest_manager_integration/types';
 import type {
   PluginSetup,
   PluginStart,
@@ -36,7 +37,7 @@ import { SOLUTION_NAME } from './common/translations';
 
 import { APP_ID, APP_UI_ID, APP_PATH, APP_ICON_SOLUTION } from '../common/constants';
 
-import { updateAppLinks, type LinksPermissions } from './common/links';
+import { updateAppLinks, updateExtraAppLinks, type LinksPermissions } from './common/links';
 import { registerDeepLinksUpdater } from './common/links/deep_links';
 import { licenseService } from './common/hooks/use_license';
 import type { SecuritySolutionUiConfigType } from './common/types';
@@ -276,23 +277,30 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
     if (plugins.fleet) {
       const { registerExtension } = plugins.fleet;
+      const registerOptions: FleetUiExtensionGetterOptions = {
+        coreStart: core,
+        depsStart: plugins,
+        services: {
+          upsellingService: this.contract.upsellingService,
+        },
+      };
 
       registerExtension({
         package: 'endpoint',
         view: 'package-policy-edit',
-        Component: getLazyEndpointPolicyEditExtension(core, plugins),
+        Component: getLazyEndpointPolicyEditExtension(registerOptions),
       });
 
       registerExtension({
         package: 'endpoint',
         view: 'package-policy-response',
-        Component: getLazyEndpointPolicyResponseExtension(core, plugins),
+        Component: getLazyEndpointPolicyResponseExtension(registerOptions),
       });
 
       registerExtension({
         package: 'endpoint',
         view: 'package-generic-errors-list',
-        Component: getLazyEndpointGenericErrorsListExtension(core, plugins),
+        Component: getLazyEndpointGenericErrorsListExtension(registerOptions),
       });
 
       registerExtension({
@@ -310,7 +318,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       registerExtension({
         package: 'endpoint',
         view: 'package-detail-custom',
-        Component: getLazyEndpointPackageCustomExtension(core, plugins),
+        Component: getLazyEndpointPackageCustomExtension(registerOptions),
       });
 
       registerExtension({
@@ -503,20 +511,21 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   async registerAppLinks(core: CoreStart, plugins: StartPlugins) {
     const { links, getFilteredLinks } = await this.lazyApplicationLinks();
     const { license$ } = plugins.licensing;
-    const upselling = this.contract.upsellingService;
+    const { upsellingService, extraAppLinks$ } = this.contract;
 
     registerDeepLinksUpdater(this.appUpdater$);
 
+    const baseLinksPermissions: LinksPermissions = {
+      experimentalFeatures: this.experimentalFeatures,
+      upselling: upsellingService,
+      capabilities: core.application.capabilities,
+    };
+
     license$.subscribe(async (license) => {
       const linksPermissions: LinksPermissions = {
-        experimentalFeatures: this.experimentalFeatures,
-        upselling,
-        capabilities: core.application.capabilities,
+        ...baseLinksPermissions,
+        ...(license.type != null && { license }),
       };
-
-      if (license.type !== undefined) {
-        linksPermissions.license = license;
-      }
 
       // set initial links to not block rendering
       updateAppLinks(links, linksPermissions);
@@ -524,6 +533,13 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       // set filtered links asynchronously
       const filteredLinks = await getFilteredLinks(core, plugins);
       updateAppLinks(filteredLinks, linksPermissions);
+    });
+
+    combineLatest([extraAppLinks$, license$]).subscribe(([extraAppLinks, license]) => {
+      updateExtraAppLinks(extraAppLinks, {
+        ...baseLinksPermissions,
+        ...(license.type != null && { license }),
+      });
     });
   }
 }

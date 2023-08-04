@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { History } from 'history';
 import {
   createKbnUrlStateStorage,
+  IKbnUrlStateStorage,
   StateContainer,
   withNotifyOnErrors,
 } from '@kbn/kibana-utils-plugin/public';
@@ -97,6 +98,10 @@ export interface DiscoverStateContainer {
    * State of saved search, the saved object of Discover
    */
   savedSearchState: DiscoverSavedSearchContainer;
+  /**
+   * State of url, allows updating and subscribing to url changes
+   */
+  stateStorage: IKbnUrlStateStorage;
   /**
    * Service for handling search sessions
    */
@@ -252,6 +257,7 @@ export function getDiscoverStateContainer({
     services,
     searchSessionManager,
     getAppState: appStateContainer.getState,
+    getInternalState: internalStateContainer.getState,
     getSavedSearch: savedSearchContainer.getState,
     setDataView,
   });
@@ -451,6 +457,7 @@ export function getDiscoverStateContainer({
     internalState: internalStateContainer,
     dataState: dataStateContainer,
     savedSearchState: savedSearchContainer,
+    stateStorage,
     searchSessionManager,
     actions: {
       initializeAndSync,
@@ -540,6 +547,6 @@ function createUrlGeneratorState({
     viewMode: appState.viewMode,
     hideAggregatedPreview: appState.hideAggregatedPreview,
     breakdownField: appState.breakdownField,
-    dataViewSpec: !dataView?.isPersisted() ? dataView?.toSpec(false) : undefined,
+    dataViewSpec: !dataView?.isPersisted() ? dataView?.toMinimalSpec() : undefined,
   };
 }

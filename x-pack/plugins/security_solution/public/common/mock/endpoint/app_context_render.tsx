@@ -12,7 +12,7 @@ import { createMemoryHistory } from 'history';
 import type { RenderOptions, RenderResult } from '@testing-library/react';
 import { render as reactRender } from '@testing-library/react';
 import type { Action, Reducer, Store } from 'redux';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient } from '@tanstack/react-query';
 import { coreMock } from '@kbn/core/public/mocks';
 import { PLUGIN_ID } from '@kbn/fleet-plugin/common';
 import type { RenderHookOptions, RenderHookResult } from '@testing-library/react-hooks';
@@ -26,7 +26,6 @@ import ReactDOM from 'react-dom';
 import type { AppLinkItems } from '../../links/types';
 import { ExperimentalFeaturesService } from '../../experimental_features_service';
 import { applyIntersectionObserverMock } from '../intersection_observer_mock';
-import { ConsoleManager } from '../../../management/components/console';
 import type { StartPlugins, StartServices } from '../../../types';
 import { depsStartMock } from './dependencies_start_mock';
 import type { MiddlewareActionSpyHelper } from '../../store/test_utils';
@@ -40,7 +39,7 @@ import { createStartServicesMock } from '../../lib/kibana/kibana_react.mock';
 import { SUB_PLUGINS_REDUCER, mockGlobalState, createSecuritySolutionStorageMock } from '..';
 import type { ExperimentalFeatures } from '../../../../common/experimental_features';
 import { APP_UI_ID, APP_PATH } from '../../../../common/constants';
-import { KibanaContextProvider, KibanaServices } from '../../lib/kibana';
+import { KibanaServices } from '../../lib/kibana';
 import { links } from '../../links/app_links';
 import { fleetGetPackageHttpMock } from '../../../management/mocks';
 import { allowedExperimentalValues } from '../../../../common/experimental_features';
@@ -237,13 +236,16 @@ export const createAppRootMockRenderer = (): AppContextTestRender => {
   });
 
   const AppWrapper: React.FC<{ children: React.ReactElement }> = ({ children }) => (
-    <KibanaContextProvider services={startServices}>
-      <AppRootProvider store={store} history={history} coreStart={coreStart} depsStart={depsStart}>
-        <QueryClientProvider client={queryClient}>
-          <ConsoleManager>{children}</ConsoleManager>
-        </QueryClientProvider>
-      </AppRootProvider>
-    </KibanaContextProvider>
+    <AppRootProvider
+      store={store}
+      history={history}
+      coreStart={coreStart}
+      depsStart={depsStart}
+      startServices={startServices}
+      queryClient={queryClient}
+    >
+      {children}
+    </AppRootProvider>
   );
 
   const render: UiRender = (ui, options) => {
