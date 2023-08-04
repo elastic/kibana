@@ -374,7 +374,7 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
         invokedBy: TIMELINE_CONVERSATION_TITLE,
       });
     }
-  }, [activeTab, reportAssistantInvoked, setActiveTab]);
+  }, [activeTab, conversationId, reportAssistantInvoked, setActiveTab]);
 
   const setDiscoverAsActiveTab = useCallback(() => {
     setActiveTab(TimelineTabs.discover);
