@@ -23,7 +23,13 @@ import { I18nProvider, __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render, waitFor, screen } from '@testing-library/react';
 import { DEFAULT_FREQUENCY } from '../../../common/constants';
 import { transformActionVariables } from '../../lib/action_variables';
-import { RuleNotifyWhen, RuleNotifyWhenType } from '@kbn/alerting-plugin/common';
+import {
+  RuleActionTypes,
+  RuleNotifyWhen,
+  RuleNotifyWhenType,
+  RuleSystemAction,
+} from '@kbn/alerting-plugin/common';
+import userEvent from '@testing-library/user-event';
 
 const CUSTOM_NOTIFY_WHEN_OPTIONS: NotifyWhenSelectOptions[] = [
   {
@@ -255,7 +261,7 @@ describe('action_type_form', () => {
     );
   });
 
-  it('shows an error icon when there is a form error and the action accordion is closed ', async () => {
+  it('shows an error icon when there is a form error and the action accordion is closed', async () => {
     const actionType = actionTypeRegistryMock.createMockActionTypeModel({
       id: '.pagerduty',
       iconClass: 'test',
@@ -496,8 +502,9 @@ describe('action_type_form', () => {
         </IntlProvider>
       );
 
-      wrapper.getByTestId('notifyWhenSelect').click();
-      await act(async () => {
+      userEvent.click(wrapper.getByTestId('notifyWhenSelect'));
+
+      await waitFor(async () => {
         expect(wrapper.queryByText('On status changes')).not.toBeTruthy();
         expect(wrapper.queryByText('On check intervals')).not.toBeTruthy();
         expect(wrapper.queryByText('On custom action intervals')).not.toBeTruthy();
@@ -509,6 +516,101 @@ describe('action_type_form', () => {
         expect(wrapper.getByTestId('onActiveAlert')).toBeTruthy();
         expect(wrapper.queryByTestId('onThrottleInterval')).not.toBeTruthy();
       });
+    });
+  });
+
+  describe('system actions', () => {
+    const systemActionItem: RuleSystemAction = {
+      id: '123',
+      actionTypeId: '.test',
+      params: {},
+      uuid: '456',
+      type: RuleActionTypes.SYSTEM,
+    };
+
+    it('should not show the "Action frequency" selection', async () => {
+      render(
+        <IntlProvider locale="en">
+          {getActionTypeForm({
+            index: 1,
+            actionItem: systemActionItem,
+          })}
+        </IntlProvider>
+      );
+
+      await waitFor(() => {
+        expect(screen.getByTestId('alertActionAccordion-1')).toBeInTheDocument();
+      });
+
+      expect(screen.queryByTestId('action-notify-when-form-row')).not.toBeInTheDocument();
+    });
+
+    it('should not show the "Run when" selection', async () => {
+      render(
+        <IntlProvider locale="en">
+          {getActionTypeForm({
+            index: 1,
+            actionItem: systemActionItem,
+          })}
+        </IntlProvider>
+      );
+
+      await waitFor(() => {
+        expect(screen.getByTestId('alertActionAccordion-1')).toBeInTheDocument();
+      });
+
+      expect(screen.queryByTestId('addNewActionConnectorActionGroup-1')).not.toBeInTheDocument();
+    });
+
+    it('should not show alerts filter KQL bar', async () => {
+      render(
+        <IntlProvider locale="en">
+          {getActionTypeForm({
+            index: 1,
+            actionItem: systemActionItem,
+          })}
+        </IntlProvider>
+      );
+
+      await waitFor(() => {
+        expect(screen.getByTestId('alertActionAccordion-1')).toBeInTheDocument();
+      });
+
+      expect(screen.queryByTestId('alertsFilterQueryToggle')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('alertsFilterTimeframeToggle')).not.toBeInTheDocument();
+    });
+
+    it('should not show the accordion title when the the action accordion is closed', async () => {
+      render(
+        <IntlProvider locale="en">
+          {getActionTypeForm({
+            index: 1,
+            actionItem: systemActionItem,
+          })}
+        </IntlProvider>
+      );
+
+      await waitFor(() => {
+        expect(screen.getByTestId('alertActionAccordion-1')).toBeInTheDocument();
+      });
+
+      expect(screen.queryByTestId('action-group-error-icon')).not.toBeInTheDocument();
+
+      const accordionButton = screen.getAllByRole('button', {
+        expanded: true,
+      })[0];
+
+      userEvent.click(accordionButton);
+
+      await waitFor(() => {
+        expect(
+          screen.getAllByRole('button', {
+            expanded: false,
+          })[0]
+        ).toBeInTheDocument();
+      });
+
+      expect(screen.queryByTestId('action-accordion-title-1')).not.toBeInTheDocument();
     });
   });
 });

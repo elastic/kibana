@@ -427,7 +427,7 @@ export const ActionTypeForm = ({
             defaultNotifyWhenValue={defaultNotifyWhenValue}
           />
         )}
-        {showSelectActionGroup && !isSystemActionItem && (
+        {showSelectActionGroup && (
           <>
             {!hideNotifyWhen && <EuiSpacer size="s" />}
             <EuiSuperSelect
@@ -575,7 +575,10 @@ export const ActionTypeForm = ({
                       {!isSystemActionItem &&
                         (selectedActionGroup || actionItem.frequency?.summary) &&
                         !isOpen && (
-                          <EuiFlexItem grow={false}>
+                          <EuiFlexItem
+                            grow={false}
+                            data-test-subj={`action-accordion-title-${index}`}
+                          >
                             <EuiBadge iconType="clock">
                               {actionItem.frequency?.summary
                                 ? i18n.translate(

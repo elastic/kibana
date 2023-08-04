@@ -12,12 +12,15 @@ import { RuleActions } from './rule_actions';
 import { actionTypeRegistryMock } from '../../../action_type_registry.mock';
 import { ActionConnector, ActionTypeModel, RuleAction } from '../../../../types';
 import * as useFetchRuleActionConnectorsHook from '../../../hooks/use_fetch_rule_action_connectors';
+import { render, waitFor, screen } from '@testing-library/react';
+import { RuleSystemAction, RuleActionTypes } from '@kbn/alerting-plugin/common';
 
 const actionTypeRegistry = actionTypeRegistryMock.create();
 const mockedUseFetchRuleActionConnectorsHook = jest.spyOn(
   useFetchRuleActionConnectorsHook,
   'useFetchRuleActionConnectors'
 );
+
 describe('Rule Actions', () => {
   async function setup() {
     const ruleActions = [
@@ -168,5 +171,44 @@ describe('Rule Actions', () => {
     expect(wrapper.find('[data-test-subj="actionConnectorName-2-logs2"]').exists).toBeTruthy();
     expect(wrapper.find('[data-test-subj="actionConnectorName-3-slack1"]').exists).toBeTruthy();
     expect(wrapper.find('[data-test-subj="actionConnectorName-4-slack2"]').exists).toBeTruthy();
+  });
+
+  describe('system actions', () => {
+    const systemAction: RuleSystemAction = {
+      id: '123',
+      actionTypeId: '.test',
+      params: {},
+      uuid: '456',
+      type: RuleActionTypes.SYSTEM,
+    };
+
+    mockedUseFetchRuleActionConnectorsHook.mockReturnValue({
+      isLoadingActionConnectors: false,
+      actionConnectors: [
+        {
+          id: '123',
+          name: 'Test',
+          isSystemAction: true,
+          actionTypeId: '.test',
+        },
+      ] as Array<ActionConnector<Record<string, unknown>>>,
+      reloadRuleActionConnectors: jest.fn(),
+    });
+
+    actionTypeRegistry.list.mockReturnValue([
+      { id: '.test', iconClass: 'logsApp' },
+    ] as ActionTypeModel[]);
+
+    it('does not show the notify text on system actions', async () => {
+      render(<RuleActions ruleActions={[systemAction]} actionTypeRegistry={actionTypeRegistry} />);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('rule-actions-action-0-wrapper')).toBeInTheDocument();
+      });
+
+      expect(
+        screen.queryByTestId('rule-actions-action-0-notify-text-wrapper')
+      ).not.toBeInTheDocument();
+    });
   });
 });

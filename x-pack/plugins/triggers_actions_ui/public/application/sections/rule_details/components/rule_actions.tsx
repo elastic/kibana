@@ -82,7 +82,7 @@ export function RuleActions({
         const isSystemActionItem = isSystemAction(action);
 
         return (
-          <EuiFlexItem key={index}>
+          <EuiFlexItem key={index} data-test-subj={`rule-actions-action-${index}-wrapper`}>
             <EuiFlexGroup alignItems="center" gutterSize="s" component="span">
               <EuiFlexItem grow={false}>
                 <EuiIcon size="m" type={getActionIconClass(actionTypeId) ?? 'apps'} />
@@ -100,7 +100,9 @@ export function RuleActions({
                     <EuiIcon size="s" type="bell" />
                   </EuiFlexItem>
                   {isSystemActionItem ? null : (
-                    <EuiFlexItem>
+                    <EuiFlexItem
+                      data-test-subj={`rule-actions-action-${index}-notify-text-wrapper`}
+                    >
                       <EuiText
                         data-test-subj={`actionConnectorName-${index}-${
                           actionName || actionTypeId

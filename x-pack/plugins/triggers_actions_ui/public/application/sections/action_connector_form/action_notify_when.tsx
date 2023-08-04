@@ -303,6 +303,7 @@ export const ActionNotifyWhen = ({
         'xpack.triggersActionsUI.sections.ruleForm.actionNotifyWhen.actionFrequencyLabel',
         { defaultMessage: 'Action frequency' }
       )}
+      data-test-subj="action-notify-when-form-row"
     >
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem>
