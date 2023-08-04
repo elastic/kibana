@@ -3668,19 +3668,19 @@
           },
           {
             "plugin": "aiops",
-            "path": "x-pack/plugins/aiops/public/components/change_point_detection/change_point_detection_root.tsx"
-          },
-          {
-            "plugin": "aiops",
-            "path": "x-pack/plugins/aiops/public/components/change_point_detection/change_point_detection_root.tsx"
-          },
-          {
-            "plugin": "aiops",
             "path": "x-pack/plugins/aiops/public/components/log_rate_analysis/log_rate_analysis_content/log_rate_analysis_content_wrapper.tsx"
           },
           {
             "plugin": "aiops",
             "path": "x-pack/plugins/aiops/public/components/log_rate_analysis/log_rate_analysis_content/log_rate_analysis_content_wrapper.tsx"
+          },
+          {
+            "plugin": "aiops",
+            "path": "x-pack/plugins/aiops/public/components/change_point_detection/change_point_detection_root.tsx"
+          },
+          {
+            "plugin": "aiops",
+            "path": "x-pack/plugins/aiops/public/components/change_point_detection/change_point_detection_root.tsx"
           },
           {
             "plugin": "security",
