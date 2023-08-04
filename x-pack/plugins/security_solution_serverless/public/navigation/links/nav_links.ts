@@ -10,10 +10,13 @@ import type { ChromeNavLinks, CoreStart } from '@kbn/core/public';
 import { SecurityPageName, type NavigationLink } from '@kbn/security-solution-navigation';
 import { isSecurityId } from '@kbn/security-solution-navigation/links';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
-import { mlNavCategories, mlNavLinks } from './sections/ml_links';
-import { devToolsNavLink } from './sections/dev_tools_links';
 import { assetsNavLinks } from './sections/assets_links';
-import { projectSettingsNavLinks } from './sections/project_settings';
+import { mlNavCategories, mlNavLinks } from './sections/ml_links';
+import {
+  projectSettingsNavCategories,
+  projectSettingsNavLinks,
+} from './sections/project_settings_links';
+import { devToolsNavLink } from './sections/dev_tools_links';
 import type { ProjectNavigationLink } from './types';
 import { getCloudLinkKey, getCloudUrl, getNavLinkIdFromProjectPageName, isCloudLink } from './util';
 
@@ -72,6 +75,7 @@ const processNavLinks = (
     const projectSettingsNavLink = projectNavLinks[projectSettingsLinkIndex];
     projectNavLinks[projectSettingsLinkIndex] = {
       ...projectSettingsNavLink,
+      categories: projectSettingsNavCategories,
       links: [...projectSettingsNavLinks, ...(projectSettingsNavLink.links ?? [])],
     };
   }
@@ -115,7 +119,7 @@ const processCloudLinks = (
     const extraProps: Partial<ProjectNavigationLink> = {};
     if (isCloudLink(link.id)) {
       const externalUrl = getCloudUrl(getCloudLinkKey(link.id), cloud);
-      extraProps.externalUrl = externalUrl ?? '#'; // TODO: disable the link if the url is not defined
+      extraProps.externalUrl = externalUrl ?? '#'; // fallback to # if not found, should only happen in dev
     }
     if (link.links) {
       extraProps.links = processCloudLinks(link.links, cloud);

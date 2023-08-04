@@ -145,7 +145,7 @@ const SolutionSideNavPanelCategories: React.FC<SolutionSideNavPanelCategoriesPro
     return (
       <>
         {categories.map((category, index) => {
-          const categoryItems = category.linkIds.reduce<SolutionSideNavItem[]>((acc, linkId) => {
+          const categoryItems = category.linkIds?.reduce<SolutionSideNavItem[]>((acc, linkId) => {
             const link = items.find((item) => item.id === linkId);
             if (link) {
               acc.push(link);
@@ -153,7 +153,7 @@ const SolutionSideNavPanelCategories: React.FC<SolutionSideNavPanelCategoriesPro
             return acc;
           }, []);
 
-          if (!categoryItems.length) {
+          if (!categoryItems?.length) {
             return null;
           }
 

@@ -5,18 +5,19 @@
  * 2.0.
  */
 
-import { APP_PATH, MANAGE_PATH } from '@kbn/security-solution-plugin/common';
+import { APP_PATH, SecurityPageName } from '@kbn/security-solution-plugin/common';
 import type { Services } from '../common/services';
 import { subscribeBreadcrumbs } from './breadcrumbs';
+import { SecurityPagePath } from './links/constants';
 import { subscribeNavigationTree } from './navigation_tree';
 import { getSecuritySideNavComponent } from './side_navigation';
 
-const SECURITY_MANAGE_PATH = `${APP_PATH}${MANAGE_PATH}`;
+const SECURITY_MANAGEMENT_PATH = `${APP_PATH}${SecurityPagePath[SecurityPageName.projectSettings]}`;
 
 export const configureNavigation = (services: Services) => {
   const { serverless, securitySolution, management } = services;
   securitySolution.setIsSidebarEnabled(false);
-  management.setLandingPageRedirect(SECURITY_MANAGE_PATH);
+  management.setLandingPageRedirect(SECURITY_MANAGEMENT_PATH);
 
   serverless.setProjectHome(APP_PATH);
   serverless.setSideNavComponent(getSecuritySideNavComponent(services));

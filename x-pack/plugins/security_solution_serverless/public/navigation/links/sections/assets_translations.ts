@@ -54,19 +54,19 @@ export const FLEET_POLICIES_TITLE = i18n.translate(
 export const FLEET_ENROLLMENT_TOKENS_TITLE = i18n.translate(
   'xpack.securitySolutionServerless.navLinks.assets.fleet.enrollmentTokens.title',
   {
-    defaultMessage: 'Enrollment Tokens',
+    defaultMessage: 'Enrollment tokens',
   }
 );
 export const FLEET_UNINSTALL_TOKENS_TITLE = i18n.translate(
   'xpack.securitySolutionServerless.navLinks.assets.fleet.uninstallTokens.title',
   {
-    defaultMessage: 'Uninstall Tokens',
+    defaultMessage: 'Uninstall tokens',
   }
 );
 export const FLEET_DATA_STREAMS_TITLE = i18n.translate(
   'xpack.securitySolutionServerless.navLinks.assets.fleet.dataStreams.title',
   {
-    defaultMessage: 'Data Streams',
+    defaultMessage: 'Data streams',
   }
 );
 export const FLEET_SETTINGS_TITLE = i18n.translate(

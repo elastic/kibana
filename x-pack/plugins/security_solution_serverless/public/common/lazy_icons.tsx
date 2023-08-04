@@ -33,3 +33,12 @@ export const IconSiemLazy = withSuspenseIcon(React.lazy(() => import('./icons/si
 export const IconEcctlLazy = withSuspenseIcon(React.lazy(() => import('./icons/ecctl')));
 export const IconGraphLazy = withSuspenseIcon(React.lazy(() => import('./icons/graph')));
 export const IconLoggingLazy = withSuspenseIcon(React.lazy(() => import('./icons/logging')));
+export const IconMapServicesLazy = withSuspenseIcon(
+  React.lazy(() => import('./icons/map_services'))
+);
+export const IconSecurityShieldLazy = withSuspenseIcon(
+  React.lazy(() => import('./icons/security_shield'))
+);
+export const IconProductFeaturesAlertingLazy = withSuspenseIcon(
+  React.lazy(() => import('./icons/product_features_alerting'))
+);

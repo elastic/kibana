@@ -5,12 +5,10 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/react';
-import { LinkAnchor } from '../links';
+import { EuiFlexGroup } from '@elastic/eui';
 import type { NavigationLink } from '../types';
 import { LandingLinkIcon } from './landing_links_icons';
-import { getKibanaLinkProps } from './utils';
+import { LandingColumnLinks } from './landing_links';
 
 export interface LandingLinksIconsGroupsProps {
   items: NavigationLink[];
@@ -24,49 +22,14 @@ export interface LandingSubLinkProps {
   onLinkClick?: (id: string) => void;
 }
 
-const useSubLinkStyles = () => {
-  const { euiTheme } = useEuiTheme();
-  return {
-    container: css`
-      margin-top: ${euiTheme.size.base};
-    `,
-  };
-};
-
-const LandingSubLink: React.FC<LandingSubLinkProps> = React.memo(function LandingSubLink({
-  item,
-  urlState,
-  onLinkClick,
-}) {
-  const styles = useSubLinkStyles();
-  const linkProps = getKibanaLinkProps({ item, urlState, onLinkClick });
-
-  return (
-    <EuiFlexItem grow={false} css={styles.container} data-test-subj="LandingSubItem">
-      <LinkAnchor tabIndex={-1} {...linkProps}>
-        <h2>{item.title}</h2>
-      </LinkAnchor>
-    </EuiFlexItem>
-  );
-});
-
 export const LandingLinksIconsGroups: React.FC<LandingLinksIconsGroupsProps> = React.memo(
   function LandingLinksIconsGroups({ items, urlState, onLinkClick }) {
     return (
       <EuiFlexGroup gutterSize="xl" wrap>
-        {items.map(({ links, ...item }) => (
-          <LandingLinkIcon key={item.id} item={item} urlState={urlState} onLinkClick={onLinkClick}>
+        {items.map(({ links, ...link }) => (
+          <LandingLinkIcon key={link.id} item={link} urlState={urlState} onLinkClick={onLinkClick}>
             {links?.length && (
-              <EuiFlexGroup gutterSize="none" direction="column" alignItems="flexStart">
-                {links.map((subItem) => (
-                  <LandingSubLink
-                    key={subItem.id}
-                    item={subItem}
-                    urlState={urlState}
-                    onLinkClick={onLinkClick}
-                  />
-                ))}
-              </EuiFlexGroup>
+              <LandingColumnLinks items={links} urlState={urlState} onLinkClick={onLinkClick} />
             )}
           </LandingLinkIcon>
         ))}

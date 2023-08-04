@@ -78,8 +78,8 @@ export const RULES = i18n.translate('xpack.securitySolution.navigation.rules', {
   defaultMessage: 'Rules',
 });
 
-export const SIEM_RULES = i18n.translate('xpack.securitySolution.navigation.siemRules', {
-  defaultMessage: 'SIEM Rules',
+export const SIEM_RULES = i18n.translate('xpack.securitySolution.navigation.detectionRules', {
+  defaultMessage: 'Detection rules (SIEM)',
 });
 
 export const ADD_RULES = i18n.translate('xpack.securitySolution.navigation.addRules', {
@@ -87,7 +87,7 @@ export const ADD_RULES = i18n.translate('xpack.securitySolution.navigation.addRu
 });
 
 export const EXCEPTIONS = i18n.translate('xpack.securitySolution.navigation.exceptions', {
-  defaultMessage: 'Shared Exception Lists',
+  defaultMessage: 'Shared exception lists',
 });
 
 export const ALERTS = i18n.translate('xpack.securitySolution.navigation.alerts', {

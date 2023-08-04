@@ -10,6 +10,6 @@ import { i18n } from '@kbn/i18n';
 export const DEV_TOOLS_TITLE = i18n.translate(
   'xpack.securitySolutionServerless.navLinks.devTools.title',
   {
-    defaultMessage: 'Dev Tools',
+    defaultMessage: 'Dev tools',
   }
 );

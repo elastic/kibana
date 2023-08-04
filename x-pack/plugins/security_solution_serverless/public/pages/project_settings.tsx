@@ -6,22 +6,40 @@
  */
 
 import React from 'react';
-import { LandingLinksIcons } from '@kbn/security-solution-navigation/landing_links';
-import { SecurityPageName } from '@kbn/security-solution-navigation';
+import { EuiHorizontalRule, EuiPageHeader, EuiSpacer } from '@elastic/eui';
+import {
+  LandingLinksIcons,
+  LandingLinksIconsCategoriesGroups,
+} from '@kbn/security-solution-navigation/landing_links';
+import type { AccordionLinkCategory } from '@kbn/security-solution-navigation';
+import {
+  isAccordionLinkCategory,
+  isSeparatorLinkCategory,
+  SecurityPageName,
+} from '@kbn/security-solution-navigation';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import { EuiPageHeader, EuiSpacer } from '@elastic/eui';
 import { useNavLink } from '../common/hooks/use_nav_links';
 
 export const ProjectSettingsRoute: React.FC = () => {
-  const link = useNavLink(SecurityPageName.projectSettings);
-  const { links = [], categories = [], title } = link ?? {};
+  const projectSettingsLink = useNavLink(SecurityPageName.projectSettings);
+  const { links = [], categories = [], title } = projectSettingsLink ?? {};
+
+  const iconLinkIds =
+    categories.find((category) => isSeparatorLinkCategory(category))?.linkIds ?? [];
+  const iconLinks = links.filter(({ id }) => iconLinkIds.includes(id));
+
+  const accordionCategories = (categories.filter((category) => isAccordionLinkCategory(category)) ??
+    []) as AccordionLinkCategory[];
 
   return (
     <KibanaPageTemplate restrictWidth={false} contentBorder={false} grow={true}>
       <KibanaPageTemplate.Section>
         <EuiPageHeader pageTitle={title} />
         <EuiSpacer size="xl" />
-        <LandingLinksIcons items={links} />
+        <LandingLinksIcons items={iconLinks} />
+        <EuiSpacer size="l" />
+        <EuiHorizontalRule />
+        <LandingLinksIconsCategoriesGroups links={links} categories={accordionCategories} />
       </KibanaPageTemplate.Section>
     </KibanaPageTemplate>
   );

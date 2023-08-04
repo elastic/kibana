@@ -7,13 +7,12 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, EuiTitle, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { LinkAnchor } from '../links';
 import type { NavigationLink } from '../types';
 import { BetaBadge } from './beta_badge';
-import { getKibanaLinkProps } from './utils';
+import { LandingLink } from './landing_links';
 
 export interface LandingLinksIconsProps {
-  items: NavigationLink[];
+  items: Readonly<NavigationLink[]>;
   urlState?: string;
   onLinkClick?: (id: string) => void;
 }
@@ -44,7 +43,6 @@ export const LandingLinkIcon: React.FC<LandingLinkIconProps> = React.memo(functi
   children,
 }) {
   const styles = useLinkIconStyles();
-  const linkProps = getKibanaLinkProps({ item, urlState, onLinkClick });
   const { title, description, landingIcon, isBeta, betaOptions } = item;
 
   return (
@@ -56,17 +54,23 @@ export const LandingLinkIcon: React.FC<LandingLinkIconProps> = React.memo(functi
       data-test-subj="LandingItem"
     >
       <EuiFlexItem grow={false}>
-        <LinkAnchor tabIndex={-1} {...linkProps}>
+        <LandingLink
+          tabIndex={-1} // Prevents the icon from being tabbable
+          item={item}
+          urlState={urlState}
+          onLinkClick={onLinkClick}
+          external={false} // Never show the external icon
+        >
           <EuiIcon aria-hidden="true" size="xl" type={landingIcon ?? ''} role="presentation" />
-        </LinkAnchor>
+        </LandingLink>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiTitle size="xxs" css={styles.title}>
           <EuiFlexGroup gutterSize="none" alignItems="center">
             <EuiFlexItem grow={false}>
-              <LinkAnchor {...linkProps}>
-                <h2>{title}</h2>
-              </LinkAnchor>
+              <LandingLink item={item} urlState={urlState} onLinkClick={onLinkClick}>
+                {title}
+              </LandingLink>
             </EuiFlexItem>
             {isBeta && (
               <EuiFlexItem grow={false}>

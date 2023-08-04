@@ -60,8 +60,31 @@ export enum ExternalPageName {
   fleetDataStreams = 'fleet:data_streams',
   fleetSettings = 'fleet:settings',
   // Integrations
+  // No deepLinkId registered, using path for the security search
   integrationsSecurity = 'integrations:/browse/security',
+  // Management
+  // Ref: packages/default-nav/management/default_navigation.ts
+  managementIngestPipelines = 'management:ingest_pipelines',
+  managementPipelines = 'management:pipelines',
+  managementIndexManagement = 'management:index_management',
+  managementTransforms = 'management:transform',
+  managementMaintenanceWindows = 'management:maintenanceWindows',
+  managementTriggersActions = 'management:triggersActions',
+  managementCases = 'management:cases',
+  managementTriggersActionsConnectors = 'management:triggersActionsConnectors',
+  managementReporting = 'management:reporting',
+  managementJobsListLink = 'management:jobsListLink',
+  managementDataViews = 'management:dataViews',
+  managementObjects = 'management:objects',
+  managementApiKeys = 'management:api_keys',
+  managementTags = 'management:tags',
+  managementFiles = 'management:filesManagement',
+  managementSpaces = 'management:spaces',
+  managementSettings = 'management:settings',
   // Cloud UI
+  // These are links to Cloud UI outside Kibana
+  // Special Format: <cloud>:<cloudUrlKey>
+  // cloudUrlKey Ref: x-pack/plugins/security_solution_serverless/public/navigation/links/util.ts
   cloudUsersAndRoles = 'cloud:usersAndRoles',
   cloudBilling = 'cloud:billing',
 }

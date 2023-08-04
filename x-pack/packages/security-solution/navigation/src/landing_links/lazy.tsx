@@ -34,3 +34,10 @@ export const LandingLinksImages = withSuspense(LandingLinksImagesLazy);
 
 const LandingLinksImageCardsLazy = lazy(() => import('./landing_links_images_cards'));
 export const LandingLinksImageCards = withSuspense(LandingLinksImageCardsLazy);
+
+const LandingLinksIconsCategoriesGroupsLazy = lazy(
+  () => import('./landing_links_icons_categories_groups')
+);
+export const LandingLinksIconsCategoriesGroups = withSuspense(
+  LandingLinksIconsCategoriesGroupsLazy
+);

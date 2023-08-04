@@ -7,13 +7,14 @@
 import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
 import { EuiHorizontalRule, EuiSpacer, EuiTitle, useEuiTheme } from '@elastic/eui';
-import type { NavigationLink, LinkCategory } from '../types';
+import type { NavigationLink, TitleLinkCategory, SeparatorLinkCategory } from '../types';
 import { LandingLinksIcons } from './landing_links_icons';
 import { LinkCategoryType } from '../constants';
 
 export interface LandingLinksIconsCategoriesProps {
   links: Readonly<NavigationLink[]>;
-  categories: Readonly<LinkCategory[]>;
+  /** Only `title` and `separator` category types supported */
+  categories: Readonly<Array<TitleLinkCategory | SeparatorLinkCategory>>;
   urlState?: string;
   onLinkClick?: (id: string) => void;
 }

@@ -110,18 +110,22 @@ export const LinkAnchor = withLink<EuiLinkProps>(EuiLink);
 
 // Utils
 
-// External IDs are in the format `appId:deepLinkId/path` to match the Chrome NavLinks format.
-// Internal Security Solution ids are in the format `deepLinkId/path`, the appId is omitted for convenience.
+// External IDs are in the format `appId:deepLinkId` to match the Chrome NavLinks format.
+// Internal Security Solution ids are the deepLinkId, the appId is omitted for convenience.
 export const isSecurityId = (id: string): boolean => !id.includes(':');
+
+// External links may contain an optional `path` in addition to the `appId` and `deepLinkId`.
+// Format: `<appId>:<deepLinkId>/<path>`
 export const getAppIdsFromId = (
   id: string
 ): { appId?: string; deepLinkId?: string; path?: string } => {
-  const [appAndDeepLinkId, path] = id.split(/-(.*)/);
-  if (!isSecurityId(appAndDeepLinkId)) {
-    const [appId, deepLinkId] = appAndDeepLinkId.split(':');
+  const [linkId, strippedPath] = id.split(/\/(.*)/); // split by the first `/` character
+  const path = strippedPath ? `/${strippedPath}` : '';
+  if (!isSecurityId(linkId)) {
+    const [appId, deepLinkId] = linkId.split(':');
     return { appId, deepLinkId, path };
   }
-  return { deepLinkId: appAndDeepLinkId, path }; // undefined `appId` for internal Security Solution links
+  return { deepLinkId: linkId, path }; // undefined `appId` for internal Security Solution links
 };
 
 export const mergePaths = (path: string | undefined, subPath: string | undefined) => {
