@@ -67,14 +67,14 @@ export default ({ getService }: FtrProviderContext): void => {
       ));
     });
 
-    it('should throw 400 when create a case with cases as owner', async () => {
+    it('should throw 403 when create a case with cases as owner', async () => {
       expect(
         await createCase(
         supertest,
         getPostCaseRequest({
           owner: 'cases'
         }),
-        400
+        403
       ));
     });
   });

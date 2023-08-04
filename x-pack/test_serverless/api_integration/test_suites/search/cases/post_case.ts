@@ -14,13 +14,13 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
 
   describe('post_case', () => {
-    it('400 when trying to create case', async () => {
+    it('403 when trying to create case', async () => {
       await supertest
         .post(CASES_URL)
         .set('kbn-xsrf', 'foo')
         .set('x-elastic-internal-origin', 'foo')
         .send(getPostCaseRequest())
-        .expect(400);
+        .expect(403);
     });
   });
 };

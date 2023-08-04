@@ -71,7 +71,7 @@ const logAndIncreaseDeprecationTelemetryCounters = ({
 };
 
 export const registerRoutes = (deps: RegisterRoutesDeps) => {
-  const { router, routes, logger, kibanaVersion, telemetryUsageCounter, configSchema } = deps;
+  const { router, routes, logger, kibanaVersion, telemetryUsageCounter } = deps;
 
   routes.forEach((route) => {
     const { method, path, params, options, routerOptions, handler } = route;
@@ -90,18 +90,8 @@ export const registerRoutes = (deps: RegisterRoutesDeps) => {
         let responseHeaders = {};
         const isKibanaRequest = getIsKibanaRequest(request.headers);
 
-        const hasCasesOwnerInQuery =
-          request.query?.owner === 'cases' || request.query?.owners?.includes('cases');
-
-        const hasCasesOwnerInBody =
-          request.body?.owner === 'cases' || request.body?.owners?.includes('cases');
-
         if (!context.cases) {
           return response.badRequest({ body: 'RouteHandlerContext is not registered for cases' });
-        }
-
-        if (!configSchema?.stack.enabled && (hasCasesOwnerInBody || hasCasesOwnerInQuery)) {
-          return response.badRequest({ body: 'cases as owner is not allowed' });
         }
 
         try {

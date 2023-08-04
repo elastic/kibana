@@ -15,7 +15,6 @@ import type {
 } from '@kbn/core/server';
 
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import type { ConfigType } from '../../config';
 import type { CasesRequestHandlerContext, CasesRouter } from '../../types';
 
 type TelemetryUsageCounter = ReturnType<UsageCollectionSetup['createUsageCounter']>;
@@ -26,7 +25,6 @@ export interface RegisterRoutesDeps {
   logger: Logger;
   kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
   telemetryUsageCounter?: TelemetryUsageCounter;
-  configSchema?: ConfigType;
 }
 
 export interface TotalCommentByCase {
