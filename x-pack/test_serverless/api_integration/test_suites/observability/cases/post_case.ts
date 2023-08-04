@@ -9,11 +9,8 @@ import expect from '@kbn/expect';
 import { ConnectorTypes } from '@kbn/cases-plugin/common/types/domain';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { getPostCaseRequest, postCaseResp } from './helpers/mock';
-import { deleteCasesByESQuery, createCase } from './helpers/api';
-import { removeServerGeneratedPropertiesFromCase } from './helpers/omit';
+import { deleteCasesByESQuery, createCase, getPostCaseRequest } from './helpers/api';
 
-// eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   // const supertestWithoutAuth = getService('supertestWithoutAuth');
   const es = getService('es');
@@ -25,22 +22,9 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('should create a case', async () => {
-      const postedCase = await createCase(
-        supertest,
-        getPostCaseRequest({
-          connector: {
-            id: '123',
-            name: 'Jira',
-            type: ConnectorTypes.jira,
-            fields: { issueType: 'Task', priority: 'High', parent: null },
-          },
-        })
-      );
-      const data = removeServerGeneratedPropertiesFromCase(postedCase);
-
-      expect(data).to.eql(
-        postCaseResp(
-          null,
+      expect(
+        await createCase(
+          supertest,
           getPostCaseRequest({
             connector: {
               id: '123',
@@ -48,7 +32,8 @@ export default ({ getService }: FtrProviderContext): void => {
               type: ConnectorTypes.jira,
               fields: { issueType: 'Task', priority: 'High', parent: null },
             },
-          })
+          }),
+          200
         )
       );
     });

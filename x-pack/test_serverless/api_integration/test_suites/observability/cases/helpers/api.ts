@@ -6,11 +6,13 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
+import type SuperTest from 'supertest';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server/src/saved_objects_index_pattern';
 import { CASES_URL } from '@kbn/cases-plugin/common';
-import { Case } from '@kbn/cases-plugin/common/types/domain';
-import { CasePostRequest, CasesFindResponse } from '@kbn/cases-plugin/common/types/api';
-import type SuperTest from 'supertest';
+import { Case, CaseSeverity, CaseStatuses } from '@kbn/cases-plugin/common/types/domain';
+import type { CasePostRequest } from '@kbn/cases-plugin/common/types/api';
+import { ConnectorTypes } from '@kbn/cases-plugin/common/types/domain';
+import { CasesFindResponse } from '@kbn/cases-plugin/common/types/api';
 
 export interface User {
   username: string;
@@ -108,6 +110,71 @@ export const deleteMappings = async (es: Client): Promise<void> => {
     body: {},
     conflicts: 'proceed',
   });
+};
+
+export const defaultUser = { email: null, full_name: null, username: 'elastic' };
+/**
+ * A null filled user will occur when the security plugin is disabled
+ */
+export const nullUser = { email: null, full_name: null, username: null };
+
+export const postCaseReq: CasePostRequest = {
+  description: 'This is a brand new case of a bad meanie defacing data',
+  title: 'Super Bad Observability Issue',
+  tags: ['defacement'],
+  severity: CaseSeverity.LOW,
+  connector: {
+    id: 'none',
+    name: 'none',
+    type: ConnectorTypes.none,
+    fields: null,
+  },
+  settings: {
+    syncAlerts: true,
+  },
+  owner: 'observability',
+  assignees: [],
+};
+
+/**
+ * Return a request for creating a case.
+ */
+export const getPostCaseRequest = (req?: Partial<CasePostRequest>): CasePostRequest => ({
+  ...postCaseReq,
+  ...req,
+});
+
+export const postCaseResp = (
+  id?: string | null,
+  req: CasePostRequest = postCaseReq
+): Partial<Case> => ({
+  ...req,
+  ...(id != null ? { id } : {}),
+  comments: [],
+  duration: null,
+  severity: req.severity ?? CaseSeverity.LOW,
+  totalAlerts: 0,
+  totalComment: 0,
+  closed_by: null,
+  created_by: defaultUser,
+  external_service: null,
+  status: CaseStatuses.open,
+  updated_by: null,
+  category: null,
+});
+
+const findCommon = {
+  page: 1,
+  per_page: 20,
+  total: 0,
+  count_open_cases: 0,
+  count_closed_cases: 0,
+  count_in_progress_cases: 0,
+};
+
+export const findCasesResp: CasesFindResponse = {
+  ...findCommon,
+  cases: [],
 };
 
 export const createCase = async (
