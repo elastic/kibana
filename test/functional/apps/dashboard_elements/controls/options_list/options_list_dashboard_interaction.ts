@@ -35,7 +35,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       'header',
     ]);
 
-  describe('Interactions between options list and dashboard', () => {
+  describe.only('Interactions between options list and dashboard', () => {
     let controlId: string;
 
     const returnToDashboard = async () => {
