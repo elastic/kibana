@@ -10,7 +10,7 @@ import { CoreSetup } from '@kbn/core/server';
 import { extractReferences, injectReferences } from '@kbn/data-plugin/common';
 import { IRuleTypeAlerts } from '@kbn/alerting-plugin/server';
 import { ALERT_EVALUATION_VALUE, ALERT_REASON, ALERT_URL } from '@kbn/rule-data-utils';
-import { RuleAlertData } from '@kbn/alerting-plugin/common';
+import { StackEsqueryAlert } from '@kbn/alerts-as-data-utils';
 import { ALERT_TITLE, ALERT_EVALUATION_CONDITIONS } from './fields';
 import { RuleType } from '../../types';
 import { ActionContext } from './action_context';
@@ -36,7 +36,7 @@ export function getRuleType(
   ActionContext,
   typeof ActionGroupId,
   never,
-  RuleAlertData
+  StackEsqueryAlert
 > {
   const ruleTypeName = i18n.translate('xpack.stackAlerts.esQuery.alertTypeTitle', {
     defaultMessage: 'Elasticsearch query',
@@ -141,7 +141,7 @@ export function getRuleType(
     }
   );
 
-  const alerts: IRuleTypeAlerts<RuleAlertData> = {
+  const alerts: IRuleTypeAlerts<StackEsqueryAlert> = {
     context: 'stack.esquery',
     mappings: {
       fieldMap: {

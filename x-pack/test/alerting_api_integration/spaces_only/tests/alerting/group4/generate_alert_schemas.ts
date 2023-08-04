@@ -84,7 +84,13 @@ export default function checkAlertSchemasTest({ getService }: FtrProviderContext
           }
         });
 
-      const { stdout } = await execa('git', ['ls-files', '--modified']);
+      const { stdout } = await execa('git', [
+        'ls-files',
+        '--modified',
+        '--others',
+        '--exclude-standard',
+      ]);
+
       expect(stdout).not.to.contain('packages/kbn-alerts-as-data-utils/src/schemas/generated');
     });
   });
