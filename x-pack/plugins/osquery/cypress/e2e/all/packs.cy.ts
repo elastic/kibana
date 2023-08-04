@@ -20,7 +20,7 @@ import {
   selectAllAgents,
   submitQuery,
 } from '../../tasks/live_query';
-import { ROLE, login } from '../../tasks/login';
+import { ROLE } from '../../tasks/login';
 import {
   activatePack,
   cleanupAllPrebuiltPacks,
@@ -110,7 +110,7 @@ describe('ALL - Packs', () => {
     });
 
     beforeEach(() => {
-      login(ROLE.soc_manager);
+      cy.loginKibana(ROLE.soc_manager);
       navigateTo('/app/osquery');
     });
 
@@ -653,7 +653,7 @@ describe('ALL - Packs', () => {
 
   describe('Validate that agent policy is getting removed from pack if we remove agent policy', () => {
     beforeEach(() => {
-      login();
+      cy.loginKibana();
     });
     const AGENT_POLICY_NAME = `PackTest` + generateRandomStringName(1)[0];
     const REMOVING_PACK = 'removing-pack' + generateRandomStringName(1)[0];
@@ -705,7 +705,7 @@ describe('ALL - Packs', () => {
 
   describe('Load prebuilt packs', () => {
     beforeEach(() => {
-      login(ROLE.soc_manager);
+      cy.loginKibana(ROLE.soc_manager);
       navigateTo('/app/osquery/packs');
     });
 
@@ -787,7 +787,7 @@ describe('ALL - Packs', () => {
 
   describe('Global packs', () => {
     beforeEach(() => {
-      login();
+      cy.loginKibana();
       navigateTo('/app/osquery/packs');
     });
 

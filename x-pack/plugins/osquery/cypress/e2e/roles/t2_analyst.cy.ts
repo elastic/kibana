@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ROLE, login } from '../../tasks/login';
+import { ROLE } from '../../tasks/login';
 import { navigateTo } from '../../tasks/navigation';
 import {
   checkResults,
@@ -39,7 +39,7 @@ describe('T2 Analyst - READ + Write Live/Saved + runSavedQueries ', () => {
   });
 
   beforeEach(() => {
-    login(ROLE.t2_analyst);
+    cy.loginKibana(ROLE.t2_analyst);
     navigateTo('/app/osquery');
   });
 

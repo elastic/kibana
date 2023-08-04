@@ -6,7 +6,7 @@
  */
 
 import { navigateTo } from '../../tasks/navigation';
-import { ROLE, login } from '../../tasks/login';
+import { ROLE } from '../../tasks/login';
 import { checkResults, inputQuery, submitQuery } from '../../tasks/live_query';
 import { loadSavedQuery, cleanupSavedQuery } from '../../tasks/api_fixtures';
 import { triggerLoadData } from '../../tasks/inventory';
@@ -23,7 +23,7 @@ describe('ALL - Inventory', () => {
   });
 
   beforeEach(() => {
-    login(ROLE.soc_manager);
+    cy.loginKibana(ROLE.soc_manager);
     navigateTo('/app/osquery');
   });
 

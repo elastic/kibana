@@ -416,7 +416,6 @@ ${JSON.stringify(cyCustomEnv, null, 2)}
                   configFile: cypressConfigFilePath,
                   reporter: argv.reporter as string,
                   reporterOptions: argv.reporterOptions,
-                  headed: true,
                   config: {
                     e2e: {
                       baseUrl,

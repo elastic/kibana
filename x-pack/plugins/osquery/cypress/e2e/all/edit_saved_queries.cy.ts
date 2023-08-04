@@ -6,7 +6,7 @@
  */
 
 import { navigateTo } from '../../tasks/navigation';
-import { ROLE, login } from '../../tasks/login';
+import { ROLE } from '../../tasks/login';
 import { loadSavedQuery, cleanupSavedQuery } from '../../tasks/api_fixtures';
 
 describe('ALL - Edit saved query', () => {
@@ -21,7 +21,7 @@ describe('ALL - Edit saved query', () => {
   });
 
   beforeEach(() => {
-    login(ROLE.soc_manager);
+    cy.loginKibana(ROLE.soc_manager);
     navigateTo('/app/osquery/saved_queries');
   });
 

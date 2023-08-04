@@ -1,8 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 // ***********************************************
@@ -30,3 +31,21 @@
 //
 // -- This is will overwrite an existing command --
 // Cypress.Commands.overwrite("visit", (originalFn, url, options) => { ... })
+
+import { login } from '../tasks/login';
+
+Cypress.Commands.add('loginKibana', (role) => login(role));
+
+Cypress.Commands.add('getBySel', (selector, ...args) =>
+  cy.get(`[data-test-subj="${selector}"]`, ...args)
+);
+
+// finds elements that start with the given selector
+Cypress.Commands.add('getBySelContains', (selector, ...args) =>
+  cy.get(`[data-test-subj^="${selector}"]`, ...args)
+);
+
+Cypress.Commands.add(
+  'clickOutside',
+  () => cy.get('body').click(0, 0) // 0,0 here are the x and y coordinates
+);
