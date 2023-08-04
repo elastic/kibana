@@ -46,6 +46,8 @@ import {
   SORT_DEFAULT_ORDER_SETTING,
   buildDataTableRecord,
 } from '@kbn/discover-utils';
+import type { UnifiedDataTableProps } from '@kbn/unified-data-table';
+import type { UnifiedDataTableSettings } from '@kbn/unified-data-table';
 import { VIEW_MODE } from '../../common/constants';
 import { getSortForEmbeddable, SortPair } from '../utils/sorting';
 import { ISearchEmbeddable, SearchInput, SearchOutput } from './types';
@@ -54,8 +56,6 @@ import { DiscoverServices } from '../build_services';
 import { SavedSearchEmbeddableComponent } from './saved_search_embeddable_component';
 import * as columnActions from '../components/doc_table/actions/columns';
 import { handleSourceColumnState } from '../utils/state_helpers';
-import { DiscoverGridProps } from '../components/discover_grid/discover_grid';
-import { DiscoverGridSettings } from '../components/discover_grid/types';
 import { DocTableProps } from '../components/doc_table/doc_table_wrapper';
 import { updateSearchSource } from './utils/update_search_source';
 import { FieldStatisticsTable } from '../application/main/components/field_stats_table';
@@ -64,11 +64,11 @@ import { getValidViewMode } from '../application/main/utils/get_valid_view_mode'
 import { fetchSql } from '../application/main/utils/fetch_sql';
 import { ADHOC_DATA_VIEW_RENDER_EVENT } from '../constants';
 
-export type SearchProps = Partial<DiscoverGridProps> &
+export type SearchProps = Partial<UnifiedDataTableProps> &
   Partial<DocTableProps> & {
     savedSearchId?: string;
     filters?: Filter[];
-    settings?: DiscoverGridSettings;
+    settings?: UnifiedDataTableSettings;
     description?: string;
     sharedItemTitle?: string;
     inspectorAdapters?: Adapters;

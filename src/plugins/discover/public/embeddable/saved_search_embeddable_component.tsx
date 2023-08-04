@@ -42,7 +42,7 @@ export function SavedSearchEmbeddableComponent({
       {...(searchProps as DiscoverGridEmbeddableProps)}
       showFullScreenButton={false}
       query={query}
-      className="dscDiscoverGrid"
+      className="udtDataTable"
     />
   );
 }

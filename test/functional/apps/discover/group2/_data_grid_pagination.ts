@@ -52,18 +52,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should show footer only for the last page', async () => {
       // footer is not shown
-      await testSubjects.missingOrFail('discoverTableFooter');
+      await testSubjects.missingOrFail('unifiedDataTableFooter');
       // go to next page
       await testSubjects.click('pagination-button-next');
       // footer is not shown yet
       await retry.try(async function () {
-        await testSubjects.missingOrFail('discoverTableFooter');
+        await testSubjects.missingOrFail('unifiedDataTableFooter');
       });
       // go to the last page
       await testSubjects.click('pagination-button-4');
       // footer is shown now
       await retry.try(async function () {
-        await testSubjects.existOrFail('discoverTableFooter');
+        await testSubjects.existOrFail('unifiedDataTableFooter');
       });
     });
 
@@ -80,7 +80,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await retry.try(async function () {
         return !testSubjects.exists('pagination-button-1'); // only page 0 is left
       });
-      await testSubjects.existOrFail('discoverTableFooter');
+      await testSubjects.existOrFail('unifiedDataTableFooter');
     });
 
     it('should render exact number of rows which where configured in the saved search or in settings', async () => {

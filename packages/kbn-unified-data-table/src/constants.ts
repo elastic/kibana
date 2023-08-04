@@ -5,18 +5,25 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { SAMPLE_ROWS_PER_PAGE_SETTING } from '@kbn/discover-utils';
-import { IUiSettingsClient } from '@kbn/core/public';
+import { EuiDataGridStyle } from '@elastic/eui';
 
 export const DEFAULT_ROWS_PER_PAGE = 100;
 export const ROWS_PER_PAGE_OPTIONS = [10, 25, 50, DEFAULT_ROWS_PER_PAGE, 250, 500];
 
-export enum VIEW_MODE {
-  DOCUMENT_LEVEL = 'documents',
-  AGGREGATED_LEVEL = 'aggregated',
-}
+export const defaultMonacoEditorWidth = 370;
+export const defaultTimeColumnWidth = 210;
+export const kibanaJSON = 'kibana-json';
 
-export const getDefaultRowsPerPage = (uiSettings: IUiSettingsClient): number => {
-  return parseInt(uiSettings.get(SAMPLE_ROWS_PER_PAGE_SETTING), 10) || DEFAULT_ROWS_PER_PAGE;
+export const GRID_STYLE = {
+  border: 'all',
+  fontSize: 's',
+  cellPadding: 's',
+  rowHover: 'none',
+} as EuiDataGridStyle;
+
+export const toolbarVisibility = {
+  showColumnSelector: {
+    allowHide: false,
+    allowReorder: true,
+  },
 };

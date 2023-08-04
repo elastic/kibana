@@ -15,16 +15,17 @@ import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { CONTEXT_STEP_SETTING, DOC_HIDE_TIME_COLUMN_SETTING } from '@kbn/discover-utils';
+import { UnifiedDataTable } from '@kbn/unified-data-table';
+import { getDefaultRowsPerPage } from '../../../common/constants';
 import { LoadingStatus } from './services/context_query_state';
 import { ActionBar } from './components/action_bar/action_bar';
-import { DiscoverGrid } from '../../components/discover_grid/discover_grid';
 import { DocViewFilterFn } from '../../services/doc_views/doc_views_types';
 import { AppState } from './services/context_state';
 import { SurrDocType } from './services/context';
 import { MAX_CONTEXT_SIZE, MIN_CONTEXT_SIZE } from './services/constants';
 import { DocTableContext } from '../../components/doc_table/doc_table_context';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
-import { DiscoverGridFlyout } from '../../components/discover_grid/discover_grid_flyout';
+import { DiscoverGridFlyout } from '../../components/discover_grid_flyout';
 import { DocViewer } from '../../services/doc_views/components/doc_viewer';
 
 export interface ContextAppContentProps {
@@ -53,7 +54,7 @@ export function clamp(value: number) {
   return Math.max(Math.min(MAX_CONTEXT_SIZE, value), MIN_CONTEXT_SIZE);
 }
 
-const DiscoverGridMemoized = React.memo(DiscoverGrid);
+const DiscoverGridMemoized = React.memo(UnifiedDataTable);
 const DocTableContextMemoized = React.memo(DocTableContext);
 const ActionBarMemoized = React.memo(ActionBar);
 
@@ -149,7 +150,7 @@ export function ContextAppContent({
           <CellActionsProvider getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}>
             <DiscoverGridMemoized
               ariaLabelledBy="surDocumentsAriaLabel"
-              columns={columns}
+              columnsIds={columns}
               rows={rows}
               dataView={dataView}
               expandedDoc={expandedDoc}
@@ -160,13 +161,29 @@ export function ContextAppContent({
               showTimeCol={showTimeCol}
               useNewFieldsApi={useNewFieldsApi}
               isPaginationEnabled={false}
+              rowsPerPageState={getDefaultRowsPerPage(services.uiSettings)}
               controlColumnIds={controlColumnIds}
               setExpandedDoc={setExpandedDoc}
               onFilter={addFilter}
-              onAddColumn={onAddColumn}
-              onRemoveColumn={onRemoveColumn}
               onSetColumns={onSetColumns}
-              DocumentView={DiscoverGridFlyout}
+              getDocumentView={(displayedRows: DataTableRecord[], displayedColumns: string[]) => {
+                return (
+                  expandedDoc && (
+                    <DiscoverGridFlyout
+                      dataView={dataView}
+                      hit={expandedDoc}
+                      hits={displayedRows}
+                      // if default columns are used, dont make them part of the URL - the context state handling will take care to restore them
+                      columns={displayedColumns}
+                      onFilter={addFilter}
+                      onRemoveColumn={onRemoveColumn}
+                      onAddColumn={onAddColumn}
+                      onClose={() => setExpandedDoc(undefined)}
+                      setExpandedDoc={setExpandedDoc}
+                    />
+                  )
+                );
+              }}
               services={services}
             />
           </CellActionsProvider>

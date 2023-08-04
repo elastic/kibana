@@ -7,16 +7,23 @@
  */
 import React, { useState, memo } from 'react';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
-import { DiscoverGrid, DiscoverGridProps } from '../components/discover_grid/discover_grid';
+import { AggregateQuery, Query } from '@kbn/es-query';
+import { UnifiedDataTable } from '@kbn/unified-data-table';
+import type { UnifiedDataTableProps } from '@kbn/unified-data-table';
 import './saved_search_grid.scss';
-import { DiscoverGridFlyout } from '../components/discover_grid/discover_grid_flyout';
+import { SavedSearch } from '@kbn/saved-search-plugin/common';
+import { DiscoverGridFlyout } from '../components/discover_grid_flyout';
 import { SavedSearchEmbeddableBase } from './saved_search_embeddable_base';
 
-export interface DiscoverGridEmbeddableProps extends DiscoverGridProps {
+export interface DiscoverGridEmbeddableProps extends UnifiedDataTableProps {
   totalHitCount: number;
+  query?: AggregateQuery | Query;
+  onAddColumn: (column: string) => void;
+  onRemoveColumn: (column: string) => void;
+  savedSearch?: SavedSearch;
 }
 
-export const DataGridMemoized = memo(DiscoverGrid);
+export const DataGridMemoized = memo(UnifiedDataTable);
 
 export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
   const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>(undefined);
@@ -31,7 +38,26 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
         {...props}
         setExpandedDoc={setExpandedDoc}
         expandedDoc={expandedDoc}
-        DocumentView={DiscoverGridFlyout}
+        getDocumentView={(displayedRows: DataTableRecord[], displayedColumns: string[]) => {
+          return (
+            expandedDoc && (
+              <DiscoverGridFlyout
+                dataView={props.dataView}
+                hit={expandedDoc}
+                hits={displayedRows}
+                // if default columns are used, dont make them part of the URL - the context state handling will take care to restore them
+                columns={displayedColumns}
+                savedSearchId={props.savedSearch?.id}
+                onFilter={props.onFilter}
+                onRemoveColumn={props.onRemoveColumn}
+                onAddColumn={props.onAddColumn}
+                onClose={() => setExpandedDoc(undefined)}
+                setExpandedDoc={setExpandedDoc}
+                query={props.query}
+              />
+            )
+          );
+        }}
       />
     </SavedSearchEmbeddableBase>
   );
