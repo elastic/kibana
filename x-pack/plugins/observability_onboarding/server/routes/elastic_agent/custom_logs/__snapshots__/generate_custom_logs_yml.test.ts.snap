@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`generateYml should return a basic yml configuration 1`] = `
+exports[`generateCustomLogsYml should return a basic yml configuration 1`] = `
 "outputs:
   default:
     type: elasticsearch
@@ -21,7 +21,7 @@ inputs:
 "
 `;
 
-exports[`generateYml should return a yml configuration with customConfigurations 1`] = `
+exports[`generateCustomLogsYml should return a yml configuration with customConfigurations 1`] = `
 "outputs:
   default:
     type: elasticsearch
@@ -47,7 +47,7 @@ agent.monitoring:
 "
 `;
 
-exports[`generateYml should return a yml configuration with multiple logFilePaths 1`] = `
+exports[`generateCustomLogsYml should return a yml configuration with multiple logFilePaths 1`] = `
 "outputs:
   default:
     type: elasticsearch
@@ -69,7 +69,7 @@ inputs:
 "
 `;
 
-exports[`generateYml should return a yml configuration with service name 1`] = `
+exports[`generateCustomLogsYml should return a yml configuration with service name 1`] = `
 "outputs:
   default:
     type: elasticsearch
