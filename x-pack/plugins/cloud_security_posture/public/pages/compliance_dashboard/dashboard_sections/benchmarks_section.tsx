@@ -41,8 +41,10 @@ export const getClusterIdQuery = (cluster: Cluster): NavFilter => {
     // TODO: remove assertion after typing CspFinding as discriminating union
     return { 'cloud.account.id': cluster.meta.cloud!.account.id };
   }
-  // using runtime field since old events won't have orchestrator.cluster.id
-  return { asset_identifier: cluster.meta.assetIdentifierId };
+  // TODO: change this to orchestrator.cluster.id' once we are sure there are no CSP packages with version < 1.5.0
+  // v1.5.0 contains a processor to copy "cluster_id" -> "orchestrator.cluster.id" to support agents < v8.8.0
+  // and cloudbeat agents >= v8.8.0 populate both cluster_id and "orchestrator.cluster.id"
+  return { cluster_id: cluster.meta.assetIdentifierId };
 };
 
 export const BenchmarksSection = ({
