@@ -10,6 +10,6 @@ const replacePattern = require('../replace_pattern');
 
 module.exports = (patterns) => {
   return patterns.map((patternObject) => {
-    return replacePattern(patternObject.path, { brackets: true });
+    return replacePattern(patternObject.path);
   });
 };
