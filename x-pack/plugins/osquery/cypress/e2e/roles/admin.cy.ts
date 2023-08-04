@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { ROLE, login } from '../../tasks/login';
+import { ROLE } from '../../tasks/login';
 import { navigateTo } from '../../tasks/navigation';
 import { checkResults, inputQuery, selectAllAgents, submitQuery } from '../../tasks/live_query';
 
 describe('Admin', () => {
   beforeEach(() => {
-    login(ROLE.admin);
+    cy.task('login', ROLE.admin);
     navigateTo('/app/osquery');
   });
 

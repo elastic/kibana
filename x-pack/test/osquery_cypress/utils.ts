@@ -11,12 +11,17 @@ import { map } from 'lodash';
 import { PackagePolicy, CreatePackagePolicyResponse } from '@kbn/fleet-plugin/common';
 import { KbnClient } from '@kbn/test';
 
+export const DEFAULT_HEADERS = Object.freeze({
+  'x-elastic-internal-product': 'security-solution',
+});
+
 export const getInstalledIntegration = async (kbnClient: KbnClient, integrationName: string) => {
   const {
     data: { item },
   } = await kbnClient.request<{ item: PackagePolicy }>({
     method: 'GET',
     path: `/api/fleet/epm/packages/${integrationName}`,
+    headers: DEFAULT_HEADERS,
   });
 
   return item;
@@ -33,6 +38,7 @@ export const addIntegrationToAgentPolicy = async (
   return kbnClient.request<CreatePackagePolicyResponse>({
     method: 'POST',
     path: '/api/fleet/package_policies',
+    headers: DEFAULT_HEADERS,
     body: {
       policy_id: agentPolicyId,
       package: {

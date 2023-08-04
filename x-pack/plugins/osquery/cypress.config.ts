@@ -6,6 +6,7 @@
  */
 
 import { defineCypressConfig } from '@kbn/cypress-config';
+import { login } from './tasks/login';
 
 export default defineCypressConfig({
   defaultCommandTimeout: 60000,
@@ -38,4 +39,10 @@ export default defineCypressConfig({
     experimentalMemoryManagement: true,
     numTestsKeptInMemory: 10,
   },
+
+  setupNodeEvents: (on, config) => {
+    on('task', {
+      login
+    })
+  });
 });
