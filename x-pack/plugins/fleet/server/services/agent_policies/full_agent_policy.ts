@@ -354,8 +354,10 @@ export function transformOutputToFullPolicyOutput(
         if (rest.when) {
           return {
             topic: topicName,
-            [rest.when.type as string]: {
-              message: rest.when.condition,
+            when: {
+              [rest.when.type as string]: {
+                message: rest.when.condition,
+              },
             },
           };
         }
