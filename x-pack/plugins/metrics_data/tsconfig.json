@@ -26,5 +26,7 @@
     "@kbn/core-http-server",
     "@kbn/logging",
     "@kbn/config-schema",
+    "@kbn/kibana-react-plugin",
+    "@kbn/core-http-browser",
   ]
 }
