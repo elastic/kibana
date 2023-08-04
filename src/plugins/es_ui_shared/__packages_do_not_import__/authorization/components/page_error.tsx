@@ -6,11 +6,7 @@
  * Side Public License, v 1.
  */
 
-import {
-  EuiSpacer,
-  EuiEmptyPrompt,
-  EuiPageContent_Deprecated as EuiPageContent,
-} from '@elastic/eui';
+import { EuiSpacer, EuiEmptyPrompt, EuiPageSection } from '@elastic/eui';
 import React from 'react';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { Error } from '../types';
@@ -41,7 +37,7 @@ export const PageError: React.FunctionComponent<Props> = ({
   const message = error?.message;
 
   const errorContent = (
-    <EuiPageContent verticalPosition="center" horizontalPosition="center" color="danger">
+    <EuiPageSection alignment="center" color="danger">
       <EuiEmptyPrompt
         title={<h2>{title}</h2>}
         body={
@@ -69,7 +65,7 @@ export const PageError: React.FunctionComponent<Props> = ({
         actions={actions}
         {...rest}
       />
-    </EuiPageContent>
+    </EuiPageSection>
   );
 
   if (isCentered) {
