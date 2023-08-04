@@ -16,7 +16,7 @@
     ],
     "patterns": [
       "_msearch/template",
-      "{indices}/_msearch/template"
+      "{index}/_msearch/template"
     ],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/search-multi-search.html"
   }
