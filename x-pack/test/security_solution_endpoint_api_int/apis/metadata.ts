@@ -15,12 +15,15 @@ import {
   METADATA_UNITED_TRANSFORM,
   METADATA_TRANSFORMS_STATUS_ROUTE,
   metadataTransformPrefix,
+  ENDPOINT_DEFAULT_SORT_FIELD,
+  ENDPOINT_DEFAULT_SORT_DIRECTION,
 } from '@kbn/security-solution-plugin/common/endpoint/constants';
 import { AGENTS_INDEX } from '@kbn/fleet-plugin/common';
 import { indexFleetEndpointPolicy } from '@kbn/security-solution-plugin/common/endpoint/data_loaders/index_fleet_endpoint_policy';
 import { TRANSFORM_STATES } from '@kbn/security-solution-plugin/common/constants';
 import type { IndexedHostsAndAlertsResponse } from '@kbn/security-solution-plugin/common/endpoint/index_data';
 
+import { MetadataListResponse } from '@kbn/security-solution-plugin/common/endpoint/types';
 import { generateAgentDocs, generateMetadataDocs } from './metadata.fixtures';
 import {
   deleteAllDocsFromMetadataCurrentIndex,
@@ -293,6 +296,73 @@ export default function ({ getService }: FtrProviderContext) {
         expect(body.total).to.eql(numberOfHostsInFixture);
         expect(body.page).to.eql(0);
         expect(body.pageSize).to.eql(10);
+      });
+
+      describe('sorting', () => {
+        it('metadata api should return 400 with not supported sorting field', async () => {
+          await supertest
+            .get(HOST_METADATA_LIST_ROUTE)
+            .set('kbn-xsrf', 'xxx')
+            .set('Elastic-Api-Version', '2023-10-31')
+            .query({
+              sortField: 'abc',
+            })
+            .expect(400);
+        });
+
+        it('metadata api should sort by enrollment date by default', async () => {
+          const { body }: { body: MetadataListResponse } = await supertest
+            .get(HOST_METADATA_LIST_ROUTE)
+            .set('kbn-xsrf', 'xxx')
+            .set('Elastic-Api-Version', '2023-10-31')
+            .expect(200);
+
+          expect(body.sortDirection).to.eql(ENDPOINT_DEFAULT_SORT_DIRECTION);
+          expect(body.sortField).to.eql(ENDPOINT_DEFAULT_SORT_FIELD);
+        });
+
+        const FIELDS = [
+          'metadata.host.hostname',
+          'host_status',
+          'metadata.Endpoint.policy.applied.name',
+          'metadata.Endpoint.policy.applied.status',
+          'metadata.host.os.name',
+          'metadata.host.ip',
+          'metadata.agent.version',
+          'metadata.@timestamp',
+        ];
+
+        for (const field of FIELDS) {
+          it(`metadata api should be able to sort by ${field}`, async () => {
+            let body: MetadataListResponse;
+
+            ({ body } = await supertest
+              .get(HOST_METADATA_LIST_ROUTE)
+              .set('kbn-xsrf', 'xxx')
+              .set('Elastic-Api-Version', '2023-10-31')
+              .query({
+                sortField: field,
+                sortDirection: 'asc',
+              })
+              .expect(200));
+
+            expect(body.sortDirection).to.eql('asc');
+            expect(body.sortField).to.eql(field);
+
+            ({ body } = await supertest
+              .get(HOST_METADATA_LIST_ROUTE)
+              .set('kbn-xsrf', 'xxx')
+              .set('Elastic-Api-Version', '2023-10-31')
+              .query({
+                sortField: field,
+                sortDirection: 'desc',
+              })
+              .expect(200));
+
+            expect(body.sortDirection).to.eql('desc');
+            expect(body.sortField).to.eql(field);
+          });
+        }
       });
     });
 
