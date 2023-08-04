@@ -43,7 +43,7 @@ import type {
   CasesUI,
   AttachmentUI,
 } from '../../common/ui/types';
-import { CaseMetricsFeature } from '../../common/api';
+import { CaseMetricsFeature } from '../../common/types/api';
 import { SECURITY_SOLUTION_OWNER } from '../../common/constants';
 import type { SnakeToCamelCase } from '../../common/types';
 import { covertToSnakeCase } from './utils';

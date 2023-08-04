@@ -6,21 +6,21 @@
  */
 
 import React, { Fragment } from 'react';
-import styled from 'styled-components';
 import { EuiPage, EuiPageBody, EuiSpacer } from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
 
-export const Page = styled(EuiPage)`
-  background: ${(props) => props.theme.eui.euiColorEmptyShade};
-  width: 100%;
-  align-self: center;
-  margin-left: 0;
-  margin-right: 0;
-  flex: 1;
-`;
+export const pageCss = ({ euiTheme }: UseEuiTheme) => ({
+  background: euiTheme.colors.emptyShade,
+  width: '100%',
+  alignSelf: 'center',
+  marginLeft: 0,
+  marginRight: 0,
+  flex: 1,
+});
 
-export const ContentWrapper = styled.div`
-  height: 100%;
-`;
+export const contentCss = {
+  height: '100%',
+};
 
 interface Props {
   restrictWidth?: number;
@@ -29,13 +29,13 @@ interface Props {
 
 export const WithoutHeaderLayout: React.FC<Props> = ({ restrictWidth, children }) => (
   <Fragment>
-    <Page restrictWidth={restrictWidth || 1200}>
+    <EuiPage css={pageCss} restrictWidth={restrictWidth || 1200}>
       <EuiPageBody>
-        <ContentWrapper>
+        <div css={contentCss}>
           <EuiSpacer size="m" />
           {children}
-        </ContentWrapper>
+        </div>
       </EuiPageBody>
-    </Page>
+    </EuiPage>
   </Fragment>
 );

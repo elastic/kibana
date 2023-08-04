@@ -24,7 +24,13 @@ import type { IAssignmentService, ITagsClient } from '@kbn/saved-objects-tagging
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../../../common';
 import { getAsset, getPathParts } from '../../archive';
 import { KibanaAssetType, KibanaSavedObjectType } from '../../../../types';
-import type { AssetType, AssetReference, AssetParts, Installation } from '../../../../types';
+import type {
+  AssetType,
+  AssetReference,
+  AssetParts,
+  Installation,
+  PackageSpecTags,
+} from '../../../../types';
 import { savedObjectTypes } from '../../packages';
 import { indexPatternTypes, getIndexPatternSavedObjects } from '../index_pattern/install';
 import { saveKibanaAssetsRefs } from '../../packages/install';
@@ -159,6 +165,7 @@ export async function installKibanaAssetsAndReferences({
   paths,
   installedPkg,
   spaceId,
+  assetTags,
 }: {
   savedObjectsClient: SavedObjectsClientContract;
   savedObjectsImporter: Pick<ISavedObjectsImporter, 'import' | 'resolveImportErrors'>;
@@ -170,6 +177,7 @@ export async function installKibanaAssetsAndReferences({
   paths: string[];
   installedPkg?: SavedObject<Installation>;
   spaceId: string;
+  assetTags?: PackageSpecTags[];
 }) {
   const kibanaAssets = await getKibanaAssets(paths);
   if (installedPkg) await deleteKibanaSavedObjectsAssets({ savedObjectsClient, installedPkg });
@@ -195,6 +203,7 @@ export async function installKibanaAssetsAndReferences({
       pkgName,
       spaceId,
       importedAssets,
+      assetTags,
     })
   );
 
