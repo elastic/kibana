@@ -8,11 +8,10 @@
 import { setMockValues } from '../../../../../__mocks__/kea_logic';
 import React from 'react';
 import { shallow } from 'enzyme';
-import { EuiButton, EuiText } from '@elastic/eui';
+import { EuiText } from '@elastic/eui';
 import { HttpError } from '../../../../../../../common/types/api';
 import {
   TextExpansionCallOut,
-  ModelDeployed,
   TextExpansionDismissButton,
   ModelStarted,
   FineTuneModelsButton,
@@ -20,6 +19,7 @@ import {
 import { DeployModel } from './deploy_model';
 import { TextExpansionErrors } from './text_expansion_errors';
 import { ModelDeploymentInProgress } from './model_deployment_in_progress';
+import { ModelDeployed } from './model_deployed';
 
 jest.mock('./text_expansion_callout_data', () => ({
   useTextExpansionCallOutData: jest.fn(() => ({
@@ -90,57 +90,6 @@ describe('TextExpansionCallOut', () => {
 
     const wrapper = shallow(<TextExpansionCallOut />);
     expect(wrapper.find(ModelStarted).length).toBe(1);
-  });
-
-  describe('DeployModel', () => {
-    it('renders deploy button', () => {
-      const wrapper = shallow(
-        <DeployModel
-          dismiss={() => {}}
-          ingestionMethod="crawler"
-          isCreateButtonDisabled={false}
-          isDismissable={false}
-        />
-      );
-      expect(wrapper.find(EuiButton).length).toBe(1);
-      const button = wrapper.find(EuiButton);
-      expect(button.prop('disabled')).toBe(false);
-    });
-    it('renders disabled deploy button if it is set to disabled', () => {
-      const wrapper = shallow(
-        <DeployModel
-          dismiss={() => {}}
-          ingestionMethod="crawler"
-          isCreateButtonDisabled
-          isDismissable={false}
-        />
-      );
-      expect(wrapper.find(EuiButton).length).toBe(1);
-      const button = wrapper.find(EuiButton);
-      expect(button.prop('disabled')).toBe(true);
-    });
-    it('renders dismiss button if it is set to dismissable', () => {
-      const wrapper = shallow(
-        <DeployModel
-          dismiss={() => {}}
-          ingestionMethod="crawler"
-          isCreateButtonDisabled={false}
-          isDismissable
-        />
-      );
-      expect(wrapper.find(TextExpansionDismissButton).length).toBe(1);
-    });
-    it('does not render dismiss button if it is set to non-dismissable', () => {
-      const wrapper = shallow(
-        <DeployModel
-          dismiss={() => {}}
-          ingestionMethod="crawler"
-          isCreateButtonDisabled={false}
-          isDismissable={false}
-        />
-      );
-      expect(wrapper.find(TextExpansionDismissButton).length).toBe(0);
-    });
   });
 
   describe('ModelStarted', () => {

@@ -6,18 +6,14 @@
  */
 
 import React from 'react';
-
-import { useActions, useValues } from 'kea';
-
+import { useValues } from 'kea';
 import {
-  EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiSpacer,
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -27,6 +23,7 @@ import { useTextExpansionCallOutData } from './text_expansion_callout_data';
 import { getTextExpansionError, TextExpansionCalloutLogic } from './text_expansion_callout_logic';
 import { TextExpansionErrors } from './text_expansion_errors';
 import { DeployModel } from './deploy_model';
+import { ModelDeployed } from './model_deployed';
 import { ModelDeploymentInProgress } from './model_deployment_in_progress';
 
 export interface TextExpansionCallOutState {
@@ -80,91 +77,6 @@ export const FineTuneModelsButton: React.FC = () => (
     )}
   </EuiButtonEmpty>
 );
-
-export const ModelDeployed = ({
-  dismiss,
-  ingestionMethod,
-  isDismissable,
-  isStartButtonDisabled,
-}: Pick<
-  TextExpansionCallOutState,
-  'dismiss' | 'ingestionMethod' | 'isDismissable' | 'isStartButtonDisabled'
->) => {
-  const { startTextExpansionModel } = useActions(TextExpansionCalloutLogic);
-
-  return (
-    <EuiCallOut color="success">
-      <EuiFlexGroup direction="column" gutterSize="s">
-        <EuiFlexItem grow>
-          <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
-            <EuiFlexItem grow={false}>
-              <EuiIcon color="success" type="checkInCircleFilled" />
-            </EuiFlexItem>
-            <EuiFlexItem grow>
-              <EuiText color="success" size="xs">
-                <h3>
-                  {i18n.translate(
-                    'xpack.enterpriseSearch.content.index.pipelines.textExpansionCallOut.deployedTitle',
-                    { defaultMessage: 'Your ELSER model has deployed but not started.' }
-                  )}
-                </h3>
-              </EuiText>
-            </EuiFlexItem>
-            {isDismissable && (
-              <EuiFlexItem grow={false}>
-                <TextExpansionDismissButton dismiss={dismiss} />
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
-        </EuiFlexItem>
-        <EuiFlexItem grow>
-          <EuiText size="s">
-            <p>
-              {i18n.translate(
-                'xpack.enterpriseSearch.content.index.pipelines.textExpansionCallOut.deployedBody',
-                {
-                  defaultMessage:
-                    'You may start the model in a single-threaded configuration for testing, or tune the performance for a production environment.',
-                }
-              )}
-            </p>
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiSpacer size="s" />
-        </EuiFlexItem>
-        <EuiFlexItem grow>
-          <EuiFlexGroup
-            direction="row"
-            gutterSize="s"
-            alignItems="center"
-            justifyContent="flexStart"
-          >
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                color="success"
-                data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-textExpansionCallOut-startModel`}
-                disabled={isStartButtonDisabled}
-                iconType="playFilled"
-                onClick={() => startTextExpansionModel(undefined)}
-              >
-                {i18n.translate(
-                  'xpack.enterpriseSearch.content.indices.pipelines.textExpansionCallOut.startModelButton.label',
-                  {
-                    defaultMessage: 'Start single-threaded',
-                  }
-                )}
-              </EuiButton>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <FineTuneModelsButton />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiCallOut>
-  );
-};
 
 export const ModelStarted = ({
   dismiss,
