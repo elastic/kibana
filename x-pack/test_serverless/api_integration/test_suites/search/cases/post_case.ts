@@ -6,8 +6,9 @@
  */
 
 import { CASES_URL } from '@kbn/cases-plugin/common/constants';
+
 import { getPostCaseRequest } from './helper/mock';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {

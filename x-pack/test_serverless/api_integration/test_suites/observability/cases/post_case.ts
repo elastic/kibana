@@ -6,13 +6,12 @@
  */
 
 import expect from '@kbn/expect';
-
 import { ConnectorTypes } from '@kbn/cases-plugin/common/types/domain';
+
+import { FtrProviderContext } from '../../../ftr_provider_context';
 import { getPostCaseRequest, postCaseResp } from './helpers/mock';
 import { deleteCasesByESQuery, createCase } from './helpers/api';
 import { removeServerGeneratedPropertiesFromCase } from './helpers/omit';
-
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
