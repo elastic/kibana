@@ -21,25 +21,26 @@ export interface UseFetchHistoricalSummaryResponse {
 }
 
 export interface Params {
-  sloIds: string[];
+  list: Array<{ sloId: string; instanceId: string }>;
   shouldRefetch?: boolean;
 }
 
 const LONG_REFETCH_INTERVAL = 1000 * 60; // 1 minute
+
 export function useFetchHistoricalSummary({
-  sloIds = [],
+  list = [],
   shouldRefetch,
 }: Params): UseFetchHistoricalSummaryResponse {
   const { http } = useKibana().services;
 
   const { isInitialLoading, isLoading, isError, isSuccess, isRefetching, data } = useQuery({
-    queryKey: sloKeys.historicalSummary(sloIds),
+    queryKey: sloKeys.historicalSummary(list),
     queryFn: async ({ signal }) => {
       try {
         const response = await http.post<FetchHistoricalSummaryResponse>(
           '/internal/observability/slos/_historical_summary',
           {
-            body: JSON.stringify({ sloIds }),
+            body: JSON.stringify({ list }),
             signal,
           }
         );
