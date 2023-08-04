@@ -5781,6 +5781,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/unified-data-table@link:packages/kbn-unified-data-table":
+  version "0.0.0"
+  uid ""
+
 "@kbn/unified-field-list-examples-plugin@link:examples/unified_field_list_examples":
   version "0.0.0"
   uid ""
