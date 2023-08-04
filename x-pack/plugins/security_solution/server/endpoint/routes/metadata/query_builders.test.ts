@@ -10,6 +10,7 @@ import { metadataCurrentIndexPattern } from '../../../../common/endpoint/constan
 import { get } from 'lodash';
 import { expectedCompleteUnitedIndexQuery } from './query_builders.fixtures';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 
 describe('query builder', () => {
   describe('MetadataGetQuery', () => {
@@ -112,6 +113,60 @@ describe('query builder', () => {
       );
       const expected = expectedCompleteUnitedIndexQuery;
       expect(query.body.query).toEqual(expected);
+    });
+
+    describe('sorting', () => {
+      let soClient: jest.Mocked<SavedObjectsClientContract>;
+
+      beforeEach(() => {
+        soClient = savedObjectsClientMock.create();
+        soClient.find.mockResolvedValue({
+          saved_objects: [],
+          total: 0,
+          per_page: 0,
+          page: 0,
+        });
+      });
+
+      it('uses default sort field if none passed', async () => {
+        const query = await buildUnitedIndexQuery(soClient, {
+          page: 1,
+          pageSize: 10,
+        });
+
+        expect(query.body.sort).toEqual([
+          { 'united.agent.enrolled_at': { order: 'desc', unmapped_type: 'date' } },
+        ]);
+      });
+
+      it.each`
+        inputField                                 | mappedField
+        ${'host_status'}                           | ${'status'}
+        ${'metadata.host.hostname'}                | ${'united.endpoint.host.hostname'}
+        ${'metadata.Endpoint.policy.applied.name'} | ${'united.endpoint.Endpoint.policy.applied.name'}
+      `('correctly maps field $inputField', async ({ inputField, mappedField }) => {
+        const query = await buildUnitedIndexQuery(soClient, {
+          page: 1,
+          pageSize: 10,
+          sortField: inputField,
+          sortDirection: 'asc',
+        });
+
+        expect(query.body.sort).toEqual([{ [mappedField]: 'asc' }]);
+      });
+
+      it('uses `unmapped_type`: `date` for last_seen field', async () => {
+        const query = await buildUnitedIndexQuery(soClient, {
+          page: 1,
+          pageSize: 10,
+          sortField: 'metadata.@timestamp',
+          sortDirection: 'asc',
+        });
+
+        expect(query.body.sort).toEqual([
+          { 'united.endpoint.@timestamp': { order: 'asc', unmapped_type: 'date' } },
+        ]);
+      });
     });
   });
 });
