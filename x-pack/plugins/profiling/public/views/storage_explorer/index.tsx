@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
+import { EuiButton, EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { AsyncComponent } from '../../components/async_component';
 import { useProfilingDependencies } from '../../components/contexts/profiling_dependencies/use_profiling_dependencies';
@@ -73,9 +74,47 @@ export function StorageExplorerView() {
     [fetchStorageExplorerHostsDetails, timeRange.inSeconds.start, timeRange.inSeconds.end, kuery]
   );
 
+  const totalNumberOfDistinctProbabilisticValues =
+    storageExplorerSummaryState.data?.totalNumberOfDistinctProbabilisticValues || 0;
+  const hasDistinctProbabilisticValues = totalNumberOfDistinctProbabilisticValues > 1;
+
   return (
     <ProfilingAppPageTemplate>
       <EuiFlexGroup direction="column">
+        {hasDistinctProbabilisticValues && (
+          <EuiFlexItem grow={false}>
+            <EuiCallOut
+              title={i18n.translate(
+                'xpack.profiling.storageExplorer.distinctProbabilisticProfilingValues.title',
+                {
+                  defaultMessage:
+                    "We've identified {count} distinct profiling values. Make sure to update them.",
+                  values: { count: totalNumberOfDistinctProbabilisticValues },
+                }
+              )}
+              color="warning"
+              iconType="warning"
+            >
+              <EuiText size="s" color="subdued">
+                {i18n.translate(
+                  'xpack.profiling.storageExplorer.distinctProbabilisticProfilingValues.description',
+                  {
+                    defaultMessage:
+                      'We recommend using a consistent probabilistic value for each project for more efficient storage, cost management, and to maintain good statistical accuracy.',
+                  }
+                )}
+              </EuiText>
+              <EuiSpacer />
+              {/* TODO: define href */}
+              <EuiButton href="#" color="warning">
+                {i18n.translate(
+                  'xpack.profiling.storageExplorer.distinctProbabilisticProfilingValues.button',
+                  { defaultMessage: 'Learn how' }
+                )}
+              </EuiButton>
+            </EuiCallOut>
+          </EuiFlexItem>
+        )}
         <EuiFlexItem grow={false}>
           <Summary
             data={storageExplorerSummaryState.data}
@@ -83,19 +122,16 @@ export function StorageExplorerView() {
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiPanel hasShadow={false} hasBorder>
-            <AsyncComponent
-              size="xl"
-              {...storageExplorerHostBreakdownState}
-              style={{ height: 400 }}
-            >
-              <HostBreakdownChart data={storageExplorerHostBreakdownState.data} />
-            </AsyncComponent>
-          </EuiPanel>
+          <AsyncComponent size="xl" {...storageExplorerHostBreakdownState} style={{ height: 400 }}>
+            <HostBreakdownChart data={storageExplorerHostBreakdownState.data} />
+          </AsyncComponent>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <AsyncComponent size="xl" {...storageExplorerHostsDetails} style={{ height: 400 }}>
-            <HostsTable data={storageExplorerHostsDetails.data} />
+            <HostsTable
+              data={storageExplorerHostsDetails.data}
+              hasDistinctProbabilisticValues={hasDistinctProbabilisticValues}
+            />
           </AsyncComponent>
         </EuiFlexItem>
       </EuiFlexGroup>

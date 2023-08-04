@@ -13,8 +13,10 @@ import {
   ScaleType,
   Settings,
 } from '@elastic/charts';
+import { EuiIcon, EuiPanel, EuiSpacer, EuiText, EuiTitle, EuiToolTip } from '@elastic/eui';
 import { asDynamicBytes } from '@kbn/observability-plugin/common';
 import React, { useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
 import type { StorageExplorerHostBreakdownSizeChart } from '../../../common/storage_explorer';
 import { useKibanaTimeZoneSetting } from '../../hooks/use_kibana_timezone_setting';
 import { useProfilingChartsTheme } from '../../hooks/use_profiling_charts_theme';
@@ -48,39 +50,58 @@ export function HostBreakdownChart({ data = [] }: Props) {
   const xFormatter = niceTimeFormatter([min, max]);
 
   return (
-    <Chart size={{ height: 400 }}>
-      <Settings
-        showLegend
-        legendPosition={Position.Right}
-        baseTheme={chartsBaseTheme}
-        theme={chartsTheme}
-      />
-      <Axis
-        id="x-axis"
-        position={Position.Bottom}
-        showOverlappingTicks
-        tickFormat={xFormatter}
-        gridLine={{ visible: false }}
-      />
-      <Axis
-        id="y-axis"
-        position={Position.Left}
-        gridLine={{ visible: true }}
-        tickFormat={asDynamicBytes}
-      />
-      {hostBreakdownTimeseries.map((serie) => (
-        <AreaSeries
-          timeZone={timeZone}
-          key={serie.title}
-          id={serie.title}
-          xScaleType={ScaleType.Time}
-          yScaleType={ScaleType.Linear}
-          xAccessor="x"
-          yAccessors={['y']}
-          data={serie.data}
-          stackAccessors={['x']}
-        />
-      ))}
-    </Chart>
+    <>
+      <EuiTitle>
+        <EuiText>
+          {i18n.translate('xpack.profiling.storageExplorer.summary.title', {
+            defaultMessage: 'Machine breakdown',
+          })}
+          <EuiToolTip
+            content={i18n.translate('xpack.profiling.storageExplorer.summary.title.hint', {
+              defaultMessage: 'This graph shows the combined values of events and metrics',
+            })}
+          >
+            <EuiIcon type="questionInCircle" style={{ marginLeft: 4 }} />
+          </EuiToolTip>
+        </EuiText>
+      </EuiTitle>
+      <EuiSpacer />
+      <EuiPanel hasShadow={false} hasBorder>
+        <Chart size={{ height: 400 }}>
+          <Settings
+            showLegend
+            legendPosition={Position.Right}
+            baseTheme={chartsBaseTheme}
+            theme={chartsTheme}
+          />
+          <Axis
+            id="x-axis"
+            position={Position.Bottom}
+            showOverlappingTicks
+            tickFormat={xFormatter}
+            gridLine={{ visible: false }}
+          />
+          <Axis
+            id="y-axis"
+            position={Position.Left}
+            gridLine={{ visible: true }}
+            tickFormat={asDynamicBytes}
+          />
+          {hostBreakdownTimeseries.map((serie) => (
+            <AreaSeries
+              timeZone={timeZone}
+              key={serie.title}
+              id={serie.title}
+              xScaleType={ScaleType.Time}
+              yScaleType={ScaleType.Linear}
+              xAccessor="x"
+              yAccessors={['y']}
+              data={serie.data}
+              stackAccessors={['x']}
+            />
+          ))}
+        </Chart>
+      </EuiPanel>
+    </>
   );
 }

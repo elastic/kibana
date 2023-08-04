@@ -11,81 +11,149 @@ import {
   EuiBasicTableColumn,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiInMemoryTable,
+  EuiToolTip,
 } from '@elastic/eui';
-import React, { useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import { asDynamicBytes } from '@kbn/observability-plugin/common';
+import React, { useMemo, useState } from 'react';
 import { StorageExplorerHostDetails } from '../../../common/storage_explorer';
+import { LabelWithHint } from '../../components/label_with_hint';
 
 interface Props {
   data?: StorageExplorerHostDetails[];
+  hasDistinctProbabilisticValues: boolean;
 }
-export function HostsTable({ data = [] }: Props) {
+
+const sorting = {
+  sort: {
+    field: 'hostName',
+    direction: 'desc' as const,
+  },
+};
+
+export function HostsTable({ data = [], hasDistinctProbabilisticValues }: Props) {
   const [pagination, setPagination] = useState({ pageIndex: 0 });
 
   function onTableChange({ page: { index } }: CriteriaWithPagination<StorageExplorerHostDetails>) {
     setPagination({ pageIndex: index });
   }
 
-  const columns: Array<EuiBasicTableColumn<StorageExplorerHostDetails>> = [
-    {
-      field: 'projectId',
-      name: 'Project ID',
-      sortable: true,
-    },
-    {
-      field: 'hostName',
-      name: 'Machine',
-      sortable: true,
-    },
-    {
-      field: 'hostId',
-      name: 'Machine ID',
-      sortable: true,
-    },
-    {
-      field: 'probabilisticValues',
-      name: 'Probabilistic Profiling values',
-      sortable: true,
-      render: (probabilisticValues: StorageExplorerHostDetails['probabilisticValues']) => {
-        return (
-          <EuiFlexGroup gutterSize="s">
-            {probabilisticValues.map((value, index) => {
-              return (
-                <EuiFlexItem key={index} grow={false}>
-                  <EuiBadge color="hollow">{value}</EuiBadge>
-                </EuiFlexItem>
-              );
-            })}
-          </EuiFlexGroup>
-        );
+  const probabilisticValuesCountPerProjectId = data.reduce<Record<string, number>>((acc, curr) => {
+    const projectId = curr.projectId;
+    const currentCount = acc[projectId] ?? 0;
+    return { ...acc, [projectId]: currentCount + curr.probabilisticValues.length };
+  }, {});
+
+  const columns: Array<EuiBasicTableColumn<StorageExplorerHostDetails>> = useMemo(
+    () => [
+      ...(hasDistinctProbabilisticValues
+        ? [
+            {
+              field: 'distinctProbabilisticWarning',
+              width: '30',
+              name: '',
+              sortable: true,
+              render: (_, item) => {
+                if (probabilisticValuesCountPerProjectId[item.projectId] > 1) {
+                  return (
+                    <EuiToolTip
+                      content={i18n.translate(
+                        'xpack.profiling.storageExplorer.hostsTable.distinctProbabilisticValues',
+                        {
+                          defaultMessage:
+                            "We've identified distint probabilistic profiling values for the same project",
+                        }
+                      )}
+                    >
+                      <EuiIcon type="warning" color="warning" />
+                    </EuiToolTip>
+                  );
+                }
+              },
+            } as EuiBasicTableColumn<StorageExplorerHostDetails>,
+          ]
+        : []),
+      {
+        field: 'projectId',
+        width: '100',
+        name: i18n.translate('xpack.profiling.storageExplorer.hostsTable.projectId', {
+          defaultMessage: 'Project ID',
+        }),
+        sortable: true,
       },
-    },
-    {
-      field: 'totalMetricsSize',
-      name: 'Metrics data',
-      sortable: true,
-      render: (size: StorageExplorerHostDetails['totalMetricsSize']) => asDynamicBytes(size),
-    },
-    {
-      field: 'totalEventsSize',
-      name: 'Events data',
-      sortable: true,
-      render: (size: StorageExplorerHostDetails['totalEventsSize']) => asDynamicBytes(size),
-    },
-    {
-      field: 'totalSize',
-      name: 'Total data',
-      sortable: true,
-      render: (size: StorageExplorerHostDetails['totalSize']) => asDynamicBytes(size),
-    },
-  ];
-  const sorting = {
-    sort: {
-      field: 'hostName',
-      direction: 'desc' as const,
-    },
-  };
+      {
+        field: 'hostName',
+        name: i18n.translate('xpack.profiling.storageExplorer.hostsTable.machine', {
+          defaultMessage: 'Machine',
+        }),
+        sortable: true,
+        render: (_, item) => {
+          return `${item.hostName} (${item.hostId})`;
+        },
+      },
+      {
+        field: 'probabilisticValues',
+        name: i18n.translate('xpack.profiling.storageExplorer.hostsTable.probabilisticValues', {
+          defaultMessage: 'Probabilistic Profiling values',
+        }),
+        sortable: true,
+        render: (probabilisticValues: StorageExplorerHostDetails['probabilisticValues']) => {
+          return (
+            <EuiFlexGroup gutterSize="s">
+              {probabilisticValues.map((value, index) => {
+                return (
+                  <EuiFlexItem key={index} grow={false}>
+                    <EuiBadge color="hollow">{value}</EuiBadge>
+                  </EuiFlexItem>
+                );
+              })}
+            </EuiFlexGroup>
+          );
+        },
+      },
+      {
+        field: 'totalMetricsSize',
+        name: i18n.translate('xpack.profiling.storageExplorer.hostsTable.metricsData', {
+          defaultMessage: 'Metrics data',
+        }),
+        sortable: true,
+        width: '200',
+        render: (size: StorageExplorerHostDetails['totalMetricsSize']) => asDynamicBytes(size),
+      },
+      {
+        field: 'totalEventsSize',
+        name: i18n.translate('xpack.profiling.storageExplorer.hostsTable.eventsData', {
+          defaultMessage: 'Events data',
+        }),
+        sortable: true,
+        width: '200',
+        render: (size: StorageExplorerHostDetails['totalEventsSize']) => asDynamicBytes(size),
+      },
+      {
+        field: 'totalSize',
+        name: (
+          <LabelWithHint
+            label={i18n.translate('xpack.profiling.storageExplorer.hostsTable.totalData', {
+              defaultMessage: 'Total data',
+            })}
+            hint={i18n.translate('xpack.profiling.storageExplorer.hostsTable.totalData.hint', {
+              defaultMessage: 'The combined value of metrics and events.',
+            })}
+            labelSize="xs"
+            labelStyle={{ fontWeight: 700 }}
+            iconSize="s"
+          />
+        ),
+        sortable: true,
+        width: '200',
+        render: (size: StorageExplorerHostDetails['totalSize']) => asDynamicBytes(size),
+      },
+    ],
+    [hasDistinctProbabilisticValues, probabilisticValuesCountPerProjectId]
+  );
+
   return (
     <EuiInMemoryTable
       items={data}

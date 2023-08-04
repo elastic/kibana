@@ -14,8 +14,9 @@ import {
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
-import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { asDynamicBytes } from '@kbn/observability-plugin/common';
+import React from 'react';
 import { StorageExplorerSummary } from '../../../common/storage_explorer';
 import { asPercentage } from '../../utils/formatters/as_percentage';
 
@@ -26,39 +27,52 @@ interface Props {
 export function Summary({ data, isLoading }: Props) {
   const summaryInfo = [
     {
-      title: 'Total data',
+      title: i18n.translate('xpack.profiling.storageExplorer.summary.totalData', {
+        defaultMessage: 'Total data',
+      }),
       value: data?.totalProfilingSizeBytes
         ? asDynamicBytes(data?.totalProfilingSizeBytes)
         : undefined,
-      hint: 'Hint',
+      hint: undefined,
     },
     {
-      title: 'Daily data generation',
+      title: i18n.translate('xpack.profiling.storageExplorer.summary.dailyDataGeneration', {
+        defaultMessage: 'Daily data generation',
+      }),
       value: data?.dailyDataGenerationBytes
         ? asDynamicBytes(data?.dailyDataGenerationBytes)
         : undefined,
 
-      hint: 'Hint',
+      hint: undefined,
     },
     {
-      title: 'Total debug symbols size',
+      title: i18n.translate('xpack.profiling.storageExplorer.summary.totalDebugSymbolsSize', {
+        defaultMessage: 'Total debug symbols size',
+      }),
       value: data?.totalSymbolsSizeBytes ? asDynamicBytes(data?.totalSymbolsSizeBytes) : undefined,
-      hint: 'Hint',
+      hint: undefined,
     },
     {
-      title: 'Disc space used',
+      title: i18n.translate('xpack.profiling.storageExplorer.summary.discSpaceUsed', {
+        defaultMessage: 'Disc space used',
+      }),
       value: data?.diskSpaceUsedPct ? asPercentage(data?.diskSpaceUsedPct) : undefined,
-      hint: 'Hint',
+      hint: undefined,
     },
     {
-      title: 'Number of machines',
+      title: i18n.translate('xpack.profiling.storageExplorer.summary.numberOfMachines', {
+        defaultMessage: 'Number of machines',
+      }),
       value: data?.totalNumberOfHosts,
-      hint: 'Hint',
+      hint: undefined,
     },
     {
-      title: 'Distinct probabilistic profiling values',
+      title: i18n.translate(
+        'xpack.profiling.storageExplorer.summary.distinctProbabilisticProfilingValues',
+        { defaultMessage: 'Distinct probabilistic profiling values' }
+      ),
       value: data?.totalNumberOfDistinctProbabilisticValues,
-      hint: 'Hint',
+      hint: undefined,
     },
   ];
   return (
