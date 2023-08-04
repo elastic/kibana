@@ -16,7 +16,7 @@
     ],
     "patterns": [
       "_searchable_snapshots/cache/clear",
-      "{indices}/_searchable_snapshots/cache/clear"
+      "{index}/_searchable_snapshots/cache/clear"
     ],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/searchable-snapshots-apis.html"
   }
