@@ -53,7 +53,7 @@ describe('Outputs', () => {
       });
     } else {
       describe('Form validation', () => {
-        it.only('renders all form fields', () => {
+        it('renders all form fields', () => {
           selectKafkaOutput();
 
           cy.getBySel(SETTINGS_OUTPUTS.NAME_INPUT);
