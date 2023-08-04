@@ -11,7 +11,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiPageHeader,
   EuiEmptyPrompt,
-  EuiPageContent_Deprecated as EuiPageContent,
+  EuiPageSection,
   EuiSpacer,
   EuiButton,
   EuiButtonEmpty,
@@ -95,25 +95,20 @@ export const PipelinesEdit: React.FunctionComponent<RouteComponentProps<MatchPar
 
   if (isLoading) {
     return (
-      <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
+      <EuiPageSection alignment="center" color="subdued">
         <SectionLoading>
           <FormattedMessage
             id="xpack.ingestPipelines.edit.loadingPipelinesDescription"
             defaultMessage="Loading pipeline…"
           />
         </SectionLoading>
-      </EuiPageContent>
+      </EuiPageSection>
     );
   }
 
   if (error) {
     return (
-      <EuiPageContent
-        verticalPosition="center"
-        horizontalPosition="center"
-        color="danger"
-        data-test-subj="fetchPipelineError"
-      >
+      <EuiPageSection alignment="center" color="danger" data-test-subj="fetchPipelineError">
         <EuiEmptyPrompt
           iconType="warning"
           title={
@@ -135,7 +130,7 @@ export const PipelinesEdit: React.FunctionComponent<RouteComponentProps<MatchPar
             </EuiButton>
           }
         />
-      </EuiPageContent>
+      </EuiPageSection>
     );
   }
 

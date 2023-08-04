@@ -11,7 +11,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiEmptyPrompt,
   EuiLink,
-  EuiPageContent_Deprecated as EuiPageContent,
+  EuiPageSection,
   EuiButton,
   EuiPopover,
   EuiContextMenu,
@@ -48,7 +48,7 @@ export const EmptyList: FunctionComponent = () => {
   ];
 
   return (
-    <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
+    <EuiPageSection alignment="center" color="subdued">
       <EuiEmptyPrompt
         iconType="managementApp"
         data-test-subj="emptyList"
@@ -109,6 +109,6 @@ export const EmptyList: FunctionComponent = () => {
           </EuiPopover>
         }
       />
-    </EuiPageContent>
+    </EuiPageSection>
   );
 };

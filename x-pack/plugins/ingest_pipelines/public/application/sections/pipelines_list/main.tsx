@@ -14,7 +14,7 @@ import { parse } from 'query-string';
 import {
   EuiPageHeader,
   EuiButtonEmpty,
-  EuiPageContent_Deprecated as EuiPageContent,
+  EuiPageSection,
   EuiEmptyPrompt,
   EuiButton,
   EuiSpacer,
@@ -81,7 +81,7 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
 
   if (error) {
     return (
-      <EuiPageContent verticalPosition="center" horizontalPosition="center" color="danger">
+      <EuiPageSection alignment="center" color="danger">
         <EuiEmptyPrompt
           iconType="warning"
           title={
@@ -102,20 +102,20 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
             </EuiButton>
           }
         />
-      </EuiPageContent>
+      </EuiPageSection>
     );
   }
 
   if (isLoading) {
     return (
-      <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
+      <EuiPageSection alignment="center" color="subdued">
         <SectionLoading data-test-subj="sectionLoading">
           <FormattedMessage
             id="xpack.ingestPipelines.list.loadingMessage"
             defaultMessage="Loading pipelines..."
           />
         </SectionLoading>
-      </EuiPageContent>
+      </EuiPageSection>
     );
   }
 

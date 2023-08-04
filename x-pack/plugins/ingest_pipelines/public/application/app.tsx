@@ -6,7 +6,7 @@
  */
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiPageContent_Deprecated as EuiPageContent, EuiEmptyPrompt } from '@elastic/eui';
+import { EuiPageSection, EuiEmptyPrompt } from '@elastic/eui';
 import React, { FunctionComponent } from 'react';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 
@@ -67,20 +67,20 @@ export const App: FunctionComponent = () => {
       {({ isLoading, hasPrivileges, privilegesMissing }) => {
         if (isLoading) {
           return (
-            <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
+            <EuiPageSection alignment="center" color="subdued">
               <SectionLoading>
                 <FormattedMessage
                   id="xpack.ingestPipelines.app.checkingPrivilegesDescription"
                   defaultMessage="Checking privileges…"
                 />
               </SectionLoading>
-            </EuiPageContent>
+            </EuiPageSection>
           );
         }
 
         if (!hasPrivileges) {
           return (
-            <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
+            <EuiPageSection alignment="center" color="subdued">
               <EuiEmptyPrompt
                 iconType="securityApp"
                 title={
@@ -105,7 +105,7 @@ export const App: FunctionComponent = () => {
                   </p>
                 }
               />
-            </EuiPageContent>
+            </EuiPageSection>
           );
         }
 
