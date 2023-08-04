@@ -12,11 +12,7 @@ import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { SORT_DEFAULT_ORDER_SETTING } from '@kbn/discover-utils';
 import { getSort } from './get_sort';
-import {
-  getESQuerySortForTimeField,
-  // getESQuerySortForTieBreaker,
-  // getTieBreakerField,
-} from './get_es_query_sort';
+import { getESQuerySortForTimeField } from './get_es_query_sort';
 
 /**
  * Prepares sort for search source, that's sending the request to ES
@@ -55,7 +51,10 @@ export function getSortForSearchSource(
     return sortPair as EsQuerySortValue;
   });
 
-  // TODO: do we need to have a tie breaker like this?
+  // Do we need to have a tie breaker like this? We have it for Surrounding Documents page but not here yet.
+  // Introducing it here might become an unexpected change for users of Discover and also CSV reports
+  // as it will change the ordering of documents.
+
   // if (dataView.isTimeBased() && sortPairs.length) {
   //   const firstSortPair = sortPairs[0];
   //   const firstPairSortDir = Array.isArray(firstSortPair)
