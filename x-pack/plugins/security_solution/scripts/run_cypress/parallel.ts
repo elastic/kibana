@@ -383,6 +383,7 @@ ${JSON.stringify(config.getAll(), null, 2)}
             // Normalized the set of available env vars in cypress
             const cyCustomEnv = {
               ...ftrEnv,
+              burn: argv.burn,
 
               // NOTE:
               // ELASTICSEARCH_URL needs to be crated here with auth because SIEM cypress setup depends on it. At some
