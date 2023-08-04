@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useState, useEffect } from 'react';
+import React, { FC, useState, memo } from 'react';
 
 import {
   EuiButtonEmpty,
@@ -36,260 +36,242 @@ interface Props {
   handleAdvancedConfigUpdate: (configUpdate: Partial<MlInferenceState>) => void;
   ignoreFailure: boolean;
   onFailure: MlInferenceState['onFailure'];
+  takeActionOnFailure: MlInferenceState['takeActionOnFailure'];
 }
 
-export const OnFailureConfiguration: FC<Props> = ({
-  handleAdvancedConfigUpdate,
-  ignoreFailure,
-  onFailure,
-}) => {
-  const {
-    services: {
-      docLinks: { links },
-    },
-  } = useMlKibana();
+export const OnFailureConfiguration: FC<Props> = memo(
+  ({ handleAdvancedConfigUpdate, ignoreFailure, onFailure, takeActionOnFailure }) => {
+    const {
+      services: {
+        docLinks: { links },
+      },
+    } = useMlKibana();
 
-  const [editOnFailure, setEditOnFailure] = useState<boolean>(false);
-  const [actionOnFailure, setActionOnFailure] = useState<boolean>(true);
-  const [isOnFailureValid, setIsOnFailureValid] = useState<boolean>(false);
-  const [onFailureString, setOnFailureString] = useState<string>(
-    JSON.stringify(onFailure, null, 2)
-  );
+    const [editOnFailure, setEditOnFailure] = useState<boolean>(false);
+    const [isOnFailureValid, setIsOnFailureValid] = useState<boolean>(false);
+    const [onFailureString, setOnFailureString] = useState<string>(
+      JSON.stringify(onFailure, null, 2)
+    );
 
-  const updateIgnoreFailure = (e: EuiSwitchEvent) => {
-    const checked = e.target.checked;
-    handleAdvancedConfigUpdate({ ignoreFailure: checked });
-    if (checked === false) {
-      setActionOnFailure(false);
-    }
-  };
-
-  const updateOnFailure = () => {
-    handleAdvancedConfigUpdate({ onFailure: JSON.parse(onFailureString) });
-    setEditOnFailure(false);
-  };
-
-  const handleOnFailureChange = (json: string) => {
-    setOnFailureString(json);
-    const valid = isValidJson(json);
-    setIsOnFailureValid(valid);
-  };
-
-  const resetOnFailure = () => {
-    setOnFailureString(JSON.stringify(getDefaultOnFailureConfiguration(), null, 2));
-    setIsOnFailureValid(true);
-  };
-
-  useEffect(() => {
-    if (actionOnFailure === false) {
-      setEditOnFailure(false);
-      setIsOnFailureValid(true);
-      handleAdvancedConfigUpdate({ onFailure: undefined });
-    } else {
-      setOnFailureString(JSON.stringify(getDefaultOnFailureConfiguration(), null, 2));
+    const updateIgnoreFailure = (e: EuiSwitchEvent) => {
+      const checked = e.target.checked;
       handleAdvancedConfigUpdate({
-        onFailure: getDefaultOnFailureConfiguration(),
-        ignoreFailure: true,
+        ignoreFailure: checked,
+        ...(checked === false ? { takeActionOnFailure: false, onFailure: undefined } : {}),
       });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [actionOnFailure]);
+    };
 
-  return (
-    <EuiFlexGroup direction="column">
-      <EuiFlexItem>
-        <EuiFlexGroup>
-          <EuiFlexItem grow={3}>
-            <EuiTitle size="s">
-              <h4>
-                {i18n.translate(
-                  'xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.advanced.onFailureTitle',
-                  { defaultMessage: 'Ingesting problematic documents' }
-                )}
-              </h4>
-            </EuiTitle>
-            <EuiSpacer size="m" />
-            <EuiText color="subdued" size="s">
-              <p>
-                <FormattedMessage
-                  id="xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.advanced.handleFailuresExplanation"
-                  defaultMessage="If the model fails to produce a prediction, for example, due to the data schema change, the document will be ingested without the prediction."
-                />
-              </p>
-              <p>
-                <FormattedMessage
-                  id="xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.advanced.handleFailuresDescription"
-                  defaultMessage="By default, pipeline processing stops on failure. To ignore the failure, {ignoreFailure} is set to true. {inferenceDocsLink}."
-                  values={{
-                    ignoreFailure: <EuiCode>{'ignore_failure'}</EuiCode>,
-                    inferenceDocsLink: (
-                      <EuiLink external target="_blank" href={links.ingest.pipelineFailure}>
-                        Learn more.
-                      </EuiLink>
-                    ),
-                  }}
-                />
-              </p>
-              <p>
-                <FormattedMessage
-                  id="xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.advanced.onFailureDescription"
-                  defaultMessage="The {onFailure} configuration shown will be used as a default. It is used to specify a list of processors to run immediately after a processor failure and provides information on why the failure occurred. {onFailureDocsLink}"
-                  values={{
-                    onFailure: <EuiCode>{'on_failure'}</EuiCode>,
-                    onFailureDocsLink: (
-                      <EuiLink external target="_blank" href={links.ingest.pipelineFailure}>
-                        Learn more.
-                      </EuiLink>
-                    ),
-                  }}
-                />
-              </p>
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem grow={7}>
-            <EuiFlexGroup direction="column">
-              <EuiFlexItem>
-                <EuiFlexGroup direction="column" gutterSize="s">
-                  <EuiFlexItem grow={false}>
+    const updateOnFailure = () => {
+      handleAdvancedConfigUpdate({ onFailure: JSON.parse(onFailureString) });
+      setEditOnFailure(false);
+    };
+
+    const handleOnFailureChange = (json: string) => {
+      setOnFailureString(json);
+      const valid = isValidJson(json);
+      setIsOnFailureValid(valid);
+    };
+
+    const handleTakeActionOnFailureChange = (checked: boolean) => {
+      handleAdvancedConfigUpdate({
+        takeActionOnFailure: checked,
+        onFailure: checked === false ? undefined : getDefaultOnFailureConfiguration(),
+      });
+      if (checked === false) {
+        setEditOnFailure(false);
+        setIsOnFailureValid(true);
+      }
+    };
+
+    const resetOnFailure = () => {
+      setOnFailureString(JSON.stringify(getDefaultOnFailureConfiguration(), null, 2));
+      setIsOnFailureValid(true);
+    };
+
+    return (
+      <EuiFlexGroup direction="column">
+        <EuiFlexItem>
+          <EuiFlexGroup>
+            <EuiFlexItem grow={3}>
+              <EuiTitle size="s">
+                <h4>
+                  {i18n.translate(
+                    'xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.advanced.onFailureTitle',
+                    { defaultMessage: 'Ingesting problematic documents' }
+                  )}
+                </h4>
+              </EuiTitle>
+              <EuiSpacer size="m" />
+              <EuiText color="subdued" size="s">
+                <p>
+                  <FormattedMessage
+                    id="xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.advanced.handleFailuresExplanation"
+                    defaultMessage="If the model fails to produce a prediction, for example, due to a change in the data schema, the document will be ingested without the prediction."
+                  />
+                </p>
+                <p>
+                  <FormattedMessage
+                    id="xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.advanced.handleFailuresDescription"
+                    defaultMessage="By default, pipeline processing stops on failure. To run the pipeline's remaining processors despite the failure, {ignoreFailure} is set to true. {inferenceDocsLink}."
+                    values={{
+                      ignoreFailure: <EuiCode>{'ignore_failure'}</EuiCode>,
+                      inferenceDocsLink: (
+                        <EuiLink external target="_blank" href={links.ingest.pipelineFailure}>
+                          Learn more.
+                        </EuiLink>
+                      ),
+                    }}
+                  />
+                </p>
+                <p>
+                  <FormattedMessage
+                    id="xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.advanced.onFailureDescription"
+                    defaultMessage="The {onFailure} configuration shown will be used as a default. It is used to specify a list of processors to run immediately after the inference processor failure and provides information on why the failure occurred. {onFailureDocsLink}"
+                    values={{
+                      onFailure: <EuiCode>{'on_failure'}</EuiCode>,
+                      onFailureDocsLink: (
+                        <EuiLink external target="_blank" href={links.ingest.pipelineFailure}>
+                          Learn more.
+                        </EuiLink>
+                      ),
+                    }}
+                  />
+                </p>
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={7}>
+              <EuiFlexGroup direction="column">
+                <EuiFlexItem>
+                  <EuiFlexGroup direction="column" gutterSize="s">
+                    <EuiFlexItem grow={false}>
+                      <EuiFormRow
+                        helpText={
+                          <FormattedMessage
+                            id="xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.advanced.ignoreFailurelHelpText"
+                            defaultMessage="This must be checked for any actions to occur on failure."
+                          />
+                        }
+                      >
+                        <EuiSwitch
+                          label={
+                            <FormattedMessage
+                              id="xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.advanced.ignoreFailureLabel"
+                              defaultMessage="Continue on failure"
+                            />
+                          }
+                          checked={ignoreFailure}
+                          onChange={updateIgnoreFailure}
+                        />
+                      </EuiFormRow>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      {ignoreFailure === true ? (
+                        <EuiFormRow>
+                          <EuiSwitch
+                            label={
+                              <EuiFlexItem>
+                                <FormattedMessage
+                                  id="xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.advanced.noActionOnFailureLabel"
+                                  defaultMessage="Take action on failure."
+                                />
+                              </EuiFlexItem>
+                            }
+                            checked={takeActionOnFailure}
+                            onChange={(e: EuiSwitchEvent) =>
+                              handleTakeActionOnFailureChange(e.target.checked)
+                            }
+                          />
+                        </EuiFormRow>
+                      ) : null}
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  {takeActionOnFailure === true ? (
                     <EuiFormRow
+                      fullWidth
+                      label={
+                        <EuiText size="s">
+                          <strong>
+                            {i18n.translate(
+                              'xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.advanced.onFailureHeadingLabel',
+                              { defaultMessage: 'Actions to take on failure' }
+                            )}
+                          </strong>
+                        </EuiText>
+                      }
+                      labelAppend={
+                        <EuiFlexGroup gutterSize="xs" justifyContent="flexEnd">
+                          <EuiFlexItem grow={false}>
+                            <EuiButtonEmpty
+                              iconType="pencil"
+                              size="xs"
+                              onClick={() => {
+                                setEditOnFailure(!editOnFailure);
+                              }}
+                            >
+                              {editOnFailure ? CANCEL_EDIT_MESSAGE : EDIT_MESSAGE}
+                            </EuiButtonEmpty>
+                          </EuiFlexItem>
+                          <EuiFlexItem grow={false}>
+                            {editOnFailure ? (
+                              <SaveChangesButton
+                                onClick={updateOnFailure}
+                                disabled={isOnFailureValid === false}
+                              />
+                            ) : null}
+                          </EuiFlexItem>
+                          <EuiFlexItem grow={false}>
+                            {editOnFailure ? (
+                              <EuiButtonEmpty size="xs" onClick={resetOnFailure}>
+                                {i18n.translate(
+                                  'xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.advanced.resetOnFailureButton',
+                                  { defaultMessage: 'Reset' }
+                                )}
+                              </EuiButtonEmpty>
+                            ) : null}
+                          </EuiFlexItem>
+                        </EuiFlexGroup>
+                      }
                       helpText={
                         <FormattedMessage
-                          id="xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.advanced.ignoreFailurelHelpText"
-                          defaultMessage="This must be checked for any actions to occur on failure."
+                          id="xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.advanced.onFailureHelpText"
+                          defaultMessage="In case of failure, this configuration stores the document, provides the timestamp at which ingest failed, and the context for the failure."
                         />
                       }
                     >
-                      <EuiSwitch
-                        label={
-                          <FormattedMessage
-                            id="xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.advanced.ignoreFailureLabel"
-                            defaultMessage="Continue on failure"
-                          />
-                        }
-                        checked={ignoreFailure}
-                        onChange={updateIgnoreFailure}
-                      />
-                    </EuiFormRow>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiFormRow
-                      helpText={
-                        actionOnFailure === false ? (
-                          <FormattedMessage
-                            id="xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.advanced.noActionOnFailureLabelHelpText"
-                            defaultMessage="This will clear the processors above. No actions will occur on failure."
-                          />
-                        ) : null
-                      }
-                    >
-                      <EuiSwitch
-                        label={
-                          <EuiFlexItem>
-                            <FormattedMessage
-                              id="xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.advanced.noActionOnFailureLabel"
-                              defaultMessage="Take action on failure."
-                            />
-                          </EuiFlexItem>
-                        }
-                        checked={actionOnFailure}
-                        onChange={(e: EuiSwitchEvent) => setActionOnFailure(e.target.checked)}
-                      />
-                    </EuiFormRow>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiFormRow
-                  fullWidth
-                  label={
-                    <EuiText size="s">
-                      <strong>
-                        {i18n.translate(
-                          'xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.advanced.onFailureHeadingLabel',
-                          { defaultMessage: 'Actions to take on failure' }
-                        )}
-                      </strong>
-                    </EuiText>
-                  }
-                  labelAppend={
-                    <EuiFlexGroup gutterSize="xs" justifyContent="flexEnd">
-                      <EuiFlexItem grow={false}>
-                        <EuiButtonEmpty
-                          iconType="pencil"
-                          size="xs"
-                          disabled={actionOnFailure === false}
-                          onClick={() => {
-                            setEditOnFailure(!editOnFailure);
-                          }}
-                        >
-                          {editOnFailure ? CANCEL_EDIT_MESSAGE : EDIT_MESSAGE}
-                        </EuiButtonEmpty>
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
+                      <>
+                        {!editOnFailure ? (
+                          <EuiCodeBlock
+                            isCopyable={true}
+                            overflowHeight={350}
+                            css={{ height: '350px' }}
+                          >
+                            {JSON.stringify(onFailure, null, 2)}
+                          </EuiCodeBlock>
+                        ) : null}
                         {editOnFailure ? (
-                          <SaveChangesButton
-                            onClick={updateOnFailure}
-                            disabled={isOnFailureValid === false}
+                          <CodeEditor
+                            height={300}
+                            languageId="json"
+                            options={{
+                              automaticLayout: true,
+                              lineNumbers: 'off',
+                              tabSize: 2,
+                            }}
+                            value={onFailureString}
+                            onChange={handleOnFailureChange}
                           />
                         ) : null}
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        {editOnFailure ? (
-                          <EuiButtonEmpty size="xs" onClick={resetOnFailure}>
-                            {i18n.translate(
-                              'xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.advanced.resetOnFailureButton',
-                              { defaultMessage: 'Reset' }
-                            )}
-                          </EuiButtonEmpty>
-                        ) : null}
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  }
-                  helpText={
-                    actionOnFailure === true ? (
-                      <FormattedMessage
-                        id="xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.advanced.onFailureHelpText"
-                        defaultMessage="In case of failure, this configuration sets the index document as failed, provides the timestamp at which ingest failed, and the context for the failure."
-                      />
-                    ) : (
-                      <FormattedMessage
-                        id="xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.advanced.onFailureNoActionHelpText"
-                        defaultMessage="No action will take place on failure."
-                      />
-                    )
-                  }
-                >
-                  <>
-                    {!editOnFailure ? (
-                      <EuiCodeBlock
-                        isCopyable={true}
-                        overflowHeight={350}
-                        css={{ height: '350px' }}
-                      >
-                        {JSON.stringify(onFailure, null, 2)}
-                      </EuiCodeBlock>
-                    ) : null}
-                    {editOnFailure ? (
-                      <CodeEditor
-                        height={300}
-                        languageId="json"
-                        options={{
-                          automaticLayout: true,
-                          lineNumbers: 'off',
-                          tabSize: 2,
-                          readOnly: actionOnFailure === false,
-                        }}
-                        value={onFailureString}
-                        onChange={handleOnFailureChange}
-                      />
-                    ) : null}
-                  </>
-                </EuiFormRow>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-};
+                      </>
+                    </EuiFormRow>
+                  ) : null}
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
+);

@@ -25,13 +25,19 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { CodeEditor } from '@kbn/kibana-react-plugin/public';
 import { ModelItem } from '../../../model_management/models_list';
-import { EDIT_MESSAGE, CANCEL_EDIT_MESSAGE, CREATE_FIELD_MAPPING_MESSAGE } from '../constants';
-import { validateInferenceConfigType } from '../validation';
+import {
+  EDIT_MESSAGE,
+  CANCEL_EDIT_MESSAGE,
+  CREATE_FIELD_MAPPING_MESSAGE,
+  CLEAR_BUTTON_LABEL,
+} from '../constants';
+import { validateInferenceConfig } from '../validation';
 import { isValidJson } from '../../../../../common/util/validation_utils';
 import { SaveChangesButton } from './save_changes_button';
 import { useMlKibana } from '../../../contexts/kibana';
 import type { MlInferenceState, InferenceModelTypes } from '../types';
 import { AdditionalAdvancedSettings } from './additional_advanced_settings';
+import { validateFieldMap } from '../validation';
 
 function getDefaultFieldMapString() {
   return JSON.stringify(
@@ -51,9 +57,8 @@ interface Props {
   inferenceConfig: ModelItem['inference_config'];
   modelInferenceConfig: ModelItem['inference_config'];
   modelInputFields: ModelItem['input'];
-  inferenceConfigError?: string;
-  fieldMapError?: string;
   modelType?: InferenceModelTypes;
+  setHasUnsavedChanges: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export const ProcessorConfiguration: FC<Props> = memo(
@@ -63,9 +68,8 @@ export const ProcessorConfiguration: FC<Props> = memo(
     inferenceConfig,
     modelInputFields,
     modelInferenceConfig,
-    inferenceConfigError,
-    fieldMapError,
     modelType,
+    setHasUnsavedChanges,
   }) => {
     const {
       services: {
@@ -79,11 +83,10 @@ export const ProcessorConfiguration: FC<Props> = memo(
     const [inferenceConfigString, setInferenceConfigString] = useState<string>(
       JSON.stringify(inferenceConfig, null, 2)
     );
-    const [inferenceConfigModelTypeError, setInferenceConfigModelTypeError] = useState<
-      string | undefined
-    >();
+    const [inferenceConfigError, setInferenceConfigError] = useState<string | undefined>();
+    const [fieldMapError, setFieldMapError] = useState<string | undefined>();
     const [fieldMappingString, setFieldMappingString] = useState<string>(
-      getDefaultFieldMapString()
+      fieldMap ? JSON.stringify(fieldMap, null, 2) : getDefaultFieldMapString()
     );
     const [isInferenceConfigValid, setIsInferenceConfigValid] = useState<boolean>(true);
     const [isFieldMapValid, setIsFieldMapValid] = useState<boolean>(true);
@@ -95,25 +98,33 @@ export const ProcessorConfiguration: FC<Props> = memo(
     };
 
     const updateInferenceConfig = () => {
-      const invalidInferenceConfigMessage = validateInferenceConfigType(
+      const invalidInferenceConfigMessage = validateInferenceConfig(
         JSON.parse(inferenceConfigString),
         modelType
       );
 
       if (invalidInferenceConfigMessage === undefined) {
         handleAdvancedConfigUpdate({ inferenceConfig: JSON.parse(inferenceConfigString) });
+        setHasUnsavedChanges(false);
         setEditInferenceConfig(false);
-        setInferenceConfigModelTypeError(undefined);
+        setInferenceConfigError(undefined);
       } else {
+        setHasUnsavedChanges(true);
         setIsInferenceConfigValid(false);
-        setInferenceConfigModelTypeError(invalidInferenceConfigMessage);
+        setInferenceConfigError(invalidInferenceConfigMessage);
       }
     };
 
     const resetInferenceConfig = () => {
       setInferenceConfigString(JSON.stringify(modelInferenceConfig, null, 2));
       setIsInferenceConfigValid(true);
-      setInferenceConfigModelTypeError(undefined);
+      setInferenceConfigError(undefined);
+    };
+
+    const clearFieldMap = () => {
+      setFieldMappingString('{}');
+      setIsFieldMapValid(true);
+      setFieldMapError(undefined);
     };
 
     const handleFieldMapChange = (json: string) => {
@@ -123,8 +134,21 @@ export const ProcessorConfiguration: FC<Props> = memo(
     };
 
     const updateFieldMap = () => {
-      handleAdvancedConfigUpdate({ fieldMap: JSON.parse(fieldMappingString) });
-      setEditFieldMapping(false);
+      const invalidFieldMapMessage = validateFieldMap(
+        modelInputFields.field_names ?? [],
+        JSON.parse(fieldMappingString)
+      );
+
+      if (invalidFieldMapMessage === undefined) {
+        handleAdvancedConfigUpdate({ fieldMap: JSON.parse(fieldMappingString) });
+        setHasUnsavedChanges(false);
+        setEditFieldMapping(false);
+        setFieldMapError(undefined);
+      } else {
+        setHasUnsavedChanges(true);
+        setIsFieldMapValid(false);
+        setFieldMapError(invalidFieldMapMessage);
+      }
     };
 
     return (
@@ -169,7 +193,7 @@ export const ProcessorConfiguration: FC<Props> = memo(
                         size="xs"
                         onClick={() => {
                           if (!editInferenceConfig === false) {
-                            setInferenceConfigModelTypeError(undefined);
+                            setInferenceConfigError(undefined);
                             setIsInferenceConfigValid(true);
                           }
                           setEditInferenceConfig(!editInferenceConfig);
@@ -198,10 +222,8 @@ export const ProcessorConfiguration: FC<Props> = memo(
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 }
-                error={inferenceConfigError ?? inferenceConfigModelTypeError}
-                isInvalid={
-                  inferenceConfigError !== undefined || inferenceConfigModelTypeError !== undefined
-                }
+                error={inferenceConfigError ?? inferenceConfigError}
+                isInvalid={inferenceConfigError !== undefined || inferenceConfigError !== undefined}
               >
                 {editInferenceConfig ? (
                   <CodeEditor
@@ -247,7 +269,7 @@ export const ProcessorConfiguration: FC<Props> = memo(
                         <EuiPopover
                           button={
                             <EuiLink onClick={() => setIsPopoverOpen(!isPopoverOpen)}>
-                              See them here.
+                              You can review them here.
                             </EuiLink>
                           }
                           isOpen={isPopoverOpen}
@@ -288,7 +310,13 @@ export const ProcessorConfiguration: FC<Props> = memo(
                         iconType="pencil"
                         size="xs"
                         onClick={() => {
-                          setEditFieldMapping(!editFieldMapping);
+                          const editingState = !editFieldMapping;
+                          if (editingState === false) {
+                            setFieldMapError(undefined);
+                            setIsFieldMapValid(true);
+                            setHasUnsavedChanges(false);
+                          }
+                          setEditFieldMapping(editingState);
                         }}
                       >
                         {editFieldMapping
@@ -298,14 +326,21 @@ export const ProcessorConfiguration: FC<Props> = memo(
                           : CREATE_FIELD_MAPPING_MESSAGE}
                       </EuiButtonEmpty>
                     </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      {editFieldMapping ? (
+                    {editFieldMapping ? (
+                      <EuiFlexItem grow={false}>
                         <SaveChangesButton
                           onClick={updateFieldMap}
                           disabled={isFieldMapValid === false}
                         />
-                      ) : null}
-                    </EuiFlexItem>
+                      </EuiFlexItem>
+                    ) : null}
+                    {editFieldMapping ? (
+                      <EuiFlexItem grow={false}>
+                        <EuiButtonEmpty size="xs" onClick={clearFieldMap}>
+                          {CLEAR_BUTTON_LABEL}
+                        </EuiButtonEmpty>
+                      </EuiFlexItem>
+                    ) : null}
                   </EuiFlexGroup>
                 }
                 error={fieldMapError}

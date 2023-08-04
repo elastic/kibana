@@ -31,10 +31,7 @@ import { TestPipeline } from './components/test_pipeline';
 import { ReviewAndCreatePipeline } from './components/review_and_create_pipeline';
 import { useMlApiContext } from '../../contexts/kibana';
 import { getPipelineConfig } from './get_pipeline_config';
-import {
-  validateInferencePipelineConfigurationStep,
-  validateInferencePipelineAdvancedStep,
-} from './validation';
+import { validateInferencePipelineConfigurationStep } from './validation';
 import type { MlInferenceState, InferenceModelTypes } from './types';
 import { useFetchPipelines } from './hooks/use_fetch_pipelines';
 
@@ -51,6 +48,7 @@ export const AddInferencePipelineFlyout: FC<AddInferencePipelineFlyoutProps> = (
   const initialState = useMemo(() => getInitialState(model), [model.model_id]);
   const [formState, setFormState] = useState<MlInferenceState>(initialState);
   const [step, setStep] = useState<AddInferencePipelineSteps>(ADD_INFERENCE_PIPELINE_STEPS.DETAILS);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState<boolean>(false);
 
   const {
     trainedModels: { createInferencePipeline },
@@ -82,17 +80,6 @@ export const AddInferencePipelineFlyout: FC<AddInferencePipelineFlyoutProps> = (
     return errors;
   }, [pipelineNames, formState.pipelineName]);
 
-  const { inferenceConfig: inferenceConfigError, fieldMap: fieldMapError } = useMemo(() => {
-    const errors = validateInferencePipelineAdvancedStep(
-      model.input?.field_names ?? [],
-      formState.fieldMap,
-      formState.inferenceConfig
-    );
-    return errors;
-    // Model input fields will not change unless the model is changed. Therefore, we can just check the model_id.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [formState.fieldMap, formState.inferenceConfig, model.model_id]);
-
   const sourceIndex = useMemo(
     () =>
       Array.isArray(model.metadata?.analytics_config.source.index)
@@ -121,9 +108,7 @@ export const AddInferencePipelineFlyout: FC<AddInferencePipelineFlyoutProps> = (
           step={step}
           setStep={setStep}
           isDetailsStepValid={pipelineNameError === undefined && targetFieldError === undefined}
-          isConfigureProcessorStepValid={
-            inferenceConfigError === undefined && fieldMapError === undefined
-          }
+          isConfigureProcessorStepValid={hasUnsavedChanges === false}
         />
         <EuiSpacer size="m" />
         {step === ADD_INFERENCE_PIPELINE_STEPS.DETAILS && (
@@ -142,16 +127,16 @@ export const AddInferencePipelineFlyout: FC<AddInferencePipelineFlyoutProps> = (
             fieldMap={formState.fieldMap}
             handleAdvancedConfigUpdate={handleConfigUpdate}
             inferenceConfig={formState.inferenceConfig}
-            inferenceConfigError={inferenceConfigError}
             modelInferenceConfig={model.inference_config}
-            fieldMapError={fieldMapError}
             modelInputFields={model.input ?? []}
             modelType={modelType as InferenceModelTypes}
+            setHasUnsavedChanges={setHasUnsavedChanges}
           />
         )}
         {step === ADD_INFERENCE_PIPELINE_STEPS.ON_FAILURE && (
           <OnFailureConfiguration
             ignoreFailure={formState.ignoreFailure}
+            takeActionOnFailure={formState.takeActionOnFailure}
             handleAdvancedConfigUpdate={handleConfigUpdate}
             onFailure={formState.onFailure}
           />
@@ -176,9 +161,7 @@ export const AddInferencePipelineFlyout: FC<AddInferencePipelineFlyoutProps> = (
           step={step}
           setStep={setStep}
           isDetailsStepValid={pipelineNameError === undefined && targetFieldError === undefined}
-          isConfigureProcessorStepValid={
-            inferenceConfigError === undefined && fieldMapError === undefined
-          }
+          isConfigureProcessorStepValid={hasUnsavedChanges === false}
           pipelineCreated={formState.pipelineCreated}
           creatingPipeline={formState.creatingPipeline}
         />

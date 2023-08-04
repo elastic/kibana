@@ -20,6 +20,11 @@ export const CANCEL_BUTTON_LABEL = i18n.translate(
   { defaultMessage: 'Cancel' }
 );
 
+export const CLEAR_BUTTON_LABEL = i18n.translate(
+  'xpack.ml.trainedModels.actions.clearButtonLabel',
+  { defaultMessage: 'Clear' }
+);
+
 export const CLOSE_BUTTON_LABEL = i18n.translate(
   'xpack.ml.trainedModels.actions.closeButtonLabel',
   { defaultMessage: 'Close' }

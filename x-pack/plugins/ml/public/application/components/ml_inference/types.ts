@@ -30,6 +30,7 @@ export interface MlInferenceState {
   tag?: string;
   targetField: string;
   targetFieldError?: string;
+  takeActionOnFailure: boolean;
 }
 
 export interface AddInferencePipelineFormErrors {

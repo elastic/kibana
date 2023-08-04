@@ -73,12 +73,19 @@ export const validateInferencePipelineConfigurationStep = (
   return errors;
 };
 
-export const validateInferenceConfigType = (
+export const validateInferenceConfig = (
   inferenceConfig: IngestInferenceProcessor['inference_config'],
   modelType?: InferenceModelTypes
 ) => {
   const inferenceConfigKeys = Object.keys(inferenceConfig ?? {});
   let error;
+
+  // If inference config has been changed, it cannot be an empty object
+  if (inferenceConfig && Object.keys(inferenceConfig).length === 0) {
+    error = NO_EMPTY_INFERENCE_CONFIG_OBJECT;
+    return error;
+  }
+
   // If populated, inference config must have the correct model type
   if (inferenceConfig && inferenceConfigKeys.length > 0) {
     if (modelType === inferenceConfigKeys[0]) {
@@ -88,29 +95,24 @@ export const validateInferenceConfigType = (
     }
     return error;
   }
+  return error;
 };
 
-export const validateInferencePipelineAdvancedStep = (
+export const validateFieldMap = (
   modelInputFields: string[],
-  fieldMap: IngestInferenceProcessor['field_map'],
-  inferenceConfig: IngestInferenceProcessor['inference_config']
+  fieldMap: IngestInferenceProcessor['field_map']
 ) => {
-  const errors: AddInferencePipelineFormErrors = {};
+  let error;
   const fieldMapValues: string[] = Object.values(fieldMap?.field_map ?? {});
 
   // If populated, field map must include at least some model input fields as values.
   if (fieldMap && fieldMapValues.length > 0) {
     if (fieldMapValues.some((v) => modelInputFields.includes(v))) {
-      return errors;
+      return error;
     } else {
-      errors.fieldMap = FIELD_MAP_REQUIRED_FIELDS_ERROR;
+      error = FIELD_MAP_REQUIRED_FIELDS_ERROR;
     }
   }
 
-  // If inference config has been changed, it cannot be an empty object
-  if (inferenceConfig && Object.keys(inferenceConfig).length === 0) {
-    errors.inferenceConfig = NO_EMPTY_INFERENCE_CONFIG_OBJECT;
-  }
-
-  return errors;
+  return error;
 };
