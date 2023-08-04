@@ -10,10 +10,10 @@
     "@kbn/test-jest-helpers",
     "@kbn/saved-objects-tagging-oss-plugin",
     "@kbn/i18n",
-    "@kbn/core-saved-objects-server",
     "@kbn/config-schema",
     "@kbn/saved-objects-settings",
     "@kbn/content-management-plugin",
+    "@kbn/content-management-utils",
   ],
   "exclude": [
     "target/**/*",
