@@ -18,7 +18,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaOverview = getService('monitoringKibanaOverview');
   const clusterOverview = getService('monitoringClusterOverview');
 
-  describe('Kibana Stack Monitoring a11y tests', () => {
+  describe.only('Kibana Stack Monitoring a11y tests', () => {
     before(async () => {
       await PageObjects.common.navigateToApp('monitoring');
       await a11y.testAppSnapshot();
@@ -29,7 +29,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await a11y.testAppSnapshot();
     });
 
-    it.only('a11y tests for self monitoring home page', async function () {
+    it('a11y tests for self monitoring home page', async function () {
       await noData.enableMonitoring();
       await a11y.testAppSnapshot();
       await retry.waitForWithTimeout('alert button to be visible', 30000, async () => {
