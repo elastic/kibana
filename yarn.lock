@@ -18182,7 +18182,7 @@ inquirer@^8.2.5:
     through "^2.3.6"
     wrap-ansi "^7.0.0"
 
-install-artifact-from-github@^1.3.1:
+install-artifact-from-github@^1.3.3:
   version "1.3.3"
   resolved "https://registry.yarnpkg.com/install-artifact-from-github/-/install-artifact-from-github-1.3.3.tgz#57d89bacfa0f47d7307fe41b6247cda9f9a8079c"
   integrity sha512-x79SL0d8WOi1ZjXSTUqqs0GPQZ92YArJAN9O46wgU9wdH2U9ecyyhB9YGDbPe2OLV4ptmt6AZYRQZ2GydQZosQ==
@@ -21879,7 +21879,7 @@ mute-stream@0.0.8:
   resolved "https://registry.yarnpkg.com/mute-stream/-/mute-stream-0.0.8.tgz#1630c42b2251ff81e2a283de96a5497ea92e5e0d"
   integrity sha512-nnbWWOkoWyUsTjKrhgD0dcz22mdkSnpYqbEjIm2nhwhuxlSkpywJmBo8h0ZqJdkp73mb90SssHkN4rsRaBAfAA==
 
-nan@^2.16.0, nan@^2.17.0:
+nan@^2.17.0:
   version "2.17.0"
   resolved "https://registry.yarnpkg.com/nan/-/nan-2.17.0.tgz#c0150a2368a182f033e9aa5195ec76ea41a199cb"
   integrity sha512-2ZTgtl0nJsO0KQCjEpxcIr5D+Yv90plTitZt9JBfQvVJDS5seMl3FOvsh3+9CoYWXf/1l5OaZzzF6nDm4cagaQ==
@@ -22129,7 +22129,7 @@ node-gyp@^8.4.1:
     tar "^6.1.2"
     which "^2.0.2"
 
-node-gyp@^9.0.0:
+node-gyp@^9.4.0:
   version "9.4.0"
   resolved "https://registry.yarnpkg.com/node-gyp/-/node-gyp-9.4.0.tgz#2a7a91c7cba4eccfd95e949369f27c9ba704f369"
   integrity sha512-dMXsYP6gc9rRbejLXmTbVRYjAHw7ppswsKyMxuxJxxOHzluIO1rGp9TOQgjFJ+2MCqcOcQTOPB/8Xwhr+7s4Eg==
@@ -24410,14 +24410,14 @@ re-resizable@^6.9.9:
   resolved "https://registry.yarnpkg.com/re-resizable/-/re-resizable-6.9.9.tgz#99e8b31c67a62115dc9c5394b7e55892265be216"
   integrity sha512-l+MBlKZffv/SicxDySKEEh42hR6m5bAHfNu3Tvxks2c4Ah+ldnWjfnVRwxo/nxF27SsUsxDS0raAzFuJNKABXA==
 
-re2@1.17.7:
-  version "1.17.7"
-  resolved "https://registry.yarnpkg.com/re2/-/re2-1.17.7.tgz#e14cab85a177a5534c7215c322d1b043c55aa1e9"
-  integrity sha512-X8GSuiBoVWwcjuppqSjsIkRxNUKDdjhkO9SBekQbZ2ksqWUReCy7DQPWOVpoTnpdtdz5PIpTTxTFzvJv5UMfjA==
+re2@1.20.1:
+  version "1.20.1"
+  resolved "https://registry.yarnpkg.com/re2/-/re2-1.20.1.tgz#27450f6de6299635f50305a670cc15ac30687f85"
+  integrity sha512-JbzIoI5adNCqGUK8wHG1dMSyggvPyA4kx2hewt1lma5sP7/iWCfM15XKbCZlX2yvu5k80jSKAOQqJF7KC+2n8Q==
   dependencies:
-    install-artifact-from-github "^1.3.1"
-    nan "^2.16.0"
-    node-gyp "^9.0.0"
+    install-artifact-from-github "^1.3.3"
+    nan "^2.17.0"
+    node-gyp "^9.4.0"
 
 react-ace@^7.0.5:
   version "7.0.5"
