@@ -254,6 +254,12 @@ export const RISK_SCORE_CREATE_STORED_SCRIPT = `${INTERNAL_RISK_SCORE_URL}/store
 export const RISK_SCORE_DELETE_STORED_SCRIPT = `${INTERNAL_RISK_SCORE_URL}/stored_scripts/delete`;
 export const RISK_SCORE_PREVIEW_URL = `${INTERNAL_RISK_SCORE_URL}/preview`;
 
+export const RISK_ENGINE_URL = `${INTERNAL_RISK_SCORE_URL}/engine`;
+export const RISK_ENGINE_STATUS_URL = `${RISK_ENGINE_URL}/status`;
+export const RISK_ENGINE_INIT_URL = `${RISK_ENGINE_URL}/init`;
+export const RISK_ENGINE_ENABLE_URL = `${RISK_ENGINE_URL}/enable`;
+export const RISK_ENGINE_DISABLE_URL = `${RISK_ENGINE_URL}/disable`;
+
 /**
  * Public Risk Score routes
  */
