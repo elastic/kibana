@@ -147,6 +147,10 @@ export class ApmConfiguration {
       config.secretToken = process.env.ELASTIC_APM_SECRET_TOKEN;
     }
 
+    if (process.env.ELASTIC_APM_API_KEY) {
+      config.apiKey = process.env.ELASTIC_APM_API_KEY;
+    }
+
     if (process.env.ELASTIC_APM_GLOBAL_LABELS) {
       config.globalLabels = Object.fromEntries(
         process.env.ELASTIC_APM_GLOBAL_LABELS.split(',').map((p) => {
