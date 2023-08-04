@@ -370,7 +370,7 @@ export class SyntheticsMonitorClient {
       heartbeatConfigs.push(
         formatHeartbeatRequest(
           {
-            monitor: normalizeSecrets(monitor).attributes,
+            monitor: normalizedMonitor,
             configId: monitor.id,
           },
           paramsString
