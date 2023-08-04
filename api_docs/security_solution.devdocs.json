@@ -442,6 +442,21 @@
           },
           {
             "parentPluginId": "securitySolution",
+            "id": "def-public.UpsellingService.messages$",
+            "type": "Object",
+            "tags": [],
+            "label": "messages$",
+            "description": [],
+            "signature": [
+              "Observable",
+              "<Map<\"investigation_guide\", string>>"
+            ],
+            "path": "x-pack/plugins/security_solution/public/common/lib/upsellings/upselling_service.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "securitySolution",
             "id": "def-public.UpsellingService.Unnamed",
             "type": "Function",
             "tags": [],
@@ -527,6 +542,38 @@
                     "text": "SecurityPageName"
                   },
                   ", React.ComponentType<{}>>>"
+                ],
+                "path": "x-pack/plugins/security_solution/public/common/lib/upsellings/upselling_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-public.UpsellingService.registerMessages",
+            "type": "Function",
+            "tags": [],
+            "label": "registerMessages",
+            "description": [],
+            "signature": [
+              "(messages: Partial<Record<\"investigation_guide\", string>>) => void"
+            ],
+            "path": "x-pack/plugins/security_solution/public/common/lib/upsellings/upselling_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "securitySolution",
+                "id": "def-public.UpsellingService.registerMessages.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "messages",
+                "description": [],
+                "signature": [
+                  "Partial<Record<\"investigation_guide\", string>>"
                 ],
                 "path": "x-pack/plugins/security_solution/public/common/lib/upsellings/upselling_service.ts",
                 "deprecated": false,
