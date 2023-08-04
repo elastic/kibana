@@ -6,15 +6,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { schema, TypeOf } from '@kbn/config-schema';
-import {
-  CoreQueryParamsSchemaProperties,
-  validateCoreQueryBody,
-} from '@kbn/triggers-actions-ui-plugin/server';
+import { validateCoreQueryBody } from '@kbn/triggers-actions-ui-plugin/server';
 import { z } from '@kbn/zod';
 import { ComparatorFnNames } from '../../../common';
 import { Comparator } from '../../../common/comparator_types';
-import { getComparatorSchemaType } from '../lib/comparator';
 import { ParamsSchemaZod as ParamsSchema } from './rule_type_params_zod';
 // rule type parameters
 
