@@ -19,7 +19,6 @@ import {
   EuiFlexItem,
   EuiHorizontalRule,
   EuiIcon,
-  EuiLink,
   EuiPanel,
   EuiPopover,
   EuiSpacer,
@@ -46,7 +45,6 @@ import { HttpSetup } from '@kbn/core-http-browser';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { docLinks } from '../../../../shared/doc_links';
 import { generateEncodedPath } from '../../../../shared/encode_path_params';
 import { HttpLogic } from '../../../../shared/http';
 import { KibanaLogic } from '../../../../shared/kibana';
@@ -448,12 +446,6 @@ export const SearchApplicationDocsExplorer: React.FC = () => {
               <EuiSpacer size="m" />
               <Sorting sortableFields={sortableFields} />
               <EuiSpacer size="m" />
-              <EuiLink href={docLinks.searchTemplates} target="_blank">
-                <FormattedMessage
-                  id="xpack.enterpriseSearch.searchApplications.searchApplication.docsExplorer.improveResultsLink"
-                  defaultMessage="Improve these results"
-                />
-              </EuiLink>
             </EuiFlexItem>
             <EuiFlexItem>
               <PagingInfo view={PagingInfoView} />
