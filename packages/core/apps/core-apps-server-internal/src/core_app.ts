@@ -22,6 +22,8 @@ import type {
 import type { UiPlugins } from '@kbn/core-plugins-base-server-internal';
 import type { HttpResources, HttpResourcesServiceToolkit } from '@kbn/core-http-resources-server';
 import type { InternalCorePreboot, InternalCoreSetup } from '@kbn/core-lifecycle-server-internal';
+import { firstValueFrom, map, type Observable } from 'rxjs';
+import { CoreAppConfig, type CoreAppConfigType, CoreAppPath } from './core_app_config';
 import { registerBundleRoutes } from './bundle_routes';
 import type { InternalCoreAppsServiceRequestHandlerContext } from './internal_types';
 
@@ -42,11 +44,15 @@ export class CoreAppsService {
   private readonly logger: Logger;
   private readonly env: Env;
   private readonly configService: IConfigService;
+  private readonly config$: Observable<CoreAppConfig>;
 
   constructor(core: CoreContext) {
     this.logger = core.logger.get('core-app');
     this.env = core.env;
     this.configService = core.configService;
+    this.config$ = this.configService
+      .atPath<CoreAppConfigType>(CoreAppPath)
+      .pipe(map((rawCfg) => new CoreAppConfig(rawCfg)));
   }
 
   preboot(corePreboot: InternalCorePreboot, uiPlugins: UiPlugins) {
@@ -59,9 +65,10 @@ export class CoreAppsService {
     }
   }
 
-  setup(coreSetup: InternalCoreSetup, uiPlugins: UiPlugins) {
+  async setup(coreSetup: InternalCoreSetup, uiPlugins: UiPlugins) {
     this.logger.debug('Setting up core app.');
-    this.registerDefaultRoutes(coreSetup, uiPlugins);
+    const config = await firstValueFrom(this.config$);
+    this.registerDefaultRoutes(coreSetup, uiPlugins, config);
     this.registerStaticDirs(coreSetup);
   }
 
@@ -90,7 +97,11 @@ export class CoreAppsService {
     });
   }
 
-  private registerDefaultRoutes(coreSetup: InternalCoreSetup, uiPlugins: UiPlugins) {
+  private registerDefaultRoutes(
+    coreSetup: InternalCoreSetup,
+    uiPlugins: UiPlugins,
+    config: CoreAppConfig
+  ) {
     const httpSetup = coreSetup.http;
     const router = httpSetup.createRouter<InternalCoreAppsServiceRequestHandlerContext>('');
     const resources = coreSetup.httpResources.createRegistrar(router);
@@ -150,6 +161,17 @@ export class CoreAppsService {
       }
     );
 
+    if (config.allowDynamicConfigOverrides) {
+      this.registerInternalCoreSettingsRoute(router);
+    }
+  }
+
+  /**
+   * Registers the HTTP API that allows updating in-memory the settings that opted-in to be dynamically updatable.
+   * @param router {@link IRouter}
+   * @private
+   */
+  private registerInternalCoreSettingsRoute(router: IRouter) {
     router.versioned
       .put({
         path: '/internal/core/_settings',

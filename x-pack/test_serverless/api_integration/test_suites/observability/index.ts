@@ -11,6 +11,7 @@ export default function ({ loadTestFile }: FtrProviderContext) {
   describe('serverless observability API', function () {
     loadTestFile(require.resolve('./fleet'));
     loadTestFile(require.resolve('./snapshot_telemetry'));
+    loadTestFile(require.resolve('./telemetry_config'));
     loadTestFile(require.resolve('./apm_api_integration/feature_flags.ts'));
     loadTestFile(require.resolve('./threshold_rule/avg_pct_fired'));
     loadTestFile(require.resolve('./threshold_rule/avg_pct_no_data'));

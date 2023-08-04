@@ -6,11 +6,15 @@
  * Side Public License, v 1.
  */
 
-export { CoreAppsService } from './core_app';
-export { config, type CoreAppConfigType } from './core_app_config';
-export type {
-  InternalCoreAppsServiceRequestHandlerContext,
-  InternalCoreAppsServiceRouter,
-} from './internal_types';
-// only used by integration tests
-export { registerRouteForBundle, FileHashCache } from './bundle_routes';
+import { config, CoreAppConfig } from './core_app_config';
+
+describe('CoreApp Config', () => {
+  test('set correct defaults', () => {
+    const configValue = new CoreAppConfig(config.schema.validate({}));
+    expect(configValue).toMatchInlineSnapshot(`
+      CoreAppConfig {
+        "allowDynamicConfigOverrides": false,
+      }
+    `);
+  });
+});

@@ -77,3 +77,6 @@ console.autocompleteDefinitions.endpointsAvailability: serverless
 
 # Allow authentication via the Elasticsearch JWT realm with the `shared_secret` client authentication type.
 elasticsearch.requestHeadersWhitelist: ["authorization", "es-client-authentication"]
+
+# Enable dynamic config to be updated via the internal HTTP requests
+coreApp.allowDynamicConfigOverrides: true

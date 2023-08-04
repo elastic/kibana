@@ -11,5 +11,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
   describe('serverless security API', function () {
     loadTestFile(require.resolve('./fleet'));
     loadTestFile(require.resolve('./snapshot_telemetry'));
+    loadTestFile(require.resolve('./telemetry_config'));
   });
 }

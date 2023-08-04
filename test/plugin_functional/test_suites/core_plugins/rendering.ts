@@ -159,7 +159,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'telemetry.labels.testJobId (string)',
         'telemetry.labels.ciBuildName (string)',
         'telemetry.labels.performancePhase (string)',
-        'telemetry.labels.serverless (any)',
+        'telemetry.labels.serverless (any)', // It's the project type (string), claims any because schema.conditional. Can only be set on Serverless.
         'telemetry.hidePrivacyStatement (boolean)',
         'telemetry.optIn (boolean)',
         'telemetry.sendUsageFrom (alternatives)',
@@ -341,6 +341,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'telemetry.labels.testJobId (string)',
         'telemetry.labels.ciBuildName (string)',
         'telemetry.labels.performancePhase (string)',
+        'telemetry.labels.serverless (any)', // It's the project type (string), claims any because schema.conditional. Can only be set on Serverless.
         'telemetry.hidePrivacyStatement (boolean)',
         'telemetry.optIn (boolean)',
         'telemetry.sendUsageFrom (alternatives)',

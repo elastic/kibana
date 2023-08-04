@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 
-export { CoreAppsService } from './src';
+export { CoreAppsService, config } from './src';
 export type {
+  CoreAppConfigType,
   InternalCoreAppsServiceRequestHandlerContext,
   InternalCoreAppsServiceRouter,
 } from './src';

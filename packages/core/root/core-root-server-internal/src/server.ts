@@ -350,7 +350,7 @@ export class Server {
     this.#pluginsInitialized = pluginsSetup.initialized;
 
     this.registerCoreContext(coreSetup);
-    this.coreApp.setup(coreSetup, uiPlugins);
+    await this.coreApp.setup(coreSetup, uiPlugins);
 
     setupTransaction?.end();
     this.uptimePerStep.setup = { start: setupStartUptime, end: performance.now() };
