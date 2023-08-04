@@ -5,10 +5,19 @@
  * 2.0.
  */
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { DiscoverStart } from '@kbn/discover-plugin/public';
+import { DiscoverSetup, DiscoverStart } from '@kbn/discover-plugin/public';
+import { SharePluginSetup } from '@kbn/share-plugin/public';
+import { DiscoverLogExplorerLocators } from '../common/locators';
 
-export type DiscoverLogExplorerPluginSetup = void;
+export interface DiscoverLogExplorerPluginSetup {
+  locators: DiscoverLogExplorerLocators;
+}
 export type DiscoverLogExplorerPluginStart = void;
+
+export interface DiscoverLogExplorerSetupDeps {
+  share: SharePluginSetup;
+  discover: DiscoverSetup;
+}
 
 export interface DiscoverLogExplorerStartDeps {
   data: DataPublicPluginStart;

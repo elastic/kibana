@@ -9,6 +9,8 @@ import { PluginInitializerContext } from '@kbn/core/public';
 import { DiscoverLogExplorerConfig } from '../common/plugin_config';
 import { DiscoverLogExplorerPlugin } from './plugin';
 
+export type { DiscoverLogExplorerPluginSetup } from './types';
+
 export function plugin(context: PluginInitializerContext<DiscoverLogExplorerConfig>) {
   return new DiscoverLogExplorerPlugin(context);
 }
