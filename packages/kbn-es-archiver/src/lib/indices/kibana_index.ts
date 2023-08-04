@@ -15,7 +15,11 @@ import { KbnClient } from '@kbn/test';
 import { Stats } from '../stats';
 import { deleteIndex } from './delete_index';
 import { ES_CLIENT_HEADERS } from '../../client_headers';
-import { ALL_SAVED_OBJECT_INDICES, MAIN_SAVED_OBJECT_INDEX, TASK_MANAGER_SAVED_OBJECT_INDEX } from './constants';
+import {
+  ALL_SAVED_OBJECT_INDICES,
+  MAIN_SAVED_OBJECT_INDEX,
+  TASK_MANAGER_SAVED_OBJECT_INDEX
+} from './constants';
 
 /**
  * Deletes all indices that start with `.kibana`, or if onlyTaskManager==true, all indices that start with `.kibana_task_manager`
@@ -31,7 +35,9 @@ export async function deleteSavedObjectIndices({
   onlyTaskManager?: boolean;
   log: ToolingLog;
 }) {
-  const indexPattern = onlyTaskManager ? `${TASK_MANAGER_SAVED_OBJECT_INDEX}*` : `${MAIN_SAVED_OBJECT_INDEX}*`;
+  const indexPattern = onlyTaskManager
+    ? `${TASK_MANAGER_SAVED_OBJECT_INDEX}*`
+    : `${MAIN_SAVED_OBJECT_INDEX}*`;
   const indexNames = await fetchSavedObjectIndices(client, indexPattern);
   if (!indexNames.length) {
     return;
