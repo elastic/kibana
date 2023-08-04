@@ -22,7 +22,7 @@ import React, { useCallback } from 'react';
 import { Body } from './data_quality_panel/body';
 import { DataQualityProvider } from './data_quality_panel/data_quality_context';
 import { EMPTY_STAT } from './helpers';
-import { DataQualityCheckedParams } from './types';
+import { ReportDataQualityCheckAllClicked, ReportDataQualityIndexChecked } from './types';
 
 interface Props {
   addSuccessToast: (toast: { title: string }) => void;
@@ -54,7 +54,8 @@ interface Props {
     headerContent?: React.ReactNode;
   }) => void;
   patterns: string[];
-  reportDataQualityChecked: (params: DataQualityCheckedParams) => void;
+  reportDataQualityIndexChecked: ReportDataQualityIndexChecked;
+  reportDataQualityCheckAllClicked: ReportDataQualityCheckAllClicked;
   setLastChecked: (lastChecked: string) => void;
   theme?: PartialTheme;
   baseTheme: Theme;
@@ -74,7 +75,8 @@ const DataQualityPanelComponent: React.FC<Props> = ({
   lastChecked,
   openCreateCaseFlyout,
   patterns,
-  reportDataQualityChecked,
+  reportDataQualityIndexChecked,
+  reportDataQualityCheckAllClicked,
   setLastChecked,
   theme,
 }) => {
@@ -103,7 +105,8 @@ const DataQualityPanelComponent: React.FC<Props> = ({
         lastChecked={lastChecked}
         openCreateCaseFlyout={openCreateCaseFlyout}
         patterns={patterns}
-        reportDataQualityChecked={reportDataQualityChecked}
+        reportDataQualityCheckAllClicked={reportDataQualityCheckAllClicked}
+        reportDataQualityIndexChecked={reportDataQualityIndexChecked}
         setLastChecked={setLastChecked}
         theme={theme}
         baseTheme={baseTheme}

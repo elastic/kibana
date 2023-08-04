@@ -19,7 +19,7 @@ import { EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import React from 'react';
 
 import { Pattern } from '../../../pattern';
-import { PatternRollup, SelectedIndex, ReportDataQualityChecked } from '../../../../types';
+import { PatternRollup, SelectedIndex, ReportDataQualityIndexChecked } from '../../../../types';
 
 export interface Props {
   addSuccessToast: (toast: { title: string }) => void;
@@ -51,7 +51,7 @@ export interface Props {
   patternIndexNames: Record<string, string[]>;
   patternRollups: Record<string, PatternRollup>;
   patterns: string[];
-  reportDataQualityChecked: ReportDataQualityChecked;
+  reportDataQualityIndexChecked: ReportDataQualityIndexChecked;
   selectedIndex: SelectedIndex | null;
   setSelectedIndex: (selectedIndex: SelectedIndex | null) => void;
   theme?: PartialTheme;
@@ -78,7 +78,7 @@ const IndicesDetailsComponent: React.FC<Props> = ({
   patternIndexNames,
   patternRollups,
   patterns,
-  reportDataQualityChecked,
+  reportDataQualityIndexChecked,
   selectedIndex,
   setSelectedIndex,
   theme,
@@ -101,7 +101,7 @@ const IndicesDetailsComponent: React.FC<Props> = ({
           openCreateCaseFlyout={openCreateCaseFlyout}
           pattern={pattern}
           patternRollup={patternRollups[pattern]}
-          reportDataQualityChecked={reportDataQualityChecked}
+          reportDataQualityIndexChecked={reportDataQualityIndexChecked}
           selectedIndex={selectedIndex}
           setSelectedIndex={setSelectedIndex}
           theme={theme}

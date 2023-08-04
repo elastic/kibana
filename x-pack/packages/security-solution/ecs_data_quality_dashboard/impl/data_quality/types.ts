@@ -139,6 +139,8 @@ export interface IndexToCheck {
   indexName: string;
 }
 
+export type OnCheckAllCompleted = (params: { requestTime: number }) => void;
+
 export type OnCheckCompleted = ({
   error,
   formatBytes,
@@ -147,6 +149,7 @@ export type OnCheckCompleted = ({
   partitionedFieldMetadata,
   pattern,
   version,
+  requestTime,
 }: {
   error: string | null;
   formatBytes: (value: number | undefined) => string;
@@ -155,6 +158,7 @@ export type OnCheckCompleted = ({
   partitionedFieldMetadata: PartitionedFieldMetadata | null;
   pattern: string;
   version: string;
+  requestTime?: number;
 }) => void;
 
 export interface ErrorSummary {
@@ -175,7 +179,8 @@ export interface SelectedIndex {
   pattern: string;
 }
 
-export interface DataQualityCheckedParams {
+export interface DataQualityIndexCheckedParams {
+  isCheckAll?: boolean;
   error?: string;
   indexName: string;
   incompatibleFields?: Array<{ type?: string; field?: string; value?: string }>;
@@ -185,6 +190,18 @@ export interface DataQualityCheckedParams {
   pattern: string;
   sizeInBytes?: number;
   timeConsumedMs?: number;
+  version: string;
 }
 
-export type ReportDataQualityChecked = (params: DataQualityCheckedParams) => void;
+export interface DataQualityCheckAllClickedParams {
+  numberOfDocuments?: number;
+  numberOfIncompatibleFields?: number;
+  numberOfIndices?: number;
+  numberOfIndicesChecked?: number;
+  sizeInBytes?: number;
+  timeConsumedMs?: number;
+  version: string;
+}
+
+export type ReportDataQualityIndexChecked = (params: DataQualityIndexCheckedParams) => void;
+export type ReportDataQualityCheckAllClicked = (params: DataQualityCheckAllClickedParams) => void;

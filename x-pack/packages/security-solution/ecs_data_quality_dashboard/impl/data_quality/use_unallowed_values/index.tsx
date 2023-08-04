@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { useDataQualityContext } from '../data_quality_panel/data_quality_context';
 import { fetchUnallowedValues, getUnallowedValues } from './helpers';
@@ -33,7 +33,6 @@ export const useUnallowedValues = ({
   const { httpFetch } = useDataQualityContext();
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
-  const startTime = useRef<number>(Date.now());
   useEffect(() => {
     if (requestItems.length === 0) {
       return;
@@ -42,6 +41,8 @@ export const useUnallowedValues = ({
     const abortController = new AbortController();
 
     async function fetchData() {
+      const startTime = Date.now();
+
       try {
         const searchResults = await fetchUnallowedValues({
           abortController,
@@ -61,13 +62,12 @@ export const useUnallowedValues = ({
       } catch (e) {
         if (!abortController.signal.aborted) {
           setError(e.message);
-          onLoad?.({ requestTime: Date.now() - startTime.current, error: e.message });
+          onLoad?.({ requestTime: Date.now() - startTime, error: e.message });
         }
       } finally {
         if (!abortController.signal.aborted) {
           setLoading(false);
-
-          onLoad?.({ requestTime: Date.now() - startTime.current });
+          onLoad?.({ requestTime: Date.now() - startTime });
         }
       }
     }

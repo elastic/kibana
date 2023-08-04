@@ -6,10 +6,13 @@
  */
 
 import { TelemetryEventTypes } from '../../constants';
-import type { TelemetryEvent } from '../../types';
+import type {
+  DataQualityTelemetryCheckAllClickedEvent,
+  DataQualityTelemetryIndexCheckedEvent,
+} from '../../types';
 
-export const dataQualityCheckedEvent: TelemetryEvent = {
-  eventType: TelemetryEventTypes.DataQualityChecked,
+export const dataQualityIndexCheckedEvent: DataQualityTelemetryIndexCheckedEvent = {
+  eventType: TelemetryEventTypes.DataQualityIndexChecked,
   schema: {
     pattern: {
       type: 'keyword',
@@ -28,7 +31,7 @@ export const dataQualityCheckedEvent: TelemetryEvent = {
     numberOfIndices: {
       type: 'integer',
       _meta: {
-        description: 'Number of indices checked',
+        description: 'Number of indices',
         optional: true,
       },
     },
@@ -36,6 +39,13 @@ export const dataQualityCheckedEvent: TelemetryEvent = {
       type: 'integer',
       _meta: {
         description: 'Time consumed in milliseconds',
+        optional: true,
+      },
+    },
+    version: {
+      type: 'keyword',
+      _meta: {
+        description: 'ECS version',
         optional: true,
       },
     },
@@ -53,36 +63,66 @@ export const dataQualityCheckedEvent: TelemetryEvent = {
         optional: true,
       },
     },
-    incompatibleFields: {
-      type: 'array',
+    numberOfDocuments: {
+      type: 'integer',
       _meta: {
-        description: 'List of incompatible fields',
+        description: 'Number of documents',
         optional: true,
       },
-      items: {
-        properties: {
-          type: {
-            type: 'keyword',
-            _meta: {
-              description: 'Field type',
-              optional: true,
-            },
-          },
-          field: {
-            type: 'keyword',
-            _meta: {
-              description: 'Field name',
-              optional: true,
-            },
-          },
-          value: {
-            type: 'keyword',
-            _meta: {
-              description: 'Field value',
-              optional: true,
-            },
-          },
-        },
+    },
+    sizeInBytes: {
+      type: 'integer',
+      _meta: {
+        description: 'Size in bytes',
+        optional: true,
+      },
+    },
+    isCheckAll: {
+      type: 'boolean',
+      _meta: {
+        description: 'Is triggered by check all button',
+        optional: true,
+      },
+    },
+  },
+};
+
+export const dataQualityCheckAllClickedEvent: DataQualityTelemetryCheckAllClickedEvent = {
+  eventType: TelemetryEventTypes.DataQualityCheckAllClicked,
+  schema: {
+    numberOfIndices: {
+      type: 'integer',
+      _meta: {
+        description: 'Number of indices',
+        optional: true,
+      },
+    },
+    numberOfIndicesChecked: {
+      type: 'integer',
+      _meta: {
+        description: 'Number of indices checked',
+        optional: true,
+      },
+    },
+    timeConsumedMs: {
+      type: 'integer',
+      _meta: {
+        description: 'Time consumed in milliseconds',
+        optional: true,
+      },
+    },
+    version: {
+      type: 'keyword',
+      _meta: {
+        description: 'ECS version',
+        optional: true,
+      },
+    },
+    numberOfIncompatibleFields: {
+      type: 'integer',
+      _meta: {
+        description: 'Number of incompatible fields',
+        optional: true,
       },
     },
     numberOfDocuments: {

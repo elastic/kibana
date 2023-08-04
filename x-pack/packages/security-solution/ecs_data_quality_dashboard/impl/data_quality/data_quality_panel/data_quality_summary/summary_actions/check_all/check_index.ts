@@ -45,6 +45,7 @@ export async function checkIndex({
   version: string;
 }) {
   try {
+    const startTime = Date.now();
     const indexes = await fetchMappings({
       abortController,
       httpFetch,
@@ -90,6 +91,7 @@ export async function checkIndex({
         partitionedFieldMetadata,
         pattern,
         version,
+        requestTime: Date.now() - startTime,
       });
     }
   } catch (error) {

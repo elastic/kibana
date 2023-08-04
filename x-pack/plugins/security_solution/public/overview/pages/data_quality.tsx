@@ -49,7 +49,10 @@ import {
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { useSignalIndex } from '../../detections/containers/detection_engine/alerts/use_signal_index';
 import * as i18n from './translations';
-import type { DataQualityCheckedParams } from '../../common/lib/telemetry';
+import type {
+  DataQualityCheckAllClickedParams,
+  DataQualityIndexCheckedParams,
+} from '../../common/lib/telemetry';
 
 const LOCAL_STORAGE_KEY = 'dataQualityDashboardLastChecked';
 
@@ -208,9 +211,16 @@ const DataQualityComponent: React.FC = () => {
     [createCaseFlyout]
   );
 
-  const reportDataQualityChecked = useCallback(
-    (params: DataQualityCheckedParams) => {
-      telemetry.reportDataQualityChecked(params);
+  const reportDataQualityIndexChecked = useCallback(
+    (params: DataQualityIndexCheckedParams) => {
+      telemetry.reportDataQualityIndexChecked(params);
+    },
+    [telemetry]
+  );
+
+  const reportDataQualityCheckAllClicked = useCallback(
+    (params: DataQualityCheckAllClickedParams) => {
+      telemetry.reportDataQualityCheckAllClicked(params);
     },
     [telemetry]
   );
@@ -246,7 +256,8 @@ const DataQualityComponent: React.FC = () => {
             defaultBytesFormat={defaultBytesFormat}
             defaultNumberFormat={defaultNumberFormat}
             getGroupByFieldsOnClick={getGroupByFieldsOnClick}
-            reportDataQualityChecked={reportDataQualityChecked}
+            reportDataQualityCheckAllClicked={reportDataQualityCheckAllClicked}
+            reportDataQualityIndexChecked={reportDataQualityIndexChecked}
             httpFetch={httpFetch}
             ilmPhases={ilmPhases}
             isAssistantEnabled={hasAssistantPrivilege}

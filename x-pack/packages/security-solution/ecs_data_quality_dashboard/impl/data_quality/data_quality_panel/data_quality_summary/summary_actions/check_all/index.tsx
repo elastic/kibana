@@ -15,7 +15,12 @@ import { checkIndex } from './check_index';
 import { useDataQualityContext } from '../../../data_quality_context';
 import { getAllIndicesToCheck } from './helpers';
 import * as i18n from '../../../../translations';
-import type { EcsMetadata, IndexToCheck, OnCheckCompleted } from '../../../../types';
+import type {
+  EcsMetadata,
+  IndexToCheck,
+  OnCheckCompleted,
+  OnCheckAllCompleted,
+} from '../../../../types';
 
 const CheckAllButton = styled(EuiButton)`
   width: 112px;
@@ -37,6 +42,7 @@ interface Props {
   formatNumber: (value: number | undefined) => string;
   ilmPhases: string[];
   incrementCheckAllIndiciesChecked: () => void;
+  onCheckAllCompleted: OnCheckAllCompleted;
   onCheckCompleted: OnCheckCompleted;
   patternIndexNames: Record<string, string[]>;
   patterns: string[];
@@ -55,6 +61,7 @@ const CheckAllComponent: React.FC<Props> = ({
   onCheckCompleted,
   patternIndexNames,
   patterns,
+  onCheckAllCompleted,
   setCheckAllIndiciesChecked,
   setCheckAllTotalIndiciesToCheck,
   setIndexToCheck,
@@ -78,6 +85,7 @@ const CheckAllComponent: React.FC<Props> = ({
   const onClick = useCallback(() => {
     async function beginCheck() {
       const allIndicesToCheck = getAllIndicesToCheck(patternIndexNames);
+      const startTime = Date.now();
       setCheckAllIndiciesChecked(0);
       setCheckAllTotalIndiciesToCheck(allIndicesToCheck.length);
 
@@ -110,6 +118,10 @@ const CheckAllComponent: React.FC<Props> = ({
       if (!abortController.current.signal.aborted) {
         setIndexToCheck(null);
         setIsRunning(false);
+
+        onCheckAllCompleted({
+          requestTime: Date.now() - startTime,
+        });
       }
     }
 
@@ -127,6 +139,7 @@ const CheckAllComponent: React.FC<Props> = ({
     httpFetch,
     incrementCheckAllIndiciesChecked,
     isRunning,
+    onCheckAllCompleted,
     onCheckCompleted,
     patternIndexNames,
     setCheckAllIndiciesChecked,

@@ -17,8 +17,9 @@ import type {
   ReportAlertsTakeActionParams,
 } from './events/alerts_grouping/types';
 import type {
-  DataQualityCheckedParams,
-  DataQualityTelemetryEvent,
+  DataQualityCheckAllClickedParams,
+  DataQualityIndexCheckedParams,
+  DataQualityTelemetryEvents,
 } from './events/data_quality/types';
 import type {
   EntityAnalyticsTelemetryEvent,
@@ -80,13 +81,14 @@ export interface TelemetryClientStart {
   reportCellActionClicked(params: ReportCellActionClickedParams): void;
 
   reportAnomaliesCountClicked(params: ReportAnomaliesCountClickedParams): void;
-  reportDataQualityChecked(params: DataQualityCheckedParams): void;
+  reportDataQualityIndexChecked(params: DataQualityIndexCheckedParams): void;
+  reportDataQualityCheckAllClicked(params: DataQualityCheckAllClickedParams): void;
 }
 
 export type TelemetryEvent =
   | AlertsGroupingTelemetryEvent
   | EntityAnalyticsTelemetryEvent
-  | DataQualityTelemetryEvent
+  | DataQualityTelemetryEvents
   | {
       eventType: TelemetryEventTypes.MLJobUpdate;
       schema: RootSchema<ReportMLJobUpdateParams>;

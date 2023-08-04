@@ -6,11 +6,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-
-interface Props {
-  ilmPhases: string[];
-  patterns: string[];
-}
+import { EcsVersion } from '@kbn/ecs';
 
 import {
   getTotalDocsCount,
@@ -22,10 +18,25 @@ import {
   updateResultOnCheckCompleted,
 } from './helpers';
 
-import type { OnCheckCompleted, PartitionedFieldMetadata, PatternRollup } from '../types';
+import type {
+  OnCheckAllCompleted,
+  OnCheckCompleted,
+  PatternRollup,
+  ReportDataQualityCheckAllClicked,
+  ReportDataQualityIndexChecked,
+} from '../types';
+import { getDocsCount, getSizeInBytes } from '../helpers';
+import { getIndexIncompatible } from '../data_quality_panel/pattern/helpers';
 
+interface Props {
+  ilmPhases: string[];
+  patterns: string[];
+  reportDataQualityCheckAllClicked: ReportDataQualityCheckAllClicked;
+  reportDataQualityIndexChecked: ReportDataQualityIndexChecked;
+}
 interface UseResultsRollup {
   onCheckCompleted: OnCheckCompleted;
+  onCheckAllCompleted: OnCheckAllCompleted;
   patternIndexNames: Record<string, string[]>;
   patternRollups: Record<string, PatternRollup>;
   totalDocsCount: number | undefined;
@@ -43,7 +54,12 @@ interface UseResultsRollup {
   updatePatternRollup: (patternRollup: PatternRollup) => void;
 }
 
-export const useResultsRollup = ({ ilmPhases, patterns }: Props): UseResultsRollup => {
+export const useResultsRollup = ({
+  ilmPhases,
+  patterns,
+  reportDataQualityIndexChecked,
+  reportDataQualityCheckAllClicked,
+}: Props): UseResultsRollup => {
   const [patternIndexNames, setPatternIndexNames] = useState<Record<string, string[]>>({});
   const [patternRollups, setPatternRollups] = useState<Record<string, PatternRollup>>({});
 
@@ -80,13 +96,7 @@ export const useResultsRollup = ({ ilmPhases, patterns }: Props): UseResultsRoll
       indexName,
       partitionedFieldMetadata,
       pattern,
-    }: {
-      error: string | null;
-      formatBytes: (value: number | undefined) => string;
-      formatNumber: (value: number | undefined) => string;
-      indexName: string;
-      partitionedFieldMetadata: PartitionedFieldMetadata | null;
-      pattern: string;
+      requestTime,
     }) => {
       setPatternRollups((current) =>
         updateResultOnCheckCompleted({
@@ -99,8 +109,46 @@ export const useResultsRollup = ({ ilmPhases, patterns }: Props): UseResultsRoll
           patternRollups: current,
         })
       );
+
+      reportDataQualityIndexChecked({
+        error: error ?? undefined,
+        pattern,
+        indexName,
+        numberOfDocuments: getDocsCount({ indexName, stats: patternRollups[pattern].stats }),
+        numberOfIncompatibleFields: getIndexIncompatible({
+          indexName,
+          results: patternRollups[pattern].results,
+        }),
+        numberOfIndices: patternRollups[pattern].indices,
+        sizeInBytes: getSizeInBytes({ stats: patternRollups[pattern].stats, indexName }),
+        timeConsumedMs: requestTime,
+        version: EcsVersion,
+        isCheckAll: true,
+      });
     },
-    []
+    [patternRollups, reportDataQualityIndexChecked]
+  );
+
+  const onCheckAllCompleted = useCallback(
+    ({ requestTime }: { requestTime: number }) => {
+      reportDataQualityCheckAllClicked({
+        numberOfDocuments: totalDocsCount,
+        numberOfIncompatibleFields: totalIncompatible,
+        numberOfIndices: totalIndices,
+        numberOfIndicesChecked: totalIndicesChecked,
+        sizeInBytes: totalSizeInBytes,
+        timeConsumedMs: requestTime,
+        version: EcsVersion,
+      });
+    },
+    [
+      reportDataQualityCheckAllClicked,
+      totalDocsCount,
+      totalIncompatible,
+      totalIndices,
+      totalIndicesChecked,
+      totalSizeInBytes,
+    ]
   );
 
   useEffect(() => {
@@ -111,6 +159,7 @@ export const useResultsRollup = ({ ilmPhases, patterns }: Props): UseResultsRoll
 
   return {
     onCheckCompleted,
+    onCheckAllCompleted,
     patternIndexNames,
     patternRollups,
     totalDocsCount,

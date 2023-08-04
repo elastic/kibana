@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EcsFlat } from '@kbn/ecs';
+import { EcsFlat, EcsVersion } from '@kbn/ecs';
 import type {
   FlameElementEvent,
   HeatmapElementEvent,
@@ -38,7 +38,7 @@ import type {
   IlmPhase,
   PartitionedFieldMetadata,
   PatternRollup,
-  ReportDataQualityChecked,
+  ReportDataQualityIndexChecked,
 } from '../../types';
 import { useAddToNewCase } from '../../use_add_to_new_case';
 import { useMappings } from '../../use_mappings';
@@ -78,7 +78,7 @@ export interface Props {
   }) => void;
   pattern: string;
   patternRollup: PatternRollup | undefined;
-  reportDataQualityChecked: ReportDataQualityChecked;
+  reportDataQualityIndexChecked: ReportDataQualityIndexChecked;
   theme?: PartialTheme;
   baseTheme: Theme;
   updatePatternRollup: (patternRollup: PatternRollup) => void;
@@ -97,7 +97,7 @@ const IndexPropertiesComponent: React.FC<Props> = ({
   openCreateCaseFlyout,
   pattern,
   patternRollup,
-  reportDataQualityChecked,
+  reportDataQualityIndexChecked,
   theme,
   baseTheme,
   updatePatternRollup,
@@ -118,7 +118,7 @@ const IndexPropertiesComponent: React.FC<Props> = ({
       if (!patternRollup?.stats || !patternRollup?.results) {
         return;
       }
-      reportDataQualityChecked({
+      reportDataQualityIndexChecked({
         error,
         pattern,
         indexName,
@@ -130,9 +130,10 @@ const IndexPropertiesComponent: React.FC<Props> = ({
         numberOfIndices: patternRollup.indices,
         sizeInBytes: getSizeInBytes({ stats: patternRollup.stats, indexName }),
         timeConsumedMs: requestTime,
+        version: EcsVersion,
       });
     },
-    [indexName, pattern, patternRollup, reportDataQualityChecked]
+    [indexName, pattern, patternRollup, reportDataQualityIndexChecked]
   );
 
   const {

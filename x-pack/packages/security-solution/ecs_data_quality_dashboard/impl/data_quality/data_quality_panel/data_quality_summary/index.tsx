@@ -12,7 +12,7 @@ import styled from 'styled-components';
 import { getErrorSummaries } from '../../helpers';
 import { StatsRollup } from '../pattern/pattern_summary/stats_rollup';
 import { SummaryActions } from './summary_actions';
-import type { OnCheckCompleted, PatternRollup } from '../../types';
+import type { OnCheckAllCompleted, OnCheckCompleted, PatternRollup } from '../../types';
 
 const MAX_SUMMARY_ACTIONS_CONTAINER_WIDTH = 400;
 const MIN_SUMMARY_ACTIONS_CONTAINER_WIDTH = 235;
@@ -47,6 +47,7 @@ export interface Props {
   totalIndicesChecked: number | undefined;
   totalSizeInBytes: number | undefined;
   onCheckCompleted: OnCheckCompleted;
+  onCheckAllCompleted: OnCheckAllCompleted;
 }
 
 const DataQualitySummaryComponent: React.FC<Props> = ({
@@ -67,6 +68,7 @@ const DataQualitySummaryComponent: React.FC<Props> = ({
   totalIndicesChecked,
   totalSizeInBytes,
   onCheckCompleted,
+  onCheckAllCompleted,
 }) => {
   const errorSummary = useMemo(() => getErrorSummaries(patternRollups), [patternRollups]);
 
@@ -83,6 +85,7 @@ const DataQualitySummaryComponent: React.FC<Props> = ({
             ilmPhases={ilmPhases}
             lastChecked={lastChecked}
             onCheckCompleted={onCheckCompleted}
+            onCheckAllCompleted={onCheckAllCompleted}
             openCreateCaseFlyout={openCreateCaseFlyout}
             patternIndexNames={patternIndexNames}
             patterns={patterns}

@@ -46,7 +46,12 @@ import { RemoteClustersCallout } from '../remote_clusters_callout';
 import { SummaryTable } from '../summary_table';
 import { getSummaryTableColumns } from '../summary_table/helpers';
 import * as i18n from './translations';
-import type { PatternRollup, ReportDataQualityChecked, SelectedIndex, SortConfig } from '../../types';
+import type {
+  PatternRollup,
+  ReportDataQualityIndexChecked,
+  SelectedIndex,
+  SortConfig,
+} from '../../types';
 import { useIlmExplain } from '../../use_ilm_explain';
 import { useStats } from '../../use_stats';
 
@@ -87,7 +92,7 @@ interface Props {
   }) => void;
   pattern: string;
   patternRollup: PatternRollup | undefined;
-  reportDataQualityChecked: ReportDataQualityChecked;
+  reportDataQualityIndexChecked: ReportDataQualityIndexChecked;
   selectedIndex: SelectedIndex | null;
   setSelectedIndex: (selectedIndex: SelectedIndex | null) => void;
   theme?: PartialTheme;
@@ -114,7 +119,7 @@ const PatternComponent: React.FC<Props> = ({
   openCreateCaseFlyout,
   pattern,
   patternRollup,
-  reportDataQualityChecked,
+  reportDataQualityIndexChecked,
   selectedIndex,
   setSelectedIndex,
   theme,
@@ -161,7 +166,7 @@ const PatternComponent: React.FC<Props> = ({
                 openCreateCaseFlyout={openCreateCaseFlyout}
                 pattern={pattern}
                 patternRollup={patternRollup}
-                reportDataQualityChecked={reportDataQualityChecked}
+                reportDataQualityIndexChecked={reportDataQualityIndexChecked}
                 theme={theme}
                 baseTheme={baseTheme}
                 updatePatternRollup={updatePatternRollup}
@@ -184,7 +189,7 @@ const PatternComponent: React.FC<Props> = ({
       openCreateCaseFlyout,
       pattern,
       patternRollup,
-      reportDataQualityChecked,
+      reportDataQualityIndexChecked,
       theme,
       baseTheme,
       updatePatternRollup,

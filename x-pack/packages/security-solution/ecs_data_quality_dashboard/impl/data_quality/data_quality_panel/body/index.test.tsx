@@ -39,7 +39,7 @@ describe('IndexInvalidValues', () => {
           lastChecked={''}
           openCreateCaseFlyout={jest.fn()}
           patterns={[]}
-          reportDataQualityChecked={jest.fn()}
+          reportDataQualityIndexChecked={jest.fn()}
           setLastChecked={jest.fn()}
           baseTheme={DARK_THEME}
         />
@@ -69,7 +69,7 @@ describe('IndexInvalidValues', () => {
               lastChecked={''}
               openCreateCaseFlyout={jest.fn()}
               patterns={patterns}
-              reportDataQualityChecked={jest.fn()}
+              reportDataQualityIndexChecked={jest.fn()}
               setLastChecked={jest.fn()}
               baseTheme={DARK_THEME}
             />
@@ -96,7 +96,7 @@ describe('IndexInvalidValues', () => {
             lastChecked={''}
             openCreateCaseFlyout={jest.fn()}
             patterns={patterns}
-            reportDataQualityChecked={jest.fn()}
+            reportDataQualityIndexChecked={jest.fn()}
             setLastChecked={jest.fn()}
             baseTheme={DARK_THEME}
           />

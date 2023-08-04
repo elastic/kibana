@@ -21,7 +21,7 @@ import React from 'react';
 import { DataQualityDetails } from './data_quality_details';
 import { DataQualitySummary } from '../data_quality_summary';
 import { useResultsRollup } from '../../use_results_rollup';
-import { ReportDataQualityChecked } from '../../types';
+import { ReportDataQualityCheckAllClicked, ReportDataQualityIndexChecked } from '../../types';
 
 interface Props {
   addSuccessToast: (toast: { title: string }) => void;
@@ -52,7 +52,8 @@ interface Props {
     headerContent?: React.ReactNode;
   }) => void;
   patterns: string[];
-  reportDataQualityChecked: ReportDataQualityChecked;
+  reportDataQualityCheckAllClicked: ReportDataQualityCheckAllClicked;
+  reportDataQualityIndexChecked: ReportDataQualityIndexChecked;
   setLastChecked: (lastChecked: string) => void;
   theme?: PartialTheme;
   baseTheme: Theme;
@@ -69,13 +70,15 @@ const BodyComponent: React.FC<Props> = ({
   lastChecked,
   openCreateCaseFlyout,
   patterns,
-  reportDataQualityChecked,
+  reportDataQualityCheckAllClicked,
+  reportDataQualityIndexChecked,
   setLastChecked,
   theme,
   baseTheme,
 }) => {
   const {
     onCheckCompleted,
+    onCheckAllCompleted,
     patternIndexNames,
     patternRollups,
     totalDocsCount,
@@ -85,7 +88,12 @@ const BodyComponent: React.FC<Props> = ({
     totalSizeInBytes,
     updatePatternIndexNames,
     updatePatternRollup,
-  } = useResultsRollup({ ilmPhases, patterns });
+  } = useResultsRollup({
+    ilmPhases,
+    patterns,
+    reportDataQualityIndexChecked,
+    reportDataQualityCheckAllClicked,
+  });
 
   return (
     <EuiFlexGroup data-test-subj="body" direction="column" gutterSize="none">
@@ -108,6 +116,7 @@ const BodyComponent: React.FC<Props> = ({
           totalIndicesChecked={totalIndicesChecked}
           totalSizeInBytes={totalSizeInBytes}
           onCheckCompleted={onCheckCompleted}
+          onCheckAllCompleted={onCheckAllCompleted}
         />
         <EuiSpacer size="l" />
       </EuiFlexItem>
@@ -125,7 +134,7 @@ const BodyComponent: React.FC<Props> = ({
           patterns={patterns}
           patternIndexNames={patternIndexNames}
           patternRollups={patternRollups}
-          reportDataQualityChecked={reportDataQualityChecked}
+          reportDataQualityIndexChecked={reportDataQualityIndexChecked}
           theme={theme}
           baseTheme={baseTheme}
           updatePatternIndexNames={updatePatternIndexNames}
