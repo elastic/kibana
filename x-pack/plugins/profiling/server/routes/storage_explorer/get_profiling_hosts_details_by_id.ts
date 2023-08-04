@@ -62,6 +62,18 @@ export async function getProfilingHostsDetailsById({
             probabilisticValues: {
               terms: {
                 field: 'profiling.agent.config.probabilistic_threshold',
+                size: 5,
+                order: {
+                  // Order by @timestamp to receive the active value first
+                  latestDate: 'desc',
+                },
+              },
+              aggs: {
+                latestDate: {
+                  max: {
+                    field: ProfilingESField.Timestamp,
+                  },
+                },
               },
             },
           },

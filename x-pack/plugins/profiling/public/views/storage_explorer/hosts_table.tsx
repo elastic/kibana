@@ -43,7 +43,7 @@ export function HostsTable({ data = [], hasDistinctProbabilisticValues }: Props)
   const probabilisticValuesCountPerProjectId = data.reduce<Record<string, number>>((acc, curr) => {
     const projectId = curr.projectId;
     const currentCount = acc[projectId] ?? 0;
-    return { ...acc, [projectId]: currentCount + curr.probabilisticValues.length };
+    return { ...acc, [projectId]: currentCount + 1 };
   }, {});
 
   const columns: Array<EuiBasicTableColumn<StorageExplorerHostDetails>> = useMemo(
@@ -105,7 +105,9 @@ export function HostsTable({ data = [], hasDistinctProbabilisticValues }: Props)
               {probabilisticValues.map((value, index) => {
                 return (
                   <EuiFlexItem key={index} grow={false}>
-                    <EuiBadge color="hollow">{value}</EuiBadge>
+                    <EuiBadge color="hollow" isDisabled={index > 0}>
+                      {value}
+                    </EuiBadge>
                   </EuiFlexItem>
                 );
               })}
