@@ -325,7 +325,7 @@
     "raw-loader": "^3.1.0",
     "rbush": "^3.0.1",
     "re-resizable": "^6.1.1",
-    "re2": "^1.16.0",
+    "re2": "1.20.1",
     "react": "^16.14.0",
     "react-ace": "^7.0.5",
     "react-beautiful-dnd": "^13.0.0",
