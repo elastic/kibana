@@ -10,7 +10,7 @@ import {
   RefetchQueryFilters,
   useQuery,
 } from '@tanstack/react-query';
-import { GetSLOBurnRatesResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { ALL_VALUE, GetSLOBurnRatesResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { useKibana } from '../../utils/kibana_react';
 import { sloKeys } from './query_key_factory';
 
@@ -48,7 +48,7 @@ export function useFetchSloBurnRates({
           const response = await http.post<GetSLOBurnRatesResponse>(
             `/internal/observability/slos/${slo.id}/_burn_rates`,
             {
-              body: JSON.stringify({ windows, instanceId: slo.instanceId }),
+              body: JSON.stringify({ windows, instanceId: slo.instanceId ?? ALL_VALUE }),
               signal,
             }
           );
