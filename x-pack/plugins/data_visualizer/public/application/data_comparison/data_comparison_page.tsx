@@ -16,7 +16,6 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiPageHeader,
-  EuiCallOut,
 } from '@elastic/eui';
 
 import type { WindowParameters } from '@kbn/aiops-utils';
@@ -34,7 +33,6 @@ import {
 import moment from 'moment';
 import { css } from '@emotion/react';
 import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
-import { i18n } from '@kbn/i18n';
 import { RANDOM_SAMPLER_OPTION, RandomSampler } from '@kbn/ml-random-sampler-utils';
 import { MIN_SAMPLER_PROBABILITY } from '../index_data_visualizer/constants/random_sampler';
 import { useData } from '../common/hooks/use_data';
@@ -350,42 +348,18 @@ export const DataComparisonPage: FC = () => {
 
           <EuiFlexItem>
             <EuiPanel paddingSize="m">
-              {!dataView?.isTimeBased() ? (
-                <EuiCallOut
-                  title={i18n.translate(
-                    'xpack.dataVisualizer.dataViewNotBasedOnTimeSeriesWarning.title',
-                    {
-                      defaultMessage:
-                        'The data view "{dataViewTitle}" is not based on a time series.',
-                      values: { dataViewTitle: dataView.getName() },
-                    }
-                  )}
-                  color="danger"
-                  iconType="warning"
-                >
-                  <p>
-                    {i18n.translate(
-                      'xpack.dataVisualizer.dataComparisonTimeSeriesWarning.description',
-                      {
-                        defaultMessage: 'Data comparison only runs over time-based indices.',
-                      }
-                    )}
-                  </p>
-                </EuiCallOut>
-              ) : (
-                <DataComparisonView
-                  isBrushCleared={isBrushCleared}
-                  onReset={clearSelection}
-                  windowParameters={windowParameters}
-                  dataView={dataView}
-                  searchString={searchString ?? ''}
-                  searchQuery={searchQuery}
-                  searchQueryLanguage={searchQueryLanguage}
-                  lastRefresh={lastRefresh}
-                  randomSampler={randomSampler}
-                  forceRefresh={forceRefresh}
-                />
-              )}
+              <DataComparisonView
+                isBrushCleared={isBrushCleared}
+                onReset={clearSelection}
+                windowParameters={windowParameters}
+                dataView={dataView}
+                searchString={searchString ?? ''}
+                searchQuery={searchQuery}
+                searchQueryLanguage={searchQueryLanguage}
+                lastRefresh={lastRefresh}
+                randomSampler={randomSampler}
+                forceRefresh={forceRefresh}
+              />
             </EuiPanel>
           </EuiFlexItem>
         </EuiFlexGroup>

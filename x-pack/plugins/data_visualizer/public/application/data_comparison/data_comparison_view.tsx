@@ -152,7 +152,9 @@ export const DataComparisonView = ({
     setPageIndex(0);
   };
 
-  return windowParameters === undefined ? (
+  const requiresWindowParameters = dataView?.isTimeBased() && windowParameters === undefined;
+
+  return requiresWindowParameters ? (
     <EuiEmptyPrompt
       color="subdued"
       hasShadow={false}
@@ -189,7 +191,7 @@ export const DataComparisonView = ({
         onRefresh={onRefresh}
         onCancel={cancelRequest}
         shouldRerunAnalysis={shouldRerunAnalysis}
-        runAnalysisDisabled={!dataView || !windowParameters}
+        runAnalysisDisabled={!dataView || requiresWindowParameters}
       >
         <EuiFlexItem grow={false}>
           <EuiFormRow display="columnCompressedSwitch">
