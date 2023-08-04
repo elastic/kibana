@@ -97,6 +97,10 @@ export const updateList = async ({
           }
           ctx._source.updated_at = params.updated_at;
           ctx._source.updated_by = params.updated_by;
+          // needed for list that were created before migration to data streams
+          if (ctx._source.containsKey('@timestamp') == false) {
+            ctx._source['@timestamp'] = ctx._source.created_at;
+          }
         `,
       },
     });

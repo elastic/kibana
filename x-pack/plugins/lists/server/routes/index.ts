@@ -31,8 +31,8 @@ export * from './internal/create_exception_filter_route';
 export * from './import_exceptions_route';
 export * from './list/import_list_item_route';
 export * from './init_routes';
-export * from './patch_list_item_route';
-export * from './patch_list_route';
+export * from './list_item/patch_list_item_route';
+export * from './list/patch_list_route';
 export * from './read_endpoint_list_item_route';
 export * from './read_exception_list_item_route';
 export * from './read_exception_list_route';
@@ -44,8 +44,8 @@ export * from './summary_exception_list_route';
 export * from './update_endpoint_list_item_route';
 export * from './update_exception_list_item_route';
 export * from './update_exception_list_route';
-export * from './update_list_item_route';
-export * from './update_list_route';
+export * from './list_item/update_list_item_route';
+export * from './list/update_list_route';
 export * from './utils';
 
 // internal

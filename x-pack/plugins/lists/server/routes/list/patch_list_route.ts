@@ -7,44 +7,47 @@
 
 import { validate } from '@kbn/securitysolution-io-ts-utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
+import { LIST_URL } from '@kbn/securitysolution-list-constants';
 
-import type { ListsPluginRouter } from '../types';
-import { patchListItemRequest, patchListItemResponse } from '../../common/api';
+import type { ListsPluginRouter } from '../../types';
+import { patchListRequest, patchListResponse } from '../../../common/api';
+import { buildRouteValidation, buildSiemResponse } from '../utils';
+import { getListClient } from '..';
 
-import { buildRouteValidation, buildSiemResponse } from './utils';
-
-import { getListClient } from '.';
-
-export const patchListItemRoute = (router: ListsPluginRouter): void => {
+export const patchListRoute = (router: ListsPluginRouter): void => {
   router.patch(
     {
       options: {
         tags: ['access:lists-all'],
       },
-      path: LIST_ITEM_URL,
+      path: LIST_URL,
       validate: {
-        body: buildRouteValidation(patchListItemRequest),
+        body: buildRouteValidation(patchListRequest),
       },
     },
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
       try {
-        const { value, id, meta, _version } = request.body;
+        const { name, description, id, meta, _version, version } = request.body;
         const lists = await getListClient(context);
-        const listItem = await lists.patchListItem({
-          _version,
-          id,
-          meta,
-          value,
-        });
-        if (listItem == null) {
+
+        const dataStreamExists = await lists.getListDataStreamExists();
+        // needs to be migrated to data stream if index exists
+        if (!dataStreamExists) {
+          const indexExists = await lists.getListIndexExists();
+          if (indexExists) {
+            await lists.migrateListIndexToDataStream();
+          }
+        }
+
+        const list = await lists.patchList({ _version, description, id, meta, name, version });
+        if (list == null) {
           return siemResponse.error({
-            body: `list item id: "${id}" not found`,
+            body: `list id: "${id}" not found`,
             statusCode: 404,
           });
         } else {
-          const [validated, errors] = validate(listItem, patchListItemResponse);
+          const [validated, errors] = validate(list, patchListResponse);
           if (errors != null) {
             return siemResponse.error({ body: errors, statusCode: 500 });
           } else {

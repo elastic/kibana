@@ -9,12 +9,10 @@ import { validate } from '@kbn/securitysolution-io-ts-utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { LIST_URL } from '@kbn/securitysolution-list-constants';
 
-import type { ListsPluginRouter } from '../types';
-import { updateListRequest, updateListResponse } from '../../common/api';
-
-import { buildRouteValidation, buildSiemResponse } from './utils';
-
-import { getListClient } from '.';
+import type { ListsPluginRouter } from '../../types';
+import { updateListRequest, updateListResponse } from '../../../common/api';
+import { buildRouteValidation, buildSiemResponse } from '../utils';
+import { getListClient } from '..';
 
 export const updateListRoute = (router: ListsPluginRouter): void => {
   router.put(
@@ -32,6 +30,16 @@ export const updateListRoute = (router: ListsPluginRouter): void => {
       try {
         const { name, description, id, meta, _version, version } = request.body;
         const lists = await getListClient(context);
+
+        const dataStreamExists = await lists.getListDataStreamExists();
+        // needs to be migrated to data stream if index exists
+        if (!dataStreamExists) {
+          const indexExists = await lists.getListIndexExists();
+          if (indexExists) {
+            await lists.migrateListIndexToDataStream();
+          }
+        }
+
         const list = await lists.updateList({ _version, description, id, meta, name, version });
         if (list == null) {
           return siemResponse.error({

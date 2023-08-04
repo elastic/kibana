@@ -20,6 +20,6 @@ export const waitUntilDocumentIndexed = async (fn: () => Promise<void>): Promise
   await new Promise((resolve) => setTimeout(resolve, DEFAULT_INDEX_REFRESH_TIME));
   await pRetry(fn, {
     minTimeout: DEFAULT_INDEX_REFRESH_TIME,
-    retries: 3,
+    retries: 5,
   });
 };

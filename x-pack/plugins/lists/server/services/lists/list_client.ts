@@ -318,6 +318,8 @@ export class ListClient {
   public migrateListIndexToDataStream = async (): Promise<void> => {
     const { esClient } = this;
     const listName = this.getListName();
+    // update list index template
+    await this.setListTemplate();
     // first need to update mapping of existing index to add @timestamp
     await putMappings(
       esClient,
@@ -338,6 +340,8 @@ export class ListClient {
   public migrateListItemIndexToDataStream = async (): Promise<void> => {
     const { esClient } = this;
     const listItemName = this.getListItemName();
+    // update list items index template
+    await this.setListItemTemplate();
     // first need to update mapping of existing index to add @timestamp
     await putMappings(
       esClient,
