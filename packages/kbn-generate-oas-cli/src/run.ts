@@ -77,16 +77,21 @@ run(
       await Fsp.writeFile(OUTPUT_FILE, JSON.stringify(spec, null, 2));
 
       const { protocol, hostname, port } = coreStart.http.getServerInfo();
-      const url = `${protocol}://${hostname}:${port}/docs/alerting`;
+      const url = `${protocol}://${hostname}:${port}/oas/alerting`;
 
       // TODO: Better way of doing it? Without waiting I get:
       // License is not available, authentication is not possible
       await waitUntilAPIReady(url, log);
 
-      const response = await axios.get(url, {
+      const update = await axios.get(`${url}/update`, {
         auth: { username: 'elastic', password: 'changeme' },
       });
-      console.log(JSON.stringify(response.data, null, 2));
+      console.log(JSON.stringify(update.data, null, 2));
+
+      const create = await axios.get(`${url}/create`, {
+        auth: { username: 'elastic', password: 'changeme' },
+      });
+      console.log(JSON.stringify(create.data, null, 2));
 
       log.success('Done!');
       done = true;

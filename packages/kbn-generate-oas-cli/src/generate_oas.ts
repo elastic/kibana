@@ -140,9 +140,10 @@ function extractParameterObjects(
       }
 
       if (instanceofZodTypeOptional(shapeSchema)) {
-        if (isPathParameter) {
-          throw new Error(`Path parameter: "${shapeKey}" must not be optional`);
-        }
+        // // why?
+        // if (isPathParameter) {
+        //   throw new Error(`Path parameter: "${shapeKey}" must not be optional`);
+        // }
         shapeSchema = shapeSchema.unwrap();
       }
 

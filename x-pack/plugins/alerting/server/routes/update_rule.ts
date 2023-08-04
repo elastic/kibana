@@ -17,6 +17,7 @@ import {
   rewriteActionsReq,
   rewriteActionsRes,
   rewriteRuleLastRun,
+  actionsSchema,
 } from './lib';
 import {
   RuleTypeParams,
@@ -25,81 +26,30 @@ import {
   validateNotifyWhenType,
   PartialRule,
 } from '../types';
-import { validateHours } from './lib/validate_hours';
-import { validateTimezone } from './lib/validate_timezone';
 
 const paramSchema = z.object({
   id: z.string(),
 });
 
-const bodySchema = z.object({
-  name: z.string({ description: 'The name of the rule.' }),
-  tags: z.array(z.string()),
-  schedule: z.object({
-    interval: z.string().superRefine(validateDurationSchema),
-  }),
-  throttle: z.nullable(z.optional(z.string().superRefine(validateDurationSchema))),
-  params: z.record(z.string(), z.any()),
-  actions: z.array(
-    z.object({
-      group: z.string(),
-      id: z.string(),
-      frequency: z.optional(
-        z.object({
-          summary: z.boolean(),
-          notify_when: z.enum(['onActionGroupChange', 'onActiveAlert', 'onThrottleInterval']),
-          throttle: z.nullable(z.string().superRefine(validateDurationSchema)),
-        })
-      ),
-      params: z.record(z.string(), z.any()),
-      uuid: z.optional(z.string()),
-      alerts_filter: z.optional(
-        z.object({
-          query: z.optional(
-            z.object({
-              kql: z.string(),
-              filters: z.array(
-                z.object({
-                  query: z.optional(z.record(z.string(), z.any())),
-                  meta: z.record(z.string(), z.any()),
-                  state$: z.optional(z.object({ store: z.string() })),
-                })
-              ),
-              dsl: z.optional(z.string()),
-            })
-          ),
-          timeframe: z.optional(
-            z.object({
-              days: z.array(
-                z.union([
-                  z.literal(1),
-                  z.literal(2),
-                  z.literal(3),
-                  z.literal(4),
-                  z.literal(5),
-                  z.literal(6),
-                  z.literal(7),
-                ])
-              ),
-              hours: z.object({
-                start: z.string().superRefine(validateHours),
-                end: z.string().superRefine(validateHours),
-              }),
-              timezone: z.string().superRefine(validateTimezone),
-            })
-          ),
-        })
-      ),
-    })
-  ),
-  notify_when: z.optional(
-    z.nullable(
-      z
-        .enum(['onActionGroupChange', 'onActiveAlert', 'onThrottleInterval'])
-        .refine(validateNotifyWhenType)
-    )
-  ),
-});
+export const bodySchema = z
+  .object({
+    name: z.string({ description: 'The name of the rule.' }),
+    tags: z.array(z.string()),
+    schedule: z.object({
+      interval: z.string().superRefine(validateDurationSchema),
+    }),
+    throttle: z.nullable(z.optional(z.string().superRefine(validateDurationSchema))),
+    params: z.record(z.string(), z.any()),
+    actions: actionsSchema,
+    notify_when: z.optional(
+      z.nullable(
+        z
+          .enum(['onActionGroupChange', 'onActiveAlert', 'onThrottleInterval'])
+          .refine(validateNotifyWhenType)
+      )
+    ),
+  })
+  .describe('Update rule request');
 
 const rewriteBodyReq: RewriteRequestCase<UpdateOptions<RuleTypeParams>> = (result) => {
   const { notify_when: notifyWhen, actions, ...rest } = result.data;

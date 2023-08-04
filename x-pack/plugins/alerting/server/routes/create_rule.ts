@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+// import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 import { validateDurationSchema, RuleTypeDisabledError } from '../lib';
 import { CreateOptions } from '../rules_client';
 import {
@@ -27,28 +28,27 @@ import {
 } from '../types';
 import { RouteOptions } from '.';
 
-export const bodySchema = schema.object({
-  name: schema.string(),
-  rule_type_id: schema.string(),
-  enabled: schema.boolean({ defaultValue: true }),
-  consumer: schema.string(),
-  tags: schema.arrayOf(schema.string(), { defaultValue: [] }),
-  throttle: schema.maybe(schema.nullable(schema.string({ validate: validateDurationSchema }))),
-  params: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
-  schedule: schema.object({
-    interval: schema.string({ validate: validateDurationSchema }),
+export const bodySchema = z.object({
+  name: z.string(),
+  rule_type_id: z.string(),
+  enabled: z.boolean().default(true),
+  consumer: z.string(),
+  tags: z.array(z.string()).default([]),
+  throttle: z.optional(z.nullable(z.string().superRefine(validateDurationSchema))),
+  params: z.record(z.string(), z.any()).default({}),
+  schedule: z.object({
+    interval: z.string().superRefine(validateDurationSchema),
   }),
   actions: actionsSchema,
-  notify_when: schema.maybe(
-    schema.nullable(
-      schema.oneOf(
-        [
-          schema.literal('onActionGroupChange'),
-          schema.literal('onActiveAlert'),
-          schema.literal('onThrottleInterval'),
-        ],
-        { validate: validateNotifyWhenType }
-      )
+  notify_when: z.optional(
+    z.nullable(
+      z
+        .union([
+          z.literal('onActionGroupChange'),
+          z.literal('onActiveAlert'),
+          z.literal('onThrottleInterval'),
+        ])
+        .superRefine(validateNotifyWhenType)
     )
   ),
 });
@@ -112,12 +112,15 @@ export const createRuleRoute = ({ router, licenseState, usageCounter }: RouteOpt
     {
       path: `${BASE_ALERTING_API_PATH}/rule/{id?}`,
       validate: {
-        params: schema.maybe(
-          schema.object({
-            id: schema.maybe(schema.string()),
+        params: z.optional(
+          z.object({
+            id: z.optional(z.string()),
           })
         ),
         body: bodySchema,
+      },
+      options: {
+        isZod: true,
       },
     },
     handleDisabledApiKeysError(

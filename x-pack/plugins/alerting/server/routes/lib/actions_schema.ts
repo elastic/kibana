@@ -5,69 +5,60 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 import { validateTimezone } from './validate_timezone';
 import { validateDurationSchema } from '../../lib';
 import { validateHours } from './validate_hours';
 
-export const actionsSchema = schema.arrayOf(
-  schema.object({
-    group: schema.string(),
-    id: schema.string(),
-    params: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
-    frequency: schema.maybe(
-      schema.object({
-        summary: schema.boolean(),
-        notify_when: schema.oneOf([
-          schema.literal('onActionGroupChange'),
-          schema.literal('onActiveAlert'),
-          schema.literal('onThrottleInterval'),
-        ]),
-        throttle: schema.nullable(schema.string({ validate: validateDurationSchema })),
+export const actionsSchema = z.array(
+  z.object({
+    group: z.string(),
+    id: z.string(),
+    frequency: z.optional(
+      z.object({
+        summary: z.boolean(),
+        notify_when: z.enum(['onActionGroupChange', 'onActiveAlert', 'onThrottleInterval']),
+        throttle: z.nullable(z.string().superRefine(validateDurationSchema)),
       })
     ),
-    uuid: schema.maybe(schema.string()),
-    alerts_filter: schema.maybe(
-      schema.object({
-        query: schema.maybe(
-          schema.object({
-            kql: schema.string(),
-            filters: schema.arrayOf(
-              schema.object({
-                query: schema.maybe(schema.recordOf(schema.string(), schema.any())),
-                meta: schema.recordOf(schema.string(), schema.any()),
-                state$: schema.maybe(schema.object({ store: schema.string() })),
+    params: z.record(z.string(), z.any()),
+    uuid: z.optional(z.string()),
+    alerts_filter: z.optional(
+      z.object({
+        query: z.optional(
+          z.object({
+            kql: z.string(),
+            filters: z.array(
+              z.object({
+                query: z.optional(z.record(z.string(), z.any())),
+                meta: z.record(z.string(), z.any()),
+                state$: z.optional(z.object({ store: z.string() })),
               })
             ),
-            dsl: schema.maybe(schema.string()),
+            dsl: z.optional(z.string()),
           })
         ),
-        timeframe: schema.maybe(
-          schema.object({
-            days: schema.arrayOf(
-              schema.oneOf([
-                schema.literal(1),
-                schema.literal(2),
-                schema.literal(3),
-                schema.literal(4),
-                schema.literal(5),
-                schema.literal(6),
-                schema.literal(7),
+        timeframe: z.optional(
+          z.object({
+            days: z.array(
+              z.union([
+                z.literal(1),
+                z.literal(2),
+                z.literal(3),
+                z.literal(4),
+                z.literal(5),
+                z.literal(6),
+                z.literal(7),
               ])
             ),
-            hours: schema.object({
-              start: schema.string({
-                validate: validateHours,
-              }),
-              end: schema.string({
-                validate: validateHours,
-              }),
+            hours: z.object({
+              start: z.string().superRefine(validateHours),
+              end: z.string().superRefine(validateHours),
             }),
-            timezone: schema.string({ validate: validateTimezone }),
+            timezone: z.string().superRefine(validateTimezone),
           })
         ),
       })
     ),
-  }),
-  { defaultValue: [] }
+  })
 );
