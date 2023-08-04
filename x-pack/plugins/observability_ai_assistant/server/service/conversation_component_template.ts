@@ -87,6 +87,9 @@ export const conversationComponentTemplate: ClusterComponentTemplate['component_
             },
           },
         },
+        public: {
+          type: 'boolean',
+        },
       },
     },
   };

@@ -22,12 +22,8 @@ const containerClassName = css`
   overflow-wrap: break-word;
 
   code {
-    display: block;
     background: ${euiThemeVars.euiColorLightestShade};
-    white-space: pre;
-    margin-top: 8px;
-    margin-bottom: 8px;
-    padding: 8px;
+    padding: 0 8px;
   }
 `;
 

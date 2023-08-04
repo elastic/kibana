@@ -5,6 +5,7 @@
  * 2.0.
  */
 import * as t from 'io-ts';
+import { toBooleanRt } from '@kbn/io-ts-utils';
 import {
   Conversation,
   ConversationCreateRequest,
@@ -58,6 +59,7 @@ export const baseConversationRt: t.Type<ConversationRequestBase> = t.type({
   messages: t.array(messageRt),
   labels: t.record(t.string, t.string),
   numeric_labels: t.record(t.string, t.number),
+  public: toBooleanRt,
 });
 
 export const conversationCreateRt: t.Type<ConversationCreateRequest> = t.intersection([

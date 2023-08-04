@@ -40,16 +40,27 @@ export function getTimelineItemsfromConversation({
       const isSystemPrompt = message.message.role === MessageRole.System;
 
       let title: string;
+      let content: string | undefined;
+
       if (hasFunction) {
         title = i18n.translate('xpack.observabilityAiAssistant.suggestedFunctionEvent', {
           defaultMessage: 'suggested a function',
         });
+        content = `I have requested your system performs the function _${
+          message.message.function_call?.name
+        }_ with the payload 
+\`\`\`
+${JSON.stringify(JSON.parse(message.message.function_call?.arguments || ''), null, 4)}
+\`\`\`
+        and return its results for me to look at.`;
       } else if (isSystemPrompt) {
         title = i18n.translate('xpack.observabilityAiAssistant.addedSystemPromptEvent', {
-          defaultMessage: 'returned data',
+          defaultMessage: 'added a prompt',
         });
+        content = '';
       } else {
         title = '';
+        content = message.message.content;
       }
 
       const props = {
@@ -62,15 +73,7 @@ export function getTimelineItemsfromConversation({
         canGiveFeedback: message.message.role === MessageRole.Assistant,
         loading: false,
         title,
-        content: hasFunction
-          ? `I have requested your system performs the function _${
-              message.message.function_call?.name
-            }_ with the payload 
-\`\`\`
-${JSON.stringify(JSON.parse(message.message.function_call?.arguments || ''), null, 4)}
-\`\`\`
-and return its results for me to look at.`
-          : message.message.content,
+        content,
         currentUser,
       };
 

@@ -5,11 +5,18 @@
  * 2.0.
  */
 
-import type { PluginInitializerContext } from '@kbn/core/server';
+import type { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
 import type { ObservabilityAIAssistantConfig } from './config';
 import { ObservabilityAIAssistantPlugin } from './plugin';
 
 export type { ObservabilityAIAssistantServerRouteRepository } from './routes/get_global_observability_ai_assistant_route_repository';
+
+import { config as configSchema } from './config';
+
+export const config: PluginConfigDescriptor<ObservabilityAIAssistantConfig> = {
+  exposeToBrowser: {},
+  schema: configSchema,
+};
 
 export const plugin = (ctx: PluginInitializerContext<ObservabilityAIAssistantConfig>) =>
   new ObservabilityAIAssistantPlugin(ctx);
