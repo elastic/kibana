@@ -14,10 +14,11 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { default as React, useCallback, useEffect, useState } from 'react';
+import { ObservabilityOnboardingPluginSetupDeps } from '../../../../plugin';
 import { useWizard } from '.';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
-import { useKibanaNavigation } from '../../../../hooks/use_kibana_navigation';
 import {
   ElasticAgentPlatform,
   getElasticAgentSetupCommand,
@@ -34,9 +35,14 @@ import {
 } from '../../../shared/step_panel';
 import { ApiKeyBanner } from './api_key_banner';
 import { BackButton } from './back_button';
+import { getDiscoverNavigationParams } from '../../utils';
 
 export function InstallElasticAgent() {
-  const { navigateToKibanaUrl } = useKibanaNavigation();
+  const {
+    services: {
+      discover: { locator },
+    },
+  } = useKibana<ObservabilityOnboardingPluginSetupDeps>();
   const { goBack, goToStep, getState, setState } = useWizard();
   const wizardState = getState();
   const [elasticAgentPlatform, setElasticAgentPlatform] =
@@ -46,7 +52,7 @@ export function InstallElasticAgent() {
     goToStep('inspect');
   }
   function onContinue() {
-    navigateToKibanaUrl('/app/logs/stream');
+    locator?.navigate(getDiscoverNavigationParams(wizardState.datasetName));
   }
 
   function onAutoDownloadConfig() {

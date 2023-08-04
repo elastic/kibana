@@ -13,7 +13,9 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { default as React, useCallback, useEffect, useState } from 'react';
+import { ObservabilityOnboardingPluginSetupDeps } from '../../../plugin';
 import { useWizard } from '.';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { useKibanaNavigation } from '../../../hooks/use_kibana_navigation';
@@ -32,8 +34,15 @@ import {
   StepPanelFooter,
 } from '../../shared/step_panel';
 import { ApiKeyBanner } from '../custom_logs/wizard/api_key_banner';
+import { getDiscoverNavigationParams } from '../utils';
 
 export function InstallElasticAgent() {
+  const {
+    services: {
+      discover: { locator },
+    },
+  } = useKibana<ObservabilityOnboardingPluginSetupDeps>();
+
   const { navigateToKibanaUrl } = useKibanaNavigation();
   const { getState, setState } = useWizard();
   const wizardState = getState();
@@ -47,7 +56,7 @@ export function InstallElasticAgent() {
     navigateToKibanaUrl('/app/observabilityOnboarding');
   }
   function onContinue() {
-    navigateToKibanaUrl('/app/logs/stream');
+    locator?.navigate(getDiscoverNavigationParams(datasetName));
   }
 
   function onAutoDownloadConfig() {
