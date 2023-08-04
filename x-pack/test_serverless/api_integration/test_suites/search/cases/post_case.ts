@@ -6,11 +6,35 @@
  */
 
 import { CASES_URL } from '@kbn/cases-plugin/common/constants';
+import { CaseSeverity } from '@kbn/cases-plugin/common/types/domain';
+import type { CasePostRequest } from '@kbn/cases-plugin/common/types/api';
+import { ConnectorTypes } from '@kbn/cases-plugin/common/types/domain';
 
-import { getPostCaseRequest } from './helper/mock';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
+const postCaseReq: CasePostRequest = {
+  description: 'This is a brand new case of a bad meanie defacing data',
+  title: 'Super Bad Observability Issue',
+  tags: ['defacement'],
+  severity: CaseSeverity.LOW,
+  connector: {
+    id: 'none',
+    name: 'none',
+    type: ConnectorTypes.none,
+    fields: null,
+  },
+  settings: {
+    syncAlerts: true,
+  },
+  owner: 'cases',
+  assignees: [],
+};
+
+const getPostCaseRequest = (req?: Partial<CasePostRequest>): CasePostRequest => ({
+  ...postCaseReq,
+  ...req,
+});
+
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
 

@@ -6,12 +6,11 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
+import { FtrProviderContext } from '../../../ftr_provider_context';
 import { getCase, createCase, deleteCasesByESQuery, getPostCaseRequest, postCaseResp } from './helpers/api';
 import { removeServerGeneratedPropertiesFromCase } from './helpers/omit';
 
-// eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const es = getService('es');
