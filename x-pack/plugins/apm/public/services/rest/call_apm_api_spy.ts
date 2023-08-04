@@ -5,9 +5,15 @@
  * 2.0.
  */
 import { once } from 'lodash';
-import * as createCallApmApi from './create_call_apm_api';
-import type { AbstractAPMClient } from './create_call_apm_api';
+import { createCallApmApi, callApmApi } from './create_call_apm_api';
+import type {
+  AbstractAPMClient,
+  APIClientRequestParamsOf,
+  APIReturnType,
+} from './create_call_apm_api';
 import { type APIEndpoint } from '../../../server';
+
+const spyObj = { createCallApmApi, callApmApi };
 
 export type CallApmApiSpy = jest.SpyInstance<
   Promise<any>,
@@ -17,18 +23,13 @@ export type CallApmApiSpy = jest.SpyInstance<
 export type CreateCallApmApiSpy = jest.SpyInstance<AbstractAPMClient>;
 
 export const getCreateCallApmApiSpy = () =>
-  jest.spyOn(
-    createCallApmApi,
-    'createCallApmApi'
-  ) as unknown as CreateCallApmApiSpy;
+  jest.spyOn(spyObj, 'createCallApmApi') as unknown as CreateCallApmApiSpy;
 export const getCallApmApiSpy = () =>
-  jest.spyOn(createCallApmApi, 'callApmApi') as unknown as CallApmApiSpy;
+  jest.spyOn(spyObj, 'callApmApi') as unknown as CallApmApiSpy;
 
 type MockApmApiCall = <TEndpoint extends APIEndpoint>(
   endpoint: TEndpoint,
-  fn: (
-    params: createCallApmApi.APIClientRequestParamsOf<TEndpoint>
-  ) => createCallApmApi.APIReturnType<TEndpoint>
+  fn: (params: APIClientRequestParamsOf<TEndpoint>) => APIReturnType<TEndpoint>
 ) => void;
 
 const getSpy = once(() => {
