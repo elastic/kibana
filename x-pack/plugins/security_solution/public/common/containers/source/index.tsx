@@ -94,12 +94,7 @@ export const useFetchIndex = (
   const { data } = useKibana().services;
   const abortCtrl = useRef(new AbortController());
   const previousIndexesName = useRef<string[]>([]);
-  const isMounted = useRef(true);
-  useEffect(() => {
-    return () => {
-      isMounted.current = false;
-    };
-  }, []);
+
   const [state, setState] = useState<FetchIndexReturn & { loading: boolean }>({
     browserFields: DEFAULT_BROWSER_FIELDS,
     indexes: indexNames,
@@ -121,28 +116,25 @@ export const useFetchIndex = (
           const { browserFields } = getDataViewStateFromIndexFields(iNames, dataView.fields);
 
           previousIndexesName.current = dv.getIndexPattern().split(',');
-          if (isMounted.current) {
-            setState({
-              loading: false,
-              dataView,
-              browserFields,
-              indexes: dv.getIndexPattern().split(','),
-              indexExists: dv.getIndexPattern().split(',').length > 0,
-              indexPatterns: getIndexFields(dv.getIndexPattern(), dv.fields),
-            });
-          }
+
+          setState({
+            loading: false,
+            dataView,
+            browserFields,
+            indexes: dv.getIndexPattern().split(','),
+            indexExists: dv.getIndexPattern().split(',').length > 0,
+            indexPatterns: getIndexFields(dv.getIndexPattern(), dv.fields),
+          });
         } catch (exc) {
-          if (isMounted.current) {
-            setState({
-              browserFields: DEFAULT_BROWSER_FIELDS,
-              indexes: indexNames,
-              indexExists: true,
-              indexPatterns: DEFAULT_INDEX_PATTERNS,
-              dataView: undefined,
-              loading: false,
-            });
-            addError(exc?.message, { title: i18n.ERROR_INDEX_FIELDS_SEARCH });
-          }
+          setState({
+            browserFields: DEFAULT_BROWSER_FIELDS,
+            indexes: indexNames,
+            indexExists: true,
+            indexPatterns: DEFAULT_INDEX_PATTERNS,
+            dataView: undefined,
+            loading: false,
+          });
+          addError(exc?.message, { title: i18n.ERROR_INDEX_FIELDS_SEARCH });
         }
       };
 
