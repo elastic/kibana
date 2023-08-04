@@ -49,8 +49,7 @@ export function InstallElasticAgent() {
   const [elasticAgentPlatform, setElasticAgentPlatform] =
     useState<ElasticAgentPlatform>('linux-tar');
 
-  const datasetName = 'elastic-agent';
-  const namespace = 'default';
+  const datasetName = 'system-logs';
 
   function onBack() {
     navigateToKibanaUrl('/app/observabilityOnboarding');
@@ -92,10 +91,7 @@ export function InstallElasticAgent() {
           params: {
             body: {
               name: datasetName,
-              state: {
-                datasetName,
-                namespace,
-              },
+              type: 'systemLogs',
             },
           },
         });
@@ -103,26 +99,6 @@ export function InstallElasticAgent() {
     },
     [monitoringRole?.hasPrivileges]
   );
-
-  const { status: saveOnboardingStateDataStatus } = useFetcher((callApi) => {
-    const { onboardingId } = getState();
-    if (onboardingId) {
-      return callApi(
-        'PUT /internal/observability_onboarding/flow/{onboardingId}',
-        {
-          params: {
-            path: { onboardingId },
-            body: {
-              state: {
-                datasetName,
-                namespace,
-              },
-            },
-          },
-        }
-      );
-    }
-  }, []);
 
   const { apiKeyEncoded, onboardingId } = installShipperSetup ?? getState();
 
@@ -141,7 +117,7 @@ export function InstallElasticAgent() {
     [
       apiKeyEncoded,
       onboardingId,
-      saveOnboardingStateDataStatus === FETCH_STATUS.SUCCESS,
+      installShipperSetupStatus === FETCH_STATUS.SUCCESS,
     ]
   );
 

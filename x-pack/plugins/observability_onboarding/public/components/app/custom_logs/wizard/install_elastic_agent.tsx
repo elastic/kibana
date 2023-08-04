@@ -99,6 +99,7 @@ export function InstallElasticAgent() {
           params: {
             body: {
               name: datasetName,
+              type: 'logFiles',
               state: {
                 datasetName,
                 serviceName,

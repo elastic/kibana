@@ -9,7 +9,7 @@
     ],
     "patterns": [
       "_ml/memory/_stats",
-      "_ml/memory/{nodes}/_stats"
+      "_ml/memory/{node_id}/_stats"
     ],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/get-ml-memory.html"
   }
