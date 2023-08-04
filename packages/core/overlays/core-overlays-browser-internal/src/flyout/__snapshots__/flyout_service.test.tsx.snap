@@ -51,26 +51,14 @@ Array [
             "calls": Array [
               Array [
                 Object {
-                  "children": <KibanaThemeProviderCheck
-                    theme={
-                      Object {
-                        "theme$": Observable {
-                          "_subscribe": [Function],
-                        },
-                      }
-                    }
+                  "children": <EuiFlyout
+                    onClose={[Function]}
                   >
-                    <EuiErrorBoundary>
-                      <EuiFlyout
-                        onClose={[Function]}
-                      >
-                        <MountWrapper
-                          className="kbnOverlayMountWrapper"
-                          mount={[Function]}
-                        />
-                      </EuiFlyout>
-                    </EuiErrorBoundary>
-                  </KibanaThemeProviderCheck>,
+                    <MountWrapper
+                      className="kbnOverlayMountWrapper"
+                      mount={[Function]}
+                    />
+                  </EuiFlyout>,
                 },
                 Object {},
               ],
@@ -78,26 +66,14 @@ Array [
             "results": Array [
               Object {
                 "type": "return",
-                "value": <KibanaThemeProviderCheck
-                  theme={
-                    Object {
-                      "theme$": Observable {
-                        "_subscribe": [Function],
-                      },
-                    }
-                  }
+                "value": <EuiFlyout
+                  onClose={[Function]}
                 >
-                  <EuiErrorBoundary>
-                    <EuiFlyout
-                      onClose={[Function]}
-                    >
-                      <MountWrapper
-                        className="kbnOverlayMountWrapper"
-                        mount={[Function]}
-                      />
-                    </EuiFlyout>
-                  </EuiErrorBoundary>
-                </KibanaThemeProviderCheck>,
+                  <MountWrapper
+                    className="kbnOverlayMountWrapper"
+                    mount={[Function]}
+                  />
+                </EuiFlyout>,
               },
             ],
           },
@@ -130,26 +106,14 @@ Array [
             "calls": Array [
               Array [
                 Object {
-                  "children": <KibanaThemeProviderCheck
-                    theme={
-                      Object {
-                        "theme$": Observable {
-                          "_subscribe": [Function],
-                        },
-                      }
-                    }
+                  "children": <EuiFlyout
+                    onClose={[Function]}
                   >
-                    <EuiErrorBoundary>
-                      <EuiFlyout
-                        onClose={[Function]}
-                      >
-                        <MountWrapper
-                          className="kbnOverlayMountWrapper"
-                          mount={[Function]}
-                        />
-                      </EuiFlyout>
-                    </EuiErrorBoundary>
-                  </KibanaThemeProviderCheck>,
+                    <MountWrapper
+                      className="kbnOverlayMountWrapper"
+                      mount={[Function]}
+                    />
+                  </EuiFlyout>,
                 },
                 Object {},
               ],
@@ -157,26 +121,14 @@ Array [
             "results": Array [
               Object {
                 "type": "return",
-                "value": <KibanaThemeProviderCheck
-                  theme={
-                    Object {
-                      "theme$": Observable {
-                        "_subscribe": [Function],
-                      },
-                    }
-                  }
+                "value": <EuiFlyout
+                  onClose={[Function]}
                 >
-                  <EuiErrorBoundary>
-                    <EuiFlyout
-                      onClose={[Function]}
-                    >
-                      <MountWrapper
-                        className="kbnOverlayMountWrapper"
-                        mount={[Function]}
-                      />
-                    </EuiFlyout>
-                  </EuiErrorBoundary>
-                </KibanaThemeProviderCheck>,
+                  <MountWrapper
+                    className="kbnOverlayMountWrapper"
+                    mount={[Function]}
+                  />
+                </EuiFlyout>,
               },
             ],
           },
