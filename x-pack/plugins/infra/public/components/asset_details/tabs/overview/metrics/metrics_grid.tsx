@@ -126,7 +126,7 @@ const CHARTS_IN_ORDER: Array<
             }),
           },
           {
-            ...hostLensFormulas.diskSpaceAvailable,
+            ...hostLensFormulas.diskSpaceAvailability,
             label: i18n.translate(
               'xpack.infra.assetDetails.metricsCharts.diskSpace.label.available',
               {
@@ -163,13 +163,13 @@ const CHARTS_IN_ORDER: Array<
       {
         data: [
           {
-            ...hostLensFormulas.diskReadThroughput,
+            ...hostLensFormulas.diskIORead,
             label: i18n.translate('xpack.infra.assetDetails.metricsCharts.metric.label.read', {
               defaultMessage: 'Read',
             }),
           },
           {
-            ...hostLensFormulas.diskWriteThroughput,
+            ...hostLensFormulas.diskIOWrite,
             label: i18n.translate('xpack.infra.assetDetails.metricsCharts.metric.label.write', {
               defaultMessage: 'Write',
             }),
@@ -195,13 +195,13 @@ const CHARTS_IN_ORDER: Array<
       {
         data: [
           {
-            ...hostLensFormulas.diskIORead,
+            ...hostLensFormulas.diskReadThroughput,
             label: i18n.translate('xpack.infra.assetDetails.metricsCharts.metric.label.read', {
               defaultMessage: 'Read',
             }),
           },
           {
-            ...hostLensFormulas.diskIOWrite,
+            ...hostLensFormulas.diskWriteThroughput,
             label: i18n.translate('xpack.infra.assetDetails.metricsCharts.metric.label.write', {
               defaultMessage: 'Write',
             }),
