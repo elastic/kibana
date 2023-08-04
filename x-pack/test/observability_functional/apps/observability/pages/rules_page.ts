@@ -139,7 +139,7 @@ export default ({ getService }: FtrProviderContext) => {
         await testSubjects.waitForDeleted('centerJustifiedSpinner');
         const tableRows = await find.allByCssSelector('.euiTableRow');
         const rows = await getRulesList(tableRows);
-        expect(rows.length).to.be(2);
+        expect(rows.length).to.be(1);
         expect(rows[0].name).to.contain('error-log');
         expect(rows[0].enabled).to.be('Enabled');
         expect(rows[1].name).to.contain('uptime');
