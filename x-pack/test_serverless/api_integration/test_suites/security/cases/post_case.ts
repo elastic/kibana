@@ -9,10 +9,7 @@ import expect from '@kbn/expect';
 
 import { ConnectorTypes } from '@kbn/cases-plugin/common/types/domain';
 import { getPostCaseRequest, postCaseResp } from './helpers/mock';
-import {
-  deleteCasesByESQuery,
-  createCase,
-} from './helpers/api';
+import { deleteCasesByESQuery, createCase } from './helpers/api';
 import { removeServerGeneratedPropertiesFromCase } from './helpers/omit';
 
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
@@ -59,23 +56,25 @@ export default ({ getService }: FtrProviderContext): void => {
     it('should throw 403 when create a case with observability as owner', async () => {
       expect(
         await createCase(
-        supertest,
-        getPostCaseRequest({
-          owner: 'observability'
-        }),
-        403
-      ));
+          supertest,
+          getPostCaseRequest({
+            owner: 'observability',
+          }),
+          403
+        )
+      );
     });
 
     it('should throw 403 when create a case with cases as owner', async () => {
       expect(
         await createCase(
-        supertest,
-        getPostCaseRequest({
-          owner: 'cases'
-        }),
-        403
-      ));
+          supertest,
+          getPostCaseRequest({
+            owner: 'cases',
+          }),
+          403
+        )
+      );
     });
   });
 };

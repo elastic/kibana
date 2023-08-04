@@ -8,11 +8,7 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
-import {
-  findCases,
-  createCase,
-  deleteAllCaseItems
-} from './helpers/api';
+import { findCases, createCase, deleteAllCaseItems } from './helpers/api';
 import { findCasesResp, postCaseReq } from './helpers/mock';
 
 // eslint-disable-next-line import/no-default-export

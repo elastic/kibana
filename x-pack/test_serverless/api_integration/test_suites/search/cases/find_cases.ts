@@ -14,7 +14,8 @@ export default ({ getService }: FtrProviderContext): void => {
 
   describe('find_cases', () => {
     it('403 when find cases', async () => {
-      await supertest.get(`${CASES_URL}/_find`)
+      await supertest
+        .get(`${CASES_URL}/_find`)
         .set('kbn-xsrf', 'foo')
         .set('x-elastic-internal-origin', 'foo')
         .expect(403);

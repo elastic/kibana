@@ -8,11 +8,7 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
-import {
-  getCase,
-  createCase,
-  deleteCasesByESQuery
-} from './helpers/api';
+import { getCase, createCase, deleteCasesByESQuery } from './helpers/api';
 import { getPostCaseRequest, postCaseResp } from './helpers/mock';
 import { removeServerGeneratedPropertiesFromCase } from './helpers/omit';
 
@@ -35,4 +31,4 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(data.comments?.length).to.eql(0);
     });
   });
-}
+};

@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import {
-  Case,
-  CaseSeverity,
-  CaseStatuses,
-} from '@kbn/cases-plugin/common/types/domain';
+import { Case, CaseSeverity, CaseStatuses } from '@kbn/cases-plugin/common/types/domain';
 import type { CasePostRequest } from '@kbn/cases-plugin/common/types/api';
 import { ConnectorTypes } from '@kbn/cases-plugin/common/types/domain';
 import { CasesFindResponse } from '@kbn/cases-plugin/common/types/api';
