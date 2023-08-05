@@ -121,6 +121,7 @@ export const NavigationEmbeddablePanelEditorLink = ({
     <EuiPanel
       hasBorder
       hasShadow={false}
+      color={dashboardError ? 'warning' : 'plain'}
       className={`navEmbeddableLinkPanel ${dashboardError ? 'linkError' : ''}`}
     >
       <EuiFlexGroup gutterSize="s" responsive={false} wrap={false} alignItems="center">

@@ -1,5 +1,4 @@
 .navEmbeddableComponent {
-  font-weight: $euiFontWeightRegular;
 
   .navigationLink {
     max-width: fit-content; // added this so that the error tooltip shows up **right beside** the link label
@@ -18,22 +17,22 @@
       border-radius: 0;
       .euiListGroupItem__text {
         cursor: default;
-        font-weight: $euiFontWeightSemiBold;
         color: $euiColorPrimary;
       }
     }
   }
 
   .verticalLayoutWrapper {
+    gap: $euiSizeXS;
     .navigationLink {
-      .euiListGroupItem__text {
-        line-height: 1.2rem;
-        min-block-size: 1.2rem;
-        padding-block: $euiSizeXS;
-      }
-
       &.navigationLinkCurrent {
-        box-shadow: $euiColorPrimary 2px 0 0 inset;
+        &::before {
+          content: "";
+          position: absolute;
+          width: 0.5 * $euiSizeXS;
+          height: 75%;
+          background-color: $euiColorPrimary;
+        }
       }
     }
   }
@@ -47,7 +46,7 @@
 
     .navigationLink {
       &.navigationLinkCurrent {
-        box-shadow: $euiColorPrimary 0 -2px 0 inset;
+        box-shadow: $euiColorPrimary 0 (-0.5 * $euiSizeXS) 0 inset;
 
         .euiListGroupItem__text {
           padding-inline: 0;

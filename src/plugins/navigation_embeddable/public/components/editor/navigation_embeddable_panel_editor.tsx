@@ -175,7 +175,10 @@ const NavigationEmbeddablePanelEditor = ({
               <EuiFormRow label={NavEmbeddableStrings.editor.panelEditor.getLinksTitle()}>
                 <div>
                   <EuiDragDropContext onDragEnd={onDragEnd}>
-                    <EuiDroppable droppableId="navEmbeddableDroppableLinksArea">
+                    <EuiDroppable
+                      className="navEmbeddableDroppableLinksArea"
+                      droppableId="navEmbeddableDroppableLinksArea"
+                    >
                       {orderedLinks.map((link, idx) => (
                         <EuiDraggable
                           spacing="m"
@@ -198,7 +201,12 @@ const NavigationEmbeddablePanelEditor = ({
                       ))}
                     </EuiDroppable>
                   </EuiDragDropContext>
-                  <EuiButtonEmpty size="s" iconType="plusInCircle" onClick={() => addOrEditLink()}>
+                  <EuiButtonEmpty
+                    flush="left"
+                    size="s"
+                    iconType="plusInCircle"
+                    onClick={() => addOrEditLink()}
+                  >
                     {NavEmbeddableStrings.editor.getAddButtonLabel()}
                   </EuiButtonEmpty>
                 </div>
