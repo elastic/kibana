@@ -11,7 +11,7 @@ import { services } from './apm_api_integration/common/services';
 export default createTestConfig({
   testFiles: [require.resolve('../common'), require.resolve('.')],
   junit: {
-    reportName: 'Serverless Observability API Integration Tests',
+    reportName: 'Serverless Observability + Feature Flags API Integration Tests',
   },
   suiteTags: { exclude: ['skipSvlOblt'] },
   services,

@@ -6,28 +6,27 @@
  */
 import { FtrConfigProviderContext } from '@kbn/test';
 
-import { services } from './services';
-import type { CreateTestConfigOptions } from '../shared/types';
+import { services } from '../services';
+import type { CreateTestConfigOptions } from '../types';
 
 export function createTestConfig(options: CreateTestConfigOptions) {
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
-    const svlSharedConfig = await readConfigFile(require.resolve('../shared/config.base.ts'));
+    const svlBaseConfig = await readConfigFile(require.resolve('../config.base.ts'));
 
     return {
-      ...svlSharedConfig.getAll(),
+      ...svlBaseConfig.getAll(),
 
       services: {
         ...services,
         ...options.services,
       },
       kbnTestServer: {
-        ...svlSharedConfig.get('kbnTestServer'),
+        ...svlBaseConfig.get('kbnTestServer'),
         serverArgs: [
-          ...svlSharedConfig.get('kbnTestServer.serverArgs'),
-          `--serverless=${options.serverlessProject}`,
+          ...svlBaseConfig.get('kbnTestServer.serverArgs'),
+          `--serverless=oblt`,
           `--xpack.alerting.enableFrameworkAlerts=true`,
           '--xpack.encryptedSavedObjects.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"',
-          '--xpack.observability.unsafe.thresholdRule.enabled=true',
           '--server.publicBaseUrl=https://localhost:5601',
         ],
       },
