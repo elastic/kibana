@@ -10,12 +10,12 @@ import { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiPageHeader,
-  EuiEmptyPrompt,
   EuiPageSection,
   EuiSpacer,
   EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
+  EuiPageTemplate,
 } from '@elastic/eui';
 
 import { Pipeline } from '../../../../common/types';
@@ -108,29 +108,27 @@ export const PipelinesEdit: React.FunctionComponent<RouteComponentProps<MatchPar
 
   if (error) {
     return (
-      <EuiPageSection alignment="center" color="danger" data-test-subj="fetchPipelineError">
-        <EuiEmptyPrompt
-          iconType="warning"
-          title={
-            <h2>
-              <FormattedMessage
-                id="xpack.ingestPipelines.edit.fetchPipelineError"
-                defaultMessage="Unable to load '{name}'"
-                values={{ name: decodedPipelineName }}
-              />
-            </h2>
-          }
-          body={<p>{error.message}</p>}
-          actions={
-            <EuiButton onClick={resendRequest} iconType="refresh" color="danger">
-              <FormattedMessage
-                id="xpack.ingestPipelines.edit.fetchPipelineReloadButton"
-                defaultMessage="Try again"
-              />
-            </EuiButton>
-          }
-        />
-      </EuiPageSection>
+      <EuiPageTemplate.EmptyPrompt
+        iconType="warning"
+        title={
+          <h2>
+            <FormattedMessage
+              id="xpack.ingestPipelines.edit.fetchPipelineError"
+              defaultMessage="Unable to load '{name}'"
+              values={{ name: decodedPipelineName }}
+            />
+          </h2>
+        }
+        body={<p>{error.message}</p>}
+        actions={
+          <EuiButton onClick={resendRequest} iconType="refresh" color="danger">
+            <FormattedMessage
+              id="xpack.ingestPipelines.edit.fetchPipelineReloadButton"
+              defaultMessage="Try again"
+            />
+          </EuiButton>
+        }
+      />
     );
   }
 
