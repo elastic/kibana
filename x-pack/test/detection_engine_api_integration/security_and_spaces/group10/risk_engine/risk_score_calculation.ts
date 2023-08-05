@@ -62,7 +62,7 @@ export default ({ getService }: FtrProviderContext): void => {
     });
   };
 
-  describe('Risk Engine Scoring - Calculation', () => {
+  describe('Risk Engine Scoring - Calculation API', () => {
     context('with auditbeat data', () => {
       const { indexListOfDocuments } = dataGeneratorFactory({
         es,

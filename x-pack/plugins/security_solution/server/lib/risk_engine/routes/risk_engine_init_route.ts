@@ -5,18 +5,20 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
+import type { Logger, StartServicesAccessor } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { RISK_ENGINE_INIT_URL, APP_ID } from '../../../../common/constants';
-import type { SetupPlugins } from '../../../plugin';
+import type { SetupPlugins, StartPlugins } from '../../../plugin';
 
 import type { SecuritySolutionPluginRouter } from '../../../types';
+import { riskScoreServiceFactory } from '../risk_score_service';
 
 export const riskEngineInitRoute = (
   router: SecuritySolutionPluginRouter,
   logger: Logger,
-  security: SetupPlugins['security']
+  security: SetupPlugins['security'],
+  getStartServices: StartServicesAccessor<StartPlugins>
 ) => {
   router.post(
     {
@@ -29,12 +31,30 @@ export const riskEngineInitRoute = (
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
       const securitySolution = await context.securitySolution;
+      const [_, { taskManager }] = await getStartServices();
       const riskEngineClient = securitySolution.getRiskEngineDataClient();
       const spaceId = securitySolution.getSpaceId();
+      const riskScoreService = riskScoreServiceFactory({
+        esClient: (await context.core).elasticsearch.client.asCurrentUser,
+        logger,
+        riskEngineDataClient: riskEngineClient,
+        spaceId,
+      });
 
       try {
+        if (!taskManager) {
+          return siemResponse.error({
+            statusCode: 400,
+            body: {
+              message: 'Task Manager is not available',
+            },
+          });
+        }
+
         const initResult = await riskEngineClient.init({
+          taskManager,
           namespace: spaceId,
+          riskScoreService,
         });
 
         const initResultResponse = {
