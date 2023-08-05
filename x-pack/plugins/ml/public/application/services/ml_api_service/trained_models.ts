@@ -6,6 +6,7 @@
  */
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
 
 import { useMemo } from 'react';
 import type { HttpFetchQuery } from '@kbn/core/public';
@@ -120,7 +121,7 @@ export function trainedModelsApiProvider(httpService: HttpService) {
     /**
      * Creates inference pipeline
      */
-    createInferencePipeline(pipelineName: string, pipeline: estypes.IngestPipeline) {
+    createInferencePipeline(pipelineName: string, pipeline: IngestPipeline) {
       return httpService.http<estypes.IngestSimulateResponse>({
         path: `${ML_INTERNAL_BASE_PATH}/trained_models/create_inference_pipeline`,
         method: 'POST',

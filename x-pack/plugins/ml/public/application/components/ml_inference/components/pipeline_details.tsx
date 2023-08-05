@@ -85,13 +85,26 @@ export const PipelineDetails: FC<Props> = memo(
               />
             </p>
             <p>
-              {i18n.translate(
-                'xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.configure.descriptionUsePipelines',
-                {
-                  defaultMessage:
-                    'Use pipeline/_simulate or _reindex API to pass data into this pipeline. Predictions are stored in the Target field.',
-                }
-              )}
+              <FormattedMessage
+                id="xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.configure.descriptionUsePipelines"
+                defaultMessage="Use {pipelineSimulateLink} or {reindexLink} to pass data into this pipeline. Predictions are stored in the Target field."
+                values={{
+                  reindexLink: (
+                    <EuiLink
+                      external
+                      target="_blank"
+                      href={links.upgradeAssistant.reindexWithPipeline}
+                    >
+                      _reindex API
+                    </EuiLink>
+                  ),
+                  pipelineSimulateLink: (
+                    <EuiLink external target="_blank" href={links.apis.simulatePipeline}>
+                      pipeline/_simulate
+                    </EuiLink>
+                  ),
+                }}
+              />
             </p>
           </EuiText>
         </EuiFlexItem>

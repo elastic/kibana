@@ -263,7 +263,7 @@ export const ProcessorConfiguration: FC<Props> = memo(
                 <p>
                   <FormattedMessage
                     id="xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.advanced.fieldMapDescriptionTwo"
-                    defaultMessage="The list of fields the model expects. {fieldsList}"
+                    defaultMessage="The model expects certain input fields. {fieldsList}"
                     values={{
                       fieldsList: (
                         <EuiPopover

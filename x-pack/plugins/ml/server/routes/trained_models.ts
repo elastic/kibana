@@ -297,7 +297,10 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
       routeGuard.fullLicenseAPIGuard(async ({ client, request, mlClient, response }) => {
         try {
           const { pipeline, pipelineName } = request.body;
-          const body = await modelsProvider(client).createInferencePipeline(pipeline, pipelineName);
+          const body = await modelsProvider(client).createInferencePipeline(
+            pipeline!,
+            pipelineName
+          );
           return response.ok({
             body,
           });
