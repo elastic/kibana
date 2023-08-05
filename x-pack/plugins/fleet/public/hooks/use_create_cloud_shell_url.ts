@@ -29,14 +29,14 @@ export const useCreateCloudShellUrl = ({
 
   if (!fleetServerHost && !isLoading) {
     isError = true;
-    error = i18n.translate('xpack.fleet.agentEnrollment.cloudFormation.noFleetServerHost', {
+    error = i18n.translate('xpack.fleet.agentEnrollment.cloudShell.noFleetServerHost', {
       defaultMessage: 'No Fleet Server host found',
     });
   }
 
   if (!enrollmentAPIKey && !isLoading) {
     isError = true;
-    error = i18n.translate('xpack.fleet.agentEnrollment.cloudFormation.noApiKey', {
+    error = i18n.translate('xpack.fleet.agentEnrollment.cloudShell.noApiKey', {
       defaultMessage: 'No enrollment token found',
     });
   }
