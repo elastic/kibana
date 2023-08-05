@@ -285,7 +285,14 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         expect(response?.saved_objects?.[0]?.attributes).to.eql({
+          dataViewId: '.alerts-security.alerts-default',
           enabled: true,
+          filter: {},
+          pageSize: 10000,
+          range: {
+            end: 'now',
+            start: 'now-30d',
+          },
         });
       });
 
