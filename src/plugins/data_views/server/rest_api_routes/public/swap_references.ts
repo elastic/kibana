@@ -56,13 +56,15 @@ export const swapReferencesRoute = (
       version: INITIAL_REST_VERSION,
       validate: {
         request: {
-          body: schema.object({
-            from_id: idSchema,
-            from_type: schema.maybe(schema.string()),
-            to_id: idSchema,
-            for_id: schema.maybe(schema.oneOf([idSchema, schema.arrayOf(idSchema)])),
-            for_type: schema.maybe(schema.string()),
+          params: schema.object({
             preview: schema.maybe(schema.boolean()),
+          }),
+          body: schema.object({
+            fromId: idSchema,
+            fromType: schema.maybe(schema.string()),
+            toId: idSchema,
+            forId: schema.maybe(schema.oneOf([idSchema, schema.arrayOf(idSchema)])),
+            forType: schema.maybe(schema.string()),
             delete: schema.maybe(schema.boolean()),
           }),
         },
@@ -70,7 +72,6 @@ export const swapReferencesRoute = (
           200: {
             body: schema.object({
               result: schema.arrayOf(schema.object({ id: idSchema, type: schema.string() })),
-              preview: schema.boolean(),
               deleteSuccess: schema.maybe(schema.boolean()),
             }),
           },
@@ -82,30 +83,30 @@ export const swapReferencesRoute = (
         const savedObjectsClient = (await ctx.core).savedObjects.client;
         const [core] = await getStartServices();
         const types = core.savedObjects.getTypeRegistry().getAllTypes();
-        const type = req.body.from_type || DATA_VIEW_SAVED_OBJECT_TYPE;
-        const preview = req.body.preview !== undefined ? req.body.preview : true;
+        const type = req.body.fromType || DATA_VIEW_SAVED_OBJECT_TYPE;
+        const preview = req.params.preview !== undefined ? req.params.preview : true;
         const searchId =
-          !Array.isArray(req.body.for_id) && req.body.for_id !== undefined
-            ? [req.body.for_id]
-            : req.body.for_id;
+          !Array.isArray(req.body.forId) && req.body.forId !== undefined
+            ? [req.body.forId]
+            : req.body.forId;
 
         usageCollection?.incrementCounter({ counterName: 'swap_references' });
 
         // verify 'to' object actually exists
         try {
-          await savedObjectsClient.get(type, req.body.to_id);
+          await savedObjectsClient.get(type, req.body.toId);
         } catch (e) {
-          throw new Error(`Could not find object with type ${type} and id ${req.body.to_id}`);
+          throw new Error(`Could not find object with type ${type} and id ${req.body.toId}`);
         }
 
         // assemble search params
         const findParams: SavedObjectsFindOptions = {
           type: types.map((t) => t.name),
-          hasReference: { type, id: req.body.from_id },
+          hasReference: { type, id: req.body.fromId },
         };
 
-        if (req.body.for_type) {
-          findParams.type = [req.body.for_type];
+        if (req.body.forType) {
+          findParams.type = [req.body.forType];
         }
 
         const { saved_objects: savedObjects } = await savedObjectsClient.find(findParams);
@@ -138,8 +139,8 @@ export const swapReferencesRoute = (
         // iterate over list and update references
         for (const savedObject of filteredSavedObjects) {
           const updatedRefs = savedObject.references.map((ref) => {
-            if (ref.type === type && ref.id === req.body.from_id) {
-              return { ...ref, id: req.body.to_id };
+            if (ref.type === type && ref.id === req.body.fromId) {
+              return { ...ref, id: req.body.toId };
             } else {
               return ref;
             }
@@ -160,7 +161,7 @@ export const swapReferencesRoute = (
           if (verifyNoMoreRefs.total > 0) {
             body.deleteSuccess = false;
           } else {
-            await savedObjectsClient.delete(type, req.body.from_id);
+            await savedObjectsClient.delete(type, req.body.fromId);
             body.deleteSuccess = true;
           }
         }

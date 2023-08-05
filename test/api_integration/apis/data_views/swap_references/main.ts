@@ -52,8 +52,8 @@ export default function ({ getService }: FtrProviderContext) {
         .post(DATA_VIEW_SWAP_REFERENCES_PATH)
         .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
         .send({
-          from_id: prevDataViewId,
-          to_id: dataViewId,
+          fromId: prevDataViewId,
+          toId: dataViewId,
         });
       expect(res).to.have.property('status', 200);
     });
@@ -63,9 +63,9 @@ export default function ({ getService }: FtrProviderContext) {
         .post(DATA_VIEW_SWAP_REFERENCES_PATH)
         .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
         .send({
-          from_id: prevDataViewId,
-          from_type: 'index-pattern',
-          to_id: dataViewId,
+          fromId: prevDataViewId,
+          fromType: 'index-pattern',
+          toId: dataViewId,
         });
       expect(res).to.have.property('status', 200);
     });
@@ -73,11 +73,11 @@ export default function ({ getService }: FtrProviderContext) {
     it('can save changes', async () => {
       const res = await supertest
         .post(DATA_VIEW_SWAP_REFERENCES_PATH)
+        .query({ preview: false })
         .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
         .send({
-          from_id: prevDataViewId,
-          to_id: dataViewId,
-          preview: false,
+          fromId: prevDataViewId,
+          toId: dataViewId,
         });
       expect(res).to.have.property('status', 200);
       expect(res.body.result.length).to.equal(1);
@@ -89,11 +89,11 @@ export default function ({ getService }: FtrProviderContext) {
     it('can save changes and remove old saved object', async () => {
       const res = await supertest
         .post(DATA_VIEW_SWAP_REFERENCES_PATH)
+        .query({ preview: false })
         .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
         .send({
-          from_id: prevDataViewId,
-          to_id: dataViewId,
-          preview: false,
+          fromId: prevDataViewId,
+          toId: dataViewId,
           delete: true,
         });
       expect(res).to.have.property('status', 200);
@@ -123,8 +123,8 @@ export default function ({ getService }: FtrProviderContext) {
         const res = await supertest
           .post(DATA_VIEW_SWAP_REFERENCES_PATH)
           .send({
-            from_id: '8963ca30-3224-11e8-a572-ffca06da1357',
-            to_id: '91200a00-9efd-11e7-acb3-3dab96693fab',
+            fromId: '8963ca30-3224-11e8-a572-ffca06da1357',
+            toId: '91200a00-9efd-11e7-acb3-3dab96693fab',
           })
           .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION);
         expect(res).to.have.property('status', 200);
@@ -133,11 +133,11 @@ export default function ({ getService }: FtrProviderContext) {
         // limit to one item
         const res2 = await supertest
           .post(DATA_VIEW_SWAP_REFERENCES_PATH)
+          .query({ preview: false })
           .send({
-            from_id: '8963ca30-3224-11e8-a572-ffca06da1357',
-            to_id: '91200a00-9efd-11e7-acb3-3dab96693fab',
-            for_id: ['960372e0-3224-11e8-a572-ffca06da1357'],
-            preview: false,
+            fromId: '8963ca30-3224-11e8-a572-ffca06da1357',
+            toId: '91200a00-9efd-11e7-acb3-3dab96693fab',
+            forId: ['960372e0-3224-11e8-a572-ffca06da1357'],
           })
           .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION);
         expect(res2).to.have.property('status', 200);
@@ -149,8 +149,8 @@ export default function ({ getService }: FtrProviderContext) {
         const res = await supertest
           .post(DATA_VIEW_SWAP_REFERENCES_PATH)
           .send({
-            from_id: '8963ca30-3224-11e8-a572-ffca06da1357',
-            to_id: '91200a00-9efd-11e7-acb3-3dab96693fab',
+            fromId: '8963ca30-3224-11e8-a572-ffca06da1357',
+            toId: '91200a00-9efd-11e7-acb3-3dab96693fab',
           })
           .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION);
         expect(res).to.have.property('status', 200);
@@ -159,11 +159,11 @@ export default function ({ getService }: FtrProviderContext) {
         // limit to one item
         const res2 = await supertest
           .post(DATA_VIEW_SWAP_REFERENCES_PATH)
+          .query({ preview: false })
           .send({
-            from_id: '8963ca30-3224-11e8-a572-ffca06da1357',
-            to_id: '91200a00-9efd-11e7-acb3-3dab96693fab',
-            for_type: 'search',
-            preview: false,
+            fromId: '8963ca30-3224-11e8-a572-ffca06da1357',
+            toId: '91200a00-9efd-11e7-acb3-3dab96693fab',
+            forType: 'search',
           })
           .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION);
         expect(res2).to.have.property('status', 200);
