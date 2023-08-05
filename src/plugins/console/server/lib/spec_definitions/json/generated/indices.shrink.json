@@ -10,7 +10,7 @@
       "POST"
     ],
     "patterns": [
-      "{indices}/_shrink/{target}"
+      "{index}/_shrink/{target}"
     ],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-shrink-index.html"
   }
