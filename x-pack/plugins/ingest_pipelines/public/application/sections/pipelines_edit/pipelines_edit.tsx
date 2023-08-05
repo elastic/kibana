@@ -10,7 +10,6 @@ import { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiPageHeader,
-  EuiPageSection,
   EuiSpacer,
   EuiButton,
   EuiButtonEmpty,
@@ -95,14 +94,12 @@ export const PipelinesEdit: React.FunctionComponent<RouteComponentProps<MatchPar
 
   if (isLoading) {
     return (
-      <EuiPageSection alignment="center" color="subdued">
-        <SectionLoading>
-          <FormattedMessage
-            id="xpack.ingestPipelines.edit.loadingPipelinesDescription"
-            defaultMessage="Loading pipeline…"
-          />
-        </SectionLoading>
-      </EuiPageSection>
+      <SectionLoading>
+        <FormattedMessage
+          id="xpack.ingestPipelines.edit.loadingPipelinesDescription"
+          defaultMessage="Loading pipeline…"
+        />
+      </SectionLoading>
     );
   }
 
