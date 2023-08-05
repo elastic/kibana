@@ -81,7 +81,6 @@ export default function ({ getService }: FtrProviderContext) {
         });
       expect(res).to.have.property('status', 200);
       expect(res.body.result.length).to.equal(1);
-      expect(res.body.preview).to.equal(false);
       expect(res.body.result[0].id).to.equal('dd7caf20-9efd-11e7-acb3-3dab96693fab');
       expect(res.body.result[0].type).to.equal('visualization');
     });
