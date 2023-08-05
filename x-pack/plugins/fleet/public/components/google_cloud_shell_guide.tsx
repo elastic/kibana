@@ -25,51 +25,54 @@ const Link = ({ children, url }: { children: React.ReactNode; url: string }) => 
 
 export const GoogleCloudShellGuide = (props: { commandText: string }) => {
   return (
-    <EuiText>
-      <p>
-        <FormattedMessage
-          id="xpack.fleet.googleCloudShell.guide.description"
-          defaultMessage="The Google Cloud Shell Command below will create all the necessary resources to evaluate the security posture of your GCP projects. Learn more about {learnMore}."
-          values={{
-            learnMore: (
-              <Link url={GOOGLE_CLOUD_SHELL_EXTERNAL_DOC_URL}>
-                <FormattedMessage
-                  id="xpack.fleet.googleCloudShell.guide.learnMoreLinkText"
-                  defaultMessage="Google Cloud Shell"
-                />
-              </Link>
-            ),
-          }}
-        />
-      </p>
+    <>
+      <EuiSpacer size="m" />
       <EuiText size="s" color="subdued">
-        <ol>
-          <li>
-            <FormattedMessage
-              id="xpack.fleet.googleCloudShell.guide.steps.login"
-              defaultMessage="Log into your Google Cloud Console"
-            />
-          </li>
-          <li>
-            <>
+        <p>
+          <FormattedMessage
+            id="xpack.fleet.googleCloudShell.guide.description"
+            defaultMessage="The Google Cloud Shell Command below will create all the necessary resources to evaluate the security posture of your GCP projects. Learn more about {learnMore}."
+            values={{
+              learnMore: (
+                <Link url={GOOGLE_CLOUD_SHELL_EXTERNAL_DOC_URL}>
+                  <FormattedMessage
+                    id="xpack.fleet.googleCloudShell.guide.learnMoreLinkText"
+                    defaultMessage="Google Cloud Shell"
+                  />
+                </Link>
+              ),
+            }}
+          />
+        </p>
+        <EuiText size="s" color="subdued">
+          <ol>
+            <li>
               <FormattedMessage
-                id="xpack.fleet.googleCloudShell.guide.steps.copy"
-                defaultMessage="Copy the command below"
+                id="xpack.fleet.googleCloudShell.guide.steps.login"
+                defaultMessage="Log into your Google Cloud Console"
               />
-              <EuiSpacer size="m" />
-              <EuiCodeBlock language="bash" isCopyable>
-                {props.commandText}
-              </EuiCodeBlock>
-            </>
-          </li>
-          <li>
-            <FormattedMessage
-              id="xpack.fleet.googleCloudShell.guide.steps.launch"
-              defaultMessage="Click the Launch Google Cloud Shell button below and then execute the command you copied earlier in google cloud shell."
-            />
-          </li>
-        </ol>
+            </li>
+            <li>
+              <>
+                <FormattedMessage
+                  id="xpack.fleet.googleCloudShell.guide.steps.copy"
+                  defaultMessage="Copy the command below"
+                />
+                <EuiSpacer size="m" />
+                <EuiCodeBlock language="bash" isCopyable>
+                  {props.commandText}
+                </EuiCodeBlock>
+              </>
+            </li>
+            <li>
+              <FormattedMessage
+                id="xpack.fleet.googleCloudShell.guide.steps.launch"
+                defaultMessage="Click the Launch Google Cloud Shell button below and then execute the command you copied earlier in google cloud shell."
+              />
+            </li>
+          </ol>
+        </EuiText>
       </EuiText>
-    </EuiText>
+    </>
   );
 };

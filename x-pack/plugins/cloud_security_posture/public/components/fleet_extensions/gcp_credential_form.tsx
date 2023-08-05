@@ -450,7 +450,7 @@ const GcpInputVarFields = ({
               data-test-subj={CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_TYPE}
               fullWidth
               options={credentialOptionsList}
-              value={credentialsTypeFields?.value}
+              value={credentialsTypeFields?.value || credentialOptionsList[0].value}
               onChange={(optionElem) => {
                 onChange('credentials_type', optionElem.target.value);
               }}

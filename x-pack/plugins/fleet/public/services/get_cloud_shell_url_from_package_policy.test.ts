@@ -19,7 +19,7 @@ describe('getCloudShellUrlFromPackagePolicyy', () => {
     expect(result).toBeUndefined();
   });
 
-  test('returns undefined when no enabled input has a cloudFormationTemplateUrl', () => {
+  test('returns undefined when no enabled input has a CloudShellUrl', () => {
     const packagePolicy = {
       inputs: [
         { enabled: false, config: { cloud_shell_url: { value: 'url1' } } },
@@ -31,7 +31,7 @@ describe('getCloudShellUrlFromPackagePolicyy', () => {
     expect(result).toBeUndefined();
   });
 
-  test('returns the cloudFormationTemplateUrl of the first enabled input', () => {
+  test('returns the CloudShellUrl of the first enabled input', () => {
     const packagePolicy = {
       inputs: [
         { enabled: false, config: { cloud_shell_url: { value: 'url1' } } },
@@ -44,7 +44,7 @@ describe('getCloudShellUrlFromPackagePolicyy', () => {
     expect(result).toBe('url2');
   });
 
-  test('returns the cloudFormationTemplateUrl of the first enabled input and ignores subsequent inputs', () => {
+  test('returns the CloudShellUrl of the first enabled input and ignores subsequent inputs', () => {
     const packagePolicy = {
       inputs: [
         { enabled: true, config: { cloud_shell_url: { value: 'url1' } } },
