@@ -23,6 +23,7 @@ export type SelectionType = 'tabs' | 'radio' | undefined;
 export interface CloudSecurityIntegration {
   integrationType: CloudSecurityIntegrationType | undefined;
   cloudformationUrl: string | undefined;
+  cloudShellUrl: string | undefined;
 }
 
 export interface BaseProps {

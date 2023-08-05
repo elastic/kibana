@@ -155,7 +155,7 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<FlyOutProps> = ({
           </EuiText>
         )}
 
-        {selectionType === 'tabs' ? (
+        {selectionType === 'tabs' && !cloudSecurityIntegration?.cloudShellUrl ? (
           <>
             <EuiSpacer size="l" />
             <EuiTabs style={{ marginBottom: '-25px' }}>

@@ -268,6 +268,13 @@ const GcpAccountTypeSelect = ({
         size="m"
       />
       <EuiSpacer size="l" />
+      <EuiText color="subdued" size="s">
+        <FormattedMessage
+          id="xpack.csp.fleetIntegration.gcpAccountType.singleAccountDescription"
+          defaultMessage="Deploying to a single account is suitable for an initial POC. To ensure complete coverage, it is strongly recommended to deploy CSPM at the organization-level, which automatically connects all accounts (both current and future)."
+        />
+      </EuiText>
+      <EuiSpacer size="l" />
     </>
   );
 };

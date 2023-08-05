@@ -20,6 +20,7 @@ import {
   EuiForm,
   EuiCallOut,
   EuiTextArea,
+  EuiHorizontalRule,
 } from '@elastic/eui';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import { NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
@@ -44,7 +45,8 @@ export const CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS = {
 type SetupFormatGCP = 'google_cloud_shell' | 'manual';
 const GCPSetupInfoContent = () => (
   <>
-    <EuiSpacer size="l" />
+    <EuiHorizontalRule margin="xxl" />
+    <EuiSpacer size="s" />
     <EuiTitle size="s">
       <h2>
         <FormattedMessage
