@@ -7,6 +7,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiHeaderLink, EuiHeaderLinks, EuiIcon } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { ObservabilityAIAssistantActionMenuItem } from '@kbn/observability-ai-assistant-plugin/public';
 import { useProfilingRouter } from '../hooks/use_profiling_router';
 import { NoDataTabs } from '../views/no_data_view';
 
@@ -31,6 +32,7 @@ export function ProfilingHeaderActionMenu() {
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiHeaderLink>
+      <ObservabilityAIAssistantActionMenuItem />
     </EuiHeaderLinks>
   );
 }

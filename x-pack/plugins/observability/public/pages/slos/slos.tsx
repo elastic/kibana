@@ -20,6 +20,7 @@ import { AutoRefreshButton } from './components/auto_refresh_button';
 import { HeaderTitle } from './components/header_title';
 import { FeedbackButton } from '../../components/slo/feedback_button/feedback_button';
 import { paths } from '../../../common/locators/paths';
+import { HeaderMenu } from '../overview/components/header_menu/header_menu';
 
 export function SlosPage() {
   const {
@@ -88,6 +89,7 @@ export function SlosPage() {
       }}
       data-test-subj="slosPage"
     >
+      <HeaderMenu />
       <SloList autoRefresh={isAutoRefreshing} />
     </ObservabilityPageTemplate>
   );
