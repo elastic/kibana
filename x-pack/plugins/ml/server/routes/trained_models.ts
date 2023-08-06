@@ -103,7 +103,7 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
                 modelIdsAndAliases.map(async (modelIdAndAlias) => {
                   return {
                     modelIdAndAlias,
-                    result: await modelsManager.getModelsPipelinesAndIndices(modelIdAndAlias),
+                    result: await modelsManager.getModelsPipelinesAndIndicesMap(modelIdAndAlias),
                   };
                 })
               );

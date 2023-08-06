@@ -115,10 +115,10 @@ export class ModelsProvider {
   }
 
   /**
-   * Retrieves the map of model ids and aliases with associated pipelines.
+   * Retrieves the network map and metadata of model ids, pipelines, and indices that are tied to the model ids.
    * @param modelIds - Array of models ids and model aliases.
    */
-  async getModelsPipelinesAndIndices(modelId: string): Promise<ModelMapResult> {
+  async getModelsPipelinesAndIndicesMap(modelId: string): Promise<ModelMapResult> {
     const result: ModelMapResult = {
       ingestPipelines: new Map(),
       indices: [],

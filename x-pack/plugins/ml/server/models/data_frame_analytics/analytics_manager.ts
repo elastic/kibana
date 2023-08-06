@@ -575,9 +575,8 @@ export class AnalyticsManager {
       }
 
       if (modelId && model) {
-        const pipelinesAndIndicesResults = await this._modelsProvider.getModelsPipelinesAndIndices(
-          modelId
-        );
+        const pipelinesAndIndicesResults =
+          await this._modelsProvider.getModelsPipelinesAndIndicesMap(modelId);
         // Adding information about the trained model
         pipelinesAndIndicesResults.elements.push({
           data: {
