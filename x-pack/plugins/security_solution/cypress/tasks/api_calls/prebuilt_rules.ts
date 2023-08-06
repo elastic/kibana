@@ -74,6 +74,41 @@ export const excessivelyInstallAllPrebuiltRules = () => {
   installAllPrebuiltRulesRequest();
 };
 
+export const waitUntilAllRuleAssetsCreated = (
+  rules: Array<typeof SAMPLE_PREBUILT_RULE>,
+  index = '.kibana_security_solution'
+) =>
+  cy.waitUntil(
+    () => {
+      return cy
+        .request({
+          method: 'GET',
+          url: `${Cypress.env('ELASTICSEARCH_URL')}/${index}/_search`,
+          headers: { 'kbn-xsrf': 'cypress-creds', 'Content-Type': 'application/json' },
+          failOnStatusCode: false,
+          body: {
+            query: {
+              match: {
+                type: 'security-rule',
+              },
+            },
+          },
+        })
+        .then((response) => {
+          const areAllRulesCreated = rules.every((rule) =>
+            // Checking that all the expected rules are stored in ES
+            response.body.hits.hits.some(
+              (storedRule: { _source: typeof SAMPLE_PREBUILT_RULE }) =>
+                storedRule._source['security-rule'].rule_id === rule['security-rule'].rule_id
+            )
+          );
+
+          return areAllRulesCreated;
+        });
+    },
+    { interval: 500, timeout: 12000 }
+  );
+
 export const createNewRuleAsset = ({
   index = '.kibana_security_solution',
   rule = SAMPLE_PREBUILT_RULE,
@@ -84,6 +119,7 @@ export const createNewRuleAsset = ({
   const url = `${Cypress.env('ELASTICSEARCH_URL')}/${index}/_doc/security-rule:${
     rule['security-rule'].rule_id
   }`;
+  cy.log('URL', url);
   cy.waitUntil(
     () => {
       return cy
@@ -170,6 +206,7 @@ export const getRuleAssets = (index: string | undefined = '.kibana_security_solu
 /* during e2e tests, and allow for manual installation of mock rules instead. */
 export const preventPrebuiltRulesPackageInstallation = () => {
   cy.intercept('POST', '/api/fleet/epm/packages/_bulk*', {});
+  cy.intercept('POST', '/api/fleet/epm/packages/security_detection_engine/*', {});
 };
 
 /**
@@ -190,14 +227,19 @@ export const createAndInstallMockedPrebuiltRules = ({
   rules?: Array<typeof SAMPLE_PREBUILT_RULE>;
   installToKibana?: boolean;
 }) => {
-  cy.log('Install prebuilt rules');
+  cy.log('Install prebuilt rules', rules?.length);
   preventPrebuiltRulesPackageInstallation();
   // TODO: use this bulk method once the issue with Cypress is fixed
   // bulkCreateRuleAssets({ rules });
   rules?.forEach((rule) => {
     createNewRuleAsset({ rule });
   });
+
+  if (rules?.length) {
+    waitUntilAllRuleAssetsCreated(rules);
+  }
+
   if (installToKibana) {
-    installAllPrebuiltRulesRequest();
+    return installAllPrebuiltRulesRequest();
   }
 };

@@ -104,10 +104,12 @@ export interface APMUsage {
     metric: TimeframeMap;
     onboarding: TimeframeMap;
     agent_configuration: TimeframeMapAll;
-    max_transaction_groups_per_service: TimeframeMap;
-    max_error_groups_per_service: TimeframeMap;
+    max_transaction_groups_per_service: TimeframeMap1d;
+    max_error_groups_per_service: TimeframeMap1d;
     traces: TimeframeMap;
     services: TimeframeMap;
+    environments: TimeframeMap1d;
+    span_destination_service_resource: TimeframeMap1d;
   };
   cardinality: {
     client: { geo: { country_iso_code: { rum: TimeframeMap1d } } };

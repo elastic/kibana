@@ -16,6 +16,7 @@ import {
 import {
   BLOCKLIST_PATH,
   ENDPOINTS_PATH,
+  ENTITY_ANALYTICS_MANAGEMENT_PATH,
   EVENT_FILTERS_PATH,
   HOST_ISOLATION_EXCEPTIONS_PATH,
   MANAGE_PATH,
@@ -34,6 +35,7 @@ import {
   POLICIES,
   RESPONSE_ACTIONS_HISTORY,
   TRUSTED_APPLICATIONS,
+  ENTITY_ANALYTICS_RISK_SCORE,
 } from '../app/translations';
 import { licenseService } from '../common/hooks/use_license';
 import type { LinkItem } from '../common/links/types';
@@ -46,9 +48,16 @@ import { IconTool } from '../common/icons/tool';
 import { IconPipeline } from '../common/icons/pipeline';
 import { IconSavedObject } from '../common/icons/saved_object';
 import { IconDashboards } from '../common/icons/dashboards';
+import { IconEntityAnalytics } from '../common/icons/entity_analytics';
 import { HostIsolationExceptionsApiClient } from './pages/host_isolation_exceptions/host_isolation_exceptions_api_client';
 
 const categories = [
+  {
+    label: i18n.translate('xpack.securitySolution.appLinks.category.entityAnalytics', {
+      defaultMessage: 'Entity Analytics',
+    }),
+    linkIds: [SecurityPageName.entityAnalyticsManagement],
+  },
   {
     label: i18n.translate('xpack.securitySolution.appLinks.category.endpoints', {
       defaultMessage: 'Endpoints',
@@ -158,6 +167,19 @@ export const links: LinkItem = {
       hideTimeline: true,
     },
     {
+      id: SecurityPageName.entityAnalyticsManagement,
+      title: ENTITY_ANALYTICS_RISK_SCORE,
+      description: i18n.translate('xpack.securitySolution.appLinks.entityRiskScoringDescription', {
+        defaultMessage: 'Manage entity risk scoring and detect insider threats.',
+      }),
+      landingIcon: IconEntityAnalytics,
+      path: ENTITY_ANALYTICS_MANAGEMENT_PATH,
+      skipUrlState: true,
+      hideTimeline: true,
+      capabilities: [`${SERVER_APP_ID}.entity-analytics`],
+      experimentalKey: 'riskScoringRoutesEnabled',
+    },
+    {
       id: SecurityPageName.responseActionsHistory,
       title: RESPONSE_ACTIONS_HISTORY,
       description: i18n.translate('xpack.securitySolution.appLinks.actionHistoryDescription', {
@@ -196,7 +218,7 @@ export const getManagementFilteredLinks = async (
     fleetAuthz && currentUser
       ? calculateEndpointAuthz(licenseService, fleetAuthz, currentUser.roles)
       : getEndpointAuthzInitialState();
-
+  const showEntityAnalytics = licenseService.isPlatinumPlus();
   const showHostIsolationExceptions =
     canAccessHostIsolationExceptions || // access host isolation exceptions is a paid feature, always show the link.
     // read host isolation exceptions is not a paid feature, to allow deleting exceptions after a downgrade scenario.
@@ -232,6 +254,10 @@ export const getManagementFilteredLinks = async (
 
   if (!canReadBlocklist) {
     linksToExclude.push(SecurityPageName.blocklist);
+  }
+
+  if (!showEntityAnalytics) {
+    linksToExclude.push(SecurityPageName.entityAnalyticsManagement);
   }
 
   return excludeLinks(linksToExclude);

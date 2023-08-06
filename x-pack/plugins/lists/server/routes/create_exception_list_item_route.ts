@@ -7,14 +7,14 @@
 
 import { validate } from '@kbn/securitysolution-io-ts-utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import {
-  CreateExceptionListItemSchemaDecoded,
-  createExceptionListItemSchema,
-  exceptionListItemSchema,
-} from '@kbn/securitysolution-io-ts-list-types';
 import { EXCEPTION_LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
 
 import type { ListsPluginRouter } from '../types';
+import {
+  CreateExceptionListItemRequestDecoded,
+  createExceptionListItemRequest,
+  createExceptionListItemResponse,
+} from '../../common/api';
 
 import { buildRouteValidation, buildSiemResponse } from './utils';
 import { getExceptionListClient } from './utils/get_exception_list_client';
@@ -30,9 +30,9 @@ export const createExceptionListItemRoute = (router: ListsPluginRouter): void =>
       path: EXCEPTION_LIST_ITEM_URL,
       validate: {
         body: buildRouteValidation<
-          typeof createExceptionListItemSchema,
-          CreateExceptionListItemSchemaDecoded
-        >(createExceptionListItemSchema),
+          typeof createExceptionListItemRequest,
+          CreateExceptionListItemRequestDecoded
+        >(createExceptionListItemRequest),
       },
     },
     async (context, request, response) => {
@@ -103,7 +103,7 @@ export const createExceptionListItemRoute = (router: ListsPluginRouter): void =>
               tags,
               type,
             });
-            const [validated, errors] = validate(createdList, exceptionListItemSchema);
+            const [validated, errors] = validate(createdList, createExceptionListItemResponse);
             if (errors != null) {
               return siemResponse.error({ body: errors, statusCode: 500 });
             } else {

@@ -1,0 +1,8 @@
+name: format
+in: query
+description: Simplified or legacy format for package inputs
+required: false
+schema:
+  type: string
+  enum: ['simplified', 'legacy']
+  

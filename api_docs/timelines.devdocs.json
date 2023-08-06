@@ -1556,14 +1556,6 @@
           {
             "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/public/detections/components/alerts_kpis/common/hooks.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/detections/hooks/trigger_actions_alert_table/use_cell_actions.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/detections/hooks/trigger_actions_alert_table/use_cell_actions.tsx"
           }
         ],
         "children": [

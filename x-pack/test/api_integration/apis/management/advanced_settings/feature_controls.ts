@@ -52,7 +52,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
     const basePath = spaceId ? `/s/${spaceId}` : '';
 
     return await supertest
-      .post(`${basePath}/api/kibana/settings`)
+      .post(`${basePath}/internal/kibana/settings`)
       .auth(username, password)
       .set('kbn-xsrf', 'foo')
       .send({ changes: { [CSV_QUOTE_VALUES_SETTING]: null } })

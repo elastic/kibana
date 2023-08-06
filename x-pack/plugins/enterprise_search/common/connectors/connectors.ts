@@ -49,9 +49,19 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     serviceType: 'jira',
   },
   {
+    iconPath: 'github.svg',
+    isBeta: true,
+    isNative: false,
+    keywords: ['github', 'cloud', 'connector'],
+    name: i18n.translate('xpack.enterpriseSearch.content.nativeConnectors.github.name', {
+      defaultMessage: 'GitHub & GitHub Enterprise Server',
+    }),
+    serviceType: 'github',
+  },
+  {
     iconPath: 'google_cloud_storage.svg',
     isBeta: true,
-    isNative: true,
+    isNative: false,
     keywords: ['google', 'cloud', 'blob', 's3', 'connector'],
     name: i18n.translate('xpack.enterpriseSearch.content.nativeConnectors.googleCloud.name', {
       defaultMessage: 'Google Cloud Storage',
@@ -132,24 +142,13 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
   {
     iconPath: 'dropbox.svg',
     isBeta: true,
-    isNative: false,
+    isNative: true,
     isTechPreview: false,
     keywords: ['dropbox', 'connector'],
     name: i18n.translate('xpack.enterpriseSearch.content.nativeConnectors.dropbox.name', {
       defaultMessage: 'Dropbox',
     }),
     serviceType: 'dropbox',
-  },
-  {
-    iconPath: 'github.svg',
-    isBeta: true,
-    isNative: false,
-    isTechPreview: false,
-    keywords: ['github', 'cloud', 'server', 'connector'],
-    name: i18n.translate('xpack.enterpriseSearch.content.nativeConnectors.github.name', {
-      defaultMessage: 'GitHub',
-    }),
-    serviceType: 'github',
   },
   {
     iconPath: 'oracle.svg',
@@ -170,6 +169,17 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
       defaultMessage: 'S3',
     }),
     serviceType: 's3',
+  },
+  {
+    iconPath: 'servicenow.svg',
+    isBeta: true,
+    isNative: true,
+    isTechPreview: false,
+    keywords: ['servicenow', 'cloud', 'connector'],
+    name: i18n.translate('xpack.enterpriseSearch.content.nativeConnectors.serviceNow.name', {
+      defaultMessage: 'ServiceNow',
+    }),
+    serviceType: 'servicenow',
   },
   {
     iconPath: 'sharepoint_server.svg',

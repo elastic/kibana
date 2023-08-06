@@ -318,7 +318,7 @@ exports[`ScreenReaderRouteAnnouncements renders 1`] = `
 
 exports[`SkipToMainContent renders 1`] = `
 <button
-  class="euiSkipLink emotion-euiButtonDisplay-s-defaultMinWidth-fill-primary-euiSkipLink-fixed-euiScreenReaderOnly"
+  class="euiButton euiSkipLink emotion-euiButtonDisplay-s-defaultMinWidth-fill-primary-euiSkipLink-fixed-euiScreenReaderOnly"
   tabindex="0"
   type="button"
 >

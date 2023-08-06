@@ -6,8 +6,8 @@
  */
 
 import { defaultHeaders } from './default_timeline_headers';
-import type { SavedTimeline } from '../../../../common/types/timeline/api';
-import { TimelineType, TimelineStatus } from '../../../../common/types/timeline/api';
+import type { SavedTimeline } from '../../../../common/api/timeline';
+import { TimelineType, TimelineStatus } from '../../../../common/api/timeline';
 import { Direction } from '../../../../common/search_strategy';
 
 export const draftTimelineDefaults: SavedTimeline = {

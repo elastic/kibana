@@ -14,8 +14,8 @@
  * Side Public License, v 1.
  */
 
-import React, { useContext, useMemo } from 'react';
-import { DragContext, DragDrop, DropOverlayWrapper, DropType } from '@kbn/dom-drag-drop';
+import React, { useMemo } from 'react';
+import { DragDrop, DropOverlayWrapper, DropType, useDragDropContext } from '@kbn/dom-drag-drop';
 import { EuiEmptyPrompt, EuiPanel } from '@elastic/eui';
 
 const DROP_PROPS = {
@@ -34,8 +34,8 @@ export interface ExampleDropZoneProps {
 }
 
 export const ExampleDropZone: React.FC<ExampleDropZoneProps> = ({ onDropField }) => {
-  const dragDropContext = useContext(DragContext);
-  const draggingFieldName = dragDropContext.dragging?.id;
+  const [{ dragging }] = useDragDropContext();
+  const draggingFieldName = dragging?.id;
 
   const onDroppingField = useMemo(() => {
     if (!draggingFieldName) {

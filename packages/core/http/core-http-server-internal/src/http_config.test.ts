@@ -486,6 +486,50 @@ describe('cors', () => {
   });
 });
 
+describe('versioned', () => {
+  it('defaults version resolution "oldest" not in dev', () => {
+    expect(config.schema.validate({}, { dev: undefined })).toMatchObject({
+      versioned: { versionResolution: 'oldest' },
+    });
+    expect(config.schema.validate({}, { dev: false })).toMatchObject({
+      versioned: { versionResolution: 'oldest' },
+    });
+  });
+
+  it('does not allow "none" when not in dev', () => {
+    expect(() =>
+      config.schema.validate({ versioned: { versionResolution: 'none' } }, { dev: false })
+    ).toThrow(/failed validation/);
+  });
+
+  it('defaults version resolution "none" when in dev', () => {
+    expect(config.schema.validate({}, { dev: true })).toMatchObject({
+      versioned: { versionResolution: 'none' },
+    });
+  });
+});
+
+describe('restrictInternalApis', () => {
+  it('is only allowed on serverless', () => {
+    expect(() => config.schema.validate({ restrictInternalApis: false }, {})).toThrow(
+      /a value wasn't expected/
+    );
+    expect(() => config.schema.validate({ restrictInternalApis: true }, {})).toThrow(
+      /a value wasn't expected/
+    );
+    expect(
+      config.schema.validate({ restrictInternalApis: true }, { serverless: true })
+    ).toMatchObject({
+      restrictInternalApis: true,
+    });
+  });
+  it('defaults to false', () => {
+    expect(
+      config.schema.validate({ restrictInternalApis: undefined }, { serverless: true })
+    ).toMatchObject({ restrictInternalApis: false });
+  });
+});
+
 describe('HttpConfig', () => {
   it('converts customResponseHeaders to strings or arrays of strings', () => {
     const httpSchema = config.schema;
@@ -511,5 +555,12 @@ describe('HttpConfig', () => {
       array: ['1', '2', '3'],
       nested: '{"foo":1,"bar":"dolly"}',
     });
+  });
+
+  it('defaults restrictInternalApis to false', () => {
+    const rawConfig = config.schema.validate({}, {});
+    const rawCspConfig = cspConfig.schema.validate({});
+    const httpConfig = new HttpConfig(rawConfig, rawCspConfig, ExternalUrlConfig.DEFAULT);
+    expect(httpConfig.restrictInternalApis).toBe(false);
   });
 });

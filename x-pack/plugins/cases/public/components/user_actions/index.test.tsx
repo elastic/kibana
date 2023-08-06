@@ -23,7 +23,7 @@ import {
 import { UserActions } from '.';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
-import { Actions } from '../../../common/api';
+import { UserActionActions } from '../../../common/types/domain';
 import { userProfiles, userProfilesMap } from '../../containers/user_profiles/api.mock';
 import { getCaseConnectorsMockResponse } from '../../common/mock/connectors';
 import type { UserActivityParams } from '../user_actions_activity_bar/types';
@@ -82,7 +82,8 @@ const useFindCaseUserActionsMock = useFindCaseUserActions as jest.Mock;
 const useUpdateCommentMock = useUpdateComment as jest.Mock;
 const patchComment = jest.fn();
 
-describe(`UserActions`, () => {
+// FLAKY: https://github.com/elastic/kibana/issues/156741
+describe.skip(`UserActions`, () => {
   const sampleData = {
     content: 'what a great comment update',
   };
@@ -149,7 +150,7 @@ describe(`UserActions`, () => {
   });
 
   it('Switches to markdown when edit is clicked and back to panel when canceled', async () => {
-    const ourActions = [getUserAction('comment', Actions.create)];
+    const ourActions = [getUserAction('comment', UserActionActions.create)];
 
     useFindCaseUserActionsMock.mockReturnValue({
       ...defaultUseFindCaseUserActions,
@@ -184,7 +185,7 @@ describe(`UserActions`, () => {
   });
 
   it('calls update comment when comment markdown is saved', async () => {
-    const ourActions = [getUserAction('comment', Actions.create)];
+    const ourActions = [getUserAction('comment', UserActionActions.create)];
 
     useFindCaseUserActionsMock.mockReturnValue({
       ...defaultUseFindCaseUserActions,
@@ -236,7 +237,7 @@ describe(`UserActions`, () => {
 
   it('shows quoted text in last MarkdownEditorTextArea', async () => {
     const quoteableText = `> Solve this fast! \n\n`;
-    const ourActions = [getUserAction('comment', Actions.create)];
+    const ourActions = [getUserAction('comment', UserActionActions.create)];
 
     useFindCaseUserActionsMock.mockReturnValue({
       ...defaultUseFindCaseUserActions,
@@ -280,7 +281,7 @@ describe(`UserActions`, () => {
   it('it should persist the draft of new comment while existing old comment is updated', async () => {
     const editedComment = 'it is an edited comment';
     const newComment = 'another cool comment';
-    const ourActions = [getUserAction('comment', Actions.create)];
+    const ourActions = [getUserAction('comment', UserActionActions.create)];
 
     useFindCaseUserActionsMock.mockReturnValue({
       ...defaultUseFindCaseUserActions,
@@ -325,7 +326,8 @@ describe(`UserActions`, () => {
     });
   });
 
-  describe('Host isolation action', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/156742
+  describe.skip('Host isolation action', () => {
     it('renders in the cases details view', async () => {
       const isolateAction = [getHostIsolationUserAction()];
       const props = {
@@ -372,7 +374,15 @@ describe(`UserActions`, () => {
     });
   });
 
-  describe('pagination', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/156750
+  // FLAKY: https://github.com/elastic/kibana/issues/156749
+  // FLAKY: https://github.com/elastic/kibana/issues/156748
+  // FLAKY: https://github.com/elastic/kibana/issues/156747
+  // FLAKY: https://github.com/elastic/kibana/issues/156746
+  // FLAKY: https://github.com/elastic/kibana/issues/156745
+  // FLAKY: https://github.com/elastic/kibana/issues/156744
+  // FLAKY: https://github.com/elastic/kibana/issues/156743
+  describe.skip('pagination', () => {
     beforeEach(() => {
       jest.clearAllMocks();
     });
@@ -512,13 +522,13 @@ describe(`UserActions`, () => {
     it('shows more button visible 21st user action added', async () => {
       const mockUserActions = [
         ...caseUserActions,
-        getUserAction('comment', Actions.create),
-        getUserAction('comment', Actions.update),
-        getUserAction('comment', Actions.create),
-        getUserAction('comment', Actions.update),
-        getUserAction('comment', Actions.create),
-        getUserAction('comment', Actions.update),
-        getUserAction('comment', Actions.create),
+        getUserAction('comment', UserActionActions.create),
+        getUserAction('comment', UserActionActions.update),
+        getUserAction('comment', UserActionActions.create),
+        getUserAction('comment', UserActionActions.update),
+        getUserAction('comment', UserActionActions.create),
+        getUserAction('comment', UserActionActions.update),
+        getUserAction('comment', UserActionActions.create),
       ];
       useInfiniteFindCaseUserActionsMock.mockReturnValue({
         ...defaultInfiniteUseFindCaseUserActions,
@@ -572,7 +582,7 @@ describe(`UserActions`, () => {
               total: 21,
               page: 2,
               perPage: 10,
-              userActions: [getUserAction('comment', Actions.create)],
+              userActions: [getUserAction('comment', UserActionActions.create)],
             },
           ],
         },

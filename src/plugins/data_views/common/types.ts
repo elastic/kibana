@@ -252,10 +252,10 @@ export interface SavedObjectsClientCommonFindArgs {
 }
 
 /**
- * Common interface for the saved objects client
+ * Common interface for the saved objects client on server and content management in browser
  * @public
  */
-export interface SavedObjectsClientCommon {
+export interface PersistenceAPI {
   /**
    * Search for saved objects
    * @param options - options for search
@@ -269,14 +269,6 @@ export interface SavedObjectsClientCommon {
    * @param id - id of saved object
    */
   get: (id: string) => Promise<SavedObject<DataViewAttributes>>;
-  /**
-   * Update a saved object by id
-   * @param type - type of saved object
-   * @param id - id of saved object
-   * @param attributes - attributes to update
-   * @param options - client options
-   */
-  getSavedSearch: (id: string) => Promise<SavedObject>;
   /**
    * Update a saved object by id
    * @param type - type of saved object
@@ -525,6 +517,7 @@ export type DataViewSpec = {
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type SourceFilter = {
   value: string;
+  clientId?: string | number;
 };
 
 export interface HasDataService {

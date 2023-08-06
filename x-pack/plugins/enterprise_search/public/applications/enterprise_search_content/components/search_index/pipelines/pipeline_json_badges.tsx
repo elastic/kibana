@@ -71,7 +71,7 @@ const SharedPipelineBadge: React.FC = () => (
     position="top"
     content={i18n.translate(
       'xpack.enterpriseSearch.content.indices.pipelines.tabs.jsonConfigurations.shared.description',
-      { defaultMessage: 'This pipeline is shared across all Enterprise Search ingestion methods' }
+      { defaultMessage: 'This pipeline is shared across all Search ingestion methods' }
     )}
   >
     <EuiBadge iconType="logstashIf" color="hollow">

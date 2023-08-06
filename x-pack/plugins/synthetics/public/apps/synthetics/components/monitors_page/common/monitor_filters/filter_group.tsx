@@ -23,9 +23,17 @@ import { FilterButton } from './filter_button';
 
 const mixUrlValues = (
   values?: LabelWithCountValue[],
-  urlLabels?: string[]
+  urlLabels?: string[] | string
 ): LabelWithCountValue[] => {
-  const urlValues = urlLabels?.map((label) => ({ label, count: 0 })) ?? [];
+  let urlValues: Array<{
+    label: string;
+    count: number;
+  }> = [];
+  if (typeof urlLabels === 'string' && urlLabels) {
+    urlValues.push({ label: urlLabels, count: 0 });
+  } else if (Array.isArray(urlLabels)) {
+    urlValues = urlLabels?.map((label) => ({ label, count: 0 })) ?? [];
+  }
   const newValues = [...(values ?? [])];
   // add url values that are not in the values
   urlValues.forEach((urlValue) => {

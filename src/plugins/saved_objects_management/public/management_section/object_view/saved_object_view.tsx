@@ -19,6 +19,7 @@ import {
   HttpSetup,
   IUiSettingsClient,
   DocLinksStart,
+  ThemeServiceStart,
 } from '@kbn/core/public';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import { Header, Inspect, NotFoundErrors } from './components';
@@ -38,6 +39,7 @@ export interface SavedObjectEditionProps {
   uiSettings: IUiSettingsClient;
   docLinks: DocLinksStart['links'];
   settings: SettingsStart;
+  theme: ThemeServiceStart;
 }
 export interface SavedObjectEditionState {
   type: string;
@@ -94,12 +96,12 @@ export class SavedObjectEdition extends Component<
   }
 
   render() {
-    const { capabilities, notFoundType, http, uiSettings, docLinks, settings } = this.props;
+    const { capabilities, notFoundType, http, uiSettings, docLinks, settings, theme } = this.props;
     const { object } = this.state;
     const { delete: canDelete } = capabilities.savedObjectsManagement as Record<string, boolean>;
     const canView = this.canViewInApp(capabilities, object);
     return (
-      <KibanaContextProvider services={{ uiSettings, settings }}>
+      <KibanaContextProvider services={{ uiSettings, settings, theme }}>
         <EuiFlexGroup
           direction="column"
           data-test-subject="savedObjectsEdit"

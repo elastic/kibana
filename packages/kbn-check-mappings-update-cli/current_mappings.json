@@ -42,6 +42,25 @@
       }
     }
   },
+  "url": {
+    "dynamic": false,
+    "properties": {
+      "slug": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword"
+          }
+        }
+      },
+      "accessDate": {
+        "type": "date"
+      },
+      "createDate": {
+        "type": "date"
+      }
+    }
+  },
   "usage-counters": {
     "dynamic": false,
     "properties": {
@@ -127,25 +146,6 @@
     "dynamic": false,
     "properties": {
       "lastUpdatedAt": {
-        "type": "date"
-      }
-    }
-  },
-  "url": {
-    "dynamic": false,
-    "properties": {
-      "slug": {
-        "type": "text",
-        "fields": {
-          "keyword": {
-            "type": "keyword"
-          }
-        }
-      },
-      "accessDate": {
-        "type": "date"
-      },
-      "createDate": {
         "type": "date"
       }
     }
@@ -616,6 +616,30 @@
       }
     }
   },
+  "tag": {
+    "properties": {
+      "name": {
+        "type": "text"
+      },
+      "description": {
+        "type": "text"
+      },
+      "color": {
+        "type": "text"
+      }
+    }
+  },
+  "search": {
+    "dynamic": false,
+    "properties": {
+      "title": {
+        "type": "text"
+      },
+      "description": {
+        "type": "text"
+      }
+    }
+  },
   "alert": {
     "dynamic": false,
     "properties": {
@@ -871,30 +895,6 @@
       "events": {
         "type": "date_range",
         "format": "epoch_millis||strict_date_optional_time"
-      }
-    }
-  },
-  "tag": {
-    "properties": {
-      "name": {
-        "type": "text"
-      },
-      "description": {
-        "type": "text"
-      },
-      "color": {
-        "type": "text"
-      }
-    }
-  },
-  "search": {
-    "dynamic": false,
-    "properties": {
-      "title": {
-        "type": "text"
-      },
-      "description": {
-        "type": "text"
       }
     }
   },
@@ -1406,6 +1406,14 @@
   "cases-telemetry": {
     "dynamic": false,
     "properties": {}
+  },
+  "infrastructure-monitoring-log-view": {
+    "dynamic": false,
+    "properties": {
+      "name": {
+        "type": "text"
+      }
+    }
   },
   "canvas-element": {
     "dynamic": false,
@@ -2249,6 +2257,9 @@
   },
   "observability-onboarding-state": {
     "properties": {
+      "type": {
+        "type": "keyword"
+      },
       "state": {
         "type": "object",
         "dynamic": false
@@ -2796,6 +2807,9 @@
               },
               "value": {
                 "type": "text"
+              },
+              "relation": {
+                "type": "keyword"
               }
             }
           },
@@ -2924,6 +2938,14 @@
       }
     }
   },
+  "risk-engine-configuration": {
+    "dynamic": false,
+    "properties": {
+      "enabled": {
+        "type": "boolean"
+      }
+    }
+  },
   "infrastructure-ui-source": {
     "dynamic": false,
     "properties": {}
@@ -2931,14 +2953,6 @@
   "inventory-view": {
     "dynamic": false,
     "properties": {}
-  },
-  "infrastructure-monitoring-log-view": {
-    "dynamic": false,
-    "properties": {
-      "name": {
-        "type": "text"
-      }
-    }
   },
   "metrics-explorer-view": {
     "dynamic": false,
@@ -2976,18 +2990,6 @@
       }
     }
   },
-  "enterprise_search_telemetry": {
-    "dynamic": false,
-    "properties": {}
-  },
-  "app_search_telemetry": {
-    "dynamic": false,
-    "properties": {}
-  },
-  "workplace_search_telemetry": {
-    "dynamic": false,
-    "properties": {}
-  },
   "apm-indices": {
     "dynamic": false,
     "properties": {}
@@ -3019,5 +3021,17 @@
         "type": "text"
       }
     }
+  },
+  "enterprise_search_telemetry": {
+    "dynamic": false,
+    "properties": {}
+  },
+  "app_search_telemetry": {
+    "dynamic": false,
+    "properties": {}
+  },
+  "workplace_search_telemetry": {
+    "dynamic": false,
+    "properties": {}
   }
 }

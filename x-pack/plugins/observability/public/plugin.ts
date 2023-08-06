@@ -54,6 +54,7 @@ import { ExploratoryViewPublicStart } from '@kbn/exploratory-view-plugin/public'
 import { RulesLocatorDefinition } from './locators/rules';
 import { RuleDetailsLocatorDefinition } from './locators/rule_details';
 import { SloDetailsLocatorDefinition } from './locators/slo_details';
+import { SloEditLocatorDefinition } from './locators/slo_edit';
 import { observabilityAppId, observabilityFeatureId } from '../common';
 import { registerDataHandler } from './context/has_data_context/data_handler';
 import {
@@ -69,9 +70,7 @@ import {
   OVERVIEW_PATH,
   RULES_PATH,
   SLOS_PATH,
-} from './routes/paths';
-import { createCoPilotService } from './context/co_pilot_context/create_co_pilot_service';
-import { type CoPilotService } from './typings/co_pilot';
+} from '../common/locators/paths';
 
 export interface ConfigSchema {
   unsafe: {
@@ -85,16 +84,17 @@ export interface ConfigSchema {
       uptime: {
         enabled: boolean;
       };
+      observability: {
+        enabled: boolean;
+      };
     };
     thresholdRule: {
       enabled: boolean;
     };
   };
   compositeSlo: { enabled: boolean };
-  aiAssistant?: {
-    enabled?: boolean;
-  };
 }
+
 export type ObservabilityPublicSetup = ReturnType<Plugin['setup']>;
 
 export interface ObservabilityPublicPluginsSetup {
@@ -145,8 +145,6 @@ export class Plugin
   private readonly appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
   private observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry =
     {} as ObservabilityRuleTypeRegistry;
-
-  private coPilotService: CoPilotService | undefined;
 
   // Define deep links as constant and hidden. Whether they are shown or hidden
   // in the global navigation will happen in `updateGlobalNavigation`.
@@ -222,6 +220,8 @@ export class Plugin
     const sloDetailsLocator = pluginsSetup.share.url.locators.create(
       new SloDetailsLocatorDefinition()
     );
+
+    const sloEditLocator = pluginsSetup.share.url.locators.create(new SloEditLocatorDefinition());
 
     const mount = async (params: AppMountParameters<unknown>) => {
       // Load application bundle
@@ -337,11 +337,6 @@ export class Plugin
       )
     );
 
-    this.coPilotService = createCoPilotService({
-      enabled: !!config.aiAssistant?.enabled,
-      http: coreSetup.http,
-    });
-
     return {
       dashboard: { register: registerDataHandler },
       observabilityRuleTypeRegistry: this.observabilityRuleTypeRegistry,
@@ -349,7 +344,7 @@ export class Plugin
       rulesLocator,
       ruleDetailsLocator,
       sloDetailsLocator,
-      getCoPilotService: () => this.coPilotService!,
+      sloEditLocator,
     };
   }
 
@@ -379,7 +374,6 @@ export class Plugin
     return {
       observabilityRuleTypeRegistry: this.observabilityRuleTypeRegistry,
       useRulesLink: createUseRulesLink(),
-      getCoPilotService: () => this.coPilotService!,
     };
   }
 }

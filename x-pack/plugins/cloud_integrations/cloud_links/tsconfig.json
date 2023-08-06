@@ -19,6 +19,7 @@
     "@kbn/guided-onboarding-plugin",
     "@kbn/core-chrome-browser",
     "@kbn/core-doc-links-browser",
+    "@kbn/core-ui-settings-browser",
   ],
   "exclude": [
     "target/**/*",

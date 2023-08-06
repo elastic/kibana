@@ -1673,49 +1673,6 @@
       },
       {
         "parentPluginId": "ruleRegistry",
-        "id": "def-server.createGetSummarizedAlertsFn",
-        "type": "Function",
-        "tags": [],
-        "label": "createGetSummarizedAlertsFn",
-        "description": [],
-        "signature": [
-          "(opts: CreateGetSummarizedAlertsFnOpts) => () => ({ start, end, executionUuid, ruleId, spaceId, excludedAlertInstanceIds, alertsFilter, }: ",
-          {
-            "pluginId": "alerting",
-            "scope": "server",
-            "docId": "kibAlertingPluginApi",
-            "section": "def-server.GetSummarizedAlertsFnOpts",
-            "text": "GetSummarizedAlertsFnOpts"
-          },
-          ") => Promise<",
-          "SummarizedAlerts",
-          ">"
-        ],
-        "path": "x-pack/plugins/rule_registry/server/utils/create_get_summarized_alerts_fn.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "ruleRegistry",
-            "id": "def-server.createGetSummarizedAlertsFn.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "opts",
-            "description": [],
-            "signature": [
-              "CreateGetSummarizedAlertsFnOpts"
-            ],
-            "path": "x-pack/plugins/rule_registry/server/utils/create_get_summarized_alerts_fn.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "ruleRegistry",
         "id": "def-server.createLifecycleExecutor",
         "type": "Function",
         "tags": [],
@@ -2030,17 +1987,7 @@
             "section": "def-server.RuleExecutorOptions",
             "text": "RuleExecutorOptions"
           },
-          "<TParams, TState, { [x: string]: unknown; }, { [x: string]: unknown; }, \"default\", never>) => Promise<{ state: TState; }>; getSummarizedAlerts: ({ start, end, executionUuid, ruleId, spaceId, excludedAlertInstanceIds, alertsFilter, }: ",
-          {
-            "pluginId": "alerting",
-            "scope": "server",
-            "docId": "kibAlertingPluginApi",
-            "section": "def-server.GetSummarizedAlertsFnOpts",
-            "text": "GetSummarizedAlertsFnOpts"
-          },
-          ") => Promise<",
-          "SummarizedAlerts",
-          ">; id: string; name: string; producer: string; validate: { params: ",
+          "<TParams, TState, { [x: string]: unknown; }, { [x: string]: unknown; }, \"default\", never>) => Promise<{ state: TState; }>; id: string; name: string; producer: string; validate: { params: ",
           "RuleTypeParamsValidator",
           "<TParams>; }; cancelAlertsOnRuleTimeout?: boolean | undefined; alerts?: ",
           {
@@ -2050,7 +1997,7 @@
             "section": "def-server.IRuleTypeAlerts",
             "text": "IRuleTypeAlerts"
           },
-          " | undefined; recoveryActionGroup?: ",
+          "<never> | undefined; recoveryActionGroup?: ",
           {
             "pluginId": "alerting",
             "scope": "common",

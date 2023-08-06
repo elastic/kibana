@@ -58,7 +58,7 @@
             "label": "createSetupContract",
             "description": [],
             "signature": [
-              "() => jest.Mock<any, any>"
+              "() => jest.Mock<any, any, any>"
             ],
             "path": "packages/core/doc-links/core-doc-links-browser-mocks/src/doc_links_service.mock.ts",
             "deprecated": false,

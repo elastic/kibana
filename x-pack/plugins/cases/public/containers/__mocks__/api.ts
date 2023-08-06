@@ -40,12 +40,12 @@ import type {
 } from '../../../common/ui/types';
 import { SeverityAll } from '../../../common/ui/types';
 import type {
-  CasePatchRequest,
-  CasePostRequest,
-  CommentRequest,
   SingleCaseMetricsResponse,
-} from '../../../common/api';
-import { CaseStatuses } from '../../../common/api';
+  CasePostRequest,
+  CasePatchRequest,
+  AttachmentRequest,
+} from '../../../common/types/api';
+import { CaseStatuses } from '../../../common/types/domain';
 import type { ValidFeatureId } from '@kbn/rule-data-utils';
 import type { UserProfile } from '@kbn/security-plugin/common';
 import { userProfiles } from '../user_profiles/api.mock';
@@ -122,7 +122,7 @@ export const updateCases = async (
 ): Promise<CasesUI> => Promise.resolve(allCases.cases);
 
 export const createAttachments = async (
-  newComment: CommentRequest,
+  newComment: AttachmentRequest,
   caseId: string,
   signal: AbortSignal
 ): Promise<CaseUI> => Promise.resolve(basicCase);

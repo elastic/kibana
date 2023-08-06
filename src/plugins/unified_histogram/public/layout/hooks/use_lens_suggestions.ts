@@ -69,7 +69,7 @@ export const useLensSuggestions = ({
   return {
     allSuggestions,
     currentSuggestion,
-    suggestionUnsupported: isPlainRecord && !currentSuggestion,
+    suggestionUnsupported: !currentSuggestion && !dataView.isTimeBased(),
   };
 };
 

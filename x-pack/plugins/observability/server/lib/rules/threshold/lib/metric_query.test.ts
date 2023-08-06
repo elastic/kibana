@@ -24,6 +24,7 @@ describe("The Metric Threshold Alert's getElasticsearchMetricQuery", () => {
   };
 
   const groupBy = 'host.doggoname';
+  const timeFieldName = 'mockedTimeFieldName';
   const timeframe = {
     start: moment().subtract(5, 'minutes').valueOf(),
     end: moment().valueOf(),
@@ -33,6 +34,7 @@ describe("The Metric Threshold Alert's getElasticsearchMetricQuery", () => {
     const searchBody = getElasticsearchMetricQuery(
       expressionParams,
       timeframe,
+      timeFieldName,
       100,
       true,
       void 0,
@@ -52,14 +54,15 @@ describe("The Metric Threshold Alert's getElasticsearchMetricQuery", () => {
   });
 
   describe('when passed a filterQuery', () => {
-    const filterQuery =
-      // This is adapted from a real-world query that previously broke alerts
-      // We want to make sure it doesn't override any existing filters
-      '{"bool":{"filter":[{"bool":{"filter":[{"bool":{"must_not":[{"bool":{"should":[{"query_string":{"query":"bark*","fields":["host.name^1.0"],"type":"best_fields","default_operator":"or","max_determinized_states":10000,"enable_position_increments":true,"fuzziness":"AUTO","fuzzy_prefix_length":0,"fuzzy_max_expansions":50,"phrase_slop":0,"escape":false,"auto_generate_synonyms_phrase_query":true,"fuzzy_transpositions":true,"boost":1}}],"adjust_pure_negative":true,"minimum_should_match":"1","boost":1}}],"adjust_pure_negative":true,"boost":1}},{"bool":{"must_not":[{"bool":{"should":[{"query_string":{"query":"woof*","fields":["host.name^1.0"],"type":"best_fields","default_operator":"or","max_determinized_states":10000,"enable_position_increments":true,"fuzziness":"AUTO","fuzzy_prefix_length":0,"fuzzy_max_expansions":50,"phrase_slop":0,"escape":false,"auto_generate_synonyms_phrase_query":true,"fuzzy_transpositions":true,"boost":1}}],"adjust_pure_negative":true,"minimum_should_match":"1","boost":1}}],"adjust_pure_negative":true,"boost":1}}],"adjust_pure_negative":true,"boost":1}}],"adjust_pure_negative":true,"boost":1}}';
+    // This is adapted from a real-world query that previously broke alerts
+    // We want to make sure it doesn't override any existing filters
+    // https://github.com/elastic/kibana/issues/68492
+    const filterQuery = 'NOT host.name:dv* and NOT host.name:ts*';
 
     const searchBody = getElasticsearchMetricQuery(
       expressionParams,
       timeframe,
+      timeFieldName,
       100,
       true,
       void 0,
@@ -74,7 +77,36 @@ describe("The Metric Threshold Alert's getElasticsearchMetricQuery", () => {
 
     test('includes a metric field filter', () => {
       expect(searchBody.query.bool.filter).toMatchObject(
-        expect.arrayContaining([{ exists: { field: 'system.is.a.good.puppy.dog' } }])
+        expect.arrayContaining([
+          { range: { mockedTimeFieldName: expect.any(Object) } },
+          { exists: { field: 'system.is.a.good.puppy.dog' } },
+          {
+            bool: {
+              filter: [
+                {
+                  bool: {
+                    must_not: {
+                      bool: {
+                        should: [{ query_string: { fields: ['host.name'], query: 'dv*' } }],
+                        minimum_should_match: 1,
+                      },
+                    },
+                  },
+                },
+                {
+                  bool: {
+                    must_not: {
+                      bool: {
+                        should: [{ query_string: { fields: ['host.name'], query: 'ts*' } }],
+                        minimum_should_match: 1,
+                      },
+                    },
+                  },
+                },
+              ],
+            },
+          },
+        ])
       );
     });
   });
