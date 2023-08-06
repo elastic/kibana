@@ -17,7 +17,6 @@ export const DEFAULT_URL_AZURE =
   'https://{your-resource-name}.openai.azure.com/openai/deployments/{deployment-id}/chat/completions?api-version={api-version}' as const;
 
 export const DEFAULT_BODY = `{
-    "model":"gpt-3.5-turbo",
     "messages": [{
         "role":"user",
         "content":"Hello world"
@@ -59,7 +58,7 @@ export const openAiConfig: ConfigFieldSchema[] = [
     label: i18n.DEFAULT_MODEL_LABEL,
     helpText: (
       <FormattedMessage
-        defaultMessage="The OpenAI default model. For more information on the default model, refer to the {genAiAPIModelDocs}."
+        defaultMessage='The model can be set on a per request basis by including a "model" parameter in the request body. If no model is provided, the fallback will be the default model. For more information, refer to the {genAiAPIModelDocs}.'
         id="xpack.stackConnectors.components.genAi.openAiDocumentationModel"
         values={{
           genAiAPIModelDocs: (
