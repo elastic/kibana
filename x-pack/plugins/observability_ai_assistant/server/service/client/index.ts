@@ -115,8 +115,13 @@ export class ObservabilityAIAssistantClient implements IObservabilityAIAssistant
     };
   };
 
-  get = async (conversationId: string): Promise<Conversation | undefined> => {
-    return (await this.getConversationWithMetaFields(conversationId))?._source;
+  get = async (conversationId: string): Promise<Conversation> => {
+    const conversation = await this.getConversationWithMetaFields(conversationId);
+
+    if (!conversation) {
+      throw notFound();
+    }
+    return conversation._source!;
   };
 
   delete = async (conversationId: string): Promise<void> => {
@@ -129,6 +134,7 @@ export class ObservabilityAIAssistantClient implements IObservabilityAIAssistant
     await this.dependencies.esClient.delete({
       id: conversation._id,
       index: conversation._index,
+      refresh: 'wait_for',
     });
   };
 
@@ -230,6 +236,7 @@ export class ObservabilityAIAssistantClient implements IObservabilityAIAssistant
       id: document._id,
       index: document._index,
       doc: updatedConversation,
+      refresh: 'wait_for',
     });
 
     return updatedConversation;
@@ -251,6 +258,7 @@ export class ObservabilityAIAssistantClient implements IObservabilityAIAssistant
     await this.dependencies.esClient.index({
       index: this.dependencies.resources.aliases.conversations,
       document: createdConversation,
+      refresh: 'wait_for',
     });
 
     return createdConversation;

@@ -29,16 +29,8 @@ const Template: ComponentStory<typeof Component> = (props: ChatFlyoutProps) => {
 
 const defaultProps: ChatFlyoutProps = {
   isOpen: true,
-  initialConversation: {
-    '@timestamp': '',
-    conversation: {
-      title: 'How is this working',
-    },
-    messages: [getSystemMessage()],
-    labels: {},
-    numeric_labels: {},
-    public: false,
-  },
+  title: 'How is this working',
+  messages: [getSystemMessage()],
   onClose: () => {},
 };
 

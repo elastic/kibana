@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { FindActionResult } from '@kbn/actions-plugin/server';
+import { AbortError } from '@kbn/kibana-utils-plugin/common';
 import {
   act,
   renderHook,
@@ -11,12 +13,13 @@ import {
   type RenderHookResult,
 } from '@testing-library/react-hooks';
 import { BehaviorSubject, Subject } from 'rxjs';
-import { AbortError } from '@kbn/kibana-utils-plugin/common';
 import { MessageRole } from '../../common';
-import { PendingMessage } from '../types';
+import type { PendingMessage } from '../types';
 import { useTimeline, UseTimelineResult } from './use_timeline';
 
 type HookProps = Parameters<typeof useTimeline>[0];
+
+const WAIT_OPTIONS = { timeout: 1500 };
 
 describe('useTimeline', () => {
   let hookResult: RenderHookResult<HookProps, UseTimelineResult, Renderer<HookProps>>;
@@ -25,9 +28,17 @@ describe('useTimeline', () => {
     beforeAll(() => {
       hookResult = renderHook((props) => useTimeline(props), {
         initialProps: {
-          connectors: {},
+          connectors: {
+            loading: false,
+            selectedConnector: 'OpenAI',
+            selectConnector: () => {},
+            connectors: [{ id: 'OpenAI' }] as FindActionResult[],
+          },
           service: {},
-        } as HookProps,
+          messages: [],
+          onChatComplete: jest.fn(),
+          onChatUpdate: jest.fn(),
+        } as unknown as HookProps,
       });
     });
     it('renders the correct timeline items', () => {
@@ -49,24 +60,22 @@ describe('useTimeline', () => {
     beforeAll(() => {
       hookResult = renderHook((props) => useTimeline(props), {
         initialProps: {
-          initialConversation: {
-            messages: [
-              {
-                '@timestamp': new Date().toISOString(),
-                message: {
-                  role: MessageRole.User,
-                  content: 'Hello',
-                },
+          messages: [
+            {
+              '@timestamp': new Date().toISOString(),
+              message: {
+                role: MessageRole.User,
+                content: 'Hello',
               },
-              {
-                '@timestamp': new Date().toISOString(),
-                message: {
-                  role: MessageRole.Assistant,
-                  content: 'Goodbye',
-                },
+            },
+            {
+              '@timestamp': new Date().toISOString(),
+              message: {
+                role: MessageRole.Assistant,
+                content: 'Goodbye',
               },
-            ],
-          },
+            },
+          ],
           connectors: {
             selectedConnector: 'foo',
           },
@@ -106,39 +115,55 @@ describe('useTimeline', () => {
   describe('when submitting a new prompt', () => {
     let subject: Subject<PendingMessage>;
 
+    let props: Omit<HookProps, 'onChatUpdate' | 'onChatComplete' | 'service'> & {
+      onChatUpdate: jest.MockedFn<HookProps['onChatUpdate']>;
+      onChatComplete: jest.MockedFn<HookProps['onChatComplete']>;
+      service: Omit<HookProps['service'], 'executeFunction'> & {
+        executeFunction: jest.MockedFn<HookProps['service']['executeFunction']>;
+      };
+    };
+
     beforeEach(() => {
+      props = {
+        messages: [],
+        connectors: {
+          selectedConnector: 'foo',
+        },
+        service: {
+          chat: jest.fn().mockImplementation(() => {
+            subject = new BehaviorSubject<PendingMessage>({
+              message: {
+                role: MessageRole.Assistant,
+                content: '',
+              },
+            });
+            return subject;
+          }),
+          executeFunction: jest.fn(),
+        },
+        onChatUpdate: jest.fn().mockImplementation((messages) => {
+          props = { ...props, messages };
+          hookResult.rerender(props as unknown as HookProps);
+        }),
+        onChatComplete: jest.fn(),
+      } as any;
+
       hookResult = renderHook((nextProps) => useTimeline(nextProps), {
-        initialProps: {
-          initialConversation: {
-            messages: [],
-          },
-          connectors: {
-            selectedConnector: 'foo',
-          },
-          service: {
-            chat: jest.fn().mockImplementation(() => {
-              subject = new BehaviorSubject<PendingMessage>({
-                message: {
-                  role: MessageRole.Assistant,
-                  content: '',
-                },
-              });
-              return subject;
-            }),
-          },
-        } as unknown as HookProps,
+        initialProps: props as unknown as HookProps,
       });
     });
 
     describe("and it's loading", () => {
-      it('adds two items of which the last one is loading', async () => {
+      beforeEach(() => {
         act(() => {
           hookResult.result.current.onSubmit({
             '@timestamp': new Date().toISOString(),
             message: { role: MessageRole.User, content: 'Hello' },
           });
         });
+      });
 
+      it('adds two items of which the last one is loading', async () => {
         expect(hookResult.result.current.items[0].role).toEqual(MessageRole.User);
         expect(hookResult.result.current.items[1].role).toEqual(MessageRole.User);
 
@@ -184,6 +209,8 @@ describe('useTimeline', () => {
           subject.complete();
         });
 
+        await hookResult.waitForNextUpdate(WAIT_OPTIONS);
+
         expect(hookResult.result.current.items[2]).toMatchObject({
           role: MessageRole.Assistant,
           content: 'Goodbye',
@@ -193,13 +220,9 @@ describe('useTimeline', () => {
         });
       });
 
-      describe('and it being aborted', () => {
-        beforeEach(async () => {
+      describe('and it is being aborted', () => {
+        beforeEach(() => {
           act(() => {
-            hookResult.result.current.onSubmit({
-              '@timestamp': new Date().toISOString(),
-              message: { role: MessageRole.User, content: 'Hello' },
-            });
             subject.next({ message: { role: MessageRole.Assistant, content: 'My partial' } });
             subject.next({
               message: {
@@ -280,6 +303,8 @@ describe('useTimeline', () => {
                 subject.complete();
               });
 
+              await hookResult.waitForNextUpdate(WAIT_OPTIONS);
+
               expect(hookResult.result.current.items.length).toBe(3);
 
               expect(hookResult.result.current.items[2]).toEqual({
@@ -294,6 +319,81 @@ describe('useTimeline', () => {
               });
             });
           });
+        });
+      });
+
+      describe('and a function call is returned', () => {
+        it('the function call is executed and its response is sent as a user reply', async () => {
+          jest.clearAllMocks();
+
+          act(() => {
+            subject.next({
+              message: {
+                role: MessageRole.Assistant,
+                function_call: {
+                  trigger: MessageRole.Assistant,
+                  name: 'my_function',
+                  arguments: '{}',
+                },
+              },
+            });
+            subject.complete();
+          });
+
+          props.service.executeFunction.mockResolvedValueOnce({
+            content: {
+              message: 'my-response',
+            },
+          });
+
+          await hookResult.waitForNextUpdate(WAIT_OPTIONS);
+
+          expect(props.onChatUpdate).toHaveBeenCalledTimes(2);
+
+          expect(
+            props.onChatUpdate.mock.calls[0][0].map(
+              (msg) => msg.message.content || msg.message.function_call?.name
+            )
+          ).toEqual(['Hello', 'my_function']);
+
+          expect(
+            props.onChatUpdate.mock.calls[1][0].map(
+              (msg) => msg.message.content || msg.message.function_call?.name
+            )
+          ).toEqual(['Hello', 'my_function', JSON.stringify({ message: 'my-response' })]);
+
+          expect(props.onChatComplete).not.toHaveBeenCalled();
+
+          expect(props.service.executeFunction).toHaveBeenCalledWith(
+            'my_function',
+            '{}',
+            expect.any(Object)
+          );
+
+          act(() => {
+            subject.next({
+              message: {
+                role: MessageRole.Assistant,
+                content: 'looks like my-function returned my-response',
+              },
+            });
+            subject.complete();
+          });
+
+          await hookResult.waitForNextUpdate(WAIT_OPTIONS);
+
+          expect(props.onChatComplete).toHaveBeenCalledTimes(1);
+
+          expect(
+            props.onChatComplete.mock.calls[0][0].map(
+              (msg) => msg.message.content || msg.message.function_call?.name
+            )
+          ).toEqual([
+            'Hello',
+            'my_function',
+            JSON.stringify({ message: 'my-response' }),
+            'looks like my-function returned my-response',
+          ]);
         });
       });
     });

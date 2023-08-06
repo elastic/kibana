@@ -15,10 +15,9 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
-import { i18n } from '@kbn/i18n';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import React from 'react';
-import { type ConversationCreateRequest } from '../../../common/types';
+import type { Message } from '../../../common/types';
 import type { UseGenAIConnectorsResult } from '../../hooks/use_genai_connectors';
 import { useTimeline } from '../../hooks/use_timeline';
 import { ObservabilityAIAssistantService } from '../../types';
@@ -41,29 +40,37 @@ const loadingSpinnerContainerClassName = css`
 `;
 
 export function ChatBody({
-  initialConversation,
+  title,
+  messages,
   connectors,
   currentUser,
   service,
   connectorsManagementHref,
   isConversationListExpanded,
   onToggleExpandConversationList,
+  onChatUpdate,
+  onChatComplete,
 }: {
-  initialConversation?: ConversationCreateRequest;
+  title: string;
+  messages: Message[];
   connectors: UseGenAIConnectorsResult;
   currentUser?: Pick<AuthenticatedUser, 'full_name' | 'username'>;
   service: ObservabilityAIAssistantService;
   connectorsManagementHref: string;
   isConversationListExpanded?: boolean;
   onToggleExpandConversationList?: () => void;
+  onChatUpdate: (messages: Message[]) => void;
+  onChatComplete: (messages: Message[]) => void;
 }) {
   const { euiTheme } = useEuiTheme();
 
   const timeline = useTimeline({
-    initialConversation,
+    messages,
     connectors,
     currentUser,
     service,
+    onChatUpdate,
+    onChatComplete,
   });
 
   let footer: React.ReactNode;
@@ -130,15 +137,7 @@ export function ChatBody({
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiPanel hasBorder={false} hasShadow={false} paddingSize="m">
-          <ChatHeader
-            title={
-              initialConversation?.conversation.title ??
-              i18n.translate('xpack.observabilityAiAssistant.chatHeader.newConversation', {
-                defaultMessage: 'New conversation',
-              })
-            }
-            connectors={connectors}
-          />
+          <ChatHeader title={title} connectors={connectors} />
         </EuiPanel>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>

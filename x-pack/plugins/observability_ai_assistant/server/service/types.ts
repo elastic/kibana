@@ -22,7 +22,7 @@ export interface IObservabilityAIAssistantClient {
     connectorId: string;
     functions: Array<FunctionDefinition['options']>;
   }) => Promise<IncomingMessage>;
-  get: (conversationId: string) => void;
+  get: (conversationId: string) => Promise<Conversation>;
   find: (options?: { query?: string }) => Promise<{ conversations: Conversation[] }>;
   create: (conversation: ConversationCreateRequest) => Promise<Conversation>;
   update: (conversation: ConversationUpdateRequest) => Promise<Conversation>;

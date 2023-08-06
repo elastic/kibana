@@ -41,9 +41,10 @@ export function ChatTimeline({
 }: ChatTimelineProps) {
   return (
     <EuiCommentList>
-      {items.map((item) => (
+      {items.map((item, index) => (
         <ChatItem
-          key={item.id}
+          // use index, not id to prevent unmounting of component when message is persisted
+          key={index}
           {...item}
           onFeedbackClick={(feedback) => {
             onFeedback(item, feedback);

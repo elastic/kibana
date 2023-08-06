@@ -5,32 +5,72 @@
  * 2.0.
  */
 
-import { ComponentStory } from '@storybook/react';
+import { ComponentMeta, ComponentStoryObj } from '@storybook/react';
 import React from 'react';
 import { KibanaReactStorybookDecorator } from '../../utils/storybook_decorator';
 import { ConversationList as Component } from './conversation_list';
 
-export default {
+type ConversationListProps = React.ComponentProps<typeof Component>;
+
+const meta: ComponentMeta<typeof Component> = {
   component: Component,
   title: 'app/Organisms/ConversationList',
   decorators: [KibanaReactStorybookDecorator],
 };
 
-type ConversationListProps = React.ComponentProps<typeof Component>;
+export default meta;
 
-const Template: ComponentStory<typeof Component> = (props: ConversationListProps) => {
+const Wrapper = (props: ConversationListProps) => {
   return (
-    <div style={{ minHeight: 800, display: 'flex' }}>
+    <div style={{ minHeight: 800, maxWidth: 240, display: 'flex' }}>
       <Component {...props} />
     </div>
   );
 };
 
-const defaultProps: ConversationListProps = {
-  onClickConversation: (conversationId: string) => {},
-  onClickNewChat: () => {},
-  onClickSettings: () => {},
+export const ChatHeaderLoading: ComponentStoryObj<typeof Component> = {
+  args: {
+    loading: true,
+  },
+  render: Wrapper,
 };
 
-export const ConversationList = Template.bind({});
-ConversationList.args = defaultProps;
+export const ChatHeaderError: ComponentStoryObj<typeof Component> = {
+  args: {
+    error: new Error(),
+  },
+  render: Wrapper,
+};
+
+export const ChatHeaderLoaded: ComponentStoryObj<typeof Component> = {
+  args: {
+    loading: false,
+    selected: '',
+    conversations: [
+      {
+        id: '',
+        label: 'New conversation',
+      },
+      {
+        id: 'first',
+        label: 'My first conversation',
+        href: '/my-first-conversation',
+      },
+      {
+        id: 'second',
+        label: 'My second conversation',
+        href: '/my-second-conversation',
+      },
+    ],
+  },
+  render: Wrapper,
+};
+
+export const ChatHeaderEmpty: ComponentStoryObj<typeof Component> = {
+  args: {
+    loading: false,
+    selected: '',
+    conversations: [],
+  },
+  render: Wrapper,
+};
