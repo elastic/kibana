@@ -8,6 +8,6 @@
 import { i18n } from '@kbn/i18n';
 
 export const EMPTY_CONVERSATION_TITLE = i18n.translate(
-  'xpack.observabilityAiAssitant.emptyConversationTitle',
+  'xpack.observabilityAiAssistant.emptyConversationTitle',
   { defaultMessage: 'New conversation' }
 );
