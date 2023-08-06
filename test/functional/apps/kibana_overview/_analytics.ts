@@ -8,22 +8,23 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { WebElementWrapper } from '../../services/lib/web_element_wrapper';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const find = getService('find');
+  const log = getService('log');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['common', 'header']);
 
-  // FLAKY https://github.com/elastic/kibana/issues/135089
-  describe.skip('overview page - Analytics apps', function describeIndexTests() {
+  describe('overview page - Analytics apps', function describeIndexTests() {
     before(async () => {
-      await esArchiver.load('test/functional/fixtures/es_archiver/logstash_functional');
+      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await kibanaServer.importExport.load(
         'test/functional/fixtures/kbn_archiver/kibana_sample_data_flights_index_pattern'
       );
-      await PageObjects.common.navigateToUrl('kibana_overview', '', { useActualUrl: true });
+      log.debug('Navigating to kibana_overview...');
+      await PageObjects.common.navigateToApp('kibana_overview');
+      log.debug('Waiting until loading has finished...');
       await PageObjects.header.waitUntilLoadingHasFinished();
     });
 
@@ -40,14 +41,22 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const kbnOverviewAppsCards = await find.allByCssSelector('.kbnOverviewApps__item');
       expect(kbnOverviewAppsCards.length).to.be(apps.length);
 
-      const verifyImageUrl = async (el: WebElementWrapper, imgName: string) => {
-        const image = await el.findByCssSelector('img');
-        const imageUrl = await image.getAttribute('src');
-        expect(imageUrl.includes(imgName)).to.be(true);
+      const verifyImageUrl = async (imgName: string) => {
+        let found = false;
+        for (let i = 0; i < kbnOverviewAppsCards.length; i++) {
+          const el = kbnOverviewAppsCards[i];
+          const image = await el.findByCssSelector('img');
+          const imageUrl = await image.getAttribute('src');
+          found = imageUrl.includes(imgName);
+          if (found) {
+            break;
+          }
+        }
+        expect(found).to.be(true);
       };
 
       for (let i = 0; i < apps.length; i++) {
-        verifyImageUrl(kbnOverviewAppsCards[i], `kibana_${apps[i]}_light.svg`);
+        await verifyImageUrl(`kibana_${apps[i]}_light.svg`);
       }
     });
 
