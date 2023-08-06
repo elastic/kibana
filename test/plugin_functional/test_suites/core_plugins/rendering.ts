@@ -104,7 +104,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'data.search.sessions.management.refreshTimeout (duration)',
         'data.search.sessions.maxUpdateRetries (number)',
         'data.search.sessions.notTouchedTimeout (duration)',
-        'data_views.scriptedFieldsEnabled (boolean)',
+        'data_views.scriptedFieldsEnabled (any)', // It's a boolean (any because schema.conditional)
         'dev_tools.deeplinks.navLinkStatus (string)',
         'enterpriseSearch.canDeployEntSearch (boolean)',
         'enterpriseSearch.host (string)',
