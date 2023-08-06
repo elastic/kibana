@@ -7,7 +7,7 @@
 
 import React, { Fragment, useMemo } from 'react';
 import { EuiCallOut, EuiText, EuiSpacer, EuiAccordion } from '@elastic/eui';
-import type { RulePreviewLogs } from '../../../../../common/api/detection_engine/model/rule_schema';
+import type { RulePreviewLogs } from '../../../../../common/api/detection_engine';
 import * as i18n from './translations';
 
 interface PreviewLogsComponentProps {
