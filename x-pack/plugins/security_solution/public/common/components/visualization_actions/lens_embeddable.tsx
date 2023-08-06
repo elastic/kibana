@@ -190,6 +190,7 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
       if (!Array.isArray(e.data) || preferredSeriesType !== 'area') {
         return;
       }
+      //
       // Update timerange when clicking on a dot in an area chart
       const [{ query }] = await createFiltersFromValueClickAction({
         data: e.data,
