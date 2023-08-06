@@ -73,6 +73,7 @@ export function createMergedEsQuery(
 
   if (isQuery(query) && query.language === SEARCH_QUERY_LANGUAGE.KUERY) {
     const ast = fromKueryExpression(query.query);
+    console.log(`--@@ast`, ast);
     if (query.query !== '') {
       combinedQuery = toElasticsearchQuery(ast, dataView);
     }

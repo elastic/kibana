@@ -16,7 +16,6 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiPageHeader,
-  EuiCallOut,
 } from '@elastic/eui';
 
 import type { WindowParameters } from '@kbn/aiops-utils';
@@ -34,19 +33,20 @@ import {
 import moment from 'moment';
 import { css } from '@emotion/react';
 import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
-import { i18n } from '@kbn/i18n';
-import { RANDOM_SAMPLER_OPTION, RandomSampler } from '@kbn/ml-random-sampler-utils';
-import { MIN_SAMPLER_PROBABILITY } from '../index_data_visualizer/constants/random_sampler';
+import { useDataComparisonStateManagerContext } from './use_state_manager';
+import { RandomSamplerOption } from '../index_data_visualizer/constants/random_sampler';
 import { useData } from '../common/hooks/use_data';
 import {
   DV_FROZEN_TIER_PREFERENCE,
-  DV_RANDOM_SAMPLER_P_VALUE,
-  DV_RANDOM_SAMPLER_PREFERENCE,
   DVKey,
   DVStorageMapped,
 } from '../index_data_visualizer/types/storage';
 import { useCurrentEuiTheme } from '../common/hooks/use_current_eui_theme';
-import { DataComparisonFullAppState, getDefaultDataComparisonState } from './types';
+import {
+  DataComparisonFullAppState,
+  DataComparisonQueryState,
+  getDefaultDataComparisonState,
+} from './types';
 import { useDataSource } from '../common/hooks/data_source_context';
 import { useDataVisualizerKibana } from '../kibana_context';
 import { DataComparisonView } from './data_comparison_view';
@@ -124,24 +124,25 @@ export const PageHeader: FC = () => {
   );
 };
 
-interface DataComparisonDefaultState {
+const defaultSearchQuery = {
+  match_all: {},
+};
+interface DataComparisonDefaultState extends DataComparisonQueryState {
   indexPattern: string;
-  searchQuery: string;
-  searchString: string;
-  searchQueryLanguage: string;
-  filters: string;
   randomSampler: string;
+  randomSamplerMode: RandomSamplerOption;
+  randomSamplerProbability: null | number;
 }
-export const getDataComparisonDefaultState = (): DataComparisonDefaultState => ({
-  indexPattern: undefined,
-  searchQuery: undefined,
-  searchString: undefined,
-  searchQueryLanguage: undefined,
-  filters: undefined,
-  randomSamplerMode: RANDOM_SAMPLER_OPTION.ON_AUTOMATIC,
-  randomSamplerProbability: MIN_SAMPLER_PROBABILITY,
-  randomSampler: undefined,
-});
+// export const getDataComparisonDefaultState = (): DataComparisonDefaultState => ({
+//   indexPattern: undefined,
+//   searchQuery: undefined,
+//   searchString: undefined,
+//   searchQueryLanguage: undefined,
+//   filters: [],
+//   randomSamplerMode: RANDOM_SAMPLER_OPTION.ON_AUTOMATIC,
+//   randomSamplerProbability: MIN_SAMPLER_PROBABILITY,
+//   randomSampler: undefined,
+// });
 // export class DataComparisonStateManager {
 //   private docCount$ = new BehaviorSubject<number>(0);
 //   private mode$ = new BehaviorSubject<RandomSamplerOption>(RANDOM_SAMPLER_OPTION.ON_AUTOMATIC);
@@ -158,50 +159,23 @@ export const DataComparisonPage: FC = (props) => {
   } = useDataVisualizerKibana();
   const { dataView, savedSearch } = useDataSource();
 
-  // const referenceStateManager = new BehaviorSubject<DataComparisonDefaultState>({
-  //   indexPattern:
-  // })
+  const { reference: referenceStateManager, production: productionStateManager } =
+    useDataComparisonStateManagerContext();
 
   const [dataComparisonListState, setDataComparisonListState] = usePageUrlState<{
     pageKey: 'DV_DATA_COMP';
     pageUrlState: DataComparisonFullAppState;
   }>('DV_DATA_COMP', getDefaultDataComparisonState());
 
-  const [randomSamplerMode, setRandomSamplerMode] = useStorage<
-    DVKey,
-    DVStorageMapped<typeof DV_RANDOM_SAMPLER_PREFERENCE>
-  >(DV_RANDOM_SAMPLER_PREFERENCE, RANDOM_SAMPLER_OPTION.ON_AUTOMATIC);
-
-  const [randomSamplerProbability, setRandomSamplerProbability] = useStorage<
-    DVKey,
-    DVStorageMapped<typeof DV_RANDOM_SAMPLER_P_VALUE>
-  >(DV_RANDOM_SAMPLER_P_VALUE, MIN_SAMPLER_PROBABILITY);
   const [lastRefresh, setLastRefresh] = useState(0);
 
   const forceRefresh = useCallback(() => setLastRefresh(Date.now()), [setLastRefresh]);
 
-  const randomSampler = useMemo(
-    () =>
-      new RandomSampler(
-        randomSamplerMode,
-        setRandomSamplerMode,
-        randomSamplerProbability,
-        setRandomSamplerProbability
-      ),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
-  );
+  const randomSampler = useMemo(() => referenceStateManager.randomSampler, [referenceStateManager]);
 
   const randomSamplerProd = useMemo(
-    () =>
-      new RandomSampler(
-        randomSamplerMode,
-        (randomSamplerMode) => console.log('randomSamplerMode', randomSamplerMode),
-        randomSamplerProbability,
-        (randomSamplerProb) => console.log('randomSamplerProb', randomSamplerProb)
-      ),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
+    () => productionStateManager.randomSampler,
+    [productionStateManager]
   );
 
   const [globalState, setGlobalState] = useUrlState('_g');
@@ -389,6 +363,7 @@ export const DataComparisonPage: FC = (props) => {
                     },
                     badgeWidth: 90,
                   }}
+                  stateManager={referenceStateManager}
                 />
                 <DocumentCountWithDualBrush
                   randomSampler={randomSamplerProd}
@@ -422,6 +397,7 @@ export const DataComparisonPage: FC = (props) => {
                     },
                     badgeWidth: 90,
                   }}
+                  stateManager={productionStateManager}
                 />
               </EuiPanel>
             </EuiFlexItem>
@@ -429,44 +405,17 @@ export const DataComparisonPage: FC = (props) => {
 
           <EuiFlexItem>
             <EuiPanel paddingSize="m">
-              {!dataView?.isTimeBased() ? (
-                <EuiCallOut
-                  title={i18n.translate(
-                    'xpack.dataVisualizer.dataViewNotBasedOnTimeSeriesWarning.title',
-                    {
-                      defaultMessage:
-                        'The data view "{dataViewTitle}" is not based on a time series.',
-                      values: { dataViewTitle: dataView.getName() },
-                    }
-                  )}
-                  color="danger"
-                  iconType="warning"
-                >
-                  <p>
-                    {i18n.translate(
-                      'xpack.dataVisualizer.dataComparisonTimeSeriesWarning.description',
-                      {
-                        defaultMessage: 'Data comparison only runs over time-based indices.',
-                      }
-                    )}
-                  </p>
-                </EuiCallOut>
-              ) : (
-                <DataComparisonView
-                  isBrushCleared={isBrushCleared}
-                  onReset={clearSelection}
-                  windowParameters={windowParameters}
-                  dataView={dataView}
-                  searchString={searchString ?? ''}
-                  searchQuery={searchQuery}
-                  searchQueryLanguage={searchQueryLanguage}
-                  lastRefresh={lastRefresh}
-                  randomSampler={randomSampler}
-                  randomSamplerProd={randomSamplerProd}
-                  forceRefresh={forceRefresh}
-                  initialSettings={initialSettings}
-                />
-              )}
+              <DataComparisonView
+                isBrushCleared={isBrushCleared}
+                onReset={clearSelection}
+                windowParameters={windowParameters}
+                dataView={dataView}
+                searchString={searchString ?? ''}
+                searchQueryLanguage={searchQueryLanguage}
+                lastRefresh={lastRefresh}
+                randomSampler={randomSampler}
+                forceRefresh={forceRefresh}
+              />
             </EuiPanel>
           </EuiFlexItem>
         </EuiFlexGroup>

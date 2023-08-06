@@ -95,7 +95,6 @@ export const useData = (
     randomSamplerProd
   );
 
-  console.log(`--@@documentStatsProd`, documentStatsProd);
   useEffect(() => {
     const timefilterUpdateSubscription = merge(
       timefilter.getAutoRefreshFetch$(),

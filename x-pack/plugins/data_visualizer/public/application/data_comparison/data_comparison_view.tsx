@@ -17,7 +17,6 @@ import { EuiSwitchEvent } from '@elastic/eui/src/components/form/switch/switch';
 import { useTableState } from '@kbn/ml-in-memory-table';
 import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
 import { RandomSampler } from '@kbn/ml-random-sampler-utils';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { kbnTypeToSupportedType } from '../common/util/field_types_utils';
 import {
   getDataComparisonType,
@@ -36,7 +35,6 @@ interface DataComparisonViewProps {
   windowParameters?: WindowParameters;
   dataView: DataView;
   searchString: Query['query'];
-  searchQuery: QueryDslQueryContainer;
   searchQueryLanguage: SearchQueryLanguage;
   isBrushCleared: boolean;
   runAnalysisDisabled?: boolean;
@@ -52,14 +50,11 @@ export const DataComparisonView = ({
   windowParameters,
   dataView,
   searchString,
-  searchQuery,
   searchQueryLanguage,
   onReset,
   isBrushCleared,
   lastRefresh,
   forceRefresh,
-  randomSampler,
-  randomSamplerProd,
   initialSettings,
 }: DataComparisonViewProps) => {
   const [showDataComparisonOnly, setShowDataComparisonOnly] = useState(false);
@@ -126,11 +121,8 @@ export const DataComparisonView = ({
     ...fetchInfo,
     initialSettings,
     lastRefresh,
-    randomSampler,
-    randomSamplerProd,
     searchString,
     searchQueryLanguage,
-    searchQuery,
   });
 
   const filteredData = useMemo(() => {

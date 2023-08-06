@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React, { FC, useMemo } from 'react';
 import { pick } from 'lodash';
 
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
@@ -24,6 +24,12 @@ import {
 
 import { useLocation } from 'react-router-dom';
 import { parse } from 'query-string';
+import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
+import {
+  DataComparisonStateManagerContext,
+  defaultSearchQuery,
+  StateManager,
+} from './use_state_manager';
 import { DV_STORAGE_KEYS } from '../index_data_visualizer/types/storage';
 import { getCoreStart, getPluginsStart } from '../../kibana_services';
 import { DataComparisonPage } from './data_comparison_page';
@@ -94,7 +100,35 @@ export const DataComparisonDetectionAppState: FC<DataComparisonDetectionAppState
     index: params.index,
     production: params.production,
     reference: params.reference,
+    timeField: params.timeField,
   };
+
+  const referenceStateManager = useMemo(
+    () =>
+      new StateManager({
+        id: 'referenceDataDriftData',
+        indexPattern: params.reference ?? dataView.getIndexPattern(),
+        searchString: '',
+        searchQuery: defaultSearchQuery,
+        searchQueryLanguage: SEARCH_QUERY_LANGUAGE.KUERY,
+        filters: [],
+        timeFieldName: dataView.timeFieldName,
+      }),
+    [params.reference, dataView]
+  );
+  const productionStateManager = useMemo(
+    () =>
+      new StateManager({
+        id: 'productionDataDriftData',
+        indexPattern: params.production ?? dataView.getIndexPattern(),
+        searchString: '',
+        searchQuery: defaultSearchQuery,
+        searchQueryLanguage: SEARCH_QUERY_LANGUAGE.KUERY,
+        filters: [],
+        timeFieldName: dataView.timeFieldName,
+      }),
+    [params.production, dataView]
+  );
 
   return (
     <KibanaThemeProvider theme$={coreStart.theme.theme$}>
@@ -103,7 +137,15 @@ export const DataComparisonDetectionAppState: FC<DataComparisonDetectionAppState
           <DataSourceContext.Provider value={{ dataView, savedSearch }}>
             <StorageContextProvider storage={localStorage} storageKeys={DV_STORAGE_KEYS}>
               <DatePickerContextProvider {...datePickerDeps}>
-                <DataComparisonPage initialSettings={initialSettings} />
+                <DataComparisonStateManagerContext.Provider
+                  value={{
+                    dataView,
+                    reference: referenceStateManager,
+                    production: productionStateManager,
+                  }}
+                >
+                  <DataComparisonPage initialSettings={initialSettings} />
+                </DataComparisonStateManagerContext.Provider>
               </DatePickerContextProvider>
             </StorageContextProvider>
           </DataSourceContext.Provider>

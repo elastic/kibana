@@ -17,11 +17,14 @@ import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesW
 import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
 import { getDefaultDSLQuery } from '@kbn/ml-query-utils';
 import { i18n } from '@kbn/i18n';
-import { RandomSampler, RandomSamplerWrapper } from '@kbn/ml-random-sampler-utils';
+import { RandomSamplerWrapper } from '@kbn/ml-random-sampler-utils';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
 import { AggregationsAggregate } from '@elastic/elasticsearch/lib/api/types';
 import { QueryDslBoolQuery } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { isDefined } from '@kbn/ml-is-defined';
+import { mapAndFlattenFilters } from '@kbn/data-plugin/public';
+import { createMergedEsQuery } from '../index_data_visualizer/utils/saved_search_utils';
+import { useDataComparisonStateManagerContext } from './use_state_manager';
 import { useDataVisualizerKibana } from '../kibana_context';
 import {
   REFERENCE_LABEL,
@@ -564,20 +567,15 @@ export const useFetchDataComparisonResult = (
     initialSettings,
     currentDataView,
     timeRanges,
-    searchQuery,
     searchString,
+    searchQueryLanguage,
     lastRefresh,
-    randomSampler,
-    randomSamplerProd,
   }: {
     lastRefresh: number;
     initialSettings?: InitialSettings;
-    randomSampler?: RandomSampler;
-    randomSamplerProd?: RandomSampler;
     fields?: DataComparisonField[];
     currentDataView?: DataView;
     timeRanges?: { reference: TimeRange; production: TimeRange };
-    searchQuery?: estypes.QueryDslQueryContainer;
     searchString?: Query['query'];
     searchQueryLanguage?: SearchQueryLanguage;
   } = { lastRefresh: 0 }
@@ -587,6 +585,23 @@ export const useFetchDataComparisonResult = (
   const [loaded, setLoaded] = useState<number>(0);
   const [progressMessage, setProgressMessage] = useState<string | undefined>();
   const abortController = useRef(new AbortController());
+  const {
+    uiSettings,
+    data: { query: queryManager },
+  } = useDataVisualizerKibana().services;
+  // const {
+  //   services: {
+  //     uiSettings,
+  //     notifications: { toasts },
+  //     data: { query: queryManager },
+  //     unifiedSearch: {
+  //       ui: { SearchBar },
+  //     },
+  //   },
+  // } = useDataVisualizerKibana();
+
+  const { reference: referenceStateManager, production: productionStateManager } =
+    useDataComparisonStateManagerContext();
 
   const cancelRequest = useCallback(() => {
     abortController.current.abort();
@@ -599,6 +614,16 @@ export const useFetchDataComparisonResult = (
   useEffect(
     () => {
       const doFetchEsRequest = async function () {
+        const randomSampler = referenceStateManager.randomSampler;
+        const randomSamplerProd = productionStateManager.randomSampler;
+        console.log(
+          `--@@doFetchEsRequest called`,
+          'randomSampler',
+          randomSampler,
+          'randomSamplerProd',
+          randomSamplerProd
+        );
+
         if (!randomSampler || !randomSamplerProd) return;
 
         const randomSamplerWrapper = randomSampler.createRandomSamplerWrapper();
@@ -636,8 +661,23 @@ export const useFetchDataComparisonResult = (
             values: { referenceIndex },
           })
         );
+
+        const kqlQuery =
+          searchString !== undefined && searchQueryLanguage !== undefined
+            ? { query: searchString, language: searchQueryLanguage }
+            : undefined;
+
+        console.log(`--@@kqlQuery`, kqlQuery, searchString, searchQueryLanguage);
         const refDataQuery = getDataComparisonQuery({
-          searchQuery,
+          searchQuery: createMergedEsQuery(
+            kqlQuery,
+            mapAndFlattenFilters([
+              ...queryManager.filterManager.getFilters(),
+              ...(referenceStateManager.filters$.getValue() ?? []),
+            ]),
+            currentDataView,
+            uiSettings
+          ),
           datetimeField: currentDataView?.timeFieldName,
           runtimeFields,
           timeRange: timeRanges?.reference,
@@ -698,7 +738,15 @@ export const useFetchDataComparisonResult = (
           setLoaded(0.25);
 
           const prodDataQuery = getDataComparisonQuery({
-            searchQuery,
+            searchQuery: createMergedEsQuery(
+              kqlQuery,
+              mapAndFlattenFilters([
+                ...queryManager.filterManager.getFilters(),
+                ...(productionStateManager.filters$.getValue() ?? []),
+              ]),
+              currentDataView,
+              uiSettings
+            ),
             datetimeField: currentDataView?.timeFieldName,
             runtimeFields,
             timeRange: timeRanges?.production,
@@ -893,6 +941,8 @@ export const useFetchDataComparisonResult = (
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [
+      referenceStateManager,
+      productionStateManager,
       dataSearch,
       // eslint-disable-next-line react-hooks/exhaustive-deps
       JSON.stringify({

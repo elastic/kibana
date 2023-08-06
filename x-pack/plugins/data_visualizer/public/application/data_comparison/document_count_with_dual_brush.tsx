@@ -11,6 +11,9 @@ import { DocumentCountChart, type DocumentCountChartPoint } from '@kbn/aiops-com
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { DocumentCountChartProps } from '@kbn/aiops-components';
 import { RandomSampler } from '@kbn/ml-random-sampler-utils';
+import { Filter } from '@kbn/es-query';
+import useObservable from 'react-use/lib/useObservable';
+import { StateManager, useDataComparisonStateManagerContext } from './use_state_manager';
 import { useDataVisualizerKibana } from '../kibana_context';
 import { DocumentCountStats } from '../../../common/types/field_stats';
 import { TotalCountHeader } from '../common/components/document_count_content/total_count_header';
@@ -43,6 +46,7 @@ export interface DocumentCountContentProps
   randomSampler: RandomSampler;
   reload: () => void;
   approximate: boolean;
+  stateManager: StateManager;
 }
 
 export const DocumentCountWithDualBrush: FC<DocumentCountContentProps> = ({
@@ -61,11 +65,23 @@ export const DocumentCountWithDualBrush: FC<DocumentCountContentProps> = ({
   windowParameters,
   incomingInitialAnalysisStart,
   approximate,
+  stateManager,
   ...docCountChartProps
 }) => {
   const {
-    services: { data, uiSettings, fieldFormats, charts },
+    services: {
+      data,
+      uiSettings,
+      fieldFormats,
+      charts,
+      unifiedSearch: {
+        ui: { SearchBar },
+      },
+    },
   } = useDataVisualizerKibana();
+
+  const { dataView } = useDataComparisonStateManagerContext();
+  const stateFilters = useObservable(stateManager.filters$);
 
   const bucketTimestamps = Object.keys(documentCountStats?.buckets ?? {}).map((time) => +time);
   const splitBucketTimestamps = Object.keys(documentCountStatsSplit?.buckets ?? {}).map(
@@ -101,9 +117,29 @@ export const DocumentCountWithDualBrush: FC<DocumentCountContentProps> = ({
   return (
     <EuiFlexGroup gutterSize="m" direction="column">
       <EuiFlexGroup gutterSize="m" direction="row" alignItems="center">
+        {/* <EuiFlexItem>*/}
+        {/*  <TotalCountHeader totalCount={totalCount} approximate={approximate} />*/}
+        {/* </EuiFlexItem>*/}
         <EuiFlexItem>
-          {/* <TotalCountHeader totalCount={totalCount} approximate={approximate} />*/}
+          <SearchBar
+            key={`dataComparison-${stateManager.id}`}
+            dataTestSubj="dataVisualizerQueryInput"
+            appName={'dataVisualizer'}
+            showFilterBar={true}
+            showDatePicker={false}
+            showQueryInput={false}
+            // onQuerySubmit={(params: { dateRange: TimeRange; query?: Query | undefined }) =>
+            //   searchHandler({ query: params.query })
+            // }
+            filters={stateFilters}
+            onFiltersUpdated={(filters: Filter[]) => stateManager.filters$.next(filters)}
+            indexPatterns={[dataView]}
+            displayStyle={'inPage'}
+            isClearable={true}
+            customSubmitButton={<div />}
+          />
         </EuiFlexItem>
+
         <EuiFlexItem grow={false}>
           <SamplingMenu randomSampler={randomSampler} reload={reload} />
         </EuiFlexItem>
