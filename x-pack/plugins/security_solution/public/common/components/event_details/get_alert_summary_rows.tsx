@@ -23,6 +23,7 @@ import {
   ALERT_NEW_TERMS_FIELDS,
   ALERT_NEW_TERMS,
   ALERT_THRESHOLD_RESULT,
+  ALERT_RULE_CUSTOM_HIGHLIGHTED_FIELDS,
 } from '../../../../common/field_maps/field_names';
 import {
   AGENT_STATUS_FIELD_NAME,
@@ -34,7 +35,6 @@ import type { EventSummaryField, EnrichedFieldInfo } from './types';
 import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy/timeline';
 
 import { isAlertFromEndpointEvent } from '../../utils/endpoint_alert_check';
-import { useCustomHighlightedFields } from './custom_highlighted_fields';
 
 const THRESHOLD_TERMS_FIELD = `${ALERT_THRESHOLD_RESULT}.terms.field`;
 const THRESHOLD_TERMS_VALUE = `${ALERT_THRESHOLD_RESULT}.terms.value`;
@@ -217,6 +217,15 @@ function getFieldsByRuleType(ruleType?: string): EventSummaryField[] {
 }
 
 /**
+ * Gets the fields to display based on custom rules and configuration
+ * @param customs The list of custom-defined fields to display
+ * @returns The list of custom-defined fields to display
+ */
+function getHighlightedFieldsOverride(customs: string[]): EventSummaryField[] {
+  return customs.map((field) => ({ id: field }));
+}
+
+/**
   This function is exported because it is used in the Exception Component to
   populate the conditions with the Highlighted Fields. Additionally, the new
   Alert Summary Flyout also requires access to these fields.
@@ -230,20 +239,26 @@ export function getEventFieldsToDisplay({
   eventCategories,
   eventCode,
   eventRuleType,
+  highlightedFieldsOverride,
 }: {
   eventCategories: EventCategories;
   eventCode?: string;
   eventRuleType?: string;
+  highlightedFieldsOverride: string[];
 }): EventSummaryField[] {
-  const fields = [
-    ...alwaysDisplayedFields,
-    ...getFieldsByCategory(eventCategories),
-    ...getFieldsByEventCode(eventCode, eventCategories),
-    ...getFieldsByRuleType(eventRuleType),
-  ];
+  if (highlightedFieldsOverride.length) {
+    return getHighlightedFieldsOverride(highlightedFieldsOverride);
+  } else {
+    const fields = [
+      ...alwaysDisplayedFields,
+      ...getFieldsByCategory(eventCategories),
+      ...getFieldsByEventCode(eventCode, eventCategories),
+      ...getFieldsByRuleType(eventRuleType),
+    ];
 
-  // Filter all fields by their id to make sure there are no duplicates
-  return uniqBy('id', fields);
+    // Filter all fields by their id to make sure there are no duplicates
+    return uniqBy('id', fields);
+  }
 }
 
 interface EventCategories {
@@ -307,21 +322,13 @@ export const getSummaryRows = ({
     { category: 'kibana', field: ALERT_RULE_CUSTOM_HIGHLIGHTED_FIELDS },
     data
   );
-  const customRuleHighlightedFields = customRuleHighlightedFieldsField?.originalValue;
-
-  const customHighlightedFields = [
-    ...useCustomHighlightedFields(),
-    ...(customRuleHighlightedFields ?? []),
-  ];
-  const eventSummaryCustoms: EventSummaryField[] = customHighlightedFields.map(
-    (custom: string) => ({ id: custom })
-  );
+  const customRuleHighlightedFields = customRuleHighlightedFieldsField?.originalValue ?? [];
 
   const tableFields = getEventFieldsToDisplay({
     eventCategories,
     eventCode,
     eventRuleType,
-    eventSummaryCustoms,
+    highlightedFieldsOverride: customRuleHighlightedFields,
   });
 
   return data != null

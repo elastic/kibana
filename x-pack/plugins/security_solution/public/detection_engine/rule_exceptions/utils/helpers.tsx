@@ -46,7 +46,10 @@ import * as i18n from './translations';
 import type { AlertData, Flattened } from './types';
 
 import { WithCopyToClipboard } from '../../../common/lib/clipboard/with_copy_to_clipboard';
-import { ALERT_ORIGINAL_EVENT } from '../../../../common/field_maps/field_names';
+import {
+  ALERT_ORIGINAL_EVENT,
+  ALERT_RULE_CUSTOM_HIGHLIGHTED_FIELDS,
+} from '../../../../common/field_maps/field_names';
 import {
   EVENT_CODE,
   EVENT_CATEGORY,
@@ -955,7 +958,7 @@ export const getAlertHighlightedFields = (alertData: AlertData): EventSummaryFie
   const eventCategory = get(alertData, EVENT_CATEGORY);
   const eventCode = get(alertData, EVENT_CODE);
   const eventRuleType = get(alertData, KIBANA_ALERT_RULE_TYPE);
-
+  const highlightedFieldsOverride = get(alertData, ALERT_RULE_CUSTOM_HIGHLIGHTED_FIELDS);
   const eventCategories = {
     primaryEventCategory: Array.isArray(eventCategory) ? eventCategory[0] : eventCategory,
     allEventCategories: [eventCategory],
@@ -965,6 +968,7 @@ export const getAlertHighlightedFields = (alertData: AlertData): EventSummaryFie
     eventCategories,
     eventCode,
     eventRuleType,
+    highlightedFieldsOverride,
   });
   return filterHighlightedFields(fieldsToDisplay, highlightedFieldsPrefixToExclude, alertData);
 };

@@ -11,29 +11,31 @@ import { EuiToolTip } from '@elastic/eui';
 import type { DataViewFieldBase } from '@kbn/es-query';
 import type { FieldHook } from '../../../../shared_imports';
 import { Field } from '../../../../shared_imports';
-import { GROUP_BY_FIELD_PLACEHOLDER, GROUP_BY_FIELD_LICENSE_WARNING } from './translations';
+import { FIELD_PLACEHOLDER } from './translations';
 
-interface GroupByFieldsProps {
+interface MultiSelectAutocompleteProps {
   browserFields: DataViewFieldBase[];
   isDisabled: boolean;
   field: FieldHook;
+  disabledText?: string;
 }
 
 const FIELD_COMBO_BOX_WIDTH = 410;
 
 const fieldDescribedByIds = 'detectionEngineStepDefineRuleGroupByField';
 
-export const GroupByComponent: React.FC<GroupByFieldsProps> = ({
+export const MultiSelectAutocompleteComponent: React.FC<MultiSelectAutocompleteProps> = ({
   browserFields,
+  disabledText,
   isDisabled,
   field,
-}: GroupByFieldsProps) => {
+}: MultiSelectAutocompleteProps) => {
   const fieldEuiFieldProps = useMemo(
     () => ({
       fullWidth: true,
       noSuggestions: false,
       options: browserFields.map((browserField) => ({ label: browserField.name })),
-      placeholder: GROUP_BY_FIELD_PLACEHOLDER,
+      placeholder: FIELD_PLACEHOLDER,
       onCreateOption: undefined,
       style: { width: `${FIELD_COMBO_BOX_WIDTH}px` },
       isDisabled,
@@ -44,7 +46,7 @@ export const GroupByComponent: React.FC<GroupByFieldsProps> = ({
     <Field field={field} idAria={fieldDescribedByIds} euiFieldProps={fieldEuiFieldProps} />
   );
   return isDisabled ? (
-    <EuiToolTip position="right" content={GROUP_BY_FIELD_LICENSE_WARNING}>
+    <EuiToolTip position="right" content={disabledText}>
       {fieldComponent}
     </EuiToolTip>
   ) : (
@@ -52,4 +54,4 @@ export const GroupByComponent: React.FC<GroupByFieldsProps> = ({
   );
 };
 
-export const GroupByFields = React.memo(GroupByComponent);
+export const MultiSelectFieldsAutocomplete = React.memo(MultiSelectAutocompleteComponent);

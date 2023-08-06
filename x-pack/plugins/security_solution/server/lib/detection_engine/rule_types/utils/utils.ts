@@ -902,6 +902,7 @@ export const racFieldMappings: Record<string, string> = {
   'signal.rule.risk_score': `${ALERT_RULE_PARAMETERS}.riskScore`,
   'signal.rule.severity': `${ALERT_RULE_PARAMETERS}.severity`,
   'signal.rule.building_block_type': `${ALERT_RULE_PARAMETERS}.buildingBlockType`,
+  'signal.rule.custom_highlighted_fields': `${ALERT_RULE_PARAMETERS}.customHighlightedFields`,
   'signal.rule.namespace': `${ALERT_RULE_PARAMETERS}.namespace`,
   'signal.rule.note': `${ALERT_RULE_PARAMETERS}.note`,
   'signal.rule.license': `${ALERT_RULE_PARAMETERS}.license`,

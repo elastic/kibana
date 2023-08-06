@@ -17,8 +17,9 @@ interface AutocompleteFieldProps {
   idAria: string;
   indices: DataViewBase;
   isDisabled: boolean;
-  fieldType: string;
+  fieldType: string | undefined;
   placeholder?: string;
+  acceptsMultiSelection?: boolean;
 }
 
 export const AutocompleteField = ({
@@ -29,6 +30,7 @@ export const AutocompleteField = ({
   isDisabled,
   fieldType,
   placeholder,
+  acceptsMultiSelection,
 }: AutocompleteFieldProps) => {
   const handleFieldChange = useCallback(
     ([newField]: DataViewFieldBase[]): void => {
@@ -46,7 +48,7 @@ export const AutocompleteField = ({
     return newSelectedField;
   }, [field.value, indices]);
 
-  const fieldTypeFilter = useMemo(() => [fieldType], [fieldType]);
+  const fieldTypeFilter = useMemo(() => (fieldType != null ? [fieldType] : []), [fieldType]);
 
   return (
     <EuiFormRow
@@ -69,6 +71,7 @@ export const AutocompleteField = ({
         data-test-subj={dataTestSubj}
         aria-label={idAria}
         fieldInputWidth={500}
+        acceptsMultiSelection={acceptsMultiSelection}
       />
     </EuiFormRow>
   );

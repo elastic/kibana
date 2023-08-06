@@ -47,6 +47,7 @@ import {
   buildAlertSuppressionDescription,
   buildAlertSuppressionWindowDescription,
   buildAlertSuppressionMissingFieldsDescription,
+  buildHighlightedFieldsOverrideDescription,
 } from './helpers';
 import * as i18n from './translations';
 import { buildMlJobsDescription } from './build_ml_jobs_description';
@@ -244,7 +245,7 @@ export const getDescriptionItem = (
     return buildUnorderedListArrayDescription(label, field, values);
   } else if (field === 'customHighlightedFields') {
     const values: string[] = get(field, data);
-    return buildUnorderedListArrayDescription(label, field, values);
+    return buildHighlightedFieldsOverrideDescription(label, values);
   } else if (field === 'riskScore') {
     const values: AboutStepRiskScore = get(field, data);
     return buildRiskScoreDescription(values);

@@ -499,7 +499,7 @@ export const formatAboutStepData = (
     timestampOverrideFallbackDisabled,
     ...rest
   } = aboutStepData;
-
+  console.log({ customHighlightedFields });
   const detectionExceptionLists =
     exceptionsList != null ? exceptionsList.filter((list) => list.type !== 'endpoint') : [];
 

@@ -161,18 +161,11 @@ export const schema: FormSchema<AboutStepRule> = {
     labelAppend: OptionalFieldLabel,
   },
   customHighlightedFields: {
-    type: FIELD_TYPES.MULTI_SELECT,
+    type: FIELD_TYPES.COMBO_BOX,
     label: i18n.translate(
       'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldCustomHighlightedFieldsLabel',
       {
         defaultMessage: 'Custom highlighted fields',
-      }
-    ),
-    helpText: i18n.translate(
-      'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldCustomHighlightedFieldsHelpText',
-      {
-        defaultMessage:
-          'Add additional highlighted fields to the rule that will appear in the alert. Press enter after each field to add a new one.',
       }
     ),
     labelAppend: OptionalFieldLabel,

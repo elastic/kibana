@@ -231,7 +231,7 @@ export const getAboutStepsData = (rule: Rule, detailsView: boolean): AboutStepRu
       isMappingChecked: riskScoreMapping.length > 0,
     },
     falsePositives,
-    customHighlightedFields,
+    customHighlightedFields: customHighlightedFields ?? [],
     threat: threat as Threats,
     threatIndicatorPath,
   };

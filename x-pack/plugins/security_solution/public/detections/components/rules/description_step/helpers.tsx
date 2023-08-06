@@ -201,6 +201,38 @@ export const buildUnorderedListArrayDescription = (
   return [];
 };
 
+export const buildHighlightedFieldsOverrideDescription = (
+  label: string,
+  values: string[]
+): ListItems[] => {
+  if (isEmpty(values)) {
+    return [];
+  }
+  const description = (
+    <EuiFlexGroup responsive={false} gutterSize="xs" wrap>
+      {values.map((val: string) =>
+        isEmpty(val) ? null : (
+          <EuiFlexItem grow={false} key={`${label}-${val}`}>
+            <EuiBadgeWrap
+              data-test-subj="customHighlightedFieldsStringArrayDescriptionBadgeItem"
+              color="hollow"
+            >
+              {val}
+            </EuiBadgeWrap>
+          </EuiFlexItem>
+        )
+      )}
+    </EuiFlexGroup>
+  );
+
+  return [
+    {
+      title: label,
+      description,
+    },
+  ];
+};
+
 export const buildStringArrayDescription = (
   label: string,
   field: string,
