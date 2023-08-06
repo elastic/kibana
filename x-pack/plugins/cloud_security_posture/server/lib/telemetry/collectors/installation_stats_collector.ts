@@ -22,28 +22,20 @@ const getEnabledInputStreamVars = (packagePolicy: PackagePolicy) => {
   return enabledInput?.streams[0].vars;
 };
 
-const getCspmTelemetryFields = (
+const getAccountTypeField = (
   packagePolicy: PackagePolicy
-): CloudSecurityInstallationStats['cspm'] => {
+): CloudSecurityInstallationStats['account_type'] => {
   if (packagePolicy.vars?.posture.value !== 'cspm') return;
 
   const provider = packagePolicy.vars?.deployment?.value;
   const inputStreamVars = getEnabledInputStreamVars(packagePolicy);
   const accountType = inputStreamVars?.[`${provider}.account_type`]?.value;
 
-  if (!accountType) return;
-
   // If the account_type field is not present, we can assume that AWS integrations without it are single accounts,
   // as this field did not exist before organization accounts were introduced.
-  if (!accountType && provider === 'aws') {
-    return {
-      account_type: 'single-account',
-    };
-  }
+  if (!accountType) return 'single-account';
 
-  return {
-    account_type: accountType,
-  };
+  return accountType;
 };
 
 const getInstalledPackagePolicies = (
@@ -64,7 +56,7 @@ const getInstalledPackagePolicies = (
         created_at: packagePolicy.created_at,
         agent_policy_id: packagePolicy.policy_id,
         agent_count: agentCounts,
-        cspm: getCspmTelemetryFields(packagePolicy),
+        account_type: getAccountTypeField(packagePolicy),
       };
     }
   );

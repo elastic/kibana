@@ -86,7 +86,5 @@ export interface CloudSecurityInstallationStats {
   deployment_mode: string;
   created_at: string;
   agent_count: number;
-  cspm?: {
-    account_type: 'single-account' | 'organization-account';
-  };
+  account_type?: 'single-account' | 'organization-account';
 }

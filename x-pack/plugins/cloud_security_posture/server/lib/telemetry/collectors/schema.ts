@@ -153,11 +153,7 @@ export const cspmUsageSchema: MakeSchemaFrom<CspmUsage> = {
       deployment_mode: { type: 'keyword' },
       created_at: { type: 'date' },
       agent_count: { type: 'long' },
-      cspm: {
-        account_type: {
-          type: 'keyword',
-        },
-      },
+      account_type: { type: 'keyword' },
     },
   },
 };
