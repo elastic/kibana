@@ -98,19 +98,37 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
                 ])
               );
 
-              const pipelinesResponse = await modelsProvider(client).getModelsPipelines(
-                modelIdsAndAliases
+              const modelsManager = modelsProvider(client);
+              const modelsPipelinesAndIndices = await Promise.all(
+                modelIdsAndAliases.map(async (modelIdAndAlias) => {
+                  return {
+                    modelIdAndAlias,
+                    result: await modelsManager.getModelsPipelinesAndIndices(modelIdAndAlias),
+                  };
+                })
               );
+
               for (const model of result) {
-                model.pipelines = {
-                  ...(pipelinesResponse.get(model.model_id) ?? {}),
-                  ...(model.metadata?.model_aliases ?? []).reduce((acc, alias) => {
-                    return Object.assign(acc, pipelinesResponse.get(alias) ?? {});
-                  }, {}),
-                  ...(modelDeploymentsMap[model.model_id] ?? []).reduce((acc, deploymentId) => {
-                    return Object.assign(acc, pipelinesResponse.get(deploymentId) ?? {});
-                  }, {}),
-                };
+                const modelAliases = model.metadata?.model_aliases ?? [];
+                const modelMap = modelsPipelinesAndIndices.find(
+                  (d) =>
+                    d.modelIdAndAlias === model.model_id ||
+                    modelAliases.find((alias) => alias === d.modelIdAndAlias)
+                )?.result;
+                if (modelMap) {
+                  const pipelinesResponse = modelMap.ingestPipelines;
+                  model.pipelines = {
+                    ...(pipelinesResponse.get(model.model_id) ?? {}),
+                    ...(model.metadata?.model_aliases ?? []).reduce((acc, alias) => {
+                      return Object.assign(acc, pipelinesResponse.get(alias) ?? {});
+                    }, {}),
+                    ...(modelDeploymentsMap[model.model_id] ?? []).reduce((acc, deploymentId) => {
+                      return Object.assign(acc, pipelinesResponse.get(deploymentId) ?? {});
+                    }, {}),
+                  };
+
+                  model.indices = modelMap.indices;
+                }
               }
             }
           } catch (e) {

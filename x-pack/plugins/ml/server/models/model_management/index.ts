@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { modelsProvider } from './models_provider';
+export { ModelsProvider, modelsProvider } from './models_provider';
 export { MemoryUsageService } from './memory_usage';

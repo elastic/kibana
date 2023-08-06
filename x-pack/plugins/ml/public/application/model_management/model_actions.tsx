@@ -476,6 +476,33 @@ export function useModelActions({
         onClick: (item) => onTestAction(item),
         enabled: (item) => canTestTrainedModels && isTestable(item, true) && !isLoading,
       },
+      {
+        name: i18n.translate('xpack.ml.inference.modelsList.analyzeDataDriftLabel', {
+          defaultMessage: 'Analyze data drift',
+        }),
+        description: i18n.translate('xpack.ml.inference.modelsList.analyzeDataDriftLabel', {
+          defaultMessage: 'Analyze data drift',
+        }),
+        'data-test-subj': 'mlModelsAnalyzeDataDriftAction',
+        icon: 'visTagCloud',
+        type: 'icon',
+        isPrimary: true,
+        available: (item) => {
+          return Array.isArray(item.indices) && item.indices.length > 0;
+        },
+        onClick: async (item) => {
+          if (!item.indices) return;
+          if (item.indices.length === 0) return;
+
+          const indexPatterns = item.indices.map((o) => Object.keys(o));
+          const path = await urlLocator.getUrl({
+            page: ML_PAGES.DATA_DRIFT,
+            pageState: { destIp: indexPatterns.join(',') },
+          });
+
+          await navigateToPath(path, false);
+        },
+      },
     ],
     [
       urlLocator,

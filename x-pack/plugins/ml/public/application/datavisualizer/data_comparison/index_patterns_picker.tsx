@@ -13,9 +13,12 @@ import { MlPageHeader } from '../../components/page_header';
 import { DataDriftIndexPatternsEditor } from './data_drift_index_patterns_editor';
 
 export const DataDriftIndexPatternsPicker: FC = () => {
-  const { sourceIp, destIp: initialProductionIndexPattern } = parse(location.search, {
+  const { sourceIp, destIp } = parse(location.search, {
     sort: false,
   }) as { sourceIp: string; destIp: string };
+
+  const initialProductionIndexPattern = destIp ? destIp.replaceAll(`'`, '') : '';
+  const initialReferenceIndexPattern = sourceIp ? sourceIp.replaceAll(`'`, '') : '';
 
   return (
     <div data-test-subj="mlPageSourceSelection">
@@ -29,7 +32,7 @@ export const DataDriftIndexPatternsPicker: FC = () => {
         <EuiPageSection>
           <DataDriftIndexPatternsEditor
             initialProductionIndexPattern={initialProductionIndexPattern}
-            initialReferenceIndexPattern={sourceIp ?? ''}
+            initialReferenceIndexPattern={initialReferenceIndexPattern}
           />
         </EuiPageSection>
       </EuiPageBody>
