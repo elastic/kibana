@@ -209,7 +209,7 @@ export function ConversationView() {
             <EuiCallOut
               color="danger"
               title={i18n.translate(
-                'xpack.observabilityAiAssistant.couldNotFindConversationContent',
+                'xpack.observabilityAiAssistant.couldNotFindConversationTitle',
                 {
                   defaultMessage: 'Conversation not found',
                 }
