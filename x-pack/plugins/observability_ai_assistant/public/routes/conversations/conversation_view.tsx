@@ -7,20 +7,18 @@
 import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
-import { merge, omit } from 'lodash';
 import React, { useMemo, useState } from 'react';
-import type { ConversationCreateRequest, Message } from '../../../common/types';
 import { ChatBody } from '../../components/chat/chat_body';
 import { ConversationList } from '../../components/chat/conversation_list';
-import { AbortableAsyncState, useAbortableAsync } from '../../hooks/use_abortable_async';
+import { useAbortableAsync } from '../../hooks/use_abortable_async';
 import { useConfirmModal } from '../../hooks/use_confirm_modal';
+import { useConversation } from '../../hooks/use_conversation';
 import { useCurrentUser } from '../../hooks/use_current_user';
 import { useGenAIConnectors } from '../../hooks/use_genai_connectors';
 import { useKibana } from '../../hooks/use_kibana';
 import { useObservabilityAIAssistant } from '../../hooks/use_observability_ai_assistant';
 import { useObservabilityAIAssistantParams } from '../../hooks/use_observability_ai_assistant_params';
 import { useObservabilityAIAssistantRouter } from '../../hooks/use_observability_ai_assistant_router';
-import { createNewConversation } from '../../hooks/use_timeline';
 import { EMPTY_CONVERSATION_TITLE } from '../../i18n';
 import { getConnectorsManagementHref } from '../../utils/get_connectors_management_href';
 
@@ -63,31 +61,8 @@ export function ConversationView() {
 
   const conversationId = 'conversationId' in path ? path.conversationId : undefined;
 
-  const conversation: AbortableAsyncState<ConversationCreateRequest | undefined> =
-    useAbortableAsync(
-      ({ signal }) => {
-        if (!conversationId) {
-          const nextConversation = createNewConversation();
-          setDisplayedMessages(nextConversation.messages);
-          return nextConversation;
-        }
-
-        return service
-          .callApi('GET /internal/observability_ai_assistant/conversation/{conversationId}', {
-            signal,
-            params: { path: { conversationId } },
-          })
-          .then((nextConversation) => {
-            setDisplayedMessages(nextConversation.messages);
-            return nextConversation;
-          })
-          .catch((error) => {
-            setDisplayedMessages([]);
-            throw error;
-          });
-      },
-      [conversationId]
-    );
+  const { conversation, displayedMessages, setDisplayedMessages, save } =
+    useConversation(conversationId);
 
   const conversations = useAbortableAsync(
     ({ signal }) => {
@@ -112,8 +87,6 @@ export function ConversationView() {
       })),
     ];
   }, [conversations.value?.conversations, conversationId, observabilityAIAssistantRouter]);
-
-  const [displayedMessages, setDisplayedMessages] = useState<Message[]>([]);
 
   function navigateToConversation(nextConversationId?: string) {
     observabilityAIAssistantRouter.push(
@@ -233,71 +206,14 @@ export function ConversationView() {
               service={service}
               messages={displayedMessages}
               onChatComplete={(messages) => {
-                const conversationObject = conversation.value!;
-                if (conversationId) {
-                  service
-                    .callApi(
-                      `POST /internal/observability_ai_assistant/conversation/{conversationId}`,
-                      {
-                        signal: null,
-                        params: {
-                          path: {
-                            conversationId,
-                          },
-                          body: {
-                            conversation: merge(
-                              {
-                                '@timestamp': conversationObject['@timestamp'],
-                                conversation: {
-                                  id: conversationId,
-                                },
-                              },
-                              omit(
-                                conversationObject,
-                                'conversation.last_updated',
-                                'namespace',
-                                'user'
-                              ),
-                              { messages }
-                            ),
-                          },
-                        },
-                      }
-                    )
-                    .then(() => {
-                      conversations.refresh();
-                    })
-                    .catch((err) => {
-                      notifications.toasts.addError(err, {
-                        title: i18n.translate(
-                          'xpack.observabilityAiAssistant.errorCreatingConversation',
-                          { defaultMessage: 'Could not create conversation' }
-                        ),
-                      });
-                    });
-                } else {
-                  service
-                    .callApi(`PUT /internal/observability_ai_assistant/conversation`, {
-                      signal: null,
-                      params: {
-                        body: {
-                          conversation: merge({}, conversationObject, { messages }),
-                        },
-                      },
-                    })
-                    .then((createdConversation) => {
-                      navigateToConversation(createdConversation.conversation.id);
-                      conversations.refresh();
-                    })
-                    .catch((err) => {
-                      notifications.toasts.addError(err, {
-                        title: i18n.translate(
-                          'xpack.observabilityAiAssistant.errorCreatingConversation',
-                          { defaultMessage: 'Could not create conversation' }
-                        ),
-                      });
-                    });
-                }
+                save(messages)
+                  .then((nextConversation) => {
+                    conversations.refresh();
+                    if (!conversationId) {
+                      navigateToConversation(nextConversation.conversation.id);
+                    }
+                  })
+                  .catch(() => {});
               }}
               onChatUpdate={(messages) => {
                 setDisplayedMessages(messages);
