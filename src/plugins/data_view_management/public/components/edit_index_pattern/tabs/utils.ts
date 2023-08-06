@@ -73,7 +73,12 @@ function getTitle(type: string, filteredCount: Dictionary<number>, totalCount: D
   return title + count;
 }
 
-export function getTabs(indexPattern: DataView, fieldFilter: string, relationshipCount = 0) {
+export function getTabs(
+  indexPattern: DataView,
+  fieldFilter: string,
+  relationshipCount = 0,
+  scriptedFieldsEnabled: boolean
+) {
   const totalCount = getCounts(indexPattern.fields.getAll(), indexPattern.getSourceFiltering());
   const filteredCount = getCounts(
     indexPattern.fields.getAll(),
@@ -89,7 +94,7 @@ export function getTabs(indexPattern: DataView, fieldFilter: string, relationshi
     'data-test-subj': 'tab-indexedFields',
   });
 
-  if (areScriptedFieldsEnabled(indexPattern)) {
+  if (areScriptedFieldsEnabled(indexPattern) && scriptedFieldsEnabled) {
     tabs.push({
       name: getTitle('scripted', filteredCount, totalCount),
       id: TAB_SCRIPTED_FIELDS,

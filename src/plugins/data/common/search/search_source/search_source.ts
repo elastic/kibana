@@ -774,6 +774,7 @@ export class SearchSource {
     return field;
   }
 
+  // todo
   private flatten() {
     const { getConfig } = this.dependencies;
     const searchRequest = this.mergeProps();

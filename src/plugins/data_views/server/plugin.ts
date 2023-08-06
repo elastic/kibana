@@ -23,6 +23,11 @@ import {
 } from './types';
 import { DataViewsStorage } from './content_management';
 
+// duped, change
+interface ClientConfigType {
+  scriptedFieldsEnabled?: boolean;
+}
+
 export class DataViewsServerPlugin
   implements
     Plugin<
@@ -34,7 +39,7 @@ export class DataViewsServerPlugin
 {
   private readonly logger: Logger;
 
-  constructor(initializerContext: PluginInitializerContext) {
+  constructor(private readonly initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get('dataView');
   }
 
@@ -67,11 +72,14 @@ export class DataViewsServerPlugin
     { uiSettings, capabilities }: CoreStart,
     { fieldFormats }: DataViewsServerPluginStartDependencies
   ) {
+    const config = this.initializerContext.config.get<ClientConfigType>();
+
     const serviceFactory = dataViewsServiceFactory({
       logger: this.logger.get('indexPatterns'),
       uiSettings,
       fieldFormats,
       capabilities,
+      scriptedFieldsEnabled: config.scriptedFieldsEnabled === false ? false : true, // accounting for null value
     });
 
     return {

@@ -85,6 +85,7 @@ export const getTags = (indexPattern: DataViewListItem | DataView, isDefault: bo
   return tags;
 };
 
+// todo add to this
 export const areScriptedFieldsEnabled = (indexPattern: DataViewListItem | DataView) => {
   return !isRollup(indexPattern.type);
 };

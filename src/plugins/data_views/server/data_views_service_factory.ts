@@ -25,6 +25,7 @@ interface DataViewsServiceFactoryDeps {
   uiSettings: UiSettingsServiceStart;
   fieldFormats: FieldFormatsStart;
   capabilities: CoreStart['capabilities'];
+  scriptedFieldsEnabled: boolean;
 }
 
 /**
@@ -65,5 +66,6 @@ export const dataViewsServiceFactory = (deps: DataViewsServiceFactoryDeps) =>
           : request
           ? (await capabilities.resolveCapabilities(request)).advancedSettings.save === true
           : false,
+      scriptedFieldsEnabled: deps.scriptedFieldsEnabled,
     });
   };
