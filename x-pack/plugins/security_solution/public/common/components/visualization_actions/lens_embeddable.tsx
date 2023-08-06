@@ -187,8 +187,6 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
 
   const onFilterCallback = useCallback(
     async (e: ClickTriggerEvent['data'] | MultiClickTriggerEvent['data']) => {
-      console.log('######e', e, JSON.stringify(e));
-      console.log('######multi?', isClickTriggerEvent(e));
       if (!isClickTriggerEvent(e) || preferredSeriesType !== 'area') {
         return;
       }
