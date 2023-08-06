@@ -19,7 +19,11 @@ import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
 import { RandomSampler } from '@kbn/ml-random-sampler-utils';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { kbnTypeToSupportedType } from '../common/util/field_types_utils';
-import { getDataComparisonType, useFetchDataComparisonResult } from './use_data_drift_result';
+import {
+  getDataComparisonType,
+  InitialSettings,
+  useFetchDataComparisonResult,
+} from './use_data_drift_result';
 import type { DataComparisonField, Feature, TimeRange } from './types';
 import { DataComparisonOverviewTable } from './data_comparison_overview_table';
 
@@ -40,6 +44,8 @@ interface DataComparisonViewProps {
   lastRefresh: number;
   forceRefresh: () => void;
   randomSampler: RandomSampler;
+  randomSamplerProd: RandomSampler;
+  initialSettings: InitialSettings;
 }
 // Data drift view
 export const DataComparisonView = ({
@@ -53,6 +59,8 @@ export const DataComparisonView = ({
   lastRefresh,
   forceRefresh,
   randomSampler,
+  randomSamplerProd,
+  initialSettings,
 }: DataComparisonViewProps) => {
   const [showDataComparisonOnly, setShowDataComparisonOnly] = useState(false);
 
@@ -116,8 +124,10 @@ export const DataComparisonView = ({
 
   const { result, cancelRequest } = useFetchDataComparisonResult({
     ...fetchInfo,
+    initialSettings,
     lastRefresh,
     randomSampler,
+    randomSamplerProd,
     searchString,
     searchQueryLanguage,
     searchQuery,

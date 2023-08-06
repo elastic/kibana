@@ -22,6 +22,8 @@ import {
   wrapWithTheme,
 } from '@kbn/kibana-react-plugin/public';
 
+import { useLocation } from 'react-router-dom';
+import { parse } from 'query-string';
 import { DV_STORAGE_KEYS } from '../index_data_visualizer/types/storage';
 import { getCoreStart, getPluginsStart } from '../../kibana_services';
 import { DataComparisonPage } from './data_comparison_page';
@@ -82,6 +84,17 @@ export const DataComparisonDetectionAppState: FC<DataComparisonDetectionAppState
     wrapWithTheme,
     uiSettingsKeys: UI_SETTINGS,
   };
+  const location = useLocation();
+
+  const params = parse(location.search, {
+    sort: false,
+  });
+
+  const initialSettings = {
+    index: params.index,
+    production: params.production,
+    reference: params.reference,
+  };
 
   return (
     <KibanaThemeProvider theme$={coreStart.theme.theme$}>
@@ -90,7 +103,7 @@ export const DataComparisonDetectionAppState: FC<DataComparisonDetectionAppState
           <DataSourceContext.Provider value={{ dataView, savedSearch }}>
             <StorageContextProvider storage={localStorage} storageKeys={DV_STORAGE_KEYS}>
               <DatePickerContextProvider {...datePickerDeps}>
-                <DataComparisonPage />
+                <DataComparisonPage initialSettings={initialSettings} />
               </DatePickerContextProvider>
             </StorageContextProvider>
           </DataSourceContext.Provider>

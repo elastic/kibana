@@ -100,9 +100,9 @@ export const DocumentCountWithDualBrush: FC<DocumentCountContentProps> = ({
 
   return (
     <EuiFlexGroup gutterSize="m" direction="column">
-      <EuiFlexGroup gutterSize="m" direction="row">
+      <EuiFlexGroup gutterSize="m" direction="row" alignItems="center">
         <EuiFlexItem>
-          <TotalCountHeader totalCount={totalCount} approximate={approximate} />
+          {/* <TotalCountHeader totalCount={totalCount} approximate={approximate} />*/}
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <SamplingMenu randomSampler={randomSampler} reload={reload} />
@@ -125,6 +125,7 @@ export const DocumentCountWithDualBrush: FC<DocumentCountContentProps> = ({
             barColorOverride={barColorOverride}
             barHighlightColorOverride={barHighlightColorOverride}
             {...docCountChartProps}
+            height={60}
           />
         </EuiFlexItem>
       )}

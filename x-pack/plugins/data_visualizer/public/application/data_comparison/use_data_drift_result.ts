@@ -551,18 +551,29 @@ const initialState = {
   error: undefined,
   errorBody: undefined,
 };
+
+export interface InitialSettings {
+  index: string;
+  production: string;
+  reference: string;
+}
+
 export const useFetchDataComparisonResult = (
   {
     fields,
+    initialSettings,
     currentDataView,
     timeRanges,
     searchQuery,
     searchString,
     lastRefresh,
     randomSampler,
+    randomSamplerProd,
   }: {
     lastRefresh: number;
+    initialSettings?: InitialSettings;
     randomSampler?: RandomSampler;
+    randomSamplerProd?: RandomSampler;
     fields?: DataComparisonField[];
     currentDataView?: DataView;
     timeRanges?: { reference: TimeRange; production: TimeRange };
@@ -588,9 +599,10 @@ export const useFetchDataComparisonResult = (
   useEffect(
     () => {
       const doFetchEsRequest = async function () {
-        if (!randomSampler) return;
+        if (!randomSampler || !randomSamplerProd) return;
 
         const randomSamplerWrapper = randomSampler.createRandomSamplerWrapper();
+        const prodRandomSamplerWrapper = randomSamplerProd.createRandomSamplerWrapper();
 
         setLoaded(0);
         setResult({
@@ -611,8 +623,10 @@ export const useFetchDataComparisonResult = (
         setResult({ data: undefined, status: FETCH_STATUS.LOADING, error: undefined });
 
         // Place holder for when there might be difference data views in the future
-        const referenceIndex = currentDataView?.getIndexPattern();
-        const productionIndex = referenceIndex;
+        const referenceIndex = initialSettings
+          ? initialSettings.reference
+          : currentDataView?.getIndexPattern();
+        const productionIndex = initialSettings ? initialSettings.production : referenceIndex;
 
         const runtimeFields = currentDataView?.getRuntimeMappings();
 
@@ -648,6 +662,8 @@ export const useFetchDataComparisonResult = (
             },
           };
 
+          console.log(`--@@baselineRequest`, baselineRequest);
+
           const baselineResponseAggs = await fetchInParallelChunks({
             fields,
             randomSamplerWrapper,
@@ -661,6 +677,8 @@ export const useFetchDataComparisonResult = (
                 signal,
               }),
           });
+
+          console.log(`--@@baselineResponseAggs`, baselineResponseAggs);
 
           if (isReturnedError(baselineResponseAggs)) {
             setResult({
@@ -701,9 +719,12 @@ export const useFetchDataComparisonResult = (
               ...prodDataQuery,
             },
           };
+
+          console.log(`--@@driftedRequest`, driftedRequest);
+
           const driftedRespAggs = await fetchInParallelChunks({
             fields,
-            randomSamplerWrapper,
+            randomSamplerWrapper: prodRandomSamplerWrapper,
 
             asyncFetchFn: (chunkedFields: DataComparisonField[]) =>
               fetchComparisonDriftedData({
@@ -711,7 +732,7 @@ export const useFetchDataComparisonResult = (
                 baseRequest: driftedRequest,
                 baselineResponseAggs,
                 fields: chunkedFields,
-                randomSamplerWrapper,
+                randomSamplerWrapper: prodRandomSamplerWrapper,
                 signal,
               }),
           });

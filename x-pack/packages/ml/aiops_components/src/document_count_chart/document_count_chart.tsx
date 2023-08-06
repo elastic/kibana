@@ -96,8 +96,10 @@ export interface DocumentCountChartProps {
   };
   /** Optional callback function which gets called the brush selection has changed */
   brushSelectionUpdateHandler?: (windowParameters: WindowParameters, force: boolean) => void;
-  /** Optional width */
+  /** Optional chart width */
   width?: number;
+  /** Optional chart height */
+  height?: number;
   /** Data chart points */
   chartPoints: DocumentCountChartPoint[];
   /** Data chart points split */
@@ -184,6 +186,7 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
   dependencies,
   brushSelectionUpdateHandler,
   width,
+  height,
   chartPoints,
   chartPointsSplit,
   timeRangeEarliest,
@@ -466,7 +469,7 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
         <Chart
           size={{
             width: '100%',
-            height: 120,
+            height: height ?? 120,
           }}
         >
           <Settings

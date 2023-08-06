@@ -11,11 +11,16 @@ import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { SEARCH_QUERY_LANGUAGE, SearchQueryLanguage } from '@kbn/ml-query-utils';
 import { DATA_COMPARISON_TYPE } from './constants';
 
-export interface DataComparisonAppState {
+interface DataComparisonQueryState {
   searchString?: Query['query'];
   searchQuery?: estypes.QueryDslQueryContainer;
   searchQueryLanguage: SearchQueryLanguage;
   filters?: Filter[];
+}
+
+export interface DataComparisonAppState {
+  reference: DataComparisonQueryState;
+  production: DataComparisonQueryState;
 }
 
 export type DataComparisonFullAppState = Required<DataComparisonAppState>;
@@ -28,10 +33,18 @@ const defaultSearchQuery = {
 export const getDefaultDataComparisonState = (
   overrides?: Partial<DataComparisonAppState>
 ): DataComparisonFullAppState => ({
-  searchString: '',
-  searchQuery: defaultSearchQuery,
-  searchQueryLanguage: SEARCH_QUERY_LANGUAGE.KUERY,
-  filters: [],
+  reference: {
+    searchString: '',
+    searchQuery: defaultSearchQuery,
+    searchQueryLanguage: SEARCH_QUERY_LANGUAGE.KUERY,
+    filters: [],
+  },
+  production: {
+    searchString: '',
+    searchQuery: defaultSearchQuery,
+    searchQueryLanguage: SEARCH_QUERY_LANGUAGE.KUERY,
+    filters: [],
+  },
   ...overrides,
 });
 
