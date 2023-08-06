@@ -24,12 +24,4 @@ export class IndexAutocompleteComponent extends ListComponent {
     }
     return !_.find(tokens, nonValidIndexType);
   }
-
-  getDefaultTermMeta() {
-    return 'index';
-  }
-
-  getContextKey() {
-    return 'indices';
-  }
 }

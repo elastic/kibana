@@ -215,6 +215,7 @@ export const useDiscoverHistogram = ({
    * Request params
    */
   const { query, filters } = useQuerySubscriber({ data: services.data });
+  const customFilters = useInternalStateSelector((state) => state.customFilters);
   const timefilter = services.data.query.timefilter.timefilter;
   const timeRange = timefilter.getAbsoluteTime();
   const relativeTimeRange = useObservable(
@@ -305,7 +306,7 @@ export const useDiscoverHistogram = ({
     services: { ...services, uiActions: getUiActions() },
     dataView: isPlainRecord ? textBasedDataView : dataView,
     query: isPlainRecord ? textBasedQuery : query,
-    filters,
+    filters: [...(filters ?? []), ...customFilters],
     timeRange,
     relativeTimeRange,
     columns,
