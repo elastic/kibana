@@ -323,7 +323,7 @@ describe('PartitionVisComponent', function () {
           'col-1-1': -10,
         },
       ],
-    } as unknown as Datatable;
+    } as unknown as unknown as Datatable;
     const newProps = { ...wrapperProps, visData: newVisData };
     const component = mountWithIntl(<PartitionVisComponent {...newProps} />);
     expect(findTestSubject(component, 'partitionVisNegativeValues').text()).toEqual(
