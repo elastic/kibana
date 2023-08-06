@@ -20,8 +20,8 @@
     ],
     "patterns": [
       "_settings",
-      "{indices}/_settings",
-      "{indices}/_settings/{name}",
+      "{index}/_settings",
+      "{index}/_settings/{name}",
       "_settings/{name}"
     ],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-get-settings.html"

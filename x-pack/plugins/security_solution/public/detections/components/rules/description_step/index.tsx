@@ -14,11 +14,11 @@ import type { ThreatMapping, Threats, Type } from '@kbn/securitysolution-io-ts-a
 import type { DataViewBase, Filter } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
 import { FilterManager } from '@kbn/data-plugin/public';
-import { buildRelatedIntegrationsDescription } from '../related_integrations/integrations_description';
 import type {
   RelatedIntegrationArray,
   RequiredFieldArray,
-} from '../../../../../common/api/detection_engine/model/rule_schema';
+} from '../../../../../common/api/detection_engine/model/rule_schema/common_attributes';
+import { buildRelatedIntegrationsDescription } from '../related_integrations/integrations_description';
 import { DEFAULT_TIMELINE_TITLE } from '../../../../timelines/components/timeline/translations';
 import type { EqlOptionsSelected } from '../../../../../common/search_strategy';
 import { useKibana } from '../../../../common/lib/kibana';
