@@ -161,7 +161,7 @@ export const swapReferencesRoute = (
           if (verifyNoMoreRefs.total > 0) {
             body.deleteSuccess = false;
           } else {
-            await savedObjectsClient.delete(type, req.body.fromId);
+            await savedObjectsClient.delete(type, req.body.fromId, { refresh: 'wait_for' });
             body.deleteSuccess = true;
           }
         }
