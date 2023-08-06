@@ -327,7 +327,13 @@ export function getExecutionLogAggregation({
             // Bucket sort to allow paging through executions
             executionUuidSorted: {
               bucket_sort: {
-                sort: formatSortForBucketSort(sort),
+                sort: [
+                  {
+                    'numErroredActions>_count': {
+                      order: 'desc',
+                    },
+                  },
+                ],
                 from: (page - 1) * perPage,
                 size: perPage,
                 gap_policy: 'insert_zeros' as estypes.AggregationsGapPolicy,
@@ -336,6 +342,37 @@ export function getExecutionLogAggregation({
             // Filter by action execute doc and get information from this event
             actionExecution: {
               filter: getProviderAndActionFilter('actions', 'execute'),
+              aggs: {
+                actionOutcomes: {
+                  terms: {
+                    field: OUTCOME_FIELD,
+                    size: 2,
+                  },
+                },
+              },
+            },
+            numErroredActions: {
+              filter: {
+                bool: {
+                  must: [
+                    {
+                      match: {
+                        [ACTION_FIELD]: 'execute',
+                      },
+                    },
+                    {
+                      match: {
+                        [PROVIDER_FIELD]: 'actions',
+                      },
+                    },
+                    {
+                      match: {
+                        [OUTCOME_FIELD]: 'failure',
+                      },
+                    },
+                  ],
+                },
+              },
               aggs: {
                 actionOutcomes: {
                   terms: {
@@ -475,6 +512,8 @@ function getProviderAndActionFilter(provider: string, action: string) {
 }
 
 function formatExecutionLogAggBucket(bucket: IExecutionUuidAggBucket): IExecutionLog {
+  console.log('#####');
+  console.log(JSON.stringify(bucket?.numErroredActions, null, 2));
   const durationUs = bucket?.ruleExecution?.executionDuration?.value
     ? bucket.ruleExecution.executionDuration.value
     : 0;

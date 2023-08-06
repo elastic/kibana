@@ -484,7 +484,6 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
       query,
       aggs,
     };
-
     try {
       const { aggregations } = await esClient.search<IValidatedEvent>({
         index,
