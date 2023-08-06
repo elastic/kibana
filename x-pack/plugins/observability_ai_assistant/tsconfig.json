@@ -33,7 +33,8 @@
     "@kbn/observability-shared-plugin",
     "@kbn/kibana-utils-plugin",
     "@kbn/monaco",
-    "@kbn/io-ts-utils"
+    "@kbn/io-ts-utils",
+    "@kbn/std"
   ],
   "exclude": ["target/**/*"]
 }
