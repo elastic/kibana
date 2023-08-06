@@ -8,11 +8,7 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import type { PluginInitializerContext } from '@kbn/core/server';
-import {
-  SIGNALS_INDEX_KEY,
-  DEFAULT_SIGNALS_INDEX,
-  CUSTOM_HIGHLIGHTED_FIELD_SETTING_DEFAULT,
-} from '../common/constants';
+import { SIGNALS_INDEX_KEY, DEFAULT_SIGNALS_INDEX } from '../common/constants';
 import type { ExperimentalFeatures } from '../common/experimental_features';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
 
@@ -95,19 +91,6 @@ export const configSchema = schema.object({
   }),
 
   /**
-   * A list of string values (comma delimited) that will be used select the fields that will appear
-   * in the highlighted fields section of the alert event details view.
-   *
-   * @example
-   * xpack.securitySolution.customHighlightedFields: ['host.name', 'user.name']
-   */
-  customHighlightedFields: schema.arrayOf(schema.string(), {
-    defaultValue: () => {
-      return CUSTOM_HIGHLIGHTED_FIELD_SETTING_DEFAULT;
-    },
-  }),
-
-  /**
    * Artifacts Configuration
    */
   packagerTaskInterval: schema.string({ defaultValue: '60s' }),
@@ -148,7 +131,6 @@ export type ConfigType = ConfigSchema & {
 
 export const createConfig = (context: PluginInitializerContext): ConfigType => {
   const pluginConfig = context.config.get<TypeOf<typeof configSchema>>();
-  const customHighlightedFields = pluginConfig.customHighlightedFields;
   const logger = context.logger.get('config');
 
   const { invalid, features: experimentalFeatures } = parseExperimentalConfigValue(
@@ -167,6 +149,5 @@ ${invalid.map((key) => `      - ${key}`).join('\n')}
   return {
     ...pluginConfig,
     experimentalFeatures,
-    customHighlightedFields,
   };
 };

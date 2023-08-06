@@ -48,7 +48,6 @@ const getAvailableFields = (
   const uniqueFields = Array.from(fieldsByName.values());
 
   if (fieldTypeFilter && fieldTypeFilter?.length > 0) {
-    console.log('HERE', { fieldTypeFilter });
     return uniqueFields.filter(({ type }) => fieldTypeFilter.includes(type));
   }
 

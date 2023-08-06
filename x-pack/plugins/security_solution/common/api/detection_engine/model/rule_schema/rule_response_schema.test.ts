@@ -232,4 +232,33 @@ describe('Rule response schema', () => {
       expect(message.schema).toEqual({});
     });
   });
+
+  describe('custom_highlighted_fields', () => {
+    test('it should validate rule with "custom_highlighted_fields"', () => {
+      const payload = getRulesSchemaMock();
+      payload.custom_highlighted_fields = ['foo', 'bar'];
+
+      const decoded = RuleResponse.decode(payload);
+      const checked = exactCheck(payload, decoded);
+      const message = pipe(checked, foldLeftRight);
+      const expected = getRulesSchemaMock();
+
+      expect(getPaths(left(message.errors))).toEqual([]);
+      expect(message.schema).toEqual(expected);
+    });
+
+    test('it should NOT validate a string for "custom_highlighted_fields"', () => {
+      const payload: RuleResponse & { custom_highlighted_fields: string } = {
+        ...getRulesSchemaMock(),
+        custom_highlighted_fields: 'foo',
+      };
+
+      const decoded = RuleResponse.decode(payload);
+      const checked = exactCheck(payload, decoded);
+      const message = pipe(checked, foldLeftRight);
+
+      expect(getPaths(left(message.errors))).toEqual(['invalid keys "custom_highlighted_fields"']);
+      expect(message.schema).toEqual({});
+    });
+  });
 });

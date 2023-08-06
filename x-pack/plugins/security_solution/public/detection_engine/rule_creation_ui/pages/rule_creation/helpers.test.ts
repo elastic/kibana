@@ -555,6 +555,7 @@ describe('helpers', () => {
         severity_mapping: [],
         tags: ['tag1', 'tag2'],
         threat: getThreatMock(),
+        custom_highlighted_fields: ['foo', 'bar'],
       };
 
       expect(result).toEqual(expected);
@@ -635,6 +636,7 @@ describe('helpers', () => {
         severity_mapping: [],
         tags: ['tag1', 'tag2'],
         threat: getThreatMock(),
+        custom_highlighted_fields: ['foo', 'bar'],
       };
 
       expect(result).toEqual(expected);
@@ -659,6 +661,7 @@ describe('helpers', () => {
         severity_mapping: [],
         tags: ['tag1', 'tag2'],
         threat: getThreatMock(),
+        custom_highlighted_fields: ['foo', 'bar'],
       };
 
       expect(result).toEqual(expected);
@@ -702,6 +705,7 @@ describe('helpers', () => {
         severity_mapping: [],
         tags: ['tag1', 'tag2'],
         threat: getThreatMock(),
+        custom_highlighted_fields: ['foo', 'bar'],
       };
 
       expect(result).toEqual(expected);
@@ -754,6 +758,7 @@ describe('helpers', () => {
             ],
           },
         ],
+        custom_highlighted_fields: ['foo', 'bar'],
       };
 
       expect(result).toEqual(expected);
@@ -782,6 +787,7 @@ describe('helpers', () => {
         threat: getThreatMock(),
         timestamp_override: 'event.ingest',
         timestamp_override_fallback_disabled: true,
+        custom_highlighted_fields: ['foo', 'bar'],
       };
 
       expect(result).toEqual(expected);

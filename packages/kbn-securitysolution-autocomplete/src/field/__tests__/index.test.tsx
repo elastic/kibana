@@ -140,4 +140,29 @@ describe('FieldComponent', () => {
       expect(wrapper.getByTestId('fieldAutocompleteComboBox')).toHaveTextContent('custom')
     );
   });
+
+  it('should allow multi field selection if "acceptsMultiSelection" is "true"', async () => {
+    const wrapper = render(
+      <FieldComponent
+        isClearable={false}
+        isDisabled={true}
+        isLoading={false}
+        indexPattern={{
+          fields,
+          id: '1234',
+          title: 'logstash-*',
+        }}
+        onChange={jest.fn()}
+        placeholder="Placeholder text"
+        selectedField={getField('machine.os.raw')}
+        acceptsMultiSelection
+      />
+    );
+    const fieldAutocompleteComboBox = wrapper.getByTestId('comboBoxSearchInput');
+    fireEvent.change(fieldAutocompleteComboBox, { target: { value: '_source' } });
+    fireEvent.change(fieldAutocompleteComboBox, { target: { value: 'machine.os.raw' } });
+    await waitFor(() =>
+      expect(wrapper.getByTestId('fieldAutocompleteComboBox')).toHaveTextContent('_source')
+    );
+  });
 });

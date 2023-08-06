@@ -233,9 +233,6 @@ export const DETECTION_ENGINE_RULES_BULK_CREATE =
 export const DETECTION_ENGINE_RULES_BULK_UPDATE =
   `${DETECTION_ENGINE_RULES_URL}/_bulk_update` as const;
 
-/** The default value for custom highlighted fields */
-export const CUSTOM_HIGHLIGHTED_FIELD_SETTING_DEFAULT = [];
-
 /**
  * Internal Risk Score routes
  */

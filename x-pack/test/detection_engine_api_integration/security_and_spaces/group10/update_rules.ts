@@ -841,6 +841,28 @@ export default ({ getService }: FtrProviderContext) => {
           });
         });
       });
+
+      describe('custom_highlighted_fields', () => {
+        it('should overwrite custom_highlighted_fields value on update - non additive', async () => {
+          await createRule(supertest, log, {
+            ...getSimpleRule('rule-1'),
+            custom_highlighted_fields: ['blob', 'boop'],
+          });
+
+          const ruleUpdate = {
+            ...getSimpleRuleUpdate('rule-1'),
+            custom_highlighted_fields: ['foo', 'bar'],
+          };
+
+          const { body } = await supertest
+            .put(DETECTION_ENGINE_RULES_URL)
+            .set('kbn-xsrf', 'true')
+            .send(ruleUpdate)
+            .expect(200);
+
+          expect(body.custom_highlighted_fields).to.eql(['foo', 'bar']);
+        });
+      });
     });
   });
 };

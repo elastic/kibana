@@ -347,7 +347,6 @@ const CreateRulePageComponent: React.FC = () => {
           eqlOptions: eqlOptionsSelected,
         };
         const localAboutStepData = aboutStepForm.getFormData();
-        console.log({ localAboutStepData });
         const localScheduleStepData = scheduleStepForm.getFormData();
         const localActionsStepData = actionsStepForm.getFormData();
         const startMlJobsIfNeeded = async () => {

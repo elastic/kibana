@@ -239,6 +239,7 @@ export interface AboutStepRuleJson {
   timestamp_override?: TimestampOverride;
   timestamp_override_fallback_disabled?: boolean;
   note?: string;
+  custom_highlighted_fields?: string[];
 }
 
 export interface ScheduleStepRuleJson {

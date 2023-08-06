@@ -49,146 +49,188 @@ describe('Auto populate exception with Alert data', () => {
     cy.task('esArchiverResetKibana');
     cy.task('esArchiverLoad', 'endpoint');
     login();
-    createRule(getEndpointRule());
-    visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
-    goToRuleDetails();
-    waitForAlertsToPopulate();
   });
-  after(() => {
-    cy.task('esArchiverUnload', 'endpoint');
-    deleteAlertsAndRules();
-  });
+
   afterEach(() => {
     cy.task('esArchiverUnload', 'endpoint');
   });
 
-  it('Should create a Rule exception item from alert actions overflow menu and auto populate the conditions using alert Highlighted fields', () => {
-    cy.get(LOADING_INDICATOR).should('not.exist');
-    addExceptionFromFirstAlert();
-
-    const highlightedFieldsBasedOnAlertDoc = [
-      'host.name',
-      'agent.id',
-      'user.name',
-      'process.executable',
-      'file.path',
-    ];
-
-    /**
-     * Validate the highlighted fields are auto populated, these
-     * fields are based on the alert document that should be generated
-     * when the endpoint rule runs
-     */
-    validateHighlightedFieldsPopulatedAsExceptionConditions(highlightedFieldsBasedOnAlertDoc);
-
-    /**
-     * Validate that the comments are opened by default with one comment added
-     * showing a text contains information about the pre-filled conditions
-     */
-    validateExceptionCommentCountAndText(
-      1,
-      'Exception conditions are pre-filled with relevant data from an alert with the alert id (_id):'
-    );
-
-    addExceptionFlyoutItemName(ITEM_NAME);
-    submitNewExceptionItem();
+  after(() => {
+    cy.task('esArchiverUnload', 'endpoint');
+    deleteAlertsAndRules();
   });
-  it('Should create a Rule exception from Alerts take action button and change multiple exception items without resetting to initial auto-prefilled entries', () => {
-    cy.get(LOADING_INDICATOR).should('not.exist');
 
-    // Open first Alert Summary
-    expandFirstAlert();
+  describe('Default highlighted fields', () => {
+    beforeEach(() => {
+      createRule(getEndpointRule());
+      visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
+      goToRuleDetails();
+      waitForAlertsToPopulate();
+    });
 
-    // The Rule exception should populated with highlighted fields
-    openAddRuleExceptionFromAlertActionButton();
+    it('Should create a Rule exception item from alert actions overflow menu and auto populate the conditions using alert Highlighted fields', () => {
+      cy.get(LOADING_INDICATOR).should('not.exist');
+      addExceptionFromFirstAlert();
 
-    const highlightedFieldsBasedOnAlertDoc = [
-      'host.name',
-      'agent.id',
-      'user.name',
-      'process.executable',
-      'file.path',
-    ];
+      const highlightedFieldsBasedOnAlertDoc = [
+        'host.name',
+        'agent.id',
+        'user.name',
+        'process.executable',
+        'file.path',
+      ];
 
-    /**
-     * Validate the highlighted fields are auto populated, these
-     * fields are based on the alert document that should be generated
-     * when the endpoint rule runs
-     */
-    validateHighlightedFieldsPopulatedAsExceptionConditions(highlightedFieldsBasedOnAlertDoc);
+      /**
+       * Validate the highlighted fields are auto populated, these
+       * fields are based on the alert document that should be generated
+       * when the endpoint rule runs
+       */
+      validateHighlightedFieldsPopulatedAsExceptionConditions(highlightedFieldsBasedOnAlertDoc);
 
-    /**
-     * Validate that the comments are opened by default with one comment added
-     * showing a text contains information about the pre-filled conditions
-     */
-    validateExceptionCommentCountAndText(
-      1,
-      'Exception conditions are pre-filled with relevant data from an alert with the alert id (_id):'
-    );
+      /**
+       * Validate that the comments are opened by default with one comment added
+       * showing a text contains information about the pre-filled conditions
+       */
+      validateExceptionCommentCountAndText(
+        1,
+        'Exception conditions are pre-filled with relevant data from an alert with the alert id (_id):'
+      );
 
-    addExceptionFlyoutItemName(ITEM_NAME);
+      addExceptionFlyoutItemName(ITEM_NAME);
+      submitNewExceptionItem();
+    });
+    it('Should create a Rule exception from Alerts take action button and change multiple exception items without resetting to initial auto-prefilled entries', () => {
+      cy.get(LOADING_INDICATOR).should('not.exist');
 
-    cy.get(ADD_AND_BTN).click();
+      // Open first Alert Summary
+      expandFirstAlert();
 
-    // edit conditions
-    addExceptionEntryFieldValue(ADDITIONAL_ENTRY, 5);
-    addExceptionEntryFieldValueValue('foo', 5);
+      // The Rule exception should populated with highlighted fields
+      openAddRuleExceptionFromAlertActionButton();
 
-    // Change the name again
-    editExceptionFlyoutItemName(ITEM_NAME_EDIT);
+      const highlightedFieldsBasedOnAlertDoc = [
+        'host.name',
+        'agent.id',
+        'user.name',
+        'process.executable',
+        'file.path',
+      ];
 
-    // validate the condition is still 'host.hostname' or got rest after the name is changed
-    validateExceptionConditionField(ADDITIONAL_ENTRY);
+      /**
+       * Validate the highlighted fields are auto populated, these
+       * fields are based on the alert document that should be generated
+       * when the endpoint rule runs
+       */
+      validateHighlightedFieldsPopulatedAsExceptionConditions(highlightedFieldsBasedOnAlertDoc);
 
-    submitNewExceptionItem();
+      /**
+       * Validate that the comments are opened by default with one comment added
+       * showing a text contains information about the pre-filled conditions
+       */
+      validateExceptionCommentCountAndText(
+        1,
+        'Exception conditions are pre-filled with relevant data from an alert with the alert id (_id):'
+      );
 
-    goToExceptionsTab();
+      addExceptionFlyoutItemName(ITEM_NAME);
 
-    // new exception item displays
-    cy.get(EXCEPTION_ITEM_VIEWER_CONTAINER).should('have.length', 1);
-    cy.get(EXCEPTION_CARD_ITEM_NAME).should('have.text', ITEM_NAME_EDIT);
-    cy.get(EXCEPTION_CARD_ITEM_CONDITIONS).contains('span', 'host.hostname');
+      cy.get(ADD_AND_BTN).click();
+
+      // edit conditions
+      addExceptionEntryFieldValue(ADDITIONAL_ENTRY, 5);
+      addExceptionEntryFieldValueValue('foo', 5);
+
+      // Change the name again
+      editExceptionFlyoutItemName(ITEM_NAME_EDIT);
+
+      // validate the condition is still 'host.hostname' or got rest after the name is changed
+      validateExceptionConditionField(ADDITIONAL_ENTRY);
+
+      submitNewExceptionItem();
+
+      goToExceptionsTab();
+
+      // new exception item displays
+      cy.get(EXCEPTION_ITEM_VIEWER_CONTAINER).should('have.length', 1);
+      cy.get(EXCEPTION_CARD_ITEM_NAME).should('have.text', ITEM_NAME_EDIT);
+      cy.get(EXCEPTION_CARD_ITEM_CONDITIONS).contains('span', 'host.hostname');
+    });
+    it('Should delete all prefilled exception entries when creating a Rule exception from Alerts take action button without resetting to initial auto-prefilled entries', () => {
+      cy.get(LOADING_INDICATOR).should('not.exist');
+
+      // Open first Alert Summary
+      expandFirstAlert();
+
+      // The Rule exception should populated with highlighted fields
+      openAddRuleExceptionFromAlertActionButton();
+
+      const highlightedFieldsBasedOnAlertDoc = [
+        'host.name',
+        'agent.id',
+        'user.name',
+        'process.executable',
+        'file.path',
+      ];
+
+      /**
+       * Validate the highlighted fields are auto populated, these
+       * fields are based on the alert document that should be generated
+       * when the endpoint rule runs
+       */
+      validateHighlightedFieldsPopulatedAsExceptionConditions(highlightedFieldsBasedOnAlertDoc);
+
+      /**
+       * Delete all the highlighted fields to see if any condition
+       * will prefuilled again.
+       */
+      const highlightedFieldsCount = highlightedFieldsBasedOnAlertDoc.length - 1;
+      highlightedFieldsBasedOnAlertDoc.forEach((_, index) =>
+        cy
+          .get(ENTRY_DELETE_BTN)
+          .eq(highlightedFieldsCount - index)
+          .click()
+      );
+
+      /**
+       * Validate that there are no highlighted fields are auto populated
+       * after the deletion
+       */
+      validateEmptyExceptionConditionField();
+    });
   });
-  it('Should delete all prefilled exception entries when creating a Rule exception from Alerts take action button without resetting to initial auto-prefilled entries', () => {
-    cy.get(LOADING_INDICATOR).should('not.exist');
 
-    // Open first Alert Summary
-    expandFirstAlert();
+  describe('custom highlighted fields', () => {
+    beforeEach(() => {
+      createRule({ ...getEndpointRule(), custom_highlighted_fields: ['message'] });
+      visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
+      goToRuleDetails();
+      waitForAlertsToPopulate();
+    });
 
-    // The Rule exception should populated with highlighted fields
-    openAddRuleExceptionFromAlertActionButton();
+    it('Should create a Rule exception item from alert actions overflow menu and auto populate the conditions using the rule defined custom highlighted fields', () => {
+      cy.get(LOADING_INDICATOR).should('not.exist');
+      addExceptionFromFirstAlert();
 
-    const highlightedFieldsBasedOnAlertDoc = [
-      'host.name',
-      'agent.id',
-      'user.name',
-      'process.executable',
-      'file.path',
-    ];
+      const highlightedFieldsBasedOnAlertDoc = ['message'];
 
-    /**
-     * Validate the highlighted fields are auto populated, these
-     * fields are based on the alert document that should be generated
-     * when the endpoint rule runs
-     */
-    validateHighlightedFieldsPopulatedAsExceptionConditions(highlightedFieldsBasedOnAlertDoc);
+      /**
+       * Validate the highlighted fields are auto populated, these
+       * fields are based on the alert document that should be generated
+       * when the endpoint rule runs
+       */
+      validateHighlightedFieldsPopulatedAsExceptionConditions(highlightedFieldsBasedOnAlertDoc);
 
-    /**
-     * Delete all the highlighted fields to see if any condition
-     * will prefuilled again.
-     */
-    const highlightedFieldsCount = highlightedFieldsBasedOnAlertDoc.length - 1;
-    highlightedFieldsBasedOnAlertDoc.forEach((_, index) =>
-      cy
-        .get(ENTRY_DELETE_BTN)
-        .eq(highlightedFieldsCount - index)
-        .click()
-    );
+      /**
+       * Validate that the comments are opened by default with one comment added
+       * showing a text contains information about the pre-filled conditions
+       */
+      validateExceptionCommentCountAndText(
+        1,
+        'Exception conditions are pre-filled with relevant data from an alert with the alert id (_id):'
+      );
 
-    /**
-     * Validate that there are no highlighted fields are auto populated
-     * after the deletion
-     */
-    validateEmptyExceptionConditionField();
+      addExceptionFlyoutItemName(ITEM_NAME);
+      submitNewExceptionItem();
+    });
   });
 });

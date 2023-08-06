@@ -345,6 +345,7 @@ const commonRuleParamsKeys = [
   'name',
   'description',
   'false_positives',
+  'custom_highlighted_fields',
   'rule_id',
   'max_signals',
   'risk_score',

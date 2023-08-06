@@ -7,7 +7,7 @@
 
 import { rulesFieldMap } from '../8.0.0';
 
-export const alertsFieldMap840 = {
+export const rulesFieldMap810 = {
   ...rulesFieldMap,
   'kibana.alert.rule.custom_highlighted_fields': {
     type: 'keyword',
@@ -16,4 +16,4 @@ export const alertsFieldMap840 = {
   },
 } as const;
 
-export type RulesFieldMap = typeof rulesFieldMap;
+export type RulesFieldMap810 = typeof rulesFieldMap810;

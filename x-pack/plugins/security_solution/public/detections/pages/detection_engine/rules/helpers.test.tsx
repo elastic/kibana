@@ -144,6 +144,7 @@ describe('rule helpers', () => {
         threat: getThreatMock(),
         timestampOverride: 'event.ingested',
         timestampOverrideFallbackDisabled: false,
+        customHighlightedFields: [],
       };
       const scheduleRuleStepData = { from: '0s', interval: '5m' };
       const ruleActionsStepData = {
@@ -180,6 +181,14 @@ describe('rule helpers', () => {
       const result: AboutStepRule = getAboutStepsData(mockedRule, false);
 
       expect(result.note).toEqual('');
+    });
+
+    test('returns customHighlightedField as empty array if property does not exist on rule', () => {
+      const mockedRule = mockRuleWithEverything('test-id');
+      delete mockedRule.custom_highlighted_fields;
+      const result: AboutStepRule = getAboutStepsData(mockedRule, false);
+
+      expect(result.customHighlightedFields).toEqual([]);
     });
   });
 

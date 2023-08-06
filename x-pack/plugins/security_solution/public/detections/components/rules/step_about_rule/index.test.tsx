@@ -274,6 +274,7 @@ describe('StepAboutRuleComponent', () => {
           technique: [],
         },
       ],
+      customHighlightedFields: [],
     };
 
     await act(async () => {
@@ -333,6 +334,7 @@ describe('StepAboutRuleComponent', () => {
           technique: [],
         },
       ],
+      customHighlightedFields: [],
     };
 
     await act(async () => {
