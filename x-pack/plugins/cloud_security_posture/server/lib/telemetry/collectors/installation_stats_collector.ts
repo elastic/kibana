@@ -27,11 +27,11 @@ const getAccountTypeField = (
 ): CloudSecurityInstallationStats['account_type'] => {
   if (packagePolicy.vars?.posture.value !== 'cspm') return;
 
-  const provider = packagePolicy.vars?.deployment?.value;
   const inputStreamVars = getEnabledInputStreamVars(packagePolicy);
-  const accountType = inputStreamVars?.[`${provider}.account_type`]?.value;
+  const cloudProvider = packagePolicy.vars?.deployment?.value;
+  const accountType = inputStreamVars?.[`${cloudProvider}.account_type`]?.value;
 
-  // If the account_type field is not present, we can assume that AWS integrations without it are single accounts,
+  // If the account_type field is not present, we can assume that the cspm integrations is a single accounts,
   // as this field did not exist before organization accounts were introduced.
   if (!accountType) return 'single-account';
 
