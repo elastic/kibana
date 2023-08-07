@@ -35,8 +35,6 @@ export const RULE_SUMMARY_BUTTON_TEST_ID = 'securitySolutionDocumentDetailsFlyou
 export const DESCRIPTION_TITLE_TEST_ID = 'securitySolutionDocumentDetailsFlyoutDescriptionTitle';
 export const DESCRIPTION_DETAILS_TEST_ID =
   'securitySolutionDocumentDetailsFlyoutDescriptionDetails';
-export const DESCRIPTION_EXPAND_BUTTON_TEST_ID =
-  'securitySolutionDocumentDetailsFlyoutDescriptionExpandButton';
 export const REASON_TITLE_TEST_ID = 'securitySolutionDocumentDetailsFlyoutReasonTitle';
 export const REASON_DETAILS_TEST_ID = 'securitySolutionDocumentDetailsFlyoutReasonDetails';
 export const MITRE_ATTACK_TITLE_TEST_ID = 'securitySolutionAlertDetailsFlyoutMitreAttackTitle';

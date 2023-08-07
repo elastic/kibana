@@ -2722,43 +2722,6 @@ Object {
 
 exports[`data modeling usage data with meta.isDeprecated jobTypes 1`] = `
 Object {
-  "PNG": Object {
-    "app": Object {
-      "canvas workpad": 0,
-      "dashboard": 0,
-      "search": 0,
-      "visualization": 0,
-    },
-    "available": true,
-    "deprecated": 0,
-    "error_codes": undefined,
-    "execution_times": undefined,
-    "layout": undefined,
-    "metrics": Object {
-      "png_cpu": Object {
-        "50.0": null,
-        "75.0": null,
-        "95.0": null,
-        "99.0": null,
-      },
-      "png_memory": Object {
-        "50.0": null,
-        "75.0": null,
-        "95.0": null,
-        "99.0": null,
-      },
-    },
-    "output_size": Object {
-      "1.0": null,
-      "25.0": null,
-      "5.0": null,
-      "50.0": null,
-      "75.0": null,
-      "95.0": null,
-      "99.0": null,
-    },
-    "total": 0,
-  },
   "PNGV2": Object {
     "app": Object {
       "canvas workpad": 0,
@@ -2862,43 +2825,6 @@ Object {
   },
   "enabled": true,
   "last7Days": Object {
-    "PNG": Object {
-      "app": Object {
-        "canvas workpad": 0,
-        "dashboard": 0,
-        "search": 0,
-        "visualization": 0,
-      },
-      "available": true,
-      "deprecated": 0,
-      "error_codes": undefined,
-      "execution_times": undefined,
-      "layout": undefined,
-      "metrics": Object {
-        "png_cpu": Object {
-          "50.0": null,
-          "75.0": null,
-          "95.0": null,
-          "99.0": null,
-        },
-        "png_memory": Object {
-          "50.0": null,
-          "75.0": null,
-          "95.0": null,
-          "99.0": null,
-        },
-      },
-      "output_size": Object {
-        "1.0": null,
-        "25.0": null,
-        "5.0": null,
-        "50.0": null,
-        "75.0": null,
-        "95.0": null,
-        "99.0": null,
-      },
-      "total": 0,
-    },
     "PNGV2": Object {
       "app": Object {
         "canvas workpad": 0,
@@ -3219,43 +3145,6 @@ Object {
 
 exports[`data modeling with empty data 1`] = `
 Object {
-  "PNG": Object {
-    "app": Object {
-      "canvas workpad": 0,
-      "dashboard": 0,
-      "search": 0,
-      "visualization": 0,
-    },
-    "available": true,
-    "deprecated": 0,
-    "error_codes": undefined,
-    "execution_times": undefined,
-    "layout": undefined,
-    "metrics": Object {
-      "png_cpu": Object {
-        "50.0": null,
-        "75.0": null,
-        "95.0": null,
-        "99.0": null,
-      },
-      "png_memory": Object {
-        "50.0": null,
-        "75.0": null,
-        "95.0": null,
-        "99.0": null,
-      },
-    },
-    "output_size": Object {
-      "1.0": null,
-      "25.0": null,
-      "5.0": null,
-      "50.0": null,
-      "75.0": null,
-      "95.0": null,
-      "99.0": null,
-    },
-    "total": 0,
-  },
   "PNGV2": Object {
     "app": Object {
       "canvas workpad": 0,
@@ -3359,43 +3248,6 @@ Object {
   },
   "enabled": true,
   "last7Days": Object {
-    "PNG": Object {
-      "app": Object {
-        "canvas workpad": 0,
-        "dashboard": 0,
-        "search": 0,
-        "visualization": 0,
-      },
-      "available": true,
-      "deprecated": 0,
-      "error_codes": undefined,
-      "execution_times": undefined,
-      "layout": undefined,
-      "metrics": Object {
-        "png_cpu": Object {
-          "50.0": null,
-          "75.0": null,
-          "95.0": null,
-          "99.0": null,
-        },
-        "png_memory": Object {
-          "50.0": null,
-          "75.0": null,
-          "95.0": null,
-          "99.0": null,
-        },
-      },
-      "output_size": Object {
-        "1.0": null,
-        "25.0": null,
-        "5.0": null,
-        "50.0": null,
-        "75.0": null,
-        "95.0": null,
-        "99.0": null,
-      },
-      "total": 0,
-    },
     "PNGV2": Object {
       "app": Object {
         "canvas workpad": 0,
@@ -3704,43 +3556,6 @@ Object {
 
 exports[`data modeling with metrics and execution times in the data 1`] = `
 Object {
-  "PNG": Object {
-    "app": Object {
-      "canvas workpad": 0,
-      "dashboard": 0,
-      "search": 0,
-      "visualization": 0,
-    },
-    "available": true,
-    "deprecated": 0,
-    "error_codes": undefined,
-    "execution_times": undefined,
-    "layout": undefined,
-    "metrics": Object {
-      "png_cpu": Object {
-        "50.0": null,
-        "75.0": null,
-        "95.0": null,
-        "99.0": null,
-      },
-      "png_memory": Object {
-        "50.0": null,
-        "75.0": null,
-        "95.0": null,
-        "99.0": null,
-      },
-    },
-    "output_size": Object {
-      "1.0": null,
-      "25.0": null,
-      "5.0": null,
-      "50.0": null,
-      "75.0": null,
-      "95.0": null,
-      "99.0": null,
-    },
-    "total": 0,
-  },
   "PNGV2": Object {
     "app": Object {
       "canvas workpad": 0,
@@ -3844,43 +3659,6 @@ Object {
   },
   "enabled": true,
   "last7Days": Object {
-    "PNG": Object {
-      "app": Object {
-        "canvas workpad": 0,
-        "dashboard": 0,
-        "search": 0,
-        "visualization": 0,
-      },
-      "available": true,
-      "deprecated": 0,
-      "error_codes": undefined,
-      "execution_times": undefined,
-      "layout": undefined,
-      "metrics": Object {
-        "png_cpu": Object {
-          "50.0": null,
-          "75.0": null,
-          "95.0": null,
-          "99.0": null,
-        },
-        "png_memory": Object {
-          "50.0": null,
-          "75.0": null,
-          "95.0": null,
-          "99.0": null,
-        },
-      },
-      "output_size": Object {
-        "1.0": null,
-        "25.0": null,
-        "5.0": null,
-        "50.0": null,
-        "75.0": null,
-        "95.0": null,
-        "99.0": null,
-      },
-      "total": 0,
-    },
     "PNGV2": Object {
       "app": Object {
         "canvas workpad": 0,
@@ -4223,43 +4001,6 @@ Object {
 
 exports[`data modeling with sparse data 1`] = `
 Object {
-  "PNG": Object {
-    "app": Object {
-      "canvas workpad": 0,
-      "dashboard": 0,
-      "search": 0,
-      "visualization": 0,
-    },
-    "available": true,
-    "deprecated": 0,
-    "error_codes": Object {},
-    "execution_times": Object {},
-    "layout": undefined,
-    "metrics": Object {
-      "png_cpu": Object {
-        "50.0": null,
-        "75.0": null,
-        "95.0": null,
-        "99.0": null,
-      },
-      "png_memory": Object {
-        "50.0": null,
-        "75.0": null,
-        "95.0": null,
-        "99.0": null,
-      },
-    },
-    "output_size": Object {
-      "1.0": null,
-      "25.0": null,
-      "5.0": null,
-      "50.0": null,
-      "75.0": null,
-      "95.0": null,
-      "99.0": null,
-    },
-    "total": 1,
-  },
   "PNGV2": Object {
     "app": Object {
       "canvas workpad": 0,
@@ -4363,43 +4104,6 @@ Object {
   },
   "enabled": true,
   "last7Days": Object {
-    "PNG": Object {
-      "app": Object {
-        "canvas workpad": 0,
-        "dashboard": 0,
-        "search": 0,
-        "visualization": 0,
-      },
-      "available": true,
-      "deprecated": 0,
-      "error_codes": Object {},
-      "execution_times": Object {},
-      "layout": undefined,
-      "metrics": Object {
-        "png_cpu": Object {
-          "50.0": null,
-          "75.0": null,
-          "95.0": null,
-          "99.0": null,
-        },
-        "png_memory": Object {
-          "50.0": null,
-          "75.0": null,
-          "95.0": null,
-          "99.0": null,
-        },
-      },
-      "output_size": Object {
-        "1.0": null,
-        "25.0": null,
-        "5.0": null,
-        "50.0": null,
-        "75.0": null,
-        "95.0": null,
-        "99.0": null,
-      },
-      "total": 1,
-    },
     "PNGV2": Object {
       "app": Object {
         "canvas workpad": 0,
@@ -4730,43 +4434,6 @@ Object {
 
 exports[`data modeling with usage data from the reporting/archived_reports es archive 1`] = `
 Object {
-  "PNG": Object {
-    "app": Object {
-      "canvas workpad": 0,
-      "dashboard": 0,
-      "search": 0,
-      "visualization": 0,
-    },
-    "available": true,
-    "deprecated": 0,
-    "error_codes": Object {},
-    "execution_times": Object {},
-    "layout": undefined,
-    "metrics": Object {
-      "png_cpu": Object {
-        "50.0": null,
-        "75.0": null,
-        "95.0": null,
-        "99.0": null,
-      },
-      "png_memory": Object {
-        "50.0": null,
-        "75.0": null,
-        "95.0": null,
-        "99.0": null,
-      },
-    },
-    "output_size": Object {
-      "1.0": null,
-      "25.0": null,
-      "5.0": null,
-      "50.0": null,
-      "75.0": null,
-      "95.0": null,
-      "99.0": null,
-    },
-    "total": 1,
-  },
   "PNGV2": Object {
     "app": Object {
       "canvas workpad": 0,
@@ -4870,43 +4537,6 @@ Object {
   },
   "enabled": true,
   "last7Days": Object {
-    "PNG": Object {
-      "app": Object {
-        "canvas workpad": 0,
-        "dashboard": 0,
-        "search": 0,
-        "visualization": 0,
-      },
-      "available": true,
-      "deprecated": 0,
-      "error_codes": undefined,
-      "execution_times": undefined,
-      "layout": undefined,
-      "metrics": Object {
-        "png_cpu": Object {
-          "50.0": null,
-          "75.0": null,
-          "95.0": null,
-          "99.0": null,
-        },
-        "png_memory": Object {
-          "50.0": null,
-          "75.0": null,
-          "95.0": null,
-          "99.0": null,
-        },
-      },
-      "output_size": Object {
-        "1.0": null,
-        "25.0": null,
-        "5.0": null,
-        "50.0": null,
-        "75.0": null,
-        "95.0": null,
-        "99.0": null,
-      },
-      "total": 0,
-    },
     "PNGV2": Object {
       "app": Object {
         "canvas workpad": 0,
