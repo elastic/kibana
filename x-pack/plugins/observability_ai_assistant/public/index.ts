@@ -20,6 +20,14 @@ export const ContextualInsight = withSuspense(
   lazy(() => import('./components/insight/insight').then((m) => ({ default: m.Insight })))
 );
 
+export const ObservabilityAIAssistantActionMenuItem = withSuspense(
+  lazy(() =>
+    import('./components/action_menu_item/action_menu_item').then((m) => ({
+      default: m.ObservabilityAIAssistantActionMenuItem,
+    }))
+  )
+);
+
 export { ObservabilityAIAssistantProvider } from './context/observability_ai_assistant_provider';
 
 export type { ObservabilityAIAssistantPluginSetup, ObservabilityAIAssistantPluginStart };

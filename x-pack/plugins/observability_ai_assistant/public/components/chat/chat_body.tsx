@@ -12,7 +12,6 @@ import {
   EuiLoadingSpinner,
   EuiPanel,
   EuiSpacer,
-  useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
@@ -21,7 +20,6 @@ import type { Message } from '../../../common/types';
 import type { UseGenAIConnectorsResult } from '../../hooks/use_genai_connectors';
 import { useTimeline } from '../../hooks/use_timeline';
 import { ObservabilityAIAssistantService } from '../../types';
-import { HideExpandConversationListButton } from '../buttons/hide_expand_conversation_list_button';
 import { MissingCredentialsCallout } from '../missing_credentials_callout';
 import { ChatHeader } from './chat_header';
 import { ChatPromptEditor } from './chat_prompt_editor';
@@ -29,6 +27,8 @@ import { ChatTimeline } from './chat_timeline';
 
 const containerClassName = css`
   max-height: 100%;
+  max-width: 100%;
+  height: 1px;
 `;
 
 const timelineClassName = css`
@@ -46,8 +46,6 @@ export function ChatBody({
   currentUser,
   service,
   connectorsManagementHref,
-  isConversationListExpanded,
-  onToggleExpandConversationList,
   onChatUpdate,
   onChatComplete,
 }: {
@@ -57,13 +55,9 @@ export function ChatBody({
   currentUser?: Pick<AuthenticatedUser, 'full_name' | 'username'>;
   service: ObservabilityAIAssistantService;
   connectorsManagementHref: string;
-  isConversationListExpanded?: boolean;
-  onToggleExpandConversationList?: () => void;
   onChatUpdate: (messages: Message[]) => void;
   onChatComplete: (messages: Message[]) => void;
 }) {
-  const { euiTheme } = useEuiTheme();
-
   const timeline = useTimeline({
     messages,
     connectors,
@@ -120,21 +114,6 @@ export function ChatBody({
 
   return (
     <EuiFlexGroup direction="column" gutterSize="none" className={containerClassName}>
-      <EuiFlexItem grow={false}>
-        {onToggleExpandConversationList ? (
-          <EuiPanel
-            hasShadow={false}
-            hasBorder={false}
-            borderRadius="none"
-            css={{ borderBottom: `solid 1px ${euiTheme.border.color}` }}
-          >
-            <HideExpandConversationListButton
-              isExpanded={Boolean(isConversationListExpanded)}
-              onClick={onToggleExpandConversationList}
-            />
-          </EuiPanel>
-        ) : null}
-      </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiPanel hasBorder={false} hasShadow={false} paddingSize="m">
           <ChatHeader title={title} connectors={connectors} />
