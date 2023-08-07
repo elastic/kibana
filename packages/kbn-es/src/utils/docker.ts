@@ -314,7 +314,7 @@ export async function setupServerlessVolumes(log: ToolingLog, options: Serverles
     log.info('Using existing object store.');
   }
 
-  await Fsp.chmod(options.basePath, 0o766).then((msg: any) => {
+  await Fsp.chmod(options.basePath, 0o777).then((msg: any) => {
     if (msg) {
       log.warning(msg);
     }
