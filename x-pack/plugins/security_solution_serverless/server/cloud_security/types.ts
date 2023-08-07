@@ -30,7 +30,7 @@ export type PostureType =
   | typeof CNVM_POLICY_TEMPLATE;
 
 export interface CloudSecurityMeteringCallbackInput
-  extends Omit<MeteringCallbackInput, 'cloudSetup' | 'abortController'> {
+  extends Omit<MeteringCallbackInput, 'cloudSetup' | 'abortController' | 'config'> {
   projectId: string;
   postureType: PostureType;
 }
