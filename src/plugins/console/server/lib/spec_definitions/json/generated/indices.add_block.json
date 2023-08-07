@@ -23,6 +23,14 @@
         "0"
       ]
     },
+    "url_components": {
+      "block": [
+        "metadata",
+        "read",
+        "read_only",
+        "write"
+      ]
+    },
     "methods": [
       "PUT"
     ],

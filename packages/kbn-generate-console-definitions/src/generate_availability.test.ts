@@ -21,73 +21,32 @@ describe('generateAvailability', () => {
     urls: [],
   };
 
-  it('converts empty availability to true for stack, false for serverless', () => {
-    const endpoint = mockEndpoint;
+  const mockAvailability: SpecificationTypes.Availability = {
+    since: '7.7.0',
+    stability: SpecificationTypes.Stability.stable,
+  };
 
-    const availability = generateAvailability(endpoint);
-    expect(availability).toEqual({
-      stack: true,
-      serverless: false,
-    });
-  });
-
-  describe('converts correctly stack visibility', function () {
-    it('public visibility to true', () => {
+  describe('converts to false if the availability object is missing for either stack or serverless', () => {
+    it('if availability for stack is missing, the endpoint is not available there', () => {
       const endpoint = {
         ...mockEndpoint,
         availability: {
-          stack: {
-            visibility: SpecificationTypes.Visibility.public,
-          },
-        },
-      };
-
-      const availability = generateAvailability(endpoint);
-      expect(availability).toEqual({
-        stack: true,
-        serverless: false,
-      });
-    });
-
-    it('private visibility to false', () => {
-      const endpoint = {
-        ...mockEndpoint,
-        availability: {
-          stack: {
-            visibility: SpecificationTypes.Visibility.private,
-          },
+          serverless: mockAvailability,
         },
       };
 
       const availability = generateAvailability(endpoint);
       expect(availability).toEqual({
         stack: false,
-        serverless: false,
+        serverless: true,
       });
     });
 
-    it('feature_flag visibility to false', () => {
+    it('if availability for serverless is missing, the endpoint is not available there', () => {
       const endpoint = {
         ...mockEndpoint,
         availability: {
-          stack: {
-            visibility: SpecificationTypes.Visibility.feature_flag,
-          },
-        },
-      };
-
-      const availability = generateAvailability(endpoint);
-      expect(availability).toEqual({
-        stack: false,
-        serverless: false,
-      });
-    });
-
-    it('missing visibility to true', () => {
-      const endpoint = {
-        ...mockEndpoint,
-        availability: {
-          stack: {},
+          stack: mockAvailability,
         },
       };
 
@@ -99,17 +58,48 @@ describe('generateAvailability', () => {
     });
   });
 
-  describe('converts correctly serverless visibility', function () {
-    it('public visibility to true', () => {
+  describe('converts to true if the availability object is present and visibility is not set (public by default)', () => {
+    it('if availability for stack is set and its visibility is not set, the endpoint is available there', () => {
       const endpoint = {
         ...mockEndpoint,
         availability: {
+          stack: mockAvailability,
+        },
+      };
+      const availability = generateAvailability(endpoint);
+      expect(availability).toEqual({
+        stack: true,
+        serverless: false,
+      });
+    });
+
+    it('if availability for serverless is set and its visibility is not set, the endpoint is available there', () => {
+      const endpoint = {
+        ...mockEndpoint,
+        availability: {
+          serverless: mockAvailability,
+        },
+      };
+      const availability = generateAvailability(endpoint);
+      expect(availability).toEqual({
+        stack: false,
+        serverless: true,
+      });
+    });
+  });
+
+  describe('checks visibility value if the availability object is present and visibility is set', () => {
+    it('if visibility is set to public', () => {
+      const endpoint = {
+        ...mockEndpoint,
+        availability: {
+          stack: { ...mockAvailability, visibility: SpecificationTypes.Visibility.public },
           serverless: {
+            ...mockAvailability,
             visibility: SpecificationTypes.Visibility.public,
           },
         },
       };
-
       const availability = generateAvailability(endpoint);
       expect(availability).toEqual({
         stack: true,
@@ -117,51 +107,35 @@ describe('generateAvailability', () => {
       });
     });
 
-    it('private visibility to false', () => {
+    it('if visibility is set to private', () => {
       const endpoint = {
         ...mockEndpoint,
         availability: {
-          serverless: {
-            visibility: SpecificationTypes.Visibility.private,
-          },
+          stack: { ...mockAvailability, visibility: SpecificationTypes.Visibility.private },
+          serverless: { ...mockAvailability, visibility: SpecificationTypes.Visibility.private },
         },
       };
-
       const availability = generateAvailability(endpoint);
       expect(availability).toEqual({
-        stack: true,
+        stack: false,
         serverless: false,
       });
     });
 
-    it('feature_flag visibility to false', () => {
+    it('if visibility is set to feature_flag', () => {
       const endpoint = {
         ...mockEndpoint,
         availability: {
+          stack: { ...mockAvailability, visibility: SpecificationTypes.Visibility.feature_flag },
           serverless: {
+            ...mockAvailability,
             visibility: SpecificationTypes.Visibility.feature_flag,
           },
         },
       };
-
       const availability = generateAvailability(endpoint);
       expect(availability).toEqual({
-        stack: true,
-        serverless: false,
-      });
-    });
-
-    it('missing visibility to true for stack, false for serverless', () => {
-      const endpoint = {
-        ...mockEndpoint,
-        availability: {
-          serverless: {},
-        },
-      };
-
-      const availability = generateAvailability(endpoint);
-      expect(availability).toEqual({
-        stack: true,
+        stack: false,
         serverless: false,
       });
     });

@@ -13,6 +13,14 @@
         "pending_watches"
       ]
     },
+    "url_components": {
+      "metric": [
+        "_all",
+        "queued_watches",
+        "current_watches",
+        "pending_watches"
+      ]
+    },
     "methods": [
       "GET"
     ],

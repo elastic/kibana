@@ -6,6 +6,15 @@
       "human": "__flag__",
       "pretty": "__flag__"
     },
+    "url_components": {
+      "target": [
+        "_all",
+        "http",
+        "ingest",
+        "thread_pool",
+        "script"
+      ]
+    },
     "methods": [
       "GET"
     ],
