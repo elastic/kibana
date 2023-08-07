@@ -65,7 +65,7 @@ export function getTimelineItemsfromConversation({
           throw new Error('Could not find preceding message with function_call');
         }
         title = i18n.translate('xpack.observabilityAiAssistant.executedFunctionEvent', {
-          defaultMessage: 'Executed a function',
+          defaultMessage: 'executed a function',
         });
         content = message.message.content;
         element = (

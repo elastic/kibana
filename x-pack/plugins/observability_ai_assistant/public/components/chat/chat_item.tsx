@@ -126,6 +126,8 @@ export function ChatItem({
           controls={controls}
         />
       ) : null;
+  } else {
+    element = <EuiErrorBoundary>{element}</EuiErrorBoundary>;
   }
 
   return (
@@ -175,7 +177,7 @@ export function ChatItem({
       }
       username={getRoleTranslation(role)}
     >
-      <EuiErrorBoundary>{element}</EuiErrorBoundary>
+      {element}
     </EuiComment>
   );
 }
