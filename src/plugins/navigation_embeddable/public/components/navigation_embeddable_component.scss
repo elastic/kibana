@@ -27,9 +27,9 @@
     .navigationLink {
       &.navigationLinkCurrent {
         &::before {
-          content: "";
+          content: '';
           position: absolute;
-          width: 0.5 * $euiSizeXS;
+          width: .5 * $euiSizeXS;
           height: 75%;
           background-color: $euiColorPrimary;
         }
@@ -46,7 +46,7 @@
 
     .navigationLink {
       &.navigationLinkCurrent {
-        box-shadow: $euiColorPrimary 0 (-0.5 * $euiSizeXS) 0 inset;
+        box-shadow: $euiColorPrimary 0 (-.5 * $euiSizeXS) 0 inset;
 
         .euiListGroupItem__text {
           padding-inline: 0;
