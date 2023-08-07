@@ -106,6 +106,7 @@ export interface IContainer<
   >(
     id: string,
     newExplicitInput: Partial<EEI>,
-    newType?: string
-  ): void;
+    newType?: string,
+    generateNewId?: boolean
+  ): Promise<string>;
 }

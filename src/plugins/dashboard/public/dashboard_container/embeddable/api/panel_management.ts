@@ -47,46 +47,16 @@ export async function replacePanel(
   newPanelState: Partial<PanelState>,
   generateNewId?: boolean
 ): Promise<string> {
-  let panels;
-  let panelId;
-
-  if (generateNewId) {
-    // replace panel can be called with generateNewId in order to totally destroy and recreate the embeddable
-    panelId = uuidv4();
-    panels = { ...this.input.panels };
-    delete panels[previousPanelState.explicitInput.id];
-    panels[panelId] = {
-      ...previousPanelState,
-      ...newPanelState,
-      gridData: {
-        ...previousPanelState.gridData,
-        i: panelId,
-      },
-      explicitInput: {
-        ...newPanelState.explicitInput,
-        id: panelId,
-      },
-    };
-  } else {
-    // Because the embeddable type can change, we have to operate at the container level here
-    panelId = previousPanelState.explicitInput.id;
-    panels = {
-      ...this.input.panels,
-      [panelId]: {
-        ...previousPanelState,
-        ...newPanelState,
-        gridData: {
-          ...previousPanelState.gridData,
-        },
-        explicitInput: {
-          ...newPanelState.explicitInput,
-          id: panelId,
-        },
-      },
-    };
-  }
-
-  await this.updateInput({ panels });
+  const panelId = await this.replaceEmbeddable(
+    previousPanelState.explicitInput.id,
+    {
+      ...newPanelState.explicitInput,
+      id: previousPanelState.explicitInput.id,
+    },
+    newPanelState.type,
+    generateNewId
+  );
+  // await this.updateInput({ panels });
   return panelId;
 }
 

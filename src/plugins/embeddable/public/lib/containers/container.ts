@@ -176,7 +176,12 @@ export abstract class Container<
     EEI extends EmbeddableInput = EmbeddableInput,
     EEO extends EmbeddableOutput = EmbeddableOutput,
     E extends IEmbeddable<EEI, EEO> = IEmbeddable<EEI, EEO>
-  >(id: string, newExplicitInput: Partial<EEI>, newType?: string) {
+  >(
+    id: string,
+    newExplicitInput: Partial<EEI>,
+    newType?: string,
+    generateNewId?: boolean
+  ): Promise<string> {
     if (!this.input.panels[id]) {
       throw new PanelNotFoundError();
     }
@@ -186,21 +191,28 @@ export abstract class Container<
       if (!factory) {
         throw new EmbeddableFactoryNotFoundError(newType);
       }
-      this.updateInput({
-        panels: {
-          ...this.input.panels,
-          [id]: {
-            ...this.input.panels[id],
-            explicitInput: { ...newExplicitInput, id },
-            type: newType,
-          },
-        },
-      } as Partial<TContainerInput>);
-    } else {
-      this.updateInputForChild(id, newExplicitInput);
     }
 
+    const panels = { ...this.input.panels };
+    const oldPanel = panels[id];
+
+    if (generateNewId) {
+      delete panels[id];
+      id = uuidv4();
+    }
+    this.updateInput({
+      panels: {
+        ...panels,
+        [id]: {
+          ...oldPanel,
+          explicitInput: { ...newExplicitInput, id },
+          type: newType ?? oldPanel.type,
+        },
+      },
+    } as Partial<TContainerInput>);
+
     await this.untilEmbeddableLoaded<E>(id);
+    return id;
   }
 
   public removeEmbeddable(embeddableId: string) {
