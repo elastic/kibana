@@ -208,9 +208,6 @@ export interface LensPublicStart {
    * @experimental
    */
   EmbeddableComponent: React.ComponentType<EmbeddableComponentProps>;
-  getEmbeddableComponent: (
-    overrideServices?: Partial<LensEmbeddableStartServices>
-  ) => React.ComponentType<EmbeddableComponentProps>;
   /**
    * React component which can be used to embed a Lens Visualization Save Modal Component.
    * See `x-pack/examples/embedded_lens_example` for exemplary usage.
@@ -292,7 +289,6 @@ export class LensPlugin {
   private dataViewsService: DataViewsPublicPluginStart | undefined;
   private initDependenciesForApi: () => void = () => {};
   private locator?: LensAppLocator;
-  private lensEmbeddableFactory: EmbeddableFactory | undefined;
 
   setup(
     core: CoreSetup<LensPluginStartDependencies, void>,
@@ -369,8 +365,10 @@ export class LensPlugin {
     };
 
     if (embeddable) {
-      this.lensEmbeddableFactory = new EmbeddableFactory(getStartServicesForEmbeddable);
-      embeddable.registerEmbeddableFactory('lens', this.lensEmbeddableFactory);
+      embeddable.registerEmbeddableFactory(
+        'lens',
+        new EmbeddableFactory(getStartServicesForEmbeddable)
+      );
     }
 
     if (share) {
@@ -613,10 +611,6 @@ export class LensPlugin {
 
     return {
       EmbeddableComponent: getEmbeddableComponent(core, startDependencies),
-      getEmbeddableComponent: (overrideServices?: Partial<LensEmbeddableStartServices>) => {
-        this.lensEmbeddableFactory?.setOverrideServices(overrideServices);
-        return getEmbeddableComponent(core, startDependencies);
-      },
       SaveModalComponent: getSaveModalComponent(core, startDependencies),
       navigateToPrefilledEditor: (
         input,
@@ -683,7 +677,13 @@ export class LensPlugin {
           this.editorFrameService!.loadVisualizations(),
           this.editorFrameService!.loadDatasources(),
         ]);
-        return getEditLensConfiguration(core, startDependencies, visualizationMap, datasourceMap);
+        const Component = await getEditLensConfiguration(
+          core,
+          startDependencies,
+          visualizationMap,
+          datasourceMap
+        );
+        return Component;
       },
     };
   }

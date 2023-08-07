@@ -84,8 +84,6 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
       },
     } = useKibana().services;
 
-    console.log({ filterManager });
-
     const dispatch = useDispatch();
     const setTablesActivePageToZero = useCallback(() => {
       dispatch(usersActions.setUsersTablesActivePageToZero());

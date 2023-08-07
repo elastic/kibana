@@ -173,7 +173,6 @@ export const getDiscoverAppStateContainer = ({
   const resetToState = (state: DiscoverAppState) => {
     addLog('[appState] reset state to', state);
     previousState = state;
-    addLog('[appStateContainer] reset state');
     appStateContainer.set(state);
   };
 
@@ -185,7 +184,6 @@ export const getDiscoverAppStateContainer = ({
   const replaceUrlState = async (newPartial: DiscoverAppState = {}, merge = true) => {
     addLog('[appState] replaceUrlState', { newPartial, merge });
     const state = merge ? { ...appStateContainer.getState(), ...newPartial } : newPartial;
-    addLog('[appStateContainer] replace URL State');
     await stateStorage.set(APP_STATE_URL_KEY, state, { replace: true });
   };
 

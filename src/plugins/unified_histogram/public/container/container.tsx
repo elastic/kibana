@@ -125,7 +125,7 @@ export const UnifiedHistogramContainer = forwardRef<
     });
   }, [input$, stateService]);
 
-  const { dataView, query, searchSessionId, requestAdapter, withDefaultActions } = containerProps;
+  const { dataView, query, searchSessionId, requestAdapter } = containerProps;
   const currentSuggestion = useStateSelector(stateService?.state$, currentSuggestionSelector);
   const topPanelHeight = useStateSelector(stateService?.state$, topPanelHeightSelector);
   const stateProps = useStateProps({

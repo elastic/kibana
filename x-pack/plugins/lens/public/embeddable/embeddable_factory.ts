@@ -65,13 +65,7 @@ export class EmbeddableFactory implements EmbeddableFactoryDefinition {
     getIconForSavedObject: () => 'lensApp',
   };
 
-  overrideServices: Partial<LensEmbeddableStartServices> | undefined;
-
   constructor(private getStartServices: () => Promise<LensEmbeddableStartServices>) {}
-
-  public setOverrideServices = (services: Partial<LensEmbeddableStartServices> | undefined) => {
-    this.overrideServices = services;
-  };
 
   public isEditable = async () => {
     const { capabilities } = await this.getStartServices();
@@ -101,10 +95,6 @@ export class EmbeddableFactory implements EmbeddableFactoryDefinition {
 
   async create(input: LensEmbeddableInput, parent?: IContainer) {
     try {
-      const startServices = await this.getStartServices();
-
-      const services = { ...startServices, ...(this.overrideServices ?? {}) };
-
       const {
         data,
         timefilter,
@@ -124,7 +114,7 @@ export class EmbeddableFactory implements EmbeddableFactoryDefinition {
         inspector,
         spaces,
         uiSettings,
-      } = services;
+      } = await this.getStartServices();
 
       const { Embeddable } = await import('../async_services');
 

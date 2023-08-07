@@ -40,7 +40,6 @@ import {
   takeUntil,
 } from 'rxjs/operators';
 
-import { updateDiscoverAppState } from '../../../common/store/discover/actions';
 import type {
   TimelineErrorResponse,
   ResponseTimeline,
@@ -120,8 +119,6 @@ const timelineActionsType = [
   updateRange.type,
   upsertColumn.type,
 ];
-
-const discoverActionsType = [updateDiscoverAppState.type];
 
 const isItAtimelineAction = (timelineId: string | undefined) =>
   timelineId && timelineId.toLowerCase().startsWith('timeline');

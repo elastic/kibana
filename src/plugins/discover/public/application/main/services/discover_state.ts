@@ -346,8 +346,6 @@ export function getDiscoverStateContainer({
     const appStateInitAndSyncUnsubscribe = appStateContainer.initAndSync(
       savedSearchContainer.getState()
     );
-
-    addLog('Initializing Sync');
     // subscribing to state changes of appStateContainer, triggering data fetching
     const appStateUnsubscribe = appStateContainer.subscribe(
       buildStateSubscribe({
@@ -359,7 +357,6 @@ export function getDiscoverStateContainer({
         setDataView,
       })
     );
-
     // start subscribing to dataStateContainer, triggering data fetching
     const unsubscribeData = dataStateContainer.subscribe();
 

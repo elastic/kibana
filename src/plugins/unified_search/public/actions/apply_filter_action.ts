@@ -32,7 +32,7 @@ async function isCompatible(context: ApplyGlobalFilterActionContext) {
   return context.filters !== undefined;
 }
 
-export function createFilterActionFactory(
+export function createFilterAction(
   filterManager: FilterManager,
   timeFilter: TimefilterContract,
   theme: ThemeServiceSetup,

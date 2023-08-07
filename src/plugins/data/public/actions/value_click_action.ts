@@ -46,9 +46,7 @@ export function createValueClickActionDefinition(
       try {
         const filters: Filter[] = await createFiltersFromValueClickAction(context.data);
         if (filters.length > 0) {
-          const applyFilterTrigger = getStartServices().uiActions.getTrigger(APPLY_FILTER_TRIGGER);
-
-          await applyFilterTrigger.exec({
+          await getStartServices().uiActions.getTrigger(APPLY_FILTER_TRIGGER).exec({
             filters,
             embeddable: context.embeddable,
             timeFieldName: context.data.timeFieldName,

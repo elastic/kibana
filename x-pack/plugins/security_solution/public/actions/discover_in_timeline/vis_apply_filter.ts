@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createFilterActionFactory } from '@kbn/unified-search-plugin/public';
+import { createFilterAction } from '@kbn/unified-search-plugin/public';
 import type { History } from 'history';
 import type { SecurityAppStore } from '../../common/store';
 import type { StartServices } from '../../types';
@@ -16,7 +16,7 @@ const createDiscoverHistogramCustomFilterAction = (
   history: History,
   services: StartServices
 ) => {
-  const histogramApplyFilter = createFilterActionFactory(
+  const histogramApplyFilter = createFilterAction(
     services.customDataService.query.filterManager,
     services.customDataService.query.timefilter.timefilter,
     services.theme,
