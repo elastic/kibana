@@ -20,7 +20,7 @@ import { devToolsNavLink } from './sections/dev_tools_links';
 import type { ProjectNavigationLink } from './types';
 import { getCloudLinkKey, getCloudUrl, getNavLinkIdFromProjectPageName, isCloudLink } from './util';
 
-export const getProjectNavLinks$ = (
+export const createProjectNavLinks$ = (
   securityNavLinks$: Observable<Array<NavigationLink<SecurityPageName>>>,
   core: CoreStart,
   cloud: CloudStart
@@ -119,7 +119,7 @@ const processCloudLinks = (
     const extraProps: Partial<ProjectNavigationLink> = {};
     if (isCloudLink(link.id)) {
       const externalUrl = getCloudUrl(getCloudLinkKey(link.id), cloud);
-      extraProps.externalUrl = externalUrl ?? '#'; // fallback to # if not found, should only happen in dev
+      extraProps.externalUrl = externalUrl || '#'; // fallback to # if empty, should only happen in dev
     }
     if (link.links) {
       extraProps.links = processCloudLinks(link.links, cloud);

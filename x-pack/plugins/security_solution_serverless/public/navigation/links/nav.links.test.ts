@@ -8,7 +8,7 @@ import type { ChromeNavLink } from '@kbn/core/public';
 import { APP_UI_ID } from '@kbn/security-solution-plugin/common';
 import type { NavigationLink } from '@kbn/security-solution-navigation';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
-import { getProjectNavLinks$ } from './nav_links';
+import { createProjectNavLinks$ } from './nav_links';
 import { BehaviorSubject, firstValueFrom, take } from 'rxjs';
 import { mockServices } from '../../common/services/__mocks__/services.mock';
 import { mlNavCategories, mlNavLinks } from './sections/ml_links';
@@ -75,7 +75,7 @@ describe('getProjectNavLinks', () => {
     mockChromeNavLinksHas.mockReturnValue(false); // no external links exist
     const testSecurityNavLinks$ = new BehaviorSubject([link1, link2]);
 
-    const projectNavLinks$ = getProjectNavLinks$(testSecurityNavLinks$, testServices);
+    const projectNavLinks$ = createProjectNavLinks$(testSecurityNavLinks$, testServices);
     const value = await firstValueFrom(projectNavLinks$.pipe(take(1)));
     expect(value).toEqual([link1, link2]);
   });
@@ -84,7 +84,7 @@ describe('getProjectNavLinks', () => {
     mockChromeNavLinks.mockReturnValue([devToolsNavLink]);
     const testSecurityNavLinks$ = new BehaviorSubject([link1]);
 
-    const projectNavLinks$ = getProjectNavLinks$(testSecurityNavLinks$, testServices);
+    const projectNavLinks$ = createProjectNavLinks$(testSecurityNavLinks$, testServices);
 
     const value = await firstValueFrom(projectNavLinks$.pipe(take(1)));
     expect(value).toEqual([link1, projectLinkDevTools]);
@@ -94,7 +94,7 @@ describe('getProjectNavLinks', () => {
     mockChromeNavLinks.mockReturnValue([chromeNavLink1]);
     const testSecurityNavLinks$ = new BehaviorSubject([link1, link2, linkMlLanding]);
 
-    const projectNavLinks$ = getProjectNavLinks$(testSecurityNavLinks$, testServices);
+    const projectNavLinks$ = createProjectNavLinks$(testSecurityNavLinks$, testServices);
 
     const value = await firstValueFrom(projectNavLinks$.pipe(take(1)));
     expect(value).toEqual([
@@ -108,7 +108,7 @@ describe('getProjectNavLinks', () => {
     mockChromeNavLinksHas.mockReturnValue(true); // all external links exist
     const testSecurityNavLinks$ = new BehaviorSubject([link1, link2, linkMlLanding]);
 
-    const projectNavLinks$ = getProjectNavLinks$(testSecurityNavLinks$, testServices);
+    const projectNavLinks$ = createProjectNavLinks$(testSecurityNavLinks$, testServices);
 
     const value = await firstValueFrom(projectNavLinks$.pipe(take(1)));
     expect(value).toEqual([

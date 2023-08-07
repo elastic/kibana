@@ -14,7 +14,6 @@ import {
 } from '@kbn/security-solution-side-nav';
 import { useNavLinks } from '../../common/hooks/use_nav_links';
 import { ExternalPageName } from '../links/constants';
-import { isCloudLink } from '../links/util';
 
 type GetLinkProps = (link: NavigationLink) => {
   href: string & Partial<SolutionSideNavItem>;
@@ -81,9 +80,9 @@ export const useSideNavItems = (): SolutionSideNavItem[] => {
 
   const getLinkProps = useCallback<GetLinkProps>(
     (link) => {
-      if (isCloudLink(link.id)) {
+      if (link.externalUrl) {
         return {
-          href: link.externalUrl ?? '',
+          href: link.externalUrl,
           openInNewTab: true,
         };
       } else {
