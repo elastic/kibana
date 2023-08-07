@@ -21,7 +21,7 @@
     ],
     "patterns": [
       "_field_caps",
-      "{indices}/_field_caps"
+      "{index}/_field_caps"
     ],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/search-field-caps.html"
   }
