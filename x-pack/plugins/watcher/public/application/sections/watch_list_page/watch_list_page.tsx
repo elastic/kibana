@@ -53,6 +53,8 @@ export const WatchListPage = () => {
     history,
     links: { watcherGettingStartedUrl },
   } = useAppContext();
+  const [query, setQuery] = useState('');
+
   const [selection, setSelection] = useState([]);
   const [watchesToDelete, setWatchesToDelete] = useState<string[]>([]);
   // Filter out deleted watches on the client, because the API will return 200 even though some watches
@@ -446,7 +448,15 @@ export const WatchListPage = () => {
           : '',
     };
 
+    const handleOnChange = ({ queryText, error }: { queryText: string, error: string }) => {
+      if (!error) {
+        setQuery(queryText);
+      }
+    };
+
     const searchConfig = {
+      onChange: handleOnChange,
+      query: query,
       box: {
         incremental: true,
       },
