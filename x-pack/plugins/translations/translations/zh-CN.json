@@ -33420,7 +33420,6 @@
     "xpack.securitySolution.flyout.documentDetails.overviewTab.threatIntelligenceText": "威胁情报字段",
     "xpack.securitySolution.flyout.documentDetails.prevalenceButton": "普及率",
     "xpack.securitySolution.flyout.documentDetails.prevalenceTitle": "普及率",
-    "xpack.securitySolution.flyout.documentDetails.responseButton": "响应",
     "xpack.securitySolution.flyout.documentDetails.riskScoreTitle": "风险分数",
     "xpack.securitySolution.flyout.documentDetails.ruleDescriptionTitle": "规则描述",
     "xpack.securitySolution.flyout.documentDetails.sessionPreview.commandText": "依据",

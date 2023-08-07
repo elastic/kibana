@@ -341,3 +341,21 @@ export const SESSION_PREVIEW_COMMAND_TEXT = i18n.translate(
     defaultMessage: 'by',
   }
 );
+
+export const RESPONSE_TITLE = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.responseSectionTitle',
+  {
+    defaultMessage: 'Response',
+  }
+);
+
+export const RESPONSE_BUTTON = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.responseSectionButton',
+  {
+    defaultMessage: 'Response details',
+  }
+);
+
+export const RESPONSE_EMPTY = i18n.translate('xpack.securitySolution.flyout.response.empty', {
+  defaultMessage: 'There are no response actions defined for this event.',
+});
