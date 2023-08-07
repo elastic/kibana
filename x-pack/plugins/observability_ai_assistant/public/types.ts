@@ -63,7 +63,8 @@ export interface ObservabilityAIAssistantService {
   ) => Promise<{ content?: Serializable; data?: Serializable }>;
   renderFunction: (
     name: string,
-    response: { data?: Serializable; content?: Serializable; arguments: string | undefined }
+    args: string | undefined,
+    response: { data?: Serializable; content?: Serializable }
   ) => React.ReactNode;
 }
 

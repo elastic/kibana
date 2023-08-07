@@ -61,9 +61,8 @@ export function useTimeline({
       messages,
       currentUser,
       hasConnector,
-      service,
     });
-  }, [messages, currentUser, hasConnector, service]);
+  }, [messages, currentUser, hasConnector]);
 
   const [subscription, setSubscription] = useState<Subscription | undefined>();
 

@@ -189,14 +189,18 @@ export function createService({
 
       return await fn.respond({ arguments: parsedArguments }, signal);
     },
-    renderFunction: (name, response) => {
+    renderFunction: (name, args, response) => {
       const fn = functionRegistry.get(name);
 
       if (!fn) {
         throw new Error(`Function ${name} not found`);
       }
 
-      return fn.render?.({ response });
+      const parsedArguments = args ? JSON.parse(args) : {};
+
+      // validate
+
+      return fn.render?.({ response, arguments: parsedArguments });
     },
   };
 }

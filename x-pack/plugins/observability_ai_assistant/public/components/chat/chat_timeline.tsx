@@ -12,11 +12,12 @@ import type { Message } from '../../../common';
 import type { Feedback } from '../feedback_buttons';
 import { ChatItem } from './chat_item';
 
-export interface ChatTimelineItem extends Pick<Message['message'], 'role' | 'function_call'> {
+export interface ChatTimelineItem
+  extends Pick<Message['message'], 'role' | 'content' | 'function_call'> {
   id: string;
   title: string;
   loading: boolean;
-  content?: React.ReactNode;
+  element?: React.ReactNode;
   error?: any;
   canEdit: boolean;
   canRegenerate: boolean;

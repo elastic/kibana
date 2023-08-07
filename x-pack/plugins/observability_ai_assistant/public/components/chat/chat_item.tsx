@@ -10,6 +10,7 @@ import {
   EuiComment,
   EuiContextMenuItem,
   EuiContextMenuPanel,
+  EuiErrorBoundary,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPopover,
@@ -54,6 +55,7 @@ const euiCommentClassName = css`
 export function ChatItem({
   title,
   content,
+  element,
   canEdit,
   canGiveFeedback,
   canRegenerate,
@@ -113,6 +115,19 @@ export function ChatItem({
     );
   }
 
+  if (!element) {
+    element =
+      content || error || controls ? (
+        <MessagePanel
+          body={
+            content || loading ? <MessageText content={content || ''} loading={loading} /> : null
+          }
+          error={error}
+          controls={controls}
+        />
+      ) : null;
+  }
+
   return (
     <EuiComment
       event={
@@ -160,15 +175,7 @@ export function ChatItem({
       }
       username={getRoleTranslation(role)}
     >
-      {content || error || controls ? (
-        <MessagePanel
-          body={
-            content || loading ? <MessageText content={content || ''} loading={loading} /> : null
-          }
-          error={error}
-          controls={controls}
-        />
-      ) : null}
+      <EuiErrorBoundary>{element}</EuiErrorBoundary>
     </EuiComment>
   );
 }
