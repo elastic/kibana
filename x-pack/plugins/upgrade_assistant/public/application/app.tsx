@@ -11,7 +11,7 @@ import { Redirect } from 'react-router-dom';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiEmptyPrompt, EuiPageSection, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiPageSection, EuiLoadingSpinner, EuiPageTemplate } from '@elastic/eui';
 import { ScopedHistory } from '@kbn/core/public';
 
 import { API_BASE_PATH } from '../../common/constants';
@@ -73,60 +73,52 @@ const AppHandlingClusterUpgradeState: React.FunctionComponent = () => {
 
   if (clusterUpgradeState === 'isUpgrading') {
     return (
-      <EuiPageSection paddingSize="none" alignment="center" data-test-subj="isUpgradingMessage">
-        <EuiEmptyPrompt
-          iconType="logoElasticsearch"
-          title={
-            <h1>
-              <FormattedMessage
-                id="xpack.upgradeAssistant.upgradingTitle"
-                defaultMessage="Your cluster is upgrading"
-              />
-            </h1>
-          }
-          body={
-            <p>
-              <FormattedMessage
-                id="xpack.upgradeAssistant.upgradingDescription"
-                defaultMessage="One or more Elasticsearch nodes have a newer version of
+      <EuiPageTemplate.EmptyPrompt
+        iconType="logoElasticsearch"
+        title={
+          <h1>
+            <FormattedMessage
+              id="xpack.upgradeAssistant.upgradingTitle"
+              defaultMessage="Your cluster is upgrading"
+            />
+          </h1>
+        }
+        body={
+          <p>
+            <FormattedMessage
+              id="xpack.upgradeAssistant.upgradingDescription"
+              defaultMessage="One or more Elasticsearch nodes have a newer version of
                 Elasticsearch than Kibana. Once all your nodes are upgraded, upgrade Kibana."
-              />
-            </p>
-          }
-          data-test-subj="emptyPrompt"
-        />
-      </EuiPageSection>
+            />
+          </p>
+        }
+        data-test-subj="emptyPrompt"
+      />
     );
   }
 
   if (clusterUpgradeState === 'isUpgradeComplete') {
     return (
-      <EuiPageSection
-        paddingSize="none"
-        alignment="center"
-        data-test-subj="isUpgradeCompleteMessage"
-      >
-        <EuiEmptyPrompt
-          iconType="logoElasticsearch"
-          title={
-            <h1>
-              <FormattedMessage
-                id="xpack.upgradeAssistant.upgradedTitle"
-                defaultMessage="Your cluster has been upgraded"
-              />
-            </h1>
-          }
-          body={
-            <p>
-              <FormattedMessage
-                id="xpack.upgradeAssistant.upgradedDescription"
-                defaultMessage="All Elasticsearch nodes have been upgraded. You may now upgrade Kibana."
-              />
-            </p>
-          }
-          data-test-subj="emptyPrompt"
-        />
-      </EuiPageSection>
+      <EuiPageTemplate.EmptyPrompt
+        iconType="logoElasticsearch"
+        title={
+          <h1>
+            <FormattedMessage
+              id="xpack.upgradeAssistant.upgradedTitle"
+              defaultMessage="Your cluster has been upgraded"
+            />
+          </h1>
+        }
+        body={
+          <p>
+            <FormattedMessage
+              id="xpack.upgradeAssistant.upgradedDescription"
+              defaultMessage="All Elasticsearch nodes have been upgraded. You may now upgrade Kibana."
+            />
+          </p>
+        }
+        data-test-subj="emptyPrompt"
+      />
     );
   }
 
@@ -157,11 +149,7 @@ export const App = ({ history }: { history: ScopedHistory }) => {
 
   // Prevent flicker of the underlying UI while we wait for the status to fetch.
   if (isLoading && isInitialRequest) {
-    return (
-      <EuiPageSection paddingSize="none" alignment="center">
-        <EuiEmptyPrompt body={<EuiLoadingSpinner size="l" />} />
-      </EuiPageSection>
-    );
+    return <EuiPageTemplate.EmptyPrompt body={<EuiLoadingSpinner size="l" />} />;
   }
 
   return (

@@ -6,7 +6,7 @@
  */
 
 import React, { FunctionComponent } from 'react';
-import { EuiPageSection, EuiEmptyPrompt } from '@elastic/eui';
+import { EuiPageTemplate } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { DeprecationSource } from '../../../../common/types';
@@ -20,18 +20,16 @@ export const DeprecationsPageLoadingError: FunctionComponent<Props> = ({
   deprecationSource,
   message,
 }) => (
-  <EuiPageSection alignment="center" color="danger" data-test-subj="deprecationsPageLoadingError">
-    <EuiEmptyPrompt
-      iconType="warning"
-      title={
-        <h2>
-          {i18n.translate('xpack.upgradeAssistant.deprecationsPageLoadingError.title', {
-            defaultMessage: 'Could not retrieve {deprecationSource} deprecation issues',
-            values: { deprecationSource },
-          })}
-        </h2>
-      }
-      body={message}
-    />
-  </EuiPageSection>
+  <EuiPageTemplate.EmptyPrompt
+    iconType="warning"
+    title={
+      <h2>
+        {i18n.translate('xpack.upgradeAssistant.deprecationsPageLoadingError.title', {
+          defaultMessage: 'Could not retrieve {deprecationSource} deprecation issues',
+          values: { deprecationSource },
+        })}
+      </h2>
+    }
+    body={message}
+  />
 );

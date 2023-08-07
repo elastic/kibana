@@ -8,7 +8,7 @@
 import React, { useEffect, useMemo } from 'react';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
 
-import { EuiPageHeader, EuiSpacer, EuiPageSection, EuiLink, EuiCallOut } from '@elastic/eui';
+import { EuiPageHeader, EuiSpacer, EuiLink, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DocLinksStart } from '@kbn/core/public';
@@ -149,21 +149,15 @@ export const EsDeprecations = withRouter(({ history }: RouteComponentProps) => {
   }
 
   if (isLoading) {
-    return (
-      <EuiPageSection alignment="center" color="subdued">
-        <SectionLoading>{i18nTexts.isLoading}</SectionLoading>
-      </EuiPageSection>
-    );
+    return <SectionLoading>{i18nTexts.isLoading}</SectionLoading>;
   }
 
   if (esDeprecations?.deprecations?.length === 0) {
     return (
-      <EuiPageSection alignment="center" color="subdued">
-        <NoDeprecationsPrompt
-          deprecationType="Elasticsearch"
-          navigateToOverviewPage={() => history.push('/overview')}
-        />
-      </EuiPageSection>
+      <NoDeprecationsPrompt
+        deprecationType="Elasticsearch"
+        navigateToOverviewPage={() => history.push('/overview')}
+      />
     );
   }
 
