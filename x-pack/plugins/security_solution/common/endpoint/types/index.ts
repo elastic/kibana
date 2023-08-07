@@ -1325,18 +1325,6 @@ export interface ListPageRouteState {
   backButtonLabel?: string;
 }
 
-/**
- * REST API standard base response for list types
- */
-interface BaseListResponse<D = unknown> {
-  data: D[];
-  page: number;
-  pageSize: number;
-  total: number;
-  sortField: string;
-  sortDirection: 'asc' | 'desc';
-}
-
 export interface AdditionalOnSwitchChangeParams {
   value: boolean;
   policyConfigData: UIPolicyConfig;
@@ -1346,7 +1334,14 @@ export interface AdditionalOnSwitchChangeParams {
 /**
  * Returned by the server via GET /api/endpoint/metadata
  */
-export type MetadataListResponse = BaseListResponse<HostInfo>;
+export interface MetadataListResponse {
+  data: HostInfo[];
+  page: number;
+  pageSize: number;
+  total: number;
+  sortField: string;
+  sortDirection: 'asc' | 'desc';
+}
 
 export type { EndpointPrivileges } from './authz';
 
