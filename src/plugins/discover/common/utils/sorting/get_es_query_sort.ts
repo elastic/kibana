@@ -36,6 +36,12 @@ export function getEsQuerySort({
   ];
 }
 
+/**
+ * Prepares "sort" structure for a time field for next ES request
+ * @param sortDir
+ * @param timeFieldName
+ * @param isTimeNanosBased
+ */
 export function getESQuerySortForTimeField({
   sortDir,
   timeFieldName,
@@ -58,6 +64,11 @@ export function getESQuerySortForTimeField({
   };
 }
 
+/**
+ * Prepares "sort" structure for a tie breaker for next ES request
+ * @param sortDir
+ * @param tieBreakerFieldName
+ */
 export function getESQuerySortForTieBreaker({
   sortDir,
   tieBreakerFieldName,

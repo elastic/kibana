@@ -45,6 +45,7 @@ import { getRawRecordType } from '../../utils/get_raw_record_type';
 import { DiscoverGridFlyout } from '../../../../components/discover_grid/discover_grid_flyout';
 import { DocViewer } from '../../../../services/doc_views/components/doc_viewer';
 import { useSavedSearchInitial } from '../../services/discover_state_provider';
+import { useFetchMoreRecords } from './use_fetch_more_records';
 
 const containerStyles = css`
   position: relative;
@@ -85,7 +86,6 @@ function DiscoverDocumentsComponent({
 }) {
   const services = useDiscoverServices();
   const documents$ = stateContainer.dataState.data$.documents$;
-  const totalHits$ = stateContainer.dataState.data$.totalHits$;
   const savedSearch = useSavedSearchInitial();
   const { dataViews, capabilities, uiSettings, uiActions } = services;
   const [query, sort, rowHeight, rowsPerPage, grid, columns, index] = useAppStateSelector(
@@ -119,7 +119,6 @@ function DiscoverDocumentsComponent({
   const isDataLoading =
     documentState.fetchStatus === FetchStatus.LOADING ||
     documentState.fetchStatus === FetchStatus.PARTIAL;
-  const isMoreDataLoading = documentState.fetchStatus === FetchStatus.LOADING_MORE;
   const isTextBasedQuery = useMemo(() => getRawRecordType(query) === RecordRawType.PLAIN, [query]);
   // This is needed to prevent EuiDataGrid pushing onSort because the data view has been switched.
   // It's just necessary for non-text-based query lang requests since they don't have a partial result state, that's
@@ -135,23 +134,10 @@ function DiscoverDocumentsComponent({
     isTextBasedQuery || !documentState.result || documentState.result.length === 0;
   const rows = useMemo(() => documentState.result || [], [documentState.result]);
 
-  const totalHitsState = useDataState(totalHits$);
-  const totalHits = totalHitsState.result || 0;
-  const canFetchMoreRecords =
-    !isTextBasedQuery &&
-    rows.length > 0 &&
-    totalHits > rows.length &&
-    Boolean(rows[rows.length - 1].raw.sort?.length);
-
-  const onFetchMoreRecords = useMemo(
-    () =>
-      canFetchMoreRecords
-        ? () => {
-            stateContainer.dataState.fetchMore();
-          }
-        : undefined,
-    [canFetchMoreRecords, stateContainer.dataState]
-  );
+  const { isMoreDataLoading, totalHits, onFetchMoreRecords } = useFetchMoreRecords({
+    isTextBasedQuery,
+    stateContainer,
+  });
 
   const {
     columns: currentColumns,
