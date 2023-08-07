@@ -26,7 +26,7 @@ interface Props {
   core: CoreStart;
 }
 
-export const ThemDarkModeToggle = ({ security, core }: Props) => {
+export const ThemeDarkModeToggle = ({ security, core }: Props) => {
   return (
     <UserProfilesKibanaProvider core={core} security={security}>
       <ThemeDarkModeToggleUi uiSettingsClient={core.uiSettings} />

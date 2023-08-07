@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type { SecurityPluginStart, UserMenuLink } from '@kbn/security-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
-import { ThemDarkModeToggle } from './theme_darkmode_toggle';
+import { ThemeDarkModeToggle } from './theme_darkmode_toggle';
 
 export const createUserMenuLinks = ({
   core,
@@ -60,7 +60,7 @@ export const createUserMenuLinks = ({
   }
 
   userMenuLinks.push({
-    content: <ThemDarkModeToggle core={core} security={security} />,
+    content: <ThemeDarkModeToggle core={core} security={security} />,
     order: 400,
     label: '',
     iconType: '',
