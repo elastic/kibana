@@ -22,6 +22,7 @@ export interface ChatTimelineItem
   canExpand: boolean;
   canGiveFeedback: boolean;
   canRegenerate: boolean;
+  hide: boolean;
   currentUser?: Pick<AuthenticatedUser, 'username' | 'full_name'>;
   error?: any;
 }
@@ -43,22 +44,24 @@ export function ChatTimeline({
 }: ChatTimelineProps) {
   return (
     <EuiCommentList>
-      {items.map((item) => (
-        <ChatItem
-          key={item.id}
-          {...item}
-          onEditSubmit={(content) => {
-            onEdit(item, content);
-          }}
-          onFeedbackClick={(feedback) => {
-            onFeedback(item, feedback);
-          }}
-          onRegenerateClick={() => {
-            onRegenerate(item);
-          }}
-          onStopGeneratingClick={onStopGenerating}
-        />
-      ))}
+      {items.map((item) =>
+        !item.hide ? (
+          <ChatItem
+            key={item.id}
+            {...item}
+            onEditSubmit={(content) => {
+              onEdit(item, content);
+            }}
+            onFeedbackClick={(feedback) => {
+              onFeedback(item, feedback);
+            }}
+            onRegenerateClick={() => {
+              onRegenerate(item);
+            }}
+            onStopGeneratingClick={onStopGenerating}
+          />
+        ) : null
+      )}
     </EuiCommentList>
   );
 }

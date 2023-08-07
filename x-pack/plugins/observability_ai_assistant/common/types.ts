@@ -31,6 +31,7 @@ export interface Message {
       trigger: MessageRole.Assistant | MessageRole.User | MessageRole.Elastic;
     };
     data?: string;
+    isAssistantSetupMessage?: boolean;
   };
 }
 

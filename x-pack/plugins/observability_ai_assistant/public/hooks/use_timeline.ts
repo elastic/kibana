@@ -15,12 +15,12 @@ import type { ChatTimelineProps } from '../components/chat/chat_timeline';
 import type { ObservabilityAIAssistantService, PendingMessage } from '../types';
 import { getTimelineItemsfromConversation } from '../utils/get_timeline_items_from_conversation';
 import type { UseGenAIConnectorsResult } from './use_genai_connectors';
-import { getSystemMessage } from '../service/get_system_message';
+import { getAssistantSetupMessage } from '../service/get_assistant_setup_message';
 
 export function createNewConversation(): ConversationCreateRequest {
   return {
     '@timestamp': new Date().toISOString(),
-    messages: [getSystemMessage()],
+    messages: [getAssistantSetupMessage()],
     conversation: {
       title: '',
     },
@@ -177,6 +177,7 @@ ${JSON.stringify(message.content, null, 2).trim()}
         content: pendingMessage.message.content,
         loading: !pendingMessage.aborted && !pendingMessage.error,
         function_call: pendingMessage.message.function_call,
+        hide: Boolean(pendingMessage.message.isAssistantSetupMessage),
         currentUser,
         error: pendingMessage.error,
       });

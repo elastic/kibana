@@ -32,6 +32,7 @@ export function getTimelineItemsfromConversation({
       canExpand: false,
       canGiveFeedback: false,
       canRegenerate: false,
+      hide: false,
       loading: false,
       currentUser,
     },
@@ -52,7 +53,7 @@ export function getTimelineItemsfromConversation({
 \`\`\`
 ${JSON.stringify(JSON.parse(message.message.function_call?.arguments || ''), null, 4)}
 \`\`\`
-        and return its results for me to look at.`;
+and return its results for me to look at.`;
       } else if (isSystemPrompt) {
         title = i18n.translate('xpack.observabilityAiAssistant.addedSystemPromptEvent', {
           defaultMessage: 'added a prompt',
@@ -72,6 +73,7 @@ ${JSON.stringify(JSON.parse(message.message.function_call?.arguments || ''), nul
         canRegenerate: hasConnector && message.message.role === MessageRole.Assistant,
         canGiveFeedback: message.message.role === MessageRole.Assistant,
         loading: false,
+        hide: Boolean(message.message.isAssistantSetupMessage),
         title,
         content,
         currentUser,
