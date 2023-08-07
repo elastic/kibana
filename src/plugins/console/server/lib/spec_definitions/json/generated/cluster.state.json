@@ -21,11 +21,11 @@
     ],
     "patterns": [
       "_cluster/state",
-      "_cluster/state/{metrics}",
-      "_cluster/state/{metrics}/{indices}"
+      "_cluster/state/{metric}",
+      "_cluster/state/{metric}/{index}"
     ],
     "url_components": {
-      "metrics": [
+      "metric": [
         "_all",
         "blocks",
         "master_node",
@@ -35,7 +35,7 @@
         "routing_table",
         "version"
       ],
-      "indices": null
+      "index": null
     },
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/cluster-state.html"
   }
