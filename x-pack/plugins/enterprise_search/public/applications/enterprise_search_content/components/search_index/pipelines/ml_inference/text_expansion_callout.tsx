@@ -35,8 +35,6 @@ export interface TextExpansionCallOutProps {
   isDismissable?: boolean;
 }
 
-const TRAINED_MODELS_PATH = '/app/ml/trained_models';
-
 export const TextExpansionDismissButton = ({
   dismiss,
 }: Pick<TextExpansionCallOutState, 'dismiss'>) => {
