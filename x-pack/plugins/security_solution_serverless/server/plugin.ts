@@ -61,6 +61,7 @@ export class SecuritySolutionServerlessPlugin
     this.cspmUsageReportingTask = new SecurityUsageReportingTask({
       core: coreSetup,
       logFactory: this.initializerContext.logger,
+      config: this.config,
       taskManager: pluginsSetup.taskManager,
       cloudSetup: pluginsSetup.cloudSetup,
       taskType: cloudSecurityMetringTaskProperties.taskType,
@@ -72,6 +73,7 @@ export class SecuritySolutionServerlessPlugin
     this.endpointUsageReportingTask = new SecurityUsageReportingTask({
       core: coreSetup,
       logFactory: this.initializerContext.logger,
+      config: this.config,
       taskType: ENDPOINT_METERING_TASK.TYPE,
       taskTitle: ENDPOINT_METERING_TASK.TITLE,
       version: ENDPOINT_METERING_TASK.VERSION,
