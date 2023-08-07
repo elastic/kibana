@@ -46,7 +46,7 @@ export enum SecurityPageName {
   hostsAnomalies = 'hosts-anomalies',
   hostsRisk = 'hosts-risk',
   hostsEvents = 'hosts-events',
-  investigate = 'investigate',
+  investigations = 'investigations',
   kubernetes = 'kubernetes',
   landing = 'get_started',
   mlLanding = 'machine_learning-landing', // serverless only

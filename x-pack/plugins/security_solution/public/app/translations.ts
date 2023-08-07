@@ -142,9 +142,6 @@ export const FINDINGS = i18n.translate('xpack.securitySolution.navigation.findin
 export const EXPLORE = i18n.translate('xpack.securitySolution.navigation.explore', {
   defaultMessage: 'Explore',
 });
-export const INVESTIGATE = i18n.translate('xpack.securitySolution.navigation.investigate', {
-  defaultMessage: 'Investigate',
-});
 export const MANAGE = i18n.translate('xpack.securitySolution.navigation.manage', {
   defaultMessage: 'Manage',
 });

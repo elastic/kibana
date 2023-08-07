@@ -35,6 +35,7 @@ export const ProjectSettingsRoute: React.FC = () => {
     <KibanaPageTemplate restrictWidth={false} contentBorder={false} grow={true}>
       <KibanaPageTemplate.Section>
         <EuiPageHeader pageTitle={title} />
+        <EuiSpacer size="l" />
         <EuiSpacer size="xl" />
         <LandingLinksIcons items={iconLinks} />
         <EuiSpacer size="l" />

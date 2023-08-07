@@ -42,3 +42,5 @@ export const IconSecurityShieldLazy = withSuspenseIcon(
 export const IconProductFeaturesAlertingLazy = withSuspenseIcon(
   React.lazy(() => import('./icons/product_features_alerting'))
 );
+export const IconTimelineLazy = withSuspenseIcon(React.lazy(() => import('./icons/timeline')));
+export const IconOsqueryLazy = withSuspenseIcon(React.lazy(() => import('./icons/osquery')));

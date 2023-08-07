@@ -6,25 +6,15 @@
  */
 
 import React from 'react';
-import { LandingLinksIconsCategories } from '@kbn/security-solution-navigation/landing_links';
-import {
-  SecurityPageName,
-  isTitleLinkCategory,
-  isSeparatorLinkCategory,
-  type TitleLinkCategory,
-  type SeparatorLinkCategory,
-} from '@kbn/security-solution-navigation';
+import { LandingLinksIcons } from '@kbn/security-solution-navigation/landing_links';
+import { SecurityPageName } from '@kbn/security-solution-navigation';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { EuiPageHeader, EuiSpacer } from '@elastic/eui';
 import { useNavLink } from '../common/hooks/use_nav_links';
 
-export const MachineLearningRoute: React.FC = () => {
-  const link = useNavLink(SecurityPageName.mlLanding);
-  const { links = [], categories = [], title } = link ?? {};
-
-  const compatibleCategories = categories.filter(
-    (category) => isTitleLinkCategory(category) || isSeparatorLinkCategory(category)
-  ) as Array<TitleLinkCategory | SeparatorLinkCategory>;
+export const InvestigationsRoute: React.FC = () => {
+  const link = useNavLink(SecurityPageName.investigations);
+  const { links = [], title } = link ?? {};
 
   return (
     <KibanaPageTemplate restrictWidth={false} contentBorder={false} grow={true}>
@@ -32,11 +22,11 @@ export const MachineLearningRoute: React.FC = () => {
         <EuiPageHeader pageTitle={title} />
         <EuiSpacer size="l" />
         <EuiSpacer size="xl" />
-        <LandingLinksIconsCategories links={links} categories={compatibleCategories} />
+        <LandingLinksIcons items={links} />
       </KibanaPageTemplate.Section>
     </KibanaPageTemplate>
   );
 };
 
 // eslint-disable-next-line import/no-default-export
-export default MachineLearningRoute;
+export default InvestigationsRoute;

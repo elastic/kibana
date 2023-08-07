@@ -9,6 +9,7 @@ import { SecurityPageName } from '@kbn/security-solution-navigation';
 
 // Paths for internal Security pages that only exist in serverless projects and do not exist on ESS
 export const SecurityPagePath = {
+  [SecurityPageName.investigations]: '/investigations',
   [SecurityPageName.mlLanding]: '/ml',
   [SecurityPageName.assets]: '/assets',
   [SecurityPageName.cloudDefend]: '/cloud_defend',
@@ -29,6 +30,8 @@ export const SecurityPagePath = {
  * The path should not be used for links displayed in the main left navigation, since highlighting won't work.
  **/
 export enum ExternalPageName {
+  // Osquery
+  osquery = 'osquery:',
   // Machine Learning
   // Ref: packages/default-nav/ml/default_navigation.ts
   mlOverview = 'ml:overview',

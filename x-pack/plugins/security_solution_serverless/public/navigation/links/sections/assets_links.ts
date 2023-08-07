@@ -43,8 +43,8 @@ export const createAssetsLinkFromManage = (manageLink: LinkItem): LinkItem => {
   // Get endpoint sub links from the manage categories
   const endpointsSubLinkIds =
     manageLink.categories
-      ?.find(({ linkIds }) => linkIds.includes(SecurityPageName.endpoints))
-      ?.linkIds.filter((linkId) => linkId !== SecurityPageName.endpoints) ?? [];
+      ?.find(({ linkIds }) => linkIds?.includes(SecurityPageName.endpoints))
+      ?.linkIds?.filter((linkId) => linkId !== SecurityPageName.endpoints) ?? [];
 
   const endpointsLink = manageLink.links?.find(({ id }) => id === SecurityPageName.endpoints);
   const endpointsSubLinks =
@@ -64,7 +64,7 @@ export const createAssetsLinkFromManage = (manageLink: LinkItem): LinkItem => {
 
   return {
     ...assetsAppLink,
-    links: assetsSubLinks, // cloudDefend and endpoints links are added in the projectAppLinksSwitcher on runtime
+    links: assetsSubLinks,
   };
 };
 

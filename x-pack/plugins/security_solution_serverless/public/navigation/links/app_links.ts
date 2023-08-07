@@ -11,6 +11,7 @@ import type {
 } from '@kbn/security-solution-plugin/public/common/links/types';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
 import { cloneDeep, remove } from 'lodash';
+import { createInvestigationsLinkFromTimeline } from './sections/investigations_links';
 import { mlAppLink } from './sections/ml_links';
 import { createAssetsLinkFromManage } from './sections/assets_links';
 import { createProjectSettingsLinkFromManage } from './sections/project_settings_links';
@@ -20,6 +21,13 @@ import { createProjectSettingsLinkFromManage } from './sections/project_settings
 // The capabilities filtering is done after this function is called by the security_solution plugin.
 export const projectAppLinksSwitcher: AppLinksSwitcher = (appLinks) => {
   const projectAppLinks = cloneDeep(appLinks) as LinkItem[];
+
+  // Remove timeline link
+  const [timelineLinkItem] = remove(projectAppLinks, { id: SecurityPageName.timelines });
+  if (timelineLinkItem) {
+    // Add investigations link
+    projectAppLinks.push(createInvestigationsLinkFromTimeline(timelineLinkItem));
+  }
 
   // Remove manage link
   const [manageLinkItem] = remove(projectAppLinks, { id: SecurityPageName.administration });

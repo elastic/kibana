@@ -19,6 +19,7 @@ import {
 import { devToolsNavLink } from './sections/dev_tools_links';
 import type { ProjectNavigationLink } from './types';
 import { getCloudLinkKey, getCloudUrl, getNavLinkIdFromProjectPageName, isCloudLink } from './util';
+import { investigationsNavLinks } from './sections/investigations_links';
 
 export const createProjectNavLinks$ = (
   securityNavLinks$: Observable<Array<NavigationLink<SecurityPageName>>>,
@@ -46,6 +47,18 @@ const processNavLinks = (
   cloud: CloudStart
 ): ProjectNavigationLink[] => {
   const projectNavLinks: ProjectNavigationLink[] = [...securityNavLinks];
+
+  // Investigations. injecting external sub-links and categories definition to the landing
+  const investigationsLinkIndex = projectNavLinks.findIndex(
+    ({ id }) => id === SecurityPageName.investigations
+  );
+  if (investigationsLinkIndex !== -1) {
+    const investigationNavLink = projectNavLinks[investigationsLinkIndex];
+    projectNavLinks[investigationsLinkIndex] = {
+      ...investigationNavLink,
+      links: [...(investigationNavLink.links ?? []), ...investigationsNavLinks],
+    };
+  }
 
   // ML. injecting external sub-links and categories definition to the landing
   const mlLinkIndex = projectNavLinks.findIndex(({ id }) => id === SecurityPageName.mlLanding);
