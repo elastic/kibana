@@ -56,7 +56,6 @@ export async function replacePanel(
     newPanelState.type,
     generateNewId
   );
-  // await this.updateInput({ panels });
   return panelId;
 }
 

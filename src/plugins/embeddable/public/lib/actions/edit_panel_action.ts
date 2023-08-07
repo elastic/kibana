@@ -19,7 +19,6 @@ import {
   EmbeddableStateTransfer,
   EmbeddableInput,
   Container,
-  isReferenceOrValueEmbeddable,
 } from '../..';
 
 export const ACTION_EDIT_PANEL = 'editPanel';
