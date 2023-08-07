@@ -16,7 +16,7 @@ import {
   entityClickedEvent,
   entityRiskFilteredEvent,
 } from './entity_analytics';
-import { dataQualityCheckedEvent } from './data_quality';
+import { dataQualityIndexCheckedEvent, dataQualityCheckAllClickedEvent } from './data_quality';
 
 const mlJobUpdateEvent: TelemetryEvent = {
   eventType: TelemetryEventTypes.MLJobUpdate,
@@ -123,5 +123,6 @@ export const telemetryEvents = [
   mlJobUpdateEvent,
   cellActionClickedEvent,
   anomaliesCountClickedEvent,
-  dataQualityCheckedEvent,
+  dataQualityIndexCheckedEvent,
+  dataQualityCheckAllClickedEvent,
 ];

@@ -180,33 +180,33 @@ export interface SelectedIndex {
 }
 
 export interface DataQualityIndexCheckedParams {
-  isCheckAll?: boolean;
+  ecsVersion: string;
   error?: string;
-  indexName: string;
   incompatibleFields?: Array<{ type?: string; field?: string; value?: string }>;
+  indexName: string;
+  isCheckAll?: boolean;
   numberOfDocuments?: number;
   numberOfIncompatibleFields?: number;
   numberOfIndices?: number;
   pattern: string;
   sizeInBytes?: number;
   timeConsumedMs?: number;
-  version: string;
 }
 
 export interface DataQualityCheckAllClickedParams {
+  ecsVersion: string;
   numberOfDocuments?: number;
   numberOfIncompatibleFields?: number;
   numberOfIndices?: number;
   numberOfIndicesChecked?: number;
   sizeInBytes?: number;
   timeConsumedMs?: number;
-  version: string;
 }
 
 export type ReportDataQualityIndexChecked = (params: DataQualityIndexCheckedParams) => void;
 export type ReportDataQualityCheckAllClicked = (params: DataQualityCheckAllClickedParams) => void;
 
 export interface TelemetryEvents {
-  reportDataQualityIndexChecked: ReportDataQualityIndexChecked;
-  reportDataQualityCheckAllClicked: ReportDataQualityCheckAllClicked;
+  reportDataQualityIndexChecked?: ReportDataQualityIndexChecked;
+  reportDataQualityCheckAllClicked?: ReportDataQualityCheckAllClicked;
 }

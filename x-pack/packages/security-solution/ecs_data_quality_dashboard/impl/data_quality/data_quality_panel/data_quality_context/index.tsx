@@ -11,7 +11,7 @@ import { TelemetryEvents } from '../../types';
 
 interface DataQualityProviderProps {
   httpFetch: HttpHandler;
-  telemetryEvents?: TelemetryEvents;
+  telemetryEvents: TelemetryEvents;
 }
 
 const DataQualityContext = React.createContext<DataQualityProviderProps | undefined>(undefined);

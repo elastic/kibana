@@ -50,8 +50,8 @@ import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { useSignalIndex } from '../../detections/containers/detection_engine/alerts/use_signal_index';
 import * as i18n from './translations';
 import type {
-  DataQualityCheckAllClickedParams,
-  DataQualityIndexCheckedParams,
+  ReportDataQualityCheckAllClickedParams,
+  ReportDataQualityIndexCheckedParams,
 } from '../../common/lib/telemetry';
 
 const LOCAL_STORAGE_KEY = 'dataQualityDashboardLastChecked';
@@ -212,14 +212,14 @@ const DataQualityComponent: React.FC = () => {
   );
 
   const reportDataQualityIndexChecked = useCallback(
-    (params: DataQualityIndexCheckedParams) => {
+    (params: ReportDataQualityIndexCheckedParams) => {
       telemetry.reportDataQualityIndexChecked(params);
     },
     [telemetry]
   );
 
   const reportDataQualityCheckAllClicked = useCallback(
-    (params: DataQualityCheckAllClickedParams) => {
+    (params: ReportDataQualityCheckAllClickedParams) => {
       telemetry.reportDataQualityCheckAllClicked(params);
     },
     [telemetry]

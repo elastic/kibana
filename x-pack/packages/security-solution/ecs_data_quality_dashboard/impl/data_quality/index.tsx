@@ -54,8 +54,8 @@ interface Props {
     headerContent?: React.ReactNode;
   }) => void;
   patterns: string[];
-  reportDataQualityIndexChecked: ReportDataQualityIndexChecked;
-  reportDataQualityCheckAllClicked: ReportDataQualityCheckAllClicked;
+  reportDataQualityIndexChecked?: ReportDataQualityIndexChecked;
+  reportDataQualityCheckAllClicked?: ReportDataQualityCheckAllClicked;
   setLastChecked: (lastChecked: string) => void;
   theme?: PartialTheme;
   baseTheme: Theme;

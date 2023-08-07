@@ -8,37 +8,38 @@
 import type { RootSchema } from '@kbn/analytics-client';
 import type { TelemetryEventTypes } from '../../constants';
 
-export interface DataQualityIndexCheckedParams {
+export interface ReportDataQualityIndexCheckedParams {
+  ecsVersion?: string;
   error?: string;
-  isCheckAll?: boolean;
   indexName: string;
+  isCheckAll?: boolean;
   numberOfDocuments?: number;
   numberOfIncompatibleFields?: number;
   numberOfIndices?: number;
   pattern: string;
   sizeInBytes?: number;
   timeConsumedMs?: number;
-  version?: string;
 }
 
-export interface DataQualityCheckAllClickedParams {
+export interface ReportDataQualityCheckAllClickedParams {
+  ecsVersion?: string;
+  isCheckAll?: boolean;
   numberOfDocuments?: number;
   numberOfIncompatibleFields?: number;
   numberOfIndices?: number;
   numberOfIndicesChecked?: number;
   sizeInBytes?: number;
   timeConsumedMs?: number;
-  version?: string;
 }
 
 export interface DataQualityTelemetryIndexCheckedEvent {
   eventType: TelemetryEventTypes.DataQualityIndexChecked;
-  schema: RootSchema<DataQualityIndexCheckedParams>;
+  schema: RootSchema<ReportDataQualityIndexCheckedParams>;
 }
 
 export interface DataQualityTelemetryCheckAllClickedEvent {
   eventType: TelemetryEventTypes.DataQualityCheckAllClicked;
-  schema: RootSchema<DataQualityCheckAllClickedParams>;
+  schema: RootSchema<ReportDataQualityCheckAllClickedParams>;
 }
 
 export type DataQualityTelemetryEvents =

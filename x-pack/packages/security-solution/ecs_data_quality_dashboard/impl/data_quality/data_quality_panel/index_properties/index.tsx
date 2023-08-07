@@ -29,7 +29,7 @@ import {
   INCOMPATIBLE_TAB_ID,
 } from './helpers';
 import { LoadingEmptyPrompt } from '../loading_empty_prompt';
-import { getIndexIncompatible, getIndexPropertiesContainerId } from '../pattern/helpers';
+import { getIndexPropertiesContainerId } from '../pattern/helpers';
 import { getTabs } from '../tabs/helpers';
 import { getAllIncompatibleMarkdownComments } from '../tabs/incompatible_tab/helpers';
 import * as i18n from './translations';
@@ -37,7 +37,6 @@ import type { EcsMetadata, IlmPhase, PartitionedFieldMetadata, PatternRollup } f
 import { useAddToNewCase } from '../../use_add_to_new_case';
 import { useMappings } from '../../use_mappings';
 import { useUnallowedValues } from '../../use_unallowed_values';
-import { getDocsCount, getSizeInBytes } from '../../helpers';
 import { useDataQualityContext } from '../data_quality_context';
 
 const EMPTY_MARKDOWN_COMMENTS: string[] = [];
@@ -107,34 +106,12 @@ const IndexPropertiesComponent: React.FC<Props> = ({
     [indexName]
   );
 
-  const onUnallowedValuesLoaded = useCallback(
-    ({ requestTime, error }: { requestTime: number; error?: string }) => {
-      if (!patternRollup?.stats || !patternRollup?.results) {
-        return;
-      }
-      telemetryEvents?.reportDataQualityIndexChecked({
-        error,
-        pattern,
-        indexName,
-        numberOfDocuments: getDocsCount({ indexName, stats: patternRollup.stats }),
-        numberOfIncompatibleFields: getIndexIncompatible({
-          indexName,
-          results: patternRollup.results,
-        }),
-        numberOfIndices: patternRollup.indices,
-        sizeInBytes: getSizeInBytes({ stats: patternRollup.stats, indexName }),
-        timeConsumedMs: requestTime,
-        version: EcsVersion,
-      });
-    },
-    [indexName, pattern, patternRollup, telemetryEvents]
-  );
-
   const {
     error: unallowedValuesError,
     loading: loadingUnallowedValues,
     unallowedValues,
-  } = useUnallowedValues({ indexName, requestItems, onLoad: onUnallowedValuesLoaded });
+    requestTime,
+  } = useUnallowedValues({ indexName, requestItems });
 
   const mappingsProperties = useMemo(
     () =>
@@ -272,6 +249,17 @@ const IndexPropertiesComponent: React.FC<Props> = ({
             },
           },
         });
+
+        telemetryEvents.reportDataQualityIndexChecked?.({
+          error: error ?? undefined,
+          pattern,
+          indexName,
+          numberOfDocuments: docsCount,
+          numberOfIncompatibleFields: indexIncompatible,
+          sizeInBytes: patternRollup.sizeInBytes,
+          timeConsumedMs: requestTime,
+          ecsVersion: EcsVersion,
+        });
       }
     }
   }, [
@@ -286,6 +274,8 @@ const IndexPropertiesComponent: React.FC<Props> = ({
     partitionedFieldMetadata,
     pattern,
     patternRollup,
+    requestTime,
+    telemetryEvents,
     unallowedValuesError,
     updatePatternRollup,
   ]);

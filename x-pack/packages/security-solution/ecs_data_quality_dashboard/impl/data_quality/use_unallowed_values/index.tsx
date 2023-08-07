@@ -15,15 +15,14 @@ export interface UseUnallowedValues {
   unallowedValues: Record<string, UnallowedValueCount[]> | null;
   error: string | null;
   loading: boolean;
+  requestTime: number | undefined;
 }
 
 export const useUnallowedValues = ({
   indexName,
   requestItems,
-  onLoad,
 }: {
   indexName: string;
-  onLoad?: (params: { error?: string; requestTime: number }) => void;
   requestItems: UnallowedValueRequestItem[];
 }): UseUnallowedValues => {
   const [unallowedValues, setUnallowedValues] = useState<Record<
@@ -33,6 +32,7 @@ export const useUnallowedValues = ({
   const { httpFetch } = useDataQualityContext();
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
+  const [requestTime, setRequestTime] = useState<number>();
   useEffect(() => {
     if (requestItems.length === 0) {
       return;
@@ -62,12 +62,12 @@ export const useUnallowedValues = ({
       } catch (e) {
         if (!abortController.signal.aborted) {
           setError(e.message);
-          onLoad?.({ requestTime: Date.now() - startTime, error: e.message });
+          setRequestTime(Date.now() - startTime);
         }
       } finally {
         if (!abortController.signal.aborted) {
           setLoading(false);
-          onLoad?.({ requestTime: Date.now() - startTime });
+          setRequestTime(Date.now() - startTime);
         }
       }
     }
@@ -77,7 +77,7 @@ export const useUnallowedValues = ({
     return () => {
       abortController.abort();
     };
-  }, [httpFetch, indexName, onLoad, requestItems, setError]);
+  }, [httpFetch, indexName, requestItems, setError]);
 
-  return { unallowedValues, error, loading };
+  return { unallowedValues, error, loading, requestTime };
 };

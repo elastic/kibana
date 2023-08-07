@@ -42,7 +42,7 @@ export const dataQualityIndexCheckedEvent: DataQualityTelemetryIndexCheckedEvent
         optional: true,
       },
     },
-    version: {
+    ecsVersion: {
       type: 'keyword',
       _meta: {
         description: 'ECS version',
@@ -111,7 +111,7 @@ export const dataQualityCheckAllClickedEvent: DataQualityTelemetryCheckAllClicke
         optional: true,
       },
     },
-    version: {
+    ecsVersion: {
       type: 'keyword',
       _meta: {
         description: 'ECS version',
@@ -136,6 +136,13 @@ export const dataQualityCheckAllClickedEvent: DataQualityTelemetryCheckAllClicke
       type: 'integer',
       _meta: {
         description: 'Size in bytes',
+        optional: true,
+      },
+    },
+    isCheckAll: {
+      type: 'boolean',
+      _meta: {
+        description: 'Is triggered by check all button',
         optional: true,
       },
     },

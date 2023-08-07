@@ -98,7 +98,7 @@ export const useResultsRollup = ({ ilmPhases, patterns }: Props): UseResultsRoll
         })
       );
 
-      telemetryEvents?.reportDataQualityIndexChecked({
+      telemetryEvents.reportDataQualityIndexChecked?.({
         error: error ?? undefined,
         pattern,
         indexName,
@@ -110,7 +110,7 @@ export const useResultsRollup = ({ ilmPhases, patterns }: Props): UseResultsRoll
         numberOfIndices: patternRollups[pattern].indices,
         sizeInBytes: getSizeInBytes({ stats: patternRollups[pattern].stats, indexName }),
         timeConsumedMs: requestTime,
-        version: EcsVersion,
+        ecsVersion: EcsVersion,
         isCheckAll: true,
       });
     },
@@ -119,14 +119,14 @@ export const useResultsRollup = ({ ilmPhases, patterns }: Props): UseResultsRoll
 
   const onCheckAllCompleted = useCallback(
     ({ requestTime }: { requestTime: number }) => {
-      telemetryEvents?.reportDataQualityCheckAllClicked({
+      telemetryEvents.reportDataQualityCheckAllClicked?.({
         numberOfDocuments: totalDocsCount,
         numberOfIncompatibleFields: totalIncompatible,
         numberOfIndices: totalIndices,
         numberOfIndicesChecked: totalIndicesChecked,
         sizeInBytes: totalSizeInBytes,
         timeConsumedMs: requestTime,
-        version: EcsVersion,
+        ecsVersion: EcsVersion,
       });
     },
     [

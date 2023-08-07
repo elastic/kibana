@@ -17,8 +17,8 @@ import type {
   ReportMLJobUpdateParams,
   ReportCellActionClickedParams,
   ReportAnomaliesCountClickedParams,
-  DataQualityIndexCheckedParams,
-  DataQualityCheckAllClickedParams,
+  ReportDataQualityIndexCheckedParams,
+  ReportDataQualityCheckAllClickedParams,
 } from './types';
 import { TelemetryEventTypes } from './constants';
 
@@ -75,11 +75,11 @@ export class TelemetryClient implements TelemetryClientStart {
     this.analytics.reportEvent(TelemetryEventTypes.AnomaliesCountClicked, params);
   };
 
-  public reportDataQualityIndexChecked = (params: DataQualityIndexCheckedParams) => {
+  public reportDataQualityIndexChecked = (params: ReportDataQualityIndexCheckedParams) => {
     this.analytics.reportEvent(TelemetryEventTypes.DataQualityIndexChecked, params);
   };
 
-  public reportDataQualityCheckAllClicked = (params: DataQualityCheckAllClickedParams) => {
+  public reportDataQualityCheckAllClicked = (params: ReportDataQualityCheckAllClickedParams) => {
     this.analytics.reportEvent(TelemetryEventTypes.DataQualityCheckAllClicked, params);
   };
 }
