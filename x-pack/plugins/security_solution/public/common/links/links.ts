@@ -153,9 +153,16 @@ const getNormalizedLink = (id: SecurityPageName): Readonly<NormalizedLink> | und
 
 const processAppLinks = (appLinks: AppLinkItems, linksPermissions: LinksPermissions): LinkItem[] =>
   appLinks.reduce<LinkItem[]>((acc, { links, ...appLinkWithoutSublinks }) => {
+    // license check
     if (!isLinkAllowed(appLinkWithoutSublinks, linksPermissions)) {
+      if (linksPermissions.upselling.isPageUpsellable(appLinkWithoutSublinks.id)) {
+        acc.push({ ...appLinkWithoutSublinks, unauthorized: true });
+      }
+
       return acc;
     }
+
+    // Capabilities check
     if (!hasCapabilities(linksPermissions.capabilities, appLinkWithoutSublinks.capabilities)) {
       if (linksPermissions.upselling.isPageUpsellable(appLinkWithoutSublinks.id)) {
         acc.push({ ...appLinkWithoutSublinks, unauthorized: true });

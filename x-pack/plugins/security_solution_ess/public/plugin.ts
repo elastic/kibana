@@ -9,6 +9,7 @@ import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { subscribeBreadcrumbs } from './breadcrumbs';
 import { createServices } from './common/services';
 import { getSecurityGetStartedComponent } from './get_started';
+import { registerUpsellings } from './upselling/register_upsellings';
 import type {
   SecuritySolutionEssPluginSetup,
   SecuritySolutionEssPluginStart,
@@ -27,8 +28,13 @@ export class SecuritySolutionEssPlugin
 {
   public setup(
     _core: CoreSetup,
-    _setupDeps: SecuritySolutionEssPluginSetupDeps
+    setupDeps: SecuritySolutionEssPluginSetupDeps
   ): SecuritySolutionEssPluginSetup {
+    const { securitySolution, licensing } = setupDeps;
+    licensing.license$.subscribe((license) => {
+      registerUpsellings(securitySolution.upselling, license);
+    });
+
     return {};
   }
 
