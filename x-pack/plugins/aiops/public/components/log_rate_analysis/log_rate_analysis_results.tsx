@@ -373,11 +373,11 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
               {currentAnalysisType === LOG_RATE_ANALYSIS_TYPE.SPIKE
                 ? i18n.translate('xpack.aiops.analysis.analysisTypeSpikeCallOutContent', {
                     defaultMessage:
-                      'The median log rate in the selected deviation time range is higher than the baseline. Therefore, the results shows statistically significant items within the deviation time range that are contributors to the spike. The "doc count" column refers to the amount of documents in the deviation time range.',
+                      'The median log rate in the selected deviation time range is higher than the baseline. Therefore, the analysis results table shows statistically significant items within the deviation time range that are contributors to the spike. The "doc count" column refers to the amount of documents in the deviation time range.',
                   })
                 : i18n.translate('xpack.aiops.analysis.analysisTypeDipCallOutContent', {
                     defaultMessage:
-                      'The median log rate in the selected deviation time range is lower than the baseline. Therefore, the analysis results table shows statistically significant items within the baseline time range that are less present or missing within the deviation time range. The "doc count" column refers to the amount of documents in the baseline time range.',
+                      'The median log rate in the selected deviation time range is lower than the baseline. Therefore, the analysis results table shows statistically significant items within the baseline time range that are less in number or missing within the deviation time range. The "doc count" column refers to the amount of documents in the baseline time range.',
                   })}
             </EuiText>
           </EuiCallOut>
