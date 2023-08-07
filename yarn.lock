@@ -1789,15 +1789,6 @@
   dependencies:
     tslib "^2.0.0"
 
-"@elastic/apm-rum-core@^5.12.1":
-  version "5.12.1"
-  resolved "https://registry.yarnpkg.com/@elastic/apm-rum-core/-/apm-rum-core-5.12.1.tgz#ad78787876c68b9ce718d1c42b8e7b12b12eaa69"
-  integrity sha512-b9CyqLdu2rSdjqi5Pc2bNfQCRQT26GjQzCTpJq1WoewDaoivsPoUDrY7tCJV+j3rmRSxG7vX91pM5SygjFr7aA==
-  dependencies:
-    error-stack-parser "^1.3.5"
-    opentracing "^0.14.3"
-    promise-polyfill "^8.1.3"
-
 "@elastic/apm-rum-core@^5.18.0":
   version "5.18.0"
   resolved "https://registry.yarnpkg.com/@elastic/apm-rum-core/-/apm-rum-core-5.18.0.tgz#d1c25594c8e81a929b1f9444ecc081359a97b3d5"
@@ -1815,19 +1806,12 @@
     "@elastic/apm-rum" "^5.9.1"
     hoist-non-react-statics "^3.3.0"
 
-"@elastic/apm-rum@^5.10.0":
+"@elastic/apm-rum@^5.10.0", "@elastic/apm-rum@^5.9.1":
   version "5.13.0"
   resolved "https://registry.yarnpkg.com/@elastic/apm-rum/-/apm-rum-5.13.0.tgz#a79df440a2e80a492b24e9c04b62c408a6863fa4"
   integrity sha512-b3H9EEwUpDsGhtqY9oiVILR3nFh8jM9rA9LQGZxw155d2x1MEFyqOhI1uXkhgxirnC+RZHRuQKcfWxZtPQnrfA==
   dependencies:
     "@elastic/apm-rum-core" "^5.18.0"
-
-"@elastic/apm-rum@^5.9.1":
-  version "5.9.1"
-  resolved "https://registry.yarnpkg.com/@elastic/apm-rum/-/apm-rum-5.9.1.tgz#23b12650d443ec0a5f7c6b7b4039334e42d2fe8a"
-  integrity sha512-NJAdzxXxf+LeCI0Dz3P+RMVY66C8sAztIg4tvnrhvBqxf8d7se+FpYw3oYjw3BZ8UDycmXEaIqEGcynUUndgqA==
-  dependencies:
-    "@elastic/apm-rum-core" "^5.12.1"
 
 "@elastic/apm-synthtrace@link:bazel-bin/packages/elastic-apm-synthtrace":
   version "0.0.0"
@@ -6382,18 +6366,10 @@
   dependencies:
     "@types/node" "*"
 
-"@types/node-fetch@2.6.4":
+"@types/node-fetch@2.6.4", "@types/node-fetch@^2.5.7":
   version "2.6.4"
   resolved "https://registry.yarnpkg.com/@types/node-fetch/-/node-fetch-2.6.4.tgz#1bc3a26de814f6bf466b25aeb1473fa1afe6a660"
   integrity sha512-1ZX9fcN4Rvkvgv4E6PAY5WXUFWFcRWxZa3EW83UjycOB9ljJCedb2CupIP4RZMEwF/M3eTcCihbBRgwtGbg5Rg==
-  dependencies:
-    "@types/node" "*"
-    form-data "^3.0.0"
-
-"@types/node-fetch@^2.5.7":
-  version "2.6.2"
-  resolved "https://registry.yarnpkg.com/@types/node-fetch/-/node-fetch-2.6.2.tgz#d1a9c5fd049d9415dce61571557104dec3ec81da"
-  integrity sha512-DHqhlq5jeESLy19TYhLakJ07kNumXWjcDdxXsLUMJZ6ue8VZJj4kLPQVE/2mdHh3xZziNF1xppu5lwmS53HR+A==
   dependencies:
     "@types/node" "*"
     form-data "^3.0.0"
