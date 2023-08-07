@@ -121,15 +121,11 @@ export class ChromeService {
    * screen we want to hide the chrome, and when they are toggled back to normal we want to show the chrome.
    */
   private handleEuiFullScreenChanges = () => {
-    const body = document.querySelector('body');
+    const { body } = document;
     const classesOnBodyWhenEuiFullScreen = ['euiDataGrid__restrictBody'];
 
     let isChromeHiddenForEuiFullScreen = false;
     let observer: MutationObserver | undefined;
-
-    if (!body) {
-      return;
-    }
 
     const onBodyClassesChange = ({
       isChromeVisible,
@@ -164,10 +160,7 @@ export class ChromeService {
       observer = new MutationObserver((mutationList) => {
         mutationList.forEach((mutation) => {
           if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
-            onBodyClassesChange({
-              className: body.className,
-              isChromeVisible: isVisible,
-            });
+            onBodyClassesChange({ className: body.className, isChromeVisible: isVisible });
           }
         });
       });
