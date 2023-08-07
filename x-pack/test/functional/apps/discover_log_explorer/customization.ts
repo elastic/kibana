@@ -25,11 +25,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('DatasetSelector should replace the DataViewPicker', async () => {
         // Assert does not render on discover app
         await PageObjects.common.navigateToApp('discover');
-        await testSubjects.missingOrFail('dataset-selector-popover');
+        await testSubjects.missingOrFail('datasetSelectorPopover');
 
         // Assert it renders on log-explorer profile
         await PageObjects.common.navigateToApp('discover', { hash: '/p/log-explorer' });
-        await testSubjects.existOrFail('dataset-selector-popover');
+        await testSubjects.existOrFail('datasetSelectorPopover');
       });
 
       it('the TopNav bar should hide New, Open and Save options', async () => {
@@ -67,7 +67,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         // Assert it renders on log-explorer profile
         await PageObjects.common.navigateToApp('discover', { hash: '/p/log-explorer' });
-        await testSubjects.existOrFail('datasetFiltersCustomization');
+        await testSubjects.existOrFail('datasetFiltersCustomization', { allowHidden: true });
       });
     });
   });

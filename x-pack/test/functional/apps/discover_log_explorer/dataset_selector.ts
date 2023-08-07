@@ -171,10 +171,8 @@ export default function (providerContext: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const logger = getService('log');
   const retry = getService('retry');
-  const PageObjects = getPageObjects(['common', 'discoverLogExplorer']);
-
   const supertest = getService('supertest');
-  const browser = getService('browser');
+  const PageObjects = getPageObjects(['common', 'discoverLogExplorer']);
 
   const uninstallPackage = ({ name, version }: IntegrationPackage) => {
     return supertest.delete(`/api/fleet/epm/packages/${name}/${version}`).set('kbn-xsrf', 'xxxx');
@@ -374,10 +372,24 @@ export default function (providerContext: FtrProviderContext) {
 
           await PageObjects.discoverLogExplorer.openDatasetSelector();
 
+          // Initially fetched integrations
           await retry.try(async () => {
             const { nodes } = await PageObjects.discoverLogExplorer.getIntegrations();
             expect(nodes.length).to.be(15);
             await nodes.at(-1)?.scrollIntoViewIfNecessary();
+          });
+
+          // Load more integrations
+          await retry.try(async () => {
+            const { nodes } = await PageObjects.discoverLogExplorer.getIntegrations();
+            expect(nodes.length).to.be(28);
+            await nodes.at(-1)?.scrollIntoViewIfNecessary();
+          });
+
+          // No other integrations to load after scrolling to last integration
+          await retry.try(async () => {
+            const { nodes } = await PageObjects.discoverLogExplorer.getIntegrations();
+            expect(nodes.length).to.be(28);
           });
 
           logger.info(`Uninstalling ${additionalPackages.length} integration packages.`);
