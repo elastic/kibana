@@ -189,6 +189,7 @@ export function Histogram({
           disabledActions={disabledActions}
           onFilter={onFilter}
           onBrushEnd={onBrushEnd}
+          withDefaultActions
         />
       </div>
       {timeRangeDisplay}

@@ -208,6 +208,9 @@ export interface LensPublicStart {
    * @experimental
    */
   EmbeddableComponent: React.ComponentType<EmbeddableComponentProps>;
+  getEmbeddableComponent: (
+    overrideServices?: Partial<LensEmbeddableStartServices>
+  ) => React.ComponentType<EmbeddableComponentProps>;
   /**
    * React component which can be used to embed a Lens Visualization Save Modal Component.
    * See `x-pack/examples/embedded_lens_example` for exemplary usage.
@@ -289,6 +292,7 @@ export class LensPlugin {
   private dataViewsService: DataViewsPublicPluginStart | undefined;
   private initDependenciesForApi: () => void = () => {};
   private locator?: LensAppLocator;
+  private lensEmbeddableFactory: EmbeddableFactory | undefined;
 
   setup(
     core: CoreSetup<LensPluginStartDependencies, void>,
@@ -365,10 +369,8 @@ export class LensPlugin {
     };
 
     if (embeddable) {
-      embeddable.registerEmbeddableFactory(
-        'lens',
-        new EmbeddableFactory(getStartServicesForEmbeddable)
-      );
+      this.lensEmbeddableFactory = new EmbeddableFactory(getStartServicesForEmbeddable);
+      embeddable.registerEmbeddableFactory('lens', this.lensEmbeddableFactory);
     }
 
     if (share) {
@@ -611,6 +613,10 @@ export class LensPlugin {
 
     return {
       EmbeddableComponent: getEmbeddableComponent(core, startDependencies),
+      getEmbeddableComponent: (overrideServices?: Partial<LensEmbeddableStartServices>) => {
+        this.lensEmbeddableFactory?.setOverrideServices(overrideServices);
+        return getEmbeddableComponent(core, startDependencies);
+      },
       SaveModalComponent: getSaveModalComponent(core, startDependencies),
       navigateToPrefilledEditor: (
         input,

@@ -32,14 +32,16 @@ async function isCompatible(context: ApplyGlobalFilterActionContext) {
   return context.filters !== undefined;
 }
 
-export function createFilterAction(
+export function createFilterActionFactory(
   filterManager: FilterManager,
   timeFilter: TimefilterContract,
-  theme: ThemeServiceSetup
+  theme: ThemeServiceSetup,
+  id: string = ACTION_GLOBAL_APPLY_FILTER,
+  type: string = ACTION_GLOBAL_APPLY_FILTER
 ): UiActionsActionDefinition<ApplyGlobalFilterActionContext> {
   return {
-    type: ACTION_GLOBAL_APPLY_FILTER,
-    id: ACTION_GLOBAL_APPLY_FILTER,
+    type,
+    id,
     order: 100,
     getIconType: () => 'filter',
     getDisplayName: () => {

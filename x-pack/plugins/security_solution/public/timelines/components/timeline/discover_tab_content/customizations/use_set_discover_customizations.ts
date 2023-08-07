@@ -6,17 +6,13 @@
  */
 
 import type { CustomizationCallback } from '@kbn/discover-plugin/public/customizations/types';
-import { useGetStatefulQueryBar } from '../use_get_stateful_query_bar';
+import { useHistogramCustomization } from './histogram';
+import { useSearchBarCustomizations } from './search_bar';
 
 export const useSetDiscoverCustomizationCallbacks = (): CustomizationCallback[] => {
-  const { CustomStatefulTopNavKqlQueryBar } = useGetStatefulQueryBar();
+  const searchBarCustomizationCallback = useSearchBarCustomizations();
 
-  const setSearchBarCustomizations: CustomizationCallback = ({ customizations }) => {
-    customizations.set({
-      id: 'search_bar',
-      CustomSearchBar: CustomStatefulTopNavKqlQueryBar,
-    });
-  };
+  const histogramCustomizationCallback = useHistogramCustomization();
 
-  return [setSearchBarCustomizations];
+  return [searchBarCustomizationCallback, histogramCustomizationCallback];
 };

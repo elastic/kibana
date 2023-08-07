@@ -137,7 +137,6 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
 
   const onAddFilter = useCallback(
     (field: DataViewField | string, values: unknown, operation: '+' | '-') => {
-      debugger;
       const fieldName = typeof field === 'string' ? field : field.name;
       popularizeField(dataView, fieldName, dataViews, capabilities);
       const newFilters = generateFilters(filterManager, field, values, operation, dataView);

@@ -9,6 +9,7 @@
 import { useQuerySubscriber } from '@kbn/unified-field-list/src/hooks/use_query_subscriber';
 import {
   UnifiedHistogramApi,
+  UnifiedHistogramContainerProps,
   UnifiedHistogramFetchStatus,
   UnifiedHistogramState,
 } from '@kbn/unified-histogram-plugin/public';
@@ -26,6 +27,7 @@ import {
 } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
 import type { RequestAdapter } from '@kbn/inspector-plugin/common';
+import { useDiscoverCustomization } from '../../../../customizations';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { getUiActions } from '../../../../kibana_services';
 import { FetchStatus } from '../../../types';
@@ -49,7 +51,7 @@ export const useDiscoverHistogram = ({
   inspectorAdapters,
   hideChart,
   isPlainRecord,
-}: UseDiscoverHistogramProps) => {
+}: UseDiscoverHistogramProps): UnifiedHistogramContainerProps => {
   const services = useDiscoverServices();
   const savedSearchData$ = stateContainer.dataState.data$;
 
@@ -299,7 +301,7 @@ export const useDiscoverHistogram = ({
 
   const dataView = useInternalStateSelector((state) => state.dataView!);
 
-  console.log({ histogramServices: services });
+  const histogramCustomization = useDiscoverCustomization('unified_histogram');
 
   return {
     ref,
@@ -311,6 +313,10 @@ export const useDiscoverHistogram = ({
     timeRange,
     relativeTimeRange,
     columns,
+    onFilter: histogramCustomization?.onFilter,
+    onBrushEnd: histogramCustomization?.onBrushEnd,
+    withDefaultActions: histogramCustomization?.withDefaultActions,
+    disabledActions: histogramCustomization?.disabledActions,
   };
 };
 

@@ -122,6 +122,8 @@ export const createInitialState = (
     analyzer: analyzerState.analyzer,
     discover: {
       app: undefined,
+      internal: undefined,
+      savedSearch: undefined,
     },
   };
 

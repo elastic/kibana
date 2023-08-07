@@ -85,6 +85,8 @@ export const singleSearchAfter = async <
         overrideBody,
       });
 
+      ruleExecutionLogger.warn(JSON.stringify({ searchAfterQuery }, undefined, 2));
+
       const start = performance.now();
       const { body: nextSearchAfterResult } =
         await services.scopedClusterClient.asCurrentUser.search<SignalSource, TAggregations>(

@@ -22,7 +22,7 @@ import type {
   UnifiedSearchPublicPluginStart,
   UnifiedSearchPublicPluginStartUi,
 } from './types';
-import { createFilterAction } from './actions/apply_filter_action';
+import { createFilterActionFactory } from './actions/apply_filter_action';
 import { createUpdateFilterReferencesAction } from './actions/update_filter_references_action';
 import { ACTION_GLOBAL_APPLY_FILTER, UPDATE_FILTER_REFERENCES_ACTION } from './actions';
 import { FiltersBuilderLazy } from './filters_builder';
@@ -51,7 +51,7 @@ export class UnifiedSearchPublicPlugin
     uiActions.registerTrigger(updateFilterReferencesTrigger);
 
     uiActions.registerAction(
-      createFilterAction(query.filterManager, query.timefilter.timefilter, core.theme)
+      createFilterActionFactory(query.filterManager, query.timefilter.timefilter, core.theme)
     );
 
     uiActions.registerAction(createUpdateFilterReferencesAction(query.filterManager));

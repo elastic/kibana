@@ -10,6 +10,14 @@ export enum SecurityCellActionsTrigger {
   ALERTS_COUNT = 'security-alertsCount-cellActions',
 }
 
+export enum DiscoverInTimelineTrigger {
+  HISTOGRAM_TRIGGER = 'security-discoverInTimeline-histogramTrigger',
+}
+
+export enum DiscoverInTimelineAction {
+  VIS_FILTER_ACTION = 'security-discoverInTimeline-visFilterAction',
+}
+
 export enum SecurityCellActionType {
   FILTER = 'security-cellAction-type-filter',
   COPY = 'security-cellAction-type-copyToClipboard',

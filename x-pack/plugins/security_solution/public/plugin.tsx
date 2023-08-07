@@ -17,7 +17,6 @@ import type {
   Plugin as IPlugin,
 } from '@kbn/core/public';
 
-import { createFilterAction } from '@kbn/unified-search-plugin/public/actions/apply_filter_action';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { NowProvider, QueryService } from '@kbn/data-plugin/public';
 import { DEFAULT_APP_CATEGORIES, AppNavLinkStatus } from '@kbn/core/public';
@@ -56,7 +55,6 @@ import { LazyEndpointCustomAssetsExtension } from './management/pages/policy/vie
 
 import type { SecurityAppStore } from './common/store/types';
 import { PluginContract } from './plugin_contract';
-
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   /**
    * The current Kibana branch. e.g. 'main'
@@ -176,10 +174,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         // @ts-expect-error
         _name: 'custom',
       };
-
-      startPluginsDeps.uiActions.registerAction(
-        createFilterAction(query.filterManager, query.timefilter.timefilter, core.theme)
-      );
 
       const services: StartServices = {
         ...coreStart,
