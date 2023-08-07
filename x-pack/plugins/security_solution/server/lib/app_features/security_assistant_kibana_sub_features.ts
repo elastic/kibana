@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import type { SubFeatureConfig } from '@kbn/features-plugin/common';
 
+// @ts-expect-error unused variable
 const createConversationSubFeature: SubFeatureConfig = {
   name: i18n.translate(
     'xpack.securitySolution.featureRegistry.assistant.createConversationSubFeatureName',
@@ -51,6 +52,7 @@ export enum AssistantSubFeatureId {
 // Defines all the ordered Security Assistant subFeatures available
 export const assistantSubFeaturesMap = Object.freeze(
   new Map<AssistantSubFeatureId, SubFeatureConfig>([
-    [AssistantSubFeatureId.createConversation, createConversationSubFeature],
+    // This is a sample sub-feature that can be used for future implementations
+    // [AssistantSubFeatureId.createConversation, createConversationSubFeature],
   ])
 );

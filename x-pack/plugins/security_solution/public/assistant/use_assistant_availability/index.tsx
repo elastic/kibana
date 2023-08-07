@@ -7,7 +7,7 @@
 
 import { useLicense } from '../../common/hooks/use_license';
 import { useKibana } from '../../common/lib/kibana';
-import { SERVER_APP_ID } from '../../../common';
+import { ASSISTANT_FEATURE_ID } from '../../../common';
 
 export interface UseAssistantAvailability {
   // True when user is Enterprise. When false, the Assistant is disabled and unavailable
@@ -19,7 +19,7 @@ export interface UseAssistantAvailability {
 export const useAssistantAvailability = (): UseAssistantAvailability => {
   const isEnterprise = useLicense().isEnterprise();
   const capabilities = useKibana().services.application.capabilities;
-  const isAssistantEnabled = capabilities[SERVER_APP_ID]?.isAssistantEnabled === true;
+  const isAssistantEnabled = capabilities[ASSISTANT_FEATURE_ID]?.isAssistantEnabled === true;
 
   return {
     isAssistantEnabled: isEnterprise,
