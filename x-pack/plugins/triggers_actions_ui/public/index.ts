@@ -51,3 +51,4 @@ export { loadActionTypes } from './application/lib/action_connector_api/connecto
 export type { TIME_UNITS } from './application/constants';
 export { getTimeUnitLabel } from './common/lib/get_time_unit_label';
 export type { TriggersAndActionsUiServices } from '../public/application/app';
+export { transformAlert } from './application/lib/alert_api/common_transformations';

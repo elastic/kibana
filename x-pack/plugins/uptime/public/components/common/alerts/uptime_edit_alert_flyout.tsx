@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import { AsApiContract } from '@kbn/actions-plugin/common';
 import React, { useMemo } from 'react';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import {
   Alert,
+  transformAlert,
   TriggersAndActionsUIPublicPluginStart,
 } from '../../../../../triggers_actions_ui/public';
 
@@ -24,11 +26,12 @@ interface KibanaDeps {
 
 export const UptimeEditAlertFlyoutComponent = ({
   alertFlyoutVisible,
-  initialAlert,
+  initialAlert: rawAlert,
   setAlertFlyoutVisibility,
 }: Props) => {
   const { triggersActionsUi } = useKibana<KibanaDeps>().services;
 
+  const initialAlert = transformAlert(rawAlert as unknown as AsApiContract<Alert>);
   const EditAlertFlyout = useMemo(
     () =>
       triggersActionsUi.getEditAlertFlyout({
