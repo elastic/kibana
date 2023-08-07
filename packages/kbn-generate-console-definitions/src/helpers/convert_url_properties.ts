@@ -47,7 +47,7 @@ const convertValueOf = (
     return convertLiteralValue(valueOf);
   }
   // for query params we can ignore 'dictionary_of' and 'user_defined_value'
-  return '';
+  throw new Error('unexpected valueOf type ' + kind);
 };
 
 const convertInstanceOf = (
