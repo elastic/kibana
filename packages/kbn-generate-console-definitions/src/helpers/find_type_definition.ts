@@ -6,4 +6,12 @@
  * Side Public License, v 1.
  */
 
-export * as SpecificationTypes from './specification_types';
+import type { SpecificationTypes } from '../types';
+export const findTypeDefinition = (
+  schema: SpecificationTypes.Model,
+  typeName: SpecificationTypes.TypeName
+): SpecificationTypes.TypeDefinition | undefined => {
+  return schema.types.find(
+    (type) => type.name.name === typeName.name && type.name.namespace === typeName.namespace
+  );
+};
