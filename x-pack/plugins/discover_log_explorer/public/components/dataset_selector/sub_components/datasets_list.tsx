@@ -70,6 +70,7 @@ export const DatasetsList = ({
   if (isEmpty) {
     return (
       <EuiEmptyPrompt
+        data-test-subj="emptyDatasetPrompt"
         iconType="search"
         paddingSize="m"
         title={<h2>{noDatasetsLabel}</h2>}

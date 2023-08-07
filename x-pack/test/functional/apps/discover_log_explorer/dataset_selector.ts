@@ -188,154 +188,237 @@ export default function (providerContext: FtrProviderContext) {
   };
 
   describe('Dataset Selector', () => {
-    before('initialize tests', async () => {
-      await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
-      await esArchiver.load(
-        'x-pack/test/functional/es_archives/discover_log_explorer/data_streams'
-      );
-      logger.info(`Installing ${initialPackages.length} integration packages.`);
-      await Promise.all(initialPackages.map(installPackage));
-      await PageObjects.common.navigateToApp('discover', { hash: '/p/log-explorer' });
-    });
+    describe('without installed integrations or uncategorized data streams', () => {
+      before(async () => {
+        await PageObjects.common.navigateToApp('discover', { hash: '/p/log-explorer' });
+      });
 
-    after('clean up archives', async () => {
-      await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover');
-      await esArchiver.unload(
-        'x-pack/test/functional/es_archives/discover_log_explorer/data_streams'
-      );
-
-      logger.info(`Uninstalling ${initialPackages.length} integration packages.`);
-      await Promise.all(initialPackages.map(uninstallPackage));
-    });
-
-    describe('when open on the first navigation level', () => {
       beforeEach(async () => {
         await PageObjects.discoverLogExplorer.openDatasetSelector();
-        await PageObjects.discoverLogExplorer.clearSearchField();
       });
 
       afterEach(async () => {
-        await PageObjects.discoverLogExplorer.clearSearchField();
         await PageObjects.discoverLogExplorer.closeDatasetSelector();
       });
 
-      it('should always display the all log datasets entry as first item', async () => {
-        const allLogDatasetButton = await PageObjects.discoverLogExplorer.getAllLogDatasetsButton();
-        const menuEntries = await PageObjects.discoverLogExplorer.getCurrentPanelEntries();
+      describe('when open on the first navigation level', () => {
+        it('should always display the all log datasets entry as first item', async () => {
+          const allLogDatasetButton =
+            await PageObjects.discoverLogExplorer.getAllLogDatasetsButton();
+          const menuEntries = await PageObjects.discoverLogExplorer.getCurrentPanelEntries();
 
-        const allLogDatasetTitle = await allLogDatasetButton.getVisibleText();
-        const firstEntryTitle = await menuEntries[0].getVisibleText();
+          const allLogDatasetTitle = await allLogDatasetButton.getVisibleText();
+          const firstEntryTitle = await menuEntries[0].getVisibleText();
 
-        expect(allLogDatasetTitle).to.be('All log datasets');
-        expect(allLogDatasetTitle).to.be(firstEntryTitle);
-      });
-
-      it('should always display the unmanaged datasets entry as second item', async () => {
-        const unamanagedDatasetButton =
-          await PageObjects.discoverLogExplorer.getUnmanagedDatasetsButton();
-        const menuEntries = await PageObjects.discoverLogExplorer.getCurrentPanelEntries();
-
-        const unmanagedDatasetTitle = await unamanagedDatasetButton.getVisibleText();
-        const secondEntryTitle = await menuEntries[1].getVisibleText();
-
-        expect(unmanagedDatasetTitle).to.be('Uncategorized');
-        expect(unmanagedDatasetTitle).to.be(secondEntryTitle);
-      });
-
-      it('should display a list of installed integrations', async () => {
-        const { integrations } = await PageObjects.discoverLogExplorer.getIntegrations();
-
-        expect(integrations.length).to.be(3);
-        expect(integrations).to.eql(initialPackagesTexts);
-      });
-
-      it('should sort the integrations list by the clicked sorting option', async () => {
-        // Test ascending order
-        await PageObjects.discoverLogExplorer.clickSortButtonBy('asc');
-
-        await retry.try(async () => {
-          const { integrations } = await PageObjects.discoverLogExplorer.getIntegrations();
-          expect(integrations).to.eql(initialPackagesTexts);
+          expect(allLogDatasetTitle).to.be('All log datasets');
+          expect(allLogDatasetTitle).to.be(firstEntryTitle);
         });
 
-        // Test descending order
-        await PageObjects.discoverLogExplorer.clickSortButtonBy('desc');
+        it('should always display the unmanaged datasets entry as second item', async () => {
+          const unamanagedDatasetButton =
+            await PageObjects.discoverLogExplorer.getUnmanagedDatasetsButton();
+          const menuEntries = await PageObjects.discoverLogExplorer.getCurrentPanelEntries();
 
-        await retry.try(async () => {
-          const { integrations } = await PageObjects.discoverLogExplorer.getIntegrations();
-          expect(integrations).to.eql(initialPackagesTexts.slice().reverse());
+          const unmanagedDatasetTitle = await unamanagedDatasetButton.getVisibleText();
+          const secondEntryTitle = await menuEntries[1].getVisibleText();
+
+          expect(unmanagedDatasetTitle).to.be('Uncategorized');
+          expect(unmanagedDatasetTitle).to.be(secondEntryTitle);
         });
 
-        // Test back ascending order
-        await PageObjects.discoverLogExplorer.clickSortButtonBy('asc');
-
-        await retry.try(async () => {
-          const { integrations } = await PageObjects.discoverLogExplorer.getIntegrations();
-          expect(integrations).to.eql(initialPackagesTexts);
-        });
-      });
-
-      it('should filter the integrations list by the typed integration name', async () => {
-        await PageObjects.discoverLogExplorer.typeSearchFieldWith('system');
-
-        await retry.try(async () => {
-          const { integrations } = await PageObjects.discoverLogExplorer.getIntegrations();
-          expect(integrations).to.eql([initialPackageMap.system]);
-        });
-
-        await PageObjects.discoverLogExplorer.typeSearchFieldWith('a');
-
-        await retry.try(async () => {
-          const { integrations } = await PageObjects.discoverLogExplorer.getIntegrations();
-          expect(integrations).to.eql([initialPackageMap.apache, initialPackageMap.aws]);
-        });
-      });
-
-      it('should display an empty prompt when the search does not match any result', async () => {
-        await PageObjects.discoverLogExplorer.typeSearchFieldWith('no result search text');
-
-        await retry.try(async () => {
+        it('should display an empty prompt for no integrations', async () => {
           const { integrations } = await PageObjects.discoverLogExplorer.getIntegrations();
           expect(integrations.length).to.be(0);
-        });
 
-        await PageObjects.discoverLogExplorer.assertNoIntegrationsPromptExists();
+          await PageObjects.discoverLogExplorer.assertNoIntegrationsPromptExists();
+        });
+      });
+
+      describe('when navigating into Uncategorized data streams', () => {
+        it('should display an empty prompt for no data streams', async () => {
+          const unamanagedDatasetButton =
+            await PageObjects.discoverLogExplorer.getUnmanagedDatasetsButton();
+          await unamanagedDatasetButton.click();
+
+          const unamanagedDatasetEntries =
+            await PageObjects.discoverLogExplorer.getCurrentPanelEntries();
+
+          expect(unamanagedDatasetEntries.length).to.be(0);
+
+          await PageObjects.discoverLogExplorer.assertNoDataStreamsPromptExists();
+        });
       });
     });
 
-    // describe('when click on an integration and moves into the second navigation level', () => {});
+    describe('with installed integrations and uncategorized data streams', () => {
+      before(async () => {
+        await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
+        await esArchiver.load(
+          'x-pack/test/functional/es_archives/discover_log_explorer/data_streams'
+        );
+        logger.info(`Installing ${initialPackages.length} integration packages.`);
+        await Promise.all(initialPackages.map(installPackage));
+        await PageObjects.common.navigateToApp('discover', { hash: '/p/log-explorer' });
+      });
 
-    describe('when open/close the selector', () => {
-      it('should remember the latest navigation panel and restore it', async () => {
-        await PageObjects.discoverLogExplorer.openDatasetSelector();
-        await PageObjects.discoverLogExplorer.clearSearchField();
+      after(async () => {
+        await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover');
+        await esArchiver.unload(
+          'x-pack/test/functional/es_archives/discover_log_explorer/data_streams'
+        );
 
-        await retry.try(async () => {
-          const { nodes } = await PageObjects.discoverLogExplorer.getIntegrations();
-          await nodes[0].click();
+        logger.info(`Uninstalling ${initialPackages.length} integration packages.`);
+        await Promise.all(initialPackages.map(uninstallPackage));
+      });
+
+      describe('when open on the first navigation level', () => {
+        beforeEach(async () => {
+          await PageObjects.discoverLogExplorer.openDatasetSelector();
+          await PageObjects.discoverLogExplorer.clearSearchField();
         });
 
-        await retry.try(async () => {
-          const panelTitleNode =
-            await PageObjects.discoverLogExplorer.getDatasetSelectorContextMenuPanelTitle();
-          const menuEntries = await PageObjects.discoverLogExplorer.getCurrentPanelEntries();
-
-          expect(await panelTitleNode.getVisibleText()).to.be('Apache HTTP Server');
-          expect(await menuEntries[0].getVisibleText()).to.be('access');
-          expect(await menuEntries[1].getVisibleText()).to.be('error');
+        afterEach(async () => {
+          await PageObjects.discoverLogExplorer.clearSearchField();
+          await PageObjects.discoverLogExplorer.closeDatasetSelector();
         });
 
-        await PageObjects.discoverLogExplorer.closeDatasetSelector();
-        await PageObjects.discoverLogExplorer.openDatasetSelector();
-
-        await retry.try(async () => {
-          const panelTitleNode =
-            await PageObjects.discoverLogExplorer.getDatasetSelectorContextMenuPanelTitle();
+        it('should always display the all log datasets entry as first item', async () => {
+          const allLogDatasetButton =
+            await PageObjects.discoverLogExplorer.getAllLogDatasetsButton();
           const menuEntries = await PageObjects.discoverLogExplorer.getCurrentPanelEntries();
 
-          expect(await panelTitleNode.getVisibleText()).to.be('Apache HTTP Server');
-          expect(await menuEntries[0].getVisibleText()).to.be('access');
-          expect(await menuEntries[1].getVisibleText()).to.be('error');
+          const allLogDatasetTitle = await allLogDatasetButton.getVisibleText();
+          const firstEntryTitle = await menuEntries[0].getVisibleText();
+
+          expect(allLogDatasetTitle).to.be('All log datasets');
+          expect(allLogDatasetTitle).to.be(firstEntryTitle);
+        });
+
+        it('should always display the unmanaged datasets entry as second item', async () => {
+          const unamanagedDatasetButton =
+            await PageObjects.discoverLogExplorer.getUnmanagedDatasetsButton();
+          const menuEntries = await PageObjects.discoverLogExplorer.getCurrentPanelEntries();
+
+          const unmanagedDatasetTitle = await unamanagedDatasetButton.getVisibleText();
+          const secondEntryTitle = await menuEntries[1].getVisibleText();
+
+          expect(unmanagedDatasetTitle).to.be('Uncategorized');
+          expect(unmanagedDatasetTitle).to.be(secondEntryTitle);
+        });
+
+        it('should display a list of installed integrations', async () => {
+          const { integrations } = await PageObjects.discoverLogExplorer.getIntegrations();
+
+          expect(integrations.length).to.be(3);
+          expect(integrations).to.eql(initialPackagesTexts);
+        });
+
+        it('should sort the integrations list by the clicked sorting option', async () => {
+          // Test ascending order
+          await PageObjects.discoverLogExplorer.clickSortButtonBy('asc');
+
+          await retry.try(async () => {
+            const { integrations } = await PageObjects.discoverLogExplorer.getIntegrations();
+            expect(integrations).to.eql(initialPackagesTexts);
+          });
+
+          // Test descending order
+          await PageObjects.discoverLogExplorer.clickSortButtonBy('desc');
+
+          await retry.try(async () => {
+            const { integrations } = await PageObjects.discoverLogExplorer.getIntegrations();
+            expect(integrations).to.eql(initialPackagesTexts.slice().reverse());
+          });
+
+          // Test back ascending order
+          await PageObjects.discoverLogExplorer.clickSortButtonBy('asc');
+
+          await retry.try(async () => {
+            const { integrations } = await PageObjects.discoverLogExplorer.getIntegrations();
+            expect(integrations).to.eql(initialPackagesTexts);
+          });
+        });
+
+        it('should filter the integrations list by the typed integration name', async () => {
+          await PageObjects.discoverLogExplorer.typeSearchFieldWith('system');
+
+          await retry.try(async () => {
+            const { integrations } = await PageObjects.discoverLogExplorer.getIntegrations();
+            expect(integrations).to.eql([initialPackageMap.system]);
+          });
+
+          await PageObjects.discoverLogExplorer.typeSearchFieldWith('a');
+
+          await retry.try(async () => {
+            const { integrations } = await PageObjects.discoverLogExplorer.getIntegrations();
+            expect(integrations).to.eql([initialPackageMap.apache, initialPackageMap.aws]);
+          });
+        });
+
+        it('should display an empty prompt when the search does not match any result', async () => {
+          await PageObjects.discoverLogExplorer.typeSearchFieldWith('no result search text');
+
+          await retry.try(async () => {
+            const { integrations } = await PageObjects.discoverLogExplorer.getIntegrations();
+            expect(integrations.length).to.be(0);
+          });
+
+          await PageObjects.discoverLogExplorer.assertNoIntegrationsPromptExists();
+        });
+
+        it('should load more integrations scrolling to the end of the list', async () => {
+          // Install more integrations and reload the page
+          logger.info(`Installing ${additionalPackages.length} integration packages.`);
+          await Promise.all(additionalPackages.map(installPackage));
+          await PageObjects.common.navigateToApp('discover', { hash: '/p/log-explorer' });
+
+          await PageObjects.discoverLogExplorer.openDatasetSelector();
+
+          await retry.try(async () => {
+            const { nodes } = await PageObjects.discoverLogExplorer.getIntegrations();
+            expect(nodes.length).to.be(15);
+            await nodes.at(-1)?.scrollIntoViewIfNecessary();
+          });
+
+          logger.info(`Uninstalling ${additionalPackages.length} integration packages.`);
+          await Promise.all(additionalPackages.map(uninstallPackage));
+        });
+      });
+
+      // describe('when click on an integration and moves into the second navigation level', () => {});
+
+      describe('when open/close the selector', () => {
+        it('should restore the latest navigation panel', async () => {
+          await PageObjects.discoverLogExplorer.openDatasetSelector();
+          await PageObjects.discoverLogExplorer.clearSearchField();
+
+          await retry.try(async () => {
+            const { nodes } = await PageObjects.discoverLogExplorer.getIntegrations();
+            await nodes[0].click();
+          });
+
+          await retry.try(async () => {
+            const panelTitleNode =
+              await PageObjects.discoverLogExplorer.getDatasetSelectorContextMenuPanelTitle();
+            const menuEntries = await PageObjects.discoverLogExplorer.getCurrentPanelEntries();
+
+            expect(await panelTitleNode.getVisibleText()).to.be('Apache HTTP Server');
+            expect(await menuEntries[0].getVisibleText()).to.be('access');
+            expect(await menuEntries[1].getVisibleText()).to.be('error');
+          });
+
+          await PageObjects.discoverLogExplorer.closeDatasetSelector();
+          await PageObjects.discoverLogExplorer.openDatasetSelector();
+
+          await retry.try(async () => {
+            const panelTitleNode =
+              await PageObjects.discoverLogExplorer.getDatasetSelectorContextMenuPanelTitle();
+            const menuEntries = await PageObjects.discoverLogExplorer.getCurrentPanelEntries();
+
+            expect(await panelTitleNode.getVisibleText()).to.be('Apache HTTP Server');
+            expect(await menuEntries[0].getVisibleText()).to.be('access');
+            expect(await menuEntries[1].getVisibleText()).to.be('error');
+          });
         });
       });
     });

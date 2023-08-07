@@ -43,7 +43,7 @@ export function DiscoverLogExplorerPageObject({ getService }: FtrProviderContext
 
     async getCurrentPanelEntries() {
       const contextMenu = await this.getDatasetSelectorContextMenu();
-      return contextMenu.findAllByTagName('button');
+      return contextMenu.findAllByClassName('euiContextMenuItem', 2000);
     },
 
     getAllLogDatasetsButton() {
@@ -57,7 +57,7 @@ export function DiscoverLogExplorerPageObject({ getService }: FtrProviderContext
     async getIntegrations() {
       const content = await this.getDatasetSelectorContent();
 
-      const nodes = await content.findAllByCssSelector('[data-test-subj*="integration-"]');
+      const nodes = await content.findAllByCssSelector('[data-test-subj*="integration-"]', 2000);
       const integrations = await Promise.all(nodes.map((node) => node.getVisibleText()));
 
       return {
@@ -118,6 +118,13 @@ export function DiscoverLogExplorerPageObject({ getService }: FtrProviderContext
       const promptTitle = await integrationStatus.findByTagName('h2');
 
       expect(await promptTitle.getVisibleText()).to.be('No integrations found');
+    },
+
+    async assertNoDataStreamsPromptExists() {
+      const integrationStatus = await testSubjects.find('emptyDatasetPrompt');
+      const promptTitle = await integrationStatus.findByTagName('h2');
+
+      expect(await promptTitle.getVisibleText()).to.be('No data streams found');
     },
   };
 }
