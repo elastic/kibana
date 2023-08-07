@@ -17,6 +17,10 @@ import { asyncMap, asyncForEach } from '@kbn/std';
 import { ToolingLog } from '@kbn/tooling-log';
 import { Config } from '@kbn/test';
 import { EsArchiver, KibanaServer, Es, RetryService } from '@kbn/ftr-common-functional-services';
+import {
+  ELASTIC_HTTP_VERSION_HEADER,
+  X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
+} from '@kbn/core-http-common';
 
 import { Auth } from '../services/auth';
 import { getInputDelays } from '../services/input_delays';
@@ -62,6 +66,10 @@ export class JourneyFtrHarness {
     await this.kibanaServer.request({
       path: '/internal/core/_settings',
       method: 'PUT',
+      headers: {
+        [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'ftr',
+      },
       body: { telemetry: { labels } },
     });
   }
