@@ -6,5 +6,9 @@
  */
 
 export function useObservabilityAIAssistant() {
-  return {};
+  return {
+    getFunctions: () => {
+      return [];
+    },
+  };
 }

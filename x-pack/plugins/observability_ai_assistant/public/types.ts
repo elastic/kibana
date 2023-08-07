@@ -17,6 +17,7 @@ import type {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
+import type { LensPublicStart, LensPublicSetup } from '@kbn/lens-plugin/public';
 import type {
   CreateChatCompletionResponse,
   CreateChatCompletionResponseChoicesInner,
@@ -62,7 +63,7 @@ export interface ObservabilityAIAssistantService {
   ) => Promise<{ content?: Serializable; data?: Serializable }>;
   renderFunction: (
     name: string,
-    response: { data?: Serializable; content?: Serializable }
+    response: { data?: Serializable; content?: Serializable; arguments: string | undefined }
   ) => React.ReactNode;
 }
 
@@ -76,11 +77,13 @@ export interface ObservabilityAIAssistantPluginSetupDependencies {
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
   security: SecurityPluginSetup;
   observabilityShared: ObservabilitySharedPluginSetup;
+  lens: LensPublicSetup;
 }
 export interface ObservabilityAIAssistantPluginStartDependencies {
   security: SecurityPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   observabilityShared: ObservabilitySharedPluginStart;
+  lens: LensPublicStart;
 }
 
 export interface ConfigSchema {}

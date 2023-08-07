@@ -10,15 +10,18 @@ import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import dedent from 'dedent';
 import { type Message, MessageRole } from '../../common';
 import type { ChatTimelineItem } from '../components/chat/chat_timeline';
+import { ObservabilityAIAssistantService } from '../types';
 
 export function getTimelineItemsfromConversation({
   currentUser,
   messages,
   hasConnector,
+  service,
 }: {
   currentUser?: Pick<AuthenticatedUser, 'username' | 'full_name'>;
   messages: Message[];
   hasConnector: boolean;
+  service: ObservabilityAIAssistantService;
 }): ChatTimelineItem[] {
   return [
     {
@@ -33,12 +36,12 @@ export function getTimelineItemsfromConversation({
       loading: false,
       currentUser,
     },
-    ...messages.map((message) => {
+    ...messages.map((message, index) => {
       const hasFunction = !!message.message.function_call?.name;
       const isSystemPrompt = message.message.role === MessageRole.System;
 
       let title: string;
-      let content: string | undefined;
+      let content: React.ReactNode;
 
       if (hasFunction) {
         title = i18n.translate('xpack.observabilityAiAssistant.suggestedFunctionEvent', {
@@ -56,6 +59,19 @@ export function getTimelineItemsfromConversation({
           defaultMessage: 'added a prompt',
         });
         content = '';
+      } else if (message.message.name) {
+        const prevMessage = messages[index - 1];
+        if (!prevMessage || !prevMessage.message.function_call) {
+          throw new Error('Could not find preceding message with function_call');
+        }
+        title = i18n.translate('xpack.observabilityAiAssistant.executedFunctionEvent', {
+          defaultMessage: 'Executed a function',
+        });
+        content = service.renderFunction(message.message.name, {
+          content: message.message.content,
+          data: message.message.data,
+          arguments: prevMessage.message.function_call.arguments,
+        });
       } else {
         title = '';
         content = message.message.content;

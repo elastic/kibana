@@ -18,6 +18,7 @@ import type { Logger } from '@kbn/logging';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import type {
+  ContextDefinition,
   ContextRegistry,
   FunctionRegistry,
   RegisterContextDefinition,
@@ -111,7 +112,7 @@ export class ObservabilityAIAssistantPlugin
       functionRegistry,
     }));
 
-    const registerContext: RegisterContextDefinition = (context) => {
+    const registerContext: RegisterContextDefinition = (context: ContextDefinition) => {
       contextRegistry.set(context.name, context);
     };
 
@@ -123,6 +124,7 @@ export class ObservabilityAIAssistantPlugin
       registerContext,
       registerFunction,
       service,
+      pluginsStart,
     });
 
     return {
