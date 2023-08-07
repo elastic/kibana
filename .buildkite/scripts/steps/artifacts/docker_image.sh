@@ -7,11 +7,11 @@ set -euo pipefail
 source .buildkite/scripts/steps/artifacts/env.sh
 
 GIT_ABBREV_COMMIT=${BUILDKITE_COMMIT:0:12}
- if [[ "${BUILDKITE_PULL_REQUEST:-false}" == "false" ]]; then
+if [[ "${BUILDKITE_PULL_REQUEST:-false}" == "false" ]]; then
   KIBANA_IMAGE_TAG="git-$GIT_ABBREV_COMMIT"
- else
+else
   KIBANA_IMAGE_TAG="pr-$GIT_ABBREV_COMMIT"
- fi
+fi
 
 KIBANA_IMAGE="docker.elastic.co/kibana-ci/kibana-serverless:$KIBANA_IMAGE_TAG"
 
