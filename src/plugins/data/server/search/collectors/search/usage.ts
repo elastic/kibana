@@ -46,7 +46,8 @@ export function usageProvider(core: CoreSetup): SearchUsage {
         await repository.incrementCounter<CollectedUsage>(
           SAVED_OBJECT_ID,
           SAVED_OBJECT_ID,
-          counterFields
+          counterFields,
+          { refresh: false }
         );
 
         // Since search requests may have completed while the saved object was being updated, we minus
