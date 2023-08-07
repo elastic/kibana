@@ -90,7 +90,6 @@ export function DefaultConnectorField({
         onBlur={onBlur}
         isDisabled={isDisabled}
         data-test-subj={`default-connectors-input-${isLoading ? 'loading' : 'loaded'}`}
-        // renderOption={renderOption}
         fullWidth
         aria-label={TAGS_LABEL}
         isLoading={isLoading}
