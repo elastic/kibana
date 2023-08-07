@@ -7,7 +7,7 @@
 
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
-import { Filter } from '@kbn/es-query';
+import { Filter, FilterStateStore } from '@kbn/es-query';
 
 type DiscoverPropertiesToPick = 'dataViewId' | 'dataViewSpec' | 'filters';
 
@@ -16,26 +16,39 @@ type DiscoverNavigationParams = Pick<
   DiscoverPropertiesToPick
 >;
 
+const defaultFilterKey = 'data_stream.dataset';
 const defaultLogsDataViewId = 'logs-*';
 const defaultLogsDataView: DataViewSpec = {
   title: defaultLogsDataViewId,
 };
 
-const getDefaultDatasetFilter = (dataset: string): Filter[] => [
+const getDefaultDatasetFilter = (datasets: string[]): Filter[] => [
   {
-    meta: {},
+    meta: {
+      key: defaultFilterKey,
+      params: datasets,
+      type: 'phrases',
+    },
     query: {
-      match_phrase: {
-        'data_stream.dataset': dataset,
+      bool: {
+        minimum_should_match: 1,
+        should: datasets.map((dataset) => ({
+          match_phrase: {
+            [defaultFilterKey]: dataset,
+          },
+        })),
       },
+    },
+    $state: {
+      store: FilterStateStore.APP_STATE,
     },
   },
 ];
 
 export const getDiscoverNavigationParams = (
-  dataset: string
+  datasets: string[]
 ): DiscoverNavigationParams => ({
   dataViewId: defaultLogsDataViewId,
   dataViewSpec: defaultLogsDataView,
-  filters: getDefaultDatasetFilter(dataset),
+  filters: getDefaultDatasetFilter(datasets),
 });

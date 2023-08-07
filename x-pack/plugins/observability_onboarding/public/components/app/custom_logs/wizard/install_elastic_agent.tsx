@@ -53,7 +53,7 @@ export function InstallElasticAgent() {
   }
   async function onContinue() {
     await locator?.navigate(
-      getDiscoverNavigationParams(wizardState.datasetName)
+      getDiscoverNavigationParams([wizardState.datasetName])
     );
   }
 
