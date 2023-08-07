@@ -17,7 +17,7 @@ import {
 } from '../../tasks/live_query';
 import { loadSpace, loadPack, cleanupPack, cleanupSpace } from '../../tasks/api_fixtures';
 
-describe('ALL - Custom space', { tags: [tag.SERVERLESS, tag.ESS] }, () => {
+describe('ALL - Custom space', { tags: [tag.ESS] }, () => {
   ['default', 'custom-space'].forEach((spaceName) => {
     describe(`[${spaceName}]`, () => {
       let packName: string;

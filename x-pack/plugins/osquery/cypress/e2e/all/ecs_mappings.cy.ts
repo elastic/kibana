@@ -19,7 +19,7 @@ import {
   typeInOsqueryFieldInput,
 } from '../../tasks/live_query';
 
-describe('EcsMapping', { tags: [tag.SERVERLESS, tag.ESS] }, () => {
+describe('EcsMapping', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
   beforeEach(() => {
     cy.loginKibana(ROLE.soc_manager);
   });

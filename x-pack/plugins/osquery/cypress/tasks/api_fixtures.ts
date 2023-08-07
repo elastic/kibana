@@ -113,7 +113,6 @@ export const cleanupPack = (id: string, space = 'default') => {
     headers: {
       'Elastic-Api-Version': API_VERSIONS.public.v1,
     },
-    failOnStatusCode: false,
   });
 };
 
@@ -272,5 +271,4 @@ export const cleanupAgentPolicy = (agentPolicyId: string) =>
     method: 'POST',
     body: { agentPolicyId },
     url: '/api/fleet/agent_policies/delete',
-    failOnStatusCode: false,
   });

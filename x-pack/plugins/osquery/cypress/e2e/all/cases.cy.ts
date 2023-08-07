@@ -15,7 +15,8 @@ import { navigateTo } from '../../tasks/navigation';
 import { ROLE } from '../../tasks/login';
 import { loadLiveQuery, loadCase, cleanupCase } from '../../tasks/api_fixtures';
 
-describe('Add to Cases', { tags: [tag.SERVERLESS, tag.ESS] }, () => {
+// TODO CHECK: no serverless because lack of api permissions
+describe('Add to Cases', { tags: [tag.ESS] }, () => {
   let liveQueryId: string;
   let liveQueryQuery: string;
 

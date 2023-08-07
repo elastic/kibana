@@ -23,7 +23,7 @@ import { ROLE } from '../../tasks/login';
 import { getSavedQueriesComplexTest } from '../../tasks/saved_queries';
 import { loadCase, cleanupCase, loadPack, cleanupPack } from '../../tasks/api_fixtures';
 
-describe('ALL - Saved queries', { tags: [tag.SERVERLESS, tag.ESS] }, () => {
+describe('ALL - Saved queries', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
   let caseId: string;
 
   before(() => {
@@ -43,7 +43,7 @@ describe('ALL - Saved queries', { tags: [tag.SERVERLESS, tag.ESS] }, () => {
 
   getSavedQueriesComplexTest();
 
-  it.skip('checks that user cant add a saved query with an ID that already exists', () => {
+  it('checks that user cant add a saved query with an ID that already exists', () => {
     cy.contains('Saved queries').click();
     cy.contains('Add saved query').click();
 

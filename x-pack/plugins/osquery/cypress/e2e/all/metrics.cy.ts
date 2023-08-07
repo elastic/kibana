@@ -12,7 +12,7 @@ import { checkResults, inputQuery, submitQuery } from '../../tasks/live_query';
 import { loadSavedQuery, cleanupSavedQuery } from '../../tasks/api_fixtures';
 import { triggerLoadData } from '../../tasks/inventory';
 
-describe('ALL - Inventory', { tags: [tag.SERVERLESS, tag.ESS] }, () => {
+describe('ALL - Inventory', { tags: [tag.ESS] }, () => {
   let savedQueryName: string;
   let savedQueryId: string;
 
