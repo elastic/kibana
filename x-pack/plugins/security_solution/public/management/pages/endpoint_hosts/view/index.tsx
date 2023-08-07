@@ -318,6 +318,10 @@ const getEndpointListColumns = ({
 // FIXME: this needs refactoring - we are pulling in all selectors from endpoint, which includes many more than what the list uses
 const selector = (createStructuredSelector as CreateStructuredSelector)(selectors);
 
+const stateHandleDeployEndpointsClick: AgentPolicyDetailsDeployAgentAction = {
+  onDoneNavigateTo: [APP_UI_ID, { path: getEndpointListPath({ name: 'endpointList' }) }],
+};
+
 export const EndpointList = () => {
   const history = useHistory();
   const {
@@ -403,27 +407,32 @@ export const EndpointList = () => {
     [history, queryParams]
   );
 
+  const stateHandleCreatePolicyClick: CreatePackagePolicyRouteState = useMemo(
+    () => ({
+      onCancelNavigateTo: [
+        APP_UI_ID,
+        {
+          path: getEndpointListPath({ name: 'endpointList' }),
+        },
+      ],
+      onCancelUrl: getAppUrl({ path: getEndpointListPath({ name: 'endpointList' }) }),
+      onSaveNavigateTo: [
+        APP_UI_ID,
+        {
+          path: getEndpointListPath({ name: 'endpointList' }),
+        },
+      ],
+    }),
+    [getAppUrl]
+  );
+
   const handleCreatePolicyClick = useNavigateToAppEventHandler<CreatePackagePolicyRouteState>(
     'fleet',
     {
       path: `/integrations/${
         endpointPackageVersion ? `/endpoint-${endpointPackageVersion}` : ''
       }/add-integration`,
-      state: {
-        onCancelNavigateTo: [
-          APP_UI_ID,
-          {
-            path: getEndpointListPath({ name: 'endpointList' }),
-          },
-        ],
-        onCancelUrl: getAppUrl({ path: getEndpointListPath({ name: 'endpointList' }) }),
-        onSaveNavigateTo: [
-          APP_UI_ID,
-          {
-            path: getEndpointListPath({ name: 'endpointList' }),
-          },
-        ],
-      },
+      state: stateHandleCreatePolicyClick,
     }
   );
 
@@ -469,9 +478,7 @@ export const EndpointList = () => {
   const handleDeployEndpointsClick =
     useNavigateToAppEventHandler<AgentPolicyDetailsDeployAgentAction>('fleet', {
       path: `/policies/${selectedPolicyId}?openEnrollmentFlyout=true`,
-      state: {
-        onDoneNavigateTo: [APP_UI_ID, { path: getEndpointListPath({ name: 'endpointList' }) }],
-      },
+      state: stateHandleDeployEndpointsClick,
     });
 
   const handleSelectableOnChange = useCallback<(o: EuiSelectableProps['options']) => void>(
@@ -519,24 +526,28 @@ export const EndpointList = () => {
     ]
   );
 
+  const sorting = useMemo(
+    () => ({
+      sort: { field: sortField as keyof HostInfoInterface, direction: sortDirection },
+    }),
+    [sortDirection, sortField]
+  );
+
+  const mutableListData = useMemo(() => [...listData], [listData]);
+
   const renderTableOrEmptyState = useMemo(() => {
     if (endpointsExist) {
       return (
         <EuiBasicTable
           data-test-subj="endpointListTable"
-          items={[...listData]}
+          items={mutableListData}
           columns={columns}
           error={listError?.message}
           pagination={paginationSetup}
           onChange={onTableChange}
           loading={loading}
           rowProps={setTableRowProps}
-          sorting={{
-            sort: {
-              field: sortField as keyof HostInfoInterface,
-              direction: sortDirection,
-            },
-          }}
+          sorting={sorting}
         />
       );
     } else if (canReadEndpointList && !canAccessFleet) {
@@ -579,17 +590,16 @@ export const EndpointList = () => {
     handleDeployEndpointsClick,
     handleSelectableOnChange,
     hasPolicyData,
-    listData,
     listError?.message,
     loading,
+    mutableListData,
     onTableChange,
     paginationSetup,
     policyItemsLoading,
     policyItems,
     selectedPolicyId,
     setTableRowProps,
-    sortField,
-    sortDirection,
+    sorting,
   ]);
 
   return (
