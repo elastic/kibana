@@ -2944,6 +2944,14 @@
       }
     }
   },
+  "risk-engine-configuration": {
+    "dynamic": false,
+    "properties": {
+      "enabled": {
+        "type": "boolean"
+      }
+    }
+  },
   "infrastructure-ui-source": {
     "dynamic": false,
     "properties": {}
