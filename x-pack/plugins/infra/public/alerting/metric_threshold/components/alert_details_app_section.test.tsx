@@ -43,7 +43,7 @@ jest.mock('../../../hooks/use_kibana', () => ({
   }),
 }));
 
-jest.mock('../../../containers/metrics_source/source', () => ({
+jest.mock('@kbn/metrics-data-plugin/public/containers/metrics_source/source', () => ({
   withSourceProvider: () => jest.fn,
   useSourceContext: () => ({
     source: { id: 'default' },

@@ -15,7 +15,7 @@ import { MetricsExplorerMetric } from '../../../../common/http_api/metrics_explo
 import { Expressions } from './expression';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 
-jest.mock('../../../containers/metrics_source/source', () => ({
+jest.mock('@kbn/metrics-data-plugin/public/containers/metrics_source/source', () => ({
   withSourceProvider: () => jest.fn,
   useSourceContext: () => ({
     source: { id: 'default' },

@@ -12,7 +12,7 @@ import { Comparator } from '../../../../common/alerting/metrics';
 import { MetricExpression } from '../types';
 import { ExpressionRow } from './expression_row';
 
-jest.mock('../../../containers/metrics_source/source', () => ({
+jest.mock('@kbn/metrics-data-plugin/public/containers/metrics_source/source', () => ({
   withSourceProvider: () => jest.fn,
   useSourceContext: () => ({
     source: { id: 'default' },
