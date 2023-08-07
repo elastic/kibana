@@ -11,3 +11,10 @@ This new endpoint is designed to have a more automation-friendly signature. It w
 
 ## Generate CSV
 Although historically related to reporting, the CsvGenerator class has now be moved into its own package `@kbn/generate-csv` and `@kbn/generate-csv-types`. 
+
+## Serverless configuration
+There are several improvements made for reporting in serverless environments. Most changes are reflected in `reporting/server/config/schema.ts` for reference. 
+
+PNG and PDF reports are not possible in serverless. CSV reporting is enabled by default but can be set to `xpack.reporting.export_types.csv.enabled: false`. Image reporting will not be registered by the export types registry in the reporting plugin if not enabled in the config.
+
+The deprecated setting `xpack.reporting.roles.enabled` is false by default for serverless. 
