@@ -9,7 +9,7 @@ import type { CoreStart, HttpResponse } from '@kbn/core/public';
 import { AbortError } from '@kbn/kibana-utils-plugin/common';
 import { SecurityPluginStart } from '@kbn/security-plugin/public';
 import { IncomingMessage } from 'http';
-import { cloneDeep } from 'lodash';
+import { cloneDeep, pick } from 'lodash';
 import {
   BehaviorSubject,
   catchError,
@@ -88,7 +88,7 @@ export function createService({
           body: {
             messages,
             connectorId,
-            functions: functions.map((fn) => fn.options),
+            functions: functions.map((fn) => pick(fn.options, 'name', 'description', 'parameters')),
           },
         },
         signal: controller.signal,

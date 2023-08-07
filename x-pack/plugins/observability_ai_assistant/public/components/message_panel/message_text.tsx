@@ -93,8 +93,6 @@ export function MessageText(props: Props) {
     }
   `;
 
-  console.log('props', props.content);
-
   return (
     <EuiText size="s" className={containerClassName}>
       <ReactMarkdown

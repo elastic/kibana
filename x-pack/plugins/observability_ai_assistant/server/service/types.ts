@@ -20,7 +20,7 @@ export interface IObservabilityAIAssistantClient {
   chat: (options: {
     messages: Message[];
     connectorId: string;
-    functions: Array<FunctionDefinition['options']>;
+    functions: Array<Pick<FunctionDefinition['options'], 'name' | 'description' | 'parameters'>>;
   }) => Promise<IncomingMessage>;
   get: (conversationId: string) => Promise<Conversation>;
   find: (options?: { query?: string }) => Promise<{ conversations: Conversation[] }>;

@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
 import type { Serializable } from '@kbn/utility-types';
 import type { RegisterFunctionDefinition } from '../../common/types';
-import { MessageText } from '../components/message_panel/message_text';
 import type { ObservabilityAIAssistantService } from '../types';
 
 export function registerElasticsearchFunction({
@@ -53,17 +51,6 @@ export function registerElasticsearchFunction({
           },
         })
         .then((response) => ({ content: response as Serializable }));
-    },
-    ({ arguments: { method, path }, response: { content, name } }) => {
-      return (
-        <MessageText
-          loading={false}
-          content={`Called *${name}* with payload \`${method} ${path}\`. The response was: 
-\`\`\`
-${JSON.stringify(JSON.parse(String(content)), null, 4)}
-\`\`\``}
-        />
-      );
     }
   );
 }

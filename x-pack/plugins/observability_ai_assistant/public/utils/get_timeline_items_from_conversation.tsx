@@ -47,15 +47,22 @@ export function getTimelineItemsfromConversation({
 
       if (hasFunction) {
         title = i18n.translate('xpack.observabilityAiAssistant.suggestedFunctionEvent', {
-          defaultMessage: 'suggested a function',
+          defaultMessage: 'suggested to call {functionName}',
+          values: {
+            functionName: message.message.function_call!.name,
+          },
         });
-        content = `I have requested your system performs the function _${
-          message.message.function_call?.name
-        }_ with the payload 
-\`\`\`
-${JSON.stringify(JSON.parse(message.message.function_call?.arguments || ''), null, 4)}
-\`\`\`
-and return its results for me to look at.`;
+        content =
+          '```\n' +
+          JSON.stringify(
+            {
+              name: message.message.function_call!.name,
+              arguments: JSON.parse(message.message.function_call?.arguments || ''),
+            },
+            null,
+            4
+          ) +
+          '\n```';
       } else if (isSystemPrompt) {
         title = i18n.translate('xpack.observabilityAiAssistant.addedSystemPromptEvent', {
           defaultMessage: 'added a prompt',
@@ -87,7 +94,7 @@ and return its results for me to look at.`;
         role: message.message.role,
         canCopy: true,
         canEdit: hasConnector && (message.message.role === MessageRole.User || hasFunction),
-        canExpand: message.message.role === MessageRole.User && Boolean(message.message.name),
+        canExpand: Boolean(message.message.name) || Boolean(message.message.function_call),
         canRegenerate: hasConnector && message.message.role === MessageRole.Assistant,
         canGiveFeedback: message.message.role === MessageRole.Assistant,
         loading: false,

@@ -145,7 +145,7 @@ export class ObservabilityAIAssistantClient implements IObservabilityAIAssistant
   }: {
     messages: Message[];
     connectorId: string;
-    functions: Array<FunctionDefinition['options']>;
+    functions: Array<Pick<FunctionDefinition['options'], 'name' | 'description' | 'parameters'>>;
   }): Promise<IncomingMessage> => {
     const messagesForOpenAI: ChatCompletionRequestMessage[] = compact(
       messages
@@ -165,9 +165,7 @@ export class ObservabilityAIAssistantClient implements IObservabilityAIAssistant
         })
     );
 
-    const functionsForOpenAI: ChatCompletionFunctions[] = functions.map((fn) =>
-      omit(fn, 'contexts')
-    );
+    const functionsForOpenAI: ChatCompletionFunctions[] = functions;
 
     const connector = await this.dependencies.actionsClient.get({
       id: connectorId,

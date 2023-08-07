@@ -184,25 +184,23 @@ export function ChatItem({
     );
   }
 
-  if (!element) {
-    element =
-      content || error || controls ? (
-        canExpand ? (
-          <EuiAccordion
-            id={accordionId}
-            className={accordionButtonClassName}
-            forceState={isAccordionOpen ? 'open' : 'closed'}
-            onToggle={handleAccordionToggle}
-          >
-            <EuiSpacer size="s" />
-            <MessageText content={content || ''} loading={loading} />
-          </EuiAccordion>
-        ) : (
-          <MessageText content={content || ''} loading={loading} />
-        )
-      ) : null;
-  } else {
-    element = (
+  console.log({
+    content,
+    error,
+    controls,
+    element,
+    canExpand,
+  });
+
+  let contentElement: React.ReactNode =
+    content || error || controls ? <MessageText content={content || ''} loading={loading} /> : null;
+
+  if (element) {
+    element = <EuiErrorBoundary>{element}</EuiErrorBoundary>;
+  }
+
+  if (canExpand) {
+    contentElement = (
       <EuiAccordion
         id={accordionId}
         className={accordionButtonClassName}
@@ -210,7 +208,7 @@ export function ChatItem({
         onToggle={handleAccordionToggle}
       >
         <EuiSpacer size="s" />
-        <EuiErrorBoundary>{element}</EuiErrorBoundary>
+        {contentElement}
       </EuiAccordion>
     );
   }
@@ -264,6 +262,7 @@ export function ChatItem({
       username={getRoleTranslation(role)}
     >
       {element}
+      {contentElement}
     </EuiComment>
   );
 }
