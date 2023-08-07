@@ -90,7 +90,7 @@ export function FunctionListPopover({
                     </EuiText>
                     <EuiSpacer size="xs" />
                     <EuiText size="s">
-                      <p>{func.options.description}</p>
+                      <p>{func.options.descriptionForUser}</p>
                     </EuiText>
                   </>
                 ),

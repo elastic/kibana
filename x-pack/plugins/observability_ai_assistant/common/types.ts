@@ -84,6 +84,7 @@ interface FunctionResponse {
 interface FunctionOptions<TParameters extends CompatibleJSONSchema = CompatibleJSONSchema> {
   name: string;
   description: string;
+  descriptionForUser: string;
   parameters: TParameters;
   contexts: string[];
 }
