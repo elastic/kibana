@@ -15,8 +15,11 @@ import { createLifecycleExecutor, IRuleDataClient } from '@kbn/rule-registry-plu
 import { LicenseType } from '@kbn/licensing-plugin/server';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import { EsQueryRuleParamsExtractedParams } from '@kbn/stack-alerts-plugin/server/rule_types/es_query/rule_type_params';
-import { paths } from '../../../../common/locators/paths';
-import { AlertsLocatorParams, observabilityFeatureId } from '../../../../common';
+import {
+  AlertsLocatorParams,
+  observabilityFeatureId,
+  observabilityPaths,
+} from '../../../../common';
 import { Comparator } from '../../../../common/threshold_rule/types';
 import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '../../../../common/constants';
 import { THRESHOLD_RULE_REGISTRATION_CONTEXT } from '../../../common/constants';
@@ -182,6 +185,6 @@ export function thresholdRuleType(
     producer: observabilityFeatureId,
     alerts: MetricsRulesTypeAlertDefinition,
     getViewInAppRelativeUrl: ({ rule }: GetViewInAppRelativeUrlFnOpts<{}>) =>
-      paths.observability.ruleDetails(rule.id),
+      observabilityPaths.ruleDetails(rule.id),
   };
 }
