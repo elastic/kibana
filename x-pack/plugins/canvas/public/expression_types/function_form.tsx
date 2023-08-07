@@ -7,7 +7,7 @@
 
 import React, { ReactElement } from 'react';
 import { EuiButtonIcon, EuiCallOut, EuiFlexGroup, EuiFormRow, EuiToolTip } from '@elastic/eui';
-import { isPlainObject, uniq, last, compact, debounce } from 'lodash';
+import { isPlainObject, uniq, last, compact } from 'lodash';
 import { Ast, fromExpression } from '@kbn/interpreter';
 import { ArgAddPopover, ArgOptions } from '../components/arg_add_popover';
 // @ts-expect-error unconverted components
