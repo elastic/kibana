@@ -68,7 +68,9 @@ interface UseLensAttributesMetricChartParams
   visualizationType: 'lnsMetric';
 }
 
-type UseLensAttributesParams = UseLensAttributesXYChartParams | UseLensAttributesMetricChartParams;
+export type UseLensAttributesParams =
+  | UseLensAttributesXYChartParams
+  | UseLensAttributesMetricChartParams;
 
 export const useLensAttributes = ({
   dataView,

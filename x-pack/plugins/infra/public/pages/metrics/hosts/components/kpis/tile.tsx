@@ -5,31 +5,26 @@
  * 2.0.
  */
 import React, { useMemo, useCallback } from 'react';
-
 import { i18n } from '@kbn/i18n';
 import { BrushTriggerEvent } from '@kbn/charts-plugin/public';
-import { EuiIcon, EuiPanel, EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
-import styled from 'styled-components';
-import { Action } from '@kbn/ui-actions-plugin/public';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { LensWrapper, TooltipContent } from '../../../../../components/lens';
+import { LensMetricChart } from '../../../../../components/lens';
 import { KPIChartProps } from '../../../../../common/visualizations/lens/dashboards/host/kpi_grid_config';
 import { buildCombinedHostsFilter } from '../../../../../utils/filters/build';
-import { useLensAttributes } from '../../../../../hooks/use_lens_attributes';
 import { useMetricsDataViewContext } from '../../hooks/use_data_view';
 import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
 import { useHostsViewContext } from '../../hooks/use_hosts_view';
 import { useHostCountContext } from '../../hooks/use_host_count';
 import { useAfterLoadedState } from '../../hooks/use_after_loaded_state';
-import { KPI_CHART_MIN_HEIGHT } from '../../constants';
 
-export const Tile = ({ id, title, layers, style, toolTip }: KPIChartProps) => {
+export const Tile = ({ id, title, layers, toolTip }: KPIChartProps) => {
   const { searchCriteria, onSubmit } = useUnifiedSearchContext();
   const { dataView } = useMetricsDataViewContext();
   const { requestTs, hostNodes, loading: hostsLoading } = useHostsViewContext();
   const { data: hostCountData, isRequestRunning: hostCountLoading } = useHostCountContext();
 
   const shouldUseSearchCriteria = hostNodes.length === 0;
+
+  const loading = hostsLoading || hostCountLoading;
 
   const getSubtitle = () => {
     return searchCriteria.limit < (hostCountData?.count.value ?? 0)
@@ -44,13 +39,6 @@ export const Tile = ({ id, title, layers, style, toolTip }: KPIChartProps) => {
         });
   };
 
-  const { formula, attributes, getExtraActions, error } = useLensAttributes({
-    dataView,
-    title,
-    layers: { ...layers, options: { ...layers.options, subtitle: getSubtitle() } },
-    visualizationType: 'lnsMetric',
-  });
-
   const filters = useMemo(() => {
     return shouldUseSearchCriteria
       ? searchCriteria.filters
@@ -61,34 +49,7 @@ export const Tile = ({ id, title, layers, style, toolTip }: KPIChartProps) => {
             dataView,
           }),
         ];
-  }, [shouldUseSearchCriteria, searchCriteria.filters, hostNodes, dataView]);
-
-  const loading = hostsLoading || !attributes || hostCountLoading;
-
-  // prevents requestTs and serchCriteria states from reloading the chart
-  // we want it to reload only once the host count and table have finished loading
-  const { afterLoadedState } = useAfterLoadedState(loading, {
-    attributes,
-    lastReloadRequestTime: requestTs,
-    ...searchCriteria,
-    filters,
-  });
-
-  const extraActions: Action[] = useMemo(
-    () =>
-      getExtraActions({
-        timeRange: afterLoadedState.dateRange,
-        query: shouldUseSearchCriteria ? afterLoadedState.query : undefined,
-        filters,
-      }),
-    [
-      afterLoadedState.dateRange,
-      afterLoadedState.query,
-      filters,
-      getExtraActions,
-      shouldUseSearchCriteria,
-    ]
-  );
+  }, [dataView, hostNodes, searchCriteria.filters, shouldUseSearchCriteria]);
 
   const handleBrushEnd = useCallback(
     ({ range }: BrushTriggerEvent['data']) => {
@@ -104,63 +65,28 @@ export const Tile = ({ id, title, layers, style, toolTip }: KPIChartProps) => {
     [onSubmit]
   );
 
+  // prevents requestTs and serchCriteria state from reloading the chart
+  // we want it to reload only once the table has finished loading
+  const { afterLoadedState } = useAfterLoadedState(loading, {
+    lastReloadRequestTime: requestTs,
+    query: searchCriteria.query,
+    dateRange: searchCriteria.dateRange,
+    filters,
+  });
+
   return (
-    <EuiPanelStyled
-      hasShadow={false}
-      paddingSize={error ? 'm' : 'none'}
-      data-test-subj={`hostsViewKPI-${id}`}
-    >
-      {error ? (
-        <EuiFlexGroup
-          style={{ minHeight: '100%', alignContent: 'center' }}
-          gutterSize="xs"
-          justifyContent="center"
-          alignItems="center"
-          direction="column"
-        >
-          <EuiFlexItem grow={false}>
-            <EuiIcon type="warning" />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiText size="s" textAlign="center">
-              <FormattedMessage
-                id="xpack.infra.hostsViewPage.errorOnLoadingLensDependencies"
-                defaultMessage="There was an error trying to load Lens Plugin."
-              />
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      ) : (
-        <EuiToolTip
-          delay="regular"
-          content={<TooltipContent formula={formula} description={toolTip} />}
-          anchorClassName="eui-fullWidth"
-        >
-          <div>
-            <LensWrapper
-              id={`hostsViewKPIGrid${id}Tile`}
-              attributes={afterLoadedState.attributes}
-              style={style}
-              extraActions={extraActions}
-              lastReloadRequestTime={afterLoadedState.lastReloadRequestTime}
-              dateRange={afterLoadedState.dateRange}
-              filters={afterLoadedState.filters}
-              query={shouldUseSearchCriteria ? afterLoadedState.query : undefined}
-              onBrushEnd={handleBrushEnd}
-              loading={loading}
-              hidePanelTitles
-            />
-          </div>
-        </EuiToolTip>
-      )}
-    </EuiPanelStyled>
+    <LensMetricChart
+      id={`hostsViewKPIGrid${id}Tile`}
+      dataView={dataView}
+      dateRange={afterLoadedState.dateRange}
+      filters={afterLoadedState.filters}
+      layers={{ ...layers, options: { ...layers.options, subtitle: getSubtitle() } }}
+      lastReloadRequestTime={afterLoadedState.lastReloadRequestTime}
+      loading={loading}
+      query={shouldUseSearchCriteria ? afterLoadedState.query : undefined}
+      title={title}
+      toolTip={toolTip}
+      onBrushEnd={handleBrushEnd}
+    />
   );
 };
-
-const EuiPanelStyled = styled(EuiPanel)`
-  min-height: ${KPI_CHART_MIN_HEIGHT}px;
-  .echMetric {
-    border-radius: ${({ theme }) => theme.eui.euiBorderRadius};
-    pointer-events: none;
-  }
-`;
