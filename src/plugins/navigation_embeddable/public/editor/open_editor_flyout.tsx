@@ -16,7 +16,6 @@ import { EuiLoadingSpinner, EuiPanel } from '@elastic/eui';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 
-import { NavigationEmbeddableAttributes } from '../../common/content_management';
 import { coreServices } from '../services/kibana_services';
 import {
   NavigationEmbeddableByReferenceInput,
@@ -24,6 +23,7 @@ import {
 } from '../embeddable/types';
 import { memoizedFetchDashboards } from '../components/dashboard_link/dashboard_link_tools';
 import { getNavigationEmbeddableAttributeService } from '../services/attribute_service';
+import { NavigationEmbeddableLink } from '../../common/content_management';
 
 const LazyNavigationEmbeddablePanelEditor = React.lazy(
   () => import('../components/navigation_embeddable_panel_editor')
@@ -43,19 +43,40 @@ export async function openEditorFlyout(
   initialInput: NavigationEmbeddableInput,
   parentDashboard?: DashboardContainer
 ): Promise<Partial<NavigationEmbeddableInput>> {
-  const { attributes } = await getNavigationEmbeddableAttributeService().unwrapAttributes(
-    initialInput
-  );
+  const attributeService = getNavigationEmbeddableAttributeService();
+  const { attributes } = await attributeService.unwrapAttributes(initialInput);
+  const isByReference = attributeService.inputIsRefType(initialInput);
 
   return new Promise((resolve, reject) => {
     const closed$ = new Subject<true>();
 
-    const onSave = async (newAttributes: NavigationEmbeddableAttributes, useRefType: boolean) => {
-      const newInput = await getNavigationEmbeddableAttributeService().wrapAttributes(
-        newAttributes,
-        useRefType,
-        initialInput
-      );
+    const onSaveToLibrary = async (newLinks: NavigationEmbeddableLink[]) => {
+      const newAttributes = {
+        ...attributes,
+        links: newLinks,
+      };
+      const updatedInput = (initialInput as NavigationEmbeddableByReferenceInput).savedObjectId
+        ? await attributeService.wrapAttributes(newAttributes, true, initialInput)
+        : await attributeService.getInputAsRefType(
+            {
+              ...initialInput,
+              attributes: newAttributes,
+            },
+            { showSaveModal: true }
+          );
+      resolve(updatedInput);
+      parentDashboard?.reload();
+      editorFlyout.close();
+    };
+
+    const onAddToDashboard = (newLinks: NavigationEmbeddableLink[]) => {
+      const newInput: NavigationEmbeddableInput = {
+        ...initialInput,
+        attributes: {
+          ...attributes,
+          links: newLinks,
+        },
+      };
       resolve(newInput);
       parentDashboard?.reload();
       editorFlyout.close();
@@ -78,11 +99,12 @@ export async function openEditorFlyout(
     const editorFlyout = coreServices.overlays.openFlyout(
       toMountPoint(
         <NavigationEmbeddablePanelEditor
-          attributes={attributes}
+          initialLinks={attributes?.links}
           onClose={onCancel}
-          onSave={onSave}
+          onSaveToLibrary={onSaveToLibrary}
+          onAddToDashboard={onAddToDashboard}
           parentDashboard={parentDashboard}
-          savedObjectId={(initialInput as NavigationEmbeddableByReferenceInput).savedObjectId}
+          isByReference={isByReference}
         />,
         { theme$: coreServices.theme.theme$ }
       ),

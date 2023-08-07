@@ -35,7 +35,10 @@ export interface NavigationEmbeddableCreationOptions {
 }
 
 // TODO: Replace string 'OPEN_FLYOUT_ADD_DRILLDOWN' with constant as part of https://github.com/elastic/kibana/issues/154381
-const getDefaultNavigationEmbeddableInput = (): Omit<NavigationEmbeddableInput, 'id'> => ({
+const getDefaultNavigationEmbeddableInput = (): Omit<NavigationEmbeddableByValueInput, 'id'> => ({
+  attributes: {
+    title: '',
+  },
   disabledActions: [ACTION_ADD_PANEL, 'OPEN_FLYOUT_ADD_DRILLDOWN'],
 });
 
@@ -96,13 +99,13 @@ export class NavigationEmbeddableFactoryDefinition
       reduxEmbeddablePackage,
       { editable },
       { ...getDefaultNavigationEmbeddableInput(), ...initialInput },
-      await getNavigationEmbeddableAttributeService(),
+      getNavigationEmbeddableAttributeService(),
       parent
     );
   }
 
   public async getExplicitInput(
-    initialInput?: NavigationEmbeddableInput,
+    initialInput: NavigationEmbeddableInput,
     parent?: DashboardContainer
   ): Promise<Omit<NavigationEmbeddableInput, 'id'>> {
     if (!parent) return {};
@@ -113,7 +116,7 @@ export class NavigationEmbeddableFactoryDefinition
       {
         ...getDefaultNavigationEmbeddableInput(),
         ...initialInput,
-      } as NavigationEmbeddableByValueInput,
+      },
       parent
     );
 

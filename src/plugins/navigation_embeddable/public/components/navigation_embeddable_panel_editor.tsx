@@ -17,7 +17,6 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiButton,
-  EuiToolTip,
   EuiFormRow,
   EuiFlexItem,
   EuiFlexGroup,
@@ -28,18 +27,14 @@ import {
   EuiButtonEmpty,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
-  EuiSwitch,
-  EuiFieldText,
   EuiDragDropContext,
   euiDragDropReorder,
+  EuiToolTip,
 } from '@elastic/eui';
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 
 import { coreServices } from '../services/kibana_services';
-import {
-  NavigationEmbeddableAttributes,
-  NavigationEmbeddableLink,
-} from '../../common/content_management';
+import { NavigationEmbeddableLink } from '../../common/content_management';
 import { NavEmbeddableStrings } from './navigation_embeddable_strings';
 
 import { openLinkEditorFlyout } from '../editor/open_link_editor_flyout';
@@ -51,39 +46,36 @@ import noLinksIllustrationLight from '../assets/empty_links_light.svg';
 import './navigation_embeddable.scss';
 
 const NavigationEmbeddablePanelEditor = ({
-  onSave,
+  onSaveToLibrary,
+  onAddToDashboard,
   onClose,
-  attributes,
-  savedObjectId,
+  initialLinks,
   parentDashboard,
+  isByReference,
 }: {
-  onSave: (newAttributes: NavigationEmbeddableAttributes, useRefType: boolean) => void;
+  onSaveToLibrary: (newLinks: NavigationEmbeddableLink[]) => void;
+  onAddToDashboard: (newLinks: NavigationEmbeddableLink[]) => void;
   onClose: () => void;
-  attributes?: NavigationEmbeddableAttributes;
-  savedObjectId?: string;
+  initialLinks?: NavigationEmbeddableLink[];
   parentDashboard?: DashboardContainer;
+  isByReference: boolean;
 }) => {
   const isDarkTheme = useObservable(coreServices.theme.theme$)?.darkMode;
   const toasts = coreServices.notifications.toasts;
   const editLinkFlyoutRef: React.RefObject<HTMLDivElement> = useMemo(() => React.createRef(), []);
 
   const [orderedLinks, setOrderedLinks] = useState<NavigationEmbeddableLink[]>([]);
-  const [saveToLibrary, setSaveToLibrary] = useState(true);
-  const [libraryTitle, setLibraryTitle] = useState<string>(attributes?.title ?? '');
   const [isSaving, setIsSaving] = useState(false);
 
-  const isEditingExisting = Boolean(
-    savedObjectId || (attributes?.links && attributes?.links.length > 0)
-  );
+  const isEditingExisting = initialLinks || isByReference;
 
   useEffect(() => {
-    const initialLinks = attributes?.links;
     if (!initialLinks) {
       setOrderedLinks([]);
       return;
     }
     setOrderedLinks(memoizedGetOrderedLinkList(initialLinks));
-  }, [attributes]);
+  }, [initialLinks]);
 
   const onDragEnd = useCallback(
     ({ source, destination }) => {
@@ -142,46 +134,13 @@ const NavigationEmbeddablePanelEditor = ({
     [orderedLinks, toasts]
   );
 
-  const saveButtonComponent = useMemo(() => {
-    const canSave = orderedLinks.length !== 0 && saveToLibrary ? Boolean(libraryTitle) : true;
-
-    const button = (
-      <EuiButton
-        disabled={!canSave}
-        isLoading={isSaving}
-        onClick={async () => {
-          setIsSaving(true);
-          const newLinks = [...orderedLinks];
-          const newAttributes: NavigationEmbeddableAttributes = {
-            title: libraryTitle,
-            links: newLinks,
-          };
-          await onSave(newAttributes, Boolean(savedObjectId) || saveToLibrary);
-          setIsSaving(false);
-        }}
-      >
-        {savedObjectId
-          ? NavEmbeddableStrings.editor.panelEditor.getUpdateLibraryItemButtonLabel()
-          : NavEmbeddableStrings.editor.panelEditor.getSaveButtonLabel()}
-      </EuiButton>
-    );
-
-    return canSave ? (
-      button
-    ) : (
-      <EuiToolTip content={NavEmbeddableStrings.editor.panelEditor.getEmptyLinksTooltip()}>
-        {button}
-      </EuiToolTip>
-    );
-  }, [onSave, isSaving, orderedLinks, saveToLibrary, libraryTitle, savedObjectId]);
-
   return (
     <>
       <div ref={editLinkFlyoutRef} />
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
           <h2>
-            {attributes?.links && Object.keys(attributes?.links).length > 0
+            {isEditingExisting
               ? NavEmbeddableStrings.editor.panelEditor.getEditFlyoutTitle()
               : NavEmbeddableStrings.editor.panelEditor.getCreateFlyoutTitle()}
           </h2>
@@ -250,36 +209,75 @@ const NavigationEmbeddablePanelEditor = ({
               )}
             </>
           </EuiFormRow>
-          <EuiFormRow>
-            <EuiSwitch
-              label="Save to library"
-              checked={saveToLibrary}
-              compressed
-              onChange={(e) => setSaveToLibrary(e.target.checked)}
-            />
-          </EuiFormRow>
-          {saveToLibrary ? (
-            <EuiFormRow label={NavEmbeddableStrings.editor.panelEditor.getTitleInputLabel()}>
-              <EuiFieldText
-                id="titleInput"
-                name="title"
-                type="text"
-                value={libraryTitle ?? ''}
-                onChange={(e) => setLibraryTitle(e.target.value)}
-                required={saveToLibrary}
-              />
-            </EuiFormRow>
-          ) : null}
         </EuiForm>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup responsive={false} justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={onClose} iconType="cross">
+            <EuiButtonEmpty onClick={onClose} iconType="cross" flush="left">
               {NavEmbeddableStrings.editor.getCancelButtonLabel()}
             </EuiButtonEmpty>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>{saveButtonComponent}</EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup>
+              {!isByReference ? (
+                <EuiFlexItem grow={false} css={{ 'margin-left': 'auto' }}>
+                  <EuiToolTip
+                    repositionOnScroll={false}
+                    position="top"
+                    content={
+                      <p>
+                        {NavEmbeddableStrings.editor.panelEditor.getAddToDashboardButtonTooltip()}
+                      </p>
+                    }
+                  >
+                    <EuiButton
+                      disabled={orderedLinks.length === 0}
+                      isLoading={isSaving}
+                      onClick={async () => {
+                        setIsSaving(true);
+                        await onAddToDashboard(orderedLinks);
+                        setIsSaving(false);
+                      }}
+                    >
+                      {NavEmbeddableStrings.editor.panelEditor.getAddToDashboardButtonLabel()}
+                    </EuiButton>
+                  </EuiToolTip>
+                </EuiFlexItem>
+              ) : null}
+              {!initialLinks || isByReference ? (
+                <EuiFlexItem grow={false}>
+                  <EuiToolTip
+                    repositionOnScroll={false}
+                    position="top"
+                    content={
+                      <p>
+                        {initialLinks
+                          ? NavEmbeddableStrings.editor.panelEditor.getUpdateLibraryItemButtonTooltip()
+                          : NavEmbeddableStrings.editor.panelEditor.getSaveToLibraryButtonTooltip()}
+                      </p>
+                    }
+                  >
+                    <EuiButton
+                      fill
+                      iconType="folderCheck"
+                      disabled={orderedLinks.length === 0}
+                      isLoading={isSaving}
+                      onClick={async () => {
+                        setIsSaving(true);
+                        await onSaveToLibrary(orderedLinks);
+                        setIsSaving(false);
+                      }}
+                    >
+                      {initialLinks
+                        ? NavEmbeddableStrings.editor.panelEditor.getUpdateLibraryItemButtonLabel()
+                        : NavEmbeddableStrings.editor.panelEditor.getSaveToLibraryButtonLabel()}
+                    </EuiButton>
+                  </EuiToolTip>
+                </EuiFlexItem>
+              ) : null}
+            </EuiFlexGroup>
+          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutFooter>
     </>

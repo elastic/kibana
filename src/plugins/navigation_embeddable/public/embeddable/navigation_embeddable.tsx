@@ -136,7 +136,8 @@ export class NavigationEmbeddable
 
   public async getInputAsRefType(): Promise<SavedObjectEmbeddableInput> {
     return this.attributeService.getInputAsRefType(this.getExplicitInput(), {
-      showSaveModal: false,
+      showSaveModal: true,
+      saveModalTitle: this.getTitle(),
     });
   }
 

@@ -13,6 +13,7 @@ import {
   SavedObjectEmbeddableInput,
 } from '@kbn/embeddable-plugin/public';
 
+import { DashboardAttributes } from '@kbn/dashboard-plugin/common';
 import { ExternalLinkEmbeddableStrings } from '../components/external_link/external_link_strings';
 import { DashboardLinkEmbeddableStrings } from '../components/dashboard_link/dashboard_link_strings';
 import {
@@ -21,6 +22,11 @@ import {
   NavigationLinkType,
   NavigationEmbeddableAttributes,
 } from '../../common/content_management';
+
+export interface DashboardItem {
+  id: string;
+  attributes: DashboardAttributes;
+}
 
 export const NavigationLinkInfo: {
   [id in NavigationLinkType]: { icon: string; displayName: string; description: string };

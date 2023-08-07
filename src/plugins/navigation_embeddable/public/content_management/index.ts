@@ -7,3 +7,4 @@
  */
 
 export { navigationEmbeddableClient } from './navigation_embeddable_content_management_client.ts';
+export { checkForDuplicateTitle } from './duplicate_title_check';

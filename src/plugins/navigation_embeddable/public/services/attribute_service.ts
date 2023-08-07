@@ -16,7 +16,7 @@ import {
   NavigationEmbeddableByValueInput,
 } from '../embeddable/types';
 import { embeddableService } from './kibana_services';
-import { navigationEmbeddableClient } from '../content_management';
+import { checkForDuplicateTitle, navigationEmbeddableClient } from '../content_management';
 import { NAVIGATION_EMBEDDABLE_TYPE } from '../../common/constants';
 
 export type NavigationEmbeddableDocument = NavigationEmbeddableAttributes & {
@@ -80,7 +80,13 @@ export function getNavigationEmbeddableAttributeService(): NavigationEmbeddableA
       };
     },
     checkForDuplicateTitle: (props: OnSaveProps) => {
-      return Promise.resolve(false);
+      return checkForDuplicateTitle({
+        title: props.newTitle,
+        copyOnSave: false,
+        lastSavedTitle: '',
+        isTitleDuplicateConfirmed: props.isTitleDuplicateConfirmed,
+        onTitleDuplicate: props.onTitleDuplicate,
+      });
     },
   });
   return navigationEmbeddableAttributeService;
