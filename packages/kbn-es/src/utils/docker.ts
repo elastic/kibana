@@ -315,9 +315,12 @@ export async function setupServerlessVolumes(log: ToolingLog, options: Serverles
   }
 
   // Permissions are set separately from mkdir due to default umask
-  await Fsp.chmod(volumePath, 0o766).then(() =>
-    log.info('Setup object store permissions (chmod 766).')
-  );
+  await Fsp.chmod(volumePath, 0o766).then((msg: any) => {
+    if (msg) {
+      log.warning(msg);
+    }
+    log.info('Setup object store permissions (chmod 766).');
+  });
 
   log.indent(-4);
 
