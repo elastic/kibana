@@ -241,7 +241,9 @@ export function CustomEquationEditor({
           </div>
         </EuiPopover>
       </EuiFlexItem>
-      //TODO:LABEL
+
+      {/* TODO:LABEL */}
+
       {/* <EuiSpacer size={'s'} />
       <EuiFlexGroup>
         <EuiFlexItem>

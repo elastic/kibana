@@ -381,16 +381,6 @@ export default function Expressions(props: Props) {
           />
         </h5>
       </EuiTitle>
-      <EuiSpacer size={'s'} />
-      <EuiText size="xs">
-        <h3>
-          <FormattedMessage
-            id="xpack.observability.threshold.rule.alertFlyout.conditions"
-            defaultMessage="Set rule conditions"
-          />
-        </h3>
-      </EuiText>
-      <EuiSpacer size={'xs'} />
       {ruleParams.criteria &&
         ruleParams.criteria.map((e, idx) => {
           return (

@@ -128,18 +128,16 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
 
           {aggType === Aggregators.CUSTOM && (
             <>
-              <EuiSpacer size={'m'} />
-              <StyledExpressionRow>
-                <CustomEquationEditor
-                  expression={expression}
-                  fields={normalizedFields}
-                  aggregationTypes={aggregationType}
-                  onChange={handleCustomMetricChange}
-                  errors={errors}
-                  dataView={dataView}
-                />
-                {criticalThresholdExpression}
-              </StyledExpressionRow>
+              <EuiSpacer size={'xs'} />
+              <CustomEquationEditor
+                expression={expression}
+                fields={normalizedFields}
+                aggregationTypes={aggregationType}
+                onChange={handleCustomMetricChange}
+                errors={errors}
+                dataView={dataView}
+              />
+              {criticalThresholdExpression}
               <EuiSpacer size={'s'} />
             </>
           )}
