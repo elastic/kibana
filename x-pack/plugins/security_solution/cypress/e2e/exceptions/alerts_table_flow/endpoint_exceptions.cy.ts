@@ -25,7 +25,7 @@ import {
 } from '../../../tasks/create_new_rule';
 import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../../urls/navigation';
 import {
-  addExceptionEntryFieldValue,
+  addExceptionEntryFieldValueAndSelectSuggestion,
   addExceptionEntryFieldValueValue,
   addExceptionFlyoutItemName,
   editExceptionFlyoutItemName,
@@ -103,7 +103,7 @@ describe(
 
       cy.get(ADD_AND_BTN).click();
       // edit conditions
-      addExceptionEntryFieldValue(ADDITIONAL_ENTRY, 6);
+      addExceptionEntryFieldValueAndSelectSuggestion(ADDITIONAL_ENTRY, 6);
       addExceptionEntryFieldValueValue('foo', 4);
 
       // Change the name again

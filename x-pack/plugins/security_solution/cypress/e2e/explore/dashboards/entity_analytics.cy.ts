@@ -34,7 +34,7 @@ import {
 } from '../../../screens/entity_analytics';
 import {
   openRiskTableFilterAndSelectTheLowOption,
-  removeLowFilter,
+  removeLowFilterAndCloseRiskTableFilter,
 } from '../../../tasks/host_risk';
 import { createRule } from '../../../tasks/api_calls/rules';
 import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
@@ -153,14 +153,13 @@ describe('Entity Analytics Dashboard', { tags: [tag.ESS, tag.SERVERLESS] }, () =
       cy.get(HOSTS_TABLE_ALERT_CELL).should('have.length', 5);
     });
 
-    // tracked by https://github.com/elastic/kibana/issues/161874
-    it.skip('filters by risk classification', () => {
+    it('filters by risk classification', () => {
       openRiskTableFilterAndSelectTheLowOption();
 
       cy.get(HOSTS_DONUT_CHART).should('include.text', '1Total');
       cy.get(HOSTS_TABLE_ROWS).should('have.length', 1);
 
-      removeLowFilter();
+      removeLowFilterAndCloseRiskTableFilter();
     });
 
     it('filters the host risk table with KQL search bar query', () => {
@@ -248,7 +247,7 @@ describe('Entity Analytics Dashboard', { tags: [tag.ESS, tag.SERVERLESS] }, () =
       cy.get(USERS_DONUT_CHART).should('include.text', '2Total');
       cy.get(USERS_TABLE_ROWS).should('have.length', 2);
 
-      removeLowFilter();
+      removeLowFilterAndCloseRiskTableFilter();
     });
 
     it('filters the host risk table with KQL search bar query', () => {
