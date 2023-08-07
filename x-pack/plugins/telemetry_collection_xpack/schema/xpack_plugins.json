@@ -6607,6 +6607,9 @@
               },
               "agent_count": {
                 "type": "long"
+              },
+              "account_type": {
+                "type": "keyword"
               }
             }
           }
