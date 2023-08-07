@@ -36,11 +36,12 @@ import {
   type WindowParameters,
 } from '@kbn/aiops-utils';
 import { MULTILAYER_TIME_AXIS_STYLE } from '@kbn/charts-plugin/common';
-
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+
 import { DualBrush, DualBrushAnnotation } from '../..';
+
 import { BrushBadge } from './brush_badge';
 
 declare global {
@@ -76,6 +77,19 @@ export interface BrushSettings {
 }
 
 /**
+ * Callback function which gets called when the brush selection has changed
+ *
+ * @param windowParameters Baseline and deviation time ranges.
+ * @param force Force update
+ * @param logRateAnalysisType `spike` or `dip` based on median log rate bucket size
+ */
+export type BrushSelectionUpdateHandler = (
+  windowParameters: WindowParameters,
+  force: boolean,
+  logRateAnalysisType: LogRateAnalysisType
+) => void;
+
+/**
  * Props for document count chart
  */
 export interface DocumentCountChartProps {
@@ -86,18 +100,8 @@ export interface DocumentCountChartProps {
     fieldFormats: FieldFormatsStart;
     uiSettings: IUiSettingsClient;
   };
-  /**
-   * Optional callback function which gets called the brush selection has changed
-   *
-   * @param windowParameters Baseline and deviation time ranges.
-   * @param force Force update
-   * @param logRateAnalysisType `spike` or `dip` based on median log rate bucket size
-   */
-  brushSelectionUpdateHandler?: (
-    windowParameters: WindowParameters,
-    force: boolean,
-    logRateAnalysisType: LogRateAnalysisType
-  ) => void;
+  /** Optional callback for handling brush selection updates */
+  brushSelectionUpdateHandler?: BrushSelectionUpdateHandler;
   /** Optional width */
   width?: number;
   /** Data chart points */

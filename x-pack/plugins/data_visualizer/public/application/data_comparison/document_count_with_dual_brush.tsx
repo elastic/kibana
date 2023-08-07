@@ -9,7 +9,7 @@ import type { WindowParameters, LogRateHistogramItem } from '@kbn/aiops-utils';
 import React, { FC } from 'react';
 import { DocumentCountChart } from '@kbn/aiops-components';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import type { DocumentCountChartProps } from '@kbn/aiops-components';
+import type { BrushSelectionUpdateHandler, DocumentCountChartProps } from '@kbn/aiops-components';
 import { RandomSampler } from '@kbn/ml-random-sampler-utils';
 import { useDataVisualizerKibana } from '../kibana_context';
 import { DocumentCountStats } from '../../../common/types/field_stats';
@@ -26,7 +26,7 @@ export interface DocumentCountContentProps
     | 'interval'
     | 'chartPointsSplitLabel'
   > {
-  brushSelectionUpdateHandler: (windowParameters: WindowParameters, force: boolean) => void;
+  brushSelectionUpdateHandler: BrushSelectionUpdateHandler;
   documentCountStats?: DocumentCountStats;
   documentCountStatsSplit?: DocumentCountStats;
   documentCountStatsSplitLabel?: string;
