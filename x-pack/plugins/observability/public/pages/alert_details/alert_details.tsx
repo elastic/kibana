@@ -26,7 +26,7 @@ import PageNotFound from '../404';
 import { getTimeZone } from '../../utils/get_time_zone';
 import { isAlertDetailsEnabledPerApp } from '../../utils/is_alert_details_enabled';
 import { observabilityFeatureId } from '../../../common';
-import { paths } from '../../routes/paths';
+import { paths } from '../../../common/locators/paths';
 
 interface AlertDetailsPathParams {
   alertId: string;

@@ -167,5 +167,6 @@
     "@kbn/navigation-plugin",
     "@kbn/alerts-ui-shared",
     "@kbn/core-logging-server-mocks",
+    "@kbn/core-lifecycle-browser",
   ]
 }
