@@ -11,12 +11,15 @@ import {
   EuiFlexGroup,
   EuiButtonEmpty,
   EuiSpacer,
+  EuiExpression,
+  EuiPopover,
 } from '@elastic/eui';
 import React, { useState, useCallback, useMemo } from 'react';
 import { omit, range, first, xor, debounce } from 'lodash';
 import { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DataViewBase } from '@kbn/es-query';
+import { i18n } from '@kbn/i18n';
 import { OMITTED_AGGREGATIONS_FOR_CUSTOM_METRICS } from '../../../../../common/threshold_rule/metrics_explorer';
 import {
   Aggregators,
@@ -28,12 +31,8 @@ import { MetricExpression } from '../../types';
 import { CustomMetrics, AggregationTypes, NormalizedFields } from './types';
 import { MetricRowWithAgg } from './metric_row_with_agg';
 import { MetricRowWithCount } from './metric_row_with_count';
-import {
-  CUSTOM_EQUATION,
-  EQUATION_HELP_MESSAGE,
-  LABEL_HELP_MESSAGE,
-  LABEL_LABEL,
-} from '../../i18n_strings';
+import { ClosablePopoverTitle } from '../closable_popover_title';
+import { CUSTOM_EQUATION, EQUATION_HELP_MESSAGE } from '../../i18n_strings';
 
 export interface CustomEquationEditorProps {
   onChange: (expression: MetricExpression) => void;
@@ -62,6 +61,7 @@ export function CustomEquationEditor({
     expression?.customMetrics ?? [NEW_METRIC]
   );
   const [label, setLabel] = useState<string | undefined>(expression?.label || undefined);
+  const [customEqPopoverOpen, setCustomEqPopoverOpen] = useState(false);
   const [equation, setEquation] = useState<string | undefined>(expression?.equation || undefined);
   const debouncedOnChange = useMemo(() => debounce(onChange, 500), [onChange]);
 
@@ -181,28 +181,68 @@ export function CustomEquationEditor({
         </EuiButtonEmpty>
       </EuiFlexGroup>
       <EuiSpacer size={'m'} />
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <EuiFormRow
-            label="Equation"
-            fullWidth
-            helpText={EQUATION_HELP_MESSAGE}
-            isInvalid={errors.equation != null}
-            error={[errors.equation]}
-          >
-            <EuiFieldText
-              data-test-subj="thresholdRuleCustomEquationEditorFieldText"
-              isInvalid={errors.equation != null}
-              compressed
+      <EuiFlexItem>
+        <EuiPopover
+          button={
+            <EuiFormRow
               fullWidth
-              placeholder={placeholder}
-              onChange={handleEquationChange}
-              value={equation ?? ''}
-            />
-          </EuiFormRow>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer size={'s'} />
+              label={i18n.translate(
+                'xpack.observability.threshold.rule.alertFlyout.customEquationEditor.equationAndThreshold',
+                { defaultMessage: 'Equation and threshold' }
+              )}
+              error={[errors.equation]}
+              isInvalid={errors.equation != null}
+            >
+              <>
+                <EuiSpacer size="xs" />
+                <EuiExpression
+                  data-test-subj="customEquation"
+                  description={'Equation'}
+                  value={equation ?? ''}
+                  display={'columns'}
+                  onClick={() => {
+                    setCustomEqPopoverOpen(true);
+                  }}
+                />
+              </>
+            </EuiFormRow>
+          }
+          isOpen={customEqPopoverOpen}
+          closePopover={() => {
+            setCustomEqPopoverOpen(false);
+          }}
+          display="block"
+          ownFocus
+          anchorPosition={'downLeft'}
+          repositionOnScroll
+        >
+          <div>
+            <ClosablePopoverTitle onClose={() => setCustomEqPopoverOpen(false)}>
+              {i18n.translate(
+                'xpack.observability.threshold.rule.alertFlyout.customEquationEditor.aggregationLabel',
+                { defaultMessage: CUSTOM_EQUATION }
+              )}
+            </ClosablePopoverTitle>
+            <EuiFormRow
+              fullWidth
+              helpText={EQUATION_HELP_MESSAGE}
+              isInvalid={errors.equation != null}
+            >
+              <EuiFieldText
+                data-test-subj="thresholdRuleCustomEquationEditorFieldText"
+                isInvalid={errors.equation != null}
+                compressed
+                fullWidth
+                placeholder={placeholder}
+                onChange={handleEquationChange}
+                value={equation ?? ''}
+              />
+            </EuiFormRow>
+          </div>
+        </EuiPopover>
+      </EuiFlexItem>
+      //TODO:LABEL
+      {/* <EuiSpacer size={'s'} />
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiFormRow label={LABEL_LABEL} fullWidth helpText={LABEL_HELP_MESSAGE}>
@@ -215,8 +255,8 @@ export function CustomEquationEditor({
               onChange={handleLabelChange}
             />
           </EuiFormRow>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+        </EuiFlexItem> */}
+      {/* </EuiFlexGroup> */}
     </div>
   );
 }

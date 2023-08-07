@@ -4,28 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  EuiButtonIcon,
-  EuiExpression,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLink,
-  EuiSpacer,
-  EuiText,
-} from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useMemo } from 'react';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import {
   AggregationType,
   builtInComparators,
   IErrorObject,
-  OfExpression,
   ThresholdExpression,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { DataViewBase } from '@kbn/es-query';
-import useToggle from 'react-use/lib/useToggle';
 import { Aggregators, Comparator } from '../../../../common/threshold_rule/types';
 import { AGGREGATION_TYPES, DerivedIndexPattern, MetricExpression } from '../types';
 import { CustomEquationEditor } from './custom_equation';
@@ -62,14 +51,8 @@ const StyledExpressionRow = euiStyled(EuiFlexGroup)`
   margin: 0 -4px;
 `;
 
-const StyledExpression = euiStyled.div`
-  padding: 0 4px;
-`;
-
 // eslint-disable-next-line react/function-component-definition
 export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
-  const [isExpanded, toggle] = useToggle(true);
-
   const {
     dataView,
     children,
@@ -90,13 +73,6 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
   } = expression;
 
   const isMetricPct = useMemo(() => Boolean(metric && metric.endsWith('.pct')), [metric]);
-
-  const updateMetric = useCallback(
-    (m?: MetricExpression['metric']) => {
-      setRuleParams(expressionId, { ...expression, metric: m });
-    },
-    [expressionId, expression, setRuleParams]
-  );
 
   const updateComparator = useCallback(
     (c?: string) => {
@@ -147,69 +123,8 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
   return (
     <>
       <EuiFlexGroup gutterSize="xs">
-        <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
-            onClick={toggle}
-            data-test-subj="thresholdRuleExpandRow"
-            aria-label={i18n.translate(
-              'xpack.observability.threshold.rule.alertFlyout.expandRowLabel',
-              {
-                defaultMessage: 'Expand row.',
-              }
-            )}
-          />
-        </EuiFlexItem>
         <EuiFlexItem grow>
-          <StyledExpressionRow style={{ gap: aggType !== 'custom' ? 24 : 12 }}>
-            <StyledExpression>
-              <EuiExpression
-                data-test-subj="thresholdRuleCustomEquationWhen"
-                description={i18n.translate(
-                  'xpack.observability.thresholdRule.expressionItems.descriptionLabel',
-                  {
-                    defaultMessage: 'when',
-                  }
-                )}
-                value={aggregationType.custom.text}
-                display={'inline'}
-              />
-            </StyledExpression>
-            {!['count', 'custom'].includes(aggType) && (
-              <StyledExpression>
-                <OfExpression
-                  customAggTypesOptions={aggregationType}
-                  aggField={metric}
-                  fields={normalizedFields}
-                  aggType={aggType}
-                  errors={errors}
-                  onChangeSelectedAggField={updateMetric}
-                  helpText={
-                    <FormattedMessage
-                      id="xpack.observability.threshold.rule.alertFlyout.ofExpression.helpTextDetail"
-                      defaultMessage="Can't find a metric? {documentationLink}."
-                      values={{
-                        documentationLink: (
-                          <EuiLink
-                            data-test-subj="thresholdRuleExpressionRowLearnHowToAddMoreDataLink"
-                            href="https://www.elastic.co/guide/en/observability/current/configure-settings.html"
-                            target="BLANK"
-                          >
-                            <FormattedMessage
-                              id="xpack.observability.threshold.rule.alertFlyout.ofExpression.popoverLinkLabel"
-                              defaultMessage="Learn how to add more data"
-                            />
-                          </EuiLink>
-                        ),
-                      }}
-                    />
-                  }
-                  data-test-subj="thresholdRuleOfExpression"
-                />
-              </StyledExpression>
-            )}
-            {criticalThresholdExpression}
-          </StyledExpressionRow>
+          <StyledExpressionRow style={{ gap: aggType !== 'custom' ? 24 : 12 }} />
 
           {aggType === Aggregators.CUSTOM && (
             <>
@@ -223,6 +138,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
                   errors={errors}
                   dataView={dataView}
                 />
+                {criticalThresholdExpression}
               </StyledExpressionRow>
               <EuiSpacer size={'s'} />
             </>
@@ -244,7 +160,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
-      {isExpanded ? <div style={{ padding: '0 0 0 28px' }}>{children}</div> : null}
+      {children}
       <EuiSpacer size={'s'} />
     </>
   );
@@ -266,16 +182,16 @@ const ThresholdElement: React.FC<{
 
   return (
     <>
-      <StyledExpression>
-        <ThresholdExpression
-          thresholdComparator={comparator || Comparator.GT}
-          threshold={displayedThreshold}
-          customComparators={customComparators}
-          onChangeSelectedThresholdComparator={updateComparator}
-          onChangeSelectedThreshold={updateThreshold}
-          errors={errors}
-        />
-      </StyledExpression>
+      <ThresholdExpression
+        thresholdComparator={comparator || Comparator.GT}
+        threshold={displayedThreshold}
+        customComparators={customComparators}
+        onChangeSelectedThresholdComparator={updateComparator}
+        onChangeSelectedThreshold={updateThreshold}
+        errors={errors}
+        display="fullWidth"
+      />
+
       {isMetricPct && (
         <div
           style={{

@@ -354,12 +354,12 @@ export default function Expressions(props: Props) {
       />
       <EuiSpacer size={'s'} />
       <EuiText size="xs">
-        <h4>
+        <h3>
           <FormattedMessage
             id="xpack.observability.threshold.rule.alertFlyout.conditions"
-            defaultMessage="Conditions"
+            defaultMessage="Set rule conditions"
           />
-        </h4>
+        </h3>
       </EuiText>
       <EuiSpacer size={'xs'} />
       {ruleParams.criteria &&

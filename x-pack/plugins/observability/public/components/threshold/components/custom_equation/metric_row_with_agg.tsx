@@ -7,20 +7,23 @@
 
 import {
   EuiFormRow,
-  EuiHorizontalRule,
   EuiFlexItem,
   EuiFlexGroup,
   EuiSelect,
   EuiComboBox,
   EuiComboBoxOptionOption,
+  EuiPopover,
+  EuiExpression,
+  EuiSpacer,
 } from '@elastic/eui';
-import React, { useMemo, useCallback } from 'react';
+import React, { useMemo, useCallback, useState } from 'react';
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { ValidNormalizedTypes } from '@kbn/triggers-actions-ui-plugin/public';
 import { Aggregators, CustomMetricAggTypes } from '../../../../../common/threshold_rule/types';
 import { MetricRowControls } from './metric_row_controls';
 import { NormalizedFields, MetricRowBaseProps } from './types';
+import { ClosablePopoverTitle } from '../closable_popover_title';
 
 interface MetricRowWithAggProps extends MetricRowBaseProps {
   aggType?: CustomMetricAggTypes;
@@ -43,6 +46,8 @@ export function MetricRowWithAgg({
     onDelete(name);
   }, [name, onDelete]);
 
+  const [aggTypePopoverOpen, setAggTypePopoverOpen] = useState(false);
+
   const fieldOptions = useMemo(
     () =>
       fields.reduce((acc, fieldValue) => {
@@ -59,15 +64,6 @@ export function MetricRowWithAgg({
     [fields, aggregationTypes, aggType]
   );
 
-  const aggOptions = useMemo(
-    () =>
-      Object.values(aggregationTypes).map((a) => ({
-        text: a.text,
-        value: a.value,
-      })),
-    [aggregationTypes]
-  );
-
   const handleFieldChange = useCallback(
     (selectedOptions: EuiComboBoxOptionOption[]) => {
       onChange({
@@ -80,11 +76,11 @@ export function MetricRowWithAgg({
   );
 
   const handleAggChange = useCallback(
-    (el: React.ChangeEvent<HTMLSelectElement>) => {
+    (customAggType: string) => {
       onChange({
         name,
         field,
-        aggType: el.target.value as CustomMetricAggTypes,
+        aggType: customAggType as CustomMetricAggTypes,
       });
     },
     [name, field, onChange]
@@ -96,46 +92,100 @@ export function MetricRowWithAgg({
   return (
     <>
       <EuiFlexGroup gutterSize="xs" alignItems="flexEnd">
-        <EuiFlexItem style={{ maxWidth: 145 }}>
-          <EuiFormRow
-            label={i18n.translate(
-              'xpack.observability.threshold.rule.alertFlyout.customEquationEditor.aggregationLabel',
-              { defaultMessage: 'Aggregation {name}', values: { name } }
-            )}
-            isInvalid={isAggInvalid}
+        <EuiFlexItem grow={1}>
+          <EuiPopover
+            button={
+              <EuiFormRow
+                fullWidth
+                label={i18n.translate(
+                  'xpack.observability.threshold.rule.alertFlyout.customEquationEditor.aggregationLabel',
+                  { defaultMessage: 'Aggregation {name}', values: { name } }
+                )}
+                isInvalid={!field}
+              >
+                <>
+                  <EuiSpacer size="xs" />
+                  <EuiExpression
+                    data-test-subj="aggregationName"
+                    description={aggregationTypes[aggType].text}
+                    value={field}
+                    isActive={aggTypePopoverOpen}
+                    display={'columns'}
+                    onClick={() => {
+                      setAggTypePopoverOpen(true);
+                    }}
+                  />
+                </>
+              </EuiFormRow>
+            }
+            isOpen={aggTypePopoverOpen}
+            closePopover={() => {
+              setAggTypePopoverOpen(false);
+            }}
+            display="block"
+            ownFocus
+            anchorPosition={'downLeft'}
+            repositionOnScroll
           >
-            <EuiSelect
-              data-test-subj="thresholdRuleMetricRowWithAggSelect"
-              compressed
-              options={aggOptions}
-              value={aggType}
-              isInvalid={isAggInvalid}
-              onChange={handleAggChange}
-            />
-          </EuiFormRow>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiFormRow
-            label={i18n.translate(
-              'xpack.observability.threshold.rule.alertFlyout.customEquationEditor.fieldLabel',
-              { defaultMessage: 'Field {name}', values: { name } }
-            )}
-            isInvalid={isFieldInvalid}
-          >
-            <EuiComboBox
-              fullWidth
-              compressed
-              isInvalid={isFieldInvalid}
-              singleSelection={{ asPlainText: true }}
-              options={fieldOptions}
-              selectedOptions={field ? [{ label: field }] : []}
-              onChange={handleFieldChange}
-            />
-          </EuiFormRow>
+            <div>
+              <ClosablePopoverTitle onClose={() => setAggTypePopoverOpen(false)}>
+                {i18n.translate(
+                  'xpack.observability.threshold.rule.alertFlyout.customEquationEditor.aggregationLabel',
+                  { defaultMessage: 'Aggregation {name}', values: { name } }
+                )}
+              </ClosablePopoverTitle>
+
+              <EuiFlexGroup gutterSize="l" alignItems="flexEnd">
+                <EuiFlexItem style={{ maxWidth: 145 }}>
+                  <EuiFormRow
+                    label={i18n.translate(
+                      'xpack.observability.threshold.rule.alertFlyout.customEquationEditor.aggregationLabel',
+                      { defaultMessage: 'Aggregation type' }
+                    )}
+                    isInvalid={isAggInvalid}
+                  >
+                    <EuiSelect
+                      data-test-subj="aggregationTypeSelect"
+                      id="aggTypeField"
+                      value={aggType}
+                      fullWidth
+                      onChange={(e) => {
+                        handleAggChange(e.target.value);
+                      }}
+                      options={Object.values(aggregationTypes).map(({ text, value }) => {
+                        return {
+                          text,
+                          value,
+                        };
+                      })}
+                    />
+                  </EuiFormRow>
+                </EuiFlexItem>
+                <EuiFlexItem style={{ minWidth: 300 }}>
+                  <EuiFormRow
+                    label={i18n.translate(
+                      'xpack.observability.threshold.rule.alertFlyout.customEquationEditor.fieldLabel',
+                      { defaultMessage: 'Field name' }
+                    )}
+                    isInvalid={isFieldInvalid}
+                  >
+                    <EuiComboBox
+                      fullWidth
+                      isInvalid={isFieldInvalid}
+                      singleSelection={{ asPlainText: true }}
+                      options={fieldOptions}
+                      selectedOptions={field ? [{ label: field }] : []}
+                      onChange={handleFieldChange}
+                    />
+                  </EuiFormRow>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </div>
+          </EuiPopover>
         </EuiFlexItem>
         <MetricRowControls onDelete={handleDelete} disableDelete={disableDelete} />
       </EuiFlexGroup>
-      <EuiHorizontalRule margin="xs" />
+      <EuiSpacer size="m" />
     </>
   );
 }

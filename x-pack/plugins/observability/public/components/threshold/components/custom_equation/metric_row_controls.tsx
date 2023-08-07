@@ -21,7 +21,7 @@ export function MetricRowControls({ onDelete, disableDelete }: MetricRowControlP
           aria-label={DELETE_LABEL}
           iconType="trash"
           color="danger"
-          style={{ marginBottom: '0.2em' }}
+          style={{ marginBottom: '0.6em' }}
           onClick={onDelete}
           disabled={disableDelete}
           title={DELETE_LABEL}
