@@ -101,6 +101,7 @@ export const ControlFrame = ({
           {renderEmbeddablePrepend()}
         </>
       }
+      onClick={(e) => e.preventDefault()}
     >
       {embeddable && (
         <div
