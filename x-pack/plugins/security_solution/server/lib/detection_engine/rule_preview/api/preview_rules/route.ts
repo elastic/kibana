@@ -28,8 +28,8 @@ import { RuleExecutionStatus } from '../../../../../../common/api/detection_engi
 import type {
   PreviewResponse,
   RulePreviewLogs,
-} from '../../../../../../common/api/detection_engine/model/rule_schema';
-import { previewRulesSchema } from '../../../../../../common/api/detection_engine/model/rule_schema';
+} from '../../../../../../common/api/detection_engine';
+import { previewRulesSchema } from '../../../../../../common/api/detection_engine';
 
 import type { StartPlugins, SetupPlugins } from '../../../../../plugin';
 import { buildSiemResponse } from '../../../routes/utils';
