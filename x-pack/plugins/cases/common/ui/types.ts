@@ -12,7 +12,6 @@ import type {
   READ_CASES_CAPABILITY,
   UPDATE_CASES_CAPABILITY,
 } from '..';
-import type { CaseMetricsFeature, CasesMetricsResponse, SingleCaseMetricsResponse } from '../api';
 import type { CASES_CONNECTORS_CAPABILITY, PUSH_CASES_CAPABILITY } from '../constants';
 import type { SnakeToCamelCase } from '../types';
 import type {
