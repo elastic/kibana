@@ -424,7 +424,9 @@ export class Execution<
             switchMap((args) => this.invokeFunction(fn, input, args)),
             this.execution.params.partial ? identity : last(),
             switchMap((output) => (getType(output) === 'error' ? throwError(output) : of(output))),
-            tap((output) => this.execution.params.debug && Object.assign(head.debug ?? {}, { output })),
+            tap(
+              (output) => this.execution.params.debug && Object.assign(head.debug ?? {}, { output })
+            ),
             switchMap((output) => this.invokeChain<ChainOutput>(tail, output)),
             catchError((rawError) => {
               const error = createError(rawError);
