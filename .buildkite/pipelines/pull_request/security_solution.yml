@@ -14,7 +14,7 @@ steps:
       - "target/kibana-security-solution/**/*"
 
   - command: .buildkite/scripts/steps/functional/security_solution_burn.sh
-    label: ':fire: Security Solution Cypress Tests'
+    label: 'Security Solution Cypress tests, burning changed specs'
     agents:
       queue: n2-4-spot
     depends_on: build
