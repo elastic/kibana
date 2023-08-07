@@ -36,7 +36,9 @@ const OsqueryResponseActionsUpsellingSectionlLazy = lazy(async () => {
 
   return {
     default: () => (
-      <OsqueryResponseActionsUpsellingSection requiredPLI={AppFeatureKey.threatIntelligence} />
+      <OsqueryResponseActionsUpsellingSection
+        requiredPLI={AppFeatureKey.osqueryAutomatedResponseActions}
+      />
     ),
   };
 });
