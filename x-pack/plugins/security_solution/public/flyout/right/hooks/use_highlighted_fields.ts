@@ -65,7 +65,7 @@ export const useHighlightedFields = ({
     { category: 'kibana', field: ALERT_RULE_CUSTOM_HIGHLIGHTED_FIELDS },
     dataFormattedForFieldBrowser
   );
-  console.log({ highlightedFieldsOverride });
+
   const eventRuleType = Array.isArray(eventRuleTypeField?.originalValue)
     ? eventRuleTypeField?.originalValue?.[0]
     : eventRuleTypeField?.originalValue;
@@ -74,7 +74,8 @@ export const useHighlightedFields = ({
     eventCategories,
     eventCode,
     eventRuleType,
-    highlightedFieldsOverride: highlightedFieldsOverride ?? [],
+    highlightedFieldsOverride:
+      highlightedFieldsOverride != null ? highlightedFieldsOverride.originalValue : [],
   });
 
   return tableFields.reduce<UseHighlightedFieldsResult[]>((acc, field) => {

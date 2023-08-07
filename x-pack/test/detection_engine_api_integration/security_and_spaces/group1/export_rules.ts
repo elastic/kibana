@@ -742,5 +742,6 @@ function expectToMatchRuleSchema(obj: RuleResponse): void {
     index: expect.arrayContaining([]),
     query: expect.any(String),
     actions: expect.arrayContaining([]),
+    custom_highlighted_fields: expect.arrayContaining([]),
   });
 }

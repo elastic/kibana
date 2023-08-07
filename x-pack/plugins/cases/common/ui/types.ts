@@ -222,7 +222,6 @@ export interface RuleEcs {
   timeline_title?: string[];
   max_signals?: number[];
   risk_score?: string[];
-  custom_highlighted_fields?: string[];
   output_index?: string[];
   description?: string[];
   from?: string[];

@@ -98,7 +98,7 @@ export const baseRuleParams = t.exact(
     falsePositives: RuleFalsePositiveArray,
     from: RuleIntervalFrom,
     ruleId: RuleSignatureId,
-    customHighlightedFields: RuleCustomHighlightedFieldArray,
+    customHighlightedFields: t.union([RuleCustomHighlightedFieldArray, t.undefined]),
     immutable: IsRuleImmutable,
     license: t.union([RuleLicense, t.undefined]),
     outputIndex: AlertsIndex,

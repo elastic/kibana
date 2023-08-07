@@ -337,6 +337,7 @@ export default ({ getService }: FtrProviderContext) => {
             max_signals: 100,
             risk_score_mapping: [],
             severity_mapping: [],
+            custom_highlighted_fields: [],
             threat: [],
             to: 'now',
             references: [],
@@ -380,6 +381,7 @@ export default ({ getService }: FtrProviderContext) => {
           'kibana.alert.original_event.ingested': '2022-03-23T16:50:28.994Z',
           'kibana.alert.original_event.dataset': 'elastic_agent.filebeat',
           'kibana.alert.original_event.kind': 'signal',
+          'kibana.alert.rule.custom_highlighted_fields': [],
         });
       });
 

@@ -153,7 +153,6 @@ export const loadRule = (includeResponseActions = false) =>
       query: '_id:*',
       author: [],
       false_positives: [],
-      custom_highlighted_fields: [],
       references: [],
       risk_score: 21,
       risk_score_mapping: [],
