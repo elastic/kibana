@@ -212,7 +212,10 @@ export type SanitizedRule<Params extends RuleTypeParams = never> = Omit<
 > & { actions: SanitizedRuleAction[] };
 
 export type ResolvedSanitizedRule<Params extends RuleTypeParams = never> = SanitizedRule<Params> &
-  Omit<SavedObjectsResolveResponse, 'saved_object'>;
+  Omit<SavedObjectsResolveResponse, 'saved_object'> & {
+    outcome: string;
+    alias_target_id?: string;
+  };
 
 export type SanitizedRuleConfig = Pick<
   SanitizedRule,

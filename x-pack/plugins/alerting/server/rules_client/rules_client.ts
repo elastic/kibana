@@ -12,7 +12,7 @@ import { RulesClientContext, BulkOptions, MuteOptions } from './types';
 import { clone, CloneArguments } from './methods/clone';
 import { createRule, CreateRuleParams } from '../application/rule/methods/create';
 import { get, GetParams } from './methods/get';
-import { resolve, ResolveParams } from './methods/resolve';
+import { resolveRule, ResolveParams } from '../application/rule/methods/resolve';
 import { getAlertState, GetAlertStateParams } from './methods/get_alert_state';
 import { getAlertSummary, GetAlertSummaryParams } from './methods/get_alert_summary';
 import {
@@ -118,7 +118,7 @@ export class RulesClient {
   public get = <Params extends RuleTypeParams = never>(params: GetParams) =>
     get<Params>(this.context, params);
   public resolve = <Params extends RuleTypeParams = never>(params: ResolveParams) =>
-    resolve<Params>(this.context, params);
+    resolveRule<Params>(this.context, params);
   public update = <Params extends RuleTypeParams = never>(params: UpdateOptions<Params>) =>
     update<Params>(this.context, params);
 

@@ -6,13 +6,13 @@
  */
 
 import { IRouter } from '@kbn/core/server';
+import { ResolvedSanitizedRule } from '../../../../../common';
 import { resolveParamsSchemaV1 } from '../../../../../common/routes/rule/apis/resolve';
 import { ILicenseState } from '../../../../lib';
 import { verifyAccessAndContext } from '../../../lib';
 import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../../../../types';
-import { Rule } from '../../../../application/rule/types';
 import type { RuleParamsV1 } from '../../../../../common/routes/rule/response';
-import { transformRuleToRuleResponseV1 } from '../../transforms';
+import { transformResolveResponseV1 } from './transforms';
 
 export const resolveRuleRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
@@ -34,7 +34,7 @@ export const resolveRuleRoute = (
           includeSnoozeData: true,
         });
         return res.ok({
-          body: transformRuleToRuleResponseV1(rule as Rule<RuleParamsV1>),
+          body: transformResolveResponseV1(rule as ResolvedSanitizedRule<RuleParamsV1>),
         });
       })
     )

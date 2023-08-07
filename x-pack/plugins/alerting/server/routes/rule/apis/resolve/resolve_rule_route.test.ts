@@ -13,7 +13,6 @@ import { verifyApiAccess } from '../../../../lib/license_api_access';
 import { mockHandlerArguments } from '../../../_mock_handler_arguments';
 import { rulesClientMock } from '../../../../rules_client.mock';
 import { ResolvedSanitizedRule } from '../../../../types';
-import { AsApiContract } from '../../../lib';
 
 const rulesClient = rulesClientMock.create();
 jest.mock('../../../../lib/license_api_access', () => ({
@@ -67,7 +66,7 @@ describe('resolveRuleRoute', () => {
     revision: 0,
   };
 
-  const resolveResult: AsApiContract<ResolvedSanitizedRule<{ bar: boolean }>> = {
+  const resolveResult = {
     ...pick(
       mockedRule,
       'consumer',
@@ -86,13 +85,13 @@ describe('resolveRuleRoute', () => {
     updated_by: mockedRule.updatedBy,
     api_key_owner: mockedRule.apiKeyOwner,
     muted_alert_ids: mockedRule.mutedInstanceIds,
-    created_at: mockedRule.createdAt,
-    updated_at: mockedRule.updatedAt,
+    created_at: mockedRule.createdAt.toISOString(),
+    updated_at: mockedRule.updatedAt.toISOString(),
     id: mockedRule.id,
     revision: mockedRule.revision,
     execution_status: {
       status: mockedRule.executionStatus.status,
-      last_execution_date: mockedRule.executionStatus.lastExecutionDate,
+      last_execution_date: mockedRule.executionStatus.lastExecutionDate.toISOString(),
     },
     actions: [
       {

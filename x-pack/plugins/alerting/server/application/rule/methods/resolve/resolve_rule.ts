@@ -7,12 +7,12 @@
 
 import { AlertConsumers } from '@kbn/rule-data-utils';
 
-import { RawRule, RuleTypeParams, ResolvedSanitizedRule } from '../../types';
-import { ReadOperations, AlertingAuthorizationEntity } from '../../authorization';
-import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
-import { getAlertFromRaw } from '../lib/get_alert_from_raw';
-import { RulesClientContext } from '../types';
-import { formatLegacyActions } from '../lib';
+import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
+import { RawRule, RuleTypeParams, ResolvedSanitizedRule } from '../../../../types';
+import { ReadOperations, AlertingAuthorizationEntity } from '../../../../authorization';
+import { getAlertFromRaw } from '../../../../rules_client/lib/get_alert_from_raw';
+import { RulesClientContext } from '../../../../rules_client/types';
+import { formatLegacyActions } from '../../../../rules_client/lib';
 
 export interface ResolveParams {
   id: string;
@@ -20,7 +20,7 @@ export interface ResolveParams {
   includeSnoozeData?: boolean;
 }
 
-export async function resolve<Params extends RuleTypeParams = never>(
+export async function resolveRule<Params extends RuleTypeParams = never>(
   context: RulesClientContext,
   { id, includeLegacyId, includeSnoozeData = false }: ResolveParams
 ): Promise<ResolvedSanitizedRule<Params>> {
