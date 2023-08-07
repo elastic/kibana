@@ -363,7 +363,6 @@ async function endpointListMiddleware({
 
   try {
     const decodedQuery: Query = searchBarQuery(getState());
-    const sorting = sortField ? { sortField, sortDirection } : {};
 
     endpointResponse = await coreStart.http.get<MetadataListResponse>(HOST_METADATA_LIST_ROUTE, {
       version: '2023-10-31',
@@ -371,7 +370,8 @@ async function endpointListMiddleware({
         page: pageIndex,
         pageSize,
         kuery: decodedQuery.query as string,
-        ...sorting,
+        sortField,
+        sortDirection,
       },
     });
 
