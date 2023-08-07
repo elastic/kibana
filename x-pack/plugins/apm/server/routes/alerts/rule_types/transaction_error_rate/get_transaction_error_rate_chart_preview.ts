@@ -29,6 +29,7 @@ import {
   BarSeriesDataMap,
   getFilteredBarSeries,
 } from '../utils/get_filtered_series_for_preview_chart';
+import { getParsedFilterQuery } from '../utils/get_parsed_filtered_query';
 
 export async function getTransactionErrorRateChartPreview({
   config,
@@ -48,6 +49,8 @@ export async function getTransactionErrorRateChartPreview({
     end,
     transactionName,
     groupBy: groupByFields,
+    useFilterQuery,
+    filterQuery,
   } = alertParams;
 
   const searchAggregatedTransactions = await getSearchTransactionsEvents({
@@ -61,6 +64,22 @@ export async function getTransactionErrorRateChartPreview({
     groupByFields
   );
 
+  const termFilterQuery =
+    !useFilterQuery || useFilterQuery === 'false'
+      ? [
+          ...termQuery(SERVICE_NAME, serviceName, {
+            queryEmptyString: false,
+          }),
+          ...termQuery(TRANSACTION_TYPE, transactionType, {
+            queryEmptyString: false,
+          }),
+          ...termQuery(TRANSACTION_NAME, transactionName, {
+            queryEmptyString: false,
+          }),
+          ...environmentQuery(environment),
+        ]
+      : [];
+
   const params = {
     apm: {
       events: [getProcessorEventForTransactions(searchAggregatedTransactions)],
@@ -71,17 +90,9 @@ export async function getTransactionErrorRateChartPreview({
       query: {
         bool: {
           filter: [
-            ...termQuery(SERVICE_NAME, serviceName, {
-              queryEmptyString: false,
-            }),
-            ...termQuery(TRANSACTION_TYPE, transactionType, {
-              queryEmptyString: false,
-            }),
-            ...termQuery(TRANSACTION_NAME, transactionName, {
-              queryEmptyString: false,
-            }),
+            ...termFilterQuery,
+            ...getParsedFilterQuery(filterQuery),
             ...rangeQuery(start, end),
-            ...environmentQuery(environment),
             ...getDocumentTypeFilterForTransactions(
               searchAggregatedTransactions
             ),

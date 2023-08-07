@@ -22,6 +22,7 @@ import {
   BarSeriesDataMap,
   getFilteredBarSeries,
 } from '../utils/get_filtered_series_for_preview_chart';
+import { getParsedFilterQuery } from '../utils/get_parsed_filtered_query';
 
 export async function getTransactionErrorCountChartPreview({
   apmEventClient,
@@ -38,6 +39,8 @@ export async function getTransactionErrorCountChartPreview({
     start,
     end,
     groupBy: groupByFields,
+    useFilterQuery,
+    filterQuery,
   } = alertParams;
 
   const allGroupByFields = getAllGroupByFields(
@@ -45,17 +48,25 @@ export async function getTransactionErrorCountChartPreview({
     groupByFields
   );
 
+  const termFilterQuery =
+    !useFilterQuery || useFilterQuery === 'false'
+      ? [
+          ...termQuery(SERVICE_NAME, serviceName, {
+            queryEmptyString: false,
+          }),
+          ...termQuery(ERROR_GROUP_ID, errorGroupingKey, {
+            queryEmptyString: false,
+          }),
+          ...environmentQuery(environment),
+        ]
+      : [];
+
   const query = {
     bool: {
       filter: [
-        ...termQuery(SERVICE_NAME, serviceName, {
-          queryEmptyString: false,
-        }),
-        ...termQuery(ERROR_GROUP_ID, errorGroupingKey, {
-          queryEmptyString: false,
-        }),
+        ...termFilterQuery,
+        ...getParsedFilterQuery(filterQuery),
         ...rangeQuery(start, end),
-        ...environmentQuery(environment),
         { term: { [PROCESSOR_EVENT]: ProcessorEvent.error } },
       ],
     },

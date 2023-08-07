@@ -24,7 +24,6 @@ import {
 import { createLifecycleRuleTypeFactory } from '@kbn/rule-registry-plugin/server';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import { firstValueFrom } from 'rxjs';
-import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { getGroupByTerms } from '../utils/get_groupby_terms';
 import { SearchAggregatedTransactionSetting } from '../../../../../common/aggregated_transactions';
 import { getEnvironmentEsField } from '../../../../../common/environment_filter_values';
@@ -68,6 +67,7 @@ import {
 } from './average_or_percentile_agg';
 import { getGroupByActionVariables } from '../utils/get_groupby_action_variables';
 import { getAllGroupByFields } from '../../../../../common/rules/get_all_groupby_fields';
+import { getParsedFilterQuery } from '../utils/get_parsed_filtered_query';
 
 const ruleTypeConfig = RULE_TYPES_CONFIG[ApmRuleType.TransactionDuration];
 
@@ -82,21 +82,6 @@ export function registerTransactionDurationRuleType({
     ruleDataClient,
     logger,
   });
-
-  const getParsedFilterQuery: (
-    filterQuery: string | undefined
-  ) => Array<Record<string, any>> = (filterQuery) => {
-    if (!filterQuery) return [];
-
-    try {
-      const parsedQuery = toElasticsearchQuery(
-        fromKueryExpression(filterQuery)
-      );
-      return [parsedQuery];
-    } catch (error) {
-      return [];
-    }
-  };
 
   const ruleType = createLifecycleRuleType({
     id: ApmRuleType.TransactionDuration,
@@ -152,7 +137,7 @@ export function registerTransactionDurationRuleType({
         searchAggregatedTransactions
       );
 
-      const termFilterQuery = !ruleParams.filterQuery
+      const termFilterQuery = !ruleParams.useFilterQuery
         ? [
             ...termQuery(SERVICE_NAME, ruleParams.serviceName, {
               queryEmptyString: false,

@@ -7,7 +7,6 @@
 
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { rangeQuery, termQuery } from '@kbn/observability-plugin/server';
-import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import {
   AggregationType,
   ApmRuleType,
@@ -37,6 +36,7 @@ import {
   BarSeriesDataMap,
   getFilteredBarSeries,
 } from '../utils/get_filtered_series_for_preview_chart';
+import { getParsedFilterQuery } from '../utils/get_parsed_filtered_query';
 
 export async function getTransactionDurationChartPreview({
   alertParams,
@@ -57,6 +57,7 @@ export async function getTransactionDurationChartPreview({
     start,
     end,
     groupBy: groupByFields,
+    useFilterQuery,
     filterQuery,
   } = alertParams;
   const searchAggregatedTransactions = await getSearchTransactionsEvents({
@@ -65,33 +66,21 @@ export async function getTransactionDurationChartPreview({
     kuery: '',
   });
 
-  const termFilterQuery = !filterQuery
-    ? [
-        ...termQuery(SERVICE_NAME, serviceName, {
-          queryEmptyString: false,
-        }),
-        ...termQuery(TRANSACTION_TYPE, transactionType, {
-          queryEmptyString: false,
-        }),
-        ...termQuery(TRANSACTION_NAME, transactionName, {
-          queryEmptyString: false,
-        }),
-        ...environmentQuery(environment),
-      ]
-    : [];
-
-  const getParsedFilterQuery: (
-    filter: string | undefined
-  ) => Array<Record<string, any>> = (filter) => {
-    if (!filter) return [];
-
-    try {
-      const parsedQuery = toElasticsearchQuery(fromKueryExpression(filter));
-      return [parsedQuery];
-    } catch (error) {
-      return [];
-    }
-  };
+  const termFilterQuery =
+    !useFilterQuery || useFilterQuery === 'false'
+      ? [
+          ...termQuery(SERVICE_NAME, serviceName, {
+            queryEmptyString: false,
+          }),
+          ...termQuery(TRANSACTION_TYPE, transactionType, {
+            queryEmptyString: false,
+          }),
+          ...termQuery(TRANSACTION_NAME, transactionName, {
+            queryEmptyString: false,
+          }),
+          ...environmentQuery(environment),
+        ]
+      : [];
 
   const query = {
     bool: {

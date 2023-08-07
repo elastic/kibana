@@ -53,6 +53,7 @@ import {
 import { getGroupByTerms } from '../utils/get_groupby_terms';
 import { getGroupByActionVariables } from '../utils/get_groupby_action_variables';
 import { getAllGroupByFields } from '../../../../../common/rules/get_all_groupby_fields';
+import { getParsedFilterQuery } from '../utils/get_parsed_filtered_query';
 
 const ruleTypeConfig = RULE_TYPES_CONFIG[ApmRuleType.ErrorCount];
 
@@ -119,6 +120,18 @@ export function registerErrorCountRuleType({
           savedObjectsClient,
         });
 
+        const termFilterQuery = !ruleParams.useFilterQuery
+          ? [
+              ...termQuery(SERVICE_NAME, ruleParams.serviceName, {
+                queryEmptyString: false,
+              }),
+              ...termQuery(ERROR_GROUP_ID, ruleParams.errorGroupingKey, {
+                queryEmptyString: false,
+              }),
+              ...environmentQuery(ruleParams.environment),
+            ]
+          : [];
+
         const searchParams = {
           index: indices.error,
           body: {
@@ -135,13 +148,8 @@ export function registerErrorCountRuleType({
                     },
                   },
                   { term: { [PROCESSOR_EVENT]: ProcessorEvent.error } },
-                  ...termQuery(SERVICE_NAME, ruleParams.serviceName, {
-                    queryEmptyString: false,
-                  }),
-                  ...termQuery(ERROR_GROUP_ID, ruleParams.errorGroupingKey, {
-                    queryEmptyString: false,
-                  }),
-                  ...environmentQuery(ruleParams.environment),
+                  ...termFilterQuery,
+                  ...getParsedFilterQuery(ruleParams.filterQuery),
                 ],
               },
             },

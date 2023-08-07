@@ -62,6 +62,7 @@ import {
 import { getGroupByTerms } from '../utils/get_groupby_terms';
 import { getGroupByActionVariables } from '../utils/get_groupby_action_variables';
 import { getAllGroupByFields } from '../../../../../common/rules/get_all_groupby_fields';
+import { getParsedFilterQuery } from '../utils/get_parsed_filtered_query';
 
 const ruleTypeConfig = RULE_TYPES_CONFIG[ApmRuleType.TransactionErrorRate];
 
@@ -139,6 +140,21 @@ export function registerTransactionErrorRateRuleType({
           ? indices.metric
           : indices.transaction;
 
+        const termFilterQuery = !ruleParams.useFilterQuery
+          ? [
+              ...termQuery(SERVICE_NAME, ruleParams.serviceName, {
+                queryEmptyString: false,
+              }),
+              ...termQuery(TRANSACTION_TYPE, ruleParams.transactionType, {
+                queryEmptyString: false,
+              }),
+              ...termQuery(TRANSACTION_NAME, ruleParams.transactionName, {
+                queryEmptyString: false,
+              }),
+              ...environmentQuery(ruleParams.environment),
+            ]
+          : [];
+
         const searchParams = {
           index,
           body: {
@@ -165,16 +181,8 @@ export function registerTransactionErrorRateRuleType({
                       ],
                     },
                   },
-                  ...termQuery(SERVICE_NAME, ruleParams.serviceName, {
-                    queryEmptyString: false,
-                  }),
-                  ...termQuery(TRANSACTION_TYPE, ruleParams.transactionType, {
-                    queryEmptyString: false,
-                  }),
-                  ...termQuery(TRANSACTION_NAME, ruleParams.transactionName, {
-                    queryEmptyString: false,
-                  }),
-                  ...environmentQuery(ruleParams.environment),
+                  ...termFilterQuery,
+                  ...getParsedFilterQuery(ruleParams.filterQuery),
                 ],
               },
             },
