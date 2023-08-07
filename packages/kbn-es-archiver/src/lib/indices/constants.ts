@@ -6,12 +6,6 @@
  * Side Public License, v 1.
  */
 
-export { createCreateIndexStream } from './create_index_stream';
-export { createDeleteIndexStream } from './delete_index_stream';
-export { createGenerateIndexRecordsStream } from './generate_index_records_stream';
-export {
-  migrateSavedObjectIndex,
-  deleteSavedObjectIndices,
-  cleanSavedObjectIndices,
-  createDefaultSpace,
-} from './kibana_index';
+export const MAIN_SAVED_OBJECT_INDEX = '.kibana';
+export const TASK_MANAGER_SAVED_OBJECT_INDEX = '.kibana_task_manager';
+export const ALL_SAVED_OBJECT_INDICES = [MAIN_SAVED_OBJECT_INDEX, TASK_MANAGER_SAVED_OBJECT_INDEX];

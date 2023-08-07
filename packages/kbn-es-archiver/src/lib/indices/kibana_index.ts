@@ -15,11 +15,16 @@ import { KbnClient } from '@kbn/test';
 import { Stats } from '../stats';
 import { deleteIndex } from './delete_index';
 import { ES_CLIENT_HEADERS } from '../../client_headers';
+import {
+  ALL_SAVED_OBJECT_INDICES,
+  MAIN_SAVED_OBJECT_INDEX,
+  TASK_MANAGER_SAVED_OBJECT_INDEX,
+} from './constants';
 
 /**
  * Deletes all indices that start with `.kibana`, or if onlyTaskManager==true, all indices that start with `.kibana_task_manager`
  */
-export async function deleteKibanaIndices({
+export async function deleteSavedObjectIndices({
   client,
   stats,
   onlyTaskManager = false,
@@ -30,8 +35,10 @@ export async function deleteKibanaIndices({
   onlyTaskManager?: boolean;
   log: ToolingLog;
 }) {
-  const indexPattern = onlyTaskManager ? '.kibana_task_manager*' : '.kibana*';
-  const indexNames = await fetchKibanaIndices(client, indexPattern);
+  const indexPattern = onlyTaskManager
+    ? `${TASK_MANAGER_SAVED_OBJECT_INDEX}*`
+    : `${MAIN_SAVED_OBJECT_INDEX}*`;
+  const indexNames = await fetchSavedObjectIndices(client, indexPattern);
   if (!indexNames.length) {
     return;
   }
@@ -61,7 +68,7 @@ export async function deleteKibanaIndices({
  * builds up an object that implements just enough of the kbnMigrations interface
  * as is required by migrations.
  */
-export async function migrateKibanaIndex({ kbnClient }: { kbnClient: KbnClient }) {
+export async function migrateSavedObjectIndex({ kbnClient }: { kbnClient: KbnClient }) {
   await kbnClient.savedObjects.migrate();
 }
 
@@ -71,7 +78,7 @@ export async function migrateKibanaIndex({ kbnClient }: { kbnClient: KbnClient }
  * with .kibana, then filters out any that aren't actually Kibana's core
  * index (e.g. we don't want to remove .kibana_task_manager or the like).
  */
-function isKibanaIndex(index?: string): index is string {
+function isSavedObjectIndex(index?: string): index is string {
   return Boolean(
     index &&
       (/^\.kibana(:?_\d*)?$/.test(index) ||
@@ -79,7 +86,7 @@ function isKibanaIndex(index?: string): index is string {
   );
 }
 
-async function fetchKibanaIndices(client: KibanaClient, indexPattern: string) {
+async function fetchSavedObjectIndices(client: KibanaClient, indexPattern: string) {
   const resp = await client.cat.indices(
     { index: indexPattern, format: 'json' },
     {
@@ -91,24 +98,26 @@ async function fetchKibanaIndices(client: KibanaClient, indexPattern: string) {
     throw new Error(`expected response to be an array ${inspect(resp.body)}`);
   }
 
-  return resp.body.map((x: { index?: string }) => x.index).filter(isKibanaIndex);
+  return resp.body.map((x: { index?: string }) => x.index).filter(isSavedObjectIndex);
 }
 
 const delay = (delayInMs: number) => new Promise((resolve) => setTimeout(resolve, delayInMs));
 
-export async function cleanKibanaIndices({
+export async function cleanSavedObjectIndices({
   client,
   stats,
   log,
+  index = ALL_SAVED_OBJECT_INDICES,
 }: {
   client: KibanaClient;
   stats: Stats;
   log: ToolingLog;
+  index?: string | string[];
 }) {
   while (true) {
     const resp = await client.deleteByQuery(
       {
-        index: `.kibana,.kibana_task_manager`,
+        index,
         body: {
           query: {
             bool: {
@@ -145,7 +154,8 @@ export async function cleanKibanaIndices({
       `.kibana rather than deleting the whole index`
   );
 
-  stats.deletedIndex('.kibana');
+  stats.deletedIndex(MAIN_SAVED_OBJECT_INDEX);
+  stats.deletedIndex(TASK_MANAGER_SAVED_OBJECT_INDEX);
 }
 
 export async function createDefaultSpace({

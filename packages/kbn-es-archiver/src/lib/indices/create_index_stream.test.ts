@@ -6,7 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { mockDeleteKibanaIndices } from './create_index_stream.test.mock';
+import {
+  mockCleanSavedObjectIndices,
+  mockDeleteSavedObjectIndices,
+} from './create_index_stream.test.mock';
 
 import sinon from 'sinon';
 import Chance from 'chance';
@@ -27,7 +30,8 @@ const chance = new Chance();
 const log = createStubLogger();
 
 beforeEach(() => {
-  mockDeleteKibanaIndices.mockClear();
+  mockCleanSavedObjectIndices.mockClear();
+  mockDeleteSavedObjectIndices.mockClear();
 });
 
 describe('esArchiver: createCreateIndexStream()', () => {
@@ -172,7 +176,7 @@ describe('esArchiver: createCreateIndexStream()', () => {
     });
   });
 
-  describe('deleteKibanaIndices', () => {
+  describe('deleteSavedObjectIndices', () => {
     function doTest(...indices: string[]) {
       return createPromiseFromStreams([
         createListStream(indices.map((index) => createStubIndexRecord(index))),
@@ -184,25 +188,25 @@ describe('esArchiver: createCreateIndexStream()', () => {
     it('does not delete Kibana indices for indexes that do not start with .kibana', async () => {
       await doTest('.foo');
 
-      expect(mockDeleteKibanaIndices).not.toHaveBeenCalled();
+      expect(mockDeleteSavedObjectIndices).not.toHaveBeenCalled();
     });
 
     it('deletes Kibana indices at most once for indices that start with .kibana', async () => {
       // If we are loading the main Kibana index, we should delete all Kibana indices for backwards compatibility reasons.
       await doTest('.kibana_7.16.0_001', '.kibana_task_manager_7.16.0_001');
 
-      expect(mockDeleteKibanaIndices).toHaveBeenCalledTimes(1);
-      expect(mockDeleteKibanaIndices).toHaveBeenCalledWith(
-        expect.not.objectContaining({ onlyTaskManager: true })
+      expect(mockDeleteSavedObjectIndices).toHaveBeenCalledTimes(1);
+      expect(mockDeleteSavedObjectIndices).toHaveBeenCalledWith(
+        expect.not.objectContaining({ index: '.kibana_task_manager_7.16.0_001' })
       );
     });
 
-    it('deletes Kibana task manager index at most once, using onlyTaskManager: true', async () => {
+    it('deletes Kibana task manager index at most once', async () => {
       // If we are loading the Kibana task manager index, we should only delete that index, not any other Kibana indices.
       await doTest('.kibana_task_manager_7.16.0_001', '.kibana_task_manager_7.16.0_002');
 
-      expect(mockDeleteKibanaIndices).toHaveBeenCalledTimes(1);
-      expect(mockDeleteKibanaIndices).toHaveBeenCalledWith(
+      expect(mockDeleteSavedObjectIndices).toHaveBeenCalledTimes(1);
+      expect(mockDeleteSavedObjectIndices).toHaveBeenCalledWith(
         expect.objectContaining({ onlyTaskManager: true })
       );
     });
@@ -212,15 +216,60 @@ describe('esArchiver: createCreateIndexStream()', () => {
       // So, we first delete only the Kibana task manager indices, then we wind up deleting all Kibana indices.
       await doTest('.kibana_task_manager_7.16.0_001', '.kibana_7.16.0_001');
 
-      expect(mockDeleteKibanaIndices).toHaveBeenCalledTimes(2);
-      expect(mockDeleteKibanaIndices).toHaveBeenNthCalledWith(
+      expect(mockDeleteSavedObjectIndices).toHaveBeenCalledTimes(2);
+      expect(mockDeleteSavedObjectIndices).toHaveBeenNthCalledWith(
         1,
         expect.objectContaining({ onlyTaskManager: true })
       );
-      expect(mockDeleteKibanaIndices).toHaveBeenNthCalledWith(
+      expect(mockDeleteSavedObjectIndices).toHaveBeenNthCalledWith(
         2,
-        expect.not.objectContaining({ onlyTaskManager: true })
+        expect.not.objectContaining({ index: expect.any(String) })
       );
+    });
+  });
+
+  describe('saved object cleanup', () => {
+    describe('when saved object documents are found', () => {
+      it('cleans the corresponding saved object indices', async () => {
+        const client = createStubClient();
+        const stats = createStubStats();
+        await createPromiseFromStreams([
+          createListStream([
+            createStubDocRecord('.kibana_task_manager', 1),
+            createStubDocRecord('.kibana_task_manager', 2),
+            createStubDocRecord('.kibana', 3),
+          ]),
+          createCreateIndexStream({ client, stats, log }),
+        ]);
+
+        expect(mockCleanSavedObjectIndices).toHaveBeenCalledTimes(2);
+
+        expect(mockCleanSavedObjectIndices).toHaveBeenNthCalledWith(
+          1,
+          expect.objectContaining({ index: '.kibana_task_manager' })
+        );
+        expect(mockCleanSavedObjectIndices).toHaveBeenNthCalledWith(
+          2,
+          expect.not.objectContaining({ index: expect.any(String) })
+        );
+      });
+    });
+
+    describe('when saved object documents are not found', () => {
+      it('does not clean any indices', async () => {
+        const client = createStubClient();
+        const stats = createStubStats();
+        await createPromiseFromStreams([
+          createListStream([
+            createStubDocRecord('.foo', 1),
+            createStubDocRecord('.bar', 2),
+            createStubDocRecord('.baz', 3),
+          ]),
+          createCreateIndexStream({ client, stats, log }),
+        ]);
+
+        expect(mockCleanSavedObjectIndices).not.toHaveBeenCalled();
+      });
     });
   });
 
