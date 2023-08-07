@@ -20,6 +20,7 @@ export const LabelRotation = Object.freeze({
   Horizontal: 0,
   Vertical: 90,
   Angled: 75,
+  VerticalRotation: 270,
 });
 export type LabelRotation = $Values<typeof LabelRotation>;
 
