@@ -61,7 +61,7 @@ export interface AiopsAppDependencies {
     }>;
   };
   presentationUtil?: PresentationUtilPluginStart;
-  embeddable: EmbeddableStart;
+  embeddable?: EmbeddableStart;
   cases?: CasesUiStart;
 }
 

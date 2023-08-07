@@ -401,7 +401,7 @@ const FieldPanel: FC<FieldPanelProps> = ({
 
   const onSaveCallback: SaveModalDashboardProps['onSave'] = useCallback(
     ({ dashboardId, newTitle, newDescription }) => {
-      const stateTransfer = embeddable.getStateTransfer();
+      const stateTransfer = embeddable!.getStateTransfer();
 
       const embeddableInput: Partial<EmbeddableChangePointChartInput> = {
         title: newTitle,
