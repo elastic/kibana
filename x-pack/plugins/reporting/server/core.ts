@@ -163,9 +163,8 @@ export class ReportingCore {
     this.pluginStart$.next(startDeps); // trigger the observer
     this.pluginStartDeps = startDeps; // cache
 
-
     this.exportTypesRegistry.getAll().forEach((et) => {
-      et.start({ ...startDeps});
+      et.start({ ...startDeps });
     });
 
     const { taskManager } = startDeps;
