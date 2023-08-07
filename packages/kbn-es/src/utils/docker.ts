@@ -314,13 +314,6 @@ export async function setupServerlessVolumes(log: ToolingLog, options: Serverles
     log.info('Using existing object store.');
   }
 
-  await Fsp.chmod(options.basePath, 0o777).then((msg: any) => {
-    if (msg) {
-      log.warning(msg);
-    }
-    log.info('Setup base path permissions (chmod 766).');
-  });
-
   // Permissions are set separately from mkdir due to default umask
   await Fsp.chmod(volumePath, 0o766).then((msg: any) => {
     if (msg) {
@@ -332,6 +325,13 @@ export async function setupServerlessVolumes(log: ToolingLog, options: Serverles
   log.indent(-4);
 
   return ['--volume', `${options.basePath}:/objectstore:z`];
+}
+
+async function setupUserPerm() {
+  const pU = await execa('id', ['-u']);
+  const pG = await execa('id', ['-g']);
+
+  return ['-u', `${pU.stdout}:${pG.stdout}`];
 }
 
 /**
@@ -382,6 +382,7 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
   await setupDocker(log, image);
 
   const volumeCmd = await setupServerlessVolumes(log, options);
+  const userCmd = await setupUserPerm();
 
   const nodeNames = await Promise.all(
     SERVERLESS_NODES.map(async (node, i) => {
@@ -391,7 +392,8 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
         params: node.params.concat(
           resolveEsArgs(DEFAULT_SERVERLESS_ESARGS.concat(node.esArgs ?? []), options),
           i === 0 ? resolvePort(options) : [],
-          volumeCmd
+          volumeCmd,
+          userCmd
         ),
       });
       return node.name;
