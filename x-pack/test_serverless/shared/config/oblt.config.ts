@@ -22,13 +22,7 @@ export function createTestConfig(options: CreateTestConfigOptions) {
       },
       kbnTestServer: {
         ...svlBaseConfig.get('kbnTestServer'),
-        serverArgs: [
-          ...svlBaseConfig.get('kbnTestServer.serverArgs'),
-          `--serverless=oblt`,
-          `--xpack.alerting.enableFrameworkAlerts=true`,
-          '--xpack.encryptedSavedObjects.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"',
-          '--server.publicBaseUrl=https://localhost:5601',
-        ],
+        serverArgs: [...svlBaseConfig.get('kbnTestServer.serverArgs'), `--serverless=oblt`],
       },
       testFiles: options.testFiles,
       junit: options.junit,

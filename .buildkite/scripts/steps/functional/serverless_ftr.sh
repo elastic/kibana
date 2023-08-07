@@ -14,6 +14,7 @@ if [[ "$SERVERLESS_ENVIRONMENT" == "search" ]]; then
 elif [[ "$SERVERLESS_ENVIRONMENT" == "observability" ]]; then
   SERVERLESS_CONFIGS=(
     "x-pack/test_serverless/api_integration/test_suites/observability/config.ts"
+     "x-pack/test_serverless/api_integration/test_suites/observability/feature_flags.config.ts"
     "x-pack/test_serverless/functional/test_suites/observability/config.ts"
     "x-pack/test_serverless/functional/test_suites/observability/cypress/config_headless.ts"
   )

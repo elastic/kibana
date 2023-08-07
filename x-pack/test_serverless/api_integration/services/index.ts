@@ -12,6 +12,7 @@ import { services as svlSharedServices } from '../../shared/services';
 
 import { SvlCommonApiServiceProvider } from './svl_common_api';
 import { AlertingApiProvider } from './alerting_api';
+import { DataViewProvider } from './data_view';
 
 export const services = {
   ...xpackApiIntegrationServices,
@@ -19,6 +20,7 @@ export const services = {
 
   svlCommonApi: SvlCommonApiServiceProvider,
   alertingApi: AlertingApiProvider,
+  dataViewApi: DataViewProvider,
 };
 
 export type InheritedFtrProviderContext = GenericFtrProviderContext<typeof services, {}>;

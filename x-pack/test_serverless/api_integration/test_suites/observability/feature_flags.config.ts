@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { createTestConfig } from '../../../shared/config/oblt.config';
+import { createTestConfig } from '../../../shared/config/oblt.feature_flags.config';
 import { services } from './apm_api_integration/common/services';
 
 export default createTestConfig({
-  testFiles: [require.resolve('../common'), require.resolve('.')],
+  testFiles: [require.resolve('./threshold_rule/index.ts')],
   junit: {
     reportName: 'Serverless Observability + Feature Flags API Integration Tests',
   },

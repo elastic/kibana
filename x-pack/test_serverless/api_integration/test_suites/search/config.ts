@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { createTestConfig } from '../../config.base';
+import { createTestConfig } from '../../../shared/config/search.config';
 
 export default createTestConfig({
-  serverlessProject: 'es',
   testFiles: [require.resolve('../common'), require.resolve('.')],
   junit: {
     reportName: 'Serverless Search API Integration Tests',

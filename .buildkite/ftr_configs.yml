@@ -85,6 +85,7 @@ disabled:
   # Serverless configs, currently only for manual tests runs, CI integration planned
   - x-pack/test_serverless/api_integration/test_suites/common/config.ts
   - x-pack/test_serverless/api_integration/test_suites/observability/config.ts
+  - x-pack/test_serverless/api_integration/test_suites/observability/feature_flags.config.ts
   - x-pack/test_serverless/api_integration/test_suites/search/config.ts
   - x-pack/test_serverless/api_integration/test_suites/security/config.ts
   - x-pack/test_serverless/functional/test_suites/common/config.ts

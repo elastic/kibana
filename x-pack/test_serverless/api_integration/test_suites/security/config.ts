@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { createTestConfig } from '../../config.base';
+import { createTestConfig } from '../../../shared/config/security.config';
 
 export default createTestConfig({
-  serverlessProject: 'security',
   testFiles: [require.resolve('../common'), require.resolve('.')],
   junit: {
     reportName: 'Serverless Security API Integration Tests',
