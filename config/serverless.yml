@@ -80,3 +80,16 @@ elasticsearch.requestHeadersWhitelist: ["authorization", "es-client-authenticati
 
 # Enable dynamic config to be updated via the internal HTTP requests
 coreApp.allowDynamicConfigOverrides: true
+
+# Visualizations editors readonly settings
+vis_type_gauge.readOnly: true
+vis_type_heatmap.readOnly: true
+vis_type_metric.readOnly: true
+vis_type_pie.readOnly: true
+vis_type_table.readOnly: true
+vis_type_tagcloud.readOnly: true
+vis_type_timelion.readOnly: true
+vis_type_timeseries.readOnly: true
+vis_type_vislib.readOnly: true
+vis_type_xy.readOnly: true
+input_control_vis.readOnly: true
