@@ -181,25 +181,23 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           .utc('Sep 20, 2015 @ 06:31:44.000', 'MMM D, YYYY [@] HH:mm:ss.SSS')
           .format();
 
-        await es.bulk(
-          {
-            index: esIndexPrefix,
-            body: Array<{
-              a: string;
-              b: string;
-              '@timestamp': string;
-            }>(100)
-              .fill({ a: '', b: '', '@timestamp': timestamp })
-              .map((template, i) => {
-                return {
-                  ...template,
-                  a: i > 50 ? `${(i % 5) + 1}` : '', // generate 5 values for the index + empty string
-                  b: i < 50 ? `${(i % 5) + 1}` : '', // generate 5 values for the index + empty string
-                };
-              })
-              .map((d) => `{"index": {}}\n${JSON.stringify(d)}\n`),
-          }
-        );
+        await es.bulk({
+          index: esIndexPrefix,
+          body: Array<{
+            a: string;
+            b: string;
+            '@timestamp': string;
+          }>(100)
+            .fill({ a: '', b: '', '@timestamp': timestamp })
+            .map((template, i) => {
+              return {
+                ...template,
+                a: i > 50 ? `${(i % 5) + 1}` : '', // generate 5 values for the index + empty string
+                b: i < 50 ? `${(i % 5) + 1}` : '', // generate 5 values for the index + empty string
+              };
+            })
+            .map((d) => `{"index": {}}\n${JSON.stringify(d)}\n`),
+        });
 
         log.info(`Creating dataView ${esIndexPrefix}`);
         await indexPatterns.create(
