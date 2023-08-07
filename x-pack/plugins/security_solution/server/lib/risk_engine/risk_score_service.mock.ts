@@ -6,7 +6,7 @@
  */
 
 import type { RiskScoreService } from './risk_score_service';
-import type { RiskScore } from './types';
+import type { RiskScore } from '../../../common/risk_engine';
 
 const createRiskScoreMock = (overrides: Partial<RiskScore> = {}): RiskScore => ({
   '@timestamp': '2023-02-15T00:15:19.231Z',

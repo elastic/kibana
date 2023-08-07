@@ -45,10 +45,12 @@ import { createIndex } from '../risk_score/indices/lib/create_index';
 interface InitOpts extends SavedObjectsClients {
   namespace: string;
   user: AuthenticatedUser | null | undefined;
+  esClient: ElasticsearchClient;
 }
 
 interface InitializeRiskEngineResourcesOpts {
   namespace?: string;
+  esClient: ElasticsearchClient;
 }
 
 interface RiskEngineDataClientOpts {
@@ -104,7 +106,13 @@ export class RiskEngineDataClient {
     return result;
   }
 
-  public async getWriter({ namespace, esClient }: { namespace: string }): Promise<Writer> {
+  public async getWriter({
+    namespace,
+    esClient,
+  }: {
+    namespace: string;
+    esClient: ElasticsearchClient;
+  }): Promise<Writer> {
     if (this.writerCache.get(namespace)) {
       return this.writerCache.get(namespace) as Writer;
     }
@@ -113,7 +121,11 @@ export class RiskEngineDataClient {
     return this.writerCache.get(namespace) as Writer;
   }
 
-  private async initializeWriter(namespace: string, index: string, esClient): Promise<Writer> {
+  private async initializeWriter(
+    namespace: string,
+    index: string,
+    esClient: ElasticsearchClient
+  ): Promise<Writer> {
     const writer = new RiskEngineDataWriter({
       namespace,
       index,
@@ -315,10 +327,6 @@ export class RiskEngineDataClient {
         options,
       });
 
-      console.log('----------');
-      console.log(JSON.stringify(options));
-      console.log('----------');
-      console.log(JSON.stringify(transforms));
       if (transforms?.[getLatestTransformId(namespace)].success === false) {
         throw new Error('Transform failed to start');
       }

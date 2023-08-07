@@ -26,10 +26,11 @@ export const enrichEvents: EnrichEventsFunction = async ({ services, logger, eve
     const enrichments = [];
 
     logger.debug('Alert enrichments started');
+    const isNewRiskScoreModuleAvailable = false;
 
     const [isHostRiskScoreIndexExist, isUserRiskScoreIndexExist] = await Promise.all([
-      getIsHostRiskScoreAvailable({ spaceId, services }),
-      getIsUserRiskScoreAvailable({ spaceId, services }),
+      getIsHostRiskScoreAvailable({ spaceId, services, isNewRiskScoreModuleAvailable }),
+      getIsUserRiskScoreAvailable({ spaceId, services, isNewRiskScoreModuleAvailable }),
     ]);
 
     if (isHostRiskScoreIndexExist) {
@@ -39,6 +40,7 @@ export const enrichEvents: EnrichEventsFunction = async ({ services, logger, eve
           logger,
           events,
           spaceId,
+          isNewRiskScoreModuleAvailable,
         })
       );
     }
@@ -50,6 +52,7 @@ export const enrichEvents: EnrichEventsFunction = async ({ services, logger, eve
           logger,
           events,
           spaceId,
+          isNewRiskScoreModuleAvailable,
         })
       );
     }
