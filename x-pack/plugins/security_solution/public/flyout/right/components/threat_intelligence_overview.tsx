@@ -6,7 +6,7 @@
  */
 
 import type { FC } from 'react';
-import React, { useCallback } from 'react';
+import React, { useCallback, memo } from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiPanel } from '@elastic/eui';
 import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
 import { useFetchThreatIntelligence } from '../hooks/use_fetch_threat_intelligence';
@@ -30,7 +30,7 @@ import { LeftPanelKey, LeftPanelInsightsTabPath } from '../../left';
  * The component fetches the necessary data, then pass it down to the InsightsSubSection component for loading and error state,
  * and the SummaryPanel component for data rendering.
  */
-export const ThreatIntelligenceOverview: FC = () => {
+export const ThreatIntelligenceOverview: FC = memo(() => {
   const { eventId, indexName, scopeId, dataFormattedForFieldBrowser } = useRightPanelContext();
   const { openLeftPanel } = useExpandableFlyoutContext();
 
@@ -94,6 +94,6 @@ export const ThreatIntelligenceOverview: FC = () => {
       </EuiButtonEmpty>
     </InsightsSubSection>
   );
-};
+});
 
 ThreatIntelligenceOverview.displayName = 'ThreatIntelligenceOverview';
