@@ -18,7 +18,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const dashboardAddPanel = getService('dashboardAddPanel');
 
-  describe('dashboard listing page', function describeIndexTests() {
+  describe.only('dashboard listing page', function describeIndexTests() {
     const dashboardName = 'Dashboard Listing Test';
 
     before(async function () {
@@ -211,6 +211,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.dashboard.clickCreateDashboardPrompt();
         await dashboardAddPanel.clickOpenAddPanel();
         await dashboardAddPanel.addEveryEmbeddableOnCurrentPage();
+        await dashboardAddPanel.ensureAddPanelIsClosed();
         await PageObjects.dashboard.saveDashboard(`${dashboardName}-editMetaData`);
         const originalPanelCount = await PageObjects.dashboard.getPanelCount();
 

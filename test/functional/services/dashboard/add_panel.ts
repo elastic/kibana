@@ -145,6 +145,20 @@ export class DashboardAddPanelService extends FtrService {
     }
   }
 
+  async ensureAddPanelIsClosed() {
+    this.log.debug('DashboardAddPanel.ensureAddPanelIsClosed');
+    const isOpen = await this.isAddPanelOpen();
+    if (isOpen) {
+      await this.retry.try(async () => {
+        await this.closeAddPanel();
+        const isNowOpen = await this.isAddPanelOpen();
+        if (isNowOpen) {
+          throw new Error('Add panel still open, trying again.');
+        }
+      });
+    }
+  }
+
   async closeAddPanel() {
     await this.flyout.ensureAllClosed();
   }
