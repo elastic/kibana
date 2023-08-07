@@ -9,7 +9,7 @@
     ],
     "patterns": [
       "_analyze",
-      "{indices}/_analyze"
+      "{index}/_analyze"
     ],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-analyze.html"
   }

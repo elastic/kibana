@@ -25,7 +25,7 @@
     ],
     "patterns": [
       "_cat/segments",
-      "_cat/segments/{indices}"
+      "_cat/segments/{index}"
     ],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/cat-segments.html"
   }

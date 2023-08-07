@@ -9,7 +9,8 @@ import { renderHook } from '@testing-library/react-hooks';
 import React from 'react';
 import { SecurityPageName } from '../../../common';
 import { UpsellingService } from '../lib/upsellings';
-import { useUpsellingComponent, useUpsellingPage } from './use_upselling';
+import { useUpsellingComponent, useUpsellingMessage, useUpsellingPage } from './use_upselling';
+import { UpsellingProvider } from '../components/upselling_provider';
 
 const mockUpselling = new UpsellingService();
 
@@ -28,6 +29,9 @@ jest.mock('../lib/kibana', () => {
 });
 
 const TestComponent = () => <div>{'TEST 1 2 3'}</div>;
+const RenderWrapper: React.FunctionComponent = ({ children }) => {
+  return <UpsellingProvider upsellingService={mockUpselling}>{children}</UpsellingProvider>;
+};
 
 describe('use_upselling', () => {
   test('useUpsellingComponent returns sections', () => {
@@ -35,7 +39,9 @@ describe('use_upselling', () => {
       entity_analytics_panel: TestComponent,
     });
 
-    const { result } = renderHook(() => useUpsellingComponent('entity_analytics_panel'));
+    const { result } = renderHook(() => useUpsellingComponent('entity_analytics_panel'), {
+      wrapper: RenderWrapper,
+    });
     expect(result.current).toBe(TestComponent);
   });
 
@@ -44,7 +50,34 @@ describe('use_upselling', () => {
       [SecurityPageName.hosts]: TestComponent,
     });
 
-    const { result } = renderHook(() => useUpsellingPage(SecurityPageName.hosts));
+    const { result } = renderHook(() => useUpsellingPage(SecurityPageName.hosts), {
+      wrapper: RenderWrapper,
+    });
     expect(result.current).toBe(TestComponent);
+  });
+
+  test('useUpsellingMessage returns pages', () => {
+    const testMessage = 'test message';
+    mockUpselling.registerMessages({
+      investigation_guide: testMessage,
+    });
+
+    const { result } = renderHook(() => useUpsellingMessage('investigation_guide'), {
+      wrapper: RenderWrapper,
+    });
+    expect(result.current).toBe(testMessage);
+  });
+
+  test('useUpsellingMessage returns null when upsellingMessageId not found', () => {
+    const emptyMessages = {};
+    mockUpselling.registerMessages(emptyMessages);
+
+    const { result } = renderHook(
+      () => useUpsellingMessage('my_fake_message_id' as 'investigation_guide'),
+      {
+        wrapper: RenderWrapper,
+      }
+    );
+    expect(result.current).toBe(null);
   });
 });
