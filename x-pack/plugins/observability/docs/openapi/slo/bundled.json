@@ -266,6 +266,15 @@
           },
           {
             "$ref": "#/components/parameters/slo_id"
+          },
+          {
+            "name": "instanceId",
+            "in": "query",
+            "description": "the specific instanceId used by the summary calculation",
+            "schema": {
+              "type": "string"
+            },
+            "example": "host-abcde"
           }
         ],
         "responses": {
@@ -1368,6 +1377,16 @@
             "type": "boolean",
             "example": true
           },
+          "groupBy": {
+            "description": "optional group by field to use to generate an SLO per distinct value",
+            "type": "string",
+            "example": "some.field"
+          },
+          "instanceId": {
+            "description": "the value derived from the groupBy field, if present, otherwise '*'",
+            "type": "string",
+            "example": "host-abcde"
+          },
           "createdAt": {
             "description": "The creation date",
             "type": "string",
@@ -1553,6 +1572,11 @@
           },
           "settings": {
             "$ref": "#/components/schemas/settings"
+          },
+          "groupBy": {
+            "description": "optional group by field to use to generate an SLO per distinct value",
+            "type": "string",
+            "example": "some.field"
           }
         }
       },

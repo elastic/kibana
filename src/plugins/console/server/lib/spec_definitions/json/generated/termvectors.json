@@ -22,8 +22,8 @@
       "POST"
     ],
     "patterns": [
-      "{indices}/_termvectors/{id}",
-      "{indices}/_termvectors"
+      "{index}/_termvectors/{id}",
+      "{index}/_termvectors"
     ],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/docs-termvectors.html"
   }
