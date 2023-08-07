@@ -24,7 +24,6 @@
     "@kbn/spaces-plugin",
     "@kbn/kibana-react-plugin",
     "@kbn/shared-ux-utility",
-    "@kbn/stack-connectors-plugin",
     "@kbn/alerting-plugin",
     "@kbn/shared-ux-link-redirect-app",
     "@kbn/typed-react-router-config",
@@ -35,7 +34,8 @@
     "@kbn/monaco",
     "@kbn/io-ts-utils",
     "@kbn/std",
-    "@kbn/lens-plugin"
+    "@kbn/lens-plugin",
+    "@kbn/alerting-plugin"
   ],
   "exclude": ["target/**/*"]
 }
