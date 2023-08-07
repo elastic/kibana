@@ -53,10 +53,12 @@ export const useData = (
     autoRefreshSelector: true,
   });
 
-  const docCountRequestParams: {
-    reference: DocumentStatsSearchStrategyParams | undefined;
-    production: DocumentStatsSearchStrategyParams | undefined;
-  } = useMemo(() => {
+  const docCountRequestParams:
+    | {
+        reference: DocumentStatsSearchStrategyParams | undefined;
+        production: DocumentStatsSearchStrategyParams | undefined;
+      }
+    | undefined = useMemo(() => {
     const timefilterActiveBounds = timeRange ?? timefilter.getActiveBounds();
     if (timefilterActiveBounds !== undefined) {
       _timeBuckets.setInterval('auto');
@@ -129,10 +131,10 @@ export const useData = (
     documentStatsProd,
     timefilter,
     /** Start timestamp filter */
-    earliest: docCountRequestParams?.reference.earliest,
+    earliest: docCountRequestParams?.reference?.earliest,
     /** End timestamp filter */
-    latest: docCountRequestParams?.reference.latest,
-    intervalMs: docCountRequestParams?.reference.intervalMs,
+    latest: docCountRequestParams?.reference?.latest,
+    intervalMs: docCountRequestParams?.reference?.intervalMs,
     forceRefresh: () => setLastRefresh(Date.now()),
   };
 };

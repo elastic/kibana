@@ -16,7 +16,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSwitchEvent } from '@elastic/eui/src/components/form/switch/switch';
 import { useTableState } from '@kbn/ml-in-memory-table';
 import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
-import { RandomSampler } from '@kbn/ml-random-sampler-utils';
 import { kbnTypeToSupportedType } from '../common/util/field_types_utils';
 import {
   getDataComparisonType,
@@ -41,8 +40,6 @@ interface DataComparisonViewProps {
   onReset: () => void;
   lastRefresh: number;
   forceRefresh: () => void;
-  randomSampler: RandomSampler;
-  randomSamplerProd: RandomSampler;
   initialSettings: InitialSettings;
 }
 // Data drift view

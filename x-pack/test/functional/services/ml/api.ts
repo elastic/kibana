@@ -1494,7 +1494,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
         });
       this.assertResponseStatusCode(200, status, ingestPipeline);
 
-      log.debug('> Ingest pipeline crated');
+      log.debug('> Ingest pipeline created');
       return ingestPipeline;
     },
 

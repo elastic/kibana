@@ -11713,7 +11713,6 @@
     "xpack.dataVisualizer.nameCollisionMsg": "“{name}”已存在，请提供唯一名称",
     "xpack.dataVisualizer.randomSamplerSettingsPopUp.probabilityLabel": "使用的概率：{samplingProbability}%",
     "xpack.dataVisualizer.searchPanel.ofFieldsTotal": "，共 {totalCount} 个",
-    "xpack.dataVisualizer.searchPanel.totalDocCountLabel": "总文档数：{prepend}{strongTotalCount}",
     "xpack.dataVisualizer.searchPanel.totalDocCountNumber": "{totalCount, plural, other {#}}",
     "xpack.dataVisualizer.addCombinedFieldsLabel": "添加组合字段",
     "xpack.dataVisualizer.chrome.help.appName": "数据可视化工具",

@@ -559,6 +559,7 @@ export interface InitialSettings {
   index: string;
   production: string;
   reference: string;
+  timeField: string;
 }
 
 export const useFetchDataComparisonResult = (
@@ -589,16 +590,6 @@ export const useFetchDataComparisonResult = (
     uiSettings,
     data: { query: queryManager },
   } = useDataVisualizerKibana().services;
-  // const {
-  //   services: {
-  //     uiSettings,
-  //     notifications: { toasts },
-  //     data: { query: queryManager },
-  //     unifiedSearch: {
-  //       ui: { SearchBar },
-  //     },
-  //   },
-  // } = useDataVisualizerKibana();
 
   const { reference: referenceStateManager, production: productionStateManager } =
     useDataComparisonStateManagerContext();
@@ -616,14 +607,6 @@ export const useFetchDataComparisonResult = (
       const doFetchEsRequest = async function () {
         const randomSampler = referenceStateManager.randomSampler;
         const randomSamplerProd = productionStateManager.randomSampler;
-        console.log(
-          `--@@doFetchEsRequest called`,
-          'randomSampler',
-          randomSampler,
-          'randomSamplerProd',
-          randomSamplerProd
-        );
-
         if (!randomSampler || !randomSamplerProd) return;
 
         const randomSamplerWrapper = randomSampler.createRandomSamplerWrapper();
@@ -667,7 +650,6 @@ export const useFetchDataComparisonResult = (
             ? { query: searchString, language: searchQueryLanguage }
             : undefined;
 
-        console.log(`--@@kqlQuery`, kqlQuery, searchString, searchQueryLanguage);
         const refDataQuery = getDataComparisonQuery({
           searchQuery: createMergedEsQuery(
             kqlQuery,
@@ -701,7 +683,7 @@ export const useFetchDataComparisonResult = (
               ...refDataQuery,
             },
           };
-
+          // eslint-disable-next-line no-console
           console.log(`--@@baselineRequest`, baselineRequest);
 
           const baselineResponseAggs = await fetchInParallelChunks({
@@ -717,8 +699,6 @@ export const useFetchDataComparisonResult = (
                 signal,
               }),
           });
-
-          console.log(`--@@baselineResponseAggs`, baselineResponseAggs);
 
           if (isReturnedError(baselineResponseAggs)) {
             setResult({
@@ -767,7 +747,7 @@ export const useFetchDataComparisonResult = (
               ...prodDataQuery,
             },
           };
-
+          // eslint-disable-next-line no-console
           console.log(`--@@driftedRequest`, driftedRequest);
 
           const driftedRespAggs = await fetchInParallelChunks({
@@ -809,6 +789,9 @@ export const useFetchDataComparisonResult = (
               ...refDataQuery,
             },
           };
+
+          // eslint-disable-next-line no-console
+          console.log(`--@@referenceHistogramRequest`, referenceHistogramRequest);
 
           const referenceHistogramRespAggs = await fetchInParallelChunks({
             fields,
@@ -854,6 +837,8 @@ export const useFetchDataComparisonResult = (
               ...prodDataQuery,
             },
           };
+          // eslint-disable-next-line no-console
+          console.log(`--@@productionHistogramRequest`, productionHistogramRequest);
 
           const productionHistogramRespAggs = await fetchInParallelChunks({
             fields,

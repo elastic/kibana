@@ -89,13 +89,8 @@ export function DataViewEditor({
       return i18n.translate('xpack.ml.dataDrift.indexPatternsEditor.error.noEmptyIndexPattern', {
         defaultMessage: 'Index pattern must not be empty.',
       });
-
-    if (isLoadingOptions === false && options.length === 0)
-      return i18n.translate('xpack.ml.dataDrift.indexPatternsEditor.error.noTimestampField', {
-        defaultMessage: 'No matching data stream, index, or index alias has a timestamp field.',
-      });
     return undefined;
-  }, [indexPattern, isLoadingOptions, options.length]);
+  }, [indexPattern]);
 
   return (
     <EuiFlexGroup direction="column">

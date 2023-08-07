@@ -12,12 +12,19 @@ import { i18n } from '@kbn/i18n';
 
 const SIGFIGS_IF_ROUNDING = 3; // Number of sigfigs to use for values < 10
 
+const defaultDocCountLabel = i18n.translate(
+  'xpack.dataVisualizer.searchPanel.totalDocumentsLabel',
+  { defaultMessage: 'Total documents' }
+);
+
 export const TotalCountHeader = ({
   totalCount,
   approximate,
   loading,
+  label = defaultDocCountLabel,
 }: {
   totalCount: number;
+  label?: string;
   loading?: boolean;
   approximate?: boolean;
 }) => {
@@ -26,8 +33,9 @@ export const TotalCountHeader = ({
       <EuiText size="s" data-test-subj="dataVisualizerTotalDocCountHeader" textAlign="center">
         <FormattedMessage
           id="xpack.dataVisualizer.searchPanel.totalDocCountLabel"
-          defaultMessage="Total documents: {prepend}{strongTotalCount}"
+          defaultMessage="{label}: {prepend}{strongTotalCount}"
           values={{
+            label,
             prepend: !loading && approximate ? '~' : '',
             strongTotalCount: loading ? (
               <EuiLoadingSpinner size="s" />

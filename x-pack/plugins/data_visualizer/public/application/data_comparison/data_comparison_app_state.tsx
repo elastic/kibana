@@ -25,6 +25,7 @@ import {
 import { useLocation } from 'react-router-dom';
 import { parse } from 'query-string';
 import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
+import { InitialSettings } from './use_data_drift_result';
 import {
   DataComparisonStateManagerContext,
   defaultSearchQuery,
@@ -45,6 +46,8 @@ export interface DataComparisonDetectionAppStateProps {
 }
 
 export type DataComparisonSpec = typeof DataComparisonDetectionAppState;
+
+const getStr = (arg: string | string[] | null) => `${arg ? arg : ''}`;
 
 export const DataComparisonDetectionAppState: FC<DataComparisonDetectionAppStateProps> = ({
   dataView,
@@ -96,23 +99,23 @@ export const DataComparisonDetectionAppState: FC<DataComparisonDetectionAppState
     sort: false,
   });
 
-  const initialSettings = {
-    index: params.index,
-    production: params.production,
-    reference: params.reference,
-    timeField: params.timeField,
+  const initialSettings: InitialSettings = {
+    index: getStr(params.index),
+    production: getStr(params.production),
+    reference: getStr(params.reference),
+    timeField: getStr(params.timeField),
   };
 
   const referenceStateManager = useMemo(
     () =>
       new StateManager({
         id: 'referenceDataDriftData',
-        indexPattern: params.reference ?? dataView.getIndexPattern(),
+        indexPattern: getStr(params.reference) ?? dataView.getIndexPattern(),
         searchString: '',
         searchQuery: defaultSearchQuery,
         searchQueryLanguage: SEARCH_QUERY_LANGUAGE.KUERY,
         filters: [],
-        timeFieldName: dataView.timeFieldName,
+        timeField: dataView.timeFieldName,
       }),
     [params.reference, dataView]
   );
@@ -120,12 +123,12 @@ export const DataComparisonDetectionAppState: FC<DataComparisonDetectionAppState
     () =>
       new StateManager({
         id: 'productionDataDriftData',
-        indexPattern: params.production ?? dataView.getIndexPattern(),
+        indexPattern: getStr(params.production) ?? dataView.getIndexPattern(),
         searchString: '',
         searchQuery: defaultSearchQuery,
         searchQueryLanguage: SEARCH_QUERY_LANGUAGE.KUERY,
         filters: [],
-        timeFieldName: dataView.timeFieldName,
+        timeField: dataView.timeFieldName,
       }),
     [params.production, dataView]
   );

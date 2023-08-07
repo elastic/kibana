@@ -108,20 +108,6 @@ export function DataDriftIndexPatternsEditor({
       );
     }, [referenceDataViewEditorService, productionDataViewEditorService]);
 
-  const combinedTimeFieldError$: Observable<string | undefined> = useMemo(() => {
-    return combineLatest([
-      combinedTimeFieldOptions$,
-      referenceDataViewEditorService.loadingTimestampFields$,
-      productionDataViewEditorService.loadingTimestampFields$,
-    ]).pipe(
-      map(([options, isLoadingReference, isLoadingProduction]) => {
-        if (!isLoadingProduction && !isLoadingProduction && options.length === 0) {
-          return 'Both reference and production data sets must have at least one time field name in common. Try a different index pattern.';
-        }
-      })
-    );
-  }, [combinedTimeFieldOptions$, referenceDataViewEditorService, productionDataViewEditorService]);
-
   const combinedTimeFieldOptions = useObservable(combinedTimeFieldOptions$, []);
 
   const [referenceIndexPattern, setReferenceIndexPattern] = useState<string>(
@@ -138,7 +124,8 @@ export function DataDriftIndexPatternsEditor({
     const indicesName = `${referenceIndexPattern},${productionIndexPattern}`;
 
     const matchingDataViews = await dataViews.find(indicesName);
-    const timeFieldName = Array.isArray(timeField) ? timeField[0].value : undefined;
+    const timeFieldName =
+      Array.isArray(timeField) && timeField.length > 0 ? timeField[0].value : undefined;
 
     let dataView;
     if (
@@ -176,8 +163,6 @@ export function DataDriftIndexPatternsEditor({
     await navigateToPath(url);
   };
 
-  const errorMessage = useObservable(combinedTimeFieldError$, undefined);
-
   return (
     <EuiFlexGroup direction="column">
       <EuiFlexGrid className="fieldEditor__flyoutPanels" gutterSize="xl" columns={2}>
@@ -211,14 +196,14 @@ export function DataDriftIndexPatternsEditor({
         </EuiFlexItem>
       </EuiFlexGrid>
       <EuiFormRow
-        label={'Time'}
-        error={errorMessage}
-        isInvalid={errorMessage !== undefined}
+        label={i18n.translate('xpack.ml.dataDrift.indexPatternsEditor.timeField', {
+          defaultMessage: 'Time field',
+        })}
         fullWidth
       >
         <>
           <EuiComboBox<string>
-            placeholder={i18n.translate('xpack.ml.dataDrift.indexPatternsEditor.placeholderLabel', {
+            placeholder={i18n.translate('xpack.ml.dataDrift.indexPatternsEditor.timestampField', {
               defaultMessage: 'Select a timestamp field',
             })}
             singleSelection={{ asPlainText: true }}
@@ -247,7 +232,7 @@ export function DataDriftIndexPatternsEditor({
 
       <EuiFormRow id="analyzeDriftData">
         <EuiButton
-          disabled={!productionIndexPattern || !referenceIndexPattern || timeField.length === 0}
+          disabled={!productionIndexPattern || !referenceIndexPattern}
           fill
           onClick={createDataViewAndRedirectToDataComparisonPage}
           iconType="visTagCloud"

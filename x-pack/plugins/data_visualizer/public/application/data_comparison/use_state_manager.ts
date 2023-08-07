@@ -18,8 +18,18 @@ export const defaultSearchQuery = {
   match_all: {},
 };
 
+interface StateManagerConstructorArgs {
+  id: string;
+  indexPattern: string;
+  searchString: string;
+  searchQuery: estypes.QueryDslQueryContainer;
+  searchQueryLanguage: SearchQueryLanguage;
+  filters: Filter[];
+  timeField?: string;
+}
+
 export class StateManager {
-  private timeFieldName?: string;
+  private _timeField?: string;
   private _id: string = 'dataDriftStateManager';
 
   private indexPattern$ = new BehaviorSubject<string>('');
@@ -32,7 +42,6 @@ export class StateManager {
   private randomSamplerMode$ = new BehaviorSubject<RandomSamplerOption>(
     RANDOM_SAMPLER_OPTION.ON_AUTOMATIC
   );
-  private randomSamplerProbability$ = new BehaviorSubject<number | null>();
   private _randomSampler = new RandomSampler();
 
   // private randomSamplerMode: (mode: RandomSamplerOption) => void;
@@ -45,15 +54,15 @@ export class StateManager {
     searchQuery,
     searchQueryLanguage,
     filters,
-    timeFieldName,
-  }) {
+    timeField,
+  }: StateManagerConstructorArgs) {
     this._id = id;
     this.indexPattern$.next(indexPattern);
     this.searchString$.next(searchString);
     this.query$.next(searchQuery);
     this.searchQueryLanguage$.next(searchQueryLanguage);
     this.filters$.next(filters);
-    this.timeFieldName = timeFieldName;
+    this._timeField = timeField;
   }
 
   public setRandomSamplerMode(mode: RandomSamplerOption) {
@@ -85,13 +94,10 @@ export class StateManager {
   public get id() {
     return this._id;
   }
-  // public setFilters(f: Filter[]) {
-  //   this.filters$.next(f);
-  // }
-  //
-  // public getFilters$() {
-  //   return this.filters$;
-  // }
+
+  public get timeField() {
+    return this._timeField;
+  }
 }
 
 export const DataComparisonStateManagerContext = createContext<{

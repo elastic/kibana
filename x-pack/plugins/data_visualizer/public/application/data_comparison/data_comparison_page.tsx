@@ -16,6 +16,7 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiPageHeader,
+  EuiHorizontalRule,
 } from '@elastic/eui';
 
 import type { WindowParameters } from '@kbn/aiops-utils';
@@ -33,8 +34,9 @@ import {
 import moment from 'moment';
 import { css } from '@emotion/react';
 import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
+import { i18n } from '@kbn/i18n';
+import { InitialSettings } from './use_data_drift_result';
 import { useDataComparisonStateManagerContext } from './use_state_manager';
-import { RandomSamplerOption } from '../index_data_visualizer/constants/random_sampler';
 import { useData } from '../common/hooks/use_data';
 import {
   DV_FROZEN_TIER_PREFERENCE,
@@ -42,15 +44,11 @@ import {
   DVStorageMapped,
 } from '../index_data_visualizer/types/storage';
 import { useCurrentEuiTheme } from '../common/hooks/use_current_eui_theme';
-import {
-  DataComparisonFullAppState,
-  DataComparisonQueryState,
-  getDefaultDataComparisonState,
-} from './types';
+import { DataComparisonFullAppState, getDefaultDataComparisonState } from './types';
 import { useDataSource } from '../common/hooks/data_source_context';
 import { useDataVisualizerKibana } from '../kibana_context';
 import { DataComparisonView } from './data_comparison_view';
-import { COMPARISON_LABEL, REFERENCE_LABEL } from './constants';
+import { COMPARISON_LABEL, PRODUCTION_LABEL, REFERENCE_LABEL } from './constants';
 import { SearchPanelContent } from '../index_data_visualizer/components/search_panel/search_bar';
 import { useSearch } from '../common/hooks/use_search';
 import { DocumentCountWithDualBrush } from './document_count_with_dual_brush';
@@ -124,36 +122,17 @@ export const PageHeader: FC = () => {
   );
 };
 
-const defaultSearchQuery = {
-  match_all: {},
-};
-interface DataComparisonDefaultState extends DataComparisonQueryState {
-  indexPattern: string;
-  randomSampler: string;
-  randomSamplerMode: RandomSamplerOption;
-  randomSamplerProbability: null | number;
+const getDataComparisonDataLabel = (label: string, indexPattern?: string) =>
+  i18n.translate('xpack.dataVisualizer.dataComparison.dataLabel', {
+    defaultMessage: '{label} data: {indexPattern}',
+    values: { label, indexPattern },
+  });
+
+interface Props {
+  initialSettings: InitialSettings;
 }
-// export const getDataComparisonDefaultState = (): DataComparisonDefaultState => ({
-//   indexPattern: undefined,
-//   searchQuery: undefined,
-//   searchString: undefined,
-//   searchQueryLanguage: undefined,
-//   filters: [],
-//   randomSamplerMode: RANDOM_SAMPLER_OPTION.ON_AUTOMATIC,
-//   randomSamplerProbability: MIN_SAMPLER_PROBABILITY,
-//   randomSampler: undefined,
-// });
-// export class DataComparisonStateManager {
-//   private docCount$ = new BehaviorSubject<number>(0);
-//   private mode$ = new BehaviorSubject<RandomSamplerOption>(RANDOM_SAMPLER_OPTION.ON_AUTOMATIC);
-//   private probability$ = new BehaviorSubject<RandomSamplerProbability>(DEFAULT_PROBABILITY);
-//   private setRandomSamplerModeInStorage: (mode: RandomSamplerOption) => void;
-//   private setRandomSamplerProbabilityInStorage: (prob: RandomSamplerProbability) => void;
-// }
 
-export const DataComparisonPage: FC = (props) => {
-  const initialSettings = props.initialSettings;
-
+export const DataComparisonPage: FC<Props> = ({ initialSettings }) => {
   const {
     services: { data: dataService },
   } = useDataVisualizerKibana();
@@ -309,6 +288,13 @@ export const DataComparisonPage: FC = (props) => {
     [JSON.stringify({ windowParameters, colors })]
   );
 
+  const referenceIndexPatternLabel = initialSettings?.reference
+    ? getDataComparisonDataLabel(REFERENCE_LABEL, initialSettings.reference)
+    : getDataComparisonDataLabel(REFERENCE_LABEL);
+  const productionIndexPatternLabel = initialSettings?.production
+    ? getDataComparisonDataLabel(PRODUCTION_LABEL, initialSettings?.production)
+    : getDataComparisonDataLabel(COMPARISON_LABEL);
+
   return (
     <EuiPageBody
       data-test-subj="dataComparisonDataComparisonPage"
@@ -328,84 +314,86 @@ export const DataComparisonPage: FC = (props) => {
               setSearchParams={setSearchParams}
             />
           </EuiFlexItem>
-          {documentCountStats !== undefined && (
-            <EuiFlexItem>
-              <EuiPanel paddingSize="m">
-                <DocumentCountWithDualBrush
-                  randomSampler={randomSampler}
-                  reload={forceRefresh}
-                  brushSelectionUpdateHandler={brushSelectionUpdate}
-                  documentCountStats={documentCountStats}
-                  documentCountStatsSplit={documentCountStatsCompare}
-                  isBrushCleared={isBrushCleared}
-                  totalCount={totalCount}
-                  approximate={sampleProbability < 1}
-                  sampleProbability={sampleProbability}
-                  initialAnalysisStart={initialAnalysisStart}
-                  barStyleAccessor={barStyleAccessor}
-                  baselineBrush={{
-                    label: REFERENCE_LABEL,
-                    annotationStyle: {
-                      strokeWidth: 0,
-                      stroke: colors.referenceColor,
-                      fill: colors.referenceColor,
-                      opacity: 0.5,
-                    },
-                    badgeWidth: 80,
-                  }}
-                  deviationBrush={{
-                    label: COMPARISON_LABEL,
-                    annotationStyle: {
-                      strokeWidth: 0,
-                      stroke: colors.productionColor,
-                      fill: colors.productionColor,
-                      opacity: 0.5,
-                    },
-                    badgeWidth: 90,
-                  }}
-                  stateManager={referenceStateManager}
-                />
-                <DocumentCountWithDualBrush
-                  randomSampler={randomSamplerProd}
-                  reload={forceRefresh}
-                  brushSelectionUpdateHandler={brushSelectionUpdate}
-                  documentCountStats={documentStatsProd.documentCountStats}
-                  documentCountStatsSplit={documentStatsProd.documentCountStatsCompare}
-                  isBrushCleared={isBrushCleared}
-                  totalCount={documentStatsProd.totalCount}
-                  approximate={documentStatsProd.sampleProbability < 1}
-                  sampleProbability={documentStatsProd.sampleProbability}
-                  initialAnalysisStart={initialAnalysisStart}
-                  barStyleAccessor={barStyleAccessor}
-                  baselineBrush={{
-                    label: REFERENCE_LABEL,
-                    annotationStyle: {
-                      strokeWidth: 0,
-                      stroke: colors.referenceColor,
-                      fill: colors.referenceColor,
-                      opacity: 0.5,
-                    },
-                    badgeWidth: 80,
-                  }}
-                  deviationBrush={{
-                    label: COMPARISON_LABEL,
-                    annotationStyle: {
-                      strokeWidth: 0,
-                      stroke: colors.productionColor,
-                      fill: colors.productionColor,
-                      opacity: 0.5,
-                    },
-                    badgeWidth: 90,
-                  }}
-                  stateManager={productionStateManager}
-                />
-              </EuiPanel>
-            </EuiFlexItem>
-          )}
+          <EuiFlexItem>
+            <EuiPanel paddingSize="m">
+              <DocumentCountWithDualBrush
+                label={referenceIndexPatternLabel}
+                randomSampler={randomSampler}
+                reload={forceRefresh}
+                brushSelectionUpdateHandler={brushSelectionUpdate}
+                documentCountStats={documentCountStats}
+                documentCountStatsSplit={documentCountStatsCompare}
+                isBrushCleared={isBrushCleared}
+                totalCount={totalCount}
+                approximate={sampleProbability < 1}
+                sampleProbability={sampleProbability}
+                initialAnalysisStart={initialAnalysisStart}
+                barStyleAccessor={barStyleAccessor}
+                baselineBrush={{
+                  label: REFERENCE_LABEL,
+                  annotationStyle: {
+                    strokeWidth: 0,
+                    stroke: colors.referenceColor,
+                    fill: colors.referenceColor,
+                    opacity: 0.5,
+                  },
+                  badgeWidth: 80,
+                }}
+                deviationBrush={{
+                  label: COMPARISON_LABEL,
+                  annotationStyle: {
+                    strokeWidth: 0,
+                    stroke: colors.productionColor,
+                    fill: colors.productionColor,
+                    opacity: 0.5,
+                  },
+                  badgeWidth: 90,
+                }}
+                stateManager={referenceStateManager}
+              />
+              <EuiHorizontalRule />
+              <DocumentCountWithDualBrush
+                label={productionIndexPatternLabel}
+                randomSampler={randomSamplerProd}
+                reload={forceRefresh}
+                brushSelectionUpdateHandler={brushSelectionUpdate}
+                documentCountStats={documentStatsProd.documentCountStats}
+                documentCountStatsSplit={documentStatsProd.documentCountStatsCompare}
+                isBrushCleared={isBrushCleared}
+                totalCount={documentStatsProd.totalCount}
+                approximate={documentStatsProd.sampleProbability < 1}
+                sampleProbability={documentStatsProd.sampleProbability}
+                initialAnalysisStart={initialAnalysisStart}
+                barStyleAccessor={barStyleAccessor}
+                baselineBrush={{
+                  label: REFERENCE_LABEL,
+                  annotationStyle: {
+                    strokeWidth: 0,
+                    stroke: colors.referenceColor,
+                    fill: colors.referenceColor,
+                    opacity: 0.5,
+                  },
+                  badgeWidth: 80,
+                }}
+                deviationBrush={{
+                  label: COMPARISON_LABEL,
+                  annotationStyle: {
+                    strokeWidth: 0,
+                    stroke: colors.productionColor,
+                    fill: colors.productionColor,
+                    opacity: 0.5,
+                  },
+                  badgeWidth: 90,
+                }}
+                stateManager={productionStateManager}
+              />
+            </EuiPanel>
+          </EuiFlexItem>
 
           <EuiFlexItem>
             <EuiPanel paddingSize="m">
               <DataComparisonView
+                initialSettings={initialSettings}
                 isBrushCleared={isBrushCleared}
                 onReset={clearSelection}
                 windowParameters={windowParameters}
@@ -413,7 +401,6 @@ export const DataComparisonPage: FC = (props) => {
                 searchString={searchString ?? ''}
                 searchQueryLanguage={searchQueryLanguage}
                 lastRefresh={lastRefresh}
-                randomSampler={randomSampler}
                 forceRefresh={forceRefresh}
               />
             </EuiPanel>
