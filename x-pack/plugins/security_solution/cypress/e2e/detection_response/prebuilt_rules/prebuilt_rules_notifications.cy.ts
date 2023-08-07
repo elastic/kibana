@@ -14,6 +14,7 @@ import {
 import {
   installAllPrebuiltRulesRequest,
   createAndInstallMockedPrebuiltRules,
+  waitUntilAllRulesCreated,
 } from '../../../tasks/api_calls/prebuilt_rules';
 import {
   resetRulesTableState,
@@ -149,29 +150,31 @@ describe('Detection rules, Prebuilt Rules Installation and Update Notifications'
     describe('Rule installation available and rule update available notifications', () => {
       beforeEach(() => {
         installAllPrebuiltRulesRequest().then(() => {
-          /* Create new rule assets with a different rule_id as the one that was */
-          /* installed before in order to trigger the installation notification */
-          const RULE_2 = createRuleAssetSavedObject({
-            name: 'Test rule 2',
-            rule_id: 'rule_2',
+          waitUntilAllRulesCreated([RULE_1]).then(() => {
+            /* Create new rule assets with a different rule_id as the one that was */
+            /* installed before in order to trigger the installation notification */
+            const RULE_2 = createRuleAssetSavedObject({
+              name: 'Test rule 2',
+              rule_id: 'rule_2',
+            });
+            /* Create new rule asset with the same rule_id as the one that was installed  */
+            /* but with a higher version, in order to trigger the update notification     */
+            const UPDATED_RULE = createRuleAssetSavedObject({
+              name: 'Test rule 1.1 (updated)',
+              rule_id: 'rule_1',
+              version: 2,
+            });
+            createAndInstallMockedPrebuiltRules({
+              rules: [RULE_2, UPDATED_RULE],
+              installToKibana: false,
+            });
+            visitWithoutDateRange(SECURITY_DETECTIONS_RULES_URL);
+            waitForRulesTableToBeLoaded();
           });
-          /* Create new rule asset with the same rule_id as the one that was installed  */
-          /* but with a higher version, in order to trigger the update notification     */
-          const UPDATED_RULE = createRuleAssetSavedObject({
-            name: 'Test rule 1.1 (updated)',
-            rule_id: 'rule_1',
-            version: 2,
-          });
-          createAndInstallMockedPrebuiltRules({
-            rules: [RULE_2, UPDATED_RULE],
-            installToKibana: false,
-          });
-          visitWithoutDateRange(SECURITY_DETECTIONS_RULES_URL);
-          waitForRulesTableToBeLoaded();
         });
       });
 
-      it('should notify user about prebuilt rules available for installation and for upgrade', () => {
+      it.only('should notify user about prebuilt rules available for installation and for upgrade', () => {
         // 1 rule available for installation
         cy.get(ADD_ELASTIC_RULES_BTN).should('have.text', `Add Elastic rules${1}`);
         // 1 rule available for update

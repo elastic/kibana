@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { RuleResponse } from '../../../common/api/detection_engine';
 import { ELASTIC_SECURITY_RULE_ID } from '../../../common/detection_engine/constants';
 import type { PrePackagedRulesStatusResponse } from '../../../public/detection_engine/rule_management/logic/types';
 import { getPrebuiltRuleWithExceptionsMock } from '../../../server/lib/detection_engine/prebuilt_rules/mocks';
@@ -74,6 +75,11 @@ export const excessivelyInstallAllPrebuiltRules = () => {
   installAllPrebuiltRulesRequest();
 };
 
+/*
+ * Wait until all rules assets passed in as parameters are
+ * created in the `.kibana_security_solution` index as prebuilt rule assets
+ * (security-rule saved objects)
+ */
 export const waitUntilAllRuleAssetsCreated = (
   rules: Array<typeof SAMPLE_PREBUILT_RULE>,
   index = '.kibana_security_solution'
@@ -109,6 +115,48 @@ export const waitUntilAllRuleAssetsCreated = (
     { interval: 500, timeout: 12000 }
   );
 
+/*
+ * Wait until all rules assets passed in as parameters are
+ * created in the `.kibana_alerting_cases` index as actual installed rules
+ * (saved objects of type alert)
+ */
+export const waitUntilAllRulesCreated = (
+  rules: Array<typeof SAMPLE_PREBUILT_RULE>,
+  index = '.kibana_alerting_cases'
+) =>
+  cy.waitUntil(
+    () => {
+      return cy
+        .request({
+          method: 'GET',
+          url: `${Cypress.env('ELASTICSEARCH_URL')}/${index}/_search`,
+          headers: { 'kbn-xsrf': 'cypress-creds', 'Content-Type': 'application/json' },
+          failOnStatusCode: false,
+          body: {
+            query: {
+              term: {
+                type: {
+                  value: 'alert',
+                },
+              },
+            },
+          },
+        })
+        .then((response) => {
+          const areAllRulesCreated = rules.every((rule) => {
+            // Checking that all the expected rules are stored in ES
+            return response.body.hits.hits.some(
+              (storedRule: { _source: { alert: RuleResponse } }) =>
+                storedRule._source.alert.params.ruleId === rule['security-rule'].rule_id
+            );
+          });
+
+          return areAllRulesCreated;
+        });
+    },
+    { interval: 500, timeout: 12000 }
+  );
+
 export const createNewRuleAsset = ({
   index = '.kibana_security_solution',
   rule = SAMPLE_PREBUILT_RULE,
@@ -119,7 +167,7 @@ export const createNewRuleAsset = ({
   const url = `${Cypress.env('ELASTICSEARCH_URL')}/${index}/_doc/security-rule:${
     rule['security-rule'].rule_id
   }`;
-  cy.log('URL', url);
+
   cy.waitUntil(
     () => {
       return cy
@@ -143,13 +191,17 @@ export const bulkCreateRuleAssets = ({
   index?: string;
   rules?: Array<typeof SAMPLE_PREBUILT_RULE>;
 }) => {
+  cy.log(
+    'Bulk Install prebuilt rules',
+    rules?.map((rule) => rule['security-rule'].rule_id).join(', ')
+  );
   const url = `${Cypress.env('ELASTICSEARCH_URL')}/${index}/_bulk`;
 
   const bulkIndexRequestBody = rules.reduce((body, rule) => {
     const indexOperation = {
       index: {
         _index: index,
-        _id: rule['security-rule'].rule_id,
+        _id: `security-rule:${rule['security-rule'].rule_id}`,
       },
     };
 
@@ -176,7 +228,6 @@ export const bulkCreateRuleAssets = ({
           method: 'POST',
           url,
           headers: { 'kbn-xsrf': 'cypress-creds', 'Content-Type': 'application/json' },
-          failOnStatusCode: false,
           body: bulkIndexRequestBody,
         })
         .then((response) => response.status === 200);
@@ -227,13 +278,10 @@ export const createAndInstallMockedPrebuiltRules = ({
   rules?: Array<typeof SAMPLE_PREBUILT_RULE>;
   installToKibana?: boolean;
 }) => {
-  cy.log('Install prebuilt rules', rules?.length);
+  cy.log('Install prebuilt rules', rules?.map((rule) => rule['security-rule'].rule_id).join(', '));
   preventPrebuiltRulesPackageInstallation();
-  // TODO: use this bulk method once the issue with Cypress is fixed
-  // bulkCreateRuleAssets({ rules });
-  rules?.forEach((rule) => {
-    createNewRuleAsset({ rule });
-  });
+
+  bulkCreateRuleAssets({ rules });
 
   if (rules?.length) {
     waitUntilAllRuleAssetsCreated(rules);
