@@ -18,7 +18,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const dashboardAddPanel = getService('dashboardAddPanel');
 
-  describe.only('dashboard listing page', function describeIndexTests() {
+  describe('dashboard listing page', function describeIndexTests() {
     const dashboardName = 'Dashboard Listing Test';
 
     before(async function () {
