@@ -40,7 +40,7 @@ describe('Endpoints page', () => {
   });
 
   describe('Sorting', () => {
-    it('Sorts by enrollment date descreasing by default', () => {
+    it('Sorts by enrollment date descending order by default', () => {
       cy.intercept('api/endpoint/metadata*').as('getEndpointMetadataRequest');
 
       loadPage(APP_ENDPOINTS_PATH);
@@ -52,7 +52,7 @@ describe('Endpoints page', () => {
         expect(body.sortDirection).to.equal('desc');
       });
 
-      // no sorting indicator is present on screen
+      // no sorting indicator is present on the screen
       cy.get('.euiTableSortIcon').should('not.exist');
     });
 
