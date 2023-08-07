@@ -75,6 +75,7 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
   if (error) {
     return (
       <EuiPageTemplate.EmptyPrompt
+        color="danger"
         iconType="warning"
         title={
           <h2 data-test-subj="pipelineLoadError">

@@ -106,6 +106,7 @@ export const PipelinesEdit: React.FunctionComponent<RouteComponentProps<MatchPar
   if (error) {
     return (
       <EuiPageTemplate.EmptyPrompt
+        color="danger"
         iconType="warning"
         title={
           <h2>
