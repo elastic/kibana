@@ -9,6 +9,7 @@ import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 import {
+  EuiFieldPassword,
   EuiFieldText,
   EuiFormRow,
   EuiPanel,
@@ -19,7 +20,6 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { MultiRowInput } from '../multi_row_input';
 import { kafkaAuthType, kafkaSaslMechanism } from '../../../../../../../common/constants';
 
 import type { OutputFormInputsType } from './use_output_form';
@@ -44,6 +44,11 @@ const kafkaSaslOptions = [
 
 const kafkaAuthenticationsOptions = [
   {
+    id: kafkaAuthType.None,
+    label: 'None',
+    'data-test-subj': 'kafkaAuthenticationNoneRadioButton',
+  },
+  {
     id: kafkaAuthType.Userpass,
     label: 'Username / Password',
     'data-test-subj': 'kafkaAuthenticationUsernamePasswordRadioButton',
@@ -52,11 +57,6 @@ const kafkaAuthenticationsOptions = [
     id: kafkaAuthType.Ssl,
     label: 'SSL',
     'data-test-subj': 'kafkaAuthenticationSSLRadioButton',
-  },
-  {
-    id: kafkaAuthType.Kerberos,
-    label: 'Kerberos',
-    'data-test-subj': 'kafkaAuthenticationKerberosRadioButton',
   },
 ];
 
@@ -67,26 +67,11 @@ export const OutputFormKafkaAuthentication: React.FunctionComponent<{
 
   const renderAuthentication = () => {
     switch (inputs.kafkaAuthMethodInput.value) {
+      case kafkaAuthType.None:
+        return null;
       case kafkaAuthType.Ssl:
         return (
           <>
-            <MultiRowInput
-              placeholder={i18n.translate(
-                'xpack.fleet.settings.editOutputFlyout.sslCertificateAuthoritiesInputPlaceholder',
-                {
-                  defaultMessage: 'Specify certificate authority',
-                }
-              )}
-              label={i18n.translate(
-                'xpack.fleet.settings.editOutputFlyout.sslCertificateAuthoritiesInputLabel',
-                {
-                  defaultMessage: 'Server SSL certificate authorities (optional)',
-                }
-              )}
-              multiline={true}
-              sortable={false}
-              {...inputs.kafkaSslCertificateAuthoritiesInput.props}
-            />
             <EuiFormRow
               fullWidth
               label={
@@ -122,7 +107,7 @@ export const OutputFormKafkaAuthentication: React.FunctionComponent<{
               <EuiTextArea
                 fullWidth
                 rows={5}
-                {...inputs.sslKeyInput.props}
+                {...inputs.kafkaSslKeyInput.props}
                 placeholder={i18n.translate(
                   'xpack.fleet.settings.editOutputFlyout.sslKeyInputPlaceholder',
                   {
@@ -133,8 +118,6 @@ export const OutputFormKafkaAuthentication: React.FunctionComponent<{
             </EuiFormRow>
           </>
         );
-      case kafkaAuthType.Kerberos:
-        return null;
       default:
       case kafkaAuthType.Userpass:
         return (
@@ -165,7 +148,8 @@ export const OutputFormKafkaAuthentication: React.FunctionComponent<{
               }
               {...inputs.kafkaAuthPasswordInput.formRowProps}
             >
-              <EuiFieldText
+              <EuiFieldPassword
+                type={'dual'}
                 data-test-subj="settingsOutputsFlyout.kafkaPasswordInput"
                 fullWidth
                 {...inputs.kafkaAuthPasswordInput.props}

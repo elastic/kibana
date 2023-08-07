@@ -917,8 +917,7 @@ describe('Output Service', () => {
         hosts: ['http://test:4343'],
         auth_type: null,
         broker_timeout: null,
-        broker_ack_reliability: null,
-        broker_buffer_size: null,
+        required_acks: null,
         client_id: null,
         compression: null,
         compression_level: null,
@@ -1034,8 +1033,7 @@ describe('Output Service', () => {
         ca_trusted_fingerprint: null,
         auth_type: null,
         broker_timeout: null,
-        broker_ack_reliability: null,
-        broker_buffer_size: null,
+        required_acks: null,
         client_id: null,
         compression: null,
         compression_level: null,
@@ -1258,9 +1256,8 @@ describe('Output Service', () => {
         ca_sha256: null,
         ca_trusted_fingerprint: null,
         broker_timeout: 10,
-        broker_ack_reliability: 'Wait for local commit',
-        broker_buffer_size: 256,
-        client_id: 'Elastic Agent',
+        required_acks: 1,
+        client_id: 'Elastic',
         compression: 'gzip',
         compression_level: 4,
         partition: 'hash',
@@ -1285,11 +1282,10 @@ describe('Output Service', () => {
       expect(soClient.update).toBeCalledWith(expect.anything(), expect.anything(), {
         hosts: ['test:4343'],
         broker_timeout: 10,
-        broker_ack_reliability: 'Wait for local commit',
-        broker_buffer_size: 256,
+        required_acks: 1,
         ca_sha256: null,
         ca_trusted_fingerprint: null,
-        client_id: 'Elastic Agent',
+        client_id: 'Elastic',
         compression: 'gzip',
         compression_level: 4,
         partition: 'hash',
@@ -1310,25 +1306,24 @@ describe('Output Service', () => {
 
       await outputService.update(soClient, esClientMock, 'output-test', {
         type: 'kafka',
-        hosts: ['http://test:4343'],
+        hosts: ['test:4343'],
         is_default: true,
       });
 
       expect(soClient.update).toBeCalledWith(expect.anything(), expect.anything(), {
         type: 'kafka',
-        hosts: ['http://test:4343'],
+        hosts: ['test:4343'],
         is_default: true,
         ca_sha256: null,
         ca_trusted_fingerprint: null,
-        client_id: 'Elastic Agent',
+        client_id: 'Elastic',
         compression: 'gzip',
         compression_level: 4,
         partition: 'hash',
         timeout: 30,
         version: '1.0.0',
         broker_timeout: 10,
-        broker_ack_reliability: 'Wait for local commit',
-        broker_buffer_size: 256,
+        required_acks: 1,
       });
       expect(mockedAgentPolicyService.update).toBeCalledWith(
         expect.anything(),
@@ -1354,7 +1349,7 @@ describe('Output Service', () => {
         'output-test',
         {
           type: 'kafka',
-          hosts: ['http://test:4343'],
+          hosts: ['test:4343'],
           is_default: true,
         },
         {
@@ -1364,19 +1359,18 @@ describe('Output Service', () => {
 
       expect(soClient.update).toBeCalledWith(expect.anything(), expect.anything(), {
         type: 'kafka',
-        hosts: ['http://test:4343'],
+        hosts: ['test:4343'],
         is_default: true,
         ca_sha256: null,
         ca_trusted_fingerprint: null,
-        client_id: 'Elastic Agent',
+        client_id: 'Elastic',
         compression: 'gzip',
         compression_level: 4,
         partition: 'hash',
         timeout: 30,
         version: '1.0.0',
         broker_timeout: 10,
-        broker_ack_reliability: 'Wait for local commit',
-        broker_buffer_size: 256,
+        required_acks: 1,
       });
       expect(mockedAgentPolicyService.update).toBeCalledWith(
         expect.anything(),
@@ -1396,25 +1390,24 @@ describe('Output Service', () => {
 
       await outputService.update(soClient, esClientMock, 'output-test', {
         type: 'kafka',
-        hosts: ['http://test:4343'],
+        hosts: ['test:4343'],
         is_default: true,
       });
 
       expect(soClient.update).toBeCalledWith(expect.anything(), expect.anything(), {
         type: 'kafka',
-        hosts: ['http://test:4343'],
+        hosts: ['test:4343'],
         is_default: true,
         ca_sha256: null,
         ca_trusted_fingerprint: null,
-        client_id: 'Elastic Agent',
+        client_id: 'Elastic',
         compression: 'gzip',
         compression_level: 4,
         partition: 'hash',
         timeout: 30,
         version: '1.0.0',
         broker_timeout: 10,
-        broker_ack_reliability: 'Wait for local commit',
-        broker_buffer_size: 256,
+        required_acks: 1,
       });
       expect(mockedAgentPolicyService.update).toBeCalledWith(
         expect.anything(),
@@ -1438,7 +1431,7 @@ describe('Output Service', () => {
         'output-test',
         {
           type: 'kafka',
-          hosts: ['http://test:4343'],
+          hosts: ['test:4343'],
           is_default: true,
         },
         {
@@ -1448,19 +1441,18 @@ describe('Output Service', () => {
 
       expect(soClient.update).toBeCalledWith(expect.anything(), expect.anything(), {
         type: 'kafka',
-        hosts: ['http://test:4343'],
+        hosts: ['test:4343'],
         is_default: true,
         ca_sha256: null,
         ca_trusted_fingerprint: null,
-        client_id: 'Elastic Agent',
+        client_id: 'Elastic',
         compression: 'gzip',
         compression_level: 4,
         partition: 'hash',
         timeout: 30,
         version: '1.0.0',
         broker_timeout: 10,
-        broker_ack_reliability: 'Wait for local commit',
-        broker_buffer_size: 256,
+        required_acks: 1,
       });
       expect(mockedAgentPolicyService.update).toBeCalledWith(
         expect.anything(),

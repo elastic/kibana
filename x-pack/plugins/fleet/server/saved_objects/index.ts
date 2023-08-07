@@ -229,6 +229,22 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
         broker_timeout: { type: 'integer' },
         broker_ack_reliability: { type: 'text' },
         broker_buffer_size: { type: 'integer' },
+        required_acks: { type: 'integer' },
+        channel_buffer_size: { type: 'integer' },
+      },
+    },
+    modelVersions: {
+      '1': {
+        changes: [
+          {
+            type: 'mappings_deprecation',
+            deprecatedMappings: [
+              'broker_ack_reliability',
+              'broker_buffer_size',
+              'channel_buffer_size',
+            ],
+          },
+        ],
       },
     },
     migrations: {
@@ -513,7 +529,7 @@ export function registerEncryptedSavedObjects(
     type: OUTPUT_SAVED_OBJECT_TYPE,
     attributesToEncrypt: new Set([
       { key: 'ssl', dangerouslyExposeValue: true },
-      { key: 'password', dangerouslyExposeValue: true },
+      // { key: 'password', dangerouslyExposeValue: true }, //TODO:
     ]),
     attributesToExcludeFromAAD: new Set([
       'output_id',

@@ -114,10 +114,8 @@ properties:
     type: number
   broker_timeout:
     type: number
-  broker_buffer_size:
+  required_acks:
     type: number
-  broker_ack_reliability:
-    type: string
 required:
   - name
   - type

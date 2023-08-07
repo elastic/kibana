@@ -1743,6 +1743,12 @@
       },
       "broker_buffer_size": {
         "type": "integer"
+      },
+      "required_acks": {
+        "type": "integer"
+      },
+      "channel_buffer_size": {
+        "type": "integer"
       }
     }
   },

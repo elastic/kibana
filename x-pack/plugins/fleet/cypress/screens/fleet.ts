@@ -136,6 +136,7 @@ export const getSpecificSelectorId = (selector: string, id: number) => {
 export const SETTINGS_OUTPUTS_KAFKA = {
   VERSION_SELECT: 'settingsOutputsFlyout.kafkaVersionInput',
   AUTHENTICATION_SELECT: 'settingsOutputsFlyout.kafkaAuthenticationRadioInput',
+  AUTHENTICATION_NONE_OPTION: 'kafkaAuthenticationNoneRadioButton',
   AUTHENTICATION_USERNAME_PASSWORD_OPTION: 'kafkaAuthenticationUsernamePasswordRadioButton',
   AUTHENTICATION_SSL_OPTION: 'kafkaAuthenticationSSLRadioButton',
   AUTHENTICATION_KERBEROS_OPTION: 'kafkaAuthenticationKerberosRadioButton',
@@ -173,7 +174,6 @@ export const SETTINGS_OUTPUTS_KAFKA = {
   BROKER_PANEL: 'settingsOutputsFlyout.kafkaBrokerSettingsPanel',
   BROKER_TIMEOUT_SELECT: 'settingsOutputsFlyout.kafkaBrokerTimeoutInput',
   BROKER_REACHABILITY_TIMEOUT_SELECT: 'settingsOutputsFlyout.kafkaBrokerReachabilityTimeoutInput',
-  BROKER_CHANNEL_BUFFER_SIZE_SELECT: 'settingsOutputsFlyout.kafkaBrokerChannelBufferSizeInput',
   BROKER_ACK_RELIABILITY_SELECT: 'settingsOutputsFlyout.kafkaBrokerAckReliabilityInputLabel',
   KEY_INPUT: 'settingsOutputsFlyout.kafkaKeyInput',
 };

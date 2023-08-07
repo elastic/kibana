@@ -21,6 +21,7 @@ export const selectKafkaOutput = () => {
   visit('/app/fleet/settings');
   cy.getBySel(SETTINGS_OUTPUTS.ADD_BTN).click();
   cy.getBySel(SETTINGS_OUTPUTS.TYPE_INPUT).select('kafka');
+  cy.getBySel(SETTINGS_OUTPUTS_KAFKA.AUTHENTICATION_USERNAME_PASSWORD_OPTION).click();
 };
 
 export const shouldDisplayError = (handler: string) => {
@@ -56,7 +57,7 @@ export const kafkaOutputBody = {
   name: 'kafka_test1',
   type: 'kafka',
   is_default: false,
-  hosts: ['https://example.com'],
+  hosts: ['example.com:2000'],
   topics: [{ topic: 'test' }],
   auth_type: 'user_pass',
   username: 'kafka',
@@ -110,7 +111,7 @@ export const kafkaOutputFormValues = {
   },
   firstTopicCondition: {
     selector: SETTINGS_OUTPUTS_KAFKA.TOPICS_CONDITION_INPUT,
-    value: 'testCondition',
+    value: 'testCondition: abc',
   },
   firstTopicWhen: {
     selector: SETTINGS_OUTPUTS_KAFKA.TOPICS_WHEN_INPUT,
@@ -122,7 +123,7 @@ export const kafkaOutputFormValues = {
   },
   secondTopicCondition: {
     selector: getSpecificSelectorId(SETTINGS_OUTPUTS_KAFKA.TOPICS_CONDITION_INPUT, 1),
-    value: 'testCondition1',
+    value: 'testCondition1: dca',
   },
   secondTopicWhen: {
     selector: getSpecificSelectorId(SETTINGS_OUTPUTS_KAFKA.TOPICS_WHEN_INPUT, 1),
@@ -154,11 +155,7 @@ export const kafkaOutputFormValues = {
   },
   brokerAckReliability: {
     selector: SETTINGS_OUTPUTS_KAFKA.BROKER_ACK_RELIABILITY_SELECT,
-    value: 'Do not wait',
-  },
-  brokerChannelBufferSize: {
-    selector: SETTINGS_OUTPUTS_KAFKA.BROKER_CHANNEL_BUFFER_SIZE_SELECT,
-    value: '512',
+    value: '0',
   },
   brokerTimeout: {
     selector: SETTINGS_OUTPUTS_KAFKA.BROKER_TIMEOUT_SELECT,
@@ -185,7 +182,7 @@ export const resetKafkaOutputForm = () => {
 
 export const fillInKafkaOutputForm = () => {
   cy.getBySel(kafkaOutputFormValues.name.selector).type(kafkaOutputFormValues.name.value);
-  cy.get('[placeholder="Specify host"').clear().type('http://localhost:5000');
+  cy.get('[placeholder="Specify host"').clear().type('localhost:5000');
   cy.getBySel(kafkaOutputFormValues.username.selector).type(kafkaOutputFormValues.username.value);
   cy.getBySel(kafkaOutputFormValues.password.selector).type(kafkaOutputFormValues.password.value);
 
@@ -249,9 +246,6 @@ export const fillInKafkaOutputForm = () => {
   cy.getBySel(kafkaOutputFormValues.brokerAckReliability.selector).select(
     kafkaOutputFormValues.brokerAckReliability.value
   );
-  cy.getBySel(kafkaOutputFormValues.brokerChannelBufferSize.selector).select(
-    kafkaOutputFormValues.brokerChannelBufferSize.value
-  );
   cy.getBySel(kafkaOutputFormValues.brokerTimeout.selector).select(
     kafkaOutputFormValues.brokerTimeout.value
   );
@@ -285,6 +279,8 @@ export const validateOutputTypeChangeToKafka = (outputId: string) => {
   visit(`/app/fleet/settings/outputs/${outputId}`);
   cy.getBySel(kafkaOutputFormValues.name.selector).clear();
   cy.getBySel(SETTINGS_OUTPUTS.TYPE_INPUT).select('kafka');
+  cy.getBySel(SETTINGS_OUTPUTS_KAFKA.AUTHENTICATION_USERNAME_PASSWORD_OPTION).click();
+
   fillInKafkaOutputForm();
   cy.intercept('PUT', '**/api/fleet/outputs/**').as('saveOutput');
 

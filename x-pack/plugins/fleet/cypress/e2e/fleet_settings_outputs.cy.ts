@@ -61,9 +61,9 @@ describe('Outputs', () => {
           cy.get('[placeholder="Specify host"');
           cy.getBySel(SETTINGS_OUTPUTS.ADD_HOST_ROW_BTN);
           cy.getBySel(SETTINGS_OUTPUTS_KAFKA.AUTHENTICATION_SELECT).within(() => {
+            cy.getBySel(SETTINGS_OUTPUTS_KAFKA.AUTHENTICATION_NONE_OPTION);
             cy.getBySel(SETTINGS_OUTPUTS_KAFKA.AUTHENTICATION_USERNAME_PASSWORD_OPTION);
             cy.getBySel(SETTINGS_OUTPUTS_KAFKA.AUTHENTICATION_SSL_OPTION);
-            cy.getBySel(SETTINGS_OUTPUTS_KAFKA.AUTHENTICATION_KERBEROS_OPTION);
           });
 
           // Verify user/pass fields
@@ -134,7 +134,10 @@ describe('Outputs', () => {
             cy.getBySel(SETTINGS_OUTPUTS_KAFKA.HEADERS_VALUE_INPUT);
             cy.getBySel(SETTINGS_OUTPUTS_KAFKA.HEADERS_ADD_ROW_BUTTON).should('be.disabled');
             cy.getBySel(SETTINGS_OUTPUTS_KAFKA.HEADERS_REMOVE_ROW_BUTTON).should('be.disabled');
-            cy.getBySel(SETTINGS_OUTPUTS_KAFKA.HEADERS_CLIENT_ID_INPUT);
+            cy.getBySel(SETTINGS_OUTPUTS_KAFKA.HEADERS_CLIENT_ID_INPUT).should(
+              'have.value',
+              'Elastic'
+            );
           });
 
           // Verify add header
@@ -166,7 +169,6 @@ describe('Outputs', () => {
 
           cy.getBySel(SETTINGS_OUTPUTS_KAFKA.BROKER_PANEL).within(() => {
             cy.getBySel(SETTINGS_OUTPUTS_KAFKA.BROKER_ACK_RELIABILITY_SELECT);
-            cy.getBySel(SETTINGS_OUTPUTS_KAFKA.BROKER_CHANNEL_BUFFER_SIZE_SELECT);
             cy.getBySel(SETTINGS_OUTPUTS_KAFKA.BROKER_TIMEOUT_SELECT);
             cy.getBySel(SETTINGS_OUTPUTS_KAFKA.BROKER_REACHABILITY_TIMEOUT_SELECT);
           });
@@ -175,17 +177,27 @@ describe('Outputs', () => {
 
         it('displays proper error messages', () => {
           selectKafkaOutput();
+          cy.getBySel(SETTINGS_OUTPUTS_KAFKA.HEADERS_CLIENT_ID_INPUT).clear();
+          cy.getBySel(SETTINGS_OUTPUTS_KAFKA.TOPICS_ADD_ROW_BUTTON).click();
           cy.getBySel(SETTINGS_SAVE_BTN).click();
 
           cy.contains('Name is required');
-          cy.contains('URL is required');
+          cy.contains('Host is required');
           cy.contains('Username is required');
           cy.contains('Password is required');
           cy.contains('Default topic is required');
+          cy.contains('Topic is required');
+          cy.contains(
+            'Client ID is invalid. Only letters, numbers, dots, underscores, and dashes are allowed.'
+          );
+          cy.contains('Must be a key, value pair i.e. "http.response.code: 200"');
           shouldDisplayError(SETTINGS_OUTPUTS.NAME_INPUT);
           shouldDisplayError(SETTINGS_OUTPUTS_KAFKA.AUTHENTICATION_USERNAME_INPUT);
           shouldDisplayError(SETTINGS_OUTPUTS_KAFKA.AUTHENTICATION_PASSWORD_INPUT);
           shouldDisplayError(SETTINGS_OUTPUTS_KAFKA.TOPICS_DEFAULT_TOPIC_INPUT);
+          shouldDisplayError(SETTINGS_OUTPUTS_KAFKA.TOPICS_CONDITION_INPUT);
+          shouldDisplayError(SETTINGS_OUTPUTS_KAFKA.TOPICS_TOPIC_INPUT);
+          shouldDisplayError(SETTINGS_OUTPUTS_KAFKA.HEADERS_CLIENT_ID_INPUT);
         });
       });
 
@@ -319,6 +331,7 @@ describe('Outputs', () => {
           visit(`/app/fleet/settings/outputs/${kafkaOutputToESId}`);
           cy.getBySel(SETTINGS_OUTPUTS.TYPE_INPUT).select('elasticsearch');
           cy.getBySel(kafkaOutputFormValues.name.selector).clear().type('kafka_to_es');
+          cy.get('[placeholder="Specify host URL"').clear().type('https://localhost:5000');
 
           cy.intercept('PUT', '**/api/fleet/outputs/**').as('saveOutput');
 
