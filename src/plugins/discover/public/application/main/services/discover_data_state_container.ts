@@ -27,6 +27,7 @@ import { validateTimeRange } from '../utils/validate_time_range';
 import { fetchAll } from '../utils/fetch_all';
 import { sendResetMsg } from '../hooks/use_saved_search_messages';
 import { getFetch$ } from '../utils/get_fetch_observable';
+import { InternalState } from './discover_internal_state_container';
 
 export interface SavedSearchData {
   main$: DataMain$;
@@ -133,12 +134,14 @@ export function getDataStateContainer({
   services,
   searchSessionManager,
   getAppState,
+  getInternalState,
   getSavedSearch,
   setDataView,
 }: {
   services: DiscoverServices;
   searchSessionManager: DiscoverSearchSessionManager;
   getAppState: () => DiscoverAppState;
+  getInternalState: () => InternalState;
   getSavedSearch: () => SavedSearch;
   setDataView: (dataView: DataView) => void;
 }): DiscoverDataStateContainer {
@@ -214,6 +217,7 @@ export function getDataStateContainer({
         searchSessionId,
         services,
         getAppState,
+        getInternalState,
         savedSearch: getSavedSearch(),
         useNewFieldsApi: !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE),
       });

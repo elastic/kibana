@@ -3733,27 +3733,31 @@
               },
               {
                 "plugin": "reporting",
-                "path": "x-pack/plugins/reporting/server/routes/deprecations/deprecations.ts"
+                "path": "x-pack/plugins/reporting/server/routes/internal/deprecations/deprecations.ts"
               },
               {
                 "plugin": "reporting",
-                "path": "x-pack/plugins/reporting/server/routes/generate/generate_from_jobparams.ts"
+                "path": "x-pack/plugins/reporting/server/routes/internal/management/jobs.ts"
               },
               {
                 "plugin": "reporting",
-                "path": "x-pack/plugins/reporting/server/routes/management/jobs.ts"
+                "path": "x-pack/plugins/reporting/server/routes/internal/management/jobs.ts"
               },
               {
                 "plugin": "reporting",
-                "path": "x-pack/plugins/reporting/server/routes/management/jobs.ts"
+                "path": "x-pack/plugins/reporting/server/routes/internal/management/jobs.ts"
               },
               {
                 "plugin": "reporting",
-                "path": "x-pack/plugins/reporting/server/routes/management/jobs.ts"
+                "path": "x-pack/plugins/reporting/server/routes/internal/management/jobs.ts"
               },
               {
                 "plugin": "reporting",
-                "path": "x-pack/plugins/reporting/server/routes/management/jobs.ts"
+                "path": "x-pack/plugins/reporting/server/routes/public/generate_from_jobparams.ts"
+              },
+              {
+                "plugin": "reporting",
+                "path": "x-pack/plugins/reporting/server/routes/public/jobs.ts"
               },
               {
                 "plugin": "cloudSecurityPosture",
@@ -4466,6 +4470,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/lib/tags/routes/get_tags_by_name.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/risk_engine/routes/risk_engine_status_route.ts"
               },
               {
                 "plugin": "serverlessSearch",
@@ -6523,19 +6531,19 @@
               },
               {
                 "plugin": "reporting",
-                "path": "x-pack/plugins/reporting/server/routes/diagnostic/browser.ts"
+                "path": "x-pack/plugins/reporting/server/routes/internal/diagnostic/browser.ts"
               },
               {
                 "plugin": "reporting",
-                "path": "x-pack/plugins/reporting/server/routes/diagnostic/screenshot.ts"
+                "path": "x-pack/plugins/reporting/server/routes/internal/generate/csv_searchsource_immediate.ts"
               },
               {
                 "plugin": "reporting",
-                "path": "x-pack/plugins/reporting/server/routes/generate/csv_searchsource_immediate.ts"
+                "path": "x-pack/plugins/reporting/server/routes/internal/generate/generate_from_jobparams.ts"
               },
               {
                 "plugin": "reporting",
-                "path": "x-pack/plugins/reporting/server/routes/generate/generate_from_jobparams.ts"
+                "path": "x-pack/plugins/reporting/server/routes/public/generate_from_jobparams.ts"
               },
               {
                 "plugin": "indexManagement",
@@ -7252,6 +7260,18 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/lib/risk_engine/routes/risk_score_preview_route.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/risk_engine/routes/risk_engine_init_route.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/risk_engine/routes/risk_engine_enable_route.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/risk_engine/routes/risk_engine_disable_route.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -8617,7 +8637,7 @@
               },
               {
                 "plugin": "reporting",
-                "path": "x-pack/plugins/reporting/server/routes/deprecations/deprecations.ts"
+                "path": "x-pack/plugins/reporting/server/routes/internal/deprecations/deprecations.ts"
               },
               {
                 "plugin": "indexManagement",
@@ -9765,7 +9785,11 @@
               },
               {
                 "plugin": "reporting",
-                "path": "x-pack/plugins/reporting/server/routes/management/jobs.ts"
+                "path": "x-pack/plugins/reporting/server/routes/internal/management/jobs.ts"
+              },
+              {
+                "plugin": "reporting",
+                "path": "x-pack/plugins/reporting/server/routes/public/jobs.ts"
               },
               {
                 "plugin": "indexManagement",

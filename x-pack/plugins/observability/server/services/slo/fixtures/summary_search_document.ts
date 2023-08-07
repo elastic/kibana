@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ALL_VALUE } from '@kbn/slo-schema';
 import { v1 as uuidv1 } from 'uuid';
 
 export const aSummaryDocument = ({
@@ -33,7 +34,7 @@ export const aSummaryDocument = ({
         duration: '30d',
         type: 'rolling',
       },
-      instanceId: '*',
+      instanceId: ALL_VALUE,
       name: 'irrelevant',
       description: '',
       id,

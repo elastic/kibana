@@ -14,6 +14,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
 import { buildExistsFilter } from '@kbn/es-query';
+import { EuiComboBox } from '@elastic/eui';
 import { SearchBar, SearchBarProps } from '../search_bar';
 import { setIndexPatterns } from '../services';
 
@@ -453,6 +454,23 @@ storiesOf('SearchBar', module)
         },
       },
     } as unknown as SearchBarProps)
+  )
+  .add('with prepended controls', () =>
+    wrapSearchBarInContext({
+      prependFilterBar: (
+        <EuiComboBox
+          placeholder="Select option"
+          options={[
+            {
+              label: 'Filter 1',
+            },
+          ]}
+          fullWidth={false}
+          isClearable={true}
+        />
+      ),
+      showQueryInput: true,
+    } as SearchBarProps)
   )
   .add('without switch query language', () =>
     wrapSearchBarInContext({
