@@ -64,7 +64,6 @@ import { createRule } from '../../../../tasks/api_calls/rules';
 import { getNewRule } from '../../../../objects/rule';
 import { ALERTS_URL } from '../../../../urls/navigation';
 import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
-import { ROLES } from '../../../../../common/test';
 
 describe(
   'Alert details expandable flyout right panel',
@@ -74,7 +73,7 @@ describe(
 
     beforeEach(() => {
       cleanKibana();
-      login(ROLES.detections_admin); // TODO: Ensure assistant for default cypress role
+      login();
       createRule(rule);
       visit(ALERTS_URL);
       waitForAlertsToPopulate();

@@ -24,7 +24,7 @@ import { allCasesPermissions } from '../../../../cases_test_utils';
 import {
   DEFAULT_ALERTS_INDEX,
   DEFAULT_PREVIEW_INDEX,
-  SERVER_APP_ID,
+  ASSISTANT_FEATURE_ID,
 } from '../../../../../common/constants';
 
 const ecsData: Ecs = {
@@ -144,7 +144,7 @@ describe('event details panel component', () => {
       services: {
         application: {
           capabilities: {
-            [SERVER_APP_ID]: {
+            [ASSISTANT_FEATURE_ID]: {
               isAssistantEnabled: true,
             },
           },
