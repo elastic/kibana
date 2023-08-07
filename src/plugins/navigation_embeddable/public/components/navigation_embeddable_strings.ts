@@ -69,7 +69,7 @@ export const NavEmbeddableStrings = {
           defaultMessage: 'Update library item',
         }),
       getUpdateLibraryItemButtonTooltip: () =>
-        i18n.translate('navigationEmbeddable.panelEditor.updateLibraryItemButtonLabel', {
+        i18n.translate('navigationEmbeddable.panelEditor.updateLibraryItemButtonTooltip', {
           defaultMessage: 'Editing this panel might affect other dashboards.',
         }),
       getTitleInputLabel: () =>

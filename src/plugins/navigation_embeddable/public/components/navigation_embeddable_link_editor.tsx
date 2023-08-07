@@ -34,8 +34,8 @@ import {
   EXTERNAL_LINK_TYPE,
   DASHBOARD_LINK_TYPE,
   NavigationEmbeddableLink,
-  DashboardItem,
 } from '../../common/content_management';
+import { DashboardItem } from '../embeddable/types';
 import { NavEmbeddableStrings } from './navigation_embeddable_strings';
 import { NavigationEmbeddableUnorderedLink } from '../editor/open_link_editor_flyout';
 import { ExternalLinkDestinationPicker } from './external_link/external_link_destination_picker';

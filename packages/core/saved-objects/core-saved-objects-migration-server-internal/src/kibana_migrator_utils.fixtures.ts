@@ -1504,6 +1504,23 @@ export const INDEX_MAP_BEFORE_SPLIT: IndexMap = {
           },
         },
       },
+      navigation_embeddable: {
+        properties: {
+          id: {
+            type: 'text',
+          },
+          title: {
+            type: 'text',
+          },
+          description: {
+            type: 'text',
+          },
+          links: {
+            dynamic: false,
+            properties: {},
+          },
+        },
+      },
       'cases-comments': {
         dynamic: false,
         properties: {
