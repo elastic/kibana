@@ -27,8 +27,8 @@ import {
   calculateFailedTransactionRate,
   getOutcomeAggregation,
 } from '../../../lib/helpers/transaction_error_rate';
-import { serviceGroupQuery } from '../../../lib/service_group_query';
 import { maybe } from '../../../../common/utils/maybe';
+import { serviceGroupWithOverflowQuery } from '../../../lib/service_group_query_with_overflow';
 
 interface AggregationParams {
   environment: string;
@@ -102,7 +102,7 @@ export async function getServiceTransactionStats({
               ...rangeQuery(start, end),
               ...environmentQuery(environment),
               ...kqlQuery(kuery),
-              ...serviceGroupQuery(serviceGroup),
+              ...serviceGroupWithOverflowQuery(serviceGroup),
             ],
           },
         },

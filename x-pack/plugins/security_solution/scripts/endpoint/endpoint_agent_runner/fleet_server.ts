@@ -36,8 +36,8 @@ import type {
   PostFleetServerHostsResponse,
 } from '@kbn/fleet-plugin/common/types/rest_spec/fleet_server_hosts';
 import chalk from 'chalk';
+import { isLocalhost } from '../common/is_localhost';
 import { dump } from './utils';
-import { isLocalhost } from '../common/localhost_services';
 import { fetchFleetServerUrl, waitForHostToEnroll } from '../common/fleet_services';
 import { getRuntimeServices } from './runtime';
 
@@ -50,21 +50,10 @@ export const runFleetServerIfNeeded = async (): Promise<
   const {
     log,
     kibana: { isLocalhost: isKibanaOnLocalhost },
-    kbnClient,
   } = getRuntimeServices();
 
   log.info(`Setting up fleet server (if necessary)`);
   log.indent(4);
-
-  const currentFleetServerUrl = await fetchFleetServerUrl(kbnClient);
-
-  if (currentFleetServerUrl) {
-    log.info(
-      `Fleet server is already enrolled with Fleet - URL:\n${currentFleetServerUrl}\nNothing to do.`
-    );
-    log.indent(-4);
-    return;
-  }
 
   try {
     fleetServerAgentPolicyId = await getOrCreateFleetServerAgentPolicyId();

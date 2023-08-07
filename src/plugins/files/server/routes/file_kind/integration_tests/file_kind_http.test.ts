@@ -172,6 +172,23 @@ describe('File kind HTTP API', () => {
     expect(files3.length).toBe(2);
   });
 
+  test('can filter by mime type with special characters', async () => {
+    await createFile({ name: 'test', mimeType: 'image/x:123' });
+    await createFile({ name: 'test 2', mimeType: 'text/html' });
+
+    const {
+      body: { files },
+    } = await request
+      .post(root, `/api/files/files/${fileKind}/list`)
+      .send({
+        mimeType: 'image/x:123',
+      })
+      .expect(200);
+
+    expect(files.length).toBe(1);
+    expect(files[0]).toMatchObject({ name: 'test' });
+  });
+
   test('can filter by file extension', async () => {
     await createFile({ name: 'test', mimeType: 'image/png' });
     await createFile({ name: 'test 2', mimeType: 'text/html' });

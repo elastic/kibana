@@ -23,8 +23,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const es = getService('es');
 
   const synthtraceEsClient = getService('synthtraceEsClient');
-
-  // FAILING VERSION BUMP: https://github.com/elastic/kibana/issues/155930
+  // FLAKY https://github.com/elastic/kibana/issues/160298
   registry.when.skip(
     'fetching service anomalies with a trial license',
     { config: 'trial', archives: [] },
@@ -88,8 +87,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             name: 'Latency anomaly | service-a',
             params: {
               environment: 'production',
-              windowSize: 99,
-              windowUnit: 'y',
+              windowSize: 5,
+              windowUnit: 'h',
               anomalySeverityType: ML_ANOMALY_SEVERITY.WARNING,
             },
             ruleTypeId: ApmRuleType.Anomaly,

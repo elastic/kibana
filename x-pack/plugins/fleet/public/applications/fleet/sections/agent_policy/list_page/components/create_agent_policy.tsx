@@ -29,10 +29,8 @@ import { useAuthz, useStartServices, sendCreateAgentPolicy } from '../../../../h
 import { AgentPolicyForm, agentPolicyFormValidation } from '../../components';
 import { DevtoolsRequestFlyoutButton } from '../../../../components';
 import { generateCreateAgentPolicyDevToolsRequest } from '../../services';
-import {
-  ExperimentalFeaturesService,
-  generateNewAgentPolicyWithDefaults,
-} from '../../../../services';
+import { ExperimentalFeaturesService } from '../../../../services';
+import { generateNewAgentPolicyWithDefaults } from '../../../../../../../common/services/generate_new_agent_policy';
 
 const FlyoutWithHigherZIndex = styled(EuiFlyout)`
   z-index: ${(props) => props.theme.eui.euiZLevel5};

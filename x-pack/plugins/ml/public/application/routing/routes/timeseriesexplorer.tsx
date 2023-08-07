@@ -12,6 +12,7 @@ import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import { useUrlState } from '@kbn/ml-url-state';
 import { useTimefilter } from '@kbn/ml-date-picker';
+import type { IUiSettingsClient } from '@kbn/core/public';
 import { ML_PAGES } from '../../../locator';
 import { getViewableDetectors } from '../../timeseriesexplorer/timeseriesexplorer_utils/get_viewable_detectors';
 import {
@@ -19,6 +20,7 @@ import {
   useMlApiContext,
   useMlKibana,
   useNotifications,
+  useUiSettings,
 } from '../../contexts/kibana';
 import { MlJobWithTimeRange } from '../../../../common/types/anomaly_detection_jobs';
 import { TimeSeriesExplorer } from '../../timeseriesexplorer';
@@ -73,7 +75,7 @@ export const timeSeriesExplorerRouteFactory = (
 
 const PageWrapper: FC<PageProps> = ({ deps }) => {
   const mlApi = useMlApiContext();
-
+  const uiSettings = useUiSettings();
   const { context, results } = useRouteResolver('full', ['canGetJobs'], {
     ...basicResolvers(),
     jobs: mlJobService.loadJobsWrapper,
@@ -87,7 +89,7 @@ const PageWrapper: FC<PageProps> = ({ deps }) => {
       <MlAnnotationUpdatesContext.Provider value={annotationUpdatesService}>
         {results ? (
           <TimeSeriesExplorerUrlStateManager
-            config={deps.config}
+            config={uiSettings}
             jobsWithTimeRange={results.jobsWithTimeRange.jobs}
           />
         ) : null}
@@ -99,7 +101,7 @@ const PageWrapper: FC<PageProps> = ({ deps }) => {
 type AppStateZoom = Exclude<TimeSeriesExplorerAppState['mlTimeSeriesExplorer'], undefined>['zoom'];
 
 interface TimeSeriesExplorerUrlStateManager {
-  config: any;
+  config: IUiSettingsClient;
   jobsWithTimeRange: MlJobWithTimeRange[];
 }
 

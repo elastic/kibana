@@ -24,6 +24,7 @@ import {
 import { DefaultFieldRenderer } from '../../../../../../timelines/components/field_renderers/field_renderers';
 import { HostDetailsLink, NetworkDetailsLink } from '../../../../../../common/components/links';
 import type { SelectedDataView } from '../../../../../../common/store/sourcerer/model';
+import { SourcererScopeName } from '../../../../../../common/store/sourcerer/model';
 import { getEnrichedFieldInfo } from '../../../../../../common/components/event_details/helpers';
 import { getTimelineEventData } from '../../../utils/get_timeline_event_data';
 import {
@@ -87,7 +88,7 @@ export const HostPanel = React.memo(
       );
     }, [browserFields, data, id]);
 
-    const { data: hostRisk, isLicenseValid: isRiskLicenseValid } = useRiskScore({
+    const { data: hostRisk, isAuthorized: isRiskScoreAuthorized } = useRiskScore({
       riskEntity: RiskScoreEntity.host,
       skip: hostName == null,
     });
@@ -148,7 +149,7 @@ export const HostPanel = React.memo(
               )}
             </EuiFlexGroup>
             <EuiSpacer size="l" />
-            {isRiskLicenseValid && (
+            {isRiskScoreAuthorized && (
               <>
                 <EuiFlexGroup data-test-subj="host-panel-risk">
                   {hostRiskScore && (
@@ -170,6 +171,7 @@ export const HostPanel = React.memo(
                   attrName={'host.ip'}
                   idPrefix="alert-details-page-user"
                   render={renderHostIp}
+                  sourcererScopeId={SourcererScopeName.detections}
                 />
               </HostPanelSection>
             </EuiFlexGroup>

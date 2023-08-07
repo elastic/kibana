@@ -13,19 +13,20 @@ import {
   CONTROL_GROUP_TYPE,
   getDefaultControlGroupInput,
 } from '@kbn/controls-plugin/common';
-import { syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
+import { TimeRange } from '@kbn/es-query';
 import { isErrorEmbeddable, ViewMode } from '@kbn/embeddable-plugin/public';
 import { lazyLoadReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
 import { type ControlGroupContainer, ControlGroupOutput } from '@kbn/controls-plugin/public';
+import { GlobalQueryStateFromUrl, syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
 
 import { DashboardContainerInput } from '../../../../common';
 import { DashboardContainer } from '../dashboard_container';
 import { pluginServices } from '../../../services/plugin_services';
-import { DEFAULT_DASHBOARD_INPUT } from '../../../dashboard_constants';
 import { DashboardCreationOptions } from '../dashboard_container_factory';
 import { startSyncingDashboardDataViews } from './data_views/sync_dashboard_data_views';
 import { LoadDashboardReturn } from '../../../services/dashboard_content_management/types';
 import { syncUnifiedSearchState } from './unified_search/sync_dashboard_unified_search_state';
+import { DEFAULT_DASHBOARD_INPUT, GLOBAL_STATE_STORAGE_KEY } from '../../../dashboard_constants';
 import { startSyncingDashboardControlGroup } from './controls/dashboard_control_group_integration';
 import { startDashboardSearchSessionIntegration } from './search_sessions/start_dashboard_search_session_integration';
 
@@ -36,7 +37,7 @@ export const createDashboard = async (
   creationOptions?: DashboardCreationOptions,
   dashboardCreationStartTime?: number,
   savedObjectId?: string
-): Promise<DashboardContainer> => {
+): Promise<DashboardContainer | undefined> => {
   const {
     data: { dataViews },
     dashboardContentManagement: { loadDashboardState },
@@ -74,11 +75,13 @@ export const createDashboard = async (
   // --------------------------------------------------------------------------------------
   // Initialize Dashboard integrations
   // --------------------------------------------------------------------------------------
-  const { input, searchSessionId } = await initializeDashboard({
+  const initializeResult = await initializeDashboard({
     loadDashboardReturn: savedObjectResult,
     untilDashboardReady,
     creationOptions,
   });
+  if (!initializeResult) return;
+  const { input, searchSessionId } = initializeResult;
 
   // --------------------------------------------------------------------------------------
   // Build and return the dashboard container.
@@ -139,13 +142,12 @@ export const initializeDashboard = async ({
   // --------------------------------------------------------------------------------------
   // Run validation.
   // --------------------------------------------------------------------------------------
-  if (
-    loadDashboardReturn &&
-    validateLoadedSavedObject &&
-    !validateLoadedSavedObject(loadDashboardReturn)
-  ) {
+  const validationResult = loadDashboardReturn && validateLoadedSavedObject?.(loadDashboardReturn);
+  if (validationResult === 'invalid') {
     // throw error to stop the rest of Dashboard loading and make the factory return an ErrorEmbeddable.
     throw new Error('Dashboard failed saved object result validation');
+  } else if (validationResult === 'redirected') {
+    return;
   }
 
   // --------------------------------------------------------------------------------------
@@ -175,7 +177,13 @@ export const initializeDashboard = async ({
   // Set up unified search integration.
   // --------------------------------------------------------------------------------------
   if (useUnifiedSearchIntegration && unifiedSearchSettings?.kbnUrlStateStorage) {
-    const { filters, query, timeRestore, timeRange, refreshInterval } = initialInput;
+    const {
+      query,
+      filters,
+      timeRestore,
+      timeRange: savedTimeRange,
+      refreshInterval: savedRefreshInterval,
+    } = initialInput;
     const { kbnUrlStateStorage } = unifiedSearchSettings;
 
     // apply filters and query to the query service
@@ -183,26 +191,35 @@ export const initializeDashboard = async ({
     queryString.setQuery(query ?? queryString.getDefaultQuery());
 
     /**
-     * If a global time range is not set explicitly and the time range was saved with the dashboard, apply
-     * time range and refresh interval to the query service. Otherwise, set the current dashboard time range
-     * from the query service. The order of the following lines is very important.
+     * Get initial time range, and set up dashboard time restore if applicable
      */
+    const initialTimeRange: TimeRange = (() => {
+      // if there is an explicit time range in the URL it always takes precedence.
+      const urlOverrideTimeRange =
+        kbnUrlStateStorage.get<GlobalQueryStateFromUrl>(GLOBAL_STATE_STORAGE_KEY)?.time;
+      if (urlOverrideTimeRange) return urlOverrideTimeRange;
+
+      // if this Dashboard has timeRestore return the time range that was saved with the dashboard.
+      if (timeRestore && savedTimeRange) return savedTimeRange;
+
+      // otherwise fall back to the time range from the timefilterService.
+      return timefilterService.getTime();
+    })();
+    initialInput.timeRange = initialTimeRange;
     if (timeRestore) {
-      if (timeRange) timefilterService.setTime(timeRange);
-      if (refreshInterval) timefilterService.setRefreshInterval(refreshInterval);
+      if (savedTimeRange) timefilterService.setTime(savedTimeRange);
+      if (savedRefreshInterval) timefilterService.setRefreshInterval(savedRefreshInterval);
     }
 
+    // start syncing global query state with the URL.
     const { stop: stopSyncingQueryServiceStateWithUrl } = syncGlobalQueryStateWithUrl(
       queryService,
       kbnUrlStateStorage
     );
 
-    if (!timeRestore) {
-      initialInput.timeRange = timefilterService.getTime();
-    }
-
     untilDashboardReady().then((dashboardContainer) => {
-      const stopSyncingUnifiedSearchState = syncUnifiedSearchState.bind(dashboardContainer)();
+      const stopSyncingUnifiedSearchState =
+        syncUnifiedSearchState.bind(dashboardContainer)(kbnUrlStateStorage);
       dashboardContainer.stopSyncingWithUnifiedSearch = () => {
         stopSyncingUnifiedSearchState();
         stopSyncingQueryServiceStateWithUrl();

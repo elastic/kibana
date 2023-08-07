@@ -12,30 +12,34 @@ import type {
   READ_CASES_CAPABILITY,
   UPDATE_CASES_CAPABILITY,
 } from '..';
+import type { CaseMetricsFeature, CasesMetricsResponse, SingleCaseMetricsResponse } from '../api';
+import type { CASES_CONNECTORS_CAPABILITY, PUSH_CASES_CAPABILITY } from '../constants';
+import type { SnakeToCamelCase } from '../types';
 import type {
-  CasePatchRequest,
+  CaseSeverity,
   CaseStatuses,
+  UserAction,
+  Case as CaseSnakeCase,
   User,
   ActionConnector,
-  UserAction,
-  SingleCaseMetricsResponse,
-  Comment,
-  Case as CaseSnakeCase,
-  UserActionFindResponse,
-  FindTypeField as UserActionFindTypeField,
-  CommentResponseAlertsType,
+  AlertAttachment,
+  Attachment,
+  ExternalReferenceAttachment,
+  PersistableStateAttachment,
+} from '../types/domain';
+import type {
+  CasePatchRequest,
   CasesFindResponse,
   CasesStatusResponse,
-  CasesMetricsResponse,
-  CaseSeverity,
-  CommentResponseExternalReferenceType,
-  CommentResponseTypePersistableState,
+  CaseUserActionStatsResponse,
   GetCaseConnectorsResponse,
   GetCaseUsersResponse,
-  CaseUserActionStatsResponse,
-} from '../api';
-import type { PUSH_CASES_CAPABILITY } from '../constants';
-import type { SnakeToCamelCase } from '../types';
+  UserActionFindRequestTypes,
+  UserActionFindResponse,
+  CaseMetricsFeature,
+  CasesMetricsResponse,
+  SingleCaseMetricsResponse,
+} from '../types/api';
 
 type DeepRequired<T> = { [K in keyof T]: DeepRequired<T[K]> } & Required<T>;
 
@@ -67,7 +71,7 @@ export const SeverityAll = 'all' as const;
 export type CaseSeverityWithAll = CaseSeverity | typeof SeverityAll;
 
 export const UserActionTypeAll = 'all' as const;
-export type CaseUserActionTypeWithAll = UserActionFindTypeField | typeof UserActionTypeAll;
+export type CaseUserActionTypeWithAll = UserActionFindRequestTypes | typeof UserActionTypeAll;
 
 /**
  * The type for the `refreshRef` prop (a `React.Ref`) defined by the `CaseViewComponentProps`.
@@ -83,16 +87,18 @@ export type CaseViewRefreshPropInterface = null | {
   refreshCase: () => Promise<void>;
 };
 
-export type CommentUI = SnakeToCamelCase<Comment>;
-export type AlertComment = SnakeToCamelCase<CommentResponseAlertsType>;
-export type ExternalReferenceComment = SnakeToCamelCase<CommentResponseExternalReferenceType>;
-export type PersistableComment = SnakeToCamelCase<CommentResponseTypePersistableState>;
+export type AttachmentUI = SnakeToCamelCase<Attachment>;
+export type AlertAttachmentUI = SnakeToCamelCase<AlertAttachment>;
+export type ExternalReferenceAttachmentUI = SnakeToCamelCase<ExternalReferenceAttachment>;
+export type PersistableStateAttachmentUI = SnakeToCamelCase<PersistableStateAttachment>;
 export type UserActionUI = SnakeToCamelCase<UserAction>;
 export type FindCaseUserActions = Omit<SnakeToCamelCase<UserActionFindResponse>, 'userActions'> & {
   userActions: UserActionUI[];
 };
 export type CaseUserActionsStats = SnakeToCamelCase<CaseUserActionStatsResponse>;
-export type CaseUI = Omit<SnakeToCamelCase<CaseSnakeCase>, 'comments'> & { comments: CommentUI[] };
+export type CaseUI = Omit<SnakeToCamelCase<CaseSnakeCase>, 'comments'> & {
+  comments: AttachmentUI[];
+};
 export type CasesUI = CaseUI[];
 export type CasesFindResponseUI = Omit<SnakeToCamelCase<CasesFindResponse>, 'cases'> & {
   cases: CasesUI;
@@ -145,17 +151,12 @@ export interface FilterOptions {
   assignees: Array<string | null> | null;
   reporters: User[];
   owner: string[];
+  category: string[];
 }
 export type PartialFilterOptions = Partial<FilterOptions>;
 
 export type SingleCaseMetrics = SingleCaseMetricsResponse;
-export type SingleCaseMetricsFeature =
-  | 'alerts.count'
-  | 'alerts.users'
-  | 'alerts.hosts'
-  | 'actions.isolateHost'
-  | 'connectors'
-  | 'lifespan';
+export type SingleCaseMetricsFeature = Exclude<CaseMetricsFeature, CaseMetricsFeature.MTTR>;
 
 export enum SortFieldCase {
   closedAt = 'closedAt',
@@ -164,6 +165,7 @@ export enum SortFieldCase {
   severity = 'severity',
   status = 'status',
   title = 'title',
+  category = 'category',
 }
 
 export type CaseUser = SnakeToCamelCase<User>;
@@ -174,7 +176,7 @@ export interface FetchCasesProps extends ApiProps {
 }
 
 export interface ApiProps {
-  signal: AbortSignal;
+  signal?: AbortSignal;
 }
 
 export interface ActionLicense {
@@ -192,7 +194,15 @@ export interface FieldMappings {
 
 export type UpdateKey = keyof Pick<
   CasePatchRequest,
-  'connector' | 'description' | 'status' | 'tags' | 'title' | 'settings' | 'severity' | 'assignees'
+  | 'connector'
+  | 'description'
+  | 'status'
+  | 'tags'
+  | 'title'
+  | 'settings'
+  | 'severity'
+  | 'assignees'
+  | 'category'
 >;
 
 export interface UpdateByKey {
@@ -276,6 +286,7 @@ export interface CasesPermissions {
   update: boolean;
   delete: boolean;
   push: boolean;
+  connectors: boolean;
 }
 
 export interface CasesCapabilities {
@@ -284,4 +295,5 @@ export interface CasesCapabilities {
   [UPDATE_CASES_CAPABILITY]: boolean;
   [DELETE_CASES_CAPABILITY]: boolean;
   [PUSH_CASES_CAPABILITY]: boolean;
+  [CASES_CONNECTORS_CAPABILITY]: boolean;
 }

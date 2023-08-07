@@ -32,7 +32,6 @@ export class TimelinesPlugin
     core.getStartServices().then(([_, depsStart]) => {
       const TimelineSearchStrategy = timelineSearchStrategyProvider(
         depsStart.data,
-        depsStart.alerting,
         this.logger,
         this.security
       );

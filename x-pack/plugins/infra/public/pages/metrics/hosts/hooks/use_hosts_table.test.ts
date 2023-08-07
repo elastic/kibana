@@ -10,9 +10,13 @@ import { renderHook } from '@testing-library/react-hooks';
 import { InfraAssetMetricsItem } from '../../../../../common/http_api';
 import * as useUnifiedSearchHooks from './use_unified_search';
 import * as useHostsViewHooks from './use_hosts_view';
+import * as useKibanaContextForPluginHook from '../../../../hooks/use_kibana';
+import * as useMetricsDataViewHooks from './use_data_view';
 
 jest.mock('./use_unified_search');
 jest.mock('./use_hosts_view');
+jest.mock('./use_data_view');
+jest.mock('../../../../hooks/use_kibana');
 
 const mockUseUnifiedSearchContext =
   useUnifiedSearchHooks.useUnifiedSearchContext as jest.MockedFunction<
@@ -21,6 +25,15 @@ const mockUseUnifiedSearchContext =
 const mockUseHostsViewContext = useHostsViewHooks.useHostsViewContext as jest.MockedFunction<
   typeof useHostsViewHooks.useHostsViewContext
 >;
+const mockUseMetricsDataViewContext =
+  useMetricsDataViewHooks.useMetricsDataViewContext as jest.MockedFunction<
+    typeof useMetricsDataViewHooks.useMetricsDataViewContext
+  >;
+
+const mockUseKibanaContextForPlugin =
+  useKibanaContextForPluginHook.useKibanaContextForPlugin as jest.MockedFunction<
+    typeof useKibanaContextForPluginHook.useKibanaContextForPlugin
+  >;
 
 const mockHostNode: InfraAssetMetricsItem[] = [
   {
@@ -99,6 +112,13 @@ const mockHostNode: InfraAssetMetricsItem[] = [
   },
 ];
 
+const mockKibanaServices = {
+  telemetry: { reportHostEntryClicked: () => {} },
+  data: {
+    query: { filterManager: () => {} },
+  },
+};
+
 describe('useHostTable hook', () => {
   beforeAll(() => {
     mockUseUnifiedSearchContext.mockReturnValue({
@@ -110,6 +130,18 @@ describe('useHostTable hook', () => {
     mockUseHostsViewContext.mockReturnValue({
       hostNodes: mockHostNode,
     } as ReturnType<typeof useHostsViewHooks.useHostsViewContext>);
+
+    mockUseHostsViewContext.mockReturnValue({
+      hostNodes: mockHostNode,
+    } as ReturnType<typeof useHostsViewHooks.useHostsViewContext>);
+
+    mockUseMetricsDataViewContext.mockReturnValue({
+      dataView: { id: 'default' },
+    } as ReturnType<typeof useMetricsDataViewHooks.useMetricsDataViewContext>);
+
+    mockUseKibanaContextForPlugin.mockReturnValue({
+      services: mockKibanaServices,
+    } as unknown as ReturnType<typeof useKibanaContextForPluginHook.useKibanaContextForPlugin>);
   });
   it('it should map the nodes returned from the snapshot api to a format matching eui table items', () => {
     const expected = [

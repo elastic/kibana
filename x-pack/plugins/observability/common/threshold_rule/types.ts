@@ -6,12 +6,11 @@
  */
 
 import * as rt from 'io-ts';
-import { indexPatternRt } from '@kbn/io-ts-utils';
 import { ML_ANOMALY_THRESHOLD } from '@kbn/ml-anomaly-utils/anomaly_threshold';
 import { values } from 'lodash';
+import { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import { Color } from './color_palette';
 import { metricsExplorerMetricRT } from './metrics_explorer';
-
 import { TimeUnitChar } from '../utils/formatters/duration';
 import { SNAPSHOT_CUSTOM_AGGREGATIONS } from './constants';
 
@@ -94,67 +93,13 @@ export const logDataViewReferenceRT = rt.type({
   dataViewId: rt.string,
 });
 
-export type LogDataViewReference = rt.TypeOf<typeof logDataViewReferenceRT>;
-
 // Index name
 export const logIndexNameReferenceRT = rt.type({
   type: rt.literal('index_name'),
   indexName: rt.string,
 });
-export type LogIndexNameReference = rt.TypeOf<typeof logIndexNameReferenceRT>;
 
 export const logIndexReferenceRT = rt.union([logDataViewReferenceRT, logIndexNameReferenceRT]);
-
-/**
- * Properties that represent a full source configuration, which is the result of merging static values with
- * saved values.
- */
-const SourceConfigurationFieldsRT = rt.type({
-  message: rt.array(rt.string),
-});
-export const SourceConfigurationRT = rt.type({
-  name: rt.string,
-  description: rt.string,
-  metricAlias: rt.string,
-  logIndices: logIndexReferenceRT,
-  inventoryDefaultView: rt.string,
-  metricsExplorerDefaultView: rt.string,
-  fields: SourceConfigurationFieldsRT,
-  logColumns: rt.array(SourceConfigurationColumnRuntimeType),
-  anomalyThreshold: rt.number,
-});
-
-export const metricsSourceConfigurationPropertiesRT = rt.strict({
-  name: SourceConfigurationRT.props.name,
-  description: SourceConfigurationRT.props.description,
-  metricAlias: SourceConfigurationRT.props.metricAlias,
-  inventoryDefaultView: SourceConfigurationRT.props.inventoryDefaultView,
-  metricsExplorerDefaultView: SourceConfigurationRT.props.metricsExplorerDefaultView,
-  anomalyThreshold: rt.number,
-});
-
-export type MetricsSourceConfigurationProperties = rt.TypeOf<
-  typeof metricsSourceConfigurationPropertiesRT
->;
-
-export const partialMetricsSourceConfigurationReqPayloadRT = rt.partial({
-  ...metricsSourceConfigurationPropertiesRT.type.props,
-  metricAlias: indexPatternRt,
-});
-
-export const partialMetricsSourceConfigurationPropertiesRT = rt.partial({
-  ...metricsSourceConfigurationPropertiesRT.type.props,
-});
-
-export type PartialMetricsSourceConfigurationProperties = rt.TypeOf<
-  typeof partialMetricsSourceConfigurationPropertiesRT
->;
-
-const metricsSourceConfigurationOriginRT = rt.keyof({
-  fallback: null,
-  internal: null,
-  stored: null,
-});
 
 /**
  * Source status
@@ -179,32 +124,6 @@ export const metricsSourceStatusRT = rt.strict({
 });
 
 export type MetricsSourceStatus = rt.TypeOf<typeof metricsSourceStatusRT>;
-
-export const metricsSourceConfigurationRT = rt.exact(
-  rt.intersection([
-    rt.type({
-      id: rt.string,
-      origin: metricsSourceConfigurationOriginRT,
-      configuration: metricsSourceConfigurationPropertiesRT,
-    }),
-    rt.partial({
-      updatedAt: rt.number,
-      version: rt.string,
-      status: metricsSourceStatusRT,
-    }),
-  ])
-);
-
-export type MetricsSourceConfiguration = rt.TypeOf<typeof metricsSourceConfigurationRT>;
-export type PartialMetricsSourceConfiguration = DeepPartial<MetricsSourceConfiguration>;
-
-export const metricsSourceConfigurationResponseRT = rt.type({
-  source: metricsSourceConfigurationRT,
-});
-
-export type MetricsSourceConfigurationResponse = rt.TypeOf<
-  typeof metricsSourceConfigurationResponseRT
->;
 
 export enum Comparator {
   GT = '>',
@@ -282,13 +201,14 @@ export interface MetricAnomalyParams {
 
 // Types for the executor
 
-export interface MetricThresholdParams {
+export interface ThresholdParams {
   criteria: MetricExpressionParams[];
   filterQuery?: string;
-  filterQueryText?: string;
   sourceId?: string;
   alertOnNoData?: boolean;
   alertOnGroupDisappear?: boolean;
+  searchConfiguration: SerializedSearchSourceFields;
+  groupBy?: string[];
 }
 
 interface BaseMetricExpressionParams {

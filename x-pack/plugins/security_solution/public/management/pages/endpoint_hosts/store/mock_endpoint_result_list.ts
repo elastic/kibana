@@ -7,11 +7,11 @@
 
 import type { HttpStart } from '@kbn/core/public';
 import type {
+  BulkGetPackagePoliciesResponse,
   GetAgentPoliciesResponse,
   GetAgentPoliciesResponseItem,
-  GetPackagesResponse,
   GetAgentsResponse,
-  BulkGetPackagePoliciesResponse,
+  GetPackagesResponse,
 } from '@kbn/fleet-plugin/common/types/rest_spec';
 import type {
   GetHostPolicyResponse,
@@ -25,8 +25,8 @@ import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_da
 import {
   INGEST_API_AGENT_POLICIES,
   INGEST_API_EPM_PACKAGES,
-  INGEST_API_PACKAGE_POLICIES,
   INGEST_API_FLEET_AGENTS,
+  INGEST_API_PACKAGE_POLICIES,
 } from '../../../services/policies/ingest';
 import type { GetPolicyListResponse } from '../../policy/types';
 import { pendingActionsResponseMock } from '../../../../common/lib/endpoint_pending_actions/mocks';
@@ -54,9 +54,12 @@ export const mockEndpointResultList: (options?: {
 
   const hosts: HostInfo[] = [];
   for (let index = 0; index < actualCountToReturn; index++) {
+    const newDate = new Date();
+    const metadata = generator.generateHostMetadata(newDate.getTime());
     hosts.push({
-      metadata: generator.generateHostMetadata(),
+      metadata,
       host_status: HostStatus.UNHEALTHY,
+      last_checkin: newDate.toISOString(),
     });
   }
   const mock: MetadataListResponse = {
@@ -72,9 +75,12 @@ export const mockEndpointResultList: (options?: {
  * returns a mocked API response for retrieving a single host metadata
  */
 export const mockEndpointDetailsApiResult = (): HostInfo => {
+  const newDate = new Date();
+  const metadata = generator.generateHostMetadata(newDate.getTime());
   return {
-    metadata: generator.generateHostMetadata(),
+    metadata,
     host_status: HostStatus.UNHEALTHY,
+    last_checkin: newDate.toISOString(),
   };
 };
 
@@ -118,8 +124,8 @@ const endpointListApiPathHandlerMocks = ({
       };
     },
 
-    // Do policies referenced in endpoint list exist
-    // just returns 1 single agent policy that includes all of the packagePolicy IDs provided
+    // Do policies reference in endpoint list exist
+    // just returns 1 single agent policy that includes all the packagePolicy IDs provided
     [INGEST_API_AGENT_POLICIES]: (): GetAgentPoliciesResponse => {
       return {
         items: [agentPolicy],
@@ -184,7 +190,7 @@ const endpointListApiPathHandlerMocks = ({
 };
 
 /**
- * Sets up mock impelementations in support of the Endpoints list view
+ * Sets up mock implementations in support of the Endpoints list view
  *
  * @param mockedHttpService
  * @param endpointsResults

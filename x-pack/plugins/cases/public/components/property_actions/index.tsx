@@ -101,7 +101,7 @@ export const PropertyActions = React.memo<PropertyActionsProps>(
           gutterSize="none"
         >
           {propertyActions.map((action, key) => (
-            <EuiFlexItem grow={false} key={`${action.label}${key}`}>
+            <EuiFlexItem grow={false} key={`${action.type}-${key}`}>
               <span>
                 {(action.type === AttachmentActionType.BUTTON && (
                   <PropertyActionButton

@@ -25,5 +25,6 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./query_signals'));
     loadTestFile(require.resolve('./open_close_signals'));
     loadTestFile(require.resolve('./import_timelines'));
+    loadTestFile(require.resolve('./coverage_overview'));
   });
 };

@@ -49,8 +49,10 @@ jest.mock('../../../../hooks/use_discover_services', () => {
   };
 });
 
-jest.mock('@kbn/unified-field-list-plugin/public', () => {
-  const originalModule = jest.requireActual('@kbn/unified-field-list-plugin/public');
+jest.mock('@kbn/unified-field-list/src/hooks/use_query_subscriber', () => {
+  const originalModule = jest.requireActual(
+    '@kbn/unified-field-list/src/hooks/use_query_subscriber'
+  );
   return {
     ...originalModule,
     useQuerySubscriber: jest.fn(() => ({

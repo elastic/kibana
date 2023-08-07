@@ -10,7 +10,7 @@ import {
   QueryDslFieldAndFormat,
   QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { UMElasticsearchQueryFnParams } from '../../legacy_uptime/lib/adapters/framework';
+import { UptimeEsClient } from '../../lib';
 import {
   GetPingsParams,
   HttpResponseBody,
@@ -65,21 +65,23 @@ function isStringArray(value: unknown): value is string[] {
 }
 
 type QueryFields = Array<QueryDslFieldAndFormat | Field>;
-type GetParamsWithFields<F> = UMElasticsearchQueryFnParams<
-  GetPingsParams & { fields: QueryFields; fieldsExtractorFn: (doc: any) => F }
->;
-type GetParamsWithoutFields = UMElasticsearchQueryFnParams<GetPingsParams>;
+type GetParamsWithFields<F> = GetPingsParams & {
+  fields: QueryFields;
+  fieldsExtractorFn: (doc: any) => F;
+};
+
+type GetParamsWithoutFields = GetPingsParams;
 
 export function queryPings(
-  params: UMElasticsearchQueryFnParams<GetPingsParams>
+  params: GetPingsParams & { uptimeEsClient: UptimeEsClient }
 ): Promise<PingsResponse>;
 
 export function queryPings<F>(
-  params: UMElasticsearchQueryFnParams<GetParamsWithFields<F>>
+  params: GetParamsWithFields<F> & { uptimeEsClient: UptimeEsClient }
 ): Promise<{ total: number; pings: F[] }>;
 
 export async function queryPings<F>(
-  params: GetParamsWithFields<F> | GetParamsWithoutFields
+  params: (GetParamsWithFields<F> | GetParamsWithoutFields) & { uptimeEsClient: UptimeEsClient }
 ): Promise<PingsResponse | { total: number; pings: F[] }> {
   const {
     uptimeEsClient,

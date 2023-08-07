@@ -75,7 +75,6 @@ export const AreaSeriesComponent = ({ index, groupId, visData }: AreaSeriesCompo
     xAccessor={0}
     yAccessors={[1]}
     data={visData._hide ? [] : visData.data}
-    sortIndex={index}
     color={visData.color}
     curve={visData.lines?.steps ? CurveType.CURVE_STEP : CurveType.LINEAR}
     stackAccessors={visData.stack ? [0] : undefined}

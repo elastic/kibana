@@ -6,6 +6,8 @@
  */
 
 import type { RequestHandler } from '@kbn/core/server';
+import type { UploadActionApiRequestBody } from '../../../../common/api/endpoint';
+import { UploadActionRequestSchema } from '../../../../common/api/endpoint';
 import type { ResponseActionsApiCommandNames } from '../../../../common/endpoint/service/response_actions/constants';
 import type {
   ResponseActionUploadParameters,
@@ -13,10 +15,6 @@ import type {
   HostMetadata,
 } from '../../../../common/endpoint/types';
 import { UPLOAD_ROUTE } from '../../../../common/endpoint/constants';
-import {
-  type UploadActionApiRequestBody,
-  UploadActionRequestSchema,
-} from '../../../../common/endpoint/schema/actions';
 import { withEndpointAuthz } from '../with_endpoint_authz';
 import type {
   SecuritySolutionPluginRouter,
@@ -37,10 +35,10 @@ export const registerActionFileUploadRoute = (
 
   const logger = endpointContext.logFactory.get('uploadAction');
 
-  router.post(
-    {
+  router.versioned
+    .post({
+      access: 'public',
       path: UPLOAD_ROUTE,
-      validate: UploadActionRequestSchema,
       options: {
         authRequired: true,
         tags: ['access:securitySolution'],
@@ -50,13 +48,20 @@ export const registerActionFileUploadRoute = (
           maxBytes: endpointContext.serverConfig.maxUploadResponseActionFileBytes,
         },
       },
-    },
-    withEndpointAuthz(
-      { all: ['canWriteFileOperations'] },
-      logger,
-      getActionFileUploadHandler(endpointContext)
-    )
-  );
+    })
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: {
+          request: UploadActionRequestSchema,
+        },
+      },
+      withEndpointAuthz(
+        { all: ['canWriteFileOperations'] },
+        logger,
+        getActionFileUploadHandler(endpointContext)
+      )
+    );
 };
 
 export const getActionFileUploadHandler = (

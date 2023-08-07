@@ -5,17 +5,21 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
-import { EuiBasicTableColumn } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
+import {
+  EuiBasicTableColumn,
+  CriteriaWithPagination,
+  EuiTableSelectionType,
+  type EuiBasicTable,
+} from '@elastic/eui';
 import createContainer from 'constate';
 import { isEqual } from 'lodash';
-import { CriteriaWithPagination } from '@elastic/eui';
 import { isNumber } from 'lodash/fp';
+import { hostLensFormulas } from '../../../../common/visualizations';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { createInventoryMetricFormatter } from '../../inventory_view/lib/create_inventory_metric_formatter';
-import { HostsTableEntryTitle } from '../components/hosts_table_entry_title';
-import {
+import { EntryTitle } from '../components/table/entry_title';
+import type {
   InfraAssetMetadataType,
   InfraAssetMetricsItem,
   InfraAssetMetricType,
@@ -24,6 +28,11 @@ import { useHostFlyoutUrlState } from './use_host_flyout_url_state';
 import { Sorting, useHostsTableUrlState } from './use_hosts_table_url_state';
 import { useHostsViewContext } from './use_hosts_view';
 import { useUnifiedSearchContext } from './use_unified_search';
+import { useMetricsDataViewContext } from './use_data_view';
+import { ColumnHeader } from '../components/table/column_header';
+import { TABLE_COLUMN_LABEL } from '../translations';
+import { TOOLTIP } from '../../../../common/visualizations/lens/dashboards/host/translations';
+import { buildCombinedHostsFilter } from '../../../../utils/filters/build';
 
 /**
  * Columns and items types
@@ -112,65 +121,50 @@ const sortTableData =
 /**
  * Columns translations
  */
-const titleLabel = i18n.translate('xpack.infra.hostsViewPage.table.nameColumnHeader', {
-  defaultMessage: 'Name',
-});
-
-const cpuUsageLabel = i18n.translate('xpack.infra.hostsViewPage.table.cpuUsageColumnHeader', {
-  defaultMessage: 'CPU usage (avg.)',
-});
-
-const diskSpaceUsageLabel = i18n.translate(
-  'xpack.infra.hostsViewPage.table.diskSpaceUsageColumnHeader',
-  {
-    defaultMessage: 'Disk Space Usage (avg.)',
-  }
-);
-
-const txLabel = i18n.translate('xpack.infra.hostsViewPage.table.txColumnHeader', {
-  defaultMessage: 'TX (avg.)',
-});
-
-const rxLabel = i18n.translate('xpack.infra.hostsViewPage.table.rxColumnHeader', {
-  defaultMessage: 'RX (avg.)',
-});
-
-const memoryFreeLabel = i18n.translate('xpack.infra.hostsViewPage.table.memoryFreeColumnHeader', {
-  defaultMessage: 'Memory Free (avg.)',
-});
-
-const memoryUsageLabel = i18n.translate('xpack.infra.hostsViewPage.table.memoryUsageColumnHeader', {
-  defaultMessage: 'Memory Usage (avg.)',
-});
-
-const normalizedLoad1mLabel = i18n.translate(
-  'xpack.infra.hostsViewPage.table.normalizedLoad1mColumnHeader',
-  {
-    defaultMessage: 'Normalized Load (avg.)',
-  }
-);
-
-const toggleDialogActionLabel = i18n.translate(
-  'xpack.infra.hostsViewPage.table.toggleDialogWithDetails',
-  {
-    defaultMessage: 'Toggle dialog with details',
-  }
-);
 
 /**
  * Build a table columns and items starting from the snapshot nodes.
  */
 export const useHostsTable = () => {
+  const [selectedItems, setSelectedItems] = useState<HostNodeRow[]>([]);
   const { hostNodes } = useHostsViewContext();
   const { searchCriteria } = useUnifiedSearchContext();
   const [{ pagination, sorting }, setProperties] = useHostsTableUrlState();
   const {
-    services: { telemetry },
+    services: {
+      telemetry,
+      data: {
+        query: { filterManager: filterManagerService },
+      },
+    },
   } = useKibanaContextForPlugin();
+  const { dataView } = useMetricsDataViewContext();
 
   const [hostFlyoutState, setHostFlyoutState] = useHostFlyoutUrlState();
+  const popoverContainerRef = useRef<HTMLDivElement>(null);
+  const tableRef = useRef<EuiBasicTable | null>(null);
 
   const closeFlyout = useCallback(() => setHostFlyoutState(null), [setHostFlyoutState]);
+
+  const onSelectionChange = (newSelectedItems: HostNodeRow[]) => {
+    setSelectedItems(newSelectedItems);
+  };
+
+  const filterSelectedHosts = useCallback(() => {
+    if (!selectedItems.length) {
+      return [];
+    }
+    const selectedHostNames = selectedItems.map(({ name }) => name);
+    const newFilter = buildCombinedHostsFilter({
+      field: 'host.name',
+      values: selectedHostNames,
+      dataView,
+    });
+
+    filterManagerService.addFilters(newFilter);
+    setSelectedItems([]);
+    tableRef.current?.setSelection([]);
+  }, [dataView, filterManagerService, selectedItems]);
 
   const reportHostEntryClick = useCallback(
     ({ name, cloudProvider }: HostNodeRow['title']) => {
@@ -201,8 +195,8 @@ export const useHostsTable = () => {
 
   const items = useMemo(() => buildItemsList(hostNodes), [hostNodes]);
   const clickedItem = useMemo(
-    () => items.find(({ id }) => id === hostFlyoutState?.clickedItemId),
-    [hostFlyoutState?.clickedItemId, items]
+    () => items.find(({ id }) => id === hostFlyoutState?.itemId),
+    [hostFlyoutState?.itemId, items]
   );
 
   const currentPage = useMemo(() => {
@@ -222,35 +216,33 @@ export const useHostsTable = () => {
         field: 'id',
         actions: [
           {
-            name: toggleDialogActionLabel,
-            description: toggleDialogActionLabel,
+            name: TABLE_COLUMN_LABEL.toggleDialogAction,
+            description: TABLE_COLUMN_LABEL.toggleDialogAction,
             icon: ({ id }) =>
-              hostFlyoutState?.clickedItemId && id === hostFlyoutState?.clickedItemId
-                ? 'minimize'
-                : 'expand',
+              hostFlyoutState?.itemId && id === hostFlyoutState?.itemId ? 'minimize' : 'expand',
             type: 'icon',
             'data-test-subj': 'hostsView-flyout-button',
             onClick: ({ id }) => {
               setHostFlyoutState({
-                clickedItemId: id,
+                itemId: id,
               });
-              if (id === hostFlyoutState?.clickedItemId) {
+              if (id === hostFlyoutState?.itemId) {
                 setHostFlyoutState(null);
               } else {
-                setHostFlyoutState({ clickedItemId: id });
+                setHostFlyoutState({ itemId: id });
               }
             },
           },
         ],
       },
       {
-        name: titleLabel,
+        name: TABLE_COLUMN_LABEL.title,
         field: 'title',
         sortable: true,
         truncateText: true,
         'data-test-subj': 'hostsView-tableRow-title',
         render: (title: HostNodeRow['title']) => (
-          <HostsTableEntryTitle
+          <EntryTitle
             title={title}
             time={searchCriteria.dateRange}
             onClick={() => reportHostEntryClick(title)}
@@ -259,7 +251,14 @@ export const useHostsTable = () => {
         width: '20%',
       },
       {
-        name: cpuUsageLabel,
+        name: (
+          <ColumnHeader
+            label={TABLE_COLUMN_LABEL.cpuUsage}
+            toolTip={TOOLTIP.cpuUsage}
+            formula={hostLensFormulas.cpuUsage.value}
+            popoverContainerRef={popoverContainerRef}
+          />
+        ),
         field: 'cpu',
         sortable: true,
         'data-test-subj': 'hostsView-tableRow-cpuUsage',
@@ -267,7 +266,14 @@ export const useHostsTable = () => {
         align: 'right',
       },
       {
-        name: normalizedLoad1mLabel,
+        name: (
+          <ColumnHeader
+            label={TABLE_COLUMN_LABEL.normalizedLoad1m}
+            toolTip={TOOLTIP.normalizedLoad1m}
+            formula={hostLensFormulas.normalizedLoad1m.value}
+            popoverContainerRef={popoverContainerRef}
+          />
+        ),
         field: 'normalizedLoad1m',
         sortable: true,
         'data-test-subj': 'hostsView-tableRow-normalizedLoad1m',
@@ -275,15 +281,29 @@ export const useHostsTable = () => {
         align: 'right',
       },
       {
-        name: memoryUsageLabel,
+        name: (
+          <ColumnHeader
+            label={TABLE_COLUMN_LABEL.memoryUsage}
+            toolTip={TOOLTIP.memoryUsage}
+            formula={hostLensFormulas.memoryUsage.value}
+            popoverContainerRef={popoverContainerRef}
+          />
+        ),
         field: 'memory',
         sortable: true,
-        'data-test-subj': 'hostsView-tableRow-memoryTotal',
+        'data-test-subj': 'hostsView-tableRow-memoryUsage',
         render: (avg: number) => formatMetric('memory', avg),
         align: 'right',
       },
       {
-        name: memoryFreeLabel,
+        name: (
+          <ColumnHeader
+            label={TABLE_COLUMN_LABEL.memoryFree}
+            toolTip={TOOLTIP.memoryFree}
+            formula={hostLensFormulas.memoryFree.value}
+            popoverContainerRef={popoverContainerRef}
+          />
+        ),
         field: 'memoryFree',
         sortable: true,
         'data-test-subj': 'hostsView-tableRow-memoryFree',
@@ -291,7 +311,14 @@ export const useHostsTable = () => {
         align: 'right',
       },
       {
-        name: diskSpaceUsageLabel,
+        name: (
+          <ColumnHeader
+            label={TABLE_COLUMN_LABEL.diskSpaceUsage}
+            toolTip={TOOLTIP.diskSpaceUsage}
+            formula={hostLensFormulas.diskSpaceUsage.value}
+            popoverContainerRef={popoverContainerRef}
+          />
+        ),
         field: 'diskSpaceUsage',
         sortable: true,
         'data-test-subj': 'hostsView-tableRow-diskSpaceUsage',
@@ -299,7 +326,14 @@ export const useHostsTable = () => {
         align: 'right',
       },
       {
-        name: rxLabel,
+        name: (
+          <ColumnHeader
+            label={TABLE_COLUMN_LABEL.rx}
+            toolTip={TOOLTIP.rx}
+            formula={hostLensFormulas.rx.value}
+            popoverContainerRef={popoverContainerRef}
+          />
+        ),
         field: 'rx',
         sortable: true,
         'data-test-subj': 'hostsView-tableRow-rx',
@@ -308,7 +342,14 @@ export const useHostsTable = () => {
         width: '120px',
       },
       {
-        name: txLabel,
+        name: (
+          <ColumnHeader
+            label={TABLE_COLUMN_LABEL.tx}
+            toolTip={TOOLTIP.tx}
+            formula={hostLensFormulas.tx.value}
+            popoverContainerRef={popoverContainerRef}
+          />
+        ),
         field: 'tx',
         sortable: true,
         'data-test-subj': 'hostsView-tableRow-tx',
@@ -318,12 +359,18 @@ export const useHostsTable = () => {
       },
     ],
     [
-      hostFlyoutState?.clickedItemId,
+      hostFlyoutState?.itemId,
       reportHostEntryClick,
       searchCriteria.dateRange,
       setHostFlyoutState,
+      popoverContainerRef,
     ]
   );
+
+  const selection: EuiTableSelectionType<HostNodeRow> = {
+    onSelectionChange,
+    selectable: (item: HostNodeRow) => !!item.name,
+  };
 
   return {
     columns,
@@ -331,10 +378,17 @@ export const useHostsTable = () => {
     currentPage,
     closeFlyout,
     items,
-    isFlyoutOpen: !!hostFlyoutState?.clickedItemId,
+    isFlyoutOpen: !!hostFlyoutState?.itemId,
     onTableChange,
     pagination,
     sorting,
+    selection,
+    selectedItemsCount: selectedItems.length,
+    filterSelectedHosts,
+    refs: {
+      popoverContainerRef,
+      tableRef,
+    },
   };
 };
 

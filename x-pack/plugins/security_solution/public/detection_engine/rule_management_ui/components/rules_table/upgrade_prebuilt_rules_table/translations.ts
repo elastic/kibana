@@ -23,3 +23,10 @@ export const UPDATE_SELECTED_RULES = (numberOfSelectedRules: number) => {
     }
   );
 };
+
+export const SEARCH_PLACEHOLDER = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.upgradeRules.searchBarPlaceholder',
+  {
+    defaultMessage: 'Search by rule name',
+  }
+);

@@ -21,6 +21,7 @@ import { getTelemetryChannelEndpoint } from '../../common/telemetry_config';
 import { PAYLOAD_CONTENT_ENCODING } from '../../common/constants';
 
 interface SendTelemetryOptInStatusConfig {
+  appendServerlessChannelsSuffix: boolean;
   sendUsageTo: 'staging' | 'prod';
   newOptInStatus: boolean;
   currentKibanaVersion: string;
@@ -31,8 +32,10 @@ export async function sendTelemetryOptInStatus(
   config: SendTelemetryOptInStatusConfig,
   statsGetterConfig: StatsGetterConfig
 ): Promise<void> {
-  const { sendUsageTo, newOptInStatus, currentKibanaVersion } = config;
+  const { appendServerlessChannelsSuffix, sendUsageTo, newOptInStatus, currentKibanaVersion } =
+    config;
   const optInStatusUrl = getTelemetryChannelEndpoint({
+    appendServerlessChannelsSuffix,
     env: sendUsageTo,
     channelName: 'optInStatus',
   });

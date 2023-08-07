@@ -18,7 +18,7 @@ import {
   unwrapEsResponse,
   WrappedElasticsearchClientError,
 } from '../common/utils/unwrap_es_response';
-import { observabilityCoPilotConfig } from './services/openai/config';
+
 export { rangeQuery, kqlQuery, termQuery, termsQuery } from './utils/queries';
 export { getInspectResponse } from '../common/utils/get_inspect_response';
 
@@ -35,9 +35,13 @@ const configSchema = schema.object({
         enabled: schema.boolean({ defaultValue: false }),
       }),
       logs: schema.object({
-        enabled: schema.boolean({ defaultValue: false }),
+        // Enable it by default: https://github.com/elastic/kibana/issues/159945
+        enabled: schema.boolean({ defaultValue: true }),
       }),
       uptime: schema.object({
+        enabled: schema.boolean({ defaultValue: false }),
+      }),
+      observability: schema.object({
         enabled: schema.boolean({ defaultValue: false }),
       }),
     }),
@@ -49,7 +53,6 @@ const configSchema = schema.object({
     groupByPageSize: schema.number({ defaultValue: 10_000 }),
   }),
   enabled: schema.boolean({ defaultValue: true }),
-  coPilot: schema.maybe(observabilityCoPilotConfig),
   compositeSlo: schema.object({
     enabled: schema.boolean({ defaultValue: false }),
   }),
@@ -58,8 +61,11 @@ const configSchema = schema.object({
 export const config: PluginConfigDescriptor = {
   exposeToBrowser: {
     unsafe: true,
-    coPilot: {
+    aiAssistant: {
       enabled: true,
+      feedback: {
+        enabled: true,
+      },
     },
   },
   schema: configSchema,

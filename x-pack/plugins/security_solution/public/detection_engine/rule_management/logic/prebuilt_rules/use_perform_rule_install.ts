@@ -15,7 +15,7 @@ export const usePerformInstallAllRules = () => {
 
   return usePerformAllRulesInstallMutation({
     onError: (err) => {
-      addError(err, { title: i18n.FAILED_ALL_RULES_INSTALL });
+      addError(err, { title: i18n.RULE_INSTALLATION_FAILED });
     },
     onSuccess: (result) => {
       addSuccess(getSuccessToastMessage(result));
@@ -28,7 +28,7 @@ export const usePerformInstallSpecificRules = () => {
 
   return usePerformSpecificRulesInstallMutation({
     onError: (err) => {
-      addError(err, { title: i18n.FAILED_SPECIFIC_RULES_INSTALL });
+      addError(err, { title: i18n.RULE_INSTALLATION_FAILED });
     },
     onSuccess: (result) => {
       addSuccess(getSuccessToastMessage(result));
@@ -44,18 +44,18 @@ const getSuccessToastMessage = (result: {
     failed: number;
   };
 }) => {
-  let toastMessage: string = '';
+  const toastMessages: string[] = [];
   const {
     summary: { succeeded, skipped, failed },
   } = result;
   if (succeeded > 0) {
-    toastMessage += i18n.INSTALL_RULE_SUCCESS(succeeded);
+    toastMessages.push(i18n.INSTALL_RULE_SUCCESS(succeeded));
   }
   if (skipped > 0) {
-    toastMessage += i18n.INSTALL_RULE_SKIPPED(skipped);
+    toastMessages.push(i18n.INSTALL_RULE_SKIPPED(skipped));
   }
   if (failed > 0) {
-    toastMessage += i18n.INSTALL_RULE_FAILED(failed);
+    toastMessages.push(i18n.INSTALL_RULE_FAILED(failed));
   }
-  return toastMessage;
+  return toastMessages.join(' ');
 };

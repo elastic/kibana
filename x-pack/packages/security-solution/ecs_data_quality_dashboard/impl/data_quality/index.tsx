@@ -11,6 +11,7 @@ import type {
   FlameElementEvent,
   HeatmapElementEvent,
   MetricElementEvent,
+  PartialTheme,
   PartitionElementEvent,
   Theme,
   WordCloudElementEvent,
@@ -53,7 +54,8 @@ interface Props {
   }) => void;
   patterns: string[];
   setLastChecked: (lastChecked: string) => void;
-  theme: Theme;
+  theme?: PartialTheme;
+  baseTheme: Theme;
 }
 
 /** Renders the `Data Quality` dashboard content */
@@ -71,6 +73,7 @@ const DataQualityPanelComponent: React.FC<Props> = ({
   patterns,
   setLastChecked,
   theme,
+  baseTheme,
 }) => {
   const formatBytes = useCallback(
     (value: number | undefined): string =>
@@ -99,6 +102,7 @@ const DataQualityPanelComponent: React.FC<Props> = ({
         patterns={patterns}
         setLastChecked={setLastChecked}
         theme={theme}
+        baseTheme={baseTheme}
       />
     </DataQualityProvider>
   );

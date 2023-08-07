@@ -9,6 +9,7 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 
 import type { Agent } from '../../types';
 import { appContextService } from '../app_context';
+import { DATA_TIERS } from '../../../common/constants';
 
 export async function fetchAndAssignAgentMetrics(esClient: ElasticsearchClient, agents: Agent[]) {
   try {
@@ -72,7 +73,7 @@ const aggregationQueryBuilder = (agentIds: string[]) => ({
       must: [
         {
           terms: {
-            _tier: ['data_hot', 'data_warm'],
+            _tier: DATA_TIERS,
           },
         },
         {
@@ -166,7 +167,7 @@ const aggregationQueryBuilder = (agentIds: string[]) => ({
                     },
                     script: {
                       source: `if (params.cpu_total > 0) {
-                      return params.cpu_total / params._interval  
+                      return params.cpu_total / params._interval
                     }
                     `,
                       lang: 'painless',

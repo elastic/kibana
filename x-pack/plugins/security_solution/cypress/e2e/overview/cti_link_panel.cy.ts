@@ -14,7 +14,6 @@ import {
 
 import { login, visit } from '../../tasks/login';
 import { OVERVIEW_URL } from '../../urls/navigation';
-import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
 
 describe('CTI Link Panel', () => {
   beforeEach(() => {
@@ -33,7 +32,7 @@ describe('CTI Link Panel', () => {
 
   describe('enabled threat intel module', () => {
     before(() => {
-      esArchiverLoad('threat_indicator');
+      cy.task('esArchiverLoad', 'threat_indicator');
     });
 
     beforeEach(() => {
@@ -41,7 +40,7 @@ describe('CTI Link Panel', () => {
     });
 
     after(() => {
-      esArchiverUnload('threat_indicator');
+      cy.task('esArchiverUnload', 'threat_indicator');
     });
 
     it('renders disabled dashboard module as expected when there are no events in the selected time period', () => {

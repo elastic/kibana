@@ -32,7 +32,7 @@ import {
 export const TimeRangeStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) => {
   const timefilter = useTimefilter();
   const { services } = useMlKibana();
-  const mlContext = useDataSource();
+  const dataSourceContext = useDataSource();
 
   const { jobCreator, jobCreatorUpdate, jobCreatorUpdated, chartLoader, chartInterval } =
     useContext(JobCreatorContext);
@@ -131,8 +131,8 @@ export const TimeRangeStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) 
               <FullTimeRangeSelector
                 frozenDataPreference={frozenDataPreference}
                 setFrozenDataPreference={setFrozenDataPreference}
-                dataView={mlContext.currentDataView}
-                query={mlContext.combinedQuery}
+                dataView={dataSourceContext.selectedDataView}
+                query={dataSourceContext.combinedQuery}
                 disabled={false}
                 callback={fullTimeRangeCallback}
                 timefilter={timefilter}

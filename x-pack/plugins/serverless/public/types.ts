@@ -10,8 +10,10 @@ import type {
   ChromeProjectNavigation,
   ChromeSetProjectBreadcrumbsParams,
   SideNavComponent,
+  ChromeProjectNavigationNode,
 } from '@kbn/core-chrome-browser';
 import type { ManagementSetup, ManagementStart } from '@kbn/management-plugin/public';
+import type { Observable } from 'rxjs';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ServerlessPluginSetup {}
@@ -24,6 +26,7 @@ export interface ServerlessPluginStart {
   setNavigation(projectNavigation: ChromeProjectNavigation): void;
   setProjectHome(homeHref: string): void;
   setSideNavComponent: (navigation: SideNavComponent) => void;
+  getActiveNavigationNodes$: () => Observable<ChromeProjectNavigationNode[][]>;
 }
 
 export interface ServerlessPluginSetupDependencies {

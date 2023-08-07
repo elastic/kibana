@@ -118,7 +118,7 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
     }
   },
   getDefaultLabel: (column, indexPattern) => {
-    const field = indexPattern.getFieldByName(column.sourceField);
+    const field = indexPattern?.getFieldByName(column.sourceField);
     return ofName(field, column.timeShift, column.timeScale, column.reducedTimeRange);
   },
   buildColumn({ field, previousColumn }, columnParams) {

@@ -52,22 +52,22 @@ export interface VulnerabilityRecord {
     version: string;
   };
   cloud: {
-    image: {
+    image?: {
       id: string;
     };
-    provider: string;
-    instance: {
+    provider?: string;
+    instance?: {
       id: string;
     };
-    machine: {
+    machine?: {
       type: string;
     };
     region: string;
-    availability_zone: string;
-    service: {
+    availability_zone?: string;
+    service?: {
       name: string;
     };
-    account: {
+    account?: {
       id: string;
     };
   };
@@ -130,4 +130,30 @@ export interface Vector {
   version: string;
   vector: string;
   score: number | undefined;
+}
+
+export interface VulnerabilitiesQueryData {
+  page: VulnerabilityRecord[];
+  total: number;
+}
+
+export interface VulnerabilitiesByResourceQueryData {
+  page: Array<{
+    resource: {
+      id: string;
+      name: string;
+    };
+    cloud: {
+      region: string;
+    };
+    vulnerabilities_count: number;
+    severity_map: {
+      critical: number;
+      high: number;
+      medium: number;
+      low: number;
+    };
+  }>;
+  total: number;
+  total_vulnerabilities: number;
 }

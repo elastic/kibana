@@ -10,11 +10,11 @@ import { createPromiseFromStreams } from '@kbn/utils';
 import { createRulesAndExceptionsStreamFromNdJson } from './create_rules_stream_from_ndjson';
 import { BadRequestError } from '@kbn/securitysolution-es-utils';
 
-import type { RuleToImport } from '../../../../../../common/detection_engine/rule_management';
+import type { RuleToImport } from '../../../../../../common/api/detection_engine/rule_management';
 import {
   getOutputDetailsSample,
   getSampleDetailsAsNdjson,
-} from '../../../../../../common/detection_engine/rule_management/mocks';
+} from '../../../../../../common/api/detection_engine/rule_management/mocks';
 import type { RuleExceptionsPromiseFromStreams } from './import_rules_utils';
 
 export const getOutputSample = (): Partial<RuleToImport> => ({

@@ -22,7 +22,8 @@ import {
 } from '@kbn/core/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { SharePluginStart } from '@kbn/share-plugin/server';
-import { Alert, type FieldMap } from '@kbn/alerts-as-data-utils';
+import type { FieldMap } from '@kbn/alerts-as-data-utils';
+import { Alert } from '@kbn/alerts-as-data-utils';
 import { Filter } from '@kbn/es-query';
 import { RuleTypeRegistry as OrigruleTypeRegistry } from './rule_type_registry';
 import { PluginSetupContract, PluginStartContract } from './plugin';
@@ -164,16 +165,6 @@ export interface RuleTypeParamsValidator<Params extends RuleTypeParams> {
   validateMutatedParams?: (mutatedOject: Params, origObject?: Params) => Params;
 }
 
-export interface GetSummarizedAlertsFnOpts {
-  start?: Date;
-  end?: Date;
-  executionUuid?: string;
-  ruleId: string;
-  spaceId: string;
-  excludedAlertInstanceIds: string[];
-  alertsFilter?: AlertsFilter | null;
-}
-
 export type AlertHit = Alert & {
   _id: string;
   _index: string;
@@ -182,6 +173,7 @@ export interface SummarizedAlertsChunk {
   count: number;
   data: AlertHit[];
 }
+
 export interface SummarizedAlerts {
   new: SummarizedAlertsChunk;
   ongoing: SummarizedAlertsChunk;
@@ -190,7 +182,6 @@ export interface SummarizedAlerts {
 export interface CombinedSummarizedAlerts extends SummarizedAlerts {
   all: SummarizedAlertsChunk;
 }
-export type GetSummarizedAlertsFn = (opts: GetSummarizedAlertsFnOpts) => Promise<SummarizedAlerts>;
 export interface GetViewInAppRelativeUrlFnOpts<Params extends RuleTypeParams> {
   rule: Pick<SanitizedRule<Params>, 'id'> &
     Omit<Partial<SanitizedRule<Params>>, 'viewInAppRelativeUrl'>;
@@ -207,7 +198,11 @@ interface ComponentTemplateSpec {
   fieldMap: FieldMap;
 }
 
-export interface IRuleTypeAlerts {
+export type FormatAlert<AlertData extends RuleAlertData> = (
+  alert: Partial<AlertData>
+) => Partial<AlertData>;
+
+export interface IRuleTypeAlerts<AlertData extends RuleAlertData = never> {
   /**
    * Specifies the target alerts-as-data resource
    * for this rule type. All alerts created with the same
@@ -256,6 +251,11 @@ export interface IRuleTypeAlerts {
    * Optional secondary alias to use. This alias should not include the namespace.
    */
   secondaryAlias?: string;
+
+  /**
+   * Optional function to format each alert in summarizedAlerts right after fetching them.
+   */
+  formatAlert?: FormatAlert<AlertData>;
 }
 
 export interface RuleType<
@@ -304,8 +304,7 @@ export interface RuleType<
   ruleTaskTimeout?: string;
   cancelAlertsOnRuleTimeout?: boolean;
   doesSetRecoveryContext?: boolean;
-  getSummarizedAlerts?: GetSummarizedAlertsFn;
-  alerts?: IRuleTypeAlerts;
+  alerts?: IRuleTypeAlerts<AlertData>;
   /**
    * Determines whether framework should
    * automatically make recovery determination. Defaults to true.
@@ -321,48 +320,8 @@ export type UntypedRuleType = RuleType<
   AlertInstanceContext
 >;
 
-export interface RawAlertsFilter extends AlertsFilter {
-  query?: {
-    kql: string;
-    filters: Filter[];
-    dsl: string;
-  };
-  timeframe?: AlertsFilterTimeframe;
-}
-
-export interface RawRuleAction extends SavedObjectAttributes {
-  uuid: string;
-  group: string;
-  actionRef: string;
-  actionTypeId: string;
-  params: RuleActionParams;
-  frequency?: {
-    summary: boolean;
-    notifyWhen: RuleNotifyWhenType;
-    throttle: string | null;
-  };
-  alertsFilter?: RawAlertsFilter;
-}
-
 export interface RuleMeta extends SavedObjectAttributes {
   versionApiKeyLastmodified?: string;
-}
-
-// note that the `error` property is "null-able", as we're doing a partial
-// update on the rule when we update this data, but need to ensure we
-// delete any previous error if the current status has no error
-export interface RawRuleExecutionStatus extends SavedObjectAttributes {
-  status: RuleExecutionStatuses;
-  lastExecutionDate: string;
-  lastDuration?: number;
-  error: null | {
-    reason: RuleExecutionStatusErrorReasons;
-    message: string;
-  };
-  warning: null | {
-    reason: RuleExecutionStatusWarningReasons;
-    message: string;
-  };
 }
 
 export type PartialRule<Params extends RuleTypeParams = never> = Pick<Rule<Params>, 'id'> &
@@ -382,40 +341,6 @@ export type PartialRuleWithLegacyId<Params extends RuleTypeParams = never> = Pic
   'id'
 > &
   Partial<Omit<RuleWithLegacyId<Params>, 'id'>>;
-
-export interface RawRule extends SavedObjectAttributes {
-  enabled: boolean;
-  name: string;
-  tags: string[];
-  alertTypeId: string; // this cannot be renamed since it is in the saved object
-  consumer: string;
-  legacyId: string | null;
-  schedule: IntervalSchedule;
-  actions: RawRuleAction[];
-  params: SavedObjectAttributes;
-  mapped_params?: MappedParams;
-  scheduledTaskId?: string | null;
-  createdBy: string | null;
-  updatedBy: string | null;
-  createdAt: string;
-  updatedAt: string;
-  apiKey: string | null;
-  apiKeyOwner: string | null;
-  apiKeyCreatedByUser?: boolean | null;
-  throttle?: string | null;
-  notifyWhen?: RuleNotifyWhenType | null;
-  muteAll: boolean;
-  mutedInstanceIds: string[];
-  meta?: RuleMeta;
-  executionStatus: RawRuleExecutionStatus;
-  monitoring?: RawRuleMonitoring;
-  snoozeSchedule?: RuleSnooze; // Remove ? when this parameter is made available in the public API
-  isSnoozedUntil?: string | null;
-  lastRun?: RawRuleLastRun | null;
-  nextRun?: string | null;
-  revision: number;
-  running?: boolean | null;
-}
 
 export interface AlertingPlugin {
   setup: PluginSetupContract;
@@ -469,3 +394,77 @@ export type PublicRuleResultService = PublicLastRunSetters;
 
 export interface RawRuleLastRun extends SavedObjectAttributes, RuleLastRun {}
 export interface RawRuleMonitoring extends SavedObjectAttributes, RuleMonitoring {}
+
+export interface RawRuleAlertsFilter extends AlertsFilter {
+  query?: {
+    kql: string;
+    filters: Filter[];
+    dsl: string;
+  };
+  timeframe?: AlertsFilterTimeframe;
+}
+
+export interface RawRuleAction extends SavedObjectAttributes {
+  uuid: string;
+  group: string;
+  actionRef: string;
+  actionTypeId: string;
+  params: RuleActionParams;
+  frequency?: {
+    summary: boolean;
+    notifyWhen: RuleNotifyWhenType;
+    throttle: string | null;
+  };
+  alertsFilter?: RawRuleAlertsFilter;
+}
+
+// note that the `error` property is "null-able", as we're doing a partial
+// update on the rule when we update this data, but need to ensure we
+// delete any previous error if the current status has no error
+export interface RawRuleExecutionStatus extends SavedObjectAttributes {
+  status: RuleExecutionStatuses;
+  lastExecutionDate: string;
+  lastDuration?: number;
+  error: null | {
+    reason: RuleExecutionStatusErrorReasons;
+    message: string;
+  };
+  warning: null | {
+    reason: RuleExecutionStatusWarningReasons;
+    message: string;
+  };
+}
+
+export interface RawRule extends SavedObjectAttributes {
+  enabled: boolean;
+  name: string;
+  tags: string[];
+  alertTypeId: string; // this cannot be renamed since it is in the saved object
+  consumer: string;
+  legacyId: string | null;
+  schedule: IntervalSchedule;
+  actions: RawRuleAction[];
+  params: SavedObjectAttributes;
+  mapped_params?: MappedParams;
+  scheduledTaskId?: string | null;
+  createdBy: string | null;
+  updatedBy: string | null;
+  createdAt: string;
+  updatedAt: string;
+  apiKey: string | null;
+  apiKeyOwner: string | null;
+  apiKeyCreatedByUser?: boolean | null;
+  throttle?: string | null;
+  notifyWhen?: RuleNotifyWhenType | null;
+  muteAll: boolean;
+  mutedInstanceIds: string[];
+  meta?: RuleMeta;
+  executionStatus: RawRuleExecutionStatus;
+  monitoring?: RawRuleMonitoring;
+  snoozeSchedule?: RuleSnooze; // Remove ? when this parameter is made available in the public API
+  isSnoozedUntil?: string | null;
+  lastRun?: RawRuleLastRun | null;
+  nextRun?: string | null;
+  revision: number;
+  running?: boolean | null;
+}

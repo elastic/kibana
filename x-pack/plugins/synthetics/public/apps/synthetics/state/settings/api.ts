@@ -19,10 +19,10 @@ import {
   LocationMonitorsResponse,
   LocationMonitorsType,
 } from '../../../../../common/runtime_types';
-import { API_URLS, SYNTHETICS_API_URLS } from '../../../../../common/constants';
+import { SYNTHETICS_API_URLS } from '../../../../../common/constants';
 import { LocationMonitor } from '.';
 
-const apiPath = API_URLS.DYNAMIC_SETTINGS;
+const apiPath = SYNTHETICS_API_URLS.DYNAMIC_SETTINGS;
 
 interface SaveApiRequest {
   settings: DynamicSettings;
@@ -51,7 +51,7 @@ export const fetchLocationMonitors = async (): Promise<LocationMonitor[]> => {
 export type ActionConnector = Omit<RawActionConnector, 'secrets'>;
 
 export const fetchConnectors = async (): Promise<ActionConnector[]> => {
-  const response = (await apiService.get(API_URLS.RULE_CONNECTORS)) as Array<
+  const response = (await apiService.get(SYNTHETICS_API_URLS.RULE_CONNECTORS)) as Array<
     AsApiContract<ActionConnector>
   >;
   return response.map(
@@ -61,6 +61,7 @@ export const fetchConnectors = async (): Promise<ActionConnector[]> => {
       is_preconfigured: isPreconfigured,
       is_deprecated: isDeprecated,
       is_missing_secrets: isMissingSecrets,
+      is_system_action: isSystemAction,
       ...res
     }) => ({
       ...res,
@@ -69,12 +70,13 @@ export const fetchConnectors = async (): Promise<ActionConnector[]> => {
       isDeprecated,
       isPreconfigured,
       isMissingSecrets,
+      isSystemAction,
     })
   );
 };
 
 export const fetchActionTypes = async (): Promise<ActionType[]> => {
-  const response = (await apiService.get(API_URLS.CONNECTOR_TYPES, {
+  const response = (await apiService.get(SYNTHETICS_API_URLS.CONNECTOR_TYPES, {
     feature_id: 'uptime',
   })) as Array<AsApiContract<ActionType>>;
   return response.map<ActionType>(
@@ -83,6 +85,7 @@ export const fetchActionTypes = async (): Promise<ActionType[]> => {
       enabled_in_license: enabledInLicense,
       minimum_license_required: minimumLicenseRequired,
       supported_feature_ids: supportedFeatureIds,
+      is_system_action_type: isSystemActionType,
       ...res
     }: AsApiContract<ActionType>) => ({
       ...res,
@@ -90,6 +93,7 @@ export const fetchActionTypes = async (): Promise<ActionType[]> => {
       enabledInLicense,
       minimumLicenseRequired,
       supportedFeatureIds,
+      isSystemActionType,
     })
   );
 };

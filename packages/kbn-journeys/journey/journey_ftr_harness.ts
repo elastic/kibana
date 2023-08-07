@@ -25,6 +25,7 @@ import { KibanaUrl } from '../services/kibana_url';
 import type { Step, AnyStep } from './journey';
 import type { JourneyConfig } from './journey_config';
 import { JourneyScreenshots } from './journey_screenshots';
+import { getNewPageObject } from '../services/page';
 
 export class JourneyFtrHarness {
   private readonly screenshots: JourneyScreenshots;
@@ -240,9 +241,8 @@ export class JourneyFtrHarness {
       return await block();
     }
 
-    const span = this.apm?.startSpan(name, type ?? null, {
-      childOf: this.currentTransaction,
-    });
+    const span = this.currentTransaction.startSpan(name, type ?? null);
+
     if (!span) {
       return await block();
     }
@@ -358,7 +358,11 @@ export class JourneyFtrHarness {
       throw new Error('performance service is not properly initialized');
     }
 
+    const isServerlessProject = !!this.config.get('serverless');
+    const kibanaPage = getNewPageObject(isServerlessProject, page, this.log);
+
     this.#_ctx = this.journeyConfig.getExtendedStepCtx({
+      kibanaPage,
       page,
       log: this.log,
       inputDelays: getInputDelays(),
@@ -415,11 +419,8 @@ export class JourneyFtrHarness {
         ? args.map((arg) => (typeof arg === 'string' ? arg : inspect(arg, false, null))).join(' ')
         : message.text();
 
-      if (
-        url.includes('kbn-ui-shared-deps-npm.dll.js') &&
-        text.includes('moment construction falls')
-      ) {
-        // ignore errors from moment about constructing dates with invalid formats
+      if (url.includes('kbn-ui-shared-deps-npm.dll.js')) {
+        // ignore errors/warning from kbn-ui-shared-deps-npm.dll.js
         return;
       }
 

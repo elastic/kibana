@@ -7,7 +7,7 @@
 
 import { EuiSpacer, EuiTab, EuiTabs, EuiSkeletonText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { LogStream } from '@kbn/infra-plugin/public';
+import { LogStream } from '@kbn/logs-shared-plugin/public';
 import React, { useMemo } from 'react';
 import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
 import { TransactionMetadata } from '../../../shared/metadata_table/transaction_metadata';

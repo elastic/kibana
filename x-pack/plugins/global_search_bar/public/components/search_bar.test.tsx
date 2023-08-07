@@ -5,16 +5,18 @@
  * 2.0.
  */
 
-import React from 'react';
-import { act, render, screen, fireEvent } from '@testing-library/react';
-import { of, BehaviorSubject } from 'rxjs';
-import { filter, map } from 'rxjs/operators';
-import { applicationServiceMock } from '@kbn/core/public/mocks';
-import { globalSearchPluginMock } from '@kbn/global-search-plugin/public/mocks';
+import type { ChromeStyle } from '@kbn/core-chrome-browser';
+import { applicationServiceMock, coreMock } from '@kbn/core/public/mocks';
 import { GlobalSearchBatchedResults, GlobalSearchResult } from '@kbn/global-search-plugin/public';
-import { SearchBar } from './search_bar';
+import { globalSearchPluginMock } from '@kbn/global-search-plugin/public/mocks';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { TrackUiMetricFn } from '../types';
+import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/public/mocks';
+import { act, fireEvent, render, screen } from '@testing-library/react';
+import React from 'react';
+import { BehaviorSubject, of } from 'rxjs';
+import { filter, map } from 'rxjs/operators';
+import { EventReporter } from '../telemetry';
+import { SearchBar } from './search_bar';
 
 jest.mock(
   'react-virtualized-auto-sizer',
@@ -46,17 +48,18 @@ const createBatch = (...results: Result[]): GlobalSearchBatchedResults => ({
 jest.useFakeTimers({ legacyFakeTimers: true });
 
 describe('SearchBar', () => {
-  let searchService: ReturnType<typeof globalSearchPluginMock.createStartContract>;
-  let applications: ReturnType<typeof applicationServiceMock.createStartContract>;
-  let trackUiMetric: TrackUiMetricFn;
+  const usageCollection = usageCollectionPluginMock.createSetupContract();
+  const core = coreMock.createStart();
 
   const basePathUrl = '/plugins/globalSearchBar/assets/';
   const darkMode = false;
+  const eventReporter = new EventReporter({ analytics: core.analytics, usageCollection });
+  let searchService: ReturnType<typeof globalSearchPluginMock.createStartContract>;
+  let applications: ReturnType<typeof applicationServiceMock.createStartContract>;
 
   beforeEach(() => {
     applications = applicationServiceMock.createStartContract();
     searchService = globalSearchPluginMock.createStartContract();
-    trackUiMetric = jest.fn();
   });
 
   const update = () => {
@@ -87,145 +90,155 @@ describe('SearchBar', () => {
     expect(await screen.findAllByTestId('nav-search-option')).toHaveLength(list.length);
   };
 
-  it('correctly filters and sorts results', async () => {
-    searchService.find
-      .mockReturnValueOnce(
-        of(
-          createBatch('Discover', 'Canvas'),
-          createBatch({ id: 'Visualize', type: 'test' }, 'Graph')
+  describe('chromeStyle: classic', () => {
+    const chromeStyle$ = of<ChromeStyle>('classic');
+
+    it('correctly filters and sorts results', async () => {
+      searchService.find
+        .mockReturnValueOnce(
+          of(
+            createBatch('Discover', 'Canvas'),
+            createBatch({ id: 'Visualize', type: 'test' }, 'Graph')
+          )
         )
-      )
-      .mockReturnValueOnce(of(createBatch('Discover', { id: 'My Dashboard', type: 'test' })));
+        .mockReturnValueOnce(of(createBatch('Discover', { id: 'My Dashboard', type: 'test' })));
 
-    render(
-      <IntlProvider locale="en">
-        <SearchBar
-          globalSearch={searchService}
-          navigateToUrl={applications.navigateToUrl}
-          basePathUrl={basePathUrl}
-          darkMode={darkMode}
-          trackUiMetric={trackUiMetric}
-        />
-      </IntlProvider>
-    );
+      render(
+        <IntlProvider locale="en">
+          <SearchBar
+            globalSearch={searchService}
+            navigateToUrl={applications.navigateToUrl}
+            basePathUrl={basePathUrl}
+            darkMode={darkMode}
+            chromeStyle$={chromeStyle$}
+            reportEvent={eventReporter}
+          />
+        </IntlProvider>
+      );
 
-    expect(searchService.find).toHaveBeenCalledTimes(0);
+      expect(searchService.find).toHaveBeenCalledTimes(0);
 
-    await focusAndUpdate();
+      await focusAndUpdate();
 
-    expect(searchService.find).toHaveBeenCalledTimes(1);
-    expect(searchService.find).toHaveBeenCalledWith({}, {});
-    await assertSearchResults(['Canvas • Kibana', 'Discover • Kibana', 'Graph • Kibana']);
+      expect(searchService.find).toHaveBeenCalledTimes(1);
+      expect(searchService.find).toHaveBeenCalledWith({}, {});
+      await assertSearchResults(['Canvas • Kibana', 'Discover • Kibana', 'Graph • Kibana']);
 
-    simulateTypeChar('d');
+      simulateTypeChar('d');
 
-    await assertSearchResults(['Discover • Kibana', 'My Dashboard • Test']);
-    expect(searchService.find).toHaveBeenCalledTimes(2);
-    expect(searchService.find).toHaveBeenLastCalledWith({ term: 'd' }, {});
-
-    expect(trackUiMetric).nthCalledWith(1, 'count', 'search_focus');
-    expect(trackUiMetric).nthCalledWith(2, 'count', 'search_request');
-    expect(trackUiMetric).toHaveBeenCalledTimes(2);
-  });
-
-  it('supports keyboard shortcuts', async () => {
-    render(
-      <IntlProvider locale="en">
-        <SearchBar
-          globalSearch={searchService}
-          navigateToUrl={applications.navigateToUrl}
-          basePathUrl={basePathUrl}
-          darkMode={darkMode}
-          trackUiMetric={trackUiMetric}
-        />
-      </IntlProvider>
-    );
-    act(() => {
-      fireEvent.keyDown(window, { key: '/', ctrlKey: true, metaKey: true });
+      await assertSearchResults(['Discover • Kibana', 'My Dashboard • Test']);
+      expect(searchService.find).toHaveBeenCalledTimes(2);
+      expect(searchService.find).toHaveBeenLastCalledWith({ term: 'd' }, {});
     });
 
-    const inputElement = await screen.findByTestId('nav-search-input');
+    it('supports keyboard shortcuts', async () => {
+      render(
+        <IntlProvider locale="en">
+          <SearchBar
+            globalSearch={searchService}
+            navigateToUrl={applications.navigateToUrl}
+            basePathUrl={basePathUrl}
+            darkMode={darkMode}
+            chromeStyle$={chromeStyle$}
+            reportEvent={eventReporter}
+          />
+        </IntlProvider>
+      );
+      act(() => {
+        fireEvent.keyDown(window, { key: '/', ctrlKey: true, metaKey: true });
+      });
 
-    expect(document.activeElement).toEqual(inputElement);
+      const inputElement = await screen.findByTestId('nav-search-input');
 
-    expect(trackUiMetric).nthCalledWith(1, 'count', 'shortcut_used');
-    expect(trackUiMetric).nthCalledWith(2, 'count', 'search_focus');
-    expect(trackUiMetric).toHaveBeenCalledTimes(2);
-  });
-
-  it('only display results from the last search', async () => {
-    const firstSearchTrigger = new BehaviorSubject<boolean>(false);
-    const firstSearch = firstSearchTrigger.pipe(
-      filter((event) => event),
-      map(() => {
-        return createBatch('Discover', 'Canvas');
-      })
-    );
-    const secondSearch = of(createBatch('Visualize', 'Map'));
-
-    searchService.find.mockReturnValueOnce(firstSearch).mockReturnValueOnce(secondSearch);
-
-    render(
-      <IntlProvider locale="en">
-        <SearchBar
-          globalSearch={searchService}
-          navigateToUrl={applications.navigateToUrl}
-          basePathUrl={basePathUrl}
-          darkMode={darkMode}
-          trackUiMetric={trackUiMetric}
-        />
-      </IntlProvider>
-    );
-
-    await focusAndUpdate();
-
-    expect(searchService.find).toHaveBeenCalledTimes(1);
-    //
-    simulateTypeChar('d');
-    await assertSearchResults(['Visualize • Kibana', 'Map • Kibana']);
-
-    firstSearchTrigger.next(true);
-
-    update();
-
-    await assertSearchResults(['Visualize • Kibana', 'Map • Kibana']);
-  });
-
-  it('tracks the application navigated to', async () => {
-    searchService.find.mockReturnValueOnce(
-      of(createBatch('Discover', { id: 'My Dashboard', type: 'test' }))
-    );
-
-    render(
-      <IntlProvider locale="en">
-        <SearchBar
-          globalSearch={searchService}
-          navigateToUrl={applications.navigateToUrl}
-          basePathUrl={basePathUrl}
-          darkMode={darkMode}
-          trackUiMetric={trackUiMetric}
-        />
-      </IntlProvider>
-    );
-
-    expect(searchService.find).toHaveBeenCalledTimes(0);
-
-    await focusAndUpdate();
-
-    expect(searchService.find).toHaveBeenCalledTimes(1);
-    expect(searchService.find).toHaveBeenCalledWith({}, {});
-    await assertSearchResults(['Discover • Kibana']);
-
-    const navSearchOptionToClick = await screen.findByTestId('nav-search-option');
-    act(() => {
-      fireEvent.click(navSearchOptionToClick);
+      expect(document.activeElement).toEqual(inputElement);
     });
 
-    expect(trackUiMetric).nthCalledWith(1, 'count', 'search_focus');
-    expect(trackUiMetric).nthCalledWith(2, 'click', [
-      'user_navigated_to_application',
-      'user_navigated_to_application_discover',
-    ]);
-    expect(trackUiMetric).toHaveBeenCalledTimes(2);
+    it('only display results from the last search', async () => {
+      const firstSearchTrigger = new BehaviorSubject<boolean>(false);
+      const firstSearch = firstSearchTrigger.pipe(
+        filter((event) => event),
+        map(() => {
+          return createBatch('Discover', 'Canvas');
+        })
+      );
+      const secondSearch = of(createBatch('Visualize', 'Map'));
+
+      searchService.find.mockReturnValueOnce(firstSearch).mockReturnValueOnce(secondSearch);
+
+      render(
+        <IntlProvider locale="en">
+          <SearchBar
+            globalSearch={searchService}
+            navigateToUrl={applications.navigateToUrl}
+            basePathUrl={basePathUrl}
+            darkMode={darkMode}
+            chromeStyle$={chromeStyle$}
+            reportEvent={eventReporter}
+          />
+        </IntlProvider>
+      );
+
+      await focusAndUpdate();
+
+      expect(searchService.find).toHaveBeenCalledTimes(1);
+      //
+      simulateTypeChar('d');
+      await assertSearchResults(['Visualize • Kibana', 'Map • Kibana']);
+
+      firstSearchTrigger.next(true);
+
+      update();
+
+      await assertSearchResults(['Visualize • Kibana', 'Map • Kibana']);
+    });
+  });
+
+  describe('chromeStyle: project', () => {
+    const chromeStyle$ = of<ChromeStyle>('project');
+
+    it('supports keyboard shortcuts', async () => {
+      render(
+        <IntlProvider locale="en">
+          <SearchBar
+            globalSearch={searchService}
+            navigateToUrl={applications.navigateToUrl}
+            basePathUrl={basePathUrl}
+            darkMode={darkMode}
+            chromeStyle$={chromeStyle$}
+            reportEvent={eventReporter}
+          />
+        </IntlProvider>
+      );
+
+      act(() => {
+        fireEvent.keyDown(window, { key: '/', ctrlKey: true, metaKey: true });
+      });
+
+      expect(await screen.findByTestId('nav-search-input')).toEqual(document.activeElement);
+
+      fireEvent.click(await screen.findByTestId('nav-search-conceal'));
+      expect(screen.queryAllByTestId('nav-search-input')).toHaveLength(0);
+    });
+
+    it('supports show/hide', async () => {
+      render(
+        <IntlProvider locale="en">
+          <SearchBar
+            globalSearch={searchService}
+            navigateToUrl={applications.navigateToUrl}
+            basePathUrl={basePathUrl}
+            darkMode={darkMode}
+            chromeStyle$={chromeStyle$}
+            reportEvent={eventReporter}
+          />
+        </IntlProvider>
+      );
+
+      fireEvent.click(await screen.findByTestId('nav-search-reveal'));
+      expect(await screen.findByTestId('nav-search-input')).toBeVisible();
+
+      fireEvent.click(await screen.findByTestId('nav-search-conceal'));
+      expect(screen.queryAllByTestId('nav-search-input')).toHaveLength(0);
+    });
   });
 });

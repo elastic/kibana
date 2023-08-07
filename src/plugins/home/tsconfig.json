@@ -31,6 +31,8 @@
     "@kbn/core-analytics-server",
     "@kbn/storybook",
     "@kbn/cloud-chat-provider-plugin",
+    "@kbn/shared-ux-router",
+    "@kbn/core-http-common",
   ],
   "exclude": [
     "target/**/*",

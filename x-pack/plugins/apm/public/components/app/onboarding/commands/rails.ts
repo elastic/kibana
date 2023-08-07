@@ -4,15 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { i18n } from '@kbn/i18n';
 
 export const railsVariables = (secretToken?: string) => ({
-  apmServiceName: 'service_name',
   ...(secretToken && { secretToken: 'secret_token' }),
   ...(!secretToken && { apiKey: 'api_key' }),
   apmServerUrl: 'server_url',
-  apmEnvironment: 'environment',
 });
 
 export const railsHighlightLang = 'rb';
@@ -30,7 +27,7 @@ export const rails = `# config/elastic_apm.yml:
     defaultMessage: 'Defaults to the name of your Rails app.',
   }
 )}
-service_name: 'my-service-name'
+service_name: '<your-service-name>'
 
 {{^secretToken}}
 # {{apiKeyHint}}
@@ -45,4 +42,4 @@ secret_token: '{{{secretToken}}}'
 server_url: '{{{apmServerUrl}}}'
 
 # {{{serviceEnvironmentHint}}}
-environment: 'my-environment'`;
+environment: '<your-environment>'`;

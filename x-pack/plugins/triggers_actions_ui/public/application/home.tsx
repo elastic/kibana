@@ -6,8 +6,8 @@
  */
 
 import React, { useState, lazy, useEffect, useCallback } from 'react';
-import { RouteComponentProps, Switch, Redirect } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
+import { RouteComponentProps, Redirect } from 'react-router-dom';
+import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSpacer, EuiPageTemplate } from '@elastic/eui';
@@ -130,7 +130,7 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
       <EuiSpacer size="l" />
       <HealthContextProvider>
         <HealthCheck waitForCheck={true}>
-          <Switch>
+          <Routes>
             <Route exact path={routeToLogs} component={renderLogsList} />
             <Route exact path={routeToRules} component={renderRulesList} />
             {isInternalAlertsTableEnabled ? (
@@ -146,7 +146,7 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
             ) : (
               <Redirect to={routeToRules} />
             )}
-          </Switch>
+          </Routes>
         </HealthCheck>
       </HealthContextProvider>
     </>

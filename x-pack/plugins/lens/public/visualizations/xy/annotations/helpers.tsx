@@ -8,17 +8,15 @@
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import {
-  getAnnotationAccessor,
   isQueryAnnotationConfig,
-} from '@kbn/event-annotation-plugin/public';
-import {
+  getAnnotationAccessor,
   createCopiedAnnotation,
-  EventAnnotationConfig,
-  getDefaultQueryAnnotation,
-} from '@kbn/event-annotation-plugin/common';
+} from '@kbn/event-annotation-components';
+import type { EventAnnotationConfig } from '@kbn/event-annotation-common';
+import { getDefaultQueryAnnotation } from '@kbn/event-annotation-common';
 import { IconChartBarAnnotations } from '@kbn/chart-icons';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
-import { isDraggedDataViewField } from '../../../utils';
+import { getUniqueLabelGenerator, isDraggedDataViewField } from '../../../utils';
 import type { FramePublicAPI, Visualization } from '../../../types';
 import { isHorizontalChart } from '../state_helpers';
 import type { XYState, XYDataLayerConfig, XYAnnotationLayerConfig, XYLayerConfig } from '../types';
@@ -364,7 +362,6 @@ export const onAnnotationDrop: Visualization<XYState>['onDrop'] = ({
     default:
       return prevState;
   }
-  return prevState;
 };
 
 export const setAnnotationsDimension: Visualization<XYState>['setDimension'] = ({
@@ -416,16 +413,6 @@ export const getAnnotationsConfiguration = ({
 }) => {
   const groupLabel = getAxisName('x', { isHorizontal: isHorizontalChart(state.layers) });
 
-  const emptyButtonLabels = {
-    buttonAriaLabel: i18n.translate('xpack.lens.indexPattern.addColumnAriaLabelClick', {
-      defaultMessage: 'Add an annotation to {groupLabel}',
-      values: { groupLabel },
-    }),
-    buttonLabel: i18n.translate('xpack.lens.configure.emptyConfigClick', {
-      defaultMessage: 'Add an annotation',
-    }),
-  };
-
   return {
     groups: [
       {
@@ -445,7 +432,6 @@ export const getAnnotationsConfiguration = ({
         supportFieldFormat: false,
         enableDimensionEditor: true,
         filterOperations: () => false,
-        labels: emptyButtonLabels,
       },
     ],
   };
@@ -454,29 +440,15 @@ export const getAnnotationsConfiguration = ({
 export const getUniqueLabels = (layers: XYLayerConfig[]) => {
   const annotationLayers = getAnnotationsLayers(layers);
   const columnLabelMap = {} as Record<string, string>;
-  const counts = {} as Record<string, number>;
 
-  const makeUnique = (label: string) => {
-    let uniqueLabel = label;
-
-    while (counts[uniqueLabel] >= 0) {
-      const num = ++counts[uniqueLabel];
-      uniqueLabel = i18n.translate('xpack.lens.uniqueLabel', {
-        defaultMessage: '{label} [{num}]',
-        values: { label, num },
-      });
-    }
-
-    counts[uniqueLabel] = 0;
-    return uniqueLabel;
-  };
+  const uniqueLabelGenerator = getUniqueLabelGenerator();
 
   annotationLayers.forEach((layer) => {
     if (!layer.annotations) {
       return;
     }
     layer.annotations.forEach((l) => {
-      columnLabelMap[l.id] = makeUnique(l.label);
+      columnLabelMap[l.id] = uniqueLabelGenerator(l.label);
     });
   });
   return columnLabelMap;

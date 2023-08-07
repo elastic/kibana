@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import classNames from 'classnames';
 import UseUnmount from 'react-use/lib/useUnmount';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 
@@ -18,7 +17,7 @@ import {
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 
-import { EuiHorizontalRule, EuiToolTipProps } from '@elastic/eui';
+import { EuiHorizontalRule, EuiIcon, EuiToolTipProps } from '@elastic/eui';
 import {
   getDashboardTitle,
   leaveConfirmStrings,
@@ -27,9 +26,10 @@ import {
 } from '../_dashboard_app_strings';
 import { UI_SETTINGS } from '../../../common';
 import { useDashboardAPI } from '../dashboard_app';
+import { DashboardEmbedSettings } from '../types';
 import { pluginServices } from '../../services/plugin_services';
 import { useDashboardMenuItems } from './use_dashboard_menu_items';
-import { DashboardEmbedSettings, DashboardRedirect } from '../types';
+import { DashboardRedirect } from '../../dashboard_container/types';
 import { DashboardEditingToolbar } from './dashboard_editing_toolbar';
 import { useDashboardMountContext } from '../hooks/dashboard_mount_context';
 import { getFullEditPath, LEGACY_DASHBOARD_APP_ID } from '../../dashboard_constants';
@@ -77,6 +77,7 @@ export function DashboardTopNav({ embedSettings, redirectTo }: DashboardTopNavPr
   const fullScreenMode = dashboard.select((state) => state.componentState.fullScreenMode);
   const savedQueryId = dashboard.select((state) => state.componentState.savedQueryId);
   const lastSavedId = dashboard.select((state) => state.componentState.lastSavedId);
+
   const viewMode = dashboard.select((state) => state.explicitInput.viewMode);
   const query = dashboard.select((state) => state.explicitInput.query);
   const title = dashboard.select((state) => state.explicitInput.title);
@@ -144,10 +145,23 @@ export function DashboardTopNav({ embedSettings, redirectTo }: DashboardTopNavPr
         },
       },
       {
-        text: dashboardTitle,
+        text:
+          viewMode === ViewMode.EDIT ? (
+            <>
+              {dashboardTitle} <EuiIcon size="s" type="pencil" />
+            </>
+          ) : (
+            dashboardTitle
+          ),
+        onClick:
+          viewMode === ViewMode.EDIT
+            ? () => {
+                dashboard.showSettings();
+              }
+            : undefined,
       },
     ]);
-  }, [setBreadcrumbs, redirectTo, dashboardTitle]);
+  }, [setBreadcrumbs, redirectTo, dashboardTitle, dashboard, viewMode]);
 
   /**
    * Build app leave handler whenever hasUnsavedChanges changes
@@ -207,11 +221,7 @@ export function DashboardTopNav({ embedSettings, redirectTo }: DashboardTopNavPr
   });
 
   return (
-    <div
-      className={classNames('dashboardTopNav', {
-        'dashboardTopNav-fullscreenMode': fullScreenMode,
-      })}
-    >
+    <div className="dashboardTopNav">
       <h1
         id="dashboardTitle"
         className="euiScreenReaderOnly"

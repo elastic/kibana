@@ -5,8 +5,7 @@
     "index": ".kibana",
     "source": {
       "coreMigrationVersion": "7.14.0",
-      "references": [
-      ],
+      "references": [],
       "test-deprecations-plugin": {
         "title": "Test saved object"
       },

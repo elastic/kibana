@@ -10,6 +10,7 @@ import {
   ALERT_RISK_SCORE,
   ALERT_SEVERITY,
   ALERT_RULE_PARAMETERS,
+  ALERT_WORKFLOW_TAGS,
 } from '@kbn/rule-data-utils';
 import { ENRICHMENT_DESTINATION_PATH } from '../../../../../common/constants';
 
@@ -51,6 +52,7 @@ export const TIMELINE_EVENTS_FIELDS = [
   '@timestamp',
   'kibana.alert.ancestors.index',
   'kibana.alert.workflow_status',
+  ALERT_WORKFLOW_TAGS,
   'kibana.alert.group.id',
   'kibana.alert.original_time',
   'kibana.alert.reason',

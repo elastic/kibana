@@ -12,9 +12,9 @@ import {
   getNotificationsQuerySchema,
 } from './schemas/notifications_schema';
 import { wrapError } from '../client/error_wrapper';
-import { RouteInitialization } from '../types';
+import type { RouteInitialization } from '../types';
 
-export function notificationsRoutes({ router, routeGuard }: RouteInitialization) {
+export function notificationsRoutes({ router, routeGuard, enabledFeatures }: RouteInitialization) {
   /**
    * @apiGroup Notifications
    *
@@ -46,7 +46,11 @@ export function notificationsRoutes({ router, routeGuard }: RouteInitialization)
       routeGuard.fullLicenseAPIGuard(
         async ({ client, request, response, mlSavedObjectService }) => {
           try {
-            const notificationsService = new NotificationsService(client, mlSavedObjectService);
+            const notificationsService = new NotificationsService(
+              client,
+              mlSavedObjectService,
+              enabledFeatures
+            );
 
             const results = await notificationsService.searchMessages(request.query);
 
@@ -91,7 +95,11 @@ export function notificationsRoutes({ router, routeGuard }: RouteInitialization)
       routeGuard.fullLicenseAPIGuard(
         async ({ client, mlSavedObjectService, request, response }) => {
           try {
-            const notificationsService = new NotificationsService(client, mlSavedObjectService);
+            const notificationsService = new NotificationsService(
+              client,
+              mlSavedObjectService,
+              enabledFeatures
+            );
 
             const results = await notificationsService.countMessages(request.query);
 

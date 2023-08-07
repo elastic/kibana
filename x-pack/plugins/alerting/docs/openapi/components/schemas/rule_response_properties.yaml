@@ -113,7 +113,9 @@ properties:
     nullable: true
     example: '2022-12-06T00:14:43.818Z'
   notify_when:
-    $ref: 'notify_when.yaml'
+    type: string
+    description: Indicates how often alerts generate actions.
+    nullable: true
   params:
     type: object
     description: The parameters for the rule.

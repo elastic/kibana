@@ -26,6 +26,7 @@ export const getRuntimeFieldEditorLoader =
     const { Provider: KibanaReactContextProvider } = createKibanaReactContext({
       uiSettings,
       settings,
+      theme,
     });
 
     let overlayRef: OverlayRef | null = null;

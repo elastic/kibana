@@ -799,6 +799,22 @@
             "path": "x-pack/plugins/security/public/nav_control/nav_control_component.tsx",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-public.UserMenuLink.content",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "content",
+            "description": [
+              "Render a custom ReactNode instead of the default <EuiContextMenuItem />"
+            ],
+            "signature": [
+              "boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined"
+            ],
+            "path": "x-pack/plugins/security/public/nav_control/nav_control_component.tsx",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -983,6 +999,42 @@
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "security",
+        "id": "def-public.UpdateUserProfileHook",
+        "type": "Type",
+        "tags": [],
+        "label": "UpdateUserProfileHook",
+        "description": [],
+        "signature": [
+          "(props?: Props | undefined) => { update: (data: ",
+          "UserProfileData",
+          ") => void; showSuccessNotification: (props: { isRefreshRequired: boolean; }) => void; isLoading: boolean; userProfileData?: ",
+          "UserProfileData",
+          " | null | undefined; }"
+        ],
+        "path": "x-pack/plugins/security/public/account_management/user_profile/use_update_user_profile.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "security",
+            "id": "def-public.UpdateUserProfileHook.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "Props | undefined"
+            ],
+            "path": "x-pack/plugins/security/public/account_management/user_profile/use_update_user_profile.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
       }
     ],
     "objects": [],
@@ -1110,14 +1162,10 @@
             "\nA set of methods to work with Kibana user profiles."
           ],
           "signature": [
-            "{ suggest: <D extends ",
-            {
-              "pluginId": "security",
-              "scope": "common",
-              "docId": "kibSecurityPluginApi",
-              "section": "def-common.UserProfileData",
-              "text": "UserProfileData"
-            },
+            "{ update: <D extends ",
+            "UserProfileData",
+            ">(data: D) => Promise<void>; suggest: <D extends ",
+            "UserProfileData",
             ">(path: string, params: ",
             {
               "pluginId": "security",
@@ -1135,13 +1183,7 @@
               "text": "UserProfile"
             },
             "<D>[]>; bulkGet: <D extends ",
-            {
-              "pluginId": "security",
-              "scope": "common",
-              "docId": "kibSecurityPluginApi",
-              "section": "def-common.UserProfileData",
-              "text": "UserProfileData"
-            },
+            "UserProfileData",
             ">(params: ",
             {
               "pluginId": "security",
@@ -1159,13 +1201,7 @@
               "text": "UserProfile"
             },
             "<D>[]>; getCurrent: <D extends ",
-            {
-              "pluginId": "security",
-              "scope": "common",
-              "docId": "kibSecurityPluginApi",
-              "section": "def-common.UserProfileData",
-              "text": "UserProfileData"
-            },
+            "UserProfileData",
             ">(params?: ",
             {
               "pluginId": "security",
@@ -1182,7 +1218,35 @@
               "section": "def-common.GetUserProfileResponse",
               "text": "GetUserProfileResponse"
             },
-            "<D>>; }"
+            "<D>>; readonly userProfile$: ",
+            "Observable",
+            "<",
+            "UserProfileData",
+            " | null>; }"
+          ],
+          "path": "x-pack/plugins/security/public/plugin.tsx",
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "security",
+          "id": "def-public.SecurityPluginStart.hooks",
+          "type": "Object",
+          "tags": [],
+          "label": "hooks",
+          "description": [
+            "\nA set of hooks to work with Kibana user profiles"
+          ],
+          "signature": [
+            "{ useUpdateUserProfile: ",
+            {
+              "pluginId": "security",
+              "scope": "public",
+              "docId": "kibSecurityPluginApi",
+              "section": "def-public.UpdateUserProfileHook",
+              "text": "UpdateUserProfileHook"
+            },
+            "; }"
           ],
           "path": "x-pack/plugins/security/public/plugin.tsx",
           "deprecated": false,
@@ -3200,6 +3264,10 @@
               "path": "x-pack/plugins/ml/server/routes/annotations.ts"
             },
             {
+              "plugin": "logstash",
+              "path": "x-pack/plugins/logstash/server/routes/pipeline/save.ts"
+            },
+            {
               "plugin": "securitySolution",
               "path": "x-pack/plugins/security_solution/server/request_context_factory.ts"
             },
@@ -3224,8 +3292,16 @@
               "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/signals/open_close_signals_route.ts"
             },
             {
-              "plugin": "logstash",
-              "path": "x-pack/plugins/logstash/server/routes/pipeline/save.ts"
+              "plugin": "securitySolution",
+              "path": "x-pack/plugins/security_solution/server/lib/risk_engine/routes/risk_engine_init_route.ts"
+            },
+            {
+              "plugin": "securitySolution",
+              "path": "x-pack/plugins/security_solution/server/lib/risk_engine/routes/risk_engine_enable_route.ts"
+            },
+            {
+              "plugin": "securitySolution",
+              "path": "x-pack/plugins/security_solution/server/lib/risk_engine/routes/risk_engine_disable_route.ts"
             },
             {
               "plugin": "cloudChat",

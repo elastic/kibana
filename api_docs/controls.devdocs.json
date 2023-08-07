@@ -1777,7 +1777,8 @@
             "section": "def-public.ControlOutput",
             "text": "ControlOutput"
           },
-          ", any>"
+          ", any> implements ",
+          "IClearableControl"
         ],
         "path": "src/plugins/controls/public/options_list/embeddable/options_list_embeddable.tsx",
         "deprecated": false,
@@ -1917,7 +1918,7 @@
                 "section": "def-common.Filter",
                 "text": "Filter"
               },
-              "[] | undefined) => void; setDataViewId: (payload: string | undefined) => void; }"
+              "[] | undefined) => void; setDataViewId: (payload: string | undefined) => void; setExplicitInputDataViewId: (payload: string) => void; }"
             ],
             "path": "src/plugins/controls/public/options_list/embeddable/options_list_embeddable.tsx",
             "deprecated": false,
@@ -2073,6 +2074,22 @@
                 "isRequired": false
               }
             ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "controls",
+            "id": "def-public.OptionsListEmbeddable.clearSelections",
+            "type": "Function",
+            "tags": [],
+            "label": "clearSelections",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/plugins/controls/public/options_list/embeddable/options_list_embeddable.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
             "returnComment": []
           },
           {
@@ -2864,7 +2881,8 @@
             "section": "def-public.ControlOutput",
             "text": "ControlOutput"
           },
-          ", any>"
+          ", any> implements ",
+          "IClearableControl"
         ],
         "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable.tsx",
         "deprecated": false,
@@ -3162,13 +3180,29 @@
           },
           {
             "parentPluginId": "controls",
+            "id": "def-public.RangeSliderEmbeddable.clearSelections",
+            "type": "Function",
+            "tags": [],
+            "label": "clearSelections",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "controls",
             "id": "def-public.RangeSliderEmbeddable.reload",
             "type": "Function",
             "tags": [],
             "label": "reload",
             "description": [],
             "signature": [
-              "() => void"
+              "() => Promise<void>"
             ],
             "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable.tsx",
             "deprecated": false,
@@ -5037,7 +5071,8 @@
             "label": "value",
             "description": [],
             "signature": [
-              "[string, string]"
+              "RangeValue",
+              " | undefined"
             ],
             "path": "src/plugins/controls/common/range_slider/types.ts",
             "deprecated": false,
@@ -6772,7 +6807,8 @@
             "label": "value",
             "description": [],
             "signature": [
-              "[string, string]"
+              "RangeValue",
+              " | undefined"
             ],
             "path": "src/plugins/controls/common/range_slider/types.ts",
             "deprecated": false,

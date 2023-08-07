@@ -28,8 +28,8 @@ import { KibanaLogic } from '../../../../shared/kibana';
 
 import { ConnectorConfigurationApiLogic } from '../../../api/connector/update_connector_configuration_api_logic';
 
+import { ConnectorConfigurationFormItems } from './connector_configuration_form_items';
 import { ConnectorConfigurationLogic } from './connector_configuration_logic';
-import { ConnectorConfigurationFormItems } from './sync_rules/connector_configuration_form_items';
 
 export const ConnectorConfigurationForm = () => {
   const { productFeatures } = useValues(KibanaLogic);
@@ -50,18 +50,20 @@ export const ConnectorConfigurationForm = () => {
         items={localConfigView.unCategorizedItems}
         hasDocumentLevelSecurityEnabled={productFeatures.hasDocumentLevelSecurityEnabled}
       />
-      {localConfigView.categories.map((category) => (
-        <>
+      {localConfigView.categories.map((category, index) => (
+        <React.Fragment key={index}>
           <EuiSpacer />
           <EuiTitle size="s">
             <h3>{category.label}</h3>
           </EuiTitle>
+          <EuiSpacer />
           <ConnectorConfigurationFormItems
             items={category.configEntries}
             hasDocumentLevelSecurityEnabled={productFeatures.hasDocumentLevelSecurityEnabled}
           />
-        </>
+        </React.Fragment>
       ))}
+      <EuiSpacer />
       <EuiFormRow>
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>

@@ -151,6 +151,7 @@ describe('update()', () => {
         name: 'email connector',
         isPreconfigured: false,
         isDeprecated: false,
+        isSystemAction: false,
       },
     ]);
     rulesClientParams.getActionsClient.mockResolvedValue(actionsClient);
@@ -200,6 +201,7 @@ describe('update()', () => {
         name: 'email connector',
         isPreconfigured: false,
         isDeprecated: false,
+        isSystemAction: false,
       },
       {
         id: '2',
@@ -216,6 +218,7 @@ describe('update()', () => {
         name: 'email connector',
         isPreconfigured: false,
         isDeprecated: false,
+        isSystemAction: false,
       },
     ]);
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
@@ -476,6 +479,7 @@ describe('update()', () => {
         name: 'email connector',
         isPreconfigured: false,
         isDeprecated: false,
+        isSystemAction: false,
       },
       {
         id: '2',
@@ -492,6 +496,7 @@ describe('update()', () => {
         name: 'another email connector',
         isPreconfigured: false,
         isDeprecated: false,
+        isSystemAction: false,
       },
       {
         id: 'preconfigured',
@@ -508,6 +513,7 @@ describe('update()', () => {
         name: 'preconfigured email connector',
         isPreconfigured: true,
         isDeprecated: false,
+        isSystemAction: false,
       },
     ]);
     actionsClient.isPreconfigured.mockReset();
@@ -714,6 +720,242 @@ describe('update()', () => {
     expect(actionsClient.isPreconfigured).toHaveBeenCalledTimes(3);
   });
 
+  test('should update a rule with some system actions', async () => {
+    actionsClient.getBulk.mockReset();
+    actionsClient.getBulk.mockResolvedValue([
+      {
+        id: '1',
+        actionTypeId: 'test',
+        config: {
+          from: 'me@me.com',
+          hasAuth: false,
+          host: 'hello',
+          port: 22,
+          secure: null,
+          service: null,
+        },
+        isMissingSecrets: false,
+        name: 'email connector',
+        isPreconfigured: false,
+        isDeprecated: false,
+        isSystemAction: false,
+      },
+      {
+        id: '2',
+        actionTypeId: 'test2',
+        config: {
+          from: 'me@me.com',
+          hasAuth: false,
+          host: 'hello',
+          port: 22,
+          secure: null,
+          service: null,
+        },
+        isMissingSecrets: false,
+        name: 'another email connector',
+        isPreconfigured: false,
+        isDeprecated: false,
+        isSystemAction: false,
+      },
+      {
+        id: 'system_action-id',
+        actionTypeId: 'test',
+        config: {},
+        isMissingSecrets: false,
+        name: 'system action connector',
+        isPreconfigured: false,
+        isDeprecated: false,
+        isSystemAction: true,
+      },
+    ]);
+    actionsClient.isSystemAction.mockReset();
+    actionsClient.isSystemAction.mockReturnValueOnce(false);
+    actionsClient.isSystemAction.mockReturnValueOnce(true);
+    actionsClient.isSystemAction.mockReturnValueOnce(true);
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        enabled: true,
+        schedule: { interval: '1m' },
+        params: {
+          bar: true,
+        },
+        actions: [
+          {
+            group: 'default',
+            actionRef: 'action_0',
+            actionTypeId: 'test',
+            params: {
+              foo: true,
+            },
+          },
+          {
+            group: 'default',
+            actionRef: 'system_action:system_action-id',
+            actionTypeId: 'test',
+            params: {},
+          },
+          {
+            group: 'custom',
+            actionRef: 'system_action:system_action-id',
+            actionTypeId: 'test',
+            params: {},
+          },
+        ],
+        notifyWhen: 'onActiveAlert',
+        revision: 1,
+        scheduledTaskId: 'task-123',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      },
+      references: [
+        {
+          name: 'action_0',
+          type: 'action',
+          id: '1',
+        },
+        {
+          name: 'param:soRef_0',
+          type: 'someSavedObjectType',
+          id: '9',
+        },
+      ],
+    });
+    const result = await rulesClient.update({
+      id: '1',
+      data: {
+        schedule: { interval: '1m' },
+        name: 'abc',
+        tags: ['foo'],
+        params: {
+          bar: true,
+        },
+        throttle: null,
+        notifyWhen: 'onActiveAlert',
+        actions: [
+          {
+            group: 'default',
+            id: '1',
+            params: {
+              foo: true,
+            },
+          },
+          {
+            group: 'default',
+            id: 'system_action-id',
+            params: {},
+          },
+          {
+            group: 'custom',
+            id: 'system_action-id',
+            params: {},
+          },
+        ],
+      },
+    });
+
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenNthCalledWith(
+      1,
+      'alert',
+      {
+        actions: [
+          {
+            group: 'default',
+            actionRef: 'action_0',
+            actionTypeId: 'test',
+            params: {
+              foo: true,
+            },
+            uuid: '106',
+          },
+          {
+            group: 'default',
+            actionRef: 'system_action:system_action-id',
+            actionTypeId: 'test',
+            params: {},
+            uuid: '107',
+          },
+          {
+            group: 'custom',
+            actionRef: 'system_action:system_action-id',
+            actionTypeId: 'test',
+            params: {},
+            uuid: '108',
+          },
+        ],
+        alertTypeId: 'myType',
+        apiKey: null,
+        apiKeyOwner: null,
+        apiKeyCreatedByUser: null,
+        consumer: 'myApp',
+        enabled: true,
+        meta: { versionApiKeyLastmodified: 'v7.10.0' },
+        name: 'abc',
+        notifyWhen: 'onActiveAlert',
+        params: { bar: true },
+        revision: 1,
+        schedule: { interval: '1m' },
+        scheduledTaskId: 'task-123',
+        tags: ['foo'],
+        throttle: null,
+        updatedAt: '2019-02-12T21:01:22.479Z',
+        updatedBy: 'elastic',
+      },
+      {
+        id: '1',
+        overwrite: true,
+        references: [{ id: '1', name: 'action_0', type: 'action' }],
+        version: '123',
+      }
+    );
+
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "actions": Array [
+          Object {
+            "actionTypeId": "test",
+            "group": "default",
+            "id": "1",
+            "params": Object {
+              "foo": true,
+            },
+          },
+          Object {
+            "actionTypeId": "test",
+            "group": "default",
+            "id": "system_action-id",
+            "params": Object {},
+          },
+          Object {
+            "actionTypeId": "test",
+            "group": "custom",
+            "id": "system_action-id",
+            "params": Object {},
+          },
+        ],
+        "createdAt": 2019-02-12T21:01:22.479Z,
+        "enabled": true,
+        "id": "1",
+        "notifyWhen": "onActiveAlert",
+        "params": Object {
+          "bar": true,
+        },
+        "revision": 1,
+        "schedule": Object {
+          "interval": "1m",
+        },
+        "scheduledTaskId": "task-123",
+        "updatedAt": 2019-02-12T21:01:22.479Z,
+      }
+    `);
+    expect(encryptedSavedObjects.getDecryptedAsInternalUser).toHaveBeenCalledWith('alert', '1', {
+      namespace: 'default',
+    });
+    expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
+    expect(actionsClient.isSystemAction).toHaveBeenCalledTimes(3);
+  });
+
   test('should call useSavedObjectReferences.extractReferences and useSavedObjectReferences.injectReferences if defined for rule type', async () => {
     const ruleParams = {
       bar: true,
@@ -826,7 +1068,7 @@ describe('update()', () => {
             actionTypeId: 'test',
             group: 'default',
             params: { foo: true },
-            uuid: '106',
+            uuid: '109',
           },
         ],
         alertTypeId: 'myType',
@@ -1006,7 +1248,7 @@ describe('update()', () => {
             "params": Object {
               "foo": true,
             },
-            "uuid": "107",
+            "uuid": "110",
           },
         ],
         "alertTypeId": "myType",
@@ -1159,7 +1401,7 @@ describe('update()', () => {
             "params": Object {
               "foo": true,
             },
-            "uuid": "108",
+            "uuid": "111",
           },
         ],
         "alertTypeId": "myType",
@@ -1438,6 +1680,7 @@ describe('update()', () => {
         name: 'email connector',
         isPreconfigured: false,
         isDeprecated: false,
+        isSystemAction: false,
       },
       {
         id: '2',
@@ -1454,6 +1697,7 @@ describe('update()', () => {
         name: 'email connector',
         isPreconfigured: false,
         isDeprecated: false,
+        isSystemAction: false,
       },
     ]);
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
@@ -2024,6 +2268,7 @@ describe('update()', () => {
         name: 'email connector',
         isPreconfigured: false,
         isDeprecated: false,
+        isSystemAction: false,
       },
       {
         id: '2',
@@ -2040,6 +2285,7 @@ describe('update()', () => {
         name: 'another connector',
         isPreconfigured: false,
         isDeprecated: false,
+        isSystemAction: false,
       },
     ]);
 
@@ -2098,6 +2344,7 @@ describe('update()', () => {
         name: 'slack connector',
         isPreconfigured: false,
         isDeprecated: false,
+        isSystemAction: false,
       },
     ]);
     actionsClient.isPreconfigured.mockReset();
@@ -2178,7 +2425,7 @@ describe('update()', () => {
             params: {
               foo: true,
             },
-            uuid: '144',
+            uuid: '147',
           },
         ],
         alertTypeId: 'myType',
@@ -2259,6 +2506,7 @@ describe('update()', () => {
         name: 'email connector',
         isPreconfigured: false,
         isDeprecated: false,
+        isSystemAction: false,
       },
       {
         id: '2',
@@ -2275,6 +2523,7 @@ describe('update()', () => {
         name: 'email connector',
         isPreconfigured: false,
         isDeprecated: false,
+        isSystemAction: false,
       },
     ]);
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
@@ -2610,6 +2859,7 @@ describe('update()', () => {
         name: 'email connector',
         isPreconfigured: false,
         isDeprecated: false,
+        isSystemAction: false,
       },
     ]);
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
@@ -2726,7 +2976,7 @@ describe('update()', () => {
             frequency: { notifyWhen: 'onActiveAlert', summary: false, throttle: null },
             group: 'default',
             params: { foo: true },
-            uuid: '151',
+            uuid: '154',
           },
         ],
         alertTypeId: 'myType',
@@ -2930,7 +3180,7 @@ describe('update()', () => {
             "params": Object {
               "foo": true,
             },
-            "uuid": "152",
+            "uuid": "155",
           },
         ],
         "alertTypeId": "myType",

@@ -6,9 +6,9 @@ xpack.apm.enabled: false
 xpack.observability.enabled: false
 xpack.uptime.enabled: false
 
-## Enable the Serverless Security plugin
-xpack.serverless.security.enabled: true
-xpack.serverless.security.productTypes:
+## Enable the Security Solution Serverless plugin
+xpack.securitySolutionServerless.enabled: true
+xpack.securitySolutionServerless.productTypes:
   [
     { product_line: 'security', product_tier: 'complete' },
     { product_line: 'endpoint', product_tier: 'complete' },
@@ -22,3 +22,10 @@ xpack.serverless.plugin.developer.projectSwitcher.currentType: 'security'
 
 # Specify in telemetry the project type
 telemetry.labels.serverless: security
+
+# Fleet specific configuration
+xpack.fleet.internal.capabilities: ['security']
+
+# Serverless security specific options
+xpack.securitySolution.enableExperimental:
+  - discoverInTimeline

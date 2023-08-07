@@ -55,6 +55,7 @@ import { TelemetryReceiver } from './lib/telemetry/receiver';
 import { licenseService } from './lib/license';
 import { PolicyWatcher } from './endpoint/lib/policy/license_watch';
 import previewPolicy from './lib/detection_engine/routes/index/preview_policy.json';
+import type { IRuleMonitoringService } from './lib/detection_engine/rule_monitoring';
 import { createRuleMonitoringService } from './lib/detection_engine/rule_monitoring';
 import { EndpointMetadataService } from './endpoint/services/metadata';
 import type {
@@ -93,6 +94,8 @@ import {
   ENDPOINT_FIELDS_SEARCH_STRATEGY,
   ENDPOINT_SEARCH_STRATEGY,
 } from '../common/endpoint/constants';
+import { RiskEngineDataClient } from './lib/risk_engine/risk_engine_data_client';
+
 import { AppFeatures } from './lib/app_features';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
@@ -104,6 +107,7 @@ export class Plugin implements ISecuritySolutionPlugin {
   private readonly appClientFactory: AppClientFactory;
   private readonly appFeatures: AppFeatures;
 
+  private readonly ruleMonitoringService: IRuleMonitoringService;
   private readonly endpointAppContextService = new EndpointAppContextService();
   private readonly telemetryReceiver: ITelemetryReceiver;
   private readonly telemetryEventsSender: ITelemetryEventsSender;
@@ -116,6 +120,7 @@ export class Plugin implements ISecuritySolutionPlugin {
   private checkMetadataTransformsTask: CheckMetadataTransformsTask | undefined;
   private telemetryUsageCounter?: UsageCounter;
   private endpointContext: EndpointAppContext;
+  private riskEngineDataClient: RiskEngineDataClient | undefined;
 
   constructor(context: PluginInitializerContext) {
     const serverConfig = createConfig(context);
@@ -126,6 +131,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     this.appClientFactory = new AppClientFactory();
     this.appFeatures = new AppFeatures(this.logger, this.config.experimentalFeatures);
 
+    this.ruleMonitoringService = createRuleMonitoringService(this.config, this.logger);
     this.telemetryEventsSender = new TelemetryEventsSender(this.logger);
     this.telemetryReceiver = new TelemetryReceiver(this.logger);
 
@@ -154,8 +160,15 @@ export class Plugin implements ISecuritySolutionPlugin {
     initUiSettings(core.uiSettings, experimentalFeatures);
     appFeatures.init(plugins.features);
 
-    const ruleMonitoringService = createRuleMonitoringService(config, logger, core, plugins);
-    ruleMonitoringService.registerEventLogProvider();
+    this.ruleMonitoringService.setup(core, plugins);
+
+    this.riskEngineDataClient = new RiskEngineDataClient({
+      logger: this.logger,
+      kibanaVersion: this.pluginContext.env.packageInfo.version,
+      elasticsearchClientPromise: core
+        .getStartServices()
+        .then(([{ elasticsearch }]) => elasticsearch.client.asInternalUser),
+    });
 
     const requestContextFactory = new RequestContextFactory({
       config,
@@ -163,9 +176,10 @@ export class Plugin implements ISecuritySolutionPlugin {
       core,
       plugins,
       endpointAppContextService: this.endpointAppContextService,
-      ruleMonitoringService,
+      ruleMonitoringService: this.ruleMonitoringService,
       kibanaVersion: pluginContext.env.packageInfo.version,
       kibanaBranch: pluginContext.env.packageInfo.branch,
+      riskEngineDataClient: this.riskEngineDataClient,
     });
 
     const router = core.http.createRouter<SecuritySolutionRequestHandlerContext>();
@@ -233,7 +247,8 @@ export class Plugin implements ISecuritySolutionPlugin {
       config: this.config,
       publicBaseUrl: core.http.basePath.publicBaseUrl,
       ruleDataClient,
-      ruleExecutionLoggerFactory: ruleMonitoringService.createRuleExecutionLogClientForExecutors,
+      ruleExecutionLoggerFactory:
+        this.ruleMonitoringService.createRuleExecutionLogClientForExecutors,
       version: pluginContext.env.packageInfo.version,
     };
 
@@ -397,6 +412,8 @@ export class Plugin implements ISecuritySolutionPlugin {
   ): SecuritySolutionPluginStart {
     const { config, logger } = this;
 
+    this.ruleMonitoringService.start(core, plugins);
+
     const savedObjectsClient = new SavedObjectsClient(core.savedObjects.createInternalRepository());
     const registerIngestCallback = plugins.fleet?.registerExternalCallback;
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -416,6 +433,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       packagePolicyService,
       agentPolicyService,
       createFilesClient,
+      createFleetActionsClient,
     } =
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       plugins.fleet!;
@@ -437,6 +455,8 @@ export class Plugin implements ISecuritySolutionPlugin {
         packagePolicyService: plugins.fleet.packagePolicyService,
         logger,
         experimentalFeatures: config.experimentalFeatures,
+        packagerTaskPackagePolicyUpdateBatchSize: config.packagerTaskPackagePolicyUpdateBatchSize,
+        esClient: core.elasticsearch.client.asInternalUser,
       });
 
       // Migrate artifacts to fleet and then start the minifest task after that is done
@@ -500,6 +520,8 @@ export class Plugin implements ISecuritySolutionPlugin {
         core.elasticsearch.client.asInternalUser,
         this.endpointContext
       ),
+      createFleetActionsClient,
+      esClient: core.elasticsearch.client.asInternalUser,
     });
 
     this.telemetryReceiver.start(

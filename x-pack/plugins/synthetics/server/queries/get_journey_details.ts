@@ -6,9 +6,8 @@
  */
 
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { createEsParams, UptimeEsClient } from '../lib';
 import { JourneyStep, Ping, SyntheticsJourneyApiResponse } from '../../common/runtime_types';
-import { UMElasticsearchQueryFn } from '../legacy_uptime/lib/adapters';
-import { createEsParams } from '../legacy_uptime/lib/lib';
 
 export interface GetJourneyDetails {
   checkGroup: string;
@@ -16,10 +15,12 @@ export interface GetJourneyDetails {
 
 type DocumentSource = (Ping & { '@timestamp': string; synthetics: { type: string } }) | JourneyStep;
 
-export const getJourneyDetails: UMElasticsearchQueryFn<
-  GetJourneyDetails,
-  SyntheticsJourneyApiResponse['details']
-> = async ({ uptimeEsClient, checkGroup }) => {
+export const getJourneyDetails = async ({
+  uptimeEsClient,
+  checkGroup,
+}: GetJourneyDetails & {
+  uptimeEsClient: UptimeEsClient;
+}): Promise<SyntheticsJourneyApiResponse['details']> => {
   const params = createEsParams({
     body: {
       query: {

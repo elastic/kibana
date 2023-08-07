@@ -21,11 +21,19 @@ import { ValuesType } from 'utility-types';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { AgentApiDetails, AgentInstructions } from '../instruction_variants';
 import { ApiKeyCallout } from './api_key_callout';
+import { agentStatusCheckInstruction } from '../agent_status_instructions';
 
 export const createOpenTelemetryAgentInstructions = (
   commonOptions: AgentInstructions
 ): EuiStepProps[] => {
-  const { baseUrl, apmServerUrl, apiKeyDetails } = commonOptions;
+  const {
+    baseUrl,
+    apmServerUrl,
+    apiKeyDetails,
+    checkAgentStatus,
+    agentStatus,
+    agentStatusLoading,
+  } = commonOptions;
   return [
     {
       title: i18n.translate('xpack.apm.onboarding.otel.download.title', {
@@ -96,6 +104,11 @@ export const createOpenTelemetryAgentInstructions = (
         </>
       ),
     },
+    agentStatusCheckInstruction({
+      checkAgentStatus,
+      agentStatus,
+      agentStatusLoading,
+    }),
   ];
 };
 
@@ -151,7 +164,7 @@ export function OpenTelemetryInstructions({
   if (secretToken) {
     authHeaderValue = `Authorization=Bearer ${secretToken}`;
   } else {
-    authHeaderValue = `Authorization=ApiKey ${apiKeyDetails?.encodedKey}`;
+    authHeaderValue = `Authorization=ApiKey ${apiKeyDetails?.apiKey}`;
   }
   const items = [
     {
@@ -183,6 +196,7 @@ export function OpenTelemetryInstructions({
   const columns: Array<EuiBasicTableColumn<ValuesType<typeof items>>> = [
     {
       field: 'setting',
+      width: '23%',
       name: i18n.translate(
         'xpack.apm.onboarding.config_otel.column.configSettings',
         {
@@ -192,6 +206,7 @@ export function OpenTelemetryInstructions({
     },
     {
       field: 'value',
+      width: '55%',
       name: i18n.translate(
         'xpack.apm.onboarding.config_otel.column.configValue',
         {

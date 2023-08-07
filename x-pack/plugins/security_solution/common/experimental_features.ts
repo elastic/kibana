@@ -69,7 +69,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables the `upload` endpoint response action (v8.9)
    */
-  responseActionUploadEnabled: false,
+  responseActionUploadEnabled: true,
 
   /**
    * Enables top charts on Alerts Page
@@ -80,21 +80,6 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables the new security flyout over the current alert details flyout
    */
   securityFlyoutEnabled: false,
-
-  /**
-   * Enables the Elastic Security Assistant
-   */
-  assistantEnabled: false,
-
-  /**
-   * Keep DEPRECATED experimental flags that are documented to prevent failed upgrades.
-   * https://www.elastic.co/guide/en/security/current/user-risk-score.html
-   * https://www.elastic.co/guide/en/security/current/host-risk-score.html
-   *
-   * Issue: https://github.com/elastic/kibana/issues/146777
-   */
-  riskyHostsEnabled: false, // DEPRECATED
-  riskyUsersEnabled: false, // DEPRECATED
 
   /*
    * Enables new Set of filters on the Alerts page.
@@ -116,6 +101,22 @@ export const allowedExperimentalValues = Object.freeze({
    * The flag doesn't have to be documented and has to be removed after the feature is ready to release.
    */
   detectionsCoverageOverview: false,
+
+  /**
+   * Enable risk engine client and initialisation of datastream, component templates and mappings
+   */
+  riskScoringPersistence: false,
+
+  /**
+   * Enables experimental Entity Analytics HTTP endpoints
+   */
+  riskScoringRoutesEnabled: false,
+  /*
+   *
+   * Enables Discover embedded within timeline
+   *
+   * */
+  discoverInTimeline: true,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

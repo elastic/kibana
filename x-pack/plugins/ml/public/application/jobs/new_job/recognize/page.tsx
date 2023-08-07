@@ -36,7 +36,6 @@ import {
 import { CreateResultCallout } from './components/create_result_callout';
 import { KibanaObjects } from './components/kibana_objects';
 import { ModuleJobs } from './components/module_jobs';
-import { checkForSavedObjects } from './resolvers';
 import { JobSettingsForm, JobSettingsFormValues } from './components/job_settings_form';
 import { TimeRange } from '../common/components';
 import { JobId } from '../../../../../common/types/anomaly_detection_jobs';
@@ -92,7 +91,7 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
   const [jobsAwaitingNodeCount, setJobsAwaitingNodeCount] = useState(0);
   // #endregion
 
-  const { selectedSavedSearch, currentDataView: dataView, combinedQuery } = useDataSource();
+  const { selectedSavedSearch, selectedDataView: dataView, combinedQuery } = useDataSource();
   const pageTitle = selectedSavedSearch
     ? i18n.translate('xpack.ml.newJob.recognize.savedSearchPageTitle', {
         defaultMessage: 'saved search {savedSearchTitle}',
@@ -112,9 +111,6 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
     try {
       const response = await getDataRecognizerModule({ moduleId });
       setJobs(response.jobs);
-
-      const kibanaObjectsResult = await checkForSavedObjects(response.kibana as KibanaObjects);
-      setKibanaObjects(kibanaObjectsResult);
 
       setSaveState(SAVE_STATE.NOT_SAVED);
 
@@ -323,7 +319,7 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
 
       {jobsAwaitingNodeCount > 0 && <JobsAwaitingNodeWarning jobCount={jobsAwaitingNodeCount} />}
 
-      <EuiFlexGroup wrap={true} gutterSize="m">
+      <EuiFlexGroup wrap={true} gutterSize="m" data-test-subj="mlPageJobWizard recognizer">
         <EuiFlexItem grow={1}>
           <EuiPanel grow={false} hasShadow={false} hasBorder>
             <EuiTitle size="s">

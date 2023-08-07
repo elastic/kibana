@@ -26,6 +26,7 @@ describe('sendTelemetryOptInStatus', () => {
 
   it('calls fetch with the opt in status returned from the telemetryCollectionManager', async () => {
     const mockConfig = {
+      appendServerlessChannelsSuffix: false,
       sendUsageTo: 'prod' as const,
       newOptInStatus: true,
       currentKibanaVersion: 'mock_kibana_version',
@@ -57,6 +58,7 @@ describe('sendTelemetryOptInStatus', () => {
 
   it('sends to staging endpoint on "sendUsageTo: staging"', async () => {
     const mockConfig = {
+      appendServerlessChannelsSuffix: false,
       sendUsageTo: 'staging' as const,
       newOptInStatus: true,
       currentKibanaVersion: 'mock_kibana_version',

@@ -24,7 +24,6 @@
       "dataViewFieldEditor",
       "dataViewEditor",
       "expressions",
-      "unifiedFieldList",
       "unifiedSearch",
       "unifiedHistogram"
     ],

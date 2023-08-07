@@ -414,7 +414,7 @@
         "label": "TimeDuration",
         "description": [],
         "signature": [
-          "({ allowedUnits, allowedDurations }: TimeDurationType) => ",
+          "({ allowedUnits }: TimeDurationType) => ",
           "Type",
           "<string, string, unknown>"
         ],
@@ -425,9 +425,9 @@
           {
             "parentPluginId": "@kbn/securitysolution-io-ts-types",
             "id": "def-common.TimeDuration.$1",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
-            "label": "{ allowedUnits, allowedDurations }",
+            "label": "{ allowedUnits }",
             "description": [],
             "signature": [
               "TimeDurationType"
@@ -696,7 +696,7 @@
         "label": "TimeDurationC",
         "description": [],
         "signature": [
-          "({ allowedUnits, allowedDurations }: TimeDurationType) => ",
+          "({ allowedUnits }: TimeDurationType) => ",
           "Type",
           "<string, string, unknown>"
         ],
@@ -708,12 +708,12 @@
           {
             "parentPluginId": "@kbn/securitysolution-io-ts-types",
             "id": "def-common.TimeDurationC.$1",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "__0",
             "description": [],
             "signature": [
-              "TimeDurationWithAllowedDurations | TimeDurationWithAllowedUnits"
+              "TimeDurationType"
             ],
             "path": "packages/kbn-securitysolution-io-ts-types/src/time_duration/index.ts",
             "deprecated": false,
@@ -1006,6 +1006,24 @@
           "<string[], string, unknown>"
         ],
         "path": "packages/kbn-securitysolution-io-ts-types/src/non_empty_string_array/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-io-ts-types",
+        "id": "def-common.NumberBetweenZeroAndOneInclusive",
+        "type": "Object",
+        "tags": [],
+        "label": "NumberBetweenZeroAndOneInclusive",
+        "description": [
+          "\nTypes a number between 0 and 1 inclusive. Useful for specifying a probability, weighting, etc."
+        ],
+        "signature": [
+          "Type",
+          "<number, number, unknown>"
+        ],
+        "path": "packages/kbn-securitysolution-io-ts-types/src/number_between_zero_and_one_inclusive/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

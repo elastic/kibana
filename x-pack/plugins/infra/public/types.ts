@@ -38,14 +38,19 @@ import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { CasesUiStart } from '@kbn/cases-plugin/public';
 import { DiscoverStart } from '@kbn/discover-plugin/public';
 import { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import {
+  LogsSharedClientSetupExports,
+  LogsSharedClientStartExports,
+} from '@kbn/logs-shared-plugin/public';
 import { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import { ObservabilityAIAssistantPluginStart } from '@kbn/observability-ai-assistant-plugin/public';
 import type { UnwrapPromise } from '../common/utility_types';
 import type {
   SourceProviderProps,
   UseNodeMetricsTableOptions,
 } from './components/infrastructure_node_metrics_tables/shared';
 import { InventoryViewsServiceStart } from './services/inventory_views';
-import { LogViewsServiceStart } from './services/log_views';
 import { MetricsExplorerViewsServiceStart } from './services/metrics_explorer_views';
 import { ITelemetryClient } from './services/telemetry';
 import type { InfraLocators } from '../common/locators';
@@ -57,7 +62,6 @@ export interface InfraClientSetupExports {
 
 export interface InfraClientStartExports {
   inventoryViews: InventoryViewsServiceStart;
-  logViews: LogViewsServiceStart;
   metricsExplorerViews: MetricsExplorerViewsServiceStart;
   telemetry: ITelemetryClient;
   locators: InfraLocators;
@@ -73,6 +77,7 @@ export interface InfraClientStartExports {
 }
 
 export interface InfraClientSetupDeps {
+  logsShared: LogsSharedClientSetupExports;
   home?: HomePublicPluginSetup;
   observability: ObservabilityPublicSetup;
   observabilityShared: ObservabilitySharedPluginSetup;
@@ -84,6 +89,7 @@ export interface InfraClientSetupDeps {
   share: SharePluginSetup;
   lens: LensPublicStart;
   fieldFormats: FieldFormatsSetup;
+  licensing: LicensingPluginSetup;
 }
 
 export interface InfraClientStartDeps {
@@ -93,10 +99,13 @@ export interface InfraClientStartDeps {
   dataViews: DataViewsPublicPluginStart;
   discover: DiscoverStart;
   embeddable?: EmbeddableStart;
+  kibanaVersion?: string;
   lens: LensPublicStart;
+  logsShared: LogsSharedClientStartExports;
   ml: MlPluginStart;
   observability: ObservabilityPublicStart;
   observabilityShared: ObservabilitySharedPluginStart;
+  observabilityAIAssistant: ObservabilityAIAssistantPluginStart;
   osquery?: unknown; // OsqueryPluginStart - can't be imported due to cyclic dependency;
   share: SharePluginStart;
   spaces: SpacesPluginStart;
@@ -107,6 +116,7 @@ export interface InfraClientStartDeps {
   usageCollection: UsageCollectionStart;
   telemetry: ITelemetryClient;
   fieldFormats: FieldFormatsStart;
+  licensing: LicensingPluginStart;
 }
 
 export type InfraClientCoreSetup = CoreSetup<InfraClientStartDeps, InfraClientStartExports>;

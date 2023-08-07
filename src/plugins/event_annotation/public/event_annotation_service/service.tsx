@@ -10,31 +10,24 @@ import React from 'react';
 import { partition } from 'lodash';
 import { queryToAst } from '@kbn/data-plugin/common';
 import { ExpressionAstExpression } from '@kbn/expressions-plugin/common';
-import {
-  CoreStart,
-  SavedObjectReference,
-  SavedObjectsFindOptions,
-  SavedObjectsFindOptionsReference,
-} from '@kbn/core/public';
+import type { CoreStart, SavedObjectReference } from '@kbn/core/public';
 import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
 import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
-import { defaultAnnotationLabel } from '../../common/manual_event_annotation';
-import { EventAnnotationGroupContent } from '../../common/types';
-import {
-  EventAnnotationConfig,
-  EventAnnotationGroupConfig,
-  EVENT_ANNOTATION_GROUP_TYPE,
-} from '../../common';
-import { EventAnnotationServiceType } from './types';
+import { type EventAnnotationServiceType } from '@kbn/event-annotation-components';
 import {
   defaultAnnotationColor,
   defaultAnnotationRangeColor,
   isRangeAnnotationConfig,
   isQueryAnnotationConfig,
-} from './helpers';
+  defaultAnnotationLabel,
+  type EventAnnotationGroupContent,
+  type EventAnnotationConfig,
+  type EventAnnotationGroupConfig,
+} from '@kbn/event-annotation-common';
 import { EventAnnotationGroupSavedObjectFinder } from '../components/event_annotation_group_saved_object_finder';
-import {
+import { CONTENT_ID } from '../../common/content_management';
+import type {
   EventAnnotationGroupCreateIn,
   EventAnnotationGroupCreateOut,
   EventAnnotationGroupDeleteIn,
@@ -106,7 +99,7 @@ export function getEventAnnotationService(
     savedObjectId: string
   ): Promise<EventAnnotationGroupConfig> => {
     const savedObject = await client.get<EventAnnotationGroupGetIn, EventAnnotationGroupGetOut>({
-      contentTypeId: EVENT_ANNOTATION_GROUP_TYPE,
+      contentTypeId: CONTENT_ID,
       id: savedObjectId,
     });
 
@@ -117,30 +110,47 @@ export function getEventAnnotationService(
     return mapSavedObjectToGroupConfig(savedObject.item);
   };
 
+  const groupExistsWithTitle = async (title: string): Promise<boolean> => {
+    const { hits } = await client.search<
+      EventAnnotationGroupSearchIn,
+      EventAnnotationGroupSearchOut
+    >({
+      contentTypeId: CONTENT_ID,
+      query: {
+        text: title,
+      },
+      options: {
+        searchFields: ['title'],
+      },
+    });
+
+    for (const hit of hits) {
+      if (hit.attributes.title.toLowerCase() === title.toLowerCase()) {
+        return true;
+      }
+    }
+
+    return false;
+  };
+
   const findAnnotationGroupContent = async (
     searchTerm: string,
     pageSize: number,
-    references?: SavedObjectsFindOptionsReference[],
-    referencesToExclude?: SavedObjectsFindOptionsReference[]
+    tagsToInclude?: string[],
+    tagsToExclude?: string[]
   ): Promise<{ total: number; hits: EventAnnotationGroupContent[] }> => {
-    const searchOptions: SavedObjectsFindOptions = {
-      type: [EVENT_ANNOTATION_GROUP_TYPE],
-      searchFields: ['title^3', 'description'],
-      search: searchTerm ? `${searchTerm}*` : undefined,
-      perPage: pageSize,
-      page: 1,
-      defaultSearchOperator: 'AND' as const,
-      hasReference: references,
-      hasNoReference: referencesToExclude,
-    };
-
     const { pagination, hits } = await client.search<
       EventAnnotationGroupSearchIn,
       EventAnnotationGroupSearchOut
     >({
-      contentTypeId: EVENT_ANNOTATION_GROUP_TYPE,
+      contentTypeId: CONTENT_ID,
       query: {
-        text: searchOptions.search,
+        text: searchTerm ? `${searchTerm}*` : undefined,
+        limit: pageSize,
+        tags: {
+          included: tagsToInclude,
+          excluded: tagsToExclude,
+        },
       },
     });
 
@@ -153,7 +163,7 @@ export function getEventAnnotationService(
   const deleteAnnotationGroups = async (ids: string[]): Promise<void> => {
     for (const id of ids) {
       await client.delete<EventAnnotationGroupDeleteIn, EventAnnotationGroupDeleteOut>({
-        contentTypeId: EVENT_ANNOTATION_GROUP_TYPE,
+        contentTypeId: CONTENT_ID,
         id,
       });
     }
@@ -223,7 +233,7 @@ export function getEventAnnotationService(
 
     const groupSavedObjectId = (
       await client.create<EventAnnotationGroupCreateIn, EventAnnotationGroupCreateOut>({
-        contentTypeId: EVENT_ANNOTATION_GROUP_TYPE,
+        contentTypeId: CONTENT_ID,
         data: {
           ...attributes,
         },
@@ -243,7 +253,7 @@ export function getEventAnnotationService(
     const { attributes, references } = getAnnotationGroupAttributesAndReferences(group);
 
     await client.update<EventAnnotationGroupUpdateIn, EventAnnotationGroupUpdateOut>({
-      contentTypeId: EVENT_ANNOTATION_GROUP_TYPE,
+      contentTypeId: CONTENT_ID,
       id: annotationGroupId,
       data: {
         ...attributes,
@@ -259,7 +269,7 @@ export function getEventAnnotationService(
       EventAnnotationGroupSearchIn,
       EventAnnotationGroupSearchOut
     >({
-      contentTypeId: EVENT_ANNOTATION_GROUP_TYPE,
+      contentTypeId: CONTENT_ID,
       query: {
         text: '*',
       },
@@ -270,6 +280,7 @@ export function getEventAnnotationService(
 
   return {
     loadAnnotationGroup,
+    groupExistsWithTitle,
     updateAnnotationGroup,
     createAnnotationGroup,
     deleteAnnotationGroups,

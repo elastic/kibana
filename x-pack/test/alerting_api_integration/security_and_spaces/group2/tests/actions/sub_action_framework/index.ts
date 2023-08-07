@@ -91,6 +91,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
         expect(res.body).to.eql({
           id: res.body.id,
           is_preconfigured: false,
+          is_system_action: false,
           is_deprecated: false,
           is_missing_secrets: false,
           name: 'My sub connector',

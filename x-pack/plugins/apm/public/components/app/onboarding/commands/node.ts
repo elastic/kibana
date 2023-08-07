@@ -7,18 +7,16 @@
 import { i18n } from '@kbn/i18n';
 
 export const nodeVariables = (secretToken?: string) => ({
-  apmServiceName: 'serviceName',
   ...(secretToken && { secretToken: 'secretToken' }),
   ...(!secretToken && { apiKey: 'apiKey' }),
   apmServerUrl: 'serverUrl',
-  apmEnvironment: 'environment',
 });
 
 export const nodeHighlightLang = 'js';
 
 export const nodeLineNumbers = () => ({
   start: 1,
-  highlight: '2, 5, 8, 11, 14-15',
+  highlight: '2, 4, 7, 10, 13-14',
 });
 
 export const node = `// ${i18n.translate(
@@ -29,14 +27,13 @@ export const node = `// ${i18n.translate(
   }
 )}
 var apm = require('elastic-apm-node').start({
-
   // {{serviceNameHint}} ${i18n.translate(
     'xpack.apm.onboarding.nodeClient.createConfig.commands.serviceName',
     {
       defaultMessage: 'Overrides the service name in package.json.',
     }
   )}
-  serviceName: 'my-service-name',
+  serviceName: '<your-service-name>',
 
   {{^secretToken}}
   // {{apiKeyHint}}
@@ -51,5 +48,5 @@ var apm = require('elastic-apm-node').start({
   serverUrl: '{{{apmServerUrl}}}',
 
   // {{{serviceEnvironmentHint}}}
-  environment: 'my-environment'
+  environment: '<your-environment>'
 })`;

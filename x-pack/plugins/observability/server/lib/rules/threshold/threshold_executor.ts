@@ -7,36 +7,31 @@
 
 import { i18n } from '@kbn/i18n';
 import { ALERT_ACTION_GROUP, ALERT_EVALUATION_VALUES, ALERT_REASON } from '@kbn/rule-data-utils';
+import { LocatorPublic } from '@kbn/share-plugin/common';
 import { isEqual } from 'lodash';
 import {
   ActionGroupIdsOf,
-  AlertInstanceContext as AlertContext,
   AlertInstanceState as AlertState,
   RecoveredActionGroup,
 } from '@kbn/alerting-plugin/common';
 import { Alert, RuleTypeState } from '@kbn/alerting-plugin/server';
 import { IBasePath, Logger } from '@kbn/core/server';
 import { LifecycleRuleExecutor } from '@kbn/rule-registry-plugin/server';
+import { AlertsLocatorParams, getAlertUrl, TimeUnitChar } from '../../../../common';
 import { createFormatter } from '../../../../common/threshold_rule/formatters';
 import { Comparator } from '../../../../common/threshold_rule/types';
 import { ObservabilityConfig } from '../../..';
-import { TimeUnitChar } from '../../../../common/utils/formatters/duration';
-import { getOriginalActionGroup } from './utils';
 import { AlertStates } from './types';
 
 import {
   buildFiredAlertReason,
-  buildInvalidQueryAlertReason,
   buildNoDataAlertReason,
   // buildRecoveredAlertReason,
-  stateToAlertMessage,
 } from './messages';
 import {
   createScopedLogger,
   AdditionalContext,
-  getAlertDetailsUrl,
   getContextForRecoveredAlerts,
-  getViewInMetricsAppUrl,
   UNGROUPED_FACTORY_KEY,
   hasAdditionalContext,
   validGroupByForContext,
@@ -53,23 +48,27 @@ export type MetricThresholdRuleTypeState = RuleTypeState & {
   lastRunTimestamp?: number;
   missingGroups?: Array<string | MissingGroupsRecord>;
   groupBy?: string | string[];
-  filterQuery?: string;
 };
 export type MetricThresholdAlertState = AlertState; // no specific instance state used
-export type MetricThresholdAlertContext = AlertContext; // no specific instance state used
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type MetricThresholdAlertContext = {
+  alertDetailsUrl: string;
+  groupings?: object;
+  reason?: string;
+  timestamp: string; // ISO string
+  value?: Array<number | null> | null;
+};
 
-export const FIRED_ACTIONS_ID = 'metrics.threshold.fired';
-export const WARNING_ACTIONS_ID = 'metrics.threshold.warning';
-export const NO_DATA_ACTIONS_ID = 'metrics.threshold.nodata';
+export const FIRED_ACTIONS_ID = 'threshold.fired';
+export const NO_DATA_ACTIONS_ID = 'threshold.nodata';
 
 type MetricThresholdActionGroup =
   | typeof FIRED_ACTIONS_ID
-  | typeof WARNING_ACTIONS_ID
   | typeof NO_DATA_ACTIONS_ID
   | typeof RecoveredActionGroup.id;
 
 type MetricThresholdAllowedActionGroups = ActionGroupIdsOf<
-  typeof FIRED_ACTIONS | typeof WARNING_ACTIONS | typeof NO_DATA_ACTIONS
+  typeof FIRED_ACTIONS | typeof NO_DATA_ACTIONS
 >;
 
 type MetricThresholdAlert = Alert<
@@ -87,6 +86,7 @@ type MetricThresholdAlertFactory = (
 ) => MetricThresholdAlert;
 
 export const createMetricThresholdExecutor = ({
+  alertsLocator,
   basePath,
   logger,
   config,
@@ -94,6 +94,7 @@ export const createMetricThresholdExecutor = ({
   basePath: IBasePath;
   logger: Logger;
   config: ObservabilityConfig;
+  alertsLocator?: LocatorPublic<AlertsLocatorParams>;
 }): LifecycleRuleExecutor<
   MetricThresholdRuleParams,
   MetricThresholdRuleTypeState,
@@ -122,7 +123,13 @@ export const createMetricThresholdExecutor = ({
     });
 
     // TODO: check if we need to use "savedObjectsClient"=> https://github.com/elastic/kibana/issues/159340
-    const { alertWithLifecycle, getAlertUuid, getAlertByAlertUuid, dataViews } = services;
+    const {
+      alertWithLifecycle,
+      getAlertUuid,
+      getAlertByAlertUuid,
+      getAlertStartedDate,
+      searchSourceClient,
+    } = services;
 
     const alertFactory: MetricThresholdAlertFactory = (
       id,
@@ -140,46 +147,11 @@ export const createMetricThresholdExecutor = ({
           ...flattenAdditionalContext(additionalContext),
         },
       });
-    // TODO: check if we need to use "sourceId"
+
     const { alertOnNoData, alertOnGroupDisappear: _alertOnGroupDisappear } = params as {
-      sourceId?: string;
       alertOnNoData: boolean;
       alertOnGroupDisappear: boolean | undefined;
     };
-
-    if (!params.filterQuery && params.filterQueryText) {
-      try {
-        const { fromKueryExpression } = await import('@kbn/es-query');
-        fromKueryExpression(params.filterQueryText);
-      } catch (e) {
-        thresholdLogger.error(e.message);
-        const timestamp = startedAt.toISOString();
-        const actionGroupId = FIRED_ACTIONS_ID; // Change this to an Error action group when able
-        const reason = buildInvalidQueryAlertReason(params.filterQueryText);
-        const alert = alertFactory(UNGROUPED_FACTORY_KEY, reason, actionGroupId);
-        const alertUuid = getAlertUuid(UNGROUPED_FACTORY_KEY);
-
-        alert.scheduleActions(actionGroupId, {
-          alertDetailsUrl: getAlertDetailsUrl(basePath, spaceId, alertUuid),
-          alertState: stateToAlertMessage[AlertStates.ERROR],
-          group: UNGROUPED_FACTORY_KEY,
-          metric: mapToConditionsLookup(criteria, (c) => c.metric),
-          reason,
-          timestamp,
-          value: null,
-          viewInAppUrl: getViewInMetricsAppUrl(basePath, spaceId),
-        });
-
-        return {
-          state: {
-            lastRunTimestamp: startedAt.valueOf(),
-            missingGroups: [],
-            groupBy: params.groupBy,
-            filterQuery: params.filterQuery,
-          },
-        };
-      }
-    }
 
     // For backwards-compatibility, interpret undefined alertOnGroupDisappear as true
     const alertOnGroupDisappear = _alertOnGroupDisappear !== false;
@@ -190,17 +162,21 @@ export const createMetricThresholdExecutor = ({
       alertOnGroupDisappear && filterQueryIsSame && groupByIsSame && state.missingGroups
         ? state.missingGroups
         : [];
-    // TODO: check the DATA VIEW
-    const defaultDataView = await dataViews.getDefaultDataView();
-    const dataView = defaultDataView?.getIndexPattern();
+
+    const initialSearchSource = await searchSourceClient.create(params.searchConfiguration!);
+    const dataView = initialSearchSource.getField('index')!.getIndexPattern();
+    const timeFieldName = initialSearchSource.getField('index')?.timeFieldName;
     if (!dataView) {
       throw new Error('No matched data view');
+    } else if (!timeFieldName) {
+      throw new Error('No timestamp field is specified');
     }
 
     const alertResults = await evaluateRule(
       services.scopedClusterClient.asCurrentUser,
       params as EvaluatedRuleParams,
       dataView,
+      timeFieldName,
       compositeSize,
       alertOnGroupDisappear,
       logger,
@@ -226,7 +202,6 @@ export const createMetricThresholdExecutor = ({
     for (const group of groups) {
       // AND logic; all criteria must be across the threshold
       const shouldAlertFire = alertResults.every((result) => result[group]?.shouldFire);
-      const shouldAlertWarn = alertResults.every((result) => result[group]?.shouldWarn);
       // AND logic; because we need to evaluate all criteria, if one of them reports no data then the
       // whole alert is in a No Data/Error state
       const isNoData = alertResults.some((result) => result[group]?.isNoData);
@@ -239,16 +214,14 @@ export const createMetricThresholdExecutor = ({
         ? AlertStates.NO_DATA
         : shouldAlertFire
         ? AlertStates.ALERT
-        : shouldAlertWarn
-        ? AlertStates.WARNING
         : AlertStates.OK;
 
       let reason;
-      if (nextState === AlertStates.ALERT || nextState === AlertStates.WARNING) {
+      if (nextState === AlertStates.ALERT) {
         reason = alertResults
           .map((result) =>
             buildFiredAlertReason({
-              ...formatAlertResult(result[group], nextState === AlertStates.WARNING),
+              ...formatAlertResult(result[group]),
               group,
             })
           )
@@ -289,8 +262,6 @@ export const createMetricThresholdExecutor = ({
             ? RecoveredActionGroup.id
             : nextState === AlertStates.NO_DATA
             ? NO_DATA_ACTIONS_ID
-            : nextState === AlertStates.WARNING
-            ? WARNING_ACTIONS_ID
             : FIRED_ACTIONS_ID;
 
         const additionalContext = hasAdditionalContext(params.groupBy, validGroupByForContext)
@@ -304,7 +275,9 @@ export const createMetricThresholdExecutor = ({
         );
 
         const evaluationValues = alertResults.reduce((acc: Array<number | null>, result) => {
-          acc.push(result[group].currentValue);
+          if (result[group]) {
+            acc.push(result[group].currentValue);
+          }
           return acc;
         }, []);
 
@@ -316,29 +289,21 @@ export const createMetricThresholdExecutor = ({
           evaluationValues
         );
         const alertUuid = getAlertUuid(group);
+        const indexedStartedAt = getAlertStartedDate(group) ?? startedAt.toISOString();
         scheduledActionsCount++;
 
         alert.scheduleActions(actionGroupId, {
-          alertDetailsUrl: getAlertDetailsUrl(basePath, spaceId, alertUuid),
-          alertState: stateToAlertMessage[nextState],
-          group,
-          groupByKeys: groupByKeysObjectMapping[group],
-          metric: mapToConditionsLookup(criteria, (c) => {
-            if (c.aggType === 'count') {
-              return 'count';
-            }
-            return c.metric;
-          }),
+          alertDetailsUrl: await getAlertUrl(
+            alertUuid,
+            spaceId,
+            indexedStartedAt,
+            alertsLocator,
+            basePath.publicBaseUrl
+          ),
+          groupings: groupByKeysObjectMapping[group],
           reason,
-          threshold: mapToConditionsLookup(alertResults, (result, index) => {
-            const evaluation = result[group];
-            if (!evaluation) {
-              return criteria[index].threshold;
-            }
-            return formatAlertResult(evaluation).threshold;
-          }),
           timestamp,
-          value: mapToConditionsLookup(alertResults, (result, index) => {
+          value: alertResults.map((result, index) => {
             const evaluation = result[group];
             if (!evaluation && criteria[index].aggType === 'count') {
               return 0;
@@ -347,12 +312,10 @@ export const createMetricThresholdExecutor = ({
             }
             return formatAlertResult(evaluation).currentValue;
           }),
-          viewInAppUrl: getViewInMetricsAppUrl(basePath, spaceId),
           ...additionalContext,
         });
       }
     }
-
     const { getRecoveredAlerts } = services.alertFactory.done();
     const recoveredAlerts = getRecoveredAlerts();
 
@@ -364,31 +327,22 @@ export const createMetricThresholdExecutor = ({
     for (const alert of recoveredAlerts) {
       const recoveredAlertId = alert.getId();
       const alertUuid = getAlertUuid(recoveredAlertId);
+      const timestamp = startedAt.toISOString();
+      const indexedStartedAt = getAlertStartedDate(recoveredAlertId) ?? timestamp;
 
       const alertHits = alertUuid ? await getAlertByAlertUuid(alertUuid) : undefined;
       const additionalContext = getContextForRecoveredAlerts(alertHits);
-      const originalActionGroup = getOriginalActionGroup(alertHits);
 
       alert.setContext({
-        alertDetailsUrl: getAlertDetailsUrl(basePath, spaceId, alertUuid),
-        alertState: stateToAlertMessage[AlertStates.OK],
-        group: recoveredAlertId,
-        groupByKeys: groupByKeysObjectForRecovered[recoveredAlertId],
-        metric: mapToConditionsLookup(criteria, (c) => {
-          if (criteria.aggType === 'count') {
-            return 'count';
-          }
-          return c.metric;
-        }),
+        alertDetailsUrl: await getAlertUrl(
+          alertUuid,
+          spaceId,
+          indexedStartedAt,
+          alertsLocator,
+          basePath.publicBaseUrl
+        ),
+        groupings: groupByKeysObjectForRecovered[recoveredAlertId],
         timestamp: startedAt.toISOString(),
-        threshold: mapToConditionsLookup(criteria, (c) => c.threshold),
-        viewInAppUrl: getViewInMetricsAppUrl(basePath, spaceId),
-
-        originalAlertState: translateActionGroupToAlertState(originalActionGroup),
-        originalAlertStateWasALERT: originalActionGroup === FIRED_ACTIONS.id,
-        originalAlertStateWasWARNING: originalActionGroup === WARNING_ACTIONS.id,
-        // eslint-disable-next-line @typescript-eslint/naming-convention
-        originalAlertStateWasNO_DATA: originalActionGroup === NO_DATA_ACTIONS.id,
         ...additionalContext,
       });
     }
@@ -408,48 +362,18 @@ export const createMetricThresholdExecutor = ({
   };
 
 export const FIRED_ACTIONS = {
-  id: 'metrics.threshold.fired',
+  id: 'threshold.fired',
   name: i18n.translate('xpack.observability.threshold.rule.alerting.threshold.fired', {
     defaultMessage: 'Alert',
   }),
 };
 
-export const WARNING_ACTIONS = {
-  id: 'metrics.threshold.warning',
-  name: i18n.translate('xpack.observability.threshold.rule.alerting.threshold.warning', {
-    defaultMessage: 'Warning',
-  }),
-};
-
 export const NO_DATA_ACTIONS = {
-  id: 'metrics.threshold.nodata',
+  id: 'threshold.nodata',
   name: i18n.translate('xpack.observability.threshold.rule.alerting.threshold.nodata', {
     defaultMessage: 'No Data',
   }),
 };
-
-const translateActionGroupToAlertState = (
-  actionGroupId: string | undefined
-): string | undefined => {
-  if (actionGroupId === FIRED_ACTIONS.id) {
-    return stateToAlertMessage[AlertStates.ALERT];
-  }
-  if (actionGroupId === WARNING_ACTIONS.id) {
-    return stateToAlertMessage[AlertStates.WARNING];
-  }
-  if (actionGroupId === NO_DATA_ACTIONS.id) {
-    return stateToAlertMessage[AlertStates.NO_DATA];
-  }
-};
-
-const mapToConditionsLookup = (
-  list: any[],
-  mapFn: (value: any, index: number, array: any[]) => unknown
-) =>
-  list.map(mapFn).reduce((result: Record<string, any>, value, i) => {
-    result[`condition${i}`] = value;
-    return result;
-  }, {} as Record<string, unknown>);
 
 const formatAlertResult = <AlertResult>(
   alertResult: {
@@ -457,21 +381,15 @@ const formatAlertResult = <AlertResult>(
     currentValue: number | null;
     threshold: number[];
     comparator: Comparator;
-    warningThreshold?: number[];
-    warningComparator?: Comparator;
     timeSize: number;
     timeUnit: TimeUnitChar;
-  } & AlertResult,
-  useWarningThreshold?: boolean
+  } & AlertResult
 ) => {
-  const { metric, currentValue, threshold, comparator, warningThreshold, warningComparator } =
-    alertResult;
+  const { metric, currentValue, threshold, comparator } = alertResult;
   const noDataValue = i18n.translate(
     'xpack.observability.threshold.rule.alerting.threshold.noDataFormattedValue',
     { defaultMessage: '[NO DATA]' }
   );
-  const thresholdToFormat = useWarningThreshold ? warningThreshold! : threshold;
-  const comparatorToUse = useWarningThreshold ? warningComparator! : comparator;
 
   if (metric.endsWith('.pct')) {
     const formatter = createFormatter('percent');
@@ -479,10 +397,10 @@ const formatAlertResult = <AlertResult>(
       ...alertResult,
       currentValue:
         currentValue !== null && currentValue !== undefined ? formatter(currentValue) : noDataValue,
-      threshold: Array.isArray(thresholdToFormat)
-        ? thresholdToFormat.map((v: number) => formatter(v))
-        : formatter(thresholdToFormat),
-      comparator: comparatorToUse,
+      threshold: Array.isArray(threshold)
+        ? threshold.map((v: number) => formatter(v))
+        : formatter(threshold),
+      comparator,
     };
   }
 
@@ -491,9 +409,9 @@ const formatAlertResult = <AlertResult>(
     ...alertResult,
     currentValue:
       currentValue !== null && currentValue !== undefined ? formatter(currentValue) : noDataValue,
-    threshold: Array.isArray(thresholdToFormat)
-      ? thresholdToFormat.map((v: number) => formatter(v))
-      : formatter(thresholdToFormat),
-    comparator: comparatorToUse,
+    threshold: Array.isArray(threshold)
+      ? threshold.map((v: number) => formatter(v))
+      : formatter(threshold),
+    comparator,
   };
 };

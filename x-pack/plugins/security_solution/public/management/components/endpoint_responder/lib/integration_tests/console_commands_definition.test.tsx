@@ -65,6 +65,7 @@ describe('When displaying Endpoint Response Actions', () => {
       'suspend-process --pid',
       'get-file --path',
       'execute --command',
+      'upload --file',
     ]);
   });
 });

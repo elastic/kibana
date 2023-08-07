@@ -21,7 +21,7 @@ import React from 'react';
 import { APIReturnType } from '../../../../services/rest/create_call_api';
 
 type ApiKeyPayload =
-  APIReturnType<'POST /internal/observability_onboarding/custom_logs/save'>;
+  APIReturnType<'POST /internal/observability_onboarding/logs/flow'>;
 
 export type HasPrivileges = boolean;
 
@@ -94,7 +94,11 @@ export function ApiKeyBanner({
                 iconType="copyClipboard"
                 onClick={copy}
                 color="success"
-                style={{ backgroundColor: 'transparent' }}
+                css={{
+                  '> svg.euiIcon': {
+                    borderRadius: '0 !important',
+                  },
+                }}
                 aria-label={i18n.translate(
                   'xpack.observability_onboarding.apiKeyBanner.field.copyButton',
                   {

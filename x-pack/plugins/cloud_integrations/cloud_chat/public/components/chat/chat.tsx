@@ -37,10 +37,10 @@ export const Chat = ({ onHide = () => {}, onReady, onResize }: Props) => {
   }
 
   const { isReady, isResized, style } = config;
-  const { bottom, height, right } = style;
+  const { right } = style;
 
   const buttonCSS = css`
-    bottom: calc(${bottom} + ${height});
+    bottom: ${euiThemeVars.euiSizeXS};
     position: fixed;
     right: calc(${right} + ${euiThemeVars.euiSizeXS});
     visibility: ${isReady && isResized ? 'visible' : 'hidden'};

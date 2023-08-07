@@ -54,7 +54,7 @@ export const Page: FC<Props> = ({ jobId }) => {
     false,
   ]);
 
-  const { currentDataView } = useDataSource();
+  const { selectedDataView } = useDataSource();
 
   const createAnalyticsForm = useCreateAnalyticsForm();
   const { state } = createAnalyticsForm;
@@ -66,7 +66,7 @@ export const Page: FC<Props> = ({ jobId }) => {
   useEffect(() => {
     initiateWizard();
 
-    if (currentDataView) {
+    if (selectedDataView) {
       (async function () {
         if (jobId !== undefined) {
           const analyticsConfigs = await ml.dataFrameAnalytics.getDataFrameAnalytics(jobId, true);
@@ -188,7 +188,7 @@ export const Page: FC<Props> = ({ jobId }) => {
                   <FormattedMessage
                     id="xpack.ml.dataframe.analytics.creationPageSourceIndexTitle"
                     defaultMessage="Source data view: {dataViewTitle}"
-                    values={{ dataViewTitle: currentDataView.title }}
+                    values={{ dataViewTitle: selectedDataView.title }}
                   />
                 </h2>
               </EuiFlexItem>

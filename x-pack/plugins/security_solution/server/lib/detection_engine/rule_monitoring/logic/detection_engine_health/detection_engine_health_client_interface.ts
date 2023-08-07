@@ -12,7 +12,7 @@ import type {
   RuleHealthSnapshot,
   SpaceHealthParameters,
   SpaceHealthSnapshot,
-} from '../../../../../../common/detection_engine/rule_monitoring';
+} from '../../../../../../common/api/detection_engine/rule_monitoring';
 
 /**
  * Calculates health of the Detection Engine overall and detection rules individually.
@@ -32,4 +32,9 @@ export interface IDetectionEngineHealthClient {
    * Calculates health stats for the whole cluster.
    */
   calculateClusterHealth(args: ClusterHealthParameters): Promise<ClusterHealthSnapshot>;
+
+  /**
+   * Installs assets for monitoring Detection Engine health, such as dashboards and data views.
+   */
+  installAssetsForMonitoringHealth(): Promise<void>;
 }

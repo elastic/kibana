@@ -10,16 +10,24 @@ import type {
   ExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { INTERNAL_ALERTING_API_FIND_RULES_PATH } from '@kbn/alerting-plugin/common';
+import { BASE_ACTION_API_PATH } from '@kbn/actions-plugin/common';
+import type { ActionType, AsApiContract } from '@kbn/actions-plugin/common';
+import type { ActionResult } from '@kbn/actions-plugin/server';
 import type { BulkInstallPackagesResponse } from '@kbn/fleet-plugin/common';
 import { epmRouteService } from '@kbn/fleet-plugin/common';
 import type { InstallPackageResponse } from '@kbn/fleet-plugin/common/types';
-import type { UpgradeSpecificRulesRequest } from '../../../../common/detection_engine/prebuilt_rules/api/perform_rule_upgrade/perform_rule_upgrade_request_schema';
-import type { PerformRuleUpgradeResponseBody } from '../../../../common/detection_engine/prebuilt_rules/api/perform_rule_upgrade/perform_rule_upgrade_response_schema';
-import type { InstallSpecificRulesRequest } from '../../../../common/detection_engine/prebuilt_rules/api/perform_rule_installation/perform_rule_installation_request_schema';
-import type { PerformRuleInstallationResponseBody } from '../../../../common/detection_engine/prebuilt_rules/api/perform_rule_installation/perform_rule_installation_response_schema';
-import type { GetPrebuiltRulesStatusResponseBody } from '../../../../common/detection_engine/prebuilt_rules/api/get_prebuilt_rules_status/response_schema';
-import type { RuleManagementFiltersResponse } from '../../../../common/detection_engine/rule_management/api/rules/filters/response_schema';
-import { RULE_MANAGEMENT_FILTERS_URL } from '../../../../common/detection_engine/rule_management/api/urls';
+import { convertRulesFilterToKQL } from '../../../../common/utils/kql';
+import type {
+  UpgradeSpecificRulesRequest,
+  PerformRuleUpgradeResponseBody,
+  InstallSpecificRulesRequest,
+  PerformRuleInstallationResponseBody,
+  GetPrebuiltRulesStatusResponseBody,
+  ReviewRuleUpgradeResponseBody,
+  ReviewRuleInstallationResponseBody,
+} from '../../../../common/api/detection_engine/prebuilt_rules';
+import type { GetRuleManagementFiltersResponse } from '../../../../common/api/detection_engine/rule_management';
+import { RULE_MANAGEMENT_FILTERS_URL } from '../../../../common/api/detection_engine/rule_management';
 import type { BulkActionsDryRunErrCode } from '../../../../common/constants';
 import {
   DETECTION_ENGINE_RULES_BULK_ACTION,
@@ -35,20 +43,17 @@ import {
   PREBUILT_RULES_STATUS_URL,
   REVIEW_RULE_INSTALLATION_URL,
   REVIEW_RULE_UPGRADE_URL,
-} from '../../../../common/detection_engine/prebuilt_rules';
+} from '../../../../common/api/detection_engine/prebuilt_rules';
 
-import type { RulesReferencedByExceptionListsSchema } from '../../../../common/detection_engine/rule_exceptions';
-import { DETECTION_ENGINE_RULES_EXCEPTIONS_REFERENCE_URL } from '../../../../common/detection_engine/rule_exceptions';
+import type { RulesReferencedByExceptionListsSchema } from '../../../../common/api/detection_engine/rule_exceptions';
+import { DETECTION_ENGINE_RULES_EXCEPTIONS_REFERENCE_URL } from '../../../../common/api/detection_engine/rule_exceptions';
 
 import type {
   BulkActionDuplicatePayload,
   BulkActionEditPayload,
-} from '../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
-import { BulkActionType } from '../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
-import type {
-  PreviewResponse,
-  RuleResponse,
-} from '../../../../common/detection_engine/rule_schema';
+} from '../../../../common/api/detection_engine/rule_management/bulk_actions/bulk_actions_route';
+import { BulkActionType } from '../../../../common/api/detection_engine/rule_management/bulk_actions/bulk_actions_route';
+import type { PreviewResponse, RuleResponse } from '../../../../common/api/detection_engine';
 
 import { KibanaServices } from '../../../common/lib/kibana';
 import * as i18n from '../../../detections/pages/detection_engine/rules/translations';
@@ -70,9 +75,6 @@ import type {
   RulesSnoozeSettingsMap,
   UpdateRulesProps,
 } from '../logic/types';
-import { convertRulesFilterToKQL } from '../logic/utils';
-import type { ReviewRuleUpgradeResponseBody } from '../../../../common/detection_engine/prebuilt_rules/api/review_rule_upgrade/response_schema';
-import type { ReviewRuleInstallationResponseBody } from '../../../../common/detection_engine/prebuilt_rules/api/review_rule_installation/response_schema';
 
 /**
  * Create provided Rule
@@ -166,14 +168,14 @@ export const fetchRules = async ({
   },
   signal,
 }: FetchRulesProps): Promise<FetchRulesResponse> => {
-  const filterString = convertRulesFilterToKQL(filterOptions);
+  const kql = convertRulesFilterToKQL(filterOptions);
 
   const query = {
     page: pagination.page,
     per_page: pagination.perPage,
     sort_field: sortingOptions.field,
     sort_order: sortingOptions.order,
-    ...(filterString !== '' ? { filter: filterString } : {}),
+    ...(kql !== '' ? { filter: kql } : {}),
   };
 
   return KibanaServices.get().http.fetch<FetchRulesResponse>(DETECTION_ENGINE_RULES_URL_FIND, {
@@ -236,6 +238,21 @@ export const fetchRulesSnoozeSettings = async ({
     return result;
   }, {} as RulesSnoozeSettingsMap);
 };
+
+export const fetchConnectors = (
+  signal?: AbortSignal
+): Promise<Array<AsApiContract<ActionResult>>> =>
+  KibanaServices.get().http.fetch(`${BASE_ACTION_API_PATH}/connectors`, { method: 'GET', signal });
+
+export const fetchConnectorTypes = (signal?: AbortSignal): Promise<ActionType[]> =>
+  KibanaServices.get().http.fetch(`${BASE_ACTION_API_PATH}/connector_types`, {
+    method: 'GET',
+    signal,
+    query: {
+      feature_id: 'siem',
+    },
+  });
+
 export interface BulkActionSummary {
   failed: number;
   skipped: number;
@@ -435,8 +452,8 @@ export const fetchRuleManagementFilters = async ({
   signal,
 }: {
   signal?: AbortSignal;
-}): Promise<RuleManagementFiltersResponse> =>
-  KibanaServices.get().http.fetch<RuleManagementFiltersResponse>(RULE_MANAGEMENT_FILTERS_URL, {
+}): Promise<GetRuleManagementFiltersResponse> =>
+  KibanaServices.get().http.fetch<GetRuleManagementFiltersResponse>(RULE_MANAGEMENT_FILTERS_URL, {
     method: 'GET',
     signal,
   });

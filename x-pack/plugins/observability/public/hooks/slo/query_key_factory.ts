@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-interface SloKeyFilter {
-  name: string;
+import type { Indicator } from '@kbn/slo-schema';
+
+interface SloListFilter {
+  kqlQuery: string;
   page: number;
   sortBy: string;
-  indicatorTypes: string[];
+  sortDirection: string;
 }
 
 interface CompositeSloKeyFilter {
@@ -21,7 +23,7 @@ interface CompositeSloKeyFilter {
 export const sloKeys = {
   all: ['slo'] as const,
   lists: () => [...sloKeys.all, 'list'] as const,
-  list: (filters: SloKeyFilter) => [...sloKeys.lists(), filters] as const,
+  list: (filters: SloListFilter) => [...sloKeys.lists(), filters] as const,
   details: () => [...sloKeys.all, 'details'] as const,
   detail: (sloId?: string) => [...sloKeys.details(), sloId] as const,
   rules: () => [...sloKeys.all, 'rules'] as const,
@@ -29,8 +31,12 @@ export const sloKeys = {
   activeAlerts: () => [...sloKeys.all, 'activeAlerts'] as const,
   activeAlert: (sloIds: string[]) => [...sloKeys.activeAlerts(), sloIds] as const,
   historicalSummaries: () => [...sloKeys.all, 'historicalSummary'] as const,
-  historicalSummary: (sloIds: string[]) => [...sloKeys.historicalSummaries(), sloIds] as const,
+  historicalSummary: (list: Array<{ sloId: string; instanceId: string }>) =>
+    [...sloKeys.historicalSummaries(), list] as const,
   globalDiagnosis: () => [...sloKeys.all, 'globalDiagnosis'] as const,
+  burnRates: (sloId: string, instanceId: string | undefined) =>
+    [...sloKeys.all, 'burnRates', sloId, instanceId] as const,
+  preview: (indicator?: Indicator) => [...sloKeys.all, 'preview', indicator] as const,
 };
 
 export const compositeSloKeys = {

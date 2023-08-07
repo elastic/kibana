@@ -6,6 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { AlertConsumers } from '@kbn/rule-data-utils';
+import type { ValidFeatureId } from '@kbn/rule-data-utils';
 
 export const SLO_BURN_RATE_RULE_TYPE_ID = 'slo.rules.burnRate';
 export const OBSERVABILITY_THRESHOLD_RULE_TYPE_ID = 'observability.rules.threshold';
@@ -45,3 +47,12 @@ export const LOW_PRIORITY_ACTION = {
     defaultMessage: 'Low',
   }),
 };
+
+export const observabilityAlertFeatureIds: ValidFeatureId[] = [
+  AlertConsumers.APM,
+  AlertConsumers.INFRASTRUCTURE,
+  AlertConsumers.LOGS,
+  AlertConsumers.UPTIME,
+  AlertConsumers.SLO,
+  AlertConsumers.OBSERVABILITY,
+];

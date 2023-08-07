@@ -7,26 +7,30 @@
  */
 
 import { orderBy } from 'lodash/fp';
-import React, { createContext, FC, useCallback, useContext } from 'react';
+import React, { createContext, FC, useContext, useMemo } from 'react';
 import type { CellAction, CellActionsProviderProps, GetActions } from '../types';
 
-const CellActionsContext = createContext<{ getActions: GetActions } | null>(null);
+interface CellActionsContextValue {
+  getActions: GetActions;
+}
+const CellActionsContext = createContext<CellActionsContextValue | null>(null);
 
 export const CellActionsProvider: FC<CellActionsProviderProps> = ({
   children,
   getTriggerCompatibleActions,
 }) => {
-  const getActions = useCallback<GetActions>(
-    (context) =>
-      getTriggerCompatibleActions(context.trigger.id, context).then((actions) =>
-        orderBy(['order', 'id'], ['asc', 'asc'], actions)
-      ) as Promise<CellAction[]>,
+  const value = useMemo<CellActionsContextValue>(
+    () => ({
+      getActions: (context) =>
+        getTriggerCompatibleActions(context.trigger.id, context).then((actions) =>
+          orderBy(['order', 'id'], ['asc', 'asc'], actions)
+        ) as Promise<CellAction[]>,
+    }),
     [getTriggerCompatibleActions]
   );
 
-  return (
-    <CellActionsContext.Provider value={{ getActions }}>{children}</CellActionsContext.Provider>
-  );
+  // make sure that provider's value does not change
+  return <CellActionsContext.Provider value={value}>{children}</CellActionsContext.Provider>;
 };
 
 export const useCellActionsContext = () => {

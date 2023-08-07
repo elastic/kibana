@@ -19,12 +19,13 @@ import { EuiCallOut, EuiCode, EuiLoadingSpinner, EuiButtonIcon, EuiFlexItem } fr
 import type {
   AttachmentType,
   AttachmentViewObject,
+  CommonAttachmentViewProps,
 } from '../../../client/attachment_framework/types';
 
 import { AttachmentActionType } from '../../../client/attachment_framework/types';
 import { UserActionTimestamp } from '../timestamp';
 import type { AttachmentTypeRegistry } from '../../../../common/registry';
-import type { Comment } from '../../../../common/api';
+import type { Attachment } from '../../../../common/types/domain';
 import type { UserActionBuilder, UserActionBuilderArgs } from '../types';
 import type { SnakeToCamelCase } from '../../../../common/types';
 import {
@@ -56,7 +57,10 @@ type BuilderArgs<C, R> = Pick<
 const getAttachmentRenderer = memoize((cachingKey: string) => {
   let AttachmentElement: React.ReactElement;
 
-  const renderCallback = (attachmentViewObject: AttachmentViewObject, props: object) => {
+  const renderCallback = (
+    attachmentViewObject: AttachmentViewObject<CommonAttachmentViewProps>,
+    props: CommonAttachmentViewProps
+  ) => {
     if (!attachmentViewObject.children) return;
 
     if (!AttachmentElement) {
@@ -72,7 +76,7 @@ const getAttachmentRenderer = memoize((cachingKey: string) => {
 });
 
 export const createRegisteredAttachmentUserActionBuilder = <
-  C extends Comment,
+  C extends Attachment,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   R extends AttachmentTypeRegistry<AttachmentType<any>>
 >({
@@ -86,8 +90,6 @@ export const createRegisteredAttachmentUserActionBuilder = <
   getAttachmentViewProps,
   handleDeleteComment,
 }: BuilderArgs<C, R>): ReturnType<UserActionBuilder> => ({
-  // TODO: Fix this manually. Issue #123375
-  // eslint-disable-next-line react/display-name
   build: () => {
     const attachmentTypeId: string = getId();
     const isTypeRegistered = registry.has(attachmentTypeId);
@@ -118,6 +120,7 @@ export const createRegisteredAttachmentUserActionBuilder = <
 
     const props = {
       ...getAttachmentViewProps(),
+      attachmentId: comment.id,
       caseData: { id: caseData.id, title: caseData.title },
     };
 
@@ -147,6 +150,7 @@ export const createRegisteredAttachmentUserActionBuilder = <
                   <EuiFlexItem
                     grow={false}
                     data-test-subj={`attachment-${attachmentTypeId}-${comment.id}`}
+                    key={`attachment-${attachmentTypeId}-${comment.id}`}
                   >
                     <EuiButtonIcon
                       aria-label={action.label}
@@ -154,6 +158,7 @@ export const createRegisteredAttachmentUserActionBuilder = <
                       color={action.color ?? 'text'}
                       onClick={action.onClick}
                       data-test-subj={`attachment-${attachmentTypeId}-${comment.id}-${action.iconType}`}
+                      key={`attachment-${attachmentTypeId}-${comment.id}-${action.iconType}`}
                     />
                   </EuiFlexItem>
                 )) ||

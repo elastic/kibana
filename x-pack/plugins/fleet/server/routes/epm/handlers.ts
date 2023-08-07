@@ -32,9 +32,9 @@ import type {
   UpdatePackageResponse,
   GetVerificationKeyIdResponse,
   GetBulkAssetsResponse,
-  SimpleSOAssetType,
   GetInstalledPackagesResponse,
   GetEpmDataStreamsResponse,
+  AssetSOObject,
 } from '../../../common/types';
 import type {
   GetCategoriesRequestSchema,
@@ -52,6 +52,7 @@ import type {
   UpdatePackageRequestSchema,
   GetLimitedPackagesRequestSchema,
   GetBulkAssetsRequestSchema,
+  CreateCustomIntegrationRequestSchema,
 } from '../../types';
 import {
   bulkInstallPackages,
@@ -65,6 +66,7 @@ import {
   removeInstallation,
   getLimitedPackages,
   getInstallation,
+  getBulkAssets,
 } from '../../services/epm/packages';
 import type { BulkInstallResponse } from '../../services/epm/packages';
 import { defaultFleetErrorHandler, fleetErrorToResponseOptions, FleetError } from '../../errors';
@@ -76,15 +78,12 @@ import { updatePackage } from '../../services/epm/packages/update';
 import { getGpgKeyIdOrUndefined } from '../../services/epm/packages/package_verification';
 import type {
   ReauthorizeTransformRequestSchema,
-  SimpleSOAssetAttributes,
   PackageListItem,
   PackageList,
   PackageInfo,
   InstallationInfo,
 } from '../../types';
-import type { KibanaSavedObjectType, ElasticsearchAssetType } from '../../../common/types/models';
 import { getDataStreams } from '../../services/epm/data_streams';
-import { allowedAssetTypesLookup } from '../../../common/constants';
 
 const CACHE_CONTROL_10_MINUTES_HEADER: HttpResponseOptions['headers'] = {
   'cache-control': 'max-age=600',
@@ -317,30 +316,12 @@ export const getBulkAssetsHandler: FleetRequestHandler<
   TypeOf<typeof GetBulkAssetsRequestSchema.body>
 > = async (context, request, response) => {
   try {
-    const savedObjectsClient = (await context.fleet).internalSoClient;
     const { assetIds } = request.body;
+    const savedObjectsClient = (await context.fleet).internalSoClient;
+    const assets = await getBulkAssets(savedObjectsClient, assetIds as AssetSOObject[]);
 
-    const { resolved_objects: resolvedObjects } =
-      await savedObjectsClient.bulkResolve<SimpleSOAssetAttributes>(assetIds);
-    const res: SimpleSOAssetType[] = resolvedObjects
-      .map(({ saved_object: savedObject }) => savedObject)
-      .filter(
-        (savedObject) =>
-          savedObject?.error?.statusCode !== 404 && allowedAssetTypesLookup.has(savedObject.type)
-      )
-      .map((obj) => {
-        return {
-          id: obj.id,
-          type: obj.type as unknown as ElasticsearchAssetType | KibanaSavedObjectType,
-          updatedAt: obj.updated_at,
-          attributes: {
-            title: obj.attributes.title,
-            description: obj.attributes.description,
-          },
-        };
-      });
     const body: GetBulkAssetsResponse = {
-      items: res,
+      items: assets,
     };
     return response.ok({ body });
   } catch (error) {
@@ -409,6 +390,45 @@ export const installPackageFromRegistryHandler: FleetRequestHandler<
     ignoreConstraints: request.body?.ignore_constraints,
     prerelease: request.query?.prerelease,
     authorizationHeader,
+  });
+
+  if (!res.error) {
+    const body: InstallPackageResponse = {
+      items: res.assets || [],
+      _meta: {
+        install_source: res.installSource,
+      },
+    };
+    return response.ok({ body });
+  } else {
+    return await defaultFleetErrorHandler({ error: res.error, response });
+  }
+};
+export const createCustomIntegrationHandler: FleetRequestHandler<
+  undefined,
+  undefined,
+  TypeOf<typeof CreateCustomIntegrationRequestSchema.body>
+> = async (context, request, response) => {
+  const coreContext = await context.core;
+  const fleetContext = await context.fleet;
+  const savedObjectsClient = fleetContext.internalSoClient;
+  const esClient = coreContext.elasticsearch.client.asInternalUser;
+  const user = (await appContextService.getSecurity()?.authc.getCurrentUser(request)) || undefined;
+  const kibanaVersion = appContextService.getKibanaVersion();
+  const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request, user?.username);
+  const spaceId = fleetContext.spaceId;
+  const { integrationName, force, datasets } = request.body;
+
+  const res = await installPackage({
+    installSource: 'custom',
+    savedObjectsClient,
+    pkgName: integrationName,
+    datasets,
+    esClient,
+    spaceId,
+    force,
+    authorizationHeader,
+    kibanaVersion,
   });
 
   if (!res.error) {

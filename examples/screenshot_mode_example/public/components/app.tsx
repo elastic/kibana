@@ -7,8 +7,7 @@
  */
 
 import React, { useEffect } from 'react';
-import { BrowserRouter as Router } from 'react-router-dom';
-import { CompatRouter } from 'react-router-dom-v5-compat';
+import { BrowserRouter as Router } from '@kbn/shared-ux-router';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
 
 import {
@@ -63,63 +62,61 @@ export const ScreenshotModeExampleApp = ({
   }, [isScreenshotMode, notifications, http]);
   return (
     <Router basename={basename}>
-      <CompatRouter>
-        <I18nProvider>
-          <>
-            <navigation.ui.TopNavMenu
-              appName={PLUGIN_NAME}
-              showSearchBar={true}
-              useDefaultBehaviors={true}
-            />
-            <EuiPage restrictWidth="1000px">
-              <EuiPageBody>
-                <EuiPageHeader>
-                  <EuiTitle size="l">
-                    <h1>
-                      <FormattedMessage
-                        id="screenshotModeExample.helloWorldText"
-                        defaultMessage="{name}"
-                        values={{ name: PLUGIN_NAME }}
-                      />
-                    </h1>
-                  </EuiTitle>
-                </EuiPageHeader>
-                <EuiPageContent>
-                  <EuiPageContentHeader>
-                    <EuiTitle>
-                      <h2>
-                        {isScreenshotMode ? (
-                          <FormattedMessage
-                            id="screenshotModeExample.screenshotModeTitle"
-                            defaultMessage="We are in screenshot mode!"
-                          />
-                        ) : (
-                          <FormattedMessage
-                            id="screenshotModeExample.normalModeTitle"
-                            defaultMessage="We are not in screenshot mode!"
-                          />
-                        )}
-                      </h2>
-                    </EuiTitle>
-                  </EuiPageContentHeader>
-                  <EuiPageContentBody>
-                    <EuiText>
+      <I18nProvider>
+        <>
+          <navigation.ui.TopNavMenu
+            appName={PLUGIN_NAME}
+            showSearchBar={true}
+            useDefaultBehaviors={true}
+          />
+          <EuiPage restrictWidth="1000px">
+            <EuiPageBody>
+              <EuiPageHeader>
+                <EuiTitle size="l">
+                  <h1>
+                    <FormattedMessage
+                      id="screenshotModeExample.helloWorldText"
+                      defaultMessage="{name}"
+                      values={{ name: PLUGIN_NAME }}
+                    />
+                  </h1>
+                </EuiTitle>
+              </EuiPageHeader>
+              <EuiPageContent>
+                <EuiPageContentHeader>
+                  <EuiTitle>
+                    <h2>
                       {isScreenshotMode ? (
-                        <p>We detected screenshot mode. The chrome navbar should be hidden.</p>
+                        <FormattedMessage
+                          id="screenshotModeExample.screenshotModeTitle"
+                          defaultMessage="We are in screenshot mode!"
+                        />
                       ) : (
-                        <p>
-                          This is how the app looks in normal mode. The chrome navbar should be
-                          visible.
-                        </p>
+                        <FormattedMessage
+                          id="screenshotModeExample.normalModeTitle"
+                          defaultMessage="We are not in screenshot mode!"
+                        />
                       )}
-                    </EuiText>
-                  </EuiPageContentBody>
-                </EuiPageContent>
-              </EuiPageBody>
-            </EuiPage>
-          </>
-        </I18nProvider>
-      </CompatRouter>
+                    </h2>
+                  </EuiTitle>
+                </EuiPageContentHeader>
+                <EuiPageContentBody>
+                  <EuiText>
+                    {isScreenshotMode ? (
+                      <p>We detected screenshot mode. The chrome navbar should be hidden.</p>
+                    ) : (
+                      <p>
+                        This is how the app looks in normal mode. The chrome navbar should be
+                        visible.
+                      </p>
+                    )}
+                  </EuiText>
+                </EuiPageContentBody>
+              </EuiPageContent>
+            </EuiPageBody>
+          </EuiPage>
+        </>
+      </I18nProvider>
     </Router>
   );
 };

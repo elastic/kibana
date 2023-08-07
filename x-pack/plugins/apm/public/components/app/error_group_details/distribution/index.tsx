@@ -13,6 +13,7 @@ import {
   Position,
   ScaleType,
   Settings,
+  Tooltip,
 } from '@elastic/charts';
 import { EuiTitle } from '@elastic/eui';
 import {
@@ -94,9 +95,9 @@ export function ErrorDistribution({ distribution, title, fetchStatus }: Props) {
         id="errorDistribution"
       >
         <Chart>
+          <Tooltip stickTo="top" />
           <Settings
             xDomain={{ min, max }}
-            tooltip={{ stickTo: 'top' }}
             showLegend
             showLegendExtra
             legendPosition={Position.Bottom}

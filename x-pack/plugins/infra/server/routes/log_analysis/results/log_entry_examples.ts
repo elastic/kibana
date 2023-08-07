@@ -46,8 +46,10 @@ export const initGetLogEntryExamplesRoute = ({
           },
         } = request.body;
 
-        const [, , { logViews }] = await getStartServices();
-        const resolvedLogView = await logViews.getScopedClient(request).getResolvedLogView(logView);
+        const [, { logsShared }] = await getStartServices();
+        const resolvedLogView = await logsShared.logViews
+          .getScopedClient(request)
+          .getResolvedLogView(logView);
 
         try {
           const infraMlContext = await assertHasInfraMlPlugins(requestContext);

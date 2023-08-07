@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
+import type { ISavedObjectsImporter, Logger } from '@kbn/core/server';
 import { withSecuritySpan } from '../../../../../utils/with_security_span';
 import type { ExtMeta } from '../utils/console_logging';
 
@@ -16,15 +16,17 @@ import type {
   RuleHealthSnapshot,
   SpaceHealthParameters,
   SpaceHealthSnapshot,
-} from '../../../../../../common/detection_engine/rule_monitoring';
+} from '../../../../../../common/api/detection_engine/rule_monitoring';
 
 import type { IEventLogHealthClient } from './event_log/event_log_health_client';
 import type { IRuleObjectsHealthClient } from './rule_objects/rule_objects_health_client';
 import type { IDetectionEngineHealthClient } from './detection_engine_health_client_interface';
+import { installAssetsForRuleMonitoring } from './assets/install_assets_for_rule_monitoring';
 
 export const createDetectionEngineHealthClient = (
   ruleObjectsHealthClient: IRuleObjectsHealthClient,
   eventLogHealthClient: IEventLogHealthClient,
+  savedObjectsImporter: ISavedObjectsImporter,
   logger: Logger,
   currentSpaceId: string
 ): IDetectionEngineHealthClient => {
@@ -50,9 +52,10 @@ export const createDetectionEngineHealthClient = (
         } catch (e) {
           const logMessage = 'Error calculating rule health';
           const logReason = e instanceof Error ? e.message : String(e);
-          const logSuffix = `[rule id ${ruleId}]`;
+          const logSuffix = `[rule id ${ruleId}][space id ${currentSpaceId}]`;
           const logMeta: ExtMeta = {
             rule: { id: ruleId },
+            kibana: { spaceId: currentSpaceId },
           };
 
           logger.error(`${logMessage}: ${logReason} ${logSuffix}`, logMeta);
@@ -112,11 +115,36 @@ export const createDetectionEngineHealthClient = (
         } catch (e) {
           const logMessage = 'Error calculating cluster health';
           const logReason = e instanceof Error ? e.message : String(e);
+          const logSuffix = `[space id ${currentSpaceId}]`;
+          const logMeta: ExtMeta = {
+            kibana: { spaceId: currentSpaceId },
+          };
 
-          logger.error(`${logMessage}: ${logReason}`);
+          logger.error(`${logMessage}: ${logReason} ${logSuffix}`, logMeta);
           throw e;
         }
       });
+    },
+
+    installAssetsForMonitoringHealth: (): Promise<void> => {
+      return withSecuritySpan(
+        'IDetectionEngineHealthClient.installAssetsForMonitoringHealth',
+        async () => {
+          try {
+            await installAssetsForRuleMonitoring(savedObjectsImporter, logger, currentSpaceId);
+          } catch (e) {
+            const logMessage = 'Error installing assets for monitoring Detection Engine health';
+            const logReason = e instanceof Error ? e.message : String(e);
+            const logSuffix = `[space id ${currentSpaceId}]`;
+            const logMeta: ExtMeta = {
+              kibana: { spaceId: currentSpaceId },
+            };
+
+            logger.error(`${logMessage}: ${logReason} ${logSuffix}`, logMeta);
+            throw e;
+          }
+        }
+      );
     },
   };
 };

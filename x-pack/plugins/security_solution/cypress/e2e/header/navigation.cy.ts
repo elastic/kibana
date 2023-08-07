@@ -28,7 +28,7 @@ import {
   CSP_FINDINGS,
   POLICIES,
   EXPLORE,
-  MANAGE,
+  SETTINGS,
   ENTITY_ANALYTICS,
 } from '../../screens/security_header';
 
@@ -169,7 +169,7 @@ describe('top-level navigation common to all pages in the Security app', () => {
   });
 
   it('navigates to the Manage landing page', () => {
-    navigateFromHeaderTo(MANAGE);
+    navigateFromHeaderTo(SETTINGS);
     cy.url().should('include', MANAGE_URL);
   });
 

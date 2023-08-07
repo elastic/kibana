@@ -175,6 +175,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
           ...DEFAULT_DASHBOARD_INPUT,
           id: initialInput.id,
         },
+        isEmbeddedExternally: creationOptions?.isEmbeddedExternally,
         animatePanelTransforms: false, // set panel transforms to false initially to avoid panels animating on initial render.
         hasUnsavedChanges: false, // if there is initial unsaved changes, the initial diff will catch them.
         lastSavedId: savedObjectId,
@@ -258,12 +259,16 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       hidePanelTitles,
       refreshInterval,
       executionContext,
+      panels,
     } = this.input;
 
     let combinedFilters = filters;
     if (this.controlGroup) {
       combinedFilters = combineDashboardFiltersWithControlGroupFilters(filters, this.controlGroup);
     }
+    const hasCustomTimeRange = Boolean(
+      (panels[id]?.explicitInput as Partial<InheritedChildInput>)?.timeRange
+    );
     return {
       searchSessionId: this.searchSessionId,
       refreshConfig: refreshInterval,
@@ -272,11 +277,13 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       executionContext,
       syncTooltips,
       syncColors,
-      timeRange,
-      timeslice,
       viewMode,
       query,
       id,
+      // do not pass any time information from dashboard to panel when panel has custom time range
+      // to avoid confusing panel which timeRange should be used
+      timeRange: hasCustomTimeRange ? undefined : timeRange,
+      timeslice: hasCustomTimeRange ? undefined : timeslice,
     };
   }
 
@@ -373,12 +380,14 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
         });
       });
 
-    const { input: newInput, searchSessionId } = await initializeDashboard({
+    const initializeResult = await initializeDashboard({
       creationOptions: this.creationOptions,
       controlGroup: this.controlGroup,
       untilDashboardReady,
       loadDashboardReturn,
     });
+    if (!initializeResult) return;
+    const { input: newInput, searchSessionId } = initializeResult;
 
     this.searchSessionId = searchSessionId;
 
@@ -418,10 +427,12 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
 
   public openOverlay = (ref: OverlayRef) => {
     this.clearOverlays();
+    this.dispatch.setHasOverlays(true);
     this.overlayRef = ref;
   };
 
   public clearOverlays = () => {
+    this.dispatch.setHasOverlays(false);
     this.controlGroup?.closeAllFlyouts();
     this.overlayRef?.close();
   };

@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { DATA_VIEW_PATH, INITIAL_REST_VERSION } from '@kbn/data-views-plugin/server/constants';
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import {
+  KIBANA_LOADING_ICON,
   LOADING_INDICATOR,
   LOADING_INDICATOR_HIDDEN,
-  KIBANA_LOADING_ICON,
 } from '../screens/security_header';
+import { EUI_BASIC_TABLE_LOADING } from '../screens/common/controls';
 
 const primaryButton = 0;
 
@@ -218,6 +219,27 @@ export const deleteConnectors = () => {
   });
 };
 
+export const deletePrebuiltRulesAssets = () => {
+  const kibanaIndexUrl = `${Cypress.env('ELASTICSEARCH_URL')}/.kibana_\*`;
+  rootRequest({
+    method: 'POST',
+    url: `${kibanaIndexUrl}/_delete_by_query?conflicts=proceed`,
+    body: {
+      query: {
+        bool: {
+          filter: [
+            {
+              match: {
+                type: 'security-rule',
+              },
+            },
+          ],
+        },
+      },
+    },
+  });
+};
+
 export const postDataView = (dataSource: string) => {
   rootRequest({
     method: 'POST',
@@ -258,4 +280,9 @@ export const waitForPageToBeLoaded = () => {
 export const waitForWelcomePanelToBeLoaded = () => {
   cy.get(KIBANA_LOADING_ICON).should('exist');
   cy.get(KIBANA_LOADING_ICON).should('not.exist');
+};
+
+export const waitForTableToLoad = () => {
+  cy.get(EUI_BASIC_TABLE_LOADING).should('exist');
+  cy.get(EUI_BASIC_TABLE_LOADING).should('not.exist');
 };

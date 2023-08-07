@@ -8,23 +8,32 @@
 import { EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { useLocation } from 'react-router-dom';
 
-const OBSERVABILITY_ONBOARDING_FEEDBACK_LINK =
-  'https://ela.st/logs-onboarding-feedback';
+const LOGS_ONBOARDING_FEEDBACK_LINK = 'https://ela.st/logs-onboarding-feedback';
 
 export function ObservabilityOnboardingHeaderActionMenu() {
-  return (
-    <EuiButton
-      data-test-subj="observabilityOnboardingPageGiveFeedback"
-      href={OBSERVABILITY_ONBOARDING_FEEDBACK_LINK}
-      size="s"
-      target="_blank"
-      color="warning"
-      iconType="editorComment"
-    >
-      {i18n.translate('xpack.observability_onboarding.header.feedback', {
-        defaultMessage: 'Give feedback',
-      })}
-    </EuiButton>
-  );
+  const location = useLocation();
+  const normalizedPathname = location.pathname.replace(/\/$/, '');
+
+  const isRootPage = normalizedPathname === '';
+
+  if (!isRootPage) {
+    return (
+      <EuiButton
+        data-test-subj="observabilityOnboardingPageGiveFeedback"
+        href={LOGS_ONBOARDING_FEEDBACK_LINK}
+        size="s"
+        target="_blank"
+        color="warning"
+        iconType="editorComment"
+      >
+        {i18n.translate('xpack.observability_onboarding.header.feedback', {
+          defaultMessage: 'Give feedback',
+        })}
+      </EuiButton>
+    );
+  }
+
+  return <></>;
 }

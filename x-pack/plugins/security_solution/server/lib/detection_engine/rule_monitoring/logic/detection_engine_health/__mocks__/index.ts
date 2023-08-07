@@ -9,13 +9,15 @@ import {
   clusterHealthSnapshotMock,
   ruleHealthSnapshotMock,
   spaceHealthSnapshotMock,
-} from '../../../../../../../common/detection_engine/rule_monitoring/mocks';
+} from '../../../../../../../common/api/detection_engine/rule_monitoring/mocks';
 
 import type { IDetectionEngineHealthClient } from '../detection_engine_health_client_interface';
 
 type CalculateRuleHealth = IDetectionEngineHealthClient['calculateRuleHealth'];
 type CalculateSpaceHealth = IDetectionEngineHealthClient['calculateSpaceHealth'];
 type CalculateClusterHealth = IDetectionEngineHealthClient['calculateClusterHealth'];
+type InstallAssetsForMonitoringHealth =
+  IDetectionEngineHealthClient['installAssetsForMonitoringHealth'];
 
 export const detectionEngineHealthClientMock = {
   create: (): jest.Mocked<IDetectionEngineHealthClient> => ({
@@ -30,5 +32,12 @@ export const detectionEngineHealthClientMock = {
     calculateClusterHealth: jest
       .fn<ReturnType<CalculateClusterHealth>, Parameters<CalculateClusterHealth>>()
       .mockResolvedValue(clusterHealthSnapshotMock.getEmptyClusterHealthSnapshot()),
+
+    installAssetsForMonitoringHealth: jest
+      .fn<
+        ReturnType<InstallAssetsForMonitoringHealth>,
+        Parameters<InstallAssetsForMonitoringHealth>
+      >()
+      .mockResolvedValue(),
   }),
 };

@@ -8,6 +8,7 @@
 import React, { FC } from 'react';
 import { Redirect } from 'react-router-dom';
 import { parse } from 'query-string';
+import { useMlKibana } from '../../../contexts/kibana';
 import { ML_PAGES } from '../../../../locator';
 import { createPath, MlRoute, PageLoader, PageProps } from '../../router';
 import { useRouteResolver } from '../../use_resolver';
@@ -33,9 +34,32 @@ const PageWrapper: FC<PageProps> = ({ location }) => {
     sort: false,
   });
 
+  const {
+    services: {
+      data: {
+        query: {
+          timefilter: { timefilter: timeFilter },
+        },
+      },
+      dashboard: dashboardService,
+      uiSettings: kibanaConfig,
+      mlServices: { mlApiServices },
+    },
+  } = useMlKibana();
+
   const { context } = useRouteResolver('full', ['canCreateJob'], {
     redirect: () =>
-      resolver(dashboard, dataViewId, embeddable, geoField, splitField, from, to, layer),
+      resolver(
+        { mlApiServices, timeFilter, kibanaConfig, dashboardService },
+        dashboard,
+        dataViewId,
+        embeddable,
+        geoField,
+        splitField,
+        from,
+        to,
+        layer
+      ),
   });
 
   return (

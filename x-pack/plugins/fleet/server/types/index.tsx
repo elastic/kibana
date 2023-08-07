@@ -70,6 +70,7 @@ export type {
   InstallSource,
   InstallResult,
   GetCategoriesRequest,
+  GetPackagesRequest,
   DataType,
   FleetServerEnrollmentAPIKey,
   FleetServerAgent,
@@ -89,6 +90,8 @@ export type {
   PackageListItem,
   PackageList,
   InstallationInfo,
+  ActionStatusOptions,
+  PackageSpecTags,
 } from '../../common/types';
 export { ElasticsearchAssetType, KibanaAssetType, KibanaSavedObjectType } from '../../common/types';
 export { dataTypes } from '../../common/constants';

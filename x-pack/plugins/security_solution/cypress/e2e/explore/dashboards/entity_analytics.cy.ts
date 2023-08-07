@@ -9,8 +9,8 @@ import { login, visit } from '../../../tasks/login';
 
 import { ALERTS_URL, ENTITY_ANALYTICS_URL } from '../../../urls/navigation';
 
-import { esArchiverLoad, esArchiverUnload } from '../../../tasks/es_archiver';
-import { cleanKibana, deleteAlertsAndRules } from '../../../tasks/common';
+import { cleanKibana, deleteAlertsAndRules, waitForPageToBeLoaded } from '../../../tasks/common';
+
 import {
   ANOMALIES_TABLE,
   ANOMALIES_TABLE_ROWS,
@@ -28,14 +28,12 @@ import {
   USERS_TABLE_ALERT_CELL,
   HOSTS_TABLE_ALERT_CELL,
   HOSTS_TABLE,
-  ANOMALIES_TABLE_NEXT_PAGE_BUTTON,
-  ANOMALIES_TABLE_ENABLE_JOB_BUTTON,
   ANOMALIES_TABLE_ENABLE_JOB_LOADER,
   ANOMALIES_TABLE_COUNT_COLUMN,
 } from '../../../screens/entity_analytics';
 import {
   openRiskTableFilterAndSelectTheLowOption,
-  removeLowFilter,
+  removeLowFilterAndCloseRiskTableFilter,
 } from '../../../tasks/host_risk';
 import { createRule } from '../../../tasks/api_calls/rules';
 import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
@@ -45,6 +43,11 @@ import { OPTION_LIST_LABELS, OPTION_LIST_VALUES } from '../../../screens/common/
 import { setRowsPerPageTo } from '../../../tasks/table_pagination';
 import { clearSearchBar, kqlSearch } from '../../../tasks/security_header';
 import { setEndDate, setEndDateNow, updateDates } from '../../../tasks/date_picker';
+import {
+  enableJob,
+  navigateToNextPage,
+  waitForAnomaliesToBeLoaded,
+} from '../../../tasks/entity_analytics';
 
 const TEST_USER_ALERTS = 2;
 const TEST_USER_NAME = 'test';
@@ -74,8 +77,8 @@ describe('Entity Analytics Dashboard', () => {
 
   describe('Risk Score enabled but still no data', () => {
     before(() => {
-      esArchiverLoad('risk_hosts_no_data');
-      esArchiverLoad('risk_users_no_data');
+      cy.task('esArchiverLoad', 'risk_hosts_no_data');
+      cy.task('esArchiverLoad', 'risk_users_no_data');
     });
 
     beforeEach(() => {
@@ -84,8 +87,8 @@ describe('Entity Analytics Dashboard', () => {
     });
 
     after(() => {
-      esArchiverUnload('risk_hosts_no_data');
-      esArchiverUnload('risk_users_no_data');
+      cy.task('esArchiverUnload', 'risk_hosts_no_data');
+      cy.task('esArchiverUnload', 'risk_users_no_data');
     });
 
     it('shows no data detected prompt for host risk score module', () => {
@@ -99,8 +102,8 @@ describe('Entity Analytics Dashboard', () => {
 
   describe('With Legacy data', () => {
     before(() => {
-      esArchiverLoad('risk_hosts_legacy_data');
-      esArchiverLoad('risk_users_legacy_data');
+      cy.task('esArchiverLoad', 'risk_hosts_legacy_data');
+      cy.task('esArchiverLoad', 'risk_users_legacy_data');
     });
 
     beforeEach(() => {
@@ -109,8 +112,8 @@ describe('Entity Analytics Dashboard', () => {
     });
 
     after(() => {
-      esArchiverUnload('risk_hosts_legacy_data');
-      esArchiverUnload('risk_users_legacy_data');
+      cy.task('esArchiverUnload', 'risk_hosts_legacy_data');
+      cy.task('esArchiverUnload', 'risk_users_legacy_data');
     });
 
     it('shows upgrade host risk button', () => {
@@ -124,7 +127,7 @@ describe('Entity Analytics Dashboard', () => {
 
   describe('With host risk data', () => {
     before(() => {
-      esArchiverLoad('risk_hosts');
+      cy.task('esArchiverLoad', 'risk_hosts');
     });
 
     beforeEach(() => {
@@ -133,7 +136,7 @@ describe('Entity Analytics Dashboard', () => {
     });
 
     after(() => {
-      esArchiverUnload('risk_hosts');
+      cy.task('esArchiverUnload', 'risk_hosts');
     });
 
     it('renders donut chart', () => {
@@ -155,7 +158,7 @@ describe('Entity Analytics Dashboard', () => {
       cy.get(HOSTS_DONUT_CHART).should('include.text', '1Total');
       cy.get(HOSTS_TABLE_ROWS).should('have.length', 1);
 
-      removeLowFilter();
+      removeLowFilterAndCloseRiskTableFilter();
     });
 
     it('filters the host risk table with KQL search bar query', () => {
@@ -212,7 +215,7 @@ describe('Entity Analytics Dashboard', () => {
 
   describe('With user risk data', () => {
     before(() => {
-      esArchiverLoad('risk_users');
+      cy.task('esArchiverLoad', 'risk_users');
     });
 
     beforeEach(() => {
@@ -221,7 +224,7 @@ describe('Entity Analytics Dashboard', () => {
     });
 
     after(() => {
-      esArchiverUnload('risk_users');
+      cy.task('esArchiverUnload', 'risk_users');
     });
 
     it('renders donut chart', () => {
@@ -243,7 +246,7 @@ describe('Entity Analytics Dashboard', () => {
       cy.get(USERS_DONUT_CHART).should('include.text', '2Total');
       cy.get(USERS_TABLE_ROWS).should('have.length', 2);
 
-      removeLowFilter();
+      removeLowFilterAndCloseRiskTableFilter();
     });
 
     it('filters the host risk table with KQL search bar query', () => {
@@ -301,39 +304,38 @@ describe('Entity Analytics Dashboard', () => {
 
   describe('With anomalies data', () => {
     before(() => {
-      esArchiverLoad('network');
+      cy.task('esArchiverLoad', 'network');
+      login();
+      visit(ENTITY_ANALYTICS_URL);
+      waitForPageToBeLoaded();
+      cy.get(ANOMALIES_TABLE).should('be.visible');
+      waitForAnomaliesToBeLoaded();
     });
 
     after(() => {
-      esArchiverUnload('network');
+      cy.task('esArchiverUnload', 'network');
     });
 
-    beforeEach(() => {
-      login();
-      visit(ENTITY_ANALYTICS_URL);
-    });
+    it('should enable a job and renders the table with pagination', () => {
+      // Enables the job and perform checks
+      cy.get(ANOMALIES_TABLE_ROWS, { timeout: 120000 })
+        .eq(5)
+        .within(() => {
+          enableJob();
+          cy.get(ANOMALIES_TABLE_ENABLE_JOB_LOADER).should('be.visible');
+          cy.get(ANOMALIES_TABLE_COUNT_COLUMN).should('include.text', '0');
+        });
 
-    it('renders table with pagination', () => {
-      cy.get(ANOMALIES_TABLE).should('be.visible');
-      cy.get(ANOMALIES_TABLE_ROWS).should('have.length', 10);
+      // Checks pagination
+      cy.get(ANOMALIES_TABLE_ROWS, { timeout: 120000 }).should('have.length', 10);
 
       // navigates to next page
-      cy.get(ANOMALIES_TABLE_NEXT_PAGE_BUTTON).click();
+      navigateToNextPage();
       cy.get(ANOMALIES_TABLE_ROWS).should('have.length', 10);
 
       // updates rows per page to 25 items
       setRowsPerPageTo(25);
       cy.get(ANOMALIES_TABLE_ROWS).should('have.length', 25);
-    });
-
-    it('enables a job', () => {
-      cy.get(ANOMALIES_TABLE_ROWS)
-        .eq(5)
-        .within(() => {
-          cy.get(ANOMALIES_TABLE_ENABLE_JOB_BUTTON).click();
-          cy.get(ANOMALIES_TABLE_ENABLE_JOB_LOADER).should('be.visible');
-          cy.get(ANOMALIES_TABLE_COUNT_COLUMN).should('include.text', '0');
-        });
     });
   });
 });

@@ -6,32 +6,21 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import type {
-  IScopedClusterClient,
-  Logger,
-  RequestHandler,
-  SavedObjectsClientContract,
-} from '@kbn/core/server';
+import type { Logger, RequestHandler } from '@kbn/core/server';
+import type { MetadataListResponse } from '../../../../common/endpoint/types';
 import { errorHandler } from '../error_handler';
 import type { SecuritySolutionRequestHandlerContext } from '../../../types';
 
 import type { EndpointAppContext } from '../../types';
-import type { GetMetadataRequestSchema } from '.';
-import type { EndpointAppContextService } from '../../endpoint_app_context_services';
-import type { GetMetadataListRequestQuery } from '../../../../common/endpoint/schema/metadata';
+import type {
+  GetMetadataListRequestQuery,
+  GetMetadataRequestSchema,
+} from '../../../../common/api/endpoint';
 import {
   ENDPOINT_DEFAULT_PAGE,
   ENDPOINT_DEFAULT_PAGE_SIZE,
   METADATA_TRANSFORMS_PATTERN,
 } from '../../../../common/endpoint/constants';
-
-export interface MetadataRequestContext {
-  esClient?: IScopedClusterClient;
-  endpointAppContextService: EndpointAppContextService;
-  logger: Logger;
-  requestHandlerContext?: SecuritySolutionRequestHandlerContext;
-  savedObjectsClient?: SavedObjectsClientContract;
-}
 
 export const getLogger = (endpointAppContext: EndpointAppContext): Logger => {
   return endpointAppContext.logFactory.get('metadata');
@@ -60,14 +49,14 @@ export function getMetadataListRequestHandler(
         request.query
       );
 
-      return response.ok({
-        body: {
-          data,
-          total,
-          page: request.query.page || ENDPOINT_DEFAULT_PAGE,
-          pageSize: request.query.pageSize || ENDPOINT_DEFAULT_PAGE_SIZE,
-        },
-      });
+      const body: MetadataListResponse = {
+        data,
+        total,
+        page: request.query.page || ENDPOINT_DEFAULT_PAGE,
+        pageSize: request.query.pageSize || ENDPOINT_DEFAULT_PAGE_SIZE,
+      };
+
+      return response.ok({ body });
     } catch (error) {
       return errorHandler(logger, response, error);
     }

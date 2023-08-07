@@ -206,7 +206,10 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
     showElasticRules:
       savedFilter?.source === RuleSource.Prebuilt ?? DEFAULT_FILTER_OPTIONS.showElasticRules,
     enabled: savedFilter?.enabled,
+    ruleExecutionStatus:
+      savedFilter?.ruleExecutionStatus ?? DEFAULT_FILTER_OPTIONS.ruleExecutionStatus,
   });
+
   const [sortingOptions, setSortingOptions] = useState<SortingOptions>({
     field: savedSorting?.field ?? DEFAULT_SORTING_OPTIONS.field,
     order: savedSorting?.order ?? DEFAULT_SORTING_OPTIONS.order,
@@ -248,6 +251,7 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
       showCustomRules: DEFAULT_FILTER_OPTIONS.showCustomRules,
       tags: DEFAULT_FILTER_OPTIONS.tags,
       enabled: undefined,
+      ruleExecutionStatus: DEFAULT_FILTER_OPTIONS.ruleExecutionStatus,
     });
     setSortingOptions({
       field: DEFAULT_SORTING_OPTIONS.field,

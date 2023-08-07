@@ -53,7 +53,7 @@ export interface PageProps {
 
 export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
   const timefilter = useTimefilter();
-  const mlContext = useDataSource();
+  const dataSourceContext = useDataSource();
   const {
     services: { maps: mapsPlugin },
   } = useMlKibana();
@@ -63,9 +63,9 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
   const jobCreator = useMemo(
     () =>
       jobCreatorFactory(jobType)(
-        mlContext.currentDataView,
-        mlContext.selectedSavedSearch,
-        mlContext.combinedQuery
+        dataSourceContext.selectedDataView,
+        dataSourceContext.selectedSavedSearch,
+        dataSourceContext.combinedQuery
       ),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [jobType]
@@ -148,7 +148,7 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
       jobCreator.modelChangeAnnotations = true;
     }
 
-    if (mlContext.selectedSavedSearch !== null) {
+    if (dataSourceContext.selectedSavedSearch !== null) {
       // Jobs created from saved searches cannot be cloned in the wizard as the
       // ML job config holds no reference to the saved search ID.
       jobCreator.createdBy = null;
@@ -202,13 +202,13 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
   chartInterval.setInterval('auto');
 
   const chartLoader = useMemo(
-    () => new ChartLoader(mlContext.currentDataView, jobCreator.query),
-    [mlContext.currentDataView, jobCreator.query]
+    () => new ChartLoader(dataSourceContext.selectedDataView, jobCreator.query),
+    [dataSourceContext.selectedDataView, jobCreator.query]
   );
 
   const mapLoader = useMemo(
-    () => new MapLoader(mlContext.currentDataView, jobCreator.query, mapsPlugin),
-    [mlContext.currentDataView, jobCreator.query, mapsPlugin]
+    () => new MapLoader(dataSourceContext.selectedDataView, jobCreator.query, mapsPlugin),
+    [dataSourceContext.selectedDataView, jobCreator.query, mapsPlugin]
   );
 
   const resultsLoader = useMemo(
@@ -227,8 +227,10 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
   return (
     <Fragment>
       <MlPageHeader>
-        <FormattedMessage id="xpack.ml.newJob.page.createJob" defaultMessage="Create job" />:{' '}
-        {jobCreatorTitle}
+        <div data-test-subj={`mlPageJobWizardHeader-${jobCreator.type}`}>
+          <FormattedMessage id="xpack.ml.newJob.page.createJob" defaultMessage="Create job" />:{' '}
+          {jobCreatorTitle}
+        </div>
       </MlPageHeader>
 
       <div style={{ backgroundColor: 'inherit' }} data-test-subj={`mlPageJobWizard ${jobType}`}>

@@ -158,7 +158,7 @@ describe('FileService', () => {
     const file1 = await createDisposableFile({ fileKind, name: 'test' });
     const unknownID = 'foo';
 
-    expect(async () => {
+    await expect(async () => {
       await fileService.bulkGetById({ ids: [file1.id, unknownID] });
     }).rejects.toThrowError(`File [${unknownID}] not found`);
   });

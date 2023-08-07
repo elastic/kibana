@@ -69,7 +69,7 @@ export const editCalendarRouteFactory = (
   ],
 });
 
-const PageWrapper: FC<NewCalendarPageProps> = ({ location, mode, deps }) => {
+const PageWrapper: FC<NewCalendarPageProps> = ({ location, mode }) => {
   let calendarId: string | undefined;
   if (mode === MODE.EDIT) {
     const pathMatch: string[] | null = location.pathname.match(/.+\/(.+)$/);

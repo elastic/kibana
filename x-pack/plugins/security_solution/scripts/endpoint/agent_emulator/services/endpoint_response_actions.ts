@@ -8,7 +8,7 @@
 import type { KbnClient } from '@kbn/test';
 import { BASE_ENDPOINT_ACTION_ROUTE } from '../../../../common/endpoint/constants';
 import type { ActionListApiResponse } from '../../../../common/endpoint/types';
-import type { EndpointActionListRequestQuery } from '../../../../common/endpoint/schema/actions';
+import type { EndpointActionListRequestQuery } from '../../../../common/api/endpoint';
 
 export const fetchEndpointActionList = async (
   kbn: KbnClient,
@@ -19,6 +19,9 @@ export const fetchEndpointActionList = async (
       await kbn.request<ActionListApiResponse>({
         method: 'GET',
         path: BASE_ENDPOINT_ACTION_ROUTE,
+        headers: {
+          'Elastic-Api-Version': '2023-10-31',
+        },
         query: options,
       })
     ).data;

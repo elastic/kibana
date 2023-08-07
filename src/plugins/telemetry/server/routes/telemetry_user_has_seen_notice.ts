@@ -18,7 +18,7 @@ import {
   updateTelemetrySavedObject,
 } from '../saved_objects';
 
-export function registerTelemetryUserHasSeenNotice(router: IRouter) {
+export function registerTelemetryUserHasSeenNotice(router: IRouter, currentKibanaVersion: string) {
   const v2Handler: RequestHandler<undefined, undefined, undefined, RequestHandlerContext> = async (
     context,
     req,
@@ -33,6 +33,9 @@ export function registerTelemetryUserHasSeenNotice(router: IRouter) {
     const updatedAttributes: TelemetrySavedObjectAttributes = {
       ...telemetrySavedObject,
       userHasSeenNotice: true,
+      // We need to store that the user was notified in this version.
+      // Otherwise, it'll continuously show the banner if previously opted-out.
+      lastVersionChecked: currentKibanaVersion,
     };
     await updateTelemetrySavedObject(soClient, updatedAttributes);
 

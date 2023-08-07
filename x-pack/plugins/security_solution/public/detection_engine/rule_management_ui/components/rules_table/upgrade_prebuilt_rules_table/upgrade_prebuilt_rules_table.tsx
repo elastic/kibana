@@ -7,6 +7,8 @@
 
 import {
   EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiInMemoryTable,
   EuiProgress,
   EuiSkeletonLoading,
@@ -15,10 +17,11 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import * as i18n from '../../../../../detections/pages/detection_engine/rules/translations';
-import { useIsUpgradingSecurityPackages } from '../../../../rule_management/logic/use_upgrade_security_packages';
 import { RULES_TABLE_INITIAL_PAGE_SIZE, RULES_TABLE_PAGE_SIZE_OPTIONS } from '../constants';
+import { RulesChangelogLink } from '../rules_changelog_link';
 import { UpgradePrebuiltRulesTableButtons } from './upgrade_prebuilt_rules_table_buttons';
 import { useUpgradePrebuiltRulesTableContext } from './upgrade_prebuilt_rules_table_context';
+import { UpgradePrebuiltRulesTableFilters } from './upgrade_prebuilt_rules_table_filters';
 import { useUpgradePrebuiltRulesTableColumns } from './use_upgrade_prebuilt_rules_table_columns';
 
 const NO_ITEMS_MESSAGE = (
@@ -26,6 +29,7 @@ const NO_ITEMS_MESSAGE = (
     title={<h3>{i18n.NO_RULES_AVAILABLE_FOR_UPGRADE}</h3>}
     titleSize="s"
     body={i18n.NO_RULES_AVAILABLE_FOR_UPGRADE_BODY}
+    data-test-subj="noPrebuiltRulesAvailableForUpgrade"
   />
 );
 
@@ -33,24 +37,29 @@ const NO_ITEMS_MESSAGE = (
  * Table Component for displaying rules that have available updates
  */
 export const UpgradePrebuiltRulesTable = React.memo(() => {
-  const isUpgradingSecurityPackages = useIsUpgradingSecurityPackages();
-
   const upgradeRulesTableContext = useUpgradePrebuiltRulesTableContext();
 
   const {
-    state: { rules, tags, isFetched, isLoading, isRefetching, selectedRules },
+    state: {
+      rules,
+      filteredRules,
+      isFetched,
+      isLoading,
+      selectedRules,
+      isRefetching,
+      isUpgradingSecurityPackages,
+    },
     actions: { selectRules },
   } = upgradeRulesTableContext;
   const rulesColumns = useUpgradePrebuiltRulesTableColumns();
 
   const isTableEmpty = isFetched && rules.length === 0;
 
-  const shouldShowLinearProgress = (isFetched && isRefetching) || isUpgradingSecurityPackages;
-  const shouldShowLoadingOverlay = !isFetched && isRefetching;
+  const shouldShowProgress = isUpgradingSecurityPackages || isRefetching;
 
   return (
     <>
-      {shouldShowLinearProgress && (
+      {shouldShowProgress && (
         <EuiProgress
           data-test-subj="loadingRulesInfoProgress"
           size="xs"
@@ -59,7 +68,7 @@ export const UpgradePrebuiltRulesTable = React.memo(() => {
         />
       )}
       <EuiSkeletonLoading
-        isLoading={isLoading || shouldShowLoadingOverlay}
+        isLoading={isLoading}
         loadingContent={
           <>
             <EuiSkeletonTitle />
@@ -70,43 +79,46 @@ export const UpgradePrebuiltRulesTable = React.memo(() => {
           isTableEmpty ? (
             NO_ITEMS_MESSAGE
           ) : (
-            <EuiInMemoryTable
-              items={rules}
-              sorting
-              search={{
-                box: {
-                  incremental: true,
-                  isClearable: true,
-                },
-                toolsRight: [<UpgradePrebuiltRulesTableButtons />],
-                filters: [
-                  {
-                    type: 'field_value_selection',
-                    field: 'rule.tags',
-                    name: 'Tags',
-                    multiSelect: true,
-                    options: tags.map((tag) => ({
-                      value: tag,
-                      name: tag,
-                      field: 'rule.tags',
-                    })),
-                  },
-                ],
-              }}
-              pagination={{
-                initialPageSize: RULES_TABLE_INITIAL_PAGE_SIZE,
-                pageSizeOptions: RULES_TABLE_PAGE_SIZE_OPTIONS,
-              }}
-              isSelectable
-              selection={{
-                selectable: () => true,
-                onSelectionChange: selectRules,
-                initialSelected: selectedRules,
-              }}
-              itemId="rule_id"
-              data-test-subj="rules-upgrades-table"
-              columns={rulesColumns}
-            />
+            <>
+              <EuiFlexGroup direction="column">
+                <EuiFlexItem grow={false}>
+                  <RulesChangelogLink />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiFlexGroup
+                    alignItems="flexStart"
+                    gutterSize="s"
+                    responsive={false}
+                    wrap={true}
+                  >
+                    <EuiFlexItem grow={true}>
+                      <UpgradePrebuiltRulesTableFilters />
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <UpgradePrebuiltRulesTableButtons />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+
+              <EuiInMemoryTable
+                items={filteredRules}
+                sorting
+                pagination={{
+                  initialPageSize: RULES_TABLE_INITIAL_PAGE_SIZE,
+                  pageSizeOptions: RULES_TABLE_PAGE_SIZE_OPTIONS,
+                }}
+                isSelectable
+                selection={{
+                  selectable: () => true,
+                  onSelectionChange: selectRules,
+                  initialSelected: selectedRules,
+                }}
+                itemId="rule_id"
+                data-test-subj="rules-upgrades-table"
+                columns={rulesColumns}
+              />
+            </>
           )
         }
       />

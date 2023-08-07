@@ -23,21 +23,26 @@ import {
   ChromeBreadcrumb,
   ChromeGlobalHelpExtensionMenuLink,
   ChromeHelpExtension,
+  ChromeHelpMenuLink,
   ChromeNavControl,
+  ChromeUserBanner,
 } from '@kbn/core-chrome-browser/src';
+import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { HttpStart } from '@kbn/core-http-browser';
 import { MountPoint } from '@kbn/core-mount-utils-browser';
 import { i18n } from '@kbn/i18n';
+import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
+import { Router } from '@kbn/shared-ux-router';
 import React, { createRef, useCallback, useState } from 'react';
-import { Router } from 'react-router-dom';
-import { CompatRouter } from 'react-router-dom-v5-compat';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import useObservable from 'react-use/lib/useObservable';
-import { Observable, debounceTime } from 'rxjs';
+import { debounceTime, Observable, of } from 'rxjs';
 import { HeaderActionMenu, useHeaderActionMenuMounter } from '../header/header_action_menu';
 import { HeaderBreadcrumbs } from '../header/header_breadcrumbs';
 import { HeaderHelpMenu } from '../header/header_help_menu';
 import { HeaderNavControls } from '../header/header_nav_controls';
+import { HeaderTopBanner } from '../header/header_top_banner';
+import { ScreenReaderRouteAnnouncements, SkipToMainContent } from '../header/screen_reader_a11y';
 import { ProjectNavigation } from './navigation';
 
 const headerCss = {
@@ -84,14 +89,16 @@ const headerStrings = {
   },
 };
 
-interface Props {
+export interface Props {
+  headerBanner$: Observable<ChromeUserBanner | undefined>;
   breadcrumbs$: Observable<ChromeBreadcrumb[]>;
   actionMenu$: Observable<MountPoint | undefined>;
-  kibanaDocLink: string;
+  docLinks: DocLinksStart;
   children: React.ReactNode;
   globalHelpExtensionMenuLinks$: Observable<ChromeGlobalHelpExtensionMenuLink[]>;
   helpExtension$: Observable<ChromeHelpExtension | undefined>;
   helpSupportUrl$: Observable<string>;
+  helpMenuLinks$: Observable<ChromeHelpMenuLink[]>;
   homeHref$: Observable<string | undefined>;
   kibanaVersion: string;
   application: InternalApplicationStart;
@@ -158,10 +165,10 @@ const Logo = (
 
 export const ProjectHeader = ({
   application,
-  kibanaDocLink,
   kibanaVersion,
   children,
   prependBasePath,
+  docLinks,
   ...observables
 }: Props) => {
   const [navId] = useState(htmlIdGenerator()());
@@ -169,101 +176,115 @@ export const ProjectHeader = ({
   const toggleCollapsibleNavRef = createRef<HTMLButtonElement & { euiAnimate: () => void }>();
   const headerActionMenuMounter = useHeaderActionMenuMounter(observables.actionMenu$);
 
-  const handleCloseNav = useCallback(() => {
-    setIsOpen(false);
-    if (toggleCollapsibleNavRef.current) {
-      toggleCollapsibleNavRef.current.focus();
-    }
-  }, [setIsOpen, toggleCollapsibleNavRef]);
-
-  const handleToggleNavButtonClick = useCallback(
-    () => setIsOpen((prevIsOpen) => !prevIsOpen),
-    [setIsOpen]
-  );
-
   return (
     <>
-      <EuiHeader position="fixed" data-test-subj="kibanaProjectHeader">
-        <EuiHeaderSection grow={false}>
-          <EuiHeaderSectionItem css={headerCss.nav.toggleNavButton}>
-            <Router history={application.history}>
-              <CompatRouter>
-                <ProjectNavigation
-                  isOpen={isOpen!}
-                  closeNav={handleCloseNav}
-                  button={
-                    <EuiHeaderSectionItemButton
-                      data-test-subj="toggleNavButton"
-                      aria-label={headerStrings.nav.closeNavAriaLabel}
-                      onClick={handleToggleNavButtonClick}
-                      aria-expanded={isOpen!}
-                      aria-pressed={isOpen!}
-                      aria-controls={navId}
-                      ref={toggleCollapsibleNavRef}
-                    >
-                      <EuiIcon type={isOpen ? 'menuLeft' : 'menuRight'} size="m" />
-                    </EuiHeaderSectionItemButton>
-                  }
-                >
-                  {children}
-                </ProjectNavigation>
-              </CompatRouter>
-            </Router>
-          </EuiHeaderSectionItem>
+      <ScreenReaderRouteAnnouncements
+        breadcrumbs$={observables.breadcrumbs$}
+        customBranding$={of()}
+        appId$={application.currentAppId$}
+      />
+      <SkipToMainContent />
 
-          <EuiHeaderSectionItem>
-            <Logo
-              prependBasePath={prependBasePath}
-              application={application}
-              homeHref$={observables.homeHref$}
-              loadingCount$={observables.loadingCount$}
-            />
-          </EuiHeaderSectionItem>
+      <HeaderTopBanner headerBanner$={observables.headerBanner$} />
+      <header data-test-subj="kibanaProjectHeader">
+        <div id="globalHeaderBars" data-test-subj="headerGlobalNav" className="header__bars">
+          <EuiHeader position="fixed" className="header__firstBar">
+            <EuiHeaderSection grow={false}>
+              <EuiHeaderSectionItem css={headerCss.nav.toggleNavButton}>
+                <Router history={application.history}>
+                  <ProjectNavigation
+                    isOpen={isOpen!}
+                    closeNav={() => {
+                      setIsOpen(false);
+                      if (toggleCollapsibleNavRef.current) {
+                        toggleCollapsibleNavRef.current.focus();
+                      }
+                    }}
+                    button={
+                      <EuiHeaderSectionItemButton
+                        data-test-subj="toggleNavButton"
+                        aria-label={headerStrings.nav.closeNavAriaLabel}
+                        onClick={() => setIsOpen(!isOpen)}
+                        aria-expanded={isOpen!}
+                        aria-pressed={isOpen!}
+                        aria-controls={navId}
+                        ref={toggleCollapsibleNavRef}
+                      >
+                        <EuiIcon type={isOpen ? 'menuLeft' : 'menuRight'} size="m" />
+                      </EuiHeaderSectionItemButton>
+                    }
+                  >
+                    {children}
+                  </ProjectNavigation>
+                </Router>
+              </EuiHeaderSectionItem>
 
-          <EuiHeaderSectionItem>
-            <HeaderNavControls navControls$={observables.navControlsLeft$} />
-          </EuiHeaderSectionItem>
+              <EuiHeaderSectionItem>
+                <Logo
+                  prependBasePath={prependBasePath}
+                  application={application}
+                  homeHref$={observables.homeHref$}
+                  loadingCount$={observables.loadingCount$}
+                />
+              </EuiHeaderSectionItem>
 
-          <EuiHeaderSectionItem>
-            <EuiHeaderLink href="https://cloud.elastic.co/deployments">
-              {headerStrings.cloud.linkToDeployments}
-            </EuiHeaderLink>
-          </EuiHeaderSectionItem>
+              <EuiHeaderSectionItem>
+                <HeaderNavControls navControls$={observables.navControlsLeft$} />
+              </EuiHeaderSectionItem>
 
-          <EuiHeaderSectionItem>
-            <HeaderBreadcrumbs breadcrumbs$={observables.breadcrumbs$} />
-          </EuiHeaderSectionItem>
-        </EuiHeaderSection>
+              <EuiHeaderSectionItem>
+                <EuiHeaderLink href="https://cloud.elastic.co/deployments">
+                  {headerStrings.cloud.linkToDeployments}
+                </EuiHeaderLink>
+              </EuiHeaderSectionItem>
 
-        <EuiHeaderSection side="right">
-          <EuiHeaderSectionItem>
-            <HeaderNavControls navControls$={observables.navControlsCenter$} />
-            <HeaderNavControls navControls$={observables.navControlsRight$} />
-          </EuiHeaderSectionItem>
+              <EuiHeaderSectionItem>
+                <RedirectAppLinks coreStart={{ application }}>
+                  <HeaderBreadcrumbs breadcrumbs$={observables.breadcrumbs$} />
+                </RedirectAppLinks>
+              </EuiHeaderSectionItem>
+            </EuiHeaderSection>
 
-          <EuiHeaderSectionItem>
-            <HeaderHelpMenu
-              globalHelpExtensionMenuLinks$={observables.globalHelpExtensionMenuLinks$}
-              helpExtension$={observables.helpExtension$}
-              helpSupportUrl$={observables.helpSupportUrl$}
-              kibanaDocLink={kibanaDocLink}
-              kibanaVersion={kibanaVersion}
-              navigateToUrl={application.navigateToUrl}
-            />
-          </EuiHeaderSectionItem>
-        </EuiHeaderSection>
-      </EuiHeader>
+            <EuiHeaderSection side="right">
+              <EuiHeaderSectionItem>
+                <HeaderNavControls navControls$={observables.navControlsCenter$} />
+              </EuiHeaderSectionItem>
 
-      {headerActionMenuMounter.mount && (
-        <EuiHeader data-test-subj="kibanaProjectHeaderActionMenu">
-          <EuiHeaderSection />
-          <EuiHeaderSection side="right">
-            <EuiHeaderSectionItem>
-              <HeaderActionMenu mounter={headerActionMenuMounter} />
-            </EuiHeaderSectionItem>
-          </EuiHeaderSection>
-        </EuiHeader>
-      )}
+              <EuiHeaderSectionItem>
+                <HeaderHelpMenu
+                  globalHelpExtensionMenuLinks$={observables.globalHelpExtensionMenuLinks$}
+                  helpExtension$={observables.helpExtension$}
+                  helpSupportUrl$={observables.helpSupportUrl$}
+                  defaultContentLinks$={observables.helpMenuLinks$}
+                  kibanaDocLink={docLinks.links.elasticStackGetStarted}
+                  docLinks={docLinks}
+                  kibanaVersion={kibanaVersion}
+                  navigateToUrl={application.navigateToUrl}
+                />
+              </EuiHeaderSectionItem>
+
+              <EuiHeaderSectionItem>
+                <HeaderNavControls navControls$={observables.navControlsRight$} />
+              </EuiHeaderSectionItem>
+            </EuiHeaderSection>
+          </EuiHeader>
+
+          <EuiHeader
+            position="fixed"
+            className="header__secondBar"
+            data-test-subj="kibanaProjectHeaderActionMenu"
+          >
+            <EuiHeaderSection />
+            {headerActionMenuMounter.mount && (
+              <EuiHeaderSection side="right">
+                <EuiHeaderSectionItem>
+                  <HeaderActionMenu mounter={headerActionMenuMounter} />
+                </EuiHeaderSectionItem>
+              </EuiHeaderSection>
+            )}
+          </EuiHeader>
+        </div>
+      </header>
     </>
   );
 };

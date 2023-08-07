@@ -42,10 +42,33 @@ export * from './parse_duration';
 export * from './execution_log_types';
 export * from './rule_snooze_type';
 export * from './rrule_type';
-export * from './maintenance_window';
 export * from './default_rule_aggregation';
 export * from './rule_tags_aggregation';
 export * from './iso_weekdays';
+export * from './saved_objects/rules/mappings';
+
+export type {
+  MaintenanceWindowModificationMetadata,
+  DateRange,
+  MaintenanceWindowSOProperties,
+  MaintenanceWindowSOAttributes,
+  MaintenanceWindow,
+  MaintenanceWindowCreateBody,
+  MaintenanceWindowClientContext,
+  MaintenanceWindowDeepLinkIds,
+} from './maintenance_window';
+
+export {
+  MaintenanceWindowStatus,
+  MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
+  MAINTENANCE_WINDOW_FEATURE_ID,
+  MAINTENANCE_WINDOW_API_PRIVILEGES,
+  MAINTENANCE_WINDOWS_APP_ID,
+  MANAGEMENT_APP_ID,
+  MAINTENANCE_WINDOW_PATHS,
+  MAINTENANCE_WINDOW_DEEP_LINK_IDS,
+  MAINTENANCE_WINDOW_DATE_FORMAT,
+} from './maintenance_window';
 
 export {
   mappingFromFieldMap,

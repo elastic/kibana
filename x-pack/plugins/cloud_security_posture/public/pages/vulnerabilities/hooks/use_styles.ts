@@ -30,6 +30,13 @@ export const useStyles = () => {
         font-weight: ${euiTheme.font.weight.bold};
       }
     }
+    & .euiDataGrid__leftControls {
+      > .euiButtonEmpty:hover:not(:disabled),
+      .euiButtonEmpty:focus {
+        text-decoration: none;
+        cursor: default;
+      }
+    }
     & .euiButtonIcon {
       color: ${euiTheme.colors.primary};
     }
@@ -39,6 +46,10 @@ export const useStyles = () => {
     & .euiDataGridRowCell__expandActions > [data-test-subj='euiDataGridCellExpandButton'] {
       display: none;
     }
+    & .euiDataGridRowCell__contentByHeight + .euiDataGridRowCell__expandActions {
+      padding: 0;
+    }
+
     & .euiDataGridRowCell__expandFlex {
       align-items: center;
     }

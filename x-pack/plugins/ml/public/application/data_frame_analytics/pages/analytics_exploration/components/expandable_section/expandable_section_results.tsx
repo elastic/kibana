@@ -10,6 +10,8 @@ import React, { FC, useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { escapeKuery } from '@kbn/es-query';
+import { cloneDeep } from 'lodash';
+import moment from 'moment';
 
 import {
   EuiButtonIcon,
@@ -41,7 +43,7 @@ import {
 } from '@kbn/ml-data-frame-analytics-utils';
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { SEARCH_QUERY_LANGUAGE } from '../../../../../../../common/constants/search';
+import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
 
 import { getToastNotifications } from '../../../../../util/dependency_cache';
 import { useColorRange, ColorRangeLegend } from '../../../../../components/color_range_legend';
@@ -53,6 +55,8 @@ import {
   replaceTokensInDFAUrlValue,
   openCustomUrlWindow,
 } from '../../../../../util/custom_url_utils';
+import { replaceStringTokens } from '../../../../../util/string_utils';
+import { parseInterval } from '../../../../../../../common/util/parse_interval';
 
 import { ExpandableSection, ExpandableSectionProps, HEADER_ITEMS_LOADING } from '.';
 import { IndexPatternPrompt } from '../index_pattern_prompt';
@@ -227,12 +231,40 @@ export const ExpandableSectionResults: FC<ExpandableSectionResultsProps> = ({
   );
 
   const openCustomUrl = (item: DataGridItem, customUrl: MlKibanaUrlConfig) => {
-    // Replace any tokens in the configured url_value with values from the source record and open link in a new tab/window.
-    const urlPath = replaceTokensInDFAUrlValue(
-      customUrl,
-      item,
-      data.query.timefilter.timefilter.getTime()
-    );
+    const timeRangeInterval =
+      customUrl.time_range !== undefined ? parseInterval(customUrl.time_range) : null;
+    let urlPath;
+
+    // Interval time range
+    if (timeRangeInterval !== null) {
+      // Create a copy of the record as we are adding properties into it.
+      const record = cloneDeep(item);
+      const timestamp = record[indexPattern!.timeFieldName!];
+      const configuredUrlValue = customUrl.url_value;
+
+      if (configuredUrlValue.includes('$earliest$')) {
+        const earliestMoment = moment(timestamp);
+        earliestMoment.subtract(timeRangeInterval);
+        record.earliest = earliestMoment.toISOString(); // e.g. 2016-02-08T16:00:00.000Z
+      }
+
+      if (configuredUrlValue.includes('$latest$')) {
+        const latestMoment = moment(timestamp);
+        latestMoment.add(timeRangeInterval);
+        record.latest = latestMoment.toISOString();
+      }
+
+      urlPath = replaceStringTokens(customUrl.url_value, record, true);
+    } else {
+      // Custom time range
+      // Replace any tokens in the configured url_value with values from the source record and open link in a new tab/window.
+      urlPath = replaceTokensInDFAUrlValue(
+        customUrl,
+        item,
+        data.query.timefilter.timefilter.getTime()
+      );
+    }
+
     openCustomUrlWindow(urlPath, customUrl, basePath.get());
   };
 

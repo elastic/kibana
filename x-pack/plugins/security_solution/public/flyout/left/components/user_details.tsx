@@ -50,6 +50,7 @@ import { USER_DETAILS_RELATED_HOSTS_TABLE_TEST_ID, USER_DETAILS_TEST_ID } from '
 import { ENTITY_RISK_CLASSIFICATION } from '../../../explore/components/risk_score/translations';
 import { HOST_RISK_TOOLTIP } from '../../../explore/hosts/components/hosts_table/translations';
 import * as i18n from './translations';
+import { useHasSecurityCapability } from '../../../helper_hooks';
 
 const USER_DETAILS_ID = 'entities-users-details';
 const RELATED_HOSTS_ID = 'entities-users-related-hosts';
@@ -77,7 +78,11 @@ export const UserDetails: React.FC<UserDetailsProps> = ({ userName, timestamp })
   // create a unique, but stable (across re-renders) query id
   const userDetailsQueryId = useMemo(() => `${USER_DETAILS_ID}-${uuid()}`, []);
   const relatedHostsQueryId = useMemo(() => `${RELATED_HOSTS_ID}-${uuid()}`, []);
+
+  const hasEntityAnalyticsCapability = useHasSecurityCapability('entity-analytics');
   const isPlatinumOrTrialLicense = useMlCapabilities().isPlatinumOrTrialLicense;
+  const isEntityAnalyticsAuthorized = isPlatinumOrTrialLicense && hasEntityAnalyticsCapability;
+
   const narrowDateRange = useCallback(
     (score, interval) => {
       const fromTo = scoreIntervalToDateTime(score, interval);
@@ -126,10 +131,9 @@ export const UserDetails: React.FC<UserDetailsProps> = ({ userName, timestamp })
               visibleCellActions={5}
               showActionTooltips
               triggerId={SecurityCellActionsTrigger.DEFAULT}
-              field={{
-                name: 'host.name',
+              data={{
                 value: host,
-                type: 'keyword',
+                field: 'host.name',
               }}
             >
               {host}
@@ -152,7 +156,7 @@ export const UserDetails: React.FC<UserDetailsProps> = ({ userName, timestamp })
           );
         },
       },
-      ...(isPlatinumOrTrialLicense
+      ...(isEntityAnalyticsAuthorized
         ? [
             {
               field: 'risk',
@@ -177,7 +181,7 @@ export const UserDetails: React.FC<UserDetailsProps> = ({ userName, timestamp })
           ]
         : []),
     ],
-    [isPlatinumOrTrialLicense]
+    [isEntityAnalyticsAuthorized]
   );
 
   const relatedHostsCount = useMemo(
@@ -284,5 +288,3 @@ export const UserDetails: React.FC<UserDetailsProps> = ({ userName, timestamp })
     </>
   );
 };
-
-UserDetails.displayName = 'UserDetails';

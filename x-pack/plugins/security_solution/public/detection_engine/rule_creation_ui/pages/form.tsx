@@ -57,10 +57,13 @@ export const useRuleForms = ({
   });
   // FormData doesn't populate on the first render, so we use the defaultValue if the formData
   // doesn't have what we wanted
-  const defineStepData =
-    'index' in defineStepFormData
-      ? { ...defineStepFormData, eqlOptions: eqlOptionsSelected }
-      : defineStepDefault;
+  const defineStepData = useMemo(
+    () =>
+      'index' in defineStepFormData
+        ? { ...defineStepFormData, eqlOptions: eqlOptionsSelected }
+        : defineStepDefault,
+    [defineStepDefault, defineStepFormData, eqlOptionsSelected]
+  );
 
   // ABOUT STEP FORM
   const typeDependentAboutRuleSchema = useMemo(

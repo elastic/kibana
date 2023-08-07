@@ -8,9 +8,9 @@
 import type React from 'react';
 import type { EuiCommentProps, IconType, EuiButtonProps } from '@elastic/eui';
 import type {
-  CommentRequestExternalReferenceType,
-  CommentRequestPersistableStateType,
-} from '../../../common/api';
+  ExternalReferenceAttachmentPayload,
+  PersistableStateAttachmentPayload,
+} from '../../../common/types/domain';
 import type { CaseUI } from '../../containers/types';
 
 export enum AttachmentActionType {
@@ -20,12 +20,12 @@ export enum AttachmentActionType {
 
 interface BaseAttachmentAction {
   type: AttachmentActionType;
-  label: string;
   isPrimary?: boolean;
   disabled?: boolean;
 }
 
 interface ButtonAttachmentAction extends BaseAttachmentAction {
+  label: string;
   type: AttachmentActionType.BUTTON;
   onClick: () => void;
   iconType: string;
@@ -48,17 +48,18 @@ export interface AttachmentViewObject<Props = {}> {
 }
 
 export interface CommonAttachmentViewProps {
+  attachmentId: string;
   caseData: Pick<CaseUI, 'id' | 'title'>;
 }
 
 export interface ExternalReferenceAttachmentViewProps extends CommonAttachmentViewProps {
-  externalReferenceId: CommentRequestExternalReferenceType['externalReferenceId'];
-  externalReferenceMetadata: CommentRequestExternalReferenceType['externalReferenceMetadata'];
+  externalReferenceId: ExternalReferenceAttachmentPayload['externalReferenceId'];
+  externalReferenceMetadata: ExternalReferenceAttachmentPayload['externalReferenceMetadata'];
 }
 
 export interface PersistableStateAttachmentViewProps extends CommonAttachmentViewProps {
-  persistableStateAttachmentTypeId: CommentRequestPersistableStateType['persistableStateAttachmentTypeId'];
-  persistableStateAttachmentState: CommentRequestPersistableStateType['persistableStateAttachmentState'];
+  persistableStateAttachmentTypeId: PersistableStateAttachmentPayload['persistableStateAttachmentTypeId'];
+  persistableStateAttachmentState: PersistableStateAttachmentPayload['persistableStateAttachmentState'];
 }
 
 export interface AttachmentType<Props> {
@@ -67,7 +68,6 @@ export interface AttachmentType<Props> {
   displayName: string;
   getAttachmentViewObject: (props: Props) => AttachmentViewObject<Props>;
   getAttachmentRemovalObject?: (props: Props) => Pick<AttachmentViewObject<Props>, 'event'>;
-  hideDefaultActions?: boolean;
 }
 
 export type ExternalReferenceAttachmentType = AttachmentType<ExternalReferenceAttachmentViewProps>;

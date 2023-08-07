@@ -5,23 +5,25 @@
  * 2.0.
  */
 
-import { flowRight } from 'lodash';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import type { DiscoverStart } from '@kbn/discover-plugin/public';
-import { findInventoryFields } from '../inventory_models';
-import { MESSAGE_FIELD, TIMESTAMP_FIELD } from '../constants';
-import type { TimeRange } from '../time';
-import type { LogsLocatorParams } from './logs_locator';
-import type { InfraClientCoreSetup } from '../../public/types';
 import {
   DEFAULT_LOG_VIEW,
   LogViewColumnConfiguration,
   LogViewReference,
+  ResolvedLogView,
+} from '@kbn/logs-shared-plugin/common';
+import { flowRight } from 'lodash';
+import type { InfraClientCoreSetup } from '../../public/types';
+import { MESSAGE_FIELD, TIMESTAMP_FIELD } from '../constants';
+import { findInventoryFields } from '../inventory_models';
+import type { TimeRange } from '../time';
+import {
   replaceLogFilterInQueryString,
   replaceLogPositionInQueryString,
   replaceLogViewInQueryString,
-  ResolvedLogView,
-} from '../log_views';
+} from '../url_state_storage_service';
+import type { LogsLocatorParams } from './logs_locator';
 import type { NodeLogsLocatorParams } from './node_logs_locator';
 
 interface LocationToDiscoverParams {
@@ -59,9 +61,9 @@ export const getLocationToDiscover = async ({
   filter,
   logView = DEFAULT_LOG_VIEW,
 }: LocationToDiscoverParams) => {
-  const [, plugins, pluginStart] = await core.getStartServices();
-  const { discover } = plugins;
-  const { logViews } = pluginStart;
+  const [, plugins] = await core.getStartServices();
+  const { discover, logsShared } = plugins;
+  const { logViews } = logsShared;
   const resolvedLogView = await logViews.client.getResolvedLogView(logView);
 
   const discoverParams: DiscoverAppLocatorParams = {

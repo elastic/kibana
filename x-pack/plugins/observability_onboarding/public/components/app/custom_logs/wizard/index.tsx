@@ -5,11 +5,15 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
+import {
+  createWizardContext,
+  Step,
+} from '../../../../context/create_wizard_context';
 import { ConfigureLogs } from './configure_logs';
-import { SelectLogs } from './select_logs';
-import { InstallElasticAgent } from './install_elastic_agent';
-import { createWizardContext } from '../../../../context/create_wizard_context';
 import { Inspect } from './inspect';
+import { InstallElasticAgent } from './install_elastic_agent';
+import { SelectLogs } from './select_logs';
 
 interface WizardState {
   datasetName: string;
@@ -28,6 +32,8 @@ interface WizardState {
   uploadType?: 'log-file' | 'api-key';
   elasticAgentPlatform: 'linux-tar' | 'macos' | 'windows' | 'deb' | 'rpm';
   autoDownloadConfig: boolean;
+  apiKeyEncoded: string;
+  onboardingId: string;
 }
 
 const initialState: WizardState = {
@@ -38,17 +44,40 @@ const initialState: WizardState = {
   customConfigurations: '',
   elasticAgentPlatform: 'linux-tar',
   autoDownloadConfig: false,
+  apiKeyEncoded: '',
+  onboardingId: '',
 };
 
-const { Provider, Step, useWizard } = createWizardContext({
-  initialState,
-  initialStep: 'selectLogs',
-  steps: {
-    selectLogs: SelectLogs,
-    configureLogs: ConfigureLogs,
-    installElasticAgent: InstallElasticAgent,
-    inspect: Inspect,
+export type CustomLogsSteps =
+  | 'selectLogs'
+  | 'configureLogs'
+  | 'installElasticAgent'
+  | 'inspect';
+
+const steps: Record<CustomLogsSteps, Step> = {
+  selectLogs: { component: SelectLogs },
+  configureLogs: { component: ConfigureLogs },
+  installElasticAgent: {
+    component: InstallElasticAgent,
+    title: i18n.translate(
+      'xpack.observability_onboarding.customLogs.installShipper.title',
+      {
+        defaultMessage: 'Install shipper to collect logs',
+      }
+    ),
   },
+  inspect: { component: Inspect },
+};
+
+const {
+  Provider,
+  useWizard,
+  routes: customLogsRoutes,
+} = createWizardContext({
+  initialState,
+  initialStep: 'configureLogs',
+  steps,
+  basePath: '/customLogs',
 });
 
-export { Provider, Step, useWizard };
+export { Provider, useWizard, customLogsRoutes };

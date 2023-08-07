@@ -24,7 +24,6 @@ export const embeddableServiceFactory: EmbeddableServiceFactory = ({ startPlugin
     'getEmbeddableFactory',
     'getEmbeddableFactories',
     'getStateTransfer',
-    'EmbeddablePanel',
     'getAllMigrations',
     'telemetry',
     'extract',

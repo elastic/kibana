@@ -30,6 +30,7 @@ export interface MlKibanaUrlConfig extends BaseUrlConfig {
    * The optional time range for the custom URL configuration
    */
   time_range?: string;
+  is_custom_time_range?: boolean;
 }
 
 /**

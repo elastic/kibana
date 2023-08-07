@@ -5,19 +5,15 @@
  * 2.0.
  */
 
-import type { LensChartConfig } from '../../../types';
-import { getFilters } from './utils';
+import type { FormulaConfig } from '../../../types';
 
-export const diskReadThroughput: LensChartConfig = {
-  title: 'Disk Read Throughput',
-  formula: {
-    formula: "counter_rate(max(system.diskio.read.count), kql='system.diskio.read.count: *')",
-    format: {
-      id: 'bytes',
-      params: {
-        decimals: 1,
-      },
+export const diskReadThroughput: FormulaConfig = {
+  label: 'Disk Read Throughput',
+  value: "counter_rate(max(system.diskio.read.count), kql='system.diskio.read.count: *')",
+  format: {
+    id: 'bytes',
+    params: {
+      decimals: 1,
     },
   },
-  getFilters,
 };

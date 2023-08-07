@@ -34,6 +34,11 @@ export type ActionTypeSecrets = Record<string, unknown>;
 export type ActionTypeParams = Record<string, unknown>;
 export type ConnectorTokenClientContract = PublicMethodsOf<ConnectorTokenClient>;
 
+import type { ActionExecutionSource } from './lib';
+export type { ActionExecutionSource } from './lib';
+
+export { ActionExecutionSourceType } from './lib';
+
 export interface Services {
   savedObjectsClient: SavedObjectsClientContract;
   scopedClusterClient: ElasticsearchClient;
@@ -55,7 +60,11 @@ export interface ActionsPlugin {
 }
 
 // the parameters passed to an action type executor function
-export interface ActionTypeExecutorOptions<Config, Secrets, Params> {
+export interface ActionTypeExecutorOptions<
+  Config extends Record<string, unknown>,
+  Secrets extends Record<string, unknown>,
+  Params
+> {
   actionId: string;
   services: Services;
   config: Config;
@@ -65,6 +74,7 @@ export interface ActionTypeExecutorOptions<Config, Secrets, Params> {
   isEphemeral?: boolean;
   taskInfo?: TaskInfo;
   configurationUtilities: ActionsConfigurationUtilities;
+  source?: ActionExecutionSource<unknown>;
 }
 
 export interface ActionResult<Config extends ActionTypeConfig = ActionTypeConfig> {
@@ -75,13 +85,15 @@ export interface ActionResult<Config extends ActionTypeConfig = ActionTypeConfig
   config?: Config;
   isPreconfigured: boolean;
   isDeprecated: boolean;
+  isSystemAction: boolean;
 }
 
-export interface PreConfiguredAction<
+export interface InMemoryConnector<
   Config extends ActionTypeConfig = ActionTypeConfig,
   Secrets extends ActionTypeSecrets = ActionTypeSecrets
 > extends ActionResult<Config> {
   secrets: Secrets;
+  config: Config;
 }
 
 export interface FindActionResult extends ActionResult {
@@ -89,7 +101,12 @@ export interface FindActionResult extends ActionResult {
 }
 
 // signature of the action type executor function
-export type ExecutorType<Config, Secrets, Params, ResultData> = (
+export type ExecutorType<
+  Config extends Record<string, unknown>,
+  Secrets extends Record<string, unknown>,
+  Params,
+  ResultData
+> = (
   options: ActionTypeExecutorOptions<Config, Secrets, Params>
 ) => Promise<ActionTypeExecutorResult<ResultData>>;
 
@@ -133,18 +150,29 @@ export interface ActionType<
     secrets: ValidatorType<Secrets>;
     connector?: (config: Config, secrets: Secrets) => string | null;
   };
-
+  isSystemActionType?: boolean;
+  /**
+   * Additional Kibana privileges to be checked by the actions framework.
+   * Use it if you want to perform extra authorization checks based on a Kibana feature.
+   * For example, you can define the privileges a users needs to have to execute
+   * a Case or OsQuery system action.
+   *
+   * The list of the privileges follows the Kibana privileges format usually generated with `security.authz.actions.*.get(...)`.
+   *
+   * It only works with system actions and only when executing an action.
+   * For all other scenarios they will be ignored
+   */
+  getKibanaPrivileges?: (args?: { params?: Params }) => string[];
   renderParameterTemplates?: RenderParameterTemplates<Params>;
-
   executor: ExecutorType<Config, Secrets, Params, ExecutorResultData>;
 }
 
-export interface RawAction extends SavedObjectAttributes {
+export interface RawAction extends Record<string, unknown> {
   actionTypeId: string;
   name: string;
   isMissingSecrets: boolean;
-  config: SavedObjectAttributes;
-  secrets: SavedObjectAttributes;
+  config: Record<string, unknown>;
+  secrets: Record<string, unknown>;
 }
 
 export interface ActionTaskParams extends SavedObjectAttributes {
@@ -194,6 +222,11 @@ export interface ResponseSettings {
 
 export interface SSLSettings {
   verificationMode?: 'none' | 'certificate' | 'full';
+  pfx?: Buffer;
+  cert?: Buffer;
+  key?: Buffer;
+  passphrase?: string;
+  ca?: Buffer;
 }
 
 export interface ConnectorToken extends SavedObjectAttributes {

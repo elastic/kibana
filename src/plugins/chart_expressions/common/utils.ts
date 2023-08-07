@@ -20,6 +20,31 @@ export const extractContainerType = (context?: KibanaExecutionContext): string |
   }
 };
 
+/* Function to identify if the pie is rendered inside the aggBased editor
+ Context comes with this format
+  {
+   type: 'dashboard', // application for lens, agg based charts
+   description: 'test',
+   child: {
+     type: 'lens', // agg_based for legacy editor
+     name: 'pie',
+     id: 'id',
+     description: 'test',
+     url: '',
+   },
+ }; */
+export const isOnAggBasedEditor = (context?: KibanaExecutionContext): boolean => {
+  if (context) {
+    return Boolean(
+      context.type &&
+        context.type === 'application' &&
+        context.child &&
+        context.child.type === 'agg_based'
+    );
+  }
+  return false;
+};
+
 export const extractVisualizationType = (context?: KibanaExecutionContext): string | undefined => {
   if (context) {
     const recursiveGet = (item: KibanaExecutionContext): KibanaExecutionContext | undefined => {

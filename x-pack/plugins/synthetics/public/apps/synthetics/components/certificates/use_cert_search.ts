@@ -5,20 +5,16 @@
  * 2.0.
  */
 
-import { useContext } from 'react';
-import { createEsParams, useEsSearch } from '@kbn/observability-shared-plugin/public';
+import { useContext, useEffect } from 'react';
 
-import { SYNTHETICS_INDEX_PATTERN } from '../../../../../common/constants';
+import { useDispatch, useSelector } from 'react-redux';
+import { getCertsListAction, selectCertsListState } from '../../state/certs';
 import {
   DEFAULT_DIRECTION,
-  DEFAULT_FROM,
   DEFAULT_SIZE,
   DEFAULT_SORT,
-  DEFAULT_TO,
-  getCertsRequestBody,
-  processCertsResult,
 } from '../../../../../common/requests/get_certs_request_body';
-import { CertResult, GetCertsParams, Ping } from '../../../../../common/runtime_types';
+import { CertResult, GetCertsParams } from '../../../../../common/runtime_types';
 import { SyntheticsRefreshContext } from '../../contexts';
 
 export const useCertSearch = ({
@@ -27,31 +23,24 @@ export const useCertSearch = ({
   search,
   sortBy = DEFAULT_SORT,
   direction = DEFAULT_DIRECTION,
-}: GetCertsParams): CertResult & { loading?: boolean } => {
+}: GetCertsParams): CertResult & { isLoading?: boolean } => {
   const { lastRefresh } = useContext(SyntheticsRefreshContext);
 
-  const searchBody = getCertsRequestBody({
-    pageIndex,
-    size,
-    search,
-    sortBy,
-    direction,
-    to: DEFAULT_TO,
-    from: DEFAULT_FROM,
-  });
+  const dispatch = useDispatch();
 
-  const esParams = createEsParams({
-    index: SYNTHETICS_INDEX_PATTERN,
-    body: searchBody,
-  });
+  useEffect(() => {
+    dispatch(
+      getCertsListAction.get({
+        pageIndex,
+        size,
+        search,
+        sortBy,
+        direction,
+      })
+    );
+  }, [direction, dispatch, lastRefresh, pageIndex, search, size, sortBy]);
 
-  const { data: result, loading } = useEsSearch<Ping, typeof esParams>(
-    esParams,
-    [size, pageIndex, lastRefresh, search, sortBy, direction],
-    {
-      name: 'getTLSCertificates',
-    }
-  );
+  const { data, isLoading } = useSelector(selectCertsListState);
 
-  return result ? { ...processCertsResult(result), loading } : { certs: [], total: 0, loading };
+  return { ...(data ?? { certs: [], total: 0 }), isLoading };
 };

@@ -10,7 +10,7 @@ import { parse } from 'query-string';
 import { i18n } from '@kbn/i18n';
 import { DataSourceContextProvider } from '../../../contexts/ml';
 import { ML_PAGES } from '../../../../locator';
-import { NavigateToPath } from '../../../contexts/kibana';
+import { NavigateToPath, useMlKibana } from '../../../contexts/kibana';
 import { createPath, MlRoute, PageLoader, PageProps } from '../../router';
 import { useRouteResolver } from '../../use_resolver';
 import { basicResolvers } from '../../resolvers';
@@ -41,10 +41,16 @@ export const analyticsJobsCreationRouteFactory = (
   ],
 });
 
-const PageWrapper: FC<PageProps> = ({ location, deps }) => {
+const PageWrapper: FC<PageProps> = ({ location }) => {
   const { index, jobId, savedSearchId }: Record<string, any> = parse(location.search, {
     sort: false,
   });
+  const {
+    services: {
+      data: { dataViews: dataViewsService },
+      savedSearch: savedSearchService,
+    },
+  } = useMlKibana();
 
   const { context } = useRouteResolver(
     'full',
@@ -52,7 +58,13 @@ const PageWrapper: FC<PageProps> = ({ location, deps }) => {
     {
       ...basicResolvers(),
       analyticsFields: () =>
-        loadNewJobCapabilities(index, savedSearchId, deps.dataViewsContract, DATA_FRAME_ANALYTICS),
+        loadNewJobCapabilities(
+          index,
+          savedSearchId,
+          dataViewsService,
+          savedSearchService,
+          DATA_FRAME_ANALYTICS
+        ),
     }
   );
 

@@ -121,12 +121,14 @@ import type { PackagePolicyService } from './services/package_policy_service';
 import { PackagePolicyServiceImpl } from './services/package_policy';
 import { registerFleetUsageLogger, startFleetUsageLogger } from './services/fleet_usage_logger';
 import { CheckDeletedFilesTask } from './tasks/check_deleted_files_task';
-import { getRequestStore } from './services/request_store';
 import {
   UninstallTokenService,
   type UninstallTokenServiceInterface,
 } from './services/security/uninstall_token_service';
+import { FleetActionsClient, type FleetActionsClientInterface } from './services/actions';
 import type { FilesClientFactory } from './services/files/types';
+import { PolicyWatcher } from './services/agent_policy_watch';
+import { getPackageSpecTagId } from './services/epm/kibana/assets/tag_assets';
 
 export interface FleetSetupDeps {
   security: SecurityPluginSetup;
@@ -230,6 +232,11 @@ export interface FleetStartContract {
 
   messageSigningService: MessageSigningServiceInterface;
   uninstallTokenService: UninstallTokenServiceInterface;
+  createFleetActionsClient: (packageName: string) => FleetActionsClientInterface;
+  /*
+  Function exported to allow creating unique ids for saved object tags
+   */
+  getPackageSpecTagId: (spaceId: string, pkgName: string, tagName: string) => string;
 }
 
 export class FleetPlugin
@@ -255,6 +262,7 @@ export class FleetPlugin
   private agentService?: AgentService;
   private packageService?: PackageService;
   private packagePolicyService?: PackagePolicyService;
+  private policyWatcher?: PolicyWatcher;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config$ = this.initializerContext.config.create<FleetConfigType>();
@@ -389,42 +397,38 @@ export class FleetPlugin
             .getSavedObjects()
             .getScopedClient(request, { excludedExtensions: [SECURITY_EXTENSION_ID] });
 
-        const requestStore = getRequestStore();
+        return {
+          get agentClient() {
+            const agentService = plugin.setupAgentService(esClient.asInternalUser, soClient);
 
-        return requestStore.run(request, () => {
-          return {
-            get agentClient() {
-              const agentService = plugin.setupAgentService(esClient.asInternalUser, soClient);
+            return {
+              asCurrentUser: agentService.asScoped(request),
+              asInternalUser: agentService.asInternalUser,
+            };
+          },
+          get packagePolicyService() {
+            const service = plugin.setupPackagePolicyService();
 
-              return {
-                asCurrentUser: agentService.asScoped(request),
-                asInternalUser: agentService.asInternalUser,
-              };
-            },
-            get packagePolicyService() {
-              const service = plugin.setupPackagePolicyService();
+            return {
+              asCurrentUser: service.asScoped(request),
+              asInternalUser: service.asInternalUser,
+            };
+          },
+          authz,
+          get internalSoClient() {
+            // Use a lazy getter to avoid constructing this client when not used by a request handler
+            return getInternalSoClient();
+          },
+          get spaceId() {
+            return deps.spaces?.spacesService?.getSpaceId(request) ?? DEFAULT_SPACE_ID;
+          },
 
-              return {
-                asCurrentUser: service.asScoped(request),
-                asInternalUser: service.asInternalUser,
-              };
-            },
-            authz,
-            get internalSoClient() {
-              // Use a lazy getter to avoid constructing this client when not used by a request handler
-              return getInternalSoClient();
-            },
-            get spaceId() {
-              return deps.spaces?.spacesService?.getSpaceId(request) ?? DEFAULT_SPACE_ID;
-            },
-
-            get limitedToPackages() {
-              if (routeAuthz && routeAuthz.granted) {
-                return routeAuthz.scopeDataToPackages;
-              }
-            },
-          };
-        });
+          get limitedToPackages() {
+            if (routeAuthz && routeAuthz.granted) {
+              return routeAuthz.scopeDataToPackages;
+            }
+          },
+        };
       }
     );
 
@@ -494,7 +498,6 @@ export class FleetPlugin
       uninstallTokenService,
     });
     licenseService.start(plugins.licensing.license$);
-
     this.telemetryEventsSender.start(plugins.telemetry, core);
     this.bulkActionsResolver?.start(plugins.taskManager);
     this.fleetUsageSender?.start(plugins.taskManager);
@@ -502,6 +505,10 @@ export class FleetPlugin
     startFleetUsageLogger(plugins.taskManager);
 
     const logger = appContextService.getLogger();
+
+    this.policyWatcher = new PolicyWatcher(core.savedObjects, core.elasticsearch, logger);
+
+    this.policyWatcher.start(licenseService);
 
     const fleetSetupPromise = (async () => {
       try {
@@ -586,11 +593,16 @@ export class FleetPlugin
       ),
       messageSigningService,
       uninstallTokenService,
+      createFleetActionsClient(packageName: string) {
+        return new FleetActionsClient(core.elasticsearch.client.asInternalUser, packageName);
+      },
+      getPackageSpecTagId,
     };
   }
 
   public async stop() {
     appContextService.stop();
+    this.policyWatcher?.stop();
     licenseService.stop();
     this.telemetryEventsSender.stop();
     this.fleetStatus$.complete();

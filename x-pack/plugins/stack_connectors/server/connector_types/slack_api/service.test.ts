@@ -128,7 +128,7 @@ describe('Slack API service', () => {
         logger,
         configurationUtilities,
         method: 'get',
-        url: 'conversations.list?types=public_channel,private_channel',
+        url: 'conversations.list?exclude_archived=true&types=public_channel,private_channel&limit=1000',
       });
     });
 

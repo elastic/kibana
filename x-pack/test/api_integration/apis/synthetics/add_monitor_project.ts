@@ -176,6 +176,9 @@ export default function ({ getService }: FtrProviderContext) {
               status: {
                 enabled: true,
               },
+              tls: {
+                enabled: true,
+              },
             },
             'filter_journeys.match': 'check if title is present',
             'filter_journeys.tags': [],
@@ -358,6 +361,9 @@ export default function ({ getService }: FtrProviderContext) {
               status: {
                 enabled: true,
               },
+              tls: {
+                enabled: true,
+              },
             },
             form_monitor_type: 'http',
             journey_id: journeyId,
@@ -474,6 +480,9 @@ export default function ({ getService }: FtrProviderContext) {
               status: {
                 enabled: true,
               },
+              tls: {
+                enabled: true,
+              },
             },
             form_monitor_type: 'tcp',
             journey_id: journeyId,
@@ -578,6 +587,9 @@ export default function ({ getService }: FtrProviderContext) {
             enabled: true,
             alert: {
               status: {
+                enabled: true,
+              },
+              tls: {
                 enabled: true,
               },
             },
@@ -1204,7 +1216,7 @@ export default function ({ getService }: FtrProviderContext) {
           [ConfigKey.PORT]: 443,
         };
 
-        const modifiedMonitor = { ...monitors[0]?.attributes, ...updates };
+        const modifiedMonitor = { ...monitors[0], ...updates };
 
         await supertest
           .put(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '/' + monitors[0]?.config_id)
@@ -1920,7 +1932,13 @@ export default function ({ getService }: FtrProviderContext) {
     it('project monitors - handles alert config without adding arbitrary fields', async () => {
       const project = `test-project-${uuidv4()}`;
       const testAlert = {
-        status: { enabled: false, doesnotexit: true },
+        status: {
+          enabled: false,
+          doesnotexit: true,
+          tls: {
+            enabled: true,
+          },
+        },
       };
       try {
         await supertest
@@ -1952,6 +1970,9 @@ export default function ({ getService }: FtrProviderContext) {
         expect(monitors[0][ConfigKey.ALERT_CONFIG]).eql({
           status: {
             enabled: testAlert.status.enabled,
+          },
+          tls: {
+            enabled: true,
           },
         });
       } finally {

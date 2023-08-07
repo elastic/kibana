@@ -7,7 +7,7 @@
  */
 
 import { pipe, forEach } from 'lodash/fp';
-import { escapeKuery, KueryNode, nodeBuilder, nodeTypes } from '@kbn/es-query';
+import { KueryNode, nodeBuilder, nodeTypes } from '@kbn/es-query';
 
 import { getFlattenedObject } from '@kbn/std';
 
@@ -44,7 +44,7 @@ export function filterArgsToKuery({
         .map((value) =>
           nodeBuilder.is(
             `${attrPrefix}.${fieldName}`,
-            isWildcard ? nodeTypes.wildcard.buildNode(value) : escapeKuery(value)
+            isWildcard ? nodeTypes.wildcard.buildNode(value) : value
           )
         );
       kueryExpressions.push(nodeBuilder.or(orExpressions));
@@ -56,10 +56,7 @@ export function filterArgsToKuery({
       const andExpressions = values
         .filter(Boolean)
         .map((value) =>
-          nodeTypes.function.buildNode(
-            'not',
-            nodeBuilder.is(`${attrPrefix}.${fieldName}`, escapeKuery(value))
-          )
+          nodeTypes.function.buildNode('not', nodeBuilder.is(`${attrPrefix}.${fieldName}`, value))
         );
       kueryExpressions.push(nodeBuilder.and(andExpressions));
     }

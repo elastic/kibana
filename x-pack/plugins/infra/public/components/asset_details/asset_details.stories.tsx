@@ -13,15 +13,16 @@ import { AssetDetails } from './asset_details';
 import { decorateWithGlobalStorybookThemeProviders } from '../../test_utils/use_global_storybook_theme';
 import { FlyoutTabIds, Tab, type AssetDetailsProps } from './types';
 import { DecorateWithKibanaContext } from './__stories__/decorator';
+import { assetDetailsState } from './__stories__/context/fixtures';
 
-const links: AssetDetailsProps['links'] = ['alertRule', 'nodeDetails', 'apmServices', 'uptime'];
+const links: AssetDetailsProps['links'] = ['alertRule', 'nodeDetails', 'apmServices'];
 const tabs: Tab[] = [
   {
-    id: FlyoutTabIds.METRICS,
-    name: i18n.translate('xpack.infra.nodeDetails.tabs.metrics', {
-      defaultMessage: 'Metrics',
+    id: FlyoutTabIds.OVERVIEW,
+    name: i18n.translate('xpack.infra.nodeDetails.tabs.overview.title', {
+      defaultMessage: 'Overview',
     }),
-    'data-test-subj': 'hostsView-flyout-tabs-metrics',
+    'data-test-subj': 'hostsView-flyout-tabs-overview',
   },
   {
     id: FlyoutTabIds.LOGS,
@@ -58,13 +59,6 @@ const tabs: Tab[] = [
     }),
     'data-test-subj': 'hostsView-flyout-apm-link',
   },
-  {
-    id: FlyoutTabIds.LINK_TO_UPTIME,
-    name: i18n.translate('xpack.infra.infra.nodeDetails.updtimeTabLabel', {
-      defaultMessage: 'Uptime',
-    }),
-    'data-test-subj': 'hostsView-flyout-uptime-link',
-  },
 ];
 
 const stories: Meta<AssetDetailsProps> = {
@@ -80,34 +74,7 @@ const stories: Meta<AssetDetailsProps> = {
     },
   },
   args: {
-    node: {
-      name: 'host1',
-      id: 'host1-macOS',
-      title: {
-        name: 'host1',
-        cloudProvider: null,
-      },
-      os: 'macOS',
-      ip: '192.168.0.1',
-      rx: 123179.18222222221,
-      tx: 123030.54555555557,
-      memory: 0.9044444444444445,
-      cpu: 0.3979674157303371,
-      diskSpaceUsage: 0.3979674157303371,
-      normalizedLoad1m: 0.15291777273162221,
-      memoryFree: 34359738368,
-    },
-    overrides: {
-      metadata: {
-        showActionsColumn: true,
-      },
-    },
-    nodeType: 'host',
-    currentTimeRange: {
-      interval: '1s',
-      from: 168363046800,
-      to: 168363046900,
-    },
+    ...assetDetailsState,
     tabs,
     links,
   },

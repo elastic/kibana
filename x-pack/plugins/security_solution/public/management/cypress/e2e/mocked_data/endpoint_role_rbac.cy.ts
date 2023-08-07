@@ -7,6 +7,7 @@
 
 import { closeAllToasts } from '../../tasks/toasts';
 import { login } from '../../tasks/login';
+import { loadPage } from '../../tasks/common';
 
 describe('When defining a kibana role for Endpoint security access', () => {
   const getAllSubFeatureRows = (): Cypress.Chainable<JQuery<HTMLElement>> => {
@@ -18,7 +19,7 @@ describe('When defining a kibana role for Endpoint security access', () => {
 
   beforeEach(() => {
     login();
-    cy.visit('/app/management/security/roles/edit');
+    loadPage('/app/management/security/roles/edit');
     closeAllToasts();
     cy.getByTestSubj('addSpacePrivilegeButton').click();
     cy.getByTestSubj('featureCategoryButton_securitySolution').closest('button').click();

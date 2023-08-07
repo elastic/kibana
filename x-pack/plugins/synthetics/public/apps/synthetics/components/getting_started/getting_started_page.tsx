@@ -20,7 +20,7 @@ import { useHistory } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import styled from 'styled-components';
-import { useBreadcrumbs, useLocations } from '../../hooks';
+import { useBreadcrumbs, useEnablement, useLocations } from '../../hooks';
 import { usePrivateLocationsAPI } from '../settings/private_locations/hooks/use_locations_api';
 import { LoadingState } from '../monitors_page/overview/overview/monitor_detail_flyout';
 import {
@@ -39,6 +39,8 @@ import { AddLocationFlyout } from '../settings/private_locations/add_location_fl
 export const GettingStartedPage = () => {
   const dispatch = useDispatch();
   const history = useHistory();
+
+  useEnablement();
 
   useEffect(() => {
     dispatch(getServiceLocations());

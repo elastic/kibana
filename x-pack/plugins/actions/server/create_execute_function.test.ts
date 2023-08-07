@@ -32,7 +32,7 @@ describe('execute()', () => {
       taskManager: mockTaskManager,
       actionTypeRegistry,
       isESOCanEncrypt: true,
-      preconfiguredActions: [],
+      inMemoryConnectors: [],
     });
     savedObjectsClient.get.mockResolvedValueOnce({
       id: '123',
@@ -103,7 +103,7 @@ describe('execute()', () => {
       taskManager: mockTaskManager,
       actionTypeRegistry,
       isESOCanEncrypt: true,
-      preconfiguredActions: [],
+      inMemoryConnectors: [],
     });
     savedObjectsClient.get.mockResolvedValueOnce({
       id: '123',
@@ -176,7 +176,7 @@ describe('execute()', () => {
       taskManager: mockTaskManager,
       actionTypeRegistry,
       isESOCanEncrypt: true,
-      preconfiguredActions: [],
+      inMemoryConnectors: [],
     });
     savedObjectsClient.get.mockResolvedValueOnce({
       id: '123',
@@ -247,13 +247,14 @@ describe('execute()', () => {
       taskManager: mockTaskManager,
       actionTypeRegistry: actionTypeRegistryMock.create(),
       isESOCanEncrypt: true,
-      preconfiguredActions: [
+      inMemoryConnectors: [
         {
           id: '123',
           actionTypeId: 'mock-action-preconfigured',
           config: {},
           isPreconfigured: true,
           isDeprecated: false,
+          isSystemAction: false,
           name: 'x',
           secrets: {},
         },
@@ -321,18 +322,102 @@ describe('execute()', () => {
     );
   });
 
+  test('schedules the action with all given parameters with a system action', async () => {
+    const executeFn = createExecutionEnqueuerFunction({
+      taskManager: mockTaskManager,
+      actionTypeRegistry: actionTypeRegistryMock.create(),
+      isESOCanEncrypt: true,
+      inMemoryConnectors: [
+        {
+          actionTypeId: 'test.system-action',
+          config: {},
+          id: 'system-connector-test.system-action',
+          name: 'System action: test.system-action',
+          secrets: {},
+          isPreconfigured: false,
+          isDeprecated: false,
+          isSystemAction: true,
+        },
+      ],
+    });
+    const source = { type: 'alert', id: uuidv4() };
+
+    savedObjectsClient.get.mockResolvedValueOnce({
+      id: '123',
+      type: 'action',
+      attributes: {
+        actionTypeId: 'test.system-action',
+      },
+      references: [],
+    });
+
+    savedObjectsClient.create.mockResolvedValueOnce({
+      id: '234',
+      type: 'action_task_params',
+      attributes: {},
+      references: [],
+    });
+
+    await executeFn(savedObjectsClient, {
+      id: 'system-connector-test.system-action',
+      params: { baz: false },
+      spaceId: 'default',
+      executionId: 'system-connector-.casesabc',
+      apiKey: Buffer.from('system-connector-test.system-action:abc').toString('base64'),
+      source: asSavedObjectExecutionSource(source),
+    });
+
+    expect(mockTaskManager.schedule).toHaveBeenCalledTimes(1);
+    expect(mockTaskManager.schedule.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "params": Object {
+            "actionTaskParamsId": "234",
+            "spaceId": "default",
+          },
+          "scope": Array [
+            "actions",
+          ],
+          "state": Object {},
+          "taskType": "actions:test.system-action",
+        },
+      ]
+    `);
+    expect(savedObjectsClient.get).not.toHaveBeenCalled();
+    expect(savedObjectsClient.create).toHaveBeenCalledWith(
+      'action_task_params',
+      {
+        actionId: 'system-connector-test.system-action',
+        params: { baz: false },
+        executionId: 'system-connector-.casesabc',
+        source: 'SAVED_OBJECT',
+        apiKey: Buffer.from('system-connector-test.system-action:abc').toString('base64'),
+      },
+      {
+        references: [
+          {
+            id: source.id,
+            name: 'source',
+            type: source.type,
+          },
+        ],
+      }
+    );
+  });
+
   test('schedules the action with all given parameters with a preconfigured action and relatedSavedObjects', async () => {
     const executeFn = createExecutionEnqueuerFunction({
       taskManager: mockTaskManager,
       actionTypeRegistry: actionTypeRegistryMock.create(),
       isESOCanEncrypt: true,
-      preconfiguredActions: [
+      inMemoryConnectors: [
         {
           id: '123',
           actionTypeId: 'mock-action-preconfigured',
           config: {},
           isPreconfigured: true,
           isDeprecated: false,
+          isSystemAction: false,
           name: 'x',
           secrets: {},
         },
@@ -421,12 +506,113 @@ describe('execute()', () => {
     );
   });
 
+  test('schedules the action with all given parameters with a system action and relatedSavedObjects', async () => {
+    const executeFn = createExecutionEnqueuerFunction({
+      taskManager: mockTaskManager,
+      actionTypeRegistry: actionTypeRegistryMock.create(),
+      isESOCanEncrypt: true,
+      inMemoryConnectors: [
+        {
+          actionTypeId: 'test.system-action',
+          config: {},
+          id: 'system-connector-test.system-action',
+          name: 'System action: test.system-action',
+          secrets: {},
+          isPreconfigured: false,
+          isDeprecated: false,
+          isSystemAction: true,
+        },
+      ],
+    });
+    const source = { type: 'alert', id: uuidv4() };
+
+    savedObjectsClient.get.mockResolvedValueOnce({
+      id: '123',
+      type: 'action',
+      attributes: {
+        actionTypeId: 'test.system-action',
+      },
+      references: [],
+    });
+    savedObjectsClient.create.mockResolvedValueOnce({
+      id: '234',
+      type: 'action_task_params',
+      attributes: {},
+      references: [],
+    });
+    await executeFn(savedObjectsClient, {
+      id: 'system-connector-test.system-action',
+      params: { baz: false },
+      spaceId: 'default',
+      apiKey: Buffer.from('system-connector-test.system-action:abc').toString('base64'),
+      source: asSavedObjectExecutionSource(source),
+      executionId: 'system-connector-.casesabc',
+      relatedSavedObjects: [
+        {
+          id: 'some-id',
+          namespace: 'some-namespace',
+          type: 'some-type',
+          typeId: 'some-typeId',
+        },
+      ],
+    });
+    expect(mockTaskManager.schedule).toHaveBeenCalledTimes(1);
+    expect(mockTaskManager.schedule.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "params": Object {
+            "actionTaskParamsId": "234",
+            "spaceId": "default",
+          },
+          "scope": Array [
+            "actions",
+          ],
+          "state": Object {},
+          "taskType": "actions:test.system-action",
+        },
+      ]
+    `);
+    expect(savedObjectsClient.get).not.toHaveBeenCalled();
+    expect(savedObjectsClient.create).toHaveBeenCalledWith(
+      'action_task_params',
+      {
+        actionId: 'system-connector-test.system-action',
+        params: { baz: false },
+        apiKey: Buffer.from('system-connector-test.system-action:abc').toString('base64'),
+        executionId: 'system-connector-.casesabc',
+        source: 'SAVED_OBJECT',
+        relatedSavedObjects: [
+          {
+            id: 'related_some-type_0',
+            namespace: 'some-namespace',
+            type: 'some-type',
+            typeId: 'some-typeId',
+          },
+        ],
+      },
+      {
+        references: [
+          {
+            id: source.id,
+            name: 'source',
+            type: source.type,
+          },
+          {
+            id: 'some-id',
+            name: 'related_some-type_0',
+            type: 'some-type',
+          },
+        ],
+      }
+    );
+  });
+
   test('throws when passing isESOCanEncrypt with false as a value', async () => {
     const executeFn = createExecutionEnqueuerFunction({
       taskManager: mockTaskManager,
       isESOCanEncrypt: false,
       actionTypeRegistry: actionTypeRegistryMock.create(),
-      preconfiguredActions: [],
+      inMemoryConnectors: [],
     });
     await expect(
       executeFn(savedObjectsClient, {
@@ -447,7 +633,7 @@ describe('execute()', () => {
       taskManager: mockTaskManager,
       isESOCanEncrypt: true,
       actionTypeRegistry: actionTypeRegistryMock.create(),
-      preconfiguredActions: [],
+      inMemoryConnectors: [],
     });
     savedObjectsClient.get.mockResolvedValueOnce({
       id: '123',
@@ -479,7 +665,7 @@ describe('execute()', () => {
       taskManager: mockTaskManager,
       isESOCanEncrypt: true,
       actionTypeRegistry: mockedActionTypeRegistry,
-      preconfiguredActions: [],
+      inMemoryConnectors: [],
     });
     mockedActionTypeRegistry.ensureActionTypeEnabled.mockImplementation(() => {
       throw new Error('Fail');
@@ -511,7 +697,7 @@ describe('execute()', () => {
       taskManager: mockTaskManager,
       isESOCanEncrypt: true,
       actionTypeRegistry: mockedActionTypeRegistry,
-      preconfiguredActions: [
+      inMemoryConnectors: [
         {
           actionTypeId: 'mock-action',
           config: {},
@@ -519,6 +705,7 @@ describe('execute()', () => {
           name: 'Slack #xyz',
           secrets: {},
           isPreconfigured: true,
+          isSystemAction: false,
           isDeprecated: false,
         },
       ],
@@ -550,6 +737,62 @@ describe('execute()', () => {
 
     expect(mockedActionTypeRegistry.ensureActionTypeEnabled).not.toHaveBeenCalled();
   });
+
+  test('should ensure if a system action type is enabled', async () => {
+    const mockedActionTypeRegistry = actionTypeRegistryMock.create();
+    const executeFn = createExecutionEnqueuerFunction({
+      taskManager: mockTaskManager,
+      isESOCanEncrypt: true,
+      actionTypeRegistry: mockedActionTypeRegistry,
+      inMemoryConnectors: [
+        {
+          actionTypeId: 'test.system-action',
+          config: {},
+          id: 'system-connector-test.system-action',
+          name: 'System action: test.system-action',
+          secrets: {},
+          isPreconfigured: false,
+          isDeprecated: false,
+          isSystemAction: true,
+        },
+      ],
+    });
+
+    mockedActionTypeRegistry.ensureActionTypeEnabled.mockImplementation(() => {
+      throw new Error('Fail');
+    });
+
+    savedObjectsClient.get.mockResolvedValueOnce({
+      id: '123',
+      type: 'action',
+      attributes: {
+        actionTypeId: 'test.system-action',
+      },
+      references: [],
+    });
+
+    savedObjectsClient.create.mockResolvedValueOnce({
+      id: '234',
+      type: 'action_task_params',
+      attributes: {},
+      references: [],
+    });
+
+    await expect(
+      executeFn(savedObjectsClient, {
+        id: 'system-connector-test.system-action',
+        params: { baz: false },
+        spaceId: 'default',
+        executionId: 'system-connector-.test.system-action-abc',
+        apiKey: null,
+        source: asHttpRequestExecutionSource(request),
+      })
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`"Fail"`);
+
+    expect(mockedActionTypeRegistry.ensureActionTypeEnabled).toHaveBeenCalledWith(
+      'test.system-action'
+    );
+  });
 });
 
 describe('bulkExecute()', () => {
@@ -559,7 +802,7 @@ describe('bulkExecute()', () => {
       taskManager: mockTaskManager,
       actionTypeRegistry,
       isESOCanEncrypt: true,
-      preconfiguredActions: [],
+      inMemoryConnectors: [],
     });
     savedObjectsClient.bulkGet.mockResolvedValueOnce({
       saved_objects: [
@@ -647,7 +890,7 @@ describe('bulkExecute()', () => {
       taskManager: mockTaskManager,
       actionTypeRegistry,
       isESOCanEncrypt: true,
-      preconfiguredActions: [],
+      inMemoryConnectors: [],
     });
     savedObjectsClient.bulkGet.mockResolvedValueOnce({
       saved_objects: [
@@ -738,7 +981,7 @@ describe('bulkExecute()', () => {
       taskManager: mockTaskManager,
       actionTypeRegistry,
       isESOCanEncrypt: true,
-      preconfiguredActions: [],
+      inMemoryConnectors: [],
     });
     savedObjectsClient.bulkGet.mockResolvedValueOnce({
       saved_objects: [
@@ -822,13 +1065,14 @@ describe('bulkExecute()', () => {
       taskManager: mockTaskManager,
       actionTypeRegistry: actionTypeRegistryMock.create(),
       isESOCanEncrypt: true,
-      preconfiguredActions: [
+      inMemoryConnectors: [
         {
           id: '123',
           actionTypeId: 'mock-action-preconfigured',
           config: {},
           isPreconfigured: true,
           isDeprecated: false,
+          isSystemAction: false,
           name: 'x',
           secrets: {},
         },
@@ -913,18 +1157,116 @@ describe('bulkExecute()', () => {
     );
   });
 
+  test('schedules the action with all given parameters with a system action', async () => {
+    const executeFn = createBulkExecutionEnqueuerFunction({
+      taskManager: mockTaskManager,
+      actionTypeRegistry: actionTypeRegistryMock.create(),
+      isESOCanEncrypt: true,
+      inMemoryConnectors: [
+        {
+          actionTypeId: 'test.system-action',
+          config: {},
+          id: 'system-connector-test.system-action',
+          name: 'System action: test.system-action',
+          secrets: {},
+          isPreconfigured: false,
+          isDeprecated: false,
+          isSystemAction: true,
+        },
+      ],
+    });
+    const source = { type: 'alert', id: uuidv4() };
+
+    savedObjectsClient.bulkGet.mockResolvedValueOnce({
+      saved_objects: [
+        {
+          id: '123',
+          type: 'action',
+          attributes: {
+            actionTypeId: 'test.system-action',
+          },
+          references: [],
+        },
+      ],
+    });
+    savedObjectsClient.bulkCreate.mockResolvedValueOnce({
+      saved_objects: [
+        {
+          id: '234',
+          type: 'action_task_params',
+          attributes: {
+            actionId: 'system-connector-test.system-action',
+          },
+          references: [],
+        },
+      ],
+    });
+    await executeFn(savedObjectsClient, [
+      {
+        id: 'system-connector-test.system-action',
+        params: { baz: false },
+        spaceId: 'default',
+        executionId: 'system-connector-.casesabc',
+        apiKey: Buffer.from('system-connector-test.system-action:abc').toString('base64'),
+        source: asSavedObjectExecutionSource(source),
+      },
+    ]);
+    expect(mockTaskManager.bulkSchedule).toHaveBeenCalledTimes(1);
+    expect(mockTaskManager.bulkSchedule.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          Object {
+            "params": Object {
+              "actionTaskParamsId": "234",
+              "spaceId": "default",
+            },
+            "scope": Array [
+              "actions",
+            ],
+            "state": Object {},
+            "taskType": "actions:test.system-action",
+          },
+        ],
+      ]
+    `);
+    expect(savedObjectsClient.get).not.toHaveBeenCalled();
+    expect(savedObjectsClient.bulkCreate).toHaveBeenCalledWith(
+      [
+        {
+          type: 'action_task_params',
+          attributes: {
+            actionId: 'system-connector-test.system-action',
+            params: { baz: false },
+            executionId: 'system-connector-.casesabc',
+            source: 'SAVED_OBJECT',
+            apiKey: Buffer.from('system-connector-test.system-action:abc').toString('base64'),
+          },
+          references: [
+            {
+              id: source.id,
+              name: 'source',
+              type: source.type,
+            },
+          ],
+        },
+      ],
+      { refresh: false }
+    );
+  });
+
   test('schedules the action with all given parameters with a preconfigured action and relatedSavedObjects', async () => {
     const executeFn = createBulkExecutionEnqueuerFunction({
       taskManager: mockTaskManager,
       actionTypeRegistry: actionTypeRegistryMock.create(),
       isESOCanEncrypt: true,
-      preconfiguredActions: [
+      inMemoryConnectors: [
         {
           id: '123',
           actionTypeId: 'mock-action-preconfigured',
           config: {},
           isPreconfigured: true,
           isDeprecated: false,
+          isSystemAction: false,
           name: 'x',
           secrets: {},
         },
@@ -1030,12 +1372,130 @@ describe('bulkExecute()', () => {
     );
   });
 
+  test('schedules the action with all given parameters with a system action and relatedSavedObjects', async () => {
+    const executeFn = createBulkExecutionEnqueuerFunction({
+      taskManager: mockTaskManager,
+      actionTypeRegistry: actionTypeRegistryMock.create(),
+      isESOCanEncrypt: true,
+      inMemoryConnectors: [
+        {
+          actionTypeId: 'test.system-action',
+          config: {},
+          id: 'system-connector-test.system-action',
+          name: 'System action: test.system-action',
+          secrets: {},
+          isPreconfigured: false,
+          isDeprecated: false,
+          isSystemAction: true,
+        },
+      ],
+    });
+    const source = { type: 'alert', id: uuidv4() };
+
+    savedObjectsClient.bulkGet.mockResolvedValueOnce({
+      saved_objects: [
+        {
+          id: '123',
+          type: 'action',
+          attributes: {
+            actionTypeId: 'test.system-action',
+          },
+          references: [],
+        },
+      ],
+    });
+    savedObjectsClient.bulkCreate.mockResolvedValueOnce({
+      saved_objects: [
+        {
+          id: '234',
+          type: 'action_task_params',
+          attributes: {
+            actionId: 'system-connector-test.system-action',
+          },
+          references: [],
+        },
+      ],
+    });
+    await executeFn(savedObjectsClient, [
+      {
+        id: 'system-connector-test.system-action',
+        params: { baz: false },
+        spaceId: 'default',
+        apiKey: Buffer.from('system-connector-test.system-action:abc').toString('base64'),
+        source: asSavedObjectExecutionSource(source),
+        executionId: 'system-connector-.casesabc',
+        relatedSavedObjects: [
+          {
+            id: 'some-id',
+            namespace: 'some-namespace',
+            type: 'some-type',
+            typeId: 'some-typeId',
+          },
+        ],
+      },
+    ]);
+    expect(mockTaskManager.bulkSchedule).toHaveBeenCalledTimes(1);
+    expect(mockTaskManager.bulkSchedule.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          Object {
+            "params": Object {
+              "actionTaskParamsId": "234",
+              "spaceId": "default",
+            },
+            "scope": Array [
+              "actions",
+            ],
+            "state": Object {},
+            "taskType": "actions:test.system-action",
+          },
+        ],
+      ]
+    `);
+    expect(savedObjectsClient.get).not.toHaveBeenCalled();
+    expect(savedObjectsClient.bulkCreate).toHaveBeenCalledWith(
+      [
+        {
+          type: 'action_task_params',
+          attributes: {
+            actionId: 'system-connector-test.system-action',
+            params: { baz: false },
+            apiKey: Buffer.from('system-connector-test.system-action:abc').toString('base64'),
+            executionId: 'system-connector-.casesabc',
+            source: 'SAVED_OBJECT',
+            relatedSavedObjects: [
+              {
+                id: 'related_some-type_0',
+                namespace: 'some-namespace',
+                type: 'some-type',
+                typeId: 'some-typeId',
+              },
+            ],
+          },
+          references: [
+            {
+              id: source.id,
+              name: 'source',
+              type: source.type,
+            },
+            {
+              id: 'some-id',
+              name: 'related_some-type_0',
+              type: 'some-type',
+            },
+          ],
+        },
+      ],
+      { refresh: false }
+    );
+  });
+
   test('throws when passing isESOCanEncrypt with false as a value', async () => {
     const executeFn = createBulkExecutionEnqueuerFunction({
       taskManager: mockTaskManager,
       isESOCanEncrypt: false,
       actionTypeRegistry: actionTypeRegistryMock.create(),
-      preconfiguredActions: [],
+      inMemoryConnectors: [],
     });
     await expect(
       executeFn(savedObjectsClient, [
@@ -1058,7 +1518,7 @@ describe('bulkExecute()', () => {
       taskManager: mockTaskManager,
       isESOCanEncrypt: true,
       actionTypeRegistry: actionTypeRegistryMock.create(),
-      preconfiguredActions: [],
+      inMemoryConnectors: [],
     });
     savedObjectsClient.bulkGet.mockResolvedValueOnce({
       saved_objects: [
@@ -1096,7 +1556,7 @@ describe('bulkExecute()', () => {
       taskManager: mockTaskManager,
       isESOCanEncrypt: true,
       actionTypeRegistry: mockedActionTypeRegistry,
-      preconfiguredActions: [],
+      inMemoryConnectors: [],
     });
     mockedActionTypeRegistry.ensureActionTypeEnabled.mockImplementation(() => {
       throw new Error('Fail');
@@ -1134,7 +1594,7 @@ describe('bulkExecute()', () => {
       taskManager: mockTaskManager,
       isESOCanEncrypt: true,
       actionTypeRegistry: mockedActionTypeRegistry,
-      preconfiguredActions: [
+      inMemoryConnectors: [
         {
           actionTypeId: 'mock-action',
           config: {},
@@ -1143,6 +1603,7 @@ describe('bulkExecute()', () => {
           secrets: {},
           isPreconfigured: true,
           isDeprecated: false,
+          isSystemAction: false,
         },
       ],
     });
@@ -1154,6 +1615,65 @@ describe('bulkExecute()', () => {
           type: 'action',
           attributes: {
             actionTypeId: 'mock-action',
+          },
+          references: [],
+        },
+      ],
+    });
+    savedObjectsClient.bulkCreate.mockResolvedValueOnce({
+      saved_objects: [
+        {
+          id: '234',
+          type: 'action_task_params',
+          attributes: {
+            actionId: '123',
+          },
+          references: [],
+        },
+      ],
+    });
+
+    await executeFn(savedObjectsClient, [
+      {
+        id: '123',
+        params: { baz: false },
+        spaceId: 'default',
+        executionId: '123abc',
+        apiKey: null,
+        source: asHttpRequestExecutionSource(request),
+      },
+    ]);
+
+    expect(mockedActionTypeRegistry.ensureActionTypeEnabled).not.toHaveBeenCalled();
+  });
+
+  test('should skip ensure action type if action type is system action and license is valid', async () => {
+    const mockedActionTypeRegistry = actionTypeRegistryMock.create();
+    const executeFn = createBulkExecutionEnqueuerFunction({
+      taskManager: mockTaskManager,
+      isESOCanEncrypt: true,
+      actionTypeRegistry: mockedActionTypeRegistry,
+      inMemoryConnectors: [
+        {
+          actionTypeId: 'test.system-action',
+          config: {},
+          id: 'system-connector-test.system-action',
+          name: 'System action: test.system-action',
+          secrets: {},
+          isPreconfigured: false,
+          isDeprecated: false,
+          isSystemAction: true,
+        },
+      ],
+    });
+    mockedActionTypeRegistry.isActionExecutable.mockImplementation(() => true);
+    savedObjectsClient.bulkGet.mockResolvedValueOnce({
+      saved_objects: [
+        {
+          id: '123',
+          type: 'action',
+          attributes: {
+            actionTypeId: 'test.system-action',
           },
           references: [],
         },

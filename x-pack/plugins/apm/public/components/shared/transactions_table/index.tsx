@@ -25,6 +25,7 @@ import {
 } from '../../../../common/latency_aggregation_types';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
+import { useApmRouter } from '../../../hooks/use_apm_router';
 import { useBreakpoints } from '../../../hooks/use_breakpoints';
 import {
   FETCH_STATUS,
@@ -33,7 +34,6 @@ import {
 } from '../../../hooks/use_fetcher';
 import { usePreferredDataSourceAndBucketSize } from '../../../hooks/use_preferred_data_source_and_bucket_size';
 import { APIReturnType } from '../../../services/rest/create_call_apm_api';
-import { txGroupsDroppedBucketName } from '../links/apm/transaction_detail_link';
 import { TransactionOverviewLink } from '../links/apm/transaction_overview_link';
 import { fromQuery, toQuery } from '../links/url_helpers';
 import { OverviewTableContainer } from '../overview_table_container';
@@ -57,6 +57,7 @@ const INITIAL_STATE: InitialState = {
     maxTransactionGroupsExceeded: false,
     transactionOverflowCount: 0,
     transactionGroupsTotalItems: 0,
+    hasActiveAlerts: false,
   },
 };
 
@@ -97,8 +98,10 @@ export function TransactionsTable({
   saveTableOptionsToUrl = false,
 }: Props) {
   const history = useHistory();
+  const { link } = useApmRouter();
 
   const {
+    query,
     query: {
       comparisonEnabled,
       offset,
@@ -179,12 +182,8 @@ export function TransactionsTable({
       ).then((response) => {
         const currentPageTransactionGroups = orderBy(
           response.transactionGroups,
-          [
-            (transactionItem) =>
-              transactionItem.name === txGroupsDroppedBucketName ? -1 : 0,
-            field,
-          ],
-          ['asc', direction]
+          [field],
+          [direction]
         ).slice(index * size, (index + 1) * size);
 
         return {
@@ -226,6 +225,7 @@ export function TransactionsTable({
       maxTransactionGroupsExceeded,
       transactionOverflowCount,
       transactionGroupsTotalItems,
+      hasActiveAlerts,
     },
   } = data;
 
@@ -289,6 +289,9 @@ export function TransactionsTable({
     shouldShowSparkPlots,
     offset,
     transactionOverflowCount,
+    showAlertsColumn: hasActiveAlerts,
+    link,
+    query,
   });
 
   const pagination = useMemo(

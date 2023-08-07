@@ -118,13 +118,17 @@ export const getQuery = ({
 });
 const getFirstKey = (
   buckets: AggregationsMultiBucketAggregateBase<AggregationsStringTermsBucketKeys>['buckets']
-): undefined | string => {
-  if (!!Array.isArray(buckets) && !!buckets.length) return buckets[0].key;
+) => {
+  return !!Array.isArray(buckets) && !!buckets.length ? (buckets[0].key as string) : '';
 };
 const createVulnerabilitiesByResource = (resource: FindingsAggBucket) => ({
-  'resource.id': resource.key,
-  'resource.name': getFirstKey(resource.name.buckets),
-  'cloud.region': getFirstKey(resource.region.buckets),
+  resource: {
+    id: resource.key,
+    name: getFirstKey(resource.name.buckets),
+  },
+  cloud: {
+    region: getFirstKey(resource.region.buckets),
+  },
   vulnerabilities_count: resource.doc_count,
   severity_map: {
     critical: resource.critical.doc_count,

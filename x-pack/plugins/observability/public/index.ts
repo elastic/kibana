@@ -46,11 +46,14 @@ export {
   ruleDetailsLocatorID,
   rulesLocatorID,
   sloDetailsLocatorID,
+  sloEditLocatorID,
   uptimeOverviewLocatorID,
 } from '../common';
 
-export type { UXMetrics } from './components/core_web_vitals/core_vitals';
-export { getCoreVitalsComponent } from './components/core_web_vitals/get_core_web_vitals_lazy';
+export type { SloEditLocatorParams } from './locators/slo_edit';
+
+export type { UXMetrics } from './pages/overview/components/sections/ux/core_web_vitals/core_vitals';
+export { getCoreVitalsComponent } from './pages/overview/components/sections/ux/core_web_vitals/get_core_web_vitals_lazy';
 
 export { DatePicker } from './pages/overview/components/date_picker/date_picker';
 export { ObservabilityAlertSearchBar } from './components/alert_search_bar/get_alert_search_bar_lazy';
@@ -67,6 +70,7 @@ export { observabilityFeatureId, observabilityAppId } from '../common';
 
 export { useTimeBuckets } from './hooks/use_time_buckets';
 export { createUseRulesLink } from './hooks/create_use_rules_link';
+export { useSummaryTimeRange } from './hooks/use_summary_time_range';
 
 export { getApmTraceUrl } from './utils/get_apm_trace_url';
 
@@ -85,7 +89,3 @@ export { calculateTimeRangeBucketSize } from './pages/overview/helpers/calculate
 
 export { convertTo } from '../common/utils/formatters/duration';
 export { formatAlertEvaluationValue } from './utils/format_alert_evaluation_value';
-
-export { CoPilotPrompt } from './components/co_pilot_prompt';
-export { useCoPilot } from './hooks/use_co_pilot';
-export { CoPilotContextProvider } from './context/co_pilot_context';

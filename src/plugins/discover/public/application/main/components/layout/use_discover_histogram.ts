@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { useQuerySubscriber } from '@kbn/unified-field-list-plugin/public';
+import { useQuerySubscriber } from '@kbn/unified-field-list/src/hooks/use_query_subscriber';
 import {
   UnifiedHistogramApi,
   UnifiedHistogramFetchStatus,
@@ -215,6 +215,7 @@ export const useDiscoverHistogram = ({
    * Request params
    */
   const { query, filters } = useQuerySubscriber({ data: services.data });
+  const customFilters = useInternalStateSelector((state) => state.customFilters);
   const timefilter = services.data.query.timefilter.timefilter;
   const timeRange = timefilter.getAbsoluteTime();
   const relativeTimeRange = useObservable(
@@ -305,7 +306,7 @@ export const useDiscoverHistogram = ({
     services: { ...services, uiActions: getUiActions() },
     dataView: isPlainRecord ? textBasedDataView : dataView,
     query: isPlainRecord ? textBasedQuery : query,
-    filters,
+    filters: [...(filters ?? []), ...customFilters],
     timeRange,
     relativeTimeRange,
     columns,

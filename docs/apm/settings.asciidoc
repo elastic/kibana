@@ -21,3 +21,14 @@ include::./../settings/apm-settings.asciidoc[tag=apm-indices-settings]
 === General APM settings
 
 include::./../settings/apm-settings.asciidoc[tag=general-apm-settings]
+
+[float]
+[[apm-labs]]
+=== APM Labs
+
+**APM Labs** allows you to easily try out new features that are technical preview.
+
+To enable APM labs, navigate to **APM** > **Settings** > **General settings** and toggle **Enable labs button in APM**.
+Select **Save changes** and refresh the page.
+
+After enabling **APM Labs** select **Labs** in the toolbar to see the technical preview features available to try out.

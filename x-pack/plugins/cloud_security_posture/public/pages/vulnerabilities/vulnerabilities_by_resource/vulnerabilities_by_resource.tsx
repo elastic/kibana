@@ -9,16 +9,16 @@ import {
   EuiButtonEmpty,
   EuiDataGrid,
   EuiDataGridCellValueElementProps,
-  EuiDataGridColumnCellAction,
   EuiFlexItem,
   EuiProgress,
   EuiSpacer,
-  EuiToolTip,
 } from '@elastic/eui';
 import { DataView } from '@kbn/data-views-plugin/common';
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
+import { Link, generatePath } from 'react-router-dom';
 import { LOCAL_STORAGE_PAGE_SIZE_FINDINGS_KEY } from '../../../common/constants';
+import { findingsNavigation } from '../../../common/navigation/constants';
 import { useCloudPostureTable } from '../../../common/hooks/use_cloud_posture_table';
 import { ErrorCallout } from '../../configurations/layout/error_callout';
 import { FindingsSearchBar } from '../../configurations/layout/findings_search_bar';
@@ -32,8 +32,7 @@ import {
   defaultLoadingRenderer,
   defaultNoDataRenderer,
 } from '../../../components/cloud_posture_page';
-import { getFilters } from '../utils/get_filters';
-import { FILTER_IN, FILTER_OUT, SEARCH_BAR_PLACEHOLDER, VULNERABILITIES } from '../translations';
+import { SEARCH_BAR_PLACEHOLDER, VULNERABILITIES } from '../translations';
 import { useStyles } from '../hooks/use_styles';
 import { FindingsGroupBySelector } from '../../configurations/layout/findings_group_by_selector';
 import { vulnerabilitiesPathnameHandler } from '../utils/vulnerabilities_pathname_handler';
@@ -41,6 +40,8 @@ import { useLatestVulnerabilitiesByResource } from '../hooks/use_latest_vulnerab
 import { EmptyState } from '../../../components/empty_state';
 import { SeverityMap } from './severity_map';
 import { VULNERABILITY_RESOURCE_COUNT } from './test_subjects';
+import { getVulnerabilitiesGridCellActions } from '../utils/get_vulnerabilities_grid_cell_actions';
+import type { VulnerabilitiesByResourceQueryData } from '../types';
 
 const getDefaultQuery = ({ query, filters }: any): any => ({
   query,
@@ -49,12 +50,18 @@ const getDefaultQuery = ({ query, filters }: any): any => ({
   pageIndex: 0,
 });
 
-export const VulnerabilitiesByResource = ({ dataView }: { dataView: DataView }) => {
+const VulnerabilitiesByResourceDataGrid = ({
+  dataView,
+  data,
+  isFetching,
+}: {
+  dataView: DataView;
+  data: VulnerabilitiesByResourceQueryData | undefined;
+  isFetching: boolean;
+}) => {
   const {
     pageIndex,
-    query,
     sort,
-    queryError,
     pageSize,
     onChangeItemsPerPage,
     onChangePage,
@@ -67,15 +74,7 @@ export const VulnerabilitiesByResource = ({ dataView }: { dataView: DataView }) 
     defaultQuery: getDefaultQuery,
     paginationLocalStorageKey: LOCAL_STORAGE_PAGE_SIZE_FINDINGS_KEY,
   });
-
   const styles = useStyles();
-  const { data, isLoading, isFetching } = useLatestVulnerabilitiesByResource({
-    query,
-    sortOrder: sort[0]?.direction,
-    enabled: !queryError,
-    pageIndex,
-    pageSize,
-  });
 
   const { isLastLimitedPage, limitedTotalItemCount } = useLimitProperties({
     total: data?.total,
@@ -84,114 +83,19 @@ export const VulnerabilitiesByResource = ({ dataView }: { dataView: DataView }) 
   });
 
   const columns = useMemo(() => {
-    const getColumnIdValue = (rowIndex: number, columnId: string) => {
-      const vulnerabilityRow = data?.page[rowIndex];
-      if (!vulnerabilityRow) return null;
-
-      if (columnId === vulnerabilitiesByResourceColumns.resource_id) {
-        return vulnerabilityRow['resource.id'];
-      }
-      if (columnId === vulnerabilitiesByResourceColumns.resource_name) {
-        return vulnerabilityRow['resource.name'];
-      }
-      if (columnId === vulnerabilitiesByResourceColumns.region) {
-        return vulnerabilityRow['cloud.region'];
-      }
-    };
-
-    const cellActions: EuiDataGridColumnCellAction[] = [
-      ({ Component, rowIndex, columnId }) => {
-        const rowIndexFromPage = rowIndex > pageSize - 1 ? rowIndex % pageSize : rowIndex;
-
-        const value = getColumnIdValue(rowIndexFromPage, columnId);
-
-        if (!value) return null;
-        return (
-          <EuiToolTip
-            position="top"
-            content={i18n.translate(
-              'xpack.csp.vulnerabilities.vulnerabilitiesTableCell.addFilterButtonTooltip',
-              {
-                defaultMessage: 'Add {columnId} filter',
-                values: { columnId },
-              }
-            )}
-          >
-            <Component
-              iconType="plusInCircle"
-              aria-label={i18n.translate(
-                'xpack.csp.vulnerabilities.vulnerabilitiesTableCell.addFilterButton',
-                {
-                  defaultMessage: 'Add {columnId} negated filter',
-                  values: { columnId },
-                }
-              )}
-              onClick={() => {
-                setUrlQuery({
-                  pageIndex: 0,
-                  filters: getFilters({
-                    filters: urlQuery.filters,
-                    dataView,
-                    field: columnId,
-                    value,
-                    negate: false,
-                  }),
-                });
-              }}
-            >
-              {FILTER_IN}
-            </Component>
-          </EuiToolTip>
-        );
-      },
-      ({ Component, rowIndex, columnId }) => {
-        const rowIndexFromPage = rowIndex > pageSize - 1 ? rowIndex % pageSize : rowIndex;
-
-        const value = getColumnIdValue(rowIndexFromPage, columnId);
-
-        if (!value) return null;
-        return (
-          <EuiToolTip
-            position="top"
-            content={i18n.translate(
-              'xpack.csp.vulnerabilities.vulnerabilitiesTableCell.addNegatedFilterButtonTooltip',
-              {
-                defaultMessage: 'Add {columnId} negated filter',
-                values: { columnId },
-              }
-            )}
-          >
-            <Component
-              iconType="minusInCircle"
-              aria-label={i18n.translate(
-                'xpack.csp.vulnerabilities.vulnerabilitiesTableCell.addNegateFilterButton',
-                {
-                  defaultMessage: 'Add {columnId} negated filter',
-                  values: { columnId },
-                }
-              )}
-              onClick={() => {
-                setUrlQuery({
-                  pageIndex: 0,
-                  filters: getFilters({
-                    filters: urlQuery.filters,
-                    dataView,
-                    field: columnId,
-                    value,
-                    negate: true,
-                  }),
-                });
-              }}
-            >
-              {FILTER_OUT}
-            </Component>
-          </EuiToolTip>
-        );
-      },
-    ];
-
-    return getVulnerabilitiesByResourceColumnsGrid(cellActions);
-  }, [data?.page, dataView, pageSize, setUrlQuery, urlQuery.filters]);
+    if (!data?.page) {
+      return [];
+    }
+    return getVulnerabilitiesGridCellActions<typeof data.page>({
+      columnGridFn: getVulnerabilitiesByResourceColumnsGrid,
+      columns: vulnerabilitiesByResourceColumns,
+      dataView,
+      pageSize,
+      data: data.page,
+      setUrlQuery,
+      filters: urlQuery.filters,
+    });
+  }, [data, dataView, pageSize, setUrlQuery, urlQuery.filters]);
 
   const renderCellValue = useMemo(() => {
     const Cell: React.FC<EuiDataGridCellValueElementProps> = ({
@@ -203,16 +107,26 @@ export const VulnerabilitiesByResource = ({ dataView }: { dataView: DataView }) 
       const resourceVulnerabilityRow = data?.page[rowIndexFromPage];
 
       if (isFetching) return null;
-      if (!resourceVulnerabilityRow?.['resource.id']) return null;
+      if (!resourceVulnerabilityRow?.resource?.id) return null;
 
       if (columnId === vulnerabilitiesByResourceColumns.resource_id) {
-        return <>{resourceVulnerabilityRow['resource.id']}</>;
+        return (
+          <Link
+            to={generatePath(findingsNavigation.resource_vulnerabilities.path, {
+              resourceId: encodeURIComponent(resourceVulnerabilityRow?.resource?.id),
+            })}
+            className="eui-textTruncate"
+            title={resourceVulnerabilityRow?.resource?.id}
+          >
+            {resourceVulnerabilityRow?.resource?.id}
+          </Link>
+        );
       }
       if (columnId === vulnerabilitiesByResourceColumns.resource_name) {
-        return <>{resourceVulnerabilityRow['resource.name']}</>;
+        return <>{resourceVulnerabilityRow?.resource?.name}</>;
       }
       if (columnId === vulnerabilitiesByResourceColumns.region) {
-        return <>{resourceVulnerabilityRow['cloud.region']}</>;
+        return <>{resourceVulnerabilityRow?.cloud?.region}</>;
       }
       if (columnId === vulnerabilitiesByResourceColumns.vulnerabilities_count) {
         return (
@@ -236,16 +150,109 @@ export const VulnerabilitiesByResource = ({ dataView }: { dataView: DataView }) 
     return Cell;
   }, [data?.page, pageSize, isFetching]);
 
+  if (data?.page.length === 0) {
+    return <EmptyState onResetFilters={onResetFilters} />;
+  }
+
+  return (
+    <>
+      <EuiProgress
+        size="xs"
+        color="accent"
+        style={{
+          opacity: isFetching ? 1 : 0,
+        }}
+      />
+      <EuiDataGrid
+        className={styles.gridStyle}
+        aria-label={VULNERABILITIES}
+        columns={columns}
+        columnVisibility={{
+          visibleColumns: columns.map(({ id }) => id),
+          setVisibleColumns: () => {},
+        }}
+        rowCount={limitedTotalItemCount}
+        toolbarVisibility={{
+          showColumnSelector: false,
+          showDisplaySelector: false,
+          showKeyboardShortcuts: false,
+          showSortSelector: false,
+          showFullScreenSelector: false,
+          additionalControls: {
+            left: {
+              prepend: (
+                <>
+                  <EuiButtonEmpty size="xs" color="text">
+                    {i18n.translate('xpack.csp.vulnerabilitiesByResource.totalResources', {
+                      defaultMessage: '{total, plural, one {# Resource} other {# Resources}}',
+                      values: { total: data?.total },
+                    })}
+                  </EuiButtonEmpty>
+                  <EuiButtonEmpty size="xs" color="text">
+                    {i18n.translate('xpack.csp.vulnerabilitiesByResource.totalVulnerabilities', {
+                      defaultMessage:
+                        '{total, plural, one {# Vulnerability} other {# Vulnerabilities}}',
+                      values: { total: data?.total_vulnerabilities },
+                    })}
+                  </EuiButtonEmpty>
+                </>
+              ),
+            },
+            right: (
+              <EuiFlexItem grow={false} className={styles.groupBySelector}>
+                <FindingsGroupBySelector
+                  type="resource"
+                  pathnameHandler={vulnerabilitiesPathnameHandler}
+                />
+              </EuiFlexItem>
+            ),
+          },
+        }}
+        gridStyle={{
+          border: 'horizontal',
+          cellPadding: 'l',
+          stripes: false,
+          rowHover: 'none',
+          header: 'underline',
+        }}
+        renderCellValue={renderCellValue}
+        inMemory={{ level: 'enhancements' }}
+        sorting={{ columns: sort, onSort }}
+        pagination={{
+          pageIndex,
+          pageSize,
+          pageSizeOptions: [10, 25, 100],
+          onChangeItemsPerPage,
+          onChangePage,
+        }}
+      />
+      {isLastLimitedPage && <LimitedResultsBar />}
+    </>
+  );
+};
+
+export const VulnerabilitiesByResource = ({ dataView }: { dataView: DataView }) => {
+  const { pageIndex, query, sort, queryError, pageSize, setUrlQuery } = useCloudPostureTable({
+    dataView,
+    defaultQuery: getDefaultQuery,
+    paginationLocalStorageKey: LOCAL_STORAGE_PAGE_SIZE_FINDINGS_KEY,
+  });
+
+  const { data, isLoading, isFetching } = useLatestVulnerabilitiesByResource({
+    query,
+    sortOrder: sort[0]?.direction,
+    enabled: !queryError,
+    pageIndex,
+    pageSize,
+  });
+
   const error = queryError || null;
 
-  if (error) {
-    return <ErrorCallout error={error as Error} />;
-  }
-  if (isLoading) {
+  if (isLoading && !error) {
     return defaultLoadingRenderer();
   }
 
-  if (!data?.page) {
+  if (!data?.page && !error) {
     return defaultNoDataRenderer();
   }
 
@@ -256,89 +263,17 @@ export const VulnerabilitiesByResource = ({ dataView }: { dataView: DataView }) 
         setQuery={(newQuery) => {
           setUrlQuery({ ...newQuery, pageIndex: 0 });
         }}
-        loading={isLoading}
+        loading={isFetching}
         placeholder={SEARCH_BAR_PLACEHOLDER}
       />
       <EuiSpacer size="m" />
-      {!isLoading && data.page.length === 0 ? (
-        <EmptyState onResetFilters={onResetFilters} />
-      ) : (
-        <>
-          <EuiProgress
-            size="xs"
-            color="accent"
-            style={{
-              opacity: isFetching ? 1 : 0,
-            }}
-          />
-          <EuiDataGrid
-            className={styles.gridStyle}
-            aria-label={VULNERABILITIES}
-            columns={columns}
-            columnVisibility={{
-              visibleColumns: columns.map(({ id }) => id),
-              setVisibleColumns: () => {},
-            }}
-            rowCount={limitedTotalItemCount}
-            toolbarVisibility={{
-              showColumnSelector: false,
-              showDisplaySelector: false,
-              showKeyboardShortcuts: false,
-              showSortSelector: false,
-              showFullScreenSelector: false,
-              additionalControls: {
-                left: {
-                  prepend: (
-                    <>
-                      <EuiButtonEmpty size="xs" color="text">
-                        {i18n.translate('xpack.csp.vulnerabilitiesByResource.totalResources', {
-                          defaultMessage: '{total, plural, one {# Resource} other {# Resources}}',
-                          values: { total: data?.total },
-                        })}
-                      </EuiButtonEmpty>
-                      <EuiButtonEmpty size="xs" color="text">
-                        {i18n.translate(
-                          'xpack.csp.vulnerabilitiesByResource.totalVulnerabilities',
-                          {
-                            defaultMessage:
-                              '{total, plural, one {# Vulnerability} other {# Vulnerabilities}}',
-                            values: { total: data?.total_vulnerabilities },
-                          }
-                        )}
-                      </EuiButtonEmpty>
-                    </>
-                  ),
-                },
-                right: (
-                  <EuiFlexItem grow={false} className={styles.groupBySelector}>
-                    <FindingsGroupBySelector
-                      type="resource"
-                      pathnameHandler={vulnerabilitiesPathnameHandler}
-                    />
-                  </EuiFlexItem>
-                ),
-              },
-            }}
-            gridStyle={{
-              border: 'horizontal',
-              cellPadding: 'l',
-              stripes: false,
-              rowHover: 'none',
-              header: 'underline',
-            }}
-            renderCellValue={renderCellValue}
-            inMemory={{ level: 'enhancements' }}
-            sorting={{ columns: sort, onSort }}
-            pagination={{
-              pageIndex,
-              pageSize,
-              pageSizeOptions: [10, 25, 100],
-              onChangeItemsPerPage,
-              onChangePage,
-            }}
-          />
-          {isLastLimitedPage && <LimitedResultsBar />}
-        </>
+      {error && <ErrorCallout error={error as Error} />}
+      {!error && (
+        <VulnerabilitiesByResourceDataGrid
+          dataView={dataView}
+          data={data}
+          isFetching={isFetching}
+        />
       )}
     </>
   );
