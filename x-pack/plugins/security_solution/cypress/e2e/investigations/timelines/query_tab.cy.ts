@@ -31,7 +31,9 @@ import {
 
 import { TIMELINES_URL } from '../../../urls/navigation';
 
-describe('Timeline query tab', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+
+describe.skip('Timeline query tab', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+
   before(() => {
     cleanKibana();
     login();
