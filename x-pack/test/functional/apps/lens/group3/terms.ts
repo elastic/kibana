@@ -198,8 +198,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                 };
               })
               .map((d) => `{"index": {}}\n${JSON.stringify(d)}\n`),
-          },
-          { meta: true }
+          }
         );
 
         log.info(`Creating dataView ${esIndexPrefix}`);
