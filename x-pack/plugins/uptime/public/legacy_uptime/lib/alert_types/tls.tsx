@@ -24,6 +24,7 @@ const TLSAlert = React.lazy(() => import('./lazy_wrapper/tls_alert'));
 export const initTlsAlertType: AlertTypeInitializer = ({
   core,
   plugins,
+  isHidden,
 }): ObservabilityRuleTypeModel => ({
   id: CLIENT_ALERT_TYPES.TLS,
   iconClass: 'uptimeApp',
@@ -50,7 +51,7 @@ export const initTlsAlertType: AlertTypeInitializer = ({
   },
   defaultActionMessage,
   defaultRecoveryMessage,
-  requiresAppContext: false,
+  requiresAppContext: isHidden,
   format: ({ fields }) => ({
     reason: fields[ALERT_REASON] || '',
     link: `/app/uptime${CERTIFICATES_ROUTE}`,
