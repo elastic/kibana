@@ -395,9 +395,9 @@ export class DashboardPageControls extends FtrService {
   }
 
   public async isOptionsListPopoverOpen(controlId: string) {
-    const isOptionsListPopoverOpen = await this.find.existsByCssSelector(`#control-popover-${controlId}`);
-    this.log.debug(`Is popover open: ${isOptionsListPopoverOpen} for Options List: ${controlId}`);
-    return isOptionsListPopoverOpen;
+    const isPopoverOpen = await this.find.existsByCssSelector(`#control-popover-${controlId}`);
+    this.log.debug(`Is popover open: ${isPopoverOpen} for Options List: ${controlId}`);
+    return isPopoverOpen;
   }
 
   public async optionsListOpenPopover(controlId: string) {
@@ -412,8 +412,8 @@ export class DashboardPageControls extends FtrService {
   public async optionsListEnsurePopoverIsClosed(controlId: string) {
     this.log.debug(`Ensure popover is closed for Options List: ${controlId}`);
     await this.retry.try(async () => {
-      const isOptionsListPopoverOpen = await this.isOptionsListPopoverOpen(controlId);
-      if (isOptionsListPopoverOpen) {
+      const isPopoverOpen = await this.isOptionsListPopoverOpen(controlId);
+      if (isPopoverOpen) {
         await this.testSubjects.click(`optionsList-control-${controlId}`);
         await this.testSubjects.waitForDeleted(`optionsList-control-available-options`);
       }
