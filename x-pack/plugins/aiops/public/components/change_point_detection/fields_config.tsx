@@ -166,7 +166,11 @@ const FieldPanel: FC<FieldPanelProps> = ({
   onSelectionChange,
   'data-test-subj': dataTestSubj,
 }) => {
-  const { embeddable } = useAiopsAppContext();
+  const {
+    embeddable,
+    application: { capabilities },
+    cases,
+  } = useAiopsAppContext();
 
   const { dataView } = useDataSource();
 
@@ -177,6 +181,12 @@ const FieldPanel: FC<FieldPanelProps> = ({
   const [isExpanded, setIsExpanded] = useState<boolean>(true);
 
   const [isActionMenuOpen, setIsActionMenuOpen] = useState(false);
+
+  const canEditDashboards = capabilities.dashboard?.createNew ?? false;
+  const { create: canCreateCase, update: canUpdateCase } = cases?.helpers?.canUseCases() ?? {
+    create: false,
+    update: false,
+  };
 
   const [dashboardAttachment, setDashboardAttachment] = useState<{
     applyTimeRange: boolean;
@@ -202,156 +212,189 @@ const FieldPanel: FC<FieldPanelProps> = ({
   const caseAttachmentButtonDisabled =
     isDefined(fieldConfig.splitField) && selectedPartitions.length === 0;
 
-  const panels: EuiContextMenuProps['panels'] = [
-    {
-      id: 'panelActions',
-      size: 's',
-      items: [
-        {
-          name:
-            selectedPartitions.length > 0
-              ? i18n.translate('xpack.aiops.changePointDetection.attachSelectedChartsLabel', {
-                  defaultMessage: 'Attach selected charts',
-                })
-              : i18n.translate('xpack.aiops.changePointDetection.attachChartsLabel', {
-                  defaultMessage: 'Attach charts',
-                }),
-          icon: 'plusInCircle',
-          panel: 'attachMainPanel',
-        },
-        {
-          name: i18n.translate('xpack.aiops.changePointDetection.removeConfigLabel', {
-            defaultMessage: 'Remove configuration',
-          }),
-          icon: 'trash',
-          onClick: onRemove,
-          disabled: removeDisabled,
-        },
-      ],
-    },
-    {
-      id: 'attachMainPanel',
-      size: 's',
-      initialFocusedItemIndex: 0,
-      title:
-        selectedPartitions.length > 0
-          ? i18n.translate('xpack.aiops.changePointDetection.attachSelectedChartsLabel', {
-              defaultMessage: 'Attach selected charts',
-            })
-          : i18n.translate('xpack.aiops.changePointDetection.attachChartsLabel', {
-              defaultMessage: 'Attach charts',
+  const timeRange = useTimeRangeUpdates();
+
+  const panels = useMemo<EuiContextMenuProps['panels']>(() => {
+    return [
+      {
+        id: 'panelActions',
+        size: 's',
+        items: [
+          ...(canEditDashboards || canUpdateCase || canCreateCase
+            ? [
+                {
+                  name:
+                    selectedPartitions.length > 0
+                      ? i18n.translate(
+                          'xpack.aiops.changePointDetection.attachSelectedChartsLabel',
+                          {
+                            defaultMessage: 'Attach selected charts',
+                          }
+                        )
+                      : i18n.translate('xpack.aiops.changePointDetection.attachChartsLabel', {
+                          defaultMessage: 'Attach charts',
+                        }),
+                  icon: 'plusInCircle',
+                  panel: 'attachMainPanel',
+                },
+              ]
+            : []),
+          {
+            name: i18n.translate('xpack.aiops.changePointDetection.removeConfigLabel', {
+              defaultMessage: 'Remove configuration',
             }),
-      items: [
-        {
-          name: i18n.translate('xpack.aiops.changePointDetection.attachToDashboardLabel', {
-            defaultMessage: 'To dashboard',
-          }),
-          panel: 'attachToDashboardPanel',
-        },
-        {
-          name: i18n.translate('xpack.aiops.changePointDetection.attachToCaseLabel', {
-            defaultMessage: 'To case',
-          }),
-          disabled: caseAttachmentButtonDisabled,
-          ...(caseAttachmentButtonDisabled
-            ? {
-                toolTipPosition: 'left',
-                toolTipContent: i18n.translate(
-                  'xpack.aiops.changePointDetection.attachToCaseTooltipContent',
-                  {
-                    defaultMessage: 'Select change points to attach',
-                  }
-                ),
-              }
-            : {}),
-          onClick: () => {
-            openCasesModalCallback({
-              timeRange,
-              fn: fieldConfig.fn,
-              metricField: fieldConfig.metricField,
-              dataViewId: dataView.id,
-              ...(fieldConfig.splitField
-                ? {
-                    splitField: fieldConfig.splitField,
-                    partitions: selectedPartitions,
-                  }
-                : {}),
-            });
+            icon: 'trash',
+            onClick: onRemove,
+            disabled: removeDisabled,
           },
-        },
-      ],
-    },
-    {
-      id: 'attachToDashboardPanel',
-      title: i18n.translate('xpack.aiops.changePointDetection.attachToDashboardTitle', {
-        defaultMessage: 'Attach to dashboard',
-      }),
-      size: 's',
-      content: (
-        <EuiPanel paddingSize={'s'}>
-          <EuiSpacer size={'s'} />
-          <EuiForm>
-            <EuiFormRow fullWidth>
-              <EuiSwitch
-                label={i18n.translate('xpack.aiops.changePointDetection.applyTimeRangeLabel', {
-                  defaultMessage: 'Apply time range',
-                })}
-                checked={dashboardAttachment.applyTimeRange}
-                onChange={(e) =>
-                  setDashboardAttachment((prevState) => {
-                    return {
-                      ...prevState,
-                      applyTimeRange: e.target.checked,
-                    };
-                  })
-                }
-                compressed
-              />
-            </EuiFormRow>
-            {isDefined(fieldConfig.splitField) && selectedPartitions.length === 0 ? (
-              <EuiFormRow
-                fullWidth
-                label={
-                  <FormattedMessage
-                    id="xpack.aiops.changePointDetection.maxSeriesToPlotLabel"
-                    defaultMessage="Max series"
-                  />
-                }
-              >
-                <EuiFieldNumber
-                  value={dashboardAttachment.maxSeriesToPlot}
+        ],
+      },
+      {
+        id: 'attachMainPanel',
+        size: 's',
+        initialFocusedItemIndex: 0,
+        title:
+          selectedPartitions.length > 0
+            ? i18n.translate('xpack.aiops.changePointDetection.attachSelectedChartsLabel', {
+                defaultMessage: 'Attach selected charts',
+              })
+            : i18n.translate('xpack.aiops.changePointDetection.attachChartsLabel', {
+                defaultMessage: 'Attach charts',
+              }),
+        items: [
+          ...(canEditDashboards
+            ? [
+                {
+                  name: i18n.translate('xpack.aiops.changePointDetection.attachToDashboardLabel', {
+                    defaultMessage: 'To dashboard',
+                  }),
+                  panel: 'attachToDashboardPanel',
+                },
+              ]
+            : []),
+          ...(canUpdateCase || canCreateCase
+            ? [
+                {
+                  name: i18n.translate('xpack.aiops.changePointDetection.attachToCaseLabel', {
+                    defaultMessage: 'To case',
+                  }),
+                  disabled: caseAttachmentButtonDisabled,
+                  ...(caseAttachmentButtonDisabled
+                    ? {
+                        toolTipPosition: 'left' as const,
+                        toolTipContent: i18n.translate(
+                          'xpack.aiops.changePointDetection.attachToCaseTooltipContent',
+                          {
+                            defaultMessage: 'Select change points to attach',
+                          }
+                        ),
+                      }
+                    : {}),
+                  onClick: () => {
+                    openCasesModalCallback({
+                      timeRange,
+                      fn: fieldConfig.fn,
+                      metricField: fieldConfig.metricField,
+                      dataViewId: dataView.id,
+                      ...(fieldConfig.splitField
+                        ? {
+                            splitField: fieldConfig.splitField,
+                            partitions: selectedPartitions,
+                          }
+                        : {}),
+                    });
+                  },
+                },
+              ]
+            : []),
+        ],
+      },
+      {
+        id: 'attachToDashboardPanel',
+        title: i18n.translate('xpack.aiops.changePointDetection.attachToDashboardTitle', {
+          defaultMessage: 'Attach to dashboard',
+        }),
+        size: 's',
+        content: (
+          <EuiPanel paddingSize={'s'}>
+            <EuiSpacer size={'s'} />
+            <EuiForm>
+              <EuiFormRow fullWidth>
+                <EuiSwitch
+                  label={i18n.translate('xpack.aiops.changePointDetection.applyTimeRangeLabel', {
+                    defaultMessage: 'Apply time range',
+                  })}
+                  checked={dashboardAttachment.applyTimeRange}
                   onChange={(e) =>
                     setDashboardAttachment((prevState) => {
                       return {
                         ...prevState,
-                        maxSeriesToPlot: Number(e.target.value),
+                        applyTimeRange: e.target.checked,
                       };
                     })
                   }
+                  compressed
                 />
               </EuiFormRow>
-            ) : null}
+              {isDefined(fieldConfig.splitField) && selectedPartitions.length === 0 ? (
+                <EuiFormRow
+                  fullWidth
+                  label={
+                    <FormattedMessage
+                      id="xpack.aiops.changePointDetection.maxSeriesToPlotLabel"
+                      defaultMessage="Max series"
+                    />
+                  }
+                >
+                  <EuiFieldNumber
+                    value={dashboardAttachment.maxSeriesToPlot}
+                    onChange={(e) =>
+                      setDashboardAttachment((prevState) => {
+                        return {
+                          ...prevState,
+                          maxSeriesToPlot: Number(e.target.value),
+                        };
+                      })
+                    }
+                  />
+                </EuiFormRow>
+              ) : null}
 
-            <EuiSpacer size={'m'} />
+              <EuiSpacer size={'m'} />
 
-            <EuiButton
-              fill
-              type={'submit'}
-              fullWidth
-              onClick={setDashboardAttachmentReady.bind(null, true)}
-            >
-              <FormattedMessage
-                id="xpack.aiops.changePointDetection.submitDashboardAttachButtonLabel"
-                defaultMessage="Attach"
-              />
-            </EuiButton>
-          </EuiForm>
-        </EuiPanel>
-      ),
-    },
-  ];
-
-  const timeRange = useTimeRangeUpdates();
+              <EuiButton
+                fill
+                type={'submit'}
+                fullWidth
+                onClick={setDashboardAttachmentReady.bind(null, true)}
+              >
+                <FormattedMessage
+                  id="xpack.aiops.changePointDetection.submitDashboardAttachButtonLabel"
+                  defaultMessage="Attach"
+                />
+              </EuiButton>
+            </EuiForm>
+          </EuiPanel>
+        ),
+      },
+    ];
+  }, [
+    canCreateCase,
+    canEditDashboards,
+    canUpdateCase,
+    caseAttachmentButtonDisabled,
+    dashboardAttachment.applyTimeRange,
+    dashboardAttachment.maxSeriesToPlot,
+    dataView.id,
+    fieldConfig.fn,
+    fieldConfig.metricField,
+    fieldConfig.splitField,
+    onRemove,
+    openCasesModalCallback,
+    removeDisabled,
+    selectedPartitions,
+    timeRange,
+  ]);
 
   const onSaveCallback: SaveModalDashboardProps['onSave'] = useCallback(
     ({ dashboardId, newTitle, newDescription }) => {
