@@ -124,7 +124,7 @@ const CardStepComponent: React.FC<{
               iconType={isDone ? icon_cross : 'checkInCircleFilled'}
               size="xs"
               css={css`
-                border-radius: ${euiTheme.base * 0.375}px;
+                border-radius: ${euiTheme.border.radius.medium};
                 border: 1px solid ${euiTheme.colors.lightShade};
                 .euiIcon {
                   inline-size: ${euiTheme.size.m};

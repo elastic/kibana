@@ -14,7 +14,7 @@ import { EXPLORE_STEP2_DESCRIPTION1 } from '../translations';
 const OverviewLinkComponent = () => {
   const getLinkProps = useGetLinkProps();
   const onClick = useCallback((e) => {
-    // TODO: telemetry
+    // TODO: telemetry https://github.com/elastic/kibana/issues/163247
   }, []);
   const { onClick: onLinkClicked } = getLinkProps({
     id: SecurityPageName.overview,

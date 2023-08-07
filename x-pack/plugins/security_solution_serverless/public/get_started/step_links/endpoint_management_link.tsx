@@ -19,7 +19,7 @@ import { SecurityPageName } from '@kbn/security-solution-navigation';
 const EndpointManagementLinkComponent = () => {
   const getLinkProps = useGetLinkProps();
   const onClick = useCallback((e) => {
-    // TODO: telemetry
+    // TODO: telemetry https://github.com/elastic/kibana/issues/163247
   }, []);
   const { onClick: onLinkClicked } = getLinkProps({
     id: SecurityPageName.endpoints,

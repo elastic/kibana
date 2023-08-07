@@ -17,7 +17,7 @@ const IntegrationsLinkComponent = () => {
   const onClick = useCallback(
     (e) => {
       e.preventDefault();
-      // TODO: telemetry
+      // TODO: telemetry https://github.com/elastic/kibana/issues/163247
       navigateTo({ url: integrationsUrl });
     },
     [navigateTo, integrationsUrl]

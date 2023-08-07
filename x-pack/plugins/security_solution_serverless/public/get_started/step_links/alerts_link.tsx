@@ -14,7 +14,7 @@ import React, { useCallback } from 'react';
 const AlertsLinkComponent = () => {
   const getLinkProps = useGetLinkProps();
   const onClick = useCallback((e) => {
-    // TODO: telemetry
+    // TODO: telemetry https://github.com/elastic/kibana/issues/163247
   }, []);
   const { onClick: onLinkClicked } = getLinkProps({
     id: SecurityPageName.alerts,
