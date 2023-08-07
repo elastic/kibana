@@ -29,8 +29,8 @@ export const LensMetricChart = ({
     <LensChart
       {...props}
       disableTriggers={disableTriggers}
-      toolTip={<TooltipContent description={toolTip} />}
       height={height}
+      toolTip={<TooltipContent description={toolTip} />}
       visualizationType="lnsMetric"
       hidePanelTitles
     />

@@ -25,10 +25,10 @@ export const LensXYChart = ({
   return (
     <LensChart
       {...props}
+      borderRadius="m"
       disableTriggers={disableTriggers}
       loading={loading}
       height={height}
-      borderRadius="m"
       visualizationType="lnsXY"
     />
   );
