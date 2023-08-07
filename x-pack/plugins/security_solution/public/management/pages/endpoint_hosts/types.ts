@@ -10,6 +10,7 @@ import type { GetInfoResponse } from '@kbn/fleet-plugin/common';
 import type {
   AppLocation,
   EndpointPendingActions,
+  EndpointSortableField,
   HostInfo,
   Immutable,
   PolicyData,
@@ -102,7 +103,7 @@ export interface EndpointIndexUIQueryParams {
   /** Which page to show */
   page_index?: string;
   /** Field used for sorting */
-  sort_field?: string;
+  sort_field?: EndpointSortableField;
   /** Direction of sorting */
   sort_direction?: 'asc' | 'desc';
   /** show the policy response or host details */

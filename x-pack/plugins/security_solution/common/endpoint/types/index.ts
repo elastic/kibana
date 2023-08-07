@@ -1331,6 +1331,22 @@ export interface AdditionalOnSwitchChangeParams {
   protectionOsList: ImmutableArray<Partial<keyof UIPolicyConfig>>;
 }
 
+/** Allowed fields for sorting in the EndpointList table.
+ * These are the column fields in the EndpointList table, based on the
+ * returned `HostInfoInterface` data type (and not on the internal data structure).
+ */
+export enum EndpointSortableField {
+  ENROLLED_AT = 'united.agent.enrolled_at',
+  HOSTNAME = 'metadata.host.hostname',
+  HOST_STATUS = 'host_status',
+  POLICY_NAME = 'metadata.Endpoint.policy.applied.name',
+  POLICY_STATUS = 'metadata.Endpoint.policy.applied.status',
+  HOST_OS_NAME = 'metadata.host.os.name',
+  HOST_IP = 'metadata.host.ip',
+  AGENT_VERSION = 'metadata.agent.version',
+  LAST_SEEN = 'metadata.@timestamp',
+}
+
 /**
  * Returned by the server via GET /api/endpoint/metadata
  */
@@ -1339,7 +1355,7 @@ export interface MetadataListResponse {
   page: number;
   pageSize: number;
   total: number;
-  sortField: string;
+  sortField: EndpointSortableField;
   sortDirection: 'asc' | 'desc';
 }
 

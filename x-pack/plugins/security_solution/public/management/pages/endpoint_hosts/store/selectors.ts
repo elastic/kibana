@@ -11,7 +11,11 @@ import { createSelector } from 'reselect';
 import { matchPath } from 'react-router-dom';
 import { decode } from '@kbn/rison';
 import type { Query } from '@kbn/es-query';
-import type { EndpointPendingActions, Immutable } from '../../../../../common/endpoint/types';
+import type {
+  EndpointPendingActions,
+  EndpointSortableField,
+  Immutable,
+} from '../../../../../common/endpoint/types';
 import type { EndpointIndexUIQueryParams, EndpointState } from '../types';
 import { extractListPaginationParams } from '../../../common/routing';
 import {
@@ -128,6 +132,8 @@ export const uiQueryParams: (
             if (['asc', 'desc'].includes(value)) {
               data[key] = value as EndpointIndexUIQueryParams['sort_direction'];
             }
+          } else if (key === 'sort_field') {
+            data[key] = value as EndpointSortableField;
           } else {
             data[key] = value;
           }

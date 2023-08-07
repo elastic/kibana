@@ -23,7 +23,10 @@ import { indexFleetEndpointPolicy } from '@kbn/security-solution-plugin/common/e
 import { TRANSFORM_STATES } from '@kbn/security-solution-plugin/common/constants';
 import type { IndexedHostsAndAlertsResponse } from '@kbn/security-solution-plugin/common/endpoint/index_data';
 
-import { MetadataListResponse } from '@kbn/security-solution-plugin/common/endpoint/types';
+import {
+  EndpointSortableField,
+  MetadataListResponse,
+} from '@kbn/security-solution-plugin/common/endpoint/types';
 import { generateAgentDocs, generateMetadataDocs } from './metadata.fixtures';
 import {
   deleteAllDocsFromMetadataCurrentIndex,
@@ -321,18 +324,7 @@ export default function ({ getService }: FtrProviderContext) {
           expect(body.sortField).to.eql(ENDPOINT_DEFAULT_SORT_FIELD);
         });
 
-        const FIELDS = [
-          'metadata.host.hostname',
-          'host_status',
-          'metadata.Endpoint.policy.applied.name',
-          'metadata.Endpoint.policy.applied.status',
-          'metadata.host.os.name',
-          'metadata.host.ip',
-          'metadata.agent.version',
-          'metadata.@timestamp',
-        ];
-
-        for (const field of FIELDS) {
+        for (const field of Object.values(EndpointSortableField)) {
           it(`metadata api should be able to sort by ${field}`, async () => {
             let body: MetadataListResponse;
 

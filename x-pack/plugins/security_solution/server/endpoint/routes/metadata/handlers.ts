@@ -7,7 +7,10 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import type { Logger, RequestHandler } from '@kbn/core/server';
-import type { MetadataListResponse } from '../../../../common/endpoint/types';
+import type {
+  MetadataListResponse,
+  EndpointSortableField,
+} from '../../../../common/endpoint/types';
 import { errorHandler } from '../error_handler';
 import type { SecuritySolutionRequestHandlerContext } from '../../../types';
 
@@ -56,7 +59,8 @@ export function getMetadataListRequestHandler(
         total,
         page: request.query.page || ENDPOINT_DEFAULT_PAGE,
         pageSize: request.query.pageSize || ENDPOINT_DEFAULT_PAGE_SIZE,
-        sortField: request.query.sortField || ENDPOINT_DEFAULT_SORT_FIELD,
+        sortField:
+          (request.query.sortField as EndpointSortableField) || ENDPOINT_DEFAULT_SORT_FIELD,
         sortDirection: request.query.sortDirection || ENDPOINT_DEFAULT_SORT_DIRECTION,
       };
 

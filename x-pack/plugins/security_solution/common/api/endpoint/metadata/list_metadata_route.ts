@@ -8,7 +8,7 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { ENDPOINT_DEFAULT_PAGE, ENDPOINT_DEFAULT_PAGE_SIZE } from '../../../endpoint/constants';
-import { HostStatus } from '../../../endpoint/types';
+import { HostStatus, EndpointSortableField } from '../../../endpoint/types';
 
 export const GetMetadataListRequestSchema = {
   query: schema.object(
@@ -18,16 +18,14 @@ export const GetMetadataListRequestSchema = {
       kuery: schema.maybe(schema.string()),
       sortField: schema.maybe(
         schema.oneOf([
-          // allowed fields for sorting - these are the column fields in the EndpointList table, based on the
-          // returned `HostInfoInterface` data type, and not on the internal data structure
-          schema.literal('metadata.host.hostname'),
-          schema.literal('host_status'),
-          schema.literal('metadata.Endpoint.policy.applied.name'),
-          schema.literal('metadata.Endpoint.policy.applied.status'),
-          schema.literal('metadata.host.os.name'),
-          schema.literal('metadata.host.ip'),
-          schema.literal('metadata.agent.version'),
-          schema.literal('metadata.@timestamp'),
+          schema.literal(EndpointSortableField.HOSTNAME.toString()),
+          schema.literal(EndpointSortableField.HOST_STATUS.toString()),
+          schema.literal(EndpointSortableField.POLICY_NAME.toString()),
+          schema.literal(EndpointSortableField.POLICY_STATUS.toString()),
+          schema.literal(EndpointSortableField.HOST_OS_NAME.toString()),
+          schema.literal(EndpointSortableField.HOST_IP.toString()),
+          schema.literal(EndpointSortableField.AGENT_VERSION.toString()),
+          schema.literal(EndpointSortableField.LAST_SEEN.toString()),
         ])
       ),
       sortDirection: schema.maybe(schema.oneOf([schema.literal('asc'), schema.literal('desc')])),

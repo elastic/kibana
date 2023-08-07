@@ -6,6 +6,7 @@
  */
 
 import type { MetadataListResponse } from '../../../../../common/endpoint/types';
+import { EndpointSortableField } from '../../../../../common/endpoint/types';
 import { APP_ENDPOINTS_PATH } from '../../../../../common/constants';
 import type { ReturnTypeFromChainable } from '../../types';
 import { indexEndpointHosts } from '../../tasks/index_endpoint_hosts';
@@ -58,16 +59,7 @@ describe('Endpoints page', () => {
     it('User can sort by any field', () => {
       loadPage(APP_ENDPOINTS_PATH);
 
-      const fields = [
-        'metadata.host.hostname',
-        'host_status',
-        'metadata.Endpoint.policy.applied.name',
-        'metadata.Endpoint.policy.applied.status',
-        'metadata.host.os.name',
-        'metadata.host.ip',
-        'metadata.agent.version',
-        'metadata.@timestamp',
-      ];
+      const fields = Object.values(EndpointSortableField);
 
       for (let i = 0; i < fields.length; i++) {
         const field = fields[i];

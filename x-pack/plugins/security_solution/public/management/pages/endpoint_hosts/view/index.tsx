@@ -47,6 +47,7 @@ import type {
   Immutable,
   PolicyDetailsRouteState,
 } from '../../../../../common/endpoint/types';
+import { EndpointSortableField } from '../../../../../common/endpoint/types';
 import { DEFAULT_POLL_INTERVAL, MANAGEMENT_PAGE_SIZE_OPTIONS } from '../../../common/constants';
 import { HostsEmptyState, PolicyEmptyState } from '../../../components/management_empty_state';
 import { FormattedDate } from '../../../../common/components/formatted_date';
@@ -98,7 +99,7 @@ const getEndpointListColumns = ({
 
   return [
     {
-      field: 'metadata.host.hostname',
+      field: EndpointSortableField.HOSTNAME,
       width: '15%',
       name: i18n.translate('xpack.securitySolution.endpoint.list.hostname', {
         defaultMessage: 'Endpoint',
@@ -127,7 +128,7 @@ const getEndpointListColumns = ({
       },
     },
     {
-      field: 'host_status',
+      field: EndpointSortableField.HOST_STATUS,
       width: '14%',
       name: i18n.translate('xpack.securitySolution.endpoint.list.hostStatus', {
         defaultMessage: 'Agent status',
@@ -144,7 +145,7 @@ const getEndpointListColumns = ({
       },
     },
     {
-      field: 'metadata.Endpoint.policy.applied.name',
+      field: EndpointSortableField.POLICY_NAME,
       width: '15%',
       name: i18n.translate('xpack.securitySolution.endpoint.list.policy', {
         defaultMessage: 'Policy',
@@ -196,7 +197,7 @@ const getEndpointListColumns = ({
       },
     },
     {
-      field: 'metadata.Endpoint.policy.applied.status',
+      field: EndpointSortableField.POLICY_STATUS,
       width: '9%',
       name: i18n.translate('xpack.securitySolution.endpoint.list.policyStatus', {
         defaultMessage: 'Policy status',
@@ -231,7 +232,7 @@ const getEndpointListColumns = ({
       },
     },
     {
-      field: 'metadata.host.os.name',
+      field: EndpointSortableField.HOST_OS_NAME,
       width: '9%',
       name: i18n.translate('xpack.securitySolution.endpoint.list.os', {
         defaultMessage: 'OS',
@@ -248,7 +249,7 @@ const getEndpointListColumns = ({
       },
     },
     {
-      field: 'metadata.host.ip',
+      field: EndpointSortableField.HOST_IP,
       width: '12%',
       name: i18n.translate('xpack.securitySolution.endpoint.list.ip', {
         defaultMessage: 'IP address',
@@ -267,7 +268,7 @@ const getEndpointListColumns = ({
       },
     },
     {
-      field: 'metadata.agent.version',
+      field: EndpointSortableField.AGENT_VERSION,
       width: '9%',
       name: i18n.translate('xpack.securitySolution.endpoint.list.endpointVersion', {
         defaultMessage: 'Version',
@@ -284,7 +285,7 @@ const getEndpointListColumns = ({
       },
     },
     {
-      field: 'metadata.@timestamp',
+      field: EndpointSortableField.LAST_SEEN,
       name: lastActiveColumnName,
       width: '9%',
       sortable: true,
@@ -400,7 +401,7 @@ export const EndpointList = () => {
           page_index: JSON.stringify(index),
           page_size: JSON.stringify(size),
           sort_direction: sort?.direction,
-          sort_field: sort?.field,
+          sort_field: sort?.field as EndpointSortableField,
         })
       );
     },
