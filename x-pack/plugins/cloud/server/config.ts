@@ -29,7 +29,12 @@ const configSchema = schema.object({
   users_and_roles_url: schema.maybe(schema.string()),
   organization_url: schema.maybe(schema.string()),
   profile_url: schema.maybe(schema.string()),
-  projects_url: schema.maybe(schema.string()),
+  projects_url: schema.conditional(
+    schema.contextRef('serverless'),
+    true,
+    schema.string({ defaultValue: '/projects' }),
+    schema.never()
+  ),
   trial_end_date: schema.maybe(schema.string()),
   is_elastic_staff_owned: schema.maybe(schema.boolean()),
   serverless: schema.maybe(
