@@ -40,7 +40,7 @@ interface CaseRouteHandlerArguments<P, Q, B> {
   kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
 }
 
-type CaseRouteTags = 'access:casesSuggestUserProfiles' | 'access:casesGetConnectorsConfigure';
+type CaseRouteTags = 'access:casesSuggestUserProfiles';
 
 export interface CaseRoute<P = unknown, Q = unknown, B = unknown> {
   method: 'get' | 'post' | 'put' | 'delete' | 'patch';

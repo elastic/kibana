@@ -18,7 +18,6 @@ export function useGetUserCasesPermissions() {
     update: false,
     delete: false,
     push: false,
-    connectors: false,
   });
   const uiCapabilities = useKibana().services.application.capabilities;
 
@@ -34,7 +33,6 @@ export function useGetUserCasesPermissions() {
       update: casesCapabilities.update,
       delete: casesCapabilities.delete,
       push: casesCapabilities.push,
-      connectors: casesCapabilities.connectors,
     });
   }, [
     casesCapabilities.all,
@@ -43,7 +41,6 @@ export function useGetUserCasesPermissions() {
     casesCapabilities.update,
     casesCapabilities.delete,
     casesCapabilities.push,
-    casesCapabilities.connectors,
   ]);
 
   return casesPermissions;
