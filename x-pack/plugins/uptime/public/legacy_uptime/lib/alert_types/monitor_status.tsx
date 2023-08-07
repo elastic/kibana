@@ -32,6 +32,7 @@ let validateFunc: (ruleParams: any) => ValidationResult;
 export const initMonitorStatusAlertType: AlertTypeInitializer = ({
   core,
   plugins,
+  isHidden,
 }): ObservabilityRuleTypeModel => ({
   id: CLIENT_ALERT_TYPES.MONITOR_STATUS,
   description,
@@ -55,7 +56,7 @@ export const initMonitorStatusAlertType: AlertTypeInitializer = ({
   },
   defaultActionMessage,
   defaultRecoveryMessage,
-  requiresAppContext: false,
+  requiresAppContext: isHidden,
   format: ({ fields }) => ({
     reason: fields[ALERT_REASON] || '',
     link: getMonitorRouteFromMonitorId({
