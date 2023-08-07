@@ -18,10 +18,13 @@ export function buildChatItem(params: ChatItemBuildProps): ChatTimelineItem {
     title: '',
     canEdit: false,
     canGiveFeedback: false,
+    canCopy: true,
+    canExpand: false,
     canRegenerate: params.role === MessageRole.User,
     currentUser: {
       username: 'elastic',
     },
+    hide: false,
     loading: false,
     ...params,
   };
@@ -106,6 +109,7 @@ export function buildFunction(): FunctionDefinition {
       name: 'elasticsearch',
       contexts: ['core'],
       description: 'Call Elasticsearch APIs on behalf of the user',
+      descriptionForUser: 'Call Elasticsearch APIs on behalf of the user',
       parameters: {
         type: 'object',
         properties: {
@@ -135,6 +139,7 @@ export function buildFunctionServiceSummary(): FunctionDefinition {
       contexts: ['core'],
       description:
         'Gets a summary of a single service, including: the language, service version, deployments, infrastructure, alerting, etc. ',
+      descriptionForUser: 'Get a summary for a single service.',
       parameters: {
         type: 'object',
       },
