@@ -50,7 +50,7 @@
       "POST"
     ],
     "patterns": [
-      "{indices}/_delete_by_query"
+      "{index}/_delete_by_query"
     ],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/docs-delete-by-query.html"
   }

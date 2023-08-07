@@ -13,7 +13,10 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { default as React, useCallback, useEffect, useState } from 'react';
+import { getSystemLogsDataStreams } from '../../../../common/elastic_agent_logs';
+import { ObservabilityOnboardingPluginSetupDeps } from '../../../plugin';
 import { useWizard } from '.';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { useKibanaNavigation } from '../../../hooks/use_kibana_navigation';
@@ -32,22 +35,32 @@ import {
   StepPanelFooter,
 } from '../../shared/step_panel';
 import { ApiKeyBanner } from '../custom_logs/wizard/api_key_banner';
+import { getDiscoverNavigationParams } from '../utils';
 
 export function InstallElasticAgent() {
+  const {
+    services: {
+      discover: { locator },
+    },
+  } = useKibana<ObservabilityOnboardingPluginSetupDeps>();
+
   const { navigateToKibanaUrl } = useKibanaNavigation();
   const { getState, setState } = useWizard();
   const wizardState = getState();
   const [elasticAgentPlatform, setElasticAgentPlatform] =
     useState<ElasticAgentPlatform>('linux-tar');
 
-  const datasetName = 'elastic-agent';
-  const namespace = 'default';
+  const datasetName = 'system-logs';
 
   function onBack() {
     navigateToKibanaUrl('/app/observabilityOnboarding');
   }
-  function onContinue() {
-    navigateToKibanaUrl('/app/logs/stream');
+  async function onContinue() {
+    const dataStreams = getSystemLogsDataStreams();
+    const dataSets = dataStreams.map(
+      (dataSream) => dataSream.data_stream.dataset
+    );
+    await locator?.navigate(getDiscoverNavigationParams(dataSets));
   }
 
   function onAutoDownloadConfig() {
@@ -83,10 +96,7 @@ export function InstallElasticAgent() {
           params: {
             body: {
               name: datasetName,
-              state: {
-                datasetName,
-                namespace,
-              },
+              type: 'systemLogs',
             },
           },
         });
@@ -94,26 +104,6 @@ export function InstallElasticAgent() {
     },
     [monitoringRole?.hasPrivileges]
   );
-
-  const { status: saveOnboardingStateDataStatus } = useFetcher((callApi) => {
-    const { onboardingId } = getState();
-    if (onboardingId) {
-      return callApi(
-        'PUT /internal/observability_onboarding/flow/{onboardingId}',
-        {
-          params: {
-            path: { onboardingId },
-            body: {
-              state: {
-                datasetName,
-                namespace,
-              },
-            },
-          },
-        }
-      );
-    }
-  }, []);
 
   const { apiKeyEncoded, onboardingId } = installShipperSetup ?? getState();
 
@@ -132,7 +122,7 @@ export function InstallElasticAgent() {
     [
       apiKeyEncoded,
       onboardingId,
-      saveOnboardingStateDataStatus === FETCH_STATUS.SUCCESS,
+      installShipperSetupStatus === FETCH_STATUS.SUCCESS,
     ]
   );
 
