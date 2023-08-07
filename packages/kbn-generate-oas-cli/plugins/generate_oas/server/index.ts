@@ -19,7 +19,7 @@ import { OpenAPIV3 } from 'openapi-types';
 
 type RuleTypeParams = [string, [z.ZodTypeAny, z.ZodTypeAny, ...z.ZodTypeAny[]]];
 
-export class AlertingOasPlugin implements Plugin {
+export class GenerateOasPlugin implements Plugin {
   // private updateSchema: [z.ZodTypeAny, z.ZodTypeAny, ...z.ZodTypeAny[]] | undefined
   // private createSchema: Array<z.infer<typeof createBodySchema> | undefined
   private updateSchema: OpenAPIV3.SchemaObject | undefined;
@@ -111,4 +111,4 @@ export class AlertingOasPlugin implements Plugin {
   }
 }
 
-export const plugin = () => new AlertingOasPlugin();
+export const plugin = () => new GenerateOasPlugin();

@@ -1,9 +1,9 @@
 {
   "type": "plugin",
-  "id": "@kbn/alerting_oas",
+  "id": "@kbn/generate_oas",
   "owner": "@elastic/response-ops",
   "plugin": {
-    "id": "alertingOas",
+    "id": "generateOas",
     "server": true,
     "browser": false,
     "requiredPlugins": [
