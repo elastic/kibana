@@ -23,6 +23,8 @@ const getBenchmarkIdIconType = (props: Props): string => {
       return cisEksIcon;
     case 'cis_aws':
       return 'logoAWS';
+    case 'cis_gcp':
+      return 'logoGCP';
     case 'cis_k8s':
     default:
       return 'logoKubernetes';
