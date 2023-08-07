@@ -25,7 +25,7 @@ export interface HostsStrategyResponse extends IEsSearchResponse {
 
 export interface HostsRequestOptions extends RequestOptionsPaginated<HostsFields> {
   defaultIndex: string[];
-  isNewRiskScoreEnabled: boolean;
+  isNewRiskScoreModuleAvailable: boolean;
 }
 
 export interface HostsSortField {

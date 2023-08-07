@@ -67,7 +67,7 @@ export const useUserRelatedHosts = ({
       factoryQueryType: RelatedEntitiesQueries.relatedHosts,
       userName,
       from,
-      isNewRiskScoreEnabled: false,
+      isNewRiskScoreModuleAvailable: false,
     }),
     [indexNames, from, userName]
   );

@@ -39,5 +39,5 @@ export interface UsersRelatedHostsRequestOptions extends Partial<RequestBasicOpt
   skip?: boolean;
   from: string;
   inspect?: Maybe<Inspect>;
-  isNewRiskScoreEnabled: boolean;
+  isNewRiskScoreModuleAvailable: boolean;
 }
