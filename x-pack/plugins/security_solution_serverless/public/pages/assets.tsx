@@ -21,14 +21,14 @@ const INTEGRATIONS_CALLOUT_TITLE = i18n.translate(
     defaultMessage: 'Integrations',
   }
 );
-const INTEGRATIONS_CALLOUT_CONTENT = i18n.translate(
+const INTEGRATIONS_CALLOUT_DESCRIPTION = i18n.translate(
   'xpack.securitySolutionServerless.assets.integrationsCallout.content',
   {
     defaultMessage: 'Choose an integration to start collecting and analyzing your data.',
   }
 );
-const INTEGRATIONS_CALLOUT_BUTTON = i18n.translate(
-  'xpack.securitySolutionServerless.assets.integrationsCallout.button',
+const INTEGRATIONS_CALLOUT_BUTTON_TEXT = i18n.translate(
+  'xpack.securitySolutionServerless.assets.integrationsCallout.content',
   {
     defaultMessage: 'Browse integrations',
   }
@@ -54,9 +54,9 @@ export const AssetsRoute: React.FC = () => {
           iconType="cluster"
           style={{ borderRadius: euiTheme.border.radius.medium }}
         >
-          <p>{INTEGRATIONS_CALLOUT_CONTENT}</p>
+          <p>{INTEGRATIONS_CALLOUT_DESCRIPTION}</p>
           <LinkButton id={ExternalPageName.integrationsSecurity} fill>
-            {INTEGRATIONS_CALLOUT_BUTTON}
+            {INTEGRATIONS_CALLOUT_BUTTON_TEXT}
           </LinkButton>
         </EuiCallOut>
       </KibanaPageTemplate.Section>

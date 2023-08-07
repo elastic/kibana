@@ -23,7 +23,7 @@ export const SecurityPagePath = {
  * `pluginId`: is the id of the plugin that owns the deep link
  *
  * `deepLinkId`: is the id of the deep link inside the plugin.
- * Keep empty for the root page of the plugin, e.g. `ml:`
+ * Keep empty for the root page of the plugin, e.g. `osquery:`
  *
  * `path`: is the path to append to the plugin and deep link.
  * This is optional and only needed if the path is not registered in the plugin's `deepLinks`. e.g. `integrations:/browse/security`
