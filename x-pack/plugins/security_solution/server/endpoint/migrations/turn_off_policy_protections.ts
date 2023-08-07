@@ -5,14 +5,21 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
-import { isPolicySetToEventCollectionOnly } from '../../../common/endpoint/models/policy_config_helpers';
+import type { Logger, ElasticsearchClient } from '@kbn/core/server';
+import type { UpdatePackagePolicy } from '@kbn/fleet-plugin/common';
+import type { AuthenticatedUser } from '@kbn/security-plugin/common';
+import {
+  isPolicySetToEventCollectionOnly,
+  setPolicyToEventCollectionOnly,
+} from '../../../common/endpoint/models/policy_config_helpers';
 import type { PolicyData } from '../../../common/endpoint/types';
 import { AppFeatureSecurityKey } from '../../../common/types/app_features';
 import type { EndpointInternalFleetServicesInterface } from '../services/fleet';
 import type { AppFeatures } from '../../lib/app_features';
+import { getPolicyDataForUpdate } from '../../../common/endpoint/service/policy';
 
 export const turnOffPolicyProtections = async (
+  esClient: ElasticsearchClient,
   fleetServices: EndpointInternalFleetServicesInterface,
   appFeaturesService: AppFeatures,
   logger: Logger
@@ -32,18 +39,20 @@ export const turnOffPolicyProtections = async (
   );
 
   const { packagePolicy, internalSoClient, endpointPolicyKuery } = fleetServices;
-  const updates = [];
+  const updates: UpdatePackagePolicy[] = [];
   const messages: string[] = [];
   let hasMoreData = true;
+  let total = 0;
   let page = 1;
 
   do {
-    const { items } = await packagePolicy.list(internalSoClient, {
+    const { items, total: totalPolicies } = await packagePolicy.list(internalSoClient, {
       page: page++,
       kuery: endpointPolicyKuery,
-      perPage: 100,
+      perPage: 1000,
     });
 
+    total = totalPolicies;
     hasMoreData = items.length > 0;
 
     for (const item of items) {
@@ -56,14 +65,47 @@ export const turnOffPolicyProtections = async (
           `Policy [${integrationPolicy.id}][${integrationPolicy.name}] updated to disable protections. Trigger: [${message}]`
         );
 
-        // FIXME:PT prepare the update
+        integrationPolicy.inputs[0].config.policy.value =
+          setPolicyToEventCollectionOnly(policySettings);
+
+        updates.push({
+          ...getPolicyDataForUpdate(integrationPolicy),
+          id: integrationPolicy.id,
+        });
       }
     }
   } while (hasMoreData);
 
   if (updates.length > 0) {
-    // FIXME:PT make the update by calling bulkUpdate
+    log.info(`Found ${updates.length} policies that need updates`);
+
+    const bulkUpdateResponse = await fleetServices.packagePolicy.bulkUpdate(
+      internalSoClient,
+      esClient,
+      updates,
+      {
+        user: { username: 'elastic' } as AuthenticatedUser,
+      }
+    );
+
+    log.debug(`Bulk update response:\n${JSON.stringify(bulkUpdateResponse, null, 2)}`);
+
+    if (bulkUpdateResponse.failedPolicies.length > 0) {
+      log.error(
+        `Done. ${
+          bulkUpdateResponse.failedPolicies.length
+        } out of ${total} failed to update:\n${JSON.stringify(
+          bulkUpdateResponse.failedPolicies,
+          null,
+          2
+        )}`
+      );
+    } else {
+      log.info(
+        `Done. The following ${updates.length} updates were applied:\n${messages.join('\n')}`
+      );
+    }
   } else {
-    log.info(`Done. No policies needed updating.`);
+    log.info(`Done. Checked ${total} policies and no updates needed`);
   }
 };
