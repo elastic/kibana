@@ -51,6 +51,7 @@ import {
 } from './change_point_detection_context';
 import { useChangePointResults } from './use_change_point_agg_request';
 import { useSplitFieldCardinality } from './use_split_field_cardinality';
+import { MAX_SERIES } from '../../embeddable/const';
 
 const selectControlCss = { width: '350px' };
 
@@ -356,6 +357,8 @@ const FieldPanel: FC<FieldPanelProps> = ({
                         };
                       })
                     }
+                    min={1}
+                    max={MAX_SERIES}
                   />
                 </EuiFormRow>
               ) : null}
