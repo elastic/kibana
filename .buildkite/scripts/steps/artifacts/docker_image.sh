@@ -71,7 +71,7 @@ cat << EOF | buildkite-agent annotate --style "info" --context image
   ARM64: \`$KIBANA_IMAGE-arm64\`
 EOF
 
- if [[ "${BUILDKITE_PULL_REQUEST:-false}" != "false" ]]; then
+if [[ "${BUILDKITE_PULL_REQUEST:-false}" != "false" ]]; then
   buildkite-agent meta-data set pr_comment:deploy_cloud:head "* Kibana Serverless Image: \`$KIBANA_IMAGE\`"
   cat << EOF | buildkite-agent annotate --style "info" --context kibana-serverless-image
 
