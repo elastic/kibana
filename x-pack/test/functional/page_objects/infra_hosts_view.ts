@@ -211,7 +211,7 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
     // Asset Details Flyout Tabs
     async getAssetDetailsKPITileValue(type: string) {
       const container = await testSubjects.find('infraAssetDetailsKPIGrid');
-      const element = await container.findByTestSubject(`assetDetailsKPI-${type}`);
+      const element = await container.findByTestSubject(`infraAssetDetailsKPI${type}`);
       const div = await element.findByClassName('echMetricText__value');
       return div.getAttribute('title');
     },

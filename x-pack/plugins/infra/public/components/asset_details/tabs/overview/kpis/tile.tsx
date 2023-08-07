@@ -71,7 +71,7 @@ export const Tile = ({
     <EuiPanelStyled
       hasShadow={false}
       paddingSize={error ? 'm' : 'none'}
-      data-test-subj={`assetDetailsKPI-${id}`}
+      data-test-subj={`infraAssetDetailsKPI${id}`}
     >
       {error ? (
         <EuiFlexGroup
@@ -100,7 +100,7 @@ export const Tile = ({
           anchorClassName="eui-fullWidth"
         >
           <LensWrapper
-            id={`infraAssetDetailsKPIGrid${id}Tile`}
+            id={`infraAssetDetailsKPI${id}`}
             attributes={attributes}
             style={{ height: MIN_HEIGHT }}
             extraActions={extraActions}
