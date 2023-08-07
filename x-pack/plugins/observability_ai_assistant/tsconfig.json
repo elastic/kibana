@@ -24,7 +24,6 @@
     "@kbn/spaces-plugin",
     "@kbn/kibana-react-plugin",
     "@kbn/shared-ux-utility",
-    "@kbn/stack-connectors-plugin",
     "@kbn/alerting-plugin",
     "@kbn/features-plugin"
   ],
