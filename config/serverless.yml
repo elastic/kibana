@@ -90,3 +90,6 @@ vis_type_timeseries.readOnly: true
 vis_type_vislib.readOnly: true
 vis_type_xy.readOnly: true
 input_control_vis.readOnly: true
+
+# Disable cases in stack management
+xpack.cases.stack.enabled: false

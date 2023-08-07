@@ -26,6 +26,7 @@ import {
   getConnectorsFormDeserializer,
   getConnectorsFormSerializer,
 } from '../utils';
+import { useAvailableCasesOwners } from '../app/use_available_owners';
 import type { CaseAttachmentsWithoutOwner } from '../../types';
 import { useGetSupportedActionConnectors } from '../../containers/configure/use_get_supported_action_connectors';
 import { useCreateCaseWithAttachmentsTransaction } from '../../common/apm/use_cases_transactions';
@@ -68,6 +69,7 @@ export const FormContext: React.FC<Props> = ({
   const { mutateAsync: createAttachments } = useCreateAttachments();
   const { mutateAsync: pushCaseToExternalService } = usePostPushToService();
   const { startTransaction } = useCreateCaseWithAttachmentsTransaction();
+  const availableOwners = useAvailableCasesOwners();
 
   const submitCase = useCallback(
     async (
@@ -83,6 +85,8 @@ export const FormContext: React.FC<Props> = ({
         const { selectedOwner, ...userFormData } = dataWithoutConnectorId;
         const caseConnector = getConnectorById(dataConnectorId, connectors);
 
+        console.log('form context', {owner, availableOwners, selectedOwner});
+
         startTransaction({ appId, attachments });
 
         const connectorToUpdate = caseConnector
@@ -94,7 +98,7 @@ export const FormContext: React.FC<Props> = ({
             ...userFormData,
             connector: connectorToUpdate,
             settings: { syncAlerts },
-            owner: selectedOwner ?? owner[0],
+            owner: selectedOwner ?? availableOwners[0],
           },
         });
 
