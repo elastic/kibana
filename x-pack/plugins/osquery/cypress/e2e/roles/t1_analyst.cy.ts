@@ -24,7 +24,7 @@ import {
   loadSavedQuery,
 } from '../../tasks/api_fixtures';
 
-describe('T1 Analyst - READ + runSavedQueries ', { tags: [tag.ESS] }, () => {
+describe('T1 Analyst - READ + runSavedQueries ', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
   let savedQueryName: string;
   let savedQueryId: string;
   let packName: string;
