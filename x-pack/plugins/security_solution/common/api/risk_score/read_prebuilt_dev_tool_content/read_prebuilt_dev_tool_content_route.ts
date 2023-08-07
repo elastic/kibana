@@ -5,9 +5,13 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
+import { schema } from '@kbn/config-schema';
 
-export const indexStatusSchema = t.type({
-  indexName: t.string,
-  entity: t.string,
-});
+export const readConsoleRequestBody = {
+  params: schema.object({
+    console_id: schema.oneOf([
+      schema.literal('enable_host_risk_score'),
+      schema.literal('enable_user_risk_score'),
+    ]),
+  }),
+};
