@@ -463,7 +463,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         ).to.eql([{ name: 'synth-go_production_request_GET /apple', y: 10000 }]);
       });
 
-      it('with empty service name, transaction name and transaction type', async () => {
+      it('with empty filter query', async () => {
         const options = {
           params: {
             query: {
@@ -490,7 +490,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         ]);
       });
 
-      it('with empty service name, transaction name, transaction type and group by on transaction name', async () => {
+      it('with empty filter query and group by on transaction name', async () => {
         const options = {
           params: {
             query: {
