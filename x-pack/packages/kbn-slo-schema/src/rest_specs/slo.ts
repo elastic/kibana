@@ -187,6 +187,7 @@ const getSLOBurnRatesResponseSchema = t.type({
 const getSLOBurnRatesParamsSchema = t.type({
   path: t.type({ id: t.string }),
   body: t.type({
+    instanceId: allOrAnyString,
     windows: t.array(
       t.type({
         name: t.string,

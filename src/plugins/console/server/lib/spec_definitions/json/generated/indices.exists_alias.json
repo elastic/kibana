@@ -17,7 +17,7 @@
     ],
     "patterns": [
       "_alias/{name}",
-      "{indices}/_alias/{name}"
+      "{index}/_alias/{name}"
     ],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-aliases.html"
   }

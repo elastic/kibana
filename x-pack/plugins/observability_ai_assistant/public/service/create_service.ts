@@ -12,12 +12,18 @@ import { createCallObservabilityAIAssistantAPI } from '../api';
 import { CreateChatCompletionResponseChunk, ObservabilityAIAssistantService } from '../types';
 import { readableStreamReaderIntoObservable } from '../utils/readable_stream_reader_into_observable';
 
-export function createService(coreStart: CoreStart): ObservabilityAIAssistantService {
+export function createService({
+  coreStart,
+  enabled,
+}: {
+  coreStart: CoreStart;
+  enabled: boolean;
+}): ObservabilityAIAssistantService {
   const client = createCallObservabilityAIAssistantAPI(coreStart);
 
   return {
     isEnabled: () => {
-      return true;
+      return enabled;
     },
     async chat({
       connectorId,
