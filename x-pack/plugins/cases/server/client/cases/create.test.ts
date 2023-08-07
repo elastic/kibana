@@ -10,6 +10,7 @@ import {
   MAX_TAGS_PER_CASE,
   MAX_LENGTH_PER_TAG,
   MAX_TITLE_LENGTH,
+  MAX_ASSIGNEES_PER_CASE,
 } from '../../../common/constants';
 import { SECURITY_SOLUTION_OWNER } from '../../../common';
 import { mockCases } from '../../mocks';
@@ -81,6 +82,14 @@ describe('create', () => {
         assignees: [{ uid: '1' }],
         theCase: caseSO,
       });
+    });
+
+    it('should throw an error if the assignees array length is too long', async () => {
+      const assignees = Array(MAX_ASSIGNEES_PER_CASE + 1).fill({ uid: 'foo' });
+
+      await expect(create({ ...theCase, assignees }, clientArgs)).rejects.toThrow(
+        `Failed to create case: Error: The length of the field assignees is too long. Array must be of length <= ${MAX_ASSIGNEES_PER_CASE}.`
+      );
     });
   });
 
