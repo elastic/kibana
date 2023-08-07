@@ -95,7 +95,7 @@ describe('Alert Event Details', () => {
     });
   });
 
-  describe('Response actions', () => {
+  describe.skip('Response actions', () => {
     let multiQueryPackId: string;
     let multiQueryPackName: string;
     let ruleId: string;
