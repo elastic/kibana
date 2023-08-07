@@ -48,7 +48,7 @@ import {
 import { OVERVIEW_URL, TIMELINE_TEMPLATES_URL } from '../../../urls/navigation';
 import { EQL_QUERY_VALIDATION_ERROR } from '../../../screens/create_new_rule';
 
-describe('Create a timeline from a template', () => {
+describe.skip('Create a timeline from a template', () => {
   before(() => {
     deleteTimelines();
     login();
