@@ -42,7 +42,7 @@ describe('event_log_list_status_filter', () => {
       <EventLogListStatusFilter selectedOptions={[]} onChange={onChangeMock} />
     );
 
-    wrapper.find(EuiFilterButton).simulate('click');
+    wrapper.find(EuiFilterButton).find('button').simulate('click');
 
     const statusItems = wrapper.find(EuiFilterSelectItem);
     expect(statusItems.length).toEqual(4);

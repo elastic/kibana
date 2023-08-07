@@ -233,6 +233,9 @@ export const DETECTION_ENGINE_RULES_BULK_CREATE =
 export const DETECTION_ENGINE_RULES_BULK_UPDATE =
   `${DETECTION_ENGINE_RULES_URL}/_bulk_update` as const;
 
+/**
+ * Internal Risk Score routes
+ */
 export const INTERNAL_RISK_SCORE_URL = '/internal/risk_score' as const;
 export const DEV_TOOL_PREBUILT_CONTENT =
   `${INTERNAL_RISK_SCORE_URL}/prebuilt_content/dev_tool/{console_id}` as const;
@@ -244,15 +247,26 @@ export const prebuiltSavedObjectsBulkCreateUrl = (templateName: string) =>
 export const PREBUILT_SAVED_OBJECTS_BULK_DELETE = `${INTERNAL_RISK_SCORE_URL}/prebuilt_content/saved_objects/_bulk_delete/{template_name}`;
 export const prebuiltSavedObjectsBulkDeleteUrl = (templateName: string) =>
   `${INTERNAL_RISK_SCORE_URL}/prebuilt_content/saved_objects/_bulk_delete/${templateName}` as const;
-
-export const INTERNAL_DASHBOARDS_URL = `/internal/dashboards` as const;
-export const INTERNAL_TAGS_URL = `/internal/tags`;
-
 export const RISK_SCORE_CREATE_INDEX = `${INTERNAL_RISK_SCORE_URL}/indices/create`;
 export const RISK_SCORE_DELETE_INDICES = `${INTERNAL_RISK_SCORE_URL}/indices/delete`;
 export const RISK_SCORE_CREATE_STORED_SCRIPT = `${INTERNAL_RISK_SCORE_URL}/stored_scripts/create`;
 export const RISK_SCORE_DELETE_STORED_SCRIPT = `${INTERNAL_RISK_SCORE_URL}/stored_scripts/delete`;
 export const RISK_SCORE_PREVIEW_URL = `${INTERNAL_RISK_SCORE_URL}/preview`;
+
+export const RISK_ENGINE_URL = `${INTERNAL_RISK_SCORE_URL}/engine`;
+export const RISK_ENGINE_STATUS_URL = `${RISK_ENGINE_URL}/status`;
+export const RISK_ENGINE_INIT_URL = `${RISK_ENGINE_URL}/init`;
+export const RISK_ENGINE_ENABLE_URL = `${RISK_ENGINE_URL}/enable`;
+export const RISK_ENGINE_DISABLE_URL = `${RISK_ENGINE_URL}/disable`;
+
+/**
+ * Public Risk Score routes
+ */
+export const RISK_ENGINE_PUBLIC_PREFIX = '/api/risk_scores' as const;
+export const RISK_SCORE_CALCULATION_URL = `${RISK_ENGINE_PUBLIC_PREFIX}/calculation` as const;
+
+export const INTERNAL_DASHBOARDS_URL = `/internal/dashboards` as const;
+export const INTERNAL_TAGS_URL = `/internal/tags`;
 
 /**
  * Internal detection engine routes

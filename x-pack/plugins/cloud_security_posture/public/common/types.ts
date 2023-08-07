@@ -6,7 +6,7 @@
  */
 import type { Criteria } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import type { BoolQuery, Filter, Query } from '@kbn/es-query';
+import type { BoolQuery, Filter, Query, EsQueryConfig } from '@kbn/es-query';
 import { CspFinding } from '../../common/schemas/csp_finding';
 
 export type FindingsGroupByKind = 'default' | 'resource';
@@ -18,6 +18,10 @@ export interface FindingsBaseURLQuery {
 
 export interface FindingsBaseProps {
   dataView: DataView;
+}
+
+export interface FindingsBaseESQueryConfig {
+  config: EsQueryConfig;
 }
 
 export interface FindingsBaseEsQuery {

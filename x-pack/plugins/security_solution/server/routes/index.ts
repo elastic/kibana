@@ -74,7 +74,14 @@ import { registerManageExceptionsRoutes } from '../lib/exceptions/api/register_r
 import { registerDashboardsRoutes } from '../lib/dashboards/routes';
 import { registerTagsRoutes } from '../lib/tags/routes';
 import { setAlertTagsRoute } from '../lib/detection_engine/routes/signals/set_alert_tags_route';
-import { riskScorePreviewRoute } from '../lib/risk_engine/routes';
+import {
+  riskScorePreviewRoute,
+  riskEngineDisableRoute,
+  riskEngineInitRoute,
+  riskEngineEnableRoute,
+  riskEngineStatusRoute,
+} from '../lib/risk_engine/routes';
+import { riskScoreCalculationRoute } from '../lib/risk_engine/routes/risk_score_calculation_route';
 
 export const initRoutes = (
   router: SecuritySolutionPluginRouter,
@@ -175,5 +182,10 @@ export const initRoutes = (
 
   if (config.experimentalFeatures.riskScoringRoutesEnabled) {
     riskScorePreviewRoute(router, logger);
+    riskScoreCalculationRoute(router, logger);
+    riskEngineInitRoute(router, logger, security);
+    riskEngineEnableRoute(router, logger, security);
+    riskEngineStatusRoute(router, logger);
+    riskEngineDisableRoute(router, logger, security);
   }
 };
