@@ -16,11 +16,13 @@ import {
   EuiFlexItem,
   EuiForm,
   EuiFormRow,
+  EuiIcon,
   EuiPanel,
   EuiPopover,
   EuiProgress,
   EuiSpacer,
   EuiSwitch,
+  EuiToolTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -341,10 +343,26 @@ const FieldPanel: FC<FieldPanelProps> = ({
                 <EuiFormRow
                   fullWidth
                   label={
-                    <FormattedMessage
-                      id="xpack.aiops.changePointDetection.maxSeriesToPlotLabel"
-                      defaultMessage="Max series"
-                    />
+                    <EuiFlexGroup gutterSize={'xs'} alignItems={'center'}>
+                      <EuiFlexItem grow={false}>
+                        <FormattedMessage
+                          id="xpack.aiops.changePointDetection.maxSeriesToPlotLabel"
+                          defaultMessage="Max series"
+                        />
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiToolTip
+                          content={i18n.translate(
+                            'xpack.aiops.changePointDetection.maxSeriesToPlotDescription',
+                            {
+                              defaultMessage: 'The maximum number of change points to visualize.',
+                            }
+                          )}
+                        >
+                          <EuiIcon type={'questionInCircle'} />
+                        </EuiToolTip>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
                   }
                 >
                   <EuiFieldNumber
