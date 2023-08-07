@@ -42,7 +42,7 @@ export const EmbeddableInputTracker: FC<{
     <ReloadContextProvider reload$={reload$}>
       <DataSourceContextProvider dataViewId={input.dataViewId}>
         <FilterQueryContextProvider timeRange={input.timeRange}>
-          <ChardGridEmbeddableWrapper
+          <ChartGridEmbeddableWrapper
             timeRange={input.timeRange}
             fn={input.fn}
             metricField={input.metricField}
@@ -68,7 +68,7 @@ export const EmbeddableInputTracker: FC<{
  * @param partitions
  * @constructor
  */
-export const ChardGridEmbeddableWrapper: FC<EmbeddableChangePointChartProps> = ({
+export const ChartGridEmbeddableWrapper: FC<EmbeddableChangePointChartProps> = ({
   fn,
   metricField,
   maxSeriesToPlot,

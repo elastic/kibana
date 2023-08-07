@@ -39,7 +39,6 @@ export const useCasesModal = <EmbeddableType extends EmbeddableChangePointChartT
           {
             type: AttachmentType.persistableState,
             persistableStateAttachmentTypeId: embeddableType,
-            // TODO Cases: improve type for persistableStateAttachmentState with io-ts
             persistableStateAttachmentState: JSON.parse(
               JSON.stringify(persistableStateAttachmentState)
             ),

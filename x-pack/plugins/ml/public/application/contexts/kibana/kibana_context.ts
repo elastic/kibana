@@ -52,7 +52,6 @@ interface StartPlugins {
   lens: LensPublicStart;
   savedObjectsManagement: SavedObjectsManagementPluginStart;
   savedSearch: SavedSearchPublicPluginStart;
-
   presentationUtil: PresentationUtilPluginStart;
 }
 export type StartServices = CoreStart &
