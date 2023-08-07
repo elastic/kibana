@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 export const GET_STARTED_PAGE_TITLE = i18n.translate(
   'xpack.securitySolutionServerless.getStarted.title',
   {
-    defaultMessage: `Welcome`,
+    defaultMessage: `Welcome to Security Solution`,
   }
 );
 
