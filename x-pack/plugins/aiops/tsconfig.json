@@ -37,6 +37,7 @@
     "@kbn/ml-category-validator",
     "@kbn/ml-date-picker",
     "@kbn/ml-error-utils",
+    "@kbn/ml-in-memory-table",
     "@kbn/ml-is-defined",
     "@kbn/ml-is-populated-object",
     "@kbn/ml-kibana-theme",

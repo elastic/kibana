@@ -6,7 +6,7 @@
  */
 import expect from '@kbn/expect';
 import { first } from 'lodash';
-import { PrivilegeType } from '@kbn/apm-plugin/common/privilege_type';
+import { PrivilegeType, ClusterPrivilegeType } from '@kbn/apm-plugin/common/privilege_type';
 import { ApmUsername } from '@kbn/apm-plugin/server/test_helpers/create_apm_users/authentication';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import { ApmApiError, ApmApiSupertest } from '../../../common/apm_api_supertest';
@@ -19,6 +19,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   const agentKeyName = 'test';
   const allApplicationPrivileges = [PrivilegeType.AGENT_CONFIG, PrivilegeType.EVENT];
+  const clusterPrivileges = [ClusterPrivilegeType.MANAGE_OWN_API_KEY];
 
   async function createAgentKey(apiClient: ApmApiSupertest, privileges = allApplicationPrivileges) {
     return await apiClient({
@@ -60,6 +61,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             _inspect: [],
             data: {
               missingPrivileges: allApplicationPrivileges,
+              missingClusterPrivileges: clusterPrivileges,
             },
           });
         });

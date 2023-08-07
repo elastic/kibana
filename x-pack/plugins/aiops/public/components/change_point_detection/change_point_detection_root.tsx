@@ -34,9 +34,15 @@ import { ReloadContextProvider } from '../../hooks/use_reload';
 
 const localStorage = new Storage(window.localStorage);
 
+/**
+ * Props for the ChangePointDetectionAppState component.
+ */
 export interface ChangePointDetectionAppStateProps {
+  /** The data view to analyze. */
   dataView: DataView;
+  /** The saved search to analyze. */
   savedSearch: SavedSearch | null;
+  /** App dependencies */
   appDependencies: AiopsAppDependencies;
 }
 

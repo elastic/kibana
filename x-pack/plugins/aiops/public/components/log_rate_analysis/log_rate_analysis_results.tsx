@@ -30,6 +30,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { SignificantTerm, SignificantTermGroup } from '@kbn/ml-agg-utils';
 
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
+import { LOG_RATE_ANALYSIS_TYPE, type LogRateAnalysisType } from '../../../common/constants';
 import { initialState, streamReducer } from '../../../common/api/stream_reducer';
 import type { AiopsApiLogRateAnalysis } from '../../../common/api';
 import {
@@ -68,8 +69,13 @@ const groupResultsOnMessage = i18n.translate(
 const resultsGroupedOffId = 'aiopsLogRateAnalysisGroupingOff';
 const resultsGroupedOnId = 'aiopsLogRateAnalysisGroupingOn';
 
+/**
+ * Interface for log rate analysis results data.
+ */
 export interface LogRateAnalysisResultsData {
+  /** Statistically significant field/value items. */
   significantTerms: SignificantTerm[];
+  /** Statistically significant groups of field/value items. */
   significantTermsGroups: SignificantTermGroup[];
 }
 
@@ -79,6 +85,8 @@ export interface LogRateAnalysisResultsData {
 interface LogRateAnalysisResultsProps {
   /** The data view to analyze. */
   dataView: DataView;
+  /** The type of analysis, whether it's a spike or dip */
+  analysisType?: LogRateAnalysisType;
   /** Start timestamp filter */
   earliest: number;
   /** End timestamp filter */
@@ -104,6 +112,7 @@ interface LogRateAnalysisResultsProps {
 
 export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
   dataView,
+  analysisType = LOG_RATE_ANALYSIS_TYPE.SPIKE,
   earliest,
   isBrushCleared,
   latest,
@@ -170,7 +179,16 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
       index: dataView.getIndexPattern(),
       grouping: true,
       flushFix: true,
-      ...windowParameters,
+      // If analysis type is `spike`, pass on window parameters as is,
+      // if it's `dip`, swap baseline and deviation.
+      ...(analysisType === LOG_RATE_ANALYSIS_TYPE.SPIKE
+        ? windowParameters
+        : {
+            baselineMin: windowParameters.deviationMin,
+            baselineMax: windowParameters.deviationMax,
+            deviationMin: windowParameters.baselineMin,
+            deviationMax: windowParameters.baselineMax,
+          }),
       overrides,
       sampleProbability,
     },
@@ -384,7 +402,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
             <p>
               <FormattedMessage
                 id="xpack.aiops.logRateAnalysis.page.noResultsPromptBody"
-                defaultMessage="Try to adjust the baseline and deviation time ranges and rerun the analysis. If you still get no results, there might be no statistically significant entities contributing to this spike in log rates."
+                defaultMessage="Try to adjust the baseline and deviation time ranges and rerun the analysis. If you still get no results, there might be no statistically significant entities contributing to this deviation in log rate."
               />
             </p>
           }

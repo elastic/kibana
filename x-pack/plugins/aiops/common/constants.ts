@@ -5,10 +5,29 @@
  * 2.0.
  */
 
-export const SPIKE_ANALYSIS_THRESHOLD = 0.02;
+/**
+ * The p-value threshold to be used for statistically significant items.
+ */
+export const LOG_RATE_ANALYSIS_P_VALUE_THRESHOLD = 0.02;
 
-// For the technical preview of Log Rate Analysis we use a hard coded seed.
-// In future versions we might use a user specific seed or let the user costumise it.
+/**
+ * The type of log rate analysis (spike or dip) will affect how parameters are
+ * passed to the analysis API endpoint.
+ */
+export const LOG_RATE_ANALYSIS_TYPE = {
+  SPIKE: 'spike',
+  DIP: 'dip',
+} as const;
+/**
+ * Union type of log rate analysis types.
+ */
+export type LogRateAnalysisType =
+  typeof LOG_RATE_ANALYSIS_TYPE[keyof typeof LOG_RATE_ANALYSIS_TYPE];
+
+/**
+ * For the technical preview of Log Rate Analysis we use a hard coded seed.
+ * In future versions we might use a user specific seed or let the user customise it.
+ */
 export const RANDOM_SAMPLER_SEED = 3867412;
 
 export const CASES_ATTACHMENT_CHANGE_POINT_CHART = 'aiopsChangePointChart';

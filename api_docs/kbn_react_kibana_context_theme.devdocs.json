@@ -26,10 +26,10 @@
         "tags": [],
         "label": "KibanaThemeProvider",
         "description": [
-          "\nA Kibana-specific theme provider that uses the Kibana theme service to customize the EUI theme."
+          "\nA Kibana-specific theme provider that uses the Kibana theme service to customize the EUI theme.\n\nIf the theme provider is missing a parent EuiProvider, one will automatically be rendered instead."
         ],
         "signature": [
-          "({ theme: { theme$ }, euiTheme: theme, children, ...props }: ",
+          "({ theme, children, ...props }: ",
           {
             "pluginId": "@kbn/react-kibana-context-theme",
             "scope": "common",
@@ -42,13 +42,14 @@
         "path": "packages/react/kibana_context/theme/theme_provider.tsx",
         "deprecated": false,
         "trackAdoption": false,
+        "returnComment": [],
         "children": [
           {
             "parentPluginId": "@kbn/react-kibana-context-theme",
             "id": "def-common.KibanaThemeProvider.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  theme: { theme$ },\n  euiTheme: theme,\n  children,\n  ...props\n}",
+            "label": "__0",
             "description": [],
             "signature": [
               {
@@ -61,11 +62,9 @@
             ],
             "path": "packages/react/kibana_context/theme/theme_provider.tsx",
             "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
+            "trackAdoption": false
           }
         ],
-        "returnComment": [],
         "initialIsOpen": false
       },
       {
