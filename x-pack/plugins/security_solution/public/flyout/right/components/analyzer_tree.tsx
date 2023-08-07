@@ -39,15 +39,37 @@ export interface AnalyzerTreeProps {
    * Boolean value of whether there is error in data fetching
    */
   error: boolean;
+  /**
+   * Optional parameter to limit the number of child nodes to be displayed
+   */
+  childCountLimit?: number;
+  /**
+   * Optional parameter to limit the depth of ancestors
+   */
+  ancestorLevel?: number;
+  /**
+   * Optional parameter to limit the depth of descendants
+   */
+  descendantLevel?: number;
 }
 
 /**
  * Analyzer tree that represent a summary view of analyzer. It shows current process, and its parent and child processes
  */
-export const AnalyzerTree: React.FC<AnalyzerTreeProps> = ({ statsNodes, loading, error }) => {
+export const AnalyzerTree: React.FC<AnalyzerTreeProps> = ({
+  statsNodes,
+  loading,
+  error,
+  childCountLimit = 3,
+  ancestorLevel = 1,
+  descendantLevel = 1,
+}) => {
   const { eventId, indexName, scopeId } = useRightPanelContext();
   const { openLeftPanel } = useExpandableFlyoutContext();
-  const items = useMemo(() => getTreeNodes(statsNodes ?? []), [statsNodes]);
+  const items = useMemo(
+    () => getTreeNodes(statsNodes ?? [], childCountLimit, ancestorLevel, descendantLevel),
+    [statsNodes, childCountLimit, ancestorLevel, descendantLevel]
+  );
 
   const goToAnalyserTab = useCallback(() => {
     openLeftPanel({
@@ -89,7 +111,12 @@ export const AnalyzerTree: React.FC<AnalyzerTreeProps> = ({ statsNodes, loading,
           >
             {ANALYZER_PREVIEW_TITLE}
           </EuiButtonEmpty>
-          <EuiTreeView items={items} display="compressed" aria-label={ANALYZER_PREVIEW_TITLE} />
+          <EuiTreeView
+            items={items}
+            display="compressed"
+            aria-label={ANALYZER_PREVIEW_TITLE}
+            showExpansionArrows
+          />
         </EuiPanel>
       </EuiPanel>
     );
