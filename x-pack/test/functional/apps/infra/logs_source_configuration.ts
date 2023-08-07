@@ -6,6 +6,10 @@
  */
 
 import expect from '@kbn/expect';
+import {
+  ELASTIC_HTTP_VERSION_HEADER,
+  X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
+} from '@kbn/core-http-common';
 import { DATES } from './constants';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -135,6 +139,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         const [{ stats }] = await supertest
           .post(`/internal/telemetry/clusters/_stats`)
           .set(COMMON_REQUEST_HEADERS)
+          .set(ELASTIC_HTTP_VERSION_HEADER, '2')
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .set('Accept', 'application/json')
           .send({
             unencrypted: true,

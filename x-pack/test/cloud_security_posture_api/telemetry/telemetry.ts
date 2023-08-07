@@ -6,7 +6,10 @@
  */
 
 import expect from '@kbn/expect';
-import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
+import {
+  ELASTIC_HTTP_VERSION_HEADER,
+  X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
+} from '@kbn/core-http-common';
 import { data, MockTelemetryFindings } from './data';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
@@ -68,6 +71,8 @@ export default function ({ getService }: FtrProviderContext) {
         body: [{ stats: apiResponse }],
       } = await supertest
         .post(`/internal/telemetry/clusters/_stats`)
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .set('kbn-xsrf', 'xxxx')
         .send({
           unencrypted: true,
@@ -121,6 +126,8 @@ export default function ({ getService }: FtrProviderContext) {
       } = await supertest
         .post(`/internal/telemetry/clusters/_stats`)
         .set('kbn-xsrf', 'xxxx')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send({
           unencrypted: true,
           refreshCache: true,
@@ -166,6 +173,8 @@ export default function ({ getService }: FtrProviderContext) {
       } = await supertest
         .post(`/internal/telemetry/clusters/_stats`)
         .set('kbn-xsrf', 'xxxx')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send({
           unencrypted: true,
           refreshCache: true,
@@ -242,6 +251,8 @@ export default function ({ getService }: FtrProviderContext) {
       } = await supertest
         .post(`/internal/telemetry/clusters/_stats`)
         .set('kbn-xsrf', 'xxxx')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send({
           unencrypted: true,
           refreshCache: true,
@@ -296,6 +307,8 @@ export default function ({ getService }: FtrProviderContext) {
       } = await supertest
         .post(`/internal/telemetry/clusters/_stats`)
         .set('kbn-xsrf', 'xxxx')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send({
           unencrypted: true,
           refreshCache: true,

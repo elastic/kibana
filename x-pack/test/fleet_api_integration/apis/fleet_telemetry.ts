@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import {
+  ELASTIC_HTTP_VERSION_HEADER,
+  X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
+} from '@kbn/core-http-common';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry, generateAgent } from '../helpers';
@@ -126,6 +130,8 @@ export default function (providerContext: FtrProviderContext) {
       } = await supertest
         .post(`/internal/telemetry/clusters/_stats`)
         .set('kbn-xsrf', 'xxxx')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send({
           unencrypted: true,
           refreshCache: true,

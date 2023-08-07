@@ -54,17 +54,22 @@ export default function telemetryConfigTest({ getService }: FtrProviderContext) 
           await supertest
             .post('/internal/telemetry/optIn')
             .set('kbn-xsrf', 'xxx')
-            .set(ELASTIC_HTTP_VERSION_HEADER, apiVersion)
+            .set(ELASTIC_HTTP_VERSION_HEADER, '2')
             .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
             .send({ enabled: true })
             .expect(200);
 
-          await supertest.get(api).set('kbn-xsrf', 'xxx').expect(200, {
-            allowChangingOptInStatus: true,
-            optIn: true,
-            sendUsageFrom: 'server',
-            telemetryNotifyUserAboutOptInDefault: false,
-          });
+          await supertest
+            .get(api)
+            .set('kbn-xsrf', 'xxx')
+            .set(ELASTIC_HTTP_VERSION_HEADER, apiVersion)
+            .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+            .expect(200, {
+              allowChangingOptInStatus: true,
+              optIn: true,
+              sendUsageFrom: 'server',
+              telemetryNotifyUserAboutOptInDefault: false,
+            });
         });
 
         it('GET should get false when opted-out', async () => {
@@ -72,7 +77,7 @@ export default function telemetryConfigTest({ getService }: FtrProviderContext) 
           await supertest
             .post('/internal/telemetry/optIn')
             .set('kbn-xsrf', 'xxx')
-            .set(ELASTIC_HTTP_VERSION_HEADER, apiVersion)
+            .set(ELASTIC_HTTP_VERSION_HEADER, '2')
             .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
             .send({ enabled: false })
             .expect(200);

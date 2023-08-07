@@ -6,6 +6,10 @@
  */
 
 import { UsageStatsPayload } from '@kbn/telemetry-collection-manager-plugin/server';
+import {
+  ELASTIC_HTTP_VERSION_HEADER,
+  X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
+} from '@kbn/core-http-common';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export interface UsageStatsPayloadTestFriendly extends UsageStatsPayload {
@@ -31,7 +35,8 @@ export function UsageAPIProvider({ getService }: FtrProviderContext) {
     const { body } = await supertest
       .post('/internal/telemetry/clusters/_stats')
       .set('kbn-xsrf', 'xxx')
-      .set('x-elastic-internal-origin', 'xxx')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send({ refreshCache: true, ...payload })
       .expect(200);
     return body;

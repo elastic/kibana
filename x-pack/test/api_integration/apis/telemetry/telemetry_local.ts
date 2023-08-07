@@ -41,6 +41,8 @@ export default function ({ getService }: FtrProviderContext) {
       const { body } = await supertest
         .post('/internal/telemetry/clusters/_stats')
         .set('kbn-xsrf', 'xxx')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send({ unencrypted: true, refreshCache: true })
         .expect(200);
 

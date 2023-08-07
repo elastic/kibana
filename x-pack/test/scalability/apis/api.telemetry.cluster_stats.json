@@ -34,7 +34,9 @@
               "Cookie": "",
               "Kbn-Version": "",
               "Accept-Encoding": "gzip, deflate, br",
-              "Content-Type": "application/json"
+              "Content-Type": "application/json",
+              "elastic-api-version": "2",
+              "x-elastic-internal-origin": "kibana"
             },
             "statusCode": 200
           }

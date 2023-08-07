@@ -6,6 +6,10 @@
  * Side Public License, v 1.
  */
 
+import {
+  ELASTIC_HTTP_VERSION_HEADER,
+  X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
+} from '@kbn/core-http-common';
 import { setupIntegrationEnvironment, TestEnvironmentUtils } from '../../test_utils';
 
 describe('Files usage telemetry', () => {
@@ -46,6 +50,8 @@ describe('Files usage telemetry', () => {
 
     const { body } = await request
       .post(root, '/internal/telemetry/clusters/_stats')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send({ unencrypted: true });
 
     expect(body[0].stats.stack_stats.kibana.plugins.files).toMatchInlineSnapshot(`
