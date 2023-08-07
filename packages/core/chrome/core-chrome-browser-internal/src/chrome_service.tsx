@@ -225,6 +225,11 @@ export class ChromeService {
       projectNavigation.setProjectHome(homeHref);
     };
 
+    const setProjectsUrl = (projectsUrl: string) => {
+      validateChromeStyle();
+      projectNavigation.setProjectsUrl(projectsUrl);
+    };
+
     const isIE = () => {
       const ua = window.navigator.userAgent;
       const msie = ua.indexOf('MSIE '); // IE 10 or older
@@ -317,6 +322,7 @@ export class ChromeService {
                 loadingCount$={http.getLoadingCount$()}
                 headerBanner$={headerBanner$.pipe(takeUntil(this.stop$))}
                 homeHref$={projectNavigation.getProjectHome$()}
+                projectsUrl$={projectNavigation.getProjectsUrl$()}
                 docLinks={docLinks}
                 kibanaVersion={injectedMetadata.getKibanaVersion()}
                 prependBasePath={http.basePath.prepend}
@@ -444,6 +450,7 @@ export class ChromeService {
       getChromeStyle$: () => chromeStyle$.pipe(takeUntil(this.stop$)),
       project: {
         setHome: setProjectHome,
+        setProjectsUrl,
         setNavigation: setProjectNavigation,
         setSideNavComponent: setProjectSideNavComponent,
         setBreadcrumbs: setProjectBreadcrumbs,

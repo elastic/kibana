@@ -52,7 +52,7 @@
       "POST"
     ],
     "patterns": [
-      "{indices}/_update_by_query"
+      "{index}/_update_by_query"
     ],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/docs-update-by-query.html"
   }
