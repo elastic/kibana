@@ -8,6 +8,10 @@
 
 import expect from '@kbn/expect';
 import { KBN_SCREENSHOT_MODE_ENABLED_KEY } from '@kbn/screenshot-mode-plugin/public';
+import {
+  ELASTIC_HTTP_VERSION_HEADER,
+  X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
+} from '@kbn/core-http-common';
 import { PluginFunctionalProviderContext } from '../../services';
 
 const TELEMETRY_SO_TYPE = 'telemetry';
@@ -85,6 +89,8 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
         await supertest
           .post('/internal/telemetry/optIn')
           .set('kbn-xsrf', 'xxx')
+          .set(ELASTIC_HTTP_VERSION_HEADER, '2')
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .send({ enabled: true })
           .expect(200);
 
@@ -97,6 +103,8 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
         await supertest
           .post('/internal/telemetry/optIn')
           .set('kbn-xsrf', 'xxx')
+          .set(ELASTIC_HTTP_VERSION_HEADER, '2')
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .send({ enabled: false })
           .expect(200);
 

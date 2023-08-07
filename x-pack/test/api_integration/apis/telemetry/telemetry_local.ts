@@ -12,6 +12,10 @@ import ossPluginsTelemetrySchema from '@kbn/telemetry-plugin/schema/oss_plugins.
 import xpackRootTelemetrySchema from '@kbn/telemetry-collection-xpack-plugin/schema/xpack_root.json';
 import xpackPluginsTelemetrySchema from '@kbn/telemetry-collection-xpack-plugin/schema/xpack_plugins.json';
 import { assertTelemetryPayload } from '@kbn/telemetry-tools';
+import {
+  ELASTIC_HTTP_VERSION_HEADER,
+  X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
+} from '@kbn/core-http-common';
 import { flatKeys } from '../../../../../test/api_integration/apis/telemetry/utils';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
