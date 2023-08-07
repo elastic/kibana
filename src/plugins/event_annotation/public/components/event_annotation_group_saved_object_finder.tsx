@@ -12,6 +12,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
 import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
 import { ContentClient } from '@kbn/content-management-plugin/public';
+import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import {
   EuiButton,
   EuiEmptyPrompt,
@@ -25,11 +26,13 @@ import { EVENT_ANNOTATION_GROUP_TYPE } from '@kbn/event-annotation-common';
 
 export const EventAnnotationGroupSavedObjectFinder = ({
   contentClient,
+  uiSettings,
   fixedPageSize = 10,
   checkHasAnnotationGroups,
   onChoose,
   onCreateNew,
 }: {
+  uiSettings: IUiSettingsClient;
   contentClient: ContentClient;
   fixedPageSize?: number;
   checkHasAnnotationGroups: () => Promise<boolean>;
@@ -108,7 +111,7 @@ export const EventAnnotationGroupSavedObjectFinder = ({
         />
       }
       savedObjectMetaData={savedObjectMetaData}
-      services={{ contentClient }}
+      services={{ contentClient, uiSettings }}
     />
   );
 };

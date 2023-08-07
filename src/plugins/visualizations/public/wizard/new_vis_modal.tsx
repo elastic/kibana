@@ -12,7 +12,7 @@ import { EuiModal } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
-import { ApplicationStart, DocLinksStart } from '@kbn/core/public';
+import { ApplicationStart, DocLinksStart, IUiSettingsClient } from '@kbn/core/public';
 import { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
 import { ContentClient } from '@kbn/content-management-plugin/public';
 import { SearchSelection } from './search_selection';
@@ -28,6 +28,7 @@ interface TypeSelectionProps {
   visTypesRegistry: TypesStart;
   editorParams?: string[];
   addBasePath: (path: string) => string;
+  uiSettings: IUiSettingsClient;
   docLinks: DocLinksStart;
   application: ApplicationStart;
   outsideVisualizeApp?: boolean;
@@ -87,6 +88,7 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
         <EuiModal onClose={this.onCloseModal} className="visNewVisSearchDialog">
           <SearchSelection
             contentClient={this.props.contentClient}
+            uiSettings={this.props.uiSettings}
             onSearchSelected={this.onSearchSelected}
             visType={this.state.visType}
             goBack={() => this.setState({ showSearchVisModal: false })}

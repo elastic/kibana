@@ -10,6 +10,7 @@ import { EuiDelayRender, EuiSkeletonText } from '@elastic/eui';
 import React from 'react';
 import { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { ContentClient } from '@kbn/content-management-plugin/public';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { SavedObjectFinderProps } from './saved_object_finder';
 
 const LazySavedObjectFinder = React.lazy(() => import('./saved_object_finder'));
@@ -27,10 +28,11 @@ const SavedObjectFinder = (props: SavedObjectFinderProps) => (
 
 export const getSavedObjectFinder = (
   contentClient: ContentClient,
+  uiSettings: IUiSettingsClient,
   savedObjectsTagging?: SavedObjectsTaggingApi
 ) => {
   return (props: SavedObjectFinderProps) => (
-    <SavedObjectFinder {...props} services={{ savedObjectsTagging, contentClient }} />
+    <SavedObjectFinder {...props} services={{ savedObjectsTagging, contentClient, uiSettings }} />
   );
 };
 

@@ -19,7 +19,7 @@ interface SearchSelectionProps {
 const fixedPageSize: number = 8;
 
 export const SearchSelection: FC<SearchSelectionProps> = ({ onSearchSelected }) => {
-  const { contentManagement } = useAppDependencies();
+  const { contentManagement, uiSettings } = useAppDependencies();
 
   return (
     <>
@@ -70,7 +70,7 @@ export const SearchSelection: FC<SearchSelectionProps> = ({ onSearchSelected }) 
             },
           ]}
           fixedPageSize={fixedPageSize}
-          services={{ contentClient: contentManagement.client }}
+          services={{ contentClient: contentManagement.client, uiSettings }}
         />
       </EuiModalBody>
     </>

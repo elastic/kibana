@@ -11,6 +11,7 @@ import PropTypes from 'prop-types';
 import React, { ReactElement, ReactNode } from 'react';
 import { getTagFindReferences, parseQuery } from '@kbn/saved-objects-management-plugin/public';
 import type { ContentClient } from '@kbn/content-management-plugin/public';
+import type { IUiSettingsClient } from '@kbn/core/public';
 
 import {
   EuiFlexGroup,
@@ -30,7 +31,7 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
-import { FinderAttributes, SavedObjectCommon } from '../../common';
+import { FinderAttributes, SavedObjectCommon, LISTING_LIMIT_SETTING } from '../../common';
 
 export interface SavedObjectMetaData<T extends FinderAttributes = FinderAttributes> {
   type: string;
@@ -59,6 +60,7 @@ interface SavedObjectFinderState {
 interface SavedObjectFinderServices {
   savedObjectsTagging?: SavedObjectsTaggingApi;
   contentClient: ContentClient;
+  uiSettings: IUiSettingsClient;
 }
 
 interface BaseSavedObjectFinder {
@@ -105,7 +107,7 @@ export class SavedObjectFinderUi extends React.Component<
 
   private debouncedFetch = debounce(async (query: Query) => {
     const metaDataMap = this.getSavedObjectMetaDataMap();
-    const { contentClient } = this.props.services;
+    const { contentClient, uiSettings } = this.props.services;
 
     const { queryText, visibleTypes, selectedTags } = parseQuery(
       query,
@@ -128,6 +130,7 @@ export class SavedObjectFinderUi extends React.Component<
       query: {
         text: queryText ? `${queryText}*` : undefined,
         ...(includeTags?.length ? { tags: { included: includeTags } } : {}),
+        limit: uiSettings.get(LISTING_LIMIT_SETTING), // TODO: support pagination,
       },
     });
 

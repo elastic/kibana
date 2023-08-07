@@ -127,6 +127,7 @@ export const AddPanelFlyout = ({
           services={{
             contentClient: contentManagement.client,
             savedObjectsTagging: savedObjectsTaggingOss?.getTaggingApi(),
+            uiSettings: core.uiSettings,
           }}
           onChoose={onChoose}
           savedObjectMetaData={metaData}

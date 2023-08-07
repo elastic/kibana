@@ -68,6 +68,8 @@ describe('NewVisModal', () => {
     getByGroup: (group: VisGroups) => _visTypes.filter((type) => type.group === group),
   };
   const addBasePath = (url: string) => `testbasepath${url}`;
+  const settingsGet = jest.fn();
+  const uiSettings: any = { get: settingsGet };
   const docLinks = {
     links: {
       dashboard: {
@@ -97,6 +99,7 @@ describe('NewVisModal', () => {
         onClose={() => null}
         visTypesRegistry={visTypes}
         addBasePath={addBasePath}
+        uiSettings={uiSettings}
         application={{} as ApplicationStart}
         docLinks={docLinks as DocLinksStart}
         contentClient={contentManagement.client}
@@ -113,6 +116,7 @@ describe('NewVisModal', () => {
         onClose={() => null}
         visTypesRegistry={visTypes}
         addBasePath={addBasePath}
+        uiSettings={uiSettings}
         application={{} as ApplicationStart}
         docLinks={docLinks as DocLinksStart}
         contentClient={contentManagement.client}
@@ -128,6 +132,7 @@ describe('NewVisModal', () => {
         onClose={() => null}
         visTypesRegistry={visTypes}
         addBasePath={addBasePath}
+        uiSettings={uiSettings}
         application={{} as ApplicationStart}
         docLinks={docLinks as DocLinksStart}
         contentClient={contentManagement.client}
@@ -144,6 +149,7 @@ describe('NewVisModal', () => {
           onClose={() => null}
           visTypesRegistry={visTypes}
           addBasePath={addBasePath}
+          uiSettings={uiSettings}
           application={{} as ApplicationStart}
           docLinks={docLinks as DocLinksStart}
           contentClient={contentManagement.client}
@@ -162,6 +168,7 @@ describe('NewVisModal', () => {
           visTypesRegistry={visTypes}
           editorParams={['foo=true', 'bar=42']}
           addBasePath={addBasePath}
+          uiSettings={uiSettings}
           application={{} as ApplicationStart}
           docLinks={docLinks as DocLinksStart}
           contentClient={contentManagement.client}
@@ -186,6 +193,7 @@ describe('NewVisModal', () => {
           editorParams={['foo=true', 'bar=42']}
           originatingApp={'coolJestTestApp'}
           addBasePath={addBasePath}
+          uiSettings={uiSettings}
           application={{ navigateToApp } as unknown as ApplicationStart}
           docLinks={docLinks as DocLinksStart}
           stateTransfer={stateTransfer}
@@ -211,6 +219,7 @@ describe('NewVisModal', () => {
           visTypesRegistry={visTypes}
           editorParams={['foo=true', 'bar=42']}
           addBasePath={addBasePath}
+          uiSettings={uiSettings}
           application={{ navigateToApp } as unknown as ApplicationStart}
           docLinks={docLinks as DocLinksStart}
           contentClient={contentManagement.client}
@@ -231,6 +240,7 @@ describe('NewVisModal', () => {
           onClose={() => null}
           visTypesRegistry={visTypes}
           addBasePath={addBasePath}
+          uiSettings={uiSettings}
           application={{} as ApplicationStart}
           docLinks={docLinks as DocLinksStart}
           contentClient={contentManagement.client}

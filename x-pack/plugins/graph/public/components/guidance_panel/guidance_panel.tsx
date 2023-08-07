@@ -80,7 +80,7 @@ function GuidancePanelComponent(props: GuidancePanelProps) {
     IUnifiedSearchPluginServices & { contentManagement: ContentManagementPublicStart }
   >();
   const { services, overlays } = kibana;
-  const { application, data, contentManagement } = services;
+  const { application, data, contentManagement, uiSettings } = services;
   const [hasDataViews, setHasDataViews] = useState<boolean>(true);
 
   useEffect(() => {
@@ -93,7 +93,7 @@ function GuidancePanelComponent(props: GuidancePanelProps) {
   if (!overlays || !application) return null;
 
   const onOpenDatasourcePicker = () => {
-    openSourceModal({ overlays, contentManagement }, onIndexPatternSelected);
+    openSourceModal({ overlays, contentManagement, uiSettings }, onIndexPatternSelected);
   };
 
   let content = (

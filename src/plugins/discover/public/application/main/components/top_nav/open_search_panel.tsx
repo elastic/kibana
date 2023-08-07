@@ -30,7 +30,8 @@ interface OpenSearchPanelProps {
 }
 
 export function OpenSearchPanel(props: OpenSearchPanelProps) {
-  const { addBasePath, capabilities, savedObjectsTagging, contentClient } = useDiscoverServices();
+  const { addBasePath, capabilities, savedObjectsTagging, contentClient, uiSettings } =
+    useDiscoverServices();
   const hasSavedObjectPermission =
     capabilities.savedObjectsManagement?.edit || capabilities.savedObjectsManagement?.delete;
 
@@ -51,6 +52,7 @@ export function OpenSearchPanel(props: OpenSearchPanelProps) {
           services={{
             savedObjectsTagging,
             contentClient,
+            uiSettings,
           }}
           noItemsMessage={
             <FormattedMessage

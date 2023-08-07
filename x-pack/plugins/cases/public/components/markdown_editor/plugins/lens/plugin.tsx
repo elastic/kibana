@@ -72,6 +72,7 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
     lens,
     storage,
     contentManagement,
+    uiSettings,
     data: {
       query: {
         timefilter: { timefilter },
@@ -330,6 +331,7 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
           fixedPageSize={10}
           services={{
             contentClient: contentManagement.client,
+            uiSettings,
           }}
           leftChildren={createLensButton}
           helpText={i18n.translate(

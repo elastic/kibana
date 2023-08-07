@@ -40,6 +40,7 @@ export const buildAllDashboardActions = async ({
 
   const SavedObjectFinder = getSavedObjectFinder(
     contentManagement.client,
+    core.uiSettings,
     savedObjectsTaggingOss?.getTaggingApi()
   );
   const changeViewAction = new ReplacePanelAction(SavedObjectFinder);

@@ -22,6 +22,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { EVENT_ANNOTATION_GROUP_TYPE } from '@kbn/event-annotation-common';
+import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 
 export const EventAnnotationGroupSavedObjectFinder = ({
   fixedPageSize = 10,
@@ -29,8 +30,10 @@ export const EventAnnotationGroupSavedObjectFinder = ({
   onChoose,
   onCreateNew,
   contentClient,
+  uiSettings,
 }: {
   contentClient: ContentClient;
+  uiSettings: IUiSettingsClient;
   fixedPageSize?: number;
   checkHasAnnotationGroups: () => Promise<boolean>;
   onChoose: (value: {
@@ -110,6 +113,7 @@ export const EventAnnotationGroupSavedObjectFinder = ({
       savedObjectMetaData={savedObjectMetaData}
       services={{
         contentClient,
+        uiSettings,
       }}
     />
   );

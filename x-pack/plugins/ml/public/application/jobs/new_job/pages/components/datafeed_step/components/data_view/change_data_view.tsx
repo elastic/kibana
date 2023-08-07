@@ -57,6 +57,7 @@ export const ChangeDataViewModal: FC<Props> = ({ onClose }) => {
     services: {
       data: { dataViews },
       contentManagement,
+      uiSettings,
     },
   } = useMlKibana();
   const navigateToPath = useNavigateToPath();
@@ -169,7 +170,7 @@ export const ChangeDataViewModal: FC<Props> = ({ onClose }) => {
                   },
                 ]}
                 fixedPageSize={fixedPageSize}
-                services={{ contentClient: contentManagement.client }}
+                services={{ contentClient: contentManagement.client, uiSettings }}
               />
             </>
           )}

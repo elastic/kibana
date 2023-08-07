@@ -287,6 +287,7 @@ export function getEventAnnotationService(
       return (
         <EventAnnotationGroupSavedObjectFinder
           contentClient={contentManagement.client}
+          uiSettings={core.uiSettings}
           checkHasAnnotationGroups={checkHasAnnotationGroups}
           {...props}
         />

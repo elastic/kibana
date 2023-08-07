@@ -134,7 +134,11 @@ export function SearchBarComponent(props: SearchBarStateProps & SearchBarProps) 
               data-test-subj="graphDatasourceButton"
               onClick={() => {
                 confirmWipeWorkspace(
-                  () => openSourceModal({ overlays, contentManagement }, onIndexPatternSelected),
+                  () =>
+                    openSourceModal(
+                      { overlays, contentManagement, uiSettings },
+                      onIndexPatternSelected
+                    ),
                   i18n.translate('xpack.graph.clearWorkspace.confirmText', {
                     defaultMessage:
                       'If you change data sources, your current fields and vertices will be reset.',

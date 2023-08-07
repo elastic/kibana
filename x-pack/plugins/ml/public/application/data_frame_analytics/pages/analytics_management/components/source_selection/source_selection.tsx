@@ -34,6 +34,7 @@ export const SourceSelection: FC = () => {
       savedSearch: savedSearchService,
       data: { dataViews: dataViewsService },
       contentManagement,
+      uiSettings,
     },
   } = useMlKibana();
   const navigateToPath = useNavigateToPath();
@@ -162,6 +163,7 @@ export const SourceSelection: FC = () => {
             fixedPageSize={fixedPageSize}
             services={{
               contentClient: contentManagement.client,
+              uiSettings,
             }}
           />
         </EuiPageContent>

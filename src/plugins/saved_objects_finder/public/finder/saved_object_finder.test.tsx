@@ -26,6 +26,7 @@ import { SavedObjectFinderUi as SavedObjectFinder } from './saved_object_finder'
 import { contentManagementMock } from '@kbn/content-management-plugin/public/mocks';
 import { findTestSubject } from '@kbn/test-jest-helpers';
 import { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import { coreMock } from '@kbn/core/public/mocks';
 
 describe('SavedObjectsFinder', () => {
   const doc = {
@@ -70,6 +71,9 @@ describe('SavedObjectsFinder', () => {
   beforeEach(() => {
     (contentClient.mSearch as any as jest.SpyInstance).mockClear();
   });
+  const coreStart = coreMock.createStart();
+  const uiSettings = coreStart.uiSettings;
+  uiSettings.get.mockImplementation(() => 10);
 
   const savedObjectsTagging = {
     ui: {
@@ -100,6 +104,7 @@ describe('SavedObjectsFinder', () => {
     const wrapper = shallow(
       <SavedObjectFinder
         services={{
+          uiSettings,
           contentClient,
           savedObjectsTagging,
         }}
@@ -111,7 +116,7 @@ describe('SavedObjectsFinder', () => {
     await nextTick();
     expect(contentClient.mSearch).toHaveBeenCalledWith({
       contentTypes: [{ contentTypeId: 'search' }],
-      query: {},
+      query: { limit: 10 },
     });
   });
 
@@ -123,10 +128,7 @@ describe('SavedObjectsFinder', () => {
 
       const wrapper = shallow(
         <SavedObjectFinder
-          services={{
-            contentClient,
-            savedObjectsTagging,
-          }}
+          services={{ uiSettings, contentClient, savedObjectsTagging }}
           savedObjectMetaData={searchMetaData}
         />
       );
@@ -149,10 +151,7 @@ describe('SavedObjectsFinder', () => {
 
       const wrapper = mount(
         <SavedObjectFinder
-          services={{
-            contentClient,
-            savedObjectsTagging,
-          }}
+          services={{ uiSettings, contentClient, savedObjectsTagging }}
           onChoose={chooseStub}
           savedObjectMetaData={searchMetaData}
         />
@@ -174,10 +173,7 @@ describe('SavedObjectsFinder', () => {
 
       const wrapper = shallow(
         <SavedObjectFinder
-          services={{
-            contentClient,
-            savedObjectsTagging,
-          }}
+          services={{ uiSettings, contentClient, savedObjectsTagging }}
           savedObjectMetaData={searchMetaData}
           helpText="This is some description about the action"
         />
@@ -197,10 +193,7 @@ describe('SavedObjectsFinder', () => {
       const button = <EuiButton>Hello</EuiButton>;
       const wrapper = shallow(
         <SavedObjectFinder
-          services={{
-            contentClient,
-            savedObjectsTagging,
-          }}
+          services={{ uiSettings, contentClient, savedObjectsTagging }}
           savedObjectMetaData={searchMetaData}
           leftChildren={button}
         />
@@ -233,10 +226,7 @@ describe('SavedObjectsFinder', () => {
 
       const wrapper = mount(
         <SavedObjectFinder
-          services={{
-            contentClient,
-            savedObjectsTagging,
-          }}
+          services={{ uiSettings, contentClient, savedObjectsTagging }}
           savedObjectMetaData={metaDataConfig}
         />
       );
@@ -260,10 +250,7 @@ describe('SavedObjectsFinder', () => {
 
       const wrapper = mount(
         <SavedObjectFinder
-          services={{
-            contentClient,
-            savedObjectsTagging,
-          }}
+          services={{ uiSettings, contentClient, savedObjectsTagging }}
           savedObjectMetaData={metaDataConfig}
         />
       );
@@ -291,10 +278,7 @@ describe('SavedObjectsFinder', () => {
 
       const wrapper = mount(
         <SavedObjectFinder
-          services={{
-            contentClient,
-            savedObjectsTagging,
-          }}
+          services={{ uiSettings, contentClient, savedObjectsTagging }}
           savedObjectMetaData={searchMetaData}
         />
       );
@@ -314,10 +298,7 @@ describe('SavedObjectsFinder', () => {
 
       const wrapper = mount(
         <SavedObjectFinder
-          services={{
-            contentClient,
-            savedObjectsTagging,
-          }}
+          services={{ uiSettings, contentClient, savedObjectsTagging }}
           savedObjectMetaData={searchMetaData}
         />
       );
@@ -340,10 +321,7 @@ describe('SavedObjectsFinder', () => {
 
       const wrapper = mount(
         <SavedObjectFinder
-          services={{
-            contentClient,
-            savedObjectsTagging,
-          }}
+          services={{ uiSettings, contentClient, savedObjectsTagging }}
           savedObjectMetaData={metaDataConfig}
         />
       );
@@ -367,10 +345,7 @@ describe('SavedObjectsFinder', () => {
 
       const wrapper = mount(
         <SavedObjectFinder
-          services={{
-            contentClient,
-            savedObjectsTagging,
-          }}
+          services={{ uiSettings, contentClient, savedObjectsTagging }}
           savedObjectMetaData={metaDataConfig}
         />
       );
@@ -399,10 +374,7 @@ describe('SavedObjectsFinder', () => {
 
     const wrapper = shallow(
       <SavedObjectFinder
-        services={{
-          contentClient,
-          savedObjectsTagging,
-        }}
+        services={{ uiSettings, contentClient, savedObjectsTagging }}
         savedObjectMetaData={[
           {
             type: 'search',
@@ -429,10 +401,7 @@ describe('SavedObjectsFinder', () => {
 
       const wrapper = mount(
         <SavedObjectFinder
-          services={{
-            contentClient,
-            savedObjectsTagging,
-          }}
+          services={{ uiSettings, contentClient, savedObjectsTagging }}
           savedObjectMetaData={searchMetaData}
         />
       );
@@ -449,9 +418,7 @@ describe('SavedObjectsFinder', () => {
             contentTypeId: 'search',
           },
         ],
-        query: {
-          text: 'abc*',
-        },
+        query: { limit: 10, text: 'abc*' },
       });
     });
 
@@ -462,10 +429,7 @@ describe('SavedObjectsFinder', () => {
 
       const wrapper = mount(
         <SavedObjectFinder
-          services={{
-            contentClient,
-            savedObjectsTagging,
-          }}
+          services={{ uiSettings, contentClient, savedObjectsTagging }}
           savedObjectMetaData={searchMetaData}
         />
       );
@@ -488,10 +452,7 @@ describe('SavedObjectsFinder', () => {
 
     const wrapper = shallow(
       <SavedObjectFinder
-        services={{
-          contentClient,
-          savedObjectsTagging,
-        }}
+        services={{ uiSettings, contentClient, savedObjectsTagging }}
         savedObjectMetaData={[
           {
             type: 'search',
@@ -518,9 +479,7 @@ describe('SavedObjectsFinder', () => {
           contentTypeId: 'vis',
         },
       ],
-      query: {
-        text: undefined,
-      },
+      query: { limit: 10, text: undefined },
     });
   });
 
@@ -532,10 +491,7 @@ describe('SavedObjectsFinder', () => {
 
       const wrapper = mount(
         <SavedObjectFinder
-          services={{
-            contentClient,
-            savedObjectsTagging,
-          }}
+          services={{ uiSettings, contentClient, savedObjectsTagging }}
           showFilter={true}
           savedObjectMetaData={metaDataConfig}
         />
@@ -555,10 +511,7 @@ describe('SavedObjectsFinder', () => {
 
       const wrapper = mount(
         <SavedObjectFinder
-          services={{
-            contentClient,
-            savedObjectsTagging,
-          }}
+          services={{ uiSettings, contentClient, savedObjectsTagging }}
           showFilter={false}
           savedObjectMetaData={metaDataConfig}
         />
@@ -576,10 +529,7 @@ describe('SavedObjectsFinder', () => {
 
       const wrapper = mount(
         <SavedObjectFinder
-          services={{
-            contentClient,
-            savedObjectsTagging,
-          }}
+          services={{ uiSettings, contentClient, savedObjectsTagging }}
           showFilter={true}
           savedObjectMetaData={searchMetaData}
         />
@@ -598,10 +548,7 @@ describe('SavedObjectsFinder', () => {
 
       const wrapper = mount(
         <SavedObjectFinder
-          services={{
-            contentClient,
-            savedObjectsTagging: undefined,
-          }}
+          services={{ uiSettings, contentClient, savedObjectsTagging: undefined }}
           showFilter={true}
           savedObjectMetaData={metaDataConfig}
         />
@@ -620,10 +567,7 @@ describe('SavedObjectsFinder', () => {
 
       const wrapper = mount(
         <SavedObjectFinder
-          services={{
-            contentClient,
-            savedObjectsTagging,
-          }}
+          services={{ uiSettings, contentClient, savedObjectsTagging }}
           showFilter={true}
           savedObjectMetaData={metaDataConfig}
         />
@@ -640,9 +584,7 @@ describe('SavedObjectsFinder', () => {
             contentTypeId: 'vis',
           },
         ],
-        query: {
-          text: undefined,
-        },
+        query: { limit: 10, text: undefined },
       });
       search.onChange?.({ query: Query.parse('type:(search or vis)'), queryText: '', error: null });
       expect(contentClient.mSearch).toHaveBeenLastCalledWith({
@@ -654,9 +596,7 @@ describe('SavedObjectsFinder', () => {
             contentTypeId: 'vis',
           },
         ],
-        query: {
-          text: undefined,
-        },
+        query: { limit: 10, text: undefined },
       });
     });
 
@@ -667,10 +607,7 @@ describe('SavedObjectsFinder', () => {
 
       const wrapper = mount(
         <SavedObjectFinder
-          services={{
-            contentClient,
-            savedObjectsTagging,
-          }}
+          services={{ uiSettings, contentClient, savedObjectsTagging }}
           showFilter={true}
           savedObjectMetaData={metaDataConfig}
         />
@@ -691,6 +628,7 @@ describe('SavedObjectsFinder', () => {
           },
         ],
         query: {
+          limit: 10,
           text: undefined,
           tags: {
             included: ['tag1'],
@@ -708,6 +646,7 @@ describe('SavedObjectsFinder', () => {
           },
         ],
         query: {
+          limit: 10,
           text: undefined,
           tags: {
             included: ['tag1', 'tag2'],
@@ -725,10 +664,7 @@ describe('SavedObjectsFinder', () => {
     const noItemsMessage = <span id="myNoItemsMessage" />;
     const wrapper = mount(
       <SavedObjectFinder
-        services={{
-          contentClient,
-          savedObjectsTagging,
-        }}
+        services={{ uiSettings, contentClient, savedObjectsTagging }}
         noItemsMessage={noItemsMessage}
         savedObjectMetaData={searchMetaData}
       />
@@ -756,10 +692,7 @@ describe('SavedObjectsFinder', () => {
 
       const wrapper = mount(
         <SavedObjectFinder
-          services={{
-            contentClient,
-            savedObjectsTagging,
-          }}
+          services={{ uiSettings, contentClient, savedObjectsTagging }}
           initialPageSize={15}
           savedObjectMetaData={searchMetaData}
         />
@@ -781,10 +714,7 @@ describe('SavedObjectsFinder', () => {
 
       const wrapper = mount(
         <SavedObjectFinder
-          services={{
-            contentClient,
-            savedObjectsTagging,
-          }}
+          services={{ uiSettings, contentClient, savedObjectsTagging }}
           initialPageSize={15}
           savedObjectMetaData={searchMetaData}
         />
@@ -812,10 +742,7 @@ describe('SavedObjectsFinder', () => {
 
       const wrapper = mount(
         <SavedObjectFinder
-          services={{
-            contentClient,
-            savedObjectsTagging,
-          }}
+          services={{ uiSettings, contentClient, savedObjectsTagging }}
           initialPageSize={15}
           savedObjectMetaData={searchMetaData}
         />
@@ -846,10 +773,7 @@ describe('SavedObjectsFinder', () => {
 
       const wrapper = mount(
         <SavedObjectFinder
-          services={{
-            contentClient,
-            savedObjectsTagging,
-          }}
+          services={{ uiSettings, contentClient, savedObjectsTagging }}
           fixedPageSize={33}
           savedObjectMetaData={searchMetaData}
         />
@@ -871,10 +795,7 @@ describe('SavedObjectsFinder', () => {
 
       const wrapper = mount(
         <SavedObjectFinder
-          services={{
-            contentClient,
-            savedObjectsTagging,
-          }}
+          services={{ uiSettings, contentClient, savedObjectsTagging }}
           fixedPageSize={33}
           savedObjectMetaData={searchMetaData}
         />
@@ -905,10 +826,7 @@ describe('SavedObjectsFinder', () => {
 
       const wrapper = mount(
         <SavedObjectFinder
-          services={{
-            contentClient,
-            savedObjectsTagging,
-          }}
+          services={{ uiSettings, contentClient, savedObjectsTagging }}
           savedObjectMetaData={searchMetaData}
         />
       );
@@ -921,10 +839,7 @@ describe('SavedObjectsFinder', () => {
 
       const wrapper = mount(
         <SavedObjectFinder
-          services={{
-            contentClient,
-            savedObjectsTagging,
-          }}
+          services={{ uiSettings, contentClient, savedObjectsTagging }}
           savedObjectMetaData={[
             {
               type: 'search',
@@ -946,10 +861,7 @@ describe('SavedObjectsFinder', () => {
 
       const wrapper = mount(
         <SavedObjectFinder
-          services={{
-            contentClient,
-            savedObjectsTagging,
-          }}
+          services={{ uiSettings, contentClient, savedObjectsTagging }}
           savedObjectMetaData={searchMetaData}
         />
       );
@@ -971,10 +883,7 @@ describe('SavedObjectsFinder', () => {
 
     const wrapper = mount(
       <SavedObjectFinder
-        services={{
-          contentClient,
-          savedObjectsTagging,
-        }}
+        services={{ uiSettings, contentClient, savedObjectsTagging }}
         savedObjectMetaData={[
           {
             type: 'search',
@@ -1002,10 +911,7 @@ describe('SavedObjectsFinder', () => {
 
       const wrapper = mount(
         <SavedObjectFinder
-          services={{
-            contentClient,
-            savedObjectsTagging,
-          }}
+          services={{ uiSettings, contentClient, savedObjectsTagging }}
           savedObjectMetaData={metaDataConfig}
         />
       );
@@ -1026,10 +932,7 @@ describe('SavedObjectsFinder', () => {
 
       const wrapper = mount(
         <SavedObjectFinder
-          services={{
-            savedObjectsTagging,
-            contentClient,
-          }}
+          services={{ uiSettings, savedObjectsTagging, contentClient }}
           savedObjectMetaData={searchMetaData}
         />
       );
@@ -1050,10 +953,7 @@ describe('SavedObjectsFinder', () => {
 
       const wrapper = mount(
         <SavedObjectFinder
-          services={{
-            contentClient,
-            savedObjectsTagging: undefined,
-          }}
+          services={{ uiSettings, contentClient, savedObjectsTagging: undefined }}
           savedObjectMetaData={metaDataConfig}
         />
       );
