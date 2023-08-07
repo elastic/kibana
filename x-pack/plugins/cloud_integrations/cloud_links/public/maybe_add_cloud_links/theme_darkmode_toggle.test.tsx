@@ -11,7 +11,7 @@ import '@testing-library/jest-dom';
 import { coreMock } from '@kbn/core/public/mocks';
 import { securityMock } from '@kbn/security-plugin/public/mocks';
 
-import { ThemDarkModeToggle } from './theme_darkmode_toggle';
+import { ThemeDarkModeToggle } from './theme_darkmode_toggle';
 
 const mockUseUpdateUserProfile = jest.fn();
 
@@ -23,7 +23,7 @@ jest.mock('@kbn/user-profile-components', () => {
   };
 });
 
-describe('ThemDarkModeToggle', () => {
+describe('ThemeDarkModeToggle', () => {
   it('renders correctly and toggles dark mode', () => {
     const security = securityMock.createStart();
     const core = coreMock.createStart();
@@ -36,7 +36,7 @@ describe('ThemDarkModeToggle', () => {
     });
 
     const { getByTestId, rerender } = render(
-      <ThemDarkModeToggle core={core} security={security} />
+      <ThemeDarkModeToggle core={core} security={security} />
     );
 
     const toggleSwitch = getByTestId('darkModeToggleSwitch');
@@ -51,7 +51,7 @@ describe('ThemDarkModeToggle', () => {
     });
 
     // Rerender the component to apply the new props
-    rerender(<ThemDarkModeToggle core={core} security={security} />);
+    rerender(<ThemeDarkModeToggle core={core} security={security} />);
 
     fireEvent.click(toggleSwitch);
     expect(mockUpdate).toHaveBeenLastCalledWith({ userSettings: { darkMode: 'light' } });
