@@ -18,6 +18,7 @@ export const GetMetadataListRequestSchema = {
       kuery: schema.maybe(schema.string()),
       sortField: schema.maybe(
         schema.oneOf([
+          schema.literal(EndpointSortableField.ENROLLED_AT.toString()),
           schema.literal(EndpointSortableField.HOSTNAME.toString()),
           schema.literal(EndpointSortableField.HOST_STATUS.toString()),
           schema.literal(EndpointSortableField.POLICY_NAME.toString()),
