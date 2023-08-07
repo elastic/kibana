@@ -18,7 +18,7 @@ export interface DiscoverGridFooterProps {
   isLoadingMore?: boolean;
   rowCount: number;
   sampleSize: number;
-  pageIndex?: number;
+  pageIndex?: number; // starts from 0
   pageCount: number;
   totalHits?: number;
   onFetchMoreRecords?: () => void;
