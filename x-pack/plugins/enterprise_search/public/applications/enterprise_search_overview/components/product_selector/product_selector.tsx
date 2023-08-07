@@ -19,7 +19,7 @@ import {
 } from '@elastic/eui';
 import { Chat } from '@kbn/cloud-chat-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { WelcomeBanner } from '@kbn/serverless-api-panels';
+import { WelcomeBanner } from '@kbn/search-api-panels';
 
 import { AddContentEmptyPrompt } from '../../../shared/add_content_empty_prompt';
 import { ErrorStateCallout } from '../../../shared/error_state';

@@ -14,13 +14,12 @@ import type { HttpStart } from '@kbn/core-http-browser';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { CodeBox } from './code_box';
-import { languageDefinitions } from '../languages/languages';
-import { LanguageDefinition, LanguageDefinitionSnippetArguments } from '../languages/types';
+import { LanguageDefinition } from '../types';
 import { OverviewPanel } from './overview_panel';
 import { IntegrationsPanel } from './integrations_panel';
 
 interface IngestDataProps {
-  codeArguments: LanguageDefinitionSnippetArguments;
+  codeSnippet: string;
   selectedLanguage: LanguageDefinition;
   setSelectedLanguage: (language: LanguageDefinition) => void;
   docLinks: any;
@@ -28,10 +27,12 @@ interface IngestDataProps {
   pluginId: string;
   application?: ApplicationStart;
   sharePlugin: SharePluginStart;
+  languages: LanguageDefinition[];
+  showTryInConsole: boolean;
 }
 
 export const IngestData: React.FC<IngestDataProps> = ({
-  codeArguments,
+  codeSnippet,
   selectedLanguage,
   setSelectedLanguage,
   docLinks,
@@ -39,6 +40,8 @@ export const IngestData: React.FC<IngestDataProps> = ({
   pluginId,
   application,
   sharePlugin,
+  languages,
+  showTryInConsole,
 }) => {
   const [selectedIngestMethod, setSelectedIngestMethod] = useState<
     'ingestViaApi' | 'ingestViaIntegration'
@@ -52,9 +55,9 @@ export const IngestData: React.FC<IngestDataProps> = ({
       leftPanelContent={
         selectedIngestMethod === 'ingestViaApi' ? (
           <CodeBox
-            code="ingestData"
-            codeArgs={codeArguments}
-            languages={languageDefinitions}
+            showTryInConsole={showTryInConsole}
+            codeSnippet={codeSnippet}
+            languages={languages}
             selectedLanguage={selectedLanguage}
             setSelectedLanguage={setSelectedLanguage}
             http={http}

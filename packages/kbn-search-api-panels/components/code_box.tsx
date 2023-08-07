@@ -1,9 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
+
+import React, { useState } from 'react';
 
 import {
   EuiButtonEmpty,
@@ -19,49 +22,46 @@ import {
   EuiThemeProvider,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useState } from 'react';
-import { PLUGIN_ID } from '../../../common';
-import { useKibanaServices } from '../hooks/use_kibana';
-import { consoleDefinition } from './languages/console';
-import { LanguageDefinition, LanguageDefinitionSnippetArguments } from './languages/types';
+import type { HttpStart } from '@kbn/core-http-browser';
+import type { ApplicationStart } from '@kbn/core-application-browser';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
+
+import { LanguageDefinition } from '../types';
 import { TryInConsoleButton } from './try_in_console_button';
 import './code_box.scss';
 
 interface CodeBoxProps {
   languages: LanguageDefinition[];
-  code: keyof LanguageDefinition;
-  codeArgs: LanguageDefinitionSnippetArguments;
+  codeSnippet: string;
   // overrides the language type for syntax highlighting
   languageType?: string;
   selectedLanguage: LanguageDefinition;
   setSelectedLanguage: (language: LanguageDefinition) => void;
+  http: HttpStart;
+  pluginId: string;
+  application?: ApplicationStart;
+  sharePlugin: SharePluginStart;
+  showTryInConsole: boolean;
 }
 
-const getCodeSnippet = (
-  language: Partial<LanguageDefinition>,
-  key: keyof LanguageDefinition,
-  args: LanguageDefinitionSnippetArguments
-): string => {
-  const snippetVal = language[key];
-  if (snippetVal === undefined) return '';
-  if (typeof snippetVal === 'string') return snippetVal;
-  return snippetVal(args);
-};
-
 export const CodeBox: React.FC<CodeBoxProps> = ({
-  code,
-  codeArgs,
-  languages,
+  application,
+  codeSnippet,
+  http,
   languageType,
+  languages,
+  pluginId,
   selectedLanguage,
   setSelectedLanguage,
+  sharePlugin,
+  showTryInConsole,
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
-  const { http } = useKibanaServices();
+
   const items = languages.map((language) => (
     <EuiContextMenuItem
       key={language.id}
-      icon={http.basePath.prepend(`/plugins/${PLUGIN_ID}/assets/${language.iconType}`)}
+      icon={http.basePath.prepend(`/plugins/${pluginId}/assets/${language.iconType}`)}
       onClick={() => {
         setSelectedLanguage(language);
         setIsPopoverOpen(false);
@@ -86,8 +86,6 @@ export const CodeBox: React.FC<CodeBoxProps> = ({
       </EuiButtonEmpty>
     </EuiThemeProvider>
   );
-  const codeSnippet = getCodeSnippet(selectedLanguage, code, codeArgs);
-  const showTryInConsole = code in consoleDefinition;
 
   return (
     <EuiThemeProvider colorMode="dark">
@@ -119,7 +117,11 @@ export const CodeBox: React.FC<CodeBoxProps> = ({
           </EuiFlexItem>
           {showTryInConsole && (
             <EuiFlexItem grow={false}>
-              <TryInConsoleButton request={getCodeSnippet(consoleDefinition, code, codeArgs)} />
+              <TryInConsoleButton
+                request={codeSnippet}
+                application={application}
+                sharePlugin={sharePlugin}
+              />
             </EuiFlexItem>
           )}
         </EuiFlexGroup>

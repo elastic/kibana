@@ -27,18 +27,22 @@ import {
   CodeBox,
   LanguageClientPanel,
   InstallClientPanel,
-} from '@kbn/serverless-api-panels';
+} from '@kbn/search-api-panels';
 
 import React, { useMemo, useState } from 'react';
+import type {
+  LanguageDefinition,
+  LanguageDefinitionSnippetArguments,
+} from '@kbn/search-api-panels';
 import { docLinks } from '../../../common/doc_links';
 import { PLUGIN_ID } from '../../../common';
 import { useKibanaServices } from '../hooks/use_kibana';
 import { API_KEY_PLACEHOLDER, ELASTICSEARCH_URL_PLACEHOLDER } from '../constants';
 import { javascriptDefinition } from './languages/javascript';
 import { languageDefinitions } from './languages/languages';
-import { LanguageDefinition, LanguageDefinitionSnippetArguments } from './languages/types';
 import './overview.scss';
 import { ApiKeyPanel } from './api_key/api_key';
+import { getCodeSnippet, showTryInConsole } from './languages/utils';
 
 export const ElasticsearchOverview = () => {
   const [selectedLanguage, setSelectedLanguage] =
@@ -81,7 +85,9 @@ export const ElasticsearchOverview = () => {
 
       <EuiPageTemplate.Section color="subdued" bottomBorder="extended">
         <InstallClientPanel
-          codeArguments={codeSnippetArguments}
+          codeSnippet={getCodeSnippet(selectedLanguage, 'installClient', codeSnippetArguments)}
+          showTryInConsole={showTryInConsole('installClient')}
+          languages={languageDefinitions}
           language={selectedLanguage}
           setSelectedLanguage={setSelectedLanguage}
           http={http}
@@ -117,9 +123,13 @@ export const ElasticsearchOverview = () => {
           })}
           leftPanelContent={
             <CodeBox
-              code="configureClient"
-              codeArgs={codeSnippetArguments}
               languages={languageDefinitions}
+              codeSnippet={getCodeSnippet(
+                selectedLanguage,
+                'configureClient',
+                codeSnippetArguments
+              )}
+              showTryInConsole={showTryInConsole('configureClient')}
               selectedLanguage={selectedLanguage}
               setSelectedLanguage={setSelectedLanguage}
               http={http}
@@ -169,9 +179,9 @@ export const ElasticsearchOverview = () => {
           })}
           leftPanelContent={
             <CodeBox
-              code="testConnection"
-              codeArgs={codeSnippetArguments}
               languages={languageDefinitions}
+              codeSnippet={getCodeSnippet(selectedLanguage, 'testConnection', codeSnippetArguments)}
+              showTryInConsole={showTryInConsole('testConnection')}
               selectedLanguage={selectedLanguage}
               setSelectedLanguage={setSelectedLanguage}
               http={http}
@@ -188,7 +198,9 @@ export const ElasticsearchOverview = () => {
       </EuiPageTemplate.Section>
       <EuiPageTemplate.Section color="subdued" bottomBorder="extended">
         <IngestData
-          codeArguments={codeSnippetArguments}
+          codeSnippet={getCodeSnippet(selectedLanguage, 'ingestData', codeSnippetArguments)}
+          showTryInConsole={showTryInConsole('ingestData')}
+          languages={languageDefinitions}
           selectedLanguage={selectedLanguage}
           setSelectedLanguage={setSelectedLanguage}
           http={http}
@@ -206,9 +218,13 @@ export const ElasticsearchOverview = () => {
           })}
           leftPanelContent={
             <CodeBox
-              code="buildSearchQuery"
-              codeArgs={codeSnippetArguments}
               languages={languageDefinitions}
+              codeSnippet={getCodeSnippet(
+                selectedLanguage,
+                'buildSearchQuery',
+                codeSnippetArguments
+              )}
+              showTryInConsole={showTryInConsole('buildSearchQuery')}
               selectedLanguage={selectedLanguage}
               setSelectedLanguage={setSelectedLanguage}
               http={http}

@@ -30,11 +30,9 @@ import {
   InstallClientPanel,
   OverviewPanel,
   CodeBox,
-} from '@kbn/serverless-api-panels';
+} from '@kbn/search-api-panels';
 
-import { javascriptDefinition } from '@kbn/serverless-api-panels/languages/javascript';
-import { languageDefinitions } from '@kbn/serverless-api-panels/languages/languages';
-import { LanguageDefinition } from '@kbn/serverless-api-panels/languages/types';
+import { LanguageDefinition } from '@kbn/search-api-panels';
 
 import { KibanaDeps } from '../../../../../../../common/types';
 
@@ -47,6 +45,10 @@ import { KibanaLogic } from '../../../../../shared/kibana';
 import { IndexViewLogic } from '../../index_view_logic';
 import { OverviewLogic } from '../../overview.logic';
 import { GenerateApiKeyModal } from '../generate_api_key_modal/modal';
+
+import { javascriptDefinition } from './languages/javascript';
+import { languageDefinitions } from './languages/languages';
+import { getCodeSnippet, showTryInConsole } from './languages/utils';
 
 export const APIGettingStarted = () => {
   const { http } = useValues(HttpLogic);
@@ -70,6 +72,9 @@ export const APIGettingStarted = () => {
       {isGenerateModalOpen && (
         <GenerateApiKeyModal indexName={indexName} onClose={closeGenerateModal} />
       )}
+      <EuiTitle size="l">
+        <h2>Getting Started with Elastic API</h2>
+      </EuiTitle>
       <SelectClientPanel docLinks={docLinks} http={http} isPanelLeft={false}>
         {languageDefinitions.map((language, index) => (
           <EuiFlexItem key={`panelItem.${index}`}>
@@ -84,14 +89,16 @@ export const APIGettingStarted = () => {
         ))}
       </SelectClientPanel>
       <InstallClientPanel
-        codeArguments={codeArgs}
+        codeSnippet={getCodeSnippet(selectedLanguage, 'installClient', codeArgs)}
+        showTryInConsole={showTryInConsole('installClient')}
+        languages={languageDefinitions}
         language={selectedLanguage}
         setSelectedLanguage={setSelectedLanguage}
         http={http}
         pluginId={''}
-        isPanelLeft={false}
         application={services.application}
         sharePlugin={services.share}
+        isPanelLeft={false}
       />
 
       <OverviewPanel
@@ -195,9 +202,9 @@ export const APIGettingStarted = () => {
         })}
         rightPanelContent={
           <CodeBox
-            code="configureClient"
-            codeArgs={codeArgs}
             languages={languageDefinitions}
+            codeSnippet={getCodeSnippet(selectedLanguage, 'configureClient', codeArgs)}
+            showTryInConsole={showTryInConsole('configureClient')}
             selectedLanguage={selectedLanguage}
             setSelectedLanguage={setSelectedLanguage}
             http={http}
@@ -209,26 +216,26 @@ export const APIGettingStarted = () => {
         links={[
           ...(selectedLanguage.basicConfig
             ? [
-                {
-                  href: selectedLanguage.basicConfig,
-                  label: i18n.translate('xpack.serverlessSearch.configureClient.basicConfigLabel', {
-                    defaultMessage: 'Basic configuration',
-                  }),
-                },
-              ]
+              {
+                href: selectedLanguage.basicConfig,
+                label: i18n.translate('xpack.serverlessSearch.configureClient.basicConfigLabel', {
+                  defaultMessage: 'Basic configuration',
+                }),
+              },
+            ]
             : []),
           ...(selectedLanguage.advancedConfig
             ? [
-                {
-                  href: selectedLanguage.advancedConfig,
-                  label: i18n.translate(
-                    'xpack.serverlessSearch.configureClient.advancedConfigLabel',
-                    {
-                      defaultMessage: 'Advanced configuration',
-                    }
-                  ),
-                },
-              ]
+              {
+                href: selectedLanguage.advancedConfig,
+                label: i18n.translate(
+                  'xpack.serverlessSearch.configureClient.advancedConfigLabel',
+                  {
+                    defaultMessage: 'Advanced configuration',
+                  }
+                ),
+              },
+            ]
             : []),
         ]}
         title={i18n.translate('xpack.serverlessSearch.configureClient.title', {
@@ -243,9 +250,9 @@ export const APIGettingStarted = () => {
         })}
         rightPanelContent={
           <CodeBox
-            code="testConnection"
-            codeArgs={codeArgs}
             languages={languageDefinitions}
+            codeSnippet={getCodeSnippet(selectedLanguage, 'testConnection', codeArgs)}
+            showTryInConsole={showTryInConsole('testConnection')}
             selectedLanguage={selectedLanguage}
             setSelectedLanguage={setSelectedLanguage}
             http={http}
@@ -263,9 +270,9 @@ export const APIGettingStarted = () => {
         description={'Add data to your data stream or index to make it searchable'}
         rightPanelContent={
           <CodeBox
-            code="ingestData"
-            codeArgs={codeArgs}
             languages={languageDefinitions}
+            codeSnippet={getCodeSnippet(selectedLanguage, 'ingestData', codeArgs)}
+            showTryInConsole={showTryInConsole('ingestData')}
             selectedLanguage={selectedLanguage}
             setSelectedLanguage={setSelectedLanguage}
             http={http}
@@ -285,9 +292,9 @@ export const APIGettingStarted = () => {
         })}
         rightPanelContent={
           <CodeBox
-            code="buildSearchQuery"
-            codeArgs={codeArgs}
             languages={languageDefinitions}
+            codeSnippet={getCodeSnippet(selectedLanguage, 'buildSearchQuery', codeArgs)}
+            showTryInConsole={showTryInConsole('buildSearchQuery')}
             selectedLanguage={selectedLanguage}
             setSelectedLanguage={setSelectedLanguage}
             http={http}

@@ -5,13 +5,14 @@
  * 2.0.
  */
 
+import { Languages, LanguageDefinition } from '@kbn/search-api-panels';
+
 import { curlDefinition } from './curl';
 import { goDefinition } from './go';
 import { javascriptDefinition } from './javascript';
 import { phpDefinition } from './php';
 import { pythonDefinition } from './python';
 import { rubyDefinition } from './ruby';
-import { Languages, LanguageDefinition } from './types';
 
 const languageDefinitionRecords: Partial<Record<Languages, LanguageDefinition>> = {
   [Languages.CURL]: curlDefinition,

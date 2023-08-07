@@ -30,7 +30,7 @@ export const GenerateApiKeyPanel: React.FC = () => {
       )}
       <EuiFlexGroup>
         <EuiFlexItem>
-          <EuiPanel hasBorder>
+          <EuiPanel hasBorder paddingSize='xl'>
             {isHiddenIndex ? (
               <EuiEmptyPrompt
                 body={

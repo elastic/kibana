@@ -20,7 +20,7 @@ import {
 
 import type { HttpStart } from '@kbn/core-http-browser';
 
-import { LanguageDefinition } from '../languages/types';
+import { LanguageDefinition } from '../types';
 import './select_client.scss';
 
 interface SelectClientProps {

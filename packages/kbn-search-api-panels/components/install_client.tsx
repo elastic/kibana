@@ -14,17 +14,13 @@ import type { HttpStart } from '@kbn/core-http-browser';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { CodeBox } from './code_box';
-import { languageDefinitions } from '../languages/languages';
 import { OverviewPanel } from './overview_panel';
-import {
-  LanguageDefinition,
-  Languages,
-  LanguageDefinitionSnippetArguments,
-} from '../languages/types';
+import { LanguageDefinition, Languages } from '../types';
 import { GithubLink } from './github_link';
 
 interface InstallClientProps {
-  codeArguments: LanguageDefinitionSnippetArguments;
+  codeSnippet: string;
+  showTryInConsole: boolean;
   language: LanguageDefinition;
   setSelectedLanguage: (language: LanguageDefinition) => void;
   http: HttpStart;
@@ -32,6 +28,7 @@ interface InstallClientProps {
   application?: ApplicationStart;
   sharePlugin: SharePluginStart;
   isPanelLeft?: boolean;
+  languages: LanguageDefinition[];
 }
 
 const Link: React.FC<{ language: Languages; http: HttpStart; pluginId: string }> = ({
@@ -78,8 +75,10 @@ const Link: React.FC<{ language: Languages; http: HttpStart; pluginId: string }>
 };
 
 export const InstallClientPanel: React.FC<InstallClientProps> = ({
-  codeArguments,
+  codeSnippet,
+  showTryInConsole,
   language,
+  languages,
   setSelectedLanguage,
   http,
   pluginId,
@@ -90,10 +89,10 @@ export const InstallClientPanel: React.FC<InstallClientProps> = ({
   const panelContent = (
     <>
       <CodeBox
-        code="installClient"
-        codeArgs={codeArguments}
+        showTryInConsole={showTryInConsole}
+        codeSnippet={codeSnippet}
         languageType="shell"
-        languages={languageDefinitions}
+        languages={languages}
         selectedLanguage={language}
         setSelectedLanguage={setSelectedLanguage}
         http={http}

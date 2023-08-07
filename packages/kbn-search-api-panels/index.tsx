@@ -20,6 +20,8 @@ export * from './components/select_client';
 export * from './components/try_in_console_button';
 export * from './components/install_client';
 
+export * from './types';
+
 export interface WelcomeBannerProps {
   userProfile: any;
   assetBasePath?: string;
