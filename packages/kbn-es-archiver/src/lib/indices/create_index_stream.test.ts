@@ -236,7 +236,7 @@ describe('esArchiver: createCreateIndexStream()', () => {
         await createPromiseFromStreams([
           createListStream([
             createStubDocRecord('.kibana_task_manager', 1),
-            createStubDocRecord('.kibana_alerting_cases', 2),
+            createStubDocRecord('.kibana_task_manager', 2),
             createStubDocRecord('.kibana', 3),
           ]),
           createCreateIndexStream({ client, stats, log }),
