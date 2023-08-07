@@ -35,6 +35,9 @@ export function initExternalSpacesApi(deps: ExternalRouteDeps, buildFlavor: Buil
   initGetAllSpacesApi(deps);
   initPutSpacesApi(deps);
 
+  // In the serverless environment, Spaces are enabled but are effectively hidden from the user. We
+  // we do not support more than 1 space: the default space. These HTTP APIs for creating, deleting,
+  // and manipulating saved objects across multiple spaces are not needed.
   if (buildFlavor !== 'serverless') {
     initDeleteSpacesApi(deps);
     initPostSpacesApi(deps);
