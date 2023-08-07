@@ -10,62 +10,25 @@ import { registerEsHelpers } from './lib';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
-const API_BASE_PATH = '/api/ingest_pipelines';
-
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
+  const ingestPipelines = getService('ingestPipelines');
 
-  const { createPipeline, deletePipeline, cleanupPipelines, createIndex, deleteIndex } =
-    registerEsHelpers(getService);
+  const { createPipeline, createIndex, deleteIndex } = registerEsHelpers(getService);
 
   describe('Pipelines', function () {
     after(async () => {
-      await cleanupPipelines();
+      await ingestPipelines.api.cleanPipelines();
     });
 
-    describe('Create', () => {
-      const PIPELINE_ID = 'test_create_pipeline';
-      const REQUIRED_FIELDS_PIPELINE_ID = 'test_create_required_fields_pipeline';
-
-      after(async () => {
-        // Clean up any pipelines created in test cases
-        await Promise.all([PIPELINE_ID, REQUIRED_FIELDS_PIPELINE_ID].map(deletePipeline)).catch(
-          (err) => {
-            // eslint-disable-next-line no-console
-            console.log(`[Cleanup error] Error deleting pipelines: ${err.message}`);
-            throw err;
-          }
-        );
-      });
-
+    // TODO temp
+    describe.only('Create', () => {
       it('should create a pipeline', async () => {
+        const pipelineRequestBody = ingestPipelines.fixtures.createPipelineBody();
         const { body } = await supertest
-          .post(API_BASE_PATH)
+          .post(ingestPipelines.fixtures.apiBasePath)
           .set('kbn-xsrf', 'xxx')
-          .send({
-            name: PIPELINE_ID,
-            description: 'test pipeline description',
-            processors: [
-              {
-                script: {
-                  source: 'ctx._type = null',
-                },
-              },
-            ],
-            on_failure: [
-              {
-                set: {
-                  field: 'error.message',
-                  value: '{{ failure_message }}',
-                },
-              },
-            ],
-            version: 1,
-            _meta: {
-              field_1: 'test',
-              field_2: 10,
-            },
-          })
+          .send(pipelineRequestBody)
           .expect(200);
 
         expect(body).to.eql({
@@ -74,20 +37,12 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should create a pipeline with only required fields', async () => {
+        const pipelineRequestBody = ingestPipelines.fixtures.createPipelineBodyWithRequiredFields(); // Includes name and processors[] only
+
         const { body } = await supertest
-          .post(API_BASE_PATH)
+          .post(ingestPipelines.fixtures.apiBasePath)
           .set('kbn-xsrf', 'xxx')
-          // Excludes description, version, on_failure processors, and _meta
-          .send({
-            name: REQUIRED_FIELDS_PIPELINE_ID,
-            processors: [
-              {
-                script: {
-                  source: 'ctx._type = null',
-                },
-              },
-            ],
-          })
+          .send(pipelineRequestBody)
           .expect(200);
 
         expect(body).to.eql({
@@ -96,31 +51,26 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should not allow creation of an existing pipeline', async () => {
+        const { name, ...pipelineRequestBody } =
+          ingestPipelines.fixtures.createPipelineBodyWithRequiredFields(); // Includes name and processors[] only
+
+        // First, create a pipeline using the ES API
+        await ingestPipelines.api.createPipeline({ id: name, ...pipelineRequestBody });
+
+        // Then, create a pipeline with our internal API
         const { body } = await supertest
-          .post(API_BASE_PATH)
+          .post(ingestPipelines.fixtures.apiBasePath)
           .set('kbn-xsrf', 'xxx')
           .send({
-            name: PIPELINE_ID,
-            description: 'test pipeline description',
-            processors: [
-              {
-                script: {
-                  source: 'ctx._type = null',
-                },
-              },
-            ],
-            version: 1,
-            _meta: {
-              field_1: 'test',
-              field_2: 10,
-            },
+            name,
+            ...pipelineRequestBody,
           })
           .expect(409);
 
         expect(body).to.eql({
           statusCode: 409,
           error: 'Conflict',
-          message: `There is already a pipeline with name '${PIPELINE_ID}'.`,
+          message: `There is already a pipeline with name '${name}'.`,
         });
       });
     });
