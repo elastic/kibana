@@ -11,6 +11,7 @@ import { noop } from 'lodash';
 import { coreMock, scopedHistoryMock, themeServiceMock } from '@kbn/core/public/mocks';
 import type { Unmount } from '@kbn/management-plugin/public/types';
 
+import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
 import { securityMock } from '../../mocks';
 import { apiKeysManagementApp } from './api_keys_management_app';
 
@@ -23,13 +24,30 @@ describe('apiKeysManagementApp', () => {
     getStartServices.mockResolvedValue([coreStartMock, {}, {}]);
     const { authc } = securityMock.createSetup();
     const setBreadcrumbs = jest.fn();
-    const history = scopedHistoryMock.create({ pathname: '/create' });
+    const history = scopedHistoryMock.create({ pathname: '/' });
     coreStartMock.application.capabilities = {
       ...coreStartMock.application.capabilities,
       api_keys: {
         save: true,
       },
     };
+
+    coreStartMock.http.get.mockResolvedValue({
+      apiKeys: [],
+      canManageCrossClusterApiKeys: true,
+      canManageApiKeys: true,
+      canManageOwnApiKeys: true,
+    });
+
+    authc.getCurrentUser.mockResolvedValue(
+      mockAuthenticatedUser({
+        username: 'elastic',
+        full_name: '',
+        email: '',
+        enabled: true,
+        roles: ['superuser'],
+      })
+    );
 
     let unmount: Unmount = noop;
     await act(async () => {
