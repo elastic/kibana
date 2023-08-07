@@ -291,7 +291,6 @@ export function transformOutputToFullPolicyOutput(
       key,
       compression,
       compression_level,
-      auth_type,
       username,
       password,
       sasl,
@@ -338,7 +337,6 @@ export function transformOutputToFullPolicyOutput(
       key,
       compression,
       compression_level,
-      auth_type,
       username,
       password,
       sasl,
@@ -363,7 +361,7 @@ export function transformOutputToFullPolicyOutput(
           };
         }
       }),
-      headers,
+      headers: (headers ?? []).filter((item) => item.key !== '' || item.value !== ''),
       timeout,
       broker_timeout,
       required_acks,

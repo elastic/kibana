@@ -90,12 +90,10 @@ describe('Outputs', () => {
           cy.getBySel(SETTINGS_OUTPUTS_KAFKA.AUTHENTICATION_NONE_OPTION).click();
 
           cy.getBySel(SETTINGS_OUTPUTS_KAFKA.AUTHENTICATION_SASL_SELECT).should('not.exist');
-          cy.getBySel(SETTINGS_OUTPUTS_KAFKA.AUTHENTICATION_VERIFICATION_MODE_INPUT).should(
-            'not.exist'
-          );
+          cy.getBySel(SETTINGS_OUTPUTS_KAFKA.AUTHENTICATION_VERIFICATION_MODE_INPUT);
           cy.getBySel(SETTINGS_OUTPUTS_KAFKA.AUTHENTICATION_USERNAME_INPUT).should('not.exist');
           cy.getBySel(SETTINGS_OUTPUTS_KAFKA.AUTHENTICATION_PASSWORD_INPUT).should('not.exist');
-          cy.get('[placeholder="Specify certificate authority"]').should('not.exist');
+          cy.get('[placeholder="Specify certificate authority"]');
           cy.get('[placeholder="Specify ssl certificate"]').should('not.exist');
           cy.get('[placeholder="Specify certificate key"]').should('not.exist');
 
