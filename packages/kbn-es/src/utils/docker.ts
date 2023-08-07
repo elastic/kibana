@@ -110,6 +110,8 @@ const DEFAULT_SERVERLESS_ESARGS: Array<[string, string]> = [
   ['xpack.security.enabled', 'false'],
 
   ['cluster.name', 'stateless'],
+
+  ['ES_LOG_STYLE', 'file'],
 ];
 
 const SERVERLESS_NODES: Array<Omit<ServerlessEsNodeArgs, 'image'>> = [
