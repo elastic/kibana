@@ -9,7 +9,8 @@ import type { TimelineFilter } from '../objects/timeline';
 
 export const ADD_NOTE_BUTTON = '[data-test-subj="add-note"]';
 
-export const ADD_FILTER = '[data-test-subj="timeline"] [data-test-subj="addFilter"]';
+export const ADD_FILTER =
+  '[data-test-subj="timeline-search-or-filter"] [data-test-subj="addFilter"]';
 
 export const ATTACH_TIMELINE_TO_CASE_BUTTON = '[data-test-subj="attach-timeline-case-button"]';
 
@@ -332,6 +333,7 @@ export const HOVER_ACTIONS = {
   FILTER_FOR: '[data-test-subj="hover-actions-filter-for"]',
   FILTER_OUT: '[data-test-subj="hovhover-actions-filter-out"]',
   COPY: '[data-test-subj="hover-actions-copy-button"]',
+  SHOW_TOP: '[data-test-subj=show-top-field]',
 };
 
 export const GET_TIMELINE_HEADER = (fieldName: string) => {

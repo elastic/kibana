@@ -24,7 +24,7 @@ import type {
   RuleName,
   RuleReferenceArray,
   RuleTagArray,
-} from '../../common/detection_engine/rule_schema';
+} from '../../common/api/detection_engine';
 
 interface RuleFields {
   defaultIndexPatterns: IndexPatternArray;

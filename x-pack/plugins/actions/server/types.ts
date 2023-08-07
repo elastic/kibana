@@ -151,6 +151,18 @@ export interface ActionType<
     connector?: (config: Config, secrets: Secrets) => string | null;
   };
   isSystemActionType?: boolean;
+  /**
+   * Additional Kibana privileges to be checked by the actions framework.
+   * Use it if you want to perform extra authorization checks based on a Kibana feature.
+   * For example, you can define the privileges a users needs to have to execute
+   * a Case or OsQuery system action.
+   *
+   * The list of the privileges follows the Kibana privileges format usually generated with `security.authz.actions.*.get(...)`.
+   *
+   * It only works with system actions and only when executing an action.
+   * For all other scenarios they will be ignored
+   */
+  getKibanaPrivileges?: (args?: { params?: Params }) => string[];
   renderParameterTemplates?: RenderParameterTemplates<Params>;
   executor: ExecutorType<Config, Secrets, Params, ExecutorResultData>;
 }
@@ -210,6 +222,11 @@ export interface ResponseSettings {
 
 export interface SSLSettings {
   verificationMode?: 'none' | 'certificate' | 'full';
+  pfx?: Buffer;
+  cert?: Buffer;
+  key?: Buffer;
+  passphrase?: string;
+  ca?: Buffer;
 }
 
 export interface ConnectorToken extends SavedObjectAttributes {

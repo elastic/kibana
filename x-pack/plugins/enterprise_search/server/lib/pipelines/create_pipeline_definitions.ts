@@ -8,11 +8,6 @@
 import { IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient } from '@kbn/core/server';
 
-import { generateMlInferencePipelineBody } from '../../../common/ml_inference_pipeline';
-import {
-  InferencePipelineInferenceConfig,
-  MlInferencePipeline,
-} from '../../../common/types/pipelines';
 import { getInferencePipelineNameFromIndexName } from '../../utils/ml_inference_pipeline_utils';
 
 /**
@@ -226,37 +221,4 @@ export const createIndexPipelineDefinitions = async (
     }
     throw error;
   }
-};
-
-/**
- * Format the body of an ML inference pipeline for a specified model.
- * Does not create the pipeline, only returns JSON for the user to preview.
- * @param modelId modelId selected by user.
- * @param sourceField The document field that model will read.
- * @param destinationField The document field that the model will write to.
- * @param inferenceConfig The configuration for the model.
- * @param esClient the Elasticsearch Client to use when retrieving model details.
- */
-export const formatMlPipelineBody = async (
-  pipelineName: string,
-  modelId: string,
-  sourceField: string,
-  destinationField: string,
-  inferenceConfig: InferencePipelineInferenceConfig | undefined,
-  esClient: ElasticsearchClient
-): Promise<MlInferencePipeline> => {
-  // This will raise a 404 if model doesn't exist
-  const models = await esClient.ml.getTrainedModels({ model_id: modelId });
-  const model = models.trained_model_configs[0];
-  return generateMlInferencePipelineBody({
-    inferenceConfig,
-    model,
-    pipelineName,
-    fieldMappings: [
-      {
-        sourceField,
-        targetField: destinationField,
-      },
-    ],
-  });
 };

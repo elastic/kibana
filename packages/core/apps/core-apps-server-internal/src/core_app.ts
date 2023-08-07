@@ -93,18 +93,21 @@ export class CoreAppsService {
     const router = httpSetup.createRouter<InternalCoreAppsServiceRequestHandlerContext>('');
     const resources = coreSetup.httpResources.createRegistrar(router);
 
-    router.get({ path: '/', validate: false }, async (context, req, res) => {
-      const { uiSettings } = await context.core;
-      const defaultRoute = await uiSettings.client.get<string>('defaultRoute');
-      const basePath = httpSetup.basePath.get(req);
-      const url = `${basePath}${defaultRoute}`;
+    router.get(
+      { path: '/', validate: false, options: { access: 'public' } },
+      async (context, req, res) => {
+        const { uiSettings } = await context.core;
+        const defaultRoute = await uiSettings.client.get<string>('defaultRoute');
+        const basePath = httpSetup.basePath.get(req);
+        const url = `${basePath}${defaultRoute}`;
 
-      return res.redirected({
-        headers: {
-          location: url,
-        },
-      });
-    });
+        return res.redirected({
+          headers: {
+            location: url,
+          },
+        });
+      }
+    );
 
     this.registerCommonDefaultRoutes({
       basePath: coreSetup.http.basePath,

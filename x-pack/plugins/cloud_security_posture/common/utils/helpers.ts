@@ -18,7 +18,7 @@ import {
   CLOUDBEAT_VANILLA,
   CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE,
 } from '../constants';
-import type { BenchmarkId, Score } from '../types';
+import type { BenchmarkId, Score, BaseCspSetupStatus } from '../types';
 
 /**
  * @example
@@ -83,4 +83,18 @@ export const calculatePostureScore = (passed: number, failed: number): Score => 
   if (total === 0) return total;
 
   return roundScore(passed / (passed + failed));
+};
+
+export const getStatusForIndexName = (indexName: string, status?: BaseCspSetupStatus) => {
+  if (status) {
+    const indexDetail = status.indicesDetails.find(
+      (details) => details.index.indexOf(indexName) !== -1
+    );
+
+    if (indexDetail) {
+      return indexDetail.status;
+    }
+  }
+
+  return 'unknown';
 };

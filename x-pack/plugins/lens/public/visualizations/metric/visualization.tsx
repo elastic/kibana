@@ -13,7 +13,7 @@ import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import { LayoutDirection } from '@elastic/charts';
 import { euiLightVars, euiThemeVars } from '@kbn/ui-theme';
 import { IconChartMetric } from '@kbn/chart-icons';
-import { AccessorConfig } from '@kbn/visualization-ui-components/public';
+import { AccessorConfig } from '@kbn/visualization-ui-components';
 import { CollapseFunction } from '../../../common/expressions';
 import type { LayerType } from '../../../common/types';
 import { layerTypes } from '../../../common/layer_types';

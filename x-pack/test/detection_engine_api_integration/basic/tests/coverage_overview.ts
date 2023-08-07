@@ -7,8 +7,10 @@
 
 import expect from '@kbn/expect';
 
-import { RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL } from '@kbn/security-solution-plugin/common/detection_engine/rule_management/api/urls';
-import { ThreatArray } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
+import {
+  RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL,
+  ThreatArray,
+} from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createPrebuiltRuleAssetSavedObjects,

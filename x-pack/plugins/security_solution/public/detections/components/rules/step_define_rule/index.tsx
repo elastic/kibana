@@ -80,7 +80,7 @@ import { useLicense } from '../../../../common/hooks/use_license';
 import {
   minimumLicenseForSuppression,
   AlertSuppressionMissingFieldsStrategy,
-} from '../../../../../common/detection_engine/rule_schema';
+} from '../../../../../common/api/detection_engine/model/rule_schema';
 import { DurationInput } from '../duration_input';
 
 const CommonUseField = getUseField({ component: Field });

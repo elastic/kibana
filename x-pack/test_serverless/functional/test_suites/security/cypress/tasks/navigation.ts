@@ -6,10 +6,5 @@
  */
 
 export const navigatesToLandingPage = () => {
-  cy.visit('/', {
-    auth: {
-      username: 'elastic',
-      password: 'changeme',
-    },
-  });
+  cy.visit('/app/security/get_started');
 };

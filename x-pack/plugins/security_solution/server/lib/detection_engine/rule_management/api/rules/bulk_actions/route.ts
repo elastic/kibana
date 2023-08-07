@@ -20,18 +20,19 @@ import {
   MAX_RULES_TO_UPDATE_IN_PARALLEL,
   RULES_TABLE_MAX_PAGE_SIZE,
 } from '../../../../../../../common/constants';
+import type { PerformBulkActionResponse } from '../../../../../../../common/api/detection_engine/rule_management/bulk_actions/bulk_actions_route';
 import {
   BulkActionType,
   PerformBulkActionRequestBody,
   PerformBulkActionRequestQuery,
-} from '../../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
+} from '../../../../../../../common/api/detection_engine/rule_management/bulk_actions/bulk_actions_route';
 import type {
   NormalizedRuleError,
   RuleDetailsInError,
   BulkEditActionResponse,
   BulkEditActionResults,
   BulkEditActionSummary,
-} from '../../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/response_schema';
+} from '../../../../../../../common/api/detection_engine';
 import type { SetupPlugins } from '../../../../../../plugin';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 import { buildRouteValidation } from '../../../../../../utils/build_validation/route_validation';
@@ -246,7 +247,7 @@ export const performBulkActionRoute = (
         },
       },
     },
-    async (context, request, response) => {
+    async (context, request, response): Promise<IKibanaResponse<PerformBulkActionResponse>> => {
       const { body } = request;
       const siemResponse = buildSiemResponse(response);
 

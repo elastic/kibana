@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import { HttpSetup, DocLinksStart } from '@kbn/core/public';
 import { ObservabilityFetchDataPlugins } from '../../../../typings/fetch_overview_data';
-import { paths } from '../../../../routes/paths';
+import { paths } from '../../../../../common/locators/paths';
 
 export interface ObservabilityStatusContent {
   id: ObservabilityFetchDataPlugins | 'alert';
@@ -58,7 +58,7 @@ export const getContent = (
       addTitle: i18n.translate('xpack.observability.statusVisualization.apm.link', {
         defaultMessage: 'Add data',
       }),
-      addLink: http.basePath.prepend('/app/home#/tutorial/apm'),
+      addLink: http.basePath.prepend('/app/apm/tutorial'),
       learnMoreLink: docLinks.links.apm.overview,
       goToAppTitle: i18n.translate('xpack.observability.statusVisualization.apm.goToAppTitle', {
         defaultMessage: 'Show services inventory',
@@ -116,7 +116,7 @@ export const getContent = (
       addTitle: i18n.translate('xpack.observability.statusVisualization.ux.link', {
         defaultMessage: 'Add data',
       }),
-      addLink: http.basePath.prepend('/app/home#/tutorial/apm'),
+      addLink: http.basePath.prepend('/app/apm/tutorial'),
       learnMoreLink: docLinks.links.observability.userExperience,
       goToAppTitle: i18n.translate('xpack.observability.statusVisualization.ux.goToAppTitle', {
         defaultMessage: 'Show dashboard',

@@ -24,7 +24,7 @@ import {
   mockRule,
 } from '../../../../detection_engine/rule_management_ui/components/rules_table/__mocks__/mock';
 import { FilterStateStore } from '@kbn/es-query';
-import { AlertSuppressionMissingFieldsStrategy } from '../../../../../common/detection_engine/rule_schema';
+import { AlertSuppressionMissingFieldsStrategy } from '../../../../../common/api/detection_engine/model/rule_schema';
 
 import type { Rule } from '../../../../detection_engine/rule_management/logic';
 import type {

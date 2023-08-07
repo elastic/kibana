@@ -5,6 +5,7 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
+import moment from 'moment/moment';
 import { v4 as uuidv4 } from 'uuid';
 import { omit } from 'lodash';
 import { secretKeys } from '@kbn/synthetics-plugin/common/constants/monitor_management';
@@ -49,12 +50,17 @@ export default function ({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'true')
         .send(newMonitor);
 
-      expect(apiResponse.body.attributes).eql(
+      const { created_at: createdAt, updated_at: updatedAt } = apiResponse.body;
+      expect([createdAt, updatedAt].map((d) => moment(d).isValid())).eql([true, true]);
+
+      expect(apiResponse.body).eql(
         omit(
           {
             ...newMonitor,
             [ConfigKey.MONITOR_QUERY_ID]: apiResponse.body.id,
             [ConfigKey.CONFIG_ID]: apiResponse.body.id,
+            created_at: createdAt,
+            updated_at: updatedAt,
           },
           secretKeys
         )
@@ -111,13 +117,19 @@ export default function ({ getService }: FtrProviderContext) {
         .send(newMonitor);
 
       expect(apiResponse.status).eql(200);
-      expect(apiResponse.body.attributes).eql(
+
+      const { created_at: createdAt, updated_at: updatedAt } = apiResponse.body;
+      expect([createdAt, updatedAt].map((d) => moment(d).isValid())).eql([true, true]);
+
+      expect(apiResponse.body).eql(
         omit(
           {
             ...DEFAULT_FIELDS[DataStream.HTTP],
             ...newMonitor,
             [ConfigKey.MONITOR_QUERY_ID]: apiResponse.body.id,
             [ConfigKey.CONFIG_ID]: apiResponse.body.id,
+            created_at: createdAt,
+            updated_at: updatedAt,
             revision: 1,
           },
           secretKeys
@@ -180,7 +192,12 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(200);
 
       const response = await supertestAPI
-        .get(SYNTHETICS_API_URLS.GET_SYNTHETICS_MONITOR.replace('{monitorId}', apiResponse.body.id))
+        .get(
+          SYNTHETICS_API_URLS.GET_SYNTHETICS_MONITOR.replace(
+            '{monitorId}',
+            apiResponse.body.config_id
+          )
+        )
         .set('kbn-xsrf', 'true')
         .expect(200);
 
@@ -375,7 +392,7 @@ export default function ({ getService }: FtrProviderContext) {
           .send(monitor)
           .expect(200);
         monitorId = apiResponse.body.id;
-        expect(apiResponse.body.attributes[ConfigKey.NAMESPACE]).eql(EXPECTED_NAMESPACE);
+        expect(apiResponse.body[ConfigKey.NAMESPACE]).eql(EXPECTED_NAMESPACE);
       } finally {
         await security.user.delete(username);
         await security.role.delete(roleName);
@@ -423,7 +440,7 @@ export default function ({ getService }: FtrProviderContext) {
           .send(monitor)
           .expect(200);
         monitorId = apiResponse.body.id;
-        expect(apiResponse.body.attributes[ConfigKey.NAMESPACE]).eql('default');
+        expect(apiResponse.body[ConfigKey.NAMESPACE]).eql('default');
       } finally {
         await security.user.delete(username);
         await security.role.delete(roleName);
@@ -467,7 +484,7 @@ export default function ({ getService }: FtrProviderContext) {
           .send(monitor)
           .expect(200);
         monitorId = apiResponse.body.id;
-        expect(apiResponse.body.attributes[ConfigKey.NAMESPACE]).eql(monitor[ConfigKey.NAMESPACE]);
+        expect(apiResponse.body[ConfigKey.NAMESPACE]).eql(monitor[ConfigKey.NAMESPACE]);
       } finally {
         await security.user.delete(username);
         await security.role.delete(roleName);

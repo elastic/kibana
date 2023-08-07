@@ -13,7 +13,7 @@ import {
   buildAlertsFilter,
 } from '../../../detections/components/alerts_table/default_config';
 import { getEsQueryFilter } from '../../../detections/containers/detection_engine/exceptions/get_es_query_filter';
-import type { IndexPatternArray } from '../../../../common/detection_engine/rule_schema';
+import type { IndexPatternArray } from '../../../../common/api/detection_engine/model/rule_schema';
 import { prepareExceptionItemsForBulkClose } from '../utils/helpers';
 import * as i18nCommon from '../../../common/translations';
 import * as i18n from './translations';

@@ -12,30 +12,27 @@ import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { EuiFlexGroup, EuiFlexItem, EuiHealth, EuiText } from '@elastic/eui';
 import { useUrlParams } from '../../../hooks';
-import { useMonitorQueryId } from '../hooks/use_monitor_query_id';
+import { useMonitorQueryFilters } from '../hooks/use_monitor_query_filters';
 import { ClientPluginsStart } from '../../../../../plugin';
-import { useSelectedLocation } from '../hooks/use_selected_location';
 
 export const MonitorFailedTests = ({
   time,
   allowBrushing = true,
-  location,
 }: {
   time: { to: string; from: string };
   allowBrushing?: boolean;
-  location: ReturnType<typeof useSelectedLocation>;
 }) => {
   const {
     exploratoryView: { ExploratoryViewEmbeddable },
   } = useKibana<ClientPluginsStart>().services;
 
-  const monitorId = useMonitorQueryId();
+  const { queryIdFilter, locationFilter } = useMonitorQueryFilters();
 
   const { errorStateId } = useParams<{ errorStateId: string }>();
 
   const [, updateUrl] = useUrlParams();
 
-  if (!monitorId && !errorStateId) {
+  if (!queryIdFilter && !errorStateId) {
     return null;
   }
 
@@ -51,10 +48,10 @@ export const MonitorFailedTests = ({
           {
             time,
             reportDefinitions: {
-              ...(monitorId ? { 'monitor.id': [monitorId] } : {}),
+              ...queryIdFilter,
               ...(errorStateId ? { 'state.id': [errorStateId] } : {}),
-              'observer.geo.name': [location?.label || ''],
             },
+            filters: locationFilter,
             dataType: 'synthetics',
             selectedMetricField: 'failed_tests',
             name: FAILED_TESTS_LABEL,

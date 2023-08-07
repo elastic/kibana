@@ -780,7 +780,7 @@ export class Embeddable
 
   async openConfingPanel(startDependencies: LensPluginStartDependencies) {
     const { getEditLensConfiguration } = await import('../async_services');
-    const Component = getEditLensConfiguration(
+    const Component = await getEditLensConfiguration(
       this.deps.coreStart,
       startDependencies,
       this.deps.visualizationMap,
@@ -1039,7 +1039,7 @@ export class Embeddable
               handleEvent={this.handleEvent}
               onData$={this.updateActiveData}
               onRender$={this.onRender}
-              interactive={!input.disableTriggers}
+              interactive={!input.disableTriggers && !this.isTextBasedLanguage()}
               renderMode={input.renderMode}
               syncColors={input.syncColors}
               syncTooltips={input.syncTooltips}
@@ -1055,6 +1055,7 @@ export class Embeddable
                 this.logError('runtime');
               }}
               noPadding={this.visDisplayOptions.noPadding}
+              docLinks={this.deps.coreStart.docLinks}
             />
           </KibanaThemeProvider>
           <MessagesBadge

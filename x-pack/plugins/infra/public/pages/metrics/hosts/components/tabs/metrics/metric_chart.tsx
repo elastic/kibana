@@ -7,19 +7,12 @@
 import React, { CSSProperties, useCallback, useMemo } from 'react';
 import { Action } from '@kbn/ui-actions-plugin/public';
 import { BrushTriggerEvent } from '@kbn/charts-plugin/public';
-import {
-  EuiIcon,
-  EuiPanel,
-  EuiI18n,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiText,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiIcon, EuiPanel, EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
-import { LensWrapper } from '../../../../../../common/visualizations/lens/lens_wrapper';
-import { useLensAttributes, Layer, LayerType } from '../../../../../../hooks/use_lens_attributes';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { LensWrapper } from '../../../../../../components/lens';
+import { useLensAttributes, Layer } from '../../../../../../hooks/use_lens_attributes';
 import { useMetricsDataViewContext } from '../../../hooks/use_data_view';
 import { useUnifiedSearchContext } from '../../../hooks/use_unified_search';
 import { FormulaConfig, XYLayerOptions } from '../../../../../../common/visualizations';
@@ -31,7 +24,7 @@ import { METRIC_CHART_MIN_HEIGHT } from '../../../constants';
 
 export interface MetricChartProps extends Pick<TypedLensByValueInput, 'id' | 'overrides'> {
   title: string;
-  layers: Array<Layer<XYLayerOptions, FormulaConfig[], LayerType>>;
+  layers: Array<Layer<XYLayerOptions, FormulaConfig[]>>;
 }
 
 const lensStyle: CSSProperties = {
@@ -128,16 +121,16 @@ export const MetricChart = ({ id, title, layers, overrides }: MetricChartProps) 
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiText size="s" textAlign="center">
-              <EuiI18n
-                token="'xpack.infra.hostsViewPage.errorOnLoadingLensDependencies'"
-                default="There was an error trying to load Lens Plugin."
+              <FormattedMessage
+                id="xpack.infra.hostsViewPage.errorOnLoadingLensDependencies"
+                defaultMessage="There was an error trying to load Lens Plugin."
               />
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
       ) : (
         <LensWrapper
-          id={`hostsViewsmetricsChart-${id}`}
+          id={`hostsViewMetricsChart-${id}`}
           attributes={attributes}
           style={lensStyle}
           extraActions={extraActions}
@@ -148,7 +141,6 @@ export const MetricChart = ({ id, title, layers, overrides }: MetricChartProps) 
           onBrushEnd={handleBrushEnd}
           loading={loading}
           overrides={overrides}
-          hasTitle
         />
       )}
     </EuiPanel>

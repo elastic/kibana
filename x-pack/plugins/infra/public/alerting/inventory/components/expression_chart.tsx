@@ -10,8 +10,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { first, last } from 'lodash';
 import moment from 'moment';
 import React, { useCallback, useMemo } from 'react';
-import { getChartTheme } from '../../../utils/get_chart_theme';
-import { useIsDarkMode } from '../../../hooks/use_is_dark_mode';
+import { useTimelineChartTheme } from '../../../utils/use_timeline_chart_theme';
 import { InventoryMetricConditions } from '../../../../common/alerting/metrics';
 import { Color } from '../../../../common/color_palette';
 import { MetricsExplorerAggregation, MetricsExplorerRow } from '../../../../common/http_api';
@@ -45,6 +44,7 @@ export const ExpressionChart: React.FC<Props> = ({
   nodeType,
   sourceId,
 }) => {
+  const chartTheme = useTimelineChartTheme();
   const timerange = useMemo(
     () => ({
       interval: `${expression.timeSize || 1}${expression.timeUnit}`,
@@ -77,7 +77,6 @@ export const ExpressionChart: React.FC<Props> = ({
     region: options.region,
     timerange,
   });
-  const isDarkMode = useIsDarkMode();
 
   const metric = {
     field: expression.metric,
@@ -192,7 +191,7 @@ export const ExpressionChart: React.FC<Props> = ({
             tickFormat={dateFormatter}
           />
           <Axis id={'values'} position={Position.Left} tickFormat={yAxisFormater} domain={domain} />
-          <Settings theme={getChartTheme(isDarkMode)} />
+          <Settings baseTheme={chartTheme.baseTheme} />
           <Tooltip {...tooltipProps} />
         </Chart>
       </ChartContainer>

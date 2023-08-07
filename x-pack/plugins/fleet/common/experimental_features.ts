@@ -22,6 +22,7 @@ export const allowedExperimentalValues = Object.freeze({
   showExperimentalShipperOptions: false,
   agentTamperProtectionEnabled: false,
   secretsStorage: false,
+  kafkaOutput: true,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

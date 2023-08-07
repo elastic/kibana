@@ -9,7 +9,7 @@ import { DataView } from '@kbn/data-views-plugin/public';
 import { SortDirection } from '@kbn/data-plugin/public';
 import { createSearchSourceStub } from './_stubs';
 import { fetchAnchor, updateSearchSource } from './anchor';
-import { dataViewMock } from '../../../__mocks__/data_view';
+import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { savedSearchMock } from '../../../__mocks__/saved_search';
 
 describe('context app', function () {

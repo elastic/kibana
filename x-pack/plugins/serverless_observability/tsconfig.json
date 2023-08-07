@@ -25,5 +25,9 @@
     "@kbn/ml-plugin",
     "@kbn/i18n",
     "@kbn/management-cards-navigation",
+    "@kbn/cloud-plugin",
+    "@kbn/data-plugin",
+    "@kbn/observability-plugin",
+    "@kbn/io-ts-utils",
   ]
 }
