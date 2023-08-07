@@ -43,7 +43,6 @@ import {
 
 import { OVERVIEW_URL, TIMELINE_TEMPLATES_URL } from '../../../urls/navigation';
 
-
 describe.skip('Create a timeline from a template', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
   before(() => {
     deleteTimelines();
