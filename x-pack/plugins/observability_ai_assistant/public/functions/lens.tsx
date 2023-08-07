@@ -114,8 +114,6 @@ export function registerLensFunction({
       return { content: '' };
     },
     ({ arguments: { visualization, from, to, query } }) => {
-      console.log(visualization, from, to, query);
-
       const adHocDataView: { id: string; name: string; type: string } = {
         id: 'adhoc-dataview',
         name: 'adhoc-dataview',

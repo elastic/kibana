@@ -203,6 +203,8 @@ export function ChatItem({
           <MessageText content={content || ''} loading={loading} />
         )
       ) : null;
+  } else {
+    element = <EuiErrorBoundary>{element}</EuiErrorBoundary>;
   }
 
   return (
@@ -251,7 +253,7 @@ export function ChatItem({
       }
       username={getRoleTranslation(role)}
     >
-      <EuiErrorBoundary>{element}</EuiErrorBoundary>
+      {element}
     </EuiComment>
   );
 }

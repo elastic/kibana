@@ -57,11 +57,13 @@ export function useTimeline({
   const hasConnector = !!connectorId;
 
   const conversationItems = useMemo(() => {
-    return getTimelineItemsfromConversation({
+    const items = getTimelineItemsfromConversation({
       messages,
       currentUser,
       hasConnector,
     });
+
+    return items;
   }, [messages, currentUser, hasConnector]);
 
   const [subscription, setSubscription] = useState<Subscription | undefined>();
