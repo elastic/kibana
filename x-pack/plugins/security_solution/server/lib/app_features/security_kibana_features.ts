@@ -225,6 +225,8 @@ export const getSecurityAppFeaturesConfig = (
       ],
     },
 
-    [AppFeatureSecurityKey.osqueryAutomatedResponseActions]: {},
+    [AppFeatureSecurityKey.osqueryAutomatedResponseActions]: {
+      // TODO: I believe we do not need anything here. Empty makes TS happy
+    },
   };
 };
