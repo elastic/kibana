@@ -6,11 +6,15 @@
  */
 
 import { setMockValues } from '../../../../../__mocks__/kea_logic';
+
 import React from 'react';
+
 import { shallow } from 'enzyme';
-import { TextExpansionDismissButton, FineTuneModelsButton } from './text_expansion_callout';
-import { ModelStarted } from './model_started';
+
 import { EuiText } from '@elastic/eui';
+
+import { ModelStarted } from './model_started';
+import { TextExpansionDismissButton, FineTuneModelsButton } from './text_expansion_callout';
 
 const DEFAULT_VALUES = {
   startTextExpansionModelError: undefined,

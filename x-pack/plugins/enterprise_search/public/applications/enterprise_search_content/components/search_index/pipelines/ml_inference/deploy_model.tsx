@@ -6,9 +6,9 @@
  */
 
 import React from 'react';
-import { TextExpansionCallOutState, TextExpansionDismissButton } from './text_expansion_callout';
+
 import { useActions } from 'kea';
-import { TextExpansionCalloutLogic } from './text_expansion_callout_logic';
+
 import {
   EuiBadge,
   EuiButton,
@@ -18,9 +18,13 @@ import {
   EuiLink,
   EuiText,
 } from '@elastic/eui';
-import { FormattedMessage, FormattedHTMLMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage, FormattedHTMLMessage } from '@kbn/i18n-react';
+
 import { docLinks } from '../../../../../shared/doc_links';
+
+import { TextExpansionCallOutState, TextExpansionDismissButton } from './text_expansion_callout';
+import { TextExpansionCalloutLogic } from './text_expansion_callout_logic';
 
 export const DeployModel = ({
   dismiss,

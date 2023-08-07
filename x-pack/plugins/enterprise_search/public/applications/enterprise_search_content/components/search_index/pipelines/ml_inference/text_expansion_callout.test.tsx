@@ -6,15 +6,19 @@
  */
 
 import { setMockValues } from '../../../../../__mocks__/kea_logic';
+
 import React from 'react';
+
 import { shallow } from 'enzyme';
+
 import { HttpError } from '../../../../../../../common/types/api';
-import { TextExpansionCallOut } from './text_expansion_callout';
+
 import { DeployModel } from './deploy_model';
-import { TextExpansionErrors } from './text_expansion_errors';
-import { ModelDeploymentInProgress } from './model_deployment_in_progress';
 import { ModelDeployed } from './model_deployed';
+import { ModelDeploymentInProgress } from './model_deployment_in_progress';
 import { ModelStarted } from './model_started';
+import { TextExpansionCallOut } from './text_expansion_callout';
+import { TextExpansionErrors } from './text_expansion_errors';
 
 jest.mock('./text_expansion_callout_data', () => ({
   useTextExpansionCallOutData: jest.fn(() => ({

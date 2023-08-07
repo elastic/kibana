@@ -6,11 +6,7 @@
  */
 
 import React from 'react';
-import {
-  TextExpansionCallOutState,
-  TextExpansionDismissButton,
-  FineTuneModelsButton,
-} from './text_expansion_callout';
+
 import {
   EuiCallOut,
   EuiFlexGroup,
@@ -20,7 +16,14 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+
 import { KibanaLogic } from '../../../../../shared/kibana';
+
+import {
+  TextExpansionCallOutState,
+  TextExpansionDismissButton,
+  FineTuneModelsButton,
+} from './text_expansion_callout';
 import { TRAINED_MODELS_PATH } from './utils';
 
 export const ModelStarted = ({

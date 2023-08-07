@@ -6,13 +6,9 @@
  */
 
 import React from 'react';
-import {
-  TextExpansionCallOutState,
-  TextExpansionDismissButton,
-  FineTuneModelsButton,
-} from './text_expansion_callout';
+
 import { useActions } from 'kea';
-import { TextExpansionCalloutLogic } from './text_expansion_callout_logic';
+
 import {
   EuiButton,
   EuiCallOut,
@@ -23,6 +19,13 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+
+import {
+  TextExpansionCallOutState,
+  TextExpansionDismissButton,
+  FineTuneModelsButton,
+} from './text_expansion_callout';
+import { TextExpansionCalloutLogic } from './text_expansion_callout_logic';
 
 export const ModelDeployed = ({
   dismiss,
