@@ -32,3 +32,18 @@ export interface StorageExplorerHostDetails {
   totalMetricsSize: number;
   totalSize: number;
 }
+
+export type StorageExplorerIndexNames =
+  | 'events'
+  | 'stackframes'
+  | 'stacktraces'
+  | 'executables'
+  | 'metrics';
+export interface StorageExplorerIndexStats {
+  docCount: number;
+  sizeInBytes: number;
+}
+export type StotageExplorerDataBreakdownSize = Record<
+  StorageExplorerIndexNames,
+  StorageExplorerIndexStats
+>;

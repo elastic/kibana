@@ -54,7 +54,7 @@ export function HostBreakdownChart({ data = [] }: Props) {
       <EuiTitle>
         <EuiText>
           {i18n.translate('xpack.profiling.storageExplorer.summary.title', {
-            defaultMessage: 'Machine breakdown',
+            defaultMessage: 'Host breakdown',
           })}
           <EuiToolTip
             content={i18n.translate('xpack.profiling.storageExplorer.summary.title.hint', {

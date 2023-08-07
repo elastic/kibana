@@ -8,12 +8,15 @@
 import { ElasticsearchClient } from '@kbn/core/server';
 
 const symbolsIndices = ['profiling-symbols-global', 'profiling-symbols-private'];
-const indices = [
+const profilingMainIndices = [
   'profiling-events-*',
   'profiling-metrics',
   'profiling-stacktraces',
   'profiling-executables',
   'profiling-stackframes',
+];
+const indices = [
+  ...profilingMainIndices,
   'profiling-sq-executables',
   'profiling-sq-leafframes',
   'profiling-hosts',
@@ -26,6 +29,10 @@ function getIndicesStats({ client, index }: { client: ElasticsearchClient; index
 
 export function getTotalIndicesStats({ client }: { client: ElasticsearchClient }) {
   return getIndicesStats({ client, index: indices.join() });
+}
+
+export function getMainIndicesStats({ client }: { client: ElasticsearchClient }) {
+  return getIndicesStats({ client, index: profilingMainIndices.join() });
 }
 
 export function getTotalSymbolsStats({ client }: { client: ElasticsearchClient }) {

@@ -14,6 +14,7 @@ export {
   asDuration,
   asDynamicBytes,
   asAbsoluteDateTime,
+  asInteger,
 } from './utils/formatters';
 export { getInspectResponse } from './utils/get_inspect_response';
 export { getAlertDetailsUrl, getAlertUrl } from './utils/alerting/alert_url';

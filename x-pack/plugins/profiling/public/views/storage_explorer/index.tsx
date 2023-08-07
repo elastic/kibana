@@ -5,9 +5,18 @@
  * 2.0.
  */
 
-import { EuiButton, EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiCallOut,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiTab,
+  EuiTabs,
+  EuiText,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useState } from 'react';
 import { AsyncComponent } from '../../components/async_component';
 import { useProfilingDependencies } from '../../components/contexts/profiling_dependencies/use_profiling_dependencies';
 import { ProfilingAppPageTemplate } from '../../components/profiling_app_page_template';
@@ -15,6 +24,7 @@ import { AsyncStatus } from '../../hooks/use_async';
 import { useProfilingParams } from '../../hooks/use_profiling_params';
 import { useTimeRange } from '../../hooks/use_time_range';
 import { useTimeRangeAsync } from '../../hooks/use_time_range_async';
+import { DataBreakdown } from './data_breakdown';
 import { HostsTable } from './hosts_table';
 import { HostBreakdownChart } from './host_breakdown_chart';
 import { Summary } from './summary';
@@ -22,8 +32,13 @@ import { Summary } from './summary';
 export function StorageExplorerView() {
   const { query } = useProfilingParams('/storage-explorer');
   const { rangeFrom, rangeTo, kuery } = query;
-
   const timeRange = useTimeRange({ rangeFrom, rangeTo });
+  const { docLinks } = useProfilingDependencies().start.core;
+
+  const [selectedTab, setSelectedTab] = useState<'host_breakdown' | 'data_breakdown'>(
+    // TODO: revert back
+    'data_breakdown'
+  );
 
   const {
     services: {
@@ -105,9 +120,8 @@ export function StorageExplorerView() {
                 )}
               </EuiText>
               <EuiSpacer />
-              {/* TODO: define href */}
               <EuiButton
-                href="https://www.elastic.co/guide/en/observability/current/profiling-probabilistic-profiling.html"
+                href={`${docLinks.ELASTIC_WEBSITE_URL}/guide/en/observability/${docLinks.DOC_LINK_VERSION}/profiling-probabilistic-profiling.html`}
                 color="warning"
               >
                 {i18n.translate(
@@ -124,19 +138,55 @@ export function StorageExplorerView() {
             isLoading={storageExplorerSummaryState.status === AsyncStatus.Loading}
           />
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <AsyncComponent size="xl" {...storageExplorerHostBreakdownState} style={{ height: 400 }}>
-            <HostBreakdownChart data={storageExplorerHostBreakdownState.data} />
-          </AsyncComponent>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <AsyncComponent size="xl" {...storageExplorerHostsDetails} style={{ height: 400 }}>
-            <HostsTable
-              data={storageExplorerHostsDetails.data}
-              hasDistinctProbabilisticValues={hasDistinctProbabilisticValues}
-            />
-          </AsyncComponent>
-        </EuiFlexItem>
+        <EuiTabs>
+          <EuiTab
+            onClick={() => {
+              setSelectedTab('host_breakdown');
+            }}
+            isSelected={selectedTab === 'host_breakdown'}
+          >
+            {i18n.translate('xpack.profiling.storageExplorer.tabs.hostBreakdown', {
+              defaultMessage: 'Host breakdown',
+            })}
+          </EuiTab>
+          <EuiTab
+            onClick={() => {
+              setSelectedTab('data_breakdown');
+            }}
+            isSelected={selectedTab === 'data_breakdown'}
+          >
+            {i18n.translate('xpack.profiling.storageExplorer.tabs.dataBreakdown', {
+              defaultMessage: 'Data breakdown',
+            })}
+          </EuiTab>
+        </EuiTabs>
+        {selectedTab === 'host_breakdown' ? (
+          <>
+            <EuiFlexItem grow={false}>
+              <AsyncComponent
+                size="xl"
+                {...storageExplorerHostBreakdownState}
+                style={{ height: 400 }}
+              >
+                <HostBreakdownChart data={storageExplorerHostBreakdownState.data} />
+              </AsyncComponent>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <AsyncComponent size="xl" {...storageExplorerHostsDetails} style={{ height: 400 }}>
+                <HostsTable
+                  data={storageExplorerHostsDetails.data}
+                  hasDistinctProbabilisticValues={hasDistinctProbabilisticValues}
+                />
+              </AsyncComponent>
+            </EuiFlexItem>
+          </>
+        ) : null}
+
+        {selectedTab === 'data_breakdown' ? (
+          <EuiFlexItem grow={false}>
+            <DataBreakdown />
+          </EuiFlexItem>
+        ) : null}
       </EuiFlexGroup>
     </ProfilingAppPageTemplate>
   );

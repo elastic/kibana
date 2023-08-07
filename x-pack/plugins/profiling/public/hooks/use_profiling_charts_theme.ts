@@ -23,6 +23,13 @@ const profilingTheme: RecursivePartial<Theme> = {
     barsPadding: 0,
     histogramPadding: 0,
   },
+  partition: {
+    fillLabel: {
+      textColor: 'white',
+    },
+    emptySizeRatio: 0.3,
+    sectorLineWidth: 0,
+  },
 };
 
 export function useProfilingChartsTheme() {
