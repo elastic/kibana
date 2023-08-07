@@ -15,11 +15,13 @@ import {
   EuiSpacer,
   EuiStat,
   EuiTextColor,
+  EuiCallOut,
 } from '@elastic/eui';
 
 import { roundToDecimalPlace } from '@kbn/ml-number-utils';
 import { i18n } from '@kbn/i18n';
 import { euiThemeVars } from '@kbn/ui-theme';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { TextExpansionInference, FormattedTextExpansionResponse } from '.';
 
 export const getTextExpansionOutputComponent = (inferrer: TextExpansionInference) => (
@@ -96,6 +98,16 @@ export const DocumentResult: FC<{
           )}
         >
           <>
+            <EuiSpacer size="s" />
+            <EuiCallOut color="primary">
+              <FormattedMessage
+                id="xpack.ml.trainedModels.testModelsFlyout.textExpansion.output.tokenHelpInfo"
+                defaultMessage="Extracted tokens, which are not synonyms of the query, represent linguistic elements
+              relevant to the search result. The weight value represents the relevancy of a given
+              token."
+              />
+            </EuiCallOut>
+            <EuiSpacer size="s" />
             <EuiInMemoryTable
               items={tokens}
               columns={[

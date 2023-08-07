@@ -11,8 +11,7 @@ import { SUPPORTED_PYTORCH_TASKS } from '@kbn/ml-trained-models-utils';
 import { BehaviorSubject } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { trainedModelsApiProvider } from '../../../../services/ml_api_service/trained_models';
-import { InferenceBase, INPUT_TYPE } from '../inference_base';
-import type { InferResponse } from '../inference_base';
+import { InferenceBase, INPUT_TYPE, type InferResponse } from '../inference_base';
 import { getTextExpansionOutputComponent } from './text_expansion_output';
 import { getTextExpansionInput } from './text_expansion_input';
 
@@ -41,7 +40,8 @@ export class TextExpansionInference extends InferenceBase<TextExpansionResponse>
   );
   protected info = [
     i18n.translate('xpack.ml.trainedModels.testModelsFlyout.textExpansion.info', {
-      defaultMessage: 'Expand text into a sparse representation of tokens weighted by importance.',
+      defaultMessage:
+        'Expand your search to include relevant terms in the results that are not present in the query.',
     }),
   ];
 
