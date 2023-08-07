@@ -528,8 +528,19 @@ const FieldPanel: FC<FieldPanelProps> = ({
             defaultMessage: 'Change point chart',
           })}
           documentInfo={{
-            title: 'Title',
-            description: 'Desc',
+            title: i18n.translate('xpack.aiops.changePointDetection.attachmentTitle', {
+              defaultMessage: 'Change point: {function}({metric}){splitBy}',
+              values: {
+                function: fieldConfig.fn,
+                metric: fieldConfig.metricField,
+                splitBy: fieldConfig.splitField
+                  ? i18n.translate('xpack.aiops.changePointDetection.splitByTitle', {
+                      defaultMessage: ' split by "{splitField}"',
+                      values: { splitField: fieldConfig.splitField },
+                    })
+                  : '',
+              },
+            }),
           }}
           onClose={() => {
             setDashboardAttachmentReady(false);
