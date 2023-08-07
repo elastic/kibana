@@ -21,7 +21,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
 
   describe('lens terms', () => {
-    describe.skip('lens multi terms suite', () => {
+    describe('lens multi terms suite', () => {
       it('should allow creation of lens xy chart with multi terms categories', async () => {
         await PageObjects.visualize.navigateToNewVisualization();
         await PageObjects.visualize.clickVisType('lens');
@@ -96,7 +96,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.lens.closeDimensionEditor();
       });
     });
-    describe.skip('sorting by custom metric', () => {
+    describe('sorting by custom metric', () => {
       it('should allow sort by custom metric', async () => {
         await PageObjects.visualize.navigateToNewVisualization();
         await PageObjects.visualize.clickVisType('lens');
