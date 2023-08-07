@@ -198,6 +198,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.cases.files.allowedMimeTypes (array)',
         'xpack.cases.files.maxSize (number)',
         'xpack.cases.markdownPlugins.lens (boolean)',
+        'xpack.cases.stack.enabled (boolean)',
         'xpack.ccr.ui.enabled (boolean)',
         'xpack.cloud.base_url (string)',
         'xpack.cloud.cname (string)',
