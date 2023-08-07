@@ -30,11 +30,12 @@ export interface ChatPromptEditorProps {
   onSubmit: (message: Message) => Promise<void>;
 }
 
-export function ChatPromptEditor({ onSubmit, disabled, loading }: ChatPromptEditorProps) {
+export function ChatPromptEditor({ disabled, loading, onSubmit }: ChatPromptEditorProps) {
   const { getFunctions } = useObservabilityAIAssistant();
   const functions = getFunctions();
 
   const [prompt, setPrompt] = useState('');
+
   const [functionPayload, setFunctionPayload] = useState<string | undefined>('');
   const [selectedFunction, setSelectedFunction] = useState<FunctionDefinition | undefined>();
 

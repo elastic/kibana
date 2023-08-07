@@ -17,12 +17,15 @@ export interface ChatTimelineItem
   id: string;
   title: string;
   loading: boolean;
+  canCopy: boolean;
   element?: React.ReactNode;
-  error?: any;
   canEdit: boolean;
-  canRegenerate: boolean;
+  canExpand: boolean;
   canGiveFeedback: boolean;
+  canRegenerate: boolean;
+  hide: boolean;
   currentUser?: Pick<AuthenticatedUser, 'username' | 'full_name'>;
+  error?: any;
 }
 
 export interface ChatTimelineProps {
@@ -42,23 +45,25 @@ export function ChatTimeline({
 }: ChatTimelineProps) {
   return (
     <EuiCommentList>
-      {items.map((item, index) => (
-        <ChatItem
-          // use index, not id to prevent unmounting of component when message is persisted
-          key={index}
-          {...item}
-          onFeedbackClick={(feedback) => {
-            onFeedback(item, feedback);
-          }}
-          onRegenerateClick={() => {
-            onRegenerate(item);
-          }}
-          onEditSubmit={(content) => {
-            onEdit(item, content);
-          }}
-          onStopGeneratingClick={onStopGenerating}
-        />
-      ))}
+      {items.map((item, index) =>
+        !item.hide ? (
+          <ChatItem
+            // use index, not id to prevent unmounting of component when message is persisted
+            key={index}
+            {...item}
+            onFeedbackClick={(feedback) => {
+              onFeedback(item, feedback);
+            }}
+            onRegenerateClick={() => {
+              onRegenerate(item);
+            }}
+            onEditSubmit={(content) => {
+              onEdit(item, content);
+            }}
+            onStopGeneratingClick={onStopGenerating}
+          />
+        ) : null
+      )}
     </EuiCommentList>
   );
 }

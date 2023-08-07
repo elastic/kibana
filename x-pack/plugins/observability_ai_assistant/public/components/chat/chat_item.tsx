@@ -6,21 +6,22 @@
  */
 
 import {
+  EuiAccordion,
   EuiButtonIcon,
   EuiComment,
-  EuiContextMenuItem,
-  EuiContextMenuPanel,
-  EuiErrorBoundary,
   EuiFlexGroup,
+  EuiErrorBoundary,
   EuiFlexItem,
   EuiPopover,
+  EuiSpacer,
+  EuiText,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { MessageRole } from '../../../common/types';
 import { Feedback, FeedbackButtons } from '../feedback_buttons';
-import { MessagePanel } from '../message_panel/message_panel';
 import { MessageText } from '../message_panel/message_text';
 import { RegenerateResponseButton } from '../buttons/regenerate_response_button';
 import { StopGeneratingButton } from '../buttons/stop_generating_button';
@@ -31,7 +32,7 @@ import { ChatTimelineItem } from './chat_timeline';
 export interface ChatItemAction {
   id: string;
   label: string;
-  icon?: string;
+  icon: string;
   handler: () => void;
 }
 
@@ -52,11 +53,30 @@ const euiCommentClassName = css`
   }
 `;
 
+const expandableMessageClassName = css`
+  .euiCommentEvent__header {
+    background: transparent;
+    border-block-end: none;
+  }
+
+  .euiCommentEvent {
+    border: none;
+  }
+`;
+
+const accordionButtonClassName = css`
+  .euiAccordion__iconButton {
+    display: none;
+  }
+`;
+
 export function ChatItem({
   title,
   content,
   element,
+  canCopy,
   canEdit,
+  canExpand,
   canGiveFeedback,
   canRegenerate,
   role,
@@ -68,28 +88,77 @@ export function ChatItem({
   onStopGeneratingClick,
   onFeedbackClick,
 }: ChatItemProps) {
-  const [isActionsPopoverOpen, setIsActionsPopover] = useState(false);
+  const accordionId = useGeneratedHtmlId({ prefix: 'chat' });
 
-  const handleClickActions = () => {
-    setIsActionsPopover(!isActionsPopoverOpen);
+  const [isPopoverOpen, setIsPopoverOpen] = useState<string | undefined>();
+  const [isAccordionOpen, setIsAccordionOpen] = useState<boolean>(false);
+
+  const handleAccordionToggle = () => {
+    setIsAccordionOpen(!isAccordionOpen);
   };
 
-  const [_, setEditing] = useState(false);
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (isPopoverOpen) {
+        setIsPopoverOpen(undefined);
+      }
+    }, 800);
 
-  const actions: ChatItemAction[] = canEdit
-    ? [
-        {
-          id: 'edit',
-          label: i18n.translate('xpack.observabilityAiAssistant.chatTimeline.actions.editMessage', {
-            defaultMessage: 'Edit message',
-          }),
-          handler: () => {
-            setEditing(false);
-            setIsActionsPopover(false);
+    return () => {
+      clearTimeout(timeout);
+    };
+  }, [isPopoverOpen]);
+
+  const actions: ChatItemAction[] = [
+    ...(canEdit
+      ? [
+          {
+            id: 'edit',
+            icon: 'documentEdit',
+            label: i18n.translate(
+              'xpack.observabilityAiAssistant.chatTimeline.actions.editMessage',
+              {
+                defaultMessage: 'Edit message',
+              }
+            ),
+            handler: () => {
+              onEditSubmit(content || '');
+            },
           },
-        },
-      ]
-    : [];
+        ]
+      : []),
+    ...(canExpand
+      ? [
+          {
+            id: 'expand',
+            icon: isAccordionOpen ? 'eyeClosed' : 'eye',
+            label: i18n.translate('xpack.observabilityAiAssistant.chatTimeline.actions.inspect', {
+              defaultMessage: 'Inspect message',
+            }),
+            handler: () => {
+              handleAccordionToggle();
+            },
+          },
+        ]
+      : []),
+    ...(canCopy
+      ? [
+          {
+            id: 'copy',
+            icon: 'copyClipboard',
+            label: i18n.translate(
+              'xpack.observabilityAiAssistant.chatTimeline.actions.copyMessage',
+              {
+                defaultMessage: 'Copied message',
+              }
+            ),
+            handler: () => {
+              navigator.clipboard.writeText(content || '');
+            },
+          },
+        ]
+      : []),
+  ];
 
   let controls: React.ReactNode;
 
@@ -118,60 +187,77 @@ export function ChatItem({
   if (!element) {
     element =
       content || error || controls ? (
-        <MessagePanel
-          body={
-            content || loading ? <MessageText content={content || ''} loading={loading} /> : null
-          }
-          error={error}
-          controls={controls}
-        />
+        canExpand ? (
+          <EuiAccordion
+            id={accordionId}
+            className={accordionButtonClassName}
+            forceState={isAccordionOpen ? 'open' : 'closed'}
+            onToggle={handleAccordionToggle}
+          >
+            <EuiSpacer size="s" />
+            <MessageText content={content || ''} loading={loading} />
+          </EuiAccordion>
+        ) : (
+          <MessageText content={content || ''} loading={loading} />
+        )
       ) : null;
   } else {
-    element = <EuiErrorBoundary>{element}</EuiErrorBoundary>;
+    element = (
+      <EuiAccordion
+        id={accordionId}
+        className={accordionButtonClassName}
+        forceState={isAccordionOpen ? 'open' : 'closed'}
+        onToggle={handleAccordionToggle}
+      >
+        <EuiSpacer size="s" />
+        <EuiErrorBoundary>{element}</EuiErrorBoundary>
+      </EuiAccordion>
+    );
   }
 
   return (
     <EuiComment
       event={
         <ChatItemTitle
-          actionsTrigger={
-            actions.length ? (
+          actions={actions.map(({ id, icon, label, handler }) =>
+            label ? (
               <EuiPopover
-                anchorPosition="downLeft"
                 button={
                   <EuiButtonIcon
-                    aria-label={i18n.translate(
-                      'xpack.observabilityAiAssistant.chatTimeline.actions',
-                      {
-                        defaultMessage: 'Actions',
-                      }
-                    )}
+                    aria-label={label}
+                    key={id}
+                    iconType={icon}
+                    onClick={() => {
+                      setIsPopoverOpen(id);
+                      handler();
+                    }}
                     color="text"
-                    display="empty"
-                    iconType="boxesHorizontal"
-                    size="s"
-                    onClick={handleClickActions}
                   />
                 }
+                isOpen={isPopoverOpen === id}
+                closePopover={() => setIsPopoverOpen(undefined)}
                 panelPaddingSize="s"
-                closePopover={handleClickActions}
-                isOpen={isActionsPopoverOpen}
               >
-                <EuiContextMenuPanel
-                  size="s"
-                  items={actions.map(({ id, icon, label, handler }) => (
-                    <EuiContextMenuItem key={id} icon={icon} onClick={handler}>
-                      {label}
-                    </EuiContextMenuItem>
-                  ))}
-                />
+                <EuiText size="s">
+                  <p>{label}</p>
+                </EuiText>
               </EuiPopover>
-            ) : null
-          }
+            ) : (
+              <EuiButtonIcon
+                aria-label={label}
+                key={id}
+                iconType={icon}
+                onClick={handler}
+                color="text"
+              />
+            )
+          )}
           title={title}
         />
       }
-      className={euiCommentClassName}
+      className={
+        role === MessageRole.User && canExpand ? expandableMessageClassName : euiCommentClassName
+      }
       timelineAvatar={
         <ChatItemAvatar loading={loading && !content} currentUser={currentUser} role={role} />
       }

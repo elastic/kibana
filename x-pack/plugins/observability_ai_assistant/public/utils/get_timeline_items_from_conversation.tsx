@@ -8,7 +8,6 @@ import React from 'react';
 import { v4 } from 'uuid';
 import { i18n } from '@kbn/i18n';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
-import dedent from 'dedent';
 import { type Message, MessageRole } from '../../common';
 import type { ChatTimelineItem } from '../components/chat/chat_timeline';
 import { RenderFunction } from '../components/render_function';
@@ -29,9 +28,12 @@ export function getTimelineItemsfromConversation({
       title: i18n.translate('xpack.observabilityAiAssistant.conversationStartTitle', {
         defaultMessage: 'started a conversation',
       }),
+      canCopy: false,
       canEdit: false,
+      canExpand: false,
       canGiveFeedback: false,
       canRegenerate: false,
+      hide: false,
       loading: false,
       currentUser,
     },
@@ -47,13 +49,13 @@ export function getTimelineItemsfromConversation({
         title = i18n.translate('xpack.observabilityAiAssistant.suggestedFunctionEvent', {
           defaultMessage: 'suggested a function',
         });
-        content = dedent(`I have requested your system performs the function _${
+        content = `I have requested your system performs the function _${
           message.message.function_call?.name
         }_ with the payload 
-        \`\`\`
-        ${JSON.stringify(JSON.parse(message.message.function_call?.arguments || ''), null, 4)}
-        \`\`\`
-        and return its results for me to look at.`);
+\`\`\`
+${JSON.stringify(JSON.parse(message.message.function_call?.arguments || ''), null, 4)}
+\`\`\`
+and return its results for me to look at.`;
       } else if (isSystemPrompt) {
         title = i18n.translate('xpack.observabilityAiAssistant.addedSystemPromptEvent', {
           defaultMessage: 'added a prompt',
@@ -83,10 +85,13 @@ export function getTimelineItemsfromConversation({
       const props = {
         id: v4(),
         role: message.message.role,
+        canCopy: true,
         canEdit: hasConnector && (message.message.role === MessageRole.User || hasFunction),
+        canExpand: message.message.role === MessageRole.User && Boolean(message.message.name),
         canRegenerate: hasConnector && message.message.role === MessageRole.Assistant,
         canGiveFeedback: message.message.role === MessageRole.Assistant,
         loading: false,
+        hide: Boolean(message.message.isAssistantSetupMessage),
         title,
         content,
         currentUser,

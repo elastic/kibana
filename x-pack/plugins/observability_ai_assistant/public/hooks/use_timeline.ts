@@ -13,15 +13,15 @@ import { MessageRole, type ConversationCreateRequest, type Message } from '../..
 import type { ChatPromptEditorProps } from '../components/chat/chat_prompt_editor';
 import type { ChatTimelineProps } from '../components/chat/chat_timeline';
 import { EMPTY_CONVERSATION_TITLE } from '../i18n';
-import { getSystemMessage } from '../service/get_system_message';
 import type { ObservabilityAIAssistantService, PendingMessage } from '../types';
 import { getTimelineItemsfromConversation } from '../utils/get_timeline_items_from_conversation';
 import type { UseGenAIConnectorsResult } from './use_genai_connectors';
+import { getAssistantSetupMessage } from '../service/get_assistant_setup_message';
 
 export function createNewConversation(): ConversationCreateRequest {
   return {
     '@timestamp': new Date().toISOString(),
-    messages: [getSystemMessage()],
+    messages: [getAssistantSetupMessage()],
     conversation: {
       title: EMPTY_CONVERSATION_TITLE,
     },
@@ -167,7 +167,10 @@ export function useTimeline({
     if (pendingMessage) {
       return conversationItems.concat({
         id: '',
+        canCopy: true,
         canEdit: false,
+        canExpand:
+          pendingMessage.message.role === MessageRole.User && Boolean(pendingMessage.message.name),
         canRegenerate: pendingMessage.aborted || !!pendingMessage.error,
         canGiveFeedback: false,
         title: '',
@@ -175,6 +178,7 @@ export function useTimeline({
         content: pendingMessage.message.content,
         loading: !pendingMessage.aborted && !pendingMessage.error,
         function_call: pendingMessage.message.function_call,
+        hide: Boolean(pendingMessage.message.isAssistantSetupMessage),
         currentUser,
         error: pendingMessage.error,
       });

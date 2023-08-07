@@ -8,7 +8,7 @@
 import { uniqueId } from 'lodash';
 import { MessageRole, Conversation, FunctionDefinition } from '../../common/types';
 import { ChatTimelineItem } from '../components/chat/chat_timeline';
-import { getSystemMessage } from '../service/get_system_message';
+import { getAssistantSetupMessage } from '../service/get_assistant_setup_message';
 
 type ChatItemBuildProps = Partial<ChatTimelineItem> & Pick<ChatTimelineItem, 'role'>;
 
@@ -92,7 +92,7 @@ export function buildConversation(params?: Partial<Conversation>) {
       title: '',
       last_updated: '',
     },
-    messages: [getSystemMessage()],
+    messages: [getAssistantSetupMessage()],
     labels: {},
     numeric_labels: {},
     namespace: '',

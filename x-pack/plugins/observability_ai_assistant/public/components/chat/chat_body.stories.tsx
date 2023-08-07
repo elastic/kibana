@@ -8,9 +8,9 @@
 import { ComponentStory } from '@storybook/react';
 import React from 'react';
 import { Observable } from 'rxjs';
-import { MessageRole } from '../../../common';
-import { getSystemMessage } from '../../service/get_system_message';
+import { getAssistantSetupMessage } from '../../service/get_assistant_setup_message';
 import { ObservabilityAIAssistantService } from '../../types';
+import { MessageRole } from '../../../common';
 import { KibanaReactStorybookDecorator } from '../../utils/storybook_decorator';
 import { ChatBody as Component } from './chat_body';
 
@@ -33,7 +33,7 @@ const Template: ComponentStory<typeof Component> = (props: ChatBodyProps) => {
 const defaultProps: ChatBodyProps = {
   title: 'My Conversation',
   messages: [
-    getSystemMessage(),
+    getAssistantSetupMessage(),
     {
       '@timestamp': new Date().toISOString(),
       message: {

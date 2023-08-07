@@ -28,6 +28,7 @@ import { ChatTimeline } from './chat_timeline';
 const containerClassName = css`
   max-height: 100%;
   max-width: 100%;
+  height: 1px;
 `;
 
 const timelineClassName = css`
