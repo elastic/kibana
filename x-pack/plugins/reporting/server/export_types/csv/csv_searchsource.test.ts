@@ -4,6 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import nodeCrypto from '@elastic/node-crypto';
+import { coreMock, elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { Writable } from 'stream';
+import { CancellationToken } from '@kbn/reporting-common';
+import { createMockConfigSchema } from '../../test_helpers';
+import { CsvSearchSourceExportType } from '@kbn/reporting-export-types-csv';
+import { discoverPluginMock } from '@kbn/discover-plugin/server/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
+import { createMockScreenshottingStart } from '@kbn/screenshotting-plugin/server/mock';
 
 jest.mock('@kbn/generate-csv', () => ({
   CsvGenerator: class CsvGeneratorMock {
@@ -16,15 +25,6 @@ jest.mock('@kbn/generate-csv', () => ({
   },
 }));
 
-import nodeCrypto from '@elastic/node-crypto';
-import { coreMock, elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import { Writable } from 'stream';
-import { CancellationToken } from '@kbn/reporting-common';
-import { createMockConfigSchema } from '../../test_helpers';
-import { CsvSearchSourceExportType } from '@kbn/reporting-export-types-csv';
-import { discoverPluginMock } from '@kbn/discover-plugin/server/mocks';
-import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
-import { createMockScreenshottingStart } from '@kbn/screenshotting-plugin/server/mock';
 
 const mockLogger = loggingSystemMock.createLogger();
 const encryptionKey = 'tetkey';
@@ -68,12 +68,13 @@ beforeAll(async () => {
     discover: discoverPluginMock.createStartContract(),
     data: dataPluginMock.createStartContract(),
     screenshotting: createMockScreenshottingStart(),
-  });
-});
+  })
+})
 
 beforeEach(() => {
   stream = {} as typeof stream;
-});
+})
+
 
 test('gets the csv content from job parameters', async () => {
   const payload = await mockCsvSearchSourceExportType.runTask(
@@ -87,7 +88,7 @@ test('gets the csv content from job parameters', async () => {
       version: '7.13.0',
     },
     new CancellationToken(),
-    stream
+    stream,
   );
 
   expect(payload).toMatchInlineSnapshot(`
