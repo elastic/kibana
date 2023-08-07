@@ -6,10 +6,12 @@
  */
 
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { GetViewInAppRelativeUrlFnOpts } from '@kbn/alerting-plugin/server';
 import {
   asDuration,
   formatDurationFromTimeUnitChar,
   getAlertDetailsUrl,
+  observabilityPaths,
   ProcessorEvent,
   TimeUnitChar,
 } from '@kbn/observability-plugin/common';
@@ -298,6 +300,8 @@ export function registerTransactionDurationRuleType({
       return { state: {} };
     },
     alerts: ApmRuleTypeAlertDefinition,
+    getViewInAppRelativeUrl: ({ rule }: GetViewInAppRelativeUrlFnOpts<{}>) =>
+      observabilityPaths.ruleDetails(rule.id),
   });
 
   alerting.registerType(ruleType);

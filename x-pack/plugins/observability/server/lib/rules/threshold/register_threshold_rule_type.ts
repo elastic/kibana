@@ -181,8 +181,7 @@ export function thresholdRuleType(
     },
     producer: observabilityFeatureId,
     alerts: MetricsRulesTypeAlertDefinition,
-    getViewInAppRelativeUrl: ({ rule }: GetViewInAppRelativeUrlFnOpts<{}>) => {
-      return paths.observability.ruleDetails(rule.id);
-    },
+    getViewInAppRelativeUrl: ({ rule }: GetViewInAppRelativeUrlFnOpts<{}>) =>
+      paths.observability.ruleDetails(rule.id),
   };
 }
