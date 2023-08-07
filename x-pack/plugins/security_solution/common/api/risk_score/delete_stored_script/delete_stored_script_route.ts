@@ -5,14 +5,11 @@
  * 2.0.
  */
 
+import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
-import { RiskScoreEntity } from '../../../../common/search_strategy';
 
-export const onboardingRiskScoreSchema = {
-  body: schema.object({
-    riskScoreEntity: schema.oneOf([
-      schema.literal(RiskScoreEntity.host),
-      schema.literal(RiskScoreEntity.user),
-    ]),
-  }),
-};
+export const deleteStoredScriptRequestBody = schema.object({
+  id: schema.string({ minLength: 1 }),
+});
+
+export type DeleteStoredScriptRequestBody = TypeOf<typeof deleteStoredScriptRequestBody>;
