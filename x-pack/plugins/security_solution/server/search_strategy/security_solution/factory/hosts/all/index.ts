@@ -97,7 +97,12 @@ async function enhanceEdges(
   esClient: IScopedClusterClient,
   isNewRiskScoreModuleAvailable: boolean
 ): Promise<HostsEdges[]> {
-  const hostRiskData = await getHostRiskData(esClient, spaceId, hostNames, isNewRiskScoreModuleAvailable);
+  const hostRiskData = await getHostRiskData(
+    esClient,
+    spaceId,
+    hostNames,
+    isNewRiskScoreModuleAvailable
+  );
   const hostsRiskByHostName: Record<string, string> | undefined = hostRiskData?.hits.hits.reduce(
     (acc, hit) => ({
       ...acc,

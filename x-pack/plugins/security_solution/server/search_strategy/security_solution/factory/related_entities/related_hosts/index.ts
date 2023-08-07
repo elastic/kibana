@@ -82,7 +82,12 @@ async function addHostRiskData(
   isNewRiskScoreModuleAvailable: boolean
 ): Promise<RelatedHost[]> {
   const hostNames = relatedHosts.map((item) => item.host);
-  const hostRiskData = await getHostRiskData(esClient, spaceId, hostNames, isNewRiskScoreModuleAvailable);
+  const hostRiskData = await getHostRiskData(
+    esClient,
+    spaceId,
+    hostNames,
+    isNewRiskScoreModuleAvailable
+  );
   const hostsRiskByHostName: Record<string, RiskSeverity> | undefined =
     hostRiskData?.hits.hits.reduce(
       (acc, hit) => ({
