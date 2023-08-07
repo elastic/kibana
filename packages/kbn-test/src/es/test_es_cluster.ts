@@ -220,7 +220,7 @@ export function createTestEsCluster<
       // multiple nodes, they'll all share the same ESinstallation.
       const firstNode = this.nodes[0];
       if (serverless || esFrom === 'serverless') {
-        return await firstNode.runServerless({ basePath, port });
+        return await firstNode.runServerless({ basePath, port, clean: true });
       } else if (esFrom === 'source') {
         installPath = (await firstNode.installSource(config)).installPath;
       } else if (esFrom === 'snapshot') {
