@@ -26,6 +26,7 @@ export const FinderApp = (props: {
           services={{
             savedObjectsTagging: props.savedObjectsTagging.getTaggingApi(),
             contentClient: props.contentClient,
+            uiSettings: props.core.uiSettings,
           }}
           onChoose={(...args) => {
             alert(JSON.stringify(args));
