@@ -15,7 +15,6 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import { internal, notFound } from '@hapi/boom';
 import { compact, isEmpty, merge, omit } from 'lodash';
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
-import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/gen_ai/constants';
 import {
   type Conversation,
   type ConversationCreateRequest,
@@ -134,12 +133,7 @@ export class ObservabilityAIAssistantClient implements IObservabilityAIAssistant
       })
     );
 
-    const connector = await this.dependencies.actionsClient.get({
-      id: connectorId,
-    });
-
     const request: Omit<CreateChatCompletionRequest, 'model'> & { model?: string } = {
-      ...(connector.config?.apiProvider === OpenAiProviderType.OpenAi ? { model: 'gpt-4' } : {}),
       messages: messagesForOpenAI,
       stream: true,
     };
