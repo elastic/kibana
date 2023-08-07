@@ -28,6 +28,7 @@
     "@kbn/security-plugin",
     "@kbn/security-solution-plugin",
     "@kbn/fleet-plugin",
-    "@kbn/cases-plugin"
+    "@kbn/cases-plugin",
+    "@kbn/security-solution-plugin/cypress"
   ]
 }
