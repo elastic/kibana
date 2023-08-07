@@ -15,6 +15,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { default as React, useCallback, useEffect, useState } from 'react';
+import { getSystemLogsDataStreams } from '../../../../common/elastic_agent_logs';
 import { ObservabilityOnboardingPluginSetupDeps } from '../../../plugin';
 import { useWizard } from '.';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
@@ -55,7 +56,11 @@ export function InstallElasticAgent() {
     navigateToKibanaUrl('/app/observabilityOnboarding');
   }
   async function onContinue() {
-    await locator?.navigate(getDiscoverNavigationParams([datasetName]));
+    const dataStreams = getSystemLogsDataStreams();
+    const dataSets = dataStreams.map(
+      (dataSream) => dataSream.data_stream.dataset
+    );
+    await locator?.navigate(getDiscoverNavigationParams(dataSets));
   }
 
   function onAutoDownloadConfig() {
