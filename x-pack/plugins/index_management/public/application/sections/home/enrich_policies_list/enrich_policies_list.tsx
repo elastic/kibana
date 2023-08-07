@@ -87,7 +87,7 @@ export const EnrichPoliciesList = () => {
     return (
       <PageLoading>
         <FormattedMessage
-          id="xpack.idxMgmt.enrichPoliciesList.loadingEnrichPoliciesDescription"
+          id="xpack.idxMgmt.enrich_policies.list.loadingStateLabel"
           defaultMessage="Loading enrich policies…"
         />
       </PageLoading>
@@ -99,7 +99,7 @@ export const EnrichPoliciesList = () => {
       <PageError
         title={
           <FormattedMessage
-            id="xpack.idxMgmt.enrichPoliciesList.loadingEnrichPoliciesErrorMessage"
+            id="xpack.idxMgmt.enrich_policies.list.errorStateLabel"
             defaultMessage="Error loading enrich policies"
           />
         }
@@ -112,7 +112,7 @@ export const EnrichPoliciesList = () => {
     <div className={`${APP_WRAPPER_CLASS} im-snapshotTestSubject`} data-test-subj="indicesList">
       <EuiText color="subdued">
         <FormattedMessage
-          id="xpack.idxMgmt.enrichPoliciesList.enrichPoliciesDescription"
+          id="xpack.idxMgmt.enrich_policies.list.descriptionTitle"
           defaultMessage="Enrich policies allow you to enrich your data by adding context via additional data. {learnMoreLink}"
           values={{
             learnMoreLink: (

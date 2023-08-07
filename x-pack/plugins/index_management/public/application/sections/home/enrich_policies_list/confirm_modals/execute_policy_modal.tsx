@@ -8,6 +8,7 @@
 import React, { useState } from 'react';
 import { EuiConfirmModal } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { executeEnrichPolicy } from '../../../../services/api';
 import { useAppContext } from '../../../../app_context';
 
@@ -58,15 +59,28 @@ export const ExecutePolicyModal = ({
 
   return (
     <EuiConfirmModal
-      title="Execute enrich policy"
+      title={i18n.translate('xpack.idxMgmt.enrich_policies.executeModal.confirmTitle', {
+        defaultMessage: 'Execute enrich policy',
+      })}
       onCancel={handleOnCancel}
       onConfirm={handleExecutePolicy}
-      cancelButtonText="Cancel"
-      confirmButtonText="Execute"
+      cancelButtonText={i18n.translate('xpack.idxMgmt.enrich_policies.executeModal.cancelButton', {
+        defaultMessage: 'Cancel',
+      })}
+      confirmButtonText={i18n.translate(
+        'xpack.idxMgmt.enrich_policies.executeModal.executeButton',
+        { defaultMessage: 'Execute' }
+      )}
       confirmButtonDisabled={isExecuting}
     >
       <p>
-        You are about to execute the enrich policy <strong>{policyToExecute}</strong>.
+        <FormattedMessage
+          id="xpack.idxMgmt.enrich_policies.deleteModal.bodyCopy"
+          defaultMessage="You are about to execute the enrich policy {policy}."
+          values={{
+            policy: <strong>{policyToExecute}</strong>,
+          }}
+        />
       </p>
     </EuiConfirmModal>
   );

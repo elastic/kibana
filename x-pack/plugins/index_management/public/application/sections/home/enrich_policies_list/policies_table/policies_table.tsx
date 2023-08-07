@@ -7,6 +7,8 @@
 
 import React, { FunctionComponent } from 'react';
 import { EuiInMemoryTable, EuiBasicTableColumn, EuiSearchBarProps, EuiButton } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { EnrichPolicy } from '../enrich_policies_list';
 
 export interface Props {
@@ -30,10 +32,16 @@ export const PoliciesTable: FunctionComponent<Props> = ({
   const renderToolsRight = () => {
     return [
       <EuiButton key="reloadPolicies" iconType="refresh" color="success" onClick={onReloadClick}>
-        Reload
+        <FormattedMessage
+          id="xpack.idxMgmt.enrich_policies.table.reloadButton"
+          defaultMessage="Reload"
+        />
       </EuiButton>,
       <EuiButton key="createPolicy" fill iconType="plusInCircle">
-        Create enrich policy
+        <FormattedMessage
+          id="xpack.idxMgmt.enrich_policies.table.createPolicyButton"
+          defaultMessage="Create enrich policy"
+        />
       </EuiButton>,
     ];
   };
@@ -48,47 +56,67 @@ export const PoliciesTable: FunctionComponent<Props> = ({
   const columns: Array<EuiBasicTableColumn<EnrichPolicy>> = [
     {
       field: 'name',
-      name: 'Name',
+      name: i18n.translate('xpack.idxMgmt.enrich_policies.table.nameField', {
+        defaultMessage: 'Name',
+      }),
       sortable: true,
       truncateText: true,
     },
     {
       field: 'type',
-      name: 'Type',
+      name: i18n.translate('xpack.idxMgmt.enrich_policies.table.typeField', {
+        defaultMessage: 'Type',
+      }),
       sortable: true,
     },
     {
       field: 'sourceIndices',
-      name: 'Source indices',
+      name: i18n.translate('xpack.idxMgmt.enrich_policies.table.sourceIndicesField', {
+        defaultMessage: 'Source indices',
+      }),
       truncateText: true,
       render: (indices: string[]) => indices.join(', '),
     },
     {
       field: 'matchField',
-      name: 'Match field',
+      name: i18n.translate('xpack.idxMgmt.enrich_policies.table.matchFieldField', {
+        defaultMessage: 'Match field',
+      }),
       truncateText: true,
     },
     {
       field: 'enrichFields',
-      name: 'Enrich fields',
+      name: i18n.translate('xpack.idxMgmt.enrich_policies.table.enrichFieldsField', {
+        defaultMessage: 'Enrich fields',
+      }),
       truncateText: false,
       render: (fields: string[]) => fields.join(', '),
     },
     {
-      name: 'Actions',
+      name: i18n.translate('xpack.idxMgmt.enrich_policies.table.actionsField', {
+        defaultMessage: 'Actions',
+      }),
       actions: [
         {
           isPrimary: true,
-          name: 'Execute',
-          description: 'Execute this enrich policy',
+          name: i18n.translate('xpack.idxMgmt.enrich_policies.table.executeAction', {
+            defaultMessage: 'Execute',
+          }),
+          description: i18n.translate('xpack.idxMgmt.enrich_policies.table.executeDescription', {
+            defaultMessage: 'Execute this enrich policy',
+          }),
           type: 'icon',
           icon: 'play',
           onClick: ({ name }) => onExecutePolicyClick(name),
         },
         {
           isPrimary: true,
-          name: 'Delete',
-          description: 'Delete this enrich policy',
+          name: i18n.translate('xpack.idxMgmt.enrich_policies.table.deleteAction', {
+            defaultMessage: 'Delete',
+          }),
+          description: i18n.translate('xpack.idxMgmt.enrich_policies.table.deleteDescription', {
+            defaultMessage: 'Delete this enrich policy',
+          }),
           type: 'icon',
           icon: 'trash',
           color: 'danger',

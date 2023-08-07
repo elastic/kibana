@@ -8,6 +8,7 @@
 import React, { useState } from 'react';
 import { EuiConfirmModal } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { deleteEnrichPolicy } from '../../../../services/api';
 import { useAppContext } from '../../../../app_context';
 
@@ -59,16 +60,27 @@ export const DeletePolicyModal = ({
   return (
     <EuiConfirmModal
       buttonColor="danger"
-      title="Delete enrich policy"
+      title={i18n.translate('xpack.idxMgmt.enrich_policies.deleteModal.confirmTitle', {
+        defaultMessage: 'Delete enrich policy',
+      })}
       onCancel={handleOnCancel}
       onConfirm={handleDeletePolicy}
-      cancelButtonText="Cancel"
-      confirmButtonText="Delete"
+      cancelButtonText={i18n.translate('xpack.idxMgmt.enrich_policies.deleteModal.cancelButton', {
+        defaultMessage: 'Cancel',
+      })}
+      confirmButtonText={i18n.translate('xpack.idxMgmt.enrich_policies.deleteModal.deleteButton', {
+        defaultMessage: 'Delete',
+      })}
       confirmButtonDisabled={isDeleting}
     >
       <p>
-        You are about to delete the enrich policy <strong>{policyToDelete}</strong>. This action is
-        irreverisble.
+        <FormattedMessage
+          id="xpack.idxMgmt.enrich_policies.deleteModal.bodyCopy"
+          defaultMessage="You are about to delete the enrich policy {policy}. This action is irreverisble."
+          values={{
+            policy: <strong>{policyToDelete}</strong>,
+          }}
+        />
       </p>
     </EuiConfirmModal>
   );
