@@ -69,13 +69,8 @@ describe('Outputs', () => {
           // Verify user/pass fields
           cy.getBySel(SETTINGS_OUTPUTS_KAFKA.AUTHENTICATION_USERNAME_INPUT);
           cy.getBySel(SETTINGS_OUTPUTS_KAFKA.AUTHENTICATION_PASSWORD_INPUT);
-
-          // Verify SSL fields
-          cy.getBySel(SETTINGS_OUTPUTS_KAFKA.AUTHENTICATION_SSL_OPTION).click();
           cy.get('[placeholder="Specify certificate authority"]');
-          cy.get('[placeholder="Specify ssl certificate"]');
-          cy.get('[placeholder="Specify certificate key"]');
-          cy.getBySel(SETTINGS_OUTPUTS_KAFKA.AUTHENTICATION_USERNAME_PASSWORD_OPTION).click();
+          cy.getBySel(SETTINGS_OUTPUTS_KAFKA.AUTHENTICATION_VERIFICATION_MODE_INPUT);
 
           cy.getBySel(SETTINGS_OUTPUTS_KAFKA.AUTHENTICATION_SASL_SELECT).within(() => {
             cy.getBySel(SETTINGS_OUTPUTS_KAFKA.AUTHENTICATION_SASL_PLAIN_OPTION);
@@ -83,6 +78,30 @@ describe('Outputs', () => {
             cy.getBySel(SETTINGS_OUTPUTS_KAFKA.AUTHENTICATION_SASL_SCRAM_512_OPTION);
           });
 
+          // Verify SSL fields
+          cy.getBySel(SETTINGS_OUTPUTS_KAFKA.AUTHENTICATION_SSL_OPTION).click();
+          cy.get('[placeholder="Specify certificate authority"]');
+          cy.get('[placeholder="Specify ssl certificate"]');
+          cy.get('[placeholder="Specify certificate key"]');
+          cy.getBySel(SETTINGS_OUTPUTS_KAFKA.AUTHENTICATION_VERIFICATION_MODE_INPUT);
+
+          // Verify None fields
+
+          cy.getBySel(SETTINGS_OUTPUTS_KAFKA.AUTHENTICATION_NONE_OPTION).click();
+
+          cy.getBySel(SETTINGS_OUTPUTS_KAFKA.AUTHENTICATION_SASL_SELECT).should('not.exist');
+          cy.getBySel(SETTINGS_OUTPUTS_KAFKA.AUTHENTICATION_VERIFICATION_MODE_INPUT).should(
+            'not.exist'
+          );
+          cy.getBySel(SETTINGS_OUTPUTS_KAFKA.AUTHENTICATION_USERNAME_INPUT).should('not.exist');
+          cy.getBySel(SETTINGS_OUTPUTS_KAFKA.AUTHENTICATION_PASSWORD_INPUT).should('not.exist');
+          cy.get('[placeholder="Specify certificate authority"]').should('not.exist');
+          cy.get('[placeholder="Specify ssl certificate"]').should('not.exist');
+          cy.get('[placeholder="Specify certificate key"]').should('not.exist');
+
+          cy.getBySel(SETTINGS_OUTPUTS_KAFKA.AUTHENTICATION_USERNAME_PASSWORD_OPTION).click();
+
+          // Verify Partitioning fields
           cy.getBySel(SETTINGS_OUTPUTS_KAFKA.PARTITIONING_PANEL).within(() => {
             cy.getBySel(SETTINGS_OUTPUTS_KAFKA.PARTITIONING_SELECT);
             cy.getBySel(SETTINGS_OUTPUTS_KAFKA.PARTITIONING_RANDOM_OPTION);

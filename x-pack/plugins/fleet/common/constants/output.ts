@@ -69,6 +69,13 @@ export const kafkaAcknowledgeReliabilityLevel = {
   DoNotWait: 0,
 } as const;
 
+export const kafkaVerificationModes = {
+  Full: 'full',
+  None: 'none',
+  Strict: 'strict',
+  Certificate: 'certificate',
+} as const;
+
 export const kafkaSupportedVersions = [
   '0.8.2.0',
   '0.8.2.1',

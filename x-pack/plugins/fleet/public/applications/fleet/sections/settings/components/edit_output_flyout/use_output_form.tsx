@@ -23,6 +23,7 @@ import {
   kafkaCompressionType,
   kafkaPartitionType,
   kafkaSaslMechanism,
+  kafkaVerificationModes,
   outputType,
 } from '../../../../../../../common/constants';
 
@@ -89,6 +90,7 @@ export interface OutputFormInputsType {
   maxBatchBytes: ReturnType<typeof useNumberInput>;
   kafkaHostsInput: ReturnType<typeof useComboInput>;
   kafkaVersionInput: ReturnType<typeof useInput>;
+  kafkaVerificationModeInput: ReturnType<typeof useInput>;
   kafkaAuthMethodInput: ReturnType<typeof useRadioInput>;
   kafkaSaslMechanismInput: ReturnType<typeof useRadioInput>;
   kafkaAuthUsernameInput: ReturnType<typeof useInput>;
@@ -316,6 +318,12 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     isSSLEditable
   );
 
+  const kafkaVerificationModeInput = useInput(
+    kafkaOutput?.ssl?.verification_mode ?? kafkaVerificationModes.Full,
+    undefined,
+    isSSLEditable
+  );
+
   const kafkaSaslMechanismInput = useRadioInput(
     kafkaOutput?.sasl?.mechanism ?? kafkaSaslMechanism.Plain,
     isDisabled('sasl')
@@ -429,6 +437,7 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     maxBatchBytes,
     kafkaVersionInput,
     kafkaHostsInput,
+    kafkaVerificationModeInput,
     kafkaAuthMethodInput,
     kafkaAuthUsernameInput,
     kafkaAuthPasswordInput,
@@ -605,6 +614,7 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
                       certificate_authorities: kafkaSslCertificateAuthoritiesInput.value.filter(
                         (val) => val !== ''
                       ),
+                      verification_mode: kafkaVerificationModeInput.value,
                     },
                   }
                 : {}),
@@ -616,6 +626,7 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
                       certificate_authorities: kafkaSslCertificateAuthoritiesInput.value.filter(
                         (val) => val !== ''
                       ),
+                      verification_mode: kafkaVerificationModeInput.value,
                     },
                   }
                 : {}),
@@ -763,15 +774,16 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     compressionLevelInput.value,
     loadBalanceEnabledInput.value,
     typeInput.value,
+    kafkaSslCertificateAuthoritiesInput.value,
     nameInput.value,
     kafkaHostsInput.value,
     defaultOutputInput.value,
     defaultMonitoringOutputInput.value,
     additionalYamlConfigInput.value,
+    kafkaVerificationModeInput.value,
     kafkaAuthMethodInput.value,
     kafkaSslCertificateInput.value,
     kafkaSslKeyInput.value,
-    kafkaSslCertificateAuthoritiesInput.value,
     kafkaClientIdInput.value,
     kafkaVersionInput.value,
     kafkaKeyInput.value,

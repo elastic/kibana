@@ -35,6 +35,9 @@ properties:
         type: string
       key:
         type: string
+      verification_mode:
+        type: string
+        enum: ['none', 'full', 'certificate', 'strict']
   proxy_id:
     type: string
   shipper:

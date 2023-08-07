@@ -13,6 +13,7 @@ import {
   kafkaPartitionType,
   kafkaSaslMechanism,
   kafkaTopicWhenType,
+  kafkaVerificationModes,
   outputType,
 } from '../../../common/constants';
 
@@ -64,6 +65,14 @@ const BaseSchema = {
       certificate_authorities: schema.maybe(schema.arrayOf(schema.string())),
       certificate: schema.maybe(schema.string()),
       key: schema.maybe(schema.string()),
+      verification_mode: schema.maybe(
+        schema.oneOf([
+          schema.literal(kafkaVerificationModes.Full),
+          schema.literal(kafkaVerificationModes.None),
+          schema.literal(kafkaVerificationModes.Certificate),
+          schema.literal(kafkaVerificationModes.Certificate),
+        ])
+      ),
     })
   ),
   proxy_id: schema.nullable(schema.string()),

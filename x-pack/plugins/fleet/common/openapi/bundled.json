@@ -7701,6 +7701,15 @@
               },
               "key": {
                 "type": "string"
+              },
+              "verification_mode": {
+                "type": "string",
+                "enum": [
+                  "none",
+                  "full",
+                  "certificate",
+                  "strict"
+                ]
               }
             }
           },
@@ -8100,6 +8109,15 @@
               },
               "key": {
                 "type": "string"
+              },
+              "verification_mode": {
+                "type": "string",
+                "enum": [
+                  "none",
+                  "full",
+                  "certificate",
+                  "strict"
+                ]
               }
             }
           },

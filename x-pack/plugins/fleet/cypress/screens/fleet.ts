@@ -142,6 +142,7 @@ export const SETTINGS_OUTPUTS_KAFKA = {
   AUTHENTICATION_KERBEROS_OPTION: 'kafkaAuthenticationKerberosRadioButton',
   AUTHENTICATION_USERNAME_INPUT: 'settingsOutputsFlyout.kafkaUsernameInput',
   AUTHENTICATION_PASSWORD_INPUT: 'settingsOutputsFlyout.kafkaPasswordInput',
+  AUTHENTICATION_VERIFICATION_MODE_INPUT: 'settingsOutputsFlyout.kafkaVerificationModeInput',
   AUTHENTICATION_SASL_SELECT: 'settingsOutputsFlyout.kafkaSaslInput',
   AUTHENTICATION_SASL_PLAIN_OPTION: 'kafkaSaslPlainRadioButton',
   AUTHENTICATION_SASL_SCRAM_256_OPTION: 'kafkaSaslScramSha256RadioButton',

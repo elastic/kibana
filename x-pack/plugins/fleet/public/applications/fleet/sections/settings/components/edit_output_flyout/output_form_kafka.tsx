@@ -12,7 +12,10 @@ import { i18n } from '@kbn/i18n';
 
 import { useStartServices } from '../../../../../../hooks';
 
-import { kafkaSupportedVersions } from '../../../../../../../common/constants';
+import {
+  kafkaSupportedVersions,
+  kafkaVerificationModes,
+} from '../../../../../../../common/constants';
 
 import { MultiRowInput } from '../multi_row_input';
 
@@ -45,6 +48,19 @@ export const OutputFormKafkaSection: React.FunctionComponent<Props> = (props) =>
         text: version,
         label: version,
       })),
+    []
+  );
+
+  const kafkaVerificationModeOptions = useMemo(
+    () =>
+      (Object.keys(kafkaVerificationModes) as Array<keyof typeof kafkaVerificationModes>).map(
+        (key) => {
+          return {
+            text: kafkaVerificationModes[key],
+            label: key,
+          };
+        }
+      ),
     []
   );
 
@@ -105,25 +121,53 @@ export const OutputFormKafkaSection: React.FunctionComponent<Props> = (props) =>
       <EuiSpacer size="m" />
 
       <OutputFormKafkaAuthentication inputs={inputs} />
-      <EuiSpacer size="m" />
 
-      <MultiRowInput
-        placeholder={i18n.translate(
-          'xpack.fleet.settings.editOutputFlyout.sslCertificateAuthoritiesInputPlaceholder',
-          {
-            defaultMessage: 'Specify certificate authority',
-          }
-        )}
-        label={i18n.translate(
-          'xpack.fleet.settings.editOutputFlyout.sslCertificateAuthoritiesInputLabel',
-          {
-            defaultMessage: 'Server SSL certificate authorities (optional)',
-          }
-        )}
-        multiline={true}
-        sortable={false}
-        {...inputs.kafkaSslCertificateAuthoritiesInput.props}
-      />
+      {inputs.kafkaAuthMethodInput.value !== 'none' && (
+        <>
+          <EuiSpacer size="m" />
+
+          <MultiRowInput
+            placeholder={i18n.translate(
+              'xpack.fleet.settings.editOutputFlyout.sslCertificateAuthoritiesInputPlaceholder',
+              {
+                defaultMessage: 'Specify certificate authority',
+              }
+            )}
+            label={i18n.translate(
+              'xpack.fleet.settings.editOutputFlyout.sslCertificateAuthoritiesInputLabel',
+              {
+                defaultMessage: 'Server SSL certificate authorities (optional)',
+              }
+            )}
+            multiline={true}
+            sortable={false}
+            {...inputs.kafkaSslCertificateAuthoritiesInput.props}
+          />
+
+          <EuiFormRow
+            fullWidth
+            label={
+              <FormattedMessage
+                id="xpack.fleet.settings.editOutputFlyout.kafkaVerificationModeInputLabel"
+                defaultMessage="Verification mode"
+              />
+            }
+          >
+            <EuiSelect
+              fullWidth
+              data-test-subj="settingsOutputsFlyout.kafkaVerificationModeInput"
+              {...inputs.kafkaVerificationModeInput.props}
+              options={kafkaVerificationModeOptions}
+              placeholder={i18n.translate(
+                'xpack.fleet.settings.editOutputFlyout.kafkaVerificationModeInputPlaceholder',
+                {
+                  defaultMessage: 'Specify verification mode',
+                }
+              )}
+            />
+          </EuiFormRow>
+        </>
+      )}
 
       <EuiSpacer size="m" />
 

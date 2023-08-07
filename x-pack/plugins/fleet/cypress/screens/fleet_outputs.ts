@@ -97,6 +97,10 @@ export const kafkaOutputFormValues = {
     selector: SETTINGS_OUTPUTS_KAFKA.AUTHENTICATION_PASSWORD_INPUT,
     value: 'test_password',
   },
+  verificationMode: {
+    selector: SETTINGS_OUTPUTS_KAFKA.AUTHENTICATION_VERIFICATION_MODE_INPUT,
+    value: 'certificate',
+  },
   hash: {
     selector: SETTINGS_OUTPUTS_KAFKA.PARTITIONING_HASH_INPUT,
     value: 'testHash',
@@ -185,6 +189,10 @@ export const fillInKafkaOutputForm = () => {
   cy.get('[placeholder="Specify host"').clear().type('localhost:5000');
   cy.getBySel(kafkaOutputFormValues.username.selector).type(kafkaOutputFormValues.username.value);
   cy.getBySel(kafkaOutputFormValues.password.selector).type(kafkaOutputFormValues.password.value);
+  cy.getBySel(kafkaOutputFormValues.verificationMode.selector).select(
+    kafkaOutputFormValues.verificationMode.value
+  );
+  cy.get('[placeholder="Specify certificate authority"]').clear().type('testCA');
 
   cy.getBySel(SETTINGS_OUTPUTS_KAFKA.AUTHENTICATION_SASL_SCRAM_256_OPTION).click();
   cy.getBySel(SETTINGS_OUTPUTS_KAFKA.PARTITIONING_HASH_OPTION).click();
@@ -260,6 +268,9 @@ export const validateSavedKafkaOutputForm = () => {
     const { selector, value } = kafkaOutputFormValues[key as keyof typeof kafkaOutputFormValues];
     cy.getBySel(selector).should('have.value', value);
   });
+
+  cy.get('[placeholder="Specify host"').should('have.value', 'localhost:5000');
+  cy.get('[placeholder="Specify certificate authority"]').should('have.value', 'testCA');
 
   cy.getBySel(SETTINGS_OUTPUTS.TYPE_INPUT).should('have.value', 'kafka');
 
