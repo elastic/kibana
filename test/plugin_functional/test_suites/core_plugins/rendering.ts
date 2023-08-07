@@ -223,7 +223,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.cloud.profile_url (string)',
         'xpack.cloud.performance_url (string)',
         'xpack.cloud.users_and_roles_url (string)',
-        'xpack.cloud.projects_url (string)',
+        'xpack.cloud.projects_url (any)', // It's a string (any because schema.conditional)
         // can't be used to infer urls or customer id from the outside
         'xpack.cloud.serverless.project_id (string)',
         'xpack.discoverEnhanced.actions.exploreDataInChart.enabled (boolean)',
