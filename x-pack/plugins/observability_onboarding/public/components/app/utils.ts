@@ -19,12 +19,14 @@ type DiscoverNavigationParams = Pick<
 const defaultFilterKey = 'data_stream.dataset';
 const defaultLogsDataViewId = 'logs-*';
 const defaultLogsDataView: DataViewSpec = {
+  id: defaultLogsDataViewId,
   title: defaultLogsDataViewId,
 };
 
 const getDefaultDatasetFilter = (datasets: string[]): Filter[] => [
   {
     meta: {
+      index: defaultLogsDataViewId,
       key: defaultFilterKey,
       params: datasets,
       type: 'phrases',
