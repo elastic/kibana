@@ -37,7 +37,7 @@ export function SvlCommonApiServiceProvider({}: FtrProviderContext) {
       );
     },
 
-    assertApiNotFound(body: any, status: number) {
+    assertApiNotFound(body: unknown, status: number) {
       expect(body).to.eql({
         statusCode: 404,
         error: 'Not Found',
