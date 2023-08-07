@@ -19,6 +19,7 @@ import { LocatorPublic } from '@kbn/share-plugin/common';
 
 import { memoize, last, upperCase } from 'lodash';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/server';
+import { ALL_VALUE } from '@kbn/slo-schema';
 import { AlertsLocatorParams, getAlertUrl } from '../../../../common';
 import { SLO_ID_FIELD, SLO_REVISION_FIELD } from '../../../../common/field_names/slo';
 import { Duration, SLO, toDurationUnit } from '../../../domain/models';
@@ -53,7 +54,7 @@ async function evaluateWindow(slo: SLO, summaryClient: DefaultSLIClient, windowD
     toDurationUnit(windowDef.shortWindow.unit)
   );
 
-  const sliData = await summaryClient.fetchSLIDataFrom(slo, [
+  const sliData = await summaryClient.fetchSLIDataFrom(slo, ALL_VALUE, [
     { name: LONG_WINDOW, duration: longWindowDuration.add(slo.settings.syncDelay) },
     { name: SHORT_WINDOW, duration: shortWindowDuration.add(slo.settings.syncDelay) },
   ]);
