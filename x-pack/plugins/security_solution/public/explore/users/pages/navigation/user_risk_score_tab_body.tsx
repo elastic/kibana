@@ -24,6 +24,8 @@ import {
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { EMPTY_SEVERITY_COUNT, RiskScoreEntity } from '../../../../../common/search_strategy';
 import { RiskScoresNoDataDetected } from '../../../components/risk_score/risk_score_onboarding/risk_score_no_data_detected';
+import { useRiskEngineStatus } from '../../../../entity_analytics/api/hooks/use_risk_engine_status';
+import { RiskScoreUpdatePanel } from '../../../../entity_analytics/components/risk_score_update_panel';
 
 const UserRiskScoreTableManage = manageQuery(UserRiskScoreTable);
 
@@ -36,6 +38,7 @@ export const UserRiskScoreQueryTabBody = ({
   startDate: from,
   type,
 }: UsersComponentsQueryProps) => {
+  const { data: riskScoreEngineStatus } = useRiskEngineStatus();
   const getUserRiskScoreSelector = useMemo(() => usersSelectors.userRiskScoreSelector(), []);
   const { activePage, limit, sort } = useDeepEqualSelector((state: State) =>
     getUserRiskScoreSelector(state)
@@ -95,6 +98,10 @@ export const UserRiskScoreQueryTabBody = ({
 
   if (!isAuthorized) {
     return <>{'TODO: Add RiskScore Upsell'}</>;
+  }
+
+  if (riskScoreEngineStatus?.isUpdateAvailable) {
+    return <RiskScoreUpdatePanel />;
   }
 
   if (status.isDisabled || status.isDeprecated) {

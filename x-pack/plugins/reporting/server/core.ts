@@ -102,7 +102,6 @@ export class ReportingCore {
   private monitorTask: MonitorReportsTask;
   private config: ReportingConfigType;
   private executing: Set<string>;
-  private exportTypes: ExportType[] = [];
   private exportTypesRegistry = new ExportTypesRegistry();
 
   public getContract: () => ReportingSetup;
@@ -118,20 +117,9 @@ export class ReportingCore {
     const config = createConfig(core, context.config.get<ReportingConfigType>(), logger);
     this.config = config;
 
-    // Export Type declarations
-    this.exportTypes.push(
-      new CsvSearchSourceExportType(this.core, this.config, this.logger, this.context)
-    );
-    this.exportTypes.push(new CsvV2ExportType(this.core, this.config, this.logger, this.context));
-    this.exportTypes.push(new PdfExportType(this.core, this.config, this.logger, this.context));
-    this.exportTypes.push(new PngExportType(this.core, this.config, this.logger, this.context));
-    // deprecated export types for tests
-    this.exportTypes.push(new PdfV1ExportType(this.core, this.config, this.logger, this.context));
-
-    this.exportTypes.forEach((et) => {
+    this.getExportTypes().forEach((et) => {
       this.exportTypesRegistry.register(et);
     });
-
     this.deprecatedAllowedRoles = config.roles.enabled ? config.roles.allow : false;
     this.executeTask = new ExecuteReportTask(this, config, this.logger);
     this.monitorTask = new MonitorReportsTask(this, config, this.logger);
@@ -157,7 +145,7 @@ export class ReportingCore {
     this.pluginSetup$.next(true); // trigger the observer
     this.pluginSetupDeps = setupDeps; // cache
 
-    this.exportTypes.forEach((et) => {
+    this.exportTypesRegistry.getAll().forEach((et) => {
       et.setup(setupDeps);
     });
 
@@ -175,8 +163,9 @@ export class ReportingCore {
     this.pluginStart$.next(startDeps); // trigger the observer
     this.pluginStartDeps = startDeps; // cache
 
-    this.exportTypes.forEach((et) => {
-      et.start({ ...startDeps });
+
+    this.exportTypesRegistry.getAll().forEach((et) => {
+      et.start({ ...startDeps, reporting: this.getContract() });
     });
 
     const { taskManager } = startDeps;
@@ -224,6 +213,30 @@ export class ReportingCore {
   public setConfig(config: ReportingConfigType) {
     this.config = config;
     this.pluginSetup$.next(true);
+  }
+
+  /**
+   * Validate export types with config settings
+   * only CSV export types should be registered in the export types registry for serverless
+   */
+  private getExportTypes(): ExportType[] {
+    const exportTypes = [];
+    if (!this.config.export_types.pdf.enabled || !this.config.export_types.png.enabled) {
+      exportTypes.push(
+        new CsvSearchSourceExportType(this.core, this.config, this.logger, this.context)
+      );
+      exportTypes.push(new CsvV2ExportType(this.core, this.config, this.logger, this.context));
+    } else {
+      exportTypes.push(
+        new CsvSearchSourceExportType(this.core, this.config, this.logger, this.context)
+      );
+      exportTypes.push(new CsvV2ExportType(this.core, this.config, this.logger, this.context));
+      exportTypes.push(new PdfExportType(this.core, this.config, this.logger, this.context));
+      exportTypes.push(new PngExportType(this.core, this.config, this.logger, this.context));
+      // deprecated export types for tests
+      exportTypes.push(new PdfV1ExportType(this.core, this.config, this.logger, this.context));
+    }
+    return exportTypes;
   }
 
   /**
