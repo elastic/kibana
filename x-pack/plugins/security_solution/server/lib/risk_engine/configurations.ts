@@ -155,4 +155,4 @@ export const getLatestTransformId = (namespace: string): string =>
   `${riskScoreBaseIndexName}_latest_transform_${namespace}`;
 
 export const getLatestTransformIndex = (spaceId = 'default') =>
-  `${riskScoreBaseIndexName}.risk_score_latest_${spaceId}`;
+  `${riskScoreBaseIndexName}.risk-score-latest-${spaceId}`;

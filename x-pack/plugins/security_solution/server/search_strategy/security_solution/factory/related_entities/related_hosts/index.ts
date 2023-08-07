@@ -58,7 +58,12 @@ export const usersRelatedHosts: SecuritySolutionFactory<RelatedEntitiesQueries.r
       {}
     );
     const enhancedHosts = deps?.spaceId
-      ? await addHostRiskData(relatedHosts, deps.spaceId, deps.esClient)
+      ? await addHostRiskData(
+          relatedHosts,
+          deps.spaceId,
+          deps.esClient,
+          options?.isNewRiskScoreEnabled ?? false
+        )
       : relatedHosts;
 
     return {
@@ -73,10 +78,11 @@ export const usersRelatedHosts: SecuritySolutionFactory<RelatedEntitiesQueries.r
 async function addHostRiskData(
   relatedHosts: RelatedHost[],
   spaceId: string,
-  esClient: IScopedClusterClient
+  esClient: IScopedClusterClient,
+  isNewRiskScoreEnabled: boolean
 ): Promise<RelatedHost[]> {
   const hostNames = relatedHosts.map((item) => item.host);
-  const hostRiskData = await getHostRiskData(esClient, spaceId, hostNames);
+  const hostRiskData = await getHostRiskData(esClient, spaceId, hostNames, isNewRiskScoreEnabled);
   const hostsRiskByHostName: Record<string, RiskSeverity> | undefined =
     hostRiskData?.hits.hits.reduce(
       (acc, hit) => ({

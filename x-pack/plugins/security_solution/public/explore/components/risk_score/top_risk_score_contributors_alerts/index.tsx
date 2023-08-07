@@ -13,7 +13,9 @@ import type { Filter } from '@kbn/es-query';
 import { HeaderSection } from '../../../../common/components/header_section';
 
 import * as i18n from './translations';
-
+import type { RiskInputs } from '../../../../../common/risk_engine';
+import { RiskScoreEntity } from '../../../../../common/risk_engine';
+import type { HostRiskScore, UserRiskScore } from '../../../../../common/search_strategy';
 import { ALERTS_TABLE_REGISTRY_CONFIG_IDS } from '../../../../../common/constants';
 import { AlertsTableComponent } from '../../../../detections/components/alerts_table';
 import { GroupedAlertsTable } from '../../../../detections/components/alerts_table/alerts_grouping';
@@ -25,11 +27,10 @@ import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 
 export interface TopRiskScoreContributorsAlertsProps {
-  loading: boolean;
   toggleStatus: boolean;
   toggleQuery?: (status: boolean) => void;
-  riskScore: any;
-  riskEntity: string;
+  riskScore: HostRiskScore | UserRiskScore;
+  riskEntity: RiskScoreEntity;
 }
 
 export const TopRiskScoreContributorsAlerts: React.FC<TopRiskScoreContributorsAlertsProps> = ({
@@ -39,24 +40,9 @@ export const TopRiskScoreContributorsAlerts: React.FC<TopRiskScoreContributorsAl
   riskEntity,
 }) => {
   const { to, from } = useGlobalTime();
-  const [
-    {
-      loading: userInfoLoading,
-      isSignalIndexExists,
-      isAuthenticated,
-      hasEncryptionKey,
-      canUserCRUD,
-      hasIndexRead,
-      signalIndexName,
-      hasIndexWrite,
-      hasIndexMaintenance,
-    },
-  ] = useUserData();
-  const {
-    indexPattern,
-    runtimeMappings,
-    loading: isLoadingIndexPattern,
-  } = useSourcererDataView(SourcererScopeName.detections);
+  const [{ loading: userInfoLoading, signalIndexName, hasIndexWrite, hasIndexMaintenance }] =
+    useUserData();
+  const { runtimeMappings } = useSourcererDataView(SourcererScopeName.detections);
   const getGlobalFiltersQuerySelector = useMemo(
     () => inputsSelectors.globalFiltersQuerySelector(),
     []
@@ -65,22 +51,29 @@ export const TopRiskScoreContributorsAlerts: React.FC<TopRiskScoreContributorsAl
 
   const query = useDeepEqualSelector(getGlobalQuerySelector);
   const filters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
-  const riskInputs = riskScore?.[riskEntity]?.risk?.inputs ?? [];
-  const inputFilters = [
-    {
-      meta: {
-        alias: null,
-        negate: false,
-        disabled: false,
-      },
-      query: {
-        terms: {
-          _id: riskInputs.map((item) => item.id),
+
+  const inputFilters = useMemo(() => {
+    const riskScoreByType =
+      riskEntity === RiskScoreEntity.host
+        ? (riskScore as HostRiskScore).host
+        : (riskScore as UserRiskScore).user;
+    const riskInputs = (riskScoreByType?.risk?.inputs ?? []) as RiskInputs;
+    return [
+      {
+        meta: {
+          alias: null,
+          negate: false,
+          disabled: false,
+        },
+        query: {
+          terms: {
+            _id: riskInputs.map((item) => item.id),
+          },
         },
       },
-    },
-  ];
-  console.log(riskInputs, 'RISK INPUTS 123');
+    ];
+  }, [riskScore, riskEntity]);
+
   const renderGroupedAlertTable = useCallback(
     (groupingFilters: Filter[]) => {
       return (
@@ -92,7 +85,7 @@ export const TopRiskScoreContributorsAlerts: React.FC<TopRiskScoreContributorsAl
         />
       );
     },
-    [inputFilters]
+    [inputFilters, filters]
   );
 
   return (

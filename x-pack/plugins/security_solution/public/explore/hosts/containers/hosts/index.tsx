@@ -145,6 +145,7 @@ export const useAllHost = ({
           direction,
           field: sortField,
         },
+        // isNewRiskScoreEnabled: false,
       };
       if (!deepEqual(prevRequest, myRequest)) {
         return myRequest;
