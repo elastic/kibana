@@ -6,12 +6,5 @@
  * Side Public License, v 1.
  */
 
-import type { SpecificationTypes } from './types';
-export const findTypeDefinition = (
-  schema: SpecificationTypes.Model,
-  typeName: SpecificationTypes.TypeName
-): SpecificationTypes.TypeDefinition | undefined => {
-  return schema.types.find(
-    (type) => type.name.name === typeName.name && type.name.namespace === typeName.namespace
-  );
-};
+export { findTypeDefinition } from './find_type_definition';
+export { convertUrlProperties } from './convert_url_properties';
