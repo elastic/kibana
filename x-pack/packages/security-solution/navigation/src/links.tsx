@@ -132,7 +132,7 @@ export const mergePaths = (path: string | undefined, subPath: string | undefined
   if (path && subPath) {
     return `${path.replace(/\/$/, '')}/${subPath.replace(/^\//, '')}`;
   }
-  return path ?? subPath ?? '';
+  return path || subPath || '';
 };
 
 export const formatPath = (path: string, urlState: string) => {

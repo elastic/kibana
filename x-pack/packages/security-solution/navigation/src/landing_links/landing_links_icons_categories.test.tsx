@@ -9,7 +9,7 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { SecurityPageName } from '../constants';
 import { mockNavigateTo, mockGetAppUrl } from '../../mocks/navigation';
-import type { LinkCategories, NavigationLink } from '../types';
+import type { SeparatorLinkCategory, TitleLinkCategory, NavigationLink } from '../types';
 import { LandingLinksIconsCategories } from './landing_links_icons_categories';
 import { BETA } from './beta_badge';
 
@@ -24,7 +24,7 @@ const HOSTS_ITEM_LABEL = 'hosts!!';
 const CATEGORY_1_LABEL = 'first tests category';
 const CATEGORY_2_LABEL = 'second tests category';
 
-const categories: LinkCategories = [
+const categories: Array<SeparatorLinkCategory | TitleLinkCategory> = [
   {
     label: CATEGORY_1_LABEL,
     linkIds: [SecurityPageName.rules],

@@ -178,6 +178,7 @@ export const links: LinkItem = {
       hideTimeline: true,
       capabilities: [`${SERVER_APP_ID}.entity-analytics`],
       experimentalKey: 'riskScoringRoutesEnabled',
+      licenseType: 'platinum',
     },
     {
       id: SecurityPageName.responseActionsHistory,
@@ -218,7 +219,7 @@ export const getManagementFilteredLinks = async (
     fleetAuthz && currentUser
       ? calculateEndpointAuthz(licenseService, fleetAuthz, currentUser.roles)
       : getEndpointAuthzInitialState();
-  const showEntityAnalytics = licenseService.isPlatinumPlus();
+
   const showHostIsolationExceptions =
     canAccessHostIsolationExceptions || // access host isolation exceptions is a paid feature, always show the link.
     // read host isolation exceptions is not a paid feature, to allow deleting exceptions after a downgrade scenario.
@@ -254,10 +255,6 @@ export const getManagementFilteredLinks = async (
 
   if (!canReadBlocklist) {
     linksToExclude.push(SecurityPageName.blocklist);
-  }
-
-  if (!showEntityAnalytics) {
-    linksToExclude.push(SecurityPageName.entityAnalyticsManagement);
   }
 
   return excludeLinks(linksToExclude);
