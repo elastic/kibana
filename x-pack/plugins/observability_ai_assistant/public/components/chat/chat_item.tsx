@@ -53,7 +53,7 @@ const euiCommentClassName = css`
   }
 `;
 
-const systemMessageClassName = css`
+const expandableMessageClassName = css`
   .euiCommentEvent__header {
     background: transparent;
     border-block-end: none;
@@ -132,11 +132,9 @@ export function ChatItem({
           {
             id: 'expand',
             icon: isAccordionOpen ? 'eyeClosed' : 'eye',
-            label: isAccordionOpen
-              ? i18n.translate('xpack.observabilityAiAssistant.chatTimeline.actions.inspect', {
-                  defaultMessage: 'Inspect message',
-                })
-              : '',
+            label: i18n.translate('xpack.observabilityAiAssistant.chatTimeline.actions.inspect', {
+              defaultMessage: 'Inspect message',
+            }),
             handler: () => {
               handleAccordionToggle();
             },
@@ -155,7 +153,7 @@ export function ChatItem({
               }
             ),
             handler: () => {
-              navigator.clipboard.writeText(content?.toString() || '');
+              navigator.clipboard.writeText(content || '');
             },
           },
         ]
@@ -197,14 +195,24 @@ export function ChatItem({
             onToggle={handleAccordionToggle}
           >
             <EuiSpacer size="s" />
-            <MessageText content={'POOP'} loading={loading} />
+            <MessageText content={content || ''} loading={loading} />
           </EuiAccordion>
         ) : (
           <MessageText content={content || ''} loading={loading} />
         )
       ) : null;
   } else {
-    element = <EuiErrorBoundary>{element}</EuiErrorBoundary>;
+    element = (
+      <EuiAccordion
+        id={accordionId}
+        className={accordionButtonClassName}
+        forceState={isAccordionOpen ? 'open' : 'closed'}
+        onToggle={handleAccordionToggle}
+      >
+        <EuiSpacer size="s" />
+        <EuiErrorBoundary>{element}</EuiErrorBoundary>
+      </EuiAccordion>
+    );
   }
 
   return (
@@ -247,7 +255,9 @@ export function ChatItem({
           title={title}
         />
       }
-      className={role === MessageRole.System ? systemMessageClassName : euiCommentClassName}
+      className={
+        role === MessageRole.User && canExpand ? expandableMessageClassName : euiCommentClassName
+      }
       timelineAvatar={
         <ChatItemAvatar loading={loading && !content} currentUser={currentUser} role={role} />
       }

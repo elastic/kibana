@@ -87,11 +87,13 @@ export function MessageText(props: Props) {
   const containerClassName = css`
     overflow-wrap: break-word;
 
-    code {
+    pre {
       background: ${euiThemeVars.euiColorLightestShade};
       padding: 0 8px;
     }
   `;
+
+  console.log('props', props.content);
 
   return (
     <EuiText size="s" className={containerClassName}>
