@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ALL_VALUE } from '@kbn/slo-schema';
 import { SLO } from '../../domain/models';
 import { FindSLO } from './find_slo';
 import { createSLO } from './fixtures/slo';
@@ -92,6 +93,8 @@ describe('FindSLO', () => {
             updatedAt: slo.updatedAt.toISOString(),
             enabled: slo.enabled,
             revision: slo.revision,
+            groupBy: slo.groupBy,
+            instanceId: ALL_VALUE,
           },
         ],
       });
@@ -145,6 +148,7 @@ function summarySearchResult(slo: SLO): Paginated<SLOSummary> {
     results: [
       {
         id: slo.id,
+        instanceId: slo.groupBy === ALL_VALUE ? ALL_VALUE : 'host-abcde',
         summary: {
           status: 'HEALTHY',
           sliValue: 0.9999,
