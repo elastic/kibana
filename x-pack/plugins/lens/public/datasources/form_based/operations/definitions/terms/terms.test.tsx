@@ -2477,7 +2477,9 @@ describe('terms', () => {
       const functionComboBox = refEditor
         .find(EuiComboBox)
         .filter('[data-test-subj="indexPattern-reference-function"]');
-      const option = functionComboBox.prop('options')!.find(({ label }) => label === 'Average')!;
+      const option = functionComboBox
+        .prop('options')!
+        .find(({ label }: { label: string }) => label === 'Average')!;
 
       act(() => {
         functionComboBox.prop('onChange')!([option]);
@@ -2546,7 +2548,7 @@ describe('terms', () => {
 
       const option = fieldComboBox
         .prop('options')[0]
-        .options!.find(({ label }) => label === 'memory')!;
+        .options!.find(({ label }: { label: string }) => label === 'memory')!;
       act(() => {
         fieldComboBox.prop('onChange')!([option]);
       });
@@ -2627,7 +2629,9 @@ describe('terms', () => {
       const functionComboBox = comboBoxes.filter(
         '[data-test-subj="indexPattern-reference-function"]'
       );
-      const option = functionComboBox.prop('options')!.find(({ label }) => label === 'Average')!;
+      const option = functionComboBox
+        .prop('options')!
+        .find(({ label }: { label: string }) => label === 'Average')!;
       act(() => {
         functionComboBox.prop('onChange')!([option]);
       });
