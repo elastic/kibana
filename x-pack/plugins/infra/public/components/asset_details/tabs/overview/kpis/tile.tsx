@@ -8,7 +8,7 @@ import React, { useMemo } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { TimeRange } from '@kbn/es-query';
-import { LensMetricChart } from '../../../../lens';
+import { LensChart, TooltipContent } from '../../../../lens';
 import type { KPIChartProps } from '../../../../../common/visualizations/lens/dashboards/host/kpi_grid_config';
 import { buildCombinedHostsFilter } from '../../../../../utils/filters/build';
 
@@ -18,6 +18,7 @@ export interface TileProps {
   nodeName: string;
 }
 
+const HEIGHT = 150;
 const AVERAGE_SUBTITLE = i18n.translate(
   'xpack.infra.assetDetailsEmbeddable.overview.metricTrend.subtitle.average',
   {
@@ -45,15 +46,18 @@ export const Tile = ({
   }, [dataView, nodeName]);
 
   return (
-    <LensMetricChart
+    <LensChart
       id={`infraAssetDetailsKPI${id}`}
       dataView={dataView}
       dateRange={timeRange}
       layers={{ ...layers, options: { ...layers.options, subtitle: AVERAGE_SUBTITLE } }}
+      height={HEIGHT}
       filters={filters}
       title={title}
-      toolTip={toolTip}
+      toolTip={<TooltipContent description={toolTip} />}
+      visualizationType="lnsMetric"
       disableTriggers
+      hidePanelTitles
     />
   );
 };

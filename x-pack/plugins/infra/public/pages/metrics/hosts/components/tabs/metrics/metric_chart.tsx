@@ -6,7 +6,7 @@
  */
 import React, { useMemo } from 'react';
 import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
-import { LensXYChart } from '../../../../../../components/lens';
+import { LensChart } from '../../../../../../components/lens';
 import { Layer } from '../../../../../../hooks/use_lens_attributes';
 import { useMetricsDataViewContext } from '../../../hooks/use_data_view';
 import { useUnifiedSearchContext } from '../../../hooks/use_unified_search';
@@ -51,8 +51,9 @@ export const MetricChart = ({ id, title, layers, overrides }: MetricChartProps) 
   });
 
   return (
-    <LensXYChart
+    <LensChart
       id={`hostsView-metricChart-${id}`}
+      borderRadius="m"
       dataView={dataView}
       dateRange={afterLoadedState.dateRange}
       height={METRIC_CHART_MIN_HEIGHT}
@@ -63,6 +64,7 @@ export const MetricChart = ({ id, title, layers, overrides }: MetricChartProps) 
       query={afterLoadedState.query}
       title={title}
       overrides={overrides}
+      visualizationType="lnsXY"
     />
   );
 };

@@ -6,7 +6,7 @@
  */
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { LensMetricChart } from '../../../../../components/lens';
+import { LensChart, TooltipContent } from '../../../../../components/lens';
 import { KPIChartProps } from '../../../../../common/visualizations/lens/dashboards/host/kpi_grid_config';
 import { buildCombinedHostsFilter } from '../../../../../utils/filters/build';
 import { useMetricsDataViewContext } from '../../hooks/use_data_view';
@@ -19,7 +19,7 @@ const AVERAGE_SUBTITLE = i18n.translate('xpack.infra.hostsViewPage.metricTrend.s
   defaultMessage: 'Average',
 });
 
-export const Tile = ({ id, title, layers, toolTip }: KPIChartProps) => {
+export const Tile = ({ id, title, layers, toolTip, height }: KPIChartProps) => {
   const { searchCriteria } = useUnifiedSearchContext();
   const { dataView } = useMetricsDataViewContext();
   const { requestTs, hostNodes, loading: hostsLoading } = useHostsViewContext();
@@ -62,7 +62,7 @@ export const Tile = ({ id, title, layers, toolTip }: KPIChartProps) => {
   });
 
   return (
-    <LensMetricChart
+    <LensChart
       id={`hostsViewKPI-${id}`}
       dataView={dataView}
       dateRange={afterLoadedState.dateRange}
@@ -70,10 +70,13 @@ export const Tile = ({ id, title, layers, toolTip }: KPIChartProps) => {
       layers={{ ...layers, options: { ...layers.options, subtitle: getSubtitle() } }}
       lastReloadRequestTime={afterLoadedState.lastReloadRequestTime}
       loading={loading}
+      height={height}
       query={afterLoadedState.query}
       title={title}
-      toolTip={toolTip}
+      toolTip={<TooltipContent description={toolTip} />}
+      visualizationType="lnsMetric"
       disableTriggers
+      hidePanelTitles
     />
   );
 };

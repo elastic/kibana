@@ -8,14 +8,11 @@ import React, { CSSProperties, useMemo } from 'react';
 import { EuiPanel, EuiToolTip, type EuiPanelProps } from '@elastic/eui';
 import { Action } from '@kbn/ui-actions-plugin/public';
 import { css } from '@emotion/react';
-import {
-  useLensAttributes,
-  type UseLensAttributesParams,
-} from '../../../hooks/use_lens_attributes';
-import type { BaseChartProps } from '../types';
-import type { TooltipContentProps } from '../metric_explanation/tooltip_content';
-import { LensWrapper } from '../lens_wrapper';
-import { ChartLoadError } from '../chart_load_error';
+import { useLensAttributes, type UseLensAttributesParams } from '../../hooks/use_lens_attributes';
+import type { BaseChartProps } from './types';
+import type { TooltipContentProps } from './metric_explanation/tooltip_content';
+import { LensWrapper } from './lens_wrapper';
+import { ChartLoadError } from './chart_load_error';
 
 const MIN_HEIGHT = 300;
 

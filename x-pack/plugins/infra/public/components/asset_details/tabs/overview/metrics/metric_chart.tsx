@@ -8,7 +8,7 @@ import React, { useMemo } from 'react';
 import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
-import { LensXYChart } from '../../../../lens';
+import { LensChart } from '../../../../lens';
 import { buildCombinedHostsFilter } from '../../../../../utils/filters/build';
 import { type Layer } from '../../../../../hooks/use_lens_attributes';
 import type { FormulaConfig, XYLayerOptions } from '../../../../../common/visualizations';
@@ -42,8 +42,9 @@ export const MetricChart = ({
   }, [dataView, nodeName]);
 
   return (
-    <LensXYChart
+    <LensChart
       id={`infraAssetDetailsMetricsChart${id}`}
+      borderRadius="m"
       dataView={dataView}
       dateRange={timeRange}
       height={HEIGHT}
@@ -51,6 +52,7 @@ export const MetricChart = ({
       filters={filters}
       title={title}
       overrides={overrides}
+      visualizationType="lnsXY"
       disableTriggers
     />
   );
