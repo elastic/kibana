@@ -40007,7 +40007,6 @@
     "eventAnnotation.group.args.annotationConfigs.ignoreGlobalFilters.help": "进行切换以忽略标注的全局筛选",
     "eventAnnotation.group.args.annotationGroups": "标注组",
     "eventAnnotation.group.description": "事件标注组",
-    "eventAnnotation.listingViewTitle": "标注组",
     "eventAnnotation.manualAnnotation.args.color": "线条的颜色",
     "eventAnnotation.manualAnnotation.args.icon": "用于标注线条的可选图标",
     "eventAnnotation.manualAnnotation.args.id": "标注的 ID",

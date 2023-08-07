@@ -43,6 +43,7 @@
     "expressionShape": "src/plugins/expression_shape",
     "expressionTagcloud": "src/plugins/chart_expressions/expression_tagcloud",
     "eventAnnotation": "src/plugins/event_annotation",
+    "eventAnnotationApplication": "src/plugins/event_annotation_application",
     "eventAnnotationCommon": "packages/kbn-event-annotation-common",
     "eventAnnotationComponents": "packages/kbn-event-annotation-components",
     "fieldFormats": "src/plugins/field_formats",

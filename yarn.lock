@@ -4261,6 +4261,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/event-annotation-application-plugin@link:src/plugins/event_annotation_application":
+  version "0.0.0"
+  uid ""
+
 "@kbn/event-annotation-common@link:packages/kbn-event-annotation-common":
   version "0.0.0"
   uid ""

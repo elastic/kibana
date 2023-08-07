@@ -1,0 +1,29 @@
+{
+  "type": "plugin",
+  "id": "@kbn/event-annotation-application-plugin",
+  "owner": "@elastic/kibana-visualizations",
+  "description": "The listing page for event annotations.",
+  "plugin": {
+    "id": "eventAnnotationApplication",
+    "server": false,
+    "browser": true,
+    "requiredPlugins": [
+      "savedObjectsManagement",
+      "eventAnnotation",
+      "data",
+      "presentationUtil",
+      "visualizations",
+      "dataViews",
+      "unifiedSearch",
+      "kibanaUtils",
+      "contentManagement"
+    ],
+    "optionalPlugins": [
+      "savedObjectsTagging",
+    ],
+    "requiredBundles": [
+      "kibanaReact",
+    ],
+    "extraPublicDirs": []
+  }
+}

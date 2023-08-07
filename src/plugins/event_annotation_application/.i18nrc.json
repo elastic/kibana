@@ -1,0 +1,6 @@
+{
+  "prefix": "eventAnnotationsApplication",
+  "paths": {
+    "eventAnnotationsApplication": "."
+  }
+}

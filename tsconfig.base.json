@@ -714,6 +714,8 @@
       "@kbn/eslint-plugin-telemetry/*": ["packages/kbn-eslint-plugin-telemetry/*"],
       "@kbn/eso-plugin": ["x-pack/test/encrypted_saved_objects_api_integration/plugins/api_consumer_plugin"],
       "@kbn/eso-plugin/*": ["x-pack/test/encrypted_saved_objects_api_integration/plugins/api_consumer_plugin/*"],
+      "@kbn/event-annotation-application-plugin": ["src/plugins/event_annotation_application"],
+      "@kbn/event-annotation-application-plugin/*": ["src/plugins/event_annotation_application/*"],
       "@kbn/event-annotation-common": ["packages/kbn-event-annotation-common"],
       "@kbn/event-annotation-common/*": ["packages/kbn-event-annotation-common/*"],
       "@kbn/event-annotation-components": ["packages/kbn-event-annotation-components"],

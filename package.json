@@ -394,6 +394,7 @@
     "@kbn/es-types": "link:packages/kbn-es-types",
     "@kbn/es-ui-shared-plugin": "link:src/plugins/es_ui_shared",
     "@kbn/eso-plugin": "link:x-pack/test/encrypted_saved_objects_api_integration/plugins/api_consumer_plugin",
+    "@kbn/event-annotation-application-plugin": "link:src/plugins/event_annotation_application",
     "@kbn/event-annotation-common": "link:packages/kbn-event-annotation-common",
     "@kbn/event-annotation-components": "link:packages/kbn-event-annotation-components",
     "@kbn/event-annotation-plugin": "link:src/plugins/event_annotation",

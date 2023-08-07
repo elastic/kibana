@@ -24,7 +24,7 @@ export { eventAnnotationGroup } from './event_annotation_group';
 export type { EventAnnotationGroupArgs } from './event_annotation_group';
 
 export type { FetchEventAnnotationsArgs } from './fetch_event_annotations/types';
-export type { EventAnnotationArgs, EventAnnotationOutput } from './types';
+export type { EventAnnotationOutput } from './types';
 
 export type { EventAnnotationGroupSavedObjectAttributes } from './content_management';
 export { ANNOTATIONS_LISTING_VIEW_ID } from './constants';
