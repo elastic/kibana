@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { tag } from '../../tags';
 import { ROLE } from '../../tasks/login';
 import { navigateTo } from '../../tasks/navigation';
 import {
@@ -16,7 +17,7 @@ import {
 } from '../../tasks/live_query';
 import { loadSpace, loadPack, cleanupPack, cleanupSpace } from '../../tasks/api_fixtures';
 
-describe('ALL - Custom space', () => {
+describe('ALL - Custom space', { tags: [tag.SERVERLESS, tag.ESS] }, () => {
   ['default', 'custom-space'].forEach((spaceName) => {
     describe(`[${spaceName}]`, () => {
       let packName: string;

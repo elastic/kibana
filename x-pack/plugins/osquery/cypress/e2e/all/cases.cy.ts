@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { tag } from '../../tags';
 import {
   addLiveQueryToCase,
   checkActionItemsInResults,
@@ -14,7 +15,7 @@ import { navigateTo } from '../../tasks/navigation';
 import { ROLE } from '../../tasks/login';
 import { loadLiveQuery, loadCase, cleanupCase } from '../../tasks/api_fixtures';
 
-describe('Add to Cases', () => {
+describe('Add to Cases', { tags: [tag.SERVERLESS, tag.ESS] }, () => {
   let liveQueryId: string;
   let liveQueryQuery: string;
 

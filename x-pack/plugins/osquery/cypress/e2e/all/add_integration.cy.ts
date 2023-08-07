@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { tag } from '@kbn/security-solution-plugin/cypress/tags';
 import {
   cleanupPack,
   cleanupAgentPolicy,
@@ -31,7 +32,8 @@ import {
 
 import { findAndClickButton, findFormFieldByRowsLabelAndType } from '../../tasks/live_query';
 
-describe('ALL - Add Integration', () => {
+// TODO try to fix it for serverless too
+describe('ALL - Add Integration', { tags: tag.ESS }, () => {
   let savedQueryId: string;
 
   before(() => {
@@ -77,7 +79,7 @@ describe('ALL - Add Integration', () => {
       cleanupAgentPolicy(policyId);
     });
 
-    it('should add the old integration and be able to upgrade it', () => {
+    it('should add the old integration and be able to upgrade it', { tags: tag.ESS }, () => {
       cy.visit(createOldOsqueryPath(oldVersion));
       addCustomIntegration(integrationName, policyName);
       policyContainsIntegration(integrationName, policyName);

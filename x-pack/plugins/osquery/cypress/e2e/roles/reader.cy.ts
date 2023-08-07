@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { tag } from '../../tags';
 import { ROLE } from '../../tasks/login';
 import { navigateTo } from '../../tasks/navigation';
 import {
@@ -15,7 +16,7 @@ import {
   loadSavedQuery,
 } from '../../tasks/api_fixtures';
 
-describe('Reader - only READ', () => {
+describe('Reader - only READ', { tags: [tag.ESS] }, () => {
   let savedQueryName: string;
   let savedQueryId: string;
   let packName: string;

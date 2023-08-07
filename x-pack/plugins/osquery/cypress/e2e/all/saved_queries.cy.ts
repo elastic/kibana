@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { tag } from '../../tags';
 import { preparePack } from '../../tasks/packs';
 import {
   addToCase,
@@ -22,7 +23,7 @@ import { ROLE } from '../../tasks/login';
 import { getSavedQueriesComplexTest } from '../../tasks/saved_queries';
 import { loadCase, cleanupCase, loadPack, cleanupPack } from '../../tasks/api_fixtures';
 
-describe('ALL - Saved queries', () => {
+describe('ALL - Saved queries', { tags: [tag.SERVERLESS, tag.ESS] }, () => {
   let caseId: string;
 
   before(() => {

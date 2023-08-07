@@ -5,10 +5,11 @@
  * 2.0.
  */
 
+import { tag } from '../../tags';
 import { navigateTo } from '../../tasks/navigation';
 import { checkResults, inputQuery, selectAllAgents, submitQuery } from '../../tasks/live_query';
 
-describe('Admin', () => {
+describe('Admin', { tags: [tag.ESS] }, () => {
   beforeEach(() => {
     cy.loginKibana();
     navigateTo('/app/osquery');

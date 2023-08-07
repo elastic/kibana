@@ -46,10 +46,11 @@ import {
 import { navigateTo } from '../../tasks/navigation';
 import { RESULTS_TABLE, RESULTS_TABLE_BUTTON } from '../../screens/live_query';
 import { OSQUERY_POLICY } from '../../screens/fleet';
+import { tag } from '../../tags';
 
 const UUID_REGEX = '[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}';
 
-describe('Alert Event Details', () => {
+describe('Alert Event Details', { tags: [tag.SERVERLESS, tag.ESS] }, () => {
   beforeEach(() => {
     cy.loginKibana(ROLE.soc_manager);
   });

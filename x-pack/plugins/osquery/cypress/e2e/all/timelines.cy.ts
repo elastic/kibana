@@ -5,10 +5,11 @@
  * 2.0.
  */
 
+import { tag } from '../../tags';
 import { takeOsqueryActionWithParams } from '../../tasks/live_query';
 import { ROLE } from '../../tasks/login';
 
-describe('ALL - Timelines', () => {
+describe('ALL - Timelines', { tags: [tag.SERVERLESS, tag.ESS] }, () => {
   beforeEach(() => {
     cy.loginKibana(ROLE.soc_manager);
   });

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { tag } from '../../tags';
 import { getAdvancedButton } from '../../screens/integrations';
 import { ROLE } from '../../tasks/login';
 import { navigateTo } from '../../tasks/navigation';
@@ -18,7 +19,7 @@ import {
   typeInOsqueryFieldInput,
 } from '../../tasks/live_query';
 
-describe('EcsMapping', () => {
+describe('EcsMapping', { tags: [tag.SERVERLESS, tag.ESS] }, () => {
   beforeEach(() => {
     cy.loginKibana(ROLE.soc_manager);
   });

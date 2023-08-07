@@ -102,6 +102,7 @@ export const loadPack = (payload: Partial<PackItem> = {}, space = 'default') =>
     headers: {
       'Elastic-Api-Version': API_VERSIONS.public.v1,
     },
+
     url: `/s/${space}/api/osquery/packs`,
   }).then((response) => response.body.data);
 
@@ -112,6 +113,7 @@ export const cleanupPack = (id: string, space = 'default') => {
     headers: {
       'Elastic-Api-Version': API_VERSIONS.public.v1,
     },
+    failOnStatusCode: false,
   });
 };
 
@@ -266,4 +268,9 @@ export const loadAgentPolicy = () =>
   }).then((response) => response.body.item);
 
 export const cleanupAgentPolicy = (agentPolicyId: string) =>
-  request({ method: 'POST', body: { agentPolicyId }, url: '/api/fleet/agent_policies/delete' });
+  request({
+    method: 'POST',
+    body: { agentPolicyId },
+    url: '/api/fleet/agent_policies/delete',
+    failOnStatusCode: false,
+  });

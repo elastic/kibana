@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { tag } from '../../tags';
 import { ROLE } from '../../tasks/login';
 import {
   checkResults,
@@ -17,7 +18,7 @@ import { navigateTo } from '../../tasks/navigation';
 import { loadPack, loadRule, cleanupRule, cleanupPack } from '../../tasks/api_fixtures';
 import { preparePack } from '../../tasks/packs';
 
-describe('Alert Test', () => {
+describe('Alert Test', { tags: [tag.ESS] }, () => {
   let packName: string;
   let packId: string;
   let ruleName: string;

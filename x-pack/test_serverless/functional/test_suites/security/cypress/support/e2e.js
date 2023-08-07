@@ -25,6 +25,10 @@ import './commands';
 import 'cypress-real-events/support';
 import '@kbn/security-solution-plugin/public/management/cypress/support/e2e';
 
+import registerCypressGrep from '@cypress/grep';
+
+registerCypressGrep();
+
 Cypress.on('uncaught:exception', () => {
   return false;
 });

@@ -8,6 +8,7 @@
 import { recurse } from 'cypress-recurse';
 import { find } from 'lodash';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
+import { tag } from '../../tags';
 import { API_VERSIONS } from '../../../common/constants';
 import { FLEET_AGENT_POLICIES, navigateTo } from '../../tasks/navigation';
 import {
@@ -50,7 +51,7 @@ import {
 } from '../../tasks/api_fixtures';
 import { request } from '../../tasks/common';
 
-describe('ALL - Packs', () => {
+describe('ALL - Packs', { tags: [tag.SERVERLESS, tag.ESS] }, () => {
   let savedQueryId: string;
   let savedQueryName: string;
   let nomappingSavedQueryId: string;

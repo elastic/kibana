@@ -5,11 +5,12 @@
  * 2.0.
  */
 
+import { tag } from '../../tags';
 import { navigateTo } from '../../tasks/navigation';
 import { ROLE } from '../../tasks/login';
 import { loadSavedQuery, cleanupSavedQuery } from '../../tasks/api_fixtures';
 
-describe('ALL - Edit saved query', () => {
+describe('ALL - Edit saved query', { tags: [tag.SERVERLESS, tag.ESS] }, () => {
   let savedQueryName: string;
   let savedQueryId: string;
 

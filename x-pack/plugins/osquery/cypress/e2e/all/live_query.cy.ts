@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { tag } from '../../tags';
 import { ROLE } from '../../tasks/login';
 import { navigateTo } from '../../tasks/navigation';
 import {
@@ -34,7 +35,7 @@ import {
   loadCase,
 } from '../../tasks/api_fixtures';
 
-describe('ALL - Live Query', () => {
+describe('ALL - Live Query', { tags: [tag.SERVERLESS, tag.ESS] }, () => {
   let packId: string;
   let packName: string;
   let savedQueryId: string;

@@ -5,11 +5,12 @@
  * 2.0.
  */
 
+import { tag } from '../../tags';
 import { ROLE } from '../../tasks/login';
 import { NAV_SEARCH_INPUT_OSQUERY_RESULTS } from '../../tasks/navigation';
 import { loadRule, cleanupRule } from '../../tasks/api_fixtures';
 
-describe('None', () => {
+describe('None', { tags: [tag.ESS] }, () => {
   beforeEach(() => {
     cy.loginKibana(ROLE.none);
 

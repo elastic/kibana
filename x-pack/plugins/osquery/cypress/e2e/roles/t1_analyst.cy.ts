@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { tag } from '../../tags';
 import { SAVED_QUERY_ID } from '../../../public/saved_queries/constants';
 import { ROLE } from '../../tasks/login';
 import { navigateTo } from '../../tasks/navigation';
@@ -23,7 +24,7 @@ import {
   loadSavedQuery,
 } from '../../tasks/api_fixtures';
 
-describe('T1 Analyst - READ + runSavedQueries ', () => {
+describe('T1 Analyst - READ + runSavedQueries ', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
   let savedQueryName: string;
   let savedQueryId: string;
   let packName: string;

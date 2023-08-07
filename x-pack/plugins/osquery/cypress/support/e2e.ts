@@ -25,9 +25,15 @@
 // force ESM in this module
 export {};
 
+// @ts-expect-error check this
+import registerCypressGrep from '@cypress/grep';
+
 import 'cypress-react-selector';
 // import './coverage';
+import type { ROLE } from '../tasks/login';
 import { login } from '../tasks/login';
+
+registerCypressGrep();
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -41,7 +47,7 @@ declare global {
 
       clickOutside(): Chainable<JQuery<HTMLBodyElement>>;
 
-      loginKibana: (role: string) => void;
+      loginKibana: (role?: ROLE) => void;
     }
   }
 }
@@ -60,7 +66,7 @@ Cypress.Commands.add(
   () => cy.get('body').click(0, 0) // 0,0 here are the x and y coordinates
 );
 
-Cypress.Commands.add('loginKibana', (role: string) => login(role));
+Cypress.Commands.add('loginKibana', (role?: ROLE) => login(role));
 
 // Alternatively you can use CommonJS syntax:
 // require('./commands')

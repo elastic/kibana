@@ -29,6 +29,8 @@ export default defineCypressConfig({
     'cypress-react-selector': {
       root: '#osquery-app',
     },
+    grepFilterSpecs: true,
+    grepTags: '@ess',
   },
 
   e2e: {
@@ -37,5 +39,12 @@ export default defineCypressConfig({
     experimentalRunAllSpecs: true,
     experimentalMemoryManagement: true,
     numTestsKeptInMemory: 10,
+  },
+
+  setupNodeEvents(on, config) {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    require('@cypress/grep/src/plugin')(config);
+
+    return config;
   },
 });

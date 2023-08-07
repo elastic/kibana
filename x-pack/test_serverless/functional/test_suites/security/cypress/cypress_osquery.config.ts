@@ -9,6 +9,7 @@
 import { defineCypressConfig } from '@kbn/cypress-config';
 import { setupDataLoaderTasks } from './support/setup_data_loader_tasks';
 
+// eslint-disable-next-line import/no-default-export
 export default defineCypressConfig({
   defaultCommandTimeout: 60000,
   execTimeout: 60000,
@@ -24,6 +25,8 @@ export default defineCypressConfig({
     'cypress-react-selector': {
       root: '#osquery-app',
     },
+    grepFilterSpecs: true,
+    grepTags: '@serverless --@brokenInServerless',
   },
 
   e2e: {
@@ -33,6 +36,9 @@ export default defineCypressConfig({
     specPattern: '../../../../../plugins/osquery/cypress/e2e/**/*.cy.ts',
     setupNodeEvents: (on, config) => {
       setupDataLoaderTasks(on, config);
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      require('@cypress/grep/src/plugin')(config);
+      return config;
     },
   },
 });
