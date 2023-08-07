@@ -64,7 +64,7 @@ describe('<IndexManagementHome />', () => {
           'Enrich Policies',
         ];
 
-        expect(allTabs.length).toBe(4);
+        expect(allTabs.length).toBe(5);
         for (let i = 0; i < allTabs.length; i++) {
           expect(tabListContainer.childAt(i).text()).toEqual(allTabsLabels[i]);
         }
