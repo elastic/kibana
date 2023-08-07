@@ -15,9 +15,6 @@ import { createCasesRoute } from '../create_cases_route';
 export const getConnectorsRoute = createCasesRoute({
   method: 'get',
   path: `${CASE_CONFIGURE_CONNECTORS_URL}/_find`,
-  routerOptions: {
-    tags: ['access:casesGetConnectorsConfigure'],
-  },
   handler: async ({ context, response }) => {
     try {
       const caseContext = await context.cases;
