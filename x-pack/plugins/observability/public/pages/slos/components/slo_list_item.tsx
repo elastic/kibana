@@ -31,7 +31,7 @@ import type { ActiveAlerts } from '../../../hooks/slo/use_fetch_active_alerts';
 import type { SloRule } from '../../../hooks/slo/use_fetch_rules_for_slo';
 import { useGetFilteredRuleTypes } from '../../../hooks/use_get_filtered_rule_types';
 import type { RulesParams } from '../../../locators/rules';
-import { paths } from '../../../routes/paths';
+import { paths } from '../../../../common/locators/paths';
 import { useKibana } from '../../../utils/kibana_react';
 import {
   transformCreateSLOFormToCreateSLOInput,

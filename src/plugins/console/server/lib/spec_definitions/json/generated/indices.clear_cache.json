@@ -21,7 +21,7 @@
     ],
     "patterns": [
       "_cache/clear",
-      "{indices}/_cache/clear"
+      "{index}/_cache/clear"
     ],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-clearcache.html"
   }
