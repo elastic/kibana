@@ -15,6 +15,7 @@ import { useHostsViewContext } from '../../../hooks/use_hosts_view';
 import { buildCombinedHostsFilter } from '../../../../../../utils/filters/build';
 import { useHostsTableContext } from '../../../hooks/use_hosts_table';
 import { useAfterLoadedState } from '../../../hooks/use_after_loaded_state';
+import { METRIC_CHART_MIN_HEIGHT } from '../../../constants';
 
 export interface MetricChartProps extends Pick<TypedLensByValueInput, 'id' | 'overrides'> {
   title: string;
@@ -54,6 +55,7 @@ export const MetricChart = ({ id, title, layers, overrides }: MetricChartProps) 
       id={`hostsView-metricChart${id}`}
       dataView={dataView}
       dateRange={afterLoadedState.dateRange}
+      height={METRIC_CHART_MIN_HEIGHT}
       layers={layers}
       lastReloadRequestTime={afterLoadedState.lastReloadRequestTime}
       loading={loading}

@@ -5,19 +5,15 @@
  * 2.0.
  */
 
-import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { Layer } from '../../../../../hooks/use_lens_attributes';
 import { hostLensFormulas } from '../../../constants';
-import { FormulaConfig } from '../../../types';
 import { TOOLTIP } from './translations';
-import { MetricLayerOptions } from '../../visualization_types/layers';
+import type { LensMetricChartProp } from '../../../../../components/lens';
 
-export interface KPIChartProps
-  extends Pick<TypedLensByValueInput, 'id' | 'title' | 'overrides' | 'style'> {
-  layers: Layer<MetricLayerOptions, FormulaConfig, 'data'>;
-  toolTip: string;
-}
+export type KPIChartProps = Pick<
+  LensMetricChartProp,
+  'id' | 'title' | 'layers' | 'toolTip' | 'height'
+>;
 
 export const KPI_CHARTS: KPIChartProps[] = [
   {

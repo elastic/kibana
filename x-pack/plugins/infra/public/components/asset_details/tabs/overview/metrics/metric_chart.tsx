@@ -13,6 +13,7 @@ import { buildCombinedHostsFilter } from '../../../../../utils/filters/build';
 import { type Layer } from '../../../../../hooks/use_lens_attributes';
 import type { FormulaConfig, XYLayerOptions } from '../../../../../common/visualizations';
 
+const HEIGHT = 250;
 export interface MetricChartProps extends Pick<TypedLensByValueInput, 'id' | 'overrides'> {
   title: string;
   layers: Array<Layer<XYLayerOptions, FormulaConfig[]>>;
@@ -45,6 +46,7 @@ export const MetricChart = ({
       id={`assetDetailsMetricsChart${id}`}
       dataView={dataView}
       dateRange={timeRange}
+      height={HEIGHT}
       layers={layers}
       filters={filters}
       title={title}

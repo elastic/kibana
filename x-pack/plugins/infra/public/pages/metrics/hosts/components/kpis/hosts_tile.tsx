@@ -24,7 +24,7 @@ const HOSTS_CHART: Omit<Props, 'loading' | 'value' | 'toolTip'> = {
   ['data-test-subj']: 'hostsViewKPI-hostsCount',
 };
 
-export const HostsTile = ({ style }: Pick<KPIChartProps, 'style'>) => {
+export const HostsTile = ({ height }: Pick<KPIChartProps, 'height'>) => {
   const { data: hostCountData, isRequestRunning: hostCountLoading } = useHostCountContext();
   const { searchCriteria } = useUnifiedSearchContext();
 
@@ -42,7 +42,7 @@ export const HostsTile = ({ style }: Pick<KPIChartProps, 'style'>) => {
   return (
     <MetricChartWrapper
       {...HOSTS_CHART}
-      style={style}
+      style={{ height }}
       value={hostCountData?.count.value ?? 0}
       subtitle={getSubtitle()}
       toolTip={

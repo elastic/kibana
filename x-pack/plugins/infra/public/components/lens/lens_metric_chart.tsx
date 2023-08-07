@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { CSSProperties, useMemo } from 'react';
 import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { EuiPanel, EuiToolTip, useEuiTheme } from '@elastic/eui';
@@ -15,7 +15,7 @@ import { FormulaConfig, MetricLayerOptions } from '../../common/visualizations';
 import { Layer, useLensAttributes } from '../../hooks/use_lens_attributes';
 import { LensWrapperProps } from './lens_wrapper';
 
-export type Props = Pick<TypedLensByValueInput, 'id' | 'title' | 'overrides' | 'disableTriggers'> &
+export type Props = Pick<TypedLensByValueInput, 'id' | 'title' | 'disableTriggers'> &
   Pick<
     LensWrapperProps,
     'dateRange' | 'filters' | 'query' | 'lastReloadRequestTime' | 'loading' | 'onBrushEnd'
@@ -23,6 +23,7 @@ export type Props = Pick<TypedLensByValueInput, 'id' | 'title' | 'overrides' | '
     dataView?: DataView;
     layers: Layer<MetricLayerOptions, FormulaConfig, 'data'>;
     toolTip: string;
+    height?: number;
   };
 
 const MIN_HEIGHT = 150;
@@ -39,6 +40,7 @@ export const LensMetricChart = ({
   title,
   onBrushEnd,
   disableTriggers = false,
+  height = MIN_HEIGHT,
   loading = false,
 }: Props) => {
   const { euiTheme } = useEuiTheme();
@@ -52,11 +54,17 @@ export const LensMetricChart = ({
 
   const isLoading = loading || !attributes;
 
-  const extraActions: Action[] = getExtraActions({
-    timeRange: dateRange,
-    query,
-    filters,
-  });
+  const extraActions: Action[] = useMemo(
+    () =>
+      getExtraActions({
+        timeRange: dateRange,
+        query,
+        filters,
+      }),
+    [dateRange, filters, getExtraActions, query]
+  );
+
+  const sytle: CSSProperties = useMemo(() => ({ height }), [height]);
 
   return (
     <EuiPanel
@@ -65,7 +73,7 @@ export const LensMetricChart = ({
       data-test-subj={id}
       css={css`
         position: relative;
-        min-height: ${MIN_HEIGHT}px;
+        min-height: ${height}px;
         .echMetric {
           border-radius: ${euiTheme.border.radius.medium};
           pointer-events: none;
@@ -83,16 +91,16 @@ export const LensMetricChart = ({
           <LensWrapper
             id={id}
             attributes={attributes}
-            style={{ height: MIN_HEIGHT }}
-            extraActions={extraActions}
-            lastReloadRequestTime={lastReloadRequestTime}
             dateRange={dateRange}
+            disableTriggers={disableTriggers}
+            extraActions={extraActions}
             filters={filters}
+            lastReloadRequestTime={lastReloadRequestTime}
+            loading={isLoading}
+            style={sytle}
             query={query}
             onBrushEnd={onBrushEnd}
-            loading={isLoading}
             hidePanelTitles
-            disableTriggers={disableTriggers}
           />
         </EuiToolTip>
       )}

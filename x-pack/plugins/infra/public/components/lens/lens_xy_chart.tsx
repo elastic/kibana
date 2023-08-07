@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { CSSProperties, useMemo } from 'react';
 import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { EuiPanel } from '@elastic/eui';
@@ -22,6 +22,7 @@ export type Props = Pick<TypedLensByValueInput, 'id' | 'title' | 'overrides' | '
   > & {
     dataView?: DataView;
     layers: Array<Layer<XYLayerOptions, FormulaConfig[]>>;
+    height?: number;
   };
 
 const MIN_HEIGHT = 300;
@@ -33,10 +34,12 @@ export const LensXYChart = ({
   filters,
   layers,
   lastReloadRequestTime,
+  overrides,
   query,
   title,
   onBrushEnd,
   disableTriggers = false,
+  height = MIN_HEIGHT,
   loading = false,
 }: Props) => {
   const { attributes, getExtraActions, error } = useLensAttributes({
@@ -48,11 +51,17 @@ export const LensXYChart = ({
 
   const isLoading = loading || !attributes;
 
-  const extraActions: Action[] = getExtraActions({
-    timeRange: dateRange,
-    query,
-    filters,
-  });
+  const extraActions: Action[] = useMemo(
+    () =>
+      getExtraActions({
+        timeRange: dateRange,
+        query,
+        filters,
+      }),
+    [dateRange, filters, getExtraActions, query]
+  );
+
+  const sytle: CSSProperties = useMemo(() => ({ height }), [height]);
 
   return (
     <EuiPanel
@@ -63,7 +72,7 @@ export const LensXYChart = ({
       data-test-subj={id}
       css={css`
         position: relative;
-        min-height: ${MIN_HEIGHT}px;
+        min-height: ${height}px;
       `}
     >
       {error ? (
@@ -72,15 +81,16 @@ export const LensXYChart = ({
         <LensWrapper
           id={id}
           attributes={attributes}
-          style={{ height: MIN_HEIGHT }}
-          extraActions={extraActions}
-          lastReloadRequestTime={lastReloadRequestTime}
           dateRange={dateRange}
+          disableTriggers={disableTriggers}
+          extraActions={extraActions}
           filters={filters}
+          lastReloadRequestTime={lastReloadRequestTime}
+          loading={isLoading}
+          overrides={overrides}
           query={query}
           onBrushEnd={onBrushEnd}
-          loading={isLoading}
-          disableTriggers={disableTriggers}
+          style={sytle}
         />
       )}
     </EuiPanel>
