@@ -53,10 +53,7 @@ import type {
   BulkActionEditPayload,
 } from '../../../../common/api/detection_engine/rule_management/bulk_actions/bulk_actions_route';
 import { BulkActionType } from '../../../../common/api/detection_engine/rule_management/bulk_actions/bulk_actions_route';
-import type {
-  PreviewResponse,
-  RuleResponse,
-} from '../../../../common/api/detection_engine/model/rule_schema';
+import type { PreviewResponse, RuleResponse } from '../../../../common/api/detection_engine';
 
 import { KibanaServices } from '../../../common/lib/kibana';
 import * as i18n from '../../../detections/pages/detection_engine/rules/translations';

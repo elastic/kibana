@@ -30,7 +30,6 @@ import {
   StatusCheckFilters,
   Ping,
   GetMonitorAvailabilityParams,
-  OverviewPing,
 } from '../../../../common/runtime_types';
 import { CLIENT_ALERT_TYPES, MONITOR_STATUS } from '../../../../common/constants/uptime_alerts';
 import {
@@ -244,7 +243,7 @@ export const getStatusMessage = (
   return statusMessage + availabilityMessage;
 };
 
-export const getInstanceId = (monitorInfo: Ping | OverviewPing, monIdByLoc: string) => {
+export const getInstanceId = (monitorInfo: Ping, monIdByLoc: string) => {
   const normalizeText = (txt: string) => {
     // replace url and name special characters with -
     return txt.replace(/[^A-Z0-9]+/gi, '_').toLowerCase();
