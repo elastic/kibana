@@ -75,7 +75,7 @@ export const ExecutePolicyModal = ({
     >
       <p>
         <FormattedMessage
-          id="xpack.idxMgmt.enrich_policies.deleteModal.bodyCopy"
+          id="xpack.idxMgmt.enrich_policies.executeModal.bodyCopy"
           defaultMessage="You are about to execute the enrich policy {policy}."
           values={{
             policy: <strong>{policyToExecute}</strong>,
