@@ -8,10 +8,7 @@
 import expect from '@kbn/expect';
 import { INTERNAL_ROUTES, PUBLIC_ROUTES } from '@kbn/reporting-plugin/common/constants/routes';
 import { indexTimestamp } from '@kbn/reporting-plugin/server/lib/store/index_timestamp';
-import {
-  JobTypes,
-  ReportingUsageType,
-} from '@kbn/reporting-plugin/server/usage/types';
+import { JobTypes, ReportingUsageType } from '@kbn/reporting-plugin/server/usage/types';
 import { Response } from 'supertest';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 

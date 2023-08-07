@@ -4,11 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { services as svlServices } from '../../../services'
+import { services as svlServices } from '../../../services';
 import { createUsageServices } from './usage';
 import { createScenarios } from './scenarios';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { services as apiIntegrationServices } from '../services'
+import { services as apiIntegrationServices } from '.';
 
 export function ReportingAPIProvider(context: FtrProviderContext) {
   return {

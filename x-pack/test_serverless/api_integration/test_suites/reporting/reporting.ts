@@ -7,7 +7,7 @@
 
 import { FtrConfigProviderContext } from '@kbn/test';
 import { resolve } from 'path';
-import { ReportingFunctionalProvider } from 'x-pack/test/reporting_functional/services';
+import { ReportingFunctionalProvider } from '../../../../test/reporting_functional/services';
 import { ReportingAPIProvider } from './services';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
