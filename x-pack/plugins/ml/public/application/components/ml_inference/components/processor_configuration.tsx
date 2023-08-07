@@ -52,6 +52,7 @@ function getDefaultFieldMapString() {
 }
 
 interface Props {
+  condition?: string;
   fieldMap: MlInferenceState['fieldMap'];
   handleAdvancedConfigUpdate: (configUpdate: Partial<MlInferenceState>) => void;
   inferenceConfig: ModelItem['inference_config'];
@@ -59,10 +60,12 @@ interface Props {
   modelInputFields: ModelItem['input'];
   modelType?: InferenceModelTypes;
   setHasUnsavedChanges: React.Dispatch<React.SetStateAction<boolean>>;
+  tag?: string;
 }
 
 export const ProcessorConfiguration: FC<Props> = memo(
   ({
+    condition,
     fieldMap,
     handleAdvancedConfigUpdate,
     inferenceConfig,
@@ -70,6 +73,7 @@ export const ProcessorConfiguration: FC<Props> = memo(
     modelInferenceConfig,
     modelType,
     setHasUnsavedChanges,
+    tag,
   }) => {
     const {
       services: {
@@ -375,7 +379,11 @@ export const ProcessorConfiguration: FC<Props> = memo(
         </EuiFlexItem>
         {/* ADDITIONAL ADVANCED SETTINGS */}
         <EuiFlexItem>
-          <AdditionalAdvancedSettings handleAdvancedConfigUpdate={handleAdvancedConfigUpdate} />
+          <AdditionalAdvancedSettings
+            handleAdvancedConfigUpdate={handleAdvancedConfigUpdate}
+            condition={condition}
+            tag={tag}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
     );

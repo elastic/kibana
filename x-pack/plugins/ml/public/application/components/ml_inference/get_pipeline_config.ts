@@ -32,7 +32,7 @@ export function getPipelineConfig(state: MlInferenceState) {
             ? { inference_config: inferenceConfig }
             : {}),
           ...(condition && condition !== '' ? { if: condition } : {}),
-          ...(tag && tag !== '' ? { tag: condition } : {}),
+          ...(tag && tag !== '' ? { tag } : {}),
           ...(onFailure && Object.keys(onFailure).length > 0 ? { on_failure: onFailure } : {}),
         },
       },

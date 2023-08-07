@@ -121,7 +121,7 @@ export const ReviewAndCreatePipeline: FC<Props> = ({
                           <EuiLink
                             onClick={async () => {
                               await application.navigateToApp(MANAGEMENT_APP_ID, {
-                                path: '/ingest/ingest_pipelines/',
+                                path: `/ingest/ingest_pipelines/?pipeline=${pipelineName}`,
                                 openInNewTab: true,
                               });
                             }}
@@ -156,10 +156,16 @@ export const ReviewAndCreatePipeline: FC<Props> = ({
                     defaultMessage="Learn more about {ingestPipelineConfigLink} and {inferencePipelineConfigLink} configuration."
                     values={{
                       ingestPipelineConfigLink: (
-                        <EuiLink href={links.ingest.pipelines}>{'ingest pipeline'}</EuiLink>
+                        <EuiLink href={links.ingest.pipelines} external target={'_blank'}>
+                          {'ingest pipeline'}
+                        </EuiLink>
                       ),
                       inferencePipelineConfigLink: (
-                        <EuiLink href={modelType ? inferenceProcessorLink : links.ingest.inference}>
+                        <EuiLink
+                          href={modelType ? inferenceProcessorLink : links.ingest.inference}
+                          external
+                          target={'_blank'}
+                        >
                           {'inference processor'}
                         </EuiLink>
                       ),

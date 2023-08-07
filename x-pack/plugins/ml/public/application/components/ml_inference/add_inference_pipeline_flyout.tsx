@@ -17,6 +17,7 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
+import { extractErrorProperties } from '@kbn/ml-error-utils';
 
 import { ModelItem } from '../../model_management/models_list';
 import type { AddInferencePipelineSteps } from './types';
@@ -60,9 +61,21 @@ export const AddInferencePipelineFlyout: FC<AddInferencePipelineFlyoutProps> = (
     setFormState({ ...formState, creatingPipeline: true });
     try {
       await createInferencePipeline(formState.pipelineName, getPipelineConfig(formState));
-      setFormState({ ...formState, pipelineCreated: true, creatingPipeline: false });
+      setFormState({
+        ...formState,
+        pipelineCreated: true,
+        creatingPipeline: false,
+        pipelineError: undefined,
+      });
     } catch (e) {
-      setFormState({ ...formState, creatingPipeline: false, pipelineError: e.message });
+      // eslint-disable-next-line no-console
+      console.error(e);
+      const errorProperties = extractErrorProperties(e);
+      setFormState({
+        ...formState,
+        creatingPipeline: false,
+        pipelineError: errorProperties.message ?? e.message,
+      });
     }
   };
 
@@ -124,6 +137,7 @@ export const AddInferencePipelineFlyout: FC<AddInferencePipelineFlyoutProps> = (
         )}
         {step === ADD_INFERENCE_PIPELINE_STEPS.CONFIGURE_PROCESSOR && model && (
           <ProcessorConfiguration
+            condition={formState.condition}
             fieldMap={formState.fieldMap}
             handleAdvancedConfigUpdate={handleConfigUpdate}
             inferenceConfig={formState.inferenceConfig}
@@ -131,6 +145,7 @@ export const AddInferencePipelineFlyout: FC<AddInferencePipelineFlyoutProps> = (
             modelInputFields={model.input ?? []}
             modelType={modelType as InferenceModelTypes}
             setHasUnsavedChanges={setHasUnsavedChanges}
+            tag={formState.tag}
           />
         )}
         {step === ADD_INFERENCE_PIPELINE_STEPS.ON_FAILURE && (

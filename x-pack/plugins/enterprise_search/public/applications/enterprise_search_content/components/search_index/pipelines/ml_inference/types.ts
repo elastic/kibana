@@ -11,11 +11,10 @@ import { InferencePipelineInferenceConfig } from '../../../../../../../common/ty
 
 export interface InferencePipelineConfiguration {
   existingPipeline?: boolean;
-  fieldMappings?: FieldMapping[];
   inferenceConfig?: InferencePipelineInferenceConfig;
   modelID: string;
   pipelineName: string;
-  sourceField: string;
+  fieldMappings?: FieldMapping[];
   targetField: string;
 }
 
