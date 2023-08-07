@@ -1,0 +1,126 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import expect from '@kbn/expect';
+import { INTERNAL_ROUTES, PUBLIC_ROUTES } from '@kbn/reporting-plugin/common/constants/routes';
+import { indexTimestamp } from '@kbn/reporting-plugin/server/lib/store/index_timestamp';
+import {
+  JobTypes,
+  ReportingUsageType,
+} from '@kbn/reporting-plugin/server/usage/types';
+import { Response } from 'supertest';
+import { FtrProviderContext } from '../../../ftr_provider_context';
+
+export function createUsageServices({ getService }: FtrProviderContext) {
+  const log = getService('log');
+  const esSupertest = getService('esSupertest');
+  const supertest = getService('supertest');
+
+  return {
+    async waitForJobToFinish(downloadReportPath: string, ignoreFailure = false) {
+      log.debug(`Waiting for job to finish: ${downloadReportPath}`);
+      const JOB_IS_PENDING_CODE = 503;
+      let response: Response & { statusCode?: number };
+
+      const statusCode = await new Promise((resolve) => {
+        const intervalId = setInterval(async () => {
+          response = await supertest.get(downloadReportPath).responseType('blob');
+          if (response.statusCode === 503) {
+            log.debug(`Report at path ${downloadReportPath} is pending`);
+          } else if (response.statusCode === 200) {
+            log.debug(`Report at path ${downloadReportPath} is complete`);
+          } else {
+            log.debug(`Report at path ${downloadReportPath} returned code ${response.statusCode}`);
+          }
+          if (response.statusCode !== JOB_IS_PENDING_CODE) {
+            clearInterval(intervalId);
+            resolve(response.statusCode);
+          }
+        }, 1500);
+      });
+      if (!ignoreFailure) {
+        const jobInfo = await supertest.get(
+          downloadReportPath.replace(
+            PUBLIC_ROUTES.JOBS.DOWNLOAD_PREFIX,
+            INTERNAL_ROUTES.JOBS.INFO_PREFIX
+          )
+        );
+        expect(jobInfo.body.output.warnings).to.be(undefined); // expect no failure message to be present in job info
+        expect(statusCode).to.be(200);
+      }
+    },
+
+    /**
+     *
+     * @return {Promise<Function>} A function to call to clean up the index alias that was added.
+     */
+    async coerceReportsIntoExistingIndex(indexName: string) {
+      log.debug(`ReportingAPI.coerceReportsIntoExistingIndex(${indexName})`);
+
+      // Adding an index alias coerces the report to be generated on an existing index which means any new
+      // index schema won't be applied. This is important if a point release updated the schema. Reports may still
+      // be inserted into an existing index before the new schema is applied.
+      const timestampForIndex = indexTimestamp('week', '.');
+      await esSupertest
+        .post('/_aliases')
+        .send({
+          actions: [
+            {
+              add: { index: indexName, alias: `.reporting-${timestampForIndex}` },
+            },
+          ],
+        })
+        .expect(200);
+
+      return async () => {
+        await esSupertest
+          .post('/_aliases')
+          .send({
+            actions: [
+              {
+                remove: { index: indexName, alias: `.reporting-${timestampForIndex}` },
+              },
+            ],
+          })
+          .expect(200);
+      };
+    },
+
+    async expectAllJobsToFinishSuccessfully(jobPaths: string[]) {
+      await Promise.all(
+        jobPaths.map(async (path) => {
+          log.debug(`wait for job to finish: ${path}`);
+          await this.waitForJobToFinish(path);
+        })
+      );
+    },
+
+    expectRecentJobTypeTotalStats(stats: ReportingUsageType, jobType: string, count: number) {
+      const actual = stats.last7Days[jobType as keyof JobTypes].total;
+      log.info(
+        `expecting recent stats to report ${count} ${jobType} job types (actual: ${actual})`
+      );
+      expect(actual).to.be(count);
+    },
+
+    expectAllTimeJobTypeTotalStats(stats: ReportingUsageType, jobType: string, count: number) {
+      const actual = stats[jobType as keyof JobTypes].total;
+      log.info(
+        `expecting all time stats to report ${count} ${jobType} job types (actual: ${actual})`
+      );
+      expect(actual).to.be(count);
+    },
+
+    getCompletedReportCount(stats: ReportingUsageType) {
+      return stats.status.completed;
+    },
+
+    expectCompletedReportCount(stats: ReportingUsageType, count: number) {
+      expect(this.getCompletedReportCount(stats)).to.be(count);
+    },
+  };
+}
