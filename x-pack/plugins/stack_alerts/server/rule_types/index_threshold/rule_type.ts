@@ -231,10 +231,6 @@ export function getRuleType(
       );
     }
 
-    if (name === 'error') {
-      throw new Error('purposely throwing this error');
-    }
-
     const esClient = scopedClusterClient.asCurrentUser;
     const date = new Date().toISOString();
     // the undefined values below are for config-schema optional types

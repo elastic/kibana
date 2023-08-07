@@ -40,7 +40,6 @@ export function metricsRoute(params: MetricsRouteParams) {
   let lastMetrics: NodeMetrics | null = null;
 
   metrics$.subscribe((metrics) => {
-    // console.log(`${JSON.stringify(metrics)}`);
     lastMetrics = { process_uuid: taskManagerId, timestamp: new Date().toISOString(), ...metrics };
   });
 
