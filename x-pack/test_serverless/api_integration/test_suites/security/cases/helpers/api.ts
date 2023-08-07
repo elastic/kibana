@@ -132,7 +132,7 @@ export const postCaseReq: CasePostRequest = {
   settings: {
     syncAlerts: true,
   },
-  owner: 'observability',
+  owner: 'securitySolution',
   assignees: [],
 };
 
