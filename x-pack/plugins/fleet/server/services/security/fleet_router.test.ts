@@ -214,20 +214,26 @@ describe('FleetAuthzRouter', () => {
       } as unknown as jest.Mocked<IRouter<FleetRequestHandlerContext>>;
     });
 
-    const METHODS: RouteMethod[] = ['get', 'post', 'delete', 'put', 'patch'];
+    const METHODS: Array<'get' | 'post' | 'delete' | 'put' | 'patch'> = [
+      'get',
+      'post',
+      'delete',
+      'put',
+      'patch',
+    ];
 
     for (const method of METHODS) {
       describe(`${method}`, () => {
         it('should set default access to public', () => {
           const fleetAuthzRouter = makeRouterWithFleetAuthz(fakeRouter, mockLogger);
-          (fleetAuthzRouter as any)[method](
+          fleetAuthzRouter[method](
             {
               path: '/test',
               validate: false,
             },
             (() => {}) as any
           );
-          expect((fakeRouter as any)[method]).toBeCalledWith(
+          expect(fakeRouter[method]).toBeCalledWith(
             expect.objectContaining({
               options: { access: 'public' },
             }),
@@ -237,7 +243,7 @@ describe('FleetAuthzRouter', () => {
 
         it('should not allow to define internal routes', () => {
           const fleetAuthzRouter = makeRouterWithFleetAuthz(fakeRouter, mockLogger);
-          (fleetAuthzRouter as any)[method](
+          fleetAuthzRouter[method](
             {
               path: '/test',
               validate: false,
@@ -245,7 +251,7 @@ describe('FleetAuthzRouter', () => {
             },
             (() => {}) as any
           );
-          expect((fakeRouter as any)[method]).toBeCalledWith(
+          expect(fakeRouter[method]).toBeCalledWith(
             expect.objectContaining({
               options: { access: 'internal' },
             }),
