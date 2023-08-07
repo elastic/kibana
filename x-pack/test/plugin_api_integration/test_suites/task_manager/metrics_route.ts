@@ -170,20 +170,8 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('task run test', () => {
-      let connectorId: string | null = null;
       let ruleId: string | null = null;
       before(async () => {
-        // create a connector
-        const connector = await request
-          .post(`/api/actions/connector`)
-          .set('kbn-xsrf', 'foo')
-          .send({
-            name: 'A server.log action',
-            connector_type_id: '.server-log',
-          })
-          .expect(200)
-          .then((response) => response.body);
-
         // create a rule that fires actions
         const rule = await request
           .post(`/api/alerting/rule`)
@@ -196,20 +184,7 @@ export default function ({ getService }: FtrProviderContext) {
             consumer: 'alerts',
             // set schedule long so we can control when it runs
             schedule: { interval: '1d' },
-            actions: [
-              {
-                frequency: {
-                  notify_when: 'onActiveAlert',
-                  throttle: null,
-                  summary: false,
-                },
-                group: 'query matched',
-                id: connector.id,
-                params: {
-                  message: 'foo',
-                },
-              },
-            ],
+            actions: [],
             params: {
               aggType: 'count',
               esQuery: '{\n  "query":{\n    "match_all" : {}\n  }\n}',
@@ -229,16 +204,11 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(200)
           .then((response) => response.body);
 
-        connectorId = connector.id;
         ruleId = rule.id;
       });
 
       after(async () => {
-        // delete rule and connector
-        await request
-          .delete(`/api/actions/connector/${connectorId}`)
-          .set('kbn-xsrf', 'foo')
-          .expect(204);
+        // delete rule
         await request.delete(`/api/alerting/rule/${ruleId}`).set('kbn-xsrf', 'foo').expect(204);
       });
 
@@ -246,128 +216,39 @@ export default function ({ getService }: FtrProviderContext) {
         const initialMetrics = (
           await getMetrics(
             false,
-            (metrics) => metrics?.metrics?.task_run?.value.by_type.alerting.total === 1
+            (metrics) =>
+              metrics?.metrics?.task_run?.value.by_type.alerting?.total === 1 &&
+              metrics?.metrics?.task_run?.value.by_type.alerting?.success === 1
           )
         ).metrics;
         expect(initialMetrics).not.to.be(null);
         expect(initialMetrics?.task_claim).not.to.be(null);
         expect(initialMetrics?.task_claim?.value).not.to.be(null);
 
-        console.log(JSON.stringify(initialMetrics));
+        for (let i = 0; i < 1; ++i) {
+          // run the rule and expect counters to increment
+          await request
+            .post('/api/sample_tasks/run_soon')
+            .set('kbn-xsrf', 'xxx')
+            .send({ task: { id: ruleId } })
+            .expect(200);
 
-        // let previousTaskClaimSuccess = initialMetrics?.task_claim?.value.total!;
-        // let previousTaskClaimTotal = initialMetrics?.task_claim?.value.success!;
-        // let previousTaskClaimTimestamp: string = initialMetrics?.task_claim?.timestamp!;
+          await getMetrics(
+            false,
+            (metrics) =>
+              metrics?.metrics?.task_run?.value.by_type.alerting?.total === i + 2 &&
+              metrics?.metrics?.task_run?.value.by_type.alerting?.success === i + 2
+          );
+        }
 
-        // for (let i = 0; i < 5; ++i) {
-        //   const metrics = (
-        //     await getMetrics(
-        //       false,
-        //       (m: NodeMetrics) => m.metrics?.task_claim?.timestamp !== previousTaskClaimTimestamp
-        //     )
-        //   ).metrics;
-        //   expect(metrics).not.to.be(null);
-        //   expect(metrics?.task_claim).not.to.be(null);
-        //   expect(metrics?.task_claim?.value).not.to.be(null);
-
-        //   expect(metrics?.task_claim?.value.success).to.be.greaterThan(previousTaskClaimSuccess);
-        //   expect(metrics?.task_claim?.value.total).to.be.greaterThan(previousTaskClaimTotal);
-
-        //   previousTaskClaimTimestamp = metrics?.task_claim?.timestamp!;
-        //   previousTaskClaimSuccess = metrics?.task_claim?.value.success!;
-        //   previousTaskClaimTotal = metrics?.task_claim?.value.total!;
-
-        //   // check that duration histogram exists
-        //   expect(metrics?.task_claim?.value.duration).not.to.be(null);
-        //   expect(Array.isArray(metrics?.task_claim?.value.duration.counts)).to.be(true);
-        //   expect(Array.isArray(metrics?.task_claim?.value.duration.values)).to.be(true);
-        // }
+        // counter should reset on its own
+        await getMetrics(
+          false,
+          (metrics) =>
+            metrics?.metrics?.task_run?.value.by_type.alerting?.total === 0 &&
+            metrics?.metrics?.task_run?.value.by_type.alerting?.success === 0
+        );
       });
-
-      // it('should reset task run success/total counters at an interval', async () => {
-      //   // counters are reset every 30 seconds, so with a polling interval of 3 seconds,
-      //   // counters should reach max value of 10 before resetting
-      //   const initialCounterValue = 7;
-      //   const initialMetrics = (
-      //     await getMetrics(
-      //       false,
-      //       (metrics) => metrics?.metrics?.task_claim?.value.total === initialCounterValue
-      //     )
-      //   ).metrics;
-      //   expect(initialMetrics).not.to.be(null);
-      //   expect(initialMetrics?.task_claim).not.to.be(null);
-      //   expect(initialMetrics?.task_claim?.value).not.to.be(null);
-
-      //   let previousTaskClaimSuccess = initialMetrics?.task_claim?.value.total!;
-      //   let previousTaskClaimTotal = initialMetrics?.task_claim?.value.success!;
-      //   let previousTaskClaimTimestamp: string = initialMetrics?.task_claim?.timestamp!;
-
-      //   for (let i = 0; i < 5; ++i) {
-      //     const metrics = (
-      //       await getMetrics(
-      //         false,
-      //         (m: NodeMetrics) => m.metrics?.task_claim?.timestamp !== previousTaskClaimTimestamp
-      //       )
-      //     ).metrics;
-      //     expect(metrics).not.to.be(null);
-      //     expect(metrics?.task_claim).not.to.be(null);
-      //     expect(metrics?.task_claim?.value).not.to.be(null);
-
-      //     if ((initialCounterValue + i + 1) % 10 === 1) {
-      //       expect(metrics?.task_claim?.value.success).to.equal(1);
-      //       expect(metrics?.task_claim?.value.total).to.equal(1);
-      //     } else {
-      //       expect(metrics?.task_claim?.value.success).to.be.greaterThan(previousTaskClaimSuccess);
-      //       expect(metrics?.task_claim?.value.total).to.be.greaterThan(previousTaskClaimTotal);
-      //     }
-
-      //     previousTaskClaimTimestamp = metrics?.task_claim?.timestamp!;
-      //     previousTaskClaimSuccess = metrics?.task_claim?.value.success!;
-      //     previousTaskClaimTotal = metrics?.task_claim?.value.total!;
-
-      //     // check that duration histogram exists
-      //     expect(metrics?.task_claim?.value.duration).not.to.be(null);
-      //     expect(Array.isArray(metrics?.task_claim?.value.duration.counts)).to.be(true);
-      //     expect(Array.isArray(metrics?.task_claim?.value.duration.values)).to.be(true);
-      //   }
-      // });
-
-      // it('should reset task run success/total counters on request', async () => {
-      //   const initialCounterValue = 1;
-      //   const initialMetrics = (
-      //     await getMetrics(
-      //       false,
-      //       (metrics) => metrics?.metrics?.task_claim?.value.total === initialCounterValue
-      //     )
-      //   ).metrics;
-      //   expect(initialMetrics).not.to.be(null);
-      //   expect(initialMetrics?.task_claim).not.to.be(null);
-      //   expect(initialMetrics?.task_claim?.value).not.to.be(null);
-
-      //   let previousTaskClaimTimestamp: string = initialMetrics?.task_claim?.timestamp!;
-
-      //   for (let i = 0; i < 5; ++i) {
-      //     const metrics = (
-      //       await getMetrics(
-      //         true,
-      //         (m: NodeMetrics) => m.metrics?.task_claim?.timestamp !== previousTaskClaimTimestamp
-      //       )
-      //     ).metrics;
-      //     expect(metrics).not.to.be(null);
-      //     expect(metrics?.task_claim).not.to.be(null);
-      //     expect(metrics?.task_claim?.value).not.to.be(null);
-
-      //     expect(metrics?.task_claim?.value.success).to.equal(1);
-      //     expect(metrics?.task_claim?.value.total).to.equal(1);
-
-      //     previousTaskClaimTimestamp = metrics?.task_claim?.timestamp!;
-
-      //     // check that duration histogram exists
-      //     expect(metrics?.task_claim?.value.duration).not.to.be(null);
-      //     expect(Array.isArray(metrics?.task_claim?.value.duration.counts)).to.be(true);
-      //     expect(Array.isArray(metrics?.task_claim?.value.duration.values)).to.be(true);
-      //   }
-      // });
     });
   });
 }

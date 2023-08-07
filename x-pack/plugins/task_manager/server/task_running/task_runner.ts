@@ -47,6 +47,7 @@ import {
   FailedRunResult,
   FailedTaskResult,
   isFailedRunResult,
+  RunContext,
   SuccessfulRunResult,
   TaskDefinition,
   TaskStatus,
@@ -321,9 +322,9 @@ export class TaskManagerRunner implements TaskRunner {
 
       let taskParamsValidation;
       if (this.requeueInvalidTasksConfig.enabled) {
-        taskParamsValidation = this.validateTaskParams();
+        taskParamsValidation = this.validateTaskParams(modifiedContext);
         if (!taskParamsValidation.error) {
-          taskParamsValidation = await this.validateIndirectTaskParams();
+          taskParamsValidation = await this.validateIndirectTaskParams(modifiedContext);
         }
       }
 
@@ -359,9 +360,9 @@ export class TaskManagerRunner implements TaskRunner {
     }
   }
 
-  private validateTaskParams() {
+  private validateTaskParams({ taskInstance }: RunContext) {
     let error;
-    const { state, taskType, params, id, numSkippedRuns = 0 } = this.instance.task;
+    const { state, taskType, params, id, numSkippedRuns = 0 } = taskInstance;
     const { max_attempts: maxAttempts } = this.requeueInvalidTasksConfig;
 
     try {
@@ -383,9 +384,9 @@ export class TaskManagerRunner implements TaskRunner {
     return { ...(error ? { error } : {}), state };
   }
 
-  private async validateIndirectTaskParams() {
+  private async validateIndirectTaskParams({ taskInstance }: RunContext) {
     let error;
-    const { state, taskType, id, numSkippedRuns = 0 } = this.instance.task;
+    const { state, taskType, id, numSkippedRuns = 0 } = taskInstance;
     const { max_attempts: maxAttempts } = this.requeueInvalidTasksConfig;
     const indirectParamsSchema = this.definition.indirectParamsSchema;
 
