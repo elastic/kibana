@@ -70,23 +70,26 @@ const accordionButtonClassName = css`
   }
 `;
 
-export function ChatItem({
-  title,
-  content,
-  canCopy,
-  canEdit,
-  canGiveFeedback,
-  canRegenerate,
-  canExpand,
-  role,
-  loading,
-  error,
-  currentUser,
-  onEditSubmit,
-  onRegenerateClick,
-  onStopGeneratingClick,
-  onFeedbackClick,
-}: ChatItemProps) {
+export function ChatItem(props: ChatItemProps) {
+  const {
+    title,
+    content,
+    canCopy,
+    canEdit,
+    canGiveFeedback,
+    canRegenerate,
+    canExpand,
+    role,
+    loading,
+    error,
+    currentUser,
+    onEditSubmit,
+    onRegenerateClick,
+    onStopGeneratingClick,
+    onFeedbackClick,
+  } = props;
+
+  console.log(props);
   const accordionId = useGeneratedHtmlId({ prefix: 'chat' });
 
   const [isPopoverOpen, setIsPopoverOpen] = useState<string | undefined>();
@@ -154,7 +157,7 @@ export function ChatItem({
               }
             ),
             handler: () => {
-              navigator.clipboard.writeText(content || '');
+              navigator.clipboard.writeText(content?.toString() || '');
             },
           },
         ]

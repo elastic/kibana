@@ -88,30 +88,32 @@ interface FunctionOptions<TParameters extends CompatibleJSONSchema = CompatibleJ
   contexts: string[];
 }
 
-type RespondFunction<
-  TParameters extends CompatibleJSONSchema,
-  TResponse extends FunctionResponse
-> = (options: { arguments: FromSchema<TParameters> }, signal: AbortSignal) => Promise<TResponse>;
+type RespondFunction<TArguments, TResponse extends FunctionResponse> = (
+  options: { arguments: TArguments },
+  signal: AbortSignal
+) => Promise<TResponse>;
 
-type RenderFunction<TResponse extends FunctionResponse> = (options: {
+type RenderFunction<TArguments, TResponse extends FunctionResponse> = (options: {
+  arguments: TArguments;
   response: TResponse;
 }) => React.ReactNode;
 
 export interface FunctionDefinition {
   options: FunctionOptions;
   respond: (options: { arguments: any }, signal: AbortSignal) => Promise<FunctionResponse>;
-  render?: RenderFunction<any>;
+  render?: RenderFunction<any, any>;
 }
 
 export type RegisterContextDefinition = (options: ContextDefinition) => void;
 
 export type RegisterFunctionDefinition = <
   TParameters extends CompatibleJSONSchema,
-  TResponse extends FunctionResponse
+  TResponse extends FunctionResponse,
+  TArguments = FromSchema<TParameters>
 >(
   options: FunctionOptions<TParameters>,
-  respond: RespondFunction<TParameters, TResponse>,
-  render?: RenderFunction<TResponse>
+  respond: RespondFunction<TArguments, TResponse>,
+  render?: RenderFunction<TArguments, TResponse>
 ) => void;
 
 export type ContextRegistry = Map<string, ContextDefinition>;

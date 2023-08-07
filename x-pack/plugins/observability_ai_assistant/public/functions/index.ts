@@ -6,8 +6,10 @@
  */
 
 import type { RegisterContextDefinition, RegisterFunctionDefinition } from '../../common/types';
+import type { ObservabilityAIAssistantPluginStartDependencies } from '../types';
 import type { ObservabilityAIAssistantService } from '../types';
 import { registerElasticsearchFunction } from './elasticsearch';
+import { registerLensFunction } from './lens';
 import { registerRecallFunction } from './recall';
 import { registerSetupKbFunction } from './setup_kb';
 import { registerSummarisationFunction } from './summarise';
@@ -16,10 +18,12 @@ export function registerFunctions({
   registerFunction,
   registerContext,
   service,
+  pluginsStart,
 }: {
   registerFunction: RegisterFunctionDefinition;
   registerContext: RegisterContextDefinition;
   service: ObservabilityAIAssistantService;
+  pluginsStart: ObservabilityAIAssistantPluginStartDependencies;
 }) {
   registerContext({
     name: 'core',
@@ -31,4 +35,5 @@ export function registerFunctions({
   registerSummarisationFunction({ service, registerFunction });
   registerRecallFunction({ service, registerFunction });
   registerSetupKbFunction({ service, registerFunction });
+  registerLensFunction({ service, registerFunction, pluginsStart });
 }
