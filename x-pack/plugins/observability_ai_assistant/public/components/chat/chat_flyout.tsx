@@ -4,23 +4,24 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { EuiFlexGroup, EuiFlexItem, EuiFlyout } from '@elastic/eui';
 import React, { useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiFlyout, useEuiTheme } from '@elastic/eui';
-import type { ConversationCreateRequest } from '../../../common/types';
+import type { Message } from '../../../common/types';
 import { useCurrentUser } from '../../hooks/use_current_user';
 import { useGenAIConnectors } from '../../hooks/use_genai_connectors';
-import { useObservabilityAIAssistant } from '../../hooks/use_observability_ai_assistant';
-import { ChatBody } from './chat_body';
-import { ConversationList } from './conversation_list';
 import { useKibana } from '../../hooks/use_kibana';
+import { useObservabilityAIAssistant } from '../../hooks/use_observability_ai_assistant';
 import { getConnectorsManagementHref } from '../../utils/get_connectors_management_href';
+import { ChatBody } from './chat_body';
 
 export function ChatFlyout({
-  initialConversation,
+  title,
+  messages,
   isOpen,
   onClose,
 }: {
-  initialConversation: ConversationCreateRequest;
+  title: string;
+  messages: Message[];
   isOpen: boolean;
   onClose: () => void;
 }) {
@@ -28,46 +29,31 @@ export function ChatFlyout({
 
   const currentUser = useCurrentUser();
 
-  const { euiTheme } = useEuiTheme();
-
   const {
     services: { http },
   } = useKibana();
 
   const [isConversationListExpanded, setIsConversationListExpanded] = useState(false);
 
-  const handleClickConversation = (id: string) => {};
-  const handleClickNewChat = () => {};
-  const handleClickSettings = () => {};
-
   const service = useObservabilityAIAssistant();
 
   return isOpen ? (
     <EuiFlyout onClose={onClose}>
       <EuiFlexGroup responsive={false} gutterSize="none">
-        {isConversationListExpanded ? (
-          <EuiFlexItem
-            grow={false}
-            css={{ minWidth: 200, borderRight: `solid 1px ${euiTheme.border.color}` }}
-          >
-            <ConversationList
-              onClickConversation={handleClickConversation}
-              onClickNewChat={handleClickNewChat}
-              onClickSettings={handleClickSettings}
-            />
-          </EuiFlexItem>
-        ) : null}
         <EuiFlexItem>
           <ChatBody
             service={service}
             connectors={connectors}
-            initialConversation={initialConversation}
+            title={title}
+            messages={messages}
             currentUser={currentUser}
             connectorsManagementHref={getConnectorsManagementHref(http)}
             isConversationListExpanded={isConversationListExpanded}
             onToggleExpandConversationList={() =>
               setIsConversationListExpanded(!isConversationListExpanded)
             }
+            onChatComplete={() => {}}
+            onChatUpdate={() => {}}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

@@ -7,17 +7,16 @@
 import { v4 } from 'uuid';
 import { i18n } from '@kbn/i18n';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
-import { MessageRole } from '../../common';
-import type { ConversationCreateRequest } from '../../common/types';
+import { type Message, MessageRole } from '../../common';
 import type { ChatTimelineItem } from '../components/chat/chat_timeline';
 
 export function getTimelineItemsfromConversation({
   currentUser,
-  conversation,
+  messages,
   hasConnector,
 }: {
   currentUser?: Pick<AuthenticatedUser, 'username' | 'full_name'>;
-  conversation: ConversationCreateRequest;
+  messages: Message[];
   hasConnector: boolean;
 }): ChatTimelineItem[] {
   return [
@@ -36,7 +35,7 @@ export function getTimelineItemsfromConversation({
       loading: false,
       currentUser,
     },
-    ...conversation.messages.map((message) => {
+    ...messages.map((message) => {
       const hasFunction = !!message.message.function_call?.name;
       const isSystemPrompt = message.message.role === MessageRole.System;
 

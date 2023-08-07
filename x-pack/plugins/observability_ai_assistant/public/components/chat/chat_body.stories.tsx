@@ -28,16 +28,8 @@ const Template: ComponentStory<typeof Component> = (props: ChatBodyProps) => {
 };
 
 const defaultProps: ChatBodyProps = {
-  initialConversation: {
-    '@timestamp': new Date().toISOString(),
-    conversation: {
-      title: 'My conversation',
-    },
-    labels: {},
-    numeric_labels: {},
-    messages: [getAssistantSetupMessage()],
-    public: false,
-  },
+  title: 'My Conversation',
+  messages: [getAssistantSetupMessage()],
   connectors: {
     connectors: [
       {
@@ -64,6 +56,8 @@ const defaultProps: ChatBodyProps = {
       return new Observable();
     },
   } as unknown as ObservabilityAIAssistantService,
+  onChatUpdate: () => {},
+  onChatComplete: () => {},
 };
 
 export const ChatBody = Template.bind({});

@@ -44,6 +44,7 @@ export function ChatTimeline({
 }: ChatTimelineProps) {
   return (
     <EuiCommentList>
+<<<<<<< HEAD
       {items.map((item) =>
         !item.hide ? (
           <ChatItem
@@ -62,6 +63,25 @@ export function ChatTimeline({
           />
         ) : null
       )}
+=======
+      {items.map((item, index) => (
+        <ChatItem
+          // use index, not id to prevent unmounting of component when message is persisted
+          key={index}
+          {...item}
+          onFeedbackClick={(feedback) => {
+            onFeedback(item, feedback);
+          }}
+          onRegenerateClick={() => {
+            onRegenerate(item);
+          }}
+          onEditSubmit={(content) => {
+            onEdit(item, content);
+          }}
+          onStopGeneratingClick={onStopGenerating}
+        />
+      ))}
+>>>>>>> 4d60bfcae1fcab5e49d1c152fc16700e9d02c47e
     </EuiCommentList>
   );
 }

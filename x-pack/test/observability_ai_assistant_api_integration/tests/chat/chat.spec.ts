@@ -6,9 +6,9 @@
  */
 
 import expect from '@kbn/expect';
-import { MessageRole, type Message } from '@kbn/observability-ai-assistant-plugin/public';
+import { MessageRole, type Message } from '@kbn/observability-ai-assistant-plugin/common';
 import getPort from 'get-port';
-import http, { Server } from 'http';
+import http, { Server, ServerResponse } from 'http';
 import { PassThrough } from 'stream';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
@@ -83,12 +83,23 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         .send({
           messages,
           connectorId: 'does not exist',
+          functions: [],
         })
         .expect(404);
     });
 
     it('returns a streaming response from the server', async () => {
       const NUM_RESPONSES = 5;
+
+      async function writeChunks(response: ServerResponse) {
+        const chunks = new Array(NUM_RESPONSES).fill(undefined).map(() => 'data: {}');
+        for await (const chunk of chunks) {
+          response.write(chunk);
+          await new Promise((resolve) => {
+            setTimeout(resolve, 100);
+          });
+        }
+      }
 
       requestHandler = (request, response) => {
         response.writeHead(200, {
@@ -97,12 +108,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           Connection: 'keep-alive',
         });
 
-        new Array(NUM_RESPONSES).fill(undefined).forEach(() => {
-          response.write(`data: {}`);
+        writeChunks(response).then(() => {
+          response.write('data: [DONE]');
+          response.end();
         });
-
-        response.write('data: [DONE]');
-        response.end();
       };
 
       await Promise.race([
@@ -116,15 +125,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
           const passThrough = new PassThrough();
 
-          passThrough.on('data', (chunk) => {
-            receivedChunks.push(chunk.toString());
-          });
-
-          passThrough.on('end', () => {
-            expect(receivedChunks.length).to.eql(NUM_RESPONSES + 1);
-            resolve();
-          });
-
           supertest
             .post(CHAT_API_URL)
             .set('kbn-xsrf', 'foo')
@@ -132,8 +132,21 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             .send({
               messages,
               connectorId,
+              functions: [],
             })
             .pipe(passThrough);
+
+          passThrough.on('data', (chunk) => {
+            receivedChunks.push(chunk.toString());
+          });
+
+          passThrough.on('end', () => {
+            expect(receivedChunks.length).to.eql(
+              NUM_RESPONSES + 1,
+              'received no of chunks did not match expected. This might be because of a 4xx or 5xx'
+            );
+            resolve();
+          });
         }),
       ]);
     });

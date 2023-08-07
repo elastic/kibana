@@ -6,11 +6,11 @@
  */
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle, useEuiTheme } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/css';
 import { UseGenAIConnectorsResult } from '../../hooks/use_genai_connectors';
 import { AssistantAvatar } from '../assistant_avatar';
 import { ConnectorSelectorBase } from '../connector_selector/connector_selector_base';
+import { EMPTY_CONVERSATION_TITLE } from '../../i18n';
 
 export function ChatHeader({
   title,
@@ -21,11 +21,7 @@ export function ChatHeader({
 }) {
   const hasTitle = !!title;
 
-  const displayedTitle =
-    title ||
-    i18n.translate('xpack.observabilityAiAssistant.emptyConversationTitle', {
-      defaultMessage: 'New conversation',
-    });
+  const displayedTitle = title || EMPTY_CONVERSATION_TITLE;
 
   const theme = useEuiTheme();
 

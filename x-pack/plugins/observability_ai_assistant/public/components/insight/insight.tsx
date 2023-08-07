@@ -24,7 +24,15 @@ import { InsightBase } from './insight_base';
 import { MissingCredentialsCallout } from '../missing_credentials_callout';
 import { getConnectorsManagementHref } from '../../utils/get_connectors_management_href';
 
-function ChatContent({ messages, connectorId }: { messages: Message[]; connectorId: string }) {
+function ChatContent({
+  title,
+  messages,
+  connectorId,
+}: {
+  title: string;
+  messages: Message[];
+  connectorId: string;
+}) {
   const service = useObservabilityAIAssistant();
 
   const [pendingMessage, setPendingMessage] = useState<PendingMessage | undefined>();
@@ -52,26 +60,15 @@ function ChatContent({ messages, connectorId }: { messages: Message[]; connector
 
   const [isOpen, setIsOpen] = useState(false);
 
-  const initialConversation = useMemo(() => {
-    const time = new Date().toISOString();
-    return {
-      '@timestamp': time,
-      messages: pendingMessage?.message.content
-        ? messages.concat({
-            '@timestamp': time,
-            message: {
-              role: MessageRole.Assistant,
-              content: pendingMessage.message.content,
-            },
-          })
-        : messages,
-      conversation: {
-        title: '',
-      },
-      labels: {},
-      numeric_labels: {},
-      public: false,
-    };
+  const displayedMessages = useMemo(() => {
+    return pendingMessage
+      ? messages.concat({
+          '@timestamp': new Date().toISOString(),
+          message: {
+            ...pendingMessage.message,
+          },
+        })
+      : messages;
   }, [pendingMessage, messages]);
 
   return (
@@ -116,11 +113,12 @@ function ChatContent({ messages, connectorId }: { messages: Message[]; connector
         }
       />
       <ChatFlyout
+        title={title}
         isOpen={isOpen}
         onClose={() => {
           setIsOpen(() => false);
         }}
-        initialConversation={initialConversation}
+        messages={displayedMessages}
       />
     </>
   );
@@ -138,7 +136,9 @@ export function Insight({ messages, title }: { messages: Message[]; title: strin
   let children: React.ReactNode = null;
 
   if (hasOpened && connectors.selectedConnector) {
-    children = <ChatContent messages={messages} connectorId={connectors.selectedConnector} />;
+    children = (
+      <ChatContent title={title} messages={messages} connectorId={connectors.selectedConnector} />
+    );
   } else if (!connectors.loading && !connectors.connectors?.length) {
     children = (
       <MissingCredentialsCallout connectorsManagementHref={getConnectorsManagementHref(http!)} />
