@@ -41,8 +41,8 @@ import { SummarySection } from './dashboard_sections/summary_section';
 import { BenchmarksSection } from './dashboard_sections/benchmarks_section';
 import { CSPM_POLICY_TEMPLATE, KSPM_POLICY_TEMPLATE } from '../../../common/constants';
 import { cspIntegrationDocsNavigation } from '../../common/navigation/constants';
+import { NO_FINDINGS_STATUS_REFRESH_INTERVAL_MS } from '../../common/constants';
 
-const REFETCH_INTERVAL_MS = 20000;
 const POSTURE_TYPE_CSPM = CSPM_POLICY_TEMPLATE;
 const POSTURE_TYPE_KSPM = KSPM_POLICY_TEMPLATE;
 
@@ -225,7 +225,7 @@ export const getDefaultTab = (
 
 const determineDashboardDataRefetchInterval = (data: ComplianceDashboardData | undefined) => {
   if (data?.stats.totalFindings === 0) {
-    return REFETCH_INTERVAL_MS;
+    return NO_FINDINGS_STATUS_REFRESH_INTERVAL_MS;
   }
 
   return false;
@@ -238,7 +238,7 @@ const TabContent = ({ posturetype }: { posturetype: PosturePolicyTemplate }) => 
         return false;
       }
 
-      return REFETCH_INTERVAL_MS;
+      return NO_FINDINGS_STATUS_REFRESH_INTERVAL_MS;
     },
   });
   const isCloudSecurityPostureInstalled = !!getSetupStatus?.installedPackageVersion;
