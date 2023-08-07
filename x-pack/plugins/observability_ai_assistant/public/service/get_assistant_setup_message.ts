@@ -42,6 +42,8 @@ export function getAssistantSetupMessage() {
 
   Note that any visualisations will be displayed ABOVE your textual response, not below.
 
+  Before you call a function, make sure its name is correct.
+
   Feel free to use Markdown in your replies, especially for code and query statements.`),
     },
   };
