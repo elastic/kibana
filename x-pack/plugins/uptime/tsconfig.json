@@ -55,7 +55,6 @@
     "@kbn/core-doc-links-browser",
     "@kbn/usage-collection-plugin",
     "@kbn/core-application-browser",
-    "@kbn/telemetry-plugin",
     "@kbn/encrypted-saved-objects-plugin",
     "@kbn/task-manager-plugin",
     "@kbn/features-plugin",
