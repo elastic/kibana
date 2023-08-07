@@ -110,6 +110,10 @@ export const LensWrapper = ({
         .echLegend .echLegendList {
           display: flex;
         }
+        .echMetric {
+          border-radius: ${euiTheme.border.radius.medium};
+          pointer-events: none;
+        }
       `}
       ref={ref}
     >
