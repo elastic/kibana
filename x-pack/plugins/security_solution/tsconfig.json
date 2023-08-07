@@ -164,6 +164,9 @@
     "@kbn/discover-plugin",
     "@kbn/navigation-plugin",
     "@kbn/data-view-editor-plugin",
-    "@kbn/alerts-ui-shared"
+    "@kbn/alerts-ui-shared",
+    "@kbn/saved-search-plugin",
+    "@kbn/chart-expressions-common",
+    "@kbn/unified-histogram-plugin"
   ]
 }
