@@ -161,9 +161,9 @@ export class CoreVersionedRoute implements VersionedRoute {
     ) {
       try {
         const { body, params, query } = validate(req, validation.request, handler.options.version);
-        (req as Mutable<KibanaRequest>).body = body;
-        (req as Mutable<KibanaRequest>).params = params;
-        (req as Mutable<KibanaRequest>).query = query;
+        req.body = body;
+        req.params = params;
+        req.query = query;
       } catch (e) {
         return res.badRequest({
           body: e.message,
@@ -171,9 +171,9 @@ export class CoreVersionedRoute implements VersionedRoute {
       }
     } else {
       // Preserve behavior of not passing through unvalidated data
-      (req as Mutable<KibanaRequest>).body = {};
-      (req as Mutable<KibanaRequest>).params = {};
-      (req as Mutable<KibanaRequest>).query = {};
+      req.body = {};
+      req.params = {};
+      req.query = {};
     }
 
     const response = await handler.fn(ctx, req, res);
