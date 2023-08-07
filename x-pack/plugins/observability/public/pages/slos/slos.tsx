@@ -19,7 +19,7 @@ import { SloList } from './components/slo_list';
 import { AutoRefreshButton } from './components/auto_refresh_button';
 import { HeaderTitle } from './components/header_title';
 import { FeedbackButton } from '../../components/slo/feedback_button/feedback_button';
-import { paths } from '../../config/paths';
+import { paths } from '../../../common/locators/paths';
 
 export function SlosPage() {
   const {
@@ -31,8 +31,7 @@ export function SlosPage() {
   const { hasAtLeast } = useLicense();
 
   const { isInitialLoading, isLoading, isError, sloList } = useFetchSloList();
-
-  const { total } = sloList || {};
+  const { total } = sloList || { total: 0 };
 
   const [isAutoRefreshing, setIsAutoRefreshing] = useState<boolean>(true);
 

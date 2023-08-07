@@ -307,6 +307,16 @@ export class FindService extends FtrService {
     }, timeout);
   }
 
+  public async existsByXpath(
+    selector: string,
+    timeout: number = this.WAIT_FOR_EXISTS_TIME
+  ): Promise<boolean> {
+    this.log.debug(`Find.existsByXpath('${selector}') with timeout=${timeout}`);
+    return await this.exists(async (drive) => {
+      return this.wrapAll(await drive.findElements(By.xpath(selector)));
+    }, timeout);
+  }
+
   public async clickByCssSelectorWhenNotDisabled(selector: string, opts?: TimeoutOpt) {
     const timeout = opts?.timeout ?? this.defaultFindTimeout;
 

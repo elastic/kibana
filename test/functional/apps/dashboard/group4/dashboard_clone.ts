@@ -17,7 +17,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('dashboard clone', function describeIndexTests() {
     const dashboardName = 'Dashboard Clone Test';
-    const clonedDashboardName = dashboardName + ' Copy';
+    const clonedDashboardName = dashboardName + ' (1)';
 
     before(async function () {
       return PageObjects.dashboard.initTests();
@@ -31,7 +31,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.dashboard.saveDashboard(dashboardName);
 
       await PageObjects.dashboard.clickClone();
-      await PageObjects.dashboard.confirmClone();
       await PageObjects.dashboard.gotoDashboardLandingPage();
       await listingTable.searchAndExpectItemsCount('dashboard', clonedDashboardName, 1);
     });
@@ -42,39 +41,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const panelTitles = await PageObjects.dashboard.getPanelTitles();
         expect(panelTitles).to.eql(PageObjects.dashboard.getTestVisualizationNames());
       });
-    });
-
-    it('clone appends Copy to the dashboard title name', async () => {
-      await PageObjects.dashboard.loadSavedDashboard(dashboardName);
-      await PageObjects.dashboard.clickClone();
-
-      const title = await PageObjects.dashboard.getCloneTitle();
-      expect(title).to.be(clonedDashboardName);
-    });
-
-    it('and warns on duplicate name', async function () {
-      await PageObjects.dashboard.confirmClone();
-      await PageObjects.dashboard.expectDuplicateTitleWarningDisplayed({ displayed: true });
-    });
-
-    it("and doesn't save", async () => {
-      await PageObjects.dashboard.cancelClone();
-      await PageObjects.dashboard.gotoDashboardLandingPage();
-
-      await listingTable.searchAndExpectItemsCount('dashboard', dashboardName, 1);
-    });
-
-    it('Clones on confirm duplicate title warning', async function () {
-      await PageObjects.dashboard.loadSavedDashboard(dashboardName);
-      await PageObjects.dashboard.clickClone();
-
-      await PageObjects.dashboard.confirmClone();
-      await PageObjects.dashboard.expectDuplicateTitleWarningDisplayed({ displayed: true });
-      await PageObjects.dashboard.confirmClone();
-      await PageObjects.dashboard.waitForRenderComplete();
-      await PageObjects.dashboard.gotoDashboardLandingPage();
-
-      await listingTable.searchAndExpectItemsCount('dashboard', dashboardName + ' Copy', 2);
     });
   });
 }

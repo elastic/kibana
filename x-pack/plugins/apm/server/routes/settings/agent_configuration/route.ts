@@ -40,7 +40,7 @@ function throwNotFoundIfAgentConfigNotAvailable(
 
 // get list of configurations
 const agentConfigurationRoute = createApmServerRoute({
-  endpoint: 'GET /api/apm/settings/agent-configuration 2023-05-22',
+  endpoint: 'GET /api/apm/settings/agent-configuration 2023-10-31',
   options: { tags: ['access:apm'] },
   handler: async (
     resources
@@ -66,7 +66,7 @@ const agentConfigurationRoute = createApmServerRoute({
 
 // get a single configuration
 const getSingleAgentConfigurationRoute = createApmServerRoute({
-  endpoint: 'GET /api/apm/settings/agent-configuration/view 2023-05-22',
+  endpoint: 'GET /api/apm/settings/agent-configuration/view 2023-10-31',
   params: t.partial({
     query: serviceRt,
   }),
@@ -103,7 +103,7 @@ const getSingleAgentConfigurationRoute = createApmServerRoute({
 
 // delete configuration
 const deleteAgentConfigurationRoute = createApmServerRoute({
-  endpoint: 'DELETE /api/apm/settings/agent-configuration 2023-05-22',
+  endpoint: 'DELETE /api/apm/settings/agent-configuration 2023-10-31',
   options: {
     tags: ['access:apm', 'access:apm_write'],
   },
@@ -171,7 +171,7 @@ const deleteAgentConfigurationRoute = createApmServerRoute({
 
 // create/update configuration
 const createOrUpdateAgentConfigurationRoute = createApmServerRoute({
-  endpoint: 'PUT /api/apm/settings/agent-configuration 2023-05-22',
+  endpoint: 'PUT /api/apm/settings/agent-configuration 2023-10-31',
   options: {
     tags: ['access:apm', 'access:apm_write'],
   },
@@ -248,7 +248,7 @@ export type AgentConfigSearchParams = t.TypeOf<typeof searchParamsRt>;
 
 // Lookup single configuration (used by APM Server)
 const agentConfigurationSearchRoute = createApmServerRoute({
-  endpoint: 'POST /api/apm/settings/agent-configuration/search 2023-05-22',
+  endpoint: 'POST /api/apm/settings/agent-configuration/search 2023-10-31',
   params: t.type({
     body: searchParamsRt,
   }),
@@ -319,7 +319,7 @@ const agentConfigurationSearchRoute = createApmServerRoute({
 
 // get environments for service
 const listAgentConfigurationEnvironmentsRoute = createApmServerRoute({
-  endpoint: 'GET /api/apm/settings/agent-configuration/environments 2023-05-22',
+  endpoint: 'GET /api/apm/settings/agent-configuration/environments 2023-10-31',
   params: t.partial({
     query: t.partial({ serviceName: t.string }),
   }),
@@ -343,14 +343,13 @@ const listAgentConfigurationEnvironmentsRoute = createApmServerRoute({
     ]);
     const coreContext = await context.core;
 
-    const { serviceName, start, end } = params.query;
+    const { serviceName } = params.query;
     const searchAggregatedTransactions = await getSearchTransactionsEvents({
       apmEventClient,
       config,
       kuery: '',
-      start,
-      end,
     });
+
     const size = await coreContext.uiSettings.client.get<number>(
       maxSuggestions
     );
@@ -368,7 +367,7 @@ const listAgentConfigurationEnvironmentsRoute = createApmServerRoute({
 
 // get agentName for service
 const agentConfigurationAgentNameRoute = createApmServerRoute({
-  endpoint: 'GET /api/apm/settings/agent-configuration/agent_name 2023-05-22',
+  endpoint: 'GET /api/apm/settings/agent-configuration/agent_name 2023-10-31',
   params: t.type({
     query: t.type({ serviceName: t.string }),
   }),

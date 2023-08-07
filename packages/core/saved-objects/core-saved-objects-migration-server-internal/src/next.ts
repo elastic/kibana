@@ -208,6 +208,7 @@ export const nextActionMap = (
         index: state.targetIndex,
         mappings: omit(state.targetIndexMappings, ['_meta']), // ._meta property will be updated on a later step
         batchSize: state.batchSize,
+        query: Option.toUndefined(state.updatedTypesQuery),
       }),
     UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK: (
       state: UpdateTargetMappingsPropertiesWaitForTaskState

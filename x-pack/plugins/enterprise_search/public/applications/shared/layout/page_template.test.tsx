@@ -201,16 +201,29 @@ describe('EnterpriseSearchPageTemplateWrapper', () => {
       );
     });
 
-    it('automatically sets the Enterprise Search logo onto passed solution navs', () => {
+    it('automatically sets the Search logo onto passed solution navs', () => {
       const wrapper = shallow(
-        <EnterpriseSearchPageTemplateWrapper
-          solutionNav={{ name: 'Enterprise Search', items: [] }}
-        />
+        <EnterpriseSearchPageTemplateWrapper solutionNav={{ name: 'Search', items: [] }} />
       );
 
       expect(wrapper.find(KibanaPageTemplate).prop('solutionNav')).toEqual({
         icon: 'logoEnterpriseSearch',
-        name: 'Enterprise Search',
+        name: 'Search',
+        items: [],
+      });
+    });
+
+    it('sets the solutionNavIcon passed', () => {
+      const wrapper = shallow(
+        <EnterpriseSearchPageTemplateWrapper
+          solutionNav={{ name: 'Search', items: [] }}
+          solutionNavIcon="logoElasticsearch"
+        />
+      );
+
+      expect(wrapper.find(KibanaPageTemplate).prop('solutionNav')).toEqual({
+        icon: 'logoElasticsearch',
+        name: 'Search',
         items: [],
       });
     });

@@ -473,7 +473,7 @@ describe('retries', () => {
 
     const timeStart = performance.now();
     await initializeEs(esContext);
-    const timeElapsed = performance.now() - timeStart;
+    const timeElapsed = Math.ceil(performance.now() - timeStart);
 
     expect(timeElapsed).toBeGreaterThanOrEqual(MOCK_RETRY_DELAY);
 

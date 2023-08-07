@@ -188,6 +188,9 @@ export const createCaseSavedObjectType = (
       total_comments: {
         type: 'integer',
       },
+      category: {
+        type: 'keyword',
+      },
     },
   },
   migrations: caseMigrations,

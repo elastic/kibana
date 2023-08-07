@@ -41,13 +41,14 @@ import {
   ALERT_URL,
   ALERT_UUID,
   ALERT_WORKFLOW_STATUS,
+  ALERT_WORKFLOW_TAGS,
   EVENT_KIND,
   SPACE_IDS,
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
 
 import type { EventsForEnrichment } from '../types';
-import type { BaseFieldsLatest } from '../../../../../../../common/detection_engine/schemas/alerts';
+import type { BaseFieldsLatest } from '../../../../../../../common/api/detection_engine/model/alerts';
 
 import {
   ALERT_ANCESTORS,
@@ -94,6 +95,7 @@ export const createAlert = (
     [ALERT_ORIGINAL_TIME]: undefined,
     [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
     [ALERT_WORKFLOW_STATUS]: 'open',
+    [ALERT_WORKFLOW_TAGS]: [],
     [ALERT_DEPTH]: 1,
     [ALERT_REASON]: 'reasonable reason',
     [ALERT_SEVERITY]: 'high',

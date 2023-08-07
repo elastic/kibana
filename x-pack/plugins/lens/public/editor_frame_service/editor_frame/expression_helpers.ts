@@ -7,7 +7,7 @@
 import { Ast, fromExpression } from '@kbn/interpreter';
 import type { DateRange } from '../../../common/types';
 import { DatasourceStates } from '../../state_management';
-import { Visualization, DatasourceMap, DatasourceLayers, IndexPatternMap } from '../../types';
+import type { Visualization, DatasourceMap, DatasourceLayers, IndexPatternMap } from '../../types';
 
 export function getDatasourceExpressionsByLayers(
   datasourceMap: DatasourceMap,
@@ -80,7 +80,9 @@ export function buildExpression({
   dateRange: DateRange;
   nowInstant: Date;
 }): Ast | null {
-  if (visualization === null) {
+  // if an unregistered visualization is passed in the SO
+  // then this will be set as "undefined". Relax the check to catch both
+  if (visualization == null) {
     return null;
   }
 

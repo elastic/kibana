@@ -18,7 +18,6 @@ import { toExpressionAst } from '../to_ast';
 import { getGaugeOptions } from '../editor/components';
 import { GaugeVisParams } from '../types';
 import { SplitTooltip } from './split_tooltip';
-import { convertGaugeToLens } from '../convert_to_lens';
 
 export const getGaugeVisTypeDefinition = (
   props: GaugeTypeProps
@@ -130,8 +129,12 @@ export const getGaugeVisTypeDefinition = (
     ],
   },
   requiresSearch: true,
-  navigateToLens: async (vis, timefilter) => (vis ? convertGaugeToLens(vis, timefilter) : null),
+  navigateToLens: async (vis, timefilter) => {
+    const { convertGaugeToLens } = await import('../convert_to_lens');
+    return vis ? convertGaugeToLens(vis, timefilter) : null;
+  },
   getExpressionVariables: async (vis, timeFilter) => {
+    const { convertGaugeToLens } = await import('../convert_to_lens');
     return {
       canNavigateToLens: Boolean(vis?.params ? await convertGaugeToLens(vis, timeFilter) : null),
     };

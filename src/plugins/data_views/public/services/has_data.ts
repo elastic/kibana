@@ -157,7 +157,7 @@ export class HasData {
   // Data Views
 
   private getHasDataViews = async ({ http }: { http: HttpStart }): Promise<HasDataViewsResponse> =>
-    http.get<HasDataViewsResponse>(`/internal/data_views/has_data_views`);
+    http.get<HasDataViewsResponse>(`/internal/data_views/has_data_views`, { version: '1' });
 
   private hasDataViews = (http: HttpStart): Promise<boolean> => {
     return this.getHasDataViews({ http })

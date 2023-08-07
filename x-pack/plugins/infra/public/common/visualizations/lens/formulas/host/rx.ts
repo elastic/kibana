@@ -5,20 +5,16 @@
  * 2.0.
  */
 
-import type { LensChartConfig } from '../../../types';
-import { getFilters } from './utils';
+import type { FormulaConfig } from '../../../types';
 
-export const rx: LensChartConfig = {
-  title: 'Network Inbound (RX)',
-  formula: {
-    formula:
-      "average(host.network.ingress.bytes) * 8 / (max(metricset.period, kql='host.network.ingress.bytes: *') / 1000)",
-    format: {
-      id: 'bits',
-      params: {
-        decimals: 1,
-      },
+export const rx: FormulaConfig = {
+  label: 'Network Inbound (RX)',
+  value:
+    "average(host.network.ingress.bytes) * 8 / (max(metricset.period, kql='host.network.ingress.bytes: *') / 1000)",
+  format: {
+    id: 'bits',
+    params: {
+      decimals: 1,
     },
   },
-  getFilters,
 };

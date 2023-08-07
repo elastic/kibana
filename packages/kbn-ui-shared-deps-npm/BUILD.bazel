@@ -52,12 +52,14 @@ RUNTIME_DEPS = [
   "@npm//react-beautiful-dnd",
   "@npm//react-dom",
   "@npm//react-router-dom",
+  "@npm//react-router-dom-v5-compat",
   "@npm//react-router",
   "@npm//react",
   "@npm//rxjs",
   "@npm//styled-components",
   "@npm//tslib",
   "@npm//uuid",
+  "@npm//io-ts",
 ]
 
 webpack_cli(
@@ -84,9 +86,11 @@ webpack_cli(
   env = select({
     "//:dist": {
       "NODE_ENV": "production",
+      "NODE_OPTIONS": "--openssl-legacy-provider",
     },
     "//conditions:default": {
       "NODE_ENV": "development",
+      "NODE_OPTIONS": "--openssl-legacy-provider",
     },
   })
 )

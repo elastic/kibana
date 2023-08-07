@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { getOverridesFor } from './utils';
+import { getOverridesFor, isOnAggBasedEditor } from './utils';
 
 describe('Overrides utilities', () => {
   describe('getOverridesFor', () => {
@@ -29,5 +29,79 @@ describe('Overrides utilities', () => {
         getOverridesFor({ otherOverride: { a: 15 }, settings: { b: 10, c: 'ignore' } }, 'settings')
       ).toEqual({ b: 10, c: undefined });
     });
+  });
+});
+
+describe('isOnAggBasedEditor', () => {
+  it('should return false if is on dashboard', () => {
+    const context = {
+      type: 'dashboard',
+      description: 'test',
+      child: {
+        type: 'lens',
+        name: 'lnsPie',
+        id: 'd8bb29a7-13a4-43fa-a162-d7705050bb6c',
+        description: 'test',
+        url: '/gdu/app/lens#/edit_by_value',
+      },
+    };
+    expect(isOnAggBasedEditor(context)).toEqual(false);
+  });
+
+  it('should return false if is on editor but lens', () => {
+    const context = {
+      type: 'application',
+      description: 'test',
+      child: {
+        type: 'lens',
+        name: 'lnsPie',
+        id: 'd8bb29a7-13a4-43fa-a162-d7705050bb6c',
+        description: 'test',
+        url: '/gdu/app/lens#/edit_by_value',
+      },
+    };
+    expect(isOnAggBasedEditor(context)).toEqual(false);
+  });
+
+  it('should return false if is on dashboard but agg_based', () => {
+    const context = {
+      type: 'dashboard',
+      description: 'test',
+      child: {
+        type: 'agg_based',
+        name: 'pie',
+        id: 'd8bb29a7-13a4-43fa-a162-d7705050bb6c',
+        description: 'test',
+        url: '',
+      },
+    };
+    expect(isOnAggBasedEditor(context)).toEqual(false);
+  });
+
+  it('should return true if is on editor but agg_based', () => {
+    const context = {
+      type: 'application',
+      description: 'test',
+      child: {
+        type: 'agg_based',
+        name: 'pie',
+        id: 'd8bb29a7-13a4-43fa-a162-d7705050bb6c',
+        description: 'test',
+        url: '',
+      },
+    };
+    expect(isOnAggBasedEditor(context)).toEqual(true);
+  });
+
+  it('should return false if child is missing', () => {
+    const context = {
+      type: 'application',
+      description: 'test',
+    };
+    expect(isOnAggBasedEditor(context)).toEqual(false);
+  });
+
+  it('should return false if context is missing', () => {
+    expect(isOnAggBasedEditor()).toEqual(false);
   });
 });

@@ -77,7 +77,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await ml.commonUI.waitForMlLoadingIndicatorToDisappear();
 
-      await ml.testExecution.logTestStep('Exploror page loaded');
+      await ml.testExecution.logTestStep('Explorer page loaded');
       await ml.lensVisualizations.anomalyExplorerPageLoaded();
 
       await ml.testExecution.logTestStep('pre-fills the job selection');

@@ -7,7 +7,9 @@
 
 import { IScopedClusterClient } from '@kbn/core/server';
 
-import { CONNECTORS_INDEX, CONNECTORS_JOBS_INDEX } from '../..';
+import { CONNECTORS_INDEX, CURRENT_CONNECTORS_JOB_INDEX } from '../..';
+import { CONNECTORS_ACCESS_CONTROL_INDEX_PREFIX } from '../../../common/constants';
+
 import { SyncJobType, SyncStatus, TriggerMethod } from '../../../common/types/connectors';
 
 import { ErrorCode } from '../../../common/types/error_codes';
@@ -40,6 +42,7 @@ describe('startSync lib function', () => {
           error: null,
           index_name: 'index_name',
           language: null,
+          last_access_control_sync_error: null,
           last_access_control_sync_scheduled_at: null,
           last_access_control_sync_status: null,
           last_seen: null,
@@ -92,7 +95,7 @@ describe('startSync lib function', () => {
         trigger_method: TriggerMethod.ON_DEMAND,
         worker_hostname: null,
       },
-      index: CONNECTORS_JOBS_INDEX,
+      index: CURRENT_CONNECTORS_JOB_INDEX,
     });
   });
   it('should start a full sync with service type, pipeline and nextSyncConfig', async () => {
@@ -161,7 +164,7 @@ describe('startSync lib function', () => {
         trigger_method: TriggerMethod.ON_DEMAND,
         worker_hostname: null,
       },
-      index: CONNECTORS_JOBS_INDEX,
+      index: CURRENT_CONNECTORS_JOB_INDEX,
     });
   });
 
@@ -296,7 +299,7 @@ describe('startSync lib function', () => {
         trigger_method: TriggerMethod.ON_DEMAND,
         worker_hostname: null,
       },
-      index: CONNECTORS_JOBS_INDEX,
+      index: CURRENT_CONNECTORS_JOB_INDEX,
     });
   });
 
@@ -310,7 +313,7 @@ describe('startSync lib function', () => {
           created_at: null,
           custom_scheduling: {},
           error: null,
-          index_name: 'index_name',
+          index_name: 'search-index_name',
           language: null,
           last_access_control_sync_status: null,
           last_seen: null,
@@ -344,7 +347,7 @@ describe('startSync lib function', () => {
           configuration: {},
           filtering: null,
           id: 'connectorId',
-          index_name: 'index_name',
+          index_name: `${CONNECTORS_ACCESS_CONTROL_INDEX_PREFIX}index_name`,
           language: null,
           pipeline: null,
           service_type: null,
@@ -363,7 +366,7 @@ describe('startSync lib function', () => {
         trigger_method: TriggerMethod.ON_DEMAND,
         worker_hostname: null,
       },
-      index: CONNECTORS_JOBS_INDEX,
+      index: CURRENT_CONNECTORS_JOB_INDEX,
     });
   });
 });

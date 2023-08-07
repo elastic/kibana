@@ -10,6 +10,7 @@ import { useQuery } from '@tanstack/react-query';
 import { i18n } from '@kbn/i18n';
 import { filter } from 'lodash';
 import type { ECSMapping } from '@kbn/osquery-io-ts-types';
+import { API_VERSIONS } from '../../common/constants';
 import { useKibana } from '../common/lib/kibana';
 import type { ESTermQuery } from '../../common/typed_json';
 import { useErrorToast } from '../common/hooks/use_error_toast';
@@ -63,7 +64,7 @@ export const useLiveQueryDetails = ({
 
   return useQuery<{ data: LiveQueryDetailsItem }, Error, LiveQueryDetailsItem>(
     ['liveQueries', { actionId, filterQuery, queryIds }],
-    () => http.get(`/api/osquery/live_queries/${actionId}`),
+    () => http.get(`/api/osquery/live_queries/${actionId}`, { version: API_VERSIONS.public.v1 }),
     {
       enabled: !skip && !!actionId,
       refetchInterval: isLive ? 5000 : false,

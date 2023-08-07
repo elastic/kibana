@@ -133,29 +133,32 @@ describe('Textbased Data Source', () => {
 
   describe('uniqueLabels', () => {
     it('appends a suffix to duplicates', () => {
-      const map = TextBasedDatasource.uniqueLabels({
-        layers: {
-          a: {
-            columns: [
-              {
-                columnId: 'a',
-                fieldName: 'Foo',
-                meta: {
-                  type: 'number',
+      const map = TextBasedDatasource.uniqueLabels(
+        {
+          layers: {
+            a: {
+              columns: [
+                {
+                  columnId: 'a',
+                  fieldName: 'Foo',
+                  meta: {
+                    type: 'number',
+                  },
                 },
-              },
-              {
-                columnId: 'b',
-                fieldName: 'Foo',
-                meta: {
-                  type: 'number',
+                {
+                  columnId: 'b',
+                  fieldName: 'Foo',
+                  meta: {
+                    type: 'number',
+                  },
                 },
-              },
-            ],
-            index: 'foo',
+              ],
+              index: 'foo',
+            },
           },
-        },
-      } as unknown as TextBasedPrivateState);
+        } as unknown as TextBasedPrivateState,
+        {}
+      );
 
       expect(map).toMatchInlineSnapshot(`
         Object {
@@ -247,31 +250,6 @@ describe('Textbased Data Source', () => {
         indexPatterns,
       };
       expect(TextBasedDatasource.getDropProps(props)).toBeUndefined();
-    });
-
-    it('should return props if field is allowed to be dropped', () => {
-      const props = {
-        target: {
-          layerId: 'a',
-          groupId: 'groupId',
-          columnId: 'col1',
-          filterOperations: jest.fn(),
-          isMetricDimension: true,
-        },
-        source: {
-          id: 'col1',
-          field: 'Test 1',
-          humanData: {
-            label: 'Test 1',
-          },
-        },
-        state: baseState,
-        indexPatterns,
-      };
-      expect(TextBasedDatasource.getDropProps(props)).toStrictEqual({
-        dropTypes: ['field_add'],
-        nextLabel: 'Test 1',
-      });
     });
   });
 
@@ -407,6 +385,22 @@ describe('Textbased Data Source', () => {
       );
       expect(suggestions[0].state).toEqual({
         ...state,
+        fieldList: [
+          {
+            id: 'newid',
+            meta: {
+              type: 'number',
+            },
+            name: 'bytes',
+          },
+          {
+            id: 'newid',
+            meta: {
+              type: 'string',
+            },
+            name: 'dest',
+          },
+        ],
         layers: {
           newid: {
             allColumns: [

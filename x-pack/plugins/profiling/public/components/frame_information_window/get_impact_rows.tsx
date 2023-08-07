@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { calculateImpactEstimates } from '../../utils/calculate_impact_estimates';
+import { calculateImpactEstimates } from '../../../common/calculate_impact_estimates';
 import { asCost } from '../../utils/formatters/as_cost';
 import { asDuration } from '../../utils/formatters/as_duration';
 import { asNumber } from '../../utils/formatters/as_number';
@@ -20,11 +20,13 @@ export function getImpactRows({
   countExclusive,
   totalSamples,
   totalSeconds,
+  isApproximate = false,
 }: {
   countInclusive: number;
   countExclusive: number;
   totalSamples: number;
   totalSeconds: number;
+  isApproximate: boolean;
 }) {
   const {
     percentage,

@@ -8,17 +8,15 @@
 import rison from '@kbn/rison';
 import type { RefreshInterval, TimeRange } from '@kbn/data-plugin/common/query';
 import type { Filter } from '@kbn/es-query';
-import { i18n } from '@kbn/i18n';
 
 export const PLUGIN_ID = 'lens';
 export const APP_ID = 'lens';
+export const LENS_APP_NAME = 'lens';
 export const LENS_EMBEDDABLE_TYPE = 'lens';
 export const DOC_TYPE = 'lens';
 export const NOT_INTERNATIONALIZED_PRODUCT_NAME = 'Lens Visualizations';
 export const BASE_API_URL = '/api/lens';
 export const LENS_EDIT_BY_VALUE = 'edit_by_value';
-
-export const ENABLE_SQL = 'discover:enableSql';
 
 export const PieChartTypes = {
   PIE: 'pie',
@@ -89,7 +87,3 @@ export function getEditPath(
 export function getFullPath(id?: string) {
   return `/app/${PLUGIN_ID}${id ? getEditPath(id) : getBasePath()}`;
 }
-
-export const LENS_APP_NAME = i18n.translate('xpack.lens.queryInput.appName', {
-  defaultMessage: 'Lens',
-});

@@ -5,116 +5,119 @@
  * 2.0.
  */
 
-/* eslint-disable cypress/unsafe-to-chain-command */
-
+import { collapseDocumentDetailsExpandableFlyoutLeftSection } from '../../../../tasks/expandable_flyout/alert_details_right_panel';
+import { DOCUMENT_DETAILS_FLYOUT_INVESTIGATION_TAB_CONTENT } from '../../../../screens/expandable_flyout/alert_details_left_panel_investigation_tab';
 import {
-  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_MITRE_ATTACK_DETAILS,
-  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_MITRE_ATTACK_TITLE,
-  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_HIGHLIGHTED_FIELDS_DETAILS,
-  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_HIGHLIGHTED_FIELDS_GO_TO_TABLE_LINK,
-  DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_CONTENT,
-  DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_EVENT_TYPE_ROW,
-  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_HIGHLIGHTED_FIELDS_HEADER_TITLE,
-  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INVESTIGATION_SECTION_HEADER,
-  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INVESTIGATION_SECTION_CONTENT,
-  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_DESCRIPTION_SECTION_HEADER,
-  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_DESCRIPTION_SECTION_CONTENT,
-  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_REASON_TITLE,
-  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_DESCRIPTION_TITLE,
-  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_DESCRIPTION_DETAILS,
-  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_DESCRIPTION_EXPAND_BUTTON,
-  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_REASON_DETAILS,
-  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_ENTITIES_HEADER,
-  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_ENTITIES_CONTENT,
-  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_ENTITY_PANEL_HEADER,
-  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_ENTITY_PANEL_CONTENT,
-  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_VIEW_ALL_ENTITIES_BUTTON,
-  DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_ENTITIES_CONTENT,
+  createNewCaseFromExpandableFlyout,
+  expandFirstAlertExpandableFlyout,
+} from '../../../../tasks/expandable_flyout/common';
+import {
+  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_ABOUT_SECTION_CONTENT,
+  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_ABOUT_SECTION_HEADER,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_ANALYZER_TREE,
-  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_THREAT_INTELLIGENCE_HEADER,
+  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_DESCRIPTION_DETAILS,
+  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_DESCRIPTION_TITLE,
+  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_OPEN_RULE_PREVIEW_BUTTON,
+  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_HIGHLIGHTED_FIELDS_DETAILS,
+  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_HIGHLIGHTED_FIELDS_HEADER_TITLE,
+  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_CORRELATIONS_CONTENT,
+  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_CORRELATIONS_HEADER,
+  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_CORRELATIONS_VALUES,
+  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_ENTITIES_CONTENT,
+  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_ENTITIES_HEADER,
+  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_ENTITY_PANEL_CONTENT,
+  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_ENTITY_PANEL_HEADER,
+  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_PREVALENCE_CONTENT,
+  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_PREVALENCE_HEADER,
+  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_PREVALENCE_VALUES,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_THREAT_INTELLIGENCE_CONTENT,
+  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_THREAT_INTELLIGENCE_HEADER,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_THREAT_INTELLIGENCE_VALUES,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INVESTIGATION_GUIDE_BUTTON,
-  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_CORRELATIONS_HEADER,
-  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_CORRELATIONS_CONTENT,
-  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_CORRELATIONS_VALUES,
-  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_CORRELATIONS_VIEW_ALL_BUTTON,
-  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_PREVALENCE_HEADER,
-  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_PREVALENCE_CONTENT,
-  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_PREVALENCE_VALUES,
-} from '../../../../screens/document_expandable_flyout';
+  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INVESTIGATION_SECTION_CONTENT,
+  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INVESTIGATION_SECTION_HEADER,
+  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_MITRE_ATTACK_DETAILS,
+  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_MITRE_ATTACK_TITLE,
+  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_REASON_DETAILS,
+  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_REASON_TITLE,
+  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_SESSION_PREVIEW,
+  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_HIGHLIGHTED_FIELDS_TABLE_FIELD_CELL,
+  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_HIGHLIGHTED_FIELDS_TABLE_VALUE_CELL,
+} from '../../../../screens/expandable_flyout/alert_details_right_panel_overview_tab';
 import {
-  expandFirstAlertExpandableFlyout,
-  openOverviewTab,
-  toggleOverviewTabDescriptionSection,
-  toggleOverviewTabInvestigationSection,
-  toggleOverviewTabInsightsSection,
-  toggleOverviewTabVisualizationsSection,
-  clickThreatIntelligenceViewAllButton,
+  clickCorrelationsViewAllButton,
+  clickEntitiesViewAllButton,
+  clickInvestigationGuideButton,
   clickPrevalenceViewAllButton,
-} from '../../../../tasks/document_expandable_flyout';
+  clickThreatIntelligenceViewAllButton,
+  toggleOverviewTabAboutSection,
+  toggleOverviewTabInsightsSection,
+  toggleOverviewTabInvestigationSection,
+  toggleOverviewTabVisualizationsSection,
+} from '../../../../tasks/expandable_flyout/alert_details_right_panel_overview_tab';
 import { cleanKibana } from '../../../../tasks/common';
 import { login, visit } from '../../../../tasks/login';
 import { createRule } from '../../../../tasks/api_calls/rules';
 import { getNewRule } from '../../../../objects/rule';
 import { ALERTS_URL } from '../../../../urls/navigation';
 import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
+import {
+  DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_ENTITIES_CONTENT,
+  DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_HOST_DETAILS,
+  DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_USER_DETAILS,
+} from '../../../../screens/expandable_flyout/alert_details_left_panel_entities_tab';
 
-// Skipping these for now as the feature is protected behind a feature flag set to false by default
-// To run the tests locally, add 'securityFlyoutEnabled' in the Cypress config.ts here https://github.com/elastic/kibana/blob/main/x-pack/test/security_solution_cypress/config.ts#L50
-describe.skip(
+describe(
   'Alert details expandable flyout right panel overview tab',
   { env: { ftrConfig: { enableExperimental: ['securityFlyoutEnabled'] } } },
   () => {
     const rule = getNewRule();
 
-    before(() => {
+    beforeEach(() => {
       cleanKibana();
       login();
       createRule(rule);
       visit(ALERTS_URL);
       waitForAlertsToPopulate();
       expandFirstAlertExpandableFlyout();
-      openOverviewTab();
     });
 
-    describe('description section', () => {
-      it('should display description section header and content', () => {
-        cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_DESCRIPTION_SECTION_HEADER)
-          .should('be.visible')
-          .and('have.text', 'Description');
-        cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_DESCRIPTION_SECTION_CONTENT).should(
-          'be.visible'
-        );
-      });
+    describe('about section', () => {
+      it('should display about section', () => {
+        cy.log('header and content');
 
-      it('should display document description and expand button', () => {
+        cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_ABOUT_SECTION_HEADER)
+          .should('be.visible')
+          .and('have.text', 'About');
+        cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_ABOUT_SECTION_CONTENT).should('be.visible');
+
+        cy.log('description');
+
         cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_DESCRIPTION_TITLE)
           .should('be.visible')
-          .and('have.text', 'Rule description');
+          .and('contain.text', 'Rule description');
+        cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_DESCRIPTION_TITLE)
+          .should('be.visible')
+          .within(() => {
+            cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_OPEN_RULE_PREVIEW_BUTTON)
+              .should('be.visible')
+              .and('have.text', 'Rule summary');
+          });
         cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_DESCRIPTION_DETAILS)
           .should('be.visible')
           .and('have.text', rule.description);
-        cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_DESCRIPTION_EXPAND_BUTTON)
-          .should('be.visible')
-          .and('have.text', 'Expand');
-        cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_DESCRIPTION_EXPAND_BUTTON).click();
-        cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_DESCRIPTION_EXPAND_BUTTON).should(
-          'have.text',
-          'Collapse'
-        );
-      });
 
-      it('should display reason', () => {
+        cy.log('reason');
+
         cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_REASON_TITLE)
           .should('be.visible')
           .and('have.text', 'Alert reason');
         cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_REASON_DETAILS)
           .should('be.visible')
           .and('contain.text', rule.name);
-      });
 
-      it('should display mitre attack', () => {
+        cy.log('mitre attack');
+
         cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_MITRE_ATTACK_TITLE)
           .should('be.visible')
           // @ts-ignore
@@ -129,61 +132,93 @@ describe.skip(
       });
     });
 
-    describe('investigation section', () => {
-      before(() => {
-        toggleOverviewTabDescriptionSection();
-        toggleOverviewTabInvestigationSection();
-      });
+    describe('visualizations section', () => {
+      it('should display analyzer and session previews', () => {
+        toggleOverviewTabAboutSection();
+        toggleOverviewTabVisualizationsSection();
 
-      it('should display description section header and content', () => {
+        cy.log('analyzer graph preview');
+
+        cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_ANALYZER_TREE).scrollIntoView();
+        cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_ANALYZER_TREE).should('be.visible');
+
+        cy.log('session view preview');
+
+        cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_SESSION_PREVIEW).scrollIntoView();
+        cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_SESSION_PREVIEW).should('be.visible');
+      });
+    });
+
+    describe('investigation section', () => {
+      it('should display investigation section', () => {
+        toggleOverviewTabAboutSection();
+        toggleOverviewTabInvestigationSection();
+
+        cy.log('header and content');
+
         cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INVESTIGATION_SECTION_HEADER)
           .should('be.visible')
           .and('have.text', 'Investigation');
         cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INVESTIGATION_SECTION_CONTENT).should(
           'be.visible'
         );
-      });
 
-      it('should display investigation guide button', () => {
+        cy.log('investigation guide button');
+
         cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INVESTIGATION_GUIDE_BUTTON)
           .should('be.visible')
           .and('have.text', 'Investigation guide');
-      });
 
-      it('should display highlighted fields', () => {
+        cy.log('should navigate to left Investigation tab');
+
+        clickInvestigationGuideButton();
+        cy.get(DOCUMENT_DETAILS_FLYOUT_INVESTIGATION_TAB_CONTENT).scrollIntoView();
+        cy.get(DOCUMENT_DETAILS_FLYOUT_INVESTIGATION_TAB_CONTENT).should('be.visible');
+
+        cy.log('highlighted fields');
+
         cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_HIGHLIGHTED_FIELDS_HEADER_TITLE)
           .should('be.visible')
           .and('have.text', 'Highlighted fields');
         cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_HIGHLIGHTED_FIELDS_DETAILS).should(
           'be.visible'
         );
-      });
 
-      it('should navigate to table tab when clicking on highlighted fields view button', () => {
-        cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_HIGHLIGHTED_FIELDS_GO_TO_TABLE_LINK)
+        cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_HIGHLIGHTED_FIELDS_TABLE_FIELD_CELL)
           .should('be.visible')
-          .click();
+          .and('contain.text', 'host.name');
+        const hostNameCell =
+          DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_HIGHLIGHTED_FIELDS_TABLE_VALUE_CELL('siem-kibana');
+        cy.get(hostNameCell).should('be.visible').and('have.text', 'siem-kibana');
 
-        // the table component is rendered within a dom element with overflow, so Cypress isn't finding it
-        // this next line is a hack that scrolls to a specific element in the table
-        // (in the middle of it vertically) to ensure Cypress finds it
-        cy.get(DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_EVENT_TYPE_ROW).scrollIntoView();
-        cy.get(DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_CONTENT).should('be.visible');
+        cy.get(hostNameCell).click();
+        cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_HOST_DETAILS).scrollIntoView();
+        cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_HOST_DETAILS).should('be.visible');
 
-        // go back to Overview tab to reset view for next test
-        openOverviewTab();
+        collapseDocumentDetailsExpandableFlyoutLeftSection();
+
+        cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_HIGHLIGHTED_FIELDS_TABLE_FIELD_CELL)
+          .should('be.visible')
+          .and('contain.text', 'user.name');
+        const userNameCell =
+          DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_HIGHLIGHTED_FIELDS_TABLE_VALUE_CELL('test');
+        cy.get(userNameCell).should('be.visible').and('have.text', 'test');
+
+        cy.get(userNameCell).click();
+        cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_USER_DETAILS).scrollIntoView();
+        cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_USER_DETAILS).should('be.visible');
       });
     });
 
     describe('insights section', () => {
-      before(() => {
-        toggleOverviewTabDescriptionSection();
-        toggleOverviewTabInsightsSection();
-      });
-
       it('should display entities section', () => {
+        toggleOverviewTabAboutSection();
+        toggleOverviewTabInsightsSection();
+
+        cy.log('header and content');
+
+        cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_ENTITIES_HEADER).scrollIntoView();
         cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_ENTITIES_HEADER)
-          .scrollIntoView()
           .should('be.visible')
           .and('have.text', 'Entities');
         cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_ENTITIES_CONTENT).should('be.visible');
@@ -193,21 +228,28 @@ describe.skip(
         cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_ENTITY_PANEL_CONTENT).should(
           'be.visible'
         );
-      });
 
-      it('should navigate to left panel, entities tab when view all entities is clicked', () => {
-        cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_VIEW_ALL_ENTITIES_BUTTON)
-          .should('be.visible')
-          .click();
+        cy.log('should navigate to left panel Entities tab');
+
+        clickEntitiesViewAllButton();
         cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_ENTITIES_CONTENT).should('be.visible');
       });
 
-      // TODO work on getting proper IoC data to make the threat intelligence section work here
-      it.skip('should display threat intelligence section', () => {
+      it('should display threat intelligence section', () => {
+        toggleOverviewTabAboutSection();
+        toggleOverviewTabInsightsSection();
+
+        cy.log('header and content');
+
+        cy.get(
+          DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_THREAT_INTELLIGENCE_HEADER
+        ).scrollIntoView();
         cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_THREAT_INTELLIGENCE_HEADER)
-          .scrollIntoView()
           .should('be.visible')
           .and('have.text', 'Threat Intelligence');
+        cy.get(
+          DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_THREAT_INTELLIGENCE_CONTENT
+        ).scrollIntoView();
         cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_THREAT_INTELLIGENCE_CONTENT)
           .should('be.visible')
           .within(() => {
@@ -215,70 +257,78 @@ describe.skip(
             cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_THREAT_INTELLIGENCE_VALUES)
               .eq(0)
               .should('be.visible')
-              .and('have.text', '1 threat match detected'); // TODO
+              .and('have.text', '0 threat match detected'); // TODO work on getting proper IoC data to get proper data here
 
             // field with threat enrichement
             cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_THREAT_INTELLIGENCE_VALUES)
               .eq(1)
               .should('be.visible')
-              .and('have.text', '1 field enriched with threat intelligence'); // TODO
+              .and('have.text', '0 field enriched with threat intelligence'); // TODO work on getting proper IoC data to get proper data here
           });
-      });
 
-      // TODO work on getting proper IoC data to make the threat intelligence section work here
-      //  and improve when we can navigate Threat Intelligence to sub tab directly
-      it.skip('should navigate to left panel, entities tab when view all fields of threat intelligence is clicked', () => {
+        cy.log('should navigate to left panel Threat Intelligence tab');
+
         clickThreatIntelligenceViewAllButton();
-        cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_ENTITIES_CONTENT).should('be.visible');
+        cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_ENTITIES_CONTENT).should('be.visible'); // TODO update when we can navigate to Threat Intelligence sub tab directly
       });
 
-      // TODO work on getting proper data to display in the cases, ancestry, session and source event sections
+      // TODO: skipping this due to flakiness
       it.skip('should display correlations section', () => {
+        cy.log('link the alert to a new case');
+
+        createNewCaseFromExpandableFlyout();
+
+        toggleOverviewTabAboutSection();
+        toggleOverviewTabInsightsSection();
+
+        cy.log('header and content');
+
+        cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_CORRELATIONS_HEADER).scrollIntoView();
         cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_CORRELATIONS_HEADER)
-          .scrollIntoView()
           .should('be.visible')
           .and('have.text', 'Correlations');
+        cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_CORRELATIONS_CONTENT).scrollIntoView();
         cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_CORRELATIONS_CONTENT)
           .should('be.visible')
           .within(() => {
-            // threat match detected
+            // TODO the order in which these appear is not deterministic currently, hence this can cause flakiness
             cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_CORRELATIONS_VALUES)
               .eq(0)
               .should('be.visible')
-              .and('have.text', '1 related case'); // TODO
-
-            // field with threat enrichement
+              .and('have.text', '1 alert related by ancestry');
             cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_CORRELATIONS_VALUES)
               .eq(1)
               .should('be.visible')
-              .and('have.text', '1 alert related by ancestry'); // TODO
+              .and('have.text', '1 related case');
+            // cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_CORRELATIONS_VALUES)
+            //   .eq(2)
+            //   .should('be.visible')
+            //   .and('have.text', '1 alert related by the same source event'); // TODO work on getting proper data to display some same source data here
             cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_CORRELATIONS_VALUES)
-              .eq(1)
+              .eq(2)
               .should('be.visible')
-              .and('have.text', '1 alert related by the same source event'); // TODO
-            cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_CORRELATIONS_VALUES)
-              .eq(1)
-              .should('be.visible')
-              .and('have.text', '1 alert related by session'); // TODO
+              .and('have.text', '1 alert related by session');
           });
-      });
 
-      // TODO work on getting proper data to display in the cases, ancestry, session and source event sections
-      //  and improve when we can navigate Correlations to sub tab directly
-      it.skip('should navigate to left panel, entities tab when view all fields of correlations is clicked', () => {
-        cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_CORRELATIONS_VIEW_ALL_BUTTON)
-          .should('be.visible')
-          .click();
-        cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_ENTITIES_CONTENT).should('be.visible');
+        cy.log('should navigate to left panel Correlations tab');
+
+        clickCorrelationsViewAllButton();
+        cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_ENTITIES_CONTENT).should('be.visible'); // TODO update when we can navigate to Correlations sub tab directly
       });
 
       // TODO work on getting proper data to make the prevalence section work here
       //  we need to generate enough data to have at least one field with prevalence
       it.skip('should display prevalence section', () => {
+        toggleOverviewTabAboutSection();
+        toggleOverviewTabInsightsSection();
+
+        cy.log('header and content');
+
+        cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_PREVALENCE_HEADER).scrollIntoView();
         cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_PREVALENCE_HEADER)
-          .scrollIntoView()
           .should('be.visible')
           .and('have.text', 'Prevalence');
+        cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_PREVALENCE_CONTENT).scrollIntoView();
         cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_PREVALENCE_CONTENT)
           .should('be.visible')
           .within(() => {
@@ -286,24 +336,11 @@ describe.skip(
               .should('be.visible')
               .and('have.text', 'is uncommon');
           });
-      });
 
-      // TODO work on getting proper data to make the prevalence section work here
-      //  we need to generate enough data to have at least one field with prevalence
-      it.skip('should navigate to left panel, entities tab when view all fields of prevalence is clicked', () => {
+        cy.log('should navigate to left panel Prevalence tab');
+
         clickPrevalenceViewAllButton();
-        cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_ENTITIES_CONTENT).should('be.visible');
-      });
-    });
-
-    describe('visualizations section', () => {
-      before(() => {
-        toggleOverviewTabInsightsSection();
-        toggleOverviewTabVisualizationsSection();
-      });
-
-      it('should display analyzer preview', () => {
-        cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_ANALYZER_TREE).should('be.visible');
+        cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_ENTITIES_CONTENT).should('be.visible'); // TODO update when we can navigate to Prevalence sub tab directly
       });
     });
   }

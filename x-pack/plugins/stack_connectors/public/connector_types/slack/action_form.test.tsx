@@ -95,11 +95,12 @@ actionTypeRegistry.register(getSlackApiConnectorType());
 const baseProps = {
   actions: [],
   defaultActionGroupId: 'metrics.inventory_threshold.fired',
-  hasSummary: true,
+  hasAlertsMappings: true,
   featureId: 'alerting',
   recoveryActionGroup: 'recovered',
   actionTypeRegistry,
   minimumThrottleInterval: [1, 'm'] as [number | undefined, string],
+  producerId: 'infratstructure',
   setActions: jest.fn(),
   setActionIdByIndex: jest.fn(),
   setActionParamsProperty: jest.fn(),

@@ -37,6 +37,7 @@ export const startRuntimeServices = async ({
     username,
     password,
     log,
+    asSuperuser: otherOptions?.asSuperuser,
   });
 
   runtimeServices = {

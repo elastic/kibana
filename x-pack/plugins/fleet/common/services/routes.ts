@@ -23,6 +23,7 @@ import {
   DOWNLOAD_SOURCE_API_ROUTES,
   FLEET_SERVER_HOST_API_ROUTES,
   FLEET_PROXY_API_ROUTES,
+  UNINSTALL_TOKEN_ROUTES,
 } from '../constants';
 
 export const epmRouteService = {
@@ -281,6 +282,12 @@ export const enrollmentAPIKeyRouteService = {
   getInfoPath: (keyId: string) => ENROLLMENT_API_KEY_ROUTES.INFO_PATTERN.replace('{keyId}', keyId),
   getDeletePath: (keyId: string) =>
     ENROLLMENT_API_KEY_ROUTES.DELETE_PATTERN.replace('{keyId}', keyId),
+};
+
+export const uninstallTokensRouteService = {
+  getListPath: () => UNINSTALL_TOKEN_ROUTES.LIST_PATTERN,
+  getInfoPath: (uninstallTokenId: string) =>
+    UNINSTALL_TOKEN_ROUTES.INFO_PATTERN.replace('{uninstallTokenId}', uninstallTokenId),
 };
 
 export const setupRouteService = {

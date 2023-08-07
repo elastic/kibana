@@ -22,7 +22,6 @@ import type {
   TimelineNonEcsData,
 } from '../../../../common/search_strategy/timeline';
 import type {
-  RowRendererId,
   TimelineTabs,
   TimelinePersistInput,
   SerializedFilterQuery,
@@ -30,6 +29,7 @@ import type {
   ColumnHeaderOptions,
   SortColumnTimeline,
 } from '../../../../common/types/timeline';
+import type { RowRendererId } from '../../../../common/api/timeline';
 import type { ResolveTimelineConfig } from '../../components/open_timeline/types';
 
 const actionCreator = actionCreatorFactory('x-pack/security_solution/local/timeline');

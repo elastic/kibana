@@ -9,11 +9,12 @@ import React from 'react';
 import { EuiCommentList } from '@elastic/eui';
 import { render, screen } from '@testing-library/react';
 
-import { Actions, NONE_CONNECTOR_ID } from '../../../common/api';
+import { NONE_CONNECTOR_ID } from '../../../common/constants';
 import { getUserAction, getJiraConnector } from '../../containers/mock';
 import { TestProviders } from '../../common/mock';
 import { createConnectorUserActionBuilder } from './connector';
 import { getMockBuilderArgs } from './mock';
+import { UserActionActions } from '../../../common/types/domain';
 
 jest.mock('../../common/lib/kibana');
 jest.mock('../../common/navigation/hooks');
@@ -26,7 +27,7 @@ describe('createConnectorUserActionBuilder ', () => {
   });
 
   it('renders correctly', async () => {
-    const userAction = getUserAction('connector', Actions.update, {
+    const userAction = getUserAction('connector', UserActionActions.update, {
       payload: { connector: getJiraConnector() },
     });
 
@@ -46,7 +47,7 @@ describe('createConnectorUserActionBuilder ', () => {
   });
 
   it('renders the removed connector label if the connector is none', async () => {
-    const userAction = getUserAction('connector', Actions.update, {
+    const userAction = getUserAction('connector', UserActionActions.update, {
       payload: { connector: { ...getJiraConnector(), id: NONE_CONNECTOR_ID } },
     });
 

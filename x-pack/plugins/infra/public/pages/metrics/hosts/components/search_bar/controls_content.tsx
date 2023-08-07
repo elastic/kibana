@@ -12,16 +12,16 @@ import {
   type ControlGroupInput,
 } from '@kbn/controls-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
-import { compareFilters, COMPARE_ALL_OPTIONS, Filter, Query, TimeRange } from '@kbn/es-query';
+import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { DataView } from '@kbn/data-views-plugin/public';
-import { skipWhile, Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { useControlPanels } from '../../hooks/use_control_panels_url_state';
 
 interface Props {
   dataView: DataView | undefined;
   timeRange: TimeRange;
   filters: Filter[];
-  selectedOptions: Filter[];
   query: Query;
   onFiltersChange: (filters: Filter[]) => void;
 }
@@ -30,13 +30,11 @@ export const ControlsContent: React.FC<Props> = ({
   dataView,
   filters,
   query,
-  selectedOptions,
   timeRange,
   onFiltersChange,
 }) => {
   const [controlPanels, setControlPanels] = useControlPanels(dataView);
-  const inputSubscription = useRef<Subscription>();
-  const filterSubscription = useRef<Subscription>();
+  const subscriptions = useRef<Subscription>(new Subscription());
 
   const getInitialInput = useCallback(async () => {
     const initialInput: Partial<ControlGroupInput> = {
@@ -57,37 +55,42 @@ export const ControlsContent: React.FC<Props> = ({
   const loadCompleteHandler = useCallback(
     (controlGroup: ControlGroupAPI) => {
       if (!controlGroup) return;
-      inputSubscription.current = controlGroup.onFiltersPublished$
-        .pipe(
-          skipWhile((newFilters) =>
-            compareFilters(selectedOptions, newFilters, COMPARE_ALL_OPTIONS)
-          )
-        )
-        .subscribe((newFilters) => {
-          onFiltersChange(newFilters);
-        });
 
-      filterSubscription.current = controlGroup
-        .getInput$()
-        .subscribe(({ panels }) => setControlPanels(panels));
+      subscriptions.current.add(
+        controlGroup.onFiltersPublished$.subscribe((newFilters) => {
+          onFiltersChange(newFilters);
+        })
+      );
+
+      subscriptions.current.add(
+        controlGroup.getInput$().subscribe(({ panels }) => setControlPanels(panels))
+      );
     },
-    [onFiltersChange, setControlPanels, selectedOptions]
+    [onFiltersChange, setControlPanels]
   );
 
   useEffect(() => {
+    const currentSubscriptions = subscriptions.current;
     return () => {
-      filterSubscription.current?.unsubscribe();
-      inputSubscription.current?.unsubscribe();
+      currentSubscriptions.unsubscribe();
     };
   }, []);
 
   return (
-    <ControlGroupRenderer
-      getCreationOptions={getInitialInput}
-      ref={loadCompleteHandler}
-      timeRange={timeRange}
-      query={query}
-      filters={filters}
-    />
+    <ControlGroupContainer>
+      <ControlGroupRenderer
+        getCreationOptions={getInitialInput}
+        ref={loadCompleteHandler}
+        timeRange={timeRange}
+        query={query}
+        filters={filters}
+      />
+    </ControlGroupContainer>
   );
 };
+
+const ControlGroupContainer = euiStyled.div`
+  .controlGroup {
+    min-height: ${(props) => props.theme.eui.euiSizeXXL}
+  }
+`;

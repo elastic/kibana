@@ -20,7 +20,7 @@ import type {
   UsageStatsPayload,
   CacheDetails,
 } from '@kbn/telemetry-collection-manager-plugin/server/types';
-import { assertTelemetryPayload } from '../../../../../test/api_integration/apis/telemetry/utils';
+import { assertTelemetryPayload } from '@kbn/telemetry-tools';
 import basicClusterFixture from './fixtures/basiccluster.json';
 import multiClusterFixture from './fixtures/multicluster.json';
 import type { SecurityService } from '../../../../../test/common/services/security/security';

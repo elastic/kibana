@@ -14,8 +14,8 @@
  */
 
 import { omit, unset } from 'lodash';
-import type { CaseAttributes, CaseConnector, CaseFullExternalService } from '../../../common/api';
-import { CaseSeverity, CaseStatuses } from '../../../common/api';
+import type { CaseAttributes, ExternalService, CaseConnector } from '../../../common/types/domain';
+import { CaseSeverity, CaseStatuses } from '../../../common/types/domain';
 import { CASE_SAVED_OBJECT, SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import type {
@@ -58,7 +58,7 @@ const createUpdateSOResponse = ({
   status,
 }: {
   connector?: ESCaseConnectorWithId;
-  externalService?: CaseFullExternalService;
+  externalService?: ExternalService | null;
   severity?: CasePersistedSeverity;
   status?: CasePersistedStatus;
 } = {}): SavedObjectsUpdateResponse<CasePersistedAttributes> => {
@@ -98,7 +98,7 @@ const createUpdateSOResponse = ({
 const createFindSO = (
   params: {
     connector?: ESCaseConnectorWithId;
-    externalService?: CaseFullExternalService;
+    externalService?: ExternalService | null;
     overrides?: Partial<CasePersistedAttributes>;
     caseId?: string;
   } = {}
@@ -114,7 +114,7 @@ const createCaseUpdateParams = ({
   status,
 }: {
   connector?: CaseConnector;
-  externalService?: CaseFullExternalService;
+  externalService?: ExternalService | null;
   severity?: CaseSeverity;
   status?: CaseStatuses;
 }): Partial<CaseAttributes> => ({
@@ -131,7 +131,7 @@ const createCasePostParams = ({
   status,
 }: {
   connector: CaseConnector;
-  externalService?: CaseFullExternalService;
+  externalService?: ExternalService | null;
   severity?: CaseSeverity;
   status?: CaseStatuses;
 }): CaseAttributes => ({
@@ -147,7 +147,7 @@ const createCasePatchParams = ({
   externalService,
 }: {
   connector?: CaseConnector;
-  externalService?: CaseFullExternalService;
+  externalService?: ExternalService | null;
 } = {}): Partial<CaseAttributes> => ({
   ...basicCaseFields,
   connector,
@@ -201,6 +201,7 @@ describe('CasesService', () => {
         expect(restUpdateAttributes).toMatchInlineSnapshot(`
           Object {
             "assignees": Array [],
+            "category": null,
             "closed_at": null,
             "closed_by": null,
             "created_at": "2019-11-25T21:54:48.952Z",
@@ -693,6 +694,7 @@ describe('CasesService', () => {
         expect(creationAttributes).toMatchInlineSnapshot(`
           Object {
             "assignees": Array [],
+            "category": null,
             "closed_at": null,
             "closed_by": null,
             "connector": Object {
@@ -1870,16 +1872,22 @@ describe('CasesService', () => {
     );
 
     /**
-     * Status, severity, connector, and external_service
-     * are being set to a default value if missing.
-     * Decode will not throw an error as they are defined.
+     * The following fields are set to a default value if missing:
+     * - status
+     * - severity
+     * - connector
+     * - external_service
+     * - category
+     *
+     * Decode is not expected to throw an error as they are defined.
      */
     const attributesToValidateIfMissing = omit(
       caseTransformedAttributesProps,
       'status',
       'severity',
       'connector',
-      'external_service'
+      'external_service',
+      'category'
     );
 
     describe('getCaseIdsByAlertId', () => {
@@ -1956,6 +1964,7 @@ describe('CasesService', () => {
           Object {
             "attributes": Object {
               "assignees": Array [],
+              "category": null,
               "closed_at": null,
               "closed_by": null,
               "connector": Object {
@@ -2048,6 +2057,7 @@ describe('CasesService', () => {
             "saved_object": Object {
               "attributes": Object {
                 "assignees": Array [],
+                "category": null,
                 "closed_at": null,
                 "closed_by": null,
                 "connector": Object {
@@ -2139,6 +2149,7 @@ describe('CasesService', () => {
               Object {
                 "attributes": Object {
                   "assignees": Array [],
+                  "category": null,
                   "closed_at": null,
                   "closed_by": null,
                   "connector": Object {
@@ -2230,6 +2241,7 @@ describe('CasesService', () => {
               Object {
                 "attributes": Object {
                   "assignees": Array [],
+                  "category": null,
                   "closed_at": null,
                   "closed_by": null,
                   "connector": Object {
@@ -2334,6 +2346,7 @@ describe('CasesService', () => {
               Object {
                 "attributes": Object {
                   "assignees": Array [],
+                  "category": null,
                   "closed_at": null,
                   "closed_by": null,
                   "connector": Object {
@@ -2388,6 +2401,7 @@ describe('CasesService', () => {
               Object {
                 "attributes": Object {
                   "assignees": Array [],
+                  "category": null,
                   "closed_at": null,
                   "closed_by": null,
                   "connector": Object {
@@ -2488,6 +2502,7 @@ describe('CasesService', () => {
           Object {
             "attributes": Object {
               "assignees": Array [],
+              "category": null,
               "closed_at": null,
               "closed_by": null,
               "connector": Object {

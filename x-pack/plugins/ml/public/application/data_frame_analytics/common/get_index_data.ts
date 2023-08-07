@@ -18,12 +18,10 @@ import {
 import { ml } from '../../services/ml_api_service';
 import { newJobCapsServiceAnalytics } from '../../services/new_job_capabilities/new_job_capabilities_service_analytics';
 
-import { SavedSearchQuery } from '../../contexts/ml';
-
 export const getIndexData = async (
   jobConfig: DataFrameAnalyticsConfig | undefined,
   dataGrid: UseDataGridReturnType,
-  searchQuery: SavedSearchQuery,
+  searchQuery: estypes.QueryDslQueryContainer,
   options: { didCancel: boolean }
 ) => {
   if (jobConfig !== undefined) {

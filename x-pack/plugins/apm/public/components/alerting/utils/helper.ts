@@ -16,7 +16,7 @@ export interface AlertMetadata {
   end?: string;
 }
 
-const BUCKET_SIZE = 20;
+export const ALERT_PREVIEW_BUCKET_SIZE = 5;
 
 export function getIntervalAndTimeRange({
   windowSize,
@@ -28,7 +28,8 @@ export function getIntervalAndTimeRange({
   const end = Date.now();
   const start =
     end -
-    moment.duration(windowSize, windowUnit).asMilliseconds() * BUCKET_SIZE;
+    moment.duration(windowSize, windowUnit).asMilliseconds() *
+      ALERT_PREVIEW_BUCKET_SIZE;
 
   return {
     interval: `${windowSize}${windowUnit}`,

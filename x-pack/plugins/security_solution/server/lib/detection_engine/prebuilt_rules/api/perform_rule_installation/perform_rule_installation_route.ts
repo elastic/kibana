@@ -6,13 +6,15 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { PERFORM_RULE_INSTALLATION_URL } from '../../../../../../common/detection_engine/prebuilt_rules';
-import { PerformRuleInstallationRequestBody } from '../../../../../../common/detection_engine/prebuilt_rules/api/perform_rule_installation/perform_rule_installation_request_schema';
+import {
+  PERFORM_RULE_INSTALLATION_URL,
+  PerformRuleInstallationRequestBody,
+  SkipRuleInstallReason,
+} from '../../../../../../common/api/detection_engine/prebuilt_rules';
 import type {
   PerformRuleInstallationResponseBody,
   SkippedRuleInstall,
-} from '../../../../../../common/detection_engine/prebuilt_rules/api/perform_rule_installation/perform_rule_installation_response_schema';
-import { SkipRuleInstallReason } from '../../../../../../common/detection_engine/prebuilt_rules/api/perform_rule_installation/perform_rule_installation_response_schema';
+} from '../../../../../../common/api/detection_engine/prebuilt_rules';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import { buildRouteValidation } from '../../../../../utils/build_validation/route_validation';
 import type { PromisePoolError } from '../../../../../utils/promise_pool';
@@ -25,6 +27,7 @@ import { createPrebuiltRules } from '../../logic/rule_objects/create_prebuilt_ru
 import { createPrebuiltRuleObjectsClient } from '../../logic/rule_objects/prebuilt_rule_objects_client';
 import { fetchRuleVersionsTriad } from '../../logic/rule_versions/fetch_rule_versions_triad';
 import { getVersionBuckets } from '../../model/rule_versions/get_version_buckets';
+import { performTimelinesInstallation } from '../../logic/perform_timelines_installation';
 
 export const performRuleInstallationRoute = (router: SecuritySolutionPluginRouter) => {
   router.post(
@@ -98,20 +101,32 @@ export const performRuleInstallationRoute = (router: SecuritySolutionPluginRoute
           rulesClient,
           installableRules
         );
-        const combinedErrors = [...fetchErrors, ...installationErrors];
+        const ruleErrors = [...fetchErrors, ...installationErrors];
+
+        const { error: timelineInstallationError } = await performTimelinesInstallation(
+          ctx.securitySolution
+        );
+
+        const allErrors = aggregatePrebuiltRuleErrors(ruleErrors);
+        if (timelineInstallationError) {
+          allErrors.push({
+            message: timelineInstallationError,
+            rules: [],
+          });
+        }
 
         const body: PerformRuleInstallationResponseBody = {
           summary: {
-            total: installedRules.length + skippedRules.length + combinedErrors.length,
+            total: installedRules.length + skippedRules.length + ruleErrors.length,
             succeeded: installedRules.length,
             skipped: skippedRules.length,
-            failed: combinedErrors.length,
+            failed: ruleErrors.length,
           },
           results: {
             created: installedRules.map(({ result }) => internalRuleToAPIResponse(result)),
             skipped: skippedRules,
           },
-          errors: aggregatePrebuiltRuleErrors(combinedErrors),
+          errors: allErrors,
         };
 
         return response.ok({ body });

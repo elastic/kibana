@@ -134,21 +134,6 @@ export const OptionsListPopoverActionBar = ({
                   />
                 </EuiToolTip>
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiToolTip
-                  position="top"
-                  content={OptionsListStrings.popover.getClearAllSelectionsButtonTitle()}
-                >
-                  <EuiButtonIcon
-                    size="xs"
-                    color="danger"
-                    iconType="eraser"
-                    onClick={() => optionsList.dispatch.clearSelections({})}
-                    data-test-subj="optionsList-control-clear-all-selections"
-                    aria-label={OptionsListStrings.popover.getClearAllSelectionsButtonTitle()}
-                  />
-                </EuiToolTip>
-              </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>

@@ -25,6 +25,10 @@ export interface ValueFormatConfig {
   params?: {
     decimals: number;
     suffix?: string;
+    compact?: boolean;
+    pattern?: string;
+    fromUnit?: string;
+    toUnit?: string;
   };
 }
 

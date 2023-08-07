@@ -6,17 +6,84 @@
  * Side Public License, v 1.
  */
 
-import type { VersionedRouter, VersionedRoute } from '@kbn/core-http-server';
+import type {
+  VersionedRouter,
+  VersionedRoute,
+  VersionedRouteConfig,
+  AddVersionOpts,
+  RequestHandler,
+  KibanaResponseFactory,
+} from '@kbn/core-http-server';
 
-const createMockVersionedRoute = (): VersionedRoute => {
-  const api: VersionedRoute = { addVersion: jest.fn(() => api) };
+export type MockedVersionedRoute = jest.Mocked<VersionedRoute>;
+
+const createMockVersionedRoute = (): MockedVersionedRoute => {
+  const addVersion = jest.fn((_, __) => api);
+  const api: MockedVersionedRoute = { addVersion };
   return api;
 };
 
-export const createVersionedRouterMock = (): jest.Mocked<VersionedRouter<any>> => ({
-  delete: jest.fn((_) => createMockVersionedRoute()),
-  get: jest.fn((_) => createMockVersionedRoute()),
-  patch: jest.fn((_) => createMockVersionedRoute()),
-  post: jest.fn((_) => createMockVersionedRoute()),
-  put: jest.fn((_) => createMockVersionedRoute()),
-});
+export type MockedVersionedRouter = jest.Mocked<VersionedRouter<any>> & {
+  getRoute: (method: keyof VersionedRouter, path: string) => RegisteredVersionedRoute;
+};
+
+const createMethodHandler = () => jest.fn((_) => createMockVersionedRoute());
+
+export const createVersionedRouterMock = (): MockedVersionedRouter => {
+  const router: Omit<MockedVersionedRouter, 'getRoute'> = {
+    delete: createMethodHandler(),
+    get: createMethodHandler(),
+    patch: createMethodHandler(),
+    post: createMethodHandler(),
+    put: createMethodHandler(),
+  };
+
+  return {
+    ...router,
+    getRoute: getRoute.bind(null, router),
+  };
+};
+
+export interface RegisteredVersionedRoute {
+  config: VersionedRouteConfig<any>;
+  versions: {
+    [version: string]: {
+      config: AddVersionOpts<any, any, any>;
+      handler: RequestHandler<any, any, any, any, any, KibanaResponseFactory>;
+    };
+  };
+}
+const getRoute = (
+  router: Omit<MockedVersionedRouter, 'getRoute'>,
+  method: keyof VersionedRouter,
+  path: string
+): RegisteredVersionedRoute => {
+  if (!router[method].mock.calls.length) {
+    throw new Error(`No routes registered for [${method.toUpperCase()} ${path}]`);
+  }
+
+  let route: undefined | RegisteredVersionedRoute;
+  for (let x = 0; x < router[method].mock.calls.length; x++) {
+    const [routeConfig] = router[method].mock.calls[x];
+    if (routeConfig.path === path) {
+      const mockedAddVersion = router[method].mock.results[x].value as MockedVersionedRoute;
+      route = {
+        config: routeConfig,
+        versions: mockedAddVersion.addVersion.mock.calls.reduce(
+          (acc, [config, handler]) => ({
+            ...acc,
+            [config.version]: { config, handler },
+          }),
+          {}
+        ),
+      };
+      break;
+    }
+  }
+
+  if (!route) {
+    throw new Error(`No routes registered for [${method.toUpperCase()} ${path}]`);
+  }
+
+  return route;
+};

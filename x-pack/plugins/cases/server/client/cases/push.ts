@@ -14,14 +14,22 @@ import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { asSavedObjectExecutionSource } from '@kbn/actions-plugin/server';
 import type {
   ActionConnector,
+  AlertAttachmentPayload,
+  AttachmentAttributes,
   Case,
-  ExternalServiceResponse,
   ConfigurationAttributes,
-  CommentRequestAlertType,
-  CommentAttributes,
-} from '../../../common/api';
-import { CaseRt, CaseStatuses, ActionTypes, OWNER_FIELD, CommentType } from '../../../common/api';
-import { CASE_COMMENT_SAVED_OBJECT, CASE_SAVED_OBJECT } from '../../../common/constants';
+} from '../../../common/types/domain';
+import {
+  CaseRt,
+  CaseStatuses,
+  UserActionTypes,
+  AttachmentType,
+} from '../../../common/types/domain';
+import {
+  CASE_COMMENT_SAVED_OBJECT,
+  CASE_SAVED_OBJECT,
+  OWNER_FIELD,
+} from '../../../common/constants';
 
 import { createIncident, getDurationInSeconds, getUserProfiles } from './utils';
 import { createCaseError } from '../../common/error';
@@ -35,8 +43,8 @@ import { Operations } from '../../authorization';
 import { casesConnectors } from '../../connectors';
 import { getAlerts } from '../alerts/get';
 import { buildFilter } from '../utils';
-import type { ICaseResponse } from '../typedoc_interfaces';
 import { decodeOrThrow } from '../../../common/api/runtime_types';
+import type { ExternalServiceResponse } from '../../../common/types/api';
 
 /**
  * Returns true if the case should be closed based on the configuration settings.
@@ -58,9 +66,9 @@ const changeAlertsStatusToClose = async (
   const alertAttachments = (await caseService.getAllCaseComments({
     id: [caseId],
     options: {
-      filter: nodeBuilder.is(`${CASE_COMMENT_SAVED_OBJECT}.attributes.type`, CommentType.alert),
+      filter: nodeBuilder.is(`${CASE_COMMENT_SAVED_OBJECT}.attributes.type`, AttachmentType.alert),
     },
-  })) as SavedObjectsFindResponse<CommentRequestAlertType>;
+  })) as SavedObjectsFindResponse<AlertAttachmentPayload>;
 
   const alerts = alertAttachments.saved_objects
     .map((attachment) =>
@@ -253,7 +261,7 @@ export const push = async (
 
     if (shouldMarkAsClosed) {
       await userActionService.creator.createUserAction({
-        type: ActionTypes.status,
+        type: UserActionTypes.status,
         payload: { status: CaseStatuses.closed },
         user,
         caseId,
@@ -267,7 +275,7 @@ export const push = async (
     }
 
     await userActionService.creator.createUserAction({
-      type: ActionTypes.pushed,
+      type: UserActionTypes.pushed,
       payload: { externalService },
       user,
       caseId,
@@ -290,7 +298,7 @@ export const push = async (
           attributes: {
             ...origComment.attributes,
             ...updatedComment?.attributes,
-          } as CommentAttributes,
+          } as AttachmentAttributes,
           version: updatedComment?.version ?? origComment.version,
           references: origComment?.references ?? [],
         };
@@ -304,7 +312,7 @@ export const push = async (
 };
 
 const getProfiles = async (
-  caseInfo: ICaseResponse,
+  caseInfo: Case,
   securityStartPlugin: SecurityPluginStart
 ): Promise<Map<string, UserProfile> | undefined> => {
   const uids = new Set([

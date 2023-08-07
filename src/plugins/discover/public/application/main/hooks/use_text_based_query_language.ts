@@ -47,6 +47,7 @@ export function useTextBasedQueryLanguage({
         columns: [],
         query: undefined,
       };
+      indexTitle.current = '';
     }
   }, []);
 
@@ -56,14 +57,23 @@ export function useTextBasedQueryLanguage({
       if (!query || next.fetchStatus === FetchStatus.ERROR) {
         return;
       }
+      const sendComplete = () => {
+        stateContainer.dataState.data$.documents$.next({
+          ...next,
+          fetchStatus: FetchStatus.COMPLETE,
+        });
+      };
       const { columns: stateColumns, index, viewMode } = stateContainer.appState.getState();
       let nextColumns: string[] = [];
       const isTextBasedQueryLang =
         recordRawType === 'plain' && isOfAggregateQueryType(query) && 'sql' in query;
-      const hasResults = next.result?.length && next.fetchStatus === FetchStatus.COMPLETE;
+      const hasResults = Boolean(next.result?.length);
       const initialFetch = !prev.current.columns.length;
 
       if (isTextBasedQueryLang) {
+        if (next.fetchStatus !== FetchStatus.PARTIAL) {
+          return;
+        }
         if (hasResults) {
           // check if state needs to contain column transformation due to a different columns in the resultset
           const firstRow = next.result![0];
@@ -92,13 +102,13 @@ export function useTextBasedQueryLanguage({
         const addDataViewToState = Boolean(dataViewObj?.id !== index) || initialFetch;
         const queryChanged = indexPatternFromQuery !== indexTitle.current;
         if (!addColumnsToState && !queryChanged) {
+          sendComplete();
           return;
         }
 
         if (queryChanged) {
           indexTitle.current = indexPatternFromQuery;
         }
-
         const nextState = {
           ...(addDataViewToState && { index: dataViewObj.id }),
           ...(addColumnsToState && { columns: nextColumns }),
@@ -106,7 +116,8 @@ export function useTextBasedQueryLanguage({
             viewMode: getValidViewMode({ viewMode, isTextBasedQueryMode: true }),
           }),
         };
-        stateContainer.appState.replaceUrlState(nextState);
+        await stateContainer.appState.replaceUrlState(nextState);
+        sendComplete();
       } else {
         // cleanup for a "regular" query
         cleanup();

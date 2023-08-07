@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Theme } from '@elastic/charts';
+import type { PartialTheme, Theme } from '@elastic/charts';
 import React, { useMemo } from 'react';
 
 import { getFlattenedBuckets } from './helpers';
@@ -19,7 +19,8 @@ export interface Props {
   onIndexSelected: ({ indexName, pattern }: SelectedIndex) => void;
   patternRollups: Record<string, PatternRollup>;
   patterns: string[];
-  theme: Theme;
+  theme?: PartialTheme;
+  baseTheme: Theme;
 }
 
 const StorageDetailsComponent: React.FC<Props> = ({
@@ -29,6 +30,7 @@ const StorageDetailsComponent: React.FC<Props> = ({
   patternRollups,
   patterns,
   theme,
+  baseTheme,
 }) => {
   const flattenedBuckets = useMemo(
     () =>
@@ -49,6 +51,7 @@ const StorageDetailsComponent: React.FC<Props> = ({
         patterns={patterns}
         patternRollups={patternRollups}
         theme={theme}
+        baseTheme={baseTheme}
       />
     </StorageTreemapContainer>
   );

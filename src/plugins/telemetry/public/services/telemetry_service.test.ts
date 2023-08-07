@@ -146,7 +146,7 @@ describe('TelemetryService', () => {
       });
 
       expect(telemetryService.getTelemetryUrl()).toMatchInlineSnapshot(
-        `"https://telemetry-staging.elastic.co/xpack/v2/send"`
+        `"https://telemetry-staging.elastic.co/v3/send/kibana-snapshot"`
       );
     });
 
@@ -156,7 +156,7 @@ describe('TelemetryService', () => {
       });
 
       expect(telemetryService.getTelemetryUrl()).toMatchInlineSnapshot(
-        `"https://telemetry.elastic.co/xpack/v2/send"`
+        `"https://telemetry.elastic.co/v3/send/kibana-snapshot"`
       );
     });
   });
@@ -168,7 +168,7 @@ describe('TelemetryService', () => {
       });
 
       expect(telemetryService.getOptInStatusUrl()).toMatchInlineSnapshot(
-        `"https://telemetry-staging.elastic.co/opt_in_status/v2/send"`
+        `"https://telemetry-staging.elastic.co/v3/send/kibana-opt-in-reports"`
       );
     });
 
@@ -178,7 +178,7 @@ describe('TelemetryService', () => {
       });
 
       expect(telemetryService.getOptInStatusUrl()).toMatchInlineSnapshot(
-        `"https://telemetry.elastic.co/opt_in_status/v2/send"`
+        `"https://telemetry.elastic.co/v3/send/kibana-opt-in-reports"`
       );
     });
   });

@@ -35,6 +35,7 @@ import { SplitText } from './split_text';
 import { Nbsp } from './nbsp';
 import { useDateFormat } from '../../hooks';
 import { TextHighlight } from './text_highlight';
+import { SessionViewTelemetryKey } from '../../types';
 
 export const EXEC_USER_CHANGE = i18n.translate('xpack.sessionView.execUserChange', {
   defaultMessage: 'Exec user change',
@@ -62,6 +63,7 @@ export interface ProcessDeps {
   loadNextButton?: ReactElement | null;
   loadPreviousButton?: ReactElement | null;
   handleCollapseProcessTree?: () => void;
+  trackEvent(name: SessionViewTelemetryKey): void;
 }
 
 /**
@@ -85,6 +87,7 @@ export function ProcessTreeNode({
   loadPreviousButton,
   loadNextButton,
   handleCollapseProcessTree,
+  trackEvent,
 }: ProcessDeps) {
   const [childrenExpanded, setChildrenExpanded] = useState(isSessionLeader || process.autoExpand);
   const [alertsExpanded, setAlertsExpanded] = useState(false);
@@ -167,12 +170,17 @@ export function ProcessTreeNode({
   }, [hasInvestigatedAlert]);
 
   const onChildrenToggle = useCallback(() => {
-    setChildrenExpanded(!childrenExpanded);
-  }, [childrenExpanded]);
+    const newValue = !childrenExpanded;
+    setChildrenExpanded(newValue);
+
+    trackEvent(newValue ? 'children_opened' : 'children_closed');
+  }, [childrenExpanded, trackEvent]);
 
   const onAlertsToggle = useCallback(() => {
-    setAlertsExpanded(!alertsExpanded);
-  }, [alertsExpanded]);
+    const newValue = !alertsExpanded;
+    setAlertsExpanded(newValue);
+    trackEvent(newValue ? 'alerts_opened' : 'alerts_closed');
+  }, [alertsExpanded, trackEvent]);
 
   const onProcessClicked = useCallback(
     (e: MouseEvent) => {
@@ -190,8 +198,10 @@ export function ProcessTreeNode({
       if (isSessionLeader && scrollerRef.current) {
         scrollerRef.current.scrollTop = 0;
       }
+
+      trackEvent('process_selected');
     },
-    [isSessionLeader, onProcessSelected, process, scrollerRef]
+    [isSessionLeader, onProcessSelected, process, scrollerRef, trackEvent]
   );
 
   const processDetails = process.getDetails();
@@ -203,7 +213,8 @@ export function ProcessTreeNode({
     if (entityId) {
       onJumpToOutput(entityId);
     }
-  }, [onJumpToOutput, processDetails.process?.entity_id]);
+    trackEvent('output_clicked');
+  }, [onJumpToOutput, processDetails.process?.entity_id, trackEvent]);
 
   const processIcon = useMemo(() => {
     if (!process.parent) {
@@ -392,6 +403,7 @@ export function ProcessTreeNode({
                 scrollerRef={scrollerRef}
                 onChangeJumpToEventVisibility={onChangeJumpToEventVisibility}
                 onShowAlertDetails={onShowAlertDetails}
+                trackEvent={trackEvent}
               />
             );
           })}

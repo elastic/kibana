@@ -9,17 +9,15 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { constant, identity } from 'fp-ts/lib/function';
 
-import {
-  QueryObserverBaseResult,
-  UseMutateAsyncFunction,
-  UseMutateFunction,
-  useMutation,
-  useQuery,
-  useQueryClient,
-} from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useUiTracker } from '@kbn/observability-shared-plugin/public';
 
-import { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
+import {
+  MutationContext,
+  SavedViewResult,
+  ServerError,
+  UpdateViewParams,
+} from '../../common/saved_views';
 import { MetricsSourceConfigurationResponse } from '../../common/metrics_sources';
 import {
   CreateInventoryViewAttributesRequestPayload,
@@ -31,41 +29,12 @@ import { useUrlState } from '../utils/use_url_state';
 import { useSavedViewsNotifier } from './use_saved_views_notifier';
 import { useSourceContext } from '../containers/metrics_source';
 
-interface UpdateViewParams {
-  id: string;
-  attributes: UpdateInventoryViewAttributesRequestPayload;
-}
-
-export interface UseInventoryViewsResult {
-  views?: InventoryView[];
-  currentView?: InventoryView | null;
-  createView: UseMutateAsyncFunction<
-    InventoryView,
-    ServerError,
-    CreateInventoryViewAttributesRequestPayload
-  >;
-  deleteViewById: UseMutateFunction<null, ServerError, string, MutationContext>;
-  fetchViews: QueryObserverBaseResult<InventoryView[]>['refetch'];
-  updateViewById: UseMutateAsyncFunction<InventoryView, ServerError, UpdateViewParams>;
-  switchViewById: (id: InventoryViewId) => void;
-  setDefaultViewById: UseMutateFunction<
-    MetricsSourceConfigurationResponse,
-    ServerError,
-    string,
-    MutationContext
-  >;
-  isCreatingView: boolean;
-  isFetchingCurrentView: boolean;
-  isFetchingViews: boolean;
-  isUpdatingView: boolean;
-}
-
-type ServerError = IHttpFetchError<ResponseErrorBody>;
-
-interface MutationContext {
-  id?: string;
-  previousViews?: InventoryView[];
-}
+export type UseInventoryViewsResult = SavedViewResult<
+  InventoryView,
+  InventoryViewId,
+  CreateInventoryViewAttributesRequestPayload,
+  MetricsSourceConfigurationResponse
+>;
 
 const queryKeys = {
   find: ['inventory-views-find'] as const,
@@ -122,7 +91,7 @@ export const useInventoryViews = (): UseInventoryViewsResult => {
     MetricsSourceConfigurationResponse,
     ServerError,
     string,
-    MutationContext
+    MutationContext<InventoryView>
   >({
     mutationFn: (id) => updateSourceConfiguration({ inventoryDefaultView: id }),
     /**
@@ -167,7 +136,7 @@ export const useInventoryViews = (): UseInventoryViewsResult => {
   const { mutateAsync: updateViewById, isLoading: isUpdatingView } = useMutation<
     InventoryView,
     ServerError,
-    UpdateViewParams
+    UpdateViewParams<UpdateInventoryViewAttributesRequestPayload>
   >({
     mutationFn: ({ id, attributes }) => inventoryViews.client.updateInventoryView(id, attributes),
     onError: (error) => {
@@ -178,7 +147,12 @@ export const useInventoryViews = (): UseInventoryViewsResult => {
     },
   });
 
-  const { mutate: deleteViewById } = useMutation<null, ServerError, string, MutationContext>({
+  const { mutate: deleteViewById } = useMutation<
+    null,
+    ServerError,
+    string,
+    MutationContext<InventoryView>
+  >({
     mutationFn: (id: string) => inventoryViews.client.deleteInventoryView(id),
     /**
      * To provide a quick feedback, we perform an optimistic update on the list

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { RRule } from 'rrule';
+import { Frequency } from '@kbn/rrule';
 import { httpServiceMock } from '@kbn/core/server/mocks';
 import { licenseStateMock } from '../../lib/license_state.mock';
 import { verifyApiAccess } from '../../lib/license_api_access';
@@ -36,7 +36,7 @@ const updateParams = {
   r_rule: {
     tzid: 'CET',
     dtstart: '2023-03-26T00:00:00.000Z',
-    freq: RRule.WEEKLY,
+    freq: Frequency.WEEKLY,
     count: 10,
   },
 };

@@ -50,7 +50,6 @@ export function getDisplayText(id: INSTRUCTION_VARIANT) {
 export interface AgentApiKey {
   apiKey: string | null;
   id?: string;
-  encodedKey?: string;
   error: boolean;
   errorMessage?: string;
 }
@@ -67,4 +66,7 @@ export interface AgentInstructions {
   apmServerUrl: string;
   apiKeyDetails?: AgentApiDetails;
   secretToken?: string;
+  checkAgentStatus: () => void;
+  agentStatus?: boolean;
+  agentStatusLoading: boolean;
 }

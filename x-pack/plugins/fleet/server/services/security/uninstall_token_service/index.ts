@@ -18,6 +18,7 @@ import type {
 import type {
   AggregationsMultiBucketAggregateBase,
   AggregationsTopHitsAggregate,
+  SearchHit,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
@@ -26,9 +27,14 @@ import { asyncForEach } from '@kbn/std';
 
 import type { AggregationsTermsInclude } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import type { GetUninstallTokensResponse } from '../../../../common/types/rest_spec/uninstall_token';
+import { UninstallTokenError } from '../../../../common/errors';
 
-import type { UninstallToken } from '../../../../common/types/models/uninstall_token';
+import type { GetUninstallTokensMetadataResponse } from '../../../../common/types/rest_spec/uninstall_token';
+
+import type {
+  UninstallToken,
+  UninstallTokenMetadata,
+} from '../../../../common/types/models/uninstall_token';
 
 import { UNINSTALL_TOKENS_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../../constants';
 import { appContextService } from '../../app_context';
@@ -50,30 +56,83 @@ interface UninstallTokenSOAggregation {
 }
 
 export interface UninstallTokenServiceInterface {
-  getTokenForPolicyId(policyId: string): Promise<UninstallToken | null>;
+  /**
+   * Get uninstall token based on its id.
+   *
+   * @param id
+   * @returns uninstall token if found, null if not found
+   */
+  getToken(id: string): Promise<UninstallToken | null>;
 
-  getTokensForPolicyIds(policyIds: string[]): Promise<UninstallToken[]>;
-
-  findTokensForPartialPolicyId(
-    searchString: string,
+  /**
+   * Get uninstall token metadata, optionally filtering by partial policyID, paginated
+   *
+   * @param policyIdFilter a string for partial matching the policyId
+   * @param page
+   * @param perPage
+   * @returns Uninstall Tokens Metadata Response
+   */
+  getTokenMetadata(
+    policyIdFilter?: string,
     page?: number,
     perPage?: number
-  ): Promise<GetUninstallTokensResponse>;
+  ): Promise<GetUninstallTokensMetadataResponse>;
 
-  getAllTokens(page?: number, perPage?: number): Promise<GetUninstallTokensResponse>;
-
+  /**
+   * Get hashed uninstall token for given policy id
+   *
+   * @param policyId agent policy id
+   * @returns hashedToken
+   */
   getHashedTokenForPolicyId(policyId: string): Promise<string>;
 
+  /**
+   * Get hashed uninstall tokens for given policy ids
+   *
+   * @param policyIds agent policy ids
+   * @returns Record<policyId, hashedToken>
+   */
   getHashedTokensForPolicyIds(policyIds?: string[]): Promise<Record<string, string>>;
 
+  /**
+   * Get hashed uninstall token for all policies
+   *
+   * @returns Record<policyId, hashedToken>
+   */
   getAllHashedTokens(): Promise<Record<string, string>>;
 
+  /**
+   * Generate uninstall token for given policy id
+   * Will not create a new token if one already exists for a given policy unless force: true is used
+   *
+   * @param policyId agent policy id
+   * @param force generate a new token even if one already exists
+   * @returns hashedToken
+   */
   generateTokenForPolicyId(policyId: string, force?: boolean): Promise<string>;
 
+  /**
+   * Generate uninstall tokens for given policy ids
+   * Will not create a new token if one already exists for a given policy unless force: true is used
+   *
+   * @param policyIds agent policy ids
+   * @param force generate a new token even if one already exists
+   * @returns Record<policyId, hashedToken>
+   */
   generateTokensForPolicyIds(policyIds: string[], force?: boolean): Promise<Record<string, string>>;
 
+  /**
+   * Generate uninstall tokens all policies
+   * Will not create a new token if one already exists for a given policy unless force: true is used
+   *
+   * @param force generate a new token even if one already exists
+   * @returns Record<policyId, hashedToken>
+   */
   generateTokensForAllPolicies(force?: boolean): Promise<Record<string, string>>;
 
+  /**
+   * If encryption is available, checks for any plain text uninstall tokens and encrypts them
+   */
   encryptTokens(): Promise<void>;
 }
 
@@ -82,62 +141,97 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
 
   constructor(private esoClient: EncryptedSavedObjectsClient) {}
 
-  /**
-   * gets uninstall token for given policy id
-   *
-   * @param policyId agent policy id
-   * @returns uninstall token if found
-   */
-  public async getTokenForPolicyId(policyId: string): Promise<UninstallToken | null> {
-    return (await this.getTokensByIncludeFilter({ include: policyId })).items[0] ?? null;
+  public async getToken(id: string): Promise<UninstallToken | null> {
+    const filter = `${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}.id: "${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}:${id}"`;
+
+    const uninstallTokens = await this.getDecryptedTokens({ filter });
+
+    return uninstallTokens.length === 1 ? uninstallTokens[0] : null;
   }
 
-  /**
-   * gets uninstall tokens for given policy ids
-   *
-   * @param policyIds agent policy ids
-   * @returns array of UninstallToken objects
-   */
-  public async getTokensForPolicyIds(policyIds: string[]): Promise<UninstallToken[]> {
-    return (await this.getTokensByIncludeFilter({ include: policyIds })).items;
-  }
-  /**
-   * gets uninstall token for given policy id, paginated
-   *
-   * @param searchString a string for partial matching the policyId
-   * @param page
-   * @param perPage
-   * @param policyId agent policy id
-   * @returns GetUninstallTokensResponse
-   */
-  public async findTokensForPartialPolicyId(
-    searchString: string,
-    page: number = 1,
-    perPage: number = 20
-  ): Promise<GetUninstallTokensResponse> {
-    return await this.getTokensByIncludeFilter({ include: `.*${searchString}.*`, page, perPage });
-  }
-
-  /**
-   * gets uninstall tokens for all policies, optionally paginated or returns all tokens
-   * @param page
-   * @param perPage
-   * @returns GetUninstallTokensResponse
-   */
-  public async getAllTokens(page?: number, perPage?: number): Promise<GetUninstallTokensResponse> {
-    return this.getTokensByIncludeFilter({ perPage, page });
-  }
-
-  private async getTokensByIncludeFilter({
+  public async getTokenMetadata(
+    policyIdFilter?: string,
     page = 1,
-    perPage = SO_SEARCH_LIMIT,
-    include,
-  }: {
-    include?: AggregationsTermsInclude;
-    perPage?: number;
-    page?: number;
-  }): Promise<GetUninstallTokensResponse> {
+    perPage = 20
+  ): Promise<GetUninstallTokensMetadataResponse> {
+    const includeFilter = policyIdFilter ? `.*${policyIdFilter}.*` : undefined;
+
+    const tokenObjects = await this.getTokenObjectsByIncludeFilter(includeFilter);
+
+    const items: UninstallTokenMetadata[] = tokenObjects
+      .slice((page - 1) * perPage, page * perPage)
+      .map<UninstallTokenMetadata>(({ _id, _source }) => {
+        this.assertPolicyId(_source[UNINSTALL_TOKENS_SAVED_OBJECT_TYPE]);
+        this.assertCreatedAt(_source.created_at);
+
+        return {
+          id: _id.replace(`${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}:`, ''),
+          policy_id: _source[UNINSTALL_TOKENS_SAVED_OBJECT_TYPE].policy_id,
+          created_at: _source.created_at,
+        };
+      });
+
+    return { items, total: tokenObjects.length, page, perPage };
+  }
+
+  private async getDecryptedTokensForPolicyIds(policyIds: string[]): Promise<UninstallToken[]> {
+    const tokenObjectHits = await this.getTokenObjectsByIncludeFilter(policyIds);
+
+    if (tokenObjectHits.length === 0) {
+      return [];
+    }
+
+    const filter: string = tokenObjectHits
+      .map(({ _id }) => {
+        return `${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}.id: "${_id}"`;
+      })
+      .join(' or ');
+
+    return this.getDecryptedTokens({ filter });
+  }
+
+  private getDecryptedTokens = async (
+    options: Partial<SavedObjectsCreatePointInTimeFinderOptions>
+  ): Promise<UninstallToken[]> => {
+    const tokensFinder =
+      await this.esoClient.createPointInTimeFinderDecryptedAsInternalUser<UninstallTokenSOAttributes>(
+        {
+          type: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
+          perPage: SO_SEARCH_LIMIT,
+          ...options,
+        }
+      );
+    let tokenObject: Array<SavedObjectsFindResult<UninstallTokenSOAttributes>> = [];
+
+    for await (const result of tokensFinder.find()) {
+      tokenObject = result.saved_objects;
+      break;
+    }
+    tokensFinder.close();
+
+    const uninstallTokens: UninstallToken[] = tokenObject.map(
+      ({ id: _id, attributes, created_at: createdAt }) => {
+        this.assertPolicyId(attributes);
+        this.assertToken(attributes);
+        this.assertCreatedAt(createdAt);
+
+        return {
+          id: _id,
+          policy_id: attributes.policy_id,
+          token: attributes.token || attributes.token_plain,
+          created_at: createdAt,
+        };
+      }
+    );
+
+    return uninstallTokens;
+  };
+
+  private async getTokenObjectsByIncludeFilter(
+    include?: AggregationsTermsInclude
+  ): Promise<Array<SearchHit<any>>> {
     const bucketSize = 10000;
+
     const query: SavedObjectsCreatePointInTimeFinderOptions = {
       type: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
       perPage: 0,
@@ -152,13 +246,15 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
             latest: {
               top_hits: {
                 size: 1,
-                sort: [{ [`${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}.created_at`]: { order: 'desc' } }],
+                sort: [{ created_at: { order: 'desc' } }],
+                _source: [`${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}.policy_id`, 'created_at'],
               },
             },
           },
         },
       },
     };
+
     // encrypted saved objects doesn't decrypt aggregation values so we get
     // the ids first from saved objects to use with encrypted saved objects
     const idFinder = this.soClient.createPointInTimeFinder<
@@ -178,76 +274,22 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
       break;
     }
 
-    const firstItemsIndexInPage = (page - 1) * perPage;
-    const isCurrentPageEmpty = firstItemsIndexInPage >= aggResults.length;
-    if (isCurrentPageEmpty) {
-      return { items: [], total: aggResults.length, page, perPage };
-    }
-
     const getCreatedAt = (soBucket: UninstallTokenSOAggregationBucket) =>
       new Date(soBucket.latest.hits.hits[0]._source?.created_at ?? Date.now()).getTime();
 
-    // sort buckets by  { created_at: 'desc' }
-    // this is done with `slice()` instead of ES, because
-    // 1) the query below doesn't support pagination, so we need to slice the IDs here,
-    // 2) the query above doesn't support bucket sorting based on sub aggregation, see this:
-    // https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-bucket-terms-aggregation.html#_ordering_by_a_sub_aggregation
+    // sorting and paginating buckets is done here instead of ES,
+    // because SO query doesn't support `bucket_sort`
     aggResults.sort((a, b) => getCreatedAt(b) - getCreatedAt(a));
 
-    const filter: string = aggResults
-      .slice((page - 1) * perPage, page * perPage)
-      .map(({ latest }) => {
-        return `${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}.id: "${latest.hits.hits[0]._id}"`;
-      })
-      .join(' or ');
-
-    const tokensFinder =
-      await this.esoClient.createPointInTimeFinderDecryptedAsInternalUser<UninstallTokenSOAttributes>(
-        {
-          type: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
-          perPage: SO_SEARCH_LIMIT,
-          filter,
-        }
-      );
-    let tokenObjects: Array<SavedObjectsFindResult<UninstallTokenSOAttributes>> = [];
-
-    for await (const result of tokensFinder.find()) {
-      tokenObjects = result.saved_objects;
-      break;
-    }
-    tokensFinder.close();
-
-    const items: UninstallToken[] = tokenObjects
-      .filter(
-        ({ attributes }) => attributes.policy_id && (attributes.token || attributes.token_plain)
-      )
-      .map(({ attributes, created_at: createdAt }) => ({
-        policy_id: attributes.policy_id,
-        token: attributes.token || attributes.token_plain,
-        ...(createdAt ? { created_at: createdAt } : {}),
-      }));
-
-    return { items, total: aggResults.length, page, perPage };
+    return aggResults.map((bucket) => bucket.latest.hits.hits[0]);
   }
 
-  /**
-   * get hashed uninstall token for given policy id
-   *
-   * @param policyId agent policy id
-   * @returns hashedToken
-   */
   public async getHashedTokenForPolicyId(policyId: string): Promise<string> {
     return (await this.getHashedTokensForPolicyIds([policyId]))[policyId];
   }
 
-  /**
-   * get hashed uninstall tokens for given policy ids
-   *
-   * @param policyIds agent policy ids
-   * @returns Record<policyId, hashedToken>
-   */
   public async getHashedTokensForPolicyIds(policyIds: string[]): Promise<Record<string, string>> {
-    const tokens = await this.getTokensForPolicyIds(policyIds);
+    const tokens = await this.getDecryptedTokensForPolicyIds(policyIds);
     return tokens.reduce((acc, { policy_id: policyId, token }) => {
       if (policyId && token) {
         acc[policyId] = this.hashToken(token);
@@ -256,47 +298,28 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
     }, {} as Record<string, string>);
   }
 
-  /**
-   * get hashed uninstall token for all policies
-   *
-   * @returns Record<policyId, hashedToken>
-   */
   public async getAllHashedTokens(): Promise<Record<string, string>> {
     const policyIds = await this.getAllPolicyIds();
     return this.getHashedTokensForPolicyIds(policyIds);
   }
 
-  /**
-   * generate uninstall token for given policy id
-   * will not create a new token if one already exists for a given policy unless force: true is used
-   *
-   * @param policyId agent policy id
-   * @param force generate a new token even if one already exists
-   * @returns hashedToken
-   */
   public async generateTokenForPolicyId(policyId: string, force: boolean = false): Promise<string> {
     return (await this.generateTokensForPolicyIds([policyId], force))[policyId];
   }
 
-  /**
-   * generate uninstall tokens for given policy ids
-   * will not create a new token if one already exists for a given policy unless force: true is used
-   *
-   * @param policyIds agent policy ids
-   * @param force generate a new token even if one already exists
-   * @returns Record<policyId, hashedToken>
-   */
   public async generateTokensForPolicyIds(
     policyIds: string[],
     force: boolean = false
   ): Promise<Record<string, string>> {
-    if (!policyIds.length) {
+    const { agentTamperProtectionEnabled } = appContextService.getExperimentalFeatures();
+
+    if (!agentTamperProtectionEnabled || !policyIds.length) {
       return {};
     }
 
     const existingTokens = force
       ? {}
-      : (await this.getTokensForPolicyIds(policyIds)).reduce(
+      : (await this.getDecryptedTokensForPolicyIds(policyIds)).reduce(
           (acc, { policy_id: policyId, token }) => {
             acc[policyId] = token;
             return acc;
@@ -337,13 +360,6 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
     }, {} as Record<string, string>);
   }
 
-  /**
-   * generate uninstall tokens all policies
-   * will not create a new token if one already exists for a given policy unless force: true is used
-   *
-   * @param force generate a new token even if one already exists
-   * @returns Record<policyId, hashedToken>
-   */
   public async generateTokensForAllPolicies(
     force: boolean = false
   ): Promise<Record<string, string>> {
@@ -351,9 +367,6 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
     return this.generateTokensForPolicyIds(policyIds, force);
   }
 
-  /**
-   * if encryption is available, checks for any plain text uninstall tokens and encrypts them
-   */
   public async encryptTokens(): Promise<void> {
     if (!this.isEncryptionAvailable) {
       return;
@@ -474,5 +487,23 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
 
   private get isEncryptionAvailable(): boolean {
     return appContextService.getEncryptedSavedObjectsSetup()?.canEncrypt ?? false;
+  }
+
+  private assertCreatedAt(createdAt: string | undefined): asserts createdAt is string {
+    if (!createdAt) {
+      throw new UninstallTokenError('Uninstall Token is missing creation date.');
+    }
+  }
+
+  private assertToken(attributes: UninstallTokenSOAttributes | undefined) {
+    if (!attributes?.token && !attributes?.token_plain) {
+      throw new UninstallTokenError('Uninstall Token is missing the token.');
+    }
+  }
+
+  private assertPolicyId(attributes: UninstallTokenSOAttributes | undefined) {
+    if (!attributes?.policy_id) {
+      throw new UninstallTokenError('Uninstall Token is missing policy ID.');
+    }
   }
 }

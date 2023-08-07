@@ -12,6 +12,7 @@ import {
   Alerts,
   AlertsTableConfigurationRegistry,
   BulkActionsConfig,
+  BulkActionsPanelConfig,
   BulkActionsState,
   BulkActionsVerbs,
   UseBulkActionsRegistry,
@@ -42,7 +43,7 @@ export interface UseBulkActions {
   isBulkActionsColumnActive: boolean;
   getBulkActionsLeadingControlColumn: GetLeadingControlColumn;
   bulkActionsState: BulkActionsState;
-  bulkActions: BulkActionsConfig[];
+  bulkActions: BulkActionsPanelConfig[];
   setIsBulkActionsLoading: (isLoading: boolean) => void;
   clearSelection: () => void;
 }
@@ -69,6 +70,23 @@ const getCaseAttachments = ({
 }) => {
   const filteredAlerts = filterAlertsAlreadyAttachedToCase(alerts ?? [], caseId);
   return groupAlertsByRule?.(filteredAlerts) ?? [];
+};
+
+const addItemsToInitialPanel = ({
+  panels,
+  items,
+}: {
+  panels: BulkActionsPanelConfig[];
+  items: BulkActionsConfig[];
+}) => {
+  if (panels.length > 0) {
+    if (panels[0].items) {
+      panels[0].items.push(...items);
+    }
+    return panels;
+  } else {
+    return [{ id: 0, items }];
+  }
 };
 
 export const useBulkAddToCaseActions = ({
@@ -128,6 +146,10 @@ export const useBulkAddToCaseActions = ({
             onClick: (alerts?: TimelineItem[]) => {
               selectCaseModal.open({
                 getAttachments: ({ theCase }) => {
+                  if (theCase == null) {
+                    return alerts ? casesService?.helpers.groupAlertsByRule(alerts) ?? [] : [];
+                  }
+
                   return getCaseAttachments({
                     alerts,
                     caseId: theCase.id,
@@ -157,14 +179,20 @@ export function useBulkActions({
   useBulkActionsConfig = () => [],
 }: BulkActionsProps): UseBulkActions {
   const [bulkActionsState, updateBulkActionsState] = useContext(BulkActionsContext);
-  const configBulkActions = useBulkActionsConfig(query);
+  const configBulkActionPanels = useBulkActionsConfig(query);
 
   const clearSelection = () => {
     updateBulkActionsState({ action: BulkActionsVerbs.clear });
   };
   const caseBulkActions = useBulkAddToCaseActions({ casesConfig, refresh, clearSelection });
 
-  const bulkActions = [...configBulkActions, ...caseBulkActions];
+  const bulkActions =
+    caseBulkActions.length !== 0
+      ? addItemsToInitialPanel({
+          panels: configBulkActionPanels,
+          items: caseBulkActions,
+        })
+      : configBulkActionPanels;
 
   const isBulkActionsColumnActive = bulkActions.length !== 0;
 

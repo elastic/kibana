@@ -2,8 +2,15 @@
 
 ## Disable APM and Uptime, enable Enterprise Search
 xpack.apm.enabled: false
+
+xpack.cloudSecurityPosture.enabled: false
+xpack.infra.enabled: false
+xpack.observability.enabled: false
+xpack.securitySolution.enabled: false
+xpack.serverless.observability.enabled: false
 xpack.uptime.enabled: false
 enterpriseSearch.enabled: false
+monitoring.ui.enabled: false
 
 ## Enable the Serverless Search plugin
 xpack.serverless.search.enabled: true
@@ -13,3 +20,12 @@ uiSettings.overrides.defaultRoute: /app/elasticsearch
 
 ## Set the dev project switcher current type
 xpack.serverless.plugin.developer.projectSwitcher.currentType: 'search'
+
+# Specify in telemetry the project type
+telemetry.labels.serverless: search
+
+# Alerts config
+xpack.actions.enabledActionTypes: ['.email', '.index', '.slack', '.jira', '.webhook', '.teams']
+
+# Fleet specific configuration
+xpack.fleet.internal.capabilities: ['serverless_search']

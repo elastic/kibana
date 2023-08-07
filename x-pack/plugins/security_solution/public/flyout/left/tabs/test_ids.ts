@@ -25,4 +25,3 @@ export const INSIGHTS_TAB_RESPONSE_BUTTON_TEST_ID =
   'securitySolutionDocumentDetailsFlyoutInsightsTabResponseButton';
 export const INVESTIGATION_TAB_CONTENT_TEST_ID =
   'securitySolutionDocumentDetailsFlyoutInvestigationsTabContent';
-export const HISTORY_TAB_CONTENT_TEST_ID = 'securitySolutionDocumentDetailsFlyoutHistoryTabContent';

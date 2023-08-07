@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-plugin/public';
+import { LENS_EMBEDDABLE_TYPE, type Embeddable as LensEmbeddable } from '@kbn/lens-plugin/public';
 import { ErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import ReactDOM, { unmountComponentAtNode } from 'react-dom';
 
 import { createAddToExistingCaseLensAction } from './add_to_existing_case';
-import type { ActionContext, DashboardVisualizationEmbeddable } from './types';
+import type { ActionContext } from './types';
 import { useCasesAddToExistingCaseModal } from '../../all_cases/selector_modal/use_cases_add_to_existing_case_modal';
 import React from 'react';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
@@ -23,7 +23,6 @@ import {
   MockEmbeddable,
   mockTimeRange,
 } from './mocks';
-import { CommentType } from '../../../../common';
 import { useKibana } from '../../../common/lib/kibana';
 import { waitFor } from '@testing-library/dom';
 import { canUseCases } from '../../../client/helpers/can_use_cases';
@@ -74,7 +73,7 @@ describe('createAddToExistingCaseLensAction', () => {
     id: 'mockId',
     attributes: mockAttributes,
     timeRange: mockTimeRange,
-  }) as unknown as DashboardVisualizationEmbeddable;
+  }) as unknown as LensEmbeddable;
 
   const context = {
     embeddable: mockEmbeddable,
@@ -125,7 +124,7 @@ describe('createAddToExistingCaseLensAction', () => {
           ...context,
           embeddable: new ErrorEmbeddable('some error', {
             id: '123',
-          }) as unknown as DashboardVisualizationEmbeddable,
+          }) as unknown as LensEmbeddable,
         })
       ).toEqual(false);
     });
@@ -134,7 +133,7 @@ describe('createAddToExistingCaseLensAction', () => {
       expect(
         await action.isCompatible({
           ...context,
-          embeddable: new MockEmbeddable('not_lens') as unknown as DashboardVisualizationEmbeddable,
+          embeddable: new MockEmbeddable('not_lens') as unknown as LensEmbeddable,
         })
       ).toEqual(false);
     });
@@ -176,17 +175,16 @@ describe('createAddToExistingCaseLensAction', () => {
         expect(mockOpenModal).toHaveBeenCalled();
 
         const getAttachments = mockOpenModal.mock.calls[0][0].getAttachments;
-        expect(getAttachments()).toEqual(
-          expect.objectContaining([
-            {
-              comment: `!{lens${JSON.stringify({
-                timeRange: mockTimeRange,
-                attributes: mockAttributes,
-              })}}`,
-              type: CommentType.user as const,
+        expect(getAttachments()).toEqual([
+          {
+            persistableStateAttachmentState: {
+              attributes: mockAttributes,
+              timeRange: mockTimeRange,
             },
-          ])
-        );
+            persistableStateAttachmentTypeId: '.lens',
+            type: 'persistableState',
+          },
+        ]);
       });
     });
 

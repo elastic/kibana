@@ -125,7 +125,11 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
     {
       path: '/internal/enterprise_search/connectors/{connectorId}/scheduling',
       validate: {
-        body: schema.object({ enabled: schema.boolean(), interval: schema.string() }),
+        body: schema.object({
+          access_control: schema.object({ enabled: schema.boolean(), interval: schema.string() }),
+          full: schema.object({ enabled: schema.boolean(), interval: schema.string() }),
+          incremental: schema.object({ enabled: schema.boolean(), interval: schema.string() }),
+        }),
         params: schema.object({
           connectorId: schema.string(),
         }),
@@ -204,6 +208,7 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
         query: schema.object({
           from: schema.number({ defaultValue: 0, min: 0 }),
           size: schema.number({ defaultValue: 10, min: 0 }),
+          type: schema.maybe(schema.string()),
         }),
       },
     },
@@ -213,7 +218,8 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
         client,
         request.params.connectorId,
         request.query.from,
-        request.query.size
+        request.query.size,
+        request.query.type as 'content' | 'access_control' | 'all'
       );
       return response.ok({ body: result });
     })

@@ -4,15 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { i18n } from '@kbn/i18n';
 
 export const dotnetVariables = (secretToken?: string) => ({
-  apmServiceName: 'ServiceName',
   ...(secretToken && { secretToken: 'SecretToken' }),
   ...(!secretToken && { apiKey: 'ApiKey' }),
   apmServerUrl: 'ServerUrl',
-  apmEnvironment: 'Environment',
 });
 
 export const dotnetHighlightLang = 'dotnet';
@@ -30,7 +27,7 @@ export const dotnet = `{
         defaultMessage: 'Default is the entry assembly of the application.',
       }
     )}
-    "ServiceName": "my-service-name",
+    "ServiceName": "<your-service-name>",
     {{^secretToken}}
     /// {{apiKeyHint}}
     "ApiKey": "{{{apiKey}}}",
@@ -42,6 +39,6 @@ export const dotnet = `{
     /// {{{serverUrlHint}}}
     "ServerUrl": "{{{apmServerUrl}}}",
     /// {{{serviceEnvironmentHint}}}
-    "Environment": "my-environment",
+    "Environment": "<your-environment>",
   }
 }`;

@@ -15,6 +15,7 @@ import {
   SecurityCellActionsTrigger,
 } from '../../cell_actions';
 import type { EnrichedFieldInfo } from '../types';
+import { getSourcererScopeId } from '../../../../helpers';
 
 const ActionWrapper = euiStyled.div`
   margin-left: ${({ theme }) => theme.eui.euiSizeS};
@@ -92,14 +93,13 @@ export const OverviewCardWithActions: React.FC<OverviewCardWithActionsProps> = (
 
       <ActionWrapper>
         <SecurityCellActions
-          field={{
-            name: enrichedFieldInfo.data.field,
+          data={{
+            field: enrichedFieldInfo.data.field,
             value: enrichedFieldInfo?.values,
-            type: enrichedFieldInfo.data.type,
-            aggregatable: enrichedFieldInfo.fieldFromBrowserField?.aggregatable,
           }}
           triggerId={SecurityCellActionsTrigger.DETAILS_FLYOUT}
           mode={CellActionsMode.INLINE}
+          sourcererScopeId={getSourcererScopeId(contextId)}
           metadata={{ scopeId: contextId }}
           visibleCellActions={3}
         />

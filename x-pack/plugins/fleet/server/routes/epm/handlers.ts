@@ -12,6 +12,8 @@ import mime from 'mime-types';
 import semverValid from 'semver/functions/valid';
 import type { ResponseHeaders, KnownHeaders, HttpResponseOptions } from '@kbn/core/server';
 
+import { pick } from 'lodash';
+
 import { HTTPAuthorizationHeader } from '../../../common/http_authorization_header';
 import { generateTransformSecondaryAuthHeaders } from '../../services/api_keys/transform_api_keys';
 import { handleTransformReauthorizeAndStart } from '../../services/epm/elasticsearch/transform/reauthorize';
@@ -30,9 +32,9 @@ import type {
   UpdatePackageResponse,
   GetVerificationKeyIdResponse,
   GetBulkAssetsResponse,
-  SimpleSOAssetType,
   GetInstalledPackagesResponse,
   GetEpmDataStreamsResponse,
+  AssetSOObject,
 } from '../../../common/types';
 import type {
   GetCategoriesRequestSchema,
@@ -50,6 +52,7 @@ import type {
   UpdatePackageRequestSchema,
   GetLimitedPackagesRequestSchema,
   GetBulkAssetsRequestSchema,
+  CreateCustomIntegrationRequestSchema,
 } from '../../types';
 import {
   bulkInstallPackages,
@@ -63,19 +66,24 @@ import {
   removeInstallation,
   getLimitedPackages,
   getInstallation,
+  getBulkAssets,
 } from '../../services/epm/packages';
 import type { BulkInstallResponse } from '../../services/epm/packages';
 import { defaultFleetErrorHandler, fleetErrorToResponseOptions, FleetError } from '../../errors';
-import { appContextService, checkAllowedPackages, licenseService } from '../../services';
+import { appContextService, checkAllowedPackages } from '../../services';
 import { getArchiveEntry } from '../../services/epm/archive/cache';
 import { getAsset } from '../../services/epm/archive/storage';
 import { getPackageUsageStats } from '../../services/epm/packages/get';
 import { updatePackage } from '../../services/epm/packages/update';
 import { getGpgKeyIdOrUndefined } from '../../services/epm/packages/package_verification';
-import type { ReauthorizeTransformRequestSchema, SimpleSOAssetAttributes } from '../../types';
-import type { KibanaSavedObjectType, ElasticsearchAssetType } from '../../../common/types/models';
+import type {
+  ReauthorizeTransformRequestSchema,
+  PackageListItem,
+  PackageList,
+  PackageInfo,
+  InstallationInfo,
+} from '../../types';
 import { getDataStreams } from '../../services/epm/data_streams';
-import { allowedAssetTypesLookup } from '../../../common/constants';
 
 const CACHE_CONTROL_10_MINUTES_HEADER: HttpResponseOptions['headers'] = {
   'cache-control': 'max-age=600',
@@ -109,9 +117,9 @@ export const getListHandler: FleetRequestHandler<
       savedObjectsClient,
       ...request.query,
     });
-
+    const flattenedRes = res.map((pkg) => soToInstallationInfo(pkg)) as PackageList;
     const body: GetPackagesResponse = {
-      items: res,
+      items: flattenedRes,
       response: res,
     };
     return response.ok({
@@ -291,9 +299,10 @@ export const getInfoHandler: FleetRequestHandler<
       ignoreUnverified,
       prerelease,
     });
+    const flattenedRes = soToInstallationInfo(res) as PackageInfo;
 
     const body: GetInfoResponse = {
-      item: res,
+      item: flattenedRes,
     };
     return response.ok({ body });
   } catch (error) {
@@ -307,30 +316,12 @@ export const getBulkAssetsHandler: FleetRequestHandler<
   TypeOf<typeof GetBulkAssetsRequestSchema.body>
 > = async (context, request, response) => {
   try {
-    const savedObjectsClient = (await context.fleet).internalSoClient;
     const { assetIds } = request.body;
+    const savedObjectsClient = (await context.fleet).internalSoClient;
+    const assets = await getBulkAssets(savedObjectsClient, assetIds as AssetSOObject[]);
 
-    const { resolved_objects: resolvedObjects } =
-      await savedObjectsClient.bulkResolve<SimpleSOAssetAttributes>(assetIds);
-    const res: SimpleSOAssetType[] = resolvedObjects
-      .map(({ saved_object: savedObject }) => savedObject)
-      .filter(
-        (savedObject) =>
-          savedObject?.error?.statusCode !== 404 && allowedAssetTypesLookup.has(savedObject.type)
-      )
-      .map((obj) => {
-        return {
-          id: obj.id,
-          type: obj.type as unknown as ElasticsearchAssetType | KibanaSavedObjectType,
-          updatedAt: obj.updated_at,
-          attributes: {
-            title: obj.attributes.title,
-            description: obj.attributes.description,
-          },
-        };
-      });
     const body: GetBulkAssetsResponse = {
-      items: res,
+      items: assets,
     };
     return response.ok({ body });
   } catch (error) {
@@ -413,6 +404,45 @@ export const installPackageFromRegistryHandler: FleetRequestHandler<
     return await defaultFleetErrorHandler({ error: res.error, response });
   }
 };
+export const createCustomIntegrationHandler: FleetRequestHandler<
+  undefined,
+  undefined,
+  TypeOf<typeof CreateCustomIntegrationRequestSchema.body>
+> = async (context, request, response) => {
+  const coreContext = await context.core;
+  const fleetContext = await context.fleet;
+  const savedObjectsClient = fleetContext.internalSoClient;
+  const esClient = coreContext.elasticsearch.client.asInternalUser;
+  const user = (await appContextService.getSecurity()?.authc.getCurrentUser(request)) || undefined;
+  const kibanaVersion = appContextService.getKibanaVersion();
+  const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request, user?.username);
+  const spaceId = fleetContext.spaceId;
+  const { integrationName, force, datasets } = request.body;
+
+  const res = await installPackage({
+    installSource: 'custom',
+    savedObjectsClient,
+    pkgName: integrationName,
+    datasets,
+    esClient,
+    spaceId,
+    force,
+    authorizationHeader,
+    kibanaVersion,
+  });
+
+  if (!res.error) {
+    const body: InstallPackageResponse = {
+      items: res.assets || [],
+      _meta: {
+        install_source: res.installSource,
+      },
+    };
+    return response.ok({ body });
+  } else {
+    return await defaultFleetErrorHandler({ error: res.error, response });
+  }
+};
 
 const bulkInstallServiceResponseToHttpEntry = (
   result: BulkInstallResponse
@@ -461,13 +491,6 @@ export const installPackageByUploadHandler: FleetRequestHandler<
   undefined,
   TypeOf<typeof InstallPackageByUploadRequestSchema.body>
 > = async (context, request, response) => {
-  if (!licenseService.isEnterprise()) {
-    return response.customError({
-      statusCode: 403,
-      body: { message: 'Requires Enterprise license' },
-    });
-  }
-
   const coreContext = await context.core;
   const fleetContext = await context.fleet;
   const savedObjectsClient = fleetContext.internalSoClient;
@@ -600,4 +623,30 @@ export const reauthorizeTransformsHandler: FleetRequestHandler<
   } catch (error) {
     return defaultFleetErrorHandler({ error, response });
   }
+};
+
+// Don't expose the whole SO in the API response, only selected fields
+const soToInstallationInfo = (pkg: PackageListItem | PackageInfo) => {
+  if ('savedObject' in pkg && pkg.savedObject?.attributes) {
+    const { attributes } = pkg.savedObject;
+    const installationInfo: InstallationInfo = {
+      ...pick(pkg.savedObject, ['created_at', 'updated_at', 'namespaces', 'type']),
+      installed_kibana: attributes.installed_kibana,
+      installed_kibana_space_id: attributes.installed_kibana_space_id,
+      installed_es: attributes.installed_es,
+      install_status: attributes.install_status,
+      install_source: attributes.install_source,
+      name: attributes.name,
+      version: attributes.version,
+      verification_status: attributes.verification_status,
+      verification_key_id: attributes.verification_key_id,
+      experimental_data_stream_features: attributes.experimental_data_stream_features,
+    };
+    return {
+      // When savedObject gets removed, replace `pkg` with `...omit(pkg, 'savedObject')`
+      ...pkg,
+      installationInfo,
+    };
+  }
+  return pkg;
 };

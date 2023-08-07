@@ -7,7 +7,7 @@
 
 import * as t from 'io-ts';
 
-const DefaultEmailType = t.intersection([
+const DefaultEmailCodec = t.intersection([
   t.type({
     to: t.array(t.string),
   }),
@@ -17,19 +17,7 @@ const DefaultEmailType = t.intersection([
   }),
 ]);
 
-export const DynamicSettingsType = t.intersection([
-  t.strict({
-    heartbeatIndices: t.string,
-    certAgeThreshold: t.number,
-    certExpirationThreshold: t.number,
-    defaultConnectors: t.array(t.string),
-  }),
-  t.partial({
-    defaultEmail: DefaultEmailType,
-  }),
-]);
-
-export const DynamicSettingsSaveType = t.intersection([
+export const DynamicSettingsSaveCodec = t.intersection([
   t.type({
     success: t.boolean,
   }),
@@ -38,13 +26,21 @@ export const DynamicSettingsSaveType = t.intersection([
   }),
 ]);
 
-export type DynamicSettings = t.TypeOf<typeof DynamicSettingsType>;
-export type DefaultEmail = t.TypeOf<typeof DefaultEmailType>;
-export type DynamicSettingsSaveResponse = t.TypeOf<typeof DynamicSettingsSaveType>;
+export const DynamicSettingsCodec = t.intersection([
+  t.strict({
+    heartbeatIndices: t.string,
+    certAgeThreshold: t.number,
+    certExpirationThreshold: t.number,
+    defaultConnectors: t.array(t.string),
+  }),
+  t.partial({
+    defaultEmail: DefaultEmailCodec,
+  }),
+]);
 
-// `DynamicSettingsAttributes` type helps isolate the Saved Object's attributes from API response object,
-// and it may likely be a duplicate of `DynamicSettings` initially.
-export type DynamicSettingsAttributes = t.TypeOf<typeof DynamicSettingsType>;
+export type DynamicSettings = t.TypeOf<typeof DynamicSettingsCodec>;
+export type DefaultEmail = t.TypeOf<typeof DefaultEmailCodec>;
+export type DynamicSettingsSaveResponse = t.TypeOf<typeof DynamicSettingsSaveCodec>;
 
 export const LocationMonitorsType = t.type({
   status: t.number,

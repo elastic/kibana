@@ -22,8 +22,8 @@ import { i18n } from '@kbn/i18n';
 import React, { useMemo, useState } from 'react';
 import { docLinks } from '../../../common/doc_links';
 import { PLUGIN_ID } from '../../../common';
-import { decodeCloudId } from '../../../common/services/decode_cloud_id';
 import { useKibanaServices } from '../hooks/use_kibana';
+import { API_KEY_PLACEHOLDER, ELASTICSEARCH_URL_PLACEHOLDER } from '../constants';
 import { CodeBox } from './code_box';
 import { javascriptDefinition } from './languages/javascript';
 import { languageDefinitions } from './languages/languages';
@@ -36,9 +36,6 @@ import { SelectClientPanel } from './overview_panels/select_client';
 import { ApiKeyPanel } from './api_key/api_key';
 import { LanguageClientPanel } from './overview_panels/language_client_panel';
 
-const ELASTICSEARCH_URL_PLACEHOLDER = 'https://your_deployment_url';
-const API_KEY_PLACEHOLDER = 'your_api_key';
-
 export const ElasticsearchOverview = () => {
   const [selectedLanguage, setSelectedLanguage] =
     useState<LanguageDefinition>(javascriptDefinition);
@@ -49,12 +46,9 @@ export const ElasticsearchOverview = () => {
     http,
     userProfile,
   } = useKibanaServices();
-  const cloudId = cloud.cloudId ?? '';
   const elasticsearchURL = useMemo(() => {
-    if (cloudId.length === 0) return ELASTICSEARCH_URL_PLACEHOLDER;
-    const decodedCloudId = decodeCloudId(cloudId);
-    return decodedCloudId?.elasticsearchUrl ?? ELASTICSEARCH_URL_PLACEHOLDER;
-  }, [cloudId]);
+    return cloud?.elasticsearchUrl ?? ELASTICSEARCH_URL_PLACEHOLDER;
+  }, [cloud]);
   const assetBasePath = http.basePath.prepend(`/plugins/${PLUGIN_ID}/assets/`);
   const codeSnippetArguments: LanguageDefinitionSnippetArguments = {
     url: elasticsearchURL,

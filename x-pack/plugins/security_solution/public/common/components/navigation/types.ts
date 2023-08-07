@@ -28,7 +28,8 @@ export type UrlStateType =
   | 'cloud_posture'
   | 'findings'
   | 'entity_analytics'
-  | 'data_quality';
+  | 'data_quality'
+  | 'coverage_overview';
 
 export interface NavTab {
   id: string;

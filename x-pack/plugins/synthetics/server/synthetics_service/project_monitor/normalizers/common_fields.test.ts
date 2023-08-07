@@ -108,6 +108,9 @@ describe('getNormalizeCommonFields', () => {
             status: {
               enabled: statusEnabled ?? true,
             },
+            tls: {
+              enabled: true,
+            },
           },
           custom_heartbeat_id: 'test-id-test-projectId-test-namespace',
           enabled: true,
@@ -167,6 +170,9 @@ describe('getNormalizeCommonFields', () => {
       normalizedFields: {
         alert: {
           status: {
+            enabled: true,
+          },
+          tls: {
             enabled: true,
           },
         },

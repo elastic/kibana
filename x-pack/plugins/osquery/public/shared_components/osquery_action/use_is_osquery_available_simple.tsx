@@ -9,6 +9,7 @@ import { useEffect, useState } from 'react';
 
 import { find } from 'lodash';
 import type { AgentPolicy, FleetServerAgent, NewPackagePolicy } from '@kbn/fleet-plugin/common';
+import { API_VERSIONS } from '../../../common/constants';
 import { useKibana } from '../../common/lib/kibana';
 import { OSQUERY_INTEGRATION_NAME } from '../../../common';
 
@@ -23,10 +24,12 @@ export const useIsOsqueryAvailableSimple = ({ agentId }: IProps) => {
     (async () => {
       try {
         const { item: agentInfo }: { item: FleetServerAgent } = await http.get(
-          `/internal/osquery/fleet_wrapper/agents/${agentId}`
+          `/internal/osquery/fleet_wrapper/agents/${agentId}`,
+          { version: API_VERSIONS.internal.v1 }
         );
         const { item: packageInfo }: { item: AgentPolicy } = await http.get(
-          `/internal/osquery/fleet_wrapper/agent_policies/${agentInfo.policy_id}`
+          `/internal/osquery/fleet_wrapper/agent_policies/${agentInfo.policy_id}`,
+          { version: API_VERSIONS.internal.v1 }
         );
         const osqueryPackageInstalled = find(packageInfo?.package_policies, [
           'package.name',

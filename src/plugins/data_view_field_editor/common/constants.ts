@@ -6,4 +6,6 @@
  * Side Public License, v 1.
  */
 
-export const API_BASE_PATH = '/api/index_pattern_field_editor';
+export const FIELD_PREVIEW_PATH = '/internal/data_view_field_editor/field_preview';
+
+export const INITIAL_REST_VERSION = '1';

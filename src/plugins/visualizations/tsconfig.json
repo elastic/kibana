@@ -42,7 +42,8 @@
     "@kbn/i18n-react",
     "@kbn/safer-lodash-set",
     "@kbn/shared-ux-page-analytics-no-data",
-    "@kbn/content-management-table-list",
+    "@kbn/content-management-table-list-view",
+    "@kbn/content-management-tabbed-table-list-view",
     "@kbn/test-jest-helpers",
     "@kbn/analytics",
     "@kbn/content-management-content-editor",
@@ -57,7 +58,11 @@
     "@kbn/core-saved-objects-api-server",
     "@kbn/object-versioning",
     "@kbn/core-saved-objects-server",
-    "@kbn/core-saved-objects-utils-server"
+    "@kbn/core-saved-objects-utils-server",
+    "@kbn/content-management-table-list-view-table",
+    "@kbn/content-management-tabbed-table-list-view",
+    "@kbn/content-management-table-list-view",
+    "@kbn/content-management-utils"
   ],
   "exclude": [
     "target/**/*",

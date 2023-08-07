@@ -205,17 +205,21 @@ export default function (program) {
   }
 
   command.action(async function (opts) {
+    const unknownOptions = this.getUnknownOptions();
     const configs = compileConfigStack({
       configOverrides: opts.config,
       devConfig: opts.devConfig,
       dev: opts.dev,
-      serverless: opts.serverless,
+      serverless: opts.serverless || unknownOptions.serverless,
     });
 
     const configsEvaluted = getConfigFromFiles(configs);
-    const isServerlessMode = !!(configsEvaluted.serverless || opts.serverless);
+    const isServerlessMode = !!(
+      configsEvaluted.serverless ||
+      opts.serverless ||
+      unknownOptions.serverless
+    );
 
-    const unknownOptions = this.getUnknownOptions();
     const cliArgs = {
       dev: !!opts.dev,
       envName: unknownOptions.env ? unknownOptions.env.name : undefined,

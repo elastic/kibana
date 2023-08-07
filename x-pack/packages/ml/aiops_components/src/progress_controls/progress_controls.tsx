@@ -26,33 +26,66 @@ import { useAnimatedProgressBarBackground } from './use_animated_progress_bar_ba
 // TODO Consolidate with duplicate component `CorrelationsProgressControls` in
 // `x-pack/plugins/apm/public/components/app/correlations/progress_controls.tsx`
 
+/**
+ * Props for ProgressControlProps
+ */
 interface ProgressControlProps {
+  isBrushCleared: boolean;
   progress: number;
   progressMessage: string;
   onRefresh: () => void;
   onCancel: () => void;
+  onReset: () => void;
   isRunning: boolean;
   shouldRerunAnalysis: boolean;
+  runAnalysisDisabled?: boolean;
 }
 
+/**
+ * ProgressControls React Component
+ * Component with ability to Run & cancel analysis
+ * by default use `Baseline` and `Deviation` for the badge name
+ * @type {FC<ProgressControlProps>}
+ * @param children - List of Kibana services that are required as dependencies
+ * @param brushSelectionUpdateHandler - Optional callback function which gets called the brush selection has changed
+ * @param width - Optional width
+ * @param chartPoints - Data chart points
+ * @param chartPointsSplit - Data chart points split
+ * @param timeRangeEarliest - Start time range for the chart
+ * @param timeRangeLatest - Ending time range for the chart
+ * @param interval - Time interval for the document count buckets
+ * @param chartPointsSplitLabel - Label to name the adjustedChartPointsSplit histogram
+ * @param isBrushCleared - Whether or not brush has been reset
+ * @param autoAnalysisStart - Timestamp for start of initial analysis
+ * @param barColorOverride - Optional color override for the default bar color for charts
+ * @param barStyleAccessor - Optional style to override bar chart
+ * @param barHighlightColorOverride - Optional color override for the highlighted bar color for charts
+ * @param deviationBrush - Optional settings override for the 'deviation' brush
+ * @param baselineBrush - Optional settings override for the 'baseline' brush
+ * @returns {React.ReactElement} The ProgressControls component.
+ */
 export const ProgressControls: FC<ProgressControlProps> = ({
   children,
+  isBrushCleared,
   progress,
   progressMessage,
   onRefresh,
   onCancel,
+  onReset,
   isRunning,
   shouldRerunAnalysis,
+  runAnalysisDisabled = false,
 }) => {
   const { euiTheme } = useEuiTheme();
   const runningProgressBarStyles = useAnimatedProgressBarBackground(euiTheme.colors.success);
   const analysisCompleteStyle = { display: 'none' };
 
   return (
-    <EuiFlexGroup alignItems="center">
+    <EuiFlexGroup alignItems="center" gutterSize="s">
       <EuiFlexItem grow={false}>
         {!isRunning && (
           <EuiButton
+            disabled={runAnalysisDisabled}
             data-test-subj={`aiopsRerunAnalysisButton${shouldRerunAnalysis ? ' shouldRerun' : ''}`}
             size="s"
             onClick={onRefresh}
@@ -89,9 +122,21 @@ export const ProgressControls: FC<ProgressControlProps> = ({
           </EuiButton>
         )}
       </EuiFlexItem>
+      {(progress === 1 || isRunning === false) && !isBrushCleared ? (
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            data-test-subj="aiopsClearSelectionBadge"
+            size="s"
+            onClick={onReset}
+            color="text"
+          >
+            <FormattedMessage id="xpack.aiops.resetLabel" defaultMessage="Reset" />
+          </EuiButton>
+        </EuiFlexItem>
+      ) : null}
       <EuiFlexItem>
         {progress === 1 ? (
-          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+          <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>
               <EuiIcon type="checkInCircleFilled" color={euiTheme.colors.success} />
             </EuiFlexItem>

@@ -7,22 +7,25 @@
 
 import rison from '@kbn/rison';
 import type { Query } from '@kbn/es-query';
-import { Filter } from '@kbn/es-query';
-import type { LensSavedObjectAttributes } from '@kbn/lens-plugin/public';
+import type { Filter } from '@kbn/es-query';
+import type { LensPublicStart, LensSavedObjectAttributes } from '@kbn/lens-plugin/public';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import type { TimefilterContract } from '@kbn/data-plugin/public';
+import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import { QuickLensJobCreator } from './quick_create_job';
-import { ml } from '../../../services/ml_api_service';
+import type { MlApiServices } from '../../../services/ml_api_service';
 
-import {
-  getUiSettings,
-  getSavedObjectsClient,
-  getTimefilter,
-  getShare,
-  getLens,
-} from '../../../util/dependency_cache';
 import { getDefaultQuery } from '../utils/new_job_utils';
 
+interface Dependencies {
+  lens: LensPublicStart;
+  kibanaConfig: IUiSettingsClient;
+  timeFilter: TimefilterContract;
+  dashboardService: DashboardStart;
+  mlApiServices: MlApiServices;
+}
 export async function resolver(
-  lensSavedObjectId: string | undefined,
+  deps: Dependencies,
   lensSavedObjectRisonString: string | undefined,
   fromRisonStrong: string,
   toRisonStrong: string,
@@ -30,12 +33,13 @@ export async function resolver(
   filtersRisonString: string,
   layerIndexRisonString: string
 ) {
-  let vis: LensSavedObjectAttributes;
-  if (lensSavedObjectId) {
-    vis = await getLensSavedObject(lensSavedObjectId);
-  } else if (lensSavedObjectRisonString) {
-    vis = rison.decode(lensSavedObjectRisonString) as unknown as LensSavedObjectAttributes;
-  } else {
+  const { lens, mlApiServices, timeFilter, kibanaConfig, dashboardService } = deps;
+  if (lensSavedObjectRisonString === undefined) {
+    throw new Error('Cannot create visualization');
+  }
+  const vis = rison.decode(lensSavedObjectRisonString) as unknown as LensSavedObjectAttributes;
+
+  if (!vis) {
     throw new Error('Cannot create visualization');
   }
 
@@ -72,17 +76,11 @@ export async function resolver(
   }
 
   const jobCreator = new QuickLensJobCreator(
-    getLens(),
-    getUiSettings(),
-    getTimefilter(),
-    getShare(),
-    ml
+    lens,
+    kibanaConfig,
+    timeFilter,
+    dashboardService,
+    mlApiServices
   );
   await jobCreator.createAndStashADJob(vis, from, to, query, filters, layerIndex);
-}
-
-async function getLensSavedObject(id: string) {
-  const savedObjectClient = getSavedObjectsClient();
-  const so = await savedObjectClient.get<LensSavedObjectAttributes>('lens', id);
-  return so.attributes;
 }

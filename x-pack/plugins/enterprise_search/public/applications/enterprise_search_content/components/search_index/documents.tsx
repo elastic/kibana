@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, ChangeEvent } from 'react';
+import React, { useEffect, useState, ChangeEvent } from 'react';
 
 import { useActions, useValues } from 'kea';
 
@@ -20,28 +20,83 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
+import {
+  CONNECTORS_ACCESS_CONTROL_INDEX_PREFIX,
+  ENTERPRISE_SEARCH_DOCUMENTS_DEFAULT_DOC_COUNT,
+} from '../../../../../common/constants';
+import { Status } from '../../../../../common/types/api';
+
+import { DEFAULT_META } from '../../../shared/constants';
+import { KibanaLogic } from '../../../shared/kibana';
+
+import { mappingsWithPropsApiLogic } from '../../api/mappings/mappings_logic';
+
+import { searchDocumentsApiLogic } from '../../api/search_documents/search_documents_api_logic';
+
+import {
+  AccessControlIndexSelector,
+  AccessControlSelectorOption,
+} from './components/access_control_index_selector/access_control_index_selector';
 import { DocumentList } from './components/document_list/document_list';
-import { DocumentsLogic, DEFAULT_PAGINATION } from './documents_logic';
-
 import { IndexNameLogic } from './index_name_logic';
-
-import './documents.scss';
 import { IndexViewLogic } from './index_view_logic';
+import './documents.scss';
+
+export const INDEX_DOCUMENTS_META_DEFAULT = {
+  page: {
+    current: 0,
+    size: ENTERPRISE_SEARCH_DOCUMENTS_DEFAULT_DOC_COUNT,
+    total_pages: 0,
+    total_results: 0,
+  },
+};
+
+export const DEFAULT_PAGINATION = {
+  pageIndex: INDEX_DOCUMENTS_META_DEFAULT.page.current,
+  pageSize: INDEX_DOCUMENTS_META_DEFAULT.page.size,
+  totalItemCount: INDEX_DOCUMENTS_META_DEFAULT.page.total_results,
+};
 
 export const SearchIndexDocuments: React.FC = () => {
   const { indexName } = useValues(IndexNameLogic);
-  const { ingestionMethod } = useValues(IndexViewLogic);
-  const { simplifiedMapping } = useValues(DocumentsLogic);
-  const { makeRequest, makeMappingRequest, setSearchQuery } = useActions(DocumentsLogic);
+  const { ingestionMethod, hasDocumentLevelSecurityFeature } = useValues(IndexViewLogic);
+  const { productFeatures } = useValues(KibanaLogic);
+
+  const [selectedIndexType, setSelectedIndexType] =
+    useState<AccessControlSelectorOption['value']>('content-index');
+  const indexToShow =
+    selectedIndexType === 'content-index'
+      ? indexName
+      : indexName.replace('search-', CONNECTORS_ACCESS_CONTROL_INDEX_PREFIX);
+  const mappingLogic = mappingsWithPropsApiLogic(indexToShow);
+  const documentLogic = searchDocumentsApiLogic(indexToShow);
+
+  const { makeRequest: getDocuments } = useActions(documentLogic);
+  const { makeRequest: getMappings } = useActions(mappingLogic);
+  const { data, status } = useValues(documentLogic);
+  const { data: mappingData, status: mappingStatus } = useValues(mappingLogic);
+
+  const docs = data?.results?.hits.hits ?? [];
+
+  const [pagination, setPagination] = useState(DEFAULT_PAGINATION);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const shouldShowAccessControlSwitcher =
+    hasDocumentLevelSecurityFeature && productFeatures.hasDocumentLevelSecurityEnabled;
 
   useEffect(() => {
-    makeRequest({
-      indexName,
-      pagination: DEFAULT_PAGINATION,
-      query: '',
+    getDocuments({
+      indexName: indexToShow,
+      pagination,
+      query: searchQuery,
     });
-    makeMappingRequest({ indexName });
-  }, [indexName]);
+  }, [indexToShow, pagination, searchQuery]);
+
+  useEffect(() => {
+    setSearchQuery('');
+    setPagination(DEFAULT_PAGINATION);
+    getMappings({ indexName: indexToShow });
+  }, [indexToShow]);
 
   return (
     <EuiPanel hasBorder={false} hasShadow={false} paddingSize="none">
@@ -58,6 +113,14 @@ export const SearchIndexDocuments: React.FC = () => {
                 </h2>
               </EuiTitle>
             </EuiFlexItem>
+            {shouldShowAccessControlSwitcher && (
+              <EuiFlexItem grow={false}>
+                <AccessControlIndexSelector
+                  onChange={setSelectedIndexType}
+                  valueOfSelected={selectedIndexType}
+                />
+              </EuiFlexItem>
+            )}
             <EuiFlexItem>
               <EuiFieldSearch
                 data-telemetry-id={`entSearchContent-${ingestionMethod}-documents-searchDocuments`}
@@ -77,11 +140,21 @@ export const SearchIndexDocuments: React.FC = () => {
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem>
-          {!simplifiedMapping &&
+          {docs.length === 0 &&
             i18n.translate('xpack.enterpriseSearch.content.searchIndex.documents.noMappings', {
               defaultMessage: 'No documents found for index',
             })}
-          {simplifiedMapping && <DocumentList />}
+          {docs.length > 0 && (
+            <DocumentList
+              docs={docs}
+              docsPerPage={pagination.pageSize}
+              isLoading={status !== Status.SUCCESS && mappingStatus !== Status.SUCCESS}
+              mappings={mappingData?.mappings?.properties ?? {}}
+              meta={data?.meta ?? DEFAULT_META}
+              onPaginate={(pageIndex) => setPagination({ ...pagination, pageIndex })}
+              setDocsPerPage={(pageSize) => setPagination({ ...pagination, pageSize })}
+            />
+          )}
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>

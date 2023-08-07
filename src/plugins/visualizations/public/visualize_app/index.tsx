@@ -8,7 +8,7 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Router } from 'react-router-dom';
+import { Router } from '@kbn/shared-ux-router';
 
 import { AppMountParameters } from '@kbn/core/public';
 import {
@@ -17,7 +17,7 @@ import {
   toMountPoint,
 } from '@kbn/kibana-react-plugin/public';
 import { FormattedRelative } from '@kbn/i18n-react';
-import { TableListViewKibanaProvider } from '@kbn/content-management-table-list';
+import { TableListViewKibanaProvider } from '@kbn/content-management-table-list-view-table';
 import { VisualizeApp } from './app';
 import { VisualizeServices } from './types';
 import { addHelpMenuToAppChrome, addBadgeToAppChrome } from './utils';

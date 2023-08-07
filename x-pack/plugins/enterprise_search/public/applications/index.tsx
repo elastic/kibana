@@ -8,7 +8,6 @@
 import React, { FC } from 'react';
 import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
-import { Router } from 'react-router-dom';
 
 import { getContext, resetContext } from 'kea';
 import { Store } from 'redux';
@@ -17,6 +16,7 @@ import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { I18nProvider } from '@kbn/i18n-react';
 
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { Router } from '@kbn/shared-ux-router';
 
 import { DEFAULT_PRODUCT_FEATURES } from '../../common/constants';
 import { ClientConfigType, InitialAppData, ProductAccess } from '../../common/types';
@@ -66,7 +66,7 @@ export const renderApp = (
   const { history } = params;
   const { application, chrome, http, uiSettings } = core;
   const { capabilities, navigateToUrl } = application;
-  const { charts, cloud, guidedOnboarding, lens, security } = plugins;
+  const { charts, cloud, guidedOnboarding, lens, security, share } = plugins;
 
   const entCloudHost = getCloudEnterpriseSearchHost(plugins.cloud);
   externalUrl.enterpriseSearchUrl = publicUrl || entCloudHost || config.host || '';
@@ -107,6 +107,7 @@ export const renderApp = (
     setBreadcrumbs: chrome.setBreadcrumbs,
     setChromeIsVisible: chrome.setIsVisible,
     setDocTitle: chrome.docTitle.change,
+    share,
     uiSettings,
   });
   const unmountLicensingLogic = mountLicensingLogic({

@@ -11,11 +11,13 @@ export default function ({ getService }: FtrProviderContext) {
   const svlCommonApi = getService('svlCommonApi');
   const supertest = getService('supertest');
 
-  describe('security/users', function () {
+  // Test should be unskipped when the API is disabled
+  // https://github.com/elastic/kibana/issues/161337
+  describe.skip('security/users', function () {
     it('rejects request to create user', async () => {
       const { body, status } = await supertest
         .post(`/internal/security/users/some_testuser`)
-        .set(svlCommonApi.getCommonRequestHeader())
+        .set(svlCommonApi.getInternalRequestHeader())
         .send({ username: 'some_testuser', password: 'testpassword', roles: [] });
 
       // in a non-serverless environment this would succeed with a 200

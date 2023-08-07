@@ -1,7 +1,7 @@
 [[run-pattern-analysis-discover]]
 == Run a pattern analysis on your log data
 
-preview::[]
+preview::["This functionality is in technical preview, requires a link:https://www.elastic.co/subscriptions[Platinum subscription], and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features."]
 
 include::../user/ml/index.asciidoc[tag=log-pattern-analysis-intro]
 Log pattern analysis works on every text field.

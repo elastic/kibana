@@ -27,6 +27,16 @@ const SAMPLE_SOURCEMAP = {
   mappings: 'A,AAAB;;ABCDE;',
 };
 
+const SAMPLE_ANDROID_MAP = `# compiler: R8
+# compiler_version: 3.2.47
+# min_api: 26
+# common_typos_disable
+# {"id":"com.android.tools.r8.mapping","version":"2.0"}
+# pg_map_id: 127b14c
+# pg_map_hash: SHA-256 127b14c0be5dd1b55beee544a8d0e7c9414b432868ed8bc54ca5cc43cba12435
+a1.TableInfo$ForeignKey$$ExternalSyntheticOutline0 -> a1.e:
+# {"id":"sourceFile","fileName":"R8$$SyntheticClass"}`;
+
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
   const apmApiClient = getService('apmApiClient');
@@ -85,7 +95,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     sourcemap: SourceMap;
   }) {
     const response = await apmApiClient.writeUser({
-      endpoint: 'POST /api/apm/sourcemaps 2023-05-22',
+      endpoint: 'POST /api/apm/sourcemaps 2023-10-31',
       type: 'form-data',
       params: {
         body: {
@@ -99,6 +109,28 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     return response.body;
   }
 
+  async function uploadAndroidMap({
+    serviceName,
+    serviceVersion,
+    androidMap,
+  }: {
+    serviceName: string;
+    serviceVersion: string;
+    androidMap: string;
+  }) {
+    const response = await apmApiClient.writeUser({
+      endpoint: 'POST /api/apm/androidmaps 2023-10-31',
+      type: 'form-data',
+      params: {
+        body: {
+          service_name: serviceName,
+          service_version: serviceVersion,
+          map_file: androidMap,
+        },
+      },
+    });
+    return response.body;
+  }
   async function runSourceMapMigration() {
     await apmApiClient.writeUser({
       endpoint: 'POST /internal/apm/sourcemaps/migrate_fleet_artifacts',
@@ -107,7 +139,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   async function deleteSourcemap(id: string) {
     await apmApiClient.writeUser({
-      endpoint: 'DELETE /api/apm/sourcemaps/{id} 2023-05-22',
+      endpoint: 'DELETE /api/apm/sourcemaps/{id} 2023-10-31',
       params: { path: { id } },
     });
   }
@@ -116,7 +148,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     const query = page && perPage ? { page, perPage } : {};
 
     const response = await apmApiClient.readUser({
-      endpoint: 'GET /api/apm/sourcemaps 2023-05-22',
+      endpoint: 'GET /api/apm/sourcemaps 2023-10-31',
       params: { query },
     });
     return response.body;
@@ -128,6 +160,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       await Promise.all([deleteAllFleetSourceMaps(), deleteAllApmSourceMaps()]);
     });
 
+    async function getDecodedMapContent(encodedContent?: string): Promise<string | undefined> {
+      if (encodedContent) {
+        return (await unzip(Buffer.from(encodedContent, 'base64'))).toString();
+      }
+    }
+
     async function getDecodedSourceMapContent(
       encodedContent?: string
     ): Promise<SourceMap | undefined> {
@@ -136,11 +174,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       }
     }
 
-    let resp: APIReturnType<'POST /api/apm/sourcemaps 2023-05-22'>;
+    let resp: APIReturnType<'POST /api/apm/sourcemaps 2023-10-31'>;
     describe('upload source map', () => {
       after(async () => {
         await apmApiClient.writeUser({
-          endpoint: 'DELETE /api/apm/sourcemaps/{id} 2023-05-22',
+          endpoint: 'DELETE /api/apm/sourcemaps/{id} 2023-10-31',
           params: { path: { id: resp.id } },
         });
       });
@@ -235,6 +273,111 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
           expect(contentBefore?.sourceRoot).to.be('');
           expect(contentAfter?.sourceRoot).to.be('changed-source-root');
+        });
+
+        it('updates the content hash', async () => {
+          expect(resBefore._source?.content_sha256).to.not.be(resAfter._source?.content_sha256);
+        });
+      });
+    });
+
+    let androidResp: APIReturnType<'POST /api/apm/androidmaps 2023-10-31'>;
+    describe('upload android map', () => {
+      after(async () => {
+        await apmApiClient.writeUser({
+          endpoint: 'DELETE /api/apm/sourcemaps/{id} 2023-10-31',
+          params: { path: { id: androidResp.id } },
+        });
+      });
+
+      before(async () => {
+        androidResp = await uploadAndroidMap({
+          serviceName: 'uploading-test',
+          serviceVersion: '1.0.0',
+          androidMap: SAMPLE_ANDROID_MAP,
+        });
+
+        await waitForSourceMapCount(1);
+      });
+
+      it('is uploaded as a fleet artifact', async () => {
+        const res = await esClient.search({
+          index: '.fleet-artifacts',
+          size: 1,
+          query: {
+            bool: {
+              filter: [{ term: { type: 'sourcemap' } }, { term: { package_name: 'apm' } }],
+            },
+          },
+        });
+
+        // @ts-expect-error
+        expect(res.hits.hits[0]._source.identifier).to.be('uploading-test-1.0.0-android');
+      });
+
+      it('is added to .apm-source-map index', async () => {
+        const res = await esClient.search<ApmSourceMap>({
+          index: '.apm-source-map',
+        });
+
+        const source = res.hits.hits[0]._source;
+        const decodedSourceMap = await getDecodedMapContent(source?.content);
+        expect(decodedSourceMap).to.eql(SAMPLE_ANDROID_MAP);
+        expect(source?.content_sha256).to.be(
+          '702e07279b0fbed47fdbf5e71528dff845b4f07a16ca79cab0c1b06eb71be966'
+        );
+        expect(source?.file.path).to.be('android');
+        expect(source?.service.name).to.be('uploading-test');
+        expect(source?.service.version).to.be('1.0.0');
+      });
+
+      describe('when uploading a new android map with the same service.name and service.version', () => {
+        let resBefore: GetResponse<ApmSourceMap>;
+        let resAfter: GetResponse<ApmSourceMap>;
+
+        before(async () => {
+          async function getSourceMapDocFromApmIndex() {
+            await esClient.indices.refresh({ index: '.apm-source-map' });
+            return await esClient.get<ApmSourceMap>({
+              index: '.apm-source-map',
+              id: 'uploading-test-1.0.0-android',
+            });
+          }
+
+          resBefore = await getSourceMapDocFromApmIndex();
+
+          await uploadAndroidMap({
+            serviceName: 'uploading-test',
+            serviceVersion: '1.0.0',
+            androidMap: '# compiler: R8\n# ANOTHER MAP',
+          });
+
+          resAfter = await getSourceMapDocFromApmIndex();
+        });
+
+        after(async () => {
+          await deleteAllApmSourceMaps();
+          await deleteAllFleetSourceMaps();
+        });
+
+        it('creates one document in the .apm-source-map index', async () => {
+          const res = await esClient.search<ApmSourceMap>({ index: '.apm-source-map', size: 0 });
+
+          // @ts-expect-error
+          expect(res.hits.total.value).to.be(1);
+        });
+
+        it('creates two documents in the .fleet-artifacts index', async () => {
+          const res = await listSourcemaps({ page: 1, perPage: 10 });
+          expect(res.total).to.be(2);
+        });
+
+        it('updates the content', async () => {
+          const contentBefore = await getDecodedMapContent(resBefore._source?.content);
+          const contentAfter = await getDecodedMapContent(resAfter._source?.content);
+
+          expect(contentBefore).to.be(SAMPLE_ANDROID_MAP);
+          expect(contentAfter).to.be('# compiler: R8\n# ANOTHER MAP');
         });
 
         it('updates the content hash', async () => {

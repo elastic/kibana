@@ -20,7 +20,7 @@ import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_fe
 import { useKibana } from '../../lib/kibana';
 import { EventsViewType } from './event_details';
 import * as i18n from './translations';
-import { RESPONSE_ACTION_TYPES } from '../../../../common/detection_engine/rule_response_actions/schemas/response_actions';
+import { RESPONSE_ACTION_TYPES } from '../../../../common/api/detection_engine/model/rule_response_actions';
 
 const TabContentWrapper = styled.div`
   height: 100%;
@@ -80,7 +80,7 @@ export const useOsqueryTab = ({
 
   const actionItems = actionsData?.data.items || [];
 
-  const ruleName = expandedEventFieldsObject?.kibana?.alert?.rule?.name;
+  const ruleName = expandedEventFieldsObject?.kibana?.alert?.rule?.name?.[0];
 
   const content = (
     <TabContentWrapper data-test-subj="osqueryViewWrapper">

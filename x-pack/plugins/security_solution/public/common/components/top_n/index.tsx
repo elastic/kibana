@@ -83,7 +83,6 @@ export interface OwnProps {
   onFilterAdded?: () => void;
   paddingSize?: 's' | 'm' | 'l' | 'none';
   showLegend?: boolean;
-  value?: string[] | string | null;
   globalFilters?: Filter[];
 }
 type PropsFromRedux = ConnectedProps<typeof connector>;
@@ -107,7 +106,6 @@ const StatefulTopNComponent: React.FC<Props> = ({
   showLegend,
   scopeId,
   toggleTopN,
-  value,
 }) => {
   const { uiSettings } = useKibana().services;
   const { from, deleteQuery, setQuery, to } = useGlobalTime();
@@ -169,7 +167,6 @@ const StatefulTopNComponent: React.FC<Props> = ({
       to={isActiveTimeline(scopeId ?? '') ? activeTimelineTo : to}
       toggleTopN={toggleTopN}
       onFilterAdded={onFilterAdded}
-      value={value}
     />
   );
 };

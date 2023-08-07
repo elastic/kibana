@@ -15,6 +15,7 @@ describe('ManagedUser', () => {
   const mockProps = {
     managedUser: mockManagedUser,
     contextID: '',
+    scopeId: '',
     isDraggable: false,
   };
 

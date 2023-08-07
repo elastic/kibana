@@ -18,57 +18,24 @@ import {
   EuiText,
   EuiLink,
   EuiButton,
-  EuiConfirmModal,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { CANCEL_BUTTON_LABEL } from '../../../../../shared/constants';
-
 import { docLinks } from '../../../../../shared/doc_links';
+
+import { ConvertConnectorModal } from '../../../shared/convert_connector_modal/convert_connector_modal';
 
 import { ConvertConnectorLogic } from './convert_connector_logic';
 
 export const ConvertConnector: React.FC = () => {
-  const { convertConnector, hideModal, showModal } = useActions(ConvertConnectorLogic);
-  const { isLoading, isModalVisible } = useValues(ConvertConnectorLogic);
+  const { showModal } = useActions(ConvertConnectorLogic);
+  const { isModalVisible } = useValues(ConvertConnectorLogic);
 
   return (
     <>
-      {isModalVisible && (
-        <EuiConfirmModal
-          onCancel={() => hideModal()}
-          onConfirm={() => convertConnector()}
-          title={i18n.translate(
-            'xpack.enterpriseSearch.content.engine.indices.convertInfexConfirm.title',
-            { defaultMessage: 'Sure you want to convert your connector?' }
-          )}
-          buttonColor="danger"
-          cancelButtonText={CANCEL_BUTTON_LABEL}
-          confirmButtonText={i18n.translate(
-            'xpack.enterpriseSearch.content.engine.indices.convertIndexConfirm.text',
-            {
-              defaultMessage: 'Yes',
-            }
-          )}
-          isLoading={isLoading}
-          defaultFocusedButton="confirm"
-          maxWidth
-        >
-          <EuiText>
-            <p>
-              {i18n.translate(
-                'xpack.enterpriseSearch.content.engine.indices.convertIndexConfirm.description',
-                {
-                  defaultMessage:
-                    "Once you convert a native connector to a self-managed connector client this can't be undone.",
-                }
-              )}
-            </p>
-          </EuiText>
-        </EuiConfirmModal>
-      )}
+      {isModalVisible && <ConvertConnectorModal />}
       <EuiFlexGroup direction="row" alignItems="center" gutterSize="xs">
         <EuiFlexItem grow={false}>
           <EuiIcon type="wrench" />

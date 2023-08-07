@@ -16,7 +16,6 @@ import { Legacy } from '../../legacy_shims';
 export interface EnableAlertResponse {
   isSufficientlySecure?: boolean;
   hasPermanentEncryptionKey?: boolean;
-  disabledWatcherClusterAlerts?: boolean;
 }
 
 const showApiKeyAndEncryptionError = (theme$?: Observable<CoreTheme>) => {
@@ -46,39 +45,12 @@ const showApiKeyAndEncryptionError = (theme$?: Observable<CoreTheme>) => {
   });
 };
 
-const showUnableToDisableWatcherClusterAlertsError = (theme$?: Observable<CoreTheme>) => {
-  const settingsUrl = Legacy.shims.docLinks.links.alerting.generalSettings;
-
+const showAlertsCreatedConfirmation = () => {
   Legacy.shims.toastNotifications.addWarning({
-    title: i18n.translate('xpack.monitoring.healthCheck.unableToDisableWatches.title', {
-      defaultMessage: 'Legacy cluster alerts still active',
-    }),
-    text: toMountPoint(
-      <div>
-        <p>
-          {i18n.translate('xpack.monitoring.healthCheck.unableToDisableWatches.text', {
-            defaultMessage:
-              'We failed to remove legacy cluster alerts. Please check the Kibana server log for more details, or try again later.',
-          })}
-        </p>
-        <EuiSpacer size="xs" />
-        <EuiLink href={settingsUrl} external target="_blank">
-          {i18n.translate('xpack.monitoring.healthCheck.unableToDisableWatches.action', {
-            defaultMessage: 'Learn more.',
-          })}
-        </EuiLink>
-      </div>,
-      { theme$ }
-    ),
-  });
-};
-
-const showDisabledWatcherClusterAlertsError = () => {
-  Legacy.shims.toastNotifications.addWarning({
-    title: i18n.translate('xpack.monitoring.healthCheck.disabledWatches.title', {
+    title: i18n.translate('xpack.monitoring.healthCheck.alertsCreatedConfirmation.title', {
       defaultMessage: 'New alerts created',
     }),
-    text: i18n.translate('xpack.monitoring.healthCheck.disabledWatches.text', {
+    text: i18n.translate('xpack.monitoring.healthCheck.alertsCreatedConfirmation.text', {
       defaultMessage:
         'Review the alert definition using Setup mode and configure additional action connectors to get notified via your favorite method.',
     }),
@@ -87,14 +59,11 @@ const showDisabledWatcherClusterAlertsError = () => {
 };
 
 export const showAlertsToast = (response: EnableAlertResponse, theme$?: Observable<CoreTheme>) => {
-  const { isSufficientlySecure, hasPermanentEncryptionKey, disabledWatcherClusterAlerts } =
-    response;
+  const { isSufficientlySecure, hasPermanentEncryptionKey } = response;
 
   if (isSufficientlySecure === false || hasPermanentEncryptionKey === false) {
     showApiKeyAndEncryptionError(theme$);
-  } else if (disabledWatcherClusterAlerts === false) {
-    showUnableToDisableWatcherClusterAlertsError(theme$);
-  } else if (disabledWatcherClusterAlerts === true) {
-    showDisabledWatcherClusterAlertsError();
+  } else {
+    showAlertsCreatedConfirmation();
   }
 };

@@ -26,7 +26,7 @@ export function createTestConfig(options: CreateTestConfigOptions) {
         ...svlSharedConfig.get('kbnTestServer'),
         serverArgs: [
           ...svlSharedConfig.get('kbnTestServer.serverArgs'),
-          `--serverless${options.serverlessProject ? `=${options.serverlessProject}` : ''}`,
+          `--serverless=${options.serverlessProject}`,
         ],
       },
       testFiles: options.testFiles,
@@ -52,11 +52,16 @@ export function createTestConfig(options: CreateTestConfigOptions) {
         observability: {
           pathname: '/app/observability',
         },
+        management: {
+          pathname: '/app/management',
+        },
       },
       // choose where screenshots should be saved
       screenshots: {
         directory: resolve(__dirname, 'screenshots'),
       },
+      junit: options.junit,
+      suiteTags: options.suiteTags,
     };
   };
 }

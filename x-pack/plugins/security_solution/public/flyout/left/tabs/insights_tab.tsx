@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useState } from 'react';
+import React, { memo, useCallback, useState } from 'react';
 
 import { EuiButtonGroup, EuiSpacer } from '@elastic/eui';
 import type { EuiButtonGroupOptionProps } from '@elastic/eui/src/components/button/button_group/button_group';
@@ -68,9 +68,10 @@ const insightsButtons: EuiButtonGroupOptionProps[] = [
  */
 export const InsightsTab: React.FC = memo(() => {
   const [activeInsightsId, setActiveInsightsId] = useState(ENTITIES_TAB_ID);
-  const onChangeCompressed = (optionId: string) => {
+
+  const onChangeCompressed = useCallback((optionId: string) => {
     setActiveInsightsId(optionId);
-  };
+  }, []);
 
   return (
     <>
@@ -80,7 +81,7 @@ export const InsightsTab: React.FC = memo(() => {
         legend={INSIGHTS_BUTTONGROUP_OPTIONS}
         options={insightsButtons}
         idSelected={activeInsightsId}
-        onChange={(id) => onChangeCompressed(id)}
+        onChange={onChangeCompressed}
         buttonSize="compressed"
         isFullWidth
         data-test-subj={INSIGHTS_TAB_BUTTON_GROUP_TEST_ID}

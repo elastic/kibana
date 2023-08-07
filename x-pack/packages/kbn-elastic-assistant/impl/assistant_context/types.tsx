@@ -45,14 +45,14 @@ export interface ConversationTheme {
 export interface Conversation {
   apiConfig: {
     connectorId?: string;
+    defaultSystemPromptId?: string;
     provider?: OpenAiProviderType;
+    model?: string;
   };
   id: string;
   messages: Message[];
+  replacements?: Record<string, string>;
   theme?: ConversationTheme;
-}
-
-export interface OpenAIConfig {
-  temperature: number;
-  model: string;
+  isDefault?: boolean;
+  excludeFromLastConversationStorage?: boolean;
 }

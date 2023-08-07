@@ -62,7 +62,10 @@ export const NativeConnectorConfiguration: React.FC = () => {
 
   const hasDescription = !!index.connector.description;
   const hasConfigured = hasConfiguredConfiguration(index.connector.configuration);
-  const hasConfiguredAdvanced = index.connector.last_synced || index.connector.scheduling.enabled;
+  const hasConfiguredAdvanced =
+    index.connector.last_synced ||
+    index.connector.scheduling.full.enabled ||
+    index.connector.scheduling.incremental.enabled;
   const hasResearched = hasDescription || hasConfigured || hasConfiguredAdvanced;
   const icon = nativeConnector.icon;
 

@@ -17,12 +17,16 @@ import { buildRouteValidationWithExcess } from '../../../../../utils/build_valid
 import { buildSiemResponse } from '../../../../detection_engine/routes/utils';
 
 import { buildFrameworkRequest } from '../../../utils/common';
-import { getTimelineQuerySchema } from '../../../schemas/timelines';
+import { getTimelineQuerySchema } from '../../../../../../common/api/timeline';
 import { getTimelineTemplateOrNull, getTimelineOrNull } from '../../../saved_object/timelines';
+import type {
+  TimelineSavedObject,
+  ResolvedTimelineWithOutcomeSavedObject,
+} from '../../../../../../common/api/timeline';
 
 export const getTimelineRoute = (
   router: SecuritySolutionPluginRouter,
-  config: ConfigType,
+  _: ConfigType,
   security: SetupPlugins['security']
 ) => {
   router.get(
@@ -41,7 +45,7 @@ export const getTimelineRoute = (
         const query = request.query ?? {};
         const { template_timeline_id: templateTimelineId, id } = query;
 
-        let res = null;
+        let res: TimelineSavedObject | ResolvedTimelineWithOutcomeSavedObject | null = null;
 
         if (templateTimelineId != null && id == null) {
           res = await getTimelineTemplateOrNull(frameworkRequest, templateTimelineId);

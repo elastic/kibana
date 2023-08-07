@@ -10,6 +10,7 @@ import { CoreSetup, CoreStart, Plugin, Logger, PluginInitializerContext } from '
 
 import { LicenseType } from '@kbn/licensing-plugin/common/types';
 
+import { registerCollector } from './usage';
 import { setupCapabilities } from './capabilities';
 import { PluginSetupDependencies, PluginStartDependencies } from './types';
 import { registerRoutes } from './routes';
@@ -38,7 +39,13 @@ export class TransformServerPlugin implements Plugin<{}, void, any, any> {
 
   setup(
     coreSetup: CoreSetup<PluginStartDependencies>,
-    { licensing, features, alerting, security: securitySetup }: PluginSetupDependencies
+    {
+      licensing,
+      features,
+      alerting,
+      security: securitySetup,
+      usageCollection,
+    }: PluginSetupDependencies
   ): {} {
     const { http, getStartServices } = coreSetup;
 
@@ -77,6 +84,12 @@ export class TransformServerPlugin implements Plugin<{}, void, any, any> {
         coreStart,
         security: securityStart,
       });
+
+      const alertIndex = coreStart.savedObjects.getIndexForType('alert');
+
+      if (usageCollection) {
+        registerCollector(usageCollection, alertIndex);
+      }
     });
 
     if (alerting) {

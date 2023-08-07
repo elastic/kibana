@@ -6,8 +6,7 @@
  */
 
 import React from 'react';
-import { Switch } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
+import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 import {
@@ -32,12 +31,12 @@ const AlertsRoute = () => (
 const AlertsContainerComponent: React.FC = () => {
   useReadonlyHeader(i18n.READ_ONLY_BADGE_TOOLTIP);
   return (
-    <Switch>
+    <Routes>
       <Route path={ALERTS_PATH} exact component={AlertsRoute} />
       {/* Redirect to the alerts page filtered for the given alert id */}
       <Route path={`${ALERT_DETAILS_REDIRECT_PATH}/:alertId`} component={AlertDetailsRedirect} />
       <Route component={NotFoundPage} />
-    </Switch>
+    </Routes>
   );
 };
 

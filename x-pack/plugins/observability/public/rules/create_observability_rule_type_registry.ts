@@ -16,7 +16,7 @@ import { AsDuration, AsPercent } from '../../common/utils/formatters';
 export type ObservabilityRuleTypeFormatter = (options: {
   fields: ParsedTechnicalFields & Record<string, any>;
   formatters: { asDuration: AsDuration; asPercent: AsPercent };
-}) => { reason: string; link: string };
+}) => { reason: string; link?: string };
 
 export interface ObservabilityRuleTypeModel<Params extends RuleTypeParams = RuleTypeParams>
   extends RuleTypeModel<Params> {

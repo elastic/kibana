@@ -8,7 +8,7 @@
 import { ServiceLocationErrors, SyntheticsMonitor } from '../../../../../common/runtime_types';
 import { TestNowResponse } from '../../../../../common/types';
 import { apiService } from '../../../../utils/api_service';
-import { API_URLS } from '../../../../../common/constants';
+import { SYNTHETICS_API_URLS } from '../../../../../common/constants';
 
 export const triggerTestNowMonitor = async ({
   configId,
@@ -16,7 +16,7 @@ export const triggerTestNowMonitor = async ({
   configId: string;
   name: string;
 }): Promise<TestNowResponse | undefined> => {
-  return await apiService.get(API_URLS.TRIGGER_MONITOR + `/${configId}`);
+  return await apiService.get(SYNTHETICS_API_URLS.TRIGGER_MONITOR + `/${configId}`);
 };
 
 export const runOnceMonitor = async ({
@@ -26,5 +26,5 @@ export const runOnceMonitor = async ({
   monitor: SyntheticsMonitor;
   id: string;
 }): Promise<{ errors: ServiceLocationErrors }> => {
-  return await apiService.post(API_URLS.RUN_ONCE_MONITOR + `/${id}`, monitor);
+  return await apiService.post(SYNTHETICS_API_URLS.RUN_ONCE_MONITOR + `/${id}`, monitor);
 };

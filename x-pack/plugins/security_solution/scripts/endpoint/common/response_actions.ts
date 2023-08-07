@@ -209,8 +209,9 @@ export const sendEndpointActionResponse = async (
     const fileMeta = await esClient.index({
       index: FILE_STORAGE_METADATA_INDEX,
       id: getFileDownloadId(action, action.agents[0]),
-      body: fileMetaDoc,
+      op_type: 'create',
       refresh: 'wait_for',
+      body: fileMetaDoc,
     });
 
     // Index the file content (just one chunk)
@@ -224,12 +225,14 @@ export const sendEndpointActionResponse = async (
           document: cborx.encode({
             bid: fileMeta._id,
             last: true,
+            '@timestamp': new Date().toISOString(),
             data: Buffer.from(
               'UEsDBAoACQAAAFZeRFWpAsDLHwAAABMAAAAMABwAYmFkX2ZpbGUudHh0VVQJAANTVjxjU1Y8Y3V4CwABBPUBAAAEFAAAAMOcoyEq/Q4VyG02U9O0LRbGlwP/y5SOCfRKqLz1rsBQSwcIqQLAyx8AAAATAAAAUEsBAh4DCgAJAAAAVl5EVakCwMsfAAAAEwAAAAwAGAAAAAAAAQAAAKSBAAAAAGJhZF9maWxlLnR4dFVUBQADU1Y8Y3V4CwABBPUBAAAEFAAAAFBLBQYAAAAAAQABAFIAAAB1AAAAAAA=',
               'base64'
             ),
           }),
           refresh: 'wait_for',
+          op_type: 'create',
         },
         {
           headers: {
@@ -360,6 +363,6 @@ export function updateActionDoc<T = unknown>(esClient: Client, id: string, doc: 
     index: AGENT_ACTIONS_INDEX,
     id,
     doc,
-    refresh: true,
+    refresh: 'wait_for',
   });
 }

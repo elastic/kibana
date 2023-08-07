@@ -10,7 +10,7 @@ import type { Client } from '@elastic/elasticsearch';
 import { KbnClient, uriencode } from '@kbn/test';
 import pMap from 'p-map';
 import { SyntheticsMonitor } from '../../../../common/runtime_types';
-import { API_URLS, SYNTHETICS_API_URLS } from '../../../../common/constants';
+import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import { journeyStart, journeySummary, step1, step2 } from './data/browser_docs';
 import { firstDownHit, getUpHit } from './data/sample_docs';
 
@@ -28,13 +28,13 @@ export class SyntheticsServices {
     try {
       const { data } = await this.requester.request({
         description: 'get monitor by id',
-        path: API_URLS.GET_SYNTHETICS_MONITOR.replace('{monitorId}', monitorId),
+        path: SYNTHETICS_API_URLS.GET_SYNTHETICS_MONITOR.replace('{monitorId}', monitorId),
         query: {
           decrypted: true,
         },
         method: 'GET',
       });
-      return (data as { attributes: SyntheticsMonitor })?.attributes;
+      return data as SyntheticsMonitor;
     } catch (e) {
       // eslint-disable-next-line no-console
       console.log(e);
@@ -44,7 +44,7 @@ export class SyntheticsServices {
 
   async enableMonitorManagedViaApi() {
     try {
-      await axios.post(this.kibanaUrl + '/internal/uptime/service/enablement', undefined, {
+      await axios.put(this.kibanaUrl + SYNTHETICS_API_URLS.SYNTHETICS_ENABLEMENT, undefined, {
         auth: { username: 'elastic', password: 'changeme' },
         headers: { 'kbn-xsrf': 'true' },
       });
@@ -70,8 +70,8 @@ export class SyntheticsServices {
       const response = await axios.post(
         this.kibanaUrl +
           (configId
-            ? `/internal/uptime/service/monitors?id=${configId}`
-            : `/internal/uptime/service/monitors`),
+            ? `${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}?id=${configId}`
+            : SYNTHETICS_API_URLS.SYNTHETICS_MONITORS),
         testData,
         {
           auth: { username: 'elastic', password: 'changeme' },
@@ -88,7 +88,7 @@ export class SyntheticsServices {
   async deleteTestMonitorByQuery(query: string) {
     const { data } = await this.requester.request({
       description: 'get monitors by name',
-      path: uriencode`/internal/uptime/service/monitors`,
+      path: SYNTHETICS_API_URLS.SYNTHETICS_MONITORS,
       query: {
         perPage: 10,
         page: 1,
@@ -105,7 +105,7 @@ export class SyntheticsServices {
       async (monitor: Record<string, any>) => {
         await this.requester.request({
           description: 'delete monitor',
-          path: uriencode`/internal/uptime/service/monitors/${monitor.id}`,
+          path: uriencode`${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}/${monitor.id}`,
           method: 'DELETE',
         });
       },
@@ -200,70 +200,29 @@ export class SyntheticsServices {
     });
   }
 
-  async cleaUp(things: Array<'monitors' | 'alerts' | 'rules'> = ['monitors', 'alerts', 'rules']) {
-    const promises = [];
-    if (things.includes('monitors')) {
-      promises.push(this.cleanTestMonitors());
-    }
-    if (things.includes('alerts')) {
-      promises.push(this.cleaUpAlerts());
-    }
-
-    if (things.includes('rules')) {
-      promises.push(this.cleaUpRules());
-    }
-
-    await Promise.all(promises);
-  }
-
-  async cleaUpAlerts() {
-    const getService = this.params.getService;
-    const es: Client = getService('es');
-    const listOfIndices = await es.cat.indices({ format: 'json' });
-    for (const index of listOfIndices) {
-      if (index.index?.startsWith('.internal.alerts-observability.uptime.alerts')) {
-        await es.deleteByQuery({ index: index.index, query: { match_all: {} } });
-      }
-    }
-  }
-
-  async cleaUpRules() {
+  async cleaUp() {
     try {
-      const { data: response } = await this.requester.request({
-        description: 'get monitors by name',
-        path: `/internal/alerting/rules/_find`,
-        query: {
-          per_page: 10,
-          page: 1,
-        },
-        method: 'GET',
-      });
-      const { data = [] } = response as any;
+      const getService = this.params.getService;
+      const server = getService('kibanaServer');
 
-      if (data.length > 0) {
-        // eslint-disable-next-line no-console
-        console.log(`Deleting ${data.length} rules`);
-
-        await axios.patch(
-          this.kibanaUrl + '/internal/alerting/rules/_bulk_delete',
-          {
-            ids: data.map((rule: any) => rule.id),
-          },
-          { auth: { username: 'elastic', password: 'changeme' }, headers: { 'kbn-xsrf': 'true' } }
-        );
-      }
+      await server.savedObjects.clean({ types: ['synthetics-monitor', 'alert'] });
+      await this.cleaUpAlerts();
     } catch (e) {
       // eslint-disable-next-line no-console
       console.log(e);
     }
   }
 
-  async cleanTestMonitors() {
-    const getService = this.params.getService;
-    const server = getService('kibanaServer');
-
+  async cleaUpAlerts() {
     try {
-      await server.savedObjects.clean({ types: ['synthetics-monitor'] });
+      const getService = this.params.getService;
+      const es: Client = getService('es');
+      const listOfIndices = await es.cat.indices({ format: 'json' });
+      for (const index of listOfIndices) {
+        if (index.index?.startsWith('.internal.alerts-observability.uptime.alerts')) {
+          await es.deleteByQuery({ index: index.index, query: { match_all: {} } });
+        }
+      }
     } catch (e) {
       // eslint-disable-next-line no-console
       console.log(e);

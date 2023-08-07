@@ -10,9 +10,10 @@ import * as rt from 'io-ts';
 
 export const InfraMetricTypeRT = rt.keyof({
   cpu: null,
-  diskLatency: null,
+  normalizedLoad1m: null,
+  diskSpaceUsage: null,
   memory: null,
-  memoryTotal: null,
+  memoryFree: null,
   rx: null,
   tx: null,
 });

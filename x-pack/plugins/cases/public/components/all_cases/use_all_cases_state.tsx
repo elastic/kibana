@@ -10,7 +10,6 @@ import { useLocation, useHistory } from 'react-router-dom';
 import { isEqual } from 'lodash';
 
 import useLocalStorage from 'react-use/lib/useLocalStorage';
-import { parse, stringify } from 'query-string';
 
 import type {
   FilterOptions,
@@ -23,6 +22,7 @@ import type {
 
 import { DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS } from '../../containers/use_get_cases';
 import { parseUrlQueryParams } from './utils';
+import { stringifyToURL, parseURL } from '../utils';
 import { LOCAL_STORAGE_KEYS } from '../../../common/constants';
 import { SORT_ORDER_VALUES } from '../../../common/ui/types';
 import { useCasesContext } from '../cases_context/use_cases_context';
@@ -140,7 +140,7 @@ export function useAllCasesState(
         return;
       }
 
-      const parsedUrlParams: ParsedUrlQueryParams = parse(location.search);
+      const parsedUrlParams: ParsedUrlQueryParams = parseURL(location.search);
       const urlParams: PartialQueryParams = parseUrlQueryParams(parsedUrlParams);
 
       let newQueryParams: QueryParams = getQueryParams(params, urlParams, localStorageQueryParams);
@@ -168,7 +168,7 @@ export function useAllCasesState(
       const newFilterOptions: FilterOptions = getFilterOptions(
         filterOptions,
         params,
-        parse(location.search),
+        parseURL(location.search),
         localStorageFilterOptions
       );
 
@@ -192,7 +192,7 @@ export function useAllCasesState(
   );
 
   const updateLocation = useCallback(() => {
-    const parsedUrlParams = parse(location.search);
+    const parsedUrlParams = parseURL(location.search);
     const stateUrlParams = {
       ...parsedUrlParams,
       ...queryParams,
@@ -205,7 +205,10 @@ export function useAllCasesState(
       try {
         const newHistory = {
           ...location,
-          search: stringify({ ...parsedUrlParams, ...stateUrlParams }),
+          search: stringifyToURL({ ...parsedUrlParams, ...stateUrlParams } as unknown as Record<
+            string,
+            string
+          >),
         };
         history.replace(newHistory);
       } catch {

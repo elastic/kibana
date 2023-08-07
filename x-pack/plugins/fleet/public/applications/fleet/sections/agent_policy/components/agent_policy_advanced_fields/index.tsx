@@ -125,7 +125,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
           />
         }
       >
-        {isUninstallCommandFlyoutOpen && (
+        {isUninstallCommandFlyoutOpen && agentPolicy.id && (
           <UninstallCommandFlyout
             target="agent"
             policyId={agentPolicy.id}
@@ -326,18 +326,22 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
             }}
             data-test-subj="tamperProtectionSwitch"
           />
-          <EuiSpacer size="s" />
-          <EuiLink
-            onClick={() => {
-              setIsUninstallCommandFlyoutOpen(true);
-            }}
-            disabled={agentPolicy.is_protected === false}
-            data-test-subj="uninstallCommandLink"
-          >
-            {i18n.translate('xpack.fleet.agentPolicyForm.tamperingUninstallLink', {
-              defaultMessage: 'Get uninstall command',
-            })}
-          </EuiLink>
+          {agentPolicy.id && (
+            <>
+              <EuiSpacer size="s" />
+              <EuiLink
+                onClick={() => {
+                  setIsUninstallCommandFlyoutOpen(true);
+                }}
+                disabled={agentPolicy.is_protected === false}
+                data-test-subj="uninstallCommandLink"
+              >
+                {i18n.translate('xpack.fleet.agentPolicyForm.tamperingUninstallLink', {
+                  defaultMessage: 'Get uninstall command',
+                })}
+              </EuiLink>
+            </>
+          )}
         </EuiDescribedFormGroup>
       )}
       <EuiDescribedFormGroup

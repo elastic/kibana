@@ -9,6 +9,10 @@
       "name": "Security Solution - Cypress"
     },
     {
+      "key": "cypress/security_solution_explore",
+      "name": "Security Solution Explore - Cypress"
+    },
+    {
       "key": "cypress/osquery_cypress",
       "name": "Osquery - Cypress"
     },

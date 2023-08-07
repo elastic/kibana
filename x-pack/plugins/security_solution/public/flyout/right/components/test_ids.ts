@@ -14,6 +14,7 @@ export const EXPAND_DETAILS_BUTTON_TEST_ID =
   'securitySolutionDocumentDetailsFlyoutHeaderExpandDetailButton';
 export const COLLAPSE_DETAILS_BUTTON_TEST_ID =
   'securitySolutionDocumentDetailsFlyoutHeaderCollapseDetailButton';
+export const FLYOUT_HEADER_STATUS_BUTTON_TEST_ID = 'rule-status-badge';
 export const FLYOUT_HEADER_SEVERITY_TITLE_TEST_ID =
   'securitySolutionAlertDetailsFlyoutHeaderSeverityTitle';
 export const FLYOUT_HEADER_SEVERITY_VALUE_TEST_ID = 'severity';
@@ -23,18 +24,17 @@ export const FLYOUT_HEADER_RISK_SCORE_VALUE_TEST_ID =
   'securitySolutionAlertDetailsFlyoutHeaderRiskScoreValue';
 export const FLYOUT_HEADER_SHARE_BUTTON_TEST_ID =
   'securitySolutionAlertDetailsFlyoutHeaderShareButton';
+export const FLYOUT_HEADER_CHAT_BUTTON_TEST_ID = 'newChatById';
 
-/* Description section */
+/* About section */
 
-export const DESCRIPTION_SECTION_TEST_ID =
-  'securitySolutionDocumentDetailsFlyoutDescriptionSection';
-export const DESCRIPTION_SECTION_HEADER_TEST_ID = DESCRIPTION_SECTION_TEST_ID + HEADER_TEST_ID;
-export const DESCRIPTION_SECTION_CONTENT_TEST_ID = DESCRIPTION_SECTION_TEST_ID + CONTENT_TEST_ID;
+export const ABOUT_SECTION_TEST_ID = 'securitySolutionDocumentDetailsFlyoutAboutSection';
+export const ABOUT_SECTION_HEADER_TEST_ID = ABOUT_SECTION_TEST_ID + HEADER_TEST_ID;
+export const ABOUT_SECTION_CONTENT_TEST_ID = ABOUT_SECTION_TEST_ID + CONTENT_TEST_ID;
+export const RULE_SUMMARY_BUTTON_TEST_ID = 'securitySolutionDocumentDetailsFlyoutRuleSummaryButton';
 export const DESCRIPTION_TITLE_TEST_ID = 'securitySolutionDocumentDetailsFlyoutDescriptionTitle';
 export const DESCRIPTION_DETAILS_TEST_ID =
   'securitySolutionDocumentDetailsFlyoutDescriptionDetails';
-export const DESCRIPTION_EXPAND_BUTTON_TEST_ID =
-  'securitySolutionDocumentDetailsFlyoutDescriptionExpandButton';
 export const REASON_TITLE_TEST_ID = 'securitySolutionDocumentDetailsFlyoutReasonTitle';
 export const REASON_DETAILS_TEST_ID = 'securitySolutionDocumentDetailsFlyoutReasonDetails';
 export const MITRE_ATTACK_TITLE_TEST_ID = 'securitySolutionAlertDetailsFlyoutMitreAttackTitle';
@@ -51,9 +51,15 @@ export const HIGHLIGHTED_FIELDS_TITLE_TEST_ID =
   'securitySolutionDocumentDetailsFlyoutHighlightedFieldsTitle';
 export const HIGHLIGHTED_FIELDS_DETAILS_TEST_ID =
   'securitySolutionDocumentDetailsFlyoutHighlightedFieldsDetails';
-export const HIGHLIGHTED_FIELDS_TEST_ID = 'securitySolutionDocumentDetailsFlyoutHighlightedFields';
-export const HIGHLIGHTED_FIELDS_HEADER_EXPAND_ICON_TEST_ID = 'query-toggle-header';
-export const HIGHLIGHTED_FIELDS_GO_TO_TABLE_LINK = 'summary-view-go-to-table-link';
+export const HIGHLIGHTED_FIELDS_CELL_TEST_ID =
+  'securitySolutionDocumentDetailsFlyoutHighlightedFieldsCell';
+export const HIGHLIGHTED_FIELDS_BASIC_CELL_TEST_ID =
+  'securitySolutionDocumentDetailsFlyoutHighlightedFieldsBasicCell';
+export const HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID =
+  'securitySolutionDocumentDetailsFlyoutHighlightedFieldsLinkedCell';
+export const HIGHLIGHTED_FIELDS_AGENT_STATUS_CELL_TEST_ID =
+  'securitySolutionDocumentDetailsFlyoutHighlightedFieldsAgentStatusCell';
+
 export const INVESTIGATION_GUIDE_BUTTON_TEST_ID =
   'securitySolutionDocumentDetailsFlyoutInvestigationGuideButton';
 
@@ -69,7 +75,6 @@ export const ENTITIES_HOST_CONTENT_TEST_ID =
   'securitySolutionDocumentDetailsFlyoutEntitiesHostContent';
 export const ENTITIES_VIEW_ALL_BUTTON_TEST_ID =
   'securitySolutionDocumentDetailsFlyoutEntitiesViewAllButton';
-export const ENTITY_PANEL_ICON_TEST_ID = 'securitySolutionDocumentDetailsFlyoutEntityPanelTypeIcon';
 export const ENTITY_PANEL_TOGGLE_BUTTON_TEST_ID =
   'securitySolutionDocumentDetailsFlyoutEntityPanelToggleButton';
 export const ENTITY_PANEL_HEADER_TEST_ID = 'securitySolutionDocumentDetailsFlyoutEntityPanelHeader';
@@ -130,5 +135,10 @@ export const VISUALIZATIONS_SECTION_HEADER_TEST_ID =
   'securitySolutionDocumentDetailsVisualizationsTitleHeader';
 export const ANALYZER_PREVIEW_TEST_ID = 'securitySolutionDocumentDetailsAnalayzerPreview';
 export const ANALYZER_TREE_TEST_ID = 'securitySolutionDocumentDetailsAnalayzerTree';
+export const ANALYZER_TREE_VIEW_DETAILS_BUTTON_TEST_ID =
+  'securitySolutionDocumentDetailsAnalayzerTreeViewDetailsButton';
 export const ANALYZER_TREE_LOADING_TEST_ID = 'securitySolutionDocumentDetailsAnalayzerTreeLoading';
 export const ANALYZER_TREE_ERROR_TEST_ID = 'securitySolutionDocumentDetailsAnalayzerTreeError';
+export const SESSION_PREVIEW_TEST_ID = 'securitySolutionDocumentDetailsSessionPreview';
+export const SESSION_PREVIEW_VIEW_DETAILS_BUTTON_TEST_ID =
+  'securitySolutionDocumentDetailsSessionPreviewViewDetailsButton';

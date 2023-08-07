@@ -21,7 +21,7 @@ import type { CasesOwners } from '../../client/helpers/can_use_cases';
 import type { EuiBasicTableOnChange, Solution } from './types';
 
 import { SortFieldCase, StatusAll } from '../../../common/ui/types';
-import { CaseStatuses, caseStatuses } from '../../../common/api';
+import { CaseStatuses, caseStatuses } from '../../../common/types/domain';
 import { OWNER_INFO } from '../../../common/constants';
 import { useAvailableCasesOwners } from '../app/use_available_owners';
 import { useCasesColumns } from './use_cases_columns';
@@ -278,6 +278,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
             status: filterOptions.status,
             owner: filterOptions.owner,
             severity: filterOptions.severity,
+            category: filterOptions.category,
           }}
           hiddenStatuses={hiddenStatuses}
           onCreateCasePressed={onCreateCasePressed}

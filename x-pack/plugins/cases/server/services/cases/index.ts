@@ -23,13 +23,14 @@ import type {
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { nodeBuilder } from '@kbn/es-query';
 
+import type { Case, CaseStatuses, User } from '../../../common/types/domain';
+import { caseStatuses } from '../../../common/types/domain';
 import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
   MAX_DOCS_PER_PAGE,
 } from '../../../common/constants';
-import type { Case, User, CaseStatuses } from '../../../common/api';
-import { decodeOrThrow, caseStatuses } from '../../../common/api';
+import { decodeOrThrow } from '../../../common/api';
 import type { SavedObjectFindOptionsKueryNode, SOWithErrors } from '../../common/types';
 import { defaultSortField, flattenCaseSavedObject, isSOError } from '../../common/utils';
 import { DEFAULT_PAGE, DEFAULT_PER_PAGE } from '../../routes/api';
@@ -69,6 +70,7 @@ import type {
   PostCaseArgs,
   PatchCaseArgs,
   PatchCasesArgs,
+  GetCategoryArgs,
 } from './types';
 import type { AttachmentTransformedAttributes } from '../../common/types/attachments';
 import { bulkDecodeSOAttributes } from '../utils';
@@ -553,6 +555,36 @@ export class CasesService {
       return results?.aggregations?.tags?.buckets.map(({ key }) => key) ?? [];
     } catch (error) {
       this.log.error(`Error on GET tags: ${error}`);
+      throw error;
+    }
+  }
+
+  public async getCategories({ filter }: GetCategoryArgs): Promise<string[]> {
+    try {
+      this.log.debug(`Attempting to GET all categories`);
+
+      const results = await this.unsecuredSavedObjectsClient.find<
+        unknown,
+        { categories: { buckets: Array<{ key: string }> } }
+      >({
+        type: CASE_SAVED_OBJECT,
+        page: 1,
+        perPage: 1,
+        filter,
+        aggs: {
+          categories: {
+            terms: {
+              field: `${CASE_SAVED_OBJECT}.attributes.category`,
+              size: MAX_DOCS_PER_PAGE,
+              order: { _key: 'asc' },
+            },
+          },
+        },
+      });
+
+      return results?.aggregations?.categories?.buckets.map(({ key }) => key) ?? [];
+    } catch (error) {
+      this.log.error(`Error on GET categories: ${error}`);
       throw error;
     }
   }

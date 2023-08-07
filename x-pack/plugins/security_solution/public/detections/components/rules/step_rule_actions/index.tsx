@@ -10,23 +10,30 @@ import type { FC } from 'react';
 import React, { memo, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import type { ActionVariables } from '@kbn/triggers-actions-ui-plugin/public';
+import type {
+  ActionTypeRegistryContract,
+  ActionVariables,
+} from '@kbn/triggers-actions-ui-plugin/public';
 import { UseArray } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
-import type { RuleObjectId } from '../../../../../common/detection_engine/rule_schema';
+import type { RuleObjectId } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { isQueryRule } from '../../../../../common/detection_engine/utils';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { ResponseActionsForm } from '../../../../detection_engine/rule_response_actions/response_actions_form';
 import type { RuleStepProps, ActionsStepRule } from '../../../pages/detection_engine/rules/types';
-import { StepRuleDescription } from '../description_step';
 import { Form, UseField } from '../../../../shared_imports';
 import type { FormHook } from '../../../../shared_imports';
 import { StepContentWrapper } from '../step_content_wrapper';
 import { RuleActionsField } from '../rule_actions_field';
 import { useKibana } from '../../../../common/lib/kibana';
-import { getSchema } from './get_schema';
-import * as I18n from './translations';
+import {
+  useFetchConnectors,
+  useFetchConnectorTypes,
+} from '../../../../detection_engine/rule_management/api/hooks/use_fetch_connectors';
+import * as i18n from './translations';
 import { RuleSnoozeSection } from './rule_snooze_section';
+import { NotificationAction } from './notification_action';
+import { ResponseAction } from './response_action';
 
 interface StepRuleActionsProps extends RuleStepProps {
   ruleId?: RuleObjectId; // Rule SO's id (not ruleId)
@@ -118,7 +125,7 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
       </>
     ) : (
       <>
-        <EuiText>{I18n.NO_ACTIONS_READ_PERMISSIONS}</EuiText>
+        <EuiText>{i18n.NO_ACTIONS_READ_PERMISSIONS}</EuiText>
       </>
     );
   }, [
@@ -139,22 +146,79 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
     </>
   );
 };
+
 export const StepRuleActions = memo(StepRuleActionsComponent);
 
 const StepRuleActionsReadOnlyComponent: FC<StepRuleActionsReadOnlyProps> = ({
   addPadding,
-  defaultValues: data,
+  defaultValues: ruleActionsData,
 }) => {
   const {
-    services: {
-      triggersActionsUi: { actionTypeRegistry },
-    },
+    services: { triggersActionsUi },
   } = useKibana();
-  const schema = useMemo(() => getSchema({ actionTypeRegistry }), [actionTypeRegistry]);
+
+  const actionTypeRegistry = triggersActionsUi.actionTypeRegistry as ActionTypeRegistryContract;
+
+  const { data: connectors } = useFetchConnectors();
+  const { data: connectorTypes } = useFetchConnectorTypes();
+
+  const notificationActions = ruleActionsData.actions;
+  const responseActions = ruleActionsData.responseActions || [];
+
+  const ruleHasActions = notificationActions.length > 0 || responseActions.length > 0;
+
+  if (!ruleHasActions || !connectors || !connectorTypes) {
+    return null;
+  }
+
+  const hasBothNotificationAndResponseActions =
+    notificationActions.length > 0 && responseActions.length > 0;
+
   return (
     <StepContentWrapper addPadding={addPadding}>
-      <StepRuleDescription schema={schema} data={data} columns="single" />
+      {notificationActions.length > 0 && (
+        <>
+          <EuiText size="m">{i18n.NOTIFICATION_ACTIONS}</EuiText>
+          <EuiSpacer size="s" />
+        </>
+      )}
+
+      {notificationActions.map((action, index) => {
+        const isLastItem = index === notificationActions.length - 1;
+        return (
+          <>
+            <NotificationAction
+              action={action}
+              connectorTypes={connectorTypes}
+              connectors={connectors}
+              actionTypeRegistry={actionTypeRegistry}
+              key={action.id}
+            />
+            {!isLastItem && <EuiSpacer size="s" />}
+          </>
+        );
+      })}
+
+      {hasBothNotificationAndResponseActions && <EuiSpacer size="l" />}
+
+      {responseActions.length > 0 && (
+        <>
+          <EuiText size="m">{i18n.RESPONSE_ACTIONS}</EuiText>
+          <EuiSpacer size="s" />
+        </>
+      )}
+
+      {responseActions.map((action, index) => {
+        const isLastItem = index === responseActions.length - 1;
+        return (
+          <>
+            <ResponseAction action={action} key={`${action.actionTypeId}-${index}`} />
+            {!isLastItem && <EuiSpacer size="s" />}
+          </>
+        );
+      })}
     </StepContentWrapper>
   );
 };
+
 export const StepRuleActionsReadOnly = memo(StepRuleActionsReadOnlyComponent);

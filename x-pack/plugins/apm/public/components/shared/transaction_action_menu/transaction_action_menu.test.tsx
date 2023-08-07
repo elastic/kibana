@@ -9,7 +9,6 @@ import { act, fireEvent, render } from '@testing-library/react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
-import { RouterProvider } from '@kbn/typed-react-router-config';
 import { License } from '@kbn/licensing-plugin/common/license';
 import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
 import { ApmPluginContextValue } from '../../../context/apm_plugin/apm_plugin_context';
@@ -26,7 +25,6 @@ import {
 } from '../../../utils/test_helpers';
 import { TransactionActionMenu } from './transaction_action_menu';
 import * as Transactions from './__fixtures__/mock_data';
-import { apmRouter } from '../../routing/apm_route_config';
 
 const apmContextMock = {
   ...mockApmPluginContextValue,
@@ -44,10 +42,8 @@ history.replace(
 function Wrapper({ children }: { children?: React.ReactNode }) {
   return (
     <MemoryRouter>
-      <MockApmPluginContextWrapper value={apmContextMock}>
-        <RouterProvider history={history} router={apmRouter as any}>
-          {children}
-        </RouterProvider>
+      <MockApmPluginContextWrapper value={apmContextMock} history={history}>
+        {children}
       </MockApmPluginContextWrapper>
     </MemoryRouter>
   );

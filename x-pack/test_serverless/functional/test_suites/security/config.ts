@@ -9,5 +9,9 @@ import { createTestConfig } from '../../config.base';
 
 export default createTestConfig({
   serverlessProject: 'security',
-  testFiles: [require.resolve('.')],
+  testFiles: [require.resolve('../common'), require.resolve('.')],
+  junit: {
+    reportName: 'Serverless Security Functional Tests',
+  },
+  suiteTags: { exclude: ['skipSvlSec'] },
 });

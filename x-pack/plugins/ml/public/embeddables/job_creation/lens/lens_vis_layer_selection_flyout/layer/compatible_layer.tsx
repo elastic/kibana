@@ -34,6 +34,7 @@ export const CompatibleLayer: FC<Props> = ({ layer, layerIndex, embeddable }) =>
       uiSettings,
       mlServices: { mlApiServices },
       lens,
+      dashboardService,
     },
   } = useMlFromLensKibanaContext();
 
@@ -43,7 +44,7 @@ export const CompatibleLayer: FC<Props> = ({ layer, layerIndex, embeddable }) =>
         lens,
         uiSettings,
         data.query.timefilter.timefilter,
-        share,
+        dashboardService,
         mlApiServices
       ),
     // eslint-disable-next-line react-hooks/exhaustive-deps

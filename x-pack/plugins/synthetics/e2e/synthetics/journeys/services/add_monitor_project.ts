@@ -6,6 +6,7 @@
  */
 
 import axios from 'axios';
+import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 
 export const addTestMonitorProject = async (
   kibanaUrl: string,
@@ -18,7 +19,11 @@ export const addTestMonitorProject = async (
   };
   try {
     return await axios.put(
-      kibanaUrl + `/api/synthetics/project/${projectName}/monitors/_bulk_update`,
+      kibanaUrl +
+        SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace(
+          '{projectName}',
+          projectName
+        ),
       testData,
       {
         auth: { username: 'elastic', password: 'changeme' },

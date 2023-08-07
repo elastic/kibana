@@ -5,7 +5,7 @@
     ],
     "patterns": [
       "_searchable_snapshots/cache/stats",
-      "_searchable_snapshots/{nodes}/cache/stats"
+      "_searchable_snapshots/{node_id}/cache/stats"
     ],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/searchable-snapshots-apis.html"
   }

@@ -8,27 +8,55 @@
 import React from 'react';
 import GenerativeAiConnectorFields from './connector';
 import { ConnectorFormTestProvider } from '../lib/test_utils';
-import { act, render, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { OpenAiProviderType } from '../../../common/gen_ai/constants';
+import { DEFAULT_OPENAI_MODEL, OpenAiProviderType } from '../../../common/gen_ai/constants';
+import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
+import { useGetDashboard } from './use_get_dashboard';
+
+jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
+jest.mock('./use_get_dashboard');
+
+const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
+const mockDashboard = useGetDashboard as jest.Mock;
+const openAiConnector = {
+  actionTypeId: '.gen-ai',
+  name: 'genAi',
+  id: '123',
+  config: {
+    apiUrl: 'https://openaiurl.com',
+    apiProvider: OpenAiProviderType.OpenAi,
+    defaultModel: DEFAULT_OPENAI_MODEL,
+  },
+  secrets: {
+    apiKey: 'thats-a-nice-looking-key',
+  },
+  isDeprecated: false,
+};
+const azureConnector = {
+  ...openAiConnector,
+  config: {
+    apiUrl: 'https://azureaiurl.com',
+    apiProvider: OpenAiProviderType.AzureAi,
+  },
+  secrets: {
+    apiKey: 'thats-a-nice-looking-key',
+  },
+};
+
+const navigateToUrl = jest.fn();
 
 describe('GenerativeAiConnectorFields renders', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    useKibanaMock().services.application.navigateToUrl = navigateToUrl;
+    mockDashboard.mockImplementation(({ connectorId }) => ({
+      dashboardUrl: `https://dashboardurl.com/${connectorId}`,
+    }));
+  });
   test('open ai connector fields are rendered', async () => {
-    const actionConnector = {
-      actionTypeId: '.gen-ai',
-      name: 'genAi',
-      config: {
-        apiUrl: 'https://openaiurl.com',
-        apiProvider: OpenAiProviderType.OpenAi,
-      },
-      secrets: {
-        apiKey: 'thats-a-nice-looking-key',
-      },
-      isDeprecated: false,
-    };
-
     const { getAllByTestId } = render(
-      <ConnectorFormTestProvider connector={actionConnector}>
+      <ConnectorFormTestProvider connector={openAiConnector}>
         <GenerativeAiConnectorFields
           readOnly={false}
           isEdit={false}
@@ -37,31 +65,18 @@ describe('GenerativeAiConnectorFields renders', () => {
       </ConnectorFormTestProvider>
     );
     expect(getAllByTestId('config.apiUrl-input')[0]).toBeInTheDocument();
-    expect(getAllByTestId('config.apiUrl-input')[0]).toHaveValue(actionConnector.config.apiUrl);
+    expect(getAllByTestId('config.apiUrl-input')[0]).toHaveValue(openAiConnector.config.apiUrl);
     expect(getAllByTestId('config.apiProvider-select')[0]).toBeInTheDocument();
     expect(getAllByTestId('config.apiProvider-select')[0]).toHaveValue(
-      actionConnector.config.apiProvider
+      openAiConnector.config.apiProvider
     );
     expect(getAllByTestId('open-ai-api-doc')[0]).toBeInTheDocument();
     expect(getAllByTestId('open-ai-api-keys-doc')[0]).toBeInTheDocument();
   });
 
   test('azure ai connector fields are rendered', async () => {
-    const actionConnector = {
-      actionTypeId: '.gen-ai',
-      name: 'genAi',
-      config: {
-        apiUrl: 'https://azureaiurl.com',
-        apiProvider: OpenAiProviderType.AzureAi,
-      },
-      secrets: {
-        apiKey: 'thats-a-nice-looking-key',
-      },
-      isDeprecated: false,
-    };
-
     const { getAllByTestId } = render(
-      <ConnectorFormTestProvider connector={actionConnector}>
+      <ConnectorFormTestProvider connector={azureConnector}>
         <GenerativeAiConnectorFields
           readOnly={false}
           isEdit={false}
@@ -69,31 +84,72 @@ describe('GenerativeAiConnectorFields renders', () => {
         />
       </ConnectorFormTestProvider>
     );
-
     expect(getAllByTestId('config.apiUrl-input')[0]).toBeInTheDocument();
-    expect(getAllByTestId('config.apiUrl-input')[0]).toHaveValue(actionConnector.config.apiUrl);
+    expect(getAllByTestId('config.apiUrl-input')[0]).toHaveValue(azureConnector.config.apiUrl);
     expect(getAllByTestId('config.apiProvider-select')[0]).toBeInTheDocument();
     expect(getAllByTestId('config.apiProvider-select')[0]).toHaveValue(
-      actionConnector.config.apiProvider
+      azureConnector.config.apiProvider
     );
     expect(getAllByTestId('azure-ai-api-doc')[0]).toBeInTheDocument();
     expect(getAllByTestId('azure-ai-api-keys-doc')[0]).toBeInTheDocument();
   });
 
+  describe('Dashboard link', () => {
+    it('Does not render if isEdit is false and dashboardUrl is defined', async () => {
+      const { queryByTestId } = render(
+        <ConnectorFormTestProvider connector={openAiConnector}>
+          <GenerativeAiConnectorFields
+            readOnly={false}
+            isEdit={false}
+            registerPreSubmitValidator={() => {}}
+          />
+        </ConnectorFormTestProvider>
+      );
+      expect(queryByTestId('link-gen-ai-token-dashboard')).not.toBeInTheDocument();
+    });
+    it('Does not render if isEdit is true and dashboardUrl is null', async () => {
+      mockDashboard.mockImplementation((id: string) => ({
+        dashboardUrl: null,
+      }));
+      const { queryByTestId } = render(
+        <ConnectorFormTestProvider connector={openAiConnector}>
+          <GenerativeAiConnectorFields
+            readOnly={false}
+            isEdit={false}
+            registerPreSubmitValidator={() => {}}
+          />
+        </ConnectorFormTestProvider>
+      );
+      expect(queryByTestId('link-gen-ai-token-dashboard')).not.toBeInTheDocument();
+    });
+    it('Renders if isEdit is true and dashboardUrl is defined', async () => {
+      const { getByTestId } = render(
+        <ConnectorFormTestProvider connector={openAiConnector}>
+          <GenerativeAiConnectorFields
+            readOnly={false}
+            isEdit={true}
+            registerPreSubmitValidator={() => {}}
+          />
+        </ConnectorFormTestProvider>
+      );
+      expect(getByTestId('link-gen-ai-token-dashboard')).toBeInTheDocument();
+    });
+    it('On click triggers redirect with correct saved object id', async () => {
+      const { getByTestId } = render(
+        <ConnectorFormTestProvider connector={openAiConnector}>
+          <GenerativeAiConnectorFields
+            readOnly={false}
+            isEdit={true}
+            registerPreSubmitValidator={() => {}}
+          />
+        </ConnectorFormTestProvider>
+      );
+      fireEvent.click(getByTestId('link-gen-ai-token-dashboard'));
+      expect(navigateToUrl).toHaveBeenCalledWith(`https://dashboardurl.com/123`);
+    });
+  });
   describe('Validation', () => {
     const onSubmit = jest.fn();
-    const actionConnector = {
-      actionTypeId: '.gen-ai',
-      name: 'genAi',
-      config: {
-        apiUrl: 'https://openaiurl.com',
-        apiProvider: OpenAiProviderType.OpenAi,
-      },
-      secrets: {
-        apiKey: 'thats-a-nice-looking-key',
-      },
-      isDeprecated: false,
-    };
 
     beforeEach(() => {
       jest.clearAllMocks();
@@ -101,7 +157,7 @@ describe('GenerativeAiConnectorFields renders', () => {
 
     it('connector validation succeeds when connector config is valid', async () => {
       const { getByTestId } = render(
-        <ConnectorFormTestProvider connector={actionConnector} onSubmit={onSubmit}>
+        <ConnectorFormTestProvider connector={openAiConnector} onSubmit={onSubmit}>
           <GenerativeAiConnectorFields
             readOnly={false}
             isEdit={false}
@@ -119,16 +175,16 @@ describe('GenerativeAiConnectorFields renders', () => {
       });
 
       expect(onSubmit).toBeCalledWith({
-        data: actionConnector,
+        data: openAiConnector,
         isValid: true,
       });
     });
 
     it('validates correctly if the apiUrl is empty', async () => {
       const connector = {
-        ...actionConnector,
+        ...openAiConnector,
         config: {
-          ...actionConnector.config,
+          ...openAiConnector.config,
           apiUrl: '',
         },
       };
@@ -159,9 +215,9 @@ describe('GenerativeAiConnectorFields renders', () => {
     ];
     it.each(tests)('validates correctly %p', async (field, value) => {
       const connector = {
-        ...actionConnector,
+        ...openAiConnector,
         config: {
-          ...actionConnector.config,
+          ...openAiConnector.config,
           headers: [],
         },
       };
