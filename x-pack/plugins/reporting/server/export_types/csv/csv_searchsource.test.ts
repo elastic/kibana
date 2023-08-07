@@ -25,7 +25,6 @@ jest.mock('@kbn/generate-csv', () => ({
   },
 }));
 
-
 const mockLogger = loggingSystemMock.createLogger();
 const encryptionKey = 'tetkey';
 const headers = { sid: 'cooltestheaders' };
@@ -68,13 +67,12 @@ beforeAll(async () => {
     discover: discoverPluginMock.createStartContract(),
     data: dataPluginMock.createStartContract(),
     screenshotting: createMockScreenshottingStart(),
-  })
-})
+  });
+});
 
 beforeEach(() => {
   stream = {} as typeof stream;
-})
-
+});
 
 test('gets the csv content from job parameters', async () => {
   const payload = await mockCsvSearchSourceExportType.runTask(
@@ -88,7 +86,7 @@ test('gets the csv content from job parameters', async () => {
       version: '7.13.0',
     },
     new CancellationToken(),
-    stream,
+    stream
   );
 
   expect(payload).toMatchInlineSnapshot(`
