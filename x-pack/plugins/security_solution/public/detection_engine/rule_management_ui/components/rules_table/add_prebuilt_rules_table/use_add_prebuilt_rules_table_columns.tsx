@@ -6,7 +6,7 @@
  */
 
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiButtonEmpty, EuiBadge, EuiText, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiButtonEmpty, EuiBadge, EuiText, EuiLoadingSpinner, EuiLink } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { SHOW_RELATED_INTEGRATIONS_SETTING } from '../../../../../../common/constants';
 import { PopoverItems } from '../../../../../common/components/popover_items';
@@ -22,16 +22,36 @@ import type { AddPrebuiltRulesTableActions } from './add_prebuilt_rules_table_co
 import { useAddPrebuiltRulesTableContext } from './add_prebuilt_rules_table_context';
 import type { RuleSignatureId } from '../../../../../../common/api/detection_engine/model/rule_schema';
 import { getNormalizedSeverity } from '../helpers';
+import { useRuleDetailsFlyoutContext } from './use_rule_details_flyout';
 
 export type TableColumn = EuiBasicTableColumn<RuleInstallationInfoForReview>;
+
+interface RuleNameProps {
+  name: string;
+  ruleId: string;
+}
+
+const RuleName = ({ name, ruleId }: RuleNameProps) => {
+  const {
+    actions: { openFlyoutForRuleId },
+  } = useRuleDetailsFlyoutContext();
+
+  return (
+    <EuiLink
+      onClick={() => {
+        openFlyoutForRuleId(ruleId);
+      }}
+    >
+      {name}
+    </EuiLink>
+  );
+};
 
 export const RULE_NAME_COLUMN: TableColumn = {
   field: 'name',
   name: i18n.COLUMN_RULE,
-  render: (value: RuleInstallationInfoForReview['name']) => (
-    <EuiText id={value} size="s">
-      {value}
-    </EuiText>
+  render: (value: RuleInstallationInfoForReview['name'], rule: RuleInstallationInfoForReview) => (
+    <RuleName name={value} ruleId={rule.rule_id} />
   ),
   sortable: true,
   truncateText: true,

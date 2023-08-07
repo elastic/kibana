@@ -14,6 +14,7 @@ import { RulesTables } from './rules_tables';
 import { AllRulesTabs, RulesTableToolbar } from './rules_table_toolbar';
 import { UpgradePrebuiltRulesTable } from './upgrade_prebuilt_rules_table/upgrade_prebuilt_rules_table';
 import { UpgradePrebuiltRulesTableContextProvider } from './upgrade_prebuilt_rules_table/upgrade_prebuilt_rules_table_context';
+import { UpgradePrebuiltRulesFlyoutContextProvider } from './add_prebuilt_rules_table/use_rule_details_flyout';
 
 /**
  * Table Component for displaying all Rules for a given cluster. Provides the ability to filter
@@ -40,9 +41,11 @@ export const AllRules = React.memo(() => {
     return (
       <>
         <UpgradePrebuiltRulesTableContextProvider>
-          <RulesTableToolbar />
-          <EuiSpacer />
-          <UpgradePrebuiltRulesTable />
+          <UpgradePrebuiltRulesFlyoutContextProvider>
+            <RulesTableToolbar />
+            <EuiSpacer />
+            <UpgradePrebuiltRulesTable />
+          </UpgradePrebuiltRulesFlyoutContextProvider>
         </UpgradePrebuiltRulesTableContextProvider>
       </>
     );
