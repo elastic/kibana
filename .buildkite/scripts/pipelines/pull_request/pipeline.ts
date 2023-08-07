@@ -170,6 +170,10 @@ const uploadPipeline = (pipelineContent: string | object) => {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/deploy_cloud.yml'));
     }
 
+    if (GITHUB_PR_LABELS.includes('ci:build-serverless-image')) {
+      pipeline.push(getPipeline('.buildkite/pipelines/artifacts_container_image.yml'));
+    }
+
     if (
       (await doAnyChangesMatch([/.*stor(ies|y).*/])) ||
       GITHUB_PR_LABELS.includes('ci:build-storybooks')
