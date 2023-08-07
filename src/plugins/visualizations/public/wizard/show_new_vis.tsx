@@ -19,6 +19,7 @@ import {
   getDocLinks,
   getTheme,
   getContentManagement,
+  getUISettings,
 } from '../services';
 import type { BaseVisType } from '../vis_types';
 
@@ -79,6 +80,7 @@ export function showNewVisModal({
             editorParams={editorParams}
             visTypesRegistry={getTypes()}
             contentClient={getContentManagement().client}
+            uiSettings={getUISettings()}
             addBasePath={getHttp().basePath.prepend}
             application={getApplication()}
             docLinks={getDocLinks()}
