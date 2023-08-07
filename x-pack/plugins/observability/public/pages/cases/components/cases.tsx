@@ -13,7 +13,7 @@ import { usePluginContext } from '../../../hooks/use_plugin_context';
 import { useFetchAlertDetail } from '../../../hooks/use_fetch_alert_detail';
 import { useFetchAlertData } from '../../../hooks/use_fetch_alert_data';
 import { LazyAlertsFlyout } from '../../..';
-import { CASES_PATH, paths } from '../../../routes/paths';
+import { CASES_PATH, paths } from '../../../../common/locators/paths';
 
 export interface CasesProps {
   permissions: CasesPermissions;

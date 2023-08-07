@@ -599,7 +599,7 @@ export class DashboardPageControls extends FtrService {
     this.log.debug(`Setting control data view to ${dataViewTitle}`);
     await this.testSubjects.click('open-data-view-picker');
     await this.retry.try(async () => {
-      await this.testSubjects.existOrFail('data-view-picker-title');
+      await this.testSubjects.existOrFail('data-view-picker-popover');
     });
     await this.testSubjects.click(`data-view-picker-${dataViewTitle}`);
   }
