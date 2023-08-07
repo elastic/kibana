@@ -8,7 +8,10 @@
 import { VectorTile } from '@mapbox/vector-tile';
 import Protobuf from 'pbf';
 import expect from '@kbn/expect';
-import { ELASTIC_HTTP_VERSION_HEADER, X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
+import {
+  ELASTIC_HTTP_VERSION_HEADER,
+  X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
+} from '@kbn/core-http-common';
 import { getTileUrlParams } from '@kbn/maps-vector-tile-utils';
 
 function findFeature(layer, callbackFn) {

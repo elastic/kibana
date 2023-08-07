@@ -6,7 +6,10 @@
  */
 
 import expect from '@kbn/expect';
-import { ELASTIC_HTTP_VERSION_HEADER, X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
+import {
+  ELASTIC_HTTP_VERSION_HEADER,
+  X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
+} from '@kbn/core-http-common';
 import path from 'path';
 import { copyFile, rm } from 'fs/promises';
 

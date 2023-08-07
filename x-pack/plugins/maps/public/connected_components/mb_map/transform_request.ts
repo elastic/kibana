@@ -7,7 +7,7 @@
 
 import {
   ELASTIC_HTTP_VERSION_HEADER,
-  X_ELASTIC_INTERNAL_ORIGIN_REQUEST
+  X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
 import {
   FONTS_API_PATH,
