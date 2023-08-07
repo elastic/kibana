@@ -43,7 +43,7 @@ export const MetricChart = ({
 
   return (
     <LensXYChart
-      id={`assetDetailsMetricsChart${id}`}
+      id={`infraAssetDetailsMetricsChart${id}`}
       dataView={dataView}
       dateRange={timeRange}
       height={HEIGHT}

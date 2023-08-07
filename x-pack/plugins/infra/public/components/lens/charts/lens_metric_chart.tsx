@@ -6,10 +6,10 @@
  */
 import React from 'react';
 import { FormulaConfig, MetricLayerOptions } from '../../../common/visualizations';
-import { Layer } from '../../../hooks/use_lens_attributes';
+import type { Layer } from '../../../hooks/use_lens_attributes';
 import { LensChart } from './lens_chart';
 import { TooltipContent } from '../metric_explanation/tooltip_content';
-import { BaseChartProps } from '../types';
+import type { BaseChartProps } from '../types';
 
 export interface Props extends Omit<BaseChartProps, 'overrides' | 'hidePanelTitles'> {
   layers: Layer<MetricLayerOptions, FormulaConfig, 'data'>;

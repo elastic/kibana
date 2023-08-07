@@ -7,5 +7,6 @@
 
 export { LensMetricChart, type Props as LensMetricChartProps } from './charts/lens_metric_chart';
 export { LensXYChart, type Props as LensXYChartProps } from './charts/lens_xy_chart';
+export { ChartPlaceholder } from './chart_placeholder';
 export { TooltipContent } from './metric_explanation/tooltip_content';
 export { HostMetricsDocsLink } from './metric_explanation/host_metrics_docs_link';

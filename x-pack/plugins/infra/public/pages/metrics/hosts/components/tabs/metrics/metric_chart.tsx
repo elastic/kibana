@@ -52,7 +52,7 @@ export const MetricChart = ({ id, title, layers, overrides }: MetricChartProps) 
 
   return (
     <LensXYChart
-      id={`hostsView-metricChart${id}`}
+      id={`hostsView-metricChart-${id}`}
       dataView={dataView}
       dateRange={afterLoadedState.dateRange}
       height={METRIC_CHART_MIN_HEIGHT}

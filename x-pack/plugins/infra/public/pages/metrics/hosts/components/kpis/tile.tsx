@@ -63,7 +63,7 @@ export const Tile = ({ id, title, layers, toolTip }: KPIChartProps) => {
 
   return (
     <LensMetricChart
-      id={`hostsViewKPIGrid${id}Tile`}
+      id={`hostsViewKPI-${id}`}
       dataView={dataView}
       dateRange={afterLoadedState.dateRange}
       filters={afterLoadedState.filters}

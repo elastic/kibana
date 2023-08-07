@@ -16,7 +16,6 @@ export interface Props extends Pick<MetricWTrend, 'title' | 'color' | 'extra' | 
   value: number;
   toolTip: React.ReactNode;
   style?: CSSProperties;
-  ['data-test-subj']?: string;
 }
 
 export const MetricChartWrapper = React.memo(
@@ -42,7 +41,7 @@ export const MetricChartWrapper = React.memo(
     };
 
     return (
-      <EuiPanel hasShadow={false} paddingSize="none" {...props}>
+      <EuiPanel {...props} hasShadow={false} paddingSize="none" data-test-subj={id}>
         {loading && !loadedOnce.current ? (
           <ChartPlaceholder style={style} />
         ) : (

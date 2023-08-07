@@ -6,8 +6,8 @@
  */
 import React from 'react';
 import { FormulaConfig, XYLayerOptions } from '../../../common/visualizations';
-import { Layer } from '../../../hooks/use_lens_attributes';
-import { BaseChartProps } from '../types';
+import type { Layer } from '../../../hooks/use_lens_attributes';
+import type { BaseChartProps } from '../types';
 import { LensChart } from './lens_chart';
 
 export interface Props extends Omit<BaseChartProps, 'hidePanelTitles'> {

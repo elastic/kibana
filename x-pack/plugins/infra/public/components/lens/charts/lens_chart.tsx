@@ -13,7 +13,7 @@ import {
   type UseLensAttributesParams,
 } from '../../../hooks/use_lens_attributes';
 import type { BaseChartProps } from '../types';
-import { TooltipContentProps } from '../metric_explanation/tooltip_content';
+import type { TooltipContentProps } from '../metric_explanation/tooltip_content';
 import { LensWrapper } from '../lens_wrapper';
 import { ChartLoadError } from '../chart_load_error';
 

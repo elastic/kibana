@@ -46,7 +46,7 @@ export const Tile = ({
 
   return (
     <LensMetricChart
-      id={`assetDetailsKPIGrid${id}Tile`}
+      id={`infraAssetDetailsKPI${id}`}
       dataView={dataView}
       dateRange={timeRange}
       layers={{ ...layers, options: { ...layers.options, subtitle: AVERAGE_SUBTITLE } }}

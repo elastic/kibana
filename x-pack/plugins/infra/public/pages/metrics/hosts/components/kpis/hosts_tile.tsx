@@ -16,12 +16,11 @@ import { type Props, MetricChartWrapper } from '../chart/metric_chart_wrapper';
 import { TooltipContent } from '../../../../../components/lens';
 
 const HOSTS_CHART: Omit<Props, 'loading' | 'value' | 'toolTip'> = {
-  id: `metric-hostCount`,
+  id: 'hostsViewKPI-hostsCount',
   color: '#6DCCB1',
   title: i18n.translate('xpack.infra.hostsViewPage.metricTrend.hostCount.title', {
     defaultMessage: 'Hosts',
   }),
-  ['data-test-subj']: 'hostsViewKPI-hostsCount',
 };
 
 export const HostsTile = ({ height }: Pick<KPIChartProps, 'height'>) => {
