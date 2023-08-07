@@ -26,11 +26,17 @@
 .kbnBody.kbnBody--hasHeaderBanner.kbnBody--projectLayout.euiBody--headerIsFixed {
   padding-top: $kbnHeaderBannerHeight + $euiHeaderHeightCompensation;
 
-  // overriding `top` positioning of the project side nav
+  // overriding `top` positioning of the project side nav, and flyouts
   // overriding `top` positioning of the project app menu toolbar
   &.euiBody--headerIsFixed .euiCollapsibleNav,
   &.euiBody--headerIsFixed:not(.euiDataGrid__restrictBody) .euiFlyout,
   .header__actionMenu {
     top: $kbnHeaderBannerHeight + $euiHeaderHeightCompensation;
+  }
+
+  // overriding `height` calculation of the project side nav, and flyouts
+  &.euiBody--headerIsFixed .euiCollapsibleNav
+  &.euiBody--headerIsFixed:not(.euiDataGrid__restrictBody) .euiFlyout {
+    height: calc(100% - #{$kbnHeaderBannerHeight + $euiHeaderHeightCompensation});
   }
 }
