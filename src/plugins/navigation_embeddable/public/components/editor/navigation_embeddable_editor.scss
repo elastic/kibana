@@ -49,9 +49,11 @@
   }
 
   &.linkError {
-    background-color: tint($euiColorWarning, 95%);
     border: 1px solid transparentize($euiColorWarningText, .7);
-    color: $euiColorWarningText;
+
+    .navEmbeddableLinkText {
+      color: $euiColorWarningText;
+    }
 
     .navEmbeddableLinkText--noLabel {
       font-style: italic;
@@ -70,4 +72,8 @@
       visibility: visible;
     }
   }
+}
+
+.navEmbeddableDroppableLinksArea {
+  margin: 0 (-$euiSizeXS);
 }
