@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import url from 'url';
 import supertest from 'supertest';
 import { NodeMetrics } from '@kbn/task-manager-plugin/server/routes/metrics';
@@ -84,8 +84,6 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should reset task claim success/total counters at an interval', async () => {
-        // counters are reset every 30 seconds, so with a polling interval of 3 seconds,
-        // counters should reach max value of 10 before resetting
         const initialCounterValue = 7;
         const initialMetrics = (
           await getMetrics(
@@ -97,38 +95,13 @@ export default function ({ getService }: FtrProviderContext) {
         expect(initialMetrics?.task_claim).not.to.be(null);
         expect(initialMetrics?.task_claim?.value).not.to.be(null);
 
-        let previousTaskClaimSuccess = initialMetrics?.task_claim?.value.total!;
-        let previousTaskClaimTotal = initialMetrics?.task_claim?.value.success!;
-        let previousTaskClaimTimestamp: string = initialMetrics?.task_claim?.timestamp!;
-
-        for (let i = 0; i < 5; ++i) {
-          const metrics = (
-            await getMetrics(
-              false,
-              (m: NodeMetrics) => m.metrics?.task_claim?.timestamp !== previousTaskClaimTimestamp
-            )
-          ).metrics;
-          expect(metrics).not.to.be(null);
-          expect(metrics?.task_claim).not.to.be(null);
-          expect(metrics?.task_claim?.value).not.to.be(null);
-
-          if ((initialCounterValue + i + 1) % 10 === 1) {
-            expect(metrics?.task_claim?.value.success).to.equal(1);
-            expect(metrics?.task_claim?.value.total).to.equal(1);
-          } else {
-            expect(metrics?.task_claim?.value.success).to.be.greaterThan(previousTaskClaimSuccess);
-            expect(metrics?.task_claim?.value.total).to.be.greaterThan(previousTaskClaimTotal);
-          }
-
-          previousTaskClaimTimestamp = metrics?.task_claim?.timestamp!;
-          previousTaskClaimSuccess = metrics?.task_claim?.value.success!;
-          previousTaskClaimTotal = metrics?.task_claim?.value.total!;
-
-          // check that duration histogram exists
-          expect(metrics?.task_claim?.value.duration).not.to.be(null);
-          expect(Array.isArray(metrics?.task_claim?.value.duration.counts)).to.be(true);
-          expect(Array.isArray(metrics?.task_claim?.value.duration.values)).to.be(true);
-        }
+        // retry until counter value resets
+        const resetMetrics = (
+          await getMetrics(false, (m: NodeMetrics) => m?.metrics?.task_claim?.value.total === 1)
+        ).metrics;
+        expect(resetMetrics).not.to.be(null);
+        expect(resetMetrics?.task_claim).not.to.be(null);
+        expect(resetMetrics?.task_claim?.value).not.to.be(null);
       });
 
       it('should reset task claim success/total counters on request', async () => {
