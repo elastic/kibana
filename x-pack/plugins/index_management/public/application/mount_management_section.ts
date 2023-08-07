@@ -65,6 +65,7 @@ export async function mountManagementSection(
     uiSettings,
     executionContext,
     settings,
+    notifications,
   } = core;
 
   const { url } = startDependencies.share;
@@ -104,6 +105,7 @@ export async function mountManagementSection(
     docLinks,
     kibanaVersion,
     theme$,
+    toasts: notifications.toasts,
   };
 
   const unmountAppCallback = renderApp(element, { core, dependencies: appDependencies });

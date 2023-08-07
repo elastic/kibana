@@ -56,7 +56,7 @@ describe('<IndexManagementHome />', () => {
         const indexManagementContainer = find('indexManagementHeaderContent');
         const tabListContainer = indexManagementContainer.find('div.euiTabs');
         const allTabs = tabListContainer.children();
-        const allTabsLabels = ['Indices', 'Data Streams', 'Index Templates', 'Component Templates'];
+        const allTabsLabels = ['Indices', 'Data Streams', 'Index Templates', 'Component Templates', 'Enrich Policies'];
 
         expect(allTabs.length).toBe(4);
         for (let i = 0; i < allTabs.length; i++) {
