@@ -301,10 +301,10 @@ packages/kbn-cypress-config @elastic/kibana-operations
 x-pack/plugins/dashboard_enhanced @elastic/kibana-presentation
 src/plugins/dashboard @elastic/kibana-presentation
 src/plugins/data @elastic/kibana-visualizations @elastic/kibana-data-discovery
-test/plugin_functional/plugins/data_search @elastic/kibana-app-services
+test/plugin_functional/plugins/data_search @elastic/kibana-data-discovery
 packages/kbn-data-service @elastic/kibana-visualizations @elastic/kibana-data-discovery
 src/plugins/data_view_editor @elastic/kibana-data-discovery
-examples/data_view_field_editor_example @elastic/kibana-app-services
+examples/data_view_field_editor_example @elastic/kibana-data-discovery
 src/plugins/data_view_field_editor @elastic/kibana-data-discovery
 src/plugins/data_view_management @elastic/kibana-data-discovery
 src/plugins/data_views @elastic/kibana-data-discovery
@@ -434,7 +434,7 @@ packages/kbn-import-locator @elastic/kibana-operations
 packages/kbn-import-resolver @elastic/kibana-operations
 x-pack/plugins/index_lifecycle_management @elastic/platform-deployment-management
 x-pack/plugins/index_management @elastic/platform-deployment-management
-test/plugin_functional/plugins/index_patterns @elastic/kibana-app-services
+test/plugin_functional/plugins/index_patterns @elastic/kibana-data-discovery
 x-pack/packages/kbn-infra-forge @elastic/actionable-observability
 x-pack/plugins/infra @elastic/infra-monitoring-ui
 x-pack/plugins/ingest_pipelines @elastic/platform-deployment-management
@@ -559,7 +559,6 @@ packages/kbn-repo-source-classifier @elastic/kibana-operations
 packages/kbn-repo-source-classifier-cli @elastic/kibana-operations
 packages/kbn-reporting/common @elastic/appex-sharedux
 x-pack/examples/reporting_example @elastic/appex-sharedux
-x-pack/plugins/reporting_export_types @elastic/appex-sharedux
 x-pack/plugins/reporting @elastic/appex-sharedux
 x-pack/test/plugin_functional/plugins/resolver_test @elastic/security-solution
 examples/response_stream @elastic/ml-ui
@@ -790,15 +789,34 @@ packages/kbn-yarn-lock-validator @elastic/kibana-operations
 # used for the 'team' designator within Kibana Stats
 
 # Data Discovery
-/x-pack/test/functional/apps/discover/ @elastic/kibana-data-discovery
-/x-pack/test/functional_with_es_ssl/apps/discover_ml_uptime/discover/ @elastic/kibana-data-discovery
-/test/functional/apps/discover/ @elastic/kibana-data-discovery
-/test/functional/apps/context/ @elastic/kibana-data-discovery
-/test/api_integration/apis/unified_field_list/ @elastic/kibana-data-discovery
-/x-pack/test/search_sessions_integration/ @elastic/kibana-data-discovery
-/test/plugin_functional/test_suites/data_plugin @elastic/kibana-data-discovery
-/examples/demo_search/ @elastic/kibana-data-discovery
+/test/accessibility/apps/discover.ts @elastic/kibana-data-discovery
+/test/api_integration/apis/data_views @elastic/kibana-data-discovery
+/test/api_integration/apis/data_view_field_editor @elastic/kibana-data-discovery
+/test/api_integration/apis/kql_telemetry @elastic/kibana-data-discovery
+/test/api_integration/apis/scripts @elastic/kibana-data-discovery
+/test/api_integration/apis/search @elastic/kibana-data-discovery
+/test/examples/data_view_field_editor_example @elastic/kibana-data-discovery
 /test/examples/discover_customization_examples @elastic/kibana-data-discovery
+/test/examples/field_formats @elastic/kibana-data-discovery
+/test/examples/partial_results @elastic/kibana-data-discovery
+/test/examples/search @elastic/kibana-data-discovery
+/test/examples/unified_field_list_examples @elastic/kibana-data-discovery
+/test/functional/apps/context @elastic/kibana-data-discovery
+/test/functional/apps/discover @elastic/kibana-data-discovery
+/test/functional/apps/management/ccs_compatibility/_data_views_ccs.ts @elastic/kibana-data-discovery
+/test/functional/apps/management/data_views @elastic/kibana-data-discovery
+/test/plugin_functional/test_suites/data_plugin @elastic/kibana-data-discovery
+/x-pack/test/accessibility/apps/search_sessions.ts @elastic/kibana-data-discovery
+/x-pack/test/api_integration/apis/management/rollup/index_patterns_extensions.js @elastic/kibana-data-discovery
+/x-pack/test/api_integration/apis/search @elastic/kibana-data-discovery
+/x-pack/test/examples/search_examples @elastic/kibana-data-discovery
+/x-pack/test/functional/apps/data_views @elastic/kibana-data-discovery
+/x-pack/test/functional/apps/discover @elastic/kibana-data-discovery
+/x-pack/test/functional_with_es_ssl/apps/discover_ml_uptime/discover @elastic/kibana-data-discovery
+/x-pack/test/search_sessions_integration @elastic/kibana-data-discovery
+/x-pack/test/stack_functional_integration/apps/ccs/ccs_discover.js @elastic/kibana-data-discovery
+/x-pack/test/stack_functional_integration/apps/management/_index_pattern_create.js @elastic/kibana-data-discovery
+/x-pack/test/upgrade/apps/discover @elastic/kibana-data-discovery
 
 # Vis Editors
 /src/plugins/visualize/ @elastic/kibana-visualizations
@@ -1080,6 +1098,7 @@ x-pack/plugins/cloud_integrations/cloud_full_story/server/config.ts @elastic/kib
 /x-pack/plugins/security_solution/server/lib/timeline @elastic/security-threat-hunting-investigations
 
 ## Security Solution sub teams - Threat Hunting Explore
+/x-pack/plugins/security_solution/common/api/risk_score @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/common/search_strategy/security_solution/hosts @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/common/search_strategy/security_solution/matrix_histogram @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/common/search_strategy/security_solution/network @elastic/security-threat-hunting-explore
@@ -1243,6 +1262,7 @@ x-pack/plugins/cloud_integrations/cloud_full_story/server/config.ts @elastic/kib
 /x-pack/test_serverless/functional/test_suites/security/cypress/e2e/endpoint_management @elastic/security-defend-workflows
 /x-pack/test_serverless/functional/test_suites/security/cypress/screens/endpoint_management @elastic/security-defend-workflows
 /x-pack/test_serverless/functional/test_suites/security/cypress/tasks/endpoint_management @elastic/security-defend-workflows
+/x-pack/plugins/security_solution_serverless/public/upselling/sections/endpoint_management @elastic/security-defend-workflows
 
 ## Security Solution sub teams - security-telemetry (Data Engineering)
 x-pack/plugins/security_solution/server/usage/ @elastic/security-data-analytics
