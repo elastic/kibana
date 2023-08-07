@@ -74,6 +74,10 @@ and return its results for me to look at.`;
           data: message.message.data,
           arguments: prevMessage.message.function_call.arguments,
         });
+
+        console.log('title', title);
+        console.log('content', content);
+        console.log('message', message);
       } else {
         title = '';
         content = message.message.content;
@@ -84,7 +88,7 @@ and return its results for me to look at.`;
         role: message.message.role,
         canCopy: true,
         canEdit: hasConnector && (message.message.role === MessageRole.User || hasFunction),
-        canExpand: message.message.role === MessageRole.System,
+        canExpand: message.message.role === MessageRole.User && Boolean(message.message.name),
         canRegenerate: hasConnector && message.message.role === MessageRole.Assistant,
         canGiveFeedback: message.message.role === MessageRole.Assistant,
         loading: false,

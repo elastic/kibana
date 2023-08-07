@@ -168,7 +168,8 @@ export function useTimeline({
         id: '',
         canCopy: true,
         canEdit: false,
-        canExpand: pendingMessage.message.role === MessageRole.System,
+        canExpand:
+          pendingMessage.message.role === MessageRole.User && Boolean(pendingMessage.message.name),
         canRegenerate: pendingMessage.aborted || !!pendingMessage.error,
         canGiveFeedback: false,
         title: '',

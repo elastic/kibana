@@ -8,7 +8,7 @@
 import React, { useEffect, useState } from 'react';
 import {
   EuiButtonEmpty,
-  EuiContextMenuItem,
+  EuiContextMenu,
   EuiContextMenuPanel,
   EuiPopover,
   EuiSpacer,
@@ -69,23 +69,36 @@ export function FunctionListPopover({
         </EuiButtonEmpty>
       }
       closePopover={handleClickFunctionList}
+      css={{ maxWidth: 400 }}
       panelPaddingSize="none"
       isOpen={isFunctionListOpen}
     >
       <EuiContextMenuPanel size="s">
-        {functions.map((func) => (
-          <EuiContextMenuItem key={func.options.name} onClick={() => handleSelectFunction(func)}>
-            <EuiText size="s">
-              <p>
-                <strong>{func.options.name}</strong>
-              </p>
-            </EuiText>
-            <EuiSpacer size="xs" />
-            <EuiText size="s">
-              <p>{func.options.description}</p>
-            </EuiText>
-          </EuiContextMenuItem>
-        ))}
+        <EuiContextMenu
+          initialPanelId={0}
+          panels={[
+            {
+              id: 0,
+              width: 500,
+              items: functions.map((func) => ({
+                name: (
+                  <>
+                    <EuiText size="s">
+                      <p>
+                        <strong>{func.options.name}</strong>
+                      </p>
+                    </EuiText>
+                    <EuiSpacer size="xs" />
+                    <EuiText size="s">
+                      <p>{func.options.description}</p>
+                    </EuiText>
+                  </>
+                ),
+                onClick: () => handleSelectFunction(func),
+              })),
+            },
+          ]}
+        />
       </EuiContextMenuPanel>
     </EuiPopover>
   );

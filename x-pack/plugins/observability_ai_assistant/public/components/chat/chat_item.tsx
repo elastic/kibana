@@ -238,7 +238,7 @@ export function ChatItem(props: ChatItemProps) {
         <MessagePanel
           body={
             content || loading ? (
-              role === MessageRole.System ? (
+              canExpand ? (
                 <EuiAccordion
                   id={accordionId}
                   className={accordionButtonClassName}
@@ -246,7 +246,7 @@ export function ChatItem(props: ChatItemProps) {
                   onToggle={handleAccordionToggle}
                 >
                   <EuiSpacer size="s" />
-                  <MessageText content={content || ''} loading={loading} />
+                  <MessageText content={'POOP'} loading={loading} />
                 </EuiAccordion>
               ) : (
                 <MessageText content={content || ''} loading={loading} />
