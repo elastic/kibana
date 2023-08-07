@@ -7,7 +7,8 @@
 
 import { request } from '@kbn/security-solution-plugin/public/management/cypress/tasks/common';
 import { isLocalhost } from '@kbn/security-solution-plugin/scripts/endpoint/common/is_localhost';
-import { ServerlessRoleName } from '../../../../../shared/lib';
+import type { ServerlessRoleName } from '../../../../../shared/lib';
+import { STANDARD_HTTP_HEADERS } from '../../../../../shared/lib/security/default_http_headers';
 
 /**
  * Send login via API
@@ -26,7 +27,7 @@ const sendApiLoginRequest = (
   cy.log(`Authenticating [${username}] via ${url.toString()}`);
 
   return request({
-    headers: { 'kbn-xsrf': 'cypress-creds-via-env' },
+    headers: { ...STANDARD_HTTP_HEADERS },
     method: 'POST',
     url: url.toString(),
     body: {

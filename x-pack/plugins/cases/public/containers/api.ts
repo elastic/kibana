@@ -20,6 +20,7 @@ import type {
   CaseUserActionStatsResponse,
   GetCaseConnectorsResponse,
   UserActionFindResponse,
+  SingleCaseMetricsResponse,
 } from '../../common/types/api';
 import type {
   CaseConnectors,
@@ -34,7 +35,6 @@ import type {
   CasesUI,
 } from '../../common/ui/types';
 import { SeverityAll, SortFieldCase, StatusAll } from '../../common/ui/types';
-import type { SingleCaseMetricsResponse } from '../../common/api';
 import {
   getCaseCommentsUrl,
   getCasesDeleteFileAttachmentsUrl,

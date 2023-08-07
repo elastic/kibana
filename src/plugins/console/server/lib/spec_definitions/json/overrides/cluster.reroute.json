@@ -12,8 +12,8 @@
             },
             "index": "{index}",
             "shard": 0,
-            "from_node": "{node}",
-            "to_node": "{node}"
+            "from_node": "",
+            "to_node": ""
           },
           "cancel": {
             "__template": {
@@ -23,7 +23,7 @@
             },
             "index": "{index}",
             "shard": 0,
-            "node": "{node}",
+            "node": "",
             "allow_primary": { "__one_of": [true, false] }
           },
           "allocate": {
@@ -34,7 +34,7 @@
             },
             "index": "{index}",
             "shard": 0,
-            "node": "{node}",
+            "node": "",
             "allow_primary": { "__one_of": [true, false] }
           }
         }
