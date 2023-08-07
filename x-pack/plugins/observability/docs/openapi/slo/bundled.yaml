@@ -165,6 +165,12 @@ paths:
         - $ref: '#/components/parameters/kbn_xsrf'
         - $ref: '#/components/parameters/space_id'
         - $ref: '#/components/parameters/slo_id'
+        - name: instanceId
+          in: query
+          description: the specific instanceId used by the summary calculation
+          schema:
+            type: string
+          example: host-abcde
       responses:
         '200':
           description: Successful request
@@ -939,6 +945,14 @@ components:
           description: Indicate if the SLO is enabled
           type: boolean
           example: true
+        groupBy:
+          description: optional group by field to use to generate an SLO per distinct value
+          type: string
+          example: some.field
+        instanceId:
+          description: the value derived from the groupBy field, if present, otherwise '*'
+          type: string
+          example: host-abcde
         createdAt:
           description: The creation date
           type: string
@@ -1072,6 +1086,10 @@ components:
           $ref: '#/components/schemas/objective'
         settings:
           $ref: '#/components/schemas/settings'
+        groupBy:
+          description: optional group by field to use to generate an SLO per distinct value
+          type: string
+          example: some.field
     create_slo_response:
       title: Create SLO response
       type: object

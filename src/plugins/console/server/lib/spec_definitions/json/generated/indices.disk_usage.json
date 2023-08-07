@@ -17,7 +17,7 @@
       "POST"
     ],
     "patterns": [
-      "{indices}/_disk_usage"
+      "{index}/_disk_usage"
     ],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-disk-usage.html"
   }

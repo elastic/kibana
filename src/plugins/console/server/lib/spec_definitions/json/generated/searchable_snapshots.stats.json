@@ -12,7 +12,7 @@
     ],
     "patterns": [
       "_searchable_snapshots/stats",
-      "{indices}/_searchable_snapshots/stats"
+      "{index}/_searchable_snapshots/stats"
     ],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/searchable-snapshots-apis.html"
   }
