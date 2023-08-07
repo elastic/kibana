@@ -15,6 +15,7 @@ describe('APM tutorial', () => {
     cy.contains('APM Server');
     cy.contains('Linux DEB');
     cy.contains('Linux RPM');
+    cy.contains('Other Linux');
     cy.contains('macOS');
     cy.contains('Windows');
     cy.contains('Fleet');
