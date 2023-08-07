@@ -64,7 +64,8 @@
     "@kbn/shared-ux-utility",
     "@kbn/core-application-browser",
     "@kbn/core-saved-objects-server",
-    "@kbn/discover-utils"
+    "@kbn/discover-utils",
+    "@kbn/field-types"
   ],
   "exclude": [
     "target/**/*"
