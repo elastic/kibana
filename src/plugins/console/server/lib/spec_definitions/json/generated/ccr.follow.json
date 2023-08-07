@@ -7,7 +7,7 @@
       "PUT"
     ],
     "patterns": [
-      "{indices}/_ccr/follow"
+      "{index}/_ccr/follow"
     ],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/ccr-put-follow.html"
   }

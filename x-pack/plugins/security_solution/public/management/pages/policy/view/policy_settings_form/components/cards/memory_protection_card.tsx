@@ -9,6 +9,7 @@ import React, { memo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { OperatingSystem } from '@kbn/securitysolution-utils';
 import { EuiSpacer } from '@elastic/eui';
+import { useGetProtectionsUnavailableComponent } from '../../hooks/use_get_protections_unavailable_component';
 import { useTestIdGenerator } from '../../../../../../hooks/use_test_id_generator';
 import { NotifyUserOption } from '../notify_user_option';
 import { DetectPreventProtectionLevel } from '../detect_prevent_protection_level';
@@ -41,6 +42,7 @@ export const MemoryProtectionCard = memo<MemoryProtectionCardProps>(
   ({ policy, onChange, mode, 'data-test-subj': dataTestSubj }) => {
     const isPlatinumPlus = useLicense().isPlatinumPlus();
     const getTestId = useTestIdGenerator(dataTestSubj);
+    const isProtectionsAllowed = !useGetProtectionsUnavailableComponent();
     const protection = 'memory_protection';
     const protectionLabel = i18n.translate(
       'xpack.securitySolution.endpoint.policy.protections.memory',
@@ -48,6 +50,10 @@ export const MemoryProtectionCard = memo<MemoryProtectionCardProps>(
         defaultMessage: 'Memory threat protections',
       }
     );
+
+    if (!isProtectionsAllowed) {
+      return null;
+    }
 
     if (!isPlatinumPlus) {
       return (
