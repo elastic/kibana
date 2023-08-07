@@ -28,7 +28,7 @@ export class ShareMenuManager {
     core: CoreStart,
     urlService: BrowserUrlService,
     shareRegistry: ShareMenuRegistryStart,
-    allowEmbed: boolean,
+    disableEmbed: boolean,
     anonymousAccessServiceProvider?: () => AnonymousAccessServiceContract
   ) {
     return {
@@ -46,7 +46,7 @@ export class ShareMenuManager {
         const anonymousAccess = anonymousAccessServiceProvider?.();
         this.toggleShareContextMenu({
           ...options,
-          allowEmbed,
+          allowEmbed: disableEmbed ? false : options.allowEmbed,
           onClose,
           menuItems,
           urlService,
