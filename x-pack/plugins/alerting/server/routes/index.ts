@@ -29,7 +29,7 @@ import { getActionErrorLogRoute } from './get_action_error_log';
 import { getRuleExecutionKPIRoute } from './get_rule_execution_kpi';
 import { getRuleStateRoute } from './get_rule_state';
 import { healthRoute } from './health';
-import { resolveRuleRoute } from './resolve_rule';
+import { resolveRuleRoute } from './rule/apis/resolve';
 import { ruleTypesRoute } from './rule_types';
 import { muteAllRuleRoute } from './mute_all_rule';
 import { muteAlertRoute } from './mute_alert';
