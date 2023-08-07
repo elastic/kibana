@@ -163,8 +163,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/150757
-    describe.skip('Field Formatters and Scripted Fields', () => {
+    describe('Field Formatters and Scripted Fields', () => {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/reporting/hugedata');
       });
