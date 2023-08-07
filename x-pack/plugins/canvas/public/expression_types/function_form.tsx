@@ -96,7 +96,7 @@ export class FunctionForm extends BaseForm {
         key: `${id}.${arg.name}.${valueIndex}`,
         ...passedProps,
         valueIndex,
-        onValueChange: debounce(onValueChange(arg.name, valueIndex), 100),
+        onValueChange: onValueChange(arg.name, valueIndex),
         onValueRemove: onValueRemove(arg.name, valueIndex),
         argValue: argValue ?? null,
       });
