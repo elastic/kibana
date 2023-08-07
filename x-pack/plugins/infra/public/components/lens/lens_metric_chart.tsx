@@ -15,7 +15,7 @@ import { FormulaConfig, MetricLayerOptions } from '../../common/visualizations';
 import { Layer, useLensAttributes } from '../../hooks/use_lens_attributes';
 import { LensWrapperProps } from './lens_wrapper';
 
-export type Props = Pick<TypedLensByValueInput, 'id' | 'title' | 'overrides'> &
+export type Props = Pick<TypedLensByValueInput, 'id' | 'title' | 'overrides' | 'disableTriggers'> &
   Pick<
     LensWrapperProps,
     'dateRange' | 'filters' | 'query' | 'lastReloadRequestTime' | 'loading' | 'onBrushEnd'
@@ -38,6 +38,7 @@ export const LensMetricChart = ({
   query,
   title,
   onBrushEnd,
+  disableTriggers = false,
   loading = false,
 }: Props) => {
   const { euiTheme } = useEuiTheme();
@@ -91,6 +92,7 @@ export const LensMetricChart = ({
             onBrushEnd={onBrushEnd}
             loading={isLoading}
             hidePanelTitles
+            disableTriggers={disableTriggers}
           />
         </EuiToolTip>
       )}

@@ -18,6 +18,13 @@ export interface TileProps {
   nodeName: string;
 }
 
+const AVERAGE_SUBTITLE = i18n.translate(
+  'xpack.infra.assetDetailsEmbeddable.overview.metricTrend.subtitle.average',
+  {
+    defaultMessage: 'Average',
+  }
+);
+
 export const Tile = ({
   id,
   layers,
@@ -27,11 +34,6 @@ export const Tile = ({
   nodeName,
   timeRange,
 }: KPIChartProps & TileProps) => {
-  const getSubtitle = () =>
-    i18n.translate('xpack.infra.assetDetailsEmbeddable.overview.metricTrend.subtitle.average', {
-      defaultMessage: 'Average',
-    });
-
   const filters = useMemo(() => {
     return [
       buildCombinedHostsFilter({
@@ -44,13 +46,14 @@ export const Tile = ({
 
   return (
     <LensMetricChart
-      id={`hostsViewKPIGrid${id}Tile`}
+      id={`assetDetailsKPIGrid${id}Tile`}
       dataView={dataView}
       dateRange={timeRange}
-      layers={{ ...layers, options: { ...layers.options, subtitle: getSubtitle() } }}
+      layers={{ ...layers, options: { ...layers.options, subtitle: AVERAGE_SUBTITLE } }}
       filters={filters}
       title={title}
       toolTip={toolTip}
+      disableTriggers
     />
   );
 };

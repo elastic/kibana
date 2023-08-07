@@ -4,8 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useMemo } from 'react';
-import { BrushTriggerEvent } from '@kbn/charts-plugin/public';
+import React, { useMemo } from 'react';
 import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { LensXYChart } from '../../../../../../components/lens';
 import { Layer } from '../../../../../../hooks/use_lens_attributes';
@@ -23,7 +22,7 @@ export interface MetricChartProps extends Pick<TypedLensByValueInput, 'id' | 'ov
 }
 
 export const MetricChart = ({ id, title, layers, overrides }: MetricChartProps) => {
-  const { searchCriteria, onSubmit } = useUnifiedSearchContext();
+  const { searchCriteria } = useUnifiedSearchContext();
   const { dataView } = useMetricsDataViewContext();
   const { requestTs, loading } = useHostsViewContext();
   const { currentPage } = useHostsTableContext();
@@ -42,42 +41,26 @@ export const MetricChart = ({ id, title, layers, overrides }: MetricChartProps) 
         ];
   }, [searchCriteria.filters, currentPage, dataView, shouldUseSearchCriteria]);
 
-  const handleBrushEnd = useCallback(
-    ({ range }: BrushTriggerEvent['data']) => {
-      const [min, max] = range;
-      onSubmit({
-        dateRange: {
-          from: new Date(min).toISOString(),
-          to: new Date(max).toISOString(),
-          mode: 'absolute',
-        },
-      });
-    },
-    [onSubmit]
-  );
-
   // prevents requestTs and serchCriteria state from reloading the chart
   // we want it to reload only once the table has finished loading
   const { afterLoadedState } = useAfterLoadedState(loading, {
     lastReloadRequestTime: requestTs,
     dateRange: searchCriteria.dateRange,
-    query: searchCriteria.query,
-    filters,
+    query: shouldUseSearchCriteria ? searchCriteria.query : undefined,
   });
 
   return (
     <LensXYChart
-      id={`hostsViewMetricChart${id}`}
+      id={`hostsView-metricChart${id}`}
       dataView={dataView}
       dateRange={afterLoadedState.dateRange}
       layers={layers}
       lastReloadRequestTime={afterLoadedState.lastReloadRequestTime}
       loading={loading}
       filters={filters}
-      query={shouldUseSearchCriteria ? afterLoadedState.query : undefined}
+      query={afterLoadedState.query}
       title={title}
       overrides={overrides}
-      onBrushEnd={handleBrushEnd}
     />
   );
 };

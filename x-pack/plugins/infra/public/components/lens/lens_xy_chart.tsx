@@ -15,7 +15,7 @@ import { FormulaConfig, XYLayerOptions } from '../../common/visualizations';
 import { Layer, useLensAttributes } from '../../hooks/use_lens_attributes';
 import { LensWrapperProps } from './lens_wrapper';
 
-export type Props = Pick<TypedLensByValueInput, 'id' | 'title' | 'overrides'> &
+export type Props = Pick<TypedLensByValueInput, 'id' | 'title' | 'overrides' | 'disableTriggers'> &
   Pick<
     LensWrapperProps,
     'dateRange' | 'filters' | 'query' | 'lastReloadRequestTime' | 'loading' | 'onBrushEnd'
@@ -36,6 +36,7 @@ export const LensXYChart = ({
   query,
   title,
   onBrushEnd,
+  disableTriggers = false,
   loading = false,
 }: Props) => {
   const { attributes, getExtraActions, error } = useLensAttributes({
@@ -79,6 +80,7 @@ export const LensXYChart = ({
           query={query}
           onBrushEnd={onBrushEnd}
           loading={isLoading}
+          disableTriggers={disableTriggers}
         />
       )}
     </EuiPanel>

@@ -49,6 +49,7 @@ export const MetricChart = ({
       filters={filters}
       title={title}
       overrides={overrides}
+      disableTriggers
     />
   );
 };

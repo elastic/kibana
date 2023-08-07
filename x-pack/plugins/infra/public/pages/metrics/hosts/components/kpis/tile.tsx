@@ -4,9 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useMemo, useCallback } from 'react';
+import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { BrushTriggerEvent } from '@kbn/charts-plugin/public';
 import { LensMetricChart } from '../../../../../components/lens';
 import { KPIChartProps } from '../../../../../common/visualizations/lens/dashboards/host/kpi_grid_config';
 import { buildCombinedHostsFilter } from '../../../../../utils/filters/build';
@@ -16,8 +15,12 @@ import { useHostsViewContext } from '../../hooks/use_hosts_view';
 import { useHostCountContext } from '../../hooks/use_host_count';
 import { useAfterLoadedState } from '../../hooks/use_after_loaded_state';
 
+const AVERAGE_SUBTITLE = i18n.translate('xpack.infra.hostsViewPage.metricTrend.subtitle.average', {
+  defaultMessage: 'Average',
+});
+
 export const Tile = ({ id, title, layers, toolTip }: KPIChartProps) => {
-  const { searchCriteria, onSubmit } = useUnifiedSearchContext();
+  const { searchCriteria } = useUnifiedSearchContext();
   const { dataView } = useMetricsDataViewContext();
   const { requestTs, hostNodes, loading: hostsLoading } = useHostsViewContext();
   const { data: hostCountData, isRequestRunning: hostCountLoading } = useHostCountContext();
@@ -34,9 +37,7 @@ export const Tile = ({ id, title, layers, toolTip }: KPIChartProps) => {
             limit: searchCriteria.limit,
           },
         })
-      : i18n.translate('xpack.infra.hostsViewPage.metricTrend.subtitle.average', {
-          defaultMessage: 'Average',
-        });
+      : AVERAGE_SUBTITLE;
   };
 
   const filters = useMemo(() => {
@@ -51,26 +52,12 @@ export const Tile = ({ id, title, layers, toolTip }: KPIChartProps) => {
         ];
   }, [dataView, hostNodes, searchCriteria.filters, shouldUseSearchCriteria]);
 
-  const handleBrushEnd = useCallback(
-    ({ range }: BrushTriggerEvent['data']) => {
-      const [min, max] = range;
-      onSubmit({
-        dateRange: {
-          from: new Date(min).toISOString(),
-          to: new Date(max).toISOString(),
-          mode: 'absolute',
-        },
-      });
-    },
-    [onSubmit]
-  );
-
   // prevents requestTs and serchCriteria state from reloading the chart
   // we want it to reload only once the table has finished loading
   const { afterLoadedState } = useAfterLoadedState(loading, {
     lastReloadRequestTime: requestTs,
-    query: searchCriteria.query,
     dateRange: searchCriteria.dateRange,
+    query: shouldUseSearchCriteria ? searchCriteria.query : undefined,
     filters,
   });
 
@@ -83,10 +70,10 @@ export const Tile = ({ id, title, layers, toolTip }: KPIChartProps) => {
       layers={{ ...layers, options: { ...layers.options, subtitle: getSubtitle() } }}
       lastReloadRequestTime={afterLoadedState.lastReloadRequestTime}
       loading={loading}
-      query={shouldUseSearchCriteria ? afterLoadedState.query : undefined}
+      query={afterLoadedState.query}
       title={title}
       toolTip={toolTip}
-      onBrushEnd={handleBrushEnd}
+      disableTriggers
     />
   );
 };
