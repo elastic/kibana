@@ -9,7 +9,7 @@
       "PUT"
     ],
     "patterns": [
-      "{indices}"
+      "{index}"
     ],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-create-index.html"
   }

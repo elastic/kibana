@@ -14,7 +14,7 @@ type PliAppFeatures = Readonly<
 
 export const PLI_APP_FEATURES: PliAppFeatures = {
   security: {
-    essentials: [],
+    essentials: [AppFeatureKey.endpointHostManagement, AppFeatureKey.endpointPolicyManagement],
     complete: [
       AppFeatureKey.advancedInsights,
       AppFeatureKey.investigationGuide,
@@ -26,6 +26,7 @@ export const PLI_APP_FEATURES: PliAppFeatures = {
     essentials: [
       AppFeatureKey.endpointHostManagement,
       AppFeatureKey.endpointPolicyManagement,
+      AppFeatureKey.endpointPolicyProtections,
       AppFeatureKey.endpointArtifactManagement,
     ],
     complete: [
