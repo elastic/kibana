@@ -19,15 +19,7 @@ export default {
 const Template: ComponentStory<typeof Component> = (props: CasesProps) => <Component {...props} />;
 
 const defaultProps: CasesProps = {
-  permissions: {
-    read: true,
-    all: true,
-    create: true,
-    delete: true,
-    push: true,
-    update: true,
-    connectors: true,
-  },
+  permissions: { read: true, all: true, create: true, delete: true, push: true, update: true },
 };
 
 export const CasesPageWithAllPermissions = Template.bind({});
@@ -42,6 +34,5 @@ CasesPageWithNoPermissions.args = {
     delete: false,
     push: false,
     update: false,
-    connectors: false,
   },
 };

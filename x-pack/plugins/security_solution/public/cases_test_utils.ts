@@ -11,7 +11,6 @@ export const noCasesCapabilities = () => ({
   update_cases: false,
   delete_cases: false,
   push_cases: false,
-  cases_connector: false,
 });
 
 export const readCasesCapabilities = () => ({
@@ -20,7 +19,6 @@ export const readCasesCapabilities = () => ({
   update_cases: false,
   delete_cases: false,
   push_cases: false,
-  cases_connector: true,
 });
 
 export const allCasesCapabilities = () => ({
@@ -29,7 +27,6 @@ export const allCasesCapabilities = () => ({
   update_cases: true,
   delete_cases: true,
   push_cases: true,
-  cases_connector: true,
 });
 
 export const noCasesPermissions = () => ({
@@ -39,7 +36,6 @@ export const noCasesPermissions = () => ({
   update: false,
   delete: false,
   push: false,
-  connectors: false,
 });
 
 export const readCasesPermissions = () => ({
@@ -49,7 +45,6 @@ export const readCasesPermissions = () => ({
   update: false,
   delete: false,
   push: false,
-  connectors: true,
 });
 
 export const writeCasesPermissions = () => ({
@@ -59,7 +54,6 @@ export const writeCasesPermissions = () => ({
   update: true,
   delete: true,
   push: true,
-  connectors: true,
 });
 
 export const allCasesPermissions = () => ({
@@ -69,5 +63,4 @@ export const allCasesPermissions = () => ({
   update: true,
   delete: true,
   push: true,
-  connectors: true,
 });
