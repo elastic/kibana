@@ -7,7 +7,10 @@
 
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { useDispatch, useSelector } from 'react-redux';
-import { useEffect } from 'react';
+import React, { useEffect } from 'react';
+import { EuiIcon } from '@elastic/eui';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { ClientPluginsStart } from '../../../../../../plugin';
 import { selectDynamicSettings } from '../../../../state/settings/selectors';
 import { fetchActionTypes } from '../../../../state/settings/api';
 import { getConnectorsAction } from '../../../../state/settings/actions';
@@ -16,6 +19,7 @@ export const useAlertingDefaults = () => {
   const { data: actionTypes } = useFetcher(() => fetchActionTypes(), []);
   const { connectors, connectorsLoading, loading, settings } = useSelector(selectDynamicSettings);
   const { defaultConnectors } = settings || {};
+  const { actionTypeRegistry } = useKibana<ClientPluginsStart>().services.triggersActionsUi;
 
   const dispatch = useDispatch();
 
@@ -29,6 +33,12 @@ export const useAlertingDefaults = () => {
       value: connectorAction.id,
       label: connectorAction.name,
       'data-test-subj': connectorAction.name,
+      prepend: (
+        <EuiIcon
+          type={actionTypeRegistry.get(connectorAction.actionTypeId as string).iconClass}
+          size="s"
+        />
+      ),
     }));
 
   return {
