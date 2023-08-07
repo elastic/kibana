@@ -217,7 +217,9 @@ export const RiskScoreEnableSection = () => {
               {isUpdateAvailable && (
                 <EuiFlexGroup gutterSize="s" alignItems={'center'}>
                   <EuiFlexItem>
-                    {initRiskEngineMutation.isLoading && <EuiLoadingSpinner size="m" />}
+                    {initRiskEngineMutation.isLoading && !isModalVisible && (
+                      <EuiLoadingSpinner size="m" />
+                    )}
                   </EuiFlexItem>
                   <EuiButtonEmpty
                     disabled={initRiskEngineMutation.isLoading}
