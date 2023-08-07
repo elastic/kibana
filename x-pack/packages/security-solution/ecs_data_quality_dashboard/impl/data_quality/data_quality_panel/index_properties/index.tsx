@@ -33,17 +33,12 @@ import { getIndexIncompatible, getIndexPropertiesContainerId } from '../pattern/
 import { getTabs } from '../tabs/helpers';
 import { getAllIncompatibleMarkdownComments } from '../tabs/incompatible_tab/helpers';
 import * as i18n from './translations';
-import type {
-  EcsMetadata,
-  IlmPhase,
-  PartitionedFieldMetadata,
-  PatternRollup,
-  ReportDataQualityIndexChecked,
-} from '../../types';
+import type { EcsMetadata, IlmPhase, PartitionedFieldMetadata, PatternRollup } from '../../types';
 import { useAddToNewCase } from '../../use_add_to_new_case';
 import { useMappings } from '../../use_mappings';
 import { useUnallowedValues } from '../../use_unallowed_values';
 import { getDocsCount, getSizeInBytes } from '../../helpers';
+import { useDataQualityContext } from '../data_quality_context';
 
 const EMPTY_MARKDOWN_COMMENTS: string[] = [];
 
@@ -78,7 +73,6 @@ export interface Props {
   }) => void;
   pattern: string;
   patternRollup: PatternRollup | undefined;
-  reportDataQualityIndexChecked: ReportDataQualityIndexChecked;
   theme?: PartialTheme;
   baseTheme: Theme;
   updatePatternRollup: (patternRollup: PatternRollup) => void;
@@ -97,12 +91,12 @@ const IndexPropertiesComponent: React.FC<Props> = ({
   openCreateCaseFlyout,
   pattern,
   patternRollup,
-  reportDataQualityIndexChecked,
   theme,
   baseTheme,
   updatePatternRollup,
 }) => {
   const { error: mappingsError, indexes, loading: loadingMappings } = useMappings(indexName);
+  const { telemetryEvents } = useDataQualityContext();
 
   const requestItems = useMemo(
     () =>
@@ -113,12 +107,12 @@ const IndexPropertiesComponent: React.FC<Props> = ({
     [indexName]
   );
 
-  const telemetryReportDataQualityChecked = useCallback(
+  const onUnallowedValuesLoaded = useCallback(
     ({ requestTime, error }: { requestTime: number; error?: string }) => {
       if (!patternRollup?.stats || !patternRollup?.results) {
         return;
       }
-      reportDataQualityIndexChecked({
+      telemetryEvents?.reportDataQualityIndexChecked({
         error,
         pattern,
         indexName,
@@ -133,14 +127,14 @@ const IndexPropertiesComponent: React.FC<Props> = ({
         version: EcsVersion,
       });
     },
-    [indexName, pattern, patternRollup, reportDataQualityIndexChecked]
+    [indexName, pattern, patternRollup, telemetryEvents]
   );
 
   const {
     error: unallowedValuesError,
     loading: loadingUnallowedValues,
     unallowedValues,
-  } = useUnallowedValues({ indexName, requestItems, onLoad: telemetryReportDataQualityChecked });
+  } = useUnallowedValues({ indexName, requestItems, onLoad: onUnallowedValuesLoaded });
 
   const mappingsProperties = useMemo(
     () =>

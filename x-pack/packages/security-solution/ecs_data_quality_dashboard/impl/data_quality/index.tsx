@@ -17,7 +17,7 @@ import type {
   WordCloudElementEvent,
   XYChartElementEvent,
 } from '@elastic/charts';
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 
 import { Body } from './data_quality_panel/body';
 import { DataQualityProvider } from './data_quality_panel/data_quality_context';
@@ -92,8 +92,13 @@ const DataQualityPanelComponent: React.FC<Props> = ({
     [defaultNumberFormat]
   );
 
+  const telemetryEvents = useMemo(
+    () => ({ reportDataQualityCheckAllClicked, reportDataQualityIndexChecked }),
+    [reportDataQualityCheckAllClicked, reportDataQualityIndexChecked]
+  );
+
   return (
-    <DataQualityProvider httpFetch={httpFetch}>
+    <DataQualityProvider httpFetch={httpFetch} telemetryEvents={telemetryEvents}>
       <Body
         addSuccessToast={addSuccessToast}
         canUserCreateAndReadCases={canUserCreateAndReadCases}
@@ -105,8 +110,6 @@ const DataQualityPanelComponent: React.FC<Props> = ({
         lastChecked={lastChecked}
         openCreateCaseFlyout={openCreateCaseFlyout}
         patterns={patterns}
-        reportDataQualityCheckAllClicked={reportDataQualityCheckAllClicked}
-        reportDataQualityIndexChecked={reportDataQualityIndexChecked}
         setLastChecked={setLastChecked}
         theme={theme}
         baseTheme={baseTheme}

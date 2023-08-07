@@ -18,21 +18,14 @@ import {
   updateResultOnCheckCompleted,
 } from './helpers';
 
-import type {
-  OnCheckAllCompleted,
-  OnCheckCompleted,
-  PatternRollup,
-  ReportDataQualityCheckAllClicked,
-  ReportDataQualityIndexChecked,
-} from '../types';
+import type { OnCheckAllCompleted, OnCheckCompleted, PatternRollup } from '../types';
 import { getDocsCount, getSizeInBytes } from '../helpers';
 import { getIndexIncompatible } from '../data_quality_panel/pattern/helpers';
+import { useDataQualityContext } from '../data_quality_panel/data_quality_context';
 
 interface Props {
   ilmPhases: string[];
   patterns: string[];
-  reportDataQualityCheckAllClicked: ReportDataQualityCheckAllClicked;
-  reportDataQualityIndexChecked: ReportDataQualityIndexChecked;
 }
 interface UseResultsRollup {
   onCheckCompleted: OnCheckCompleted;
@@ -54,15 +47,10 @@ interface UseResultsRollup {
   updatePatternRollup: (patternRollup: PatternRollup) => void;
 }
 
-export const useResultsRollup = ({
-  ilmPhases,
-  patterns,
-  reportDataQualityIndexChecked,
-  reportDataQualityCheckAllClicked,
-}: Props): UseResultsRollup => {
+export const useResultsRollup = ({ ilmPhases, patterns }: Props): UseResultsRollup => {
   const [patternIndexNames, setPatternIndexNames] = useState<Record<string, string[]>>({});
   const [patternRollups, setPatternRollups] = useState<Record<string, PatternRollup>>({});
-
+  const { telemetryEvents } = useDataQualityContext();
   const updatePatternRollup = useCallback((patternRollup: PatternRollup) => {
     setPatternRollups((current) =>
       onPatternRollupUpdated({ patternRollup, patternRollups: current })
@@ -110,7 +98,7 @@ export const useResultsRollup = ({
         })
       );
 
-      reportDataQualityIndexChecked({
+      telemetryEvents?.reportDataQualityIndexChecked({
         error: error ?? undefined,
         pattern,
         indexName,
@@ -126,12 +114,12 @@ export const useResultsRollup = ({
         isCheckAll: true,
       });
     },
-    [patternRollups, reportDataQualityIndexChecked]
+    [patternRollups, telemetryEvents]
   );
 
   const onCheckAllCompleted = useCallback(
     ({ requestTime }: { requestTime: number }) => {
-      reportDataQualityCheckAllClicked({
+      telemetryEvents?.reportDataQualityCheckAllClicked({
         numberOfDocuments: totalDocsCount,
         numberOfIncompatibleFields: totalIncompatible,
         numberOfIndices: totalIndices,
@@ -142,7 +130,7 @@ export const useResultsRollup = ({
       });
     },
     [
-      reportDataQualityCheckAllClicked,
+      telemetryEvents,
       totalDocsCount,
       totalIncompatible,
       totalIndices,

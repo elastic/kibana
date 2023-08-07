@@ -21,7 +21,6 @@ import React from 'react';
 import { DataQualityDetails } from './data_quality_details';
 import { DataQualitySummary } from '../data_quality_summary';
 import { useResultsRollup } from '../../use_results_rollup';
-import { ReportDataQualityCheckAllClicked, ReportDataQualityIndexChecked } from '../../types';
 
 interface Props {
   addSuccessToast: (toast: { title: string }) => void;
@@ -52,8 +51,6 @@ interface Props {
     headerContent?: React.ReactNode;
   }) => void;
   patterns: string[];
-  reportDataQualityCheckAllClicked: ReportDataQualityCheckAllClicked;
-  reportDataQualityIndexChecked: ReportDataQualityIndexChecked;
   setLastChecked: (lastChecked: string) => void;
   theme?: PartialTheme;
   baseTheme: Theme;
@@ -70,8 +67,6 @@ const BodyComponent: React.FC<Props> = ({
   lastChecked,
   openCreateCaseFlyout,
   patterns,
-  reportDataQualityCheckAllClicked,
-  reportDataQualityIndexChecked,
   setLastChecked,
   theme,
   baseTheme,
@@ -91,8 +86,6 @@ const BodyComponent: React.FC<Props> = ({
   } = useResultsRollup({
     ilmPhases,
     patterns,
-    reportDataQualityIndexChecked,
-    reportDataQualityCheckAllClicked,
   });
 
   return (
@@ -134,7 +127,6 @@ const BodyComponent: React.FC<Props> = ({
           patterns={patterns}
           patternIndexNames={patternIndexNames}
           patternRollups={patternRollups}
-          reportDataQualityIndexChecked={reportDataQualityIndexChecked}
           theme={theme}
           baseTheme={baseTheme}
           updatePatternIndexNames={updatePatternIndexNames}

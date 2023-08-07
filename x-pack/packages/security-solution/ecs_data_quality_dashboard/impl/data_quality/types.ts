@@ -205,3 +205,8 @@ export interface DataQualityCheckAllClickedParams {
 
 export type ReportDataQualityIndexChecked = (params: DataQualityIndexCheckedParams) => void;
 export type ReportDataQualityCheckAllClicked = (params: DataQualityCheckAllClickedParams) => void;
+
+export interface TelemetryEvents {
+  reportDataQualityIndexChecked: ReportDataQualityIndexChecked;
+  reportDataQualityCheckAllClicked: ReportDataQualityCheckAllClicked;
+}
