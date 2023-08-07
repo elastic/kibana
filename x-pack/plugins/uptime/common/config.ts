@@ -31,4 +31,3 @@ export const config: PluginConfigDescriptor = {
 };
 
 export type UptimeConfig = TypeOf<typeof uptimeConfig>;
-export type ServiceConfig = TypeOf<typeof serviceConfig>;
