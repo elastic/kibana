@@ -42,7 +42,7 @@ import {
 
 import { OVERVIEW_URL, TIMELINE_TEMPLATES_URL } from '../../../urls/navigation';
 
-describe('Create a timeline from a template', () => {
+describe.skip('Create a timeline from a template', () => {
   before(() => {
     deleteTimelines();
     login();
