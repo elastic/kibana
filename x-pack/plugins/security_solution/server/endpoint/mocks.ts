@@ -46,9 +46,6 @@ import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-m
 import { casesPluginMock } from '@kbn/cases-plugin/server/mocks';
 import { createCasesClientMock } from '@kbn/cases-plugin/server/client/mocks';
 import type { VersionedRouteConfig, AddVersionOpts } from '@kbn/core-http-server';
-import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
-import { ALL_APP_FEATURE_KEYS } from '../../common';
-import { AppFeatures } from '../lib/app_features';
 import { createActionCreateServiceMock } from './services/actions/mocks';
 import { getEndpointAuthzInitialStateMock } from '../../common/endpoint/service/authz/mocks';
 import { createMockConfig, requestContextMock } from '../lib/detection_engine/routes/__mocks__';
@@ -74,6 +71,7 @@ import type { EndpointAuthz } from '../../common/endpoint/types/authz';
 import { EndpointFleetServicesFactory } from './services/fleet';
 import { createLicenseServiceMock } from '../../common/license/mocks';
 import { createFeatureUsageServiceMock } from './services/feature_usage/mocks';
+import { createAppFeaturesMock } from '../lib/app_features/mocks';
 
 /**
  * Creates a mocked EndpointAppContext.
@@ -166,13 +164,8 @@ export const createMockEndpointAppContextServiceStartContract =
       },
       savedObjectsStart
     );
-
-    const featuresPluginSetup = featuresPluginMock.createSetup();
     const experimentalFeatures = config.experimentalFeatures;
-    const appFeatures = new AppFeatures(logger, experimentalFeatures);
-
-    appFeatures.init(featuresPluginSetup);
-    appFeatures.set([...ALL_APP_FEATURE_KEYS]);
+    const appFeatures = createAppFeaturesMock(undefined, experimentalFeatures, undefined, logger);
 
     packagePolicyService.list.mockImplementation(async (_, options) => {
       return {
