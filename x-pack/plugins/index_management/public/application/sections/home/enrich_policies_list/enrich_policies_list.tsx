@@ -16,57 +16,7 @@ import { useLoadEnrichPolicies } from '../../../services/api';
 import { PageLoading, PageError } from '../../../../shared_imports';
 import { PoliciesTable } from './policies_table';
 import { DeletePolicyModal, ExecutePolicyModal } from './confirm_modals';
-
-type PolicyType = 'match' | 'geo_match' | 'range' | '';
-
-interface BaseTypes {
-  name: string;
-  sourceIndices: string[];
-  matchField: string;
-  enrichFields: string[];
-}
-
-export interface EnrichPolicy extends BaseTypes {
-  type: PolicyType;
-}
-
-interface BaseEnrichPolicy {
-  config: {
-    match?: BaseTypes;
-    geo_match?: BaseTypes;
-    range?: BaseTypes;
-  };
-}
-
-const getPolicyType = (policy: BaseEnrichPolicy): PolicyType => {
-  if (policy.config.match) {
-    return 'match';
-  }
-
-  if (policy.config.geo_match) {
-    return 'geo_match';
-  }
-
-  if (policy.config.range) {
-    return 'range';
-  }
-
-  return '';
-};
-
-const serializeEnrichmentPolicies = (policies: BaseEnrichPolicy[]) => {
-  return policies.map((policy: any) => {
-    const policyType = getPolicyType(policy);
-
-    return {
-      name: policy.config[policyType].name,
-      type: policyType,
-      sourceIndices: policy.config[policyType].indices,
-      matchField: policy.config[policyType].match_field,
-      enrichFields: policy.config[policyType].enrich_fields,
-    };
-  });
-};
+import { serializeEnrichmentPolicies } from '../../../lib/enrich_policy_serializer';
 
 export const EnrichPoliciesList = () => {
   const {

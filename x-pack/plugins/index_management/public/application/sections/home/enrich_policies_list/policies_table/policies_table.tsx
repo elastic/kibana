@@ -9,7 +9,7 @@ import React, { FunctionComponent } from 'react';
 import { EuiInMemoryTable, EuiBasicTableColumn, EuiSearchBarProps, EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { EnrichPolicy } from '../enrich_policies_list';
+import type { EnrichPolicy } from '../../../../types';
 
 export interface Props {
   policies: EnrichPolicy[];
