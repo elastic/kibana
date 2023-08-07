@@ -12,7 +12,6 @@ import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ExecuteReportTask } from '.';
 import type { ReportingCore } from '../..';
 import type { ReportingConfigType } from '../../config';
-import type { ExportType } from '../../export_types/common';
 import { createMockConfigSchema, createMockReportingCore } from '../../test_helpers';
 import type { SavedReport } from '../store';
 

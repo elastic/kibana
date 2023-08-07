@@ -165,7 +165,7 @@ export class ReportingCore {
 
 
     this.exportTypesRegistry.getAll().forEach((et) => {
-      et.start({ ...startDeps, reporting: this.getContract() });
+      et.start({ ...startDeps});
     });
 
     const { taskManager } = startDeps;

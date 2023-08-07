@@ -8,20 +8,17 @@
 import * as Rx from 'rxjs';
 import { coreMock, elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { Writable } from 'stream';
-import { CancellationToken } from '@kbn/reporting-common';
+import { CancellationToken, generatePngObservable, LocatorParams } from '@kbn/reporting-common';
 import { ScreenshottingStart } from '@kbn/screenshotting-plugin/server';
-import { ReportingCore } from '../..';
-import { LocatorParams } from '../../../common/types';
-import { cryptoFactory } from '../../lib';
-import { createMockConfigSchema, createMockReportingCore } from '../../test_helpers';
-import { generatePngObservable } from '../common';
-import { TaskPayloadPNGV2 } from './types';
-import { PngExportType } from './png_v2';
+import { PngExportType } from '@kbn/reporting-export-types-png';
+import { cryptoFactory } from '@kbn/reporting-common/crypto';
+import { createMockConfigSchema } from '../../test_helpers';
+import { TaskPayloadPNGV2 } from '@kbn/reporting-export-types-png/types';
+
 
 jest.mock('../common/generate_png');
 
 let content: string;
-let mockReportingCore: ReportingCore;
 let mockPngExportType: PngExportType;
 let stream: jest.Mocked<Writable>;
 
@@ -51,7 +48,6 @@ beforeEach(async () => {
     },
   });
 
-  mockReportingCore = await createMockReportingCore(configType);
   const context = coreMock.createPluginInitializerContext(configType);
 
   const mockCoreSetup = coreMock.createSetup();
@@ -66,7 +62,6 @@ beforeEach(async () => {
     uiSettings: mockCoreStart.uiSettings,
     screenshotting: {} as unknown as ScreenshottingStart,
     esClient: elasticsearchServiceMock.createClusterClient(),
-    reporting: mockReportingCore.getContract(),
   });
 });
 
