@@ -27,7 +27,7 @@ export interface StorageExplorerHostDetails {
   hostId: string;
   hostName: string;
   projectId: string;
-  probabilisticValues: number[];
+  probabilisticValues: Array<{ value: number; date: number }>;
   totalEventsSize: number;
   totalMetricsSize: number;
   totalSize: number;

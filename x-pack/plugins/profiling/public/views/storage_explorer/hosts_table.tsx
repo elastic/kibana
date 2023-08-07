@@ -16,7 +16,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { asDynamicBytes } from '@kbn/observability-plugin/common';
+import { asDynamicBytes, asAbsoluteDateTime } from '@kbn/observability-plugin/common';
 import React, { useMemo, useState } from 'react';
 import { StorageExplorerHostDetails } from '../../../common/storage_explorer';
 import { LabelWithHint } from '../../components/label_with_hint';
@@ -85,8 +85,8 @@ export function HostsTable({ data = [], hasDistinctProbabilisticValues }: Props)
       },
       {
         field: 'hostName',
-        name: i18n.translate('xpack.profiling.storageExplorer.hostsTable.machine', {
-          defaultMessage: 'Machine',
+        name: i18n.translate('xpack.profiling.storageExplorer.hostsTable.host', {
+          defaultMessage: 'Host',
         }),
         sortable: true,
         render: (_, item) => {
@@ -105,9 +105,19 @@ export function HostsTable({ data = [], hasDistinctProbabilisticValues }: Props)
               {probabilisticValues.map((value, index) => {
                 return (
                   <EuiFlexItem key={index} grow={false}>
-                    <EuiBadge color="hollow" isDisabled={index > 0}>
-                      {value}
-                    </EuiBadge>
+                    <EuiToolTip
+                      content={i18n.translate(
+                        'xpack.profiling.storageExplorer.hostsTable.probabilisticProfilingValues',
+                        {
+                          defaultMessage: 'Introduced on {date}',
+                          values: { date: asAbsoluteDateTime(value.date) },
+                        }
+                      )}
+                    >
+                      <EuiBadge color="hollow" isDisabled={index > 0}>
+                        {value.value}
+                      </EuiBadge>
+                    </EuiToolTip>
                   </EuiFlexItem>
                 );
               })}

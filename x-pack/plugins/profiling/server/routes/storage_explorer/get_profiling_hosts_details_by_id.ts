@@ -10,7 +10,7 @@ import { ProfilingESClient } from '../../utils/create_profiling_es_client';
 
 interface HostDetails {
   hostName: string;
-  probabilisticValues: number[];
+  probabilisticValues: Array<{ value: number; date: number }>;
 }
 
 export async function getProfilingHostsDetailsById({
@@ -63,15 +63,16 @@ export async function getProfilingHostsDetailsById({
               terms: {
                 field: 'profiling.agent.config.probabilistic_threshold',
                 size: 5,
-                order: {
-                  // Order by @timestamp to receive the active value first
-                  latestDate: 'desc',
-                },
               },
               aggs: {
-                latestDate: {
-                  max: {
-                    field: ProfilingESField.Timestamp,
+                sample: {
+                  top_metrics: {
+                    metrics: {
+                      field: 'profiling.agent.start_time',
+                    },
+                    sort: {
+                      'profiling.agent.start_time': 'asc',
+                    },
                   },
                 },
               },
@@ -86,9 +87,10 @@ export async function getProfilingHostsDetailsById({
     resp.aggregations?.hostIds.buckets.reduce<Record<string, HostDetails>>((acc, curr) => {
       const hostId = curr.key as string;
       const hostName = curr.hostNames.top[0].metrics['profiling.host.name'] as string;
-      const probabilisticValues = curr.probabilisticValues.buckets.map(
-        (probValues) => probValues.key as number
-      );
+      const probabilisticValues = curr.probabilisticValues.buckets.map((probValues) => ({
+        value: probValues.key as number,
+        date: Number(probValues.sample.top[0]?.metrics?.['profiling.agent.start_time']),
+      }));
       return { ...acc, [hostId]: { hostName, probabilisticValues } };
     }, {}) || {}
   );

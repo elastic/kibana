@@ -60,8 +60,8 @@ export function Summary({ data, isLoading }: Props) {
       hint: undefined,
     },
     {
-      title: i18n.translate('xpack.profiling.storageExplorer.summary.numberOfMachines', {
-        defaultMessage: 'Number of machines',
+      title: i18n.translate('xpack.profiling.storageExplorer.summary.numberOfHosts', {
+        defaultMessage: 'Number of hosts',
       }),
       value: data?.totalNumberOfHosts,
       hint: undefined,

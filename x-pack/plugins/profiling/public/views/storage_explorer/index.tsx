@@ -106,7 +106,10 @@ export function StorageExplorerView() {
               </EuiText>
               <EuiSpacer />
               {/* TODO: define href */}
-              <EuiButton href="#" color="warning">
+              <EuiButton
+                href="https://www.elastic.co/guide/en/observability/current/profiling-probabilistic-profiling.html"
+                color="warning"
+              >
                 {i18n.translate(
                   'xpack.profiling.storageExplorer.distinctProbabilisticProfilingValues.button',
                   { defaultMessage: 'Learn how' }
