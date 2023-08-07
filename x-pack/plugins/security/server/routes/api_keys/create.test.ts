@@ -77,6 +77,7 @@ describe('Create API Key route', () => {
         api_key: 'abc123',
         id: 'key_id',
         name: 'my api key',
+        encoded: 'encoded123',
       });
 
       const payload = {
@@ -104,6 +105,7 @@ describe('Create API Key route', () => {
         api_key: 'abc123',
         id: 'key_id',
         name: 'my api key',
+        encoded: 'encoded123',
       });
     });
 

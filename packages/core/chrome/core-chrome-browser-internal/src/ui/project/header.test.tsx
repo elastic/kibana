@@ -28,6 +28,7 @@ describe('Header', () => {
     helpSupportUrl$: Rx.of('app/help'),
     helpMenuLinks$: Rx.of([]),
     homeHref$: Rx.of('app/home'),
+    projectsUrl$: Rx.of('/projects/'),
     kibanaVersion: '8.9',
     loadingCount$: Rx.of(0),
     navControlsLeft$: Rx.of([]),
@@ -70,5 +71,16 @@ describe('Header', () => {
     await toggleNav();
     await toggleNav();
     await toggleNav();
+  });
+
+  it('displays the link to projects', async () => {
+    render(
+      <ProjectHeader {...mockProps}>
+        <EuiHeader>Hello, world!</EuiHeader>
+      </ProjectHeader>
+    );
+
+    const projectsLink = await screen.getByTestId('projectsLink');
+    expect(projectsLink).toHaveAttribute('href', '/projects/');
   });
 });

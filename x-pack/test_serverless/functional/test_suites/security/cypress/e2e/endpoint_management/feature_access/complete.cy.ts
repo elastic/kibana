@@ -19,7 +19,13 @@ describe(
     },
   },
   () => {
-    const pages = getEndpointManagementPageList();
+    const allPages = getEndpointManagementPageList();
+    const deniedPages = allPages.filter(({ id }) => {
+      return id !== 'endpointList' && id !== 'policyList';
+    });
+    const allowedPages = allPages.filter(({ id }) => {
+      return id === 'endpointList' || id === 'policyList';
+    });
     let username: string;
     let password: string;
 
@@ -30,7 +36,14 @@ describe(
       });
     });
 
-    for (const { url, title } of pages) {
+    for (const { url, title, pageTestSubj } of allowedPages) {
+      it(`should allow access to ${title}`, () => {
+        cy.visit(url);
+        cy.getByTestSubj(pageTestSubj).should('exist');
+      });
+    }
+
+    for (const { url, title } of deniedPages) {
       it(`should not allow access to ${title}`, () => {
         cy.visit(url);
         getNoPrivilegesPage().should('exist');
