@@ -85,7 +85,7 @@ export const UserProfilesKibanaProvider: FC<UserProfilesKibanaDependencies> = ({
 /**
  * React hook for accessing pre-wired services.
  */
-export function useServices() {
+export function useUserProfiles() {
   const context = useContext(UserProfilesContext);
 
   if (!context) {

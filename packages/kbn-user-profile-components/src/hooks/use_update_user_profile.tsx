@@ -12,7 +12,7 @@ import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
 
 import type { UserProfileData } from '../types';
-import { useServices } from '../services';
+import { useUserProfiles } from '../services';
 
 interface Props {
   notificationSuccess?: {
@@ -51,7 +51,7 @@ export const useUpdateUserProfile = ({
   notificationSuccess = {},
   pageReloadChecker,
 }: Props = {}) => {
-  const { userProfileApiClient, notifySuccess } = useServices();
+  const { userProfileApiClient, notifySuccess } = useUserProfiles();
   const { userProfile$ } = userProfileApiClient;
   const {
     enabled: notificationSuccessEnabled = true,
