@@ -39,7 +39,7 @@ describe('<WatchEditPage />', () => {
   let testBed: WatchEditTestBed;
 
   beforeAll(() => {
-    jest.useFakeTimers({ legacyFakeTimers: true });
+    jest.useFakeTimers();
   });
 
   afterAll(() => {
@@ -50,7 +50,10 @@ describe('<WatchEditPage />', () => {
     beforeEach(async () => {
       httpRequestsMockHelpers.setLoadWatchResponse(WATCH_ID, WATCH);
 
-      testBed = await setup(httpSetup);
+      await act(async () => {
+        testBed = await setup(httpSetup);
+      });
+
       testBed.component.update();
     });
 
@@ -82,9 +85,7 @@ describe('<WatchEditPage />', () => {
 
         form.setInputValue('nameInput', EDITED_WATCH_NAME);
 
-        await act(async () => {
-          actions.clickSubmitButton();
-        });
+        await actions.clickSubmitButton();
 
         const DEFAULT_LOGGING_ACTION_ID = 'logging_1';
         const DEFAULT_LOGGING_ACTION_TYPE = 'logging';
@@ -137,7 +138,10 @@ describe('<WatchEditPage />', () => {
     beforeEach(async () => {
       httpRequestsMockHelpers.setLoadWatchResponse(WATCH_ID, { watch });
 
-      testBed = await setup(httpSetup);
+      await act(async () => {
+        testBed = await setup(httpSetup);
+      });
+
       testBed.component.update();
     });
 
@@ -162,9 +166,7 @@ describe('<WatchEditPage />', () => {
 
         form.setInputValue('nameInput', EDITED_WATCH_NAME);
 
-        await act(async () => {
-          actions.clickSubmitButton();
-        });
+        await actions.clickSubmitButton();
 
         const {
           id,
