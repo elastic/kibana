@@ -52,15 +52,15 @@ Kibana users benefit greatly from autocomplete suggestions since not all Elastic
 Autocomplete definitions are all created in the form of javascript objects loaded from `json` and `js` files. 
 
 ### Creating definitions
-The [`generated`](https://github.com/elastic/kibana/blob/main/src/plugins/console/server/lib/spec_definitions/json/generated) folder contains definitions created automatically from Elasticsearch REST API specifications. See this [README](https://github.com/elastic/kibana/blob/main/packages/kbn-spec-to-console/README.md) file for more information on the `spec-to-console` script. 
+The [`generated`](https://github.com/elastic/kibana/blob/main/src/plugins/console/server/lib/spec_definitions/json/generated) folder contains definitions created automatically from Elasticsearch specifications. See this [README](https://github.com/elastic/kibana/blob/main/packages/kbn-generate-console-definitions/README.md) file for more information on the `generate-console-definitions` script. The AppEx/Management team (@elastic/platform-deployment-management) regularly runs the script to update the definitions and is planning to automate this process. 
 
 Manually created override files in the [`overrides`](https://github.com/elastic/kibana/blob/main/src/plugins/console/server/lib/spec_definitions/json/overrides) folder contain additions for request body parameters since those
 are not created by the script. Any other fixes such as documentation links, request methods and patterns and url parameters 
-should be addressed at the source. That means this should be fixed in Elasticsearch REST API specifications and then 
+should be addressed at the source. That means this should be fixed in Elasticsearch specifications and then 
 autocomplete definitions can be re-generated with the script. 
 
 If there are any endpoints missing completely from the `generated` folder, this should also be addressed at the source, i.e. 
-Elasticsearch REST API specifications. If for some reason, that is not possible, then additional definitions files 
+Elasticsearch specifications. If for some reason, that is not possible, then additional definitions files 
 can be placed in the folder [`manual`]((https://github.com/elastic/kibana/blob/main/src/plugins/console/server/lib/spec_definitions/json/manual)).
 
 ### Top level keys
@@ -97,6 +97,15 @@ Query url parameters and their values. See the [Query url parameters](#query-url
 
 #### `priority`
 Value for selecting one autocomplete definition, if several configurations are loaded from the files. The highest number takes precedence.
+
+#### `availability`
+A property that describes if an endpoint is available in stack and serverless environments. Endpoints with a `false` boolean value are filtered out in the corresponding environment. An example of an endpoint that is not available in the serverless environment:
+```json
+"availability": {
+  "stack": true,
+  "serverless": false
+}
+```
 
 #### `data_autocomplete_rules`
 Request body parameters and their values. Only used in `overrides` files because REST API specs don't contain any information about body request parameters.
