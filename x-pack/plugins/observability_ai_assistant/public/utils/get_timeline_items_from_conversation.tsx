@@ -4,23 +4,22 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import React from 'react';
 import { v4 } from 'uuid';
 import { i18n } from '@kbn/i18n';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { type Message, MessageRole } from '../../common';
 import type { ChatTimelineItem } from '../components/chat/chat_timeline';
-import { ObservabilityAIAssistantService } from '../types';
+import { RenderFunction } from '../components/render_function';
 
 export function getTimelineItemsfromConversation({
   currentUser,
   messages,
   hasConnector,
-  service,
 }: {
   currentUser?: Pick<AuthenticatedUser, 'username' | 'full_name'>;
   messages: Message[];
   hasConnector: boolean;
-  service: ObservabilityAIAssistantService;
 }): ChatTimelineItem[] {
   return [
     {
@@ -43,7 +42,8 @@ export function getTimelineItemsfromConversation({
       const isSystemPrompt = message.message.role === MessageRole.System;
 
       let title: string;
-      let content: React.ReactNode;
+      let content: string | undefined;
+      let element: React.ReactNode | undefined;
 
       if (hasFunction) {
         title = i18n.translate('xpack.observabilityAiAssistant.suggestedFunctionEvent', {
@@ -69,15 +69,14 @@ and return its results for me to look at.`;
         title = i18n.translate('xpack.observabilityAiAssistant.executedFunctionEvent', {
           defaultMessage: 'executed a function',
         });
-        content = service.renderFunction(message.message.name, {
-          content: message.message.content,
-          data: message.message.data,
-          arguments: prevMessage.message.function_call.arguments,
-        });
-
-        console.log('title', title);
-        console.log('content', content);
-        console.log('message', message);
+        content = message.message.content;
+        element = (
+          <RenderFunction
+            name={message.message.name}
+            arguments={prevMessage.message.function_call.arguments}
+            response={message.message}
+          />
+        );
       } else {
         title = '';
         content = message.message.content;
@@ -96,6 +95,7 @@ and return its results for me to look at.`;
         title,
         content,
         currentUser,
+        element,
       };
 
       return props;

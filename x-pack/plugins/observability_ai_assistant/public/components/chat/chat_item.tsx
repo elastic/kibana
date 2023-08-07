@@ -10,6 +10,7 @@ import {
   EuiButtonIcon,
   EuiComment,
   EuiFlexGroup,
+  EuiErrorBoundary,
   EuiFlexItem,
   EuiPopover,
   EuiSpacer,
@@ -21,7 +22,6 @@ import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
 import { MessageRole } from '../../../common/types';
 import { Feedback, FeedbackButtons } from '../feedback_buttons';
-import { MessagePanel } from '../message_panel/message_panel';
 import { MessageText } from '../message_panel/message_text';
 import { RegenerateResponseButton } from '../buttons/regenerate_response_button';
 import { StopGeneratingButton } from '../buttons/stop_generating_button';
@@ -70,26 +70,24 @@ const accordionButtonClassName = css`
   }
 `;
 
-export function ChatItem(props: ChatItemProps) {
-  const {
-    title,
-    content,
-    canCopy,
-    canEdit,
-    canGiveFeedback,
-    canRegenerate,
-    canExpand,
-    role,
-    loading,
-    error,
-    currentUser,
-    onEditSubmit,
-    onRegenerateClick,
-    onStopGeneratingClick,
-    onFeedbackClick,
-  } = props;
-
-  console.log(props);
+export function ChatItem({
+  title,
+  content,
+  element,
+  canCopy,
+  canEdit,
+  canExpand,
+  canGiveFeedback,
+  canRegenerate,
+  role,
+  loading,
+  error,
+  currentUser,
+  onEditSubmit,
+  onRegenerateClick,
+  onStopGeneratingClick,
+  onFeedbackClick,
+}: ChatItemProps) {
   const accordionId = useGeneratedHtmlId({ prefix: 'chat' });
 
   const [isPopoverOpen, setIsPopoverOpen] = useState<string | undefined>();
@@ -188,6 +186,25 @@ export function ChatItem(props: ChatItemProps) {
     );
   }
 
+  if (!element) {
+    element =
+      content || error || controls ? (
+        canExpand ? (
+          <EuiAccordion
+            id={accordionId}
+            className={accordionButtonClassName}
+            forceState={isAccordionOpen ? 'open' : 'closed'}
+            onToggle={handleAccordionToggle}
+          >
+            <EuiSpacer size="s" />
+            <MessageText content={'POOP'} loading={loading} />
+          </EuiAccordion>
+        ) : (
+          <MessageText content={content || ''} loading={loading} />
+        )
+      ) : null;
+  }
+
   return (
     <EuiComment
       event={
@@ -234,29 +251,7 @@ export function ChatItem(props: ChatItemProps) {
       }
       username={getRoleTranslation(role)}
     >
-      {content || error || controls ? (
-        <MessagePanel
-          body={
-            content || loading ? (
-              canExpand ? (
-                <EuiAccordion
-                  id={accordionId}
-                  className={accordionButtonClassName}
-                  forceState={isAccordionOpen ? 'open' : 'closed'}
-                  onToggle={handleAccordionToggle}
-                >
-                  <EuiSpacer size="s" />
-                  <MessageText content={'POOP'} loading={loading} />
-                </EuiAccordion>
-              ) : (
-                <MessageText content={content || ''} loading={loading} />
-              )
-            ) : null
-          }
-          controls={controls}
-          error={error}
-        />
-      ) : null}
+      <EuiErrorBoundary>{element}</EuiErrorBoundary>
     </EuiComment>
   );
 }

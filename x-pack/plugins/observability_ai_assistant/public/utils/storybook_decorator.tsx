@@ -36,7 +36,9 @@ const service: ObservabilityAIAssistantService = {
     args: string | undefined,
     signal: AbortSignal
   ): Promise<{ content?: Serializable; data?: Serializable }> => ({}),
-  renderFunction: (name: string, response: {}) => <div>Hello! {name}</div>,
+  renderFunction: (name: string, args: string | undefined, response: {}) => (
+    <div>Hello! {name}</div>
+  ),
 };
 
 export function KibanaReactStorybookDecorator(Story: ComponentType) {

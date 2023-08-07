@@ -34,7 +34,8 @@
     "@kbn/kibana-utils-plugin",
     "@kbn/monaco",
     "@kbn/io-ts-utils",
-    "@kbn/std"
+    "@kbn/std",
+    "@kbn/lens-plugin"
   ],
   "exclude": ["target/**/*"]
 }

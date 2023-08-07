@@ -40,6 +40,8 @@ export function registerLensFunction({
         properties: {
           visualization: {
             type: 'object',
+            description:
+              'The visualization type (e.g., an XY chart, or a pie chart) and its configuration',
             oneOf: [
               {
                 properties: {
@@ -112,6 +114,8 @@ export function registerLensFunction({
       return { content: '' };
     },
     ({ arguments: { visualization, from, to, query } }) => {
+      console.log(visualization, from, to, query);
+
       const adHocDataView: { id: string; name: string; type: string } = {
         id: 'adhoc-dataview',
         name: 'adhoc-dataview',
