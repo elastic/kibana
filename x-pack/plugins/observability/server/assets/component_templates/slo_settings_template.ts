@@ -11,6 +11,7 @@ export const getSLOSettingsTemplate = (name: string) => ({
   name,
   template: {
     settings: {
+      auto_expand_replicas: '0-all',
       hidden: true,
     },
   },
