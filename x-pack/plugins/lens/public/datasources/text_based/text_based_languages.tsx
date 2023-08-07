@@ -112,7 +112,7 @@ export function getTextBasedDatasource({
     if (fieldName) return [];
     if (context && 'dataViewSpec' in context && context.dataViewSpec.title && context.query) {
       const newLayerId = generateId();
-      const textBasedQueryColumns = context.contextualFields ?? [];
+      const textBasedQueryColumns = context.textBasedColumns ?? [];
       const newColumns = textBasedQueryColumns?.map((c) => {
         return {
           columnId: c.id,

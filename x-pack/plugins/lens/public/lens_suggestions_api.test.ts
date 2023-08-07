@@ -63,7 +63,7 @@ describe('suggestionsApi', () => {
         name: 'DataView',
       },
       fieldName: '',
-      contextualFields: textBasedQueryColumns,
+      textBasedColumns: textBasedQueryColumns,
       query: {
         sql: 'SELECT field1, field2 FROM "index1"',
       },
@@ -110,7 +110,7 @@ describe('suggestionsApi', () => {
         name: 'DataView',
       },
       fieldName: '',
-      contextualFields: textBasedQueryColumns,
+      textBasedColumns: textBasedQueryColumns,
       query: {
         sql: 'SELECT field1, field2 FROM "index1"',
       },
@@ -159,7 +159,7 @@ describe('suggestionsApi', () => {
         name: 'DataView',
       },
       fieldName: '',
-      contextualFields: textBasedQueryColumns,
+      textBasedColumns: textBasedQueryColumns,
       query: {
         sql: 'SELECT field1, field2 FROM "index1"',
       },
@@ -201,7 +201,7 @@ describe('suggestionsApi', () => {
         name: 'DataView',
       },
       fieldName: '',
-      contextualFields: textBasedQueryColumns,
+      textBasedColumns: textBasedQueryColumns,
       query: {
         sql: 'SELECT field1, field2 FROM "index1"',
       },

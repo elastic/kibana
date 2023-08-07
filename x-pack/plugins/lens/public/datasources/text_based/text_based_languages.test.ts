@@ -384,7 +384,7 @@ describe('Textbased Data Source', () => {
       const state = {
         layers: {},
         initialContext: {
-          contextualFields: textBasedQueryColumns,
+          textBasedColumns: textBasedQueryColumns,
           query: { sql: 'SELECT * FROM "foo"' },
           dataViewSpec: {
             title: 'foo',
@@ -473,7 +473,7 @@ describe('Textbased Data Source', () => {
       const state = {
         layers: {},
         initialContext: {
-          contextualFields: [
+          textBasedColumns: [
             {
               id: 'bytes',
               name: 'bytes',

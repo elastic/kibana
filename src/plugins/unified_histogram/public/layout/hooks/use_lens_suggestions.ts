@@ -34,7 +34,7 @@ export const useLensSuggestions = ({
     const context = {
       dataViewSpec: dataView?.toSpec(),
       fieldName: '',
-      contextualFields: columns,
+      textBasedColumns: columns,
       query: query && isOfAggregateQueryType(query) ? query : undefined,
     };
     const allSuggestions = isPlainRecord

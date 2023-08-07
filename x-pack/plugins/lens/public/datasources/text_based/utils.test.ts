@@ -173,7 +173,7 @@ describe('Text based languages utils', () => {
         indexPatternRefs: [],
         fieldList: [],
         initialContext: {
-          contextualFields: textBasedQueryColumns,
+          textBasedColumns: textBasedQueryColumns,
           query: { sql: 'SELECT * FROM "foo"' },
           fieldName: '',
           dataViewSpec: {
@@ -221,7 +221,7 @@ describe('Text based languages utils', () => {
 
       expect(updatedState).toStrictEqual({
         initialContext: {
-          contextualFields: textBasedQueryColumns,
+          textBasedColumns: textBasedQueryColumns,
           query: { sql: 'SELECT * FROM "foo"' },
           fieldName: '',
           dataViewSpec: {
@@ -325,7 +325,7 @@ describe('Text based languages utils', () => {
         indexPatternRefs: [],
         fieldList: [],
         initialContext: {
-          contextualFields: textBasedQueryColumns,
+          textBasedColumns: textBasedQueryColumns,
           query: { sql: 'SELECT * FROM "foo"' },
           fieldName: '',
           dataViewSpec: {
@@ -378,7 +378,7 @@ describe('Text based languages utils', () => {
 
       expect(updatedState).toStrictEqual({
         initialContext: {
-          contextualFields: textBasedQueryColumns,
+          textBasedColumns: textBasedQueryColumns,
           query: { sql: 'SELECT * FROM "foo"' },
           fieldName: '',
           dataViewSpec: {
