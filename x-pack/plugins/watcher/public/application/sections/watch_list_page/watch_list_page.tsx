@@ -448,7 +448,7 @@ export const WatchListPage = () => {
           : '',
     };
 
-    const handleOnChange = ({ queryText, error }: { queryText: string, error: string }) => {
+    const handleOnChange = ({ queryText, error }: { queryText: string; error: string }) => {
       if (!error) {
         setQuery(queryText);
       }
@@ -456,7 +456,7 @@ export const WatchListPage = () => {
 
     const searchConfig = {
       onChange: handleOnChange,
-      query: query,
+      query,
       box: {
         incremental: true,
       },
