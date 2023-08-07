@@ -114,6 +114,68 @@ export class ChromeService {
     );
   }
 
+  private setIsVisible = (isVisible: boolean) => this.isForceHidden$.next(!isVisible);
+
+  /**
+   * Some EUI component can be toggled in Full screen (e.g. the EuiDataGrid). When they are toggled in full
+   * screen we want to hide the chrome, and when they are toggled back to normal we want to show the chrome.
+   */
+  private handleEuiFullScreenChanges = () => {
+    const body = document.querySelector('body');
+    const classesOnBodyWhenEuiFullScreen = ['euiDataGrid__restrictBody'];
+
+    let isChromeHiddenForEuiFullScreen = false;
+    let observer: MutationObserver | undefined;
+
+    if (!body) {
+      return;
+    }
+
+    const onBodyClassesChange = ({
+      isChromeVisible,
+      className,
+    }: {
+      /** The current value of the isVisible$ Observable */
+      isChromeVisible: boolean;
+      /** The HTML body classes */
+      className: string;
+    }) => {
+      if (
+        classesOnBodyWhenEuiFullScreen.some((name) => className.includes(name)) &&
+        isChromeVisible
+      ) {
+        isChromeHiddenForEuiFullScreen = true;
+        this.setIsVisible(false);
+      } else if (
+        classesOnBodyWhenEuiFullScreen.every((name) => !className.includes(name)) &&
+        !isChromeVisible &&
+        isChromeHiddenForEuiFullScreen
+      ) {
+        isChromeHiddenForEuiFullScreen = false;
+        this.setIsVisible(true);
+      }
+    };
+
+    this.isVisible$.subscribe((isVisible) => {
+      if (observer) {
+        observer.disconnect();
+      }
+
+      observer = new MutationObserver((mutationList) => {
+        mutationList.forEach((mutation) => {
+          if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+            onBodyClassesChange({
+              className: body.className,
+              isChromeVisible: isVisible,
+            });
+          }
+        });
+      });
+
+      observer.observe(body, { attributes: true });
+    });
+  };
+
   public setup({ analytics }: SetupDeps) {
     const docTitle = this.docTitle.setup({ document: window.document });
     registerAnalyticsContextProvider(analytics, docTitle.title$);
@@ -128,6 +190,7 @@ export class ChromeService {
     customBranding,
   }: StartDeps): Promise<InternalChromeStart> {
     this.initVisibility(application);
+    this.handleEuiFullScreenChanges();
 
     const globalHelpExtensionMenuLinks$ = new BehaviorSubject<ChromeGlobalHelpExtensionMenuLink[]>(
       []
@@ -379,7 +442,7 @@ export class ChromeService {
 
       getIsVisible$: () => this.isVisible$,
 
-      setIsVisible: (isVisible: boolean) => this.isForceHidden$.next(!isVisible),
+      setIsVisible: this.setIsVisible.bind(this),
 
       getBadge$: () => badge$.pipe(takeUntil(this.stop$)),
 
