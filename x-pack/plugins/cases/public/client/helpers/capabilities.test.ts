@@ -12,7 +12,6 @@ describe('getUICapabilities', () => {
     expect(getUICapabilities(undefined)).toMatchInlineSnapshot(`
       Object {
         "all": false,
-        "connectors": false,
         "create": false,
         "delete": false,
         "push": false,
@@ -26,7 +25,6 @@ describe('getUICapabilities', () => {
     expect(getUICapabilities()).toMatchInlineSnapshot(`
       Object {
         "all": false,
-        "connectors": false,
         "create": false,
         "delete": false,
         "push": false,
@@ -40,7 +38,6 @@ describe('getUICapabilities', () => {
     expect(getUICapabilities({ create_cases: true })).toMatchInlineSnapshot(`
       Object {
         "all": false,
-        "connectors": false,
         "create": true,
         "delete": false,
         "push": false,
@@ -58,12 +55,10 @@ describe('getUICapabilities', () => {
         update_cases: false,
         delete_cases: false,
         push_cases: false,
-        cases_connectors: false,
       })
     ).toMatchInlineSnapshot(`
       Object {
         "all": false,
-        "connectors": false,
         "create": false,
         "delete": false,
         "push": false,
@@ -77,7 +72,6 @@ describe('getUICapabilities', () => {
     expect(getUICapabilities({})).toMatchInlineSnapshot(`
       Object {
         "all": false,
-        "connectors": false,
         "create": false,
         "delete": false,
         "push": false,
@@ -95,35 +89,10 @@ describe('getUICapabilities', () => {
         update_cases: true,
         delete_cases: true,
         push_cases: true,
-        cases_connectors: true,
       })
     ).toMatchInlineSnapshot(`
       Object {
         "all": false,
-        "connectors": true,
-        "create": false,
-        "delete": true,
-        "push": true,
-        "read": true,
-        "update": true,
-      }
-    `);
-  });
-
-  it('returns false for the all field when cases_connectors is false', () => {
-    expect(
-      getUICapabilities({
-        create_cases: false,
-        read_cases: true,
-        update_cases: true,
-        delete_cases: true,
-        push_cases: true,
-        cases_connectors: false,
-      })
-    ).toMatchInlineSnapshot(`
-      Object {
-        "all": false,
-        "connectors": false,
         "create": false,
         "delete": true,
         "push": true,
