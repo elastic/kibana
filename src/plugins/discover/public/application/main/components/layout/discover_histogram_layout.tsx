@@ -15,7 +15,6 @@ import { useDiscoverHistogram } from './use_discover_histogram';
 import { type DiscoverMainContentProps, DiscoverMainContent } from './discover_main_content';
 import { ResetSearchButton } from './reset_search_button';
 import { useAppStateSelector } from '../../services/discover_app_state_container';
-import { useDataState } from '../../hooks/use_data_state';
 
 export interface DiscoverHistogramLayoutProps extends DiscoverMainContentProps {
   resizeRef: RefObject<HTMLDivElement>;
@@ -43,8 +42,6 @@ export const DiscoverHistogramLayout = ({
     isPlainRecord,
   });
 
-  const documentState = useDataState(dataState.data$.documents$);
-
   // Initialized when the first search has been requested or
   // when in text-based mode since search sessions are not supported
   if (!searchSessionId && !isPlainRecord) {
@@ -57,7 +54,6 @@ export const DiscoverHistogramLayout = ({
       searchSessionId={searchSessionId}
       requestAdapter={dataState.inspectorAdapters.requests}
       resizeRef={resizeRef}
-      textBasedQueryColumns={documentState.textBasedQueryColumns}
       appendHitsCounter={
         savedSearch.id ? (
           <ResetSearchButton resetSavedSearch={stateContainer.actions.undoSavedSearchChanges} />

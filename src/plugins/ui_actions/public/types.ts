@@ -18,8 +18,7 @@ export type TriggerToActionsRegistry = Map<string, string[]>;
 export interface VisualizeFieldContext {
   fieldName: string;
   dataViewSpec: DataViewSpec;
-  contextualFields?: string[];
-  textBasedQueryColumns?: DatatableColumn[];
+  contextualFields?: DatatableColumn[];
   originatingApp?: string;
   query?: AggregateQuery;
 }

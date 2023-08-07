@@ -54,7 +54,6 @@ export type UnifiedHistogramContainerProps = {
   | 'columns'
   | 'resizeRef'
   | 'appendHitsCounter'
-  | 'textBasedQueryColumns'
   | 'children'
 >;
 

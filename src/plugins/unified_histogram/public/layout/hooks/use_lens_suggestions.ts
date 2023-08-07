@@ -19,7 +19,6 @@ export const useLensSuggestions = ({
   originalSuggestion,
   isPlainRecord,
   columns,
-  textBasedQueryColumns,
   lensSuggestionsApi,
   onSuggestionChange,
 }: {
@@ -27,8 +26,7 @@ export const useLensSuggestions = ({
   query?: Query | AggregateQuery;
   originalSuggestion?: Suggestion;
   isPlainRecord?: boolean;
-  columns?: string[];
-  textBasedQueryColumns?: DatatableColumn[];
+  columns?: DatatableColumn[];
   lensSuggestionsApi: LensSuggestionsApi;
   onSuggestionChange?: (suggestion: Suggestion | undefined) => void;
 }) => {
@@ -37,7 +35,6 @@ export const useLensSuggestions = ({
       dataViewSpec: dataView?.toSpec(),
       fieldName: '',
       contextualFields: columns,
-      textBasedQueryColumns,
       query: query && isOfAggregateQueryType(query) ? query : undefined,
     };
     const allSuggestions = isPlainRecord
@@ -47,7 +44,7 @@ export const useLensSuggestions = ({
     const [firstSuggestion] = allSuggestions;
 
     return { firstSuggestion, allSuggestions };
-  }, [columns, dataView, isPlainRecord, lensSuggestionsApi, query, textBasedQueryColumns]);
+  }, [dataView, isPlainRecord, lensSuggestionsApi, query, columns]);
 
   const [allSuggestions, setAllSuggestions] = useState(suggestions.allSuggestions);
   const currentSuggestion = originalSuggestion ?? suggestions.firstSuggestion;
@@ -85,5 +82,5 @@ const getSuggestionDeps = ({
 }: {
   dataView: DataView;
   query?: Query | AggregateQuery;
-  columns?: string[];
+  columns?: DatatableColumn[];
 }) => [dataView.id, columns, query];

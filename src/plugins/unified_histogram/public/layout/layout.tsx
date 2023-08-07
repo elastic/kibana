@@ -69,11 +69,7 @@ export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> 
   /**
    * The current columns
    */
-  columns?: string[];
-  /**
-   * The selected columns with their meta
-   */
-  textBasedQueryColumns?: DatatableColumn[];
+  columns?: DatatableColumn[];
   /**
    * Context object for requests made by Unified Histogram components -- optional
    */
@@ -173,7 +169,6 @@ export const UnifiedHistogramLayout = ({
   timeRange,
   relativeTimeRange,
   columns,
-  textBasedQueryColumns,
   request,
   hits,
   lensTablesAdapter,
@@ -204,7 +199,6 @@ export const UnifiedHistogramLayout = ({
     originalSuggestion,
     isPlainRecord,
     columns,
-    textBasedQueryColumns,
     lensSuggestionsApi,
     onSuggestionChange,
   });
