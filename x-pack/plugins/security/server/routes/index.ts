@@ -62,17 +62,18 @@ export function defineRoutes(params: RouteDefinitionParams) {
   defineAnalyticsRoutes(params);
   defineApiKeysRoutes(params);
   defineAuthenticationRoutes(params);
+  defineAuthorizationRoutes(params);
   defineSessionManagementRoutes(params);
+  defineUserProfileRoutes(params);
   defineViewRoutes(params);
 
+  // In the serverless environment...
   if (params.buildFlavor !== 'serverless') {
-    defineAnonymousAccessRoutes(params);
-    defineAuthorizationRoutes(params);
-    defineDeprecationsRoutes(params);
-    defineIndicesRoutes(params);
-    defineRoleMappingRoutes(params);
-    defineSecurityCheckupGetStateRoutes(params);
-    defineUserProfileRoutes(params);
-    defineUsersRoutes(params);
+    defineAnonymousAccessRoutes(params); // anonymous access is disabled
+    defineDeprecationsRoutes(params); // deprecated kibana user roles are not applicable, these HTTP APIs are not needed
+    defineIndicesRoutes(params); // the ES privileges form used to help define roles (only consumer) is disabled, so there is no need for these HTTP APIs
+    defineRoleMappingRoutes(params); // role mappings are managed internally, based on configurations in control plane, these HTTP APIs are not needed
+    defineSecurityCheckupGetStateRoutes(params); // security checkup is not applicable, these HTTP APIs are not needed
+    defineUsersRoutes(params); // the native realm is not enabled (there is only Elastic cloud SAML), no user HTTP API routes are needed
   }
 }

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import expect from 'expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -13,28 +14,31 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('security/user_profiles', function () {
     describe('route access', () => {
-      describe('disabled', () => {
+      describe('internal', () => {
         it('update', async () => {
-          const { body, status } = await supertest
+          const { status } = await supertest
             .post(`/internal/security/user_profile/_data`)
             .set(svlCommonApi.getInternalRequestHeader())
             .send({ key: 'value' });
-          svlCommonApi.assertApiNotFound(body, status);
+          // Status should be 401, unauthorized
+          expect(status).not.toBe(404);
         });
 
         it('get current', async () => {
-          const { body, status } = await supertest
+          const { status } = await supertest
             .get(`/internal/security/user_profile`)
             .set(svlCommonApi.getInternalRequestHeader());
-          svlCommonApi.assertApiNotFound(body, status);
+          // Status should be 401, unauthorized
+          expect(status).not.toBe(404);
         });
 
         it('bulk get', async () => {
-          const { body, status } = await supertest
+          const { status } = await supertest
             .get(`/internal/security/user_profile`)
             .set(svlCommonApi.getInternalRequestHeader())
             .send({ uids: ['12345678'] });
-          svlCommonApi.assertApiNotFound(body, status);
+          // Status should be 401, unauthorized
+          expect(status).not.toBe(404);
         });
       });
     });

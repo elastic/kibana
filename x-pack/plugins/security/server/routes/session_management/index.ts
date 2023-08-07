@@ -14,6 +14,8 @@ export function defineSessionManagementRoutes(params: RouteDefinitionParams) {
   defineSessionInfoRoutes(params);
   defineSessionExtendRoutes(params);
 
+  // In the serverless environment, sessions will remain valid until a user logs out of cloud
+  // eliminating the need for an invalidate session HTTP API
   if (params.buildFlavor !== 'serverless') {
     defineInvalidateSessionsRoutes(params);
   }

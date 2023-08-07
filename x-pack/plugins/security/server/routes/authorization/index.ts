@@ -12,8 +12,14 @@ import { defineRolesRoutes } from './roles';
 import { defineShareSavedObjectPermissionRoutes } from './spaces';
 
 export function defineAuthorizationRoutes(params: RouteDefinitionParams) {
-  defineRolesRoutes(params);
-  definePrivilegesRoutes(params);
+  // The reset session endpoint is registered with httpResources and should remain public in serverless
   resetSessionPageRoutes(params);
-  defineShareSavedObjectPermissionRoutes(params);
+
+  // In the serverless environment, roles, privileges, and permissions are managed internally and only
+  // exposed to users and administrators via control plane UI, eliminating the need for any public HTTP APIs.
+  if (params.buildFlavor !== 'serverless') {
+    defineRolesRoutes(params);
+    definePrivilegesRoutes(params);
+    defineShareSavedObjectPermissionRoutes(params);
+  }
 }

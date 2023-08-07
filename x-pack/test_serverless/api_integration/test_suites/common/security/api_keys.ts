@@ -16,12 +16,40 @@ export default function ({ getService }: FtrProviderContext) {
   describe('security/api_keys', function () {
     describe('route access', () => {
       describe('internal', () => {
-        // The create test MUST be executed for the update, get, get all, and invalidate tests to function
+        before(async () => {
+          const { body, status } = await supertest
+            .post('/internal/security/api_key')
+            .set(svlCommonApi.getInternalRequestHeader())
+            .send({
+              name: 'test',
+              metadata: {},
+              role_descriptors: {},
+            });
+          expect(status).toBe(200);
+          roleMapping = body;
+        });
+
+        after(async () => {
+          const { body, status } = await supertest
+            .get('/internal/security/api_key?isAdmin=true')
+            .set(svlCommonApi.getInternalRequestHeader());
+
+          if (status === 200) {
+            await supertest
+              .post('/internal/security/api_key/invalidate')
+              .set(svlCommonApi.getInternalRequestHeader())
+              .send({
+                apiKeys: body?.apiKeys,
+                isAdmin: true,
+              });
+          }
+        });
+
         it('create', async () => {
-          let body: any;
+          let body: unknown;
           let status: number;
           const requestBody = {
-            name: 'test',
+            name: 'create_test',
             metadata: {},
             role_descriptors: {},
           };
@@ -45,16 +73,16 @@ export default function ({ getService }: FtrProviderContext) {
             .set(svlCommonApi.getInternalRequestHeader())
             .send(requestBody));
           // expect success because we're using the internal header
+          expect(body).toEqual(expect.objectContaining({ name: 'create_test' }));
           expect(status).toBe(200);
-          roleMapping = body;
         });
 
         it('update', async () => {
-          let body: any;
+          let body: unknown;
           let status: number;
           const requestBody = {
             id: roleMapping.id,
-            metadata: {},
+            metadata: { test: 'value' },
             role_descriptors: {},
           };
 
@@ -77,11 +105,12 @@ export default function ({ getService }: FtrProviderContext) {
             .set(svlCommonApi.getInternalRequestHeader())
             .send(requestBody));
           // expect success because we're using the internal header
+          expect(body).toEqual(expect.objectContaining({ updated: true }));
           expect(status).toBe(200);
         });
 
         it('get all', async () => {
-          let body: any;
+          let body: unknown;
           let status: number;
 
           ({ body, status } = await supertest
@@ -108,7 +137,7 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         it('get enabled', async () => {
-          let body: any;
+          let body: unknown;
           let status: number;
 
           ({ body, status } = await supertest
@@ -132,8 +161,8 @@ export default function ({ getService }: FtrProviderContext) {
           expect(status).toBe(200);
         });
 
-        it('get priviledges', async () => {
-          let body: any;
+        it('get privileges', async () => {
+          let body: unknown;
           let status: number;
 
           ({ body, status } = await supertest
@@ -158,7 +187,7 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         it('invalidate', async () => {
-          let body: any;
+          let body: unknown;
           let status: number;
           const requestBody = {
             apiKeys: [

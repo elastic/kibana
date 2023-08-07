@@ -104,7 +104,7 @@ export default function ({ getService }: FtrProviderContext) {
           ({ body, status } = await supertest
             .get('/api/spaces/space/default')
             .set(svlCommonApi.getInternalRequestHeader()));
-          // expect succes because we're using the internal header
+          // expect success because we're using the internal header
           expect(body).toEqual(
             expect.objectContaining({
               id: 'default',
@@ -133,7 +133,7 @@ export default function ({ getService }: FtrProviderContext) {
           ({ body, status } = await supertest
             .get('/api/spaces/space')
             .set(svlCommonApi.getInternalRequestHeader()));
-          // expect succes because we're using the internal header
+          // expect success because we're using the internal header
           expect(body).toEqual(
             expect.arrayContaining([
               expect.objectContaining({
@@ -164,7 +164,7 @@ export default function ({ getService }: FtrProviderContext) {
           ({ body, status } = await supertest
             .get('/internal/spaces/_active_space')
             .set(svlCommonApi.getInternalRequestHeader()));
-          // expect succes because we're using the internal header
+          // expect success because we're using the internal header
           expect(body).toEqual(
             expect.objectContaining({
               id: 'default',
@@ -203,7 +203,7 @@ export default function ({ getService }: FtrProviderContext) {
               name: 'UPDATED!',
               disabledFeatures: [],
             }));
-          // expect succes because we're using the internal header
+          // expect success because we're using the internal header
           expect(body).toEqual(
             expect.objectContaining({
               id: 'default',

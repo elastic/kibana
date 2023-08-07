@@ -133,6 +133,7 @@ export function defineCommonRoutes({
   }
 
   if (buildFlavor !== 'serverless') {
+    // In the serverless environment, we do not support API login - the only valid authentication methodolgoy is SAML
     router.post(
       {
         path: '/internal/security/login',
@@ -179,6 +180,7 @@ export function defineCommonRoutes({
       })
     );
 
+    // In the serverless environment, there is no need for access agreement acknowledgment
     router.post(
       { path: '/internal/security/access_agreement/acknowledge', validate: false },
       createLicensedRouteHandler(async (context, request, response) => {

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import expect from 'expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -22,7 +23,7 @@ export default function ({ getService }: FtrProviderContext) {
           svlCommonApi.assertApiNotFound(body, status);
         });
 
-        it('fix decprecated roles', async () => {
+        it('fix deprecated roles', async () => {
           const { body, status } = await supertest
             .post('/internal/security/deprecations/kibana_user_role/_fix_users')
             .set(svlCommonApi.getInternalRequestHeader());
@@ -42,12 +43,14 @@ export default function ({ getService }: FtrProviderContext) {
             .set(svlCommonApi.getInternalRequestHeader());
           svlCommonApi.assertApiNotFound(body, status);
         });
+      });
 
+      describe('internal', () => {
         it('get record auth type', async () => {
-          const { body, status } = await supertest
-            .get('/internal/security/analytics/_record_auth_type')
+          const { status } = await supertest
+            .post('/internal/security/analytics/_record_auth_type')
             .set(svlCommonApi.getInternalRequestHeader());
-          svlCommonApi.assertApiNotFound(body, status);
+          expect(status).toBe(200);
         });
       });
     });

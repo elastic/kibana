@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import expect from 'expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -21,7 +22,7 @@ export default function ({ getService }: FtrProviderContext) {
           svlCommonApi.assertApiNotFound(body, status);
         });
 
-        it('get built-in elasticsearch priviledges', async () => {
+        it('get built-in elasticsearch privileges', async () => {
           const { body, status } = await supertest
             .get('/internal/security/esPrivileges/builtin')
             .set(svlCommonApi.getInternalRequestHeader());
@@ -62,12 +63,14 @@ export default function ({ getService }: FtrProviderContext) {
             .set(svlCommonApi.getInternalRequestHeader());
           svlCommonApi.assertApiNotFound(body, status);
         });
+      });
 
+      describe('public', () => {
         it('reset session page', async () => {
-          const { body, status } = await supertest
+          const { status } = await supertest
             .get('/internal/security/reset_session_page.js')
-            .set(svlCommonApi.getInternalRequestHeader());
-          svlCommonApi.assertApiNotFound(body, status);
+            .set(svlCommonApi.getCommonRequestHeader());
+          expect(status).toBe(200);
         });
       });
     });

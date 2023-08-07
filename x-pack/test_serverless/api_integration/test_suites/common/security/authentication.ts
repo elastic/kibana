@@ -150,18 +150,8 @@ export default function ({ getService }: FtrProviderContext) {
 
       describe('public', () => {
         it('logout', async () => {
-          const { body, status } = await supertest
-            .get('/api/security/logout')
-            .set(svlCommonApi.getCommonRequestHeader());
-
-          // Should fail with 400 (not 404) because it cannot process redirect (but for no other reason)
-          // Can we set this up to mock a successsful redirect?
-          expect(body).toEqual({
-            statusCode: 400,
-            error: 'Bad Request',
-            message: 'Client should be able to process redirect response.',
-          });
-          expect(status).not.toBe(404);
+          const { status } = await supertest.get('/api/security/logout');
+          expect(status).toBe(302);
         });
 
         it('SAML callback', async () => {

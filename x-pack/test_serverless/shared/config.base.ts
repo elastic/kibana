@@ -64,8 +64,7 @@ export default async () => {
         // In the real world the SAML config is injected by control plane.
         '--xpack.cloud.id=ftr_fake_cloud_id',
         `--xpack.security.authc.providers=${JSON.stringify({
-          basic: { 'cloud-basic': { order: 0 } },
-          saml: { 'cloud-saml-kibana': { order: 1, realm: 'cloud-saml-kibana' } },
+          saml: { 'cloud-saml-kibana': { order: 0, realm: 'cloud-saml-kibana' } },
         })}`,
       ],
     },

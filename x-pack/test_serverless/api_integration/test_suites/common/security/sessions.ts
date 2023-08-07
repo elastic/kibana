@@ -68,7 +68,8 @@ export default function ({ getService }: FtrProviderContext) {
 
           ({ body, status } = await supertest
             .post('/internal/security/session')
-            .set(svlCommonApi.getInternalRequestHeader()));
+            .set(svlCommonApi.getInternalRequestHeader())
+            .set('version', '2023.8.31'));
           // expect redirect
           expect(status).toBe(302);
         });
