@@ -32,7 +32,7 @@ const configSchema = schema.object({
   projects_url: schema.conditional(
     schema.contextRef('serverless'),
     true,
-    schema.string({ defaultValue: '/projects' }),
+    schema.string({ defaultValue: '/projects/' }),
     schema.never()
   ),
   trial_end_date: schema.maybe(schema.string()),
