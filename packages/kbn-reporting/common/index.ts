@@ -33,6 +33,7 @@ export {
   getFieldFormats,
   setFieldFormats,
   generatePdfObservable,
+  generatePdfObservableV2,
   getFullRedirectAppUrl,
   validateUrls,
   getFullUrls,
