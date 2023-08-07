@@ -24,6 +24,7 @@ export default function ({ getService }: FtrProviderContext) {
       maps: ['all', 'read', 'minimal_all', 'minimal_read'],
       generalCases: ['all', 'read', 'minimal_all', 'minimal_read', 'cases_delete'],
       observabilityCases: ['all', 'read', 'minimal_all', 'minimal_read', 'cases_delete'],
+      observabilityAIAssistant: ['all', 'read', 'minimal_all', 'minimal_read'],
       slo: ['all', 'read', 'minimal_all', 'minimal_read'],
       fleetv2: ['all', 'read', 'minimal_all', 'minimal_read'],
       fleet: ['all', 'read', 'minimal_all', 'minimal_read'],
