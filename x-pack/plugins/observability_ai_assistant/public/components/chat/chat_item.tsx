@@ -184,14 +184,6 @@ export function ChatItem({
     );
   }
 
-  console.log({
-    content,
-    error,
-    controls,
-    element,
-    canExpand,
-  });
-
   let contentElement: React.ReactNode =
     content || error || controls ? <MessageText content={content || ''} loading={loading} /> : null;
 
