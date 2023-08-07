@@ -35,10 +35,11 @@ import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { Route } from '@kbn/shared-ux-router';
 import { UserAvatar, UserProfilesPopover } from '@kbn/user-profile-components';
 
-import type { ApiKey, RestApiKey } from '../../../../common/model';
+import type { ApiKey, AuthenticatedUser, RestApiKey } from '../../../../common/model';
 import { Breadcrumb } from '../../../components/breadcrumb';
 import { SelectableTokenField } from '../../../components/token_field';
 import { useCapabilities } from '../../../components/use_capabilities';
+import { useAuthentication } from '../../../components/use_current_user';
 import type { CreateAPIKeyResult } from '../api_keys_api_client';
 import { APIKeysAPIClient } from '../api_keys_api_client';
 import { ApiKeyFlyout } from './api_key_flyout';
@@ -48,10 +49,12 @@ import { InvalidateProvider } from './invalidate_provider';
 export const APIKeysGridPage: FunctionComponent = () => {
   const { services } = useKibana<CoreStart>();
   const history = useHistory();
+  const authc = useAuthentication();
   const [state, getApiKeys] = useAsyncFn(
-    () => new APIKeysAPIClient(services.http).getApiKeys(),
+    () => Promise.all([new APIKeysAPIClient(services.http).getApiKeys(), authc.getCurrentUser()]),
     [services.http]
   );
+
   const [createdApiKey, setCreatedApiKey] = useState<CreateAPIKeyResult>();
   const [openedApiKey, setOpenedApiKey] = useState<CategorizedApiKey>();
   const readOnly = !useCapabilities('api_keys').save;
@@ -84,6 +87,11 @@ export const APIKeysGridPage: FunctionComponent = () => {
     );
   }
 
+  const [
+    { apiKeys, canManageCrossClusterApiKeys, canManageApiKeys, canManageOwnApiKeys },
+    currentUser,
+  ] = state.value;
+
   return (
     <>
       <Route path="/create">
@@ -100,7 +108,7 @@ export const APIKeysGridPage: FunctionComponent = () => {
               getApiKeys();
             }}
             onCancel={() => history.push({ pathname: '/' })}
-            canManageCrossClusterApiKeys={state.value.canManageCrossClusterApiKeys}
+            canManageCrossClusterApiKeys={canManageCrossClusterApiKeys}
           />
         </Breadcrumb>
       </Route>
@@ -125,7 +133,7 @@ export const APIKeysGridPage: FunctionComponent = () => {
         />
       )}
 
-      {!state.value.apiKeys.length ? (
+      {!apiKeys.length ? (
         <ApiKeysEmptyPrompt readOnly={readOnly}>
           <EuiButton
             {...reactRouterNavigate(history, '/create')}
@@ -183,7 +191,7 @@ export const APIKeysGridPage: FunctionComponent = () => {
               </>
             )}
 
-            {!state.value.canManageApiKeys && !readOnly ? (
+            {canManageOwnApiKeys && !canManageApiKeys ? (
               <>
                 <EuiCallOut
                   title={
@@ -198,24 +206,25 @@ export const APIKeysGridPage: FunctionComponent = () => {
             ) : undefined}
 
             <InvalidateProvider
-              isAdmin={state.value.canManageApiKeys}
+              isAdmin={canManageApiKeys}
               notifications={services.notifications}
               apiKeysAPIClient={new APIKeysAPIClient(services.http)}
             >
               {(invalidateApiKeyPrompt) => (
                 <ApiKeysTable
-                  apiKeys={state.value!.apiKeys}
+                  apiKeys={apiKeys}
                   onClick={(apiKey) => setOpenedApiKey(apiKey)}
-                  onDelete={(apiKeys) =>
+                  onDelete={(apiKeysToDelete) =>
                     invalidateApiKeyPrompt(
-                      apiKeys.map(({ name, id }) => ({ name, id })),
+                      apiKeysToDelete.map(({ name, id }) => ({ name, id })),
                       getApiKeys
                     )
                   }
+                  currentUser={currentUser}
                   createdApiKey={createdApiKey}
-                  canManageCrossClusterApiKeys={state.value!.canManageCrossClusterApiKeys}
-                  canManageApiKeys={state.value!.canManageApiKeys}
-                  canManageOwnApiKeys={state.value!.canManageOwnApiKeys}
+                  canManageCrossClusterApiKeys={canManageCrossClusterApiKeys}
+                  canManageApiKeys={canManageApiKeys}
+                  canManageOwnApiKeys={canManageOwnApiKeys}
                   readOnly={readOnly}
                   loading={state.loading}
                 />
@@ -294,6 +303,7 @@ export const ApiKeyCreatedCallout: FunctionComponent<ApiKeyCreatedCalloutProps> 
 
 export interface ApiKeysTableProps {
   apiKeys: ApiKey[];
+  currentUser: AuthenticatedUser;
   createdApiKey?: CreateAPIKeyResult;
   readOnly?: boolean;
   loading?: boolean;
@@ -307,6 +317,7 @@ export interface ApiKeysTableProps {
 export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
   apiKeys,
   createdApiKey,
+  currentUser,
   onClick,
   onDelete,
   canManageApiKeys = false,
@@ -321,6 +332,9 @@ export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
     () => categorizeApiKeys(apiKeys),
     [apiKeys]
   );
+
+  const deletable = (item: CategorizedApiKey) =>
+    canManageApiKeys || (canManageOwnApiKeys && item.username === currentUser.username);
 
   columns.push(
     {
@@ -350,7 +364,7 @@ export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
     }
   );
 
-  if (canManageApiKeys) {
+  if (canManageApiKeys || usernameFilters.length > 1) {
     columns.push({
       field: 'username',
       name: (
@@ -421,6 +435,7 @@ export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
           type: 'icon',
           color: 'danger',
           onClick: (item) => onDelete([item]),
+          available: deletable,
           'data-test-subj': 'apiKeysTableDeleteAction',
         },
       ],
@@ -480,6 +495,7 @@ export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
                 <EuiButton
                   onClick={() => onDelete(selectedItems)}
                   color="danger"
+                  iconType="trash"
                   data-test-subj="bulkInvalidateActionButton"
                 >
                   <FormattedMessage
@@ -508,6 +524,7 @@ export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
         readOnly
           ? undefined
           : {
+              selectable: deletable,
               onSelectionChange: setSelectedItems,
             }
       }
