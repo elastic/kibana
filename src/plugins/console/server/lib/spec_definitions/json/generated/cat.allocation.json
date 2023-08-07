@@ -27,7 +27,7 @@
     ],
     "patterns": [
       "_cat/allocation",
-      "_cat/allocation/{nodes}"
+      "_cat/allocation/{node_id}"
     ],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/cat-allocation.html"
   }
