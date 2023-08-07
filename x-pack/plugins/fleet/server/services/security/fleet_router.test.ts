@@ -6,7 +6,7 @@
  */
 
 import type { CheckPrivilegesDynamically } from '@kbn/security-plugin/server/authorization/check_privileges_dynamically';
-import type { IRouter, RequestHandler, RouteConfig, RouteMethod } from '@kbn/core/server';
+import type { IRouter, RequestHandler, RouteConfig } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
