@@ -65,6 +65,10 @@ jest.mock('./utils/create_datastream', () => ({
   createDataStream: jest.fn(),
 }));
 
+jest.mock('../risk_score/transform/helpers/transforms', () => ({
+  createAndStartTransform: jest.fn(),
+}));
+
 describe('RiskEngineDataClient', () => {
   let riskEngineDataClient: RiskEngineDataClient;
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
@@ -88,31 +92,33 @@ describe('RiskEngineDataClient', () => {
 
   describe('getWriter', () => {
     it('should return a writer object', async () => {
-      const writer = await riskEngineDataClient.getWriter({ namespace: 'default' });
+      const writer = await riskEngineDataClient.getWriter({ namespace: 'default', esClient });
       expect(writer).toBeDefined();
       expect(typeof writer?.bulk).toBe('function');
     });
 
     it('should cache and return the same writer for the same namespace', async () => {
-      const writer1 = await riskEngineDataClient.getWriter({ namespace: 'default' });
-      const writer2 = await riskEngineDataClient.getWriter({ namespace: 'default' });
-      const writer3 = await riskEngineDataClient.getWriter({ namespace: 'space-1' });
+      const writer1 = await riskEngineDataClient.getWriter({ namespace: 'default', esClient });
+      const writer2 = await riskEngineDataClient.getWriter({ namespace: 'default', esClient });
+      const writer3 = await riskEngineDataClient.getWriter({ namespace: 'space-1', esClient });
 
       expect(writer1).toEqual(writer2);
       expect(writer2).not.toEqual(writer3);
     });
 
     it('should cache writer and not call initializeResources for a second tme', async () => {
-      const initializeResourcesSpy = jest.spyOn(riskEngineDataClient, 'initializeResources');
-      await riskEngineDataClient.getWriter({ namespace: 'default' });
-      await riskEngineDataClient.getWriter({ namespace: 'default' });
-      expect(initializeResourcesSpy).toHaveBeenCalledTimes(1);
+      // to be able spy on private method acst to any
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const initializeWriterSpy = jest.spyOn(riskEngineDataClient as any, 'initializeWriter');
+      await riskEngineDataClient.getWriter({ namespace: 'default', esClient });
+      await riskEngineDataClient.getWriter({ namespace: 'default', esClient });
+      expect(initializeWriterSpy).toHaveBeenCalledTimes(1);
     });
   });
 
   describe('initializeResources success', () => {
     it('should initialize risk engine resources', async () => {
-      await riskEngineDataClient.initializeResources({ namespace: 'default' });
+      await riskEngineDataClient.initializeResources({ namespace: 'default', esClient });
 
       expect(createOrUpdateIlmPolicy).toHaveBeenCalledWith({
         logger,
@@ -173,6 +179,9 @@ describe('RiskEngineDataClient', () => {
                       "calculated_score_norm": Object {
                         "type": "float",
                       },
+                      "category_1_count": Object {
+                        "type": "float",
+                      },
                       "category_1_score": Object {
                         "type": "float",
                       },
@@ -227,6 +236,9 @@ describe('RiskEngineDataClient', () => {
                         "type": "float",
                       },
                       "calculated_score_norm": Object {
+                        "type": "float",
+                      },
+                      "category_1_count": Object {
                         "type": "float",
                       },
                       "category_1_score": Object {
@@ -333,7 +345,7 @@ describe('RiskEngineDataClient', () => {
       (createOrUpdateIlmPolicy as jest.Mock).mockRejectedValue(error);
 
       try {
-        await riskEngineDataClient.initializeResources({ namespace: 'default' });
+        await riskEngineDataClient.initializeResources({ namespace: 'default', esClient });
       } catch (e) {
         expect(logger.error).toHaveBeenCalledWith(
           `Error initializing risk engine resources: ${error.message}`
@@ -562,6 +574,7 @@ describe('RiskEngineDataClient', () => {
         savedObjectsClient: mockSavedObjectClient,
         namespace: 'default',
         user: { username: 'elastic' } as AuthenticatedUser,
+        esClient,
       });
 
       expect(initResult).toEqual({
@@ -581,6 +594,7 @@ describe('RiskEngineDataClient', () => {
         savedObjectsClient: mockSavedObjectClient,
         namespace: 'default',
         user: { username: 'elastic' } as AuthenticatedUser,
+        esClient,
       });
 
       expect(initResult).toEqual({
@@ -601,6 +615,7 @@ describe('RiskEngineDataClient', () => {
         savedObjectsClient: mockSavedObjectClient,
         namespace: 'default',
         user: { username: 'elastic' } as AuthenticatedUser,
+        esClient,
       });
 
       expect(initResult).toEqual({
@@ -621,6 +636,7 @@ describe('RiskEngineDataClient', () => {
         savedObjectsClient: mockSavedObjectClient,
         namespace: 'default',
         user: { username: 'elastic' } as AuthenticatedUser,
+        esClient,
       });
 
       expect(initResult).toEqual({
@@ -641,6 +657,7 @@ describe('RiskEngineDataClient', () => {
         savedObjectsClient: mockSavedObjectClient,
         namespace: 'default',
         user: { username: 'elastic' } as AuthenticatedUser,
+        esClient,
       });
 
       expect(initResult).toEqual({
@@ -661,6 +678,7 @@ describe('RiskEngineDataClient', () => {
         savedObjectsClient: mockSavedObjectClient,
         namespace: 'default',
         user: { username: 'elastic' } as AuthenticatedUser,
+        esClient,
       });
 
       expect(initResult).toEqual({

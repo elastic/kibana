@@ -23,3 +23,4 @@ export function fromEnum<EnumType extends string>(
     t.identity
   );
 }
+

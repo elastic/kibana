@@ -7,7 +7,7 @@
 
 import type { ESQuery } from '../../../../typed_json';
 import { RISKY_HOSTS_INDEX_PREFIX, RISKY_USERS_INDEX_PREFIX } from '../../../../constants';
-import { RiskScoreEntity } from '../../../../risk_engine/types';
+import { RiskScoreEntity, getRiskScoreLatestIndex } from '../../../../risk_engine';
 
 /**
  * Make sure this aligns with the index in step 6, 9 in
@@ -19,7 +19,7 @@ export const getHostRiskIndex = (
   isNewRiskScoreModuleAvailable: boolean
 ): string => {
   return isNewRiskScoreModuleAvailable
-    ? 'risk-score.risk-score-latest-default'
+    ? getRiskScoreLatestIndex(spaceId)
     : `${RISKY_HOSTS_INDEX_PREFIX}${onlyLatest ? 'latest_' : ''}${spaceId}`;
 };
 
@@ -29,7 +29,7 @@ export const getUserRiskIndex = (
   isNewRiskScoreModuleAvailable: boolean
 ): string => {
   return isNewRiskScoreModuleAvailable
-    ? 'risk-score.risk-score-latest-default'
+    ? getRiskScoreLatestIndex(spaceId)
     : `${RISKY_USERS_INDEX_PREFIX}${onlyLatest ? 'latest_' : ''}${spaceId}`;
 };
 

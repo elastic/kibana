@@ -6,7 +6,7 @@
  */
 import type { FieldMap } from '@kbn/alerts-as-data-utils';
 import type { IdentifierType } from '../../../common/risk_engine';
-import { RiskScoreEntity } from '../../../common/risk_engine/types';
+import { RiskScoreEntity, riskScoreBaseIndexName } from '../../../common/risk_engine';
 import type { IIndexPatternString } from './utils/create_datastream';
 
 export const ilmPolicy = {
@@ -144,8 +144,6 @@ export const ilmPolicyName = '.risk-score-ilm-policy';
 export const mappingComponentName = '.risk-score-mappings';
 export const totalFieldsLimit = 1000;
 
-const riskScoreBaseIndexName = 'risk-score';
-
 export const getIndexPattern = (namespace: string): IIndexPatternString => ({
   template: `.${riskScoreBaseIndexName}.${riskScoreBaseIndexName}-${namespace}-index-template`,
   alias: `${riskScoreBaseIndexName}.${riskScoreBaseIndexName}-${namespace}`,
@@ -153,6 +151,3 @@ export const getIndexPattern = (namespace: string): IIndexPatternString => ({
 
 export const getLatestTransformId = (namespace: string): string =>
   `${riskScoreBaseIndexName}_latest_transform_${namespace}`;
-
-export const getLatestTransformIndex = (spaceId = 'default') =>
-  `${riskScoreBaseIndexName}.risk-score-latest-${spaceId}`;

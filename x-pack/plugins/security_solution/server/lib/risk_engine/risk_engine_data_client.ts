@@ -25,13 +25,12 @@ import {
   ilmPolicyName,
   ilmPolicy,
   getLatestTransformId,
-  getLatestTransformIndex,
 } from './configurations';
 import { createDataStream } from './utils/create_datastream';
 import type { RiskEngineDataWriter as Writer } from './risk_engine_data_writer';
 import { RiskEngineDataWriter } from './risk_engine_data_writer';
-import type { InitRiskEngineResult } from '../../../common/risk_engine/types';
-import { RiskEngineStatus } from '../../../common/risk_engine/types';
+import type { InitRiskEngineResult } from '../../../common/risk_engine';
+import { RiskEngineStatus, getRiskScoreLatestIndex } from '../../../common/risk_engine';
 import { getLegacyTransforms, removeLegacyTransforms } from './utils/risk_engine_transforms';
 import {
   updateSavedObjectAttribute,
@@ -294,7 +293,7 @@ export class RiskEngineDataClient {
 
       const options = {
         dest: {
-          index: getLatestTransformIndex(namespace),
+          index: getRiskScoreLatestIndex(namespace),
         },
         frequency: '1m',
         latest: {
@@ -316,7 +315,7 @@ export class RiskEngineDataClient {
         esClient,
         logger: this.options.logger,
         options: {
-          index: getLatestTransformIndex(namespace),
+          index: getRiskScoreLatestIndex(namespace),
           mappings: mappingFromFieldMap(riskScoreFieldMap, 'strict'),
         },
       });
