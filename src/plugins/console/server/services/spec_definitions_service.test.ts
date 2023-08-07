@@ -9,9 +9,9 @@
 import globby from 'globby';
 import fs from 'fs';
 import { SpecDefinitionsService } from '.';
-import { EndpointDefinition, EndpointsAvailability } from '../../common/types';
+import type { EndpointDefinition, EndpointsAvailability } from '../../common/types';
 
-const mockReadFilySync = jest.spyOn(fs, 'readFileSync');
+const mockReadFileSync = jest.spyOn(fs, 'readFileSync');
 const mockGlobbySync = jest.spyOn(globby, 'sync');
 const mockJsLoadersGetter = jest.fn();
 
@@ -57,7 +57,7 @@ describe('SpecDefinitionsService', () => {
     // mock the function that lists files in the definitions folders
     mockGlobbySync.mockImplementation(() => []);
     // mock the function that reads files
-    mockReadFilySync.mockImplementation(() => '');
+    mockReadFileSync.mockImplementation(() => '');
     // mock the function that returns the list of js definitions loaders
     mockJsLoadersGetter.mockImplementation(() => []);
   });
@@ -117,7 +117,7 @@ describe('SpecDefinitionsService', () => {
       return [];
     });
 
-    mockReadFilySync.mockImplementation((path) => {
+    mockReadFileSync.mockImplementation((path) => {
       if (path.toString() === '/generated/endpoint1.json') {
         return JSON.stringify(getMockEndpoint({ endpointName: 'endpoint1' }));
       }
@@ -162,7 +162,7 @@ describe('SpecDefinitionsService', () => {
       return [];
     });
 
-    mockReadFilySync.mockImplementation((path) => {
+    mockReadFileSync.mockImplementation((path) => {
       if (path.toString() === '/generated/endpoint1.json') {
         return JSON.stringify(getMockEndpoint({ endpointName: 'endpoint1' }));
       }
@@ -219,7 +219,7 @@ describe('SpecDefinitionsService', () => {
       return [];
     });
 
-    mockReadFilySync.mockImplementation((path) => {
+    mockReadFileSync.mockImplementation((path) => {
       if (path.toString() === 'manual_endpoint.json') {
         return JSON.stringify(getMockEndpoint({ endpointName: 'manual_endpoint' }));
       }
@@ -250,7 +250,7 @@ describe('SpecDefinitionsService', () => {
       return [];
     });
 
-    mockReadFilySync.mockImplementation((path) => {
+    mockReadFileSync.mockImplementation((path) => {
       if (path.toString() === 'generated_endpoint.json') {
         return JSON.stringify(getMockEndpoint({ endpointName: 'test', methods: ['GET'] }));
       }
@@ -288,7 +288,7 @@ describe('SpecDefinitionsService', () => {
       return [];
     });
 
-    mockReadFilySync.mockImplementation((path) => {
+    mockReadFileSync.mockImplementation((path) => {
       if (path.toString() === '/generated/endpoint1.json') {
         return JSON.stringify(
           getMockEndpoint({
@@ -330,7 +330,7 @@ describe('SpecDefinitionsService', () => {
       return [];
     });
 
-    mockReadFilySync.mockImplementation((path) => {
+    mockReadFileSync.mockImplementation((path) => {
       if (path.toString() === '/generated/endpoint1.json') {
         return JSON.stringify(
           getMockEndpoint({

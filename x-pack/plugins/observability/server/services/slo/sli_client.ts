@@ -11,9 +11,11 @@ import {
   AggregationsSumAggregate,
   AggregationsValueCountAggregate,
   MsearchMultisearchBody,
+  QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ElasticsearchClient } from '@kbn/core/server';
 import {
+  ALL_VALUE,
   occurrencesBudgetingMethodSchema,
   timeslicesBudgetingMethodSchema,
   toMomentUnitOfTime,
@@ -27,6 +29,7 @@ import { InternalQueryError } from '../../errors';
 export interface SLIClient {
   fetchSLIDataFrom(
     slo: SLO,
+    instanceId: string,
     lookbackWindows: LookbackWindow[]
   ): Promise<Record<WindowName, IndicatorData>>;
 }
@@ -45,6 +48,7 @@ export class DefaultSLIClient implements SLIClient {
 
   async fetchSLIDataFrom(
     slo: SLO,
+    instanceId: string,
     lookbackWindows: LookbackWindow[]
   ): Promise<Record<WindowName, IndicatorData>> {
     const sortedLookbackWindows = [...lookbackWindows].sort((a, b) =>
@@ -55,7 +59,7 @@ export class DefaultSLIClient implements SLIClient {
 
     if (occurrencesBudgetingMethodSchema.is(slo.budgetingMethod)) {
       const result = await this.esClient.search<unknown, EsAggregations>({
-        ...commonQuery(slo, longestDateRange),
+        ...commonQuery(slo, instanceId, longestDateRange),
         index: SLO_DESTINATION_INDEX_PATTERN,
         aggs: toLookbackWindowsAggregationsQuery(sortedLookbackWindows),
       });
@@ -65,7 +69,7 @@ export class DefaultSLIClient implements SLIClient {
 
     if (timeslicesBudgetingMethodSchema.is(slo.budgetingMethod)) {
       const result = await this.esClient.search<unknown, EsAggregations>({
-        ...commonQuery(slo, longestDateRange),
+        ...commonQuery(slo, instanceId, longestDateRange),
         index: SLO_DESTINATION_INDEX_PATTERN,
         aggs: toLookbackWindowsSlicedAggregationsQuery(slo, sortedLookbackWindows),
       });
@@ -79,21 +83,28 @@ export class DefaultSLIClient implements SLIClient {
 
 function commonQuery(
   slo: SLO,
+  instanceId: string,
   dateRange: DateRange
 ): Pick<MsearchMultisearchBody, 'size' | 'query'> {
+  const filter: QueryDslQueryContainer[] = [
+    { term: { 'slo.id': slo.id } },
+    { term: { 'slo.revision': slo.revision } },
+    {
+      range: {
+        '@timestamp': { gte: dateRange.from.toISOString(), lt: dateRange.to.toISOString() },
+      },
+    },
+  ];
+
+  if (instanceId !== ALL_VALUE) {
+    filter.push({ term: { 'slo.instanceId': instanceId } });
+  }
+
   return {
     size: 0,
     query: {
       bool: {
-        filter: [
-          { term: { 'slo.id': slo.id } },
-          { term: { 'slo.revision': slo.revision } },
-          {
-            range: {
-              '@timestamp': { gte: dateRange.from.toISOString(), lt: dateRange.to.toISOString() },
-            },
-          },
-        ],
+        filter,
       },
     },
   };
