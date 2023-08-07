@@ -11,6 +11,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButtonEmpty, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import { MAX_LOADED_GRID_ROWS } from '../../../common/constants';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 
@@ -112,6 +113,11 @@ const DiscoverGridFooterContainer: React.FC<DiscoverGridFooterContainerProps> = 
   children,
 }) => {
   const { euiTheme } = useEuiTheme();
+  const { fieldFormats } = useDiscoverServices();
+
+  const formattedRowCount = fieldFormats
+    .getDefaultInstance(KBN_FIELD_TYPES.NUMBER, [ES_FIELD_TYPES.INTEGER])
+    .convert(rowCount);
 
   return (
     <p
@@ -136,7 +142,7 @@ const DiscoverGridFooterContainer: React.FC<DiscoverGridFooterContainerProps> = 
             id="discover.gridSampleSize.lastPageDescription"
             defaultMessage="Search results are limited to {rowCount} documents."
             values={{
-              rowCount,
+              rowCount: formattedRowCount,
             }}
           />
         ) : (
@@ -144,7 +150,7 @@ const DiscoverGridFooterContainer: React.FC<DiscoverGridFooterContainerProps> = 
             id="discover.gridSampleSize.limitDescription"
             defaultMessage="Search results are limited to {sampleSize} documents. Add more search terms to narrow your search."
             values={{
-              sampleSize: rowCount,
+              sampleSize: formattedRowCount,
             }}
           />
         )}
