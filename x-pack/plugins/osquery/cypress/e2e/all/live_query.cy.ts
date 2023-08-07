@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ROLE } from '../../tasks/login';
+import { ROLE, login } from '../../tasks/login';
 import { navigateTo } from '../../tasks/navigation';
 import {
   addToCase,
@@ -80,7 +80,7 @@ describe('ALL - Live Query', () => {
   });
 
   beforeEach(() => {
-    cy.loginKibana(ROLE.soc_manager);
+    login(ROLE.soc_manager);
     navigateTo('/app/osquery');
   });
 

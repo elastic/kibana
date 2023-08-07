@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ROLE } from '../../tasks/login';
+import { ROLE, login } from '../../tasks/login';
 import {
   checkResults,
   findAndClickButton,
@@ -45,7 +45,7 @@ describe('Alert Test', () => {
   });
 
   beforeEach(() => {
-    cy.loginKibana(ROLE.alert_test);
+    login(ROLE.alert_test);
   });
 
   after(() => {
@@ -55,7 +55,7 @@ describe('Alert Test', () => {
 
   describe('alert_test role', () => {
     beforeEach(() => {
-      cy.loginKibana(ROLE.alert_test);
+      login(ROLE.alert_test);
     });
 
     it('should not be able to run live query', () => {
@@ -91,7 +91,7 @@ describe('Alert Test', () => {
 
   describe('t1_analyst role', () => {
     beforeEach(() => {
-      cy.loginKibana(ROLE.t1_analyst);
+      login(ROLE.t1_analyst);
 
       cy.visit(`/app/security/rules/id/${ruleId}/alerts`);
       cy.getBySel('expand-event').first().click();

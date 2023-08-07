@@ -27,21 +27,16 @@ export {};
 
 import 'cypress-react-selector';
 // import './coverage';
-import { login } from '../tasks/login';
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace Cypress {
     interface Chainable {
       getBySel(...args: Parameters<Cypress.Chainable['get']>): Chainable<JQuery<HTMLElement>>;
-
       getBySelContains(
         ...args: Parameters<Cypress.Chainable['get']>
       ): Chainable<JQuery<HTMLElement>>;
-
       clickOutside(): Chainable<JQuery<HTMLBodyElement>>;
-
-      loginKibana: (role: string) => void;
     }
   }
 }
@@ -59,8 +54,6 @@ Cypress.Commands.add(
   'clickOutside',
   () => cy.get('body').click(0, 0) // 0,0 here are the x and y coordinates
 );
-
-Cypress.Commands.add('loginKibana', (role: string) => login(role));
 
 // Alternatively you can use CommonJS syntax:
 // require('./commands')

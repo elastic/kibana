@@ -21,7 +21,7 @@ import {
   RESPONSE_ACTIONS_ITEM_2,
   OSQUERY_RESPONSE_ACTION_ADD_BUTTON,
 } from '../../tasks/response_actions';
-import { ROLE } from '../../tasks/login';
+import { ROLE, login } from '../../tasks/login';
 import {
   addToCase,
   checkActionItemsInResults,
@@ -51,7 +51,7 @@ const UUID_REGEX = '[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-
 
 describe('Alert Event Details', () => {
   beforeEach(() => {
-    cy.loginKibana(ROLE.soc_manager);
+    login(ROLE.soc_manager);
   });
 
   describe('Packs and rules creation', () => {

@@ -29,6 +29,7 @@ import {
   policyContainsIntegration,
 } from '../../tasks/integrations';
 
+import { login } from '../../tasks/login';
 import { findAndClickButton, findFormFieldByRowsLabelAndType } from '../../tasks/live_query';
 
 describe('ALL - Add Integration', () => {
@@ -41,7 +42,7 @@ describe('ALL - Add Integration', () => {
   });
 
   beforeEach(() => {
-    cy.loginKibana();
+    login();
   });
 
   after(() => {

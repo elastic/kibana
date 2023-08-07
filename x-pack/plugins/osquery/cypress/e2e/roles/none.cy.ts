@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { ROLE } from '../../tasks/login';
+import { ROLE, login } from '../../tasks/login';
 import { NAV_SEARCH_INPUT_OSQUERY_RESULTS } from '../../tasks/navigation';
 import { loadRule, cleanupRule } from '../../tasks/api_fixtures';
 
 describe('None', () => {
   beforeEach(() => {
-    cy.loginKibana(ROLE.none);
+    login(ROLE.none);
 
     cy.visit('/app/home');
   });
@@ -48,13 +48,13 @@ describe('None', () => {
     let ruleId: string;
 
     before(() => {
-      cy.loginKibana(ROLE.soc_manager);
+      login(ROLE.soc_manager);
       loadRule(true).then((data) => {
         ruleId = data.id;
       });
       cy.visit(`/app/security/alerts`);
       cy.getBySel('expand-event').should('exist');
-      cy.loginKibana(ROLE.none);
+      login(ROLE.none);
     });
 
     after(() => {

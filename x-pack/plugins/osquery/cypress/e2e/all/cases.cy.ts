@@ -11,7 +11,7 @@ import {
   viewRecentCaseAndCheckResults,
 } from '../../tasks/live_query';
 import { navigateTo } from '../../tasks/navigation';
-import { ROLE } from '../../tasks/login';
+import { ROLE, login } from '../../tasks/login';
 import { loadLiveQuery, loadCase, cleanupCase } from '../../tasks/api_fixtures';
 
 describe('Add to Cases', () => {
@@ -37,7 +37,7 @@ describe('Add to Cases', () => {
         caseId = caseInfo.id;
         caseTitle = caseInfo.title;
       });
-      cy.loginKibana(ROLE.soc_manager);
+      login(ROLE.soc_manager);
       navigateTo('/app/osquery');
     });
 
@@ -69,7 +69,7 @@ describe('Add to Cases', () => {
         caseId = caseInfo.id;
         caseTitle = caseInfo.title;
       });
-      cy.loginKibana(ROLE.soc_manager);
+      login(ROLE.soc_manager);
       navigateTo('/app/osquery');
     });
 
