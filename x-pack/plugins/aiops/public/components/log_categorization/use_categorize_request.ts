@@ -35,6 +35,7 @@ interface CategoriesAgg {
       sparkline: {
         buckets: Array<{ key_as_string: string; key: number; doc_count: number }>;
       };
+      regex: string;
     }>;
   };
 }
@@ -52,6 +53,7 @@ export interface Category {
   count: number;
   examples: string[];
   sparkline?: Array<{ doc_count: number; key: number; key_as_string: string }>;
+  regex: string;
 }
 
 export type EventRate = Array<{
@@ -256,6 +258,7 @@ function processCategoryResults(
       key: b.key,
       count: b.doc_count,
       examples: b.hit.hits.hits.map((h) => get(h._source, field)),
+      regex: b.regex,
     };
   });
   return {

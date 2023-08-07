@@ -113,7 +113,7 @@ export const DocViewerTable = ({
 }: DocViewRenderProps) => {
   const showActionsInsideTableCell = useIsWithinBreakpoints(['xl'], true);
 
-  const { storage, uiSettings, fieldFormats } = useDiscoverServices();
+  const { storage, uiSettings, fieldFormats, uiActions } = useDiscoverServices();
   const showMultiFields = uiSettings.get(SHOW_MULTIFIELDS);
   const currentDataViewId = dataView.id!;
   const isSingleDocView = !filter;
@@ -277,7 +277,7 @@ export const DocViewerTable = ({
       <EuiTableHeaderCell
         key="header-cell-actions"
         align="left"
-        width={showActionsInsideTableCell ? 150 : 62}
+        width={showActionsInsideTableCell ? 168 : 62}
         isSorted={false}
       >
         <EuiText size="xs">
@@ -336,6 +336,8 @@ export const DocViewerTable = ({
                     onToggleColumn={onToggleColumn}
                     ignoredValue={!!ignored}
                     onTogglePinned={onTogglePinned}
+                    uiActions={uiActions}
+                    dataView={dataView}
                   />
                 </EuiTableRowCell>
               )}
@@ -374,7 +376,15 @@ export const DocViewerTable = ({
         }
       );
     },
-    [onToggleColumn, onTogglePinned, isSingleDocView, showActionsInsideTableCell, searchText]
+    [
+      searchText,
+      isSingleDocView,
+      showActionsInsideTableCell,
+      onToggleColumn,
+      onTogglePinned,
+      uiActions,
+      dataView,
+    ]
   );
 
   const rowElements = [

@@ -9,11 +9,13 @@ import { i18n } from '@kbn/i18n';
 import {
   createAction,
   ACTION_CATEGORIZE_FIELD,
+  ACTION_CATEGORIZE_FIELD_VALUE,
   type CategorizeFieldContext,
 } from '@kbn/ui-actions-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
-import { AiopsPluginStartDeps } from '../../types';
+import type { AiopsPluginStartDeps } from '../../types';
 import { showCategorizeFlyout } from './show_flyout';
+import { showCategorizeValuePopover } from './show_popover';
 
 export const categorizeFieldAction = (coreStart: CoreStart, plugins: AiopsPluginStartDeps) =>
   createAction<CategorizeFieldContext>({
@@ -27,7 +29,24 @@ export const categorizeFieldAction = (coreStart: CoreStart, plugins: AiopsPlugin
       return field.esTypes?.includes('text') === true;
     },
     execute: async (context: CategorizeFieldContext) => {
+      const { field, dataView, fieldValue } = context;
+      showCategorizeFlyout(field, dataView, coreStart, plugins, fieldValue);
+    },
+  });
+
+export const categorizeFieldValueAction = (coreStart: CoreStart, plugins: AiopsPluginStartDeps) =>
+  createAction<CategorizeFieldContext>({
+    type: ACTION_CATEGORIZE_FIELD_VALUE,
+    id: ACTION_CATEGORIZE_FIELD_VALUE,
+    getDisplayName: () =>
+      i18n.translate('xpack.aiops.categorizeFieldAction.displayName', {
+        defaultMessage: 'Categorize field',
+      }),
+    isCompatible: async ({ field }: CategorizeFieldContext) => {
+      return field.esTypes?.includes('text') === true;
+    },
+    execute: async (context: CategorizeFieldContext) => {
       const { field, dataView } = context;
-      showCategorizeFlyout(field, dataView, coreStart, plugins);
+      showCategorizeValuePopover(field, dataView, coreStart, plugins);
     },
   });

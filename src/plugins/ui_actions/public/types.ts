@@ -26,6 +26,7 @@ export interface VisualizeFieldContext {
 export interface CategorizeFieldContext {
   field: DataViewField;
   dataView: DataView;
+  fieldValue?: string;
   originatingApp?: string;
 }
 
@@ -33,3 +34,4 @@ export const ACTION_VISUALIZE_FIELD = 'ACTION_VISUALIZE_FIELD';
 export const ACTION_VISUALIZE_GEO_FIELD = 'ACTION_VISUALIZE_GEO_FIELD';
 export const ACTION_VISUALIZE_LENS_FIELD = 'ACTION_VISUALIZE_LENS_FIELD';
 export const ACTION_CATEGORIZE_FIELD = 'ACTION_CATEGORIZE_FIELD';
+export const ACTION_CATEGORIZE_FIELD_VALUE = 'ACTION_CATEGORIZE_FIELD_VALUE';

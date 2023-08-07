@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { FC } from 'react';
 import { takeUntil, distinctUntilChanged, skip } from 'rxjs/operators';
 import { from } from 'rxjs';
 import { pick } from 'lodash';
@@ -23,17 +23,16 @@ import { DatePickerContextProvider } from '@kbn/ml-date-picker';
 import { StorageContextProvider } from '@kbn/ml-local-storage';
 import type { AiopsPluginStartDeps } from '../../types';
 import { AiopsAppContext } from '../../hooks/use_aiops_app_context';
-import { LogCategorizationFlyout } from './log_categorization_for_flyout';
+// import { LogCategorizationFlyout } from './log_categorization_for_flyout';
 import { AIOPS_STORAGE_KEYS } from '../../types/storage';
 
 const localStorage = new Storage(window.localStorage);
 
-export async function showCategorizeFlyout(
+export async function showCategorizeValuePopover(
   field: DataViewField,
   dataView: DataView,
   coreStart: CoreStart,
-  plugins: AiopsPluginStartDeps,
-  fieldValue?: string
+  plugins: AiopsPluginStartDeps
 ): Promise<void> {
   const { http, theme, overlays, application, notifications, uiSettings } = coreStart;
 
@@ -59,6 +58,7 @@ export async function showCategorizeFlyout(
         uiSettingsKeys: UI_SETTINGS,
       };
 
+      return;
       const flyoutSession = overlays.openFlyout(
         toMountPoint(
           wrapWithTheme(
@@ -70,13 +70,13 @@ export async function showCategorizeFlyout(
               <AiopsAppContext.Provider value={appDependencies}>
                 <DatePickerContextProvider {...datePickerDeps}>
                   <StorageContextProvider storage={localStorage} storageKeys={AIOPS_STORAGE_KEYS}>
-                    <LogCategorizationFlyout
+                    hello
+                    {/* <LogCategorizationFlyout
                       dataView={dataView}
                       savedSearch={null}
                       selectedField={field}
-                      fieldValue={fieldValue}
                       onClose={onFlyoutClose}
-                    />
+                    /> */}
                   </StorageContextProvider>
                 </DatePickerContextProvider>
               </AiopsAppContext.Provider>
@@ -104,3 +104,54 @@ export async function showCategorizeFlyout(
     }
   });
 }
+
+interface Props {
+  field: DataViewField;
+  dataView: DataView;
+  coreStart: CoreStart;
+  plugins: AiopsPluginStartDeps;
+}
+
+export const PopoverContents: FC<Props> = ({ field, dataView, coreStart, plugins }) => {
+  const { http, theme, overlays, application, notifications, uiSettings } = coreStart;
+
+  const appDependencies = {
+    notifications,
+    uiSettings,
+    http,
+    theme,
+    application,
+    ...plugins,
+  };
+  const datePickerDeps = {
+    ...pick(appDependencies, ['data', 'http', 'notifications', 'theme', 'uiSettings']),
+    toMountPoint,
+    wrapWithTheme,
+    uiSettingsKeys: UI_SETTINGS,
+  };
+
+  return (
+    <>
+      <KibanaContextProvider
+        services={{
+          ...coreStart,
+        }}
+      >
+        <AiopsAppContext.Provider value={appDependencies}>
+          <DatePickerContextProvider {...datePickerDeps}>
+            <StorageContextProvider storage={localStorage} storageKeys={AIOPS_STORAGE_KEYS}>
+              hello popover
+              {/* <LogCategorizationFlyout
+                      dataView={dataView}
+                      savedSearch={null}
+                      selectedField={field}
+                      onClose={onFlyoutClose}
+                    /> */}
+            </StorageContextProvider>
+          </DatePickerContextProvider>
+        </AiopsAppContext.Provider>
+      </KibanaContextProvider>
+      ,
+    </>
+  );
+};

@@ -7,7 +7,10 @@
  */
 
 import type { UiActionsStart, CategorizeFieldContext } from '@kbn/ui-actions-plugin/public';
-import { CATEGORIZE_FIELD_TRIGGER } from '@kbn/ui-actions-browser/src/triggers';
+import {
+  CATEGORIZE_FIELD_TRIGGER,
+  // CATEGORIZE_FIELD_VALUE_TRIGGER,
+} from '@kbn/ui-actions-browser/src/triggers';
 import type { DataViewField, DataView } from '@kbn/data-views-plugin/public';
 
 async function getCompatibleActions(
@@ -55,4 +58,21 @@ export async function canCategorize(
   const actions = await getCompatibleActions(uiActions, field, dataView, CATEGORIZE_FIELD_TRIGGER);
 
   return actions.length > 0;
+}
+
+export function triggerCategorizeValueActions(
+  uiActions: UiActionsStart,
+  field: DataViewField,
+  fieldValue: string,
+  originatingApp: string,
+  dataView?: DataView
+) {
+  if (!dataView) return;
+  const triggerOptions: CategorizeFieldContext = {
+    dataView,
+    field,
+    originatingApp,
+    fieldValue,
+  };
+  uiActions.getTrigger(CATEGORIZE_FIELD_TRIGGER).exec(triggerOptions);
 }

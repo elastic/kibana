@@ -8,13 +8,13 @@ import React, { FC, useState, useEffect, useCallback, useRef, useMemo } from 're
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
+// import { FormattedMessage } from '@kbn/i18n-react';
 import {
-  EuiTitle,
-  EuiFlyoutHeader,
-  EuiFlyoutBody,
-  EuiFlexGroup,
-  EuiFlexItem,
+  // EuiTitle,
+  // EuiFlyoutHeader,
+  // EuiFlyoutBody,
+  // EuiFlexGroup,
+  // EuiFlexItem,
   useEuiTheme,
 } from '@elastic/eui';
 
@@ -26,26 +26,24 @@ import { useData } from '../../hooks/use_data';
 import { useSearch } from '../../hooks/use_search';
 import { useCategorizeRequest } from './use_categorize_request';
 import type { EventRate, Category, SparkLinesPerCategory } from './use_categorize_request';
-import { CategoryTable } from './category_table';
+// import { CategoryTable } from './category_table';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
-import { InformationText } from './information_text';
+// import { InformationText } from './information_text';
 import { createMergedEsQuery } from '../../application/utils/search_utils';
-import { SamplingMenu } from './sampling_menu';
-import { TechnicalPreviewBadge } from './technical_preview_badge';
-import { LoadingCategorization } from './loading_categorization';
+// import { SamplingMenu } from './sampling_menu';
+// import { TechnicalPreviewBadge } from './technical_preview_badge';
+// import { LoadingCategorization } from './loading_categorization';
 import { useValidateFieldRequest } from './use_validate_category_field';
 import {
   type LogCategorizationPageUrlState,
   getDefaultLogCategorizationAppState,
 } from '../../application/utils/url_state';
-import { FieldValidationCallout } from './category_validation_callout';
-import { CategoryFinder } from './category_finder';
+// import { FieldValidationCallout } from './category_validation_callout';
 
 export interface LogCategorizationPageProps {
   dataView: DataView;
   savedSearch: SavedSearch | null;
   selectedField: DataViewField;
-  fieldValue: string | undefined;
   onClose: () => void;
 }
 
@@ -55,11 +53,8 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
   dataView,
   savedSearch,
   selectedField,
-  fieldValue,
   onClose,
 }) => {
-  // console.log(fieldValue);
-
   const {
     notifications: { toasts },
     data: {
@@ -97,8 +92,6 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
   const [fieldValidationResult, setFieldValidationResult] = useState<FieldValidationResults | null>(
     null
   );
-  const [filteredCategories, setFilteredCategories] = useState<Category[]>([]);
-  const [filterKey, setFilterKey] = useState<string | null>(null);
 
   const cancelRequest = useCallback(() => {
     cancelValidationRequest();
@@ -233,84 +226,63 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
     randomSampler,
   ]);
 
-  useEffect(
-    function filterCategories() {
-      if (!data) {
-        return;
-      }
-      setFilteredCategories(
-        filterKey === null ? data.categories : data.categories.filter((c) => c.key === filterKey)
-      );
-    },
-    [data, filterKey]
-  );
+  return <>hello there</>;
 
-  return (
-    <>
-      <EuiFlyoutHeader hasBorder>
-        <EuiFlexGroup gutterSize="s" alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiTitle size="m">
-              <h2 id="flyoutTitle" data-test-subj="mlJobSelectorFlyoutTitle">
-                <FormattedMessage
-                  id="xpack.aiops.categorizeFlyout.title"
-                  defaultMessage="Pattern analysis of {name}"
-                  values={{ name: selectedField.name }}
-                />
-              </h2>
-            </EuiTitle>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false} css={{ marginTop: euiTheme.size.xs }}>
-            <TechnicalPreviewBadge />
-          </EuiFlexItem>
-          <EuiFlexItem />
-          <EuiFlexItem grow={false}>
-            <SamplingMenu randomSampler={randomSampler} reload={() => forceRefresh()} />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlyoutHeader>
-      <EuiFlyoutBody data-test-subj="mlJobSelectorFlyoutBody">
-        <FieldValidationCallout validationResults={fieldValidationResult} />
+  // return (
+  //   <>
+  //     <EuiFlyoutHeader hasBorder>
+  //       <EuiFlexGroup gutterSize="s" alignItems="center">
+  //         <EuiFlexItem grow={false}>
+  //           <EuiTitle size="m">
+  //             <h2 id="flyoutTitle" data-test-subj="mlJobSelectorFlyoutTitle">
+  //               <FormattedMessage
+  //                 id="xpack.aiops.categorizeFlyout.title"
+  //                 defaultMessage="Pattern analysis of {name}"
+  //                 values={{ name: selectedField.name }}
+  //               />
+  //             </h2>
+  //           </EuiTitle>
+  //         </EuiFlexItem>
+  //         <EuiFlexItem grow={false} css={{ marginTop: euiTheme.size.xs }}>
+  //           <TechnicalPreviewBadge />
+  //         </EuiFlexItem>
+  //         <EuiFlexItem />
+  //         <EuiFlexItem grow={false}>
+  //           <SamplingMenu randomSampler={randomSampler} reload={() => forceRefresh()} />
+  //         </EuiFlexItem>
+  //       </EuiFlexGroup>
+  //     </EuiFlyoutHeader>
+  //     <EuiFlyoutBody data-test-subj="mlJobSelectorFlyoutBody">
+  //       <FieldValidationCallout validationResults={fieldValidationResult} />
 
-        {loading === true ? <LoadingCategorization onClose={onClose} /> : null}
+  //       {loading === true ? <LoadingCategorization onClose={onClose} /> : null}
 
-        <InformationText
-          loading={loading}
-          categoriesLength={data?.categories?.length ?? null}
-          eventRateLength={eventRate.length}
-          fieldSelected={selectedField !== null}
-        />
+  //       <InformationText
+  //         loading={loading}
+  //         categoriesLength={data?.categories?.length ?? null}
+  //         eventRateLength={eventRate.length}
+  //         fieldSelected={selectedField !== null}
+  //       />
 
-        {selectedField !== undefined && data !== null ? (
-          <CategoryFinder
-            categories={data.categories}
-            eventRate={eventRate}
-            loading={loading}
-            sparkLines={data.sparkLines}
-            value={fieldValue}
-            setFilterKey={setFilterKey}
-          />
-        ) : null}
-
-        {loading === false && data !== null && data.categories.length > 0 ? (
-          <CategoryTable
-            categories={filteredCategories}
-            aiopsListState={stateFromUrl}
-            dataViewId={dataView.id!}
-            eventRate={eventRate}
-            sparkLines={data.sparkLines}
-            selectedField={selectedField}
-            pinnedCategory={pinnedCategory}
-            setPinnedCategory={setPinnedCategory}
-            selectedCategory={selectedCategory}
-            setSelectedCategory={setSelectedCategory}
-            timefilter={timefilter}
-            onAddFilter={onAddFilter}
-            onClose={onClose}
-            enableRowActions={false}
-          />
-        ) : null}
-      </EuiFlyoutBody>
-    </>
-  );
+  //       {loading === false && data !== null && data.categories.length > 0 ? (
+  //         <CategoryTable
+  //           categories={data.categories}
+  //           aiopsListState={stateFromUrl}
+  //           dataViewId={dataView.id!}
+  //           eventRate={eventRate}
+  //           sparkLines={data.sparkLines}
+  //           selectedField={selectedField}
+  //           pinnedCategory={pinnedCategory}
+  //           setPinnedCategory={setPinnedCategory}
+  //           selectedCategory={selectedCategory}
+  //           setSelectedCategory={setSelectedCategory}
+  //           timefilter={timefilter}
+  //           onAddFilter={onAddFilter}
+  //           onClose={onClose}
+  //           enableRowActions={false}
+  //         />
+  //       ) : null}
+  //     </EuiFlyoutBody>
+  //   </>
+  // );
 };

@@ -32,7 +32,9 @@ export {
   ROW_CLICK_TRIGGER,
   rowClickTrigger,
   CATEGORIZE_FIELD_TRIGGER,
+  CATEGORIZE_FIELD_VALUE_TRIGGER,
   categorizeFieldTrigger,
+  categorizeFieldValueTrigger,
 } from '@kbn/ui-actions-browser/src/triggers';
 export type { VisualizeFieldContext, CategorizeFieldContext } from './types';
 export {
@@ -40,5 +42,6 @@ export {
   ACTION_VISUALIZE_GEO_FIELD,
   ACTION_VISUALIZE_LENS_FIELD,
   ACTION_CATEGORIZE_FIELD,
+  ACTION_CATEGORIZE_FIELD_VALUE,
 } from './types';
 export type { ActionExecutionContext, ActionExecutionMeta, ActionMenuItemProps } from './actions';

@@ -28,19 +28,36 @@ export class AiopsPlugin
       import('@kbn/ui-actions-plugin/public'),
       import('./components/log_categorization'),
       firstValueFrom(plugins.licensing.license$),
-    ]).then(([uiActionsImports, { categorizeFieldAction }, license]) => {
-      if (license.hasAtLeast('platinum')) {
-        const { ACTION_CATEGORIZE_FIELD, CATEGORIZE_FIELD_TRIGGER } = uiActionsImports;
-        if (plugins.uiActions.hasAction(ACTION_CATEGORIZE_FIELD)) {
-          plugins.uiActions.unregisterAction(ACTION_CATEGORIZE_FIELD);
-        }
+    ]).then(
+      ([uiActionsImports, { categorizeFieldAction, categorizeFieldValueAction }, license]) => {
+        if (license.hasAtLeast('platinum')) {
+          const {
+            ACTION_CATEGORIZE_FIELD,
+            ACTION_CATEGORIZE_FIELD_VALUE,
+            CATEGORIZE_FIELD_TRIGGER,
+            CATEGORIZE_FIELD_VALUE_TRIGGER,
+          } = uiActionsImports;
 
-        plugins.uiActions.addTriggerAction(
-          CATEGORIZE_FIELD_TRIGGER,
-          categorizeFieldAction(core, plugins)
-        );
+          if (plugins.uiActions.hasAction(ACTION_CATEGORIZE_FIELD)) {
+            plugins.uiActions.unregisterAction(ACTION_CATEGORIZE_FIELD);
+          }
+
+          plugins.uiActions.addTriggerAction(
+            CATEGORIZE_FIELD_TRIGGER,
+            categorizeFieldAction(core, plugins)
+          );
+
+          if (plugins.uiActions.hasAction(ACTION_CATEGORIZE_FIELD_VALUE)) {
+            plugins.uiActions.unregisterAction(ACTION_CATEGORIZE_FIELD_VALUE);
+          }
+
+          plugins.uiActions.addTriggerAction(
+            CATEGORIZE_FIELD_VALUE_TRIGGER,
+            categorizeFieldValueAction(core, plugins)
+          );
+        }
       }
-    });
+    );
 
     return {};
   }

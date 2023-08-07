@@ -16,6 +16,7 @@ export {
   ROW_CLICK_TRIGGER,
   rowClickTrigger,
   CATEGORIZE_FIELD_TRIGGER,
+  CATEGORIZE_FIELD_VALUE_TRIGGER,
   categorizeFieldTrigger,
   defaultTrigger,
 } from './src/triggers';
