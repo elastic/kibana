@@ -6,7 +6,7 @@
  */
 
 import type { CheckPrivilegesDynamically } from '@kbn/security-plugin/server/authorization/check_privileges_dynamically';
-import type { IRouter, RequestHandler, RouteConfig } from '@kbn/core/server';
+import type { IRouter, RequestHandler, RouteConfig, RouteMethod } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
@@ -200,5 +200,59 @@ describe('FleetAuthzRouter', () => {
         })
       ).toEqual('forbidden');
     });
+  });
+
+  describe('default access', () => {
+    let fakeRouter: jest.Mocked<IRouter<FleetRequestHandlerContext>>;
+    beforeEach(() => {
+      fakeRouter = {
+        get: jest.fn(),
+        post: jest.fn(),
+        delete: jest.fn(),
+        put: jest.fn(),
+        patch: jest.fn(),
+      } as unknown as jest.Mocked<IRouter<FleetRequestHandlerContext>>;
+    });
+
+    const METHODS: RouteMethod[] = ['get', 'post', 'delete', 'put', 'patch'];
+
+    for (const method of METHODS) {
+      describe(`${method}`, () => {
+        it('should set default access to public', () => {
+          const fleetAuthzRouter = makeRouterWithFleetAuthz(fakeRouter, mockLogger);
+          (fleetAuthzRouter as any)[method](
+            {
+              path: '/test',
+              validate: false,
+            },
+            (() => {}) as any
+          );
+          expect((fakeRouter as any)[method]).toBeCalledWith(
+            expect.objectContaining({
+              options: { access: 'public' },
+            }),
+            expect.anything()
+          );
+        });
+
+        it('should not allow to define internal routes', () => {
+          const fleetAuthzRouter = makeRouterWithFleetAuthz(fakeRouter, mockLogger);
+          (fleetAuthzRouter as any)[method](
+            {
+              path: '/test',
+              validate: false,
+              options: { access: 'internal' },
+            },
+            (() => {}) as any
+          );
+          expect((fakeRouter as any)[method]).toBeCalledWith(
+            expect.objectContaining({
+              options: { access: 'internal' },
+            }),
+            expect.anything()
+          );
+        });
+      });
+    }
   });
 });
