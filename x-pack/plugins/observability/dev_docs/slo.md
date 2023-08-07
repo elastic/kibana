@@ -77,7 +77,7 @@ curl --request POST \
 	},
 	"timeWindow": {
 		"duration": "30d",
-		"isRolling": true
+		"type": "rolling"
 	},
 	"budgetingMethod": "occurrences",
 	"objective": {
@@ -112,7 +112,7 @@ curl --request POST \
 	},
 	"timeWindow": {
 		"duration": "1M",
-		"isCalendar": true
+		"type": "calendarAligned"
 	},
 	"budgetingMethod": "occurrences",
 	"objective": {
@@ -146,8 +146,8 @@ curl --request POST \
 		}
 	},
 	"timeWindow": {
-		"duration": "1w",
-		"isRolling": true
+		"duration": "7d",
+		"type": "rolling"
 	},
 	"budgetingMethod": "timeslices",
 	"objective": {
@@ -187,7 +187,7 @@ curl --request POST \
 	},
 	"timeWindow": {
 		"duration": "7d",
-		"isRolling": true
+		"type": "rolling"
 	},
 	"budgetingMethod": "occurrences",
 	"objective": {
@@ -223,7 +223,7 @@ curl --request POST \
 	},
 	"timeWindow": {
 		"duration": "7d",
-		"isRolling": true
+		"type": "rolling"
 	},
 	"budgetingMethod": "timeslices",
 	"objective": {
@@ -260,8 +260,8 @@ curl --request POST \
 		}
 	},
 	"timeWindow": {
-		"duration": "1w",
-		"isCalendar": true
+		"duration": "7d",
+		"type": "calendarAligned"
 	},
 	"budgetingMethod": "timeslices",
 	"objective": {
@@ -300,7 +300,7 @@ curl --request POST \
 	},
 	"timeWindow": {
 		"duration": "7d",
-		"isRolling": true
+		"type": "rolling"
 	},
 	"budgetingMethod": "occurrences",
 	"objective": {
@@ -355,7 +355,7 @@ curl --request POST \
 	},
 	"timeWindow": {
 		"duration": "7d",
-		"isRolling": true
+		"type": "rolling"
 	},
 	"budgetingMethod": "occurrences",
 	"objective": {
