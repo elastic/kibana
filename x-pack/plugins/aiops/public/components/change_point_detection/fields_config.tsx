@@ -491,7 +491,7 @@ const FieldPanel: FC<FieldPanelProps> = ({
                         defaultMessage: 'Context menu',
                       }
                     )}
-                    iconType="boxesVertical"
+                    iconType="boxesHorizontal"
                     color="text"
                     onClick={setIsActionMenuOpen.bind(null, true)}
                   />
