@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { EuiConfirmModal } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { executeEnrichPolicy } from '../../../../services/api';
@@ -18,33 +18,38 @@ export const ExecutePolicyModal = ({
   policyToExecute: string;
   callback: (data?: { hasExecutedPolicy: boolean }) => void;
 }) => {
+  const [isExecuting, setIsExecuting] = useState(false);
   const { toasts } = useAppContext();
 
   const handleExecutePolicy = () => {
-    executeEnrichPolicy(policyToExecute).then(({ data, error }) => {
-      if (data) {
-        const successMessage = i18n.translate(
-          'xpack.idxMgmt.enrich_policies.executeModal.successDeleteNotificationMessage',
-          { defaultMessage: 'Executed {policyToExecute}', values: { policyToExecute } }
-        );
-        toasts.addSuccess(successMessage);
+    setIsExecuting(true);
 
-        return callback({ hasExecutedPolicy: true });
-      }
+    executeEnrichPolicy(policyToExecute)
+      .then(({ data, error }) => {
+        if (data) {
+          const successMessage = i18n.translate(
+            'xpack.idxMgmt.enrich_policies.executeModal.successDeleteNotificationMessage',
+            { defaultMessage: 'Executed {policyToExecute}', values: { policyToExecute } }
+          );
+          toasts.addSuccess(successMessage);
 
-      if (error) {
-        const errorMessage = i18n.translate(
-          'xpack.idxMgmt.enrich_policies.executeModal.errorDeleteNotificationMessage',
-          {
-            defaultMessage: "Error executing enrich policy: '{error}'",
-            values: { error: error.message },
-          }
-        );
-        toasts.addDanger(errorMessage);
-      }
+          return callback({ hasExecutedPolicy: true });
+        }
 
-      callback();
-    });
+        if (error) {
+          const errorMessage = i18n.translate(
+            'xpack.idxMgmt.enrich_policies.executeModal.errorDeleteNotificationMessage',
+            {
+              defaultMessage: "Error executing enrich policy: '{error}'",
+              values: { error: error.message },
+            }
+          );
+          toasts.addDanger(errorMessage);
+        }
+
+        callback();
+      })
+      .finally(() => setIsExecuting(false));
   };
 
   const handleOnCancel = () => {
@@ -58,6 +63,7 @@ export const ExecutePolicyModal = ({
       onConfirm={handleExecutePolicy}
       cancelButtonText="Cancel"
       confirmButtonText="Execute"
+      confirmButtonDisabled={isExecuting}
     >
       <p>
         You are about to execute the enrich policy <strong>{policyToExecute}</strong>.
