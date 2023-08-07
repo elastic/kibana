@@ -15,7 +15,7 @@ import { cryptoFactory } from '@kbn/reporting-common/crypto';
 import { createMockConfigSchema } from '../../test_helpers';
 import { TaskPayloadPNGV2 } from '@kbn/reporting-export-types-png/types';
 
-jest.mock('@kbn/reporting-common/export_type_helpers/generate_png.ts');
+jest.mock('@kbn/reporting-common/export_type_helpers/generate_png');
 
 let content: string;
 let mockPngExportType: PngExportType;
