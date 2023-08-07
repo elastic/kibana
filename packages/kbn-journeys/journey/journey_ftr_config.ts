@@ -90,6 +90,8 @@ export function makeFtrConfigProvider(
           `--telemetry.labels=${JSON.stringify(telemetryLabels)}`,
           '--csp.strict=false',
           '--csp.warnLegacyBrowsers=false',
+          '--csp.warnLegacyBrowsers=false',
+          '--coreApp.allowDynamicConfigOverrides=true',
         ],
 
         env: {

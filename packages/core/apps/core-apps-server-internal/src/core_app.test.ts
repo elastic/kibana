@@ -17,6 +17,7 @@ import { PluginType } from '@kbn/core-base-common';
 import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
 import { coreInternalLifecycleMock } from '@kbn/core-lifecycle-server-mocks';
 import { CoreAppsService } from './core_app';
+import { of } from 'rxjs';
 
 const emptyPlugins = (): UiPlugins => ({
   internal: new Map(),
@@ -75,7 +76,7 @@ describe('CoreApp', () => {
       const routerMock = mockRouter.create();
       internalCoreSetup.http.createRouter.mockReturnValue(routerMock);
 
-      coreContext.configService.atPathSync.mockReturnValue({ allowDynamicConfigOverrides: true });
+      coreContext.configService.atPath.mockReturnValue(of({ allowDynamicConfigOverrides: true }));
       const localCoreApp = new CoreAppsService(coreContext);
       await localCoreApp.setup(internalCoreSetup, emptyPlugins());
 

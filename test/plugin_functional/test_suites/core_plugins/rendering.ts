@@ -327,6 +327,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.security.ui (any)',
 
         'telemetry.allowChangingOptInStatus (boolean)',
+        'telemetry.appendServerlessChannelsSuffix (any)', // It's a boolean (any because schema.conditional)
         'telemetry.banner (boolean)',
         'telemetry.labels.branch (string)',
         'telemetry.labels.ciBuildId (string)',
