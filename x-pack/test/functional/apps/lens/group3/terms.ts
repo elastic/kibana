@@ -183,8 +183,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await es.bulk(
           {
-            human: true,
-            pretty: true,
             index: esIndexPrefix,
             body: Array<{
               a: string;
