@@ -11,7 +11,7 @@ import { withRouter, RouteComponentProps } from 'react-router-dom';
 import {
   EuiPageHeader,
   EuiSpacer,
-  EuiPageContent_Deprecated as EuiPageContent,
+  EuiPageSection as EuiPageContent,
   EuiLink,
   EuiCallOut,
 } from '@elastic/eui';

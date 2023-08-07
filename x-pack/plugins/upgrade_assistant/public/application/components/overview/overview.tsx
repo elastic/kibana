@@ -15,7 +15,7 @@ import {
   EuiSpacer,
   EuiLink,
   EuiPageBody,
-  EuiPageContentBody_Deprecated as EuiPageContentBody,
+  EuiPageSection as EuiPageContentBody,
 } from '@elastic/eui';
 import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 

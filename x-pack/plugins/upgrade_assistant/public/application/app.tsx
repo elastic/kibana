@@ -13,7 +13,7 @@ import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiEmptyPrompt,
-  EuiPageContent_Deprecated as EuiPageContent,
+  EuiPageSection as EuiPageContent,
   EuiLoadingSpinner,
 } from '@elastic/eui';
 import { ScopedHistory } from '@kbn/core/public';

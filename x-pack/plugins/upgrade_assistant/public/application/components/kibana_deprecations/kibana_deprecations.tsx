@@ -9,7 +9,7 @@ import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
 import {
-  EuiPageContent_Deprecated as EuiPageContent,
+  EuiPageSection as EuiPageContent,
   EuiPageHeader,
   EuiSpacer,
   EuiCallOut,
