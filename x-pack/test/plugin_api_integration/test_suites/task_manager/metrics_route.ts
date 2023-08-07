@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect/expect';
+import expect from '@kbn/expect';
 import url from 'url';
 import supertest from 'supertest';
 import { NodeMetrics } from '@kbn/task-manager-plugin/server/routes/metrics';
