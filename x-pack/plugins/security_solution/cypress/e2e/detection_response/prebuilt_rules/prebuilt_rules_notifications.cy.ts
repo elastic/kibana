@@ -174,7 +174,7 @@ describe('Detection rules, Prebuilt Rules Installation and Update Notifications'
         });
       });
 
-      it.only('should notify user about prebuilt rules available for installation and for upgrade', () => {
+      it('should notify user about prebuilt rules available for installation and for upgrade', () => {
         // 1 rule available for installation
         cy.get(ADD_ELASTIC_RULES_BTN).should('have.text', `Add Elastic rules${1}`);
         // 1 rule available for update
