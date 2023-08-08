@@ -28,7 +28,7 @@ const INTEGRATIONS_CALLOUT_DESCRIPTION = i18n.translate(
   }
 );
 const INTEGRATIONS_CALLOUT_BUTTON_TEXT = i18n.translate(
-  'xpack.securitySolutionServerless.assets.integrationsCallout.content',
+  'xpack.securitySolutionServerless.assets.integrationsCallout.buttonText',
   {
     defaultMessage: 'Browse integrations',
   }

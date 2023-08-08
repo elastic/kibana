@@ -7,13 +7,7 @@
 
 import React from 'react';
 import { LandingLinksIconsCategories } from '@kbn/security-solution-navigation/landing_links';
-import {
-  SecurityPageName,
-  isTitleLinkCategory,
-  isSeparatorLinkCategory,
-  type TitleLinkCategory,
-  type SeparatorLinkCategory,
-} from '@kbn/security-solution-navigation';
+import { SecurityPageName } from '@kbn/security-solution-navigation';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { EuiPageHeader, EuiSpacer } from '@elastic/eui';
 import { useNavLink } from '../common/hooks/use_nav_links';
@@ -22,17 +16,13 @@ export const MachineLearningRoute: React.FC = () => {
   const link = useNavLink(SecurityPageName.mlLanding);
   const { links = [], categories = [], title } = link ?? {};
 
-  const compatibleCategories = categories.filter(
-    (category) => isTitleLinkCategory(category) || isSeparatorLinkCategory(category)
-  ) as Array<TitleLinkCategory | SeparatorLinkCategory>;
-
   return (
     <KibanaPageTemplate restrictWidth={false} contentBorder={false} grow={true}>
       <KibanaPageTemplate.Section>
         <EuiPageHeader pageTitle={title} />
         <EuiSpacer size="l" />
         <EuiSpacer size="xl" />
-        <LandingLinksIconsCategories links={links} categories={compatibleCategories} />
+        <LandingLinksIconsCategories links={links} categories={categories} />
       </KibanaPageTemplate.Section>
     </KibanaPageTemplate>
   );
