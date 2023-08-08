@@ -34,6 +34,18 @@ describe('UpsellingService', () => {
     expect(value.get(SecurityPageName.hosts)).toEqual(TestComponent);
   });
 
+  it('registers messages', async () => {
+    const testMessage = 'test message';
+    const service = new UpsellingService();
+    service.registerMessages({
+      investigation_guide: testMessage,
+    });
+
+    const value = await firstValueFrom(service.messages$);
+
+    expect(value.get('investigation_guide')).toEqual(testMessage);
+  });
+
   it('"isPageUpsellable" returns true when page is upsellable', () => {
     const service = new UpsellingService();
     service.registerPages({

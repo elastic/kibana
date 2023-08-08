@@ -40,7 +40,6 @@ import { ExceptionItemComments } from '../item_comments';
 import {
   defaultEndpointExceptionItems,
   retrieveAlertOsTypes,
-  filterIndexPatterns,
   getPrepopulatedRuleExceptionWithHighlightFields,
 } from '../../utils/helpers';
 import type { AlertData } from '../../utils/types';
@@ -515,7 +514,6 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
             onOsChange={setSelectedOs}
             onExceptionItemAdd={setExceptionItemsToAdd}
             onSetErrorExists={setConditionsValidationError}
-            onFilterIndexPatterns={filterIndexPatterns}
             getExtendedFields={getExtendedFields}
           />
 
