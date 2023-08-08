@@ -161,9 +161,7 @@ export function ServicesTable({
   const initialSortDirection =
     initialSortField === StorageExplorerFieldName.ServiceName ? 'asc' : 'desc';
 
-  const loading =
-    serviceStatisticsFetch.status === FETCH_STATUS.LOADING ||
-    loadingSummaryStats;
+  const loading = serviceStatisticsFetch.status === FETCH_STATUS.LOADING;
 
   const items = joinByKey(
     [
@@ -296,6 +294,9 @@ export function ServicesTable({
     },
   ];
 
+  const isDownloadButtonDisable =
+    isEmpty(serviceStatisticsItems) || loadingSummaryStats;
+
   return (
     <EuiPanel
       hasShadow={false}
@@ -308,7 +309,7 @@ export function ServicesTable({
           <EuiButton
             data-test-subj="StorageExplorerDownloadReportButton"
             iconType="download"
-            isDisabled={isEmpty(serviceStatisticsItems)}
+            isDisabled={isDownloadButtonDisable}
             onClick={() =>
               downloadJson({
                 fileName: `storage-explorefpr-${moment(Date.now()).format(
