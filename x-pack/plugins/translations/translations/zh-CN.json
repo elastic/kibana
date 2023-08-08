@@ -20813,7 +20813,6 @@
     "xpack.lens.app.exploreDataInDiscoverDrilldown": "在 Discover 中打开",
     "xpack.lens.app.exploreDataInDiscoverDrilldown.newTabConfig": "在新选项卡中打开",
     "xpack.lens.app.goBackModalCancelBtn": "取消",
-    "xpack.lens.app.goBackModalTitle": "放弃更改？",
     "xpack.lens.app.inspect": "检查",
     "xpack.lens.app.inspectAriaLabel": "检查",
     "xpack.lens.app.replaceInCanvas": "在 Canvas 中替换",
