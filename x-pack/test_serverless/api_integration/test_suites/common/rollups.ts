@@ -8,8 +8,8 @@
 import expect from 'expect';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { INITIAL_REST_VERSION_INTERNAL } from '@kbn/data-views-plugin/server/constants';
+import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common/src/constants';
 import { FIELDS_FOR_WILDCARD_PATH as BASE_URI } from '@kbn/data-views-plugin/common/constants';
-import { stringify } from 'query-string';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -27,20 +27,18 @@ export default function ({ getService }: FtrProviderContext) {
       );
     });
     it('returns 200 and best effort response despite lack of rollup support', async () => {
-      const uri = `${BASE_URI}?${stringify(
-        {
+      const response = await supertest
+        .get(BASE_URI)
+        .query({
           pattern: 'basic_index',
           type: 'rollup',
           rollup_index: 'bar',
-        },
-        { sort: false }
-      )}`;
-      const response = await supertest
-        .get(uri)
-        // .query()
-        .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL);
+        })
+        .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'true');
 
       expect(response.status).toBe(200);
+      expect(response.body.fields.length).toEqual(5);
     });
   });
 }
