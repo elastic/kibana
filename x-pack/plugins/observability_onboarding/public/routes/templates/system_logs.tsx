@@ -8,6 +8,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
 import { breadcrumbsApp } from '../../application/app';
 import { Provider as WizardProvider } from '../../components/app/system_logs';
@@ -28,27 +29,32 @@ export function SystemLogs({ children }: Props) {
     ],
     breadcrumbsApp
   );
+
+  const queryClient = new QueryClient();
+
   return (
-    <WizardProvider>
-      <EuiFlexGroup direction="column" alignItems="center">
-        <EuiFlexItem grow={false}>
-          <EuiSpacer size="l" />
-          <EuiTitle
-            size="l"
-            data-test-subj="obltOnboardingSystemLogsFilePageHeader"
-          >
-            <h1>
-              {i18n.translate(
-                'xpack.observability_onboarding.title.collectSystemLogs',
-                { defaultMessage: 'Install shipper to collect system logs' }
-              )}
-            </h1>
-          </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem grow={1} style={{ width: '50%' }}>
-          {children}
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </WizardProvider>
+    <QueryClientProvider client={queryClient}>
+      <WizardProvider>
+        <EuiFlexGroup direction="column" alignItems="center">
+          <EuiFlexItem grow={false}>
+            <EuiSpacer size="l" />
+            <EuiTitle
+              size="l"
+              data-test-subj="obltOnboardingSystemLogsFilePageHeader"
+            >
+              <h1>
+                {i18n.translate(
+                  'xpack.observability_onboarding.title.collectSystemLogs',
+                  { defaultMessage: 'Install shipper to collect system logs' }
+                )}
+              </h1>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem grow={1} style={{ width: '50%' }}>
+            {children}
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </WizardProvider>
+    </QueryClientProvider>
   );
 }

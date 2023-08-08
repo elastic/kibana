@@ -32,6 +32,7 @@ import {
   StepPanelFooter,
 } from '../../shared/step_panel';
 import { ApiKeyBanner } from '../custom_logs/wizard/api_key_banner';
+import { SystemIntegrationBanner } from './system_integration_banner';
 
 export function InstallElasticAgent() {
   const { navigateToKibanaUrl } = useKibanaNavigation();
@@ -209,6 +210,8 @@ export function InstallElasticAgent() {
             )}
           </p>
         </EuiText>
+        <EuiSpacer size="m" />
+        <SystemIntegrationBanner />
         <EuiSpacer size="m" />
         {apiKeyEncoded && onboardingId ? (
           <ApiKeyBanner
