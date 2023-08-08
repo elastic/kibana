@@ -15,9 +15,9 @@ import { ALL_APP_FEATURE_KEYS } from '../../../common';
 import { turnOffPolicyProtections } from './turn_off_policy_protections';
 import { FleetPackagePolicyGenerator } from '../../../common/endpoint/data_generators/fleet_package_policy_generator';
 import type { PolicyData } from '../../../common/endpoint/types';
-import { policyFactoryWithoutPaidFeatures } from '../../../common/endpoint/models/policy_config';
 import type { PackagePolicyClient } from '@kbn/fleet-plugin/server';
 import type { PromiseResolvedValue } from '../../../common/endpoint/types/utility_types';
+import { setPolicyToEventCollectionOnly } from '../../../common/endpoint/models/policy_config_helpers';
 
 describe('Turn Off Policy Protections Migration', () => {
   let esClient: ElasticsearchClient;
@@ -59,7 +59,9 @@ describe('Turn Off Policy Protections Migration', () => {
         return policy;
       }
 
-      policy.inputs[0].config.policy.value = policyFactoryWithoutPaidFeatures();
+      policy.inputs[0].config.policy.value = setPolicyToEventCollectionOnly(
+        policy.inputs[0].config.policy.value
+      );
 
       return policy;
     };
@@ -100,7 +102,7 @@ describe('Turn Off Policy Protections Migration', () => {
         });
 
       bulkUpdateResponse = {
-        updatedPolicies: [page1Items[1], page2Items[0]],
+        updatedPolicies: [page1Items[0], page2Items[1]],
         failedPolicies: [],
       };
 
@@ -113,9 +115,37 @@ describe('Turn Off Policy Protections Migration', () => {
       await callTurnOffPolicyProtections();
 
       expect(fleetServices.packagePolicy.list as jest.Mock).toHaveBeenCalledTimes(3);
+      expect(fleetServices.packagePolicy.bulkUpdate as jest.Mock).toHaveBeenCalledWith(
+        fleetServices.internalSoClient,
+        esClient,
+        [
+          expect.objectContaining({ id: bulkUpdateResponse.updatedPolicies![0].id }),
+          expect.objectContaining({ id: bulkUpdateResponse.updatedPolicies![1].id }),
+        ],
+        { user: { username: 'elastic' } }
+      );
+      expect(logger.info).toHaveBeenCalledWith(
+        'Found 2 policies that need updates:\n' +
+          `Policy [${bulkUpdateResponse.updatedPolicies![0].id}][${
+            bulkUpdateResponse.updatedPolicies![0].name
+          }] updated to disable protections. Trigger: [property [mac.malware.mode] is set to [prevent]]\n` +
+          `Policy [${bulkUpdateResponse.updatedPolicies![1].id}][${
+            bulkUpdateResponse.updatedPolicies![1].name
+          }] updated to disable protections. Trigger: [property [mac.malware.mode] is set to [prevent]]`
+      );
+      expect(logger.info).toHaveBeenCalledWith('Done. All updates applied successfully');
+    });
 
-      // FIXME:PT working here
-      expect(true).toBe(false);
+    it('should log failures', async () => {
+      bulkUpdateResponse.failedPolicies.push({
+        error: new Error('oh oh'),
+        packagePolicy: bulkUpdateResponse.updatedPolicies![0],
+      });
+      await callTurnOffPolicyProtections();
+
+      expect(logger.error).toHaveBeenCalledWith(
+        expect.stringContaining('Done. 1 out of 2 failed to update:')
+      );
     });
   });
 });

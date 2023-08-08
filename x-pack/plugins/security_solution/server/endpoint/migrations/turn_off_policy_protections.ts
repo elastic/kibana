@@ -77,7 +77,7 @@ export const turnOffPolicyProtections = async (
   } while (hasMoreData);
 
   if (updates.length > 0) {
-    log.info(`Found ${updates.length} policies that need updates`);
+    log.info(`Found ${updates.length} policies that need updates:\n${messages.join('\n')}`);
 
     const bulkUpdateResponse = await fleetServices.packagePolicy.bulkUpdate(
       internalSoClient,
@@ -92,18 +92,12 @@ export const turnOffPolicyProtections = async (
 
     if (bulkUpdateResponse.failedPolicies.length > 0) {
       log.error(
-        `Done. ${
-          bulkUpdateResponse.failedPolicies.length
-        } out of ${total} failed to update:\n${JSON.stringify(
-          bulkUpdateResponse.failedPolicies,
-          null,
-          2
-        )}`
+        `Done. ${bulkUpdateResponse.failedPolicies.length} out of ${
+          updates.length
+        } failed to update:\n${JSON.stringify(bulkUpdateResponse.failedPolicies, null, 2)}`
       );
     } else {
-      log.info(
-        `Done. The following ${updates.length} updates were applied:\n${messages.join('\n')}`
-      );
+      log.info(`Done. All updates applied successfully`);
     }
   } else {
     log.info(`Done. Checked ${total} policies and no updates needed`);
