@@ -113,6 +113,19 @@ const anomaliesCountClickedEvent: TelemetryEvent = {
   },
 };
 
+const breadCrumbClickedEvent: TelemetryEvent = {
+  eventType: TelemetryEventTypes.BreadcrumbClicked,
+  schema: {
+    title: {
+      type: 'keyword',
+      _meta: {
+        description: 'Breadcrumb title',
+        optional: false,
+      },
+    },
+  },
+};
+
 export const telemetryEvents = [
   alertsGroupingToggledEvent,
   alertsGroupingChangedEvent,
@@ -125,4 +138,5 @@ export const telemetryEvents = [
   anomaliesCountClickedEvent,
   dataQualityIndexCheckedEvent,
   dataQualityCheckAllClickedEvent,
+  breadCrumbClickedEvent,
 ];

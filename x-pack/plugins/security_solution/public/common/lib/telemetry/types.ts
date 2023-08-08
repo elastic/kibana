@@ -61,6 +61,10 @@ export interface ReportAnomaliesCountClickedParams {
   count: number;
 }
 
+export interface ReportBreadcrumbClickedParams {
+  title: string;
+}
+
 export type TelemetryEventParams =
   | ReportAlertsGroupingTelemetryEventParams
   | ReportEntityAnalyticsTelemetryEventParams
@@ -68,7 +72,8 @@ export type TelemetryEventParams =
   | ReportCellActionClickedParams
   | ReportAnomaliesCountClickedParams
   | ReportDataQualityIndexCheckedParams
-  | ReportDataQualityCheckAllClickedParams;
+  | ReportDataQualityCheckAllClickedParams
+  | ReportBreadcrumbClickedParams;
 
 export interface TelemetryClientStart {
   reportAlertsGroupingChanged(params: ReportAlertsGroupingChangedParams): void;
@@ -85,6 +90,7 @@ export interface TelemetryClientStart {
   reportAnomaliesCountClicked(params: ReportAnomaliesCountClickedParams): void;
   reportDataQualityIndexChecked(params: ReportDataQualityIndexCheckedParams): void;
   reportDataQualityCheckAllClicked(params: ReportDataQualityCheckAllClickedParams): void;
+  reportBreadcrumbClicked(params: ReportBreadcrumbClickedParams): void;
 }
 
 export type TelemetryEvent =
@@ -102,4 +108,8 @@ export type TelemetryEvent =
   | {
       eventType: TelemetryEventTypes.AnomaliesCountClicked;
       schema: RootSchema<ReportAnomaliesCountClickedParams>;
+    }
+  | {
+      eventType: TelemetryEventTypes.BreadcrumbClicked;
+      schema: RootSchema<ReportBreadcrumbClickedParams>;
     };

@@ -34,15 +34,13 @@ export enum TELEMETRY_EVENT {
   // Landing page - dashboard
   DASHBOARD = 'navigate_to_dashboard',
   CREATE_DASHBOARD = 'create_dashboard',
-
-  // Breadcrumbs
-  BREADCRUMB = 'breadcrumb_',
 }
 
 export enum TelemetryEventTypes {
   AlertsGroupingChanged = 'Alerts Grouping Changed',
   AlertsGroupingToggled = 'Alerts Grouping Toggled',
   AlertsGroupingTakeAction = 'Alerts Grouping Take Action',
+  BreadcrumbClicked = 'Breadcrumb Clicked',
   EntityDetailsClicked = 'Entity Details Clicked',
   EntityAlertsClicked = 'Entity Alerts Clicked',
   EntityRiskFiltered = 'Entity Risk Filtered',

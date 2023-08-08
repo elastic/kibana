@@ -19,6 +19,7 @@ import type {
   ReportAnomaliesCountClickedParams,
   ReportDataQualityIndexCheckedParams,
   ReportDataQualityCheckAllClickedParams,
+  ReportBreadcrumbClickedParams,
 } from './types';
 import { TelemetryEventTypes } from './constants';
 
@@ -81,5 +82,11 @@ export class TelemetryClient implements TelemetryClientStart {
 
   public reportDataQualityCheckAllClicked = (params: ReportDataQualityCheckAllClickedParams) => {
     this.analytics.reportEvent(TelemetryEventTypes.DataQualityCheckAllClicked, params);
+  };
+
+  public reportBreadcrumbClicked = ({ title }: ReportBreadcrumbClickedParams) => {
+    this.analytics.reportEvent(TelemetryEventTypes.BreadcrumbClicked, {
+      title,
+    });
   };
 }
