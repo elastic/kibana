@@ -1534,6 +1534,88 @@
       },
       {
         "parentPluginId": "alerting",
+        "id": "def-server.GetViewInAppRelativeUrlFnOpts",
+        "type": "Interface",
+        "tags": [],
+        "label": "GetViewInAppRelativeUrlFnOpts",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "alerting",
+            "scope": "server",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-server.GetViewInAppRelativeUrlFnOpts",
+            "text": "GetViewInAppRelativeUrlFnOpts"
+          },
+          "<Params>"
+        ],
+        "path": "x-pack/plugins/alerting/server/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "alerting",
+            "id": "def-server.GetViewInAppRelativeUrlFnOpts.rule",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "rule",
+            "description": [],
+            "signature": [
+              "Pick<",
+              {
+                "pluginId": "alerting",
+                "scope": "common",
+                "docId": "kibAlertingPluginApi",
+                "section": "def-common.SanitizedRule",
+                "text": "SanitizedRule"
+              },
+              "<Params>, \"id\"> & Omit<Partial<",
+              {
+                "pluginId": "alerting",
+                "scope": "common",
+                "docId": "kibAlertingPluginApi",
+                "section": "def-common.SanitizedRule",
+                "text": "SanitizedRule"
+              },
+              "<Params>>, \"viewInAppRelativeUrl\">"
+            ],
+            "path": "x-pack/plugins/alerting/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-server.GetViewInAppRelativeUrlFnOpts.start",
+            "type": "number",
+            "tags": [],
+            "label": "start",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/plugins/alerting/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-server.GetViewInAppRelativeUrlFnOpts.end",
+            "type": "number",
+            "tags": [],
+            "label": "end",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/plugins/alerting/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
         "id": "def-server.IRuleTypeAlerts",
         "type": "Interface",
         "tags": [],
