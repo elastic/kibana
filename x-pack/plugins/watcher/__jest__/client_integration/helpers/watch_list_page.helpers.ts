@@ -100,6 +100,7 @@ export type TestSubjects =
   | 'appTitle'
   | 'documentationLink'
   | 'watchesTable'
+  | 'watcherListSearchError'
   | 'cell'
   | 'row'
   | 'deleteWatchButton'

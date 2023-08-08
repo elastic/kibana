@@ -54,27 +54,27 @@ export function ErrorSampleContextualInsight({
           role: MessageRole.User,
           content: `I'm an SRE. I am looking at an exception and trying to understand what it means.
 
-          Your task is to describe what the error means and what it could be caused by.
-    
-          The error occurred on a service called ${serviceName}, which is a ${runtimeName} service written in ${languageName}. The
-          runtime version is ${runtimeVersion}.
-    
-          The request it occurred for is called ${transactionName}.
-    
-          ${
-            logStacktrace
-              ? `The log stacktrace:
-          ${logStacktrace}`
-              : ''
-          }
-    
-          ${
-            exceptionStacktrace
-              ? `The exception stacktrace:
-          ${exceptionStacktrace}`
-              : ''
-          }
-          `,
+Your task is to describe what the error means and what it could be caused by.
+
+The error occurred on a service called ${serviceName}, which is a ${runtimeName} service written in ${languageName}. The
+runtime version is ${runtimeVersion}.
+
+The request it occurred for is called ${transactionName}.
+
+${
+  logStacktrace
+    ? `The log stacktrace:
+${logStacktrace}`
+    : ''
+}
+
+${
+  exceptionStacktrace
+    ? `The exception stacktrace:
+${exceptionStacktrace}`
+    : ''
+}
+`,
         },
       },
     ];
