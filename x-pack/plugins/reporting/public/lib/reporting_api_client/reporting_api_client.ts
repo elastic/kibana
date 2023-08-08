@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import type { HttpFetchQuery } from '@kbn/core/public';
 import { HttpSetup, IUiSettingsClient } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
@@ -90,7 +91,7 @@ export class ReportingAPIClient implements IReportingAPI {
     });
 
     const href = `${path}?${searchParams}`;
-    console.log({href})
+    
     return href;
   }
 
@@ -98,18 +99,16 @@ export class ReportingAPIClient implements IReportingAPI {
    * Get the internal URL
    */
   public getReportURL(jobId: string) {
- 
     const downloadLink = this.http.basePath.prepend(
-      `${PUBLIC_ROUTES.JOBS.DOWNLOAD_PREFIX}/${jobId}`
+      `${INTERNAL_ROUTES.JOBS.DOWNLOAD_PREFIX}/${jobId}`
     );
-
+      console.log({downloadLink})
     return downloadLink;
   }
 
   public downloadReport(jobId: string) {
     const location = this.getReportURL(jobId);
-    console.log('\n\n\n\n\n location', location)
-    window.open(location);
+    return this.http.get(location, {headers: [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]})
   }
 
   public async deleteReport(jobId: string) {
