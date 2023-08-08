@@ -307,6 +307,7 @@ kibana_vars=(
     xpack.observability.unsafe.alertDetails.metrics.enabled
     xpack.observability.unsafe.alertDetails.logs.enabled
     xpack.observability.unsafe.alertDetails.uptime.enabled
+    xpack.observability.unsafe.alertDetails.observability.enabled
     xpack.observability.unsafe.thresholdRule.enabled
     xpack.observability.compositeSlo.enabled
     xpack.reporting.capture.browser.autoDownload

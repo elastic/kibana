@@ -31,7 +31,7 @@ export const useRiskScoreData = (data: TimelineEventsDetailsItem[]) => {
   const {
     data: hostRiskData,
     loading: hostRiskLoading,
-    isLicenseValid: isHostLicenseValid,
+    isAuthorized: isHostRiskScoreAuthorized,
     isModuleEnabled: isHostRiskModuleEnabled,
   } = useRiskScore({
     filterQuery: hostNameFilterQuery,
@@ -57,7 +57,7 @@ export const useRiskScoreData = (data: TimelineEventsDetailsItem[]) => {
   const {
     data: userRiskData,
     loading: userRiskLoading,
-    isLicenseValid: isUserLicenseValid,
+    isAuthorized: isUserRiskScoreAuthorized,
     isModuleEnabled: isUserRiskModuleEnabled,
   } = useRiskScore({
     filterQuery: userNameFilterQuery,
@@ -75,5 +75,9 @@ export const useRiskScoreData = (data: TimelineEventsDetailsItem[]) => {
     [userRiskLoading, isUserRiskModuleEnabled, userRiskData]
   );
 
-  return { userRisk, hostRisk, isLicenseValid: isHostLicenseValid && isUserLicenseValid };
+  return {
+    userRisk,
+    hostRisk,
+    isAuthorized: isHostRiskScoreAuthorized && isUserRiskScoreAuthorized,
+  };
 };

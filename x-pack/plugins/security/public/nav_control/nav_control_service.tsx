@@ -29,7 +29,6 @@ interface SetupDeps {
   securityLicense: SecurityLicense;
   logoutUrl: string;
   securityApiClients: SecurityApiClients;
-  showNavLinks?: boolean;
 }
 
 interface StartDeps {
@@ -55,18 +54,16 @@ export class SecurityNavControlService {
   private securityApiClients!: SecurityApiClients;
 
   private navControlRegistered!: boolean;
-  private showNavLinks!: boolean;
 
   private securityFeaturesSubscription?: Subscription;
 
   private readonly stop$ = new ReplaySubject<void>(1);
   private userMenuLinks$ = new BehaviorSubject<UserMenuLink[]>([]);
 
-  public setup({ securityLicense, logoutUrl, securityApiClients, showNavLinks = true }: SetupDeps) {
+  public setup({ securityLicense, logoutUrl, securityApiClients }: SetupDeps) {
     this.securityLicense = securityLicense;
     this.logoutUrl = logoutUrl;
     this.securityApiClients = securityApiClients;
-    this.showNavLinks = showNavLinks;
   }
 
   public start({ core, authc }: StartDeps): SecurityNavControlServiceStart {
@@ -75,7 +72,7 @@ export class SecurityNavControlService {
         const isAnonymousPath = core.http.anonymousPaths.isAnonymous(window.location.pathname);
 
         const shouldRegisterNavControl =
-          this.showNavLinks && !isAnonymousPath && showLinks && !this.navControlRegistered;
+          !isAnonymousPath && showLinks && !this.navControlRegistered;
         if (shouldRegisterNavControl) {
           this.registerSecurityNavControl(core, authc);
         }
@@ -121,8 +118,9 @@ export class SecurityNavControlService {
 
   private registerSecurityNavControl(core: CoreStart, authc: AuthenticationServiceSetup) {
     const { theme$ } = core.theme;
+
     core.chrome.navControls.registerRight({
-      order: 2000,
+      order: 4000,
       mount: (element: HTMLElement) => {
         ReactDOM.render(
           <Providers

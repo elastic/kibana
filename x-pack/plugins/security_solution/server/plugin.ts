@@ -170,10 +170,6 @@ export class Plugin implements ISecuritySolutionPlugin {
         .then(([{ elasticsearch }]) => elasticsearch.client.asInternalUser),
     });
 
-    if (experimentalFeatures.riskScoringPersistence) {
-      this.riskEngineDataClient.initializeResources({});
-    }
-
     const requestContextFactory = new RequestContextFactory({
       config,
       logger,
@@ -525,6 +521,7 @@ export class Plugin implements ISecuritySolutionPlugin {
         this.endpointContext
       ),
       createFleetActionsClient,
+      esClient: core.elasticsearch.client.asInternalUser,
     });
 
     this.telemetryReceiver.start(

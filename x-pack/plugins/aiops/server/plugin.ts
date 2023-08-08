@@ -18,7 +18,9 @@ import {
   AiopsPluginSetupDeps,
   AiopsPluginStartDeps,
 } from './types';
+
 import { defineLogRateAnalysisRoute } from './routes';
+import { defineLogCategorizationRoutes } from './routes/log_categorization';
 
 export class AiopsPlugin
   implements Plugin<AiopsPluginSetup, AiopsPluginStart, AiopsPluginSetupDeps, AiopsPluginStartDeps>
@@ -49,6 +51,7 @@ export class AiopsPlugin
     // Register server side APIs
     core.getStartServices().then(([coreStart, depsStart]) => {
       defineLogRateAnalysisRoute(router, aiopsLicense, this.logger, coreStart);
+      defineLogCategorizationRoutes(router, aiopsLicense);
     });
 
     return {};

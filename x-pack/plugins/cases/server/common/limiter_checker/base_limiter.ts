@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import type { CommentRequest, CommentType } from '../../../common/api';
+import type { AttachmentType } from '../../../common/types/domain';
+import type { AttachmentRequest } from '../../../common/types/api';
 import type { Limiter } from './types';
 
 interface LimiterParams {
   limit: number;
-  attachmentType: CommentType;
-  field: string;
+  attachmentType: AttachmentType | AttachmentType[];
+  field?: string;
   attachmentNoun: string;
 }
 
@@ -25,7 +26,7 @@ export abstract class BaseLimiter implements Limiter {
   }
 
   public abstract countOfItemsWithinCase(caseId: string): Promise<number>;
-  public abstract countOfItemsInRequest(requests: CommentRequest[]): number;
+  public abstract countOfItemsInRequest(requests: AttachmentRequest[]): number;
 }
 
 const makeErrorMessage = (limit: number, noun: string) => {

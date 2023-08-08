@@ -62,7 +62,6 @@ export const WatchListPage = () => {
     pageIndex: 0,
     pageSize: PAGINATION.initialPageSize,
   });
-  const [query, setQuery] = useState('');
 
   useEffect(() => {
     setBreadcrumbs([listBreadcrumb]);
@@ -447,14 +446,7 @@ export const WatchListPage = () => {
           : '',
     };
 
-    const handleOnChange = (search: { queryText: string }) => {
-      setQuery(search.queryText);
-      return true;
-    };
-
     const searchConfig = {
-      query,
-      onChange: handleOnChange,
       box: {
         incremental: true,
       },

@@ -7,9 +7,9 @@
 
 import { validate } from '@kbn/securitysolution-io-ts-utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { acknowledgeSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { LIST_INDEX } from '@kbn/securitysolution-list-constants';
 
+import { createListIndexResponse } from '../../common/api';
 import type { ListsPluginRouter } from '../types';
 
 import { buildSiemResponse } from './utils';
@@ -83,7 +83,7 @@ export const createListIndexRoute = (router: ListsPluginRouter): void => {
             await lists.createListItemBootStrapIndex();
           }
 
-          const [validated, errors] = validate({ acknowledged: true }, acknowledgeSchema);
+          const [validated, errors] = validate({ acknowledged: true }, createListIndexResponse);
           if (errors != null) {
             return siemResponse.error({ body: errors, statusCode: 500 });
           } else {

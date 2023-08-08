@@ -6,10 +6,10 @@
  */
 
 import * as rt from 'io-ts';
-import { SettingsRt } from '../../../../api';
+import { CaseSettingsRt } from '../../case/v1';
 import { UserActionTypes } from '../action/v1';
 
-export const SettingsUserActionPayloadRt = rt.strict({ settings: SettingsRt });
+export const SettingsUserActionPayloadRt = rt.strict({ settings: CaseSettingsRt });
 
 export const SettingsUserActionRt = rt.strict({
   type: rt.literal(UserActionTypes.settings),

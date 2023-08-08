@@ -33,8 +33,8 @@ import { globalUrlParamReducer, initialGlobalUrlParam } from './global_url_param
 import { groupsReducer } from './grouping/reducer';
 import type { GroupState } from './grouping/types';
 import { analyzerReducer } from '../../resolver/store/reducer';
-import type { AnalyzerOuterState } from '../../resolver/types';
 import { securitySolutionDiscoverReducer } from './discover/reducer';
+import type { AnalyzerState } from '../../resolver/types';
 
 enableMapSet();
 
@@ -64,7 +64,7 @@ export const createInitialState = (
   },
   dataTableState: DataTableState,
   groupsState: GroupState,
-  analyzerState: AnalyzerOuterState
+  analyzerState: AnalyzerState
 ): State => {
   const initialPatterns = {
     [SourcererScopeName.default]: getScopePatternListSelection(

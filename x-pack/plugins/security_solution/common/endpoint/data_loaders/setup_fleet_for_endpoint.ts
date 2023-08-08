@@ -153,7 +153,13 @@ export const installOrUpgradeEndpointFleetPackage = async (
     return bulkResp[0] as BulkInstallPackageInfo;
   };
 
-  return retryOnError(updatePackages, ['no_shard_available_action_exception'], logger, 5, 10000)
+  return retryOnError(
+    updatePackages,
+    ['no_shard_available_action_exception', 'illegal_index_shard_state_exception'],
+    logger,
+    5,
+    10000
+  )
     .then((result) => {
       usageRecord.set('success');
 
@@ -161,6 +167,7 @@ export const installOrUpgradeEndpointFleetPackage = async (
     })
     .catch((err) => {
       usageRecord.set('failure', err.message);
+      usageTracker.dump(logger);
 
       throw err;
     });

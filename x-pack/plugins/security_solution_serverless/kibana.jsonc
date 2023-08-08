@@ -18,7 +18,8 @@
       "security",
       "securitySolution",
       "serverless",
-      "taskManager"
+      "taskManager",
+      "cloud"
     ],
     "optionalPlugins": [
       "securitySolutionEss"

@@ -136,6 +136,11 @@ describe('useDashboardListingTable', () => {
       setPageDataTestSubject: expect.any(Function),
       title: 'Dashboard List',
       urlStateEnabled: false,
+      contentEditor: {
+        onSave: expect.any(Function),
+        isReadonly: false,
+        customValidators: expect.any(Object),
+      },
     };
 
     expect(tableListViewTableProps).toEqual(expectedProps);

@@ -13,12 +13,12 @@ import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/observability-plugin/
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { createIndexConnector, createRule } from '../helpers/alerting_api_helper';
 import { createDataView, deleteDataView } from '../helpers/data_view';
-import { waitForAlertInIndex, waitForRuleStatus } from '../helpers/alerting_wait_for_helpers';
 
 export default function ({ getService }: FtrProviderContext) {
   const esClient = getService('es');
   const supertest = getService('supertest');
   const esDeleteAllIndices = getService('esDeleteAllIndices');
+  const alertingApi = getService('alertingApi');
   const logger = getService('log');
 
   describe('Threshold rule - AVG - PCT - FIRED', () => {
@@ -40,8 +40,14 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     after(async () => {
-      await supertest.delete(`/api/alerting/rule/${ruleId}`).set('kbn-xsrf', 'foo');
-      await supertest.delete(`/api/actions/connector/${actionId}`).set('kbn-xsrf', 'foo');
+      await supertest
+        .delete(`/api/alerting/rule/${ruleId}`)
+        .set('kbn-xsrf', 'foo')
+        .set('x-elastic-internal-origin', 'foo');
+      await supertest
+        .delete(`/api/actions/connector/${actionId}`)
+        .set('kbn-xsrf', 'foo')
+        .set('x-elastic-internal-origin', 'foo');
       await esClient.deleteByQuery({
         index: THRESHOLD_RULE_ALERT_INDEX,
         query: { term: { 'kibana.alert.rule.uuid': ruleId } },
@@ -119,17 +125,15 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should be active', async () => {
-        const executionStatus = await waitForRuleStatus({
-          id: ruleId,
+        const executionStatus = await alertingApi.waitForRuleStatus({
+          ruleId,
           expectedStatus: 'active',
-          supertest,
         });
-        expect(executionStatus.status).to.be('active');
+        expect(executionStatus).to.be('active');
       });
 
       it('should set correct information in the alert document', async () => {
-        const resp = await waitForAlertInIndex({
-          esClient,
+        const resp = await alertingApi.waitForAlertInIndex({
           indexName: THRESHOLD_RULE_ALERT_INDEX,
           ruleId,
         });

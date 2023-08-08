@@ -8,9 +8,9 @@
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { ScopedHistory } from '@kbn/core/public';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import React, { useEffect, useMemo, useState } from 'react';
+import { css } from '@emotion/react';
 import { DiscoverMainRoute } from '../../application/main';
 import type { DiscoverServices } from '../../build_services';
 import type { CustomizationCallback } from '../../customizations';
@@ -32,15 +32,15 @@ export interface DiscoverContainerInternalProps {
   isLoading?: boolean;
 }
 
-const DiscoverContainerWrapper = euiStyled(EuiFlexGroup)`
+const discoverContainerWrapperCss = css`
   width: 100%;
   height: 100%;
 
   // override the embedded discover page height
   // to fit in the container
   .dscPage {
-    height: 100%
-}
+    height: 100%;
+  }
 `;
 
 export const DiscoverContainerInternal = ({
@@ -71,14 +71,17 @@ export const DiscoverContainerInternal = ({
 
   if (!initialized || !services || isLoading) {
     return (
-      <DiscoverContainerWrapper>
+      <EuiFlexGroup css={discoverContainerWrapperCss}>
         <LoadingIndicator type="spinner" />
-      </DiscoverContainerWrapper>
+      </EuiFlexGroup>
     );
   }
 
   return (
-    <DiscoverContainerWrapper data-test-subj="data-container-internal-wrapper">
+    <EuiFlexGroup
+      css={discoverContainerWrapperCss}
+      data-test-subj="discover-container-internal-wrapper"
+    >
       <EuiFlexItem>
         <KibanaContextProvider services={services}>
           <DiscoverMainRoute
@@ -88,7 +91,7 @@ export const DiscoverContainerInternal = ({
           />
         </KibanaContextProvider>
       </EuiFlexItem>
-    </DiscoverContainerWrapper>
+    </EuiFlexGroup>
   );
 };
 

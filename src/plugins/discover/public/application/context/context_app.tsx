@@ -17,7 +17,7 @@ import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { generateFilters } from '@kbn/data-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
-import { DOC_TABLE_LEGACY, SEARCH_FIELDS_FROM_SOURCE } from '../../../common';
+import { DOC_TABLE_LEGACY, SEARCH_FIELDS_FROM_SOURCE } from '@kbn/discover-utils';
 import { ContextErrorMessage } from './components/context_error_message';
 import { LoadingStatus } from './services/context_query_state';
 import { AppState, GlobalState, isEqualFilters } from './services/context_state';

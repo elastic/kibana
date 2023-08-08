@@ -87,3 +87,11 @@ Body::      A JSON payload sent to the OpenAI API URL. For example:
 === Connector networking configuration
 
 Use the <<action-settings, Action configuration settings>> to customize connector networking configurations, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
+
+[float]
+[[gen-ai-connector-token-dashboard]]
+=== Token usage dashboard
+
+Once you've created a Generative AI connector, you can monitor its token usage using the *Generative AI Token Usage* dashboard. Select the connector in *{stack-manage-app}* > *{connectors-ui}* to view its details, then click the *View OpenAI Usage Dashboard for "_<Name>_" Connector* link to open the dashboard.
+
+NOTE: To view the dashboard, you need at least `read` and `view_index_metadata` privileges for the `.kibana-event-log-*` index and the `Read` feature privilege for {kib}. You can set up a role with these minimum privileges and assign it to non-admin users who need to view this dashboard.

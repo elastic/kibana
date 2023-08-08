@@ -7,7 +7,7 @@
 
 import type { Store, AnyAction, Reducer } from 'redux';
 import { createStore } from 'redux';
-import type { AnalyzerState } from '../../types';
+import type { AnalyzerById } from '../../types';
 import { cameraReducer } from './reducer';
 import { inverseProjectionMatrix } from './selectors';
 import { applyMatrix3 } from '../../models/vector2';
@@ -16,25 +16,23 @@ import { EMPTY_RESOLVER } from '../helpers';
 import { userSetZoomLevel, userSetPositionOfCamera, userSetRasterSize } from './action';
 
 describe('inverseProjectionMatrix', () => {
-  let store: Store<AnalyzerState, AnyAction>;
+  let store: Store<AnalyzerById, AnyAction>;
   let compare: (worldPosition: [number, number], expectedRasterPosition: [number, number]) => void;
   const id = 'test-id';
   beforeEach(() => {
-    const testReducer: Reducer<AnalyzerState, AnyAction> = (
+    const testReducer: Reducer<AnalyzerById, AnyAction> = (
       state = {
-        analyzerById: {
-          [id]: EMPTY_RESOLVER,
-        },
+        [id]: EMPTY_RESOLVER,
       },
       action
-    ): AnalyzerState => cameraReducer(state, action);
+    ): AnalyzerById => cameraReducer(state, action);
     store = createStore(testReducer, undefined);
     compare = (rasterPosition: [number, number], expectedWorldPosition: [number, number]) => {
       // time isn't really relevant as we aren't testing animation
       const time = 0;
       const [worldX, worldY] = applyMatrix3(
         rasterPosition,
-        inverseProjectionMatrix(store.getState().analyzerById[id].camera)(time)
+        inverseProjectionMatrix(store.getState()[id].camera)(time)
       );
       expect(worldX).toBeCloseTo(expectedWorldPosition[0]);
       expect(worldY).toBeCloseTo(expectedWorldPosition[1]);

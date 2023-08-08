@@ -9,14 +9,23 @@ import React, { FC } from 'react';
 
 import { RectAnnotation } from '@elastic/charts';
 import { useEuiTheme } from '@elastic/eui';
+import { RectAnnotationSpec } from '@elastic/charts/dist/chart_types/xy_chart/utils/specs';
 
 interface BrushAnnotationProps {
   id: string;
   min: number;
   max: number;
+  style?: RectAnnotationSpec['style'];
 }
 
-export const DualBrushAnnotation: FC<BrushAnnotationProps> = ({ id, min, max }) => {
+/**
+ * DualBrushAnnotation React Component
+ * Dual brush annotation component that overlays the document count chart
+ * @type {FC<BrushAnnotationProps>}
+ * @param props - `BrushAnnotationProps` component props
+ * @returns {React.ReactElement} The DualBrushAnnotation component.
+ */
+export const DualBrushAnnotation: FC<BrushAnnotationProps> = ({ id, min, max, style }) => {
   const { euiTheme } = useEuiTheme();
   const { colors } = euiTheme;
 
@@ -34,12 +43,14 @@ export const DualBrushAnnotation: FC<BrushAnnotationProps> = ({ id, min, max }) 
         },
       ]}
       id={`rect_brush_annotation_${id}`}
-      style={{
-        strokeWidth: 0,
-        stroke: colors.lightShade,
-        fill: colors.lightShade,
-        opacity: 0.5,
-      }}
+      style={
+        style ?? {
+          strokeWidth: 0,
+          stroke: colors.lightShade,
+          fill: colors.lightShade,
+          opacity: 0.5,
+        }
+      }
       hideTooltips={true}
     />
   );

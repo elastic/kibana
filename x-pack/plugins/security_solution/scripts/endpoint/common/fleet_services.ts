@@ -279,7 +279,8 @@ export const getAgentDownloadUrl = async (
 ): Promise<string> => {
   const agentVersion = closestMatch ? await getLatestAgentDownloadVersion(version, log) : version;
   const downloadArch =
-    { arm64: 'arm64', x64: 'x86_64' }[process.arch] ?? `UNSUPPORTED_ARCHITECTURE_${process.arch}`;
+    { arm64: 'arm64', x64: 'x86_64' }[process.arch as string] ??
+    `UNSUPPORTED_ARCHITECTURE_${process.arch}`;
   const agentFile = `elastic-agent-${agentVersion}-linux-${downloadArch}.tar.gz`;
   const artifactSearchUrl = `https://artifacts-api.elastic.co/v1/search/${agentVersion}/${agentFile}`;
 

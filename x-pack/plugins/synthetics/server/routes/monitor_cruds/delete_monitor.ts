@@ -68,7 +68,7 @@ export const deleteMonitor = async ({
   routeContext: RouteContext;
   monitorId: string;
 }) => {
-  const { spaceId, savedObjectsClient, server, syntheticsMonitorClient, request } = routeContext;
+  const { spaceId, savedObjectsClient, server, syntheticsMonitorClient } = routeContext;
   const { logger, telemetry, stackVersion } = server;
 
   const { monitor, monitorWithSecret } = await getMonitorToDelete(
@@ -92,7 +92,6 @@ export const deleteMonitor = async ({
         /* Type cast encrypted saved objects to decrypted saved objects for delete flow only.
          * Deletion does not require all monitor fields */
       ] as SyntheticsMonitorWithId[],
-      request,
       savedObjectsClient,
       spaceId
     );

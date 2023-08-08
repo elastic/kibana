@@ -10,27 +10,19 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { TimeRange } from '@kbn/es-query';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
-import { OverlayRef, OverlayStart, ThemeServiceStart } from '@kbn/core/public';
+import { OverlayStart, ThemeServiceStart } from '@kbn/core/public';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 
-import { CustomizePanelEditor } from './customize_panel_editor';
-import { ViewMode, CommonlyUsedRange } from '../../../lib/types';
 import { IEmbeddable, Embeddable, EmbeddableInput, EmbeddableOutput } from '../../..';
+import { ViewMode, CommonlyUsedRange } from '../../../lib/types';
+import { tracksOverlays } from '../track_overlays';
+import { CustomizePanelEditor } from './customize_panel_editor';
 
 export const ACTION_CUSTOMIZE_PANEL = 'ACTION_CUSTOMIZE_PANEL';
 
 const VISUALIZE_EMBEDDABLE_TYPE = 'visualization';
 
 type VisualizeEmbeddable = IEmbeddable<{ id: string }, EmbeddableOutput & { visTypeName: string }>;
-
-interface TracksOverlays {
-  openOverlay: (ref: OverlayRef) => void;
-  clearOverlays: () => void;
-}
-
-function tracksOverlays(root: unknown): root is TracksOverlays {
-  return Boolean((root as TracksOverlays).openOverlay && (root as TracksOverlays).clearOverlays);
-}
 
 function isVisualizeEmbeddable(
   embeddable: IEmbeddable | VisualizeEmbeddable

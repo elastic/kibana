@@ -42,6 +42,7 @@ import {
   TRANSACTION_RESULT,
   TRANSACTION_TYPE,
   USER_AGENT_ORIGINAL,
+  SPAN_DESTINATION_SERVICE_RESOURCE,
 } from '../../../../common/es_fields/apm';
 import {
   APM_SERVICE_GROUP_SAVED_OBJECT_TYPE,
@@ -802,6 +803,32 @@ export const tasks: TelemetryTask[] = [
         },
       });
 
+      const spanDestinationServiceResourceCount = (
+        await telemetryClient.search({
+          index: indices.transaction,
+          body: {
+            track_total_hits: false,
+            size: 0,
+            timeout,
+            query: {
+              bool: {
+                filter: [
+                  { term: { [PROCESSOR_EVENT]: ProcessorEvent.span } },
+                  range1d,
+                ],
+              },
+            },
+          },
+          aggs: {
+            span_destination_service_resource: {
+              cardinality: {
+                field: SPAN_DESTINATION_SERVICE_RESOURCE,
+              },
+            },
+          },
+        })
+      ).aggregations?.span_destination_service_resource.value;
+
       return {
         counts: {
           max_error_groups_per_service: {
@@ -822,6 +849,9 @@ export const tasks: TelemetryTask[] = [
             '1d':
               servicesAndEnvironmentsCount.aggregations?.service_environments
                 .value || 0,
+          },
+          span_destination_service_resource: {
+            '1d': spanDestinationServiceResourceCount || 0,
           },
         },
       };

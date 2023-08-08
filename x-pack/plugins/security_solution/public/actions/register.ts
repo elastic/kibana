@@ -105,7 +105,7 @@ const registerCellActions = (
     filterOut: createFilterOutCellActionFactory({ store, services }),
     addToTimeline: createAddToTimelineCellActionFactory({ store, services }),
     investigateInNewTimeline: createInvestigateInNewTimelineCellActionFactory({ store, services }),
-    showTopN: createShowTopNCellActionFactory({ store, history, services }),
+    showTopN: createShowTopNCellActionFactory({ services }),
     copyToClipboard: createCopyToClipboardCellActionFactory({ services }),
     toggleColumn: createToggleColumnCellActionFactory({ store }),
   };

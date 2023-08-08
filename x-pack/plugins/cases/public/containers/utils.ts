@@ -11,29 +11,37 @@ import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 
 import type { ToastInputFields } from '@kbn/core/public';
-import type { CaseUserActionStatsResponse } from '../../common/types/api';
-import type { Configuration, Configurations, UserActions } from '../../common/types/domain';
-import { ConfigurationRt, ConfigurationsRt, UserActionsRt } from '../../common/types/domain';
-import { NO_ASSIGNEES_FILTERING_KEYWORD } from '../../common/constants';
+import {
+  AttachmentType,
+  CaseRt,
+  CasesRt,
+  ConfigurationRt,
+  ConfigurationsRt,
+  UserActionsRt,
+} from '../../common/types/domain';
 import type {
   CasePatchRequest,
   CaseResolveResponse,
+  CaseUserActionStatsResponse,
   SingleCaseMetricsResponse,
-  User,
+} from '../../common/types/api';
+import {
+  CaseResolveResponseRt,
+  CaseUserActionStatsResponseRt,
+  SingleCaseMetricsResponseRt,
+} from '../../common/types/api';
+import type {
   Case,
   Cases,
-} from '../../common/api';
-import {
-  CaseRt,
-  CasesRt,
-  throwErrors,
-  CommentType,
-  CaseResolveResponseRt,
-  SingleCaseMetricsResponseRt,
-} from '../../common/api';
+  Configuration,
+  Configurations,
+  User,
+  UserActions,
+} from '../../common/types/domain';
+import { NO_ASSIGNEES_FILTERING_KEYWORD } from '../../common/constants';
+import { throwErrors } from '../../common/api';
 import type { CaseUI, FilterOptions, UpdateByKey } from './types';
 import * as i18n from './translations';
-import { CaseUserActionStatsResponseRt } from '../../common/types/api';
 
 export const getTypedPayload = <T>(a: unknown): T => a as T;
 
@@ -110,7 +118,7 @@ export const createUpdateSuccessToaster = (
   value: UpdateByKey['updateValue']
 ): ToastInputFields => {
   const caseHasAlerts = caseBeforeUpdate.comments.some(
-    (comment) => comment.type === CommentType.alert
+    (comment) => comment.type === AttachmentType.alert
   );
 
   const toast: ToastInputFields = {

@@ -11,7 +11,7 @@ import { MarkdownSimple, toMountPoint, wrapWithTheme } from '@kbn/kibana-react-p
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { SortDirection } from '@kbn/data-plugin/public';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
-import { CONTEXT_TIE_BREAKER_FIELDS_SETTING } from '../../../../common';
+import { CONTEXT_TIE_BREAKER_FIELDS_SETTING } from '@kbn/discover-utils';
 import { fetchAnchor } from '../services/anchor';
 import { fetchSurroundingDocs, SurrDocType } from '../services/context';
 import {
