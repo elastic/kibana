@@ -115,7 +115,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             <EuiFlexGroup
               direction="column"
               gutterSize="m"
-              data-test-subj="productCard-resourceLinks"
+              data-test-subj="productCard-rightPanelItems"
             >
               {rightPanelItems.map((rightPanelItem) => {
                 return <EuiFlexItem>{rightPanelItem}</EuiFlexItem>;

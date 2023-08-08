@@ -16,9 +16,8 @@ import { ErrorStateCallout } from '../../../shared/error_state';
 import { SetupGuideCta } from '../setup_guide';
 import { TrialCallout } from '../trial_callout';
 
-import { BehavioralAnalyticsProductCard } from './behavioral_analytics_product_card';
 import { ElasticsearchProductCard } from './elasticsearch_product_card';
-import { SearchApplicationsProductCard } from './search_applications_product_card';
+import { EnterpriseSearchProductCard } from './enterprise_search_product_card';
 
 import { ProductSelector } from '.';
 
@@ -28,8 +27,7 @@ describe('ProductSelector', () => {
     const wrapper = shallow(<ProductSelector />);
 
     expect(wrapper.find(ElasticsearchProductCard)).toHaveLength(1);
-    expect(wrapper.find(SearchApplicationsProductCard)).toHaveLength(1);
-    expect(wrapper.find(BehavioralAnalyticsProductCard)).toHaveLength(1);
+    expect(wrapper.find(EnterpriseSearchProductCard)).toHaveLength(1);
     expect(wrapper.find(SetupGuideCta)).toHaveLength(1);
   });
 
@@ -66,8 +64,7 @@ describe('ProductSelector', () => {
       const wrapper = shallow(<ProductSelector />);
 
       expect(wrapper.find(ElasticsearchProductCard)).toHaveLength(1);
-      expect(wrapper.find(SearchApplicationsProductCard)).toHaveLength(1);
-      expect(wrapper.find(BehavioralAnalyticsProductCard)).toHaveLength(1);
+      expect(wrapper.find(EnterpriseSearchProductCard)).toHaveLength(1);
       expect(wrapper.find(SetupGuideCta)).toHaveLength(0);
     });
   });
