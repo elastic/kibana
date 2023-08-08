@@ -188,14 +188,14 @@ export function App({
       ) {
         return actions.confirm(
           i18n.translate('xpack.lens.app.unsavedWorkMessage', {
-            defaultMessage: 'Leave Lens with unsaved work?',
+            defaultMessage: 'Leave with unsaved changes?',
           }),
           i18n.translate('xpack.lens.app.unsavedWorkTitle', {
             defaultMessage: 'Unsaved changes',
           }),
           undefined,
           i18n.translate('xpack.lens.app.unsavedWorkConfirmBtn', {
-            defaultMessage: 'Discard changes',
+            defaultMessage: 'Discard',
           }),
           'danger'
         );
