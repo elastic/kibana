@@ -76,8 +76,15 @@ describe('<WatchListPage />', () => {
           testBed.component.update();
         });
 
-        // TODO unskip once https://github.com/elastic/kibana/pull/163297 is merged
-        test.skip('should retain the search query', async () => {
+        test('should show error callout if search is invalid', async () => {
+          const { exists, actions } = testBed;
+
+          await actions.searchWatches('or');
+
+          expect(exists('watcherListSearchError')).toBe(true);
+        });
+
+        test('should retain the search query', async () => {
           const { table, actions } = testBed;
 
           await actions.searchWatches(watch1.name);
