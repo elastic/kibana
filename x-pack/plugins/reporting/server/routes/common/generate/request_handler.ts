@@ -18,11 +18,7 @@ import type { ReportingCore } from '../../..';
 import { PUBLIC_ROUTES } from '../../../../common/constants';
 import { checkParamsVersion } from '../../../lib';
 import { Report } from '../../../lib/store';
-import type {
-  BaseParams,
-  ReportingJobResponse,
-  ReportingUser,
-} from '../../../types';
+import type { BaseParams, ReportingJobResponse, ReportingUser } from '../../../types';
 
 export const handleUnavailable = (res: KibanaResponseFactory) => {
   return res.custom({ statusCode: 503, body: 'Not Available' });

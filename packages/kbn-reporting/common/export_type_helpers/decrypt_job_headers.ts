@@ -30,14 +30,11 @@ export const decryptJobHeaders = async (
     logger.error(err);
 
     throw new Error(
-      i18n.translate(
-        'reporting.common.failedToDecryptReportJobDataErrorMessage',
-        {
-          defaultMessage:
-            'Failed to decrypt report job data. Please ensure that {encryptionKey} is set and re-generate this report. {err}',
-          values: { encryptionKey: 'reporting.common.encryptionKey', err: err.toString() },
-        }
-      )
+      i18n.translate('reporting.common.failedToDecryptReportJobDataErrorMessage', {
+        defaultMessage:
+          'Failed to decrypt report job data. Please ensure that {encryptionKey} is set and re-generate this report. {err}',
+        values: { encryptionKey: 'reporting.common.encryptionKey', err: err.toString() },
+      })
     );
   }
 };
