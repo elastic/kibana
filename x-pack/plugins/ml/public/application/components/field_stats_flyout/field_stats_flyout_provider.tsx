@@ -25,7 +25,15 @@ export const FieldStatsFlyoutProvider: FC<{
   fieldStatsServices: FieldStatsServices;
   timeRangeMs?: TimeRangeMs;
   dslQuery?: FieldStatsProps['dslQuery'];
-}> = ({ dataView, fieldStatsServices, timeRangeMs, dslQuery, children }) => {
+  disablePopulatedFields?: boolean;
+}> = ({
+  dataView,
+  fieldStatsServices,
+  timeRangeMs,
+  dslQuery,
+  disablePopulatedFields = false,
+  children,
+}) => {
   const {
     services: {
       data: { search },
@@ -43,6 +51,7 @@ export const FieldStatsFlyoutProvider: FC<{
   const [populatedFields$] = useState(new BehaviorSubject<Set<string>>(new Set()));
 
   useEffect(() => {
+    if (disablePopulatedFields) return;
     const abortController = new AbortController();
 
     const queryAndRunTimeMappings = getMergedSampleDocsForPopulatedFieldsQuery({
