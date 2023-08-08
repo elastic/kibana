@@ -15,6 +15,7 @@ import {
   EuiIcon,
   EuiLink,
   EuiPageContent_Deprecated as EuiPageContent,
+  EuiCallOut,
   EuiSpacer,
   EuiText,
   EuiToolTip,
@@ -55,6 +56,7 @@ export const WatchListPage = () => {
     links: { watcherGettingStartedUrl },
   } = useAppContext();
   const [query, setQuery] = useState('');
+  const [queryError, setQueryError] = useState<string | null>(null);
 
   const [selection, setSelection] = useState([]);
   const [watchesToDelete, setWatchesToDelete] = useState<string[]>([]);
@@ -449,9 +451,12 @@ export const WatchListPage = () => {
           : '',
     };
 
-    const handleOnChange = ({ queryText, error: queryError }: EuiSearchBarOnChangeArgs) => {
-      if (!queryError) {
+    const handleOnChange = ({ queryText, error: searchError }: EuiSearchBarOnChangeArgs) => {
+      if (!searchError) {
         setQuery(queryText);
+        setQueryError(null);
+      } else {
+        setQueryError(searchError.message);
       }
     };
 
@@ -509,6 +514,25 @@ export const WatchListPage = () => {
           }}
           selection={selectionConfig}
           isSelectable={true}
+          childrenBetween={
+            queryError && (
+              <>
+                <EuiCallOut
+                  data-test-subj="watcherListSearchError"
+                  iconType="warning"
+                  color="danger"
+                  title={
+                    <FormattedMessage
+                      id="xpack.watcher.sections.watchList.watchTable.errorOnSearch"
+                      defaultMessage="Invalid search: {queryError}"
+                      values={{ queryError }}
+                    />
+                  }
+                />
+                <EuiSpacer />
+              </>
+            )
+          }
           message={
             <FormattedMessage
               id="xpack.watcher.sections.watchList.watchTable.noWatchesMessage"
