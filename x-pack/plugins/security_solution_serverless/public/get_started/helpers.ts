@@ -23,6 +23,9 @@ export const isStepActive = (step: Step, activeProducts: Set<ProductLine>) =>
   !step.productLineRequired ||
   step.productLineRequired?.some((condition) => activeProducts.has(condition));
 
+export const getActiveSteps = (steps: Step[] | undefined, activeProducts: Set<ProductLine>) =>
+  steps?.filter((step) => isStepActive(step, activeProducts));
+
 const getfinishedActiveSteps = (
   finishedStepIds: StepId[] | undefined,
   activeStepIds: StepId[] | undefined
@@ -59,7 +62,7 @@ export const getStepsByActiveProduct = ({
   sectionId: SectionId;
 }) => {
   const card = getCard({ cardId, sectionId });
-  const steps = card?.steps?.filter((step) => isStepActive(step, activeProducts));
+  const steps = getActiveSteps(card?.steps, activeProducts);
 
   return steps;
 };
@@ -73,7 +76,7 @@ export const setupActiveSections = (
         (acc, section) => {
           const activeCards =
             section.cards?.reduce((accCards, card) => {
-              const activeSteps = card.steps?.filter((step) => isStepActive(step, activeProducts));
+              const activeSteps = getActiveSteps(card.steps, activeProducts);
               const activeStepIds = activeSteps?.map(({ id }) => id);
               const stepsDone: Set<StepId> = getfinishedActiveSteps(
                 finishedSteps[card.id] ? [...finishedSteps[card.id]] : undefined,
