@@ -32,7 +32,7 @@ import { useApmRouter } from '../../../hooks/use_apm_router';
 import { useProfilingPlugin } from '../../../hooks/use_profiling_plugin';
 import { CustomLinkMenuSection } from './custom_link_menu_section';
 import { getSections } from './sections';
-import { CustomLinkFlyoutComponent } from './custom_link_flyout_component';
+import { CustomLinkFlyout } from './custom_link_flyout';
 
 interface Props {
   readonly transaction?: Transaction;
@@ -72,14 +72,14 @@ export function TransactionActionMenu({ transaction, isLoading }: Props) {
 
   const [isCreateEditFlyoutOpen, setIsCreateEditFlyoutOpen] = useState(false);
 
-  const openCustomLinkFlyout = function () {
+  function openCustomLinkFlyout() {
     setIsCreateEditFlyoutOpen(true);
     setIsActionPopoverOpen(false);
-  };
+  }
 
   return (
     <>
-      <CustomLinkFlyoutComponent
+      <CustomLinkFlyout
         transaction={transaction}
         isOpen={isCreateEditFlyoutOpen}
         onClose={() => setIsCreateEditFlyoutOpen(false)}

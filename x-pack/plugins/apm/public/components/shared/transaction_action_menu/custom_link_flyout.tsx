@@ -13,7 +13,7 @@ import { useFetcher } from '../../../hooks/use_fetcher';
 import { convertFiltersToQuery } from '../../app/settings/custom_link/create_edit_custom_link_flyout/helper';
 import { CreateEditCustomLinkFlyout } from '../../app/settings/custom_link/create_edit_custom_link_flyout';
 
-export function CustomLinkFlyoutComponent({
+export function CustomLinkFlyout({
   transaction,
   isOpen,
   onClose,
