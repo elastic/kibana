@@ -8,13 +8,14 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useKibana } from './use_kibana';
 
+export const SYSTEM_INTEGRATION_URL = '/api/fleet/epm/packages/system';
+export const SYSTEM_INTEGRATION_STATUS_QUERY_KEY = ['system-integration'];
+
 type IntegrationInstallStatus =
   | 'installed'
   | 'installing'
   | 'install_failed'
   | 'not_installed';
-
-const SYSTEM_INTEGRATION_URL = '/api/fleet/epm/packages/system';
 
 const INTEGRATIONS_CALL_TIMEOUT = 2000;
 
@@ -31,18 +32,20 @@ export interface IntegrationResponse {
  */
 export const useSystemIntegrationStatus = () => {
   const { http } = useKibana().services;
-  const queryKey = ['system-integration'];
 
   const fetchSystemIntegration = () =>
     http.get<IntegrationResponse>(SYSTEM_INTEGRATION_URL);
 
-  const query = useQuery(queryKey, fetchSystemIntegration);
+  const query = useQuery(
+    SYSTEM_INTEGRATION_STATUS_QUERY_KEY,
+    fetchSystemIntegration
+  );
 
   const queryClient = useQueryClient();
 
   // cancel slow integrations call to unblock the UI
   setTimeout(
-    () => queryClient.cancelQueries(queryKey),
+    () => queryClient.cancelQueries(SYSTEM_INTEGRATION_STATUS_QUERY_KEY),
     INTEGRATIONS_CALL_TIMEOUT
   );
 
