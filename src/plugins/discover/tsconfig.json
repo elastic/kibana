@@ -65,7 +65,8 @@
     "@kbn/core-application-browser",
     "@kbn/core-saved-objects-server",
     "@kbn/discover-utils",
-    "@kbn/field-types"
+    "@kbn/field-types",
+    "@kbn/content-management-plugin",
   ],
   "exclude": [
     "target/**/*"
