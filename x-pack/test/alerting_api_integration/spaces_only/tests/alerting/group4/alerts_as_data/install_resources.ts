@@ -7,7 +7,7 @@
 
 import { alertFieldMap, ecsFieldMap, legacyAlertFieldMap } from '@kbn/alerts-as-data-utils';
 import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
@@ -163,6 +163,7 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
             rollover_alias: '.alerts-test.patternfiring.alerts-default',
           },
           mapping: {
+            ignore_malformed: 'true',
             total_fields: {
               limit: '2500',
             },
@@ -196,6 +197,7 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
       });
 
       expect(contextIndex[indexName].settings?.index?.mapping).to.eql({
+        ignore_malformed: 'true',
         total_fields: {
           limit: '2500',
         },
