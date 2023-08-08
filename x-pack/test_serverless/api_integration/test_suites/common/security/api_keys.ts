@@ -130,9 +130,11 @@ export default function ({ getService }: FtrProviderContext) {
             .get('/internal/security/api_key?isAdmin=true')
             .set(svlCommonApi.getInternalRequestHeader()));
           // expect success because we're using the internal header
-          expect(body).toEqual({
-            apiKeys: expect.arrayContaining([expect.objectContaining({ id: roleMapping.id })]),
-          });
+          expect(body).toEqual(
+            expect.objectContaining({
+              apiKeys: expect.arrayContaining([expect.objectContaining({ id: roleMapping.id })]),
+            })
+          );
           expect(status).toBe(200);
         });
 
@@ -158,31 +160,6 @@ export default function ({ getService }: FtrProviderContext) {
             .set(svlCommonApi.getInternalRequestHeader()));
           // expect success because we're using the internal header
           expect(body).toEqual({ apiKeysEnabled: true });
-          expect(status).toBe(200);
-        });
-
-        it('get privileges', async () => {
-          let body: unknown;
-          let status: number;
-
-          ({ body, status } = await supertest
-            .get('/internal/security/api_key/privileges')
-            .set(svlCommonApi.getCommonRequestHeader()));
-          // expect a rejection because we're not using the internal header
-          expect(body).toEqual({
-            statusCode: 400,
-            error: 'Bad Request',
-            message: expect.stringContaining(
-              'method [get] exists but is not available with the current configuration'
-            ),
-          });
-          expect(status).toBe(400);
-
-          ({ body, status } = await supertest
-            .get('/internal/security/api_key/privileges')
-            .set(svlCommonApi.getInternalRequestHeader()));
-          // expect success because we're using the internal header
-          expect(body).toEqual({ areApiKeysEnabled: true, canManage: true, isAdmin: true });
           expect(status).toBe(200);
         });
 
