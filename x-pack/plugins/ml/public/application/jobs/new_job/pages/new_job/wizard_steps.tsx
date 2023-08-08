@@ -12,6 +12,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { EuiSpacer, EuiTitle, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { FieldStatsServices } from '@kbn/unified-field-list/src/components/field_stats';
+import { JOB_TYPE } from '../../../../../../common/constants/new_job';
 import { JobCreatorContext } from '../components/job_creator_context';
 import { useMlKibana } from '../../../../contexts/kibana';
 import { FieldStatsFlyoutProvider } from '../../../../components/field_stats_flyout';
@@ -120,7 +121,8 @@ export const WizardSteps: FC<Props> = ({ currentStep, setCurrentStep }) => {
           <FieldStatsFlyoutProvider
             dataView={dataSourceContext.selectedDataView}
             fieldStatsServices={fieldStatsServices}
-            timeRangeMs={timeRangeMs}
+            // Advanced creation wizard doesn't have time range picker, so it should be defined by query only
+            timeRangeMs={jobCreator.type === JOB_TYPE.ADVANCED ? undefined : timeRangeMs}
             dslQuery={jobCreator.query}
           >
             <>
