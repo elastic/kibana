@@ -36,7 +36,6 @@ export const AppMenuBar = ({ isOpen, headerActionMenuMounter }: AppMenuBarProps)
       >
         <HeaderActionMenu mounter={headerActionMenuMounter} />
       </div>
-      <div className="header__actionMenu__clearFix" />
     </EuiThemeProvider>
   );
 };

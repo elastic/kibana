@@ -189,7 +189,13 @@ export const ProjectHeader = ({
       <SkipToMainContent />
 
       <HeaderTopBanner headerBanner$={observables.headerBanner$} />
-      <header data-test-subj="kibanaProjectHeader">
+      <header
+        data-test-subj="kibanaProjectHeader"
+        css={css`
+          /* FIXME use a variable for the app bar height */
+          margin-bottom: ${headerActionMenuMounter.mount ? 48 : 0}px;
+        `}
+      >
         <div id="globalHeaderBars" data-test-subj="headerGlobalNav" className="header__bars">
           <EuiHeader position="fixed" className="header__firstBar">
             <EuiHeaderSection grow={false}>
