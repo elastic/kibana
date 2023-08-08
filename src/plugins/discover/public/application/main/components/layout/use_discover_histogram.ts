@@ -239,8 +239,7 @@ export const useDiscoverHistogram = ({
   } = useObservable(textBasedFetchComplete$, {
     dataView: stateContainer.internalState.getState().dataView!,
     query: stateContainer.appState.getState().query,
-    columns:
-      savedSearchData$.documents$.getValue().textBasedQueryColumns?.map(({ name }) => name) ?? [],
+    columns: savedSearchData$.documents$.getValue().textBasedQueryColumns ?? [],
   });
 
   /**
@@ -387,7 +386,7 @@ const createFetchCompleteObservable = (stateContainer: DiscoverStateContainer) =
     map(({ textBasedQueryColumns }) => ({
       dataView: stateContainer.internalState.getState().dataView!,
       query: stateContainer.appState.getState().query!,
-      columns: textBasedQueryColumns?.map(({ name }) => name) ?? [],
+      columns: textBasedQueryColumns ?? [],
     }))
   );
 };
