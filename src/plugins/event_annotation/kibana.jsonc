@@ -9,7 +9,6 @@
     "browser": true,
     "requiredPlugins": [
       "expressions",
-      "savedObjectsManagement",
       "data",
       "presentationUtil",
       "visualizations",

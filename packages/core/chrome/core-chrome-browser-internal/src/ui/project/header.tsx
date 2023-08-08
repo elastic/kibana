@@ -78,8 +78,8 @@ const headerStrings = {
     }),
   },
   cloud: {
-    linkToDeployments: i18n.translate('core.ui.primaryNav.cloud.linkToDeployments', {
-      defaultMessage: 'My deployments',
+    linkToProjects: i18n.translate('core.ui.primaryNav.cloud.linkToProjects', {
+      defaultMessage: 'Projects',
     }),
   },
   nav: {
@@ -100,6 +100,7 @@ export interface Props {
   helpSupportUrl$: Observable<string>;
   helpMenuLinks$: Observable<ChromeHelpMenuLink[]>;
   homeHref$: Observable<string | undefined>;
+  projectsUrl$: Observable<string | undefined>;
   kibanaVersion: string;
   application: InternalApplicationStart;
   loadingCount$: ReturnType<HttpStart['getLoadingCount$']>;
@@ -175,6 +176,7 @@ export const ProjectHeader = ({
   const [isOpen, setIsOpen] = useLocalStorage(LOCAL_STORAGE_IS_OPEN_KEY, true);
   const toggleCollapsibleNavRef = createRef<HTMLButtonElement & { euiAnimate: () => void }>();
   const headerActionMenuMounter = useHeaderActionMenuMounter(observables.actionMenu$);
+  const projectsUrl = useObservable(observables.projectsUrl$);
 
   return (
     <>
@@ -233,8 +235,8 @@ export const ProjectHeader = ({
               </EuiHeaderSectionItem>
 
               <EuiHeaderSectionItem>
-                <EuiHeaderLink href="https://cloud.elastic.co/deployments">
-                  {headerStrings.cloud.linkToDeployments}
+                <EuiHeaderLink href={projectsUrl} data-test-subj={'projectsLink'}>
+                  {headerStrings.cloud.linkToProjects}
                 </EuiHeaderLink>
               </EuiHeaderSectionItem>
 
