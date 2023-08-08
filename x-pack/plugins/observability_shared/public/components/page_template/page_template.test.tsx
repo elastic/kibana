@@ -65,7 +65,6 @@ describe('Page template', () => {
           pageTitle: 'Test title',
           rightSideItems: [<span>Test side item</span>],
         }}
-        paddingSize="m"
       >
         <div>Test structure</div>
       </LazyObservabilityPageTemplate>
@@ -87,7 +86,6 @@ describe('Page template', () => {
         }}
         getPageTemplateServices={getPageTemplateServices}
         guidedOnboardingApi={guidedOnboardingMock.createStart().guidedOnboardingApi}
-        paddingSize="m"
       >
         <div>Test structure</div>
       </ObservabilityPageTemplate>
@@ -110,7 +108,6 @@ describe('Page template', () => {
           }}
           getPageTemplateServices={getPageTemplateServices}
           guidedOnboardingApi={guidedOnboardingMock.createStart().guidedOnboardingApi}
-          paddingSize="m"
         >
           <div>Test structure</div>
         </ObservabilityPageTemplate>

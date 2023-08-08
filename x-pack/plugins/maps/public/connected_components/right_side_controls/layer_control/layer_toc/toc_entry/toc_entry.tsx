@@ -46,7 +46,7 @@ export interface ReduxDispatchProps {
 export interface OwnProps {
   depth: number;
   layer: ILayer;
-  dragHandleProps?: DraggableProvidedDragHandleProps;
+  dragHandleProps?: DraggableProvidedDragHandleProps | null;
   isDragging?: boolean;
   isDraggingOver?: boolean;
   isCombineLayer?: boolean;
