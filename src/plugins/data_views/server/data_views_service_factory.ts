@@ -26,6 +26,7 @@ interface DataViewsServiceFactoryDeps {
   fieldFormats: FieldFormatsStart;
   capabilities: CoreStart['capabilities'];
   scriptedFieldsEnabled: boolean;
+  rollupsEnabled: boolean;
 }
 
 /**
@@ -39,14 +40,18 @@ export const dataViewsServiceFactory = (deps: DataViewsServiceFactoryDeps) =>
     request?: KibanaRequest,
     byPassCapabilities?: boolean
   ) {
-    const { logger, uiSettings, fieldFormats, capabilities } = deps;
+    const { logger, uiSettings, fieldFormats, capabilities, rollupsEnabled } = deps;
     const uiSettingsClient = uiSettings.asScopedToClient(savedObjectsClient);
     const formats = await fieldFormats.fieldFormatServiceFactory(uiSettingsClient);
 
     return new DataViewsService({
       uiSettings: new UiSettingsServerToCommon(uiSettingsClient),
       savedObjectsClient: new SavedObjectsClientWrapper(savedObjectsClient),
-      apiClient: new IndexPatternsApiServer(elasticsearchClient, savedObjectsClient),
+      apiClient: new IndexPatternsApiServer(
+        elasticsearchClient,
+        savedObjectsClient,
+        rollupsEnabled
+      ),
       fieldFormats: formats,
       onError: (error) => {
         logger.error(error);
