@@ -82,7 +82,9 @@ const SHARED_SERVERLESS_PARAMS = [
 
   '--rm',
 
-  // '--detach',
+  '--detach',
+
+  '--privileged',
 
   '--net',
   'elastic',
@@ -132,7 +134,7 @@ const SERVERLESS_NODES: Array<Omit<ServerlessEsNodeArgs, 'image'>> = [
   {
     name: 'es02',
     params: [
-      '--detach',
+      // '--detach',
       '-p',
       '127.0.0.1:9202:9202',
 
@@ -150,7 +152,7 @@ const SERVERLESS_NODES: Array<Omit<ServerlessEsNodeArgs, 'image'>> = [
   {
     name: 'es03',
     params: [
-      '--detach',
+      // '--detach',
       '-p',
       '127.0.0.1:9203:9203',
 
@@ -384,7 +386,7 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
   await setupDocker(log, image);
 
   const volumeCmd = await setupServerlessVolumes(log, options);
-  const userCmd = await setupUserPerm();
+  // const userCmd = await setupUserPerm();
 
   const nodeNames = await Promise.all(
     SERVERLESS_NODES.map(async (node, i) => {
@@ -394,8 +396,8 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
         params: node.params.concat(
           resolveEsArgs(DEFAULT_SERVERLESS_ESARGS.concat(node.esArgs ?? []), options),
           i === 0 ? resolvePort(options) : [],
-          volumeCmd,
-          userCmd
+          volumeCmd
+          // userCmd
         ),
       });
       return node.name;
