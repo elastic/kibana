@@ -7,11 +7,10 @@
 
 import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { i18n } from '@kbn/i18n';
+import type { FormulaConfig, MetricLayerOptions } from '@kbn/visualization-utils';
 import { Layer } from '../../../../../hooks/use_lens_attributes';
 import { hostLensFormulas } from '../../../constants';
-import { FormulaConfig } from '../../../types';
 import { TOOLTIP } from './translations';
-import { MetricLayerOptions } from '../../visualization_types/layers';
 
 export interface KPIChartProps
   extends Pick<TypedLensByValueInput, 'id' | 'title' | 'overrides' | 'style'> {

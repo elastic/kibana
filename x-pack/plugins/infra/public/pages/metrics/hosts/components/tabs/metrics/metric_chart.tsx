@@ -11,11 +11,11 @@ import { EuiIcon, EuiPanel, EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } fr
 import { css } from '@emotion/react';
 import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { FormulaConfig, XYLayerOptions } from '@kbn/visualization-utils';
 import { LensWrapper } from '../../../../../../components/lens';
 import { useLensAttributes, Layer } from '../../../../../../hooks/use_lens_attributes';
 import { useMetricsDataViewContext } from '../../../hooks/use_data_view';
 import { useUnifiedSearchContext } from '../../../hooks/use_unified_search';
-import { FormulaConfig, XYLayerOptions } from '../../../../../../common/visualizations';
 import { useHostsViewContext } from '../../../hooks/use_hosts_view';
 import { buildCombinedHostsFilter } from '../../../../../../utils/filters/build';
 import { useHostsTableContext } from '../../../hooks/use_hosts_table';

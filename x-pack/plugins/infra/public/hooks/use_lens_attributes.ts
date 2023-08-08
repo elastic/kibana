@@ -13,7 +13,6 @@ import type { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/publ
 import { i18n } from '@kbn/i18n';
 import useAsync from 'react-use/lib/useAsync';
 import { FormulaPublicApi, LayerType as LensLayerType } from '@kbn/lens-plugin/public';
-import { InfraClientSetupDeps } from '../types';
 import {
   type XYLayerOptions,
   type MetricLayerOptions,
@@ -27,7 +26,9 @@ import {
   XYReferenceLinesLayer,
   Chart,
   LensVisualizationState,
-} from '../common/visualizations';
+} from '@kbn/visualization-utils';
+
+import { InfraClientSetupDeps } from '../types';
 import { useLazyRef } from './use_lazy_ref';
 
 type Options = XYLayerOptions | MetricLayerOptions;
