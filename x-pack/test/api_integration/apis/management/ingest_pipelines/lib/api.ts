@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IngestPutPipelineRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { IngestPutPipelineRequest } from '@elastic/elasticsearch/lib/api/types';
 import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../../../ftr_provider_context';

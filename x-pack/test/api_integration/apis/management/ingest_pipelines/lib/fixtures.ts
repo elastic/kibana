@@ -5,19 +5,28 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import {
+  IngestProcessorContainer,
+  VersionNumber,
+  Metadata,
+  IngestPutPipelineRequest,
+} from '@elastic/elasticsearch/lib/api/types';
 
-export interface Pipeline {
+interface Pipeline {
   name: string;
   description?: string;
-  onFailureProcessors?: estypes.IngestProcessorContainer[];
-  processors: estypes.IngestProcessorContainer[];
-  version?: estypes.VersionNumber;
-  metadata?: estypes.Metadata;
+  onFailureProcessors?: IngestProcessorContainer[];
+  processors: IngestProcessorContainer[];
+  version?: VersionNumber;
+  metadata?: Metadata;
+}
+
+interface IngestPutPipelineInternalRequest extends Omit<IngestPutPipelineRequest, 'id'> {
+  name: string;
 }
 
 export function IngestPipelinesFixturesProvider() {
-  const defaultProcessors: estypes.IngestProcessorContainer[] = [
+  const defaultProcessors: IngestProcessorContainer[] = [
     {
       script: {
         source: 'ctx._type = null',
@@ -25,7 +34,7 @@ export function IngestPipelinesFixturesProvider() {
     },
   ];
 
-  const defaultOnFailureProcessors: estypes.IngestProcessorContainer[] = [
+  const defaultOnFailureProcessors: IngestProcessorContainer[] = [
     {
       set: {
         field: 'error.message',
@@ -34,21 +43,21 @@ export function IngestPipelinesFixturesProvider() {
     },
   ];
 
-  const defaultMetadata: estypes.Metadata = {
+  const defaultMetadata: Metadata = {
     field_1: 'test',
     field_2: 10,
   };
 
   const apiBasePath = '/api/ingest_pipelines';
 
-  const createPipelineBodyWithRequiredFields = () => {
+  const createPipelineBodyWithRequiredFields = (): IngestPutPipelineInternalRequest => {
     return {
       name: `test-pipeline-required-fields-${Math.random()}`,
       processors: defaultProcessors,
     };
   };
 
-  const createPipelineBody = (pipeline?: Pipeline) => {
+  const createPipelineBody = (pipeline?: Pipeline): IngestPutPipelineInternalRequest => {
     if (pipeline) {
       const { name, description, processors, onFailureProcessors, version, metadata } = pipeline;
       return {
