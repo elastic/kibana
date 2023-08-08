@@ -7,7 +7,7 @@
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { LensChart, TooltipContent } from '../../../../../components/lens';
-import { KPIChartProps } from '../../../../../common/visualizations/lens/dashboards/host/kpi_grid_config';
+import type { KPIChartProps } from '../../../../../common/visualizations/lens/dashboards/host/kpi_grid_config';
 import { buildCombinedHostsFilter } from '../../../../../utils/filters/build';
 import { useMetricsDataViewContext } from '../../hooks/use_data_view';
 import { useUnifiedSearchContext } from '../../hooks/use_unified_search';

@@ -7,11 +7,11 @@
 import React, { useCallback } from 'react';
 import { EuiFlexGrid, EuiFlexItem, EuiTitle, EuiSpacer, EuiFlexGroup } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { TimeRange } from '@kbn/es-query';
+import type { TimeRange } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { buildCombinedHostsFilter } from '../../../../../utils/filters/build';
 import { HostMetricsDocsLink, LensChart } from '../../../../lens';
-import { CHARTS_IN_ORDER, DataViewOrigin } from './dashboard_config';
+import { CHARTS_IN_ORDER, type DataViewOrigin } from './dashboard_config';
 
 const HEIGHT = 250;
 
