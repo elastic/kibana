@@ -629,17 +629,6 @@
       }
     }
   },
-  "search": {
-    "dynamic": false,
-    "properties": {
-      "title": {
-        "type": "text"
-      },
-      "description": {
-        "type": "text"
-      }
-    }
-  },
   "alert": {
     "dynamic": false,
     "properties": {
@@ -928,6 +917,17 @@
       "legacyIndexPatternRef": {
         "type": "text",
         "index": false
+      }
+    }
+  },
+  "search": {
+    "dynamic": false,
+    "properties": {
+      "title": {
+        "type": "text"
+      },
+      "description": {
+        "type": "text"
       }
     }
   },
@@ -1655,6 +1655,9 @@
         "type": "keyword"
       },
       "auth_type": {
+        "type": "keyword"
+      },
+      "connection_type": {
         "type": "keyword"
       },
       "username": {
