@@ -9,7 +9,7 @@ import { EuiDescriptionList, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { isEmpty, chunk, get, pick, isNumber } from 'lodash/fp';
 import React, { memo, useState } from 'react';
 import styled from 'styled-components';
-
+import { css } from '@emotion/css';
 import type { ThreatMapping, Threats, Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { DataViewBase, Filter } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
@@ -68,13 +68,11 @@ const DescriptionListContainer = styled(EuiDescriptionList)`
   }
 `;
 
-export const DescriptionListPanelContainer = styled(EuiDescriptionList)`
-  ${({ theme }) => `
-    dt {
-      font-size: ${theme.eui.euiFontSizeXS} !important;
-    }
-    text-overflow: ellipsis;
-  `}
+const panelViewStyle = css`
+  dt {
+    font-size: 90% !important;
+  }
+  text-overflow: ellipsis;
 `;
 
 interface StepRuleDescriptionProps<T> {
@@ -82,7 +80,7 @@ interface StepRuleDescriptionProps<T> {
   data: unknown;
   indexPatterns?: DataViewBase;
   schema: FormSchema<T>;
-  isInPanelView?: boolean;
+  isInPanelView?: boolean; // Option to show description list in smaller font
 }
 
 export const StepRuleDescriptionComponent = <T,>({
@@ -141,7 +139,7 @@ export const StepRuleDescriptionComponent = <T,>({
     return (
       <EuiFlexGroup>
         <EuiFlexItem data-test-subj="listItemColumnStepRuleDescriptionPanel">
-          <DescriptionListPanelContainer listItems={listItems} />
+          <EuiDescriptionList listItems={listItems} className={panelViewStyle} />
         </EuiFlexItem>
       </EuiFlexGroup>
     );

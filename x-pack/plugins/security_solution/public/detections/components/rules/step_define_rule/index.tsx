@@ -116,7 +116,7 @@ interface StepDefineRuleReadOnlyProps {
   descriptionColumns: 'multi' | 'single' | 'singleSplit';
   defaultValues: DefineStepRule;
   indexPattern: DataViewBase;
-  isInPanelView?: boolean;
+  isInPanelView?: boolean; // Option to show description list in smaller font
 }
 
 export const MyLabelButton = styled(EuiButtonEmpty)`

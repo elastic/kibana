@@ -137,7 +137,7 @@ export const PreviewSection: React.FC<PreviewSectionProps> = ({
         css={css`
           margin: ${euiTheme.size.xs};
           height: 99%;
-          box-shadow: 0px 0px 5px 5px #999999;
+          box-shadow: 0px 0px 5px 5px ${euiTheme.colors.darkShade};
         `}
         className="eui-yScroll"
         data-test-subj={PREVIEW_SECTION}

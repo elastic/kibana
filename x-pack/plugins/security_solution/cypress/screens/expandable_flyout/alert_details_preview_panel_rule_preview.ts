@@ -38,8 +38,6 @@ export const DOCUMENT_DETAILS_FLYOUT_UPDATED_BY = getDataTestSubjectSelector(
   RULE_PREVIEW_RULE_UPDATED_BY_TEST_ID
 );
 
-export const DOCUMENT_DETAILS_FLYOUT_RULE_SWITCH = getDataTestSubjectSelector('ruleSwitch');
-
 export const DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_BODY =
   getDataTestSubjectSelector(RULE_PREVIEW_BODY_TEST_ID);
 

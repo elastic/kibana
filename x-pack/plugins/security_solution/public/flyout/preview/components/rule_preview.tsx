@@ -12,7 +12,6 @@ import { ExpandableSection } from '../../right/components/expandable_section';
 import { useRuleWithFallback } from '../../../detection_engine/rule_management/logic/use_rule_with_fallback';
 import { getStepsData } from '../../../detections/pages/detection_engine/rules/helpers';
 import { RulePreviewTitle } from './rule_preview_title';
-import { useRuleSwitch } from '../hooks/use_rule_switch';
 import { StepAboutRuleReadOnly } from '../../../detections/components/rules/step_about_rule';
 import { StepDefineRuleReadOnly } from '../../../detections/components/rules/step_define_rule';
 import { StepScheduleRuleReadOnly } from '../../../detections/components/rules/step_schedule_rule';
@@ -33,11 +32,7 @@ import * as i18n from './translations';
 export const RulePreview: React.FC = memo(() => {
   const { ruleId, indexPattern } = usePreviewPanelContext();
   const [rule, setRule] = useState<Rule | null>(null);
-  const {
-    rule: maybeRule,
-    loading: ruleLoading,
-    isExistingRule,
-  } = useRuleWithFallback(ruleId ?? '');
+  const { rule: maybeRule, loading: ruleLoading } = useRuleWithFallback(ruleId ?? '');
 
   // persist rule until refresh is complete
   useEffect(() => {
@@ -45,11 +40,6 @@ export const RulePreview: React.FC = memo(() => {
       setRule(maybeRule);
     }
   }, [maybeRule]);
-
-  const { userInfoLoading, tooltipText, isButtonDisabled, isRuleEnabled } = useRuleSwitch({
-    rule,
-    isExistingRule,
-  });
 
   const { aboutRuleData, defineRuleData, scheduleRuleData, ruleActionsData } =
     rule != null
@@ -61,19 +51,13 @@ export const RulePreview: React.FC = memo(() => {
           ruleActionsData: null,
         };
 
-  const hasNotificationActions = ruleActionsData != null && ruleActionsData.actions.length > 0;
-  const hasResponseActions =
-    ruleActionsData != null && (ruleActionsData.responseActions || []).length > 0;
-  const hasActions = hasNotificationActions || hasResponseActions;
+  const hasNotificationActions = Boolean(ruleActionsData?.actions?.length);
+  const hasResponseActions = Boolean(ruleActionsData?.responseActions?.length);
+  const hasActions = ruleActionsData != null && (hasNotificationActions || hasResponseActions);
 
   return rule ? (
     <EuiPanel hasShadow={false} data-test-subj={RULE_PREVIEW_BODY_TEST_ID} className="eui-yScroll">
-      <RulePreviewTitle
-        rule={rule}
-        tooltipText={tooltipText}
-        isButtonDisabled={isButtonDisabled}
-        isRuleEnabled={isRuleEnabled}
-      />
+      <RulePreviewTitle rule={rule} />
       <EuiHorizontalRule margin="s" />
       <ExpandableSection
         title={i18n.RULE_PREVIEW_ABOUT_TEXT}
@@ -92,37 +76,41 @@ export const RulePreview: React.FC = memo(() => {
         )}
       </ExpandableSection>
       <EuiHorizontalRule margin="l" />
-      <ExpandableSection
-        title={i18n.RULE_PREVIEW_DEFINITION_TEXT}
-        expanded={false}
-        data-test-subj={RULE_PREVIEW_DEFINITION_TEST_ID}
-      >
-        {defineRuleData && (
-          <StepDefineRuleReadOnly
-            addPadding={false}
-            descriptionColumns="single"
-            defaultValues={defineRuleData}
-            indexPattern={indexPattern}
-            isInPanelView
-          />
-        )}
-      </ExpandableSection>
-      <EuiHorizontalRule margin="l" />
-      <ExpandableSection
-        title={i18n.RULE_PREVIEW_SCHEDULE_TEXT}
-        expanded={false}
-        data-test-subj={RULE_PREVIEW_SCHEDULE_TEST_ID}
-      >
-        {scheduleRuleData && (
-          <StepScheduleRuleReadOnly
-            addPadding={false}
-            descriptionColumns="single"
-            defaultValues={scheduleRuleData}
-            isInPanelView
-          />
-        )}
-      </ExpandableSection>
-      <EuiHorizontalRule margin="l" />
+      {defineRuleData && (
+        <>
+          <ExpandableSection
+            title={i18n.RULE_PREVIEW_DEFINITION_TEXT}
+            expanded={false}
+            data-test-subj={RULE_PREVIEW_DEFINITION_TEST_ID}
+          >
+            <StepDefineRuleReadOnly
+              addPadding={false}
+              descriptionColumns="single"
+              defaultValues={defineRuleData}
+              indexPattern={indexPattern}
+              isInPanelView
+            />
+          </ExpandableSection>
+          <EuiHorizontalRule margin="l" />
+        </>
+      )}
+      {scheduleRuleData && (
+        <>
+          <ExpandableSection
+            title={i18n.RULE_PREVIEW_SCHEDULE_TEXT}
+            expanded={false}
+            data-test-subj={RULE_PREVIEW_SCHEDULE_TEST_ID}
+          >
+            <StepScheduleRuleReadOnly
+              addPadding={false}
+              descriptionColumns="single"
+              defaultValues={scheduleRuleData}
+              isInPanelView
+            />
+          </ExpandableSection>
+          <EuiHorizontalRule margin="l" />
+        </>
+      )}
       {hasActions && (
         <ExpandableSection
           title={i18n.RULE_PREVIEW_ACTIONS_TEXT}
@@ -133,7 +121,7 @@ export const RulePreview: React.FC = memo(() => {
         </ExpandableSection>
       )}
     </EuiPanel>
-  ) : ruleLoading || userInfoLoading ? (
+  ) : ruleLoading ? (
     <EuiLoadingSpinner size="l" data-test-subj={RULE_PREVIEW_LOADING_TEST_ID} />
   ) : null;
 });

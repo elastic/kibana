@@ -36,8 +36,3 @@ export const ENABLE_RULE_TEXT = i18n.translate(
   'xpack.securitySolution.flyout.documentDetails.rulePreviewEnableRuleText',
   { defaultMessage: 'Enable' }
 );
-
-export const UNKNOWN_TEXT = i18n.translate(
-  'xpack.securitySolution.flyout.documentDetails.rulePreviewUnknownText',
-  { defaultMessage: 'Unknown' }
-);

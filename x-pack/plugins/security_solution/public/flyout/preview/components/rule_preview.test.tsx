@@ -15,11 +15,8 @@ import { ExpandableFlyoutContext } from '@kbn/expandable-flyout/src/context';
 import { ThemeProvider } from 'styled-components';
 import { getMockTheme } from '../../../common/lib/kibana/kibana_react.mock';
 import { TestProviders } from '../../../common/mock';
-import { useAppToasts } from '../../../common/hooks/use_app_toasts';
-import { useAppToastsMock } from '../../../common/hooks/use_app_toasts.mock';
 import { useRuleWithFallback } from '../../../detection_engine/rule_management/logic/use_rule_with_fallback';
 import { getStepsData } from '../../../detections/pages/detection_engine/rules/helpers';
-import { useRuleSwitch } from '../hooks/use_rule_switch';
 import {
   mockAboutStepRule,
   mockDefineStepRule,
@@ -46,16 +43,6 @@ jest.mock('../../../detection_engine/rule_management/logic/use_rule_with_fallbac
 const mockGetStepsData = getStepsData as jest.Mock;
 jest.mock('../../../detections/pages/detection_engine/rules/helpers');
 
-const mockUseRuleSwitch = useRuleSwitch as jest.Mock;
-jest.mock('../hooks/use_rule_switch');
-
-jest.mock('../../../detection_engine/rule_management/logic/use_start_ml_jobs', () => ({
-  useStartMlJobs: jest.fn().mockReturnValue({ startMlJobs: jest.fn() }),
-}));
-
-jest.mock('../../../common/hooks/use_app_toasts');
-const useAppToastsValueMock = useAppToastsMock.create();
-
 const mockTheme = getMockTheme({ eui: { euiColorMediumShade: '#ece' } });
 
 const contextValue = {
@@ -65,13 +52,7 @@ const contextValue = {
 
 describe('<RulePreview />', () => {
   beforeEach(() => {
-    (useAppToasts as jest.Mock).mockReturnValue(useAppToastsValueMock);
-    mockUseRuleSwitch.mockReturnValue({
-      tooltipText: '',
-      userInfoLoading: false,
-      isButtonDisabled: false,
-      isRuleEnabled: true,
-    });
+    // (useAppToasts as jest.Mock).mockReturnValue(useAppToastsValueMock);
   });
 
   afterEach(() => {

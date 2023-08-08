@@ -57,7 +57,7 @@ interface StepAboutRuleReadOnlyProps {
   addPadding: boolean;
   descriptionColumns: 'multi' | 'single' | 'singleSplit';
   defaultValues: AboutStepRule;
-  isInPanelView?: boolean;
+  isInPanelView?: boolean; // Option to show description list in smaller font
 }
 
 const ThreeQuartersContainer = styled.div`
