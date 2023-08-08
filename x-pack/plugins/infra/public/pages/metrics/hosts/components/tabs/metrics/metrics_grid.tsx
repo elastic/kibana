@@ -8,68 +8,217 @@ import React from 'react';
 
 import { EuiFlexGrid, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { EuiSpacer } from '@elastic/eui';
+import { hostLensFormulas, type XYLayerOptions } from '../../../../../../common/visualizations';
+import { HostMetricsDocsLink } from '../../../../../../components/lens';
 import { MetricChart, MetricChartProps } from './metric_chart';
 
 const DEFAULT_BREAKDOWN_SIZE = 20;
-const CHARTS_IN_ORDER: Array<Pick<MetricChartProps, 'title' | 'type'> & { fullRow?: boolean }> = [
-  {
-    title: i18n.translate('xpack.infra.hostsViewPage.tabs.metricsCharts.load', {
-      defaultMessage: 'Normalized Load',
-    }),
-    type: 'load',
+const XY_LAYER_OPTIONS: XYLayerOptions = {
+  breakdown: {
+    size: DEFAULT_BREAKDOWN_SIZE,
+    sourceField: 'host.name',
   },
+};
+
+const PERCENT_LEFT_AXIS: Pick<MetricChartProps, 'overrides'>['overrides'] = {
+  axisLeft: {
+    domain: {
+      min: 0,
+      max: 1,
+    },
+  },
+};
+
+const CHARTS_IN_ORDER: MetricChartProps[] = [
   {
-    title: i18n.translate('xpack.infra.hostsViewPage.tabs.metricsCharts.cpu', {
+    id: 'cpuUsage',
+    title: i18n.translate('xpack.infra.hostsViewPage.tabs.metricsCharts.cpuUsage', {
       defaultMessage: 'CPU Usage',
     }),
-    type: 'cpu',
+    layers: [
+      {
+        data: [hostLensFormulas.cpuUsage],
+        layerType: 'data',
+        options: XY_LAYER_OPTIONS,
+      },
+    ],
+    overrides: PERCENT_LEFT_AXIS,
   },
   {
-    title: i18n.translate('xpack.infra.hostsViewPage.tabs.metricsCharts.memory', {
+    id: 'normalizedLoad1m',
+    title: i18n.translate('xpack.infra.hostsViewPage.tabs.metricsCharts.normalizedLoad1m', {
+      defaultMessage: 'Normalized Load',
+    }),
+    layers: [
+      {
+        data: [hostLensFormulas.normalizedLoad1m],
+        layerType: 'data',
+        options: XY_LAYER_OPTIONS,
+      },
+      {
+        data: [
+          {
+            value: '1',
+            format: {
+              id: 'percent',
+              params: {
+                decimals: 0,
+              },
+            },
+            color: '#6092c0',
+          },
+        ],
+        layerType: 'referenceLine',
+      },
+    ],
+  },
+  {
+    id: 'memoryUsage',
+    title: i18n.translate('xpack.infra.hostsViewPage.tabs.metricsCharts.memoryUsage', {
       defaultMessage: 'Memory Usage',
     }),
-    type: 'memory',
+    layers: [
+      {
+        data: [hostLensFormulas.memoryUsage],
+        layerType: 'data',
+        options: XY_LAYER_OPTIONS,
+      },
+    ],
+    overrides: PERCENT_LEFT_AXIS,
   },
   {
-    title: i18n.translate('xpack.infra.hostsViewPage.tabs.metricsCharts.memoryAvailable', {
-      defaultMessage: 'Memory Available',
+    id: 'memoryFree',
+    title: i18n.translate('xpack.infra.hostsViewPage.tabs.metricsCharts.memoryFree', {
+      defaultMessage: 'Memory Free',
     }),
-    type: 'memoryAvailable',
+    layers: [
+      {
+        data: [hostLensFormulas.memoryFree],
+        layerType: 'data',
+        options: XY_LAYER_OPTIONS,
+      },
+    ],
   },
   {
-    title: i18n.translate('xpack.infra.hostsViewPage.tabs.metricsCharts.rx', {
-      defaultMessage: 'Network Inbound (RX)',
+    id: 'diskSpaceUsed',
+    title: i18n.translate('xpack.infra.hostsViewPage.tabs.metricsCharts.diskSpaceUsed', {
+      defaultMessage: 'Disk Space Usage',
     }),
-    type: 'rx',
+    layers: [
+      {
+        data: [hostLensFormulas.diskSpaceUsage],
+        layerType: 'data',
+        options: XY_LAYER_OPTIONS,
+      },
+    ],
+    overrides: PERCENT_LEFT_AXIS,
   },
   {
-    title: i18n.translate('xpack.infra.hostsViewPage.tabs.metricsCharts.tx', {
-      defaultMessage: 'Network Outbound (TX)',
+    id: 'diskSpaceAvailable',
+    title: i18n.translate('xpack.infra.hostsViewPage.tabs.metricsCharts.diskSpaceAvailable', {
+      defaultMessage: 'Disk Space Available',
     }),
-    type: 'tx',
+    layers: [
+      {
+        data: [hostLensFormulas.diskSpaceAvailable],
+        layerType: 'data',
+        options: XY_LAYER_OPTIONS,
+      },
+    ],
   },
   {
+    id: 'diskIORead',
     title: i18n.translate('xpack.infra.hostsViewPage.tabs.metricsCharts.diskIORead', {
       defaultMessage: 'Disk Read IOPS',
     }),
-    type: 'diskIORead',
+    layers: [
+      {
+        data: [hostLensFormulas.diskIORead],
+        layerType: 'data',
+        options: XY_LAYER_OPTIONS,
+      },
+    ],
   },
   {
-    title: i18n.translate('xpack.infra.hostsViewPage.tabs.metricsCharts.DiskIOWrite', {
+    id: 'diskIOWrite',
+    title: i18n.translate('xpack.infra.hostsViewPage.tabs.metricsCharts.diskIOWrite', {
       defaultMessage: 'Disk Write IOPS',
     }),
-    type: 'diskIOWrite',
+    layers: [
+      {
+        data: [hostLensFormulas.diskIOWrite],
+        layerType: 'data',
+        options: XY_LAYER_OPTIONS,
+      },
+    ],
+  },
+  {
+    id: 'diskReadThroughput',
+    title: i18n.translate('xpack.infra.hostsViewPage.tabs.metricsCharts.diskReadThroughput', {
+      defaultMessage: 'Disk Read Throughput',
+    }),
+    layers: [
+      {
+        data: [hostLensFormulas.diskReadThroughput],
+        layerType: 'data',
+        options: XY_LAYER_OPTIONS,
+      },
+    ],
+  },
+  {
+    id: 'diskWriteThroughput',
+    title: i18n.translate('xpack.infra.hostsViewPage.tabs.metricsCharts.diskWriteThroughput', {
+      defaultMessage: 'Disk Write Throughput',
+    }),
+    layers: [
+      {
+        data: [hostLensFormulas.diskWriteThroughput],
+        layerType: 'data',
+        options: XY_LAYER_OPTIONS,
+      },
+    ],
+  },
+  {
+    id: 'rx',
+    title: i18n.translate('xpack.infra.hostsViewPage.tabs.metricsCharts.rx', {
+      defaultMessage: 'Network Inbound (RX)',
+    }),
+    layers: [
+      {
+        data: [hostLensFormulas.rx],
+        layerType: 'data',
+        options: XY_LAYER_OPTIONS,
+      },
+    ],
+  },
+  {
+    id: 'tx',
+    title: i18n.translate('xpack.infra.hostsViewPage.tabs.metricsCharts.tx', {
+      defaultMessage: 'Network Outbound (TX)',
+    }),
+    layers: [
+      {
+        data: [hostLensFormulas.tx],
+        layerType: 'data',
+        options: XY_LAYER_OPTIONS,
+      },
+    ],
   },
 ];
 
 export const MetricsGrid = React.memo(() => {
   return (
-    <EuiFlexGrid columns={2} gutterSize="s" data-test-subj="hostsView-metricChart">
-      {CHARTS_IN_ORDER.map(({ fullRow, ...chartProp }) => (
-        <EuiFlexItem key={chartProp.type} style={fullRow ? { gridColumn: '1/-1' } : {}}>
-          <MetricChart breakdownSize={DEFAULT_BREAKDOWN_SIZE} {...chartProp} />
-        </EuiFlexItem>
-      ))}
-    </EuiFlexGrid>
+    <>
+      <HostMetricsDocsLink />
+      <EuiSpacer size="s" />
+      <EuiFlexGrid columns={2} gutterSize="s" data-test-subj="hostsView-metricChart">
+        {CHARTS_IN_ORDER.map((chartProp, index) => (
+          <EuiFlexItem key={index} grow={false}>
+            <MetricChart {...chartProp} />
+          </EuiFlexItem>
+        ))}
+      </EuiFlexGrid>
+    </>
   );
 });

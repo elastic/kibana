@@ -13,7 +13,6 @@
       "lens",
       "licensing",
       "uiActions",
-      "unifiedFieldList",
     ],
     "requiredBundles": [
       "fieldFormats",

@@ -14,52 +14,64 @@ import {
   PostMessageSubActionParamsSchema,
   SlackApiSecretsSchema,
   SlackApiParamsSchema,
+  SlackApiConfigSchema,
 } from './schema';
 
 export type SlackApiSecrets = TypeOf<typeof SlackApiSecretsSchema>;
+export type SlackApiConfig = TypeOf<typeof SlackApiConfigSchema>;
 
 export type PostMessageParams = TypeOf<typeof PostMessageParamsSchema>;
 export type PostMessageSubActionParams = TypeOf<typeof PostMessageSubActionParamsSchema>;
 export type SlackApiParams = TypeOf<typeof SlackApiParamsSchema>;
-export type SlackApiConnectorType = ConnectorType<{}, SlackApiSecrets, SlackApiParams, unknown>;
+export type SlackApiConnectorType = ConnectorType<
+  SlackApiConfig,
+  SlackApiSecrets,
+  SlackApiParams,
+  unknown
+>;
 
 export type SlackApiExecutorOptions = ConnectorTypeExecutorOptions<
-  {},
+  SlackApiConfig,
   SlackApiSecrets,
   SlackApiParams
 >;
 
 export type SlackExecutorOptions = ConnectorTypeExecutorOptions<
-  {},
+  SlackApiConfig,
   SlackApiSecrets,
   SlackApiParams
 >;
 
 export type SlackApiActionParams = TypeOf<typeof SlackApiParamsSchema>;
 
-export interface GetChannelsResponse {
-  ok: true;
-  error?: string;
-  channels?: Array<{
-    id: string;
-    name: string;
-    is_channel: boolean;
-    is_archived: boolean;
-    is_private: boolean;
-  }>;
-}
-
-export interface PostMessageResponse {
+export interface SlackAPiResponse {
   ok: boolean;
-  channel?: string;
   error?: string;
   message?: {
     text: string;
   };
+  response_metadata?: {
+    next_cursor: string;
+  };
+}
+
+export interface ChannelsResponse {
+  id: string;
+  name: string;
+  is_channel: boolean;
+  is_archived: boolean;
+  is_private: boolean;
+}
+export interface GetChannelsResponse extends SlackAPiResponse {
+  channels?: ChannelsResponse[];
+}
+
+export interface PostMessageResponse extends SlackAPiResponse {
+  channel?: string;
 }
 
 export interface SlackApiService {
-  getChannels: () => Promise<ConnectorTypeExecutorResult<unknown>>;
+  getChannels: () => Promise<ConnectorTypeExecutorResult<GetChannelsResponse | void>>;
   postMessage: ({
     channels,
     text,

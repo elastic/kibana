@@ -25,7 +25,7 @@ import {
   sendGetAgentTags,
   useFleetServerStandalone,
 } from '../../../hooks';
-import { AgentEnrollmentFlyout } from '../../../components';
+import { AgentEnrollmentFlyout, UninstallCommandFlyout } from '../../../components';
 import {
   AgentStatusKueryHelper,
   ExperimentalFeaturesService,
@@ -47,10 +47,11 @@ import { AgentTableHeader } from './components/table_header';
 import type { SelectionMode } from './components/types';
 import { SearchAndFilterBar } from './components/search_and_filter_bar';
 import { TagsAddRemove } from './components/tags_add_remove';
-import { AgentActivityFlyout } from './components';
+import { AgentActivityFlyout, AgentSoftLimitCallout } from './components';
 import { TableRowActions } from './components/table_row_actions';
 import { AgentListTable } from './components/agent_list_table';
 import { getKuery } from './utils/get_kuery';
+import { useAgentSoftLimit } from './hooks';
 
 const REFRESH_INTERVAL_MS = 30000;
 
@@ -133,6 +134,9 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   // Agent actions states
   const [agentToReassign, setAgentToReassign] = useState<Agent | undefined>(undefined);
   const [agentToUnenroll, setAgentToUnenroll] = useState<Agent | undefined>(undefined);
+  const [agentToGetUninstallCommand, setAgentToGetUninstallCommand] = useState<Agent | undefined>(
+    undefined
+  );
   const [agentToUpgrade, setAgentToUpgrade] = useState<Agent | undefined>(undefined);
   const [agentToAddRemoveTags, setAgentToAddRemoveTags] = useState<Agent | undefined>(undefined);
   const [tagsPopoverButton, setTagsPopoverButton] = useState<HTMLElement>();
@@ -162,6 +166,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     return selectedStatus.some((status) => status === 'inactive' || status === 'unenrolled');
   }, [selectedStatus]);
 
+  // filters kuery
   const kuery = useMemo(() => {
     return getKuery({
       search,
@@ -207,6 +212,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
           setAgentToAddRemoveTags(agent);
           setShowTagsAddRemove(!showTagsAddRemove);
         }}
+        onGetUninstallCommandClick={() => setAgentToGetUninstallCommand(agent)}
         onRequestDiagnosticsClick={() => setAgentToRequestDiagnostics(agent)}
       />
     );
@@ -344,14 +350,16 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     }, {} as { [k: string]: AgentPolicy });
   }, [agentPolicies]);
 
-  const isAgentSelectable = (agent: Agent) => {
-    if (!agent.active) return false;
-    if (!agent.policy_id) return true;
-
-    const agentPolicy = agentPoliciesIndexedById[agent.policy_id];
-    const isHosted = agentPolicy?.is_managed === true;
-    return !isHosted;
-  };
+  const isAgentSelectable = useCallback(
+    (agent: Agent) => {
+      if (!agent.active) return false;
+      if (!agent.policy_id) return true;
+      const agentPolicy = agentPoliciesIndexedById[agent.policy_id];
+      const isHosted = agentPolicy?.is_managed === true;
+      return !isHosted;
+    },
+    [agentPoliciesIndexedById]
+  );
 
   const onSelectionChange = (newAgents: Agent[]) => {
     setSelectedAgents(newAgents);
@@ -389,6 +397,8 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   const { isFleetServerStandalone } = useFleetServerStandalone();
   const showUnhealthyCallout = isFleetServerUnhealthy && !isFleetServerStandalone;
 
+  const { shouldDisplayAgentSoftLimit } = useAgentSoftLimit();
+
   const onClickAddFleetServer = useCallback(() => {
     flyoutContext.openFleetServerFlyout();
   }, [flyoutContext]);
@@ -403,6 +413,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   };
 
   const isCurrentRequestIncremented = currentRequestRef?.current === 1;
+
   return (
     <>
       {isAgentActivityFlyoutOpen ? (
@@ -453,6 +464,18 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
           />
         </EuiPortal>
       )}
+      {agentToGetUninstallCommand?.policy_id && (
+        <EuiPortal>
+          <UninstallCommandFlyout
+            target="agent"
+            policyId={agentToGetUninstallCommand.policy_id}
+            onClose={() => {
+              setAgentToGetUninstallCommand(undefined);
+              refreshAgents({ refreshTags: true });
+            }}
+          />
+        </EuiPortal>
+      )}
       {agentToUpgrade && (
         <EuiPortal>
           <AgentUpgradeAgentModal
@@ -497,6 +520,12 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
           ) : (
             <FleetServerOnPremUnhealthyCallout onClickAddFleetServer={onClickAddFleetServer} />
           )}
+          <EuiSpacer size="l" />
+        </>
+      )}
+      {shouldDisplayAgentSoftLimit && (
+        <>
+          <AgentSoftLimitCallout />
           <EuiSpacer size="l" />
         </>
       )}

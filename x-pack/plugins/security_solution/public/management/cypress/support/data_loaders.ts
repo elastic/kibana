@@ -7,7 +7,10 @@
 
 // / <reference types="cypress" />
 
-import type { CasePostRequest } from '@kbn/cases-plugin/common/api';
+import type { CasePostRequest } from '@kbn/cases-plugin/common';
+import execa from 'execa';
+import { startRuntimeServices } from '../../../../scripts/endpoint/endpoint_agent_runner/runtime';
+import { runFleetServerIfNeeded } from '../../../../scripts/endpoint/endpoint_agent_runner/fleet_server';
 import {
   sendEndpointActionResponse,
   sendFleetActionResponse,
@@ -46,8 +49,11 @@ import {
   indexEndpointRuleAlerts,
 } from '../../../../common/endpoint/data_loaders/index_endpoint_rule_alerts';
 import {
+  startEndpointHost,
   createAndEnrollEndpointHost,
   destroyEndpointHost,
+  stopEndpointHost,
+  VAGRANT_CWD,
 } from '../../../../scripts/endpoint/common/endpoint_host_services';
 
 /**
@@ -67,8 +73,11 @@ export const dataLoaders = (
   const stackServicesPromise = createRuntimeServices({
     kibanaUrl: config.env.KIBANA_URL,
     elasticsearchUrl: config.env.ELASTICSEARCH_URL,
-    username: config.env.ELASTICSEARCH_USERNAME,
-    password: config.env.ELASTICSEARCH_PASSWORD,
+    fleetServerUrl: config.env.FLEET_SERVER_URL,
+    username: config.env.KIBANA_USERNAME,
+    password: config.env.KIBANA_PASSWORD,
+    esUsername: config.env.ELASTICSEARCH_USERNAME,
+    esPassword: config.env.ELASTICSEARCH_PASSWORD,
     asSuperuser: true,
   });
 
@@ -79,7 +88,7 @@ export const dataLoaders = (
       agentPolicyName,
     }: {
       policyName: string;
-      endpointPackageVersion: string;
+      endpointPackageVersion?: string;
       agentPolicyName?: string;
     }) => {
       const { kbnClient } = await stackServicesPromise;
@@ -110,7 +119,15 @@ export const dataLoaders = (
 
     indexEndpointHosts: async (options: IndexEndpointHostsCyTaskOptions = {}) => {
       const { kbnClient, esClient } = await stackServicesPromise;
-      const { count: numHosts, version, os, isolation, withResponseActions } = options;
+      const {
+        count: numHosts,
+        version,
+        os,
+        isolation,
+        withResponseActions,
+        numResponseActions,
+        alertIds,
+      } = options;
 
       return cyLoadEndpointDataHandler(esClient, kbnClient, {
         numHosts,
@@ -118,6 +135,8 @@ export const dataLoaders = (
         os,
         isolation,
         withResponseActions,
+        numResponseActions,
+        alertIds,
       });
     },
 
@@ -189,12 +208,36 @@ export const dataLoadersForRealEndpoints = (
   on: Cypress.PluginEvents,
   config: Cypress.PluginConfigOptions
 ): void => {
+  let fleetServerContainerId: string | undefined;
+
   const stackServicesPromise = createRuntimeServices({
     kibanaUrl: config.env.KIBANA_URL,
     elasticsearchUrl: config.env.ELASTICSEARCH_URL,
-    username: config.env.ELASTICSEARCH_USERNAME,
-    password: config.env.ELASTICSEARCH_PASSWORD,
+    fleetServerUrl: config.env.FLEET_SERVER_URL,
+    username: config.env.KIBANA_USERNAME,
+    password: config.env.KIBANA_PASSWORD,
+    esUsername: config.env.ELASTICSEARCH_USERNAME,
+    esPassword: config.env.ELASTICSEARCH_PASSWORD,
     asSuperuser: true,
+  });
+
+  on('before:run', async () => {
+    await startRuntimeServices({
+      kibanaUrl: config.env.KIBANA_URL,
+      elasticUrl: config.env.ELASTICSEARCH_URL,
+      fleetServerUrl: config.env.FLEET_SERVER_URL,
+      username: config.env.KIBANA_USERNAME,
+      password: config.env.KIBANA_PASSWORD,
+      asSuperuser: true,
+    });
+    const data = await runFleetServerIfNeeded();
+    fleetServerContainerId = data?.fleetServerContainerId;
+  });
+
+  on('after:run', () => {
+    if (fleetServerContainerId) {
+      execa.sync('docker', ['kill', fleetServerContainerId]);
+    }
   });
 
   on('task', {
@@ -208,7 +251,7 @@ export const dataLoadersForRealEndpoints = (
         log,
         kbnClient,
       }).then((newHost) => {
-        return waitForEndpointToStreamData(kbnClient, newHost.agentId, 120000).then(() => {
+        return waitForEndpointToStreamData(kbnClient, newHost.agentId, 360000).then(() => {
           return newHost;
         });
       });
@@ -219,6 +262,110 @@ export const dataLoadersForRealEndpoints = (
     ): Promise<null> => {
       const { kbnClient } = await stackServicesPromise;
       return destroyEndpointHost(kbnClient, createdHost).then(() => null);
+    },
+
+    createFileOnEndpoint: async ({
+      hostname,
+      path,
+      content,
+    }: {
+      hostname: string;
+      path: string;
+      content: string;
+    }): Promise<null> => {
+      if (process.env.CI) {
+        await execa('vagrant', ['ssh', '--', `echo ${content} > ${path}`], {
+          env: {
+            VAGRANT_CWD,
+          },
+        });
+      } else {
+        await execa(`multipass`, ['exec', hostname, '--', 'sh', '-c', `echo ${content} > ${path}`]);
+      }
+      return null;
+    },
+
+    uploadFileToEndpoint: async ({
+      hostname,
+      srcPath,
+      destPath = '.',
+    }: {
+      hostname: string;
+      srcPath: string;
+      destPath: string;
+    }): Promise<null> => {
+      if (process.env.CI) {
+        await execa('vagrant', ['upload', srcPath, destPath], {
+          env: {
+            VAGRANT_CWD,
+          },
+        });
+      } else {
+        await execa(`multipass`, ['transfer', srcPath, `${hostname}:${destPath}`]);
+      }
+
+      return null;
+    },
+
+    installPackagesOnEndpoint: async ({
+      hostname,
+      packages,
+    }: {
+      hostname: string;
+      packages: string[];
+    }): Promise<null> => {
+      await execa(`multipass`, [
+        'exec',
+        hostname,
+        '--',
+        'sh',
+        '-c',
+        `sudo apt install -y ${packages.join(' ')}`,
+      ]);
+      return null;
+    },
+
+    readZippedFileContentOnEndpoint: async ({
+      hostname,
+      path,
+      password,
+    }: {
+      hostname: string;
+      path: string;
+      password?: string;
+    }): Promise<string> => {
+      let result;
+
+      if (process.env.CI) {
+        result = await execa(
+          `vagrant`,
+          ['ssh', '--', `unzip -p ${password ? `-P ${password} ` : ''}${path}`],
+          {
+            env: {
+              VAGRANT_CWD,
+            },
+          }
+        );
+      } else {
+        result = await execa(`multipass`, [
+          'exec',
+          hostname,
+          '--',
+          'sh',
+          '-c',
+          `unzip -p ${password ? `-P ${password} ` : ''}${path}`,
+        ]);
+      }
+
+      return result.stdout;
+    },
+
+    stopEndpointHost: async (hostName) => {
+      return stopEndpointHost(hostName);
+    },
+
+    startEndpointHost: async (hostName) => {
+      return startEndpointHost(hostName);
     },
   });
 };

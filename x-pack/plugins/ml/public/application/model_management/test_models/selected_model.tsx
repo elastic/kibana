@@ -37,7 +37,7 @@ export const SelectedModel: FC<Props> = ({ model, inputType, deploymentId }) => 
 
   const inferrer = useMemo<InferrerType | undefined>(() => {
     if (model.model_type === TRAINED_MODEL_TYPE.PYTORCH) {
-      const taskType = Object.keys(model.inference_config)[0];
+      const taskType = Object.keys(model.inference_config ?? {})[0];
 
       switch (taskType) {
         case SUPPORTED_PYTORCH_TASKS.NER:

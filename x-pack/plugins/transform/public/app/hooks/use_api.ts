@@ -10,6 +10,7 @@ import { useMemo } from 'react';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
+import { DEFAULT_SAMPLER_SHARD_SIZE } from '@kbn/ml-agg-utils';
 
 import {
   ReauthorizeTransformsRequestSchema,
@@ -54,16 +55,13 @@ import type {
 } from '../../../common/api_schemas/update_transforms';
 import type { GetTransformsStatsResponseSchema } from '../../../common/api_schemas/transforms_stats';
 import type { TransformId } from '../../../common/types/transform';
-import { API_BASE_PATH } from '../../../common/constants';
+import { addInternalBasePath } from '../../../common/constants';
 import type { EsIndex } from '../../../common/types/es_index';
 import type { EsIngestPipeline } from '../../../common/types/es_ingest_pipeline';
 
 import { useAppDependencies } from '../app_dependencies';
 
 import type { SavedSearchQuery } from './use_search_items';
-
-// Default sampler shard size used for field histograms
-export const DEFAULT_SAMPLER_SHARD_SIZE = 5000;
 
 export interface FieldHistogramRequestConfig {
   fieldName: string;
@@ -81,7 +79,7 @@ export const useApi = () => {
     () => ({
       async getTransformNodes(): Promise<GetTransformNodesResponseSchema | IHttpFetchError> {
         try {
-          return await http.get(`${API_BASE_PATH}transforms/_nodes`);
+          return await http.get(addInternalBasePath(`transforms/_nodes`), { version: '1' });
         } catch (e) {
           return e;
         }
@@ -90,7 +88,9 @@ export const useApi = () => {
         transformId: TransformId
       ): Promise<GetTransformsResponseSchema | IHttpFetchError> {
         try {
-          return await http.get(`${API_BASE_PATH}transforms/${transformId}`);
+          return await http.get(addInternalBasePath(`transforms/${transformId}`), {
+            version: '1',
+          });
         } catch (e) {
           return e;
         }
@@ -99,7 +99,10 @@ export const useApi = () => {
         fetchOptions: FetchOptions = {}
       ): Promise<GetTransformsResponseSchema | IHttpFetchError> {
         try {
-          return await http.get(`${API_BASE_PATH}transforms`, fetchOptions);
+          return await http.get(addInternalBasePath(`transforms`), {
+            ...fetchOptions,
+            version: '1',
+          });
         } catch (e) {
           return e;
         }
@@ -108,7 +111,9 @@ export const useApi = () => {
         transformId: TransformId
       ): Promise<GetTransformsStatsResponseSchema | IHttpFetchError> {
         try {
-          return await http.get(`${API_BASE_PATH}transforms/${transformId}/_stats`);
+          return await http.get(addInternalBasePath(`transforms/${transformId}/_stats`), {
+            version: '1',
+          });
         } catch (e) {
           return e;
         }
@@ -117,7 +122,10 @@ export const useApi = () => {
         fetchOptions: FetchOptions = {}
       ): Promise<GetTransformsStatsResponseSchema | IHttpFetchError> {
         try {
-          return await http.get(`${API_BASE_PATH}transforms/_stats`, fetchOptions);
+          return await http.get(addInternalBasePath(`transforms/_stats`), {
+            ...fetchOptions,
+            version: '1',
+          });
         } catch (e) {
           return e;
         }
@@ -127,8 +135,9 @@ export const useApi = () => {
         transformConfig: PutTransformsRequestSchema
       ): Promise<PutTransformsResponseSchema | IHttpFetchError> {
         try {
-          return await http.put(`${API_BASE_PATH}transforms/${transformId}`, {
+          return await http.put(addInternalBasePath(`transforms/${transformId}`), {
             body: JSON.stringify(transformConfig),
+            version: '1',
           });
         } catch (e) {
           return e;
@@ -139,8 +148,9 @@ export const useApi = () => {
         transformConfig: PostTransformsUpdateRequestSchema
       ): Promise<PostTransformsUpdateResponseSchema | IHttpFetchError> {
         try {
-          return await http.post(`${API_BASE_PATH}transforms/${transformId}/_update`, {
+          return await http.post(addInternalBasePath(`transforms/${transformId}/_update`), {
             body: JSON.stringify(transformConfig),
+            version: '1',
           });
         } catch (e) {
           return e;
@@ -150,8 +160,9 @@ export const useApi = () => {
         reqBody: DeleteTransformsRequestSchema
       ): Promise<DeleteTransformsResponseSchema | IHttpFetchError> {
         try {
-          return await http.post(`${API_BASE_PATH}delete_transforms`, {
+          return await http.post(addInternalBasePath(`delete_transforms`), {
             body: JSON.stringify(reqBody),
+            version: '1',
           });
         } catch (e) {
           return e;
@@ -161,8 +172,9 @@ export const useApi = () => {
         obj: PostTransformsPreviewRequestSchema
       ): Promise<PostTransformsPreviewResponseSchema | IHttpFetchError> {
         try {
-          return await http.post(`${API_BASE_PATH}transforms/_preview`, {
+          return await http.post(addInternalBasePath(`transforms/_preview`), {
             body: JSON.stringify(obj),
+            version: '1',
           });
         } catch (e) {
           return e;
@@ -172,8 +184,9 @@ export const useApi = () => {
         reqBody: ReauthorizeTransformsRequestSchema
       ): Promise<ReauthorizeTransformsResponseSchema | IHttpFetchError> {
         try {
-          return await http.post(`${API_BASE_PATH}reauthorize_transforms`, {
+          return await http.post(addInternalBasePath(`reauthorize_transforms`), {
             body: JSON.stringify(reqBody),
+            version: '1',
           });
         } catch (e) {
           return e;
@@ -184,8 +197,9 @@ export const useApi = () => {
         reqBody: ResetTransformsRequestSchema
       ): Promise<ResetTransformsResponseSchema | IHttpFetchError> {
         try {
-          return await http.post(`${API_BASE_PATH}reset_transforms`, {
+          return await http.post(addInternalBasePath(`reset_transforms`), {
             body: JSON.stringify(reqBody),
+            version: '1',
           });
         } catch (e) {
           return e;
@@ -195,8 +209,9 @@ export const useApi = () => {
         reqBody: StartTransformsRequestSchema
       ): Promise<StartTransformsResponseSchema | IHttpFetchError> {
         try {
-          return await http.post(`${API_BASE_PATH}start_transforms`, {
+          return await http.post(addInternalBasePath(`start_transforms`), {
             body: JSON.stringify(reqBody),
+            version: '1',
           });
         } catch (e) {
           return e;
@@ -206,8 +221,9 @@ export const useApi = () => {
         transformsInfo: StopTransformsRequestSchema
       ): Promise<StopTransformsResponseSchema | IHttpFetchError> {
         try {
-          return await http.post(`${API_BASE_PATH}stop_transforms`, {
+          return await http.post(addInternalBasePath(`stop_transforms`), {
             body: JSON.stringify(transformsInfo),
+            version: '1',
           });
         } catch (e) {
           return e;
@@ -217,8 +233,9 @@ export const useApi = () => {
         transformsInfo: ScheduleNowTransformsRequestSchema
       ): Promise<ScheduleNowTransformsResponseSchema | IHttpFetchError> {
         try {
-          return await http.post(`${API_BASE_PATH}schedule_now_transforms`, {
+          return await http.post(addInternalBasePath(`schedule_now_transforms`), {
             body: JSON.stringify(transformsInfo),
+            version: '1',
           });
         } catch (e) {
           return e;
@@ -232,11 +249,12 @@ export const useApi = () => {
         { messages: GetTransformsAuditMessagesResponseSchema; total: number } | IHttpFetchError
       > {
         try {
-          return await http.get(`${API_BASE_PATH}transforms/${transformId}/messages`, {
+          return await http.get(addInternalBasePath(`transforms/${transformId}/messages`), {
             query: {
               sortField,
               sortDirection,
             },
+            version: '1',
           });
         } catch (e) {
           return e;
@@ -244,14 +262,14 @@ export const useApi = () => {
       },
       async getEsIndices(): Promise<EsIndex[] | IHttpFetchError> {
         try {
-          return await http.get(`/api/index_management/indices`);
+          return await http.get(`/api/index_management/indices`, { version: '1' });
         } catch (e) {
           return e;
         }
       },
       async getEsIngestPipelines(): Promise<EsIngestPipeline[] | IHttpFetchError> {
         try {
-          return await http.get('/api/ingest_pipelines');
+          return await http.get('/api/ingest_pipelines', { version: '1' });
         } catch (e) {
           return e;
         }
@@ -264,13 +282,14 @@ export const useApi = () => {
         samplerShardSize = DEFAULT_SAMPLER_SHARD_SIZE
       ): Promise<FieldHistogramsResponseSchema | IHttpFetchError> {
         try {
-          return await http.post(`${API_BASE_PATH}field_histograms/${dataViewTitle}`, {
+          return await http.post(addInternalBasePath(`field_histograms/${dataViewTitle}`), {
             body: JSON.stringify({
               query,
               fields,
               samplerShardSize,
               ...(runtimeMappings !== undefined ? { runtimeMappings } : {}),
             }),
+            version: '1',
           });
         } catch (e) {
           return e;

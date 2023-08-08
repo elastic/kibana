@@ -13,6 +13,7 @@ export class FieldEditorService extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly retry = this.ctx.getService('retry');
   private readonly find = this.ctx.getService('find');
+  private readonly comboBox = this.ctx.getService('comboBox');
 
   public async setName(name: string, clearFirst = false, typeCharByChar = false) {
     await this.testSubjects.setValue('nameField > input', name, {
@@ -31,6 +32,15 @@ export class FieldEditorService extends FtrService {
   }
   public async disableValue() {
     await this.testSubjects.setEuiSwitch('valueRow > toggle', 'uncheck');
+  }
+  public async clearScript() {
+    const editor = await (
+      await this.testSubjects.find('valueRow')
+    ).findByClassName('react-monaco-editor-container');
+    const textarea = await editor.findByClassName('monaco-mouse-cursor-text');
+    await textarea.click();
+    const input = await this.find.activeElement();
+    await input.clearValueWithKeyboard();
   }
   public async typeScript(script: string) {
     const editor = await (
@@ -81,6 +91,10 @@ export class FieldEditorService extends FtrService {
     await this.testSubjects.setValue('truncateEditorLength', length);
   }
 
+  public async setFieldType(type: string) {
+    await this.comboBox.set('typeField', type);
+  }
+
   public async setFieldFormat(format: string) {
     await this.find.clickByCssSelector(
       'select[data-test-subj="editorSelectedFormatId"] > option[value="' + format + '"]'
@@ -108,5 +122,9 @@ export class FieldEditorService extends FtrService {
         timeout: 1000,
       });
     });
+  }
+
+  public async waitUntilClosed() {
+    await this.testSubjects.waitForDeleted('fieldEditor');
   }
 }

@@ -112,7 +112,7 @@ describe('useFetch', () => {
     });
 
     expect(result.current.data).toEqual(undefined);
-    expect(result.current.isLoading).toEqual(true);
+    expect(result.current.isLoading).toEqual(false);
     expect(result.current.error).toEqual(undefined);
 
     expect(mockFetchFn).not.toHaveBeenCalled();

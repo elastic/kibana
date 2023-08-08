@@ -48,7 +48,7 @@ import {
 } from '../../../../../common/constants/annotations';
 import { withKibana } from '@kbn/kibana-react-plugin/public';
 import { ML_APP_LOCATOR, ML_PAGES } from '../../../../../common/constants/locator';
-import { timeFormatter } from '../../../../../common/util/date_utils';
+import { timeFormatter } from '@kbn/ml-date-utils';
 import { MlAnnotationUpdatesContext } from '../../../contexts/ml/ml_annotation_updates_context';
 import { DatafeedChartFlyout } from '../../../jobs/jobs_list/components/datafeed_chart_flyout';
 import { RevertModelSnapshotFlyout } from '../../model_snapshots/revert_model_snapshot_flyout';

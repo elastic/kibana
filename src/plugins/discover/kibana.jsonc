@@ -20,12 +20,13 @@
       "savedObjects",
       "savedObjectsFinder",
       "savedObjectsManagement",
+      "savedSearch",
       "dataViewFieldEditor",
       "dataViewEditor",
       "expressions",
-      "unifiedFieldList",
       "unifiedSearch",
-      "unifiedHistogram"
+      "unifiedHistogram",
+      "contentManagement"
     ],
     "optionalPlugins": [
       "home",
@@ -36,14 +37,7 @@
       "savedObjectsTaggingOss",
       "lens"
     ],
-    "requiredBundles": [
-      "kibanaUtils",
-      "kibanaReact",
-      "unifiedSearch",
-      "savedSearch"
-    ],
-    "extraPublicDirs": [
-      "common"
-    ]
+    "requiredBundles": ["kibanaUtils", "kibanaReact", "unifiedSearch"],
+    "extraPublicDirs": ["common"]
   }
 }

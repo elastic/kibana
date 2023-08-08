@@ -23,7 +23,7 @@ import {
  */
 export const mockState: SyntheticsAppState = {
   ui: {
-    alertFlyoutVisible: false,
+    alertFlyoutVisible: null,
     basePath: 'yyz',
     esKuery: '',
     integrationsPopoverOpen: null,
@@ -85,6 +85,13 @@ export const mockState: SyntheticsAppState = {
     error: null,
     loading: false,
     loaded: false,
+    monitorFilterOptions: {
+      monitorTypes: [],
+      tags: [],
+      locations: [],
+      projects: [],
+      schedules: [],
+    },
   },
   overview: {
     pageState: {
@@ -123,6 +130,7 @@ export const mockState: SyntheticsAppState = {
   },
   dynamicSettings: {
     loading: false,
+    locationMonitors: [],
   },
   defaultAlerting: {
     loading: false,
@@ -140,6 +148,20 @@ export const mockState: SyntheticsAppState = {
     loading: false,
     status: null,
     error: null,
+  },
+  globalParams: {
+    addError: null,
+    editError: null,
+  },
+  certificates: {
+    total: 0,
+  },
+  certsList: {
+    error: null,
+    data: {
+      total: 0,
+      certs: [],
+    },
   },
 };
 

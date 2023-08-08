@@ -6,7 +6,6 @@
  */
 
 import type { IScopedClusterClient } from '@kbn/core/server';
-
 import type { PipelineDefinition } from '../../../common/types/trained_models';
 
 export type ModelService = ReturnType<typeof modelsProvider>;
@@ -50,6 +49,20 @@ export function modelsProvider(client: IScopedClusterClient) {
       }
 
       return modelIdsMap;
+    },
+
+    /**
+     * Deletes associated pipelines of the requested model
+     * @param modelIds
+     */
+    async deleteModelPipelines(modelIds: string[]) {
+      const pipelines = await this.getModelsPipelines(modelIds);
+      const pipelinesIds: string[] = [
+        ...new Set([...pipelines.values()].flatMap((v) => Object.keys(v!))),
+      ];
+      await Promise.all(
+        pipelinesIds.map((id) => client.asCurrentUser.ingest.deletePipeline({ id }))
+      );
     },
   };
 }

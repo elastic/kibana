@@ -32,6 +32,8 @@ import type { UsersComponentsQueryProps } from '../../../users/pages/navigation/
 import type { HostsComponentsQueryProps } from '../../../hosts/pages/navigation/types';
 import { useDashboardHref } from '../../../../common/hooks/use_dashboard_href';
 import { RiskScoresNoDataDetected } from '../risk_score_onboarding/risk_score_no_data_detected';
+import { useRiskEngineStatus } from '../../../../entity_analytics/api/hooks/use_risk_engine_status';
+import { RiskScoreUpdatePanel } from '../../../../entity_analytics/components/risk_score_update_panel';
 
 const StyledEuiFlexGroup = styled(EuiFlexGroup)`
   margin-top: ${({ theme }) => theme.eui.euiSizeL};
@@ -82,13 +84,16 @@ const RiskDetailsTabBodyComponent: React.FC<
     [entityName, riskEntity]
   );
 
-  const { data, loading, refetch, inspect, isDeprecated, isModuleEnabled } = useRiskScore({
-    filterQuery,
-    onlyLatest: false,
-    riskEntity,
-    skip: !overTimeToggleStatus && !contributorsToggleStatus,
-    timerange,
-  });
+  const { data, loading, refetch, inspect, isDeprecated, isModuleEnabled, isAuthorized } =
+    useRiskScore({
+      filterQuery,
+      onlyLatest: false,
+      riskEntity,
+      skip: !overTimeToggleStatus && !contributorsToggleStatus,
+      timerange,
+    });
+
+  const { data: riskScoreEngineStatus } = useRiskEngineStatus();
 
   const rules = useMemo(() => {
     const lastRiskItem = data && data.length > 0 ? data[data.length - 1] : null;
@@ -127,6 +132,14 @@ const RiskDetailsTabBodyComponent: React.FC<
     isDisabled: !isModuleEnabled && !loading,
     isDeprecated: isDeprecated && !loading,
   };
+
+  if (!isAuthorized) {
+    return <>{'TODO: Add RiskScore Upsell'}</>;
+  }
+
+  if (riskScoreEngineStatus?.isUpdateAvailable) {
+    return <RiskScoreUpdatePanel />;
+  }
 
   if (status.isDisabled || status.isDeprecated) {
     return (

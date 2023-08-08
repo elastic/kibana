@@ -8,8 +8,9 @@
 import * as t from 'io-ts';
 import React from 'react';
 import { Redirect } from 'react-router-dom';
+import { customLogsRoutes } from '../components/app/custom_logs/wizard';
+import { systemLogsRoutes } from '../components/app/system_logs';
 import { Home } from '../components/app/home';
-import { CustomLogs } from '../components/app/custom_logs';
 
 export type RouteParams<T extends keyof typeof routes> = DecodeParams<
   typeof routes[T]['params']
@@ -26,26 +27,21 @@ export interface Params {
   path?: t.HasProps;
 }
 
-export const routes = {
+export const baseRoutes = {
   '/': {
-    handler: () => {
-      return <Home />;
-    },
+    handler: () => <Home />,
     params: {},
     exact: true,
   },
   '/overview': {
-    handler: () => {
-      return <Redirect to="/" />;
-    },
+    handler: () => <Redirect to="/" />,
     params: {},
     exact: true,
   },
-  '/customLogs': {
-    handler: () => {
-      return <CustomLogs />;
-    },
-    params: {},
-    exact: true,
-  },
+};
+
+export const routes = {
+  ...baseRoutes,
+  ...customLogsRoutes,
+  ...systemLogsRoutes,
 };

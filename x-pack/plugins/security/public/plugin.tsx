@@ -24,7 +24,9 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 
 import type { SecurityLicense } from '../common/licensing';
 import { SecurityLicenseService } from '../common/licensing';
+import type { UpdateUserProfileHook } from './account_management';
 import { accountManagementApp, UserProfileAPIClient } from './account_management';
+import { getUseUpdateUserProfile } from './account_management/user_profile/use_update_user_profile';
 import { AnalyticsService } from './analytics';
 import { AnonymousAccessService } from './anonymous_access';
 import type { AuthenticationServiceSetup, AuthenticationServiceStart } from './authentication';
@@ -107,7 +109,6 @@ export class SecurityPlugin
       securityLicense: license,
       logoutUrl: getLogoutUrl(core.http),
       securityApiClients: this.securityApiClients,
-      showNavLinks: this.config.showNavLinks,
     });
 
     this.analyticsService.setup({
@@ -132,6 +133,7 @@ export class SecurityPlugin
         authc: this.authc,
         fatalErrors: core.fatalErrors,
         getStartServices: core.getStartServices,
+        uiConfig: this.config.ui,
       });
     }
 
@@ -180,7 +182,10 @@ export class SecurityPlugin
     this.securityCheckupService.start({ http, notifications, docLinks });
 
     if (management) {
-      this.managementService.start({ capabilities: application.capabilities });
+      this.managementService.start({
+        capabilities: application.capabilities,
+        uiConfig: this.config.ui,
+      });
     }
 
     if (share) {
@@ -203,6 +208,16 @@ export class SecurityPlugin
         suggest: this.securityApiClients.userProfiles.suggest.bind(
           this.securityApiClients.userProfiles
         ),
+        update: this.securityApiClients.userProfiles.update.bind(
+          this.securityApiClients.userProfiles
+        ),
+        userProfile$: this.securityApiClients.userProfiles.userProfile$,
+      },
+      hooks: {
+        useUpdateUserProfile: getUseUpdateUserProfile({
+          apiClient: this.securityApiClients.userProfiles,
+          notifications: core.notifications,
+        }),
       },
     };
   }
@@ -243,7 +258,17 @@ export interface SecurityPluginStart {
   /**
    * A set of methods to work with Kibana user profiles.
    */
-  userProfiles: Pick<UserProfileAPIClient, 'getCurrent' | 'bulkGet' | 'suggest'>;
+  userProfiles: Pick<
+    UserProfileAPIClient,
+    'getCurrent' | 'bulkGet' | 'suggest' | 'update' | 'userProfile$'
+  >;
+
+  /**
+   * A set of hooks to work with Kibana user profiles
+   */
+  hooks: {
+    useUpdateUserProfile: UpdateUserProfileHook;
+  };
 
   /**
    * Exposes UI components that will be loaded asynchronously.

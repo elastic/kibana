@@ -772,11 +772,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       it(`runs correctly and populates recovery context for ${searchType} search type`, async () => {
         await initData();
 
-        // delay to let rule run once before adding data
-        await new Promise((resolve) => setTimeout(resolve, 3000));
-        await createEsDocumentsInGroups(1, endDate);
-
-        const docs = await waitForDocs(2);
+        let docs = await waitForDocs(1);
         const activeDoc = docs[0];
         const {
           name: activeName,
@@ -792,6 +788,8 @@ export default function ruleTests({ getService }: FtrProviderContext) {
           /rule 'fire then recovers' is active:\n\n- Value: \d+\n- Conditions Met: Number of matching documents is less than 1 over 4s\n- Timestamp: \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z\n- Link:/
         );
 
+        await createEsDocumentsInGroups(1, endDate);
+        docs = await waitForDocs(2);
         const recoveredDoc = docs[1];
         const {
           name: recoveredName,
@@ -979,6 +977,34 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       });
     });
 
+    describe('aggType and groupBy', () => {
+      it('sets aggType: "count" and groupBy: "all" when they are undefined', async () => {
+        endDate = new Date().toISOString();
+
+        await createEsDocumentsInGroups(ES_GROUPS_TO_WRITE, endDate);
+
+        await createRule({
+          name: 'always fire',
+          esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
+          size: 100,
+          thresholdComparator: '>',
+          threshold: [0],
+          aggType: undefined,
+          groupBy: undefined,
+        });
+
+        const docs = await waitForDocs(2);
+
+        expect(docs[0]._source.hits.length).greaterThan(0);
+        const messagePattern =
+          /rule 'always fire' is active:\n\n- Value: \d+\n- Conditions Met: Number of matching documents is greater than 0 over 20s\n- Timestamp: \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
+        expect(docs[0]._source.params.message).to.match(messagePattern);
+
+        expect(docs[1]._source.hits.length).to.be(0);
+        expect(docs[1]._source.params.message).to.match(/rule 'always fire' is recovered/);
+      });
+    });
+
     async function waitForDocs(count: number): Promise<any[]> {
       return await esTestIndexToolOutput.waitForDocs(
         ES_TEST_INDEX_SOURCE,
@@ -1080,8 +1106,8 @@ export default function ruleTests({ getService }: FtrProviderContext) {
             thresholdComparator: params.thresholdComparator,
             threshold: params.threshold,
             searchType: params.searchType,
-            aggType: params.aggType ?? 'count',
-            groupBy: params.groupBy ?? 'all',
+            aggType: params.aggType,
+            groupBy: params.groupBy,
             aggField: params.aggField,
             termField: params.termField,
             termSize: params.termSize,

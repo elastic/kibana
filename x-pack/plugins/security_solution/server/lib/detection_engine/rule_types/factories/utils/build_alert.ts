@@ -37,6 +37,7 @@ import {
   ALERT_URL,
   ALERT_UUID,
   ALERT_WORKFLOW_STATUS,
+  ALERT_WORKFLOW_TAGS,
   EVENT_KIND,
   SPACE_IDS,
   TIMESTAMP,
@@ -84,7 +85,7 @@ import { transformAlertToRuleAction } from '../../../../../../common/detection_e
 import type {
   AncestorLatest,
   BaseFieldsLatest,
-} from '../../../../../../common/detection_engine/schemas/alerts';
+} from '../../../../../../common/api/detection_engine/model/alerts';
 
 export const generateAlertId = (alert: BaseFieldsLatest) => {
   return createHash('sha256')
@@ -246,6 +247,7 @@ export const buildAlert = (
     [ALERT_RULE_VERSION]: params.version,
     [ALERT_URL]: alertUrl,
     [ALERT_UUID]: alertUuid,
+    [ALERT_WORKFLOW_TAGS]: [],
     ...flattenWithPrefix(ALERT_RULE_META, params.meta),
     // These fields don't exist in the mappings, but leaving here for now to limit changes to the alert building logic
     'kibana.alert.rule.risk_score': params.riskScore,

@@ -16,11 +16,9 @@ interface Props {
 export const EntityComponent: React.FC<Props> = ({ entityName, entityValue }) => {
   return (
     <SecurityCellActions
-      field={{
-        name: entityName,
+      data={{
+        field: entityName,
         value: entityValue,
-        type: 'keyword',
-        aggregatable: true,
       }}
       triggerId={SecurityCellActionsTrigger.DEFAULT}
       mode={CellActionsMode.HOVER_DOWN}

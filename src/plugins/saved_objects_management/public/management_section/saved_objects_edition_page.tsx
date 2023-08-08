@@ -64,6 +64,8 @@ const SavedObjectsEditionPage = ({
         uiSettings={coreStart.uiSettings}
         history={history}
         docLinks={docLinks}
+        settings={coreStart.settings}
+        theme={coreStart.theme}
       />
     </RedirectAppLinks>
   );

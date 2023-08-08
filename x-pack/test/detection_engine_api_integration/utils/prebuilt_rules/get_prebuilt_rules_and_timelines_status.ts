@@ -8,10 +8,11 @@
 import {
   GetPrebuiltRulesAndTimelinesStatusResponse,
   PREBUILT_RULES_STATUS_URL,
-} from '@kbn/security-solution-plugin/common/detection_engine/prebuilt_rules';
+} from '@kbn/security-solution-plugin/common/api/detection_engine/prebuilt_rules';
 import type SuperTest from 'supertest';
 
 /**
+ * (LEGACY)
  * Helper to retrieve the prebuilt rules status
  *
  * @param supertest The supertest deps

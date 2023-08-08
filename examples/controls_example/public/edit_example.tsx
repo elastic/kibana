@@ -14,11 +14,11 @@ import {
   EuiButtonGroup,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLoadingContent,
   EuiPanel,
   EuiSpacer,
   EuiText,
   EuiTitle,
+  EuiSkeletonRectangle,
 } from '@elastic/eui';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { OPTIONS_LIST_CONTROL, RANGE_SLIDER_CONTROL } from '@kbn/controls-plugin/common';
@@ -77,7 +77,7 @@ export const EditExample = () => {
     setIsLoading(true);
 
     // simulated async load await
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    await new Promise((resolve) => setTimeout(resolve, 6000));
 
     let input: Partial<ControlGroupInput> = {};
     const inputAsString = localStorage.getItem(INPUT_KEY);
@@ -180,7 +180,7 @@ export const EditExample = () => {
         {isLoading ? (
           <>
             <EuiSpacer />
-            <EuiLoadingContent lines={1} />
+            <EuiSkeletonRectangle width="100%" height="2em" />
           </>
         ) : null}
         <ControlGroupRenderer

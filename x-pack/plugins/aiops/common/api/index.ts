@@ -5,19 +5,27 @@
  * 2.0.
  */
 
+import type { HttpSetup } from '@kbn/core/public';
+
 import type {
-  AiopsExplainLogRateSpikesSchema,
-  AiopsExplainLogRateSpikesApiAction,
-} from './explain_log_rate_spikes';
+  AiopsLogRateAnalysisSchema,
+  AiopsLogRateAnalysisApiAction,
+} from './log_rate_analysis';
 import { streamReducer } from './stream_reducer';
 
-export const API_ENDPOINT = {
-  EXPLAIN_LOG_RATE_SPIKES: '/internal/aiops/explain_log_rate_spikes',
+export const AIOPS_API_ENDPOINT = {
+  LOG_RATE_ANALYSIS: '/internal/aiops/log_rate_analysis',
+  CATEGORIZATION_FIELD_VALIDATION: '/internal/aiops/categorization_field_validation',
 } as const;
 
-export interface ApiExplainLogRateSpikes {
-  endpoint: typeof API_ENDPOINT.EXPLAIN_LOG_RATE_SPIKES;
+type AiopsApiEndpointKeys = keyof typeof AIOPS_API_ENDPOINT;
+export type AiopsApiEndpoint = typeof AIOPS_API_ENDPOINT[AiopsApiEndpointKeys];
+
+export interface AiopsApiLogRateAnalysis {
+  http: HttpSetup;
+  endpoint: AiopsApiEndpoint;
+  apiVersion: string;
   reducer: typeof streamReducer;
-  body: AiopsExplainLogRateSpikesSchema;
-  actions: AiopsExplainLogRateSpikesApiAction;
+  body: AiopsLogRateAnalysisSchema;
+  actions: AiopsLogRateAnalysisApiAction;
 }

@@ -16,15 +16,15 @@ import type {
 import type { Filter } from '@kbn/es-query';
 import type { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
 import {
+  DOC_HIDE_TIME_COLUMN_SETTING,
+  SEARCH_FIELDS_FROM_SOURCE,
+  SORT_DEFAULT_ORDER_SETTING,
+} from '@kbn/discover-utils';
+import {
   DiscoverAppState,
   isEqualFilters,
 } from '../application/main/services/discover_app_state_container';
 import { getSortForSearchSource } from './sorting';
-import {
-  DOC_HIDE_TIME_COLUMN_SETTING,
-  SEARCH_FIELDS_FROM_SOURCE,
-  SORT_DEFAULT_ORDER_SETTING,
-} from '../../common';
 
 /**
  * Preparing data to share the current state as link or CSV/Report
@@ -32,7 +32,8 @@ import {
 export async function getSharingData(
   currentSearchSource: ISearchSource,
   state: DiscoverAppState | SavedSearch,
-  services: { uiSettings: IUiSettingsClient; data: DataPublicPluginStart }
+  services: { uiSettings: IUiSettingsClient; data: DataPublicPluginStart },
+  isPlainRecord?: boolean
 ) {
   const { uiSettings: config, data } = services;
   const searchSource = currentSearchSource.createCopy();
@@ -57,7 +58,7 @@ export async function getSharingData(
     // conditionally add the time field column:
     let timeFieldName: string | undefined;
     const hideTimeColumn = config.get(DOC_HIDE_TIME_COLUMN_SETTING);
-    if (!hideTimeColumn && index && index.timeFieldName) {
+    if (!hideTimeColumn && index && index.timeFieldName && !isPlainRecord) {
       timeFieldName = index.timeFieldName;
     }
     if (timeFieldName && !columns.includes(timeFieldName)) {
@@ -106,7 +107,7 @@ export async function getSharingData(
 
         searchSource.setField('fields', fields);
       }
-      return searchSource.getSerializedFields(true);
+      return searchSource.getSerializedFields(true, false);
     },
     columns,
   };

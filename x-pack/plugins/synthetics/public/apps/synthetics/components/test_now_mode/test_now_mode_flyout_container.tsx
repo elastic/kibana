@@ -83,7 +83,6 @@ export function TestNowModeFlyoutContainer() {
             key={manualTestRun.testRunId}
             manualTestRun={manualTestRun}
             onDone={onDone}
-            showErrors={flyoutOpenTestRun?.testRunId !== manualTestRun.testRunId}
           />
         ))}
       {flyout}

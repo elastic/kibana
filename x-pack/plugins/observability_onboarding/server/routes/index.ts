@@ -8,11 +8,15 @@ import type {
   EndpointOf,
   ServerRouteRepository,
 } from '@kbn/server-route-repository';
-import { statusRouteRepository } from './status/route';
+import { elasticAgentRouteRepository } from './elastic_agent/route';
+import { flowRouteRepository } from './flow/route';
+import { logsOnboardingRouteRepository } from './logs/route';
 
 function getTypedObservabilityOnboardingServerRouteRepository() {
   const repository = {
-    ...statusRouteRepository,
+    ...flowRouteRepository,
+    ...logsOnboardingRouteRepository,
+    ...elasticAgentRouteRepository,
   };
 
   return repository;

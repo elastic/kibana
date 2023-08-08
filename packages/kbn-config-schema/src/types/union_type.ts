@@ -9,13 +9,25 @@
 import typeDetect from 'type-detect';
 import { SchemaTypeError, SchemaTypesError } from '../errors';
 import { internals } from '../internals';
-import { Type, TypeOptions } from './type';
+import { Type, TypeOptions, ExtendsDeepOptions } from './type';
 
 export class UnionType<RTS extends Array<Type<any>>, T> extends Type<T> {
+  private readonly unionTypes: RTS;
+  private readonly typeOptions?: TypeOptions<T>;
+
   constructor(types: RTS, options?: TypeOptions<T>) {
     const schema = internals.alternatives(types.map((type) => type.getSchema())).match('any');
 
     super(schema, options);
+    this.unionTypes = types;
+    this.typeOptions = options;
+  }
+
+  public extendsDeep(options: ExtendsDeepOptions) {
+    return new UnionType(
+      this.unionTypes.map((t) => t.extendsDeep(options)),
+      this.typeOptions
+    );
   }
 
   protected handleError(type: string, { value, details }: Record<string, any>, path: string[]) {

@@ -5,87 +5,49 @@
  * 2.0.
  */
 
-import { useState, useEffect, useRef } from 'react';
-import type { HttpSetup, ToastsApi } from '@kbn/core/public';
-import type { ActionConnector } from '../../../../common/api';
+import { useQuery } from '@tanstack/react-query';
+import type { HttpSetup } from '@kbn/core/public';
+import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
+import { useCasesToast } from '../../../common/use_cases_toast';
+import type { ServerError } from '../../../types';
+import type { ActionConnector } from '../../../../common/types/domain';
+import { connectorsQueriesKeys } from '../constants';
 import { getSeverity } from './api';
 import * as i18n from './translations';
-
-type Severity = Array<{ id: number; name: string }>;
+import type { ResilientSeverity } from './types';
 
 interface Props {
   http: HttpSetup;
-  toastNotifications: Pick<
-    ToastsApi,
-    'get$' | 'add' | 'remove' | 'addSuccess' | 'addWarning' | 'addDanger' | 'addError'
-  >;
   connector?: ActionConnector;
 }
 
-export interface UseGetSeverity {
-  severity: Severity;
-  isLoading: boolean;
-}
-
-export const useGetSeverity = ({ http, toastNotifications, connector }: Props): UseGetSeverity => {
-  const [isLoading, setIsLoading] = useState(true);
-  const [severity, setSeverity] = useState<Severity>([]);
-  const abortCtrl = useRef(new AbortController());
-  const didCancel = useRef(false);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      if (!connector) {
-        setIsLoading(false);
-        return;
-      }
-
-      try {
-        abortCtrl.current = new AbortController();
-        setIsLoading(true);
-
-        const res = await getSeverity({
-          http,
-          signal: abortCtrl.current.signal,
-          connectorId: connector.id,
-        });
-
-        if (!didCancel.current) {
-          setIsLoading(false);
-          setSeverity(res.data ?? []);
-
-          if (res.status && res.status === 'error') {
-            toastNotifications.addDanger({
-              title: i18n.SEVERITY_API_ERROR,
-              text: `${res.serviceMessage ?? res.message}`,
-            });
-          }
+export const useGetSeverity = ({ http, connector }: Props) => {
+  const { showErrorToast } = useCasesToast();
+  return useQuery<ActionTypeExecutorResult<ResilientSeverity>, ServerError>(
+    connectorsQueriesKeys.resilientGetSeverity(connector?.id ?? ''),
+    ({ signal }) => {
+      return getSeverity({
+        http,
+        signal,
+        connectorId: connector?.id ?? '',
+      });
+    },
+    {
+      enabled: Boolean(connector),
+      staleTime: 60 * 1000, // one minute
+      onSuccess: (res) => {
+        if (res.status && res.status === 'error') {
+          showErrorToast(new Error(i18n.SEVERITY_API_ERROR), {
+            title: i18n.SEVERITY_API_ERROR,
+            toastMessage: `${res.serviceMessage ?? res.message}`,
+          });
         }
-      } catch (error) {
-        if (!didCancel.current) {
-          setIsLoading(false);
-          if (error.name !== 'AbortError') {
-            toastNotifications.addDanger({
-              title: i18n.SEVERITY_API_ERROR,
-              text: error.message,
-            });
-          }
-        }
-      }
-    };
-
-    didCancel.current = false;
-    abortCtrl.current.abort();
-    fetchData();
-
-    return () => {
-      didCancel.current = true;
-      abortCtrl.current.abort();
-    };
-  }, [http, connector, toastNotifications]);
-
-  return {
-    severity,
-    isLoading,
-  };
+      },
+      onError: (error: ServerError) => {
+        showErrorToast(error, { title: i18n.SEVERITY_API_ERROR });
+      },
+    }
+  );
 };
+
+export type UseGetSeverity = ReturnType<typeof useGetSeverity>;

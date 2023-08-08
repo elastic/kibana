@@ -2,95 +2,8 @@
   "id": "infra",
   "client": {
     "classes": [],
-    "functions": [
-      {
-        "parentPluginId": "infra",
-        "id": "def-public.LazyLogStreamWrapper",
-        "type": "Function",
-        "tags": [],
-        "label": "LazyLogStreamWrapper",
-        "description": [],
-        "signature": [
-          "(props: ",
-          {
-            "pluginId": "infra",
-            "scope": "public",
-            "docId": "kibInfraPluginApi",
-            "section": "def-public.LogStreamProps",
-            "text": "LogStreamProps"
-          },
-          ") => JSX.Element"
-        ],
-        "path": "x-pack/plugins/infra/public/components/log_stream/lazy_log_stream_wrapper.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "infra",
-            "id": "def-public.LazyLogStreamWrapper.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "props",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "infra",
-                "scope": "public",
-                "docId": "kibInfraPluginApi",
-                "section": "def-public.LogStreamProps",
-                "text": "LogStreamProps"
-              }
-            ],
-            "path": "x-pack/plugins/infra/public/components/log_stream/lazy_log_stream_wrapper.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      }
-    ],
-    "interfaces": [
-      {
-        "parentPluginId": "infra",
-        "id": "def-public.LogStreamProps",
-        "type": "Interface",
-        "tags": [],
-        "label": "LogStreamProps",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "infra",
-            "scope": "public",
-            "docId": "kibInfraPluginApi",
-            "section": "def-public.LogStreamProps",
-            "text": "LogStreamProps"
-          },
-          " extends LogStreamContentProps"
-        ],
-        "path": "x-pack/plugins/infra/public/components/log_stream/log_stream.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "infra",
-            "id": "def-public.LogStreamProps.height",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "height",
-            "description": [],
-            "signature": [
-              "string | number | undefined"
-            ],
-            "path": "x-pack/plugins/infra/public/components/log_stream/log_stream.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      }
-    ],
+    "functions": [],
+    "interfaces": [],
     "enums": [
       {
         "parentPluginId": "infra",
@@ -339,20 +252,6 @@
         },
         {
           "parentPluginId": "infra",
-          "id": "def-public.InfraClientStartExports.logViews",
-          "type": "Object",
-          "tags": [],
-          "label": "logViews",
-          "description": [],
-          "signature": [
-            "LogViewsServiceStart"
-          ],
-          "path": "x-pack/plugins/infra/public/types.ts",
-          "deprecated": false,
-          "trackAdoption": false
-        },
-        {
-          "parentPluginId": "infra",
           "id": "def-public.InfraClientStartExports.metricsExplorerViews",
           "type": "Object",
           "tags": [],
@@ -374,6 +273,20 @@
           "description": [],
           "signature": [
             "ITelemetryClient"
+          ],
+          "path": "x-pack/plugins/infra/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "infra",
+          "id": "def-public.InfraClientStartExports.locators",
+          "type": "Object",
+          "tags": [],
+          "label": "locators",
+          "description": [],
+          "signature": [
+            "InfraLocators"
           ],
           "path": "x-pack/plugins/infra/public/types.ts",
           "deprecated": false,
@@ -532,6 +445,17 @@
           },
           {
             "parentPluginId": "infra",
+            "id": "def-server.InfraConfig.enabled",
+            "type": "boolean",
+            "tags": [],
+            "label": "enabled",
+            "description": [],
+            "path": "x-pack/plugins/infra/common/plugin_config_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "infra",
             "id": "def-server.InfraConfig.inventory",
             "type": "Object",
             "tags": [],
@@ -659,13 +583,27 @@
         },
         {
           "parentPluginId": "infra",
-          "id": "def-server.InfraPluginSetup.logViews",
-          "type": "Object",
+          "id": "def-server.InfraPluginSetup.inventoryViews",
+          "type": "Uncategorized",
           "tags": [],
-          "label": "logViews",
+          "label": "inventoryViews",
           "description": [],
           "signature": [
-            "LogViewsServiceSetup"
+            "void"
+          ],
+          "path": "x-pack/plugins/infra/server/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "infra",
+          "id": "def-server.InfraPluginSetup.metricsExplorerViews",
+          "type": "Uncategorized",
+          "tags": [],
+          "label": "metricsExplorerViews",
+          "description": [],
+          "signature": [
+            "void"
           ],
           "path": "x-pack/plugins/infra/server/types.ts",
           "deprecated": false,
@@ -695,20 +633,6 @@
           "description": [],
           "signature": [
             "InventoryViewsServiceStart"
-          ],
-          "path": "x-pack/plugins/infra/server/types.ts",
-          "deprecated": false,
-          "trackAdoption": false
-        },
-        {
-          "parentPluginId": "infra",
-          "id": "def-server.InfraPluginStart.logViews",
-          "type": "Object",
-          "tags": [],
-          "label": "logViews",
-          "description": [],
-          "signature": [
-            "LogViewsServiceStart"
           ],
           "path": "x-pack/plugins/infra/server/types.ts",
           "deprecated": false,

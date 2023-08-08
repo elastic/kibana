@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RouteConfig, RequestHandler, Logger } from '@kbn/core/server';
+import type { RouteConfig, RequestHandler, Logger, IKibanaResponse } from '@kbn/core/server';
 import { validate } from '@kbn/securitysolution-io-ts-utils';
 
 import { DETECTION_ENGINE_RULES_BULK_DELETE } from '../../../../../../../common/constants';
@@ -13,7 +13,7 @@ import {
   BulkDeleteRulesRequestBody,
   validateQueryRuleByIds,
   BulkCrudRulesResponse,
-} from '../../../../../../../common/detection_engine/rule_management';
+} from '../../../../../../../common/api/detection_engine/rule_management';
 
 import { buildRouteValidation } from '../../../../../../utils/build_validation/route_validation';
 import type {
@@ -54,7 +54,11 @@ export const bulkDeleteRulesRoute = (router: SecuritySolutionPluginRouter, logge
       tags: ['access:securitySolution'],
     },
   };
-  const handler: Handler = async (context, request, response) => {
+  const handler: Handler = async (
+    context,
+    request,
+    response
+  ): Promise<IKibanaResponse<BulkCrudRulesResponse>> => {
     logDeprecatedBulkEndpoint(logger, DETECTION_ENGINE_RULES_BULK_DELETE);
 
     const siemResponse = buildSiemResponse(response);

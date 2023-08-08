@@ -7,4 +7,3 @@
 
 export { isSnoozeActive } from './is_snooze_active';
 export { isSnoozeExpired } from './is_snooze_expired';
-export { utcToLocalUtc, localUtcToUtc } from './timezone_helpers';

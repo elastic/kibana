@@ -6,13 +6,28 @@
  */
 
 import { CONNECTORS_INDEX } from '../..';
-import { setupConnectorsIndices } from '../../index_management/setup_indices';
 
 import { fetchConnectorById, fetchConnectorByIndexName, fetchConnectors } from './fetch_connectors';
 
-jest.mock('../../index_management/setup_indices', () => ({
-  setupConnectorsIndices: jest.fn(),
-}));
+const indexNotFoundError = {
+  meta: {
+    body: {
+      error: {
+        type: 'index_not_found_exception',
+      },
+    },
+  },
+};
+
+const otherError = {
+  meta: {
+    body: {
+      error: {
+        type: 'other_error',
+      },
+    },
+  },
+};
 
 describe('fetchConnectors lib', () => {
   const mockClient = {
@@ -46,49 +61,30 @@ describe('fetchConnectors lib', () => {
         index: CONNECTORS_INDEX,
       });
     });
-    it('should call setup connectors on index not found error', async () => {
-      mockClient.asCurrentUser.get.mockImplementationOnce(() =>
-        Promise.reject({
-          meta: {
-            body: {
-              error: {
-                type: 'index_not_found_exception',
-              },
-            },
-          },
-        })
-      );
+    it('should return undefined on index not found error', async () => {
+      mockClient.asCurrentUser.get.mockImplementationOnce(() => Promise.reject(indexNotFoundError));
       await expect(fetchConnectorById(mockClient as any, 'id')).resolves.toEqual(undefined);
       expect(mockClient.asCurrentUser.get).toHaveBeenCalledWith({
         id: 'id',
         index: CONNECTORS_INDEX,
       });
-      expect(setupConnectorsIndices as jest.Mock).toHaveBeenCalledWith(mockClient.asCurrentUser);
     });
-    it('should not call setup connectors on other errors', async () => {
-      mockClient.asCurrentUser.get.mockImplementationOnce(() =>
-        Promise.reject({
-          meta: {
-            body: {
-              error: {
-                type: 'other error',
-              },
-            },
-          },
-        })
-      );
-      await expect(fetchConnectorById(mockClient as any, 'id')).resolves.toEqual(undefined);
+    it('should throw on other errors', async () => {
+      mockClient.asCurrentUser.get.mockImplementationOnce(() => Promise.reject(otherError));
+      await expect(fetchConnectorById(mockClient as any, 'id')).rejects.toEqual(otherError);
       expect(mockClient.asCurrentUser.get).toHaveBeenCalledWith({
         id: 'id',
         index: CONNECTORS_INDEX,
       });
-      expect(setupConnectorsIndices as jest.Mock).not.toHaveBeenCalled();
     });
   });
   describe('fetch connector by name', () => {
     it('should fetch connector by index name', async () => {
       mockClient.asCurrentUser.search.mockImplementationOnce(() =>
         Promise.resolve({ hits: { hits: [{ _id: 'connectorId', _source: { source: 'source' } }] } })
+      );
+      mockClient.asCurrentUser.get.mockImplementationOnce(() =>
+        Promise.resolve({ _id: 'connectorId', _source: { source: 'source' } })
       );
       await expect(fetchConnectorByIndexName(mockClient as any, 'id')).resolves.toEqual({
         id: 'connectorId',
@@ -103,15 +99,9 @@ describe('fetchConnectors lib', () => {
         },
       });
     });
-    it('should call setup connectors on index not found error', async () => {
+    it('should return undefined on index not found error', async () => {
       mockClient.asCurrentUser.search.mockImplementationOnce(() =>
-        Promise.reject({
-          meta: {
-            body: {
-              error: { type: 'index_not_found_exception' },
-            },
-          },
-        })
+        Promise.reject(indexNotFoundError)
       );
       await expect(fetchConnectorByIndexName(mockClient as any, 'id')).resolves.toEqual(undefined);
       expect(mockClient.asCurrentUser.search).toHaveBeenCalledWith({
@@ -122,21 +112,10 @@ describe('fetchConnectors lib', () => {
           },
         },
       });
-      expect(setupConnectorsIndices as jest.Mock).toHaveBeenCalledWith(mockClient.asCurrentUser);
     });
-    it('should not call setup connectors on other errors', async () => {
-      mockClient.asCurrentUser.search.mockImplementationOnce(() =>
-        Promise.reject({
-          meta: {
-            body: {
-              error: {
-                type: 'other error',
-              },
-            },
-          },
-        })
-      );
-      await expect(fetchConnectorByIndexName(mockClient as any, 'id')).resolves.toEqual(undefined);
+    it('should throw on other errors', async () => {
+      mockClient.asCurrentUser.search.mockImplementationOnce(() => Promise.reject(otherError));
+      await expect(fetchConnectorByIndexName(mockClient as any, 'id')).rejects.toEqual(otherError);
       expect(mockClient.asCurrentUser.search).toHaveBeenCalledWith({
         index: CONNECTORS_INDEX,
         query: {
@@ -145,7 +124,6 @@ describe('fetchConnectors lib', () => {
           },
         },
       });
-      expect(setupConnectorsIndices as jest.Mock).not.toHaveBeenCalled();
     });
   });
   describe('fetch connectors', () => {
@@ -194,15 +172,9 @@ describe('fetchConnectors lib', () => {
       });
       expect(mockClient.asCurrentUser.search).toHaveBeenCalledTimes(3);
     });
-    it('should call setup connectors on index not found error', async () => {
+    it('should return empty array on index not found error', async () => {
       mockClient.asCurrentUser.search.mockImplementationOnce(() =>
-        Promise.reject({
-          meta: {
-            body: {
-              error: { type: 'index_not_found_exception' },
-            },
-          },
-        })
+        Promise.reject(indexNotFoundError)
       );
       await expect(fetchConnectors(mockClient as any)).resolves.toEqual([]);
       expect(mockClient.asCurrentUser.search).toHaveBeenCalledWith({
@@ -211,28 +183,16 @@ describe('fetchConnectors lib', () => {
         query: { match_all: {} },
         size: 1000,
       });
-      expect(setupConnectorsIndices as jest.Mock).toHaveBeenCalledWith(mockClient.asCurrentUser);
     });
-    it('should not call setup connectors on other errors', async () => {
-      mockClient.asCurrentUser.search.mockImplementationOnce(() =>
-        Promise.reject({
-          meta: {
-            body: {
-              error: {
-                type: 'other error',
-              },
-            },
-          },
-        })
-      );
-      await expect(fetchConnectors(mockClient as any)).resolves.toEqual([]);
+    it('should throw on other errors', async () => {
+      mockClient.asCurrentUser.search.mockImplementationOnce(() => Promise.reject(otherError));
+      await expect(fetchConnectors(mockClient as any)).rejects.toEqual(otherError);
       expect(mockClient.asCurrentUser.search).toHaveBeenCalledWith({
         from: 0,
         index: CONNECTORS_INDEX,
         query: { match_all: {} },
         size: 1000,
       });
-      expect(setupConnectorsIndices as jest.Mock).not.toHaveBeenCalled();
     });
   });
 });

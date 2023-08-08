@@ -11,12 +11,12 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { Subscription } from 'rxjs';
 
-import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { DataView } from '@kbn/data-plugin/common';
 import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
 import type { ESQuery } from '../../../common/typed_json';
 
 import type { inputsModel } from '../../common/store';
+import type { RunTimeMappings } from '../../common/store/sourcerer/model';
 import { useKibana } from '../../common/lib/kibana';
 import { createFilter } from '../../common/containers/helpers';
 import { timelineActions } from '../store/timeline';
@@ -89,7 +89,7 @@ export interface UseTimelineEventsProps {
   indexNames: string[];
   language?: KueryFilterQueryKind;
   limit: number;
-  runtimeMappings: MappingRuntimeFields;
+  runtimeMappings: RunTimeMappings;
   skip?: boolean;
   sort?: TimelineRequestSortField[];
   startDate?: string;
@@ -356,7 +356,7 @@ export const useTimelineEventsHandler = ({
         querySize: prevRequest?.pagination.querySize ?? 0,
         sort: prevRequest?.sort ?? initSortDefault,
         timerange: prevRequest?.timerange ?? {},
-        runtimeMappings: prevRequest?.runtimeMappings ?? {},
+        runtimeMappings: (prevRequest?.runtimeMappings ?? {}) as RunTimeMappings,
         ...deStructureEqlOptions(prevEqlRequest),
       };
 

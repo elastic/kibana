@@ -41,8 +41,8 @@ describe('SessionManagementService', () => {
   });
 
   afterEach(() => {
-    mockSessionIndexInitialize.mockReset();
-    mockSessionIndexCleanUp.mockReset();
+    mockSessionIndexInitialize.mockClear();
+    mockSessionIndexCleanUp.mockClear();
   });
 
   describe('setup()', () => {

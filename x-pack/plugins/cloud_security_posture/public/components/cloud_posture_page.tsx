@@ -15,14 +15,13 @@ import { SubscriptionNotAllowed } from './subscription_not_allowed';
 import { useSubscriptionStatus } from '../common/hooks/use_subscription_status';
 import { FullSizeCenteredPage } from './full_size_centered_page';
 import { CspLoadingState } from './csp_loading_state';
+import { useLicenseManagementLocatorApi } from '../common/api/use_license_management_locator_api';
 
 export const LOADING_STATE_TEST_SUBJECT = 'cloud_posture_page_loading';
 export const ERROR_STATE_TEST_SUBJECT = 'cloud_posture_page_error';
 export const PACKAGE_NOT_INSTALLED_TEST_SUBJECT = 'cloud_posture_page_package_not_installed';
 export const CSPM_INTEGRATION_NOT_INSTALLED_TEST_SUBJECT = 'cloud_posture_page_cspm_not_installed';
 export const KSPM_INTEGRATION_NOT_INSTALLED_TEST_SUBJECT = 'cloud_posture_page_kspm_not_installed';
-export const VULN_MGMT_INTEGRATION_NOT_INSTALLED_TEST_SUBJECT =
-  'cloud_posture_page_vuln_mgmt_not_installed';
 export const DEFAULT_NO_DATA_TEST_SUBJECT = 'cloud_posture_page_no_data';
 export const SUBSCRIPTION_NOT_ALLOWED_TEST_SUBJECT = 'cloud_posture_page_subscription_not_allowed';
 
@@ -152,9 +151,9 @@ export const defaultNoDataRenderer = () => (
   </FullSizeCenteredPage>
 );
 
-const subscriptionNotAllowedRenderer = () => (
+const subscriptionNotAllowedRenderer = (licenseManagementLocator?: string) => (
   <FullSizeCenteredPage data-test-subj={SUBSCRIPTION_NOT_ALLOWED_TEST_SUBJECT}>
-    <SubscriptionNotAllowed />
+    <SubscriptionNotAllowed licenseManagementLocator={licenseManagementLocator} />
   </FullSizeCenteredPage>
 );
 
@@ -174,18 +173,19 @@ export const CloudPosturePage = <TData, TError>({
   noDataRenderer = defaultNoDataRenderer,
 }: CloudPosturePageProps<TData, TError>) => {
   const subscriptionStatus = useSubscriptionStatus();
+  const getLicenseManagementLocator = useLicenseManagementLocatorApi();
 
   const render = () => {
     if (subscriptionStatus.isError) {
       return defaultErrorRenderer(subscriptionStatus.error);
     }
 
-    if (subscriptionStatus.isLoading) {
+    if (subscriptionStatus.isLoading || getLicenseManagementLocator.isLoading) {
       return defaultLoadingRenderer();
     }
 
     if (!subscriptionStatus.data) {
-      return subscriptionNotAllowedRenderer();
+      return subscriptionNotAllowedRenderer(getLicenseManagementLocator.data);
     }
 
     if (!query) {

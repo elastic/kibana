@@ -6,6 +6,8 @@
  */
 import React from 'react';
 import { EuiSuperSelect } from '@elastic/eui';
+import { useUiSetting } from '@kbn/kibana-react-plugin/public';
+import { syntheticsThrottlingEnabled } from '@kbn/observability-plugin/public';
 import { useConnectionProfiles } from './use_connection_profiles';
 import { ThrottlingDisabledCallout } from './throttling_disabled_callout';
 import { ThrottlingConfig } from '../../../../../../../common/runtime_types';
@@ -36,6 +38,10 @@ export const ThrottlingConfigField = (props: ThrottlingConfigFieldProps) => {
 
   const options = useConnectionProfiles(initialValue);
 
+  const isThrottlingEnabled = useUiSetting<boolean>(syntheticsThrottlingEnabled);
+
+  const isReadOnly = props.readOnly || !isThrottlingEnabled;
+
   return (
     <>
       <EuiSuperSelect
@@ -58,14 +64,14 @@ export const ThrottlingConfigField = (props: ThrottlingConfigFieldProps) => {
         defaultValue={PROFILE_VALUES_ENUM.DEFAULT}
         valueOfSelected={value?.id}
         fullWidth={props.fullWidth}
-        readOnly={props.readOnly}
+        readOnly={isReadOnly}
       />
       {isThrottlingDisabled && <ThrottlingDisabledCallout />}
       {isCustom && (
         <ThrottlingFields
           throttling={props?.value}
           setValue={props.onChange}
-          readOnly={props.readOnly}
+          readOnly={isReadOnly}
         />
       )}
     </>

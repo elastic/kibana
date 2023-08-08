@@ -14,20 +14,32 @@ import {
   EuiText,
   EuiPopoverTitle,
   useEuiTheme,
+  EuiIconTip,
 } from '@elastic/eui';
 import { ToolbarButton } from '@kbn/kibana-react-plugin/public';
 import { IconChartBarReferenceLine, IconChartBarAnnotations } from '@kbn/chart-icons';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { css } from '@emotion/react';
+import { getIgnoreGlobalFilterIcon } from '../../../shared_components/ignore_global_filter/data_view_picker_icon';
 import type {
   VisualizationLayerHeaderContentProps,
   VisualizationLayerWidgetProps,
   VisualizationType,
 } from '../../../types';
 import { State, visualizationTypes, SeriesType, XYAnnotationLayerConfig } from '../types';
-import { isHorizontalChart, isHorizontalSeries } from '../state_helpers';
+import {
+  annotationLayerHasUnsavedChanges,
+  isHorizontalChart,
+  isHorizontalSeries,
+} from '../state_helpers';
 import { ChangeIndexPattern, StaticHeader } from '../../../shared_components';
 import { updateLayer } from '.';
-import { isAnnotationsLayer, isDataLayer, isReferenceLayer } from '../visualization_helpers';
+import {
+  isAnnotationsLayer,
+  isByReferenceAnnotationsLayer,
+  isDataLayer,
+  isReferenceLayer,
+} from '../visualization_helpers';
 
 export function LayerHeader(props: VisualizationLayerWidgetProps<State>) {
   const layer = props.state.layers.find((l) => l.layerId === props.layerId);
@@ -38,7 +50,12 @@ export function LayerHeader(props: VisualizationLayerWidgetProps<State>) {
     return <ReferenceLayerHeader />;
   }
   if (isAnnotationsLayer(layer)) {
-    return <AnnotationsLayerHeader />;
+    return (
+      <AnnotationsLayerHeader
+        title={isByReferenceAnnotationsLayer(layer) ? layer.__lastSaved.title : undefined}
+        hasUnsavedChanges={annotationLayerHasUnsavedChanges(layer)}
+      />
+    );
   }
   return <DataLayerHeader {...props} />;
 }
@@ -62,13 +79,40 @@ function ReferenceLayerHeader() {
   );
 }
 
-function AnnotationsLayerHeader() {
+function AnnotationsLayerHeader({
+  title,
+  hasUnsavedChanges,
+}: {
+  title: string | undefined;
+  hasUnsavedChanges: boolean;
+}) {
   return (
     <StaticHeader
       icon={IconChartBarAnnotations}
-      label={i18n.translate('xpack.lens.xyChart.layerAnnotationsLabel', {
-        defaultMessage: 'Annotations',
-      })}
+      label={
+        title ||
+        i18n.translate('xpack.lens.xyChart.layerAnnotationsLabel', {
+          defaultMessage: 'Annotations',
+        })
+      }
+      indicator={
+        hasUnsavedChanges && (
+          <div
+            css={css`
+              padding-bottom: 3px;
+              padding-left: 4px;
+            `}
+          >
+            <EuiIconTip
+              content={i18n.translate('xpack.lens.xyChart.unsavedChanges', {
+                defaultMessage: 'Unsaved changes',
+              })}
+              type="dot"
+              color={euiThemeVars.euiColorSuccess}
+            />
+          </div>
+        )
+      }
     />
   );
 }
@@ -87,25 +131,6 @@ function AnnotationLayerHeaderContent({
   const layer = state.layers[layerIndex] as XYAnnotationLayerConfig;
   const currentIndexPattern = frame.dataViews.indexPatterns[layer.indexPatternId];
 
-  const extraIconLabelProps = !layer.ignoreGlobalFilters
-    ? {}
-    : {
-        icon: {
-          component: (
-            <EuiIcon
-              type={'filterIgnore'}
-              color={euiTheme.colors.disabledText}
-              css={css`
-                margin-top: 15px;
-              `}
-            />
-          ),
-          tooltipValue: i18n.translate('xpack.lens.layerPanel.ignoreGlobalFilters', {
-            defaultMessage: 'Ignore global filters',
-          }),
-          'data-test-subj': 'lnsChangeIndexPatternIgnoringFilters',
-        },
-      };
   return (
     <ChangeIndexPattern
       data-test-subj="indexPattern-switcher"
@@ -115,7 +140,14 @@ function AnnotationLayerHeaderContent({
         'data-test-subj': 'lns_layerIndexPatternLabel',
         size: 's',
         fontWeight: 'normal',
-        ...extraIconLabelProps,
+        extraIcons: layer.ignoreGlobalFilters
+          ? [
+              getIgnoreGlobalFilterIcon({
+                color: euiTheme.colors.disabledText,
+                dataTestSubj: 'lnsChangeIndexPatternIgnoringFilters',
+              }),
+            ]
+          : undefined,
       }}
       indexPatternId={layer.indexPatternId}
       indexPatternRefs={frame.dataViews.indexPatternRefs}
@@ -203,6 +235,7 @@ const DataLayerHeaderTrigger = function ({
       onClick={onClick}
       fullWidth
       size="s"
+      textProps={{ style: { lineHeight: '100%' } }}
     >
       <>
         <EuiIcon type={currentVisType.icon} />

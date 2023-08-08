@@ -283,10 +283,23 @@ export const installLegacyRiskScoreModule = (
   }
 };
 
-export const intercepInstallRiskScoreModule = () => {
+export const interceptInstallRiskScoreModule = () => {
   cy.intercept(`POST`, RISK_SCORE_URL).as('install');
 };
 
 export const waitForInstallRiskScoreModule = () => {
   cy.wait(['@install'], { requestTimeout: 50000 });
+};
+
+export const installRiskScoreModule = () => {
+  cy.request({
+    url: RISK_SCORE_URL,
+    method: 'POST',
+    body: {
+      riskScoreEntity: 'host',
+    },
+    headers: { 'kbn-xsrf': 'cypress-creds' },
+  })
+    .its('status')
+    .should('eql', 200);
 };

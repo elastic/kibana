@@ -19,5 +19,7 @@
     "@kbn/content-management-plugin",
     "@kbn/config-schema",
     "@kbn/core-saved-objects-api-server",
+    "@kbn/config-schema",
+    "@kbn/object-versioning",
   ]
 }

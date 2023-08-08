@@ -22,8 +22,12 @@ export const getRuntimeFieldEditorLoader =
   (coreSetup: CoreSetup) => async (): Promise<LoadEditorResponse> => {
     const { RuntimeFieldEditorFlyoutContent } = await import('./components');
     const [core] = await coreSetup.getStartServices();
-    const { uiSettings, theme, overlays, docLinks } = core;
-    const { Provider: KibanaReactContextProvider } = createKibanaReactContext({ uiSettings });
+    const { uiSettings, theme, overlays, docLinks, settings } = core;
+    const { Provider: KibanaReactContextProvider } = createKibanaReactContext({
+      uiSettings,
+      settings,
+      theme,
+    });
 
     let overlayRef: OverlayRef | null = null;
 

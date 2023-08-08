@@ -14,8 +14,11 @@ import {
   EuiFlexItem,
   EuiLink,
   EuiPanel,
+  EuiSpacer,
 } from '@elastic/eui';
+import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 import {
+  isOpenTelemetryAgentName,
   isRumAgentName,
   isServerlessAgent,
 } from '../../../../common/agent_name';
@@ -36,6 +39,8 @@ import { ServiceOverviewDependenciesTable } from './service_overview_dependencie
 import { ServiceOverviewErrorsTable } from './service_overview_errors_table';
 import { ServiceOverviewInstancesChartAndTable } from './service_overview_instances_chart_and_table';
 import { ServiceOverviewThroughputChart } from './service_overview_throughput_chart';
+import { SloCallout } from '../../shared/slo_callout';
+import { useLocalStorage } from '../../../hooks/use_local_storage';
 /**
  * The height a chart should be if it's next to a table with 5 rows and a title.
  * Add the height of the pagination row.
@@ -49,11 +54,12 @@ export function ServiceOverview() {
 
   const {
     query,
-    query: { kuery, environment, rangeFrom, rangeTo },
+    query: { kuery, environment, rangeFrom, rangeTo, transactionType },
   } = useApmParams('/services/{serviceName}/overview');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
   const isRumAgent = isRumAgentName(agentName);
+  const isOpenTelemetryAgent = isOpenTelemetryAgentName(agentName as AgentName);
   const isServerless = isServerlessAgent(serverlessType);
 
   const dependenciesLink = router.link('/services/{serviceName}/dependencies', {
@@ -76,6 +82,11 @@ export function ServiceOverview() {
     ? 'column'
     : 'row';
 
+  const [sloCalloutDismissed, setSloCalloutDismissed] = useLocalStorage(
+    'apm.sloCalloutDismissed',
+    false
+  );
+
   return (
     <AnnotationsContextProvider
       serviceName={serviceName}
@@ -83,6 +94,17 @@ export function ServiceOverview() {
       start={start}
       end={end}
     >
+      {!sloCalloutDismissed && (
+        <SloCallout
+          dismissCallout={() => {
+            setSloCalloutDismissed(true);
+          }}
+          serviceName={serviceName}
+          environment={environment}
+          transactionType={transactionType}
+        />
+      )}
+      <EuiSpacer />
       <ChartPointerEventContextProvider>
         <EuiFlexGroup direction="column" gutterSize="s">
           {fallbackToTransactions && (
@@ -159,13 +181,15 @@ export function ServiceOverview() {
                   />
                 </EuiFlexItem>
               ) : (
-                <EuiFlexItem grow={3}>
-                  <TransactionBreakdownChart
-                    showAnnotations={false}
-                    environment={environment}
-                    kuery={kuery}
-                  />
-                </EuiFlexItem>
+                !isOpenTelemetryAgent && (
+                  <EuiFlexItem grow={3}>
+                    <TransactionBreakdownChart
+                      showAnnotations={false}
+                      environment={environment}
+                      kuery={kuery}
+                    />
+                  </EuiFlexItem>
+                )
               )}
               {!isRumAgent && (
                 <EuiFlexItem grow={7}>

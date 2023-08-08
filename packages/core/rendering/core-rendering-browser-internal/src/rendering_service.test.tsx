@@ -61,6 +61,7 @@ describe('RenderingService#start', () => {
     expect(targetDomElement.querySelector('div.kbnAppWrapper')).toMatchInlineSnapshot(`
       <div
         class="kbnAppWrapper kbnAppWrapper--hiddenChrome"
+        data-test-subj="kbnAppWrapper hiddenChrome"
       >
         <div
           id="app-fixed-viewport"
@@ -105,7 +106,7 @@ describe('RenderingService#start', () => {
           `);
   });
 
-  it('adds global styles via `CoreContextProvider` `globalStyles` configuration', () => {
+  it('adds global styles via `KibanaRootRenderingContext` `globalStyles` configuration', () => {
     startService();
     expect(document.querySelector(`style[data-emotion="eui-styles-global"]`)).toBeDefined();
   });

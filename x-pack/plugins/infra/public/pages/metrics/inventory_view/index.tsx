@@ -7,7 +7,7 @@
 
 import { EuiErrorBoundary } from '@elastic/eui';
 import React from 'react';
-import { useTrackPageview } from '@kbn/observability-plugin/public';
+import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { css } from '@emotion/react';
 import { FilterBar } from './components/filter_bar';
@@ -21,7 +21,7 @@ import { inventoryTitle } from '../../../translations';
 import { SavedViews } from './components/saved_views';
 import { SnapshotContainer } from './components/snapshot_container';
 import { fullHeightContentStyles } from '../../../page_template.styles';
-import { SurveyKubernetes } from './components/survey_kubernetes';
+import { SurveySection } from './components/survey_section';
 import { NoRemoteCluster } from '../../../components/empty_states';
 
 export const SnapshotPage = () => {
@@ -60,7 +60,7 @@ export const SnapshotPage = () => {
           hasData={metricIndicesExist}
           pageHeader={{
             pageTitle: inventoryTitle,
-            rightSideItems: [<SavedViews />, <SurveyKubernetes />],
+            rightSideItems: [<SavedViews />, <SurveySection />],
           }}
           pageSectionProps={{
             contentProps: {

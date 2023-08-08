@@ -1,4 +1,4 @@
-title: APM availability indicator type definition
+title: APM availability
 required:
   - type
   - params
@@ -32,15 +32,6 @@ properties:
         description: The APM transaction name or "*"
         type: string
         example: GET /my/api
-      goodStatusCodes:
-        description: The status codes considered as good events. Default to 2xx, 3xx and 4xx
-        type: array
-        items:
-          type: string
-        example: 
-          - "2xx"
-          - "3xx"
-          - "4xx"
       filter:
         description: KQL query used for filtering the data
         type: string

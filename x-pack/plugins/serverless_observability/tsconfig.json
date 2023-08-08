@@ -17,7 +17,17 @@
   "kbn_references": [
     "@kbn/core",
     "@kbn/config-schema",
+    "@kbn/management-plugin",
     "@kbn/serverless",
     "@kbn/observability-shared-plugin",
+    "@kbn/kibana-react-plugin",
+    "@kbn/shared-ux-chrome-navigation",
+    "@kbn/ml-plugin",
+    "@kbn/i18n",
+    "@kbn/management-cards-navigation",
+    "@kbn/cloud-plugin",
+    "@kbn/data-plugin",
+    "@kbn/observability-plugin",
+    "@kbn/io-ts-utils",
   ]
 }

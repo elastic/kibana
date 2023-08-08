@@ -9,7 +9,7 @@
 import { Logger } from '../cli/logger';
 import { confirm } from './utils';
 
-export async function create(keystore, command, options) {
+export async function create(keystore, options) {
   const logger = new Logger(options);
 
   if (keystore.exists()) {

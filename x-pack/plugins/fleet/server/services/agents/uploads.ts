@@ -76,10 +76,13 @@ export async function getAgentUploads(
         .utc(action.timestamp!)
         .format('YYYY-MM-DDTHH-mm-ss')}Z-00.zip`;
     const filePath = file ? agentRouteService.getAgentFileDownloadLink(file.id, file.name) : '';
+    const isActionExpired = action.expiration ? Date.parse(action.expiration) < Date.now() : false;
+    const status =
+      file?.Status ?? (action.error ? 'FAILED' : isActionExpired ? 'EXPIRED' : 'IN_PROGRESS');
     const result = {
       actionId: action.actionId,
       id: file?.id ?? action.actionId,
-      status: file?.Status ?? (action.error ? 'FAILED' : 'IN_PROGRESS'),
+      status,
       name: fileName,
       createTime: action.timestamp!,
       filePath,
@@ -94,7 +97,15 @@ export async function getAgentUploads(
 async function _getRequestDiagnosticsActions(
   esClient: ElasticsearchClient,
   agentId: string
-): Promise<Array<{ actionId: string; timestamp?: string; fileId?: string; error?: string }>> {
+): Promise<
+  Array<{
+    actionId: string;
+    timestamp?: string;
+    expiration?: string;
+    fileId?: string;
+    error?: string;
+  }>
+> {
   const agentActionRes = await esClient.search<any>({
     index: AGENT_ACTIONS_INDEX,
     ignore_unavailable: true,
@@ -121,6 +132,7 @@ async function _getRequestDiagnosticsActions(
   const agentActions = agentActionRes.hits.hits.map((hit) => ({
     actionId: hit._source?.action_id as string,
     timestamp: hit._source?.['@timestamp'],
+    expiration: hit._source?.expiration,
   }));
 
   if (agentActions.length === 0) {
@@ -160,6 +172,7 @@ async function _getRequestDiagnosticsActions(
       return {
         actionId: action.actionId,
         timestamp: action.timestamp,
+        expiration: action.expiration,
         fileId: actionResult?.fileId,
         error: actionResult?.error,
       };

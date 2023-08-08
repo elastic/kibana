@@ -8,18 +8,17 @@
 import React from 'react';
 import { EuiEmptyPrompt, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import styled from 'styled-components';
 
-const Panel = styled(EuiPanel)`
-  max-width: 500px;
-  margin-right: auto;
-  margin-left: auto;
-`;
+const panelCss = {
+  maxWidth: '500px',
+  marginRight: 'auto',
+  marginLeft: 'auto',
+};
 
 const MissingPrivilegesComponent = () => (
   <div>
     <EuiSpacer />
-    <Panel>
+    <EuiPanel css={panelCss}>
       <EuiEmptyPrompt
         iconType="securityApp"
         title={
@@ -39,7 +38,7 @@ const MissingPrivilegesComponent = () => (
           </p>
         }
       />
-    </Panel>
+    </EuiPanel>
     <EuiSpacer />
   </div>
 );

@@ -6,19 +6,13 @@
  */
 
 import React from 'react';
-import moment from 'moment';
 
-import {
-  ALERT_END,
-  ALERT_START,
-  ALERT_STATUS,
-  ALERT_STATUS_ACTIVE,
-  ALERT_REASON,
-} from '@kbn/rule-data-utils';
+import { ALERT_REASON } from '@kbn/rule-data-utils';
 
 import { ObservabilityRuleTypeModel } from '@kbn/observability-plugin/public';
 import { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
-import { getSyntheticsMonitorRouteFromMonitorId } from '../../../../../common/utils/get_synthetics_monitor_url';
+import { getSyntheticsErrorRouteFromMonitorId } from '../../../../../common/utils/get_synthetics_monitor_url';
+import { STATE_ID } from '../../../../../common/field_names';
 import { SyntheticsMonitorStatusTranslations } from '../../../../../common/rules/synthetics/translations';
 import { StatusRuleParams } from '../../../../../common/rules/status_rule';
 import { SYNTHETICS_ALERT_RULE_TYPES } from '../../../../../common/constants/synthetics_alerts';
@@ -47,13 +41,14 @@ export const initMonitorStatusAlertType: AlertTypeInitializer = ({
   defaultActionMessage,
   defaultRecoveryMessage,
   requiresAppContext: true,
-  format: ({ fields }) => ({
-    reason: fields[ALERT_REASON] || '',
-    link: getSyntheticsMonitorRouteFromMonitorId({
-      configId: fields.configId,
-      dateRangeEnd: fields[ALERT_STATUS] === ALERT_STATUS_ACTIVE ? 'now' : fields[ALERT_END]!,
-      dateRangeStart: moment(new Date(fields[ALERT_START]!)).subtract('5', 'm').toISOString(),
-      locationId: fields['location.id'],
-    }),
-  }),
+  format: ({ fields }) => {
+    return {
+      reason: fields[ALERT_REASON] || '',
+      link: getSyntheticsErrorRouteFromMonitorId({
+        configId: fields.configId,
+        locationId: fields['location.id'],
+        stateId: fields[STATE_ID],
+      }),
+    };
+  },
 });

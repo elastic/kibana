@@ -6,13 +6,10 @@
  */
 
 import React from 'react';
-import { render } from 'react-dom';
 import { Ast } from '@kbn/interpreter';
-import { I18nProvider } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { PaletteRegistry, CUSTOM_PALETTE } from '@kbn/coloring';
 import { ThemeServiceStart } from '@kbn/core/public';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import { IconChartDatatable } from '@kbn/chart-icons';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
@@ -337,37 +334,16 @@ export const getDatatableVisualization = ({
       sorting: prevState.sorting?.columnId === columnId ? undefined : prevState.sorting,
     };
   },
-  renderDimensionEditor(domElement, props) {
-    render(
-      <KibanaThemeProvider theme$={theme.theme$}>
-        <I18nProvider>
-          <TableDimensionEditor {...props} paletteService={paletteService} />
-        </I18nProvider>
-      </KibanaThemeProvider>,
-      domElement
-    );
+  DimensionEditorComponent(props) {
+    return <TableDimensionEditor {...props} paletteService={paletteService} />;
   },
 
-  renderDimensionEditorAdditionalSection(domElement, props) {
-    render(
-      <KibanaThemeProvider theme$={theme.theme$}>
-        <I18nProvider>
-          <TableDimensionEditorAdditionalSection {...props} paletteService={paletteService} />
-        </I18nProvider>
-      </KibanaThemeProvider>,
-      domElement
-    );
+  DimensionEditorAdditionalSectionComponent(props) {
+    return <TableDimensionEditorAdditionalSection {...props} paletteService={paletteService} />;
   },
 
-  renderDimensionEditorDataExtra(domElement, props) {
-    render(
-      <KibanaThemeProvider theme$={theme.theme$}>
-        <I18nProvider>
-          <TableDimensionDataExtraEditor {...props} paletteService={paletteService} />
-        </I18nProvider>
-      </KibanaThemeProvider>,
-      domElement
-    );
+  DimensionEditorDataExtraComponent(props) {
+    return <TableDimensionDataExtraEditor {...props} paletteService={paletteService} />;
   },
 
   getSupportedLayers() {
@@ -522,15 +498,8 @@ export const getDatatableVisualization = ({
     }, []);
   },
 
-  renderToolbar(domElement, props) {
-    render(
-      <KibanaThemeProvider theme$={theme.theme$}>
-        <I18nProvider>
-          <DataTableToolbar {...props} />
-        </I18nProvider>
-      </KibanaThemeProvider>,
-      domElement
-    );
+  ToolbarComponent(props) {
+    return <DataTableToolbar {...props} />;
   },
 
   onEditAction(state, event) {

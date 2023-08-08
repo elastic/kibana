@@ -25,12 +25,14 @@ describe('DataQualityPanel', () => {
             defaultBytesFormat={''}
             defaultNumberFormat={''}
             getGroupByFieldsOnClick={jest.fn()}
+            httpFetch={jest.fn()}
             ilmPhases={ilmPhases}
+            isAssistantEnabled={true}
             lastChecked={''}
             openCreateCaseFlyout={jest.fn()}
             patterns={[]}
             setLastChecked={jest.fn()}
-            theme={DARK_THEME}
+            baseTheme={DARK_THEME}
           />
         </TestProviders>
       );
@@ -57,12 +59,14 @@ describe('DataQualityPanel', () => {
             defaultBytesFormat={''}
             defaultNumberFormat={''}
             getGroupByFieldsOnClick={jest.fn()}
+            httpFetch={jest.fn()}
             ilmPhases={ilmPhases}
+            isAssistantEnabled={true}
             lastChecked={''}
             openCreateCaseFlyout={jest.fn()}
             patterns={[]}
             setLastChecked={jest.fn()}
-            theme={DARK_THEME}
+            baseTheme={DARK_THEME}
           />
         </TestProviders>
       );

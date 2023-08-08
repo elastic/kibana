@@ -8,13 +8,13 @@
 import type { FrameworkRequest } from '../../../framework';
 import { persistNote } from './saved_object';
 import { getOverridableNote } from './get_overridable_note';
-import type { NoteResult } from '../../../../../common/types/timeline/note';
+import type { Note } from '../../../../../common/api/timeline';
 
 export const persistNotes = async (
   frameworkRequest: FrameworkRequest,
   timelineSavedObjectId: string,
   existingNoteIds?: string[],
-  newNotes?: NoteResult[],
+  newNotes?: Note[],
   overrideOwner: boolean = true
 ) => {
   return Promise.all(

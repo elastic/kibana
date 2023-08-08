@@ -5,16 +5,10 @@
  * 2.0.
  */
 
-import { CoreSetup } from '@kbn/core/server';
-import { AlertingSetup } from '../../types';
+import type { RegisterRuleTypesParams } from '../types';
 import { getRuleType } from './rule_type';
 
-interface RegisterParams {
-  alerting: AlertingSetup;
-  core: CoreSetup;
-}
-
-export function register(params: RegisterParams) {
+export function register(params: RegisterRuleTypesParams) {
   const { alerting, core } = params;
   alerting.registerType(getRuleType(core));
 }

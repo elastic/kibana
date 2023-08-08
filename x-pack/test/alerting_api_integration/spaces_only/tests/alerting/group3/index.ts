@@ -15,5 +15,6 @@ export default function alertingTests({ loadTestFile, getService }: FtrProviderC
     after(async () => await tearDown(getService));
 
     loadTestFile(require.resolve('./builtin_alert_types'));
+    loadTestFile(require.resolve('./maintenance_window_flows'));
   });
 }

@@ -8,6 +8,7 @@
 import { KubernetesSecurityPlugin } from './plugin';
 
 export type { KubernetesSecurityStart } from './types';
+export { KUBERNETES_TITLE, KUBERNETES_PATH } from '../common/constants';
 
 export function plugin() {
   return new KubernetesSecurityPlugin();

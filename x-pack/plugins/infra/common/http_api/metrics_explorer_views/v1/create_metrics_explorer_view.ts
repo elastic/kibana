@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { nonEmptyStringRt } from '@kbn/io-ts-utils';
 import * as rt from 'io-ts';
+import {
+  metricsExplorerViewAttributesRT,
+  metricsExplorerViewRT,
+} from '../../../metrics_explorer_views';
 
 export const createMetricsExplorerViewAttributesRequestPayloadRT = rt.intersection([
-  rt.type({
-    name: nonEmptyStringRt,
-  }),
-  rt.UnknownRecord,
-  rt.exact(rt.partial({ isDefault: rt.undefined, isStatic: rt.undefined })),
+  metricsExplorerViewAttributesRT,
+  rt.partial({ isDefault: rt.undefined, isStatic: rt.undefined }),
 ]);
 
 export type CreateMetricsExplorerViewAttributesRequestPayload = rt.TypeOf<
@@ -24,6 +24,4 @@ export const createMetricsExplorerViewRequestPayloadRT = rt.type({
   attributes: createMetricsExplorerViewAttributesRequestPayloadRT,
 });
 
-export type CreateMetricsExplorerViewRequestPayload = rt.TypeOf<
-  typeof createMetricsExplorerViewRequestPayloadRT
->;
+export type CreateMetricsExplorerViewResponsePayload = rt.TypeOf<typeof metricsExplorerViewRT>;

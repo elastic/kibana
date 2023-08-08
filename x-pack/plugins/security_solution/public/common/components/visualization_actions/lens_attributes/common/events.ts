@@ -21,7 +21,7 @@ export const getEventsHistogramLensAttributes: GetLensAttributes = (
         title: 'Empty XY chart',
         legend: {
           isVisible: true,
-          position: 'left',
+          position: 'right',
           legendSize: 'xlarge',
         },
         valueLabels: 'hide',
@@ -49,6 +49,7 @@ export const getEventsHistogramLensAttributes: GetLensAttributes = (
           yLeft: false,
           yRight: true,
         },
+        valuesInLegend: true,
       },
       query: {
         query: '',

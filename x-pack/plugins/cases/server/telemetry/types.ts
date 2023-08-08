@@ -11,7 +11,7 @@ import type { Owner } from '../../common/constants/types';
 
 export type BucketKeyString = Omit<Bucket, 'key'> & { key: string };
 
-interface Bucket<T extends string | number = string | number> {
+export interface Bucket<T extends string | number = string | number> {
   doc_count: number;
   key: T;
 }

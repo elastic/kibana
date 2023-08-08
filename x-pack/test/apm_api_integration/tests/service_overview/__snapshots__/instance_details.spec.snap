@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`APM API tests basic apm_8.0.0 Instance details when data is loaded fetch instance details return the correct data 1`] = `
+exports[`APM API tests service_overview/instance_details.spec.ts basic apm_8.0.0 Instance details when data is loaded fetch instance details return the correct data 1`] = `
 Object {
   "agent": Object {
     "ephemeral_id": "2745d454-f57f-4473-a09b-fe6bef295860",
@@ -34,10 +34,13 @@ Object {
     },
   },
   "kubernetes": Object {
+    "container": Object {},
+    "deployment": Object {},
     "pod": Object {
       "name": "opbeans-java-b8fcdf794-czvtr",
       "uid": "e0bf3100-4a0d-4d96-88ef-4e3aa3c78a5d",
     },
+    "replicaset": Object {},
   },
   "service": Object {
     "environment": "production",

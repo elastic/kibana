@@ -11,6 +11,7 @@ import * as yaml from 'js-yaml';
 import type { UrlObject } from 'url';
 import Url from 'url';
 import type { Role } from '@kbn/security-plugin/common';
+import { isLocalhost } from '../../../../scripts/endpoint/common/is_localhost';
 import { getWithResponseActionsRole } from '../../../../scripts/endpoint/common/roles_users/with_response_actions_role';
 import { getNoResponseActionsRole } from '../../../../scripts/endpoint/common/roles_users/without_response_actions_role';
 import { request } from './common';
@@ -81,6 +82,9 @@ const ELASTICSEARCH_USERNAME = 'ELASTICSEARCH_USERNAME';
  */
 const ELASTICSEARCH_PASSWORD = 'ELASTICSEARCH_PASSWORD';
 
+const KIBANA_USERNAME = 'KIBANA_USERNAME';
+const KIBANA_PASSWORD = 'KIBANA_PASSWORD';
+
 /**
  * The Kibana server endpoint used for authentication
  */
@@ -110,46 +114,6 @@ export const getUrlWithRoute = (role: string, route: string) => {
   return theUrl;
 };
 
-interface User {
-  username: string;
-  password: string;
-}
-
-/**
- * Builds a URL with basic auth using the passed in user.
- *
- * @param user the user information to build the basic auth with
- * @param route string route to visit
- */
-export const constructUrlWithUser = (user: User, route: string) => {
-  const url = Cypress.config().baseUrl;
-  const kibana = new URL(String(url));
-  const hostname = kibana.hostname;
-  const username = user.username;
-  const password = user.password;
-  const protocol = kibana.protocol.replace(':', '');
-  const port = kibana.port;
-
-  const path = `${route.startsWith('/') ? '' : '/'}${route}`;
-  const strUrl = `${protocol}://${username}:${password}@${hostname}:${port}${path}`;
-  const builtUrl = new URL(strUrl);
-
-  cy.log(`origin: ${builtUrl.href}`);
-
-  return builtUrl.href;
-};
-
-export const getCurlScriptEnvVars = () => ({
-  ELASTICSEARCH_URL: Cypress.env('ELASTICSEARCH_URL'),
-  ELASTICSEARCH_USERNAME: Cypress.env('ELASTICSEARCH_USERNAME'),
-  ELASTICSEARCH_PASSWORD: Cypress.env('ELASTICSEARCH_PASSWORD'),
-  KIBANA_URL: Cypress.config().baseUrl,
-});
-
-export const createRoleAndUser = (role: ROLE) => {
-  createCustomRoleAndUser(role, rolesMapping[role]);
-};
-
 export const createCustomRoleAndUser = (role: string, rolePrivileges: Omit<Role, 'name'>) => {
   // post the role
   request({
@@ -170,50 +134,16 @@ export const createCustomRoleAndUser = (role: string, rolePrivileges: Omit<Role,
   });
 };
 
-export const deleteRoleAndUser = (role: ROLE) => {
-  request({
-    method: 'DELETE',
-    url: `/internal/security/users/${role}`,
-  });
-  request({
-    method: 'DELETE',
-    url: `/api/security/role/${role}`,
-  });
-};
-
-export const loginWithUser = (user: User) => {
-  const url = Cypress.config().baseUrl;
-
-  request({
-    body: {
-      providerType: 'basic',
-      providerName: url && !url.includes('localhost') ? 'cloud-basic' : 'basic',
-      currentURL: '/',
-      params: {
-        username: user.username,
-        password: user.password,
-      },
-    },
-    headers: { 'kbn-xsrf': 'cypress-creds-via-config' },
-    method: 'POST',
-    url: constructUrlWithUser(user, LOGIN_API_ENDPOINT),
-  });
-};
-
 export const loginWithRole = async (role: ROLE) => {
   loginWithCustomRole(role, rolesMapping[role]);
 };
 
 export const loginWithCustomRole = async (role: string, rolePrivileges: Omit<Role, 'name'>) => {
   createCustomRoleAndUser(role, rolePrivileges);
-  const theUrl = Url.format({
-    auth: `${role}:changeme`,
-    username: role,
-    password: Cypress.env(ELASTICSEARCH_PASSWORD),
-    protocol: Cypress.env('protocol'),
-    hostname: Cypress.env('hostname'),
-    port: Cypress.env('configport'),
-  } as UrlObject);
+  const theUrl = new URL(String(Cypress.config().baseUrl));
+  theUrl.username = role;
+  theUrl.password = Cypress.env(ELASTICSEARCH_PASSWORD);
+
   cy.log(`origin: ${theUrl}`);
   request({
     body: {
@@ -254,7 +184,8 @@ export const login = (role?: ROLE) => {
  * via environment variables
  */
 const credentialsProvidedByEnvironment = (): boolean =>
-  Cypress.env(ELASTICSEARCH_USERNAME) != null && Cypress.env(ELASTICSEARCH_PASSWORD) != null;
+  (Cypress.env(KIBANA_USERNAME) != null && Cypress.env(KIBANA_PASSWORD) != null) ||
+  (Cypress.env(ELASTICSEARCH_USERNAME) != null && Cypress.env(ELASTICSEARCH_PASSWORD) != null);
 
 /**
  * Authenticates with Kibana by reading credentials from the
@@ -265,24 +196,47 @@ const credentialsProvidedByEnvironment = (): boolean =>
 const loginViaEnvironmentCredentials = () => {
   const url = Cypress.config().baseUrl;
 
+  if (!url) {
+    throw Error(`Cypress config baseUrl not set!`);
+  }
+
+  const urlObj = new URL(url);
+
+  let username: string;
+  let password: string;
+  let usernameEnvVar: string;
+  let passwordEnvVar: string;
+
+  if (Cypress.env(KIBANA_USERNAME) && Cypress.env(KIBANA_PASSWORD)) {
+    username = Cypress.env(KIBANA_USERNAME);
+    password = Cypress.env(KIBANA_PASSWORD);
+    usernameEnvVar = KIBANA_USERNAME;
+    passwordEnvVar = KIBANA_PASSWORD;
+  } else {
+    username = Cypress.env(ELASTICSEARCH_USERNAME);
+    password = Cypress.env(ELASTICSEARCH_PASSWORD);
+    usernameEnvVar = ELASTICSEARCH_USERNAME;
+    passwordEnvVar = ELASTICSEARCH_PASSWORD;
+  }
+
   cy.log(
-    `Authenticating via environment credentials from the \`CYPRESS_${ELASTICSEARCH_USERNAME}\` and \`CYPRESS_${ELASTICSEARCH_PASSWORD}\` environment variables`
+    `Authenticating user [${username}] retrieved via environment credentials from the \`CYPRESS_${usernameEnvVar}\` and \`CYPRESS_${passwordEnvVar}\` environment variables`
   );
 
   // programmatically authenticate without interacting with the Kibana login page
   request({
     body: {
       providerType: 'basic',
-      providerName: url && !url.includes('localhost') ? 'cloud-basic' : 'basic',
+      providerName: url && !isLocalhost(urlObj.hostname) ? 'cloud-basic' : 'basic',
       currentURL: '/',
       params: {
-        username: Cypress.env(ELASTICSEARCH_USERNAME),
-        password: Cypress.env(ELASTICSEARCH_PASSWORD),
+        username,
+        password,
       },
     },
     headers: { 'kbn-xsrf': 'cypress-creds-via-env' },
     method: 'POST',
-    url: `${Cypress.config().baseUrl}${LOGIN_API_ENDPOINT}`,
+    url: `${url}${LOGIN_API_ENDPOINT}`,
   });
 };
 
@@ -316,37 +270,6 @@ const loginViaConfig = () => {
       url: `${Cypress.config().baseUrl}${LOGIN_API_ENDPOINT}`,
     });
   });
-};
-
-/**
- * Get the configured auth details that were used to spawn cypress
- *
- * @returns the default Elasticsearch username and password for this environment
- */
-export const getEnvAuth = (): User => {
-  if (credentialsProvidedByEnvironment()) {
-    return {
-      username: Cypress.env(ELASTICSEARCH_USERNAME),
-      password: Cypress.env(ELASTICSEARCH_PASSWORD),
-    };
-  } else {
-    let user: User = { username: '', password: '' };
-    cy.readFile(KIBANA_DEV_YML_PATH).then((devYml) => {
-      const config = yaml.safeLoad(devYml);
-      user = { username: config.elasticsearch.username, password: config.elasticsearch.password };
-    });
-
-    return user;
-  }
-};
-
-/**
- * Authenticates with Kibana, visits the specified `url`, and waits for the
- * Kibana global nav to be displayed before continuing
- */
-export const loginAndWaitForPage = (url: string) => {
-  login();
-  cy.visit(url);
 };
 
 export const getRoleWithArtifactReadPrivilege = (privilegePrefix: string) => {

@@ -10,18 +10,17 @@ import http from 'http';
 
 import type SuperTest from 'supertest';
 import { CASE_CONFIGURE_CONNECTORS_URL } from '@kbn/cases-plugin/common/constants';
-import {
-  CasesConfigureResponse,
-  CaseConnector,
-  ConnectorTypes,
-  CasePostRequest,
-  Case,
-  GetCaseConnectorsResponse,
-  getCaseConnectorsUrl,
-} from '@kbn/cases-plugin/common/api';
+import { getCaseConnectorsUrl } from '@kbn/cases-plugin/common/api';
 import { ActionResult, FindActionResult } from '@kbn/actions-plugin/server/types';
 import { getServiceNowServer } from '@kbn/actions-simulators-plugin/server/plugin';
 import { RecordingServiceNowSimulator } from '@kbn/actions-simulators-plugin/server/servicenow_simulation';
+import {
+  Case,
+  CaseConnector,
+  Configuration,
+  ConnectorTypes,
+} from '@kbn/cases-plugin/common/types/domain';
+import { CasePostRequest, GetCaseConnectorsResponse } from '@kbn/cases-plugin/common/types/api';
 import { User } from '../authentication/types';
 import { superUser } from '../authentication/users';
 import { getPostCaseRequest } from '../mock';
@@ -221,7 +220,7 @@ export const createCaseWithConnector = async ({
 }): Promise<{
   postedCase: Case;
   connector: CreateConnectorResponse;
-  configuration: CasesConfigureResponse;
+  configuration: Configuration;
 }> => {
   const connector = await createConnector({
     supertest,

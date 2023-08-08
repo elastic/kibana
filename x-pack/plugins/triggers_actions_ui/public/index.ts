@@ -75,12 +75,9 @@ export { getCategory } from './application/sections/field_browser/helpers';
 export type { ConfigFieldSchema, SecretsFieldSchema } from './application/components';
 
 export {
-  ButtonGroupField,
-  HiddenField,
   JsonEditorWithMessageVariables,
   JsonFieldWrapper,
   MustacheTextFieldWrapper,
-  PasswordField,
   SimpleConnectorForm,
   TextAreaWithMessageVariables,
   TextFieldWithMessageVariables,
@@ -150,3 +147,5 @@ export const getNotifyWhenOptions = async () => {
 };
 
 export { transformRule } from './application/lib/rule_api/common_transformations';
+
+export { validateActionFilterQuery } from './application/lib/value_validators';

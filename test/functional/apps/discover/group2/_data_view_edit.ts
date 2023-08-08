@@ -21,6 +21,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'discover',
     'timePicker',
     'dashboard',
+    'unifiedFieldList',
   ]);
 
   describe('data view flyout', function () {
@@ -76,10 +77,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await retry.waitFor('current data view to get updated', async () => {
         return (await PageObjects.discover.getCurrentlySelectedDataView()) === `${initialPattern}*`;
       });
-      await PageObjects.discover.waitUntilSidebarHasLoaded();
+      await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
 
       expect(await PageObjects.discover.getHitCountInt()).to.be(2);
-      expect((await PageObjects.discover.getAllFieldNames()).length).to.be(3);
+      expect((await PageObjects.unifiedFieldList.getAllFieldNames()).length).to.be(3);
     });
 
     it('create saved data view', async function () {
@@ -91,8 +92,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await PageObjects.discover.getHitCountInt()).to.be(1);
       });
 
-      await PageObjects.discover.waitUntilSidebarHasLoaded();
-      expect((await PageObjects.discover.getAllFieldNames()).length).to.be(2);
+      await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
+      expect((await PageObjects.unifiedFieldList.getAllFieldNames()).length).to.be(2);
     });
 
     it('update data view with a different time field', async function () {
@@ -122,8 +123,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await retry.try(async () => {
         expect(await PageObjects.discover.getHitCountInt()).to.be(3);
       });
-      await PageObjects.discover.waitUntilSidebarHasLoaded();
-      expect((await PageObjects.discover.getAllFieldNames()).length).to.be(3);
+      await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
+      expect((await PageObjects.unifiedFieldList.getAllFieldNames()).length).to.be(3);
       expect(await PageObjects.discover.isChartVisible()).to.be(true);
       expect(await PageObjects.timePicker.timePickerExists()).to.be(true);
     });
@@ -137,8 +138,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await retry.try(async () => {
         expect(await PageObjects.discover.getHitCountInt()).to.be(4);
       });
-      await PageObjects.discover.waitUntilSidebarHasLoaded();
-      expect((await PageObjects.discover.getAllFieldNames()).length).to.be(3);
+      await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
+      expect((await PageObjects.unifiedFieldList.getAllFieldNames()).length).to.be(3);
       expect(await PageObjects.discover.isChartVisible()).to.be(false);
       expect(await PageObjects.timePicker.timePickerExists()).to.be(false);
     });

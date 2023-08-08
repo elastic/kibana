@@ -15,6 +15,7 @@ import { AlertingConfig } from '../config';
 import { AlertingPluginsStart } from '../plugin';
 import { HealthStatus } from '../types';
 import { getAlertingHealthStatus } from './get_health';
+import { stateSchemaByVersion, emptyState, type LatestTaskStateSchema } from './task_state';
 
 export const HEALTH_TASK_TYPE = 'alerting_health_check';
 
@@ -41,11 +42,11 @@ export async function scheduleAlertingHealthCheck(
       schedule: {
         interval,
       },
-      state: {},
+      state: emptyState,
       params: {},
     });
   } catch (e) {
-    logger.debug(`Error scheduling task, received ${e.message}`);
+    logger.error(`Error scheduling ${HEALTH_TASK_ID}, received ${e.message}`);
   }
 }
 
@@ -57,6 +58,7 @@ function registerAlertingHealthCheckTask(
   taskManager.registerTaskDefinitions({
     [HEALTH_TASK_TYPE]: {
       title: 'Alerting framework health check task',
+      stateSchemaByVersion,
       createTaskRunner: healthCheckTaskRunner(logger, coreStartServices),
     },
   });
@@ -67,23 +69,26 @@ export function healthCheckTaskRunner(
   coreStartServices: Promise<[CoreStart, AlertingPluginsStart, unknown]>
 ) {
   return ({ taskInstance }: RunContext) => {
-    const { state } = taskInstance;
+    const state = taskInstance.state as LatestTaskStateSchema;
     return {
       async run() {
         try {
-          return await getAlertingHealthStatus(
+          const result = await getAlertingHealthStatus(
             (
               await coreStartServices
             )[0].savedObjects,
             state.runs
           );
+          const updatedState: LatestTaskStateSchema = result.state;
+          return { state: updatedState };
         } catch (errMsg) {
           logger.warn(`Error executing alerting health check task: ${errMsg}`);
+          const updatedState: LatestTaskStateSchema = {
+            runs: state.runs + 1,
+            health_status: HealthStatus.Error,
+          };
           return {
-            state: {
-              runs: (state.runs || 0) + 1,
-              health_status: HealthStatus.Error,
-            },
+            state: updatedState,
           };
         }
       },

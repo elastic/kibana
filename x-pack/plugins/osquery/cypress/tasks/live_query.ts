@@ -11,12 +11,14 @@ export const DEFAULT_QUERY = 'select * from processes;';
 export const BIG_QUERY = 'select * from processes, users limit 110;';
 
 export const selectAllAgents = () => {
-  cy.react('AgentsTable').find('input').should('not.be.disabled');
-  cy.react('AgentsTable EuiComboBox', {
-    props: { placeholder: 'Select agents or groups to query' },
-  }).click();
-  cy.react('EuiFilterSelectItem').contains('All agents').should('exist');
-  cy.react('AgentsTable EuiComboBox').type('{downArrow}{enter}{esc}');
+  cy.getBySel('agentSelection').find('input').should('not.be.disabled');
+  cy.getBySel('agentSelection').within(() => {
+    cy.getBySel('comboBoxInput').click();
+  });
+  cy.contains('All agents').should('exist');
+  cy.getBySel('agentSelection').within(() => {
+    cy.getBySel('comboBoxInput').type('{downArrow}{enter}{esc}');
+  });
   cy.contains('2 agents selected.');
 };
 
@@ -47,7 +49,12 @@ export const checkResults = () => {
 export const typeInECSFieldInput = (text: string, index = 0) =>
   cy.getBySel('ECS-field-input').eq(index).type(text);
 export const typeInOsqueryFieldInput = (text: string, index = 0) =>
-  cy.react('OsqueryColumnFieldComponent').eq(index).react('ResultComboBox').type(text);
+  cy
+    .react('OsqueryColumnFieldComponent')
+    .eq(index)
+    .within(() => {
+      cy.getBySel('comboBoxInput').type(text);
+    });
 
 export const getOsqueryFieldTypes = (value: 'Osquery value' | 'Static value', index = 0) => {
   cy.getBySel(`osquery-result-type-select-${index}`).click();
@@ -150,7 +157,7 @@ export const checkActionItemsInResults = ({
 export const takeOsqueryActionWithParams = () => {
   cy.getBySel('take-action-dropdown-btn').click();
   cy.getBySel('osquery-action-item').click();
-  cy.contains('1 agent selected.');
+  selectAllAgents();
   inputQuery("SELECT * FROM os_version where name='{{host.os.name}}';", {
     parseSpecialCharSequences: false,
   });

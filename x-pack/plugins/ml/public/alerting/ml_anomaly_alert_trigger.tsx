@@ -145,7 +145,7 @@ const MlAnomalyAlertTrigger: FC<MlAnomalyAlertTriggerProps> = ({
   const maxNumberOfBuckets = useMemo(() => {
     if (jobConfigs.length === 0) return;
 
-    const bucketDuration = parseInterval(jobConfigs[0].analysis_config.bucket_span);
+    const bucketDuration = parseInterval(jobConfigs[0].analysis_config.bucket_span!);
 
     const lookbackIntervalDuration = advancedSettings.lookbackInterval
       ? parseInterval(advancedSettings.lookbackInterval)

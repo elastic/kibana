@@ -297,7 +297,7 @@ export const schema: FormSchema<AboutStepRule> = {
   },
 };
 
-export const threatIndicatorPathRequiredSchemaValue = {
+const threatIndicatorPathRequiredSchemaValue = {
   type: FIELD_TYPES.TEXT,
   label: i18n.translate(
     'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldThreatIndicatorPathLabel',
@@ -325,4 +325,9 @@ export const threatIndicatorPathRequiredSchemaValue = {
       type: VALIDATION_TYPES.FIELD,
     },
   ],
+};
+
+export const threatMatchAboutSchema = {
+  ...schema,
+  threatIndicatorPath: threatIndicatorPathRequiredSchemaValue,
 };

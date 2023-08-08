@@ -46,7 +46,7 @@ export const getNormalizeHTTPFields = ({
     version,
   });
 
-  // Add common erros to errors arary
+  // Add common errors to errors array
   errors.push(...commonErrors);
 
   /* Check if monitor has multiple urls */

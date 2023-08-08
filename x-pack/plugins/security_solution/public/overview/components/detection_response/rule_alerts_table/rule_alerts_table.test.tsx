@@ -8,7 +8,7 @@
 import moment from 'moment';
 import React from 'react';
 
-import { fireEvent, render } from '@testing-library/react';
+import { fireEvent, render, waitFor } from '@testing-library/react';
 
 import { SecurityPageName } from '../../../../../common/constants';
 import { TestProviders } from '../../../../common/mock';
@@ -31,6 +31,12 @@ const mockNavigateToAlertsPageWithFilters = jest.fn();
 jest.mock('../../../../common/hooks/use_navigate_to_alerts_page_with_filters', () => {
   return {
     useNavigateToAlertsPageWithFilters: () => mockNavigateToAlertsPageWithFilters,
+  };
+});
+
+jest.mock('../../../../common/hooks/use_global_filter_query', () => {
+  return {
+    useGlobalFilterQuery: () => ({}),
   };
 });
 
@@ -167,6 +173,27 @@ describe('RuleAlertsTable', () => {
       fieldName: 'kibana.alert.rule.name',
       selectedOptions: ['ruleName'],
       title: 'Rule name',
+    });
+  });
+
+  it('should render `View all open alerts` button which opens alert page with only status filter', async () => {
+    mockUseRuleAlertsItemsReturn({ items });
+    const { getByTestId } = render(
+      <TestProviders>
+        <RuleAlertsTable {...defaultProps} />
+      </TestProviders>
+    );
+
+    expect(getByTestId('severityRuleAlertsButton')).toBeInTheDocument();
+
+    fireEvent.click(getByTestId('severityRuleAlertsButton'));
+
+    await waitFor(() => {
+      expect(mockNavigateToAlertsPageWithFilters).toHaveBeenCalledWith({
+        fieldName: 'kibana.alert.workflow_status',
+        title: 'Status',
+        selectedOptions: ['open'],
+      });
     });
   });
 });

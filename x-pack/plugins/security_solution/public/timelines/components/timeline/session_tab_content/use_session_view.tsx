@@ -75,7 +75,12 @@ const NavigationComponent: React.FC<NavigationProps> = ({
   return (
     <EuiFlexGroup alignItems="center" gutterSize="none">
       <EuiFlexItem grow={false}>
-        <EuiButtonEmpty iconType="cross" onClick={onCloseOverlay} size="xs">
+        <EuiButtonEmpty
+          iconType="cross"
+          onClick={onCloseOverlay}
+          size="xs"
+          data-test-subj="close-overlay"
+        >
           {title()}
         </EuiButtonEmpty>
       </EuiFlexItem>
@@ -259,7 +264,7 @@ export const useSessionView = ({
   }, [scopeId]);
   const { globalFullScreen } = useGlobalFullScreen();
   const { timelineFullScreen } = useTimelineFullScreen();
-  const { canAccessEndpointManagement } = useUserPrivileges().endpointPrivileges;
+  const { canReadPolicyManagement } = useUserPrivileges().endpointPrivileges;
 
   const defaults = isTimelineScope(scopeId) ? timelineDefaults : tableDefaults;
   const { sessionViewConfig, activeTab } = useDeepEqualSelector((state) => ({
@@ -304,7 +309,7 @@ export const useSessionView = ({
           loadAlertDetails: openEventDetailsPanel,
           isFullScreen: fullScreen,
           height: heightMinusSearchBar,
-          canAccessEndpointManagement,
+          canReadPolicyManagement,
         })
       : null;
   }, [
@@ -313,7 +318,7 @@ export const useSessionView = ({
     sessionView,
     openEventDetailsPanel,
     fullScreen,
-    canAccessEndpointManagement,
+    canReadPolicyManagement,
   ]);
 
   return {

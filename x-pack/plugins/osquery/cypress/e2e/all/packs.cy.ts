@@ -7,6 +7,8 @@
 
 import { recurse } from 'cypress-recurse';
 import { find } from 'lodash';
+import type { PackagePolicy } from '@kbn/fleet-plugin/common';
+import { API_VERSIONS } from '../../../common/constants';
 import { FLEET_AGENT_POLICIES, navigateTo } from '../../tasks/navigation';
 import {
   checkActionItemsInResults,
@@ -46,6 +48,7 @@ import {
   loadPack,
   cleanupAgentPolicy,
 } from '../../tasks/api_fixtures';
+import { request } from '../../tasks/common';
 
 describe('ALL - Packs', () => {
   let savedQueryId: string;
@@ -63,16 +66,16 @@ describe('ALL - Packs', () => {
   describe('Create and edit a pack', () => {
     before(() => {
       loadSavedQuery().then((data) => {
-        savedQueryId = data.id;
-        savedQueryName = data.attributes.id;
+        savedQueryId = data.saved_object_id;
+        savedQueryName = data.id;
       });
       loadSavedQuery({
         ecs_mapping: {},
         interval: '3600',
         query: 'select * from uptime;',
       }).then((data) => {
-        nomappingSavedQueryId = data.id;
-        nomappingSavedQueryName = data.attributes.id;
+        nomappingSavedQueryId = data.saved_object_id;
+        nomappingSavedQueryName = data.id;
       });
       loadSavedQuery({
         ecs_mapping: {
@@ -83,8 +86,8 @@ describe('ALL - Packs', () => {
         interval: '3600',
         query: 'select * from uptime;',
       }).then((data) => {
-        oneMappingSavedQueryId = data.id;
-        oneMappingSavedQueryName = data.attributes.id;
+        oneMappingSavedQueryId = data.saved_object_id;
+        oneMappingSavedQueryName = data.id;
       });
       loadSavedQuery({
         ecs_mapping: {
@@ -101,8 +104,8 @@ describe('ALL - Packs', () => {
         interval: '3600',
         query: 'select * from uptime;',
       }).then((data) => {
-        multipleMappingsSavedQueryId = data.id;
-        multipleMappingsSavedQueryName = data.attributes.id;
+        multipleMappingsSavedQueryId = data.saved_object_id;
+        multipleMappingsSavedQueryName = data.id;
       });
     });
 
@@ -225,12 +228,17 @@ describe('ALL - Packs', () => {
             query: 'select * from uptime;',
           },
         };
-        cy.request('/internal/osquery/fleet_wrapper/package_policies').then((response) => {
+        request<{ items: PackagePolicy[] }>({
+          url: '/internal/osquery/fleet_wrapper/package_policies',
+          headers: {
+            'Elastic-Api-Version': API_VERSIONS.internal.v1,
+          },
+        }).then((response) => {
           const item = response.body.items.find(
-            (policy: { policy_id: string }) => policy.policy_id === 'fleet-server-policy'
+            (policy: PackagePolicy) => policy.policy_id === 'fleet-server-policy'
           );
 
-          expect(item.inputs[0].config.osquery.value.packs[packName].queries).to.deep.equal(
+          expect(item?.inputs[0].config?.osquery.value.packs[packName].queries).to.deep.equal(
             queries
           );
         });
@@ -290,8 +298,8 @@ describe('ALL - Packs', () => {
             [savedQueryName]: { ecs_mapping: {}, interval: 3600, query: 'select * from uptime;' },
           },
         }).then((pack) => {
-          packId = pack.id;
-          packName = pack.attributes.name;
+          packId = pack.saved_object_id;
+          packName = pack.name;
         });
       });
 
@@ -332,8 +340,8 @@ describe('ALL - Packs', () => {
             [savedQueryName]: { ecs_mapping: {}, interval: 3600, query: 'select * from uptime;' },
           },
         }).then((pack) => {
-          packId = pack.id;
-          packName = pack.attributes.name;
+          packId = pack.saved_object_id;
+          packName = pack.name;
         });
       });
 
@@ -365,8 +373,8 @@ describe('ALL - Packs', () => {
             [savedQueryName]: { ecs_mapping: {}, interval: 3600, query: 'select * from uptime;' },
           },
         }).then((pack) => {
-          packId = pack.id;
-          packName = pack.attributes.name;
+          packId = pack.saved_object_id;
+          packName = pack.name;
         });
       });
 
@@ -408,8 +416,8 @@ describe('ALL - Packs', () => {
             [savedQueryName]: { ecs_mapping: {}, interval: 3600, query: 'select * from uptime;' },
           },
         }).then((pack) => {
-          packId = pack.id;
-          packName = pack.attributes.name;
+          packId = pack.saved_object_id;
+          packName = pack.name;
         });
       });
 
@@ -452,8 +460,8 @@ describe('ALL - Packs', () => {
             [savedQueryName]: { ecs_mapping: {}, interval: 3600, query: 'select * from uptime;' },
           },
         }).then((pack) => {
-          packId = pack.id;
-          packName = pack.attributes.name;
+          packId = pack.saved_object_id;
+          packName = pack.name;
         });
       });
 
@@ -479,8 +487,8 @@ describe('ALL - Packs', () => {
             [savedQueryName]: { ecs_mapping: {}, interval: 60, query: 'select * from uptime;' },
           },
         }).then((pack) => {
-          packId = pack.id;
-          packName = pack.attributes.name;
+          packId = pack.saved_object_id;
+          packName = pack.name;
         });
       });
 
@@ -537,8 +545,8 @@ describe('ALL - Packs', () => {
             [savedQueryName]: { ecs_mapping: {}, interval: 3600, query: 'select * from uptime;' },
           },
         }).then((pack) => {
-          packId = pack.id;
-          packName = pack.attributes.name;
+          packId = pack.saved_object_id;
+          packName = pack.name;
         });
       });
 
@@ -574,8 +582,8 @@ describe('ALL - Packs', () => {
             [savedQueryName]: { ecs_mapping: {}, interval: 3600, query: 'select * from uptime;' },
           },
         }).then((pack) => {
-          packId = pack.id;
-          packName = pack.attributes.name;
+          packId = pack.saved_object_id;
+          packName = pack.name;
         });
       });
 
@@ -631,7 +639,7 @@ describe('ALL - Packs', () => {
             [savedQueryName]: { ecs_mapping: {}, interval: 3600, query: 'select * from uptime;' },
           },
         }).then((pack) => {
-          packName = pack.attributes.name;
+          packName = pack.name;
         });
       });
 
@@ -829,10 +837,15 @@ describe('ALL - Packs', () => {
         addIntegration(agentPolicy);
         cy.contains('Add Elastic Agent later').click();
         cy.contains('osquery_manager-');
-        cy.request('/internal/osquery/fleet_wrapper/package_policies').then((response) => {
+        request<{ items: PackagePolicy[] }>({
+          url: '/internal/osquery/fleet_wrapper/package_policies',
+          headers: {
+            'Elastic-Api-Version': API_VERSIONS.internal.v1,
+          },
+        }).then((response) => {
           const item = find(response.body.items, ['policy_id', agentPolicyId]);
 
-          expect(item.inputs[0].config.osquery.value.packs[globalPack]).to.deep.equal({
+          expect(item?.inputs[0].config?.osquery.value.packs[globalPack]).to.deep.equal({
             shard: 100,
             queries: {},
           });
@@ -879,12 +892,17 @@ describe('ALL - Packs', () => {
         cy.contains(`Successfully created "${shardPack}" pack`);
         closeToastIfVisible();
 
-        cy.request('/internal/osquery/fleet_wrapper/package_policies').then((response) => {
+        request<{ items: PackagePolicy[] }>({
+          url: '/internal/osquery/fleet_wrapper/package_policies',
+          headers: {
+            'Elastic-Api-Version': API_VERSIONS.internal.v1,
+          },
+        }).then((response) => {
           const shardPolicy = response.body.items.find(
-            (policy: { policy_id: string }) => policy.policy_id === 'fleet-server-policy'
+            (policy: PackagePolicy) => policy.policy_id === 'fleet-server-policy'
           );
 
-          expect(shardPolicy.inputs[0].config.osquery.value.packs[shardPack]).to.deep.equal({
+          expect(shardPolicy?.inputs[0].config?.osquery.value.packs[shardPack]).to.deep.equal({
             shard: 15,
             queries: {},
           });

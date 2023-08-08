@@ -20,7 +20,7 @@ import type { ActionRequestComponentProps } from '../types';
 // @ts-expect-error TS2769
 const StyledEuiBasicTable = styled(EuiBasicTable)`
   table {
-    background-color: ${({ theme: { eui } }) => eui.euiPageBackgroundColor};
+    background-color: transparent;
   }
   .euiTableHeaderCell {
     border-bottom: ${(props) => props.theme.eui.euiBorderThin};
@@ -30,7 +30,7 @@ const StyledEuiBasicTable = styled(EuiBasicTable)`
   }
   .euiTableRow {
     &:hover {
-      background-color: white !important;
+      background-color: ${({ theme: { eui } }) => eui.euiColorEmptyShade} !important;
     }
     .euiTableRowCell {
       border-top: none !important;

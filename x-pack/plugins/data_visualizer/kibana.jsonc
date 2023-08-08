@@ -16,7 +16,8 @@
       "fileUpload",
       "uiActions",
       "charts",
-      "unifiedSearch"
+      "unifiedSearch",
+      "savedSearch"
     ],
     "optionalPlugins": [
       "security",
@@ -34,10 +35,8 @@
       "esUiShared",
       "fieldFormats",
       "uiActions",
-      "unifiedFieldList",
       "lens",
       "cloudChat",
-      "savedSearch"
     ]
   }
 }

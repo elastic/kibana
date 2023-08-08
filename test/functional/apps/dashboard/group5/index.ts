@@ -22,7 +22,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     await esArchiver.unload('test/functional/fixtures/es_archiver/dashboard/current/data');
   }
 
-  describe('dashboard app - group 1', function () {
+  describe('dashboard app - group 5', function () {
     before(loadCurrentData);
     after(unloadCurrentData);
 

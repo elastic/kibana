@@ -17,7 +17,6 @@ import type {
 } from '@elastic/eui/src/components/date_picker/types';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
-import { useActionHistoryUrlParams } from './use_action_history_url_params';
 
 export interface DateRangePickerValues {
   autoRefreshOptions: {
@@ -37,7 +36,6 @@ export const ActionLogDateRangePicker = memo(
   ({
     dateRangePickerState,
     isDataLoading,
-    isFlyout,
     onRefresh,
     onRefreshChange,
     onTimeChange,
@@ -45,13 +43,11 @@ export const ActionLogDateRangePicker = memo(
   }: {
     dateRangePickerState: DateRangePickerValues;
     isDataLoading: boolean;
-    isFlyout: boolean;
     onRefresh: () => void;
     onRefreshChange: (evt: OnRefreshChangeProps) => void;
     onTimeChange: ({ start, end }: DurationRange) => void;
     'data-test-subj'?: string;
   }) => {
-    const { startDate: startDateFromUrl, endDate: endDateFromUrl } = useActionHistoryUrlParams();
     const getTestId = useTestIdGenerator(dataTestSubj);
     const kibana = useKibana<IUnifiedSearchPluginServices>();
     const { uiSettings } = kibana.services;
@@ -77,22 +73,14 @@ export const ActionLogDateRangePicker = memo(
               isLoading={isDataLoading}
               dateFormat={uiSettings.get('dateFormat')}
               commonlyUsedRanges={commonlyUsedRanges}
-              end={
-                isFlyout
-                  ? dateRangePickerState.endDate
-                  : endDateFromUrl ?? dateRangePickerState.endDate
-              }
+              end={dateRangePickerState.endDate}
               isPaused={!dateRangePickerState.autoRefreshOptions.enabled}
               onTimeChange={onTimeChange}
               onRefreshChange={onRefreshChange}
               refreshInterval={dateRangePickerState.autoRefreshOptions.duration}
               onRefresh={onRefresh}
               recentlyUsedRanges={dateRangePickerState.recentlyUsedDateRanges}
-              start={
-                isFlyout
-                  ? dateRangePickerState.startDate
-                  : startDateFromUrl ?? dateRangePickerState.startDate
-              }
+              start={dateRangePickerState.startDate}
               showUpdateButton={false}
               updateButtonProps={{ iconOnly: true, fill: false }}
               width="auto"

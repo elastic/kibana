@@ -11,10 +11,12 @@ import { useHistory } from 'react-router-dom';
 import { isServerlessAgent } from '../../../../common/agent_name';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { useApmParams } from '../../../hooks/use_apm_params';
+import { useLocalStorage } from '../../../hooks/use_local_storage';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { AggregatedTransactionsBadge } from '../../shared/aggregated_transactions_badge';
 import { TransactionCharts } from '../../shared/charts/transaction_charts';
 import { replace } from '../../shared/links/url_helpers';
+import { SloCallout } from '../../shared/slo_callout';
 import { TransactionsTable } from '../../shared/transactions_table';
 
 export function TransactionOverview() {
@@ -48,8 +50,23 @@ export function TransactionOverview() {
 
   const isServerless = isServerlessAgent(serverlessType);
 
+  const [sloCalloutDismissed, setSloCalloutDismissed] = useLocalStorage(
+    'apm.sloCalloutDismissed',
+    false
+  );
+
   return (
     <>
+      {!sloCalloutDismissed && (
+        <SloCallout
+          dismissCallout={() => {
+            setSloCalloutDismissed(true);
+          }}
+          serviceName={serviceName}
+          environment={environment}
+          transactionType={transactionType}
+        />
+      )}
       {fallbackToTransactions && (
         <>
           <EuiFlexGroup>

@@ -14,9 +14,8 @@ import { TestProviders } from '../../../../common/mock';
 
 import { EndpointOverview } from '.';
 import type { EndpointFields } from '../../../../../common/search_strategy/security_solution/hosts';
-import { HostPolicyResponseActionStatus } from '../../../../../common/search_strategy/security_solution/hosts';
-import { HostStatus } from '../../../../../common/endpoint/types';
 import { EndpointMetadataGenerator } from '../../../../../common/endpoint/data_generators/endpoint_metadata_generator';
+import { set } from 'lodash';
 
 jest.mock('../../../../common/lib/kibana');
 
@@ -39,11 +38,6 @@ describe('EndpointOverview Component', () => {
 
   beforeEach(() => {
     endpointData = {
-      endpointPolicy: 'demo',
-      policyStatus: HostPolicyResponseActionStatus.success,
-      sensorVersion: '7.9.0-SNAPSHOT',
-      isolation: false,
-      elasticAgentStatus: HostStatus.HEALTHY,
       pendingActions: {},
       hostInfo: new EndpointMetadataGenerator('seed').generateHostInfo({
         metadata: {
@@ -59,9 +53,13 @@ describe('EndpointOverview Component', () => {
 
   test('it renders with endpoint data', () => {
     render();
-    expect(findData.at(0).text()).toEqual(endpointData.endpointPolicy);
-    expect(findData.at(1).text()).toEqual(endpointData.policyStatus);
-    expect(findData.at(2).text()).toContain(endpointData.sensorVersion); // contain because drag adds a space
+    expect(findData.at(0).text()).toEqual(
+      endpointData?.hostInfo?.metadata.Endpoint.policy.applied.name
+    );
+    expect(findData.at(1).text()).toEqual(
+      endpointData?.hostInfo?.metadata.Endpoint.policy.applied.status
+    );
+    expect(findData.at(2).text()).toContain(endpointData?.hostInfo?.metadata.agent.version); // contain because drag adds a space
     expect(findData.at(3).text()).toEqual('HealthyIsolated');
   });
 
@@ -74,7 +72,7 @@ describe('EndpointOverview Component', () => {
   });
 
   test('it shows isolation status', () => {
-    endpointData.isolation = true;
+    set(endpointData.hostInfo ?? {}, 'metadata.Endpoint.state.isolation', true);
     render();
     expect(findData.at(3).text()).toEqual('HealthyIsolated');
   });
@@ -84,7 +82,7 @@ describe('EndpointOverview Component', () => {
     ['isolate', 'Isolating'],
     ['unisolate', 'Releasing'],
   ])('it shows pending %s status', (action, expectedLabel) => {
-    endpointData.isolation = true;
+    set(endpointData.hostInfo ?? {}, 'metadata.Endpoint.state.isolation', true);
     endpointData.pendingActions![action] = 1;
     render();
     expect(findData.at(3).text()).toEqual(`Healthy${expectedLabel}`);

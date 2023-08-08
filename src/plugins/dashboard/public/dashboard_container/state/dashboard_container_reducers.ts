@@ -56,6 +56,10 @@ export const dashboardContainerReducers = {
     }
   },
 
+  setLastSavedId: (state: DashboardReduxState, action: PayloadAction<string | undefined>) => {
+    state.componentState.lastSavedId = action.payload;
+  },
+
   setStateFromSettingsFlyout: (
     state: DashboardReduxState,
     action: PayloadAction<DashboardStateFromSettingsFlyout>
@@ -116,10 +120,18 @@ export const dashboardContainerReducers = {
     state.componentState.lastSavedInput = action.payload;
   },
 
+  /**
+   * Resets the dashboard to the last saved input, excluding:
+   * 1) The time range, unless `timeRestore` is `true` - if we include the time range on reset even when
+   *    `timeRestore` is `false`, this causes unecessary data fetches for the control group.
+   * 2) The view mode, since resetting should never impact this - sometimes the Dashboard saved objects
+   *    have this saved in and we don't want resetting to cause unexpected view mode changes.
+   */
   resetToLastSavedInput: (state: DashboardReduxState) => {
     state.explicitInput = {
       ...state.componentState.lastSavedInput,
-      viewMode: state.explicitInput.viewMode, // keep current view mode when resetting
+      ...(!state.explicitInput.timeRestore && { timeRange: state.explicitInput.timeRange }),
+      viewMode: state.explicitInput.viewMode,
     };
   },
 
@@ -209,5 +221,12 @@ export const dashboardContainerReducers = {
 
   setHighlightPanelId: (state: DashboardReduxState, action: PayloadAction<string | undefined>) => {
     state.componentState.highlightPanelId = action.payload;
+  },
+
+  setAnimatePanelTransforms: (
+    state: DashboardReduxState,
+    action: PayloadAction<boolean | undefined>
+  ) => {
+    state.componentState.animatePanelTransforms = action.payload;
   },
 };

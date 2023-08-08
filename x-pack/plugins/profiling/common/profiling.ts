@@ -103,6 +103,7 @@ export interface StackFrame {
   FunctionName: string;
   FunctionOffset: number;
   LineNumber: number;
+  Inline: boolean;
 }
 
 export const emptyStackFrame: StackFrame = {
@@ -110,6 +111,7 @@ export const emptyStackFrame: StackFrame = {
   FunctionName: '',
   FunctionOffset: 0,
   LineNumber: 0,
+  Inline: false,
 };
 
 export interface Executable {
@@ -127,6 +129,8 @@ export interface StackFrameMetadata {
   FileID: FileID;
   // StackTrace.Type
   FrameType: FrameType;
+  // StackFrame.Inline
+  Inline: boolean;
 
   // StackTrace.AddressOrLine
   AddressOrLine: number;
@@ -155,6 +159,8 @@ export interface StackFrameMetadata {
   // unused atm due to lack of symbolization metadata
   SourcePackageURL: string;
   // unused atm due to lack of symbolization metadata
+
+  SamplingRate: number;
 }
 
 export function createStackFrameMetadata(
@@ -165,6 +171,7 @@ export function createStackFrameMetadata(
   metadata.FrameID = options.FrameID ?? '';
   metadata.FileID = options.FileID ?? '';
   metadata.FrameType = options.FrameType ?? 0;
+  metadata.Inline = options.Inline ?? false;
   metadata.AddressOrLine = options.AddressOrLine ?? 0;
   metadata.FunctionName = options.FunctionName ?? '';
   metadata.FunctionOffset = options.FunctionOffset ?? 0;
@@ -176,6 +183,7 @@ export function createStackFrameMetadata(
   metadata.SourceFilename = options.SourceFilename ?? '';
   metadata.SourcePackageHash = options.SourcePackageHash ?? '';
   metadata.SourcePackageURL = options.SourcePackageURL ?? '';
+  metadata.SamplingRate = options.SamplingRate ?? 1.0;
 
   // Unknown/invalid offsets are currently set to 0.
   //
@@ -307,6 +315,7 @@ export function groupStackFrameMetadataByStackTrace(
         FileID: fileID,
         AddressOrLine: addressOrLine,
         FrameType: trace.Types[i],
+        Inline: frame.Inline,
         FunctionName: frame.FunctionName,
         FunctionOffset: frame.FunctionOffset,
         SourceLine: frame.LineNumber,

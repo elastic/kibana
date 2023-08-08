@@ -24,6 +24,7 @@ export const mockGroupingProps = {
         {
           key: [host1Name],
           key_as_string: `${host1Name}`,
+          selectedGroup: 'host.name',
           doc_count: 1,
           hostsCountAggregation: {
             value: 1,
@@ -56,6 +57,7 @@ export const mockGroupingProps = {
         {
           key: [host2Name],
           key_as_string: `${host2Name}`,
+          selectedGroup: 'host.name',
           doc_count: 1,
           hostsCountAggregation: {
             value: 1,
@@ -88,6 +90,7 @@ export const mockGroupingProps = {
         {
           key: ['-'],
           key_as_string: `-`,
+          selectedGroup: 'host.name',
           isNullGroup: true,
           doc_count: 11,
           hostsCountAggregation: {

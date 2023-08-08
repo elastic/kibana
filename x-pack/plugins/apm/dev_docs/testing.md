@@ -97,6 +97,12 @@ node x-pack/plugins/apm/scripts/test/e2e --server
 node x-pack/plugins/apm/scripts/test/e2e --runner --open
 ```
 
+### Rum tests multiple times to check for flakiness
+
+```
+node x-pack/plugins/apm/scripts/test/e2e --runner --times <NUMBER> [--spec <FILE_NAME>]
+```
+
 ### A11y checks
 
 Accessibility tests are added on the e2e with `checkA11y()`, they will run together with cypress.
@@ -110,13 +116,13 @@ TODO: We could try moving this tests to the new e2e tests located at `x-pack/plu
 **Start server**
 
 ```
-node scripts/functional_tests_server --config x-pack/test/functional/config.base.js
+node scripts/functional_tests_server --config x-pack/test/functional/apps/apm/config.ts
 ```
 
 **Run tests**
 
 ```
-node scripts/functional_test_runner --config x-pack/test/functional/config.base.js --grep='APM specs'
+node scripts/functional_test_runner --config x-pack/test/functional/apps/apm/config.ts --grep='APM specs'
 ```
 
 APM tests are located in `x-pack/test/functional/apps/apm`.

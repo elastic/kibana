@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export const CLOSE_BTN = '[data-test-subj="close"]';
+export const FIELD_BROWSER_CLOSE_BTN = '[data-test-subj="close"]';
 
 export const FIELDS_BROWSER_CONTAINER = '[data-test-subj="fields-browser-container"]';
 
@@ -34,6 +34,9 @@ export const FIELDS_BROWSER_HEADER_HOST_GEO_CONTINENT_NAME_HEADER =
 
 export const FIELDS_BROWSER_MESSAGE_CHECKBOX = `${FIELDS_BROWSER_CONTAINER} [data-test-subj="field-message-checkbox"]`;
 
+export const GET_FIELD_CHECKBOX = (fieldName: string) =>
+  `${FIELDS_BROWSER_CONTAINER} [data-test-subj="field-${fieldName}-checkbox"]`;
+
 export const FIELDS_BROWSER_MESSAGE_HEADER =
   '[data-test-subj="timeline"] [data-test-subj="header-text-message"]';
 
@@ -43,9 +46,8 @@ export const FIELDS_BROWSER_CATEGORIES_FILTER_BUTTON = `${FIELDS_BROWSER_CONTAIN
 export const FIELDS_BROWSER_CATEGORIES_COUNT = `${FIELDS_BROWSER_CATEGORIES_FILTER_BUTTON} span.euiNotificationBadge`;
 
 export const FIELDS_BROWSER_SELECTED_CATEGORIES_BADGES = `${FIELDS_BROWSER_CONTAINER} [data-test-subj="category-badges"]`;
-export const FIELDS_BROWSER_CATEGORY_BADGE = (id: string) => {
-  return `${FIELDS_BROWSER_SELECTED_CATEGORIES_BADGES} [data-test-subj="category-badge-${id}"]`;
-};
+export const FIELDS_BROWSER_CATEGORY_BADGE = (id: string) =>
+  `${FIELDS_BROWSER_SELECTED_CATEGORIES_BADGES} [data-test-subj="category-badge-${id}"]`;
 
 export const FIELDS_BROWSER_CATEGORIES_FILTER_CONTAINER =
   '[data-test-subj="categories-selector-container"]';

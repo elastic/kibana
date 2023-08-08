@@ -21,3 +21,15 @@ export const TIEBREAKER_FIELD = '_doc';
 export const HOST_FIELD = 'host.name';
 export const CONTAINER_FIELD = 'container.id';
 export const POD_FIELD = 'kubernetes.pod.uid';
+
+export const DISCOVER_APP_TARGET = 'discover';
+export const LOGS_APP_TARGET = 'logs-ui';
+
+export const O11Y_AAD_FIELDS = [
+  'cloud.*',
+  'host.*',
+  'orchestrator.*',
+  'container.*',
+  'labels.*',
+  'tags',
+];

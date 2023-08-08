@@ -13,14 +13,13 @@ import {
   MatcherFunction,
   RenderOptions,
 } from '@testing-library/react';
-import { Router } from 'react-router-dom';
+import { Router } from '@kbn/shared-ux-router';
 import { Route } from '@kbn/shared-ux-router';
 
 import { merge, mergeWith } from 'lodash';
 import { createMemoryHistory, History } from 'history';
 import { CoreStart } from '@kbn/core/public';
 import { I18nProvider } from '@kbn/i18n-react';
-import { EuiPageTemplate_Deprecated as EuiPageTemplate } from '@elastic/eui';
 import { coreMock } from '@kbn/core/public/mocks';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { configure } from '@testing-library/dom';
@@ -29,6 +28,7 @@ import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { KibanaContextProvider, KibanaServices } from '@kbn/kibana-react-plugin/public';
 import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { mockState } from './__mocks__/synthetics_store.mock';
 import { MountWithReduxProvider } from './helper_with_redux';
 import { AppState } from '../../state';
@@ -129,6 +129,14 @@ export const mockCore: () => Partial<CoreStart> = () => {
       get: getSetting,
       get$: setSetting$,
     },
+    settings: {
+      client: {
+        ...defaultCore.settings.client,
+        get: getSetting,
+        get$: setSetting$,
+      },
+      globalClient: defaultCore.settings.globalClient,
+    },
     usageCollection: {
       reportUiCounter: () => {},
     },
@@ -147,7 +155,7 @@ export const mockCore: () => Partial<CoreStart> = () => {
     observabilityShared: {
       navigation: {
         // @ts-ignore
-        PageTemplate: EuiPageTemplate,
+        PageTemplate: KibanaPageTemplate,
       },
     },
     exploratoryView: {

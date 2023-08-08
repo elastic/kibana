@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import type { BoolQuery } from '@kbn/es-query';
 import type { NamedAggregation } from '@kbn/securitysolution-grouping';
 import { isNoneGroup, getGroupingQuery } from '@kbn/securitysolution-grouping';
+import type { RunTimeMappings } from '../../../../common/store/sourcerer/model';
 
 interface AlertsGroupingQueryParams {
   additionalFilters: Array<{
@@ -17,9 +17,9 @@ interface AlertsGroupingQueryParams {
   from: string;
   pageIndex: number;
   pageSize: number;
-  runtimeMappings: MappingRuntimeFields;
+  runtimeMappings: RunTimeMappings;
   selectedGroup: string;
-  selectedGroupEsTypes: string[];
+  uniqueValue: string;
   to: string;
 }
 
@@ -30,7 +30,7 @@ export const getAlertsGroupingQuery = ({
   pageSize,
   runtimeMappings,
   selectedGroup,
-  selectedGroupEsTypes,
+  uniqueValue,
   to,
 }: AlertsGroupingQueryParams) =>
   getGroupingQuery({
@@ -42,7 +42,7 @@ export const getAlertsGroupingQuery = ({
       : [],
     pageNumber: pageIndex * pageSize,
     runtimeMappings,
-    selectedGroupEsTypes,
+    uniqueValue,
     size: pageSize,
     sort: [{ unitsCount: { order: 'desc' } }],
     to,
@@ -167,16 +167,9 @@ const getAggregationsByGroupField = (field: string): NamedAggregation[] => {
             },
           },
           {
-            usersCountAggregation: {
+            hostsCountAggregation: {
               cardinality: {
                 field: 'host.name',
-              },
-            },
-          },
-          {
-            usersCountAggregation: {
-              cardinality: {
-                field: 'user.name',
               },
             },
           },
@@ -208,7 +201,7 @@ const getAggregationsByGroupField = (field: string): NamedAggregation[] => {
             },
           },
           {
-            usersCountAggregation: {
+            hostsCountAggregation: {
               cardinality: {
                 field: 'host.name',
               },

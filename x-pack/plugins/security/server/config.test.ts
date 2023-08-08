@@ -67,7 +67,7 @@ describe('config schema', () => {
         "secureCookies": false,
         "session": Object {
           "cleanupInterval": "PT1H",
-          "idleTimeout": "PT8H",
+          "idleTimeout": "P3D",
           "lifespan": "P30D",
         },
         "showInsecureClusterWarning": true,
@@ -122,7 +122,7 @@ describe('config schema', () => {
         "secureCookies": false,
         "session": Object {
           "cleanupInterval": "PT1H",
-          "idleTimeout": "PT8H",
+          "idleTimeout": "P3D",
           "lifespan": "P30D",
         },
         "showInsecureClusterWarning": true,
@@ -176,7 +176,7 @@ describe('config schema', () => {
         "secureCookies": false,
         "session": Object {
           "cleanupInterval": "PT1H",
-          "idleTimeout": "PT8H",
+          "idleTimeout": "P3D",
           "lifespan": "P30D",
         },
         "showInsecureClusterWarning": true,
@@ -1412,6 +1412,44 @@ describe('config schema', () => {
     });
   });
 
+  describe('ui', () => {
+    it('should not allow xpack.security.ui.* to be configured outside of the serverless context', () => {
+      expect(() =>
+        ConfigSchema.validate(
+          {
+            ui: {
+              userManagementEnabled: false,
+              roleManagementEnabled: false,
+              roleMappingManagementEnabled: false,
+            },
+          },
+          { serverless: false }
+        )
+      ).toThrowErrorMatchingInlineSnapshot(`"[ui]: a value wasn't expected to be present"`);
+    });
+
+    it('should allow xpack.security.ui.* to be configured inside of the serverless context', () => {
+      expect(
+        ConfigSchema.validate(
+          {
+            ui: {
+              userManagementEnabled: false,
+              roleManagementEnabled: false,
+              roleMappingManagementEnabled: false,
+            },
+          },
+          { serverless: true }
+        ).ui
+      ).toMatchInlineSnapshot(`
+        Object {
+          "roleManagementEnabled": false,
+          "roleMappingManagementEnabled": false,
+          "userManagementEnabled": false,
+        }
+      `);
+    });
+  });
+
   describe('session', () => {
     it('should throw error if xpack.security.session.cleanupInterval is less than 10 seconds', () => {
       expect(() => ConfigSchema.validate({ session: { cleanupInterval: '9s' } })).toThrow(
@@ -1447,7 +1485,7 @@ describe('config schema', () => {
           "concurrentSessions": Object {
             "maxSessions": 3,
           },
-          "idleTimeout": "PT8H",
+          "idleTimeout": "P3D",
           "lifespan": "P30D",
         }
       `);
@@ -1874,7 +1912,7 @@ describe('createConfig()', () => {
       expect(createMockConfig().session.getExpirationTimeouts({ type: 'basic', name: 'basic1' }))
         .toMatchInlineSnapshot(`
         Object {
-          "idleTimeout": "PT8H",
+          "idleTimeout": "P3D",
           "lifespan": "P30D",
         }
       `);
@@ -1924,7 +1962,7 @@ describe('createConfig()', () => {
         })
       ).toMatchInlineSnapshot(`
         Object {
-          "idleTimeout": "PT8H",
+          "idleTimeout": "P3D",
           "lifespan": "PT0.456S",
         }
       `);
@@ -1958,7 +1996,7 @@ describe('createConfig()', () => {
           createMockConfig({ session: { lifespan: 456 } }).session.getExpirationTimeouts(provider)
         ).toMatchInlineSnapshot(`
           Object {
-            "idleTimeout": "PT8H",
+            "idleTimeout": "P3D",
             "lifespan": "PT0.456S",
           }
         `);
@@ -2039,14 +2077,14 @@ describe('createConfig()', () => {
       expect(configWithoutGlobal.session.getExpirationTimeouts({ type: 'basic', name: 'basic1' }))
         .toMatchInlineSnapshot(`
         Object {
-          "idleTimeout": "PT8H",
+          "idleTimeout": "P3D",
           "lifespan": "PT0.654S",
         }
       `);
       expect(configWithoutGlobal.session.getExpirationTimeouts({ type: 'saml', name: 'saml1' }))
         .toMatchInlineSnapshot(`
         Object {
-          "idleTimeout": "PT8H",
+          "idleTimeout": "P3D",
           "lifespan": "PT11M5.544S",
         }
       `);
@@ -2063,7 +2101,7 @@ describe('createConfig()', () => {
       expect(configWithGlobal.session.getExpirationTimeouts({ type: 'basic', name: 'basic1' }))
         .toMatchInlineSnapshot(`
         Object {
-          "idleTimeout": "PT8H",
+          "idleTimeout": "P3D",
           "lifespan": "PT0.654S",
         }
       `);

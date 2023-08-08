@@ -17,6 +17,7 @@ import { createCli } from './create';
 import { listCli } from './list';
 import { addCli } from './add';
 import { removeCli } from './remove';
+import { showCli } from './show';
 
 const argv = process.argv.slice();
 const program = new Command('bin/kibana-keystore');
@@ -31,6 +32,7 @@ createCli(program, keystore);
 listCli(program, keystore);
 addCli(program, keystore);
 removeCli(program, keystore);
+showCli(program, keystore);
 
 program
   .command('help <command>')

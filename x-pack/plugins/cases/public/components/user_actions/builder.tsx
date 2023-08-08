@@ -17,6 +17,7 @@ import { createTagsUserActionBuilder } from './tags';
 import { createTitleUserActionBuilder } from './title';
 import { createCaseUserActionBuilder } from './create_case';
 import type { UserActionBuilderMap } from './types';
+import { createCategoryUserActionBuilder } from './category';
 
 export const builderMap: UserActionBuilderMap = {
   create_case: createCaseUserActionBuilder,
@@ -30,4 +31,5 @@ export const builderMap: UserActionBuilderMap = {
   description: createDescriptionUserActionBuilder,
   settings: createSettingsUserActionBuilder,
   assignees: createAssigneesUserActionBuilder,
+  category: createCategoryUserActionBuilder,
 };

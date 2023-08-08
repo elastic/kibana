@@ -11,6 +11,7 @@ import { PropsWithChildren, ReactElement, RefObject } from 'react';
 import React, { useMemo } from 'react';
 import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
 import { css } from '@emotion/css';
+import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import type { LensEmbeddableInput, LensSuggestionsApi, Suggestion } from '@kbn/lens-plugin/public';
 import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
@@ -68,7 +69,7 @@ export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> 
   /**
    * The current columns
    */
-  columns?: string[];
+  columns?: DatatableColumn[];
   /**
    * Context object for requests made by Unified Histogram components -- optional
    */
@@ -77,6 +78,7 @@ export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> 
    * Context object for the hits count -- leave undefined to hide the hits count
    */
   hits?: UnifiedHistogramHitsContext;
+  lensTablesAdapter?: Record<string, Datatable>;
   /**
    * Context object for the chart -- leave undefined to hide the chart
    */
@@ -169,6 +171,7 @@ export const UnifiedHistogramLayout = ({
   columns,
   request,
   hits,
+  lensTablesAdapter,
   chart: originalChart,
   breakdown,
   resizeRef,
@@ -273,6 +276,7 @@ export const UnifiedHistogramLayout = ({
           onChartLoad={onChartLoad}
           onFilter={onFilter}
           onBrushEnd={onBrushEnd}
+          lensTablesAdapter={lensTablesAdapter}
         />
       </InPortal>
       <InPortal node={mainPanelNode}>{children}</InPortal>

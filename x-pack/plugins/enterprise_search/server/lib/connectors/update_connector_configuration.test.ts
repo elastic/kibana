@@ -51,7 +51,6 @@ describe('updateConnectorConfiguration lib function', () => {
       if_primary_term: 0,
       if_seq_no: 3,
       index: CONNECTORS_INDEX,
-      refresh: 'wait_for',
     });
   });
 

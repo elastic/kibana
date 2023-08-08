@@ -87,14 +87,16 @@ export interface UserProfileAvatarData {
   /**
    * Base64 data URL for the user avatar image.
    */
-  imageUrl?: string;
+  imageUrl?: string | null;
 }
+
+export type DarkModeValue = '' | 'dark' | 'light';
 
 /**
  * User settings stored in the data object of the User Profile
  */
 export interface UserSettingsData {
-  darkMode?: string;
+  darkMode?: DarkModeValue;
 }
 
 /**

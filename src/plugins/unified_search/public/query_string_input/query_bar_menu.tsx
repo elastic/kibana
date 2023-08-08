@@ -28,6 +28,7 @@ import {
   withCloseFilterEditorConfirmModal,
   WithCloseFilterEditorConfirmModalProps,
 } from '../filter_bar/filter_editor';
+import { SuggestionsAbstraction } from '../typeahead/suggestions_component';
 
 export const strings = {
   getFilterSetButtonLabel: () =>
@@ -47,6 +48,7 @@ export interface QueryBarMenuProps extends WithCloseFilterEditorConfirmModalProp
   toggleFilterBarMenuPopover: (value: boolean) => void;
   openQueryBarMenu: boolean;
   nonKqlMode?: 'lucene' | 'text';
+  disableQueryLanguageSwitcher?: boolean;
   dateRangeFrom?: string;
   dateRangeTo?: string;
   savedQueryService: SavedQueryService;
@@ -67,11 +69,13 @@ export interface QueryBarMenuProps extends WithCloseFilterEditorConfirmModalProp
   indexPatterns?: Array<DataView | string>;
   buttonProps?: Partial<EuiButtonIconProps>;
   isDisabled?: boolean;
+  suggestionsAbstraction?: SuggestionsAbstraction;
 }
 
 function QueryBarMenuComponent({
   language,
   nonKqlMode,
+  disableQueryLanguageSwitcher,
   dateRangeFrom,
   dateRangeTo,
   onQueryChange,
@@ -99,6 +103,7 @@ function QueryBarMenuComponent({
   onCloseFilterPopover,
   onLocalFilterCreate,
   onLocalFilterUpdate,
+  suggestionsAbstraction,
 }: QueryBarMenuProps) {
   const [renderedComponent, setRenderedComponent] = useState('menu');
 
@@ -158,6 +163,7 @@ function QueryBarMenuComponent({
     manageFilterSetComponent,
     hiddenPanelOptions,
     nonKqlMode,
+    disableQueryLanguageSwitcher,
     closePopover: plainClosePopover,
     onQueryBarSubmit,
     onFiltersUpdated,
@@ -201,6 +207,7 @@ function QueryBarMenuComponent({
                 onLocalFilterCreate={onLocalFilterCreate}
                 closePopoverOnAdd={plainClosePopover}
                 closePopoverOnCancel={plainClosePopover}
+                suggestionsAbstraction={suggestionsAbstraction}
               />,
             ]}
           />

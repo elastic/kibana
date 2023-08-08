@@ -63,7 +63,7 @@ export class ServerlessPlugin implements Plugin<ServerlessPluginSetup, Serverles
             // with a specific config.  So in this case, to ensure the switcher remains enabled,
             // write the selected config to `recent` and tack on the setting to enable the switcher.
             writeFileSync(
-              resolve(getConfigDirectory(), 'serverless.recent.yml'),
+              resolve(getConfigDirectory(), 'serverless.recent.dev.yml'),
               `xpack.serverless.plugin.developer.projectSwitcher.enabled: true\nserverless: ${selectedProjectType}\n`
             );
 

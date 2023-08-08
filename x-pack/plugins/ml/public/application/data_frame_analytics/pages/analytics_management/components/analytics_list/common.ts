@@ -7,18 +7,14 @@
 
 import { EuiTableActionsColumnType, Query, Ast } from '@elastic/eui';
 
-import { DATA_FRAME_TASK_STATE } from '../../../../../../../common/constants/data_frame_analytics';
-import { DataFrameTaskStateType } from '../../../../../../../common/types/data_frame_analytics';
-export { DATA_FRAME_TASK_STATE };
-export type { DataFrameTaskStateType };
-
-import { DataFrameAnalyticsId, DataFrameAnalyticsConfig } from '../../../../common';
 import {
-  DataFrameAnalysisConfigType,
-  DataFrameAnalyticsStats,
-} from '../../../../../../../common/types/data_frame_analytics';
-
-export type { DataFrameAnalyticsStats } from '../../../../../../../common/types/data_frame_analytics';
+  DATA_FRAME_TASK_STATE,
+  type DataFrameAnalyticsId,
+  type DataFrameAnalyticsConfig,
+  type DataFrameAnalysisConfigType,
+  type DataFrameAnalyticsStats,
+  type DataFrameTaskStateType,
+} from '@kbn/ml-data-frame-analytics-utils';
 
 export enum DATA_FRAME_MODE {
   BATCH = 'batch',

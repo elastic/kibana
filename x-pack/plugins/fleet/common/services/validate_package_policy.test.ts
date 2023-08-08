@@ -1030,5 +1030,53 @@ describe('Fleet - validatePackagePolicyConfig', () => {
 
       expect(res).toBeNull();
     });
+    it('should accept a secret ref instead of a text value for a secret field', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          value: { isSecretRef: true, id: 'secret1' },
+        },
+        {
+          name: 'secret_variable',
+          type: 'text',
+          secret: true,
+        },
+        'secret_variable',
+        safeLoad
+      );
+
+      expect(res).toBeNull();
+    });
+    it('secret refs should always have an id', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          value: { isSecretRef: true },
+        },
+        {
+          name: 'secret_variable',
+          type: 'text',
+          secret: true,
+        },
+        'secret_variable',
+        safeLoad
+      );
+
+      expect(res).toEqual(['Secret reference is invalid, id must be a string']);
+    });
+    it('secret ref id should be a string', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          value: { isSecretRef: true, id: 123 },
+        },
+        {
+          name: 'secret_variable',
+          type: 'text',
+          secret: true,
+        },
+        'secret_variable',
+        safeLoad
+      );
+
+      expect(res).toEqual(['Secret reference is invalid, id must be a string']);
+    });
   });
 });

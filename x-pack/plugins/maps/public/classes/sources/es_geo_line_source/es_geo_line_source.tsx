@@ -20,16 +20,17 @@ import {
 } from '../../../../common/constants';
 import { getField, addFieldToDSL } from '../../../../common/elasticsearch_util';
 import {
+  DataFilters,
   ESGeoLineSourceDescriptor,
   ESGeoLineSourceResponseMeta,
   VectorSourceRequestMeta,
 } from '../../../../common/descriptor_types';
 import { getDataSourceLabel, getDataViewLabel } from '../../../../common/i18n_getters';
-import { AbstractESAggSource } from '../es_agg_source';
+import { AbstractESAggSource, ESAggsSourceSyncMeta } from '../es_agg_source';
 import { DataRequest } from '../../util/data_request';
-import { registerSource } from '../source_registry';
 import { convertToGeoJson } from './convert_to_geojson';
 import { ESDocField } from '../../fields/es_doc_field';
+import { InlineField } from '../../fields/inline_field';
 import { UpdateSourceEditor } from './update_source_editor';
 import { ImmutableSourceProperty, SourceEditorArgs } from '../source';
 import { GeoJsonWithMeta } from '../vector_source';
@@ -39,10 +40,18 @@ import { ITooltipProperty, TooltipProperty } from '../../tooltips/tooltip_proper
 import { getIsGoldPlus } from '../../../licensed_features';
 import { LICENSED_FEATURES } from '../../../licensed_features';
 import { mergeExecutionContext } from '../execution_context_utils';
+import { ENTITY_INPUT_LABEL, SORT_INPUT_LABEL } from './geo_line_form';
+import {
+  DEFAULT_LINE_SIMPLIFICATION_SIZE,
+  MAX_TERMS_TRACKS,
+  TIME_SERIES_ID_FIELD_NAME,
+} from './constants';
 
-type ESGeoLineSourceSyncMeta = Pick<ESGeoLineSourceDescriptor, 'splitField' | 'sortField'>;
-
-const MAX_TRACKS = 250;
+type ESGeoLineSourceSyncMeta = ESAggsSourceSyncMeta &
+  Pick<
+    ESGeoLineSourceDescriptor,
+    'groupByTimeseries' | 'lineSimplificationSize' | 'splitField' | 'sortField'
+  >;
 
 export const geoLineTitle = i18n.translate('xpack.maps.source.esGeoLineTitle', {
   defaultMessage: 'Tracks',
@@ -63,21 +72,27 @@ export class ESGeoLineSource extends AbstractESAggSource {
     const normalizedDescriptor = AbstractESAggSource.createDescriptor(
       descriptor
     ) as ESGeoLineSourceDescriptor;
+
     if (!isValidStringConfig(normalizedDescriptor.geoField)) {
       throw new Error('Cannot create an ESGeoLineSource without a geoField');
     }
-    if (!isValidStringConfig(normalizedDescriptor.splitField)) {
-      throw new Error('Cannot create an ESGeoLineSource without a splitField');
-    }
-    if (!isValidStringConfig(normalizedDescriptor.sortField)) {
-      throw new Error('Cannot create an ESGeoLineSource without a sortField');
-    }
+
+    const groupByTimeseries =
+      typeof normalizedDescriptor.groupByTimeseries === 'boolean'
+        ? normalizedDescriptor.groupByTimeseries
+        : false;
+
     return {
       ...normalizedDescriptor,
       type: SOURCE_TYPES.ES_GEO_LINE,
+      groupByTimeseries,
+      lineSimplificationSize:
+        typeof normalizedDescriptor.lineSimplificationSize === 'number'
+          ? normalizedDescriptor.lineSimplificationSize
+          : DEFAULT_LINE_SIMPLIFICATION_SIZE,
       geoField: normalizedDescriptor.geoField!,
-      splitField: normalizedDescriptor.splitField!,
-      sortField: normalizedDescriptor.sortField!,
+      splitField: normalizedDescriptor.splitField,
+      sortField: normalizedDescriptor.sortField,
     };
   }
 
@@ -102,14 +117,19 @@ export class ESGeoLineSource extends AbstractESAggSource {
         indexPatternId={this.getIndexPatternId()}
         onChange={onChange}
         metrics={this._descriptor.metrics}
-        splitField={this._descriptor.splitField}
-        sortField={this._descriptor.sortField}
+        groupByTimeseries={this._descriptor.groupByTimeseries}
+        lineSimplificationSize={this._descriptor.lineSimplificationSize}
+        splitField={this._descriptor.splitField ?? ''}
+        sortField={this._descriptor.sortField ?? ''}
       />
     );
   }
 
-  getSyncMeta(): ESGeoLineSourceSyncMeta {
+  getSyncMeta(dataFilters: DataFilters): ESGeoLineSourceSyncMeta {
     return {
+      ...super.getSyncMeta(dataFilters),
+      groupByTimeseries: this._descriptor.groupByTimeseries,
+      lineSimplificationSize: this._descriptor.lineSimplificationSize,
       splitField: this._descriptor.splitField,
       sortField: this._descriptor.sortField,
     };
@@ -134,37 +154,50 @@ export class ESGeoLineSource extends AbstractESAggSource {
     ];
   }
 
-  _createSplitField(): IField {
-    return new ESDocField({
-      fieldName: this._descriptor.splitField,
+  _createSplitField(): IField | null {
+    return this._descriptor.splitField
+      ? new ESDocField({
+          fieldName: this._descriptor.splitField,
+          source: this,
+          origin: FIELD_ORIGIN.SOURCE,
+        })
+      : null;
+  }
+
+  _createTsidField(): IField | null {
+    return new InlineField<ESGeoLineSource>({
+      fieldName: TIME_SERIES_ID_FIELD_NAME,
+      label: TIME_SERIES_ID_FIELD_NAME,
       source: this,
       origin: FIELD_ORIGIN.SOURCE,
+      dataType: 'string',
     });
   }
 
-  getFieldNames() {
-    return [
-      ...this.getMetricFields().map((esAggMetricField) => esAggMetricField.getName()),
-      this._descriptor.splitField,
-      this._descriptor.sortField,
-    ];
-  }
-
   async getFields(): Promise<IField[]> {
-    return [...this.getMetricFields(), this._createSplitField()];
+    const groupByField = this._descriptor.groupByTimeseries
+      ? this._createTsidField()
+      : this._createSplitField();
+    return groupByField ? [...this.getMetricFields(), groupByField] : this.getMetricFields();
   }
 
   getFieldByName(name: string): IField | null {
-    return name === this._descriptor.splitField
-      ? this._createSplitField()
-      : this.getMetricFieldForName(name);
+    if (name === this._descriptor.splitField) {
+      return this._createSplitField();
+    }
+
+    if (name === TIME_SERIES_ID_FIELD_NAME) {
+      return this._createTsidField();
+    }
+
+    return this.getMetricFieldForName(name);
   }
 
   isGeoGridPrecisionAware() {
     return false;
   }
 
-  showJoinEditor() {
+  supportsJoins() {
     return false;
   }
 
@@ -177,6 +210,126 @@ export class ESGeoLineSource extends AbstractESAggSource {
   ): Promise<GeoJsonWithMeta> {
     if (!getIsGoldPlus()) {
       throw new Error(REQUIRES_GOLD_LICENSE_MSG);
+    }
+
+    return this._descriptor.groupByTimeseries
+      ? this._getGeoLineByTimeseries(
+          layerName,
+          requestMeta,
+          registerCancelCallback,
+          isRequestStillActive,
+          inspectorAdapters
+        )
+      : this._getGeoLineByTerms(
+          layerName,
+          requestMeta,
+          registerCancelCallback,
+          isRequestStillActive,
+          inspectorAdapters
+        );
+  }
+
+  async _getGeoLineByTimeseries(
+    layerName: string,
+    requestMeta: VectorSourceRequestMeta,
+    registerCancelCallback: (callback: () => void) => void,
+    isRequestStillActive: () => boolean,
+    inspectorAdapters: Adapters
+  ): Promise<GeoJsonWithMeta> {
+    const indexPattern = await this.getIndexPattern();
+    const searchSource = await this.makeSearchSource(requestMeta, 0);
+    searchSource.setField('trackTotalHits', false);
+    searchSource.setField('aggs', {
+      totalEntities: {
+        cardinality: {
+          field: '_tsid',
+        },
+      },
+      tracks: {
+        time_series: {},
+        aggs: {
+          path: {
+            geo_line: {
+              point: {
+                field: this._descriptor.geoField,
+              },
+              size: this._descriptor.lineSimplificationSize,
+            },
+          },
+          ...this.getValueAggsDsl(indexPattern),
+        },
+      },
+    });
+
+    const resp = await this._runEsQuery({
+      requestId: `${this.getId()}_tracks`,
+      requestName: i18n.translate('xpack.maps.source.esGeoLine.timeSeriesTrackRequestName', {
+        defaultMessage: `'{layerName}' tracks request (time series)`,
+        values: {
+          layerName,
+        },
+      }),
+      searchSource,
+      registerCancelCallback,
+      requestDescription: i18n.translate(
+        'xpack.maps.source.esGeoLine.timeSeriesTrackRequestDescription',
+        {
+          defaultMessage:
+            'Get tracks from data view: {dataViewName}, geospatial field: {geoFieldName}',
+          values: {
+            dataViewName: indexPattern.getName(),
+            geoFieldName: this._descriptor.geoField,
+          },
+        }
+      ),
+      searchSessionId: requestMeta.searchSessionId,
+      executionContext: mergeExecutionContext(
+        { description: 'es_geo_line:time_series_tracks' },
+        requestMeta.executionContext
+      ),
+      requestsAdapter: inspectorAdapters.requests,
+    });
+
+    const { featureCollection } = convertToGeoJson(resp, TIME_SERIES_ID_FIELD_NAME);
+
+    const entityCount = featureCollection.features.length;
+    const areEntitiesTrimmed = entityCount >= 10000; // 10000 is max buckets created by time_series aggregation
+
+    return {
+      data: featureCollection,
+      meta: {
+        areResultsTrimmed: areEntitiesTrimmed,
+        areEntitiesTrimmed,
+        entityCount,
+        numTrimmedTracks: 0, // geo_line by time series never truncates tracks and instead simplifies tracks
+        totalEntities: resp?.aggregations?.totalEntities?.value ?? 0,
+      } as ESGeoLineSourceResponseMeta,
+    };
+  }
+
+  async _getGeoLineByTerms(
+    layerName: string,
+    requestMeta: VectorSourceRequestMeta,
+    registerCancelCallback: (callback: () => void) => void,
+    isRequestStillActive: () => boolean,
+    inspectorAdapters: Adapters
+  ): Promise<GeoJsonWithMeta> {
+    if (!this._descriptor.splitField) {
+      throw new Error(
+        i18n.translate('xpack.maps.source.esGeoLine.missingConfigurationError', {
+          defaultMessage: `Unable to create tracks. Provide a value for required configuration '{inputLabel}'`,
+          values: { inputLabel: ENTITY_INPUT_LABEL },
+        })
+      );
+    }
+
+    if (!this._descriptor.sortField) {
+      throw new Error(
+        i18n.translate('xpack.maps.source.esGeoLine.missingConfigurationError', {
+          defaultMessage: `Unable to create tracks. Provide a value for required configuration '{inputLabel}'`,
+          values: { inputLabel: SORT_INPUT_LABEL },
+        })
+      );
     }
 
     const indexPattern = await this.getIndexPattern();
@@ -192,8 +345,8 @@ export class ESGeoLineSource extends AbstractESAggSource {
     const entitySearchSource = await this.makeSearchSource(requestMeta, 0);
     entitySearchSource.setField('trackTotalHits', false);
     const splitField = getField(indexPattern, this._descriptor.splitField);
-    const cardinalityAgg = { precision_threshold: 1 };
-    const termsAgg = { size: MAX_TRACKS };
+    const cardinalityAgg = { precision_threshold: MAX_TERMS_TRACKS };
+    const termsAgg = { size: MAX_TERMS_TRACKS };
     entitySearchSource.setField('aggs', {
       totalEntities: {
         cardinality: addFieldToDSL(cardinalityAgg, splitField),
@@ -214,7 +367,7 @@ export class ESGeoLineSource extends AbstractESAggSource {
     const entityResp = await this._runEsQuery({
       requestId: `${this.getId()}_entities`,
       requestName: i18n.translate('xpack.maps.source.esGeoLine.entityRequestName', {
-        defaultMessage: '{layerName} entities',
+        defaultMessage: `'{layerName}' entities request`,
         values: {
           layerName,
         },
@@ -222,7 +375,12 @@ export class ESGeoLineSource extends AbstractESAggSource {
       searchSource: entitySearchSource,
       registerCancelCallback,
       requestDescription: i18n.translate('xpack.maps.source.esGeoLine.entityRequestDescription', {
-        defaultMessage: 'Elasticsearch terms request to fetch entities within map buffer.',
+        defaultMessage:
+          'Get entities within map buffer from data view: {dataViewName}, entities: {splitFieldName}',
+        values: {
+          dataViewName: indexPattern.getName(),
+          splitFieldName: this._descriptor.splitField,
+        },
       }),
       searchSessionId: requestMeta.searchSessionId,
       executionContext: mergeExecutionContext(
@@ -237,7 +395,7 @@ export class ESGeoLineSource extends AbstractESAggSource {
       []
     );
     const totalEntities = _.get(entityResp, 'aggregations.totalEntities.value', 0);
-    const areEntitiesTrimmed = entityBuckets.length >= MAX_TRACKS;
+    const areEntitiesTrimmed = entityBuckets.length >= MAX_TERMS_TRACKS;
     if (totalEntities === 0) {
       return {
         data: EMPTY_FEATURE_COLLECTION,
@@ -289,7 +447,7 @@ export class ESGeoLineSource extends AbstractESAggSource {
     const tracksResp = await this._runEsQuery({
       requestId: `${this.getId()}_tracks`,
       requestName: i18n.translate('xpack.maps.source.esGeoLine.trackRequestName', {
-        defaultMessage: '{layerName} tracks',
+        defaultMessage: `'{layerName}' tracks request (terms)`,
         values: {
           layerName,
         },
@@ -298,11 +456,16 @@ export class ESGeoLineSource extends AbstractESAggSource {
       registerCancelCallback,
       requestDescription: i18n.translate('xpack.maps.source.esGeoLine.trackRequestDescription', {
         defaultMessage:
-          'Elasticsearch geo_line request to fetch tracks for entities. Tracks are not filtered by map buffer.',
+          'Get tracks for {numEntities} entities from data view: {dataViewName}, geospatial field: {geoFieldName}',
+        values: {
+          dataViewName: indexPattern.getName(),
+          geoFieldName: this._descriptor.geoField,
+          numEntities: entityBuckets.length,
+        },
       }),
       searchSessionId: requestMeta.searchSessionId,
       executionContext: mergeExecutionContext(
-        { description: 'es_geo_line:tracks' },
+        { description: 'es_geo_line:terms_tracks' },
         requestMeta.executionContext
       ),
       requestsAdapter: inspectorAdapters.requests,
@@ -388,15 +551,21 @@ export class ESGeoLineSource extends AbstractESAggSource {
 
   async getTooltipProperties(properties: GeoJsonProperties): Promise<ITooltipProperty[]> {
     const tooltipProperties = await super.getTooltipProperties(properties);
-    tooltipProperties.push(
-      new TooltipProperty(
-        'isTrackComplete',
-        i18n.translate('xpack.maps.source.esGeoLine.isTrackCompleteLabel', {
-          defaultMessage: 'track is complete',
-        }),
-        properties!.complete.toString()
-      )
-    );
+    if (properties && typeof properties!.complete === 'boolean') {
+      tooltipProperties.push(
+        new TooltipProperty(
+          '__kbn__track__complete',
+          this._descriptor.groupByTimeseries
+            ? i18n.translate('xpack.maps.source.esGeoLine.isTrackSimplifiedLabel', {
+                defaultMessage: 'track is simplified',
+              })
+            : i18n.translate('xpack.maps.source.esGeoLine.isTrackTruncatedLabel', {
+                defaultMessage: 'track is truncated',
+              }),
+          (!properties.complete).toString()
+        )
+      );
+    }
     return tooltipProperties;
   }
 
@@ -404,8 +573,3 @@ export class ESGeoLineSource extends AbstractESAggSource {
     return [LICENSED_FEATURES.GEO_LINE_AGG];
   }
 }
-
-registerSource({
-  ConstructorFunction: ESGeoLineSource,
-  type: SOURCE_TYPES.ES_GEO_LINE,
-});

@@ -21,13 +21,9 @@ import useLocalStorage from 'react-use/lib/useLocalStorage';
 import byteSize from 'byte-size';
 import { SectionLoading } from '../../shared_imports';
 import { ProcessTree } from '../process_tree';
-import {
-  AlertStatusEventEntityIdMap,
-  Process,
-  ProcessEvent,
-} from '../../../common/types/process_tree';
-import { DisplayOptionsState } from '../../../common/types/session_view';
-import { SessionViewDeps } from '../../types';
+import type { AlertStatusEventEntityIdMap, Process, ProcessEvent } from '../../../common';
+import type { DisplayOptionsState } from '../session_view_display_options';
+import type { SessionViewDeps, SessionViewTelemetryKey } from '../../types';
 import { SessionViewDetailPanel } from '../session_view_detail_panel';
 import { SessionViewSearchBar } from '../session_view_search_bar';
 import { SessionViewDisplayOptions } from '../session_view_display_options';
@@ -40,13 +36,14 @@ import {
   useFetchGetTotalIOBytes,
 } from './hooks';
 import { LOCAL_STORAGE_DISPLAY_OPTIONS_KEY } from '../../../common/constants';
+import { CLOUD_DEFEND_INDEX, ENDPOINT_INDEX } from '../../methods';
 import { REFRESH_SESSION, TOGGLE_TTY_PLAYER, DETAIL_PANEL } from './translations';
 
 /**
  * The main wrapper component for the session view.
  */
 export const SessionView = ({
-  processIndex,
+  index,
   sessionEntityId,
   sessionStartTime,
   height,
@@ -55,13 +52,34 @@ export const SessionView = ({
   jumpToCursor,
   investigatedAlertId,
   loadAlertDetails,
-  canAccessEndpointManagement,
-}: SessionViewDeps) => {
+  canReadPolicyManagement,
+  trackEvent,
+}: SessionViewDeps & { trackEvent: (name: SessionViewTelemetryKey) => void }) => {
   // don't engage jumpTo if jumping to session leader.
   if (jumpToEntityId === sessionEntityId) {
     jumpToEntityId = undefined;
     jumpToCursor = undefined;
   }
+
+  // track session open telemetry
+  useEffect(() => {
+    let source = '';
+    // append 'app' details (which telemtry source is this from?)
+    if (index === CLOUD_DEFEND_INDEX) {
+      source += 'cloud-defend';
+    } else if (index === ENDPOINT_INDEX) {
+      source += 'endpoint';
+    } else {
+      // any telemetry producers setting process.entry_leader.entity_id will cause sessionview action to appear in timeline tables.
+      source += 'unknown';
+    }
+
+    const eventKey: SessionViewTelemetryKey = `loaded_from_${source}_${
+      investigatedAlertId ? 'alert' : 'log'
+    }` as SessionViewTelemetryKey;
+
+    trackEvent(eventKey);
+  }, [index, investigatedAlertId, trackEvent]);
 
   const [showTTY, setShowTTY] = useState(false);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
@@ -89,10 +107,6 @@ export const SessionView = ({
   const showVerboseSearchTooltip = useMemo(() => {
     return !!(!displayOptions?.verboseMode && searchQuery && searchResults?.length === 0);
   }, [displayOptions?.verboseMode, searchResults, searchQuery]);
-
-  const onToggleTTY = useCallback(() => {
-    setShowTTY(!showTTY);
-  }, [showTTY]);
 
   const onProcessSelected = useCallback((process: Process | null) => {
     setSelectedProcess(process);
@@ -132,7 +146,7 @@ export const SessionView = ({
     hasPreviousPage,
     refetch,
   } = useFetchSessionViewProcessEvents(
-    processIndex,
+    index,
     sessionEntityId,
     sessionStartTime,
     currentJumpToCursor
@@ -148,7 +162,7 @@ export const SessionView = ({
   } = useFetchSessionViewAlerts(sessionEntityId, sessionStartTime, investigatedAlertId);
 
   const { data: totalTTYOutputBytes, refetch: refetchTotalTTYOutput } = useFetchGetTotalIOBytes(
-    processIndex,
+    index,
     sessionEntityId,
     sessionStartTime
   );
@@ -159,11 +173,21 @@ export const SessionView = ({
     return { unit, value };
   }, [totalTTYOutputBytes?.total]);
 
+  const onToggleTTY = useCallback(() => {
+    if (hasTTYOutput) {
+      setShowTTY(!showTTY);
+      trackEvent('tty_loaded');
+    } else {
+      trackEvent('disabled_tty_clicked');
+    }
+  }, [hasTTYOutput, showTTY, trackEvent]);
+
   const handleRefresh = useCallback(() => {
-    refetch({ refetchPage: (_page, index, allPages) => allPages.length - 1 === index });
-    refetchAlerts({ refetchPage: (_page, index, allPages) => allPages.length - 1 === index });
+    refetch({ refetchPage: (_page, i, allPages) => allPages.length - 1 === i });
+    refetchAlerts({ refetchPage: (_page, i, allPages) => allPages.length - 1 === i });
     refetchTotalTTYOutput();
-  }, [refetch, refetchAlerts, refetchTotalTTYOutput]);
+    trackEvent('refresh_clicked');
+  }, [refetch, refetchAlerts, refetchTotalTTYOutput, trackEvent]);
 
   const alerts = useMemo(() => {
     let events: ProcessEvent[] = [];
@@ -199,9 +223,9 @@ export const SessionView = ({
   }, [newUpdatedAlertsStatus, fetchAlertStatus]);
 
   const onSearchIndexChange = useCallback(
-    (index: number) => {
+    (i: number) => {
       if (searchResults) {
-        const process = searchResults[index];
+        const process = searchResults[i];
 
         if (process) {
           onProcessSelected(process);
@@ -220,24 +244,48 @@ export const SessionView = ({
   }, []);
 
   const toggleDetailPanel = useCallback(() => {
+    const newValue = !isDetailOpen;
     detailPanelCollapseFn.current();
-    setIsDetailOpen(!isDetailOpen);
-  }, [isDetailOpen]);
+    setIsDetailOpen(newValue);
+
+    if (newValue) {
+      trackEvent('details_opened');
+    } else {
+      trackEvent('details_closed');
+    }
+  }, [isDetailOpen, trackEvent]);
 
   const onShowAlertDetails = useCallback(
     (alertUuid: string) => {
       if (loadAlertDetails) {
         loadAlertDetails(alertUuid, () => handleOnAlertDetailsClosed(alertUuid));
+        trackEvent('alert_details_loaded');
       }
     },
-    [loadAlertDetails, handleOnAlertDetailsClosed]
+    [loadAlertDetails, trackEvent, handleOnAlertDetailsClosed]
   );
 
   const handleOptionChange = useCallback(
     (checkedOptions: DisplayOptionsState) => {
       setDisplayOptions(checkedOptions);
+
+      if (checkedOptions.verboseMode !== displayOptions?.verboseMode) {
+        if (checkedOptions.verboseMode) {
+          trackEvent('verbose_mode_enabled');
+        } else {
+          trackEvent('verbose_mode_disabled');
+        }
+      }
+
+      if (checkedOptions.timestamp !== displayOptions?.timestamp) {
+        if (checkedOptions.timestamp) {
+          trackEvent('timestamp_enabled');
+        } else {
+          trackEvent('timestamp_disabled');
+        }
+      }
     },
-    [setDisplayOptions]
+    [displayOptions?.timestamp, displayOptions?.verboseMode, setDisplayOptions, trackEvent]
   );
 
   if (renderIsLoading) {
@@ -286,6 +334,7 @@ export const SessionView = ({
               setSearchQuery={setSearchQuery}
               onPrevious={onSearchIndexChange}
               onNext={onSearchIndexChange}
+              trackEvent={trackEvent}
             />
           </EuiFlexItem>
 
@@ -302,7 +351,6 @@ export const SessionView = ({
               }
             >
               <EuiButtonIcon
-                disabled={!hasTTYOutput}
                 isSelected={showTTY}
                 display={showTTY ? 'fill' : 'empty'}
                 iconType="apmTrace"
@@ -310,6 +358,7 @@ export const SessionView = ({
                 size="m"
                 aria-label={TOGGLE_TTY_PLAYER}
                 data-test-subj="sessionView:TTYPlayerToggle"
+                css={!hasTTYOutput && styles.fakeDisabled}
               />
             </EuiToolTip>
           </EuiFlexItem>
@@ -401,6 +450,7 @@ export const SessionView = ({
                       onShowAlertDetails={onShowAlertDetails}
                       showTimestamp={displayOptions?.timestamp}
                       verboseMode={displayOptions?.verboseMode}
+                      trackEvent={trackEvent}
                     />
                   </div>
                 )}
@@ -431,7 +481,7 @@ export const SessionView = ({
         }}
       </EuiResizableContainer>
       <TTYPlayer
-        index={processIndex}
+        index={index}
         show={showTTY}
         sessionEntityId={sessionEntityId}
         sessionStartTime={sessionStartTime}
@@ -439,7 +489,8 @@ export const SessionView = ({
         isFullscreen={isFullScreen}
         onJumpToEvent={onJumpToEvent}
         autoSeekToEntityId={currentJumpToOutputEntityId}
-        canAccessEndpointManagement={canAccessEndpointManagement}
+        canReadPolicyManagement={canReadPolicyManagement}
+        trackEvent={trackEvent}
       />
     </div>
   );

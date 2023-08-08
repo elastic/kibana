@@ -136,10 +136,10 @@ describe('AddInferencePipelineFlyout', () => {
     const FIELDS_STEP_INDEX = 1;
     const TEST_STEP_INDEX = 2;
     const REVIEW_STEP_INDEX = 3;
-    const setAddInferencePipelineStep = jest.fn();
+    const onAddInferencePipelineStepChange = jest.fn();
     beforeEach(() => {
       setMockActions({
-        setAddInferencePipelineStep,
+        onAddInferencePipelineStepChange,
       });
     });
     it('renders EuiStepsHorizontal', () => {
@@ -228,7 +228,7 @@ describe('AddInferencePipelineFlyout', () => {
       const steps = wrapper.find(EuiStepsHorizontal);
       const configStep = steps.prop('steps')[CONFIGURE_STEP_INDEX];
       configStep.onClick({} as any);
-      expect(setAddInferencePipelineStep).toHaveBeenCalledWith(
+      expect(onAddInferencePipelineStepChange).toHaveBeenCalledWith(
         AddInferencePipelineSteps.Configuration
       );
     });
@@ -237,21 +237,25 @@ describe('AddInferencePipelineFlyout', () => {
       const steps = wrapper.find(EuiStepsHorizontal);
       const fieldsStep = steps.prop('steps')[FIELDS_STEP_INDEX];
       fieldsStep.onClick({} as any);
-      expect(setAddInferencePipelineStep).toHaveBeenCalledWith(AddInferencePipelineSteps.Fields);
+      expect(onAddInferencePipelineStepChange).toHaveBeenCalledWith(
+        AddInferencePipelineSteps.Fields
+      );
     });
     it('clicking test step updates step', () => {
       const wrapper = shallow(<AddInferencePipelineHorizontalSteps />);
       const steps = wrapper.find(EuiStepsHorizontal);
       const testStep = steps.prop('steps')[TEST_STEP_INDEX];
       testStep.onClick({} as any);
-      expect(setAddInferencePipelineStep).toHaveBeenCalledWith(AddInferencePipelineSteps.Test);
+      expect(onAddInferencePipelineStepChange).toHaveBeenCalledWith(AddInferencePipelineSteps.Test);
     });
     it('clicking review step updates step', () => {
       const wrapper = shallow(<AddInferencePipelineHorizontalSteps />);
       const steps = wrapper.find(EuiStepsHorizontal);
       const reviewStep = steps.prop('steps')[REVIEW_STEP_INDEX];
       reviewStep.onClick({} as any);
-      expect(setAddInferencePipelineStep).toHaveBeenCalledWith(AddInferencePipelineSteps.Review);
+      expect(onAddInferencePipelineStepChange).toHaveBeenCalledWith(
+        AddInferencePipelineSteps.Review
+      );
     });
     it('cannot click fields step when data is invalid', () => {
       setMockValues({
@@ -262,7 +266,7 @@ describe('AddInferencePipelineFlyout', () => {
       const steps = wrapper.find(EuiStepsHorizontal);
       const fieldsStep = steps.prop('steps')[FIELDS_STEP_INDEX];
       fieldsStep.onClick({} as any);
-      expect(setAddInferencePipelineStep).not.toHaveBeenCalled();
+      expect(onAddInferencePipelineStepChange).not.toHaveBeenCalled();
     });
     it('cannot click test step when data is invalid', () => {
       setMockValues({
@@ -273,7 +277,7 @@ describe('AddInferencePipelineFlyout', () => {
       const steps = wrapper.find(EuiStepsHorizontal);
       const testStep = steps.prop('steps')[TEST_STEP_INDEX];
       testStep.onClick({} as any);
-      expect(setAddInferencePipelineStep).not.toHaveBeenCalled();
+      expect(onAddInferencePipelineStepChange).not.toHaveBeenCalled();
     });
     it('cannot click review step when data is invalid', () => {
       setMockValues({
@@ -284,7 +288,7 @@ describe('AddInferencePipelineFlyout', () => {
       const steps = wrapper.find(EuiStepsHorizontal);
       const reviewStep = steps.prop('steps')[REVIEW_STEP_INDEX];
       reviewStep.onClick({} as any);
-      expect(setAddInferencePipelineStep).not.toHaveBeenCalled();
+      expect(onAddInferencePipelineStepChange).not.toHaveBeenCalled();
     });
   });
   describe('ModalFooter', () => {
@@ -292,7 +296,7 @@ describe('AddInferencePipelineFlyout', () => {
     const actions = {
       attachPipeline: jest.fn(),
       createPipeline: jest.fn(),
-      setAddInferencePipelineStep: jest.fn(),
+      onAddInferencePipelineStepChange: jest.fn(),
     };
     beforeEach(() => {
       setMockActions(actions);
@@ -373,7 +377,7 @@ describe('AddInferencePipelineFlyout', () => {
       const backBtn = wrapper.find(EuiButtonEmpty).at(1);
       expect(backBtn.prop('children')).toBe('Back');
       backBtn.prop('onClick')!({} as any);
-      expect(actions.setAddInferencePipelineStep).toHaveBeenCalledWith(
+      expect(actions.onAddInferencePipelineStepChange).toHaveBeenCalledWith(
         AddInferencePipelineSteps.Configuration
       );
     });
@@ -392,7 +396,7 @@ describe('AddInferencePipelineFlyout', () => {
       const backBtn = wrapper.find(EuiButtonEmpty).at(1);
       expect(backBtn.prop('children')).toBe('Back');
       backBtn.prop('onClick')!({} as any);
-      expect(actions.setAddInferencePipelineStep).toHaveBeenCalledWith(
+      expect(actions.onAddInferencePipelineStepChange).toHaveBeenCalledWith(
         AddInferencePipelineSteps.Fields
       );
     });
@@ -411,7 +415,7 @@ describe('AddInferencePipelineFlyout', () => {
       const backBtn = wrapper.find(EuiButtonEmpty).at(1);
       expect(backBtn.prop('children')).toBe('Back');
       backBtn.prop('onClick')!({} as any);
-      expect(actions.setAddInferencePipelineStep).toHaveBeenCalledWith(
+      expect(actions.onAddInferencePipelineStepChange).toHaveBeenCalledWith(
         AddInferencePipelineSteps.Test
       );
     });
@@ -424,7 +428,7 @@ describe('AddInferencePipelineFlyout', () => {
       expect(contBtn.prop('children')).toBe('Continue');
       expect(contBtn.prop('disabled')).toBe(false);
       contBtn.prop('onClick')!({} as any);
-      expect(actions.setAddInferencePipelineStep).toHaveBeenCalledWith(
+      expect(actions.onAddInferencePipelineStepChange).toHaveBeenCalledWith(
         AddInferencePipelineSteps.Fields
       );
     });
@@ -453,7 +457,7 @@ describe('AddInferencePipelineFlyout', () => {
       expect(contBtn.prop('children')).toBe('Continue');
       expect(contBtn.prop('disabled')).toBe(false);
       contBtn.prop('onClick')!({} as any);
-      expect(actions.setAddInferencePipelineStep).toHaveBeenCalledWith(
+      expect(actions.onAddInferencePipelineStepChange).toHaveBeenCalledWith(
         AddInferencePipelineSteps.Test
       );
     });
@@ -473,7 +477,7 @@ describe('AddInferencePipelineFlyout', () => {
       expect(contBtn.prop('children')).toBe('Continue');
       expect(contBtn.prop('disabled')).toBe(false);
       contBtn.prop('onClick')!({} as any);
-      expect(actions.setAddInferencePipelineStep).toHaveBeenCalledWith(
+      expect(actions.onAddInferencePipelineStepChange).toHaveBeenCalledWith(
         AddInferencePipelineSteps.Review
       );
     });
@@ -484,11 +488,9 @@ describe('AddInferencePipelineFlyout', () => {
           ...DEFAULT_VALUES.addInferencePipelineModal,
           step: AddInferencePipelineSteps.Review,
           configuration: {
-            destinationField: 'test',
             existingPipeline: false,
             modelID: 'test-model',
             pipelineName: 'my-test-pipeline',
-            sourceField: 'body',
           },
         },
       });
@@ -510,11 +512,9 @@ describe('AddInferencePipelineFlyout', () => {
           ...DEFAULT_VALUES.addInferencePipelineModal,
           step: AddInferencePipelineSteps.Review,
           configuration: {
-            destinationField: 'test',
             existingPipeline: true,
             modelID: 'test-model',
             pipelineName: 'my-test-pipeline',
-            sourceField: 'body',
           },
         },
       });

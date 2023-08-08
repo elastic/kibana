@@ -7,7 +7,7 @@
 
 import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { useTrackPageview } from '@kbn/observability-plugin/public';
+import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
 import { ErrorCallOut } from './error_callout';
@@ -72,7 +72,7 @@ export const StepDetailPage = () => {
                 <BreakdownLegend />
               </EuiFlexItem>
               <EuiFlexItem grow={2} style={{ minWidth: 200 }}>
-                <NetworkTimingsBreakdown monitorId={data?.details?.journey.monitor.id!} />
+                <NetworkTimingsBreakdown monitorQueryId={data?.details?.journey.monitor.id!} />
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiPanel>

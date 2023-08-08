@@ -28,8 +28,8 @@ export const getUseActionColumnHook =
 
     const eventContext = useContext(StatefulEventContext);
 
-    const leadingControlColumns = useMemo(
-      () => [...getDefaultControlColumn(ACTION_BUTTON_COUNT)],
+    const leadingControlColumn = useMemo(
+      () => getDefaultControlColumn(ACTION_BUTTON_COUNT)[0],
       [ACTION_BUTTON_COUNT]
     );
 
@@ -65,7 +65,7 @@ export const getUseActionColumnHook =
           <RowAction
             columnId={`actions-${rowIndex}`}
             columnHeaders={columnHeaders}
-            controlColumn={leadingControlColumns[0]}
+            controlColumn={leadingControlColumn}
             data={timelineItem}
             disabled={false}
             index={rowIndex}
@@ -101,7 +101,7 @@ export const getUseActionColumnHook =
         columnHeaders,
         loadingEventIds,
         showCheckboxes,
-        leadingControlColumns,
+        leadingControlColumn,
         selectedEventIds,
         eventContext,
       ]
@@ -109,6 +109,6 @@ export const getUseActionColumnHook =
 
     return {
       renderCustomActionsRow,
-      width: 124,
+      width: leadingControlColumn.width,
     };
   };

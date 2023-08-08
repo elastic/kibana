@@ -17,38 +17,33 @@ import {
   EuiToolTip,
   EuiIcon,
   EuiProgress,
-  EuiLoadingContent,
+  EuiSkeletonText,
   EuiSpacer,
 } from '@elastic/eui';
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { isEmpty } from 'lodash';
-import { useProgressiveFetcher } from '../../../hooks/use_progressive_fetcher';
-import { useTimeRange } from '../../../hooks/use_time_range';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { asDynamicBytes, asPercent } from '../../../../common/utils/formatters';
 import { useApmRouter } from '../../../hooks/use_apm_router';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
-import { isPending } from '../../../hooks/use_fetcher';
+
 import { asTransactionRate } from '../../../../common/utils/formatters';
 import { getIndexManagementHref } from './get_storage_explorer_links';
+import { APIReturnType } from '../../../services/rest/create_call_apm_api';
 
-export function SummaryStats() {
+interface Props {
+  data?: APIReturnType<'GET /internal/apm/storage_explorer_summary_stats'>;
+  loading: boolean;
+  hasData: boolean;
+}
+
+export function SummaryStats({ data, loading, hasData }: Props) {
   const router = useApmRouter();
   const { core } = useApmPluginContext();
 
   const {
-    query: {
-      rangeFrom,
-      rangeTo,
-      environment,
-      kuery,
-      indexLifecyclePhase,
-      comparisonEnabled,
-    },
+    query: { rangeFrom, rangeTo, environment, kuery, comparisonEnabled },
   } = useApmParams('/storage-explorer');
-
-  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const serviceInventoryLink = router.link('/services', {
     query: {
@@ -60,27 +55,6 @@ export function SummaryStats() {
       serviceGroup: '',
     },
   });
-
-  const { data, status } = useProgressiveFetcher(
-    (callApmApi) => {
-      return callApmApi('GET /internal/apm/storage_explorer_summary_stats', {
-        params: {
-          query: {
-            indexLifecyclePhase,
-            environment,
-            kuery,
-            start,
-            end,
-          },
-        },
-      });
-    },
-    [indexLifecyclePhase, environment, kuery, start, end]
-  );
-
-  const loading = isPending(status);
-
-  const hasData = !isEmpty(data);
 
   return (
     <EuiPanel
@@ -104,7 +78,7 @@ export function SummaryStats() {
                 'xpack.apm.storageExplorer.summary.totalSize.tooltip',
                 {
                   defaultMessage:
-                    'Total storage size of all the APM indices currently, ignoring all filters.',
+                    'Total storage size of all APM indices including replicas, ignoring the filter settings.',
                 }
               )}
               value={asDynamicBytes(data?.totalSize)}
@@ -115,7 +89,7 @@ export function SummaryStats() {
               label={i18n.translate(
                 'xpack.apm.storageExplorer.summary.diskSpaceUsedPct',
                 {
-                  defaultMessage: 'Disk space used',
+                  defaultMessage: 'Relative disk space used',
                 }
               )}
               tooltipContent={i18n.translate(
@@ -131,13 +105,13 @@ export function SummaryStats() {
             />
             <SummaryMetric
               label={i18n.translate(
-                'xpack.apm.storageExplorer.summary.incrementalSize',
+                'xpack.apm.storageExplorer.summary.deltaInSize',
                 {
-                  defaultMessage: 'Incremental APM size',
+                  defaultMessage: 'Delta in APM size',
                 }
               )}
               tooltipContent={i18n.translate(
-                'xpack.apm.storageExplorer.summary.incrementalSize.tooltip',
+                'xpack.apm.storageExplorer.summary.deltaInSize.tooltip',
                 {
                   defaultMessage:
                     'The estimated storage size used by the APM indices based on the filters selected.',
@@ -256,7 +230,7 @@ function SummaryMetric({
       {loading && !hasData && (
         <>
           <EuiSpacer size="s" />
-          <EuiLoadingContent lines={2} />
+          <EuiSkeletonText lines={2} />
         </>
       )}
       {hasData && (

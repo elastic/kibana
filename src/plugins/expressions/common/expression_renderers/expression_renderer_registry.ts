@@ -27,13 +27,10 @@ export class ExpressionRendererRegistry implements IRegistry<ExpressionRenderer>
   }
 
   public toJS(): Record<string, ExpressionRenderer> {
-    return this.toArray().reduce(
-      (acc, renderer) => ({
-        ...acc,
-        [renderer.name]: renderer,
-      }),
-      {} as Record<string, ExpressionRenderer>
-    );
+    return this.toArray().reduce((acc, renderer) => {
+      acc[renderer.name] = renderer;
+      return acc;
+    }, {} as Record<string, ExpressionRenderer>);
   }
 
   public toArray(): ExpressionRenderer[] {

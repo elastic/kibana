@@ -6,7 +6,10 @@
  */
 
 import { Logger, Plugin, CoreSetup, PluginInitializerContext } from '@kbn/core/server';
-import { PluginSetupContract as AlertingPluginSetup } from '@kbn/alerting-plugin/server';
+import {
+  PluginSetupContract as AlertingPluginSetup,
+  PluginStartContract as AlertingPluginStart,
+} from '@kbn/alerting-plugin/server';
 import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import { getService, register as registerDataService } from './data';
 import { createHealthRoute, createConfigRoute } from './routes';
@@ -21,6 +24,10 @@ interface PluginsSetup {
   alerting: AlertingPluginSetup;
 }
 
+interface TriggersActionsPluginStart {
+  alerting: AlertingPluginStart;
+}
+
 export class TriggersActionsPlugin implements Plugin<void, PluginStartContract> {
   private readonly logger: Logger;
   private readonly data: PluginStartContract['data'];
@@ -30,7 +37,7 @@ export class TriggersActionsPlugin implements Plugin<void, PluginStartContract> 
     this.data = getService();
   }
 
-  public setup(core: CoreSetup, plugins: PluginsSetup): void {
+  public setup(core: CoreSetup<TriggersActionsPluginStart>, plugins: PluginsSetup): void {
     const router = core.http.createRouter();
     registerDataService({
       logger: this.logger,
@@ -45,12 +52,16 @@ export class TriggersActionsPlugin implements Plugin<void, PluginStartContract> 
       BASE_TRIGGERS_ACTIONS_UI_API_PATH,
       plugins.alerting !== undefined
     );
-    createConfigRoute(
-      this.logger,
-      router,
-      BASE_TRIGGERS_ACTIONS_UI_API_PATH,
-      plugins.alerting.getConfig
-    );
+
+    core.getStartServices().then(([_, pluginStart]) => {
+      createConfigRoute({
+        logger: this.logger,
+        router,
+        baseRoute: BASE_TRIGGERS_ACTIONS_UI_API_PATH,
+        alertingConfig: plugins.alerting.getConfig,
+        getRulesClientWithRequest: pluginStart.alerting.getRulesClientWithRequest,
+      });
+    });
   }
 
   public start(): PluginStartContract {

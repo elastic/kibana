@@ -214,6 +214,61 @@ const CODES = Object.freeze({
         'Failed to upload command execution output zip file. Timed out while queued waiting for Fleet Server',
     }
   ),
+
+  // -----------------------------------------------------------------
+  // UPLOAD CODES
+  // -----------------------------------------------------------------
+
+  // Dev:
+  // generic failure (rare corner case, software bug, etc)
+  ra_upload_error_failure: i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.upload.failure',
+    { defaultMessage: 'Upload failed' }
+  ),
+
+  // Dev:
+  // File with the given name already exists and overwrite was not allowed.
+  'ra_upload_already-exists': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.upload.fileAlreadyExists',
+    {
+      defaultMessage:
+        'File with this name already exists. Use "--overwrite" argument if wanting to overwrite it',
+    }
+  ),
+
+  // Dev:
+  // HTTP 404 from fleet server when trying to download file
+  'ra_upload_error_not-found': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.upload.fileNotFound',
+    { defaultMessage: 'Failed to retrieve file. File was not found (404)' }
+  ),
+
+  // Dev:
+  // HTTP 401, HTTP 403 from fleet server
+  'ra_upload_error_not-permitted': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.upload.fileAccessForbidden',
+    { defaultMessage: 'Failed to retrieve file. Access is forbidden (403) or unauthorized (401)' }
+  ),
+
+  // Dev:
+  // file size exceeds hard coded limit (100MB)
+  'ra_upload_error_too-big': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.upload.fileTooLarge',
+    { defaultMessage: 'Failed to save file. Size exceeds max allowed' }
+  ),
+
+  // Dev:
+  // Fleet file API could be busy, endpoint should periodically re-try (2 days = 192 x 15min, assuming that with 1Mbps 15min is enough to upload 100MB)
+  'ra_upload_error_queue-timeout': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.upload.timeout',
+    { defaultMessage: 'Attempts to retrieve file failed due to timeout' }
+  ),
+
+  // Downloaded data was corrupted, SHA256 didn't match expected, or IO error when writing to disk happened.
+  'ra_upload_error_download-failed': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.upload.fileCorruption',
+    { defaultMessage: 'Failed to save file to disk or validate its integrity' }
+  ),
 });
 
 /**

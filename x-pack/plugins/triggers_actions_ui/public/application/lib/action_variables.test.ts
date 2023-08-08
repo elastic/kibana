@@ -113,6 +113,11 @@ const expectedTransformResult = [
     description: 'This has been deprecated in favor of rule.tags.',
     name: 'tags',
   },
+  {
+    deprecated: true,
+    description: 'This has been deprecated in favor of rule.params.',
+    name: 'params',
+  },
 ];
 
 const expectedContextTransformResult = (withBraces: boolean = false) => [
@@ -139,7 +144,7 @@ const expectedStateTransformResult = (withBraces: boolean = false) => [
 const expectedParamsTransformResult = (withBraces: boolean = false) => [
   {
     description: 'fooP-description',
-    name: 'params.fooP',
+    name: 'rule.params.fooP',
     ...(withBraces && { useWithTripleBracesInTemplates: true }),
   },
 ];

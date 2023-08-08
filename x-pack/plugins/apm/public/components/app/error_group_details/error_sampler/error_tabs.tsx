@@ -9,27 +9,33 @@ import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
 
+export enum ErrorTabKey {
+  LogStackTrace = 'log_stacktrace',
+  ExceptionStacktrace = 'exception_stacktrace',
+  Metadata = 'metadata',
+}
+
 export interface ErrorTab {
-  key: 'log_stacktrace' | 'exception_stacktrace' | 'metadata' | 'summary';
+  key: ErrorTabKey;
   label: string;
 }
 
 export const logStacktraceTab: ErrorTab = {
-  key: 'log_stacktrace',
+  key: ErrorTabKey.LogStackTrace,
   label: i18n.translate('xpack.apm.errorGroup.tabs.logStacktraceLabel', {
     defaultMessage: 'Log stack trace',
   }),
 };
 
 export const exceptionStacktraceTab: ErrorTab = {
-  key: 'exception_stacktrace',
+  key: ErrorTabKey.ExceptionStacktrace,
   label: i18n.translate('xpack.apm.errorGroup.tabs.exceptionStacktraceLabel', {
     defaultMessage: 'Exception stack trace',
   }),
 };
 
 export const metadataTab: ErrorTab = {
-  key: 'metadata',
+  key: ErrorTabKey.Metadata,
   label: i18n.translate('xpack.apm.errorGroup.tabs.metadataLabel', {
     defaultMessage: 'Metadata',
   }),

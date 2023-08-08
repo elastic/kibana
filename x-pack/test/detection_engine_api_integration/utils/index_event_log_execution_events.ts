@@ -19,13 +19,17 @@ export const indexEventLogExecutionEvents = async (
   log: ToolingLog,
   events: object[]
 ): Promise<void> => {
-  const aliases = await es.cat.aliases({ format: 'json', name: '.kibana-event-log-*' });
-  const operations = events.flatMap((doc: object) => [
-    { index: { _index: aliases[0].index } },
-    doc,
-  ]);
+  const response = await es.indices.getDataStream({
+    name: `.kibana-event-log-*`,
+    expand_wildcards: 'all',
+  });
+  const operations = events.flatMap((doc: object) => [{ create: {} }, doc]);
 
-  await es.bulk({ refresh: true, operations });
+  await es.bulk({
+    index: response.data_streams[0].name,
+    refresh: true,
+    operations,
+  });
 
   return;
 };

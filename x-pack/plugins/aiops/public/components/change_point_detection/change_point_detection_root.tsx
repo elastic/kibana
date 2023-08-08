@@ -8,7 +8,7 @@
 import React, { FC } from 'react';
 import { pick } from 'lodash';
 
-import { EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 
 import { DataView } from '@kbn/data-views-plugin/common';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
@@ -19,7 +19,6 @@ import { DatePickerContextProvider } from '@kbn/ml-date-picker';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
 
-import { i18n } from '@kbn/i18n';
 import { DataSourceContext } from '../../hooks/use_data_source';
 import { AiopsAppContext, AiopsAppDependencies } from '../../hooks/use_aiops_app_context';
 import { AIOPS_STORAGE_KEYS } from '../../types/storage';
@@ -28,12 +27,19 @@ import { PageHeader } from '../page_header';
 
 import { ChangePointDetectionPage } from './change_point_detection_page';
 import { ChangePointDetectionContextProvider } from './change_point_detection_context';
+import { timeSeriesDataViewWarning } from '../../application/utils/time_series_dataview_check';
 
 const localStorage = new Storage(window.localStorage);
 
+/**
+ * Props for the ChangePointDetectionAppState component.
+ */
 export interface ChangePointDetectionAppStateProps {
+  /** The data view to analyze. */
   dataView: DataView;
+  /** The saved search to analyze. */
   savedSearch: SavedSearch | null;
+  /** App dependencies */
   appDependencies: AiopsAppDependencies;
 }
 
@@ -49,23 +55,10 @@ export const ChangePointDetectionAppState: FC<ChangePointDetectionAppStateProps>
     uiSettingsKeys: UI_SETTINGS,
   };
 
-  if (!dataView.isTimeBased()) {
-    return (
-      <EuiCallOut
-        title={i18n.translate('xpack.aiops.index.dataViewNotBasedOnTimeSeriesNotificationTitle', {
-          defaultMessage: 'The data view "{dataViewTitle}" is not based on a time series.',
-          values: { dataViewTitle: dataView.getName() },
-        })}
-        color="danger"
-        iconType="warning"
-      >
-        <p>
-          {i18n.translate('xpack.aiops.index.changePointTimeSeriesNotificationDescription', {
-            defaultMessage: 'Change point detection only runs over time-based indices.',
-          })}
-        </p>
-      </EuiCallOut>
-    );
+  const warning = timeSeriesDataViewWarning(dataView, 'change_point_detection');
+
+  if (warning !== null) {
+    return <>{warning}</>;
   }
 
   return (

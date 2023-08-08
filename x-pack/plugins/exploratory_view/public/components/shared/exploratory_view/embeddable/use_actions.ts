@@ -23,14 +23,12 @@ export function useActions({
   reportType,
   setIsSaveOpen,
   setAddToCaseOpen,
-  appId = 'observability',
   timeRange,
   lensAttributes,
 }: {
   withActions?: boolean | ActionTypes[];
   reportType: ReportViewType;
   attributes: AllSeries;
-  appId?: 'securitySolutionUI' | 'observability';
   setIsSaveOpen: (val: boolean) => void;
   setAddToCaseOpen: (val: boolean) => void;
   timeRange: { from: string; to: string };
@@ -76,8 +74,8 @@ export function useActions({
   }, [lens, lensAttributes, timeRange]);
 
   const exploreCallback = useCallback(() => {
-    application?.navigateToApp(appId, { path: routePath });
-  }, [appId, application, routePath]);
+    application?.navigateToApp('exploratory-view', { path: routePath });
+  }, [application, routePath]);
 
   const saveCallback = useCallback(() => {
     setIsSaveOpen(true);

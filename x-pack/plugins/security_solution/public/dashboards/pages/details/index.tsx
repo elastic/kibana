@@ -13,13 +13,13 @@ import type { DashboardCapabilities } from '@kbn/dashboard-plugin/common/types';
 import { useParams } from 'react-router-dom';
 
 import { pick } from 'lodash/fp';
-import { EuiLoadingSpinner } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import { SecurityPageName } from '../../../../common/constants';
 import { SpyRoute } from '../../../common/utils/route/spy_routes';
 import { useCapabilities } from '../../../common/lib/kibana';
 import { DashboardViewPromptState } from '../../hooks/use_dashboard_view_prompt_state';
-import { DashboardRenderer } from '../../../common/components/dashboards/dashboard_renderer';
-import { StatusPropmpt } from '../../components/status_prompt';
+import { DashboardRenderer } from '../../components/dashboard_renderer';
+import { StatusPrompt } from '../../components/status_prompt';
 import { SiemSearchBar } from '../../../common/components/search_bar';
 import { SecuritySolutionPageWrapper } from '../../../common/components/page_wrapper';
 import { FiltersGlobal } from '../../../common/components/filters_global';
@@ -32,6 +32,8 @@ import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { EditDashboardButton } from '../../components/edit_dashboard_button';
 
 type DashboardDetails = Record<string, string>;
+
+const dashboardViewFlexGroupStyle = { minHeight: `calc(100vh - 140px)` };
 
 const DashboardViewComponent: React.FC = () => {
   const { fromStr, toStr, from, to } = useDeepEqualSelector((state) =>
@@ -76,34 +78,47 @@ const DashboardViewComponent: React.FC = () => {
         </FiltersGlobal>
       )}
       <SecuritySolutionPageWrapper>
-        <HeaderPage border title={dashboardDetails?.title ?? <EuiLoadingSpinner size="m" />}>
-          {showWriteControls && dashboardExists && (
-            <EditDashboardButton
-              filters={filters}
-              query={query}
-              savedObjectId={savedObjectId}
-              timeRange={timeRange}
-            />
+        <EuiFlexGroup
+          direction="column"
+          style={dashboardViewFlexGroupStyle}
+          gutterSize="none"
+          data-test-subj="dashboard-view-wrapper"
+        >
+          <EuiFlexItem grow={false}>
+            <HeaderPage border title={dashboardDetails?.title ?? <EuiLoadingSpinner size="m" />}>
+              {showWriteControls && dashboardExists && (
+                <EditDashboardButton
+                  filters={filters}
+                  query={query}
+                  savedObjectId={savedObjectId}
+                  timeRange={timeRange}
+                />
+              )}
+            </HeaderPage>
+          </EuiFlexItem>
+          {!errorState && (
+            <EuiFlexItem grow>
+              <DashboardRenderer
+                query={query}
+                filters={filters}
+                canReadDashboard={canReadDashboard}
+                id={`dashboard-view-${savedObjectId}`}
+                onDashboardContainerLoaded={onDashboardContainerLoaded}
+                savedObjectId={savedObjectId}
+                timeRange={timeRange}
+              />
+            </EuiFlexItem>
           )}
-        </HeaderPage>
-
-        {!errorState && (
-          <DashboardRenderer
-            query={query}
-            filters={filters}
-            canReadDashboard={canReadDashboard}
-            id={`dashboard-view-${savedObjectId}`}
-            onDashboardContainerLoaded={onDashboardContainerLoaded}
-            savedObjectId={savedObjectId}
-            timeRange={timeRange}
+          {errorState && (
+            <EuiFlexItem data-test-subj="dashboard-view-error-prompt-wrapper" grow>
+              <StatusPrompt currentState={errorState} />
+            </EuiFlexItem>
+          )}
+          <SpyRoute
+            pageName={SecurityPageName.dashboards}
+            state={{ dashboardName: dashboardDetails?.title }}
           />
-        )}
-
-        <StatusPropmpt currentState={errorState} />
-        <SpyRoute
-          pageName={SecurityPageName.dashboards}
-          state={{ dashboardName: dashboardDetails?.title }}
-        />
+        </EuiFlexGroup>
       </SecuritySolutionPageWrapper>
     </>
   );

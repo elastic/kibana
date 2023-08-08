@@ -512,7 +512,11 @@ export const SharedLists = React.memo(() => {
               ]}
             />
           </EuiPopover>,
-          <EuiButton iconType={'importAction'} onClick={() => setDisplayImportListFlyout(true)}>
+          <EuiButton
+            data-test-subj="importSharedExceptionList"
+            iconType={'importAction'}
+            onClick={() => setDisplayImportListFlyout(true)}
+          >
             {i18n.IMPORT_EXCEPTION_LIST_BUTTON}
           </EuiButton>,
         ]}
@@ -539,7 +543,6 @@ export const SharedLists = React.memo(() => {
             setDisplayAddExceptionItemFlyout(false);
             if (didRuleChange) handleRefresh();
           }}
-          isNonTimeline={true}
         />
       )}
 

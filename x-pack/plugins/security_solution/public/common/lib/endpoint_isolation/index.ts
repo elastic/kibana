@@ -10,14 +10,18 @@ import type {
   ResponseActionApiResponse,
 } from '../../../../common/endpoint/types';
 import { KibanaServices } from '../kibana';
-import { ISOLATE_HOST_ROUTE, UNISOLATE_HOST_ROUTE } from '../../../../common/endpoint/constants';
+import {
+  ISOLATE_HOST_ROUTE_V2,
+  UNISOLATE_HOST_ROUTE_V2,
+} from '../../../../common/endpoint/constants';
 
 /** Isolates a Host running either elastic endpoint or fleet agent */
 export const isolateHost = async (
   params: HostIsolationRequestBody
 ): Promise<ResponseActionApiResponse> => {
-  return KibanaServices.get().http.post<ResponseActionApiResponse>(ISOLATE_HOST_ROUTE, {
+  return KibanaServices.get().http.post<ResponseActionApiResponse>(ISOLATE_HOST_ROUTE_V2, {
     body: JSON.stringify(params),
+    version: '2023-10-31',
   });
 };
 
@@ -25,7 +29,8 @@ export const isolateHost = async (
 export const unIsolateHost = async (
   params: HostIsolationRequestBody
 ): Promise<ResponseActionApiResponse> => {
-  return KibanaServices.get().http.post<ResponseActionApiResponse>(UNISOLATE_HOST_ROUTE, {
+  return KibanaServices.get().http.post<ResponseActionApiResponse>(UNISOLATE_HOST_ROUTE_V2, {
     body: JSON.stringify(params),
+    version: '2023-10-31',
   });
 };

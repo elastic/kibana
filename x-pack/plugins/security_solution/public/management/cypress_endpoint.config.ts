@@ -8,6 +8,8 @@
 import { defineCypressConfig } from '@kbn/cypress-config';
 // eslint-disable-next-line @kbn/imports/no_boundary_crossing
 import { dataLoaders, dataLoadersForRealEndpoints } from './cypress/support/data_loaders';
+// eslint-disable-next-line @kbn/imports/no_boundary_crossing
+import { responseActionTasks } from './cypress/support/response_actions';
 
 // eslint-disable-next-line import/no-default-export
 export default defineCypressConfig({
@@ -35,6 +37,8 @@ export default defineCypressConfig({
   },
 
   e2e: {
+    experimentalMemoryManagement: true,
+    experimentalInteractiveRunEvents: true,
     baseUrl: 'http://localhost:5620',
     supportFile: 'public/management/cypress/support/e2e.ts',
     specPattern: 'public/management/cypress/e2e/endpoint/*.cy.{js,jsx,ts,tsx}',
@@ -43,6 +47,7 @@ export default defineCypressConfig({
       dataLoaders(on, config);
       // Data loaders specific to "real" Endpoint testing
       dataLoadersForRealEndpoints(on, config);
+      responseActionTasks(on, config);
     },
   },
 });

@@ -11,7 +11,7 @@ import { FtrProviderContext } from '../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
-  const PageObjects = getPageObjects(['common', 'discover']);
+  const PageObjects = getPageObjects(['common', 'discover', 'unifiedFieldList']);
   const find = getService('find');
   const log = getService('log');
   const retry = getService('retry');
@@ -39,7 +39,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should break text on newlines', async function () {
-      await PageObjects.discover.clickFieldListItemToggle('message');
+      await PageObjects.unifiedFieldList.clickFieldListItemToggle('message');
       const dscTableRows = await find.allByCssSelector('.kbnDocTable__row');
 
       await retry.waitFor('height of multi-line content > single-line content', async () => {

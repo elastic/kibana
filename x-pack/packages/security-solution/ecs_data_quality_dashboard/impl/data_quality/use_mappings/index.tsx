@@ -8,11 +8,10 @@
 import type { IndicesGetMappingIndexMappingRecord } from '@elastic/elasticsearch/lib/api/types';
 import { useEffect, useState } from 'react';
 
-import * as i18n from '../translations';
-
+import { useDataQualityContext } from '../data_quality_panel/data_quality_context';
 import { fetchMappings } from './helpers';
 
-interface UseMappings {
+export interface UseMappings {
   indexes: Record<string, IndicesGetMappingIndexMappingRecord> | null;
   error: string | null;
   loading: boolean;
@@ -23,6 +22,7 @@ export const useMappings = (patternOrIndexName: string): UseMappings => {
     string,
     IndicesGetMappingIndexMappingRecord
   > | null>(null);
+  const { httpFetch } = useDataQualityContext();
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -31,10 +31,14 @@ export const useMappings = (patternOrIndexName: string): UseMappings => {
 
     async function fetchData() {
       try {
-        setIndexes(await fetchMappings({ abortController, patternOrIndexName }));
+        const response = await fetchMappings({ abortController, httpFetch, patternOrIndexName });
+
+        if (!abortController.signal.aborted) {
+          setIndexes(response);
+        }
       } catch (e) {
         if (!abortController.signal.aborted) {
-          setError(i18n.ERROR_LOADING_MAPPINGS({ details: e, patternOrIndexName }));
+          setError(e.message);
         }
       } finally {
         if (!abortController.signal.aborted) {
@@ -48,7 +52,7 @@ export const useMappings = (patternOrIndexName: string): UseMappings => {
     return () => {
       abortController.abort();
     };
-  }, [patternOrIndexName, setError]);
+  }, [httpFetch, patternOrIndexName, setError]);
 
   return { indexes, error, loading };
 };

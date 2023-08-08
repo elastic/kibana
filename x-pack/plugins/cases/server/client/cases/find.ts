@@ -7,21 +7,19 @@
 
 import { isEmpty } from 'lodash';
 import Boom from '@hapi/boom';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { fold } from 'fp-ts/lib/Either';
-import { identity } from 'fp-ts/lib/function';
 
-import type { CasesFindResponse, CasesFindRequest } from '../../../common/api';
-import { CasesFindRequestRt, throwErrors, CasesFindResponseRt, excess } from '../../../common/api';
+import type { CasesFindRequest, CasesFindResponse } from '../../../common/types/api';
+import { CasesFindRequestRt, CasesFindResponseRt } from '../../../common/types/api';
+import { decodeWithExcessOrThrow } from '../../../common/api';
 
 import { createCaseError } from '../../common/error';
 import { asArray, transformCases } from '../../common/utils';
 import { constructQueryOptions, constructSearch } from '../utils';
-import { includeFieldsRequiredForAuthentication } from '../../authorization/utils';
 import { Operations } from '../../authorization';
 import type { CasesClientArgs } from '..';
 import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
 import type { CasesFindQueryParams } from '../types';
+import { decodeOrThrow } from '../../../common/api/runtime_types';
 
 /**
  * Retrieves a case and optionally its comments.
@@ -41,15 +39,7 @@ export const find = async (
   } = clientArgs;
 
   try {
-    const fields = asArray(params.fields);
-
-    const queryParams = pipe(
-      excess(CasesFindRequestRt).decode({ ...params, fields }),
-      fold(throwErrors(Boom.badRequest), identity)
-    );
-
-    const { filter: authorizationFilter, ensureSavedObjectsAreAuthorized } =
-      await authorization.getAuthorizationFilter(Operations.findCases);
+    const queryParams = decodeWithExcessOrThrow(CasesFindRequestRt)(params);
 
     /**
      * Assign users to a case is only available to Platinum+
@@ -67,16 +57,20 @@ export const find = async (
       licensingService.notifyUsage(LICENSING_CASE_ASSIGNMENT_FEATURE);
     }
 
+    const { filter: authorizationFilter, ensureSavedObjectsAreAuthorized } =
+      await authorization.getAuthorizationFilter(Operations.findCases);
+
     const queryArgs: CasesFindQueryParams = {
       tags: queryParams.tags,
       reporters: queryParams.reporters,
-      sortByField: queryParams.sortField,
+      sortField: queryParams.sortField,
       status: queryParams.status,
       severity: queryParams.severity,
       owner: queryParams.owner,
       from: queryParams.from,
       to: queryParams.to,
       assignees: queryParams.assignees,
+      category: queryParams.category,
     };
 
     const statusStatsOptions = constructQueryOptions({
@@ -96,7 +90,6 @@ export const find = async (
           ...caseQueryOptions,
           ...caseSearch,
           searchFields: asArray(queryParams.searchFields),
-          fields: includeFieldsRequiredForAuthentication(fields),
         },
       }),
       caseService.getCaseStatusStats({
@@ -106,17 +99,17 @@ export const find = async (
 
     ensureSavedObjectsAreAuthorized([...cases.casesMap.values()]);
 
-    return CasesFindResponseRt.encode(
-      transformCases({
-        casesMap: cases.casesMap,
-        page: cases.page,
-        perPage: cases.perPage,
-        total: cases.total,
-        countOpenCases: statusStats.open,
-        countInProgressCases: statusStats['in-progress'],
-        countClosedCases: statusStats.closed,
-      })
-    );
+    const res = transformCases({
+      casesMap: cases.casesMap,
+      page: cases.page,
+      perPage: cases.perPage,
+      total: cases.total,
+      countOpenCases: statusStats.open,
+      countInProgressCases: statusStats['in-progress'],
+      countClosedCases: statusStats.closed,
+    });
+
+    return decodeOrThrow(CasesFindResponseRt)(res);
   } catch (error) {
     throw createCaseError({
       message: `Failed to find cases: ${JSON.stringify(params)}: ${error}`,

@@ -12,15 +12,10 @@ import {
 } from './document_migrator.test.mock';
 import { set } from '@kbn/safer-lodash-set';
 import _ from 'lodash';
-import type {
-  SavedObjectUnsanitizedDoc,
-  SavedObjectsType,
-  SavedObjectModelTransformationFn,
-} from '@kbn/core-saved-objects-server';
+import type { SavedObjectUnsanitizedDoc, SavedObjectsType } from '@kbn/core-saved-objects-server';
 import {
   SavedObjectTypeRegistry,
   LEGACY_URL_ALIAS_TYPE,
-  modelVersionToVirtualVersion,
 } from '@kbn/core-saved-objects-base-server-internal';
 import { DocumentMigrator } from './document_migrator';
 import { TransformSavedObjectDocumentError } from '../core/transform_saved_object_document_error';
@@ -30,18 +25,18 @@ const mockLoggerFactory = loggingSystemMock.create();
 const mockLogger = mockLoggerFactory.get('mock logger');
 const kibanaVersion = '25.2.3';
 
+const createType = (parts: Partial<SavedObjectsType>): SavedObjectsType => ({
+  name: 'unknown',
+  namespaceType: 'single',
+  hidden: false,
+  mappings: { properties: {} },
+  migrations: {},
+  ...parts,
+});
+
 const createRegistry = (...types: Array<Partial<SavedObjectsType>>) => {
   const registry = new SavedObjectTypeRegistry();
-  types.forEach((type) =>
-    registry.registerType({
-      name: 'unknown',
-      namespaceType: 'single',
-      hidden: false,
-      mappings: { properties: {} },
-      migrations: {},
-      ...type,
-    })
-  );
+  types.forEach((type) => registry.registerType(createType(type)));
   registry.registerType({
     name: LEGACY_URL_ALIAS_TYPE,
     namespaceType: 'agnostic',
@@ -53,17 +48,6 @@ const createRegistry = (...types: Array<Partial<SavedObjectsType>>) => {
   });
   return registry;
 };
-
-const createDoc = (
-  parts: Partial<SavedObjectUnsanitizedDoc<any>> = {}
-): SavedObjectUnsanitizedDoc<any> => ({
-  id: 'test-doc',
-  type: 'test-type',
-  attributes: {},
-  references: [],
-  coreMigrationVersion: kibanaVersion,
-  ...parts,
-});
 
 beforeEach(() => {
   mockGetConvertedObjectId.mockClear();
@@ -651,12 +635,53 @@ describe('DocumentMigrator', () => {
         ),
       });
       migrator.prepareMigrations();
-      expect(migrator.migrationVersion).toEqual({
+      expect(migrator.getMigrationVersion()).toEqual({
         aaa: '10.4.0',
         bbb: '3.2.3',
         ccc: '11.0.0',
         [LEGACY_URL_ALIAS_TYPE]: '0.1.2',
       });
+    });
+
+    test('extracts the latest non-deferred migration version info', () => {
+      const migrator = new DocumentMigrator({
+        ...testOpts(),
+        typeRegistry: createRegistry({
+          name: 'aaa',
+          migrations: {
+            '1.2.3': (doc: SavedObjectUnsanitizedDoc) => doc,
+            '2.2.1': (doc: SavedObjectUnsanitizedDoc) => doc,
+            '10.4.0': {
+              // @ts-expect-error
+              deferred: true,
+              transform: (doc: SavedObjectUnsanitizedDoc) => doc,
+            },
+          },
+        }),
+      });
+      migrator.prepareMigrations();
+      expect(migrator.getMigrationVersion({ includeDeferred: false })).toHaveProperty(
+        'aaa',
+        '2.2.1'
+      );
+    });
+
+    test('extracts the latest core migration version info', () => {
+      const migrator = new DocumentMigrator({
+        ...testOpts(),
+        typeRegistry: createRegistry({
+          name: 'aaa',
+          migrations: {
+            '1.2.3': (doc: SavedObjectUnsanitizedDoc) => doc,
+            '2.2.1': (doc: SavedObjectUnsanitizedDoc) => doc,
+          },
+        }),
+      });
+      migrator.prepareMigrations();
+      expect(migrator.getMigrationVersion({ migrationType: 'core' })).toHaveProperty(
+        'aaa',
+        '8.8.0'
+      );
     });
 
     describe('conversion to multi-namespace type', () => {
@@ -1353,171 +1378,91 @@ describe('DocumentMigrator', () => {
     });
   });
 
-  describe('down transformation', () => {
-    let migrator: DocumentMigrator;
-    let transforms: Record<number, jest.MockedFunction<SavedObjectModelTransformationFn<any>>>;
+  describe('down migration', () => {
+    it('accepts to downgrade the document if `allowDowngrade` is true', () => {
+      const registry = createRegistry({});
 
-    const createTransformFn = (
-      impl?: SavedObjectModelTransformationFn<any>
-    ): jest.MockedFunction<SavedObjectModelTransformationFn<any>> => {
-      const defaultImpl: SavedObjectModelTransformationFn = (doc) => ({
-        document: doc,
+      const fooType = createType({
+        name: 'foo',
+        switchToModelVersionAt: '8.5.0',
+        modelVersions: {
+          1: {
+            changes: [],
+            schemas: {
+              forwardCompatibility: (attrs: any) => {
+                return {
+                  foo: attrs.foo,
+                };
+              },
+            },
+          },
+        },
       });
-      return jest.fn().mockImplementation(impl ?? defaultImpl);
-    };
+      registry.registerType(fooType);
 
-    const transformCall = (num: number) => transforms[num].mock.invocationCallOrder[0];
-
-    beforeEach(() => {
-      const migrate1 = createTransformFn((doc) => {
-        doc.attributes.wentThoughDown1 = true;
-        return { document: doc };
-      });
-      const migrate2 = createTransformFn((doc) => {
-        doc.attributes.wentThoughDown2 = true;
-        return { document: doc };
-      });
-      const migrate3 = createTransformFn((doc) => {
-        doc.attributes.wentThoughDown3 = true;
-        return { document: doc };
-      });
-
-      transforms = {
-        1: migrate1,
-        2: migrate2,
-        3: migrate3,
-      };
-
-      migrator = new DocumentMigrator({
+      const migrator = new DocumentMigrator({
         ...testOpts(),
-        typeRegistry: createRegistry({
-          name: 'down-test',
-          migrations: {
-            '7.8.0': jest.fn(),
-            '7.9.0': jest.fn(),
-          },
-          switchToModelVersionAt: '8.0.0',
-          modelVersions: {
-            1: {
-              modelChange: {
-                type: 'expansion',
-                transformation: { up: jest.fn(), down: migrate1 },
-              },
-            },
-            2: {
-              modelChange: {
-                type: 'expansion',
-                transformation: { up: jest.fn(), down: migrate2 },
-              },
-            },
-            3: {
-              modelChange: {
-                type: 'expansion',
-                transformation: { up: jest.fn(), down: migrate3 },
-              },
-            },
-          },
-        }),
+        typeRegistry: registry,
       });
       migrator.prepareMigrations();
+
+      const document: SavedObjectUnsanitizedDoc = {
+        id: 'smelly',
+        type: 'foo',
+        attributes: {
+          foo: 'bar',
+          hello: 'dolly',
+        },
+        typeMigrationVersion: '10.2.0',
+      };
+
+      const migrated = migrator.migrate(document, { allowDowngrade: true });
+
+      expect(migrated).toHaveProperty('typeMigrationVersion', '10.1.0');
+      expect(migrated.attributes).toEqual({ foo: 'bar' });
     });
 
-    it('applies the expected conversion', () => {
-      const document = createDoc({
-        type: 'down-test',
-        typeMigrationVersion: modelVersionToVirtualVersion(2),
+    it('throws when trying to downgrade if `allowDowngrade` is false', () => {
+      const registry = createRegistry({});
+
+      const fooType = createType({
+        name: 'foo',
+        switchToModelVersionAt: '8.5.0',
+        modelVersions: {
+          1: {
+            changes: [],
+            schemas: {
+              forwardCompatibility: (attrs: any) => {
+                return {
+                  foo: attrs.foo,
+                };
+              },
+            },
+          },
+        },
       });
+      registry.registerType(fooType);
 
-      const result = migrator.transformDown(document, {
-        targetTypeVersion: modelVersionToVirtualVersion(1),
+      const migrator = new DocumentMigrator({
+        ...testOpts(),
+        typeRegistry: registry,
       });
+      migrator.prepareMigrations();
 
-      expect(result.typeMigrationVersion).toEqual(modelVersionToVirtualVersion(1));
-      expect(result.attributes).toEqual({
-        wentThoughDown2: true,
-      });
-    });
-
-    it('applies all the expected conversions', () => {
-      const document = createDoc({
-        type: 'down-test',
-        typeMigrationVersion: modelVersionToVirtualVersion(3),
-      });
-
-      const result = migrator.transformDown(document, {
-        targetTypeVersion: modelVersionToVirtualVersion(0),
-      });
-
-      expect(result.typeMigrationVersion).toEqual(modelVersionToVirtualVersion(0));
-      expect(result.attributes).toEqual({
-        wentThoughDown1: true,
-        wentThoughDown2: true,
-        wentThoughDown3: true,
-      });
-    });
-
-    it('applies the conversions in order', () => {
-      const document = createDoc({
-        type: 'down-test',
-        typeMigrationVersion: modelVersionToVirtualVersion(3),
-      });
-
-      const result = migrator.transformDown(document, {
-        targetTypeVersion: modelVersionToVirtualVersion(0),
-      });
-
-      expect(result.typeMigrationVersion).toEqual(modelVersionToVirtualVersion(0));
-
-      expect(transforms[1]).toHaveBeenCalledTimes(1);
-      expect(transforms[2]).toHaveBeenCalledTimes(1);
-      expect(transforms[3]).toHaveBeenCalledTimes(1);
-
-      expect(transformCall(3)).toBeLessThan(transformCall(2));
-      expect(transformCall(2)).toBeLessThan(transformCall(1));
-    });
-
-    it('throw when trying to transform to a higher version', () => {
-      const document = createDoc({
-        type: 'down-test',
-        typeMigrationVersion: modelVersionToVirtualVersion(2),
-      });
+      const document: SavedObjectUnsanitizedDoc = {
+        id: 'smelly',
+        type: 'foo',
+        attributes: {
+          foo: 'bar',
+          hello: 'dolly',
+        },
+        typeMigrationVersion: '10.2.0',
+      };
 
       expect(() =>
-        migrator.transformDown(document, {
-          targetTypeVersion: modelVersionToVirtualVersion(3),
-        })
+        migrator.migrate(document, { allowDowngrade: false })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"Trying to transform down to a higher version: 10.2.0 to 10.3.0"`
-      );
-    });
-
-    it('throw when trying to transform a document from a higher version than the max one', () => {
-      const document = createDoc({
-        type: 'down-test',
-        typeMigrationVersion: modelVersionToVirtualVersion(4),
-      });
-
-      expect(() =>
-        migrator.transformDown(document, {
-          targetTypeVersion: modelVersionToVirtualVersion(2),
-        })
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"Document \\"test-doc\\" belongs to a more recent version of Kibana [10.4.0] when the last known version is [10.3.0]."`
-      );
-    });
-
-    it('throw when trying to transform to a version without down conversion', () => {
-      const document = createDoc({
-        type: 'down-test',
-        typeMigrationVersion: modelVersionToVirtualVersion(2),
-      });
-
-      expect(() =>
-        migrator.transformDown(document, {
-          targetTypeVersion: '7.8.0',
-        })
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"Could not apply transformation migrate:7.9.0: no down conversion registered"`
+        `"Document \\"smelly\\" belongs to a more recent version of Kibana [10.2.0] when the last known version is [10.1.0]."`
       );
     });
   });

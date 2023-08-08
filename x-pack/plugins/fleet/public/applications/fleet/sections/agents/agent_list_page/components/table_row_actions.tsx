@@ -22,6 +22,7 @@ export const TableRowActions: React.FunctionComponent<{
   agentPolicy?: AgentPolicy;
   onReassignClick: () => void;
   onUnenrollClick: () => void;
+  onGetUninstallCommandClick: () => void;
   onUpgradeClick: () => void;
   onAddRemoveTagsClick: (button: HTMLElement) => void;
   onRequestDiagnosticsClick: () => void;
@@ -30,6 +31,7 @@ export const TableRowActions: React.FunctionComponent<{
   agentPolicy,
   onReassignClick,
   onUnenrollClick,
+  onGetUninstallCommandClick,
   onUpgradeClick,
   onAddRemoveTagsClick,
   onRequestDiagnosticsClick,
@@ -40,7 +42,8 @@ export const TableRowActions: React.FunctionComponent<{
   const isUnenrolling = agent.status === 'unenrolling';
   const kibanaVersion = useKibanaVersion();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { diagnosticFileUploadEnabled } = ExperimentalFeaturesService.get();
+  const { diagnosticFileUploadEnabled, agentTamperProtectionEnabled } =
+    ExperimentalFeaturesService.get();
   const menuItems = [
     <EuiContextMenuItem
       icon="inspect"
@@ -113,6 +116,26 @@ export const TableRowActions: React.FunctionComponent<{
         />
       </EuiContextMenuItem>
     );
+
+    if (agentTamperProtectionEnabled && agent.policy_id) {
+      menuItems.push(
+        <EuiContextMenuItem
+          icon="minusInCircle"
+          onClick={() => {
+            onGetUninstallCommandClick();
+            setIsMenuOpen(false);
+          }}
+          disabled={!agent.active}
+          key="getUninstallCommand"
+          data-test-subj="uninstallAgentMenuItem"
+        >
+          <FormattedMessage
+            id="xpack.fleet.agentList.getUninstallCommand"
+            defaultMessage="Uninstall agent"
+          />
+        </EuiContextMenuItem>
+      );
+    }
   }
 
   if (diagnosticFileUploadEnabled) {

@@ -8,11 +8,11 @@
 import type {
   GetRuleExecutionEventsResponse,
   GetRuleExecutionResultsResponse,
-} from '../../../../../common/detection_engine/rule_monitoring';
+} from '../../../../../common/api/detection_engine/rule_monitoring';
 import {
   LogLevel,
   RuleExecutionEventType,
-} from '../../../../../common/detection_engine/rule_monitoring';
+} from '../../../../../common/api/detection_engine/rule_monitoring';
 
 import type {
   FetchRuleExecutionEventsArgs,
@@ -21,6 +21,8 @@ import type {
 } from '../api_client_interface';
 
 export const api: jest.Mocked<IRuleMonitoringApiClient> = {
+  setupDetectionEngineHealthApi: jest.fn<Promise<void>, []>().mockResolvedValue(),
+
   fetchRuleExecutionEvents: jest
     .fn<Promise<GetRuleExecutionEventsResponse>, [FetchRuleExecutionEventsArgs]>()
     .mockResolvedValue({

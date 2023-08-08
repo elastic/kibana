@@ -6,11 +6,10 @@
  */
 
 import React, { FC, useCallback, useEffect, useState, useMemo } from 'react';
-import { PreloadedState } from '@reduxjs/toolkit';
 import { AppMountParameters, CoreSetup, CoreStart } from '@kbn/core/public';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
-import { HashRouter, RouteComponentProps, Switch } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
+import { RouteComponentProps } from 'react-router-dom';
+import { HashRouter, Routes, Route } from '@kbn/shared-ux-router';
 import { History } from 'history';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { i18n } from '@kbn/i18n';
@@ -48,16 +47,16 @@ import {
   navigateAway,
   LensRootStore,
   loadInitial,
-  LensAppState,
-  LensState,
+  setState,
 } from '../state_management';
-import { getPreloadedState, setState } from '../state_management/lens_slice';
+import { getPreloadedState } from '../state_management/lens_slice';
 import { getLensInspectorService } from '../lens_inspector_service';
 import {
   LensAppLocator,
   LENS_SHARE_STATE_ACTION,
   MainHistoryLocationState,
 } from '../../common/locator/locator';
+import { SavedObjectIndexStore } from '../persistence';
 
 function getInitialContext(history: AppMountParameters['history']) {
   const historyLocationState = history.location.state as
@@ -95,6 +94,7 @@ export async function getLensServices(
     inspector,
     navigation,
     embeddable,
+    eventAnnotation,
     savedObjectsTagging,
     usageCollection,
     fieldFormats,
@@ -106,6 +106,7 @@ export async function getLensServices(
   const storage = new Storage(localStorage);
   const stateTransfer = embeddable?.getStateTransfer();
   const embeddableEditorIncomingState = stateTransfer?.getIncomingEditorState(APP_ID);
+  const eventAnnotationService = await eventAnnotation.getService();
 
   return {
     data,
@@ -117,15 +118,17 @@ export async function getLensServices(
     usageCollection,
     savedObjectsTagging,
     attributeService,
+    eventAnnotationService,
     executionContext: coreStart.executionContext,
     http: coreStart.http,
     uiActions: startDependencies.uiActions,
     chrome: coreStart.chrome,
     overlays: coreStart.overlays,
     uiSettings: coreStart.uiSettings,
+    settings: coreStart.settings,
     application: coreStart.application,
     notifications: coreStart.notifications,
-    savedObjectsClient: coreStart.savedObjects.client,
+    savedObjectStore: new SavedObjectIndexStore(startDependencies.contentManagement.client),
     presentationUtil: startDependencies.presentationUtil,
     dataViewEditor: startDependencies.dataViewEditor,
     dataViewFieldEditor: startDependencies.dataViewFieldEditor,
@@ -181,7 +184,7 @@ export async function mountApp(
     locator
   );
 
-  const { stateTransfer, data } = lensServices;
+  const { stateTransfer, data, savedObjectStore } = lensServices;
 
   const embeddableEditorIncomingState = stateTransfer?.getIncomingEditorState(APP_ID);
 
@@ -271,9 +274,7 @@ export async function mountApp(
     initialContext,
     initialStateFromLocator,
   };
-  const lensStore: LensRootStore = makeConfigureStore(storeDeps, {
-    lens: getPreloadedState(storeDeps) as LensAppState,
-  } as unknown as PreloadedState<LensState>);
+  const lensStore: LensRootStore = makeConfigureStore(storeDeps);
 
   const EditorRenderer = React.memo(
     (props: { id?: string; history: History<unknown>; editByValue?: boolean }) => {
@@ -317,7 +318,7 @@ export async function mountApp(
           data.query.filterManager.setAppFilters([]);
           data.query.queryString.clearQuery();
         }
-        lensStore.dispatch(setState(getPreloadedState(storeDeps) as LensAppState));
+        lensStore.dispatch(setState(getPreloadedState(storeDeps)));
         lensStore.dispatch(loadInitial({ redirectCallback, initialInput, history: props.history }));
       }, [initialInput, props.history, redirectCallback]);
       useEffect(() => {
@@ -372,6 +373,7 @@ export async function mountApp(
             topNavMenuEntryGenerators={topNavMenuEntryGenerators}
             theme$={core.theme.theme$}
             coreStart={coreStart}
+            savedObjectStore={savedObjectStore}
           />
         </Provider>
       );
@@ -409,7 +411,7 @@ export async function mountApp(
         <KibanaContextProvider services={lensServices}>
           <PresentationUtilContext>
             <HashRouter>
-              <Switch>
+              <Routes>
                 <Route exact path="/edit/:id" component={EditorRoute} />
                 <Route
                   exact
@@ -418,7 +420,7 @@ export async function mountApp(
                 />
                 <Route exact path="/" component={EditorRoute} />
                 <Route path="/" component={NotFound} />
-              </Switch>
+              </Routes>
             </HashRouter>
           </PresentationUtilContext>
         </KibanaContextProvider>

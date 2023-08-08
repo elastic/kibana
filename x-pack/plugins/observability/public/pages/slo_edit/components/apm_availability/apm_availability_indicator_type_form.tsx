@@ -5,29 +5,17 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
-import {
-  EuiComboBox,
-  EuiComboBoxOptionOption,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiIconTip,
-} from '@elastic/eui';
-import { Controller, useFormContext } from 'react-hook-form';
+import { EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { CreateSLOInput } from '@kbn/slo-schema';
-
-import { useFetchApmIndex } from '../../../../hooks/slo/use_fetch_apm_indices';
+import React from 'react';
+import { useFormContext } from 'react-hook-form';
+import { CreateSLOForm } from '../../types';
 import { FieldSelector } from '../apm_common/field_selector';
+import { DataPreviewChart } from '../common/data_preview_chart';
 import { QueryBuilder } from '../common/query_builder';
 
 export function ApmAvailabilityIndicatorTypeForm() {
-  const { control, setValue, watch, getFieldState } = useFormContext<CreateSLOInput>();
-  const { data: apmIndex } = useFetchApmIndex();
-  useEffect(() => {
-    setValue('indicator.params.index', apmIndex);
-  }, [apmIndex, setValue]);
+  const { watch } = useFormContext<CreateSLOForm>();
 
   return (
     <EuiFlexGroup direction="column" gutterSize="l">
@@ -105,67 +93,7 @@ export function ApmAvailabilityIndicatorTypeForm() {
 
       <EuiFlexGroup direction="row" gutterSize="l">
         <EuiFlexItem>
-          <EuiFormRow
-            label={
-              <span>
-                {i18n.translate('xpack.observability.slo.sloEdit.apmAvailability.goodStatusCodes', {
-                  defaultMessage: 'Good status codes',
-                })}{' '}
-                <EuiIconTip
-                  content={i18n.translate(
-                    'xpack.observability.slo.sloEdit.apmAvailability.goodStatusCodes.tooltip',
-                    {
-                      defaultMessage:
-                        'Configure the HTTP status codes defining the "good" or "successful" requests for the SLO.',
-                    }
-                  )}
-                  position="top"
-                />
-              </span>
-            }
-            isInvalid={getFieldState('indicator.params.goodStatusCodes').invalid}
-          >
-            <Controller
-              shouldUnregister
-              name="indicator.params.goodStatusCodes"
-              control={control}
-              defaultValue={['2xx', '3xx', '4xx']}
-              rules={{ required: true }}
-              render={({ field: { ref, ...field }, fieldState }) => (
-                <EuiComboBox
-                  {...field}
-                  aria-label={i18n.translate(
-                    'xpack.observability.slo.sloEdit.apmAvailability.goodStatusCodes.placeholder',
-                    {
-                      defaultMessage: 'Select the good status codes',
-                    }
-                  )}
-                  placeholder={i18n.translate(
-                    'xpack.observability.slo.sloEdit.apmAvailability.goodStatusCodes.placeholder',
-                    {
-                      defaultMessage: 'Select the good status codes',
-                    }
-                  )}
-                  isInvalid={fieldState.invalid}
-                  options={generateStatusCodeOptions(['2xx', '3xx', '4xx', '5xx'])}
-                  selectedOptions={generateStatusCodeOptions(field.value)}
-                  onChange={(selected: EuiComboBoxOptionOption[]) => {
-                    if (selected.length) {
-                      return field.onChange(selected.map((opts) => opts.value));
-                    }
-
-                    field.onChange([]);
-                  }}
-                  isClearable
-                  data-test-subj="sloEditApmAvailabilityGoodStatusCodesSelector"
-                />
-              )}
-            />
-          </EuiFormRow>
-        </EuiFlexItem>
-        <EuiFlexItem>
           <QueryBuilder
-            control={control}
             dataTestSubj="apmLatencyFilterInput"
             indexPatternString={watch('indicator.params.index')}
             label={i18n.translate('xpack.observability.slo.sloEdit.apmLatency.filter', {
@@ -190,14 +118,8 @@ export function ApmAvailabilityIndicatorTypeForm() {
           />
         </EuiFlexItem>
       </EuiFlexGroup>
+
+      <DataPreviewChart />
     </EuiFlexGroup>
   );
-}
-
-function generateStatusCodeOptions(codes: string[] = []) {
-  return codes.map((code) => ({
-    label: code,
-    value: code,
-    'data-test-subj': `${code}Option`,
-  }));
 }

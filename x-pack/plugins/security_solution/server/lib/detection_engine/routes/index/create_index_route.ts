@@ -7,7 +7,7 @@
 
 import { chunk, get } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient, IKibanaResponse } from '@kbn/core/server';
 import {
   transformError,
   getBootstrapIndexExists,
@@ -20,6 +20,7 @@ import type {
   SecuritySolutionPluginRouter,
 } from '../../../../types';
 import { DETECTION_ENGINE_INDEX_URL } from '../../../../../common/constants';
+import type { CreateIndexResponse } from '../../../../../common/api/detection_engine';
 import { buildSiemResponse } from '../utils';
 import {
   getSignalsTemplate,
@@ -43,7 +44,7 @@ export const createIndexRoute = (router: SecuritySolutionPluginRouter) => {
         tags: ['access:securitySolution'],
       },
     },
-    async (context, _, response) => {
+    async (context, _, response): Promise<IKibanaResponse<CreateIndexResponse>> => {
       const siemResponse = buildSiemResponse(response);
 
       try {
@@ -96,7 +97,7 @@ export const createDetectionIndex = async (
   if (await templateNeedsUpdate({ alias: index, esClient })) {
     await esClient.indices.putIndexTemplate({
       name: index,
-      body: getSignalsTemplate(index, aadIndexAliasName) as Record<string, unknown>,
+      body: getSignalsTemplate(index, aadIndexAliasName, spaceId) as Record<string, unknown>,
     });
   }
   // Check if the old legacy siem signals template exists and remove it
@@ -109,7 +110,7 @@ export const createDetectionIndex = async (
   }
 
   if (indexExists) {
-    await addFieldAliasesToIndices({ esClient, index });
+    await addFieldAliasesToIndices({ esClient, index, spaceId });
     // The internal user is used here because Elasticsearch requires the PUT alias requestor to have 'manage' permissions
     // for BOTH the index AND alias name. However, through 7.14 admins only needed permissions for .siem-signals (the index)
     // and not .alerts-security.alerts (the alias). From the security solution perspective, all .siem-signals-<space id>-*
@@ -136,9 +137,11 @@ export const createDetectionIndex = async (
 const addFieldAliasesToIndices = async ({
   esClient,
   index,
+  spaceId,
 }: {
   esClient: ElasticsearchClient;
   index: string;
+  spaceId: string;
 }) => {
   const indexMappings = await esClient.indices.get({ index });
   const indicesByVersion: Record<number, string[]> = {};
@@ -164,7 +167,7 @@ const addFieldAliasesToIndices = async ({
     }
   }
   for (const version of versions) {
-    const body = createBackwardsCompatibilityMapping(version);
+    const body = createBackwardsCompatibilityMapping(version, spaceId);
     const indexNameChunks = chunk(indicesByVersion[version], 20);
     for (const indexNameChunk of indexNameChunks) {
       await esClient.indices.putMapping({

@@ -19,7 +19,6 @@
     "@kbn/features-plugin",
     "@kbn/infra-plugin",
     "@kbn/licensing-plugin",
-    "@kbn/observability-plugin",
     "@kbn/telemetry-collection-xpack-plugin",
     "@kbn/triggers-actions-ui-plugin",
     "@kbn/expect",
@@ -40,6 +39,10 @@
     "@kbn/dashboard-plugin",
     "@kbn/fleet-plugin",
     "@kbn/shared-ux-router",
+    "@kbn/observability-shared-plugin",
+    "@kbn/shared-ux-link-redirect-app",
+    "@kbn/es-types",
+    "@kbn/logs-shared-plugin",
   ],
   "exclude": [
     "target/**/*",

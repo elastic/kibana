@@ -50,7 +50,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
             </option>
           </select>
           <div
-            class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+            class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
           >
             <span
               class="euiFormControlLayoutCustomIcon"

@@ -11,7 +11,6 @@ import React from 'react';
 import {
   EuiLink,
   EuiPage,
-  EuiPageContent_Deprecated as EuiPageContent,
   EuiPageBody,
   EuiPanel,
   EuiSpacer,
@@ -52,7 +51,7 @@ export const ElasticsearchMLJobs = ({
           <ClusterStatus stats={clusterStatus} />
         </EuiPanel>
         <EuiSpacer size="m" />
-        <EuiPageContent>
+        <EuiPanel>
           <EuiMonitoringTable
             className="mlJobsTable"
             rows={jobs}
@@ -88,7 +87,7 @@ export const ElasticsearchMLJobs = ({
               defaultFields: ['job_id'],
             }}
           />
-        </EuiPageContent>
+        </EuiPanel>
       </EuiPageBody>
     </EuiPage>
   );

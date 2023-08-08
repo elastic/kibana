@@ -7,6 +7,7 @@
 
 import type {
   DatatableVisualizationState,
+  FieldBasedIndexPatternColumn,
   FormBasedPersistedState,
   TypedLensByValueInput,
 } from '@kbn/lens-plugin/public';
@@ -16,7 +17,7 @@ import type { Filter, Query } from '@kbn/es-query';
 
 import type { InputsModelId } from '../../store/inputs/constants';
 import type { SourcererScopeName } from '../../store/sourcerer/model';
-import type { Status } from '../../../../common/detection_engine/schemas/common';
+import type { Status } from '../../../../common/api/detection_engine';
 
 export type LensAttributes = TypedLensByValueInput['attributes'];
 export type GetLensAttributes = (
@@ -67,16 +68,16 @@ export interface LensEmbeddableComponentProps {
   extraActions?: Action[];
   extraOptions?: ExtraOptions;
   getLensAttributes?: GetLensAttributes;
-  height?: string;
+  height?: number; // px
   id: string;
   inputsModelId?: InputsModelId.global | InputsModelId.timeline;
-  inspectTitle?: string;
+  inspectTitle?: React.ReactNode;
   lensAttributes?: LensAttributes;
   onLoad?: OnEmbeddableLoaded;
   scopeId?: SourcererScopeName;
   stackByField?: string;
   timerange: { from: string; to: string };
-  width?: string;
+  width?: string | number;
   withActions?: boolean;
 }
 
@@ -180,4 +181,9 @@ export interface LensDataTableEmbeddable {
   attributes: LensDataTableAttributes<'lnsDatatable', DatatableVisualizationState>;
   id: string;
   timeRange: { from: string; to: string; fromStr: string; toStr: string };
+}
+
+export interface LensEmbeddableDataTableColumn extends FieldBasedIndexPatternColumn {
+  operationType: string;
+  params?: unknown;
 }

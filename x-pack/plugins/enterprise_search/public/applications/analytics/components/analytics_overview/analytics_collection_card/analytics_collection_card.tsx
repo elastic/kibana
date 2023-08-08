@@ -10,7 +10,7 @@ import React, { MouseEvent } from 'react';
 import { parsePath } from 'history';
 import { useValues } from 'kea';
 
-import { AreaSeries, Chart, CurveType, ScaleType, Settings } from '@elastic/charts';
+import { AreaSeries, Chart, CurveType, ScaleType, Settings, Tooltip } from '@elastic/charts';
 import {
   EuiBadge,
   EuiCard,
@@ -190,8 +190,8 @@ export const AnalyticsCollectionCard: React.FC<
               chartMargins: { bottom: 0, left: 0, right: 0, top: 0 },
             }}
             showLegend={false}
-            tooltip="none"
           />
+          <Tooltip type="none" />
           <AreaSeries
             id={collection.name}
             data={data}

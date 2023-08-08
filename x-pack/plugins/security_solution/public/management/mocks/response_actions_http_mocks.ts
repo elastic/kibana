@@ -12,13 +12,14 @@ import {
   ACTION_STATUS_ROUTE,
   GET_PROCESSES_ROUTE,
   BASE_ENDPOINT_ACTION_ROUTE,
-  ISOLATE_HOST_ROUTE,
-  UNISOLATE_HOST_ROUTE,
   KILL_PROCESS_ROUTE,
   SUSPEND_PROCESS_ROUTE,
   GET_FILE_ROUTE,
   ACTION_AGENT_FILE_INFO_ROUTE,
   EXECUTE_ROUTE,
+  UPLOAD_ROUTE,
+  ISOLATE_HOST_ROUTE_V2,
+  UNISOLATE_HOST_ROUTE_V2,
 } from '../../../common/endpoint/constants';
 import type { ResponseProvidersInterface } from '../../common/mock/endpoint/http_handler_mock_factory';
 import { httpHandlerMockFactory } from '../../common/mock/endpoint/http_handler_mock_factory';
@@ -34,6 +35,8 @@ import type {
   ActionFileInfoApiResponse,
   ResponseActionExecuteOutputContent,
   ResponseActionsExecuteParameters,
+  ResponseActionUploadOutputContent,
+  ResponseActionUploadParameters,
 } from '../../../common/endpoint/types';
 
 export type ResponseActionsHttpMocksInterface = ResponseProvidersInterface<{
@@ -58,12 +61,17 @@ export type ResponseActionsHttpMocksInterface = ResponseProvidersInterface<{
   fileInfo: () => ActionFileInfoApiResponse;
 
   execute: () => ActionDetailsApiResponse<ResponseActionExecuteOutputContent>;
+
+  upload: () => ActionDetailsApiResponse<
+    ResponseActionUploadOutputContent,
+    ResponseActionUploadParameters
+  >;
 }>;
 
 export const responseActionsHttpMocks = httpHandlerMockFactory<ResponseActionsHttpMocksInterface>([
   {
     id: 'isolateHost',
-    path: ISOLATE_HOST_ROUTE,
+    path: ISOLATE_HOST_ROUTE_V2,
     method: 'post',
     handler: (): ResponseActionApiResponse => {
       return { action: '1-2-3', data: { id: '1-2-3' } as ResponseActionApiResponse['data'] };
@@ -71,7 +79,7 @@ export const responseActionsHttpMocks = httpHandlerMockFactory<ResponseActionsHt
   },
   {
     id: 'releaseHost',
-    path: UNISOLATE_HOST_ROUTE,
+    path: UNISOLATE_HOST_ROUTE_V2,
     method: 'post',
     handler: (): ResponseActionApiResponse => {
       return { action: '3-2-1', data: { id: '3-2-1' } as ResponseActionApiResponse['data'] };
@@ -216,6 +224,25 @@ export const responseActionsHttpMocks = httpHandlerMockFactory<ResponseActionsHt
         outputs: {
           'a.b.c': generator.generateExecuteActionResponseOutput(),
         },
+      });
+
+      return { data: response };
+    },
+  },
+  {
+    id: 'upload',
+    path: UPLOAD_ROUTE,
+    method: 'post',
+    handler: (): ActionDetailsApiResponse<
+      ResponseActionUploadOutputContent,
+      ResponseActionUploadParameters
+    > => {
+      const generator = new EndpointActionGenerator('seed');
+      const response = generator.generateActionDetails<
+        ResponseActionUploadOutputContent,
+        ResponseActionUploadParameters
+      >({
+        command: 'upload',
       });
 
       return { data: response };

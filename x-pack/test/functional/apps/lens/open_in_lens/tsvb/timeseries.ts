@@ -187,5 +187,23 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(await dimensions[2].getVisibleText()).to.eql('Top 10 values of extension.raw');
       });
     });
+
+    it('should bring the ignore global filters configured at series level over', async () => {
+      await visualBuilder.clickSeriesOption();
+      await visualBuilder.setIgnoreFilters(true);
+      await header.waitUntilLoadingHasFinished();
+      await visualize.navigateToLensFromAnotherVisulization();
+      await lens.waitForVisualization('xyVisChart');
+      expect(await testSubjects.exists('lnsChangeIndexPatternIgnoringFilters')).to.be(true);
+    });
+
+    it('should bring the ignore global filters configured at panel level over', async () => {
+      await visualBuilder.clickPanelOptions('timeSeries');
+      await visualBuilder.setIgnoreFilters(true);
+      await header.waitUntilLoadingHasFinished();
+      await visualize.navigateToLensFromAnotherVisulization();
+      await lens.waitForVisualization('xyVisChart');
+      expect(await testSubjects.exists('lnsChangeIndexPatternIgnoringFilters')).to.be(true);
+    });
   });
 }

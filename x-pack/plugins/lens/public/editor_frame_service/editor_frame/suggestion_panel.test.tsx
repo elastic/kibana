@@ -34,7 +34,7 @@ import { setChangesApplied } from '../../state_management/lens_slice';
 const SELECTORS = {
   APPLY_CHANGES_BUTTON: 'button[data-test-subj="lnsApplyChanges__suggestions"]',
   SUGGESTIONS_PANEL: '[data-test-subj="lnsSuggestionsPanel"]',
-  SUGGESTION_TILE_BUTTON: 'div[data-test-subj="lnsSuggestion"]',
+  SUGGESTION_TILE_BUTTON: 'button[data-test-subj="lnsSuggestion"]',
 };
 
 jest.mock('./suggestion_helpers');
@@ -105,6 +105,7 @@ describe('suggestion_panel', () => {
       ExpressionRenderer: expressionRendererMock,
       frame: createMockFramePublicAPI(),
       getUserMessages: () => [],
+      nowProvider: { get: jest.fn(() => new Date()) },
     };
   });
 

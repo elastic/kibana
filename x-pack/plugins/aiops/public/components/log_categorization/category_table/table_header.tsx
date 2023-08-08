@@ -30,10 +30,10 @@ export const TableHeader: FC<Props> = ({
     <>
       <EuiFlexGroup gutterSize="none" alignItems="center" css={{ minHeight: euiTheme.euiSizeXL }}>
         <EuiFlexItem>
-          <EuiText size="s">
+          <EuiText size="s" data-test-subj="aiopsLogPatternsFoundCount">
             <FormattedMessage
               id="xpack.aiops.logCategorization.counts"
-              defaultMessage="{count} patterns found"
+              defaultMessage="{count} {count, plural, one {pattern} other {patterns}} found"
               values={{ count: categoriesCount }}
             />
             {selectedCategoriesCount > 0 ? (

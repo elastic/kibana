@@ -23,6 +23,7 @@ import {
   ESCalendarIntervalUnit,
   PartialTheme,
   SettingsProps,
+  Tooltip,
 } from '@elastic/charts';
 import type { CustomPaletteState } from '@kbn/charts-plugin/public';
 import { search } from '@kbn/data-plugin/public';
@@ -94,8 +95,8 @@ function shiftAndNormalizeStops(
       if (params.range === 'percent') {
         result = min + ((max - min) * value) / 100;
       }
-      // for a range of 1 value the formulas above will divide by 0, so here's a safety guard
-      if (Number.isNaN(result)) {
+      // a division by zero safeguard
+      if (!Number.isFinite(result)) {
         return 1;
       }
       return Number(result.toFixed(2));
@@ -195,7 +196,10 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
     const onRenderChange = useCallback(
       (isRendered: boolean = true) => {
         if (isRendered) {
-          renderComplete();
+          // this requestAnimationFrame call is a temporary fix for https://github.com/elastic/elastic-charts/issues/2124
+          window.requestAnimationFrame(() => {
+            renderComplete();
+          });
         }
       },
       [renderComplete]
@@ -610,11 +614,12 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
             legendPosition: args.legend.position,
           }}
         >
-          <Chart ref={chartRef}>
+          <Chart ref={chartRef} {...getOverridesFor(overrides, 'chart')}>
             <ChartSplit
               splitColumnAccessor={splitChartColumnAccessor}
               splitRowAccessor={splitChartRowAccessor}
             />
+            <Tooltip {...tooltip} />
             <Settings
               onRenderChange={onRenderChange}
               noResults={
@@ -630,7 +635,6 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
               legendSize={LegendSizeToPixels[args.legend.legendSize ?? DEFAULT_LEGEND_SIZE]}
               legendColorPicker={uiState ? LegendColorPickerWrapper : undefined}
               debugState={window._echDebugStateFlag ?? false}
-              tooltip={tooltip}
               theme={[
                 themeOverrides,
                 chartTheme,

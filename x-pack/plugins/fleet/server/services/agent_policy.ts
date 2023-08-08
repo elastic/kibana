@@ -22,6 +22,8 @@ import type { BulkResponseItem } from '@elastic/elasticsearch/lib/api/typesWithB
 
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 
+import { populateAssignedAgentsCount } from '../routes/agent_policy/handlers';
+
 import type { HTTPAuthorizationHeader } from '../../common/http_authorization_header';
 
 import {
@@ -46,6 +48,7 @@ import {
   packageToPackagePolicy,
   policyHasFleetServer,
   policyHasAPMIntegration,
+  policyHasSyntheticsIntegration,
 } from '../../common/services';
 import {
   agentPolicyStatuses,
@@ -65,6 +68,7 @@ import {
   HostedAgentPolicyRestrictionRelatedError,
   AgentPolicyNotFoundError,
   PackagePolicyRestrictionRelatedError,
+  FleetUnauthorizedError,
 } from '../errors';
 
 import type { FullAgentConfigMap } from '../../common/types/models/agent_cm';
@@ -87,6 +91,7 @@ import { appContextService } from './app_context';
 import { getFullAgentPolicy } from './agent_policies';
 import { validateOutputForPolicy } from './agent_policies';
 import { auditLoggingService } from './audit_logging';
+import { licenseService } from './license';
 
 const SAVED_OBJECT_TYPE = AGENT_POLICY_SAVED_OBJECT_TYPE;
 
@@ -207,6 +212,10 @@ class AgentPolicyService {
     return policyHasFleetServer(agentPolicy);
   }
 
+  public hasSyntheticsIntegration(agentPolicy: AgentPolicy) {
+    return policyHasSyntheticsIntegration(agentPolicy);
+  }
+
   public async create(
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
@@ -228,6 +237,8 @@ class AgentPolicyService {
       savedObjectType: AGENT_POLICY_SAVED_OBJECT_TYPE,
     });
 
+    this.checkTamperProtectionLicense(agentPolicy);
+
     await this.requireUniqueName(soClient, agentPolicy);
 
     await validateOutputForPolicy(soClient, agentPolicy);
@@ -242,10 +253,12 @@ class AgentPolicyService {
         updated_at: new Date().toISOString(),
         updated_by: options?.user?.username || 'system',
         schema_version: FLEET_AGENT_POLICIES_SCHEMA_VERSION,
+        is_protected: agentPolicy.is_protected ?? false,
       } as AgentPolicy,
       options
     );
 
+    await appContextService.getUninstallTokenService()?.generateTokenForPolicyId(newSo.id);
     await this.triggerAgentPolicyUpdatedEvent(soClient, esClient, 'created', newSo.id);
 
     return { id: newSo.id, ...newSo.attributes };
@@ -364,6 +377,8 @@ class AgentPolicyService {
     options: ListWithKuery & {
       withPackagePolicies?: boolean;
       fields?: string[];
+      esClient?: ElasticsearchClient;
+      withAgentCount?: boolean;
     }
   ): Promise<{
     items: AgentPolicy[];
@@ -379,6 +394,8 @@ class AgentPolicyService {
       kuery,
       withPackagePolicies = false,
       fields,
+      esClient,
+      withAgentCount = false,
     } = options;
 
     const baseFindParams = {
@@ -392,7 +409,10 @@ class AgentPolicyService {
     const filter = kuery ? normalizeKuery(SAVED_OBJECT_TYPE, kuery) : undefined;
     let agentPoliciesSO;
     try {
-      agentPoliciesSO = await soClient.find<AgentPolicySOAttributes>({ ...baseFindParams, filter });
+      agentPoliciesSO = await soClient.find<AgentPolicySOAttributes>({
+        ...baseFindParams,
+        filter,
+      });
     } catch (e) {
       const isBadRequest = e.output?.statusCode === 400;
       const isKQLSyntaxError = e.message?.startsWith('KQLSyntaxError');
@@ -415,14 +435,8 @@ class AgentPolicyService {
           ...agentPolicySO.attributes,
         };
         if (withPackagePolicies) {
-          const agentPolicyWithPackagePolicies = await this.get(
-            soClient,
-            agentPolicySO.id,
-            withPackagePolicies
-          );
-          if (agentPolicyWithPackagePolicies) {
-            agentPolicy.package_policies = agentPolicyWithPackagePolicies.package_policies;
-          }
+          agentPolicy.package_policies =
+            (await packagePolicyService.findAllForAgentPolicy(soClient, agentPolicySO.id)) || [];
         }
         return agentPolicy;
       },
@@ -435,6 +449,11 @@ class AgentPolicyService {
         id: agentPolicy.id,
         savedObjectType: AGENT_POLICY_SAVED_OBJECT_TYPE,
       });
+    }
+    if (esClient && withAgentCount) {
+      await populateAssignedAgentsCount(esClient, soClient, agentPolicies);
+    } else {
+      agentPolicies.forEach((item) => (item.agents = 0));
     }
 
     return {
@@ -469,6 +488,8 @@ class AgentPolicyService {
     if (!existingAgentPolicy) {
       throw new Error('Agent policy not found');
     }
+
+    this.checkTamperProtectionLicense(agentPolicy);
 
     if (existingAgentPolicy.is_managed && !options?.force) {
       Object.entries(agentPolicy)
@@ -839,7 +860,8 @@ class AgentPolicyService {
         fleetServerPolicy.unenroll_timeout = policy.unenroll_timeout;
       }
 
-      return [...acc, fleetServerPolicy];
+      acc.push(fleetServerPolicy);
+      return acc;
     }, [] as FleetServerPolicy[]);
 
     const fleetServerPoliciesBulkBody = fleetServerPolicies.flatMap((fleetServerPolicy) => [
@@ -868,7 +890,8 @@ class AgentPolicyService {
           return acc;
         }
 
-        return [...acc, value];
+        acc.push(value);
+        return acc;
       }, [] as BulkResponseItem[]);
 
       logger.debug(
@@ -1127,6 +1150,12 @@ class AgentPolicyService {
       inactivityTimeout: parseInt(inactivityTimeout, 10),
       policyIds: policies.map((policy) => policy.id),
     }));
+  }
+
+  private checkTamperProtectionLicense(agentPolicy: { is_protected?: boolean }): void {
+    if (agentPolicy?.is_protected && !licenseService.isPlatinum()) {
+      throw new FleetUnauthorizedError('Tamper protection requires Platinum license');
+    }
   }
 }
 

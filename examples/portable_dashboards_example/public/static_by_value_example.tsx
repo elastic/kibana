@@ -29,11 +29,11 @@ export const StaticByValueExample = () => {
         <DashboardRenderer
           getCreationOptions={async () => {
             return {
-              initialInput: {
+              getInitialInput: () => ({
                 timeRange: { from: 'now-30d', to: 'now' },
                 viewMode: ViewMode.VIEW,
                 panels: panelsJson as DashboardPanelMap,
-              },
+              }),
             };
           }}
         />

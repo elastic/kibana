@@ -14,7 +14,6 @@ import { VIS_EVENT_TO_TRIGGER, VisTypeDefinition } from '@kbn/visualizations-plu
 import { HeatmapTypeProps, HeatmapVisParams, AxisType, ScaleType } from '../types';
 import { toExpressionAst } from '../to_ast';
 import { getHeatmapOptions } from '../editor/components';
-import { convertToLens } from '../convert_to_lens';
 
 export const getHeatmapVisTypeDefinition = ({
   showElasticChartsOptions = false,
@@ -145,8 +144,12 @@ export const getHeatmapVisTypeDefinition = ({
     ],
   },
   requiresSearch: true,
-  navigateToLens: async (vis, timefilter) => (vis ? convertToLens(vis, timefilter) : null),
+  navigateToLens: async (vis, timefilter) => {
+    const { convertToLens } = await import('../convert_to_lens');
+    return vis ? convertToLens(vis, timefilter) : null;
+  },
   getExpressionVariables: async (vis, timeFilter) => {
+    const { convertToLens } = await import('../convert_to_lens');
     return {
       canNavigateToLens: Boolean(vis?.params ? await convertToLens(vis, timeFilter) : null),
     };

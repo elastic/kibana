@@ -48,17 +48,6 @@ const MyEuiCommentList = styled(EuiCommentList)`
       }
     }
 
-    & .comment-alert .euiCommentEvent {
-      background-color: ${theme.eui.euiColorLightestShade};
-      border: ${theme.eui.euiBorderThin};
-      padding: ${theme.eui.euiSizeS};
-      border-radius: ${theme.eui.euiSizeXS};
-    }
-
-    & .comment-alert .euiCommentEvent__headerData {
-      flex-grow: 1;
-    }
-
     & .comment-action.empty-comment [class*="euiCommentEvent-regular"] {
       box-shadow: none;
       .euiCommentEvent__header {

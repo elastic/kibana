@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment-timezone';
-import { RRule } from 'rrule';
+import { Frequency } from '@kbn/rrule';
 import { update } from './update';
 import { savedObjectsClientMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { SavedObject } from '@kbn/core/server';
@@ -28,7 +28,7 @@ const updatedAttributes = {
   rRule: {
     tzid: 'CET',
     dtstart: '2023-03-26T00:00:00.000Z',
-    freq: RRule.WEEKLY,
+    freq: Frequency.WEEKLY,
     count: 2,
   },
 };
@@ -48,7 +48,7 @@ const mockContext: jest.Mocked<MaintenanceWindowClientContext> = {
 
 describe('MaintenanceWindowClient - update', () => {
   beforeEach(() => {
-    mockContext.getModificationMetadata.mockResolvedValueOnce(updatedMetadata);
+    mockContext.getModificationMetadata.mockResolvedValue(updatedMetadata);
   });
 
   afterEach(() => {
@@ -101,9 +101,16 @@ describe('MaintenanceWindowClient - update', () => {
           { gte: '2023-04-01T23:00:00.000Z', lte: '2023-04-02T01:00:00.000Z' }, // Daylight savings
         ],
         expirationDate: moment(new Date(secondTimestamp)).tz('UTC').add(1, 'year').toISOString(),
-        ...updatedMetadata,
+        createdAt: '2023-02-26T00:00:00.000Z',
+        createdBy: 'test-user',
+        updatedAt: updatedMetadata.updatedAt,
+        updatedBy: updatedMetadata.updatedBy,
       },
-      { id: 'test-id' }
+      {
+        id: 'test-id',
+        overwrite: true,
+        version: '123',
+      }
     );
     // Only these 3 properties are worth asserting since the rest come from mocks
     expect(result).toEqual(
@@ -127,7 +134,7 @@ describe('MaintenanceWindowClient - update', () => {
       rRule: {
         tzid: 'CET',
         dtstart: '2023-03-26T00:00:00.000Z',
-        freq: RRule.WEEKLY,
+        freq: Frequency.WEEKLY,
         count: 5,
       },
       events: modifiedEvents,
@@ -157,7 +164,11 @@ describe('MaintenanceWindowClient - update', () => {
       expect.objectContaining({
         events: [...modifiedEvents, expect.any(Object), expect.any(Object), expect.any(Object)],
       }),
-      { id: 'test-id' }
+      {
+        id: 'test-id',
+        overwrite: true,
+        version: '123',
+      }
     );
 
     // Update with changing rrule
@@ -166,7 +177,7 @@ describe('MaintenanceWindowClient - update', () => {
       rRule: {
         tzid: 'CET',
         dtstart: '2023-03-26T00:00:00.000Z',
-        freq: RRule.WEEKLY,
+        freq: Frequency.WEEKLY,
         count: 2,
       },
     });
@@ -179,7 +190,11 @@ describe('MaintenanceWindowClient - update', () => {
           { gte: '2023-04-01T23:00:00.000Z', lte: '2023-04-02T00:00:00.000Z' },
         ],
       }),
-      { id: 'test-id' }
+      {
+        id: 'test-id',
+        overwrite: true,
+        version: '123',
+      }
     );
   });
 

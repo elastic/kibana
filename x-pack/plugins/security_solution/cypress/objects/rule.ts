@@ -16,7 +16,7 @@ import type {
   SavedQueryRuleCreateProps,
   ThreatMatchRuleCreateProps,
   ThresholdRuleCreateProps,
-} from '../../common/detection_engine/rule_schema';
+} from '../../common/api/detection_engine';
 import type { CreateRulePropsRewrites } from './types';
 
 const ccsRemoteName: string = Cypress.env('CCS_REMOTE_NAME');
@@ -602,3 +602,23 @@ export const expectedExportedRule = (ruleResponse: Cypress.Response<RuleResponse
 
   return `${JSON.stringify(rule)}\n${JSON.stringify(details)}\n`;
 };
+export const getEndpointRule = (): QueryRuleCreateProps => ({
+  type: 'query',
+  query: 'event.kind:alert and event.module:(endpoint and not endgame)',
+  index: ['endpoint.alerts-*'],
+  name: 'Endpoint Rule',
+  description: 'The new rule description.',
+  severity: 'high',
+  risk_score: 17,
+  interval: '10s',
+  from: 'now-50000h',
+  max_signals: 100,
+  exceptions_list: [
+    {
+      id: 'endpoint_list',
+      list_id: 'endpoint_list',
+      namespace_type: 'agnostic',
+      type: 'endpoint',
+    },
+  ],
+});

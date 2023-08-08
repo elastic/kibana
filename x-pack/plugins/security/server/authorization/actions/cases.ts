@@ -10,8 +10,8 @@ import { isString } from 'lodash';
 export class CasesActions {
   private readonly prefix: string;
 
-  constructor(versionNumber: string) {
-    this.prefix = `cases:${versionNumber}:`;
+  constructor() {
+    this.prefix = `cases:`;
   }
 
   public get(owner: string, operation: string): string {

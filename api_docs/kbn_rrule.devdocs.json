@@ -1,0 +1,273 @@
+{
+  "id": "@kbn/rrule",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [
+      {
+        "parentPluginId": "@kbn/rrule",
+        "id": "def-common.RRule",
+        "type": "Class",
+        "tags": [],
+        "label": "RRule",
+        "description": [],
+        "path": "packages/kbn-rrule/rrule.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/rrule",
+            "id": "def-common.RRule.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/kbn-rrule/rrule.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/rrule",
+                "id": "def-common.RRule.Unnamed.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "Options"
+                ],
+                "path": "packages/kbn-rrule/rrule.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/rrule",
+            "id": "def-common.RRule.between",
+            "type": "Function",
+            "tags": [],
+            "label": "between",
+            "description": [],
+            "signature": [
+              "(start: Date, end: Date) => Date[]"
+            ],
+            "path": "packages/kbn-rrule/rrule.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/rrule",
+                "id": "def-common.RRule.between.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "start",
+                "description": [],
+                "signature": [
+                  "Date"
+                ],
+                "path": "packages/kbn-rrule/rrule.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/rrule",
+                "id": "def-common.RRule.between.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "end",
+                "description": [],
+                "signature": [
+                  "Date"
+                ],
+                "path": "packages/kbn-rrule/rrule.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/rrule",
+            "id": "def-common.RRule.before",
+            "type": "Function",
+            "tags": [],
+            "label": "before",
+            "description": [],
+            "signature": [
+              "(dt: Date) => Date"
+            ],
+            "path": "packages/kbn-rrule/rrule.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/rrule",
+                "id": "def-common.RRule.before.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "dt",
+                "description": [],
+                "signature": [
+                  "Date"
+                ],
+                "path": "packages/kbn-rrule/rrule.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/rrule",
+            "id": "def-common.RRule.after",
+            "type": "Function",
+            "tags": [],
+            "label": "after",
+            "description": [],
+            "signature": [
+              "(dt: Date) => Date | null"
+            ],
+            "path": "packages/kbn-rrule/rrule.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/rrule",
+                "id": "def-common.RRule.after.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "dt",
+                "description": [],
+                "signature": [
+                  "Date"
+                ],
+                "path": "packages/kbn-rrule/rrule.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/rrule",
+            "id": "def-common.RRule.all",
+            "type": "Function",
+            "tags": [],
+            "label": "all",
+            "description": [],
+            "signature": [
+              "(limit?: number) => AllResult"
+            ],
+            "path": "packages/kbn-rrule/rrule.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/rrule",
+                "id": "def-common.RRule.all.$1",
+                "type": "number",
+                "tags": [],
+                "label": "limit",
+                "description": [],
+                "signature": [
+                  "number"
+                ],
+                "path": "packages/kbn-rrule/rrule.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [],
+    "interfaces": [],
+    "enums": [
+      {
+        "parentPluginId": "@kbn/rrule",
+        "id": "def-common.Frequency",
+        "type": "Enum",
+        "tags": [],
+        "label": "Frequency",
+        "description": [],
+        "path": "packages/kbn-rrule/rrule.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/rrule",
+        "id": "def-common.Weekday",
+        "type": "Enum",
+        "tags": [],
+        "label": "Weekday",
+        "description": [],
+        "path": "packages/kbn-rrule/rrule.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/rrule",
+        "id": "def-common.ConstructorOptions",
+        "type": "Type",
+        "tags": [],
+        "label": "ConstructorOptions",
+        "description": [],
+        "signature": [
+          "Omit<Options, \"byweekday\" | \"wkst\"> & { byweekday?: (string | number)[] | null | undefined; wkst?: number | \"MO\" | \"TU\" | \"WE\" | \"TH\" | \"FR\" | \"SA\" | \"SU\" | null | undefined; }"
+        ],
+        "path": "packages/kbn-rrule/rrule.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/rrule",
+        "id": "def-common.WeekdayStr",
+        "type": "Type",
+        "tags": [],
+        "label": "WeekdayStr",
+        "description": [],
+        "signature": [
+          "\"MO\" | \"TU\" | \"WE\" | \"TH\" | \"FR\" | \"SA\" | \"SU\""
+        ],
+        "path": "packages/kbn-rrule/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

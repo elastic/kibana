@@ -24,6 +24,7 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import { FilteringValidation } from '../../../../../../../common/types/connectors';
+import { BetaCallOut } from '../../../../../shared/beta/beta_callout';
 
 import { AdvancedSyncRules } from './advanced_sync_rules';
 import { EditSyncRulesTab } from './edit_sync_rules_tab';
@@ -103,6 +104,16 @@ export const EditSyncRulesFlyout: React.FC<EditFilteringFlyoutProps> = ({
             )}
           </h2>
         </EuiTitle>
+        <EuiSpacer />
+        <BetaCallOut
+          description={i18n.translate(
+            'xpack.enterpriseSearch.content.index.connector.syncRules.flyout.betaDescription',
+            {
+              defaultMessage:
+                'Sync rules is a beta feature. Beta features are subject to change and are not covered by the support SLA of general release (GA) features. Elastic plans to promote this feature to GA in a future release.',
+            }
+          )}
+        />
         <EuiSpacer />
         <EuiText size="s">
           {i18n.translate(

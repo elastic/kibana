@@ -132,6 +132,35 @@ describe('Update profile routes', () => {
       expect(userProfileService.update).not.toHaveBeenCalled();
     });
 
+    it('only allow specific user profile data keys to be updated for Elastic Cloud users.', async () => {
+      session.get.mockResolvedValue({
+        error: null,
+        value: sessionMock.createValue({ userProfileId: 'u_some_id' }),
+      });
+      authc.getCurrentUser.mockReturnValue(mockAuthenticatedUser({ elastic_cloud_user: true }));
+
+      await expect(
+        routeHandler(
+          getMockContext(),
+          httpServerMock.createKibanaRequest({
+            body: {
+              userSettings: {
+                darkMode: 'dark', // "userSettings.darkMode" is allowed
+              },
+            },
+          }),
+          kibanaResponseFactory
+        )
+      ).resolves.toEqual(expect.objectContaining({ status: 200, payload: undefined }));
+
+      expect(userProfileService.update).toBeCalledTimes(1);
+      expect(userProfileService.update).toBeCalledWith('u_some_id', {
+        userSettings: {
+          darkMode: 'dark',
+        },
+      });
+    });
+
     it('updates profile.', async () => {
       session.get.mockResolvedValue({
         error: null,

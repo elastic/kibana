@@ -17,6 +17,7 @@ import {
   Settings,
   TickFormatter,
   TooltipType,
+  Tooltip,
 } from '@elastic/charts';
 import { useEuiTheme } from '@elastic/eui';
 import { useChartTheme } from '../../../../../../hooks/use_chart_theme';
@@ -36,10 +37,10 @@ export const WaterfallChartFixedAxis = ({ tickFormat, domain, barStyleAccessor }
   return (
     <WaterfallChartFixedAxisContainer>
       <Chart className="axis-only-chart" data-test-subj="axisOnlyChart">
+        <Tooltip type={TooltipType.None} />
         <Settings
           showLegend={false}
           rotation={90}
-          tooltip={{ type: TooltipType.None }}
           theme={[
             {
               background: {
@@ -61,7 +62,9 @@ export const WaterfallChartFixedAxis = ({ tickFormat, domain, barStyleAccessor }
             },
           }}
           domain={domain}
-          showGridLines={true}
+          gridLine={{
+            visible: true,
+          }}
         />
 
         <BarSeries

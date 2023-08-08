@@ -9,7 +9,8 @@ import { render } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../common/mock';
 import { useAlertPrevalenceFromProcessTree } from '../../../common/containers/alerts/use_alert_prevalence_from_process_tree';
-import { mockContextValue, mockDataFormattedForFieldBrowser } from '../mocks/mock_context';
+import { mockContextValue } from '../mocks/mock_right_panel_context';
+import { mockDataFormattedForFieldBrowser } from '../mocks/mock_context';
 import { RightPanelContext } from '../context';
 import { AnalyzerPreview } from './analyzer_preview';
 import { ANALYZER_PREVIEW_TEST_ID, ANALYZER_TREE_TEST_ID } from './test_ids';
@@ -59,7 +60,6 @@ describe('<AnalyzerPreview />', () => {
     );
 
     expect(mockUseAlertPrevalenceFromProcessTree).toHaveBeenCalledWith({
-      processEntityId: '',
       isActiveTimeline: false,
       documentId: 'ancestors-id',
       indices: ['rule-parameters-index'],
@@ -84,7 +84,6 @@ describe('<AnalyzerPreview />', () => {
     );
 
     expect(mockUseAlertPrevalenceFromProcessTree).toHaveBeenCalledWith({
-      processEntityId: '',
       isActiveTimeline: false,
       documentId: '',
       indices: [],

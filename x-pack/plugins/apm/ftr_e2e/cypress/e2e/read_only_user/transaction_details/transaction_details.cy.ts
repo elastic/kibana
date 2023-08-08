@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { APIReturnType } from '../../../../../public/services/rest/create_call_apm_api';
 import { synthtrace } from '../../../../synthtrace';
 import { opbeans } from '../../../fixtures/synthtrace/opbeans';
 
@@ -32,15 +32,75 @@ describe('Transaction details', () => {
 
   beforeEach(() => {
     cy.loginAsViewerUser();
-    cy.visitKibana(
+  });
+
+  it('shows transaction name and transaction charts', () => {
+    cy.intercept(
+      'GET',
+      '/internal/apm/services/opbeans-java/transactions/charts/latency?*'
+    ).as('transactionLatencyRequest');
+
+    cy.intercept('GET', '/internal/apm/services/opbeans-java/throughput?*').as(
+      'transactionThroughputRequest'
+    );
+
+    cy.intercept(
+      'GET',
+      '/internal/apm/services/opbeans-java/transactions/charts/error_rate?*'
+    ).as('transactionFailureRateRequest');
+
+    cy.visit(
       `/app/apm/services/opbeans-java/transactions/view?${new URLSearchParams({
         ...timeRange,
         transactionName: 'GET /api/product',
       })}`
     );
-  });
 
-  it('shows transaction name and transaction charts', () => {
+    cy.wait([
+      '@transactionLatencyRequest',
+      '@transactionThroughputRequest',
+      '@transactionFailureRateRequest',
+    ]).spread(
+      (
+        latencyInterception,
+        throughputInterception,
+        failureRateInterception
+      ) => {
+        expect(latencyInterception.request.query.transactionName).to.be.eql(
+          'GET /api/product'
+        );
+
+        expect(
+          (
+            latencyInterception.response
+              ?.body as APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/charts/latency'>
+          ).currentPeriod.latencyTimeseries[0].y
+        ).to.eql(1000 * 1000);
+
+        expect(throughputInterception.request.query.transactionName).to.be.eql(
+          'GET /api/product'
+        );
+
+        expect(
+          (
+            throughputInterception.response
+              ?.body as APIReturnType<'GET /internal/apm/services/{serviceName}/throughput'>
+          ).currentPeriod[0].y
+        ).to.eql(60);
+
+        expect(failureRateInterception.request.query.transactionName).to.be.eql(
+          'GET /api/product'
+        );
+
+        expect(
+          (
+            failureRateInterception.response
+              ?.body as APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/charts/error_rate'>
+          ).currentPeriod.average
+        ).to.eql(1);
+      }
+    );
+
     cy.contains('h2', 'GET /api/product');
     cy.getByTestSubj('latencyChart');
     cy.getByTestSubj('throughput');
@@ -48,7 +108,24 @@ describe('Transaction details', () => {
     cy.getByTestSubj('errorRate');
   });
 
+  it('shows slo callout', () => {
+    cy.visitKibana(
+      `/app/apm/services/opbeans-java/transactions/view?${new URLSearchParams({
+        ...timeRange,
+        transactionName: 'GET 240rpm/75% 1000ms',
+      })}`
+    );
+    cy.contains('Create SLO');
+  });
+
   it('shows top errors table', () => {
+    cy.visitKibana(
+      `/app/apm/services/opbeans-java/transactions/view?${new URLSearchParams({
+        ...timeRange,
+        transactionName: 'GET /api/product',
+      })}`
+    );
+
     cy.contains('Top 5 errors');
     cy.getByTestSubj('topErrorsForTransactionTable')
       .contains('a', '[MockError] Foo')
@@ -58,6 +135,15 @@ describe('Transaction details', () => {
 
   describe('when navigating to a trace sample', () => {
     it('keeps the same trace sample after reloading the page', () => {
+      cy.visitKibana(
+        `/app/apm/services/opbeans-java/transactions/view?${new URLSearchParams(
+          {
+            ...timeRange,
+            transactionName: 'GET /api/product',
+          }
+        )}`
+      );
+
       cy.getByTestSubj('pagination-button-last').click();
       cy.url().then((url) => {
         cy.reload();

@@ -121,6 +121,7 @@ export const ChangePointDetectionPage: FC = () => {
                   onClick={() => setFlyoutVisible(!isFlyoutVisible)}
                   size={'s'}
                   disabled={!hasSelectedChangePoints}
+                  data-test-subj={'aiopsChangePointDetectionViewSelected'}
                 >
                   <FormattedMessage
                     id="xpack.aiops.changePointDetection.viewSelectedButtonLabel"
@@ -149,6 +150,7 @@ export const ChangePointDetectionPage: FC = () => {
           onClose={setFlyoutVisible.bind(null, false)}
           aria-labelledby={'change_point_charts'}
           size={'l'}
+          data-test-subj={'aiopsChangePointDetectionSelectedCharts'}
         >
           <EuiFlyoutHeader hasBorder>
             <EuiTitle size="m">

@@ -13,7 +13,12 @@ import { SortDirection } from '@kbn/data-plugin/public';
 import { SCALING_TYPES } from '../../../../../common/constants';
 import { GeoFieldSelect } from '../../../../components/geo_field_select';
 import { GeoIndexPatternSelect } from '../../../../components/geo_index_pattern_select';
-import { getGeoFields, getTermsFields, getSortFields } from '../../../../index_pattern_util';
+import {
+  getGeoFields,
+  getTermsFields,
+  getSortFields,
+  getIsTimeseries,
+} from '../../../../index_pattern_util';
 import { ESSearchSourceDescriptor } from '../../../../../common/descriptor_types';
 import { TopHitsForm } from './top_hits_form';
 import { OnSourceChangeArgs } from '../../source';
@@ -27,12 +32,14 @@ interface Props {
 
 interface State {
   indexPattern: DataView | null;
+  isTimeseries: boolean;
   geoFields: DataViewField[];
   geoFieldName: string | null;
   sortField: string | null;
   sortFields: DataViewField[];
   sortOrder: SortDirection;
   termFields: DataViewField[];
+  topHitsGroupByTimeseries: boolean;
   topHitsSplitField: string | null;
   topHitsSize: number;
 }
@@ -40,27 +47,32 @@ interface State {
 export class CreateSourceEditor extends Component<Props, State> {
   state: State = {
     indexPattern: null,
+    isTimeseries: false,
     geoFields: [],
     geoFieldName: null,
     sortField: null,
     sortFields: [],
     sortOrder: SortDirection.desc,
     termFields: [],
+    topHitsGroupByTimeseries: false,
     topHitsSplitField: null,
     topHitsSize: 1,
   };
 
   _onIndexPatternSelect = (indexPattern: DataView) => {
     const geoFields = getGeoFields(indexPattern.fields);
+    const isTimeseries = getIsTimeseries(indexPattern);
 
     this.setState(
       {
         indexPattern,
+        isTimeseries,
         geoFields,
         geoFieldName: geoFields.length ? geoFields[0].name : null,
         sortField: indexPattern.timeFieldName ? indexPattern.timeFieldName : null,
         sortFields: getSortFields(indexPattern.fields),
         termFields: getTermsFields(indexPattern.fields),
+        topHitsGroupByTimeseries: isTimeseries,
         topHitsSplitField: null,
       },
       this._previewLayer
@@ -80,11 +92,27 @@ export class CreateSourceEditor extends Component<Props, State> {
   };
 
   _previewLayer = () => {
-    const { indexPattern, geoFieldName, sortField, sortOrder, topHitsSplitField, topHitsSize } =
-      this.state;
+    const {
+      indexPattern,
+      geoFieldName,
+      sortField,
+      sortOrder,
+      topHitsGroupByTimeseries,
+      topHitsSplitField,
+      topHitsSize,
+    } = this.state;
 
     const tooltipProperties: string[] = [];
-    if (topHitsSplitField) {
+    if (topHitsGroupByTimeseries) {
+      const timeSeriesDimensionFieldNames = (indexPattern?.fields ?? [])
+        .filter((field) => {
+          return field.timeSeriesDimension;
+        })
+        .map((field) => {
+          return field.name;
+        });
+      tooltipProperties.push(...timeSeriesDimensionFieldNames);
+    } else if (topHitsSplitField) {
       tooltipProperties.push(topHitsSplitField);
     }
     if (indexPattern && indexPattern.timeFieldName) {
@@ -94,7 +122,7 @@ export class CreateSourceEditor extends Component<Props, State> {
     const field = geoFieldName && indexPattern?.getFieldByName(geoFieldName);
 
     const sourceConfig =
-      indexPattern && geoFieldName && sortField && topHitsSplitField
+      indexPattern && geoFieldName && sortField && (topHitsGroupByTimeseries || topHitsSplitField)
         ? {
             indexPatternId: indexPattern.id,
             geoField: geoFieldName,
@@ -102,7 +130,8 @@ export class CreateSourceEditor extends Component<Props, State> {
             sortField,
             sortOrder,
             tooltipProperties,
-            topHitsSplitField,
+            topHitsGroupByTimeseries,
+            topHitsSplitField: topHitsSplitField ? topHitsSplitField : undefined,
             topHitsSize,
           }
         : null;
@@ -129,11 +158,13 @@ export class CreateSourceEditor extends Component<Props, State> {
       <TopHitsForm
         indexPatternId={this.state.indexPattern.id}
         isColumnCompressed={false}
+        isTimeseries={this.state.isTimeseries}
         onChange={this._onTopHitsPropChange}
         sortField={this.state.sortField ? this.state.sortField : ''}
         sortFields={this.state.sortFields}
         sortOrder={this.state.sortOrder}
         termFields={this.state.termFields}
+        topHitsGroupByTimeseries={this.state.topHitsGroupByTimeseries}
         topHitsSplitField={this.state.topHitsSplitField}
         topHitsSize={this.state.topHitsSize}
       />
@@ -144,9 +175,7 @@ export class CreateSourceEditor extends Component<Props, State> {
     return (
       <EuiPanel>
         <GeoIndexPatternSelect
-          value={
-            this.state.indexPattern && this.state.indexPattern.id ? this.state.indexPattern.id : ''
-          }
+          dataView={this.state.indexPattern}
           onChange={this._onIndexPatternSelect}
         />
 

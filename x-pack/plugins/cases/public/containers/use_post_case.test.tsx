@@ -7,7 +7,7 @@
 
 import { renderHook, act } from '@testing-library/react-hooks';
 import * as api from './api';
-import { ConnectorTypes } from '../../common/api';
+import { ConnectorTypes } from '../../common/types/domain';
 import { SECURITY_SOLUTION_OWNER } from '../../common/constants';
 import { useToasts } from '../common/lib/kibana';
 import type { AppMockRenderer } from '../common/mock';
@@ -35,12 +35,6 @@ describe('usePostCase', () => {
     owner: SECURITY_SOLUTION_OWNER,
   };
 
-  beforeEach(() => {
-    jest.clearAllMocks();
-    jest.restoreAllMocks();
-  });
-
-  const abortCtrl = new AbortController();
   const addSuccess = jest.fn();
   const addError = jest.fn();
 
@@ -65,7 +59,7 @@ describe('usePostCase', () => {
 
     await waitForNextUpdate();
 
-    expect(spy).toHaveBeenCalledWith(samplePost, abortCtrl.signal);
+    expect(spy).toHaveBeenCalledWith({ newCase: samplePost });
   });
 
   it('invalidates the queries correctly', async () => {

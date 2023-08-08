@@ -6,89 +6,111 @@
  */
 
 import {
-  BARCHART_POPOVER_BUTTON,
-  BARCHART_TIMELINE_BUTTON,
-  FLYOUT_CLOSE_BUTTON,
-  FLYOUT_OVERVIEW_TAB_BLOCKS_TIMELINE_BUTTON,
-  FLYOUT_OVERVIEW_TAB_TABLE_ROW_TIMELINE_BUTTON,
-  INDICATOR_TYPE_CELL,
-  INDICATORS_TABLE_CELL_TIMELINE_BUTTON,
-  INDICATORS_TABLE_INVESTIGATE_IN_TIMELINE_BUTTON_ICON,
+  addToTimelineFromBarchartLegend,
+  addToTimelineFromFlyoutOverviewTabBlock,
+  addToTimelineFromFlyoutOverviewTabTable,
+  addToTimelineFromTableCell,
+  closeTimeline,
+  investigateInTimelineFromFlyout,
+  investigateInTimelineFromTable,
+  openTimeline,
+} from '../tasks/timeline';
+import { closeFlyout, openFlyout, openFlyoutTakeAction } from '../tasks/common';
+import {
+  TIMELINE_AND_OR_BADGE,
+  TIMELINE_DATA_PROVIDERS_WRAPPER,
   TIMELINE_DRAGGABLE_ITEM,
-  TOGGLE_FLYOUT_BUTTON,
-  UNTITLED_TIMELINE_BUTTON,
-  FLYOUT_TABLE_MORE_ACTIONS_BUTTON,
-  FLYOUT_BLOCK_MORE_ACTIONS_BUTTON,
-  FLYOUT_TAKE_ACTION_BUTTON,
-  FLYOUT_INVESTIGATE_IN_TIMELINE_ITEM,
-} from '../screens/indicators';
+} from '../screens/timeline';
 import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
-import { login } from '../tasks/login';
-import { selectRange } from '../tasks/select_range';
+import { login, visit } from '../tasks/login';
 
 const THREAT_INTELLIGENCE = '/app/security/threat_intelligence/indicators';
 
-describe.skip('Indicators', () => {
-  before(() => {
+describe('Timeline', () => {
+  beforeEach(() => {
     esArchiverLoad('threat_intelligence/indicators_data');
     login();
+    visit(THREAT_INTELLIGENCE);
   });
 
-  after(() => {
+  afterEach(() => {
     esArchiverUnload('threat_intelligence/indicators_data');
   });
 
-  describe('Indicators timeline interactions', () => {
-    beforeEach(() => {
-      cy.visit(THREAT_INTELLIGENCE);
+  // TODO: This appears to already be failing on main.
+  it.skip('should verify add to timeline and investigate in timeline work from various places', () => {
+    cy.log('add to timeline when clicking in the barchart legend');
 
-      selectRange();
+    addToTimelineFromBarchartLegend();
+    openTimeline();
+
+    cy.get(TIMELINE_DATA_PROVIDERS_WRAPPER).within(() => {
+      cy.get(TIMELINE_DRAGGABLE_ITEM).should('exist');
+      cy.get(TIMELINE_AND_OR_BADGE).should('be.visible').and('have.length', 3);
     });
 
-    it('should add entry in timeline when clicking in the barchart legend', () => {
-      cy.get(BARCHART_POPOVER_BUTTON).should('exist').first().click();
-      cy.get(BARCHART_TIMELINE_BUTTON).should('exist').first().click();
-      cy.get(UNTITLED_TIMELINE_BUTTON).should('exist').first().click();
+    closeTimeline();
+
+    cy.log('add to timeline when clicking in an indicator flyout overview tab table row');
+
+    openFlyout(0);
+    addToTimelineFromFlyoutOverviewTabTable();
+    closeFlyout();
+    openTimeline();
+
+    cy.get(TIMELINE_DATA_PROVIDERS_WRAPPER).within(() => {
       cy.get(TIMELINE_DRAGGABLE_ITEM).should('exist');
+      cy.get(TIMELINE_AND_OR_BADGE).should('be.visible').and('have.length', 5);
     });
 
-    it('should add entry in timeline when clicking in an indicator table cell', () => {
-      cy.get(INDICATOR_TYPE_CELL).first().trigger('mouseover');
-      cy.get(INDICATORS_TABLE_CELL_TIMELINE_BUTTON).should('exist').first().click({ force: true });
-      cy.get(UNTITLED_TIMELINE_BUTTON).should('exist').first().click();
+    closeTimeline();
+
+    cy.log('add to timeline when clicking in an indicator flyout overview block');
+
+    openFlyout(0);
+    addToTimelineFromFlyoutOverviewTabBlock();
+    closeFlyout();
+    openTimeline();
+
+    cy.get(TIMELINE_DATA_PROVIDERS_WRAPPER).within(() => {
       cy.get(TIMELINE_DRAGGABLE_ITEM).should('exist');
+      cy.get(TIMELINE_AND_OR_BADGE).should('be.visible').and('have.length', 5);
     });
 
-    it('should add entry in timeline when clicking in an indicator flyout overview tab table row', () => {
-      cy.get(TOGGLE_FLYOUT_BUTTON).first().click({ force: true });
-      cy.get(FLYOUT_TABLE_MORE_ACTIONS_BUTTON).first().click({ force: true });
-      cy.get(FLYOUT_OVERVIEW_TAB_TABLE_ROW_TIMELINE_BUTTON).should('exist').first().click();
-      cy.get(FLYOUT_CLOSE_BUTTON).should('exist').click();
-      cy.get(UNTITLED_TIMELINE_BUTTON).should('exist').first().click();
+    closeTimeline();
+
+    cy.log('add to timeline when clicking in an indicator table cell');
+
+    addToTimelineFromTableCell();
+    openTimeline();
+
+    cy.get(TIMELINE_DATA_PROVIDERS_WRAPPER).within(() => {
       cy.get(TIMELINE_DRAGGABLE_ITEM).should('exist');
+      cy.get(TIMELINE_AND_OR_BADGE).should('be.visible').and('have.length', 9);
     });
 
-    it('should add entry in timeline when clicking in an indicator flyout overview block', () => {
-      cy.get(TOGGLE_FLYOUT_BUTTON).first().click({ force: true });
-      cy.get(FLYOUT_BLOCK_MORE_ACTIONS_BUTTON).first().click({ force: true });
-      cy.get(FLYOUT_OVERVIEW_TAB_BLOCKS_TIMELINE_BUTTON).should('exist').first().click();
-      cy.get(FLYOUT_CLOSE_BUTTON).should('exist').click();
-      cy.get(UNTITLED_TIMELINE_BUTTON).should('exist').first().click();
+    closeTimeline();
+
+    cy.log('investigate in timeline when clicking in an indicator table action row');
+
+    investigateInTimelineFromTable();
+
+    cy.get(TIMELINE_DATA_PROVIDERS_WRAPPER).within(() => {
       cy.get(TIMELINE_DRAGGABLE_ITEM).should('exist');
+      cy.get(TIMELINE_AND_OR_BADGE).should('be.visible').and('have.length', 5);
     });
 
-    it('should investigate in timeline when clicking in an indicator table action row', () => {
-      cy.get(INDICATORS_TABLE_INVESTIGATE_IN_TIMELINE_BUTTON_ICON).should('exist').first().click();
-      cy.get(UNTITLED_TIMELINE_BUTTON).should('exist').first().click();
-      cy.get(TIMELINE_DRAGGABLE_ITEM).should('exist');
-    });
+    closeTimeline();
 
-    it('should investigate in timeline when clicking in an indicator flyout', () => {
-      cy.get(TOGGLE_FLYOUT_BUTTON).first().click({ force: true });
-      cy.get(FLYOUT_TAKE_ACTION_BUTTON).first().click();
-      cy.get(FLYOUT_INVESTIGATE_IN_TIMELINE_ITEM).should('exist').first().click();
-      cy.get(UNTITLED_TIMELINE_BUTTON).should('exist').first().click();
+    cy.log('investigate in timeline when clicking in an indicator flyout');
+
+    openFlyout(0);
+    openFlyoutTakeAction();
+    investigateInTimelineFromFlyout();
+
+    cy.get(TIMELINE_DATA_PROVIDERS_WRAPPER).within(() => {
       cy.get(TIMELINE_DRAGGABLE_ITEM).should('exist');
+      cy.get(TIMELINE_AND_OR_BADGE).should('be.visible').and('have.length', 5);
     });
   });
 });

@@ -48,11 +48,9 @@ export async function rollTotals(logger: Logger, savedObjectsClient?: ISavedObje
       ) => {
         const key = viewId === MAIN_APP_DEFAULT_VIEW_ID ? appId : serializeKey(appId, viewId);
 
-        return {
-          ...acc,
-          // No need to sum because there should be 1 document per appId only
-          [key]: { appId, viewId, numberOfClicks, minutesOnScreen },
-        };
+        // No need to sum because there should be 1 document per appId only
+        acc[key] = { appId, viewId, numberOfClicks, minutesOnScreen };
+        return acc;
       },
       {} as Record<
         string,
@@ -60,26 +58,27 @@ export async function rollTotals(logger: Logger, savedObjectsClient?: ISavedObje
       >
     );
 
-    const totals = rawApplicationUsageDaily.reduce((acc, { attributes }) => {
-      const {
-        appId,
-        viewId = MAIN_APP_DEFAULT_VIEW_ID,
-        numberOfClicks,
-        minutesOnScreen,
-      } = attributes;
-      const key = viewId === MAIN_APP_DEFAULT_VIEW_ID ? appId : serializeKey(appId, viewId);
-      const existing = acc[key] || { minutesOnScreen: 0, numberOfClicks: 0 };
+    const totals = rawApplicationUsageDaily.reduce(
+      (acc, { attributes }) => {
+        const {
+          appId,
+          viewId = MAIN_APP_DEFAULT_VIEW_ID,
+          numberOfClicks,
+          minutesOnScreen,
+        } = attributes;
+        const key = viewId === MAIN_APP_DEFAULT_VIEW_ID ? appId : serializeKey(appId, viewId);
+        const existing = acc[key] || { minutesOnScreen: 0, numberOfClicks: 0 };
 
-      return {
-        ...acc,
-        [key]: {
+        acc[key] = {
           appId,
           viewId,
           numberOfClicks: numberOfClicks + existing.numberOfClicks,
           minutesOnScreen: minutesOnScreen + existing.minutesOnScreen,
-        },
-      };
-    }, existingTotals);
+        };
+        return acc;
+      },
+      { ...existingTotals }
+    );
 
     await Promise.all([
       Object.entries(totals).length &&

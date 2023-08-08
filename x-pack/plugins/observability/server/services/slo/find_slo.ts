@@ -6,55 +6,46 @@
  */
 
 import { FindSLOParams, FindSLOResponse, findSLOResponseSchema } from '@kbn/slo-schema';
-import { SLO, SLOId, SLOWithSummary, Summary } from '../../domain/models';
-import {
-  Criteria,
-  Paginated,
-  Pagination,
-  SLORepository,
-  Sort,
-  SortField,
-  SortDirection,
-} from './slo_repository';
-import { SummaryClient } from './summary_client';
+import { SLO, SLOWithSummary } from '../../domain/models';
+import { SLORepository } from './slo_repository';
+import { Pagination, SLOSummary, Sort, SummarySearchClient } from './summary_search_client';
 
 const DEFAULT_PAGE = 1;
 const DEFAULT_PER_PAGE = 25;
 
 export class FindSLO {
-  constructor(private repository: SLORepository, private summaryClient: SummaryClient) {}
+  constructor(
+    private repository: SLORepository,
+    private summarySearchClient: SummarySearchClient
+  ) {}
 
   public async execute(params: FindSLOParams): Promise<FindSLOResponse> {
-    const pagination: Pagination = toPagination(params);
-    const criteria: Criteria = toCriteria(params);
-    const sort: Sort = toSort(params);
-
-    const { results: sloList, ...resultMeta }: Paginated<SLO> = await this.repository.find(
-      criteria,
-      sort,
-      pagination
+    const sloSummaryList = await this.summarySearchClient.search(
+      params.kqlQuery ?? '',
+      toSort(params),
+      toPagination(params)
     );
-    const summaryBySlo = await this.summaryClient.fetchSummary(sloList);
 
-    const sloListWithSummary = mergeSloWithSummary(sloList, summaryBySlo);
+    const sloList = await this.repository.findAllByIds(sloSummaryList.results.map((slo) => slo.id));
+    const sloListWithSummary = mergeSloWithSummary(sloList, sloSummaryList.results);
 
     return findSLOResponseSchema.encode({
-      page: resultMeta.page,
-      perPage: resultMeta.perPage,
-      total: resultMeta.total,
+      page: sloSummaryList.page,
+      perPage: sloSummaryList.perPage,
+      total: sloSummaryList.total,
       results: sloListWithSummary,
     });
   }
 }
 
-function mergeSloWithSummary(
-  sloList: SLO[],
-  summaryBySlo: Record<SLOId, Summary>
-): SLOWithSummary[] {
-  return sloList.map((slo) => ({
-    ...slo,
-    summary: summaryBySlo[slo.id],
-  }));
+function mergeSloWithSummary(sloList: SLO[], sloSummaryList: SLOSummary[]): SLOWithSummary[] {
+  return sloSummaryList
+    .filter((sloSummary) => sloList.some((s) => s.id === sloSummary.id))
+    .map((sloSummary) => ({
+      ...sloList.find((s) => s.id === sloSummary.id)!,
+      instanceId: sloSummary.instanceId,
+      summary: sloSummary.summary,
+    }));
 }
 
 function toPagination(params: FindSLOParams): Pagination {
@@ -67,13 +58,9 @@ function toPagination(params: FindSLOParams): Pagination {
   };
 }
 
-function toCriteria(params: FindSLOParams): Criteria {
-  return { name: params.name, indicatorTypes: params.indicatorTypes };
-}
-
 function toSort(params: FindSLOParams): Sort {
   return {
-    field: params.sortBy === 'indicatorType' ? SortField.IndicatorType : SortField.CreationTime,
-    direction: params.sortDirection === 'desc' ? SortDirection.Desc : SortDirection.Asc,
+    field: params.sortBy ?? 'status',
+    direction: params.sortDirection ?? 'asc',
   };
 }

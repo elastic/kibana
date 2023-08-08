@@ -9,8 +9,8 @@ import moment from 'moment';
 import dateMath from '@elastic/datemath';
 import { parseDuration } from '@kbn/alerting-plugin/common';
 
-import type { RuleResponse } from '../../../../../../../common/detection_engine/rule_schema';
-import type { RuleSchedule } from '../../../../../../../common/detection_engine/prebuilt_rules/model/diff/diffable_rule/diffable_field_types';
+import type { RuleResponse } from '../../../../../../../common/api/detection_engine/model/rule_schema';
+import type { RuleSchedule } from '../../../../../../../common/api/detection_engine/prebuilt_rules';
 import type { PrebuiltRuleAsset } from '../../../model/rule_assets/prebuilt_rule_asset';
 
 export const extractRuleSchedule = (rule: RuleResponse | PrebuiltRuleAsset): RuleSchedule => {

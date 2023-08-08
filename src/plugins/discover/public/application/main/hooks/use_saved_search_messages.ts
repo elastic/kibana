@@ -15,6 +15,7 @@ import type {
   DataTotalHits$,
   SavedSearchData,
 } from '../services/discover_data_state_container';
+import { RecordRawType } from '../services/discover_data_state_container';
 /**
  * Sends COMPLETE message to the main$ observable with the information
  * that no documents have been found, allowing Discover to show a no
@@ -86,8 +87,11 @@ export function sendErrorMsg(data$: DataMain$ | DataDocuments$ | DataTotalHits$,
  * Sends a RESET message to all data subjects
  * Needed when data view is switched or a new runtime field is added
  */
-export function sendResetMsg(data: SavedSearchData, initialFetchStatus: FetchStatus) {
-  const recordRawType = data.main$.getValue().recordRawType;
+export function sendResetMsg(
+  data: SavedSearchData,
+  initialFetchStatus: FetchStatus,
+  recordRawType: RecordRawType
+) {
   data.main$.next({
     fetchStatus: initialFetchStatus,
     foundDocuments: undefined,

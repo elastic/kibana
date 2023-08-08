@@ -39,6 +39,9 @@ it('builds a generated plugin into a viable archive', async () => {
     process.execPath,
     ['scripts/generate_plugin', '-y', '--name', 'fooTestPlugin'],
     {
+      env: {
+        NODE_OPTIONS: '--openssl-legacy-provider',
+      },
       cwd: REPO_ROOT,
       all: true,
     }
@@ -61,6 +64,9 @@ it('builds a generated plugin into a viable archive', async () => {
     process.execPath,
     ['../../scripts/plugin_helpers', 'build', '--kibana-version', '7.5.0'],
     {
+      env: {
+        NODE_OPTIONS: '--openssl-legacy-provider',
+      },
       cwd: PLUGIN_DIR,
       all: true,
     }
@@ -68,6 +74,8 @@ it('builds a generated plugin into a viable archive', async () => {
 
   expect(filterLogs(buildProc.all)).toMatchInlineSnapshot(`
     " info deleting the build and target directories
+     info run bazel and build required artifacts for the optimizer
+     succ bazel run successfully and artifacts were created
      info running @kbn/optimizer
      │ succ browser bundle created at plugins/foo_test_plugin/build/kibana/fooTestPlugin/target/public
      │ info stopping @kbn/optimizer

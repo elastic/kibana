@@ -17,12 +17,21 @@ import type { MigrationLog, Progress, TransformRawDocs } from '../../types';
 import type { ControlState } from '../../state_action_machine';
 import type { BulkOperationBatch } from '../../model/create_batches';
 import type { AliasAction } from '../../actions';
-import { TransformErrorObjects } from '../../core';
+import type { TransformErrorObjects } from '../../core';
 
 export interface BaseState extends ControlState {
   readonly retryCount: number;
   readonly retryDelay: number;
   readonly logs: MigrationLog[];
+  /**
+   * When true, will fully skip document migration, and will transition directly to DONE
+   * after the INDEX_STATE_UPDATE_DONE stage.
+   *
+   * This flag is set to `true` in the following scenarios:
+   * - on nodes without the `migrator` role, the flag will always be `true`.
+   * - if the migrator create the index, the workflow will set the flag to `true` given there is nothing to migrate.
+   */
+  readonly skipDocumentMigration: boolean;
 }
 
 /** Initial state before any action is performed */
@@ -57,12 +66,10 @@ export interface PostInitState extends BaseState {
    */
   readonly currentIndexMeta: IndexMappingMeta;
   /**
-   * When true, will fully skip document migration after the INDEX_STATE_UPDATE_DONE stage.
-   * Used when 'upgrading' a fresh cluster (via CREATE_TARGET_INDEX), as we create
-   * the index with the correct meta and because we're sure we don't need to migrate documents
-   * in that case.
+   * The previous algorithm that was last used to migrate this index.
+   * Used for v2->zdt state conversion.
    */
-  readonly newIndexCreation: boolean;
+  readonly previousAlgorithm: 'zdt' | 'v2';
 }
 
 /**

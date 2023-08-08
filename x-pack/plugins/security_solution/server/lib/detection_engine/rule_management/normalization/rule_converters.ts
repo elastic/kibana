@@ -18,7 +18,7 @@ import {
   SERVER_APP_ID,
 } from '../../../../../common/constants';
 
-import type { PatchRuleRequestBody } from '../../../../../common/detection_engine/rule_management';
+import type { PatchRuleRequestBody } from '../../../../../common/api/detection_engine/rule_management';
 import type {
   RelatedIntegrationArray,
   RequiredFieldArray,
@@ -27,7 +27,7 @@ import type {
   RuleResponse,
   TypeSpecificCreateProps,
   TypeSpecificResponse,
-} from '../../../../../common/detection_engine/rule_schema';
+} from '../../../../../common/api/detection_engine/model/rule_schema';
 import {
   EqlPatchParams,
   MachineLearningPatchParams,
@@ -36,7 +36,7 @@ import {
   SavedQueryPatchParams,
   ThreatMatchPatchParams,
   ThresholdPatchParams,
-} from '../../../../../common/detection_engine/rule_schema';
+} from '../../../../../common/api/detection_engine/model/rule_schema';
 
 import {
   transformAlertToRuleAction,

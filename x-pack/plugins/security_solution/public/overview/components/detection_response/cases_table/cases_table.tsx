@@ -17,7 +17,7 @@ import {
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
-import type { CaseStatuses } from '@kbn/cases-plugin/common';
+import type { CaseStatuses } from '@kbn/cases-components';
 
 import { SecurityPageName } from '../../../../app/types';
 import { FormattedDate } from '../../../../common/components/formatted_date';
@@ -71,6 +71,7 @@ export const CasesTable = React.memo(() => {
           toggleQuery={setToggleStatus}
           subtitle={<LastUpdatedAt updatedAt={updatedAt} isUpdating={isLoading} />}
           showInspectButton={false}
+          tooltip={i18n.CASES_TABLE_SECTION_TOOLTIP}
         />
 
         {toggleStatus && (

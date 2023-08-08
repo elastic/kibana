@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { getDataTestSubjectSelector } from '../helpers/common';
+import { GLOBAL_FILTERS_CONTAINER } from './date_picker';
+
 export const ADD_EXCEPTION_BTN = '[data-test-subj="add-exception-menu-item"]';
 
 export const ADD_ENDPOINT_EXCEPTION_BTN = '[data-test-subj="add-endpoint-exception-menu-item"]';
@@ -63,7 +66,7 @@ export const MANAGE_ALERT_DETECTION_RULES_BTN = '[data-test-subj="manage-alert-d
 
 export const MARK_ALERT_ACKNOWLEDGED_BTN = '[data-test-subj="acknowledged-alert-status"]';
 
-export const ALERTS_REFRESH_BTN = '[data-test-subj="querySubmitButton"]';
+export const ALERTS_REFRESH_BTN = `${GLOBAL_FILTERS_CONTAINER} [data-test-subj="querySubmitButton"]`;
 
 export const ALERTS_HISTOGRAM_PANEL_LOADER = '[data-test-subj="loadingPanelAlertsHistogram"]';
 
@@ -78,6 +81,7 @@ export const OPEN_ALERT_DETAILS_PAGE_CONTEXT_MENU_BTN =
 
 export const PROCESS_NAME_COLUMN = '[data-test-subj="dataGridHeaderCell-process.name"]';
 export const PROCESS_NAME = '[data-test-subj="formatted-field-process.name"]';
+export const MESSAGE = '[data-test-subj="formatted-field-message"]';
 
 export const REASON =
   '[data-test-subj="dataGridRowCell"][data-gridcell-column-id="kibana.alert.reason"]';
@@ -162,6 +166,8 @@ export const SHOW_TOP_N_CLOSE_BUTTON = '[data-test-subj="close"]';
 export const ALERTS_HISTOGRAM_LEGEND =
   '[data-test-subj="alerts-histogram-panel"] .echLegendItem__action';
 
+export const ALERTS_HISTOGRAM_SERIES = '[data-ech-series-name]';
+
 export const SELECT_HISTOGRAM = '[data-test-subj="chart-select-trend"]';
 
 export const LEGEND_ACTIONS = {
@@ -171,3 +177,47 @@ export const LEGEND_ACTIONS = {
   FILTER_OUT: (ruleName: string) => `[data-test-subj="legend-${ruleName}-filterOut"]`,
   COPY: (ruleName: string) => `[data-test-subj="legend-${ruleName}-embeddable_copyToClipboard"]`,
 };
+
+export const TREND_CHART_LEGEND = '[data-test-subj="draggable-legend"]';
+
+export const SESSION_VIEWER_BUTTON = '[data-test-subj="session-view-button"]';
+
+export const OVERLAY_CONTAINER = '[data-test-subj="overlayContainer"]';
+
+export const CLOSE_OVERLAY = '[data-test-subj="close-overlay"]';
+
+export const ALERT_SUMMARY_SEVERITY_DONUT_CHART =
+  getDataTestSubjectSelector('severity-level-donut');
+
+export const ALERT_TAGGING_CONTEXT_MENU_ITEM = '[data-test-subj="alert-tags-context-menu-item"]';
+
+export const ALERT_TAGGING_CONTEXT_MENU = '[data-test-subj="alert-tags-selectable-menu"]';
+
+export const ALERT_TAGGING_UPDATE_BUTTON = '[data-test-subj="alert-tags-update-button"]';
+
+export const SELECTED_ALERT_TAG = '[data-test-subj="selected-alert-tag"]';
+
+export const MIXED_ALERT_TAG = '[data-test-subj="mixed-alert-tag"]';
+
+export const UNSELECTED_ALERT_TAG = '[data-test-subj="unselected-alert-tag"]';
+
+export const ALERTS_TABLE_ROW_LOADER = '[data-test-subj="row-loader"]';
+
+export const ALERT_TABLE_SUMMARY_VIEW_SELECTABLE = '[data-test-subj="summary-view-selector"]';
+
+export const ALERT_TABLE_GRID_VIEW_OPTION = '[data-test-subj="gridView"]';
+
+export const EVENT_SUMMARY_COLUMN = '[data-gridcell-column-id="eventSummary"]';
+
+export const EVENT_SUMMARY_ALERT_RENDERER_CONTENT = '[data-test-subj="alertRenderer"]';
+
+export const ALERT_TABLE_EVENT_RENDERED_VIEW_OPTION = '[data-test-subj="eventRenderedView"]';
+
+export const ALERT_TABLE_ADDITIONAL_CONTROLS = '[data-test-subj="additionalFilters-popover"]';
+
+export const ALERT_RENDERER_CONTENT = '[data-test-subj="alertRenderer"]';
+
+export const ALERT_RENDERER_HOST_NAME =
+  '[data-test-subj="alertFieldBadge"] [data-test-subj="render-content-host.name"]';
+
+export const HOVER_ACTIONS_CONTAINER = getDataTestSubjectSelector('hover-actions-container');

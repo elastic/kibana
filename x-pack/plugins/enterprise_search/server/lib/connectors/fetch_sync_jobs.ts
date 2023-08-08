@@ -8,11 +8,10 @@
 import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 
 import { CONNECTORS_JOBS_INDEX } from '../..';
-import { ConnectorSyncJob } from '../../../common/types/connectors';
+import { ConnectorSyncJob, SyncJobType } from '../../../common/types/connectors';
 import { Paginate } from '../../../common/types/pagination';
 import { isNotNullish } from '../../../common/utils/is_not_nullish';
 
-import { setupConnectorsIndices } from '../../index_management/setup_indices';
 import { fetchWithPagination } from '../../utils/fetch_with_pagination';
 import { isIndexNotFoundException } from '../../utils/identify_exceptions';
 
@@ -32,19 +31,42 @@ export const fetchSyncJobsByConnectorId = async (
   client: IScopedClusterClient,
   connectorId: string,
   from: number,
-  size: number
+  size: number,
+  syncJobType: 'content' | 'access_control' | 'all' = 'all'
 ): Promise<Paginate<ConnectorSyncJob>> => {
   try {
+    const query =
+      syncJobType === 'all'
+        ? {
+            term: {
+              'connector.id': connectorId,
+            },
+          }
+        : {
+            bool: {
+              filter: [
+                {
+                  term: {
+                    'connector.id': connectorId,
+                  },
+                },
+                {
+                  terms: {
+                    job_type:
+                      syncJobType === 'content'
+                        ? [SyncJobType.FULL, SyncJobType.INCREMENTAL]
+                        : [SyncJobType.ACCESS_CONTROL],
+                  },
+                },
+              ],
+            },
+          };
     const result = await fetchWithPagination(
       async () =>
         await client.asCurrentUser.search<ConnectorSyncJob>({
           from,
           index: CONNECTORS_JOBS_INDEX,
-          query: {
-            term: {
-              'connector.id': connectorId,
-            },
-          },
+          query,
           size,
           sort: { created_at: { order: 'desc' } },
         }),
@@ -59,10 +81,8 @@ export const fetchSyncJobsByConnectorId = async (
     };
   } catch (error) {
     if (isIndexNotFoundException(error)) {
-      await setupConnectorsIndices(client.asCurrentUser);
       return defaultResult;
-    } else {
-      throw error;
     }
+    throw error;
   }
 };

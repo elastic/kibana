@@ -452,7 +452,8 @@ export function validateKibanaFeature(feature: KibanaFeatureConfig) {
       const values = Array.from(entry[1].values()).map(
         (managementPage) => `${entry[0]}.${managementPage}`
       );
-      return [...acc, ...values];
+      acc.push(...values);
+      return acc;
     }, [] as string[]);
 
     throw new Error(

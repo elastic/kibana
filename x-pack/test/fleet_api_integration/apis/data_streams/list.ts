@@ -138,7 +138,7 @@ export default function (providerContext: FtrProviderContext) {
       expect(body).to.eql({ data_streams: [] });
     });
 
-    it('TESTME should return correct basic data stream information', async function () {
+    it('should return correct basic data stream information', async function () {
       await seedDataStreams();
       // we can't compare the array directly as the order is unpredictable
       const expectedStreamsByDataset = keyBy(

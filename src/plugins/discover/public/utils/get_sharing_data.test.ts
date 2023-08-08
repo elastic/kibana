@@ -15,8 +15,8 @@ import {
   DOC_HIDE_TIME_COLUMN_SETTING,
   SORT_DEFAULT_ORDER_SETTING,
   SEARCH_FIELDS_FROM_SOURCE,
-} from '../../common';
-import { dataViewMock } from '../__mocks__/data_view';
+} from '@kbn/discover-utils';
+import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { getSharingData, showPublicUrlSwitch } from './get_sharing_data';
 
 describe('getSharingData', () => {
@@ -185,6 +185,41 @@ describe('getSharingData', () => {
       Object {
         "columns": Array [
           "cool-timefield",
+          "cool-field-1",
+          "cool-field-2",
+          "cool-field-3",
+          "cool-field-4",
+          "cool-field-5",
+          "cool-field-6",
+        ],
+        "getSearchSource": [Function],
+      }
+    `);
+  });
+
+  test('fields do not have prepended timeField for text based languages', async () => {
+    const index = { ...dataViewMock } as DataView;
+    index.timeFieldName = 'cool-timefield';
+
+    const searchSourceMock = createSearchSourceMock({ index });
+    const result = await getSharingData(
+      searchSourceMock,
+      {
+        columns: [
+          'cool-field-1',
+          'cool-field-2',
+          'cool-field-3',
+          'cool-field-4',
+          'cool-field-5',
+          'cool-field-6',
+        ],
+      },
+      services,
+      true
+    );
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "columns": Array [
           "cool-field-1",
           "cool-field-2",
           "cool-field-3",

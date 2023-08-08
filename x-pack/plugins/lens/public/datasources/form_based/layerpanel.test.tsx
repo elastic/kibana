@@ -30,7 +30,7 @@ jest.mock('@kbn/unified-search-plugin/public', () => {
 
 interface IndexPatternPickerOption {
   label: string;
-  checked?: 'on' | 'off';
+  checked?: 'on' | 'off' | 'mixed';
 }
 
 const fieldsOne = [

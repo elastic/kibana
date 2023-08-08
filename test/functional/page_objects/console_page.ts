@@ -49,6 +49,16 @@ export class ConsolePageObject extends FtrService {
     await this.testSubjects.click('consoleSettingsButton');
   }
 
+  public async toggleA11yOverlaySetting() {
+    // while the settings form opens/loads this may fail, so retry for a while
+    await this.retry.try(async () => {
+      const toggle = await this.testSubjects.find('enableA11yOverlay');
+      await toggle.click();
+    });
+
+    await this.testSubjects.click('settings-save-button');
+  }
+
   public async openVariablesModal() {
     await this.testSubjects.click('consoleVariablesButton');
   }
@@ -189,6 +199,11 @@ export class ConsolePageObject extends FtrService {
   public async pressEnter() {
     const textArea = await this.testSubjects.find('console-textarea');
     await textArea.pressKeys(Key.ENTER);
+  }
+
+  public async pressEscape() {
+    const textArea = await this.testSubjects.find('console-textarea');
+    await textArea.pressKeys(Key.ESCAPE);
   }
 
   public async clearTextArea() {
@@ -401,6 +416,10 @@ export class ConsolePageObject extends FtrService {
 
   public async isAutoIndentButtonVisible() {
     return await this.testSubjects.exists('consoleMenuAutoIndent');
+  }
+
+  public async isA11yOverlayVisible() {
+    return await this.testSubjects.exists('a11y-overlay');
   }
 
   public async clickCopyAsCurlButton() {

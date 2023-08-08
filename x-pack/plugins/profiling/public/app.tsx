@@ -12,7 +12,8 @@ import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { RouteRenderer, RouterProvider } from '@kbn/typed-react-router-config';
 import React, { useMemo } from 'react';
 import ReactDOM from 'react-dom';
-import { HeaderMenuPortal } from '@kbn/observability-plugin/public';
+import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
+import { ObservabilityAIAssistantProvider } from '@kbn/observability-ai-assistant-plugin/public';
 import { CheckSetup } from './components/check_setup';
 import { ProfilingDependenciesContextProvider } from './components/contexts/profiling_dependencies/profiling_dependencies_context';
 import { RouteBreadcrumbsContextProvider } from './components/contexts/route_breadcrumbs_context';
@@ -82,31 +83,33 @@ function App({
     <KibanaThemeProvider theme$={theme$}>
       <KibanaContextProvider services={{ ...coreStart, ...pluginsStart, storage }}>
         <i18nCore.Context>
-          <RedirectAppLinks coreStart={coreStart} currentAppId="profiling">
-            <RouterProvider router={profilingRouter as any} history={history}>
-              <RouterErrorBoundary>
-                <TimeRangeContextProvider>
-                  <ProfilingDependenciesContextProvider value={profilingDependencies}>
-                    <LicenseProvider>
-                      <>
-                        <CheckSetup>
-                          <RedirectWithDefaultDateRange>
-                            <RouteBreadcrumbsContextProvider>
-                              <RouteRenderer />
-                            </RouteBreadcrumbsContextProvider>
-                          </RedirectWithDefaultDateRange>
-                        </CheckSetup>
-                        <MountProfilingActionMenu
-                          setHeaderActionMenu={setHeaderActionMenu}
-                          theme$={theme$}
-                        />
-                      </>
-                    </LicenseProvider>
-                  </ProfilingDependenciesContextProvider>
-                </TimeRangeContextProvider>
-              </RouterErrorBoundary>
-            </RouterProvider>
-          </RedirectAppLinks>
+          <ObservabilityAIAssistantProvider value={pluginsStart.observabilityAIAssistant}>
+            <RedirectAppLinks coreStart={coreStart} currentAppId="profiling">
+              <RouterProvider router={profilingRouter as any} history={history}>
+                <RouterErrorBoundary>
+                  <TimeRangeContextProvider>
+                    <ProfilingDependenciesContextProvider value={profilingDependencies}>
+                      <LicenseProvider>
+                        <>
+                          <CheckSetup>
+                            <RedirectWithDefaultDateRange>
+                              <RouteBreadcrumbsContextProvider>
+                                <RouteRenderer />
+                              </RouteBreadcrumbsContextProvider>
+                            </RedirectWithDefaultDateRange>
+                          </CheckSetup>
+                          <MountProfilingActionMenu
+                            setHeaderActionMenu={setHeaderActionMenu}
+                            theme$={theme$}
+                          />
+                        </>
+                      </LicenseProvider>
+                    </ProfilingDependenciesContextProvider>
+                  </TimeRangeContextProvider>
+                </RouterErrorBoundary>
+              </RouterProvider>
+            </RedirectAppLinks>
+          </ObservabilityAIAssistantProvider>
         </i18nCore.Context>
       </KibanaContextProvider>
     </KibanaThemeProvider>

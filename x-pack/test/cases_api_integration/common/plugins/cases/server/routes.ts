@@ -6,14 +6,13 @@
  */
 
 import { createHash } from 'crypto';
-import semverCompare from 'semver/functions/compare';
-import type { CasesPatchRequest } from '@kbn/cases-plugin/common/api';
 import { schema } from '@kbn/config-schema';
 import type { CoreSetup, Logger } from '@kbn/core/server';
 import type {
   ExternalReferenceAttachmentType,
   PersistableStateAttachmentTypeSetup,
 } from '@kbn/cases-plugin/server/attachment_framework/types';
+import { CasesPatchRequest } from '@kbn/cases-plugin/common/types/api';
 import type { FixtureStartDeps } from './plugin';
 
 const hashParts = (parts: string[]): string => {
@@ -22,22 +21,12 @@ const hashParts = (parts: string[]): string => {
   return hash.update(hashFeed).digest('hex');
 };
 
-const extractMigrationInfo = (type: PersistableStateAttachmentTypeSetup) => {
-  const migrationMap = typeof type.migrations === 'function' ? type.migrations() : type.migrations;
-  const migrationVersions = Object.keys(migrationMap ?? {});
-  migrationVersions.sort(semverCompare);
-
-  return { migrationVersions };
-};
-
 const getExternalReferenceAttachmentTypeHash = (type: ExternalReferenceAttachmentType) => {
   return hashParts([type.id]);
 };
 
 const getPersistableStateAttachmentTypeHash = (type: PersistableStateAttachmentTypeSetup) => {
-  const { migrationVersions } = extractMigrationInfo(type);
-
-  return hashParts([type.id, migrationVersions.join(',')]);
+  return hashParts([type.id]);
 };
 
 export const registerRoutes = (core: CoreSetup<FixtureStartDeps>, logger: Logger) => {

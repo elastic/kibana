@@ -17,28 +17,28 @@ import {
   openTableInspectModal,
 } from '../../tasks/inspect';
 import { login, visit } from '../../tasks/login';
-import { HOSTS_URL } from '../../urls/navigation';
-import { postDataView, waitForPageToBeLoaded } from '../../tasks/common';
-import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
+import {
+  postDataView,
+  waitForPageToBeLoaded,
+  waitForWelcomePanelToBeLoaded,
+} from '../../tasks/common';
 import { selectDataView } from '../../tasks/sourcerer';
 
 const DATA_VIEW = 'auditbeat-*';
 
 describe('Inspect Explore pages', () => {
   before(() => {
-    esArchiverLoad('risk_users');
-    esArchiverLoad('risk_hosts');
-    login();
+    cy.task('esArchiverLoad', 'risk_users');
+    cy.task('esArchiverLoad', 'risk_hosts');
 
+    login();
     // Create and select data view
     postDataView(DATA_VIEW);
-    visit(HOSTS_URL);
-    selectDataView(DATA_VIEW);
   });
 
   after(() => {
-    esArchiverUnload('risk_users');
-    esArchiverUnload('risk_hosts');
+    cy.task('esArchiverUnload', 'risk_users');
+    cy.task('esArchiverUnload', 'risk_hosts');
   });
 
   INSPECT_BUTTONS_IN_SECURITY.forEach(({ pageName, url, lensVisualizations, tables }) => {
@@ -46,8 +46,15 @@ describe('Inspect Explore pages', () => {
      * Group all tests of a page into one "it" call to improve speed
      */
     it(`inspect ${pageName} page`, () => {
-      visit(url);
-      waitForPageToBeLoaded();
+      login();
+
+      visit(url, {
+        onLoad: () => {
+          waitForWelcomePanelToBeLoaded();
+          waitForPageToBeLoaded();
+          selectDataView(DATA_VIEW);
+        },
+      });
 
       lensVisualizations.forEach((lens) => {
         cy.log(`inspects the ${lens.title} visualization`);

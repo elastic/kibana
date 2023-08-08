@@ -7,5 +7,16 @@
  */
 
 export { NavigationKibanaProvider, NavigationProvider } from './src/services';
-export { Navigation } from './src/ui/navigation';
-export type { NavigationProps, NavigationServices, NavItemProps } from './types';
+
+export { DefaultNavigation, getPresets, Navigation } from './src/ui';
+
+export type {
+  GroupDefinition,
+  NavigationGroupPreset,
+  NavigationTreeDefinition,
+  ProjectNavigationDefinition,
+  RecentlyAccessedDefinition,
+  RootNavigationItemDefinition,
+} from './src/ui';
+
+export type { NavigationServices } from './types';

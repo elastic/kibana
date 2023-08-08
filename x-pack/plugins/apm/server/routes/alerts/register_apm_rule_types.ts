@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { AlertsLocatorParams } from '@kbn/observability-plugin/common';
+import { LocatorPublic } from '@kbn/share-plugin/common';
 import { Observable } from 'rxjs';
 import { IBasePath, Logger } from '@kbn/core/server';
 import {
@@ -18,6 +20,7 @@ import { legacyExperimentalFieldMap } from '@kbn/alerts-as-data-utils';
 import {
   AGENT_NAME,
   ERROR_GROUP_ID,
+  ERROR_GROUP_NAME,
   PROCESSOR_EVENT,
   SERVICE_ENVIRONMENT,
   SERVICE_LANGUAGE_NAME,
@@ -55,6 +58,10 @@ export const apmRuleTypeAlertFieldMap = {
     type: 'keyword',
     required: false,
   },
+  [ERROR_GROUP_NAME]: {
+    type: 'keyword',
+    required: false,
+  },
   [PROCESSOR_EVENT]: {
     type: 'keyword',
     required: false,
@@ -89,6 +96,7 @@ export interface RegisterRuleDependencies {
   ml?: MlPluginSetup;
   observability: ObservabilityPluginSetup;
   ruleDataClient: IRuleDataClient;
+  alertsLocator?: LocatorPublic<AlertsLocatorParams>;
 }
 
 export function registerApmRuleTypes(dependencies: RegisterRuleDependencies) {

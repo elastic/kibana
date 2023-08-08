@@ -10,7 +10,8 @@ import React, { VFC } from 'react';
 import { EuiButton, EuiEmptyPrompt, EuiImage, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { IMAGE } from './translations';
-import { useIntegrationsPageLink, useTIDocumentationLink } from '../../hooks';
+import { useTIDocumentationLink } from '../../hooks/use_documentation_link';
+import { useIntegrationsPageLink } from '../../hooks/use_integrations_page_link';
 import illustration from './integrations_light.svg';
 import { SecuritySolutionPluginTemplateWrapper } from '../../containers/security_solution_plugin_template_wrapper';
 

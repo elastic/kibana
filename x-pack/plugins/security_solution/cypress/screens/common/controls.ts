@@ -13,6 +13,10 @@ export const EUI_SELECTABLE_LIST_ITEM = '[data-test-subj="euiSelectableList"] li
 
 export const EUI_CHECKBOX = '.euiCheckbox__input';
 
+export const EUI_ICON_IS_LOADING = 'svg[data-test-loading="true"]';
+
+export const EUI_BASIC_TABLE_LOADING = '.euiBasicTable-loading';
+
 export const COMBO_BOX_INPUT = '[data-test-subj="comboBoxInput"]';
 
 export const COMBO_BOX_SELECTION = '.euiMark';

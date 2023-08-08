@@ -18,20 +18,16 @@ import type { Query } from '@kbn/es-query';
 import { QueryStringInput } from '@kbn/unified-search-plugin/public';
 import { QueryErrorMessage } from '@kbn/ml-error-utils';
 
+import { SEARCH_QUERY_LANGUAGE, SearchQueryLanguage } from '@kbn/ml-query-utils';
 import { Dictionary } from '../../../../../../../common/types/common';
-import {
-  SEARCH_QUERY_LANGUAGE,
-  SearchQueryLanguage,
-} from '../../../../../../../common/constants/search';
 import { removeFilterFromQueryString } from '../../../../../explorer/explorer_utils';
-import { SavedSearchQuery } from '../../../../../contexts/ml';
 import { useMlKibana } from '../../../../../contexts/kibana';
 
 export interface ExplorationQueryBarProps {
   indexPattern: DataView;
   setSearchQuery: (update: {
     queryString: string;
-    query?: SavedSearchQuery;
+    query?: estypes.QueryDslQueryContainer;
     language: SearchQueryLanguage;
   }) => void;
   includeQueryString?: boolean;

@@ -13,14 +13,17 @@ import {
 import { renderMustacheString } from '@kbn/actions-plugin/server/lib/mustache_renderer';
 import type { ValidatorServices } from '@kbn/actions-plugin/server/types';
 import { i18n } from '@kbn/i18n';
-import { schema } from '@kbn/config-schema';
 import type {
   SlackApiExecutorOptions,
   SlackApiConnectorType,
   SlackApiParams,
   SlackApiSecrets,
 } from '../../../common/slack_api/types';
-import { SlackApiSecretsSchema, SlackApiParamsSchema } from '../../../common/slack_api/schema';
+import {
+  SlackApiSecretsSchema,
+  SlackApiParamsSchema,
+  SlackApiConfigSchema,
+} from '../../../common/slack_api/schema';
 import { SLACK_API_CONNECTOR_ID, SLACK_URL } from '../../../common/slack_api/constants';
 import { SLACK_CONNECTOR_NAME } from './translations';
 import { api } from './api';
@@ -35,7 +38,7 @@ export const getConnectorType = (): SlackApiConnectorType => {
     name: SLACK_CONNECTOR_NAME,
     supportedFeatureIds: [AlertingConnectorFeatureId, SecurityConnectorFeatureId],
     validate: {
-      config: { schema: schema.object({}, { defaultValue: {} }) },
+      config: { schema: SlackApiConfigSchema },
       secrets: {
         schema: SlackApiSecretsSchema,
         customValidator: validateSlackUrl,
@@ -80,6 +83,7 @@ const renderParameterTemplates = (params: SlackApiParams, variables: Record<stri
 
 const slackApiExecutor = async ({
   actionId,
+  config,
   params,
   secrets,
   configurationUtilities,

@@ -26,7 +26,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     });
 
     loadTestFile(require.resolve('./_shared_item'));
-    loadTestFile(require.resolve('./_lab_mode'));
     loadTestFile(require.resolve('./_linked_saved_searches'));
     loadTestFile(require.resolve('./_visualize_listing'));
     loadTestFile(require.resolve('./_add_to_dashboard.ts'));

@@ -3,7 +3,8 @@
     "url_params": {
       "create": "__flag__",
       "cause": "",
-      "master_timeout": ""
+      "master_timeout": "",
+      "include_defaults": "__flag__"
     },
     "methods": [
       "POST"

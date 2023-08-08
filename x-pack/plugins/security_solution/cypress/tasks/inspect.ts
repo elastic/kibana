@@ -17,9 +17,8 @@ export const closesModal = () => {
 };
 
 export const clickInspectButton = (container: string) => {
-  cy.get(`${container} ${INSPECT_BUTTON_ICON}`).should('exist');
-  cy.get(`${container} ${INSPECT_BUTTON_ICON}`).invoke('show');
-  cy.get(`${container} ${INSPECT_BUTTON_ICON}`).trigger('click', { force: true });
+  cy.get(container).realHover();
+  cy.get(container).find(INSPECT_BUTTON_ICON).click({ force: true });
 };
 
 const LOADER_ARIA = '[aria-label="Loading"]';
@@ -33,14 +32,7 @@ export const openTableInspectModal = (table: InspectTableMetadata) => {
     }
   });
 
-  if (table.altInspectId) {
-    cy.get(table.altInspectId).invoke('show');
-    cy.get(table.altInspectId).trigger('click', {
-      force: true,
-    });
-  } else {
-    clickInspectButton(table.id);
-  }
+  clickInspectButton(table.altInspectId ?? table.id);
 };
 
 export const openLensVisualizationsInspectModal = (
@@ -50,14 +42,12 @@ export const openLensVisualizationsInspectModal = (
   cy.get(panelSelector)
     .get(`[data-test-embeddable-id="${embeddableId}"]`)
     .each(($el) => {
-      const container = cy.wrap($el);
-
       // wait for visualization to load
       if ($el.find(LOADER_ARIA).length > 0) {
         cy.get(LOADER_ARIA).should('not.exist');
       }
 
-      container.find(EMBEDDABLE_PANEL_TOGGLE_ICON).click();
+      cy.wrap($el).find(EMBEDDABLE_PANEL_TOGGLE_ICON).click();
       cy.get(EMBEDDABLE_PANEL_INSPECT).click();
 
       onOpen();

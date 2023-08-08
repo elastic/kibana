@@ -10,11 +10,11 @@ import { KibanaServices } from '../../../common/lib/kibana';
 import type {
   GetRuleExecutionEventsResponse,
   GetRuleExecutionResultsResponse,
-} from '../../../../common/detection_engine/rule_monitoring';
+} from '../../../../common/api/detection_engine/rule_monitoring';
 import {
   LogLevel,
   RuleExecutionEventType,
-} from '../../../../common/detection_engine/rule_monitoring';
+} from '../../../../common/api/detection_engine/rule_monitoring';
 
 import { api } from './api_client';
 
@@ -26,6 +26,23 @@ describe('Rule Monitoring API Client', () => {
   mockKibanaServices.mockReturnValue({ http: { fetch: fetchMock } });
 
   const signal = new AbortController().signal;
+
+  describe('setupDetectionEngineHealthApi', () => {
+    const responseMock = {};
+
+    beforeEach(() => {
+      fetchMock.mockClear();
+      fetchMock.mockResolvedValue(responseMock);
+    });
+
+    it('calls API with correct parameters', async () => {
+      await api.setupDetectionEngineHealthApi();
+
+      expect(fetchMock).toHaveBeenCalledWith('/internal/detection_engine/health/_setup', {
+        method: 'POST',
+      });
+    });
+  });
 
   describe('fetchRuleExecutionEvents', () => {
     const responseMock: GetRuleExecutionEventsResponse = {

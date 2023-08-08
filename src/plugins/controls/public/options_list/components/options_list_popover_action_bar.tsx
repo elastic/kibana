@@ -21,6 +21,7 @@ import {
 import { OptionsListStrings } from './options_list_strings';
 import { useOptionsList } from '../embeddable/options_list_embeddable';
 import { OptionsListPopoverSortingButton } from './options_list_popover_sorting_button';
+import { OPTIONS_LIST_DEFAULT_SEARCH_TECHNIQUE } from '../../../common/options_list/types';
 
 interface OptionsListPopoverProps {
   showOnlySelected: boolean;
@@ -39,6 +40,8 @@ export const OptionsListPopoverActionBar = ({
     optionsList.select((state) => state.componentState.totalCardinality) ?? 0;
   const searchString = optionsList.select((state) => state.componentState.searchString);
   const invalidSelections = optionsList.select((state) => state.componentState.invalidSelections);
+
+  const searchTechnique = optionsList.select((state) => state.explicitInput.searchTechnique);
 
   const allowExpensiveQueries = optionsList.select(
     (state) => state.componentState.allowExpensiveQueries
@@ -59,7 +62,9 @@ export const OptionsListPopoverActionBar = ({
               onChange={(event) => updateSearchString(event.target.value)}
               value={searchString.value}
               data-test-subj="optionsList-control-search-input"
-              placeholder={OptionsListStrings.popover.getSearchPlaceholder()}
+              placeholder={OptionsListStrings.popover.searchPlaceholder[
+                searchTechnique ?? OPTIONS_LIST_DEFAULT_SEARCH_TECHNIQUE
+              ].getPlaceholderText()}
             />
           </EuiFlexItem>
           {!hideSort && (
@@ -126,21 +131,6 @@ export const OptionsListPopoverActionBar = ({
                         ? OptionsListStrings.popover.getAllOptionsButtonTitle()
                         : OptionsListStrings.popover.getSelectedOptionsButtonTitle()
                     }
-                  />
-                </EuiToolTip>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiToolTip
-                  position="top"
-                  content={OptionsListStrings.popover.getClearAllSelectionsButtonTitle()}
-                >
-                  <EuiButtonIcon
-                    size="xs"
-                    color="danger"
-                    iconType="eraser"
-                    onClick={() => optionsList.dispatch.clearSelections({})}
-                    data-test-subj="optionsList-control-clear-all-selections"
-                    aria-label={OptionsListStrings.popover.getClearAllSelectionsButtonTitle()}
                   />
                 </EuiToolTip>
               </EuiFlexItem>

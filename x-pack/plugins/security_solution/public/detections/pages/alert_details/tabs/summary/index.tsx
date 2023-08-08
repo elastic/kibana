@@ -10,7 +10,7 @@ import { EuiFlexGroup } from '@elastic/eui';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import type { SearchHit } from '../../../../../../common/search_strategy';
-import { TimelineId } from '../../../../../../common/types';
+import { TimelineId } from '../../../../../../common/types/timeline';
 import { useDetailPanel } from '../../../../../timelines/components/side_panel/hooks/use_detail_panel';
 import { useGetUserCasesPermissions } from '../../../../../common/lib/kibana';
 import type { SelectedDataView } from '../../../../../common/store/sourcerer/model';

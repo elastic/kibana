@@ -15,6 +15,7 @@ import {
   EmbeddableFactory,
   EmbeddableFactoryNotFoundError,
   isErrorEmbeddable,
+  EmbeddablePanel,
 } from '@kbn/embeddable-plugin/public';
 import type { EmbeddableContainerContext } from '@kbn/embeddable-plugin/public';
 import { StartDeps } from '../../plugin';
@@ -50,10 +51,7 @@ const renderEmbeddableFactory = (core: CoreStart, plugins: StartDeps) => {
     };
 
     return (
-      <plugins.embeddable.EmbeddablePanel
-        embeddable={embeddable}
-        containerContext={embeddableContainerContext}
-      />
+      <EmbeddablePanel embeddable={embeddable} containerContext={embeddableContainerContext} />
     );
   };
 

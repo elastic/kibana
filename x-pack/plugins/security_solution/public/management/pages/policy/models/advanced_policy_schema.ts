@@ -1264,4 +1264,70 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       }
     ),
   },
+  {
+    key: 'windows.advanced.events.api',
+    first_supported_version: '8.8',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.api',
+      {
+        defaultMessage:
+          'Controls whether API events are enabled. Set to false to disable API event collection. Default: true',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.alerts.rollback.self_healing.registry_enabled',
+    first_supported_version: '8.8',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.alerts.rollback.self_healing.registry_enabled',
+      {
+        defaultMessage:
+          'Enables self-healing of registry based malware artifacts. Requires rollback.self_healing.enabled to also be enabled. Default: true',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.events.callstacks.include_network_images',
+    first_supported_version: '8.9',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.callstacks.include_network_images',
+      {
+        defaultMessage:
+          'Should executables and DLLs on network shares be parsed for call stack symbols?  This may cause Endpoint to hang on some networks. Default: true',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.kernel.ppl.harden_images',
+    first_supported_version: '8.9',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.kernel.ppl.harden_images',
+      {
+        defaultMessage:
+          'Mitigate attacks like PPLFault by preventing Protected Process Light (PPL) processes from loading DLLs over the network. Default: true',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.kernel.ppl.harden_am_images',
+    first_supported_version: '8.9',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.kernel.ppl.harden_am_images',
+      {
+        defaultMessage:
+          'Apply the windows.advanced.kernel.ppl.harden_images mitigation to Anti-Malware PPL as well. Disable this if third-party Anti-Malware is blocked from loading DLLs over the network. If this happens, there will be Event ID 8 events in the "Microsoft-Windows-Security-Mitigations/Kernel Mode" event log. Default: true',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.malware.networkshare',
+    first_supported_version: '8.9',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.malware.networkshare',
+      {
+        defaultMessage:
+          'Controls whether malware protection is applied to network drives. Default: true',
+      }
+    ),
+  },
 ];

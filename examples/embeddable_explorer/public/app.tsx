@@ -10,21 +10,13 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { BrowserRouter as Router, withRouter, RouteComponentProps } from 'react-router-dom';
 import { Route } from '@kbn/shared-ux-router';
-import { EuiPage, EuiPageSideBar_Deprecated as EuiPageSideBar, EuiSideNav } from '@elastic/eui';
-
+import { EuiPageTemplate, EuiSideNav } from '@elastic/eui';
 import { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { Start as InspectorStartContract } from '@kbn/inspector-plugin/public';
-import {
-  AppMountParameters,
-  CoreStart,
-  SavedObjectsStart,
-  IUiSettingsClient,
-  OverlayStart,
-} from '@kbn/core/public';
+import { AppMountParameters, CoreStart, IUiSettingsClient, OverlayStart } from '@kbn/core/public';
 import { EmbeddableExamplesStart } from '@kbn/embeddable-examples-plugin/public/plugin';
 import { HelloWorldEmbeddableExample } from './hello_world_embeddable_example';
-import { TodoEmbeddableExample } from './todo_embeddable_example';
 import { ListContainerExample } from './list_container_example';
 import { EmbeddablePanelExample } from './embeddable_panel_example';
 
@@ -51,7 +43,7 @@ const Nav = withRouter(({ history, navigateToApp, pages }: NavProps) => {
     <EuiSideNav
       items={[
         {
-          name: 'Embeddable explorer',
+          name: 'Embeddable examples',
           id: 'home',
           items: [...navItems],
         },
@@ -68,7 +60,6 @@ interface Props {
   overlays: OverlayStart;
   notifications: CoreStart['notifications'];
   inspector: InspectorStartContract;
-  savedObject: SavedObjectsStart;
   uiSettingsClient: IUiSettingsClient;
   embeddableExamples: EmbeddableExamplesStart;
 }
@@ -81,7 +72,7 @@ const EmbeddableExplorerApp = ({
 }: Props) => {
   const pages: PageDef[] = [
     {
-      title: 'Hello world embeddable',
+      title: 'Render embeddable',
       id: 'helloWorldEmbeddableSection',
       component: (
         <HelloWorldEmbeddableExample
@@ -90,31 +81,20 @@ const EmbeddableExplorerApp = ({
       ),
     },
     {
-      title: 'Todo embeddable',
-      id: 'todoEmbeddableSection',
-      component: (
-        <TodoEmbeddableExample
-          todoEmbeddableFactory={embeddableExamples.factories.getTodoEmbeddableFactory()}
-        />
-      ),
-    },
-    {
-      title: 'List container embeddable',
+      title: 'Groups of embeddables',
       id: 'listContainerSection',
       component: (
         <ListContainerExample
           listContainerEmbeddableFactory={embeddableExamples.factories.getListContainerEmbeddableFactory()}
-          searchableListContainerEmbeddableFactory={embeddableExamples.factories.getSearchableListContainerEmbeddableFactory()}
         />
       ),
     },
     {
-      title: 'Dynamically adding children to a container',
+      title: 'Context menu',
       id: 'embeddablePanelExample',
       component: (
         <EmbeddablePanelExample
-          embeddableServices={embeddableApi}
-          searchListContainerFactory={embeddableExamples.factories.getSearchableListContainerEmbeddableFactory()}
+          helloWorldFactory={embeddableExamples.factories.getHelloWorldEmbeddableFactory()}
         />
       ),
     },
@@ -126,12 +106,12 @@ const EmbeddableExplorerApp = ({
 
   return (
     <Router basename={basename}>
-      <EuiPage>
-        <EuiPageSideBar>
+      <EuiPageTemplate offset={0}>
+        <EuiPageTemplate.Sidebar>
           <Nav navigateToApp={navigateToApp} pages={pages} />
-        </EuiPageSideBar>
+        </EuiPageTemplate.Sidebar>
         {routes}
-      </EuiPage>
+      </EuiPageTemplate>
     </Router>
   );
 };

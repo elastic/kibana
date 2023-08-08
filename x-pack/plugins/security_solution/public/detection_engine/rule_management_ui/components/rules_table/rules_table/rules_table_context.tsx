@@ -25,7 +25,7 @@ import type {
   FilterOptions,
   PaginationOptions,
   Rule,
-  RuleSnoozeSettings,
+  RulesSnoozeSettingsMap,
   SortingOptions,
 } from '../../../../rule_management/logic/types';
 import { useFindRules } from '../../../../rule_management/logic/use_find_rules';
@@ -43,7 +43,7 @@ interface RulesSnoozeSettings {
   /**
    * A map object using rule SO's id (not ruleId) as keys and snooze settings as values
    */
-  data: Record<string, RuleSnoozeSettings>;
+  data: RulesSnoozeSettingsMap;
   /**
    * Sets to true during the first data loading
    */
@@ -206,7 +206,10 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
     showElasticRules:
       savedFilter?.source === RuleSource.Prebuilt ?? DEFAULT_FILTER_OPTIONS.showElasticRules,
     enabled: savedFilter?.enabled,
+    ruleExecutionStatus:
+      savedFilter?.ruleExecutionStatus ?? DEFAULT_FILTER_OPTIONS.ruleExecutionStatus,
   });
+
   const [sortingOptions, setSortingOptions] = useState<SortingOptions>({
     field: savedSorting?.field ?? DEFAULT_SORTING_OPTIONS.field,
     order: savedSorting?.order ?? DEFAULT_SORTING_OPTIONS.order,
@@ -248,6 +251,7 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
       showCustomRules: DEFAULT_FILTER_OPTIONS.showCustomRules,
       tags: DEFAULT_FILTER_OPTIONS.tags,
       enabled: undefined,
+      ruleExecutionStatus: DEFAULT_FILTER_OPTIONS.ruleExecutionStatus,
     });
     setSortingOptions({
       field: DEFAULT_SORTING_OPTIONS.field,
@@ -298,7 +302,7 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
 
   // Fetch rules snooze settings
   const {
-    data: rulesSnoozeSettings,
+    data: rulesSnoozeSettingsMap,
     isLoading: isSnoozeSettingsLoading,
     isFetching: isSnoozeSettingsFetching,
     isError: isSnoozeSettingsFetchError,
@@ -347,18 +351,11 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
   );
 
   const providerValue = useMemo(() => {
-    const rulesSnoozeSettingsMap =
-      rulesSnoozeSettings?.reduce((map, snoozeSettings) => {
-        map[snoozeSettings.id] = snoozeSettings;
-
-        return map;
-      }, {} as Record<string, RuleSnoozeSettings>) ?? {};
-
     return {
       state: {
         rules,
         rulesSnoozeSettings: {
-          data: rulesSnoozeSettingsMap,
+          data: rulesSnoozeSettingsMap ?? {},
           isLoading: isSnoozeSettingsLoading,
           isFetching: isSnoozeSettingsFetching,
           isError: isSnoozeSettingsFetchError,
@@ -392,7 +389,7 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
     };
   }, [
     rules,
-    rulesSnoozeSettings,
+    rulesSnoozeSettingsMap,
     isSnoozeSettingsLoading,
     isSnoozeSettingsFetching,
     isSnoozeSettingsFetchError,

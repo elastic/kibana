@@ -52,9 +52,10 @@ export {
   SPECIFIC_SCRIPTED_FIELD_PATH_LEGACY,
   SERVICE_KEY,
   SERVICE_KEY_LEGACY,
+  DATA_VIEW_SWAP_REFERENCES_PATH,
 } from './constants';
 
 export type { SERVICE_KEY_TYPE } from './constants';
 
-export type { FieldSpec, SavedObjectsClientCommon } from '../common/types';
+export type { FieldSpec } from '../common/types';
 export { DataViewsService, DataView } from '../common/data_views';

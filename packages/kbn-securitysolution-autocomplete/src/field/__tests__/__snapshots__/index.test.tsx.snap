@@ -22,6 +22,7 @@ Object {
             >
               <span
                 class="euiComboBoxPill euiComboBoxPill--plainText"
+                data-test-subj="euiComboBoxPill"
               >
                 machine.os.raw
               </span>
@@ -46,7 +47,7 @@ Object {
               </div>
             </div>
             <div
-              class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+              class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
             >
               <button
                 aria-label="Clear input"
@@ -96,6 +97,7 @@ Object {
           >
             <span
               class="euiComboBoxPill euiComboBoxPill--plainText"
+              data-test-subj="euiComboBoxPill"
             >
               machine.os.raw
             </span>
@@ -120,7 +122,7 @@ Object {
             </div>
           </div>
           <div
-            class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+            class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
           >
             <button
               aria-label="Clear input"
@@ -227,6 +229,7 @@ Object {
             >
               <span
                 class="euiComboBoxPill euiComboBoxPill--plainText"
+                data-test-subj="euiComboBoxPill"
               >
                 machine.os.raw
               </span>
@@ -251,24 +254,6 @@ Object {
                 />
               </div>
             </div>
-            <div
-              class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
-            >
-              <button
-                aria-label="Open list of options"
-                class="euiFormControlLayoutCustomIcon euiFormControlLayoutCustomIcon--clickable"
-                data-test-subj="comboBoxToggleListButton"
-                disabled=""
-                tabindex="-1"
-                type="button"
-              >
-                <span
-                  aria-hidden="true"
-                  class="euiFormControlLayoutCustomIcon__icon"
-                  data-euiicon-type="arrowDown"
-                />
-              </button>
-            </div>
           </div>
         </div>
       </div>
@@ -292,6 +277,7 @@ Object {
           >
             <span
               class="euiComboBoxPill euiComboBoxPill--plainText"
+              data-test-subj="euiComboBoxPill"
             >
               machine.os.raw
             </span>
@@ -315,24 +301,6 @@ Object {
                 style="position: absolute; top: 0px; left: 0px; visibility: hidden; height: 0px; overflow: scroll; white-space: pre; font-family: -webkit-small-control; letter-spacing: normal; text-transform: none;"
               />
             </div>
-          </div>
-          <div
-            class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
-          >
-            <button
-              aria-label="Open list of options"
-              class="euiFormControlLayoutCustomIcon euiFormControlLayoutCustomIcon--clickable"
-              data-test-subj="comboBoxToggleListButton"
-              disabled=""
-              tabindex="-1"
-              type="button"
-            >
-              <span
-                aria-hidden="true"
-                class="euiFormControlLayoutCustomIcon__icon"
-                data-euiicon-type="arrowDown"
-              />
-            </button>
           </div>
         </div>
       </div>
@@ -414,6 +382,7 @@ Object {
             >
               <span
                 class="euiComboBoxPill euiComboBoxPill--plainText"
+                data-test-subj="euiComboBoxPill"
               >
                 machine.os.raw
               </span>
@@ -438,7 +407,7 @@ Object {
               </div>
             </div>
             <div
-              class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+              class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
             >
               <button
                 aria-label="Open list of options"
@@ -477,6 +446,7 @@ Object {
           >
             <span
               class="euiComboBoxPill euiComboBoxPill--plainText"
+              data-test-subj="euiComboBoxPill"
             >
               machine.os.raw
             </span>
@@ -501,7 +471,7 @@ Object {
             </div>
           </div>
           <div
-            class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+            class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
           >
             <button
               aria-label="Open list of options"
@@ -597,6 +567,7 @@ Object {
             >
               <span
                 class="euiComboBoxPill euiComboBoxPill--plainText"
+                data-test-subj="euiComboBoxPill"
               >
                 machine.os.raw
               </span>
@@ -622,27 +593,13 @@ Object {
               </div>
             </div>
             <div
-              class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+              class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
             >
               <span
                 aria-label="Loading"
                 class="euiLoadingSpinner emotion-euiLoadingSpinner-m"
                 role="progressbar"
               />
-              <button
-                aria-label="Open list of options"
-                class="euiFormControlLayoutCustomIcon euiFormControlLayoutCustomIcon--clickable"
-                data-test-subj="comboBoxToggleListButton"
-                disabled=""
-                tabindex="-1"
-                type="button"
-              >
-                <span
-                  aria-hidden="true"
-                  class="euiFormControlLayoutCustomIcon__icon"
-                  data-euiicon-type="arrowDown"
-                />
-              </button>
             </div>
           </div>
         </div>
@@ -667,6 +624,7 @@ Object {
           >
             <span
               class="euiComboBoxPill euiComboBoxPill--plainText"
+              data-test-subj="euiComboBoxPill"
             >
               machine.os.raw
             </span>
@@ -692,27 +650,13 @@ Object {
             </div>
           </div>
           <div
-            class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+            class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
           >
             <span
               aria-label="Loading"
               class="euiLoadingSpinner emotion-euiLoadingSpinner-m"
               role="progressbar"
             />
-            <button
-              aria-label="Open list of options"
-              class="euiFormControlLayoutCustomIcon euiFormControlLayoutCustomIcon--clickable"
-              data-test-subj="comboBoxToggleListButton"
-              disabled=""
-              tabindex="-1"
-              type="button"
-            >
-              <span
-                aria-hidden="true"
-                class="euiFormControlLayoutCustomIcon__icon"
-                data-euiicon-type="arrowDown"
-              />
-            </button>
           </div>
         </div>
       </div>

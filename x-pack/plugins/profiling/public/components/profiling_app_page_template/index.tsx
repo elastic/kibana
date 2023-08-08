@@ -10,7 +10,9 @@ import {
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHorizontalRule,
   EuiPageHeaderContentProps,
+  EuiPanel,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
@@ -94,10 +96,13 @@ export function ProfilingAppPageTemplate({
         },
       }}
     >
-      <EuiFlexGroup direction="column">
+      <EuiFlexGroup direction="column" style={{ maxWidth: '100%' }}>
         {!hideSearchBar && (
           <EuiFlexItem grow={false}>
-            <PrimaryProfilingSearchBar />
+            <EuiPanel hasShadow={false} color="subdued">
+              <PrimaryProfilingSearchBar />
+              <EuiHorizontalRule />
+            </EuiPanel>
           </EuiFlexItem>
         )}
         <EuiFlexItem>{children}</EuiFlexItem>

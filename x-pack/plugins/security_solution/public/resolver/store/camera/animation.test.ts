@@ -5,49 +5,37 @@
  * 2.0.
  */
 
-import type { Store, Reducer } from 'redux';
+import type { Store, Reducer, AnyAction } from 'redux';
 import { createStore } from 'redux';
-import { cameraReducer, cameraInitialState } from './reducer';
-import type { CameraState, Vector2 } from '../../types';
+import { cameraReducer } from './reducer';
+import type { AnalyzerById, Vector2 } from '../../types';
 import * as selectors from './selectors';
 import { animatePanning } from './methods';
 import { lerp } from '../../lib/math';
-import type { ResolverAction } from '../actions';
 import { panAnimationDuration } from './scaling_constants';
-
-type TestAction =
-  | ResolverAction
-  | {
-      readonly type: 'animatePanning';
-      readonly payload: {
-        /**
-         * The start time of the animation.
-         */
-        readonly time: number;
-        /**
-         * The duration of the animation.
-         */
-        readonly duration: number;
-        /**
-         * The target translation the camera will animate towards.
-         */
-        readonly targetTranslation: Vector2;
-      };
-    };
+import { EMPTY_RESOLVER } from '../helpers';
 
 describe('when the camera is created', () => {
-  let store: Store<CameraState, TestAction>;
+  let store: Store<AnalyzerById, AnyAction>;
+  const id = 'test-id';
   beforeEach(() => {
-    const testReducer: Reducer<CameraState, TestAction> = (
-      state = cameraInitialState(),
+    const testReducer: Reducer<AnalyzerById, AnyAction> = (
+      state = {
+        [id]: EMPTY_RESOLVER,
+      },
       action
-    ): CameraState => {
+    ): AnalyzerById => {
       // If the test action is fired, call the animatePanning method
       if (action.type === 'animatePanning') {
         const {
           payload: { time, targetTranslation, duration },
         } = action;
-        return animatePanning(state, time, targetTranslation, duration);
+        return {
+          [id]: {
+            ...state[id],
+            camera: animatePanning(state[id].camera, time, targetTranslation, duration),
+          },
+        };
       }
       return cameraReducer(state, action);
     };
@@ -55,17 +43,17 @@ describe('when the camera is created', () => {
   });
 
   it('should be at 0,0', () => {
-    expect(selectors.translation(store.getState())(0)).toEqual([0, 0]);
+    expect(selectors.translation(store.getState()[id].camera)(0)).toEqual([0, 0]);
   });
   it('should have scale of [1,1]', () => {
-    expect(selectors.scale(store.getState())(0)).toEqual([1, 1]);
+    expect(selectors.scale(store.getState()[id].camera)(0)).toEqual([1, 1]);
   });
 
   describe('When attempting to pan to current position and scale', () => {
     const duration = panAnimationDuration;
     const startTime = 0;
     beforeEach(() => {
-      const action: TestAction = {
+      const action: AnyAction = {
         type: 'animatePanning',
         payload: {
           time: startTime,
@@ -85,10 +73,10 @@ describe('when the camera is created', () => {
         const state = store.getState();
         for (let progress = 0; progress <= 1; progress += 0.1) {
           translationAtIntervals.push(
-            selectors.translation(state)(lerp(startTime, startTime + duration, progress))
+            selectors.translation(state[id].camera)(lerp(startTime, startTime + duration, progress))
           );
           scaleAtIntervals.push(
-            selectors.scale(state)(lerp(startTime, startTime + duration, progress))
+            selectors.scale(state[id].camera)(lerp(startTime, startTime + duration, progress))
           );
         }
       });
@@ -110,7 +98,7 @@ describe('when the camera is created', () => {
     beforeEach(() => {
       // The distance the camera moves must be nontrivial in order to trigger a scale animation
       targetTranslation = [1000, 1000];
-      const action: TestAction = {
+      const action: AnyAction = {
         type: 'animatePanning',
         payload: {
           time: startTime,
@@ -129,10 +117,10 @@ describe('when the camera is created', () => {
         const state = store.getState();
         for (let progress = 0; progress <= 1; progress += 0.1) {
           translationAtIntervals.push(
-            selectors.translation(state)(lerp(startTime, startTime + duration, progress))
+            selectors.translation(state[id].camera)(lerp(startTime, startTime + duration, progress))
           );
           scaleAtIntervals.push(
-            selectors.scale(state)(lerp(startTime, startTime + duration, progress))
+            selectors.scale(state[id].camera)(lerp(startTime, startTime + duration, progress))
           );
         }
       });

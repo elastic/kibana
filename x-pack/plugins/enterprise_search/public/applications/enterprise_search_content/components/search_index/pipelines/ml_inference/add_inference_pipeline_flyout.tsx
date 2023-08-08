@@ -146,11 +146,11 @@ export const AddInferencePipelineHorizontalSteps: React.FC = () => {
     isConfigureStepValid,
     isPipelineDataValid,
   } = useValues(MLInferenceLogic);
-  const { setAddInferencePipelineStep } = useActions(MLInferenceLogic);
+  const { onAddInferencePipelineStepChange } = useActions(MLInferenceLogic);
   const navSteps: EuiStepsHorizontalProps['steps'] = [
     {
       // Configure
-      onClick: () => setAddInferencePipelineStep(AddInferencePipelineSteps.Configuration),
+      onClick: () => onAddInferencePipelineStepChange(AddInferencePipelineSteps.Configuration),
       status: isConfigureStepValid ? 'complete' : 'disabled',
       title: i18n.translate(
         'xpack.enterpriseSearch.content.indices.transforms.addInferencePipelineModal.steps.configure.title',
@@ -163,7 +163,7 @@ export const AddInferencePipelineHorizontalSteps: React.FC = () => {
       // Fields
       onClick: () => {
         if (!isConfigureStepValid) return;
-        setAddInferencePipelineStep(AddInferencePipelineSteps.Fields);
+        onAddInferencePipelineStepChange(AddInferencePipelineSteps.Fields);
       },
       status: isConfigureStepValid ? (isPipelineDataValid ? 'complete' : 'incomplete') : 'disabled',
       title: i18n.translate(
@@ -177,7 +177,7 @@ export const AddInferencePipelineHorizontalSteps: React.FC = () => {
       // Test
       onClick: () => {
         if (!isPipelineDataValid) return;
-        setAddInferencePipelineStep(AddInferencePipelineSteps.Test);
+        onAddInferencePipelineStepChange(AddInferencePipelineSteps.Test);
       },
       status: isPipelineDataValid ? 'incomplete' : 'disabled',
       title: i18n.translate(
@@ -191,7 +191,7 @@ export const AddInferencePipelineHorizontalSteps: React.FC = () => {
       // Review
       onClick: () => {
         if (!isPipelineDataValid) return;
-        setAddInferencePipelineStep(AddInferencePipelineSteps.Review);
+        onAddInferencePipelineStepChange(AddInferencePipelineSteps.Review);
       },
       status: isPipelineDataValid ? 'incomplete' : 'disabled',
       title: i18n.translate(
@@ -227,7 +227,7 @@ export const AddInferencePipelineFooter: React.FC<
     isPipelineDataValid,
     isConfigureStepValid,
   } = useValues(MLInferenceLogic);
-  const { attachPipeline, createPipeline, setAddInferencePipelineStep } =
+  const { attachPipeline, createPipeline, onAddInferencePipelineStepChange } =
     useActions(MLInferenceLogic);
 
   const attachExistingPipeline = Boolean(modal.configuration.existingPipeline);
@@ -270,7 +270,9 @@ export const AddInferencePipelineFooter: React.FC<
           <EuiButtonEmpty
             flush="both"
             iconType="arrowLeft"
-            onClick={() => setAddInferencePipelineStep(previousStep as AddInferencePipelineSteps)}
+            onClick={() =>
+              onAddInferencePipelineStepChange(previousStep as AddInferencePipelineSteps)
+            }
           >
             {BACK_BUTTON_LABEL}
           </EuiButtonEmpty>
@@ -282,7 +284,7 @@ export const AddInferencePipelineFooter: React.FC<
             data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-addMlInference-continue`}
             iconType="arrowRight"
             iconSide="right"
-            onClick={() => setAddInferencePipelineStep(nextStep as AddInferencePipelineSteps)}
+            onClick={() => onAddInferencePipelineStepChange(nextStep as AddInferencePipelineSteps)}
             disabled={!isContinueButtonEnabled}
             fill
           >

@@ -563,3 +563,26 @@ test('returns schema structure', () => {
     { path: ['nested', 'uri'], type: 'string' },
   ]);
 });
+
+describe('#extendsDeep', () => {
+  const type = schema.object({ test: schema.object({ foo: schema.string() }) });
+
+  test('objects with unknown attributes are kept when extending with unknowns=allow', () => {
+    const allowSchema = type.extendsDeep({ unknowns: 'allow' });
+    const result = allowSchema.validate({ test: { foo: 'test', bar: 'test' } });
+    expect(result).toEqual({ test: { foo: 'test', bar: 'test' } });
+  });
+
+  test('objects with unknown attributes are dropped when extending with unknowns=ignore', () => {
+    const ignoreSchema = type.extendsDeep({ unknowns: 'ignore' });
+    const result = ignoreSchema.validate({ test: { foo: 'test', bar: 'test' } });
+    expect(result).toEqual({ test: { foo: 'test' } });
+  });
+
+  test('objects with unknown attributes fail validation when extending with unknowns=forbid', () => {
+    const forbidSchema = type.extendsDeep({ unknowns: 'forbid' });
+    expect(() =>
+      forbidSchema.validate({ test: { foo: 'test', bar: 'test' } })
+    ).toThrowErrorMatchingInlineSnapshot(`"[test.bar]: definition for this key is missing"`);
+  });
+});

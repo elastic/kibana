@@ -6,13 +6,16 @@
  */
 
 import type SuperTest from 'supertest';
+import { v4 as uuidv4 } from 'uuid';
 import {
   ExternalReferenceStorageType,
-  CommentType,
+  AttachmentType,
   Case,
-  CommentRequest,
-} from '@kbn/cases-plugin/common/api';
+  ExternalReferenceAttachmentPayload,
+  PersistableStateAttachmentPayload,
+} from '@kbn/cases-plugin/common/types/domain';
 import { expect } from 'expect';
+import { AttachmentRequest } from '@kbn/cases-plugin/common/types/api';
 import {
   deleteAllCaseItems,
   findCases,
@@ -47,6 +50,7 @@ const deleteLogStashDataView = async (
 export default ({ getPageObject, getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
   const header = getPageObject('header');
   const testSubjects = getService('testSubjects');
   const cases = getService('cases');
@@ -54,8 +58,11 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const es = getService('es');
   const common = getPageObject('common');
   const retry = getService('retry');
+  const dashboard = getPageObject('dashboard');
+  const lens = getPageObject('lens');
+  const listingTable = getService('listingTable');
 
-  const createAttachmentAndNavigate = async (attachment: CommentRequest) => {
+  const createAttachmentAndNavigate = async (attachment: AttachmentRequest) => {
     const caseData = await cases.api.createCase({
       title: `Registered attachment of type ${attachment.type}`,
     });
@@ -85,16 +92,10 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   describe('Attachment framework', () => {
     describe('External reference attachments', () => {
       let caseWithAttachment: Case;
+      const externalReferenceAttachment = getExternalReferenceAttachment();
 
       before(async () => {
-        caseWithAttachment = await createAttachmentAndNavigate({
-          type: CommentType.externalReference,
-          externalReferenceId: 'my-id',
-          externalReferenceStorage: { type: ExternalReferenceStorageType.elasticSearchDoc },
-          externalReferenceAttachmentTypeId: '.test',
-          externalReferenceMetadata: null,
-          owner: 'cases',
-        });
+        caseWithAttachment = await createAttachmentAndNavigate(externalReferenceAttachment);
       });
 
       after(async () => {
@@ -103,83 +104,12 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
       it('renders an external reference attachment type correctly', async () => {
         const attachmentId = caseWithAttachment?.comments?.[0].id;
-        await validateAttachment(CommentType.externalReference, attachmentId);
+        await validateAttachment(AttachmentType.externalReference, attachmentId);
         await testSubjects.existOrFail('test-attachment-content');
       });
     });
 
     describe('Persistable state attachments', () => {
-      const getLensState = (dataViewId: string) => ({
-        title: '',
-        visualizationType: 'lnsXY',
-        type: 'lens',
-        references: [
-          {
-            type: 'index-pattern',
-            id: dataViewId,
-            name: 'indexpattern-datasource-layer-85863a23-73a0-4e11-9774-70f77b9a5898',
-          },
-        ],
-        state: {
-          visualization: {
-            legend: { isVisible: true, position: 'right' },
-            valueLabels: 'hide',
-            fittingFunction: 'None',
-            axisTitlesVisibilitySettings: { x: true, yLeft: true, yRight: true },
-            tickLabelsVisibilitySettings: { x: true, yLeft: true, yRight: true },
-            labelsOrientation: { x: 0, yLeft: 0, yRight: 0 },
-            gridlinesVisibilitySettings: { x: true, yLeft: true, yRight: true },
-            preferredSeriesType: 'bar_stacked',
-            layers: [
-              {
-                layerId: '85863a23-73a0-4e11-9774-70f77b9a5898',
-                accessors: ['63810bd4-8481-4aab-822a-532d8513a8b1'],
-                position: 'top',
-                seriesType: 'bar_stacked',
-                showGridlines: false,
-                layerType: 'data',
-                xAccessor: 'ab807e89-c453-415b-8eb4-3986de52c923',
-              },
-            ],
-          },
-          query: { query: '', language: 'kuery' },
-          filters: [],
-          datasourceStates: {
-            formBased: {
-              layers: {
-                '85863a23-73a0-4e11-9774-70f77b9a5898': {
-                  columns: {
-                    'ab807e89-c453-415b-8eb4-3986de52c923': {
-                      label: '@timestamp',
-                      dataType: 'date',
-                      operationType: 'date_histogram',
-                      sourceField: '@timestamp',
-                      isBucketed: true,
-                      scale: 'interval',
-                      params: { interval: 'auto', includeEmptyRows: true, dropPartials: false },
-                    },
-                    '63810bd4-8481-4aab-822a-532d8513a8b1': {
-                      label: 'Median of id',
-                      dataType: 'number',
-                      operationType: 'median',
-                      sourceField: 'id',
-                      isBucketed: false,
-                      scale: 'ratio',
-                      params: { emptyAsNull: true },
-                    },
-                  },
-                  columnOrder: [
-                    'ab807e89-c453-415b-8eb4-3986de52c923',
-                    '63810bd4-8481-4aab-822a-532d8513a8b1',
-                  ],
-                  incompleteColumns: {},
-                },
-              },
-            },
-          },
-        },
-      });
-
       let caseWithAttachment: Case;
       let dataViewId = '';
 
@@ -188,12 +118,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         const res = await createLogStashDataView(supertest);
         dataViewId = res.data_view.id;
 
-        caseWithAttachment = await createAttachmentAndNavigate({
-          type: CommentType.persistableState,
-          persistableStateAttachmentTypeId: '.test',
-          persistableStateAttachmentState: getLensState(dataViewId),
-          owner: 'cases',
-        });
+        const persistableStateAttachment = getPersistableStateAttachment(dataViewId);
+        caseWithAttachment = await createAttachmentAndNavigate(persistableStateAttachment);
       });
 
       after(async () => {
@@ -204,9 +130,67 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
       it('renders a persistable attachment type correctly', async () => {
         const attachmentId = caseWithAttachment?.comments?.[0].id;
-        await validateAttachment(CommentType.persistableState, attachmentId);
+        await validateAttachment(AttachmentType.persistableState, attachmentId);
         await retry.waitFor(
-          'actions accordion to exist',
+          'persistable state to exist',
+          async () => await find.existsByCssSelector('.lnsExpressionRenderer')
+        );
+      });
+    });
+
+    describe('Multiple attachments', () => {
+      let originalCase: Case;
+      let dataViewId = '';
+
+      before(async () => {
+        await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
+        const res = await createLogStashDataView(supertest);
+        dataViewId = res.data_view.id;
+
+        originalCase = await cases.api.createCase({
+          title: 'Registering multiple attachments',
+        });
+
+        const externalReferenceAttachment = getExternalReferenceAttachment();
+        const persistableStateAttachment = getPersistableStateAttachment(dataViewId);
+
+        await cases.api.createAttachment({
+          caseId: originalCase.id,
+          params: externalReferenceAttachment,
+        });
+
+        await cases.api.createAttachment({
+          caseId: originalCase.id,
+          params: persistableStateAttachment,
+        });
+
+        await cases.navigation.navigateToApp();
+        await cases.casesTable.waitForCasesToBeListed();
+        await cases.casesTable.goToFirstListedCase();
+        await header.waitUntilLoadingHasFinished();
+      });
+
+      after(async () => {
+        await cases.api.deleteAllCases();
+        await deleteLogStashDataView(supertest, dataViewId);
+        await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
+      });
+
+      it('renders multiple attachment types correctly', async () => {
+        const theCase = await getCase({
+          supertest,
+          caseId: originalCase.id,
+          includeComments: true,
+        });
+
+        const externalRefAttachmentId = theCase?.comments?.[0].id;
+        const persistableStateAttachmentId = theCase?.comments?.[1].id;
+        await validateAttachment(AttachmentType.externalReference, externalRefAttachmentId);
+        await validateAttachment(AttachmentType.persistableState, persistableStateAttachmentId);
+
+        await testSubjects.existOrFail('test-attachment-content');
+        await retry.waitFor(
+          'persistable state to exist',
           async () => await find.existsByCssSelector('.lnsExpressionRenderer')
         );
       });
@@ -346,5 +330,180 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         });
       });
     });
+
+    describe('Lens visualization as persistable attachment', () => {
+      const myDashboardName = `My-dashboard-${uuidv4()}`;
+      before(async () => {
+        await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
+        await kibanaServer.importExport.load(
+          'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
+        );
+
+        await common.navigateToApp('dashboard');
+        await dashboard.preserveCrossAppState();
+        await dashboard.clickNewDashboard();
+
+        // adds lens visualization to dashboard, save and return
+        await lens.createAndAddLensFromDashboard({ title: `My lens visualization-${uuidv4()}` });
+
+        await dashboard.waitForRenderComplete();
+        await dashboard.saveDashboard(myDashboardName);
+      });
+
+      after(async () => {
+        await common.navigateToApp('dashboard');
+        await dashboard.preserveCrossAppState();
+
+        await listingTable.searchForItemWithName(myDashboardName);
+        await listingTable.checkListingSelectAllCheckbox();
+        await listingTable.clickDeleteSelected();
+
+        await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
+        await kibanaServer.importExport.unload(
+          'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
+        );
+      });
+
+      it('adds lens visualization to a new case from dashboard', async () => {
+        const caseTitle = 'case created from my dashboard with lens visualization';
+
+        await common.navigateToApp('dashboard');
+        await dashboard.preserveCrossAppState();
+        await dashboard.loadSavedDashboard(myDashboardName);
+
+        await testSubjects.click('embeddablePanelToggleMenuIcon');
+        await testSubjects.click('embeddablePanelMore-mainMenu');
+        await testSubjects.click('embeddablePanelAction-embeddable_addToNewCase');
+
+        await cases.create.createCase({
+          title: caseTitle,
+          description: 'test description',
+          owner: 'cases',
+        });
+        await testSubjects.click('create-case-submit');
+
+        await cases.common.expectToasterToContain(`${caseTitle} has been updated`);
+        await testSubjects.click('toaster-content-case-view-link');
+
+        const title = await find.byCssSelector('[data-test-subj="editable-title-header-value"]');
+        expect(await title.getVisibleText()).toEqual(caseTitle);
+
+        await testSubjects.existOrFail('comment-persistableState-.lens');
+      });
+
+      it('adds lens visualization to an existing case from dashboard', async () => {
+        const theCaseTitle = 'case already exists!!';
+        const theCase = await cases.api.createCase({
+          title: theCaseTitle,
+          description: 'This is a test case to verify existing action scenario!!',
+          owner: 'cases',
+        });
+
+        await common.navigateToApp('dashboard');
+        await dashboard.preserveCrossAppState();
+        await dashboard.loadSavedDashboard(myDashboardName);
+
+        await testSubjects.click('embeddablePanelToggleMenuIcon');
+        await testSubjects.click('embeddablePanelMore-mainMenu');
+        await testSubjects.click('embeddablePanelAction-embeddable_addToExistingCase');
+
+        await testSubjects.click(`cases-table-row-select-${theCase.id}`);
+
+        await cases.common.expectToasterToContain(`${theCaseTitle} has been updated`);
+        await testSubjects.click('toaster-content-case-view-link');
+
+        const title = await find.byCssSelector('[data-test-subj="editable-title-header-value"]');
+        expect(await title.getVisibleText()).toEqual(theCaseTitle);
+
+        await testSubjects.existOrFail('comment-persistableState-.lens');
+      });
+    });
   });
 };
+
+const getLensState = (dataViewId: string) => ({
+  title: '',
+  visualizationType: 'lnsXY',
+  type: 'lens',
+  references: [
+    {
+      type: 'index-pattern',
+      id: dataViewId,
+      name: 'indexpattern-datasource-layer-85863a23-73a0-4e11-9774-70f77b9a5898',
+    },
+  ],
+  state: {
+    visualization: {
+      legend: { isVisible: true, position: 'right' },
+      valueLabels: 'hide',
+      fittingFunction: 'None',
+      axisTitlesVisibilitySettings: { x: true, yLeft: true, yRight: true },
+      tickLabelsVisibilitySettings: { x: true, yLeft: true, yRight: true },
+      labelsOrientation: { x: 0, yLeft: 0, yRight: 0 },
+      gridlinesVisibilitySettings: { x: true, yLeft: true, yRight: true },
+      preferredSeriesType: 'bar_stacked',
+      layers: [
+        {
+          layerId: '85863a23-73a0-4e11-9774-70f77b9a5898',
+          accessors: ['63810bd4-8481-4aab-822a-532d8513a8b1'],
+          position: 'top',
+          seriesType: 'bar_stacked',
+          showGridlines: false,
+          layerType: 'data',
+          xAccessor: 'ab807e89-c453-415b-8eb4-3986de52c923',
+        },
+      ],
+    },
+    query: { query: '', language: 'kuery' },
+    filters: [],
+    datasourceStates: {
+      formBased: {
+        layers: {
+          '85863a23-73a0-4e11-9774-70f77b9a5898': {
+            columns: {
+              'ab807e89-c453-415b-8eb4-3986de52c923': {
+                label: '@timestamp',
+                dataType: 'date',
+                operationType: 'date_histogram',
+                sourceField: '@timestamp',
+                isBucketed: true,
+                scale: 'interval',
+                params: { interval: 'auto', includeEmptyRows: true, dropPartials: false },
+              },
+              '63810bd4-8481-4aab-822a-532d8513a8b1': {
+                label: 'Median of id',
+                dataType: 'number',
+                operationType: 'median',
+                sourceField: 'id',
+                isBucketed: false,
+                scale: 'ratio',
+                params: { emptyAsNull: true },
+              },
+            },
+            columnOrder: [
+              'ab807e89-c453-415b-8eb4-3986de52c923',
+              '63810bd4-8481-4aab-822a-532d8513a8b1',
+            ],
+            incompleteColumns: {},
+          },
+        },
+      },
+    },
+  },
+});
+
+const getExternalReferenceAttachment = (): ExternalReferenceAttachmentPayload => ({
+  type: AttachmentType.externalReference,
+  externalReferenceId: 'my-id',
+  externalReferenceStorage: { type: ExternalReferenceStorageType.elasticSearchDoc },
+  externalReferenceAttachmentTypeId: '.test',
+  externalReferenceMetadata: null,
+  owner: 'cases',
+});
+
+const getPersistableStateAttachment = (dataViewId: string): PersistableStateAttachmentPayload => ({
+  type: AttachmentType.persistableState,
+  persistableStateAttachmentTypeId: '.test',
+  persistableStateAttachmentState: getLensState(dataViewId),
+  owner: 'cases',
+});

@@ -9,13 +9,13 @@ import { assertUnreachable } from '../../../../../../../../common/utility_types'
 import type {
   ThreeVersionsOf,
   ThreeWayDiff,
-} from '../../../../../../../../common/detection_engine/prebuilt_rules/model/diff/three_way_diff/three_way_diff';
+} from '../../../../../../../../common/api/detection_engine/prebuilt_rules';
 import {
   determineDiffOutcome,
   determineIfValueCanUpdate,
   ThreeWayDiffOutcome,
-} from '../../../../../../../../common/detection_engine/prebuilt_rules/model/diff/three_way_diff/three_way_diff_outcome';
-import { ThreeWayMergeOutcome } from '../../../../../../../../common/detection_engine/prebuilt_rules/model/diff/three_way_diff/three_way_merge_outcome';
+  ThreeWayMergeOutcome,
+} from '../../../../../../../../common/api/detection_engine/prebuilt_rules';
 
 export const simpleDiffAlgorithm = <TValue>(
   versions: ThreeVersionsOf<TValue>

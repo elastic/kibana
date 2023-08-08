@@ -6,7 +6,7 @@
  */
 
 import type { List } from '@kbn/securitysolution-io-ts-list-types';
-import type { RuleCreateProps } from '../../../../../common/detection_engine/rule_schema';
+import type { RuleCreateProps } from '../../../../../common/api/detection_engine/model/rule_schema';
 import type { Rule } from '../../../rule_management/logic';
 import {
   getListMock,
@@ -84,6 +84,12 @@ describe('helpers', () => {
       const result = getTimeTypeValue('random');
 
       expect(result).toEqual({ unit: 'ms', value: 0 });
+    });
+
+    test('returns timeObj with unit of d and value 5 when time is 5d ', () => {
+      const result = getTimeTypeValue('5d');
+
+      expect(result).toEqual({ unit: 'd', value: 5 });
     });
   });
 

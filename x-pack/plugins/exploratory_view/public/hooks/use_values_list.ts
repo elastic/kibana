@@ -9,8 +9,8 @@ import { capitalize, uniqBy } from 'lodash';
 import { useEffect, useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import type { ESFilter } from '@kbn/es-types';
+import { useEsSearch, createEsParams } from '@kbn/observability-shared-plugin/public';
 import { IInspectorInfo } from '@kbn/data-plugin/common';
-import { createEsParams, useEsSearch } from './use_es_search';
 import { TRANSACTION_URL } from '../components/shared/exploratory_view/configurations/constants/elasticsearch_fieldnames';
 
 export interface Props {

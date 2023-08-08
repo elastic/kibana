@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 import type { ChromeBadge, ChromeBreadcrumb } from '@kbn/core-chrome-browser';
@@ -41,6 +41,8 @@ const createStartContractMock = () => {
       getCenter$: jest.fn(),
       getRight$: jest.fn(),
       getExtension$: jest.fn(),
+      setHelpMenuLinks: jest.fn(),
+      getHelpMenuLinks$: jest.fn(),
     },
     setIsVisible: jest.fn(),
     getIsVisible$: jest.fn(),
@@ -54,7 +56,9 @@ const createStartContractMock = () => {
     registerGlobalHelpExtensionMenuLink: jest.fn(),
     getHelpExtension$: jest.fn(),
     setHelpExtension: jest.fn(),
+    setHelpMenuLinks: jest.fn(),
     setHelpSupportUrl: jest.fn(),
+    getHelpSupportUrl$: jest.fn(() => of('https://www.elastic.co/support')),
     getIsNavDrawerLocked$: jest.fn(),
     getCustomNavLink$: jest.fn(),
     setCustomNavLink: jest.fn(),
@@ -64,8 +68,12 @@ const createStartContractMock = () => {
     getChromeStyle$: jest.fn(),
     setChromeStyle: jest.fn(),
     project: {
+      setHome: jest.fn(),
+      setProjectsUrl: jest.fn(),
       setNavigation: jest.fn(),
       setSideNavComponent: jest.fn(),
+      setBreadcrumbs: jest.fn(),
+      getActiveNavigationNodes$: jest.fn(),
     },
   };
   startContract.navLinks.getAll.mockReturnValue([]);
@@ -85,6 +93,7 @@ const createStartContractMock = () => {
 type ChromeServiceContract = PublicMethodsOf<ChromeService>;
 const createMock = () => {
   const mocked: jest.Mocked<ChromeServiceContract> = {
+    setup: jest.fn(),
     start: jest.fn(),
     stop: jest.fn(),
   };

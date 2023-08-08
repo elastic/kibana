@@ -25,6 +25,7 @@ export {
   KEEP_POLICIES_UP_TO_DATE_PACKAGES,
   AUTO_UPGRADE_POLICIES_PACKAGES,
   LOCATORS_IDS,
+  FLEET_ENROLLMENT_API_PREFIX,
 } from '../../common/constants';
 
 export * from './page_paths';

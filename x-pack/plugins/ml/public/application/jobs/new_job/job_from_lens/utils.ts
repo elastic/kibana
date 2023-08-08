@@ -17,9 +17,9 @@ import type { SerializableRecord } from '@kbn/utility-types';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { layerTypes } from '@kbn/lens-plugin/public';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
+import { ML_JOB_AGGREGATION } from '@kbn/ml-anomaly-utils';
 
 import { ML_PAGES, ML_APP_LOCATOR } from '../../../../../common/constants/locator';
-import { ML_JOB_AGGREGATION } from '../../../../../common/constants/aggregation_types';
 
 export const COMPATIBLE_SERIES_TYPES = [
   'line',

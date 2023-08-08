@@ -9,7 +9,9 @@
 import _ from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 
+// TODO Remove this usage of the SavedObjectsStart contract.
 import { SavedObjectsStart } from '@kbn/core/public';
+
 import {
   ViewMode,
   PanelState,
@@ -150,6 +152,7 @@ export class ClonePanelAction implements Action<ClonePanelActionContext> {
     embeddable: IEmbeddable,
     objectIdToClone: string
   ): Promise<string> {
+    // TODO: Remove this entire functionality. See https://github.com/elastic/kibana/issues/158632 for more info.
     const savedObjectToClone = await this.savedObjects.client.get<SavedObject>(
       embeddable.type,
       objectIdToClone
@@ -183,6 +186,7 @@ export class ClonePanelAction implements Action<ClonePanelActionContext> {
           title: newTitle,
           hidePanelTitles: panelToClone.explicitInput.hidePanelTitles,
         },
+        version: panelToClone.version,
       };
     } else {
       panelState = {
@@ -191,7 +195,10 @@ export class ClonePanelAction implements Action<ClonePanelActionContext> {
           ...panelToClone.explicitInput,
           id: uuidv4(),
         },
+        version: panelToClone.version,
       };
+
+      // TODO Remove the entire `addCloneToLibrary` section from here.
       if (panelToClone.explicitInput.savedObjectId) {
         const clonedSavedObjectId = await this.addCloneToLibrary(
           embeddable,

@@ -7,6 +7,8 @@
 
 import React, { useCallback, useMemo } from 'react';
 import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { NONE_CONNECTOR_ID } from '../../../common/constants';
+import { CaseSeverity } from '../../../common/types/domain';
 import type { FormProps } from './schema';
 import { schema } from './schema';
 import { getNoneConnector, normalizeActionConnector } from '../configure_cases/utils';
@@ -14,13 +16,16 @@ import { usePostCase } from '../../containers/use_post_case';
 import { usePostPushToService } from '../../containers/use_post_push_to_service';
 
 import type { CaseUI } from '../../containers/types';
-import type { CasePostRequest } from '../../../common/api';
-import { CaseSeverity, NONE_CONNECTOR_ID } from '../../../common/api';
+import type { CasePostRequest } from '../../../common/types/api';
 import type { UseCreateAttachments } from '../../containers/use_create_attachments';
 import { useCreateAttachments } from '../../containers/use_create_attachments';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { useCasesFeatures } from '../../common/use_cases_features';
-import { getConnectorById } from '../utils';
+import {
+  getConnectorById,
+  getConnectorsFormDeserializer,
+  getConnectorsFormSerializer,
+} from '../utils';
 import type { CaseAttachmentsWithoutOwner } from '../../types';
 import { useGetSupportedActionConnectors } from '../../containers/configure/use_get_supported_action_connectors';
 import { useCreateCaseWithAttachmentsTransaction } from '../../common/apm/use_cases_transactions';
@@ -40,7 +45,7 @@ const initialCaseValue: FormProps = {
 interface Props {
   afterCaseCreated?: (
     theCase: CaseUI,
-    createAttachments: UseCreateAttachments['createAttachments']
+    createAttachments: UseCreateAttachments['mutateAsync']
   ) => Promise<void>;
   children?: JSX.Element | JSX.Element[];
   onSuccess?: (theCase: CaseUI) => void;
@@ -60,8 +65,8 @@ export const FormContext: React.FC<Props> = ({
   const { owner, appId } = useCasesContext();
   const { isSyncAlertsEnabled } = useCasesFeatures();
   const { mutateAsync: postCase } = usePostCase();
-  const { createAttachments } = useCreateAttachments();
-  const { pushCaseToExternalService } = usePostPushToService();
+  const { mutateAsync: createAttachments } = useCreateAttachments();
+  const { mutateAsync: pushCaseToExternalService } = usePostPushToService();
   const { startTransaction } = useCreateCaseWithAttachmentsTransaction();
 
   const submitCase = useCallback(
@@ -98,7 +103,7 @@ export const FormContext: React.FC<Props> = ({
           await createAttachments({
             caseId: theCase.id,
             caseOwner: theCase.owner,
-            data: attachments,
+            attachments,
           });
         }
 
@@ -138,6 +143,8 @@ export const FormContext: React.FC<Props> = ({
     options: { stripEmptyFields: false },
     schema,
     onSubmit: submitCase,
+    serializer: getConnectorsFormSerializer,
+    deserializer: getConnectorsFormDeserializer,
   });
 
   const childrenWithExtraProp = useMemo(

@@ -10,23 +10,53 @@ import React, { useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiHorizontalRule } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import { EuiPageBody } from '@elastic/eui';
+import { CardsNavigation } from '@kbn/management-cards-navigation';
+
+import { useAppContext } from '../management_app/management_context';
 
 interface ManagementLandingPageProps {
-  version: string;
   onAppMounted: (id: string) => void;
   setBreadcrumbs: () => void;
 }
 
 export const ManagementLandingPage = ({
-  version,
   setBreadcrumbs,
   onAppMounted,
 }: ManagementLandingPageProps) => {
+  const {
+    appBasePath,
+    sections,
+    kibanaVersion,
+    cardsNavigationConfig,
+    landingPageRedirect,
+    navigateToUrl,
+    basePath,
+  } = useAppContext();
   setBreadcrumbs();
+
+  // Redirect the user to the configured landing page if there is one
+  useEffect(() => {
+    if (landingPageRedirect) {
+      navigateToUrl(basePath.prepend(landingPageRedirect));
+    }
+  }, [landingPageRedirect, navigateToUrl, basePath]);
 
   useEffect(() => {
     onAppMounted('');
   }, [onAppMounted]);
+
+  if (cardsNavigationConfig?.enabled) {
+    return (
+      <EuiPageBody restrictWidth={true} data-test-subj="cards-navigation-page">
+        <CardsNavigation
+          sections={sections}
+          appBasePath={appBasePath}
+          hideLinksTo={cardsNavigationConfig?.hideLinksTo}
+        />
+      </EuiPageBody>
+    );
+  }
 
   return (
     <KibanaPageTemplate.EmptyPrompt
@@ -37,7 +67,7 @@ export const ManagementLandingPage = ({
           <FormattedMessage
             id="management.landing.header"
             defaultMessage="Welcome to Stack Management {version}"
-            values={{ version }}
+            values={{ version: kibanaVersion }}
           />
         </h1>
       }

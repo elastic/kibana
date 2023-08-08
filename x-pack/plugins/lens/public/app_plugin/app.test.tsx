@@ -12,7 +12,7 @@ import { act } from 'react-dom/test-utils';
 import { App } from './app';
 import { LensAppProps, LensAppServices } from './types';
 import { EditorFrameInstance, EditorFrameProps } from '../types';
-import { Document } from '../persistence';
+import { Document, SavedObjectIndexStore } from '../persistence';
 import {
   visualizationMap,
   datasourceMap,
@@ -87,6 +87,11 @@ describe('Lens App', () => {
       topNavMenuEntryGenerators: [],
       theme$: new Observable(),
       coreStart: coreMock.createStart(),
+      savedObjectStore: {
+        save: jest.fn(),
+        load: jest.fn(),
+        search: jest.fn(),
+      } as unknown as SavedObjectIndexStore,
     };
   }
 

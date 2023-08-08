@@ -24,4 +24,4 @@ enable_vr = false
 use_kerberos = false
 
 target_os = "linux"
-# target_cpu is added at build timeure a minimal build
+# target_cpu is added at build time

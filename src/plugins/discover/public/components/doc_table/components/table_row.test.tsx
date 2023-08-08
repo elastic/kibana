@@ -17,9 +17,9 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { discoverServiceMock } from '../../../__mocks__/services';
 import { DocViewer } from '../../../services/doc_views/components/doc_viewer';
 
-import { DOC_HIDE_TIME_COLUMN_SETTING, MAX_DOC_FIELDS_DISPLAYED } from '../../../../common';
-import { buildDataTableRecord } from '../../../utils/build_data_record';
-import { EsHitRecord } from '../../../types';
+import { DOC_HIDE_TIME_COLUMN_SETTING, MAX_DOC_FIELDS_DISPLAYED } from '@kbn/discover-utils';
+import { buildDataTableRecord } from '@kbn/discover-utils';
+import type { EsHitRecord } from '@kbn/discover-utils/types';
 
 jest.mock('../utils/row_formatter', () => {
   const originalModule = jest.requireActual('../utils/row_formatter');
@@ -131,6 +131,18 @@ describe('Doc table row component', () => {
       expect(findTestSubject(component, 'docTableRowDetailsTitle').exists()).toBeFalsy();
       toggleButton.simulate('click');
       expect(findTestSubject(component, 'docTableRowDetailsTitle').exists()).toBeTruthy();
+    });
+
+    it('should hide the single/surrounding views for text based languages', () => {
+      const props = {
+        ...defaultProps,
+        isPlainRecord: true,
+      };
+      const component = mountComponent(props);
+      const toggleButton = findTestSubject(component, 'docTableExpandToggleColumn');
+      toggleButton.simulate('click');
+      expect(findTestSubject(component, 'docTableRowDetailsTitle').text()).toBe('Expanded row');
+      expect(findTestSubject(component, 'docTableRowAction').length).toBeFalsy();
     });
   });
 });

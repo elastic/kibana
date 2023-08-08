@@ -10,6 +10,7 @@ import type { SerializableRecord } from '@kbn/utility-types';
 import type { LocatorDefinition } from '@kbn/share-plugin/public';
 import type { RuleStatus } from '@kbn/triggers-actions-ui-plugin/public';
 import { rulesLocatorID } from '../../common';
+import { RULES_PATH } from '../../common/locators/paths';
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type RulesParams = {
@@ -21,8 +22,6 @@ export type RulesParams = {
 };
 
 export interface RulesLocatorParams extends RulesParams, SerializableRecord {}
-
-export const RULES_PATH = '/alerts/rules';
 
 export class RulesLocatorDefinition implements LocatorDefinition<RulesLocatorParams> {
   public readonly id = rulesLocatorID;

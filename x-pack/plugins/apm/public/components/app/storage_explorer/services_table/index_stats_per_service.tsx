@@ -12,9 +12,11 @@ import {
   EuiPanel,
   EuiTitle,
   EuiSpacer,
+  EuiLink,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ValuesType } from 'utility-types';
+import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import {
   asDynamicBytes,
@@ -23,6 +25,7 @@ import {
 import { FETCH_STATUS, isPending } from '../../../../hooks/use_fetcher';
 import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { SizeLabel } from './size_label';
+import { getIndexManagementHref } from '../get_storage_explorer_links';
 
 type StorageExplorerIndicesStats =
   APIReturnType<'GET /internal/apm/services/{serviceName}/storage_details'>['indicesStats'];
@@ -33,6 +36,8 @@ interface Props {
 }
 
 export function IndexStatsPerService({ indicesStats, status }: Props) {
+  const { core } = useApmPluginContext();
+
   const columns: Array<
     EuiBasicTableColumn<ValuesType<StorageExplorerIndicesStats>>
   > = [
@@ -84,7 +89,15 @@ export function IndexStatsPerService({ indicesStats, status }: Props) {
           defaultMessage: 'Data stream',
         }
       ),
-      render: (_, { dataStream }) => dataStream ?? NOT_AVAILABLE_LABEL,
+      render: (_, { dataStream }) =>
+        (
+          <EuiLink
+            data-test-subj="storageExplorerIndexManagementDataStreamLink"
+            href={getIndexManagementHref(core, dataStream)}
+          >
+            {dataStream}
+          </EuiLink>
+        ) ?? NOT_AVAILABLE_LABEL,
       sortable: true,
     },
     {
@@ -117,7 +130,7 @@ export function IndexStatsPerService({ indicesStats, status }: Props) {
           tableCaption={i18n.translate(
             'xpack.apm.storageExplorer.indicesStats.table.caption',
             {
-              defaultMessage: 'Storage explorer indices breakdown',
+              defaultMessage: 'Storage Explorer indices breakdown',
             }
           )}
           items={indicesStats}

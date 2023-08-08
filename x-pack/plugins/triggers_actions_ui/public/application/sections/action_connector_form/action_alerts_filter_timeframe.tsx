@@ -20,8 +20,8 @@ import {
   EuiComboBox,
 } from '@elastic/eui';
 import deepEqual from 'fast-deep-equal';
-import { AlertsFilterTimeframe, IsoWeekday } from '@kbn/alerting-plugin/common';
-import { I18N_WEEKDAY_OPTIONS_DDD, ISO_WEEKDAYS } from '../../../common/constants';
+import { AlertsFilterTimeframe, ISO_WEEKDAYS, IsoWeekday } from '@kbn/alerting-plugin/common';
+import { I18N_WEEKDAY_OPTIONS_DDD } from '../../../common/constants';
 
 interface ActionAlertsFilterTimeframeProps {
   state?: AlertsFilterTimeframe;
@@ -49,11 +49,11 @@ const useDefaultTimezone = () => {
 const useTimeframe = (initialTimeframe?: AlertsFilterTimeframe) => {
   const timezone = useDefaultTimezone();
   const DEFAULT_TIMEFRAME = {
-    days: ISO_WEEKDAYS,
+    days: [],
     timezone,
     hours: {
       start: '00:00',
-      end: '23:59',
+      end: '00:00',
     },
   };
   return useState<AlertsFilterTimeframe>(initialTimeframe || DEFAULT_TIMEFRAME);
@@ -146,7 +146,7 @@ export const ActionAlertsFilterTimeframe: React.FC<ActionAlertsFilterTimeframePr
         label={i18n.translate(
           'xpack.triggersActionsUI.sections.actionTypeForm.ActionAlertsFilterTimeframeToggleLabel',
           {
-            defaultMessage: 'if alert is generated during timeframe',
+            defaultMessage: 'If alert is generated during timeframe',
           }
         )}
         checked={timeframeEnabled}

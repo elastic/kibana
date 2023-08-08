@@ -30,8 +30,14 @@ export const openRiskTableFilterAndSelectTheLowOption = () => {
   cy.get(HOST_BY_RISK_TABLE_FILTER_LOW).click();
 };
 
-export const removeCriticalFilter = () => {
+export const removeLowFilterAndCloseRiskTableFilter = () => {
+  cy.get(HOST_BY_RISK_TABLE_FILTER_LOW).click();
+  cy.get(HOST_BY_RISK_TABLE_FILTER).first().click();
+};
+
+export const removeCriticalFilterAndCloseRiskTableFilter = () => {
   cy.get(HOST_BY_RISK_TABLE_FILTER_CRITICAL).click();
+  cy.get(HOST_BY_RISK_TABLE_FILTER).first().click();
 };
 
 export const selectFiveItemsPerPageOption = () => {

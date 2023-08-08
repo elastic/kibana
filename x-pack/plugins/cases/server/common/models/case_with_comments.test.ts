@@ -5,39 +5,22 @@
  * 2.0.
  */
 
-import type { AttributesTypeAlerts } from '../../../common/api';
+import type { AlertAttachmentAttributes } from '../../../common/types/domain';
 import type { SavedObject } from '@kbn/core-saved-objects-api-server';
-import { CommentType, SECURITY_SOLUTION_OWNER } from '../../../common';
 import { createCasesClientMockArgs } from '../../client/mocks';
-import { mockCaseComments, mockCases } from '../../mocks';
+import { alertComment, comment, mockCaseComments, mockCases, multipleAlert } from '../../mocks';
 import { CaseCommentModel } from './case_with_comments';
+import { MAX_PERSISTABLE_STATE_AND_EXTERNAL_REFERENCES } from '../../../common/constants';
+import {
+  commentExternalReference,
+  commentFileExternalReference,
+  commentPersistableState,
+} from '../../client/cases/mock';
 
 describe('CaseCommentModel', () => {
   const theCase = mockCases[0];
   const clientArgs = createCasesClientMockArgs();
   const createdDate = '2023-04-07T12:18:36.941Z';
-  const userComment = {
-    comment: 'Wow, good luck catching that bad meanie!',
-    type: CommentType.user as const,
-    owner: SECURITY_SOLUTION_OWNER,
-  };
-
-  const singleAlert = {
-    type: CommentType.alert as const,
-    owner: SECURITY_SOLUTION_OWNER,
-    alertId: 'test-id-1',
-    index: 'test-index-1',
-    rule: {
-      id: 'rule-id-1',
-      name: 'rule-name-1',
-    },
-  };
-
-  const multipleAlert = {
-    ...singleAlert,
-    alertId: ['test-id-3', 'test-id-4', 'test-id-5'],
-    index: ['test-index-3', 'test-index-4', 'test-index-5'],
-  };
 
   clientArgs.services.caseService.getCase.mockResolvedValue(theCase);
   clientArgs.services.caseService.patchCase.mockResolvedValue(theCase);
@@ -65,7 +48,7 @@ describe('CaseCommentModel', () => {
     it('does not remove comments when filtering out duplicate alerts', async () => {
       await model.createComment({
         id: 'comment-1',
-        commentReq: userComment,
+        commentReq: comment,
         createdDate,
       });
 
@@ -74,7 +57,7 @@ describe('CaseCommentModel', () => {
           Array [
             Object {
               "attributes": Object {
-                "comment": "Wow, good luck catching that bad meanie!",
+                "comment": "a comment",
                 "created_at": "2023-04-07T12:18:36.941Z",
                 "created_by": Object {
                   "email": "damaged_raccoon@elastic.co",
@@ -107,7 +90,7 @@ describe('CaseCommentModel', () => {
     it('does not remove alerts not attached to the case', async () => {
       await model.createComment({
         id: 'comment-1',
-        commentReq: singleAlert,
+        commentReq: alertComment,
         createdDate,
       });
 
@@ -117,7 +100,7 @@ describe('CaseCommentModel', () => {
             Object {
               "attributes": Object {
                 "alertId": Array [
-                  "test-id-1",
+                  "alert-id-1",
                 ],
                 "created_at": "2023-04-07T12:18:36.941Z",
                 "created_by": Object {
@@ -127,7 +110,7 @@ describe('CaseCommentModel', () => {
                   "username": "damaged_raccoon",
                 },
                 "index": Array [
-                  "test-index-1",
+                  "alert-index-1",
                 ],
                 "owner": "securitySolution",
                 "pushed_at": null,
@@ -279,16 +262,62 @@ describe('CaseCommentModel', () => {
 
     it('does not create attachments if the alert is attached to the case', async () => {
       clientArgs.services.attachmentService.getter.getAllAlertIds.mockResolvedValueOnce(
-        new Set(['test-id-1'])
+        new Set(['alert-id-1'])
       );
 
       await model.createComment({
         id: 'comment-1',
-        commentReq: singleAlert,
+        commentReq: alertComment,
         createdDate,
       });
 
       expect(clientArgs.services.attachmentService.create).not.toHaveBeenCalled();
+    });
+
+    describe('validation', () => {
+      clientArgs.services.attachmentService.countPersistableStateAndExternalReferenceAttachments.mockResolvedValue(
+        MAX_PERSISTABLE_STATE_AND_EXTERNAL_REFERENCES
+      );
+
+      afterAll(() => {
+        jest.clearAllMocks();
+      });
+
+      it('throws if limit is reached when creating persistable state attachment', async () => {
+        await expect(
+          model.createComment({
+            id: 'comment-1',
+            commentReq: commentPersistableState,
+            createdDate,
+          })
+        ).rejects.toThrow(
+          `Case has reached the maximum allowed number (${MAX_PERSISTABLE_STATE_AND_EXTERNAL_REFERENCES}) of attached persistable state and external reference attachments.`
+        );
+      });
+
+      it('throws if limit is reached when creating external reference', async () => {
+        await expect(
+          model.createComment({
+            id: 'comment-1',
+            commentReq: commentExternalReference,
+            createdDate,
+          })
+        ).rejects.toThrow(
+          `Case has reached the maximum allowed number (${MAX_PERSISTABLE_STATE_AND_EXTERNAL_REFERENCES}) of attached persistable state and external reference attachments.`
+        );
+      });
+
+      it('does not throw if creating a file external reference and the limit is reached', async () => {
+        clientArgs.fileService.find.mockResolvedValue({ total: 0, files: [] });
+
+        await expect(
+          model.createComment({
+            id: 'comment-1',
+            commentReq: commentFileExternalReference,
+            createdDate,
+          })
+        ).resolves.not.toThrow();
+      });
     });
   });
 
@@ -298,11 +327,11 @@ describe('CaseCommentModel', () => {
         attachments: [
           {
             id: 'comment-1',
-            ...userComment,
+            ...comment,
           },
           {
             id: 'comment-2',
-            ...singleAlert,
+            ...alertComment,
           },
           {
             id: 'comment-3',
@@ -314,17 +343,18 @@ describe('CaseCommentModel', () => {
       const attachments =
         clientArgs.services.attachmentService.bulkCreate.mock.calls[0][0].attachments;
 
-      const singleAlertCall = attachments[1] as SavedObject<AttributesTypeAlerts>;
-      const multipleAlertsCall = attachments[2] as SavedObject<AttributesTypeAlerts>;
+      const singleAlertCall = attachments[1] as SavedObject<AlertAttachmentAttributes>;
+      const multipleAlertsCall = attachments[2] as SavedObject<AlertAttachmentAttributes>;
 
       expect(attachments.length).toBe(3);
       expect(attachments[0].attributes.type).toBe('user');
       expect(attachments[1].attributes.type).toBe('alert');
       expect(attachments[2].attributes.type).toBe('alert');
 
-      expect(singleAlertCall.attributes.alertId).toEqual(['test-id-1']);
-      expect(singleAlertCall.attributes.index).toEqual(['test-index-1']);
+      expect(singleAlertCall.attributes.alertId).toEqual(['alert-id-1']);
+      expect(singleAlertCall.attributes.index).toEqual(['alert-index-1']);
 
+      // test-id-4 is omitted because it is returned by getAllAlertIds, see the top of this file
       expect(multipleAlertsCall.attributes.alertId).toEqual(['test-id-3', 'test-id-5']);
       expect(multipleAlertsCall.attributes.index).toEqual(['test-index-3', 'test-index-5']);
     });
@@ -334,18 +364,18 @@ describe('CaseCommentModel', () => {
         attachments: [
           {
             id: 'comment-1',
-            ...singleAlert,
+            ...alertComment,
           },
         ],
       });
 
       const attachments = clientArgs.services.attachmentService.bulkCreate.mock.calls[0][0]
-        .attachments as Array<SavedObject<AttributesTypeAlerts>>;
+        .attachments as Array<SavedObject<AlertAttachmentAttributes>>;
 
       expect(attachments.length).toBe(1);
       expect(attachments[0].attributes.type).toBe('alert');
-      expect(attachments[0].attributes.alertId).toEqual(['test-id-1']);
-      expect(attachments[0].attributes.index).toEqual(['test-index-1']);
+      expect(attachments[0].attributes.alertId).toEqual(['alert-id-1']);
+      expect(attachments[0].attributes.index).toEqual(['alert-index-1']);
     });
 
     it('remove alerts attached to the case', async () => {
@@ -359,7 +389,7 @@ describe('CaseCommentModel', () => {
       });
 
       const attachments = clientArgs.services.attachmentService.bulkCreate.mock.calls[0][0]
-        .attachments as Array<SavedObject<AttributesTypeAlerts>>;
+        .attachments as Array<SavedObject<AlertAttachmentAttributes>>;
 
       expect(attachments.length).toBe(1);
       expect(attachments[0].attributes.type).toBe('alert');
@@ -382,7 +412,7 @@ describe('CaseCommentModel', () => {
       });
 
       const attachments = clientArgs.services.attachmentService.bulkCreate.mock.calls[0][0]
-        .attachments as Array<SavedObject<AttributesTypeAlerts>>;
+        .attachments as Array<SavedObject<AlertAttachmentAttributes>>;
 
       expect(attachments.length).toBe(1);
       expect(attachments[0].attributes.type).toBe('alert');
@@ -414,7 +444,7 @@ describe('CaseCommentModel', () => {
 
       await model.createComment({
         id: 'comment-1',
-        commentReq: singleAlert,
+        commentReq: alertComment,
         createdDate,
       });
 
@@ -426,15 +456,15 @@ describe('CaseCommentModel', () => {
         attachments: [
           {
             id: 'comment-1',
-            ...userComment,
+            ...comment,
           },
           {
             id: 'comment-2',
-            ...singleAlert,
+            ...alertComment,
           },
           {
             id: 'comment-3',
-            ...singleAlert,
+            ...alertComment,
           },
           {
             id: 'comment-4',
@@ -450,16 +480,16 @@ describe('CaseCommentModel', () => {
       const attachments =
         clientArgs.services.attachmentService.bulkCreate.mock.calls[0][0].attachments;
 
-      const singleAlertCall = attachments[1] as SavedObject<AttributesTypeAlerts>;
-      const multipleAlertsCall = attachments[2] as SavedObject<AttributesTypeAlerts>;
+      const singleAlertCall = attachments[1] as SavedObject<AlertAttachmentAttributes>;
+      const multipleAlertsCall = attachments[2] as SavedObject<AlertAttachmentAttributes>;
 
       expect(attachments.length).toBe(3);
       expect(attachments[0].attributes.type).toBe('user');
       expect(attachments[1].attributes.type).toBe('alert');
       expect(attachments[2].attributes.type).toBe('alert');
 
-      expect(singleAlertCall.attributes.alertId).toEqual(['test-id-1']);
-      expect(singleAlertCall.attributes.index).toEqual(['test-index-1']);
+      expect(singleAlertCall.attributes.alertId).toEqual(['alert-id-1']);
+      expect(singleAlertCall.attributes.index).toEqual(['alert-index-1']);
 
       expect(multipleAlertsCall.attributes.alertId).toEqual(['test-id-3', 'test-id-5']);
       expect(multipleAlertsCall.attributes.index).toEqual(['test-index-3', 'test-index-5']);
@@ -470,17 +500,17 @@ describe('CaseCommentModel', () => {
         attachments: [
           {
             id: 'comment-1',
-            ...userComment,
+            ...comment,
           },
           {
             id: 'comment-2',
-            ...singleAlert,
+            ...alertComment,
           },
           {
             id: 'comment-3',
             ...multipleAlert,
-            alertId: ['test-id-1', 'test-id-2'],
-            index: ['test-index-1', 'test-index-2'],
+            alertId: ['alert-id-1', 'test-id-2'],
+            index: ['alert-index-1', 'test-index-2'],
           },
           {
             id: 'comment-4',
@@ -494,9 +524,9 @@ describe('CaseCommentModel', () => {
       const attachments =
         clientArgs.services.attachmentService.bulkCreate.mock.calls[0][0].attachments;
 
-      const alertOne = attachments[1] as SavedObject<AttributesTypeAlerts>;
-      const alertTwo = attachments[2] as SavedObject<AttributesTypeAlerts>;
-      const alertThree = attachments[3] as SavedObject<AttributesTypeAlerts>;
+      const alertOne = attachments[1] as SavedObject<AlertAttachmentAttributes>;
+      const alertTwo = attachments[2] as SavedObject<AlertAttachmentAttributes>;
+      const alertThree = attachments[3] as SavedObject<AlertAttachmentAttributes>;
 
       expect(attachments.length).toBe(4);
       expect(attachments[0].attributes.type).toBe('user');
@@ -504,29 +534,30 @@ describe('CaseCommentModel', () => {
       expect(attachments[2].attributes.type).toBe('alert');
       expect(attachments[3].attributes.type).toBe('alert');
 
-      expect(alertOne.attributes.alertId).toEqual(['test-id-1']);
-      expect(alertOne.attributes.index).toEqual(['test-index-1']);
+      expect(alertOne.attributes.alertId).toEqual(['alert-id-1']);
+      expect(alertOne.attributes.index).toEqual(['alert-index-1']);
 
       expect(alertTwo.attributes.alertId).toEqual(['test-id-2']);
       expect(alertTwo.attributes.index).toEqual(['test-index-2']);
 
+      // test-id-4 is omitted because it is returned by getAllAlertIds, see the top of this file
       expect(alertThree.attributes.alertId).toEqual(['test-id-5']);
       expect(alertThree.attributes.index).toEqual(['test-index-5']);
     });
 
     it('remove alerts from multiple attachments with multiple alerts attached to the case', async () => {
       clientArgs.services.attachmentService.getter.getAllAlertIds.mockResolvedValueOnce(
-        new Set(['test-id-1', 'test-id-4'])
+        new Set(['alert-id-1', 'test-id-4'])
       );
       await model.bulkCreate({
         attachments: [
           {
             id: 'comment-1',
-            ...userComment,
+            ...comment,
           },
           {
             id: 'comment-2',
-            ...singleAlert,
+            ...alertComment,
           },
           {
             id: 'comment-3',
@@ -538,7 +569,7 @@ describe('CaseCommentModel', () => {
       const attachments =
         clientArgs.services.attachmentService.bulkCreate.mock.calls[0][0].attachments;
 
-      const multipleAlertsCall = attachments[1] as SavedObject<AttributesTypeAlerts>;
+      const multipleAlertsCall = attachments[1] as SavedObject<AlertAttachmentAttributes>;
 
       expect(attachments.length).toBe(2);
       expect(attachments[0].attributes.type).toBe('user');
@@ -546,6 +577,46 @@ describe('CaseCommentModel', () => {
 
       expect(multipleAlertsCall.attributes.alertId).toEqual(['test-id-3', 'test-id-5']);
       expect(multipleAlertsCall.attributes.index).toEqual(['test-index-3', 'test-index-5']);
+    });
+
+    describe('validation', () => {
+      clientArgs.services.attachmentService.countPersistableStateAndExternalReferenceAttachments.mockResolvedValue(
+        MAX_PERSISTABLE_STATE_AND_EXTERNAL_REFERENCES
+      );
+
+      afterAll(() => {
+        jest.clearAllMocks();
+      });
+
+      it('throws if limit is reached when creating persistable state attachment', async () => {
+        await expect(
+          model.bulkCreate({
+            attachments: [commentPersistableState],
+          })
+        ).rejects.toThrow(
+          `Case has reached the maximum allowed number (${MAX_PERSISTABLE_STATE_AND_EXTERNAL_REFERENCES}) of attached persistable state and external reference attachments.`
+        );
+      });
+
+      it('throws if limit is reached when creating external reference', async () => {
+        await expect(
+          model.bulkCreate({
+            attachments: [commentExternalReference],
+          })
+        ).rejects.toThrow(
+          `Case has reached the maximum allowed number (${MAX_PERSISTABLE_STATE_AND_EXTERNAL_REFERENCES}) of attached persistable state and external reference attachments.`
+        );
+      });
+
+      it('does not throw if creating a file external reference and the limit is reached', async () => {
+        clientArgs.fileService.find.mockResolvedValue({ total: 0, files: [] });
+
+        await expect(
+          model.bulkCreate({
+            attachments: [commentFileExternalReference],
+          })
+        ).resolves.not.toThrow();
+      });
     });
   });
 });

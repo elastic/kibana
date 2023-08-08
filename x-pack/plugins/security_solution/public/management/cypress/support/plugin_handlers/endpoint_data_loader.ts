@@ -37,8 +37,10 @@ export interface CyLoadEndpointDataOptions
   generatorSeed: string;
   waitUntilTransformed: boolean;
   withResponseActions: boolean;
+  numResponseActions?: number;
   isolation: boolean;
   bothIsolatedAndNormalEndpoints?: boolean;
+  alertIds?: string[];
 }
 
 /**
@@ -63,6 +65,8 @@ export const cyLoadEndpointDataHandler = async (
     os,
     withResponseActions,
     isolation,
+    numResponseActions,
+    alertIds,
   } = options;
 
   const DocGenerator = EndpointDocGenerator.custom({
@@ -91,7 +95,9 @@ export const cyLoadEndpointDataHandler = async (
     enableFleetIntegration,
     undefined,
     DocGenerator,
-    withResponseActions
+    withResponseActions,
+    numResponseActions,
+    alertIds
   );
 
   if (waitUntilTransformed) {

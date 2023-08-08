@@ -16,13 +16,24 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const inspector = getService('inspector');
   const testSubjects = getService('testSubjects');
   const filterBar = getService('filterBar');
-  const PageObjects = getPageObjects(['visualize', 'visEditor', 'visChart', 'timePicker']);
+  const PageObjects = getPageObjects([
+    'visualize',
+    'visEditor',
+    'visChart',
+    'timePicker',
+    'common',
+  ]);
 
   const xyChartSelector = 'xyVisChart';
 
   describe('vertical bar chart', function () {
     before(async () => {
       await PageObjects.visualize.initTests();
+      await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
+    });
+
+    after(async () => {
+      await PageObjects.common.unsetTime();
     });
 
     const vizName1 = 'Visualization VerticalBarChart';
@@ -33,7 +44,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       log.debug('clickVerticalBarChart');
       await PageObjects.visualize.clickVerticalBarChart();
       await PageObjects.visualize.clickNewSearch();
-      await PageObjects.timePicker.setDefaultAbsoluteRange();
       log.debug('Bucket = X-Axis');
       await PageObjects.visEditor.clickBucket('X-axis');
       log.debug('Aggregation = Date Histogram');
@@ -64,7 +74,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visualize.navigateToNewAggBasedVisualization();
         await PageObjects.visualize.clickVerticalBarChart();
         await PageObjects.visualize.clickNewSearch();
-        await PageObjects.timePicker.setDefaultAbsoluteRange();
         await PageObjects.visEditor.clickBucket('X-axis');
         await PageObjects.visEditor.selectAggregation('Date Range');
         await PageObjects.visEditor.selectField('@timestamp');
@@ -88,7 +97,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visualize.navigateToNewAggBasedVisualization();
         await PageObjects.visualize.clickVerticalBarChart();
         await PageObjects.visualize.clickNewSearch();
-        await PageObjects.timePicker.setDefaultAbsoluteRange();
         await PageObjects.visEditor.clickBucket('X-axis');
         log.debug('Aggregation = Date Range');
         await PageObjects.visEditor.selectAggregation('Date Range');
@@ -299,7 +307,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visChart.waitForVisualizationRenderingStabilized();
         await PageObjects.visEditor.clickGo(true);
 
-        const expectedEntries = ['503', '404', '200']; // sorting aligned with rendered geometries
+        const expectedEntries = ['200', '404', '503']; // sorting order aligned with the reading direction
         const legendEntries = await PageObjects.visChart.getLegendEntriesXYCharts(xyChartSelector);
         expect(legendEntries).to.eql(expectedEntries);
       });
@@ -309,7 +317,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visEditor.selectCustomSortMetric(3, 'Min', 'bytes');
         await PageObjects.visEditor.clickGo(true);
 
-        const expectedEntries = ['503', '200', '404'];
+        const expectedEntries = ['404', '200', '503'];
         const legendEntries = await PageObjects.visChart.getLegendEntriesXYCharts(xyChartSelector);
         expect(legendEntries).to.eql(expectedEntries);
       });
@@ -343,21 +351,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visEditor.clickGo(true);
 
         const expectedEntries = [
-          '404 - win xp',
-          '404 - win 8',
-          '404 - win 7',
-          '404 - osx',
-          '503 - win xp',
-          '503 - win 8',
-          '503 - win 7',
-          '503 - osx',
-          '503 - ios',
-          '404 - ios',
-          '200 - win 7',
-          '200 - osx',
-          '200 - ios',
-          '200 - win xp',
           '200 - win 8',
+          '200 - win xp',
+          '200 - ios',
+          '200 - osx',
+          '200 - win 7',
+          '404 - ios',
+          '503 - ios',
+          '503 - osx',
+          '503 - win 7',
+          '503 - win 8',
+          '503 - win xp',
+          '404 - osx',
+          '404 - win 7',
+          '404 - win 8',
+          '404 - win xp',
         ];
         const legendEntries = await PageObjects.visChart.getLegendEntriesXYCharts(xyChartSelector);
         expect(legendEntries).to.eql(expectedEntries);
@@ -369,7 +377,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visEditor.toggleDisabledAgg(3);
         await PageObjects.visEditor.clickGo(true);
 
-        const expectedEntries = ['win 7', 'osx', 'ios', 'win xp', 'win 8'];
+        const expectedEntries = ['win 8', 'win xp', 'ios', 'osx', 'win 7'];
         const legendEntries = await PageObjects.visChart.getLegendEntriesXYCharts(xyChartSelector);
         expect(legendEntries).to.eql(expectedEntries);
       });

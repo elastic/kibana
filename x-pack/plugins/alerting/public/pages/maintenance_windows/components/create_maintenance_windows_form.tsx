@@ -108,9 +108,9 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
       onSubmit: submitMaintenanceWindow,
     });
 
-    const [{ recurring }] = useFormData<FormProps>({
+    const [{ recurring, timezone }] = useFormData<FormProps>({
       form,
-      watch: ['recurring'],
+      watch: ['recurring', 'timezone'],
     });
     const isRecurring = recurring || false;
     const showTimezone = isBrowser || initialValue?.timezone !== undefined;
@@ -181,7 +181,13 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
                     },
                   }}
                 >
-                  {(fields) => <DatePickerRangeField fields={fields} data-test-subj="date-field" />}
+                  {(fields) => (
+                    <DatePickerRangeField
+                      fields={fields}
+                      timezone={timezone ?? [defaultTimezone]}
+                      data-test-subj="date-field"
+                    />
+                  )}
                 </UseMultiFields>
               </EuiFlexItem>
               {showTimezone ? (
@@ -244,7 +250,7 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
           responsive={false}
         >
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={onCancel} size="s">
+            <EuiButtonEmpty onClick={onCancel} size="s" data-test-subj="cancelMaintenanceWindow">
               {i18n.CANCEL}
             </EuiButtonEmpty>
           </EuiFlexItem>

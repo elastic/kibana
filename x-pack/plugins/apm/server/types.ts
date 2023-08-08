@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { SharePluginSetup } from '@kbn/share-plugin/server';
 import { Observable } from 'rxjs';
 import { KibanaRequest } from '@kbn/core/server';
 import {
@@ -52,6 +53,10 @@ import {
 import { InfraPluginStart, InfraPluginSetup } from '@kbn/infra-plugin/server';
 import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 
+import {
+  CustomIntegrationsPluginSetup,
+  CustomIntegrationsPluginStart,
+} from '@kbn/custom-integrations-plugin/server';
 import { APMConfig } from '.';
 import { ApmIndicesConfig } from './routes/settings/apm_indices/get_apm_indices';
 import { APMEventClient } from './lib/helpers/create_es_client/create_apm_event_client';
@@ -76,6 +81,7 @@ export interface APMPluginSetupDependencies {
   ruleRegistry: RuleRegistryPluginSetupContract;
   infra: InfraPluginSetup;
   dataViews: {};
+  share: SharePluginSetup;
 
   // optional dependencies
   actions?: ActionsPlugin['setup'];
@@ -88,8 +94,8 @@ export interface APMPluginSetupDependencies {
   spaces?: SpacesPluginSetup;
   taskManager?: TaskManagerSetupContract;
   usageCollection?: UsageCollectionSetup;
+  customIntegrations?: CustomIntegrationsPluginSetup;
 }
-
 export interface APMPluginStartDependencies {
   // required dependencies
   data: DataPluginStart;
@@ -99,6 +105,7 @@ export interface APMPluginStartDependencies {
   ruleRegistry: RuleRegistryPluginStartContract;
   infra: InfraPluginStart;
   dataViews: DataViewsServerPluginStart;
+  share: undefined;
 
   // optional dependencies
   actions?: ActionsPlugin['start'];
@@ -111,4 +118,5 @@ export interface APMPluginStartDependencies {
   spaces?: SpacesPluginStart;
   taskManager?: TaskManagerStartContract;
   usageCollection?: undefined;
+  customIntegrations?: CustomIntegrationsPluginStart;
 }

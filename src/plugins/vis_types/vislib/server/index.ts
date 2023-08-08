@@ -6,10 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { schema } from '@kbn/config-schema';
+import { PluginConfigDescriptor } from '@kbn/core/server';
+import { configSchema, VislibConfig } from '../config';
 import { VisTypeVislibServerPlugin } from './plugin';
-export const config = {
-  schema: schema.object({ enabled: schema.boolean({ defaultValue: true }) }),
+
+export const config: PluginConfigDescriptor<VislibConfig> = {
+  exposeToBrowser: {
+    readOnly: true,
+  },
+  schema: configSchema,
 };
 
 export const plugin = () => new VisTypeVislibServerPlugin();

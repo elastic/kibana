@@ -44,6 +44,7 @@ export const casesQueriesKeys = {
   connectorTypes: () => [...casesQueriesKeys.connectors, 'types'] as const,
   license: () => [...casesQueriesKeys.connectors, 'license'] as const,
   tags: () => [...casesQueriesKeys.all, 'tags'] as const,
+  categories: () => [...casesQueriesKeys.all, 'categories'] as const,
   alertFeatureIds: (alertRegistrationContexts: string[]) =>
     [...casesQueriesKeys.alerts, 'features', alertRegistrationContexts] as const,
 };
@@ -51,7 +52,11 @@ export const casesQueriesKeys = {
 export const casesMutationsKeys = {
   createCase: ['create-case'] as const,
   deleteCases: ['delete-cases'] as const,
+  updateCase: ['update-case'] as const,
   updateCases: ['update-cases'] as const,
+  pushCase: ['push-case'] as const,
+  updateComment: ['update-comment'] as const,
   deleteComment: ['delete-comment'] as const,
   deleteFileAttachment: ['delete-file-attachment'] as const,
+  bulkCreateAttachments: ['bulk-create-attachments'] as const,
 };

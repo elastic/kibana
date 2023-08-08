@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { IndexPatternServiceAPI } from '../../../data_views_service/service';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { IndexPatternServiceAPI } from '../../../data_views_service/service';
 
 import {
   Visualization,
@@ -23,9 +24,11 @@ export interface ConfigPanelWrapperProps {
   datasourceMap: DatasourceMap;
   visualizationMap: VisualizationMap;
   core: DatasourceDimensionEditorProps['core'];
-  indexPatternService: IndexPatternServiceAPI;
+  dataViews: DataViewsPublicPluginStart;
+  indexPatternService?: IndexPatternServiceAPI;
   uiActions: UiActionsStart;
-  getUserMessages: UserMessagesGetter;
+  getUserMessages?: UserMessagesGetter;
+  hideLayerHeader?: boolean;
 }
 
 export interface LayerPanelProps {

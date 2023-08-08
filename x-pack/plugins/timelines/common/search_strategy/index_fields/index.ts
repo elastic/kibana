@@ -78,7 +78,7 @@ export interface BrowserField {
   category: string;
   description: string | null;
   example: string | number | null;
-  fields: Readonly<Record<string, Partial<BrowserField>>>;
+  fields: Record<string, Partial<BrowserField>>;
   format: string;
   indexes: string[];
   name: string;
@@ -97,7 +97,7 @@ export interface BrowserField {
  * you are working with? Or perhaps you need a description for a
  * particular field? Consider using the EcsFlat module from `@kbn/ecs`
  */
-export type BrowserFields = Readonly<Record<string, Partial<BrowserField>>>;
+export type BrowserFields = Record<string, Partial<BrowserField>>;
 
 export const EMPTY_BROWSER_FIELDS = {};
 export const EMPTY_INDEX_FIELDS: FieldSpec[] = [];

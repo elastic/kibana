@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { esArchiverCCSLoad } from '../../tasks/es_archiver';
 import { getCCSEqlRule } from '../../objects/rule';
 
 import { ALERTS_COUNT, ALERT_DATA_GRID } from '../../screens/alerts';
@@ -30,7 +29,7 @@ describe('Detection rules', function () {
   });
 
   it('EQL rule on remote indices generates alerts', function () {
-    esArchiverCCSLoad('linux_process');
+    cy.task('esArchiverCCSLoad', 'linux_process');
     const rule = getCCSEqlRule();
     login();
     createRule(rule);

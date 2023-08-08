@@ -12,13 +12,16 @@ import { createPromiseFromStreams } from '@kbn/utils';
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { validate } from '@kbn/securitysolution-io-ts-utils';
-import type { ImportQuerySchemaDecoded } from '@kbn/securitysolution-io-ts-types';
-import { importQuerySchema } from '@kbn/securitysolution-io-ts-types';
 
+import type { IKibanaResponse } from '@kbn/core/server';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constants';
-import { ImportRulesResponse } from '../../../../../../../common/detection_engine/rule_management';
+import type { ImportRulesRequestQueryDecoded } from '../../../../../../../common/api/detection_engine/rule_management';
+import {
+  ImportRulesRequestQuery,
+  ImportRulesResponse,
+} from '../../../../../../../common/api/detection_engine/rule_management';
 
-import type { SecuritySolutionPluginRouter } from '../../../../../../types';
+import type { HapiReadableStream, SecuritySolutionPluginRouter } from '../../../../../../types';
 import type { ConfigType } from '../../../../../../config';
 import type { SetupPlugins } from '../../../../../../plugin';
 import { buildMlAuthz } from '../../../../../machine_learning/authz';
@@ -35,7 +38,6 @@ import type { RuleExceptionsPromiseFromStreams } from '../../../logic/import/imp
 import { importRules as importRulesHelper } from '../../../logic/import/import_rules_utils';
 import { getReferencedExceptionLists } from '../../../logic/import/gather_referenced_exceptions';
 import { importRuleExceptions } from '../../../logic/import/import_rule_exceptions';
-import type { HapiReadableStream } from '../../../logic/import/hapi_readable_stream';
 import { importRuleActionConnectors } from '../../../logic/import/action_connectors/import_rule_action_connectors';
 
 const CHUNK_PARSED_OBJECT_SIZE = 50;
@@ -49,8 +51,8 @@ export const importRulesRoute = (
     {
       path: `${DETECTION_ENGINE_RULES_URL}/_import`,
       validate: {
-        query: buildRouteValidation<typeof importQuerySchema, ImportQuerySchemaDecoded>(
-          importQuerySchema
+        query: buildRouteValidation<typeof ImportRulesRequestQuery, ImportRulesRequestQueryDecoded>(
+          ImportRulesRequestQuery
         ),
         body: schema.any(), // validation on file object is accomplished later in the handler.
       },
@@ -62,7 +64,7 @@ export const importRulesRoute = (
         },
       },
     },
-    async (context, request, response) => {
+    async (context, request, response): Promise<IKibanaResponse<ImportRulesResponse>> => {
       const siemResponse = buildSiemResponse(response);
 
       try {
@@ -144,7 +146,7 @@ export const importRulesRoute = (
           overwrite: request.query.overwrite_action_connectors,
         });
 
-        // rulesWithMigratedActions: Is returened only in case connectors were exorted from different namesapce and the
+        // rulesWithMigratedActions: Is returned only in case connectors were exported from different namespace and the
         // original rules actions' ids were replaced with new destinationIds
         const parsedRules = actionConnectorErrors.length
           ? []

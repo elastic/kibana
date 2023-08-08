@@ -50,6 +50,19 @@ describe('KibanaService', () => {
         expect.objectContaining({
           method: 'GET',
           path: '/',
+          handler: expect.any(Function),
+        })
+      );
+    });
+
+    test('registers /api/status route with the server', async () => {
+      const kibanaService = new KibanaService({ config, logger });
+      await kibanaService.start({ server });
+      expect(server.addRoute).toHaveBeenCalledWith(
+        expect.objectContaining({
+          method: 'GET',
+          path: '/api/status',
+          handler: expect.any(Function),
         })
       );
     });

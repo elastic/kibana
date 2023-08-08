@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CommentType } from '@kbn/cases-plugin/common';
+import { AttachmentType } from '@kbn/cases-plugin/common';
 import {
   DataQualityPanel,
   DATA_QUALITY_SUBTITLE,
@@ -29,9 +29,10 @@ import {
 import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
+import { useAssistantAvailability } from '../../assistant/use_assistant_availability';
 import { SecurityPageName } from '../../app/types';
 import { getGroupByFieldsOnClick } from '../../common/components/alerts_treemap/lib/helpers';
-import { useTheme } from '../../common/components/charts/common';
+import { useThemes } from '../../common/components/charts/common';
 import { HeaderPage } from '../../common/components/header_page';
 import { LandingPageComponent } from '../../common/components/landing_page';
 import { useLocalStorage } from '../../common/components/local_storage';
@@ -39,6 +40,7 @@ import { SecuritySolutionPageWrapper } from '../../common/components/page_wrappe
 import { DEFAULT_BYTES_FORMAT, DEFAULT_NUMBER_FORMAT } from '../../../common/constants';
 import { useSourcererDataView } from '../../common/containers/sourcerer';
 import {
+  KibanaServices,
   useGetUserCasesPermissions,
   useKibana,
   useToasts,
@@ -127,7 +129,9 @@ const renderOption = (
 );
 
 const DataQualityComponent: React.FC = () => {
-  const theme = useTheme();
+  const { hasAssistantPrivilege } = useAssistantAvailability();
+  const httpFetch = KibanaServices.get().http.fetch;
+  const { baseTheme, theme } = useThemes();
   const toasts = useToasts();
   const addSuccessToast = useCallback(
     (toast: { title: string }) => {
@@ -189,10 +193,10 @@ const DataQualityComponent: React.FC = () => {
     ({ comments, headerContent }: { comments: string[]; headerContent?: React.ReactNode }) => {
       const attachments: Array<{
         comment: string;
-        type: CommentType.user;
+        type: AttachmentType.user;
       }> = comments.map((x) => ({
         comment: x,
-        type: CommentType.user,
+        type: AttachmentType.user,
       }));
 
       createCaseFlyout.open({ attachments, headerContent });
@@ -200,46 +204,48 @@ const DataQualityComponent: React.FC = () => {
     [createCaseFlyout]
   );
 
+  if (isSourcererLoading || isSignalIndexNameLoading) {
+    return <EuiLoadingSpinner size="l" data-test-subj="ecsDataQualityDashboardLoader" />;
+  }
+
   return (
     <>
       {indicesExist ? (
-        <>
-          <SecuritySolutionPageWrapper data-test-subj="ecsDataQualityDashboardPage">
-            <HeaderPage subtitle={subtitle} title={i18n.DATA_QUALITY_TITLE}>
-              <EuiToolTip content={INDEX_LIFECYCLE_MANAGEMENT_PHASES}>
-                <FormControlLayout prepend={ilmFormLabel}>
-                  <EuiComboBox
-                    id={labelInputId}
-                    placeholder={SELECT_ONE_OR_MORE_ILM_PHASES}
-                    renderOption={renderOption}
-                    selectedOptions={selectedOptions}
-                    style={comboBoxStyle}
-                    options={options}
-                    onChange={setSelectedOptions}
-                  />
-                </FormControlLayout>
-              </EuiToolTip>
-            </HeaderPage>
+        <SecuritySolutionPageWrapper data-test-subj="ecsDataQualityDashboardPage">
+          <HeaderPage subtitle={subtitle} title={i18n.DATA_QUALITY_TITLE}>
+            <EuiToolTip content={INDEX_LIFECYCLE_MANAGEMENT_PHASES}>
+              <FormControlLayout prepend={ilmFormLabel}>
+                <EuiComboBox
+                  id={labelInputId}
+                  data-test-subj="selectIlmPhases"
+                  placeholder={SELECT_ONE_OR_MORE_ILM_PHASES}
+                  renderOption={renderOption}
+                  selectedOptions={selectedOptions}
+                  style={comboBoxStyle}
+                  options={options}
+                  onChange={setSelectedOptions}
+                />
+              </FormControlLayout>
+            </EuiToolTip>
+          </HeaderPage>
 
-            {isSourcererLoading || isSignalIndexNameLoading ? (
-              <EuiLoadingSpinner size="l" data-test-subj="ecsDataQualityDashboardLoader" />
-            ) : (
-              <DataQualityPanel
-                addSuccessToast={addSuccessToast}
-                canUserCreateAndReadCases={canUserCreateAndReadCases}
-                defaultBytesFormat={defaultBytesFormat}
-                defaultNumberFormat={defaultNumberFormat}
-                getGroupByFieldsOnClick={getGroupByFieldsOnClick}
-                ilmPhases={ilmPhases}
-                lastChecked={lastChecked}
-                openCreateCaseFlyout={openCreateCaseFlyout}
-                patterns={alertsAndSelectedPatterns}
-                setLastChecked={setLastChecked}
-                theme={theme}
-              />
-            )}
-          </SecuritySolutionPageWrapper>
-        </>
+          <DataQualityPanel
+            addSuccessToast={addSuccessToast}
+            canUserCreateAndReadCases={canUserCreateAndReadCases}
+            defaultBytesFormat={defaultBytesFormat}
+            defaultNumberFormat={defaultNumberFormat}
+            getGroupByFieldsOnClick={getGroupByFieldsOnClick}
+            httpFetch={httpFetch}
+            ilmPhases={ilmPhases}
+            isAssistantEnabled={hasAssistantPrivilege}
+            lastChecked={lastChecked}
+            openCreateCaseFlyout={openCreateCaseFlyout}
+            patterns={alertsAndSelectedPatterns}
+            setLastChecked={setLastChecked}
+            baseTheme={baseTheme}
+            theme={theme}
+          />
+        </SecuritySolutionPageWrapper>
       ) : (
         <LandingPageComponent />
       )}

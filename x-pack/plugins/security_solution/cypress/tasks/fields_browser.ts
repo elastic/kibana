@@ -12,13 +12,14 @@ import {
   FIELDS_BROWSER_MESSAGE_CHECKBOX,
   FIELDS_BROWSER_RESET_FIELDS,
   FIELDS_BROWSER_CHECKBOX,
-  CLOSE_BTN,
+  FIELD_BROWSER_CLOSE_BTN,
   FIELDS_BROWSER_CATEGORIES_FILTER_BUTTON,
   FIELDS_BROWSER_CATEGORY_FILTER_OPTION,
   FIELDS_BROWSER_CATEGORIES_FILTER_SEARCH,
   FIELDS_BROWSER_VIEW_ALL,
   FIELDS_BROWSER_VIEW_BUTTON,
   FIELDS_BROWSER_VIEW_SELECTED,
+  GET_FIELD_CHECKBOX,
 } from '../screens/fields_browser';
 
 export const addsFields = (fields: string[]) => {
@@ -40,21 +41,29 @@ export const addsHostGeoContinentNameToTimeline = () => {
 };
 
 export const clearFieldsBrowser = () => {
-  cy.get(FIELDS_BROWSER_FILTER_INPUT)
-    .type('{selectall}{backspace}')
-    .waitUntil((subject) => !subject.hasClass('euiFieldSearch-isLoading'));
+  cy.get(FIELDS_BROWSER_FILTER_INPUT).type('{selectall}{backspace}');
+
+  cy.waitUntil(() =>
+    cy
+      .get(FIELDS_BROWSER_FILTER_INPUT)
+      .then((subject) => !subject.hasClass('euiFieldSearch-isLoading'))
+  );
 };
 
 export const closeFieldsBrowser = () => {
-  cy.get(CLOSE_BTN).click({ force: true });
+  cy.get(FIELD_BROWSER_CLOSE_BTN).click({ force: true });
   cy.get(FIELDS_BROWSER_FILTER_INPUT).should('not.exist');
 };
 
 export const filterFieldsBrowser = (fieldName: string) => {
-  cy.get(FIELDS_BROWSER_FILTER_INPUT)
-    .clear()
-    .type(fieldName)
-    .waitUntil((subject) => !subject.hasClass('euiFieldSearch-isLoading'));
+  cy.get(FIELDS_BROWSER_FILTER_INPUT).clear();
+  cy.get(FIELDS_BROWSER_FILTER_INPUT).type(fieldName);
+
+  cy.waitUntil(() =>
+    cy
+      .get(FIELDS_BROWSER_FILTER_INPUT)
+      .then((subject) => !subject.hasClass('euiFieldSearch-isLoading'))
+  );
 };
 
 export const toggleCategoryFilter = () => {
@@ -63,8 +72,9 @@ export const toggleCategoryFilter = () => {
 
 export const toggleCategory = (category: string) => {
   toggleCategoryFilter();
-  cy.get(FIELDS_BROWSER_CATEGORIES_FILTER_SEARCH).clear().type(category);
-  cy.get(FIELDS_BROWSER_CATEGORY_FILTER_OPTION(category)).click({ force: true });
+  cy.get(FIELDS_BROWSER_CATEGORIES_FILTER_SEARCH).clear();
+  cy.get(FIELDS_BROWSER_CATEGORIES_FILTER_SEARCH).type(category);
+  cy.get(FIELDS_BROWSER_CATEGORY_FILTER_OPTION(category)).click();
   toggleCategoryFilter();
 };
 
@@ -72,6 +82,10 @@ export const removesMessageField = () => {
   cy.get(FIELDS_BROWSER_MESSAGE_CHECKBOX).uncheck({
     force: true,
   });
+};
+
+export const removeField = (fieldName: string) => {
+  cy.get(GET_FIELD_CHECKBOX(fieldName)).uncheck({ force: true });
 };
 
 export const resetFields = () => {

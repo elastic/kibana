@@ -31,8 +31,7 @@ import type { IndexDetails, PostureTypes } from '../../common/types';
 import { cspIntegrationDocsNavigation } from '../common/navigation/constants';
 import noDataIllustration from '../assets/illustrations/no_data_illustration.svg';
 import { useCspIntegrationLink } from '../common/navigation/use_csp_integration_link';
-
-const REFETCH_INTERVAL_MS = 20000;
+import { NO_FINDINGS_STATUS_REFRESH_INTERVAL_MS } from '../common/constants';
 
 const NotDeployed = () => {
   // using an existing hook to get agent id and package policy id
@@ -125,7 +124,7 @@ const IndexTimeout = () => (
       <p>
         <FormattedMessage
           id="xpack.csp.noFindingsStates.indexTimeout.indexTimeoutDescription"
-          defaultMessage="Data should appear in less than 10 minutes after elastic-agent is successfully deployed. {docs}"
+          defaultMessage="Collecting findings is taking longer than expected. {docs}."
           values={{
             docs: (
               <EuiLink href="https://ela.st/findings" target="_blank">
@@ -248,7 +247,7 @@ const ConfigurationFindingsInstalledEmptyPrompt = ({
  * */
 export const NoFindingsStates = ({ posturetype }: { posturetype: PostureTypes }) => {
   const getSetupStatus = useCspSetupStatusApi({
-    refetchInterval: REFETCH_INTERVAL_MS,
+    refetchInterval: NO_FINDINGS_STATUS_REFRESH_INTERVAL_MS,
   });
   const statusKspm = getSetupStatus.data?.kspm?.status;
   const statusCspm = getSetupStatus.data?.cspm?.status;

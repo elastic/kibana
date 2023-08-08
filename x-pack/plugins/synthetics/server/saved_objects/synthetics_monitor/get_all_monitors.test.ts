@@ -6,13 +6,13 @@
  */
 
 import { processMonitors } from './get_all_monitors';
-import { UptimeServerSetup } from '../../legacy_uptime/lib/adapters';
 import { mockEncryptedSO } from '../../synthetics_service/utils/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import { SyntheticsService } from '../../synthetics_service/synthetics_service';
 import * as getLocations from '../../synthetics_service/get_all_locations';
+import { SyntheticsServerSetup } from '../../types';
 
 describe('processMonitors', () => {
   const mockEsClient = {
@@ -21,7 +21,7 @@ describe('processMonitors', () => {
   const logger = loggerMock.create();
   const soClient = savedObjectsClientMock.create();
 
-  const serverMock: UptimeServerSetup = {
+  const serverMock: SyntheticsServerSetup = {
     logger,
     uptimeEsClient: mockEsClient,
     authSavedObjectsClient: soClient,
@@ -38,7 +38,7 @@ describe('processMonitors', () => {
       },
     },
     encryptedSavedObjects: mockEncryptedSO(),
-  } as unknown as UptimeServerSetup;
+  } as unknown as SyntheticsServerSetup;
 
   const syntheticsService = new SyntheticsService(serverMock);
 

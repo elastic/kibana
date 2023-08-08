@@ -6,7 +6,6 @@
  */
 
 import { ALERT_RISK_SCORE, ALERT_SEVERITY } from '@kbn/rule-data-utils';
-import type { RightPanelContext } from '../context';
 
 /**
  * Returns mocked data for field (mock this method: x-pack/plugins/security_solution/public/common/hooks/use_get_fields_data.ts)
@@ -81,6 +80,13 @@ export const mockDataFormattedForFieldBrowser = [
     originalValue: ['process-entity_id'],
     isObjectArray: false,
   },
+  {
+    category: 'kibana',
+    field: 'kibana.alert.workflow_status',
+    values: ['open'],
+    originalValue: ['open'],
+    isObjectArray: false,
+  },
 ];
 
 /**
@@ -139,16 +145,27 @@ export const mockSearchHit = {
 };
 
 /**
- * Mock contextValue for right panel context
+ * Mock the browserFields object
  */
-export const mockContextValue: RightPanelContext = {
-  eventId: 'eventId',
-  indexName: 'index',
-  scopeId: 'scopeId',
-  getFieldsData: mockGetFieldsData,
-  dataFormattedForFieldBrowser: null,
-  browserFields: null,
-  dataAsNestedObject: null,
-  searchHit: undefined,
-  refetchFlyoutData: jest.fn(),
+export const mockBrowserFields = {
+  kibana: {
+    fields: {
+      'kibana.alert.workflow_status': {
+        aggregatable: true,
+        count: 0,
+        esTypes: [0],
+        format: {
+          id: 'string',
+          params: undefined,
+        },
+        isMapped: true,
+        name: 'kibana.alert.workflow_status',
+        readFromDocValues: true,
+        scripted: false,
+        searchable: true,
+        shortDotsEnable: false,
+        type: 'string',
+      },
+    },
+  },
 };

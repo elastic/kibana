@@ -10,21 +10,37 @@ import {
   AlertInstanceContext as AlertContext,
   AlertInstanceState as AlertState,
 } from '@kbn/alerting-plugin/common';
-import { ALERT_ACTION } from './executor';
+import {
+  ALERT_ACTION,
+  HIGH_PRIORITY_ACTION,
+  MEDIUM_PRIORITY_ACTION,
+  LOW_PRIORITY_ACTION,
+} from '../../../../common/constants';
 
 export enum AlertStates {
   OK,
   ALERT,
 }
 
-export type BurnRateRuleParams = {
-  sloId: string;
+export interface WindowSchema {
+  id: string;
   burnRateThreshold: number;
-  maxBurnRateThreshold: number;
+  maxBurnRateThreshold: number | null;
   longWindow: { value: number; unit: string };
   shortWindow: { value: number; unit: string };
+  actionGroup: string;
+}
+
+export type BurnRateRuleParams = {
+  sloId: string;
+  windows: WindowSchema[];
 } & Record<string, any>;
 export type BurnRateRuleTypeState = RuleTypeState; // no specific rule state
 export type BurnRateAlertState = AlertState; // no specific alert state
 export type BurnRateAlertContext = AlertContext; // no specific alert context
-export type BurnRateAllowedActionGroups = ActionGroupIdsOf<typeof ALERT_ACTION>;
+export type BurnRateAllowedActionGroups = ActionGroupIdsOf<
+  | typeof ALERT_ACTION
+  | typeof HIGH_PRIORITY_ACTION
+  | typeof MEDIUM_PRIORITY_ACTION
+  | typeof LOW_PRIORITY_ACTION
+>;

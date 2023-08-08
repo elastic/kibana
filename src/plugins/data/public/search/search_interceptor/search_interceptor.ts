@@ -298,9 +298,11 @@ export class SearchInterceptor {
           isSavedToBackground = true;
         });
 
-    const cancel = once(() => {
-      if (id && !isSavedToBackground) this.deps.http.delete(`/internal/search/${strategy}/${id}`);
+    const sendCancelRequest = once(() => {
+      this.deps.http.delete(`/internal/search/${strategy}/${id}`, { version: '1' });
     });
+
+    const cancel = () => id && !isSavedToBackground && sendCancelRequest();
 
     return pollSearch(search, cancel, {
       pollInterval: this.deps.searchConfig.asyncSearch.pollInterval,
@@ -346,6 +348,7 @@ export class SearchInterceptor {
       const { executionContext, strategy, ...searchOptions } = this.getSerializableOptions(options);
       return this.deps.http
         .post(`/internal/search/${strategy}${request.id ? `/${request.id}` : ''}`, {
+          version: '1',
           signal: abortSignal,
           context: executionContext,
           body: JSON.stringify({

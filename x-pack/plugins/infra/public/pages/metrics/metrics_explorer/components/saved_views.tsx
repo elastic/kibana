@@ -8,10 +8,10 @@
 import React from 'react';
 import { useMetricsExplorerViews } from '../../../../hooks/use_metrics_explorer_views';
 import { SavedViewsToolbarControls } from '../../../../components/saved_views/toolbar_control';
-import { MetricExplorerViewState } from '../hooks/use_metric_explorer_state';
+import { MetricsExplorerViewState } from '../hooks/use_metric_explorer_state';
 
 interface Props {
-  viewState: MetricExplorerViewState;
+  viewState: MetricsExplorerViewState;
 }
 
 export const SavedViews = ({ viewState }: Props) => {
@@ -31,7 +31,7 @@ export const SavedViews = ({ viewState }: Props) => {
   } = useMetricsExplorerViews();
 
   return (
-    <SavedViewsToolbarControls<MetricExplorerViewState>
+    <SavedViewsToolbarControls
       currentView={currentView}
       views={views}
       isFetchingViews={isFetchingViews}

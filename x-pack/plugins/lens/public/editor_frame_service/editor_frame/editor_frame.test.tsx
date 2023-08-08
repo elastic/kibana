@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { ReactWrapper } from 'enzyme';
 
 // Tests are executed in a jsdom environment who does not have sizing methods,
@@ -41,7 +41,7 @@ import {
 } from '../../mocks';
 import { inspectorPluginMock } from '@kbn/inspector-plugin/public/mocks';
 import { ReactExpressionRendererType } from '@kbn/expressions-plugin/public';
-import { DragDrop } from '@kbn/dom-drag-drop';
+import { DragDrop, useDragDropContext } from '@kbn/dom-drag-drop';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
@@ -51,6 +51,7 @@ import { getLensInspectorService } from '../../lens_inspector_service';
 import { toExpression } from '@kbn/interpreter';
 import { createIndexPatternServiceMock } from '../../mocks/data_views_service_mock';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 
 function generateSuggestion(state = {}): DatasourceSuggestion {
   return {
@@ -94,6 +95,7 @@ function getDefaultProps() {
       expressions: expressionsPluginMock.createStartContract(),
       charts: chartPluginMock.createStartContract(),
       dataViews: wrapDataViewsContract(),
+      eventAnnotationService: {} as EventAnnotationServiceType,
     },
     palettes: chartPluginMock.createPaletteRegistry(),
     lensInspector: getLensInspectorService(inspectorPluginMock.createStartContract()),
@@ -175,7 +177,7 @@ describe('editor_frame', () => {
           },
         },
       });
-      expect(mockDatasource.renderDataPanel).not.toHaveBeenCalled();
+      expect(mockDatasource.DataPanelComponent).not.toHaveBeenCalled();
       lensStore.dispatch(
         setState({
           datasourceStates: {
@@ -188,7 +190,7 @@ describe('editor_frame', () => {
           },
         })
       );
-      expect(mockDatasource.renderDataPanel).toHaveBeenCalled();
+      expect(mockDatasource.DataPanelComponent).toHaveBeenCalled();
     });
 
     it('should initialize visualization state and render config panel', async () => {
@@ -302,7 +304,7 @@ describe('editor_frame', () => {
         },
       });
       const updatedState = {};
-      const setDatasourceState = (mockDatasource.renderDataPanel as jest.Mock).mock.calls[0][1]
+      const setDatasourceState = (mockDatasource.DataPanelComponent as jest.Mock).mock.calls[0][0]
         .setState;
       act(() => {
         setDatasourceState(updatedState);
@@ -332,10 +334,10 @@ describe('editor_frame', () => {
       };
       await mountWithProvider(<EditorFrame {...props} />);
 
-      const setDatasourceState = (mockDatasource.renderDataPanel as jest.Mock).mock.calls[0][1]
+      const setDatasourceState = (mockDatasource.DataPanelComponent as jest.Mock).mock.calls[0][0]
         .setState;
 
-      mockDatasource.renderDataPanel.mockClear();
+      mockDatasource.DataPanelComponent.mockClear();
 
       const updatedState = {
         title: 'shazm',
@@ -344,9 +346,8 @@ describe('editor_frame', () => {
         setDatasourceState(updatedState);
       });
 
-      expect(mockDatasource.renderDataPanel).toHaveBeenCalledTimes(1);
-      expect(mockDatasource.renderDataPanel).toHaveBeenLastCalledWith(
-        expect.any(Element),
+      expect(mockDatasource.DataPanelComponent).toHaveBeenCalledTimes(1);
+      expect(mockDatasource.DataPanelComponent).toHaveBeenLastCalledWith(
         expect.objectContaining({
           state: updatedState,
         })
@@ -382,15 +383,16 @@ describe('editor_frame', () => {
         hasDefaultTimeField: jest.fn(() => true),
       };
       mockDatasource.getPublicAPI.mockReturnValue(updatedPublicAPI);
+      mockVisualization.getConfiguration.mockClear();
 
-      const setDatasourceState = (mockDatasource.renderDataPanel as jest.Mock).mock.calls[0][1]
+      const setDatasourceState = (mockDatasource.DataPanelComponent as jest.Mock).mock.calls[0][0]
         .setState;
       act(() => {
-        setDatasourceState({});
+        setDatasourceState('newState');
       });
 
-      expect(mockVisualization.getConfiguration).toHaveBeenCalledTimes(3);
-      expect(mockVisualization.getConfiguration).toHaveBeenLastCalledWith(
+      expect(mockVisualization.getConfiguration).toHaveBeenCalledTimes(1);
+      expect(mockVisualization.getConfiguration).toHaveBeenCalledWith(
         expect.objectContaining({
           frame: expect.objectContaining({
             datasourceLayers: {
@@ -720,8 +722,7 @@ describe('editor_frame', () => {
           state: suggestionVisState,
         })
       );
-      expect(mockDatasource.renderDataPanel).toHaveBeenLastCalledWith(
-        expect.any(Element),
+      expect(mockDatasource.DataPanelComponent).toHaveBeenLastCalledWith(
         expect.objectContaining({
           state: newDatasourceState,
         })
@@ -818,14 +819,7 @@ describe('editor_frame', () => {
             getDatasourceSuggestionsForField: () => [generateSuggestion()],
             getDatasourceSuggestionsFromCurrentState: () => [generateSuggestion()],
             getDatasourceSuggestionsForVisualizeField: () => [generateSuggestion()],
-            renderDataPanel: (_element, { dragDropContext: { setDragging, dragging } }) => {
-              if (!dragging || dragging.id !== 'draggedField') {
-                setDragging({
-                  id: 'draggedField',
-                  humanData: { label: 'draggedField' },
-                });
-              }
-            },
+            DataPanelComponent: jest.fn().mockImplementation(() => <div />),
           },
         },
 
@@ -856,7 +850,7 @@ describe('editor_frame', () => {
             id: '1',
             humanData: { label: 'draggedField' },
           },
-          'field_replace'
+          'field_add'
         );
       });
 
@@ -920,21 +914,28 @@ describe('editor_frame', () => {
             getDatasourceSuggestionsForField: () => [generateSuggestion()],
             getDatasourceSuggestionsFromCurrentState: () => [generateSuggestion()],
             getDatasourceSuggestionsForVisualizeField: () => [generateSuggestion()],
-            renderDataPanel: (_element, { dragDropContext: { setDragging, dragging } }) => {
-              if (!dragging || dragging.id !== 'draggedField') {
-                setDragging({
-                  id: 'draggedField',
-                  humanData: { label: '1' },
+            DataPanelComponent: jest.fn().mockImplementation(() => {
+              const [, dndDispatch] = useDragDropContext();
+              useEffect(() => {
+                dndDispatch({
+                  type: 'startDragging',
+                  payload: {
+                    dragging: {
+                      id: 'draggedField',
+                      humanData: { label: '1' },
+                    },
+                  },
                 });
-              }
-            },
+              }, [dndDispatch]);
+              return <div />;
+            }),
           },
         },
-
         ExpressionRenderer: expressionRendererMock,
       } as EditorFrameProps;
 
       instance = (await mountWithProvider(<EditorFrame {...props} />)).instance;
+
       instance.update();
 
       act(() => {
@@ -947,7 +948,7 @@ describe('editor_frame', () => {
               label: 'label',
             },
           },
-          'field_replace'
+          'field_add'
         );
       });
 

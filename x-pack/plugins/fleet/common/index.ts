@@ -18,6 +18,9 @@ export {
   FLEET_KUBERNETES_PACKAGE,
   FLEET_CLOUD_SECURITY_POSTURE_PACKAGE,
   FLEET_CLOUD_SECURITY_POSTURE_KSPM_POLICY_TEMPLATE,
+  FLEET_CLOUD_SECURITY_POSTURE_CSPM_POLICY_TEMPLATE,
+  FLEET_CLOUD_SECURITY_POSTURE_CNVM_POLICY_TEMPLATE,
+  FLEET_CLOUD_DEFEND_PACKAGE,
   FLEET_ENDPOINT_PACKAGE,
   // Saved object type
   AGENT_POLICY_SAVED_OBJECT_TYPE,
@@ -27,6 +30,7 @@ export {
   PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
   ASSETS_SAVED_OBJECT_TYPE,
   MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE,
+  UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
   // Fleet server index
   FLEET_SERVER_SERVERS_INDEX,
   FLEET_SERVER_ARTIFACTS_INDEX,
@@ -54,6 +58,7 @@ export {
   ENDPOINT_PRIVILEGES,
   // dashboards ids
   DASHBOARD_LOCATORS_IDS,
+  FLEET_ENROLLMENT_API_PREFIX,
 } from './constants';
 export {
   // Route services
@@ -67,8 +72,6 @@ export {
   // Package policy helpers
   isValidNamespace,
   INVALID_NAMESPACE_CHARACTERS,
-  // TODO Should probably not be exposed by Fleet
-  decodeCloudId,
   getFileMetadataIndexName,
   getFileDataIndexName,
 } from './services';
@@ -111,6 +114,7 @@ export type {
   UpgradePackagePolicyDryRunResponseItem,
   BulkGetPackagePoliciesResponse,
   BulkGetAgentPoliciesResponse,
+  GetBulkAssetsResponse,
   // Models
   Agent,
   AgentStatus,
@@ -187,6 +191,9 @@ export type {
   // Fleet server models
   FleetServerAgent,
   FleetServerAgentComponentStatus,
+  AssetSOObject,
+  SimpleSOAssetType,
+  AllowedAssetTypes,
 } from './types';
 
 export { ElasticsearchAssetType } from './types';

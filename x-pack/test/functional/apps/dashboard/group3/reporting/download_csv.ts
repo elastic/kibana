@@ -67,12 +67,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await testSubjects.existOrFail('csvDownloadStarted'); // validate toast panel
   };
 
-  // Failing: See https://github.com/elastic/kibana/issues/150561
-  // Failing: See https://github.com/elastic/kibana/issues/150562
-  // Failing: See https://github.com/elastic/kibana/issues/148314
-  // Failing: See https://github.com/elastic/kibana/issues/150563
-  // Failing: See https://github.com/elastic/kibana/issues/150561
-  describe.skip('Download CSV', () => {
+  describe('Download CSV', () => {
     before('initialize tests', async () => {
       log.debug('ReportingPage:initTests');
       await browser.setWindowSize(1600, 850);
@@ -139,18 +134,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('Filtered Saved Search', () => {
       const TEST_SEARCH_TITLE = 'Customer Betty';
       const TEST_DASHBOARD_TITLE = 'Filtered Search Data';
-      const setTimeRange = async () => {
-        const fromTime = 'Jun 20, 2019 @ 23:56:51.374';
-        const toTime = 'Jun 25, 2019 @ 16:18:51.821';
-        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
-      };
+      const from = 'Jun 20, 2019 @ 23:56:51.374';
+      const to = 'Jun 25, 2019 @ 16:18:51.821';
 
       before(async () => {
         await reporting.initEcommerce();
+        await PageObjects.common.setTime({ from, to });
         await navigateToDashboardApp();
         log.info(`Creating empty dashboard`);
         await PageObjects.dashboard.clickNewDashboard();
-        await setTimeRange();
         log.info(`Adding "${TEST_SEARCH_TITLE}" to dashboard`);
         await dashboardAddPanel.addSavedSearch(TEST_SEARCH_TITLE);
         await PageObjects.dashboard.saveDashboard(TEST_DASHBOARD_TITLE);
@@ -159,6 +151,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       after(async () => {
         await reporting.teardownEcommerce();
         await esArchiver.emptyKibanaIndex();
+        await PageObjects.common.unsetTime();
       });
 
       it('Downloads filtered Discover saved search report', async () => {

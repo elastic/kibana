@@ -9,7 +9,7 @@ import { EuiPageTemplate } from '@elastic/eui';
 import type { DashboardViewPromptState } from '../hooks/use_dashboard_view_prompt_state';
 import { useDashboardViewPromptState } from '../hooks/use_dashboard_view_prompt_state';
 
-const StatusPropmptComponent = ({
+const StatusPromptComponent = ({
   currentState,
 }: {
   currentState: DashboardViewPromptState | null;
@@ -21,5 +21,5 @@ const StatusPropmptComponent = ({
     </EuiPageTemplate>
   ) : null;
 };
-StatusPropmptComponent.displayName = 'StatusPropmptComponent';
-export const StatusPropmpt = React.memo(StatusPropmptComponent);
+StatusPromptComponent.displayName = 'StatusPromptComponent';
+export const StatusPrompt = React.memo(StatusPromptComponent);

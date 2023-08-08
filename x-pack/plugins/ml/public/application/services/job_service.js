@@ -7,15 +7,16 @@
 
 import { cloneDeep, each, find, get, isNumber } from 'lodash';
 import moment from 'moment';
+
 import { i18n } from '@kbn/i18n';
+import { validateTimeRange, TIME_FORMAT } from '@kbn/ml-date-utils';
+
+import { parseInterval } from '../../../common/util/parse_interval';
+
+import { isWebUrl } from '../util/url_utils';
 
 import { ml } from './ml_api_service';
-
 import { getToastNotificationService } from './toast_notification_service';
-import { isWebUrl } from '../util/url_utils';
-import { TIME_FORMAT } from '../../../common/constants/time_format';
-import { parseInterval } from '../../../common/util/parse_interval';
-import { validateTimeRange } from '../../../common/util/date_utils';
 
 let jobs = [];
 let datafeedIds = {};

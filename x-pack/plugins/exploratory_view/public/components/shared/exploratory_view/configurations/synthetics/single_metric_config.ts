@@ -107,9 +107,9 @@ export function getSyntheticsSingleMetricConfig({ dataView }: ConfigProps): Seri
         format: 'number',
       },
       {
-        id: 'monitor_complete',
-        label: i18n.translate('xpack.exploratoryView.expView.complete', {
-          defaultMessage: 'Complete',
+        id: 'monitor_successful',
+        label: i18n.translate('xpack.exploratoryView.expView.successful', {
+          defaultMessage: 'Successful count',
         }),
         metricStateOptions: {
           titlePosition: 'bottom',

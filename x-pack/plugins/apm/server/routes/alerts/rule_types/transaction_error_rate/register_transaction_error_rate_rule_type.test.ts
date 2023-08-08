@@ -135,6 +135,7 @@ describe('Transaction error rate alert', () => {
       interval: '5 mins',
       viewInAppUrl:
         'http://localhost:5601/eyr/app/apm/services/foo?transactionType=type-foo&environment=env-foo',
+      alertDetailsUrl: 'mockedAlertsLocator > getLocation',
     });
   });
 
@@ -235,6 +236,7 @@ describe('Transaction error rate alert', () => {
       viewInAppUrl:
         'http://localhost:5601/eyr/app/apm/services/foo?transactionType=type-foo&environment=env-foo',
       transactionName: 'tx-name-foo',
+      alertDetailsUrl: 'mockedAlertsLocator > getLocation',
     });
   });
 
@@ -329,6 +331,7 @@ describe('Transaction error rate alert', () => {
       interval: '5 mins',
       viewInAppUrl:
         'http://localhost:5601/eyr/app/apm/services/foo?transactionType=type-foo&environment=env-foo',
+      alertDetailsUrl: 'mockedAlertsLocator > getLocation',
     });
   });
 
@@ -423,6 +426,7 @@ describe('Transaction error rate alert', () => {
       interval: '5 mins',
       viewInAppUrl:
         'http://localhost:5601/eyr/app/apm/services/foo?transactionType=type-foo&environment=ENVIRONMENT_ALL',
+      alertDetailsUrl: 'mockedAlertsLocator > getLocation',
     });
   });
 });

@@ -61,7 +61,6 @@ export const updateFiltering = async (
     if_primary_term: primaryTerm,
     if_seq_no: seqNo,
     index: CONNECTORS_INDEX,
-    refresh: true,
   });
 
   return result.result === 'updated' ? active : undefined;

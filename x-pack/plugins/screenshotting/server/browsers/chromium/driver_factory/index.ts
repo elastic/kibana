@@ -166,6 +166,7 @@ export class HeadlessChromiumDriverFactory {
             env: {
               TZ: browserTimezone,
             },
+            headless: 'new',
           });
         } catch (err) {
           observer.error(

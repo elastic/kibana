@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DataProviderType } from '@kbn/timelines-plugin/common';
+import { DataProviderType } from '../../../../common/api/timeline';
 
 import { mockBrowserFields } from '../../../common/containers/source/mock';
 import {

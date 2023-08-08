@@ -11,25 +11,18 @@ import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiSwitch } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SavedObjectSaveModal, showSaveModal, OnSaveProps } from '@kbn/saved-objects-plugin/public';
-import { DataView } from '@kbn/data-views-plugin/public';
 import { SavedSearch, SaveSavedSearchOptions } from '@kbn/saved-search-plugin/public';
+import { DOC_TABLE_LEGACY } from '@kbn/discover-utils';
 import { DiscoverServices } from '../../../../build_services';
 import { DiscoverStateContainer } from '../../services/discover_state';
-import { setBreadcrumbsTitle } from '../../../../utils/breadcrumbs';
-import { persistSavedSearch } from '../../utils/persist_saved_search';
-import { DOC_TABLE_LEGACY } from '../../../../../common';
 
 async function saveDataSource({
-  dataView,
-  navigateTo,
   savedSearch,
   saveOptions,
   services,
   state,
   navigateOrReloadSavedSearch,
 }: {
-  dataView: DataView;
-  navigateTo: (url: string) => void;
   savedSearch: SavedSearch;
   saveOptions: SaveSavedSearchOptions;
   services: DiscoverServices;
@@ -50,19 +43,10 @@ async function saveDataSource({
       });
       if (navigateOrReloadSavedSearch) {
         if (id !== prevSavedSearchId) {
-          navigateTo(`/view/${encodeURIComponent(id)}`);
+          services.locator.navigate({ savedSearchId: id });
         } else {
           // Update defaults so that "reload saved query" functions correctly
-          state.appState.resetWithSavedSearch(savedSearch);
-          services.chrome.docTitle.change(savedSearch.title!);
-
-          setBreadcrumbsTitle(
-            {
-              ...savedSearch,
-              id: prevSavedSearchId ?? id,
-            },
-            services.chrome
-          );
+          state.actions.undoSavedSearchChanges();
         }
       }
     }
@@ -79,36 +63,33 @@ async function saveDataSource({
       text: error.message,
     });
   }
-  return persistSavedSearch(savedSearch, {
-    dataView,
-    onError,
-    onSuccess,
-    saveOptions,
-    services,
-    state: state.appState.getState(),
-  });
+
+  try {
+    const response = await state.savedSearchState.persist(savedSearch, saveOptions);
+    if (response?.id) {
+      onSuccess(response.id!);
+    }
+    return response;
+  } catch (error) {
+    onError(error);
+  }
 }
 
 export async function onSaveSearch({
-  dataView,
-  navigateTo,
   savedSearch,
   services,
   state,
   onClose,
   onSaveCb,
-  updateAdHocDataViewId,
 }: {
-  dataView: DataView;
-  navigateTo: (path: string) => void;
   savedSearch: SavedSearch;
   services: DiscoverServices;
   state: DiscoverStateContainer;
-  updateAdHocDataViewId: (dataView: DataView) => Promise<DataView>;
   onClose?: () => void;
   onSaveCb?: () => void;
 }) {
   const { uiSettings, savedObjectsTagging } = services;
+  const dataView = state.internalState.getState().dataView;
   const onSave = async ({
     newTitle,
     newCopyOnSave,
@@ -146,21 +127,20 @@ export async function onSaveSearch({
       isTitleDuplicateConfirmed,
     };
 
-    const updatedDataView =
-      !dataView.isPersisted() && newCopyOnSave ? await updateAdHocDataViewId(dataView) : dataView;
+    if (newCopyOnSave) {
+      await state.actions.updateAdHocDataViewId();
+    }
 
     const navigateOrReloadSavedSearch = !Boolean(onSaveCb);
     const response = await saveDataSource({
-      dataView: updatedDataView,
       saveOptions,
       services,
-      navigateTo,
       savedSearch,
       state,
       navigateOrReloadSavedSearch,
     });
     // If the save wasn't successful, put the original values back.
-    if (!response.id || response.error) {
+    if (!response) {
       savedSearch.title = currentTitle;
       savedSearch.timeRestore = currentTimeRestore;
       savedSearch.rowsPerPage = currentRowsPerPage;
@@ -177,6 +157,7 @@ export async function onSaveSearch({
 
   const saveModal = (
     <SaveSearchObjectModal
+      isTimeBased={dataView?.isTimeBased() ?? false}
       services={services}
       title={savedSearch.title ?? ''}
       showCopyOnSave={!!savedSearch.id}
@@ -191,6 +172,7 @@ export async function onSaveSearch({
 }
 
 const SaveSearchObjectModal: React.FC<{
+  isTimeBased: boolean;
   services: DiscoverServices;
   title: string;
   showCopyOnSave: boolean;
@@ -200,6 +182,7 @@ const SaveSearchObjectModal: React.FC<{
   onSave: (props: OnSaveProps & { newTimeRestore: boolean; newTags: string[] }) => void;
   onClose: () => void;
 }> = ({
+  isTimeBased,
   services,
   title,
   description,
@@ -210,7 +193,9 @@ const SaveSearchObjectModal: React.FC<{
   onClose,
 }) => {
   const { savedObjectsTagging } = services;
-  const [timeRestore, setTimeRestore] = useState<boolean>(savedTimeRestore || false);
+  const [timeRestore, setTimeRestore] = useState<boolean>(
+    (isTimeBased && savedTimeRestore) || false
+  );
   const [currentTags, setCurrentTags] = useState(tags);
 
   const onModalSave = (params: OnSaveProps) => {
@@ -230,7 +215,7 @@ const SaveSearchObjectModal: React.FC<{
     />
   ) : undefined;
 
-  const timeSwitch = (
+  const timeSwitch = isTimeBased ? (
     <EuiFormRow
       helpText={
         <FormattedMessage
@@ -251,7 +236,7 @@ const SaveSearchObjectModal: React.FC<{
         }
       />
     </EuiFormRow>
-  );
+  ) : null;
 
   const options = tagSelector ? (
     <>
