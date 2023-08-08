@@ -22,7 +22,6 @@ export const calculateAndPersistRiskScores = async (
   const { riskEngineDataClient, spaceId, ...rest } = params;
   const writer = await riskEngineDataClient.getWriter({
     namespace: spaceId,
-    esClient: rest.esClient,
   });
   const { after_keys: afterKeys, scores } = await calculateRiskScores(rest);
 
