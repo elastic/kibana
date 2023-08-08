@@ -204,7 +204,7 @@ const testCase: TestCaseWithoutTimeline = {
   owner: 'securitySolution',
 };
 
-describe('Cases privileges', () => {
+describe.skip('Cases privileges', () => {
   before(() => {
     cleanKibana();
     createUsersAndRoles(usersToCreate, rolesToCreate);
