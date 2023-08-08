@@ -10,8 +10,8 @@ import React, { FC, useContext } from 'react';
 import { NotificationsStart, ToastOptions } from '@kbn/core-notifications-browser';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { I18nStart } from '@kbn/core-i18n-browser';
+import type { ThemeServiceStart } from '@kbn/core-theme-browser';
 
-import { ThemeServiceStart } from '@kbn/react-kibana-context-common';
 import type { UserProfileAPIClient } from './types';
 
 type NotifyFn = (
