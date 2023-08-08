@@ -277,7 +277,6 @@ export class APMPlugin
 
     const logger = this.logger;
     const client = core.elasticsearch.client.asInternalUser;
-    const { featureFlags } = this.currentConfig;
 
     // create .apm-agent-configuration index without blocking start lifecycle
     createApmAgentConfigurationIndex({ client, logger }).catch((e) => {
@@ -286,7 +285,7 @@ export class APMPlugin
     });
 
     // create .apm-custom-link index without blocking start lifecycle
-    createApmCustomLinkIndex({ client, logger, featureFlags }).catch((e) => {
+    createApmCustomLinkIndex({ client, logger }).catch((e) => {
       logger.error('Failed to create .apm-custom-link index');
       logger.error(e);
     });

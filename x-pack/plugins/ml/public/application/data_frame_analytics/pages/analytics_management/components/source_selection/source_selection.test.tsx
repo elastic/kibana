@@ -79,6 +79,7 @@ jest.mock('../../../../../contexts/kibana', () => ({
       savedObjectsManagement: {},
       data: { dataViews: jest.fn() },
       savedSearch: jest.fn(),
+      contentManagement: {},
     },
   }),
   useNavigateToPath: () => mockNavigateToPath,
