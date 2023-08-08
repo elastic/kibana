@@ -25,6 +25,7 @@ import {
   ReplaySubject,
   skip,
   distinctUntilChanged,
+  skipWhile,
 } from 'rxjs';
 import type { Location } from 'history';
 import deepEqual from 'react-fast-compare';
@@ -67,15 +68,17 @@ export class ProjectNavigationService {
     this.activeNodes$
       .pipe(
         takeUntil(this.stop$),
-        // skip initial empty state
-        skip(1),
+        // skip while the project navigation is not set
+        skipWhile(() => !this.projectNavigation$.getValue()),
         // only reset when the active breadcrumb path changes, use ids to get more stable reference
         distinctUntilChanged((prevNodes, nextNodes) =>
           deepEqual(
             prevNodes?.[0]?.map((node) => node.id),
             nextNodes?.[0]?.map((node) => node.id)
           )
-        )
+        ),
+        // skip the initial state, we only want to reset the breadcrumbs when the active nodes change
+        skip(1)
       )
       .subscribe(() => {
         // reset the breadcrumbs when the active nodes change
