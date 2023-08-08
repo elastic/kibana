@@ -6,7 +6,6 @@
  */
 
 import type { HttpHandler } from '@kbn/core-http-browser';
-import { IlmExplainLifecycleLifecycleExplain } from '@elastic/elasticsearch/lib/api/types';
 import { getUnallowedValueRequestItems } from '../../../allowed_values/helpers';
 import {
   getMappingsProperties,

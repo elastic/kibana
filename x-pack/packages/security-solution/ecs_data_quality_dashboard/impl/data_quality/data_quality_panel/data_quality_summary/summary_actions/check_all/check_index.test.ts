@@ -97,6 +97,7 @@ describe('checkIndex', () => {
 
       await checkIndex({
         abortController: new AbortController(),
+        batchId: 'batch-id',
         ecsMetadata,
         formatBytes,
         formatNumber,
@@ -144,6 +145,7 @@ describe('checkIndex', () => {
 
       await checkIndex({
         abortController,
+        batchId: 'batch-id',
         ecsMetadata,
         formatBytes,
         formatNumber,
@@ -166,6 +168,7 @@ describe('checkIndex', () => {
 
       await checkIndex({
         abortController: new AbortController(),
+        batchId: 'batch-id',
         ecsMetadata: null, // <--
         formatBytes,
         formatNumber,
@@ -219,6 +222,7 @@ describe('checkIndex', () => {
 
       await checkIndex({
         abortController: new AbortController(),
+        batchId: 'batch-id',
         ecsMetadata,
         formatBytes,
         formatNumber,
@@ -270,6 +274,7 @@ describe('checkIndex', () => {
 
       await checkIndex({
         abortController: new AbortController(),
+        batchId: 'batch-id',
         ecsMetadata,
         formatBytes,
         formatNumber,
@@ -329,6 +334,7 @@ describe('checkIndex', () => {
 
       await checkIndex({
         abortController,
+        batchId: 'batch-id',
         ecsMetadata,
         formatBytes,
         formatNumber,
