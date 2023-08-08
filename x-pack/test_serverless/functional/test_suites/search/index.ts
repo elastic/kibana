@@ -13,5 +13,11 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./empty_page'));
     loadTestFile(require.resolve('./navigation'));
     loadTestFile(require.resolve('./cases/attachment_framework'));
+    loadTestFile(require.resolve('./examples/data_view_field_editor_example'));
+    loadTestFile(require.resolve('./examples/discover_customization_examples'));
+    loadTestFile(require.resolve('./examples/field_formats'));
+    loadTestFile(require.resolve('./examples/partial_results'));
+    loadTestFile(require.resolve('./examples/search'));
+    loadTestFile(require.resolve('./examples/unified_field_list_examples'));
   });
 }

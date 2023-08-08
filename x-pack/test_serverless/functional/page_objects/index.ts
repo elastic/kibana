@@ -14,6 +14,7 @@ import { SvlObltOnboardingStreamLogFilePageProvider } from './svl_oblt_onboardin
 import { SvlObltOverviewPageProvider } from './svl_oblt_overview_page';
 import { SvlSearchLandingPageProvider } from './svl_search_landing_page';
 import { SvlSecLandingPageProvider } from './svl_sec_landing_page';
+import { SvlTimePickerProvider } from './svl_time_picker';
 
 export const pageObjects = {
   ...xpackFunctionalPageObjects,
@@ -25,4 +26,5 @@ export const pageObjects = {
   svlObltOverviewPage: SvlObltOverviewPageProvider,
   svlSearchLandingPage: SvlSearchLandingPageProvider,
   svlSecLandingPage: SvlSecLandingPageProvider,
+  svlTimePicker: SvlTimePickerProvider,
 };

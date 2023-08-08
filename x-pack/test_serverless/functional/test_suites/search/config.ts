@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { REPO_ROOT } from '@kbn/repo-info';
+import { findTestPluginPaths } from '@kbn/test';
+import { resolve } from 'path';
 import { createTestConfig } from '../../config.base';
 
 export default createTestConfig({
@@ -14,4 +17,5 @@ export default createTestConfig({
     reportName: 'Serverless Search Functional Tests',
   },
   suiteTags: { exclude: ['skipSvlSearch'] },
+  serverArgs: findTestPluginPaths(resolve(REPO_ROOT, 'examples')),
 });
