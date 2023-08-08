@@ -7,7 +7,7 @@
 
 import { alertFieldMap, ecsFieldMap, legacyAlertFieldMap } from '@kbn/alerts-as-data-utils';
 import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
-import expect from '@kbn/expect/expect';
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
