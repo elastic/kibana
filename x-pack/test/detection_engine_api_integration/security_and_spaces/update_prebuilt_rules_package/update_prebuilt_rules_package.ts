@@ -14,6 +14,7 @@ import JSON5 from 'json5';
 import expect from 'expect';
 import { PackageSpecManifest } from '@kbn/fleet-plugin/common';
 import { DETECTION_ENGINE_RULES_URL_FIND } from '@kbn/security-solution-plugin/common/constants';
+import { ALL_SAVED_OBJECT_INDICES } from '@kbn/core-saved-objects-server';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   deleteAllPrebuiltRuleAssets,
@@ -24,7 +25,6 @@ import {
 } from '../../utils';
 import { reviewPrebuiltRulesToInstall } from '../../utils/prebuilt_rules/review_install_prebuilt_rules';
 import { reviewPrebuiltRulesToUpgrade } from '../../utils/prebuilt_rules/review_upgrade_prebuilt_rules';
-import { ALL_SAVED_OBJECT_INDICES } from '@kbn/core-saved-objects-server';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
