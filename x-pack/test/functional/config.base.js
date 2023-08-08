@@ -38,7 +38,6 @@ export default async function ({ readConfigFile }) {
       serverArgs: [
         'path.repo=/tmp/',
         'xpack.security.authc.api_key.enabled=true',
-        'cluster.routing.allocation.disk.threshold_enabled=true', // make sure disk thresholds are enabled for UA cluster testing
       ],
     },
 
@@ -181,6 +180,14 @@ export default async function ({ readConfigFile }) {
       maintenanceWindows: {
         pathname: '/app/management/insightsAndAlerting/maintenanceWindows',
       },
+    },
+
+    suiteTags: {
+      ...kibanaCommonConfig.get('suiteTags'),
+      exclude: [
+        ...kibanaCommonConfig.get('suiteTags').exclude,
+        'upgradeAssistant',
+      ],
     },
 
     // choose where screenshots should be saved
