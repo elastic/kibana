@@ -64,7 +64,9 @@
     "@kbn/shared-ux-utility",
     "@kbn/core-application-browser",
     "@kbn/core-saved-objects-server",
-    "@kbn/discover-utils"
+    "@kbn/discover-utils",
+    "@kbn/react-kibana-mount",
+    "@kbn/react-kibana-context-render"
   ],
   "exclude": [
     "target/**/*"
