@@ -6,7 +6,6 @@
  */
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { KPIChartProps } from '../../../../../common/visualizations/lens/dashboards/host/kpi_grid_config';
 import { hostLensFormulas } from '../../../../../common/visualizations';
 import { useHostCountContext } from '../../hooks/use_host_count';
 import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
@@ -23,7 +22,7 @@ const HOSTS_CHART: Omit<Props, 'loading' | 'value' | 'toolTip'> = {
   }),
 };
 
-export const HostsTile = ({ height }: Pick<KPIChartProps, 'height'>) => {
+export const HostsTile = ({ height }: { height: number }) => {
   const { data: hostCountData, isRequestRunning: hostCountLoading } = useHostCountContext();
   const { searchCriteria } = useUnifiedSearchContext();
 

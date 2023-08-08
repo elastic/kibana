@@ -14,8 +14,7 @@ import { TOOLTIP } from './translations';
 import { FormulaConfig } from '../../../types';
 import { MetricLayerOptions } from '../../visualization_types';
 
-export interface KPIChartProps
-  extends Pick<TypedLensByValueInput, 'id' | 'title' | 'overrides' | 'style'> {
+export interface KPIChartProps extends Pick<TypedLensByValueInput, 'id' | 'title' | 'overrides'> {
   layers: Layer<MetricLayerOptions, FormulaConfig, 'data'>;
   toolTip: string;
 }

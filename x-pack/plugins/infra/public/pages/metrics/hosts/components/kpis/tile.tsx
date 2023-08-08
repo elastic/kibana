@@ -19,7 +19,13 @@ const AVERAGE_SUBTITLE = i18n.translate('xpack.infra.hostsViewPage.metricTrend.s
   defaultMessage: 'Average',
 });
 
-export const Tile = ({ id, title, layers, toolTip, height }: KPIChartProps) => {
+export const Tile = ({
+  id,
+  title,
+  layers,
+  toolTip,
+  height,
+}: KPIChartProps & { height: number }) => {
   const { searchCriteria } = useUnifiedSearchContext();
   const { dataView } = useMetricsDataViewContext();
   const { requestTs, hostNodes, loading: hostsLoading } = useHostsViewContext();
