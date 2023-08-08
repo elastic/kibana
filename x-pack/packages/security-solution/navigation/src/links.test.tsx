@@ -15,6 +15,7 @@ import {
   getAppIdsFromId,
   formatPath,
   isModified,
+  mergePaths,
 } from './links';
 import { mockGetAppUrl, mockNavigateTo } from '../mocks/navigation';
 
@@ -126,19 +127,62 @@ describe('links', () => {
     it('should return the correct app and deep link ids for an external id', () => {
       const id = 'externalAppId:12345';
       const result = getAppIdsFromId(id);
-      expect(result).toEqual({ appId: 'externalAppId', deepLinkId: '12345' });
+      expect(result).toEqual(
+        expect.objectContaining({ appId: 'externalAppId', deepLinkId: '12345' })
+      );
     });
 
     it('should return the correct deep link id for an internal id', () => {
       const id = 'internalId';
       const result = getAppIdsFromId(id);
-      expect(result).toEqual({ deepLinkId: 'internalId' });
+      expect(result).toEqual(expect.objectContaining({ deepLinkId: 'internalId' }));
     });
 
     it('should return the correct app id for a root external id', () => {
       const id = 'externalAppId:';
       const result = getAppIdsFromId(id);
-      expect(result).toEqual({ appId: 'externalAppId', deepLinkId: '' });
+      expect(result).toEqual(expect.objectContaining({ appId: 'externalAppId', deepLinkId: '' }));
+    });
+
+    it('should return the correct path', () => {
+      expect(getAppIdsFromId('externalAppId:12345')).toEqual({
+        appId: 'externalAppId',
+        deepLinkId: '12345',
+        path: '',
+      });
+
+      expect(getAppIdsFromId('externalAppId:/some/path')).toEqual({
+        appId: 'externalAppId',
+        deepLinkId: '',
+        path: '/some/path',
+      });
+
+      expect(getAppIdsFromId('externalAppId:12345/some/path')).toEqual({
+        appId: 'externalAppId',
+        deepLinkId: '12345',
+        path: '/some/path',
+      });
+    });
+  });
+
+  describe('mergePaths', () => {
+    it('should merge undefined or empty paths', () => {
+      expect(mergePaths(undefined, undefined)).toEqual('');
+      expect(mergePaths('', '')).toEqual('');
+    });
+    it('should return path if sub-path not defined or empty', () => {
+      expect(mergePaths('/main/path', undefined)).toEqual('/main/path');
+      expect(mergePaths('/main/path', '')).toEqual('/main/path');
+    });
+    it('should return sub-path if path not defined or empty', () => {
+      expect(mergePaths(undefined, '/some/sub-path')).toEqual('/some/sub-path');
+      expect(mergePaths('', '/some/sub-path')).toEqual('/some/sub-path');
+    });
+    it('should merge path and sub-path if defined', () => {
+      expect(mergePaths('/main/path', '/some/sub-path')).toEqual('/main/path/some/sub-path');
+    });
+    it('should clean path before merging', () => {
+      expect(mergePaths('/main/path/', '/some/sub-path')).toEqual('/main/path/some/sub-path');
     });
   });
 
