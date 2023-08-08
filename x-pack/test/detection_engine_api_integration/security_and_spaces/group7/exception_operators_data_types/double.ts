@@ -489,8 +489,6 @@ export default ({ getService }: FtrProviderContext) => {
           expect(hits).to.eql([]);
         });
       });
-      // here
-
       describe('working against string values in the data set', () => {
         it('will return 3 results if we have a list that includes 1 double', async () => {
           await importFile(supertest, log, 'double', ['1.0'], 'list_items.txt');
@@ -509,7 +507,7 @@ export default ({ getService }: FtrProviderContext) => {
             ],
           ]);
           await waitForRuleSuccess({ supertest, log, id });
-          await waitForSignalsToBePresent(supertest, log, 1, [id]);
+          await waitForSignalsToBePresent(supertest, log, 3, [id]);
           const signalsOpen = await getSignalsById(supertest, log, id);
           log.error(`HERE hits: ${signalsOpen.hits.hits}`);
           const hits = signalsOpen.hits.hits.map((hit) => hit._source?.double).sort();
