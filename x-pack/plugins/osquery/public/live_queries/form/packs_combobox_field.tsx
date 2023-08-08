@@ -10,15 +10,9 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiFormRow, EuiComboBox, EuiTextColor, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import styled from 'styled-components';
 
 import { useController } from 'react-hook-form';
 import type { PackSavedObject } from '../../packs/types';
-
-const TextTruncate = styled.div`
-  overflow: hidden;
-  text-overflow: ellipsis;
-`;
 
 interface PackComboBoxFieldProps {
   fieldProps?: {
@@ -103,9 +97,9 @@ export const PacksComboBoxField = ({
           <strong>{option?.name}</strong>
         </EuiFlexItem>
         <EuiFlexItem>
-          <TextTruncate>
+          <div className="eui-textTruncate">
             <EuiTextColor color="subdued">{option?.description}</EuiTextColor>
-          </TextTruncate>
+          </div>
         </EuiFlexItem>
       </EuiFlexGroup>
     ),

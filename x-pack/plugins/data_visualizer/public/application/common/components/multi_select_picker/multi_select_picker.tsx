@@ -10,6 +10,7 @@ import {
   EuiFilterButton,
   EuiFilterGroup,
   EuiFilterSelectItem,
+  EuiSelectableMessage,
   EuiIcon,
   EuiPopover,
   EuiPopoverTitle,
@@ -32,18 +33,16 @@ const SELECT_PICKER_HEIGHT = '250px';
 
 const NoFilterItems = () => {
   return (
-    <div className="euiFilterSelect__note">
-      <div className="euiFilterSelect__noteContent">
-        <EuiIcon type="minusInCircle" />
-        <EuiSpacer size="xs" />
-        <p>
-          <FormattedMessage
-            id="xpack.dataVisualizer.multiSelectPicker.NoFiltersFoundMessage"
-            defaultMessage="No filters found"
-          />
-        </p>
-      </div>
-    </div>
+    <EuiSelectableMessage>
+      <EuiIcon type="minusInCircle" />
+      <EuiSpacer size="xs" />
+      <p>
+        <FormattedMessage
+          id="xpack.dataVisualizer.multiSelectPicker.NoFiltersFoundMessage"
+          defaultMessage="No filters found"
+        />
+      </p>
+    </EuiSelectableMessage>
   );
 };
 

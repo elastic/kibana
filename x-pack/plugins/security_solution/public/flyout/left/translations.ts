@@ -27,3 +27,10 @@ export const INVESTIGATIONS_TAB = i18n.translate(
     defaultMessage: 'Investigation',
   }
 );
+
+export const RESPONSE_TAB = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.responseTab',
+  {
+    defaultMessage: 'Response',
+  }
+);

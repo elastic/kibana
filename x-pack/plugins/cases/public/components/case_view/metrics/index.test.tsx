@@ -17,7 +17,7 @@ import type { SingleCaseMetrics, SingleCaseMetricsFeature } from '../../../../co
 import { TestProviders } from '../../../common/mock';
 import { useGetCaseMetrics } from '../../../containers/use_get_case_metrics';
 import { useCasesFeatures } from '../../../common/use_cases_features';
-import { CaseMetricsFeature } from '../../../../common/api/metrics/case';
+import { CaseMetricsFeature } from '../../../../common/types/api';
 
 jest.mock('../../../containers/use_get_case_metrics');
 jest.mock('../../../common/use_cases_features');

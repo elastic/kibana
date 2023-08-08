@@ -1,0 +1,24 @@
+{
+  "indices.stats": {
+    "url_components": {
+      "metrics": [
+        "_all",
+        "bulk",
+        "completion",
+        "docs",
+        "fielddata",
+        "flush",
+        "get",
+        "indexing",
+        "merge",
+        "query_cache",
+        "refresh",
+        "request_cache",
+        "search",
+        "segments",
+        "store",
+        "warmer"
+      ]
+    }
+  }
+}
