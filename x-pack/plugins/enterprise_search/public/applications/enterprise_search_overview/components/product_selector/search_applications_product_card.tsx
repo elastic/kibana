@@ -31,7 +31,7 @@ export const SearchApplicationsProductCard = () => (
       i18n.translate('xpack.enterpriseSearch.searchApplications.features.indices', {
         defaultMessage: 'Combine your Elasticsearch indices',
       }),
-      i18n.translate('xpack.enterpriseSearch.searchApplications.features.searchPreview', {
+      i18n.translate('xpack.enterpriseSearch.searchApplications.features.docsExplorer', {
         defaultMessage: 'Easily preview your search results',
       }),
       i18n.translate('xpack.enterpriseSearch.searchApplications.features.api', {

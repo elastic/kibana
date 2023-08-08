@@ -255,7 +255,7 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
       disabled: disableLinks,
       items: [
         {
-          id: 'explainlogratespikes',
+          id: 'logRateAnalysis',
           pathId: ML_PAGES.AIOPS_LOG_RATE_ANALYSIS_INDEX_SELECT,
           name: i18n.translate('xpack.ml.navMenu.logRateAnalysisLinkText', {
             defaultMessage: 'Log Rate Analysis',

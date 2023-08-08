@@ -8,14 +8,14 @@
 import React, { type FC } from 'react';
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-
-import type { WindowParameters } from '@kbn/aiops-utils';
-
 import {
   BarStyleAccessor,
   RectAnnotationSpec,
 } from '@elastic/charts/dist/chart_types/xy_chart/utils/specs';
+
+import type { WindowParameters } from '@kbn/aiops-utils';
 import { DocumentCountChart, type DocumentCountChartPoint } from '@kbn/aiops-components';
+
 import { useAiopsAppContext } from '../../../hooks/use_aiops_app_context';
 import { DocumentCountStats } from '../../../get_document_stats';
 
