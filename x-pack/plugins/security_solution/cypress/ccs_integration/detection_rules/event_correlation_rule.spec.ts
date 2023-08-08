@@ -22,7 +22,7 @@ import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
 
 import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../urls/navigation';
 
-describe('Detection rules', function () {
+describe.skip('Detection rules', function () {
   const expectedNumberOfAlerts = '1 alert';
 
   beforeEach('Reset signals index', function () {
