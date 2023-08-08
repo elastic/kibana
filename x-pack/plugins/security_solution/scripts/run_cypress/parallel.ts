@@ -179,7 +179,7 @@ export const cli = () => {
                 kbnTestServer: {
                   serverArgs: [
                     `--server.port=${kibanaPort}`,
-                    `--elasticsearch.hosts=http://127.0.0.1:${esPort}`,
+                    `--elasticsearch.hosts=http://0.0.0.0:${esPort}`,
                   ],
                 },
               },
@@ -331,7 +331,7 @@ ${JSON.stringify(config.getAll(), null, 2)}
                 throw new Error(`Unable to create URL for ${type}. Not found in FTR config at `);
               }
 
-              const url = new URL('http://127.0.0.1');
+              const url = new URL('http://0.0.0.0');
 
               url.port = config.get(getKeyPath('port'));
               url.protocol = config.get(getKeyPath('protocol'));

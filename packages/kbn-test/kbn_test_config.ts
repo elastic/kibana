@@ -41,7 +41,7 @@ export const kbnTestConfig = new (class KbnTestConfig {
     const password = process.env.TEST_KIBANA_PASSWORD || kibanaTestUser.password;
     return {
       protocol: process.env.TEST_KIBANA_PROTOCOL || 'http',
-      hostname: process.env.TEST_KIBANA_HOSTNAME || '127.0.0.1',
+      hostname: process.env.TEST_KIBANA_HOSTNAME || '0.0.0.0',
       port: process.env.TEST_KIBANA_PORT ? parseInt(process.env.TEST_KIBANA_PORT, 10) : 5620,
       auth: `${username}:${password}`,
       username,
