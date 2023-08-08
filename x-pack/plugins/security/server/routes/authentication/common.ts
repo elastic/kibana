@@ -180,7 +180,7 @@ export function defineCommonRoutes({
       })
     );
 
-    // In the serverless environment, there is no need for access agreement acknowledgment
+    // In the serverless offering, the access agreement functionality isn't available.
     router.post(
       { path: '/internal/security/access_agreement/acknowledge', validate: false },
       createLicensedRouteHandler(async (context, request, response) => {
