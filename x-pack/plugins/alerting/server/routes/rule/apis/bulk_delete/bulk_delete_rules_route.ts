@@ -7,9 +7,9 @@
 
 import { schema } from '@kbn/config-schema';
 import { IRouter } from '@kbn/core/server';
-import { verifyAccessAndContext, handleDisabledApiKeysError } from './lib';
-import { ILicenseState, RuleTypeDisabledError } from '../lib';
-import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../types';
+import { verifyAccessAndContext, handleDisabledApiKeysError } from '../../../lib';
+import { ILicenseState, RuleTypeDisabledError } from '../../../../lib';
+import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../../../../types';
 
 export const bulkDeleteRulesRoute = ({
   router,
