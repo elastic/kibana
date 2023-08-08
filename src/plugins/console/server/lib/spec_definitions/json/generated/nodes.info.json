@@ -9,13 +9,13 @@
     ],
     "patterns": [
       "_nodes",
-      "_nodes/{nodes}",
-      "_nodes/{metrics}",
-      "_nodes/{nodes}/{metrics}"
+      "_nodes/{node_id}",
+      "_nodes/{metric}",
+      "_nodes/{node_id}/{metric}"
     ],
     "url_components": {
-      "nodes": null,
-      "metrics": [
+      "node_id": null,
+      "metric": [
         "_all",
         "_none",
         "aggregations",

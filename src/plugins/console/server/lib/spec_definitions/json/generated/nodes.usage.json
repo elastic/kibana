@@ -8,13 +8,13 @@
     ],
     "patterns": [
       "_nodes/usage",
-      "_nodes/{nodes}/usage",
-      "_nodes/usage/{metrics}",
-      "_nodes/{nodes}/usage/{metrics}"
+      "_nodes/{node_id}/usage",
+      "_nodes/usage/{metric}",
+      "_nodes/{node_id}/usage/{metric}"
     ],
     "url_components": {
-      "nodes": null,
-      "metrics": [
+      "node_id": null,
+      "metric": [
         "_all",
         "rest_actions"
       ]

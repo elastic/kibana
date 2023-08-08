@@ -10,6 +10,7 @@ import { AxiosInstance, Method, AxiosResponse, AxiosRequestConfig } from 'axios'
 import { Logger } from '@kbn/core/server';
 import { getCustomAgents } from './get_custom_agents';
 import { ActionsConfigurationUtilities } from '../actions_config';
+import { SSLSettings } from '../types';
 
 export const request = async <T = unknown>({
   axios,
@@ -19,6 +20,7 @@ export const request = async <T = unknown>({
   data,
   configurationUtilities,
   headers,
+  sslOverrides,
   ...config
 }: {
   axios: AxiosInstance;
@@ -28,8 +30,14 @@ export const request = async <T = unknown>({
   data?: T;
   configurationUtilities: ActionsConfigurationUtilities;
   headers?: Record<string, string> | null;
+  sslOverrides?: SSLSettings;
 } & AxiosRequestConfig): Promise<AxiosResponse> => {
-  const { httpAgent, httpsAgent } = getCustomAgents(configurationUtilities, logger, url);
+  const { httpAgent, httpsAgent } = getCustomAgents(
+    configurationUtilities,
+    logger,
+    url,
+    sslOverrides
+  );
   const { maxContentLength, timeout } = configurationUtilities.getResponseSettings();
 
   return await axios(url, {

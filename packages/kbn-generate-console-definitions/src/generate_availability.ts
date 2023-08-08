@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { AutocompleteAvailability } from './types';
+import type { EndpointDescription } from '@kbn/console-plugin/common/types';
 import type { SpecificationTypes } from './types';
 
 const DEFAULT_ENDPOINT_AVAILABILITY = true;
 
 export const generateAvailability = (
   endpoint: SpecificationTypes.Endpoint
-): AutocompleteAvailability => {
-  const availability: AutocompleteAvailability = {
+): EndpointDescription['availability'] => {
+  const availability: EndpointDescription['availability'] = {
     stack: DEFAULT_ENDPOINT_AVAILABILITY,
     serverless: DEFAULT_ENDPOINT_AVAILABILITY,
   };

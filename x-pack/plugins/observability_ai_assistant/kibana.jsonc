@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/observability-ai-assistant-plugin",
-  "owner": "@elastic/apm-ui",
+  "owner": "@elastic/obs-ai-assistant",
   "plugin": {
     "id": "observabilityAIAssistant",
     "server": true,
@@ -13,7 +13,8 @@
     "requiredPlugins": [
       "triggersActionsUi",
       "actions",
-      "security"
+      "security",
+      "features"
     ],
     "requiredBundles": [
       "kibanaReact"

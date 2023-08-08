@@ -61,7 +61,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const azureActivitylogsIndex =
           'BQZwpgNmDGAuCWB7AdgLmAEwIay+W6yWAtmKgOQSIDmIAtFgF4CuATmAHRZzwBu8sAJ5VadAFTkANAlhRU3BPyEiQASklFS8lu2kC55AII6wAAgAyNEFN5hWIJGnIBGDgFYOAJgDM5deCgeFAAVQQAHMgdkaihVIA===';
         await PageObjects.common.navigateToApp('discover', {
-          hash: `/p/log-explorer?_a=(index:${encodeURIComponent(azureActivitylogsIndex)})`,
+          hash: `/p/log-explorer?_a=(index:${encodeURIComponent(
+            azureActivitylogsIndex
+          )})&controlPanels=()`,
         });
         const azureDatasetSelectionTitle =
           await PageObjects.discoverLogExplorer.getDatasetSelectorButtonText();

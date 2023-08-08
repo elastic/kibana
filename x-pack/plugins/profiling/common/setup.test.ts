@@ -6,55 +6,27 @@
  */
 
 import {
-  areResourcesSetup,
+  areResourcesSetupForAdmin,
+  areResourcesSetupForViewer,
   createDefaultSetupState,
   mergePartialSetupStates,
   PartialSetupState,
 } from './setup';
 
-function createCloudState(available: boolean): PartialSetupState {
-  return {
-    cloud: {
-      available,
-    },
-  };
-}
-
-function createDataState(available: boolean): PartialSetupState {
-  return {
-    data: {
-      available,
-    },
-  };
-}
-
-function createPermissionState(configured: boolean): PartialSetupState {
-  return {
-    permissions: {
-      configured,
-    },
-  };
-}
-
-function createCollectorPolicyState(installed: boolean): PartialSetupState {
-  return {
-    policies: {
-      collector: {
-        installed,
-      },
-    },
-  };
-}
-
-function createSymbolizerPolicyState(installed: boolean): PartialSetupState {
-  return {
-    policies: {
-      symbolizer: {
-        installed,
-      },
-    },
-  };
-}
+const createCloudState = (available: boolean): PartialSetupState => ({ cloud: { available } });
+const createDataState = (available: boolean): PartialSetupState => ({ data: { available } });
+const createPermissionState = (configured: boolean): PartialSetupState => ({
+  permissions: { configured },
+});
+const createCollectorPolicyState = (installed: boolean): PartialSetupState => ({
+  policies: { collector: { installed } },
+});
+const createSymbolizerPolicyState = (installed: boolean): PartialSetupState => ({
+  policies: { symbolizer: { installed } },
+});
+const createProfilingInApmPolicyState = (profilingEnabled: boolean): PartialSetupState => ({
+  policies: { apm: { profilingEnabled } },
+});
 
 function createResourceState({
   enabled,
@@ -82,50 +54,124 @@ function createSettingsState(configured: boolean): PartialSetupState {
 }
 
 describe('Merging partial state operations', () => {
-  const defaultSetupState = createDefaultSetupState();
+  describe('Merge states', () => {
+    const defaultSetupState = createDefaultSetupState();
 
-  test('partial states with missing key', () => {
-    const mergedState = mergePartialSetupStates(defaultSetupState, [
-      createCloudState(true),
-      createDataState(true),
-    ]);
+    it('returns partial states with missing key', () => {
+      const mergedState = mergePartialSetupStates(defaultSetupState, [
+        createCloudState(true),
+        createDataState(true),
+      ]);
 
-    expect(mergedState.cloud.available).toEqual(true);
-    expect(mergedState.cloud.required).toEqual(true);
-    expect(mergedState.data.available).toEqual(true);
+      expect(mergedState.cloud.available).toEqual(true);
+      expect(mergedState.cloud.required).toEqual(true);
+      expect(mergedState.data.available).toEqual(true);
+    });
+
+    it('should deeply nested partial states with overlap', () => {
+      const mergedState = mergePartialSetupStates(defaultSetupState, [
+        createCollectorPolicyState(true),
+        createSymbolizerPolicyState(true),
+      ]);
+
+      expect(mergedState.policies.collector.installed).toEqual(true);
+      expect(mergedState.policies.symbolizer.installed).toEqual(true);
+    });
+  });
+  describe('For admin users', () => {
+    const defaultSetupState = createDefaultSetupState();
+    it('returns false when permission is not configured', () => {
+      const mergedState = mergePartialSetupStates(defaultSetupState, [
+        createResourceState({ enabled: true, created: true }),
+        createSettingsState(true),
+        createPermissionState(false),
+      ]);
+
+      expect(areResourcesSetupForAdmin(mergedState)).toBeFalsy();
+    });
+
+    it('returns false when resource management is not enabled', () => {
+      const mergedState = mergePartialSetupStates(defaultSetupState, [
+        createResourceState({ enabled: false, created: true }),
+        createSettingsState(true),
+        createPermissionState(true),
+      ]);
+
+      expect(areResourcesSetupForAdmin(mergedState)).toBeFalsy();
+    });
+
+    it('returns false when resources are not created', () => {
+      const mergedState = mergePartialSetupStates(defaultSetupState, [
+        createResourceState({ enabled: true, created: false }),
+        createSettingsState(true),
+        createPermissionState(true),
+      ]);
+
+      expect(areResourcesSetupForAdmin(mergedState)).toBeFalsy();
+    });
+
+    it('returns false when settings are not configured', () => {
+      const mergedState = mergePartialSetupStates(defaultSetupState, [
+        createResourceState({ enabled: true, created: true }),
+        createSettingsState(false),
+        createPermissionState(true),
+      ]);
+
+      expect(areResourcesSetupForAdmin(mergedState)).toBeFalsy();
+    });
+
+    it('returns true when all checks are valid', () => {
+      const mergedState = mergePartialSetupStates(defaultSetupState, [
+        createResourceState({ enabled: true, created: true }),
+        createSettingsState(true),
+        createPermissionState(true),
+      ]);
+
+      expect(areResourcesSetupForAdmin(mergedState)).toBeTruthy();
+    });
   });
 
-  test('deeply nested partial states with overlap', () => {
-    const mergedState = mergePartialSetupStates(defaultSetupState, [
-      createCollectorPolicyState(true),
-      createSymbolizerPolicyState(true),
-    ]);
+  describe('For viewer users', () => {
+    const defaultSetupState = createDefaultSetupState();
 
-    expect(mergedState.policies.collector.installed).toEqual(true);
-    expect(mergedState.policies.symbolizer.installed).toEqual(true);
-  });
+    it('returns false when collector is not installed', () => {
+      const mergedState = mergePartialSetupStates(defaultSetupState, [
+        createCollectorPolicyState(false),
+        createSymbolizerPolicyState(true),
+        createProfilingInApmPolicyState(false),
+      ]);
 
-  test('check resource status with failed partial states', () => {
-    const mergedState = mergePartialSetupStates(defaultSetupState, [
-      createCollectorPolicyState(true),
-      createSymbolizerPolicyState(true),
-      createPermissionState(false),
-      createResourceState({ enabled: true, created: true }),
-      createSettingsState(true),
-    ]);
+      expect(areResourcesSetupForViewer(mergedState)).toBeFalsy();
+    });
 
-    expect(areResourcesSetup(mergedState)).toEqual(false);
-  });
+    it('returns false when symbolizer is not installed', () => {
+      const mergedState = mergePartialSetupStates(defaultSetupState, [
+        createCollectorPolicyState(true),
+        createSymbolizerPolicyState(false),
+        createProfilingInApmPolicyState(false),
+      ]);
 
-  test('check resource status with all successful partial states', () => {
-    const mergedState = mergePartialSetupStates(defaultSetupState, [
-      createCollectorPolicyState(true),
-      createSymbolizerPolicyState(true),
-      createPermissionState(true),
-      createResourceState({ enabled: true, created: true }),
-      createSettingsState(true),
-    ]);
+      expect(areResourcesSetupForViewer(mergedState)).toBeFalsy();
+    });
 
-    expect(areResourcesSetup(mergedState)).toEqual(true);
+    it('returns false when profiling is configured in APM policy', () => {
+      const mergedState = mergePartialSetupStates(defaultSetupState, [
+        createCollectorPolicyState(true),
+        createSymbolizerPolicyState(true),
+        createProfilingInApmPolicyState(true),
+      ]);
+
+      expect(areResourcesSetupForViewer(mergedState)).toBeFalsy();
+    });
+
+    it('returns true when all checks are valid', () => {
+      const mergedState = mergePartialSetupStates(defaultSetupState, [
+        createCollectorPolicyState(true),
+        createSymbolizerPolicyState(true),
+        createProfilingInApmPolicyState(false),
+      ]);
+
+      expect(areResourcesSetupForViewer(mergedState)).toBeTruthy();
+    });
   });
 });

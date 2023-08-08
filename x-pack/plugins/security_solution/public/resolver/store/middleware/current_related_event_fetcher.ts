@@ -38,8 +38,8 @@ export function CurrentRelatedEventFetcher(
     if (!last[id]) {
       last[id] = undefined;
     }
-    const newParams = selectors.panelViewAndParameters(state.analyzer.analyzerById[id]);
-    const indices = selectors.eventIndices(state.analyzer.analyzerById[id]);
+    const newParams = selectors.panelViewAndParameters(state.analyzer[id]);
+    const indices = selectors.eventIndices(state.analyzer[id]);
 
     const oldParams = last[id];
     last[id] = newParams;
@@ -53,11 +53,9 @@ export function CurrentRelatedEventFetcher(
       const winlogRecordID = newParams.panelParameters.winlogRecordID;
 
       api.dispatch(appRequestedCurrentRelatedEventData({ id }));
-      const detectedBounds = selectors.detectedBounds(state.analyzer.analyzerById[id]);
+      const detectedBounds = selectors.detectedBounds(state.analyzer[id]);
       const timeRangeFilters =
-        detectedBounds !== undefined
-          ? undefined
-          : selectors.timeRangeFilters(state.analyzer.analyzerById[id]);
+        detectedBounds !== undefined ? undefined : selectors.timeRangeFilters(state.analyzer[id]);
       let result: SafeResolverEvent | null = null;
       try {
         result = await dataAccessLayer.event({

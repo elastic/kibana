@@ -12,6 +12,11 @@ export enum AppFeatureSecurityKey {
   advancedInsights = 'advanced_insights',
 
   /**
+   * Enables Investigation guide in Timeline
+   */
+  investigationGuide = 'investigation_guide',
+
+  /**
    * Enables access to the Endpoint List and associated views that allows management of hosts
    * running endpoint security
    */
@@ -21,6 +26,11 @@ export enum AppFeatureSecurityKey {
    * Enables endpoint policy views that enables user to manage endpoint security policies
    */
   endpointPolicyManagement = 'endpoint_policy_management',
+
+  /**
+   * Enables Endpoint Policy protections (like Malware, Ransomware, etc)
+   */
+  endpointPolicyProtections = 'endpoint_policy_protections',
 
   /**
    * Enables management of all endpoint related artifacts (ex. Trusted Applications, Event Filters,
@@ -38,6 +48,11 @@ export enum AppFeatureSecurityKey {
    * Enables Threat Intelligence
    */
   threatIntelligence = 'threat-intelligence',
+
+  /**
+   * Enables Osquery Response Actions
+   */
+  osqueryAutomatedResponseActions = 'osquery_automated_response_actions',
 }
 
 export enum AppFeatureCasesKey {

@@ -5,7 +5,7 @@
       "POST"
     ],
     "patterns": [
-      "{indices}/_terms_enum"
+      "{index}/_terms_enum"
     ],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/search-terms-enum.html"
   }

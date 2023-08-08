@@ -13,7 +13,7 @@ import {
   EuiTabbedContent,
   EuiTabbedContentTab,
 } from '@elastic/eui';
-import { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React, { Fragment, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 
@@ -41,14 +41,23 @@ type TabId = typeof OVERVIEW_TAB_ID | typeof ALERTS_TAB_ID;
 export function SloDetails({ slo, isAutoRefreshing }: Props) {
   const { search } = useLocation();
   const { data: activeAlerts } = useFetchActiveAlerts({ sloIds: [slo.id] });
-  const { isLoading: historicalSummaryLoading, data: historicalSummaryBySlo = {} } =
-    useFetchHistoricalSummary({ sloIds: [slo.id], shouldRefetch: isAutoRefreshing });
+  const { isLoading: historicalSummaryLoading, data: historicalSummaries = [] } =
+    useFetchHistoricalSummary({
+      list: [{ sloId: slo.id, instanceId: slo.instanceId ?? ALL_VALUE }],
+      shouldRefetch: isAutoRefreshing,
+    });
+
+  const sloHistoricalSummary = historicalSummaries.find(
+    (historicalSummary) =>
+      historicalSummary.sloId === slo.id &&
+      historicalSummary.instanceId === (slo.instanceId ?? ALL_VALUE)
+  );
 
   const errorBudgetBurnDownData = formatHistoricalData(
-    historicalSummaryBySlo[slo.id],
+    sloHistoricalSummary?.data,
     'error_budget_remaining'
   );
-  const historicalSliData = formatHistoricalData(historicalSummaryBySlo[slo.id], 'sli_value');
+  const historicalSliData = formatHistoricalData(sloHistoricalSummary?.data, 'sli_value');
 
   const tabs: EuiTabbedContentTab[] = [
     {
