@@ -95,11 +95,6 @@ export class EmbeddableEnhancedPlugin
             if (!embeddable) return embeddable;
             return this.enhanceEmbeddableWithDynamicActions(embeddable);
           },
-          createWithMigrations: async (...args) => {
-            const embeddable = await factory.createWithMigrations(...args);
-            if (!embeddable) return embeddable;
-            return this.enhanceEmbeddableWithDynamicActions(embeddable);
-          },
         };
       }
     );

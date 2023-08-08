@@ -100,6 +100,7 @@ describe('embeddable factory', () => {
     extract: jest.fn().mockImplementation((state) => ({ state, references: [] })),
     inject: jest.fn().mockImplementation((state) => state),
     telemetry: jest.fn().mockResolvedValue({}),
+    latestVersion: '7.11.0',
     migrations: { '7.11.0': jest.fn().mockImplementation((state) => state) },
   } as any;
   const embeddableState = {
