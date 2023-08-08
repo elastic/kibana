@@ -147,7 +147,10 @@ export const loginWithUser = (user: User) => {
           password: user.password,
         },
       },
-      headers: { 'kbn-xsrf': 'cypress-creds-via-config' },
+      headers: {
+        'kbn-xsrf': 'cypress-creds-via-config',
+        'x-elastic-internal-origin': 'security-solution',
+      },
       method: 'POST',
       url: constructUrlWithUser(user, LOGIN_API_ENDPOINT),
     });
@@ -172,7 +175,10 @@ const loginWithRole = async (role: ROLES) => {
           password: 'changeme',
         },
       },
-      headers: { 'kbn-xsrf': 'cypress-creds-via-config' },
+      headers: {
+        'kbn-xsrf': 'cypress-creds-via-config',
+        'x-elastic-internal-origin': 'security-solution',
+      },
       method: 'POST',
       url: getUrlWithRoute(role, LOGIN_API_ENDPOINT),
     });
@@ -230,7 +236,10 @@ const loginViaEnvironmentCredentials = () => {
           password,
         },
       },
-      headers: { 'kbn-xsrf': 'cypress-creds-via-env' },
+      headers: {
+        'kbn-xsrf': 'cypress-creds-via-env',
+        'x-elastic-internal-origin': 'security-solution',
+      },
       method: 'POST',
       url: `${Cypress.config().baseUrl}${LOGIN_API_ENDPOINT}`,
     });
@@ -262,7 +271,10 @@ const loginViaConfig = () => {
           password: config.elasticsearch.password,
         },
       },
-      headers: { 'kbn-xsrf': 'cypress-creds-via-config' },
+      headers: {
+        'kbn-xsrf': 'cypress-creds-via-config',
+        'x-elastic-internal-origin': 'security-solution',
+      },
       method: 'POST',
       url: `${Cypress.config().baseUrl}${LOGIN_API_ENDPOINT}`,
     });
