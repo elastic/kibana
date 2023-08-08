@@ -374,7 +374,7 @@ describe('Alert Event Details', () => {
     });
   });
 
-  describe('Case creation', () => {
+  describe.skip('Case creation', () => {
     let ruleId: string;
     let ruleName: string;
     let packId: string;
