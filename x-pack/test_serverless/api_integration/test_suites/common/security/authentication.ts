@@ -15,7 +15,8 @@ export default function ({ getService }: FtrProviderContext) {
   describe('security/authentication', function () {
     describe('route access', () => {
       describe('disabled', () => {
-        it('login', async () => {
+        // We are temporarily allowing the login API for testing purposes
+        it.skip('login', async () => {
           const { body, status } = await supertest
             .post('/internal/security/login')
             .set(svlCommonApi.getInternalRequestHeader());

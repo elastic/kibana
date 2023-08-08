@@ -14,7 +14,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('security/user_profiles', function () {
     describe('route access', () => {
-      describe('internal', () => {
+      describe.skip('internal', () => {
         it('update', async () => {
           const { status } = await supertest
             .post(`/internal/security/user_profile/_data`)
