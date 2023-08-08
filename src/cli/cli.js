@@ -14,7 +14,6 @@ import serveCommand from './serve/serve';
 const argv = process.argv.slice();
 const program = new Command('bin/kibana');
 
-
 program
   .version(pkg.version)
   .description(
