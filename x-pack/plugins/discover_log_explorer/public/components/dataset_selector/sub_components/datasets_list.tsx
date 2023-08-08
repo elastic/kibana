@@ -44,6 +44,7 @@ export const DatasetsList = ({
   if (hasError) {
     return (
       <EuiEmptyPrompt
+        data-test-subj="datasetErrorPrompt"
         iconType="warning"
         iconColor="danger"
         paddingSize="m"

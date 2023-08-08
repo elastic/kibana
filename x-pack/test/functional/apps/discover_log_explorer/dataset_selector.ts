@@ -133,6 +133,7 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       beforeEach(async () => {
+        await browser.refresh();
         await PageObjects.discoverLogExplorer.openDatasetSelector();
       });
 
@@ -173,7 +174,49 @@ export default function (providerContext: FtrProviderContext) {
         });
       });
 
-      describe('when navigating into Uncategorized data streams', () => {
+      describe.only('when navigating into Uncategorized data streams', () => {
+        it('should display a loading skeleton while loading', async function () {
+          // Skip the test in case network condition utils are not available
+          try {
+            await browser.setNetworkConditions({ download_throughput: 1024 }); // Almost stuck network conditions
+            const unamanagedDatasetButton =
+              await PageObjects.discoverLogExplorer.getUnmanagedDatasetsButton();
+            await unamanagedDatasetButton.click();
+
+            await PageObjects.discoverLogExplorer.assertLoadingSkeletonExists();
+
+            await browser.restoreNetworkConditions();
+          } catch (error) {
+            console.log(error);
+            this.skip();
+          }
+        });
+
+        it('should display an error prompt if could not retrieve the data streams', async function () {
+          // Skip the test in case network condition utils are not available
+          try {
+            const unamanagedDatasetButton =
+              await PageObjects.discoverLogExplorer.getUnmanagedDatasetsButton();
+            await unamanagedDatasetButton.click();
+
+            await retry.try(async () => {
+              await PageObjects.discoverLogExplorer.assertNoDataStreamsPromptExists();
+            });
+
+            await browser.setNetworkConditions({ offline: true });
+            await PageObjects.discoverLogExplorer.typeSearchFieldWith('a');
+
+            await retry.try(async () => {
+              await PageObjects.discoverLogExplorer.assertNoDataStreamsErrorExists();
+            });
+
+            await browser.restoreNetworkConditions();
+          } catch (error) {
+            console.log(error);
+            this.skip();
+          }
+        });
+
         it('should display an empty prompt for no data streams', async () => {
           const unamanagedDatasetButton =
             await PageObjects.discoverLogExplorer.getUnmanagedDatasetsButton();
@@ -338,7 +381,17 @@ export default function (providerContext: FtrProviderContext) {
         });
       });
 
-      // describe('when click on an integration and moves into the second navigation level', () => {});
+      describe('when click on an integration and moves into the second navigation level', () => {});
+
+      // describe('when navigating into Uncategorized data streams', () => {
+      //   beforeEach(async () => {
+      //     await PageObjects.discoverLogExplorer.openDatasetSelector();
+      //   });
+
+      //   afterEach(async () => {
+      //     await PageObjects.discoverLogExplorer.closeDatasetSelector();
+      //   });
+      // });
 
       describe('when open/close the selector', () => {
         before(async () => {

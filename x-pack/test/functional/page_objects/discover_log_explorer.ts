@@ -113,6 +113,10 @@ export function DiscoverLogExplorerPageObject({ getService }: FtrProviderContext
       );
     },
 
+    assertLoadingSkeletonExists() {
+      return testSubjects.existOrFail('datasetSelectorSkeleton');
+    },
+
     async assertNoIntegrationsPromptExists() {
       const integrationStatus = await testSubjects.find('integrationStatusItem');
       const promptTitle = await integrationStatus.findByTagName('h2');
@@ -122,6 +126,13 @@ export function DiscoverLogExplorerPageObject({ getService }: FtrProviderContext
 
     async assertNoDataStreamsPromptExists() {
       const integrationStatus = await testSubjects.find('emptyDatasetPrompt');
+      const promptTitle = await integrationStatus.findByTagName('h2');
+
+      expect(await promptTitle.getVisibleText()).to.be('No data streams found');
+    },
+
+    async assertNoDataStreamsErrorExists() {
+      const integrationStatus = await testSubjects.find('datasetErrorPrompt');
       const promptTitle = await integrationStatus.findByTagName('h2');
 
       expect(await promptTitle.getVisibleText()).to.be('No data streams found');
