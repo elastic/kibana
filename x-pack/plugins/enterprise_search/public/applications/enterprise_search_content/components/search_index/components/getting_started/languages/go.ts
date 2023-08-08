@@ -57,41 +57,15 @@ func main() {
   Do(context.Background())
 
 fmt.Println(ingestResult, err)`,
-  ingestDataIndex: ({ apiKey, url, indexName }) => `import (
-  "context"
-  "fmt"
-  "log"
-  "strings"
-​
-  "github.com/elastic/elasticsearch-serverless-go"
-)
-​
-func main() {
-  cfg := elasticsearch.Config{
-    Address: "${url}",
-    APIKey: "${apiKey}",
-  }
-  es, err := elasticsearch.NewClient(cfg)
-  if err != nil {
-    log.Fatalf("Error creating the client: %s", err)
-  }
-  res, err := es.Bulk().
-    Index("${indexName}").
-    Raw(strings.NewReader(\`
-{ "index": { "_id": "1"}}
-{"name": "foo", "title": "bar"}\n\`)).
-    Do(context.Background())
-  ​
-  fmt.Println(res, err)
-}`,
-  installClient: 'go get -u github.com/elastic/elasticsearch-serverless-go@latest',
+  ingestDataIndex: '',
+  installClient: 'go get github.com/elastic/go-elasticsearch/v8@latest',
   name: i18n.translate('xpack.enterpriseSearch.languages.go', {
     defaultMessage: 'Go',
   }),
   testConnection: `infores, err := es.Info().Do(context.Background())
-if err != nil {
-  log.Fatalf("Error getting response: %s", err)
-}
+  if err != nil {
+    log.Fatalf("Error getting response: %s", err)
+  }
 
-fmt.Println(infores)`,
+  fmt.Println(infores)`,
 };

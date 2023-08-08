@@ -10,8 +10,6 @@ import { Languages, LanguageDefinition } from '@kbn/search-api-panels';
 
 import { docLinks } from '../../../../../../shared/doc_links';
 
-import { INDEX_NAME_PLACEHOLDER } from './constants';
-
 export const pythonDefinition: LanguageDefinition = {
   buildSearchQuery: `client.search(index="books", q="snow")`,
   configureClient: ({ url, apiKey }) => `from elasticsearch import Elasticsearch
@@ -39,20 +37,7 @@ client = Elasticsearch(
 ]
 
 client.bulk(operations=documents)`,
-  ingestDataIndex: ({ apiKey, url, indexName }) => `from elasticsearch import Elasticsearch
-
-client = Elasticsearch(
-  "${url}",
-  api_key="${apiKey}"
-)
-
-documents = [
-  {"index": {"_index": "${indexName ?? INDEX_NAME_PLACEHOLDER}"}},
-  {"name": "foo", "title": "bar"},
-]
-
-client.bulk(operations=documents)
-`,
+  ingestDataIndex: '',
   installClient: `python -m pip install elasticsearch
 
 # If your application uses async/await in Python you can install with the async extra

@@ -83,7 +83,10 @@ export const APIGettingStarted = () => {
         </h2>
       </EuiTitle>
       <SelectClientPanel
-        docLinks={docLinks}
+        docLinks={{
+          elasticsearchClients: docLinks.clientsGuide,
+          kibanaRunApiInConsole: docLinks.consoleGuide,
+        }}
         http={http}
         isPanelLeft={false}
         overviewPanelProps={{ color: 'plain', hasShadow: false }}
@@ -221,8 +224,8 @@ export const APIGettingStarted = () => {
         rightPanelContent={
           <EuiSplitPanel.Outer>
             <EuiSplitPanel.Inner>
-              <EuiTitle>
-                <h4>
+              <EuiTitle size="xs">
+                <h5>
                   {isCloud
                     ? i18n.translate(
                         'xpack.enterpriseSearch.content.overview.gettingStarted.cloudId.cloudTitle',
@@ -236,7 +239,7 @@ export const APIGettingStarted = () => {
                           defaultMessage: 'Store your elasticsearch URL',
                         }
                       )}
-                </h4>
+                </h5>
               </EuiTitle>
               <EuiText>
                 {i18n.translate(

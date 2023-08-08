@@ -25,7 +25,7 @@ import { OverviewPanel } from './overview_panel';
 import './select_client.scss';
 
 export interface SelectClientPanelProps {
-  docLinks: any;
+  docLinks: { elasticsearchClients: string; kibanaRunApiInConsole: string };
   http: HttpStart;
   isPanelLeft?: boolean;
   overviewPanelProps?: Partial<EuiPanelProps>;
