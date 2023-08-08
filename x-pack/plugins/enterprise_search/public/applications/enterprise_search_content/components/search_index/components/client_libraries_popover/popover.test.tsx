@@ -85,11 +85,11 @@ describe('ClientLibrariesPopover', () => {
       wrapper
         .find(EuiContextMenuPanel)
         .prop('items')
-        ?.map((item) => shallow(<div>{item}</div>)) || [];
+        ?.map((item: HTMLElement) => shallow(<div>{item}</div>)) || [];
 
     expect(contextMenuItems.length > 0).toBeTruthy();
 
-    contextMenuItems.forEach((item, index) => {
+    contextMenuItems.forEach((item: any, index: number) => {
       const menuItem = item.find(EuiContextMenuItem);
       expect(menuItem.prop('href')).toEqual(librariesList[index].href);
     });
