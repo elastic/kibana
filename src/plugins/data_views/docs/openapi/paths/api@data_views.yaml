@@ -1,0 +1,35 @@
+get:
+  summary: Retrieves a list of all data views.
+  operationId: getAllDataViews
+  tags:
+    - data views
+  responses:
+    '200':
+      description: Indicates a successful call.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data_view:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    name:
+                      type: string
+                    namespaces:
+                      type: array
+                      items:
+                        type: string
+                    title:
+                      type: string
+                    typeMeta:
+                      type: object
+          examples:
+            getAllDataViewsResponse:
+              $ref: '../components/examples/get_data_views_response.yaml'
+servers:
+  - url: https://localhost:5601
