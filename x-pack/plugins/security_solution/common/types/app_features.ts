@@ -48,6 +48,11 @@ export enum AppFeatureSecurityKey {
    * Enables Threat Intelligence
    */
   threatIntelligence = 'threat-intelligence',
+
+  /**
+   * Enables Osquery Response Actions
+   */
+  osqueryAutomatedResponseActions = 'osquery_automated_response_actions',
 }
 
 export enum AppFeatureCasesKey {

@@ -74,11 +74,6 @@ export function ApiKeysPageProvider({ getService }: FtrProviderContext) {
       return euiCallOutHeader.getVisibleText();
     },
 
-    async getErrorCallOutText() {
-      const alertElem = await find.byCssSelector('[role="dialog"] [role="alert"] .euiText');
-      return await alertElem.getVisibleText();
-    },
-
     async getApiKeysFirstPromptTitle() {
       const titlePromptElem = await find.byCssSelector('.euiEmptyPrompt .euiTitle');
       return await titlePromptElem.getVisibleText();
@@ -133,11 +128,6 @@ export function ApiKeysPageProvider({ getService }: FtrProviderContext) {
     async getFlyoutTitleText() {
       const header = await find.byClassName('euiFlyoutHeader');
       return header.getVisibleText();
-    },
-
-    async getFlyoutUsername() {
-      const usernameField = await testSubjects.find('apiKeyFlyoutUsername');
-      return usernameField.getVisibleText();
     },
 
     async getFlyoutApiKeyStatus() {
