@@ -7,10 +7,7 @@
     "id": "ml",
     "server": true,
     "browser": true,
-    "configPath": [
-      "xpack",
-      "ml"
-    ],
+    "configPath": ["xpack", "ml"],
     "requiredPlugins": [
       "aiops",
       "charts",
@@ -31,6 +28,7 @@
       "unifiedSearch",
       "savedObjectsManagement",
       "savedSearch",
+      "contentManagement",
       "presentationUtil"
     ],
     "optionalPlugins": [
@@ -59,8 +57,6 @@
       "usageCollection",
       "unifiedSearch"
     ],
-    "extraPublicDirs": [
-      "common"
-    ]
+    "extraPublicDirs": ["common"]
   }
 }
