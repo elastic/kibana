@@ -56,10 +56,10 @@ Predicting the buffer required to account for actions depends heavily on the rul
 
 experimental[]
 
-Alerts and actions log activity in a set of "event log" data streams, one per Kibana version, named `.kibana-event-log-{VERSION}`.  These data streams are configured with a lifecycle data retention of 90 days. This can be updated to other values via the standard data stream lifecycle APIs.
+Alerts and actions log activity in a set of "event log" data streams, one per Kibana version, named `.kibana-event-log-{VERSION}`.  These data streams are configured with a lifecycle data retention of 90 days. This can be updated to other values via the standard data stream lifecycle APIs.  Note that the event log data contains the data shown in the alerting pages in {kib}, so reducing the data retention period will result in less data being available to view.
 
 For more information on data stream lifecycle management, see:
-{ref}/data-stream-lifecycle.html[Data stream lifecycl].
+{ref}/data-stream-lifecycle.html[Data stream lifecycle].
 
 [float]
 [[alerting-circuit-breakers]]
