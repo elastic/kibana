@@ -105,6 +105,7 @@ export const FlyoutWrapper = ({
                   defaultMessage: 'Apply changes',
                 })}
                 iconType="check"
+                data-test-subj="collapseFlyoutButton"
               >
                 <FormattedMessage
                   id="xpack.lens.config.applyFlyoutLabel"
