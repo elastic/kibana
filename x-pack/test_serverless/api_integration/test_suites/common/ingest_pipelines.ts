@@ -156,5 +156,65 @@ export default function ({ getService }: FtrProviderContext) {
         });
       });
     });
+
+    describe('Get', () => {
+      let pipeline: Omit<IngestPutPipelineRequest, 'id'>;
+      let pipelineName: string;
+
+      before(async () => {
+        // Create pipeline that can be used to test GET request
+        try {
+          const pipelineRequestBody =
+            ingestPipelines.fixtures.createPipelineBodyWithRequiredFields();
+          const { name, ...esPipelineRequestBody } = pipelineRequestBody;
+
+          pipeline = esPipelineRequestBody;
+          pipelineName = name;
+          await ingestPipelines.api.createPipeline({ id: name, ...esPipelineRequestBody });
+        } catch (err) {
+          log.debug('[Setup error] Error creating ingest pipeline');
+          throw err;
+        }
+      });
+
+      describe('all pipelines', () => {
+        it('should return an array of pipelines', async () => {
+          const { body } = await supertest
+            .get(ingestPipelines.fixtures.apiBasePath)
+            .set('kbn-xsrf', 'xxx')
+            .set('x-elastic-internal-origin', 'xxx')
+            .expect(200);
+
+          expect(Array.isArray(body)).to.be(true);
+
+          // There are some pipelines created OOTB with ES
+          // To not be dependent on these, we only confirm the pipeline we created as part of the test exists
+          const testPipeline = body.find(({ name }: { name: string }) => name === pipelineName);
+
+          expect(testPipeline).to.eql({
+            ...pipeline,
+            isManaged: false,
+            name: pipelineName,
+          });
+        });
+      });
+      describe('one pipeline', () => {
+        it('should return a single pipeline', async () => {
+          const uri = `${ingestPipelines.fixtures.apiBasePath}/${pipelineName}`;
+
+          const { body } = await supertest
+            .get(uri)
+            .set('kbn-xsrf', 'xxx')
+            .set('x-elastic-internal-origin', 'xxx')
+            .expect(200);
+
+          expect(body).to.eql({
+            ...pipeline,
+            isManaged: false,
+            name: pipelineName,
+          });
+        });
+      });
+    });
   });
 }
