@@ -25,10 +25,6 @@ import { ExpressionsServerSetup } from '@kbn/expressions-plugin/server';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { KbnServerError } from '@kbn/kibana-utils-plugin/server';
-import type {
-  TaskManagerSetupContract,
-  TaskManagerStartContract,
-} from '@kbn/task-manager-plugin/server';
 import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import type {
@@ -107,7 +103,6 @@ export interface SearchServiceSetupDependencies {
   bfetch: BfetchServerSetup;
   expressions: ExpressionsServerSetup;
   usageCollection?: UsageCollectionSetup;
-  taskManager?: TaskManagerSetupContract;
   security?: SecurityPluginSetup;
 }
 
@@ -115,7 +110,6 @@ export interface SearchServiceSetupDependencies {
 export interface SearchServiceStartDependencies {
   fieldFormats: FieldFormatsStart;
   indexPatterns: DataViewsServerPluginStart;
-  taskManager?: TaskManagerStartContract;
 }
 
 /** @internal */

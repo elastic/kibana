@@ -35,8 +35,6 @@ export class DataViewsServerPlugin
   private readonly logger: Logger;
   private rollupsEnabled: boolean = false;
 
-  private isRollupsEnabled = () => this.rollupsEnabled;
-
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get('dataView');
   }
@@ -52,7 +50,7 @@ export class DataViewsServerPlugin
     registerRoutes(
       core.http,
       core.getStartServices,
-      () => this.isRollupsEnabled(),
+      () => this.rollupsEnabled,
       dataViewRestCounter
     );
 
