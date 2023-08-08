@@ -87,6 +87,20 @@
           },
           {
             "parentPluginId": "cloud",
+            "id": "def-public.CloudConfigType.projects_url",
+            "type": "string",
+            "tags": [],
+            "label": "projects_url",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/cloud/public/plugin.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cloud",
             "id": "def-public.CloudConfigType.billing_url",
             "type": "string",
             "tags": [],
@@ -371,6 +385,22 @@
           },
           {
             "parentPluginId": "cloud",
+            "id": "def-public.CloudStart.projectsUrl",
+            "type": "string",
+            "tags": [],
+            "label": "projectsUrl",
+            "description": [
+              "\nThe full URL to the serverless projects page on Elastic Cloud. Undefined if not running in Serverless."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/cloud/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cloud",
             "id": "def-public.CloudStart.elasticsearchUrl",
             "type": "string",
             "tags": [],
@@ -520,6 +550,22 @@
           "label": "deploymentUrl",
           "description": [
             "\nThe full URL to the deployment management page on Elastic Cloud. Undefined if not running on Cloud."
+          ],
+          "signature": [
+            "string | undefined"
+          ],
+          "path": "x-pack/plugins/cloud/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "cloud",
+          "id": "def-public.CloudSetup.projectsUrl",
+          "type": "string",
+          "tags": [],
+          "label": "projectsUrl",
+          "description": [
+            "\nThe full URL to the serverless projects page on Elastic Cloud. Undefined if not running in Serverless."
           ],
           "signature": [
             "string | undefined"
