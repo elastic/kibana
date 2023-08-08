@@ -227,5 +227,7 @@ export const getSecurityAppFeaturesConfig = (
         },
       ],
     },
+
+    [AppFeatureSecurityKey.osqueryAutomatedResponseActions]: {},
   };
 };
