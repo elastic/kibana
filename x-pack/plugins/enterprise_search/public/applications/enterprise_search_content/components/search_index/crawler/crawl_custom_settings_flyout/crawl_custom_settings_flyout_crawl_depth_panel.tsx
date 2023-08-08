@@ -22,8 +22,8 @@ import { i18n } from '@kbn/i18n';
 
 import { CrawlCustomSettingsFlyoutLogic } from './crawl_custom_settings_flyout_logic';
 
-export const CrawlCustomSettingsFlyoutCrawlDepthPanel: React.FC = () => {
-  const { maxCrawlDepth } = useValues(CrawlCustomSettingsFlyoutLogic);
+export const CrawlCustomSettingsFlyoutCrawlDepthPanel: React.FC = ({ maxCrawlDepth, index }) => {
+
   const { onSelectMaxCrawlDepth } = useActions(CrawlCustomSettingsFlyoutLogic);
 
   return (
@@ -43,7 +43,7 @@ export const CrawlCustomSettingsFlyoutCrawlDepthPanel: React.FC = () => {
               min={1}
               value={maxCrawlDepth}
               onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                onSelectMaxCrawlDepth(parseInt(e.target.value, 10))
+                onSelectMaxCrawlDepth(index, parseInt(e.target.value, 10))
               }
             />
           </EuiFormRow>

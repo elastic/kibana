@@ -32,16 +32,15 @@ import { UrlComboBox } from '../../../../../shared/url_combo_box/url_combo_box';
 
 import { CrawlCustomSettingsFlyoutLogic } from './crawl_custom_settings_flyout_logic';
 
-export const CrawlCustomSettingsFlyoutSeedUrlsPanel: React.FC = () => {
+export const CrawlCustomSettingsFlyoutSeedUrlsPanel: React.FC = ({ index, customEntryPointUrls,
+  customSitemapUrls,
+  includeSitemapsInRobotsTxt,
+  selectedDomainUrls,
+  selectedEntryPointUrls,
+  selectedSitemapUrls }) => {
   const {
-    customEntryPointUrls,
-    customSitemapUrls,
-    entryPointUrls,
-    includeSitemapsInRobotsTxt,
-    selectedDomainUrls,
-    selectedEntryPointUrls,
-    selectedSitemapUrls,
-    sitemapUrls,
+    crawlerEntryPointUrls,
+    crawlerSitemapUrls,
   } = useValues(CrawlCustomSettingsFlyoutLogic);
   const {
     onSelectCustomEntryPointUrls,
@@ -125,22 +124,22 @@ export const CrawlCustomSettingsFlyoutSeedUrlsPanel: React.FC = () => {
                         />
                       }
                       checked={includeSitemapsInRobotsTxt}
-                      onChange={toggleIncludeSitemapsInRobotsTxt}
+                      onChange={e => toggleIncludeSitemapsInRobotsTxt(index, e)}
                     />
                   </EuiPanel>
                   <SimplifiedSelectable
                     data-telemetry-id="entSearchContent-crawler-customCrawlSettings-selectDomain"
-                    options={sitemapUrls}
+                    options={crawlerSitemapUrls[index]}
                     selectedOptions={selectedSitemapUrls}
-                    onChange={onSelectSitemapUrls}
+                    onChange={e => onSelectSitemapUrls(index, e)}
                     emptyMessage={
                       selectedDomainUrls.length === 0
                         ? i18n.translate(
-                            'xpack.enterpriseSearch.crawler.crawlCustomSettingsFlyout.emptyDomainsMessage',
-                            {
-                              defaultMessage: 'Please select a domain.',
-                            }
-                          )
+                          'xpack.enterpriseSearch.crawler.crawlCustomSettingsFlyout.emptyDomainsMessage',
+                          {
+                            defaultMessage: 'Please select a domain.',
+                          }
+                        )
                         : undefined
                     }
                   />
@@ -153,7 +152,7 @@ export const CrawlCustomSettingsFlyoutSeedUrlsPanel: React.FC = () => {
                         defaultMessage: 'Custom sitemap URLs',
                       }
                     )}
-                    onChange={onSelectCustomSitemapUrls}
+                    onChange={e => onSelectCustomSitemapUrls(index, e)}
                     selectedUrls={customSitemapUrls}
                   />
                 </>
@@ -172,17 +171,17 @@ export const CrawlCustomSettingsFlyoutSeedUrlsPanel: React.FC = () => {
                   <EuiSpacer size="s" />
                   <SimplifiedSelectable
                     data-telemetry-id="entSearchContent-crawler-customCrawlSettings-selectDomain"
-                    options={entryPointUrls}
+                    options={crawlerEntryPointUrls[index]}
                     selectedOptions={selectedEntryPointUrls}
-                    onChange={onSelectEntryPointUrls}
+                    onChange={e => onSelectEntryPointUrls(index, e)}
                     emptyMessage={
                       selectedDomainUrls.length === 0
                         ? i18n.translate(
-                            'xpack.enterpriseSearch.crawler.crawlCustomSettingsFlyout.emptyDomainsMessage',
-                            {
-                              defaultMessage: 'Please select a domain.',
-                            }
-                          )
+                          'xpack.enterpriseSearch.crawler.crawlCustomSettingsFlyout.emptyDomainsMessage',
+                          {
+                            defaultMessage: 'Please select a domain.',
+                          }
+                        )
                         : undefined
                     }
                   />
@@ -195,7 +194,7 @@ export const CrawlCustomSettingsFlyoutSeedUrlsPanel: React.FC = () => {
                         defaultMessage: 'Custom entry point URLs',
                       }
                     )}
-                    onChange={onSelectCustomEntryPointUrls}
+                    onChange={e => onSelectCustomEntryPointUrls(index, e)}
                     selectedUrls={customEntryPointUrls}
                   />
                 </>
