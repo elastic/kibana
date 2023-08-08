@@ -62,9 +62,20 @@ export default async () => {
         ])}`,
         // This ensures that we register the Security SAML API endpoints.
         // In the real world the SAML config is injected by control plane.
+        // basic: { 'cloud-basic': { order: 0 } },
+        // anonymous: {
+        //   anonymous1: {
+        //     order: 1,
+        //     credentials: {
+        //       username: 'anonymous_service_account',
+        //       password: 'anonymous_service_account_password',
+        //     },
+        //   },
+        // },
         '--xpack.cloud.id=ftr_fake_cloud_id',
         `--xpack.security.authc.providers=${JSON.stringify({
-          saml: { 'cloud-saml-kibana': { order: 0, realm: 'cloud-saml-kibana' } },
+          basic: { 'cloud-basic': { order: 0 } },
+          saml: { 'cloud-saml-kibana': { order: 1, realm: 'cloud-saml-kibana' } },
         })}`,
       ],
     },

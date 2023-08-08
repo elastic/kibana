@@ -132,54 +132,55 @@ export function defineCommonRoutes({
     return undefined;
   }
 
-  if (buildFlavor !== 'serverless') {
-    // In the serverless environment, we do not support API login - the only valid authentication methodology (or maybe just method or mechanism?) is SAML
-    router.post(
-      {
-        path: '/internal/security/login',
-        validate: {
-          body: schema.object({
-            providerType: schema.string(),
-            providerName: schema.string(),
-            currentURL: schema.string(),
-            params: schema.conditional(
-              schema.siblingRef('providerType'),
-              schema.oneOf([
-                schema.literal(BasicAuthenticationProvider.type),
-                schema.literal(TokenAuthenticationProvider.type),
-              ]),
-              basicParamsSchema,
-              schema.never()
-            ),
-          }),
-        },
-        options: { authRequired: false },
+  // Register the login route for serverless for the time being. Note: This route will move into the buildFlavor !== 'serverless' block below. See next line.
+  // ToDo: In the serverless environment, we do not support API login - the only valid authentication methodology (or maybe just method or mechanism?) is SAML
+  router.post(
+    {
+      path: '/internal/security/login',
+      validate: {
+        body: schema.object({
+          providerType: schema.string(),
+          providerName: schema.string(),
+          currentURL: schema.string(),
+          params: schema.conditional(
+            schema.siblingRef('providerType'),
+            schema.oneOf([
+              schema.literal(BasicAuthenticationProvider.type),
+              schema.literal(TokenAuthenticationProvider.type),
+            ]),
+            basicParamsSchema,
+            schema.never()
+          ),
+        }),
       },
-      createLicensedRouteHandler(async (context, request, response) => {
-        const { providerType, providerName, currentURL, params } = request.body;
-        logger.info(`Logging in with provider "${providerName}" (${providerType})`);
+      options: { authRequired: false },
+    },
+    createLicensedRouteHandler(async (context, request, response) => {
+      const { providerType, providerName, currentURL, params } = request.body;
+      logger.info(`Logging in with provider "${providerName}" (${providerType})`);
 
-        const redirectURL = parseNext(currentURL, basePath.serverBasePath);
-        const authenticationResult = await getAuthenticationService().login(request, {
-          provider: { name: providerName },
-          redirectURL,
-          value: getLoginAttemptForProviderType(providerType, redirectURL, params),
-        });
+      const redirectURL = parseNext(currentURL, basePath.serverBasePath);
+      const authenticationResult = await getAuthenticationService().login(request, {
+        provider: { name: providerName },
+        redirectURL,
+        value: getLoginAttemptForProviderType(providerType, redirectURL, params),
+      });
 
-        if (authenticationResult.redirected() || authenticationResult.succeeded()) {
-          return response.ok({
-            body: { location: authenticationResult.redirectURL || redirectURL },
-            headers: authenticationResult.authResponseHeaders,
-          });
-        }
-
-        return response.unauthorized({
-          body: authenticationResult.error,
+      if (authenticationResult.redirected() || authenticationResult.succeeded()) {
+        return response.ok({
+          body: { location: authenticationResult.redirectURL || redirectURL },
           headers: authenticationResult.authResponseHeaders,
         });
-      })
-    );
+      }
 
+      return response.unauthorized({
+        body: authenticationResult.error,
+        headers: authenticationResult.authResponseHeaders,
+      });
+    })
+  );
+
+  if (buildFlavor !== 'serverless') {
     // In the serverless offering, the access agreement functionality isn't available.
     router.post(
       { path: '/internal/security/access_agreement/acknowledge', validate: false },
