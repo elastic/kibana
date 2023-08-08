@@ -16,7 +16,16 @@ import {
   ChromeProjectNavigationNode,
 } from '@kbn/core-chrome-browser';
 import type { HttpStart } from '@kbn/core-http-browser';
-import { BehaviorSubject, Observable, combineLatest, map, takeUntil, ReplaySubject } from 'rxjs';
+import {
+  BehaviorSubject,
+  Observable,
+  combineLatest,
+  map,
+  takeUntil,
+  ReplaySubject,
+  skip,
+  distinctUntilChanged,
+} from 'rxjs';
 import type { Location } from 'history';
 import deepEqual from 'react-fast-compare';
 import classnames from 'classnames';
@@ -55,10 +64,23 @@ export class ProjectNavigationService {
     this.onHistoryLocationChange(application.history.location);
     this.unlistenHistory = application.history.listen(this.onHistoryLocationChange.bind(this));
 
-    this.activeNodes$.pipe(takeUntil(this.stop$)).subscribe(() => {
-      // reset the breadcrumbs when the active nodes change
-      this.projectBreadcrumbs$.next({ breadcrumbs: [], params: { absolute: false } });
-    });
+    this.activeNodes$
+      .pipe(
+        takeUntil(this.stop$),
+        // skip initial empty state
+        skip(1),
+        // only reset when the active breadcrumb path changes, use ids to get more stable reference
+        distinctUntilChanged((prevNodes, nextNodes) =>
+          deepEqual(
+            prevNodes?.[0]?.map((node) => node.id),
+            nextNodes?.[0]?.map((node) => node.id)
+          )
+        )
+      )
+      .subscribe(() => {
+        // reset the breadcrumbs when the active nodes change
+        this.projectBreadcrumbs$.next({ breadcrumbs: [], params: { absolute: false } });
+      });
 
     return {
       setProjectHome: (homeHref: string) => {
