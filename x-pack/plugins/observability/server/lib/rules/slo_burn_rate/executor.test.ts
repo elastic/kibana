@@ -567,9 +567,3 @@ function generateEsResponse(
     },
   };
 }
-
-function generateBucketForBurnRate(slo: SLO, burnRate: number) {
-  const total = 100;
-  const good = total * (1 - burnRate + slo.objective.target * burnRate);
-  return { good: { value: good }, total: { value: total } };
-}
