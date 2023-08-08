@@ -100,15 +100,14 @@ export class ReportingAPIClient implements IReportingAPI {
    */
   public getReportURL(jobId: string) {
     const downloadLink = this.http.basePath.prepend(
-      `${INTERNAL_ROUTES.JOBS.DOWNLOAD_PREFIX}/${jobId}`
+      `internal/reporting/jobs/download/${jobId}`
     );
-      console.log({downloadLink})
     return downloadLink;
   }
 
-  public downloadReport(jobId: string) {
+  public async downloadReport(jobId: string) {
     const location = this.getReportURL(jobId);
-    return this.http.get(location, { headers: [X_ELASTIC_INTERNAL_ORIGIN_REQUEST] })
+    return await this.http.get(location, { headers: [X_ELASTIC_INTERNAL_ORIGIN_REQUEST] })
   }
 
   public async deleteReport(jobId: string) {
