@@ -11,23 +11,41 @@ import type {
   SectionUpsellings,
   UpsellingSectionId,
 } from '@kbn/security-solution-plugin/public';
-import React, { lazy } from 'react';
 import type {
   MessageUpsellings,
   UpsellingMessageId,
 } from '@kbn/security-solution-plugin/public/common/lib/upsellings/types';
+import React, { lazy } from 'react';
+import { EndpointPolicyProtectionsLazy } from './sections/endpoint_management';
 import type { SecurityProductTypes } from '../../common/config';
 import { getProductAppFeatures } from '../../common/pli/pli_features';
 import investigationGuideUpselling from './pages/investigation_guide_upselling';
-const ThreatIntelligencePaywallLazy = lazy(() => import('./pages/threat_intelligence_paywall'));
 
-export const OsqueryResponseActionsUpsellingSectionlLazy = lazy(
-  () => import('./pages/osquery_automated_response_actions')
-);
+const ThreatIntelligencePaywallLazy = lazy(async () => {
+  const ThreatIntelligencePaywall = (await import('./pages/threat_intelligence_paywall')).default;
+
+  return {
+    default: () => <ThreatIntelligencePaywall requiredPLI={AppFeatureKey.threatIntelligence} />,
+  };
+});
+
+const OsqueryResponseActionsUpsellingSectionlLazy = lazy(async () => {
+  const OsqueryResponseActionsUpsellingSection = (
+    await import('./pages/osquery_automated_response_actions')
+  ).default;
+
+  return {
+    default: () => (
+      <OsqueryResponseActionsUpsellingSection
+        requiredPLI={AppFeatureKey.osqueryAutomatedResponseActions}
+      />
+    ),
+  };
+});
 
 interface UpsellingsConfig {
   pli: AppFeatureKey;
-  component: React.ComponentType;
+  component: React.LazyExoticComponent<React.ComponentType>;
 }
 
 interface UpsellingsMessageConfig {
@@ -93,9 +111,7 @@ export const upsellingPages: UpsellingPages = [
   {
     pageName: SecurityPageName.threatIntelligence,
     pli: AppFeatureKey.threatIntelligence,
-    component: () => (
-      <ThreatIntelligencePaywallLazy requiredPLI={AppFeatureKey.threatIntelligence} />
-    ),
+    component: ThreatIntelligencePaywallLazy,
   },
 ];
 
@@ -111,11 +127,13 @@ export const upsellingSections: UpsellingSections = [
   {
     id: 'osquery_automated_response_actions',
     pli: AppFeatureKey.osqueryAutomatedResponseActions,
-    component: () => (
-      <OsqueryResponseActionsUpsellingSectionlLazy
-        requiredPLI={AppFeatureKey.osqueryAutomatedResponseActions}
-      />
-    ),
+    component: OsqueryResponseActionsUpsellingSectionlLazy,
+  },
+
+  {
+    id: 'endpointPolicyProtections',
+    pli: AppFeatureKey.endpointPolicyProtections,
+    component: EndpointPolicyProtectionsLazy,
   },
 ];
 

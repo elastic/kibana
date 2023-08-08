@@ -31,6 +31,7 @@ export class UpdateSLO {
     const updatedSlo: SLO = Object.assign({}, originalSlo, params, {
       updatedAt: new Date(),
       revision: originalSlo.revision + 1,
+      groupBy: !!params.groupBy ? params.groupBy : originalSlo.groupBy,
     });
 
     validateSLO(updatedSlo);
