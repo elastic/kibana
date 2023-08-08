@@ -13,7 +13,6 @@ import type {
   StorageExplorerIndexNames,
   StotageExplorerDataBreakdownSize,
 } from '../../../common/storage_explorer';
-import { useProfilingDependencies } from '../../components/contexts/profiling_dependencies/use_profiling_dependencies';
 import { LabelWithHint } from '../../components/label_with_hint';
 import { getIndexLabel } from './data_breakdown_chart';
 
@@ -22,8 +21,6 @@ interface Props {
 }
 
 export function DataBreakdownIndicesSize({ data }: Props) {
-  const { docLinks } = useProfilingDependencies().start.core;
-
   return (
     <EuiFlexGroup gutterSize="s" direction="column">
       <EuiFlexItem grow={false}>
