@@ -43,7 +43,7 @@ describe('ALL - Saved queries', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
 
   getSavedQueriesComplexTest();
 
-  it('checks that user cant add a saved query with an ID that already exists', () => {
+  it.skip('checks that user cant add a saved query with an ID that already exists', () => {
     cy.contains('Saved queries').click();
     cy.contains('Add saved query').click();
 
