@@ -49,9 +49,4 @@ export enum SYNTHETICS_API_URLS {
   SYNTHETICS_MONITORS_PROJECT_DELETE = '/api/synthetics/project/{projectName}/monitors/_bulk_delete',
 
   DYNAMIC_SETTINGS = `/internal/uptime/dynamic_settings`,
-  RULE_CONNECTORS = '/api/actions/connectors',
-  CREATE_RULE = '/api/alerting/rule',
-  DELETE_RULE = '/api/alerting/rule/',
-  RULES_FIND = '/api/alerting/rules/_find',
-  CONNECTOR_TYPES = '/api/actions/connector_types',
 }
