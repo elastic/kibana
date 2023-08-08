@@ -25,16 +25,14 @@ import { DataBreakdownIndicesSize } from './data_breakdown_indices_size';
 export function DataBreakdown() {
   const theme = useEuiTheme();
   const {
-    services: {
-      fetchStorageExplorerIndicesDataBreakdownSize: fetchStorageExplorerDataBreakdownSize,
-    },
+    services: { fetchStorageExplorerIndicesDataBreakdownChart },
   } = useProfilingDependencies();
 
-  const storageExplorerDataBreakdownSize = useTimeRangeAsync(
+  const storageExplorerDataBreakdownChart = useTimeRangeAsync(
     ({ http }) => {
-      return fetchStorageExplorerDataBreakdownSize({ http });
+      return fetchStorageExplorerIndicesDataBreakdownChart({ http });
     },
-    [fetchStorageExplorerDataBreakdownSize]
+    [fetchStorageExplorerIndicesDataBreakdownChart]
   );
 
   return (
@@ -48,10 +46,10 @@ export function DataBreakdown() {
       </EuiTitle>
       <EuiSpacer />
       <EuiPanel hasShadow={false} hasBorder>
-        <AsyncComponent size="xl" {...storageExplorerDataBreakdownSize} style={{ height: 400 }}>
+        <AsyncComponent size="xl" {...storageExplorerDataBreakdownChart} style={{ height: 400 }}>
           <EuiFlexGroup direction="row" gutterSize="none">
             <EuiFlexItem>
-              <DataBreakdownChart data={storageExplorerDataBreakdownSize.data} />
+              <DataBreakdownChart data={storageExplorerDataBreakdownChart.data} />
             </EuiFlexItem>
             <EuiFlexItem
               grow={false}
@@ -63,7 +61,7 @@ export function DataBreakdown() {
               }}
             />
             <EuiFlexItem>
-              <DataBreakdownIndicesSize data={storageExplorerDataBreakdownSize.data} />
+              <DataBreakdownIndicesSize data={storageExplorerDataBreakdownChart.data} />
             </EuiFlexItem>
           </EuiFlexGroup>
         </AsyncComponent>

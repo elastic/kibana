@@ -65,7 +65,7 @@ export interface Services {
     timeTo: number;
     kuery: string;
   }) => Promise<StorageExplorerHostDetails[]>;
-  fetchStorageExplorerIndicesDataBreakdownSize: (params: {
+  fetchStorageExplorerIndicesDataBreakdownChart: (params: {
     http: AutoAbortedHttpService;
   }) => Promise<StotageExplorerIndicesDataBreakdownSize>;
 }
@@ -154,9 +154,9 @@ export function getServices(): Services {
       })) as StorageExplorerHostDetails[];
       return eventsMetricsSizeTimeseries;
     },
-    fetchStorageExplorerIndicesDataBreakdownSize: async ({ http }) => {
+    fetchStorageExplorerIndicesDataBreakdownChart: async ({ http }) => {
       const eventsMetricsSizeTimeseries = (await http.get(
-        paths.StorageExplorerIndicesDataBreakdownSize,
+        paths.StorageExplorerIndicesDataBreakdownChart,
         {}
       )) as StotageExplorerIndicesDataBreakdownSize;
       return eventsMetricsSizeTimeseries;
