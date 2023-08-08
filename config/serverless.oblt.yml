@@ -39,7 +39,6 @@ xpack.apm.featureFlags.infraUiAvailable: false
 xpack.apm.featureFlags.migrationToFleetAvailable: false
 xpack.apm.featureFlags.sourcemapApiAvailable: false
 xpack.apm.featureFlags.storageExplorerAvailable: false
-xpack.apm.featureFlags.fastRefreshAvailable: true
 
 # Specify in telemetry the project type
 telemetry.labels.serverless: observability
