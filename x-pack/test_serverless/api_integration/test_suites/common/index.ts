@@ -22,5 +22,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./security/user_profiles'));
     loadTestFile(require.resolve('./security/views'));
     loadTestFile(require.resolve('./spaces'));
+    loadTestFile(require.resolve('./rollups'));
   });
 }

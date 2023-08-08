@@ -28,7 +28,8 @@
       "unifiedSearch",
       "savedObjectsManagement",
       "savedSearch",
-      "contentManagement"
+      "contentManagement",
+      "presentationUtil"
     ],
     "optionalPlugins": [
       "alerting",
