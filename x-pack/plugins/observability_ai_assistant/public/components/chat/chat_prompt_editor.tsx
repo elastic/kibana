@@ -21,31 +21,47 @@ import { i18n } from '@kbn/i18n';
 import { useObservabilityAIAssistant } from '../../hooks/use_observability_ai_assistant';
 import { useJsonEditorModel } from '../../hooks/use_json_editor_model';
 import { type Message, MessageRole } from '../../../common';
-import type { FunctionDefinition } from '../../../common/types';
 import { FunctionListPopover } from './function_list_popover';
 
 export interface ChatPromptEditorProps {
   disabled: boolean;
   loading: boolean;
+  initialPrompt?: string;
+  initialSelectedFunctionName?: string;
+  initialFunctionPayload?: string;
   onSubmit: (message: Message) => Promise<void>;
 }
 
-export function ChatPromptEditor({ disabled, loading, onSubmit }: ChatPromptEditorProps) {
+export function ChatPromptEditor({
+  disabled,
+  loading,
+  initialPrompt,
+  initialSelectedFunctionName,
+  initialFunctionPayload,
+  onSubmit,
+}: ChatPromptEditorProps) {
   const { getFunctions } = useObservabilityAIAssistant();
   const functions = getFunctions();
 
-  const [prompt, setPrompt] = useState('');
+  const [prompt, setPrompt] = useState(initialPrompt);
 
-  const [functionPayload, setFunctionPayload] = useState<string | undefined>('');
-  const [selectedFunction, setSelectedFunction] = useState<FunctionDefinition | undefined>();
+  const [selectedFunctionName, setSelectedFunctionName] = useState<string | undefined>(
+    initialSelectedFunctionName
+  );
+  const [functionPayload, setFunctionPayload] = useState<string | undefined>(
+    initialFunctionPayload
+  );
 
-  const { model, initialJsonString } = useJsonEditorModel(selectedFunction);
+  const { model, initialJsonString } = useJsonEditorModel({
+    functionName: selectedFunctionName,
+    initialJson: initialFunctionPayload,
+  });
 
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     setFunctionPayload(initialJsonString);
-  }, [initialJsonString, selectedFunction]);
+  }, [initialJsonString, selectedFunctionName]);
 
   const handleChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     setPrompt(event.currentTarget.value);
@@ -56,8 +72,15 @@ export function ChatPromptEditor({ disabled, loading, onSubmit }: ChatPromptEdit
   };
 
   const handleClearSelection = () => {
-    setSelectedFunction(undefined);
+    setSelectedFunctionName(undefined);
     setFunctionPayload('');
+    setPrompt('');
+  };
+
+  const handleSelectFunction = (functionName: string) => {
+    setPrompt('');
+    setFunctionPayload('');
+    setSelectedFunctionName(functionName);
   };
 
   const handleResizeTextArea = () => {
@@ -76,13 +99,13 @@ export function ChatPromptEditor({ disabled, loading, onSubmit }: ChatPromptEdit
     handleResizeTextArea();
 
     try {
-      if (selectedFunction) {
+      if (selectedFunctionName) {
         await onSubmit({
           '@timestamp': new Date().toISOString(),
           message: {
             role: MessageRole.Function,
             function_call: {
-              name: selectedFunction.options.name,
+              name: selectedFunctionName,
               trigger: MessageRole.User,
               arguments: currentPayload,
             },
@@ -98,7 +121,7 @@ export function ChatPromptEditor({ disabled, loading, onSubmit }: ChatPromptEdit
     } catch (_) {
       setPrompt(currentPrompt);
     }
-  }, [functionPayload, onSubmit, prompt, selectedFunction]);
+  }, [functionPayload, onSubmit, prompt, selectedFunctionName]);
 
   useEffect(() => {
     const keyboardListener = (event: KeyboardEvent) => {
@@ -136,12 +159,12 @@ export function ChatPromptEditor({ disabled, loading, onSubmit }: ChatPromptEdit
               <EuiFlexItem grow>
                 <FunctionListPopover
                   functions={functions}
-                  selectedFunction={selectedFunction}
-                  onSelectFunction={setSelectedFunction}
+                  selectedFunctionName={selectedFunctionName}
+                  onSelectFunction={handleSelectFunction}
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                {selectedFunction ? (
+                {selectedFunctionName ? (
                   <EuiButtonEmpty
                     iconType="cross"
                     iconSide="right"
@@ -157,7 +180,7 @@ export function ChatPromptEditor({ disabled, loading, onSubmit }: ChatPromptEdit
             </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem>
-            {selectedFunction ? (
+            {selectedFunctionName ? (
               <EuiPanel borderRadius="none" color="subdued" hasShadow={false} paddingSize="xs">
                 <CodeEditor
                   aria-label="payloadEditor"
@@ -222,9 +245,9 @@ export function ChatPromptEditor({ disabled, loading, onSubmit }: ChatPromptEdit
         <EuiButtonIcon
           aria-label="Submit"
           isLoading={loading}
-          disabled={selectedFunction ? false : !prompt || loading || disabled}
+          disabled={selectedFunctionName ? false : !prompt || loading || disabled}
           display={
-            selectedFunction ? (functionPayload ? 'fill' : 'base') : prompt ? 'fill' : 'base'
+            selectedFunctionName ? (functionPayload ? 'fill' : 'base') : prompt ? 'fill' : 'base'
           }
           iconType="kqlFunction"
           size="m"

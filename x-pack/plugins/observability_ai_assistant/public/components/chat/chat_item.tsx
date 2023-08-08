@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import React, { useEffect, useState, useRef } from 'react';
+import { css } from '@emotion/css';
 import {
   EuiAccordion,
   EuiButtonIcon,
@@ -16,17 +18,17 @@ import {
   EuiSpacer,
   EuiText,
   useGeneratedHtmlId,
+  EuiHorizontalRule,
+  EuiPanel,
+  useEuiTheme,
 } from '@elastic/eui';
-import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
-import React, { useEffect, useState } from 'react';
 import { MessageRole } from '../../../common/types';
 import { Feedback, FeedbackButtons } from '../feedback_buttons';
-import { MessageText } from '../message_panel/message_text';
+import { ChatItemContentInlinePromptEditor } from './chat_item_content_inline_prompt_editor';
 import { RegenerateResponseButton } from '../buttons/regenerate_response_button';
 import { StopGeneratingButton } from '../buttons/stop_generating_button';
 import { ChatItemAvatar } from './chat_item_avatar';
-import { ChatItemTitle } from './chat_item_title';
 import { ChatTimelineItem } from './chat_timeline';
 
 export interface ChatItemAction {
@@ -43,20 +45,20 @@ export interface ChatItemProps extends ChatTimelineItem {
   onStopGeneratingClick: () => void;
 }
 
-const euiCommentClassName = css`
-  .euiCommentEvent__headerEvent {
-    flex-grow: 1;
-  }
-
-  > div:last-child {
-    overflow: hidden;
+const normalMessageClassName = css`
+  .euiCommentEvent__body {
+    padding: 0;
   }
 `;
 
-const expandableMessageClassName = css`
+const noPanelMessageClassName = css`
   .euiCommentEvent__header {
     background: transparent;
     border-block-end: none;
+  }
+
+  .euiCommentEvent__body {
+    padding: 0;
   }
 
   .euiCommentEvent {
@@ -71,31 +73,66 @@ const accordionButtonClassName = css`
 `;
 
 export function ChatItem({
-  title,
-  content,
-  element,
   canCopy,
   canEdit,
-  canExpand,
   canGiveFeedback,
   canRegenerate,
-  role,
-  loading,
-  error,
+  collapsed,
+  content,
   currentUser,
+  element,
+  error,
+  functionCall,
+  loading,
   onEditSubmit,
+  onFeedbackClick,
   onRegenerateClick,
   onStopGeneratingClick,
-  onFeedbackClick,
+  role,
+  title,
 }: ChatItemProps) {
+  const { euiTheme } = useEuiTheme();
   const accordionId = useGeneratedHtmlId({ prefix: 'chat' });
 
+  const inlineEditInputRef = useRef<HTMLInputElement | null>(null);
+
+  const [editing, setEditing] = useState<boolean>(false);
   const [isPopoverOpen, setIsPopoverOpen] = useState<string | undefined>();
   const [isAccordionOpen, setIsAccordionOpen] = useState<boolean>(false);
 
+  const noBodyMessageClassName = css`
+    .euiCommentEvent__body {
+      padding: 0;
+      height: ${isAccordionOpen ? 'fit-content' : '0px'};
+      overflow: hidden;
+    }
+  `;
+
   const handleAccordionToggle = () => {
     setIsAccordionOpen(!isAccordionOpen);
+
+    if (editing) {
+      setEditing(false);
+    }
   };
+
+  const handleToggleEdit = () => {
+    if (collapsed) {
+      setIsAccordionOpen(true);
+    }
+    setEditing(!editing);
+  };
+
+  const handleInlineEditSubmit = (newPrompt: string) => {
+    handleToggleEdit();
+    onEditSubmit(newPrompt);
+  };
+
+  useEffect(() => {
+    if (editing) {
+      inlineEditInputRef.current?.focus();
+    }
+  }, [editing]);
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -115,26 +152,19 @@ export function ChatItem({
           {
             id: 'edit',
             icon: 'documentEdit',
-            label: i18n.translate(
-              'xpack.observabilityAiAssistant.chatTimeline.actions.editMessage',
-              {
-                defaultMessage: 'Edit message',
-              }
-            ),
+            label: '',
             handler: () => {
-              onEditSubmit(content || '');
+              handleToggleEdit();
             },
           },
         ]
       : []),
-    ...(canExpand
+    ...(collapsed
       ? [
           {
             id: 'expand',
             icon: isAccordionOpen ? 'eyeClosed' : 'eye',
-            label: i18n.translate('xpack.observabilityAiAssistant.chatTimeline.actions.inspect', {
-              defaultMessage: 'Inspect message',
-            }),
+            label: '',
             handler: () => {
               handleAccordionToggle();
             },
@@ -169,29 +199,39 @@ export function ChatItem({
     controls = <StopGeneratingButton onClick={onStopGeneratingClick} />;
   } else if (displayFeedback || displayRegenerate) {
     controls = (
-      <EuiFlexGroup justifyContent="flexEnd">
-        {displayFeedback ? (
-          <EuiFlexItem grow={true}>
-            <FeedbackButtons onClickFeedback={onFeedbackClick} />
-          </EuiFlexItem>
-        ) : null}
-        {displayRegenerate ? (
-          <EuiFlexItem grow={false} style={{ alignSelf: 'flex-end' }}>
-            <RegenerateResponseButton onClick={onRegenerateClick} />
-          </EuiFlexItem>
-        ) : null}
-      </EuiFlexGroup>
+      <>
+        <EuiSpacer size="s" />
+        <EuiHorizontalRule margin="none" color={euiTheme.colors.lightestShade} />
+        <EuiPanel hasShadow={false} paddingSize="s">
+          <EuiFlexGroup justifyContent="flexEnd">
+            {displayFeedback ? (
+              <EuiFlexItem grow={true}>
+                <FeedbackButtons onClickFeedback={onFeedbackClick} />
+              </EuiFlexItem>
+            ) : null}
+            {displayRegenerate ? (
+              <EuiFlexItem grow={false} style={{ alignSelf: 'flex-end' }}>
+                <RegenerateResponseButton onClick={onRegenerateClick} />
+              </EuiFlexItem>
+            ) : null}
+          </EuiFlexGroup>
+        </EuiPanel>
+      </>
     );
   }
 
   let contentElement: React.ReactNode =
-    content || error || controls ? <MessageText content={content || ''} loading={loading} /> : null;
+    content || error || controls ? (
+      <ChatItemContentInlinePromptEditor
+        content={content}
+        functionCall={functionCall}
+        loading={loading}
+        editing={editing}
+        onSubmit={handleInlineEditSubmit}
+      />
+    ) : null;
 
-  if (element) {
-    element = <EuiErrorBoundary>{element}</EuiErrorBoundary>;
-  }
-
-  if (canExpand) {
+  if (collapsed) {
     contentElement = (
       <EuiAccordion
         id={accordionId}
@@ -207,54 +247,57 @@ export function ChatItem({
 
   return (
     <EuiComment
-      event={
-        <ChatItemTitle
-          actions={actions.map(({ id, icon, label, handler }) =>
-            label ? (
-              <EuiPopover
-                button={
-                  <EuiButtonIcon
-                    aria-label={label}
-                    key={id}
-                    iconType={icon}
-                    onClick={() => {
-                      setIsPopoverOpen(id);
-                      handler();
-                    }}
-                    color="text"
-                  />
-                }
-                isOpen={isPopoverOpen === id}
-                closePopover={() => setIsPopoverOpen(undefined)}
-                panelPaddingSize="s"
-              >
-                <EuiText size="s">
-                  <p>{label}</p>
-                </EuiText>
-              </EuiPopover>
-            ) : (
+      actions={actions.map(({ id, icon, label, handler }) =>
+        label ? (
+          <EuiPopover
+            button={
               <EuiButtonIcon
                 aria-label={label}
                 key={id}
                 iconType={icon}
-                onClick={handler}
+                onClick={() => {
+                  setIsPopoverOpen(id);
+                  handler();
+                }}
                 color="text"
               />
-            )
-          )}
-          title={title}
-        />
-      }
+            }
+            isOpen={isPopoverOpen === id}
+            closePopover={() => setIsPopoverOpen(undefined)}
+            panelPaddingSize="s"
+          >
+            <EuiText size="s">
+              <p>{label}</p>
+            </EuiText>
+          </EuiPopover>
+        ) : (
+          <EuiButtonIcon
+            aria-label={label}
+            key={id}
+            iconType={icon}
+            onClick={handler}
+            color="text"
+          />
+        )
+      )}
+      event={title}
       className={
-        role === MessageRole.User && canExpand ? expandableMessageClassName : euiCommentClassName
+        actions.length === 0 && !content
+          ? noPanelMessageClassName
+          : collapsed
+          ? noBodyMessageClassName
+          : normalMessageClassName
       }
       timelineAvatar={
         <ChatItemAvatar loading={loading && !content} currentUser={currentUser} role={role} />
       }
       username={getRoleTranslation(role)}
     >
-      {element}
-      {contentElement}
+      <EuiPanel hasShadow={false} paddingSize="s">
+        {element ? <EuiErrorBoundary>{element}</EuiErrorBoundary> : null}
+        {contentElement}
+      </EuiPanel>
+      {controls}
     </EuiComment>
   );
 }

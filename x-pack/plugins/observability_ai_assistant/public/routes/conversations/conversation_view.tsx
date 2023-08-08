@@ -173,6 +173,7 @@ export function ConversationView() {
                 });
             }}
           />
+          <EuiSpacer size="m" />
         </EuiFlexItem>
         <EuiFlexItem
           grow

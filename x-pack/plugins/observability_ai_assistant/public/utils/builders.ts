@@ -19,7 +19,7 @@ export function buildChatItem(params: ChatItemBuildProps): ChatTimelineItem {
     canEdit: false,
     canGiveFeedback: false,
     canCopy: true,
-    canExpand: false,
+    collapsed: false,
     canRegenerate: params.role === MessageRole.User,
     currentUser: {
       username: 'elastic',
@@ -69,7 +69,7 @@ export function buildFunctionChatItem(params: Omit<ChatItemBuildProps, 'role'>) 
   return buildChatItem({
     role: MessageRole.User,
     title: 'executed a function',
-    function_call: {
+    functionCall: {
       name: 'leftpad',
       arguments: '{ foo: "bar" }',
       trigger: MessageRole.Assistant,
