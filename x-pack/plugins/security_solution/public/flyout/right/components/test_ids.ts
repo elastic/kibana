@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { RESPONSE_BASE_TEST_ID } from '../../left/components/test_ids';
 import { CONTENT_TEST_ID, HEADER_TEST_ID } from './expandable_section';
 
 /* Header */
@@ -35,8 +36,6 @@ export const RULE_SUMMARY_BUTTON_TEST_ID = 'securitySolutionDocumentDetailsFlyou
 export const DESCRIPTION_TITLE_TEST_ID = 'securitySolutionDocumentDetailsFlyoutDescriptionTitle';
 export const DESCRIPTION_DETAILS_TEST_ID =
   'securitySolutionDocumentDetailsFlyoutDescriptionDetails';
-export const DESCRIPTION_EXPAND_BUTTON_TEST_ID =
-  'securitySolutionDocumentDetailsFlyoutDescriptionExpandButton';
 export const REASON_TITLE_TEST_ID = 'securitySolutionDocumentDetailsFlyoutReasonTitle';
 export const REASON_DETAILS_TEST_ID = 'securitySolutionDocumentDetailsFlyoutReasonDetails';
 export const MITRE_ATTACK_TITLE_TEST_ID = 'securitySolutionAlertDetailsFlyoutMitreAttackTitle';
@@ -144,3 +143,11 @@ export const ANALYZER_TREE_ERROR_TEST_ID = 'securitySolutionDocumentDetailsAnala
 export const SESSION_PREVIEW_TEST_ID = 'securitySolutionDocumentDetailsSessionPreview';
 export const SESSION_PREVIEW_VIEW_DETAILS_BUTTON_TEST_ID =
   'securitySolutionDocumentDetailsSessionPreviewViewDetailsButton';
+
+/* Response section */
+
+export const RESPONSE_SECTION_TEST_ID = 'securitySolutionDocumentDetailsFlyoutResponseSection';
+export const RESPONSE_SECTION_HEADER_TEST_ID = RESPONSE_SECTION_TEST_ID + HEADER_TEST_ID;
+export const RESPONSE_SECTION_CONTENT_TEST_ID = RESPONSE_SECTION_TEST_ID + CONTENT_TEST_ID;
+export const RESPONSE_BUTTON_TEST_ID = 'securitySolutionDocumentDetailsFlyoutResponseButton';
+export const RESPONSE_EMPTY_TEST_ID = `${RESPONSE_BASE_TEST_ID}Empty` as const;

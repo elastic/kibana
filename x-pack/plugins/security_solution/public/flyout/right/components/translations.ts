@@ -79,18 +79,6 @@ export const DOCUMENT_DESCRIPTION_TITLE = i18n.translate(
     defaultMessage: 'Document description',
   }
 );
-export const DOCUMENT_DESCRIPTION_EXPAND_BUTTON = i18n.translate(
-  'xpack.securitySolution.flyout.documentDetails.documentDescriptionExpandButton',
-  {
-    defaultMessage: 'Expand',
-  }
-);
-export const DOCUMENT_DESCRIPTION_COLLAPSE_BUTTON = i18n.translate(
-  'xpack.securitySolution.flyout.documentDetails.documentDescriptionCollapseButton',
-  {
-    defaultMessage: 'Collapse',
-  }
-);
 
 export const ALERT_REASON_TITLE = i18n.translate(
   'xpack.securitySolution.flyout.documentDetails.alertReasonTitle',
@@ -353,3 +341,21 @@ export const SESSION_PREVIEW_COMMAND_TEXT = i18n.translate(
     defaultMessage: 'by',
   }
 );
+
+export const RESPONSE_TITLE = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.responseSectionTitle',
+  {
+    defaultMessage: 'Response',
+  }
+);
+
+export const RESPONSE_BUTTON = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.responseSectionButton',
+  {
+    defaultMessage: 'Response details',
+  }
+);
+
+export const RESPONSE_EMPTY = i18n.translate('xpack.securitySolution.flyout.response.empty', {
+  defaultMessage: 'There are no response actions defined for this event.',
+});
