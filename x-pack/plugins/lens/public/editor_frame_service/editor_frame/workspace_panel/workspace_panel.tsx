@@ -257,9 +257,6 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     (_data: unknown, adapters?: Partial<DefaultInspectorAdapters>) => {
       if (renderDeps.current) {
         dataReceivedTime.current = performance.now();
-        if (!initialVisualizationRenderComplete.current) {
-          // NOTE: this metric is only reported for an initial editor load of a pre-existing visualization
-        }
 
         const [defaultLayerId] = Object.keys(renderDeps.current.datasourceLayers);
         const datasource = Object.values(renderDeps.current.datasourceMap)[0];
