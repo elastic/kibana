@@ -6,16 +6,15 @@
  */
 
 import { act } from 'react-dom/test-utils';
-import { createMemoryHistory } from 'history';
 
-import { API_BASE_PATH } from '../../../common/constants';
-import * as fixtures from '../../../test/fixtures';
+import * as fixtures from '../helpers/fixtures';
 import { setupEnvironment } from '../helpers';
 
-import {
-  EnrichPoliciesTestBed,
-  setup,
-} from './enrich_policies.helpers';
+import { notificationServiceMock } from '@kbn/core/public/mocks';
+
+const toastsMock = notificationServiceMock.createStartContract().toasts;
+
+import { EnrichPoliciesTestBed, setup } from './enrich_policies.helpers';
 
 describe('Enrich policies tab', () => {
   const { httpSetup, httpRequestsMockHelpers, setDelayResponse } = setupEnvironment();
@@ -60,6 +59,76 @@ describe('Enrich policies tab', () => {
       component.update();
 
       expect(exists('sectionError')).toBe(true);
+    });
+  });
+
+  describe('policies list', () => {
+    beforeEach(async () => {
+      httpRequestsMockHelpers.setLoadEnrichPoliciesResponse(fixtures.enrichPolicies);
+
+      testBed = await setup(httpSetup, { toasts: toastsMock });
+
+      await act(async () => {
+        testBed.actions.goToEnrichPoliciesTab();
+      });
+
+      testBed.component.update();
+    });
+
+    it('shows enrich policies in table', async () => {
+      const { table } = testBed;
+      expect(table.getMetaData('enrichPoliciesTable').rows.length).toBe(2);
+    });
+
+    it('can reload the table data through a call to action', async () => {
+      const { actions } = testBed;
+
+      // Reset mock to clear calls from setup
+      httpSetup.get.mockClear();
+
+      await act(async () => {
+        actions.clickReloadPoliciesButton();
+      });
+
+      // Should have made a call to load the policies after the reload
+      // button is clicked.
+      expect(httpSetup.get.mock.calls).toHaveLength(1);
+    });
+
+    describe('policy actions', () => {
+      it('can delete a policy', async () => {
+        const { actions, exists } = testBed;
+
+        httpRequestsMockHelpers.setDeleteEnrichPolicyResponse('policy-match', {
+          acknowledged: true,
+        });
+
+        await actions.clickDeletePolicyAt(0);
+
+        expect(exists('deletePolicyModal')).toBe(true);
+
+        await actions.clickConfirmDeletePolicyButton();
+
+        expect(toastsMock.addSuccess).toHaveBeenCalled();
+        expect(httpSetup.delete.mock.calls.length).toBe(1);
+      });
+
+      it('can execute a policy', async () => {
+        const { actions, exists } = testBed;
+
+        httpRequestsMockHelpers.setExecuteEnrichPolicyResponse('policy-match', {
+          acknowledged: true,
+        });
+
+        await actions.clickExecutePolicyAt(0);
+
+        expect(exists('executePolicyModal')).toBe(true);
+
+        await actions.clickConfirmExecutePolicyButton();
+
+        expect(toastsMock.addSuccess).toHaveBeenCalled();
+        expect(httpSetup.put.mock.calls.length).toBe(1);
+      });
     });
   });
 });

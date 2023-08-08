@@ -20,7 +20,7 @@ export interface ResponseError {
 // Register helpers to mock HTTP Requests
 const registerHttpRequestMockHelpers = (
   httpSetup: ReturnType<typeof httpServiceMock.createStartContract>,
-  shouldDelayResponse: () => boolean,
+  shouldDelayResponse: () => boolean
 ) => {
   const mockResponses = new Map<HttpMethod, Map<string, Promise<unknown>>>(
     ['GET', 'PUT', 'DELETE', 'POST'].map(
@@ -132,6 +132,18 @@ const registerHttpRequestMockHelpers = (
   const setLoadEnrichPoliciesResponse = (response?: HttpResponse, error?: ResponseError) =>
     mockResponse('GET', `${API_BASE_PATH}/enrich_policies`, response, error);
 
+  const setDeleteEnrichPolicyResponse = (
+    policyName: string,
+    response?: HttpResponse,
+    error?: ResponseError
+  ) => mockResponse('DELETE', `${API_BASE_PATH}/enrich_policies/${policyName}`, response, error);
+
+  const setExecuteEnrichPolicyResponse = (
+    policyName: string,
+    response?: HttpResponse,
+    error?: ResponseError
+  ) => mockResponse('PUT', `${API_BASE_PATH}/enrich_policies/${policyName}`, response, error);
+
   return {
     setLoadTemplatesResponse,
     setLoadIndicesResponse,
@@ -151,6 +163,8 @@ const registerHttpRequestMockHelpers = (
     setLoadNodesPluginsResponse,
     setLoadTelemetryResponse,
     setLoadEnrichPoliciesResponse,
+    setDeleteEnrichPolicyResponse,
+    setExecuteEnrichPolicyResponse,
   };
 };
 

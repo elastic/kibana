@@ -9,10 +9,10 @@ import React, { FunctionComponent } from 'react';
 import { EuiInMemoryTable, EuiBasicTableColumn, EuiSearchBarProps, EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { EnrichPolicy } from '../../../../types';
+import type { SerializedEnrichPolicy } from '../../../../types';
 
 export interface Props {
-  policies: EnrichPolicy[];
+  policies: SerializedEnrichPolicy[];
   onReloadClick: () => void;
   onDeletePolicyClick: (policyName: string) => void;
   onExecutePolicyClick: (policyName: string) => void;
@@ -31,7 +31,13 @@ export const PoliciesTable: FunctionComponent<Props> = ({
 }) => {
   const renderToolsRight = () => {
     return [
-      <EuiButton key="reloadPolicies" iconType="refresh" color="success" onClick={onReloadClick}>
+      <EuiButton
+        key="reloadPolicies"
+        data-test-subj="reloadPoliciesButton"
+        iconType="refresh"
+        color="success"
+        onClick={onReloadClick}
+      >
         <FormattedMessage
           id="xpack.idxMgmt.enrich_policies.table.reloadButton"
           defaultMessage="Reload"
@@ -53,7 +59,7 @@ export const PoliciesTable: FunctionComponent<Props> = ({
     },
   };
 
-  const columns: Array<EuiBasicTableColumn<EnrichPolicy>> = [
+  const columns: Array<EuiBasicTableColumn<SerializedEnrichPolicy>> = [
     {
       field: 'name',
       name: i18n.translate('xpack.idxMgmt.enrich_policies.table.nameField', {
@@ -107,6 +113,7 @@ export const PoliciesTable: FunctionComponent<Props> = ({
           }),
           type: 'icon',
           icon: 'play',
+          'data-test-subj': 'executePolicyButton',
           onClick: ({ name }) => onExecutePolicyClick(name),
         },
         {
@@ -120,6 +127,7 @@ export const PoliciesTable: FunctionComponent<Props> = ({
           type: 'icon',
           icon: 'trash',
           color: 'danger',
+          'data-test-subj': 'deletePolicyButton',
           onClick: ({ name }) => onDeletePolicyClick(name),
         },
       ],
@@ -128,6 +136,7 @@ export const PoliciesTable: FunctionComponent<Props> = ({
 
   return (
     <EuiInMemoryTable
+      data-test-subj="enrichPoliciesTable"
       items={policies}
       itemId="name"
       columns={columns}

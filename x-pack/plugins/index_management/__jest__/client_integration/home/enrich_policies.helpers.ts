@@ -6,7 +6,6 @@
  */
 
 import { act } from 'react-dom/test-utils';
-import { ReactWrapper } from 'enzyme';
 
 import {
   registerTestBed,
@@ -31,6 +30,11 @@ const testBedConfig: AsyncTestBedConfig = {
 export interface EnrichPoliciesTestBed extends TestBed<TestSubjects> {
   actions: {
     goToEnrichPoliciesTab: () => void;
+    clickReloadPoliciesButton: () => void;
+    clickDeletePolicyAt: (index: number) => Promise<void>;
+    clickConfirmDeletePolicyButton: () => Promise<void>;
+    clickExecutePolicyAt: (index: number) => Promise<void>;
+    clickConfirmExecutePolicyButton: () => Promise<void>;
   };
 }
 
@@ -47,14 +51,65 @@ export const setup = async (
   /**
    * User Actions
    */
-  const goToEnrichPoliciesTab = () => {
-    testBed.find('enrich_policiesTab').simulate('click');
+  const goToEnrichPoliciesTab = () => testBed.find('enrich_policiesTab').simulate('click');
+
+  const clickReloadPoliciesButton = () => testBed.find('reloadPoliciesButton').simulate('click');
+
+  const clickDeletePolicyAt = async (index: number) => {
+    const { rows } = testBed.table.getMetaData('enrichPoliciesTable');
+
+    const deletePolicyButton = findTestSubject(rows[index].reactWrapper, 'deletePolicyButton');
+
+    await act(async () => {
+      deletePolicyButton.simulate('click');
+    });
+
+    testBed.component.update();
+  };
+
+  const clickConfirmDeletePolicyButton = async () => {
+    const modal = testBed.find('deletePolicyModal');
+    const confirmButton = findTestSubject(modal, 'confirmModalConfirmButton');
+
+    await act(async () => {
+      confirmButton.simulate('click');
+    });
+
+    testBed.component.update();
+  };
+
+  const clickExecutePolicyAt = async (index: number) => {
+    const { rows } = testBed.table.getMetaData('enrichPoliciesTable');
+
+    const executePolicyButton = findTestSubject(rows[index].reactWrapper, 'executePolicyButton');
+
+    await act(async () => {
+      executePolicyButton.simulate('click');
+    });
+
+    testBed.component.update();
+  };
+
+  const clickConfirmExecutePolicyButton = async () => {
+    const modal = testBed.find('executePolicyModal');
+    const confirmButton = findTestSubject(modal, 'confirmModalConfirmButton');
+
+    await act(async () => {
+      confirmButton.simulate('click');
+    });
+
+    testBed.component.update();
   };
 
   return {
     ...testBed,
     actions: {
       goToEnrichPoliciesTab,
+      clickReloadPoliciesButton,
+      clickDeletePolicyAt,
+      clickConfirmDeletePolicyButton,
+      clickExecutePolicyAt,
+      clickConfirmExecutePolicyButton,
     },
   };
 };

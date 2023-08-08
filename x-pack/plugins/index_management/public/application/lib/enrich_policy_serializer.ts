@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { BaseEnrichPolicy, EnrichPolicyType } from '../types';
+import type { ESEnrichPolicy, EnrichPolicyType, SerializedEnrichPolicy } from '../types';
 
-const getPolicyType = (policy: BaseEnrichPolicy): EnrichPolicyType => {
+const getPolicyType = (policy: ESEnrichPolicy): EnrichPolicyType => {
   if (policy.config.match) {
     return 'match';
   }
@@ -23,7 +23,9 @@ const getPolicyType = (policy: BaseEnrichPolicy): EnrichPolicyType => {
   return '';
 };
 
-export const serializeEnrichmentPolicies = (policies: BaseEnrichPolicy[]) => {
+export const serializeEnrichmentPolicies = (
+  policies: ESEnrichPolicy[]
+): SerializedEnrichPolicy[] => {
   return policies.map((policy: any) => {
     const policyType = getPolicyType(policy);
 

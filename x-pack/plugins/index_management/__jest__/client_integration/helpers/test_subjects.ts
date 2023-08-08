@@ -63,4 +63,7 @@ export type TestSubjects =
   | 'updateEditIndexSettingsButton'
   | 'updateIndexSettingsErrorCallout'
   | 'viewButton'
+  | 'enrichPoliciesTable'
+  | 'deletePolicyModal'
+  | 'executePolicyModal'
   | 'detailPanelTabSelected';

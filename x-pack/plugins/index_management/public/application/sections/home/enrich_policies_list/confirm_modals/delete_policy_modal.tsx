@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { EuiConfirmModal } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -19,8 +19,18 @@ export const DeletePolicyModal = ({
   policyToDelete: string;
   callback: (data?: { hasDeletedPolicy: boolean }) => void;
 }) => {
-  const [isDeleting, setIsDeleting] = useState(false);
+  const mounted = useRef(false);
   const { toasts } = useAppContext();
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  // Since the async action of this component needs to set state after unmounting,
+  // we need to track the mounted state of this component to avoid a memory leak.
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+    };
+  }, []);
 
   const handleDeletePolicy = () => {
     setIsDeleting(true);
@@ -50,7 +60,11 @@ export const DeletePolicyModal = ({
 
         callback();
       })
-      .finally(() => setIsDeleting(false));
+      .finally(() => {
+        if (mounted.current) {
+          setIsDeleting(false);
+        }
+      });
   };
 
   const handleOnCancel = () => {
@@ -60,6 +74,7 @@ export const DeletePolicyModal = ({
   return (
     <EuiConfirmModal
       buttonColor="danger"
+      data-test-subj="deletePolicyModal"
       title={i18n.translate('xpack.idxMgmt.enrich_policies.deleteModal.confirmTitle', {
         defaultMessage: 'Delete enrich policy',
       })}

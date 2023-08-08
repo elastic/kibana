@@ -45,3 +45,28 @@ export const indexStats = {
     },
   },
 };
+
+export const enrichPolicies = {
+  policies: [
+    {
+      config: {
+        match: {
+          name: 'policy-match',
+          indices: ['users'],
+          match_field: 'email',
+          enrich_fields: ['first_name', 'last_name', 'city', 'zip', 'state'],
+        },
+      },
+    },
+    {
+      config: {
+        range: {
+          name: 'policy-range',
+          indices: ['users'],
+          match_field: 'email',
+          enrich_fields: ['first_name', 'last_name', 'city', 'zip', 'state'],
+        },
+      },
+    },
+  ],
+};

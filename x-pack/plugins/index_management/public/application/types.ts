@@ -5,27 +5,27 @@
  * 2.0.
  */
 
-// TODO:
-// should have types for ES based enrich policy type
-// and for serialized enrich policy type
-
 export type EnrichPolicyType = 'match' | 'geo_match' | 'range' | '';
 
-export interface BaseTypes {
+export interface ESEnrichPolicyType {
   name: string;
   indices: string[];
   match_field: string;
   enrich_fields: string[];
 }
 
-export interface EnrichPolicy extends BaseTypes {
+export interface SerializedEnrichPolicy {
   type: EnrichPolicyType;
+  name: string;
+  sourceIndices: string[];
+  matchField: string;
+  enrichFields: string[];
 }
 
-export interface BaseEnrichPolicy {
+export interface ESEnrichPolicy {
   config: {
-    match?: BaseTypes;
-    geo_match?: BaseTypes;
-    range?: BaseTypes;
+    match?: ESEnrichPolicyType;
+    geo_match?: ESEnrichPolicyType;
+    range?: ESEnrichPolicyType;
   };
 }

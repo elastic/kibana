@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { EuiConfirmModal } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -19,8 +19,18 @@ export const ExecutePolicyModal = ({
   policyToExecute: string;
   callback: (data?: { hasExecutedPolicy: boolean }) => void;
 }) => {
-  const [isExecuting, setIsExecuting] = useState(false);
+  const mounted = useRef(false);
   const { toasts } = useAppContext();
+  const [isExecuting, setIsExecuting] = useState(false);
+
+  // Since the async action of this component needs to set state after unmounting,
+  // we need to track the mounted state of this component to avoid a memory leak.
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+    };
+  }, []);
 
   const handleExecutePolicy = () => {
     setIsExecuting(true);
@@ -50,7 +60,11 @@ export const ExecutePolicyModal = ({
 
         callback();
       })
-      .finally(() => setIsExecuting(false));
+      .finally(() => {
+        if (mounted.current) {
+          setIsExecuting(false);
+        }
+      });
   };
 
   const handleOnCancel = () => {
@@ -59,6 +73,7 @@ export const ExecutePolicyModal = ({
 
   return (
     <EuiConfirmModal
+      data-test-subj="executePolicyModal"
       title={i18n.translate('xpack.idxMgmt.enrich_policies.executeModal.confirmTitle', {
         defaultMessage: 'Execute enrich policy',
       })}
