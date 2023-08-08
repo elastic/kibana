@@ -8,6 +8,7 @@
 
 import { SavedObjectError, SavedObjectsFindOptionsReference } from '@kbn/core/public';
 
+import { Reference } from '@kbn/content-management-utils';
 import {
   DashboardItem,
   DashboardCrudTypes,
@@ -60,7 +61,7 @@ export async function searchDashboards({
 }
 
 export type FindDashboardsByIdResponse = { id: string } & (
-  | { status: 'success'; attributes: DashboardAttributes }
+  | { status: 'success'; attributes: DashboardAttributes; references: Reference[] }
   | { status: 'error'; error: SavedObjectError }
 );
 
@@ -78,8 +79,8 @@ export async function findDashboardsByIds(
 
   return results.map((result) => {
     if (result.item.error) return { status: 'error', error: result.item.error, id: result.item.id };
-    const { attributes, id } = result.item;
-    return { id, status: 'success', attributes };
+    const { attributes, id, references } = result.item;
+    return { id, status: 'success', attributes, references };
   });
 }
 
