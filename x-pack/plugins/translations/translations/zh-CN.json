@@ -27279,7 +27279,6 @@
     "xpack.observability.enableInfrastructureHostsViewDescription": "{betaLabel} 在 Infrastructure 应用中启用主机视图。",
     "xpack.observability.inspector.stats.queryTimeValue": "{queryTime}ms",
     "xpack.observability.pages.alertDetails.pageTitle.title": "{ruleCategory} {ruleCategory, select, Anomaly {已检测到} Inventory {超出阈值} other {超出}}",
-    "xpack.observability.ruleDetails.ruleLoadError": "无法加载规则。原因：{message}",
     "xpack.observability.slo.alerting.burnRate.reason": "{actionGroupName}：过去 {longWindowDuration} 的消耗速度为 {longWindowBurnRate} 且过去 {shortWindowDuration} 为 {shortWindowBurnRate}。两个窗口超出 {burnRateThreshold} 时告警",
     "xpack.observability.slo.burnRateWindow.thresholdTip": "阈值为 {target}x",
     "xpack.observability.slo.clone.errorNotification": "无法克隆 {name}",
