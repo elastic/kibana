@@ -82,7 +82,7 @@ const SHARED_SERVERLESS_PARAMS = [
 
   '--rm',
 
-  '--detach',
+  // '--detach',
 
   '--net',
   'elastic',
@@ -132,6 +132,7 @@ const SERVERLESS_NODES: Array<Omit<ServerlessEsNodeArgs, 'image'>> = [
   {
     name: 'es02',
     params: [
+      '--detach',
       '-p',
       '127.0.0.1:9202:9202',
 
@@ -149,6 +150,7 @@ const SERVERLESS_NODES: Array<Omit<ServerlessEsNodeArgs, 'image'>> = [
   {
     name: 'es03',
     params: [
+      '--detach',
       '-p',
       '127.0.0.1:9203:9203',
 
