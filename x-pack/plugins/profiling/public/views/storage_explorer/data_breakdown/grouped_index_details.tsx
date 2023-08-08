@@ -28,16 +28,27 @@ const hintMap: Partial<Record<StorageGroupedIndexNames, string>> = {
 };
 
 export function GroupedIndexDetails({ data = [] }: Props) {
+  const orderedIndexNames = [
+    'stackframes',
+    'stacktraces',
+    'executables',
+    'metrics',
+    'events',
+  ] as StorageGroupedIndexNames[];
   return (
     <EuiFlexGroup gutterSize="s" direction="column">
-      {data.map((item) => {
+      {orderedIndexNames.map((indexName) => {
+        const stats = data.find((item) => item.indexName === indexName);
+        if (!stats) {
+          return null;
+        }
         return (
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem grow={false} key={indexName}>
             <IndexSizeItem
-              indexName={item.indexName}
-              docCount={item.docCount}
-              sizeInBytes={item.sizeInBytes}
-              hint={hintMap[item.indexName]}
+              indexName={indexName}
+              docCount={stats.docCount}
+              sizeInBytes={stats.sizeInBytes}
+              hint={hintMap[indexName]}
             />
           </EuiFlexItem>
         );

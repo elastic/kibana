@@ -48,9 +48,10 @@ export interface StorageDetailsGroupedByIndex {
 
 export interface StorageDetailsPerIndex {
   indexName: string;
-  primaryShardsDocCount: number;
-  replicaShardsDocCount: number;
-  sizeInBytes: number;
+  docCount?: number;
+  primaryShardsCount?: number;
+  replicaShardsCount?: number;
+  sizeInBytes?: number;
   dataStream?: string;
   lifecyclePhase?: string;
 }

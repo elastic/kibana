@@ -34,14 +34,11 @@ export async function getStorageDetailsPerIndex({
 
     return {
       indexName,
-      primaryShardsDocCount: indexInfo.settings?.index?.number_of_shards
-        ? (indexInfo.settings.index.number_of_shards as number)
-        : 0,
-      replicaShardsDocCount: indexInfo.settings?.index?.number_of_replicas
-        ? (indexInfo.settings.index.number_of_replicas as number)
-        : 0,
+      docCount: stats.total?.docs?.count ?? 0,
+      primaryShardsCount: indexInfo.settings?.index?.number_of_shards as number | undefined,
+      replicaShardsCount: indexInfo.settings?.index?.number_of_replicas as number | undefined,
       sizeInBytes: stats.total?.store?.size_in_bytes ?? 0,
-      dataStream: indexInfo.data_stream,
+      dataStream: indexInfo?.data_stream,
       lifecyclePhase:
         indexLifecycle && 'phase' in indexLifecycle ? indexLifecycle.phase : undefined,
     };

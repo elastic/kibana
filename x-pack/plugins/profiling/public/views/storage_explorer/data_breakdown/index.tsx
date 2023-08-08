@@ -21,6 +21,7 @@ import { useProfilingDependencies } from '../../../components/contexts/profiling
 import { useTimeRangeAsync } from '../../../hooks/use_time_range_async';
 import { GroupedIndexDetailsChart } from './grouped_index_details_chart';
 import { GroupedIndexDetails } from './grouped_index_details';
+import { StorageDetailsTable } from './storage_details_table';
 
 export function DataBreakdown() {
   const theme = useEuiTheme();
@@ -47,25 +48,32 @@ export function DataBreakdown() {
       <EuiSpacer />
       <EuiPanel hasShadow={false} hasBorder>
         <AsyncComponent size="xl" {...indicesStorageDetails} style={{ height: 400 }}>
-          <EuiFlexGroup direction="row" gutterSize="none">
+          <EuiFlexGroup direction="column">
             <EuiFlexItem>
-              <GroupedIndexDetailsChart
-                data={indicesStorageDetails.data?.storageDetailsGroupedByIndex}
-              />
+              <EuiFlexGroup direction="row" gutterSize="none">
+                <EuiFlexItem>
+                  <GroupedIndexDetailsChart
+                    data={indicesStorageDetails.data?.storageDetailsGroupedByIndex}
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem
+                  grow={false}
+                  style={{
+                    width: theme.euiTheme.border.width.thin,
+                    backgroundColor: theme.euiTheme.border.color,
+                    marginLeft: 64,
+                    marginRight: 64,
+                  }}
+                />
+                <EuiFlexItem>
+                  <GroupedIndexDetails
+                    data={indicesStorageDetails.data?.storageDetailsGroupedByIndex}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiFlexItem>
-            <EuiFlexItem
-              grow={false}
-              style={{
-                width: theme.euiTheme.border.width.thin,
-                backgroundColor: theme.euiTheme.border.color,
-                marginLeft: 64,
-                marginRight: 64,
-              }}
-            />
             <EuiFlexItem>
-              <GroupedIndexDetails
-                data={indicesStorageDetails.data?.storageDetailsGroupedByIndex}
-              />
+              <StorageDetailsTable data={indicesStorageDetails.data?.storageDetailsPerIndex} />
             </EuiFlexItem>
           </EuiFlexGroup>
         </AsyncComponent>
