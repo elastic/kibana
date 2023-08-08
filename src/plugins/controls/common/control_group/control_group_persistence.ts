@@ -87,9 +87,7 @@ const getPanelsAreEqual = (
           newPanels[panelId]
         )
       : genericControlPanelDiffSystem.getPanelIsEqual(originalPanels[panelId], newPanels[panelId]);
-    if (!panelIsEqual) {
-      return false;
-    }
+    if (!panelIsEqual) return false;
   }
   return true;
 };
@@ -98,7 +96,6 @@ export const controlGroupInputToRawControlGroupAttributes = (
   controlGroupInput: Omit<ControlGroupInput, 'id'>
 ): RawControlGroupAttributes => {
   return {
-    version: controlGroupInput.version,
     controlStyle: controlGroupInput.controlStyle,
     chainingSystem: controlGroupInput.chainingSystem,
     panelsJSON: JSON.stringify(controlGroupInput.panels),
@@ -110,7 +107,7 @@ export const rawControlGroupAttributesToControlGroupInput = (
   rawControlGroupAttributes: RawControlGroupAttributes
 ): PersistableControlGroupInput | undefined => {
   const defaultControlGroupInput = getDefaultControlGroupInput();
-  const { chainingSystem, controlStyle, ignoreParentSettingsJSON, panelsJSON, version } =
+  const { chainingSystem, controlStyle, ignoreParentSettingsJSON, panelsJSON } =
     rawControlGroupAttributes;
   const panels = safeJSONParse<ControlGroupInput['panels']>(panelsJSON);
   const ignoreParentSettings =
@@ -120,7 +117,6 @@ export const rawControlGroupAttributesToControlGroupInput = (
     ...(chainingSystem ? { chainingSystem } : {}),
     ...(controlStyle ? { controlStyle } : {}),
     ...(ignoreParentSettings ? { ignoreParentSettings } : {}),
-    ...(version ? { version } : {}),
     ...(panels ? { panels } : {}),
   };
 };
