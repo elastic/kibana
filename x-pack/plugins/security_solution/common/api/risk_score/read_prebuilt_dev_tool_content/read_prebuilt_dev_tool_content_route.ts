@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 
-export const ReadConsoleRequestSchema = {
+export const readConsoleRequestBody = {
   params: schema.object({
     console_id: schema.oneOf([
       schema.literal('enable_host_risk_score'),

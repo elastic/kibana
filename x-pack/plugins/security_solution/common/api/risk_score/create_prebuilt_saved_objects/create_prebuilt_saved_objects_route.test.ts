@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import { createPrebuiltSavedObjectsSchema } from './schema';
+import { createPrebuiltSavedObjectsRequestBody } from './create_prebuilt_saved_objects_route';
 
-describe('createPrebuiltSavedObjectsSchema', () => {
+describe('createPrebuiltSavedObjectsRequestBody', () => {
   it('should throw error', () => {
     expect(() =>
-      createPrebuiltSavedObjectsSchema.params.validate({ template_name: '123' })
+      createPrebuiltSavedObjectsRequestBody.params.validate({ template_name: '123' })
     ).toThrow();
   });
 
   it.each([['hostRiskScoreDashboards', 'userRiskScoreDashboards']])(
     'should allow template %p',
     async (template) => {
-      expect(createPrebuiltSavedObjectsSchema.params.validate({ template_name: template })).toEqual(
-        {
-          template_name: template,
-        }
-      );
+      expect(
+        createPrebuiltSavedObjectsRequestBody.params.validate({ template_name: template })
+      ).toEqual({
+        template_name: template,
+      });
     }
   );
 });

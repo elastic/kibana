@@ -17,6 +17,7 @@ import {
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INVESTIGATION_GUIDE_BUTTON,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_DESCRIPTION_TITLE,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_OPEN_RULE_PREVIEW_BUTTON,
+  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_RESPONSE_SECTION_HEADER,
 } from '../../screens/expandable_flyout/alert_details_right_panel_overview_tab';
 
 /* About section */
@@ -105,6 +106,14 @@ export const toggleOverviewTabVisualizationsSection = () => {
   cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_VISUALIZATIONS_SECTION_HEADER)
     .should('be.visible')
     .click();
+};
+
+/**
+ * Toggle the Overview tab response section in the document details expandable flyout right section
+ */
+export const toggleOverviewTabResponseSection = () => {
+  cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_RESPONSE_SECTION_HEADER).scrollIntoView();
+  cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_RESPONSE_SECTION_HEADER).should('be.visible').click();
 };
 
 /**

@@ -37,11 +37,13 @@ export function createService({
   securityStart,
   functionRegistry,
   contextRegistry,
+  enabled,
 }: {
   coreStart: CoreStart;
   securityStart: SecurityPluginStart;
   functionRegistry: FunctionRegistry;
   contextRegistry: ContextRegistry;
+  enabled: boolean;
 }): ObservabilityAIAssistantService {
   const client = createCallObservabilityAIAssistantAPI(coreStart);
 
@@ -68,7 +70,7 @@ export function createService({
 
   return {
     isEnabled: () => {
-      return true;
+      return enabled;
     },
     chat({ connectorId, messages }: { connectorId: string; messages: Message[] }) {
       const subject = new BehaviorSubject<PendingMessage>({

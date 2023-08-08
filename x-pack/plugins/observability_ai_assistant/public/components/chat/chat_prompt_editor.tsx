@@ -127,13 +127,14 @@ export function ChatPromptEditor({
     const keyboardListener = (event: KeyboardEvent) => {
       if (!event.shiftKey && event.key === keys.ENTER) {
         handleSubmit();
+        event.preventDefault();
       }
     };
 
-    window.addEventListener('keyup', keyboardListener);
+    window.addEventListener('keypress', keyboardListener);
 
     return () => {
-      window.removeEventListener('keyup', keyboardListener);
+      window.removeEventListener('keypress', keyboardListener);
     };
   }, [handleSubmit]);
 

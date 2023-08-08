@@ -5,9 +5,4 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
-
-export const indexStatusSchema = t.type({
-  indexName: t.string,
-  entity: t.string,
-});
+export { CoverageOverviewPage } from './coverage_overview_page';

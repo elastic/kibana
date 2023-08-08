@@ -24,7 +24,7 @@ type ChatBodyProps = React.ComponentProps<typeof Component>;
 
 const Template: ComponentStory<typeof Component> = (props: ChatBodyProps) => {
   return (
-    <div style={{ minHeight: 800, display: 'flex', maxWidth: 600 }}>
+    <div style={{ height: '100vh', display: 'flex', maxWidth: 600 }}>
       <Component {...props} />
     </div>
   );
