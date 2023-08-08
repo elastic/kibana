@@ -13,6 +13,7 @@ import { checkForDuplicateDashboardTitle } from './lib/check_for_duplicate_dashb
 
 import {
   searchDashboards,
+  findDashboardById,
   findDashboardsByIds,
   findDashboardIdByTitle,
 } from './lib/find_dashboards';
@@ -77,6 +78,7 @@ export const dashboardContentManagementServiceFactory: DashboardContentManagemen
           search,
           size,
         }),
+      findById: (id) => findDashboardById(contentManagement, id),
       findByIds: (ids) => findDashboardsByIds(contentManagement, ids),
       findByTitle: (title) => findDashboardIdByTitle(contentManagement, title),
     },

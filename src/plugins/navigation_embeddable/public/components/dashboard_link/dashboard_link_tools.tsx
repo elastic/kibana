@@ -19,7 +19,7 @@ import { dashboardServices } from '../../services/kibana_services';
 
 export const fetchDashboard = async (dashboardId: string): Promise<DashboardItem> => {
   const findDashboardsService = await dashboardServices.findDashboardsService();
-  const response = (await findDashboardsService.findByIds([dashboardId]))[0];
+  const response = await findDashboardsService.findById(dashboardId);
   if (response.status === 'error') {
     throw new Error(response.error.message);
   }
