@@ -205,13 +205,14 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
       if (!initialVisualizationRenderComplete.current) {
         initialVisualizationRenderComplete.current = true;
         // NOTE: this metric is only reported for an initial editor load of a pre-existing visualization
+        const currentTime = performance.now();
         reportPerformanceMetricEvent(core.analytics, {
           eventName: 'lensVisualizationRenderTime',
-          duration: performance.now() - visualizationRenderStartTime.current,
+          duration: currentTime - visualizationRenderStartTime.current,
           key1: 'time_to_data',
           value1: dataReceivedTime.current - visualizationRenderStartTime.current,
           key2: 'time_to_render',
-          value2: performance.now() - dataReceivedTime.current,
+          value2: currentTime - dataReceivedTime.current,
         });
       }
       const datasourceEvents = Object.values(renderDeps.current.datasourceMap).reduce<string[]>(
