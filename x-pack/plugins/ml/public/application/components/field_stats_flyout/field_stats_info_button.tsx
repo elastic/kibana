@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiHighlight, EuiToolTip } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { FieldIcon } from '@kbn/react-field';
@@ -16,14 +16,18 @@ export type FieldForStats = Pick<Field, 'id' | 'type'>;
 export const FieldStatsInfoButton = ({
   field,
   label,
-  searchValue = '',
   onButtonClick,
+  disabled,
+  isEmpty,
 }: {
   field: FieldForStats;
   label: string;
   searchValue?: string;
+  disabled?: boolean;
+  isEmpty?: boolean;
   onButtonClick?: (field: FieldForStats) => void;
 }) => {
+  const isDisabled = disabled === true || field.id === EVENT_RATE_FIELD_ID;
   return (
     <EuiFlexGroup gutterSize="none" alignItems="center">
       <EuiFlexItem grow={false}>
@@ -37,9 +41,11 @@ export const FieldStatsInfoButton = ({
         >
           <EuiButtonIcon
             data-test-subj={`mlInspectFieldStatsButton-${field.id}`}
-            disabled={field.id === EVENT_RATE_FIELD_ID}
+            // Only disable the button if explicitly disabled
+            disabled={isDisabled}
             size="xs"
             iconType="inspect"
+            css={{ color: isEmpty ? 'gray' : undefined }}
             onClick={(ev: React.MouseEvent<HTMLButtonElement>) => {
               if (ev.type === 'click') {
                 ev.currentTarget.focus();
@@ -61,10 +67,16 @@ export const FieldStatsInfoButton = ({
         </EuiToolTip>
       </EuiFlexItem>
       <EuiFlexItem grow={false} css={{ paddingRight: '4px' }}>
-        <FieldIcon type={getKbnFieldIconType(field.type)} fill="none" />
+        <FieldIcon
+          color={isEmpty ? 'gray' : undefined}
+          type={getKbnFieldIconType(field.type)}
+          fill="none"
+        />
       </EuiFlexItem>
       <EuiFlexItem grow={true}>
-        <EuiHighlight search={searchValue}>{label}</EuiHighlight>
+        <EuiText color={isEmpty ? 'subdued' : undefined} size="s">
+          {label}
+        </EuiText>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

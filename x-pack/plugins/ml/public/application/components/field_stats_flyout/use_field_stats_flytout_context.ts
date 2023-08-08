@@ -6,6 +6,8 @@
  */
 
 import { createContext, useContext } from 'react';
+import { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
+import { BehaviorSubject } from 'rxjs';
 interface MLJobWizardFieldStatsFlyoutProps {
   isFlyoutVisible: boolean;
   setIsFlyoutVisible: (v: boolean) => void;
@@ -14,6 +16,8 @@ interface MLJobWizardFieldStatsFlyoutProps {
   fieldName?: string;
   setFieldValue: (v: string) => void;
   fieldValue?: string | number;
+  timeRangeMs?: TimeRangeMs;
+  populatedFields$: BehaviorSubject<Set<string>>;
 }
 export const MLFieldStatsFlyoutContext = createContext<MLJobWizardFieldStatsFlyoutProps>({
   isFlyoutVisible: false,
@@ -21,6 +25,8 @@ export const MLFieldStatsFlyoutContext = createContext<MLJobWizardFieldStatsFlyo
   toggleFlyoutVisible: () => {},
   setFieldName: () => {},
   setFieldValue: () => {},
+  timeRangeMs: undefined,
+  populatedFields$: new BehaviorSubject<Set<string>>(new Set()),
 });
 
 export function useFieldStatsFlyoutContext() {

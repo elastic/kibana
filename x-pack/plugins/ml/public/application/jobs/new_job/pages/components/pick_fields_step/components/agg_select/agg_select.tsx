@@ -43,7 +43,7 @@ export const AggSelect: FC<Props> = ({ fields, changeHandler, selectedOptions, r
   // create list of labels based on already selected detectors
   // so they can be removed from the dropdown list
   const removeLabels = removeOptions.map(createLabel);
-  const { handleFieldStatsButtonClick } = useFieldStatsTrigger();
+  const { handleFieldStatsButtonClick, populatedFields } = useFieldStatsTrigger();
 
   const options: EuiComboBoxOptionOption[] = useMemo(
     () =>
@@ -55,6 +55,7 @@ export const AggSelect: FC<Props> = ({ fields, changeHandler, selectedOptions, r
           // for more robust rendering
           label: (
             <FieldStatsInfoButton
+              isEmpty={!populatedFields?.has(f.name)}
               field={f}
               label={f.name}
               onButtonClick={handleFieldStatsButtonClick}
@@ -77,7 +78,8 @@ export const AggSelect: FC<Props> = ({ fields, changeHandler, selectedOptions, r
         }
         return aggOption;
       }),
-    [handleFieldStatsButtonClick, fields, removeLabels]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [handleFieldStatsButtonClick, fields, removeLabels, populatedFields?.size]
   );
 
   useEffect(() => {

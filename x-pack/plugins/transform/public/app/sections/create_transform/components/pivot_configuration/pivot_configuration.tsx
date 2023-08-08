@@ -28,7 +28,8 @@ export const PivotConfiguration: FC<StepDefineFormHook['pivotConfig']> = memo(
     const {
       ml: { useFieldStatsTrigger, FieldStatsInfoButton },
     } = useAppDependencies();
-    const { handleFieldStatsButtonClick, closeFlyout, renderOption } = useFieldStatsTrigger();
+    const { handleFieldStatsButtonClick, closeFlyout, renderOption, populatedFields } =
+      useFieldStatsTrigger();
 
     const {
       addAggregation,
@@ -52,6 +53,7 @@ export const PivotConfiguration: FC<StepDefineFormHook['pivotConfig']> = memo(
             // for more robust rendering
             label: (
               <FieldStatsInfoButton
+                isEmpty={populatedFields && !populatedFields.has(field.id)}
                 field={field}
                 label={label}
                 onButtonClick={handleFieldStatsButtonClick}
@@ -61,7 +63,7 @@ export const PivotConfiguration: FC<StepDefineFormHook['pivotConfig']> = memo(
           };
           return aggOption;
         }),
-      [aggOptions, FieldStatsInfoButton, handleFieldStatsButtonClick]
+      [aggOptions, FieldStatsInfoButton, handleFieldStatsButtonClick, populatedFields]
     );
     return (
       <PivotConfigurationContext.Provider value={{ actions, state }}>
