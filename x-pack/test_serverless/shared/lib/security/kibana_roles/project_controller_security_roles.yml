@@ -52,6 +52,11 @@ t1_analyst:
       privileges:
         - all
       resources: "*"
+    - application: osquery
+      privileges:
+        - read
+        - run_saved_queries
+      resources: "*"
 
 t2_analyst:
   cluster:
@@ -105,6 +110,11 @@ t2_analyst:
     - application: spaces
       privileges:
         - all
+      resources: "*"
+    - application: osquery
+      privileges:
+        - read
+        - run_saved_queries
       resources: "*"
 
 t3_analyst:
@@ -236,6 +246,10 @@ threat_intelligence_analyst:
         - read
       resources: "*"
     - application: spaces
+      privileges:
+        - all
+      resources: "*"
+    - application: osquery
       privileges:
         - all
       resources: "*"
@@ -386,6 +400,10 @@ soc_manager:
       privileges:
         - all
       resources: "*"
+    - application: osquery
+      privileges:
+        - all
+      resources: "*"
 
 detections_admin:
   cluster:
@@ -507,6 +525,10 @@ platform_engineer:
         - all
       resources: "*"
     - application: spaces
+      privileges:
+        - all
+      resources: "*"
+    - application: osquery
       privileges:
         - all
       resources: "*"
