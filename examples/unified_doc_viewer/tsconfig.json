@@ -15,6 +15,14 @@
   ],
   "kbn_references": [
     "@kbn/core",
-    "@kbn/developer-examples-plugin"
+    "@kbn/developer-examples-plugin",
+    "@kbn/unified-doc-viewer",
+    "@kbn/unified-doc-viewer-plugin",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/data-views-plugin",
+    "@kbn/kibana-react-plugin",
+    "@kbn/discover-utils",
+    "@kbn/data-plugin",
+    "@kbn/field-formats-plugin"
   ]
 }
