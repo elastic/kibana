@@ -8,11 +8,13 @@ import type {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
+import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
 import type {
   CreateChatCompletionResponse,
   CreateChatCompletionResponseChoicesInner,
 } from 'openai';
 import type { Observable } from 'rxjs';
+import type { FeaturesPluginSetup, FeaturesPluginStart } from '@kbn/features-plugin/public';
 import type { Message } from '../common/types';
 import type { ObservabilityAIAssistantAPIClient } from './api';
 
@@ -40,10 +42,14 @@ export interface ObservabilityAIAssistantPluginStart extends ObservabilityAIAssi
 
 export interface ObservabilityAIAssistantPluginSetup {}
 export interface ObservabilityAIAssistantPluginSetupDependencies {
-  triggersActions: TriggersAndActionsUIPublicPluginSetup;
+  triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
+  security: SecurityPluginSetup;
+  features: FeaturesPluginSetup;
 }
 export interface ObservabilityAIAssistantPluginStartDependencies {
-  triggersActions: TriggersAndActionsUIPublicPluginStart;
+  triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
+  security: SecurityPluginStart;
+  features: FeaturesPluginStart;
 }
 
 export interface ConfigSchema {}
