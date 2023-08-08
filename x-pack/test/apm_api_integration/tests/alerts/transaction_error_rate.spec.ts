@@ -69,6 +69,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               .transaction({ transactionName: 'tx-node' })
               .timestamp(timestamp)
               .duration(400)
+              .failure(),
+            opbeansNode
+              .transaction({ transactionName: 'tx-node' })
+              .timestamp(timestamp)
+              .duration(800)
               .success(),
           ];
         });
