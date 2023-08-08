@@ -14,6 +14,7 @@ import { registerCloudUsageCollector } from './collectors';
 import { getIsCloudEnabled } from '../common/is_cloud_enabled';
 import { parseDeploymentIdFromDeploymentUrl } from '../common/parse_deployment_id_from_deployment_url';
 import { decodeCloudId, DecodedCloudId } from '../common/decode_cloud_id';
+import { getFullCloudUrl } from '../common/utils';
 import { readInstanceSizeMb } from './env';
 
 interface PluginsSetup {
@@ -104,6 +105,14 @@ export interface CloudStart {
    * `true` when running on Elastic Cloud.
    */
   isCloudEnabled: boolean;
+  /**
+   * The full URL to the serverless projects.
+   */
+  projectsUrl?: string;
+  /**
+   * The full URL to cloud/serverless.
+   */
+  baseUrl?: string;
 }
 
 export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
@@ -132,6 +141,7 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
     }
 
     return {
+      ...this.getCloudUrls(),
       cloudId: this.config.id,
       instanceSizeMb: readInstanceSizeMb(),
       deploymentId: parseDeploymentIdFromDeploymentUrl(this.config.deployment_url),
@@ -142,8 +152,6 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
       isCloudEnabled,
       trialEndDate: this.config.trial_end_date ? new Date(this.config.trial_end_date) : undefined,
       isElasticStaffOwned: this.config.is_elastic_staff_owned,
-      projectsUrl: this.config.projects_url,
-      baseUrl: this.config.base_url,
       apm: {
         url: this.config.apm?.url,
         secretToken: this.config.apm?.secret_token,
@@ -155,11 +163,20 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
     };
   }
 
-  public start(): Pick<CloudSetup, 'isCloudEnabled' | 'projectsUrl' | 'baseUrl'> {
+  public start(): CloudStart {
     return {
+      ...this.getCloudUrls(),
       isCloudEnabled: getIsCloudEnabled(this.config.id),
-      projectsUrl: this.config.projects_url,
-      baseUrl: this.config.base_url,
+    };
+  }
+
+  private getCloudUrls() {
+    const { base_url: baseUrl } = this.config;
+    const projectsUrl = getFullCloudUrl(this.config.base_url, this.config.projects_url);
+
+    return {
+      baseUrl,
+      projectsUrl,
     };
   }
 }

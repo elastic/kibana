@@ -17,7 +17,7 @@ Object {
   "isElasticStaffOwned": undefined,
   "isServerlessEnabled": false,
   "kibanaUrl": undefined,
-  "projectsUrl": "/projects/",
+  "projectsUrl": "https://cloud.elastic.co/projects/",
   "serverless": Object {
     "projectId": undefined,
   },
@@ -29,6 +29,6 @@ exports[`Cloud Plugin #start interface snapshot 1`] = `
 Object {
   "baseUrl": "https://cloud.elastic.co",
   "isCloudEnabled": true,
-  "projectsUrl": "/projects/",
+  "projectsUrl": "https://cloud.elastic.co/projects/",
 }
 `;
