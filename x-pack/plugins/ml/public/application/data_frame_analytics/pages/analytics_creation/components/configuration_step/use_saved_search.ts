@@ -15,9 +15,9 @@ import {
   Query,
   toElasticsearchQuery,
 } from '@kbn/es-query';
+import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
 import { useMlKibana } from '../../../../../contexts/kibana';
 import { useDataSource } from '../../../../../contexts/ml';
-import { SEARCH_QUERY_LANGUAGE } from '../../../../../../../common/constants/search';
 
 // `undefined` is used for a non-initialized state
 // `null` is set if no saved search is used

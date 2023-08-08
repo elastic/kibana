@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { TimeRange } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { HostMetricsDocsLink } from '../../../../../common/visualizations/metric_explanation/host_metrics_docs_link';
+import { HostMetricsDocsLink } from '../../../../lens';
 import { MetricChart, type MetricChartProps } from './metric_chart';
 import { hostLensFormulas } from '../../../../../common/visualizations';
 

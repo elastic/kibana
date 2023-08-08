@@ -19,7 +19,6 @@ import {
   INSTALL_ALL_RULES_BUTTON,
 } from '../../../screens/alerts_detection_rules';
 import {
-  confirmRulesDelete,
   deleteFirstRule,
   selectAllRules,
   selectNumberOfRules,
@@ -191,7 +190,6 @@ describe('Prebuilt rules', () => {
       it('Allows to delete all rules at once', () => {
         selectAllRules();
         deleteSelectedRules();
-        confirmRulesDelete();
         cy.get(RULES_EMPTY_PROMPT).should('be.visible');
       });
     });

@@ -7,13 +7,13 @@
 
 import { validate } from '@kbn/securitysolution-io-ts-utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import {
-  CreateEndpointListItemSchemaDecoded,
-  createEndpointListItemSchema,
-  exceptionListItemSchema,
-} from '@kbn/securitysolution-io-ts-list-types';
 import { ENDPOINT_LIST_ID, ENDPOINT_LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
 
+import {
+  CreateEndpointListItemRequestDecoded,
+  createEndpointListItemRequest,
+  createEndpointListItemResponse,
+} from '../../common/api';
 import type { ListsPluginRouter } from '../types';
 
 import { buildRouteValidation, buildSiemResponse, getExceptionListClient } from './utils';
@@ -28,9 +28,9 @@ export const createEndpointListItemRoute = (router: ListsPluginRouter): void => 
       path: ENDPOINT_LIST_ITEM_URL,
       validate: {
         body: buildRouteValidation<
-          typeof createEndpointListItemSchema,
-          CreateEndpointListItemSchemaDecoded
-        >(createEndpointListItemSchema),
+          typeof createEndpointListItemRequest,
+          CreateEndpointListItemRequestDecoded
+        >(createEndpointListItemRequest),
       },
     },
     async (context, request, response) => {
@@ -69,7 +69,7 @@ export const createEndpointListItemRoute = (router: ListsPluginRouter): void => 
             tags,
             type,
           });
-          const [validated, errors] = validate(createdList, exceptionListItemSchema);
+          const [validated, errors] = validate(createdList, createEndpointListItemResponse);
           if (errors != null) {
             return siemResponse.error({ body: errors, statusCode: 500 });
           } else {

@@ -4443,10 +4443,10 @@
           },
           {
             "parentPluginId": "triggersActionsUi",
-            "id": "def-public.RuleType.hasGetSummarizedAlerts",
+            "id": "def-public.RuleType.hasAlertsMappings",
             "type": "CompoundType",
             "tags": [],
-            "label": "hasGetSummarizedAlerts",
+            "label": "hasAlertsMappings",
             "description": [],
             "signature": [
               "boolean | undefined"

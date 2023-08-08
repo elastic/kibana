@@ -443,8 +443,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/162584
-    describe.skip('API access with expired access token.', () => {
+    describe('API access with expired access token.', () => {
       let sessionCookie: Cookie;
 
       beforeEach(async function () {

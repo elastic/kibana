@@ -13,12 +13,15 @@ import {
   EuiIcon,
   EuiLoadingChart,
   EuiPanel,
+  EuiSpacer,
+  EuiTitle,
 } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import React from 'react';
 import { useFormContext } from 'react-hook-form';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '../../../../utils/kibana_react';
 import { useDebouncedGetPreviewData } from '../../hooks/use_preview';
 import { useSectionFormValidation } from '../../hooks/use_section_form_validation';
@@ -45,14 +48,25 @@ export function DataPreviewChart() {
   const baseTheme = charts.theme.useChartsBaseTheme();
   const dateFormat = uiSettings.get('dateFormat');
   const percentFormat = uiSettings.get('format:percent:defaultPattern');
-  const panelLabel = i18n.translate('xpack.observability.slo.sloEdit.dataPreviewChart.panelLabel', {
-    defaultMessage: 'SLI preview',
-  });
+  const title = (
+    <>
+      <EuiTitle size="xs">
+        <h3>
+          <FormattedMessage
+            id="xpack.observability.slo.sloEdit.dataPreviewChart.panelLabel"
+            defaultMessage="SLI preview"
+          />
+        </h3>
+      </EuiTitle>
+      <EuiSpacer size="s" />
+    </>
+  );
 
   if (!isIndicatorSectionValid) {
     return (
       <EuiFlexItem>
-        <EuiFormRow label={panelLabel} fullWidth>
+        {title}
+        <EuiFormRow fullWidth>
           <EuiPanel hasBorder={true} hasShadow={false} style={{ minHeight: 194 }}>
             <EuiFlexGroup justifyContent="center" alignItems="center" style={{ minHeight: 160 }}>
               <EuiFlexItem grow={false}>
@@ -73,7 +87,8 @@ export function DataPreviewChart() {
 
   return (
     <EuiFlexItem>
-      <EuiFormRow label={panelLabel} fullWidth>
+      {title}
+      <EuiFormRow fullWidth>
         <EuiPanel hasBorder={true} hasShadow={false} style={{ minHeight: 194 }}>
           {(isPreviewLoading || isError) && (
             <EuiFlexGroup justifyContent="center" alignItems="center" style={{ height: 160 }}>

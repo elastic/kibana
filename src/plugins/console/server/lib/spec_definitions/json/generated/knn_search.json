@@ -8,7 +8,7 @@
       "POST"
     ],
     "patterns": [
-      "{indices}/_knn_search"
+      "{index}/_knn_search"
     ],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/search-search.html"
   }

@@ -24,12 +24,21 @@ import { User } from '../../../cases_api_integration/common/lib/authentication/t
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { generateRandomCaseWithoutConnector } from './helpers';
 
-type OmitSupertest<T> = Omit<T, 'supertest'>;
+type GetParams<T extends (...args: any) => any> = Omit<Parameters<T>[0], 'supertest'>;
 
 export function CasesAPIServiceProvider({ getService }: FtrProviderContext) {
   const kbnSupertest = getService('supertest');
   const es = getService('es');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
+
+  const getSuperTest = (hasAuth: boolean) => (hasAuth ? supertestWithoutAuth : kbnSupertest);
+
+  const createApiFunction =
+    <T extends (...args: any) => any>(apiFunc: T) =>
+    (params: GetParams<typeof apiFunc>): ReturnType<typeof apiFunc> => {
+      const supertest = getSuperTest(Boolean(params.auth));
+      return apiFunc({ supertest, ...params });
+    };
 
   return {
     async createCase(overwrites: Partial<CasePostRequest> = {}): Promise<Case> {
@@ -56,15 +65,7 @@ export function CasesAPIServiceProvider({ getService }: FtrProviderContext) {
       await deleteAllCaseItems(es);
     },
 
-    async createAttachment({
-      caseId,
-      params,
-    }: {
-      caseId: Parameters<typeof createComment>[0]['caseId'];
-      params: Parameters<typeof createComment>[0]['params'];
-    }): Promise<Case> {
-      return createComment({ supertest: kbnSupertest, params, caseId });
-    },
+    createAttachment: createApiFunction(createComment),
 
     async setStatus(
       caseId: string,
@@ -96,9 +97,7 @@ export function CasesAPIServiceProvider({ getService }: FtrProviderContext) {
       return suggestUserProfiles({ supertest: kbnSupertest, req: options });
     },
 
-    async getCase({ caseId }: OmitSupertest<Parameters<typeof getCase>[0]>): Promise<Case> {
-      return getCase({ supertest: kbnSupertest, caseId });
-    },
+    getCase: createApiFunction(getCase),
 
     async generateUserActions({
       caseId,

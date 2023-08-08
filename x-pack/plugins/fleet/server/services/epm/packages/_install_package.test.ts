@@ -124,6 +124,7 @@ describe('_installPackage', () => {
           disableILMPolicies: true,
           disableProxies: false,
           fleetServerStandalone: false,
+          capabilities: [],
         },
       })
     );
@@ -176,6 +177,7 @@ describe('_installPackage', () => {
           disableProxies: false,
           disableILMPolicies: false,
           fleetServerStandalone: false,
+          capabilities: [],
         },
       })
     );

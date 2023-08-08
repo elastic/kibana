@@ -18,8 +18,8 @@ import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock'
 import { DiscoverMainProvider } from '../../services/discover_state_provider';
 import type { SearchBarCustomization, TopNavCustomization } from '../../../../customizations';
 import type { DiscoverCustomizationId } from '../../../../customizations/customization_service';
-
 import { useDiscoverCustomization } from '../../../../customizations';
+
 setHeaderActionMenuMounter(jest.fn());
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
@@ -76,22 +76,20 @@ describe('Discover topnav component', () => {
     mockUseCustomizations = false;
     jest.clearAllMocks();
 
-    (useDiscoverCustomization as jest.Mock).mockImplementation(
-      jest.fn((id: DiscoverCustomizationId) => {
-        if (!mockUseCustomizations) {
-          return undefined;
-        }
+    (useDiscoverCustomization as jest.Mock).mockImplementation((id: DiscoverCustomizationId) => {
+      if (!mockUseCustomizations) {
+        return undefined;
+      }
 
-        switch (id) {
-          case 'top_nav':
-            return mockTopNavCustomization;
-          case 'search_bar':
-            return mockSearchBarCustomization;
-          default:
-            throw new Error(`Unknown customization id: ${id}`);
-        }
-      })
-    );
+      switch (id) {
+        case 'top_nav':
+          return mockTopNavCustomization;
+        case 'search_bar':
+          return mockSearchBarCustomization;
+        default:
+          throw new Error(`Unknown customization id: ${id}`);
+      }
+    });
   });
 
   test('generated config of TopNavMenu config is correct when discover save permissions are assigned', () => {

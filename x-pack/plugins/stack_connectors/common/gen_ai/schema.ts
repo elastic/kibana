@@ -6,16 +6,20 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { OpenAiProviderType } from './constants';
+import { DEFAULT_OPENAI_MODEL, OpenAiProviderType } from './constants';
 
 // Connector schema
-export const GenAiConfigSchema = schema.object({
-  apiProvider: schema.oneOf([
-    schema.literal(OpenAiProviderType.OpenAi as string),
-    schema.literal(OpenAiProviderType.AzureAi as string),
-  ]),
-  apiUrl: schema.string(),
-});
+export const GenAiConfigSchema = schema.oneOf([
+  schema.object({
+    apiProvider: schema.oneOf([schema.literal(OpenAiProviderType.AzureAi)]),
+    apiUrl: schema.string(),
+  }),
+  schema.object({
+    apiProvider: schema.oneOf([schema.literal(OpenAiProviderType.OpenAi)]),
+    apiUrl: schema.string(),
+    defaultModel: schema.string({ defaultValue: DEFAULT_OPENAI_MODEL }),
+  }),
+]);
 
 export const GenAiSecretsSchema = schema.object({ apiKey: schema.string() });
 

@@ -20,9 +20,9 @@ import { DataViewBase } from '@kbn/es-query';
 import {
   createSeries,
   derivedIndexPattern,
+  mockedTimestamps,
   options,
   resp,
-  timestamps,
 } from '../../../utils/metrics_explorer';
 
 const mockedFetch = jest.fn();
@@ -59,7 +59,7 @@ const renderUseMetricsExplorerDataHook = () => {
       initialProps: {
         options,
         derivedIndexPattern,
-        timestamps,
+        timestamps: mockedTimestamps,
       },
       wrapper,
     }
@@ -154,7 +154,7 @@ describe('useMetricsExplorerData Hook', () => {
         metrics: [{ aggregation: 'count' }],
       },
       derivedIndexPattern,
-      timestamps,
+      timestamps: mockedTimestamps,
     });
     expect(result.current.isLoading).toBe(true);
     await waitForNextUpdate();
@@ -177,7 +177,12 @@ describe('useMetricsExplorerData Hook', () => {
     rerender({
       options,
       derivedIndexPattern,
-      timestamps: { fromTimestamp: 1678378092225, toTimestamp: 1678381693477, interval: '>=10s' },
+      timestamps: {
+        fromTimestamp: 1678378092225,
+        toTimestamp: 1678381693477,
+        interval: '>=10s',
+        timeFieldName: 'mockedTimeFieldName',
+      },
     });
     expect(result.current.isLoading).toBe(true);
     await waitForNextUpdate();
