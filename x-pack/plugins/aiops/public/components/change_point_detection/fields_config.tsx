@@ -522,7 +522,7 @@ const FieldPanel: FC<FieldPanelProps> = ({
           <EuiFlexGroup alignItems={'center'} justifyContent={'spaceBetween'} gutterSize={'s'}>
             <EuiFlexItem grow={false}>
               <EuiPopover
-                id={''}
+                id={`panelContextMenu_${panelIndex}`}
                 button={
                   <EuiButtonIcon
                     aria-label={i18n.translate(

@@ -30,7 +30,7 @@ export const FilterQueryContext = createContext<{
 /**
  * Helper context to provide the latest filter, query and time range values
  * from the data plugin.
- * Also merges custom filers and queries provided with an input.
+ * Also merges custom filters and queries provided with an input.
  *
  * @param children
  * @constructor

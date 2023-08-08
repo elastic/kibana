@@ -122,4 +122,11 @@ export class EmbeddableChangePointChart extends AbstractEmbeddable<
       el
     );
   }
+
+  public destroy() {
+    super.destroy();
+    if (this.node) {
+      ReactDOM.unmountComponentAtNode(this.node);
+    }
+  }
 }
