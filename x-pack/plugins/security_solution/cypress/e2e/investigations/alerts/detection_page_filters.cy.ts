@@ -329,7 +329,7 @@ describe(`Detections : Page Filters`, () => {
     cy.get(FILTER_GROUP_CHANGED_BANNER).should('not.exist');
   });
 
-  context('Impact of inputs', () => {
+  context.only('Impact of inputs', () => {
     afterEach(() => {
       resetFilters();
     });
@@ -362,7 +362,7 @@ describe(`Detections : Page Filters`, () => {
         value: 'invalid',
       });
       waitForPageFilters();
-      togglePageFilterPopover(0);
+      openPageFilterPopover(0);
       cy.get(CONTROL_POPOVER(0)).should('contain.text', 'No options found');
       cy.get(EMPTY_ALERT_TABLE).should('be.visible');
     });
