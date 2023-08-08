@@ -60,10 +60,10 @@ export function ChatPromptEditor({ disabled, loading, onSubmit }: ChatPromptEdit
     setFunctionPayload('');
   };
 
-  const handleResizeTextArea = (textarea: HTMLTextAreaElement | null) => {
-    if (textarea) {
-      textarea.style.height = 'auto';
-      textarea.style.height = textarea?.scrollHeight + 'px';
+  const handleResizeTextArea = () => {
+    if (textAreaRef.current) {
+      textAreaRef.current.style.height = 'auto';
+      textAreaRef.current.style.height = textAreaRef.current?.scrollHeight + 'px';
     }
   };
 
@@ -73,7 +73,7 @@ export function ChatPromptEditor({ disabled, loading, onSubmit }: ChatPromptEdit
 
     setPrompt('');
     setFunctionPayload(undefined);
-    handleResizeTextArea(textAreaRef.current);
+    handleResizeTextArea();
 
     try {
       if (selectedFunction) {
@@ -119,11 +119,11 @@ export function ChatPromptEditor({ disabled, loading, onSubmit }: ChatPromptEdit
 
     if (textarea) {
       textarea.focus();
-      textarea.addEventListener('input', () => handleResizeTextArea(textarea), false);
+      textarea.addEventListener('input', handleResizeTextArea, false);
     }
 
     return () => {
-      textarea?.removeEventListener('input', () => handleResizeTextArea(textarea), false);
+      textarea?.removeEventListener('input', handleResizeTextArea, false);
     };
   });
 
