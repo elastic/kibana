@@ -41,7 +41,7 @@ import { MetricThresholdRuleTypeParams } from '../types';
 // TODO Use a generic props for app sections https://github.com/elastic/kibana/issues/152690
 export type MetricThresholdRule = Rule<
   MetricThresholdRuleTypeParams & {
-    filterQueryText?: string;
+    filterQuery?: string;
     groupBy?: string | string[];
   }
 >;
@@ -163,7 +163,7 @@ export default function AlertDetailsAppSection({
                   chartType={MetricsExplorerChartType.line}
                   derivedIndexPattern={derivedIndexPattern}
                   expression={criterion}
-                  filterQuery={rule.params.filterQueryText}
+                  filterQuery={rule.params.filterQuery}
                   groupBy={rule.params.groupBy}
                   hideTitle
                   timeRange={timeRange}

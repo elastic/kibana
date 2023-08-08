@@ -8,6 +8,7 @@
 import { recurse } from 'cypress-recurse';
 
 import {
+  CONFIRM_DELETE_RULE_BTN,
   CONFIRM_DUPLICATE_RULE,
   DUPLICATE_WITHOUT_EXCEPTIONS_OPTION,
   DUPLICATE_WITH_EXCEPTIONS_OPTION,
@@ -55,6 +56,7 @@ import { SCHEDULE_DETAILS } from '../screens/rule_details';
 export const deleteSelectedRules = () => {
   cy.get(BULK_ACTIONS_BTN).click();
   cy.get(DELETE_RULE_BULK_BTN).click();
+  cy.get(CONFIRM_DELETE_RULE_BTN).click();
 };
 
 // DUPLICATE

@@ -70,7 +70,7 @@ import {
   OVERVIEW_PATH,
   RULES_PATH,
   SLOS_PATH,
-} from './routes/paths';
+} from '../common/locators/paths';
 
 export interface ConfigSchema {
   unsafe: {

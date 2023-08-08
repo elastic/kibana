@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CasesMetricsFeatureField } from '../../../common/api/metrics/case';
+import type { CasesMetricsFeatureField } from '../../../common/types/api';
 import type { BaseHandlerCommonOptions, MetricsHandler } from './types';
 
 export abstract class BaseHandler<R> implements MetricsHandler<R> {

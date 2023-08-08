@@ -8,7 +8,10 @@
 
 import { chunk } from 'lodash';
 import type { ToolingLog } from '@kbn/tooling-log';
-import type { SavedObjectsBulkDeleteResponse } from '@kbn/core-saved-objects-api-server';
+import type {
+  SavedObjectsBulkDeleteResponse,
+  SavedObjectsFindResponse,
+} from '@kbn/core-saved-objects-api-server';
 
 import { KbnClientRequester, uriencode } from './kbn_client_requester';
 
@@ -28,6 +31,11 @@ interface SavedObjectResponse<Attributes extends Record<string, any>> {
   type: string;
   updated_at?: string;
   version?: string;
+}
+
+interface FindOptions {
+  type: string;
+  space?: string;
 }
 
 interface GetOptions {
@@ -147,6 +155,22 @@ export class KbnClientSavedObjects {
       path: options.space
         ? uriencode`/s/${options.space}/internal/ftr/kbn_client_so/${options.type}/${options.id}`
         : uriencode`/internal/ftr/kbn_client_so/${options.type}/${options.id}`,
+      method: 'GET',
+    });
+    return data;
+  }
+
+  /**
+   * Find saved objects
+   */
+  public async find<Attributes extends Record<string, any>>(options: FindOptions) {
+    this.log.debug('Find saved objects: %j', options);
+
+    const { data } = await this.requester.request<SavedObjectsFindResponse<Attributes>>({
+      description: 'find saved objects',
+      path: options.space
+        ? uriencode`/s/${options.space}/internal/ftr/kbn_client_so/_find?type=${options.type}`
+        : uriencode`/internal/ftr/kbn_client_so/_find?type=${options.type}`,
       method: 'GET',
     });
     return data;

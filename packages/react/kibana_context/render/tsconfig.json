@@ -16,7 +16,6 @@
     "target/**/*"
   ],
   "kbn_references": [
-    "@kbn/core-i18n-browser",
-    "@kbn/react-kibana-context-theme",
+    "@kbn/react-kibana-context-root",
   ]
 }
