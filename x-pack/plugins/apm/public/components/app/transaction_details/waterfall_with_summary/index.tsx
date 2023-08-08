@@ -60,8 +60,10 @@ export function WaterfallWithSummary<TSample extends {}>({
   const isLoading =
     waterfallFetchResult.status === FETCH_STATUS.LOADING ||
     traceSamplesFetchStatus === FETCH_STATUS.LOADING;
+  // When traceId is not present, call to waterfallFetchResult will not be initiated
   const isSucceded =
-    waterfallFetchResult.status === FETCH_STATUS.SUCCESS &&
+    (waterfallFetchResult.status === FETCH_STATUS.SUCCESS ||
+      waterfallFetchResult.status === FETCH_STATUS.NOT_INITIATED) &&
     traceSamplesFetchStatus === FETCH_STATUS.SUCCESS;
 
   useEffect(() => {
