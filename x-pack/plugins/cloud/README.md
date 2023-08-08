@@ -24,6 +24,12 @@ This is the URL of the Cloud interface.
 
 **Example:** `https://cloud.elastic.co` (on the ESS production environment)
 
+### `projectUrl`
+
+This is the URL to the "projects" interface on cloud.
+
+**Example:** `https://cloud.elastic.co/projects`
+
 ### `deploymentUrl`
 
 This is the path to the Cloud deployment management page for the deployment to which the Kibana instance belongs. The value is already prepended with `baseUrl`.

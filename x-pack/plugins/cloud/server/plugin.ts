@@ -110,7 +110,7 @@ export interface CloudStart {
    */
   projectsUrl?: string;
   /**
-   * The full URL to cloud/serverless.
+   * This is the URL of the Cloud interface.
    */
   baseUrl?: string;
 }
