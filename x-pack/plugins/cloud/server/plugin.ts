@@ -46,7 +46,7 @@ export interface CloudSetup {
    */
   projectsUrl?: string;
   /**
-   * The full URL to cloud/serverless.
+   * This is the URL of the Cloud interface.
    */
   baseUrl?: string;
   /**
@@ -172,8 +172,7 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
 
   private getCloudUrls() {
     const { base_url: baseUrl } = this.config;
-    const projectsUrl = getFullCloudUrl(this.config.base_url, this.config.projects_url);
-
+    const projectsUrl = getFullCloudUrl(baseUrl, this.config.projects_url);
     return {
       baseUrl,
       projectsUrl,
