@@ -167,6 +167,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // click "see full error" button in the toast
       const [openShardModalButton] = await testSubjects.findAll('openShardFailureModalBtn');
       await openShardModalButton.click();
+      await testSubjects.exists('shardFailureModalTitle');
       const modalHeader = await testSubjects.find('shardFailureModalTitle');
       expect(await modalHeader.getVisibleText()).to.be('2 of 4 shards failed');
       // request
