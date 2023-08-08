@@ -28,6 +28,11 @@ export enum AppFeatureSecurityKey {
   endpointPolicyManagement = 'endpoint_policy_management',
 
   /**
+   * Enables Endpoint Policy protections (like Malware, Ransomware, etc)
+   */
+  endpointPolicyProtections = 'endpoint_policy_protections',
+
+  /**
    * Enables management of all endpoint related artifacts (ex. Trusted Applications, Event Filters,
    * Host Isolation Exceptions, Blocklist.
    */
@@ -43,6 +48,11 @@ export enum AppFeatureSecurityKey {
    * Enables Threat Intelligence
    */
   threatIntelligence = 'threat-intelligence',
+
+  /**
+   * Enables Osquery Response Actions
+   */
+  osqueryAutomatedResponseActions = 'osquery_automated_response_actions',
 }
 
 export enum AppFeatureCasesKey {
