@@ -89,10 +89,6 @@ export interface ExceptionBuilderProps {
   listId: string | undefined;
   listNamespaceType: NamespaceType | undefined;
   listType: ExceptionListType;
-  listTypeSpecificIndexPatternFilter?: (
-    pattern: DataViewBase,
-    type: ExceptionListType
-  ) => DataViewBase;
   onChange: (arg: OnChangeProps) => void;
   ruleName?: string;
   isDisabled?: boolean;
@@ -115,7 +111,6 @@ export const ExceptionBuilderComponent = ({
   listId,
   listNamespaceType,
   listType,
-  listTypeSpecificIndexPatternFilter,
   onChange,
   ruleName,
   exceptionItemName,
@@ -461,7 +456,6 @@ export const ExceptionBuilderComponent = ({
                 isOnlyItem={exceptions.length === 1}
                 key={getExceptionListItemId(exceptionListItem, index)}
                 listType={listType}
-                listTypeSpecificIndexPatternFilter={listTypeSpecificIndexPatternFilter}
                 onChangeExceptionItem={handleExceptionItemChange}
                 onDeleteExceptionItem={handleDeleteExceptionItem}
                 onlyShowListOperators={containsValueListEntry(exceptions)}

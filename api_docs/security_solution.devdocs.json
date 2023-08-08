@@ -411,7 +411,15 @@
             "description": [],
             "signature": [
               "Observable",
-              "<Map<\"entity_analytics_panel\", React.ComponentType<{}>>>"
+              "<Map<",
+              {
+                "pluginId": "securitySolution",
+                "scope": "public",
+                "docId": "kibSecuritySolutionPluginApi",
+                "section": "def-public.UpsellingSectionId",
+                "text": "UpsellingSectionId"
+              },
+              ", React.ComponentType<{}>>>"
             ],
             "path": "x-pack/plugins/security_solution/public/common/lib/upsellings/upselling_service.ts",
             "deprecated": false,
@@ -442,6 +450,21 @@
           },
           {
             "parentPluginId": "securitySolution",
+            "id": "def-public.UpsellingService.messages$",
+            "type": "Object",
+            "tags": [],
+            "label": "messages$",
+            "description": [],
+            "signature": [
+              "Observable",
+              "<Map<\"investigation_guide\", string>>"
+            ],
+            "path": "x-pack/plugins/security_solution/public/common/lib/upsellings/upselling_service.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "securitySolution",
             "id": "def-public.UpsellingService.Unnamed",
             "type": "Function",
             "tags": [],
@@ -464,7 +487,15 @@
             "label": "registerSections",
             "description": [],
             "signature": [
-              "(sections: Partial<Record<\"entity_analytics_panel\", React.ComponentType<{}>>>) => void"
+              "(sections: Partial<Record<",
+              {
+                "pluginId": "securitySolution",
+                "scope": "public",
+                "docId": "kibSecuritySolutionPluginApi",
+                "section": "def-public.UpsellingSectionId",
+                "text": "UpsellingSectionId"
+              },
+              ", React.ComponentType<{}>>>) => void"
             ],
             "path": "x-pack/plugins/security_solution/public/common/lib/upsellings/upselling_service.ts",
             "deprecated": false,
@@ -478,7 +509,15 @@
                 "label": "sections",
                 "description": [],
                 "signature": [
-                  "Partial<Record<\"entity_analytics_panel\", React.ComponentType<{}>>>"
+                  "Partial<Record<",
+                  {
+                    "pluginId": "securitySolution",
+                    "scope": "public",
+                    "docId": "kibSecuritySolutionPluginApi",
+                    "section": "def-public.UpsellingSectionId",
+                    "text": "UpsellingSectionId"
+                  },
+                  ", React.ComponentType<{}>>>"
                 ],
                 "path": "x-pack/plugins/security_solution/public/common/lib/upsellings/upselling_service.ts",
                 "deprecated": false,
@@ -527,6 +566,38 @@
                     "text": "SecurityPageName"
                   },
                   ", React.ComponentType<{}>>>"
+                ],
+                "path": "x-pack/plugins/security_solution/public/common/lib/upsellings/upselling_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-public.UpsellingService.registerMessages",
+            "type": "Function",
+            "tags": [],
+            "label": "registerMessages",
+            "description": [],
+            "signature": [
+              "(messages: Partial<Record<\"investigation_guide\", string>>) => void"
+            ],
+            "path": "x-pack/plugins/security_solution/public/common/lib/upsellings/upselling_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "securitySolution",
+                "id": "def-public.UpsellingService.registerMessages.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "messages",
+                "description": [],
+                "signature": [
+                  "Partial<Record<\"investigation_guide\", string>>"
                 ],
                 "path": "x-pack/plugins/security_solution/public/common/lib/upsellings/upselling_service.ts",
                 "deprecated": false,
@@ -1974,7 +2045,7 @@
         "label": "SectionUpsellings",
         "description": [],
         "signature": [
-          "{ entity_analytics_panel?: React.ComponentType<{}> | undefined; }"
+          "{ entity_analytics_panel?: React.ComponentType<{}> | undefined; endpointPolicyProtections?: React.ComponentType<{}> | undefined; }"
         ],
         "path": "x-pack/plugins/security_solution/public/common/lib/upsellings/types.ts",
         "deprecated": false,
@@ -1989,7 +2060,7 @@
         "label": "UpsellingSectionId",
         "description": [],
         "signature": [
-          "\"entity_analytics_panel\""
+          "\"entity_analytics_panel\" | \"endpointPolicyProtections\""
         ],
         "path": "x-pack/plugins/security_solution/public/common/lib/upsellings/types.ts",
         "deprecated": false,

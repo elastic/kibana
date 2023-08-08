@@ -8,14 +8,17 @@
 import { MsearchMultisearchBody } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ElasticsearchClient } from '@kbn/core/server';
 import {
+  ALL_VALUE,
   calendarAlignedTimeWindowSchema,
   Duration,
+  fetchHistoricalSummaryResponseSchema,
   occurrencesBudgetingMethodSchema,
   rollingTimeWindowSchema,
   timeslicesBudgetingMethodSchema,
   toMomentUnitOfTime,
 } from '@kbn/slo-schema';
 import { assertNever } from '@kbn/std';
+import * as t from 'io-ts';
 import moment from 'moment';
 import { SLO_DESTINATION_INDEX_PATTERN } from '../../assets/constants';
 import { DateRange, HistoricalSummary, SLO, SLOId } from '../../domain/models';
@@ -44,36 +47,44 @@ interface DailyAggBucket {
   };
 }
 
+export interface SLOWithInstanceId {
+  sloId: SLOId;
+  instanceId: string;
+  slo: SLO;
+}
+
+export type HistoricalSummaryResponse = t.TypeOf<typeof fetchHistoricalSummaryResponseSchema>;
+
 export interface HistoricalSummaryClient {
-  fetch(sloList: SLO[]): Promise<Record<SLOId, HistoricalSummary[]>>;
+  fetch(list: SLOWithInstanceId[]): Promise<HistoricalSummaryResponse>;
 }
 
 export class DefaultHistoricalSummaryClient implements HistoricalSummaryClient {
   constructor(private esClient: ElasticsearchClient) {}
 
-  async fetch(sloList: SLO[]): Promise<Record<SLOId, HistoricalSummary[]>> {
-    const dateRangeBySlo = sloList.reduce<Record<SLOId, DateRange>>((acc, slo) => {
-      acc[slo.id] = getDateRange(slo);
+  async fetch(list: SLOWithInstanceId[]): Promise<HistoricalSummaryResponse> {
+    const dateRangeBySlo = list.reduce<Record<SLOId, DateRange>>((acc, { sloId, slo }) => {
+      acc[sloId] = getDateRange(slo);
       return acc;
     }, {});
 
-    const searches = sloList.flatMap((slo) => [
+    const searches = list.flatMap(({ sloId, instanceId, slo }) => [
       { index: SLO_DESTINATION_INDEX_PATTERN },
-      generateSearchQuery(slo, dateRangeBySlo[slo.id]),
+      generateSearchQuery(slo, instanceId, dateRangeBySlo[sloId]),
     ]);
 
-    const historicalSummaryBySlo: Record<SLOId, HistoricalSummary[]> = {};
+    const historicalSummary: HistoricalSummaryResponse = [];
     if (searches.length === 0) {
-      return historicalSummaryBySlo;
+      return historicalSummary;
     }
 
     const result = await this.esClient.msearch({ searches });
 
     for (let i = 0; i < result.responses.length; i++) {
-      const slo = sloList[i];
+      const { slo, sloId, instanceId } = list[i];
       if ('error' in result.responses[i]) {
-        // handle errorneous responses with an empty historical summary
-        historicalSummaryBySlo[slo.id] = [];
+        // handle errorneous responses with an empty historical summary data
+        historicalSummary.push({ sloId, instanceId, data: [] });
         continue;
       }
 
@@ -81,26 +92,32 @@ export class DefaultHistoricalSummaryClient implements HistoricalSummaryClient {
       const buckets = (result.responses[i].aggregations?.daily?.buckets as DailyAggBucket[]) || [];
 
       if (rollingTimeWindowSchema.is(slo.timeWindow)) {
-        historicalSummaryBySlo[slo.id] = handleResultForRolling(slo, buckets);
+        historicalSummary.push({
+          sloId,
+          instanceId,
+          data: handleResultForRolling(slo, buckets),
+        });
         continue;
       }
 
       if (calendarAlignedTimeWindowSchema.is(slo.timeWindow)) {
         if (timeslicesBudgetingMethodSchema.is(slo.budgetingMethod)) {
-          const dateRange = dateRangeBySlo[slo.id];
-          historicalSummaryBySlo[slo.id] = handleResultForCalendarAlignedAndTimeslices(
-            slo,
-            buckets,
-            dateRange
-          );
+          const dateRange = dateRangeBySlo[sloId];
+          historicalSummary.push({
+            sloId,
+            instanceId,
+            data: handleResultForCalendarAlignedAndTimeslices(slo, buckets, dateRange),
+          });
+
           continue;
         }
 
         if (occurrencesBudgetingMethodSchema.is(slo.budgetingMethod)) {
-          historicalSummaryBySlo[slo.id] = handleResultForCalendarAlignedAndOccurrences(
-            slo,
-            buckets
-          );
+          historicalSummary.push({
+            sloId,
+            instanceId,
+            data: handleResultForCalendarAlignedAndOccurrences(slo, buckets),
+          });
           continue;
         }
 
@@ -110,7 +127,7 @@ export class DefaultHistoricalSummaryClient implements HistoricalSummaryClient {
       assertNever(slo.timeWindow);
     }
 
-    return historicalSummaryBySlo;
+    return historicalSummary;
   }
 }
 
@@ -186,12 +203,21 @@ function handleResultForRolling(slo: SLO, buckets: DailyAggBucket[]): Historical
     });
 }
 
-function generateSearchQuery(slo: SLO, dateRange: DateRange): MsearchMultisearchBody {
+function generateSearchQuery(
+  slo: SLO,
+  instanceId: string,
+  dateRange: DateRange
+): MsearchMultisearchBody {
   const unit = toMomentUnitOfTime(slo.timeWindow.duration.unit);
   const timeWindowDurationInDays = moment.duration(slo.timeWindow.duration.value, unit).asDays();
 
   const { fixedInterval, bucketsPerDay } =
     getFixedIntervalAndBucketsPerDay(timeWindowDurationInDays);
+
+  const extraFilterByInstanceId =
+    !!slo.groupBy && slo.groupBy !== ALL_VALUE && instanceId !== ALL_VALUE
+      ? [{ term: { 'slo.instanceId': instanceId } }]
+      : [];
 
   return {
     size: 0,
@@ -208,6 +234,7 @@ function generateSearchQuery(slo: SLO, dateRange: DateRange): MsearchMultisearch
               },
             },
           },
+          ...extraFilterByInstanceId,
         ],
       },
     },

@@ -62,6 +62,7 @@ export function DashboardTopNav({ embedSettings, redirectTo }: DashboardTopNavPr
       getIsVisible$: getChromeIsVisible$,
       recentlyAccessed: chromeRecentlyAccessed,
     },
+    serverless,
     settings: { uiSettings },
     navigation: { TopNavMenu },
     embeddable: { getStateTransfer },
@@ -140,14 +141,7 @@ export function DashboardTopNav({ embedSettings, redirectTo }: DashboardTopNavPr
    * Set breadcrumbs to dashboard title when dashboard's title or view mode changes
    */
   useEffect(() => {
-    setBreadcrumbs([
-      {
-        text: getDashboardBreadcrumb(),
-        'data-test-subj': 'dashboardListingBreadcrumb',
-        onClick: () => {
-          redirectTo({ destination: 'listing' });
-        },
-      },
+    const dashboardTitleBreadcrumbs = [
       {
         text:
           viewMode === ViewMode.EDIT ? (
@@ -164,8 +158,26 @@ export function DashboardTopNav({ embedSettings, redirectTo }: DashboardTopNavPr
               }
             : undefined,
       },
-    ]);
-  }, [setBreadcrumbs, redirectTo, dashboardTitle, dashboard, viewMode]);
+    ];
+
+    if (serverless?.setBreadcrumbs) {
+      // set serverless breadcrumbs if available,
+      // set only the dashboardTitleBreadcrumbs because the main breadcrumbs automatically come as part of the navigation config
+      serverless.setBreadcrumbs(dashboardTitleBreadcrumbs);
+    } else {
+      // non-serverless regular breadcrumbs
+      setBreadcrumbs([
+        {
+          text: getDashboardBreadcrumb(),
+          'data-test-subj': 'dashboardListingBreadcrumb',
+          onClick: () => {
+            redirectTo({ destination: 'listing' });
+          },
+        },
+        ...dashboardTitleBreadcrumbs,
+      ]);
+    }
+  }, [setBreadcrumbs, redirectTo, dashboardTitle, dashboard, viewMode, serverless]);
 
   /**
    * Build app leave handler whenever hasUnsavedChanges changes

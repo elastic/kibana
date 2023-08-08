@@ -112,6 +112,11 @@ Array [
               "field": "slo.description",
             },
           },
+          "slo.groupBy": Object {
+            "terms": Object {
+              "field": "slo.groupBy",
+            },
+          },
           "slo.id": Object {
             "terms": Object {
               "field": "slo.id",
@@ -335,6 +340,11 @@ Array [
               "field": "slo.description",
             },
           },
+          "slo.groupBy": Object {
+            "terms": Object {
+              "field": "slo.groupBy",
+            },
+          },
           "slo.id": Object {
             "terms": Object {
               "field": "slo.id",
@@ -556,6 +566,11 @@ Array [
           "slo.description": Object {
             "terms": Object {
               "field": "slo.description",
+            },
+          },
+          "slo.groupBy": Object {
+            "terms": Object {
+              "field": "slo.groupBy",
             },
           },
           "slo.id": Object {
@@ -792,6 +807,11 @@ Array [
           "slo.description": Object {
             "terms": Object {
               "field": "slo.description",
+            },
+          },
+          "slo.groupBy": Object {
+            "terms": Object {
+              "field": "slo.groupBy",
             },
           },
           "slo.id": Object {
@@ -1043,6 +1063,11 @@ Array [
           "slo.description": Object {
             "terms": Object {
               "field": "slo.description",
+            },
+          },
+          "slo.groupBy": Object {
+            "terms": Object {
+              "field": "slo.groupBy",
             },
           },
           "slo.id": Object {

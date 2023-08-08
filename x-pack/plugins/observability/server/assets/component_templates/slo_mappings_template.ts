@@ -50,6 +50,10 @@ export const getSLOMappingsTemplate = (name: string) => ({
             revision: {
               type: 'long',
             },
+            groupBy: {
+              type: 'keyword',
+              ignore_above: 256,
+            },
             instanceId: {
               type: 'keyword',
               ignore_above: 256,
