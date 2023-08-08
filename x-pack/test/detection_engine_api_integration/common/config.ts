@@ -11,7 +11,6 @@ import { services } from './services';
 
 interface CreateTestConfigOptions {
   license: string;
-  ssl?: boolean;
 }
 
 // test.not-enabled is specifically not enabled
@@ -32,19 +31,14 @@ const enabledActionTypes = [
 ];
 
 export function createTestConfig(options: CreateTestConfigOptions, testFiles?: string[]) {
-  const { license = 'trial', ssl = false } = options;
+  const { license = 'trial' } = options;
 
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
     const xPackApiIntegrationTestsConfig = await readConfigFile(
       require.resolve('../../api_integration/config.ts')
     );
-    const servers = {
-      ...xPackApiIntegrationTestsConfig.get('servers'),
-      elasticsearch: {
-        ...xPackApiIntegrationTestsConfig.get('servers.elasticsearch'),
-        protocol: ssl ? 'https' : 'http',
-      },
-    };
+
+    const servers = xPackApiIntegrationTestsConfig.get('servers');
 
     return {
       testFiles,
@@ -56,7 +50,6 @@ export function createTestConfig(options: CreateTestConfigOptions, testFiles?: s
       esTestCluster: {
         ...xPackApiIntegrationTestsConfig.get('esTestCluster'),
         license,
-        ssl,
         serverArgs: [`xpack.license.self_generated.type=${license}`],
       },
       kbnTestServer: {
@@ -95,11 +88,8 @@ export function createTestConfig(options: CreateTestConfigOptions, testFiles?: s
               },
             },
           })}`,
-          ...(ssl
-            ? [
-                `--elasticsearch.hosts=${servers.elasticsearch.protocol}://${servers.elasticsearch.hostname}:${servers.elasticsearch.port}`,
-                `--elasticsearch.ssl.certificateAuthorities=${CA_CERT_PATH}`,
-              ]
+          ...(servers.elasticsearch.protocol === 'https'
+            ? `--elasticsearch.ssl.certificateAuthorities=${CA_CERT_PATH}`
             : []),
         ],
       },
