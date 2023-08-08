@@ -34,16 +34,8 @@ const packages: IntegrationPackage[] = [
     version: '0.13.0',
   },
   {
-    name: 'airflow',
-    version: '0.2.0',
-  },
-  {
     name: 'akamai',
     version: '2.14.0',
-  },
-  {
-    name: 'apache_spark',
-    version: '0.6.0',
   },
   {
     name: 'apache_tomcat',
@@ -52,10 +44,6 @@ const packages: IntegrationPackage[] = [
   {
     name: 'apm',
     version: '8.10.0-preview-1689351101',
-  },
-  {
-    name: 'arista_ngfw',
-    version: '0.2.0',
   },
   {
     name: 'atlassian_bitbucket',
@@ -86,24 +74,12 @@ const packages: IntegrationPackage[] = [
     version: '0.5.0',
   },
   {
-    name: 'awsfargate',
-    version: '0.3.0',
-  },
-  {
     name: 'azure',
     version: '1.5.28',
   },
   {
     name: 'azure_app_service',
     version: '0.0.1',
-  },
-  {
-    name: 'azure_application_insights',
-    version: '1.0.6',
-  },
-  {
-    name: 'azure_billing',
-    version: '1.1.3',
   },
   {
     name: 'azure_blob_storage',
@@ -116,42 +92,6 @@ const packages: IntegrationPackage[] = [
   {
     name: 'azure_functions',
     version: '0.0.1',
-  },
-  {
-    name: 'azure_metrics',
-    version: '1.0.17',
-  },
-  {
-    name: 'barracuda',
-    version: '1.5.0',
-  },
-  {
-    name: 'barracuda_cloudgen_firewall',
-    version: '1.5.0',
-  },
-  {
-    name: 'beat',
-    version: '0.1.3',
-  },
-  {
-    name: 'bitdefender',
-    version: '1.2.0',
-  },
-  {
-    name: 'bitwarden',
-    version: '1.2.0',
-  },
-  {
-    name: 'bluecoat',
-    version: '0.17.0',
-  },
-  {
-    name: 'box_events',
-    version: '1.7.0',
-  },
-  {
-    name: 'carbon_black_cloud',
-    version: '1.13.0',
   },
 ];
 
@@ -167,6 +107,7 @@ const additionalPackages = packages.slice(3);
 
 export default function (providerContext: FtrProviderContext) {
   const { getService, getPageObjects } = providerContext;
+  const browser = getService('browser');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const logger = getService('log');
@@ -368,7 +309,7 @@ export default function (providerContext: FtrProviderContext) {
           // Install more integrations and reload the page
           logger.info(`Installing ${additionalPackages.length} integration packages.`);
           await Promise.all(additionalPackages.map(installPackage));
-          await PageObjects.common.navigateToApp('discover', { hash: '/p/log-explorer' });
+          await browser.refresh();
 
           await PageObjects.discoverLogExplorer.openDatasetSelector();
 
@@ -382,14 +323,14 @@ export default function (providerContext: FtrProviderContext) {
           // Load more integrations
           await retry.try(async () => {
             const { nodes } = await PageObjects.discoverLogExplorer.getIntegrations();
-            expect(nodes.length).to.be(28);
+            expect(nodes.length).to.be(20);
             await nodes.at(-1)?.scrollIntoViewIfNecessary();
           });
 
           // No other integrations to load after scrolling to last integration
           await retry.try(async () => {
             const { nodes } = await PageObjects.discoverLogExplorer.getIntegrations();
-            expect(nodes.length).to.be(28);
+            expect(nodes.length).to.be(20);
           });
 
           logger.info(`Uninstalling ${additionalPackages.length} integration packages.`);
@@ -400,6 +341,10 @@ export default function (providerContext: FtrProviderContext) {
       // describe('when click on an integration and moves into the second navigation level', () => {});
 
       describe('when open/close the selector', () => {
+        before(async () => {
+          await browser.refresh();
+        });
+
         it('should restore the latest navigation panel', async () => {
           await PageObjects.discoverLogExplorer.openDatasetSelector();
           await PageObjects.discoverLogExplorer.clearSearchField();
