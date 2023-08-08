@@ -48,7 +48,7 @@ describe('Endpoints page', () => {
       cy.wait('@getEndpointMetadataRequest').then((subject) => {
         const body = subject.response?.body as MetadataListResponse;
 
-        expect(body.sortField).to.equal('united.agent.enrolled_at');
+        expect(body.sortField).to.equal(EndpointSortableField.ENROLLED_AT);
         expect(body.sortDirection).to.equal('desc');
       });
 

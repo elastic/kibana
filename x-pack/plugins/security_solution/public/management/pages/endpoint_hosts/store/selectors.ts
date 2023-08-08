@@ -39,7 +39,8 @@ export const pageIndex = (state: Immutable<EndpointState>): number => state.page
 
 export const pageSize = (state: Immutable<EndpointState>): number => state.pageSize;
 
-export const sortField = (state: Immutable<EndpointState>): string => state.sortField;
+export const sortField = (state: Immutable<EndpointState>): EndpointSortableField =>
+  state.sortField;
 
 export const sortDirection = (state: Immutable<EndpointState>): 'asc' | 'desc' =>
   state.sortDirection;

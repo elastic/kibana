@@ -11,6 +11,7 @@ import { get } from 'lodash';
 import { expectedCompleteUnitedIndexQuery } from './query_builders.fixtures';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import { EndpointSortableField } from '../../../../common/endpoint/types';
 
 describe('query builder', () => {
   describe('MetadataGetQuery', () => {
@@ -159,7 +160,7 @@ describe('query builder', () => {
         const query = await buildUnitedIndexQuery(soClient, {
           page: 1,
           pageSize: 10,
-          sortField: 'metadata.@timestamp',
+          sortField: EndpointSortableField.LAST_SEEN,
           sortDirection: 'asc',
         });
 

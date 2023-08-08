@@ -9,6 +9,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { buildAgentStatusRuntimeField } from '@kbn/fleet-plugin/server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import { EndpointSortableField } from '../../../../common/endpoint/types';
 import {
   ENDPOINT_DEFAULT_PAGE,
   ENDPOINT_DEFAULT_PAGE_SIZE,
@@ -58,16 +59,16 @@ export const MetadataSortMethod: estypes.SortCombinations[] = [
 ];
 
 const getUnitedMetadataSortMethod = (
-  sortField: string,
+  sortField: EndpointSortableField,
   sortDirection: 'asc' | 'desc'
 ): estypes.SortCombinations[] => {
-  const DATE_FIELDS = ['united.endpoint.@timestamp', 'united.agent.enrolled_at'];
+  const DATE_FIELDS = [EndpointSortableField.LAST_SEEN, EndpointSortableField.ENROLLED_AT];
 
   const unitedMetadataSortField = sortField.replace('metadata.', 'united.endpoint.');
 
-  if (sortField === 'host_status') {
+  if (sortField === EndpointSortableField.HOST_STATUS) {
     return [{ status: sortDirection }];
-  } else if (DATE_FIELDS.includes(unitedMetadataSortField)) {
+  } else if (DATE_FIELDS.includes(sortField)) {
     return [{ [unitedMetadataSortField]: { order: sortDirection, unmapped_type: 'date' } }];
   } else {
     return [{ [unitedMetadataSortField]: sortDirection }];
@@ -227,7 +228,7 @@ export async function buildUnitedIndexQuery(
     body: {
       query,
       track_total_hits: true,
-      sort: getUnitedMetadataSortMethod(sortField, sortDirection),
+      sort: getUnitedMetadataSortMethod(sortField as EndpointSortableField, sortDirection),
       fields,
       runtime_mappings: runtimeMappings,
     },

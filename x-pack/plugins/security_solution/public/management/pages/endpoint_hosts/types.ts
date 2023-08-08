@@ -28,7 +28,7 @@ export interface EndpointState {
   /** which page to show */
   pageIndex: number;
   /** field used for sorting */
-  sortField: string;
+  sortField: EndpointSortableField;
   /** direction of sorting */
   sortDirection: 'asc' | 'desc';
   /** total number of hosts returned */
