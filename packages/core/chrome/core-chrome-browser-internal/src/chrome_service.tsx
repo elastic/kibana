@@ -79,6 +79,7 @@ export class ChromeService {
   private readonly recentlyAccessed = new RecentlyAccessedService();
   private readonly docTitle = new DocTitleService();
   private readonly projectNavigation = new ProjectNavigationService();
+  private mutationObserver: MutationObserver | undefined;
 
   constructor(private readonly params: ConstructorParams) {}
 
@@ -122,20 +123,18 @@ export class ChromeService {
    */
   private handleEuiFullScreenChanges = () => {
     const { body } = document;
+    // HTML class names that are added to the body when Eui components are toggled in full screen
     const classesOnBodyWhenEuiFullScreen = ['euiDataGrid__restrictBody'];
 
     let isChromeHiddenForEuiFullScreen = false;
-    let observer: MutationObserver | undefined;
+    let isChromeVisible = false;
 
-    const onBodyClassesChange = ({
-      isChromeVisible,
-      className,
-    }: {
-      /** The current value of the isVisible$ Observable */
-      isChromeVisible: boolean;
-      /** The HTML body classes */
-      className: string;
-    }) => {
+    this.isVisible$.pipe(takeUntil(this.stop$)).subscribe((isVisible) => {
+      isChromeVisible = isVisible;
+    });
+
+    const onBodyClassesChange = () => {
+      const { className } = body;
       if (
         classesOnBodyWhenEuiFullScreen.some((name) => className.includes(name)) &&
         isChromeVisible
@@ -152,21 +151,15 @@ export class ChromeService {
       }
     };
 
-    this.isVisible$.subscribe((isVisible) => {
-      if (observer) {
-        observer.disconnect();
-      }
-
-      observer = new MutationObserver((mutationList) => {
-        mutationList.forEach((mutation) => {
-          if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
-            onBodyClassesChange({ className: body.className, isChromeVisible: isVisible });
-          }
-        });
+    this.mutationObserver = new MutationObserver((mutationList) => {
+      mutationList.forEach((mutation) => {
+        if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+          onBodyClassesChange();
+        }
       });
-
-      observer.observe(body, { attributes: true });
     });
+
+    this.mutationObserver.observe(body, { attributes: true });
   };
 
   public setup({ analytics }: SetupDeps) {
@@ -519,5 +512,6 @@ export class ChromeService {
     this.navLinks.stop();
     this.projectNavigation.stop();
     this.stop$.next();
+    this.mutationObserver?.disconnect();
   }
 }
