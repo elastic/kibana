@@ -38,6 +38,7 @@ export enum KNOWN_FIELD_TYPES {
   SHAPE = 'shape',
   STRING = 'string',
   TEXT = 'text',
+  TIME_SERIES_DIMENSION = 'time_series_dimension',
   VERSION = 'version',
 }
 

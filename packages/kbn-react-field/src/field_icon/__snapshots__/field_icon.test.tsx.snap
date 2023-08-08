@@ -295,6 +295,16 @@ exports[`FieldIcon renders known field types text is rendered 1`] = `
 />
 `;
 
+exports[`FieldIcon renders known field types time_series_dimension is rendered 1`] = `
+<EuiToken
+  aria-label="time_series_dimension"
+  className="kbnFieldIcon"
+  iconType="tokenTag"
+  size="s"
+  title="time_series_dimension"
+/>
+`;
+
 exports[`FieldIcon renders known field types version is rendered 1`] = `
 <EuiToken
   aria-label="version"

@@ -828,4 +828,186 @@ describe('UnifiedFieldList <FieldStats />', () => {
 
     expect(wrapper.text()).toBe('Summarymin29674max36821994Calculated from 5000 sample records.');
   });
+
+  it('should render some meta information for a time series metric field type when a time series dimension field is defined', async () => {
+    let resolveFunction: (arg: unknown) => void;
+
+    (loadFieldStats as jest.Mock).mockImplementation(() => {
+      return new Promise((resolve) => {
+        resolveFunction = resolve;
+      });
+    });
+
+    const field = dataView.fields.find((f) => f.name === 'bytes_counter')!;
+    const newDataView = {
+      ...dataView,
+      fields: [
+        ...dataView.fields,
+        {
+          name: 'ts_dimension',
+          displayName: 'ts_dimension',
+          type: 'string',
+          aggregatable: true,
+          searchable: true,
+          timeSeriesDimension: true,
+        },
+      ],
+    } as DataView;
+
+    const wrapper = await mountComponent(
+      <FieldStats
+        {...defaultProps}
+        dataViewOrDataViewId={newDataView}
+        field={field}
+        query={{ language: 'kuery', query: '' }}
+        filters={[]}
+        fromDate="now-1h"
+        toDate="now"
+      />
+    );
+
+    expect(loadFieldStats).toHaveBeenCalledWith({
+      abortController: new AbortController(),
+      services: { data: mockedServices.data },
+      dataView: newDataView,
+      fromDate: 'now-1h',
+      toDate: 'now',
+      dslQuery: {
+        bool: {
+          must: [],
+          filter: [],
+          should: [],
+          must_not: [],
+        },
+      },
+      field,
+    });
+
+    expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(1);
+
+    await act(async () => {
+      resolveFunction!({
+        numberSummary: {
+          maxValue: 36821994,
+          minValue: 29674,
+        },
+        sampledDocuments: 5000,
+        sampledValues: 5000,
+        totalDocuments: 6460,
+      });
+    });
+
+    await wrapper.update();
+
+    expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
+
+    expect(loadFieldStats).toHaveBeenCalledTimes(1);
+
+    expect(wrapper.text()).toBe(
+      'Summarymin29674max36821994Calculated from 5000 sample records.The field is a time series metric. There is 1 time series dimension for this field.'
+    );
+  });
+
+  it('should render a meta info about a time series dimension field', async () => {
+    let resolveFunction: (arg: unknown) => void;
+
+    (loadFieldStats as jest.Mock).mockImplementation(() => {
+      return new Promise((resolve) => {
+        resolveFunction = resolve;
+      });
+    });
+
+    const newDataView = {
+      ...dataView,
+      fields: [
+        ...dataView.fields,
+        {
+          name: 'ts_dimension',
+          displayName: 'ts_dimension',
+          type: 'string',
+          aggregatable: true,
+          searchable: true,
+          timeSeriesDimension: true,
+        },
+      ],
+    } as DataView;
+    const field = newDataView.fields.find((f) => f.name === 'ts_dimension')!;
+
+    const wrapper = await mountComponent(
+      <FieldStats
+        {...defaultProps}
+        dataViewOrDataViewId={newDataView}
+        field={field}
+        query={{ language: 'kuery', query: '' }}
+        filters={[]}
+        fromDate="now-1h"
+        toDate="now"
+      />
+    );
+
+    expect(loadFieldStats).toHaveBeenCalledWith({
+      abortController: new AbortController(),
+      services: { data: mockedServices.data },
+      dataView: newDataView,
+      fromDate: 'now-1h',
+      toDate: 'now',
+      dslQuery: {
+        bool: {
+          must: [],
+          filter: [],
+          should: [],
+          must_not: [],
+        },
+      },
+      field,
+    });
+
+    expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(1);
+
+    await act(async () => {
+      resolveFunction!({
+        totalDocuments: 1624,
+        sampledDocuments: 1624,
+        sampledValues: 3248,
+        topValues: {
+          buckets: [
+            {
+              count: 1349,
+              key: 'success',
+            },
+            {
+              count: 1206,
+              key: 'info',
+            },
+            {
+              count: 329,
+              key: 'security',
+            },
+            {
+              count: 164,
+              key: 'warning',
+            },
+            {
+              count: 111,
+              key: 'error',
+            },
+            {
+              count: 89,
+              key: 'login',
+            },
+          ],
+        },
+      });
+    });
+
+    await wrapper.update();
+
+    expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
+
+    expect(loadFieldStats).toHaveBeenCalledTimes(1);
+
+    expect(wrapper.text()).toBe(
+      'Top values"success"41.5%"info"37.1%"security"10.1%"warning"5.0%"error"3.4%"login"2.7%Calculated from 1624 records.The field is a time series dimension'
+    );
+  });
 });

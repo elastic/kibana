@@ -280,6 +280,31 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
 
   let title = <></>;
 
+  let timeSeriesInfoMessage: React.ReactElement | null = null;
+  const nTimeSeriesDimensions = field.timeSeriesMetric
+    ? dataView.fields.filter(({ timeSeriesDimension }) => timeSeriesDimension).length
+    : 0;
+  if (field.timeSeriesDimension) {
+    timeSeriesInfoMessage = (
+      <FormattedMessage
+        id="unifiedFieldList.fieldStats.timeSeriesDimension"
+        defaultMessage="The field is a time series dimension"
+      />
+    );
+  }
+
+  if (field.timeSeriesMetric && nTimeSeriesDimensions) {
+    timeSeriesInfoMessage = (
+      <FormattedMessage
+        id="unifiedFieldList.fieldStats.timeSeriesMetric"
+        defaultMessage="The field is a time series metric. There {mappedDimensions, plural, one {is} other {are}} {mappedDimensions} time series {mappedDimensions, plural, one {dimension} other {dimensions}} for this field."
+        values={{
+          mappedDimensions: nTimeSeriesDimensions,
+        }}
+      />
+    );
+  }
+
   function combineWithTitleAndFooter(el: React.ReactElement) {
     const dataTestSubjDocsCount = 'unifiedFieldStats-statsFooter-docsCount';
     const countsElement = totalDocuments ? (
@@ -334,6 +359,18 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
           <>
             <EuiSpacer size="m" />
             {countsElement}
+            {timeSeriesInfoMessage ? (
+              <>
+                <EuiSpacer size="s" />
+                <EuiText
+                  color="subdued"
+                  size="xs"
+                  data-test-subj={`${dataTestSubject}-timeseries-statsFooter`}
+                >
+                  {timeSeriesInfoMessage}
+                </EuiText>
+              </>
+            ) : null}
           </>
         )}
       </>

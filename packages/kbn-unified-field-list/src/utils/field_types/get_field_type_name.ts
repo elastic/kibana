@@ -143,6 +143,10 @@ export function getFieldTypeName(type?: string) {
       return i18n.translate('unifiedFieldList.fieldNameIcons.versionFieldAriaLabel', {
         defaultMessage: 'Version',
       });
+    case KNOWN_FIELD_TYPES.TIME_SERIES_DIMENSION:
+      return i18n.translate('unifiedFieldList.fieldNameIcons.timeSeriesDimensionFieldAriaLabel', {
+        defaultMessage: 'Time series dimension',
+      });
     default:
       // If you see a typescript error here, that's a sign that there are missing switch cases ^^
       const _exhaustiveCheck: never = knownType;
