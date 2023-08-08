@@ -234,7 +234,7 @@ Apm error count without filter query is active with the following conditions:
             windowUnit: 'h',
             serviceName: undefined,
             useFilterQuery: true,
-            filterQuery: 'service.name: opbeans-node and service.environment: production',
+            filterQuery: 'service.name: opbeans-java and service.environment: production',
             groupBy: [
               'service.name',
               'service.environment',
@@ -287,9 +287,9 @@ Apm error count without filter query is active with the following conditions:
         alertId = (resp.hits.hits[0]._source as any)['kibana.alert.uuid'];
         startedAt = (resp.hits.hits[0]._source as any)['kibana.alert.start'];
 
-        expect(resp.hits.hits[0]._source).property('service.name', 'opbeans-node');
+        expect(resp.hits.hits[0]._source).property('service.name', 'opbeans-java');
         expect(resp.hits.hits[0]._source).property('service.environment', 'production');
-        expect(resp.hits.hits[0]._source).property('transaction.name', 'tx-node');
+        expect(resp.hits.hits[0]._source).property('transaction.name', 'tx-java');
         expect(resp.hits.hits[0]._source).property('error.grouping_key', errorGroupingKey);
         expect(resp.hits.hits[0]._source).property('error.grouping_name', errorMessage);
       });
@@ -302,18 +302,18 @@ Apm error count without filter query is active with the following conditions:
         });
 
         expect(resp.hits.hits[0]._source?.message).eql(
-          `Error count is 15 in the last 1 hr for service: opbeans-node, env: production, name: tx-node, error key: ${errorGroupingKey}, error name: ${errorMessage}. Alert when > 1.
+          `Error count is 15 in the last 1 hr for service: opbeans-java, env: production, name: tx-java, error key: ${errorGroupingKey}, error name: ${errorMessage}. Alert when > 1.
 
 Apm error count with filter query is active with the following conditions:
 
-- Service name: opbeans-node
+- Service name: opbeans-java
 - Environment: production
 - Error count: 15 errors over the last 1 hr
 - Threshold: 1
 
 [View alert details](http://mockedpublicbaseurl/app/observability/alerts?_a=(kuery:%27kibana.alert.uuid:%20%22${alertId}%22%27%2CrangeFrom:%27${rangeFrom}%27%2CrangeTo:now%2Cstatus:all))
 
-- Transaction name: tx-node
+- Transaction name: tx-java
 - Error grouping key: ${errorGroupingKey}
 - Error grouping name: ${errorMessage}`
         );
@@ -322,8 +322,8 @@ Apm error count with filter query is active with the following conditions:
       it('shows the correct alert count for each service on service inventory', async () => {
         const serviceInventoryAlertCounts = await fetchServiceInventoryAlertCounts(apmApiClient);
         expect(serviceInventoryAlertCounts).to.eql({
-          'opbeans-node': 1,
-          'opbeans-java': 1,
+          'opbeans-node': 0,
+          'opbeans-java': 2,
         });
       });
 
@@ -332,7 +332,7 @@ Apm error count with filter query is active with the following conditions:
           apmApiClient,
           serviceName: 'opbeans-java',
         });
-        expect(serviceTabAlertCount).to.be(1);
+        expect(serviceTabAlertCount).to.be(2);
       });
 
       it('shows the correct alert count in opbeans-node service', async () => {
@@ -340,7 +340,7 @@ Apm error count with filter query is active with the following conditions:
           apmApiClient,
           serviceName: 'opbeans-node',
         });
-        expect(serviceTabAlertCount).to.be(1);
+        expect(serviceTabAlertCount).to.be(0);
       });
     });
   });
