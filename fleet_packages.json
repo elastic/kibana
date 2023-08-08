@@ -42,7 +42,7 @@
   },
   {
     "name": "profiler_symbolizer",
-    "version": "8.8.1-preview",
+    "version": "8.9.0-preview",
     "forceAlignStackVersion": true,
     "allowSyncToPrerelease": true
   },

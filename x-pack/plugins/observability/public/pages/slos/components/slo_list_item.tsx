@@ -17,7 +17,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { HistoricalSummaryResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { ALL_VALUE, HistoricalSummaryResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import { useQueryClient } from '@tanstack/react-query';
 import React, { useState } from 'react';
@@ -31,7 +31,7 @@ import type { ActiveAlerts } from '../../../hooks/slo/use_fetch_active_alerts';
 import type { SloRule } from '../../../hooks/slo/use_fetch_rules_for_slo';
 import { useGetFilteredRuleTypes } from '../../../hooks/use_get_filtered_rule_types';
 import type { RulesParams } from '../../../locators/rules';
-import { paths } from '../../../routes/paths';
+import { paths } from '../../../../common/locators/paths';
 import { useKibana } from '../../../utils/kibana_react';
 import {
   transformCreateSLOFormToCreateSLOInput,
@@ -81,7 +81,14 @@ export function SloListItem({
   };
 
   const handleViewDetails = () => {
-    navigateToUrl(basePath.prepend(paths.observability.sloDetails(slo.id)));
+    navigateToUrl(
+      basePath.prepend(
+        paths.observability.sloDetails(
+          slo.id,
+          slo.groupBy !== ALL_VALUE && slo.instanceId ? slo.instanceId : undefined
+        )
+      )
+    );
   };
 
   const handleEdit = () => {

@@ -247,6 +247,7 @@ export class ActionsClient {
 
     const actionType = this.actionTypeRegistry.get(actionTypeId);
     const configurationUtilities = this.actionTypeRegistry.getUtils();
+
     const validatedActionTypeConfig = validateConfig(actionType, config, {
       configurationUtilities,
     });
