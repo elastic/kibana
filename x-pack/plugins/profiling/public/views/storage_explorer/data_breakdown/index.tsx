@@ -22,18 +22,21 @@ import { useTimeRangeAsync } from '../../../hooks/use_time_range_async';
 import { GroupedIndexDetailsChart } from './grouped_index_details_chart';
 import { GroupedIndexDetails } from './grouped_index_details';
 import { StorageDetailsTable } from './storage_details_table';
+import { useProfilingParams } from '../../../hooks/use_profiling_params';
 
 export function DataBreakdown() {
   const theme = useEuiTheme();
+  const { query } = useProfilingParams('/storage-explorer');
+  const { indexLifecyclePhase } = query;
   const {
     services: { fetchStorageExplorerIndicesStorageDetails },
   } = useProfilingDependencies();
 
   const indicesStorageDetails = useTimeRangeAsync(
     ({ http }) => {
-      return fetchStorageExplorerIndicesStorageDetails({ http });
+      return fetchStorageExplorerIndicesStorageDetails({ http, indexLifecyclePhase });
     },
-    [fetchStorageExplorerIndicesStorageDetails]
+    [fetchStorageExplorerIndicesStorageDetails, indexLifecyclePhase]
   );
 
   return (

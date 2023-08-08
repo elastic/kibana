@@ -8,7 +8,10 @@ import { schema } from '@kbn/config-schema';
 import { sumBy, values } from 'lodash';
 import { RouteRegisterParameters } from '..';
 import { getRoutePaths } from '../../../common';
-import { StorageExplorerSummary } from '../../../common/storage_explorer';
+import {
+  IndexLifecyclePhaseSelectOption,
+  StorageExplorerSummaryAPIResponse,
+} from '../../../common/storage_explorer';
 import { getClient } from '../compat';
 import { getDailyDataGenerationSize } from './get_daily_data_generation.size';
 import { getHostBreakdownSizeTimeseries } from './get_host_breakdown_size_timeseries';
@@ -30,6 +33,13 @@ export function registerStorageExplorerRoute({
       options: { tags: ['access:profiling'] },
       validate: {
         query: schema.object({
+          indexLifecyclePhase: schema.oneOf([
+            schema.literal(IndexLifecyclePhaseSelectOption.All),
+            schema.literal(IndexLifecyclePhaseSelectOption.Hot),
+            schema.literal(IndexLifecyclePhaseSelectOption.Warm),
+            schema.literal(IndexLifecyclePhaseSelectOption.Cold),
+            schema.literal(IndexLifecyclePhaseSelectOption.Frozen),
+          ]),
           timeFrom: schema.number(),
           timeTo: schema.number(),
           kuery: schema.string(),
@@ -37,7 +47,7 @@ export function registerStorageExplorerRoute({
       },
     },
     async (context, request, response) => {
-      const { timeFrom, timeTo, kuery } = request.query;
+      const { timeFrom, timeTo, kuery, indexLifecyclePhase } = request.query;
       const client = await getClient(context);
       const profilingClient = createProfilingEsClient({ request, esClient: client });
       const profilingEsClient = profilingClient.getEsClient();
@@ -62,6 +72,7 @@ export function registerStorageExplorerRoute({
           timeFrom,
           timeTo,
           kuery,
+          indexLifecyclePhase,
         }),
       ]);
 
@@ -84,7 +95,7 @@ export function registerStorageExplorerRoute({
         (node) => node?.fs?.total?.total_in_bytes ?? 0
       );
 
-      const summary: StorageExplorerSummary = {
+      const summary: StorageExplorerSummaryAPIResponse = {
         totalProfilingSizeBytes,
         totalSymbolsSizeBytes,
         diskSpaceUsedPct: totalProfilingSizeBytes / totalDiskSpace,
@@ -101,10 +112,17 @@ export function registerStorageExplorerRoute({
 
   router.get(
     {
-      path: paths.StorageExplorerHostBreakdownSizeChart,
+      path: paths.StorageExplorerHostStorageDetails,
       options: { tags: ['access:profiling'] },
       validate: {
         query: schema.object({
+          indexLifecyclePhase: schema.oneOf([
+            schema.literal(IndexLifecyclePhaseSelectOption.All),
+            schema.literal(IndexLifecyclePhaseSelectOption.Hot),
+            schema.literal(IndexLifecyclePhaseSelectOption.Warm),
+            schema.literal(IndexLifecyclePhaseSelectOption.Cold),
+            schema.literal(IndexLifecyclePhaseSelectOption.Frozen),
+          ]),
           timeFrom: schema.number(),
           timeTo: schema.number(),
           kuery: schema.string(),
@@ -115,41 +133,24 @@ export function registerStorageExplorerRoute({
       const client = await getClient(context);
       const profilingClient = createProfilingEsClient({ request, esClient: client });
 
-      const { timeFrom, timeTo, kuery } = request.query;
-      const hostBreakdownTimeseries = await getHostBreakdownSizeTimeseries({
-        client: profilingClient,
-        timeFrom,
-        timeTo,
-        kuery,
-      });
-      return response.ok({ body: hostBreakdownTimeseries });
-    }
-  );
-
-  router.get(
-    {
-      path: paths.StorageExplorerHostDetails,
-      options: { tags: ['access:profiling'] },
-      validate: {
-        query: schema.object({
-          timeFrom: schema.number(),
-          timeTo: schema.number(),
-          kuery: schema.string(),
+      const { timeFrom, timeTo, kuery, indexLifecyclePhase } = request.query;
+      const [hostDetailsTimeseries, hostDetails] = await Promise.all([
+        getHostBreakdownSizeTimeseries({
+          client: profilingClient,
+          timeFrom,
+          timeTo,
+          kuery,
+          indexLifecyclePhase,
         }),
-      },
-    },
-    async (context, request, response) => {
-      const client = await getClient(context);
-      const profilingClient = createProfilingEsClient({ request, esClient: client });
-
-      const { timeFrom, timeTo, kuery } = request.query;
-      const hostDetails = await getHostDetails({
-        client: profilingClient,
-        timeFrom,
-        timeTo,
-        kuery,
-      });
-      return response.ok({ body: hostDetails });
+        getHostDetails({
+          client: profilingClient,
+          timeFrom,
+          timeTo,
+          kuery,
+          indexLifecyclePhase,
+        }),
+      ]);
+      return response.ok({ body: { hostDetailsTimeseries, hostDetails } });
     }
   );
 
@@ -157,18 +158,30 @@ export function registerStorageExplorerRoute({
     {
       path: paths.StorageExplorerIndicesStorageDetails,
       options: { tags: ['access:profiling'] },
-      validate: false,
+      validate: {
+        query: schema.object({
+          indexLifecyclePhase: schema.oneOf([
+            schema.literal(IndexLifecyclePhaseSelectOption.All),
+            schema.literal(IndexLifecyclePhaseSelectOption.Hot),
+            schema.literal(IndexLifecyclePhaseSelectOption.Warm),
+            schema.literal(IndexLifecyclePhaseSelectOption.Cold),
+            schema.literal(IndexLifecyclePhaseSelectOption.Frozen),
+          ]),
+        }),
+      },
     },
     async (context, request, response) => {
       const client = await getClient(context);
       const profilingClient = createProfilingEsClient({ request, esClient: client });
       const profilingEsClient = profilingClient.getEsClient();
+      const { indexLifecyclePhase } = request.query;
 
       const [storageDetailsGroupedByIndex, storageDetailsPerIndex] = await Promise.all([
         getStorageDetailsGroupedByIndex({
           client: profilingEsClient,
+          indexLifecyclePhase,
         }),
-        getStorageDetailsPerIndex({ client: profilingEsClient }),
+        getStorageDetailsPerIndex({ client: profilingEsClient, indexLifecyclePhase }),
       ]);
 
       return response.ok({ body: { storageDetailsGroupedByIndex, storageDetailsPerIndex } });

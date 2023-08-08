@@ -30,8 +30,7 @@ export function getRoutePaths() {
     HasSetupESResources: `${BASE_ROUTE_PATH}/setup/es_resources`,
     SetupDataCollectionInstructions: `${BASE_ROUTE_PATH}/setup/instructions`,
     StorageExplorerSummary: `${BASE_ROUTE_PATH}/storage_explorer/summary`,
-    StorageExplorerHostBreakdownSizeChart: `${BASE_ROUTE_PATH}/storage_explorer/host_breakdown_chart`,
-    StorageExplorerHostDetails: `${BASE_ROUTE_PATH}/storage_explorer/hosts_details`,
+    StorageExplorerHostStorageDetails: `${BASE_ROUTE_PATH}/storage_explorer/host_storage_details`,
     StorageExplorerIndicesStorageDetails: `${BASE_ROUTE_PATH}/storage_explorer/indices_storage_details`,
   };
 }

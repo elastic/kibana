@@ -6,9 +6,10 @@
  */
 
 import { Chart, Datum, Partition, Position, Settings } from '@elastic/charts';
-import { euiPaletteColorBlind, useEuiTheme } from '@elastic/eui';
+import { euiPaletteColorBlind, EuiText, useEuiTheme } from '@elastic/eui';
 import { asDynamicBytes } from '@kbn/observability-plugin/common';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import type { StorageDetailsGroupedByIndex } from '../../../../common/storage_explorer';
 import { useProfilingChartsTheme } from '../../../hooks/use_profiling_charts_theme';
 import { getGroupedIndexLabel } from './utils';
@@ -37,35 +38,47 @@ export function GroupedIndexDetailsChart({ data = [] }: Props) {
         alignItems: 'center',
       }}
     >
-      <Chart size={{ height: 250, width: 400 }}>
-        <Settings
-          showLegend
-          legendPosition={Position.Right}
-          baseTheme={chartsBaseTheme}
-          theme={{
-            ...chartsTheme,
-            background: {
-              color: 'transparent',
-            },
-          }}
-        />
-        <Partition
-          layout="sunburst"
-          id="spec_1"
-          data={sunburstData}
-          valueAccessor={(d: Datum) => Number(d.sizeInBytes)}
-          valueGetter="percent"
-          valueFormatter={(value: number) => asDynamicBytes(value)}
-          layers={[
-            {
-              groupByRollup: (d: Datum) => d.key,
-              shape: {
-                fillColor: (_, sortIndex) => groupedPalette[sortIndex],
+      {sunburstData.length ? (
+        <Chart size={{ height: 250, width: 400 }}>
+          <Settings
+            showLegend
+            legendPosition={Position.Right}
+            baseTheme={chartsBaseTheme}
+            theme={{
+              ...chartsTheme,
+              background: {
+                color: 'transparent',
               },
-            },
-          ]}
-        />
-      </Chart>
+            }}
+          />
+          <Partition
+            layout="sunburst"
+            id="spec_1"
+            data={sunburstData}
+            valueAccessor={(d: Datum) => Number(d.sizeInBytes)}
+            valueGetter="percent"
+            valueFormatter={(value: number) => asDynamicBytes(value)}
+            layers={[
+              {
+                groupByRollup: (d: Datum) => d.key,
+                shape: {
+                  fillColor: (_, sortIndex) => groupedPalette[sortIndex],
+                },
+              },
+            ]}
+          />
+        </Chart>
+      ) : (
+        <div
+          style={{ height: 250, display: 'flex', justifyContent: 'center', alignItems: 'center' }}
+        >
+          <EuiText color="subdued" size="s">
+            {i18n.translate('xpack.profiling.storageExplorer.dataBreakdown.noDataToDisplay', {
+              defaultMessage: 'No data to display',
+            })}
+          </EuiText>
+        </div>
+      )}
     </div>
   );
 }

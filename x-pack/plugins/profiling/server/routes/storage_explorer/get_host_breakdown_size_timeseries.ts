@@ -5,10 +5,14 @@
  * 2.0.
  */
 
-import { kqlQuery } from '@kbn/observability-plugin/server';
+import { kqlQuery, termQuery } from '@kbn/observability-plugin/server';
 import { ProfilingESField } from '../../../common/elasticsearch';
 import { computeBucketWidthFromTimeRangeAndBucketCount } from '../../../common/histogram';
-import { StorageExplorerHostBreakdownSizeChart } from '../../../common/storage_explorer';
+import {
+  IndexLifecyclePhaseSelectOption,
+  indexLifeCyclePhaseToDataTier,
+  StorageExplorerHostDetailsTimeseries,
+} from '../../../common/storage_explorer';
 import { ProfilingESClient } from '../../utils/create_profiling_es_client';
 import { getEstimatedSizeForDocumentsInIndex } from './get_daily_data_generation.size';
 import { allIndices, getIndicesStats } from './get_indices_stats';
@@ -19,12 +23,14 @@ export async function getHostBreakdownSizeTimeseries({
   timeFrom,
   timeTo,
   kuery,
+  indexLifecyclePhase,
 }: {
   client: ProfilingESClient;
   timeFrom: number;
   timeTo: number;
   kuery: string;
-}): Promise<StorageExplorerHostBreakdownSizeChart[]> {
+  indexLifecyclePhase: IndexLifecyclePhaseSelectOption;
+}): Promise<StorageExplorerHostDetailsTimeseries[]> {
   const bucketWidth = computeBucketWidthFromTimeRangeAndBucketCount(timeFrom, timeTo, 50);
 
   const [{ indices: allIndicesStats }, response] = await Promise.all([
@@ -34,16 +40,21 @@ export async function getHostBreakdownSizeTimeseries({
       body: {
         query: {
           bool: {
-            filter: {
+            filter: [
               ...kqlQuery(kuery),
-              range: {
-                [ProfilingESField.Timestamp]: {
-                  gte: String(timeFrom),
-                  lt: String(timeTo),
-                  format: 'epoch_second',
+              {
+                range: {
+                  [ProfilingESField.Timestamp]: {
+                    gte: String(timeFrom),
+                    lt: String(timeTo),
+                    format: 'epoch_second',
+                  },
                 },
               },
-            },
+              ...(indexLifecyclePhase !== IndexLifecyclePhaseSelectOption.All
+                ? termQuery('_tier', indexLifeCyclePhaseToDataTier[indexLifecyclePhase])
+                : []),
+            ],
           },
         },
         aggs: {

@@ -9,12 +9,12 @@ import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiStat, EuiText } from '@elastic/
 import { i18n } from '@kbn/i18n';
 import { asDynamicBytes } from '@kbn/observability-plugin/common';
 import React from 'react';
-import { StorageExplorerSummary } from '../../../common/storage_explorer';
+import { StorageExplorerSummaryAPIResponse } from '../../../common/storage_explorer';
 import { LabelWithHint } from '../../components/label_with_hint';
 import { asPercentage } from '../../utils/formatters/as_percentage';
 
 interface Props {
-  data?: StorageExplorerSummary;
+  data?: StorageExplorerSummaryAPIResponse;
   isLoading: boolean;
 }
 

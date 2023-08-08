@@ -5,7 +5,17 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+  EuiToolTip,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { AsyncComponent } from '../../../components/async_component';
 import { useProfilingDependencies } from '../../../components/contexts/profiling_dependencies/use_profiling_dependencies';
@@ -21,55 +31,65 @@ interface Props {
 
 export function HostBreakdown({ hasDistinctProbabilisticValues }: Props) {
   const { query } = useProfilingParams('/storage-explorer');
-  const { rangeFrom, rangeTo, kuery } = query;
+  const { rangeFrom, rangeTo, kuery, indexLifecyclePhase } = query;
   const timeRange = useTimeRange({ rangeFrom, rangeTo });
   const {
-    services: { fetchStorageExplorerHostBreakdownSizeChart, fetchStorageExplorerHostsDetails },
+    services: { fetchStorageExplorerHostStorageDetails },
   } = useProfilingDependencies();
 
-  const storageExplorerHostBreakdownState = useTimeRangeAsync(
+  const storageExplorerHostDetailsState = useTimeRangeAsync(
     ({ http }) => {
-      return fetchStorageExplorerHostBreakdownSizeChart({
+      return fetchStorageExplorerHostStorageDetails({
         http,
         timeFrom: timeRange.inSeconds.start,
         timeTo: timeRange.inSeconds.end,
         kuery,
+        indexLifecyclePhase,
       });
     },
     [
-      fetchStorageExplorerHostBreakdownSizeChart,
+      fetchStorageExplorerHostStorageDetails,
       timeRange.inSeconds.start,
       timeRange.inSeconds.end,
       kuery,
+      indexLifecyclePhase,
     ]
   );
 
-  const storageExplorerHostsDetails = useTimeRangeAsync(
-    ({ http }) => {
-      return fetchStorageExplorerHostsDetails({
-        http,
-        timeFrom: timeRange.inSeconds.start,
-        timeTo: timeRange.inSeconds.end,
-        kuery,
-      });
-    },
-    [fetchStorageExplorerHostsDetails, timeRange.inSeconds.start, timeRange.inSeconds.end, kuery]
-  );
   return (
-    <EuiFlexGroup direction="column">
-      <EuiFlexItem grow={false}>
-        <AsyncComponent size="xl" {...storageExplorerHostBreakdownState} style={{ height: 400 }}>
-          <HostBreakdownChart data={storageExplorerHostBreakdownState.data} />
+    <>
+      <EuiTitle>
+        <EuiText>
+          {i18n.translate('xpack.profiling.storageExplorer.hostBreakdown.title', {
+            defaultMessage: 'Host breakdown',
+          })}
+          <EuiToolTip
+            content={i18n.translate('xpack.profiling.storageExplorer.hostBreakdown.title.hint', {
+              defaultMessage: 'This graph shows the combined values of events and metrics',
+            })}
+          >
+            <EuiIcon type="questionInCircle" style={{ marginLeft: 4 }} />
+          </EuiToolTip>
+        </EuiText>
+      </EuiTitle>
+      <EuiSpacer />
+      <EuiPanel hasShadow={false} hasBorder>
+        <AsyncComponent size="xl" {...storageExplorerHostDetailsState} style={{ height: 400 }}>
+          <EuiFlexGroup direction="column">
+            <EuiFlexItem grow={false}>
+              <HostBreakdownChart
+                data={storageExplorerHostDetailsState.data?.hostDetailsTimeseries}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <HostsTable
+                data={storageExplorerHostDetailsState.data?.hostDetails}
+                hasDistinctProbabilisticValues={hasDistinctProbabilisticValues}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </AsyncComponent>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <AsyncComponent size="xl" {...storageExplorerHostsDetails} style={{ height: 400 }}>
-          <HostsTable
-            data={storageExplorerHostsDetails.data}
-            hasDistinctProbabilisticValues={hasDistinctProbabilisticValues}
-          />
-        </AsyncComponent>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+      </EuiPanel>
+    </>
   );
 }

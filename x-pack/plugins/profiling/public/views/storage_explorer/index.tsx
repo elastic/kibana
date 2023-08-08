@@ -5,11 +5,19 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiTab, EuiTabs } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
+  EuiPanel,
+  EuiTab,
+  EuiTabs,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { useProfilingDependencies } from '../../components/contexts/profiling_dependencies/use_profiling_dependencies';
 import { ProfilingAppPageTemplate } from '../../components/profiling_app_page_template';
+import { PrimaryProfilingSearchBar } from '../../components/profiling_app_page_template/primary_profiling_search_bar';
 import { AsyncStatus } from '../../hooks/use_async';
 import { useProfilingParams } from '../../hooks/use_profiling_params';
 import { useTimeRange } from '../../hooks/use_time_range';
@@ -17,11 +25,12 @@ import { useTimeRangeAsync } from '../../hooks/use_time_range_async';
 import { DataBreakdown } from './data_breakdown';
 import { DistinctProbabilisticValuesWarning } from './distinct_probabilistic_values_warning';
 import { HostBreakdown } from './host_breakdown';
+import { IndexLifecyclePhaseSelect } from './index_lifecycle_phase_select';
 import { Summary } from './summary';
 
 export function StorageExplorerView() {
   const { query } = useProfilingParams('/storage-explorer');
-  const { rangeFrom, rangeTo, kuery } = query;
+  const { rangeFrom, rangeTo, kuery, indexLifecyclePhase } = query;
   const timeRange = useTimeRange({ rangeFrom, rangeTo });
 
   const [selectedTab, setSelectedTab] = useState<'host_breakdown' | 'data_breakdown'>(
@@ -39,9 +48,16 @@ export function StorageExplorerView() {
         timeFrom: timeRange.inSeconds.start,
         timeTo: timeRange.inSeconds.end,
         kuery,
+        indexLifecyclePhase,
       });
     },
-    [fetchStorageExplorerSummary, timeRange.inSeconds.start, timeRange.inSeconds.end, kuery]
+    [
+      fetchStorageExplorerSummary,
+      timeRange.inSeconds.start,
+      timeRange.inSeconds.end,
+      kuery,
+      indexLifecyclePhase,
+    ]
   );
 
   const totalNumberOfDistinctProbabilisticValues =
@@ -49,8 +65,17 @@ export function StorageExplorerView() {
   const hasDistinctProbabilisticValues = totalNumberOfDistinctProbabilisticValues > 1;
 
   return (
-    <ProfilingAppPageTemplate>
+    <ProfilingAppPageTemplate hideSearchBar>
       <EuiFlexGroup direction="column">
+        <EuiFlexItem grow={false}>
+          <EuiPanel hasShadow={false} color="subdued">
+            <PrimaryProfilingSearchBar />
+            <EuiHorizontalRule />
+            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+              <IndexLifecyclePhaseSelect />
+            </div>
+          </EuiPanel>
+        </EuiFlexItem>
         {hasDistinctProbabilisticValues && (
           <EuiFlexItem grow={false}>
             <DistinctProbabilisticValuesWarning

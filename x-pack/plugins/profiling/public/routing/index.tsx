@@ -11,6 +11,10 @@ import * as t from 'io-ts';
 import React from 'react';
 import { TopNFunctionSortField, topNFunctionSortFieldRt } from '../../common/functions';
 import { StackTracesDisplayOption, TopNType } from '../../common/stack_traces';
+import {
+  indexLifecyclePhaseRt,
+  IndexLifecyclePhaseSelectOption,
+} from '../../common/storage_explorer';
 import { ComparisonMode, NormalizationMode } from '../components/normalization_menu';
 import { RedirectTo } from '../components/redirect_to';
 import { FlameGraphsView } from '../views/flamegraphs';
@@ -249,6 +253,14 @@ const routes = {
           },
           '/storage-explorer': {
             element: <StorageExplorerView />,
+            params: t.type({
+              query: indexLifecyclePhaseRt,
+            }),
+            defaults: {
+              query: {
+                indexLifecyclePhase: IndexLifecyclePhaseSelectOption.All,
+              },
+            },
           },
           '/': {
             element: <RedirectTo pathname="/stacktraces/threads" />,

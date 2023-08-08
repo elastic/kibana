@@ -9,10 +9,10 @@ import { getRoutePaths } from '../common';
 import { BaseFlameGraph, createFlameGraph, ElasticFlameGraph } from '../common/flamegraph';
 import { TopNFunctions } from '../common/functions';
 import type {
-  IndicesStorageDetails,
-  StorageExplorerHostBreakdownSizeChart,
-  StorageExplorerHostDetails,
-  StorageExplorerSummary,
+  IndexLifecyclePhaseSelectOption,
+  IndicesStorageDetailsAPIResponse,
+  StorageExplorerSummaryAPIResponse,
+  StorageHostDetailsAPIResponse,
 } from '../common/storage_explorer';
 import { TopNResponse } from '../common/topn';
 import type { SetupDataCollectionInstructions } from '../server/lib/setup/get_setup_instructions';
@@ -52,22 +52,19 @@ export interface Services {
     timeFrom: number;
     timeTo: number;
     kuery: string;
-  }) => Promise<StorageExplorerSummary>;
-  fetchStorageExplorerHostBreakdownSizeChart: (params: {
+    indexLifecyclePhase: IndexLifecyclePhaseSelectOption;
+  }) => Promise<StorageExplorerSummaryAPIResponse>;
+  fetchStorageExplorerHostStorageDetails: (params: {
     http: AutoAbortedHttpService;
     timeFrom: number;
     timeTo: number;
     kuery: string;
-  }) => Promise<StorageExplorerHostBreakdownSizeChart[]>;
-  fetchStorageExplorerHostsDetails: (params: {
-    http: AutoAbortedHttpService;
-    timeFrom: number;
-    timeTo: number;
-    kuery: string;
-  }) => Promise<StorageExplorerHostDetails[]>;
+    indexLifecyclePhase: IndexLifecyclePhaseSelectOption;
+  }) => Promise<StorageHostDetailsAPIResponse>;
   fetchStorageExplorerIndicesStorageDetails: (params: {
     http: AutoAbortedHttpService;
-  }) => Promise<IndicesStorageDetails>;
+    indexLifecyclePhase: IndexLifecyclePhaseSelectOption;
+  }) => Promise<IndicesStorageDetailsAPIResponse>;
 }
 
 export function getServices(): Services {
@@ -120,45 +117,44 @@ export function getServices(): Services {
       )) as SetupDataCollectionInstructions;
       return instructions;
     },
-    fetchStorageExplorerSummary: async ({ http, timeFrom, timeTo, kuery }) => {
+    fetchStorageExplorerSummary: async ({ http, timeFrom, timeTo, kuery, indexLifecyclePhase }) => {
       const query: HttpFetchQuery = {
         timeFrom,
         timeTo,
         kuery,
+        indexLifecyclePhase,
       };
       const summary = (await http.get(paths.StorageExplorerSummary, {
         query,
-      })) as StorageExplorerSummary;
+      })) as StorageExplorerSummaryAPIResponse;
       return summary;
     },
-    fetchStorageExplorerHostBreakdownSizeChart: async ({ http, timeFrom, timeTo, kuery }) => {
+    fetchStorageExplorerHostStorageDetails: async ({
+      http,
+      timeFrom,
+      timeTo,
+      kuery,
+      indexLifecyclePhase,
+    }) => {
       const query: HttpFetchQuery = {
         timeFrom,
         timeTo,
         kuery,
+        indexLifecyclePhase,
       };
-      const eventsMetricsSizeTimeseries = (await http.get(
-        paths.StorageExplorerHostBreakdownSizeChart,
-        { query }
-      )) as StorageExplorerHostBreakdownSizeChart[];
-      return eventsMetricsSizeTimeseries;
-    },
-    fetchStorageExplorerHostsDetails: async ({ http, timeFrom, timeTo, kuery }) => {
-      const query: HttpFetchQuery = {
-        timeFrom,
-        timeTo,
-        kuery,
-      };
-      const eventsMetricsSizeTimeseries = (await http.get(paths.StorageExplorerHostDetails, {
+      const eventsMetricsSizeTimeseries = (await http.get(paths.StorageExplorerHostStorageDetails, {
         query,
-      })) as StorageExplorerHostDetails[];
+      })) as StorageHostDetailsAPIResponse;
       return eventsMetricsSizeTimeseries;
     },
-    fetchStorageExplorerIndicesStorageDetails: async ({ http }) => {
+    fetchStorageExplorerIndicesStorageDetails: async ({ http, indexLifecyclePhase }) => {
+      const query: HttpFetchQuery = {
+        indexLifecyclePhase,
+      };
       const eventsMetricsSizeTimeseries = (await http.get(
         paths.StorageExplorerIndicesStorageDetails,
-        {}
-      )) as IndicesStorageDetails;
+        { query }
+      )) as IndicesStorageDetailsAPIResponse;
       return eventsMetricsSizeTimeseries;
     },
   };

@@ -16,6 +16,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useMemo, useState } from 'react';
 import { asDynamicBytes, asInteger } from '@kbn/observability-plugin/common';
 import { StorageDetailsPerIndex } from '../../../../common/storage_explorer';
+import { NOT_AVAILABLE_LABEL } from '../../../../common';
 
 interface Props {
   data?: StorageDetailsPerIndex[];
@@ -27,11 +28,6 @@ const sorting = {
     direction: 'desc' as const,
   },
 };
-
-const NOT_AVAILABLE_LABEL = i18n.translate(
-  'xpack.profiling.storageExplorer.dataBreakdown.storageDetailsTable.notAvailableLabel',
-  { defaultMessage: 'N/A' }
-);
 
 export function StorageDetailsTable({ data = [] }: Props) {
   const [pagination, setPagination] = useState({ pageIndex: 0 });

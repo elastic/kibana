@@ -9,6 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { asDynamicBytes, asInteger } from '@kbn/observability-plugin/common';
 import React from 'react';
+import { NOT_AVAILABLE_LABEL } from '../../../../common';
 import type {
   StorageDetailsGroupedByIndex,
   StorageGroupedIndexNames,
@@ -39,15 +40,13 @@ export function GroupedIndexDetails({ data = [] }: Props) {
     <EuiFlexGroup gutterSize="s" direction="column">
       {orderedIndexNames.map((indexName) => {
         const stats = data.find((item) => item.indexName === indexName);
-        if (!stats) {
-          return null;
-        }
+
         return (
           <EuiFlexItem grow={false} key={indexName}>
             <IndexSizeItem
               indexName={indexName}
-              docCount={stats.docCount}
-              sizeInBytes={stats.sizeInBytes}
+              docCount={stats?.docCount}
+              sizeInBytes={stats?.sizeInBytes}
               hint={hintMap[indexName]}
             />
           </EuiFlexItem>
@@ -107,9 +106,23 @@ function IndexSizeItem({
           borderBottom: `${theme.euiTheme.border.width.thin} solid ${theme.euiTheme.border.color}`,
         }}
       >
-        <EuiFlexItem style={{ paddingLeft: 8 }}>{docCount ? asInteger(docCount) : ''}</EuiFlexItem>
         <EuiFlexItem style={{ paddingLeft: 8 }}>
-          {sizeInBytes ? asDynamicBytes(sizeInBytes) : ''}
+          {docCount ? (
+            asInteger(docCount)
+          ) : (
+            <EuiText color="subdued" size="s">
+              {NOT_AVAILABLE_LABEL}
+            </EuiText>
+          )}
+        </EuiFlexItem>
+        <EuiFlexItem style={{ paddingLeft: 8 }}>
+          {sizeInBytes ? (
+            asDynamicBytes(sizeInBytes)
+          ) : (
+            <EuiText color="subdued" size="s">
+              {NOT_AVAILABLE_LABEL}
+            </EuiText>
+          )}
         </EuiFlexItem>
       </EuiFlexGroup>
     </>

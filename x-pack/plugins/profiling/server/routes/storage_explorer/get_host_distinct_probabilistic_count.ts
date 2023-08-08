@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { kqlQuery } from '@kbn/observability-plugin/server';
+import { kqlQuery, termQuery } from '@kbn/observability-plugin/server';
+import {
+  IndexLifecyclePhaseSelectOption,
+  indexLifeCyclePhaseToDataTier,
+} from '../../../common/storage_explorer';
 import { ProfilingESClient } from '../../utils/create_profiling_es_client';
 
 export async function getHostAndDistinctProbabilisticCount({
@@ -13,27 +17,34 @@ export async function getHostAndDistinctProbabilisticCount({
   timeFrom,
   timeTo,
   kuery,
+  indexLifecyclePhase,
 }: {
   client: ProfilingESClient;
   timeFrom: number;
   timeTo: number;
   kuery: string;
+  indexLifecyclePhase: IndexLifecyclePhaseSelectOption;
 }) {
   const response = await client.search('profiling_probabilistic_cardinality', {
     index: 'profiling-hosts',
     body: {
       query: {
         bool: {
-          filter: {
+          filter: [
             ...kqlQuery(kuery),
-            range: {
-              '@timestamp': {
-                gte: String(timeFrom),
-                lt: String(timeTo),
-                format: 'epoch_second',
+            {
+              range: {
+                '@timestamp': {
+                  gte: String(timeFrom),
+                  lt: String(timeTo),
+                  format: 'epoch_second',
+                },
               },
             },
-          },
+            ...(indexLifecyclePhase !== IndexLifecyclePhaseSelectOption.All
+              ? termQuery('_tier', indexLifeCyclePhaseToDataTier[indexLifecyclePhase])
+              : []),
+          ],
         },
       },
       aggs: {

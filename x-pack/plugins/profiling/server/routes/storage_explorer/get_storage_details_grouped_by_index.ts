@@ -5,86 +5,92 @@
  * 2.0.
  */
 import { ElasticsearchClient } from '@kbn/core/server';
-import type {
+import { groupBy, keyBy, sumBy } from 'lodash';
+import {
+  IndexLifecyclePhaseSelectOption,
   StorageDetailsGroupedByIndex,
   StorageGroupedIndexNames,
 } from '../../../common/storage_explorer';
-import { getIndicesStats, stacktracesIndices } from './get_indices_stats';
+import {
+  getIndicesLifecycleStatus,
+  getIndicesStats,
+  stacktracesIndices,
+} from './get_indices_stats';
 
-type StotageExplorerIndicesDataBreakdownChart = Record<
-  StorageGroupedIndexNames,
-  StorageDetailsGroupedByIndex
->;
+function getGroupedIndexName(indexName: string): StorageGroupedIndexNames | undefined {
+  if (indexName.indexOf('events') > 0) {
+    return 'events';
+  }
 
-const INITIAL_STATE: StotageExplorerIndicesDataBreakdownChart = {
-  events: { indexName: 'events', docCount: 0, sizeInBytes: 0 },
-  stackframes: { indexName: 'stackframes', docCount: 0, sizeInBytes: 0 },
-  stacktraces: { indexName: 'stacktraces', docCount: 0, sizeInBytes: 0 },
-  executables: { indexName: 'executables', docCount: 0, sizeInBytes: 0 },
-  metrics: { indexName: 'metrics', docCount: 0, sizeInBytes: 0 },
-};
+  if (indexName.indexOf('stackframes') > 0) {
+    return 'stackframes';
+  }
+
+  if (indexName.indexOf('stacktraces') > 0) {
+    return 'stacktraces';
+  }
+
+  if (indexName.indexOf('executables') > 0) {
+    return 'executables';
+  }
+
+  if (indexName.indexOf('metrics') > 0) {
+    return 'metrics';
+  }
+}
 
 export async function getStorageDetailsGroupedByIndex({
   client,
+  indexLifecyclePhase,
 }: {
   client: ElasticsearchClient;
-}): Promise<StorageDetailsGroupedByIndex[]> {
-  const indicesStats = await getIndicesStats({ client, indices: stacktracesIndices });
+  indexLifecyclePhase: IndexLifecyclePhaseSelectOption;
+}) {
+  const [indicesStats, indicesLifecycleStatus] = await Promise.all([
+    getIndicesStats({ client, indices: stacktracesIndices }),
+    getIndicesLifecycleStatus({ client, indices: stacktracesIndices }),
+  ]);
   const indices = indicesStats.indices || {};
 
-  const perIndexStatsMap = Object.keys(indices).reduce<StotageExplorerIndicesDataBreakdownChart>(
-    (acc, indexName) => {
-      const indexStats = indices[indexName];
-      const indexDocCount = indexStats.total?.docs?.count || 0;
-      const indexSizeInBytes = indexStats.total?.store?.size_in_bytes || 0;
+  const groupedIndexStatsMap = groupBy(
+    Object.keys(indices)
+      .filter((indexName) => {
+        const indexLifecycleStatus = indicesLifecycleStatus[indexName];
+        const currentIndexLifecyclePhase =
+          indexLifecycleStatus && 'phase' in indexLifecycleStatus
+            ? indexLifecycleStatus.phase
+            : undefined;
+        if (
+          indexLifecyclePhase !== IndexLifecyclePhaseSelectOption.All &&
+          currentIndexLifecyclePhase &&
+          currentIndexLifecyclePhase !== indexLifecyclePhase
+        ) {
+          return false;
+        }
+        return true;
+      })
+      .map((indexName) => {
+        const indexStats = indices[indexName];
+        const indexDocCount = indexStats.total?.docs?.count || 0;
+        const indexSizeInBytes = indexStats.total?.store?.size_in_bytes || 0;
 
-      function sumDocCountAndSize(stats: StorageDetailsGroupedByIndex) {
-        const sizeInBytes = stats.sizeInBytes + indexSizeInBytes;
         return {
-          docCount: stats.docCount + indexDocCount,
-          sizeInBytes,
+          indexName: getGroupedIndexName(indexName),
+          docCount: indexDocCount,
+          sizeInBytes: indexSizeInBytes,
         };
-      }
-
-      if (indexName.indexOf('events') > 0) {
-        return {
-          ...acc,
-          ['events']: { indexName: 'events', ...sumDocCountAndSize(acc.events) },
-        };
-      }
-
-      if (indexName.indexOf('stackframes') > 0) {
-        return {
-          ...acc,
-          ['stackframes']: { indexName: 'stackframes', ...sumDocCountAndSize(acc.stackframes) },
-        };
-      }
-
-      if (indexName.indexOf('stacktraces') > 0) {
-        return {
-          ...acc,
-          ['stacktraces']: { indexName: 'stacktraces', ...sumDocCountAndSize(acc.stacktraces) },
-        };
-      }
-
-      if (indexName.indexOf('executables') > 0) {
-        return {
-          ...acc,
-          ['executables']: { indexName: 'executables', ...sumDocCountAndSize(acc.executables) },
-        };
-      }
-
-      if (indexName.indexOf('metrics') > 0) {
-        return {
-          ...acc,
-          ['metrics']: { indexName: 'metrics', ...sumDocCountAndSize(acc.metrics) },
-        };
-      }
-
-      return acc;
-    },
-    INITIAL_STATE
+      }),
+    'indexName'
   );
 
-  return Object.values(perIndexStatsMap);
+  return Object.keys(groupedIndexStatsMap).map((indexName) => {
+    const values = groupedIndexStatsMap[indexName];
+    const docCount = sumBy(values, 'docCount');
+    const sizeInBytes = sumBy(values, 'sizeInBytes');
+    return {
+      indexName,
+      docCount,
+      sizeInBytes,
+    };
+  });
 }
