@@ -20,8 +20,6 @@ import { useOsqueryTab } from '../../../common/components/event_details/osquery_
 import { useResponseActionsView } from '../../../common/components/event_details/response_actions_view';
 import * as i18n from './translations';
 
-export const RESPONSE_TAB_ID = 'response-details';
-
 const ExtendedFlyoutWrapper = styled.div`
  figure {
   background-color: white
