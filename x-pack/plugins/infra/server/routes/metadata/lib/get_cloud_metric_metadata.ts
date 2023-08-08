@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { InfraSourceConfiguration } from '@kbn/metrics-data-plugin/server/lib/sources';
 import type { InfraPluginRequestHandlerContext } from '../../../types';
 import {
   InfraMetadataAggregationBucket,
   InfraMetadataAggregationResponse,
 } from '../../../lib/adapters/framework';
 import { KibanaFramework } from '../../../lib/adapters/framework/kibana_framework_adapter';
-import { InfraSourceConfiguration } from '../../../lib/sources';
 import { CLOUD_METRICS_MODULES } from '../../../lib/constants';
 import { TIMESTAMP_FIELD } from '../../../../common/constants';
 

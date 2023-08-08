@@ -6,13 +6,13 @@
  */
 
 import { KibanaRequest } from '@kbn/core/server';
+import { InfraSourceConfiguration } from '@kbn/metrics-data-plugin/server/lib/sources';
 import type { InfraPluginRequestHandlerContext } from '../../../types';
 import {
   NodeDetailsRequest,
   NodeDetailsMetricData,
 } from '../../../../common/http_api/node_details_api';
 import { InventoryMetric } from '../../../../common/inventory_models/types';
-import { InfraSourceConfiguration } from '../../sources';
 
 export interface InfraMetricsRequestOptions
   extends Omit<NodeDetailsRequest, 'sourceId' | 'nodeId' | 'cloudId'> {

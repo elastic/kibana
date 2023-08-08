@@ -13,7 +13,7 @@ import { Expression, AlertContextMeta } from './expression';
 import { act } from 'react-dom/test-utils';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 
-jest.mock('../../../containers/metrics_source/source', () => ({
+jest.mock('@kbn/metrics-data-plugin/public/containers/metrics_source/source', () => ({
   withSourceProvider: () => jest.fn,
   useSourceContext: () => ({
     source: { id: 'default' },

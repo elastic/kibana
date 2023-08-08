@@ -7,7 +7,7 @@
 
 import { SavedObjectReference, SavedObjectUnsanitizedDoc } from '@kbn/core/server';
 import { InfraSourceConfiguration } from '../../../../common/source_configuration/source_configuration';
-import { infraSourceConfigurationSavedObjectName } from '../saved_object_type';
+import { infraSourceConfigurationSavedObjectName } from '..';
 
 export const createTestSourceConfiguration = (
   overrideAttributes: Partial<InfraSourceConfiguration> = {},

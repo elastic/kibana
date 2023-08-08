@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { InfraSource } from '@kbn/metrics-data-plugin/server/lib/sources';
 import { TIMESTAMP_FIELD } from '../../../../common/constants';
 import { findInventoryFields, findInventoryModel } from '../../../../common/inventory_models';
 import { MetricsAPIMetric, MetricsAPIRequest, SnapshotRequest } from '../../../../common/http_api';
 import { ESSearchClient } from '../../../lib/metrics/types';
-import { InfraSource } from '../../../lib/sources';
 import { createTimeRangeWithInterval } from './create_timerange_with_interval';
 import { parseFilterQuery } from '../../../utils/serialized_query';
 import { transformSnapshotMetricsToMetricsAPIMetrics } from './transform_snapshot_metrics_to_metrics_api_metrics';

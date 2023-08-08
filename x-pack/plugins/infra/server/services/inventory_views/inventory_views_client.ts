@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { IInfraSources } from '@kbn/metrics-data-plugin/server/lib/sources';
 import {
   Logger,
   SavedObject,
@@ -24,7 +25,6 @@ import type {
 } from '../../../common/http_api/latest';
 import type { InventoryView, InventoryViewAttributes } from '../../../common/inventory_views';
 import { decodeOrThrow } from '../../../common/runtime_types';
-import type { IInfraSources } from '../../lib/sources';
 import { inventoryViewSavedObjectName } from '../../saved_objects/inventory_view';
 import { inventoryViewSavedObjectRT } from '../../saved_objects/inventory_view/types';
 import type { IInventoryViewsClient } from './types';

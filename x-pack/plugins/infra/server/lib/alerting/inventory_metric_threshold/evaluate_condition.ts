@@ -6,13 +6,13 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core/server';
+import { InfraSource } from '@kbn/metrics-data-plugin/server/lib/sources';
 import { mapValues } from 'lodash';
 import type { Logger } from '@kbn/logging';
 import { InventoryMetricConditions } from '../../../../common/alerting/metrics';
 import { InfraTimerangeInput } from '../../../../common/http_api';
 import { InventoryItemType } from '../../../../common/inventory_models/types';
 import { LogQueryFields } from '../../metrics/types';
-import { InfraSource } from '../../sources';
 import { calculateFromBasedOnMetric } from './lib/calculate_from_based_on_metric';
 import { getData } from './lib/get_data';
 import { AdditionalContext } from '../common/utils';

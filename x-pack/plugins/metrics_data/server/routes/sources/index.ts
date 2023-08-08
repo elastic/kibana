@@ -6,10 +6,9 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import Boom from '@hapi/boom';
+import { isBoom } from '@hapi/boom';
 import { createValidationFunction } from '../../../common/runtime_types';
-import { InfraBackendLibs } from '../../lib/infra_types';
-import { hasData } from '../../lib/sources/has_data';
+import { MetricsDataBackendLibs } from '../../lib/metrics_data_types';
 import { createSearchClient } from '../../lib/create_search_client';
 import { AnomalyThresholdRangeError, NoSuchRemoteClusterError } from '../../lib/sources/errors';
 import {
@@ -26,7 +25,7 @@ const defaultStatus = {
   remoteClustersExist: false,
 };
 
-export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => {
+export const initMetricsSourceConfigurationRoutes = (libs: MetricsDataBackendLibs) => {
   const { framework, logger } = libs;
 
   const composeSourceStatus = async (
@@ -157,7 +156,7 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
           body: metricsSourceConfigurationResponseRT.encode(sourceResponse),
         });
       } catch (error) {
-        if (Boom.isBoom(error)) {
+        if (isBoom(error)) {
           throw error;
         }
 
@@ -197,10 +196,19 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
       const soClient = (await requestContext.core).savedObjects.client;
       const source = await libs.sources.getSourceConfiguration(soClient, sourceId);
 
-      const results = await hasData(source.configuration.metricAlias, client);
+      const params = {
+        index: source.configuration.metricAlias,
+        allow_no_indices: true,
+        terminate_after: 1,
+        ignore_unavailable: true,
+        body: {
+          size: 0,
+        },
+      };
+      const results = await client(params);
 
       return response.ok({
-        body: { hasData: results, configuration: source.configuration },
+        body: { hasData: results.hits.total.value !== 0, configuration: source.configuration },
       });
     }
   );

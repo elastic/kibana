@@ -12,6 +12,7 @@ import {
   SavedObjectsUpdateResponse,
   SavedObjectsUtils,
 } from '@kbn/core/server';
+import type { IInfraSources } from '@kbn/metrics-data-plugin/server/lib/sources';
 import Boom from '@hapi/boom';
 import {
   metricsExplorerViewAttributesRT,
@@ -30,7 +31,6 @@ import type {
   MetricsExplorerViewAttributes,
 } from '../../../common/metrics_explorer_views';
 import { decodeOrThrow } from '../../../common/runtime_types';
-import type { IInfraSources } from '../../lib/sources';
 import { metricsExplorerViewSavedObjectName } from '../../saved_objects/metrics_explorer_view';
 import { metricsExplorerViewSavedObjectRT } from '../../saved_objects/metrics_explorer_view/types';
 import type { IMetricsExplorerViewsClient } from './types';

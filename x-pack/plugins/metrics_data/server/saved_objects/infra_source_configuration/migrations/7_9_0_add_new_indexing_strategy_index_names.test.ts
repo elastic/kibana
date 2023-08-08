@@ -7,7 +7,7 @@
 
 import { migrationMocks } from '@kbn/core/server/mocks';
 import { addNewIndexingStrategyIndexNames } from './7_9_0_add_new_indexing_strategy_index_names';
-import { infraSourceConfigurationSavedObjectName } from '../saved_object_type';
+import { infraSourceConfigurationSavedObjectName } from '..';
 
 describe('infra source configuration migration function for 7.9.0', () => {
   test('adds "logs-*" when the logAlias contains "filebeat-*"', () => {

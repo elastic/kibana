@@ -6,7 +6,7 @@
  */
 
 import { fold, map } from 'fp-ts/lib/Either';
-import { constant, identity } from 'fp-ts/lib/function';
+import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { failure } from 'io-ts/lib/PathReporter';
 import { inRange } from 'lodash';
@@ -20,33 +20,21 @@ import {
   InfraSource,
   InfraSourceConfiguration,
   InfraStaticSourceConfiguration,
-  SourceConfigurationConfigFileProperties,
-  sourceConfigurationConfigFilePropertiesRT,
 } from '../../../common/source_configuration/source_configuration';
-import { SourceConfigurationSavedObjectRT } from '.';
-import { InfraConfig } from '../..';
+import { SourceConfigurationSavedObjectRT } from '../../saved_objects/infra_source_configuration/types';
 import { defaultSourceConfiguration } from './defaults';
 import { AnomalyThresholdRangeError, NotFoundError } from './errors';
 import {
   extractSavedObjectReferences,
   resolveSavedObjectReferences,
 } from './saved_object_references';
-import { infraSourceConfigurationSavedObjectName } from './saved_object_type';
-
-interface Libs {
-  config: InfraConfig;
-}
+import { infraSourceConfigurationSavedObjectName } from '../../saved_objects/infra_source_configuration';
 
 // extract public interface
 export type IInfraSources = Pick<InfraSources, keyof InfraSources>;
 
 export class InfraSources {
   private internalSourceConfigurations: Map<string, InfraStaticSourceConfiguration> = new Map();
-  private readonly libs: Libs;
-
-  constructor(libs: Libs) {
-    this.libs = libs;
-  }
 
   public async getSourceConfiguration(
     savedObjectsClient: SavedObjectsClientContract,
@@ -209,14 +197,7 @@ export class InfraSources {
   }
 
   private async getStaticDefaultSourceConfiguration() {
-    const staticSourceConfiguration: SourceConfigurationConfigFileProperties['sources']['default'] =
-      pipe(
-        sourceConfigurationConfigFilePropertiesRT.decode(this.libs.config),
-        map(({ sources: { default: defaultConfiguration } }) => defaultConfiguration),
-        fold(constant({}), identity)
-      );
-
-    return mergeSourceConfiguration(defaultSourceConfiguration, staticSourceConfiguration);
+    return defaultSourceConfiguration;
   }
 
   private async getSavedSourceConfiguration(

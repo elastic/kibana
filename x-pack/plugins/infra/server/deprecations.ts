@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { InfraSources } from '@kbn/metrics-data-plugin/server/lib/sources';
 import { get } from 'lodash';
 import {
   ConfigDeprecationProvider,
@@ -20,7 +21,6 @@ import {
   HOST_FIELD,
   POD_FIELD,
 } from '../common/constants';
-import { InfraSources } from './lib/sources';
 
 const deprecatedFieldMessage = (fieldName: string, defaultValue: string, configNames: string[]) =>
   i18n.translate('xpack.infra.deprecations.deprecatedFieldDescription', {

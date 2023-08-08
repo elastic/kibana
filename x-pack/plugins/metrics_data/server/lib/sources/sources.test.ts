@@ -6,16 +6,13 @@
  */
 
 import { SavedObject } from '@kbn/core/server';
-import { InfraConfig } from '../../types';
-import { infraSourceConfigurationSavedObjectName } from './saved_object_type';
+import { infraSourceConfigurationSavedObjectName } from '../../saved_objects';
 import { InfraSources } from './sources';
 
 describe('the InfraSources lib', () => {
   describe('getSourceConfiguration method', () => {
     test('returns a source configuration if it exists', async () => {
-      const sourcesLib = new InfraSources({
-        config: createMockStaticConfiguration({}),
-      });
+      const sourcesLib = new InfraSources();
 
       const request: any = createRequestContext({
         id: 'TEST_ID',
@@ -48,42 +45,8 @@ describe('the InfraSources lib', () => {
       });
     });
 
-    test('adds missing attributes from the static configuration to a source configuration', async () => {
-      const sourcesLib = new InfraSources({
-        config: createMockStaticConfiguration({
-          default: {
-            metricAlias: 'METRIC_ALIAS',
-            logIndices: { type: 'index_pattern', indexPatternId: 'LOG_ALIAS' },
-          },
-        }),
-      });
-
-      const request: any = createRequestContext({
-        id: 'TEST_ID',
-        version: 'foo',
-        type: infraSourceConfigurationSavedObjectName,
-        updated_at: '2000-01-01T00:00:00.000Z',
-        attributes: {},
-        references: [],
-      });
-
-      expect(
-        await sourcesLib.getSourceConfiguration(request.core.savedObjects.client, 'TEST_ID')
-      ).toMatchObject({
-        id: 'TEST_ID',
-        version: 'foo',
-        updatedAt: 946684800000,
-        configuration: {
-          metricAlias: 'METRIC_ALIAS',
-          logIndices: { type: 'index_pattern', indexPatternId: 'LOG_ALIAS' },
-        },
-      });
-    });
-
     test('adds missing attributes from the default configuration to a source configuration', async () => {
-      const sourcesLib = new InfraSources({
-        config: createMockStaticConfiguration({}),
-      });
+      const sourcesLib = new InfraSources();
 
       const request: any = createRequestContext({
         id: 'TEST_ID',
@@ -107,25 +70,6 @@ describe('the InfraSources lib', () => {
       });
     });
   });
-});
-
-const createMockStaticConfiguration = (sources: any): InfraConfig => ({
-  alerting: {
-    inventory_threshold: {
-      group_by_page_size: 10000,
-    },
-    metric_threshold: {
-      group_by_page_size: 10000,
-    },
-  },
-  inventory: {
-    compositeSize: 2000,
-  },
-  logs: {
-    app_target: 'logs-ui',
-  },
-  sources,
-  enabled: true,
 });
 
 const createRequestContext = (savedObject?: SavedObject<unknown>) => {

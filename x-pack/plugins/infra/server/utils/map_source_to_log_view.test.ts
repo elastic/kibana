@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { InfraSource } from '../lib/sources';
+import { InfraSource } from '@kbn/metrics-data-plugin/server/lib/sources';
 import { getAttributesFromSourceConfiguration } from './map_source_to_log_view';
 
 describe('getAttributesFromSourceConfiguration function', () => {

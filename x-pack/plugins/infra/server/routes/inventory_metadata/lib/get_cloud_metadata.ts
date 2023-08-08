@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { InfraSourceConfiguration } from '@kbn/metrics-data-plugin/server/lib/sources';
 import { TIMESTAMP_FIELD } from '../../../../common/constants';
 import { InventoryCloudAccount } from '../../../../common/http_api/inventory_meta_api';
 import {
   InfraMetadataAggregationResponse,
   InfraMetadataAggregationBucket,
 } from '../../../lib/adapters/framework';
-import { InfraSourceConfiguration } from '../../../lib/sources';
 import { KibanaFramework } from '../../../lib/adapters/framework/kibana_framework_adapter';
 import { InventoryItemType } from '../../../../common/inventory_models/types';
 import { findInventoryModel } from '../../../../common/inventory_models';

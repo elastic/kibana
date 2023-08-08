@@ -25,7 +25,6 @@ import {
 import { initMetadataRoute } from './routes/metadata';
 import { initMetricsAPIRoute } from './routes/metrics_api';
 import { initMetricExplorerRoute } from './routes/metrics_explorer';
-import { initMetricsSourceConfigurationRoutes } from './routes/metrics_sources';
 import { initNodeDetailsRoute } from './routes/node_details';
 import { initOverviewRoute } from './routes/overview';
 import { initProcessListRoute } from './routes/process_list';
@@ -45,7 +44,6 @@ export const initInfraServer = (libs: InfraBackendLibs) => {
   initGetHostsAnomaliesRoute(libs);
   initSnapshotRoute(libs);
   initNodeDetailsRoute(libs);
-  initMetricsSourceConfigurationRoutes(libs);
   initValidateLogAnalysisDatasetsRoute(libs);
   initValidateLogAnalysisIndicesRoute(libs);
   initGetLogEntryExamplesRoute(libs);
