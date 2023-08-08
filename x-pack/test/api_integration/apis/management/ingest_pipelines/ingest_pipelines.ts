@@ -17,7 +17,7 @@ export default function ({ getService }: FtrProviderContext) {
   const ingestPipelines = getService('ingestPipelines');
   const log = getService('log');
 
-  const { createPipeline, createIndex, deleteIndex } = registerEsHelpers(getService);
+  const { createIndex, deleteIndex } = registerEsHelpers(getService);
 
   describe('Pipelines', function () {
     after(async () => {
@@ -215,56 +215,44 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('Delete', () => {
-      const PIPELINE = {
-        description: 'test pipeline description',
-        processors: [
-          {
-            script: {
-              source: 'ctx._type = null',
-            },
-          },
-        ],
-        version: 1,
-        _meta: {
-          field_1: 'test',
-          field_2: 10,
-        },
-      };
-
-      const pipelineA = { body: PIPELINE, id: 'test_delete_pipeline_a' };
-      const pipelineB = { body: PIPELINE, id: 'test_delete_pipeline_b' };
-      const pipelineC = { body: PIPELINE, id: 'test_delete_pipeline_c' };
-      const pipelineD = { body: PIPELINE, id: 'test_delete_pipeline_d' };
+      const pipelineIds: string[] = [];
 
       before(async () => {
+        const pipelineA = ingestPipelines.fixtures.createPipelineBodyWithRequiredFields();
+        const pipelineB = ingestPipelines.fixtures.createPipelineBodyWithRequiredFields();
+        const pipelineC = ingestPipelines.fixtures.createPipelineBodyWithRequiredFields();
+        const pipelineD = ingestPipelines.fixtures.createPipelineBodyWithRequiredFields();
+
         // Create several pipelines that can be used to test deletion
         await Promise.all(
-          [pipelineA, pipelineB, pipelineC, pipelineD].map((pipeline) => createPipeline(pipeline))
+          [pipelineA, pipelineB, pipelineC, pipelineD].map((pipeline) => {
+            const { name, ...pipelineRequestBody } = pipeline;
+            pipelineIds.push(pipeline.name);
+            return ingestPipelines.api.createPipeline({ id: name, ...pipelineRequestBody });
+          })
         ).catch((err) => {
-          // eslint-disable-next-line no-console
-          console.log(`[Setup error] Error creating pipelines: ${err.message}`);
+          log.debug(`[Setup error] Error creating pipelines: ${err.message}`);
           throw err;
         });
       });
 
       it('should delete a pipeline', async () => {
-        const { id } = pipelineA;
+        const pipelineA = pipelineIds[0];
 
-        const uri = `${ingestPipelines.fixtures.apiBasePath}/${id}`;
+        const uri = `${ingestPipelines.fixtures.apiBasePath}/${pipelineA}`;
 
         const { body } = await supertest.delete(uri).set('kbn-xsrf', 'xxx').expect(200);
 
         expect(body).to.eql({
-          itemsDeleted: [id],
+          itemsDeleted: [pipelineA],
           errors: [],
         });
       });
 
       it('should delete multiple pipelines', async () => {
-        const { id: pipelineBId } = pipelineB;
-        const { id: pipelineCId } = pipelineC;
-
-        const uri = `${ingestPipelines.fixtures.apiBasePath}/${pipelineBId},${pipelineCId}`;
+        const pipelineB = pipelineIds[1];
+        const pipelineC = pipelineIds[2];
+        const uri = `${ingestPipelines.fixtures.apiBasePath}/${pipelineIds[1]},${pipelineIds[2]}`;
 
         const {
           body: { itemsDeleted, errors },
@@ -273,21 +261,21 @@ export default function ({ getService }: FtrProviderContext) {
         expect(errors).to.eql([]);
 
         // The itemsDeleted array order isn't guaranteed, so we assert against each pipeline name instead
-        [pipelineBId, pipelineCId].forEach((pipelineName) => {
+        [pipelineB, pipelineC].forEach((pipelineName) => {
           expect(itemsDeleted.includes(pipelineName)).to.be(true);
         });
       });
 
       it('should return an error for any pipelines not sucessfully deleted', async () => {
         const PIPELINE_DOES_NOT_EXIST = 'pipeline_does_not_exist';
-        const { id: existingPipelineId } = pipelineD;
+        const pipelineD = pipelineIds[3];
 
-        const uri = `${ingestPipelines.fixtures.apiBasePath}/${existingPipelineId},${PIPELINE_DOES_NOT_EXIST}`;
+        const uri = `${ingestPipelines.fixtures.apiBasePath}/${pipelineD},${PIPELINE_DOES_NOT_EXIST}`;
 
         const { body } = await supertest.delete(uri).set('kbn-xsrf', 'xxx').expect(200);
 
         expect(body).to.eql({
-          itemsDeleted: [existingPipelineId],
+          itemsDeleted: [pipelineD],
           errors: [
             {
               name: PIPELINE_DOES_NOT_EXIST,
