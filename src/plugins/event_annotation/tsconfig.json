@@ -41,7 +41,6 @@
     "@kbn/core-lifecycle-browser",
     "@kbn/saved-objects-tagging-oss-plugin",
     "@kbn/dom-drag-drop",
-    "@kbn/kibana-utils-plugin",
     "@kbn/content-management-utils"
   ],
   "exclude": [
