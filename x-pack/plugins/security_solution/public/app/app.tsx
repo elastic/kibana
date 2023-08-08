@@ -20,6 +20,7 @@ import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { CellActionsProvider } from '@kbn/cell-actions';
 
 import { NavigationProvider } from '@kbn/security-solution-navigation';
+import { UpsellingProvider } from '../common/components/upselling_provider';
 import { getComments } from '../assistant/get_comments';
 import { augmentMessageCodeBlocks, LOCAL_STORAGE_KEY } from '../assistant/helpers';
 import { useConversationStore } from '../assistant/use_conversation_store';
@@ -65,6 +66,7 @@ const StartAppComponent: FC<StartAppComponent> = ({
     http,
     triggersActionsUi: { actionTypeRegistry },
     uiActions,
+    upselling,
   } = services;
 
   const { conversations, setConversations } = useConversationStore();
@@ -115,13 +117,15 @@ const StartAppComponent: FC<StartAppComponent> = ({
                             <CellActionsProvider
                               getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}
                             >
-                              <PageRouter
-                                history={history}
-                                onAppLeave={onAppLeave}
-                                setHeaderActionMenu={setHeaderActionMenu}
-                              >
-                                {children}
-                              </PageRouter>
+                              <UpsellingProvider upsellingService={upselling}>
+                                <PageRouter
+                                  history={history}
+                                  onAppLeave={onAppLeave}
+                                  setHeaderActionMenu={setHeaderActionMenu}
+                                >
+                                  {children}
+                                </PageRouter>
+                              </UpsellingProvider>
                             </CellActionsProvider>
                           </ReactQueryClientProvider>
                         </NavigationProvider>

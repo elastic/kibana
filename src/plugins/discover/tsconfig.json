@@ -63,8 +63,9 @@
     "@kbn/core-application-browser",
     "@kbn/core-saved-objects-server",
     "@kbn/discover-utils",
+    "@kbn/content-management-plugin",
     "@kbn/unified-doc-viewer",
-    "@kbn/unified-doc-viewer-plugin"
+    "@kbn/unified-doc-viewer-plugin",
   ],
   "exclude": [
     "target/**/*"
