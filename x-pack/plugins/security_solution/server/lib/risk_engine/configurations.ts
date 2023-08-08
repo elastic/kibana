@@ -151,7 +151,7 @@ export const getIndexPatternDataStream = (namespace: string): IIndexPatternStrin
 });
 
 export const getLatestTransformId = (namespace: string): string =>
-  `${riskScoreBaseIndexName}_latest_transform_${namespace}`;
+  `risk_score_latest_transform_${namespace}`;
 
 export const getTransformOptions = ({ dest, source }: { dest: string; source: string[] }) => ({
   dest: {

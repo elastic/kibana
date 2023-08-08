@@ -19,6 +19,7 @@ import {
   legacyTransformIds,
   createTransforms,
   clearLegacyTransforms,
+  clearTransforms,
 } from './utils';
 
 // eslint-disable-next-line import/no-default-export
@@ -27,12 +28,15 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const kibanaServer = getService('kibanaServer');
 
-  describe.only('Risk Engine', () => {
+  describe('Risk Engine', () => {
     afterEach(async () => {
       await cleanRiskEngineConfig({
         kibanaServer,
       });
       await clearLegacyTransforms({
+        es,
+      });
+      await clearTransforms({
         es,
       });
     });
@@ -67,7 +71,9 @@ export default ({ getService }: FtrProviderContext) => {
         const ilmPolicyName = '.risk-score-ilm-policy';
         const componentTemplateName = '.risk-score-mappings';
         const indexTemplateName = '.risk-score.risk-score-default-index-template';
-        const indexName = 'risk-score.risk-score-default';
+        const dataStreamName = 'risk-score.risk-score-default';
+        const latestIndexName = 'risk-score.risk-score-latest-default';
+        const tranformId = 'risk_score_latest_transform_default';
 
         await initRiskEngine();
 
@@ -120,6 +126,9 @@ export default ({ getService }: FtrProviderContext) => {
                       type: 'float',
                     },
                     calculated_score_norm: {
+                      type: 'float',
+                    },
+                    category_1_count: {
                       type: 'float',
                     },
                     category_1_score: {
@@ -176,6 +185,9 @@ export default ({ getService }: FtrProviderContext) => {
                       type: 'float',
                     },
                     calculated_score_norm: {
+                      type: 'float',
+                    },
+                    category_1_count: {
                       type: 'float',
                     },
                     category_1_score: {
@@ -253,10 +265,12 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         const dsResponse = await es.indices.get({
-          index: indexName,
+          index: dataStreamName,
         });
 
-        const dataStream = Object.values(dsResponse).find((ds) => ds.data_stream === indexName);
+        const dataStream = Object.values(dsResponse).find(
+          (ds) => ds.data_stream === dataStreamName
+        );
 
         expect(dataStream?.mappings?._meta?.managed).to.eql(true);
         expect(dataStream?.mappings?._meta?.namespace).to.eql('default');
@@ -276,6 +290,18 @@ export default ({ getService }: FtrProviderContext) => {
         expect(dataStream?.settings?.index?.hidden).to.eql('true');
         expect(dataStream?.settings?.index?.number_of_shards).to.eql(1);
         expect(dataStream?.settings?.index?.auto_expand_replicas).to.eql('0-1');
+
+        const indexExist = await es.indices.exists({
+          index: latestIndexName,
+        });
+
+        expect(indexExist).to.eql(true);
+
+        const transformStats = await es.transform.getTransformStats({
+          transform_id: tranformId,
+        });
+
+        expect(transformStats.transforms[0].state).to.eql('started');
       });
 
       it('should create configuration saved object', async () => {

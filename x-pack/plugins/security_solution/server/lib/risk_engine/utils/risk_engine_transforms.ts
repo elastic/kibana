@@ -121,25 +121,3 @@ export const startTransform = async ({
   return esClient.transform.startTransform({ transform_id: transformId });
 };
 
-export const stopTransform = async ({
-  esClient,
-  transformId,
-}: {
-  esClient: ElasticsearchClient;
-  transformId: string;
-}) => {
-  const transformStats = await esClient.transform.getTransformStats({
-    transform_id: transformId,
-  });
-  if (transformStats.count <= 0) {
-    throw new Error(`Can't check ${transformId} status`);
-  }
-  if (transformStats.transforms[0].state === 'stopped') {
-    return true;
-  }
-  return esClient.transform.stopTransform({
-    transform_id: transformId,
-    force: true,
-    wait_for_completion: true,
-  });
-};

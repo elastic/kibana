@@ -164,6 +164,16 @@ export const legacyTransformIds = [
   'ml_userriskscore_latest_transform_default',
 ];
 
+export const clearTransforms = async ({ es }: { es: Client }): Promise<void> => {
+  try {
+    await es.transform.deleteTransform({
+      transform_id: 'risk_score_latest_transform_default',
+    });
+  } catch (e) {
+    //
+  }
+};
+
 export const clearLegacyTransforms = async ({ es }: { es: Client }): Promise<void> => {
   const transforms = legacyTransformIds.map((transform) =>
     es.transform.deleteTransform({
