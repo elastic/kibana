@@ -156,21 +156,22 @@ export function DashboardTopNav({ embedSettings, redirectTo }: DashboardTopNavPr
       },
     ];
 
-    setBreadcrumbs([
-      {
-        text: getDashboardBreadcrumb(),
-        'data-test-subj': 'dashboardListingBreadcrumb',
-        onClick: () => {
-          redirectTo({ destination: 'listing' });
-        },
-      },
-      ...dashboardTitleBreadcrumbs,
-    ]);
-
     if (serverless?.setBreadcrumbs) {
       // set serverless breadcrumbs if available,
-      // set only the dashboardTitleBreadcrumbs because the main breadcrumbs automatically comes as part of the navigation config
+      // set only the dashboardTitleBreadcrumbs because the main breadcrumbs automatically come as part of the navigation config
       serverless.setBreadcrumbs(dashboardTitleBreadcrumbs);
+    } else {
+      // non-serverless regular breadcrumbs
+      setBreadcrumbs([
+        {
+          text: getDashboardBreadcrumb(),
+          'data-test-subj': 'dashboardListingBreadcrumb',
+          onClick: () => {
+            redirectTo({ destination: 'listing' });
+          },
+        },
+        ...dashboardTitleBreadcrumbs,
+      ]);
     }
   }, [setBreadcrumbs, redirectTo, dashboardTitle, dashboard, viewMode, serverless]);
 
