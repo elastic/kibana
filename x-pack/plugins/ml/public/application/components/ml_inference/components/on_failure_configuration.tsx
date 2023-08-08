@@ -57,7 +57,7 @@ export const OnFailureConfiguration: FC<Props> = memo(
       const checked = e.target.checked;
       handleAdvancedConfigUpdate({
         ignoreFailure: checked,
-        ...(checked === false ? { takeActionOnFailure: false, onFailure: undefined } : {}),
+        ...(checked === true ? { takeActionOnFailure: false, onFailure: undefined } : {}),
       });
     };
 
@@ -144,19 +144,12 @@ export const OnFailureConfiguration: FC<Props> = memo(
                 <EuiFlexItem>
                   <EuiFlexGroup direction="column" gutterSize="s">
                     <EuiFlexItem grow={false}>
-                      <EuiFormRow
-                        helpText={
-                          <FormattedMessage
-                            id="xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.advanced.ignoreFailurelHelpText"
-                            defaultMessage="This must be checked for any actions to occur on failure."
-                          />
-                        }
-                      >
+                      <EuiFormRow fullWidth>
                         <EuiSwitch
                           label={
                             <FormattedMessage
                               id="xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.advanced.ignoreFailureLabel"
-                              defaultMessage="Continue on failure"
+                              defaultMessage="Ignore failure and run the pipeline's remaining processors"
                             />
                           }
                           checked={ignoreFailure}
@@ -165,14 +158,14 @@ export const OnFailureConfiguration: FC<Props> = memo(
                       </EuiFormRow>
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
-                      {ignoreFailure === true ? (
+                      {ignoreFailure === false ? (
                         <EuiFormRow>
                           <EuiSwitch
                             label={
                               <EuiFlexItem>
                                 <FormattedMessage
                                   id="xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.advanced.noActionOnFailureLabel"
-                                  defaultMessage="Take action on failure."
+                                  defaultMessage="Take action on failure"
                                 />
                               </EuiFlexItem>
                             }
@@ -187,7 +180,7 @@ export const OnFailureConfiguration: FC<Props> = memo(
                   </EuiFlexGroup>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  {takeActionOnFailure === true ? (
+                  {takeActionOnFailure === true && ignoreFailure === false ? (
                     <EuiFormRow
                       fullWidth
                       label={

@@ -69,7 +69,7 @@ export const getInitialState = (model: ModelItem): MlInferenceState => {
     creatingPipeline: false,
     error: false,
     fieldMap: undefined,
-    ignoreFailure: true,
+    ignoreFailure: false,
     inferenceConfig: model.inference_config,
     modelId: model.model_id,
     onFailure: getDefaultOnFailureConfiguration(),
