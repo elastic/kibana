@@ -51,7 +51,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
   {
     iconPath: 'google_cloud_storage.svg',
     isBeta: true,
-    isNative: true,
+    isNative: false,
     keywords: ['google', 'cloud', 'blob', 's3', 'connector'],
     name: i18n.translate('xpack.enterpriseSearch.content.nativeConnectors.googleCloud.name', {
       defaultMessage: 'Google Cloud Storage',
