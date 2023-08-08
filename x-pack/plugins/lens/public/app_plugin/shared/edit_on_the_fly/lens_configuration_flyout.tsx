@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useState, useEffect } from 'react';
+import React, { useCallback, useState, useEffect, useRef } from 'react';
 import { EuiFlyoutHeader, EuiTitle, EuiAccordion, EuiSpacer } from '@elastic/eui';
 import { isOfAggregateQueryType, type AggregateQuery, type Query } from '@kbn/es-query';
 import { isEqual } from 'lodash';
@@ -14,6 +14,7 @@ import { TextBasedLangEditor } from '@kbn/text-based-languages/public';
 import type { Datatable } from '@kbn/expressions-plugin/public';
 import { useLensSelector } from '../../../state_management';
 import { SuggestionPanel } from '../../../editor_frame_service/editor_frame/suggestion_panel';
+import type { TypedLensByValueInput } from '../../../embeddable/embeddable_component';
 import type { EditConfigPanelProps } from './types';
 import { LayerConfiguration } from './layer_configuration';
 import { FlyoutWrapper } from './flyout_wrapper';
@@ -41,6 +42,7 @@ export function LensEditConfigurationFlyout({
   const [dataTable, setDataTable] = useState<Datatable | undefined>();
   const [suggestionsPanelIsClosed, setSuggestionsPanelIsClosed] = useState(true);
   const [fetchFromAdapters, setFetchFromAdapters] = useState(true);
+  const previousAttributes = useRef<TypedLensByValueInput['attributes']>(attributes);
 
   const frameApi = useFramePublicApi({
     attributes,
@@ -59,6 +61,13 @@ export function LensEditConfigurationFlyout({
       setDataTable(table);
     }
   }, [adaptersTables, dataTable, fetchFromAdapters]);
+
+  const onCancel = useCallback(() => {
+    const attrs = previousAttributes.current;
+    updateAllAttributes?.(attrs);
+    setCurrentAttributes?.(attrs);
+    closeFlyout?.();
+  }, [closeFlyout, setCurrentAttributes, updateAllAttributes]);
 
   const runQuery = useCallback(
     async (q: AggregateQuery) => {
@@ -119,7 +128,7 @@ export function LensEditConfigurationFlyout({
           </EuiTitle>
         </EuiFlyoutHeader>
       )}
-      <FlyoutWrapper datasourceId={datasourceId} closeFlyout={closeFlyout}>
+      <FlyoutWrapper datasourceId={datasourceId} closeFlyout={closeFlyout} onCancel={onCancel}>
         <>
           {isOfAggregateQueryType(attributes.state.query) && (
             <TextBasedLangEditor

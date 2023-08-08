@@ -8,10 +8,13 @@
 import React from 'react';
 import {
   EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiFlyoutBody,
   EuiFlyoutFooter,
   useEuiTheme,
   EuiCallOut,
+  EuiButton,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
@@ -21,9 +24,15 @@ import { FormattedMessage } from '@kbn/i18n-react';
 interface FlyoutWrapperProps {
   datasourceId: 'formBased' | 'textBased';
   children: JSX.Element;
+  onCancel?: () => void;
   closeFlyout?: () => void;
 }
-export const FlyoutWrapper = ({ datasourceId, children, closeFlyout }: FlyoutWrapperProps) => {
+export const FlyoutWrapper = ({
+  datasourceId,
+  children,
+  onCancel,
+  closeFlyout,
+}: FlyoutWrapperProps) => {
   const { euiTheme } = useEuiTheme();
   return (
     <>
@@ -59,17 +68,52 @@ export const FlyoutWrapper = ({ datasourceId, children, closeFlyout }: FlyoutWra
         {children}
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
-        <EuiButtonEmpty
-          onClick={closeFlyout}
-          data-test-subj="collapseFlyoutButton"
-          aria-controls="lens-config-close-button"
-          aria-expanded="true"
-          aria-label={i18n.translate('xpack.lens.config.closeFlyoutAriaLabel', {
-            defaultMessage: 'Close flyout',
-          })}
-        >
-          <FormattedMessage id="xpack.lens.config.closeFlyoutLabel" defaultMessage="Close" />
-        </EuiButtonEmpty>
+        {!Boolean(onCancel) && (
+          <EuiButtonEmpty
+            onClick={closeFlyout}
+            data-test-subj="collapseFlyoutButton"
+            aria-controls="lens-config-close-button"
+            aria-expanded="true"
+            aria-label={i18n.translate('xpack.lens.config.closeFlyoutAriaLabel', {
+              defaultMessage: 'Close flyout',
+            })}
+          >
+            <FormattedMessage id="xpack.lens.config.closeFlyoutLabel" defaultMessage="Close" />
+          </EuiButtonEmpty>
+        )}
+        {Boolean(onCancel) && (
+          <EuiFlexGroup justifyContent="spaceBetween">
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                onClick={onCancel}
+                flush="left"
+                aria-label={i18n.translate('xpack.lens.config.cancelFlyoutAriaLabel', {
+                  defaultMessage: 'Cancel applied changes',
+                })}
+              >
+                <FormattedMessage
+                  id="xpack.lens.config.cancelFlyoutLabel"
+                  defaultMessage="Cancel"
+                />
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                onClick={closeFlyout}
+                fill
+                aria-label={i18n.translate('xpack.lens.config.applyFlyoutAriaLabel', {
+                  defaultMessage: 'Apply changes',
+                })}
+                iconType="check"
+              >
+                <FormattedMessage
+                  id="xpack.lens.config.applyFlyoutLabel"
+                  defaultMessage="Apply and close"
+                />
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        )}
       </EuiFlyoutFooter>
     </>
   );
