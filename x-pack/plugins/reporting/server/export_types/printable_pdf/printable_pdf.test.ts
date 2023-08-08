@@ -16,7 +16,7 @@ import { cryptoFactory } from '@kbn/reporting-common/crypto';
 import { TaskPayloadPDF } from '@kbn/reporting-common/types';
 import { of } from 'rxjs';
 
-jest.mock('@kbn/reporting-common/export_type_helpers/generate_pdf.ts');
+jest.mock('@kbn/reporting-common/export_type_helpers/generate_pdf');
 
 let content: string;
 let mockPdfExportType: PdfV1ExportType;
