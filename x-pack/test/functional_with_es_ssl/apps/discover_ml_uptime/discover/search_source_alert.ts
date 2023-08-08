@@ -481,7 +481,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await openDiscoverAlertFlyout();
       await defineSearchSourceAlert('test-adhoc-alert');
       await testSubjects.click('saveRuleButton');
-
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       await openAlertResults(ADHOC_RULE_NAME);
@@ -575,12 +574,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await sourceDataViewOption.click();
 
       await testSubjects.click('saveRuleButton');
-
-      await retry.waitFor('consumer selection modal', async () => {
-        return await testSubjects.exists('confirmModalConfirmButton');
-      });
-
-      await testSubjects.click('confirmModalConfirmButton');
 
       await retry.waitFor('confirmation modal', async () => {
         return await testSubjects.exists('confirmModalConfirmButton');

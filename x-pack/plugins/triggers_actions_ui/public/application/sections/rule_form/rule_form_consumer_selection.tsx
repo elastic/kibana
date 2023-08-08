@@ -6,44 +6,15 @@
  */
 
 import React, { useMemo, useState, useCallback, useEffect } from 'react';
-import {
-  EuiConfirmModal,
-  EuiText,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSelect,
-  EuiSelectOption,
-} from '@elastic/eui';
+import { EuiFormRow, EuiSelect, EuiSelectOption } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { RuleCreationValidConsumer } from '../../../types';
 
-const consumerSelectionModalTitle = i18n.translate(
-  'xpack.triggersActionsUI.sections.ruleFormConsumerSelectionModal.title',
+const SELECT_LABEL: string = i18n.translate(
+  'xpack.triggersActionsUI.sections.ruleFormConsumerSelectionModal.selectLabel',
   {
-    defaultMessage: 'Select rule association',
-  }
-);
-
-const consumerSelectionModalDescription = i18n.translate(
-  'xpack.triggersActionsUI.sections.ruleFormConsumerSelectionModal.description',
-  {
-    defaultMessage:
-      'This rule needs to be associated with a particular application for proper role access visibility.',
-  }
-);
-
-const consumerSelectionModalSave = i18n.translate(
-  'xpack.triggersActionsUI.sections.ruleFormConsumerSelectionModal.save',
-  {
-    defaultMessage: 'Save',
-  }
-);
-
-const consumerSelectionModalCancel = i18n.translate(
-  'xpack.triggersActionsUI.sections.ruleFormConsumerSelectionModal.cancel',
-  {
-    defaultMessage: 'Cancel',
+    defaultMessage: 'Select role visibility',
   }
 );
 
@@ -103,16 +74,14 @@ export const VALID_CONSUMERS = [
   'discover',
 ];
 
-export interface RuleFormConsumerSelectionModalProps {
+export interface RuleFormConsumerSelectionProps {
   consumers: RuleCreationValidConsumer[];
   initialConsumer?: RuleCreationValidConsumer;
   onChange: (consumer: RuleCreationValidConsumer) => void;
-  onSave: (consumer: RuleCreationValidConsumer) => void;
-  onCancel: () => void;
 }
 
-export const RuleFormConsumerSelectionModal = (props: RuleFormConsumerSelectionModalProps) => {
-  const { consumers, initialConsumer, onSave, onCancel, onChange } = props;
+export const RuleFormConsumerSelection = (props: RuleFormConsumerSelectionProps) => {
+  const { consumers, initialConsumer, onChange } = props;
   const [selectedConsumer, setSelectedConsumer] = useState<RuleCreationValidConsumer>();
 
   const handleOnChange = useCallback(
@@ -122,12 +91,6 @@ export const RuleFormConsumerSelectionModal = (props: RuleFormConsumerSelectionM
     },
     [setSelectedConsumer, onChange]
   );
-
-  const handleOnSave = useCallback(() => {
-    if (selectedConsumer) {
-      onSave(selectedConsumer);
-    }
-  }, [selectedConsumer, onSave]);
 
   const formattedSelectOptions: EuiSelectOption[] = useMemo(() => {
     return consumers
@@ -168,35 +131,20 @@ export const RuleFormConsumerSelectionModal = (props: RuleFormConsumerSelectionM
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedConsumer, formattedSelectOptions, initialConsumer]);
 
+  if (formattedSelectOptions.length <= 1) {
+    return null;
+  }
+
   return (
-    <EuiConfirmModal
-      maxWidth={500}
-      confirmButtonDisabled={!!!selectedConsumer}
-      title={consumerSelectionModalTitle}
-      confirmButtonText={consumerSelectionModalSave}
-      cancelButtonText={consumerSelectionModalCancel}
-      onConfirm={handleOnSave}
-      onCancel={onCancel}
-      defaultFocusedButton="confirm"
-      data-test-subj="ruleFormConsumerSelectionModal"
-    >
-      <EuiFlexGroup direction="column">
-        <EuiFlexItem>
-          <EuiText>
-            <p>{consumerSelectionModalDescription}</p>
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiSelect
-            fullWidth
-            hasNoInitialSelection
-            value={selectedConsumer}
-            onChange={handleOnChange}
-            options={formattedSelectOptions}
-            data-test-subj="ruleFormConsumerSelect"
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiConfirmModal>
+    <EuiFormRow fullWidth label={SELECT_LABEL}>
+      <EuiSelect
+        fullWidth
+        hasNoInitialSelection
+        value={selectedConsumer}
+        onChange={handleOnChange}
+        options={formattedSelectOptions}
+        data-test-subj="ruleFormConsumerSelect"
+      />
+    </EuiFormRow>
   );
 };

@@ -180,8 +180,6 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         await navigateAndOpenCreateRuleFlyout();
         await selectAndFillInEsQueryRule(ruleName);
 
-        await testSubjects.click('saveRuleButton');
-
         await retry.waitFor('consumer select modal is visible', async () => {
           return await testSubjects.exists('ruleFormConsumerSelect');
         });

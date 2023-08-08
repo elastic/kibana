@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
-import { RuleFormConsumerSelectionModal } from './rule_form_consumer_selection_modal';
+import { RuleFormConsumerSelection } from './rule_form_consumer_selection';
 import { RuleCreationValidConsumer } from '../../../types';
 
 const mockConsumers: RuleCreationValidConsumer[] = [
@@ -19,8 +19,6 @@ const mockConsumers: RuleCreationValidConsumer[] = [
   'stackAlerts',
 ];
 
-const mockOnSave = jest.fn();
-const mockOnCancel = jest.fn();
 const mockOnChange = jest.fn();
 
 describe('RuleFormConsumerSelectionModal', () => {
@@ -29,19 +27,9 @@ describe('RuleFormConsumerSelectionModal', () => {
   });
 
   it('renders correctly', async () => {
-    render(
-      <RuleFormConsumerSelectionModal
-        consumers={mockConsumers}
-        onSave={mockOnSave}
-        onCancel={mockOnCancel}
-        onChange={mockOnChange}
-      />
-    );
+    render(<RuleFormConsumerSelection consumers={mockConsumers} onChange={mockOnChange} />);
 
-    expect(screen.getByTestId('ruleFormConsumerSelectionModal')).toBeInTheDocument();
     expect(screen.getByTestId('ruleFormConsumerSelect')).toBeInTheDocument();
-    expect(screen.getByTestId('confirmModalConfirmButton')).toBeInTheDocument();
-    expect(screen.getByTestId('confirmModalCancelButton')).toBeInTheDocument();
 
     expect(screen.getByText('Logs')).toBeInTheDocument();
     expect(screen.getByText('Metrics')).toBeInTheDocument();
@@ -52,14 +40,7 @@ describe('RuleFormConsumerSelectionModal', () => {
   });
 
   it('should initialize dropdown if provided with a valid initial consumer', () => {
-    render(
-      <RuleFormConsumerSelectionModal
-        consumers={mockConsumers}
-        onSave={mockOnSave}
-        onCancel={mockOnCancel}
-        onChange={mockOnChange}
-      />
-    );
+    render(<RuleFormConsumerSelection consumers={mockConsumers} onChange={mockOnChange} />);
 
     // Selects first option if no initial value is provided
     expect(mockOnChange).toHaveBeenLastCalledWith('apm');
@@ -67,11 +48,9 @@ describe('RuleFormConsumerSelectionModal', () => {
 
     // Selects initial consumer
     render(
-      <RuleFormConsumerSelectionModal
+      <RuleFormConsumerSelection
         consumers={mockConsumers}
         initialConsumer={'slo'}
-        onSave={mockOnSave}
-        onCancel={mockOnCancel}
         onChange={mockOnChange}
       />
     );
@@ -81,11 +60,9 @@ describe('RuleFormConsumerSelectionModal', () => {
 
     // Selects first value if provided with invalid consumer
     render(
-      <RuleFormConsumerSelectionModal
+      <RuleFormConsumerSelection
         consumers={mockConsumers}
-        initialConsumer={'hello' as RuleCreationValidConsumer}
-        onSave={mockOnSave}
-        onCancel={mockOnCancel}
+        initialConsumer={'invalidConsumer' as RuleCreationValidConsumer}
         onChange={mockOnChange}
       />
     );
@@ -93,15 +70,8 @@ describe('RuleFormConsumerSelectionModal', () => {
     expect(mockOnChange).toHaveBeenLastCalledWith('apm');
   });
 
-  it('should select options and save', () => {
-    render(
-      <RuleFormConsumerSelectionModal
-        consumers={mockConsumers}
-        onSave={mockOnSave}
-        onCancel={mockOnCancel}
-        onChange={mockOnChange}
-      />
-    );
+  it('should select options and call onChange', () => {
+    render(<RuleFormConsumerSelection consumers={mockConsumers} onChange={mockOnChange} />);
 
     mockConsumers.forEach((consumer) => {
       fireEvent.change(screen.getByTestId('ruleFormConsumerSelect'), {
@@ -109,38 +79,31 @@ describe('RuleFormConsumerSelectionModal', () => {
       });
 
       expect(mockOnChange).toHaveBeenLastCalledWith(consumer);
-
-      fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
-      expect(mockOnSave).toHaveBeenLastCalledWith(consumer);
     });
   });
 
-  it('should call onCancel when the cancel button is clicked', () => {
-    render(
-      <RuleFormConsumerSelectionModal
-        consumers={mockConsumers}
-        onSave={mockOnSave}
-        onCancel={mockOnCancel}
-        onChange={mockOnChange}
-      />
-    );
+  it('should default selection to the first option sorted alphabetically', () => {
+    render(<RuleFormConsumerSelection consumers={mockConsumers} onChange={mockOnChange} />);
 
-    fireEvent.click(screen.getByTestId('confirmModalCancelButton'));
-    expect(mockOnCancel).toHaveBeenCalledTimes(1);
+    expect(mockOnChange).toHaveBeenLastCalledWith('apm');
   });
 
-  it('should default selection to the first option sorted alphabetically', () => {
+  it('should default to specified consumer if passed in', () => {
     render(
-      <RuleFormConsumerSelectionModal
+      <RuleFormConsumerSelection
+        initialConsumer={'stackAlerts'}
         consumers={mockConsumers}
-        onSave={mockOnSave}
-        onCancel={mockOnCancel}
         onChange={mockOnChange}
       />
     );
 
-    fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
-    fireEvent.click(screen.getByTestId('confirmModalCancelButton'));
-    expect(mockOnSave).toHaveBeenLastCalledWith('apm');
+    expect(mockOnChange).toHaveBeenLastCalledWith('stackAlerts');
+  });
+
+  it('should display nothing if there is only 1 consumer to select', () => {
+    render(<RuleFormConsumerSelection consumers={['stackAlerts']} onChange={mockOnChange} />);
+
+    expect(mockOnChange).toHaveBeenLastCalledWith('stackAlerts');
+    expect(screen.queryByTestId('ruleFormConsumerSelect')).not.toBeInTheDocument();
   });
 });

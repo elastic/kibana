@@ -10,7 +10,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiTitle, EuiFlyoutHeader, EuiFlyout, EuiFlyoutBody, EuiPortal } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
-import { ALERTS_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import {
   Rule,
   RuleTypeParams,
@@ -22,11 +21,7 @@ import {
   TriggersActionsUiConfig,
   RuleCreationValidConsumer,
 } from '../../../types';
-import { RuleForm, RuleTypeItems } from './rule_form';
-import {
-  RuleFormConsumerSelectionModal,
-  VALID_CONSUMERS,
-} from './rule_form_consumer_selection_modal';
+import { RuleForm } from './rule_form';
 import { getRuleActionErrors, getRuleErrors, isValidRule } from './rule_errors';
 import { ruleReducer, InitialRule, InitialRuleReducer } from './rule_reducer';
 import { createRule } from '../../lib/rule_api/create';
@@ -40,13 +35,9 @@ import { HealthContextProvider } from '../../context/health_context';
 import { useKibana } from '../../../common/lib/kibana';
 import { hasRuleChanged, haveRuleParamsChanged } from './has_rule_changed';
 import { getRuleWithInvalidatedFields } from '../../lib/value_validators';
-import { DEFAULT_RULE_INTERVAL, MULTI_CONSUMER_RULE_TYPE_IDS } from '../../constants';
+import { DEFAULT_RULE_INTERVAL } from '../../constants';
 import { triggersActionsUiConfig } from '../../../common/lib/config_api';
 import { getInitialInterval } from './get_initial_interval';
-
-const isMultiConsumerRule = (rule: InitialRule) => {
-  return !!rule.ruleTypeId && MULTI_CONSUMER_RULE_TYPE_IDS.includes(rule.ruleTypeId);
-};
 
 const RuleAdd = ({
   consumer,
@@ -61,7 +52,6 @@ const RuleAdd = ({
   hideInterval,
   metadata: initialMetadata,
   filteredRuleTypes,
-  validConsumers,
   ...props
 }: RuleAddProps) => {
   const onSaveHandler = onSave ?? reloadRules;
@@ -93,10 +83,8 @@ const RuleAdd = ({
   const [ruleTypeIndex, setRuleTypeIndex] = useState<RuleTypeIndex | undefined>(
     props.ruleTypeIndex
   );
-  const [selectedConsumer, setSelectedConsumer] = useState<RuleCreationValidConsumer | undefined>();
   const [changedFromDefaultInterval, setChangedFromDefaultInterval] = useState<boolean>(false);
-  const [isConsumerSelectionModalOpen, setIsConsumerSelectionModalOpen] = useState<boolean>(false);
-  const [availableRuleTypes, setAvailableRuleTypes] = useState<RuleTypeItems>([]);
+  const [selectedConsumer, setSelectedConsumer] = useState<RuleCreationValidConsumer | undefined>();
 
   const setRule = (value: InitialRule) => {
     dispatch({ command: { type: 'setRule' }, payload: { key: 'rule', value } });
@@ -198,9 +186,8 @@ const RuleAdd = ({
     }
   };
 
-  const saveRuleAndCloseFlyout = async (newConsumer?: RuleCreationValidConsumer) => {
-    setIsSaving(true);
-    const savedRule = await onSaveRule(newConsumer);
+  const saveRuleAndCloseFlyout = async () => {
+    const savedRule = await onSaveRule();
     setIsSaving(false);
     if (savedRule) {
       onClose(RuleFlyoutCloseReason.SAVED, metadata);
@@ -212,34 +199,6 @@ const RuleAdd = ({
 
   const ruleType = rule.ruleTypeId ? ruleTypeRegistry.get(rule.ruleTypeId) : null;
 
-  const authorizedConsumers = useMemo(() => {
-    // If the app context provides a consumer, we assume that consumer is
-    // is what we set for all rules that is created in that context
-    if (rule.consumer !== ALERTS_FEATURE_ID) {
-      return [];
-    }
-
-    const selectedRuleType = availableRuleTypes.find(
-      ({ ruleType: availableRuleType }) => availableRuleType.id === rule.ruleTypeId
-    );
-    if (!selectedRuleType?.ruleType?.authorizedConsumers) {
-      return [];
-    }
-    return Object.entries(selectedRuleType.ruleType.authorizedConsumers).reduce<
-      RuleCreationValidConsumer[]
-    >((result, [authorizedConsumer, privilege]) => {
-      if (
-        privilege.all &&
-        (validConsumers || VALID_CONSUMERS).includes(
-          authorizedConsumer as RuleCreationValidConsumer
-        )
-      ) {
-        result.push(authorizedConsumer as RuleCreationValidConsumer);
-      }
-      return result;
-    }, []);
-  }, [availableRuleTypes, rule, validConsumers]);
-
   const { ruleBaseErrors, ruleErrors, ruleParamsErrors } = useMemo(
     () => getRuleErrors(rule as Rule, ruleType, config),
     [rule, ruleType, config]
@@ -248,20 +207,13 @@ const RuleAdd = ({
   // Confirm before saving if user is able to add actions but hasn't added any to this rule
   const shouldConfirmSave = canShowActions && rule.actions?.length === 0;
 
-  const shouldShowConsumerSelect = useMemo(() => {
-    if (!authorizedConsumers.length) {
-      return false;
-    }
-    return isMultiConsumerRule(rule);
-  }, [authorizedConsumers, rule]);
-
-  async function onSaveRule(newConsumer?: RuleCreationValidConsumer): Promise<Rule | undefined> {
+  async function onSaveRule(): Promise<Rule | undefined> {
     try {
       const newRule = await createRule({
         http,
         rule: {
           ...rule,
-          ...(newConsumer ? { consumer: newConsumer } : {}),
+          ...(selectedConsumer ? { consumer: selectedConsumer } : {}),
         } as RuleUpdates,
       });
       toasts.addSuccess(
@@ -282,52 +234,6 @@ const RuleAdd = ({
       );
     }
   }
-
-  const saveRule = async (newConsumer?: RuleCreationValidConsumer) => {
-    if (shouldConfirmSave) {
-      setIsConfirmRuleSaveModalOpen(true);
-    } else {
-      await saveRuleAndCloseFlyout(newConsumer);
-    }
-  };
-
-  const handleOnRuleSaveClick = () => {
-    if (isLoading || !isValidRule(rule, ruleErrors, ruleActionsErrors)) {
-      setRule(
-        getRuleWithInvalidatedFields(
-          rule as Rule,
-          ruleParamsErrors,
-          ruleBaseErrors,
-          ruleActionsErrors
-        )
-      );
-      return;
-    }
-    if (!shouldShowConsumerSelect) {
-      saveRule(selectedConsumer);
-      return;
-    }
-    if (authorizedConsumers.length === 1) {
-      setSelectedConsumer(authorizedConsumers[0]);
-      saveRule(authorizedConsumers[0]);
-      return;
-    }
-    setIsConsumerSelectionModalOpen(true);
-  };
-
-  const handleOnConsumerSave = () => {
-    setIsConsumerSelectionModalOpen(false);
-    saveRule(selectedConsumer);
-  };
-
-  const handleOnConsumerCancel = () => {
-    setSelectedConsumer(undefined);
-    setIsConsumerSelectionModalOpen(false);
-  };
-
-  const handleOnConsumerChange = (newConsumer: RuleCreationValidConsumer) => {
-    setSelectedConsumer(newConsumer);
-  };
 
   return (
     <EuiPortal>
@@ -352,6 +258,7 @@ const RuleAdd = ({
           <HealthCheck inFlyout={true} waitForCheck={true}>
             <EuiFlyoutBody>
               <RuleForm
+                canShowConsumerSelection
                 rule={rule}
                 config={config}
                 dispatch={dispatch}
@@ -368,15 +275,33 @@ const RuleAdd = ({
                 metadata={metadata}
                 filteredRuleTypes={filteredRuleTypes}
                 hideInterval={hideInterval}
-                validConsumers={validConsumers}
                 onChangeMetaData={onChangeMetaData}
-                onSetAvailableRuleTypes={setAvailableRuleTypes}
+                setConsumer={setSelectedConsumer}
               />
             </EuiFlyoutBody>
             <RuleAddFooter
               isSaving={isSaving}
               isFormLoading={isLoading}
-              onSave={handleOnRuleSaveClick}
+              onSave={async () => {
+                setIsSaving(true);
+                if (isLoading || !isValidRule(rule, ruleErrors, ruleActionsErrors)) {
+                  setRule(
+                    getRuleWithInvalidatedFields(
+                      rule as Rule,
+                      ruleParamsErrors,
+                      ruleBaseErrors,
+                      ruleActionsErrors
+                    )
+                  );
+                  setIsSaving(false);
+                  return;
+                }
+                if (shouldConfirmSave) {
+                  setIsConfirmRuleSaveModalOpen(true);
+                } else {
+                  await saveRuleAndCloseFlyout();
+                }
+              }}
               onCancel={checkForChangesAndCloseFlyout}
             />
           </HealthCheck>
@@ -385,7 +310,7 @@ const RuleAdd = ({
           <ConfirmRuleSave
             onConfirm={async () => {
               setIsConfirmRuleSaveModalOpen(false);
-              await saveRuleAndCloseFlyout(selectedConsumer);
+              await saveRuleAndCloseFlyout();
             }}
             onCancel={() => {
               setIsSaving(false);
@@ -402,15 +327,6 @@ const RuleAdd = ({
             onCancel={() => {
               setIsConfirmRuleCloseModalOpen(false);
             }}
-          />
-        )}
-        {isConsumerSelectionModalOpen && (
-          <RuleFormConsumerSelectionModal
-            consumers={authorizedConsumers}
-            initialConsumer={rule.consumer as RuleCreationValidConsumer}
-            onSave={handleOnConsumerSave}
-            onChange={handleOnConsumerChange}
-            onCancel={handleOnConsumerCancel}
           />
         )}
       </EuiFlyout>

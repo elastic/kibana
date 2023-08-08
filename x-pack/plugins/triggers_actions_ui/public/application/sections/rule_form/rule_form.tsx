@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment, useState, useEffect, useCallback, Suspense } from 'react';
+import React, { Fragment, useState, useEffect, useCallback, Suspense, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -76,12 +76,15 @@ import { ruleTypeCompare, ruleTypeGroupCompare } from '../../lib/rule_type_compa
 import { VIEW_LICENSE_OPTIONS_LINK } from '../../../common/constants';
 import { MULTI_CONSUMER_RULE_TYPE_IDS } from '../../constants';
 import { SectionLoading } from '../../components/section_loading';
+import { RuleFormConsumerSelection, VALID_CONSUMERS } from './rule_form_consumer_selection';
 import { useLoadRuleTypes } from '../../hooks/use_load_rule_types';
 import { getInitialInterval } from './get_initial_interval';
 
 const ENTER_KEY = 13;
 
 const INTEGER_REGEX = /^[1-9][0-9]*$/;
+
+const NOOP = () => {};
 
 function getProducerFeatureName(producer: string, kibanaFeatures: KibanaFeature[]) {
   return kibanaFeatures.find((featureItem) => featureItem.id === producer)?.name;
@@ -128,14 +131,15 @@ interface RuleFormProps<MetaData = Record<string, any>> {
   actionTypeRegistry: ActionTypeRegistryContract;
   operation: string;
   canChangeTrigger?: boolean; // to hide Change trigger button
+  canShowConsumerSelection?: boolean;
   setHasActionsDisabled?: (value: boolean) => void;
   setHasActionsWithBrokenConnector?: (value: boolean) => void;
+  setConsumer?: (consumer: RuleCreationValidConsumer) => void;
   metadata?: MetaData;
   filteredRuleTypes?: string[];
   hideInterval?: boolean;
   connectorFeatureId?: string;
   validConsumers?: RuleCreationValidConsumer[];
-  onSetAvailableRuleTypes?: (ruleTypes: RuleTypeItems) => void;
   onChangeMetaData: (metadata: MetaData) => void;
 }
 
@@ -143,10 +147,12 @@ export const RuleForm = ({
   rule,
   config,
   canChangeTrigger = true,
+  canShowConsumerSelection = false,
   dispatch,
   errors,
   setHasActionsDisabled,
   setHasActionsWithBrokenConnector,
+  setConsumer = NOOP,
   operation,
   ruleTypeRegistry,
   actionTypeRegistry,
@@ -156,7 +162,6 @@ export const RuleForm = ({
   connectorFeatureId = AlertingConnectorFeatureId,
   validConsumers,
   onChangeMetaData,
-  onSetAvailableRuleTypes,
 }: RuleFormProps) => {
   const {
     notifications: { toasts },
@@ -236,7 +241,6 @@ export const RuleForm = ({
 
     const availableRuleTypesResult = getAvailableRuleTypes(ruleTypes);
     setAvailableRuleTypes(availableRuleTypesResult);
-    onSetAvailableRuleTypes?.(availableRuleTypesResult);
 
     const solutionsResult = availableRuleTypesResult.reduce(
       (result: Map<string, string>, ruleTypeItem) => {
@@ -362,6 +366,44 @@ export const RuleForm = ({
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ruleTypeRegistry, availableRuleTypes, searchText, JSON.stringify(solutionsFilter)]);
+
+  const authorizedConsumers = useMemo(() => {
+    // If the app context provides a consumer, we assume that consumer is
+    // is what we set for all rules that is created in that context
+    if (rule.consumer !== ALERTS_FEATURE_ID) {
+      return [];
+    }
+
+    const selectedRuleType = availableRuleTypes.find(
+      ({ ruleType: availableRuleType }) => availableRuleType.id === rule.ruleTypeId
+    );
+    if (!selectedRuleType?.ruleType?.authorizedConsumers) {
+      return [];
+    }
+    return Object.entries(selectedRuleType.ruleType.authorizedConsumers).reduce<
+      RuleCreationValidConsumer[]
+    >((result, [authorizedConsumer, privilege]) => {
+      if (
+        privilege.all &&
+        (validConsumers || VALID_CONSUMERS).includes(
+          authorizedConsumer as RuleCreationValidConsumer
+        )
+      ) {
+        result.push(authorizedConsumer as RuleCreationValidConsumer);
+      }
+      return result;
+    }, []);
+  }, [availableRuleTypes, rule, validConsumers]);
+
+  const shouldShowConsumerSelect = useMemo(() => {
+    if (!canShowConsumerSelection) {
+      return false;
+    }
+    if (!authorizedConsumers.length) {
+      return false;
+    }
+    return !!rule.ruleTypeId && MULTI_CONSUMER_RULE_TYPE_IDS.includes(rule.ruleTypeId);
+  }, [authorizedConsumers, rule, canShowConsumerSelection]);
 
   const selectedRuleType = rule?.ruleTypeId ? ruleTypeIndex?.get(rule?.ruleTypeId) : undefined;
   const recoveryActionGroup = selectedRuleType?.recoveryActionGroup?.id;
@@ -681,6 +723,18 @@ export const RuleForm = ({
             </EuiFlexGroup>
           </EuiFormRow>
         </EuiFlexItem>
+      )}
+      {shouldShowConsumerSelect && (
+        <>
+          <EuiSpacer size="m" />
+          <EuiFlexItem>
+            <RuleFormConsumerSelection
+              consumers={authorizedConsumers}
+              initialConsumer={rule.consumer as RuleCreationValidConsumer}
+              onChange={setConsumer}
+            />
+          </EuiFlexItem>
+        </>
       )}
       <EuiSpacer size="l" />
       {canShowActions &&

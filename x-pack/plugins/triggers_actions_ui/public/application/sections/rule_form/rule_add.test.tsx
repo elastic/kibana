@@ -27,7 +27,6 @@ import {
   RuleType,
   RuleTypeModel,
 } from '../../../types';
-import { RuleFormConsumerSelectionModal } from './rule_form_consumer_selection_modal';
 import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
 import { ReactWrapper } from 'enzyme';
 import { ALERTS_FEATURE_ID } from '@kbn/alerting-plugin/common';
@@ -341,7 +340,7 @@ describe('rule_add', () => {
     });
   });
 
-  it('should set consumer when the consumer selection renders', async () => {
+  it('should set consumer when the consumer selection renders and rule is created', async () => {
     (triggersActionsUiConfig as jest.Mock).mockResolvedValue({
       minimumScheduleInterval: { value: '1m', enforce: false },
     });
@@ -418,21 +417,7 @@ describe('rule_add', () => {
       wrapper.update();
     });
 
-    expect(wrapper.find('[data-test-subj="addRuleFlyoutTitle"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="saveRuleButton"]').exists()).toBeTruthy();
-
     wrapper.find('[data-test-subj="saveRuleButton"]').last().simulate('click');
-
-    expect(wrapper.find('[data-test-subj="ruleFormConsumerSelectionModal"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="confirmModalConfirmButton"]').exists()).toBeTruthy();
-    expect(wrapper.find(RuleFormConsumerSelectionModal).props().consumers).toEqual([
-      'apm',
-      'infrastructure',
-      'logs',
-      'uptime',
-    ]);
-
-    wrapper.find('[data-test-subj="confirmModalConfirmButton"]').last().simulate('click');
 
     await act(async () => {
       await nextTick();
@@ -518,8 +503,6 @@ describe('rule_add', () => {
     expect(wrapper.find('[data-test-subj="saveRuleButton"]').exists()).toBeTruthy();
 
     wrapper.find('[data-test-subj="saveRuleButton"]').last().simulate('click');
-
-    expect(wrapper.find('[data-test-subj="ruleFormConsumerSelectionModal"]').exists()).toBeFalsy();
 
     await act(async () => {
       await nextTick();
