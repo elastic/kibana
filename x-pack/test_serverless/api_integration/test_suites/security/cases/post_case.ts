@@ -50,7 +50,7 @@ export default ({ getService }: FtrProviderContext): void => {
       );
     });
 
-    it('should throw 403 when create a case with observability as owner', async () => {
+    it('should throw 403 when trying to create a case with observability as owner', async () => {
       expect(
         await createCase(
           supertest,
@@ -62,7 +62,7 @@ export default ({ getService }: FtrProviderContext): void => {
       );
     });
 
-    it('should throw 403 when create a case with cases as owner', async () => {
+    it('should throw 403 when trying to create a case with cases as owner', async () => {
       expect(
         await createCase(
           supertest,

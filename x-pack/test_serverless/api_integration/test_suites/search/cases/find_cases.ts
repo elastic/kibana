@@ -12,7 +12,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
 
   describe('find_cases', () => {
-    it('403 when find cases', async () => {
+    it('403 when calling find cases API', async () => {
       await supertest
         .get(`${CASES_URL}/_find`)
         .set('kbn-xsrf', 'foo')
