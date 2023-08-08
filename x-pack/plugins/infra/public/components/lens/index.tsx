@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export { LensChart } from './lens_chart';
+export { LensChart, type LensChartProps } from './lens_chart';
 export { ChartPlaceholder } from './chart_placeholder';
 export { TooltipContent } from './metric_explanation/tooltip_content';
 export { HostMetricsDocsLink } from './metric_explanation/host_metrics_docs_link';

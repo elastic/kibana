@@ -8,12 +8,9 @@
 import { i18n } from '@kbn/i18n';
 import { hostLensFormulas } from '../../../constants';
 import { TOOLTIP } from './translations';
-import type { LensMetricChartProps } from '../../../../../components/lens';
+import type { LensChartProps } from '../../../../../components/lens';
 
-export type KPIChartProps = Pick<
-  LensMetricChartProps,
-  'id' | 'title' | 'layers' | 'toolTip' | 'height'
->;
+export type KPIChartProps = Pick<LensChartProps, 'id' | 'title' | 'layers' | 'toolTip' | 'height'>;
 
 export const KPI_CHARTS: KPIChartProps[] = [
   {

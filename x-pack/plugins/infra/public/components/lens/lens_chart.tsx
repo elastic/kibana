@@ -16,7 +16,7 @@ import { ChartLoadError } from './chart_load_error';
 
 const MIN_HEIGHT = 300;
 
-export type Props = UseLensAttributesParams &
+export type LensChartProps = UseLensAttributesParams &
   BaseChartProps &
   Pick<EuiPanelProps, 'borderRadius'> & {
     toolTip?: React.ReactElement<TooltipContentProps>;
@@ -37,7 +37,7 @@ export const LensChart = ({
   height = MIN_HEIGHT,
   loading = false,
   ...lensAttributesParams
-}: Props) => {
+}: LensChartProps) => {
   const { formula, attributes, getExtraActions, error } = useLensAttributes({
     ...lensAttributesParams,
   });
