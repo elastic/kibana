@@ -1,0 +1,19 @@
+{
+  "type": "plugin",
+  "id": "@kbn/unified-doc-viewer-examples",
+  "owner": "@elastic/kibana-core",
+  "description": "Examples showing usage of the unified doc viewer.",
+  "plugin": {
+    "id": "unifiedDocViewerExamples",
+    "server": false,
+    "browser": true,
+    "requiredPlugins": [
+      "data",
+      "fieldFormats",
+      "developerExamples",
+      "kibanaReact",
+      "kibanaUtils",
+      "unifiedDocViewer"
+    ]
+  }
+}
