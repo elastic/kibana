@@ -86,7 +86,12 @@ export const GroupEditorFlyout = ({
 
   return (
     <EuiFlyout onClose={onClose} size="l">
-      <EuiFlexGroup gutterSize="none">
+      <EuiFlexGroup
+        css={css`
+          height: 100%;
+        `}
+        gutterSize="none"
+      >
         <EuiFlexItem
           grow={false}
           css={css`
