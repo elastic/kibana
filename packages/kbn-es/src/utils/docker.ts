@@ -86,6 +86,8 @@ const SHARED_SERVERLESS_PARAMS = [
 
   '--privileged',
 
+  '--userns=host',
+
   '--net',
   'elastic',
 
@@ -331,12 +333,12 @@ export async function setupServerlessVolumes(log: ToolingLog, options: Serverles
   return ['--volume', `${options.basePath}:/objectstore:z`];
 }
 
-async function setupUserPerm() {
-  const pU = await execa('id', ['-u']);
-  const pG = await execa('id', ['-g']);
+// async function setupUserPerm() {
+//   const pU = await execa('id', ['-u']);
+//   const pG = await execa('id', ['-g']);
 
-  return ['-u', `${pU.stdout}:${pG.stdout}`];
-}
+//   return ['-u', `${pU.stdout}:${pG.stdout}`];
+// }
 
 /**
  * Resolve the Serverless ES image based on defaults and CLI options
