@@ -41,10 +41,13 @@ describe('createService', () => {
 
     beforeEach(() => {
       service = createService({
-        http: {
-          post: httpPostSpy,
-        },
-      } as unknown as CoreStart);
+        coreStart: {
+          http: {
+            post: httpPostSpy,
+          },
+        } as unknown as CoreStart,
+        enabled: true,
+      });
     });
 
     afterEach(() => {
