@@ -50,7 +50,7 @@ client.bulk(body: documents)
 
 # From the project's root directory:$ gem build elasticsearch-serverless.gemspec
 $ gem install elasticsearch-serverless-x.x.x.gem`,
-  name: i18n.translate('xpack.serverlessSearch.languages.ruby', {
+  name: i18n.translate('xpack.enterpriseSearch.languages.ruby', {
     defaultMessage: 'Ruby',
   }),
   testConnection: `client.info`,

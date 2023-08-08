@@ -74,7 +74,7 @@ export const CodeBox: React.FC<CodeBoxProps> = ({
   const button = (
     <EuiThemeProvider colorMode="dark">
       <EuiButtonEmpty
-        aria-label={i18n.translate('xpack.serverlessSearch.codeBox.selectAriaLabel', {
+        aria-label={i18n.translate('searchApiPanels.welcomeBanner.codeBox.selectAriaLabel', {
           defaultMessage: 'Select a programming language',
         })}
         color="text"
@@ -108,7 +108,7 @@ export const CodeBox: React.FC<CodeBoxProps> = ({
             <EuiCopy textToCopy={codeSnippet}>
               {(copy) => (
                 <EuiButtonEmpty color="text" iconType="copy" size="s" onClick={copy}>
-                  {i18n.translate('xpack.serverlessSearch.codeBox.copyButtonLabel', {
+                  {i18n.translate('searchApiPanels.welcomeBanner.codeBox.copyButtonLabel', {
                     defaultMessage: 'Copy',
                   })}
                 </EuiButtonEmpty>

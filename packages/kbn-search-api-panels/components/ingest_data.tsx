@@ -48,7 +48,7 @@ export const IngestData: React.FC<IngestDataProps> = ({
   >('ingestViaApi');
   return (
     <OverviewPanel
-      description={i18n.translate('xpack.serverlessSearch.ingestData.description', {
+      description={i18n.translate('searchApiPanels.welcomeBanner.ingestData.description', {
         defaultMessage:
           'Add data to your data stream or index to make it searchable. Choose an ingestion method that fits your application and workflow.',
       })}
@@ -74,7 +74,7 @@ export const IngestData: React.FC<IngestDataProps> = ({
           ? [
               {
                 href: selectedLanguage.apiReference,
-                label: i18n.translate('xpack.serverlessSearch.ingestData.clientDocLink', {
+                label: i18n.translate('searchApiPanels.welcomeBanner.ingestData.clientDocLink', {
                   defaultMessage: '{languageName} API reference',
                   values: { languageName: selectedLanguage.name },
                 }),
@@ -83,18 +83,18 @@ export const IngestData: React.FC<IngestDataProps> = ({
           : []),
         {
           href: docLinks.integrations,
-          label: i18n.translate('xpack.serverlessSearch.ingestData.integrationsLink', {
+          label: i18n.translate('searchApiPanels.welcomeBanner.ingestData.integrationsLink', {
             defaultMessage: 'About Integrations',
           }),
         },
       ]}
-      title={i18n.translate('xpack.serverlessSearch.ingestData.title', {
+      title={i18n.translate('searchApiPanels.welcomeBanner.ingestData.title', {
         defaultMessage: 'Ingest data',
       })}
     >
       <EuiFormFieldset
         legend={{
-          children: i18n.translate('xpack.serverlessSearch.ingestData.ingestLegendLabel', {
+          children: i18n.translate('searchApiPanels.welcomeBanner.ingestData.ingestLegendLabel', {
             defaultMessage: 'Select an ingestion method',
           }),
           display: 'hidden',
@@ -106,7 +106,7 @@ export const IngestData: React.FC<IngestDataProps> = ({
           label={
             <EuiTitle size="xs">
               <h3>
-                {i18n.translate('xpack.serverlessSearch.ingestData.ingestApiLabel', {
+                {i18n.translate('searchApiPanels.welcomeBanner.ingestData.ingestApiLabel', {
                   defaultMessage: 'Ingest via API',
                 })}
               </h3>
@@ -117,7 +117,7 @@ export const IngestData: React.FC<IngestDataProps> = ({
           onChange={() => setSelectedIngestMethod('ingestViaApi')}
         >
           <EuiText>
-            {i18n.translate('xpack.serverlessSearch.ingestData.ingestApiDescription', {
+            {i18n.translate('searchApiPanels.welcomeBanner.ingestData.ingestApiDescription', {
               defaultMessage:
                 'The most flexible way to index data, enabling full control over your customization and optimization options.',
             })}
@@ -130,7 +130,7 @@ export const IngestData: React.FC<IngestDataProps> = ({
           label={
             <EuiTitle size="xs">
               <h3>
-                {i18n.translate('xpack.serverlessSearch.ingestData.ingestIntegrationLabel', {
+                {i18n.translate('searchApiPanels.welcomeBanner.ingestData.ingestIntegrationLabel', {
                   defaultMessage: 'Ingest via integration',
                 })}
               </h3>
@@ -141,10 +141,13 @@ export const IngestData: React.FC<IngestDataProps> = ({
           onChange={() => setSelectedIngestMethod('ingestViaIntegration')}
         >
           <EuiText>
-            {i18n.translate('xpack.serverlessSearch.ingestData.ingestIntegrationDescription', {
-              defaultMessage:
-                'Specialized ingestion tools optimized for transforming data and shipping it to Elasticsearch.',
-            })}
+            {i18n.translate(
+              'searchApiPanels.welcomeBanner.ingestData.ingestIntegrationDescription',
+              {
+                defaultMessage:
+                  'Specialized ingestion tools optimized for transforming data and shipping it to Elasticsearch.',
+              }
+            )}
           </EuiText>
         </EuiCheckableCard>
       </EuiFormFieldset>

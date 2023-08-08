@@ -87,7 +87,7 @@ func main() {
   fmt.Println(res, err)
 }`,
   installClient: 'go get -u github.com/elastic/elasticsearch-serverless-go@latest',
-  name: i18n.translate('xpack.serverlessSearch.languages.go', {
+  name: i18n.translate('xpack.enterpriseSearch.languages.go', {
     defaultMessage: 'Go',
   }),
   testConnection: `infores, err := es.Info().Do(context.Background())

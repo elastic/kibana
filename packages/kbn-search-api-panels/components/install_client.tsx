@@ -42,7 +42,7 @@ const Link: React.FC<{ language: Languages; http: HttpStart; pluginId: string }>
       return (
         <GithubLink
           href="https://github.com/curl/curl"
-          label={i18n.translate('xpack.serverlessSearch.githubLink.curl.label', {
+          label={i18n.translate('searchApiPanels.welcomeBanner.githubLink.curl.label', {
             defaultMessage: 'curl',
           })}
           http={http}
@@ -53,7 +53,7 @@ const Link: React.FC<{ language: Languages; http: HttpStart; pluginId: string }>
       return (
         <GithubLink
           href="https://github.com/elastic/elasticsearch-js"
-          label={i18n.translate('xpack.serverlessSearch.githubLink.javascript.label', {
+          label={i18n.translate('searchApiPanels.welcomeBanner.githubLink.javascript.label', {
             defaultMessage: 'elasticsearch',
           })}
           http={http}
@@ -64,7 +64,7 @@ const Link: React.FC<{ language: Languages; http: HttpStart; pluginId: string }>
       return (
         <GithubLink
           href="https://github.com/elastic/elasticsearch-ruby"
-          label={i18n.translate('xpack.serverlessSearch.githubLink.ruby.label', {
+          label={i18n.translate('searchApiPanels.welcomeBanner.githubLink.ruby.label', {
             defaultMessage: 'elasticsearch-ruby',
           })}
           http={http}
@@ -107,13 +107,13 @@ export const InstallClientPanel: React.FC<InstallClientProps> = ({
       <EuiSpacer />
       <EuiCallOut
         iconType="iInCircle"
-        title={i18n.translate('xpack.serverlessSearch.apiCallOut.title', {
+        title={i18n.translate('searchApiPanels.welcomeBanner.apiCallOut.title', {
           defaultMessage: 'Call the API with Console',
         })}
         color="primary"
       >
         <EuiText size="s">
-          {i18n.translate('xpack.serverlessSearch.apiCallout.content', {
+          {i18n.translate('searchApiPanels.welcomeBanner.apiCallout.content', {
             defaultMessage:
               'Console enables you to call Elasticsearch and Kibana REST APIs directly, without needing to install a language client.',
           })}
@@ -123,20 +123,20 @@ export const InstallClientPanel: React.FC<InstallClientProps> = ({
   );
   return (
     <OverviewPanel
-      description={i18n.translate('xpack.serverlessSearch.installClient.description', {
+      description={i18n.translate('searchApiPanels.welcomeBanner.installClient.description', {
         defaultMessage:
           'Elastic builds and maintains clients in several popular languages and our community has contributed many more. Install your favorite language client to get started.',
       })}
       links={[
         {
           href: language.docLink,
-          label: i18n.translate('xpack.serverlessSearch.installClient.clientDocLink', {
+          label: i18n.translate('searchApiPanels.welcomeBanner.installClient.clientDocLink', {
             defaultMessage: '{languageName} client documentation',
             values: { languageName: language.name },
           }),
         },
       ]}
-      title={i18n.translate('xpack.serverlessSearch.installClient.title', {
+      title={i18n.translate('searchApiPanels.welcomeBanner.installClient.title', {
         defaultMessage: 'Install a client',
       })}
       leftPanelContent={isPanelLeft ? panelContent : undefined}

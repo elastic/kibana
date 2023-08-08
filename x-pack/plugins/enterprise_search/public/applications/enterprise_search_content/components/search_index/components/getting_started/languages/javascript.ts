@@ -85,7 +85,7 @@ const result = await client.helpers.bulk({
 console.log(result);
 `,
   installClient: 'npm install @elastic/elasticsearch@8',
-  name: i18n.translate('xpack.serverlessSearch.languages.javascript', {
+  name: i18n.translate('xpack.enterpriseSearch.languages.javascript', {
     defaultMessage: 'JavaScript',
   }),
   testConnection: `const resp = await client.info();

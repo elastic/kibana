@@ -56,7 +56,7 @@ export API_KEY="${apiKey}"`,
 
 # example
 brew install curl`,
-  name: i18n.translate('xpack.serverlessSearch.languages.cURL', {
+  name: i18n.translate('xpack.enterpriseSearch.languages.cURL', {
     defaultMessage: 'cURL',
   }),
   languageStyling: 'shell',

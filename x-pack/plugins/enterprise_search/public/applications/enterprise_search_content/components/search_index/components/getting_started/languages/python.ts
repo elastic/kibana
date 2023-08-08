@@ -60,7 +60,7 @@ client.bulk(operations=documents)
 # If your application uses async/await in Python you can install with the async extra
 # python -m pip install elasticsearch[async]
   `,
-  name: i18n.translate('xpack.serverlessSearch.languages.python', {
+  name: i18n.translate('xpack.enterpriseSearch.languages.python', {
     defaultMessage: 'Python',
   }),
   testConnection: `client.info()`,

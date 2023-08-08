@@ -45,7 +45,7 @@ export const IntegrationsPanel: React.FC<IntegrationsPanelProps> = ({
           <EuiFlexItem>
             <EuiTitle size="l">
               <h3>
-                {i18n.translate('xpack.serverlessSearch.ingestData.logstashTitle', {
+                {i18n.translate('searchApiPanels.welcomeBanner.ingestData.logstashTitle', {
                   defaultMessage: 'Logstash',
                 })}
               </h3>
@@ -54,7 +54,7 @@ export const IntegrationsPanel: React.FC<IntegrationsPanelProps> = ({
             <EuiSpacer size="xs" />
             <EuiText size="s">
               <p>
-                {i18n.translate('xpack.serverlessSearch.ingestData.logstashDescription', {
+                {i18n.translate('searchApiPanels.welcomeBanner.ingestData.logstashDescription', {
                   defaultMessage:
                     'Add data to your data stream or index to make it searchable. Choose an ingestion method that fits your application and workflow.',
                 })}
@@ -72,7 +72,7 @@ export const IntegrationsPanel: React.FC<IntegrationsPanelProps> = ({
               <EuiFlexItem>
                 <GithubLink
                   href="https://github.com/elastic/logstash"
-                  label={i18n.translate('xpack.serverlessSearch.ingestData.logstashLink', {
+                  label={i18n.translate('searchApiPanels.welcomeBanner.ingestData.logstashLink', {
                     defaultMessage: 'Logstash',
                   })}
                   http={http}
@@ -90,14 +90,14 @@ export const IntegrationsPanel: React.FC<IntegrationsPanelProps> = ({
           <EuiFlexItem>
             <EuiTitle size="l">
               <h3>
-                {i18n.translate('xpack.serverlessSearch.ingestData.beatsTitle', {
+                {i18n.translate('searchApiPanels.welcomeBanner.ingestData.beatsTitle', {
                   defaultMessage: 'Beats',
                 })}
               </h3>
             </EuiTitle>
             <EuiSpacer size="xs" />
             <EuiText size="s">
-              {i18n.translate('xpack.serverlessSearch.ingestData.beatsDescription', {
+              {i18n.translate('searchApiPanels.welcomeBanner.ingestData.beatsDescription', {
                 defaultMessage:
                   'Lightweight, single-purpose data shippers for Elasticsearch. Use Beats to send operational data from your servers.',
               })}
@@ -114,7 +114,7 @@ export const IntegrationsPanel: React.FC<IntegrationsPanelProps> = ({
               <EuiFlexItem>
                 <GithubLink
                   href="https://github.com/elastic/beats"
-                  label={i18n.translate('xpack.serverlessSearch.ingestData.beatsLink', {
+                  label={i18n.translate('searchApiPanels.welcomeBanner.ingestData.beatsLink', {
                     defaultMessage: 'beats',
                   })}
                   http={http}
@@ -132,14 +132,14 @@ export const IntegrationsPanel: React.FC<IntegrationsPanelProps> = ({
           <EuiFlexItem>
             <EuiTitle size="l">
               <h3>
-                {i18n.translate('xpack.serverlessSearch.ingestData.connectorsTitle', {
+                {i18n.translate('searchApiPanels.welcomeBanner.ingestData.connectorsTitle', {
                   defaultMessage: 'Connector Client',
                 })}
               </h3>
             </EuiTitle>
             <EuiSpacer size="xs" />
             <EuiText size="s">
-              {i18n.translate('xpack.serverlessSearch.ingestData.connectorsDescription', {
+              {i18n.translate('searchApiPanels.welcomeBanner.ingestData.connectorsDescription', {
                 defaultMessage:
                   'Specialized integrations for syncing data from third-party sources to Elasticsearch. Use Elastic Connectors to sync content from a range of databases and object stores.',
               })}
@@ -156,9 +156,12 @@ export const IntegrationsPanel: React.FC<IntegrationsPanelProps> = ({
               <EuiFlexItem>
                 <GithubLink
                   href="https://github.com/elastic/connectors-python"
-                  label={i18n.translate('xpack.serverlessSearch.ingestData.connectorsPythonLink', {
-                    defaultMessage: 'connectors-python',
-                  })}
+                  label={i18n.translate(
+                    'searchApiPanels.welcomeBanner.ingestData.connectorsPythonLink',
+                    {
+                      defaultMessage: 'connectors-python',
+                    }
+                  )}
                   http={http}
                   pluginId={pluginId}
                 />

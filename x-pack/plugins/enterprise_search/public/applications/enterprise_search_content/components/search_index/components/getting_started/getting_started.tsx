@@ -178,7 +178,7 @@ export const APIGettingStarted = () => {
           <EuiSplitPanel.Outer>
             <EuiSplitPanel.Inner>
               <EuiText>
-                {i18n.translate('xpack.serverlessSearch.apiKey.stepTwoDescription', {
+                {i18n.translate('xpack.enterpriseSearch.apiKey.stepTwoDescription', {
                   defaultMessage: 'Unique identifier for specific project. ',
                 })}
               </EuiText>
@@ -205,7 +205,7 @@ export const APIGettingStarted = () => {
       />
 
       <OverviewPanel
-        description={i18n.translate('xpack.serverlessSearch.configureClient.description', {
+        description={i18n.translate('xpack.enterpriseSearch.configureClient.description', {
           defaultMessage: 'Initialize your client with your unique API key and Cloud ID',
         })}
         rightPanelContent={
@@ -226,7 +226,7 @@ export const APIGettingStarted = () => {
             ? [
                 {
                   href: selectedLanguage.basicConfig,
-                  label: i18n.translate('xpack.serverlessSearch.configureClient.basicConfigLabel', {
+                  label: i18n.translate('xpack.enterpriseSearch.configureClient.basicConfigLabel', {
                     defaultMessage: 'Basic configuration',
                   }),
                 },
@@ -237,7 +237,7 @@ export const APIGettingStarted = () => {
                 {
                   href: selectedLanguage.advancedConfig,
                   label: i18n.translate(
-                    'xpack.serverlessSearch.configureClient.advancedConfigLabel',
+                    'xpack.enterpriseSearch.configureClient.advancedConfigLabel',
                     {
                       defaultMessage: 'Advanced configuration',
                     }
@@ -246,14 +246,14 @@ export const APIGettingStarted = () => {
               ]
             : []),
         ]}
-        title={i18n.translate('xpack.serverlessSearch.configureClient.title', {
+        title={i18n.translate('xpack.enterpriseSearch.configureClient.title', {
           defaultMessage: 'Configure your client',
         })}
         overviewPanelProps={{ color: 'plain', hasShadow: false }}
       />
 
       <OverviewPanel
-        description={i18n.translate('xpack.serverlessSearch.testConnection.description', {
+        description={i18n.translate('xpack.enterpriseSearch.testConnection.description', {
           defaultMessage:
             'Send a test request to confirm your language client and Elasticsearch instance are up and running.',
         })}
@@ -271,7 +271,7 @@ export const APIGettingStarted = () => {
           />
         }
         links={[]}
-        title={i18n.translate('xpack.serverlessSearch.testConnection.title', {
+        title={i18n.translate('xpack.enterpriseSearch.testConnection.title', {
           defaultMessage: 'Test your connection',
         })}
         overviewPanelProps={{ color: 'plain', hasShadow: false }}
@@ -297,7 +297,7 @@ export const APIGettingStarted = () => {
       />
 
       <OverviewPanel
-        description={i18n.translate('xpack.serverlessSearch.searchQuery.description', {
+        description={i18n.translate('xpack.enterpriseSearch.searchQuery.description', {
           defaultMessage:
             "Now you're ready to start experimenting with searching and performing aggregations on your Elasticsearch data.",
         })}
@@ -315,7 +315,7 @@ export const APIGettingStarted = () => {
           />
         }
         links={[]}
-        title={i18n.translate('xpack.serverlessSearch.searchQuery.title', {
+        title={i18n.translate('xpack.enterpriseSearch.searchQuery.title', {
           defaultMessage: 'Build your first search query',
         })}
         overviewPanelProps={{ color: 'plain', hasShadow: false }}

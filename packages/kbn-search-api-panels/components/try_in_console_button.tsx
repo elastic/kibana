@@ -42,7 +42,7 @@ export const TryInConsoleButton = ({
   return (
     <EuiButtonEmpty href={consolePreviewLink} iconType="popout" target="_blank">
       <FormattedMessage
-        id="xpack.serverlessSearch.tryInConsoleButton"
+        id="searchApiPanels.welcomeBanner.tryInConsoleButton"
         defaultMessage="Try in console"
       />
     </EuiButtonEmpty>

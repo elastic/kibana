@@ -137,7 +137,7 @@ echo $response->getStatusCode();
 echo (string) $response->getBody();
 `,
   installClient: 'composer require elasticsearch/elasticsearch',
-  name: i18n.translate('xpack.serverlessSearch.languages.php', {
+  name: i18n.translate('xpack.enterpriseSearch.languages.php', {
     defaultMessage: 'PHP',
   }),
   testConnection: `$response = $client->info();

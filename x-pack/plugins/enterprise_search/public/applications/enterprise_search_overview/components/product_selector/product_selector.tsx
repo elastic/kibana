@@ -69,7 +69,7 @@ export const ProductSelector: React.FC = () => {
         <EuiSpacer size="xl" />
         <EuiTitle>
           <h4>
-            {i18n.translate('xpack.enterpriseSearch.overview.title', {
+            {i18n.translate('xpack.enterpriseSearch.productSelector.overview.title', {
               defaultMessage: 'Ingest your content',
             })}
           </h4>
@@ -77,7 +77,7 @@ export const ProductSelector: React.FC = () => {
         <EuiSpacer size="l" />
         <EuiText>
           <p>
-            {i18n.translate('xpack.enterpriseSearch.overview.description', {
+            {i18n.translate('xpack.enterpriseSearch.productSelector.overview.description', {
               defaultMessage:
                 'The first step in building your search experience is to create a search-optimized Elasticsearch index and import your content into it. Elasticsearch offers several user-friendly options you can choose from that best match your technical expertise and data sources.',
             })}
@@ -90,11 +90,14 @@ export const ProductSelector: React.FC = () => {
         {showAddContent && (
           <>
             <AddContentEmptyPrompt
-              title={i18n.translate('xpack.enterpriseSearch.overview.emptyPromptTitle', {
-                defaultMessage: 'Add data and start searching',
-              })}
+              title={i18n.translate(
+                'xpack.enterpriseSearch.productSelector.overview.emptyPromptTitle',
+                {
+                  defaultMessage: 'Add data and start searching',
+                }
+              )}
               buttonLabel={i18n.translate(
-                'xpack.enterpriseSearch.overview.emptyPromptButtonLabel',
+                'xpack.enterpriseSearch.productSelector.overview.emptyPromptButtonLabel',
                 {
                   defaultMessage: 'Create an Elasticsearch index',
                 }
@@ -113,7 +116,7 @@ export const ProductSelector: React.FC = () => {
 
         <EuiTitle>
           <h4>
-            {i18n.translate('xpack.enterpriseSearch.overview.createCustom.title', {
+            {i18n.translate('xpack.enterpriseSearch.productSelector.overview.createCustom.title', {
               defaultMessage: 'Create a custom search experience',
             })}
           </h4>
@@ -121,10 +124,13 @@ export const ProductSelector: React.FC = () => {
         <EuiSpacer size="l" />
         <EuiText>
           <p>
-            {i18n.translate('xpack.enterpriseSearch.overview.createCustom.description', {
-              defaultMessage:
-                'Once your Elasticsearch index is created and populated, you are ready to get the full power of Elasticsearch and accelerate building search applications with plentiful out-of-the-box tools and multiple language clients, all backed by a robust and fully consumable set of APIs.',
-            })}
+            {i18n.translate(
+              'xpack.enterpriseSearch.productSelector.overview.createCustom.description',
+              {
+                defaultMessage:
+                  'Once your Elasticsearch index is created and populated, you are ready to get the full power of Elasticsearch and accelerate building search applications with plentiful out-of-the-box tools and multiple language clients, all backed by a robust and fully consumable set of APIs.',
+              }
+            )}
           </p>
         </EuiText>
 

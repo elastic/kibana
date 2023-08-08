@@ -42,7 +42,7 @@ export const WelcomeBanner: React.FC<WelcomeBannerProps> = ({
         <EuiFlexItem grow={false}>
           <EuiTitle className="serverlessSearchHeaderTitle" size="s">
             <h1>
-              {i18n.translate('xpack.serverlessSearch.header.title', {
+              {i18n.translate('searchApiPanels.welcomeBanner.header.title', {
                 defaultMessage: 'Get started with Elasticsearch',
               })}
             </h1>
@@ -51,7 +51,7 @@ export const WelcomeBanner: React.FC<WelcomeBannerProps> = ({
         <EuiFlexItem grow={false}>
           <EuiTitle size="xxxs">
             <h2>
-              {i18n.translate('xpack.serverlessSearch.header.greeting.title', {
+              {i18n.translate('searchApiPanels.welcomeBanner.header.greeting.title', {
                 defaultMessage: 'Hi {name}!',
                 values: { name: userProfile.user.full_name || userProfile.user.username },
               })}
@@ -62,7 +62,7 @@ export const WelcomeBanner: React.FC<WelcomeBannerProps> = ({
       <EuiSpacer />
       {showDescription && (
         <EuiText>
-          {i18n.translate('xpack.serverlessSearch.header.description', {
+          {i18n.translate('searchApiPanels.welcomeBanner.header.description', {
             defaultMessage:
               "Set up your programming language client, ingest some data, and you'll be ready to start searching within minutes.",
           })}

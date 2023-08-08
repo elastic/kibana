@@ -44,7 +44,7 @@ export const SelectClientPanel: React.FC<SelectClientPanelProps> = ({
         <EuiFlexItem>
           <EuiText size="s">
             <strong>
-              {i18n.translate('xpack.serverlessSearch.selectClient.heading', {
+              {i18n.translate('searchApiPanels.welcomeBanner.selectClient.heading', {
                 defaultMessage: 'Choose one',
               })}
             </strong>
@@ -57,21 +57,21 @@ export const SelectClientPanel: React.FC<SelectClientPanelProps> = ({
       </EuiFlexGroup>
       <EuiSpacer size="l" />
       <EuiCallOut
-        title={i18n.translate('xpack.serverlessSearch.selectClient.callout.title', {
+        title={i18n.translate('searchApiPanels.welcomeBanner.selectClient.callout.title', {
           defaultMessage: 'Try it now in Console',
         })}
         size="m"
         iconType="iInCircle"
       >
         <p>
-          {i18n.translate('xpack.serverlessSearch.selectClient.callout.description', {
+          {i18n.translate('searchApiPanels.welcomeBanner.selectClient.callout.description', {
             defaultMessage:
               'With Console, you can get started right away with our REST API’s. No installation required. ',
           })}
 
           <span>
             <EuiLink target="_blank" href={http.basePath.prepend(`/app/dev_tools#/console`)}>
-              {i18n.translate('xpack.serverlessSearch.selectClient.callout.link', {
+              {i18n.translate('searchApiPanels.welcomeBanner.selectClient.callout.link', {
                 defaultMessage: 'Try Console now',
               })}
             </EuiLink>
@@ -84,14 +84,17 @@ export const SelectClientPanel: React.FC<SelectClientPanelProps> = ({
     <OverviewPanel
       description={
         <FormattedMessage
-          id="xpack.serverlessSearch.selectClient.description"
+          id="searchApiPanels.welcomeBanner.selectClient.description"
           defaultMessage="Elastic builds and maintains clients in several popular languages and our community has contributed many more. Select your favorite language client or dive into the {console} to get started."
           values={{
             console: (
               <EuiLink href={http.basePath.prepend(`/app/dev_tools#/console`)}>
-                {i18n.translate('xpack.serverlessSearch.selectClient.description.console.link', {
-                  defaultMessage: 'Console',
-                })}
+                {i18n.translate(
+                  'searchApiPanels.welcomeBanner.selectClient.description.console.link',
+                  {
+                    defaultMessage: 'Console',
+                  }
+                )}
               </EuiLink>
             ),
           }}
@@ -102,18 +105,24 @@ export const SelectClientPanel: React.FC<SelectClientPanelProps> = ({
       links={[
         {
           href: docLinks.elasticsearchClients,
-          label: i18n.translate('xpack.serverlessSearch.selectClient.elasticsearchClientDocLink', {
-            defaultMessage: 'Elasticsearch clients ',
-          }),
+          label: i18n.translate(
+            'searchApiPanels.welcomeBanner.selectClient.elasticsearchClientDocLink',
+            {
+              defaultMessage: 'Elasticsearch clients ',
+            }
+          ),
         },
         {
           href: docLinks.kibanaRunApiInConsole,
-          label: i18n.translate('xpack.serverlessSearch.selectClient.apiRequestConsoleDocLink', {
-            defaultMessage: 'Run API requests in Console ',
-          }),
+          label: i18n.translate(
+            'searchApiPanels.welcomeBanner.selectClient.apiRequestConsoleDocLink',
+            {
+              defaultMessage: 'Run API requests in Console ',
+            }
+          ),
         },
       ]}
-      title={i18n.translate('xpack.serverlessSearch.selectClient.title', {
+      title={i18n.translate('searchApiPanels.welcomeBanner.selectClient.title', {
         defaultMessage: 'Select your client',
       })}
       overviewPanelProps={overviewPanelProps}
