@@ -13,7 +13,8 @@ import type {
   EcsRiskScore,
   RiskScore,
 } from '@kbn/security-solution-plugin/server/lib/risk_engine/types';
-
+import { riskEngineConfigurationTypeName } from '@kbn/security-solution-plugin/server/lib/risk_engine/saved_object';
+import type { KbnClient } from '@kbn/test';
 import {
   createRule,
   waitForSignalsToBePresent,
@@ -135,4 +136,79 @@ export const waitForRiskScoresToBePresent = async (
     'waitForRiskScoresToBePresent',
     log
   );
+};
+
+export const getRiskEngineConfigSO = async ({ kibanaServer }: { kibanaServer: KbnClient }) => {
+  const soResponse = await kibanaServer.savedObjects.find({
+    type: riskEngineConfigurationTypeName,
+  });
+
+  return soResponse?.saved_objects?.[0];
+};
+
+export const cleanRiskEngineConfig = async ({
+  kibanaServer,
+}: {
+  kibanaServer: KbnClient;
+}): Promise<void> => {
+  const so = await getRiskEngineConfigSO({ kibanaServer });
+  if (so) {
+    await kibanaServer.savedObjects.delete({
+      type: riskEngineConfigurationTypeName,
+      id: so.id,
+    });
+  }
+};
+
+export const legacyTransformIds = [
+  'ml_hostriskscore_pivot_transform_default',
+  'ml_hostriskscore_latest_transform_default',
+  'ml_userriskscore_pivot_transform_default',
+  'ml_userriskscore_latest_transform_default',
+];
+
+export const clearLegacyTransforms = async ({ es }: { es: Client }): Promise<void> => {
+  const transforms = legacyTransformIds.map((transform) =>
+    es.transform.deleteTransform({
+      transform_id: transform,
+    })
+  );
+  try {
+    await Promise.all(transforms);
+  } catch (e) {
+    //
+  }
+};
+
+export const createTransforms = async ({ es }: { es: Client }): Promise<void> => {
+  const transforms = legacyTransformIds.map((transform) =>
+    es.transform.putTransform({
+      transform_id: transform,
+      source: {
+        index: ['.alerts-security.alerts-default'],
+      },
+      dest: {
+        index: 'ml_host_risk_score_default',
+      },
+      pivot: {
+        group_by: {
+          'host.name': {
+            terms: {
+              field: 'host.name',
+            },
+          },
+        },
+        aggregations: {
+          '@timestamp': {
+            max: {
+              field: '@timestamp',
+            },
+          },
+        },
+      },
+      settings: {},
+    })
+  );
+
+  await Promise.all(transforms);
 };

@@ -10,7 +10,7 @@ import { useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 
-import { paths } from '../../routes/paths';
+import { paths } from '../../../common/locators/paths';
 import { useKibana } from '../../utils/kibana_react';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useFetchSloDetails } from '../../hooks/slo/use_fetch_slo_details';

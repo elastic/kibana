@@ -34,13 +34,13 @@ describe('breadcrumbs', () => {
     const currentLocationPathName = '/foo/item1';
     const { projectNavigation, history } = setup({ locationPathName: currentLocationPathName });
 
-    projectNavigation.setProjectNavigation({
+    const mockNavigation = {
       navigationTree: [
         {
           id: 'root',
           title: 'Root',
           path: ['root'],
-          breadcrumbStatus: 'hidden',
+          breadcrumbStatus: 'hidden' as 'hidden',
           children: [
             {
               id: 'subNav',
@@ -64,8 +64,9 @@ describe('breadcrumbs', () => {
           ],
         },
       ],
-    });
-    return { projectNavigation, history };
+    };
+    projectNavigation.setProjectNavigation(mockNavigation);
+    return { projectNavigation, history, mockNavigation };
   };
 
   test('should set breadcrumbs home / nav / custom', async () => {
@@ -150,6 +151,42 @@ describe('breadcrumbs', () => {
     history.push('/foo/item2');
     breadcrumbs = await firstValueFrom(projectNavigation.getProjectBreadcrumbs$());
     expect(breadcrumbs).toHaveLength(1); // only home is left
+  });
+
+  // this handles race condition where the final `setProjectNavigation` update happens after the app called `setProjectBreadcrumbs`
+  test("shouldn't reset initial deep context breadcrumbs", async () => {
+    const { projectNavigation, mockNavigation } = setupWithNavTree();
+    projectNavigation.setProjectNavigation({ navigationTree: [] }); // reset simulating initial state
+    projectNavigation.setProjectBreadcrumbs([
+      { text: 'custom1', href: '/custom1' },
+      { text: 'custom2', href: '/custom1/custom2' },
+    ]);
+    projectNavigation.setProjectNavigation(mockNavigation); // restore navigation
+
+    const breadcrumbs = await firstValueFrom(projectNavigation.getProjectBreadcrumbs$());
+    expect(breadcrumbs).toHaveLength(4);
+  });
+
+  test("shouldn't reset custom breadcrumbs when nav node contents changes, but not the path", async () => {
+    const { projectNavigation, mockNavigation } = setupWithNavTree();
+    projectNavigation.setProjectBreadcrumbs([
+      { text: 'custom1', href: '/custom1' },
+      { text: 'custom2', href: '/custom1/custom2' },
+    ]);
+    let breadcrumbs = await firstValueFrom(projectNavigation.getProjectBreadcrumbs$());
+    expect(breadcrumbs).toHaveLength(4);
+
+    // navigation node contents changed, but not the path
+    projectNavigation.setProjectNavigation({
+      navigationTree: [
+        { ...mockNavigation.navigationTree[0], title: 'Changed title' },
+        ...mockNavigation.navigationTree,
+      ],
+    });
+
+    // context breadcrumbs should not reset
+    breadcrumbs = await firstValueFrom(projectNavigation.getProjectBreadcrumbs$());
+    expect(breadcrumbs).toHaveLength(4);
   });
 });
 
