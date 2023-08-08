@@ -42,7 +42,7 @@ export const matchedIndiciesDefault = {
  */
 export interface DataViewEditorServiceConstructorArgs {
   /**
-   * Dependencies for the to create a new DataViewEditorService
+   * Dependencies for the DataViewEditorService
    */
   services: {
     http: HttpSetup;

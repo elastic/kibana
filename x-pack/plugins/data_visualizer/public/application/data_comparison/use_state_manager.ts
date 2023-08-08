@@ -44,9 +44,6 @@ export class StateManager {
   );
   private _randomSampler = new RandomSampler();
 
-  // private randomSamplerMode: (mode: RandomSamplerOption) => void;
-  // private randomSamplerProbability: (prob: RandomSamplerProbability) => void;
-
   constructor({
     id,
     indexPattern,
