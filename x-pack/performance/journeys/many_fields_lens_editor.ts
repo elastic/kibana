@@ -18,7 +18,7 @@ export const journey = new Journey({
         `/app/visualize#/?_g=(filters:!(),time:(from:'2022-09-07T10:53:30.262Z',to:'2022-09-07T10:55:09.280Z'))`
       )
     );
-    await page.waitForSelector('#visualizeListingHeading');
+    await page.waitForSelector(subj('table-is-ready'));
   })
   .step('Open existing Lens', async ({ page, kibanaPage }) => {
     await page.click(subj('visListingTitleLink-Lens-Stress-Test'));
