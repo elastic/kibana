@@ -112,7 +112,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
     const proxyHosts = ['localhost', 'some.non.existent.com'];
     const actionsProxyUrl = options.enableActionsProxy
       ? [
-          `--xpack.actions.proxyUrl=http://localhost:${proxyPort}`,
+          `--xpack.actions.proxyUrl=http://127.0.0.1:${proxyPort}`,
           `--xpack.actions.proxyOnlyHosts=${JSON.stringify(proxyHosts)}`,
           '--xpack.actions.proxyRejectUnauthorizedCertificates=false',
         ]
