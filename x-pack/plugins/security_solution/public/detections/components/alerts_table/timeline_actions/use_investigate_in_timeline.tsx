@@ -13,6 +13,7 @@ import type {
   ExceptionListId,
   ExceptionListIdentifiers,
 } from '@kbn/securitysolution-io-ts-list-types';
+import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { useApi } from '@kbn/securitysolution-list-hooks';
 
 import type { Filter } from '@kbn/es-query';
@@ -58,7 +59,10 @@ const detectionExceptionList = (ecsData: Ecs): ExceptionListId[] => {
             type,
           };
         })
-        .filter((exception: ExceptionListIdentifiers) => exception.type === 'detection');
+        .filter(
+          (exception: ExceptionListIdentifiers) =>
+            exception.type === ExceptionListTypeEnum.DETECTION
+        );
     }
   } catch (error) {
     // do nothing, just fail silently as parametersObject is initialized
@@ -66,14 +70,18 @@ const detectionExceptionList = (ecsData: Ecs): ExceptionListId[] => {
   detectionExceptionsList = exceptionsList.reduce(
     (acc: ExceptionListId[], next: string | object) => {
       // parsed rule.parameters returns an object else use the default string representation
-      const parsedList = typeof next === 'string' ? JSON.parse(next) : next;
-      if (parsedList.type === 'detection') {
-        const formattedList = {
-          exception_list_id: parsedList.list_id,
-          namespace_type: parsedList.namespace_type,
-        };
-        acc.push(formattedList);
-      }
+      try {
+        const parsedList = typeof next === 'string' ? JSON.parse(next) : next;
+        if (parsedList.type === ExceptionListTypeEnum.DETECTION) {
+          const formattedList = {
+            exception_list_id: parsedList.list_id,
+            namespace_type: parsedList.namespace_type,
+          };
+          acc.push(formattedList);
+        }
+        // eslint-disable-next-line no-empty
+      } catch {}
+
       return acc;
     },
     []
@@ -97,6 +105,7 @@ export const useInvestigateInTimeline = ({
 
   const getExceptionFilter = useCallback(
     async (ecsData: Ecs): Promise<Filter | undefined> => {
+      // This pulls exceptions list information from `_source` for timeline or the fields api for alerts.
       const detectionExceptionsLists = detectionExceptionList(ecsData);
       let exceptionFilter;
       if (detectionExceptionsLists.length > 0) {
