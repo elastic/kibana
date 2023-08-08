@@ -8,11 +8,12 @@
 import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
 import { pick } from 'lodash';
 
+import { createAgentPolicyMock } from '../mocks';
+
 import {
   isAgentPolicyValidForLicense,
   unsetAgentPolicyAccordingToLicenseLevel,
 } from './agent_policy_config';
-import { generateAgentPolicyWithDefaults } from './generate_new_agent_policy';
 
 describe('agent policy config and licenses', () => {
   const Platinum = licenseMock.createLicense({ license: { type: 'platinum', mode: 'platinum' } });
@@ -33,13 +34,13 @@ describe('agent policy config and licenses', () => {
   });
   describe('unsetAgentPolicyAccordingToLicenseLevel', () => {
     it('resets all paid features to default if license is gold', () => {
-      const defaults = pick(generateAgentPolicyWithDefaults(), 'is_protected');
+      const defaults = pick(createAgentPolicyMock(), 'is_protected');
       const partialPolicy = { is_protected: true };
       const retPolicy = unsetAgentPolicyAccordingToLicenseLevel(partialPolicy, Gold);
       expect(retPolicy).toEqual(defaults);
     });
     it('does not change paid features if license is platinum', () => {
-      const expected = pick(generateAgentPolicyWithDefaults(), 'is_protected');
+      const expected = pick(createAgentPolicyMock(), 'is_protected');
       const partialPolicy = { is_protected: false };
       const expected2 = { is_protected: true };
       const partialPolicy2 = { is_protected: true };

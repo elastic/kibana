@@ -73,7 +73,6 @@ export {
 
 export {
   generateNewAgentPolicyWithDefaults,
-  generateAgentPolicyWithDefaults,
   agentPolicyWithoutPaidFeatures,
 } from './generate_new_agent_policy';
 

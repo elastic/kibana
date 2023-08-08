@@ -17,16 +17,13 @@ import { allowedExperimentalValues } from '../../../../../../../common/experimen
 
 import { ExperimentalFeaturesService } from '../../../../../../services/experimental_features';
 
-import { createPackagePolicyMock } from '../../../../../../../common/mocks';
+import { createAgentPolicyMock, createPackagePolicyMock } from '../../../../../../../common/mocks';
 import type { AgentPolicy, NewAgentPolicy } from '../../../../../../../common/types';
 
 import { useLicense } from '../../../../../../hooks/use_license';
 
 import type { LicenseService } from '../../../../../../../common/services';
-import {
-  generateAgentPolicyWithDefaults,
-  generateNewAgentPolicyWithDefaults,
-} from '../../../../../../../common/services';
+import { generateNewAgentPolicyWithDefaults } from '../../../../../../../common/services';
 
 import type { ValidationResults } from '../agent_policy_validation';
 
@@ -63,7 +60,7 @@ describe('Agent policy advanced options content', () => {
     if (newAgentPolicy) {
       mockAgentPolicy = generateNewAgentPolicyWithDefaults();
     } else {
-      mockAgentPolicy = generateAgentPolicyWithDefaults();
+      mockAgentPolicy = createAgentPolicyMock();
     }
 
     renderResult = testRender.render(
