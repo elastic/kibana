@@ -91,7 +91,7 @@ export class ReportingAPIClient implements IReportingAPI {
     });
 
     const href = `${path}?${searchParams}`;
-    
+
     return href;
   }
 
@@ -99,15 +99,13 @@ export class ReportingAPIClient implements IReportingAPI {
    * Get the internal URL
    */
   public getReportURL(jobId: string) {
-    const downloadLink = this.http.basePath.prepend(
-      `internal/reporting/jobs/download/${jobId}`
-    );
+    const downloadLink = this.http.basePath.prepend(`internal/reporting/jobs/download/${jobId}`);
     return downloadLink;
   }
 
   public async downloadReport(jobId: string) {
     const location = this.getReportURL(jobId);
-    return await this.http.get(location, { headers: [X_ELASTIC_INTERNAL_ORIGIN_REQUEST] })
+    return await this.http.get(location, { headers: [X_ELASTIC_INTERNAL_ORIGIN_REQUEST] });
   }
 
   public async deleteReport(jobId: string) {
