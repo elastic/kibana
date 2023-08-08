@@ -80,11 +80,34 @@ const createActions = (testBed: TestBed) => {
     component.update();
   };
 
+  const clickViewButton = () => {
+    const { component, find } = testBed;
+
+    act(() => {
+      find('viewButton').simulate('click');
+    });
+
+    component.update();
+  };
+
+  const clickSimulateFilter = (filterId: string) => {
+    const { find, component } = testBed;
+    const filterName = filterId.toLowerCase().replaceAll(' ', '_');
+
+    act(() => {
+      find(`filterItem-${filterName}`).simulate('click');
+    });
+
+    component.update();
+  };
+
   return {
     clickReloadButton,
     clickPipelineAt,
     clickPipelineAction,
     clickActionMenu,
+    clickViewButton,
+    clickSimulateFilter,
   };
 };
 
@@ -110,4 +133,7 @@ export type PipelineListTestSubjects =
   | 'emptyList.title'
   | 'sectionLoading'
   | 'pipelineLoadError'
-  | 'reloadButton';
+  | 'reloadButton'
+  | 'viewButton'
+  | 'filterItem-managed_pipelines'
+  | 'filterItem-custom_pipelines';

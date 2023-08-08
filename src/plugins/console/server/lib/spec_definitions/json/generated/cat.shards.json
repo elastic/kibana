@@ -35,7 +35,7 @@
     ],
     "patterns": [
       "_cat/shards",
-      "_cat/shards/{indices}"
+      "_cat/shards/{index}"
     ],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/cat-shards.html"
   }

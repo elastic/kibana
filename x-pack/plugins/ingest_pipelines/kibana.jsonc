@@ -23,7 +23,7 @@
     ],
     "requiredBundles": [
       "esUiShared",
-      "kibanaReact",
+      "kibanaReact"
     ]
   }
 }

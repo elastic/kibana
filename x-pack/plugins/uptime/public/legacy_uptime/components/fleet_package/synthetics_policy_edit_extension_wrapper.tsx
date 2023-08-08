@@ -12,9 +12,14 @@ import { EuiButton, EuiCallOut } from '@elastic/eui';
 import type { PackagePolicyEditExtensionComponentProps } from '@kbn/fleet-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useEditMonitorLocator } from './use_edit_monitor_locator';
-import { DataStream } from '../../../../common/runtime_types';
 import { DeprecateNoticeModal } from './deprecate_notice_modal';
 
+enum DataStream {
+  HTTP = 'http',
+  TCP = 'tcp',
+  ICMP = 'icmp',
+  BROWSER = 'browser',
+}
 /**
  * Exports Synthetics-specific package policy instructions
  * for use in the Ingest app create / edit package policy

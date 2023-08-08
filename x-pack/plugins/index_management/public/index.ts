@@ -20,5 +20,4 @@ export { getIndexListUri, getTemplateDetailsLink } from './application/services/
 
 export type { Index } from '../common';
 
-export type { Filters } from './application/sections/home/components';
 export { FilterListButton } from './application/sections/home/components';

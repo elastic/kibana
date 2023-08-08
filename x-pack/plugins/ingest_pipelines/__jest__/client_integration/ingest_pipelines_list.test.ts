@@ -14,6 +14,36 @@ import { PipelineListTestBed } from './helpers/pipelines_list.helpers';
 
 const { setup } = pageHelpers.pipelinesList;
 
+const pipeline1 = {
+  name: 'test_pipeline1',
+  description: 'test_pipeline1 description',
+  processors: [],
+  isManaged: false,
+};
+
+const pipeline2 = {
+  name: 'test_pipeline2',
+  description: 'test_pipeline2 description',
+  processors: [],
+  isManaged: true,
+};
+
+const pipeline3 = {
+  name: 'test_pipeline3',
+  description: 'test_pipeline3 description',
+  processors: [],
+  isManaged: false,
+};
+
+const pipeline4 = {
+  name: 'test_pipeline4',
+  description: 'test_pipeline4 description',
+  processors: [],
+  isManaged: true,
+};
+
+const pipelines = [pipeline1, pipeline2, pipeline3, pipeline4];
+
 describe('<PipelinesList />', () => {
   const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
   let testBed: PipelineListTestBed;
@@ -26,22 +56,6 @@ describe('<PipelinesList />', () => {
 
       testBed.component.update();
     });
-
-    const pipeline1 = {
-      name: 'test_pipeline1',
-      description: 'test_pipeline1 description',
-      processors: [],
-      isManaged: false,
-    };
-
-    const pipeline2 = {
-      name: 'test_pipeline2',
-      description: 'test_pipeline2 description',
-      processors: [],
-      isManaged: false,
-    };
-
-    const pipelines = [pipeline1, pipeline2];
 
     httpRequestsMockHelpers.setLoadPipelinesResponse(pipelines);
 
@@ -64,7 +78,11 @@ describe('<PipelinesList />', () => {
       tableCellsValues.forEach((row, i) => {
         const pipeline = pipelines[i];
 
-        expect(row).toEqual(['', pipeline.name, 'EditDelete']);
+        expect(row).toEqual([
+          '',
+          expect.stringMatching(pipeline.name + '( Managed)?'),
+          'EditDelete',
+        ]);
       });
     });
 
@@ -117,6 +135,89 @@ describe('<PipelinesList />', () => {
         `${API_BASE_PATH}/${pipelineName}`,
         expect.anything()
       );
+    });
+  });
+
+  describe('Handle view filter', () => {
+    beforeEach(async () => {
+      await act(async () => {
+        testBed = await setup(httpSetup);
+      });
+      testBed.component.update();
+    });
+
+    test('should view button open options popover', async () => {
+      const { exists, actions } = testBed;
+
+      expect(exists('filterItem-managed_pipelines')).toBeFalsy();
+      expect(exists('filterItem-custom_pipelines')).toBeFalsy();
+
+      expect(exists('viewButton')).toBeTruthy();
+
+      await actions.clickViewButton();
+
+      expect(exists('filterItem-managed_pipelines')).toBeTruthy();
+      expect(exists('filterItem-custom_pipelines')).toBeTruthy();
+    });
+
+    test('should show only managed pipelines', async () => {
+      const { table, actions } = testBed;
+
+      await actions.clickViewButton();
+      await actions.clickSimulateFilter('custom_pipelines');
+
+      const { tableCellsValues } = table.getMetaData('pipelinesTable');
+
+      tableCellsValues.forEach((row) => {
+        const isManaged = /Managed$/.test(row[1]);
+        expect(isManaged).toBeTruthy();
+      });
+    });
+
+    test('should show only custom pipelines', async () => {
+      const { table, actions } = testBed;
+
+      await actions.clickViewButton();
+      await actions.clickSimulateFilter('managed_pipelines');
+
+      const { tableCellsValues } = table.getMetaData('pipelinesTable');
+
+      tableCellsValues.forEach((row) => {
+        const isManaged = /Managed$/.test(row[1]);
+        expect(isManaged).toBeFalsy();
+      });
+    });
+
+    test('should not display pipelines', async () => {
+      const { actions, table } = testBed;
+
+      await actions.clickViewButton();
+      await actions.clickSimulateFilter('managed_pipelines');
+      await actions.clickSimulateFilter('custom_pipelines');
+
+      const { tableCellsValues } = table.getMetaData('pipelinesTable');
+      const isTableEmpty = tableCellsValues.join('') === 'No items found';
+
+      expect(isTableEmpty).toBeTruthy();
+    });
+
+    test('should display all pipelines', async () => {
+      const { actions, table } = testBed;
+
+      await actions.clickViewButton();
+      await actions.clickSimulateFilter('managed_pipelines');
+      await actions.clickSimulateFilter('managed_pipelines');
+
+      const { tableCellsValues } = table.getMetaData('pipelinesTable');
+      tableCellsValues.forEach((row, i) => {
+        const pipeline = pipelines[i];
+
+        expect(row).toEqual([
+          '',
+          expect.stringMatching(pipeline.name + '( Managed)?'),
+          'EditDelete',
+        ]);
+      });
     });
   });
 

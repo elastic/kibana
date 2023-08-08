@@ -13,6 +13,7 @@ import { parse } from 'query-string';
 
 import {
   EuiPageHeader,
+  EuiPageTemplate,
   EuiButtonEmpty,
   EuiPageContent_Deprecated as EuiPageContent,
   EuiEmptyPrompt,
@@ -40,7 +41,6 @@ import { useRedirectToPathOrRedirectPath } from '../../hooks';
 interface Filter {
   name: string;
   checked: 'on' | 'off';
-  handleFilter?: (allPipelines: Pipeline[]) => Pipeline[];
 }
 
 interface Props<T extends string> {
@@ -48,7 +48,7 @@ interface Props<T extends string> {
   onChange(filters: Filters<T>): void;
 }
 
-export type Filters<T extends string> = {
+type Filters<T extends string> = {
   [key in T]: Filter;
 };
 
@@ -104,16 +104,21 @@ export function FilterListButton<T extends string>({ onChange, filters }: Props<
         data-test-subj="filterList"
       >
         <div className="euiFilterSelect__items">
-          {Object.entries(filters).map(([filter, item], index) => (
-            <EuiFilterSelectItem
-              checked={(item as Filter).checked}
-              key={index}
-              onClick={() => toggleFilter(filter as T)}
-              data-test-subj="filterItem"
-            >
-              {(item as Filter).name}
-            </EuiFilterSelectItem>
-          ))}
+          {Object.entries(filters).map(([filter, item], index) => {
+            const { checked, name } = item as Filter;
+            const testName = name.toLowerCase().replaceAll(' ', '_');
+
+            return (
+              <EuiFilterSelectItem
+                checked={checked}
+                key={index}
+                onClick={() => toggleFilter(filter as T)}
+                data-test-subj={`filterItem-${testName}`}
+              >
+                {name}
+              </EuiFilterSelectItem>
+            );
+          })}
         </div>
       </EuiPopover>
     </EuiFilterGroup>
@@ -125,7 +130,7 @@ const getPipelineNameFromLocation = (location: Location) => {
   return pipeline;
 };
 
-export type FilterName = 'managed' | 'notManaged';
+type FilterName = 'managed' | 'notManaged';
 
 export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
   history,
@@ -175,76 +180,64 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
         defaultMessage: 'Managed pipelines',
       }),
       checked: 'on',
-      handleFilter: (allPipelines: Pipeline[]) => isManagedPipelines(allPipelines, true),
     },
     notManaged: {
       name: i18n.translate('xpack.idxMgmt.indexTemplatesList.viewNotManagedTemplateLabel', {
-        defaultMessage: 'Not managed pipelines',
+        defaultMessage: 'Custom pipelines',
       }),
       checked: 'on',
-      handleFilter: (allPipelines: Pipeline[]) => isManagedPipelines(allPipelines, false),
     },
   });
 
-  const isManagedPipelines = (allPipelines: Pipeline[], isManaged: boolean) =>
-    allPipelines.filter((pipeline) => pipeline.isManaged === isManaged);
+  const handleFilters = () => {
+    const activeFilters = {
+      managed: filters.managed.checked === 'on',
+      notManaged: filters.notManaged.checked === 'on',
+    };
+    const filteredPipelines = data;
 
-  const selectedFilters = Object.entries(filters)
-    .filter((item) => item[1].checked === 'on')
-    .map(([filterName]) => filterName as FilterName);
-
-  const filteredPipelines = (allPipelines: Pipeline[]) => {
-    if (!selectedFilters) return allPipelines;
-
-    let filteredItems: Pipeline[] = [];
-
-    selectedFilters.forEach((filter) => {
-      const filterFunction = filters[filter]?.handleFilter;
-      if (filterFunction) {
-        filteredItems = filteredItems.concat(filterFunction(allPipelines));
-      }
+    return filteredPipelines?.filter((pipeline) => {
+      if (activeFilters.managed && pipeline.isManaged) return true;
+      if (activeFilters.notManaged && !pipeline.isManaged) return true;
+      return false;
     });
-
-    return filteredItems;
   };
+  const allPipelines = handleFilters();
 
   if (error) {
     return (
-      <EuiPageContent verticalPosition="center" horizontalPosition="center" color="danger">
-        <EuiEmptyPrompt
-          iconType="warning"
-          title={
-            <h2 data-test-subj="pipelineLoadError">
-              <FormattedMessage
-                id="xpack.ingestPipelines.list.loadErrorTitle"
-                defaultMessage="Unable to load pipelines"
-              />
-            </h2>
-          }
-          body={<p>{error.message}</p>}
-          actions={
-            <EuiButton onClick={resendRequest} iconType="refresh" color="danger">
-              <FormattedMessage
-                id="xpack.ingestPipelines.list.loadPipelineReloadButton"
-                defaultMessage="Try again"
-              />
-            </EuiButton>
-          }
-        />
-      </EuiPageContent>
+      <EuiPageTemplate.EmptyPrompt
+        color="danger"
+        iconType="warning"
+        title={
+          <h2 data-test-subj="pipelineLoadError">
+            <FormattedMessage
+              id="xpack.ingestPipelines.list.loadErrorTitle"
+              defaultMessage="Unable to load pipelines"
+            />
+          </h2>
+        }
+        body={<p>{error.message}</p>}
+        actions={
+          <EuiButton onClick={resendRequest} iconType="refresh" color="danger">
+            <FormattedMessage
+              id="xpack.ingestPipelines.list.loadPipelineReloadButton"
+              defaultMessage="Try again"
+            />
+          </EuiButton>
+        }
+      />
     );
   }
 
   if (isLoading) {
     return (
-      <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
-        <SectionLoading data-test-subj="sectionLoading">
-          <FormattedMessage
-            id="xpack.ingestPipelines.list.loadingMessage"
-            defaultMessage="Loading pipelines..."
-          />
-        </SectionLoading>
-      </EuiPageContent>
+      <SectionLoading data-test-subj="sectionLoading">
+        <FormattedMessage
+          id="xpack.ingestPipelines.list.loadingMessage"
+          defaultMessage="Loading pipelines..."
+        />
+      </SectionLoading>
     );
   }
 
@@ -316,7 +309,7 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
         onEditPipelineClick={goToEditPipeline}
         onDeletePipelineClick={setPipelinesToDelete}
         onClonePipelineClick={goToClonePipeline}
-        pipelines={filteredPipelines(data as Pipeline[])}
+        pipelines={allPipelines as Pipeline[]}
         filterListButton={<FilterListButton<FilterName> filters={filters} onChange={setFilters} />}
       />
 
