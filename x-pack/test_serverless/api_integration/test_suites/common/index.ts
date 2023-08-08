@@ -12,6 +12,7 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./security_users'));
     loadTestFile(require.resolve('./spaces'));
     loadTestFile(require.resolve('./security_response_headers'));
+    loadTestFile(require.resolve('./rollups'));
     loadTestFile(require.resolve('./ingest_pipelines'));
   });
 }
