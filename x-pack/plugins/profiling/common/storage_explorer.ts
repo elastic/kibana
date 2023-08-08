@@ -44,7 +44,7 @@ export interface StorageExplorerIndexDataBreakdownStatsStats {
   docCount: number;
   sizeInBytes: number;
 }
-export type StotageExplorerIndicesDataBreakdownSize = Record<
+export type StotageExplorerIndicesDataBreakdownChart = Record<
   StorageExplorerIndexNames,
   StorageExplorerIndexDataBreakdownStatsStats
 >;

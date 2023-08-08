@@ -13,7 +13,7 @@ import React from 'react';
 import type {
   StorageExplorerIndexNames,
   StorageExplorerIndexDataBreakdownStatsStats,
-  StotageExplorerIndicesDataBreakdownSize,
+  StotageExplorerIndicesDataBreakdownChart,
 } from '../../../common/storage_explorer';
 import { useProfilingChartsTheme } from '../../hooks/use_profiling_charts_theme';
 
@@ -43,7 +43,7 @@ export function getIndexLabel(label: StorageExplorerIndexNames) {
 }
 
 interface Props {
-  data?: StotageExplorerIndicesDataBreakdownSize;
+  data?: StotageExplorerIndicesDataBreakdownChart;
 }
 
 export function DataBreakdownChart({ data }: Props) {

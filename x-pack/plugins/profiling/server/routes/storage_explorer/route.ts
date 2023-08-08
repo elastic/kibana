@@ -11,10 +11,10 @@ import { getRoutePaths } from '../../../common';
 import { StorageExplorerSummary } from '../../../common/storage_explorer';
 import { getClient } from '../compat';
 import { getDailyDataGenerationSize } from './get_daily_data_generation.size';
-import { getDataBreakdownSize } from './get_data_breakdown_size';
 import { getHostBreakdownSizeTimeseries } from './get_host_breakdown_size_timeseries';
 import { getHostDetails } from './get_host_details';
 import { getHostAndDistinctProbabilisticCount } from './get_host_distinct_probabilistic_count';
+import { getIndicesDataBreakdownChart } from './get_indices_data_breakdown_chart';
 import { getNodesStats, getTotalIndicesStats, getTotalSymbolsStats } from './get_indices_stats';
 
 export function registerStorageExplorerRoute({
@@ -161,9 +161,25 @@ export function registerStorageExplorerRoute({
       const profilingClient = createProfilingEsClient({ request, esClient: client });
       const profilingEsClient = profilingClient.getEsClient();
 
-      const mainIndicesStats = await getDataBreakdownSize({ client: profilingEsClient });
+      const mainIndicesStats = await getIndicesDataBreakdownChart({ client: profilingEsClient });
 
       return response.ok({ body: mainIndicesStats });
+    }
+  );
+  router.get(
+    {
+      path: paths.StorageExplorerIndicesDataDetails,
+      options: { tags: ['access:profiling'] },
+      validate: false,
+    },
+    async (context, request, response) => {
+      const client = await getClient(context);
+      const profilingClient = createProfilingEsClient({ request, esClient: client });
+      const profilingEsClient = profilingClient.getEsClient();
+
+      // const mainIndicesStats = await getDataBreakdownSize({ client: profilingEsClient });
+
+      return response.ok({ body: [] });
     }
   );
 }

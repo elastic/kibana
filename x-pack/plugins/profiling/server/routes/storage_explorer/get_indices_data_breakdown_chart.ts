@@ -6,12 +6,12 @@
  */
 import { ElasticsearchClient } from '@kbn/core/server';
 import type {
-  StotageExplorerIndicesDataBreakdownSize,
+  StotageExplorerIndicesDataBreakdownChart,
   StorageExplorerIndexDataBreakdownStatsStats,
 } from '../../../common/storage_explorer';
 import { getMainIndicesStats } from './get_indices_stats';
 
-const INITIAL_STATE: StotageExplorerIndicesDataBreakdownSize = {
+const INITIAL_STATE: StotageExplorerIndicesDataBreakdownChart = {
   events: { docCount: 0, sizeInBytes: 0 },
   stackframes: { docCount: 0, sizeInBytes: 0 },
   stacktraces: { docCount: 0, sizeInBytes: 0 },
@@ -19,11 +19,11 @@ const INITIAL_STATE: StotageExplorerIndicesDataBreakdownSize = {
   metrics: { docCount: 0, sizeInBytes: 0 },
 };
 
-export async function getDataBreakdownSize({ client }: { client: ElasticsearchClient }) {
+export async function getIndicesDataBreakdownChart({ client }: { client: ElasticsearchClient }) {
   const mainIndicesStats = await getMainIndicesStats({ client });
 
   const indicesStats = mainIndicesStats.indices || {};
-  return Object.keys(indicesStats).reduce<StotageExplorerIndicesDataBreakdownSize>(
+  return Object.keys(indicesStats).reduce<StotageExplorerIndicesDataBreakdownChart>(
     (acc, indexName) => {
       const indexStats = indicesStats[indexName];
       const indexDocCount = indexStats.total?.docs?.count || 0;
