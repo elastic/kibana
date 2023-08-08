@@ -17,6 +17,7 @@ import {
   EuiButtonEmpty,
   EuiButton,
   htmlIdGenerator,
+  EuiSuperDatePicker,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -27,7 +28,11 @@ import type {
   EventAnnotationConfig,
   EventAnnotationGroupConfig,
 } from '@kbn/event-annotation-common';
+import { css } from '@emotion/react';
+import type { EmbeddableComponent as LensEmbeddableComponent } from '@kbn/lens-plugin/public';
+import { TimeRange } from '@kbn/es-query';
 import { GroupEditorControls, isGroupValid } from './group_editor_controls';
+import { lensAttributes } from './lens_attributes';
 
 export const GroupEditorFlyout = ({
   group,
@@ -37,6 +42,7 @@ export const GroupEditorFlyout = ({
   savedObjectsTagging,
   dataViews,
   createDataView,
+  LensEmbeddableComponent,
   queryInputServices,
 }: {
   group: EventAnnotationGroupConfig;
@@ -46,6 +52,7 @@ export const GroupEditorFlyout = ({
   savedObjectsTagging: SavedObjectsTaggingApi;
   dataViews: DataView[];
   createDataView: (spec: DataViewSpec) => Promise<DataView>;
+  LensEmbeddableComponent: LensEmbeddableComponent;
   queryInputServices: QueryInputServices;
 }) => {
   const flyoutHeadingId = useMemo(() => htmlIdGenerator()(), []);
@@ -73,80 +80,149 @@ export const GroupEditorFlyout = ({
     [resetContentScroll, selectedAnnotation]
   );
 
+  const [chartTimeRange, setChartTimeRange] = useState<TimeRange>({ from: 'now-15m', to: 'now' });
+
   const onClose = () => (selectedAnnotation ? setSelectedAnnotation(undefined) : parentOnClose());
 
   return (
-    <EuiFlyout onClose={onClose} size={'s'}>
-      <EuiFlyoutHeader hasBorder aria-labelledby={flyoutHeadingId}>
-        <EuiTitle size="s">
-          <h2 id={flyoutHeadingId}>
-            <FormattedMessage
-              id="eventAnnotationComponents.groupEditorFlyout.title"
-              defaultMessage="Edit annotation group"
+    <EuiFlyout onClose={onClose} size="l">
+      <EuiFlexGroup gutterSize="none">
+        <EuiFlexItem
+          grow={false}
+          css={css`
+            min-width: 346px;
+          `}
+        >
+          <EuiFlyoutHeader hasBorder aria-labelledby={flyoutHeadingId}>
+            <EuiTitle size="s">
+              <h2 id={flyoutHeadingId}>
+                <FormattedMessage
+                  id="eventAnnotationComponents.groupEditorFlyout.title"
+                  defaultMessage="Edit annotation group"
+                />
+              </h2>
+            </EuiTitle>
+          </EuiFlyoutHeader>
+
+          <EuiFlyoutBody>
+            <GroupEditorControls
+              group={group}
+              update={updateGroup}
+              selectedAnnotation={selectedAnnotation}
+              setSelectedAnnotation={setSelectedAnnotation}
+              TagSelector={savedObjectsTagging.ui.components.SavedObjectSaveModalTagSelector}
+              dataViews={dataViews}
+              createDataView={createDataView}
+              queryInputServices={queryInputServices}
+              showValidation={hasAttemptedSave}
             />
-          </h2>
-        </EuiTitle>
-      </EuiFlyoutHeader>
+          </EuiFlyoutBody>
 
-      <EuiFlyoutBody>
-        <GroupEditorControls
-          group={group}
-          update={updateGroup}
-          selectedAnnotation={selectedAnnotation}
-          setSelectedAnnotation={setSelectedAnnotation}
-          TagSelector={savedObjectsTagging.ui.components.SavedObjectSaveModalTagSelector}
-          dataViews={dataViews}
-          createDataView={createDataView}
-          queryInputServices={queryInputServices}
-          showValidation={hasAttemptedSave}
-        />
-      </EuiFlyoutBody>
+          <EuiFlyoutFooter>
+            <EuiFlexGroup justifyContent="spaceBetween">
+              {selectedAnnotation ? (
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    iconType="arrowLeft"
+                    data-test-subj="backToGroupSettings"
+                    onClick={() => setSelectedAnnotation(undefined)}
+                  >
+                    <FormattedMessage
+                      id="eventAnnotationComponents.edit.back"
+                      defaultMessage="Back"
+                    />
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              ) : (
+                <>
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonEmpty data-test-subj="cancelGroupEdit" onClick={onClose}>
+                      <FormattedMessage
+                        id="eventAnnotationComponents.edit.cancel"
+                        defaultMessage="Cancel"
+                      />
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiButton
+                      iconType="save"
+                      data-test-subj="saveAnnotationGroup"
+                      fill
+                      onClick={() => {
+                        setHasAttemptedSave(true);
 
-      <EuiFlyoutFooter>
-        <EuiFlexGroup justifyContent="spaceBetween">
-          {selectedAnnotation ? (
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                iconType="arrowLeft"
-                data-test-subj="backToGroupSettings"
-                onClick={() => setSelectedAnnotation(undefined)}
+                        if (isGroupValid(group)) {
+                          onSave();
+                        }
+                      }}
+                    >
+                      <FormattedMessage
+                        id="eventAnnotationComponents.edit.save"
+                        defaultMessage="Save annotation group"
+                      />
+                    </EuiButton>
+                  </EuiFlexItem>
+                </>
+              )}
+            </EuiFlexGroup>
+          </EuiFlyoutFooter>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFlyoutHeader>
+            <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
+              <EuiFlexItem>
+                <EuiTitle size="s">
+                  <h4>
+                    <FormattedMessage
+                      id="eventAnnotationComponents.groupEditor.preview"
+                      defaultMessage="Preview"
+                    />
+                  </h4>
+                </EuiTitle>
+              </EuiFlexItem>
+              <EuiFlexItem
+                css={css`
+                  width: 310px;
+                `}
+                grow={false}
               >
-                <FormattedMessage id="eventAnnotationComponents.edit.back" defaultMessage="Back" />
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          ) : (
-            <>
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty data-test-subj="cancelGroupEdit" onClick={onClose}>
-                  <FormattedMessage
-                    id="eventAnnotationComponents.edit.cancel"
-                    defaultMessage="Cancel"
-                  />
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  iconType="save"
-                  data-test-subj="saveAnnotationGroup"
-                  fill
-                  onClick={() => {
-                    setHasAttemptedSave(true);
-
-                    if (isGroupValid(group)) {
-                      onSave();
-                    }
+                <EuiSuperDatePicker
+                  onTimeChange={({ start: from, end: to }) => {
+                    setChartTimeRange({ from, to });
                   }}
-                >
-                  <FormattedMessage
-                    id="eventAnnotationComponents.edit.save"
-                    defaultMessage="Save annotation group"
-                  />
-                </EuiButton>
+                  start={chartTimeRange.from}
+                  end={chartTimeRange.to}
+                  showUpdateButton={false}
+                  compressed={true}
+                />
               </EuiFlexItem>
-            </>
-          )}
-        </EuiFlexGroup>
-      </EuiFlyoutFooter>
+            </EuiFlexGroup>
+          </EuiFlyoutHeader>
+          <EuiFlyoutBody>
+            <div
+              css={css`
+                & > div {
+                  height: 400px;
+                  width: 100%;
+                }
+              `}
+            >
+              <LensEmbeddableComponent
+                data-test-subj="chart"
+                id="annotation-library-preview"
+                timeRange={chartTimeRange}
+                attributes={lensAttributes}
+                onBrushEnd={({ range }) =>
+                  setChartTimeRange({
+                    from: new Date(range[0]).toISOString(),
+                    to: new Date(range[1]).toISOString(),
+                  })
+                }
+              />
+            </div>
+          </EuiFlyoutBody>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </EuiFlyout>
   );
 };

@@ -18,6 +18,7 @@ import type { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { EventAnnotationPluginStart } from '@kbn/event-annotation-plugin/public';
+import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { EventAnnotationListingPageServices } from './get_table_list';
 
 export interface EventAnnotationApplicationStartDependencies {
@@ -29,6 +30,7 @@ export interface EventAnnotationApplicationStartDependencies {
   dataViews: DataViewsPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   contentManagement: ContentManagementPublicStart;
+  lens: LensPublicStart;
 }
 
 interface SetupDependencies {
@@ -68,6 +70,7 @@ export class EventAnnotationPlugin
 
         const services: EventAnnotationListingPageServices = {
           core: coreStart,
+          LensEmbeddableComponent: pluginsStart.lens.EmbeddableComponent,
           savedObjectsTagging: pluginsStart.savedObjectsTagging,
           eventAnnotationService,
           PresentationUtilContextProvider: pluginsStart.presentationUtil.ContextProvider,

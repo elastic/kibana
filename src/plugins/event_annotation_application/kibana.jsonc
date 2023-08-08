@@ -16,10 +16,11 @@
       "dataViews",
       "unifiedSearch",
       "kibanaUtils",
-      "contentManagement"
+      "contentManagement",
     ],
     "optionalPlugins": [
       "savedObjectsTagging",
+      "lens",
     ],
     "requiredBundles": [
       "kibanaReact",

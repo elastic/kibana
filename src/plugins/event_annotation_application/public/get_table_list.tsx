@@ -18,6 +18,7 @@ import type { QueryInputServices } from '@kbn/visualization-ui-components';
 import { RootDragDropProvider } from '@kbn/dom-drag-drop';
 import type { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 import { EventAnnotationGroupTableList } from '@kbn/event-annotation-components';
+import type { EmbeddableComponent as LensEmbeddableComponent } from '@kbn/lens-plugin/public';
 
 export interface EventAnnotationListingPageServices {
   core: CoreStart;
@@ -27,6 +28,7 @@ export interface EventAnnotationListingPageServices {
   dataViews: DataView[];
   createDataView: (spec: DataViewSpec) => Promise<DataView>;
   queryInputServices: QueryInputServices;
+  LensEmbeddableComponent: LensEmbeddableComponent;
 }
 
 export const getTableList = (
@@ -54,6 +56,7 @@ export const getTableList = (
           createDataView={services.createDataView}
           queryInputServices={services.queryInputServices}
           navigateToLens={() => services.core.application.navigateToApp('lens')}
+          LensEmbeddableComponent={services.LensEmbeddableComponent}
         />
       </TableListViewKibanaProvider>
     </RootDragDropProvider>

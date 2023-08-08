@@ -18,6 +18,7 @@ import type { QueryInputServices } from '@kbn/visualization-ui-components';
 import { IToasts } from '@kbn/core-notifications-browser';
 import { EuiButton, EuiEmptyPrompt, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { EmbeddableComponent as LensEmbeddableComponent } from '@kbn/lens-plugin/public';
 import type {
   EventAnnotationGroupConfig,
   EventAnnotationGroupContent,
@@ -61,6 +62,7 @@ export const EventAnnotationGroupTableList = ({
   queryInputServices,
   toasts,
   navigateToLens,
+  LensEmbeddableComponent,
 }: {
   uiSettings: IUiSettingsClient;
   eventAnnotationService: EventAnnotationServiceType;
@@ -72,6 +74,7 @@ export const EventAnnotationGroupTableList = ({
   queryInputServices: QueryInputServices;
   toasts: IToasts;
   navigateToLens: () => void;
+  LensEmbeddableComponent: LensEmbeddableComponent;
 }) => {
   const listingLimit = uiSettings.get(SAVED_OBJECTS_LIMIT_SETTING);
   const initialPageSize = uiSettings.get(SAVED_OBJECTS_PER_PAGE_SETTING);
@@ -138,6 +141,7 @@ export const EventAnnotationGroupTableList = ({
       savedObjectsTagging={savedObjectsTagging}
       dataViews={dataViews}
       createDataView={createDataView}
+      LensEmbeddableComponent={LensEmbeddableComponent}
       queryInputServices={queryInputServices}
     />
   ) : undefined;
