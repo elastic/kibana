@@ -16,7 +16,7 @@ import type {
   GenericIndexPatternColumn,
 } from '../operations/definitions';
 import type { FieldBasedIndexPatternColumn } from '../operations/definitions/column_types';
-import { containsColumnWithTimeSeriesMetric } from '../pure_utils';
+import { shouldShowTimeSeriesOption } from '../pure_utils';
 
 export function FieldInput({
   layer,
@@ -84,9 +84,11 @@ export function FieldInput({
             })
           );
         }}
-        showTimeSeriesDimensions={Boolean(
-          dimensionGroups.find(({ groupId: id }) => groupId === id)?.isBreakdownDimension &&
-            containsColumnWithTimeSeriesMetric(layer, indexPattern)
+        showTimeSeriesDimensions={shouldShowTimeSeriesOption(
+          layer,
+          indexPattern,
+          groupId,
+          dimensionGroups
         )}
       />
     </EuiFormRow>
