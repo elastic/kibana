@@ -22,7 +22,12 @@ const coreMock = {
   uiSettings: { get: () => {} },
 } as unknown as CoreStart;
 
-const KibanaReactContext = createKibanaReactContext(coreMock);
+const KibanaReactContext = createKibanaReactContext({
+  ...coreMock,
+  dataViews: {
+    create: async () => {},
+  },
+});
 
 interface Args {
   ruleParams: ErrorCountRuleParams;
