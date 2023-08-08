@@ -260,7 +260,7 @@ curl --request POST \
 		}
 	},
 	"timeWindow": {
-		"duration": "7d",
+		"duration": "1w",
 		"type": "calendarAligned"
 	},
 	"budgetingMethod": "timeslices",
