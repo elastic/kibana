@@ -46,7 +46,7 @@ function getArtificialLogsWithDeviation(index: string, deviationType: string) {
           ) {
             tsOffset = 0;
             [...Array(100)].forEach(() => {
-              tsOffset += DAY_MS / 100;
+              tsOffset += Math.round(DAY_MS / 100);
               const doc: GeneratedDoc = {
                 user,
                 response_code: responseCode,
@@ -76,7 +76,7 @@ function getArtificialLogsWithDeviation(index: string, deviationType: string) {
     ['login.php', 'user.php', 'home.php'].forEach((url) => {
       tsOffset = 0;
       [...Array(docsPerUrl1[url])].forEach(() => {
-        tsOffset += DAY_MS / docsPerUrl1[url];
+        tsOffset += Math.round(DAY_MS / docsPerUrl1[url]);
         bulkBody.push(action);
         bulkBody.push({
           user: 'Peter',
@@ -101,7 +101,7 @@ function getArtificialLogsWithDeviation(index: string, deviationType: string) {
     ['login.php', 'home.php'].forEach((url) => {
       tsOffset = 0;
       [...Array(docsPerUrl2[url] + userIndex)].forEach(() => {
-        tsOffset += DAY_MS / docsPerUrl2[url];
+        tsOffset += Math.round(DAY_MS / docsPerUrl2[url]);
         bulkBody.push(action);
         bulkBody.push({
           user,
