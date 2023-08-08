@@ -12,8 +12,6 @@ import { debounce } from 'lodash';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useFetchSloDefinitions } from '../../hooks/slo/use_fetch_slo_definitions';
 
-// import { useFetchSloList } from '../../hooks/slo/use_fetch_slo_list';
-
 interface Props {
   initialSlo?: SLOResponse;
   errors?: string[];
@@ -24,7 +22,6 @@ function SloSelector({ initialSlo, onSelected, errors }: Props) {
   const [options, setOptions] = useState<Array<EuiComboBoxOptionOption<string>>>([]);
   const [selectedOptions, setSelectedOptions] = useState<Array<EuiComboBoxOptionOption<string>>>();
   const [searchValue, setSearchValue] = useState<string>('');
-  // const { isLoading, sloList } = useFetchSloList({ kqlQuery: `slo.name:${searchValue}*` });
   const { isLoading, data: sloList } = useFetchSloDefinitions({ name: searchValue });
   const hasError = errors !== undefined && errors.length > 0;
 

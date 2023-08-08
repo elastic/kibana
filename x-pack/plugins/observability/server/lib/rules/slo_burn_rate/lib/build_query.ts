@@ -30,12 +30,16 @@ export function generateWindowId(index: string | number) {
   return `${WINDOW}_${index}`;
 }
 
+export function generateStatsKey(id: string, type: WindowType) {
+  return `${id}_${type}`;
+}
+
 export function generateBurnRateKey(id: string, type: WindowType) {
-  return `${id}_${type}_${BURN_RATE}`;
+  return `${generateStatsKey(id, type)}_${BURN_RATE}`;
 }
 
 export function generateAboveThresholdKey(id: string, type: WindowType) {
-  return `${id}_${type}_${ABOVE_THRESHOLD}`;
+  return `${generateStatsKey(id, type)}_${ABOVE_THRESHOLD}`;
 }
 
 const TIMESLICE_AGGS = {

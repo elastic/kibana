@@ -58,6 +58,15 @@ import {
   ALERT_EVALUATION_VALUE,
   ALERT_REASON,
 } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
+import {
+  generateAboveThresholdKey,
+  generateBurnRateKey,
+  generateStatsKey,
+  generateWindowId,
+  LONG_WINDOW,
+  SHORT_WINDOW,
+} from './lib/build_query';
+import { get } from 'lodash';
 
 const commonEsResponse = {
   took: 100,
@@ -531,22 +540,26 @@ function generateEsResponse(
             return bucket.windows.reduce(
               (acc, win, index) => ({
                 ...acc,
-                [`WINDOW_${index}_SHORT`]: {
+                [generateStatsKey(generateWindowId(index), SHORT_WINDOW)]: {
                   doc_count: 100,
                   good: { value: win.shortWindowBurnRate * 100 },
                   total: { value: 100 },
                 },
-                [`WINDOW_${index}_LONG`]: {
+                [generateStatsKey(generateWindowId(index), LONG_WINDOW)]: {
                   doc_count: 100,
                   good: { value: win.longWindowBurnRate * 100 },
                   total: { value: 100 },
                 },
-                [`WINDOW_${index}_SHORT_BURN_RATE`]: { value: win.shortWindowBurnRate },
-                [`WINDOW_${index}_LONG_BURN_RATE`]: { value: win.longWindowBurnRate },
-                [`WINDOW_${index}_SHORT_ABOVE_THRESHOLD`]: {
+                [generateBurnRateKey(generateWindowId(index), SHORT_WINDOW)]: {
+                  value: win.shortWindowBurnRate,
+                },
+                [generateBurnRateKey(generateWindowId(index), LONG_WINDOW)]: {
+                  value: win.longWindowBurnRate,
+                },
+                [generateAboveThresholdKey(generateWindowId(index), SHORT_WINDOW)]: {
                   value: win.shortWindowBurnRate >= params.windows[index].burnRateThreshold ? 1 : 0,
                 },
-                [`WINDOW_${index}_LONG_ABOVE_THRESHOLD`]: {
+                [generateAboveThresholdKey(generateWindowId(index), LONG_WINDOW)]: {
                   value: win.longWindowBurnRate >= params.windows[index].burnRateThreshold ? 1 : 0,
                 },
               }),
@@ -559,8 +572,16 @@ function generateEsResponse(
           .filter((bucket: any) =>
             params.windows.some(
               (_win, index) =>
-                bucket[`WINDOW_${index}_SHORT_ABOVE_THRESHOLD`].value === 1 &&
-                bucket[`WINDOW_${index}_LONG_ABOVE_THRESHOLD`].value === 1
+                get(
+                  bucket,
+                  [generateAboveThresholdKey(generateWindowId(index), SHORT_WINDOW), 'value'],
+                  0
+                ) === 1 &&
+                get(
+                  bucket,
+                  [generateAboveThresholdKey(generateWindowId(index), LONG_WINDOW), 'value'],
+                  0
+                ) === 1
             )
           ),
       },
