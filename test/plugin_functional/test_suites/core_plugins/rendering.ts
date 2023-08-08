@@ -187,7 +187,6 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.apm.latestAgentVersionsUrl (string)',
         'xpack.apm.featureFlags.agentConfigurationAvailable (any)',
         'xpack.apm.featureFlags.configurableIndicesAvailable (any)',
-        'xpack.apm.featureFlags.fastRefreshAvailable (any)',
         'xpack.apm.featureFlags.infrastructureTabAvailable (any)',
         'xpack.apm.featureFlags.infraUiAvailable (any)',
         'xpack.apm.featureFlags.migrationToFleetAvailable (any)',
@@ -224,6 +223,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.cloud.profile_url (string)',
         'xpack.cloud.performance_url (string)',
         'xpack.cloud.users_and_roles_url (string)',
+        'xpack.cloud.projects_url (any)', // It's a string (any because schema.conditional)
         // can't be used to infer urls or customer id from the outside
         'xpack.cloud.serverless.project_id (string)',
         'xpack.discoverEnhanced.actions.exploreDataInChart.enabled (boolean)',
