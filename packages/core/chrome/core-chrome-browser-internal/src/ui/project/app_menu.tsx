@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiThemeProvider, useEuiTheme } from '@elastic/eui';
+import { EuiThemeProvider, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { MountPoint } from '@kbn/core-mount-utils-browser';
 import React from 'react';
@@ -25,28 +25,16 @@ export const AppMenuBar = ({ isOpen, headerActionMenuMounter }: AppMenuBarProps)
         className="header__actionMenu"
         data-test-subj="kibanaProjectHeaderActionMenu"
         css={css`
+          background: ${euiTheme.colors.emptyShade};
+          border-bottom: ${euiTheme.border.thin};
+          display: flex;
+          justify-content: end;
+          padding: ${euiTheme.size.s};
           /* span the width of the body content (viewport - width of side nav) */
           width: calc(100% - ${isOpen ? SIZE_EXPANDED : SIZE_COLLAPSED}px);
         `}
       >
-        <EuiFlexGroup
-          css={css`
-            /* EuiPanel-like styling */
-            padding: ${euiTheme.size.s};
-            border-bottom: ${euiTheme.border.thin};
-            background: ${euiTheme.colors.emptyShade};
-          `}
-        >
-          <EuiFlexItem
-            grow={false}
-            css={css`
-              /* force the item to use all space to the left, pushing content to the right edge of the viewport */
-              margin-left: auto;
-            `}
-          >
-            <HeaderActionMenu mounter={headerActionMenuMounter} />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <HeaderActionMenu mounter={headerActionMenuMounter} />
       </div>
       <div className="header__actionMenu__clearFix" />
     </EuiThemeProvider>
