@@ -15,8 +15,8 @@ servers:
 paths:
   /api/timeline/_export:
     post:
-      operationId: exportTimelinesRoute
-      description: Exports timelines.
+      operationId: exportTimelines
+      description: Exports timelines as an NDJSON file
       tags:
         - access:securitySolution
       parameters:
@@ -40,7 +40,7 @@ paths:
                     type: string
       responses:
         200:
-          description: Indicates the installation of prepackaged timelines was successful.
+          description: Indicates the timelines were successfully exported
           content:
             application/ndjson:
               schema:

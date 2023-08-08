@@ -1,7 +1,10 @@
 openapi: 3.0.0
 info:
-  title: Elastic Security - Timeline - Get Timeline API (https://www.elastic.co/guide/en/security/current/_get_timeline_timeline_template_by_savedobjectid.html)
+  title: Elastic Security - Timeline - Get Timeline API
   version: 8.9.0
+externalDocs:
+  url: https://www.elastic.co/guide/en/security/current/_get_timeline_timeline_template_by_savedobjectid.html
+  description: Documentation
 servers:
   - url: 'http://{kibana_host}:{port}'
     variables:
@@ -12,7 +15,7 @@ servers:
 paths:
   /api/timeline:
     get:
-      operationId: getTimelineRoute
+      operationId: getTimeline
       description: Get an existing saved timeline or timeline template. This API is used to retrieve an existing saved timeline or timeline template.
       tags:
         - access:securitySolution
@@ -44,14 +47,3 @@ paths:
                           - nullable: true
                 required:
                   - data
-        500:
-          description: Indicates that the timeline update failed.
-          content:
-            application:json:
-              schema:
-                type: object
-                properties:
-                  body:
-                    type: string
-                  statusCode:
-                    type: number

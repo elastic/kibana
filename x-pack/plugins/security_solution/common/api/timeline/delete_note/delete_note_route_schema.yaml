@@ -1,6 +1,6 @@
 openapi: 3.0.0
 info:
-  title: Elastic Security - Timeline - Notes API (https://www.elastic.co/guide/en/security/current/timeline-api-update.html)
+  title: Elastic Security - Timeline - Notes API
   version: 8.9.0
 servers:
   - url: 'http://{kibana_host}:{port}'
@@ -12,7 +12,7 @@ servers:
 paths:
   /api/note:
     delete:
-      operationId: deleteNoteroute
+      operationId: deleteNote
       description: Deletes a note from a timeline.
       tags:
         - access:securitySolution
@@ -30,14 +30,3 @@ paths:
       responses:
         200:
           description: Indicates the note was successfully deleted.
-        500:
-          description: Indicates an internal server error occurred.
-          content:
-            application:json:
-              schema:
-                type: object
-                properties:
-                  body:
-                    type: string
-                  statusCode:
-                    type: number

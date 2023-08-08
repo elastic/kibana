@@ -12,7 +12,7 @@ servers:
 paths:
   /api/timeline/_draft:
     post:
-      operationId: cleanDraftTimelinesRoute #TODO: rename
+      operationId: cleanDraftTimelines
       summary: Retrieves a draft timeline or timeline template.
       description: |
         Retrieves a clean draft timeline. If a draft timeline does not exist, it is created and returned.
@@ -46,8 +46,19 @@ paths:
                             $ref: '../model/components.yaml#/components/schemas/TimelineResponse'
                 required:
                   - data
-        500:
-          description: Indicates that an error occurred while attempting to create the draft timeline.
+        403:
+          description: Indicates that the user does not have the required permissions to create a draft timeline.
+          content:
+            application:json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  status_code:
+                    type: number
+        409:
+          description: Indicates that there is already a draft timeline with the given timelineId.
           content:
             application:json:
               schema:
