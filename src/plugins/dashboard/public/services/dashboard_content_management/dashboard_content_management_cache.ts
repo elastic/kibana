@@ -6,39 +6,34 @@
  * Side Public License, v 1.
  */
 
+import LRUCache from 'lru-cache';
 import { DashboardCrudTypes } from '../../../common/content_management';
 
 export class DashboardContentManagementCache {
-  private cache: {
-    [dashboardId: string]: DashboardCrudTypes['GetOut'] & {
-      lastFetched: Date;
-    };
-  };
+  private cache: LRUCache<string, DashboardCrudTypes['GetOut']>;
 
   constructor() {
-    this.cache = {};
+    this.cache = new LRUCache<string, DashboardCrudTypes['GetOut']>({
+      max: 100, // only store 100 dashboards
+      maxAge: 1000 * 60 * 5, // 5 minutes
+    });
   }
 
-  /**
-   * Fetch the dashboard with `id` from the cache, if it exists, and return it as long as it has been
-   * less than 5 minutes since the dashboard was last fetched
-   */
+  /** Fetch the dashboard with `id` from the cache */
   public fetchDashboard(id: string) {
-    if (this.cache[id] && Math.abs(+new Date() - +this.cache[id].lastFetched) < 300000)
-      return this.cache[id];
+    return this.cache.get(id);
   }
 
-  /** Add the fetched dashboard to the cache with an updated `lastFetched` date */
+  /** Add the fetched dashboard to the cache */
   public addDashboard({ item: dashboard, meta }: DashboardCrudTypes['GetOut']) {
-    this.cache[dashboard.id] = {
+    this.cache.set(dashboard.id, {
       meta,
       item: dashboard,
-      lastFetched: new Date(),
-    };
+    });
   }
 
-  /** Delete the dashboard with `id` from the cache, if it exists */
+  /** Delete the dashboard with `id` from the cache */
   public deleteDashboard(id: string) {
-    if (this.cache[id]) delete this.cache[id];
+    this.cache.del(id);
   }
 }
