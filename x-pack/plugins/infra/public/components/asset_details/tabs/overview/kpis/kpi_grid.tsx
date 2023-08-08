@@ -22,7 +22,7 @@ const AVERAGE_SUBTITLE = i18n.translate(
 );
 
 interface Props {
-  dataView: DataView;
+  dataView?: DataView;
   nodeName: string;
   timeRange: TimeRange;
 }
