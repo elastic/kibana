@@ -49,15 +49,6 @@ interface SecretPath {
   value: PackagePolicyConfigRecordEntry;
 }
 
-// This will be removed once the secrets index PR is merged into elasticsearch
-function getSecretsIndex() {
-  const testIndex = appContextService.getConfig()?.developer?.testSecretsIndex;
-  if (testIndex) {
-    return testIndex;
-  }
-  return SECRETS_INDEX;
-}
-
 export async function createSecrets(opts: {
   esClient: ElasticsearchClient;
   values: string[];
@@ -66,7 +57,7 @@ export async function createSecrets(opts: {
   const logger = appContextService.getLogger();
   const body = values.flatMap((value) => [
     {
-      create: { _index: getSecretsIndex() },
+      create: { _index: SECRETS_INDEX },
     },
     { value },
   ]);
@@ -99,7 +90,7 @@ export async function createSecrets(opts: {
       value: values[i],
     }));
   } catch (e) {
-    const msg = `Error creating secrets in ${getSecretsIndex()} index: ${e}`;
+    const msg = `Error creating secrets in ${SECRETS_INDEX} index: ${e}`;
     logger.error(msg);
     throw new FleetError(msg);
   }
@@ -192,7 +183,7 @@ export async function _deleteSecrets(opts: {
   const logger = appContextService.getLogger();
   const body = ids.flatMap((id) => [
     {
-      delete: { _index: getSecretsIndex(), _id: id },
+      delete: { _index: SECRETS_INDEX, _id: id },
     },
   ]);
 
@@ -221,7 +212,7 @@ export async function _deleteSecrets(opts: {
       throw new Error(JSON.stringify(errorItems));
     }
   } catch (e) {
-    const msg = `Error deleting secrets from ${getSecretsIndex()} index: ${e}`;
+    const msg = `Error deleting secrets from ${SECRETS_INDEX} index: ${e}`;
     logger.error(msg);
     throw new FleetError(msg);
   }
