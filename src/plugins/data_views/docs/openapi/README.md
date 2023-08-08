@@ -5,6 +5,13 @@ This spec is experimental and may be incomplete or change later.
 
 A guide about the openApi specification can be found at [https://swagger.io/docs/specification/about/](https://swagger.io/docs/specification/about/).
 
+
+## The `openapi` folder
+
+* `entrypoint.yaml` is the overview file which pulls together all the paths and components.
+* [Paths](paths/README.md): Defines each endpoint.  A path can have one operation per http method.
+* [Components](components/README.md): Defines reusable components.
+
 ## Tools
 
 It is possible to validate the docs before bundling them with the following
