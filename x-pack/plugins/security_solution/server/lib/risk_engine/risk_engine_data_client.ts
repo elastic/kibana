@@ -36,6 +36,8 @@ import {
   getConfiguration,
   initSavedObjects,
 } from './utils/saved_object_configuration';
+import { createAndStartTransform } from '../risk_score/transform/helpers/transforms';
+import { createIndex } from '../risk_score/indices/lib/create_index';
 
 interface InitOpts {
   namespace: string;
@@ -75,7 +77,7 @@ export class RiskEngineDataClient {
     }
 
     try {
-      await this.initializeResources({ namespace, esClient });
+      await this.initializeResources({ namespace });
       result.riskEngineResourcesInstalled = true;
     } catch (e) {
       result.errors.push(e.message);
@@ -200,7 +202,6 @@ export class RiskEngineDataClient {
 
   public async initializeResources({
     namespace = DEFAULT_NAMESPACE_STRING,
-    esClient,
   }: InitializeRiskEngineResourcesOpts) {
     try {
       const esClient = this.options.esClient;
