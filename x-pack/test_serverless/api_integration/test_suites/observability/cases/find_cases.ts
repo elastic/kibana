@@ -6,7 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import {
   findCases,
@@ -43,6 +42,16 @@ export default ({ getService }: FtrProviderContext): void => {
         cases: [a, b, c],
         count_open_cases: 3,
       });
+    });
+
+    it('returns empty response when trying to find cases with owner as cases', async () => {
+      const cases = await findCases({ supertest, query: { owner: 'cases' } });
+      expect(cases).to.eql(findCasesResp);
+    });
+
+    it('returns empty response when trying to find cases with owner as securitySolution', async () => {
+      const cases = await findCases({ supertest, query: { owner: 'securitySolution' } });
+      expect(cases).to.eql(findCasesResp);
     });
   });
 };

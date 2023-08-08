@@ -45,6 +45,16 @@ export default ({ getService }: FtrProviderContext): void => {
           count_open_cases: 3,
         });
       });
+
+      it('returns empty response when trying to find cases with owner as cases', async () => {
+        const cases = await findCases({ supertest, query: { owner: 'cases' } });
+        expect(cases).to.eql(findCasesResp);
+      });
+
+      it('returns empty response when trying to find cases with owner as observability', async () => {
+        const cases = await findCases({ supertest, query: { owner: 'observability' } });
+        expect(cases).to.eql(findCasesResp);
+      });
     });
   });
 };
