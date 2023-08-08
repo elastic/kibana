@@ -23,6 +23,7 @@ import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import { migrateToLatest, PersistableStateService } from '@kbn/kibana-utils-plugin/common';
 import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
+import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import {
   EmbeddableFactoryRegistry,
@@ -65,6 +66,7 @@ export interface EmbeddableStartDependencies {
   uiActions: UiActionsStart;
   inspector: InspectorStart;
   usageCollection: UsageCollectionStart;
+  contentManagement: ContentManagementPublicStart;
   savedObjectsManagement: SavedObjectsManagementPluginStart;
   savedObjectsTaggingOss?: SavedObjectTaggingOssPluginStart;
 }
