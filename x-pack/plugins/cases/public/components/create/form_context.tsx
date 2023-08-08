@@ -84,8 +84,8 @@ export const FormContext: React.FC<Props> = ({
       if (isValid) {
         const { selectedOwner, ...userFormData } = dataWithoutConnectorId;
         const caseConnector = getConnectorById(dataConnectorId, connectors);
+        const defaultOwner = owner[0] ?? availableOwners[0];
 
-        console.log('form context', {owner, availableOwners, selectedOwner});
 
         startTransaction({ appId, attachments });
 
@@ -98,7 +98,7 @@ export const FormContext: React.FC<Props> = ({
             ...userFormData,
             connector: connectorToUpdate,
             settings: { syncAlerts },
-            owner: selectedOwner ?? availableOwners[0],
+            owner: selectedOwner ?? defaultOwner,
           },
         });
 

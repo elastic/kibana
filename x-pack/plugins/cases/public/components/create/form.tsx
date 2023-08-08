@@ -89,8 +89,6 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
     const availableOwners = useAvailableCasesOwners();
     const canShowCaseSolutionSelection = !owner.length && availableOwners.length > 1;
 
-    console.log('create case from', {canShowCaseSolutionSelection, owner, availableOwners});
-
     const firstStep = useMemo(
       () => ({
         title: i18n.STEP_ONE_TITLE,
