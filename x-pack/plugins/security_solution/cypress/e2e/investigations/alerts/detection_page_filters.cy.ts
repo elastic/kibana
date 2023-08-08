@@ -329,7 +329,7 @@ describe(`Detections : Page Filters`, () => {
     cy.get(FILTER_GROUP_CHANGED_BANNER).should('not.exist');
   });
 
-  context.only('Impact of inputs', () => {
+  context('Impact of inputs', () => {
     afterEach(() => {
       resetFilters();
     });
