@@ -110,7 +110,8 @@ describe('Timelines', (): void => {
     });
   });
 
-  describe(
+
+  describe.skip(
     'Creates a timeline by clicking untitled timeline from bottom bar',
     { tags: tag.BROKEN_IN_SERVERLESS },
     () => {

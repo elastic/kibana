@@ -42,6 +42,7 @@ export const PanelHeader: VFC<PanelHeaderProps> = memo(
         `}
       >
         <div
+          // moving the buttons up in the header
           css={css`
             margin-top: -24px;
             margin-left: -8px;
@@ -49,7 +50,7 @@ export const PanelHeader: VFC<PanelHeaderProps> = memo(
         >
           <ExpandDetailButton />
         </div>
-        <EuiSpacer size="m" />
+        <EuiSpacer size="xs" />
         <HeaderTitle />
         <EuiSpacer size="m" />
         <EuiTabs
