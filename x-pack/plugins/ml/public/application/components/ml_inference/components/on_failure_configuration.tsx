@@ -106,7 +106,7 @@ export const OnFailureConfiguration: FC<Props> = memo(
                 <p>
                   <FormattedMessage
                     id="xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.advanced.handleFailuresExplanation"
-                    defaultMessage="If the model fails to produce a prediction, for example, due to a change in the data schema, the document will be ingested without the prediction."
+                    defaultMessage="If the model fails to produce a prediction, the document will be ingested without the prediction."
                   />
                 </p>
                 <p>

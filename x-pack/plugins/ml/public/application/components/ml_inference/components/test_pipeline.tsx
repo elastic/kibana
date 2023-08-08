@@ -153,7 +153,7 @@ export const TestPipeline: FC<Props> = memo(({ state, sourceIndex }) => {
               <FormattedMessage
                 id="xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.test.description"
                 defaultMessage="Run a simulation of the pipeline to confirm it produces the anticipated results."
-              />
+              />{' '}
               {state.targetField && (
                 <FormattedMessage
                   id="xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.test.targetFieldHint"
