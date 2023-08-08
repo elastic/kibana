@@ -17,14 +17,14 @@ export default function ({ getService }: FtrProviderContext) {
         it('get access capabilities', async () => {
           const { body, status } = await supertest
             .get('/internal/security/anonymous_access/capabilities')
-            .set(svlCommonApi.getInternalRequestHeader());
+            .set(svlCommonApi.getCommonRequestHeader());
           svlCommonApi.assertApiNotFound(body, status);
         });
 
         it('get access state', async () => {
           const { body, status } = await supertest
             .get('/internal/security/anonymous_access/state')
-            .set(svlCommonApi.getInternalRequestHeader());
+            .set(svlCommonApi.getCommonRequestHeader());
           svlCommonApi.assertApiNotFound(body, status);
         });
       });

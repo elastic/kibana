@@ -22,7 +22,7 @@ export function defineViewRoutes(params: RouteDefinitionParams) {
   defineOverwrittenSessionRoutes(params);
 
   if (params.buildFlavor !== 'serverless') {
-    // In the serverless environment, there is no need for an access agreement HTTP API
+    // In the serverless offering, the access agreement functionality isn't available.
     defineAccessAgreementRoutes(params);
 
     // In the serverless environment, the only valid authentication methodology is SAML.
