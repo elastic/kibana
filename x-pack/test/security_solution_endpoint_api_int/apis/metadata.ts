@@ -46,6 +46,9 @@ export default function ({ getService }: FtrProviderContext) {
   describe('test metadata apis', () => {
     describe('list endpoints GET route', () => {
       const numberOfHostsInFixture = 2;
+      let agent1Timestamp: number;
+      let agent2Timestamp: number;
+      let metadataTimestamp: number;
 
       before(async () => {
         await deleteAllDocsFromFleetAgents(getService);
@@ -62,10 +65,12 @@ export default function ({ getService }: FtrProviderContext) {
             '1.1.1'
           );
           const policyId = policy.integrationPolicies[0].policy_id;
-          const currentTime = new Date().getTime();
+          agent1Timestamp = new Date().getTime();
+          agent2Timestamp = agent1Timestamp + 33;
+          metadataTimestamp = agent1Timestamp + 666;
 
-          const agentDocs = generateAgentDocs(currentTime, policyId);
-          const metadataDocs = generateMetadataDocs(currentTime);
+          const agentDocs = generateAgentDocs([agent1Timestamp, agent2Timestamp], policyId);
+          const metadataDocs = generateMetadataDocs(metadataTimestamp);
 
           await Promise.all([
             bulkIndex(getService, AGENTS_INDEX, agentDocs),
@@ -299,6 +304,36 @@ export default function ({ getService }: FtrProviderContext) {
         expect(body.total).to.eql(numberOfHostsInFixture);
         expect(body.page).to.eql(0);
         expect(body.pageSize).to.eql(10);
+      });
+
+      describe('`last_checkin` runtime field', () => {
+        it('should sort based on `last_checkin` - because it is a runtime field', async () => {
+          const { body: bodyAsc }: { body: MetadataListResponse } = await supertest
+            .get(HOST_METADATA_LIST_ROUTE)
+            .set('kbn-xsrf', 'xxx')
+            .set('Elastic-Api-Version', '2023-10-31')
+            .query({
+              sortField: 'last_checkin',
+              sortDirection: 'asc',
+            })
+            .expect(200);
+
+          expect(bodyAsc.data[0].last_checkin).to.eql(new Date(agent1Timestamp).toISOString());
+          expect(bodyAsc.data[1].last_checkin).to.eql(new Date(agent2Timestamp).toISOString());
+
+          const { body: bodyDesc }: { body: MetadataListResponse } = await supertest
+            .get(HOST_METADATA_LIST_ROUTE)
+            .set('kbn-xsrf', 'xxx')
+            .set('Elastic-Api-Version', '2023-10-31')
+            .query({
+              sortField: 'last_checkin',
+              sortDirection: 'desc',
+            })
+            .expect(200);
+
+          expect(bodyDesc.data[0].last_checkin).to.eql(new Date(agent2Timestamp).toISOString());
+          expect(bodyDesc.data[1].last_checkin).to.eql(new Date(agent1Timestamp).toISOString());
+        });
       });
 
       describe('sorting', () => {

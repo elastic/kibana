@@ -1344,7 +1344,7 @@ export enum EndpointSortableField {
   HOST_OS_NAME = 'metadata.host.os.name',
   HOST_IP = 'metadata.host.ip',
   AGENT_VERSION = 'metadata.agent.version',
-  LAST_SEEN = 'metadata.@timestamp',
+  LAST_SEEN = 'last_checkin',
 }
 
 /**
