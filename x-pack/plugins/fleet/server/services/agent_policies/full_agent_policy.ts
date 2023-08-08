@@ -305,7 +305,7 @@ export function transformOutputToFullPolicyOutput(
       required_acks,
     } = output;
 
-    const transferPartition = () => {
+    const transformPartition = () => {
       if (!partition) return {};
       switch (partition) {
         case 'random':
@@ -340,7 +340,7 @@ export function transformOutputToFullPolicyOutput(
       username,
       password,
       sasl,
-      partition: transferPartition(),
+      partition: transformPartition(),
       topics: (topics ?? []).map((topic) => {
         const { topic: topicName, ...rest } = topic;
         const whenKeys = Object.keys(rest);

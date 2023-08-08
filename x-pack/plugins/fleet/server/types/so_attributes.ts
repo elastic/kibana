@@ -14,6 +14,7 @@ import type {
   OutputType,
   ShipperOutput,
   KafkaAcknowledgeReliabilityLevel,
+  KafkaConnectionTypeType,
 } from '../../common/types';
 import type { AgentType, FleetServerAgentComponent } from '../../common/types/models';
 
@@ -159,6 +160,7 @@ export interface OutputSoKafkaAttributes extends OutputSoBaseAttributes {
   compression?: ValueOf<KafkaCompressionType>;
   compression_level?: number;
   auth_type?: ValueOf<KafkaAuthType>;
+  connection_type?: ValueOf<KafkaConnectionTypeType>;
   username?: string;
   password?: string;
   sasl?: {

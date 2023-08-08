@@ -25,6 +25,8 @@ import {
   UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
 } from '../constants';
 
+import { migrateOutputEvictionsFromV8100, migrateOutputToV8100 } from './migrations/to_v8_10_0';
+
 import { migrateSyntheticsPackagePolicyToV8100 } from './migrations/synthetics/to_v8_10_0';
 
 import { migratePackagePolicyEvictionsFromV8100 } from './migrations/security_solution/to_v8_10_0';
@@ -177,6 +179,7 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
         compression_level: { type: 'integer' },
         client_id: { type: 'keyword' },
         auth_type: { type: 'keyword' },
+        connection_type: { type: 'keyword' },
         username: { type: 'keyword' },
         password: { type: 'text', index: false },
         sasl: {
@@ -244,7 +247,14 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
               'channel_buffer_size',
             ],
           },
+          {
+            type: 'data_backfill',
+            backfillFn: migrateOutputToV8100,
+          },
         ],
+        schemas: {
+          forwardCompatibility: migrateOutputEvictionsFromV8100,
+        },
       },
     },
     migrations: {

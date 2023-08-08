@@ -4997,6 +4997,11 @@ components:
           type: string
         auth_type:
           type: string
+        connection_type:
+          type: string
+          enum:
+            - plaintext
+            - encryption
         username:
           type: string
         password:
@@ -5266,6 +5271,11 @@ components:
           type: string
         auth_type:
           type: string
+        connection_type:
+          type: string
+          enum:
+            - plaintext
+            - encryption
         username:
           type: string
         password:

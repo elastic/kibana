@@ -710,6 +710,7 @@ class OutputService {
       target.key = null;
       target.compression = null;
       target.compression_level = null;
+      target.connection_type = null;
       target.client_id = null;
       target.auth_type = null;
       target.username = null;

@@ -45,6 +45,11 @@ export const kafkaAuthType = {
   None: 'none',
 } as const;
 
+export const kafkaConnectionType = {
+  Plaintext: 'plaintext',
+  Encryption: 'encryption',
+} as const;
+
 export const kafkaSaslMechanism = {
   Plain: 'PLAIN',
   ScramSha256: 'SCRAM-SHA-256',

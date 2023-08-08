@@ -10,6 +10,7 @@ import { schema } from '@kbn/config-schema';
 import {
   kafkaAuthType,
   kafkaCompressionType,
+  kafkaConnectionType,
   kafkaPartitionType,
   kafkaSaslMechanism,
   kafkaTopicWhenType,
@@ -70,7 +71,7 @@ const BaseSchema = {
           schema.literal(kafkaVerificationModes.Full),
           schema.literal(kafkaVerificationModes.None),
           schema.literal(kafkaVerificationModes.Certificate),
-          schema.literal(kafkaVerificationModes.Certificate),
+          schema.literal(kafkaVerificationModes.Strict),
         ])
       ),
     })
@@ -183,6 +184,15 @@ export const KafkaSchema = {
     schema.literal(kafkaAuthType.Ssl),
     schema.literal(kafkaAuthType.Kerberos),
   ]),
+  connection_type: schema.conditional(
+    schema.siblingRef('auth_type'),
+    kafkaAuthType.None,
+    schema.oneOf([
+      schema.literal(kafkaConnectionType.Plaintext),
+      schema.literal(kafkaConnectionType.Encryption),
+    ]),
+    schema.never()
+  ),
   username: schema.conditional(
     schema.siblingRef('auth_type'),
     kafkaAuthType.Userpass,

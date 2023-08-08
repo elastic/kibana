@@ -21,6 +21,7 @@ import {
   kafkaAcknowledgeReliabilityLevel,
   kafkaAuthType,
   kafkaCompressionType,
+  kafkaConnectionType,
   kafkaPartitionType,
   kafkaSaslMechanism,
   kafkaVerificationModes,
@@ -92,6 +93,7 @@ export interface OutputFormInputsType {
   kafkaVersionInput: ReturnType<typeof useInput>;
   kafkaVerificationModeInput: ReturnType<typeof useInput>;
   kafkaAuthMethodInput: ReturnType<typeof useRadioInput>;
+  kafkaConnectionTypeInput: ReturnType<typeof useRadioInput>;
   kafkaSaslMechanismInput: ReturnType<typeof useRadioInput>;
   kafkaAuthUsernameInput: ReturnType<typeof useInput>;
   kafkaAuthPasswordInput: ReturnType<typeof useInput>;
@@ -290,6 +292,11 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     isDisabled('auth_type')
   );
 
+  const kafkaConnectionTypeInput = useRadioInput(
+    kafkaOutput?.connection_type ?? kafkaConnectionType.Plaintext,
+    isDisabled('connection_type')
+  );
+
   const kafkaAuthUsernameInput = useInput(
     kafkaOutput?.username,
     kafkaAuthMethodInput.value === kafkaAuthType.Userpass ? validateKafkaUsername : undefined,
@@ -439,6 +446,7 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     kafkaHostsInput,
     kafkaVerificationModeInput,
     kafkaAuthMethodInput,
+    kafkaConnectionTypeInput,
     kafkaAuthUsernameInput,
     kafkaAuthPasswordInput,
     kafkaSaslMechanismInput,
@@ -609,22 +617,26 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
               is_default: defaultOutputInput.value,
               is_default_monitoring: defaultMonitoringOutputInput.value,
               config_yaml: additionalYamlConfigInput.value,
-              ssl: {
-                ...(definedCA
-                  ? {
-                      certificate_authorities: kafkaSslCertificateAuthoritiesInput.value.filter(
-                        (val) => val !== ''
-                      ),
-                    }
-                  : {}),
-                ...(kafkaAuthMethodInput.value === kafkaAuthType.Ssl
-                  ? {
-                      certificate: kafkaSslCertificateInput.value,
-                      key: kafkaSslKeyInput.value,
-                    }
-                  : {}),
-                verification_mode: kafkaVerificationModeInput.value,
-              },
+              ...(kafkaConnectionTypeInput.value !== kafkaConnectionType.Plaintext ||
+              kafkaAuthMethodInput.value !== kafkaAuthType.None
+                ? {
+                    ssl: {
+                      ...(definedCA
+                        ? {
+                            certificate_authorities:
+                              kafkaSslCertificateAuthoritiesInput.value.filter((val) => val !== ''),
+                          }
+                        : {}),
+                      ...(kafkaAuthMethodInput.value === kafkaAuthType.Ssl
+                        ? {
+                            certificate: kafkaSslCertificateInput.value,
+                            key: kafkaSslKeyInput.value,
+                          }
+                        : {}),
+                      verification_mode: kafkaVerificationModeInput.value,
+                    },
+                  }
+                : {}),
               proxy_id: proxyIdValue,
 
               client_id: kafkaClientIdInput.value || undefined,
@@ -640,6 +652,9 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
                 : {}),
 
               auth_type: kafkaAuthMethodInput.value,
+              ...(kafkaAuthMethodInput.value === kafkaAuthType.None
+                ? { connection_type: kafkaConnectionTypeInput.value }
+                : {}),
               ...(kafkaAuthMethodInput.value === kafkaAuthType.Userpass &&
               kafkaAuthUsernameInput.value
                 ? { username: kafkaAuthUsernameInput.value }
@@ -775,15 +790,16 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     defaultOutputInput.value,
     defaultMonitoringOutputInput.value,
     additionalYamlConfigInput.value,
-    kafkaVerificationModeInput.value,
     kafkaAuthMethodInput.value,
     kafkaSslCertificateInput.value,
     kafkaSslKeyInput.value,
+    kafkaVerificationModeInput.value,
     kafkaClientIdInput.value,
     kafkaVersionInput.value,
     kafkaKeyInput.value,
     kafkaCompressionCodecInput.value,
     kafkaCompressionLevelInput.value,
+    kafkaConnectionTypeInput.value,
     kafkaAuthUsernameInput.value,
     kafkaAuthPasswordInput.value,
     kafkaSaslMechanismInput.value,

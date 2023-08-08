@@ -12,10 +12,12 @@ import type { kafkaPartitionType } from '../../constants';
 import type { kafkaTopicWhenType } from '../../constants';
 import type { kafkaAcknowledgeReliabilityLevel } from '../../constants';
 import type { kafkaVerificationModes } from '../../constants';
+import type { kafkaConnectionType } from '../../constants';
 
 export type OutputType = typeof outputType;
 export type KafkaCompressionType = typeof kafkaCompressionType;
 export type KafkaAuthType = typeof kafkaAuthType;
+export type KafkaConnectionTypeType = typeof kafkaConnectionType;
 export type KafkaSaslMechanism = typeof kafkaSaslMechanism;
 export type KafkaPartitionType = typeof kafkaPartitionType;
 export type KafkaTopicWhenType = typeof kafkaTopicWhenType;
@@ -79,6 +81,7 @@ export interface KafkaOutput extends NewBaseOutput {
   compression?: ValueOf<KafkaCompressionType>;
   compression_level?: number;
   auth_type?: ValueOf<KafkaAuthType>;
+  connection_type?: ValueOf<KafkaConnectionTypeType>;
   username?: string;
   password?: string;
   sasl?: {
