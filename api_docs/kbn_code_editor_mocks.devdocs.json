@@ -270,54 +270,6 @@
               },
               {
                 "parentPluginId": "@kbn/code-editor-mocks",
-                "id": "def-common.CodeEditorStorybookMock.propArguments.useDarkTheme",
-                "type": "Object",
-                "tags": [],
-                "label": "useDarkTheme",
-                "description": [],
-                "path": "packages/shared-ux/code_editor/mocks/storybook.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "children": [
-                  {
-                    "parentPluginId": "@kbn/code-editor-mocks",
-                    "id": "def-common.CodeEditorStorybookMock.propArguments.useDarkTheme.control",
-                    "type": "Object",
-                    "tags": [],
-                    "label": "control",
-                    "description": [],
-                    "path": "packages/shared-ux/code_editor/mocks/storybook.ts",
-                    "deprecated": false,
-                    "trackAdoption": false,
-                    "children": [
-                      {
-                        "parentPluginId": "@kbn/code-editor-mocks",
-                        "id": "def-common.CodeEditorStorybookMock.propArguments.useDarkTheme.control.type",
-                        "type": "string",
-                        "tags": [],
-                        "label": "type",
-                        "description": [],
-                        "path": "packages/shared-ux/code_editor/mocks/storybook.ts",
-                        "deprecated": false,
-                        "trackAdoption": false
-                      }
-                    ]
-                  },
-                  {
-                    "parentPluginId": "@kbn/code-editor-mocks",
-                    "id": "def-common.CodeEditorStorybookMock.propArguments.useDarkTheme.defaultValue",
-                    "type": "boolean",
-                    "tags": [],
-                    "label": "defaultValue",
-                    "description": [],
-                    "path": "packages/shared-ux/code_editor/mocks/storybook.ts",
-                    "deprecated": false,
-                    "trackAdoption": false
-                  }
-                ]
-              },
-              {
-                "parentPluginId": "@kbn/code-editor-mocks",
                 "id": "def-common.CodeEditorStorybookMock.propArguments.transparentBackground",
                 "type": "Object",
                 "tags": [],
@@ -534,7 +486,7 @@
         "label": "Params",
         "description": [],
         "signature": [
-          "{ value: any; placeholder: any; \"aria-label\": any; allowFullScreen: any; languageId: any; useDarkTheme: any; transparentBackground: any; }"
+          "{ value: any; placeholder: any; \"aria-label\": any; allowFullScreen: any; languageId: any; transparentBackground: any; }"
         ],
         "path": "packages/shared-ux/code_editor/mocks/storybook.ts",
         "deprecated": false,

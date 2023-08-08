@@ -11,7 +11,7 @@ import { EuiIcon, EuiPanel, EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } fr
 import { css } from '@emotion/react';
 import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { LensWrapper } from '../../../../../../common/visualizations/lens/lens_wrapper';
+import { LensWrapper } from '../../../../../../components/lens';
 import { useLensAttributes, Layer } from '../../../../../../hooks/use_lens_attributes';
 import { useMetricsDataViewContext } from '../../../hooks/use_data_view';
 import { useUnifiedSearchContext } from '../../../hooks/use_unified_search';
@@ -130,7 +130,7 @@ export const MetricChart = ({ id, title, layers, overrides }: MetricChartProps) 
         </EuiFlexGroup>
       ) : (
         <LensWrapper
-          id={`hostsViewsmetricsChart-${id}`}
+          id={`hostsViewMetricsChart-${id}`}
           attributes={attributes}
           style={lensStyle}
           extraActions={extraActions}
@@ -141,7 +141,6 @@ export const MetricChart = ({ id, title, layers, overrides }: MetricChartProps) 
           onBrushEnd={handleBrushEnd}
           loading={loading}
           overrides={overrides}
-          hasTitle
         />
       )}
     </EuiPanel>

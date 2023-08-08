@@ -202,7 +202,6 @@ export const cli = () => {
                 );
 
                 if (
-                  // @ts-expect-error
                   configFromTestFile?.enableExperimental?.length &&
                   _.some(vars.kbnTestServer.serverArgs, (value) =>
                     value.includes('--xpack.securitySolution.enableExperimental')
@@ -220,7 +219,13 @@ export const cli = () => {
                 }
 
                 if (configFromTestFile?.license) {
-                  vars.esTestCluster.license = configFromTestFile.license;
+                  if (vars.serverless) {
+                    log.warning(
+                      `'ftrConfig.license' ignored. Value does not apply to kibana when running in serverless.\nFile: ${filePath}`
+                    );
+                  } else {
+                    vars.esTestCluster.license = configFromTestFile.license;
+                  }
                 }
 
                 if (hasFleetServerArgs) {
@@ -229,9 +234,43 @@ export const cli = () => {
                   );
                 }
 
+                // Serverless Specific
+                if (vars.serverless) {
+                  log.info(`Serverless mode detected`);
+
+                  if (configFromTestFile?.productTypes) {
+                    vars.kbnTestServer.serverArgs.push(
+                      `--xpack.securitySolutionServerless.productTypes=${JSON.stringify([
+                        ...configFromTestFile.productTypes,
+                        // Why spread it twice?
+                        // The `serverless.security.yml` file by default includes two product types as of this change.
+                        // Because it's an array, we need to ensure that existing values are "removed" and the ones
+                        // defined here are added. To do that, we duplicate the `productTypes` passed so that all array
+                        // elements in that YAML file are updated. The Security serverless plugin has code in place to
+                        // dedupe.
+                        ...configFromTestFile.productTypes,
+                      ])}`
+                    );
+                  }
+                } else if (configFromTestFile?.productTypes) {
+                  log.warning(
+                    `'ftrConfig.productTypes' ignored. Value applies only when running kibana is serverless.\nFile: ${filePath}`
+                  );
+                }
+
                 return vars;
               }
             );
+
+            log.info(`
+----------------------------------------------
+Cypress FTR setup for file: ${filePath}:
+----------------------------------------------
+
+${JSON.stringify(config.getAll(), null, 2)}
+
+----------------------------------------------
+`);
 
             const lifecycle = new Lifecycle(log);
 
@@ -280,18 +319,84 @@ export const cli = () => {
               EsVersion.getDefault()
             );
 
-            const customEnv = await pRetry(() => functionalTestRunner.run(abortCtrl.signal), {
+            const createUrlFromFtrConfig = (
+              type: 'elasticsearch' | 'kibana' | 'fleetserver',
+              withAuth: boolean = false
+            ): string => {
+              const getKeyPath = (path: string = ''): string => {
+                return `servers.${type}${path ? `.${path}` : ''}`;
+              };
+
+              if (!config.get(getKeyPath())) {
+                throw new Error(`Unable to create URL for ${type}. Not found in FTR config at `);
+              }
+
+              const url = new URL('http://localhost');
+
+              url.port = config.get(getKeyPath('port'));
+              url.protocol = config.get(getKeyPath('protocol'));
+              url.hostname = config.get(getKeyPath('hostname'));
+
+              if (withAuth) {
+                url.username = config.get(getKeyPath('username'));
+                url.password = config.get(getKeyPath('password'));
+              }
+
+              return url.toString().replace(/\/$/, '');
+            };
+
+            const baseUrl = createUrlFromFtrConfig('kibana');
+
+            const ftrEnv = await pRetry(() => functionalTestRunner.run(abortCtrl.signal), {
               retries: 1,
             });
+
+            log.debug(
+              `Env. variables returned by [functionalTestRunner.run()]:\n`,
+              JSON.stringify(ftrEnv, null, 2)
+            );
+
+            // Normalized the set of available env vars in cypress
+            const cyCustomEnv = {
+              ...ftrEnv,
+
+              // NOTE:
+              // ELASTICSEARCH_URL needs to be crated here with auth because SIEM cypress setup depends on it. At some
+              // points we should probably try to refactor that code to use `ELASTICSEARCH_URL_WITH_AUTH` instead
+              ELASTICSEARCH_URL:
+                ftrEnv.ELASTICSEARCH_URL ?? createUrlFromFtrConfig('elasticsearch', true),
+              ELASTICSEARCH_URL_WITH_AUTH: createUrlFromFtrConfig('elasticsearch', true),
+              ELASTICSEARCH_USERNAME:
+                ftrEnv.ELASTICSEARCH_USERNAME ?? config.get('servers.elasticsearch.username'),
+              ELASTICSEARCH_PASSWORD:
+                ftrEnv.ELASTICSEARCH_PASSWORD ?? config.get('servers.elasticsearch.password'),
+
+              FLEET_SERVER_URL: createUrlFromFtrConfig('fleetserver'),
+
+              KIBANA_URL: baseUrl,
+              KIBANA_URL_WITH_AUTH: createUrlFromFtrConfig('kibana', true),
+              KIBANA_USERNAME: config.get('servers.kibana.username'),
+              KIBANA_PASSWORD: config.get('servers.kibana.password'),
+            };
+
+            log.info(`
+----------------------------------------------
+Cypress run ENV for file: ${filePath}:
+----------------------------------------------
+
+${JSON.stringify(cyCustomEnv, null, 2)}
+
+----------------------------------------------
+`);
 
             if (isOpen) {
               await cypress.open({
                 configFile: cypressConfigFilePath,
                 config: {
                   e2e: {
-                    baseUrl: `http://localhost:${kibanaPort}`,
+                    baseUrl,
                   },
-                  env: customEnv,
+                  env: cyCustomEnv,
                 },
               });
             } else {
@@ -304,10 +409,10 @@ export const cli = () => {
                   reporterOptions: argv.reporterOptions,
                   config: {
                     e2e: {
-                      baseUrl: `http://localhost:${kibanaPort}`,
+                      baseUrl,
                     },
                     numTestsKeptInMemory: 0,
-                    env: customEnv,
+                    env: cyCustomEnv,
                   },
                 });
               } catch (error) {
@@ -327,7 +432,7 @@ export const cli = () => {
           concurrency: (argv.concurrency as number | undefined)
             ? (argv.concurrency as number)
             : !isOpen
-            ? 3
+            ? 2
             : 1,
         }
       ).then((results) => {

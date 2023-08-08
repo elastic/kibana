@@ -7,7 +7,7 @@
 
 import type { HttpApiTestSetupMock } from '../../mocks';
 import { createHttpApiTestSetupMock } from '../../mocks';
-import type { UploadActionApiRequestBody } from '../../../../common/endpoint/schema/actions';
+import type { UploadActionApiRequestBody } from '../../../../common/api/endpoint';
 import type { getActionFileUploadHandler } from './file_upload_handler';
 import { registerActionFileUploadRoute } from './file_upload_handler';
 import { UPLOAD_ROUTE } from '../../../../common/endpoint/constants';

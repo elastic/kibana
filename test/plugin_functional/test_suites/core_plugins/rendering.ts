@@ -83,7 +83,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         // what types of config settings can be exposed to the browser.
         // When plugin owners make a change that exposes additional config values, the changes will be reflected in this test assertion.
         // Ensure that your change does not unintentionally expose any sensitive values!
-        'console.autocompleteDefinitions.endpointsAvailability (string)',
+        'console.autocompleteDefinitions.endpointsAvailability (alternatives)',
         'console.ui.enabled (boolean)',
         'dashboard.allowByValueEmbeddables (boolean)',
         'unifiedSearch.autocomplete.querySuggestions.enabled (boolean)',
@@ -187,7 +187,6 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.apm.latestAgentVersionsUrl (string)',
         'xpack.apm.featureFlags.agentConfigurationAvailable (any)',
         'xpack.apm.featureFlags.configurableIndicesAvailable (any)',
-        'xpack.apm.featureFlags.fastRefreshAvailable (any)',
         'xpack.apm.featureFlags.infrastructureTabAvailable (any)',
         'xpack.apm.featureFlags.infraUiAvailable (any)',
         'xpack.apm.featureFlags.migrationToFleetAvailable (any)',
@@ -223,6 +222,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.cloud.profile_url (string)',
         'xpack.cloud.performance_url (string)',
         'xpack.cloud.users_and_roles_url (string)',
+        'xpack.cloud.projects_url (any)', // It's a string (any because schema.conditional)
         // can't be used to infer urls or customer id from the outside
         'xpack.cloud.serverless.project_id (string)',
         'xpack.discoverEnhanced.actions.exploreDataInChart.enabled (boolean)',
@@ -279,8 +279,6 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.upgrade_assistant.featureSet.mlSnapshots (boolean)',
         'xpack.upgrade_assistant.featureSet.reindexCorrectiveActions (boolean)',
         'xpack.upgrade_assistant.ui.enabled (boolean)',
-        'xpack.observability.aiAssistant.enabled (boolean)',
-        'xpack.observability.aiAssistant.feedback.enabled (boolean)',
         'xpack.observability.unsafe.alertDetails.metrics.enabled (boolean)',
         'xpack.observability.unsafe.alertDetails.logs.enabled (boolean)',
         'xpack.observability.unsafe.alertDetails.uptime.enabled (boolean)',

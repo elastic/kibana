@@ -5714,7 +5714,7 @@
         "label": "openAddPanelFlyout",
         "description": [],
         "signature": [
-          "({ container, onAddPanel, }: { container: ",
+          "({ container, onAddPanel, onClose, }: { container: ",
           {
             "pluginId": "embeddable",
             "scope": "public",
@@ -5738,7 +5738,7 @@
             "section": "def-public.ContainerOutput",
             "text": "ContainerOutput"
           },
-          ">; onAddPanel?: ((id: string) => void) | undefined; }) => ",
+          ">; onAddPanel?: ((id: string) => void) | undefined; onClose?: (() => void) | undefined; }) => ",
           {
             "pluginId": "@kbn/core-mount-utils-browser",
             "scope": "common",
@@ -5756,7 +5756,7 @@
             "id": "def-public.openAddPanelFlyout.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  container,\n  onAddPanel,\n}",
+            "label": "{\n  container,\n  onAddPanel,\n  onClose,\n}",
             "description": [],
             "path": "src/plugins/embeddable/public/add_panel_flyout/open_add_panel_flyout.tsx",
             "deprecated": false,
@@ -5830,6 +5830,22 @@
                   }
                 ],
                 "returnComment": []
+              },
+              {
+                "parentPluginId": "embeddable",
+                "id": "def-public.openAddPanelFlyout.$1.onClose",
+                "type": "Function",
+                "tags": [],
+                "label": "onClose",
+                "description": [],
+                "signature": [
+                  "(() => void) | undefined"
+                ],
+                "path": "src/plugins/embeddable/public/add_panel_flyout/open_add_panel_flyout.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [],
+                "returnComment": []
               }
             ]
           }
@@ -5882,6 +5898,39 @@
               "() => TFilterableEmbeddableInput"
             ],
             "path": "src/plugins/embeddable/public/lib/filterable_embeddable/should_fetch.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "embeddable",
+        "id": "def-public.tracksOverlays",
+        "type": "Function",
+        "tags": [],
+        "label": "tracksOverlays",
+        "description": [],
+        "signature": [
+          "(root: unknown) => root is TracksOverlays"
+        ],
+        "path": "src/plugins/embeddable/public/embeddable_panel/panel_actions/track_overlays.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.tracksOverlays.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "root",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "src/plugins/embeddable/public/embeddable_panel/panel_actions/track_overlays.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true

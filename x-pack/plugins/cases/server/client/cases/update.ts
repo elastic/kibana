@@ -25,11 +25,9 @@ import type { PatchCasesArgs } from '../../services/cases/types';
 import type { UserActionEvent, UserActionsDict } from '../../services/user_actions/types';
 
 import type { CasePatchRequest, CasesPatchRequest } from '../../../common/types/api';
-import { areTotalAssigneesInvalid } from '../../../common/utils/validators';
 import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
-  MAX_ASSIGNEES_PER_CASE,
   MAX_USER_ACTIONS_PER_CASE,
 } from '../../../common/constants';
 import { Operations } from '../../authorization';
@@ -135,27 +133,6 @@ function notifyPlatinumUsage(
 
   if (requestsUpdatingAssignees.length > 0) {
     licensingService.notifyUsage(LICENSING_CASE_ASSIGNMENT_FEATURE);
-  }
-}
-
-/**
- * Throws an error if any of the requests attempt to add more than
- * MAX_ASSIGNEES_PER_CASE to a case
- */
-function throwIfTotalAssigneesAreInvalid(requests: UpdateRequestWithOriginalCase[]) {
-  const requestsUpdatingAssignees = requests.filter(
-    ({ updateReq }) => updateReq.assignees !== undefined
-  );
-
-  if (
-    requestsUpdatingAssignees.some(({ updateReq }) => areTotalAssigneesInvalid(updateReq.assignees))
-  ) {
-    const ids = requestsUpdatingAssignees.map(({ updateReq }) => updateReq.id);
-    throw Boom.badRequest(
-      `You cannot assign more than ${MAX_ASSIGNEES_PER_CASE} assignees to a case, ids: [${ids.join(
-        ', '
-      )}]`
-    );
   }
 }
 
@@ -394,7 +371,6 @@ export const update = async (
 
     throwIfUpdateOwner(casesToUpdate);
     throwIfUpdateAssigneesWithoutValidLicense(casesToUpdate, hasPlatinumLicense);
-    throwIfTotalAssigneesAreInvalid(casesToUpdate);
 
     const patchCasesPayload = createPatchCasesPayload({ user, casesToUpdate });
     const userActionsDict = userActionService.creator.buildUserActions({

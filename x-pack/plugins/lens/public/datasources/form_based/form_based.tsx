@@ -141,7 +141,10 @@ export const removeColumn: Datasource<FormBasedPrivateState>['removeColumn'] = (
   columnId,
   indexPatterns,
 }) => {
-  const indexPattern = indexPatterns[prevState.layers[layerId]?.indexPatternId];
+  const indexPattern = indexPatterns?.[prevState.layers[layerId]?.indexPatternId];
+  if (!indexPattern) {
+    throw new Error('indexPatterns is not passed to the function');
+  }
   return mergeLayer({
     state: prevState,
     layerId,

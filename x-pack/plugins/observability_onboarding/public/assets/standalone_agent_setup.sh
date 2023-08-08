@@ -30,6 +30,7 @@ OS="$(uname)"
 ARCH="$(uname -m)"
 os=linux
 arch=x86_64
+cfg=/opt/Elastic/Agent/elastic-agent.yml
 if [ "${OS}" == "Linux" ]; then
   if [ "${ARCH}" == "aarch64" ]; then
     arch=arm64
@@ -39,6 +40,7 @@ elif [ "${OS}" == "Darwin" ]; then
   if [ "${ARCH}" == "arm64" ]; then
     arch=aarch64
   fi
+  cfg=/Library/Elastic/Agent/elastic-agent.yml
 else
   fail "this script is only supported on linux and macOS"
 fi
@@ -55,7 +57,7 @@ updateStepProgress() {
   local STATUS="$2" # "incomplete" | "complete" | "disabled" | "loading" | "warning" | "danger" | "current"
   local MESSAGE=${3:-}
   curl --request POST \
-    --url "${API_ENDPOINT}/custom_logs/${ONBOARDING_ID}/step/${STEPNAME}" \
+    --url "${API_ENDPOINT}/flow/${ONBOARDING_ID}/step/${STEPNAME}" \
     --header "Authorization: ApiKey ${API_KEY_ENCODED}" \
     --header "Content-Type: application/json" \
     --header "kbn-xsrf: true" \
@@ -126,7 +128,7 @@ ELASTIC_AGENT_STATE="$(elastic-agent status | grep -m1 State | sed 's/State: //'
 ELASTIC_AGENT_MESSAGE="$(elastic-agent status | grep -m1 Message | sed 's/Message: //')"
 if [ "${ELASTIC_AGENT_STATE}" = "HEALTHY" ] && [ "${ELASTIC_AGENT_MESSAGE}" = "Running" ]; then
   echo "Elastic Agent running"
-  echo "Download and save configuration to /opt/Elastic/Agent/elastic-agent.yml"
+  echo "Download and save configuration to ${cfg}"
   updateStepProgress "ea-status" "complete"
 else
   updateStepProgress "ea-status" "warning" "Expected agent status HEALTHY / Running but got ${ELASTIC_AGENT_STATE} / ${ELASTIC_AGENT_MESSAGE}"
@@ -141,7 +143,7 @@ downloadElasticAgentConfig() {
     --header "Content-Type: application/json" \
     --header "kbn-xsrf: true" \
     --no-progress-meter \
-    --output /opt/Elastic/Agent/elastic-agent.yml
+    --output ${cfg}
 
   if [ "$?" -eq 0 ]; then
     echo "Downloaded elastic-agent.yml"
@@ -156,5 +158,5 @@ if [ "${AUTO_DOWNLOAD_CONFIG}" == "autoDownloadConfig=1" ]; then
   downloadElasticAgentConfig
   echo "Done with standalone Elastic Agent setup for custom logs. Look for streaming logs to arrive in Kibana"
 else
-  echo "Done with standalone Elastic Agent setup for custom logs. Make sure to add your configuration to /opt/Elastic/Agent/elastic-agent.yml, then look for streaming logs to arrive in Kibana"
+  echo "Done with standalone Elastic Agent setup for custom logs. Make sure to add your configuration to ${cfg}, then look for streaming logs to arrive in Kibana"
 fi

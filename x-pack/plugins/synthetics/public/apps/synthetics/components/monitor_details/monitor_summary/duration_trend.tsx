@@ -9,8 +9,7 @@ import React from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { ClientPluginsStart } from '../../../../../plugin';
-import { useMonitorQueryId } from '../hooks/use_monitor_query_id';
-import { useSelectedLocation } from '../hooks/use_selected_location';
+import { useMonitorQueryFilters } from '../hooks/use_monitor_query_filters';
 
 interface MonitorDurationTrendProps {
   from: string;
@@ -22,10 +21,9 @@ export const MonitorDurationTrend = (props: MonitorDurationTrendProps) => {
     exploratoryView: { ExploratoryViewEmbeddable },
   } = useKibana<ClientPluginsStart>().services;
 
-  const monitorId = useMonitorQueryId();
-  const selectedLocation = useSelectedLocation();
+  const { queryIdFilter, locationFilter } = useMonitorQueryFilters();
 
-  if (!selectedLocation || !monitorId) {
+  if (!queryIdFilter) {
     return null;
   }
 
@@ -39,10 +37,8 @@ export const MonitorDurationTrend = (props: MonitorDurationTrendProps) => {
         time: props,
         name: metricsToShow[metric],
         selectedMetricField: 'monitor.duration.us',
-        reportDefinitions: {
-          'monitor.id': [monitorId],
-          'observer.geo.name': [selectedLocation?.label],
-        },
+        reportDefinitions: queryIdFilter,
+        filters: locationFilter,
         seriesType: 'line',
         operationType: metric,
       }))}

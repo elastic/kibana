@@ -6,10 +6,10 @@
  */
 
 import * as t from 'io-ts';
-import { PatchRuleRequestBody } from '../../crud/patch_rule/patch_rule_route';
+import { RulePatchProps } from '../../../model';
 
 /**
  * Request body parameters of the API route.
  */
 export type BulkPatchRulesRequestBody = t.TypeOf<typeof BulkPatchRulesRequestBody>;
-export const BulkPatchRulesRequestBody = t.array(PatchRuleRequestBody);
+export const BulkPatchRulesRequestBody = t.array(RulePatchProps);

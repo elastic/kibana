@@ -7,14 +7,14 @@
 
 import { validate } from '@kbn/securitysolution-io-ts-utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import {
-  UpdateEndpointListItemSchemaDecoded,
-  exceptionListItemSchema,
-  updateEndpointListItemSchema,
-} from '@kbn/securitysolution-io-ts-list-types';
 import { ENDPOINT_LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
 
 import type { ListsPluginRouter } from '../types';
+import {
+  UpdateEndpointListItemRequestDecoded,
+  updateEndpointListItemRequest,
+  updateEndpointListItemResponse,
+} from '../../common/api';
 
 import { buildRouteValidation, buildSiemResponse } from './utils';
 
@@ -29,9 +29,9 @@ export const updateEndpointListItemRoute = (router: ListsPluginRouter): void => 
       path: ENDPOINT_LIST_ITEM_URL,
       validate: {
         body: buildRouteValidation<
-          typeof updateEndpointListItemSchema,
-          UpdateEndpointListItemSchemaDecoded
-        >(updateEndpointListItemSchema),
+          typeof updateEndpointListItemRequest,
+          UpdateEndpointListItemRequestDecoded
+        >(updateEndpointListItemRequest),
       },
     },
     async (context, request, response) => {
@@ -77,7 +77,7 @@ export const updateEndpointListItemRoute = (router: ListsPluginRouter): void => 
             });
           }
         } else {
-          const [validated, errors] = validate(exceptionListItem, exceptionListItemSchema);
+          const [validated, errors] = validate(exceptionListItem, updateEndpointListItemResponse);
           if (errors != null) {
             return siemResponse.error({ body: errors, statusCode: 500 });
           } else {

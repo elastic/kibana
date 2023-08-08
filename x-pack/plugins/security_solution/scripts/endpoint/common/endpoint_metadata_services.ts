@@ -10,7 +10,7 @@ import type { KbnClient } from '@kbn/test';
 import type { WriteResponseBase } from '@elastic/elasticsearch/lib/api/types';
 import { clone, merge } from 'lodash';
 import type { DeepPartial } from 'utility-types';
-import type { GetMetadataListRequestQuery } from '../../../common/endpoint/schema/metadata';
+import type { GetMetadataListRequestQuery } from '../../../common/api/endpoint';
 import { resolvePathVariables } from '../../../public/common/utils/resolve_path_variables';
 import {
   HOST_METADATA_GET_ROUTE,

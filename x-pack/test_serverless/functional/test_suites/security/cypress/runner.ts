@@ -14,9 +14,6 @@ export async function SecuritySolutionCypressTestRunner(
   envVars?: Record<string, string>
 ) {
   const config = getService('config');
-  const esArchiver = getService('esArchiver');
-
-  await esArchiver.load('x-pack/test/security_solution_cypress/es_archives/auditbeat');
 
   return {
     FORCE_COLOR: '1',
