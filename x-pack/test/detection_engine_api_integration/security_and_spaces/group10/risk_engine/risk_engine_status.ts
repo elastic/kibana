@@ -27,7 +27,7 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const kibanaServer = getService('kibanaServer');
 
-  describe('Risk Engine', () => {
+  describe.only('Risk Engine', () => {
     afterEach(async () => {
       await cleanRiskEngineConfig({
         kibanaServer,

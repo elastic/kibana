@@ -18,26 +18,31 @@ import type { Logger, ElasticsearchClient, SavedObjectsClientContract } from '@k
 
 import {
   riskScoreFieldMap,
-  getIndexPattern,
+  getIndexPatternDataStream,
   totalFieldsLimit,
   mappingComponentName,
   ilmPolicyName,
   ilmPolicy,
   getLatestTransformId,
+  getTransformOptions,
 } from './configurations';
 import { createDataStream } from './utils/create_datastream';
 import type { RiskEngineDataWriter as Writer } from './risk_engine_data_writer';
 import { RiskEngineDataWriter } from './risk_engine_data_writer';
 import type { InitRiskEngineResult } from '../../../common/risk_engine';
 import { RiskEngineStatus, getRiskScoreLatestIndex } from '../../../common/risk_engine';
-import { getLegacyTransforms, removeLegacyTransforms } from './utils/risk_engine_transforms';
+import {
+  getLegacyTransforms,
+  removeLegacyTransforms,
+  startTransform,
+  createTransform,
+} from './utils/risk_engine_transforms';
 import {
   updateSavedObjectAttribute,
   getConfiguration,
   initSavedObjects,
 } from './utils/saved_object_configuration';
-import { createAndStartTransform } from '../risk_score/transform/helpers/transforms';
-import { createIndex } from '../risk_score/indices/lib/create_index';
+import { createIndex } from './utils/create_index';
 
 interface InitOpts {
   namespace: string;
@@ -45,7 +50,6 @@ interface InitOpts {
 
 interface InitializeRiskEngineResourcesOpts {
   namespace?: string;
-  esClient: ElasticsearchClient;
 }
 
 interface RiskEngineDataClientOpts {
@@ -103,32 +107,21 @@ export class RiskEngineDataClient {
     return result;
   }
 
-  public async getWriter({
-    namespace,
-    esClient,
-  }: {
-    namespace: string;
-    esClient: ElasticsearchClient;
-  }): Promise<Writer> {
+  public async getWriter({ namespace }: { namespace: string }): Promise<Writer> {
     if (this.writerCache.get(namespace)) {
       return this.writerCache.get(namespace) as Writer;
     }
-    const indexPatterns = getIndexPattern(namespace);
-    await this.initializeWriter(namespace, indexPatterns.alias, esClient);
+    const indexPatterns = getIndexPatternDataStream(namespace);
+    await this.initializeWriter(namespace, indexPatterns.alias);
     return this.writerCache.get(namespace) as Writer;
   }
 
-  private async initializeWriter(
-    namespace: string,
-    index: string,
-    esClient: ElasticsearchClient
-  ): Promise<Writer> {
+  private async initializeWriter(namespace: string, index: string): Promise<Writer> {
     const writer = new RiskEngineDataWriter({
       esClient: this.options.esClient,
       namespace,
       index,
       logger: this.options.logger,
-      esClient,
     });
 
     this.writerCache.set(namespace, writer);
@@ -143,7 +136,6 @@ export class RiskEngineDataClient {
 
   public async enableRiskEngine() {
     // code to run task
-
     return updateSavedObjectAttribute({
       savedObjectsClient: this.options.soClient,
       attributes: {
@@ -206,7 +198,7 @@ export class RiskEngineDataClient {
     try {
       const esClient = this.options.esClient;
 
-      const indexPatterns = getIndexPattern(namespace);
+      const indexPatterns = getIndexPatternDataStream(namespace);
 
       const indexMetadata: Metadata = {
         kibana: {
@@ -275,26 +267,6 @@ export class RiskEngineDataClient {
         indexPatterns,
       });
 
-      const options = {
-        dest: {
-          index: getRiskScoreLatestIndex(namespace),
-        },
-        frequency: '1m',
-        latest: {
-          sort: '@timestamp',
-          unique_key: [`host.name`, `user.name`],
-        },
-        source: {
-          index: [indexPatterns.alias],
-        },
-        sync: {
-          time: {
-            delay: '2s',
-            field: '@timestamp',
-          },
-        },
-      };
-
       await createIndex({
         esClient,
         logger: this.options.logger,
@@ -303,18 +275,21 @@ export class RiskEngineDataClient {
           mappings: mappingFromFieldMap(riskScoreFieldMap, 'strict'),
         },
       });
-      const transforms = await createAndStartTransform({
+
+      const transformId = getLatestTransformId(namespace);
+      await createTransform({
         esClient,
         logger: this.options.logger,
-        transformId: getLatestTransformId(namespace),
-        options,
+        transform: {
+          transform_id: transformId,
+          ...getTransformOptions({
+            dest: getRiskScoreLatestIndex(namespace),
+            source: [indexPatterns.alias],
+          }),
+        },
       });
 
-      if (transforms?.[getLatestTransformId(namespace)].success === false) {
-        throw new Error('Transform failed to start');
-      }
-
-      await this.initializeWriter(namespace, indexPatterns.alias, esClient);
+      await startTransform({ esClient, transformId });
     } catch (error) {
       this.options.logger.error(`Error initializing risk engine resources: ${error.message}`);
       throw error;

@@ -143,11 +143,32 @@ export const riskScoreFieldMap: FieldMap = {
 export const ilmPolicyName = '.risk-score-ilm-policy';
 export const mappingComponentName = '.risk-score-mappings';
 export const totalFieldsLimit = 1000;
+export const indetTemplatePattern = `.${riskScoreBaseIndexName}.${riskScoreBaseIndexName}-*`;
 
-export const getIndexPattern = (namespace: string): IIndexPatternString => ({
+export const getIndexPatternDataStream = (namespace: string): IIndexPatternString => ({
   template: `.${riskScoreBaseIndexName}.${riskScoreBaseIndexName}-${namespace}-index-template`,
   alias: `${riskScoreBaseIndexName}.${riskScoreBaseIndexName}-${namespace}`,
 });
 
 export const getLatestTransformId = (namespace: string): string =>
   `${riskScoreBaseIndexName}_latest_transform_${namespace}`;
+
+export const getTransformOptions = ({ dest, source }: { dest: string; source: string[] }) => ({
+  dest: {
+    index: dest,
+  },
+  frequency: '1m',
+  latest: {
+    sort: '@timestamp',
+    unique_key: [`host.name`, `user.name`],
+  },
+  source: {
+    index: source,
+  },
+  sync: {
+    time: {
+      delay: '2s',
+      field: '@timestamp',
+    },
+  },
+});
