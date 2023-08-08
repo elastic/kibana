@@ -70,7 +70,6 @@
     "@kbn/core-http-server",
     "@kbn/alerting-plugin",
     "@kbn/content-management-plugin",
-    "@kbn/saved-objects-management-plugin",
   ],
   "exclude": [
     "target/**/*",
