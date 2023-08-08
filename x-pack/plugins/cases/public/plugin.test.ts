@@ -15,7 +15,7 @@ import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 import { lensPluginMock } from '@kbn/lens-plugin/public/mocks';
-import { savedObjectsManagementPluginMock } from '@kbn/saved-objects-management-plugin/public/mocks';
+import { contentManagementMock } from '@kbn/content-management-plugin/public/mocks';
 import { mockStorage } from '@kbn/kibana-utils-plugin/public/storage/hashed_item_store/mock';
 import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
 import type { CasesPluginSetup, CasesPluginStart } from './types';
@@ -67,7 +67,7 @@ describe('Cases Ui Plugin', () => {
       data: dataPluginMock.createStartContract(),
       embeddable: embeddablePluginMock.createStartContract(),
       lens: lensPluginMock.createStartContract(),
-      savedObjectsManagement: savedObjectsManagementPluginMock.createStartContract(),
+      contentManagement: contentManagementMock.createStartContract(),
       storage: {
         store: {
           getItem: mockStorage.getItem,
