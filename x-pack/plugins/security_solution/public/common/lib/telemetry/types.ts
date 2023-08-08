@@ -17,7 +17,7 @@ import type {
   ReportAlertsTakeActionParams,
 } from './events/alerts_grouping/types';
 import type {
-  ReportDataQualityCheckAllClickedParams,
+  ReportDataQualityCheckAllCompletedParams,
   ReportDataQualityIndexCheckedParams,
   DataQualityTelemetryEvents,
 } from './events/data_quality/types';
@@ -72,7 +72,7 @@ export type TelemetryEventParams =
   | ReportCellActionClickedParams
   | ReportAnomaliesCountClickedParams
   | ReportDataQualityIndexCheckedParams
-  | ReportDataQualityCheckAllClickedParams
+  | ReportDataQualityCheckAllCompletedParams
   | ReportBreadcrumbClickedParams;
 
 export interface TelemetryClientStart {
@@ -89,7 +89,7 @@ export interface TelemetryClientStart {
 
   reportAnomaliesCountClicked(params: ReportAnomaliesCountClickedParams): void;
   reportDataQualityIndexChecked(params: ReportDataQualityIndexCheckedParams): void;
-  reportDataQualityCheckAllClicked(params: ReportDataQualityCheckAllClickedParams): void;
+  reportDataQualityCheckAllCompleted(params: ReportDataQualityCheckAllCompletedParams): void;
   reportBreadcrumbClicked(params: ReportBreadcrumbClickedParams): void;
 }
 

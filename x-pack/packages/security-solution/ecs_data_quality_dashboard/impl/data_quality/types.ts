@@ -139,9 +139,10 @@ export interface IndexToCheck {
   indexName: string;
 }
 
-export type OnCheckAllCompleted = (params: { requestTime: number }) => void;
+export type OnCheckAllCompleted = (params: { requestTime: number; batchId: string }) => void;
 
 export type OnCheckCompleted = ({
+  batchId,
   error,
   formatBytes,
   formatNumber,
@@ -151,6 +152,7 @@ export type OnCheckCompleted = ({
   version,
   requestTime,
 }: {
+  batchId: string;
   error: string | null;
   formatBytes: (value: number | undefined) => string;
   formatNumber: (value: number | undefined) => string;
@@ -180,21 +182,26 @@ export interface SelectedIndex {
 }
 
 export interface DataQualityIndexCheckedParams {
-  ecsVersion: string;
-  error?: string;
-  incompatibleFields?: Array<{ type?: string; field?: string; value?: string }>;
-  indexName: string;
+  batchId: string;
+  ecsVersion?: string;
+  errorCount?: number;
+  ilmPhase?: string;
+  indexId: string;
   isCheckAll?: boolean;
   numberOfDocuments?: number;
   numberOfIncompatibleFields?: number;
   numberOfIndices?: number;
-  pattern: string;
+  numberOfIndicesChecked?: number;
   sizeInBytes?: number;
   timeConsumedMs?: number;
+  unallowedMappingFields?: string[];
+  unallowedValueFields?: string[];
 }
 
-export interface DataQualityCheckAllClickedParams {
-  ecsVersion: string;
+export interface DataQualityCheckAllCompletedParams {
+  batchId: string;
+  ecsVersion?: string;
+  isCheckAll?: boolean;
   numberOfDocuments?: number;
   numberOfIncompatibleFields?: number;
   numberOfIndices?: number;
@@ -204,9 +211,11 @@ export interface DataQualityCheckAllClickedParams {
 }
 
 export type ReportDataQualityIndexChecked = (params: DataQualityIndexCheckedParams) => void;
-export type ReportDataQualityCheckAllClicked = (params: DataQualityCheckAllClickedParams) => void;
+export type ReportDataQualityCheckAllCompleted = (
+  params: DataQualityCheckAllCompletedParams
+) => void;
 
 export interface TelemetryEvents {
   reportDataQualityIndexChecked?: ReportDataQualityIndexChecked;
-  reportDataQualityCheckAllClicked?: ReportDataQualityCheckAllClicked;
+  reportDataQualityCheckAllCompleted?: ReportDataQualityCheckAllCompleted;
 }

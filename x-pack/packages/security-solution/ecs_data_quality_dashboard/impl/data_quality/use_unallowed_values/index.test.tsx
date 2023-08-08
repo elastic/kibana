@@ -21,7 +21,7 @@ const mockReportDataQualityIndexChecked = jest.fn();
 const mockReportDataQualityCheckAllClicked = jest.fn();
 const mockTelemetryEvents = {
   reportDataQualityIndexChecked: mockReportDataQualityIndexChecked,
-  reportDataQualityCheckAllClicked: mockReportDataQualityCheckAllClicked,
+  reportDataQualityCheckAllCompleted: mockReportDataQualityCheckAllClicked,
 };
 
 const ContextWrapper: React.FC = ({ children }) => (

@@ -18,6 +18,7 @@ import type {
 } from '@elastic/charts';
 import { EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { v4 as uuidv4 } from 'uuid';
 
 import { getUnallowedValueRequestItems } from '../allowed_values/helpers';
 import { ErrorEmptyPrompt } from '../error_empty_prompt';
@@ -31,13 +32,18 @@ import {
 import { LoadingEmptyPrompt } from '../loading_empty_prompt';
 import { getIndexPropertiesContainerId } from '../pattern/helpers';
 import { getTabs } from '../tabs/helpers';
-import { getAllIncompatibleMarkdownComments } from '../tabs/incompatible_tab/helpers';
+import {
+  getAllIncompatibleMarkdownComments,
+  getIncompatibleValuesFields,
+  getIncompatibleMappingsFields,
+} from '../tabs/incompatible_tab/helpers';
 import * as i18n from './translations';
 import type { EcsMetadata, IlmPhase, PartitionedFieldMetadata, PatternRollup } from '../../types';
 import { useAddToNewCase } from '../../use_add_to_new_case';
 import { useMappings } from '../../use_mappings';
 import { useUnallowedValues } from '../../use_unallowed_values';
 import { useDataQualityContext } from '../data_quality_context';
+import { getSizeInBytes } from '../../helpers';
 
 const EMPTY_MARKDOWN_COMMENTS: string[] = [];
 
@@ -61,6 +67,7 @@ export interface Props {
     groupByField1: string;
   };
   ilmPhase: IlmPhase | undefined;
+  indexId: string | null | undefined;
   indexName: string;
   isAssistantEnabled: boolean;
   openCreateCaseFlyout: ({
@@ -79,19 +86,20 @@ export interface Props {
 
 const IndexPropertiesComponent: React.FC<Props> = ({
   addSuccessToast,
+  baseTheme,
   canUserCreateAndReadCases,
+  docsCount,
   formatBytes,
   formatNumber,
-  docsCount,
   getGroupByFieldsOnClick,
   ilmPhase,
+  indexId,
   indexName,
   isAssistantEnabled,
   openCreateCaseFlyout,
   pattern,
   patternRollup,
   theme,
-  baseTheme,
   updatePatternRollup,
 }) => {
   const { error: mappingsError, indexes, loading: loadingMappings } = useMappings(indexName);
@@ -250,16 +258,28 @@ const IndexPropertiesComponent: React.FC<Props> = ({
           },
         });
 
-        telemetryEvents.reportDataQualityIndexChecked?.({
-          error: error ?? undefined,
-          pattern,
-          indexName,
-          numberOfDocuments: docsCount,
-          numberOfIncompatibleFields: indexIncompatible,
-          sizeInBytes: patternRollup.sizeInBytes,
-          timeConsumedMs: requestTime,
-          ecsVersion: EcsVersion,
-        });
+        if (indexId && requestTime != null && requestTime > 0 && partitionedFieldMetadata) {
+          telemetryEvents.reportDataQualityIndexChecked?.({
+            batchId: uuidv4(),
+            ecsVersion: EcsVersion,
+            errorCount: error ? 1 : 0,
+            ilmPhase,
+            indexId,
+            isCheckAll: false,
+            numberOfDocuments: docsCount,
+            numberOfIncompatibleFields: indexIncompatible,
+            numberOfIndices: 1,
+            numberOfIndicesChecked: 1,
+            sizeInBytes: getSizeInBytes({ stats: patternRollup.stats, indexName }),
+            timeConsumedMs: requestTime,
+            unallowedMappingFields: getIncompatibleMappingsFields(
+              partitionedFieldMetadata.incompatible
+            ),
+            unallowedValueFields: getIncompatibleValuesFields(
+              partitionedFieldMetadata.incompatible
+            ),
+          });
+        }
       }
     }
   }, [
@@ -267,6 +287,7 @@ const IndexPropertiesComponent: React.FC<Props> = ({
     formatBytes,
     formatNumber,
     ilmPhase,
+    indexId,
     indexName,
     loadingMappings,
     loadingUnallowedValues,

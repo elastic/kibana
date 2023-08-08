@@ -6,6 +6,7 @@
  */
 
 import type { HttpHandler } from '@kbn/core-http-browser';
+import { IlmExplainLifecycleLifecycleExplain } from '@elastic/elasticsearch/lib/api/types';
 import { getUnallowedValueRequestItems } from '../../../allowed_values/helpers';
 import {
   getMappingsProperties,
@@ -25,6 +26,7 @@ export const EMPTY_PARTITIONED_FIELD_METADATA: PartitionedFieldMetadata = {
 
 export async function checkIndex({
   abortController,
+  batchId,
   ecsMetadata,
   formatBytes,
   formatNumber,
@@ -35,6 +37,7 @@ export async function checkIndex({
   version,
 }: {
   abortController: AbortController;
+  batchId: string;
   ecsMetadata: Record<string, EcsMetadata> | null;
   formatBytes: (value: number | undefined) => string;
   formatNumber: (value: number | undefined) => string;
@@ -84,19 +87,21 @@ export async function checkIndex({
 
     if (!abortController.signal.aborted) {
       onCheckCompleted({
+        batchId,
         error: null,
         formatBytes,
         formatNumber,
         indexName,
         partitionedFieldMetadata,
         pattern,
-        version,
         requestTime: Date.now() - startTime,
+        version,
       });
     }
   } catch (error) {
     if (!abortController.signal.aborted) {
       onCheckCompleted({
+        batchId,
         error: error != null ? error.message : i18n.AN_ERROR_OCCURRED_CHECKING_INDEX(indexName),
         formatBytes,
         formatNumber,

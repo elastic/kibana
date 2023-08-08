@@ -19,9 +19,13 @@ import {
 } from './helpers';
 
 import type { OnCheckAllCompleted, OnCheckCompleted, PatternRollup } from '../types';
-import { getDocsCount, getSizeInBytes } from '../helpers';
-import { getIndexIncompatible } from '../data_quality_panel/pattern/helpers';
+import { getDocsCount, getIndexId, getSizeInBytes } from '../helpers';
+import { getIlmPhase, getIndexIncompatible } from '../data_quality_panel/pattern/helpers';
 import { useDataQualityContext } from '../data_quality_panel/data_quality_context';
+import {
+  getIncompatibleMappingsFields,
+  getIncompatibleValuesFields,
+} from '../data_quality_panel/tabs/incompatible_tab/helpers';
 
 interface Props {
   ilmPhases: string[];
@@ -78,6 +82,7 @@ export const useResultsRollup = ({ ilmPhases, patterns }: Props): UseResultsRoll
 
   const onCheckCompleted: OnCheckCompleted = useCallback(
     ({
+      batchId,
       error,
       formatBytes,
       formatNumber,
@@ -86,6 +91,9 @@ export const useResultsRollup = ({ ilmPhases, patterns }: Props): UseResultsRoll
       pattern,
       requestTime,
     }) => {
+      const indexId = getIndexId({ indexName, stats: patternRollups[pattern].stats });
+      const ilmExplain = patternRollups[pattern].ilmExplain;
+
       setPatternRollups((current) =>
         updateResultOnCheckCompleted({
           error,
@@ -98,36 +106,56 @@ export const useResultsRollup = ({ ilmPhases, patterns }: Props): UseResultsRoll
         })
       );
 
-      telemetryEvents.reportDataQualityIndexChecked?.({
-        error: error ?? undefined,
-        pattern,
-        indexName,
-        numberOfDocuments: getDocsCount({ indexName, stats: patternRollups[pattern].stats }),
-        numberOfIncompatibleFields: getIndexIncompatible({
-          indexName,
-          results: patternRollups[pattern].results,
-        }),
-        numberOfIndices: patternRollups[pattern].indices,
-        sizeInBytes: getSizeInBytes({ stats: patternRollups[pattern].stats, indexName }),
-        timeConsumedMs: requestTime,
-        ecsVersion: EcsVersion,
-        isCheckAll: true,
-      });
+      if (
+        indexId != null &&
+        patternRollups[pattern].stats &&
+        patternRollups[pattern].results &&
+        requestTime != null &&
+        requestTime > 0 &&
+        partitionedFieldMetadata &&
+        ilmExplain
+      ) {
+        telemetryEvents.reportDataQualityIndexChecked?.({
+          batchId,
+          ecsVersion: EcsVersion,
+          errorCount: error ? 1 : 0,
+          ilmPhase: getIlmPhase(ilmExplain[indexName]),
+          indexId,
+          isCheckAll: true,
+          numberOfDocuments: getDocsCount({ indexName, stats: patternRollups[pattern].stats }),
+          numberOfIncompatibleFields: getIndexIncompatible({
+            indexName,
+            results: patternRollups[pattern].results,
+          }),
+          numberOfIndices: 1,
+          numberOfIndicesChecked: 1,
+          sizeInBytes: getSizeInBytes({ stats: patternRollups[pattern].stats, indexName }),
+          timeConsumedMs: requestTime,
+          unallowedMappingFields: getIncompatibleMappingsFields(
+            partitionedFieldMetadata.incompatible
+          ),
+          unallowedValueFields: getIncompatibleValuesFields(partitionedFieldMetadata.incompatible),
+        });
+      }
     },
     [patternRollups, telemetryEvents]
   );
 
-  const onCheckAllCompleted = useCallback(
-    ({ requestTime }: { requestTime: number }) => {
-      telemetryEvents.reportDataQualityCheckAllClicked?.({
-        numberOfDocuments: totalDocsCount,
-        numberOfIncompatibleFields: totalIncompatible,
-        numberOfIndices: totalIndices,
-        numberOfIndicesChecked: totalIndicesChecked,
-        sizeInBytes: totalSizeInBytes,
-        timeConsumedMs: requestTime,
-        ecsVersion: EcsVersion,
-      });
+  const onCheckAllCompleted: OnCheckAllCompleted = useCallback(
+    ({ requestTime, batchId }) => {
+      if (totalIncompatible != null) {
+        telemetryEvents.reportDataQualityCheckAllCompleted?.({
+          batchId,
+          ecsVersion: EcsVersion,
+          isCheckAll: true,
+          numberOfDocuments: totalDocsCount,
+          numberOfIncompatibleFields: totalIncompatible,
+          numberOfIndices: totalIndices,
+          numberOfIndicesChecked: totalIndicesChecked,
+          sizeInBytes: totalSizeInBytes,
+          timeConsumedMs: requestTime,
+        });
+      }
     },
     [
       telemetryEvents,

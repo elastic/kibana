@@ -50,7 +50,7 @@ import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { useSignalIndex } from '../../detections/containers/detection_engine/alerts/use_signal_index';
 import * as i18n from './translations';
 import type {
-  ReportDataQualityCheckAllClickedParams,
+  ReportDataQualityCheckAllCompletedParams,
   ReportDataQualityIndexCheckedParams,
 } from '../../common/lib/telemetry';
 
@@ -218,9 +218,9 @@ const DataQualityComponent: React.FC = () => {
     [telemetry]
   );
 
-  const reportDataQualityCheckAllClicked = useCallback(
-    (params: ReportDataQualityCheckAllClickedParams) => {
-      telemetry.reportDataQualityCheckAllClicked(params);
+  const reportDataQualityCheckAllCompleted = useCallback(
+    (params: ReportDataQualityCheckAllCompletedParams) => {
+      telemetry.reportDataQualityCheckAllCompleted(params);
     },
     [telemetry]
   );
@@ -256,7 +256,7 @@ const DataQualityComponent: React.FC = () => {
             defaultBytesFormat={defaultBytesFormat}
             defaultNumberFormat={defaultNumberFormat}
             getGroupByFieldsOnClick={getGroupByFieldsOnClick}
-            reportDataQualityCheckAllClicked={reportDataQualityCheckAllClicked}
+            reportDataQualityCheckAllCompleted={reportDataQualityCheckAllCompleted}
             reportDataQualityIndexChecked={reportDataQualityIndexChecked}
             httpFetch={httpFetch}
             ilmPhases={ilmPhases}

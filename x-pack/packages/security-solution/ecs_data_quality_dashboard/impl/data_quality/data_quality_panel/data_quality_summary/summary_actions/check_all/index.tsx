@@ -10,6 +10,7 @@ import { EcsFlat, EcsVersion } from '@kbn/ecs';
 import { EuiButton } from '@elastic/eui';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
+import { v4 as uuidv4 } from 'uuid';
 
 import { checkIndex } from './check_index';
 import { useDataQualityContext } from '../../../data_quality_context';
@@ -86,6 +87,7 @@ const CheckAllComponent: React.FC<Props> = ({
     async function beginCheck() {
       const allIndicesToCheck = getAllIndicesToCheck(patternIndexNames);
       const startTime = Date.now();
+      const batchId = uuidv4();
       setCheckAllIndiciesChecked(0);
       setCheckAllTotalIndiciesToCheck(allIndicesToCheck.length);
 
@@ -106,6 +108,7 @@ const CheckAllComponent: React.FC<Props> = ({
             onCheckCompleted,
             pattern,
             version: EcsVersion,
+            batchId,
           });
 
           if (!abortController.current.signal.aborted) {
@@ -121,6 +124,7 @@ const CheckAllComponent: React.FC<Props> = ({
 
         onCheckAllCompleted({
           requestTime: Date.now() - startTime,
+          batchId,
         });
       }
     }

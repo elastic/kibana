@@ -33,6 +33,7 @@ import {
 } from './helpers';
 import {
   getDocsCount,
+  getIndexId,
   getIndexNames,
   getTotalDocsCount,
   getTotalPatternIncompatible,
@@ -154,6 +155,7 @@ const PatternComponent: React.FC<Props> = ({
                 docsCount={getDocsCount({ stats, indexName })}
                 getGroupByFieldsOnClick={getGroupByFieldsOnClick}
                 ilmPhase={ilmExplain != null ? getIlmPhase(ilmExplain[indexName]) : undefined}
+                indexId={getIndexId({ stats, indexName })}
                 indexName={indexName}
                 isAssistantEnabled={isAssistantEnabled}
                 openCreateCaseFlyout={openCreateCaseFlyout}

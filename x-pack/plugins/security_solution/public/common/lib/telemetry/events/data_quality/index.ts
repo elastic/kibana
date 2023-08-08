@@ -7,24 +7,24 @@
 
 import { TelemetryEventTypes } from '../../constants';
 import type {
-  DataQualityTelemetryCheckAllClickedEvent,
+  DataQualityTelemetryCheckAllCompletedEvent,
   DataQualityTelemetryIndexCheckedEvent,
 } from '../../types';
 
 export const dataQualityIndexCheckedEvent: DataQualityTelemetryIndexCheckedEvent = {
   eventType: TelemetryEventTypes.DataQualityIndexChecked,
   schema: {
-    pattern: {
+    batchId: {
       type: 'keyword',
       _meta: {
-        description: 'Index pattern',
+        description: 'batch id',
         optional: false,
       },
     },
-    indexName: {
+    indexId: {
       type: 'keyword',
       _meta: {
-        description: 'Index name',
+        description: 'Index uuid',
         optional: false,
       },
     },
@@ -32,6 +32,13 @@ export const dataQualityIndexCheckedEvent: DataQualityTelemetryIndexCheckedEvent
       type: 'integer',
       _meta: {
         description: 'Number of indices',
+        optional: true,
+      },
+    },
+    numberOfIndicesChecked: {
+      type: 'integer',
+      _meta: {
+        description: 'Number of indices checked',
         optional: true,
       },
     },
@@ -49,10 +56,10 @@ export const dataQualityIndexCheckedEvent: DataQualityTelemetryIndexCheckedEvent
         optional: true,
       },
     },
-    error: {
-      type: 'keyword',
+    errorCount: {
+      type: 'integer',
       _meta: {
-        description: 'Error message',
+        description: 'Error count',
         optional: true,
       },
     },
@@ -84,12 +91,44 @@ export const dataQualityIndexCheckedEvent: DataQualityTelemetryIndexCheckedEvent
         optional: true,
       },
     },
+    unallowedMappingFields: {
+      type: 'array',
+      items: {
+        type: 'keyword',
+        _meta: {
+          description: 'Unallowed mapping fields',
+        },
+      },
+    },
+    unallowedValueFields: {
+      type: 'array',
+      items: {
+        type: 'keyword',
+        _meta: {
+          description: 'Unallowed value fields',
+        },
+      },
+    },
+    ilmPhase: {
+      type: 'keyword',
+      _meta: {
+        description: 'ILM phase',
+        optional: true,
+      },
+    },
   },
 };
 
-export const dataQualityCheckAllClickedEvent: DataQualityTelemetryCheckAllClickedEvent = {
-  eventType: TelemetryEventTypes.DataQualityCheckAllClicked,
+export const dataQualityCheckAllClickedEvent: DataQualityTelemetryCheckAllCompletedEvent = {
+  eventType: TelemetryEventTypes.DataQualityCheckAllCompleted,
   schema: {
+    batchId: {
+      type: 'keyword',
+      _meta: {
+        description: 'batch id',
+        optional: false,
+      },
+    },
     numberOfIndices: {
       type: 'integer',
       _meta: {

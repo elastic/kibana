@@ -18,7 +18,7 @@ import type {
   ReportCellActionClickedParams,
   ReportAnomaliesCountClickedParams,
   ReportDataQualityIndexCheckedParams,
-  ReportDataQualityCheckAllClickedParams,
+  ReportDataQualityCheckAllCompletedParams,
   ReportBreadcrumbClickedParams,
 } from './types';
 import { TelemetryEventTypes } from './constants';
@@ -80,8 +80,10 @@ export class TelemetryClient implements TelemetryClientStart {
     this.analytics.reportEvent(TelemetryEventTypes.DataQualityIndexChecked, params);
   };
 
-  public reportDataQualityCheckAllClicked = (params: ReportDataQualityCheckAllClickedParams) => {
-    this.analytics.reportEvent(TelemetryEventTypes.DataQualityCheckAllClicked, params);
+  public reportDataQualityCheckAllCompleted = (
+    params: ReportDataQualityCheckAllCompletedParams
+  ) => {
+    this.analytics.reportEvent(TelemetryEventTypes.DataQualityCheckAllCompleted, params);
   };
 
   public reportBreadcrumbClicked = ({ title }: ReportBreadcrumbClickedParams) => {

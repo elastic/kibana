@@ -30,7 +30,7 @@ export const TestProvidersComponent: React.FC<Props> = ({ children }) => {
   const mockHttp = httpServiceMock.createStartContract({ basePath: '/test' });
   const mockTelemetryEvents = {
     reportDataQualityIndexChecked: jest.fn(),
-    reportDataQualityCheckAllClicked: jest.fn(),
+    reportDataQualityCheckAllCompleted: jest.fn(),
   };
   return (
     <I18nProvider>

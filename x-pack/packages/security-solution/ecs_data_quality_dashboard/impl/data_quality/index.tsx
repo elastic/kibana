@@ -22,7 +22,7 @@ import React, { useCallback, useMemo } from 'react';
 import { Body } from './data_quality_panel/body';
 import { DataQualityProvider } from './data_quality_panel/data_quality_context';
 import { EMPTY_STAT } from './helpers';
-import { ReportDataQualityCheckAllClicked, ReportDataQualityIndexChecked } from './types';
+import { ReportDataQualityCheckAllCompleted, ReportDataQualityIndexChecked } from './types';
 
 interface Props {
   addSuccessToast: (toast: { title: string }) => void;
@@ -55,7 +55,7 @@ interface Props {
   }) => void;
   patterns: string[];
   reportDataQualityIndexChecked?: ReportDataQualityIndexChecked;
-  reportDataQualityCheckAllClicked?: ReportDataQualityCheckAllClicked;
+  reportDataQualityCheckAllCompleted?: ReportDataQualityCheckAllCompleted;
   setLastChecked: (lastChecked: string) => void;
   theme?: PartialTheme;
   baseTheme: Theme;
@@ -76,7 +76,7 @@ const DataQualityPanelComponent: React.FC<Props> = ({
   openCreateCaseFlyout,
   patterns,
   reportDataQualityIndexChecked,
-  reportDataQualityCheckAllClicked,
+  reportDataQualityCheckAllCompleted,
   setLastChecked,
   theme,
 }) => {
@@ -93,8 +93,8 @@ const DataQualityPanelComponent: React.FC<Props> = ({
   );
 
   const telemetryEvents = useMemo(
-    () => ({ reportDataQualityCheckAllClicked, reportDataQualityIndexChecked }),
-    [reportDataQualityCheckAllClicked, reportDataQualityIndexChecked]
+    () => ({ reportDataQualityCheckAllCompleted, reportDataQualityIndexChecked }),
+    [reportDataQualityCheckAllCompleted, reportDataQualityIndexChecked]
   );
 
   return (

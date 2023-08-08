@@ -15,7 +15,7 @@ const mockReportDataQualityCheckAllClicked = jest.fn();
 const mockHttpFetch = jest.fn();
 const mockTelemetryEvents = {
   reportDataQualityIndexChecked: mockReportDataQualityIndexChecked,
-  reportDataQualityCheckAllClicked: mockReportDataQualityCheckAllClicked,
+  reportDataQualityCheckAllCompleted: mockReportDataQualityCheckAllClicked,
 };
 const ContextWrapper: React.FC = ({ children }) => (
   <DataQualityProvider httpFetch={mockHttpFetch} telemetryEvents={mockTelemetryEvents}>
