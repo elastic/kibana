@@ -14,7 +14,7 @@ import type { SetupPlugins } from '../../../plugin';
 import type { SecuritySolutionPluginRouter } from '../../../types';
 import { buildSiemResponse } from '../../detection_engine/routes/utils';
 import { buildFrameworkRequest } from '../../timeline/utils/common';
-import { getDashboardsRequest } from '../../../../common/api/timeline';
+import { getDashboardsRequest } from '../../../../common/api/tags';
 import { buildRouteValidationWithExcess } from '../../../utils/build_validation/route_validation';
 
 export const getDashboardsByTagsRoute = (

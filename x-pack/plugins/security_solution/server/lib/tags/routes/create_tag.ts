@@ -8,7 +8,7 @@ import type { Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { createTagRequest } from '../../../../common/api/timeline';
+import { createTagRequest } from '../../../../common/api/tags';
 import { INTERNAL_TAGS_URL } from '../../../../common/constants';
 import type { SetupPlugins } from '../../../plugin';
 import type { SecuritySolutionPluginRouter } from '../../../types';
