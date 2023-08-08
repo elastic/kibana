@@ -237,6 +237,12 @@ export interface DataViewsServicePublicMethods {
    */
   getFieldsForWildcard: (options: GetFieldsOptions) => Promise<FieldSpec[]>;
   /**
+   * Get existing index pattern list by providing string array index pattern list.
+   * @param indices - index pattern list
+   * @returns index pattern list of index patterns that match indices
+   */
+  getExistingIndices: (indices: string[]) => Promise<string[]>;
+  /**
    * Get list of data view ids.
    * @param refresh - clear cache and fetch from server
    */
@@ -504,6 +510,37 @@ export class DataViewsService {
     });
     return fields;
   };
+
+  /**
+   * Get existing index pattern list by providing string array index pattern list.
+   * @param indices index pattern list
+   * @returns index pattern list
+   */
+  getExistingIndices = async (indices: string[]): Promise<string[]> =>
+    await Promise.all(
+      indices.map(async (pattern) => {
+        try {
+          // when checking a negative pattern, check if the positive pattern exists
+          const indexToQuery = pattern.trim().startsWith('-')
+            ? pattern.trim().substring(1)
+            : pattern.trim();
+          const res = await this.getFieldsForWildcard({
+            // check one field to keep request fast/small
+            fields: ['_id'],
+            // true so no errors thrown in browser
+            allowNoIndex: true,
+            pattern: indexToQuery,
+          });
+          return res.length > 0;
+        } catch (e) {
+          return false;
+        }
+      })
+    )
+      .then((allPatterns) =>
+        indices.filter((pattern, i, self) => self.indexOf(pattern) === i && allPatterns[i])
+      )
+      .catch(() => indices);
 
   /**
    * Get field list by providing an index patttern (or spec).
