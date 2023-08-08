@@ -382,7 +382,7 @@ src/plugins/expression_reveal_image @elastic/kibana-presentation
 src/plugins/expression_shape @elastic/kibana-presentation
 src/plugins/chart_expressions/expression_tagcloud @elastic/kibana-visualizations
 src/plugins/chart_expressions/expression_xy @elastic/kibana-visualizations
-examples/expressions_explorer @elastic/kibana-app-services
+examples/expressions_explorer @elastic/kibana-visualizations
 src/plugins/expressions @elastic/kibana-visualizations
 packages/kbn-failed-test-reporter-cli @elastic/kibana-operations @elastic/appex-qa
 x-pack/test/plugin_api_integration/plugins/feature_usage_test @elastic/kibana-security
