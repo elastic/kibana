@@ -19,12 +19,12 @@ import { FunctionDefinition } from '../../../common/types';
 
 export function FunctionListPopover({
   functions,
-  selectedFunction,
+  selectedFunctionName,
   onSelectFunction,
 }: {
   functions: FunctionDefinition[];
-  selectedFunction?: FunctionDefinition;
-  onSelectFunction: (func: FunctionDefinition) => void;
+  selectedFunctionName?: string;
+  onSelectFunction: (func: string) => void;
 }) {
   const [isFunctionListOpen, setIsFunctionListOpen] = useState(false);
 
@@ -34,7 +34,7 @@ export function FunctionListPopover({
 
   const handleSelectFunction = (func: FunctionDefinition) => {
     setIsFunctionListOpen(false);
-    onSelectFunction(func);
+    onSelectFunction(func.options.name);
   };
 
   useEffect(() => {
@@ -61,8 +61,8 @@ export function FunctionListPopover({
           size="xs"
           onClick={handleClickFunctionList}
         >
-          {selectedFunction
-            ? selectedFunction.options.name
+          {selectedFunctionName
+            ? selectedFunctionName
             : i18n.translate('xpack.observabilityAiAssistant.prompt.callFunction', {
                 defaultMessage: 'Call function',
               })}

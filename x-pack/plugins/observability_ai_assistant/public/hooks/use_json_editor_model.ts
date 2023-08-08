@@ -6,14 +6,25 @@
  */
 import { useMemo } from 'react';
 import { monaco } from '@kbn/monaco';
-import { FunctionDefinition } from '../../common/types';
+import { useObservabilityAIAssistant } from './use_observability_ai_assistant';
 
 const { editor, languages, Uri } = monaco;
 
 const SCHEMA_URI = 'http://elastic.co/foo.json';
 const modelUri = Uri.parse(SCHEMA_URI);
 
-export const useJsonEditorModel = (functionDefinition?: FunctionDefinition) => {
+export const useJsonEditorModel = ({
+  functionName,
+  initialJson,
+}: {
+  functionName: string | undefined;
+  initialJson?: string | undefined;
+}) => {
+  const { getFunctions } = useObservabilityAIAssistant();
+  const functions = getFunctions();
+
+  const functionDefinition = functions.find((func) => func.options.name === functionName);
+
   return useMemo(() => {
     if (!functionDefinition) {
       return {};
@@ -21,7 +32,9 @@ export const useJsonEditorModel = (functionDefinition?: FunctionDefinition) => {
 
     const schema = { ...functionDefinition.options.parameters };
 
-    const initialJsonString = functionDefinition.options.parameters.properties
+    const initialJsonString = initialJson
+      ? initialJson
+      : functionDefinition.options.parameters.properties
       ? Object.keys(functionDefinition.options.parameters.properties).reduce(
           (acc, curr, index, arr) => {
             const val = `${acc}  "${curr}": "",\n`;
@@ -49,5 +62,5 @@ export const useJsonEditorModel = (functionDefinition?: FunctionDefinition) => {
     }
 
     return { model, initialJsonString };
-  }, [functionDefinition]);
+  }, [functionDefinition, initialJson]);
 };

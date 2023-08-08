@@ -135,8 +135,8 @@ export function useTimeline({
             messagesAfterChat.concat({
               '@timestamp': new Date().toISOString(),
               message: {
-                role: MessageRole.User,
                 name,
+                role: MessageRole.User,
                 content: JSON.stringify(message.content),
                 data: JSON.stringify(message.data),
               },
@@ -169,18 +169,17 @@ export function useTimeline({
         id: '',
         canCopy: true,
         canEdit: false,
-        canExpand:
-          pendingMessage.message.role === MessageRole.User && Boolean(pendingMessage.message.name),
-        canRegenerate: pendingMessage.aborted || !!pendingMessage.error,
         canGiveFeedback: false,
-        title: '',
-        role: pendingMessage.message.role,
+        canRegenerate: pendingMessage.aborted || !!pendingMessage.error,
+        collapsed: false,
         content: pendingMessage.message.content,
-        loading: !pendingMessage.aborted && !pendingMessage.error,
-        function_call: pendingMessage.message.function_call,
-        hide: Boolean(pendingMessage.message.isAssistantSetupMessage),
         currentUser,
         error: pendingMessage.error,
+        functionCall: pendingMessage.message.function_call,
+        hide: Boolean(pendingMessage.message.isAssistantSetupMessage),
+        loading: !pendingMessage.aborted && !pendingMessage.error,
+        role: pendingMessage.message.role,
+        title: '',
       });
     }
 
