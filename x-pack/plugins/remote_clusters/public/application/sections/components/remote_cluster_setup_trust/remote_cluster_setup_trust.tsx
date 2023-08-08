@@ -22,6 +22,7 @@ import { remoteClustersUrl } from '../../../services/documentation';
 import { AppContext } from '../../../app_context';
 import { ConfirmTrustSetupModal } from './confirm_modal';
 
+const MIN_ALLOWED_VERSION_API_KEYS_METHOD = '8.10';
 const CARD_MAX_WIDTH = 400;
 const i18nTexts = {
   apiKeyTitle: i18n.translate(
@@ -107,6 +108,16 @@ export const RemoteClusterSetupTrust = ({ onBack, onSubmit, isSaving }: Props) =
                   defaultMessage="View instructions"
                 />
               </EuiButton>
+              <EuiSpacer size="xl" />
+              <EuiText size="xs" color="subdued">
+                <p>
+                  <FormattedMessage
+                    id="xpack.remoteClusters.clusterWizard.trustStep.apiKeyNote"
+                    defaultMessage="Both clusters must be on version {minAllowedVersion} or above."
+                    values={{ minAllowedVersion: MIN_ALLOWED_VERSION_API_KEYS_METHOD }}
+                  />
+                </p>
+              </EuiText>
             </EuiCard>
           </EuiFlexItem>
         )}

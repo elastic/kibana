@@ -46,7 +46,7 @@ export const ConfirmTrustSetupModal = ({ closeModal, onSubmit }: ModalProps) => 
         <EuiModalHeaderTitle>
           <FormattedMessage
             id="xpack.remoteClusters.clusterWizard.trustStep.modal.title"
-            defaultMessage="Have you finished setting up trust?"
+            defaultMessage="Confirm your configuration"
           />
         </EuiModalHeaderTitle>
       </EuiModalHeader>
