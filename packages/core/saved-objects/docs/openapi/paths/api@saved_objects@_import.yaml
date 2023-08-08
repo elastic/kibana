@@ -6,7 +6,7 @@ post:
     Saved objects can be imported only into the same version, a newer minor on the same major, or the next major.
     Exported saved objects are not backwards compatible and cannot be imported into an older version of Kibana.
   tags:
-    - cases
+    - saved objects
   parameters:
     - $ref: '../components/headers/kbn_xsrf.yaml'
     - in: query

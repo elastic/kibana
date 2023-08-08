@@ -8,12 +8,15 @@ info:
   license:
     name: Elastic License 2.0
     url: https://www.elastic.co/licensing/elastic-license
-tags:
-  - name: saved objects
-    description: Manage Kibana saved objects, including dashboards, visualizations, and more.
 servers:
   - url: http://localhost:5601
     description: local
+security:
+  - basicAuth: []
+  - apiKeyAuth: []
+tags:
+  - name: saved objects
+    description: Manage Kibana saved objects, including dashboards, visualizations, and more.
 paths:
   /api/saved_objects/_export:
     post:
@@ -22,7 +25,7 @@ paths:
       description: |
         This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features. NOTE: The `savedObjects.maxImportExportSize` configuration setting limits the number of saved objects which may be exported.
       tags:
-        - cases
+        - saved objects
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
       requestBody:
@@ -87,7 +90,7 @@ paths:
       description: |
         This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features. Saved objects can be imported only into the same version, a newer minor on the same major, or the next major. Exported saved objects are not backwards compatible and cannot be imported into an older version of Kibana.
       tags:
-        - cases
+        - saved objects
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
         - in: query
@@ -204,6 +207,3 @@ components:
               icon: indexPatternApp
             managed: false
             destinationId: 82d2760c-468f-49cf-83aa-b9a35b6a8943
-security:
-  - basicAuth: []
-  - apiKeyAuth: []

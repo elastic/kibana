@@ -5,7 +5,7 @@ post:
     This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
     NOTE: The `savedObjects.maxImportExportSize` configuration setting limits the number of saved objects which may be exported.
   tags:
-    - cases
+    - saved objects
   parameters:
     - $ref: '../components/headers/kbn_xsrf.yaml'
   requestBody:
