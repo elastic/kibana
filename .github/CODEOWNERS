@@ -467,8 +467,8 @@ x-pack/plugins/licensing @elastic/kibana-core
 packages/kbn-lint-packages-cli @elastic/kibana-operations
 packages/kbn-lint-ts-projects-cli @elastic/kibana-operations
 x-pack/plugins/lists @elastic/security-detection-engine
-examples/locator_examples @elastic/kibana-app-services
-examples/locator_explorer @elastic/kibana-app-services
+examples/locator_examples @elastic/appex-sharedux
+examples/locator_explorer @elastic/appex-sharedux
 packages/kbn-logging @elastic/kibana-core
 packages/kbn-logging-mocks @elastic/kibana-core
 x-pack/plugins/logs_shared @elastic/infra-monitoring-ui
