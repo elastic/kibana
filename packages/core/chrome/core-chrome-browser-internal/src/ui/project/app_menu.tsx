@@ -29,6 +29,7 @@ export const AppMenuBar = ({ isOpen, headerActionMenuMounter }: AppMenuBarProps)
           border-bottom: ${euiTheme.border.thin};
           display: flex;
           justify-content: end;
+          align-items: center;
           padding: ${euiTheme.size.s};
           /* span the width of the body content (viewport - width of side nav) */
           width: calc(100% - ${isOpen ? SIZE_EXPANDED : SIZE_COLLAPSED}px);
