@@ -62,14 +62,18 @@ export default function (providerContext: FtrProviderContext) {
     };
 
     const deleteAllSecrets = async () => {
-      return es.deleteByQuery({
-        index: SECRETS_INDEX_NAME,
-        body: {
-          query: {
-            match_all: {},
+      try {
+        await es.deleteByQuery({
+          index: SECRETS_INDEX_NAME,
+          body: {
+            query: {
+              match_all: {},
+            },
           },
-        },
-      });
+        });
+      } catch (err) {
+        // index doesnt exist
+      }
     };
 
     const getPackagePolicyById = async (id: string) => {
