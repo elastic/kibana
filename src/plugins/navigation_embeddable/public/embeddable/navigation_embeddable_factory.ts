@@ -25,7 +25,7 @@ import {
 import type { NavigationEmbeddable } from './navigation_embeddable';
 import { coreServices, untilPluginStartServicesReady } from '../services/kibana_services';
 import { getNavigationEmbeddableAttributeService } from '../services/attribute_service';
-import { APP_ICON, APP_NAME, CONTENT_ID, NAVIGATION_EMBEDDABLE_TYPE } from '../../common/constants';
+import { APP_ICON, APP_NAME, CONTENT_ID } from '../../common';
 
 export type NavigationEmbeddableFactory = EmbeddableFactory;
 
@@ -45,7 +45,7 @@ const getDefaultNavigationEmbeddableInput = (): Omit<NavigationEmbeddableByValue
 export class NavigationEmbeddableFactoryDefinition
   implements EmbeddableFactoryDefinition<NavigationEmbeddableInput>
 {
-  public readonly type = NAVIGATION_EMBEDDABLE_TYPE;
+  public readonly type = CONTENT_ID;
 
   public readonly isContainerType = false;
 
@@ -59,7 +59,7 @@ export class NavigationEmbeddableFactoryDefinition
   // public inject: EmbeddablePersistableStateService['inject'];
   // public extract: EmbeddablePersistableStateService['extract'];
 
-  constructor(private readonly persistableStateService: EmbeddablePersistableStateService) {
+  constructor(persistableStateService: EmbeddablePersistableStateService) {
     // this.inject = createInject(this.persistableStateService);
     // this.extract = createExtract(this.persistableStateService);
   }

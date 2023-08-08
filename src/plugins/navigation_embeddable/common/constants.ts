@@ -12,8 +12,6 @@ export const LATEST_VERSION = 1;
 
 export const CONTENT_ID = 'navigation_embeddable';
 
-export const NAVIGATION_EMBEDDABLE_TYPE = 'navigation';
-
 export const APP_ICON = 'link';
 
 export const APP_NAME = i18n.translate('navigationEmbeddable.visTypeAlias.title', {

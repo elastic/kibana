@@ -27,7 +27,7 @@ import {
 import { NavigationEmbeddableComponent } from '../components/navigation_embeddable_component';
 import { NavigationEmbeddableInput, NavigationEmbeddableOutput } from './types';
 import { NavigationEmbeddableAttributes } from '../../common/content_management';
-import { NAVIGATION_EMBEDDABLE_TYPE } from '../../common/constants';
+import { CONTENT_ID } from '../../common';
 
 export const NavigationEmbeddableContext = createContext<NavigationEmbeddable | null>(null);
 export const useNavigationEmbeddable = (): NavigationEmbeddable => {
@@ -55,7 +55,7 @@ export class NavigationEmbeddable
       NavigationEmbeddableByReferenceInput
     >
 {
-  public readonly type = NAVIGATION_EMBEDDABLE_TYPE;
+  public readonly type = CONTENT_ID;
   deferEmbeddableLoad = true;
 
   private isDestroyed?: boolean;
@@ -107,7 +107,7 @@ export class NavigationEmbeddable
   }
 
   private async initializeSavedLinks(input: NavigationEmbeddableInput) {
-    const { metaInfo, attributes } = await this.attributeService.unwrapAttributes(input);
+    const { attributes } = await this.attributeService.unwrapAttributes(input);
     if (this.isDestroyed) return;
 
     // TODO handle metaInfo

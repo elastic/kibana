@@ -17,7 +17,7 @@ import {
 } from '../embeddable/types';
 import { embeddableService } from './kibana_services';
 import { checkForDuplicateTitle, navigationEmbeddableClient } from '../content_management';
-import { NAVIGATION_EMBEDDABLE_TYPE } from '../../common/constants';
+import { CONTENT_ID } from '../../common';
 
 export type NavigationEmbeddableDocument = NavigationEmbeddableAttributes & {
   references?: Reference[];
@@ -43,7 +43,7 @@ export function getNavigationEmbeddableAttributeService(): NavigationEmbeddableA
     NavigationEmbeddableByValueInput,
     NavigationEmbeddableByReferenceInput,
     NavigationEmbeddableUnwrapMetaInfo
-  >(NAVIGATION_EMBEDDABLE_TYPE, {
+  >(CONTENT_ID, {
     saveMethod: async (attributes: NavigationEmbeddableDocument, savedObjectId?: string) => {
       // TODO extract references
       const {

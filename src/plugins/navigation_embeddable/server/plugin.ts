@@ -9,9 +9,9 @@
 import { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
 import type { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
 import { CONTENT_ID, LATEST_VERSION } from '../common';
+import { NavigationEmbeddableAttributes } from '../common/content_management';
 import { NavigationEmbeddableStorage } from './content_management';
 import { navigationEmbeddableSavedObjectType } from './saved_objects';
-import { NavigationEmbeddableAttributes } from '../common/content_management';
 
 export class NavigationEmbeddableServerPlugin implements Plugin<object, object> {
   public setup(

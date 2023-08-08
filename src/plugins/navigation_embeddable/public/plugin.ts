@@ -14,8 +14,8 @@ import {
 import { DashboardStart } from '@kbn/dashboard-plugin/public';
 import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { NavigationEmbeddableFactoryDefinition } from './embeddable';
-import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
-import { APP_NAME, NAVIGATION_EMBEDDABLE_TYPE } from '../common/constants';
+import { CONTENT_ID, LATEST_VERSION } from '../common';
+import { APP_NAME } from '../common';
 import { setKibanaServices } from './services/kibana_services';
 
 export interface NavigationEmbeddableSetupDependencies {
@@ -46,7 +46,7 @@ export class NavigationEmbeddablePlugin
   ) {
     core.getStartServices().then(([_, deps]) => {
       plugins.embeddable.registerEmbeddableFactory(
-        NAVIGATION_EMBEDDABLE_TYPE,
+        CONTENT_ID,
         new NavigationEmbeddableFactoryDefinition(deps.embeddable)
       );
 

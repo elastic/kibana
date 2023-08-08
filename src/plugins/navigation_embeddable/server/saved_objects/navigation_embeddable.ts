@@ -8,8 +8,7 @@
 
 import type { SavedObjectsType } from '@kbn/core/server';
 import { ANALYTICS_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
-import { CONTENT_ID } from '../../common';
-import { APP_ICON } from '../../common/constants';
+import { APP_ICON, CONTENT_ID } from '../../common';
 
 export const navigationEmbeddableSavedObjectType: SavedObjectsType = {
   name: CONTENT_ID,

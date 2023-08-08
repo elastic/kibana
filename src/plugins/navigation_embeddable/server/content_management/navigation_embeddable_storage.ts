@@ -7,8 +7,8 @@
  */
 
 import { SOContentStorage } from '@kbn/content-management-utils';
-import type { NavigationEmbeddableCrudTypes } from '../../common/content_management';
 import { CONTENT_ID } from '../../common';
+import type { NavigationEmbeddableCrudTypes } from '../../common/content_management';
 import { cmServicesDefinition } from '../../common/content_management/cm_services';
 
 export class NavigationEmbeddableStorage extends SOContentStorage<NavigationEmbeddableCrudTypes> {
