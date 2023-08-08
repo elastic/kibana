@@ -6,11 +6,17 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { Layer } from '../../../../../hooks/use_lens_attributes';
 import { hostLensFormulas } from '../../../constants';
 import { TOOLTIP } from './translations';
 import type { LensChartProps } from '../../../../../components/lens';
+import type { MetricLayerOptions } from '../../visualization_types';
+import type { FormulaConfig } from '../../../types';
 
-export type KPIChartProps = Pick<LensChartProps, 'id' | 'title' | 'layers' | 'toolTip' | 'height'>;
+export interface KPIChartProps extends Pick<LensChartProps, 'id' | 'title' | 'height'> {
+  layers: Layer<MetricLayerOptions, FormulaConfig, 'data'>;
+  toolTip: string;
+}
 
 export const KPI_CHARTS: KPIChartProps[] = [
   {
