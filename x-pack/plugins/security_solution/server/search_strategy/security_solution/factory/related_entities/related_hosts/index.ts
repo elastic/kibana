@@ -62,7 +62,7 @@ export const usersRelatedHosts: SecuritySolutionFactory<RelatedEntitiesQueries.r
           relatedHosts,
           deps.spaceId,
           deps.esClient,
-          options?.isNewRiskScoreModuleAvailable ?? false
+          options.isNewRiskScoreModuleAvailable
         )
       : relatedHosts;
 

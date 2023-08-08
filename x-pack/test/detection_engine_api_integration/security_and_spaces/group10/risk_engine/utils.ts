@@ -9,10 +9,7 @@ import { v4 as uuidv4 } from 'uuid';
 import type SuperTest from 'supertest';
 import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
-import type {
-  EcsRiskScore,
-  RiskScore,
-} from '@kbn/security-solution-plugin/server/lib/risk_engine/types';
+import type { EcsRiskScore, RiskScore } from '@kbn/security-solution-plugin/common/risk_engine';
 import { riskEngineConfigurationTypeName } from '@kbn/security-solution-plugin/server/lib/risk_engine/saved_object';
 import type { KbnClient } from '@kbn/test';
 import {

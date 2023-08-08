@@ -72,7 +72,7 @@ export const allHosts: SecuritySolutionFactory<HostsQueries.hosts> = {
           hostNames,
           deps.spaceId,
           deps.esClient,
-          options?.isNewRiskScoreModuleAvailable ?? false
+          options.isNewRiskScoreModuleAvailable
         )
       : edges;
 
