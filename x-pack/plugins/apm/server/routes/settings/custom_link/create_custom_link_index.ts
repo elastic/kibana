@@ -12,29 +12,19 @@ import {
   Mappings,
 } from '@kbn/observability-plugin/server';
 import { APM_CUSTOM_LINK_INDEX } from '../apm_indices/get_apm_indices';
-import { ApmFeatureFlags } from '../../../../common/apm_feature_flags';
 
 export const createApmCustomLinkIndex = async ({
   client,
   logger,
-  featureFlags,
 }: {
   client: ElasticsearchClient;
   logger: Logger;
-  featureFlags: ApmFeatureFlags;
 }) => {
   return createOrUpdateIndex({
     index: APM_CUSTOM_LINK_INDEX,
     client,
     logger,
     mappings,
-    settings: featureFlags.fastRefreshAvailable
-      ? {
-          index: {
-            fast_refresh: true,
-          },
-        }
-      : {},
   });
 };
 
