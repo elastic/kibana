@@ -11,7 +11,6 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { AddContentEmptyPrompt } from '../../../shared/add_content_empty_prompt';
 import { ErrorStateCallout } from '../../../shared/error_state';
 
 import { SetupGuideCta } from '../setup_guide';
@@ -56,23 +55,6 @@ describe('ProductSelector', () => {
     const wrapper = shallow(<ProductSelector />);
 
     expect(wrapper.find(ErrorStateCallout)).toHaveLength(1);
-  });
-
-  it('renders add content', () => {
-    setMockValues({ config: { canDeployEntSearch: true, host: 'localhost' } });
-    const wrapper = shallow(<ProductSelector />);
-
-    expect(wrapper.find(AddContentEmptyPrompt)).toHaveLength(1);
-  });
-
-  it('does not render add content when theres a connection error', () => {
-    setMockValues({
-      config: { canDeployEntSearch: true, host: 'localhost' },
-      errorConnectingMessage: '502 Bad Gateway',
-    });
-    const wrapper = shallow(<ProductSelector />);
-
-    expect(wrapper.find(AddContentEmptyPrompt)).toHaveLength(0);
   });
 
   describe('access checks when host is set', () => {

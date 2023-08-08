@@ -21,7 +21,6 @@ import { Chat } from '@kbn/cloud-chat-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { WelcomeBanner } from '@kbn/search-api-panels';
 
-import { AddContentEmptyPrompt } from '../../../shared/add_content_empty_prompt';
 import { ErrorStateCallout } from '../../../shared/error_state';
 import { HttpLogic } from '../../../shared/http';
 import { KibanaLogic } from '../../../shared/kibana';
@@ -34,10 +33,9 @@ import { EnterpriseSearchOverviewPageTemplate } from '../layout';
 import { SetupGuideCta } from '../setup_guide';
 import { TrialCallout } from '../trial_callout';
 
-import { BehavioralAnalyticsProductCard } from './behavioral_analytics_product_card';
 import { ElasticsearchProductCard } from './elasticsearch_product_card';
+import { EnterpriseSearchProductCard } from './enterprise_search_product_card';
 import { IngestionSelector } from './ingestion_selector';
-import { SearchApplicationsProductCard } from './search_applications_product_card';
 
 import './product_selector.scss';
 
@@ -48,11 +46,10 @@ export const ProductSelector: React.FC = () => {
   const showErrorConnecting = !!(config.host && errorConnectingMessage);
   // The create index flow does not work without ent-search, when content is updated
   // to no longer rely on ent-search we can always show the Add Content component
-  const showAddContent = false && config.host && !errorConnectingMessage;
 
   return (
     <>
-      <EnterpriseSearchOverviewPageTemplate grow offset={0}>
+      <EnterpriseSearchOverviewPageTemplate restrictWidth grow offset={0}>
         <SetPageChrome />
         <SendTelemetry action="viewed" metric="overview" />
         <TrialCallout />
@@ -65,7 +62,6 @@ export const ProductSelector: React.FC = () => {
             />
           </EuiText>
         </EuiPageTemplate.Section>
-        <TrialCallout />
         <EuiSpacer size="xl" />
         <EuiTitle>
           <h4>
@@ -87,25 +83,6 @@ export const ProductSelector: React.FC = () => {
         <EuiSpacer size="xl" />
         <IngestionSelector />
         <EuiSpacer />
-        {showAddContent && (
-          <>
-            <AddContentEmptyPrompt
-              title={i18n.translate(
-                'xpack.enterpriseSearch.productSelector.overview.emptyPromptTitle',
-                {
-                  defaultMessage: 'Add data and start searching',
-                }
-              )}
-              buttonLabel={i18n.translate(
-                'xpack.enterpriseSearch.productSelector.overview.emptyPromptButtonLabel',
-                {
-                  defaultMessage: 'Create an Elasticsearch index',
-                }
-              )}
-            />
-            <EuiSpacer size="l" />
-          </>
-        )}
         {showErrorConnecting && (
           <>
             <SendTelemetry action="error" metric="cannot_connect" />
@@ -141,10 +118,7 @@ export const ProductSelector: React.FC = () => {
             <ElasticsearchProductCard />
           </EuiFlexItem>
           <EuiFlexItem>
-            <SearchApplicationsProductCard />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <BehavioralAnalyticsProductCard />
+            <EnterpriseSearchProductCard />
           </EuiFlexItem>
           {!config.host && config.canDeployEntSearch && (
             <EuiFlexItem>
