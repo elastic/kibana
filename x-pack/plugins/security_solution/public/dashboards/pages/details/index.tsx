@@ -11,13 +11,12 @@ import type { DashboardAPI } from '@kbn/dashboard-plugin/public';
 
 import type { DashboardCapabilities } from '@kbn/dashboard-plugin/common/types';
 import { useParams } from 'react-router-dom';
-
 import { pick } from 'lodash/fp';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import type { ViewMode } from '@kbn/embeddable-plugin/common';
 import { SecurityPageName } from '../../../../common/constants';
 import { SpyRoute } from '../../../common/utils/route/spy_routes';
-import { useCapabilities } from '../../../common/lib/kibana';
+import { useCapabilities, useKibana } from '../../../common/lib/kibana';
 import { DashboardViewPromptState } from '../../hooks/use_dashboard_view_prompt_state';
 import { DashboardRenderer } from '../../components/dashboard_renderer';
 import { StatusPrompt } from '../../components/status_prompt';
@@ -31,6 +30,8 @@ import { DASHBOARD_NOT_FOUND_TITLE } from './translations';
 import { inputsSelectors } from '../../../common/store';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { DashboardToolBar } from '../../components/dashboard_tool_bar';
+import { fetchTags } from '../../../common/containers/tags/api';
+import { REQUEST_NAMES, useFetch } from '../../../common/hooks/use_fetch';
 
 type DashboardDetails = Record<string, string>;
 
@@ -43,6 +44,7 @@ const dashboardViewFlexGroupStyle = { minHeight: `calc(100vh - 140px)` };
 const DashboardViewComponent: React.FC<DashboardViewProps> = ({
   initialViewMode,
 }: DashboardViewProps) => {
+  const { savedObjectsTagging } = useKibana().services;
   const { fromStr, toStr, from, to } = useDeepEqualSelector((state) =>
     pick(['fromStr', 'toStr', 'from', 'to'], inputsSelectors.globalTimeRangeSelector(state))
   );
@@ -65,6 +67,11 @@ const DashboardViewComponent: React.FC<DashboardViewProps> = ({
   );
   const [dashboardDetails, setDashboardDetails] = useState<DashboardDetails | undefined>();
   const [viewMode, setViewMode] = useState<ViewMode>(initialViewMode);
+  const [isManaged, setIsManaged] = useState(false);
+  const { fetch: fetchDashboardTags, data: dashboardTags } = useFetch(
+    REQUEST_NAMES.FETCH_DASHBOARD_TAGS,
+    fetchTags
+  );
 
   const onDashboardToolBarLoad = useCallback((mode: ViewMode) => {
     setViewMode(mode);
@@ -81,11 +88,21 @@ const DashboardViewComponent: React.FC<DashboardViewProps> = ({
   }, []);
 
   const handleDashboardLoaded = useCallback(
-    (container: DashboardAPI) => {
+    async (container: DashboardAPI) => {
       setDashboardContainer(container);
       onDashboardContainerLoaded(container);
+      const tagIds = container?.getExplicitInput().tags;
+      if (savedObjectsTagging) {
+        await fetchDashboardTags({
+          tagIds,
+          savedObjectsTaggingClient: savedObjectsTagging.client,
+        });
+        if (dashboardTags?.find(({ name }) => name === 'Managed')) {
+          setIsManaged(true);
+        }
+      }
     },
-    [onDashboardContainerLoaded]
+    [dashboardTags, fetchDashboardTags, onDashboardContainerLoaded, savedObjectsTagging]
   );
 
   const dashboardExists = useMemo(() => dashboardDetails != null, [dashboardDetails]);
@@ -105,13 +122,17 @@ const DashboardViewComponent: React.FC<DashboardViewProps> = ({
         >
           <EuiFlexItem grow={false}>
             <HeaderPage border title={dashboardDetails?.title ?? <EuiLoadingSpinner size="m" />}>
-              {showWriteControls && dashboardExists && dashboardContainer && savedObjectId && (
-                <DashboardToolBar
-                  dashboardContainer={dashboardContainer}
-                  onLoad={onDashboardToolBarLoad}
-                  dashboardId={savedObjectId}
-                />
-              )}
+              {showWriteControls &&
+                dashboardExists &&
+                dashboardContainer &&
+                savedObjectId &&
+                !isManaged && (
+                  <DashboardToolBar
+                    dashboardContainer={dashboardContainer}
+                    onLoad={onDashboardToolBarLoad}
+                    dashboardId={savedObjectId}
+                  />
+                )}
             </HeaderPage>
           </EuiFlexItem>
           {!errorState && (
