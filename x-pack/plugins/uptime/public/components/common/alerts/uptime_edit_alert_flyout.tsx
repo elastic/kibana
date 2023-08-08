@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { AsApiContract } from '@kbn/actions-plugin/common';
 import React, { useMemo } from 'react';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import {
+  AsApiContract,
   Alert,
   transformAlert,
   TriggersAndActionsUIPublicPluginStart,
