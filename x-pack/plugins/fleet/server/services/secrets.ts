@@ -12,12 +12,7 @@ import { set } from '@kbn/safer-lodash-set';
 
 import { packageHasNoPolicyTemplates } from '../../common/services/policy_template';
 
-import type {
-  NewPackagePolicy,
-  PackagePolicyConfigRecordEntry,
-  RegistryStream,
-  UpdatePackagePolicy,
-} from '../../common';
+import type { NewPackagePolicy, RegistryStream, UpdatePackagePolicy } from '../../common';
 import { SO_SEARCH_LIMIT } from '../../common';
 
 import {
@@ -33,6 +28,9 @@ import type {
   Secret,
   VarSecretReference,
   PolicySecretReference,
+  SecretPath,
+  DeletedSecretResponse,
+  DeletedSecretReference,
 } from '../types';
 
 import { FleetError } from '../errors';
@@ -40,15 +38,10 @@ import { SECRETS_ENDPOINT_PATH } from '../constants';
 
 import { retryTransientEsErrors } from './epm/elasticsearch/retry';
 
-// import { auditLoggingService } from './audit_logging';
+import { auditLoggingService } from './audit_logging';
 
 import { appContextService } from './app_context';
 import { packagePolicyService } from './package_policy';
-
-interface SecretPath {
-  path: string;
-  value: PackagePolicyConfigRecordEntry;
-}
 
 export async function createSecrets(opts: {
   esClient: ElasticsearchClient;
@@ -57,7 +50,7 @@ export async function createSecrets(opts: {
   const { esClient, values } = opts;
   const logger = appContextService.getLogger();
 
-  const secretsResponse: PolicySecretReference[] = await Promise.all(
+  const secretsResponse: Secret[] = await Promise.all(
     values.map(async (value) => {
       try {
         return await retryTransientEsErrors(
@@ -76,6 +69,19 @@ export async function createSecrets(opts: {
       }
     })
   );
+
+  secretsResponse.forEach((item) => {
+    auditLoggingService.writeCustomAuditLog({
+      message: `secret created: ${item.id}`,
+      event: {
+        action: 'secret_create',
+        category: ['database'],
+        type: ['access'],
+        outcome: 'success',
+      },
+    });
+  });
+
   return secretsResponse;
 }
 
@@ -165,37 +171,40 @@ export async function _deleteSecrets(opts: {
   const { esClient, ids } = opts;
   const logger = appContextService.getLogger();
 
-  await Promise.all(
-    ids.map(async (secretId) => {
+  const deletedRes: DeletedSecretReference[] = await Promise.all(
+    ids.map(async (id) => {
       try {
-        return await retryTransientEsErrors(
+        const getDeleteRes: DeletedSecretResponse = await retryTransientEsErrors(
           () =>
             esClient.transport.request({
               method: 'DELETE',
-              path: `${SECRETS_ENDPOINT_PATH}${secretId}`,
+              path: `${SECRETS_ENDPOINT_PATH}/${id}`,
             }),
           { logger }
         );
+
+        return { ...getDeleteRes, id };
       } catch (err) {
         const msg = `Error deleting secrets: ${err}`;
         logger.error(msg);
         throw new FleetError(msg);
       }
-      // TODO: audit logging
-      //   const [errorItems, successItems] = partition(res.items, (a) => a.delete?.error);
-      //   successItems.forEach((item) => {
-      //     auditLoggingService.writeCustomAuditLog({
-      //       message: `secret deleted: ${item.delete!._id}`,
-      //       event: {
-      //         action: 'secret_delete',
-      //         category: ['database'],
-      //         type: ['access'],
-      //         outcome: 'success',
-      //       },
-      //     });
-      //   });
     })
   );
+
+  deletedRes.forEach((item) => {
+    if (item.deleted === true) {
+      auditLoggingService.writeCustomAuditLog({
+        message: `secret deleted: ${item.id}`,
+        event: {
+          action: 'secret_delete',
+          category: ['database'],
+          type: ['access'],
+          outcome: 'success',
+        },
+      });
+    }
+  });
 }
 
 export async function extractAndWriteSecrets(opts: {
@@ -226,7 +235,6 @@ export async function extractAndWriteSecrets(opts: {
   };
 }
 
-// createSecrets won't return secrets anymore, only ids
 export async function extractAndUpdateSecrets(opts: {
   oldPackagePolicy: PackagePolicy;
   packagePolicyUpdate: UpdatePackagePolicy;
