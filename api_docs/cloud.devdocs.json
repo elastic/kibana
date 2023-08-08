@@ -87,6 +87,20 @@
           },
           {
             "parentPluginId": "cloud",
+            "id": "def-public.CloudConfigType.projects_url",
+            "type": "string",
+            "tags": [],
+            "label": "projects_url",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/cloud/public/plugin.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cloud",
             "id": "def-public.CloudConfigType.billing_url",
             "type": "string",
             "tags": [],
@@ -105,6 +119,34 @@
             "type": "string",
             "tags": [],
             "label": "organization_url",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/cloud/public/plugin.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cloud",
+            "id": "def-public.CloudConfigType.users_and_roles_url",
+            "type": "string",
+            "tags": [],
+            "label": "users_and_roles_url",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/cloud/public/plugin.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cloud",
+            "id": "def-public.CloudConfigType.performance_url",
+            "type": "string",
+            "tags": [],
+            "label": "performance_url",
             "description": [],
             "signature": [
               "string | undefined"
@@ -311,6 +353,54 @@
           },
           {
             "parentPluginId": "cloud",
+            "id": "def-public.CloudStart.performanceUrl",
+            "type": "string",
+            "tags": [],
+            "label": "performanceUrl",
+            "description": [
+              "\nThe full URL to the performance page on Elastic Cloud. Undefined if not running on Cloud."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/cloud/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cloud",
+            "id": "def-public.CloudStart.usersAndRolesUrl",
+            "type": "string",
+            "tags": [],
+            "label": "usersAndRolesUrl",
+            "description": [
+              "\nThe full URL to the users and roles page on Elastic Cloud. Undefined if not running on Cloud."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/cloud/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cloud",
+            "id": "def-public.CloudStart.projectsUrl",
+            "type": "string",
+            "tags": [],
+            "label": "projectsUrl",
+            "description": [
+              "\nThe full URL to the serverless projects page on Elastic Cloud. Undefined if not running in Serverless."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/cloud/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cloud",
             "id": "def-public.CloudStart.elasticsearchUrl",
             "type": "string",
             "tags": [],
@@ -460,6 +550,22 @@
           "label": "deploymentUrl",
           "description": [
             "\nThe full URL to the deployment management page on Elastic Cloud. Undefined if not running on Cloud."
+          ],
+          "signature": [
+            "string | undefined"
+          ],
+          "path": "x-pack/plugins/cloud/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "cloud",
+          "id": "def-public.CloudSetup.projectsUrl",
+          "type": "string",
+          "tags": [],
+          "label": "projectsUrl",
+          "description": [
+            "\nThe full URL to the serverless projects page on Elastic Cloud. Undefined if not running in Serverless."
           ],
           "signature": [
             "string | undefined"

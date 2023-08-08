@@ -798,7 +798,7 @@ describe('workspace_panel', () => {
       lensStore.dispatch(
         updateDatasourceState({
           datasourceId: 'testDatasource',
-          newDatasourceState: {},
+          newDatasourceState: 'newState',
         })
       );
     });

@@ -356,7 +356,7 @@ describe('kuery functions', () => {
         expect(result).toMatchInlineSnapshot(`"byt* > 1000"`);
       });
 
-      test('with wildcard field & wildcard value', () => {
+      test('with wildcard field & value', () => {
         const node = nodeTypes.function.buildNode(
           'range',
           'byt*',
@@ -364,7 +364,7 @@ describe('kuery functions', () => {
           '100*'
         ) as KqlRangeFunctionNode;
         const result = range.toKqlExpression(node);
-        expect(result).toMatchInlineSnapshot(`"byt* > 100*"`);
+        expect(result).toMatchInlineSnapshot(`"byt* > 100\\\\*"`);
       });
     });
   });

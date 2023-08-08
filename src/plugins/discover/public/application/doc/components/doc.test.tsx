@@ -13,8 +13,8 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { ReactWrapper } from 'enzyme';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { Doc, DocProps } from './doc';
-import { SEARCH_FIELDS_FROM_SOURCE as mockSearchFieldsFromSource } from '../../../../common';
-import { dataViewMock } from '../../../__mocks__/data_view';
+import { SEARCH_FIELDS_FROM_SOURCE as mockSearchFieldsFromSource } from '@kbn/discover-utils';
+import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
 const mockSearchApi = jest.fn();

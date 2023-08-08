@@ -25,7 +25,6 @@ import {
 import { createRule } from '../../../tasks/api_calls/rules';
 import { cleanKibana } from '../../../tasks/common';
 import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
-import { esArchiverLoad, esArchiverUnload } from '../../../tasks/es_archiver';
 import { login, visit, visitWithoutDateRange } from '../../../tasks/login';
 import { getNewRule, getUnmappedRule } from '../../../objects/rule';
 import { ALERTS_URL } from '../../../urls/navigation';
@@ -59,7 +58,7 @@ describe('Alert details flyout', () => {
   describe('With unmapped fields', () => {
     before(() => {
       cleanKibana();
-      esArchiverLoad('unmapped_fields');
+      cy.task('esArchiverLoad', 'unmapped_fields');
       createRule(getUnmappedRule());
     });
 
@@ -71,7 +70,7 @@ describe('Alert details flyout', () => {
     });
 
     after(() => {
-      esArchiverUnload('unmapped_fields');
+      cy.task('esArchiverUnload', 'unmapped_fields');
     });
 
     it('should display the unmapped field on the JSON view', () => {
@@ -124,7 +123,7 @@ describe('Alert details flyout', () => {
   describe('Url state management', () => {
     before(() => {
       cleanKibana();
-      esArchiverLoad('query_alert');
+      cy.task('esArchiverLoad', 'query_alert');
     });
 
     beforeEach(() => {
@@ -169,7 +168,7 @@ describe('Alert details flyout', () => {
   describe('Localstorage management', () => {
     before(() => {
       cleanKibana();
-      esArchiverLoad('query_alert');
+      cy.task('esArchiverLoad', 'query_alert');
     });
 
     beforeEach(() => {

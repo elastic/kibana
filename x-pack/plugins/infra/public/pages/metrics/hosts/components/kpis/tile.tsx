@@ -12,19 +12,18 @@ import { EuiIcon, EuiPanel, EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } fro
 import styled from 'styled-components';
 import { Action } from '@kbn/ui-actions-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { LensWrapper, TooltipContent } from '../../../../../components/lens';
 import { KPIChartProps } from '../../../../../common/visualizations/lens/dashboards/host/kpi_grid_config';
 import { buildCombinedHostsFilter } from '../../../../../utils/filters/build';
 import { useLensAttributes } from '../../../../../hooks/use_lens_attributes';
 import { useMetricsDataViewContext } from '../../hooks/use_data_view';
 import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
 import { useHostsViewContext } from '../../hooks/use_hosts_view';
-import { LensWrapper } from '../../../../../common/visualizations/lens/lens_wrapper';
 import { useHostCountContext } from '../../hooks/use_host_count';
 import { useAfterLoadedState } from '../../hooks/use_after_loaded_state';
-import { TooltipContent } from '../../../../../common/visualizations/metric_explanation/tooltip_content';
 import { KPI_CHART_MIN_HEIGHT } from '../../constants';
 
-export const Tile = ({ id, title, layers, style, toolTip, ...props }: KPIChartProps) => {
+export const Tile = ({ id, title, layers, style, toolTip }: KPIChartProps) => {
   const { searchCriteria, onSubmit } = useUnifiedSearchContext();
   const { dataView } = useMetricsDataViewContext();
   const { requestTs, hostNodes, loading: hostsLoading } = useHostsViewContext();
@@ -149,6 +148,7 @@ export const Tile = ({ id, title, layers, style, toolTip, ...props }: KPIChartPr
               query={shouldUseSearchCriteria ? afterLoadedState.query : undefined}
               onBrushEnd={handleBrushEnd}
               loading={loading}
+              hidePanelTitles
             />
           </div>
         </EuiToolTip>
@@ -158,7 +158,7 @@ export const Tile = ({ id, title, layers, style, toolTip, ...props }: KPIChartPr
 };
 
 const EuiPanelStyled = styled(EuiPanel)`
-  min-height: ${KPI_CHART_MIN_HEIGHT};
+  min-height: ${KPI_CHART_MIN_HEIGHT}px;
   .echMetric {
     border-radius: ${({ theme }) => theme.eui.euiBorderRadius};
     pointer-events: none;

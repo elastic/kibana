@@ -12,8 +12,8 @@ import styled from 'styled-components';
 
 import type { FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { getFieldValidityAndErrorMessage } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import type { ActionConnector } from '../../../common/types/domain';
 import { ConnectorsDropdown } from '../configure_cases/connectors_dropdown';
-import type { ActionConnector } from '../../../common/api';
 
 interface ConnectorSelectorProps {
   connectors: ActionConnector[];

@@ -21,8 +21,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
 
-  // Failing: See https://github.com/elastic/kibana/issues/157711
-  describe.skip('Home page', function () {
+  describe('Home page', function () {
     this.tags('includeFirefox');
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
@@ -72,6 +71,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         const documentTitle = await browser.getTitle();
         expect(documentTitle).to.contain('Inventory - Infrastructure - Observability - Elastic');
+      });
+
+      it('renders the inventory survey link', async () => {
+        await pageObjects.header.waitUntilLoadingHasFinished();
+        await pageObjects.infraHome.waitForLoading();
+
+        await pageObjects.infraHome.ensureInventoryFeedbackLinkIsVisible();
       });
 
       it('renders the kubernetes tour component and allows user to dismiss it without seeing it again', async () => {
@@ -225,8 +231,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/157740
-    describe.skip('Saved Views', () => {
+    describe('Saved Views', () => {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
         await pageObjects.infraHome.goToMetricExplorer();

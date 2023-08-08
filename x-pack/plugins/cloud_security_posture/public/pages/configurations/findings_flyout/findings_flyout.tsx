@@ -82,7 +82,7 @@ export const CodeBlock: React.FC<PropsOf<typeof EuiCodeBlock>> = (props) => (
   <EuiCodeBlock isCopyable paddingSize="s" overflowHeight={300} {...props} />
 );
 
-export const Markdown: React.FC<PropsOf<typeof EuiMarkdownFormat>> = (props) => (
+export const CspFlyoutMarkdown: React.FC<PropsOf<typeof EuiMarkdownFormat>> = (props) => (
   <EuiMarkdownFormat textSize="s" {...props} />
 );
 

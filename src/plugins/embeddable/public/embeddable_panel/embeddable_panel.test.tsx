@@ -25,7 +25,7 @@ import {
   ContactCardEmbeddableReactFactory,
   HelloWorldContainer,
 } from '../lib/test_samples';
-import { EuiBadge } from '@elastic/eui';
+import { EuiBadge, EuiNotificationBadge } from '@elastic/eui';
 import { embeddablePluginMock } from '../mocks';
 import { EmbeddablePanel } from './embeddable_panel';
 import { core, inspector } from '../kibana_services';
@@ -89,10 +89,17 @@ const setupContainerAndEmbeddable = async (viewMode?: ViewMode, hidePanelTitles?
   return { container, embeddable };
 };
 
-const renderInEditModeAndOpenContextMenu = async (
-  embeddableInputs: any,
-  getActions: UiActionsStart['getTriggerCompatibleActions'] = () => Promise.resolve([])
-) => {
+const renderInEditModeAndOpenContextMenu = async ({
+  embeddableInputs,
+  getActions = () => Promise.resolve([]),
+  showNotifications = true,
+  showBadges = true,
+}: {
+  embeddableInputs: any;
+  getActions?: UiActionsStart['getTriggerCompatibleActions'];
+  showNotifications?: boolean;
+  showBadges?: boolean;
+}) => {
   const container = new HelloWorldContainer({ id: '123', panels: {}, viewMode: ViewMode.VIEW }, {
     getEmbeddableFactory,
   } as any);
@@ -110,8 +117,8 @@ const renderInEditModeAndOpenContextMenu = async (
         <EmbeddablePanel
           embeddable={embeddable}
           getActions={getActions}
-          showNotifications={true}
-          showBadges={true}
+          showNotifications={showNotifications}
+          showBadges={showBadges}
         />
       </I18nProvider>
     );
@@ -264,19 +271,19 @@ test('Actions which are disabled via disabledActions are hidden', async () => {
   };
   const getActions = () => Promise.resolve([action]);
 
-  const { component: component1 } = await renderInEditModeAndOpenContextMenu(
-    {
+  const { component: component1 } = await renderInEditModeAndOpenContextMenu({
+    embeddableInputs: {
       firstName: 'Bob',
     },
-    getActions
-  );
-  const { component: component2 } = await renderInEditModeAndOpenContextMenu(
-    {
+    getActions,
+  });
+  const { component: component2 } = await renderInEditModeAndOpenContextMenu({
+    embeddableInputs: {
       firstName: 'Bob',
       disabledActions: ['FOO'],
     },
-    getActions
-  );
+    getActions,
+  });
 
   const fooContextMenuActionItem1 = findTestSubject(component1, 'embeddablePanelAction-FOO');
   const fooContextMenuActionItem2 = findTestSubject(component2, 'embeddablePanelAction-FOO');
@@ -300,22 +307,75 @@ test('Badges which are disabled via disabledActions are hidden', async () => {
   };
   const getActions = () => Promise.resolve([action]);
 
-  const { component: component1 } = await renderInEditModeAndOpenContextMenu(
-    {
+  const { component: component1 } = await renderInEditModeAndOpenContextMenu({
+    embeddableInputs: {
       firstName: 'Bob',
     },
-    getActions
-  );
-  const { component: component2 } = await renderInEditModeAndOpenContextMenu(
-    {
+    getActions,
+  });
+  const { component: component2 } = await renderInEditModeAndOpenContextMenu({
+    embeddableInputs: {
       firstName: 'Bob',
       disabledActions: ['BAR'],
     },
-    getActions
-  );
+    getActions,
+  });
 
   expect(component1.find(EuiBadge).length).toBe(1);
   expect(component2.find(EuiBadge).length).toBe(0);
+});
+
+test('Badges are not shown when hideBadges is true', async () => {
+  const action = {
+    id: 'BAR',
+    type: 'BAR',
+    getIconType: () => undefined,
+    getDisplayName: () => 'bar',
+    isCompatible: async () => true,
+    execute: async () => {},
+    order: 10,
+    getHref: () => {
+      return Promise.resolve(undefined);
+    },
+  };
+  const getActions = () => Promise.resolve([action]);
+
+  const { component } = await renderInEditModeAndOpenContextMenu({
+    embeddableInputs: {
+      firstName: 'Bob',
+    },
+    getActions,
+    showBadges: false,
+  });
+  expect(component.find(EuiBadge).length).toBe(0);
+  expect(component.find(EuiNotificationBadge).length).toBe(1);
+});
+
+test('Notifications are not shown when hideNotifications is true', async () => {
+  const action = {
+    id: 'BAR',
+    type: 'BAR',
+    getIconType: () => undefined,
+    getDisplayName: () => 'bar',
+    isCompatible: async () => true,
+    execute: async () => {},
+    order: 10,
+    getHref: () => {
+      return Promise.resolve(undefined);
+    },
+  };
+  const getActions = () => Promise.resolve([action]);
+
+  const { component } = await renderInEditModeAndOpenContextMenu({
+    embeddableInputs: {
+      firstName: 'Bob',
+    },
+    getActions,
+    showNotifications: false,
+  });
+
+  expect(component.find(EuiBadge).length).toBe(1);
+  expect(component.find(EuiNotificationBadge).length).toBe(0);
 });
 
 test('Edit mode actions are hidden if parent is in view mode', async () => {

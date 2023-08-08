@@ -5,22 +5,20 @@
  * 2.0.
  */
 
+import type { Case, Cases, User } from '../../../common/types/domain';
 import type {
   CasePostRequest,
-  CasesPatchRequest,
   CasesFindRequest,
-  User,
+  CasesFindResponse,
+  CaseResolveResponse,
+  CasesBulkGetRequest,
+  CasesPatchRequest,
   AllTagsFindRequest,
   AllCategoriesFindRequest,
   AllReportersFindRequest,
-  CasesByAlertId,
-  CasesBulkGetRequest,
+  GetRelatedCasesByAlertResponse,
   CasesBulkGetResponse,
-  Case,
-  CaseResolveResponse,
-  Cases,
-  CasesFindResponse,
-} from '../../../common/api';
+} from '../../../common/types/api';
 import type { CasesClient } from '../client';
 import type { CasesClientInternal } from '../client_internal';
 import type { CasesClientArgs } from '../types';
@@ -90,7 +88,7 @@ export interface CasesSubClient {
   /**
    * Retrieves the cases ID and title that have the requested alert attached to them
    */
-  getCasesByAlertID(params: CasesByAlertIDParams): Promise<CasesByAlertId>;
+  getCasesByAlertID(params: CasesByAlertIDParams): Promise<GetRelatedCasesByAlertResponse>;
 }
 
 /**

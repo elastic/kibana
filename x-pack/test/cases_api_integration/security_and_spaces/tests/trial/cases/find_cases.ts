@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { Cookie } from 'tough-cookie';
-import { User } from '@kbn/cases-plugin/common/api';
+import { User } from '@kbn/cases-plugin/common/types/domain';
 import { UserProfile } from '@kbn/security-plugin/common';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 

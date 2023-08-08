@@ -30,6 +30,5 @@
     "@kbn/ml-plugin",
     "@kbn/management-cards-navigation",
     "@kbn/core-elasticsearch-server",
-    "@kbn/observability-shared-plugin",
   ]
 }

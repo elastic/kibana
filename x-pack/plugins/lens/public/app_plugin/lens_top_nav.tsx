@@ -25,7 +25,6 @@ import {
   useLensSelector,
   useLensDispatch,
   LensAppState,
-  DispatchSetState,
   switchAndCleanDatasource,
 } from '../state_management';
 import {
@@ -314,7 +313,7 @@ export const LensTopNavMenu = ({
   } = useLensSelector((state) => state.lens);
 
   const dispatch = useLensDispatch();
-  const dispatchSetState: DispatchSetState = React.useCallback(
+  const dispatchSetState = React.useCallback(
     (state: Partial<LensAppState>) => dispatch(setState(state)),
     [dispatch]
   );

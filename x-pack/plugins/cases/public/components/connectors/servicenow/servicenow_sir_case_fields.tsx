@@ -14,7 +14,7 @@ import {
   useFormData,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { CheckBoxField, SelectField } from '@kbn/es-ui-shared-plugin/static/forms/components';
-import type { ServiceNowSIRFieldsType } from '../../../../common/api';
+import type { ServiceNowSIRFieldsType } from '../../../../common/types/domain';
 import { useKibana } from '../../../common/lib/kibana';
 import type { ConnectorFieldsProps } from '../types';
 import { useGetChoices } from './use_get_choices';

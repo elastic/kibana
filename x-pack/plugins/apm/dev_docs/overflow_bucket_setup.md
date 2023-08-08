@@ -154,7 +154,11 @@ For more detailed instructions you can check [apm-server dev documentation](http
 
 - Copy paste the below script in a file called `tx_max_group.go`
   This file is responsible for generating 3 transactions per service.
-  ```
+
+<details>
+  <summary>tx_max_group.go</summary>
+
+  ```go
   package main
 
   import (
@@ -185,9 +189,14 @@ For more detailed instructions you can check [apm-server dev documentation](http
     span.End()
   }
   ```
-  
+</details>
+
 - Now create a Bash Script file, name it anything - e.g., `service_max_group.sh`
   This file will generate services and then transactions for each service using the go script above.
+
+<details>
+  <summary>tx_max_group.go</summary>
+
   ```sh
   #!/usr/bin/env bash
 
@@ -203,6 +212,7 @@ For more detailed instructions you can check [apm-server dev documentation](http
   
   echo "Ending script"
   ```
+</details>
 
 - Run `sh service_max_group` to generate the data
 

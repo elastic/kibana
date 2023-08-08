@@ -43,7 +43,7 @@ import {
 } from '@kbn/ml-data-frame-analytics-utils';
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { SEARCH_QUERY_LANGUAGE } from '../../../../../../../common/constants/search';
+import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
 
 import { getToastNotifications } from '../../../../../util/dependency_cache';
 import { useColorRange, ColorRangeLegend } from '../../../../../components/color_range_legend';

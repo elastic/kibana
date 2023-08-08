@@ -5,39 +5,23 @@
  * 2.0.
  */
 import type { ChromeNavLink } from '@kbn/core/public';
-import { APP_UI_ID, SecurityPageName } from '@kbn/security-solution-plugin/common';
+import { APP_UI_ID } from '@kbn/security-solution-plugin/common';
+import { SecurityPageName } from '@kbn/security-solution-navigation';
 import { subscribeNavigationTree } from './navigation_tree';
-import { BehaviorSubject } from 'rxjs';
-import { mockServices, mockProjectNavLinks } from '../common/__mocks__/services.mock';
-import type { ProjectNavigationLink } from './links';
+import { mockServices, mockProjectNavLinks } from '../common/services/__mocks__/services.mock';
+import type { ProjectNavigationLink } from './links/types';
+import type { ExternalPageName } from './links/constants';
+import * as ml from '@kbn/default-nav-ml';
 
-const mockChromeNavLinks = jest.fn((): ChromeNavLink[] => []);
-const mockChromeGetNavLinks = jest.fn(() => new BehaviorSubject(mockChromeNavLinks()));
-const mockChromeNavLinksGet = jest.fn((id: string): ChromeNavLink | undefined =>
-  mockChromeNavLinks().find((link) => link.id === id)
-);
-const mockChromeNavLinksHas = jest.fn((id: string): boolean =>
-  mockChromeNavLinks().some((link) => link.id === id)
-);
-
-const testServices = {
-  ...mockServices,
-  chrome: {
-    ...mockServices.chrome,
-    navLinks: {
-      ...mockServices.chrome.navLinks,
-      get: mockChromeNavLinksGet,
-      has: mockChromeNavLinksHas,
-      getNavLinks$: mockChromeGetNavLinks,
-    },
-  },
-};
+jest.mock('@kbn/default-nav-ml');
 
 const link1Id = 'link-1' as SecurityPageName;
 const link2Id = 'link-2' as SecurityPageName;
+const link3Id = 'externalAppId:link-1' as ExternalPageName;
 
 const link1: ProjectNavigationLink = { id: link1Id, title: 'link 1' };
 const link2: ProjectNavigationLink = { id: link2Id, title: 'link 2' };
+const link3: ProjectNavigationLink = { id: link3Id, title: 'link 3' };
 
 const chromeNavLink1: ChromeNavLink = {
   id: `${APP_UI_ID}:${link1.id}`,
@@ -53,20 +37,84 @@ const chromeNavLink2: ChromeNavLink = {
   url: '/link2',
   baseUrl: '',
 };
+const chromeNavLink3: ChromeNavLink = {
+  id: link3.id,
+  title: link3.title,
+  href: '/link3',
+  url: '/link3',
+  baseUrl: '',
+};
+const chromeNavLinkMl1: ChromeNavLink = {
+  id: 'ml:subLink-1',
+  title: 'ML subLink 1',
+  href: '/ml/link1',
+  url: '/ml/link1',
+  baseUrl: '',
+};
+const chromeNavLinkMl2: ChromeNavLink = {
+  id: 'ml:subLink-2',
+  title: 'ML subLink 2',
+  href: '/ml/link2',
+  url: '/ml/link2',
+  baseUrl: '',
+};
+const defaultNavCategory1 = {
+  id: 'category_one',
+  title: 'ML Category1',
+};
 
-const waitForDebounce = async () => new Promise((resolve) => setTimeout(resolve, 150));
+(ml as { defaultNavigation: unknown }).defaultNavigation = {
+  children: [
+    {
+      id: 'root',
+      children: [
+        {
+          link: chromeNavLinkMl1.id,
+        },
+      ],
+    },
+    {
+      ...defaultNavCategory1,
+      children: [
+        {
+          title: 'Overridden ML SubLink 2',
+          link: chromeNavLinkMl2.id,
+        },
+      ],
+    },
+  ],
+};
+
+let chromeNavLinks: ChromeNavLink[] = [];
+const mockChromeNavLinksGet = jest.fn((id: string): ChromeNavLink | undefined =>
+  chromeNavLinks.find((link) => link.id === id)
+);
+const mockChromeNavLinksHas = jest.fn((id: string): boolean =>
+  chromeNavLinks.some((link) => link.id === id)
+);
+
+const testServices = {
+  ...mockServices,
+  chrome: {
+    ...mockServices.chrome,
+    navLinks: {
+      ...mockServices.chrome.navLinks,
+      get: mockChromeNavLinksGet,
+      has: mockChromeNavLinksHas,
+    },
+  },
+};
 
 describe('subscribeNavigationTree', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockChromeNavLinks.mockReturnValue([chromeNavLink1, chromeNavLink2]);
+    chromeNavLinks = [chromeNavLink1, chromeNavLink2, chromeNavLink3];
   });
 
   it('should call serverless setNavigation', async () => {
     mockProjectNavLinks.mockReturnValueOnce([link1]);
 
     subscribeNavigationTree(testServices);
-    await waitForDebounce();
 
     expect(testServices.serverless.setNavigation).toHaveBeenCalledWith({
       navigationTree: [
@@ -89,16 +137,9 @@ describe('subscribeNavigationTree', () => {
   });
 
   it('should call serverless setNavigation with external link', async () => {
-    const externalLink = { ...link1, appId: 'externalAppId' };
-    const chromeNavLinkExpected = {
-      ...chromeNavLink1,
-      id: `${externalLink.appId}:${externalLink.id}`,
-    };
-    mockChromeNavLinks.mockReturnValue([chromeNavLinkExpected]);
-    mockProjectNavLinks.mockReturnValueOnce([externalLink]);
+    mockProjectNavLinks.mockReturnValueOnce([link3]);
 
     subscribeNavigationTree(testServices);
-    await waitForDebounce();
 
     expect(testServices.serverless.setNavigation).toHaveBeenCalledWith({
       navigationTree: [
@@ -109,10 +150,10 @@ describe('subscribeNavigationTree', () => {
           breadcrumbStatus: 'hidden',
           children: [
             {
-              id: chromeNavLinkExpected.id,
-              title: externalLink.title,
-              path: ['root', chromeNavLinkExpected.id],
-              deepLink: chromeNavLinkExpected,
+              id: chromeNavLink3.id,
+              title: chromeNavLink3.title,
+              path: ['root', chromeNavLink3.id],
+              deepLink: chromeNavLink3,
             },
           ],
         },
@@ -124,7 +165,6 @@ describe('subscribeNavigationTree', () => {
     mockProjectNavLinks.mockReturnValueOnce([{ ...link1, links: [link2] }]);
 
     subscribeNavigationTree(testServices);
-    await waitForDebounce();
 
     expect(testServices.serverless.setNavigation).toHaveBeenCalledWith({
       navigationTree: [
@@ -154,47 +194,16 @@ describe('subscribeNavigationTree', () => {
     });
   });
 
-  it('should not call serverless setNavigation when projectNavLinks is empty', async () => {
-    mockProjectNavLinks.mockReturnValueOnce([]);
-
-    subscribeNavigationTree(testServices);
-    await waitForDebounce();
-
-    expect(testServices.serverless.setNavigation).not.toHaveBeenCalled();
-  });
-
-  it('should not call serverless setNavigation when chrome navLinks is empty', async () => {
-    mockChromeNavLinks.mockReturnValue([]);
-    mockProjectNavLinks.mockReturnValueOnce([link1]);
-
-    subscribeNavigationTree(testServices);
-    await waitForDebounce();
-
-    expect(testServices.serverless.setNavigation).not.toHaveBeenCalled();
-  });
-
-  it('should debounce updates', async () => {
-    const id = 'expectedId' as SecurityPageName;
-    const linkExpected = { ...link1, id };
-    const chromeNavLinkExpected = { ...chromeNavLink1, id: `${APP_UI_ID}:${id}` };
-
-    const chromeGetNavLinks$ = new BehaviorSubject([chromeNavLink1]);
-    mockChromeGetNavLinks.mockReturnValue(chromeGetNavLinks$);
-
-    mockChromeNavLinks.mockReturnValue([chromeNavLink1, chromeNavLink2, chromeNavLinkExpected]);
-    mockProjectNavLinks.mockReturnValueOnce([linkExpected]);
+  it('should add default nav for ML page', async () => {
+    const chromeNavLinkTest = {
+      ...chromeNavLink1,
+      id: `${APP_UI_ID}:${SecurityPageName.mlLanding}`,
+    };
+    chromeNavLinks = [chromeNavLinkTest, chromeNavLinkMl1, chromeNavLinkMl2];
+    mockProjectNavLinks.mockReturnValueOnce([{ ...link1, id: SecurityPageName.mlLanding }]);
 
     subscribeNavigationTree(testServices);
 
-    chromeGetNavLinks$.next([chromeNavLink1]);
-    chromeGetNavLinks$.next([chromeNavLink2]);
-    chromeGetNavLinks$.next([chromeNavLinkExpected]);
-
-    expect(testServices.serverless.setNavigation).not.toHaveBeenCalled();
-
-    await waitForDebounce();
-
-    expect(testServices.serverless.setNavigation).toHaveBeenCalledTimes(1);
     expect(testServices.serverless.setNavigation).toHaveBeenCalledWith({
       navigationTree: [
         {
@@ -204,10 +213,36 @@ describe('subscribeNavigationTree', () => {
           breadcrumbStatus: 'hidden',
           children: [
             {
-              id: chromeNavLinkExpected.id,
+              id: chromeNavLinkTest.id,
               title: link1.title,
-              path: ['root', chromeNavLinkExpected.id],
-              deepLink: chromeNavLinkExpected,
+              path: ['root', chromeNavLinkTest.id],
+              deepLink: chromeNavLinkTest,
+              children: [
+                {
+                  id: chromeNavLinkMl1.id,
+                  title: chromeNavLinkMl1.title,
+                  path: ['root', chromeNavLinkTest.id, chromeNavLinkMl1.id],
+                  deepLink: chromeNavLinkMl1,
+                },
+                {
+                  id: defaultNavCategory1.id,
+                  title: defaultNavCategory1.title,
+                  path: ['root', chromeNavLinkTest.id, defaultNavCategory1.id],
+                  children: [
+                    {
+                      id: chromeNavLinkMl2.id,
+                      title: 'Overridden ML SubLink 2',
+                      path: [
+                        'root',
+                        chromeNavLinkTest.id,
+                        defaultNavCategory1.id,
+                        chromeNavLinkMl2.id,
+                      ],
+                      deepLink: chromeNavLinkMl2,
+                    },
+                  ],
+                },
+              ],
             },
           ],
         },
@@ -216,11 +251,10 @@ describe('subscribeNavigationTree', () => {
   });
 
   it('should not include links that are not in the chrome navLinks', async () => {
-    mockChromeNavLinks.mockReturnValue([chromeNavLink2]);
+    chromeNavLinks = [chromeNavLink2];
     mockProjectNavLinks.mockReturnValueOnce([link1, link2]);
 
     subscribeNavigationTree(testServices);
-    await waitForDebounce();
 
     expect(testServices.serverless.setNavigation).toHaveBeenCalledWith({
       navigationTree: [
@@ -247,14 +281,13 @@ describe('subscribeNavigationTree', () => {
       ...chromeNavLink1,
       id: `${APP_UI_ID}:${SecurityPageName.usersEvents}`, // userEvents link is blacklisted
     };
-    mockChromeNavLinks.mockReturnValue([chromeNavLinkTest, chromeNavLink2]);
+    chromeNavLinks = [chromeNavLinkTest, chromeNavLink2];
     mockProjectNavLinks.mockReturnValueOnce([
       { ...link1, id: SecurityPageName.usersEvents },
       link2,
     ]);
 
     subscribeNavigationTree(testServices);
-    await waitForDebounce();
 
     expect(testServices.serverless.setNavigation).toHaveBeenCalledWith({
       navigationTree: [

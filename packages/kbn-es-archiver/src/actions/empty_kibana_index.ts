@@ -26,6 +26,7 @@ export async function emptyKibanaIndexAction({
 
   await cleanSavedObjectIndices({ client, stats, log });
   await migrateSavedObjectIndices(kbnClient);
+  await client.indices.refresh({ index: ALL_SAVED_OBJECT_INDICES });
   ALL_SAVED_OBJECT_INDICES.forEach((indexPattern) => stats.createdIndex(indexPattern));
   return stats.toJSON();
 }

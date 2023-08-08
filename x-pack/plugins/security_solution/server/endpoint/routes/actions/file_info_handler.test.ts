@@ -8,7 +8,7 @@
 import { validateActionId as _validateActionId } from '../../services';
 import type { HttpApiTestSetupMock } from '../../mocks';
 import { createHttpApiTestSetupMock } from '../../mocks';
-import type { EndpointActionFileDownloadParams } from '../../../../common/endpoint/schema/actions';
+import type { EndpointActionFileDownloadParams } from '../../../../common/api/endpoint';
 import { getActionFileInfoRouteHandler, registerActionFileInfoRoute } from './file_info_handler';
 import { ACTION_AGENT_FILE_INFO_ROUTE } from '../../../../common/endpoint/constants';
 import { EndpointAuthorizationError, NotFoundError } from '../../errors';

@@ -66,7 +66,7 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({ hostName
     [hostName]
   );
 
-  const { data: hostRisk, isLicenseValid } = useRiskScore({
+  const { data: hostRisk, isAuthorized } = useRiskScore({
     filterQuery,
     riskEntity: RiskScoreEntity.host,
     skip: hostName == null,
@@ -138,7 +138,7 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({ hostName
         />
       </EuiFlexItem>
       <EuiFlexItem>
-        {isLicenseValid && (
+        {isAuthorized && (
           <DescriptionListStyled
             data-test-subj={ENTITIES_HOST_OVERVIEW_RISK_LEVEL_TEST_ID}
             listItems={[hostRiskLevel]}

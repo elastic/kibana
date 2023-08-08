@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
-import { CaseStatuses } from '../../../common/api';
+import { CaseStatuses } from '../../../common/types/domain';
 import { StatusPopoverButton } from './status_popover_button';
 
 describe('StatusPopoverButton', () => {

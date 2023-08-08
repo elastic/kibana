@@ -12,6 +12,7 @@ import {
 import type SuperTest from 'supertest';
 
 /**
+ * (LEGACY)
  * Helper to retrieve the prebuilt rules status
  *
  * @param supertest The supertest deps

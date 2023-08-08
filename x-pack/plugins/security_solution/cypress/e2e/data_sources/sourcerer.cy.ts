@@ -35,7 +35,6 @@ import { SOURCERER } from '../../screens/sourcerer';
 import { createTimeline } from '../../tasks/api_calls/timelines';
 import { getTimeline, getTimelineModifiedSourcerer } from '../../objects/timeline';
 import { closeTimeline, openTimelineById } from '../../tasks/timeline';
-import { esArchiverResetKibana } from '../../tasks/es_archiver';
 
 const usersToCreate = [secReadCasesAllUser];
 const rolesToCreate = [secReadCasesAll];
@@ -44,7 +43,7 @@ const dataViews = ['auditbeat-*,fakebeat-*', 'auditbeat-*,*beat*,siem-read*,.kib
 
 describe('Sourcerer', () => {
   before(() => {
-    esArchiverResetKibana();
+    cy.task('esArchiverResetKibana');
     dataViews.forEach((dataView: string) => postDataView(dataView));
   });
   describe('permissions', () => {

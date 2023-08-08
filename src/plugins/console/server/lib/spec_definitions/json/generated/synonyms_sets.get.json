@@ -1,0 +1,15 @@
+{
+  "synonyms_sets.get": {
+    "url_params": {
+      "from": 0,
+      "size": 0
+    },
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_synonyms"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/list-synonyms.html"
+  }
+}

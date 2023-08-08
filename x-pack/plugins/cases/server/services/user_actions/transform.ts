@@ -15,8 +15,11 @@ import {
   isCreateCaseUserAction,
   isCommentUserAction,
 } from '../../../common/utils/user_actions';
-import { NONE_CONNECTOR_ID } from '../../../common/api';
-import { CASE_SAVED_OBJECT, CASE_COMMENT_SAVED_OBJECT } from '../../../common/constants';
+import {
+  CASE_SAVED_OBJECT,
+  CASE_COMMENT_SAVED_OBJECT,
+  NONE_CONNECTOR_ID,
+} from '../../../common/constants';
 import {
   CASE_REF_NAME,
   COMMENT_REF_NAME,

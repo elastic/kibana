@@ -11,6 +11,7 @@ import {
   IndicesGetIndexTemplateIndexTemplateItem,
   IndicesGetResponse,
   IngestGetPipelineResponse,
+  SecurityHasPrivilegesPrivileges,
 } from '@elastic/elasticsearch/lib/api/types';
 import * as t from 'io-ts';
 import { isoToEpochRt } from '@kbn/io-ts-utils';
@@ -55,6 +56,13 @@ const getDiagnosticsRoute = createApmServerRoute({
       fieldCaps: FieldCapsResponse;
       indices: IndicesGetResponse;
       ingestPipelines: IngestGetPipelineResponse;
+    };
+    diagnosticsPrivileges: {
+      index: Record<string, SecurityHasPrivilegesPrivileges>;
+      cluster: Record<string, boolean>;
+      hasAllClusterPrivileges: boolean;
+      hasAllIndexPrivileges: boolean;
+      hasAllPrivileges: boolean;
     };
     apmIndices: ApmIndicesConfig;
     apmIndexTemplates: Array<{

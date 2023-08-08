@@ -298,7 +298,15 @@
               "Interpolation",
               "<",
               "Theme",
-              ">; abbr?: string | undefined; footer?: string | React.ReactElement<any, string | React.JSXElementConstructor<any>> | ((props: ",
+              ">; field: (string & {}) | keyof ",
+              {
+                "pluginId": "savedObjectsManagement",
+                "scope": "public",
+                "docId": "kibSavedObjectsManagementPluginApi",
+                "section": "def-public.SavedObjectsManagementRecord",
+                "text": "SavedObjectsManagementRecord"
+              },
+              "; abbr?: string | undefined; footer?: string | React.ReactElement<any, string | React.JSXElementConstructor<any>> | ((props: ",
               "EuiTableFooterProps",
               "<",
               {
@@ -308,15 +316,7 @@
                 "section": "def-public.SavedObjectsManagementRecord",
                 "text": "SavedObjectsManagementRecord"
               },
-              ">) => React.ReactNode) | undefined; field: (string & {}) | keyof ",
-              {
-                "pluginId": "savedObjectsManagement",
-                "scope": "public",
-                "docId": "kibSavedObjectsManagementPluginApi",
-                "section": "def-public.SavedObjectsManagementRecord",
-                "text": "SavedObjectsManagementRecord"
-              },
-              "; width?: string | undefined; headers?: string | undefined; height?: string | number | undefined; readOnly?: boolean | undefined; dataType?: ",
+              ">) => React.ReactNode) | undefined; width?: string | undefined; headers?: string | undefined; height?: string | number | undefined; readOnly?: boolean | undefined; dataType?: ",
               "EuiTableDataType",
               " | undefined; render?: ((value: any, record: ",
               {

@@ -49,7 +49,7 @@
     ],
     "patterns": [
       "_cat/indices",
-      "_cat/indices/{indices}"
+      "_cat/indices/{index}"
     ],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/cat-indices.html"
   }

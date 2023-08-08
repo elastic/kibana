@@ -88,7 +88,8 @@ export const RuleSwitchComponent = ({
         ) : (
           <StaticSwitch
             data-test-subj="ruleSwitch"
-            label={undefined}
+            showLabel={false}
+            label=""
             disabled={isDisabled}
             checked={enabled}
             onChange={onRuleStateChange}

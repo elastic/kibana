@@ -81,7 +81,10 @@
     "@kbn/stack-alerts-plugin",
     "@kbn/data-view-editor-plugin",
     "@kbn/actions-plugin",
-    "@kbn/core-capabilities-common"
+    "@kbn/core-capabilities-common",
+    "@kbn/deeplinks-analytics"
   ],
-  "exclude": ["target/**/*"]
+  "exclude": [
+    "target/**/*"
+  ]
 }

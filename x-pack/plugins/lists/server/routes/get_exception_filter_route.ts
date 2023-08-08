@@ -10,12 +10,12 @@ import {
   CreateExceptionListItemSchema,
   ExceptionListItemSchema,
   FoundExceptionListItemSchema,
-  getExceptionFilterSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { EXCEPTION_FILTER } from '@kbn/securitysolution-list-constants';
 
 import { buildExceptionFilter } from '../services/exception_lists/build_exception_filter';
 import { ListsPluginRouter } from '../types';
+import { getExceptionFilterRequest } from '../../common/api';
 
 import { buildRouteValidation, buildSiemResponse } from './utils';
 
@@ -27,7 +27,7 @@ export const getExceptionFilterRoute = (router: ListsPluginRouter): void => {
       },
       path: `${EXCEPTION_FILTER}`,
       validate: {
-        body: buildRouteValidation(getExceptionFilterSchema),
+        body: buildRouteValidation(getExceptionFilterRequest),
       },
     },
     async (context, request, response) => {

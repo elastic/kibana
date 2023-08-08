@@ -9,7 +9,7 @@ import type { FC } from 'react';
 import React, { memo, useMemo } from 'react';
 import { useEuiBackgroundColor } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { FlyoutPanel } from '@kbn/expandable-flyout';
+import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
 import { PanelHeader } from './header';
 import { PanelContent } from './content';
@@ -17,14 +17,15 @@ import type { LeftPanelTabsType } from './tabs';
 import { tabs } from './tabs';
 import { useLeftPanelContext } from './context';
 
-export type LeftPanelPaths = 'visualize' | 'insights' | 'investigation';
+export type LeftPanelPaths = 'visualize' | 'insights' | 'investigation' | 'response';
 export const LeftPanelKey: LeftPanelProps['key'] = 'document-details-left';
 
 export const LeftPanelVisualizeTabPath: LeftPanelProps['path'] = ['visualize'];
 export const LeftPanelInsightsTabPath: LeftPanelProps['path'] = ['insights'];
 export const LeftPanelInvestigationTabPath: LeftPanelProps['path'] = ['investigation'];
+export const LeftPanelResponseTabPath: LeftPanelProps['path'] = ['response'];
 
-export interface LeftPanelProps extends FlyoutPanel {
+export interface LeftPanelProps extends FlyoutPanelProps {
   key: 'document-details-left';
   path?: LeftPanelPaths[];
   params?: {

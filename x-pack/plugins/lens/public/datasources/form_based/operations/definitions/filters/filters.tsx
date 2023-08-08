@@ -19,7 +19,7 @@ import {
   DragDropBuckets,
   DraggableBucketContainer,
   isQueryValid,
-} from '@kbn/visualization-ui-components/public';
+} from '@kbn/visualization-ui-components';
 import { IndexPattern } from '../../../../../types';
 import { updateColumnParam } from '../../layer_helpers';
 import type { OperationDefinition } from '..';

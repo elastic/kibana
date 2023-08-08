@@ -7,8 +7,9 @@
  */
 
 import React, { createContext, useCallback, useMemo, useContext } from 'react';
-
 import type { AppDeepLinkId } from '@kbn/core-chrome-browser';
+
+import { useNavigation as useNavigationServices } from '../../services';
 import { useInitNavNode } from '../hooks';
 import type { NodeProps, RegisterFunction } from '../types';
 import { NavigationSectionUI } from './navigation_section_ui';
@@ -45,6 +46,7 @@ function NavigationGroupInternalComp<
   Id extends string = string,
   ChildrenId extends string = Id
 >(props: Props<LinkId, Id, ChildrenId>) {
+  const { cloudLinks } = useNavigationServices();
   const navigationContext = useNavigation();
 
   const { children, node } = useMemo(() => {
@@ -58,7 +60,7 @@ function NavigationGroupInternalComp<
     };
   }, [props]);
 
-  const { navNode, registerChildNode, path, childrenNodes } = useInitNavNode(node);
+  const { navNode, registerChildNode, path, childrenNodes } = useInitNavNode(node, { cloudLinks });
 
   const unstyled = props.unstyled ?? navigationContext.unstyled;
 

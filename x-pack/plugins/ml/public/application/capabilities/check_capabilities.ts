@@ -104,7 +104,6 @@ export function usePermissionCheck<T extends MlCapabilitiesKey | MlCapabilitiesK
     mlCapabilitiesService.capabilities$,
     mlCapabilitiesService.getCapabilities()
   );
-
   return useMemo(() => {
     return Array.isArray(requestedCapabilities.current)
       ? requestedCapabilities.current.map((c) => capabilities[c])

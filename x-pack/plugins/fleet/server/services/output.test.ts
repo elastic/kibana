@@ -449,7 +449,26 @@ describe('Output Service', () => {
           },
           { id: 'output-test' }
         )
-      ).rejects.toThrow(`Logstash output needs encrypted saved object api key to be set`);
+      ).rejects.toThrow(`logstash output needs encrypted saved object api key to be set`);
+    });
+
+    it('should throw if encryptedSavedObject is not configured, kafka', async () => {
+      const soClient = getMockedSoClient({});
+
+      await expect(
+        outputService.create(
+          soClient,
+          esClientMock,
+          {
+            is_default: false,
+            is_default_monitoring: false,
+            name: 'Test',
+            type: 'kafka',
+            topics: [{ topic: 'test' }],
+          },
+          { id: 'output-test' }
+        )
+      ).rejects.toThrow(`kafka output needs encrypted saved object api key to be set`);
     });
 
     it('should work if encryptedSavedObject is configured', async () => {

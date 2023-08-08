@@ -26,12 +26,12 @@ import {
 import classNames from 'classnames';
 import { METRIC_TYPE } from '@kbn/analytics';
 import {
-  type SolutionSideNavItem,
   type LinkCategories,
   isAccordionLinkCategory,
   isTitleLinkCategory,
   isSeparatorLinkCategory,
-} from './types';
+} from '@kbn/security-solution-navigation';
+import type { SolutionSideNavItem } from './types';
 import { BetaBadge } from './beta_badge';
 import { TELEMETRY_EVENT } from './telemetry/const';
 import { useTelemetryContext } from './telemetry/telemetry_context';

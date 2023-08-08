@@ -6,6 +6,7 @@
  */
 
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
+import type { InfoResponse } from '@elastic/elasticsearch/lib/api/types';
 import {
   policyFactory as policyConfigFactory,
   policyFactoryWithoutPaidFeatures as policyConfigFactoryWithoutPaidFeatures,
@@ -27,13 +28,21 @@ import { disableProtections } from '../../../common/endpoint/models/policy_confi
 export const createDefaultPolicy = (
   licenseService: LicenseService,
   config: AnyPolicyCreateConfig | undefined,
-  cloud: CloudSetup
+  cloud: CloudSetup,
+  esClientInfo: InfoResponse
 ): PolicyConfig => {
   const factoryPolicy = policyConfigFactory();
 
   // Add license and cloud information after policy creation
   factoryPolicy.meta.license = licenseService.getLicenseType();
   factoryPolicy.meta.cloud = cloud?.isCloudEnabled;
+  factoryPolicy.meta.cluster_name = esClientInfo?.cluster_name
+    ? esClientInfo.cluster_name
+    : factoryPolicy.meta.cluster_name;
+  factoryPolicy.meta.cluster_uuid = esClientInfo?.cluster_uuid
+    ? esClientInfo.cluster_uuid
+    : factoryPolicy.meta.cluster_uuid;
+  factoryPolicy.meta.license_uid = licenseService.getLicenseUID();
 
   const defaultPolicyPerType =
     config?.type === 'cloud'
