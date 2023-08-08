@@ -12,7 +12,7 @@ servers:
 paths:
   /api/timeline:
     patch:
-      operationId: patchTimelineRoute
+      operationId: patchTimeline
       summary: Updates an existing timeline.
       description: Updates an existing timeline. This API is used to update the title, description, date range, pinned events, pinned queries, and/or pinned saved queries of an existing timeline.
       tags:
@@ -53,17 +53,6 @@ paths:
           description: Indicates that the user does not have the required access to create a draft timeline.
           content:
             application/json:
-              schema:
-                type: object
-                properties:
-                  body:
-                    type: string
-                  statusCode:
-                    type: number
-        500:
-          description: Indicates that the timeline update failed.
-          content:
-            application:json:
               schema:
                 type: object
                 properties:

@@ -15,12 +15,12 @@ servers:
 paths:
   /api/timeline/_import:
     post:
-      operationId: importTimelinesRoute
+      operationId: importTimelines
       description: Imports timelines.
       tags:
         - access:securitySolution
       requestBody:
-        description: The required timeline fields used to create a new timeline along with optional fields that will be created if not provided.
+        description: The timelines to import as a readable stream.
         required: true
         content:
           application/json:
@@ -41,7 +41,7 @@ paths:
                             type: object
       responses:
         200:
-          description: Indicates the installation of prepackaged timelines was successful.
+          description: Indicates the import of timelines was successful.
           content:
             application/json:
               schema:
@@ -53,7 +53,7 @@ paths:
                   - data
 
         400:
-          description: Indicates the installation of prepackaged timelines was unsuccessful.
+          description: Indicates the import of timelines was unsuccessful.
           content:
             application:json:
               schema:
@@ -66,7 +66,7 @@ paths:
                   statusCode:
                     type: number
         409:
-          description: Indicates the installation of prepackaged timelines was unsuccessful.
+          description: Indicates the import of timelines was unsuccessful.
           content:
             application:json:
               schema:

@@ -62,14 +62,3 @@ paths:
                             $ref: '../model/components.yaml#/components/schemas/Note'
                 required:
                   - data
-        500:
-          description: Indicates an internal server error occurred.
-          content:
-            application:json:
-              schema:
-                type: object
-                properties:
-                  body:
-                    type: string
-                  statusCode:
-                    type: number

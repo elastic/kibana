@@ -52,8 +52,8 @@ paths:
                         $ref: '../model/components.yaml#/components/schemas/FavoriteTimelineResponse'
                 required:
                   - data
-        500:
-          description: Indicates an internal server error occurred while persisting the favorite status.
+        403:
+          description: Indicates the user does not have the required permissions to persist the favorite status.
           content:
             application:json:
               schema:

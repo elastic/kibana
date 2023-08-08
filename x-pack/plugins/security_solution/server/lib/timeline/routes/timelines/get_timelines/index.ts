@@ -32,7 +32,7 @@ export const getTimelinesRoute = (
     {
       path: TIMELINES_URL,
       validate: {
-        query: escapeHatch, // TODO: why don't we use getTimelinesQuerySchema here?
+        query: escapeHatch,
       },
       options: {
         tags: ['access:securitySolution'],

@@ -82,7 +82,7 @@ export const patchTimelinesRoute = (
           const error = compareTimelinesStatus.checkIsFailureCases(TimelineStatusActions.update);
           return siemResponse.error(
             error || {
-              statusCode: 405, // TODO: what's our pattern, message & status_code or this??
+              statusCode: 405,
               body: 'update timeline error',
             }
           );
