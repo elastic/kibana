@@ -15,8 +15,6 @@ import {
   EuiPageHeader,
   EuiPageTemplate,
   EuiButtonEmpty,
-  EuiPageContent_Deprecated as EuiPageContent,
-  EuiEmptyPrompt,
   EuiButton,
   EuiSpacer,
   EuiFilterButton,
