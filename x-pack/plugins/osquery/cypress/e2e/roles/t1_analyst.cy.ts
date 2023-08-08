@@ -7,7 +7,6 @@
 
 import { tag } from '../../tags';
 import { SAVED_QUERY_ID } from '../../../public/saved_queries/constants';
-import { ROLE } from '../../tasks/login';
 import { navigateTo } from '../../tasks/navigation';
 import {
   checkActionItemsInResults,
@@ -46,7 +45,7 @@ describe('T1 Analyst - READ + runSavedQueries ', { tags: [tag.ESS, tag.SERVERLES
   });
 
   beforeEach(() => {
-    cy.loginKibana(ROLE.t1_analyst);
+    cy.loginKibana('t1_analyst');
   });
 
   after(() => {

@@ -6,7 +6,6 @@
  */
 
 import { tag } from '../../tags';
-import { ROLE } from '../../tasks/login';
 import { navigateTo } from '../../tasks/navigation';
 import {
   addToCase,
@@ -81,7 +80,7 @@ describe('ALL - Live Query', { tags: [tag.SERVERLESS, tag.ESS] }, () => {
   });
 
   beforeEach(() => {
-    cy.loginKibana(ROLE.soc_manager);
+    cy.loginKibana('soc_manager');
     navigateTo('/app/osquery');
   });
 

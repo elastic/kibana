@@ -6,7 +6,6 @@
  */
 
 import { tag } from '../../tags';
-import { ROLE } from '../../tasks/login';
 import { navigateTo } from '../../tasks/navigation';
 import {
   checkActionItemsInResults,
@@ -57,7 +56,7 @@ describe('ALL - Custom space', { tags: [tag.ESS] }, () => {
       });
 
       beforeEach(() => {
-        cy.loginKibana(ROLE.soc_manager);
+        cy.loginKibana('soc_manager');
         navigateTo(`/s/${spaceId}/app/osquery`);
       });
 

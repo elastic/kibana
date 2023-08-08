@@ -19,7 +19,6 @@ import {
   viewRecentCaseAndCheckResults,
 } from '../../tasks/live_query';
 import { navigateTo } from '../../tasks/navigation';
-import { ROLE } from '../../tasks/login';
 import { getSavedQueriesComplexTest } from '../../tasks/saved_queries';
 import { loadCase, cleanupCase, loadPack, cleanupPack } from '../../tasks/api_fixtures';
 
@@ -33,7 +32,7 @@ describe('ALL - Saved queries', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
   });
 
   beforeEach(() => {
-    cy.loginKibana(ROLE.soc_manager);
+    cy.loginKibana('soc_manager');
     navigateTo('/app/osquery');
   });
 

@@ -12,7 +12,6 @@ import {
   viewRecentCaseAndCheckResults,
 } from '../../tasks/live_query';
 import { navigateTo } from '../../tasks/navigation';
-import { ROLE } from '../../tasks/login';
 import { loadLiveQuery, loadCase, cleanupCase } from '../../tasks/api_fixtures';
 
 // TODO CHECK: no serverless because lack of api permissions
@@ -39,7 +38,7 @@ describe('Add to Cases', { tags: [tag.ESS] }, () => {
         caseId = caseInfo.id;
         caseTitle = caseInfo.title;
       });
-      cy.loginKibana(ROLE.soc_manager);
+      cy.loginKibana('soc_manager');
       navigateTo('/app/osquery');
     });
 
@@ -71,7 +70,7 @@ describe('Add to Cases', { tags: [tag.ESS] }, () => {
         caseId = caseInfo.id;
         caseTitle = caseInfo.title;
       });
-      cy.loginKibana(ROLE.soc_manager);
+      cy.loginKibana('soc_manager');
       navigateTo('/app/osquery');
     });
 

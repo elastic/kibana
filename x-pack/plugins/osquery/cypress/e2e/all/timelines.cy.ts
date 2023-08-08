@@ -7,11 +7,10 @@
 
 import { tag } from '../../tags';
 import { takeOsqueryActionWithParams } from '../../tasks/live_query';
-import { ROLE } from '../../tasks/login';
 
 describe('ALL - Timelines', { tags: [tag.ESS] }, () => {
   beforeEach(() => {
-    cy.loginKibana(ROLE.soc_manager);
+    cy.loginKibana('soc_manager');
   });
 
   it('should substitute osquery parameter on non-alert event take action', () => {

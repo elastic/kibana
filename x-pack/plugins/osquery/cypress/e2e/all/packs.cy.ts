@@ -22,7 +22,6 @@ import {
   selectAllAgents,
   submitQuery,
 } from '../../tasks/live_query';
-import { ROLE } from '../../tasks/login';
 import {
   activatePack,
   cleanupAllPrebuiltPacks,
@@ -112,7 +111,7 @@ describe('ALL - Packs', () => {
     });
 
     beforeEach(() => {
-      cy.loginKibana(ROLE.soc_manager);
+      cy.loginKibana('soc_manager');
       navigateTo('/app/osquery');
     });
 
@@ -713,7 +712,7 @@ describe('ALL - Packs', () => {
 
   describe('Load prebuilt packs', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
     beforeEach(() => {
-      cy.loginKibana(ROLE.soc_manager);
+      cy.loginKibana('soc_manager');
       navigateTo('/app/osquery/packs');
     });
 

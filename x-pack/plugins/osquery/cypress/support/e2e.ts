@@ -23,6 +23,8 @@
 // ***********************************************************
 
 // force ESM in this module
+import type { ServerlessRoleName } from '../../../../test_serverless/shared/lib';
+
 export {};
 
 // @ts-expect-error check this
@@ -30,7 +32,6 @@ import registerCypressGrep from '@cypress/grep';
 
 import 'cypress-react-selector';
 // import './coverage';
-import type { ROLE } from '../tasks/login';
 import { login } from '../tasks/login';
 
 registerCypressGrep();
@@ -66,7 +67,7 @@ Cypress.Commands.add(
   () => cy.get('body').click(0, 0) // 0,0 here are the x and y coordinates
 );
 
-Cypress.Commands.add('loginKibana', (role?: ROLE) => login(role));
+Cypress.Commands.add('loginKibana', (role?: ServerlessRoleName) => login(role));
 
 // Alternatively you can use CommonJS syntax:
 // require('./commands')

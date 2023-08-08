@@ -1,22 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { createRuntimeServices } from '@kbn/security-solution-plugin/scripts/endpoint/common/stack_services';
-import { dataLoaders } from '@kbn/security-solution-plugin/public/management/cypress/support/data_loaders';
 import { LoadUserAndRoleCyTaskOptions } from '../cypress';
 import { LoadedRoleAndUser, SecurityRoleAndUserLoader } from '../../../../../shared/lib';
 
-export const setupDataLoaderTasks = (
+export const setupUserDataLoader = (
   on: Cypress.PluginEvents,
   config: Cypress.PluginConfigOptions
 ) => {
-  // Reuse data loaders from endpoint management cypress setup
-  dataLoaders(on, config);
-
   const stackServicesPromise = createRuntimeServices({
     kibanaUrl: config.env.KIBANA_URL,
     elasticsearchUrl: config.env.ELASTICSEARCH_URL,

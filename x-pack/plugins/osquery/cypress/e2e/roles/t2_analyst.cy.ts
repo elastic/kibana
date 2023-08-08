@@ -6,7 +6,6 @@
  */
 
 import { tag } from '../../tags';
-import { ROLE } from '../../tasks/login';
 import { navigateTo } from '../../tasks/navigation';
 import {
   checkResults,
@@ -43,7 +42,7 @@ describe(
     });
 
     beforeEach(() => {
-      cy.loginKibana(ROLE.t2_analyst);
+      cy.loginKibana('t2_analyst');
       navigateTo('/app/osquery');
     });
 

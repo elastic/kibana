@@ -7,7 +7,6 @@
 
 import { tag } from '../../tags';
 import { navigateTo } from '../../tasks/navigation';
-import { ROLE } from '../../tasks/login';
 import { loadSavedQuery, cleanupSavedQuery } from '../../tasks/api_fixtures';
 
 describe('ALL - Edit saved query', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
@@ -22,7 +21,7 @@ describe('ALL - Edit saved query', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
   });
 
   beforeEach(() => {
-    cy.loginKibana(ROLE.soc_manager);
+    cy.loginKibana('soc_manager');
     navigateTo('/app/osquery/saved_queries');
   });
 

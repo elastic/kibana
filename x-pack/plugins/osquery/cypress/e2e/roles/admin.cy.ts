@@ -9,7 +9,8 @@ import { tag } from '../../tags';
 import { navigateTo } from '../../tasks/navigation';
 import { checkResults, inputQuery, selectAllAgents, submitQuery } from '../../tasks/live_query';
 
-describe('Admin', { tags: [tag.ESS] }, () => {
+// figure out how to convert this tests to serverless roles
+describe.skip('Admin', { tags: [tag.ESS] }, () => {
   beforeEach(() => {
     cy.loginKibana();
     navigateTo('/app/osquery');

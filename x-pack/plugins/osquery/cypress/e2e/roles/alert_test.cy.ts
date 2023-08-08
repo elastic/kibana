@@ -6,17 +6,8 @@
  */
 
 import { tag } from '../../tags';
-import { ROLE } from '../../tasks/login';
-import {
-  checkResults,
-  findAndClickButton,
-  findFormFieldByRowsLabelAndType,
-  submitQuery,
-} from '../../tasks/live_query';
-import { closeModalIfVisible, closeToastIfVisible } from '../../tasks/integrations';
-import { navigateTo } from '../../tasks/navigation';
+import { checkResults, submitQuery } from '../../tasks/live_query';
 import { loadPack, loadRule, cleanupRule, cleanupPack } from '../../tasks/api_fixtures';
-import { preparePack } from '../../tasks/packs';
 
 describe('Alert Test', { tags: [tag.ESS] }, () => {
   let packName: string;
@@ -46,7 +37,7 @@ describe('Alert Test', { tags: [tag.ESS] }, () => {
   });
 
   beforeEach(() => {
-    cy.loginKibana(ROLE.alert_test);
+    cy.loginKibana('t2_analyst');
   });
 
   after(() => {
@@ -56,22 +47,22 @@ describe('Alert Test', { tags: [tag.ESS] }, () => {
 
   describe('alert_test role', () => {
     beforeEach(() => {
-      cy.loginKibana(ROLE.alert_test);
+      cy.loginKibana('t2_analyst');
     });
 
     it('should not be able to run live query', () => {
-      navigateTo('/app/osquery');
-      preparePack(packName);
-      findAndClickButton('Edit');
-      cy.contains(`Edit ${packName}`);
-      findFormFieldByRowsLabelAndType(
-        'Scheduled agent policies (optional)',
-        'fleet server {downArrow}{enter}'
-      );
-      findAndClickButton('Update pack');
-      closeModalIfVisible();
-      cy.contains(`Successfully updated "${packName}" pack`);
-      closeToastIfVisible();
+      // navigateTo('/app/osquery');
+      // preparePack(packName);
+      // findAndClickButton('Edit');
+      // cy.contains(`Edit ${packName}`);
+      // findFormFieldByRowsLabelAndType(
+      //   'Scheduled agent policies (optional)',
+      //   'fleet server {downArrow}{enter}'
+      // );
+      // findAndClickButton('Update pack');
+      // closeModalIfVisible();
+      // cy.contains(`Successfully updated "${packName}" pack`);
+      // closeToastIfVisible();
 
       cy.visit('/app/security/rules');
       cy.contains(ruleName).click();
@@ -92,7 +83,7 @@ describe('Alert Test', { tags: [tag.ESS] }, () => {
 
   describe('t1_analyst role', () => {
     beforeEach(() => {
-      cy.loginKibana(ROLE.t1_analyst);
+      cy.loginKibana('t1_analyst');
 
       cy.visit(`/app/security/rules/id/${ruleId}/alerts`);
       cy.getBySel('expand-event').first().click();

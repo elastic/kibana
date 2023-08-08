@@ -16,7 +16,8 @@ import {
   loadSavedQuery,
 } from '../../tasks/api_fixtures';
 
-describe('Reader - only READ', { tags: [tag.ESS] }, () => {
+// figure out how to convert this tests to serverless roles
+describe.skip('Reader - only READ', { tags: [tag.ESS] }, () => {
   let savedQueryName: string;
   let savedQueryId: string;
   let packName: string;

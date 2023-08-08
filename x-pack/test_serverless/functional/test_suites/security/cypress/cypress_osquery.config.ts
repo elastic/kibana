@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { defineCypressConfig } from '@kbn/cypress-config';
-import { setupDataLoaderTasks } from './support/setup_data_loader_tasks';
+import { setupUserDataLoader } from './support/setup_data_loader_tasks';
 
 export default defineCypressConfig({
   defaultCommandTimeout: 60000,
@@ -33,7 +34,7 @@ export default defineCypressConfig({
     supportFile: './support/e2e.js',
     specPattern: '../../../../../plugins/osquery/cypress/e2e/**/*.cy.ts',
     setupNodeEvents: (on, config) => {
-      setupDataLoaderTasks(on, config);
+      setupUserDataLoader(on, config);
       // eslint-disable-next-line @typescript-eslint/no-var-requires
       require('@cypress/grep/src/plugin')(config);
       return config;

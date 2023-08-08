@@ -7,7 +7,6 @@
 
 import { tag } from '../../tags';
 import { getAdvancedButton } from '../../screens/integrations';
-import { ROLE } from '../../tasks/login';
 import { navigateTo } from '../../tasks/navigation';
 import {
   checkResults,
@@ -21,7 +20,7 @@ import {
 
 describe('EcsMapping', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
   beforeEach(() => {
-    cy.loginKibana(ROLE.soc_manager);
+    cy.loginKibana('soc_manager');
   });
 
   it('should properly show static values in form and results', () => {

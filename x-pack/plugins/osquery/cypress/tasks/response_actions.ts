@@ -6,7 +6,6 @@
  */
 
 import { cleanupRule, loadRule } from './api_fixtures';
-import { ROLE } from './login';
 import { closeDateTabIfVisible } from './integrations';
 
 export const RESPONSE_ACTIONS_ITEM_0 = 'response-actions-list-item-0';
@@ -33,7 +32,7 @@ export const checkOsqueryResponseActionsPermissions = (enabled: boolean) => {
   });
 
   beforeEach(() => {
-    cy.loginKibana(ROLE.soc_manager);
+    cy.loginKibana('soc_manager');
   });
 
   it(`response actions should ${enabled ? 'be available ' : 'not be available'}`, () => {
