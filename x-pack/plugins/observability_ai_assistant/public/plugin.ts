@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import type { Logger } from '@kbn/logging';
 import { createService } from './service/create_service';
 import type {
@@ -29,11 +29,20 @@ export class ObservabilityAIAssistantPlugin
   constructor(context: PluginInitializerContext<ConfigSchema>) {
     this.logger = context.logger.get();
   }
-  setup(): ObservabilityAIAssistantPluginSetup {
+  setup(
+    core: CoreSetup,
+    pluginsSetup: ObservabilityAIAssistantPluginSetupDependencies
+  ): ObservabilityAIAssistantPluginSetup {
     return {};
   }
 
-  start(coreStart: CoreStart): ObservabilityAIAssistantPluginStart {
-    return createService(coreStart);
+  start(
+    coreStart: CoreStart,
+    pluginsStart: ObservabilityAIAssistantPluginStartDependencies
+  ): ObservabilityAIAssistantPluginStart {
+    return createService({
+      coreStart,
+      enabled: coreStart.application.capabilities.observabilityAIAssistant.show === true,
+    });
   }
 }

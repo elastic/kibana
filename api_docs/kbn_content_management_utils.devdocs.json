@@ -1826,7 +1826,7 @@
                 "section": "def-common.UpdateIn",
                 "text": "UpdateIn"
               },
-              "<ContentType, Attributes, UpdateOptions>"
+              "<ContentType, Partial<Attributes>, UpdateOptions>"
             ],
             "path": "packages/kbn-content-management-utils/src/types.ts",
             "deprecated": false,
