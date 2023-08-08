@@ -120,4 +120,3 @@ export const startTransform = async ({
   }
   return esClient.transform.startTransform({ transform_id: transformId });
 };
-
