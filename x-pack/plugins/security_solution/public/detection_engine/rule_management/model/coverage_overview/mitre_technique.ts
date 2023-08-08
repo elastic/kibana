@@ -5,22 +5,17 @@
  * 2.0.
  */
 
+import type { CoverageOverviewMitreSubTechnique } from './mitre_subtechnique';
 import type { CoverageOverviewRule } from './rule';
 
 export interface CoverageOverviewMitreTechnique {
+  id: string;
   name: string;
   /**
    * An url leading to the technique's page
    */
   reference: string;
-  /**
-   * A number of covered subtechniques (having at least one enabled rule associated with it)
-   */
-  numOfCoveredSubtechniques: number;
-  /**
-   * A total number of subtechniques associated with this technique
-   */
-  numOfSubtechniques: number;
+  subtechniques: CoverageOverviewMitreSubTechnique[];
   enabledRules: CoverageOverviewRule[];
   disabledRules: CoverageOverviewRule[];
   availableRules: CoverageOverviewRule[];
