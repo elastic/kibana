@@ -73,6 +73,19 @@ export const DashboardLinkComponent = ({
     return link.label || (dashboardTitle ?? DashboardLinkStrings.getDashboardErrorLabel());
   }, [link, dashboardTitle]);
 
+  const { tooltipTitle, tooltipMessage } = useMemo(() => {
+    if (error) {
+      return {
+        tooltipTitle: DashboardLinkStrings.getDashboardErrorLabel(),
+        tooltipMessage: error.message,
+      };
+    }
+    return {
+      tooltipTitle: Boolean(dashboardDescription) ? dashboardTitle : undefined,
+      tooltipMessage: dashboardDescription || dashboardTitle,
+    };
+  }, [error, dashboardTitle, dashboardDescription]);
+
   return loadingDestinationDashboard ? (
     <li id={`dashboardLink--${link.id}--loading`}>
       <EuiButtonEmpty size="s" isLoading={true}>
@@ -105,14 +118,8 @@ export const DashboardLinkComponent = ({
           display="block"
           repositionOnScroll
           position={layout === NAV_VERTICAL_LAYOUT ? 'right' : 'bottom'}
-          title={
-            error
-              ? DashboardLinkStrings.getDashboardErrorLabel()
-              : dashboardDescription
-              ? dashboardTitle
-              : undefined
-          }
-          content={error ? error.message : dashboardDescription || dashboardTitle}
+          title={tooltipTitle}
+          content={tooltipMessage}
         >
           {/* Setting `title=""` so that the native browser tooltip is disabled */}
           <div className="eui-textTruncate" title="">
