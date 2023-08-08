@@ -15,6 +15,7 @@
     "requiredPlugins": [
       "kibanaReact",
       "management",
+      "cloud"
     ],
     "optionalPlugins": [],
     "requiredBundles": []
