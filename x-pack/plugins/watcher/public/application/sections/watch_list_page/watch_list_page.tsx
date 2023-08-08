@@ -24,6 +24,7 @@ import {
   EuiContextMenuPanel,
   EuiContextMenuItem,
   EuiPageHeader,
+  EuiSearchBarOnChangeArgs,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -448,8 +449,8 @@ export const WatchListPage = () => {
           : '',
     };
 
-    const handleOnChange = ({ queryText, error }: { queryText: string; error: string }) => {
-      if (!error) {
+    const handleOnChange = ({ queryText, error: queryError }: EuiSearchBarOnChangeArgs) => {
+      if (!queryError) {
         setQuery(queryText);
       }
     };
