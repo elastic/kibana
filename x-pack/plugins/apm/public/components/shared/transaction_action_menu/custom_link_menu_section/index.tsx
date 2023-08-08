@@ -39,10 +39,10 @@ const DEFAULT_LINKS_TO_SHOW = 3;
 
 export function CustomLinkMenuSection({
   transaction,
-  openCreateCustomLinkFlyout
+  openCreateCustomLinkFlyout,
 }: {
   transaction?: Transaction;
-  openCreateCustomLinkFlyout: ()=>void;
+  openCreateCustomLinkFlyout: () => void;
 }) {
   const [showAllLinks, setShowAllLinks] = useState(false);
 

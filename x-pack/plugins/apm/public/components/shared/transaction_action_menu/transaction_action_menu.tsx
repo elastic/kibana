@@ -72,19 +72,18 @@ export function TransactionActionMenu({ transaction, isLoading }: Props) {
 
   const [isCreateEditFlyoutOpen, setIsCreateEditFlyoutOpen] = useState(false);
 
-  const openCustomLinkFlyout = function (){
-    setIsCreateEditFlyoutOpen(true)
-    setIsActionPopoverOpen(false)
-  }
-
+  const openCustomLinkFlyout = function () {
+    setIsCreateEditFlyoutOpen(true);
+    setIsActionPopoverOpen(false);
+  };
 
   return (
     <>
-      <CustomLinkFlyoutComponent 
+      <CustomLinkFlyoutComponent
         transaction={transaction}
         isOpen={isCreateEditFlyoutOpen}
-        onClose={()=>setIsCreateEditFlyoutOpen(false)}
-        ></CustomLinkFlyoutComponent>  
+        onClose={() => setIsCreateEditFlyoutOpen(false)}
+      />
 
       <ActionMenu
         id="transactionActionMenu"
@@ -106,8 +105,12 @@ export function TransactionActionMenu({ transaction, isLoading }: Props) {
           transaction={transaction}
           profilingLocators={profilingLocators}
         />
-        {hasGoldLicense && <CustomLinkMenuSection transaction={transaction} 
-              openCreateCustomLinkFlyout={openCustomLinkFlyout} />}
+        {hasGoldLicense && (
+          <CustomLinkMenuSection
+            transaction={transaction}
+            openCreateCustomLinkFlyout={openCustomLinkFlyout}
+          />
+        )}
       </ActionMenu>
     </>
   );
