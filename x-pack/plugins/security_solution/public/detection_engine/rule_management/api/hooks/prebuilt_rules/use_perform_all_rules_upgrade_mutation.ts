@@ -14,6 +14,7 @@ import { useInvalidateFetchRulesSnoozeSettingsQuery } from '../use_fetch_rules_s
 import { useInvalidateFetchPrebuiltRulesUpgradeReviewQuery } from './use_fetch_prebuilt_rules_upgrade_review_query';
 import { useInvalidateFetchPrebuiltRulesStatusQuery } from './use_fetch_prebuilt_rules_status_query';
 import { performUpgradeAllRules } from '../../api';
+import { useInvalidateFetchCoverageOverviewQuery } from '../use_fetch_coverage_overview';
 
 export const PERFORM_ALL_RULES_UPGRADE_KEY = ['POST', 'ALL_RULES', PERFORM_RULE_UPGRADE_URL];
 
@@ -26,6 +27,7 @@ export const usePerformAllRulesUpgradeMutation = (
   const invalidateFetchPrebuiltRulesUpgradeReview =
     useInvalidateFetchPrebuiltRulesUpgradeReviewQuery();
   const invalidateRuleStatus = useInvalidateFetchPrebuiltRulesStatusQuery();
+  const invalidateFetchCoverageOverviewQuery = useInvalidateFetchCoverageOverviewQuery();
 
   return useMutation<PerformRuleUpgradeResponseBody, Error>(() => performUpgradeAllRules(), {
     ...options,
@@ -37,6 +39,7 @@ export const usePerformAllRulesUpgradeMutation = (
 
       invalidateFetchPrebuiltRulesUpgradeReview();
       invalidateRuleStatus();
+      invalidateFetchCoverageOverviewQuery();
 
       if (options?.onSettled) {
         options.onSettled(...args);
