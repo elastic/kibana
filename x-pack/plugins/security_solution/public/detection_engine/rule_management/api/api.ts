@@ -26,8 +26,14 @@ import type {
   ReviewRuleUpgradeResponseBody,
   ReviewRuleInstallationResponseBody,
 } from '../../../../common/api/detection_engine/prebuilt_rules';
-import type { GetRuleManagementFiltersResponse } from '../../../../common/api/detection_engine/rule_management';
-import { RULE_MANAGEMENT_FILTERS_URL } from '../../../../common/api/detection_engine/rule_management';
+import type {
+  CoverageOverviewResponse,
+  GetRuleManagementFiltersResponse,
+} from '../../../../common/api/detection_engine/rule_management';
+import {
+  RULE_MANAGEMENT_FILTERS_URL,
+  RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL,
+} from '../../../../common/api/detection_engine/rule_management';
 import type { BulkActionsDryRunErrCode } from '../../../../common/constants';
 import {
   DETECTION_ENGINE_RULES_BULK_ACTION,
@@ -60,6 +66,7 @@ import * as i18n from '../../../detections/pages/detection_engine/rules/translat
 import type {
   CreateRulesProps,
   ExportDocumentsProps,
+  FetchCoverageOverviewProps,
   FetchRuleProps,
   FetchRuleSnoozingProps,
   FetchRulesProps,
@@ -243,6 +250,18 @@ export const fetchConnectors = (
   signal?: AbortSignal
 ): Promise<Array<AsApiContract<ActionResult>>> =>
   KibanaServices.get().http.fetch(`${BASE_ACTION_API_PATH}/connectors`, { method: 'GET', signal });
+
+export const fetchCoverageOverview = async ({
+  filter,
+  signal,
+}: FetchCoverageOverviewProps): Promise<CoverageOverviewResponse> =>
+  KibanaServices.get().http.fetch<CoverageOverviewResponse>(RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL, {
+    method: 'POST',
+    body: JSON.stringify({
+      filter,
+    }),
+    signal,
+  });
 
 export const fetchConnectorTypes = (signal?: AbortSignal): Promise<ActionType[]> =>
   KibanaServices.get().http.fetch(`${BASE_ACTION_API_PATH}/connector_types`, {

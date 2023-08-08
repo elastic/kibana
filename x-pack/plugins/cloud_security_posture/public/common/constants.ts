@@ -212,3 +212,5 @@ export const cloudPostureIntegrations: CloudPostureIntegrations = {
 };
 export const FINDINGS_DOCS_URL = 'https://ela.st/findings';
 export const MIN_VERSION_GCP_CIS = '1.5.0';
+
+export const NO_FINDINGS_STATUS_REFRESH_INTERVAL_MS = 10000;
