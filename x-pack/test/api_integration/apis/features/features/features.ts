@@ -107,6 +107,7 @@ export default function ({ getService }: FtrProviderContext) {
             'graph',
             'guidedOnboardingFeature',
             'monitoring',
+            'observabilityAIAssistant',
             'observabilityCases',
             'savedObjectsManagement',
             'savedObjectsTagging',

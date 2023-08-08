@@ -466,28 +466,6 @@ describe.skip(`UserActions`, () => {
       expect(screen.getAllByTestId('user-actions-list')).toHaveLength(1);
     });
 
-    it('shows more button visible when hasNext page is true', async () => {
-      useInfiniteFindCaseUserActionsMock.mockReturnValue({
-        ...defaultInfiniteUseFindCaseUserActions,
-        hasNextPage: true,
-      });
-      const props = {
-        ...defaultProps,
-        userActionsStats: {
-          total: 25,
-          totalComments: 10,
-          totalOtherActions: 15,
-        },
-      };
-
-      appMockRender.render(<UserActions {...props} />);
-
-      await waitForComponentToUpdate();
-
-      expect(screen.getAllByTestId('user-actions-list')).toHaveLength(2);
-      expect(screen.getByTestId('cases-show-more-user-actions')).toBeInTheDocument();
-    });
-
     it('call fetchNextPage on showMore button click', async () => {
       useInfiniteFindCaseUserActionsMock.mockReturnValue({
         ...defaultInfiniteUseFindCaseUserActions,
