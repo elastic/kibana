@@ -13,6 +13,12 @@ import { AppFeatures } from './app_features';
 import type { AppFeatureKeys, ExperimentalFeatures } from '../../../common';
 import { ALL_APP_FEATURE_KEYS, allowedExperimentalValues } from '../../../common';
 
+class AppFeaturesMock extends AppFeatures {
+  protected registerEnabledKibanaFeatures() {
+    // NOOP
+  }
+}
+
 export const createAppFeaturesMock = (
   /** What features keys should be enabled. Default is all */
   enabledFeatureKeys: AppFeatureKeys = [...ALL_APP_FEATURE_KEYS],
@@ -20,7 +26,7 @@ export const createAppFeaturesMock = (
   featuresPluginSetupContract: FeaturesPluginSetup = featuresPluginMock.createSetup(),
   logger: Logger = loggingSystemMock.create().get('appFeatureMock')
 ) => {
-  const appFeatures = new AppFeatures(logger, experimentalFeatures);
+  const appFeatures = new AppFeaturesMock(logger, experimentalFeatures);
 
   appFeatures.init(featuresPluginSetupContract);
 
