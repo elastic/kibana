@@ -201,7 +201,7 @@
           "\nConvert instruction variant id into display text.\n"
         ],
         "signature": [
-          "(id: \"ESC\" | \"OSX\" | \"DEB\" | \"RPM\" | \"DOCKER\" | \"WINDOWS\" | \"NODE\" | \"DJANGO\" | \"FLASK\" | \"RAILS\" | \"RACK\" | \"JS\" | \"GO\" | \"JAVA\" | \"DOTNET\" | \"LINUX\" | \"PHP\" | \"FLEET\" | \"OPEN_TELEMETRY\") => any"
+          "(id: \"ESC\" | \"OSX\" | \"DEB\" | \"RPM\" | \"DOCKER\" | \"WINDOWS\" | \"NODE\" | \"DJANGO\" | \"FLASK\" | \"RAILS\" | \"RACK\" | \"JS\" | \"GO\" | \"JAVA\" | \"DOTNET\" | \"LINUX\" | \"PHP\" | \"FLEET\" | \"OPEN_TELEMETRY\" | \"OTHER_LINUX\") => any"
         ],
         "path": "src/plugins/home/common/instruction_variant.ts",
         "deprecated": false,
@@ -215,7 +215,7 @@
             "label": "id",
             "description": [],
             "signature": [
-              "\"ESC\" | \"OSX\" | \"DEB\" | \"RPM\" | \"DOCKER\" | \"WINDOWS\" | \"NODE\" | \"DJANGO\" | \"FLASK\" | \"RAILS\" | \"RACK\" | \"JS\" | \"GO\" | \"JAVA\" | \"DOTNET\" | \"LINUX\" | \"PHP\" | \"FLEET\" | \"OPEN_TELEMETRY\""
+              "\"ESC\" | \"OSX\" | \"DEB\" | \"RPM\" | \"DOCKER\" | \"WINDOWS\" | \"NODE\" | \"DJANGO\" | \"FLASK\" | \"RAILS\" | \"RACK\" | \"JS\" | \"GO\" | \"JAVA\" | \"DOTNET\" | \"LINUX\" | \"PHP\" | \"FLEET\" | \"OPEN_TELEMETRY\" | \"OTHER_LINUX\""
             ],
             "path": "src/plugins/home/common/instruction_variant.ts",
             "deprecated": false,
@@ -1180,6 +1180,17 @@
             "path": "src/plugins/home/common/instruction_variant.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "home",
+            "id": "def-public.INSTRUCTION_VARIANT.OTHER_LINUX",
+            "type": "string",
+            "tags": [],
+            "label": "OTHER_LINUX",
+            "description": [],
+            "path": "src/plugins/home/common/instruction_variant.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2118,6 +2129,17 @@
             "type": "string",
             "tags": [],
             "label": "OPEN_TELEMETRY",
+            "description": [],
+            "path": "src/plugins/home/common/instruction_variant.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "home",
+            "id": "def-server.INSTRUCTION_VARIANT.OTHER_LINUX",
+            "type": "string",
+            "tags": [],
+            "label": "OTHER_LINUX",
             "description": [],
             "path": "src/plugins/home/common/instruction_variant.ts",
             "deprecated": false,
