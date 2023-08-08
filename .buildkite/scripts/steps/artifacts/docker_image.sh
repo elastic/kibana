@@ -72,11 +72,8 @@ cat << EOF | buildkite-agent annotate --style "info" --context image
 EOF
 
 if [[ "${BUILDKITE_PULL_REQUEST:-false}" != "false" ]]; then
-  buildkite-agent meta-data set pr_comment:deploy_cloud:head "* Kibana Serverless Image: \`$KIBANA_IMAGE\`"
-  cat << EOF | buildkite-agent annotate --style "info" --context kibana-serverless-image
-
-  Kibana Serverless Image: \`$SERVERLESS_IMAGE\`
-EOF
+  buildkite-agent meta-data set pr_comment:build_serverless:head "* Kibana Serverless Image: \`$KIBANA_IMAGE\`"
+  buildkite-agent meta-data set pr_comment:early_comment_job_id "$BUILDKITE_JOB_ID"
 fi
 
 echo "--- Build dependencies report"
