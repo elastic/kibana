@@ -47,6 +47,7 @@ export const EnrichPoliciesList = () => {
   if (error) {
     return (
       <PageError
+        data-test-subj="sectionError"
         title={
           <FormattedMessage
             id="xpack.idxMgmt.enrich_policies.list.errorStateLabel"

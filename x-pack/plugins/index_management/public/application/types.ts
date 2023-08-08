@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+// TODO:
+// should have types for ES based enrich policy type
+// and for serialized enrich policy type
+
 export type EnrichPolicyType = 'match' | 'geo_match' | 'range' | '';
 
 export interface BaseTypes {

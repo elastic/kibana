@@ -19,7 +19,8 @@ export interface ResponseError {
 
 // Register helpers to mock HTTP Requests
 const registerHttpRequestMockHelpers = (
-  httpSetup: ReturnType<typeof httpServiceMock.createStartContract>
+  httpSetup: ReturnType<typeof httpServiceMock.createStartContract>,
+  shouldDelayResponse: () => boolean,
 ) => {
   const mockResponses = new Map<HttpMethod, Map<string, Promise<unknown>>>(
     ['GET', 'PUT', 'DELETE', 'POST'].map(
@@ -28,7 +29,14 @@ const registerHttpRequestMockHelpers = (
   );
 
   const mockMethodImplementation = (method: HttpMethod, path: string) => {
-    return mockResponses.get(method)?.get(path) ?? Promise.resolve({});
+    const responsePromise = mockResponses.get(method)?.get(path) ?? Promise.resolve({});
+    if (shouldDelayResponse()) {
+      return new Promise((resolve) => {
+        setTimeout(() => resolve(responsePromise), 1000);
+      });
+    }
+
+    return responsePromise;
   };
 
   httpSetup.get.mockImplementation((path) =>
@@ -121,6 +129,9 @@ const registerHttpRequestMockHelpers = (
   const setLoadTelemetryResponse = (response?: HttpResponse, error?: ResponseError) =>
     mockResponse('GET', '/api/ui_counters/_report', response, error);
 
+  const setLoadEnrichPoliciesResponse = (response?: HttpResponse, error?: ResponseError) =>
+    mockResponse('GET', `${API_BASE_PATH}/enrich_policies`, response, error);
+
   return {
     setLoadTemplatesResponse,
     setLoadIndicesResponse,
@@ -139,15 +150,23 @@ const registerHttpRequestMockHelpers = (
     setLoadComponentTemplatesResponse,
     setLoadNodesPluginsResponse,
     setLoadTelemetryResponse,
+    setLoadEnrichPoliciesResponse,
   };
 };
 
 export const init = () => {
+  let isResponseDelayed = false;
+  const getDelayResponse = () => isResponseDelayed;
+  const setDelayResponse = (shouldDelayResponse: boolean) => {
+    isResponseDelayed = shouldDelayResponse;
+  };
+
   const httpSetup = httpServiceMock.createSetupContract();
-  const httpRequestsMockHelpers = registerHttpRequestMockHelpers(httpSetup);
+  const httpRequestsMockHelpers = registerHttpRequestMockHelpers(httpSetup, getDelayResponse);
 
   return {
     httpSetup,
     httpRequestsMockHelpers,
+    setDelayResponse,
   };
 };
