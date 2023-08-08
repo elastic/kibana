@@ -167,6 +167,7 @@ export function useTimeline({
     if (pendingMessage) {
       return conversationItems.concat({
         id: '',
+        '@timestamp': new Date().toISOString(),
         canCopy: true,
         canEdit: false,
         canGiveFeedback: false,
@@ -194,7 +195,12 @@ export function useTimeline({
 
   return {
     items,
-    onEdit: (item, content) => {},
+    onEdit: async (item, newMessage) => {
+      const index = messages.findIndex((message) => message['@timestamp'] === item['@timestamp']);
+      const sliced = messages.slice(0, index);
+      const nextMessages = await chat(sliced.concat(newMessage));
+      onChatComplete(nextMessages);
+    },
     onFeedback: (item, feedback) => {},
     onRegenerate: (item) => {
       const indexOf = items.indexOf(item);

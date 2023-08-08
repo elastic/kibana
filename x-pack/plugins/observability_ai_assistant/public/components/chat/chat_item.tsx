@@ -22,9 +22,10 @@ import { ChatItemControls } from './chat_item_controls';
 import { ChatTimelineItem } from './chat_timeline';
 import { getRoleTranslation } from '../../utils/get_role_translation';
 import type { Feedback } from '../feedback_buttons';
+import type { Message } from '../../../common';
 
 export interface ChatItemProps extends ChatTimelineItem {
-  onEditSubmit: (content: string) => void;
+  onEditSubmit: (newMessage: Message) => void;
   onFeedbackClick: (feedback: Feedback) => void;
   onRegenerateClick: () => void;
   onStopGeneratingClick: () => void;
@@ -69,30 +70,30 @@ export function ChatItem({
   error,
   functionCall,
   loading,
+  role,
+  title,
   onEditSubmit,
   onFeedbackClick,
   onRegenerateClick,
   onStopGeneratingClick,
-  role,
-  title,
 }: ChatItemProps) {
   const accordionId = useGeneratedHtmlId({ prefix: 'chat' });
 
   const [editing, setEditing] = useState<boolean>(false);
-  const [isExpanded, setIsExpanded] = useState<boolean>(Boolean(element));
+  const [expanded, setExpanded] = useState<boolean>(Boolean(element));
 
   const actions = [canCopy, collapsed, canCopy].filter(Boolean);
 
   const noBodyMessageClassName = css`
     .euiCommentEvent__body {
       padding: 0;
-      height: ${isExpanded ? 'fit-content' : '0px'};
+      height: ${expanded ? 'fit-content' : '0px'};
       overflow: hidden;
     }
   `;
 
-  const handleAccordionToggle = () => {
-    setIsExpanded(!isExpanded);
+  const handleToggleExpand = () => {
+    setExpanded(!expanded);
 
     if (editing) {
       setEditing(false);
@@ -101,12 +102,12 @@ export function ChatItem({
 
   const handleToggleEdit = () => {
     if (collapsed) {
-      setIsExpanded(false);
+      setExpanded(false);
     }
     setEditing(!editing);
   };
 
-  const handleInlineEditSubmit = (newPrompt: string) => {
+  const handleInlineEditSubmit = (newPrompt: Message) => {
     handleToggleEdit();
     onEditSubmit(newPrompt);
   };
@@ -119,9 +120,9 @@ export function ChatItem({
     content || error ? (
       <ChatItemContentInlinePromptEditor
         content={content}
+        editing={editing}
         functionCall={functionCall}
         loading={loading}
-        editing={editing}
         onSubmit={handleInlineEditSubmit}
       />
     ) : null;
@@ -131,8 +132,8 @@ export function ChatItem({
       <EuiAccordion
         id={accordionId}
         className={accordionButtonClassName}
-        forceState={isExpanded ? 'open' : 'closed'}
-        onToggle={handleAccordionToggle}
+        forceState={expanded ? 'open' : 'closed'}
+        onToggle={handleToggleExpand}
       >
         <EuiSpacer size="s" />
         {contentElement}
@@ -152,10 +153,10 @@ export function ChatItem({
           canCopy={canCopy}
           collapsed={collapsed}
           canEdit={canEdit}
-          isCollapsed={isExpanded}
-          onAccordionToggle={handleAccordionToggle}
+          isCollapsed={expanded}
           onCopyToClipboard={handleCopyToClipboard}
           onToggleEdit={handleToggleEdit}
+          onToggleExpand={handleToggleExpand}
         />
       }
       className={

@@ -12,7 +12,9 @@ import { type Message, MessageRole } from '../../../common';
 import type { Feedback } from '../feedback_buttons';
 import { ChatItem } from './chat_item';
 
-export interface ChatTimelineItem extends Pick<Message['message'], 'role' | 'content'> {
+export interface ChatTimelineItem
+  extends Pick<Message, '@timestamp'>,
+    Pick<Message['message'], 'role' | 'content'> {
   id: string;
   title: string;
   loading: boolean;
@@ -20,7 +22,6 @@ export interface ChatTimelineItem extends Pick<Message['message'], 'role' | 'con
   canEdit: boolean;
   canGiveFeedback: boolean;
   canRegenerate: boolean;
-
   collapsed: boolean;
   functionCall?: {
     name: string;
@@ -35,7 +36,7 @@ export interface ChatTimelineItem extends Pick<Message['message'], 'role' | 'con
 
 export interface ChatTimelineProps {
   items: ChatTimelineItem[];
-  onEdit: (item: ChatTimelineItem, content: string) => void;
+  onEdit: (item: ChatTimelineItem, newMessage: Message) => void;
   onFeedback: (item: ChatTimelineItem, feedback: Feedback) => void;
   onRegenerate: (item: ChatTimelineItem) => void;
   onStopGenerating: () => void;
@@ -62,8 +63,8 @@ export function ChatTimeline({
             onRegenerateClick={() => {
               onRegenerate(item);
             }}
-            onEditSubmit={(content) => {
-              onEdit(item, content);
+            onEditSubmit={(newMessage) => {
+              onEdit(item, newMessage);
             }}
             onStopGeneratingClick={onStopGenerating}
           />
