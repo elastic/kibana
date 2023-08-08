@@ -98,6 +98,7 @@ export function WaterfallWithSummary<TSample extends {}>({
             })}
           </div>
         }
+        data-test-subj="apmNoTraceFound"
         titleSize="s"
       />
     );
