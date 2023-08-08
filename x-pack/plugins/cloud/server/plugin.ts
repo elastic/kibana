@@ -41,6 +41,14 @@ export interface CloudSetup {
    */
   kibanaUrl?: string;
   /**
+   * The full URL to the serverless projects.
+   */
+  projectsUrl?: string;
+  /**
+   * The full URL to cloud/serverless.
+   */
+  baseUrl?: string;
+  /**
    * {host} from the deployment url https://<deploymentId>.<application>.<host><?:port>
    */
   cloudHost?: string;
@@ -134,6 +142,8 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
       isCloudEnabled,
       trialEndDate: this.config.trial_end_date ? new Date(this.config.trial_end_date) : undefined,
       isElasticStaffOwned: this.config.is_elastic_staff_owned,
+      projectsUrl: this.config.projects_url,
+      baseUrl: this.config.base_url,
       apm: {
         url: this.config.apm?.url,
         secretToken: this.config.apm?.secret_token,
@@ -145,9 +155,11 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
     };
   }
 
-  public start() {
+  public start(): Pick<CloudSetup, 'isCloudEnabled' | 'projectsUrl' | 'baseUrl'> {
     return {
       isCloudEnabled: getIsCloudEnabled(this.config.id),
+      projectsUrl: this.config.projects_url,
+      baseUrl: this.config.base_url,
     };
   }
 }

@@ -15,6 +15,7 @@ const baseConfig = {
   base_url: 'https://cloud.elastic.co',
   deployment_url: '/abc123',
   profile_url: '/user/settings/',
+  projects_url: '/projects/',
   organization_url: '/account/',
 };
 
@@ -42,6 +43,10 @@ describe('Cloud Plugin', () => {
 
   describe('#setup', () => {
     describe('interface', () => {
+      it('snapshot', () => {
+        const { setup } = setupPlugin();
+        expect(setup).toMatchSnapshot();
+      });
       it('exposes isCloudEnabled', () => {
         const { setup } = setupPlugin();
         expect(setup.isCloudEnabled).toBe(true);
@@ -124,6 +129,10 @@ describe('Cloud Plugin', () => {
 
   describe('#start', () => {
     describe('interface', () => {
+      it('snapshot', () => {
+        const { start } = setupPlugin();
+        expect(start).toMatchSnapshot();
+      });
       it('exposes isCloudEnabled', () => {
         const { start } = setupPlugin();
         expect(start.isCloudEnabled).toBe(true);
