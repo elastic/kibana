@@ -13,14 +13,7 @@ import pMap from 'p-map';
 import { ToolingLog } from '@kbn/tooling-log';
 import { withProcRunner } from '@kbn/dev-proc-runner';
 import cypress from 'cypress';
-
-import {
-  EsVersion,
-  FunctionalTestRunner,
-  readConfigFile,
-  runElasticsearch,
-  runKibanaServer,
-} from '@kbn/test';
+import { EsVersion, FunctionalTestRunner, runElasticsearch, runKibanaServer } from '@kbn/test';
 
 import {
   Lifecycle,
@@ -31,8 +24,7 @@ import {
 import { createFailError } from '@kbn/dev-cli-errors';
 import pRetry from 'p-retry';
 import { renderSummaryTable } from './print_run';
-import { getLocalhostRealIp } from '../endpoint/common/localhost_services';
-import { parseTestFileConfig } from './utils';
+import { getFtrConfig } from './get_ftr_config';
 
 /**
  * Retrieve test files using a glob pattern.
@@ -148,8 +140,6 @@ export const cli = () => {
         writeTo: process.stdout,
       });
 
-      const hostRealIp = getLocalhostRealIp();
-
       await pMap(
         files,
         async (filePath) => {
@@ -168,109 +158,15 @@ export const cli = () => {
             const esPort: number = getEsPort();
             const kibanaPort: number = getKibanaPort();
             const fleetServerPort: number = getFleetServerPort();
-            const configFromTestFile = parseTestFileConfig(filePath);
 
-            const config = await readConfigFile(
+            const config = await getFtrConfig({
               log,
-              EsVersion.getDefault(),
-              _.isArray(argv.ftrConfigFile) ? _.last(argv.ftrConfigFile) : argv.ftrConfigFile,
-              {
-                servers: {
-                  elasticsearch: {
-                    port: esPort,
-                  },
-                  kibana: {
-                    port: kibanaPort,
-                  },
-                  fleetserver: {
-                    port: fleetServerPort,
-                  },
-                },
-                kbnTestServer: {
-                  serverArgs: [
-                    `--server.port=${kibanaPort}`,
-                    `--elasticsearch.hosts=http://localhost:${esPort}`,
-                  ],
-                },
-              },
-              (vars) => {
-                const hasFleetServerArgs = _.some(
-                  vars.kbnTestServer.serverArgs,
-                  (value) =>
-                    value.includes('--xpack.fleet.agents.fleet_server.hosts') ||
-                    value.includes('--xpack.fleet.agents.elasticsearch.host')
-                );
-
-                vars.kbnTestServer.serverArgs = _.filter(
-                  vars.kbnTestServer.serverArgs,
-                  (value) =>
-                    !(
-                      value.includes('--elasticsearch.hosts=http://localhost:9220') ||
-                      value.includes('--xpack.fleet.agents.fleet_server.hosts') ||
-                      value.includes('--xpack.fleet.agents.elasticsearch.host')
-                    )
-                );
-
-                if (
-                  configFromTestFile?.enableExperimental?.length &&
-                  _.some(vars.kbnTestServer.serverArgs, (value) =>
-                    value.includes('--xpack.securitySolution.enableExperimental')
-                  )
-                ) {
-                  vars.kbnTestServer.serverArgs = _.filter(
-                    vars.kbnTestServer.serverArgs,
-                    (value) => !value.includes('--xpack.securitySolution.enableExperimental')
-                  );
-                  vars.kbnTestServer.serverArgs.push(
-                    `--xpack.securitySolution.enableExperimental=${JSON.stringify(
-                      configFromTestFile?.enableExperimental
-                    )}`
-                  );
-                }
-
-                if (configFromTestFile?.license) {
-                  if (vars.serverless) {
-                    log.warning(
-                      `'ftrConfig.license' ignored. Value does not apply to kibana when running in serverless.\nFile: ${filePath}`
-                    );
-                  } else {
-                    vars.esTestCluster.license = configFromTestFile.license;
-                  }
-                }
-
-                if (hasFleetServerArgs) {
-                  vars.kbnTestServer.serverArgs.push(
-                    `--xpack.fleet.agents.elasticsearch.host=http://${hostRealIp}:${esPort}`
-                  );
-                }
-
-                // Serverless Specific
-                if (vars.serverless) {
-                  log.info(`Serverless mode detected`);
-
-                  if (configFromTestFile?.productTypes) {
-                    vars.kbnTestServer.serverArgs.push(
-                      `--xpack.securitySolutionServerless.productTypes=${JSON.stringify([
-                        ...configFromTestFile.productTypes,
-                        // Why spread it twice?
-                        // The `serverless.security.yml` file by default includes two product types as of this change.
-                        // Because it's an array, we need to ensure that existing values are "removed" and the ones
-                        // defined here are added. To do that, we duplicate the `productTypes` passed so that all array
-                        // elements in that YAML file are updated. The Security serverless plugin has code in place to
-                        // dedupe.
-                        ...configFromTestFile.productTypes,
-                      ])}`
-                    );
-                  }
-                } else if (configFromTestFile?.productTypes) {
-                  log.warning(
-                    `'ftrConfig.productTypes' ignored. Value applies only when running kibana is serverless.\nFile: ${filePath}`
-                  );
-                }
-
-                return vars;
-              }
-            );
+              ftrConfigFile: argv.ftrConfigFile as string,
+              specFilePath: filePath,
+              esPort,
+              kibanaPort,
+              fleetServerPort,
+            });
 
             log.info(`
 ----------------------------------------------

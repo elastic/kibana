@@ -73,7 +73,7 @@ export default defineCypressConfig({
 
             const program = path.resolve('../scripts/start_cypress_setup_env.js');
             const parameters = [
-              `run --ftr-config-file '../../../test/security_solution_cypress/cli_config.ts'`,
+              `run --ftr-config-file '../../../test/security_solution_cypress/cli_config.ts' --spec-file-path '${spec.relative}'`,
             ];
             const options = {
               env: {

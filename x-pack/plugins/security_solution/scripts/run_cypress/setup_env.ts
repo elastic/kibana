@@ -6,31 +6,21 @@
  */
 
 import path from 'path';
-import _ from 'lodash';
 import { ToolingLog } from '@kbn/tooling-log';
 import { withProcRunner } from '@kbn/dev-proc-runner';
 import yargs from 'yargs';
-
-import {
-  EsVersion,
-  FunctionalTestRunner,
-  readConfigFile,
-  runElasticsearch,
-  runKibanaServer,
-} from '@kbn/test';
-
+import { EsVersion, FunctionalTestRunner, runElasticsearch, runKibanaServer } from '@kbn/test';
 import {
   Lifecycle,
   ProviderCollection,
   readProviderSpec,
 } from '@kbn/test/src/functional_test_runner/lib';
-
 import pRetry from 'p-retry';
-import { getLocalhostRealIp } from '../endpoint/common/localhost_services';
-import { parseTestFileConfig } from './utils';
+import { getFtrConfig } from './get_ftr_config';
 
 (async () => {
   const { argv } = yargs(process.argv.slice(2)[0].split(' '))
+    .coerce('specFilePath', (specFilePath) => path.resolve(specFilePath))
     .coerce('ftrConfigFile', (ftrConfigFile) => path.resolve(ftrConfigFile))
     .default('esPort', 9222)
     .default('kibanaPort', 5622)
@@ -42,8 +32,6 @@ import { parseTestFileConfig } from './utils';
     writeTo: process.stdout,
   });
 
-  const hostRealIp = getLocalhostRealIp();
-
   await withProcRunner(log, async (procs) => {
     const abortCtrl = new AbortController();
 
@@ -52,77 +40,14 @@ import { parseTestFileConfig } from './utils';
       abortCtrl.abort();
     };
 
-    const configFromTestFile = parseTestFileConfig(argv.ftrConfigFile as string);
-
-    const config = await readConfigFile(
+    const config = await getFtrConfig({
       log,
-      EsVersion.getDefault(),
-      _.isArray(argv.ftrConfigFile) ? _.last(argv.ftrConfigFile) : argv.ftrConfigFile,
-      {
-        servers: {
-          elasticsearch: {
-            port: argv.esPort,
-          },
-          kibana: {
-            port: argv.kibanaPort,
-          },
-          fleetserver: {
-            port: argv.fleetServerPort,
-          },
-        },
-        kbnTestServer: {
-          serverArgs: [
-            `--server.port=${argv.kibanaPort}`,
-            `--elasticsearch.hosts=http://localhost:${argv.esPort}`,
-          ],
-        },
-      },
-      (vars) => {
-        const hasFleetServerArgs = _.some(
-          vars.kbnTestServer.serverArgs,
-          (value) =>
-            value.includes('--xpack.fleet.agents.fleet_server.hosts') ||
-            value.includes('--xpack.fleet.agents.elasticsearch.host')
-        );
-
-        vars.kbnTestServer.serverArgs = _.filter(
-          vars.kbnTestServer.serverArgs,
-          (value) =>
-            !(
-              value.includes('--elasticsearch.hosts=http://localhost:9220') ||
-              value.includes('--xpack.fleet.agents.fleet_server.hosts') ||
-              value.includes('--xpack.fleet.agents.elasticsearch.host')
-            )
-        );
-
-        if (
-          // @ts-expect-error
-          configFromTestFile?.enableExperimental?.length &&
-          _.some(vars.kbnTestServer.serverArgs, (value) =>
-            value.includes('--xpack.securitySolution.enableExperimental')
-          )
-        ) {
-          vars.kbnTestServer.serverArgs = _.filter(
-            vars.kbnTestServer.serverArgs,
-            (value) => !value.includes('--xpack.securitySolution.enableExperimental')
-          );
-          vars.kbnTestServer.serverArgs.push(
-            `--xpack.securitySolution.enableExperimental=${JSON.stringify(
-              configFromTestFile?.enableExperimental
-            )}`
-          );
-        }
-
-        if (hasFleetServerArgs) {
-          vars.kbnTestServer.serverArgs.push(
-            `--xpack.fleet.agents.fleet_server.hosts=["https://${hostRealIp}:${argv.fleetServerPort}"]`,
-            `--xpack.fleet.agents.elasticsearch.host=http://${hostRealIp}:${argv.esPort}`
-          );
-        }
-
-        return vars;
-      }
-    );
+      specFilePath: argv.specFilePath as string,
+      ftrConfigFile: argv.ftrConfigFile as string,
+      esPort: argv.esPort,
+      kibanaPort: argv.kibanaPort,
+      fleetServerPort: argv.fleetServerPort,
+    });
 
     const lifecycle = new Lifecycle(log);
 
