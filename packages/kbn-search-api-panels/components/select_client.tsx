@@ -8,7 +8,15 @@
 
 import React from 'react';
 
-import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
+import {
+  EuiCallOut,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
+  EuiPanelProps,
+  EuiSpacer,
+  EuiText,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -20,6 +28,7 @@ export interface SelectClientPanelProps {
   docLinks: any;
   http: HttpStart;
   isPanelLeft?: boolean;
+  overviewPanelProps?: Partial<EuiPanelProps>;
 }
 
 export const SelectClientPanel: React.FC<SelectClientPanelProps> = ({
@@ -27,6 +36,7 @@ export const SelectClientPanel: React.FC<SelectClientPanelProps> = ({
   children,
   http,
   isPanelLeft = true,
+  overviewPanelProps,
 }) => {
   const panelContent = (
     <>
@@ -106,6 +116,7 @@ export const SelectClientPanel: React.FC<SelectClientPanelProps> = ({
       title={i18n.translate('xpack.serverlessSearch.selectClient.title', {
         defaultMessage: 'Select your client',
       })}
+      overviewPanelProps={overviewPanelProps}
     />
   );
 };

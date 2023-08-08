@@ -75,7 +75,12 @@ export const APIGettingStarted = () => {
       <EuiTitle size="l">
         <h2>Getting Started with Elastic API</h2>
       </EuiTitle>
-      <SelectClientPanel docLinks={docLinks} http={http} isPanelLeft={false}>
+      <SelectClientPanel
+        docLinks={docLinks}
+        http={http}
+        isPanelLeft={false}
+        overviewPanelProps={{ color: 'plain', hasShadow: false }}
+      >
         {languageDefinitions.map((language, index) => (
           <EuiFlexItem key={`panelItem.${index}`}>
             <LanguageClientPanel
@@ -99,6 +104,7 @@ export const APIGettingStarted = () => {
         application={services.application}
         sharePlugin={services.share}
         isPanelLeft={false}
+        overviewPanelProps={{ color: 'plain', hasShadow: false }}
       />
 
       <OverviewPanel
@@ -163,6 +169,7 @@ export const APIGettingStarted = () => {
         }
         links={[]}
         title={'Generate an API key'}
+        overviewPanelProps={{ color: 'plain', hasShadow: false }}
       />
 
       <OverviewPanel
@@ -194,6 +201,7 @@ export const APIGettingStarted = () => {
         }
         links={[]}
         title={'Copy your Cloud ID'}
+        overviewPanelProps={{ color: 'plain', hasShadow: false }}
       />
 
       <OverviewPanel
@@ -216,31 +224,32 @@ export const APIGettingStarted = () => {
         links={[
           ...(selectedLanguage.basicConfig
             ? [
-              {
-                href: selectedLanguage.basicConfig,
-                label: i18n.translate('xpack.serverlessSearch.configureClient.basicConfigLabel', {
-                  defaultMessage: 'Basic configuration',
-                }),
-              },
-            ]
+                {
+                  href: selectedLanguage.basicConfig,
+                  label: i18n.translate('xpack.serverlessSearch.configureClient.basicConfigLabel', {
+                    defaultMessage: 'Basic configuration',
+                  }),
+                },
+              ]
             : []),
           ...(selectedLanguage.advancedConfig
             ? [
-              {
-                href: selectedLanguage.advancedConfig,
-                label: i18n.translate(
-                  'xpack.serverlessSearch.configureClient.advancedConfigLabel',
-                  {
-                    defaultMessage: 'Advanced configuration',
-                  }
-                ),
-              },
-            ]
+                {
+                  href: selectedLanguage.advancedConfig,
+                  label: i18n.translate(
+                    'xpack.serverlessSearch.configureClient.advancedConfigLabel',
+                    {
+                      defaultMessage: 'Advanced configuration',
+                    }
+                  ),
+                },
+              ]
             : []),
         ]}
         title={i18n.translate('xpack.serverlessSearch.configureClient.title', {
           defaultMessage: 'Configure your client',
         })}
+        overviewPanelProps={{ color: 'plain', hasShadow: false }}
       />
 
       <OverviewPanel
@@ -265,6 +274,7 @@ export const APIGettingStarted = () => {
         title={i18n.translate('xpack.serverlessSearch.testConnection.title', {
           defaultMessage: 'Test your connection',
         })}
+        overviewPanelProps={{ color: 'plain', hasShadow: false }}
       />
       <OverviewPanel
         description={'Add data to your data stream or index to make it searchable'}
@@ -283,6 +293,7 @@ export const APIGettingStarted = () => {
         }
         links={[]}
         title={'Ingest Data'}
+        overviewPanelProps={{ color: 'plain', hasShadow: false }}
       />
 
       <OverviewPanel
@@ -307,6 +318,7 @@ export const APIGettingStarted = () => {
         title={i18n.translate('xpack.serverlessSearch.searchQuery.title', {
           defaultMessage: 'Build your first search query',
         })}
+        overviewPanelProps={{ color: 'plain', hasShadow: false }}
       />
     </>
   );

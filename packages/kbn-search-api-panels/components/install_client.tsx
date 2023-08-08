@@ -8,7 +8,7 @@
 
 import React from 'react';
 
-import { EuiSpacer, EuiCallOut, EuiText } from '@elastic/eui';
+import { EuiSpacer, EuiCallOut, EuiText, EuiPanelProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { ApplicationStart } from '@kbn/core-application-browser';
@@ -29,6 +29,7 @@ interface InstallClientProps {
   sharePlugin: SharePluginStart;
   isPanelLeft?: boolean;
   languages: LanguageDefinition[];
+  overviewPanelProps?: Partial<EuiPanelProps>;
 }
 
 const Link: React.FC<{ language: Languages; http: HttpStart; pluginId: string }> = ({
@@ -85,6 +86,7 @@ export const InstallClientPanel: React.FC<InstallClientProps> = ({
   application,
   sharePlugin,
   isPanelLeft = true,
+  overviewPanelProps,
 }) => {
   const panelContent = (
     <>
@@ -139,6 +141,7 @@ export const InstallClientPanel: React.FC<InstallClientProps> = ({
       })}
       leftPanelContent={isPanelLeft ? panelContent : undefined}
       rightPanelContent={!isPanelLeft ? panelContent : undefined}
+      overviewPanelProps={overviewPanelProps}
     />
   );
 };

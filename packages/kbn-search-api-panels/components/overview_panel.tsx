@@ -16,6 +16,7 @@ import {
   EuiPanel,
   EuiTitle,
   EuiLink,
+  EuiPanelProps,
 } from '@elastic/eui';
 import { LEARN_MORE_LABEL } from '../constants';
 
@@ -25,6 +26,7 @@ interface OverviewPanelProps {
   links?: Array<{ label: string; href: string }>;
   rightPanelContent?: React.ReactNode;
   title: string;
+  overviewPanelProps?: Partial<EuiPanelProps>;
 }
 
 export const OverviewPanel: React.FC<OverviewPanelProps> = ({
@@ -34,6 +36,7 @@ export const OverviewPanel: React.FC<OverviewPanelProps> = ({
   links,
   rightPanelContent,
   title,
+  overviewPanelProps,
 }) => {
   return (
     <>
@@ -41,7 +44,7 @@ export const OverviewPanel: React.FC<OverviewPanelProps> = ({
       <EuiFlexGroup alignItems="center">
         {leftPanelContent && <EuiFlexItem grow={6}>{leftPanelContent}</EuiFlexItem>}
         <EuiFlexItem grow={4}>
-          <EuiPanel color="subdued">
+          <EuiPanel color="subdued" {...overviewPanelProps}>
             <EuiTitle>
               <h2>{title}</h2>
             </EuiTitle>
