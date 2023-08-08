@@ -17,9 +17,9 @@ import { EuiIcon, EuiPanel, EuiSpacer, EuiText, EuiTitle, EuiToolTip } from '@el
 import { asDynamicBytes } from '@kbn/observability-plugin/common';
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import type { StorageExplorerHostBreakdownSizeChart } from '../../../common/storage_explorer';
-import { useKibanaTimeZoneSetting } from '../../hooks/use_kibana_timezone_setting';
-import { useProfilingChartsTheme } from '../../hooks/use_profiling_charts_theme';
+import type { StorageExplorerHostBreakdownSizeChart } from '../../../../common/storage_explorer';
+import { useKibanaTimeZoneSetting } from '../../../hooks/use_kibana_timezone_setting';
+import { useProfilingChartsTheme } from '../../../hooks/use_profiling_charts_theme';
 
 interface Props {
   data?: StorageExplorerHostBreakdownSizeChart[];

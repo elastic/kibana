@@ -5,19 +5,9 @@
  * 2.0.
  */
 
-import {
-  EuiButton,
-  EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiTab,
-  EuiTabs,
-  EuiText,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiTab, EuiTabs } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
-import { AsyncComponent } from '../../components/async_component';
 import { useProfilingDependencies } from '../../components/contexts/profiling_dependencies/use_profiling_dependencies';
 import { ProfilingAppPageTemplate } from '../../components/profiling_app_page_template';
 import { AsyncStatus } from '../../hooks/use_async';
@@ -25,27 +15,21 @@ import { useProfilingParams } from '../../hooks/use_profiling_params';
 import { useTimeRange } from '../../hooks/use_time_range';
 import { useTimeRangeAsync } from '../../hooks/use_time_range_async';
 import { DataBreakdown } from './data_breakdown';
-import { HostsTable } from './hosts_table';
-import { HostBreakdownChart } from './host_breakdown_chart';
+import { DistinctProbabilisticValuesWarning } from './distinct_probabilistic_values_warning';
+import { HostBreakdown } from './host_breakdown';
 import { Summary } from './summary';
 
 export function StorageExplorerView() {
   const { query } = useProfilingParams('/storage-explorer');
   const { rangeFrom, rangeTo, kuery } = query;
   const timeRange = useTimeRange({ rangeFrom, rangeTo });
-  const { docLinks } = useProfilingDependencies().start.core;
 
   const [selectedTab, setSelectedTab] = useState<'host_breakdown' | 'data_breakdown'>(
-    // TODO: revert back
-    'data_breakdown'
+    'host_breakdown'
   );
 
   const {
-    services: {
-      fetchStorageExplorerSummary,
-      fetchStorageExplorerHostBreakdownSizeChart,
-      fetchStorageExplorerHostsDetails,
-    },
+    services: { fetchStorageExplorerSummary },
   } = useProfilingDependencies();
 
   const storageExplorerSummaryState = useTimeRangeAsync(
@@ -60,35 +44,6 @@ export function StorageExplorerView() {
     [fetchStorageExplorerSummary, timeRange.inSeconds.start, timeRange.inSeconds.end, kuery]
   );
 
-  const storageExplorerHostBreakdownState = useTimeRangeAsync(
-    ({ http }) => {
-      return fetchStorageExplorerHostBreakdownSizeChart({
-        http,
-        timeFrom: timeRange.inSeconds.start,
-        timeTo: timeRange.inSeconds.end,
-        kuery,
-      });
-    },
-    [
-      fetchStorageExplorerHostBreakdownSizeChart,
-      timeRange.inSeconds.start,
-      timeRange.inSeconds.end,
-      kuery,
-    ]
-  );
-
-  const storageExplorerHostsDetails = useTimeRangeAsync(
-    ({ http }) => {
-      return fetchStorageExplorerHostsDetails({
-        http,
-        timeFrom: timeRange.inSeconds.start,
-        timeTo: timeRange.inSeconds.end,
-        kuery,
-      });
-    },
-    [fetchStorageExplorerHostsDetails, timeRange.inSeconds.start, timeRange.inSeconds.end, kuery]
-  );
-
   const totalNumberOfDistinctProbabilisticValues =
     storageExplorerSummaryState.data?.totalNumberOfDistinctProbabilisticValues || 0;
   const hasDistinctProbabilisticValues = totalNumberOfDistinctProbabilisticValues > 1;
@@ -98,38 +53,9 @@ export function StorageExplorerView() {
       <EuiFlexGroup direction="column">
         {hasDistinctProbabilisticValues && (
           <EuiFlexItem grow={false}>
-            <EuiCallOut
-              title={i18n.translate(
-                'xpack.profiling.storageExplorer.distinctProbabilisticProfilingValues.title',
-                {
-                  defaultMessage:
-                    "We've identified {count} distinct profiling values. Make sure to update them.",
-                  values: { count: totalNumberOfDistinctProbabilisticValues },
-                }
-              )}
-              color="warning"
-              iconType="warning"
-            >
-              <EuiText size="s" color="subdued">
-                {i18n.translate(
-                  'xpack.profiling.storageExplorer.distinctProbabilisticProfilingValues.description',
-                  {
-                    defaultMessage:
-                      'We recommend using a consistent probabilistic value for each project for more efficient storage, cost management, and to maintain good statistical accuracy.',
-                  }
-                )}
-              </EuiText>
-              <EuiSpacer />
-              <EuiButton
-                href={`${docLinks.ELASTIC_WEBSITE_URL}/guide/en/observability/${docLinks.DOC_LINK_VERSION}/profiling-probabilistic-profiling.html`}
-                color="warning"
-              >
-                {i18n.translate(
-                  'xpack.profiling.storageExplorer.distinctProbabilisticProfilingValues.button',
-                  { defaultMessage: 'Learn how' }
-                )}
-              </EuiButton>
-            </EuiCallOut>
+            <DistinctProbabilisticValuesWarning
+              totalNumberOfDistinctProbabilisticValues={totalNumberOfDistinctProbabilisticValues}
+            />
           </EuiFlexItem>
         )}
         <EuiFlexItem grow={false}>
@@ -138,50 +64,35 @@ export function StorageExplorerView() {
             isLoading={storageExplorerSummaryState.status === AsyncStatus.Loading}
           />
         </EuiFlexItem>
-        <EuiTabs>
-          <EuiTab
-            onClick={() => {
-              setSelectedTab('host_breakdown');
-            }}
-            isSelected={selectedTab === 'host_breakdown'}
-          >
-            {i18n.translate('xpack.profiling.storageExplorer.tabs.hostBreakdown', {
-              defaultMessage: 'Host breakdown',
-            })}
-          </EuiTab>
-          <EuiTab
-            onClick={() => {
-              setSelectedTab('data_breakdown');
-            }}
-            isSelected={selectedTab === 'data_breakdown'}
-          >
-            {i18n.translate('xpack.profiling.storageExplorer.tabs.dataBreakdown', {
-              defaultMessage: 'Data breakdown',
-            })}
-          </EuiTab>
-        </EuiTabs>
+        <EuiFlexItem grow={false}>
+          <EuiTabs>
+            <EuiTab
+              onClick={() => {
+                setSelectedTab('host_breakdown');
+              }}
+              isSelected={selectedTab === 'host_breakdown'}
+            >
+              {i18n.translate('xpack.profiling.storageExplorer.tabs.hostBreakdown', {
+                defaultMessage: 'Host breakdown',
+              })}
+            </EuiTab>
+            <EuiTab
+              onClick={() => {
+                setSelectedTab('data_breakdown');
+              }}
+              isSelected={selectedTab === 'data_breakdown'}
+            >
+              {i18n.translate('xpack.profiling.storageExplorer.tabs.dataBreakdown', {
+                defaultMessage: 'Data breakdown',
+              })}
+            </EuiTab>
+          </EuiTabs>
+        </EuiFlexItem>
         {selectedTab === 'host_breakdown' ? (
-          <>
-            <EuiFlexItem grow={false}>
-              <AsyncComponent
-                size="xl"
-                {...storageExplorerHostBreakdownState}
-                style={{ height: 400 }}
-              >
-                <HostBreakdownChart data={storageExplorerHostBreakdownState.data} />
-              </AsyncComponent>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <AsyncComponent size="xl" {...storageExplorerHostsDetails} style={{ height: 400 }}>
-                <HostsTable
-                  data={storageExplorerHostsDetails.data}
-                  hasDistinctProbabilisticValues={hasDistinctProbabilisticValues}
-                />
-              </AsyncComponent>
-            </EuiFlexItem>
-          </>
+          <EuiFlexItem grow={false}>
+            <HostBreakdown hasDistinctProbabilisticValues={hasDistinctProbabilisticValues} />
+          </EuiFlexItem>
         ) : null}
-
         {selectedTab === 'data_breakdown' ? (
           <EuiFlexItem grow={false}>
             <DataBreakdown />

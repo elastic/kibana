@@ -18,8 +18,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import { asDynamicBytes, asAbsoluteDateTime } from '@kbn/observability-plugin/common';
 import React, { useMemo, useState } from 'react';
-import { StorageExplorerHostDetails } from '../../../common/storage_explorer';
-import { LabelWithHint } from '../../components/label_with_hint';
+import { StorageExplorerHostDetails } from '../../../../common/storage_explorer';
+import { LabelWithHint } from '../../../components/label_with_hint';
 
 interface Props {
   data?: StorageExplorerHostDetails[];
