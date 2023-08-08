@@ -32,9 +32,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const synthtraceEsClient = getService('synthtraceEsClient');
 
   registry.when('transaction duration alert', { config: 'basic', archives: [] }, () => {
-    let ruleId: string;
-    let actionId: string | undefined;
-
+    let ruleId1: string;
+    let actionId1: string | undefined;
+    let ruleId2: string;
+    let actionId2: string | undefined;
     const APM_ALERTS_INDEX = '.alerts-observability.apm.alerts-default';
     const ALERT_ACTION_INDEX_NAME1 = 'alert-action-transaction-duration1';
     const ALERT_ACTION_INDEX_NAME2 = 'alert-action-transaction-duration2';
@@ -67,12 +68,18 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
     after(async () => {
       await synthtraceEsClient.clean();
-      await supertest.delete(`/api/alerting/rule/${ruleId}`).set('kbn-xsrf', 'foo');
-      await supertest.delete(`/api/actions/connector/${actionId}`).set('kbn-xsrf', 'foo');
+      await supertest.delete(`/api/alerting/rule/${ruleId1}`).set('kbn-xsrf', 'foo');
+      await supertest.delete(`/api/actions/connector/${actionId1}`).set('kbn-xsrf', 'foo');
+      await supertest.delete(`/api/alerting/rule/${ruleId2}`).set('kbn-xsrf', 'foo');
+      await supertest.delete(`/api/actions/connector/${actionId2}`).set('kbn-xsrf', 'foo');
       await esDeleteAllIndices([ALERT_ACTION_INDEX_NAME1, ALERT_ACTION_INDEX_NAME2]);
       await es.deleteByQuery({
         index: APM_ALERTS_INDEX,
-        query: { term: { 'kibana.alert.rule.uuid': ruleId } },
+        query: { term: { 'kibana.alert.rule.uuid': ruleId1 } },
+      });
+      await es.deleteByQuery({
+        index: APM_ALERTS_INDEX,
+        query: { term: { 'kibana.alert.rule.uuid': ruleId2 } },
       });
       await es.deleteByQuery({
         index: '.kibana-event-log-*',
@@ -82,7 +89,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
     describe('create rule without filter query', () => {
       before(async () => {
-        actionId = await createIndexConnector({
+        actionId1 = await createIndexConnector({
           supertest,
           name: 'Transation duration without filter query',
           indexName: ALERT_ACTION_INDEX_NAME1,
@@ -111,7 +118,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           actions: [
             {
               group: 'threshold_met',
-              id: actionId,
+              id: actionId1,
               params: {
                 documents: [{ message: 'Transaction Name: {{context.transactionName}}' }],
               },
@@ -124,12 +131,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           ],
         });
         expect(createdRule.id).to.not.eql(undefined);
-        ruleId = createdRule.id;
+        ruleId1 = createdRule.id;
       });
 
       it('checks if rule is active', async () => {
         const executionStatus = await waitForRuleStatus({
-          id: ruleId,
+          id: ruleId1,
           expectedStatus: 'active',
           supertest,
         });
@@ -149,7 +156,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         const resp = await waitForAlertInIndex({
           es,
           indexName: APM_ALERTS_INDEX,
-          ruleId,
+          ruleId: ruleId1,
         });
 
         expect(resp.hits.hits[0]._source).property('service.name', 'opbeans-java');
@@ -185,7 +192,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
     describe('create rule with filter query', () => {
       before(async () => {
-        actionId = await createIndexConnector({
+        actionId2 = await createIndexConnector({
           supertest,
           name: 'Transation duration with filter query',
           indexName: ALERT_ACTION_INDEX_NAME2,
@@ -215,7 +222,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           actions: [
             {
               group: 'threshold_met',
-              id: actionId,
+              id: actionId2,
               params: {
                 documents: [{ message: 'Transaction Name: {{context.transactionName}}' }],
               },
@@ -228,12 +235,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           ],
         });
         expect(createdRule.id).to.not.eql(undefined);
-        ruleId = createdRule.id;
+        ruleId2 = createdRule.id;
       });
 
       it('checks if rule is active', async () => {
         const executionStatus = await waitForRuleStatus({
-          id: ruleId,
+          id: ruleId2,
           expectedStatus: 'active',
           supertest,
         });
@@ -253,7 +260,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         const resp = await waitForAlertInIndex({
           es,
           indexName: APM_ALERTS_INDEX,
-          ruleId,
+          ruleId: ruleId2,
         });
 
         expect(resp.hits.hits[0]._source).property('service.name', 'opbeans-node');
