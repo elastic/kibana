@@ -388,7 +388,6 @@ ${JSON.stringify(config.getAll(), null, 2)}
             // Normalized the set of available env vars in cypress
             const cyCustomEnv = {
               ...ftrEnv,
-              ...argv.env,
 
               // NOTE:
               // ELASTICSEARCH_URL needs to be created here with auth because SIEM cypress setup depends on it. At some
@@ -407,6 +406,8 @@ ${JSON.stringify(config.getAll(), null, 2)}
               KIBANA_URL_WITH_AUTH: createUrlFromFtrConfig('kibana', true),
               KIBANA_USERNAME: config.get('servers.kibana.username'),
               KIBANA_PASSWORD: config.get('servers.kibana.password'),
+
+              ...argv.env,
             };
 
             log.info(`
