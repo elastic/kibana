@@ -38,5 +38,6 @@
     "@kbn/core-saved-objects-api-browser",
     "@kbn/expressions-plugin",
     "@kbn/lens-plugin",
+    "@kbn/es-query",
   ]
 }
