@@ -112,10 +112,10 @@ describe('useFetchOrCreateRuleExceptionList', () => {
 
   it('initializes hook', async () => {
     const { result, waitForNextUpdate } = render();
-    
+
     // Should set isLoading to true while fetching
     expect(result.current).toEqual([true, null]);
-    
+
     await waitForNextUpdate();
     expect(result.current).toEqual([false, detectionExceptionList]);
   });
