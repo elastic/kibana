@@ -35,6 +35,7 @@ import {
 } from '@kbn/presentation-util-plugin/public';
 import { EuiContextMenuProps } from '@elastic/eui/src/components/context_menu/context_menu';
 import { isDefined } from '@kbn/ml-is-defined';
+import { numberValidator } from '@kbn/ml-agg-utils';
 import { EMBEDDABLE_CHANGE_POINT_CHART_TYPE } from '../../../common/constants';
 import { useCasesModal } from '../../hooks/use_cases_modal';
 import { type EmbeddableChangePointChartInput } from '../../embeddable/embeddable_change_point_chart';
@@ -217,6 +218,13 @@ const FieldPanel: FC<FieldPanelProps> = ({
 
   const timeRange = useTimeRangeUpdates();
 
+  const maxSeriesValidator = useMemo(
+    () => numberValidator({ min: 1, max: MAX_SERIES, integerOnly: true }),
+    []
+  );
+
+  const maxSeriesInvalid = maxSeriesValidator(dashboardAttachment.maxSeriesToPlot) !== null;
+
   const panels = useMemo<EuiContextMenuProps['panels']>(() => {
     return [
       {
@@ -342,6 +350,14 @@ const FieldPanel: FC<FieldPanelProps> = ({
               {isDefined(fieldConfig.splitField) && selectedPartitions.length === 0 ? (
                 <EuiFormRow
                   fullWidth
+                  isInvalid={maxSeriesInvalid}
+                  error={
+                    <FormattedMessage
+                      id="xpack.aiops.changePointDetection.maxSeriesToPlotError"
+                      defaultMessage="Max series value must be between {minValue} and {maxValue}"
+                      values={{ minValue: 1, maxValue: MAX_SERIES }}
+                    />
+                  }
                   label={
                     <EuiFlexGroup gutterSize={'xs'} alignItems={'center'}>
                       <EuiFlexItem grow={false}>
@@ -366,6 +382,7 @@ const FieldPanel: FC<FieldPanelProps> = ({
                   }
                 >
                   <EuiFieldNumber
+                    isInvalid={maxSeriesInvalid}
                     value={dashboardAttachment.maxSeriesToPlot}
                     onChange={(e) =>
                       setDashboardAttachment((prevState) => {
@@ -388,6 +405,7 @@ const FieldPanel: FC<FieldPanelProps> = ({
                 type={'submit'}
                 fullWidth
                 onClick={setDashboardAttachmentReady.bind(null, true)}
+                disabled={maxSeriesInvalid}
               >
                 <FormattedMessage
                   id="xpack.aiops.changePointDetection.submitDashboardAttachButtonLabel"
@@ -415,6 +433,7 @@ const FieldPanel: FC<FieldPanelProps> = ({
     removeDisabled,
     selectedPartitions,
     timeRange,
+    maxSeriesInvalid,
   ]);
 
   const onSaveCallback: SaveModalDashboardProps['onSave'] = useCallback(
