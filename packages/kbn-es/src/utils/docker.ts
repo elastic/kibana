@@ -84,9 +84,9 @@ const SHARED_SERVERLESS_PARAMS = [
 
   // '--detach',
 
-  '--privileged',
+  // '--privileged',
 
-  '--userns=host',
+  // '--userns=host',
 
   '--net',
   'elastic',
@@ -330,7 +330,7 @@ export async function setupServerlessVolumes(log: ToolingLog, options: Serverles
 
   log.indent(-4);
 
-  return ['--volume', `${options.basePath}:/objectstore:z`];
+  return ['--volume', `${options.basePath}:/objectstore:Z`];
 }
 
 // async function setupUserPerm() {
