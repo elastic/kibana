@@ -6,16 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { coreMock } from '@kbn/core/public/mocks';
+import { PluginServiceFactory } from '@kbn/presentation-util-plugin/public';
 import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
-import { getEventAnnotationService } from './event_annotation_service/service';
+import { contentManagementMock } from '@kbn/content-management-plugin/public/mocks';
 
-// not really mocking but avoiding async loading
-export const eventAnnotationServiceMock = getEventAnnotationService(coreMock.createStart(), {
-  client: {
-    get: jest.fn(),
-    search: jest.fn(),
-    create: jest.fn(),
-    update: jest.fn(),
-  },
-} as unknown as ContentManagementPublicStart);
+export type ContentManagementServiceFactory = PluginServiceFactory<ContentManagementPublicStart>;
+
+export const contentManagementServiceFactory: ContentManagementServiceFactory = () => {
+  return contentManagementMock.createStartContract();
+};
