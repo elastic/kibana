@@ -13,16 +13,16 @@ interface Props {
   connectorsManagementHref: string;
 }
 
-export function InsightMissingCredentials(props: Props) {
+export function MissingCredentialsCallout(props: Props) {
   return (
     <EuiCallOut
-      title={i18n.translate('xpack.observabilityAiAssistant.insight.missing.title', {
+      title={i18n.translate('xpack.observabilityAiAssistant.missingCredentialsCallout.title', {
         defaultMessage: 'Missing credentials',
       })}
       color="primary"
       iconType="iInCircle"
     >
-      {i18n.translate('xpack.observabilityAiAssistant.insight.missing.description', {
+      {i18n.translate('xpack.observabilityAiAssistant.missingCredentialsCallout.description', {
         defaultMessage:
           'You haven’t authorised OpenAI in order to generate responses from the Elastic Assistant. Authorise the model in order to proceed.',
       })}
@@ -30,7 +30,7 @@ export function InsightMissingCredentials(props: Props) {
       <EuiSpacer size="m" />
 
       <EuiButton fill color="primary" href={props.connectorsManagementHref}>
-        {i18n.translate('xpack.observabilityAiAssistant.insight.missing.buttonLabel', {
+        {i18n.translate('xpack.observabilityAiAssistant.missingCredentialsCallout.buttonLabel', {
           defaultMessage: 'Connect Assistant',
         })}
       </EuiButton>

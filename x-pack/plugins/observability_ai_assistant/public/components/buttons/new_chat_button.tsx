@@ -5,14 +5,14 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiButton, EuiButtonProps } from '@elastic/eui';
+import { EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-export function StartChatButton(props: Partial<EuiButtonProps>) {
+export function NewChatButton(props: React.ComponentProps<typeof EuiButton>) {
   return (
-    <EuiButton {...props} fill iconType="discuss" size="s">
-      {i18n.translate('xpack.observabilityAiAssistant.insight.response.startChat', {
-        defaultMessage: 'Start chat',
+    <EuiButton {...props} fill iconType="discuss">
+      {i18n.translate('xpack.observabilityAiAssistant.newChatButton', {
+        defaultMessage: 'New chat',
       })}
     </EuiButton>
   );
