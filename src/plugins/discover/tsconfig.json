@@ -65,6 +65,7 @@
     "@kbn/core-application-browser",
     "@kbn/core-saved-objects-server",
     "@kbn/discover-utils",
+    "@kbn/content-management-plugin",
     "@kbn/react-kibana-mount",
     "@kbn/react-kibana-context-render"
   ],
