@@ -90,7 +90,7 @@ export class ReportingAPIClient implements IReportingAPI {
     });
 
     const href = `${path}?${searchParams}`;
-    console.log({href})
+    console.log({ href });
     return href;
   }
 
@@ -98,7 +98,6 @@ export class ReportingAPIClient implements IReportingAPI {
    * Get the internal URL
    */
   public getReportURL(jobId: string) {
- 
     const downloadLink = this.http.basePath.prepend(
       `${PUBLIC_ROUTES.JOBS.DOWNLOAD_PREFIX}/${jobId}`
     );
@@ -108,7 +107,7 @@ export class ReportingAPIClient implements IReportingAPI {
 
   public downloadReport(jobId: string) {
     const location = this.getReportURL(jobId);
-    console.log('\n\n\n\n\n location', location)
+    console.log('\n\n\n\n\n location', location);
     window.open(location);
   }
 
