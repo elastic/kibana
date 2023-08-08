@@ -344,7 +344,7 @@ export interface Datasource<T = unknown, P = unknown> {
     prevState: T;
     layerId: string;
     columnId: string;
-    indexPatterns: IndexPatternMap;
+    indexPatterns?: IndexPatternMap;
   }) => T;
   initializeDimension?: (
     state: T,
@@ -637,7 +637,10 @@ export type DatasourceDimensionEditorProps<T = unknown> = DatasourceDimensionPro
       forceRender?: boolean;
     }
   >;
-  core: Pick<CoreStart, 'http' | 'notifications' | 'uiSettings' | 'overlays' | 'theme'>;
+  core: Pick<
+    CoreStart,
+    'http' | 'notifications' | 'uiSettings' | 'overlays' | 'theme' | 'docLinks'
+  >;
   dateRange: DateRange;
   dimensionGroups: VisualizationDimensionGroupConfig[];
   toggleFullscreen: () => void;

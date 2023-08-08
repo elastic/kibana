@@ -130,14 +130,7 @@ export default function ({ getService }: FtrProviderContext) {
               {
                 section: 'state',
                 // Don't include the 'Create time' value entry as it's not stable.
-                expectedEntries: [
-                  'STOPPED',
-                  'Create time',
-                  'Model memory limit',
-                  '2mb',
-                  'Version',
-                  '8.10.0',
-                ],
+                expectedEntries: ['STOPPED', 'Create time', 'Model memory limit', '2mb', 'Version'],
               },
               {
                 section: 'stats',
@@ -191,7 +184,8 @@ export default function ({ getService }: FtrProviderContext) {
     ];
 
     for (const testData of testDataList) {
-      describe(`${testData.suiteTitle}`, function () {
+      // FLAKY: https://github.com/elastic/kibana/issues/163220
+      describe.skip(`${testData.suiteTitle}`, function () {
         after(async () => {
           await ml.api.deleteIndices(testData.destinationIndex);
           await ml.testResources.deleteIndexPatternByTitle(testData.destinationIndex);

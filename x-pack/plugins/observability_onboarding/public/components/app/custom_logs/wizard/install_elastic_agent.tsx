@@ -14,10 +14,11 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { default as React, useCallback, useEffect, useState } from 'react';
+import { ObservabilityOnboardingPluginSetupDeps } from '../../../../plugin';
 import { useWizard } from '.';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
-import { useKibanaNavigation } from '../../../../hooks/use_kibana_navigation';
 import {
   ElasticAgentPlatform,
   getElasticAgentSetupCommand,
@@ -34,9 +35,14 @@ import {
 } from '../../../shared/step_panel';
 import { ApiKeyBanner } from './api_key_banner';
 import { BackButton } from './back_button';
+import { getDiscoverNavigationParams } from '../../utils';
 
 export function InstallElasticAgent() {
-  const { navigateToKibanaUrl } = useKibanaNavigation();
+  const {
+    services: {
+      discover: { locator },
+    },
+  } = useKibana<ObservabilityOnboardingPluginSetupDeps>();
   const { goBack, goToStep, getState, setState } = useWizard();
   const wizardState = getState();
   const [elasticAgentPlatform, setElasticAgentPlatform] =
@@ -45,8 +51,10 @@ export function InstallElasticAgent() {
   function onInspect() {
     goToStep('inspect');
   }
-  function onContinue() {
-    navigateToKibanaUrl('/app/logs/stream');
+  async function onContinue() {
+    await locator?.navigate(
+      getDiscoverNavigationParams([wizardState.datasetName])
+    );
   }
 
   function onAutoDownloadConfig() {
@@ -60,7 +68,7 @@ export function InstallElasticAgent() {
     (callApi) => {
       if (!hasAlreadySavedFlow(getState())) {
         return callApi(
-          'GET /internal/observability_onboarding/custom_logs/privileges'
+          'GET /internal/observability_onboarding/logs/setup/privileges'
         );
       }
     },
@@ -69,7 +77,7 @@ export function InstallElasticAgent() {
 
   const { data: setup } = useFetcher((callApi) => {
     return callApi(
-      'GET /internal/observability_onboarding/custom_logs/install_shipper_setup'
+      'GET /internal/observability_onboarding/logs/setup/environment'
     );
   }, []);
 
@@ -87,23 +95,21 @@ export function InstallElasticAgent() {
         logFilePaths,
       } = getState();
       if (!hasAlreadySavedFlow(getState()) && monitoringRole?.hasPrivileges) {
-        return callApi(
-          'POST /internal/observability_onboarding/custom_logs/save',
-          {
-            params: {
-              body: {
-                name: datasetName,
-                state: {
-                  datasetName,
-                  serviceName,
-                  namespace,
-                  customConfigurations,
-                  logFilePaths,
-                },
+        return callApi('POST /internal/observability_onboarding/logs/flow', {
+          params: {
+            body: {
+              name: datasetName,
+              type: 'logFiles',
+              state: {
+                datasetName,
+                serviceName,
+                namespace,
+                customConfigurations,
+                logFilePaths,
               },
             },
-          }
-        );
+          },
+        });
       }
     },
     [monitoringRole?.hasPrivileges]
@@ -120,7 +126,7 @@ export function InstallElasticAgent() {
     } = getState();
     if (onboardingId) {
       return callApi(
-        'PUT /internal/observability_onboarding/custom_logs/{onboardingId}/save',
+        'PUT /internal/observability_onboarding/flow/{onboardingId}',
         {
           params: {
             path: { onboardingId },
@@ -173,7 +179,7 @@ export function InstallElasticAgent() {
     (callApi) => {
       if (onboardingId) {
         return callApi(
-          'GET /internal/observability_onboarding/custom_logs/{onboardingId}/progress',
+          'GET /internal/observability_onboarding/flow/{onboardingId}/progress',
           { params: { path: { onboardingId } } }
         );
       }
