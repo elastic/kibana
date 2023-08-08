@@ -35,10 +35,7 @@ export default async function ({ readConfigFile }) {
     esTestCluster: {
       license: 'trial',
       from: 'snapshot',
-      serverArgs: [
-        'path.repo=/tmp/',
-        'xpack.security.authc.api_key.enabled=true',
-      ],
+      serverArgs: ['path.repo=/tmp/', 'xpack.security.authc.api_key.enabled=true'],
     },
 
     kbnTestServer: {
@@ -184,10 +181,7 @@ export default async function ({ readConfigFile }) {
 
     suiteTags: {
       ...kibanaCommonConfig.get('suiteTags'),
-      exclude: [
-        ...kibanaCommonConfig.get('suiteTags').exclude,
-        'upgradeAssistant',
-      ],
+      exclude: [...kibanaCommonConfig.get('suiteTags').exclude, 'upgradeAssistant'],
     },
 
     // choose where screenshots should be saved

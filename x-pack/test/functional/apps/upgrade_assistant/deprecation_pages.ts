@@ -76,7 +76,9 @@ export default function upgradeAssistantFunctionalTests({
 
     it('renders the Elasticsearch upgrade readiness deprecations', async () => {
       const deprecationMessages = await testSubjects.getVisibleTextAll('defaultTableCell-message');
-      const healthIndicatorsCriticalMessages = await testSubjects.getVisibleTextAll('healthIndicatorTableCell-message');
+      const healthIndicatorsCriticalMessages = await testSubjects.getVisibleTextAll(
+        'healthIndicatorTableCell-message'
+      );
 
       expect(deprecationMessages).to.contain('Disk usage exceeds low watermark');
       expect(healthIndicatorsCriticalMessages).to.contain(

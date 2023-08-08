@@ -13,9 +13,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   return {
     ...functionalConfig.getAll(),
 
-    testFiles: [
-      require.resolve('./apps/upgrade_assistant'),
-    ],
+    testFiles: [require.resolve('./apps/upgrade_assistant')],
 
     junit: {
       reportName: 'Chrome X-Pack UI Upgrade Assistant Functional Tests',
