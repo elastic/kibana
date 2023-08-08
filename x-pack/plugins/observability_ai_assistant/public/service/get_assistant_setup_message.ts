@@ -40,6 +40,8 @@ export function getAssistantSetupMessage() {
 
   You should autonomously execute these functions - do not wait on the user's permission, but be proactive.
 
+  If you suspect the function you want to execute will change or delete the data in any way, confirm the function with the user first! This is very important.
+
   Note that any visualisations will be displayed ABOVE your textual response, not below.
 
   Before you call a function, make sure its name is correct.
