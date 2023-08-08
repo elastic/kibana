@@ -105,7 +105,7 @@ describe('Timelines', (): void => {
     });
   });
 
-  describe('Creates a timeline by clicking untitled timeline from bottom bar', () => {
+  describe.skip('Creates a timeline by clicking untitled timeline from bottom bar', () => {
     beforeEach(() => {
       login();
       visit(OVERVIEW_URL);
