@@ -139,10 +139,6 @@ export const WorkspacePanel = React.memo(function WorkspacePanel(props: Workspac
   );
 });
 
-const log = (...messages: Array<string | number>) => {
-  // console.log(...messages);
-};
-
 // Exported for testing purposes only.
 export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   framePublicAPI,
