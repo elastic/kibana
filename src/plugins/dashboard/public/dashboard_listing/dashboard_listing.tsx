@@ -9,11 +9,11 @@
 import { FormattedRelative, I18nProvider } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
 
+import { TableListView } from '@kbn/content-management-table-list-view';
 import {
   type TableListViewKibanaDependencies,
   TableListViewKibanaProvider,
 } from '@kbn/content-management-table-list-view-table';
-import { TableListView } from '@kbn/content-management-table-list-view';
 
 import { toMountPoint, useExecutionContext } from '@kbn/kibana-react-plugin/public';
 
@@ -41,7 +41,6 @@ export const DashboardListing = ({
     http,
     chrome: { theme },
     savedObjectsTagging,
-
     coreContext: { executionContext },
   } = pluginServices.getServices();
 
