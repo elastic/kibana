@@ -11,9 +11,6 @@ import { Languages, LanguageDefinition } from '@kbn/search-api-panels';
 import { docLinks } from '../../../../../../shared/doc_links';
 
 export const javascriptDefinition: LanguageDefinition = {
-  advancedConfig: docLinks.jsAdvancedConfig,
-  apiReference: docLinks.jsApiReference,
-  basicConfig: docLinks.jsBasicConfig,
   buildSearchQuery: `// Let's search!
 const searchResult = await client.search({
   index: 'my-index-name',
@@ -29,7 +26,7 @@ auth: {
     apiKey: '${apiKey}'
 }
 });`,
-  docLink: docLinks.jsClient,
+  docLink: docLinks.clientsJsIntro,
   iconType: 'javascript.svg',
   id: Languages.JAVASCRIPT,
   ingestData: `// Sample flight data

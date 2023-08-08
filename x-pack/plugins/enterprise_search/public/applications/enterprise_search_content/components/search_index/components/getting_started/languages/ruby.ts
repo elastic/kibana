@@ -13,16 +13,13 @@ import { docLinks } from '../../../../../../shared/doc_links';
 import { INDEX_NAME_PLACEHOLDER } from './constants';
 
 export const rubyDefinition: LanguageDefinition = {
-  advancedConfig: docLinks.rubyAdvancedConfig,
-  apiReference: docLinks.rubyExamples,
   buildSearchQuery: `client.search(index: 'books', q: 'snow')`,
   configureClient: ({ url, apiKey }) => `client = ElasticsearchServerless::Client.new(
   api_key: '${apiKey}',
   url: '${url}'
 )
 `,
-  basicConfig: docLinks.rubyBasicConfig,
-  docLink: docLinks.rubyClient,
+  docLink: docLinks.clientsRubyOverview,
   iconType: 'ruby.svg',
   id: Languages.RUBY,
   ingestData: `documents = [

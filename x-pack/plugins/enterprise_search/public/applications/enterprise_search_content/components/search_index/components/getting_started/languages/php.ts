@@ -12,10 +12,7 @@ import { docLinks } from '../../../../../../shared/doc_links';
 
 import { INDEX_NAME_PLACEHOLDER } from './constants';
 
-
 export const phpDefinition: LanguageDefinition = {
-  advancedConfig: docLinks.phpAdvancedConfig,
-  basicConfig: docLinks.phpBasicConfig,
   buildSearchQuery: `$params = [
   'index' => 'books',
   'body'  => [
@@ -29,7 +26,7 @@ print_r($response->asArray());`,
   ->setHosts(['${url}'])
   ->setApiKey('${apiKey}')
   ->build();`,
-  docLink: docLinks.phpClient,
+  docLink: docLinks.clientsPhpOverview,
   iconType: 'php.svg',
   id: Languages.PHP,
   ingestData: `$params = [

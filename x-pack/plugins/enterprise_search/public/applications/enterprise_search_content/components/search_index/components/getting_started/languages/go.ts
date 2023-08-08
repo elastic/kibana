@@ -11,8 +11,6 @@ import { Languages, LanguageDefinition } from '@kbn/search-api-panels';
 import { docLinks } from '../../../../../../shared/doc_links';
 
 export const goDefinition: LanguageDefinition = {
-  advancedConfig: docLinks.goAdvancedConfig,
-  basicConfig: docLinks.goBasicConfig,
   buildSearchQuery: `searchResp, err := es.Search().
   Index("books").
   Q("snow").
@@ -38,7 +36,7 @@ func main() {
     log.Fatalf("Error creating the client: %s", err)
   }
 }`,
-  docLink: docLinks.goClient,
+  docLink: docLinks.clientsGoIndex,
   iconType: 'go.svg',
   id: Languages.GO,
   ingestData: `ingestResult, err := es.Bulk().

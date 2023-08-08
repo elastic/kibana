@@ -16,6 +16,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
+  EuiSpacer,
   EuiSplitPanel,
   EuiText,
   EuiThemeProvider,
@@ -50,15 +51,17 @@ import { javascriptDefinition } from './languages/javascript';
 import { languageDefinitions } from './languages/languages';
 import { getCodeSnippet, showTryInConsole } from './languages/utils';
 
+const DEFAULT_URL = 'https://localhost:9200';
+
 export const APIGettingStarted = () => {
   const { http } = useValues(HttpLogic);
   const { apiKey, isGenerateModalOpen } = useValues(OverviewLogic);
   const { openGenerateModal, closeGenerateModal } = useActions(OverviewLogic);
   const { indexName } = useValues(IndexViewLogic);
   const { services } = useKibana<KibanaDeps>();
+  const { isCloud } = useValues(KibanaLogic);
 
   const cloudContext = useCloudDetails();
-  const DEFAULT_URL = 'https://localhost:9200';
 
   const codeArgs = {
     apiKey,
@@ -73,7 +76,11 @@ export const APIGettingStarted = () => {
         <GenerateApiKeyModal indexName={indexName} onClose={closeGenerateModal} />
       )}
       <EuiTitle size="l">
-        <h2>Getting Started with Elastic API</h2>
+        <h2>
+          {i18n.translate('xpack.enterpriseSearch.content.overview.gettingStarted.pageTitle', {
+            defaultMessage: 'Getting Started with Elastic API',
+          })}
+        </h2>
       </EuiTitle>
       <SelectClientPanel
         docLinks={docLinks}
@@ -108,18 +115,36 @@ export const APIGettingStarted = () => {
       />
 
       <OverviewPanel
-        description={
-          "You'll need your private API key to securely connect to your project. Copy it somewhere safe."
-        }
+        description={i18n.translate(
+          'xpack.enterpriseSearch.content.overview.gettingStarted.generateApiKeyPanel.description',
+          {
+            defaultMessage:
+              "You'll need your private API key to securely connect to your project. Copy it somewhere safe.",
+          }
+        )}
         rightPanelContent={
           <EuiPanel>
             <EuiFlexGroup direction="column">
               <EuiFlexItem>
-                <EuiTitle>
-                  <p>Generate an API key</p>
+                <EuiTitle size="xs">
+                  <h5>
+                    {i18n.translate(
+                      'xpack.enterpriseSearch.content.overview.gettingStarted.generateApiKeyPanel.apiKeytitle',
+                      {
+                        defaultMessage: 'Generate an API key',
+                      }
+                    )}
+                  </h5>
                 </EuiTitle>
+                <EuiSpacer size="s" />
                 <EuiText>
-                  Your private, unique identifier for authentication and authorization.
+                  {i18n.translate(
+                    'xpack.enterpriseSearch.content.overview.gettingStarted.generateApiKeyPanel.apiKeydesc',
+                    {
+                      defaultMessage:
+                        'Your private, unique identifier for authentication and authorization.',
+                    }
+                  )}
                 </EuiText>
               </EuiFlexItem>
               <EuiFlexItem>
@@ -168,19 +193,58 @@ export const APIGettingStarted = () => {
           </EuiPanel>
         }
         links={[]}
-        title={'Generate an API key'}
+        title={i18n.translate(
+          'xpack.enterpriseSearch.content.overview.gettingStarted.generateApiKeyPanel.panelTitle',
+          {
+            defaultMessage: 'Generate an API key',
+          }
+        )}
         overviewPanelProps={{ color: 'plain', hasShadow: false }}
       />
 
       <OverviewPanel
-        description={"You'll need this to identify your project."}
+        description={
+          isCloud
+            ? i18n.translate(
+                'xpack.enterpriseSearch.content.overview.gettingStarted.cloudId.description',
+                {
+                  defaultMessage: "You'll need this to identify your deployment.",
+                }
+              )
+            : i18n.translate(
+                'xpack.enterpriseSearch.content.overview.gettingStarted.cloudId.descriptionElastic',
+                {
+                  defaultMessage: "You'll need this to connect your elasticsearch deployment.",
+                }
+              )
+        }
         rightPanelContent={
           <EuiSplitPanel.Outer>
             <EuiSplitPanel.Inner>
+              <EuiTitle>
+                <h4>
+                  {isCloud
+                    ? i18n.translate(
+                        'xpack.enterpriseSearch.content.overview.gettingStarted.cloudId.cloudTitle',
+                        {
+                          defaultMessage: 'Store your unique Cloud ID',
+                        }
+                      )
+                    : i18n.translate(
+                        'xpack.enterpriseSearch.content.overview.gettingStarted.cloudId.elasticTitle',
+                        {
+                          defaultMessage: 'Store your elasticsearch URL',
+                        }
+                      )}
+                </h4>
+              </EuiTitle>
               <EuiText>
-                {i18n.translate('xpack.enterpriseSearch.apiKey.stepTwoDescription', {
-                  defaultMessage: 'Unique identifier for specific project. ',
-                })}
+                {i18n.translate(
+                  'xpack.enterpriseSearch.content.overview.gettingStarted.cloudId.desc',
+                  {
+                    defaultMessage: 'Unique identifier for your deployment. ',
+                  }
+                )}
               </EuiText>
             </EuiSplitPanel.Inner>
             <EuiThemeProvider colorMode="dark">
@@ -193,21 +257,38 @@ export const APIGettingStarted = () => {
                     overflow-wrap: anywhere;
                   `}
                 >
-                  {'cloudid'}
+                  {codeArgs.url}
                 </EuiCodeBlock>
               </EuiSplitPanel.Inner>
             </EuiThemeProvider>
           </EuiSplitPanel.Outer>
         }
         links={[]}
-        title={'Copy your Cloud ID'}
+        title={
+          isCloud
+            ? i18n.translate(
+                'xpack.enterpriseSearch.overview.gettingStarted.cloudId.panelTitleCloud',
+                {
+                  defaultMessage: 'Copy your Cloud ID',
+                }
+              )
+            : i18n.translate(
+                'xpack.enterpriseSearch.overview.gettingStarted.cloudId.panelTitleElastic',
+                {
+                  defaultMessage: 'Copy your elasticsearch URL',
+                }
+              )
+        }
         overviewPanelProps={{ color: 'plain', hasShadow: false }}
       />
 
       <OverviewPanel
-        description={i18n.translate('xpack.enterpriseSearch.configureClient.description', {
-          defaultMessage: 'Initialize your client with your unique API key and Cloud ID',
-        })}
+        description={i18n.translate(
+          'xpack.enterpriseSearch.overview.gettingStarted.configureClient.description',
+          {
+            defaultMessage: 'Initialize your client with your unique API key and Cloud ID',
+          }
+        )}
         rightPanelContent={
           <CodeBox
             languages={languageDefinitions}
@@ -221,42 +302,24 @@ export const APIGettingStarted = () => {
             sharePlugin={services.share}
           />
         }
-        links={[
-          ...(selectedLanguage.basicConfig
-            ? [
-                {
-                  href: selectedLanguage.basicConfig,
-                  label: i18n.translate('xpack.enterpriseSearch.configureClient.basicConfigLabel', {
-                    defaultMessage: 'Basic configuration',
-                  }),
-                },
-              ]
-            : []),
-          ...(selectedLanguage.advancedConfig
-            ? [
-                {
-                  href: selectedLanguage.advancedConfig,
-                  label: i18n.translate(
-                    'xpack.enterpriseSearch.configureClient.advancedConfigLabel',
-                    {
-                      defaultMessage: 'Advanced configuration',
-                    }
-                  ),
-                },
-              ]
-            : []),
-        ]}
-        title={i18n.translate('xpack.enterpriseSearch.configureClient.title', {
-          defaultMessage: 'Configure your client',
-        })}
+        links={[]}
+        title={i18n.translate(
+          'xpack.enterpriseSearch.overview.gettingStarted.configureClient.title',
+          {
+            defaultMessage: 'Configure your client',
+          }
+        )}
         overviewPanelProps={{ color: 'plain', hasShadow: false }}
       />
 
       <OverviewPanel
-        description={i18n.translate('xpack.enterpriseSearch.testConnection.description', {
-          defaultMessage:
-            'Send a test request to confirm your language client and Elasticsearch instance are up and running.',
-        })}
+        description={i18n.translate(
+          'xpack.enterpriseSearch.overview.gettingStarted.testConnection.description',
+          {
+            defaultMessage:
+              'Send a test request to confirm your language client and Elasticsearch instance are up and running.',
+          }
+        )}
         rightPanelContent={
           <CodeBox
             languages={languageDefinitions}
@@ -271,13 +334,21 @@ export const APIGettingStarted = () => {
           />
         }
         links={[]}
-        title={i18n.translate('xpack.enterpriseSearch.testConnection.title', {
-          defaultMessage: 'Test your connection',
-        })}
+        title={i18n.translate(
+          'xpack.enterpriseSearch.overview.gettingStarted.testConnection.title',
+          {
+            defaultMessage: 'Test your connection',
+          }
+        )}
         overviewPanelProps={{ color: 'plain', hasShadow: false }}
       />
       <OverviewPanel
-        description={'Add data to your data stream or index to make it searchable'}
+        description={i18n.translate(
+          'xpack.enterpriseSearch.overview.gettingStarted.ingestData.description',
+          {
+            defaultMessage: 'Add data to your data stream or index to make it searchable',
+          }
+        )}
         rightPanelContent={
           <CodeBox
             languages={languageDefinitions}
@@ -292,15 +363,20 @@ export const APIGettingStarted = () => {
           />
         }
         links={[]}
-        title={'Ingest Data'}
+        title={i18n.translate('xpack.enterpriseSearch.overview.gettingStarted.ingestData.title', {
+          defaultMessage: 'Ingest Data',
+        })}
         overviewPanelProps={{ color: 'plain', hasShadow: false }}
       />
 
       <OverviewPanel
-        description={i18n.translate('xpack.enterpriseSearch.searchQuery.description', {
-          defaultMessage:
-            "Now you're ready to start experimenting with searching and performing aggregations on your Elasticsearch data.",
-        })}
+        description={i18n.translate(
+          'xpack.enterpriseSearch.overview.gettingStarted.searchQuery.description',
+          {
+            defaultMessage:
+              "Now you're ready to start experimenting with searching and performing aggregations on your Elasticsearch data.",
+          }
+        )}
         rightPanelContent={
           <CodeBox
             languages={languageDefinitions}
@@ -315,7 +391,7 @@ export const APIGettingStarted = () => {
           />
         }
         links={[]}
-        title={i18n.translate('xpack.enterpriseSearch.searchQuery.title', {
+        title={i18n.translate('xpack.enterpriseSearch.overview.gettingStarted.searchQuery.title', {
           defaultMessage: 'Build your first search query',
         })}
         overviewPanelProps={{ color: 'plain', hasShadow: false }}

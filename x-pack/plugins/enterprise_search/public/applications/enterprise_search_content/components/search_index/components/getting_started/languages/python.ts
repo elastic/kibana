@@ -13,8 +13,6 @@ import { docLinks } from '../../../../../../shared/doc_links';
 import { INDEX_NAME_PLACEHOLDER } from './constants';
 
 export const pythonDefinition: LanguageDefinition = {
-  advancedConfig: docLinks.pythonAdvancedConfig,
-  basicConfig: docLinks.pythonBasicConfig,
   buildSearchQuery: `client.search(index="books", q="snow")`,
   configureClient: ({ url, apiKey }) => `from elasticsearch import Elasticsearch
 
@@ -22,7 +20,7 @@ client = Elasticsearch(
   "${url}",
   api_key="${apiKey}"
 )`,
-  docLink: docLinks.pythonClient,
+  docLink: docLinks.clientsPythonOverview,
   iconType: 'python.svg',
   id: Languages.PYTHON,
   ingestData: `documents = [
