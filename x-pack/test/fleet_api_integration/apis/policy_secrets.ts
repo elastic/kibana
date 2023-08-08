@@ -10,7 +10,7 @@
 // So start investigating from earliest test failure in the file.
 
 import type { Client } from '@elastic/elasticsearch';
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import { FullAgentPolicy } from '@kbn/fleet-plugin/common';
 import { v4 as uuidv4 } from 'uuid';
 import { FtrProviderContext } from '../../api_integration/ftr_provider_context';
@@ -41,37 +41,43 @@ function createdPolicyToUpdatePolicy(policy: any) {
   return updatedPolicy;
 }
 
+const SECRETS_INDEX_NAME = '.fleet-secrets';
 export default function (providerContext: FtrProviderContext) {
-  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/162732
-  describe.skip('fleet policy secrets', () => {
+  describe('fleet policy secrets', () => {
     const { getService } = providerContext;
 
     const es: Client = getService('es');
     const supertest = getService('supertest');
     const kibanaServer = getService('kibanaServer');
 
+    const getSecrets = async (ids?: string[]) => {
+      const query = ids ? { terms: { _id: ids } } : { match_all: {} };
+      return es.search({
+        index: SECRETS_INDEX_NAME,
+        body: {
+          query,
+        },
+      });
+    };
+
+    const deleteAllSecrets = async () => {
+      try {
+        await es.deleteByQuery({
+          index: SECRETS_INDEX_NAME,
+          body: {
+            query: {
+              match_all: {},
+            },
+          },
+        });
+      } catch (err) {
+        // index doesnt exis
+      }
+    };
+
     const getPackagePolicyById = async (id: string) => {
       const { body } = await supertest.get(`/api/fleet/package_policies/${id}`);
       return body.item;
-    };
-
-    const maybeCreateSecretsIndex = async () => {
-      // create mock .secrets index for testing
-      if (await es.indices.exists({ index: '.fleet-test-secrets' })) {
-        await es.indices.delete({ index: '.fleet-test-secrets' });
-      }
-      await es.indices.create({
-        index: '.fleet-test-secrets',
-        body: {
-          mappings: {
-            properties: {
-              value: {
-                type: 'keyword',
-              },
-            },
-          },
-        },
-      });
     };
 
     const getFullAgentPolicyById = async (id: string) => {
@@ -137,10 +143,8 @@ export default function (providerContext: FtrProviderContext) {
     let agentPolicyId: string;
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
-      await getService('esArchiver').load(
-        'x-pack/test/functional/es_archives/fleet/empty_fleet_server'
-      );
-      await maybeCreateSecretsIndex();
+
+      await deleteAllSecrets();
     });
 
     setupFleetAndAgents(providerContext);
@@ -261,16 +265,7 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     it('should have correctly created the secrets', async () => {
-      const searchRes = await es.search({
-        index: '.fleet-test-secrets',
-        body: {
-          query: {
-            ids: {
-              values: [packageVarId, inputVarId, streamVarId],
-            },
-          },
-        },
-      });
+      const searchRes = await getSecrets([packageVarId, inputVarId, streamVarId]);
 
       expect(searchRes.hits.hits.length).to.eql(3);
 
@@ -337,14 +332,7 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     it('should have correctly deleted unused secrets after update', async () => {
-      const searchRes = await es.search({
-        index: '.fleet-test-secrets',
-        body: {
-          query: {
-            match_all: {},
-          },
-        },
-      });
+      const searchRes = await getSecrets();
 
       expect(searchRes.hits.hits.length).to.eql(3); // should have created 1 and deleted 1 doc
 
@@ -374,14 +362,7 @@ export default function (providerContext: FtrProviderContext) {
 
       expectCompiledPolicyVars(policyDoc, updatedPackageVarId);
 
-      const searchRes = await es.search({
-        index: '.fleet-test-secrets',
-        body: {
-          query: {
-            match_all: {},
-          },
-        },
-      });
+      const searchRes = await getSecrets();
 
       expect(searchRes.hits.hits.length).to.eql(3);
 
@@ -413,53 +394,36 @@ export default function (providerContext: FtrProviderContext) {
         updatedPackagePolicy.vars.package_var_secret.value.id,
         updatedPackageVarId,
       ];
-
-      const searchRes = await es.search({
-        index: '.fleet-test-secrets',
-        body: {
-          query: {
-            terms: {
-              _id: packageVarSecretIds,
-            },
-          },
-        },
-      });
+      const searchRes = await getSecrets(packageVarSecretIds);
 
       expect(searchRes.hits.hits.length).to.eql(2);
     });
 
     it('should not delete used secrets on package policy delete', async () => {
-      return supertest
+      await supertest
         .delete(`/api/fleet/package_policies/${duplicatedPackagePolicyId}`)
         .set('kbn-xsrf', 'xxxx')
         .expect(200);
 
-      const searchRes = await es.search({
-        index: '.fleet-test-secrets',
-        body: {
-          query: {
-            match_all: {},
-          },
-        },
-      });
+      // sleep to allow for secrets to be deleted
+      await new Promise((resolve) => setTimeout(resolve, 1000));
 
+      const searchRes = await getSecrets();
+
+      // should have deleted new_package_secret_val_2
       expect(searchRes.hits.hits.length).to.eql(3);
     });
 
     it('should delete all secrets on package policy delete', async () => {
-      return supertest
+      await supertest
         .delete(`/api/fleet/package_policies/${createdPackagePolicyId}`)
         .set('kbn-xsrf', 'xxxx')
         .expect(200);
 
-      const searchRes = await es.search({
-        index: '.fleet-test-secrets',
-        body: {
-          query: {
-            match_all: {},
-          },
-        },
-      });
+      // sleep to allow for secrets to be deleted
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      const searchRes = await getSecrets();
 
       expect(searchRes.hits.hits.length).to.eql(0);
     });
