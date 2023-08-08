@@ -40,15 +40,19 @@ describe('query builder', () => {
   });
 
   describe('buildUnitedIndexQuery', () => {
-    it('correctly builds empty query', async () => {
-      const soClient = savedObjectsClientMock.create();
+    let soClient: jest.Mocked<SavedObjectsClientContract>;
+
+    beforeEach(() => {
+      soClient = savedObjectsClientMock.create();
       soClient.find.mockResolvedValue({
         saved_objects: [],
         total: 0,
         per_page: 0,
         page: 0,
       });
+    });
 
+    it('correctly builds empty query', async () => {
       const query = await buildUnitedIndexQuery(
         soClient,
         { page: 1, pageSize: 10, hostStatuses: [], kuery: '' },
@@ -93,15 +97,27 @@ describe('query builder', () => {
       expect(query.body.query).toEqual(expected);
     });
 
-    it('correctly builds query', async () => {
-      const soClient = savedObjectsClientMock.create();
-      soClient.find.mockResolvedValue({
-        saved_objects: [],
-        total: 0,
-        per_page: 0,
-        page: 0,
-      });
+    it('adds `status` runtime field', async () => {
+      const query = await buildUnitedIndexQuery(
+        soClient,
+        { page: 1, pageSize: 10, hostStatuses: [], kuery: '' },
+        []
+      );
 
+      expect(query.body.runtime_mappings).toHaveProperty('status');
+    });
+
+    it('adds `last_checkin` runtime field', async () => {
+      const query = await buildUnitedIndexQuery(
+        soClient,
+        { page: 1, pageSize: 10, hostStatuses: [], kuery: '' },
+        []
+      );
+
+      expect(query.body.runtime_mappings).toHaveProperty('last_checkin');
+    });
+
+    it('correctly builds query', async () => {
       const query = await buildUnitedIndexQuery(
         soClient,
         {
@@ -117,18 +133,6 @@ describe('query builder', () => {
     });
 
     describe('sorting', () => {
-      let soClient: jest.Mocked<SavedObjectsClientContract>;
-
-      beforeEach(() => {
-        soClient = savedObjectsClientMock.create();
-        soClient.find.mockResolvedValue({
-          saved_objects: [],
-          total: 0,
-          per_page: 0,
-          page: 0,
-        });
-      });
-
       it('uses default sort field if none passed', async () => {
         const query = await buildUnitedIndexQuery(soClient, {
           page: 1,

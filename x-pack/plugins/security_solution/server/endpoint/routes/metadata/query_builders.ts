@@ -144,6 +144,17 @@ export function getESQueryHostMetadataByIDs(agentIDs: string[]) {
   };
 }
 
+const lastCheckinRuntimeField = {
+  last_checkin: {
+    type: 'date',
+    script: {
+      lang: 'painless',
+      source:
+        "emit(doc['united.agent.last_checkin'].size() > 0 ? doc['united.agent.last_checkin'].value.toInstant().toEpochMilli() : doc['united.endpoint.@timestamp'].value.toInstant().toEpochMilli());",
+    },
+  },
+};
+
 interface BuildUnitedIndexQueryResponse {
   body: {
     query: Record<string, unknown>;
@@ -222,7 +233,9 @@ export async function buildUnitedIndexQuery(
     };
   }
 
-  const runtimeMappings = await buildAgentStatusRuntimeField(soClient, 'united.agent.');
+  const statusRuntimeField = await buildAgentStatusRuntimeField(soClient, 'united.agent.');
+  const runtimeMappings = { ...statusRuntimeField, ...lastCheckinRuntimeField };
+
   const fields = Object.keys(runtimeMappings);
   return {
     body: {
