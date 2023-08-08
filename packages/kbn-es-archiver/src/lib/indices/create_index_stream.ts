@@ -14,9 +14,10 @@ import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
 import { ToolingLog } from '@kbn/dev-utils';
 
 import { Stats } from '../stats';
-import { deleteKibanaIndices } from './kibana_index';
+import { cleanSavedObjectIndices, deleteSavedObjectIndices } from './kibana_index';
 import { deleteIndex } from './delete_index';
 import { ES_CLIENT_HEADERS } from '../../client_headers';
+import { MAIN_SAVED_OBJECT_INDEX, TASK_MANAGER_SAVED_OBJECT_INDEX } from './constants';
 
 interface DocRecord {
   value: estypes.IndicesIndexState & {
@@ -43,12 +44,34 @@ export function createCreateIndexStream({
   // If we're trying to import Kibana index docs, we need to ensure that
   // previous indices are removed so we're starting w/ a clean slate for
   // migrations. This only needs to be done once per archive load operation.
-  let kibanaIndexAlreadyDeleted = false;
-  let kibanaTaskManagerIndexAlreadyDeleted = false;
+  let savedObjectIndicesAlreadyDeleted = false;
+  let taskManagerIndexAlreadyDeleted = false;
+
+  // if we detect saved object documents defined in the data.json, we will cleanup their indices
+  let savedObjectIndicesAlreadyCleaned = false;
+  let taskManagerIndexAlreadyCleaned = false;
 
   async function handleDoc(stream: Readable, record: DocRecord) {
-    if (skipDocsFromIndices.has(record.value.index)) {
+    const index = record.value.index;
+
+    if (skipDocsFromIndices.has(index)) {
       return;
+    }
+
+    if (!skipExisting) {
+      if (index?.startsWith(TASK_MANAGER_SAVED_OBJECT_INDEX)) {
+        if (!taskManagerIndexAlreadyDeleted && !taskManagerIndexAlreadyCleaned) {
+          await cleanSavedObjectIndices({ client, stats, log, index });
+          taskManagerIndexAlreadyCleaned = true;
+          log.debug(`Cleaned saved object index [${index}]`);
+        }
+      } else if (index?.startsWith(MAIN_SAVED_OBJECT_INDEX)) {
+        if (!savedObjectIndicesAlreadyDeleted && !savedObjectIndicesAlreadyCleaned) {
+          await cleanSavedObjectIndices({ client, stats, log });
+          savedObjectIndicesAlreadyCleaned = taskManagerIndexAlreadyCleaned = true;
+          log.debug(`Cleaned all saved object indices`);
+        }
+      }
     }
 
     stream.push(record);
@@ -56,8 +79,8 @@ export function createCreateIndexStream({
 
   async function handleIndex(record: DocRecord) {
     const { index, settings, mappings, aliases } = record.value;
-    const isKibanaTaskManager = index.startsWith('.kibana_task_manager');
-    const isKibana = index.startsWith('.kibana') && !isKibanaTaskManager;
+    const isKibanaTaskManager = index.startsWith(TASK_MANAGER_SAVED_OBJECT_INDEX);
+    const isKibana = index.startsWith(MAIN_SAVED_OBJECT_INDEX) && !isKibanaTaskManager;
 
     if (docsOnly) {
       return;
@@ -65,12 +88,14 @@ export function createCreateIndexStream({
 
     async function attemptToCreate(attemptNumber = 1) {
       try {
-        if (isKibana && !kibanaIndexAlreadyDeleted) {
-          await deleteKibanaIndices({ client, stats, log }); // delete all .kibana* indices
-          kibanaIndexAlreadyDeleted = kibanaTaskManagerIndexAlreadyDeleted = true;
-        } else if (isKibanaTaskManager && !kibanaTaskManagerIndexAlreadyDeleted) {
-          await deleteKibanaIndices({ client, stats, onlyTaskManager: true, log }); // delete only .kibana_task_manager* indices
-          kibanaTaskManagerIndexAlreadyDeleted = true;
+        if (isKibana && !savedObjectIndicesAlreadyDeleted) {
+          await deleteSavedObjectIndices({ client, stats, log }); // delete all .kibana* indices
+          savedObjectIndicesAlreadyDeleted = taskManagerIndexAlreadyDeleted = true;
+          log.debug(`Deleted all saved object indices`);
+        } else if (isKibanaTaskManager && !taskManagerIndexAlreadyDeleted) {
+          await deleteSavedObjectIndices({ client, stats, onlyTaskManager: true, log }); // delete only .kibana_task_manager* indices
+          taskManagerIndexAlreadyDeleted = true;
+          log.debug(`Deleted saved object index [${index}]`);
         }
 
         await client.indices.create(
@@ -93,7 +118,11 @@ export function createCreateIndexStream({
           err?.body?.error?.reason?.includes('index exists with the same name as the alias') &&
           attemptNumber < 3
         ) {
-          kibanaIndexAlreadyDeleted = false;
+          taskManagerIndexAlreadyDeleted = false;
+          if (isKibana) {
+            savedObjectIndicesAlreadyDeleted = false;
+          }
+
           const aliasStr = inspect(aliases);
           log.info(
             `failed to create aliases [${aliasStr}] because ES indicated an index/alias already exists, trying again`
