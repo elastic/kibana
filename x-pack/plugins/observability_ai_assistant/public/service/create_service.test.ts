@@ -54,6 +54,7 @@ describe('createService', () => {
         } as unknown as SecurityPluginStart,
         contextRegistry: new Map(),
         functionRegistry: new Map(),
+        enabled: true,
       });
     });
 

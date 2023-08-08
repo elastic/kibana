@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { FeaturesPluginStart, FeaturesPluginSetup } from '@kbn/features-plugin/public';
 import type {
   ObservabilitySharedPluginSetup,
   ObservabilitySharedPluginStart,
@@ -17,12 +18,12 @@ import type {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
+import type { Serializable } from '@kbn/utility-types';
 import type {
   CreateChatCompletionResponse,
   CreateChatCompletionResponseChoicesInner,
 } from 'openai';
 import type { Observable } from 'rxjs';
-import { Serializable } from '@kbn/utility-types';
 import type {
   ContextDefinition,
   FunctionDefinition,
@@ -75,12 +76,14 @@ export interface ObservabilityAIAssistantPluginSetup {}
 export interface ObservabilityAIAssistantPluginSetupDependencies {
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
   security: SecurityPluginSetup;
+  features: FeaturesPluginSetup;
   observabilityShared: ObservabilitySharedPluginSetup;
 }
 export interface ObservabilityAIAssistantPluginStartDependencies {
   security: SecurityPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   observabilityShared: ObservabilitySharedPluginStart;
+  features: FeaturesPluginStart;
 }
 
 export interface ConfigSchema {}

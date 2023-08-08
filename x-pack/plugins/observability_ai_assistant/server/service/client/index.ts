@@ -5,12 +5,11 @@
  * 2.0.
  */
 import { errors } from '@elastic/elasticsearch';
-import type { SearchHit, QueryDslTextExpansionQuery } from '@elastic/elasticsearch/lib/api/types';
+import type { QueryDslTextExpansionQuery, SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import { internal, notFound, serverUnavailable } from '@hapi/boom';
 import type { ActionsClient } from '@kbn/actions-plugin/server/actions_client';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/gen_ai/constants';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { IncomingMessage } from 'http';
 import { compact, isEmpty, merge, omit } from 'lodash';
@@ -169,12 +168,7 @@ export class ObservabilityAIAssistantClient implements IObservabilityAIAssistant
       omit(fn, 'contexts')
     );
 
-    const connector = await this.dependencies.actionsClient.get({
-      id: connectorId,
-    });
-
     const request: Omit<CreateChatCompletionRequest, 'model'> & { model?: string } = {
-      ...(connector.config?.apiProvider === OpenAiProviderType.OpenAi ? { model: 'gpt-4' } : {}),
       messages: messagesForOpenAI,
       stream: true,
       functions: functionsForOpenAI,

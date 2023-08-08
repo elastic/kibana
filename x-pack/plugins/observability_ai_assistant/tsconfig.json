@@ -34,7 +34,9 @@
     "@kbn/kibana-utils-plugin",
     "@kbn/monaco",
     "@kbn/io-ts-utils",
-    "@kbn/std"
+    "@kbn/std",
+    "@kbn/alerting-plugin",
+    "@kbn/features-plugin"
   ],
   "exclude": ["target/**/*"]
 }
