@@ -17,7 +17,6 @@ export interface ReportAlertsGroupingToggledParams {
   isOpen: boolean;
   tableId: string;
   groupNumber: number;
-  groupName?: string | undefined;
 }
 
 export interface ReportAlertsTakeActionParams {

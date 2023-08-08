@@ -32,13 +32,6 @@ export const alertsGroupingToggledEvent: TelemetryEvent = {
         optional: false,
       },
     },
-    groupName: {
-      type: 'keyword',
-      _meta: {
-        description: 'Group value',
-        optional: true,
-      },
-    },
   },
 };
 
