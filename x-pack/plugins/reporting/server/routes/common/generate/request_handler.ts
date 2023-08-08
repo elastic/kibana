@@ -9,17 +9,18 @@ import Boom from '@hapi/boom';
 import { schema, TypeOf } from '@kbn/config-schema';
 import type { KibanaRequest, KibanaResponseFactory, Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
+import { cryptoFactory } from '@kbn/reporting-common/crypto';
+import { ReportingRequestHandlerContext } from '@kbn/reporting-common';
 import rison from '@kbn/rison';
 import moment from 'moment';
 import { Counters, getCounters } from '..';
 import type { ReportingCore } from '../../..';
 import { PUBLIC_ROUTES } from '../../../../common/constants';
-import { checkParamsVersion, cryptoFactory } from '../../../lib';
+import { checkParamsVersion } from '../../../lib';
 import { Report } from '../../../lib/store';
 import type {
   BaseParams,
   ReportingJobResponse,
-  ReportingRequestHandlerContext,
   ReportingUser,
 } from '../../../types';
 

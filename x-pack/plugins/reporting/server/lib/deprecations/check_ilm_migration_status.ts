@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { IlmPolicyMigrationStatus } from '@kbn/reporting-common/url';
 import { ILM_POLICY_NAME } from '../../../common/constants';
-import { IlmPolicyMigrationStatus } from '../../../common/types';
 import { IlmPolicyManager } from '../store/ilm_policy_manager';
 import type { DeprecationsDependencies } from './types';
 

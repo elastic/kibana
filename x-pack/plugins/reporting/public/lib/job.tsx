@@ -8,12 +8,11 @@
 import { EuiText, EuiTextColor } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TaskRunResult } from '@kbn/reporting-common';
+import { BaseParamsV2, JobId } from '@kbn/reporting-common/types';
 import moment from 'moment';
 import React from 'react';
 import { JobTypes, JOB_STATUSES } from '../../common/constants';
 import type {
-  BaseParamsV2,
-  JobId,
   ReportApiJSON,
   ReportFields,
   ReportOutput,

@@ -9,12 +9,12 @@ import type { Observable } from 'rxjs';
 import { act } from 'react-dom/test-utils';
 
 import type { ILicense } from '@kbn/licensing-plugin/public';
-import type { IlmPolicyMigrationStatus } from '../../common/types';
 
 import { ListingProps as Props } from '.';
 
 import { setup, TestBed, TestDependencies, mockJobs } from './__test__';
 import { Job } from '../lib/job';
+import { IlmPolicyMigrationStatus } from '@kbn/reporting-common/url';
 
 describe('ReportListing', () => {
   let testBed: TestBed;

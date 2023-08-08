@@ -7,7 +7,7 @@
 import { errors } from '@elastic/elasticsearch';
 import type { Logger, RequestHandler } from '@kbn/core/server';
 import { ILM_POLICY_NAME, INTERNAL_ROUTES } from '../../../../common/constants';
-import type { IlmPolicyStatusResponse } from '../../../../common/types';
+import type { IlmPolicyStatusResponse } from '@kbn/reporting-common/url';
 import type { ReportingCore } from '../../../core';
 import { IlmPolicyManager } from '../../../lib';
 import { deprecations } from '../../../lib/deprecations';

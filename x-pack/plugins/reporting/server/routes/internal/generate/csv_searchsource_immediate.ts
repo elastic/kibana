@@ -8,10 +8,10 @@
 import Boom from '@hapi/boom';
 import { schema } from '@kbn/config-schema';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
+import { JobParamsDownloadCSV, ReportingRequestHandlerContext } from '@kbn/reporting-common/types';
 import moment from 'moment';
 import type { ReportingCore } from '../../..';
 import { CSV_SEARCHSOURCE_IMMEDIATE_TYPE, INTERNAL_ROUTES } from '../../../../common/constants';
-import type { JobParamsDownloadCSV } from '../../../export_types/csv_searchsource_immediate/types';
 import { PassThroughStream } from '../../../lib';
 import { authorizedUserPreRouting, getCounters } from '../../common';
 
@@ -80,7 +80,7 @@ export function registerGenerateCsvFromSavedObjectImmediate(
           eventLog.logExecutionStart();
 
           const taskPromise = csvSearchSourceImmediateExport
-            .runTask(null, req.body, context, stream, req)
+            .runTask(null, req.body, context as ReportingRequestHandlerContext, stream, req)
             .then((output) => {
               logger.info(`Job output size: ${stream.bytesWritten} bytes.`);
 
