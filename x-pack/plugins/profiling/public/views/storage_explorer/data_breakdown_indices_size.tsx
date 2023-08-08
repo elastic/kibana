@@ -11,13 +11,13 @@ import { asDynamicBytes, asInteger } from '@kbn/observability-plugin/common';
 import React from 'react';
 import type {
   StorageExplorerIndexNames,
-  StotageExplorerDataBreakdownSize,
+  StotageExplorerIndicesDataBreakdownSize,
 } from '../../../common/storage_explorer';
 import { LabelWithHint } from '../../components/label_with_hint';
 import { getIndexLabel } from './data_breakdown_chart';
 
 interface Props {
-  data?: StotageExplorerDataBreakdownSize;
+  data?: StotageExplorerIndicesDataBreakdownSize;
 }
 
 export function DataBreakdownIndicesSize({ data }: Props) {

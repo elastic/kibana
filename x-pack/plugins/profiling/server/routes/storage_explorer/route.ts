@@ -152,7 +152,7 @@ export function registerStorageExplorerRoute({
 
   router.get(
     {
-      path: paths.StorageExplorerDataBreakdownSize,
+      path: paths.StorageExplorerIndicesDataBreakdownSize,
       options: { tags: ['access:profiling'] },
       validate: false,
     },

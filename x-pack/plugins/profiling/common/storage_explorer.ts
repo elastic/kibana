@@ -39,11 +39,12 @@ export type StorageExplorerIndexNames =
   | 'stacktraces'
   | 'executables'
   | 'metrics';
-export interface StorageExplorerIndexStats {
+
+export interface StorageExplorerIndexDataBreakdownStatsStats {
   docCount: number;
   sizeInBytes: number;
 }
-export type StotageExplorerDataBreakdownSize = Record<
+export type StotageExplorerIndicesDataBreakdownSize = Record<
   StorageExplorerIndexNames,
-  StorageExplorerIndexStats
+  StorageExplorerIndexDataBreakdownStatsStats
 >;

@@ -12,8 +12,8 @@ import { asDynamicBytes } from '@kbn/observability-plugin/common';
 import React from 'react';
 import type {
   StorageExplorerIndexNames,
-  StorageExplorerIndexStats,
-  StotageExplorerDataBreakdownSize,
+  StorageExplorerIndexDataBreakdownStatsStats,
+  StotageExplorerIndicesDataBreakdownSize,
 } from '../../../common/storage_explorer';
 import { useProfilingChartsTheme } from '../../hooks/use_profiling_charts_theme';
 
@@ -43,7 +43,7 @@ export function getIndexLabel(label: StorageExplorerIndexNames) {
 }
 
 interface Props {
-  data?: StotageExplorerDataBreakdownSize;
+  data?: StotageExplorerIndicesDataBreakdownSize;
 }
 
 export function DataBreakdownChart({ data }: Props) {
@@ -54,7 +54,7 @@ export function DataBreakdownChart({ data }: Props) {
   const sunburstData = data
     ? Object.keys(data).map((key) => {
         const indexName = key as StorageExplorerIndexNames;
-        const value = data[indexName] as StorageExplorerIndexStats;
+        const value = data[indexName] as StorageExplorerIndexDataBreakdownStatsStats;
         return { key: getIndexLabel(indexName), ...value };
       })
     : [];

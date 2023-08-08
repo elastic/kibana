@@ -25,7 +25,9 @@ import { DataBreakdownIndicesSize } from './data_breakdown_indices_size';
 export function DataBreakdown() {
   const theme = useEuiTheme();
   const {
-    services: { fetchStorageExplorerDataBreakdownSize },
+    services: {
+      fetchStorageExplorerIndicesDataBreakdownSize: fetchStorageExplorerDataBreakdownSize,
+    },
   } = useProfilingDependencies();
 
   const storageExplorerDataBreakdownSize = useTimeRangeAsync(
