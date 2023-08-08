@@ -29,6 +29,9 @@ const yieldAppliedEndpointRevision = (): Cypress.Chainable<number> =>
   request<MetadataListResponse>({
     method: 'GET',
     url: HOST_METADATA_LIST_ROUTE,
+    headers: {
+      'Elastic-Api-Version': '2023-10-31',
+    },
   }).then(({ body }) => {
     expect(body.data.length).is.lte(2); // during update it can be temporary zero
     return Number(body.data?.[0]?.metadata.Endpoint.policy.applied.endpoint_policy_version) ?? -1;
