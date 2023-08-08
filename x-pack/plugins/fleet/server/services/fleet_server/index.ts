@@ -52,12 +52,12 @@ export async function allFleetServerVersionsAreAbove(
     }
   }
 
+  // there must be at least one fleet server for this check to pass
   if (policyIds.size === 0) {
     return false;
   }
 
   const versionCounts = await getAgentVersionsForAgentPolicyIds(esClient, [...policyIds]);
-
   return _allVersionsAreAtLeast(version, Object.keys(versionCounts));
 }
 
