@@ -15,7 +15,11 @@ export function createTestConfig(options: CreateTestConfigOptions) {
 
     return {
       ...svlSharedConfig.getAll(),
-      services,
+
+      services: {
+        ...services,
+        ...options.services,
+      },
       kbnTestServer: {
         ...svlSharedConfig.get('kbnTestServer'),
         serverArgs: [

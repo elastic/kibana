@@ -44,6 +44,7 @@ import {
 } from '@kbn/logs-shared-plugin/public';
 import { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import { ObservabilityAIAssistantPluginStart } from '@kbn/observability-ai-assistant-plugin/public';
 import type { UnwrapPromise } from '../common/utility_types';
 import type {
   SourceProviderProps,
@@ -104,6 +105,7 @@ export interface InfraClientStartDeps {
   ml: MlPluginStart;
   observability: ObservabilityPublicStart;
   observabilityShared: ObservabilitySharedPluginStart;
+  observabilityAIAssistant: ObservabilityAIAssistantPluginStart;
   osquery?: unknown; // OsqueryPluginStart - can't be imported due to cyclic dependency;
   share: SharePluginStart;
   spaces: SpacesPluginStart;

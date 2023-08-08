@@ -1429,9 +1429,9 @@
         "signature": [
           "() => ",
           {
-            "pluginId": "kibanaReact",
+            "pluginId": "@kbn/react-kibana-context-styled",
             "scope": "common",
-            "docId": "kibKibanaReactPluginApi",
+            "docId": "kibKbnReactKibanaContextStyledPluginApi",
             "section": "def-common.EuiTheme",
             "text": "EuiTheme"
           }

@@ -129,7 +129,10 @@ export function useFetchStream<B extends object, R extends Reducer<any, any>>(
 
   return {
     cancel,
-    data: dataThrottled,
+    // To avoid a race condition where the stream already ended but `useThrottle` would
+    // yet have to trigger another update within the throttling interval, we'll return
+    // the unthrottled data once the stream is complete.
+    data: isRunning ? dataThrottled : data,
     dispatch,
     errors,
     isCancelled,

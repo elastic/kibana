@@ -61,7 +61,7 @@ module.exports = {
     'react/no-will-update-set-state': 'error',
     'react/no-is-mounted': 'error',
     'react/no-multi-comp': ['error', { ignoreStateless: true }],
-    'react/no-unknown-property': 'error',
+    'react/no-unknown-property': ['error', { ignore: ['css'] }],
     'react/prefer-es6-class': ['error', 'always'],
     'react/prefer-stateless-function': ['error', { ignorePureComponents: true }],
     'react/no-unescaped-entities': 'error',

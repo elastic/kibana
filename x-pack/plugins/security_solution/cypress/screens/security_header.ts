@@ -60,8 +60,7 @@ export const NETWORK = '[data-test-subj="solutionSideNavPanelLink-network"]';
 
 export const USERS = '[data-test-subj="solutionSideNavPanelLink-users"]';
 
-export const INDICATORS =
-  '[data-test-subj="solutionSideNavItemLink-threat_intelligence-indicators"]';
+export const INDICATORS = '[data-test-subj="solutionSideNavItemLink-threat_intelligence"]';
 
 export const RULES = '[data-test-subj="solutionSideNavPanelLink-rules"]';
 

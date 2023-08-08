@@ -20,6 +20,17 @@ Object {
   },
   "enabled": true,
   "encryptionKey": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "export_types": Object {
+    "csv": Object {
+      "enabled": true,
+    },
+    "pdf": Object {
+      "enabled": true,
+    },
+    "png": Object {
+      "enabled": true,
+    },
+  },
   "kibanaServer": Object {},
   "poll": Object {
     "jobCompletionNotifier": Object {
@@ -66,6 +77,17 @@ Object {
     "useByteOrderMarkEncoding": false,
   },
   "enabled": true,
+  "export_types": Object {
+    "csv": Object {
+      "enabled": true,
+    },
+    "pdf": Object {
+      "enabled": true,
+    },
+    "png": Object {
+      "enabled": true,
+    },
+  },
   "kibanaServer": Object {},
   "poll": Object {
     "jobCompletionNotifier": Object {

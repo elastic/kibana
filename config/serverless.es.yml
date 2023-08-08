@@ -26,3 +26,6 @@ telemetry.labels.serverless: search
 
 # Alerts config
 xpack.actions.enabledActionTypes: ['.email', '.index', '.slack', '.jira', '.webhook', '.teams']
+
+# Fleet specific configuration
+xpack.fleet.internal.capabilities: ['serverless_search']

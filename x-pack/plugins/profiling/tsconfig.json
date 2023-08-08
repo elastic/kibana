@@ -1,16 +1,16 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "target/types",
+    "outDir": "target/types"
   },
   "include": [
     // add all the folders containing files to be compiled
     "index.ts",
     "common/**/*.ts",
+    "common/**/*.json",
     "public/**/*.ts",
     "public/**/*.tsx",
-    "server/**/*.ts",
-    "server/**/*.json"
+    "server/**/*.ts"
   ],
   "kbn_references": [
     "@kbn/core",
@@ -47,6 +47,7 @@
     "@kbn/licensing-plugin",
     "@kbn/utility-types",
     "@kbn/usage-collection-plugin",
+    "@kbn/observability-ai-assistant-plugin"
     // add references to other TypeScript projects the plugin depends on
 
     // requiredPlugins from ./kibana.json
@@ -68,6 +69,6 @@
     // "@kbn/kibana-utils-plugin",
   ],
   "exclude": [
-    "target/**/*",
+    "target/**/*"
   ]
 }

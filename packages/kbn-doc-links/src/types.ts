@@ -508,6 +508,8 @@ export interface DocLinks {
   };
   readonly clients: {
     readonly guide: string;
+    readonly goConnecting: string;
+    readonly goGettingStarted: string;
     readonly goIndex: string;
     readonly goOverview: string;
     readonly javaBasicAuthentication: string;
@@ -524,11 +526,14 @@ export interface DocLinks {
     readonly netIntroduction: string;
     readonly netNest: string;
     readonly netSingleNode: string;
-    readonly phpGuide: string;
+    readonly phpConfiguration: string;
     readonly phpConnecting: string;
+    readonly phpGuide: string;
     readonly phpInstallation: string;
     readonly phpOverview: string;
     readonly pythonAuthentication: string;
+    readonly pythonConfig: string;
+    readonly pythonConnecting: string;
     readonly pythonGuide: string;
     readonly pythonOverview: string;
     readonly rubyAuthentication: string;

@@ -488,11 +488,9 @@ describe('AddInferencePipelineFlyout', () => {
           ...DEFAULT_VALUES.addInferencePipelineModal,
           step: AddInferencePipelineSteps.Review,
           configuration: {
-            destinationField: 'test',
             existingPipeline: false,
             modelID: 'test-model',
             pipelineName: 'my-test-pipeline',
-            sourceField: 'body',
           },
         },
       });
@@ -514,11 +512,9 @@ describe('AddInferencePipelineFlyout', () => {
           ...DEFAULT_VALUES.addInferencePipelineModal,
           step: AddInferencePipelineSteps.Review,
           configuration: {
-            destinationField: 'test',
             existingPipeline: true,
             modelID: 'test-model',
             pipelineName: 'my-test-pipeline',
-            sourceField: 'body',
           },
         },
       });

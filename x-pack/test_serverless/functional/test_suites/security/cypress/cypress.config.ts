@@ -6,6 +6,7 @@
  */
 
 import { defineCypressConfig } from '@kbn/cypress-config';
+import { setupDataLoaderTasks } from './support/setup_data_loader_tasks';
 
 export default defineCypressConfig({
   reporter: '../../../../../../node_modules/cypress-multi-reporters',
@@ -27,5 +28,8 @@ export default defineCypressConfig({
     experimentalMemoryManagement: true,
     supportFile: './support/e2e.js',
     specPattern: './e2e/**/*.cy.ts',
+    setupNodeEvents: (on, config) => {
+      setupDataLoaderTasks(on, config);
+    },
   },
 });

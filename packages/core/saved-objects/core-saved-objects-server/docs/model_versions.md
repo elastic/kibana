@@ -13,8 +13,9 @@
   - [Adding an indexed field without default value](#adding-an-indexed-field-without-default-value)
   - [Adding an indexed field with a default value](#adding-an-indexed-field-with-a-default-value)
   - [Removing an existing field](#removing-an-existing-field)
-- [Particularities of the serverless environment](#particularities-of-the-serverless-environment)
+- [Limitations and edge cases in serverless environments](#limitations-and-edge-cases-in-serverless-environments)
   - [Using the fields option of the find api](#using-the-fields-option-of-the-find-savedobjects-api)
+  - [Using update with dynamically backfilled fields](#using-update-with-dynamically-backfilled-fields)
 
 ## Introduction
 
@@ -870,7 +871,7 @@ const myType: SavedObjectsType = {
 };
 ```
 
-## Particularities of the serverless environment
+## Limitations and edge cases in serverless environments
 
 The serverless environment, and the fact that upgrade in such environments are performed in a way
 where, at some point, the old and new version of the application are living in cohabitation, leads 
@@ -891,3 +892,69 @@ Which is why, when using this option, the API consumer needs to make sure that *
 to the `fields` option **were already present in the prior model version**. Otherwise, it may lead to inconsistencies
 during upgrades, where newly introduced or backfilled fields may not necessarily appear in the documents returned
 from the `search` API when the option is used.
+
+### Using `update` with dynamically backfilled fields
+
+The savedObjects `update` API is effectively a partial update (using Elasticsearch's `_update` under the hood),
+allowing API consumers to only specify the subset of fields they want to update to new values, without having to
+provide the full list of attributes (the unchanged ones). We're also not changing the `version` of the document
+during updates, even when the instance performing the operation doesn't know about the current model version
+of the document (e.g an old node during an upgrade).
+
+If this was fine before zero downtime upgrades, there is an edge case in serverless when this API is used
+to update fields that are the "source" of another field's backfill that can potentially lead to data becoming inconsistent.
+
+For example, imagine that:
+
+1. In model version 1, we have some `index (number)` field.
+
+2. In model version 2, we introduce a `odd (boolean)` field that is backfilled with the following function:
+
+```ts
+let change: SavedObjectsModelDataBackfillChange = {
+  type: 'data_backfill',
+  backfillFn: (doc, ctx) => {
+    return { attributes: { odd: doc.attributes.index % 2 === 1 } };
+  },
+};
+```
+
+3. During the cohabitation period (upgrade), an instance of the new version of Kibana creates a document 
+
+E.g with the following attributes:
+
+```ts
+const newDocAttributes = {
+  index: 12,
+  odd: false,
+}
+```
+
+4. Then an instance of the old version of Kibana updates the `index` field of this document
+
+Which could occur either while being still in the cohabitation period, or in case of rollback:
+
+```ts
+savedObjectClient.update('type', 'id', {
+  index: 11,
+});
+```
+
+We will then be in a situation where our data is **inconsistent**, as the value of the `odd` field wasn't recomputed:
+
+```json
+{
+  index: 11,
+  odd: false,
+}
+```
+
+The long term solution for that is implementing [backward-compatible updates](https://github.com/elastic/kibana/issues/152807), however
+this won't be done for the MVP, so the workaround for now is to avoid situations where this edge case can occur.
+
+It can be avoided by either:
+
+1. Not having backfill functions depending on the value of the existing fields (*recommended*)
+
+2. Not performing update operations impacting fields that are used as "source" for backfill functions
+   (*note*: both the previous and next version of Kibana must follow this rule then)

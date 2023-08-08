@@ -56,6 +56,7 @@ import {
   RULE_LAST_RUN,
   TOASTER_CLOSE_ICON,
   ADD_ELASTIC_RULES_EMPTY_PROMPT_BTN,
+  CONFIRM_DELETE_RULE_BTN,
 } from '../screens/alerts_detection_rules';
 import type { RULES_MONITORING_TABLE } from '../screens/alerts_detection_rules';
 import { EUI_CHECKBOX } from '../screens/common/controls';
@@ -115,6 +116,7 @@ export const checkDuplicatedRule = () => {
 export const deleteFirstRule = () => {
   cy.get(COLLAPSED_ACTION_BTN).first().click();
   cy.get(DELETE_RULE_ACTION_BTN).click();
+  cy.get(CONFIRM_DELETE_RULE_BTN).click();
 };
 
 export const deleteRuleFromDetailsPage = () => {
@@ -129,6 +131,7 @@ export const deleteRuleFromDetailsPage = () => {
   cy.get(ALL_ACTIONS).click();
   cy.get(RULE_DETAILS_DELETE_BTN).click();
   cy.get(RULE_DETAILS_DELETE_BTN).should('not.be.visible');
+  cy.get(CONFIRM_DELETE_RULE_BTN).click();
 };
 
 export const exportRule = (name: string) => {

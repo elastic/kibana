@@ -542,8 +542,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(200);
       });
 
-      // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/162583
-      describe.skip('post-authentication stage', () => {
+      describe('post-authentication stage', () => {
         for (const client of ['start-contract', 'request-context', 'custom']) {
           it(`expired access token should be automatically refreshed by the ${client} client`, async function () {
             this.timeout(60000);

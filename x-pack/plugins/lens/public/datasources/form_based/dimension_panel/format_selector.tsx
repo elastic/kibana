@@ -14,21 +14,25 @@ import {
   EuiRange,
   EuiFieldText,
   EuiSwitch,
-  EuiCode,
+  EuiFormLabel,
+  EuiLink,
+  useEuiTheme,
 } from '@elastic/eui';
-import { useDebouncedValue, TooltipWrapper } from '@kbn/visualization-ui-components';
+import { useDebouncedValue } from '@kbn/visualization-ui-components';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   DEFAULT_DURATION_INPUT_FORMAT,
   DEFAULT_DURATION_OUTPUT_FORMAT,
   FORMATS_UI_SETTINGS,
 } from '@kbn/field-formats-plugin/common';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
+import type { DocLinksStart } from '@kbn/core/public';
 import { LensAppServices } from '../../../app_plugin/types';
 import { GenericIndexPatternColumn } from '../form_based';
 import { isColumnFormatted } from '../operations/definitions/helpers';
 import { ValueFormatConfig } from '../operations/definitions/column_types';
 import { DurationRowInputs } from './formatting/duration_input';
+import { Prepend, PrependWidthProvider } from '../../../shared_components/prepend_provider';
 
 const supportedFormats: Record<
   string,
@@ -124,6 +128,7 @@ type FormatParamsKeys = keyof FormatParams;
 interface FormatSelectorProps {
   selectedColumn: GenericIndexPatternColumn;
   onChange: (newFormat?: { id: string; params?: FormatParams }) => void;
+  docLinks: DocLinksStart;
 }
 
 const RANGE_MIN = 0;
@@ -163,7 +168,8 @@ function useDebouncedInputforParam<T extends FormatParamsKeys>(
 
 export function FormatSelector(props: FormatSelectorProps) {
   const { uiSettings } = useKibana<LensAppServices>().services;
-  const { selectedColumn, onChange } = props;
+  const { euiTheme } = useEuiTheme();
+  const { selectedColumn, onChange, docLinks } = props;
   const currentFormat = isColumnFormatted(selectedColumn)
     ? selectedColumn.params?.format
     : undefined;
@@ -257,63 +263,39 @@ export function FormatSelector(props: FormatSelectorProps) {
   const approximatedFormat = currentFormat?.id === 'duration' && durationTo === 'humanize';
 
   return (
-    <>
-      <EuiFormRow
-        label={label}
-        display="columnCompressed"
-        fullWidth
-        helpText={
-          currentFormat?.id === 'custom' ? (
-            <FormattedMessage
-              id="xpack.lens.indexPattern.customFormat.description"
-              defaultMessage="Numeral.js format pattern (Default: {defaultPattern})"
-              values={{
-                defaultPattern: <EuiCode>{defaultNumeralPatternInKibana}</EuiCode>,
-              }}
+    <PrependWidthProvider>
+      <>
+        <EuiFormRow label={label} display="columnCompressed" fullWidth>
+          <div>
+            <EuiComboBox
+              fullWidth
+              compressed
+              isClearable={false}
+              data-test-subj="indexPattern-dimension-format"
+              aria-label={label}
+              singleSelection={singleSelectionOption}
+              options={stableOptions}
+              selectedOptions={currentOption}
+              onChange={onChangeWrapped}
             />
-          ) : null
-        }
-      >
-        <div>
-          <EuiComboBox
-            fullWidth
-            compressed
-            isClearable={false}
-            data-test-subj="indexPattern-dimension-format"
-            aria-label={label}
-            singleSelection={singleSelectionOption}
-            options={stableOptions}
-            selectedOptions={currentOption}
-            onChange={onChangeWrapped}
-          />
-          {currentFormat && selectedFormat ? (
-            <>
-              {currentFormat?.id === 'duration' ? (
-                <>
-                  <EuiSpacer size="s" />
-                  <DurationRowInputs
-                    onStartChange={setDurationFrom}
-                    onEndChange={setDurationTo}
-                    startValue={durationFrom}
-                    endValue={durationTo}
-                    testSubjEnd="indexPattern-dimension-duration-end"
-                    testSubjStart="indexPattern-dimension-duration-start"
-                  />
-                </>
-              ) : null}
-              {selectedFormat.supportsDecimals ? (
-                <>
-                  <EuiSpacer size="s" />
-                  <TooltipWrapper
-                    tooltipContent={i18n.translate(
-                      'xpack.lens.indexPattern.format.decimalsDisabled',
-                      {
-                        defaultMessage: 'Use a precise duration output format to use decimals.',
-                      }
-                    )}
-                    condition={approximatedFormat}
-                    display="block"
-                  >
+            {currentFormat && selectedFormat ? (
+              <>
+                {currentFormat?.id === 'duration' ? (
+                  <>
+                    <EuiSpacer size="s" />
+                    <DurationRowInputs
+                      onStartChange={setDurationFrom}
+                      onEndChange={setDurationTo}
+                      startValue={durationFrom}
+                      endValue={durationTo}
+                      testSubjEnd="indexPattern-dimension-duration-end"
+                      testSubjStart="indexPattern-dimension-duration-start"
+                    />
+                  </>
+                ) : null}
+                {selectedFormat.supportsDecimals && !approximatedFormat ? (
+                  <>
+                    <EuiSpacer size="s" />
                     <EuiRange
                       showInput="inputWithPopover"
                       value={decimals}
@@ -334,73 +316,88 @@ export function FormatSelector(props: FormatSelectorProps) {
                       data-test-subj="indexPattern-dimension-formatDecimals"
                       compressed
                       fullWidth
-                      prepend={decimalsLabel}
+                      prepend={<Prepend>{decimalsLabel}</Prepend>}
                       aria-label={decimalsLabel}
                       disabled={approximatedFormat}
                     />
-                  </TooltipWrapper>
-                </>
-              ) : null}
-              {selectedFormat.supportsSuffix ? (
-                <>
-                  <EuiSpacer size="s" />
-                  <EuiFieldText
-                    value={suffix}
-                    onChange={(e) => {
-                      setSuffix(e.currentTarget.value);
-                    }}
-                    data-test-subj="indexPattern-dimension-formatSuffix"
-                    compressed
-                    fullWidth
-                    prepend={suffixLabel}
-                    aria-label={suffixLabel}
-                  />
-                </>
-              ) : null}
-              {selectedFormat.supportsCompact ? (
-                <>
-                  <EuiSpacer size="s" />
-                  <TooltipWrapper
-                    tooltipContent={i18n.translate(
-                      'xpack.lens.indexPattern.format.compactDisabled',
-                      {
-                        defaultMessage:
-                          'Use a precise duration output format to use a compact format.',
-                      }
-                    )}
-                    condition={approximatedFormat}
-                    display="block"
-                  >
+                  </>
+                ) : null}
+                {selectedFormat.supportsSuffix ? (
+                  <>
+                    <EuiSpacer size="s" />
+                    <EuiFieldText
+                      value={suffix}
+                      onChange={(e) => {
+                        setSuffix(e.currentTarget.value);
+                      }}
+                      data-test-subj="indexPattern-dimension-formatSuffix"
+                      compressed
+                      fullWidth
+                      prepend={<Prepend>{suffixLabel}</Prepend>}
+                      aria-label={suffixLabel}
+                    />
+                  </>
+                ) : null}
+                {selectedFormat.supportsCompact && !approximatedFormat ? (
+                  <>
+                    <EuiSpacer size="s" />
                     <EuiSwitch
                       compressed
-                      label={compactLabel}
+                      label={
+                        <EuiFormLabel
+                          css={css`
+                            font-weight: ${euiTheme.font.weight.regular};
+                          `}
+                        >
+                          {compactLabel}
+                        </EuiFormLabel>
+                      }
                       checked={Boolean(compact)}
                       onChange={() => setCompact(!compact)}
                       data-test-subj="lns-indexpattern-dimension-formatCompact"
-                      disabled={approximatedFormat}
                     />
-                  </TooltipWrapper>
-                </>
-              ) : null}
-            </>
-          ) : null}
-        </div>
-      </EuiFormRow>
-      {currentFormat?.id === 'custom' ? (
-        <EuiFormRow display="columnCompressed" hasEmptyLabelSpace label=" ">
-          <EuiFieldText
-            data-test-subj={'numberEditorFormatPattern'}
-            prepend={i18n.translate('xpack.lens.indexPattern.custom.patternLabel', {
-              defaultMessage: 'Format',
-            })}
-            value={pattern}
-            placeholder={defaultNumeralPatternInKibana}
-            onChange={(e) => {
-              setPattern(e.target.value);
-            }}
-          />
+                  </>
+                ) : null}
+              </>
+            ) : null}
+          </div>
         </EuiFormRow>
-      ) : null}
-    </>
+        {currentFormat?.id === 'custom' ? (
+          <EuiFormRow
+            display="columnCompressed"
+            hasEmptyLabelSpace
+            label=" "
+            helpText={
+              <EuiLink
+                href={docLinks.links.indexPatterns.fieldFormattersNumber}
+                target="_blank"
+                external
+              >
+                {i18n.translate('xpack.lens.indexPattern.custom.externalDoc', {
+                  defaultMessage: 'Numeral formatting syntax',
+                })}
+              </EuiLink>
+            }
+          >
+            <EuiFieldText
+              data-test-subj={'numberEditorFormatPattern'}
+              compressed
+              prepend={
+                <Prepend>
+                  {i18n.translate('xpack.lens.indexPattern.custom.patternLabel', {
+                    defaultMessage: 'Format',
+                  })}
+                </Prepend>
+              }
+              value={pattern}
+              placeholder={defaultNumeralPatternInKibana}
+              onChange={(e) => {
+                setPattern(e.target.value);
+              }}
+            />
+          </EuiFormRow>
+        ) : null}
+      </>
+    </PrependWidthProvider>
   );
 }

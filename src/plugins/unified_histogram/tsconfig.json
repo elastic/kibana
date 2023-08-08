@@ -23,6 +23,7 @@
     "@kbn/shared-ux-utility",
     "@kbn/ui-actions-plugin",
     "@kbn/kibana-utils-plugin",
+    "@kbn/visualizations-plugin",
   ],
   "exclude": [
     "target/**/*",
