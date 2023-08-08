@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RuleResponse } from '../../../common/api/detection_engine';
+import type { BaseRuleParams } from '../../../server/lib/detection_engine/rule_schema';
 import { ELASTIC_SECURITY_RULE_ID } from '../../../common/detection_engine/constants';
 import type { PrePackagedRulesStatusResponse } from '../../../public/detection_engine/rule_management/logic/types';
 import { getPrebuiltRuleWithExceptionsMock } from '../../../server/lib/detection_engine/prebuilt_rules/mocks';
@@ -146,7 +146,7 @@ export const waitUntilAllRulesCreated = (
           const areAllRulesCreated = rules.every((rule) => {
             // Checking that all the expected rules are stored in ES
             return response.body.hits.hits.some(
-              (storedRule: { _source: { alert: RuleResponse } }) =>
+              (storedRule: { _source: { alert: { params: BaseRuleParams } } }) =>
                 storedRule._source.alert.params.ruleId === rule['security-rule'].rule_id
             );
           });
