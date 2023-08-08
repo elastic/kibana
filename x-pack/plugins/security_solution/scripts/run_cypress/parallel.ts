@@ -98,6 +98,11 @@ export const cli = () => {
             })
           )
           .map((filePath: string) => filePath.replace(basePath, '.'));
+
+        if (!files?.length) {
+          // eslint-disable-next-line no-process-exit
+          return process.exit(0);
+        }
       }
 
       if (!files?.length) {
