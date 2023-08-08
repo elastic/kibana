@@ -177,7 +177,7 @@ export const createGridColumns = (
           columnMeta,
         };
 
-        if (rowValue === null) {
+        if (rowValue == null) {
           return null;
         }
 
