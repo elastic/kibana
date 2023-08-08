@@ -33,18 +33,29 @@ export interface StorageExplorerHostDetails {
   totalSize: number;
 }
 
-export type StorageExplorerIndexNames =
+export type StorageGroupedIndexNames =
   | 'events'
   | 'stackframes'
   | 'stacktraces'
   | 'executables'
   | 'metrics';
 
-export interface StorageExplorerIndexDataBreakdownStatsStats {
+export interface StorageDetailsGroupedByIndex {
+  indexName: StorageGroupedIndexNames;
   docCount: number;
   sizeInBytes: number;
 }
-export type StotageExplorerIndicesDataBreakdownChart = Record<
-  StorageExplorerIndexNames,
-  StorageExplorerIndexDataBreakdownStatsStats
->;
+
+export interface StorageDetailsPerIndex {
+  indexName: string;
+  primaryShardsDocCount: number;
+  replicaShardsDocCount: number;
+  sizeInBytes: number;
+  dataStream?: string;
+  lifecyclePhase?: string;
+}
+
+export interface IndicesStorageDetails {
+  storageDetailsGroupedByIndex: StorageDetailsGroupedByIndex[];
+  storageDetailsPerIndex: StorageDetailsPerIndex[];
+}

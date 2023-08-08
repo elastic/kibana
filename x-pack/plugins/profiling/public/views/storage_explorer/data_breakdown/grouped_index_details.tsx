@@ -10,58 +10,38 @@ import { i18n } from '@kbn/i18n';
 import { asDynamicBytes, asInteger } from '@kbn/observability-plugin/common';
 import React from 'react';
 import type {
-  StorageExplorerIndexNames,
-  StotageExplorerIndicesDataBreakdownChart,
-} from '../../../common/storage_explorer';
-import { LabelWithHint } from '../../components/label_with_hint';
-import { getIndexLabel } from './data_breakdown_chart';
+  StorageDetailsGroupedByIndex,
+  StorageGroupedIndexNames,
+} from '../../../../common/storage_explorer';
+import { LabelWithHint } from '../../../components/label_with_hint';
+import { getGroupedIndexLabel } from './utils';
 
 interface Props {
-  data?: StotageExplorerIndicesDataBreakdownChart;
+  data?: StorageDetailsGroupedByIndex[];
 }
 
-export function DataBreakdownIndicesSize({ data }: Props) {
+const hintMap: Partial<Record<StorageGroupedIndexNames, string>> = {
+  events: i18n.translate('xpack.profiling.storageExplorer.dataBreakdown.events.hint', {
+    defaultMessage:
+      'Events linearly correlate with the probabilistic profiling value. The lower the probabilistic profiling value, the fewer events are collected.',
+  }),
+};
+
+export function GroupedIndexDetails({ data = [] }: Props) {
   return (
     <EuiFlexGroup gutterSize="s" direction="column">
-      <EuiFlexItem grow={false}>
-        <IndexSizeItem
-          indexName="stackframes"
-          docCount={data?.stackframes.docCount}
-          sizeInBytes={data?.stackframes.sizeInBytes}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <IndexSizeItem
-          indexName="stacktraces"
-          docCount={data?.stacktraces.docCount}
-          sizeInBytes={data?.stacktraces.sizeInBytes}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <IndexSizeItem
-          indexName="executables"
-          docCount={data?.executables.docCount}
-          sizeInBytes={data?.executables.sizeInBytes}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <IndexSizeItem
-          indexName="metrics"
-          docCount={data?.metrics.docCount}
-          sizeInBytes={data?.metrics.sizeInBytes}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <IndexSizeItem
-          indexName="events"
-          docCount={data?.events.docCount}
-          sizeInBytes={data?.events.sizeInBytes}
-          hint={i18n.translate('xpack.profiling.storageExplorer.dataBreakdown.events.hint', {
-            defaultMessage:
-              'Events linearly correlate with the probabilistic profiling value. The lower the probabilistic profiling value, the fewer events are collected.',
-          })}
-        />
-      </EuiFlexItem>
+      {data.map((item) => {
+        return (
+          <EuiFlexItem grow={false}>
+            <IndexSizeItem
+              indexName={item.indexName}
+              docCount={item.docCount}
+              sizeInBytes={item.sizeInBytes}
+              hint={hintMap[item.indexName]}
+            />
+          </EuiFlexItem>
+        );
+      })}
     </EuiFlexGroup>
   );
 }
@@ -72,14 +52,14 @@ function IndexSizeItem({
   sizeInBytes,
   hint,
 }: {
-  indexName: StorageExplorerIndexNames;
+  indexName: StorageGroupedIndexNames;
   docCount?: number;
   sizeInBytes?: number;
   hint?: string;
 }) {
   const theme = useEuiTheme();
 
-  const indexLabel = getIndexLabel(indexName);
+  const indexLabel = getGroupedIndexLabel(indexName);
 
   return (
     <>

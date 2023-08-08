@@ -10,7 +10,7 @@ import { ProfilingESField } from '../../../common/elasticsearch';
 import { StorageExplorerHostDetails } from '../../../common/storage_explorer';
 import { ProfilingESClient } from '../../utils/create_profiling_es_client';
 import { getEstimatedSizeForDocumentsInIndex } from './get_daily_data_generation.size';
-import { getTotalIndicesStats } from './get_indices_stats';
+import { allIndices, getIndicesStats } from './get_indices_stats';
 import { getProfilingHostsDetailsById } from './get_profiling_hosts_details_by_id';
 
 const perIndexInitialSize = { events: 0, metrics: 0 };
@@ -27,7 +27,7 @@ export async function getHostDetails({
   kuery: string;
 }): Promise<StorageExplorerHostDetails[]> {
   const [{ indices: allIndicesStats }, response] = await Promise.all([
-    getTotalIndicesStats({ client: client.getEsClient() }),
+    getIndicesStats({ client: client.getEsClient(), indices: allIndices }),
     client.search('profiling_events_metrics_details', {
       index: ['profiling-events-*', 'profiling-metrics'],
       body: {

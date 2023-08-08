@@ -7,36 +7,65 @@
 
 import { ElasticsearchClient } from '@kbn/core/server';
 
-const symbolsIndices = ['profiling-symbols-global', 'profiling-symbols-private'];
-const profilingMainIndices = [
+export const symbolsIndices = ['profiling-symbols-global', 'profiling-symbols-private'];
+
+export const stacktracesIndices = [
   'profiling-events-*',
   'profiling-metrics',
   'profiling-stacktraces',
   'profiling-executables',
   'profiling-stackframes',
 ];
-const indices = [
-  ...profilingMainIndices,
+
+export const allIndices = [
+  ...stacktracesIndices,
   'profiling-sq-executables',
   'profiling-sq-leafframes',
   'profiling-hosts',
   ...symbolsIndices,
 ];
 
-function getIndicesStats({ client, index }: { client: ElasticsearchClient; index: string }) {
-  return client.indices.stats({ index, expand_wildcards: 'all' });
+export function getIndicesStats({
+  client,
+  indices,
+}: {
+  client: ElasticsearchClient;
+  indices: string[];
+}) {
+  return client.indices.stats({ index: indices.join(), expand_wildcards: 'all' });
 }
 
-export function getTotalIndicesStats({ client }: { client: ElasticsearchClient }) {
-  return getIndicesStats({ client, index: indices.join() });
+export function getIndicesInfo({
+  client,
+  indices,
+}: {
+  client: ElasticsearchClient;
+  indices: string[];
+}) {
+  return client.indices.get({
+    index: indices.join(),
+    filter_path: [
+      '*.settings.index.number_of_shards',
+      '*.settings.index.number_of_replicas',
+      '*.data_stream',
+    ],
+    features: ['settings'],
+    expand_wildcards: 'all',
+  });
 }
 
-export function getMainIndicesStats({ client }: { client: ElasticsearchClient }) {
-  return getIndicesStats({ client, index: profilingMainIndices.join() });
-}
-
-export function getTotalSymbolsStats({ client }: { client: ElasticsearchClient }) {
-  return getIndicesStats({ client, index: symbolsIndices.join() });
+export async function getIndicesLifecycleStatus({
+  client,
+  indices,
+}: {
+  client: ElasticsearchClient;
+  indices: string[];
+}) {
+  const ilmLifecycle = await client.ilm.explainLifecycle({
+    index: indices.join(),
+    filter_path: 'indices.*.phase',
+  });
+  return ilmLifecycle.indices;
 }
 
 export function getNodesStats({ client }: { client: ElasticsearchClient }) {

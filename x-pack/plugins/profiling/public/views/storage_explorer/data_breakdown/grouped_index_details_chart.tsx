@@ -7,57 +7,25 @@
 
 import { Chart, Datum, Partition, Position, Settings } from '@elastic/charts';
 import { euiPaletteColorBlind, useEuiTheme } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { asDynamicBytes } from '@kbn/observability-plugin/common';
 import React from 'react';
-import type {
-  StorageExplorerIndexNames,
-  StorageExplorerIndexDataBreakdownStatsStats,
-  StotageExplorerIndicesDataBreakdownChart,
-} from '../../../common/storage_explorer';
-import { useProfilingChartsTheme } from '../../hooks/use_profiling_charts_theme';
-
-export function getIndexLabel(label: StorageExplorerIndexNames) {
-  switch (label) {
-    case 'events':
-      return i18n.translate('xpack.profiling.storageExplorer.dataBreakdown.chart.events', {
-        defaultMessage: 'Events',
-      });
-    case 'executables':
-      return i18n.translate('xpack.profiling.storageExplorer.dataBreakdown.chart.executables', {
-        defaultMessage: 'Executables',
-      });
-    case 'metrics':
-      return i18n.translate('xpack.profiling.storageExplorer.dataBreakdown.chart.metrics', {
-        defaultMessage: 'Metrics',
-      });
-    case 'stackframes':
-      return i18n.translate('xpack.profiling.storageExplorer.dataBreakdown.chart.stackframes', {
-        defaultMessage: 'Stackframes',
-      });
-    case 'stacktraces':
-      return i18n.translate('xpack.profiling.storageExplorer.dataBreakdown.chart.stacktraces', {
-        defaultMessage: 'Stacktraces',
-      });
-  }
-}
+import type { StorageDetailsGroupedByIndex } from '../../../../common/storage_explorer';
+import { useProfilingChartsTheme } from '../../../hooks/use_profiling_charts_theme';
+import { getGroupedIndexLabel } from './utils';
 
 interface Props {
-  data?: StotageExplorerIndicesDataBreakdownChart;
+  data?: StorageDetailsGroupedByIndex[];
 }
 
-export function DataBreakdownChart({ data }: Props) {
+export function GroupedIndexDetailsChart({ data = [] }: Props) {
   const theme = useEuiTheme();
   const { chartsBaseTheme, chartsTheme } = useProfilingChartsTheme();
   const groupedPalette = euiPaletteColorBlind();
 
-  const sunburstData = data
-    ? Object.keys(data).map((key) => {
-        const indexName = key as StorageExplorerIndexNames;
-        const value = data[indexName] as StorageExplorerIndexDataBreakdownStatsStats;
-        return { key: getIndexLabel(indexName), ...value };
-      })
-    : [];
+  const sunburstData = data.map((item) => {
+    const { indexName, ...values } = item;
+    return { key: getGroupedIndexLabel(item.indexName), ...values };
+  });
 
   return (
     <div

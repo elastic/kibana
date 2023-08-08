@@ -9,10 +9,10 @@ import { getRoutePaths } from '../common';
 import { BaseFlameGraph, createFlameGraph, ElasticFlameGraph } from '../common/flamegraph';
 import { TopNFunctions } from '../common/functions';
 import type {
-  StorageExplorerSummary,
+  IndicesStorageDetails,
   StorageExplorerHostBreakdownSizeChart,
   StorageExplorerHostDetails,
-  StotageExplorerIndicesDataBreakdownChart,
+  StorageExplorerSummary,
 } from '../common/storage_explorer';
 import { TopNResponse } from '../common/topn';
 import type { SetupDataCollectionInstructions } from '../server/lib/setup/get_setup_instructions';
@@ -65,9 +65,9 @@ export interface Services {
     timeTo: number;
     kuery: string;
   }) => Promise<StorageExplorerHostDetails[]>;
-  fetchStorageExplorerIndicesDataBreakdownChart: (params: {
+  fetchStorageExplorerIndicesStorageDetails: (params: {
     http: AutoAbortedHttpService;
-  }) => Promise<StotageExplorerIndicesDataBreakdownChart>;
+  }) => Promise<IndicesStorageDetails>;
 }
 
 export function getServices(): Services {
@@ -154,11 +154,11 @@ export function getServices(): Services {
       })) as StorageExplorerHostDetails[];
       return eventsMetricsSizeTimeseries;
     },
-    fetchStorageExplorerIndicesDataBreakdownChart: async ({ http }) => {
+    fetchStorageExplorerIndicesStorageDetails: async ({ http }) => {
       const eventsMetricsSizeTimeseries = (await http.get(
-        paths.StorageExplorerIndicesDataBreakdownChart,
+        paths.StorageExplorerIndicesStorageDetails,
         {}
-      )) as StotageExplorerIndicesDataBreakdownChart;
+      )) as IndicesStorageDetails;
       return eventsMetricsSizeTimeseries;
     },
   };

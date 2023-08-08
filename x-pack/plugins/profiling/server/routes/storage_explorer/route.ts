@@ -14,8 +14,9 @@ import { getDailyDataGenerationSize } from './get_daily_data_generation.size';
 import { getHostBreakdownSizeTimeseries } from './get_host_breakdown_size_timeseries';
 import { getHostDetails } from './get_host_details';
 import { getHostAndDistinctProbabilisticCount } from './get_host_distinct_probabilistic_count';
-import { getIndicesDataBreakdownChart } from './get_indices_data_breakdown_chart';
-import { getNodesStats, getTotalIndicesStats, getTotalSymbolsStats } from './get_indices_stats';
+import { allIndices, getIndicesStats, getNodesStats, symbolsIndices } from './get_indices_stats';
+import { getStorageDetailsGroupedByIndex } from './get_storage_details_grouped_by_index';
+import { getStorageDetailsPerIndex } from './get_storage_details_per_index';
 
 export function registerStorageExplorerRoute({
   logger,
@@ -47,11 +48,13 @@ export function registerStorageExplorerRoute({
         nodeStats,
         hostAndDistinctProbabilisticCount,
       ] = await Promise.all([
-        getTotalIndicesStats({
+        getIndicesStats({
           client: profilingEsClient,
+          indices: allIndices,
         }),
-        getTotalSymbolsStats({
+        getIndicesStats({
           client: profilingEsClient,
+          indices: symbolsIndices,
         }),
         getNodesStats({ client: profilingEsClient }),
         getHostAndDistinctProbabilisticCount({
@@ -152,7 +155,7 @@ export function registerStorageExplorerRoute({
 
   router.get(
     {
-      path: paths.StorageExplorerIndicesDataBreakdownChart,
+      path: paths.StorageExplorerIndicesStorageDetails,
       options: { tags: ['access:profiling'] },
       validate: false,
     },
@@ -161,25 +164,14 @@ export function registerStorageExplorerRoute({
       const profilingClient = createProfilingEsClient({ request, esClient: client });
       const profilingEsClient = profilingClient.getEsClient();
 
-      const mainIndicesStats = await getIndicesDataBreakdownChart({ client: profilingEsClient });
+      const [storageDetailsGroupedByIndex, storageDetailsPerIndex] = await Promise.all([
+        getStorageDetailsGroupedByIndex({
+          client: profilingEsClient,
+        }),
+        getStorageDetailsPerIndex({ client: profilingEsClient }),
+      ]);
 
-      return response.ok({ body: mainIndicesStats });
-    }
-  );
-  router.get(
-    {
-      path: paths.StorageExplorerIndicesDataDetails,
-      options: { tags: ['access:profiling'] },
-      validate: false,
-    },
-    async (context, request, response) => {
-      const client = await getClient(context);
-      const profilingClient = createProfilingEsClient({ request, esClient: client });
-      const profilingEsClient = profilingClient.getEsClient();
-
-      // const mainIndicesStats = await getDataBreakdownSize({ client: profilingEsClient });
-
-      return response.ok({ body: [] });
+      return response.ok({ body: { storageDetailsGroupedByIndex, storageDetailsPerIndex } });
     }
   );
 }

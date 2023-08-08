@@ -11,7 +11,7 @@ import { computeBucketWidthFromTimeRangeAndBucketCount } from '../../../common/h
 import { StorageExplorerHostBreakdownSizeChart } from '../../../common/storage_explorer';
 import { ProfilingESClient } from '../../utils/create_profiling_es_client';
 import { getEstimatedSizeForDocumentsInIndex } from './get_daily_data_generation.size';
-import { getTotalIndicesStats } from './get_indices_stats';
+import { allIndices, getIndicesStats } from './get_indices_stats';
 import { getProfilingHostsDetailsById } from './get_profiling_hosts_details_by_id';
 
 export async function getHostBreakdownSizeTimeseries({
@@ -28,7 +28,7 @@ export async function getHostBreakdownSizeTimeseries({
   const bucketWidth = computeBucketWidthFromTimeRangeAndBucketCount(timeFrom, timeTo, 50);
 
   const [{ indices: allIndicesStats }, response] = await Promise.all([
-    getTotalIndicesStats({ client: client.getEsClient() }),
+    getIndicesStats({ client: client.getEsClient(), indices: allIndices }),
     client.search('profiling_events_metrics_size', {
       index: ['profiling-events-*', 'profiling-metrics'],
       body: {

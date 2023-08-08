@@ -16,23 +16,23 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { AsyncComponent } from '../../components/async_component';
-import { useProfilingDependencies } from '../../components/contexts/profiling_dependencies/use_profiling_dependencies';
-import { useTimeRangeAsync } from '../../hooks/use_time_range_async';
-import { DataBreakdownChart } from './data_breakdown_chart';
-import { DataBreakdownIndicesSize } from './data_breakdown_indices_size';
+import { AsyncComponent } from '../../../components/async_component';
+import { useProfilingDependencies } from '../../../components/contexts/profiling_dependencies/use_profiling_dependencies';
+import { useTimeRangeAsync } from '../../../hooks/use_time_range_async';
+import { GroupedIndexDetailsChart } from './grouped_index_details_chart';
+import { GroupedIndexDetails } from './grouped_index_details';
 
 export function DataBreakdown() {
   const theme = useEuiTheme();
   const {
-    services: { fetchStorageExplorerIndicesDataBreakdownChart },
+    services: { fetchStorageExplorerIndicesStorageDetails },
   } = useProfilingDependencies();
 
-  const storageExplorerDataBreakdownChart = useTimeRangeAsync(
+  const indicesStorageDetails = useTimeRangeAsync(
     ({ http }) => {
-      return fetchStorageExplorerIndicesDataBreakdownChart({ http });
+      return fetchStorageExplorerIndicesStorageDetails({ http });
     },
-    [fetchStorageExplorerIndicesDataBreakdownChart]
+    [fetchStorageExplorerIndicesStorageDetails]
   );
 
   return (
@@ -46,10 +46,12 @@ export function DataBreakdown() {
       </EuiTitle>
       <EuiSpacer />
       <EuiPanel hasShadow={false} hasBorder>
-        <AsyncComponent size="xl" {...storageExplorerDataBreakdownChart} style={{ height: 400 }}>
+        <AsyncComponent size="xl" {...indicesStorageDetails} style={{ height: 400 }}>
           <EuiFlexGroup direction="row" gutterSize="none">
             <EuiFlexItem>
-              <DataBreakdownChart data={storageExplorerDataBreakdownChart.data} />
+              <GroupedIndexDetailsChart
+                data={indicesStorageDetails.data?.storageDetailsGroupedByIndex}
+              />
             </EuiFlexItem>
             <EuiFlexItem
               grow={false}
@@ -61,7 +63,9 @@ export function DataBreakdown() {
               }}
             />
             <EuiFlexItem>
-              <DataBreakdownIndicesSize data={storageExplorerDataBreakdownChart.data} />
+              <GroupedIndexDetails
+                data={indicesStorageDetails.data?.storageDetailsGroupedByIndex}
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
         </AsyncComponent>
