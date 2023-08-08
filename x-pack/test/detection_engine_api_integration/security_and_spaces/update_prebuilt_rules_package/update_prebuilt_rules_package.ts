@@ -24,6 +24,7 @@ import {
 } from '../../utils';
 import { reviewPrebuiltRulesToInstall } from '../../utils/prebuilt_rules/review_install_prebuilt_rules';
 import { reviewPrebuiltRulesToUpgrade } from '../../utils/prebuilt_rules/review_upgrade_prebuilt_rules';
+import { ALL_SAVED_OBJECT_INDICES } from '@kbn/core-saved-objects-server';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -133,6 +134,8 @@ export default ({ getService }: FtrProviderContext): void => {
       // Verify that the _perform endpoint returns the same number of installed rules as the status endpoint
       // and the _review endpoint
       const installPrebuiltRulesResponse = await installPrebuiltRules(supertest);
+      await es.indices.refresh({ index: ALL_SAVED_OBJECT_INDICES });
+
       expect(installPrebuiltRulesResponse.summary.succeeded).toBe(
         statusAfterPackageInstallation.stats.num_prebuilt_rules_to_install
       );
@@ -168,8 +171,9 @@ export default ({ getService }: FtrProviderContext): void => {
         .type('application/json')
         .send({ force: true })
         .expect(200);
-
       expect(installLatestPackageResponse.body.items.length).toBeGreaterThanOrEqual(0);
+
+      await es.indices.refresh({ index: ALL_SAVED_OBJECT_INDICES });
 
       // Verify status after intallation of the latest package
       const statusAfterLatestPackageInstallation = await getPrebuiltRulesStatus(supertest);
@@ -198,6 +202,8 @@ export default ({ getService }: FtrProviderContext): void => {
       const installPrebuiltRulesResponseAfterLatestPackageInstallation = await installPrebuiltRules(
         supertest
       );
+      await es.indices.refresh({ index: ALL_SAVED_OBJECT_INDICES });
+
       expect(installPrebuiltRulesResponseAfterLatestPackageInstallation.summary.succeeded).toBe(
         statusAfterLatestPackageInstallation.stats.num_prebuilt_rules_to_install
       );
@@ -241,6 +247,8 @@ export default ({ getService }: FtrProviderContext): void => {
       const upgradePrebuiltRulesResponseAfterLatestPackageInstallation = await upgradePrebuiltRules(
         supertest
       );
+      await es.indices.refresh({ index: ALL_SAVED_OBJECT_INDICES });
+
       expect(upgradePrebuiltRulesResponseAfterLatestPackageInstallation.summary.succeeded).toEqual(
         statusAfterLatestPackageInstallation.stats.num_prebuilt_rules_to_upgrade
       );
