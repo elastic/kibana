@@ -127,24 +127,32 @@ export function FieldSelect({
       );
     };
 
-    const [timeSeriesFields, nonTimeseriesFields] = partition(availableFields, isTimeSeriesFields);
+    const [availableTimeSeriesFields, availableNonTimeseriesFields] = partition(
+      availableFields,
+      isTimeSeriesFields
+    );
+    const [emptyTimeSeriesFields, emptyNonTimeseriesFields] = partition(
+      emptyFields,
+      isTimeSeriesFields
+    );
 
     const timeSeriesFieldsOptions = constructFieldsOptions(
-      timeSeriesFields,
+      // This group includes both available and empty fields
+      availableTimeSeriesFields.concat(emptyTimeSeriesFields),
       i18n.translate('xpack.lens.indexPattern.timeSeriesFieldsLabel', {
         defaultMessage: 'Time series dimensions',
       })
     );
 
     const availableFieldsOptions = constructFieldsOptions(
-      nonTimeseriesFields,
+      availableNonTimeseriesFields,
       i18n.translate('xpack.lens.indexPattern.availableFieldsLabel', {
         defaultMessage: 'Available fields',
       })
     );
 
     const emptyFieldsOptions = constructFieldsOptions(
-      emptyFields,
+      emptyNonTimeseriesFields,
       i18n.translate('xpack.lens.indexPattern.emptyFieldsLabel', {
         defaultMessage: 'Empty fields',
       })
