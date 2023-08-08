@@ -29,3 +29,7 @@ export type LogRateAnalysisType =
  * In future versions we might use a user specific seed or let the user customise it.
  */
 export const RANDOM_SAMPLER_SEED = 3867412;
+
+export const CASES_ATTACHMENT_CHANGE_POINT_CHART = 'aiopsChangePointChart';
+
+export const EMBEDDABLE_CHANGE_POINT_CHART_TYPE = 'aiopsChangePointChart' as const;
