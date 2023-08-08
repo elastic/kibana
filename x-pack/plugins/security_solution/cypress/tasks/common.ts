@@ -108,7 +108,7 @@ export const deleteAlertsAndRules = () => {
       action: 'delete',
     },
     failOnStatusCode: false,
-    headers: { 'kbn-xsrf': 'cypress-creds-via-config' },
+    headers: { 'kbn-xsrf': 'cypress-creds', 'x-elastic-internal-origin': 'security-solution' },
     timeout: 300000,
   });
 
@@ -250,7 +250,8 @@ export const postDataView = (dataSource: string) => {
       },
     },
     headers: {
-      'kbn-xsrf': 'cypress-creds-via-config',
+      'kbn-xsrf': 'cypress-creds',
+      'x-elastic-internal-origin': 'security-solution',
       [ELASTIC_HTTP_VERSION_HEADER]: [INITIAL_REST_VERSION],
     },
     failOnStatusCode: false,
@@ -261,7 +262,7 @@ export const deleteDataView = (dataSource: string) => {
   rootRequest({
     method: 'DELETE',
     url: `api/data_views/data_view/${dataSource}`,
-    headers: { 'kbn-xsrf': 'cypress-creds' },
+    headers: { 'kbn-xsrf': 'cypress-creds', 'x-elastic-internal-origin': 'security-solution' },
     failOnStatusCode: false,
   });
 };

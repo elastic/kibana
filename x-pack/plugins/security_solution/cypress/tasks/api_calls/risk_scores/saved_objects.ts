@@ -17,7 +17,7 @@ export const deleteSavedObjects = (templateName: `${RiskScoreEntity}RiskScoreDas
     body: {
       deleteAll: true,
     },
-    headers: { 'kbn-xsrf': 'cypress-creds-via-config' },
+    headers: { 'kbn-xsrf': 'cypress-creds', 'x-elastic-internal-origin': 'security-solution' },
   });
 };
 
@@ -30,7 +30,7 @@ export const findSavedObjects = (riskScoreEntity: RiskScoreEntity, spaceId = 'de
     .request({
       method: 'get',
       url: `${SAVED_OBJECTS_URL}/_find?fields=id&type=tag&sort_field=updated_at&search=${search}&search_fields=name`,
-      headers: { 'kbn-xsrf': 'cypress-creds-via-config' },
+      headers: { 'kbn-xsrf': 'cypress-creds', 'x-elastic-internal-origin': 'security-solution' },
     })
     .then((res) =>
       cy.request({
@@ -38,7 +38,7 @@ export const findSavedObjects = (riskScoreEntity: RiskScoreEntity, spaceId = 'de
         url: `${SAVED_OBJECTS_URL}/_find?fields=id&type=index-pattern&type=tag&type=visualization&type=dashboard&type=lens&sort_field=updated_at&has_reference=${getReference(
           res.body.saved_objects[0].id
         )}`,
-        headers: { 'kbn-xsrf': 'cypress-creds-via-config' },
+        headers: { 'kbn-xsrf': 'cypress-creds', 'x-elastic-internal-origin': 'security-solution' },
       })
     );
 };

@@ -17,5 +17,5 @@ export const addNoteToTimeline = (
       version: null,
       note: { note, timelineId },
     },
-    headers: { 'kbn-xsrf': 'cypress-creds' },
+    headers: { 'kbn-xsrf': 'cypress-creds', 'x-elastic-internal-origin': 'security-solution' },
   });

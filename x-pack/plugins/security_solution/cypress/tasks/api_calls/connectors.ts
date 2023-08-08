@@ -10,7 +10,7 @@ export const createConnector = (connector: Record<string, unknown>) =>
     method: 'POST',
     url: '/api/actions/action',
     body: connector,
-    headers: { 'kbn-xsrf': 'cypress-creds' },
+    headers: { 'kbn-xsrf': 'cypress-creds', 'x-elastic-internal-origin': 'security-solution' },
   });
 
 const slackConnectorAPIPayload = {

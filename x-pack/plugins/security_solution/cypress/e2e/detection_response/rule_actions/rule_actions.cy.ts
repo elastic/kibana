@@ -69,7 +69,7 @@ describe(
       cy.request({
         method: 'GET',
         url: `${Cypress.env('ELASTICSEARCH_URL')}/${index}/_search`,
-        headers: { 'kbn-xsrf': 'cypress-creds' },
+        headers: { 'kbn-xsrf': 'cypress-creds', 'x-elastic-internal-origin': 'security-solution' },
       }).then((response) => {
         expect(response.body.hits.hits[0]._source).to.deep.equal(expectedJson);
       });

@@ -137,7 +137,7 @@ export const deleteRuntimeField = (dataView: string, fieldName: string) => {
   rootRequest({
     url: deleteRuntimeFieldPath,
     method: 'DELETE',
-    headers: { 'kbn-xsrf': 'cypress-creds' },
+    headers: { 'kbn-xsrf': 'cypress-creds', 'x-elastic-internal-origin': 'security-solution' },
     failOnStatusCode: false,
   });
 };

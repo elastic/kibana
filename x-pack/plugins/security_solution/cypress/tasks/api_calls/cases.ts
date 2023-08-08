@@ -26,5 +26,5 @@ export const createCase = (newCase: TestCase) =>
       },
       owner: newCase.owner,
     },
-    headers: { 'kbn-xsrf': 'cypress-creds' },
+    headers: { 'kbn-xsrf': 'cypress-creds', 'x-elastic-internal-origin': 'security-solution' },
   });

@@ -23,7 +23,7 @@ export const startAlertsCasesTour = () =>
   cy.request({
     method: 'PUT',
     url: `${API_BASE_PATH}/state`,
-    headers: { 'kbn-xsrf': 'cypress-creds' },
+    headers: { 'kbn-xsrf': 'cypress-creds', 'x-elastic-internal-origin': 'security-solution' },
     body: {
       status: 'in_progress',
       guide: alertsGuideActiveState,
@@ -34,7 +34,7 @@ export const quitGlobalTour = () =>
   cy.request({
     method: 'PUT',
     url: `${API_BASE_PATH}/state`,
-    headers: { 'kbn-xsrf': 'cypress-creds' },
+    headers: { 'kbn-xsrf': 'cypress-creds', 'x-elastic-internal-origin': 'security-solution' },
     body: {
       status: 'quit',
       guide: {

@@ -12,7 +12,7 @@ const kibanaSettings = (body: Cypress.RequestBody) => {
     method: 'POST',
     url: 'internal/kibana/settings',
     body,
-    headers: { 'kbn-xsrf': 'cypress-creds' },
+    headers: { 'kbn-xsrf': 'cypress-creds', 'x-elastic-internal-origin': 'security-solution' },
   });
 };
 

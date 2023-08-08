@@ -22,7 +22,7 @@ export const createRule = (
     method: 'POST',
     url: DETECTION_ENGINE_RULES_URL,
     body: rule,
-    headers: { 'kbn-xsrf': 'cypress-creds' },
+    headers: { 'kbn-xsrf': 'cypress-creds', 'x-elastic-internal-origin': 'security-solution' },
     failOnStatusCode: false,
   });
 };
@@ -43,7 +43,7 @@ export const snoozeRule = (id: string, duration: number): Cypress.Chainable =>
         rRule: { dtstart: new Date().toISOString(), count: 1, tzid: moment().format('zz') },
       },
     },
-    headers: { 'kbn-xsrf': 'cypress-creds' },
+    headers: { 'kbn-xsrf': 'cypress-creds', 'x-elastic-internal-origin': 'security-solution' },
     failOnStatusCode: false,
   });
 
@@ -51,7 +51,7 @@ export const deleteCustomRule = (ruleId = '1') => {
   rootRequest({
     method: 'DELETE',
     url: `api/detection_engine/rules?rule_id=${ruleId}`,
-    headers: { 'kbn-xsrf': 'cypress-creds' },
+    headers: { 'kbn-xsrf': 'cypress-creds', 'x-elastic-internal-origin': 'security-solution' },
     failOnStatusCode: false,
   });
 };

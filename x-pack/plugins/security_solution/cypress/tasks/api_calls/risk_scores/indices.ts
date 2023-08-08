@@ -17,7 +17,7 @@ export const createIndex = (options: {
     method: 'put',
     url: `${INDICES_URL}/create`,
     body: options,
-    headers: { 'kbn-xsrf': 'cypress-creds-via-config' },
+    headers: { 'kbn-xsrf': 'cypress-creds', 'x-elastic-internal-origin': 'security-solution' },
   });
 };
 
@@ -29,7 +29,7 @@ export const deleteRiskScoreIndicies = (riskScoreEntity: RiskScoreEntity, spaceI
       body: {
         indices: [getPivotTransformIndex(riskScoreEntity, spaceId)],
       },
-      headers: { 'kbn-xsrf': 'cypress-creds-via-config' },
+      headers: { 'kbn-xsrf': 'cypress-creds', 'x-elastic-internal-origin': 'security-solution' },
       failOnStatusCode: false,
     })
     .then(() => {
@@ -39,7 +39,7 @@ export const deleteRiskScoreIndicies = (riskScoreEntity: RiskScoreEntity, spaceI
         body: {
           indices: [getLatestTransformIndex(riskScoreEntity, spaceId)],
         },
-        headers: { 'kbn-xsrf': 'cypress-creds-via-config' },
+        headers: { 'kbn-xsrf': 'cypress-creds', 'x-elastic-internal-origin': 'security-solution' },
         failOnStatusCode: false,
       });
     });

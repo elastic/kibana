@@ -38,7 +38,7 @@ describe(
       cy.request({
         method: 'POST',
         url: INTERNAL_ALERTING_API_MAINTENANCE_WINDOW_PATH,
-        headers: { 'kbn-xsrf': 'cypress-creds' },
+        headers: { 'kbn-xsrf': 'cypress-creds', 'x-elastic-internal-origin': 'security-solution' },
         body,
       }).then((response) => {
         maintenanceWindowId = response.body.id;
@@ -50,7 +50,7 @@ describe(
       cy.request({
         method: 'DELETE',
         url: `${INTERNAL_ALERTING_API_MAINTENANCE_WINDOW_PATH}/${maintenanceWindowId}`,
-        headers: { 'kbn-xsrf': 'cypress-creds' },
+        headers: { 'kbn-xsrf': 'cypress-creds', 'x-elastic-internal-origin': 'security-solution' },
       });
     });
 

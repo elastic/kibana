@@ -20,7 +20,7 @@ export const createListsIndex = () => {
   cy.request({
     method: 'POST',
     url: '/api/lists/index',
-    headers: { 'kbn-xsrf': 'cypress-creds' },
+    headers: { 'kbn-xsrf': 'cypress-creds', 'x-elastic-internal-origin': 'security-solution' },
     failOnStatusCode: false,
   });
 };
@@ -83,7 +83,7 @@ const deleteValueList = (list: string): Cypress.Chainable<Cypress.Response<unkno
   return cy.request({
     method: 'DELETE',
     url: `api/lists?id=${list}`,
-    headers: { 'kbn-xsrf': 'delete-lists' },
+    headers: { 'kbn-xsrf': 'delete-lists', 'x-elastic-internal-origin': 'security-solution' },
   });
 };
 
@@ -114,6 +114,7 @@ const uploadListItemData = (
     encoding: 'binary',
     headers: {
       'kbn-xsrf': 'upload-value-lists',
+      'x-elastic-internal-origin': 'security-solution',
       'Content-Type': 'multipart/form-data; boundary=----WebKitFormBoundaryJLrRH89J8QVArZyv',
     },
     body: `------WebKitFormBoundaryJLrRH89J8QVArZyv\nContent-Disposition: form-data; name="file"; filename="${file}"\n\n${removedEmptyLines}`,

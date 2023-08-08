@@ -10,7 +10,7 @@ export const deleteConfiguration = () => {
     method: 'GET',
     url: `/api/saved_objects/_find?type=risk-engine-configuration`,
     failOnStatusCode: false,
-    headers: { 'kbn-xsrf': 'cypress-creds-via-config' },
+    headers: { 'kbn-xsrf': 'cypress-creds', 'x-elastic-internal-origin': 'security-solution' },
   }).then((res) => {
     const savedObjectId = res?.body?.saved_objects?.[0]?.id;
     if (savedObjectId) {
@@ -18,7 +18,7 @@ export const deleteConfiguration = () => {
         method: 'DELETE',
         url: `/api/saved_objects/risk-engine-configuration/${savedObjectId}`,
         failOnStatusCode: false,
-        headers: { 'kbn-xsrf': 'cypress-creds-via-config' },
+        headers: { 'kbn-xsrf': 'cypress-creds', 'x-elastic-internal-origin': 'security-solution' },
       });
     }
   });

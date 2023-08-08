@@ -11,7 +11,7 @@ export const createIngestPipeline = (options: { name: string; processors: Array<
   return cy.request({
     method: 'post',
     url: `${INGEST_PIPELINES_URL}`,
-    headers: { 'kbn-xsrf': 'cypress-creds-via-config' },
+    headers: { 'kbn-xsrf': 'cypress-creds', 'x-elastic-internal-origin': 'security-solution' },
     body: options,
   });
 };
@@ -20,7 +20,7 @@ export const deleteRiskScoreIngestPipelines = (names: string[]) => {
   return cy.request({
     method: 'delete',
     url: `${INGEST_PIPELINES_URL}/${names.join(',')}`,
-    headers: { 'kbn-xsrf': 'cypress-creds-via-config' },
+    headers: { 'kbn-xsrf': 'cypress-creds', 'x-elastic-internal-origin': 'security-solution' },
     failOnStatusCode: false,
   });
 };

@@ -10,7 +10,7 @@ export const deleteIndex = (index: string) => {
   rootRequest({
     method: 'DELETE',
     url: `${Cypress.env('ELASTICSEARCH_URL')}/${index}`,
-    headers: { 'kbn-xsrf': 'cypress-creds' },
+    headers: { 'kbn-xsrf': 'cypress-creds', 'x-elastic-internal-origin': 'security-solution' },
     failOnStatusCode: false,
   });
 };
@@ -39,7 +39,7 @@ export const waitForNewDocumentToBeIndexed = (index: string, initialNumberOfDocu
       rootRequest<{ hits: { hits: unknown[] } }>({
         method: 'GET',
         url: `${Cypress.env('ELASTICSEARCH_URL')}/${index}/_search`,
-        headers: { 'kbn-xsrf': 'cypress-creds' },
+        headers: { 'kbn-xsrf': 'cypress-creds', 'x-elastic-internal-origin': 'security-solution' },
         failOnStatusCode: false,
       }).then((response) => {
         if (response.status !== 200) {
@@ -58,7 +58,7 @@ export const refreshIndex = (index: string) => {
       rootRequest({
         method: 'POST',
         url: `${Cypress.env('ELASTICSEARCH_URL')}/${index}/_refresh`,
-        headers: { 'kbn-xsrf': 'cypress-creds' },
+        headers: { 'kbn-xsrf': 'cypress-creds', 'x-elastic-internal-origin': 'security-solution' },
         failOnStatusCode: false,
       }).then((response) => {
         if (response.status !== 200) {

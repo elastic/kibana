@@ -473,7 +473,10 @@ export const setKibanaTimezoneToUTC = () =>
       method: 'POST',
       url: 'internal/kibana/settings',
       body: { changes: { 'dateFormat:tz': 'UTC' } },
-      headers: { 'kbn-xsrf': 'set-kibana-timezone-utc' },
+      headers: {
+        'kbn-xsrf': 'set-kibana-timezone-utc',
+        'x-elastic-internal-origin': 'security-solution',
+      },
     })
     .then(() => {
       cy.reload();

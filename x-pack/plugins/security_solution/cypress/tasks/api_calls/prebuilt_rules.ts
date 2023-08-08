@@ -14,7 +14,7 @@ export const getPrebuiltRulesStatus = () => {
   return cy.request<PrePackagedRulesStatusResponse>({
     method: 'GET',
     url: 'api/detection_engine/rules/prepackaged/_status',
-    headers: { 'kbn-xsrf': 'cypress-creds' },
+    headers: { 'kbn-xsrf': 'cypress-creds', 'x-elastic-internal-origin': 'security-solution' },
   });
 };
 
@@ -34,7 +34,7 @@ export const installAllPrebuiltRulesRequest = () => {
   return cy.request({
     method: 'POST',
     url: 'internal/detection_engine/prebuilt_rules/installation/_perform',
-    headers: { 'kbn-xsrf': 'cypress-creds' },
+    headers: { 'kbn-xsrf': 'cypress-creds', 'x-elastic-internal-origin': 'security-solution' },
     body: {
       mode: 'ALL_RULES',
     },
@@ -84,7 +84,11 @@ export const waitUntilAllRuleAssetsCreated = (
         .request({
           method: 'GET',
           url: `${Cypress.env('ELASTICSEARCH_URL')}/${index}/_search`,
-          headers: { 'kbn-xsrf': 'cypress-creds', 'Content-Type': 'application/json' },
+          headers: {
+            'kbn-xsrf': 'cypress-creds',
+            'x-elastic-internal-origin': 'security-solution',
+            'Content-Type': 'application/json',
+          },
           failOnStatusCode: false,
           body: {
             query: {
@@ -126,7 +130,11 @@ export const createNewRuleAsset = ({
         .request({
           method: 'PUT',
           url,
-          headers: { 'kbn-xsrf': 'cypress-creds', 'Content-Type': 'application/json' },
+          headers: {
+            'kbn-xsrf': 'cypress-creds',
+            'x-elastic-internal-origin': 'security-solution',
+            'Content-Type': 'application/json',
+          },
           failOnStatusCode: false,
           body: rule,
         })
@@ -166,6 +174,7 @@ export const bulkCreateRuleAssets = ({
     },
     headers: {
       'Content-Type': 'application/json',
+      'x-elastic-internal-origin': 'security-solution',
     },
   });
 
@@ -175,7 +184,11 @@ export const bulkCreateRuleAssets = ({
         .request({
           method: 'POST',
           url,
-          headers: { 'kbn-xsrf': 'cypress-creds', 'Content-Type': 'application/json' },
+          headers: {
+            'kbn-xsrf': 'cypress-creds',
+            'x-elastic-internal-origin': 'security-solution',
+            'Content-Type': 'application/json',
+          },
           failOnStatusCode: false,
           body: bulkIndexRequestBody,
         })
@@ -190,7 +203,11 @@ export const getRuleAssets = (index: string | undefined = '.kibana_security_solu
   return cy.request({
     method: 'GET',
     url,
-    headers: { 'kbn-xsrf': 'cypress-creds', 'Content-Type': 'application/json' },
+    headers: {
+      'kbn-xsrf': 'cypress-creds',
+      'x-elastic-internal-origin': 'security-solution',
+      'Content-Type': 'application/json',
+    },
     failOnStatusCode: false,
     body: {
       query: {

@@ -12,7 +12,7 @@ export const createStoredScript = (options: { id: string; script: {} }) => {
     method: 'put',
     url: `${STORED_SCRIPTS_URL}/create`,
     body: options,
-    headers: { 'kbn-xsrf': 'cypress-creds-via-config' },
+    headers: { 'kbn-xsrf': 'cypress-creds', 'x-elastic-internal-origin': 'security-solution' },
   });
 };
 
@@ -22,7 +22,7 @@ const deleteStoredScript = (id: string) => {
     url: `${STORED_SCRIPTS_URL}/delete`,
     body: { id },
     failOnStatusCode: false,
-    headers: { 'kbn-xsrf': 'cypress-creds-via-config' },
+    headers: { 'kbn-xsrf': 'cypress-creds', 'x-elastic-internal-origin': 'security-solution' },
   });
 };
 

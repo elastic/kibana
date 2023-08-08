@@ -298,7 +298,7 @@ export const installRiskScoreModule = () => {
     body: {
       riskScoreEntity: 'host',
     },
-    headers: { 'kbn-xsrf': 'cypress-creds' },
+    headers: { 'kbn-xsrf': 'cypress-creds', 'x-elastic-internal-origin': 'security-solution' },
   })
     .its('status')
     .should('eql', 200);
