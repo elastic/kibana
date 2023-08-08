@@ -9,7 +9,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   EuiButtonIcon,
   EuiButtonEmpty,
-  EuiFieldText,
+  EuiTextArea,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
@@ -41,13 +41,13 @@ export function ChatPromptEditor({ disabled, loading, onSubmit }: ChatPromptEdit
 
   const { model, initialJsonString } = useJsonEditorModel(selectedFunction);
 
-  const ref = useRef<HTMLInputElement>(null);
+  const textAreaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     setFunctionPayload(initialJsonString);
   }, [initialJsonString, selectedFunction]);
 
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     setPrompt(event.currentTarget.value);
   };
 
@@ -60,12 +60,20 @@ export function ChatPromptEditor({ disabled, loading, onSubmit }: ChatPromptEdit
     setFunctionPayload('');
   };
 
+  const handleResizeTextArea = (textarea: HTMLTextAreaElement | null) => {
+    if (textarea) {
+      textarea.style.height = 'auto';
+      textarea.style.height = textarea?.scrollHeight + 'px';
+    }
+  };
+
   const handleSubmit = useCallback(async () => {
     const currentPrompt = prompt;
     const currentPayload = functionPayload;
 
     setPrompt('');
     setFunctionPayload(undefined);
+    handleResizeTextArea(textAreaRef.current);
 
     try {
       if (selectedFunction) {
@@ -94,7 +102,7 @@ export function ChatPromptEditor({ disabled, loading, onSubmit }: ChatPromptEdit
 
   useEffect(() => {
     const keyboardListener = (event: KeyboardEvent) => {
-      if (event.key === keys.ENTER) {
+      if (!event.shiftKey && event.key === keys.ENTER) {
         handleSubmit();
       }
     };
@@ -107,9 +115,16 @@ export function ChatPromptEditor({ disabled, loading, onSubmit }: ChatPromptEdit
   }, [handleSubmit]);
 
   useEffect(() => {
-    if (ref.current) {
-      ref.current.focus();
+    const textarea = textAreaRef.current;
+
+    if (textarea) {
+      textarea.focus();
+      textarea.addEventListener('input', () => handleResizeTextArea(textarea), false);
     }
+
+    return () => {
+      textarea?.removeEventListener('input', () => handleResizeTextArea(textarea), false);
+    };
   });
 
   return (
@@ -187,15 +202,16 @@ export function ChatPromptEditor({ disabled, loading, onSubmit }: ChatPromptEdit
                 />
               </EuiPanel>
             ) : (
-              <EuiFieldText
+              <EuiTextArea
+                resize="vertical"
+                rows={1}
                 fullWidth
-                value={prompt}
                 placeholder={i18n.translate('xpack.observabilityAiAssistant.prompt.placeholder', {
                   defaultMessage: 'Press ‘$’ for function recommendations',
                 })}
-                inputRef={ref}
+                value={prompt}
+                inputRef={textAreaRef}
                 onChange={handleChange}
-                onSubmit={handleSubmit}
               />
             )}
           </EuiFlexItem>
