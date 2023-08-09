@@ -7,7 +7,7 @@
  */
 
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
-import { cloneDeepWith } from 'lodash';
+import { cloneDeepWith, isString } from 'lodash';
 import { Key, Origin, WebDriver } from 'selenium-webdriver';
 import { Driver as ChromiumWebDriver } from 'selenium-webdriver/chrome';
 import { modifyUrl } from '@kbn/std';
@@ -17,7 +17,7 @@ import { NoSuchSessionError } from 'selenium-webdriver/lib/error';
 import { WebElementWrapper } from '../lib/web_element_wrapper';
 import { FtrProviderContext, FtrService } from '../../ftr_provider_context';
 import { Browsers } from '../remote/browsers';
-import { NETWORK_PROFILES } from '../remote/network_profiles';
+import { NetworkOptions, NetworkProfile, NETWORK_PROFILES } from '../remote/network_profiles';
 
 export type Browser = BrowserService;
 
@@ -673,7 +673,7 @@ class BrowserService extends FtrService {
    */
   public async getNetworkConditions() {
     if (this.isChromium()) {
-      return this.driver.getNetworkConditions();
+      return this.driver.getNetworkConditions().catch(() => undefined); // Return undefined instead of throwing if no conditions are set.
     } else {
       const message =
         'WebDriver does not support the .getNetworkConditions method.\nProbably the browser in used is not chromium based.';
@@ -688,15 +688,8 @@ class BrowserService extends FtrService {
    * @return {Promise<void>}
    */
   public async restoreNetworkConditions() {
-    if (this.isChromium()) {
-      this.log.debug('Restore network conditions simulation.');
-      return this.setNetworkConditions({});
-    } else {
-      const message =
-        'WebDriver does not support the .deleteNetworkConditions method.\nProbably the browser in used is not chromium based.';
-      this.log.error(message);
-      throw new Error(message);
-    }
+    this.log.debug('Restore network conditions simulation.');
+    return this.setNetworkConditions('NO_THROTTLING');
   }
 
   /**
@@ -704,34 +697,28 @@ class BrowserService extends FtrService {
    *
    * __Sample Usage:__
    *
-   *  driver.setNetworkConditions({
-   *    offline: false,
-   *    latency: 5, // Additional latency (ms).
-   *    download_throughput: 500 * 1024, // Maximal aggregated download throughput.
-   *    upload_throughput: 500 * 1024 // Maximal aggregated upload throughput.
+   * browser.setNetworkConditions('FAST_3G')
+   * browser.setNetworkConditions('SLOW_3G')
+   * browser.setNetworkConditions('OFFLINE')
+   * browser.setNetworkConditions({
+   *   offline: false,
+   *   latency: 5, // Additional latency (ms).
+   *   download_throughput: 500 * 1024, // Maximal aggregated download throughput.
+   *   upload_throughput: 500 * 1024, // Maximal aggregated upload throughput.
    * });
    *
    * https://www.selenium.dev/selenium/docs/api/javascript/module/selenium-webdriver/chrome_exports_Driver.html#setNetworkConditions
    *
    * @return {Promise<void>}
    */
-  public async setNetworkConditions(specs: object) {
-    const {
-      DOWNLOAD: downloadThroughput,
-      UPLOAD: uploadThroughput,
-      LATENCY: latency,
-    } = NETWORK_PROFILES.CLOUD_USER;
-
-    const defaultSpecs = {
-      offline: false,
-      latency,
-      download_throughput: downloadThroughput,
-      upload_throughput: uploadThroughput,
-    };
+  public async setNetworkConditions(profileOrOptions: NetworkProfile | NetworkOptions) {
+    const networkOptions = isString(profileOrOptions)
+      ? NETWORK_PROFILES[profileOrOptions]
+      : profileOrOptions;
 
     if (this.isChromium()) {
-      this.log.debug('Set network conditions simulation.');
-      return this.driver.setNetworkConditions({ ...defaultSpecs, ...specs });
+      this.log.debug(`Set network conditions with profile "${profileOrOptions}".`);
+      return this.driver.setNetworkConditions(networkOptions);
     } else {
       const message =
         'WebDriver does not support the .setNetworkCondition method.\nProbably the browser in used is not chromium based.';

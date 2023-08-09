@@ -174,11 +174,11 @@ export default function (providerContext: FtrProviderContext) {
         });
       });
 
-      describe.only('when navigating into Uncategorized data streams', () => {
+      describe('when navigating into Uncategorized data streams', () => {
         it('should display a loading skeleton while loading', async function () {
           // Skip the test in case network condition utils are not available
           try {
-            await browser.setNetworkConditions({ download_throughput: 1024 }); // Almost stuck network conditions
+            await browser.setNetworkConditions('SLOW_3G'); // Almost stuck network conditions
             const unamanagedDatasetButton =
               await PageObjects.discoverLogExplorer.getUnmanagedDatasetsButton();
             await unamanagedDatasetButton.click();
@@ -187,7 +187,6 @@ export default function (providerContext: FtrProviderContext) {
 
             await browser.restoreNetworkConditions();
           } catch (error) {
-            console.log(error);
             this.skip();
           }
         });
@@ -203,7 +202,7 @@ export default function (providerContext: FtrProviderContext) {
               await PageObjects.discoverLogExplorer.assertNoDataStreamsPromptExists();
             });
 
-            await browser.setNetworkConditions({ offline: true });
+            await browser.setNetworkConditions('OFFLINE');
             await PageObjects.discoverLogExplorer.typeSearchFieldWith('a');
 
             await retry.try(async () => {
@@ -212,7 +211,6 @@ export default function (providerContext: FtrProviderContext) {
 
             await browser.restoreNetworkConditions();
           } catch (error) {
-            console.log(error);
             this.skip();
           }
         });
