@@ -116,5 +116,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect((await dataGrid.getDocTableRows()).length).to.be(10); // as in the saved search
       await dataGrid.checkCurrentRowsPerPageToBe(10);
     });
+
+    // TODO: add a test for sampleSize setting
   });
 }

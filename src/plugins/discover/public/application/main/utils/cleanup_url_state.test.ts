@@ -80,4 +80,29 @@ describe('cleanupUrlState', () => {
     } as unknown as AppStateUrl;
     expect(cleanupUrlState(state)).toMatchInlineSnapshot(`Object {}`);
   });
+
+  test('should keep a valid sampleSize', async () => {
+    const state = {
+      sampleSize: 50,
+    } as AppStateUrl;
+    expect(cleanupUrlState(state)).toMatchInlineSnapshot(`
+      Object {
+        "sampleSize": 50,
+      }
+    `);
+  });
+
+  test('should remove a negative sampleSize', async () => {
+    const state = {
+      sampleSize: -50,
+    } as AppStateUrl;
+    expect(cleanupUrlState(state)).toMatchInlineSnapshot(`Object {}`);
+  });
+
+  test('should remove an invalid sampleSize', async () => {
+    const state = {
+      sampleSize: 'test',
+    } as unknown as AppStateUrl;
+    expect(cleanupUrlState(state)).toMatchInlineSnapshot(`Object {}`);
+  });
 });
