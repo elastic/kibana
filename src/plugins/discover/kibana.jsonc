@@ -25,7 +25,8 @@
       "dataViewEditor",
       "expressions",
       "unifiedSearch",
-      "unifiedHistogram"
+      "unifiedHistogram",
+      "contentManagement"
     ],
     "optionalPlugins": [
       "home",
@@ -36,13 +37,7 @@
       "savedObjectsTaggingOss",
       "lens"
     ],
-    "requiredBundles": [
-      "kibanaUtils",
-      "kibanaReact",
-      "unifiedSearch"
-    ],
-    "extraPublicDirs": [
-      "common"
-    ]
+    "requiredBundles": ["kibanaUtils", "kibanaReact", "unifiedSearch"],
+    "extraPublicDirs": ["common"]
   }
 }

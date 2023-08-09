@@ -68,13 +68,13 @@ describe('registerUpsellings', () => {
     registerUpsellings(upselling, allProductTypes);
 
     const expectedPagesObject = Object.fromEntries(
-      upsellingPages.map(({ pageName }) => [pageName, expect.any(Function)])
+      upsellingPages.map(({ pageName }) => [pageName, expect.any(Object)])
     );
     expect(registerPages).toHaveBeenCalledTimes(1);
     expect(registerPages).toHaveBeenCalledWith(expectedPagesObject);
 
     const expectedSectionsObject = Object.fromEntries(
-      upsellingSections.map(({ id }) => [id, expect.any(Function)])
+      upsellingSections.map(({ id }) => [id, expect.any(Object)])
     );
     expect(registerSections).toHaveBeenCalledTimes(1);
     expect(registerSections).toHaveBeenCalledWith(expectedSectionsObject);
