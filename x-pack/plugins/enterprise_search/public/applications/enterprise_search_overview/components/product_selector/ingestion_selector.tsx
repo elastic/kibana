@@ -18,9 +18,9 @@ import {
   INGESTION_METHOD_IDS,
 } from '../../../../../common/constants';
 
-import apiLogo from '../../../../assets/images/api-cloud.svg';
-import connectorLogo from '../../../../assets/images/search-connector.svg';
-import crawlerLogo from '../../../../assets/images/search-crawler.svg';
+import apiLogo from '../../../../assets/images/api_cloud.svg';
+import connectorLogo from '../../../../assets/images/search_connector.svg';
+import crawlerLogo from '../../../../assets/images/search_crawler.svg';
 
 import {
   NEW_API_PATH,
