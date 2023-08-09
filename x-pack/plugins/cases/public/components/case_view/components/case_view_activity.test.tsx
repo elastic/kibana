@@ -37,7 +37,7 @@ import { useInfiniteFindCaseUserActions } from '../../../containers/use_infinite
 import { useOnUpdateField } from '../use_on_update_field';
 import { useCasesFeatures } from '../../../common/use_cases_features';
 import { ConnectorTypes, UserActionTypes } from '../../../../common/types/domain';
-import { CaseMetricsFeature } from '../../../../common/api/metrics/case';
+import { CaseMetricsFeature } from '../../../../common/types/api';
 
 jest.mock('../../../containers/use_infinite_find_case_user_actions');
 jest.mock('../../../containers/use_find_case_user_actions');

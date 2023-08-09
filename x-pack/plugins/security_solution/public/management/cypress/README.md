@@ -41,6 +41,8 @@ changes those defaults and target a run against different instances of the stack
 
 ```
 CYPRESS_KIBANA_URL
+CYPRESS_KIBANA_USERNAME
+CYPRESS_KIBANA_PASSWORD
 CYPRESS_ELASTICSEARCH_URL
 CYPRESS_ELASTICSEARCH_USERNAME
 CYPRESS_ELASTICSEARCH_PASSWORD
@@ -49,8 +51,8 @@ CYPRESS_BASE_URL
 
 Some notes:
 
-- The `ELASTICSEARCH_USERNAME` and `ELASTICSEARCH_PASSWORD` will be used for both Elasticsearch and Kibana access.
-- Both URL variables should not include credentials in the url
+- The `ELASTICSEARCH_USERNAME` and `ELASTICSEARCH_PASSWORD` should have sufficient privileges to CRUD on restricted indices.
+- Both URL variables should **NOT** include credentials in the url
 - `KIBANA_URL` and `BASE_URL` will almost always be the same
 
 Example:
@@ -59,7 +61,9 @@ Example:
 yarn --cwd x-pack/plugins/security_solution
 CYPRESS_BASE_URL=http://localhost:5601 \
 CYPRESS_KIBANA_URL=http://localhost:5601 \
-CYPRESS_ELASTICSEARCH_USERNAME=elastic \
+CYPRESS_KIBANA_USERNAME=elastic \
+CYPRESS_KIBANA_PASSWORD=changeme \
+CYPRESS_ELASTICSEARCH_USERNAME=system_indices_superuser \
 CYPRESS_ELASTICSEARCH_PASSWORD=changeme \
 CYPRESS_ELASTICSEARCH_URL=http://localhost:9200 cypress:dw:open
 ```

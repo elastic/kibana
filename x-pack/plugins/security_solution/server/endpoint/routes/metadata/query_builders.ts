@@ -16,7 +16,7 @@ import {
   METADATA_UNITED_INDEX,
 } from '../../../../common/endpoint/constants';
 import { buildStatusesKuery } from './support/agent_status';
-import type { GetMetadataListRequestQuery } from '../../../../common/endpoint/schema/metadata';
+import type { GetMetadataListRequestQuery } from '../../../../common/api/endpoint';
 
 /**
  * 00000000-0000-0000-0000-000000000000 is initial Elastic Agent id sent by Endpoint before policy is configured

@@ -8,11 +8,11 @@
 import React from 'react';
 import { EuiEmptyPrompt, EuiLink } from '@elastic/eui';
 import type { AppFeatureKey } from '@kbn/security-solution-plugin/common';
-import { useProductTypeByPLI } from '../hooks/use_product_type_by_pli';
+import { getProductTypeByPLI } from '../hooks/use_product_type_by_pli';
 
 export const GenericUpsellingSection: React.FC<{ requiredPLI: AppFeatureKey }> = React.memo(
   function GenericUpsellingSection({ requiredPLI }) {
-    const productTypeRequired = useProductTypeByPLI(requiredPLI);
+    const productTypeRequired = getProductTypeByPLI(requiredPLI);
 
     return (
       <EuiEmptyPrompt

@@ -41,6 +41,6 @@ export const platformServiceFactory: CanvaPlatformServiceFactory = ({
     getLegacyUrlConflict: startPlugins.spaces?.ui.components.getLegacyUrlConflict,
     getUISettings: () => coreStart.uiSettings,
     getHttp: () => coreStart.http,
-    getSavedObjectsManagement: () => startPlugins.savedObjectsManagement,
+    getContentManagement: () => startPlugins.contentManagement,
   };
 };

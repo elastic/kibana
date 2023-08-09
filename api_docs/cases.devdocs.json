@@ -496,7 +496,15 @@
               "section": "def-common.CasesFindResponseUI",
               "text": "CasesFindResponseUI"
             },
-            ">; getCasesStatus: (query: { from?: string | undefined; to?: string | undefined; owner?: string | string[] | undefined; }, signal?: AbortSignal | undefined) => Promise<{ countOpenCases: number; countInProgressCases: number; countClosedCases: number; }>; getCasesMetrics: (query: { features: string[]; } & { from?: string | undefined; to?: string | undefined; owner?: string | string[] | undefined; }, signal?: AbortSignal | undefined) => Promise<{ mttr?: number | null | undefined; }>; bulkGet: (params: { ids: string[]; }, signal?: AbortSignal | undefined) => Promise<{ cases: ({ description: string; status: ",
+            ">; getCasesStatus: (query: { from?: string | undefined; to?: string | undefined; owner?: string | string[] | undefined; }, signal?: AbortSignal | undefined) => Promise<{ countOpenCases: number; countInProgressCases: number; countClosedCases: number; }>; getCasesMetrics: (query: { features: ",
+            {
+              "pluginId": "cases",
+              "scope": "common",
+              "docId": "kibCasesPluginApi",
+              "section": "def-common.CaseMetricsFeature",
+              "text": "CaseMetricsFeature"
+            },
+            "[]; } & { from?: string | undefined; to?: string | undefined; owner?: string | string[] | undefined; }, signal?: AbortSignal | undefined) => Promise<{ mttr?: number | null | undefined; }>; bulkGet: (params: { ids: string[]; }, signal?: AbortSignal | undefined) => Promise<{ cases: ({ description: string; status: ",
             {
               "pluginId": "@kbn/cases-components",
               "scope": "common",
@@ -1390,6 +1398,18 @@
           "\nUser comment"
         ],
         "path": "x-pack/plugins/cases/common/types/domain/attachment/v1.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cases",
+        "id": "def-common.CaseMetricsFeature",
+        "type": "Enum",
+        "tags": [],
+        "label": "CaseMetricsFeature",
+        "description": [],
+        "path": "x-pack/plugins/cases/common/types/api/metrics/v1.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2353,6 +2373,21 @@
       },
       {
         "parentPluginId": "cases",
+        "id": "def-common.CasesMetricsResponse",
+        "type": "Type",
+        "tags": [],
+        "label": "CasesMetricsResponse",
+        "description": [],
+        "signature": [
+          "{ mttr?: number | null | undefined; }"
+        ],
+        "path": "x-pack/plugins/cases/common/types/api/metrics/v1.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cases",
         "id": "def-common.CasesStatus",
         "type": "Type",
         "tags": [],
@@ -2771,6 +2806,21 @@
           "\"securitySolution\""
         ],
         "path": "x-pack/plugins/cases/common/constants/owners.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cases",
+        "id": "def-common.SingleCaseMetricsResponse",
+        "type": "Type",
+        "tags": [],
+        "label": "SingleCaseMetricsResponse",
+        "description": [],
+        "signature": [
+          "{ alerts?: { count?: number | undefined; hosts?: { total: number; values: { name: string | undefined; id: string; count: number; }[]; } | undefined; users?: { total: number; values: { name: string; count: number; }[]; } | undefined; } | undefined; connectors?: { total: number; } | undefined; actions?: { isolateHost?: { isolate: { total: number; }; unisolate: { total: number; }; } | undefined; } | undefined; lifespan?: { creationDate: string; closeDate: string | null; statusInfo: { openDuration: number; inProgressDuration: number; reopenDates: string[]; }; } | undefined; }"
+        ],
+        "path": "x-pack/plugins/cases/common/types/api/metrics/v1.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

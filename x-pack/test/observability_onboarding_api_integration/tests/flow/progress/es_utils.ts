@@ -15,7 +15,7 @@ export function createLogDoc({
 }: {
   time: number;
   logFilepath: string;
-  serviceName: string;
+  serviceName?: string;
   namespace: string;
   datasetName: string;
   message: string;
@@ -30,9 +30,13 @@ export function createLogDoc({
         path: logFilepath,
       },
     },
-    service: {
-      name: serviceName,
-    },
+    ...(serviceName
+      ? {
+          service: {
+            name: serviceName,
+          },
+        }
+      : {}),
     data_stream: {
       namespace,
       type: 'logs',

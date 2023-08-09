@@ -90,21 +90,21 @@ exports[`PipelineEditor component includes required error message for falsy pipe
       labelType="label"
     >
       <div
-        data-test-subj="acePipeline"
+        data-test-subj="pipelineField"
       >
-        <EuiCodeEditor
-          mode="plain_text"
+        <CodeEditor
+          aria-label="Pipeline editor"
+          height={500}
+          languageId="text"
           onChange={[Function]}
-          setOptions={
+          options={
             Object {
-              "maxLines": Infinity,
-              "minLines": 25,
-              "readOnly": false,
+              "automaticLayout": true,
+              "lineNumbers": "on",
+              "tabSize": 2,
             }
           }
-          theme="github"
           value="input { stdin { } } filter { } output { stdout { } }"
-          width="1017"
         />
       </div>
     </EuiFormRow>
@@ -381,21 +381,21 @@ exports[`PipelineEditor component invalidates form for invalid pipeline id input
       labelType="label"
     >
       <div
-        data-test-subj="acePipeline"
+        data-test-subj="pipelineField"
       >
-        <EuiCodeEditor
-          mode="plain_text"
+        <CodeEditor
+          aria-label="Pipeline editor"
+          height={500}
+          languageId="text"
           onChange={[Function]}
-          setOptions={
+          options={
             Object {
-              "maxLines": Infinity,
-              "minLines": 25,
-              "readOnly": false,
+              "automaticLayout": true,
+              "lineNumbers": "on",
+              "tabSize": 2,
             }
           }
-          theme="github"
           value="input { stdin { } } filter { } output { stdout { } }"
-          width="1017"
         />
       </div>
     </EuiFormRow>
@@ -672,21 +672,21 @@ exports[`PipelineEditor component invalidates form for pipeline id with spaces 1
       labelType="label"
     >
       <div
-        data-test-subj="acePipeline"
+        data-test-subj="pipelineField"
       >
-        <EuiCodeEditor
-          mode="plain_text"
+        <CodeEditor
+          aria-label="Pipeline editor"
+          height={500}
+          languageId="text"
           onChange={[Function]}
-          setOptions={
+          options={
             Object {
-              "maxLines": Infinity,
-              "minLines": 25,
-              "readOnly": false,
+              "automaticLayout": true,
+              "lineNumbers": "on",
+              "tabSize": 2,
             }
           }
-          theme="github"
           value="input { stdin { } } filter { } output { stdout { } }"
-          width="1017"
         />
       </div>
     </EuiFormRow>
@@ -934,21 +934,21 @@ exports[`PipelineEditor component matches snapshot for clone pipeline 1`] = `
       labelType="label"
     >
       <div
-        data-test-subj="acePipeline"
+        data-test-subj="pipelineField"
       >
-        <EuiCodeEditor
-          mode="plain_text"
+        <CodeEditor
+          aria-label="Pipeline editor"
+          height={500}
+          languageId="text"
           onChange={[Function]}
-          setOptions={
+          options={
             Object {
-              "maxLines": Infinity,
-              "minLines": 25,
-              "readOnly": false,
+              "automaticLayout": true,
+              "lineNumbers": "on",
+              "tabSize": 2,
             }
           }
-          theme="github"
           value="input { stdin { } } filter { } output { stdout { } }"
-          width="1017"
         />
       </div>
     </EuiFormRow>
@@ -1236,21 +1236,21 @@ exports[`PipelineEditor component matches snapshot for create pipeline 1`] = `
       labelType="label"
     >
       <div
-        data-test-subj="acePipeline"
+        data-test-subj="pipelineField"
       >
-        <EuiCodeEditor
-          mode="plain_text"
+        <CodeEditor
+          aria-label="Pipeline editor"
+          height={500}
+          languageId="text"
           onChange={[Function]}
-          setOptions={
+          options={
             Object {
-              "maxLines": Infinity,
-              "minLines": 25,
-              "readOnly": false,
+              "automaticLayout": true,
+              "lineNumbers": "on",
+              "tabSize": 2,
             }
           }
-          theme="github"
           value="input { stdin { } } filter { } output { stdout { } }"
-          width="1017"
         />
       </div>
     </EuiFormRow>
@@ -1498,21 +1498,21 @@ exports[`PipelineEditor component matches snapshot for edit pipeline 1`] = `
       labelType="label"
     >
       <div
-        data-test-subj="acePipeline"
+        data-test-subj="pipelineField"
       >
-        <EuiCodeEditor
-          mode="plain_text"
+        <CodeEditor
+          aria-label="Pipeline editor"
+          height={500}
+          languageId="text"
           onChange={[Function]}
-          setOptions={
+          options={
             Object {
-              "maxLines": Infinity,
-              "minLines": 25,
-              "readOnly": false,
+              "automaticLayout": true,
+              "lineNumbers": "on",
+              "tabSize": 2,
             }
           }
-          theme="github"
           value="input { stdin { } } filter { } output { stdout { } }"
-          width="1017"
         />
       </div>
     </EuiFormRow>
