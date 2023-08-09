@@ -169,7 +169,7 @@ describe('query builder', () => {
         });
 
         expect(query.body.sort).toEqual([
-          { 'united.endpoint.@timestamp': { order: 'asc', unmapped_type: 'date' } },
+          { [EndpointSortableField.LAST_SEEN]: { order: 'asc', unmapped_type: 'date' } },
         ]);
       });
     });
