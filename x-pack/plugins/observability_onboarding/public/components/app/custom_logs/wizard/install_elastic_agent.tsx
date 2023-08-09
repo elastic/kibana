@@ -274,25 +274,15 @@ export function InstallElasticAgent() {
               title={i18n.translate(
                 'xpack.observability_onboarding.installElasticAgent.integrationSuccessCallout.title',
                 {
-                  defaultMessage: 'Integration created',
+                  defaultMessage: '{integrationName} integration installed.',
+                  values: {
+                    integrationName: wizardState.integrationName,
+                  },
                 }
               )}
               color="success"
               iconType="check"
-            >
-              <p>
-                {i18n.translate(
-                  'xpack.observability_onboarding.installElasticAgent.integrationSuccessCallout.description',
-                  {
-                    defaultMessage:
-                      'The {integrationName} integration was created',
-                    values: {
-                      integrationName: wizardState.integrationName,
-                    },
-                  }
-                )}
-              </p>
-            </EuiCallOut>
+            />
             <EuiSpacer size="m" />
           </>
         )}
