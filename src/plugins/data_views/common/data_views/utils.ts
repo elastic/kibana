@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { from, Observable } from 'rxjs';
+import { catchError, from, Observable, of } from 'rxjs';
 import { mergeMap, last, map, toArray } from 'rxjs/operators';
 import type { RuntimeField, RuntimeFieldSpec, RuntimePrimitiveTypes } from '../types';
 
@@ -33,14 +33,16 @@ const MAX_CONCURRENT_REQUESTS = 3;
  */
 export function rateLimitingForkJoin<T>(
   observables: Array<Observable<T>>,
-  maxConcurrentRequests = MAX_CONCURRENT_REQUESTS
+  maxConcurrentRequests = MAX_CONCURRENT_REQUESTS,
+  failValue: T
 ): Observable<T[]> {
   return from(observables).pipe(
     mergeMap(
       (observable, index) =>
         observable.pipe(
           last(),
-          map((value) => ({ index, value }))
+          map((value) => ({ index, value })),
+          catchError(() => of({ index, value: failValue }))
         ),
       maxConcurrentRequests
     ),
