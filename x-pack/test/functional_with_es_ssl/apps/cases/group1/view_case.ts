@@ -725,6 +725,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       it('shows more actions on button click', async () => {
+        expect(testSubjects.missingOrFail('cases-show-more-user-actions'));
+
         await cases.api.generateUserActions({
           caseId: createdCase.id,
           caseVersion: createdCase.version,
