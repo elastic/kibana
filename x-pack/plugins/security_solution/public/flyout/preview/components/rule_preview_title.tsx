@@ -34,20 +34,12 @@ export const RulePreviewTitle: React.FC<RulePreviewTitleProps> = ({ rule }) => {
       <EuiFlexGroup gutterSize="xs" direction="column">
         <EuiFlexItem data-test-subj={RULE_PREVIEW_RULE_CREATED_BY_TEST_ID}>
           <EuiText size="xs">
-            <CreatedBy
-              id="xpack.securitySolution.flyout.documentDetails.ruleCreationDescription"
-              createdBy={rule?.created_by}
-              createdAt={rule?.created_at}
-            />
+            <CreatedBy createdBy={rule?.created_by} createdAt={rule?.created_at} />
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem data-test-subj={RULE_PREVIEW_RULE_UPDATED_BY_TEST_ID}>
           <EuiText size="xs">
-            <UpdatedBy
-              id="xpack.securitySolution.flyout.documentDetails.ruleUpdateDescription"
-              updatedBy={rule?.updated_by}
-              updatedAt={rule?.updated_at}
-            />
+            <UpdatedBy updatedBy={rule?.updated_by} updatedAt={rule?.updated_at} />
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>

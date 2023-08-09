@@ -11,7 +11,6 @@ import { UNKNOWN_TEXT } from './translations';
 import { FormattedDate } from '../../../../common/components/formatted_date';
 
 interface CreatedByProps {
-  id: string;
   createdBy?: string;
   createdAt?: string;
   ['data-test-subj']?: string;
@@ -21,7 +20,6 @@ interface CreatedByProps {
  * Created by and created at text that are shown on rule details
  */
 export const CreatedBy: React.FC<CreatedByProps> = ({
-  id,
   createdBy,
   createdAt,
   'data-test-subj': dataTestSubj,
@@ -29,7 +27,7 @@ export const CreatedBy: React.FC<CreatedByProps> = ({
   return (
     <div data-test-subj={dataTestSubj}>
       <FormattedMessage
-        id={id}
+        id="xpack.securitySolution.detectionEngine.ruleDetails.ruleCreationDescription"
         defaultMessage="Created by: {by} on {date}"
         values={{
           by: createdBy ?? UNKNOWN_TEXT,
@@ -45,7 +43,6 @@ export const CreatedBy: React.FC<CreatedByProps> = ({
 CreatedBy.displayName = 'CreatedBy';
 
 interface UpdatedByProps {
-  id: string;
   updatedBy?: string;
   updatedAt?: string;
   ['data-test-subj']?: string;
@@ -55,7 +52,6 @@ interface UpdatedByProps {
  * Updated by and updated at text that are shown on rule details
  */
 export const UpdatedBy: React.FC<UpdatedByProps> = ({
-  id,
   updatedBy,
   updatedAt,
   'data-test-subj': dataTestSubj,
@@ -63,7 +59,7 @@ export const UpdatedBy: React.FC<UpdatedByProps> = ({
   return (
     <div data-test-subj={dataTestSubj}>
       <FormattedMessage
-        id={id}
+        id="xpack.securitySolution.detectionEngine.ruleDetails.ruleUpdateDescription"
         defaultMessage="Updated by: {by} on {date}"
         values={{
           by: updatedBy ?? UNKNOWN_TEXT,

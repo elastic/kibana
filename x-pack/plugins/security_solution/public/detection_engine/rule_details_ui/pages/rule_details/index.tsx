@@ -467,17 +467,9 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     () =>
       rule ? (
         [
-          <CreatedBy
-            id="xpack.securitySolution.detectionEngine.ruleDetails.ruleCreationDescription"
-            createdBy={rule?.created_by}
-            createdAt={rule?.created_at}
-          />,
+          <CreatedBy createdBy={rule?.created_by} createdAt={rule?.created_at} />,
           rule?.updated_by != null ? (
-            <UpdatedBy
-              id="xpack.securitySolution.detectionEngine.ruleDetails.ruleUpdateDescription"
-              updatedBy={rule?.updated_by}
-              updatedAt={rule?.updated_at}
-            />
+            <UpdatedBy updatedBy={rule?.updated_by} updatedAt={rule?.updated_at} />
           ) : (
             ''
           ),

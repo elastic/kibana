@@ -16,7 +16,6 @@ describe('Rule related info', () => {
       const { getByTestId } = render(
         <TestProviders>
           <CreatedBy
-            id="id"
             createdBy="test"
             createdAt="2023-01-01T22:01:00.000Z"
             data-test-subj="createdBy"
@@ -31,7 +30,7 @@ describe('Rule related info', () => {
     it('should render created unknown when created by is not available', () => {
       const { getByTestId } = render(
         <TestProviders>
-          <CreatedBy id="id" createdAt="2023-01-01T22:01:00.000Z" data-test-subj="createdBy" />
+          <CreatedBy createdAt="2023-01-01T22:01:00.000Z" data-test-subj="createdBy" />
         </TestProviders>
       );
       expect(getByTestId('createdBy')).toHaveTextContent(
@@ -44,7 +43,6 @@ describe('Rule related info', () => {
       const { getByTestId } = render(
         <TestProviders>
           <UpdatedBy
-            id="id"
             updatedBy="test"
             updatedAt="2023-01-01T22:01:00.000Z"
             data-test-subj="updatedBy"
@@ -59,7 +57,7 @@ describe('Rule related info', () => {
     it('should render updated by correctly when updated by is not available', () => {
       const { getByTestId } = render(
         <TestProviders>
-          <UpdatedBy id="id" updatedAt="2023-01-01T22:01:00.000Z" data-test-subj="updatedBy" />
+          <UpdatedBy updatedAt="2023-01-01T22:01:00.000Z" data-test-subj="updatedBy" />
         </TestProviders>
       );
       expect(getByTestId('updatedBy')).toHaveTextContent(
