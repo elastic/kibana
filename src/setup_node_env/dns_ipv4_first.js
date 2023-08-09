@@ -6,11 +6,8 @@
  * Side Public License, v 1.
  */
 
-// development env setup includes babel/register after the env is initialized
-require('./setup_env');
+// enables Node 16 default DNS lookup behavior for the current thread
+require('dns').setDefaultResultOrder('ipv4first');
 
-// restore < Node 16 default DNS lookup behavior
-require('./dns_ipv4_first');
-
-require('@kbn/babel-register').install();
-require('./polyfill');
+// overrides current process node options, so it can be restored in worker threads too
+process.env.NODE_OPTIONS = `${process.env.NODE_OPTIONS || ''} --dns-result-order=ipv4first`;
