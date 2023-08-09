@@ -18,10 +18,7 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import { CrawlCustomSettingsFlyoutLogic } from './crawl_custom_settings_flyout_logic';
-
-import { CrawlType } from '../../../../api/crawler/types';
-
+import { CrawlCustomSettingsFlyoutMultiCrawlLogic } from './crawl_custom_settings_flyout_multi_crawl_logic';
 
 const CRAWLER_TAB_PREFIX = i18n.translate(
   'xpack.enterpriseSearch.crawler.crawlCustomSettingsFlyout.multipleCrawlTabPrefix',
@@ -31,23 +28,19 @@ const CRAWLER_TAB_PREFIX = i18n.translate(
 )
 
 export const CrawlCustomSettingsFlyoutMultipleCrawlTabs: React.FC = () => {
-  const { activeCrawlerConfigTab, crawlType, crawlerConfigs } = useValues(CrawlCustomSettingsFlyoutLogic);
-  const { onAddCustomCrawler, onSelectActiveCrawlerConfigTab } = useActions(CrawlCustomSettingsFlyoutLogic);
+  const { crawlerConfigActiveTab, crawlerConfigurations } = useValues(CrawlCustomSettingsFlyoutMultiCrawlLogic);
+  const { onAddCustomCrawler, onSelectCrawlerConfigActiveTab } = useActions(CrawlCustomSettingsFlyoutMultiCrawlLogic);
 
-  const crawlerTabData = crawlerConfigs.map((crawler, index) => ({
+  const crawlerTabData = crawlerConfigurations.map((_, index) => ({
     key: `crawl_${index}`,
     index: index,
     label: `${CRAWLER_TAB_PREFIX} ${index + 1}`,
   }));
 
-  if (crawlType === CrawlType.ONE_TIME) {
-    return <></>;
-  }
-
   return <>
     <EuiTabs>
       {crawlerTabData.map((tab) => (
-        <EuiTab key={tab.key} isSelected={activeCrawlerConfigTab === tab.index} onClick={() => onSelectActiveCrawlerConfigTab(tab.index)}>
+        <EuiTab key={tab.key} isSelected={crawlerConfigActiveTab === tab.index} onClick={() => onSelectCrawlerConfigActiveTab(tab.index)}>
           {tab.label}
         </EuiTab>
       ))}

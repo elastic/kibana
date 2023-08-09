@@ -26,9 +26,15 @@ import { SimplifiedSelectable } from '../../../../../shared/simplified_selectabl
 
 import { CrawlCustomSettingsFlyoutLogic } from './crawl_custom_settings_flyout_logic';
 
-export const CrawlCustomSettingsFlyoutDomainsPanel: React.FC = ({ selectedDomainUrls, index }) => {
-  const { domainUrls } = useValues(CrawlCustomSettingsFlyoutLogic);
+export const CrawlCustomSettingsFlyoutDomainsPanelConnected: React.FC = () => {
+  const { domainUrls, selectedDomainUrls } = useValues(CrawlCustomSettingsFlyoutLogic);
   const { onSelectDomainUrls } = useActions(CrawlCustomSettingsFlyoutLogic);
+
+  return <CrawlCustomSettingsFlyoutDomainsPanel domainUrls={domainUrls} selectedDomainUrls={selectedDomainUrls} onSelectDomainUrls={onSelectDomainUrls} />
+
+}
+
+export const CrawlCustomSettingsFlyoutDomainsPanel: React.FC = ({ domainUrls, selectedDomainUrls, onSelectDomainUrls }) => {
 
   return (
     <EuiPanel hasBorder>
@@ -77,7 +83,7 @@ export const CrawlCustomSettingsFlyoutDomainsPanel: React.FC = ({ selectedDomain
           data-telemetry-id="entSearchContent-crawler-customCrawlSettings-selectDomainUrls"
           options={domainUrls}
           selectedOptions={selectedDomainUrls}
-          onChange={e => onSelectDomainUrls(index, e)}
+          onChange={onSelectDomainUrls}
         />
       </EuiAccordion>
     </EuiPanel>

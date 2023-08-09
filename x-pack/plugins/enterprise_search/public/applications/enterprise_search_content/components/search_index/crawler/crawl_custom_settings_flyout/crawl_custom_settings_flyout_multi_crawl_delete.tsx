@@ -13,21 +13,21 @@ import {
   EuiButton, EuiSpacer,
 } from '@elastic/eui';
 
-import { CrawlCustomSettingsFlyoutLogic } from './crawl_custom_settings_flyout_logic';
+import { CrawlCustomSettingsFlyoutMultiCrawlLogic } from './crawl_custom_settings_flyout_multi_crawl_logic';
 
 export const CrawlCustomSettingsFlyoutMultipleCrawlDelete: React.FC = () => {
-  const { activeCrawlerConfigTab, crawlerConfigs } = useValues(CrawlCustomSettingsFlyoutLogic);
-  const { onDeleteCustomCrawler } = useActions(CrawlCustomSettingsFlyoutLogic);
+  const { crawlerConfigActiveTab, crawlerConfigurations } = useValues(CrawlCustomSettingsFlyoutMultiCrawlLogic);
+  const { onDeleteCustomCrawler } = useActions(CrawlCustomSettingsFlyoutMultiCrawlLogic);
 
   return <>
     <EuiSpacer />
     <EuiButton
       iconType="trash"
       color='danger'
-      disabled={crawlerConfigs.length < 2}
-      onClick={() => onDeleteCustomCrawler(activeCrawlerConfigTab)}
+      disabled={crawlerConfigurations.length < 2}
+      onClick={() => onDeleteCustomCrawler(crawlerConfigActiveTab)}
     >
-      {`Delete Crawl ${activeCrawlerConfigTab + 1}`}
+      {`Delete Crawl ${crawlerConfigActiveTab + 1}`}
     </EuiButton>
   </>
 

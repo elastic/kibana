@@ -10,49 +10,53 @@ import { kea, MakeLogicType } from 'kea';
 import { Meta } from '../../../../../../../common/types';
 import { flashAPIErrors } from '../../../../../shared/flash_messages';
 import { HttpLogic } from '../../../../../shared/http';
-import { CrawlerConfiguration, CustomCrawlType, DomainConfig, DomainConfigFromServer } from '../../../../api/crawler/types';
+import { CustomCrawlType, DomainConfig, DomainConfigFromServer } from '../../../../api/crawler/types';
 import { domainConfigServerToClient } from '../../../../api/crawler/utils';
 import { IndexNameLogic } from '../../index_name_logic';
+import { CrawlCustomSettingsFlyoutMultiCrawlLogic } from './crawl_custom_settings_flyout_multi_crawl_logic'
 import { CrawlerActions, CrawlerLogic, CrawlRequestOverrides } from '../crawler_logic';
 import { extractDomainAndEntryPointFromUrl } from '../domain_management/add_domain/utils';
 
 export interface CrawlCustomSettingsFlyoutLogicValues {
-  activeCrawlerConfigTab: number;
   crawlType: string;
+  customEntryPointUrls: string[];
+  customSitemapUrls: string[];
+  domainUrls: string[];
   domainConfigs: DomainConfig[];
   domainConfigMap: {
     [key: string]: DomainConfig;
   };
-  crawlerEntryPointUrls: string[][];
-  crawlerSitemapUrls: string[][];
-  domainUrls: string[];
+  entryPointUrls: string[];
+  includeSitemapsInRobotsTxt: boolean;
   isDataLoading: boolean;
   isFormSubmitting: boolean;
   isFlyoutVisible: boolean;
-  crawlerConfigs: CrawlerConfiguration[],
+  isSingleCrawlType: boolean;
+  maxCrawlDepth: number;
+  selectedDomainUrls: string[];
+  selectedEntryPointUrls: string[];
+  selectedSitemapUrls: string[];
+  sitemapUrls: string[];
 }
 
 export interface CrawlCustomSettingsFlyoutLogicActions {
   fetchDomainConfigData(): void;
   hideFlyout(): void;
-  onAddCustomCrawler(crawler: CrawlerConfiguration): void;
-  onDeleteCustomCrawler(index: number): { index: number };
   onRecieveDomainConfigData(domainConfigs: DomainConfig[]): { domainConfigs: DomainConfig[] };
-  onSelectActiveCrawlerConfigTab(activeCrawlerConfigTab: number): { activeCrawlerConfigTab: number };
   onSelectCrawlType(crawlType: string): { crawlType: string };
-  onSelectCustomEntryPointUrls(index: number, entryPointUrls: string[]): { index: number, entryPointUrls: string[] };
-  onSelectCustomSitemapUrls(index: number, sitemapUrls: string[]): { index: number, sitemapUrls: string[] };
-  onSelectDomainUrls(index: number, domainUrls: string[]): { index: number, domainUrls: string[] };
-  onSelectEntryPointUrls(index: number, entryPointUrls: string[]): { index: number, entryPointUrls: string[] };
-  onSelectMaxCrawlDepth(index: number, maxCrawlDepth: number): { index: number, maxCrawlDepth: number };
-  onSelectSitemapUrls(index: number, sitemapUrls: string[]): { index: number, sitemapUrls: string[] };
+  onSelectCustomEntryPointUrls(entryPointUrls: string[]): { entryPointUrls: string[] };
+  onSelectCustomSitemapUrls(sitemapUrls: string[]): { sitemapUrls: string[] };
+  onSelectDomainUrls(domainUrls: string[]): { domainUrls: string[] };
+  onSelectEntryPointUrls(entryPointUrls: string[]): { entryPointUrls: string[] };
+  onSelectMaxCrawlDepth(maxCrawlDepth: number): { maxCrawlDepth: number };
+  onSelectSitemapUrls(sitemapUrls: string[]): { sitemapUrls: string[] };
   showFlyout(): void;
   startCustomCrawl(): void;
   startCrawl: CrawlerActions['startCrawl'];
-  toggleIncludeSitemapsInRobotsTxt(index: number): { index: number };
+  toggleIncludeSitemapsInRobotsTxt(): void;
 }
 
-const filterSeedUrlsByDomainUrls = (seedUrls: string[], domainUrls: string[]): string[] => {
+export const filterSeedUrlsByDomainUrls = (seedUrls: string[], domainUrls: string[]): string[] => {
   const domainUrlMap = domainUrls.reduce(
     (acc, domainUrl) => ({ ...acc, [domainUrl]: true }),
     {} as { [key: string]: boolean }
@@ -64,91 +68,62 @@ const filterSeedUrlsByDomainUrls = (seedUrls: string[], domainUrls: string[]): s
   });
 };
 
-const defaulCrawlerConfig: CrawlerConfiguration = {
-  maxCrawlDepth: 2,
-  customEntryPointUrls: [],
-  customSitemapUrls: [],
-  includeSitemapsInRobotsTxt: true,
-  selectedDomainUrls: [],
-  selectedEntryPointUrls: [],
-  selectedSitemapUrls: []
-}
-
 export const CrawlCustomSettingsFlyoutLogic = kea<
   MakeLogicType<CrawlCustomSettingsFlyoutLogicValues, CrawlCustomSettingsFlyoutLogicActions>
 >({
   path: ['enterprise_search', 'crawler', 'crawl_custom_settings_flyout_logic'],
   connect: {
     actions: [CrawlerLogic, ['startCrawl']],
+    values: [CrawlCustomSettingsFlyoutMultiCrawlLogic, ['crawlerConfigurations']]
   },
   actions: () => ({
     fetchDomainConfigData: true,
     hideFlyout: true,
-    onAddCustomCrawler: (crawler) => ({ crawler }),
-    onDeleteCustomCrawler: (index) => ({ index }),
     onRecieveDomainConfigData: (domainConfigs) => ({ domainConfigs }),
-    onSelectActiveCrawlerConfigTab: (activeCrawlerConfigTab) => ({ activeCrawlerConfigTab }),
     onSelectCrawlType: (crawlType) => ({ crawlType }),
-    onSelectCustomEntryPointUrls: (index, entryPointUrls) => ({ index, entryPointUrls }),
-    onSelectCustomSitemapUrls: (index, sitemapUrls) => ({ index, sitemapUrls }),
-    onSelectDomainUrls: (index, domainUrls) => ({ index, domainUrls }),
-    onSelectEntryPointUrls: (index, entryPointUrls) => ({ index, entryPointUrls }),
-    onSelectMaxCrawlDepth: (index, maxCrawlDepth) => ({ index, maxCrawlDepth }),
-    onSelectSitemapUrls: (index, sitemapUrls) => ({ index, sitemapUrls }),
+    onSelectCustomEntryPointUrls: (entryPointUrls) => ({ entryPointUrls }),
+    onSelectCustomSitemapUrls: (sitemapUrls) => ({ sitemapUrls }),
+    onSelectDomainUrls: (domainUrls) => ({ domainUrls }),
+    onSelectEntryPointUrls: (entryPointUrls) => ({ entryPointUrls }),
+    onSelectMaxCrawlDepth: (maxCrawlDepth) => ({ maxCrawlDepth }),
+    onSelectSitemapUrls: (sitemapUrls) => ({ sitemapUrls }),
     startCustomCrawl: true,
-    toggleIncludeSitemapsInRobotsTxt: (index) => ({ index }),
+    toggleIncludeSitemapsInRobotsTxt: true,
     showFlyout: true,
   }),
   reducers: () => ({
-    activeCrawlerConfigTab: [
-      0,
+    crawlType: [
+      CustomCrawlType.ONE_TIME,
       {
-        onSelectActiveCrawlerConfigTab: (_, { activeCrawlerConfigTab }) => activeCrawlerConfigTab,
-        onDeleteCustomCrawler: () => 0
+        onSelectCrawlType: (_, { crawlType }) => crawlType,
       }
     ],
-    crawlerConfigs: [
-      [defaulCrawlerConfig],
+    customEntryPointUrls: [
+      [],
       {
-        onAddCustomCrawler: (state, _) => [...state, defaulCrawlerConfig],
-        onDeleteCustomCrawler: (state, { index }) => {
-          return state.filter((_, i) => i !== index)
-        },
-        onSelectMaxCrawlDepth: (state, { index, maxCrawlDepth }) => {
-          return state.map((c, i) => (i === index ? { ...c, maxCrawlDepth: maxCrawlDepth } : c))
-        },
-        customEntryPointUrls: (state, { index, entryPointUrls }) => {
-          return state.map((c, i) => (i === index ? { ...c, customEntryPointUrls: entryPointUrls } : c))
-        },
-        onSelectCustomSitemapUrls: (state, { index, sitemapUrls }) => {
-          return state.map((c, i) => (i === index ? { ...c, customSitemapUrls: sitemapUrls } : c))
-        },
-        onRecieveDomainConfigData: (state, { domainConfigs }) => {
-          return state.map((c) => ({ ...c, domainConfigs: domainConfigs }))
-        },
-        toggleIncludeSitemapsInRobotsTxt: (state, { index }) => {
-          return state.map((c, i) => (i === index ? { ...c, includeSitemapsInRobotsTxt: !c.includeSitemapsInRobotsTxt } : c))
-        },
-        onSelectDomainUrls: (state, { index, domainUrls }) => {
-          return state.map((c, i) => (i === index ?
-            {
-              ...c, selectedDomainUrls: domainUrls,
-              selectedEntryPointUrls: filterSeedUrlsByDomainUrls(c.selectedEntryPointUrls, domainUrls),
-              selectedSitemapUrls: filterSeedUrlsByDomainUrls(c.selectedSitemapUrls, domainUrls)
-            } : c))
-        },
-        onSelectEntryPointUrls: (state, { index, entryPointUrls }) => {
-          return state.map((c, i) => (i === index ? { ...c, selectedEntryPointUrls: entryPointUrls } : c))
-        },
-        onSelectSitemapUrls: (state, { index, sitemapUrls }) => {
-          return state.map((c, i) => (i === index ? { ...c, selectedSitemapUrls: sitemapUrls } : c))
-        },
-      }
+        showFlyout: () => [],
+        onSelectCustomEntryPointUrls: (_, { entryPointUrls }) => entryPointUrls,
+      },
+    ],
+    customSitemapUrls: [
+      [],
+      {
+        showFlyout: () => [],
+        onSelectCustomSitemapUrls: (_, { sitemapUrls }) => sitemapUrls,
+      },
     ],
     domainConfigs: [
       [],
       {
         onRecieveDomainConfigData: (_, { domainConfigs }) => domainConfigs,
+      },
+    ],
+    includeSitemapsInRobotsTxt: [
+      true,
+      {
+        showFlyout: () => true,
+        toggleIncludeSitemapsInRobotsTxt: (includeSitemapsInRobotsTxt) =>
+          !includeSitemapsInRobotsTxt,
       },
     ],
     isDataLoading: [
@@ -173,12 +148,38 @@ export const CrawlCustomSettingsFlyoutLogic = kea<
         startCrawl: () => false,
       },
     ],
-    crawlType: [
-      CustomCrawlType.ONE_TIME,
+    maxCrawlDepth: [
+      2,
       {
-        onSelectCrawlType: (_, { crawlType }) => crawlType,
-      }
-    ]
+        showFlyout: () => 2,
+        onSelectMaxCrawlDepth: (_, { maxCrawlDepth }) => maxCrawlDepth,
+      },
+    ],
+    selectedDomainUrls: [
+      [],
+      {
+        showFlyout: () => [],
+        onSelectDomainUrls: (_, { domainUrls }) => domainUrls,
+      },
+    ],
+    selectedEntryPointUrls: [
+      [],
+      {
+        showFlyout: () => [],
+        onSelectEntryPointUrls: (_, { entryPointUrls }) => entryPointUrls,
+        onSelectDomainUrls: (entryPointUrls, { domainUrls }) =>
+          filterSeedUrlsByDomainUrls(entryPointUrls, domainUrls),
+      },
+    ],
+    selectedSitemapUrls: [
+      [],
+      {
+        showFlyout: () => [],
+        onSelectSitemapUrls: (_, { sitemapUrls }) => sitemapUrls,
+        onSelectDomainUrls: (selectedSitemapUrls, { domainUrls }) =>
+          filterSeedUrlsByDomainUrls(selectedSitemapUrls, domainUrls),
+      },
+    ],
   }),
   selectors: () => ({
     domainUrls: [
@@ -193,21 +194,39 @@ export const CrawlCustomSettingsFlyoutLogic = kea<
           {} as { [key: string]: DomainConfig }
         ),
     ],
-    crawlerEntryPointUrls: [
-      (selectors) => [selectors.domainConfigMap, selectors.crawlerConfigs],
+    entryPointUrls: [
+      (selectors) => [selectors.domainConfigMap, selectors.selectedDomainUrls],
+      (domainConfigMap: { [key: string]: DomainConfig }, selectedDomainUrls: string[]): string[] =>
+        selectedDomainUrls.flatMap(
+          (selectedDomainUrl) => domainConfigMap[selectedDomainUrl].seedUrls
+        ),
+    ],
+    isSingleCrawlType: [
+      (selectors) => [selectors.crawlType],
+      (crawlType: string): boolean => crawlType === CustomCrawlType.ONE_TIME
+    ],
+    sitemapUrls: [
+      (selectors) => [selectors.domainConfigMap, selectors.selectedDomainUrls],
+      (domainConfigMap: { [key: string]: DomainConfig }, selectedDomainUrls: string[]): string[] =>
+        selectedDomainUrls.flatMap(
+          (selectedDomainUrl) => domainConfigMap[selectedDomainUrl].sitemapUrls
+        ),
+    ],
+    multiCrawlerEntryPointUrls: [
+      (selectors) => [selectors.domainConfigMap, selectors.crawlerConfigurations],
       (domainConfigMap: { [key: string]: DomainConfig }, crawlerConfigs: CrawlerConfiguration[]): string[][] =>
         crawlerConfigs.map(c =>
           c.selectedDomainUrls.flatMap(
             (selectedDomainUrl) => domainConfigMap[selectedDomainUrl].seedUrls
           )),
     ],
-    crawlerSitemapUrls: [
-      (selectors) => [selectors.domainConfigMap, selectors.crawlerConfigs],
+    multiCrawlerSitemapUrls: [
+      (selectors) => [selectors.domainConfigMap, selectors.crawlerConfigurations],
       (domainConfigMap: { [key: string]: DomainConfig }, crawlerConfigs: CrawlerConfiguration[]): string[][] =>
         crawlerConfigs.map(c =>
           c.selectedDomainUrls.flatMap(
             (selectedDomainUrl) => domainConfigMap[selectedDomainUrl].sitemapUrls
-          )),
+          ))
     ],
   }),
   listeners: ({ actions, values }) => ({
@@ -266,6 +285,5 @@ export const CrawlCustomSettingsFlyoutLogic = kea<
 
       actions.startCrawl(overrides);
     },
-
   }),
 });
