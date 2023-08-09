@@ -15,14 +15,14 @@ import type { UpsellingMessageId } from '../lib/upsellings/types';
 
 export const useUpsellingComponent = (id: UpsellingSectionId): React.ComponentType | null => {
   const upselling = useUpsellingService();
-  const upsellingSections = useObservable(upselling.sections$);
+  const upsellingSections = useObservable(upselling.sections$, upselling.getSectionsValue());
 
   return useMemo(() => upsellingSections?.get(id) ?? null, [id, upsellingSections]);
 };
 
 export const useUpsellingMessage = (id: UpsellingMessageId): string | null => {
   const upselling = useUpsellingService();
-  const upsellingMessages = useObservable(upselling.messages$);
+  const upsellingMessages = useObservable(upselling.messages$, upselling.getMessagesValue());
 
   return useMemo(() => upsellingMessages?.get(id) ?? null, [id, upsellingMessages]);
 };
