@@ -6,6 +6,10 @@
  * Side Public License, v 1.
  */
 
+import { DataView, FieldSpec } from '@kbn/data-views-plugin/common';
+import type { OptionsListRequest } from '../../../common/options_list/types';
+import type { ControlsHTTPService } from '../http/types';
+import type { ControlsDataService } from '../data/types';
 import { optionsListServiceFactory } from './options_list_service';
 
 describe('runOptionsListRequest', () => {
@@ -18,7 +22,7 @@ describe('runOptionsListRequest', () => {
           },
         },
       },
-    };
+    } as any;
     const mockData = {
       query: {
         timefilter: {
@@ -36,7 +40,6 @@ describe('runOptionsListRequest', () => {
       http: mockHttp,
     });
 
-    const mockAbortSignal = {} as unknown as AbortSignal;
     const response = await optionsListService.runOptionsListRequest(
       {
         dataView: {
@@ -44,13 +47,13 @@ describe('runOptionsListRequest', () => {
             return {};
           },
           title: 'myDataView',
-        },
+        } as unknown as DataView,
         field: {
           name: 'myField',
-        },
-      },
+        } as unknown as FieldSpec,
+      } as unknown as OptionsListRequest,
       {} as unknown as AbortSignal
-    );
+    ) as any;
 
     expect(response.error.message).toBe('Simulated network error');
   });
