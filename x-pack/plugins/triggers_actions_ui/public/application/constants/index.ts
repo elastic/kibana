@@ -12,6 +12,10 @@ export {
   INTERNAL_BASE_ALERTING_API_PATH,
 } from '@kbn/alerting-plugin/common';
 export { BASE_ACTION_API_PATH, INTERNAL_BASE_ACTION_API_PATH } from '@kbn/actions-plugin/common';
+import {
+  OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
+  ES_QUERY_RULE_TYPE_ID,
+} from '@kbn/observability-plugin/common/constants';
 
 export type Section = 'connectors' | 'rules' | 'alerts' | 'logs';
 
@@ -117,4 +121,7 @@ export const GLOBAL_CONNECTOR_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS = [
   ...CONNECTOR_LOCKED_COLUMNS,
 ];
 
-export const MULTI_CONSUMER_RULE_TYPE_IDS = ['observability.rules.threshold', '.es-query'];
+export const MULTI_CONSUMER_RULE_TYPE_IDS = [
+  OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
+  ES_QUERY_RULE_TYPE_ID,
+];

@@ -18,6 +18,7 @@ import { useKibana } from '../../utils/kibana_react';
 import { useHasData } from '../../hooks/use_has_data';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useTimeBuckets } from '../../hooks/use_time_buckets';
+import { useGetFilteredRuleTypes } from '../../hooks/use_get_filtered_rule_types';
 import { useToasts } from '../../hooks/use_toast';
 import { LoadingObservability } from '../../components/loading_observability';
 import { renderRuleStats, RuleStatsState } from './components/rule_stats';
@@ -56,10 +57,12 @@ function InternalAlertsPage() {
       getAlertSummaryWidget: AlertSummaryWidget,
     },
   } = useKibana().services;
-  const { ObservabilityPageTemplate, observabilityRuleTypeRegistry } = usePluginContext();
+  const { ObservabilityPageTemplate } = usePluginContext();
   const alertSearchBarStateProps = useAlertSearchBarStateContainer(ALERTS_URL_STORAGE_KEY, {
     replace: false,
   });
+
+  const filteredRuleTypes = useGetFilteredRuleTypes();
 
   const onBrushEnd: BrushEndListener = (brushEvent) => {
     const { x } = brushEvent as XYBrushEvent;
@@ -123,7 +126,7 @@ function InternalAlertsPage() {
     try {
       const response = await loadRuleAggregations({
         http,
-        typesFilter: observabilityRuleTypeRegistry.list(),
+        typesFilter: filteredRuleTypes,
       });
       const { ruleExecutionStatus, ruleMutedStatus, ruleEnabledStatus, ruleSnoozedStatus } =
         response;
