@@ -184,8 +184,7 @@ export class TaskPollingLifecycle {
         // start polling for work
         this.poller.start();
       } else if (!areESAndSOAvailable) {
-        this.poller.stop();
-        this.pool.cancelRunningTasks(TaskCancellationReason.EsUnavailable);
+        this.stop(TaskCancellationReason.EsUnavailable);
       }
     });
   }
@@ -194,9 +193,9 @@ export class TaskPollingLifecycle {
     return this.events$;
   }
 
-  public stop() {
+  public async stop(reason: TaskCancellationReason) {
     this.poller.stop();
-    this.pool.cancelRunningTasks(TaskCancellationReason.Shutdown);
+    await this.pool.cancelRunningTasks(reason);
   }
 
   private emitEvent = (event: TaskLifecycleEvent) => {

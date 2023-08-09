@@ -10,4 +10,5 @@ export const EVENT_LOG_ACTIONS = {
   execute: 'execute',
   executeStart: 'execute-start',
   executeTimeout: 'execute-timeout',
+  executeCancelled: 'execute-cancelled',
 };

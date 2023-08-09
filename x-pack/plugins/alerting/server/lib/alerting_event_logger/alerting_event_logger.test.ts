@@ -16,6 +16,7 @@ import {
   createAlertRecord,
   createActionExecuteRecord,
   updateEvent,
+  createSystemShutdownRecord,
 } from './alerting_event_logger';
 import { UntypedNormalizedRuleType } from '../../rule_type_registry';
 import {
@@ -359,6 +360,37 @@ describe('AlertingEventLogger', () => {
       alertingEventLogger.logTimeout();
 
       const event = createExecuteTimeoutRecord(contextWithName);
+
+      expect(eventLogger.logEvent).toHaveBeenCalledWith(event);
+    });
+  });
+
+  describe('logShutdown()', () => {
+    test('should throw error if alertingEventLogger has not been initialized', () => {
+      expect(() => alertingEventLogger.logShutdown()).toThrowErrorMatchingInlineSnapshot(
+        `"AlertingEventLogger not initialized"`
+      );
+    });
+
+    test('should throw error if alertingEventLogger rule context is null', () => {
+      alertingEventLogger.initialize(null as unknown as RuleContextOpts);
+      expect(() => alertingEventLogger.logShutdown()).toThrowErrorMatchingInlineSnapshot(
+        `"AlertingEventLogger not initialized"`
+      );
+    });
+
+    test('should throw error if alertingEventLogger rule context is undefined', () => {
+      alertingEventLogger.initialize(undefined as unknown as RuleContextOpts);
+      expect(() => alertingEventLogger.logShutdown()).toThrowErrorMatchingInlineSnapshot(
+        `"AlertingEventLogger not initialized"`
+      );
+    });
+
+    test('should log shutdown event', () => {
+      alertingEventLogger.initialize(context);
+      alertingEventLogger.logShutdown();
+
+      const event = createSystemShutdownRecord(contextWithName);
 
       expect(eventLogger.logEvent).toHaveBeenCalledWith(event);
     });
@@ -1073,6 +1105,60 @@ describe('createExecuteTimeoutRecord', () => {
     expect(record.event?.kind).toEqual('alert');
     expect(record.message).toEqual(
       `rule: test:123: 'my-super-cool-rule' execution cancelled due to timeout - exceeded rule type timeout of 1m`
+    );
+    expect(record.event?.category).toEqual([contextWithName.ruleType.producer]);
+    expect(record.kibana?.alert?.rule?.rule_type_id).toEqual(contextWithName.ruleType.id);
+    expect(record.kibana?.alert?.rule?.consumer).toEqual(contextWithName.consumer);
+    expect(record.kibana?.alert?.rule?.execution?.uuid).toEqual(contextWithName.executionId);
+    expect(record.kibana?.saved_objects).toEqual([
+      {
+        id: contextWithName.ruleId,
+        type: 'alert',
+        type_id: contextWithName.ruleType.id,
+        rel: SAVED_OBJECT_REL_PRIMARY,
+      },
+    ]);
+    expect(record.kibana?.space_ids).toEqual([contextWithName.spaceId]);
+    expect(record?.rule?.id).toEqual(contextWithName.ruleId);
+    expect(record?.rule?.license).toEqual(contextWithName.ruleType.minimumLicenseRequired);
+    expect(record?.rule?.category).toEqual(contextWithName.ruleType.id);
+    expect(record?.rule?.ruleset).toEqual(contextWithName.ruleType.producer);
+    expect(record?.rule?.name).toEqual(contextWithName.ruleName);
+
+    // these fields should not be set by this function
+    expect(record['@timestamp']).toBeUndefined();
+    expect(record.event?.provider).toBeUndefined();
+    expect(record.event?.start).toBeUndefined();
+    expect(record.event?.outcome).toBeUndefined();
+    expect(record.event?.end).toBeUndefined();
+    expect(record.event?.duration).toBeUndefined();
+    expect(record.kibana?.alert?.rule?.execution?.metrics).toBeUndefined();
+    expect(record.kibana?.alerting).toBeUndefined();
+    expect(record.kibana?.server_uuid).toBeUndefined();
+    expect(record.kibana?.task).toBeUndefined();
+    expect(record.kibana?.version).toBeUndefined();
+    expect(record?.ecs).toBeUndefined();
+  });
+});
+
+describe('createShutdownRecord', () => {
+  test('should populate expected fields in event log record', () => {
+    const record = createSystemShutdownRecord(contextWithName);
+
+    expect(record.event).toBeDefined();
+    expect(record.kibana).toBeDefined();
+    expect(record.kibana?.alert).toBeDefined();
+    expect(record.kibana?.alert?.rule).toBeDefined();
+    expect(record.kibana?.alert?.rule?.execution).toBeDefined();
+    expect(record.kibana?.saved_objects).toBeDefined();
+    expect(record.kibana?.space_ids).toBeDefined();
+    expect(record.rule).toBeDefined();
+
+    // these fields should be explicitly set
+    expect(record.event?.action).toEqual('execute-cancelled');
+    expect(record.event?.kind).toEqual('alert');
+    expect(record.message).toEqual(
+      `rule: test:123: 'my-super-cool-rule' execution cancelled due to system shutdown`
     );
     expect(record.event?.category).toEqual([contextWithName.ruleType.producer]);
     expect(record.kibana?.alert?.rule?.rule_type_id).toEqual(contextWithName.ruleType.id);

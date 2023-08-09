@@ -82,6 +82,7 @@ import { maintenanceWindowClientMock } from '../maintenance_window_client.mock';
 import { alertsServiceMock } from '../alerts_service/alerts_service.mock';
 import { getMockMaintenanceWindow } from '../maintenance_window_client/methods/test_helpers';
 import { alertsClientMock } from '../alerts_client/alerts_client.mock';
+import { TaskCancellationReason } from '@kbn/task-manager-plugin/server/task_pool';
 
 jest.mock('uuid', () => ({
   v4: () => '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -2999,7 +3000,7 @@ describe('Task Runner', () => {
       }
     );
     await taskRunner.run();
-    await taskRunner.cancel();
+    await taskRunner.cancel(TaskCancellationReason.Expired);
 
     expect(inMemoryMetrics.increment).toHaveBeenCalledTimes(6);
     expect(inMemoryMetrics.increment.mock.calls[0][0]).toBe(IN_MEMORY_METRICS.RULE_EXECUTIONS);

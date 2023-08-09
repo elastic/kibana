@@ -35,6 +35,7 @@ import { registerTaskManagerUsageCollector } from './usage';
 import { TASK_MANAGER_INDEX } from './constants';
 import { AdHocTaskCounter } from './lib/adhoc_task_counter';
 import { setupIntervalLogging } from './lib/log_health_metrics';
+import { TaskCancellationReason } from './task_pool';
 
 export interface TaskManagerSetupContract {
   /**
@@ -305,11 +306,11 @@ export class TaskManagerPlugin
     };
   }
 
-  public stop() {
+  public async stop() {
     this.logger.info(`Stopping task manager plugin`);
 
     if (this.taskPollingLifecycle) {
-      this.taskPollingLifecycle.stop();
+      await this.taskPollingLifecycle.stop(TaskCancellationReason.Shutdown);
     }
   }
 }

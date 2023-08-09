@@ -13,6 +13,7 @@ import { Observable, Subject } from 'rxjs';
 import moment, { Duration } from 'moment';
 import { padStart } from 'lodash';
 import { Logger } from '@kbn/core/server';
+import { withTimeout } from '@kbn/std';
 import { TaskRunner } from './task_running';
 import { isTaskSavedObjectNotFoundError } from './lib/is_task_not_found_error';
 import { TaskManagerStat } from './task_events';
@@ -159,10 +160,11 @@ export class TaskPool {
     return TaskPoolRunResult.RunningAllClaimedTasks;
   };
 
-  public cancelRunningTasks(reason: TaskCancellationReason) {
-    for (const task of this.tasksInPool.values()) {
-      this.cancelTask(task, reason);
-    }
+  public async cancelRunningTasks(reason: TaskCancellationReason) {
+    // try to cancel all tasks at once
+    await Promise.allSettled(
+      [...this.tasksInPool.values()].map((task) => this.cancelTaskWithTimeout(task, reason))
+    );
   }
 
   private handleMarkAsRunning(taskRunner: TaskRunner) {
@@ -219,6 +221,17 @@ export class TaskPool {
       await task.cancel(reason);
     } catch (err) {
       this.logger.error(`Failed to cancel task ${task.toString()}: ${err}`);
+    }
+  }
+
+  private async cancelTaskWithTimeout(task: TaskRunner, reason: TaskCancellationReason) {
+    const resultMaybe = await withTimeout({
+      promise: this.cancelTask(task, reason),
+      timeoutMs: 30 * 1000,
+    });
+
+    if (resultMaybe?.timedout) {
+      this.logger.warn(`"Task ${task.id}" didn't cancel in 30sec., move on to the next.`);
     }
   }
 }

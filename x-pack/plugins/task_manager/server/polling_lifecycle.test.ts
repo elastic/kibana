@@ -20,6 +20,7 @@ import { asOk, Err, isErr, isOk, Result } from './lib/result_type';
 import { FillPoolResult } from './lib/fill_pool';
 import { ElasticsearchResponseError } from './lib/identify_es_error';
 import { executionContextServiceMock } from '@kbn/core/server/mocks';
+import { TaskCancellationReason } from './task_pool';
 
 const executionContext = executionContextServiceMock.createSetupContract();
 let mockTaskClaiming = taskClaimingMock.create({});
@@ -197,7 +198,7 @@ describe('TaskPollingLifecycle', () => {
       clock.tick(50);
       expect(mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable).toHaveBeenCalledTimes(1);
 
-      pollingLifecycle.stop();
+      pollingLifecycle.stop(TaskCancellationReason.Shutdown);
 
       clock.tick(100);
       expect(mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable).toHaveBeenCalledTimes(1);

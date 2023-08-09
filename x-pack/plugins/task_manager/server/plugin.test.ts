@@ -17,6 +17,7 @@ import type { TaskPollingLifecycle as TaskPollingLifecycleClass } from './pollin
 import { ephemeralTaskLifecycleMock } from './ephemeral_task_lifecycle.mock';
 import { EphemeralTaskLifecycle } from './ephemeral_task_lifecycle';
 import type { EphemeralTaskLifecycle as EphemeralTaskLifecycleClass } from './ephemeral_task_lifecycle';
+import { TaskCancellationReason } from './task_pool';
 
 let mockTaskPollingLifecycle = taskPollingLifecycleMock.create({});
 jest.mock('./polling_lifecycle', () => {
@@ -183,9 +184,9 @@ describe('TaskManagerPlugin', () => {
       taskManagerPlugin.setup(coreMock.createSetup(), { usageCollection: undefined });
       taskManagerPlugin.start(coreStart);
 
-      taskManagerPlugin.stop();
+      await taskManagerPlugin.stop();
 
-      expect(mockTaskPollingLifecycle.stop).toHaveBeenCalled();
+      expect(mockTaskPollingLifecycle.stop).toHaveBeenCalledWith(TaskCancellationReason.Shutdown);
       expect((logger.info as jest.Mock).mock.calls[1][0]).toBe('Stopping task manager plugin');
     });
 
@@ -199,7 +200,7 @@ describe('TaskManagerPlugin', () => {
       taskManagerPlugin.setup(coreMock.createSetup(), { usageCollection: undefined });
       taskManagerPlugin.start(coreStart);
 
-      taskManagerPlugin.stop();
+      await taskManagerPlugin.stop();
 
       expect(mockTaskPollingLifecycle.stop).not.toHaveBeenCalled();
       expect((logger.info as jest.Mock).mock.calls[1][0]).toBe('Stopping task manager plugin');
