@@ -27,7 +27,11 @@ import { OptInExampleFlyout } from './opt_in_example_flyout';
 
 type TelemetryService = TelemetryPluginSetup['telemetryService'];
 
-const SEARCH_TERMS: string[] = [
+/**
+ * These are the terms provided to Advanced Settings that map to this section. When searching,
+ * Advanced Settings will match against these terms to show or hide the section.
+ */
+export const SEARCH_TERMS: string[] = [
   'telemetry',
   'usage data', // Keeping this term for BWC
   'usage collection',
@@ -45,10 +49,8 @@ const SEARCH_TERMS: string[] = [
 
 interface Props {
   telemetryService: TelemetryService;
-  onQueryMatchChange: (searchTermMatches: boolean) => void;
   showAppliesSettingMessage: boolean;
   enableSaving: boolean;
-  query?: { text: string };
   toasts: ToastsStart;
   docLinks: DocLinksStart['links'];
 }
@@ -57,7 +59,6 @@ interface State {
   processing: boolean;
   showExample: boolean;
   showSecurityExample: boolean;
-  queryMatches: boolean | null;
   enabled: boolean;
 }
 
@@ -69,44 +70,15 @@ export class TelemetryManagementSection extends Component<Props, State> {
       processing: false,
       showExample: false,
       showSecurityExample: false,
-      queryMatches: props.query ? this.checkQueryMatch(props.query) : null,
       enabled: this.props.telemetryService.getIsOptedIn() || false,
     };
   }
 
-  UNSAFE_componentWillReceiveProps(nextProps: Props) {
-    const { query } = nextProps;
-    const queryMatches = this.checkQueryMatch(query);
-
-    if (queryMatches !== this.state.queryMatches) {
-      this.setState(
-        {
-          queryMatches,
-        },
-        () => {
-          this.props.onQueryMatchChange(queryMatches);
-        }
-      );
-    }
-  }
-
-  checkQueryMatch(query?: { text: string }): boolean {
-    const searchTerm = (query?.text ?? '').toLowerCase();
-    return (
-      this.props.telemetryService.getCanChangeOptInStatus() &&
-      SEARCH_TERMS.some((term) => term.indexOf(searchTerm) >= 0)
-    );
-  }
-
   render() {
     const { telemetryService } = this.props;
-    const { showExample, queryMatches, enabled, processing } = this.state;
+    const { showExample, enabled, processing } = this.state;
 
     if (!telemetryService.getCanChangeOptInStatus()) {
-      return null;
-    }
-
-    if (queryMatches !== null && !queryMatches) {
       return null;
     }
 

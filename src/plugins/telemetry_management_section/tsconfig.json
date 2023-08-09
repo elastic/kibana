@@ -16,6 +16,7 @@
     "@kbn/test-jest-helpers",
     "@kbn/i18n-react",
     "@kbn/i18n",
+    "@kbn/management-settings-section-registry",
   ],
   "exclude": [
     "target/**/*",
