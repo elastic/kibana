@@ -37,6 +37,7 @@ export const DashboardListingPage = ({
 }: DashboardListingPageProps) => {
   const {
     data: { query },
+    serverless,
     chrome: { setBreadcrumbs },
     dashboardContentManagement: { findDashboards },
   } = pluginServices.getServices();
@@ -59,7 +60,13 @@ export const DashboardListingPage = ({
         text: getDashboardBreadcrumb(),
       },
     ]);
-  }, [setBreadcrumbs]);
+
+    if (serverless?.setBreadcrumbs) {
+      // if serverless breadcrumbs available,
+      // reset any deeper context breadcrumbs to only keep the main "dashboard" part that comes from the navigation config
+      serverless.setBreadcrumbs([]);
+    }
+  }, [setBreadcrumbs, serverless]);
 
   useEffect(() => {
     // syncs `_g` portion of url with query services
