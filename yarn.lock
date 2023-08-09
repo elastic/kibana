@@ -2041,7 +2041,7 @@
     history "^4.9.0"
     qs "^6.7.0"
 
-"@elastic/synthetics@~1.0.0-beta.13":
+"@elastic/synthetics@~1.0.0-beta.39":
   version "1.0.0-beta.39"
   resolved "https://registry.yarnpkg.com/@elastic/synthetics/-/synthetics-1.0.0-beta.39.tgz#8cb3f13f4f463cf5bc8a3def491c04ddd5279cbd"
   integrity sha512-o2BnJ6HqRWch60ylJYqLrMncrKjMZhQDKf62Y/JkUWjj/rUfoafi7v4K/4TnI3w7Yx/0i1APODbwoCTy63FEgg==
