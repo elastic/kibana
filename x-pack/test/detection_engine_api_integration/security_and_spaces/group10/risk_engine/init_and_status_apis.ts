@@ -6,19 +6,14 @@
  */
 
 import expect from '@kbn/expect';
-import {
-  RISK_ENGINE_INIT_URL,
-  RISK_ENGINE_DISABLE_URL,
-  RISK_ENGINE_ENABLE_URL,
-  RISK_ENGINE_STATUS_URL,
-} from '@kbn/security-solution-plugin/common/constants';
 import { riskEngineConfigurationTypeName } from '@kbn/security-solution-plugin/server/lib/risk_engine/saved_object';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import {
   cleanRiskEngineConfig,
   legacyTransformIds,
-  createTransforms,
+  createLegacyTransforms,
   clearLegacyTransforms,
+  riskEngineRouteHelpersFactory,
 } from './utils';
 
 // eslint-disable-next-line import/no-default-export
@@ -26,6 +21,7 @@ export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');
   const supertest = getService('supertest');
   const kibanaServer = getService('kibanaServer');
+  const riskEngineRoutes = riskEngineRouteHelpersFactory(supertest);
 
   describe('Risk Engine', () => {
     afterEach(async () => {
@@ -37,21 +33,9 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    const initRiskEngine = async () =>
-      await supertest.post(RISK_ENGINE_INIT_URL).set('kbn-xsrf', 'true').send().expect(200);
-
-    const getRiskEngineStatus = async () =>
-      await supertest.get(RISK_ENGINE_STATUS_URL).set('kbn-xsrf', 'true').send().expect(200);
-
-    const enableRiskEngine = async () =>
-      await supertest.post(RISK_ENGINE_ENABLE_URL).set('kbn-xsrf', 'true').send().expect(200);
-
-    const disableRiskEngine = async () =>
-      await supertest.post(RISK_ENGINE_DISABLE_URL).set('kbn-xsrf', 'true').send().expect(200);
-
     describe('init api', () => {
       it('should return response with success status', async () => {
-        const response = await initRiskEngine();
+        const response = await riskEngineRoutes.init();
         expect(response.body).to.eql({
           result: {
             errors: [],
@@ -69,7 +53,7 @@ export default ({ getService }: FtrProviderContext) => {
         const indexTemplateName = '.risk-score.risk-score-default-index-template';
         const indexName = 'risk-score.risk-score-default';
 
-        await initRiskEngine();
+        await riskEngineRoutes.init();
 
         const ilmPolicy = await es.ilm.getLifecycle({
           name: ilmPolicyName,
@@ -279,7 +263,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should create configuration saved object', async () => {
-        await initRiskEngine();
+        await riskEngineRoutes.init();
         const response = await kibanaServer.savedObjects.find({
           type: riskEngineConfigurationTypeName,
         });
@@ -297,12 +281,12 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should create configuration saved object only once', async () => {
-        await initRiskEngine();
+        await riskEngineRoutes.init();
         const firstResponse = await kibanaServer.savedObjects.find({
           type: riskEngineConfigurationTypeName,
         });
 
-        await initRiskEngine();
+        await riskEngineRoutes.init();
         const secondResponse = await kibanaServer.savedObjects.find({
           type: riskEngineConfigurationTypeName,
         });
@@ -314,7 +298,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should remove legacy risk score transform if it exists', async () => {
-        await createTransforms({ es });
+        await createLegacyTransforms({ es });
 
         for (const transformId of legacyTransformIds) {
           const tr = await es.transform.getTransform({
@@ -324,7 +308,7 @@ export default ({ getService }: FtrProviderContext) => {
           expect(tr?.transforms?.[0]?.id).to.eql(transformId);
         }
 
-        await initRiskEngine();
+        await riskEngineRoutes.init();
 
         for (const transformId of legacyTransformIds) {
           try {
@@ -340,32 +324,33 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('status api', () => {
       it('should disable / enable risk engige', async () => {
-        const status1 = await getRiskEngineStatus();
+        const status1 = await riskEngineRoutes.getStatus();
+        await riskEngineRoutes.init();
 
         expect(status1.body).to.eql({
           risk_engine_status: 'NOT_INSTALLED',
           legacy_risk_engine_status: 'NOT_INSTALLED',
         });
 
-        await initRiskEngine();
+        await riskEngineRoutes.init();
 
-        const status2 = await getRiskEngineStatus();
+        const status2 = await riskEngineRoutes.getStatus();
 
         expect(status2.body).to.eql({
           risk_engine_status: 'ENABLED',
           legacy_risk_engine_status: 'NOT_INSTALLED',
         });
 
-        await disableRiskEngine();
-        const status3 = await getRiskEngineStatus();
+        await riskEngineRoutes.disable();
+        const status3 = await riskEngineRoutes.getStatus();
 
         expect(status3.body).to.eql({
           risk_engine_status: 'DISABLED',
           legacy_risk_engine_status: 'NOT_INSTALLED',
         });
 
-        await enableRiskEngine();
-        const status4 = await getRiskEngineStatus();
+        await riskEngineRoutes.enable();
+        const status4 = await riskEngineRoutes.getStatus();
 
         expect(status4.body).to.eql({
           risk_engine_status: 'ENABLED',
@@ -374,17 +359,17 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should return status of legacy risk engine', async () => {
-        await createTransforms({ es });
-        const status1 = await getRiskEngineStatus();
+        await createLegacyTransforms({ es });
+        const status1 = await riskEngineRoutes.getStatus();
 
         expect(status1.body).to.eql({
           risk_engine_status: 'NOT_INSTALLED',
           legacy_risk_engine_status: 'ENABLED',
         });
 
-        await initRiskEngine();
+        await riskEngineRoutes.init();
 
-        const status2 = await getRiskEngineStatus();
+        const status2 = await riskEngineRoutes.getStatus();
 
         expect(status2.body).to.eql({
           risk_engine_status: 'ENABLED',

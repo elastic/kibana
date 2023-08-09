@@ -16,6 +16,12 @@ import type {
 import { riskEngineConfigurationTypeName } from '@kbn/security-solution-plugin/server/lib/risk_engine/saved_object';
 import type { KbnClient } from '@kbn/test';
 import {
+  RISK_ENGINE_INIT_URL,
+  RISK_ENGINE_DISABLE_URL,
+  RISK_ENGINE_ENABLE_URL,
+  RISK_ENGINE_STATUS_URL,
+} from '@kbn/security-solution-plugin/common/constants';
+import {
   createRule,
   waitForSignalsToBePresent,
   waitForRuleSuccess,
@@ -102,6 +108,7 @@ export const deleteAllRiskScores = async (
             match_all: {},
           },
         },
+        ignore_unavailable: true,
         refresh: true,
       });
       return {
@@ -115,10 +122,12 @@ export const deleteAllRiskScores = async (
 
 export const readRiskScores = async (
   es: Client,
-  index: string[] = ['risk-score.risk-score-default']
+  index: string[] = ['risk-score.risk-score-default'],
+  size: number = 1000
 ): Promise<EcsRiskScore[]> => {
   const results = await es.search({
-    index: 'risk-score.risk-score-default',
+    index,
+    size,
   });
   return results.hits.hits.map((hit) => hit._source as EcsRiskScore);
 };
@@ -127,7 +136,7 @@ export const waitForRiskScoresToBePresent = async ({
   es,
   log,
   index = ['risk-score.risk-score-default'],
-  scoreCount = 0,
+  scoreCount = 1,
 }: {
   es: Client;
   log: ToolingLog;
@@ -136,12 +145,62 @@ export const waitForRiskScoresToBePresent = async ({
 }): Promise<void> => {
   await waitFor(
     async () => {
-      const riskScores = await readRiskScores(es, index);
-      return riskScores.length > scoreCount;
+      const riskScores = await readRiskScores(es, index, scoreCount + 10);
+      return riskScores.length >= scoreCount;
     },
     'waitForRiskScoresToBePresent',
     log
   );
+};
+
+export const getRiskEngineTasks = async ({
+  es,
+  index = ['.kibana_task_manager*'],
+}: {
+  es: Client;
+  index?: string[];
+}) => {
+  const result = await es.search({
+    index,
+    query: { match: { 'task.taskType': 'risk_engine:risk_scoring' } },
+  });
+
+  return result.hits.hits?.map((hit) => hit._source);
+};
+
+export const getRiskEngineTask = async ({
+  es,
+  index = ['.kibana_task_manager*'],
+}: {
+  es: Client;
+  index?: string[];
+}) => {
+  const result = await es.search({
+    index,
+    query: { match: { 'task.taskType': 'risk_engine:risk_scoring' } },
+  });
+
+  return result.hits.hits[0]?._source;
+};
+
+export const deleteRiskEngineTask = async ({
+  es,
+  log,
+  index = ['.kibana_task_manager*'],
+}: {
+  es: Client;
+  log: ToolingLog;
+  index?: string[];
+}) => {
+  await es.deleteByQuery({
+    index,
+    query: {
+      match: {
+        'task.taskType': 'risk_engine:risk_scoring',
+      },
+    },
+    conflicts: 'proceed',
+  });
 };
 
 export const getRiskEngineConfigSO = async ({ kibanaServer }: { kibanaServer: KbnClient }) => {
@@ -166,6 +225,28 @@ export const cleanRiskEngineConfig = async ({
   }
 };
 
+export const updateRiskEngineConfigSO = async ({
+  attributes,
+  kibanaServer,
+}: {
+  attributes: object;
+  kibanaServer: KbnClient;
+}) => {
+  const so = await getRiskEngineConfigSO({ kibanaServer });
+  if (so) {
+    await kibanaServer.savedObjects.update({
+      id: so.id,
+      type: riskEngineConfigurationTypeName,
+      attributes: {
+        ...so.attributes,
+        ...attributes,
+      },
+    });
+  } else {
+    throw Error('No risk engine config found');
+  }
+};
+
 export const legacyTransformIds = [
   'ml_hostriskscore_pivot_transform_default',
   'ml_hostriskscore_latest_transform_default',
@@ -186,7 +267,7 @@ export const clearLegacyTransforms = async ({ es }: { es: Client }): Promise<voi
   }
 };
 
-export const createTransforms = async ({ es }: { es: Client }): Promise<void> => {
+export const createLegacyTransforms = async ({ es }: { es: Client }): Promise<void> => {
   const transforms = legacyTransformIds.map((transform) =>
     es.transform.putTransform({
       transform_id: transform,
@@ -218,3 +299,17 @@ export const createTransforms = async ({ es }: { es: Client }): Promise<void> =>
 
   await Promise.all(transforms);
 };
+
+export const riskEngineRouteHelpersFactory = (supertest: SuperTest.SuperTest<SuperTest.Test>) => ({
+  init: async () =>
+    await supertest.post(RISK_ENGINE_INIT_URL).set('kbn-xsrf', 'true').send().expect(200),
+
+  getStatus: async () =>
+    await supertest.get(RISK_ENGINE_STATUS_URL).set('kbn-xsrf', 'true').send().expect(200),
+
+  enable: async () =>
+    await supertest.post(RISK_ENGINE_ENABLE_URL).set('kbn-xsrf', 'true').send().expect(200),
+
+  disable: async () =>
+    await supertest.post(RISK_ENGINE_DISABLE_URL).set('kbn-xsrf', 'true').send().expect(200),
+});

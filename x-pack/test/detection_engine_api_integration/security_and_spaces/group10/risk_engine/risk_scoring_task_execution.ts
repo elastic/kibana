@@ -6,7 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-import { RISK_ENGINE_INIT_URL } from '@kbn/security-solution-plugin/common/constants';
 // import type { RiskScore } from '@kbn/security-solution-plugin/server/lib/risk_engine/types';
 import { v4 as uuidv4 } from 'uuid';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
@@ -15,9 +14,13 @@ import { dataGeneratorFactory } from '../../../utils/data_generator';
 import {
   buildDocument,
   createAndSyncRuleAndAlertsFactory,
+  deleteRiskEngineTask,
   deleteAllRiskScores,
   readRiskScores,
   waitForRiskScoresToBePresent,
+  normalizeScores,
+  riskEngineRouteHelpersFactory,
+  updateRiskEngineConfigSO,
 } from './utils';
 
 // eslint-disable-next-line import/no-default-export
@@ -26,31 +29,11 @@ export default ({ getService }: FtrProviderContext): void => {
   const esArchiver = getService('esArchiver');
   const es = getService('es');
   const log = getService('log');
+  const kibanaServer = getService('kibanaServer');
 
   const createAndSyncRuleAndAlerts = createAndSyncRuleAndAlertsFactory({ supertest, log });
 
-  const initializeRiskEngine = async () =>
-    await supertest.post(RISK_ENGINE_INIT_URL).set('kbn-xsrf', 'true').send().expect(200);
-
-  // const calculateRiskScoreAfterRuleCreationAndExecution = async (
-  //   documentId: string,
-  //   {
-  //     alerts = 1,
-  //     riskScore = 21,
-  //     maxSignals = 100,
-  //   }: { alerts?: number; riskScore?: number; maxSignals?: number } = {}
-  // ) => {
-  //   await createAndSyncRuleAndAlerts({ query: `id: ${documentId}`, alerts, riskScore, maxSignals });
-
-  //   return await calculateRiskScores({
-  //     body: {
-  //       data_view_id: '.alerts-security.alerts-default',
-  //       range: { start: 'now-30d', end: 'now' },
-  //       identifier_type: 'host',
-  //     },
-  //   });
-  // };
-
+  const riskEngineRoutes = riskEngineRouteHelpersFactory(supertest);
   describe('Risk Engine Scoring - Task', () => {
     context('with auditbeat data', () => {
       const { indexListOfDocuments } = dataGeneratorFactory({
@@ -70,11 +53,14 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       beforeEach(async () => {
+        await deleteRiskEngineTask({ es, log });
+        await deleteAllRiskScores(log, es);
         await deleteAllAlerts(supertest, log, es);
         await deleteAllRules(supertest, log);
       });
 
       afterEach(async () => {
+        await deleteRiskEngineTask({ es, log });
         await deleteAllRiskScores(log, es);
         await deleteAllAlerts(supertest, log, es);
         await deleteAllRules(supertest, log);
@@ -104,14 +90,65 @@ export default ({ getService }: FtrProviderContext): void => {
 
         describe('initializing the risk engine', () => {
           beforeEach(async () => {
-            await initializeRiskEngine();
+            await riskEngineRoutes.init();
           });
 
           it('calculates and persists risk scores for alert documents', async () => {
             await waitForRiskScoresToBePresent({ es, log, scoreCount: 10 });
 
             const scores = await readRiskScores(es);
-            expect(scores).to.eql([]);
+            expect(normalizeScores(scores).map(({ id_value: idValue }) => idValue)).to.eql(
+              Array(10)
+                .fill(0)
+                .map((_, index) => `host-${index}`)
+            );
+          });
+
+          describe('disabling and re-enabling the risk engine', () => {
+            beforeEach(async () => {
+              await waitForRiskScoresToBePresent({ es, log, scoreCount: 10 });
+              await riskEngineRoutes.disable();
+              await riskEngineRoutes.enable();
+            });
+
+            it('calculates another round of scores', async () => {
+              await waitForRiskScoresToBePresent({ es, log, scoreCount: 20 });
+
+              const scores = await readRiskScores(es);
+              const expectedHostNames = Array(10)
+                .fill(0)
+                .map((_, index) => `host-${index}`);
+              const actualHostNames = normalizeScores(scores).map(
+                ({ id_value: idValue }) => idValue
+              );
+
+              expect(actualHostNames).to.eql([...expectedHostNames, ...expectedHostNames]);
+            });
+          });
+
+          describe('when config values are overwritten', () => {
+            beforeEach(async () => {
+              await riskEngineRoutes.disable();
+            });
+
+            describe('when task interval configuration is modified', () => {
+              beforeEach(async () => {
+                await updateRiskEngineConfigSO({
+                  attributes: {
+                    interval: '1s',
+                  },
+                  kibanaServer,
+                });
+                await riskEngineRoutes.enable();
+              });
+
+              it('executes multiple times', async () => {
+                await waitForRiskScoresToBePresent({ es, log, scoreCount: 30 });
+                const riskScores = await readRiskScores(es);
+
+                expect(riskScores.length).to.be.greaterThan(29);
+              });
+            });
           });
         });
       });
