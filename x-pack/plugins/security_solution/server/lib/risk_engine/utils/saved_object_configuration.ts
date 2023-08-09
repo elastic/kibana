@@ -22,6 +22,7 @@ const getDefaultRiskEngineConfiguration = ({
   dataViewId: getAlertsIndex(namespace),
   enabled: false,
   filter: {},
+  interval: '1h',
   pageSize: 10_000,
   range: { start: 'now-30d', end: 'now' },
 });

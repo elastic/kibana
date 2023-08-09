@@ -272,6 +272,7 @@ export default ({ getService }: FtrProviderContext) => {
           dataViewId: '.alerts-security.alerts-default',
           enabled: true,
           filter: {},
+          interval: '1h',
           pageSize: 10000,
           range: {
             end: 'now',

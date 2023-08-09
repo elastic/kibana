@@ -8,6 +8,7 @@
 import { type ConcreteTaskInstance, TaskStatus } from '@kbn/task-manager-plugin/server';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { TYPE, VERSION } from './constants';
+import { defaultState } from './state';
 
 const createRiskScoringTaskInstanceMock = (
   overrides: Partial<ConcreteTaskInstance> = {}
@@ -22,8 +23,9 @@ const createRiskScoringTaskInstanceMock = (
     scheduledAt: new Date(),
     retryAt: new Date(),
     params: {},
-    state: {},
+    state: defaultState,
     taskType: TYPE,
+    ...overrides,
   });
 
 export const riskScoringTaskMock = {

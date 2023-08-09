@@ -167,6 +167,7 @@ export interface RiskEngineConfiguration {
   dataViewId: string;
   enabled: boolean;
   filter: unknown;
+  interval: string;
   pageSize: number;
   range: Range;
 }

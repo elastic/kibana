@@ -32,8 +32,8 @@ export default ({ getService }: FtrProviderContext): void => {
   const kibanaServer = getService('kibanaServer');
 
   const createAndSyncRuleAndAlerts = createAndSyncRuleAndAlertsFactory({ supertest, log });
-
   const riskEngineRoutes = riskEngineRouteHelpersFactory(supertest);
+
   describe('Risk Engine - Risk Scoring Task', () => {
     context('with auditbeat data', () => {
       const { indexListOfDocuments } = dataGeneratorFactory({

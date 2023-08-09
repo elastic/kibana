@@ -37,8 +37,7 @@ import {
   initSavedObjects,
 } from './utils/saved_object_configuration';
 import { getRiskInputsIndex } from './get_risk_inputs_index';
-import { RiskScoringTask } from './tasks';
-import { removeRiskScoringTask } from './tasks/helpers';
+import { removeRiskScoringTask, startRiskScoringTask } from './tasks';
 
 interface InitOpts {
   namespace: string;
@@ -147,7 +146,9 @@ export class RiskEngineDataClient {
   }
 
   public async enableRiskEngine({ taskManager }: { taskManager: TaskManagerStartContract }) {
-    new RiskScoringTask({ logger: this.options.logger }).start({
+    await startRiskScoringTask({
+      logger: this.options.logger,
+      riskEngineDataClient: this,
       taskManager,
     });
 
@@ -164,7 +165,6 @@ export class RiskEngineDataClient {
   public async disableRiskEngine({ taskManager }: { taskManager: TaskManagerStartContract }) {
     await removeRiskScoringTask({
       taskManager,
-      taskId: RiskScoringTask.getTaskId(),
       logger: this.options.logger,
     });
 

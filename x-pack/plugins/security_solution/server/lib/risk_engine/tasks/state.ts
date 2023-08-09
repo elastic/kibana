@@ -21,10 +21,12 @@ export const stateSchemaByVersion = {
     up: (state: Record<string, unknown>) => ({
       lastExecutionTimestamp: state.lastExecutionTimestamp || undefined,
       runs: state.runs || 0,
+      namespace: typeof state.namespace === 'string' ? state.namespace : 'default',
       scoresWritten: typeof state.scoresWritten === 'number' ? state.scoresWritten : undefined,
     }),
     schema: schema.object({
       lastExecutionTimestamp: schema.maybe(schema.string()),
+      namespace: schema.string(),
       runs: schema.number(),
       scoresWritten: schema.maybe(schema.number()),
     }),
@@ -36,6 +38,7 @@ export type LatestTaskStateSchema = TypeOf<typeof latestTaskStateSchema>;
 
 export const defaultState: LatestTaskStateSchema = {
   lastExecutionTimestamp: undefined,
+  namespace: 'default',
   runs: 0,
   scoresWritten: undefined,
 };

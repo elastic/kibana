@@ -23,6 +23,9 @@ export const riskEngineConfigurationTypeMappings: SavedObjectsType['mappings'] =
       dynamic: false,
       properties: {},
     },
+    interval: {
+      type: 'keyword',
+    },
     pageSize: {
       type: 'integer',
     },

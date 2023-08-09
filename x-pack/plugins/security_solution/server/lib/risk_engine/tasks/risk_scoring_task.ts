@@ -6,7 +6,11 @@
  */
 
 import moment from 'moment';
-import type { Logger } from '@kbn/core/server';
+import {
+  type Logger,
+  SavedObjectsErrorHelpers,
+  type StartServicesAccessor,
+} from '@kbn/core/server';
 import type {
   ConcreteTaskInstance,
   TaskManagerSetupContract,
@@ -14,7 +18,10 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 
 import type { AfterKeys } from '../../../../common/risk_engine';
-import type { RiskScoreService } from '../risk_score_service';
+import type { StartPlugins } from '../../../plugin';
+import { type RiskScoreService, riskScoreServiceFactory } from '../risk_score_service';
+import { RiskEngineDataClient } from '../risk_engine_data_client';
+import { isRiskScoreCalculationComplete } from '../helpers';
 import {
   defaultState,
   stateSchemaByVersion,
@@ -22,146 +29,198 @@ import {
 } from './state';
 import { INTERVAL, SCOPE, TIMEOUT, TYPE, VERSION } from './constants';
 import { convertRangeToISO } from './helpers';
-import { isRiskScoreCalculationComplete } from '../helpers';
 
-// const register = (taskManager: TaskManagerSetupContract) => {};
+const logFactory =
+  (logger: Logger, taskId: string) =>
+  (message: string): void =>
+    logger.info(`[task ${taskId}]: ${message}`);
 
-export class RiskScoringTask {
-  private readonly logger: Logger;
+const getTaskName = (): string => TYPE;
 
-  constructor({ logger }: { logger: Logger }) {
-    this.logger = logger;
+// TODO does this need to account for the space?
+const getTaskId = (): string => `${TYPE}:${VERSION}`;
+
+type GetRiskScoreService = (namespace: string) => Promise<RiskScoreService>;
+
+export const registerRiskScoringTask = ({
+  getStartServices,
+  kibanaVersion,
+  logger,
+  taskManager,
+}: {
+  getStartServices: StartServicesAccessor<StartPlugins>;
+  kibanaVersion: string;
+  logger: Logger;
+  taskManager: TaskManagerSetupContract | undefined;
+}): void => {
+  if (!taskManager) {
+    logger.info('Task Manager is unavailable; skipping risk engine task registration.');
+    return;
   }
 
-  private log = (message: string): void => {
-    this.logger.info(`[task ${RiskScoringTask.getTaskId()}]: ${message}`);
-  };
+  const getRiskScoreService: GetRiskScoreService = (namespace) =>
+    getStartServices().then(([coreStart, _]) => {
+      const esClient = coreStart.elasticsearch.client.asInternalUser;
+      const soClient = coreStart.savedObjects.createInternalRepository();
+      const riskEngineDataClient = new RiskEngineDataClient({
+        logger,
+        kibanaVersion,
+        esClient,
+        namespace,
+        soClient,
+      });
 
-  static getTaskName = (): string => TYPE;
+      return riskScoreServiceFactory({
+        esClient,
+        logger,
+        riskEngineDataClient,
+        spaceId: namespace,
+      });
+    });
 
-  static getTaskId = (): string => {
-    // TODO does this need to account for the space?
-    return `${TYPE}:${VERSION}`;
-  };
+  taskManager.registerTaskDefinitions({
+    [getTaskName()]: {
+      title: 'Entity Analytics Risk Engine - Risk Scoring Task',
+      timeout: TIMEOUT,
+      stateSchemaByVersion,
+      createTaskRunner: createTaskRunnerFactory({ logger, getRiskScoreService }),
+    },
+  });
+};
 
-  public register = (
-    taskManager: TaskManagerSetupContract,
-    logger: Logger,
-    riskScoreService: Promise<RiskScoreService>
-  ) => {
-    taskManager.registerTaskDefinitions({
-      [TYPE]: {
-        title: 'Entity Analytics Risk Engine - Risk Scoring Task',
-        timeout: TIMEOUT,
-        stateSchemaByVersion,
-        createTaskRunner: this.createCreateTaskRunner(logger, riskScoreService),
+export const startRiskScoringTask = async ({
+  logger,
+  riskEngineDataClient,
+  taskManager,
+}: {
+  logger: Logger;
+  riskEngineDataClient: RiskEngineDataClient;
+  taskManager: TaskManagerStartContract;
+}) => {
+  const taskId = getTaskId();
+  const log = logFactory(logger, taskId);
+  const interval = (await riskEngineDataClient.getConfiguration())?.interval ?? INTERVAL;
+
+  log('attempting to schedule');
+  try {
+    await taskManager.ensureScheduled({
+      id: taskId,
+      taskType: TYPE,
+      scope: SCOPE,
+      schedule: {
+        interval,
       },
+      state: defaultState,
+      params: { version: VERSION },
     });
+  } catch (e) {
+    logger.warn(`[task ${taskId}]: error scheduling task, received ${e.message}`);
+  }
+};
+
+export const removeRiskScoringTask = async ({
+  logger,
+  taskManager,
+}: {
+  logger: Logger;
+  taskManager: TaskManagerStartContract;
+}) => {
+  try {
+    await taskManager.remove(getTaskId());
+  } catch (err) {
+    if (!SavedObjectsErrorHelpers.isNotFoundError(err)) {
+      logger.error(`Failed to remove risk scoring task: ${err.message}`);
+      throw err;
+    }
+  }
+};
+
+export const runTask = async ({
+  getRiskScoreService,
+  logger,
+  taskInstance,
+}: {
+  logger: Logger;
+  getRiskScoreService: GetRiskScoreService;
+  taskInstance: ConcreteTaskInstance;
+}): Promise<{
+  state: RiskScoringTaskState;
+  // TODO when do we need to return schedule?
+}> => {
+  const state = taskInstance.state as RiskScoringTaskState;
+  const taskId = taskInstance.id;
+  const log = logFactory(logger, taskId);
+  const taskExecutionTime = moment().utc().toISOString();
+
+  let afterKeys: AfterKeys = {};
+  let scoresWritten = 0;
+  const updatedState = {
+    lastExecutionTimestamp: taskExecutionTime,
+    namespace: state.namespace,
+    runs: state.runs + 1,
+    scoresWritten,
   };
 
-  public start = async ({ taskManager }: { taskManager: TaskManagerStartContract }) => {
-    const taskId = RiskScoringTask.getTaskId();
+  if (taskId !== getTaskId()) {
+    log('outdated task');
+    return { state: updatedState };
+  }
 
-    // TODO get config and use it here
-    this.log('attempting to schedule');
-    try {
-      await taskManager.ensureScheduled({
-        id: taskId,
-        taskType: TYPE,
-        scope: SCOPE,
-        schedule: {
-          interval: INTERVAL,
-        },
-        state: defaultState,
-        params: { version: VERSION },
-      });
-    } catch (e) {
-      this.logger.warn(`[task ${taskId}]: error scheduling task, received ${e.message}`); // todo
-    }
-  };
+  const riskScoreService = await getRiskScoreService(state.namespace);
+  if (!riskScoreService) {
+    log('risk score service is not available; exiting task');
+    return { state: updatedState };
+  }
 
-  public runTask = async (
-    logger: Logger,
-    riskScoreService: RiskScoreService,
-    taskInstance: ConcreteTaskInstance
-  ): Promise<{
-    state: RiskScoringTaskState;
-    // TODO when do we need to return schedule?
-  }> => {
-    const state = taskInstance.state as RiskScoringTaskState;
-    const taskId = taskInstance.id;
+  const configuration = await riskScoreService.getConfiguration();
+  if (configuration == null) {
+    log(
+      'Risk engine configuration not found; exiting task. Please reinitialize the risk engine and try again'
+    );
+    return { state: updatedState };
+  }
 
-    this.log('attempting to run');
-    const taskExecutionTime = moment().utc().toISOString();
+  const { dataViewId, enabled, filter, range: configuredRange, pageSize } = configuration;
+  if (!enabled) {
+    log('risk engine is not enabled, exiting task');
+    return { state: updatedState };
+  }
 
-    let afterKeys: AfterKeys = {};
-    let scoresWritten = 0;
-    const updatedState = {
-      lastExecutionTimestamp: taskExecutionTime,
-      runs: state.runs + 1,
-      scoresWritten,
-    };
+  const range = convertRangeToISO(configuredRange);
+  const { index, runtimeMappings } = await riskScoreService.getRiskInputsIndex({
+    dataViewId,
+  });
 
-    if (taskId !== RiskScoringTask.getTaskId()) {
-      this.log('outdated task');
-      return { state: updatedState };
-    }
-
-    if (!riskScoreService) {
-      this.log('risk score service is not available; exiting task');
-      return { state: updatedState };
-    }
-
-    const configuration = await riskScoreService.getConfiguration();
-    if (configuration == null) {
-      this.log(
-        'risk engine configuration not found; exiting task. Please re-enable the risk engine and try again'
-      );
-      return { state: updatedState };
-    }
-
-    const { dataViewId, enabled, filter, range: configuredRange, pageSize } = configuration;
-    if (!enabled) {
-      this.log('risk engine is not enabled, exiting task');
-      return { state: updatedState };
-    }
-
-    const range = convertRangeToISO(configuredRange);
-    const { index, runtimeMappings } = await riskScoreService.getRiskInputsIndex({
-      dataViewId,
+  let isWorkComplete = false;
+  while (!isWorkComplete) {
+    const result = await riskScoreService.calculateAndPersistScores({
+      afterKeys,
+      index,
+      filter,
+      identifierType: 'host', // TODO
+      pageSize,
+      range,
+      runtimeMappings,
+      weights: [],
     });
 
-    let isWorkComplete = false;
-    while (!isWorkComplete) {
-      const result = await riskScoreService.calculateAndPersistScores({
-        afterKeys,
-        index,
-        filter: undefined, // TODO default of {} breaks things
-        identifierType: 'host', // TODO
-        pageSize,
-        range,
-        runtimeMappings,
-        weights: [],
-      });
+    isWorkComplete = isRiskScoreCalculationComplete(result);
+    afterKeys = result.after_keys;
+    scoresWritten += result.scores_written;
+  }
 
-      isWorkComplete = isRiskScoreCalculationComplete(result);
-      afterKeys = result.after_keys;
-      scoresWritten += result.scores_written;
-    }
+  updatedState.scoresWritten = scoresWritten;
 
-    updatedState.scoresWritten = scoresWritten;
+  return {
+    state: updatedState,
+  };
+};
 
+const createTaskRunnerFactory =
+  ({ logger, getRiskScoreService }: { logger: Logger; getRiskScoreService: GetRiskScoreService }) =>
+  ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
     return {
-      state: updatedState,
+      run: async () => runTask({ getRiskScoreService, logger, taskInstance }),
+      cancel: async () => {},
     };
   };
-
-  private createCreateTaskRunner =
-    (logger: Logger, riskScoreService: Promise<RiskScoreService>) =>
-    ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
-      return {
-        run: async () => this.runTask(logger, await riskScoreService, taskInstance),
-        cancel: async () => {},
-      };
-    };
-}

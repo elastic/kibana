@@ -96,9 +96,7 @@ import {
 } from '../common/endpoint/constants';
 
 import { AppFeatures } from './lib/app_features';
-import { RiskScoringTask } from './lib/risk_engine/tasks';
-import { RiskEngineDataClient } from './lib/risk_engine/risk_engine_data_client';
-import { riskScoreServiceFactory } from './lib/risk_engine/risk_score_service';
+import { registerRiskScoringTask } from './lib/risk_engine/tasks/risk_scoring_task';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
@@ -163,27 +161,13 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     this.ruleMonitoringService.setup(core, plugins);
 
-    if (experimentalFeatures.riskScoringPersistence && plugins.taskManager) {
-      new RiskScoringTask({ logger: this.logger }).register(
-        plugins.taskManager,
-        this.logger,
-        core.getStartServices().then(([coreStart, depsStart]) => {
-          const esClient = coreStart.elasticsearch.client.asInternalUser;
-          const riskEngineDataClient = new RiskEngineDataClient({
-            logger: this.logger,
-            kibanaVersion: pluginContext.env.packageInfo.version,
-            esClient,
-            namespace: 'default',
-            soClient: coreStart.savedObjects.createInternalRepository(), // TODO
-          });
-          return riskScoreServiceFactory({
-            esClient,
-            logger,
-            riskEngineDataClient,
-            spaceId: 'default',
-          });
-        })
-      );
+    if (experimentalFeatures.riskScoringPersistence) {
+      registerRiskScoringTask({
+        getStartServices: core.getStartServices,
+        kibanaVersion: pluginContext.env.packageInfo.version,
+        logger: this.logger,
+        taskManager: plugins.taskManager,
+      });
     }
 
     const requestContextFactory = new RequestContextFactory({

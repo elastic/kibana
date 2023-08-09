@@ -5,4 +5,8 @@
  * 2.0.
  */
 
-export { RiskScoringTask } from './risk_scoring_task';
+export {
+  registerRiskScoringTask,
+  startRiskScoringTask,
+  removeRiskScoringTask,
+} from './risk_scoring_task';
