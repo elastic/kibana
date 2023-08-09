@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import React from 'react';
+import { css } from '@emotion/css';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -13,9 +15,7 @@ import {
   EuiPanel,
   EuiSpacer,
 } from '@elastic/eui';
-import { css } from '@emotion/css';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
-import React from 'react';
 import type { Message } from '../../../common/types';
 import type { UseGenAIConnectorsResult } from '../../hooks/use_genai_connectors';
 import { UseKnowledgeBaseResult } from '../../hooks/use_knowledge_base';

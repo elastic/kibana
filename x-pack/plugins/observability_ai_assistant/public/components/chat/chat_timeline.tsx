@@ -13,7 +13,8 @@ import type { Feedback } from '../feedback_buttons';
 import { ChatItem } from './chat_item';
 
 export interface ChatTimelineItem
-  extends Pick<Message['message'], 'role' | 'content' | 'function_call'> {
+  extends Pick<Message, '@timestamp'>,
+    Pick<Message['message'], 'role' | 'content' | 'function_call'> {
   id: string;
   title: string;
   loading: boolean;

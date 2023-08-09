@@ -30,6 +30,7 @@ export function getTimelineItemsfromConversation({
   return [
     {
       id: v4(),
+      '@timestamp': '',
       canCopy: false,
       canEdit: false,
       canGiveFeedback: false,
@@ -105,6 +106,7 @@ export function getTimelineItemsfromConversation({
 
       const props = {
         id: v4(),
+        '@timestamp': message['@timestamp'],
         canCopy: true,
         canEdit: hasConnector && (message.message.role === MessageRole.User || hasFunction),
         canGiveFeedback:

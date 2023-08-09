@@ -22,7 +22,7 @@ export function ChatItemActions({
   canCopy,
   isCollapsed,
   onToggleEdit,
-  onAccordionToggle,
+  onToggleExpand,
   onCopyToClipboard,
 }: {
   canEdit: boolean;
@@ -30,7 +30,7 @@ export function ChatItemActions({
   canCopy: boolean;
   isCollapsed: boolean;
   onToggleEdit: () => void;
-  onAccordionToggle: () => void;
+  onToggleExpand: () => void;
   onCopyToClipboard: () => void;
 }) {
   const [isPopoverOpen, setIsPopoverOpen] = useState<string | undefined>();
@@ -67,7 +67,7 @@ export function ChatItemActions({
             icon: isCollapsed ? 'eyeClosed' : 'eye',
             label: '',
             handler: () => {
-              onAccordionToggle();
+              onToggleExpand();
             },
           },
         ]
