@@ -86,7 +86,7 @@ const SHARED_SERVERLESS_PARAMS = [
 
   // '--privileged',
 
-  // '--userns=host',
+  '--userns=host',
 
   '--net',
   'elastic',
