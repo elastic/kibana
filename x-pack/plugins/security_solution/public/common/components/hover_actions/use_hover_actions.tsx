@@ -102,7 +102,16 @@ export const useHoverActions = ({
         <ProviderContentWrapper
           data-test-subj={`draggable-link-content-${dataProvider.queryMatch.field}`}
         >
-          {render(dataProvider, null, { isDragging: false, isDropAnimating: false })}
+          {render(dataProvider, null, {
+            isDragging: false,
+            isDropAnimating: false,
+            isClone: false,
+            dropAnimation: null,
+            draggingOver: null,
+            combineWith: null,
+            combineTargetFor: null,
+            mode: null,
+          })}
         </ProviderContentWrapper>
       ) : null;
 

@@ -265,6 +265,12 @@ describe('ConditionalPortal', () => {
       const snapshot: DraggableStateSnapshot = {
         isDragging: true,
         isDropAnimating: false, // <-- NOT drop animating
+        isClone: false,
+        dropAnimation: null,
+        draggingOver: null,
+        combineWith: null,
+        combineTargetFor: null,
+        mode: null,
       };
 
       expect(getStyle(style, snapshot)).not.toHaveProperty('transitionDuration');
@@ -273,7 +279,13 @@ describe('ConditionalPortal', () => {
     it('returns a style with a transitionDuration when the snapshot is drop animating', () => {
       const snapshot: DraggableStateSnapshot = {
         isDragging: true,
-        isDropAnimating: true, // <-- it is drop animating
+        isDropAnimating: false, // <-- NOT drop animating
+        isClone: false,
+        dropAnimation: null,
+        draggingOver: null,
+        combineWith: null,
+        combineTargetFor: null,
+        mode: null,
       };
 
       expect(getStyle(style, snapshot)).toHaveProperty('transitionDuration', '0.00000001s');
