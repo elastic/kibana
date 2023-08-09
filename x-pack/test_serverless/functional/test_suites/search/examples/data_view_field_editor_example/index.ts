@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../../../ftr_provider_context';
+// TODO: Changed from PluginFunctionalProviderContext to FtrProviderContext in Serverless
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects, loadTestFile }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -24,6 +25,7 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
         body: { user: 'matt', message: 20 },
       });
 
+      // TODO: Navigation to Data View Management is different in Serverless
       await PageObjects.common.navigateToApp('management');
       await testSubjects.click('app-card-dataViews');
       await PageObjects.settings.createIndexPattern('blogs', null);

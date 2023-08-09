@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 const TEST_START_TIME = 'Sep 19, 2015 @ 06:31:44.000';
 const TEST_END_TIME = 'Sep 23, 2015 @ 18:31:44.000';
@@ -28,6 +28,8 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       await kibanaServer.importExport.load(
         'x-pack/test/functional/fixtures/kbn_archiver/visualize/default'
       );
+      // TODO: Loading this from `es_archives` in `test_serverless`
+      // instead since minor modifications were required
       await esArchiver.loadIfNeeded(
         'x-pack/test_serverless/functional/es_archives/pre_calculated_histogram'
       );
@@ -47,6 +49,8 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
 
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
+      // TODO: Loading this from `es_archives` in `test_serverless`
+      // instead since minor modifications were required
       await esArchiver.unload(
         'x-pack/test_serverless/functional/es_archives/pre_calculated_histogram'
       );
