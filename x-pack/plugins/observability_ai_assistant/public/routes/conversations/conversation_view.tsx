@@ -21,6 +21,7 @@ import { useObservabilityAIAssistantParams } from '../../hooks/use_observability
 import { useObservabilityAIAssistantRouter } from '../../hooks/use_observability_ai_assistant_router';
 import { EMPTY_CONVERSATION_TITLE } from '../../i18n';
 import { getConnectorsManagementHref } from '../../utils/get_connectors_management_href';
+import { useKnowledgeBase } from '../../hooks/use_knowledge_base';
 
 const containerClassName = css`
   max-width: 100%;
@@ -32,6 +33,8 @@ const chatBodyContainerClassNameWithError = css`
 
 export function ConversationView() {
   const connectors = useGenAIConnectors();
+
+  const knowledgeBase = useKnowledgeBase();
 
   const currentUser = useCurrentUser();
 
@@ -202,6 +205,7 @@ export function ConversationView() {
             <ChatBody
               currentUser={currentUser}
               connectors={connectors}
+              knowledgeBase={knowledgeBase}
               title={conversation.value.conversation.title}
               connectorsManagementHref={getConnectorsManagementHref(http)}
               service={service}

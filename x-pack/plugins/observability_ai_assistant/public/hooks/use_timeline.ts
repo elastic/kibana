@@ -44,6 +44,7 @@ export function useTimeline({
   service,
   onChatUpdate,
   onChatComplete,
+  knowledgeBaseAvailable,
 }: {
   messages: Message[];
   connectors: UseGenAIConnectorsResult;
@@ -51,6 +52,7 @@ export function useTimeline({
   service: ObservabilityAIAssistantService;
   onChatUpdate: (messages: Message[]) => void;
   onChatComplete: (messages: Message[]) => void;
+  knowledgeBaseAvailable: boolean;
 }): UseTimelineResult {
   const connectorId = connectors.selectedConnector;
 
@@ -83,7 +85,11 @@ export function useTimeline({
 
       onChatUpdate(nextMessages);
 
-      const response$ = service.chat({ messages: nextMessages, connectorId });
+      const response$ = service.chat({
+        messages: nextMessages,
+        connectorId,
+        knowledgeBaseAvailable,
+      });
 
       let pendingMessageLocal = pendingMessage;
 

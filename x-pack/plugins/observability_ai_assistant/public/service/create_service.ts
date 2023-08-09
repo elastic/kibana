@@ -72,7 +72,15 @@ export function createService({
     isEnabled: () => {
       return enabled;
     },
-    chat({ connectorId, messages }: { connectorId: string; messages: Message[] }) {
+    chat({
+      connectorId,
+      messages,
+      knowledgeBaseAvailable,
+    }: {
+      connectorId: string;
+      messages: Message[];
+      knowledgeBaseAvailable: boolean;
+    }) {
       const subject = new BehaviorSubject<PendingMessage>({
         message: {
           role: MessageRole.Assistant,
@@ -90,7 +98,11 @@ export function createService({
           body: {
             messages,
             connectorId,
-            functions: functions.map((fn) => pick(fn.options, 'name', 'description', 'parameters')),
+            functions: functions
+              .map((fn) => pick(fn.options, 'name', 'description', 'parameters'))
+              .filter((fn) =>
+                knowledgeBaseAvailable ? fn : fn.name !== 'recall' && fn.name !== 'summarise'
+              ),
           },
         },
         signal: controller.signal,

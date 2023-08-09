@@ -42,14 +42,16 @@ function ChatContent({
   const reloadReply = useCallback(() => {
     setLoading(true);
 
-    const nextSubscription = service.chat({ messages, connectorId }).subscribe({
-      next: (msg) => {
-        setPendingMessage(() => msg);
-      },
-      complete: () => {
-        setLoading(false);
-      },
-    });
+    const nextSubscription = service
+      .chat({ messages, connectorId, knowledgeBaseAvailable: false })
+      .subscribe({
+        next: (msg) => {
+          setPendingMessage(() => msg);
+        },
+        complete: () => {
+          setLoading(false);
+        },
+      });
 
     setSubscription(nextSubscription);
   }, [messages, connectorId, service]);

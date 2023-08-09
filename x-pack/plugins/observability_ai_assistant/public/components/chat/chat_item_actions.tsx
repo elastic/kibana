@@ -95,6 +95,7 @@ export function ChatItemActions({
       {actions.map(({ id, icon, label, handler }) =>
         label ? (
           <EuiPopover
+            key={id}
             button={
               <EuiButtonIcon
                 aria-label={label}
