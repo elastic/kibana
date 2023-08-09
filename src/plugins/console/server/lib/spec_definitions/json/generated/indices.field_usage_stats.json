@@ -16,7 +16,7 @@
       "GET"
     ],
     "patterns": [
-      "{indices}/_field_usage_stats"
+      "{index}/_field_usage_stats"
     ],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/field-usage-stats.html"
   }

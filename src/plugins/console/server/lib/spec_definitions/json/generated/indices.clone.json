@@ -10,7 +10,7 @@
       "POST"
     ],
     "patterns": [
-      "{indices}/_clone/{target}"
+      "{index}/_clone/{target}"
     ],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-clone-index.html"
   }

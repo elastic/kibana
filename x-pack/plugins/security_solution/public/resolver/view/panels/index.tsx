@@ -22,7 +22,7 @@ import type { State } from '../../../common/store/types';
 // eslint-disable-next-line react/display-name
 export const PanelRouter = memo(function ({ id }: { id: string }) {
   const params: PanelViewAndParameters = useSelector((state: State) =>
-    selectors.panelViewAndParameters(state.analyzer.analyzerById[id])
+    selectors.panelViewAndParameters(state.analyzer[id])
   );
   if (params.panelView === 'nodeDetail') {
     return <NodeDetail id={id} nodeID={params.panelParameters.nodeID} />;
