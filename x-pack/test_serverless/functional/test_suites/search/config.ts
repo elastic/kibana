@@ -17,5 +17,8 @@ export default createTestConfig({
     reportName: 'Serverless Search Functional Tests',
   },
   suiteTags: { exclude: ['skipSvlSearch'] },
-  serverArgs: findTestPluginPaths(resolve(REPO_ROOT, 'examples')),
+  serverArgs: findTestPluginPaths([
+    resolve(REPO_ROOT, 'examples'),
+    resolve(REPO_ROOT, 'x-pack/examples'),
+  ]),
 });

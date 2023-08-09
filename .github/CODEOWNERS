@@ -837,6 +837,7 @@ packages/kbn-yarn-lock-validator @elastic/kibana-operations
 /x-pack/test_serverless/functional/test_suites/search/examples/field_formats @elastic/kibana-data-discovery
 /x-pack/test_serverless/functional/test_suites/search/examples/partial_results @elastic/kibana-data-discovery
 /x-pack/test_serverless/functional/test_suites/search/examples/search @elastic/kibana-data-discovery
+/x-pack/test_serverless/functional/test_suites/search/examples/search_examples @elastic/kibana-data-discovery
 /x-pack/test_serverless/functional/test_suites/search/examples/unified_field_list_examples @elastic/kibana-data-discovery
 
 # Visualizations
