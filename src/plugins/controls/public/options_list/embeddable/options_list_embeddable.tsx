@@ -245,13 +245,6 @@ export class OptionsListEmbeddable
     if (!this.dataView || this.dataView.id !== dataViewId) {
       try {
         this.dataView = await this.dataViewsService.get(dataViewId);
-        if (!this.dataView)
-          throw new Error(
-            i18n.translate('controls.optionsList.errors.dataViewNotFound', {
-              defaultMessage: 'Could not locate data view: {dataViewId}',
-              values: { dataViewId },
-            })
-          );
       } catch (e) {
         this.dispatch.setErrorMessage(e.message);
       }
@@ -278,7 +271,7 @@ export class OptionsListEmbeddable
       this.dispatch.setField(this.field);
     }
 
-    return { dataView: this.dataView, field: this.field! };
+    return { dataView: this.dataView, field: this.field };
   };
 
   private runOptionsListQuery = async (size: number = MIN_OPTIONS_LIST_REQUEST_SIZE) => {

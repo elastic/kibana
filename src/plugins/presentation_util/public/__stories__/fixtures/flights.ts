@@ -62,12 +62,19 @@ const getConfig = (() => {}) as FieldFormatsGetConfigFn;
 
 export const flightFieldByName: { [key: string]: DataViewField } = {};
 flightFieldNames.forEach(
-  (flightFieldName) =>
-    (flightFieldByName[flightFieldName] = {
+  (flightFieldName) => {
+    const fieldBase = {
       name: flightFieldName,
       type: numberFields.includes(flightFieldName) ? 'number' : 'string',
       aggregatable: true,
-    } as unknown as DataViewField)
+    };
+    flightFieldByName[flightFieldName] = {
+      ...fieldBase,
+      toSpec: () => {
+        return fieldBase;
+      },
+    } as unknown as DataViewField
+  }
 );
 flightFieldByName.Cancelled = { name: 'Cancelled', type: 'boolean' } as DataViewField;
 flightFieldByName.timestamp = { name: 'timestamp', type: 'date' } as DataViewField;

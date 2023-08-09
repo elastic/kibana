@@ -17,13 +17,21 @@ let currentDataView: DataView;
 export const injectStorybookDataView = (dataView: DataView) => (currentDataView = dataView);
 
 export const dataViewsServiceFactory: DataViewsServiceFactory = () => ({
-  get: (() =>
-    new Promise((r) =>
-      setTimeout(() => r(currentDataView), 100)
+  get: ((dataViewId) =>
+    new Promise((resolve, reject) =>
+      setTimeout(() => {
+        if (!currentDataView) {
+          reject(new Error('mock DataViews service currentDataView is undefined, call injectStorybookDataView to set'));
+        } else if (currentDataView.id === dataViewId) {
+          resolve(currentDataView)
+        } else {
+          reject(new Error(`mock DataViews service currentDataView.id: ${currentDataView.id} does not match requested dataViewId: ${dataViewId}`));
+        }
+      }, 100)
     ) as unknown) as DataViewsPublicPluginStart['get'],
   getIdsWithTitle: (() =>
-    new Promise((r) =>
-      setTimeout(() => r([{ id: currentDataView.id, title: currentDataView.title }]), 100)
+    new Promise((resolve) =>
+      setTimeout(() => resolve([{ id: currentDataView.id, title: currentDataView.title }]), 100)
     ) as unknown) as DataViewsPublicPluginStart['getIdsWithTitle'],
   getDefaultId: () => Promise.resolve(currentDataView?.id ?? null),
 });
