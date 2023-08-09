@@ -40,7 +40,7 @@ describe('runOptionsListRequest', () => {
       http: mockHttp,
     });
 
-    const response = await optionsListService.runOptionsListRequest(
+    const response = (await optionsListService.runOptionsListRequest(
       {
         dataView: {
           toSpec: () => {
@@ -53,7 +53,7 @@ describe('runOptionsListRequest', () => {
         } as unknown as FieldSpec,
       } as unknown as OptionsListRequest,
       {} as unknown as AbortSignal
-    ) as any;
+    )) as any;
 
     expect(response.error.message).toBe('Simulated network error');
   });
