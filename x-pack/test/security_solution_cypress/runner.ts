@@ -9,7 +9,6 @@ import { resolve } from 'path';
 import Url from 'url';
 
 import { withProcRunner } from '@kbn/dev-proc-runner';
-import semver from 'semver';
 
 import { FtrProviderContext } from '../common/ftr_provider_context';
 
@@ -54,37 +53,6 @@ export async function SecuritySolutionCypressCcsTestRunner({ getService }: FtrPr
         CYPRESS_CCS_KIBANA_URL: process.env.TEST_KIBANA_URLDATA,
         CYPRESS_CCS_ELASTICSEARCH_URL: process.env.TEST_ES_URLDATA,
         CYPRESS_CCS_REMOTE_NAME: process.env.TEST_CCS_REMOTE_NAME,
-        ...process.env,
-      },
-      wait: true,
-    });
-  });
-}
-
-export async function SecuritySolutionCypressUpgradeCliTestRunner({
-  getService,
-}: FtrProviderContext) {
-  const log = getService('log');
-  let command = '';
-
-  if (semver.gt(process.env.ORIGINAL_VERSION!, '7.10.0')) {
-    command = 'cypress:run:upgrade';
-  } else {
-    command = 'cypress:run:upgrade:old';
-  }
-
-  await withProcRunner(log, async (procs) => {
-    await procs.run('cypress', {
-      cmd: 'yarn',
-      args: [command],
-      cwd: resolve(__dirname, '../../plugins/security_solution'),
-      env: {
-        FORCE_COLOR: '1',
-        CYPRESS_BASE_URL: process.env.TEST_KIBANA_URL,
-        CYPRESS_ELASTICSEARCH_URL: process.env.TEST_ES_URL,
-        CYPRESS_ELASTICSEARCH_USERNAME: process.env.TEST_ES_USER,
-        CYPRESS_ELASTICSEARCH_PASSWORD: process.env.TEST_ES_PASS,
-        CYPRESS_ORIGINAL_VERSION: process.env.ORIGINAL_VERSION,
         ...process.env,
       },
       wait: true,
