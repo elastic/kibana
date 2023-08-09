@@ -107,8 +107,7 @@ const additionalPackages = packages.slice(3);
 
 const expectedUncategorized = ['logs-gaming-*', 'logs-manufacturing-*', 'logs-retail-*'];
 
-export default function (providerContext: FtrProviderContext) {
-  const { getService, getPageObjects } = providerContext;
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
