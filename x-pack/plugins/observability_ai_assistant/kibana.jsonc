@@ -7,7 +7,7 @@
     "server": true,
     "browser": true,
     "configPath": ["xpack", "observabilityAIAssistant"],
-    "requiredPlugins": ["triggersActionsUi", "actions", "security", "observabilityShared"],
+    "requiredPlugins": ["triggersActionsUi", "actions", "security", "features", "observabilityShared"],
     "requiredBundles": ["kibanaReact", "kibanaUtils"],
     "optionalPlugins": [],
     "extraPublicDirs": []

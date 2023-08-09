@@ -109,6 +109,7 @@ export class ObservabilityAIAssistantPlugin
       securityStart: pluginsStart.security,
       contextRegistry,
       functionRegistry,
+      enabled: coreStart.application.capabilities.observabilityAIAssistant.show === true,
     }));
 
     const registerContext: RegisterContextDefinition = (context) => {
