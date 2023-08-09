@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -12,14 +14,8 @@ import {
   EuiPanel,
   EuiText,
 } from '@elastic/eui';
-import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
 import { UseKnowledgeBaseResult } from '../../hooks/use_knowledge_base';
-
-const panelClassName = css`
-  border-radius: 0;
-`;
 
 export function KnowledgeBaseCallout({ knowledgeBase }: { knowledgeBase: UseKnowledgeBaseResult }) {
   let content: React.ReactNode;
@@ -104,13 +100,7 @@ export function KnowledgeBaseCallout({ knowledgeBase }: { knowledgeBase: UseKnow
   }
 
   return (
-    <EuiPanel
-      hasBorder={false}
-      hasShadow={false}
-      className={panelClassName}
-      color={color}
-      paddingSize="s"
-    >
+    <EuiPanel hasBorder={false} hasShadow={false} borderRadius="none" color={color} paddingSize="s">
       {content}
     </EuiPanel>
   );
