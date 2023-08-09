@@ -64,6 +64,7 @@ export const transformRuleToRuleResponse = <Params extends RuleParams = never>(
   ...(rule.isSnoozedUntil !== undefined
     ? { is_snoozed_until: rule.isSnoozedUntil?.toISOString() || null }
     : {}),
+  ...(rule.snoozeSchedule !== undefined ? { snooze_schedule: rule.snoozeSchedule } : {}),
   execution_status: {
     status: rule.executionStatus.status,
     ...(rule.executionStatus.error ? { error: rule.executionStatus.error } : {}),
