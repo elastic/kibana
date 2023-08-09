@@ -14,7 +14,7 @@ import { DEV_TOOL_PREBUILT_CONTENT } from '../../../../../common/constants';
 
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { consoleMappings } from '../console_mappings';
-import { ReadConsoleRequestSchema } from '../schema';
+import { readConsoleRequestBody } from '../../../../../common/api/risk_score';
 
 import { RiskScoreEntity } from '../../../../../common/search_strategy';
 import { getView } from '../utils';
@@ -48,7 +48,7 @@ export const readPrebuiltDevToolContentRoute = (router: SecuritySolutionPluginRo
   router.get(
     {
       path: DEV_TOOL_PREBUILT_CONTENT,
-      validate: ReadConsoleRequestSchema,
+      validate: readConsoleRequestBody,
       options: {
         tags: ['access:securitySolution'],
       },
