@@ -60,7 +60,6 @@ export function CustomEquationEditor({
   const [customMetrics, setCustomMetrics] = useState<CustomMetrics>(
     expression?.customMetrics ?? [NEW_METRIC]
   );
-  const [label, setLabel] = useState<string | undefined>(expression?.label || undefined);
   const [customEqPopoverOpen, setCustomEqPopoverOpen] = useState(false);
   const [equation, setEquation] = useState<string | undefined>(expression?.equation || undefined);
   const debouncedOnChange = useMemo(() => debounce(onChange, 500), [onChange]);
@@ -70,48 +69,40 @@ export function CustomEquationEditor({
       const currentVars = previous?.map((m) => m.name) ?? [];
       const name = first(xor(VAR_NAMES, currentVars))!;
       const nextMetrics = [...(previous || []), { ...NEW_METRIC, name }];
-      debouncedOnChange({ ...expression, customMetrics: nextMetrics, equation, label });
+      debouncedOnChange({ ...expression, customMetrics: nextMetrics, equation });
       return nextMetrics;
     });
-  }, [debouncedOnChange, equation, expression, label]);
+  }, [debouncedOnChange, equation, expression]);
 
   const handleDelete = useCallback(
     (name: string) => {
       setCustomMetrics((previous) => {
         const nextMetrics = previous?.filter((row) => row.name !== name) ?? [NEW_METRIC];
         const finalMetrics = (nextMetrics.length && nextMetrics) || [NEW_METRIC];
-        debouncedOnChange({ ...expression, customMetrics: finalMetrics, equation, label });
+        debouncedOnChange({ ...expression, customMetrics: finalMetrics, equation });
         return finalMetrics;
       });
     },
-    [equation, expression, debouncedOnChange, label]
+    [equation, expression, debouncedOnChange]
   );
 
   const handleChange = useCallback(
     (metric: MetricExpressionCustomMetric) => {
       setCustomMetrics((previous) => {
         const nextMetrics = previous?.map((m) => (m.name === metric.name ? metric : m));
-        debouncedOnChange({ ...expression, customMetrics: nextMetrics, equation, label });
+        debouncedOnChange({ ...expression, customMetrics: nextMetrics, equation });
         return nextMetrics;
       });
     },
-    [equation, expression, debouncedOnChange, label]
+    [equation, expression, debouncedOnChange]
   );
 
   const handleEquationChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       setEquation(e.target.value);
-      debouncedOnChange({ ...expression, customMetrics, equation: e.target.value, label });
+      debouncedOnChange({ ...expression, customMetrics, equation: e.target.value });
     },
-    [debouncedOnChange, expression, customMetrics, label]
-  );
-
-  const handleLabelChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      setLabel(e.target.value);
-      debouncedOnChange({ ...expression, customMetrics, equation, label: e.target.value });
-    },
-    [debouncedOnChange, expression, customMetrics, equation]
+    [debouncedOnChange, expression, customMetrics]
   );
 
   const disableAdd = customMetrics?.length === MAX_VARIABLES;
@@ -198,7 +189,7 @@ export function CustomEquationEditor({
                 <EuiExpression
                   data-test-subj="customEquation"
                   description={'Equation'}
-                  value={equation ?? ''}
+                  value={equation ?? placeholder}
                   display={'columns'}
                   onClick={() => {
                     setCustomEqPopoverOpen(true);
@@ -241,24 +232,7 @@ export function CustomEquationEditor({
           </div>
         </EuiPopover>
       </EuiFlexItem>
-
-      {/* TODO:LABEL */}
-
-      {/* <EuiSpacer size={'s'} />
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <EuiFormRow label={LABEL_LABEL} fullWidth helpText={LABEL_HELP_MESSAGE}>
-            <EuiFieldText
-              data-test-subj="thresholdRuleCustomEquationEditorFieldText"
-              compressed
-              fullWidth
-              value={label}
-              placeholder={CUSTOM_EQUATION}
-              onChange={handleLabelChange}
-            />
-          </EuiFormRow>
-        </EuiFlexItem> */}
-      {/* </EuiFlexGroup> */}
+      <EuiSpacer size={'s'} />
     </div>
   );
 }
