@@ -33,7 +33,7 @@ import { Middleware } from './lib/middleware';
 import { intervalFromNow } from './lib/intervals';
 import { ConcreteTaskInstance } from './task';
 import { createTaskPoller, PollingError, PollingErrorType } from './polling';
-import { TaskPool } from './task_pool';
+import { TaskCancellationReason, TaskPool } from './task_pool';
 import { TaskManagerRunner, TaskRunner } from './task_running';
 import { TaskStore } from './task_store';
 import { identifyEsError, isEsCannotExecuteScriptError } from './lib/identify_es_error';
@@ -41,6 +41,7 @@ import { BufferedTaskStore } from './buffered_task_store';
 import { TaskTypeDictionary } from './task_type_dictionary';
 import { delayOnClaimConflicts } from './polling';
 import { TaskClaiming, ClaimOwnershipResult } from './queries/task_claiming';
+import { TaskPoller } from './polling/task_poller';
 
 export type TaskPollingLifecycleOpts = {
   logger: Logger;
@@ -81,6 +82,7 @@ export class TaskPollingLifecycle {
 
   private middleware: Middleware;
 
+  private poller: TaskPoller<string, TimedFillPoolResult>;
   private usageCounter?: UsageCounter;
   private config: TaskManagerConfig;
 
@@ -156,7 +158,7 @@ export class TaskPollingLifecycle {
       config.monitored_stats_running_average_window
     ).pipe(tap((delay) => emitEvent(asTaskManagerStatEvent('pollingDelay', asOk(delay)))));
 
-    const poller = createTaskPoller<string, TimedFillPoolResult>({
+    this.poller = createTaskPoller<string, TimedFillPoolResult>({
       logger,
       initialPollInterval: pollInterval,
       pollInterval$: pollIntervalConfiguration$,
@@ -175,21 +177,26 @@ export class TaskPollingLifecycle {
       },
       work: this.pollForWork,
     });
-    this.subscribeToPoller(poller.events$);
+    this.subscribeToPoller(this.poller.events$);
 
     elasticsearchAndSOAvailability$.subscribe((areESAndSOAvailable) => {
       if (areESAndSOAvailable) {
         // start polling for work
-        poller.start();
+        this.poller.start();
       } else if (!areESAndSOAvailable) {
-        poller.stop();
-        this.pool.cancelRunningTasks();
+        this.poller.stop();
+        this.pool.cancelRunningTasks(TaskCancellationReason.EsUnavailable);
       }
     });
   }
 
   public get events(): Observable<TaskLifecycleEvent> {
     return this.events$;
+  }
+
+  public stop() {
+    this.poller.stop();
+    this.pool.cancelRunningTasks(TaskCancellationReason.Shutdown);
   }
 
   private emitEvent = (event: TaskLifecycleEvent) => {

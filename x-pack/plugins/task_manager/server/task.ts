@@ -8,6 +8,7 @@
 import { ObjectType, schema, TypeOf } from '@kbn/config-schema';
 import { isErr, tryAsResult } from './lib/result_type';
 import { Interval, isInterval, parseIntervalAsMillisecond } from './lib/intervals';
+import { TaskCancellationReason } from './task_pool';
 
 /*
  * Type definitions and validations for tasks.
@@ -107,7 +108,9 @@ export type LoadIndirectParamsResult<T extends LoadedIndirectParams = LoadedIndi
     };
 export type LoadIndirectParamsFunction = () => Promise<LoadIndirectParamsResult>;
 export type RunFunction = () => Promise<RunResult | undefined | void>;
-export type CancelFunction = () => Promise<RunResult | undefined | void>;
+export type CancelFunction = (
+  reason?: TaskCancellationReason
+) => Promise<RunResult | undefined | void>;
 export interface CancellableTask<T = never> {
   loadIndirectParams?: LoadIndirectParamsFunction;
   run: RunFunction;

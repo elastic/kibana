@@ -35,6 +35,7 @@ import {
 } from './task_runner';
 import { schema } from '@kbn/config-schema';
 import { RequeueInvalidTasksConfig } from '../config';
+import { TaskCancellationReason } from '../task_pool';
 
 const executionContext = executionContextServiceMock.createSetupContract();
 const minutesFromNow = (mins: number): Date => secondsFromNow(mins * 60);
@@ -1009,6 +1010,37 @@ describe('TaskManagerRunner', () => {
       expect(logger.warn).not.toHaveBeenCalled();
     });
 
+    test('cancel passes along a reasion for cancellation, if provided', async () => {
+      let wasCancelled = false;
+      const { runner, logger } = await readyToRunStageSetup({
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            createTaskRunner: () => ({
+              async run() {
+                const promise = new Promise((r) => setTimeout(r, 1000));
+                fakeTimer.tick(1000);
+                await promise;
+              },
+              async cancel(reason?: TaskCancellationReason) {
+                wasCancelled = true;
+                logger.debug(`task cancelled due to ${reason}`);
+              },
+            }),
+          },
+        },
+      });
+
+      const promise = runner.run();
+      await Promise.resolve();
+      await runner.cancel(TaskCancellationReason.Shutdown);
+      await promise;
+
+      expect(wasCancelled).toBeTruthy();
+      expect(logger.warn).not.toHaveBeenCalled();
+      expect(logger.debug).toHaveBeenCalledWith(`task cancelled due to Shutdown`);
+    });
+
     test('debug logs if cancel is called on a non-cancellable task', async () => {
       const { runner, logger } = await readyToRunStageSetup({
         definitions: {
@@ -1463,6 +1495,43 @@ describe('TaskManagerRunner', () => {
       });
       expect(logger.warn).toHaveBeenCalledWith(
         `Skipping reschedule for task bar \"${id}\" due to the task expiring`
+      );
+    });
+
+    test('does not update saved object if task is cancelled', async () => {
+      const id = _.random(1, 20).toString();
+      const onTaskEvent = jest.fn();
+      const error = new Error('Dangit!');
+      const { runner, store, logger } = await readyToRunStageSetup({
+        onTaskEvent,
+        instance: {
+          id,
+          startedAt: new Date(),
+        },
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            timeout: '1m',
+            createTaskRunner: () => ({
+              async run() {
+                return { error, state: {}, runAt: moment().add(1, 'm').toDate() };
+              },
+            }),
+          },
+        },
+      });
+
+      const promise = runner.run();
+      await Promise.resolve();
+      await runner.cancel();
+      await promise;
+
+      expect(store.update).not.toHaveBeenCalled();
+      expect(logger.debug).toHaveBeenCalledWith(
+        `Task update skipped due to cancellation. Task will be retried at the retryAt time.`
+      );
+      expect(logger.warn).toHaveBeenCalledWith(
+        `Skipping reschedule for task bar \"${id}\" due to the task being cancelled`
       );
     });
 

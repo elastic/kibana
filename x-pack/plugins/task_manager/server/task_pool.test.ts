@@ -6,7 +6,7 @@
  */
 import sinon from 'sinon';
 import { of, Subject } from 'rxjs';
-import { TaskPool, TaskPoolRunResult } from './task_pool';
+import { TaskCancellationReason, TaskPool, TaskPoolRunResult } from './task_pool';
 import { resolvable, sleep } from './test_utils';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { Logger } from '@kbn/core/server';
@@ -278,6 +278,36 @@ describe('TaskPool', () => {
 
     expect(logger.warn).toHaveBeenCalledWith(
       `Cancelling task TaskType "shooooo" as it expired at ${now.toISOString()} after running for 05m 30s (with timeout set at 5m).`
+    );
+    expect(logger.debug).toHaveBeenCalledWith(
+      `Cancelling task TaskType \"shooooo\" due to reason: Expired.`
+    );
+  });
+
+  test('should cancel all running tasks', async () => {
+    const logger = loggingSystemMock.create().get();
+    const pool = new TaskPool({
+      maxWorkers$: of(10),
+      logger,
+    });
+
+    const promise = pool.run([{ ...mockTask() }, { ...mockTask() }, { ...mockTask() }]);
+    await Promise.resolve();
+    await pool.cancelRunningTasks(TaskCancellationReason.Shutdown);
+    await promise;
+
+    expect(logger.debug).toHaveBeenCalledTimes(4);
+    expect(logger.debug).toHaveBeenNthCalledWith(
+      2,
+      `Cancelling task TaskType \"shooooo\" due to reason: Shutdown.`
+    );
+    expect(logger.debug).toHaveBeenNthCalledWith(
+      3,
+      `Cancelling task TaskType \"shooooo\" due to reason: Shutdown.`
+    );
+    expect(logger.debug).toHaveBeenNthCalledWith(
+      4,
+      `Cancelling task TaskType \"shooooo\" due to reason: Shutdown.`
     );
   });
 

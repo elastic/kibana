@@ -214,7 +214,6 @@ export class TaskManagerPlugin
     savedObjects,
     elasticsearch,
     executionContext,
-    docLinks,
   }: CoreStart): TaskManagerStartContract {
     const savedObjectsRepository = savedObjects.createInternalRepository(['task']);
 
@@ -304,6 +303,14 @@ export class TaskManagerPlugin
         this.config.ephemeral_tasks.enabled && this.shouldRunBackgroundTasks,
       getRegisteredTypes: () => this.definitions.getAllTypes(),
     };
+  }
+
+  public stop() {
+    this.logger.info(`Stopping task manager plugin`);
+
+    if (this.taskPollingLifecycle) {
+      this.taskPollingLifecycle.stop();
+    }
   }
 }
 

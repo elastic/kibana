@@ -22,6 +22,12 @@ interface Opts {
   logger: Logger;
 }
 
+export enum TaskCancellationReason {
+  EsUnavailable = 'EsUnavailable',
+  Expired = 'Expired',
+  Shutdown = 'Shutdown',
+}
+
 export enum TaskPoolRunResult {
   // This mean we have no Run Result becuse no tasks were Ran in this cycle
   NoTaskWereRan = 'NoTaskWereRan',
@@ -153,10 +159,9 @@ export class TaskPool {
     return TaskPoolRunResult.RunningAllClaimedTasks;
   };
 
-  public cancelRunningTasks() {
-    this.logger.debug('Cancelling running tasks.');
+  public cancelRunningTasks(reason: TaskCancellationReason) {
     for (const task of this.tasksInPool.values()) {
-      this.cancelTask(task);
+      this.cancelTask(task, reason);
     }
   }
 
@@ -202,16 +207,16 @@ export class TaskPool {
               : ``
           }.`
         );
-        this.cancelTask(taskRunner);
+        this.cancelTask(taskRunner, TaskCancellationReason.Expired);
       }
     }
   }
 
-  private async cancelTask(task: TaskRunner) {
+  private async cancelTask(task: TaskRunner, reason: TaskCancellationReason) {
     try {
-      this.logger.debug(`Cancelling task ${task.toString()}.`);
+      this.logger.debug(`Cancelling task ${task.toString()} due to reason: ${reason}.`);
       this.tasksInPool.delete(task.taskExecutionId);
-      await task.cancel();
+      await task.cancel(reason);
     } catch (err) {
       this.logger.error(`Failed to cancel task ${task.toString()}: ${err}`);
     }

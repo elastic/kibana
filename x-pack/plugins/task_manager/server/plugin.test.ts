@@ -172,6 +172,40 @@ describe('TaskManagerPlugin', () => {
     });
   });
 
+  describe('stop', () => {
+    test('should stop task polling lifecycle if it is defined', async () => {
+      const pluginInitializerContext = coreMock.createPluginInitializerContext<TaskManagerConfig>(
+        pluginInitializerContextParams
+      );
+      const logger = pluginInitializerContext.logger.get();
+      pluginInitializerContext.node.roles.backgroundTasks = true;
+      const taskManagerPlugin = new TaskManagerPlugin(pluginInitializerContext);
+      taskManagerPlugin.setup(coreMock.createSetup(), { usageCollection: undefined });
+      taskManagerPlugin.start(coreStart);
+
+      taskManagerPlugin.stop();
+
+      expect(mockTaskPollingLifecycle.stop).toHaveBeenCalled();
+      expect((logger.info as jest.Mock).mock.calls[1][0]).toBe('Stopping task manager plugin');
+    });
+
+    test('should not call stop task polling lifecycle if it is not defined', async () => {
+      const pluginInitializerContext = coreMock.createPluginInitializerContext<TaskManagerConfig>(
+        pluginInitializerContextParams
+      );
+      const logger = pluginInitializerContext.logger.get();
+      pluginInitializerContext.node.roles.backgroundTasks = false;
+      const taskManagerPlugin = new TaskManagerPlugin(pluginInitializerContext);
+      taskManagerPlugin.setup(coreMock.createSetup(), { usageCollection: undefined });
+      taskManagerPlugin.start(coreStart);
+
+      taskManagerPlugin.stop();
+
+      expect(mockTaskPollingLifecycle.stop).not.toHaveBeenCalled();
+      expect((logger.info as jest.Mock).mock.calls[1][0]).toBe('Stopping task manager plugin');
+    });
+  });
+
   describe('getElasticsearchAndSOAvailability', () => {
     test('returns true when both services are available', async () => {
       const core$ = new Subject<CoreStatus>();
