@@ -102,7 +102,7 @@ export class EnterpriseSearchPlugin implements Plugin {
       cloudSetup && (pluginsStart as PluginsStart).cloud
         ? { ...cloudSetup, ...(pluginsStart as PluginsStart).cloud }
         : undefined;
-    const userProfile = await (pluginsStart as PluginsStart).security.authc.getCurrentUser();
+    const userProfile = await (pluginsStart as PluginsStart).security.userProfiles.getCurrent();
     const plugins = { ...pluginsStart, cloud, userProfile } as PluginsStart;
 
     coreStart.chrome

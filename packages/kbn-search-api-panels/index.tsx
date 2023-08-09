@@ -23,7 +23,12 @@ export * from './components/install_client';
 export * from './types';
 
 export interface WelcomeBannerProps {
-  userProfile: any;
+  userProfile: {
+    user: {
+      full_name?: string;
+      username?: string;
+    };
+  };
   assetBasePath?: string;
   image?: string;
   showDescription?: boolean;

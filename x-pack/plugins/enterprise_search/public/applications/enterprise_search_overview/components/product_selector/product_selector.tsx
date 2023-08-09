@@ -55,11 +55,7 @@ export const ProductSelector: React.FC = () => {
         <TrialCallout />
         <EuiPageTemplate.Section alignment="top" className="entSearchProductSelectorHeader">
           <EuiText color="ghost">
-            <WelcomeBanner
-              userProfile={{ user: { ...userProfile } }}
-              image={headerImage}
-              showDescription={false}
-            />
+            <WelcomeBanner userProfile={userProfile} image={headerImage} showDescription={false} />
           </EuiText>
         </EuiPageTemplate.Section>
         <EuiSpacer size="xl" />
