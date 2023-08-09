@@ -78,7 +78,7 @@ export {
   // Message signing service
   MESSAGE_SIGNING_SERVICE_API_ROUTES,
   // secrets
-  SECRETS_INDEX,
+  SECRETS_ENDPOINT_PATH,
 } from '../../common/constants';
 
 export {
