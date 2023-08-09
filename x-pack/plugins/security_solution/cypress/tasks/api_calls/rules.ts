@@ -69,6 +69,7 @@ export const importRule = (ndjsonPath: string) => {
         headers: {
           'kbn-xsrf': 'cypress-creds',
           'content-type': 'multipart/form-data',
+          'x-elastic-internal-origin': 'security-solution',
         },
         body: formdata,
       })
@@ -83,6 +84,11 @@ export const waitForRulesToFinishExecution = (ruleIds: string[], afterDate?: Dat
       rootRequest<FetchRulesResponse>({
         method: 'GET',
         url: DETECTION_ENGINE_RULES_URL_FIND,
+        headers: {
+          'kbn-xsrf': 'cypress-creds',
+          'content-type': 'multipart/form-data',
+          'x-elastic-internal-origin': 'security-solution',
+        },
       }).then((response) => {
         const areAllRulesFinished = ruleIds.every((ruleId) =>
           response.body.data.some((rule) => {
