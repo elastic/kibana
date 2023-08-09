@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import {
   EuiPanel,
   EuiTitle,
@@ -13,26 +14,29 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { useFetcher } from '../../../../hooks/use_fetcher';
-import { TimeseriesChartWithContext } from '../../../shared/charts/timeseries_chart_with_context';
-import { getComparisonChartTheme } from '../../../shared/time_comparison/get_comparison_chart_theme';
+import moment from 'moment';
+import { getComparisonChartTheme } from '../../../../shared/time_comparison/get_comparison_chart_theme';
+import { TimeseriesChartWithContext } from '../../../../shared/charts/timeseries_chart_with_context';
+
+import { useFetcher } from '../../../../../hooks/use_fetcher';
+
+import { useApmPluginContext } from '../../../../../context/apm_plugin/use_apm_plugin_context';
 import {
-  getTimeSeriesColor,
   ChartType,
-} from '../../../shared/charts/helper/get_timeseries_color';
-import { usePreviousPeriodLabel } from '../../../../hooks/use_previous_period_text';
+  getTimeSeriesColor,
+} from '../../../../shared/charts/helper/get_timeseries_color';
+import { usePreviousPeriodLabel } from '../../../../../hooks/use_previous_period_text';
 
 const INITIAL_STATE = {
   currentPeriod: { timeseries: [] },
   previousPeriod: { timeseries: [] },
 };
 
-export function HttpRequestsChart({
+export function HttpResponseRateChart({
   kuery,
   serviceName,
   start,
   end,
-  transactionName,
   environment,
   offset,
   comparisonEnabled,
@@ -41,8 +45,6 @@ export function HttpRequestsChart({
   serviceName: string;
   start: string;
   end: string;
-  transactionType?: string;
-  transactionName?: string;
   environment: string;
   offset?: string;
   comparisonEnabled: boolean;
@@ -51,13 +53,10 @@ export function HttpRequestsChart({
   const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
     ChartType.HTTP_REQUESTS
   );
-
-  const previousPeriodLabel = usePreviousPeriodLabel();
-
   const { data = INITIAL_STATE, status } = useFetcher(
     (callApmApi) => {
       return callApmApi(
-        'GET /internal/apm/mobile-services/{serviceName}/transactions/charts/http_requests',
+        'GET /internal/apm/mobile-services/{serviceName}/http/error/rate',
         {
           params: {
             path: {
@@ -68,24 +67,20 @@ export function HttpRequestsChart({
               kuery,
               start,
               end,
-              transactionName,
               offset: comparisonEnabled ? offset : undefined,
             },
           },
         }
       );
     },
-    [
-      environment,
-      kuery,
-      serviceName,
-      start,
-      end,
-      transactionName,
-      offset,
-      comparisonEnabled,
-    ]
+    [environment, kuery, serviceName, start, end, offset, comparisonEnabled]
   );
+
+  // const theme = useTheme();
+  const min = moment.utc(start).valueOf();
+  const max = moment.utc(end).valueOf();
+  const { core } = useApmPluginContext();
+  const previousPeriodLabel = usePreviousPeriodLabel();
 
   const timeseries = [
     {
@@ -107,25 +102,25 @@ export function HttpRequestsChart({
         ]
       : []),
   ];
+
   return (
     <EuiPanel hasBorder={true}>
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiTitle size="xs">
             <h2>
-              {i18n.translate('xpack.apm.transactions.httpRequestsTitle', {
-                defaultMessage: 'HTTP Requests',
+              {i18n.translate('xpack.apm.mobile.errors.httpErrorRate', {
+                defaultMessage: 'HTTP Error Rate',
               })}
             </h2>
           </EuiTitle>
         </EuiFlexItem>
-
         <EuiFlexItem grow={false}>
           <EuiIconTip
             content={i18n.translate(
-              'xpack.apm.transactions.httpRequestsTooltip',
+              'xpack.apm.mobile.errors.httpErrorRateTooltip',
               {
-                defaultMessage: 'Total http requests',
+                defaultMessage: 'Http response status codes by type.',
               }
             )}
             position="right"
@@ -134,10 +129,10 @@ export function HttpRequestsChart({
       </EuiFlexGroup>
 
       <TimeseriesChartWithContext
-        id="requests"
+        id="httpErrors"
         showAnnotations={false}
         fetchStatus={status}
-        timeseries={data}
+        timeseries={timeseries}
         customTheme={comparisonChartTheme}
         yLabelFormat={(y) => `${y}`}
       />

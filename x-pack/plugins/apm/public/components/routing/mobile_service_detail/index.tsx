@@ -22,6 +22,8 @@ import { MobileTransactionOverview } from '../../app/mobile/transaction_overview
 import { TransactionDetails } from '../../app/transaction_details';
 import { RedirectToDefaultServiceRouteView } from '../service_detail/redirect_to_default_service_route_view';
 import { ApmTimeRangeMetadataContextProvider } from '../../../context/time_range_metadata/time_range_metadata_context';
+import { ErrorGroupDetails } from '../../app/error_group_details';
+import { MobileErrorCrashesOverview } from '../../app/mobile/error_group_overview';
 
 export function page({
   title,
@@ -146,7 +148,7 @@ export const mobileServiceDetailRoute = {
             osVersion: t.string,
             appVersion: t.string,
             netConnectionType: t.string,
-            mobileSelectedTab: t.string,
+            mobileSeleqctedTab: t.string,
           }),
         }),
         children: {
@@ -175,6 +177,42 @@ export const mobileServiceDetailRoute = {
           },
           '/mobile-services/{serviceName}/transactions': {
             element: <MobileTransactionOverview />,
+          },
+        },
+      },
+      '/mobile-services/{serviceName}/errors': {
+        ...page({
+          tabKey: 'errors',
+          title: i18n.translate('xpack.apm.views.errors.title', {
+            defaultMessage: 'Errors',
+          }),
+          element: <Outlet />,
+          searchBarOptions: {
+            showTimeComparison: true,
+            showMobileFilters: true,
+          },
+        }),
+        params: t.partial({
+          query: t.partial({
+            page: toNumberRt,
+            pageSize: toNumberRt,
+            sortField: t.string,
+            sortDirection: t.union([t.literal('asc'), t.literal('desc')]),
+            mobileErrorTabId: t.string,
+          }),
+        }),
+        children: {
+          '/mobile-services/{serviceName}/errors/{groupId}': {
+            element: <ErrorGroupDetails />,
+            params: t.type({
+              path: t.type({
+                groupId: t.string,
+              }),
+              query: t.partial({ errorId: t.string }),
+            }),
+          },
+          '/mobile-services/{serviceName}/errors': {
+            element: <MobileErrorCrashesOverview />,
           },
         },
       },

@@ -30,7 +30,7 @@ import { ApmMainTemplate } from '../apm_main_template';
 import { AnalyzeDataButton } from '../apm_service_template/analyze_data_button';
 
 type Tab = NonNullable<EuiPageHeaderProps['tabs']>[0] & {
-  key: 'overview' | 'transactions' | 'service-map' | 'alerts';
+  key: 'overview' | 'transactions' | 'errors' | 'service-map' | 'alerts';
   hidden?: boolean;
 };
 
@@ -189,6 +189,16 @@ function useTabs({ selectedTabKey }: { selectedTabKey: Tab['key'] }) {
           defaultMessage: 'Transactions',
         }
       ),
+    },
+    {
+      key: 'errors',
+      href: router.link('/mobile-services/{serviceName}/errors', {
+        path: { serviceName },
+        query,
+      }),
+      label: i18n.translate('xpack.apm.serviceDetails.errorsTabLabel', {
+        defaultMessage: 'Errors & Crashes',
+      }),
     },
     {
       key: 'service-map',

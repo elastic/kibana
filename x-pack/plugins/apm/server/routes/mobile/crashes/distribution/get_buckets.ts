@@ -11,9 +11,13 @@ import {
   termQuery,
 } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { ERROR_GROUP_ID, SERVICE_NAME } from '../../../../common/es_fields/apm';
-import { environmentQuery } from '../../../../common/utils/environment_query';
-import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
+import {
+  ERROR_GROUP_ID,
+  SERVICE_NAME,
+  ERROR_TYPE,
+} from '../../../../../common/es_fields/apm';
+import { environmentQuery } from '../../../../../common/utils/environment_query';
+import { APMEventClient } from '../../../../lib/helpers/create_es_client/create_apm_event_client';
 
 export async function getBuckets({
   environment,
@@ -43,10 +47,8 @@ export async function getBuckets({
       size: 0,
       query: {
         bool: {
-          must_not: {
-            term: { 'error.type': 'crash' },
-          },
           filter: [
+            ...termQuery(ERROR_TYPE, 'crash'),
             { term: { [SERVICE_NAME]: serviceName } },
             ...rangeQuery(start, end),
             ...environmentQuery(environment),

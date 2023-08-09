@@ -9,7 +9,7 @@ import { useAnyOfApmParams } from './use_apm_params';
 import { useFetcher } from './use_fetcher';
 import { useTimeRange } from './use_time_range';
 
-export function useErrorGroupDistributionFetcher({
+export function useCrashGroupDistributionFetcher({
   serviceName,
   groupId,
   kuery,
@@ -33,7 +33,7 @@ export function useErrorGroupDistributionFetcher({
     (callApmApi) => {
       if (start && end) {
         return callApmApi(
-          'GET /internal/apm/services/{serviceName}/errors/distribution',
+          'GET /internal/apm/mobile-services/{serviceName}/crashes/distribution',
           {
             params: {
               path: { serviceName },
@@ -65,5 +65,5 @@ export function useErrorGroupDistributionFetcher({
     ]
   );
 
-  return { errorDistributionData: data, status };
+  return { crashDistributionData: data, status };
 }
