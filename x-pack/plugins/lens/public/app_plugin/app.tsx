@@ -93,6 +93,7 @@ export function App({
     dashboardFeatureFlag,
     locator,
     share,
+    serverless,
   } = lensAppServices;
 
   const saveAndExit = useRef<() => void>();
@@ -289,7 +290,11 @@ export function App({
       });
     }
     breadcrumbs.push({ text: currentDocTitle });
-    chrome.setBreadcrumbs(breadcrumbs);
+    if (serverless?.setBreadcrumbs) {
+      serverless.setBreadcrumbs(breadcrumbs, { absolute: true });
+    } else {
+      chrome.setBreadcrumbs(breadcrumbs);
+    }
   }, [
     dashboardFeatureFlag.allowByValueEmbeddables,
     getOriginatingAppName,
@@ -300,6 +305,7 @@ export function App({
     isLinkedToOriginatingApp,
     persistedDoc,
     initialContext,
+    serverless,
   ]);
 
   const switchDatasource = useCallback(() => {
