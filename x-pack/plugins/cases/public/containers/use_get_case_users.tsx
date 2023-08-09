@@ -18,10 +18,7 @@ export const useGetCaseUsers = (caseId: string) => {
 
   return useQuery<CaseUsers, ServerError>(
     casesQueriesKeys.caseUsers(caseId),
-    () => {
-      const abortCtrlRef = new AbortController();
-      return getCaseUsers(caseId, abortCtrlRef.signal);
-    },
+    ({ signal }) => getCaseUsers({ caseId, signal }),
     {
       onError: (error: ServerError) => {
         showErrorToast(error, { title: i18n.ERROR_TITLE });

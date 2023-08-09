@@ -15,7 +15,7 @@ describe('getPosturePolicy', () => {
     ['cloudbeat/cis_k8s', getMockPolicyK8s, null],
   ] as const) {
     it(`updates package policy with hidden vars for ${name}`, () => {
-      const inputVars = getPostureInputHiddenVars(name);
+      const inputVars = getPostureInputHiddenVars(name, {} as any);
       const policy = getPosturePolicy(getPolicy(), name, inputVars);
 
       const enabledInputs = policy.inputs.filter(

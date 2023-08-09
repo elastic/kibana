@@ -26,7 +26,7 @@ import {
   SLICES,
 } from './constants';
 import { RangePopover } from './advanced_editor';
-import { DragDropBuckets } from '@kbn/visualization-ui-components/public';
+import { DragDropBuckets } from '@kbn/visualization-ui-components';
 import { getFieldByNameFactory } from '../../../pure_helpers';
 import { IndexPattern } from '../../../../../types';
 

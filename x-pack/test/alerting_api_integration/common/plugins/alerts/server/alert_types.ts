@@ -547,6 +547,7 @@ function getPatternFiringAlertsAsDataRuleType() {
     defaultActionGroupId: 'default',
     minimumLicenseRequired: 'basic',
     isExportable: true,
+    doesSetRecoveryContext: true,
     validate: {
       params: paramsSchema,
     },
@@ -577,20 +578,28 @@ function getPatternFiringAlertsAsDataRuleType() {
       for (const [instanceId, instancePattern] of Object.entries(pattern)) {
         const scheduleByPattern = instancePattern[patternIndex];
         if (scheduleByPattern === true) {
-          alertsClient.create({
+          alertsClient.report({
             id: instanceId,
             actionGroup: 'default',
             state: { patternIndex },
             payload: { patternIndex, instancePattern: instancePattern as boolean[] },
           });
         } else if (typeof scheduleByPattern === 'string') {
-          alertsClient.create({
+          alertsClient.report({
             id: instanceId,
             actionGroup: 'default',
             state: { patternIndex },
             payload: { patternIndex, instancePattern: [true] },
           });
         }
+      }
+
+      // set recovery payload
+      for (const recoveredAlert of alertsClient.getRecoveredAlerts()) {
+        alertsClient.setAlertData({
+          id: recoveredAlert.alert.getId(),
+          payload: { patternIndex: -1, instancePattern: [] },
+        });
       }
 
       return {

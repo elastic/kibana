@@ -14,17 +14,24 @@ import React from 'react';
 import { ThemeProvider } from 'styled-components';
 
 import { AssistantProvider } from '../../assistant_context';
+import { Conversation } from '../../assistant_context/types';
 
 interface Props {
   children: React.ReactNode;
+  getInitialConversations?: () => Record<string, Conversation>;
 }
 
 window.scrollTo = jest.fn();
+window.HTMLElement.prototype.scrollIntoView = jest.fn();
+
+const mockGetInitialConversations = () => ({});
 
 /** A utility for wrapping children in the providers required to run tests */
-export const TestProvidersComponent: React.FC<Props> = ({ children }) => {
+export const TestProvidersComponent: React.FC<Props> = ({
+  children,
+  getInitialConversations = mockGetInitialConversations,
+}) => {
   const actionTypeRegistry = actionTypeRegistryMock.create();
-  const mockGetInitialConversations = jest.fn(() => ({}));
   const mockGetComments = jest.fn(() => []);
   const mockHttp = httpServiceMock.createStartContract({ basePath: '/test' });
 
@@ -33,10 +40,20 @@ export const TestProvidersComponent: React.FC<Props> = ({ children }) => {
       <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
         <AssistantProvider
           actionTypeRegistry={actionTypeRegistry}
-          augmentMessageCodeBlocks={jest.fn()}
+          augmentMessageCodeBlocks={jest.fn().mockReturnValue([])}
+          baseAllow={[]}
+          baseAllowReplacement={[]}
+          defaultAllow={[]}
+          defaultAllowReplacement={[]}
+          docLinks={{
+            ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
+            DOC_LINK_VERSION: 'current',
+          }}
           getComments={mockGetComments}
-          getInitialConversations={mockGetInitialConversations}
+          getInitialConversations={getInitialConversations}
           setConversations={jest.fn()}
+          setDefaultAllow={jest.fn()}
+          setDefaultAllowReplacement={jest.fn()}
           http={mockHttp}
         >
           {children}

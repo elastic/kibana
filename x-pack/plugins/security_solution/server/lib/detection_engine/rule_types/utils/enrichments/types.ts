@@ -11,7 +11,7 @@ import type { Filter } from '@kbn/es-query';
 import type {
   BaseFieldsLatest,
   WrappedFieldsLatest,
-} from '../../../../../../common/detection_engine/schemas/alerts';
+} from '../../../../../../common/api/detection_engine/model/alerts';
 import type { RuleServices } from '../../types';
 import type { IRuleExecutionLogForExecutors } from '../../../rule_monitoring';
 

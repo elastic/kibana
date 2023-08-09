@@ -16,9 +16,9 @@ import {
   DashboardAppNoDataPage,
   isDashboardAppInNoDataState,
 } from '../no_data/dashboard_app_no_data';
-import { DashboardRedirect } from '../types';
 import { pluginServices } from '../../services/plugin_services';
 import { getDashboardBreadcrumb } from '../_dashboard_app_strings';
+import { DashboardRedirect } from '../../dashboard_container/types';
 import { getDashboardListItemLink } from './get_dashboard_list_item_link';
 import { DashboardListing } from '../../dashboard_listing/dashboard_listing';
 
@@ -37,8 +37,9 @@ export const DashboardListingPage = ({
 }: DashboardListingPageProps) => {
   const {
     data: { query },
+    serverless,
     chrome: { setBreadcrumbs },
-    dashboardSavedObject: { findDashboards },
+    dashboardContentManagement: { findDashboards },
   } = pluginServices.getServices();
 
   const [showNoDataPage, setShowNoDataPage] = useState<boolean>(false);
@@ -59,7 +60,13 @@ export const DashboardListingPage = ({
         text: getDashboardBreadcrumb(),
       },
     ]);
-  }, [setBreadcrumbs]);
+
+    if (serverless?.setBreadcrumbs) {
+      // if serverless breadcrumbs available,
+      // reset any deeper context breadcrumbs to only keep the main "dashboard" part that comes from the navigation config
+      serverless.setBreadcrumbs([]);
+    }
+  }, [setBreadcrumbs, serverless]);
 
   useEffect(() => {
     // syncs `_g` portion of url with query services

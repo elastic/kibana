@@ -9,6 +9,7 @@
 // Types and enums
 export type {
   CellAction,
+  CellActionFieldValue,
   CellActionsProps,
   CellActionExecutionContext,
   CellActionCompatibilityContext,

@@ -58,6 +58,7 @@ export {
   ENDPOINT_PRIVILEGES,
   // dashboards ids
   DASHBOARD_LOCATORS_IDS,
+  FLEET_ENROLLMENT_API_PREFIX,
 } from './constants';
 export {
   // Route services
@@ -71,8 +72,6 @@ export {
   // Package policy helpers
   isValidNamespace,
   INVALID_NAMESPACE_CHARACTERS,
-  // TODO Should probably not be exposed by Fleet
-  decodeCloudId,
   getFileMetadataIndexName,
   getFileDataIndexName,
 } from './services';

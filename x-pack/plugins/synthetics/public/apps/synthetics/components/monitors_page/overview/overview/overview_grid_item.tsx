@@ -36,6 +36,7 @@ export const OverviewGridItem = ({
     locationId: monitor.location?.id,
     monitorId: monitor.id,
     timestamp,
+    schedule: monitor.schedule,
   });
   return (
     <MetricItem

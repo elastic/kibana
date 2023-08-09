@@ -18,8 +18,11 @@ import React, {
 } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import classNames from 'classnames';
+import useUnmount from 'react-use/lib/useUnmount';
 
 import { EuiLoadingElastic, EuiLoadingSpinner } from '@elastic/eui';
+import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
+import { ErrorEmbeddable, isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 
 import {
   DashboardAPI,
@@ -31,22 +34,27 @@ import {
   DashboardContainerFactory,
   DashboardContainerFactoryDefinition,
 } from '../embeddable/dashboard_container_factory';
+import { DashboardRedirect } from '../types';
 import { DASHBOARD_CONTAINER_TYPE } from '..';
 import { DashboardContainerInput } from '../../../common';
 import type { DashboardContainer } from '../embeddable/dashboard_container';
+import { Dashboard404Page } from './dashboard_404';
 
 export interface DashboardRendererProps {
   savedObjectId?: string;
   showPlainSpinner?: boolean;
+  dashboardRedirect?: DashboardRedirect;
   getCreationOptions?: () => Promise<DashboardCreationOptions>;
 }
 
 export const DashboardRenderer = forwardRef<AwaitingDashboardAPI, DashboardRendererProps>(
-  ({ savedObjectId, getCreationOptions, showPlainSpinner }, ref) => {
+  ({ savedObjectId, getCreationOptions, dashboardRedirect, showPlainSpinner }, ref) => {
     const dashboardRoot = useRef(null);
     const [loading, setLoading] = useState(true);
     const [screenshotMode, setScreenshotMode] = useState(false);
     const [dashboardContainer, setDashboardContainer] = useState<DashboardContainer>();
+    const [fatalError, setFatalError] = useState<ErrorEmbeddable | undefined>();
+    const [dashboardMissing, setDashboardMissing] = useState(false);
 
     useImperativeHandle(
       ref,
@@ -65,22 +73,32 @@ export const DashboardRenderer = forwardRef<AwaitingDashboardAPI, DashboardRende
       })();
     }, []);
 
-    useEffect(() => {
-      if (!dashboardContainer) return;
-
-      // When a dashboard already exists, don't rebuild it, just set a new id.
-      dashboardContainer.navigateToDashboard(savedObjectId);
-
-      // Disabling exhaustive deps because this useEffect should only be triggered when the savedObjectId changes.
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [savedObjectId]);
-
     const id = useMemo(() => uuidv4(), []);
 
     useEffect(() => {
-      let canceled = false;
-      let destroyContainer: () => void;
+      /**
+       * Here we attempt to build a dashboard or navigate to a new dashboard. Clear all error states
+       * if they exist in case this dashboard loads correctly.
+       */
+      fatalError?.destroy();
+      setDashboardMissing(false);
+      setFatalError(undefined);
 
+      if (dashboardContainer) {
+        // When a dashboard already exists, don't rebuild it, just set a new id.
+        dashboardContainer.navigateToDashboard(savedObjectId).catch((e) => {
+          dashboardContainer?.destroy();
+          setDashboardContainer(undefined);
+          setFatalError(new ErrorEmbeddable(e, { id }));
+          if (e instanceof SavedObjectNotFound) {
+            setDashboardMissing(true);
+          }
+        });
+        return;
+      }
+
+      setLoading(true);
+      let canceled = false;
       (async () => {
         const creationOptions = await getCreationOptions?.();
 
@@ -91,33 +109,45 @@ export const DashboardRenderer = forwardRef<AwaitingDashboardAPI, DashboardRende
         const dashboardFactory = embeddable.getEmbeddableFactory(
           DASHBOARD_CONTAINER_TYPE
         ) as DashboardContainerFactory & { create: DashboardContainerFactoryDefinition['create'] };
-        const container = (await dashboardFactory?.create(
+        const container = await dashboardFactory?.create(
           { id } as unknown as DashboardContainerInput, // Input from creationOptions is used instead.
           undefined,
           creationOptions,
           savedObjectId
-        )) as DashboardContainer;
+        );
+        setLoading(false);
 
-        if (canceled) {
-          container.destroy();
+        if (canceled || !container) {
+          setDashboardContainer(undefined);
+          container?.destroy();
           return;
         }
 
-        setLoading(false);
+        if (isErrorEmbeddable(container)) {
+          setFatalError(container);
+          if (container.error instanceof SavedObjectNotFound) {
+            setDashboardMissing(true);
+          }
+          return;
+        }
+
         if (dashboardRoot.current) {
           container.render(dashboardRoot.current);
         }
 
         setDashboardContainer(container);
-        destroyContainer = () => container.destroy();
       })();
       return () => {
         canceled = true;
-        destroyContainer?.();
       };
       // Disabling exhaustive deps because embeddable should only be created on first render.
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    }, [savedObjectId]);
+
+    useUnmount(() => {
+      fatalError?.destroy();
+      dashboardContainer?.destroy();
+    });
 
     const viewportClasses = classNames(
       'dashboardViewport',
@@ -131,10 +161,13 @@ export const DashboardRenderer = forwardRef<AwaitingDashboardAPI, DashboardRende
       <EuiLoadingElastic size="xxl" />
     );
 
-    return (
-      <div className={viewportClasses}>
-        {loading ? loadingSpinner : <div ref={dashboardRoot} />}
-      </div>
-    );
+    const renderDashboardContents = () => {
+      if (dashboardMissing) return <Dashboard404Page dashboardRedirect={dashboardRedirect} />;
+      if (fatalError) return fatalError.render();
+      if (loading) return loadingSpinner;
+      return <div ref={dashboardRoot} />;
+    };
+
+    return <div className={viewportClasses}>{renderDashboardContents()}</div>;
   }
 );

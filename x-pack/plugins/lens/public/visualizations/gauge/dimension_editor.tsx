@@ -25,7 +25,7 @@ import {
 } from '@kbn/coloring';
 import { GaugeTicksPositions, GaugeColorModes } from '@kbn/expression-gauge-plugin/common';
 import { getMaxValue, getMinValue } from '@kbn/expression-gauge-plugin/public';
-import { TooltipWrapper } from '@kbn/visualization-ui-components/public';
+import { TooltipWrapper } from '@kbn/visualization-ui-components';
 import { isNumericFieldForDatatable } from '../../../common/expressions/datatable/utils';
 import { applyPaletteParams, PalettePanelContainer } from '../../shared_components';
 import type { VisualizationDimensionEditorProps } from '../../types';

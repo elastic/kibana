@@ -6,10 +6,10 @@
  */
 
 import React from 'react';
-import { Switch, Redirect } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
+import { Redirect } from 'react-router-dom';
+import { Routes, Route } from '@kbn/shared-ux-router';
 
-import { TimelineType } from '../../../common/types/timeline';
+import { TimelineType } from '../../../common/api/timeline';
 
 import { TimelinesPage } from './timelines_page';
 
@@ -21,7 +21,7 @@ const timelinesPagePath = `${TIMELINES_PATH}/:tabName(${TimelineType.default}|${
 const timelinesDefaultPath = `${TIMELINES_PATH}/${TimelineType.default}`;
 
 export const Timelines = React.memo(() => (
-  <Switch>
+  <Routes>
     <Route exact path={timelinesPagePath}>
       <TimelinesPage />
     </Route>
@@ -31,7 +31,7 @@ export const Timelines = React.memo(() => (
         <Redirect to={`${timelinesDefaultPath}${appendSearch(search)}`} />
       )}
     />
-  </Switch>
+  </Routes>
 ));
 
 Timelines.displayName = 'Timelines';

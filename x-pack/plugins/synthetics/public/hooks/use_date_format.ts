@@ -7,13 +7,19 @@
 
 import moment from 'moment';
 import { useEffect } from 'react';
+import { i18n } from '@kbn/i18n';
 
-export function useDateFormat(): (timestamp?: string) => string {
-  const locale = navigator.language;
+export type DateFormatter = (timestamp?: string) => string;
+export function useDateFormat(): DateFormatter {
+  const kibanaLocale = i18n.getLocale();
+  const clientLocale = navigator.language;
 
   useEffect(() => {
-    moment.locale(locale);
-  }, [locale]);
+    const preferredLocale = kibanaLocale ?? clientLocale;
+    if (moment.locale() !== preferredLocale) {
+      moment.locale(preferredLocale);
+    }
+  }, [kibanaLocale, clientLocale]);
 
   return (timestamp?: string) => {
     if (!timestamp) return '';

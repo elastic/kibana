@@ -188,5 +188,6 @@ export const exploreLinks: LinkItem = {
     }),
   ],
   links: [hostsLinks, networkLinks, usersLinks],
+  hideTimeline: true,
   skipUrlState: true,
 };

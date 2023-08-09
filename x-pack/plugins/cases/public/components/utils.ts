@@ -10,11 +10,15 @@ import type {
   FieldConfig,
   ValidationConfig,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import type { ConnectorTypeFields } from '../../common/api';
-import { ConnectorTypes } from '../../common/api';
+import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
+import type { ConnectorTypeFields } from '../../common/types/domain';
+import { ConnectorTypes } from '../../common/types/domain';
 import type { CasesPluginStart } from '../types';
 import { connectorValidator as swimlaneConnectorValidator } from './connectors/swimlane/validator';
 import type { CaseActionConnector } from './types';
+import type { CaseUser, CaseUsers } from '../../common/ui/types';
+import { convertToCaseUserWithProfileInfo } from './user_profiles/user_converter';
+import type { CaseUserWithProfileInfo } from './user_profiles/types';
 
 export const getConnectorById = (
   id: string,
@@ -170,4 +174,54 @@ export const isDeprecatedConnector = (connector?: CaseActionConnector): boolean 
 
 export const removeItemFromSessionStorage = (key: string) => {
   window.sessionStorage.removeItem(key);
+};
+
+export const stringifyToURL = (parsedParams: Record<string, string>) =>
+  new URLSearchParams(parsedParams).toString();
+export const parseURL = (queryString: string) =>
+  Object.fromEntries(new URLSearchParams(queryString));
+
+export const parseCaseUsers = ({
+  caseUsers,
+  createdBy,
+}: {
+  caseUsers?: CaseUsers;
+  createdBy: CaseUser;
+}): {
+  userProfiles: Map<string, UserProfileWithAvatar>;
+  reporterAsArray: CaseUserWithProfileInfo[];
+} => {
+  const userProfiles = new Map();
+  const reporterAsArray =
+    caseUsers?.reporter != null
+      ? [caseUsers.reporter]
+      : [convertToCaseUserWithProfileInfo(createdBy)];
+
+  if (caseUsers) {
+    for (const user of [
+      ...caseUsers.assignees,
+      ...caseUsers.participants,
+      caseUsers.reporter,
+      ...caseUsers.unassignedUsers,
+    ]) {
+      /**
+       * If the user has a valid profile UID and a valid username
+       * then the backend successfully fetched the user profile
+       * information from the security plugin. Checking only for the
+       * profile UID is not enough as a user can use our API to add
+       * an assignee with a non existing UID.
+       */
+      if (user.uid != null && user.user.username != null) {
+        userProfiles.set(user.uid, {
+          uid: user.uid,
+          user: user.user,
+          data: {
+            avatar: user.avatar,
+          },
+        });
+      }
+    }
+  }
+
+  return { userProfiles, reporterAsArray };
 };

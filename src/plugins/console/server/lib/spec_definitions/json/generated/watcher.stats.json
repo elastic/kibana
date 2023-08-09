@@ -9,10 +9,10 @@
     ],
     "patterns": [
       "_watcher/stats",
-      "_watcher/stats/{metrics}"
+      "_watcher/stats/{metric}"
     ],
     "url_components": {
-      "metrics": [
+      "metric": [
         "_all",
         "current_watches",
         "pending_watches",

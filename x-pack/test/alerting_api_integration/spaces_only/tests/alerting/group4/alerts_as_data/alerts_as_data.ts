@@ -111,6 +111,9 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
         // start should be defined
         expect(source.kibana.alert.start).to.match(timestampPattern);
 
+        // time_range.gte should be same as start
+        expect(source.kibana.alert.time_range?.gte).to.equal(source.kibana.alert.start);
+
         // timestamp should be defined
         expect(source['@timestamp']).to.match(timestampPattern);
 
@@ -120,6 +123,18 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
         // flapping information for new alert
         expect(source.kibana.alert.flapping).to.equal(false);
         expect(source.kibana.alert.flapping_history).to.eql([true]);
+
+        // workflow status should be 'open'
+        expect(source.kibana.alert.workflow_status).to.equal('open');
+
+        // event.action should be 'open'
+        expect(source.event?.action).to.equal('open');
+
+        // event.kind should be 'signal'
+        expect(source.event?.kind).to.equal('signal');
+
+        // tags should equal rule tags because rule type doesn't set any tags
+        expect(source.tags).to.eql(['foo']);
       }
 
       let alertDoc: SearchHit<PatternFiringAlert> | undefined = alertDocsRun1.find(
@@ -198,6 +213,17 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
         ...alertADocRun1.kibana.alert.flapping_history!,
         false,
       ]);
+      // event.action set to active
+      expect(alertADocRun2.event?.action).to.eql('active');
+      expect(alertADocRun2.tags).to.eql(['foo']);
+      // these values should be the same as previous run
+      expect(alertADocRun2.event?.kind).to.eql(alertADocRun1.event?.kind);
+      expect(alertADocRun2.kibana.alert.workflow_status).to.eql(
+        alertADocRun1.kibana.alert.workflow_status
+      );
+      expect(alertADocRun2.kibana.alert.time_range?.gte).to.equal(
+        alertADocRun1.kibana.alert.time_range?.gte
+      );
 
       // alertB, run 2
       // status is updated to recovered, duration is updated, end time is set
@@ -205,8 +231,9 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
       const alertBDocRun2 = alertDoc!._source!;
       // action group should be set to recovered
       expect(alertBDocRun2.kibana.alert.action_group).to.be('recovered');
-      expect(alertBDocRun2.instancePattern).to.eql(alertBDocRun1.instancePattern);
-      expect(alertBDocRun2.patternIndex).to.be(alertBDocRun1.patternIndex);
+      // rule type AAD payload should be set to recovery values
+      expect(alertBDocRun2.instancePattern).to.eql([]);
+      expect(alertBDocRun2.patternIndex).to.eql(-1);
       // uuid is the same
       expect(alertBDocRun2.kibana.alert.uuid).to.equal(alertBDocRun1.kibana.alert.uuid);
       // start time should be defined and the same as before
@@ -225,15 +252,29 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
         ...alertBDocRun1.kibana.alert.flapping_history!,
         true,
       ]);
+      // event.action set to close
+      expect(alertBDocRun2.event?.action).to.eql('close');
+      expect(alertBDocRun2.tags).to.eql(['foo']);
+      // these values should be the same as previous run
+      expect(alertBDocRun2.event?.kind).to.eql(alertBDocRun1.event?.kind);
+      expect(alertBDocRun2.kibana.alert.workflow_status).to.eql(
+        alertBDocRun1.kibana.alert.workflow_status
+      );
+      expect(alertBDocRun2.kibana.alert.time_range?.gte).to.equal(
+        alertBDocRun1.kibana.alert.time_range?.gte
+      );
+      // time_range.lte should be set to end time
+      expect(alertBDocRun2.kibana.alert.time_range?.lte).to.equal(alertBDocRun2.kibana.alert.end);
 
-      // alertB, run 2
+      // alertC, run 2
       // status is updated to recovered, duration is updated, end time is set
       alertDoc = alertDocsRun2.find((doc) => doc._source!.kibana.alert.instance.id === 'alertC');
       const alertCDocRun2 = alertDoc!._source!;
       // action group should be set to recovered
       expect(alertCDocRun2.kibana.alert.action_group).to.be('recovered');
-      expect(alertCDocRun2.instancePattern).to.eql(alertCDocRun1.instancePattern);
-      expect(alertCDocRun2.patternIndex).to.be(alertCDocRun1.patternIndex);
+      // rule type AAD payload should be set to recovery values
+      expect(alertCDocRun2.instancePattern).to.eql([]);
+      expect(alertCDocRun2.patternIndex).to.eql(-1);
       // uuid is the same
       expect(alertCDocRun2.kibana.alert.uuid).to.equal(alertCDocRun1.kibana.alert.uuid);
       // start time should be defined and the same as before
@@ -252,6 +293,19 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
         ...alertCDocRun1.kibana.alert.flapping_history!,
         true,
       ]);
+      // event.action set to close
+      expect(alertCDocRun2.event?.action).to.eql('close');
+      expect(alertCDocRun2.tags).to.eql(['foo']);
+      // these values should be the same as previous run
+      expect(alertCDocRun2.event?.kind).to.eql(alertADocRun1.event?.kind);
+      expect(alertCDocRun2.kibana.alert.workflow_status).to.eql(
+        alertCDocRun1.kibana.alert.workflow_status
+      );
+      expect(alertCDocRun2.kibana.alert.time_range?.gte).to.equal(
+        alertCDocRun1.kibana.alert.time_range?.gte
+      );
+      // time_range.lte should be set to end time
+      expect(alertCDocRun2.kibana.alert.time_range?.lte).to.equal(alertCDocRun2.kibana.alert.end);
 
       // --------------------------
       // RUN 3 - 1 re-active (alertC), 1 still recovered (alertB), 1 ongoing (alertA)
@@ -310,6 +364,17 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
         ...alertADocRun2.kibana.alert.flapping_history!,
         false,
       ]);
+      // event.action should still to active
+      expect(alertADocRun3.event?.action).to.eql('active');
+      expect(alertADocRun3.tags).to.eql(['foo']);
+      // these values should be the same as previous run
+      expect(alertADocRun3.event?.kind).to.eql(alertADocRun2.event?.kind);
+      expect(alertADocRun3.kibana.alert.workflow_status).to.eql(
+        alertADocRun2.kibana.alert.workflow_status
+      );
+      expect(alertADocRun3.kibana.alert.time_range?.gte).to.equal(
+        alertADocRun2.kibana.alert.time_range?.gte
+      );
 
       // alertB doc should be unchanged from prior run because it is still recovered
       // but its flapping history should be updated
@@ -359,6 +424,13 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
         ...alertCDocRun2.kibana.alert.flapping_history!,
         true,
       ]);
+      // event.action should be 'open'
+      expect(alertCDocRun3.event?.action).to.eql('open');
+      expect(alertCDocRun3.tags).to.eql(['foo']);
+      // these values should be the same as previous run
+      expect(alertCDocRun3.event?.kind).to.eql('signal');
+      expect(alertCDocRun3.kibana.alert.workflow_status).to.eql('open');
+      expect(alertCDocRun3.kibana.alert.time_range?.gte).to.equal(alertCDocRun3.kibana.alert.start);
     });
   });
 

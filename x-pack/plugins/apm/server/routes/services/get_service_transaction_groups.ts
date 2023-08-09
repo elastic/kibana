@@ -29,18 +29,23 @@ import {
 } from '../../lib/helpers/transaction_error_rate';
 
 const txGroupsDroppedBucketName = '_other';
+export const MAX_NUMBER_OF_TX_GROUPS = 1_000;
+
+export interface TransactionGroups {
+  alertsCount: number;
+  name: string;
+  transactionType: string;
+  latency: number | null;
+  throughput: number;
+  errorRate: number;
+  impact: number;
+}
 
 export interface ServiceTransactionGroupsResponse {
-  transactionGroups: Array<{
-    transactionType: string;
-    name: string;
-    latency: number | null;
-    throughput: number;
-    errorRate: number;
-    impact: number;
-  }>;
+  transactionGroups: TransactionGroups[];
   maxTransactionGroupsExceeded: boolean;
   transactionOverflowCount: number;
+  hasActiveAlerts: boolean;
 }
 
 export async function getServiceTransactionGroups({
@@ -115,7 +120,7 @@ export async function getServiceTransactionGroups({
           transaction_groups: {
             terms: {
               field: TRANSACTION_NAME,
-              size: 1000,
+              size: MAX_NUMBER_OF_TX_GROUPS,
               order: { _count: 'desc' },
             },
             aggs: {
@@ -155,6 +160,7 @@ export async function getServiceTransactionGroups({
         impact: totalDuration
           ? (transactionGroupTotalDuration * 100) / totalDuration
           : 0,
+        alertsCount: 0,
       };
     }) ?? [];
 
@@ -167,5 +173,6 @@ export async function getServiceTransactionGroups({
       (response.aggregations?.transaction_groups.sum_other_doc_count ?? 0) > 0,
     transactionOverflowCount:
       response.aggregations?.transaction_overflow_count.value ?? 0,
+    hasActiveAlerts: false,
   };
 }

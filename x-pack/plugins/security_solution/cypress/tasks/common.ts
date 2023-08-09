@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import { LOADING_INDICATOR, LOADING_INDICATOR_HIDDEN } from '../screens/security_header';
+import { DATA_VIEW_PATH, INITIAL_REST_VERSION } from '@kbn/data-views-plugin/server/constants';
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
+import {
+  KIBANA_LOADING_ICON,
+  LOADING_INDICATOR,
+  LOADING_INDICATOR_HIDDEN,
+} from '../screens/security_header';
+import { EUI_BASIC_TABLE_LOADING } from '../screens/common/controls';
 
 const primaryButton = 0;
 
@@ -212,20 +219,44 @@ export const deleteConnectors = () => {
   });
 };
 
+export const deletePrebuiltRulesAssets = () => {
+  const kibanaIndexUrl = `${Cypress.env('ELASTICSEARCH_URL')}/.kibana_\*`;
+  rootRequest({
+    method: 'POST',
+    url: `${kibanaIndexUrl}/_delete_by_query?conflicts=proceed`,
+    body: {
+      query: {
+        bool: {
+          filter: [
+            {
+              match: {
+                type: 'security-rule',
+              },
+            },
+          ],
+        },
+      },
+    },
+  });
+};
+
 export const postDataView = (dataSource: string) => {
   rootRequest({
     method: 'POST',
-    url: `/api/index_patterns/index_pattern`,
+    url: DATA_VIEW_PATH,
     body: {
-      index_pattern: {
+      data_view: {
         id: dataSource,
+        name: dataSource,
         fieldAttrs: '{}',
         title: dataSource,
         timeFieldName: '@timestamp',
-        fields: '{}',
       },
     },
-    headers: { 'kbn-xsrf': 'cypress-creds-via-config' },
+    headers: {
+      'kbn-xsrf': 'cypress-creds-via-config',
+      [ELASTIC_HTTP_VERSION_HEADER]: [INITIAL_REST_VERSION],
+    },
     failOnStatusCode: false,
   });
 };
@@ -244,4 +275,14 @@ export const scrollToBottom = () => cy.scrollTo('bottom');
 export const waitForPageToBeLoaded = () => {
   cy.get(LOADING_INDICATOR_HIDDEN).should('exist');
   cy.get(LOADING_INDICATOR).should('not.exist');
+};
+
+export const waitForWelcomePanelToBeLoaded = () => {
+  cy.get(KIBANA_LOADING_ICON).should('exist');
+  cy.get(KIBANA_LOADING_ICON).should('not.exist');
+};
+
+export const waitForTableToLoad = () => {
+  cy.get(EUI_BASIC_TABLE_LOADING).should('exist');
+  cy.get(EUI_BASIC_TABLE_LOADING).should('not.exist');
 };

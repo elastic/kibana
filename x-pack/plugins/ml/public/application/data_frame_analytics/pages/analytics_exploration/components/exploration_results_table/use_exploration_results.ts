@@ -34,9 +34,9 @@ import {
   type UseIndexDataReturnType,
 } from '@kbn/ml-data-grid';
 
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { MlApiServices } from '../../../../../services/ml_api_service';
 import { DataLoader } from '../../../../../datavisualizer/index_based/data_loader';
-import { SavedSearchQuery } from '../../../../../contexts/ml';
 
 import { getIndexData, getIndexFields } from '../../../../common';
 import { useTrainedModelsApiService } from '../../../../../services/ml_api_service/trained_models';
@@ -45,7 +45,7 @@ import { useExplorationDataGrid } from './use_exploration_data_grid';
 export const useExplorationResults = (
   indexPattern: DataView | undefined,
   jobConfig: DataFrameAnalyticsConfig | undefined,
-  searchQuery: SavedSearchQuery,
+  searchQuery: estypes.QueryDslQueryContainer,
   toastNotifications: CoreSetup['notifications']['toasts'],
   mlApiServices: MlApiServices
 ): UseIndexDataReturnType => {

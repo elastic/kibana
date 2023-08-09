@@ -15,7 +15,6 @@ import {
   EuiIcon,
   EuiSpacer,
   EuiCallOut,
-  EuiBetaBadge,
   EuiCodeBlock,
   EuiModalHeader,
   EuiModalHeaderTitle,
@@ -56,6 +55,7 @@ import { useSourcererDataView } from '../../../../containers/sourcerer';
 import { SourcererScopeName } from '../../../../store/sourcerer/model';
 import { filtersToInsightProviders } from './provider';
 import { useLicense } from '../../../../hooks/use_license';
+import { isProviderValid } from './helpers';
 import * as i18n from './translations';
 
 interface InsightComponentProps {
@@ -389,9 +389,16 @@ const InsightEditorComponent = ({
     [relativeTimerangeController.field]
   );
   const disableSubmit = useMemo(() => {
-    const labelOrEmpty = labelController.field.value ? labelController.field.value : '';
-    return labelOrEmpty.trim() === '' || providers.length === 0;
-  }, [labelController.field.value, providers]);
+    const labelOrEmpty = labelController.field.value ?? '';
+    const flattenedProviders = providers.flat();
+    return (
+      labelOrEmpty.trim() === '' ||
+      flattenedProviders.length === 0 ||
+      flattenedProviders.some(
+        (provider) => !isProviderValid(provider, dataView?.getFieldByName(provider.field))
+      )
+    );
+  }, [labelController.field.value, providers, dataView]);
   const filtersStub = useMemo(() => {
     const index = indexPattern && indexPattern.getName ? indexPattern.getName() : '*';
     return [
@@ -432,9 +439,6 @@ const InsightEditorComponent = ({
                 />
               )}
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiBetaBadge color={'hollow'} label={i18n.TECH_PREVIEW} size="s" />
-            </EuiFlexItem>
           </EuiFlexGroup>
         </EuiModalHeaderTitle>
       </EuiModalHeader>
@@ -453,7 +457,10 @@ const InsightEditorComponent = ({
             <EuiFormRow
               label={i18n.LABEL}
               helpText={i18n.LABEL_TEXT}
-              isInvalid={labelController.field.value != null}
+              isInvalid={
+                labelController.field.value !== undefined &&
+                labelController.field.value.trim().length === 0
+              }
               fullWidth
             >
               <EuiFieldText
@@ -478,7 +485,7 @@ const InsightEditorComponent = ({
                   filters={filtersStub}
                   onChange={onChange}
                   dataView={dataView}
-                  maxDepth={2}
+                  maxDepth={1}
                 />
               ) : (
                 <></>
@@ -524,29 +531,40 @@ const exampleInsight = `${insightPrefix}{
   "label": "Test action",
   "description": "Click to investigate",
   "providers": [
-    [     
+    [
       {"field": "event.id", "value": "{{kibana.alert.original_event.id}}", "queryType": "phrase", "excluded": "false"}
     ],
-    [  
+    [
       {"field": "event.action", "value": "", "queryType": "exists", "excluded": "false"},
       {"field": "process.pid", "value": "{{process.pid}}", "queryType": "phrase", "excluded":"false"}
     ]
   ]
 }}`;
 
-export const plugin = {
-  name: 'insights',
-  button: {
-    label: 'Insights',
-    iconType: 'aggregate',
-  },
-  helpText: (
-    <div>
-      <EuiCodeBlock language="md" fontSize="l" paddingSize="s" isCopyable>
-        {exampleInsight}
-      </EuiCodeBlock>
-      <EuiSpacer size="s" />
-    </div>
-  ),
-  editor: InsightEditor,
+export const plugin = ({
+  licenseIsPlatinum,
+  insightsUpsellingMessage,
+}: {
+  licenseIsPlatinum: boolean;
+  insightsUpsellingMessage: string | null;
+}) => {
+  const label = licenseIsPlatinum ? i18n.INVESTIGATE : i18n.INSIGHT_UPSELL;
+
+  return {
+    name: 'insights',
+    button: {
+      label: insightsUpsellingMessage ?? label,
+      iconType: 'timelineWithArrow',
+      isDisabled: !licenseIsPlatinum || !!insightsUpsellingMessage,
+    },
+    helpText: (
+      <div>
+        <EuiCodeBlock language="md" fontSize="l" paddingSize="s" isCopyable>
+          {exampleInsight}
+        </EuiCodeBlock>
+        <EuiSpacer size="s" />
+      </div>
+    ),
+    editor: InsightEditor,
+  };
 };

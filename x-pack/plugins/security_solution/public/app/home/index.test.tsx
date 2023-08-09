@@ -33,6 +33,7 @@ import type { TimelineUrl } from '../../timelines/store/timeline/model';
 import { timelineDefaults } from '../../timelines/store/timeline/defaults';
 import { URL_PARAM_KEY } from '../../common/hooks/use_url_state';
 import { InputsModelId } from '../../common/store/inputs/constants';
+import { TopValuesPopoverService } from '../components/top_values_popover/top_values_popover_service';
 
 jest.mock('../../common/store/inputs/actions');
 
@@ -95,11 +96,11 @@ jest.mock('../../timelines/components/open_timeline/helpers', () => {
   };
 });
 
-const mockGetTimiline = jest.fn();
+const mockGetTimeline = jest.fn();
 
 jest.mock('../../timelines/store/timeline', () => ({
   timelineSelectors: {
-    getTimelineByIdSelector: () => mockGetTimiline,
+    getTimelineByIdSelector: () => mockGetTimeline,
   },
 }));
 
@@ -124,6 +125,8 @@ const dummyFilter: Filter = {
   },
 };
 
+const mockTopValuesPopoverService = new TopValuesPopoverService();
+
 jest.mock('../../common/lib/kibana', () => {
   const original = jest.requireActual('../../common/lib/kibana');
   return {
@@ -132,6 +135,7 @@ jest.mock('../../common/lib/kibana', () => {
       ...original.useKibana(),
       services: {
         ...original.useKibana().services,
+        topValuesPopover: mockTopValuesPopoverService,
         data: {
           ...original.useKibana().services.data,
           dataViews: {
@@ -641,7 +645,7 @@ describe('HomePage', () => {
       const { rerender } = render(<TestComponent />);
 
       jest.clearAllMocks();
-      mockGetTimiline.mockReturnValue({ ...timelineDefaults, savedObjectId: null });
+      mockGetTimeline.mockReturnValue({ ...timelineDefaults, savedObjectId: null });
 
       rerender(<TestComponent />);
 
@@ -669,7 +673,7 @@ describe('HomePage', () => {
       const { rerender } = render(<TestComponent />);
 
       jest.clearAllMocks();
-      mockGetTimiline.mockReturnValue({ ...timelineDefaults, savedObjectId });
+      mockGetTimeline.mockReturnValue({ ...timelineDefaults, savedObjectId });
 
       rerender(<TestComponent />);
 

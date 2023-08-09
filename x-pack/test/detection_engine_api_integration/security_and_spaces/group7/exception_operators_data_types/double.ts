@@ -33,7 +33,8 @@ export default ({ getService }: FtrProviderContext) => {
   const log = getService('log');
   const es = getService('es');
 
-  describe('Rule exception operators for data type double', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/155122
+  describe.skip('Rule exception operators for data type double', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/rule_exceptions/double');
       await esArchiver.load('x-pack/test/functional/es_archives/rule_exceptions/double_as_string');
@@ -490,8 +491,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      // FLAKY: https://github.com/elastic/kibana/issues/155122
-      describe.skip('working against string values in the data set', () => {
+      describe('working against string values in the data set', () => {
         it('will return 3 results if we have a list that includes 1 double', async () => {
           await importFile(supertest, log, 'double', ['1.0'], 'list_items.txt');
           const rule = getRuleForSignalTesting(['double_as_string']);

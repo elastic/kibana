@@ -44,6 +44,10 @@ jest.mock(
   '../../../../detections/components/alerts_table/timeline_actions/use_add_to_case_actions'
 );
 
+jest.mock('../../../../common/hooks/use_upselling', () => ({
+  useUpsellingMessage: jest.fn(),
+}));
+
 jest.mock('../../../../common/components/user_privileges', () => {
   return {
     useUserPrivileges: () => ({
@@ -137,13 +141,6 @@ jest.mock(
 
 // Prevent Resolver from rendering
 jest.mock('../../graph_overlay');
-
-jest.mock(
-  'react-visibility-sensor',
-  () =>
-    ({ children }: { children: (args: { isVisible: boolean }) => React.ReactNode }) =>
-      children({ isVisible: true })
-);
 
 jest.mock('../../fields_browser/create_field_button', () => ({
   useCreateFieldButton: () => <></>,

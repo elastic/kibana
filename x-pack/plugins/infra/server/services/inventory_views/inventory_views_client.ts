@@ -14,6 +14,7 @@ import {
 } from '@kbn/core/server';
 import Boom from '@hapi/boom';
 import {
+  inventoryViewAttributesRT,
   staticInventoryViewAttributes,
   staticInventoryViewId,
 } from '../../../common/inventory_views';
@@ -131,10 +132,10 @@ export class InventoryViewsClient implements IInventoryViewsClient {
     return this.savedObjectsClient.delete(inventoryViewSavedObjectName, inventoryViewId);
   }
 
-  private mapSavedObjectToInventoryView(
-    savedObject: SavedObject | SavedObjectsUpdateResponse,
+  private mapSavedObjectToInventoryView<T>(
+    savedObject: SavedObject<T> | SavedObjectsUpdateResponse<T>,
     defaultViewId?: string
-  ) {
+  ): InventoryView {
     const inventoryViewSavedObject = decodeOrThrow(inventoryViewSavedObjectRT)(savedObject);
 
     return {
@@ -142,7 +143,7 @@ export class InventoryViewsClient implements IInventoryViewsClient {
       version: inventoryViewSavedObject.version,
       updatedAt: inventoryViewSavedObject.updated_at,
       attributes: {
-        ...inventoryViewSavedObject.attributes,
+        ...decodeOrThrow(inventoryViewAttributesRT)(inventoryViewSavedObject.attributes),
         isDefault: inventoryViewSavedObject.id === defaultViewId,
         isStatic: false,
       },

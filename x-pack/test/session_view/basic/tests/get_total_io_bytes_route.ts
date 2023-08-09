@@ -30,8 +30,7 @@ export default function getTotalIOBytesTests({ getService }: FtrProviderContext)
       .set('Elastic-Api-Version', CURRENT_API_VERSION);
   }
 
-  // Failing: See https://github.com/elastic/kibana/issues/159303
-  describe.skip(`Session view - ${GET_TOTAL_IO_BYTES_ROUTE} - with a basic license`, () => {
+  describe(`Session view - ${GET_TOTAL_IO_BYTES_ROUTE} - with a basic license`, () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/session_view/process_events');
       await esArchiver.load('x-pack/test/functional/es_archives/session_view/io_events');

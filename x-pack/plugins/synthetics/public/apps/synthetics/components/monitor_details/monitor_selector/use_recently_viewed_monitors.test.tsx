@@ -46,7 +46,7 @@ describe('useRecentlyViewedMonitors', () => {
       );
     };
 
-    jest.spyOn(useMonitorQueryModule, 'useMonitorQueryId').mockImplementation(() => '1');
+    jest.spyOn(useMonitorQueryModule, 'useMonitorQueryId').mockReturnValue('1');
     (useFetcher as jest.Mock).mockImplementation((callback) => {
       callback();
       return { loading: false, status: 'success' as FETCH_STATUS.SUCCESS, refetch: () => {} };
@@ -79,12 +79,9 @@ describe('useRecentlyViewedMonitors', () => {
 
     // Return only 'persisted-id-03' to mark 'persisted-id-02' as a deleted monitor
     const fetchedMonitor = {
-      id: 'uuid-monitor-03',
-      attributes: {
-        id: monitorQueryId3,
-        name: 'Monitor 03',
-        locations: [],
-      },
+      id: monitorQueryId3,
+      name: 'Monitor 03',
+      locations: [],
     };
     (fetchMonitorManagementList as jest.Mock).mockReturnValue({
       monitors: [fetchedMonitor],
@@ -118,8 +115,8 @@ describe('useRecentlyViewedMonitors', () => {
       {
         isGroupLabel: false,
         key: fetchedMonitor.id,
-        label: fetchedMonitor.attributes.name,
-        locationIds: fetchedMonitor.attributes.locations,
+        label: fetchedMonitor.name,
+        locationIds: fetchedMonitor.locations,
         monitorQueryId: monitorQueryId3,
       },
     ];

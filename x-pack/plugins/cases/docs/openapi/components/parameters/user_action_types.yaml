@@ -1,0 +1,24 @@
+in: query
+name: types
+description: Determines the types of user actions to return.
+schema:
+  type: array
+  items:
+    type: string
+    enum:
+      - action
+      - alert
+      - assignees
+      - attachment
+      - comment
+      - connector
+      - create_case
+      - description
+      - pushed
+      - settings
+      - severity
+      - status
+      - tags
+      - title
+      - user
+example: create_case

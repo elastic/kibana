@@ -5,9 +5,34 @@
  * 2.0.
  */
 
+import { TIME_RANGE_TYPE } from '@kbn/ml-plugin/public/application/components/custom_urls/custom_url_editor/constants';
 import type { AnalyticsTableRowDetails } from '../../../services/ml/data_frame_analytics_table';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 import type { FieldStatsType } from '../common/types';
+import {
+  type DiscoverUrlConfig,
+  type DashboardUrlConfig,
+  type OtherUrlConfig,
+} from '../../../services/ml/data_frame_analytics_edit';
+
+const testDiscoverCustomUrl: DiscoverUrlConfig = {
+  label: 'Show data',
+  indexPattern: 'ft_bank_marketing',
+  queryEntityFieldNames: ['day'],
+  timeRange: TIME_RANGE_TYPE.AUTO,
+};
+
+const testDashboardCustomUrl: DashboardUrlConfig = {
+  label: 'Show dashboard',
+  dashboardName: 'ML Test',
+  queryEntityFieldNames: ['day'],
+  timeRange: TIME_RANGE_TYPE.AUTO,
+};
+
+const testOtherCustomUrl: OtherUrlConfig = {
+  label: 'elastic.co',
+  url: 'https://www.elastic.co/',
+};
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -15,10 +40,12 @@ export default function ({ getService }: FtrProviderContext) {
   const editedDescription = 'Edited description';
 
   describe('classification creation', function () {
+    let testDashboardId: string | null = null;
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/bm_classification');
       await ml.testResources.createIndexPatternIfNeeded('ft_bank_marketing');
       await ml.testResources.setKibanaTimeZoneToUTC();
+      testDashboardId = await ml.testResources.createMLTestDashboardIfNeeded();
 
       await ml.securityUI.loginAsMlPowerUser();
     });
@@ -96,7 +123,6 @@ export default function ({ getService }: FtrProviderContext) {
                   'Model memory limit',
                   '25mb',
                   'Version',
-                  '8.9.0',
                 ],
               },
               {
@@ -343,6 +369,40 @@ export default function ({ getService }: FtrProviderContext) {
             testData.jobId,
             testData.expected.rowDetails
           );
+        });
+
+        it('adds discover custom url to the analytics job', async () => {
+          await ml.testExecution.logTestStep('opens edit flyout for discover url');
+          await ml.dataFrameAnalyticsTable.openEditFlyout(testData.jobId);
+
+          await ml.testExecution.logTestStep('adds discover custom url for the analytics job');
+          await ml.dataFrameAnalyticsEdit.addDiscoverCustomUrl(
+            testData.jobId,
+            testDiscoverCustomUrl
+          );
+        });
+
+        it('adds dashboard custom url to the analytics job', async () => {
+          await ml.testExecution.logTestStep('opens edit flyout for dashboard url');
+          await ml.dataFrameAnalyticsTable.openEditFlyout(testData.jobId);
+
+          await ml.testExecution.logTestStep('adds dashboard custom url for the analytics job');
+          await ml.dataFrameAnalyticsEdit.addDashboardCustomUrl(
+            testData.jobId,
+            testDashboardCustomUrl,
+            {
+              index: 1,
+              url: `dashboards#/view/${testDashboardId}?_g=(filters:!(),time:(from:'$earliest$',mode:absolute,to:'$latest$'))&_a=(filters:!(),query:(language:kuery,query:'day:\"$day$\"'))`,
+            }
+          );
+        });
+
+        it('adds other custom url type to the analytics job', async () => {
+          await ml.testExecution.logTestStep('opens edit flyout for other url');
+          await ml.dataFrameAnalyticsTable.openEditFlyout(testData.jobId);
+
+          await ml.testExecution.logTestStep('adds other type custom url for the analytics job');
+          await ml.dataFrameAnalyticsEdit.addOtherTypeCustomUrl(testData.jobId, testOtherCustomUrl);
         });
 
         it('edits the analytics job and displays it correctly in the job list', async () => {

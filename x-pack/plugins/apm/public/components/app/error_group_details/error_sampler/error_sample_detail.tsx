@@ -48,12 +48,13 @@ import { Summary } from '../../../shared/summary';
 import { HttpInfoSummaryItem } from '../../../shared/summary/http_info_summary_item';
 import { UserAgentSummaryItem } from '../../../shared/summary/user_agent_summary_item';
 import { TimestampTooltip } from '../../../shared/timestamp_tooltip';
+import { PlaintextStacktrace } from './plaintext_stacktrace';
 import { TransactionTab } from '../../transaction_details/waterfall_with_summary/transaction_tabs';
-import { ErrorSampleCoPilotPrompt } from './error_sample_co_pilot_prompt';
 import { ErrorTab, ErrorTabKey, getTabs } from './error_tabs';
 import { ErrorUiActionsContextMenu } from './error_ui_actions_context_menu';
 import { ExceptionStacktrace } from './exception_stacktrace';
 import { SampleSummary } from './sample_summary';
+import { ErrorSampleContextualInsight } from './error_sample_contextual_insight';
 
 const TransactionLinkName = euiStyled.div`
   margin-left: ${({ theme }) => theme.eui.euiSizeS};
@@ -336,7 +337,7 @@ export function ErrorSampleDetails({
         <SampleSummary error={error} />
       )}
 
-      <ErrorSampleCoPilotPrompt error={error} transaction={transaction} />
+      <ErrorSampleContextualInsight error={error} transaction={transaction} />
 
       <EuiTabs>
         {tabs.map(({ key, label }) => {
@@ -379,14 +380,24 @@ export function ErrorSampleDetailTabContent({
   const codeLanguage = error?.service.language?.name;
   const exceptions = error?.error.exception || [];
   const logStackframes = error?.error.log?.stacktrace;
-
+  const isPlaintextException =
+    !!error?.error.stack_trace &&
+    exceptions.length === 1 &&
+    !exceptions[0].stacktrace;
   switch (currentTab.key) {
     case ErrorTabKey.LogStackTrace:
       return (
         <Stacktrace stackframes={logStackframes} codeLanguage={codeLanguage} />
       );
     case ErrorTabKey.ExceptionStacktrace:
-      return (
+      return isPlaintextException ? (
+        <PlaintextStacktrace
+          message={exceptions[0].message}
+          type={exceptions[0].type}
+          stacktrace={error?.error.stack_trace}
+          codeLanguage={codeLanguage}
+        />
+      ) : (
         <ExceptionStacktrace
           codeLanguage={codeLanguage}
           exceptions={exceptions}

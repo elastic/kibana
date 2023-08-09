@@ -13,7 +13,7 @@ export const RANGE_SLIDER_CONTROL = 'rangeSliderControl';
 export type RangeValue = [string, string];
 
 export interface RangeSliderEmbeddableInput extends DataControlInput {
-  value: RangeValue;
+  value?: RangeValue;
 }
 
 export type RangeSliderInputWithType = Partial<RangeSliderEmbeddableInput> & { type: string };

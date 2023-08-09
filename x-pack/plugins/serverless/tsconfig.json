@@ -23,5 +23,7 @@
     "@kbn/utils",
     "@kbn/core-chrome-browser",
     "@kbn/core-chrome-browser-internal",
+    "@kbn/i18n-react",
+    "@kbn/cloud-plugin",
   ]
 }

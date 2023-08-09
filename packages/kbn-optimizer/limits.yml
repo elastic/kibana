@@ -11,12 +11,13 @@ pageLoadAssetSize:
   charts: 55000
   cloud: 21076
   cloudChat: 19894
+  cloudChatProvider: 17114
   cloudDataMigration: 19170
   cloudDefend: 18697
   cloudExperiments: 59358
   cloudFullStory: 18493
   cloudGainsight: 18710
-  cloudLinks: 17629
+  cloudLinks: 55984
   cloudSecurityPosture: 19109
   console: 46091
   contentManagement: 16254
@@ -35,12 +36,12 @@ pageLoadAssetSize:
   devTools: 38637
   discover: 99999
   discoverEnhanced: 42730
+  discoverLogExplorer: 39045
   embeddable: 87309
   embeddableEnhanced: 22107
-  enterpriseSearch: 35741
-  essSecurity: 16573
+  enterpriseSearch: 50858
   esUiShared: 326654
-  eventAnnotation: 22000
+  eventAnnotation: 48565
   exploratoryView: 74673
   expressionError: 22127
   expressionGauge: 25000
@@ -82,10 +83,11 @@ pageLoadAssetSize:
   kibanaUsageCollection: 16463
   kibanaUtils: 79713
   kubernetesSecurity: 77234
-  lens: 37000
+  lens: 38000
   licenseManagement: 41817
   licensing: 29004
   lists: 22900
+  logsShared: 281060
   logstash: 53548
   management: 46112
   maps: 90000
@@ -94,13 +96,14 @@ pageLoadAssetSize:
   monitoring: 80000
   navigation: 37269
   newsfeed: 42228
-  observability: 95000
+  observability: 115443
+  observabilityAIAssistant: 16759
   observabilityOnboarding: 19573
   observabilityShared: 52256
   osquery: 107090
   painlessLab: 179748
   presentationUtil: 58834
-  profiling: 18628
+  profiling: 36694
   remoteClusters: 51327
   reporting: 57003
   rollup: 97204
@@ -114,12 +117,13 @@ pageLoadAssetSize:
   screenshotMode: 17856
   screenshotting: 22870
   searchprofiler: 67080
-  security: 65433
+  security: 81771
   securitySolution: 66738
+  securitySolutionEss: 16573
+  securitySolutionServerless: 40000
   serverless: 16573
-  serverlessObservability: 30000
-  serverlessSearch: 45934
-  serverlessSecurity: 66019
+  serverlessObservability: 68747
+  serverlessSearch: 71995
   sessionView: 77750
   share: 71239
   snapshotRestore: 79032
@@ -136,10 +140,10 @@ pageLoadAssetSize:
   triggersActionsUi: 135613
   uiActions: 35121
   uiActionsEnhanced: 38494
-  unifiedFieldList: 65500
   unifiedHistogram: 19928
   unifiedSearch: 71059
   upgradeAssistant: 81241
+  uptime: 37842
   urlDrilldown: 30063
   urlForwarding: 32579
   usageCollection: 39762
@@ -158,5 +162,4 @@ pageLoadAssetSize:
   visTypeVislib: 242838
   visTypeXy: 46868
   visualizations: 90000
-  visualizationUiComponents: 76424
   watcher: 43598

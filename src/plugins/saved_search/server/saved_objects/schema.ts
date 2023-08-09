@@ -80,7 +80,7 @@ const SCHEMA_SEARCH_BASE = {
 };
 
 export const SCHEMA_SEARCH_V8_8_0 = schema.object(SCHEMA_SEARCH_BASE);
-export const SCHEMA_SEARCH_V8_9_0 = schema.object({
+export const SCHEMA_SEARCH_V8_10_0 = schema.object({
   ...SCHEMA_SEARCH_BASE,
   sampleSize: schema.maybe(schema.number()),
 });

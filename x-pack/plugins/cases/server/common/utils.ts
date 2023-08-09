@@ -15,6 +15,23 @@ import type {
 import { flatMap, uniqWith, xorWith } from 'lodash';
 import type { LensServerPluginSetup } from '@kbn/lens-plugin/server';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
+import type {
+  ActionsAttachmentPayload,
+  AlertAttachmentPayload,
+  Attachment,
+  AttachmentAttributes,
+  Case,
+  User,
+  UserCommentAttachmentPayload,
+} from '../../common/types/domain';
+import {
+  AttachmentType,
+  ExternalReferenceSOAttachmentPayloadRt,
+  FileAttachmentMetadataRt,
+  CaseSeverity,
+  CaseStatuses,
+  ConnectorTypes,
+} from '../../common/types/domain';
 import { isValidOwner } from '../../common/utils/owner';
 import {
   CASE_VIEW_COMMENT_PATH,
@@ -26,27 +43,6 @@ import {
 import type { CASE_VIEW_PAGE_TABS } from '../../common/types';
 import type { AlertInfo, FileAttachmentRequest, SOWithErrors } from './types';
 
-import type {
-  CasePostRequest,
-  Case,
-  CasesFindResponse,
-  CommentAttributes,
-  CommentRequest,
-  CommentRequestActionsType,
-  CommentRequestAlertType,
-  CommentRequestUserType,
-  Comment,
-  CommentsFindResponse,
-  User,
-} from '../../common/api';
-import {
-  CaseSeverity,
-  CaseStatuses,
-  CommentType,
-  ConnectorTypes,
-  ExternalReferenceSORt,
-  FileAttachmentMetadataRt,
-} from '../../common/api';
 import type { UpdateAlertStatusRequest } from '../client/alerts/types';
 import {
   parseCommentString,
@@ -54,6 +50,12 @@ import {
 } from '../../common/utils/markdown_plugins/utils';
 import { dedupAssignees } from '../client/cases/utils';
 import type { CaseSavedObjectTransformed, CaseTransformedAttributes } from './types/case';
+import type {
+  AttachmentRequest,
+  AttachmentsFindResponse,
+  CasePostRequest,
+  CasesFindResponse,
+} from '../../common/types/api';
 
 /**
  * Default sort field for querying saved objects.
@@ -84,6 +86,7 @@ export const transformNewCase = ({
   updated_at: null,
   updated_by: null,
   assignees: dedupAssignees(newCase.assignees) ?? [],
+  category: newCase.category ?? null,
 });
 
 export const transformCases = ({
@@ -119,7 +122,7 @@ export const flattenCaseSavedObject = ({
   totalAlerts = 0,
 }: {
   savedObject: CaseSavedObjectTransformed;
-  comments?: Array<SavedObject<CommentAttributes>>;
+  comments?: Array<SavedObject<AttachmentAttributes>>;
   totalComment?: number;
   totalAlerts?: number;
 }): Case => ({
@@ -132,8 +135,8 @@ export const flattenCaseSavedObject = ({
 });
 
 export const transformComments = (
-  comments: SavedObjectsFindResponse<CommentAttributes>
-): CommentsFindResponse => ({
+  comments: SavedObjectsFindResponse<AttachmentAttributes>
+): AttachmentsFindResponse => ({
   page: comments.page,
   per_page: comments.per_page,
   total: comments.total,
@@ -141,23 +144,23 @@ export const transformComments = (
 });
 
 export const flattenCommentSavedObjects = (
-  savedObjects: Array<SavedObject<CommentAttributes>>
-): Comment[] =>
-  savedObjects.reduce((acc: Comment[], savedObject: SavedObject<CommentAttributes>) => {
+  savedObjects: Array<SavedObject<AttachmentAttributes>>
+): Attachment[] =>
+  savedObjects.reduce((acc: Attachment[], savedObject: SavedObject<AttachmentAttributes>) => {
     acc.push(flattenCommentSavedObject(savedObject));
     return acc;
   }, []);
 
 export const flattenCommentSavedObject = (
-  savedObject: SavedObject<CommentAttributes>
-): Comment => ({
+  savedObject: SavedObject<AttachmentAttributes>
+): Attachment => ({
   id: savedObject.id,
   version: savedObject.version ?? '0',
   ...savedObject.attributes,
 });
 
 export const getIDsAndIndicesAsArrays = (
-  comment: CommentRequestAlertType
+  comment: AlertAttachmentPayload
 ): { ids: string[]; indices: string[] } => {
   return {
     ids: Array.isArray(comment.alertId) ? comment.alertId : [comment.alertId],
@@ -173,7 +176,7 @@ export const getIDsAndIndicesAsArrays = (
  *
  * To reformat the alert comment request requires a migration and a breaking API change.
  */
-const getAndValidateAlertInfoFromComment = (comment: CommentRequest): AlertInfo[] => {
+const getAndValidateAlertInfoFromComment = (comment: AttachmentRequest): AlertInfo[] => {
   if (!isCommentRequestTypeAlert(comment)) {
     return [];
   }
@@ -190,14 +193,14 @@ const getAndValidateAlertInfoFromComment = (comment: CommentRequest): AlertInfo[
 /**
  * Builds an AlertInfo object accumulating the alert IDs and indices for the passed in alerts.
  */
-export const getAlertInfoFromComments = (comments: CommentRequest[] = []): AlertInfo[] =>
+export const getAlertInfoFromComments = (comments: AttachmentRequest[] = []): AlertInfo[] =>
   comments.reduce((acc: AlertInfo[], comment) => {
     const alertInfo = getAndValidateAlertInfoFromComment(comment);
     acc.push(...alertInfo);
     return acc;
   }, []);
 
-type NewCommentArgs = CommentRequest & {
+type NewCommentArgs = AttachmentRequest & {
   createdDate: string;
   owner: string;
   email?: string | null;
@@ -214,7 +217,7 @@ export const transformNewComment = ({
   username,
   profile_uid: profileUid,
   ...comment
-}: NewCommentArgs): CommentAttributes => {
+}: NewCommentArgs): AttachmentAttributes => {
   return {
     ...comment,
     created_at: createdDate,
@@ -230,37 +233,48 @@ export const transformNewComment = ({
  * A type narrowing function for user comments.
  */
 export const isCommentRequestTypeUser = (
-  context: CommentRequest
-): context is CommentRequestUserType => {
-  return context.type === CommentType.user;
+  context: AttachmentRequest
+): context is UserCommentAttachmentPayload => {
+  return context.type === AttachmentType.user;
 };
 
 /**
  * A type narrowing function for actions comments.
  */
 export const isCommentRequestTypeActions = (
-  context: CommentRequest
-): context is CommentRequestActionsType => {
-  return context.type === CommentType.actions;
+  context: AttachmentRequest
+): context is ActionsAttachmentPayload => {
+  return context.type === AttachmentType.actions;
 };
 
 /**
  * A type narrowing function for alert comments.
  */
 export const isCommentRequestTypeAlert = (
-  context: CommentRequest
-): context is CommentRequestAlertType => {
-  return context.type === CommentType.alert;
+  context: AttachmentRequest
+): context is AlertAttachmentPayload => {
+  return context.type === AttachmentType.alert;
+};
+
+/**
+ * Returns true if a Comment Request is trying to create either a persistableState or an
+ * externalReference attachment.
+ */
+export const isPersistableStateOrExternalReference = (context: AttachmentRequest): boolean => {
+  return (
+    context.type === AttachmentType.persistableState ||
+    context.type === AttachmentType.externalReference
+  );
 };
 
 /**
  * A type narrowing function for file attachments.
  */
 export const isFileAttachmentRequest = (
-  context: Partial<CommentRequest>
+  context: Partial<AttachmentRequest>
 ): context is FileAttachmentRequest => {
   return (
-    ExternalReferenceSORt.is(context) &&
+    ExternalReferenceSOAttachmentPayloadRt.is(context) &&
     FileAttachmentMetadataRt.is(context.externalReferenceMetadata)
   );
 };
@@ -272,7 +286,7 @@ export function createAlertUpdateStatusRequest({
   comment,
   status,
 }: {
-  comment: CommentRequest;
+  comment: AttachmentRequest;
   status: CaseStatuses;
 }): UpdateAlertStatusRequest[] {
   return getAlertInfoFromComments([comment]).map((alert) => ({ ...alert, status }));
@@ -281,9 +295,9 @@ export function createAlertUpdateStatusRequest({
 /**
  * Counts the total alert IDs within a single comment.
  */
-export const countAlerts = (comment: SavedObjectsFindResult<CommentAttributes>) => {
+export const countAlerts = (comment: SavedObjectsFindResult<AttachmentAttributes>) => {
   let totalAlerts = 0;
-  if (comment.attributes.type === CommentType.alert) {
+  if (comment.attributes.type === AttachmentType.alert) {
     if (Array.isArray(comment.attributes.alertId)) {
       totalAlerts += comment.attributes.alertId.length;
     } else {
@@ -299,7 +313,7 @@ export const countAlerts = (comment: SavedObjectsFindResult<CommentAttributes>) 
 export const groupTotalAlertsByID = ({
   comments,
 }: {
-  comments: SavedObjectsFindResponse<CommentAttributes>;
+  comments: SavedObjectsFindResponse<AttachmentAttributes>;
 }): Map<string, number> => {
   return comments.saved_objects.reduce((acc, alertsInfo) => {
     const alertTotalForComment = countAlerts(alertsInfo);
@@ -326,7 +340,7 @@ export const countAlertsForID = ({
   comments,
   id,
 }: {
-  comments: SavedObjectsFindResponse<CommentAttributes>;
+  comments: SavedObjectsFindResponse<AttachmentAttributes>;
   id: string;
 }): number | undefined => {
   return groupTotalAlertsByID({ comments }).get(id);
@@ -371,7 +385,7 @@ export const extractLensReferencesFromCommentString = (
 export const getOrUpdateLensReferences = (
   lensEmbeddableFactory: LensServerPluginSetup['lensEmbeddableFactory'],
   newComment: string,
-  currentComment?: SavedObject<CommentRequestUserType>
+  currentComment?: SavedObject<UserCommentAttachmentPayload>
 ) => {
   if (!currentComment) {
     return extractLensReferencesFromCommentString(lensEmbeddableFactory, newComment);
@@ -459,3 +473,17 @@ export const getCaseViewPath = (params: {
 };
 
 export const isSOError = <T>(so: { error?: unknown }): so is SOWithErrors<T> => so.error != null;
+
+export const countUserAttachments = (
+  attachments: Array<SavedObject<AttachmentAttributes>>
+): number => {
+  let total = 0;
+
+  for (const attachment of attachments) {
+    if (attachment.attributes.type === AttachmentType.user) {
+      total += 1;
+    }
+  }
+
+  return total;
+};

@@ -33,9 +33,6 @@ describe('ensureSufficientLicense()', () => {
 
   it('allows licenses below gold for allowed connectors', () => {
     expect(() =>
-      ensureSufficientLicense({ ...sampleActionType, id: '.case', minimumLicenseRequired: 'basic' })
-    ).not.toThrow();
-    expect(() =>
       ensureSufficientLicense({
         ...sampleActionType,
         id: '.server-log',

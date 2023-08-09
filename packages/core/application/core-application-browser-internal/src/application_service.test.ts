@@ -10,17 +10,21 @@ import {
   MockCapabilitiesService,
   MockHistory,
   parseAppUrlMock,
+  getLocationObservableMock,
+  registerAnalyticsContextProviderMock,
 } from './application_service.test.mocks';
 
 import { createElement } from 'react';
 import { BehaviorSubject, firstValueFrom, Subject } from 'rxjs';
 import { bufferCount, takeUntil } from 'rxjs/operators';
 import { mount, shallow } from 'enzyme';
+import { createBrowserHistory } from 'history';
 
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 import { overlayServiceMock } from '@kbn/core-overlays-browser-mocks';
 import { customBrandingServiceMock } from '@kbn/core-custom-branding-browser-mocks';
+import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
 import { MockLifecycle } from './test_helpers/test_types';
 import { ApplicationService } from './application_service';
 import {
@@ -48,9 +52,12 @@ let service: ApplicationService;
 
 describe('#setup()', () => {
   beforeEach(() => {
+    jest.clearAllMocks();
     const http = httpServiceMock.createSetupContract({ basePath: '/base-path' });
+    const analytics = analyticsServiceMock.createAnalyticsServiceSetup();
     setupDeps = {
       http,
+      analytics,
       redirectTo: jest.fn(),
     };
     startDeps = {
@@ -469,13 +476,38 @@ describe('#setup()', () => {
       ]);
     });
   });
+
+  describe('analytics context provider', () => {
+    it('calls getLocationObservable with the correct parameters', () => {
+      const history = createBrowserHistory();
+      service.setup({ ...setupDeps, history });
+
+      expect(getLocationObservableMock).toHaveBeenCalledTimes(1);
+      expect(getLocationObservableMock).toHaveBeenCalledWith(window.location, history);
+    });
+
+    it('calls registerAnalyticsContextProvider with the correct parameters', () => {
+      const location$ = new Subject<string>();
+      getLocationObservableMock.mockReturnValue(location$);
+
+      service.setup(setupDeps);
+
+      expect(registerAnalyticsContextProviderMock).toHaveBeenCalledTimes(1);
+      expect(registerAnalyticsContextProviderMock).toHaveBeenCalledWith({
+        analytics: setupDeps.analytics,
+        location$,
+      });
+    });
+  });
 });
 
 describe('#start()', () => {
   beforeEach(() => {
     const http = httpServiceMock.createSetupContract({ basePath: '/base-path' });
+    const analytics = analyticsServiceMock.createAnalyticsServiceSetup();
     setupDeps = {
       http,
+      analytics,
       redirectTo: jest.fn(),
     };
     startDeps = {
@@ -1113,7 +1145,7 @@ describe('#start()', () => {
         removeListenerSpy = jest.spyOn(window, 'removeEventListener');
       });
       afterEach(() => {
-        jest.restoreAllMocks();
+        jest.clearAllMocks();
       });
 
       it('calls `navigateToApp` with `skipAppLeave` option', async () => {
@@ -1185,8 +1217,10 @@ describe('#stop()', () => {
 
     MockHistory.push.mockReset();
     const http = httpServiceMock.createSetupContract({ basePath: '/test' });
+    const analytics = analyticsServiceMock.createAnalyticsServiceSetup();
     setupDeps = {
       http,
+      analytics,
     };
     startDeps = {
       http,
@@ -1198,7 +1232,7 @@ describe('#stop()', () => {
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    jest.clearAllMocks();
   });
 
   it('removes the beforeunload listener', async () => {

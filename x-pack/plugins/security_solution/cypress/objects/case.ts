@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { CaseStatuses } from '@kbn/cases-components';
 import type { Case } from '@kbn/cases-plugin/common';
-import { CaseStatuses, CaseSeverity, ConnectorTypes } from '@kbn/cases-plugin/common';
+import { CaseSeverity, ConnectorTypes } from '@kbn/cases-plugin/common';
 import { flatten } from 'lodash';
 import type { CompleteTimeline } from './timeline';
 import { getTimeline } from './timeline';
@@ -92,6 +93,7 @@ export const getCaseResponse = (): Case => ({
   totalComment: 0,
   totalAlerts: 0,
   version: 'test-version',
+  category: null,
 });
 
 export const getServiceNowConnector = (): Connector => ({

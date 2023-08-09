@@ -24,13 +24,13 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { NavigationStorybookMock } from '../../mocks';
+import { NavigationStorybookMock, navLinksMock } from '../../mocks';
 import mdx from '../../README.mdx';
 import { NavigationProvider } from '../services';
 import { DefaultNavigation } from './default_navigation';
-import type { ChromeNavigationViewModel, NavigationServices } from '../../types';
+import type { NavigationServices } from '../../types';
 import { Navigation } from './components';
-import { ProjectNavigationDefinition } from './types';
+import type { NonEmptyArray, ProjectNavigationDefinition } from './types';
 import { getPresets } from './nav_tree_presets';
 
 const storybookMock = new NavigationStorybookMock();
@@ -115,7 +115,6 @@ const deepLinks: ChromeNavLink[] = [
 ];
 
 const simpleNavigationDefinition: ProjectNavigationDefinition = {
-  homeRef: 'https://elastic.co',
   projectNavigationTree: [
     {
       id: 'example_projet',
@@ -137,6 +136,15 @@ const simpleNavigationDefinition: ProjectNavigationDefinition = {
             {
               id: 'item3',
               title: 'Dashboards',
+            },
+            {
+              id: 'item4',
+              title: 'External link',
+              href: 'https://elastic.co',
+            },
+            {
+              id: 'item5',
+              title: 'Another link',
             },
           ],
         },
@@ -163,10 +171,10 @@ const simpleNavigationDefinition: ProjectNavigationDefinition = {
   ],
 };
 
-export const SimpleObjectDefinition = (args: ChromeNavigationViewModel & NavigationServices) => {
+export const SimpleObjectDefinition = (args: NavigationServices) => {
   const services = storybookMock.getServices({
     ...args,
-    navLinks$: of(deepLinks),
+    navLinks$: of([...navLinksMock, ...deepLinks]),
     onProjectNavigationChange: (updated) => {
       action('Update chrome navigation')(JSON.stringify(updated, null, 2));
     },
@@ -186,13 +194,8 @@ export const SimpleObjectDefinition = (args: ChromeNavigationViewModel & Navigat
 };
 
 const navigationDefinition: ProjectNavigationDefinition = {
-  homeRef: 'https://elastic.co',
   navigationTree: {
     body: [
-      {
-        type: 'cloudLink',
-        preset: 'deployments',
-      },
       // My custom project
       {
         type: 'navGroup',
@@ -252,9 +255,9 @@ const navigationDefinition: ProjectNavigationDefinition = {
           ...child,
           children: child.children?.filter((item) => {
             // Hide discover and dashboard
-            return item.id !== 'discover' && item.id !== 'dashboard';
+            return item.link !== 'discover' && item.link !== 'dashboards';
           }),
-        })),
+        })) as NonEmptyArray<any>,
       },
     ],
     footer: [
@@ -283,10 +286,10 @@ const navigationDefinition: ProjectNavigationDefinition = {
   },
 };
 
-export const ComplexObjectDefinition = (args: ChromeNavigationViewModel & NavigationServices) => {
+export const ComplexObjectDefinition = (args: NavigationServices) => {
   const services = storybookMock.getServices({
     ...args,
-    navLinks$: of(deepLinks),
+    navLinks$: of([...navLinksMock, ...deepLinks]),
     onProjectNavigationChange: (updated) => {
       action('Update chrome navigation')(JSON.stringify(updated, null, 2));
     },
@@ -305,10 +308,10 @@ export const ComplexObjectDefinition = (args: ChromeNavigationViewModel & Naviga
   );
 };
 
-export const WithUIComponents = (args: ChromeNavigationViewModel & NavigationServices) => {
+export const WithUIComponents = (args: NavigationServices) => {
   const services = storybookMock.getServices({
     ...args,
-    navLinks$: of(deepLinks),
+    navLinks$: of([...navLinksMock, ...deepLinks]),
     onProjectNavigationChange: (updated) => {
       action('Update chrome navigation')(JSON.stringify(updated, null, 2));
     },
@@ -321,9 +324,7 @@ export const WithUIComponents = (args: ChromeNavigationViewModel & NavigationSer
   return (
     <NavigationWrapper>
       <NavigationProvider {...services}>
-        <Navigation homeRef="/">
-          <Navigation.CloudLink preset="deployments" />
-
+        <Navigation>
           <Navigation.RecentlyAccessed />
 
           <Navigation.Group
@@ -333,19 +334,22 @@ export const WithUIComponents = (args: ChromeNavigationViewModel & NavigationSer
             defaultIsCollapsed={false}
           >
             <Navigation.Group id="root">
-              <Navigation.Item id="item1" link="item1" />
+              <Navigation.Item<any> id="item1" link="item1" />
               <Navigation.Item id="item2" title="Alerts">
                 {(navNode) => {
                   return (
-                    <EuiText size="s">{`Render prop: ${navNode.id} - ${navNode.title}`}</EuiText>
+                    <div className="euiSideNavItemButton">
+                      <EuiText size="s">{`Render prop: ${navNode.id} - ${navNode.title}`}</EuiText>
+                    </div>
                   );
                 }}
               </Navigation.Item>
               <Navigation.Item id="item3" title="Title in ReactNode">
-                <EuiText size="s">
+                <div className="euiSideNavItemButton">
                   <EuiLink>Title in ReactNode</EuiLink>
-                </EuiText>
+                </div>
               </Navigation.Item>
+              <Navigation.Item id="item4" title="External link" href="https://elastic.co" />
             </Navigation.Group>
 
             <Navigation.Group id="group:settings" title="Settings">
@@ -359,8 +363,20 @@ export const WithUIComponents = (args: ChromeNavigationViewModel & NavigationSer
           <Navigation.Group preset="ml" />
 
           <Navigation.Footer>
-            <Navigation.Group preset="devtools" />
-            <Navigation.Group preset="management" />
+            <Navigation.Group link="dev_tools" icon="editorCodeBlock" title="Developer tools" />
+            <Navigation.Group
+              id="project_settings_project_nav"
+              title="Project settings"
+              breadcrumbStatus="hidden"
+              icon="gear"
+            >
+              <Navigation.Group id="settings">
+                <Navigation.Item link="management" title="Management" />
+                <Navigation.Item id="cloudLinkUserAndRoles" cloudLink="userAndRoles" />
+                <Navigation.Item id="cloudLinkPerformance" cloudLink="performance" />
+                <Navigation.Item id="cloudLinkBilling" cloudLink="billingAndSub" />
+              </Navigation.Group>
+            </Navigation.Group>
           </Navigation.Footer>
         </Navigation>
       </NavigationProvider>
@@ -368,12 +384,10 @@ export const WithUIComponents = (args: ChromeNavigationViewModel & NavigationSer
   );
 };
 
-export const MinimalUIAndCustomCloudLink = (
-  args: ChromeNavigationViewModel & NavigationServices
-) => {
+export const MinimalUI = (args: NavigationServices) => {
   const services = storybookMock.getServices({
     ...args,
-    navLinks$: of(deepLinks),
+    navLinks$: of([...navLinksMock, ...deepLinks]),
     onProjectNavigationChange: (updated) => {
       action('Update chrome navigation')(JSON.stringify(updated, null, 2));
     },
@@ -386,13 +400,7 @@ export const MinimalUIAndCustomCloudLink = (
   return (
     <NavigationWrapper>
       <NavigationProvider {...services}>
-        <Navigation homeRef="/">
-          <Navigation.CloudLink
-            title="Some other cool page"
-            href="https://elastic.co"
-            icon="spaces"
-          />
-
+        <Navigation>
           <Navigation.RecentlyAccessed defaultIsCollapsed />
 
           <Navigation.Group
@@ -428,7 +436,7 @@ export const MinimalUIAndCustomCloudLink = (
 };
 
 export default {
-  title: 'Chrome/Navigation/v2',
+  title: 'Chrome/Navigation',
   description: 'Navigation container to render items for cross-app linking',
   parameters: {
     docs: {
@@ -438,10 +446,10 @@ export default {
   component: WithUIComponents,
 } as ComponentMeta<typeof WithUIComponents>;
 
-export const CreativeUI = (args: ChromeNavigationViewModel & NavigationServices) => {
+export const CreativeUI = (args: NavigationServices) => {
   const services = storybookMock.getServices({
     ...args,
-    navLinks$: of(deepLinks),
+    navLinks$: of([...navLinksMock, ...deepLinks]),
     onProjectNavigationChange: (updated) => {
       action('Update chrome navigation')(JSON.stringify(updated, null, 2));
     },
@@ -454,7 +462,7 @@ export const CreativeUI = (args: ChromeNavigationViewModel & NavigationServices)
   return (
     <NavigationWrapper>
       <NavigationProvider {...services}>
-        <Navigation homeRef="/" unstyled>
+        <Navigation unstyled>
           <EuiFlexGroup direction="column" css={{ backgroundColor: 'pink', height: '100%' }}>
             <EuiFlexItem grow>
               <EuiFlexGroup
@@ -538,8 +546,6 @@ export const CreativeUI = (args: ChromeNavigationViewModel & NavigationServices)
               </EuiFlexGroup>
             </EuiFlexItem>
           </EuiFlexGroup>
-
-          <Navigation.CloudLink preset="deployments" />
         </Navigation>
       </NavigationProvider>
     </NavigationWrapper>

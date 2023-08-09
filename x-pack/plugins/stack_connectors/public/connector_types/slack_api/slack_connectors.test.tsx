@@ -7,25 +7,51 @@
 
 import React from 'react';
 import { act, render, fireEvent, screen } from '@testing-library/react';
-import SlackActionFields from './slack_connectors';
+import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
+
 import { ConnectorFormTestProvider, waitForComponentToUpdate } from '../lib/test_utils';
+import SlackActionFields from './slack_connectors';
+import { useFetchChannels } from './use_fetch_channels';
 
 jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
+jest.mock('./use_fetch_channels');
+
+(useKibana as jest.Mock).mockImplementation(() => ({
+  services: {
+    docLinks: {
+      links: {
+        alerting: { slackApiAction: 'url' },
+      },
+    },
+    notifications: {
+      toasts: {
+        addSuccess: jest.fn(),
+        addDanger: jest.fn(),
+      },
+    },
+  },
+}));
+
+(useFetchChannels as jest.Mock).mockImplementation(() => ({
+  channels: [],
+  isLoading: false,
+}));
 
 describe('SlackActionFields renders', () => {
   const onSubmit = jest.fn();
   beforeEach(() => {
     jest.clearAllMocks();
   });
+
   it('all connector fields is rendered for web_api type', async () => {
     const actionConnector = {
       secrets: {
         token: 'some token',
       },
+      config: {},
       id: 'test',
       actionTypeId: '.slack',
       name: 'slack',
-      config: {},
       isDeprecated: false,
     };
 

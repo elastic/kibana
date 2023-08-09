@@ -52,6 +52,7 @@ import {
   PluginStartContract as FeaturesPluginStart,
   PluginSetupContract as FeaturesPluginSetup,
 } from '@kbn/features-plugin/server';
+import type { PluginSetup as UnifiedSearchServerPluginSetup } from '@kbn/unified-search-plugin/server';
 import { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import { MonitoringCollectionSetup } from '@kbn/monitoring-collection-plugin/server';
 import { SharePluginStart } from '@kbn/share-plugin/server';
@@ -143,6 +144,7 @@ export interface PluginStartContract {
   listTypes: RuleTypeRegistry['list'];
 
   getAllTypes: RuleTypeRegistry['getAllTypes'];
+  getType: RuleTypeRegistry['get'];
 
   getRulesClientWithRequest(request: KibanaRequest): RulesClientApi;
 
@@ -165,6 +167,7 @@ export interface AlertingPluginsSetup {
   monitoringCollection: MonitoringCollectionSetup;
   data: DataPluginSetup;
   features: FeaturesPluginSetup;
+  unifiedSearch: UnifiedSearchServerPluginSetup;
 }
 
 export interface AlertingPluginsStart {
@@ -343,6 +346,7 @@ export class AlertingPlugin {
       licenseState: this.licenseState,
       usageCounter: this.usageCounter,
       encryptedSavedObjects: plugins.encryptedSavedObjects,
+      config$: plugins.unifiedSearch.autocomplete.getInitializerContextConfig().create(),
     });
 
     return {
@@ -550,6 +554,7 @@ export class AlertingPlugin {
 
     return {
       listTypes: ruleTypeRegistry!.list.bind(this.ruleTypeRegistry!),
+      getType: ruleTypeRegistry!.get.bind(this.ruleTypeRegistry),
       getAllTypes: ruleTypeRegistry!.getAllTypes.bind(this.ruleTypeRegistry!),
       getAlertingAuthorizationWithRequest,
       getRulesClientWithRequest,

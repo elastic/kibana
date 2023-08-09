@@ -23,7 +23,6 @@ import { SOURCE_TYPES, VECTOR_SHAPE_TYPE } from '../../../../common/constants';
 import { getDataSourceLabel, getDataViewLabel } from '../../../../common/i18n_getters';
 import { convertToLines } from './convert_to_lines';
 import { AbstractESAggSource } from '../es_agg_source';
-import { registerSource } from '../source_registry';
 import { turfBboxToBounds } from '../../../../common/elasticsearch_util';
 import { DataRequestAbortError } from '../../util/data_request';
 import { mergeExecutionContext } from '../execution_context_utils';
@@ -94,6 +93,7 @@ export class ESPewPewSource extends AbstractESAggSource {
 
   getSyncMeta(dataFilters: DataFilters) {
     return {
+      ...super.getSyncMeta(dataFilters),
       geogridPrecision: this.getGeoGridPrecision(dataFilters.zoom),
     };
   }
@@ -304,8 +304,3 @@ export class ESPewPewSource extends AbstractESAggSource {
     return true;
   }
 }
-
-registerSource({
-  ConstructorFunction: ESPewPewSource,
-  type: SOURCE_TYPES.ES_PEW_PEW,
-});

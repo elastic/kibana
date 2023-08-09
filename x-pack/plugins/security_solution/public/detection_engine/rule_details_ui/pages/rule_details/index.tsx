@@ -10,21 +10,22 @@
 
 import {
   EuiButtonIcon,
-  EuiLoadingSpinner,
+  EuiConfirmModal,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLoadingSpinner,
   EuiSpacer,
   EuiToolTip,
   EuiWindowEvent,
 } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
 import { i18n as i18nTranslate } from '@kbn/i18n';
-import { Route } from '@kbn/shared-ux-router';
+import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { noop, omit } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Switch, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import type { ConnectedProps } from 'react-redux';
 import { connect, useDispatch } from 'react-redux';
 import styled from 'styled-components';
@@ -67,6 +68,7 @@ import { AlertsHistogramPanel } from '../../../../detections/components/alerts_k
 import { useUserData } from '../../../../detections/components/user_info';
 import { StepDefineRuleReadOnly } from '../../../../detections/components/rules/step_define_rule';
 import { StepScheduleRuleReadOnly } from '../../../../detections/components/rules/step_schedule_rule';
+import { StepRuleActionsReadOnly } from '../../../../detections/components/rules/step_rule_actions';
 import {
   buildAlertsFilter,
   buildAlertStatusFilter,
@@ -116,6 +118,7 @@ import { ExecutionLogTable } from './execution_log_table/execution_log_table';
 
 import * as detectionI18n from '../../../../detections/pages/detection_engine/translations';
 import * as ruleI18n from '../../../../detections/pages/detection_engine/rules/translations';
+
 import { RuleDetailsContextProvider } from './rule_details_context';
 import { useGetSavedQuery } from '../../../../detections/pages/detection_engine/rules/use_get_saved_query';
 import * as i18n from './translations';
@@ -124,7 +127,7 @@ import { MissingPrivilegesCallOut } from '../../../../detections/components/call
 import { useRuleWithFallback } from '../../../rule_management/logic/use_rule_with_fallback';
 import type { BadgeOptions } from '../../../../common/components/header_page/types';
 import type { AlertsStackByField } from '../../../../detections/components/alerts_kpis/common/types';
-import type { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
+import type { Status } from '../../../../../common/api/detection_engine';
 import { AlertsTableFilterGroup } from '../../../../detections/components/alerts_table/alerts_filter_group';
 import { useSignalHelpers } from '../../../../common/containers/sourcerer/use_signal_helpers';
 import { HeaderPage } from '../../../../common/components/header_page';
@@ -134,9 +137,11 @@ import { EditRuleSettingButtonLink } from '../../../../detections/pages/detectio
 import { useStartMlJobs } from '../../../rule_management/logic/use_start_ml_jobs';
 import { useBulkDuplicateExceptionsConfirmation } from '../../../rule_management_ui/components/rules_table/bulk_actions/use_bulk_duplicate_confirmation';
 import { BulkActionDuplicateExceptionsConfirmation } from '../../../rule_management_ui/components/rules_table/bulk_actions/bulk_duplicate_exceptions_confirmation';
+import { useAsyncConfirmation } from '../../../rule_management_ui/components/rules_table/rules_table/use_async_confirmation';
 import { RuleSnoozeBadge } from '../../../rule_management/components/rule_snooze_badge';
 import { useRuleIndexPattern } from '../../../rule_creation_ui/pages/form';
 import { DataSourceType } from '../../../../detections/pages/detection_engine/rules/types';
+import { useBoolState } from '../../../../common/hooks/use_bool_state';
 
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
@@ -290,7 +295,21 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
 
   const [pageTabs, setTabs] = useState<Partial<Record<RuleDetailTabs, NavTab>>>(ruleDetailTabs);
 
-  const { aboutRuleData, modifiedAboutRuleDetailsData, defineRuleData, scheduleRuleData } =
+  const [isDeleteConfirmationVisible, showDeleteConfirmation, hideDeleteConfirmation] =
+    useBoolState();
+
+  const [confirmDeletion, handleDeletionConfirm, handleDeletionCancel] = useAsyncConfirmation({
+    onInit: showDeleteConfirmation,
+    onFinish: hideDeleteConfirmation,
+  });
+
+  const {
+    aboutRuleData,
+    modifiedAboutRuleDetailsData,
+    defineRuleData,
+    scheduleRuleData,
+    ruleActionsData,
+  } =
     rule != null
       ? getStepsData({ rule, detailsView: true })
       : {
@@ -298,6 +317,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
           modifiedAboutRuleDetailsData: null,
           defineRuleData: null,
           scheduleRuleData: null,
+          ruleActionsData: null,
         };
   const [dataViewTitle, setDataViewTitle] = useState<string>();
   useEffect(() => {
@@ -604,6 +624,13 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     },
     [containerElement, onSkipFocusBeforeEventsTable, onSkipFocusAfterEventsTable]
   );
+  const currentAlertStatusFilterValue = useMemo(() => [filterGroup], [filterGroup]);
+  const updatedAtValue = useMemo(() => {
+    return timelinesUi.getLastUpdated({
+      updatedAt: updatedAt || Date.now(),
+      showUpdating,
+    });
+  }, [updatedAt, showUpdating, timelinesUi]);
 
   const renderGroupedAlertTable = useCallback(
     (groupingFilters: Filter[]) => {
@@ -644,6 +671,11 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
 
   const defaultRuleStackByOption: AlertsStackByField = 'event.category';
 
+  const hasNotificationActions = ruleActionsData != null && ruleActionsData.actions.length > 0;
+  const hasResponseActions =
+    ruleActionsData != null && (ruleActionsData.responseActions || []).length > 0;
+  const hasActions = hasNotificationActions || hasResponseActions;
+
   return (
     <>
       <NeedAdminForUpdateRulesCallOut />
@@ -654,6 +686,20 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
           onConfirm={confirmRuleDuplication}
           rulesCount={1}
         />
+      )}
+      {isDeleteConfirmationVisible && (
+        <EuiConfirmModal
+          title={ruleI18n.SINGLE_DELETE_CONFIRMATION_TITLE}
+          onCancel={handleDeletionCancel}
+          onConfirm={handleDeletionConfirm}
+          confirmButtonText={ruleI18n.DELETE_CONFIRMATION_CONFIRM}
+          cancelButtonText={ruleI18n.DELETE_CONFIRMATION_CANCEL}
+          buttonColor="danger"
+          defaultFocusedButton="confirm"
+          data-test-subj="deleteRulesConfirmationModal"
+        >
+          {i18n.DELETE_CONFIRMATION_BODY}
+        </EuiConfirmModal>
       )}
       <StyledFullHeightContainer onKeyDown={onKeyDown} ref={containerElement}>
         <EuiWindowEvent event="resize" handler={noop} />
@@ -740,6 +786,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                             hasActionsPrivileges
                           )}
                           showBulkDuplicateExceptionsConfirmation={showBulkDuplicateConfirmation}
+                          confirmDeletion={confirmDeletion}
                         />
                       </EuiFlexItem>
                     </EuiFlexGroup>
@@ -791,6 +838,16 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                         )}
                       </StepPanel>
                     </EuiFlexItem>
+                    {hasActions && (
+                      <EuiFlexItem data-test-subj="actions" component="section" grow={1}>
+                        <StepPanel loading={isLoading} title={ruleI18n.ACTIONS}>
+                          <StepRuleActionsReadOnly
+                            addPadding={false}
+                            defaultValues={ruleActionsData}
+                          />
+                        </StepPanel>
+                      </EuiFlexItem>
+                    )}
                   </EuiFlexGroup>
                 </EuiFlexItem>
               </EuiFlexGroup>
@@ -799,7 +856,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
               <EuiSpacer />
             </Display>
             <StyledMinHeightTabContainer>
-              <Switch>
+              <Routes>
                 <Route path={`/rules/id/:detailName/:tabName(${RuleDetailTabs.alerts})`}>
                   <>
                     <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
@@ -809,13 +866,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                           onFilterGroupChanged={onFilterGroupChangedCallback}
                         />
                       </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        {updatedAt &&
-                          timelinesUi.getLastUpdated({
-                            updatedAt: updatedAt || Date.now(),
-                            showUpdating,
-                          })}
-                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>{updatedAtValue}</EuiFlexItem>
                     </EuiFlexGroup>
                     <EuiSpacer size="l" />
                     <Display show={!globalFullScreen}>
@@ -831,7 +882,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                     </Display>
                     {ruleId != null && (
                       <GroupedAlertsTable
-                        currentAlertStatusFilterValue={[filterGroup]}
+                        currentAlertStatusFilterValue={currentAlertStatusFilterValue}
                         defaultFilters={alertMergedFilters}
                         from={from}
                         globalFilters={filters}
@@ -877,7 +928,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                 <Route path={`/rules/id/:detailName/:tabName(${RuleDetailTabs.executionEvents})`}>
                   <ExecutionEventsTable ruleId={ruleId} />
                 </Route>
-              </Switch>
+              </Routes>
             </StyledMinHeightTabContainer>
           </SecuritySolutionPageWrapper>
         </RuleDetailsContextProvider>

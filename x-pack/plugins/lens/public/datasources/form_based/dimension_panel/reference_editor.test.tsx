@@ -28,7 +28,7 @@ import {
 import { FieldSelect } from './field_select';
 import { FormBasedLayer } from '../types';
 
-jest.mock('@kbn/unified-field-list-plugin/public/hooks/use_existing_fields', () => ({
+jest.mock('@kbn/unified-field-list/src/hooks/use_existing_fields', () => ({
   useExistingFieldsReader: jest.fn(() => {
     return {
       hasFieldData: (dataViewId: string, fieldName: string) => {

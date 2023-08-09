@@ -16,4 +16,5 @@ export interface StartRuntimeServicesOptions {
   version?: string;
   policy?: string;
   log?: ToolingLog;
+  asSuperuser?: boolean;
 }

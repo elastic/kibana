@@ -222,7 +222,7 @@ exports[`ScreenReaderRouteAnnouncements renders 1`] = `
             Object {
               "insert": [Function],
               "inserted": Object {
-                "hus3oj-euiScreenReaderOnly": true,
+                "1w7kmys-euiScreenReaderOnly": true,
               },
               "key": "css",
               "nonce": undefined,
@@ -266,26 +266,26 @@ exports[`ScreenReaderRouteAnnouncements renders 1`] = `
           serialized={
             Object {
               "map": undefined,
-              "name": "hus3oj-euiScreenReaderOnly",
+              "name": "1w7kmys-euiScreenReaderOnly",
               "next": undefined,
               "styles": ";
-  // Take the element out of the layout
+  /* Take the element out of the layout */
   position: absolute;
-  // Keep it vertically inline
+  /* Keep it vertically inline */
   inset-block-start: auto;
-  // Chrome requires a left value, and Selenium (used by Kibana's FTR) requires an off-screen position for its .getVisibleText() to not register SR-only text
+  /* Chrome requires a left value, and Selenium (used by Kibana's FTR) requires an off-screen position for its .getVisibleText() to not register SR-only text */
   inset-inline-start: -10000px;
-  // The element must have a size (for some screen readers)
+  /* The element must have a size (for some screen readers) */
   
     inline-size: 1px;
     block-size: 1px;
   
-  // But reduce the visible size to nothing
+  /* But reduce the visible size to nothing */
   clip: rect(0 0 0 0);
   clip-path: inset(50%);
-  // And ensure no overflows occur
+  /* And ensure no overflows occur */
   overflow: hidden;
-  // Chrome requires the negative margin to not cause overflows of parent containers
+  /* Chrome requires the negative margin to not cause overflows of parent containers */
   margin: -1px;
 ;label:euiScreenReaderOnly;;;;",
               "toString": [Function],
@@ -318,7 +318,7 @@ exports[`ScreenReaderRouteAnnouncements renders 1`] = `
 
 exports[`SkipToMainContent renders 1`] = `
 <button
-  class="euiSkipLink emotion-euiButtonDisplay-s-defaultMinWidth-s-fill-primary-euiSkipLink-fixed-euiScreenReaderOnly"
+  class="euiButton euiSkipLink emotion-euiButtonDisplay-s-defaultMinWidth-fill-primary-euiSkipLink-fixed-euiScreenReaderOnly"
   tabindex="0"
   type="button"
 >

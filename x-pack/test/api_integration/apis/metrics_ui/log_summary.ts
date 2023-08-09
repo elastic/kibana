@@ -19,7 +19,7 @@ import {
   LOG_ENTRIES_SUMMARY_PATH,
   logEntriesSummaryRequestRT,
   logEntriesSummaryResponseRT,
-} from '@kbn/infra-plugin/common/http_api';
+} from '@kbn/logs-shared-plugin/common';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 

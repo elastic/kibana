@@ -1,0 +1,22 @@
+{
+  "indices.delete_data_lifecycle": {
+    "url_params": {
+      "expand_wildcards": [
+        "open",
+        "closed",
+        "hidden",
+        "none",
+        "all"
+      ],
+      "timeout": "",
+      "master_timeout": ""
+    },
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "_data_stream/{name}/_lifecycle"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/data-streams-delete-lifecycle.html"
+  }
+}

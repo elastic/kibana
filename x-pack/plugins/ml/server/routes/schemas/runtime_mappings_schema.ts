@@ -9,6 +9,10 @@ import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import { isRuntimeField } from '@kbn/ml-runtime-field-utils';
 
+/**
+ * Schema for validating a runtime field
+ */
+
 export const runtimeMappingsSchema = schema.object(
   {},
   {

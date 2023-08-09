@@ -10,7 +10,7 @@ import { useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 
-import { paths } from '../../config/paths';
+import { paths } from '../../../common/locators/paths';
 import { useKibana } from '../../utils/kibana_react';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useFetchSloDetails } from '../../hooks/slo/use_fetch_slo_details';
@@ -30,20 +30,35 @@ export function SloEditPage() {
   const { ObservabilityPageTemplate } = usePluginContext();
 
   const { sloId } = useParams<{ sloId: string | undefined }>();
-
   const { hasAtLeast } = useLicense();
   const hasRightLicense = hasAtLeast('platinum');
+  const { slo, isInitialLoading } = useFetchSloDetails({ sloId });
 
   useBreadcrumbs([
     {
       href: basePath.prepend(paths.observability.slos),
-      text: i18n.translate('xpack.observability.breadcrumbs.sloEditLinkText', {
+      text: i18n.translate('xpack.observability.breadcrumbs.sloLabel', {
         defaultMessage: 'SLOs',
       }),
     },
+    ...(!!slo
+      ? [
+          {
+            href: basePath.prepend(paths.observability.sloDetails(slo!.id)),
+            text: slo!.name,
+          },
+        ]
+      : []),
+    {
+      text: slo
+        ? i18n.translate('xpack.observability.breadcrumbs.sloEditLabel', {
+            defaultMessage: 'Edit',
+          })
+        : i18n.translate('xpack.observability.breadcrumbs.sloCreateLabel', {
+            defaultMessage: 'Create',
+          }),
+    },
   ]);
-
-  const { slo, isInitialLoading } = useFetchSloDetails({ sloId });
 
   if (hasRightLicense === false || !hasWriteCapabilities || hasErrorInGlobalDiagnosis) {
     navigateToUrl(basePath.prepend(paths.observability.slos));

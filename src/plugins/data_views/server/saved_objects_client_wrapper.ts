@@ -9,7 +9,7 @@
 import { SavedObjectsClientContract, SavedObject } from '@kbn/core/server';
 import {
   DataViewAttributes,
-  SavedObjectsClientCommon,
+  PersistenceAPI,
   SavedObjectsClientCommonFindArgs,
 } from '../common/types';
 import { DataViewSavedObjectConflictError } from '../common/errors';
@@ -17,7 +17,7 @@ import { DataViewSavedObjectConflictError } from '../common/errors';
 import type { DataViewCrudTypes } from '../common/content_management';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '../common';
 
-export class SavedObjectsClientServerToCommon implements SavedObjectsClientCommon {
+export class SavedObjectsClientWrapper implements PersistenceAPI {
   private savedObjectClient: SavedObjectsClientContract;
   constructor(savedObjectClient: SavedObjectsClientContract) {
     this.savedObjectClient = savedObjectClient;

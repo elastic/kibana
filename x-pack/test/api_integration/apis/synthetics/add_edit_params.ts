@@ -4,12 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { v4 as uuidv4 } from 'uuid';
+import { pick } from 'lodash';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import expect from '@kbn/expect';
 import { syntheticsParamType } from '@kbn/synthetics-plugin/common/types/saved_objects';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { PrivateLocationTestService } from './services/private_location_test_service';
+
+function assertHas(actual: unknown, expected: object) {
+  expect(pick(actual, Object.keys(expected))).eql(expected);
+}
 
 export default function ({ getService }: FtrProviderContext) {
   describe('AddEditParams', function () {
@@ -40,7 +46,7 @@ export default function ({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'true')
         .expect(200);
 
-      expect(getResponse.body.data[0].attributes).eql(testParam);
+      assertHas(getResponse.body[0], testParam);
     });
 
     it('handles tags and description', async () => {
@@ -63,11 +69,11 @@ export default function ({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'true')
         .expect(200);
 
-      expect(getResponse.body.data[0].attributes).eql(testParam2);
+      assertHas(getResponse.body[0], testParam2);
     });
 
     it('handles editing a param', async () => {
-      const updatedParam = {
+      const expectedUpdatedParam = {
         key: 'testUpdated',
         value: 'testUpdated',
         tags: ['a tag'],
@@ -84,21 +90,21 @@ export default function ({ getService }: FtrProviderContext) {
         .get(SYNTHETICS_API_URLS.PARAMS)
         .set('kbn-xsrf', 'true')
         .expect(200);
-      const param = getResponse.body.data[0];
-      expect(param.attributes).eql(testParam);
+      const param = getResponse.body[0];
+      assertHas(param, testParam);
 
       await supertestAPI
         .put(SYNTHETICS_API_URLS.PARAMS)
         .set('kbn-xsrf', 'true')
-        .send({ ...updatedParam, id: param.id })
+        .send({ ...expectedUpdatedParam, id: param.id })
         .expect(200);
 
       const updatedGetResponse = await supertestAPI
         .get(SYNTHETICS_API_URLS.PARAMS)
         .set('kbn-xsrf', 'true')
         .expect(200);
-      const updatedParamSO = updatedGetResponse.body.data[0];
-      expect(updatedParamSO.attributes).eql(updatedParam);
+      const actualUpdatedParam = updatedGetResponse.body[0];
+      assertHas(actualUpdatedParam, expectedUpdatedParam);
     });
 
     it('handles spaces', async () => {
@@ -118,8 +124,8 @@ export default function ({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'true')
         .expect(200);
 
-      expect(getResponse.body.data[0].namespaces).eql([SPACE_ID]);
-      expect(getResponse.body.data[0].attributes).eql(testParam);
+      expect(getResponse.body[0].namespaces).eql([SPACE_ID]);
+      assertHas(getResponse.body[0], testParam);
     });
 
     it('handles editing a param in spaces', async () => {
@@ -128,7 +134,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       await kServer.spaces.create({ id: SPACE_ID, name: SPACE_NAME });
 
-      const updatedParam = {
+      const expectedUpdatedParam = {
         key: 'testUpdated',
         value: 'testUpdated',
         tags: ['a tag'],
@@ -145,21 +151,21 @@ export default function ({ getService }: FtrProviderContext) {
         .get(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.PARAMS}`)
         .set('kbn-xsrf', 'true')
         .expect(200);
-      const param = getResponse.body.data[0];
-      expect(param.attributes).eql(testParam);
+      const param = getResponse.body[0];
+      assertHas(param, testParam);
 
       await supertestAPI
         .put(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.PARAMS}`)
         .set('kbn-xsrf', 'true')
-        .send({ ...updatedParam, id: param.id })
+        .send({ ...expectedUpdatedParam, id: param.id })
         .expect(200);
 
       const updatedGetResponse = await supertestAPI
         .get(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.PARAMS}`)
         .set('kbn-xsrf', 'true')
         .expect(200);
-      const updatedParamSO = updatedGetResponse.body.data[0];
-      expect(updatedParamSO.attributes).eql(updatedParam);
+      const actualUpdatedParam = updatedGetResponse.body[0];
+      assertHas(actualUpdatedParam, expectedUpdatedParam);
     });
 
     it('does not allow editing a param in created in one space in a different space', async () => {
@@ -188,8 +194,8 @@ export default function ({ getService }: FtrProviderContext) {
         .get(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.PARAMS}`)
         .set('kbn-xsrf', 'true')
         .expect(200);
-      const param = getResponse.body.data[0];
-      expect(param.attributes).eql(testParam);
+      const param = getResponse.body[0];
+      assertHas(param, testParam);
 
       // space does exist so get request should be 200
       await supertestAPI
@@ -207,8 +213,8 @@ export default function ({ getService }: FtrProviderContext) {
         .get(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.PARAMS}`)
         .set('kbn-xsrf', 'true')
         .expect(200);
-      const updatedParamSO = updatedGetResponse.body.data[0];
-      expect(updatedParamSO.attributes).eql(testParam);
+      const actualUpdatedParam = updatedGetResponse.body[0];
+      assertHas(actualUpdatedParam, testParam);
     });
 
     it('handles invalid spaces', async () => {
@@ -241,8 +247,8 @@ export default function ({ getService }: FtrProviderContext) {
         .get(SYNTHETICS_API_URLS.PARAMS)
         .set('kbn-xsrf', 'true')
         .expect(200);
-      const param = getResponse.body.data[0];
-      expect(param.attributes).eql(testParam);
+      const param = getResponse.body[0];
+      assertHas(param, testParam);
 
       await supertestAPI
         .put(`/s/doesnotexist${SYNTHETICS_API_URLS.PARAMS}`)
@@ -268,8 +274,8 @@ export default function ({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'true')
         .expect(200);
 
-      expect(getResponse.body.data[0].namespaces).eql(['*']);
-      expect(getResponse.body.data[0].attributes).eql(testParam);
+      expect(getResponse.body[0].namespaces).eql(['*']);
+      assertHas(getResponse.body[0], testParam);
     });
   });
 }

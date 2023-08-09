@@ -400,13 +400,6 @@ export const BULK_EDIT_FLYOUT_FORM_DELETE_TAGS_TITLE = i18n.translate(
   }
 );
 
-export const BATCH_ACTION_DELETE_SELECTED_IMMUTABLE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.batchActions.deleteSelectedImmutableTitle',
-  {
-    defaultMessage: 'Selection contains immutable rules which cannot be deleted',
-  }
-);
-
 export const EXPORT_FILENAME = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.exportFilenameTitle',
   {
@@ -672,6 +665,13 @@ export const NO_TAGS_AVAILABLE = i18n.translate(
   }
 );
 
+export const RULE_EXECTION_STATUS_FILTER = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.filters.ruleExecutionStatusFilter',
+  {
+    defaultMessage: 'Select rule execution status to filter by',
+  }
+);
+
 export const NO_RULES = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.filters.noRulesTitle',
   {
@@ -683,6 +683,33 @@ export const NO_RULES_BODY = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.filters.noRulesBodyTitle',
   {
     defaultMessage: "We weren't able to find any rules with the above filters.",
+  }
+);
+
+export const NO_RULES_AVAILABLE_FOR_INSTALL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.addRules.noRulesTitle',
+  {
+    defaultMessage: 'All Elastic rules have been installed',
+  }
+);
+
+export const NO_RULES_AVAILABLE_FOR_INSTALL_BODY = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.addRules.noRulesBodyTitle',
+  {
+    defaultMessage: 'There are no prebuilt detection rules available for installation',
+  }
+);
+export const NO_RULES_AVAILABLE_FOR_UPGRADE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.upgradeRules.noRulesTitle',
+  {
+    defaultMessage: 'All Elastic rules are up to date',
+  }
+);
+
+export const NO_RULES_AVAILABLE_FOR_UPGRADE_BODY = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.upgradeRules.noRulesBodyTitle',
+  {
+    defaultMessage: 'There are currently no available updates to your installed Elastic rules.',
   }
 );
 
@@ -824,17 +851,24 @@ export const IMPORT_FAILED_DETAILED = (message: string) =>
     }
   );
 
-export const DELETE_CONFIRMATION_TITLE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.components.allRules.deleteConfirmationTitle',
+export const BULK_DELETE_CONFIRMATION_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.allRules.bulkDeleteConfirmationTitle',
   {
     defaultMessage: 'Confirm bulk deletion',
+  }
+);
+
+export const SINGLE_DELETE_CONFIRMATION_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.allRules.singleDeleteConfirmationTitle',
+  {
+    defaultMessage: 'Confirm deletion',
   }
 );
 
 export const DELETE_CONFIRMATION_CONFIRM = i18n.translate(
   'xpack.securitySolution.detectionEngine.components.allRules.deleteConfirmationConfirm',
   {
-    defaultMessage: 'Confirm',
+    defaultMessage: 'Delete',
   }
 );
 
@@ -842,14 +876,6 @@ export const DELETE_CONFIRMATION_CANCEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.components.allRules.deleteConfirmationCancel',
   {
     defaultMessage: 'Cancel',
-  }
-);
-
-export const DELETE_CONFIRMATION_BODY = i18n.translate(
-  'xpack.securitySolution.detectionEngine.components.allRules.deleteConfirmationBody',
-  {
-    defaultMessage:
-      'This action will delete all rules that match current filter query. Click "Confirm" to continue.',
   }
 );
 
@@ -1120,13 +1146,6 @@ export const RULES_BULK_EDIT_FAILURE_DESCRIPTION = (
     }
   );
 
-export const RULE_PREVIEW_TITLE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.rulePreviewTitle',
-  {
-    defaultMessage: 'Rule preview',
-  }
-);
-
 export const CANCEL_BUTTON_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.cancelButtonLabel',
   {
@@ -1168,5 +1187,33 @@ export const RULE_MANAGEMENT_CONTEXT_TOOLTIP = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleManagement.ruleManagementContextTooltip',
   {
     defaultMessage: 'Add this alert as context',
+  }
+);
+
+export const INSTALL_RULE_BUTTON = i18n.translate(
+  'xpack.securitySolution.addRules.installRuleButton',
+  {
+    defaultMessage: 'Install rule',
+  }
+);
+
+export const UPDATE_RULE_BUTTON = i18n.translate(
+  'xpack.securitySolution.addRules.upgradeRuleButton',
+  {
+    defaultMessage: 'Update rule',
+  }
+);
+
+export const GO_BACK_TO_RULES_TABLE_BUTTON = i18n.translate(
+  'xpack.securitySolution.addRules.goBackToRulesTableButton',
+  {
+    defaultMessage: 'Go back to installed Elastic rules',
+  }
+);
+
+export const RULE_UPDATES_DOCUMENTATION_LINK = i18n.translate(
+  'xpack.securitySolution.ruleUpdates.documentationLink',
+  {
+    defaultMessage: "See what's new in Prebuilt Security Detection Rules",
   }
 );

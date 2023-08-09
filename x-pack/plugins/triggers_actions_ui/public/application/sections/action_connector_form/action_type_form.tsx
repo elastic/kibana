@@ -8,6 +8,7 @@
 import React, { Suspense, useEffect, useState, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { ValidFeatureId, AlertConsumers } from '@kbn/rule-data-utils';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -62,6 +63,7 @@ import { ActionNotifyWhen } from './action_notify_when';
 import { validateParamsForWarnings } from '../../lib/validate_params_for_warnings';
 import { ActionAlertsFilterTimeframe } from './action_alerts_filter_timeframe';
 import { ActionAlertsFilterQuery } from './action_alerts_filter_query';
+import { validateActionFilterQuery } from '../../lib/value_validators';
 
 export type ActionTypeFormProps = {
   actionItem: RuleAction;
@@ -83,11 +85,15 @@ export type ActionTypeFormProps = {
   recoveryActionGroup?: string;
   isActionGroupDisabledForActionType?: (actionGroupId: string, actionTypeId: string) => boolean;
   hideNotifyWhen?: boolean;
-  hasSummary?: boolean;
+  hasAlertsMappings?: boolean;
   minimumThrottleInterval?: [number | undefined, string];
   notifyWhenSelectOptions?: NotifyWhenSelectOptions[];
   defaultNotifyWhenValue?: RuleNotifyWhenType;
-  showActionAlertsFilter?: boolean;
+  featureId: string;
+  producerId: string;
+  ruleTypeId?: string;
+  hasFieldsForAAD?: boolean;
+  disableErrorMessages?: boolean;
 } & Pick<
   ActionAccordionFormProps,
   | 'defaultActionGroupId'
@@ -130,11 +136,15 @@ export const ActionTypeForm = ({
   recoveryActionGroup,
   hideNotifyWhen = false,
   defaultSummaryMessage,
-  hasSummary,
+  hasAlertsMappings,
   minimumThrottleInterval,
   notifyWhenSelectOptions,
   defaultNotifyWhenValue,
-  showActionAlertsFilter,
+  producerId,
+  featureId,
+  ruleTypeId,
+  hasFieldsForAAD,
+  disableErrorMessages,
 }: ActionTypeFormProps) => {
   const {
     application: { capabilities },
@@ -240,13 +250,28 @@ export const ActionTypeForm = ({
 
   useEffect(() => {
     (async () => {
+      if (disableErrorMessages) {
+        setActionParamsErrors({ errors: {} });
+        return;
+      }
       const res: { errors: IErrorObject } = await actionTypeRegistry
         .get(actionItem.actionTypeId)
         ?.validateParams(actionItem.params);
       setActionParamsErrors(res);
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [actionItem]);
+  }, [actionItem, disableErrorMessages]);
+
+  const [queryError, setQueryError] = useState<string | null>(null);
+  useEffect(() => {
+    (async () => {
+      if (disableErrorMessages) {
+        setQueryError(null);
+        return;
+      }
+      setQueryError(validateActionFilterQuery(actionItem));
+    })();
+  }, [actionItem, disableErrorMessages]);
 
   const canSave = hasSaveActionsCapability(capabilities);
 
@@ -277,7 +302,7 @@ export const ActionTypeForm = ({
       frequency={actionItem.frequency}
       throttle={actionThrottle}
       throttleUnit={actionThrottleUnit}
-      hasSummary={hasSummary}
+      hasAlertsMappings={hasAlertsMappings}
       onNotifyWhenChange={useCallback(
         (notifyWhen) => {
           setActionFrequencyProperty('notifyWhen', notifyWhen, index);
@@ -332,6 +357,8 @@ export const ActionTypeForm = ({
     selectedActionGroup &&
     setActionGroupIdByIndex &&
     !actionItem.frequency?.summary;
+
+  const showActionAlertsFilter = hasFieldsForAAD || producerId === AlertConsumers.SIEM;
 
   const accordionContent = checkEnabledResult.isEnabled ? (
     <>
@@ -415,10 +442,15 @@ export const ActionTypeForm = ({
         {showActionAlertsFilter && (
           <>
             {!hideNotifyWhen && <EuiSpacer size="xl" />}
-            <ActionAlertsFilterQuery
-              state={actionItem.alertsFilter?.query}
-              onChange={(query) => setActionAlertsFilterProperty('query', query, index)}
-            />
+            <EuiFormRow error={queryError} isInvalid={!!queryError} fullWidth>
+              <ActionAlertsFilterQuery
+                state={actionItem.alertsFilter?.query}
+                onChange={(query) => setActionAlertsFilterProperty('query', query, index)}
+                featureIds={[producerId as ValidFeatureId]}
+                appName={featureId!}
+                ruleTypeId={ruleTypeId}
+              />
+            </EuiFormRow>
             <EuiSpacer size="s" />
             <ActionAlertsFilterTimeframe
               state={actionItem.alertsFilter?.timeframe}

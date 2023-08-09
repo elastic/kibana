@@ -21,7 +21,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { useDispatch } from 'react-redux';
 
 import type { BrowserFields } from '../../../../common/containers/source';
-import { TimelineType } from '../../../../../common/types/timeline';
+import { TimelineType } from '../../../../../common/api/timeline';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { StatefulEditDataProvider } from '../../edit_data_provider';
 import { addContentToTimeline, getDisplayValue } from './helpers';

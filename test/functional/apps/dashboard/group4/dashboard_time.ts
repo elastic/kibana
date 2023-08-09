@@ -14,6 +14,7 @@ const dashboardName = 'Dashboard Test Time';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'timePicker']);
+  const pieChart = getService('pieChart');
   const browser = getService('browser');
 
   describe('dashboard time', () => {
@@ -81,6 +82,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const time = await PageObjects.timePicker.getTimeConfig();
         expect(time.start).to.equal('~ an hour ago');
         expect(time.end).to.equal('now');
+
+        /**
+         * With the time range set to an hour ago until now there should be no data. This ensures that the URL time
+         * range and NOT the saved time range was properly set on the Dashboard and passed down to its children.
+         */
+        await pieChart.expectEmptyPieChart();
       });
 
       it('should use saved time, if time is missing in global state, but _g is present in the url', async function () {
@@ -92,6 +99,30 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         const urlWithGlobalTime = `${kibanaBaseUrl}#/view/${id}?_g=(filters:!())`;
         await browser.get(urlWithGlobalTime, false);
+        const time = await PageObjects.timePicker.getTimeConfig();
+        expect(time.start).to.equal(PageObjects.timePicker.defaultStartTime);
+        expect(time.end).to.equal(PageObjects.timePicker.defaultEndTime);
+      });
+
+      it('should use saved time after time change is undone', async function () {
+        const currentUrl = await browser.getCurrentUrl();
+        const kibanaBaseUrl = currentUrl.substring(0, currentUrl.indexOf('#'));
+        const id = await PageObjects.dashboard.getDashboardIdFromCurrentUrl();
+
+        await PageObjects.dashboard.gotoDashboardLandingPage();
+
+        const urlWithGlobalTime = `${kibanaBaseUrl}#/view/${id}?_g=(filters:!())`;
+        await browser.get(urlWithGlobalTime, false);
+
+        // set the time to something else
+        await PageObjects.timePicker.setAbsoluteRange(
+          'Jan 1, 2019 @ 00:00:00.000',
+          'Jan 2, 2019 @ 00:00:00.000'
+        );
+        await PageObjects.dashboard.waitForRenderComplete();
+        await browser.goBack();
+
+        // time should have restored to the saved time range.
         const time = await PageObjects.timePicker.getTimeConfig();
         expect(time.start).to.equal(PageObjects.timePicker.defaultStartTime);
         expect(time.end).to.equal(PageObjects.timePicker.defaultEndTime);

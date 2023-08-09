@@ -20,7 +20,7 @@ import type {
 
 import type { ExceptionListSchema, ListArray } from '@kbn/securitysolution-io-ts-list-types';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
-import type { ExceptionListRuleReferencesSchema } from '../../../../../../common/detection_engine/rule_exceptions';
+import type { ExceptionListRuleReferencesSchema } from '../../../../../../common/api/detection_engine/rule_exceptions';
 import { getExceptionItemsReferences } from '../../../../../exceptions/api';
 import * as i18n from './translations';
 import * as commoni18n from '../translations';

@@ -23,21 +23,27 @@ describe('utils', () => {
 
   describe('hasInput', () => {
     it('return true if it has correct input', () => {
-      const embeddable = { getInput: () => ({ attributes: {}, timeRange: {} }) };
+      const embeddable = {
+        getInput: () => ({ timeRange: {} }),
+        getFullAttributes: jest.fn().mockReturnValue({}),
+      };
 
       // @ts-expect-error: extra attributes are not needed
       expect(hasInput(embeddable)).toBe(true);
     });
 
     it('return false if attributes are null', () => {
-      const embeddable = { getInput: () => ({ attributes: null, timeRange: {} }) };
+      const embeddable = {
+        getInput: () => ({ timeRange: {} }),
+        getFullAttributes: jest.fn().mockReturnValue(null),
+      };
 
       // @ts-expect-error: extra attributes are not needed
       expect(hasInput(embeddable)).toBe(false);
     });
 
     it('return false if timeRange is null', () => {
-      const embeddable = { getInput: () => ({ attributes: {}, timeRange: null }) };
+      const embeddable = { getInput: () => ({ timeRange: null }), getFullAttributes: () => ({}) };
 
       // @ts-expect-error: extra attributes are not needed
       expect(hasInput(embeddable)).toBe(false);
@@ -51,8 +57,12 @@ describe('utils', () => {
       // @ts-expect-error: extra attributes are not needed
       expect(getLensCaseAttachment(embeddable)).toMatchInlineSnapshot(`
         Object {
-          "comment": "!{lens{\\"timeRange\\":{},\\"attributes\\":{}}}",
-          "type": "user",
+          "persistableStateAttachmentState": Object {
+            "attributes": Object {},
+            "timeRange": Object {},
+          },
+          "persistableStateAttachmentTypeId": ".lens",
+          "type": "persistableState",
         }
       `);
     });

@@ -30,6 +30,7 @@ export async function getMatchingIndices({
   http: HttpSetup;
 }): Promise<Record<string, any>> {
   try {
+    // prepend and append index search requests with `*` to match the given text in middle of index names
     const formattedPattern = formatPattern(pattern);
 
     const { indices } = await http.post<ReturnType<typeof getMatchingIndices>>(

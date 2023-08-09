@@ -159,8 +159,9 @@ journey(`PrivateLocationsSettings`, async ({ page, params }) => {
   step('viewer user cannot add locations', async () => {
     await syntheticsApp.navigateToSettings(false);
     await page.click('text=Private Locations');
+    await page.hover(byTestId('syntheticsEmptyLocationsButton'), { force: true });
     await page.waitForSelector(
-      `text="You're missing some Kibana privileges to manage private locations"`
+      `text="You do not have sufficient permissions to perform this action."`
     );
     const createLocationBtn = await page.getByRole('button', { name: 'Create location' });
     expect(await createLocationBtn.getAttribute('disabled')).toEqual('');

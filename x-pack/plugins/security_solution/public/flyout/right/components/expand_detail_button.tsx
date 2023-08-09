@@ -7,7 +7,7 @@
 
 import { EuiButtonEmpty } from '@elastic/eui';
 import type { FC } from 'react';
-import React, { memo } from 'react';
+import React, { memo, useCallback } from 'react';
 import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
 import { COLLAPSE_DETAILS_BUTTON_TEST_ID, EXPAND_DETAILS_BUTTON_TEST_ID } from './test_ids';
 import { LeftPanelKey } from '../../left';
@@ -21,19 +21,20 @@ export const ExpandDetailButton: FC = memo(() => {
   const { closeLeftPanel, openLeftPanel, panels } = useExpandableFlyoutContext();
   const isExpanded: boolean = panels.left != null;
 
-  const { eventId, indexName } = useRightPanelContext();
+  const { eventId, indexName, scopeId } = useRightPanelContext();
 
-  const expandDetails = () => {
+  const expandDetails = useCallback(() => {
     openLeftPanel({
       id: LeftPanelKey,
       params: {
         id: eventId,
         indexName,
+        scopeId,
       },
     });
-  };
+  }, [eventId, openLeftPanel, indexName, scopeId]);
 
-  const collapseDetails = () => closeLeftPanel();
+  const collapseDetails = useCallback(() => closeLeftPanel(), [closeLeftPanel]);
 
   return isExpanded ? (
     <EuiButtonEmpty

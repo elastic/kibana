@@ -100,7 +100,6 @@ export async function topNElasticSearchQuery({
   }
 
   let totalSampledStackTraces = aggregations.total_count.value ?? 0;
-  logger.info('total sampled stacktraces: ' + totalSampledStackTraces);
   totalSampledStackTraces = Math.floor(totalSampledStackTraces / eventsIndex.sampleRate);
 
   if (searchField !== ProfilingESField.StacktraceID) {
@@ -139,8 +138,6 @@ export async function topNElasticSearchQuery({
     return groupStackFrameMetadataByStackTrace(stackTraces, stackFrames, executables);
   });
 
-  logger.info('returning payload response to client');
-
   return {
     TotalCount: totalSampledStackTraces,
     TopN: topN,
@@ -164,6 +161,7 @@ export function queryTopNCommon({
   router.get(
     {
       path: pathName,
+      options: { tags: ['access:profiling'] },
       validate: {
         query: schema.object({
           timeFrom: schema.number(),
@@ -189,7 +187,12 @@ export function queryTopNCommon({
           }),
         });
       } catch (error) {
-        return handleRouteHandlerError({ error, logger, response });
+        return handleRouteHandlerError({
+          error,
+          logger,
+          response,
+          message: 'Error while fetching TopN functions',
+        });
       }
     }
   );

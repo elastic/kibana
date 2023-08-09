@@ -43,7 +43,9 @@ const skipText = i18n.translate('home.guidedOnboarding.gettingStarted.skip.butto
 });
 
 export const GettingStarted = () => {
-  const { application, trackUiMetric, chrome, guidedOnboardingService, cloud } = getServices();
+  const { application, trackUiMetric, chrome, guidedOnboardingService, cloud, cloudChat } =
+    getServices();
+
   const [guidesState, setGuidesState] = useState<GuideState[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isError, setIsError] = useState<boolean>(false);
@@ -204,7 +206,6 @@ export const GettingStarted = () => {
         <EuiText size="m" textAlign="center">
           <p>{subtitle}</p>
         </EuiText>
-        <EuiSpacer size="s" />
         <EuiSpacer size="xxl" />
         <GuideFilters
           application={application}
@@ -226,6 +227,7 @@ export const GettingStarted = () => {
             {skipText}
           </EuiLink>
         </div>
+        {cloudChat?.Chat && <cloudChat.Chat />}
       </EuiPageTemplate.Section>
     </KibanaPageTemplate>
   );

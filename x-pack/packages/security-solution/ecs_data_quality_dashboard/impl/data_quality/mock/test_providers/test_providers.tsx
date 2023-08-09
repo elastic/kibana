@@ -35,9 +35,19 @@ export const TestProvidersComponent: React.FC<Props> = ({ children }) => {
         <AssistantProvider
           actionTypeRegistry={actionTypeRegistry}
           augmentMessageCodeBlocks={jest.fn()}
+          baseAllow={[]}
+          baseAllowReplacement={[]}
+          defaultAllow={[]}
+          defaultAllowReplacement={[]}
+          docLinks={{
+            ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
+            DOC_LINK_VERSION: 'current',
+          }}
           getComments={mockGetComments}
           getInitialConversations={mockGetInitialConversations}
           setConversations={jest.fn()}
+          setDefaultAllow={jest.fn()}
+          setDefaultAllowReplacement={jest.fn()}
           http={mockHttp}
         >
           <DataQualityProvider httpFetch={http.fetch}>{children}</DataQualityProvider>

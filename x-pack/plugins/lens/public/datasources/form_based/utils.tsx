@@ -25,7 +25,7 @@ import {
 } from '@kbn/data-plugin/public';
 
 import { estypes } from '@elastic/elasticsearch';
-import { isQueryValid } from '@kbn/visualization-ui-components/public';
+import { isQueryValid } from '@kbn/visualization-ui-components';
 import type { DateRange } from '../../../common/types';
 import type {
   FramePublicAPI,
@@ -60,6 +60,7 @@ import { supportsRarityRanking } from './operations/definitions/terms';
 import { DEFAULT_MAX_DOC_COUNT } from './operations/definitions/terms/constants';
 import { getOriginalId } from '../../../common/expressions/datatable/transpose_helpers';
 import { ReducedSamplingSectionEntries } from './info_badges';
+import { IgnoredGlobalFiltersEntries } from '../../shared_components/ignore_global_filter';
 
 function isMinOrMaxColumn(
   column?: GenericIndexPatternColumn
@@ -508,14 +509,13 @@ export function getNotifiableFeatures(
   if (!visualizationInfo) {
     return [];
   }
-  const layersWithCustomSamplingValues = Object.entries(state.layers).filter(
+  const features: UserMessage[] = [];
+  const layers = Object.entries(state.layers);
+  const layersWithCustomSamplingValues = layers.filter(
     ([, layer]) => getSamplingValue(layer) !== 1
   );
-  if (!layersWithCustomSamplingValues.length) {
-    return [];
-  }
-  return [
-    {
+  if (layersWithCustomSamplingValues.length) {
+    features.push({
       uniqueId: 'random_sampling_info',
       severity: 'info',
       fixableInEditor: false,
@@ -530,8 +530,32 @@ export function getNotifiableFeatures(
         />
       ),
       displayLocations: [{ id: 'embeddableBadge' }],
-    },
-  ];
+    });
+  }
+  const layersWithIgnoreGlobalFilters = layers.filter(([, layer]) => layer.ignoreGlobalFilters);
+  if (layersWithIgnoreGlobalFilters.length) {
+    features.push({
+      uniqueId: 'ignoring-global-filters-layers',
+      severity: 'info',
+      fixableInEditor: false,
+      shortMessage: i18n.translate('xpack.lens.xyChart.layerAnnotationsIgnoreTitle', {
+        defaultMessage: 'Layers ignoring global filters',
+      }),
+      longMessage: (
+        <IgnoredGlobalFiltersEntries
+          layers={layersWithIgnoreGlobalFilters.map(([layerId, { indexPatternId }]) => ({
+            layerId,
+            indexPatternId,
+          }))}
+          visualizationInfo={visualizationInfo}
+          dataViews={frame.dataViews}
+        />
+      ),
+      displayLocations: [{ id: 'embeddableBadge' }],
+    });
+  }
+
+  return features;
 }
 
 /**

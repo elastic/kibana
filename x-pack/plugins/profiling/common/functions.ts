@@ -5,6 +5,8 @@
  * 2.0.
  */
 import * as t from 'io-ts';
+import { sumBy } from 'lodash';
+import { calculateImpactEstimates } from './calculate_impact_estimates';
 import { createFrameGroupID, FrameGroupID } from './frame_group';
 import {
   createStackFrameMetadata,
@@ -30,21 +32,42 @@ interface TopNFunctionAndFrameGroup {
 type TopNFunction = Pick<
   TopNFunctionAndFrameGroup,
   'Frame' | 'CountExclusive' | 'CountInclusive'
-> & { Id: string; Rank: number };
+> & {
+  Id: string;
+  Rank: number;
+  impactEstimates?: ReturnType<typeof calculateImpactEstimates>;
+  selfCPUPerc: number;
+  totalCPUPerc: number;
+};
 
 export interface TopNFunctions {
   TotalCount: number;
   TopN: TopNFunction[];
+  SamplingRate: number;
+  impactEstimates?: ReturnType<typeof calculateImpactEstimates>;
+  selfCPUPerc: number;
+  totalCPUPerc: number;
 }
 
-export function createTopNFunctions(
-  events: Map<StackTraceID, number>,
-  stackTraces: Map<StackTraceID, StackTrace>,
-  stackFrames: Map<StackFrameID, StackFrame>,
-  executables: Map<FileID, Executable>,
-  startIndex: number,
-  endIndex: number
-): TopNFunctions {
+export function createTopNFunctions({
+  endIndex,
+  events,
+  executables,
+  samplingRate,
+  stackFrames,
+  stackTraces,
+  startIndex,
+  totalSeconds,
+}: {
+  endIndex: number;
+  events: Map<StackTraceID, number>;
+  executables: Map<FileID, Executable>;
+  samplingRate: number;
+  stackFrames: Map<StackFrameID, StackFrame>;
+  stackTraces: Map<StackTraceID, StackTrace>;
+  startIndex: number;
+  totalSeconds: number;
+}): TopNFunctions {
   // The `count` associated with a frame provides the total number of
   // traces in which that node has appeared at least once. However, a
   // frame may appear multiple times in a trace, and thus to avoid
@@ -52,12 +75,14 @@ export function createTopNFunctions(
   // far in each trace.
   let totalCount = 0;
   const topNFunctions = new Map<FrameGroupID, TopNFunctionAndFrameGroup>();
+  // The factor to apply to sampled events to scale the estimated result correctly.
+  const scalingFactor = 1.0 / samplingRate;
 
   // Collect metadata and inclusive + exclusive counts for each distinct frame.
   for (const [stackTraceID, count] of events) {
     const uniqueFrameGroupsPerEvent = new Set<FrameGroupID>();
-
-    totalCount += count;
+    const scaledCount = count * scalingFactor;
+    totalCount += scaledCount;
 
     // It is possible that we do not have a stacktrace for an event,
     // e.g. when stopping the host agent or on network errors.
@@ -107,12 +132,12 @@ export function createTopNFunctions(
 
       if (!uniqueFrameGroupsPerEvent.has(frameGroupID)) {
         uniqueFrameGroupsPerEvent.add(frameGroupID);
-        topNFunction.CountInclusive += count;
+        topNFunction.CountInclusive += scaledCount;
       }
 
       if (i === lenStackTrace - 1) {
         // Leaf frame: sum up counts for exclusive CPU.
-        topNFunction.CountExclusive += count;
+        topNFunction.CountExclusive += scaledCount;
       }
     }
   }
@@ -139,17 +164,55 @@ export function createTopNFunctions(
     endIndex = topN.length;
   }
 
-  const framesAndCountsAndIds = topN.slice(startIndex, endIndex).map((frameAndCount, i) => ({
-    Rank: i + 1,
-    Frame: frameAndCount.Frame,
-    CountExclusive: frameAndCount.CountExclusive,
-    CountInclusive: frameAndCount.CountInclusive,
-    Id: frameAndCount.FrameGroupID,
-  }));
+  const framesAndCountsAndIds = topN.slice(startIndex, endIndex).map((frameAndCount, i) => {
+    const countExclusive = frameAndCount.CountExclusive;
+    const countInclusive = frameAndCount.CountInclusive;
+    const totalCPUPerc = (countInclusive / totalCount) * 100;
+    const selfCPUPerc = (countExclusive / totalCount) * 100;
+
+    const impactEstimates =
+      totalSeconds > 0
+        ? calculateImpactEstimates({
+            countExclusive,
+            countInclusive,
+            totalSamples: totalCount,
+            totalSeconds,
+          })
+        : undefined;
+    return {
+      Rank: i + 1,
+      Frame: frameAndCount.Frame,
+      CountExclusive: countExclusive,
+      selfCPUPerc,
+      CountInclusive: countInclusive,
+      totalCPUPerc,
+      Id: frameAndCount.FrameGroupID,
+      impactEstimates,
+    };
+  });
+
+  const sumSelfCPU = sumBy(framesAndCountsAndIds, 'CountExclusive');
+  const selfCPUPerc = (sumSelfCPU / totalCount) * 100;
+  const sumTotalCPU = sumBy(framesAndCountsAndIds, 'CountInclusive');
+  const totalCPUPerc = (sumTotalCPU / totalCount) * 100;
+
+  const impactEstimates =
+    totalSeconds > 0
+      ? calculateImpactEstimates({
+          countExclusive: sumSelfCPU,
+          countInclusive: sumTotalCPU,
+          totalSamples: totalCount,
+          totalSeconds,
+        })
+      : undefined;
 
   return {
     TotalCount: totalCount,
     TopN: framesAndCountsAndIds,
+    SamplingRate: samplingRate,
+    impactEstimates,
+    selfCPUPerc,
+    totalCPUPerc,
   };
 }
 
@@ -157,16 +220,20 @@ export enum TopNFunctionSortField {
   Rank = 'rank',
   Frame = 'frame',
   Samples = 'samples',
-  ExclusiveCPU = 'exclusiveCPU',
-  InclusiveCPU = 'inclusiveCPU',
+  SelfCPU = 'selfCPU',
+  TotalCPU = 'totalCPU',
   Diff = 'diff',
+  AnnualizedCo2 = 'annualizedCo2',
+  AnnualizedDollarCost = 'annualizedDollarCost',
 }
 
 export const topNFunctionSortFieldRt = t.union([
   t.literal(TopNFunctionSortField.Rank),
   t.literal(TopNFunctionSortField.Frame),
   t.literal(TopNFunctionSortField.Samples),
-  t.literal(TopNFunctionSortField.ExclusiveCPU),
-  t.literal(TopNFunctionSortField.InclusiveCPU),
+  t.literal(TopNFunctionSortField.SelfCPU),
+  t.literal(TopNFunctionSortField.TotalCPU),
   t.literal(TopNFunctionSortField.Diff),
+  t.literal(TopNFunctionSortField.AnnualizedCo2),
+  t.literal(TopNFunctionSortField.AnnualizedDollarCost),
 ]);

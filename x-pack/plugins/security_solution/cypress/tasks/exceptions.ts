@@ -99,6 +99,11 @@ export const addExceptionEntryFieldValue = (field: string, index = 0) => {
   cy.get(EXCEPTION_FLYOUT_TITLE).click();
 };
 
+export const addExceptionEntryFieldValueAndSelectSuggestion = (field: string, index = 0) => {
+  cy.get(FIELD_INPUT).eq(index).type(`${field}`);
+  cy.get(`button[title="${field}"]`).click();
+};
+
 export const addExceptionEntryOperatorValue = (operator: string, index = 0) => {
   cy.get(OPERATOR_INPUT).eq(index).type(`${operator}{enter}`);
   cy.get(EXCEPTION_FLYOUT_TITLE).click();
@@ -164,7 +169,14 @@ export const addExceptionConditions = (exception: Exception) => {
   });
 };
 
+export const validateExceptionConditionField = (value: string) => {
+  cy.get(EXCEPTION_ITEM_CONTAINER).contains('span', value);
+};
+export const validateEmptyExceptionConditionField = () => {
+  cy.get(FIELD_INPUT).should('be.empty');
+};
 export const submitNewExceptionItem = () => {
+  cy.get(CONFIRM_BTN).should('exist');
   cy.get(CONFIRM_BTN).click();
   cy.get(CONFIRM_BTN).should('not.exist');
 };
@@ -193,13 +205,12 @@ export const selectOs = (os: string) => {
 export const addExceptionComment = (comment: string) => {
   cy.get(EXCEPTION_COMMENTS_ACCORDION_BTN).click();
   cy.get(EXCEPTION_COMMENT_TEXT_AREA).type(`${comment}`);
-  // cy.root()
-  //   .pipe(($el) => {
-  //     return $el.find(EXCEPTION_COMMENT_TEXT_AREA);
-  //   })
-  //   .clear()
-  //   .type(`${comment}`)
   cy.get(EXCEPTION_COMMENT_TEXT_AREA).should('have.value', comment);
+};
+
+export const validateExceptionCommentCountAndText = (count: number, comment: string) => {
+  cy.get(EXCEPTION_COMMENTS_ACCORDION_BTN).contains('h3', count);
+  cy.get(EXCEPTION_COMMENT_TEXT_AREA).contains('textarea', comment);
 };
 export const clickOnShowComments = () => {
   cy.get(EXCEPTION_ITEM_VIEWER_CONTAINER_SHOW_COMMENTS_BTN).click();
@@ -276,4 +287,9 @@ export const deleteFirstExceptionItemInListDetailPage = () => {
 
   // Delete exception
   cy.get(EXCEPTION_ITEM_OVERFLOW_ACTION_DELETE).click();
+};
+export const validateHighlightedFieldsPopulatedAsExceptionConditions = (
+  highlightedFields: string[]
+) => {
+  return highlightedFields.every((field) => validateExceptionConditionField(field));
 };

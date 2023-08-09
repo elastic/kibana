@@ -9,7 +9,7 @@ import { ALERT_RULE_NAME, ALERT_RULE_PARAMETERS, ALERT_RULE_UUID } from '@kbn/ru
 import { get, has, isEmpty } from 'lodash/fp';
 import React from 'react';
 import type { RouteProps } from 'react-router-dom';
-import { matchPath, Redirect } from 'react-router-dom';
+import { matchPath } from 'react-router-dom';
 
 import type { Capabilities, CoreStart } from '@kbn/core/public';
 import type { DocLinks } from '@kbn/doc-links';
@@ -21,7 +21,6 @@ import {
   CASES_FEATURE_ID,
   CASES_PATH,
   EXCEPTIONS_PATH,
-  LANDING_PATH,
   RULES_PATH,
   SERVER_APP_ID,
   THREAT_INTELLIGENCE_PATH,
@@ -37,6 +36,7 @@ import type { InspectResponse, StartedSubPlugins, StartServices } from './types'
 import { CASES_SUB_PLUGIN_KEY } from './types';
 import { timelineActions } from './timelines/store/timeline';
 import { TimelineId } from '../common/types';
+import { SourcererScopeName } from './common/store/sourcerer/model';
 
 export const parseRoute = (location: Pick<Location, 'hash' | 'pathname' | 'search'>) => {
   if (!isEmpty(location.hash)) {
@@ -197,15 +197,12 @@ export const getSubPluginRoutesByCapabilities = (
   capabilities: Capabilities,
   services: StartServices
 ): RouteProps[] => {
-  return [
-    ...Object.entries(subPlugins).reduce<RouteProps[]>((acc, [key, value]) => {
-      if (isSubPluginAvailable(key, capabilities)) {
-        return [...acc, ...value.routes];
-      }
+  return Object.entries(subPlugins).reduce<RouteProps[]>((acc, [key, value]) => {
+    if (isSubPluginAvailable(key, capabilities)) {
+      acc.push(...value.routes);
+    } else {
       const docLinkSelector = (docLinks: DocLinks) => docLinks.siem.privileges;
-
-      return [
-        ...acc,
+      acc.push(
         ...value.routes.map((route: RouteProps) => ({
           path: route.path,
           component: () => {
@@ -215,14 +212,11 @@ export const getSubPluginRoutesByCapabilities = (
             }
             return <NoPrivilegesPage pageName={key} docLinkSelector={docLinkSelector} />;
           },
-        })),
-      ];
-    }, []),
-    {
-      path: '',
-      component: () => <RedirectRoute capabilities={capabilities} />,
-    },
-  ];
+        }))
+      );
+    }
+    return acc;
+  }, []);
 };
 
 export const isSubPluginAvailable = (pluginKey: string, capabilities: Capabilities): boolean => {
@@ -231,19 +225,6 @@ export const isSubPluginAvailable = (pluginKey: string, capabilities: Capabiliti
   }
   return capabilities[SERVER_APP_ID].show === true;
 };
-
-export const RedirectRoute = React.memo<{ capabilities: Capabilities }>(({ capabilities }) => {
-  const overviewAvailable = isSubPluginAvailable('overview', capabilities);
-  const casesAvailable = isSubPluginAvailable(CASES_SUB_PLUGIN_KEY, capabilities);
-  if (overviewAvailable) {
-    return <Redirect to={LANDING_PATH} />;
-  }
-  if (casesAvailable) {
-    return <Redirect to={CASES_PATH} />;
-  }
-  return <Redirect to={LANDING_PATH} />;
-});
-RedirectRoute.displayName = 'RedirectRoute';
 
 const siemSignalsFieldMappings: Record<string, string> = {
   [ALERT_RULE_UUID]: 'signal.rule.id',
@@ -308,6 +289,11 @@ export const isTimelineScope = (scopeId: string) =>
 export const isInTableScope = (scopeId: string) =>
   Object.values(TableId).includes(scopeId as unknown as TableId);
 
+export const isAlertsPageScope = (scopeId: string) =>
+  [TableId.alertsOnAlertsPage, TableId.alertsOnRuleDetailsPage, TableId.alertsOnCasePage].includes(
+    scopeId as TableId
+  );
+
 export const getScopedActions = (scopeId: string) => {
   if (isTimelineScope(scopeId)) {
     return timelineActions;
@@ -325,3 +311,13 @@ export const getScopedSelectors = (scopeId: string) => {
 };
 
 export const isActiveTimeline = (timelineId: string) => timelineId === TimelineId.active;
+
+export const getSourcererScopeId = (scopeId: string): SourcererScopeName => {
+  if (isTimelineScope(scopeId)) {
+    return SourcererScopeName.timeline;
+  } else if (isAlertsPageScope(scopeId)) {
+    return SourcererScopeName.detections;
+  } else {
+    return SourcererScopeName.default;
+  }
+};

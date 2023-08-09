@@ -6,23 +6,15 @@ The Charts plugin is a way to create easier integration of shared colors, themes
 
 ### `vislibColorMaps`
 
-Color mappings related to vislib visualizations
-
-### `truncatedColorMaps`
-
-Color mappings subset of `vislibColorMaps`
+Color mappings related to vislib colors
 
 ### `colorSchemas`
 
-Color mappings in `value`/`text` form
+Color mappings in `value`/`text` form related to vislib colors
 
 ### `getHeatmapColors`
 
 Function to retrieve heatmap related colors based on `value` and `colorSchemaName`
-
-### `truncatedColorSchemas`
-
-Truncated color mappings in `value`/`text` form
 
 ## Theme
 

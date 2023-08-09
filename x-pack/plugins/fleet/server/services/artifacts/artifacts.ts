@@ -11,6 +11,8 @@ import { promisify } from 'util';
 import type { BinaryLike } from 'crypto';
 import { createHash } from 'crypto';
 
+import { isEmpty, sortBy } from 'lodash';
+
 import type { ElasticsearchClient } from '@kbn/core/server';
 
 import type { ListResult } from '../../../common/types';
@@ -21,6 +23,8 @@ import { ArtifactsElasticsearchError } from '../../errors';
 import { isElasticsearchVersionConflictError } from '../../errors/utils';
 
 import { withPackageSpan } from '../epm/packages/utils';
+
+import { appContextService } from '../app_context';
 
 import { isElasticsearchItemNotFoundError } from './utils';
 import type {
@@ -84,55 +88,100 @@ export const createArtifact = async (
   return esSearchHitToArtifact({ _id: id, _source: newArtifactData });
 };
 
+// Max length in bytes for artifacts batch
+export const BULK_CREATE_MAX_ARTIFACTS_BYTES = 4_000_000;
+
+// Function to split artifacts in batches depending on the encoded_size value.
+const generateArtifactBatches = (
+  artifacts: NewArtifact[],
+  maxArtifactsBatchSizeInBytes: number = BULK_CREATE_MAX_ARTIFACTS_BYTES
+): Array<Array<ArtifactElasticsearchProperties | { create: { _id: string } }>> => {
+  const batches: Array<Array<ArtifactElasticsearchProperties | { create: { _id: string } }>> = [];
+
+  let artifactsBatchLengthInBytes = 0;
+  const sortedArtifacts = sortBy(artifacts, 'encodedSize');
+
+  sortedArtifacts.forEach((artifact) => {
+    const esArtifact = newArtifactToElasticsearchProperties(artifact);
+    const bulkOperation = {
+      create: {
+        _id: uniqueIdFromArtifact(artifact),
+      },
+    };
+
+    // Before adding the next artifact to the current batch, check if it can be added depending on the batch size limit.
+    // If there is no artifact yet added to the current batch, we add it anyway ignoring the batch limit as the batch size has to be > 0.
+    if (artifact.encodedSize + artifactsBatchLengthInBytes >= maxArtifactsBatchSizeInBytes) {
+      artifactsBatchLengthInBytes = artifact.encodedSize;
+      batches.push([bulkOperation, esArtifact]);
+    } else {
+      // Case it's the first one
+      if (isEmpty(batches)) {
+        batches.push([]);
+      }
+      // Adds the next artifact to the current batch and increases the batch size count with the artifact size.
+      artifactsBatchLengthInBytes += artifact.encodedSize;
+      batches[batches.length - 1].push(bulkOperation, esArtifact);
+    }
+  });
+
+  return batches;
+};
+
 export const bulkCreateArtifacts = async (
   esClient: ElasticsearchClient,
   artifacts: NewArtifact[],
   refresh = false
 ): Promise<{ artifacts?: Artifact[]; errors?: Error[] }> => {
-  const { ids, newArtifactsData } = artifacts.reduce<{
-    ids: string[];
-    newArtifactsData: ArtifactElasticsearchProperties[];
-  }>(
-    (acc, artifact) => {
-      acc.ids.push(uniqueIdFromArtifact(artifact));
-      acc.newArtifactsData.push(newArtifactToElasticsearchProperties(artifact));
-      return acc;
-    },
-    { ids: [], newArtifactsData: [] }
+  const batches = generateArtifactBatches(
+    artifacts,
+    appContextService.getConfig()?.createArtifactsBulkBatchSize
   );
 
-  const body = ids.flatMap((id, index) => [
-    {
-      create: {
-        _id: id,
-      },
-    },
-    newArtifactsData[index],
-  ]);
-
-  const res = await withPackageSpan('Bulk create fleet artifacts', () =>
-    esClient.bulk({
-      index: FLEET_SERVER_ARTIFACTS_INDEX,
-      body,
-      refresh,
-    })
-  );
-  if (res.errors) {
-    const nonConflictErrors = res.items.reduce<Error[]>((acc, item) => {
-      if (item.create?.status !== 409) {
-        acc.push(new Error(item.create?.error?.reason));
-      }
-      return acc;
-    }, []);
-    if (nonConflictErrors.length > 0) {
-      return { errors: nonConflictErrors };
+  const logger = appContextService.getLogger();
+  const nonConflictErrors = [];
+  logger.debug(`Number of batches generated for fleet artifacts: ${batches.length}`);
+  for (let batchN = 0; batchN < batches.length; batchN++) {
+    logger.debug(
+      `Creating artifacts for batch ${batchN + 1} with ${batches[batchN].length / 2} artifacts`
+    );
+    logger.debug(`Artifacts in current batch: ${JSON.stringify(batches[batchN])}`);
+    // Generate a bulk create for the current batch of artifacts
+    const res = await withPackageSpan(`Bulk create fleet artifacts batch [${batchN}]`, () =>
+      esClient.bulk({
+        index: FLEET_SERVER_ARTIFACTS_INDEX,
+        body: batches[batchN],
+        refresh,
+      })
+    );
+    // Track errors of the bulk create action
+    if (res.errors) {
+      nonConflictErrors.push(
+        ...res.items.reduce<Error[]>((acc, item) => {
+          if (item.create?.status !== 409) {
+            acc.push(new Error(item.create?.error?.reason));
+          }
+          return acc;
+        }, [])
+      );
     }
   }
 
+  // If any non conflict error, it returns only the errors
+  if (nonConflictErrors.length > 0) {
+    return { errors: nonConflictErrors };
+  }
+
+  // Use non sorted artifacts array to preserve the artifacts order in the response
+  const nonSortedEsArtifactsResponse: Artifact[] = artifacts.map((artifact) => {
+    return esSearchHitToArtifact({
+      _id: uniqueIdFromArtifact(artifact),
+      _source: newArtifactToElasticsearchProperties(artifact),
+    });
+  });
+
   return {
-    artifacts: ids.map((id, index) =>
-      esSearchHitToArtifact({ _id: id, _source: newArtifactsData[index] })
-    ),
+    artifacts: nonSortedEsArtifactsResponse,
   };
 };
 
@@ -143,6 +192,37 @@ export const deleteArtifact = async (esClient: ElasticsearchClient, id: string):
       id,
       refresh: 'wait_for',
     });
+  } catch (e) {
+    throw new ArtifactsElasticsearchError(e);
+  }
+};
+
+export const bulkDeleteArtifacts = async (
+  esClient: ElasticsearchClient,
+  ids: string[]
+): Promise<Error[]> => {
+  try {
+    const body = ids.map((id) => ({
+      delete: { _index: FLEET_SERVER_ARTIFACTS_INDEX, _id: id },
+    }));
+
+    const res = await withPackageSpan(`Bulk delete fleet artifacts`, () =>
+      esClient.bulk({
+        body,
+        refresh: 'wait_for',
+      })
+    );
+    let errors: Error[] = [];
+    // Track errors of the bulk delete action
+    if (res.errors) {
+      errors = res.items.reduce<Error[]>((acc, item) => {
+        if (item.delete?.error) {
+          acc.push(new Error(item.delete.error.reason));
+        }
+        return acc;
+      }, []);
+    }
+    return errors;
   } catch (e) {
     throw new ArtifactsElasticsearchError(e);
   }

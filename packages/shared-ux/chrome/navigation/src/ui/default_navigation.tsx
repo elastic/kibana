@@ -7,23 +7,25 @@
  */
 
 import React, { FC, useCallback } from 'react';
+import { i18n } from '@kbn/i18n';
+import type { AppDeepLinkId, NodeDefinition } from '@kbn/core-chrome-browser';
 
 import { Navigation } from './components';
 import type {
   GroupDefinition,
   NavigationGroupPreset,
   NavigationTreeDefinition,
-  NodeDefinition,
   ProjectNavigationDefinition,
   ProjectNavigationTreeDefinition,
   RootNavigationItemDefinition,
 } from './types';
-import { CloudLink } from './components/cloud_link';
 import { RecentlyAccessed } from './components/recently_accessed';
 import { NavigationFooter } from './components/navigation_footer';
 import { getPresets } from './nav_tree_presets';
 
-type NodeDefinitionWithPreset = NodeDefinition & { preset?: NavigationGroupPreset };
+type NodeDefinitionWithPreset = NodeDefinition<AppDeepLinkId, string> & {
+  preset?: NavigationGroupPreset;
+};
 
 const isRootNavigationItemDefinition = (
   item: RootNavigationItemDefinition | NodeDefinitionWithPreset
@@ -37,10 +39,6 @@ const getDefaultNavigationTree = (
 ): NavigationTreeDefinition => {
   return {
     body: [
-      {
-        type: 'cloudLink',
-        preset: 'deployments',
-      },
       {
         type: 'recentlyAccessed',
       },
@@ -57,11 +55,42 @@ const getDefaultNavigationTree = (
     footer: [
       {
         type: 'navGroup',
-        ...getPresets('devtools'),
+        id: 'devTools',
+        title: i18n.translate('sharedUXPackages.chrome.sideNavigation.devTools', {
+          defaultMessage: 'Developer tools',
+        }),
+        link: 'dev_tools',
+        icon: 'editorCodeBlock',
       },
       {
         type: 'navGroup',
-        ...getPresets('management'),
+        id: 'project_settings_project_nav',
+        title: i18n.translate('sharedUXPackages.chrome.sideNavigation.projectSettings', {
+          defaultMessage: 'Project settings',
+        }),
+        icon: 'gear',
+        breadcrumbStatus: 'hidden',
+        children: [
+          {
+            id: 'settings',
+            children: [
+              {
+                link: 'management',
+                title: i18n.translate('sharedUXPackages.chrome.sideNavigation.mngt', {
+                  defaultMessage: 'Management',
+                }),
+              },
+              {
+                id: 'cloudLinkUserAndRoles',
+                cloudLink: 'userAndRoles',
+              },
+              {
+                id: 'cloudLinkBilling',
+                cloudLink: 'billingAndSub',
+              },
+            ],
+          },
+        ],
       },
     ],
   };
@@ -70,7 +99,6 @@ const getDefaultNavigationTree = (
 let idCounter = 0;
 
 export const DefaultNavigation: FC<ProjectNavigationDefinition & { dataTestSubj?: string }> = ({
-  homeRef,
   projectNavigationTree,
   navigationTree,
   dataTestSubj,
@@ -85,19 +113,13 @@ export const DefaultNavigation: FC<ProjectNavigationDefinition & { dataTestSubj?
 
   const renderItems = useCallback(
     (
-      items: Array<RootNavigationItemDefinition | NodeDefinitionWithPreset> = [],
+      items: RootNavigationItemDefinition[] | NodeDefinitionWithPreset[] = [],
       path: string[] = []
     ) => {
       return items.map((item) => {
         const isRootNavigationItem = isRootNavigationItemDefinition(item);
-        if (isRootNavigationItem) {
-          if (item.type === 'cloudLink') {
-            return <CloudLink {...item} key={`cloudLink-${idCounter++}`} />;
-          }
-
-          if (item.type === 'recentlyAccessed') {
-            return <RecentlyAccessed {...item} key={`recentlyAccessed-${idCounter++}`} />;
-          }
+        if (isRootNavigationItem && item.type === 'recentlyAccessed') {
+          return <RecentlyAccessed {...item} key={`recentlyAccessed-${idCounter++}`} />;
         }
 
         if (item.preset) {
@@ -112,18 +134,12 @@ export const DefaultNavigation: FC<ProjectNavigationDefinition & { dataTestSubj?
           );
         }
 
-        const { type, ...rest } = item as GroupDefinition;
-
-        return (
-          <React.Fragment key={id}>
-            {rest.children ? (
-              <Navigation.Group {...rest}>
-                {renderItems(rest.children, [...path, id])}
-              </Navigation.Group>
-            ) : (
-              <Navigation.Item {...rest} />
-            )}
-          </React.Fragment>
+        return item.children || (item as GroupDefinition).type === 'navGroup' ? (
+          <Navigation.Group {...item} key={id}>
+            {renderItems(item.children, [...path, id])}
+          </Navigation.Group>
+        ) : (
+          <Navigation.Item {...item} key={id} />
         );
       });
     },
@@ -131,7 +147,7 @@ export const DefaultNavigation: FC<ProjectNavigationDefinition & { dataTestSubj?
   );
 
   return (
-    <Navigation homeRef={homeRef} dataTestSubj={dataTestSubj}>
+    <Navigation dataTestSubj={dataTestSubj}>
       <>
         {renderItems(navigationDefinition.body)}
         {navigationDefinition.footer && (

@@ -72,6 +72,7 @@ export class CheckDeletedFilesTask {
     }
 
     this.wasStarted = true;
+    this.logger.info(`Started with interval of [${INTERVAL}] and timeout of [${TIMEOUT}]`);
 
     try {
       await taskManager.ensureScheduled({
@@ -85,7 +86,7 @@ export class CheckDeletedFilesTask {
         params: { version: VERSION },
       });
     } catch (e) {
-      this.logger.error(`Error scheduling task, received error: ${e}`);
+      this.logger.error(`Error scheduling task, received error: ${e.message}`, e);
     }
   };
 
@@ -104,19 +105,34 @@ export class CheckDeletedFilesTask {
       throwUnrecoverableError(new Error('Outdated task version'));
     }
 
+    this.logger.info(`[runTask()] started`);
+
+    const endRun = (msg: string = '') => {
+      this.logger.info(`[runTask()] ended${msg ? ': ' + msg : ''}`);
+    };
+
     const [{ elasticsearch }] = await core.getStartServices();
     const esClient = elasticsearch.client.asInternalUser;
 
     try {
       const readyFiles = await getFilesByStatus(esClient, this.abortController);
-      if (!readyFiles.length) return;
+
+      if (!readyFiles.length) {
+        endRun('no files to process');
+        return;
+      }
 
       const { fileIdsByIndex: deletedFileIdsByIndex, allFileIds: allDeletedFileIds } =
         await fileIdsWithoutChunksByIndex(esClient, this.abortController, readyFiles);
-      if (!allDeletedFileIds.size) return;
+
+      if (!allDeletedFileIds.size) {
+        endRun('No files with deleted chunks');
+        return;
+      }
 
       this.logger.info(`Attempting to update ${allDeletedFileIds.size} files to DELETED status`);
-      this.logger.debug(`Attempting to file ids: ${deletedFileIdsByIndex}`);
+      this.logger.debug(`Attempting to update file ids: ${deletedFileIdsByIndex}`);
+
       const updatedFilesResponses = await updateFilesStatus(
         esClient,
         this.abortController,
@@ -130,12 +146,16 @@ export class CheckDeletedFilesTask {
         this.logger.warn(`Failed to update ${failures.length} files to DELETED status`);
         this.logger.debug(`Failed to update files to DELETED status: ${failures}`);
       }
+
+      endRun('success');
     } catch (err) {
       if (err instanceof errors.RequestAbortedError) {
         this.logger.warn(`request aborted due to timeout: ${err}`);
+        endRun();
         return;
       }
       this.logger.error(err);
+      endRun('error');
     }
   };
 }

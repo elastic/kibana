@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useState, useMemo } from 'react';
+import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { throttle } from 'lodash';
 import { EuiIconTip, EuiResizeObserver } from '@elastic/eui';
@@ -15,6 +15,8 @@ import { Chart, Settings, Wordcloud, RenderChangeListener } from '@elastic/chart
 import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
 import type { PaletteRegistry, PaletteOutput } from '@kbn/coloring';
 import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/public';
+import { getOverridesFor } from '@kbn/chart-expressions-common';
+import type { AllowedSettingsOverrides, AllowedChartOverrides } from '@kbn/charts-plugin/common';
 import { getColumnByAccessor, getFormatByAccessor } from '@kbn/visualizations-plugin/common/utils';
 import { getFormatService } from '../format_service';
 import { TagcloudRendererConfig } from '../../common/types';
@@ -28,6 +30,7 @@ export type TagCloudChartProps = TagcloudRendererConfig & {
   fireEvent: IInterpreterRenderHandlers['event'];
   renderComplete: IInterpreterRenderHandlers['done'];
   palettesRegistry: PaletteRegistry;
+  overrides?: AllowedSettingsOverrides & AllowedChartOverrides;
 };
 
 const calculateWeight = (value: number, x1: number, y1: number, x2: number, y2: number) =>
@@ -80,13 +83,16 @@ export const TagCloudChart = ({
   fireEvent,
   renderComplete,
   syncColors,
+  overrides,
 }: TagCloudChartProps) => {
   const [warning, setWarning] = useState(false);
   const { bucket, metric, scale, palette, showLabel, orientation } = visParams;
 
-  const bucketFormatter = bucket
-    ? getFormatService().deserialize(getFormatByAccessor(bucket, visData.columns))
-    : null;
+  const bucketFormatter = useMemo(() => {
+    return bucket
+      ? getFormatService().deserialize(getFormatByAccessor(bucket, visData.columns))
+      : null;
+  }, [bucket, visData.columns]);
 
   const tagCloudData = useMemo(() => {
     const bucketColumn = bucket ? getColumnByAccessor(bucket, visData.columns)! : null;
@@ -120,6 +126,16 @@ export const TagCloudChart = ({
     visData.rows,
   ]);
 
+  useEffect(() => {
+    // clear warning when data changes
+    if (warning) {
+      setWarning(false);
+    }
+    // "warning" excluded from dependencies.
+    // Clear warning when "tagCloudData" changes. Do not clear warning when "warning" changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tagCloudData]);
+
   const label = bucket
     ? `${getColumnByAccessor(bucket, visData.columns)!.name} - ${
         getColumnByAccessor(metric, visData.columns)!.name
@@ -129,7 +145,10 @@ export const TagCloudChart = ({
   const onRenderChange = useCallback<RenderChangeListener>(
     (isRendered) => {
       if (isRendered) {
-        renderComplete();
+        // this requestAnimationFrame call is a temporary fix for https://github.com/elastic/elastic-charts/issues/2124
+        window.requestAnimationFrame(() => {
+          renderComplete();
+        });
       }
     },
     [renderComplete]
@@ -191,12 +210,13 @@ export const TagCloudChart = ({
     <EuiResizeObserver onResize={updateChart}>
       {(resizeRef) => (
         <div className="tgcChart__wrapper" ref={resizeRef} data-test-subj="tagCloudVisualization">
-          <Chart size="100%">
+          <Chart size="100%" {...getOverridesFor(overrides, 'chart')}>
             <Settings
               onElementClick={handleWordClick}
               onRenderChange={onRenderChange}
               ariaLabel={visParams.ariaLabel}
               ariaUseDefaultSummary={!visParams.ariaLabel}
+              {...getOverridesFor(overrides, 'settings')}
             />
             <Wordcloud
               id="tagCloud"

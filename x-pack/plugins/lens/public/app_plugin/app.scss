@@ -19,10 +19,6 @@
   flex-grow: 1;
 }
 
-.lensAnnotationIconFill {
-  fill: $euiColorEmptyShade;
-}
-
 // Less-than-ideal styles to add a vertical divider after this button. Consider restructuring markup for better semantics and styling options in the future.
 .lnsNavItem__withDivider {
   @include euiBreakpoint('m', 'l', 'xl') {

@@ -50,6 +50,7 @@ import {
 } from '../get_service_group_fields';
 import { getGroupByTerms } from '../utils/get_groupby_terms';
 import { getGroupByActionVariables } from '../utils/get_groupby_action_variables';
+import { getAllGroupByFields } from '../../../../../common/rules/get_all_groupby_fields';
 
 const ruleTypeConfig = RULE_TYPES_CONFIG[ApmRuleType.ErrorCount];
 
@@ -82,6 +83,7 @@ export function registerErrorCountRuleType({
           apmActionVariables.serviceName,
           apmActionVariables.transactionName,
           apmActionVariables.errorGroupingKey,
+          apmActionVariables.errorGroupingName,
           apmActionVariables.threshold,
           apmActionVariables.triggerValue,
           apmActionVariables.viewInAppUrl,
@@ -96,10 +98,9 @@ export function registerErrorCountRuleType({
         spaceId,
         startedAt,
       }) => {
-        const predefinedGroupby = [SERVICE_NAME, SERVICE_ENVIRONMENT];
-
-        const allGroupbyFields = Array.from(
-          new Set([...predefinedGroupby, ...(ruleParams.groupBy ?? [])])
+        const allGroupByFields = getAllGroupByFields(
+          ApmRuleType.ErrorCount,
+          ruleParams.groupBy
         );
 
         const config = await firstValueFrom(config$);
@@ -145,7 +146,7 @@ export function registerErrorCountRuleType({
             aggs: {
               error_counts: {
                 multi_terms: {
-                  terms: getGroupByTerms(allGroupbyFields),
+                  terms: getGroupByTerms(allGroupByFields),
                   size: 1000,
                   order: { _count: 'desc' as const },
                 },
@@ -164,7 +165,7 @@ export function registerErrorCountRuleType({
           response.aggregations?.error_counts.buckets.map((bucket) => {
             const groupByFields = bucket.key.reduce(
               (obj, bucketKey, bucketIndex) => {
-                obj[allGroupbyFields[bucketIndex]] = bucketKey;
+                obj[allGroupByFields[bucketIndex]] = bucketKey;
                 return obj;
               },
               {} as Record<string, string>

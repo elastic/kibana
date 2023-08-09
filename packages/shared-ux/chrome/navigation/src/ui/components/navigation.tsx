@@ -17,10 +17,11 @@ import React, {
   useRef,
 } from 'react';
 import type { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
+import useDebounce from 'react-use/lib/useDebounce';
+import useObservable from 'react-use/lib/useObservable';
 
 import { useNavigation as useNavigationServices } from '../../services';
 import { RegisterFunction, UnRegisterFunction } from '../types';
-import { CloudLink } from './cloud_link';
 import { NavigationFooter } from './navigation_footer';
 import { NavigationGroup } from './navigation_group';
 import { NavigationItem } from './navigation_item';
@@ -31,6 +32,7 @@ interface Context {
   register: RegisterFunction;
   updateFooterChildren: (children: ReactNode) => void;
   unstyled: boolean;
+  activeNodes: ChromeProjectNavigationNode[][];
 }
 
 const NavigationContext = createContext<Context>({
@@ -40,14 +42,11 @@ const NavigationContext = createContext<Context>({
   }),
   updateFooterChildren: () => {},
   unstyled: false,
+  activeNodes: [],
 });
 
 interface Props {
   children: ReactNode;
-  /**
-   * Href to the home page
-   */
-  homeRef: string;
   /**
    * Flag to indicate if the Navigation should not be styled with EUI components.
    * If set to true, the children will be rendered as is.
@@ -56,8 +55,8 @@ interface Props {
   dataTestSubj?: string;
 }
 
-export function Navigation({ children, homeRef, unstyled = false, dataTestSubj }: Props) {
-  const { onProjectNavigationChange } = useNavigationServices();
+export function Navigation({ children, unstyled = false, dataTestSubj }: Props) {
+  const { onProjectNavigationChange, activeNodes$ } = useNavigationServices();
 
   // We keep a reference of the order of the children that register themselves when mounting.
   // This guarantees that the navTree items sent to the Chrome service has the same order
@@ -65,7 +64,11 @@ export function Navigation({ children, homeRef, unstyled = false, dataTestSubj }
   const orderChildrenRef = useRef<Record<string, number>>({});
   const idx = useRef(0);
 
+  const activeNodes = useObservable(activeNodes$, []);
   const [navigationItems, setNavigationItems] = useState<
+    Record<string, ChromeProjectNavigationNode>
+  >({});
+  const [debouncedNavigationItems, setDebouncedNavigationItems] = useState<
     Record<string, ChromeProjectNavigationNode>
   >({});
   const [footerChildren, setFooterChildren] = useState<ReactNode>(null);
@@ -80,7 +83,9 @@ export function Navigation({ children, homeRef, unstyled = false, dataTestSubj }
 
   const register = useCallback(
     (navNode: ChromeProjectNavigationNode) => {
-      orderChildrenRef.current[navNode.id] = idx.current++;
+      if (orderChildrenRef.current[navNode.id] === undefined) {
+        orderChildrenRef.current[navNode.id] = idx.current++;
+      }
 
       setNavigationItems((prevItems) => {
         return {
@@ -102,30 +107,35 @@ export function Navigation({ children, homeRef, unstyled = false, dataTestSubj }
       register,
       updateFooterChildren: setFooterChildren,
       unstyled,
+      activeNodes,
     }),
-    [register, unstyled]
+    [register, unstyled, activeNodes]
+  );
+
+  useDebounce(
+    () => {
+      setDebouncedNavigationItems(navigationItems);
+    },
+    100,
+    [navigationItems]
   );
 
   useEffect(() => {
+    const navigationTree = Object.values(debouncedNavigationItems).sort((a, b) => {
+      const aOrder = orderChildrenRef.current[a.id];
+      const bOrder = orderChildrenRef.current[b.id];
+      return aOrder - bOrder;
+    });
+
     // This will update the navigation tree in the Chrome service (calling the serverless.setNavigation())
     onProjectNavigationChange({
-      homeRef,
-      navigationTree: Object.values(navigationItems).sort((a, b) => {
-        const aOrder = orderChildrenRef.current[a.id];
-        const bOrder = orderChildrenRef.current[b.id];
-        return aOrder - bOrder;
-      }),
+      navigationTree,
     });
-  }, [navigationItems, onProjectNavigationChange, homeRef]);
+  }, [debouncedNavigationItems, onProjectNavigationChange]);
 
   return (
     <NavigationContext.Provider value={contextValue}>
-      <NavigationUI
-        homeRef={homeRef}
-        footerChildren={footerChildren}
-        unstyled={unstyled}
-        dataTestSubj={dataTestSubj}
-      >
+      <NavigationUI footerChildren={footerChildren} unstyled={unstyled} dataTestSubj={dataTestSubj}>
         {children}
       </NavigationUI>
     </NavigationContext.Provider>
@@ -143,5 +153,4 @@ export function useNavigation() {
 Navigation.Group = NavigationGroup;
 Navigation.Item = NavigationItem;
 Navigation.Footer = NavigationFooter;
-Navigation.CloudLink = CloudLink;
 Navigation.RecentlyAccessed = RecentlyAccessed;

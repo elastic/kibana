@@ -10,6 +10,7 @@ import type {
   FlameElementEvent,
   HeatmapElementEvent,
   MetricElementEvent,
+  PartialTheme,
   PartitionElementEvent,
   Theme,
   WordCloudElementEvent,
@@ -70,7 +71,8 @@ export interface Props {
   }) => void;
   pattern: string;
   patternRollup: PatternRollup | undefined;
-  theme: Theme;
+  theme?: PartialTheme;
+  baseTheme: Theme;
   updatePatternRollup: (patternRollup: PatternRollup) => void;
 }
 
@@ -88,6 +90,7 @@ const IndexPropertiesComponent: React.FC<Props> = ({
   pattern,
   patternRollup,
   theme,
+  baseTheme,
   updatePatternRollup,
 }) => {
   const { error: mappingsError, indexes, loading: loadingMappings } = useMappings(indexName);
@@ -154,6 +157,7 @@ const IndexPropertiesComponent: React.FC<Props> = ({
         setSelectedTabId,
         stats: patternRollup?.stats ?? null,
         theme,
+        baseTheme,
       }),
     [
       addSuccessToast,
@@ -171,6 +175,7 @@ const IndexPropertiesComponent: React.FC<Props> = ({
       patternRollup?.docsCount,
       patternRollup?.stats,
       theme,
+      baseTheme,
     ]
   );
 

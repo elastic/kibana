@@ -22,7 +22,12 @@ const store = {
 const value = 'the-value';
 const fieldName = 'user.name';
 const context = {
-  field: { name: fieldName, value, type: 'text' },
+  data: [
+    {
+      field: { name: fieldName, type: 'text', searchable: true, aggregatable: true },
+      value,
+    },
+  ],
   metadata: {
     scopeId: TableId.test,
   },
@@ -78,7 +83,10 @@ describe('createToggleColumnCellActionFactory', () => {
 
     it('should add column', async () => {
       const name = 'fake-field-name';
-      await toggleColumnAction.execute({ ...context, field: { ...context.field, name } });
+      await toggleColumnAction.execute({
+        ...context,
+        data: [{ ...context.data[0], field: { ...context.data[0].field, name } }],
+      });
       expect(mockDispatch).toHaveBeenCalledWith(
         dataTableActions.upsertColumn({
           column: {

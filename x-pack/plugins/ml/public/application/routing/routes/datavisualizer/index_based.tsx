@@ -6,21 +6,14 @@
  */
 
 import React, { FC } from 'react';
-import { parse } from 'query-string';
-
 import { i18n } from '@kbn/i18n';
-
 import { ML_PAGES } from '../../../../locator';
 import { NavigateToPath } from '../../../contexts/kibana';
-
-import { createPath, MlRoute, PageLoader, PageProps } from '../../router';
-import { useResolver } from '../../use_resolver';
+import { createPath, MlRoute, PageLoader } from '../../router';
+import { useRouteResolver } from '../../use_resolver';
 import { IndexDataVisualizerPage as Page } from '../../../datavisualizer/index_based/index_data_visualizer';
-
-import { checkBasicLicense } from '../../../license';
-import { checkGetJobsCapabilitiesResolver } from '../../../capabilities/check_capabilities';
-import { cacheDataViewsContract } from '../../../util/index_utils';
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
+import { DataSourceContextProvider } from '../../../contexts/ml';
 
 export const indexBasedRouteFactory = (
   navigateToPath: NavigateToPath,
@@ -31,7 +24,7 @@ export const indexBasedRouteFactory = (
   title: i18n.translate('xpack.ml.dataVisualizer.dataView.docTitle', {
     defaultMessage: 'Index Data Visualizer',
   }),
-  render: (props, deps) => <PageWrapper {...props} deps={deps} />,
+  render: () => <PageWrapper />,
   breadcrumbs: [
     getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
     getBreadcrumbWithUrlForApp('DATA_VISUALIZER_BREADCRUMB', navigateToPath, basePath),
@@ -43,19 +36,14 @@ export const indexBasedRouteFactory = (
   ],
 });
 
-const PageWrapper: FC<PageProps> = ({ location, deps }) => {
-  const { redirectToMlAccessDeniedPage } = deps;
-
-  const { index, savedSearchId }: Record<string, any> = parse(location.search, { sort: false });
-  const { context } = useResolver(index, savedSearchId, deps.config, deps.dataViewsContract, {
-    checkBasicLicense,
-    cacheDataViewsContract: () => cacheDataViewsContract(deps.dataViewsContract),
-    checkGetJobsCapabilities: () => checkGetJobsCapabilitiesResolver(redirectToMlAccessDeniedPage),
-  });
+const PageWrapper: FC = () => {
+  const { context } = useRouteResolver('basic', []);
 
   return (
     <PageLoader context={context}>
-      <Page />
+      <DataSourceContextProvider>
+        <Page />
+      </DataSourceContextProvider>
     </PageLoader>
   );
 };

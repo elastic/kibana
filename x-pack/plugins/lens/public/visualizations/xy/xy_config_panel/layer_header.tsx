@@ -18,8 +18,9 @@ import {
 } from '@elastic/eui';
 import { ToolbarButton } from '@kbn/kibana-react-plugin/public';
 import { IconChartBarReferenceLine, IconChartBarAnnotations } from '@kbn/chart-icons';
-import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
+import { css } from '@emotion/react';
+import { getIgnoreGlobalFilterIcon } from '../../../shared_components/ignore_global_filter/data_view_picker_icon';
 import type {
   VisualizationLayerHeaderContentProps,
   VisualizationLayerWidgetProps,
@@ -96,13 +97,20 @@ function AnnotationsLayerHeader({
       }
       indicator={
         hasUnsavedChanges && (
-          <EuiIconTip
-            content={i18n.translate('xpack.lens.xyChart.unsavedChanges', {
-              defaultMessage: 'Unsaved changes',
-            })}
-            type="dot"
-            color={euiThemeVars.euiColorSuccess}
-          />
+          <div
+            css={css`
+              padding-bottom: 3px;
+              padding-left: 4px;
+            `}
+          >
+            <EuiIconTip
+              content={i18n.translate('xpack.lens.xyChart.unsavedChanges', {
+                defaultMessage: 'Unsaved changes',
+              })}
+              type="dot"
+              color={euiThemeVars.euiColorSuccess}
+            />
+          </div>
         )
       }
     />
@@ -123,25 +131,6 @@ function AnnotationLayerHeaderContent({
   const layer = state.layers[layerIndex] as XYAnnotationLayerConfig;
   const currentIndexPattern = frame.dataViews.indexPatterns[layer.indexPatternId];
 
-  const extraIconLabelProps = !layer.ignoreGlobalFilters
-    ? {}
-    : {
-        icon: {
-          component: (
-            <EuiIcon
-              type={'filterIgnore'}
-              color={euiTheme.colors.disabledText}
-              css={css`
-                margin-top: 15px;
-              `}
-            />
-          ),
-          tooltipValue: i18n.translate('xpack.lens.layerPanel.ignoreGlobalFilters', {
-            defaultMessage: 'Ignore global filters',
-          }),
-          'data-test-subj': 'lnsChangeIndexPatternIgnoringFilters',
-        },
-      };
   return (
     <ChangeIndexPattern
       data-test-subj="indexPattern-switcher"
@@ -151,7 +140,14 @@ function AnnotationLayerHeaderContent({
         'data-test-subj': 'lns_layerIndexPatternLabel',
         size: 's',
         fontWeight: 'normal',
-        ...extraIconLabelProps,
+        extraIcons: layer.ignoreGlobalFilters
+          ? [
+              getIgnoreGlobalFilterIcon({
+                color: euiTheme.colors.disabledText,
+                dataTestSubj: 'lnsChangeIndexPatternIgnoringFilters',
+              }),
+            ]
+          : undefined,
       }}
       indexPatternId={layer.indexPatternId}
       indexPatternRefs={frame.dataViews.indexPatternRefs}
@@ -239,6 +235,7 @@ const DataLayerHeaderTrigger = function ({
       onClick={onClick}
       fullWidth
       size="s"
+      textProps={{ style: { lineHeight: '100%' } }}
     >
       <>
         <EuiIcon type={currentVisType.icon} />

@@ -23,23 +23,10 @@ import type { DistributiveOmit } from '@elastic/eui';
 import type { ApmBase } from '@elastic/apm-rum';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { FilesSetup, FilesStart } from '@kbn/files-plugin/public';
-import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
+import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/public';
 
-import type {
-  CasesBulkGetRequest,
-  CasesBulkGetResponse,
-  CasesByAlertId,
-  CasesByAlertIDRequest,
-  CasesFindRequest,
-  CasesMetricsRequest,
-  CasesStatusRequest,
-  CommentRequestAlertType,
-  CommentRequestExternalReferenceNoSOType,
-  CommentRequestExternalReferenceSOType,
-  CommentRequestPersistableStateType,
-  CommentRequestUserType,
-} from '../common/api';
 import type { UseCasesAddToExistingCaseModal } from './components/all_cases/selector_modal/use_cases_add_to_existing_case_modal';
 import type { UseCasesAddToNewCaseFlyout } from './components/create/flyout/use_cases_add_to_new_case_flyout';
 import type { canUseCases } from './client/helpers/can_use_cases';
@@ -47,7 +34,6 @@ import type { getRuleIdFromEvent } from './client/helpers/get_rule_id_from_event
 import type { GetCasesContextProps } from './client/ui/get_cases_context';
 import type { GetCasesProps } from './client/ui/get_cases';
 import type { GetAllCasesSelectorModalProps } from './client/ui/get_all_cases_selector_modal';
-import type { GetCreateCaseFlyoutProps } from './client/ui/get_create_case_flyout';
 import type { GetRecentCasesProps } from './client/ui/get_recent_cases';
 import type { CasesStatus, CasesMetrics, CasesFindResponseUI } from '../common/ui';
 import type { GroupAlertsByRule } from './client/helpers/group_alerts_by_rule';
@@ -55,10 +41,27 @@ import type { getUICapabilities } from './client/helpers/capabilities';
 import type { AttachmentFramework } from './client/attachment_framework/types';
 import type { ExternalReferenceAttachmentTypeRegistry } from './client/attachment_framework/external_reference_registry';
 import type { PersistableStateAttachmentTypeRegistry } from './client/attachment_framework/persistable_state_registry';
+import type {
+  CasesByAlertIDRequest,
+  GetRelatedCasesByAlertResponse,
+  CasesFindRequest,
+  CasesStatusRequest,
+  CasesBulkGetRequest,
+  CasesBulkGetResponse,
+  CasesMetricsRequest,
+} from '../common/types/api';
+import type {
+  AlertAttachmentPayload,
+  UserCommentAttachmentPayload,
+  PersistableStateAttachmentPayload,
+  ExternalReferenceNoSOAttachmentPayload,
+  ExternalReferenceSOAttachmentPayload,
+} from '../common/types/domain';
 
 export interface CasesPluginSetup {
   files: FilesSetup;
   security: SecurityPluginSetup;
+  serverless?: ServerlessPluginSetup;
   management: ManagementSetup;
   home?: HomePublicPluginSetup;
 }
@@ -71,8 +74,9 @@ export interface CasesPluginStart {
   files: FilesStart;
   lens: LensPublicStart;
   licensing?: LicensingPluginStart;
-  savedObjectsManagement: SavedObjectsManagementPluginStart;
+  contentManagement: ContentManagementPublicStart;
   security: SecurityPluginStart;
+  serverless?: ServerlessPluginStart;
   spaces?: SpacesPluginStart;
   storage: Storage;
   triggersActionsUi: TriggersActionsStart;
@@ -103,7 +107,10 @@ export interface CasesUiSetup {
 
 export interface CasesUiStart {
   api: {
-    getRelatedCases: (alertId: string, query: CasesByAlertIDRequest) => Promise<CasesByAlertId>;
+    getRelatedCases: (
+      alertId: string,
+      query: CasesByAlertIDRequest
+    ) => Promise<GetRelatedCasesByAlertResponse>;
     cases: {
       find: (query: CasesFindRequest, signal?: AbortSignal) => Promise<CasesFindResponseUI>;
       getCasesStatus: (query: CasesStatusRequest, signal?: AbortSignal) => Promise<CasesStatus>;
@@ -128,14 +135,6 @@ export interface CasesUiStart {
     getAllCasesSelectorModal: (
       props: GetAllCasesSelectorModalProps
     ) => ReactElement<GetAllCasesSelectorModalProps>;
-    /**
-     * Flyout with the form to create a case for the owner
-     * @param props GetCreateCaseFlyoutProps
-     * @returns A react component that is a flyout for creating a case
-     */
-    getCreateCaseFlyout: (
-      props: GetCreateCaseFlyoutProps
-    ) => ReactElement<GetCreateCaseFlyoutProps>;
     /**
      * Get the recent cases component
      * @param props GetRecentCasesProps
@@ -164,11 +163,11 @@ export interface CasesUiStart {
 }
 
 export type SupportedCaseAttachment =
-  | CommentRequestAlertType
-  | CommentRequestUserType
-  | CommentRequestPersistableStateType
-  | CommentRequestExternalReferenceNoSOType
-  | CommentRequestExternalReferenceSOType;
+  | AlertAttachmentPayload
+  | UserCommentAttachmentPayload
+  | PersistableStateAttachmentPayload
+  | ExternalReferenceNoSOAttachmentPayload
+  | ExternalReferenceSOAttachmentPayload;
 
 export type CaseAttachments = SupportedCaseAttachment[];
 export type CaseAttachmentWithoutOwner = DistributiveOmit<SupportedCaseAttachment, 'owner'>;

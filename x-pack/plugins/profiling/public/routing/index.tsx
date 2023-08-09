@@ -9,13 +9,17 @@ import { toNumberRt } from '@kbn/io-ts-utils';
 import { createRouter, Outlet } from '@kbn/typed-react-router-config';
 import * as t from 'io-ts';
 import React from 'react';
-import { FlameGraphComparisonMode, FlameGraphNormalizationMode } from '../../common/flamegraph';
 import { TopNFunctionSortField, topNFunctionSortFieldRt } from '../../common/functions';
 import { StackTracesDisplayOption, TopNType } from '../../common/stack_traces';
+import { ComparisonMode, NormalizationMode } from '../components/normalization_menu';
 import { RedirectTo } from '../components/redirect_to';
-import { FlameGraphsView } from '../views/flame_graphs_view';
-import { FunctionsView } from '../views/functions_view';
-import { NoDataView } from '../views/no_data_view';
+import { FlameGraphsView } from '../views/flamegraphs';
+import { DifferentialFlameGraphsView } from '../views/flamegraphs/differential_flamegraphs';
+import { FlameGraphView } from '../views/flamegraphs/flamegraph';
+import { FunctionsView } from '../views/functions';
+import { DifferentialTopNFunctionsView } from '../views/functions/differential_topn';
+import { TopNFunctionsView } from '../views/functions/topn';
+import { NoDataTabs, NoDataView } from '../views/no_data_view';
 import { StackTracesView } from '../views/stack_traces_view';
 import { RouteBreadcrumb } from './route_breadcrumb';
 
@@ -33,13 +37,25 @@ const routes = {
     ),
     children: {
       '/add-data-instructions': {
-        element: (
-          <NoDataView
-            subTitle={i18n.translate('xpack.profiling.addDataTitle', {
-              defaultMessage: 'Select an option below to deploy the host-agent.',
-            })}
-          />
-        ),
+        element: <NoDataView />,
+        params: t.type({
+          query: t.type({
+            selectedTab: t.union([
+              t.literal(NoDataTabs.Binary),
+              t.literal(NoDataTabs.Deb),
+              t.literal(NoDataTabs.Docker),
+              t.literal(NoDataTabs.ElasticAgentIntegration),
+              t.literal(NoDataTabs.Kubernetes),
+              t.literal(NoDataTabs.RPM),
+              t.literal(NoDataTabs.Symbols),
+            ]),
+          }),
+        }),
+        defaults: {
+          query: {
+            selectedTab: NoDataTabs.Kubernetes,
+          },
+        },
       },
       '/': {
         children: {
@@ -95,9 +111,14 @@ const routes = {
                     })}
                     href="/flamegraphs/flamegraph"
                   >
-                    <Outlet />
+                    <FlameGraphView />
                   </RouteBreadcrumb>
                 ),
+                params: t.type({
+                  query: t.partial({
+                    searchText: t.string,
+                  }),
+                }),
               },
               '/flamegraphs/differential': {
                 element: (
@@ -107,7 +128,7 @@ const routes = {
                     })}
                     href="/flamegraphs/differential"
                   >
-                    <Outlet />
+                    <DifferentialFlameGraphsView />
                   </RouteBreadcrumb>
                 ),
                 params: t.type({
@@ -117,24 +138,28 @@ const routes = {
                       comparisonRangeTo: t.string,
                       comparisonKuery: t.string,
                       comparisonMode: t.union([
-                        t.literal(FlameGraphComparisonMode.Absolute),
-                        t.literal(FlameGraphComparisonMode.Relative),
+                        t.literal(ComparisonMode.Absolute),
+                        t.literal(ComparisonMode.Relative),
+                      ]),
+                      normalizationMode: t.union([
+                        t.literal(NormalizationMode.Scale),
+                        t.literal(NormalizationMode.Time),
                       ]),
                     }),
                     t.partial({
-                      normalizationMode: t.union([
-                        t.literal(FlameGraphNormalizationMode.Scale),
-                        t.literal(FlameGraphNormalizationMode.Time),
-                      ]),
                       baseline: toNumberRt,
                       comparison: toNumberRt,
+                      searchText: t.string,
                     }),
                   ]),
                 }),
                 defaults: {
                   query: {
-                    comparisonMode: FlameGraphComparisonMode.Absolute,
-                    normalizationMode: FlameGraphNormalizationMode.Time,
+                    comparisonRangeFrom: 'now-15m',
+                    comparisonRangeTo: 'now',
+                    comparisonKuery: '',
+                    comparisonMode: ComparisonMode.Absolute,
+                    normalizationMode: NormalizationMode.Time,
                   },
                 },
               },
@@ -174,9 +199,12 @@ const routes = {
                     })}
                     href="/functions/topn"
                   >
-                    <Outlet />
+                    <TopNFunctionsView />
                   </RouteBreadcrumb>
                 ),
+                params: t.type({
+                  query: t.partial({ pageIndex: toNumberRt }),
+                }),
               },
               '/functions/differential': {
                 element: (
@@ -186,16 +214,35 @@ const routes = {
                     })}
                     href="/functions/differential"
                   >
-                    <Outlet />
+                    <DifferentialTopNFunctionsView />
                   </RouteBreadcrumb>
                 ),
                 params: t.type({
-                  query: t.type({
-                    comparisonRangeFrom: t.string,
-                    comparisonRangeTo: t.string,
-                    comparisonKuery: t.string,
-                  }),
+                  query: t.intersection([
+                    t.type({
+                      comparisonRangeFrom: t.string,
+                      comparisonRangeTo: t.string,
+                      comparisonKuery: t.string,
+                      normalizationMode: t.union([
+                        t.literal(NormalizationMode.Scale),
+                        t.literal(NormalizationMode.Time),
+                      ]),
+                    }),
+                    t.partial({
+                      baseline: toNumberRt,
+                      comparison: toNumberRt,
+                      pageIndex: toNumberRt,
+                    }),
+                  ]),
                 }),
+                defaults: {
+                  query: {
+                    comparisonRangeFrom: 'now-15m',
+                    comparisonRangeTo: 'now',
+                    comparisonKuery: '',
+                    normalizationMode: NormalizationMode.Time,
+                  },
+                },
               },
             },
           },

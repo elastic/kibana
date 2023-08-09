@@ -14,12 +14,16 @@ import {
 } from '@kbn/core/server';
 import Boom from '@hapi/boom';
 import {
+  metricsExplorerViewAttributesRT,
   staticMetricsExplorerViewAttributes,
   staticMetricsExplorerViewId,
 } from '../../../common/metrics_explorer_views';
 import type {
   CreateMetricsExplorerViewAttributesRequestPayload,
+  FindMetricsExplorerViewResponsePayload,
+  GetMetricsExplorerViewResponsePayload,
   MetricsExplorerViewRequestQuery,
+  UpdateMetricsExplorerViewResponsePayload,
 } from '../../../common/http_api/latest';
 import type {
   MetricsExplorerView,
@@ -41,7 +45,9 @@ export class MetricsExplorerViewsClient implements IMetricsExplorerViewsClient {
   static STATIC_VIEW_ID = '0';
   static DEFAULT_SOURCE_ID = 'default';
 
-  public async find(query: MetricsExplorerViewRequestQuery): Promise<MetricsExplorerView[]> {
+  public async find(
+    query: MetricsExplorerViewRequestQuery
+  ): Promise<FindMetricsExplorerViewResponsePayload['data']> {
     this.logger.debug('Trying to load metrics explorer views ...');
 
     const sourceId = query.sourceId ?? MetricsExplorerViewsClient.DEFAULT_SOURCE_ID;
@@ -71,7 +77,7 @@ export class MetricsExplorerViewsClient implements IMetricsExplorerViewsClient {
   public async get(
     metricsExplorerViewId: string,
     query: MetricsExplorerViewRequestQuery
-  ): Promise<MetricsExplorerView> {
+  ): Promise<GetMetricsExplorerViewResponsePayload> {
     this.logger.debug(`Trying to load metrics explorer view with id ${metricsExplorerViewId} ...`);
 
     const sourceId = query.sourceId ?? MetricsExplorerViewsClient.DEFAULT_SOURCE_ID;
@@ -103,7 +109,7 @@ export class MetricsExplorerViewsClient implements IMetricsExplorerViewsClient {
     metricsExplorerViewId: string | null,
     attributes: CreateMetricsExplorerViewAttributesRequestPayload,
     query: MetricsExplorerViewRequestQuery
-  ): Promise<MetricsExplorerView> {
+  ): Promise<UpdateMetricsExplorerViewResponsePayload> {
     this.logger.debug(
       `Trying to update metrics explorer view with id "${metricsExplorerViewId}"...`
     );
@@ -147,10 +153,10 @@ export class MetricsExplorerViewsClient implements IMetricsExplorerViewsClient {
     });
   }
 
-  private mapSavedObjectToMetricsExplorerView(
-    savedObject: SavedObject | SavedObjectsUpdateResponse,
+  private mapSavedObjectToMetricsExplorerView<T>(
+    savedObject: SavedObject<T> | SavedObjectsUpdateResponse<T>,
     defaultViewId?: string
-  ) {
+  ): MetricsExplorerView {
     const metricsExplorerViewSavedObject = decodeOrThrow(metricsExplorerViewSavedObjectRT)(
       savedObject
     );
@@ -160,7 +166,9 @@ export class MetricsExplorerViewsClient implements IMetricsExplorerViewsClient {
       version: metricsExplorerViewSavedObject.version,
       updatedAt: metricsExplorerViewSavedObject.updated_at,
       attributes: {
-        ...metricsExplorerViewSavedObject.attributes,
+        ...decodeOrThrow(metricsExplorerViewAttributesRT)(
+          metricsExplorerViewSavedObject.attributes
+        ),
         isDefault: metricsExplorerViewSavedObject.id === defaultViewId,
         isStatic: false,
       },

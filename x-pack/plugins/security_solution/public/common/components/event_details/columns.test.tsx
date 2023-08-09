@@ -26,6 +26,8 @@ jest.mock('@kbn/cell-actions/src/hooks/use_load_actions', () => {
   };
 });
 
+jest.mock('../../hooks/use_get_field_spec');
+
 interface Column {
   field: string;
   name: string | JSX.Element;

@@ -22,7 +22,7 @@ export function TimeoutPrompt({
       title={
         <h2>
           {i18n.translate('xpack.apm.serviceMap.timeoutPromptTitle', {
-            defaultMessage: 'Service map timeout',
+            defaultMessage: 'Service Map timeout',
           })}
         </h2>
       }

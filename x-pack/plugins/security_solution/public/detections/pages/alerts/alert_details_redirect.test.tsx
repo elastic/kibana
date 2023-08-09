@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import { render } from '@testing-library/react';
-import { Router } from 'react-router-dom';
+import { Router } from '@kbn/shared-ux-router';
 import { AlertDetailsRedirect } from './alert_details_redirect';
 import {
   createSecuritySolutionStorageMock,

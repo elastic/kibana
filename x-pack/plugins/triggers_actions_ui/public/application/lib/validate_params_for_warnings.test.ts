@@ -22,7 +22,8 @@ describe('validateParamsForWarnings', () => {
   ];
 
   test('returns warnings when publicUrl is not set and there are publicUrl variables used', () => {
-    const warning = 'server.publicBaseUrl is not set. Actions will use relative URLs.';
+    const warning =
+      'server.publicBaseUrl is not set. Generated URLs will be either relative or empty.';
     expect(
       validateParamsForWarnings('Test for {{context.url}}', undefined, actionVariables)
     ).toEqual(warning);

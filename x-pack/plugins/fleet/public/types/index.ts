@@ -134,6 +134,7 @@ export type {
   PostRetrieveAgentsByActionsResponse,
   GetBulkAssetsRequest,
   GetBulkAssetsResponse,
+  KibanaSavedObjectType,
 } from '../../common/types';
 export {
   entries,

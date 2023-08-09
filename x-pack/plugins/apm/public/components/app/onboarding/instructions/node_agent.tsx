@@ -15,11 +15,19 @@ import {
   INSTRUCTION_VARIANT,
   AgentInstructions,
 } from '../instruction_variants';
+import { agentStatusCheckInstruction } from '../agent_status_instructions';
 
 export const createNodeAgentInstructions = (
   commonOptions: AgentInstructions
 ): EuiStepProps[] => {
-  const { baseUrl, apmServerUrl, apiKeyDetails } = commonOptions;
+  const {
+    baseUrl,
+    apmServerUrl,
+    apiKeyDetails,
+    checkAgentStatus,
+    agentStatus,
+    agentStatusLoading,
+  } = commonOptions;
   return [
     {
       title: i18n.translate('xpack.apm.onboarding.node.install.title', {
@@ -89,5 +97,10 @@ export const createNodeAgentInstructions = (
         </>
       ),
     },
+    agentStatusCheckInstruction({
+      checkAgentStatus,
+      agentStatus,
+      agentStatusLoading,
+    }),
   ];
 };

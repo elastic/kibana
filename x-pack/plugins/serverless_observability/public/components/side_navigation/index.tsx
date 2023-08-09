@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
+import type { CloudStart } from '@kbn/cloud-plugin/public';
 import { ServerlessPluginStart } from '@kbn/serverless/public';
 import {
   DefaultNavigation,
   NavigationKibanaProvider,
   NavigationTreeDefinition,
-  getPresets,
 } from '@kbn/shared-ux-chrome-navigation';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 
 const navigationTree: NavigationTreeDefinition = {
   body: [
-    { type: 'cloudLink', preset: 'projects' },
     { type: 'recentlyAccessed' },
     {
       type: 'navGroup',
@@ -25,67 +25,121 @@ const navigationTree: NavigationTreeDefinition = {
       title: 'Observability',
       icon: 'logoObservability',
       defaultIsCollapsed: false,
+      breadcrumbStatus: 'hidden',
       children: [
         {
-          id: 'services-infra',
+          id: 'discover-dashboard-alerts-slos',
           children: [
-            { id: 'services', title: 'Services', href: '/app/apm/services' },
             {
-              id: 'infra',
-              title: 'Infrastructure',
-              href: '/app/metrics/inventory',
+              title: i18n.translate('xpack.serverlessObservability.nav.discover', {
+                defaultMessage: 'Discover',
+              }),
+              link: 'discover:log-explorer',
+            },
+            {
+              title: i18n.translate('xpack.serverlessObservability.nav.dashboards', {
+                defaultMessage: 'Dashboards',
+              }),
+              link: 'dashboards',
+              getIsActive: ({ pathNameSerialized, prepend }) => {
+                return pathNameSerialized.startsWith(prepend('/app/dashboards'));
+              },
+            },
+            {
+              link: 'observability-overview:alerts',
+            },
+            {
+              link: 'observability-overview:slos',
+            },
+            {
+              id: 'aiops',
+              title: 'AIOps',
+              children: [
+                {
+                  title: i18n.translate('xpack.serverlessObservability.nav.ml.jobs', {
+                    defaultMessage: 'Anomaly detection',
+                  }),
+                  link: 'ml:anomalyDetection',
+                },
+                {
+                  title: i18n.translate('xpack.serverlessObservability.ml.logRateAnalysis', {
+                    defaultMessage: 'Log rate analysis',
+                  }),
+                  link: 'ml:logRateAnalysis',
+                  icon: 'beaker',
+                  getIsActive: ({ pathNameSerialized, prepend }) => {
+                    return pathNameSerialized.includes(prepend('/app/ml/aiops/log_rate_analysis'));
+                  },
+                },
+                {
+                  link: 'ml:changePointDetections',
+                  icon: 'beaker',
+                  getIsActive: ({ pathNameSerialized, prepend }) => {
+                    return pathNameSerialized.includes(
+                      prepend('/app/ml/aiops/change_point_detection')
+                    );
+                  },
+                },
+                {
+                  title: i18n.translate('xpack.serverlessObservability.nav.ml.job.notifications', {
+                    defaultMessage: 'Job notifications',
+                  }),
+                  link: 'ml:notifications',
+                },
+              ],
             },
           ],
         },
         {
-          id: 'alerts-cases-slos',
+          id: 'applications',
           children: [
             {
-              id: 'alerts',
-              title: 'Alerts',
-              href: '/app/observability/alerts',
-            },
-            {
-              id: 'Cases',
-              title: 'Cases',
-              href: '/app/observability/cases',
-            },
-            {
-              id: 'slos',
-              title: 'SLOs',
-              href: '/app/observability/slos',
+              id: 'apm',
+              title: i18n.translate('xpack.serverlessObservability.nav.applications', {
+                defaultMessage: 'Applications',
+              }),
+              children: [
+                {
+                  link: 'apm:services',
+                  getIsActive: ({ pathNameSerialized, prepend }) => {
+                    const regex = /app\/apm\/.*service.*/;
+                    return regex.test(pathNameSerialized);
+                  },
+                },
+                {
+                  link: 'apm:traces',
+                  getIsActive: ({ pathNameSerialized, prepend }) => {
+                    return pathNameSerialized.startsWith(prepend('/app/apm/traces'));
+                  },
+                },
+                {
+                  link: 'apm:dependencies',
+                  getIsActive: ({ pathNameSerialized, prepend }) => {
+                    return pathNameSerialized.startsWith(prepend('/app/apm/dependencies'));
+                  },
+                },
+              ],
             },
           ],
         },
         {
-          id: 'signals',
-          title: 'Signals',
+          id: 'cases-vis',
           children: [
             {
-              id: 'traces',
-              title: 'Traces',
-              href: '/app/apm/traces',
+              link: 'observability-overview:cases',
             },
             {
-              id: 'logs',
-              title: 'Logs',
-              href: '/app/logs/stream',
-            },
-          ],
-        },
-        {
-          id: 'toolbox',
-          title: 'Toolbox',
-          children: [
-            {
-              id: 'visualization',
-              title: 'Visualization',
-              href: '/app/visualize',
-            },
-            {
-              id: 'dashboards',
-              title: 'Dashboards',
-              href: '/app/dashboards',
+              title: i18n.translate('xpack.serverlessObservability.nav.visualizations', {
+                defaultMessage: 'Visualizations',
+              }),
+              link: 'visualize',
+              getIsActive: ({ pathNameSerialized, prepend }) => {
+                return (
+                  pathNameSerialized.startsWith(prepend('/app/visualize')) ||
+                  pathNameSerialized.startsWith(prepend('/app/lens')) ||
+                  pathNameSerialized.startsWith(prepend('/app/maps'))
+                );
+              },
             },
           ],
         },
@@ -93,42 +147,74 @@ const navigationTree: NavigationTreeDefinition = {
           id: 'on-boarding',
           children: [
             {
-              id: 'get-started',
-              title: 'Get started',
-              icon: 'launch',
-              href: '/app/observabilityOnboarding',
+              title: i18n.translate('xpack.serverlessObservability.nav.getStarted', {
+                defaultMessage: 'Add data',
+              }),
+              link: 'observabilityOnboarding',
             },
           ],
         },
       ],
     },
-    {
-      type: 'navGroup',
-      ...getPresets('analytics'),
-    },
-    {
-      type: 'navGroup',
-      ...getPresets('ml'),
-    },
   ],
   footer: [
     {
       type: 'navGroup',
-      ...getPresets('management'),
+      id: 'devTools',
+      title: i18n.translate('xpack.serverlessObservability.nav.devTools', {
+        defaultMessage: 'Developer tools',
+      }),
+      link: 'dev_tools',
+      icon: 'editorCodeBlock',
+    },
+    {
+      type: 'navGroup',
+      id: 'project_settings_project_nav',
+      title: i18n.translate('xpack.serverlessObservability.nav.projectSettings', {
+        defaultMessage: 'Project settings',
+      }),
+      icon: 'gear',
+      breadcrumbStatus: 'hidden',
+      children: [
+        {
+          id: 'settings',
+          children: [
+            {
+              link: 'management',
+              title: i18n.translate('xpack.serverlessObservability.nav.mngt', {
+                defaultMessage: 'Management',
+              }),
+            },
+            {
+              link: 'integrations',
+            },
+            {
+              link: 'fleet',
+            },
+            {
+              id: 'cloudLinkUserAndRoles',
+              cloudLink: 'userAndRoles',
+            },
+            {
+              id: 'cloudLinkBilling',
+              cloudLink: 'billingAndSub',
+            },
+          ],
+        },
+      ],
     },
   ],
 };
 
 export const getObservabilitySideNavComponent =
-  (core: CoreStart, { serverless }: { serverless: ServerlessPluginStart }) =>
+  (
+    core: CoreStart,
+    { serverless, cloud }: { serverless: ServerlessPluginStart; cloud: CloudStart }
+  ) =>
   () => {
     return (
-      <NavigationKibanaProvider core={core} serverless={serverless}>
-        <DefaultNavigation
-          homeRef="/app/enterprise_search/content/setup_guide"
-          navigationTree={navigationTree}
-          dataTestSubj="svlObservabilitySideNav"
-        />
+      <NavigationKibanaProvider core={core} serverless={serverless} cloud={cloud}>
+        <DefaultNavigation navigationTree={navigationTree} dataTestSubj="svlObservabilitySideNav" />
       </NavigationKibanaProvider>
     );
   };

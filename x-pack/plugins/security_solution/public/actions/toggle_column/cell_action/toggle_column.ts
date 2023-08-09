@@ -37,16 +37,21 @@ export const createToggleColumnCellActionFactory = createCellActionFactory(
     type: SecurityCellActionType.TOGGLE_COLUMN,
     getIconType: () => ICON,
     getDisplayName: () => COLUMN_TOGGLE,
-    getDisplayNameTooltip: ({ field, metadata }) =>
-      metadata?.isObjectArray ? NESTED_COLUMN(field.name) : COLUMN_TOGGLE,
-    isCompatible: async ({ field, metadata }) => {
+    getDisplayNameTooltip: ({ data, metadata }) =>
+      metadata?.isObjectArray ? NESTED_COLUMN(data[0]?.field.name) : COLUMN_TOGGLE,
+    isCompatible: async ({ data, metadata }) => {
+      const field = data[0]?.field;
+
       return (
+        data.length === 1 &&
         fieldHasCellActions(field.name) &&
         !!metadata?.scopeId &&
         (isTimelineScope(metadata.scopeId) || isInTableScope(metadata.scopeId))
       );
     },
-    execute: async ({ metadata, field }) => {
+
+    execute: async ({ metadata, data }) => {
+      const field = data[0]?.field;
       const scopeId = metadata?.scopeId;
       if (!scopeId) return;
 

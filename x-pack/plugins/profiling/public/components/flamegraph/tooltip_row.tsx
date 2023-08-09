@@ -17,6 +17,7 @@ export function TooltipRow({
   formatDifferenceAsPercentage,
   showDifference,
   formatValue,
+  prependValue = '',
 }: {
   value: number;
   label: string | React.ReactElement;
@@ -24,8 +25,11 @@ export function TooltipRow({
   formatDifferenceAsPercentage: boolean;
   showDifference: boolean;
   formatValue?: (value: number) => string;
+  prependValue?: string;
 }) {
-  const valueLabel = formatValue ? formatValue(Math.abs(value)) : value.toString();
+  const valueLabel = `${prependValue}${
+    formatValue ? formatValue(Math.abs(value)) : value.toString()
+  }`;
   const comparisonLabel =
     formatValue && isNumber(comparison) ? formatValue(comparison) : comparison?.toString();
 

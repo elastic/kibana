@@ -89,6 +89,16 @@ export const findingsNavigation = {
     path: `${CLOUD_SECURITY_POSTURE_BASE_PATH}/findings/vulnerabilities`,
     id: 'cloud_security_posture-findings-vulnerabilities',
   },
+  vulnerabilities_by_resource: {
+    name: NAV_ITEMS_NAMES.FINDINGS,
+    path: `${CLOUD_SECURITY_POSTURE_BASE_PATH}/findings/vulnerabilities/resource`,
+    id: 'cloud_security_posture-findings-vulnerabilities-resource',
+  },
+  resource_vulnerabilities: {
+    name: NAV_ITEMS_NAMES.FINDINGS,
+    path: `${CLOUD_SECURITY_POSTURE_BASE_PATH}/findings/vulnerabilities/resource/:resourceId`,
+    id: 'cloud_security_posture-findings-vulnerabilities-resourceId',
+  },
 };
 
 const ELASTIC_BASE_SHORT_URL = 'https://ela.st';

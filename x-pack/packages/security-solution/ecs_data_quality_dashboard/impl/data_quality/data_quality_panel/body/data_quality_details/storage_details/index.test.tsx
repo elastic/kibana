@@ -39,7 +39,7 @@ const defaultProps: Props = {
   onIndexSelected,
   patternRollups,
   patterns,
-  theme: DARK_THEME,
+  baseTheme: DARK_THEME,
 };
 
 describe('StorageDetails', () => {

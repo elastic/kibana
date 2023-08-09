@@ -87,7 +87,7 @@ export const SearchIndices: React.FC = () => {
     ? ''
     : hasNoIndices
     ? i18n.translate('xpack.enterpriseSearch.content.searchIndices.searchIndices.emptyPageTitle', {
-        defaultMessage: 'Welcome to Enterprise Search',
+        defaultMessage: 'Welcome to Search',
       })
     : i18n.translate('xpack.enterpriseSearch.content.searchIndices.searchIndices.pageTitle', {
         defaultMessage: 'Elasticsearch indices',
@@ -131,14 +131,14 @@ export const SearchIndices: React.FC = () => {
                 <EuiCallOut
                   size="m"
                   title={i18n.translate('xpack.enterpriseSearch.content.callout.title', {
-                    defaultMessage: 'Introducing Elasticsearch indices in Enterprise Search',
+                    defaultMessage: 'Introducing Elasticsearch indices in Search',
                   })}
                   iconType="iInCircle"
                 >
                   <p>
                     <FormattedMessage
                       id="xpack.enterpriseSearch.content.indices.callout.text"
-                      defaultMessage="Your Elasticsearch indices are now front and center in Enterprise Search. You can create new indices and build search experiences with them directly. To learn more about how to use Elasticsearch indices in Enterprise Search {docLink}"
+                      defaultMessage="Your Elasticsearch indices are now front and center in Search. You can create new indices and build search experiences with them directly. To learn more about how to use Elasticsearch indices in Search {docLink}"
                       values={{
                         docLink: (
                           <EuiLink
@@ -264,7 +264,7 @@ export const SearchIndices: React.FC = () => {
                   {i18n.translate(
                     'xpack.enterpriseSearch.content.searchIndices.searchIndices.stepsTitle',
                     {
-                      defaultMessage: 'Build beautiful search experiences with Enterprise Search',
+                      defaultMessage: 'Build beautiful search experiences with Search',
                     }
                   )}
                 </h2>

@@ -6,18 +6,20 @@
  */
 
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { UptimeEsClient } from '../../../lib';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
-import { UMElasticsearchQueryFn } from '../adapters/framework';
 import { JourneyStep } from '../../../../common/runtime_types/ping/synthetics';
 
 export interface GetJourneyStepsParams {
   checkGroups: string[];
 }
 
-export const getJourneyFailedSteps: UMElasticsearchQueryFn<
-  GetJourneyStepsParams,
-  JourneyStep[]
-> = async ({ uptimeEsClient, checkGroups }) => {
+export const getJourneyFailedSteps = async ({
+  uptimeEsClient,
+  checkGroups,
+}: GetJourneyStepsParams & {
+  uptimeEsClient: UptimeEsClient;
+}): Promise<JourneyStep[]> => {
   const params = {
     query: {
       bool: {

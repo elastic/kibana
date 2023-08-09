@@ -24,7 +24,7 @@ import {
   RawSavedDashboardPanel640To720,
   RawSavedDashboardPanel730ToLatest,
 } from './types';
-import { GridData } from '../../../../common';
+import { GridData } from '../../../../common/content_management';
 
 const PANEL_HEIGHT_SCALE_FACTOR = 5;
 const PANEL_HEIGHT_SCALE_FACTOR_WITH_MARGINS = 4;

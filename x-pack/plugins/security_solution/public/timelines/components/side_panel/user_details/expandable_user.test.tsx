@@ -47,6 +47,7 @@ describe('Expandable Host Component', () => {
   });
   const mockProps = {
     contextID: 'text-context',
+    scopeId: 'testScopeId',
     userName: 'testUserName',
     isDraggable: true,
   };

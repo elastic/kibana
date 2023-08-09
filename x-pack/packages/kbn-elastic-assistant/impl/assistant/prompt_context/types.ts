@@ -8,7 +8,7 @@
 import type { ReactNode } from 'react';
 
 /**
- * helps the Elastic Assistant display the most relevant user prompts
+ * helps the Elastic AI Assistant display the most relevant user prompts
  */
 export type PromptContextCategory =
   | 'alert'
@@ -19,7 +19,7 @@ export type PromptContextCategory =
   | string;
 
 /**
- * This interface is used to pass context to the Elastic Assistant,
+ * This interface is used to pass context to the Elastic AI Assistant,
  * for the purpose of building prompts. Examples of context include:
  * - a single alert
  * - multiple alerts
@@ -33,39 +33,53 @@ export interface PromptContext {
   /**
    * The category of data, e.g. `alert | alerts | event | events | string`
    *
-   * `category` helps the Elastic Assistant display the most relevant user prompts
+   * `category` helps the Elastic AI Assistant display the most relevant user prompts
    */
   category: PromptContextCategory;
 
   /**
-   * The Elastic Assistant will display this **short**, static description
+   * The Elastic AI Assistant will display this **short**, static description
    * in the context pill
    */
   description: string;
 
   /**
-   * The Elastic Assistant will invoke this function to retrieve the context data,
+   * The Elastic AI Assistant will invoke this function to retrieve the context data,
    * which will be included in a prompt (e.g. the contents of an alert or an event)
    */
-  getPromptContext: () => Promise<string>;
+  getPromptContext: () => Promise<string> | Promise<Record<string, string[]>>;
 
   /**
    * A unique identifier for this prompt context
    */
   id: string;
   /**
-   * An optional user prompt that's filled in, but not sent, when the Elastic Assistant opens
+   * An optional user prompt that's filled in, but not sent, when the Elastic AI Assistant opens
    */
   suggestedUserPrompt?: string;
 
   /**
-   * The Elastic Assistant will display this tooltip when the user hovers over the context pill
+   * The Elastic AI Assistant will display this tooltip when the user hovers over the context pill
    */
   tooltip: ReactNode;
 }
 
 /**
- * This interface is used to pass a default or base set of contexts to the Elastic Assistant when
+ * A prompt context that was added from the pills to the current conversation, but not yet sent
+ */
+export interface SelectedPromptContext {
+  /** fields allowed to be included in a conversation */
+  allow: string[];
+  /** fields that will be anonymized */
+  allowReplacement: string[];
+  /** unique id of the selected `PromptContext` */
+  promptContextId: string;
+  /** this data is not anonymized  */
+  rawData: string | Record<string, string[]>;
+}
+
+/**
+ * This interface is used to pass a default or base set of contexts to the Elastic AI Assistant when
  * initializing it. This is used to provide 'category' options when users create Quick Prompts.
  * Also, useful for collating all of a solutions' prompts in one place.
  *

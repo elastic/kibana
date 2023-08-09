@@ -30,6 +30,7 @@ import {
   type MlAnomaliesTableRecord,
 } from '@kbn/ml-anomaly-utils';
 import { formatHumanReadableDateTimeSeconds, timeFormatter } from '@kbn/ml-date-utils';
+import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
 import { mlJobService } from '../../services/job_service';
 import { getDataViewIdFromName } from '../../util/index_utils';
 import { getInitialAnomaliesLayers, getInitialSourceIndexFieldLayers } from '../../../maps/util';
@@ -38,14 +39,13 @@ import { ml } from '../../services/ml_api_service';
 import { escapeKueryForFieldValuePair, replaceStringTokens } from '../../util/string_utils';
 import { getUrlForRecord, openCustomUrlWindow } from '../../util/custom_url_utils';
 import { ML_APP_LOCATOR, ML_PAGES } from '../../../../common/constants/locator';
-import { SEARCH_QUERY_LANGUAGE } from '../../../../common/constants/search';
 // @ts-ignore
 import {
   escapeDoubleQuotes,
   getDateFormatTz,
   SourceIndicesWithGeoFields,
 } from '../../explorer/explorer_utils';
-import { checkPermission } from '../../capabilities/check_capabilities';
+import { usePermissionCheck } from '../../capabilities/check_capabilities';
 import type { TimeRangeBounds } from '../../util/time_buckets';
 import { useMlKibana } from '../../contexts/kibana';
 // @ts-ignore
@@ -617,7 +617,8 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
   };
 
   const { anomaly, showViewSeriesLink } = props;
-  const canConfigureRules = isRuleSupported(anomaly.source) && checkPermission('canUpdateJob');
+  const canUpdateJob = usePermissionCheck('canUpdateJob');
+  const canConfigureRules = isRuleSupported(anomaly.source) && canUpdateJob;
 
   const contextMenuItems = useMemo(() => {
     const items = [];

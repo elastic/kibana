@@ -6,46 +6,41 @@
  */
 
 import React from 'react';
-import { Metadata, type MetadataProps } from './metadata';
+import { Metadata } from './metadata';
 
 import { useMetadata } from '../../hooks/use_metadata';
 import { useSourceContext } from '../../../../containers/metrics_source';
 import { render } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
+import { AssetDetailsStateProvider } from '../../hooks/use_asset_details_state';
 
 jest.mock('../../../../containers/metrics_source');
 jest.mock('../../hooks/use_metadata');
 
-const metadataProps: MetadataProps = {
-  currentTimeRange: {
-    from: 1679316685686,
-    to: 1679585836087,
-    interval: '1m',
-  },
-  nodeType: 'host',
-  node: {
-    id: 'host-1-0',
-    name: 'host-1',
-    os: 'iOS',
-    title: {
-      name: 'host-1',
-      cloudProvider: 'gcp',
-    },
-    rx: 0,
-    tx: 0,
-    memory: 0.5445920331099282,
-    cpu: 0.2000718443867342,
-    diskLatency: 0,
-    memoryTotal: 16777216,
-  },
-  showActionsColumn: true,
-};
-
 const renderHostMetadata = () =>
   render(
     <I18nProvider>
-      <Metadata {...metadataProps} />
+      <AssetDetailsStateProvider
+        state={{
+          dateRange: {
+            from: '2023-04-09T11:07:49Z',
+            to: '2023-04-09T11:23:49Z',
+          },
+          nodeType: 'host',
+          node: {
+            id: 'host-1',
+            name: 'host-1',
+          },
+          overrides: {
+            metadata: {
+              showActionsColumn: true,
+            },
+          },
+        }}
+      >
+        <Metadata />
+      </AssetDetailsStateProvider>
     </I18nProvider>,
     { wrapper: EuiThemeProvider }
   );

@@ -11,6 +11,7 @@ import { BoolQuery } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { useBreadcrumbs, useFetcher } from '@kbn/observability-shared-plugin/public';
+import { Chat } from '@kbn/cloud-chat-plugin/public';
 
 import { useKibana } from '../../utils/kibana_react';
 import { LoadingObservability } from '../../components/loading_observability';
@@ -21,8 +22,8 @@ import { HeaderMenu } from './components/header_menu/header_menu';
 import { Resources } from './components/resources';
 import { NewsFeed } from './components/news_feed/news_feed';
 import { ObservabilityStatusProgress } from './components/observability_status/observability_status_progress';
-import { observabilityAlertFeatureIds } from '../../config/alert_feature_ids';
-import { paths } from '../../config/paths';
+import { observabilityAlertFeatureIds } from '../../../common/constants';
+import { paths } from '../../../common/locators/paths';
 import { useDatePickerContext } from '../../hooks/use_date_picker_context';
 import { useGuidedSetupProgress } from '../../hooks/use_guided_setup_progress';
 import { useHasData } from '../../hooks/use_has_data';
@@ -240,6 +241,8 @@ export function OverviewPage() {
       {isDataAssistantFlyoutVisible ? (
         <DataAssistantFlyout onClose={() => setIsDataAssistantFlyoutVisible(false)} />
       ) : null}
+
+      <Chat />
     </ObservabilityPageTemplate>
   );
 }

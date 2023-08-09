@@ -33,7 +33,7 @@ exports[`AddLicense component when license is active should display correct verb
       class="emotion-euiCard__footer"
     >
       <a
-        class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-base-primary"
+        class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-base-primary"
         data-test-subj="updateLicenseButton"
         href="/upload_license"
         rel="noreferrer"
@@ -82,7 +82,7 @@ exports[`AddLicense component when license is expired should display with correc
       class="emotion-euiCard__footer"
     >
       <a
-        class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-base-primary"
+        class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-base-primary"
         data-test-subj="updateLicenseButton"
         href="/upload_license"
         rel="noreferrer"

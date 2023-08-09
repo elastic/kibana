@@ -12,12 +12,12 @@ import { isOfAggregateQueryType } from '@kbn/es-query';
 import { useStore } from 'react-redux';
 import { TopNavMenuData } from '@kbn/navigation-plugin/public';
 import { getEsQueryConfig } from '@kbn/data-plugin/public';
-import type { DataView } from '@kbn/data-views-plugin/public';
+import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
 import moment from 'moment';
 import { LENS_APP_LOCATOR } from '../../common/locator/locator';
-import { ENABLE_SQL } from '../../common/constants';
+import { LENS_APP_NAME } from '../../common/constants';
 import { LensAppServices, LensTopNavActions, LensTopNavMenuProps } from './types';
 import { toggleSettingsMenuOpen } from './settings_menu';
 import {
@@ -25,7 +25,6 @@ import {
   useLensSelector,
   useLensDispatch,
   LensAppState,
-  DispatchSetState,
   switchAndCleanDatasource,
 } from '../state_management';
 import {
@@ -314,7 +313,7 @@ export const LensTopNavMenu = ({
   } = useLensSelector((state) => state.lens);
 
   const dispatch = useLensDispatch();
-  const dispatchSetState: DispatchSetState = React.useCallback(
+  const dispatchSetState = React.useCallback(
     (state: Partial<LensAppState>) => dispatch(setState(state)),
     [dispatch]
   );
@@ -960,10 +959,8 @@ export const LensTopNavMenu = ({
   ]);
 
   const onCreateDefaultAdHocDataView = useCallback(
-    async (pattern: string) => {
-      const dataView = await dataViewsService.create({
-        title: pattern,
-      });
+    async (dataViewSpec: DataViewSpec) => {
+      const dataView = await dataViewsService.create(dataViewSpec);
       if (dataView.fields.getByName('@timestamp')?.type === 'date') {
         dataView.timeFieldName = '@timestamp';
       }
@@ -987,13 +984,6 @@ export const LensTopNavMenu = ({
       visualization?.activeId,
     ]
   );
-
-  // setting that enables/disables SQL
-  const isSQLModeEnabled = uiSettings.get(ENABLE_SQL);
-  const supportedTextBasedLanguages = [];
-  if (isSQLModeEnabled) {
-    supportedTextBasedLanguages.push('SQL');
-  }
 
   const dataViewPickerProps: DataViewPickerProps = {
     trigger: {
@@ -1054,7 +1044,6 @@ export const LensTopNavMenu = ({
         indexPatternService.replaceDataViewId(updatedDataViewStub);
       }
     },
-    textBasedLanguages: supportedTextBasedLanguages as DataViewPickerProps['textBasedLanguages'],
   };
 
   const textBasedLanguageModeErrors = getUserMessages('textBasedLanguagesQueryInput', {
@@ -1096,7 +1085,7 @@ export const LensTopNavMenu = ({
       showFilterBar={true}
       data-test-subj="lnsApp_topNav"
       screenTitle={'lens'}
-      appName={'lens'}
+      appName={LENS_APP_NAME}
       displayStyle="detached"
       className="hide-for-sharing"
     />

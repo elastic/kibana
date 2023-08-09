@@ -41,6 +41,9 @@ export class MockEmbeddable {
   getInput() {
     return this.input;
   }
+  getFullAttributes() {
+    return this.input?.attributes;
+  }
 }
 
 export const mockAttributes = {

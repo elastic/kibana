@@ -51,6 +51,7 @@ function mountComponent() {
     request: {
       searchSessionId: '123',
     },
+    hasLensSuggestions: false,
     hits: {
       status: UnifiedHistogramFetchStatus.loading,
       total: undefined,

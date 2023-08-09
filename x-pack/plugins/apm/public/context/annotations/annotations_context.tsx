@@ -32,7 +32,7 @@ export function AnnotationsContextProvider({
     (callApmApi) => {
       if (start && end && serviceName) {
         return callApmApi(
-          'GET /api/apm/services/{serviceName}/annotation/search 2023-05-22',
+          'GET /api/apm/services/{serviceName}/annotation/search 2023-10-31',
           {
             params: {
               path: {

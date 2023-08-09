@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ProfilingSetupOptions } from './types';
 import { PartialSetupState } from '../../../common/setup';
+import { ProfilingSetupOptions } from './types';
 
 export async function hasProfilingData({
   client,
@@ -17,9 +17,5 @@ export async function hasProfilingData({
     track_total_hits: 1,
     terminate_after: 1,
   });
-  return {
-    data: {
-      available: hasProfilingDataResponse.hits.total.value > 0,
-    },
-  };
+  return { data: { available: hasProfilingDataResponse.hits.total.value > 0 } };
 }

@@ -77,6 +77,7 @@ export function getBeforeSetup(
     {
       id: '1',
       isPreconfigured: false,
+      isSystemAction: false,
       isDeprecated: false,
       actionTypeId: 'test',
       name: 'test',
@@ -87,6 +88,7 @@ export function getBeforeSetup(
     {
       id: '2',
       isPreconfigured: false,
+      isSystemAction: false,
       isDeprecated: false,
       actionTypeId: 'test2',
       name: 'test2',
@@ -98,6 +100,7 @@ export function getBeforeSetup(
       id: 'testPreconfigured',
       actionTypeId: '.slack',
       isPreconfigured: true,
+      isSystemAction: false,
       isDeprecated: false,
       name: 'test',
     },

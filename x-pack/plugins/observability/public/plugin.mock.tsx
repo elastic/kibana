@@ -71,6 +71,35 @@ const data = {
           timefilter: jest.fn(),
         },
       },
+      search: {
+        searchSource: {
+          create: jest.fn(),
+        },
+      },
+    };
+  },
+};
+
+const dataViewEditor = {
+  createStart() {
+    return {
+      userPermissions: {
+        editDataView: jest.fn(),
+      },
+    };
+  },
+};
+
+const dataViews = {
+  createStart() {
+    return {
+      getIds: jest.fn().mockImplementation(() => []),
+      get: jest.fn(),
+      create: jest.fn().mockImplementation(() => ({
+        fields: {
+          getByName: jest.fn(),
+        },
+      })),
     };
   },
 };
@@ -81,6 +110,8 @@ export const observabilityPublicPluginsStartMock = {
       cases: mockCasesContract(),
       triggersActionsUi: triggersActionsUiStartMock.createStart(),
       data: data.createStart(),
+      dataViews: dataViews.createStart(),
+      dataViewEditor: dataViewEditor.createStart(),
       lens: null,
       discover: null,
     };

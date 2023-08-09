@@ -12,6 +12,7 @@ import {
   genAiSuccessResponse,
 } from '@kbn/actions-simulators-plugin/server/gen_ai_simulation';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import { getUrlPrefix, ObjectRemover } from '../../../../../common/lib';
 
 const connectorTypeId = '.gen-ai';
 const name = 'A genAi action';
@@ -24,11 +25,13 @@ const defaultConfig = { apiProvider: 'OpenAI' };
 // eslint-disable-next-line import/no-default-export
 export default function genAiTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
+  const objectRemover = new ObjectRemover(supertest);
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const configService = getService('config');
-
-  const createConnector = async (apiUrl: string) => {
+  const retry = getService('retry');
+  const createConnector = async (apiUrl: string, spaceId?: string) => {
     const { body } = await supertest
-      .post('/api/actions/connector')
+      .post(`${getUrlPrefix(spaceId ?? 'default')}/api/actions/connector`)
       .set('kbn-xsrf', 'foo')
       .send({
         name,
@@ -38,10 +41,15 @@ export default function genAiTest({ getService }: FtrProviderContext) {
       })
       .expect(200);
 
+    objectRemover.add(spaceId ?? 'default', body.id, 'connector', 'actions');
+
     return body.id;
   };
 
   describe('GenAi', () => {
+    after(() => {
+      objectRemover.removeAll();
+    });
     describe('action creation', () => {
       const simulator = new GenAiSimulator({
         returnError: false,
@@ -59,7 +67,7 @@ export default function genAiTest({ getService }: FtrProviderContext) {
         simulator.close();
       });
 
-      it('should return 200 when creating the connector', async () => {
+      it('should return 200 when creating the connector without a default model', async () => {
         const { body: createdAction } = await supertest
           .post('/api/actions/connector')
           .set('kbn-xsrf', 'foo')
@@ -74,11 +82,45 @@ export default function genAiTest({ getService }: FtrProviderContext) {
         expect(createdAction).to.eql({
           id: createdAction.id,
           is_preconfigured: false,
+          is_system_action: false,
           is_deprecated: false,
           name,
           connector_type_id: connectorTypeId,
           is_missing_secrets: false,
-          config,
+          config: {
+            ...config,
+            defaultModel: 'gpt-4',
+          },
+        });
+      });
+
+      it('should return 200 when creating the connector with a default model', async () => {
+        const { body: createdAction } = await supertest
+          .post('/api/actions/connector')
+          .set('kbn-xsrf', 'foo')
+          .send({
+            name,
+            connector_type_id: connectorTypeId,
+            config: {
+              ...config,
+              defaultModel: 'gpt-3.5-turbo',
+            },
+            secrets,
+          })
+          .expect(200);
+
+        expect(createdAction).to.eql({
+          id: createdAction.id,
+          is_preconfigured: false,
+          is_system_action: false,
+          is_deprecated: false,
+          name,
+          connector_type_id: connectorTypeId,
+          is_missing_secrets: false,
+          config: {
+            ...config,
+            defaultModel: 'gpt-3.5-turbo',
+          },
         });
       });
 
@@ -102,7 +144,7 @@ export default function genAiTest({ getService }: FtrProviderContext) {
               statusCode: 400,
               error: 'Bad Request',
               message:
-                'error validating action type config: [apiProvider]: expected value of type [string] but got [undefined]',
+                'error validating action type config: types that failed validation:\n- [0.apiProvider]: expected at least one defined value but got [undefined]\n- [1.apiProvider]: expected at least one defined value but got [undefined]',
             });
           });
       });
@@ -123,7 +165,7 @@ export default function genAiTest({ getService }: FtrProviderContext) {
               statusCode: 400,
               error: 'Bad Request',
               message:
-                'error validating action type config: [apiUrl]: expected value of type [string] but got [undefined]',
+                'error validating action type config: types that failed validation:\n- [0.apiProvider]: expected value to equal [Azure OpenAI]\n- [1.apiUrl]: expected value of type [string] but got [undefined]',
             });
           });
       });
@@ -269,6 +311,118 @@ export default function genAiTest({ getService }: FtrProviderContext) {
               status: 'ok',
               connector_id: genAiActionId,
               data: genAiSuccessResponse,
+            });
+          });
+          describe('gen ai dashboard', () => {
+            const dashboardId = 'specific-dashboard-id-default';
+
+            it('should not create a dashboard when user does not have kibana event log permissions', async () => {
+              const { body } = await supertestWithoutAuth
+                .post(`/api/actions/connector/${genAiActionId}/_execute`)
+                .auth('global_read', 'global_read-password')
+                .set('kbn-xsrf', 'foo')
+                .send({
+                  params: {
+                    subAction: 'getDashboard',
+                    subActionParams: {
+                      dashboardId,
+                    },
+                  },
+                })
+                .expect(200);
+
+              // check dashboard has not been created
+              await supertest
+                .get(`/api/saved_objects/dashboard/${dashboardId}`)
+                .set('kbn-xsrf', 'foo')
+                .expect(404);
+
+              expect(body).to.eql({
+                status: 'ok',
+                connector_id: genAiActionId,
+                data: { available: false },
+              });
+            });
+
+            it('should create a dashboard when user has correct permissions', async () => {
+              const { body } = await supertest
+                .post(`/api/actions/connector/${genAiActionId}/_execute`)
+                .set('kbn-xsrf', 'foo')
+                .send({
+                  params: {
+                    subAction: 'getDashboard',
+                    subActionParams: {
+                      dashboardId,
+                    },
+                  },
+                })
+                .expect(200);
+
+              // check dashboard has been created
+              await retry.try(async () =>
+                supertest
+                  .get(`/api/saved_objects/dashboard/${dashboardId}`)
+                  .set('kbn-xsrf', 'foo')
+                  .expect(200)
+              );
+
+              objectRemover.add('default', dashboardId, 'dashboard', 'saved_objects');
+
+              expect(body).to.eql({
+                status: 'ok',
+                connector_id: genAiActionId,
+                data: { available: true },
+              });
+            });
+          });
+        });
+        describe('non-default space simulator', () => {
+          const simulator = new GenAiSimulator({
+            proxy: {
+              config: configService.get('kbnTestServer.serverArgs'),
+            },
+          });
+          let apiUrl: string;
+          let genAiActionId: string;
+
+          before(async () => {
+            apiUrl = await simulator.start();
+            genAiActionId = await createConnector(apiUrl, 'space1');
+          });
+          after(() => {
+            simulator.close();
+          });
+
+          const dashboardId = 'specific-dashboard-id-space1';
+
+          it('should create a dashboard in non-default space', async () => {
+            const { body } = await supertest
+              .post(`${getUrlPrefix('space1')}/api/actions/connector/${genAiActionId}/_execute`)
+              .set('kbn-xsrf', 'foo')
+              .send({
+                params: {
+                  subAction: 'getDashboard',
+                  subActionParams: {
+                    dashboardId,
+                  },
+                },
+              })
+              .expect(200);
+
+            // check dashboard has been created
+            await retry.try(
+              async () =>
+                await supertest
+                  .get(`${getUrlPrefix('space1')}/api/saved_objects/dashboard/${dashboardId}`)
+                  .set('kbn-xsrf', 'foo')
+                  .expect(200)
+            );
+            objectRemover.add('space1', dashboardId, 'dashboard', 'saved_objects');
+
+            expect(body).to.eql({
+              status: 'ok',
+              connector_id: genAiActionId,
+              data: { available: true },
             });
           });
         });

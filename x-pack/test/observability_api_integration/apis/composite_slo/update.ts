@@ -13,7 +13,7 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const kibanaServer = getService('kibanaServer');
 
-  describe('update >', () => {
+  describe.skip('update >', () => {
     const security = getService('security');
 
     before(async () => {

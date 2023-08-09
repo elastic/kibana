@@ -202,7 +202,8 @@ export interface FleetServerAgentComponent {
   type: string;
   status: FleetServerAgentComponentStatus;
   message: string;
-  units: FleetServerAgentComponentUnit[];
+  // In some case units could be missing
+  units?: FleetServerAgentComponentUnit[];
 }
 
 /**
@@ -406,5 +407,17 @@ export interface FleetServerAgentAction {
   /** Trace id */
   traceparent?: string | null;
 
+  // signed data + signature
+  signed?: {
+    data: string;
+    signature: string;
+  };
+
   [k: string]: unknown;
+}
+
+export interface ActionStatusOptions {
+  errorSize: number;
+  page?: number;
+  perPage?: number;
 }

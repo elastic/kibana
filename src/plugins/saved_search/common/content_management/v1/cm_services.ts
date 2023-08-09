@@ -60,6 +60,7 @@ const savedSearchAttributesSchema = schema.object(
       })
     ),
     rowsPerPage: schema.maybe(schema.number()),
+    sampleSize: schema.maybe(schema.number()),
     breakdownField: schema.maybe(schema.string()),
     version: schema.maybe(schema.number()),
   },

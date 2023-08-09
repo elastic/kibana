@@ -17,6 +17,8 @@ import {
   ADD_FILTER_FORM_OPERATOR_FIELD,
   ADD_FILTER_FORM_FILTER_VALUE_INPUT,
   GLOBAL_KQL_INPUT,
+  LOCAL_KQL_INPUT,
+  GET_LOCAL_SEARCH_BAR_SUBMIT_BUTTON,
 } from '../screens/search_bar';
 
 export const openAddFilterPopover = () => {
@@ -64,4 +66,12 @@ export const fillAddFilterForm = ({ key, value, operator }: SearchBarFilter) => 
   }
   cy.get(ADD_FILTER_FORM_SAVE_BUTTON).click();
   cy.get(ADD_FILTER_FORM_SAVE_BUTTON).should('not.exist');
+};
+
+export const fillLocalSearchBar = (query: string) => {
+  cy.get(LOCAL_KQL_INPUT).type(query);
+};
+
+export const submitLocalSearch = (localSearchBarSelector: string) => {
+  cy.get(GET_LOCAL_SEARCH_BAR_SUBMIT_BUTTON(localSearchBarSelector)).click();
 };

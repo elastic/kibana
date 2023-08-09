@@ -12,4 +12,6 @@ export interface Prompt {
   content: string;
   name: string;
   promptType: PromptType;
+  isDefault?: boolean; // TODO: Should be renamed to isImmutable as this flag is used to prevent users from deleting prompts
+  isNewConversationDefault?: boolean;
 }

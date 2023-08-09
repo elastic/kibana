@@ -16,10 +16,10 @@ import {
   getFilterOptionsLocalStorageKey,
 } from './use_all_cases_state';
 import { DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS } from '../../containers/use_get_cases';
-import { stringify } from 'query-string';
 import { DEFAULT_TABLE_ACTIVE_PAGE, DEFAULT_TABLE_LIMIT } from '../../containers/constants';
-import { CaseStatuses } from '../../../common';
+import { CaseStatuses } from '../../../common/types/domain';
 import { SortFieldCase } from '../../containers/types';
+import { stringifyToURL } from '../utils';
 
 const LOCAL_STORAGE_QUERY_PARAMS_DEFAULTS = {
   perPage: DEFAULT_QUERY_PARAMS.perPage,
@@ -160,29 +160,28 @@ describe('useAllCasesQueryParams', () => {
     };
     const expectedUrl = { ...URL_DEFAULTS, ...nonDefaultUrlParams };
 
-    mockLocation.search = stringify(nonDefaultUrlParams);
+    mockLocation.search = stringifyToURL(nonDefaultUrlParams as unknown as Record<string, string>);
 
     renderHook(() => useAllCasesState(), {
       wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
     });
 
     expect(useHistory().replace).toHaveBeenCalledWith({
-      search: stringify(expectedUrl),
+      search: stringifyToURL(expectedUrl as unknown as Record<string, string>),
     });
   });
 
   it('takes into account existing url filter options on first run', () => {
     const nonDefaultUrlParams = { severity: 'critical', status: 'open' };
-    const expectedUrl = { ...URL_DEFAULTS, ...nonDefaultUrlParams };
 
-    mockLocation.search = stringify(nonDefaultUrlParams);
+    mockLocation.search = stringifyToURL(nonDefaultUrlParams);
 
     renderHook(() => useAllCasesState(), {
       wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
     });
 
     expect(useHistory().replace).toHaveBeenCalledWith({
-      search: stringify(expectedUrl),
+      search: 'severity=critical&status=open&page=1&perPage=10&sortField=createdAt&sortOrder=desc',
     });
   });
 
@@ -190,16 +189,16 @@ describe('useAllCasesQueryParams', () => {
     const nonDefaultUrlParams = {
       foo: 'bar',
     };
-    const expectedUrl = { ...URL_DEFAULTS, ...nonDefaultUrlParams };
 
-    mockLocation.search = stringify(nonDefaultUrlParams);
+    mockLocation.search = stringifyToURL(nonDefaultUrlParams);
 
     renderHook(() => useAllCasesState(), {
       wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
     });
 
     expect(useHistory().replace).toHaveBeenCalledWith({
-      search: stringify(expectedUrl),
+      search:
+        'foo=bar&page=1&perPage=10&sortField=createdAt&sortOrder=desc&severity=all&status=all',
     });
   });
 
@@ -208,7 +207,7 @@ describe('useAllCasesQueryParams', () => {
       perPage: DEFAULT_TABLE_LIMIT + 5,
     };
 
-    mockLocation.search = stringify(nonDefaultUrlParams);
+    mockLocation.search = stringifyToURL(nonDefaultUrlParams as unknown as Record<string, string>);
 
     localStorage.setItem(
       LOCALSTORAGE_QUERY_PARAMS_KEY,
@@ -231,7 +230,7 @@ describe('useAllCasesQueryParams', () => {
       status: 'open',
     };
 
-    mockLocation.search = stringify(nonDefaultUrlParams);
+    mockLocation.search = stringifyToURL(nonDefaultUrlParams);
 
     localStorage.setItem(
       LOCALSTORAGE_FILTER_OPTIONS_KEY,
@@ -260,14 +259,14 @@ describe('useAllCasesQueryParams', () => {
     });
 
     it('url perPage query param cannot be > 100', () => {
-      mockLocation.search = stringify({ perPage: 1000 });
+      mockLocation.search = stringifyToURL({ perPage: '1000' });
 
       renderHook(() => useAllCasesState(), {
         wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
       });
 
       expect(useHistory().replace).toHaveBeenCalledWith({
-        search: stringify({ ...URL_DEFAULTS, perPage: 100 }),
+        search: 'perPage=100&page=1&sortField=createdAt&sortOrder=desc&severity=all&status=all',
       });
 
       mockLocation.search = '';
@@ -286,14 +285,14 @@ describe('useAllCasesQueryParams', () => {
     });
 
     it('validate spelling of url sortOrder', () => {
-      mockLocation.search = stringify({ sortOrder: 'foobar' });
+      mockLocation.search = stringifyToURL({ sortOrder: 'foobar' });
 
       renderHook(() => useAllCasesState(), {
         wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
       });
 
       expect(useHistory().replace).toHaveBeenCalledWith({
-        search: stringify({ ...URL_DEFAULTS }),
+        search: 'sortOrder=desc&page=1&perPage=10&sortField=createdAt&severity=all&status=all',
       });
     });
   });

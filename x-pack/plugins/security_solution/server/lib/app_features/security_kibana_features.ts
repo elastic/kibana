@@ -124,23 +124,7 @@ export const getSecurityBaseKibanaFeature = (): BaseKibanaFeatureConfig => ({
 
 export const getSecurityBaseKibanaSubFeatureIds = (
   _: ExperimentalFeatures // currently un-used, but left here as a convenience for possible future use
-): SecuritySubFeatureId[] => {
-  const subFeatureIds: SecuritySubFeatureId[] = [
-    SecuritySubFeatureId.endpointList,
-    SecuritySubFeatureId.trustedApplications,
-    SecuritySubFeatureId.hostIsolationExceptions,
-    SecuritySubFeatureId.blocklist,
-    SecuritySubFeatureId.eventFilters,
-    SecuritySubFeatureId.policyManagement,
-    SecuritySubFeatureId.responseActionsHistory,
-    SecuritySubFeatureId.hostIsolation,
-    SecuritySubFeatureId.processOperations,
-    SecuritySubFeatureId.fileOperations,
-    SecuritySubFeatureId.executeAction,
-  ];
-
-  return subFeatureIds;
-};
+): SecuritySubFeatureId[] => [];
 
 /**
  * Maps the AppFeatures keys to Kibana privileges that will be merged
@@ -151,7 +135,9 @@ export const getSecurityBaseKibanaSubFeatureIds = (
  * - `subFeatureIds`: the ids of the sub-features that will be added into the Security subFeatures entry.
  * - `subFeaturesPrivileges`: the privileges that will be added into the existing Security subFeature with the privilege `id` specified.
  */
-export const getSecurityAppFeaturesConfig = (): AppFeaturesSecurityConfig => {
+export const getSecurityAppFeaturesConfig = (
+  _: ExperimentalFeatures // currently un-used, but left here as a convenience for possible future use
+): AppFeaturesSecurityConfig => {
   return {
     [AppFeatureSecurityKey.advancedInsights]: {
       privileges: {
@@ -165,5 +151,83 @@ export const getSecurityAppFeaturesConfig = (): AppFeaturesSecurityConfig => {
         },
       },
     },
+    [AppFeatureSecurityKey.investigationGuide]: {
+      privileges: {
+        all: {
+          ui: ['investigation-guide'],
+        },
+        read: {
+          ui: ['investigation-guide'],
+        },
+      },
+    },
+
+    [AppFeatureSecurityKey.threatIntelligence]: {
+      privileges: {
+        all: {
+          ui: ['threat-intelligence'],
+          api: [`${APP_ID}-threat-intelligence`],
+        },
+        read: {
+          ui: ['threat-intelligence'],
+          api: [`${APP_ID}-threat-intelligence`],
+        },
+      },
+    },
+
+    [AppFeatureSecurityKey.endpointHostManagement]: {
+      subFeatureIds: [SecuritySubFeatureId.endpointList],
+    },
+
+    [AppFeatureSecurityKey.endpointPolicyManagement]: {
+      subFeatureIds: [SecuritySubFeatureId.policyManagement],
+    },
+
+    // Adds no additional kibana feature controls
+    [AppFeatureSecurityKey.endpointPolicyProtections]: {},
+
+    [AppFeatureSecurityKey.endpointArtifactManagement]: {
+      subFeatureIds: [
+        SecuritySubFeatureId.trustedApplications,
+        SecuritySubFeatureId.blocklist,
+        SecuritySubFeatureId.eventFilters,
+      ],
+      subFeaturesPrivileges: [
+        {
+          id: 'host_isolation_exceptions_all',
+          api: [
+            `${APP_ID}-accessHostIsolationExceptions`,
+            `${APP_ID}-writeHostIsolationExceptions`,
+          ],
+          ui: ['accessHostIsolationExceptions', 'writeHostIsolationExceptions'],
+        },
+        {
+          id: 'host_isolation_exceptions_read',
+          api: [`${APP_ID}-accessHostIsolationExceptions`],
+          ui: ['accessHostIsolationExceptions'],
+        },
+      ],
+    },
+
+    [AppFeatureSecurityKey.endpointResponseActions]: {
+      subFeatureIds: [
+        SecuritySubFeatureId.hostIsolationExceptions,
+
+        SecuritySubFeatureId.responseActionsHistory,
+        SecuritySubFeatureId.hostIsolation,
+        SecuritySubFeatureId.processOperations,
+        SecuritySubFeatureId.fileOperations,
+        SecuritySubFeatureId.executeAction,
+      ],
+      subFeaturesPrivileges: [
+        {
+          id: 'host_isolation_all',
+          api: [`${APP_ID}-writeHostIsolation`],
+          ui: ['writeHostIsolation'],
+        },
+      ],
+    },
+
+    [AppFeatureSecurityKey.osqueryAutomatedResponseActions]: {},
   };
 };

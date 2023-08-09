@@ -19,7 +19,6 @@ export const plugin: PluginInitializer<MapsPluginSetup, MapsPluginStart> = (
 
 export { GEOJSON_FEATURE_ID_PROPERTY_NAME, MAP_SAVED_OBJECT_TYPE } from '../common/constants';
 export { MAPS_APP_LOCATOR } from './locators/map_locator/locator_definition';
-export type { PreIndexedShape } from '../common/elasticsearch_util';
 
 export type {
   ITooltipProperty,

@@ -50,6 +50,7 @@ import { HOST_DETAILS_TEST_ID, HOST_DETAILS_RELATED_USERS_TABLE_TEST_ID } from '
 import { ENTITY_RISK_CLASSIFICATION } from '../../../explore/components/risk_score/translations';
 import { USER_RISK_TOOLTIP } from '../../../explore/users/components/all_users/translations';
 import * as i18n from './translations';
+import { useHasSecurityCapability } from '../../../helper_hooks';
 
 const HOST_DETAILS_ID = 'entities-hosts-details';
 const RELATED_USERS_ID = 'entities-hosts-related-users';
@@ -77,7 +78,10 @@ export const HostDetails: React.FC<HostDetailsProps> = ({ hostName, timestamp })
   // create a unique, but stable (across re-renders) query id
   const hostDetailsQueryId = useMemo(() => `${HOST_DETAILS_ID}-${uuid()}`, []);
   const relatedUsersQueryId = useMemo(() => `${RELATED_USERS_ID}-${uuid()}`, []);
+  const hasEntityAnalyticsCapability = useHasSecurityCapability('entity-analytics');
   const isPlatinumOrTrialLicense = useMlCapabilities().isPlatinumOrTrialLicense;
+  const isEntityAnalyticsAuthorized = isPlatinumOrTrialLicense && hasEntityAnalyticsCapability;
+
   const narrowDateRange = useCallback(
     (score, interval) => {
       const fromTo = scoreIntervalToDateTime(score, interval);
@@ -126,10 +130,9 @@ export const HostDetails: React.FC<HostDetailsProps> = ({ hostName, timestamp })
               visibleCellActions={5}
               showActionTooltips
               triggerId={SecurityCellActionsTrigger.DEFAULT}
-              field={{
-                name: 'user.name',
+              data={{
+                field: 'user.name',
                 value: user,
-                type: 'keyword',
               }}
             >
               {user}
@@ -152,7 +155,7 @@ export const HostDetails: React.FC<HostDetailsProps> = ({ hostName, timestamp })
           );
         },
       },
-      ...(isPlatinumOrTrialLicense
+      ...(isEntityAnalyticsAuthorized
         ? [
             {
               field: 'risk',
@@ -177,7 +180,7 @@ export const HostDetails: React.FC<HostDetailsProps> = ({ hostName, timestamp })
           ]
         : []),
     ],
-    [isPlatinumOrTrialLicense]
+    [isEntityAnalyticsAuthorized]
   );
 
   const relatedUsersCount = useMemo(

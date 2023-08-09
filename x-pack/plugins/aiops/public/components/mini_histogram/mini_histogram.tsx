@@ -8,7 +8,15 @@
 import React, { FC } from 'react';
 import { css } from '@emotion/react';
 
-import { Chart, BarSeries, PartialTheme, ScaleType, Settings } from '@elastic/charts';
+import {
+  Chart,
+  BarSeries,
+  PartialTheme,
+  ScaleType,
+  Settings,
+  Tooltip,
+  TooltipType,
+} from '@elastic/charts';
 import { EuiLoadingChart, EuiTextColor } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -21,9 +29,19 @@ interface MiniHistogramProps {
   chartData?: SignificantTermHistogramItem[];
   isLoading: boolean;
   label: string;
+  /** Optional color override for the default bar color for charts */
+  barColorOverride?: string;
+  /** Optional color override for the highlighted bar color for charts */
+  barHighlightColorOverride?: string;
 }
 
-export const MiniHistogram: FC<MiniHistogramProps> = ({ chartData, isLoading, label }) => {
+export const MiniHistogram: FC<MiniHistogramProps> = ({
+  chartData,
+  isLoading,
+  label,
+  barColorOverride,
+  barHighlightColorOverride,
+}) => {
   const { charts } = useAiopsAppContext();
 
   const euiTheme = useEuiTheme();
@@ -80,14 +98,14 @@ export const MiniHistogram: FC<MiniHistogramProps> = ({ chartData, isLoading, la
     );
   }
 
+  const barColor = barColorOverride ? [barColorOverride] : undefined;
+  const barHighlightColor = barHighlightColorOverride ? [barHighlightColorOverride] : ['orange'];
+
   return (
     <div css={cssChartSize}>
       <Chart>
-        <Settings
-          theme={[miniHistogramChartTheme, defaultChartTheme]}
-          showLegend={false}
-          tooltip="none"
-        />
+        <Tooltip type={TooltipType.None} />
+        <Settings theme={[miniHistogramChartTheme, defaultChartTheme]} showLegend={false} />
         <BarSeries
           id="doc_count_overall"
           xScaleType={ScaleType.Time}
@@ -96,6 +114,7 @@ export const MiniHistogram: FC<MiniHistogramProps> = ({ chartData, isLoading, la
           yAccessors={['doc_count_overall']}
           data={chartData}
           stackAccessors={[0]}
+          color={barColor}
         />
         <BarSeries
           id={label}
@@ -105,7 +124,7 @@ export const MiniHistogram: FC<MiniHistogramProps> = ({ chartData, isLoading, la
           yAccessors={['doc_count_significant_term']}
           data={chartData}
           stackAccessors={[0]}
-          color={['orange']}
+          color={barHighlightColor}
         />
       </Chart>
     </div>

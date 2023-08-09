@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { SavedObjectsClientCommon } from './types';
+import type { PersistenceAPI } from './types';
 
 /**
  * Returns an object matching a given name
@@ -15,7 +15,7 @@ import type { SavedObjectsClientCommon } from './types';
  * @param name {string}
  * @returns {SavedObject|undefined}
  */
-export async function findByName(client: SavedObjectsClientCommon, name: string) {
+export async function findByName(client: PersistenceAPI, name: string) {
   if (name) {
     const savedObjects = await client.find({
       perPage: 10,

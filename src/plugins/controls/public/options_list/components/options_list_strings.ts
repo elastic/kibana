@@ -129,10 +129,6 @@ export const OptionsListStrings = {
       i18n.translate('controls.optionsList.popover.selectedOptionsTitle', {
         defaultMessage: 'Show only selected options',
       }),
-    getClearAllSelectionsButtonTitle: () =>
-      i18n.translate('controls.optionsList.popover.clearAllSelectionsTitle', {
-        defaultMessage: 'Clear selections',
-      }),
     searchPlaceholder: {
       prefix: {
         getPlaceholderText: () =>

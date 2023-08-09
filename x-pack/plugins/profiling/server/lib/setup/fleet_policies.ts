@@ -5,125 +5,52 @@
  * 2.0.
  */
 
-import { merge } from 'lodash';
-import { ElasticsearchClient } from '@kbn/core/server';
+import { SavedObjectsClientContract } from '@kbn/core/server';
+import { PackagePolicyClient } from '@kbn/fleet-plugin/server';
 import { fetchFindLatestPackageOrThrow } from '@kbn/fleet-plugin/server/services/epm/registry';
-import { getApmPolicy } from './get_apm_policy';
-import { ProfilingSetupOptions } from './types';
-import { PartialSetupState } from '../../../common/setup';
+import { omit } from 'lodash';
 import { PackageInputType } from '../..';
-
-async function createIngestAPIKey(esClient: ElasticsearchClient) {
-  const apiKeyResponse = await esClient.security.createApiKey({
-    name: 'profiling-manager',
-    role_descriptors: {
-      profiling_manager: {
-        indices: [
-          {
-            names: ['profiling-*', '.profiling-*'],
-            privileges: [
-              'read',
-              'create_doc',
-              'create',
-              'write',
-              'index',
-              'create_index',
-              'view_index_metadata',
-              'manage',
-            ],
-          },
-        ],
-        cluster: ['monitor'],
-      },
-    },
-  });
-
-  return atob(apiKeyResponse.encoded);
-}
-
-export async function validateApmPolicy({
-  soClient,
-  packagePolicyClient,
-}: ProfilingSetupOptions): Promise<PartialSetupState> {
-  const apmPolicy = await getApmPolicy({ packagePolicyClient, soClient });
-  return {
-    policies: {
-      apm: {
-        installed: !!(apmPolicy && apmPolicy?.inputs[0].config?.['apm-server'].value?.profiling),
-      },
-    },
-  };
-}
-
-export async function updateApmPolicy({
-  client,
-  soClient,
-  packagePolicyClient,
-}: ProfilingSetupOptions) {
-  const esClient = client.getEsClient();
-  const apmPolicy = await getApmPolicy({ packagePolicyClient, soClient });
-
-  if (!apmPolicy) {
-    throw new Error(`Could not find APM policy`);
-  }
-
-  const apmPolicyApiKey = await createIngestAPIKey(esClient);
-
-  const profilingApmConfig = {
-    profiling: {
-      enabled: true,
-      elasticsearch: {
-        api_key: apmPolicyApiKey,
-      },
-      metrics: {
-        elasticsearch: {
-          hosts: ['https://1b6c02856ea642a6ac14499b01507233.us-east-2.aws.elastic-cloud.com:443'],
-          api_key: 'woq-IoMBRbbiEbPugtWW:_iBmc1PdSout7sf5FCkEpA',
-        },
-      },
-      keyvalue_retention: {
-        // 60 days
-        age: '1440h',
-        // 200 Gib
-        size_bytes: 200 * 1024 * 1024 * 1024,
-        execution_interval: '12h',
-      },
-    },
-  };
-
-  const {
-    id,
-    revision,
-    updated_at: updateAt,
-    updated_by: updateBy,
-    ...apmPolicyModified
-  } = apmPolicy;
-
-  apmPolicyModified.inputs = apmPolicy.inputs.map((input) => {
-    return input.type === 'apm'
-      ? merge({}, input, { config: { 'apm-server': { value: profilingApmConfig } } })
-      : input;
-  });
-
-  await packagePolicyClient.update(soClient, esClient, id, apmPolicyModified);
-}
+import { PartialSetupState } from '../../../common/setup';
+import { ELASTIC_CLOUD_APM_POLICY, getApmPolicy } from './get_apm_policy';
+import { ProfilingSetupOptions } from './types';
 
 const CLOUD_AGENT_POLICY_ID = 'policy-elastic-agent-on-cloud';
 const COLLECTOR_PACKAGE_POLICY_NAME = 'elastic-universal-profiling-collector';
 const SYMBOLIZER_PACKAGE_POLICY_NAME = 'elastic-universal-profiling-symbolizer';
 
+async function getPackagePolicy({
+  soClient,
+  packagePolicyClient,
+  packageName,
+}: {
+  packagePolicyClient: PackagePolicyClient;
+  soClient: SavedObjectsClientContract;
+  packageName: string;
+}) {
+  const packagePolicies = await packagePolicyClient.list(soClient, {});
+  return packagePolicies.items.find((pkg) => pkg.name === packageName);
+}
+
+export async function getCollectorPolicy({
+  soClient,
+  packagePolicyClient,
+}: {
+  packagePolicyClient: PackagePolicyClient;
+  soClient: SavedObjectsClientContract;
+}) {
+  return getPackagePolicy({
+    soClient,
+    packagePolicyClient,
+    packageName: COLLECTOR_PACKAGE_POLICY_NAME,
+  });
+}
+
 export async function validateCollectorPackagePolicy({
   soClient,
   packagePolicyClient,
 }: ProfilingSetupOptions): Promise<PartialSetupState> {
-  const packagePolicies = await packagePolicyClient.list(soClient, {});
-  return {
-    policies: {
-      collector: {
-        installed: packagePolicies.items.some((pkg) => pkg.name === COLLECTOR_PACKAGE_POLICY_NAME),
-      },
-    },
-  };
+  const collectorPolicy = await getCollectorPolicy({ soClient, packagePolicyClient });
+  return { policies: { collector: { installed: !!collectorPolicy } } };
 }
 
 export function generateSecretToken() {
@@ -138,6 +65,7 @@ export function generateSecretToken() {
   return result;
 }
 
+type PackagePolicyVars = PackageInputType & { secret_token?: string };
 export function getVarsFor({
   config,
   includeSecretToken,
@@ -145,13 +73,13 @@ export function getVarsFor({
   config: PackageInputType;
   includeSecretToken: boolean;
 }) {
-  const configKeys = Object.keys(config) as Array<keyof PackageInputType>;
+  const configKeys = Object.keys(config) as Array<keyof PackagePolicyVars>;
   if (includeSecretToken) {
     configKeys.push('secret_token');
   }
 
   return configKeys.reduce<
-    Partial<Record<keyof PackageInputType, { type: 'text' | 'bool'; value: any }>>
+    Partial<Record<keyof PackagePolicyVars, { type: 'text' | 'bool'; value: any }>>
   >((acc, currKey) => {
     const value = currKey === 'secret_token' ? generateSecretToken() : config[currKey];
     const type = typeof value === 'boolean' ? 'bool' : 'text';
@@ -198,18 +126,26 @@ export async function createCollectorPackagePolicy({
   });
 }
 
+export async function getSymbolizerPolicy({
+  soClient,
+  packagePolicyClient,
+}: {
+  packagePolicyClient: PackagePolicyClient;
+  soClient: SavedObjectsClientContract;
+}) {
+  return getPackagePolicy({
+    soClient,
+    packagePolicyClient,
+    packageName: SYMBOLIZER_PACKAGE_POLICY_NAME,
+  });
+}
+
 export async function validateSymbolizerPackagePolicy({
   soClient,
   packagePolicyClient,
 }: ProfilingSetupOptions): Promise<PartialSetupState> {
-  const packagePolicies = await packagePolicyClient.list(soClient, {});
-  return {
-    policies: {
-      symbolizer: {
-        installed: packagePolicies.items.some((pkg) => pkg.name === SYMBOLIZER_PACKAGE_POLICY_NAME),
-      },
-    },
-  };
+  const symbolizerPackagePolicy = await getSymbolizerPolicy({ soClient, packagePolicyClient });
+  return { policies: { symbolizer: { installed: !!symbolizerPackagePolicy } } };
 }
 
 export async function createSymbolizerPackagePolicy({
@@ -247,4 +183,36 @@ export async function createSymbolizerPackagePolicy({
   await packagePolicyClient.create(soClient, esClient, packagePolicy, {
     force: true,
   });
+}
+
+export async function validateProfilingInApmPackagePolicy({
+  soClient,
+  packagePolicyClient,
+}: ProfilingSetupOptions): Promise<PartialSetupState> {
+  const apmPolicy = await getApmPolicy({ packagePolicyClient, soClient });
+
+  return {
+    policies: {
+      apm: {
+        profilingEnabled: !!(
+          apmPolicy && apmPolicy?.inputs[0].config?.['apm-server'].value?.profiling
+        ),
+      },
+    },
+  };
+}
+
+export async function removeProfilingFromApmPackagePolicy({
+  client,
+  soClient,
+  packagePolicyClient,
+}: ProfilingSetupOptions) {
+  const apmPackagePolicy = await getApmPolicy({ packagePolicyClient, soClient });
+  if (!apmPackagePolicy) {
+    throw new Error(`Could not find APM package policy`);
+  }
+  const esClient = client.getEsClient();
+  // remove profiling from apm-server config
+  const newPackagePolicy = omit(apmPackagePolicy, "inputs[0].config['apm-server'].value.profiling");
+  await packagePolicyClient.update(soClient, esClient, ELASTIC_CLOUD_APM_POLICY, newPackagePolicy);
 }

@@ -26,12 +26,12 @@
     ],
     "patterns": [
       "_stats",
-      "_stats/{metrics}",
-      "{indices}/_stats",
-      "{indices}/_stats/{metrics}"
+      "_stats/{metric}",
+      "{index}/_stats",
+      "{index}/_stats/{metric}"
     ],
     "url_components": {
-      "metrics": [
+      "metric": [
         "_all",
         "bulk",
         "completion",
@@ -49,7 +49,7 @@
         "store",
         "warmer"
       ],
-      "indices": null
+      "index": null
     },
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-stats.html"
   }

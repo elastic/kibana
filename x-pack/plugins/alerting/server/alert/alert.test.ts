@@ -250,6 +250,24 @@ describe('getUUID()', () => {
   });
 });
 
+describe('getStart()', () => {
+  test('returns null for new alert', () => {
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1');
+    expect(alert.getStart()).toBeNull();
+  });
+
+  test('returns start time if set in state', () => {
+    const uuid = 'previous-uuid';
+    const meta = { uuid };
+    const state = { foo: true, start: '2023-03-28T12:27:28.159Z', duration: '0' };
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1', {
+      state,
+      meta,
+    });
+    expect(alert.getStart()).toEqual('2023-03-28T12:27:28.159Z');
+  });
+});
+
 describe('scheduleActions()', () => {
   test('makes hasScheduledActions() return true', () => {
     const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1', {

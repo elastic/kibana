@@ -6,10 +6,14 @@
  */
 
 import type { Alert } from '@kbn/alerts-as-data-utils';
+import { DeepPartial } from '@kbn/utility-types';
+import { SearchResponseBody } from '@elastic/elasticsearch/lib/api/types';
 import { Alert as LegacyAlert } from '../alert/alert';
 import {
   AlertInstanceContext,
   AlertInstanceState,
+  AlertsFilter,
+  SummarizedAlerts,
   RawAlertInstance,
   RuleAlertData,
   RuleNotifyWhenType,
@@ -19,6 +23,7 @@ import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event
 import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
 import { RulesSettingsFlappingProperties } from '../../common/rules_settings';
 import type { PublicAlertFactory } from '../alert/create_alert_factory';
+
 export interface AlertRuleData {
   consumer: string;
   executionId: string;
@@ -54,6 +59,7 @@ export interface IAlertsClient<
     type: 'new' | 'active' | 'activeCurrent' | 'recovered' | 'recoveredCurrent'
   ): Record<string, LegacyAlert<State, Context, ActionGroupIds | RecoveryActionGroupId>>;
   persistAlerts(): Promise<void>;
+  getSummarizedAlerts?(params: GetSummarizedAlertsParams): Promise<SummarizedAlerts>;
   getAlertsToSerialize(): {
     alertsToReturn: Record<string, RawAlertInstance>;
     recoveredAlertsToReturn: Record<string, RawAlertInstance>;
@@ -102,10 +108,11 @@ export interface PublicAlertsClient<
   Context extends AlertInstanceContext,
   ActionGroupIds extends string
 > {
-  create(alert: ReportedAlert<AlertData, State, Context, ActionGroupIds>): void;
+  report(alert: ReportedAlert<AlertData, State, Context, ActionGroupIds>): ReportedAlertData;
+  setAlertData(alert: UpdateableAlert<AlertData, State, Context, ActionGroupIds>): void;
   getAlertLimitValue: () => number;
   setAlertLimitReached: (reached: boolean) => void;
-  getRecoveredAlerts: () => Array<LegacyAlert<State, Context, ActionGroupIds>>;
+  getRecoveredAlerts: () => Array<RecoveredAlertData<AlertData, State, Context, ActionGroupIds>>;
 }
 
 export interface ReportedAlert<
@@ -118,5 +125,72 @@ export interface ReportedAlert<
   actionGroup: ActionGroupIds;
   state?: State;
   context?: Context;
-  payload?: AlertData;
+  payload?: DeepPartial<AlertData>;
+}
+
+export interface RecoveredAlertData<
+  AlertData extends RuleAlertData,
+  State extends AlertInstanceState,
+  Context extends AlertInstanceContext,
+  ActionGroupIds extends string
+> {
+  alert: LegacyAlert<State, Context, ActionGroupIds>;
+  hit?: AlertData;
+}
+
+export interface ReportedAlertData {
+  uuid: string;
+  start: string | null;
+}
+
+export type UpdateableAlert<
+  AlertData extends RuleAlertData,
+  State extends AlertInstanceState,
+  Context extends AlertInstanceContext,
+  ActionGroupIds extends string
+> = Pick<ReportedAlert<AlertData, State, Context, ActionGroupIds>, 'id' | 'context' | 'payload'>;
+
+export type SearchResult<AlertData> = Pick<
+  SearchResponseBody<Alert & AlertData>['hits'],
+  'hits' | 'total'
+>;
+
+export type GetSummarizedAlertsParams = {
+  ruleId: string;
+  spaceId: string;
+  excludedAlertInstanceIds: string[];
+  alertsFilter?: AlertsFilter | null;
+} & (
+  | { start: Date; end: Date; executionUuid?: never }
+  | { executionUuid: string; start?: never; end?: never }
+);
+
+export type GetAlertsQueryParams = Omit<
+  GetSummarizedAlertsParams,
+  'formatAlert' | 'isLifecycleAlert' | 'spaceId'
+>;
+
+export interface GetLifecycleAlertsQueryByExecutionUuidParams {
+  executionUuid: string;
+  ruleId: string;
+  excludedAlertInstanceIds: string[];
+  alertsFilter?: AlertsFilter | null;
+}
+
+export interface GetQueryByExecutionUuidParams
+  extends GetLifecycleAlertsQueryByExecutionUuidParams {
+  action?: string;
+}
+
+export interface GetLifecycleAlertsQueryByTimeRangeParams {
+  start: Date;
+  end: Date;
+  ruleId: string;
+  excludedAlertInstanceIds: string[];
+  alertsFilter?: AlertsFilter | null;
+}
+
+export interface GetQueryByTimeRangeParams<AlertTypes>
+  extends GetLifecycleAlertsQueryByTimeRangeParams {
+  type?: AlertTypes;
 }

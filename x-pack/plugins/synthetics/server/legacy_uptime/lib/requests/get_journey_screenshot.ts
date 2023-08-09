@@ -6,7 +6,7 @@
  */
 
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { UMElasticsearchQueryFn } from '../adapters';
+import { UptimeEsClient } from '../../../lib';
 import { RefResult, FullScreenshot } from '../../../../common/runtime_types/ping/synthetics';
 
 interface ResultType {
@@ -17,10 +17,16 @@ export type ScreenshotReturnTypesUnion =
   | ((FullScreenshot | RefResult) & { totalSteps: number })
   | null;
 
-export const getJourneyScreenshot: UMElasticsearchQueryFn<
-  { checkGroup: string; stepIndex: number },
-  ScreenshotReturnTypesUnion
-> = async ({ checkGroup, stepIndex, uptimeEsClient }) => {
+export const getJourneyScreenshot = async ({
+  checkGroup,
+  stepIndex,
+  uptimeEsClient,
+}: {
+  checkGroup: string;
+  stepIndex: number;
+} & {
+  uptimeEsClient: UptimeEsClient;
+}): Promise<ScreenshotReturnTypesUnion> => {
   const body = {
     track_total_hits: true,
     size: 0,

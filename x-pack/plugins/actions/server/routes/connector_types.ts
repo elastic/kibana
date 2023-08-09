@@ -23,6 +23,7 @@ const rewriteBodyRes: RewriteResponseCase<ActionType[]> = (results) => {
       enabledInLicense,
       minimumLicenseRequired,
       supportedFeatureIds,
+      isSystemActionType,
       ...res
     }) => ({
       ...res,
@@ -30,6 +31,7 @@ const rewriteBodyRes: RewriteResponseCase<ActionType[]> = (results) => {
       enabled_in_license: enabledInLicense,
       minimum_license_required: minimumLicenseRequired,
       supported_feature_ids: supportedFeatureIds,
+      is_system_action_type: isSystemActionType,
     })
   );
 };
@@ -49,7 +51,7 @@ export const connectorTypesRoute = (
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         const actionsClient = (await context.actions).getActionsClient();
         return res.ok({
-          body: rewriteBodyRes(await actionsClient.listTypes(req.query?.feature_id)),
+          body: rewriteBodyRes(await actionsClient.listTypes({ featureId: req.query?.feature_id })),
         });
       })
     )

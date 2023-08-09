@@ -6,12 +6,20 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { DEFAULT_OPENAI_MODEL, OpenAiProviderType } from './constants';
 
 // Connector schema
-export const GenAiConfigSchema = schema.object({
-  apiProvider: schema.string(),
-  apiUrl: schema.string(),
-});
+export const GenAiConfigSchema = schema.oneOf([
+  schema.object({
+    apiProvider: schema.oneOf([schema.literal(OpenAiProviderType.AzureAi)]),
+    apiUrl: schema.string(),
+  }),
+  schema.object({
+    apiProvider: schema.oneOf([schema.literal(OpenAiProviderType.OpenAi)]),
+    apiUrl: schema.string(),
+    defaultModel: schema.string({ defaultValue: DEFAULT_OPENAI_MODEL }),
+  }),
+]);
 
 export const GenAiSecretsSchema = schema.object({ apiKey: schema.string() });
 
@@ -20,6 +28,13 @@ export const GenAiRunActionParamsSchema = schema.object({
   body: schema.string(),
 });
 
+// Execute action schema
+export const GenAiStreamActionParamsSchema = schema.object({
+  body: schema.string(),
+  stream: schema.boolean({ defaultValue: false }),
+});
+
+export const GenAiStreamingResponseSchema = schema.any();
 export const GenAiRunActionResponseSchema = schema.object(
   {
     id: schema.string(),
@@ -44,3 +59,12 @@ export const GenAiRunActionResponseSchema = schema.object(
   },
   { unknowns: 'ignore' }
 );
+
+// Run action schema
+export const GenAiDashboardActionParamsSchema = schema.object({
+  dashboardId: schema.string(),
+});
+
+export const GenAiDashboardActionResponseSchema = schema.object({
+  available: schema.boolean(),
+});

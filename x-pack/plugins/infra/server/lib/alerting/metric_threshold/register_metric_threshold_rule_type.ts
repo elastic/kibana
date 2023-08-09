@@ -39,6 +39,7 @@ import {
   NO_DATA_ACTIONS,
 } from './metric_threshold_executor';
 import { MetricsRulesTypeAlertDefinition } from '../register_rule_types';
+import { O11Y_AAD_FIELDS } from '../../../../common/constants';
 
 type MetricThresholdAllowedActionGroups = ActionGroupIdsOf<
   typeof FIRED_ACTIONS | typeof WARNING_ACTIONS | typeof NO_DATA_ACTIONS
@@ -115,6 +116,7 @@ export async function registerMetricThresholdRuleType(
     name: i18n.translate('xpack.infra.metrics.alertName', {
       defaultMessage: 'Metric threshold',
     }),
+    fieldsForAAD: O11Y_AAD_FIELDS,
     validate: {
       params: schema.object(
         {
@@ -182,7 +184,6 @@ export async function registerMetricThresholdRuleType(
       ],
     },
     producer: 'infrastructure',
-    getSummarizedAlerts: libs.metricsRules.createGetSummarizedAlerts(),
     alerts: MetricsRulesTypeAlertDefinition,
   });
 }

@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { registerAnalyticsContextProviderMock } from './chrome_service.test.mocks';
 import { shallow, mount } from 'enzyme';
 import React from 'react';
 import * as Rx from 'rxjs';
@@ -18,6 +19,7 @@ import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import { customBrandingServiceMock } from '@kbn/core-custom-branding-browser-mocks';
+import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
 import { getAppInfo } from '@kbn/core-application-browser-internal';
 import { findTestSubject } from '@kbn/test-jest-helpers';
 import { ChromeService } from './chrome_service';
@@ -34,15 +36,18 @@ class FakeApp implements App {
 const store = new Map();
 const originalLocalStorage = window.localStorage;
 
-(window as any).localStorage = {
-  setItem: (key: string, value: string) => store.set(String(key), String(value)),
-  getItem: (key: string) => store.get(String(key)),
-  removeItem: (key: string) => store.delete(String(key)),
-};
+Object.defineProperty(window, 'localStorage', {
+  value: {
+    setItem: (key: string, value: string) => store.set(String(key), String(value)),
+    getItem: (key: string) => store.get(String(key)),
+    removeItem: (key: string) => store.delete(String(key)),
+  },
+  writable: true,
+});
 
-function defaultStartDeps(availableApps?: App[]) {
+function defaultStartDeps(availableApps?: App[], currentAppId?: string) {
   const deps = {
-    application: applicationServiceMock.createInternalStartContract(),
+    application: applicationServiceMock.createInternalStartContract(currentAppId),
     docLinks: docLinksServiceMock.createStartContract(),
     http: httpServiceMock.createStartContract(),
     injectedMetadata: injectedMetadataServiceMock.createStartContract(),
@@ -84,20 +89,38 @@ async function start({
     startDeps.injectedMetadata.getCspConfig.mockReturnValue(cspConfigMock);
   }
 
+  await service.setup({ analytics: analyticsServiceMock.createAnalyticsServiceSetup() });
+  const chromeStart = await service.start(startDeps);
+
   return {
     service,
     startDeps,
-    chrome: await service.start(startDeps),
+    chrome: chromeStart,
   };
 }
 
 beforeEach(() => {
   store.clear();
+  registerAnalyticsContextProviderMock.mockReset();
   window.history.pushState(undefined, '', '#/home?a=b');
 });
 
 afterAll(() => {
   (window as any).localStorage = originalLocalStorage;
+});
+
+describe('setup', () => {
+  it('calls registerAnalyticsContextProvider with the correct parameters', async () => {
+    const service = new ChromeService(defaultStartTestOptions({}));
+    const analytics = analyticsServiceMock.createAnalyticsServiceSetup();
+    await service.setup({ analytics });
+
+    expect(registerAnalyticsContextProviderMock).toHaveBeenCalledTimes(1);
+    expect(registerAnalyticsContextProviderMock).toHaveBeenCalledWith(
+      analytics,
+      expect.any(Object)
+    );
+  });
 });
 
 describe('start', () => {
@@ -169,7 +192,7 @@ describe('start', () => {
     expect(startDeps.notifications.toasts.addWarning).not.toBeCalled();
   });
 
-  describe('getComponent', () => {
+  describe('getHeaderComponent', () => {
     it('returns a renderable React component', async () => {
       const { chrome } = await start();
 
@@ -179,7 +202,9 @@ describe('start', () => {
     });
 
     it('renders the default project side navigation', async () => {
-      const { chrome } = await start();
+      const { chrome } = await start({
+        startDeps: defaultStartDeps([{ id: 'foo', title: 'Foo' } as App], 'foo'),
+      });
 
       chrome.setChromeStyle('project');
 
@@ -193,7 +218,9 @@ describe('start', () => {
     });
 
     it('renders the custom project side navigation', async () => {
-      const { chrome } = await start();
+      const { chrome } = await start({
+        startDeps: defaultStartDeps([{ id: 'foo', title: 'Foo' } as App], 'foo'),
+      });
 
       const MyNav = function MyNav() {
         return <div data-test-subj="customProjectSideNav">HELLO</div>;
@@ -211,6 +238,17 @@ describe('start', () => {
 
       const customProjectSideNav = findTestSubject(component, 'customProjectSideNav');
       expect(customProjectSideNav.text()).toBe('HELLO');
+    });
+
+    it('renders chromeless header', async () => {
+      const { chrome } = await start({ startDeps: defaultStartDeps() });
+
+      chrome.setIsVisible(false);
+
+      const component = mount(chrome.getHeaderComponent());
+
+      const chromeless = findTestSubject(component, 'kibanaHeaderChromeless');
+      expect(chromeless.length).toBe(1);
     });
   });
 

@@ -127,7 +127,10 @@ export const init: ModelStage<
     aliases: existingAliases,
     aliasActions,
     previousMappings: currentMappings,
-    previousAlgorithm: currentAlgo === 'v2-compatible' ? ('v2' as const) : ('zdt' as const),
+    previousAlgorithm:
+      currentAlgo === 'v2-compatible' || currentAlgo === 'v2-partially-migrated'
+        ? ('v2' as const)
+        : ('zdt' as const),
   };
 
   // compatible (8.8+) v2 algo => we jump to update index mapping

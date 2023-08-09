@@ -8,7 +8,6 @@ import moment from 'moment';
 import { loggerMock } from '@kbn/logging-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { StatusRuleExecutor } from './status_rule_executor';
-import { UptimeServerSetup } from '../../legacy_uptime/lib/adapters';
 import { mockEncryptedSO } from '../../synthetics_service/utils/mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
@@ -16,6 +15,7 @@ import { SyntheticsService } from '../../synthetics_service/synthetics_service';
 import * as monitorUtils from '../../saved_objects/synthetics_monitor/get_all_monitors';
 import * as locationsUtils from '../../synthetics_service/get_all_locations';
 import type { PublicLocation } from '../../../common/runtime_types';
+import { SyntheticsServerSetup } from '../../types';
 
 describe('StatusRuleExecutor', () => {
   const mockEsClient = elasticsearchClientMock.createElasticsearchClient();
@@ -36,7 +36,7 @@ describe('StatusRuleExecutor', () => {
     privateLocations: [],
   });
 
-  const serverMock: UptimeServerSetup = {
+  const serverMock: SyntheticsServerSetup = {
     logger,
     uptimeEsClient: mockEsClient,
     authSavedObjectsClient: soClient,
@@ -53,7 +53,7 @@ describe('StatusRuleExecutor', () => {
       },
     },
     encryptedSavedObjects: mockEncryptedSO(),
-  } as unknown as UptimeServerSetup;
+  } as unknown as SyntheticsServerSetup;
 
   const syntheticsService = new SyntheticsService(serverMock);
 

@@ -19,13 +19,16 @@ import type { MapsStartApi } from '@kbn/maps-plugin/public';
 import type { DataVisualizerPluginStart } from '@kbn/data-visualizer-plugin/public';
 import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
-import type { DashboardSetup } from '@kbn/dashboard-plugin/public';
+import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { CasesUiStart } from '@kbn/cases-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
+import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
+import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
+import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import type { MlServicesContext } from '../../app';
 
 interface StartPlugins {
@@ -40,7 +43,7 @@ interface StartPlugins {
   dataVisualizer?: DataVisualizerPluginStart;
   usageCollection?: UsageCollectionSetup;
   fieldFormats: FieldFormatsRegistry;
-  dashboard: DashboardSetup;
+  dashboard: DashboardStart;
   spacesApi?: SpacesPluginStart;
   charts: ChartsPluginStart;
   cases?: CasesUiStart;
@@ -49,6 +52,9 @@ interface StartPlugins {
   appName: string;
   lens: LensPublicStart;
   savedObjectsManagement: SavedObjectsManagementPluginStart;
+  savedSearch: SavedSearchPublicPluginStart;
+  contentManagement: ContentManagementPublicStart;
+  presentationUtil: PresentationUtilPluginStart;
 }
 export type StartServices = CoreStart &
   StartPlugins & {

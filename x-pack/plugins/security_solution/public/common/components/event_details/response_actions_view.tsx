@@ -36,7 +36,6 @@ export const useResponseActionsView = <T extends object = JSX.Element>({
   rawEventData: SearchHit | undefined;
 }): EuiTabbedContentTab | undefined => {
   const responseActionsEnabled = useIsExperimentalFeatureEnabled('endpointResponseActionsEnabled');
-
   const expandedEventFieldsObject = rawEventData
     ? (expandDottedObject((rawEventData as RawEventData).fields) as ExpandedEventFieldsObject)
     : undefined;
@@ -58,7 +57,7 @@ export const useResponseActionsView = <T extends object = JSX.Element>({
     return;
   }
 
-  const ruleName = expandedEventFieldsObject?.kibana?.alert?.rule?.name;
+  const ruleName = expandedEventFieldsObject?.kibana?.alert?.rule?.name?.[0];
 
   const totalItemCount = automatedList?.items?.length ?? 0;
 

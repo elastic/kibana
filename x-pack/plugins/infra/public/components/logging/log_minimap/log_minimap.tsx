@@ -5,19 +5,18 @@
  * 2.0.
  */
 
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import {
+  LogEntriesSummaryBucket,
+  LogEntriesSummaryHighlightsBucket,
+  LogEntryTime,
+} from '@kbn/logs-shared-plugin/common';
 import { scaleLinear } from 'd3-scale';
 import * as React from 'react';
-
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { LogEntryTime } from '../../../../common/log_entry';
 import { DensityChart } from './density_chart';
 import { HighlightedInterval } from './highlighted_interval';
 import { SearchMarkers } from './search_markers';
 import { TimeRuler } from './time_ruler';
-import {
-  LogEntriesSummaryBucket,
-  LogEntriesSummaryHighlightsBucket,
-} from '../../../../common/http_api';
 
 interface Interval {
   end: number;

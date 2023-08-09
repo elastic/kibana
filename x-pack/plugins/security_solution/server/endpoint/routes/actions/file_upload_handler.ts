@@ -6,15 +6,15 @@
  */
 
 import type { RequestHandler } from '@kbn/core/server';
+import type { UploadActionApiRequestBody } from '../../../../common/api/endpoint';
+import { UploadActionRequestSchema } from '../../../../common/api/endpoint';
+import type { ResponseActionsApiCommandNames } from '../../../../common/endpoint/service/response_actions/constants';
 import type {
   ResponseActionUploadParameters,
   ResponseActionUploadOutputContent,
+  HostMetadata,
 } from '../../../../common/endpoint/types';
 import { UPLOAD_ROUTE } from '../../../../common/endpoint/constants';
-import {
-  type UploadActionApiRequestBody,
-  UploadActionRequestSchema,
-} from '../../../../common/endpoint/schema/actions';
 import { withEndpointAuthz } from '../with_endpoint_authz';
 import type {
   SecuritySolutionPluginRouter,
@@ -23,6 +23,7 @@ import type {
 } from '../../../types';
 import type { EndpointAppContext } from '../../types';
 import { errorHandler } from '../error_handler';
+import { updateCases } from '../../services/actions/create/update_cases';
 
 export const registerActionFileUploadRoute = (
   router: SecuritySolutionPluginRouter,
@@ -34,10 +35,10 @@ export const registerActionFileUploadRoute = (
 
   const logger = endpointContext.logFactory.get('uploadAction');
 
-  router.post(
-    {
+  router.versioned
+    .post({
+      access: 'public',
       path: UPLOAD_ROUTE,
-      validate: UploadActionRequestSchema,
       options: {
         authRequired: true,
         tags: ['access:securitySolution'],
@@ -47,13 +48,20 @@ export const registerActionFileUploadRoute = (
           maxBytes: endpointContext.serverConfig.maxUploadResponseActionFileBytes,
         },
       },
-    },
-    withEndpointAuthz(
-      { all: ['canWriteFileOperations'] },
-      logger,
-      getActionFileUploadHandler(endpointContext)
-    )
-  );
+    })
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: {
+          request: UploadActionRequestSchema,
+        },
+      },
+      withEndpointAuthz(
+        { all: ['canWriteFileOperations'] },
+        logger,
+        getActionFileUploadHandler(endpointContext)
+      )
+    );
 };
 
 export const getActionFileUploadHandler = (
@@ -90,18 +98,26 @@ export const getActionFileUploadHandler = (
       return errorHandler(logger, res, err);
     }
 
+    const createActionPayload = {
+      ...actionPayload,
+      parameters: uploadParameters,
+      command: 'upload' as ResponseActionsApiCommandNames,
+      user,
+    };
+
+    const esClient = (await context.core).elasticsearch.client.asInternalUser;
+    const endpointData = await endpointContext.service
+      .getEndpointMetadataService()
+      .getMetadataForEndpoints(esClient, [...new Set(createActionPayload.endpoint_ids)]);
+    const agentIds = endpointData.map((endpoint: HostMetadata) => endpoint.elastic.agent.id);
+
     try {
       const casesClient = await endpointContext.service.getCasesClient(req);
       const { action: actionId, ...data } = await endpointContext.service
         .getActionCreateService()
         .createAction<ResponseActionUploadOutputContent, ResponseActionUploadParameters>(
-          {
-            ...actionPayload,
-            parameters: uploadParameters,
-            command: 'upload',
-            user,
-          },
-          { casesClient }
+          createActionPayload,
+          agentIds
         );
 
       // Update the file meta to include the action id, and if any errors (unlikely),
@@ -113,6 +129,9 @@ export const getActionFileUploadHandler = (
       } catch (e) {
         logger.warn(`Attempt to update File meta with Action ID failed: ${e.message}`, e);
       }
+
+      // update cases
+      await updateCases({ casesClient, createActionPayload, endpointData });
 
       return res.ok({
         body: {

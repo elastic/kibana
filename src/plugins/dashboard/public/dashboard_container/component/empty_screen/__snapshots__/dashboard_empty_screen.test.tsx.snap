@@ -59,7 +59,7 @@ exports[`DashboardEmptyScreen renders correctly with edit mode 1`] = `
                       class="euiText emotion-euiText-s-euiTextColor-subdued"
                     >
                       <span>
-                        Create a visualization of your data, or add one from the Visualize Library.
+                        Create a visualization of your data, or add one from the library.
                       </span>
                     </div>
                   </div>
@@ -73,7 +73,7 @@ exports[`DashboardEmptyScreen renders correctly with edit mode 1`] = `
                       class="euiFlexItem emotion-euiFlexItem-growZero"
                     >
                       <button
-                        class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-base-primary"
+                        class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-base-primary"
                         type="button"
                       >
                         <span
@@ -95,19 +95,18 @@ exports[`DashboardEmptyScreen renders correctly with edit mode 1`] = `
                       class="euiFlexItem emotion-euiFlexItem-growZero"
                     >
                       <button
-                        class="euiButtonEmpty euiButtonEmpty--flushLeft css-9t7nyf-empty-primary"
+                        class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-m-empty-primary-flush-left"
                         type="button"
                       >
                         <span
-                          class="euiButtonContent euiButtonEmpty__content"
+                          class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
                         >
                           <span
-                            class="euiButtonContent__icon"
                             color="inherit"
                             data-euiicon-type="folderOpen"
                           />
                           <span
-                            class="euiButtonEmpty__text"
+                            class="eui-textTruncate euiButtonEmpty__text"
                           >
                             Add from library
                           </span>
@@ -341,7 +340,7 @@ exports[`DashboardEmptyScreen renders correctly with view mode 1`] = `
                     class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
                   />
                   <button
-                    class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-base-primary"
+                    class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-base-primary"
                     type="button"
                   >
                     <span

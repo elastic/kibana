@@ -64,6 +64,7 @@ import {
   getMultiTermsSortOrder,
 } from './average_or_percentile_agg';
 import { getGroupByActionVariables } from '../utils/get_groupby_action_variables';
+import { getAllGroupByFields } from '../../../../../common/rules/get_all_groupby_fields';
 
 const ruleTypeConfig = RULE_TYPES_CONFIG[ApmRuleType.TransactionDuration];
 
@@ -103,14 +104,9 @@ export function registerTransactionDurationRuleType({
     minimumLicenseRequired: 'basic',
     isExportable: true,
     executor: async ({ params: ruleParams, services, spaceId }) => {
-      const predefinedGroupby = [
-        SERVICE_NAME,
-        SERVICE_ENVIRONMENT,
-        TRANSACTION_TYPE,
-      ];
-
-      const allGroupbyFields = Array.from(
-        new Set([...predefinedGroupby, ...(ruleParams.groupBy ?? [])])
+      const allGroupByFields = getAllGroupByFields(
+        ApmRuleType.TransactionDuration,
+        ruleParams.groupBy
       );
 
       const config = await firstValueFrom(config$);
@@ -172,7 +168,7 @@ export function registerTransactionDurationRuleType({
           aggs: {
             series: {
               multi_terms: {
-                terms: [...getGroupByTerms(allGroupbyFields)],
+                terms: [...getGroupByTerms(allGroupByFields)],
                 size: 1000,
                 ...getMultiTermsSortOrder(ruleParams.aggregationType),
               },
@@ -205,7 +201,7 @@ export function registerTransactionDurationRuleType({
       for (const bucket of response.aggregations.series.buckets) {
         const groupByFields = bucket.key.reduce(
           (obj, bucketKey, bucketIndex) => {
-            obj[allGroupbyFields[bucketIndex]] = bucketKey;
+            obj[allGroupByFields[bucketIndex]] = bucketKey;
             return obj;
           },
           {} as Record<string, string>

@@ -1065,6 +1065,15 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       });
     },
 
+    async getGroups(space?: string) {
+      const { body, status } = await kbnSupertest
+        .get(`${space ? `/s/${space}` : ''}/internal/ml/jobs/groups`)
+        .set(getCommonRequestHeader('1'));
+      this.assertResponseStatusCode(200, status, module);
+
+      return body;
+    },
+
     async getAnnotations(jobId: string) {
       log.debug(`Fetching annotations for job '${jobId}'...`);
 
@@ -1248,7 +1257,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
     async syncSavedObjects(simulate: boolean = false, space?: string) {
       const { body, status } = await kbnSupertest
         .get(`${space ? `/s/${space}` : ''}/api/ml/saved_objects/sync?simulate=${simulate}`)
-        .set(getCommonRequestHeader('2023-05-15'));
+        .set(getCommonRequestHeader('2023-10-31'));
       this.assertResponseStatusCode(200, status, body);
 
       return body;
@@ -1495,6 +1504,31 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       this.assertResponseStatusCode(200, status, body);
 
       log.debug('> Ingest pipeline deleted');
+    },
+
+    async assureMlStatsIndexExists(timeout: number = 60 * 1000) {
+      const params = {
+        index: '.ml-stats-000001',
+        id: 'noop_job_test_id',
+        body: {
+          type: 'analytics_memory_usage',
+          job_id: 'noop_job',
+          timestamp: 1687437633705,
+          peak_usage_bytes: 148148,
+          status: 'ok',
+        },
+        refresh: 'wait_for',
+      } as const;
+      await es.index(params);
+
+      await retry.waitForWithTimeout(`Stats index to exist`, timeout, async () => {
+        const statsIndices = await es.cat.indices({ format: 'json', index: '.ml-stats*' });
+        if (statsIndices[0]?.health === 'green') {
+          return true;
+        } else {
+          throw new Error(`expected stats index to exist`);
+        }
+      });
     },
 
     async setupModule(

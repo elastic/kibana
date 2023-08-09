@@ -28,7 +28,6 @@
     "@kbn/config-schema",
     "@kbn/i18n-react",
     "@kbn/inspector-plugin",
-    "@kbn/content-management-table-list",
     "@kbn/test-jest-helpers",
     "@kbn/data-views-plugin",
     "@kbn/es-query",
@@ -44,6 +43,9 @@
     "@kbn/content-management-plugin",
     "@kbn/core-saved-objects-api-server",
     "@kbn/object-versioning",
+    "@kbn/content-management-table-list-view-table",
+    "@kbn/content-management-table-list-view",
+    "@kbn/core-ui-settings-browser",
   ],
   "exclude": [
     "target/**/*",

@@ -131,19 +131,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       expect(searchesCountBeforeRestore).to.be(searchesCountAfterRestore); // no new searches started during restore
     });
-
-    it('should should clean the search session when navigating to SQL mode, and reinitialize when navigating back', async () => {
-      await PageObjects.common.navigateToApp('discover');
-      await PageObjects.timePicker.setDefaultAbsoluteRange();
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      expect(await searchSessions.exists()).to.be(true);
-      await PageObjects.discover.selectTextBaseLang('SQL');
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await searchSessions.missingOrFail();
-      await browser.goBack();
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      expect(await searchSessions.exists()).to.be(true);
-    });
   });
 
   async function getSearchSessionId(): Promise<string> {

@@ -111,8 +111,8 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         );
       });
 
-      it('should return examples for non-aggregatable fields', async () => {
-        await PageObjects.unifiedFieldList.clickFieldListItem('extension');
+      it('should return examples for non-aggregatable or geo fields', async () => {
+        await PageObjects.unifiedFieldList.clickFieldListItem('geo.coordinates');
         expect(await PageObjects.unifiedFieldList.getFieldStatsViewType()).to.be('exampleValues');
         expect(await PageObjects.unifiedFieldList.getFieldStatsDocsCount()).to.be(100);
         // actual hits might vary

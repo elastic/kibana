@@ -18,10 +18,18 @@ export const API_KEY_LABEL = i18n.translate('xpack.stackConnectors.components.ge
   defaultMessage: 'API Key',
 });
 
-export const API_PROVIDER_HEADING = i18n.translate(
-  'xpack.stackConnectors.components.genAi.providerHeading',
+export const DEFAULT_MODEL_LABEL = i18n.translate(
+  'xpack.stackConnectors.components.genAi.defaultModelTextFieldLabel',
   {
-    defaultMessage: 'OpenAI provider',
+    defaultMessage: 'Default model',
+  }
+);
+
+export const DEFAULT_MODEL_TOOLTIP_CONTENT = i18n.translate(
+  'xpack.stackConnectors.components.genAi.defaultModelTooltipContent',
+  {
+    defaultMessage:
+      'The model can be set on a per request basis by including a "model" parameter in the request body. If no model is provided, the fallback will be the default model.',
   }
 );
 
@@ -85,5 +93,18 @@ export const API_PROVIDER_REQUIRED = i18n.translate(
   'xpack.stackConnectors.components.genAi.error.requiredApiProviderText',
   {
     defaultMessage: 'API provider is required.',
+  }
+);
+
+export const USAGE_DASHBOARD_LINK = (apiProvider: string, connectorName: string) =>
+  i18n.translate('xpack.stackConnectors.components.genAi.dashboardLink', {
+    values: { apiProvider, connectorName },
+    defaultMessage: 'View {apiProvider} Usage Dashboard for "{ connectorName }" Connector',
+  });
+
+export const GET_DASHBOARD_API_ERROR = i18n.translate(
+  'xpack.stackConnectors.components.genAi.error.dashboardApiError',
+  {
+    defaultMessage: 'Error finding Generative AI Token Usage Dashboard.',
   }
 );

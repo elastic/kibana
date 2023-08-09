@@ -26,7 +26,6 @@ import {
   useLensSelector,
   useLensDispatch,
   LensAppState,
-  DispatchSetState,
   selectSavedObjectFormat,
   updateIndexPatterns,
   updateDatasourceState,
@@ -99,7 +98,7 @@ export function App({
   const saveAndExit = useRef<() => void>();
 
   const dispatch = useLensDispatch();
-  const dispatchSetState: DispatchSetState = useCallback(
+  const dispatchSetState = useCallback(
     (state: Partial<LensAppState>) => dispatch(setState(state)),
     [dispatch]
   );
@@ -189,7 +188,7 @@ export function App({
       ) {
         return actions.confirm(
           i18n.translate('xpack.lens.app.unsavedWorkMessage', {
-            defaultMessage: 'Leave Lens with unsaved work?',
+            defaultMessage: 'Leave with unsaved changes?',
           }),
           i18n.translate('xpack.lens.app.unsavedWorkTitle', {
             defaultMessage: 'Unsaved changes',
@@ -511,13 +510,17 @@ export function App({
             datasourceStates[activeDatasourceId].state,
             {
               frame: frameDatasourceAPI,
-              setState: (newStateOrUpdater) =>
+              setState: (newStateOrUpdater) => {
                 dispatch(
                   updateDatasourceState({
-                    updater: newStateOrUpdater,
+                    newDatasourceState:
+                      typeof newStateOrUpdater === 'function'
+                        ? newStateOrUpdater(datasourceStates[activeDatasourceId].state)
+                        : newStateOrUpdater,
                     datasourceId: activeDatasourceId,
                   })
-                ),
+                );
+              },
             }
           )
         : []),
@@ -673,16 +676,16 @@ export function App({
       {isGoBackToVizEditorModalVisible && (
         <EuiConfirmModal
           maxWidth={600}
-          title={i18n.translate('xpack.lens.app.goBackModalTitle', {
-            defaultMessage: 'Discard changes?',
+          title={i18n.translate('xpack.lens.app.unsavedWorkTitle', {
+            defaultMessage: 'Unsaved changes',
           })}
           onCancel={() => setIsGoBackToVizEditorModalVisible(false)}
           onConfirm={navigateToVizEditor}
           cancelButtonText={i18n.translate('xpack.lens.app.goBackModalCancelBtn', {
             defaultMessage: 'Cancel',
           })}
-          confirmButtonText={i18n.translate('xpack.lens.app.goBackModalTitle', {
-            defaultMessage: 'Discard changes?',
+          confirmButtonText={i18n.translate('xpack.lens.app.unsavedWorkConfirmBtn', {
+            defaultMessage: 'Discard changes',
           })}
           buttonColor="danger"
           defaultFocusedButton="confirm"
@@ -690,7 +693,7 @@ export function App({
         >
           {i18n.translate('xpack.lens.app.goBackModalMessage', {
             defaultMessage:
-              'The changes you have made here are not backwards compatible with your original {contextOriginatingApp} visualization. Are you sure you want to discard these unsaved changes and return to {contextOriginatingApp}?',
+              'Your changes here won’t work with your original {contextOriginatingApp} visualization. Leave with unsaved changes and return to {contextOriginatingApp}?',
             values: { contextOriginatingApp },
           })}
         </EuiConfirmModal>

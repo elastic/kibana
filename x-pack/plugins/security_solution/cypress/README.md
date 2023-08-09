@@ -45,9 +45,30 @@ Please, before opening a PR with the new test, please make sure that the test fa
 
 ## Running the tests
 
-There are currently four ways to run the tests, comprised of two execution modes and two target environments, which will be detailed below.
+### Run them locally
+Run the tests with the following yarn scripts:
+
+| Script Name | Description |
+| ----------- | ----------- |
+| cypress | Runs the default Cypress command |
+| cypress:open | Opens the Cypress UI with all tests in the `e2e` directory. This also runs a local kibana and ES instance. The kibana instance will reload when you make code changes. This is the recommended way to debug and develop tests. |
+| cypress:open:ccs | Opens the Cypress UI and runs all tests in the `ccs_e2e` directory |
+| cypress:open:upgrade | Opens the Cypress UI and runs all tests in the `upgrade_e2e` directory |
+| cypress:run | Runs all tests in the `e2e` directory excluding `investigations` and `explore` directories in headless mode |
+| cypress:run:cases | Runs all tests under `explore/cases` in the `e2e` directory related to the Cases area team in headless mode |
+| cypress:run:reporter | Runs all tests with the specified configuration in headless mode and produces a report using `cypress-multi-reporters` |
+| cypress:run:respops | Runs all tests related to the Response Ops area team, specifically tests in `detection_alerts`, `detection_rules`, and `exceptions` directories in headless mode |
+| cypress:run:ccs | Runs all tests in the `ccs_e2e` directory in headless mode |
+| cypress:run:upgrade | Runs all tests in the `upgrade_e2e` directory in headless mode |
+| cypress:investigations:run | Runs all tests in the `e2e/investigations` directory in headless mode |
+| cypress:explore:run | Runs all tests in the `e2e/explore` directory in headless mode |
+| junit:merge | Merges individual test reports into a single report and moves the report to the `junit` directory |
+
+Please note that all the headless mode commands do not open the Cypress UI and are typically used in CI/CD environments. The scripts that open the Cypress UI are useful for development and debugging.
 
 ### Execution modes
+
+There are currently four ways to run the tests, comprised of two execution modes and two target environments, which will be detailed below.
 
 #### Interactive mode
 
@@ -63,7 +84,7 @@ A headless browser is a browser simulation program that does not have a user int
 
 This is the configuration used by CI. It uses the FTR to spawn both a Kibana instance (http://localhost:5620) and an Elasticsearch instance (http://localhost:9220) with a preloaded minimum set of data (see preceding "Test data" section), and then executes cypress against this stack. You can find this configuration in `x-pack/test/security_solution_cypress`
 
-Tests run on buildkite PR pipeline is parallelized(current value = 4 parallel jobs). It can be configured in [.buildkite/pipelines/pull_request/security_solution.yml](https://github.com/elastic/kibana/blob/main/.buildkite/pipelines/pull_request/security_solution.yml) with property `parallelism`
+Tests run on buildkite PR pipeline is parallelized. It can be configured in [.buildkite/pipelines/pull_request/security_solution.yml](https://github.com/elastic/kibana/blob/main/.buildkite/pipelines/pull_request/security_solution.yml) with property `parallelism`
 
 ```yml
     ...
@@ -289,6 +310,17 @@ Contains the specs that are executed in a Cross Cluster Search configuration.
 
 Cypress convention starting version 10 (previously known as integration). Contains the specs that are going to be executed.
 
+### e2e/explore and e2e/investigations
+
+These directories contain tests which are run in their own Buildkite pipeline. 
+
+If you belong to one of the teams listed in the table, please add new e2e specs to the corresponding directory.
+
+| Directory | Area team |
+| -- | -- |
+| `e2e/explore` | Threat Hunting Explore |
+| `e2e/investigations | Threat Hunting Investigations |
+
 ### fixtures/
 
 Cypress convention. Fixtures are used as external pieces of static data when we stub responses.
@@ -370,11 +402,7 @@ Note that the command will create the folder if it does not exist.
 
 ### Using an archive from within the Cypress tests
 
-Task [cypress/tasks/es_archiver.ts](https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/cypress/tasks/es_archiver.ts) provides helpers such as `esArchiverLoad` and `esArchiverUnload` by means of `es_archiver`'s CLI.
-
-Because of `cy.exec`, used to invoke `es_archiver`, it's necessary to override its environment with `NODE_TLS_REJECT_UNAUTHORIZED=1`. It indeed would inject `NODE_TLS_REJECT_UNAUTHORIZED=0` and make `es_archive` otherwise abort with the following warning if used over https:
-
-> Warning: Setting the NODE_TLS_REJECT_UNAUTHORIZED environment variable to '0' makes TLS connections and HTTPS requests insecure by disabling certificate verification.
+Task [cypress/support/es_archiver.ts](https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/cypress/support/es_archiver.ts) provides helpers such as `esArchiverLoad` and `esArchiverUnload` by means of `es_archiver`'s CLI.
 
 ### CCS
 
@@ -387,10 +415,10 @@ Incorrect handling of the above points might result in false positives, in that 
 
 #### Remote data loading
 
-Helpers `esArchiverCCSLoad` and `esArchiverCCSUnload` are provided by [cypress/tasks/es_archiver.ts](https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/cypress/tasks/es_archiver.ts):
+Helpers `esArchiverCCSLoad` and `esArchiverCCSUnload` are provided by [cypress/support/es_archiver.ts](https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/cypress/support/es_archiver.ts):
 
 ```javascript
-import { esArchiverCCSLoad, esArchiverCCSUnload } from '../../tasks/es_archiver';
+cy.task('esArchiverCCSLoad', '<archive_name>');
 ```
 
 They will use the `CYPRESS_CCS_*_URL` environment variables for accessing the remote cluster. Complex tests involving local and remote data can interleave them with `esArchiverLoad` and `esArchiverUnload` as needed.

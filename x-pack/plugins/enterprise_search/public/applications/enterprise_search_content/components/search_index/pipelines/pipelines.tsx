@@ -30,7 +30,7 @@ import { CANCEL_BUTTON_LABEL } from '../../../../shared/constants';
 import { DataPanel } from '../../../../shared/data_panel/data_panel';
 import { docLinks } from '../../../../shared/doc_links';
 import { RevertConnectorPipelineApilogic } from '../../../api/pipelines/revert_connector_pipeline_api_logic';
-import { isApiIndex } from '../../../utils/indices';
+import { getContentExtractionDisabled, isApiIndex } from '../../../utils/indices';
 
 import { IndexNameLogic } from '../index_name_logic';
 
@@ -58,6 +58,7 @@ export const SearchIndexPipelines: React.FC = () => {
   const { status: revertStatus } = useValues(RevertConnectorPipelineApilogic);
   const { makeRequest: revertPipeline } = useActions(RevertConnectorPipelineApilogic);
   const apiIndex = isApiIndex(index);
+  const extractionDisabled = getContentExtractionDisabled(index);
 
   const pipelinesTabs: EuiTabbedContentTab[] = [
     {
@@ -128,7 +129,7 @@ export const SearchIndexPipelines: React.FC = () => {
                 {i18n.translate(
                   'xpack.enterpriseSearch.content.indices.pipelines.ingestionPipeline.docLink',
                   {
-                    defaultMessage: 'Learn more about using pipelines in Enterprise Search',
+                    defaultMessage: 'Learn more about using pipelines in Search',
                   }
                 )}
               </EuiLink>
@@ -186,7 +187,7 @@ export const SearchIndexPipelines: React.FC = () => {
               )
             }
           >
-            <IngestPipelinesCard />
+            <IngestPipelinesCard extractionDisabled={extractionDisabled} />
           </DataPanel>
           <EuiSpacer />
           <DataPanel
@@ -217,7 +218,7 @@ export const SearchIndexPipelines: React.FC = () => {
                     'xpack.enterpriseSearch.content.indices.pipelines.mlInferencePipelines.subtitleAPIindex',
                     {
                       defaultMessage:
-                        "Inference pipelines will be run as processors from the Enterprise Search Ingest Pipeline. In order to use these pipelines on API-based indices you'll need to reference the {pipelineName} pipeline in your API requests.",
+                        "Inference pipelines will be run as processors from the Search Ingest Pipeline. In order to use these pipelines on API-based indices you'll need to reference the {pipelineName} pipeline in your API requests.",
                       values: {
                         pipelineName,
                       },
@@ -227,7 +228,7 @@ export const SearchIndexPipelines: React.FC = () => {
                     'xpack.enterpriseSearch.content.indices.pipelines.mlInferencePipelines.subtitle',
                     {
                       defaultMessage:
-                        'Inference pipelines will be run as processors from the Enterprise Search Ingest Pipeline',
+                        'Inference pipelines will be run as processors from the Search Ingest Pipeline',
                     }
                   )
             }

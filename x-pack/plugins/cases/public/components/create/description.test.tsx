@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { waitFor } from '@testing-library/react';
+import { waitFor, screen } from '@testing-library/react';
 import userEvent, { specialChars } from '@testing-library/user-event';
 
 import type { FormHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
@@ -16,6 +16,7 @@ import type { FormProps } from './schema';
 import { schema } from './schema';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
+import { MAX_DESCRIPTION_LENGTH } from '../../../common/constants';
 
 describe('Description', () => {
   let globalForm: FormHook;
@@ -45,29 +46,70 @@ describe('Description', () => {
   });
 
   it('it renders', async () => {
-    const result = appMockRender.render(
+    appMockRender.render(
       <MockHookWrapperComponent>
         <Description {...defaultProps} />
       </MockHookWrapperComponent>
     );
 
-    expect(result.getByTestId('caseDescription')).toBeInTheDocument();
+    expect(screen.getByTestId('caseDescription')).toBeInTheDocument();
   });
 
   it('it changes the description', async () => {
-    const result = appMockRender.render(
+    appMockRender.render(
       <MockHookWrapperComponent>
         <Description {...defaultProps} />
       </MockHookWrapperComponent>
     );
 
+    const description = screen.getByTestId('euiMarkdownEditorTextArea');
+
     userEvent.type(
-      result.getByRole('textbox'),
+      description,
       `${specialChars.selectAll}${specialChars.delete}My new description`
     );
 
     await waitFor(() => {
       expect(globalForm.getFormData()).toEqual({ description: 'My new description' });
+    });
+  });
+
+  it('shows an error when description is empty', async () => {
+    appMockRender.render(
+      <MockHookWrapperComponent>
+        <Description {...defaultProps} />
+      </MockHookWrapperComponent>
+    );
+
+    const description = screen.getByTestId('euiMarkdownEditorTextArea');
+
+    userEvent.clear(description);
+    userEvent.type(description, '  ');
+
+    await waitFor(() => {
+      expect(screen.getByText('A description is required.')).toBeInTheDocument();
+    });
+  });
+
+  it('shows an error when description is too long', async () => {
+    const longDescription = 'a'.repeat(MAX_DESCRIPTION_LENGTH + 1);
+
+    appMockRender.render(
+      <MockHookWrapperComponent>
+        <Description {...defaultProps} />
+      </MockHookWrapperComponent>
+    );
+
+    const description = screen.getByTestId('euiMarkdownEditorTextArea');
+
+    userEvent.paste(description, longDescription);
+
+    await waitFor(() => {
+      expect(
+        screen.getByText(
+          'The length of the description is too long. The maximum length is 30000 characters.'
+        )
+      ).toBeInTheDocument();
     });
   });
 });

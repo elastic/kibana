@@ -14,7 +14,7 @@ import { filter, mergeMap, startWith, withLatestFrom, takeUntil } from 'rxjs/ope
 
 import { addError } from '../../../common/store/app/actions';
 import type { inputsModel } from '../../../common/store/inputs';
-import type { PinnedEvent } from '../../../../common/types/timeline/pinned_event';
+import type { PinnedEventResponse } from '../../../../common/api/timeline';
 import {
   pinEvent,
   endTimelineSaving,
@@ -51,7 +51,7 @@ export const epicPersistPinnedEvent = (
     withLatestFrom(timeline$, allTimelineQuery$),
     mergeMap(([result, recentTimeline, allTimelineQuery]) => {
       const savedTimeline = recentTimeline[action.payload.id];
-      const response: PinnedEvent = get('data.persistPinnedEventOnTimeline', result);
+      const response: PinnedEventResponse = get('data.persistPinnedEventOnTimeline', result);
       const callOutMsg = response && response.code === 403 ? [showCallOutUnauthorizedMsg()] : [];
 
       if (allTimelineQuery.refetch != null) {

@@ -5,38 +5,50 @@
  * 2.0.
  */
 
-import { sum } from 'lodash';
 import { createCalleeTree } from './callee';
 import { createBaseFlameGraph, createFlameGraph } from './flamegraph';
+import { decodeStackTraceResponse } from './stack_traces';
 
-import { events, stackTraces, stackFrames, executables } from './__fixtures__/stacktraces';
-
-const totalFrames = sum([...stackTraces.values()].map((trace) => trace.FrameIDs.length));
-const tree = createCalleeTree(events, stackTraces, stackFrames, executables, totalFrames);
-const baseFlamegraph = createBaseFlameGraph(tree, 60);
-const flamegraph = createFlameGraph(baseFlamegraph);
+import { stackTraceFixtures } from './__fixtures__/stacktraces';
 
 describe('Flamegraph operations', () => {
-  test('base flamegraph has non-zero total seconds', () => {
-    expect(baseFlamegraph.TotalSeconds).toEqual(60);
-  });
+  stackTraceFixtures.forEach(({ response, seconds, upsampledBy }) => {
+    const { events, stackTraces, stackFrames, executables, totalFrames, samplingRate } =
+      decodeStackTraceResponse(response);
+    const tree = createCalleeTree(
+      events,
+      stackTraces,
+      stackFrames,
+      executables,
+      totalFrames,
+      samplingRate
+    );
+    const baseFlamegraph = createBaseFlameGraph(tree, samplingRate, seconds);
+    const flamegraph = createFlameGraph(baseFlamegraph);
 
-  test('base flamegraph has one more node than the number of edges', () => {
-    const numEdges = baseFlamegraph.Edges.flatMap((edge) => edge).length;
+    describe(`stacktraces from ${seconds} seconds and upsampled by ${upsampledBy}`, () => {
+      test('base flamegraph has non-zero total seconds', () => {
+        expect(baseFlamegraph.TotalSeconds).toEqual(seconds);
+      });
 
-    expect(numEdges).toEqual(baseFlamegraph.Size - 1);
-  });
+      test('base flamegraph has one more node than the number of edges', () => {
+        const numEdges = baseFlamegraph.Edges.flatMap((edge) => edge).length;
 
-  test('all flamegraph IDs are the same non-zero length', () => {
-    // 16 is the length of a 64-bit FNV-1a hash encoded to a hex string
-    const allSameLengthIDs = flamegraph.ID.every((id) => id.length === 16);
+        expect(numEdges).toEqual(baseFlamegraph.Size - 1);
+      });
 
-    expect(allSameLengthIDs).toBeTruthy();
-  });
+      test('all flamegraph IDs are the same non-zero length', () => {
+        // 16 is the length of a 64-bit FNV-1a hash encoded to a hex string
+        const allSameLengthIDs = flamegraph.ID.every((id) => id.length === 16);
 
-  test('all flamegraph labels are non-empty', () => {
-    const allNonEmptyLabels = flamegraph.Label.every((id) => id.length > 0);
+        expect(allSameLengthIDs).toBeTruthy();
+      });
 
-    expect(allNonEmptyLabels).toBeTruthy();
+      test('all flamegraph labels are non-empty', () => {
+        const allNonEmptyLabels = flamegraph.Label.every((id) => id.length > 0);
+
+        expect(allNonEmptyLabels).toBeTruthy();
+      });
+    });
   });
 });

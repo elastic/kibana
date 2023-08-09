@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { PluginSetupContract } from '@kbn/alerting-plugin/server';
+import { O11Y_AAD_FIELDS } from '../../../../common/constants';
 import { createLogThresholdExecutor, FIRED_ACTIONS } from './log_threshold_executor';
 import { extractReferences, injectReferences } from './log_threshold_references_manager';
 import {
@@ -94,8 +95,7 @@ const alertReasonMessageActionVariableDescription = i18n.translate(
 const viewInAppUrlActionVariableDescription = i18n.translate(
   'xpack.infra.logs.alerting.threshold.viewInAppUrlActionVariableDescription',
   {
-    defaultMessage:
-      'Link to the view or feature within Elastic that can be used to investigate the alert and its context further',
+    defaultMessage: 'Link to the alert source',
   }
 );
 
@@ -160,11 +160,11 @@ export async function registerLogThresholdRuleType(
       ],
     },
     producer: 'logs',
-    getSummarizedAlerts: libs.logsRules.createGetSummarizedAlerts(),
     useSavedObjectReferences: {
       extractReferences,
       injectReferences,
     },
     alerts: LogsRulesTypeAlertDefinition,
+    fieldsForAAD: O11Y_AAD_FIELDS,
   });
 }

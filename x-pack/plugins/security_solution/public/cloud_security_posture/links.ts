@@ -6,24 +6,25 @@
  */
 import { getSecuritySolutionLink } from '@kbn/cloud-security-posture-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { SecurityPageName, SERVER_APP_ID } from '../../common/constants';
+import type { SecurityPageName } from '../../common/constants';
+import { SERVER_APP_ID } from '../../common/constants';
 import cloudSecurityPostureDashboardImage from '../common/images/cloud_security_posture_dashboard_page.png';
 import cloudNativeVulnerabilityManagementDashboardImage from '../common/images/cloud_native_vulnerability_management_dashboard_page.png';
-import type { LinkCategories, LinkItem } from '../common/links/types';
-import { IconExceptionLists } from '../management/icons/exception_lists';
+import type { LinkItem } from '../common/links/types';
+import { IconEndpoints } from '../common/icons/endpoints';
 
 const commonLinkProperties: Partial<LinkItem> = {
   hideTimeline: true,
   capabilities: [`${SERVER_APP_ID}.show`],
 };
 
-export const rootLinks: LinkItem = {
+export const findingsLinks: LinkItem = {
   ...getSecuritySolutionLink<SecurityPageName>('findings'),
   globalNavPosition: 3,
   ...commonLinkProperties,
 };
 
-export const dashboardLinks: LinkItem = {
+export const cspDashboardLink: LinkItem = {
   ...getSecuritySolutionLink<SecurityPageName>('dashboard'),
   description: i18n.translate(
     'xpack.securitySolution.appLinks.cloudSecurityPostureDashboardDescription',
@@ -36,7 +37,6 @@ export const dashboardLinks: LinkItem = {
 };
 
 export const vulnerabilityDashboardLink: LinkItem = {
-  isBeta: true,
   ...getSecuritySolutionLink<SecurityPageName>('vulnerability_dashboard'),
   description: i18n.translate('xpack.securitySolution.appLinks.vulnerabilityDashboardDescription', {
     defaultMessage:
@@ -46,7 +46,7 @@ export const vulnerabilityDashboardLink: LinkItem = {
   ...commonLinkProperties,
 };
 
-export const manageLinks: LinkItem = {
+export const benchmarksLink: LinkItem = {
   ...getSecuritySolutionLink<SecurityPageName>('benchmarks'),
   description: i18n.translate(
     'xpack.securitySolution.appLinks.cloudSecurityPostureBenchmarksDescription',
@@ -54,18 +54,6 @@ export const manageLinks: LinkItem = {
       defaultMessage: 'View benchmark rules.',
     }
   ),
-  landingIcon: IconExceptionLists,
+  landingIcon: IconEndpoints,
   ...commonLinkProperties,
 };
-
-export const manageCategories: LinkCategories = [
-  {
-    label: i18n.translate('xpack.securitySolution.appLinks.category.cloudSecurityPosture', {
-      defaultMessage: 'CLOUD SECURITY',
-    }),
-    linkIds: [
-      SecurityPageName.cloudSecurityPostureBenchmarks,
-      SecurityPageName.cloudDefendPolicies,
-    ],
-  },
-];

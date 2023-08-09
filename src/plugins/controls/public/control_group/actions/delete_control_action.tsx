@@ -25,7 +25,7 @@ export interface DeleteControlActionContext {
 export class DeleteControlAction implements Action<DeleteControlActionContext> {
   public readonly type = ACTION_DELETE_CONTROL;
   public readonly id = ACTION_DELETE_CONTROL;
-  public order = 2;
+  public order = 100; // should always be last
 
   private openConfirm;
 
@@ -60,7 +60,7 @@ export class DeleteControlAction implements Action<DeleteControlActionContext> {
     if (!embeddable.parent || !isControlGroup(embeddable.parent)) {
       throw new IncompatibleActionError();
     }
-    return 'cross';
+    return 'trash';
   }
 
   public async isCompatible({ embeddable }: DeleteControlActionContext) {

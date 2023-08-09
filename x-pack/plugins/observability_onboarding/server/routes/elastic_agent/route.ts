@@ -5,42 +5,66 @@
  * 2.0.
  */
 
-import type { Client } from '@elastic/elasticsearch';
+import * as t from 'io-ts';
+import { v4 as uuidv4 } from 'uuid';
+import {
+  generateSystemLogsYml,
+  generateCustomLogsYml,
+} from '../../../common/elastic_agent_logs';
 import { getAuthenticationAPIKey } from '../../lib/get_authentication_api_key';
+import { getFallbackESUrl } from '../../lib/get_fallback_urls';
+import { getObservabilityOnboardingFlow } from '../../lib/state';
 import { createObservabilityOnboardingServerRoute } from '../create_observability_onboarding_server_route';
-import { findLatestObservabilityOnboardingState } from '../custom_logs/find_latest_observability_onboarding_state';
-import { getESHosts } from '../custom_logs/get_es_hosts';
-import { generateYml } from './generate_yml';
 
 const generateConfig = createObservabilityOnboardingServerRoute({
-  endpoint: 'GET /api/observability_onboarding/elastic_agent/config 2023-05-24',
+  endpoint: 'GET /internal/observability_onboarding/elastic_agent/config',
+  params: t.type({
+    query: t.type({ onboardingId: t.string }),
+  }),
   options: { tags: [] },
   async handler(resources): Promise<string> {
-    const { core, plugins, request } = resources;
-    const { apiKeyId, apiKey } = getAuthenticationAPIKey(request);
+    const {
+      params: {
+        query: { onboardingId },
+      },
+      core,
+      plugins,
+      request,
+      services: { esLegacyConfigService },
+    } = resources;
+    const authApiKey = getAuthenticationAPIKey(request);
 
     const coreStart = await core.start();
     const savedObjectsClient =
       coreStart.savedObjects.createInternalRepository();
 
-    const esHost = getESHosts({
-      cloudSetup: plugins.cloud.setup,
-      esClient: coreStart.elasticsearch.client.asInternalUser as Client,
-    });
+    const elasticsearchUrl = plugins.cloud?.setup?.elasticsearchUrl
+      ? [plugins.cloud?.setup?.elasticsearchUrl]
+      : await getFallbackESUrl(esLegacyConfigService);
 
-    const savedState = await findLatestObservabilityOnboardingState({
+    const savedState = await getObservabilityOnboardingFlow({
       savedObjectsClient,
+      savedObjectId: onboardingId,
     });
 
-    const yaml = generateYml({
-      datasetName: savedState?.state.datasetName,
-      customConfigurations: savedState?.state.customConfigurations,
-      logFilePaths: savedState?.state.logFilePaths,
-      namespace: savedState?.state.namespace,
-      apiKey: `${apiKeyId}:${apiKey}`,
-      esHost,
-      logfileId: `custom-logs-${Date.now()}`,
-    });
+    const yaml =
+      savedState?.type === 'systemLogs'
+        ? generateSystemLogsYml({
+            ...savedState?.state,
+            apiKey: authApiKey
+              ? `${authApiKey?.apiKeyId}:${authApiKey?.apiKey}`
+              : '$API_KEY',
+            esHost: elasticsearchUrl,
+            uuid: uuidv4(),
+          })
+        : generateCustomLogsYml({
+            ...savedState?.state,
+            apiKey: authApiKey
+              ? `${authApiKey?.apiKeyId}:${authApiKey?.apiKey}`
+              : '$API_KEY',
+            esHost: elasticsearchUrl,
+            logfileId: `custom-logs-${uuidv4()}`,
+          });
 
     return yaml;
   },

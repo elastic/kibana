@@ -9,7 +9,7 @@ import { noop } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
-import { TimelineType } from '../../../../../common/types/timeline';
+import { TimelineType } from '../../../../../common/api/timeline';
 import type { BrowserFields } from '../../../../common/containers/source';
 import {
   useDeepEqualSelector,

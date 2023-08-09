@@ -77,7 +77,7 @@ describe('getTooltipProperties', () => {
   });
 });
 
-describe('getImmutableSourceProperties', () => {
+describe('getImmutableProperties', () => {
   it('should only show immutable props', async () => {
     const source = new MVTSingleLayerVectorSource(descriptor);
     const properties = await source.getImmutableProperties();

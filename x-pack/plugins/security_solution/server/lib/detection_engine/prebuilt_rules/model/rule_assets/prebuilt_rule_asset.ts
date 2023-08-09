@@ -14,7 +14,7 @@ import {
   RuleVersion,
   BaseCreateProps,
   TypeSpecificCreateProps,
-} from '../../../../../../common/detection_engine/rule_schema';
+} from '../../../../../../common/api/detection_engine/model/rule_schema';
 
 /**
  * Asset containing source content of a prebuilt Security detection rule.

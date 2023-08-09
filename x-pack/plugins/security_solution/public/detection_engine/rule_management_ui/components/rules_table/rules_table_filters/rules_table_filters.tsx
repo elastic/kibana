@@ -13,8 +13,10 @@ import { useRuleManagementFilters } from '../../../../rule_management/logic/use_
 import { RULES_TABLE_ACTIONS } from '../../../../../common/lib/apm/user_actions';
 import { useStartTransaction } from '../../../../../common/lib/apm/use_start_transaction';
 import * as i18n from '../../../../../detections/pages/detection_engine/rules/translations';
+import type { RuleExecutionStatus } from '../../../../../../common/api/detection_engine/rule_monitoring/model/execution_status';
 import { useRulesTableContext } from '../rules_table/rules_table_context';
 import { TagsFilterPopover } from './tags_filter_popover';
+import { RuleExecutionStatusSelector } from './rule_execution_status_selector';
 import { RuleSearchField } from './rule_search_field';
 
 const FilterWrapper = styled(EuiFlexGroup)`
@@ -36,7 +38,13 @@ const RulesTableFiltersComponent = () => {
   const rulesCustomCount = ruleManagementFields?.rules_summary.custom_count;
   const rulesPrebuiltInstalledCount = ruleManagementFields?.rules_summary.prebuilt_installed_count;
 
-  const { showCustomRules, showElasticRules, tags: selectedTags, enabled } = filterOptions;
+  const {
+    showCustomRules,
+    showElasticRules,
+    tags: selectedTags,
+    enabled,
+    ruleExecutionStatus: selectedRuleExecutionStatus,
+  } = filterOptions;
 
   const handleOnSearch = useCallback(
     (filterString) => {
@@ -76,6 +84,16 @@ const RulesTableFiltersComponent = () => {
     [selectedTags, setFilterOptions, startTransaction]
   );
 
+  const handleSelectedExecutionStatus = useCallback(
+    (newExecutionStatus?: RuleExecutionStatus) => {
+      if (newExecutionStatus !== selectedRuleExecutionStatus) {
+        startTransaction({ name: RULES_TABLE_ACTIONS.FILTER });
+        setFilterOptions({ ruleExecutionStatus: newExecutionStatus });
+      }
+    },
+    [selectedRuleExecutionStatus, setFilterOptions, startTransaction]
+  );
+
   return (
     <FilterWrapper gutterSize="m" justifyContent="flexEnd" wrap>
       <RuleSearchField initialValue={filterOptions.filter} onSearch={handleOnSearch} />
@@ -86,6 +104,15 @@ const RulesTableFiltersComponent = () => {
             selectedTags={selectedTags}
             tags={allTags}
             data-test-subj="allRulesTagPopover"
+          />
+        </EuiFilterGroup>
+      </EuiFlexItem>
+
+      <EuiFlexItem grow={false}>
+        <EuiFilterGroup>
+          <RuleExecutionStatusSelector
+            onSelectedStatusChanged={handleSelectedExecutionStatus}
+            selectedStatus={selectedRuleExecutionStatus}
           />
         </EuiFilterGroup>
       </EuiFlexItem>

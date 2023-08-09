@@ -23,8 +23,8 @@ import {
   getUseField,
   Field,
 } from '../../../../../../shared_imports';
-import { BulkActionEditType } from '../../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
-import type { BulkActionEditPayload } from '../../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
+import { BulkActionEditType } from '../../../../../../../common/api/detection_engine/rule_management/bulk_actions/bulk_actions_route';
+import type { BulkActionEditPayload } from '../../../../../../../common/api/detection_engine/rule_management/bulk_actions/bulk_actions_route';
 
 import { BulkEditFormWrapper } from './bulk_edit_form_wrapper';
 import { bulkAddRuleActions as i18n } from '../translations';

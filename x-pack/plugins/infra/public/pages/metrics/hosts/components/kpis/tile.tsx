@@ -4,52 +4,32 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useMemo } from 'react';
+import React, { useMemo, useCallback } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { BrushTriggerEvent } from '@kbn/charts-plugin/public';
-import {
-  EuiIcon,
-  EuiPanel,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiText,
-  EuiI18n,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiIcon, EuiPanel, EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
 import styled from 'styled-components';
+import { Action } from '@kbn/ui-actions-plugin/public';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { LensWrapper, TooltipContent } from '../../../../../components/lens';
+import { KPIChartProps } from '../../../../../common/visualizations/lens/dashboards/host/kpi_grid_config';
+import { buildCombinedHostsFilter } from '../../../../../utils/filters/build';
 import { useLensAttributes } from '../../../../../hooks/use_lens_attributes';
 import { useMetricsDataViewContext } from '../../hooks/use_data_view';
 import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
-import { HostsLensMetricChartFormulas } from '../../../../../common/visualizations';
 import { useHostsViewContext } from '../../hooks/use_hosts_view';
-import { LensWrapper } from '../chart/lens_wrapper';
-import { createHostsFilter } from '../../utils';
 import { useHostCountContext } from '../../hooks/use_host_count';
 import { useAfterLoadedState } from '../../hooks/use_after_loaded_state';
+import { KPI_CHART_MIN_HEIGHT } from '../../constants';
 
-export interface KPIChartProps {
-  title: string;
-  subtitle?: string;
-  trendLine?: boolean;
-  backgroundColor: string;
-  type: HostsLensMetricChartFormulas;
-  toolTip: string;
-}
-
-const MIN_HEIGHT = 150;
-
-export const Tile = ({
-  title,
-  type,
-  backgroundColor,
-  toolTip,
-  trendLine = false,
-}: KPIChartProps) => {
+export const Tile = ({ id, title, layers, style, toolTip }: KPIChartProps) => {
   const { searchCriteria, onSubmit } = useUnifiedSearchContext();
   const { dataView } = useMetricsDataViewContext();
   const { requestTs, hostNodes, loading: hostsLoading } = useHostsViewContext();
   const { data: hostCountData, isRequestRunning: hostCountLoading } = useHostCountContext();
+
+  const shouldUseSearchCriteria = hostNodes.length === 0;
 
   const getSubtitle = () => {
     return searchCriteria.limit < (hostCountData?.count.value ?? 0)
@@ -64,45 +44,29 @@ export const Tile = ({
         });
   };
 
-  const { attributes, getExtraActions, error } = useLensAttributes({
-    type,
+  const { formula, attributes, getExtraActions, error } = useLensAttributes({
     dataView,
-    options: {
-      title,
-      subtitle: getSubtitle(),
-      backgroundColor,
-      showTrendLine: trendLine,
-      showTitle: false,
-    },
-    visualizationType: 'metricChart',
+    title,
+    layers: { ...layers, options: { ...layers.options, subtitle: getSubtitle() } },
+    visualizationType: 'lnsMetric',
   });
 
   const filters = useMemo(() => {
-    return [
-      createHostsFilter(
-        hostNodes.map((p) => p.name),
-        dataView
-      ),
-    ];
-  }, [hostNodes, dataView]);
-
-  const extraActionOptions = getExtraActions({
-    timeRange: searchCriteria.dateRange,
-    filters,
-  });
-
-  const handleBrushEnd = ({ range }: BrushTriggerEvent['data']) => {
-    const [min, max] = range;
-    onSubmit({
-      dateRange: {
-        from: new Date(min).toISOString(),
-        to: new Date(max).toISOString(),
-        mode: 'absolute',
-      },
-    });
-  };
+    return shouldUseSearchCriteria
+      ? searchCriteria.filters
+      : [
+          buildCombinedHostsFilter({
+            field: 'host.name',
+            values: hostNodes.map((p) => p.name),
+            dataView,
+          }),
+        ];
+  }, [shouldUseSearchCriteria, searchCriteria.filters, hostNodes, dataView]);
 
   const loading = hostsLoading || !attributes || hostCountLoading;
+
+  // prevents requestTs and serchCriteria states from reloading the chart
+  // we want it to reload only once the host count and table have finished loading
   const { afterLoadedState } = useAfterLoadedState(loading, {
     attributes,
     lastReloadRequestTime: requestTs,
@@ -110,16 +74,45 @@ export const Tile = ({
     filters,
   });
 
+  const extraActions: Action[] = useMemo(
+    () =>
+      getExtraActions({
+        timeRange: afterLoadedState.dateRange,
+        query: shouldUseSearchCriteria ? afterLoadedState.query : undefined,
+        filters,
+      }),
+    [
+      afterLoadedState.dateRange,
+      afterLoadedState.query,
+      filters,
+      getExtraActions,
+      shouldUseSearchCriteria,
+    ]
+  );
+
+  const handleBrushEnd = useCallback(
+    ({ range }: BrushTriggerEvent['data']) => {
+      const [min, max] = range;
+      onSubmit({
+        dateRange: {
+          from: new Date(min).toISOString(),
+          to: new Date(max).toISOString(),
+          mode: 'absolute',
+        },
+      });
+    },
+    [onSubmit]
+  );
+
   return (
     <EuiPanelStyled
       hasShadow={false}
       paddingSize={error ? 'm' : 'none'}
-      style={{ minHeight: MIN_HEIGHT }}
-      data-test-subj={`hostsViewKPI-${type}`}
+      data-test-subj={`hostsViewKPI-${id}`}
     >
       {error ? (
         <EuiFlexGroup
-          style={{ height: MIN_HEIGHT, alignContent: 'center' }}
+          style={{ minHeight: '100%', alignContent: 'center' }}
           gutterSize="xs"
           justifyContent="center"
           alignItems="center"
@@ -130,31 +123,34 @@ export const Tile = ({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiText size="s" textAlign="center">
-              <EuiI18n
-                token="'xpack.infra.hostsViewPage.errorOnLoadingLensDependencies'"
-                default="There was an error trying to load Lens Plugin."
+              <FormattedMessage
+                id="xpack.infra.hostsViewPage.errorOnLoadingLensDependencies"
+                defaultMessage="There was an error trying to load Lens Plugin."
               />
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
       ) : (
         <EuiToolTip
-          className="eui-fullWidth"
           delay="regular"
-          content={toolTip}
+          content={<TooltipContent formula={formula} description={toolTip} />}
           anchorClassName="eui-fullWidth"
         >
-          <LensWrapper
-            id={`hostsViewKPIGrid${type}Tile`}
-            attributes={afterLoadedState.attributes}
-            style={{ height: MIN_HEIGHT }}
-            extraActions={[extraActionOptions.openInLens]}
-            lastReloadRequestTime={afterLoadedState.lastReloadRequestTime}
-            dateRange={afterLoadedState.dateRange}
-            filters={afterLoadedState.filters}
-            onBrushEnd={handleBrushEnd}
-            loading={loading}
-          />
+          <div>
+            <LensWrapper
+              id={`hostsViewKPIGrid${id}Tile`}
+              attributes={afterLoadedState.attributes}
+              style={style}
+              extraActions={extraActions}
+              lastReloadRequestTime={afterLoadedState.lastReloadRequestTime}
+              dateRange={afterLoadedState.dateRange}
+              filters={afterLoadedState.filters}
+              query={shouldUseSearchCriteria ? afterLoadedState.query : undefined}
+              onBrushEnd={handleBrushEnd}
+              loading={loading}
+              hidePanelTitles
+            />
+          </div>
         </EuiToolTip>
       )}
     </EuiPanelStyled>
@@ -162,6 +158,7 @@ export const Tile = ({
 };
 
 const EuiPanelStyled = styled(EuiPanel)`
+  min-height: ${KPI_CHART_MIN_HEIGHT}px;
   .echMetric {
     border-radius: ${({ theme }) => theme.eui.euiBorderRadius};
     pointer-events: none;

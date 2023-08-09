@@ -13,12 +13,15 @@ import {
   DATE_PICKER_END_DATE_POPOVER_BUTTON,
   DATE_PICKER_END_DATE_POPOVER_BUTTON_TIMELINE,
   DATE_PICKER_START_DATE_POPOVER_BUTTON,
-  GLOBAL_FILTERS_CONTAINER,
   SHOW_DATES_BUTTON,
   DATE_PICKER_START_DATE_POPOVER_BUTTON_TIMELINE,
   DATE_PICKER_SHOW_DATE_POPOVER_BUTTON,
   DATE_PICKER_NOW_TAB,
   DATE_PICKER_NOW_BUTTON,
+  LOCAL_DATE_PICKER_APPLY_BUTTON,
+  LOCAL_DATE_PICKER_END_DATE_POPOVER_BUTTON,
+  DATE_PICKER_CONTAINER,
+  GET_LOCAL_SHOW_DATES_BUTTON,
 } from '../screens/date_picker';
 
 export const setEndDate = (date: string) => {
@@ -40,8 +43,7 @@ export const setEndDateNow = () => {
 };
 
 export const setStartDate = (date: string) => {
-  cy.get(GLOBAL_FILTERS_CONTAINER);
-  cy.get('.euiSuperDatePicker');
+  cy.get(DATE_PICKER_CONTAINER).should('be.visible');
   cy.get('body').then(($container) => {
     if ($container.find(SHOW_DATES_BUTTON).length > 0) {
       cy.get(DATE_PICKER_SHOW_DATE_POPOVER_BUTTON).click({ force: true });
@@ -97,4 +99,28 @@ export const updateDates = () => {
 export const updateTimelineDates = () => {
   cy.get(DATE_PICKER_APPLY_BUTTON_TIMELINE).first().click({ force: true });
   cy.get(DATE_PICKER_APPLY_BUTTON_TIMELINE).first().should('not.have.text', 'Updating');
+};
+
+export const updateDateRangeInLocalDatePickers = (
+  localQueryBarSelector: string,
+  startDate: string,
+  endDate: string
+) => {
+  cy.get(GET_LOCAL_SHOW_DATES_BUTTON(localQueryBarSelector)).click();
+  cy.get(DATE_PICKER_ABSOLUTE_TAB).first().click();
+
+  cy.get(DATE_PICKER_ABSOLUTE_INPUT).click();
+  cy.get(DATE_PICKER_ABSOLUTE_INPUT).clear();
+  cy.get(DATE_PICKER_ABSOLUTE_INPUT).type(startDate);
+  cy.get(LOCAL_DATE_PICKER_APPLY_BUTTON).click();
+  cy.get(LOCAL_DATE_PICKER_APPLY_BUTTON).should('not.have.text', 'Updating');
+
+  cy.get(LOCAL_DATE_PICKER_END_DATE_POPOVER_BUTTON).click();
+
+  cy.get(DATE_PICKER_ABSOLUTE_TAB).first().click();
+
+  cy.get(DATE_PICKER_ABSOLUTE_INPUT).click();
+  cy.get(DATE_PICKER_ABSOLUTE_INPUT).clear();
+  cy.get(DATE_PICKER_ABSOLUTE_INPUT).type(endDate);
+  cy.get(LOCAL_DATE_PICKER_APPLY_BUTTON).click();
 };

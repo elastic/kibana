@@ -6,7 +6,7 @@
  */
 
 import type { FC } from 'react';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { EuiEmptyPrompt } from '@elastic/eui';
 
 import { ANALYZER_ERROR_MESSAGE } from './translations';
@@ -24,10 +24,11 @@ export const ANALYZE_GRAPH_ID = 'analyze_graph';
  */
 export const AnalyzeGraph: FC = () => {
   const { eventId } = useLeftPanelContext();
-  const scopeId = 'flyout'; // TO-DO: update to use context
+  const scopeId = 'flyout'; // Different scope Id to distinguish flyout and data table analyzers
   const { from, to, shouldUpdate, selectedPatterns } = useTimelineDataFilters(
     isActiveTimeline(scopeId)
   );
+  const filters = useMemo(() => ({ from, to }), [from, to]);
 
   if (!eventId) {
     return (
@@ -48,7 +49,7 @@ export const AnalyzeGraph: FC = () => {
         resolverComponentInstanceID={scopeId}
         indices={selectedPatterns}
         shouldUpdate={shouldUpdate}
-        filters={{ from, to }}
+        filters={filters}
       />
     </div>
   );

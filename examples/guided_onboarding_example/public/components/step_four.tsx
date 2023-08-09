@@ -12,24 +12,17 @@ import { EuiButton, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 
 import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public/types';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  EuiPageContentHeader_Deprecated as EuiPageContentHeader,
-  EuiPageContentBody_Deprecated as EuiPageContentBody,
-  EuiCode,
-} from '@elastic/eui';
-import { RouteComponentProps } from 'react-router-dom';
+import { EuiPageHeader, EuiPageSection, EuiCode } from '@elastic/eui';
+import { useParams } from 'react-router-dom';
 
 interface StepFourProps {
   guidedOnboarding: GuidedOnboardingPluginStart;
 }
 
-export const StepFour = (props: StepFourProps & RouteComponentProps<{ indexName: string }>) => {
-  const {
-    guidedOnboarding: { guidedOnboardingApi },
-    match: {
-      params: { indexName },
-    },
-  } = props;
+export const StepFour: React.FC<StepFourProps> = ({
+  guidedOnboarding: { guidedOnboardingApi },
+}) => {
+  const { indexName } = useParams<{ indexName: string }>();
 
   const [, setIsTourStepOpen] = useState<boolean>(false);
 
@@ -44,7 +37,7 @@ export const StepFour = (props: StepFourProps & RouteComponentProps<{ indexName:
 
   return (
     <>
-      <EuiPageContentHeader>
+      <EuiPageHeader>
         <EuiTitle>
           <h2>
             <FormattedMessage
@@ -53,8 +46,8 @@ export const StepFour = (props: StepFourProps & RouteComponentProps<{ indexName:
             />
           </h2>
         </EuiTitle>
-      </EuiPageContentHeader>
-      <EuiPageContentBody>
+      </EuiPageHeader>
+      <EuiPageSection>
         <EuiText>
           <p>
             <FormattedMessage
@@ -77,7 +70,7 @@ export const StepFour = (props: StepFourProps & RouteComponentProps<{ indexName:
         >
           Complete step 4
         </EuiButton>
-      </EuiPageContentBody>
+      </EuiPageSection>
     </>
   );
 };

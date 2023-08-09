@@ -6,8 +6,8 @@
  */
 
 import React, { memo } from 'react';
-import { Switch, Redirect } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
+import { Redirect } from 'react-router-dom';
+import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { PolicyDetails, PolicyList } from './view';
 import {
@@ -24,7 +24,7 @@ import { getPolicyDetailPath } from '../../common/routing';
 
 export const PolicyContainer = memo(() => {
   return (
-    <Switch>
+    <Routes>
       <Route
         path={[
           MANAGEMENT_ROUTING_POLICY_DETAILS_FORM_PATH,
@@ -43,7 +43,7 @@ export const PolicyContainer = memo(() => {
       />
       <Route path={MANAGEMENT_ROUTING_POLICIES_PATH} exact component={PolicyList} />
       <Route path="*" component={NotFoundPage} />
-    </Switch>
+    </Routes>
   );
 });
 

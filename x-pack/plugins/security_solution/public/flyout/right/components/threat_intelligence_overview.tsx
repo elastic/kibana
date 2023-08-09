@@ -31,7 +31,7 @@ import { LeftPanelKey, LeftPanelInsightsTabPath } from '../../left';
  * and the SummaryPanel component for data rendering.
  */
 export const ThreatIntelligenceOverview: FC = () => {
-  const { eventId, indexName, dataFormattedForFieldBrowser } = useRightPanelContext();
+  const { eventId, indexName, scopeId, dataFormattedForFieldBrowser } = useRightPanelContext();
   const { openLeftPanel } = useExpandableFlyoutContext();
 
   const goToThreatIntelligenceTab = useCallback(() => {
@@ -41,9 +41,10 @@ export const ThreatIntelligenceOverview: FC = () => {
       params: {
         id: eventId,
         indexName,
+        scopeId,
       },
     });
-  }, [eventId, openLeftPanel, indexName]);
+  }, [eventId, openLeftPanel, indexName, scopeId]);
 
   const {
     loading: threatIntelLoading,

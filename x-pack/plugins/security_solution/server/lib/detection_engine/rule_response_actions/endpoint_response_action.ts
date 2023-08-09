@@ -9,7 +9,7 @@ import { each, map, uniq } from 'lodash';
 import { ALERT_RULE_NAME, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import type { ResponseActionAlerts } from './types';
 import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
-import type { RuleResponseEndpointAction } from '../../../../common/detection_engine/rule_response_actions/schemas';
+import type { RuleResponseEndpointAction } from '../../../../common/api/detection_engine/model/rule_response_actions';
 
 export const endpointResponseAction = (
   responseAction: RuleResponseEndpointAction,
@@ -34,16 +34,19 @@ export const endpointResponseAction = (
   }, {});
   return Promise.all(
     each(agentIds, async (agent) =>
-      endpointAppContextService.getActionCreateService().createActionFromAlert({
-        hosts: {
-          [agent]: {
-            name: hosts[agent],
+      endpointAppContextService.getActionCreateService().createActionFromAlert(
+        {
+          hosts: {
+            [agent]: {
+              name: hosts[agent],
+            },
           },
+          endpoint_ids: [agent],
+          alert_ids: alertIds,
+          ...commonData,
         },
-        endpoint_ids: [agent],
-        alert_ids: alertIds,
-        ...commonData,
-      })
+        [agent]
+      )
     )
   );
 };

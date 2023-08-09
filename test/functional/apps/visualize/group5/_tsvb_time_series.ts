@@ -11,14 +11,9 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const { visualize, visualBuilder, timeToVisualize, dashboard, header, common } = getPageObjects([
-    'visualBuilder',
-    'visualize',
-    'timeToVisualize',
-    'dashboard',
-    'header',
-    'common',
-  ]);
+  const { visualize, visualBuilder, timeToVisualize, dashboard, common, visChart } = getPageObjects(
+    ['visualBuilder', 'visualize', 'timeToVisualize', 'dashboard', 'header', 'common', 'visChart']
+  );
   const security = getService('security');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
@@ -28,7 +23,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const browser = getService('browser');
   const kibanaServer = getService('kibanaServer');
 
-  describe('visual builder', function describeIndexTests() {
+  // Failing: See https://github.com/elastic/kibana/issues/162995
+  describe.skip('visual builder', function describeIndexTests() {
     before(async () => {
       await security.testUser.setRoles([
         'kibana_admin',
@@ -222,12 +218,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           it('should create a filter for series with multiple split by terms fields one of which has formatting', async () => {
             const expectedFilterPills = ['0, win 7'];
             await visualBuilder.setMetricsGroupByTerms('bytes');
-            await header.waitUntilLoadingHasFinished();
+            await visChart.waitForVisualizationRenderingStabilized();
             await visualBuilder.setAnotherGroupByTermsField('machine.os.raw');
-            await header.waitUntilLoadingHasFinished();
+            await visChart.waitForVisualizationRenderingStabilized();
             await visualBuilder.clickSeriesOption();
             await visualBuilder.setChartType('Bar');
-            await header.waitUntilLoadingHasFinished();
+            await visChart.waitForVisualizationRenderingStabilized();
             await visualBuilder.clickPanelOptions('timeSeries');
             await visualBuilder.setIntervalValue('1w');
 

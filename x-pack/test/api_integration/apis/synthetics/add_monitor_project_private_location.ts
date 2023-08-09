@@ -7,7 +7,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import expect from '@kbn/expect';
 import { ProjectMonitorsRequest } from '@kbn/synthetics-plugin/common/runtime_types';
-import { API_URLS } from '@kbn/synthetics-plugin/common/constants';
+import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from './helper/get_fixture_json';
 import { PrivateLocationTestService } from './services/private_location_test_service';
@@ -18,6 +18,7 @@ export default function ({ getService }: FtrProviderContext) {
     this.tags('skipCloud');
 
     const supertest = getService('supertest');
+    const kibanaServer = getService('kibanaServer');
 
     let projectMonitors: ProjectMonitorsRequest;
 
@@ -34,13 +35,20 @@ export default function ({ getService }: FtrProviderContext) {
     };
 
     before(async () => {
-      await supertest.put(API_URLS.SYNTHETICS_ENABLEMENT).set('kbn-xsrf', 'true').expect(200);
+      await supertest
+        .put(SYNTHETICS_API_URLS.SYNTHETICS_ENABLEMENT)
+        .set('kbn-xsrf', 'true')
+        .expect(200);
       await testPrivateLocations.installSyntheticsPackage();
 
       const testPolicyName = 'Fleet test server policy' + Date.now();
       const apiResponse = await testPrivateLocations.addFleetPolicy(testPolicyName);
       testPolicyId = apiResponse.body.item.id;
       await testPrivateLocations.setTestLocations([testPolicyId]);
+    });
+
+    after(async () => {
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     beforeEach(() => {
@@ -55,17 +63,20 @@ export default function ({ getService }: FtrProviderContext) {
       const secondMonitor = {
         ...projectMonitors.monitors[0],
         id: 'test-id-2',
-        privateLocations: ['Test private location 0'],
+        privateLocations: ['Test private location 7'],
       };
       const testMonitors = [
         projectMonitors.monitors[0],
-        { ...secondMonitor, name: '!@#$%^&*()_++[\\-\\]- wow name' },
+        {
+          ...secondMonitor,
+          name: '!@#$%^&*()_++[\\-\\]- wow name',
+        },
       ];
       try {
         const body = await monitorTestService.addProjectMonitors(project, testMonitors);
         expect(body.createdMonitors.length).eql(1);
         expect(body.failedMonitors[0].reason).eql(
-          'unknown escape sequence at line 3, column 34:\n    name: "!@#$,%,^,&,*,(,),_,+,+,[,\\,\\,-,\\,\\,],-, ,w,o,w, ,n,a,m,e,"\n                                     ^'
+          "Couldn't save or update monitor because of an invalid configuration."
         );
       } finally {
         await Promise.all([
@@ -85,32 +96,25 @@ export default function ({ getService }: FtrProviderContext) {
         privateLocations: ['Test private location 0'],
       };
       const testMonitors = [projectMonitors.monitors[0], secondMonitor];
-      try {
-        const body = await monitorTestService.addProjectMonitors(project, testMonitors);
-        expect(body.createdMonitors.length).eql(2);
-        const editedBody = await monitorTestService.addProjectMonitors(project, testMonitors);
-        expect(editedBody.createdMonitors.length).eql(0);
-        expect(editedBody.updatedMonitors.length).eql(2);
+      const body = await monitorTestService.addProjectMonitors(project, testMonitors);
+      expect(body.createdMonitors.length).eql(2);
+      const editedBody = await monitorTestService.addProjectMonitors(project, testMonitors);
+      expect(editedBody.createdMonitors.length).eql(0);
+      expect(editedBody.updatedMonitors.length).eql(2);
 
-        testMonitors[1].name = '!@#$%^&*()_++[\\-\\]- wow name';
+      testMonitors[1].name = '!@#$%^&*()_++[\\-\\]- wow name';
+      testMonitors[1].privateLocations = ['Test private location 8'];
 
-        const editedBodyError = await monitorTestService.addProjectMonitors(project, testMonitors);
-        expect(editedBodyError.createdMonitors.length).eql(0);
-        expect(editedBodyError.updatedMonitors.length).eql(1);
-        expect(editedBodyError.failedMonitors.length).eql(1);
-        expect(editedBodyError.failedMonitors[0].details).eql(
-          'Failed to update journey: test-id-2'
-        );
-        expect(editedBodyError.failedMonitors[0].reason).eql(
-          'unknown escape sequence at line 3, column 34:\n    name: "!@#$,%,^,&,*,(,),_,+,+,[,\\,\\,-,\\,\\,],-, ,w,o,w, ,n,a,m,e,"\n                                     ^'
-        );
-      } finally {
-        await Promise.all([
-          testMonitors.map((monitor) => {
-            return monitorTestService.deleteMonitorByJourney(projectMonitors, monitor.id, project);
-          }),
-        ]);
-      }
+      const editedBodyError = await monitorTestService.addProjectMonitors(project, testMonitors);
+      expect(editedBodyError.createdMonitors.length).eql(0);
+      expect(editedBodyError.updatedMonitors.length).eql(1);
+      expect(editedBodyError.failedMonitors.length).eql(1);
+      expect(editedBodyError.failedMonitors[0].details).eql(
+        'Invalid private location: "Test private location 8". Remove it or replace it with a valid private location.'
+      );
+      expect(editedBodyError.failedMonitors[0].reason).eql(
+        "Couldn't save or update monitor because of an invalid configuration."
+      );
     });
   });
 }

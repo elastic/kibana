@@ -13,6 +13,8 @@ import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { action } from '@storybook/addon-actions';
 import { createHashHistory } from 'history';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
+import { buildDataTableRecordList } from '@kbn/discover-utils';
+import { esHitsMock } from '@kbn/discover-utils/src/__mocks__';
 import { FetchStatus } from '../../../../types';
 import {
   AvailableFields$,
@@ -21,8 +23,6 @@ import {
   DataTotalHits$,
   RecordRawType,
 } from '../../../services/discover_data_state_container';
-import { buildDataTableRecordList } from '../../../../../utils/build_data_record';
-import { esHits } from '../../../../../__mocks__/es_hits';
 import { DiscoverLayoutProps } from '../discover_layout';
 import {
   DiscoverStateContainer,
@@ -38,7 +38,7 @@ const documentObservables = {
 
   documents$: new BehaviorSubject({
     fetchStatus: FetchStatus.COMPLETE,
-    result: buildDataTableRecordList(esHits),
+    result: buildDataTableRecordList(esHitsMock),
   }) as DataDocuments$,
 
   availableFields$: new BehaviorSubject({
@@ -48,7 +48,7 @@ const documentObservables = {
 
   totalHits$: new BehaviorSubject({
     fetchStatus: FetchStatus.COMPLETE,
-    result: Number(esHits.length),
+    result: Number(esHitsMock.length),
   }) as DataTotalHits$,
   fetch$: new Observable(),
 };
@@ -62,7 +62,7 @@ const plainRecordObservables = {
 
   documents$: new BehaviorSubject({
     fetchStatus: FetchStatus.COMPLETE,
-    result: buildDataTableRecordList(esHits),
+    result: buildDataTableRecordList(esHitsMock),
     recordRawType: RecordRawType.PLAIN,
   }) as DataDocuments$,
 
@@ -84,7 +84,6 @@ const getCommonProps = () => {
   const savedSearchMock = {} as unknown as SavedSearch;
   return {
     inspectorAdapters: { requests: new RequestAdapter() },
-    navigateTo: action('navigate to somewhere nice'),
     onChangeDataView: action('change the data view'),
     onUpdateQuery: action('update the query'),
     resetSavedSearch: action('reset the saved search the query'),

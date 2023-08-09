@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/logging';
 import type { CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { registerCloudDeploymentMetadataAnalyticsContext } from '../common/register_cloud_deployment_id_analytics_context';
@@ -12,6 +13,7 @@ import type { CloudConfigType } from './config';
 import { registerCloudUsageCollector } from './collectors';
 import { getIsCloudEnabled } from '../common/is_cloud_enabled';
 import { parseDeploymentIdFromDeploymentUrl } from '../common/parse_deployment_id_from_deployment_url';
+import { decodeCloudId, DecodedCloudId } from '../common/decode_cloud_id';
 import { readInstanceSizeMb } from './env';
 
 interface PluginsSetup {
@@ -30,6 +32,22 @@ export interface CloudSetup {
    * The deployment's ID. Only available when running on Elastic Cloud.
    */
   deploymentId?: string;
+  /**
+   * The full URL to the elasticsearch cluster.
+   */
+  elasticsearchUrl?: string;
+  /**
+   * The full URL to the Kibana deployment.
+   */
+  kibanaUrl?: string;
+  /**
+   * {host} from the deployment url https://<deploymentId>.<application>.<host><?:port>
+   */
+  cloudHost?: string;
+  /**
+   * {port} from the deployment url https://<deploymentId>.<application>.<host><?:port>
+   */
+  cloudDefaultPort?: string;
   /**
    * `true` when running on Elastic Cloud.
    */
@@ -53,6 +71,21 @@ export interface CloudSetup {
     url?: string;
     secretToken?: string;
   };
+  /**
+   * `true` when running on Serverless Elastic Cloud
+   * Note that `isCloudEnabled` will always be true when `isServerlessEnabled` is.
+   */
+  isServerlessEnabled: boolean;
+  /**
+   * Serverless configuration
+   */
+  serverless: {
+    /**
+     * The serverless projectId.
+     * Will always be present if `isServerlessEnabled` is `true`
+     */
+    projectId?: string;
+  };
 }
 
 /**
@@ -67,13 +100,17 @@ export interface CloudStart {
 
 export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
   private readonly config: CloudConfigType;
+  private readonly logger: Logger;
 
   constructor(private readonly context: PluginInitializerContext) {
     this.config = this.context.config.get<CloudConfigType>();
+    this.logger = this.context.logger.get();
   }
 
   public setup(core: CoreSetup, { usageCollection }: PluginsSetup): CloudSetup {
     const isCloudEnabled = getIsCloudEnabled(this.config.id);
+    const isServerlessEnabled = !!this.config.serverless?.project_id;
+
     registerCloudDeploymentMetadataAnalyticsContext(core.analytics, this.config);
     registerCloudUsageCollector(usageCollection, {
       isCloudEnabled,
@@ -81,16 +118,29 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
       isElasticStaffOwned: this.config.is_elastic_staff_owned,
     });
 
+    let decodedId: DecodedCloudId | undefined;
+    if (this.config.id) {
+      decodedId = decodeCloudId(this.config.id, this.logger);
+    }
+
     return {
       cloudId: this.config.id,
       instanceSizeMb: readInstanceSizeMb(),
       deploymentId: parseDeploymentIdFromDeploymentUrl(this.config.deployment_url),
+      elasticsearchUrl: decodedId?.elasticsearchUrl,
+      kibanaUrl: decodedId?.kibanaUrl,
+      cloudHost: decodedId?.host,
+      cloudDefaultPort: decodedId?.defaultPort,
       isCloudEnabled,
       trialEndDate: this.config.trial_end_date ? new Date(this.config.trial_end_date) : undefined,
       isElasticStaffOwned: this.config.is_elastic_staff_owned,
       apm: {
         url: this.config.apm?.url,
         secretToken: this.config.apm?.secret_token,
+      },
+      isServerlessEnabled,
+      serverless: {
+        projectId: this.config.serverless?.project_id,
       },
     };
   }

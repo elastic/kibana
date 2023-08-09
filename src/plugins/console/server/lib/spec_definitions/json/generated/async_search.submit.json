@@ -64,7 +64,7 @@
     ],
     "patterns": [
       "_async_search",
-      "{indices}/_async_search"
+      "{index}/_async_search"
     ],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/async-search.html"
   }

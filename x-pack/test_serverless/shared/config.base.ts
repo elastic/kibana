@@ -9,8 +9,8 @@ import { resolve } from 'path';
 import { format as formatUrl } from 'url';
 
 import { REPO_ROOT } from '@kbn/repo-info';
-
 import { esTestConfig, kbnTestConfig, kibanaServerTestUser } from '@kbn/test';
+import { commonFunctionalServices } from '@kbn/ftr-common-functional-services';
 
 export default async () => {
   const servers = {
@@ -24,7 +24,6 @@ export default async () => {
     esTestCluster: {
       license: 'trial',
       from: 'snapshot',
-      serverArgs: ['xpack.security.enabled=false'],
     },
 
     kbnTestServer: {
@@ -34,6 +33,7 @@ export default async () => {
       },
       sourceArgs: ['--no-base-path', '--env.name=development'],
       serverArgs: [
+        `--server.restrictInternalApis=true`,
         `--server.port=${kbnTestConfig.getPort()}`,
         '--status.allowAnonymous=true',
         // We shouldn't embed credentials into the URL since Kibana requests to Elasticsearch should
@@ -61,6 +61,15 @@ export default async () => {
           },
         ])}`,
       ],
+    },
+
+    security: { disableTestUser: true },
+
+    // Used by FTR to recognize serverless project and change its behavior accordingly
+    serverless: true,
+
+    services: {
+      ...commonFunctionalServices,
     },
 
     // overriding default timeouts from packages/kbn-test/src/functional_test_runner/lib/config/schema.ts

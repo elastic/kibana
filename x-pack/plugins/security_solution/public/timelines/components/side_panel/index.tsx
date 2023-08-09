@@ -135,6 +135,7 @@ export const DetailsPanel = React.memo(
           handleOnHostClosed={closePanel}
           isDraggable={isDraggable}
           isFlyoutView={isFlyoutView}
+          scopeId={scopeId}
         />
       );
     }
@@ -152,6 +153,7 @@ export const DetailsPanel = React.memo(
           isDraggable={isDraggable}
           isFlyoutView={isFlyoutView}
           isNewUserDetailsFlyoutEnable={isNewUserDetailsFlyoutEnable}
+          scopeId={scopeId}
         />
       );
     }

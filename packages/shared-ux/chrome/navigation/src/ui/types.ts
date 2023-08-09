@@ -8,36 +8,14 @@
 
 import type { ReactElement, ReactNode } from 'react';
 import type {
-  ChromeProjectNavigationLink,
+  AppDeepLinkId,
   ChromeProjectNavigationNode,
+  NodeDefinition,
 } from '@kbn/core-chrome-browser';
 
-import type { CloudLinkProps, RecentlyAccessedProps } from './components';
+import type { RecentlyAccessedProps } from './components';
 
-/**
- * @public
- *
- * A navigation node definition with its unique id, title, path in the tree and optional
- * deep link and children.
- */
-export interface NodeDefinition<T extends string = string, C extends string = T> {
-  /** Optional id, if not passed a "link" must be provided. */
-  id?: T;
-  /** Optional title. If not provided and a "link" is provided the title will be the Deep link title */
-  title?: string;
-  /** App id or deeplink id */
-  link?: ChromeProjectNavigationLink;
-  /** Optional icon for the navigation node. Note: not all navigation depth will render the icon */
-  icon?: string;
-  /** Optional children of the navigation node */
-  children?: Array<NodeDefinition<C>>;
-  /**
-   * Temporarilly we allow href to be passed.
-   * Once all the deeplinks will be exposed in packages we will not allow href anymore
-   * and force deeplink id to be passed
-   */
-  href?: string;
-}
+export type NonEmptyArray<T> = [T, ...T[]];
 
 /**
  * @public
@@ -45,7 +23,11 @@ export interface NodeDefinition<T extends string = string, C extends string = T>
  * A navigation node definition with its unique id, title, path in the tree and optional deep link.
  * Those are the props that can be passed to the Navigation.Group and Navigation.Item components.
  */
-export interface NodeProps extends Omit<NodeDefinition, 'children'> {
+export interface NodeProps<
+  LinkId extends AppDeepLinkId = AppDeepLinkId,
+  Id extends string = string,
+  ChildrenId extends string = Id
+> extends Omit<NodeDefinition<LinkId, Id, ChildrenId>, 'children'> {
   /**
    * Children of the node. For Navigation.Item (only) it allows a function to be set.
    * This function will receive the ChromeProjectNavigationNode object
@@ -58,12 +40,21 @@ export interface NodeProps extends Omit<NodeDefinition, 'children'> {
  *
  * Internally we enhance the Props passed to the Navigation.Item component.
  */
-export interface NodePropsEnhanced extends NodeProps {
+export interface NodePropsEnhanced<
+  LinkId extends AppDeepLinkId = AppDeepLinkId,
+  Id extends string = string,
+  ChildrenId extends string = Id
+> extends NodeProps<LinkId, Id, ChildrenId> {
   /**
    * This function correspond to the same "itemRender" function that can be passed to
    * the EuiSideNavItemType (see navigation_section_ui.tsx)
    */
   renderItem?: () => ReactElement;
+  /**
+   * Forces the node to be active. This is used to force a collapisble nav group to be open
+   * even if the URL does not match any of the nodes in the group.
+   */
+  isActive?: boolean;
 }
 
 /**
@@ -92,22 +83,24 @@ export interface RecentlyAccessedDefinition extends RecentlyAccessedProps {
 /**
  * @public
  *
- * A cloud link root item definition. Use it to add one or more links to the Cloud console
- */
-export interface CloudLinkDefinition extends CloudLinkProps {
-  type: 'cloudLink';
-}
-
-/**
- * @public
- *
  * A group root item definition.
  */
-export interface GroupDefinition extends NodeDefinition {
+export interface GroupDefinition<
+  LinkId extends AppDeepLinkId = AppDeepLinkId,
+  Id extends string = string,
+  ChildrenId extends string = Id
+> extends NodeDefinition<LinkId, Id, ChildrenId> {
   type: 'navGroup';
-  /** Flag to indicate if the group is initially collapsed or not. */
+  /**
+   * Flag to indicate if the group is initially collapsed or not.
+   *
+   * `undefined`: (Recommended) the group will be opened if any of its children nodes matches the current URL.
+   *
+   * `false`: the group will be opened event if none of its children nodes matches the current URL.
+   *
+   * `true`: the group will be collapsed event if any of its children nodes matches the current URL.
+   */
   defaultIsCollapsed?: boolean;
-  children?: NodeDefinition[];
   preset?: NavigationGroupPreset;
 }
 
@@ -116,12 +109,17 @@ export interface GroupDefinition extends NodeDefinition {
  *
  * The navigation definition for a root item in the side navigation.
  */
-export type RootNavigationItemDefinition =
-  | RecentlyAccessedDefinition
-  | CloudLinkDefinition
-  | GroupDefinition;
+export type RootNavigationItemDefinition<
+  LinkId extends AppDeepLinkId = AppDeepLinkId,
+  Id extends string = string,
+  ChildrenId extends string = Id
+> = RecentlyAccessedDefinition | GroupDefinition<LinkId, Id, ChildrenId>;
 
-export type ProjectNavigationTreeDefinition = Array<Omit<GroupDefinition, 'type'>>;
+export type ProjectNavigationTreeDefinition<
+  LinkId extends AppDeepLinkId = AppDeepLinkId,
+  Id extends string = string,
+  ChildrenId extends string = Id
+> = Array<Omit<GroupDefinition<LinkId, Id, ChildrenId>, 'type'>>;
 
 /**
  * @public
@@ -148,10 +146,6 @@ export interface NavigationTreeDefinition {
  * or when calling `setNavigation()` on the serverless plugin.
  */
 export interface ProjectNavigationDefinition {
-  /**
-   * The URL href for the home link
-   */
-  homeRef: string;
   /**
    * A navigation tree structure with object items containing labels, links, and sub-items
    * for a project. Use it if you only need to configure your project navigation and leave

@@ -1,9 +1,0 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
-
-exports[`SecuritySolutionPageWrapper it renders 1`] = `
-<Memo(SecuritySolutionPageWrapperComponent)>
-  <p>
-    Test page
-  </p>
-</Memo(SecuritySolutionPageWrapperComponent)>
-`;

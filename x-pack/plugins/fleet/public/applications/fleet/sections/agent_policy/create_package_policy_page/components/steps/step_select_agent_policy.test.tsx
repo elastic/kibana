@@ -59,7 +59,7 @@ describe('step select agent policy', () => {
   });
 
   test('should not select agent policy by default if multiple exists', async () => {
-    useGetAgentPoliciesMock.mockReturnValueOnce({
+    useGetAgentPoliciesMock.mockReturnValue({
       data: {
         items: [
           { id: 'policy-1', name: 'Policy 1' },

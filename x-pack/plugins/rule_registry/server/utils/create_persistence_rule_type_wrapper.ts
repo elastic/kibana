@@ -26,7 +26,6 @@ import { mapKeys, snakeCase } from 'lodash/fp';
 import { getCommonAlertFields } from './get_common_alert_fields';
 import { CreatePersistenceRuleTypeWrapper } from './persistence_types';
 import { errorAggregator } from './utils';
-import { AlertDocument, createGetSummarizedAlertsFn } from './create_get_summarized_alerts_fn';
 import { AlertWithSuppressionFields870 } from '../../common/schemas/8.7.0';
 
 export const ALERT_GROUP_INDEX = `${ALERT_NAMESPACE}.group.index` as const;
@@ -355,7 +354,7 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
 
                 const bulkResponse = await ruleDataClientWriter.bulk({
                   body: [...duplicateAlertUpdates, ...mapAlertsToBulkCreate(augmentedAlerts)],
-                  refresh: true,
+                  refresh: 'wait_for',
                 });
 
                 if (bulkResponse == null) {
@@ -415,11 +414,5 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
 
         return result;
       },
-      getSummarizedAlerts: createGetSummarizedAlertsFn({
-        ruleDataClient,
-        useNamespace: true,
-        isLifecycleAlert: false,
-        formatAlert: formatAlert as (alert: AlertDocument) => AlertDocument,
-      })(),
     };
   };

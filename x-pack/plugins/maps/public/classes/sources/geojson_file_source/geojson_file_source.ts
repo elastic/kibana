@@ -13,7 +13,6 @@ import {
   GeojsonFileSourceDescriptor,
   MapExtent,
 } from '../../../../common/descriptor_types';
-import { registerSource } from '../source_registry';
 import { IField } from '../../fields/field';
 import { getFeatureCollectionBounds } from '../../util/get_feature_collection_bounds';
 import { InlineField } from '../../fields/inline_field';
@@ -135,8 +134,3 @@ export class GeoJsonFileSource extends AbstractVectorSource {
     return (this._descriptor as GeojsonFileSourceDescriptor).__featureCollection;
   }
 }
-
-registerSource({
-  ConstructorFunction: GeoJsonFileSource,
-  type: SOURCE_TYPES.GEOJSON_FILE,
-});

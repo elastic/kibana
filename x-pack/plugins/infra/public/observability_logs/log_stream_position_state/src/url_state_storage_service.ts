@@ -4,16 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import * as rt from 'io-ts';
 import { IToasts } from '@kbn/core-notifications-browser';
 import { IKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
 import * as Either from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/function';
-import * as rt from 'io-ts';
 import { InvokeCreator } from 'xstate';
+import { replaceStateKeyInQueryString } from '../../../../common/url_state_storage_service';
 import { minimalTimeKeyRT, pickTimeKey } from '../../../../common/time';
 import { createPlainError, formatErrors } from '../../../../common/runtime_types';
-import { replaceStateKeyInQueryString } from '../../../utils/url_state';
 import type { LogStreamPositionContext, LogStreamPositionEvent } from './types';
 interface LogStreamPositionUrlStateDependencies {
   positionStateKey?: string;
@@ -100,7 +99,6 @@ const decodePositionQueryValueFromUrl = (queryValueFromUrl: unknown) => {
   return positionStateInUrlRT.decode(queryValueFromUrl);
 };
 
-// Used by linkTo components
 export const replaceLogPositionInQueryString = (time?: number) =>
   Number.isNaN(time) || time == null
     ? (value: string) => value

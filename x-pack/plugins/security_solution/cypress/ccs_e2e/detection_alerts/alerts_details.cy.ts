@@ -11,7 +11,6 @@ import { expandFirstAlert, waitForAlerts } from '../../tasks/alerts';
 import { openJsonView } from '../../tasks/alerts_details';
 import { createRule } from '../../tasks/api_calls/rules';
 import { cleanKibana } from '../../tasks/common';
-import { esArchiverCCSLoad } from '../../tasks/es_archiver';
 import { login, visitWithoutDateRange } from '../../tasks/login';
 
 import { getUnmappedCCSRule } from '../../objects/rule';
@@ -22,7 +21,7 @@ describe('Alert details with unmapped fields', () => {
   beforeEach(() => {
     login();
     cleanKibana();
-    esArchiverCCSLoad('unmapped_fields');
+    cy.task('esArchiverCCSLoad', 'unmapped_fields');
     createRule(getUnmappedCCSRule());
     visitWithoutDateRange(ALERTS_URL);
     waitForAlerts();

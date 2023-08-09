@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { captureErrorMock } from './router.test.mocks';
+
 import { Stream } from 'stream';
 import Boom from '@hapi/boom';
 import supertest from 'supertest';
@@ -35,6 +37,7 @@ beforeEach(async () => {
 });
 
 afterEach(async () => {
+  captureErrorMock.mockReset();
   await server.stop();
 });
 
@@ -581,6 +584,22 @@ describe('Handler', () => {
     `);
   });
 
+  it('captures the error if handler throws', async () => {
+    const { server: innerServer, createRouter } = await server.setup(setupDeps);
+    const router = createRouter('/');
+
+    const error = new Error(`some error`);
+    router.get({ path: '/', validate: false }, (context, req, res) => {
+      throw error;
+    });
+    await server.start();
+
+    await supertest(innerServer.listener).get('/').expect(500);
+
+    expect(captureErrorMock).toHaveBeenCalledTimes(1);
+    expect(captureErrorMock).toHaveBeenCalledWith(error);
+  });
+
   it('returns 500 Server error if handler throws Boom error', async () => {
     const { server: innerServer, createRouter } = await server.setup(setupDeps);
     const router = createRouter('/');
@@ -602,6 +621,7 @@ describe('Handler', () => {
         ],
       ]
     `);
+    expect(captureErrorMock).toHaveBeenCalledTimes(1);
   });
 
   it('returns 500 Server error if handler returns unexpected result', async () => {
@@ -1891,7 +1911,10 @@ describe('registerRouterAfterListening', () => {
 
     const enhanceWithContext = (fn: (...args: any[]) => any) => fn.bind(null, {});
 
-    const otherRouter = new Router('/test', loggerMock.create(), enhanceWithContext);
+    const otherRouter = new Router('/test', loggerMock.create(), enhanceWithContext, {
+      isDev: false,
+      versionedRouteResolution: 'oldest',
+    });
     otherRouter.get({ path: '/afterListening', validate: false }, (context, req, res) => {
       return res.ok({ body: 'hello from other router' });
     });
@@ -1923,7 +1946,10 @@ describe('registerRouterAfterListening', () => {
 
     const enhanceWithContext = (fn: (...args: any[]) => any) => fn.bind(null, {});
 
-    const otherRouter = new Router('/test', loggerMock.create(), enhanceWithContext);
+    const otherRouter = new Router('/test', loggerMock.create(), enhanceWithContext, {
+      isDev: false,
+      versionedRouteResolution: 'oldest',
+    });
     otherRouter.get({ path: '/afterListening', validate: false }, (context, req, res) => {
       return res.ok({ body: 'hello from other router' });
     });

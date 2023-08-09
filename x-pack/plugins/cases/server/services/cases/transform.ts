@@ -14,6 +14,9 @@ import type {
   SavedObjectsUpdateResponse,
 } from '@kbn/core/server';
 import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
+import { NONE_CONNECTOR_ID } from '../../../common/constants';
+import type { ExternalService } from '../../../common/types/domain';
+import { CaseSeverity, CaseStatuses } from '../../../common/types/domain';
 import {
   CONNECTOR_ID_REFERENCE_NAME,
   PUSH_CONNECTOR_ID_REFERENCE_NAME,
@@ -22,8 +25,6 @@ import {
   STATUS_ESMODEL_TO_EXTERNAL,
   STATUS_EXTERNAL_TO_ESMODEL,
 } from '../../common/constants';
-import type { CaseFullExternalService } from '../../../common/api';
-import { CaseSeverity, CaseStatuses, NONE_CONNECTOR_ID } from '../../../common/api';
 import {
   findConnectorIdReference,
   transformFieldsToESModel,
@@ -59,7 +60,7 @@ export function transformUpdateResponseToExternalModel(
     referenceName: CONNECTOR_ID_REFERENCE_NAME,
   });
 
-  let externalService: CaseFullExternalService | null | undefined;
+  let externalService: ExternalService | null | undefined;
 
   // if external_service is not defined then we don't want to include it in the response since it wasn't passed it as an
   // attribute to update
@@ -162,17 +163,17 @@ export function transformSavedObjectToExternalModel(
     caseSavedObject.references
   );
 
-  const severity =
-    SEVERITY_ESMODEL_TO_EXTERNAL[caseSavedObject.attributes?.severity] ?? CaseSeverity.LOW;
-  const status =
-    STATUS_ESMODEL_TO_EXTERNAL[caseSavedObject.attributes?.status] ?? CaseStatuses.open;
-
   const { total_alerts, total_comments, ...caseSavedObjectAttributes } =
     caseSavedObject.attributes ??
     ({
       total_alerts: -1,
       total_comments: -1,
     } as CasePersistedAttributes);
+
+  const severity =
+    SEVERITY_ESMODEL_TO_EXTERNAL[caseSavedObjectAttributes.severity] ?? CaseSeverity.LOW;
+  const status = STATUS_ESMODEL_TO_EXTERNAL[caseSavedObjectAttributes.status] ?? CaseStatuses.open;
+  const category = !caseSavedObjectAttributes.category ? null : caseSavedObjectAttributes.category;
 
   return {
     ...caseSavedObject,
@@ -182,6 +183,7 @@ export function transformSavedObjectToExternalModel(
       status,
       connector,
       external_service: externalService,
+      category,
     },
   };
 }
@@ -191,7 +193,7 @@ function transformESExternalService(
   // that's why it can be null here
   externalService: ExternalServicePersisted | null | undefined,
   references: SavedObjectReference[] | undefined
-): CaseFullExternalService | null {
+): ExternalService | null {
   const connectorIdRef = findConnectorIdReference(PUSH_CONNECTOR_ID_REFERENCE_NAME, references);
 
   if (!externalService) {
