@@ -12,8 +12,10 @@ import { HostMetricsDocsLink } from '../../../../../components/lens';
 import { Tile } from './tile';
 import { HostCountProvider } from '../../hooks/use_host_count';
 import { HostsTile } from './hosts_tile';
-import { KPI_CHART_MIN_HEIGHT } from '../../constants';
-import { KPI_CHARTS } from '../../../../../common/visualizations/lens/dashboards/host/kpi_grid_config';
+import {
+  KPI_CHARTS,
+  KPI_CHART_HEIGHT,
+} from '../../../../../common/visualizations/lens/dashboards/host/kpi_grid_config';
 
 export const KPIGrid = () => {
   return (
@@ -22,11 +24,11 @@ export const KPIGrid = () => {
       <EuiSpacer size="s" />
       <EuiFlexGroup direction="row" gutterSize="s" data-test-subj="hostsViewKPIGrid">
         <EuiFlexItem>
-          <HostsTile height={KPI_CHART_MIN_HEIGHT} />
+          <HostsTile height={KPI_CHART_HEIGHT} />
         </EuiFlexItem>
         {KPI_CHARTS.map((chartProp, index) => (
           <EuiFlexItem key={index}>
-            <Tile {...chartProp} height={KPI_CHART_MIN_HEIGHT} />
+            <Tile {...chartProp} height={KPI_CHART_HEIGHT} />
           </EuiFlexItem>
         ))}
       </EuiFlexGroup>

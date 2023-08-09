@@ -15,7 +15,7 @@ import { useHostsViewContext } from '../../../hooks/use_hosts_view';
 import { buildCombinedHostsFilter } from '../../../../../../utils/filters/build';
 import { useHostsTableContext } from '../../../hooks/use_hosts_table';
 import { useAfterLoadedState } from '../../../hooks/use_after_loaded_state';
-import { METRIC_CHART_MIN_HEIGHT } from '../../../constants';
+import { METRIC_CHART_HEIGHT } from '../../../constants';
 
 export interface MetricChartProps extends Pick<TypedLensByValueInput, 'id' | 'overrides'> {
   title: string;
@@ -42,7 +42,7 @@ export const MetricChart = ({ id, title, layers, overrides }: MetricChartProps) 
         ];
   }, [searchCriteria.filters, currentPage, dataView, shouldUseSearchCriteria]);
 
-  // prevents requestTs and serchCriteria state from reloading the chart
+  // prevents requestTs and searchCriteria state from reloading the chart
   // we want it to reload only once the table has finished loading
   const { afterLoadedState } = useAfterLoadedState(loading, {
     lastReloadRequestTime: requestTs,
@@ -56,7 +56,7 @@ export const MetricChart = ({ id, title, layers, overrides }: MetricChartProps) 
       borderRadius="m"
       dataView={dataView}
       dateRange={afterLoadedState.dateRange}
-      height={METRIC_CHART_MIN_HEIGHT}
+      height={METRIC_CHART_HEIGHT}
       layers={layers}
       lastReloadRequestTime={afterLoadedState.lastReloadRequestTime}
       loading={loading}

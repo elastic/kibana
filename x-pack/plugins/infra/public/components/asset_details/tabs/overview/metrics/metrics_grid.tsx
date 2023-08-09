@@ -19,6 +19,7 @@ import {
   hostLensFormulas,
   type XYLayerOptions,
 } from '../../../../../common/visualizations';
+import { METRIC_CHART_HEIGHT } from '../../../constants';
 
 type DataViewOrigin = 'logs' | 'metrics';
 interface MetricChartConfig extends Pick<LensChartProps, 'id' | 'title' | 'overrides'> {
@@ -277,8 +278,6 @@ export interface MetricsGridProps {
   logsDataView?: DataView;
 }
 
-const HEIGHT = 250;
-
 export const MetricsGrid = React.memo(
   ({ nodeName, metricsDataView, logsDataView, timeRange }: MetricsGridProps) => {
     const getDataView = useCallback(
@@ -324,7 +323,7 @@ export const MetricsGrid = React.memo(
                   borderRadius="m"
                   dataView={getDataView(dataViewOrigin)}
                   dateRange={timeRange}
-                  height={HEIGHT}
+                  height={METRIC_CHART_HEIGHT}
                   layers={layers}
                   filters={getFilters(dataViewOrigin)}
                   title={title}

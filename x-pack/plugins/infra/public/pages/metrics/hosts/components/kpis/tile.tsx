@@ -7,17 +7,16 @@
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { LensChart, TooltipContent } from '../../../../../components/lens';
-import type { KPIChartProps } from '../../../../../common/visualizations/lens/dashboards/host/kpi_grid_config';
+import {
+  type KPIChartProps,
+  AVERAGE_SUBTITLE,
+} from '../../../../../common/visualizations/lens/dashboards/host/kpi_grid_config';
 import { buildCombinedHostsFilter } from '../../../../../utils/filters/build';
 import { useMetricsDataViewContext } from '../../hooks/use_data_view';
 import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
 import { useHostsViewContext } from '../../hooks/use_hosts_view';
 import { useHostCountContext } from '../../hooks/use_host_count';
 import { useAfterLoadedState } from '../../hooks/use_after_loaded_state';
-
-const AVERAGE_SUBTITLE = i18n.translate('xpack.infra.hostsViewPage.metricTrend.subtitle.average', {
-  defaultMessage: 'Average',
-});
 
 export const Tile = ({
   id,
@@ -58,7 +57,7 @@ export const Tile = ({
         ];
   }, [dataView, hostNodes, searchCriteria.filters, shouldUseSearchCriteria]);
 
-  // prevents requestTs and serchCriteria state from reloading the chart
+  // prevents requestTs and searchCriteria state from reloading the chart
   // we want it to reload only once the table has finished loading
   const { afterLoadedState } = useAfterLoadedState(loading, {
     lastReloadRequestTime: requestTs,

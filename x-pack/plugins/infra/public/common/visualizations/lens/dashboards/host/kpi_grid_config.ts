@@ -6,13 +6,21 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
-import { Layer } from '../../../../../hooks/use_lens_attributes';
+import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import type { Layer } from '../../../../../hooks/use_lens_attributes';
 import { hostLensFormulas } from '../../../constants';
 import { TOOLTIP } from './translations';
 
-import { FormulaConfig } from '../../../types';
-import { MetricLayerOptions } from '../../visualization_types';
+import type { FormulaConfig } from '../../../types';
+import type { MetricLayerOptions } from '../../visualization_types';
+
+export const KPI_CHART_HEIGHT = 150;
+export const AVERAGE_SUBTITLE = i18n.translate(
+  'xpack.infra.assetDetailsEmbeddable.overview.metricTrend.subtitle.average',
+  {
+    defaultMessage: 'Average',
+  }
+);
 
 export interface KPIChartProps extends Pick<TypedLensByValueInput, 'id' | 'title' | 'overrides'> {
   layers: Layer<MetricLayerOptions, FormulaConfig, 'data'>;
