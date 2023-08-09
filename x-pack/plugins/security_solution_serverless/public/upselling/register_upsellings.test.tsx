@@ -31,58 +31,58 @@ describe('registerUpsellings', () => {
   it('should not register anything when all PLIs features are enabled', () => {
     mockGetProductAppFeatures.mockReturnValue(ALL_APP_FEATURE_KEYS);
 
-    const registerPages = jest.fn();
-    const registerSections = jest.fn();
-    const registerMessages = jest.fn();
+    const setRegisteredPages = jest.fn();
+    const setRegisteredSections = jest.fn();
+    const setRegisteredMessages = jest.fn();
     const upselling = {
-      registerPages,
-      registerSections,
-      registerMessages,
+      setRegisteredPages,
+      setRegisteredSections,
+      setRegisteredMessages,
     } as unknown as UpsellingService;
 
     registerUpsellings(upselling, allProductTypes);
 
-    expect(registerPages).toHaveBeenCalledTimes(1);
-    expect(registerPages).toHaveBeenCalledWith({});
+    expect(setRegisteredPages).toHaveBeenCalledTimes(1);
+    expect(setRegisteredPages).toHaveBeenCalledWith({});
 
-    expect(registerSections).toHaveBeenCalledTimes(1);
-    expect(registerSections).toHaveBeenCalledWith({});
+    expect(setRegisteredSections).toHaveBeenCalledTimes(1);
+    expect(setRegisteredSections).toHaveBeenCalledWith({});
 
-    expect(registerMessages).toHaveBeenCalledTimes(1);
-    expect(registerMessages).toHaveBeenCalledWith({});
+    expect(setRegisteredMessages).toHaveBeenCalledTimes(1);
+    expect(setRegisteredMessages).toHaveBeenCalledWith({});
   });
 
   it('should register all upsellings pages, sections and messages when PLIs features are disabled', () => {
     mockGetProductAppFeatures.mockReturnValue([]);
 
-    const registerPages = jest.fn();
-    const registerSections = jest.fn();
-    const registerMessages = jest.fn();
+    const setRegisteredPages = jest.fn();
+    const setRegisteredSections = jest.fn();
+    const setRegisteredMessages = jest.fn();
 
     const upselling = {
-      registerPages,
-      registerSections,
-      registerMessages,
+      setRegisteredPages,
+      setRegisteredSections,
+      setRegisteredMessages,
     } as unknown as UpsellingService;
 
     registerUpsellings(upselling, allProductTypes);
 
     const expectedPagesObject = Object.fromEntries(
-      upsellingPages.map(({ pageName }) => [pageName, expect.any(Object)])
+      upsellingPages.map(({ pageName }) => [pageName, expect.anything()])
     );
-    expect(registerPages).toHaveBeenCalledTimes(1);
-    expect(registerPages).toHaveBeenCalledWith(expectedPagesObject);
+    expect(setRegisteredPages).toHaveBeenCalledTimes(1);
+    expect(setRegisteredPages).toHaveBeenCalledWith(expectedPagesObject);
 
     const expectedSectionsObject = Object.fromEntries(
-      upsellingSections.map(({ id }) => [id, expect.any(Object)])
+      upsellingSections.map(({ id }) => [id, expect.anything()])
     );
-    expect(registerSections).toHaveBeenCalledTimes(1);
-    expect(registerSections).toHaveBeenCalledWith(expectedSectionsObject);
+    expect(setRegisteredSections).toHaveBeenCalledTimes(1);
+    expect(setRegisteredSections).toHaveBeenCalledWith(expectedSectionsObject);
 
     const expectedMessagesObject = Object.fromEntries(
       upsellingMessages.map(({ id }) => [id, expect.any(String)])
     );
-    expect(registerMessages).toHaveBeenCalledTimes(1);
-    expect(registerMessages).toHaveBeenCalledWith(expectedMessagesObject);
+    expect(setRegisteredMessages).toHaveBeenCalledTimes(1);
+    expect(setRegisteredMessages).toHaveBeenCalledWith(expectedMessagesObject);
   });
 });

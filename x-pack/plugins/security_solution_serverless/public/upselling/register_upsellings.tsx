@@ -22,7 +22,7 @@ import { getProductAppFeatures } from '../../common/pli/pli_features';
 import { investigationGuideUpselling } from './messages/investigation_guide_upselling';
 const ThreatIntelligencePaywallLazy = lazy(() => import('./pages/threat_intelligence_paywall'));
 
-const OsqueryResponseActionsUpsellingSectionlLazy = lazy(async () => {
+const OsqueryResponseActionsUpsellingSectionLazy = lazy(async () => {
   const OsqueryResponseActionsUpsellingSection = (
     await import('./pages/osquery_automated_response_actions')
   ).default;
@@ -110,7 +110,7 @@ export const upsellingSections: UpsellingSections = [
   {
     id: 'osquery_automated_response_actions',
     pli: AppFeatureKey.osqueryAutomatedResponseActions,
-    component: OsqueryResponseActionsUpsellingSectionlLazy,
+    component: OsqueryResponseActionsUpsellingSectionLazy,
   },
   {
     id: 'endpointPolicyProtections',

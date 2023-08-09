@@ -542,10 +542,8 @@ const exampleInsight = `${insightPrefix}{
 }}`;
 
 export const plugin = ({
-  licenseIsPlatinum,
   insightsUpsellingMessage,
 }: {
-  licenseIsPlatinum: boolean;
   insightsUpsellingMessage: string | null;
 }) => {
   return {
