@@ -10,7 +10,7 @@ import { ViewMode } from '@kbn/embeddable-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { LensAttributes } from '@kbn/visualization-utils';
+import { LensAttributes } from '@kbn/lens-embeddable-utils';
 import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 import { ChartLoadingProgress, ChartPlaceholder } from './chart_placeholder';
 import { parseDateRange } from '../../utils/datemath';

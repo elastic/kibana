@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FormulaConfig } from '@kbn/visualization-utils';
+import type { FormulaConfig } from '@kbn/lens-embeddable-utils';
 
 export const diskSpaceAvailable: FormulaConfig = {
   label: 'Disk Space Available',

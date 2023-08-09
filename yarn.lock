@@ -5917,7 +5917,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/visualization-utils@link:packages/kbn-visualization-utils":
+"@kbn/lens-embeddable-utils@link:packages/kbn-lens-embeddable-utils":
   version "0.0.0"
   uid ""
 

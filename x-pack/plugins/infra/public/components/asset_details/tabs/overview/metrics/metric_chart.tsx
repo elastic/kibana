@@ -12,7 +12,7 @@ import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { FormulaConfig, XYLayerOptions } from '@kbn/visualization-utils';
+import type { FormulaConfig, XYLayerOptions } from '@kbn/lens-embeddable-utils';
 import { LensWrapper } from '../../../../lens/lens_wrapper';
 import { buildCombinedHostsFilter } from '../../../../../utils/filters/build';
 import { useLensAttributes, type Layer } from '../../../../../hooks/use_lens_attributes';

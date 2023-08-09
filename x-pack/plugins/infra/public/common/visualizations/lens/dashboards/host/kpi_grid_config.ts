@@ -7,7 +7,7 @@
 
 import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { i18n } from '@kbn/i18n';
-import type { FormulaConfig, MetricLayerOptions } from '@kbn/visualization-utils';
+import type { FormulaConfig, MetricLayerOptions } from '@kbn/lens-embeddable-utils';
 import { Layer } from '../../../../../hooks/use_lens_attributes';
 import { hostLensFormulas } from '../../../constants';
 import { TOOLTIP } from './translations';

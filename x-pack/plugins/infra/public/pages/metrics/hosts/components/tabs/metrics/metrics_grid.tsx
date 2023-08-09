@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiFlexGrid, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer } from '@elastic/eui';
-import type { XYLayerOptions } from '@kbn/visualization-utils';
+import type { XYLayerOptions } from '@kbn/lens-embeddable-utils';
 import { hostLensFormulas } from '../../../../../../common/visualizations';
 import { HostMetricsDocsLink } from '../../../../../../components/lens';
 import { MetricChart, MetricChartProps } from './metric_chart';

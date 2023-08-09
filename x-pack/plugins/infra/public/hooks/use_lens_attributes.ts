@@ -26,7 +26,7 @@ import {
   XYReferenceLinesLayer,
   Chart,
   LensVisualizationState,
-} from '@kbn/visualization-utils';
+} from '@kbn/lens-embeddable-utils';
 
 import { InfraClientSetupDeps } from '../types';
 import { useLazyRef } from './use_lazy_ref';

@@ -9,6 +9,6 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../..',
-  roots: ['<rootDir>/packages/kbn-visualization-utils'],
+  roots: ['<rootDir>/packages/kbn-lens-embeddable-utils'],
   setupFiles: ['jest-canvas-mock'],
 };
