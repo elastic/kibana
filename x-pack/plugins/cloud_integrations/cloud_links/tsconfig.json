@@ -22,6 +22,7 @@
     "@kbn/core-ui-settings-browser",
     "@kbn/user-profile-components",
     "@kbn/core-lifecycle-browser",
+    "@kbn/kibana-react-plugin",
   ],
   "exclude": [
     "target/**/*",
