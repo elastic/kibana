@@ -34,7 +34,7 @@ export const bulkCreateFactory =
     alertWithPersistence: PersistenceAlertService,
     refreshForBulkCreate: RefreshTypes,
     ruleExecutionLogger: IRuleExecutionLogForExecutors,
-    experimentalFeatures: ExperimentalFeatures
+    experimentalFeatures?: ExperimentalFeatures
   ) =>
   async <T extends BaseFieldsLatest>(
     wrappedDocs: Array<WrappedFieldsLatest<T>>,
