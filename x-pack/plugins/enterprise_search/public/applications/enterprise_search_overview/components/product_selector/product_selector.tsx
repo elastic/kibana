@@ -101,7 +101,7 @@ export const ProductSelector: React.FC = () => {
               'xpack.enterpriseSearch.productSelector.overview.createCustom.description',
               {
                 defaultMessage:
-                  'Once your index is created and populated, you'll be ready to use the full power of Elasticsearch. Build search applications using our out-of-the-box tools and programming language clients, all backed by a robust set of APIs.',
+                  "Once your index is created and populated, you'll be ready to use the full power of Elasticsearch. Build search applications using our out-of-the-box tools and programming language clients, all backed by a robust set of APIs.",
               }
             )}
           </p>
