@@ -9,13 +9,12 @@ import type { Logger, StartServicesAccessor } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { RISK_ENGINE_ENABLE_URL, APP_ID } from '../../../../common/constants';
-import type { SetupPlugins, StartPlugins } from '../../../plugin';
+import type { StartPlugins } from '../../../plugin';
 import type { SecuritySolutionPluginRouter } from '../../../types';
 
 export const riskEngineEnableRoute = (
   router: SecuritySolutionPluginRouter,
   logger: Logger,
-  security: SetupPlugins['security'],
   getStartServices: StartServicesAccessor<StartPlugins>
 ) => {
   router.post(
