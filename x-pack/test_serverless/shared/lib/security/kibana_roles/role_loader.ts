@@ -67,6 +67,16 @@ export class RoleAndUserLoader<R extends Record<string, Role> = Record<string, R
     };
   }
 
+  async loadAll(): Promise<Record<keyof R, LoadedRoleAndUser>> {
+    const response = {} as Record<keyof R, LoadedRoleAndUser>;
+
+    for (const roleName of Object.keys(this.roles) as Array<keyof R>) {
+      response[roleName] = await this.load(roleName);
+    }
+
+    return response;
+  }
+
   private async createRole(role: Role): Promise<void> {
     const { name: roleName, ...roleDefinition } = role;
 
