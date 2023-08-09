@@ -11,10 +11,9 @@ import * as fixtures from '../helpers/fixtures';
 import { setupEnvironment } from '../helpers';
 
 import { notificationServiceMock } from '@kbn/core/public/mocks';
+import { EnrichPoliciesTestBed, setup } from './enrich_policies.helpers';
 
 const toastsMock = notificationServiceMock.createStartContract().toasts;
-
-import { EnrichPoliciesTestBed, setup } from './enrich_policies.helpers';
 
 describe('Enrich policies tab', () => {
   const { httpSetup, httpRequestsMockHelpers, setDelayResponse } = setupEnvironment();
@@ -44,7 +43,7 @@ describe('Enrich policies tab', () => {
       const error = {
         statusCode: 400,
         error: 'Bad Request',
-        message: 'invalid tier names found in ...',
+        message: 'something went wrong...',
       };
 
       httpRequestsMockHelpers.setLoadEnrichPoliciesResponse(undefined, error);
@@ -96,38 +95,82 @@ describe('Enrich policies tab', () => {
     });
 
     describe('policy actions', () => {
-      it('can delete a policy', async () => {
-        const { actions, exists } = testBed;
+      describe('deletion', () => {
+        it('can delete a policy', async () => {
+          const { actions, exists } = testBed;
 
-        httpRequestsMockHelpers.setDeleteEnrichPolicyResponse('policy-match', {
-          acknowledged: true,
+          httpRequestsMockHelpers.setDeleteEnrichPolicyResponse('policy-match', {
+            acknowledged: true,
+          });
+
+          await actions.clickDeletePolicyAt(0);
+
+          expect(exists('deletePolicyModal')).toBe(true);
+
+          await actions.clickConfirmDeletePolicyButton();
+
+          expect(toastsMock.addSuccess).toHaveBeenCalled();
+          expect(httpSetup.delete.mock.calls.length).toBe(1);
         });
 
-        await actions.clickDeletePolicyAt(0);
+        test('displays an error toast if it fails', async () => {
+          const { actions, exists } = testBed;
 
-        expect(exists('deletePolicyModal')).toBe(true);
+          const error = {
+            statusCode: 400,
+            error: 'Bad Request',
+            message: 'something went wrong...',
+          };
 
-        await actions.clickConfirmDeletePolicyButton();
+          httpRequestsMockHelpers.setDeleteEnrichPolicyResponse('policy-match', undefined, error);
 
-        expect(toastsMock.addSuccess).toHaveBeenCalled();
-        expect(httpSetup.delete.mock.calls.length).toBe(1);
+          await actions.clickDeletePolicyAt(0);
+
+          expect(exists('deletePolicyModal')).toBe(true);
+
+          await actions.clickConfirmDeletePolicyButton();
+
+          expect(toastsMock.addDanger).toHaveBeenCalled();
+        });
       });
 
-      it('can execute a policy', async () => {
-        const { actions, exists } = testBed;
+      describe('execution', () => {
+        it('can execute a policy', async () => {
+          const { actions, exists } = testBed;
 
-        httpRequestsMockHelpers.setExecuteEnrichPolicyResponse('policy-match', {
-          acknowledged: true,
+          httpRequestsMockHelpers.setExecuteEnrichPolicyResponse('policy-match', {
+            acknowledged: true,
+          });
+
+          await actions.clickExecutePolicyAt(0);
+
+          expect(exists('executePolicyModal')).toBe(true);
+
+          await actions.clickConfirmExecutePolicyButton();
+
+          expect(toastsMock.addSuccess).toHaveBeenCalled();
+          expect(httpSetup.put.mock.calls.length).toBe(1);
         });
 
-        await actions.clickExecutePolicyAt(0);
+        test('displays an error toast if it fails', async () => {
+          const { actions, exists } = testBed;
 
-        expect(exists('executePolicyModal')).toBe(true);
+          const error = {
+            statusCode: 400,
+            error: 'Bad Request',
+            message: 'something went wrong...',
+          };
 
-        await actions.clickConfirmExecutePolicyButton();
+          httpRequestsMockHelpers.setExecuteEnrichPolicyResponse('policy-match', undefined, error);
 
-        expect(toastsMock.addSuccess).toHaveBeenCalled();
-        expect(httpSetup.put.mock.calls.length).toBe(1);
+          await actions.clickExecutePolicyAt(0);
+
+          expect(exists('executePolicyModal')).toBe(true);
+
+          await actions.clickConfirmExecutePolicyButton();
+
+          expect(toastsMock.addDanger).toHaveBeenCalled();
+        });
       });
     });
   });
