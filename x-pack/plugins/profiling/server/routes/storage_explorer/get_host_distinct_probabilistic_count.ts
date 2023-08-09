@@ -48,9 +48,21 @@ export async function getHostAndDistinctProbabilisticCount({
         },
       },
       aggs: {
-        diffProbabilisticCount: {
-          cardinality: {
-            field: 'profiling.agent.config.probabilistic_threshold',
+        hostsAndProjectIds: {
+          multi_terms: {
+            terms: [{ field: 'host.id' }, { field: 'profiling.project.id' }],
+          },
+          aggs: {
+            activeProbabilisticValue: {
+              top_metrics: {
+                metrics: {
+                  field: 'profiling.agent.config.probabilistic_threshold',
+                },
+                sort: {
+                  '@timestamp': 'desc',
+                },
+              },
+            },
           },
         },
         hostCount: {
@@ -61,9 +73,35 @@ export async function getHostAndDistinctProbabilisticCount({
       },
     },
   });
+
+  const activeProbabilisticValuesPerProjectId: Record<string, Set<string>> = {};
+  response.aggregations?.hostsAndProjectIds.buckets.forEach((bucket) => {
+    const projectId = bucket.key[1] as string;
+    const activeProbabilisticValue = bucket.activeProbabilisticValue.top[0]?.metrics?.[
+      'profiling.agent.config.probabilistic_threshold'
+    ] as string | undefined;
+    if (activeProbabilisticValue) {
+      const currentMap = activeProbabilisticValuesPerProjectId[projectId];
+      if (currentMap) {
+        currentMap.add(activeProbabilisticValue);
+      } else {
+        const activeProbabilisticSet = new Set<string>();
+        activeProbabilisticSet.add(activeProbabilisticValue);
+        activeProbabilisticValuesPerProjectId[projectId] = activeProbabilisticSet;
+      }
+    }
+  });
+
+  let totalNumberOfDistinctProbabilisticValues = 0;
+  Object.keys(activeProbabilisticValuesPerProjectId).forEach((projectId) => {
+    const activeProbabilisticValues = activeProbabilisticValuesPerProjectId[projectId];
+    if (activeProbabilisticValues.size > 1) {
+      totalNumberOfDistinctProbabilisticValues += activeProbabilisticValues.size;
+    }
+  });
+
   return {
-    totalNumberOfDistinctProbabilisticValues:
-      response.aggregations?.diffProbabilisticCount.value || 0,
+    totalNumberOfDistinctProbabilisticValues,
     totalNumberOfHosts: response.aggregations?.hostCount.value || 0,
   };
 }

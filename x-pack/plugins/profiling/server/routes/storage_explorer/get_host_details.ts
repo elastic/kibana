@@ -90,7 +90,7 @@ export async function getHostDetails({
   return (
     response.aggregations?.hosts.buckets.flatMap((bucket) => {
       const hostId = bucket.key as string;
-      const { hostName, probabilisticValues } = hostsDetailsMap[hostId];
+      const hostDetails = hostsDetailsMap[hostId];
 
       return bucket.projectIds.buckets.map((projectBucket): StorageExplorerHostDetails => {
         const totalPerIndex = allIndicesStats
@@ -109,12 +109,15 @@ export async function getHostDetails({
               };
             }, perIndexInitialSize)
           : perIndexInitialSize;
+        const projectId = projectBucket.key as string;
+        const currentProjectProbabilisticValues =
+          hostDetails?.probabilisticValuesPerProject?.[projectId];
 
         return {
           hostId,
-          hostName,
-          probabilisticValues,
-          projectId: projectBucket.key as string,
+          hostName: hostDetails?.hostName,
+          probabilisticValues: currentProjectProbabilisticValues?.probabilisticValues || [],
+          projectId,
           totalEventsSize: totalPerIndex.events,
           totalMetricsSize: totalPerIndex.metrics,
           totalSize: totalPerIndex.events + totalPerIndex.metrics,

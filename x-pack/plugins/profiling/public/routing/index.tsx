@@ -252,7 +252,16 @@ const routes = {
             },
           },
           '/storage-explorer': {
-            element: <StorageExplorerView />,
+            element: (
+              <RouteBreadcrumb
+                title={i18n.translate('xpack.profiling.breadcrumb.storageExplorer', {
+                  defaultMessage: 'Storage explorer',
+                })}
+                href="/storage-explorer"
+              >
+                <StorageExplorerView />
+              </RouteBreadcrumb>
+            ),
             params: t.type({
               query: indexLifecyclePhaseRt,
             }),

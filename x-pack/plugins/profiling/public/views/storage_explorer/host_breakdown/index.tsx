@@ -61,11 +61,12 @@ export function HostBreakdown({ hasDistinctProbabilisticValues }: Props) {
       <EuiTitle>
         <EuiText>
           {i18n.translate('xpack.profiling.storageExplorer.hostBreakdown.title', {
-            defaultMessage: 'Host breakdown',
+            defaultMessage: 'Host agent breakdown',
           })}
           <EuiToolTip
             content={i18n.translate('xpack.profiling.storageExplorer.hostBreakdown.title.hint', {
-              defaultMessage: 'This graph shows the combined values of events and metrics',
+              defaultMessage:
+                'This graph shows the combined values of events and metrics. host.name[host.id]',
             })}
           >
             <EuiIcon type="questionInCircle" style={{ marginLeft: 4 }} />

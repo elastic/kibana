@@ -28,12 +28,11 @@ export function HostBreakdownChart({ data = [] }: Props) {
 
   const hostBreakdownTimeseries = useMemo(() => {
     return (
-      data.map(({ hostId, hostName, timeseries }, index) => {
+      data.map(({ hostId, hostName, timeseries }) => {
         return {
           data: timeseries ?? [],
           type: 'area',
-          // color: groupedPalette[Math.floor(index % (10 * euiPaletteColorBlindRotations))],
-          title: `${hostName} (${hostId})`,
+          title: `${hostName} [${hostId}]`,
         };
       }) ?? []
     );

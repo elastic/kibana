@@ -7,7 +7,13 @@
 
 import { ElasticsearchClient } from '@kbn/core/server';
 
-export const symbolsIndices = ['profiling-symbols-global', 'profiling-symbols-private'];
+export const symbolsIndices = [
+  'profiling-symbols-global',
+  'profiling-symbols-private',
+  'profiling-executables',
+  'profiling-stackframes',
+  'profiling-returnpads-private',
+];
 
 export const stacktracesIndices = [
   'profiling-events-*',
@@ -18,11 +24,17 @@ export const stacktracesIndices = [
 ];
 
 export const allIndices = [
-  ...stacktracesIndices,
+  'profiling-events-*',
+  'profiling-metrics',
+  'profiling-stacktraces',
   'profiling-sq-executables',
   'profiling-sq-leafframes',
   'profiling-hosts',
-  ...symbolsIndices,
+  'profiling-symbols-global',
+  'profiling-symbols-private',
+  'profiling-executables',
+  'profiling-stackframes',
+  'profiling-returnpads-private',
 ];
 
 export function getIndicesStats({

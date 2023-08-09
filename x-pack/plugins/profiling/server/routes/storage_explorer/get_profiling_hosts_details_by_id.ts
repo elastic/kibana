@@ -5,12 +5,17 @@
  * 2.0.
  */
 import { kqlQuery } from '@kbn/observability-plugin/server';
+import { keyBy } from 'lodash';
 import { ProfilingESField } from '../../../common/elasticsearch';
 import { ProfilingESClient } from '../../utils/create_profiling_es_client';
 
 interface HostDetails {
+  hostId: string;
   hostName: string;
-  probabilisticValues: Array<{ value: number; date: number }>;
+  probabilisticValuesPerProject: Record<
+    string,
+    { projectId: string; probabilisticValues: Array<{ value: number; date: number | null }> }
+  >;
 }
 
 export async function getProfilingHostsDetailsById({
@@ -25,7 +30,7 @@ export async function getProfilingHostsDetailsById({
   timeTo: number;
   kuery: string;
   hostIds: string[];
-}) {
+}): Promise<Record<string, HostDetails>> {
   const resp = await client.search('get_host_ids_names', {
     index: 'profiling-hosts',
     body: {
@@ -59,19 +64,22 @@ export async function getProfilingHostsDetailsById({
                 sort: '_score',
               },
             },
-            probabilisticValues: {
+            projectIds: {
               terms: {
-                field: 'profiling.agent.config.probabilistic_threshold',
-                size: 5,
+                field: 'profiling.project.id',
               },
               aggs: {
-                sample: {
-                  top_metrics: {
-                    metrics: {
-                      field: 'profiling.agent.start_time',
-                    },
-                    sort: {
-                      'profiling.agent.start_time': 'asc',
+                probabilisticValues: {
+                  terms: {
+                    field: 'profiling.agent.config.probabilistic_threshold',
+                    size: 5,
+                    order: { agentFirstStartDate: 'desc' },
+                  },
+                  aggs: {
+                    agentFirstStartDate: {
+                      min: {
+                        field: 'profiling.agent.start_time',
+                      },
                     },
                   },
                 },
@@ -83,15 +91,30 @@ export async function getProfilingHostsDetailsById({
     },
   });
 
-  return (
-    resp.aggregations?.hostIds.buckets.reduce<Record<string, HostDetails>>((acc, curr) => {
-      const hostId = curr.key as string;
-      const hostName = curr.hostNames.top[0].metrics['profiling.host.name'] as string;
-      const probabilisticValues = curr.probabilisticValues.buckets.map((probValues) => ({
-        value: probValues.key as number,
-        date: Number(probValues.sample.top[0]?.metrics?.['profiling.agent.start_time']),
-      }));
-      return { ...acc, [hostId]: { hostName, probabilisticValues } };
-    }, {}) || {}
-  );
+  const hostsDetails =
+    resp.aggregations?.hostIds.buckets.map((bucket): HostDetails => {
+      const hostId = bucket.key as string;
+      const hostName = bucket.hostNames.top[0].metrics['profiling.host.name'] as string;
+
+      const probabilisticValuesPerProject = bucket.projectIds.buckets.map((projectIdBucket) => {
+        const projectId = projectIdBucket.key as string;
+        const probabilisticValues = projectIdBucket.probabilisticValues.buckets.map(
+          (probValuesBucket) => {
+            return {
+              value: probValuesBucket.key as number,
+              date: probValuesBucket.agentFirstStartDate.value,
+            };
+          }
+        );
+        return { projectId, probabilisticValues };
+      });
+
+      return {
+        hostId,
+        hostName,
+        probabilisticValuesPerProject: keyBy(probabilisticValuesPerProject, 'projectId'),
+      };
+    }) || [];
+
+  return keyBy(hostsDetails, 'hostId');
 }

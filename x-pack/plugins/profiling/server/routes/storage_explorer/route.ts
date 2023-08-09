@@ -22,7 +22,6 @@ import { getStorageDetailsGroupedByIndex } from './get_storage_details_grouped_b
 import { getStorageDetailsPerIndex } from './get_storage_details_per_index';
 
 export function registerStorageExplorerRoute({
-  logger,
   router,
   services: { createProfilingEsClient },
 }: RouteRegisterParameters) {

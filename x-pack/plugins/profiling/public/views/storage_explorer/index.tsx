@@ -98,7 +98,7 @@ export function StorageExplorerView() {
               isSelected={selectedTab === 'host_breakdown'}
             >
               {i18n.translate('xpack.profiling.storageExplorer.tabs.hostBreakdown', {
-                defaultMessage: 'Host breakdown',
+                defaultMessage: 'Host agent breakdown',
               })}
             </EuiTab>
             <EuiTab

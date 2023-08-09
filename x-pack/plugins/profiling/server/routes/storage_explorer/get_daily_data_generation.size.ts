@@ -45,8 +45,8 @@ export async function getDailyDataGenerationSize({
     index: [
       'profiling-events-*',
       'profiling-stacktraces',
-      'profiling-executables',
-      'profiling-stackframes',
+      'profiling-hosts',
+      'profiling-metrics',
     ].join(),
     body: {
       query: {

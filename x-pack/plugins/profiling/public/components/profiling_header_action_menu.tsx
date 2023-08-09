@@ -9,19 +9,17 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { useProfilingRouter } from '../hooks/use_profiling_router';
 import { NoDataTabs } from '../views/no_data_view';
+import { useProfilingDependencies } from './contexts/profiling_dependencies/use_profiling_dependencies';
 
 export function ProfilingHeaderActionMenu() {
   const router = useProfilingRouter();
+  const {
+    start: { core },
+  } = useProfilingDependencies();
   return (
     <EuiHeaderLinks gutterSize="xs">
       <EuiHeaderLink
-        href={router.link('/storage-explorer', {
-          query: {
-            kuery: '',
-            rangeFrom: 'now-15m',
-            rangeTo: 'now',
-          },
-        })}
+        href={core.http.basePath.prepend('/app/profiling/storage-explorer')}
         color="text"
       >
         <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">

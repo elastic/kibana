@@ -25,7 +25,7 @@ export function DistinctProbabilisticValuesWarning({
         'xpack.profiling.storageExplorer.distinctProbabilisticProfilingValues.title',
         {
           defaultMessage:
-            "We've identified {count} distinct profiling values. Make sure to update them.",
+            "We've identified {count} distinct probabilistic profiling values. Make sure to update them.",
           values: { count: totalNumberOfDistinctProbabilisticValues },
         }
       )}

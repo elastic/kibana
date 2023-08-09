@@ -13,6 +13,7 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiInMemoryTable,
+  EuiLink,
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -20,6 +21,8 @@ import { asDynamicBytes, asAbsoluteDateTime } from '@kbn/observability-plugin/co
 import React, { useMemo, useState } from 'react';
 import { StorageExplorerHostDetails } from '../../../../common/storage_explorer';
 import { LabelWithHint } from '../../../components/label_with_hint';
+import { useProfilingParams } from '../../../hooks/use_profiling_params';
+import { useProfilingRouter } from '../../../hooks/use_profiling_router';
 
 interface Props {
   data?: StorageExplorerHostDetails[];
@@ -34,6 +37,9 @@ const sorting = {
 };
 
 export function HostsTable({ data = [], hasDistinctProbabilisticValues }: Props) {
+  const { query } = useProfilingParams('/storage-explorer');
+  const { rangeFrom, rangeTo } = query;
+  const profilingRouter = useProfilingRouter();
   const [pagination, setPagination] = useState({ pageIndex: 0 });
 
   function onTableChange({ page: { index } }: CriteriaWithPagination<StorageExplorerHostDetails>) {
@@ -85,12 +91,29 @@ export function HostsTable({ data = [], hasDistinctProbabilisticValues }: Props)
       },
       {
         field: 'hostName',
-        name: i18n.translate('xpack.profiling.storageExplorer.hostsTable.host', {
-          defaultMessage: 'Host',
-        }),
+        name: (
+          <LabelWithHint
+            label={i18n.translate('xpack.profiling.storageExplorer.hostsTable.host', {
+              defaultMessage: 'Host',
+            })}
+            hint={i18n.translate('xpack.profiling.storageExplorer.hostsTable.host.hint', {
+              defaultMessage: 'host.name[host.id]',
+            })}
+            labelSize="xs"
+            labelStyle={{ fontWeight: 700 }}
+            iconSize="s"
+          />
+        ),
         sortable: true,
         render: (_, item) => {
-          return `${item.hostName} (${item.hostId})`;
+          return (
+            <EuiLink
+              className="eui-textTruncate"
+              href={profilingRouter.link('/flamegraphs/flamegraph', {
+                query: { rangeFrom, rangeTo, kuery: `${'host.id'}: "${item.hostId}"` },
+              })}
+            >{`${item.hostName} [${item.hostId}]`}</EuiLink>
+          );
         },
       },
       {

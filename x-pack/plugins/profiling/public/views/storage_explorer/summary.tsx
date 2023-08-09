@@ -5,12 +5,16 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiStat, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiPanel, EuiStat, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { asDynamicBytes } from '@kbn/observability-plugin/common';
 import React from 'react';
+import { StackTracesDisplayOption, TopNType } from '../../../common/stack_traces';
 import { StorageExplorerSummaryAPIResponse } from '../../../common/storage_explorer';
+import { useProfilingDependencies } from '../../components/contexts/profiling_dependencies/use_profiling_dependencies';
 import { LabelWithHint } from '../../components/label_with_hint';
+import { useProfilingParams } from '../../hooks/use_profiling_params';
+import { useProfilingRouter } from '../../hooks/use_profiling_router';
 import { asPercentage } from '../../utils/formatters/as_percentage';
 
 interface Props {
@@ -25,6 +29,13 @@ interface SummaryInfo {
 }
 
 export function Summary({ data, isLoading }: Props) {
+  const { query } = useProfilingParams('/storage-explorer');
+  const { rangeFrom, rangeTo, kuery } = query;
+  const profilingRouter = useProfilingRouter();
+  const {
+    start: { core },
+  } = useProfilingDependencies();
+
   const summaryInfo: SummaryInfo[] = [
     {
       title: i18n.translate('xpack.profiling.storageExplorer.summary.totalData', {
@@ -33,6 +44,10 @@ export function Summary({ data, isLoading }: Props) {
       value: data?.totalProfilingSizeBytes
         ? asDynamicBytes(data?.totalProfilingSizeBytes)
         : undefined,
+      hint: i18n.translate('xpack.profiling.storageExplorer.summary.totalData.hint', {
+        defaultMessage:
+          'Total Storage Size of all Profiling Indices including replicas, ignoring the filter settings',
+      }),
     },
     {
       title: i18n.translate('xpack.profiling.storageExplorer.summary.dailyDataGeneration', {
@@ -47,25 +62,28 @@ export function Summary({ data, isLoading }: Props) {
         defaultMessage: 'Total debug symbols size',
       }),
       value: data?.totalSymbolsSizeBytes ? asDynamicBytes(data?.totalSymbolsSizeBytes) : undefined,
+      hint: i18n.translate('xpack.profiling.storageExplorer.summary.totalDebugSymbolsSize.hint', {
+        defaultMessage: 'The total sum of private and public debug symbols',
+      }),
     },
     {
       title: i18n.translate('xpack.profiling.storageExplorer.summary.discSpaceUsed', {
         defaultMessage: 'Disc space used',
       }),
       value: data?.diskSpaceUsedPct ? asPercentage(data?.diskSpaceUsedPct) : undefined,
+      hint: i18n.translate('xpack.profiling.storageExplorer.summary.discSpaceUsed.hint', {
+        defaultMessage:
+          'The percentage of the storage capacity that is currently used by all the Profiling indices compare the max. storage capacity currently configured for Elasticsearch',
+      }),
     },
     {
       title: i18n.translate('xpack.profiling.storageExplorer.summary.numberOfHosts', {
-        defaultMessage: 'Number of hosts',
+        defaultMessage: 'Number of host agents',
       }),
       value: data?.totalNumberOfHosts,
-    },
-    {
-      title: i18n.translate(
-        'xpack.profiling.storageExplorer.summary.distinctProbabilisticProfilingValues',
-        { defaultMessage: 'Distinct probabilistic profiling values' }
-      ),
-      value: data?.totalNumberOfDistinctProbabilisticValues,
+      hint: i18n.translate('xpack.profiling.storageExplorer.summary.numberOfHosts.hint', {
+        defaultMessage: 'Total number of Profiling host agents reporting into the deployment',
+      }),
     },
   ];
   return (
@@ -89,6 +107,39 @@ export function Summary({ data, isLoading }: Props) {
             </EuiFlexItem>
           );
         })}
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup direction="column">
+            <EuiFlexItem grow={false}>
+              <EuiLink
+                href={profilingRouter.link('/stacktraces/{topNType}', {
+                  path: { topNType: TopNType.Hosts },
+                  query: {
+                    rangeFrom,
+                    rangeTo,
+                    kuery,
+                    limit: 10,
+                    displayAs: StackTracesDisplayOption.StackTraces,
+                  },
+                })}
+              >
+                {i18n.translate('xpack.profiling.storageExplorer.summary.universalProfilingLink', {
+                  defaultMessage: 'Go to Universal profiling',
+                })}
+              </EuiLink>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiLink
+                href={core.http.basePath.prepend(
+                  '/app/management/data/index_management/data_streams'
+                )}
+              >
+                {i18n.translate('xpack.profiling.storageExplorer.summary.indexManagement', {
+                  defaultMessage: 'Go to Index Management',
+                })}
+              </EuiLink>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>
   );
