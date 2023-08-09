@@ -109,7 +109,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
     // flag for all our localhost actions to bypass it.  Currently,
     // security_and_spaces uses enableActionsProxy: true, and spaces_only
     // uses enableActionsProxy: false.
-    const proxyHosts = ['localhost', 'some.non.existent.com'];
+    const proxyHosts = ['localhost', '127.0.0.1', 'some.non.existent.com'];
     const actionsProxyUrl = options.enableActionsProxy
       ? [
           `--xpack.actions.proxyUrl=http://127.0.0.1:${proxyPort}`,
