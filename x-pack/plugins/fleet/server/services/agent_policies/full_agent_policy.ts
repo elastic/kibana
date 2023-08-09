@@ -337,9 +337,9 @@ export function transformOutputToFullPolicyOutput(
       key,
       compression,
       compression_level,
-      username,
-      password,
-      sasl,
+      ...(username ? { username } : {}),
+      ...(password ? { password } : {}),
+      ...(sasl ? { sasl } : {}),
       partition: transformPartition(),
       topics: (topics ?? []).map((topic) => {
         const { topic: topicName, ...rest } = topic;

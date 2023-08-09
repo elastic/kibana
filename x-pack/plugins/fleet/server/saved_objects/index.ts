@@ -539,7 +539,7 @@ export function registerEncryptedSavedObjects(
     type: OUTPUT_SAVED_OBJECT_TYPE,
     attributesToEncrypt: new Set([
       { key: 'ssl', dangerouslyExposeValue: true },
-      // { key: 'password', dangerouslyExposeValue: true }, //TODO:
+      { key: 'password', dangerouslyExposeValue: true },
     ]),
     attributesToExcludeFromAAD: new Set([
       'output_id',
@@ -554,6 +554,24 @@ export function registerEncryptedSavedObjects(
       'config_yaml',
       'is_preconfigured',
       'proxy_id',
+      'version',
+      'key',
+      'compression',
+      'compression_level',
+      'client_id',
+      'auth_type',
+      'connection_type',
+      'username',
+      'sasl',
+      'partition',
+      'random',
+      'round_robin',
+      'hash',
+      'topics',
+      'headers',
+      'timeout',
+      'broker_timeout',
+      'required_acks',
     ]),
   });
   // Encrypted saved objects
