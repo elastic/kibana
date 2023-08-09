@@ -29,28 +29,28 @@ export default function ({ getService }: FtrProviderContext) {
           svlCommonApi.assertApiNotFound(body, status);
         });
 
-        it.skip('create/update role', async () => {
+        it('create/update role', async () => {
           const { body, status } = await supertest
             .put('/api/security/role/test')
             .set(svlCommonApi.getInternalRequestHeader());
           svlCommonApi.assertApiNotFound(body, status);
         });
 
-        it.skip('get role', async () => {
+        it('get role', async () => {
           const { body, status } = await supertest
             .get('/api/security/role/superuser')
             .set(svlCommonApi.getInternalRequestHeader());
           svlCommonApi.assertApiNotFound(body, status);
         });
 
-        it.skip('get all roles', async () => {
+        it('get all roles', async () => {
           const { body, status } = await supertest
             .get('/api/security/role')
             .set(svlCommonApi.getInternalRequestHeader());
           svlCommonApi.assertApiNotFound(body, status);
         });
 
-        it.skip('delete role', async () => {
+        it('delete role', async () => {
           const { body, status } = await supertest
             .delete('/api/security/role/superuser')
             .set(svlCommonApi.getInternalRequestHeader());
