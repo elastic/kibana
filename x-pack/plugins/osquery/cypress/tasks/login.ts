@@ -24,7 +24,6 @@ const sendApiLoginRequest = (
   const url = new URL(Cypress.config().baseUrl ?? '');
   url.pathname = '/internal/security/login';
 
-  console.log({ url, baseUrl: Cypress.config().baseUrl });
   cy.log(`Authenticating [${username}] via ${url.toString()}`);
 
   return request({

@@ -22,17 +22,17 @@
 // https://on.cypress.io/configuration
 // ***********************************************************
 
+// @ts-expect-error check this
+import registerCypressGrep from '@cypress/grep';
+
 // force ESM in this module
 import type { ServerlessRoleName } from '../../../../test_serverless/shared/lib';
 
 export {};
 
-// @ts-expect-error check this
-import registerCypressGrep from '@cypress/grep';
-
 import 'cypress-react-selector';
 // import './coverage';
-import { login } from '../tasks/login';
+import { login } from '../../../../test_serverless/functional/test_suites/security/cypress/tasks/login';
 
 registerCypressGrep();
 
@@ -48,7 +48,7 @@ declare global {
 
       clickOutside(): Chainable<JQuery<HTMLBodyElement>>;
 
-      loginKibana: (role?: ROLE) => void;
+      loginKibana(role?: ServerlessRoleName): void;
     }
   }
 }
