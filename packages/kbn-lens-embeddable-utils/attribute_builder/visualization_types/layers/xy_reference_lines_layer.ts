@@ -13,7 +13,7 @@ import type {
   PersistedIndexPatternLayer,
   XYReferenceLineLayerConfig,
 } from '@kbn/lens-plugin/public';
-import type { ChartColumn, ChartLayer, FormulaConfig } from '../../types';
+import type { StaticChartColumn, ChartLayer, FormulaConfig } from '../../types';
 import { getDefaultReferences } from '../../utils';
 import { ReferenceLineColumn } from './columns/reference_line';
 
@@ -22,7 +22,7 @@ interface XYReferenceLinesLayerConfig {
 }
 
 export class XYReferenceLinesLayer implements ChartLayer<XYReferenceLineLayerConfig> {
-  private column: ChartColumn[];
+  private column: StaticChartColumn[];
   constructor(layerConfig: XYReferenceLinesLayerConfig) {
     this.column = layerConfig.data.map((p) => new ReferenceLineColumn(p));
   }
@@ -31,17 +31,13 @@ export class XYReferenceLinesLayer implements ChartLayer<XYReferenceLineLayerCon
     return this.column[0].getFormulaConfig().label;
   }
 
-  getLayer(
-    layerId: string,
-    accessorId: string,
-    dataView: DataView
-  ): FormBasedPersistedState['layers'] {
+  getLayer(layerId: string, accessorId: string): FormBasedPersistedState['layers'] {
     const baseLayer = { columnOrder: [], columns: {} } as PersistedIndexPatternLayer;
     return {
       [`${layerId}_reference`]: this.column.reduce((acc, curr, index) => {
         return {
           ...acc,
-          ...curr.getData(`${accessorId}_${index}_reference_column`, acc, dataView),
+          ...curr.getData(`${accessorId}_${index}_reference_column`, acc),
         };
       }, baseLayer),
     };

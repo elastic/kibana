@@ -27,14 +27,21 @@ export interface VisualizationAttributesBuilder {
 }
 
 // Column
-export interface ChartColumn {
+export interface BaseChartColumn {
+  getFormulaConfig(): FormulaConfig;
+}
+
+export interface ChartColumn extends BaseChartColumn {
   getData(
     id: string,
     baseLayer: PersistedIndexPatternLayer,
     dataView: DataView,
     formulaAPI: FormulaPublicApi
   ): PersistedIndexPatternLayer;
-  getFormulaConfig(): FormulaConfig;
+}
+
+export interface StaticChartColumn extends BaseChartColumn {
+  getData(id: string, baseLayer: PersistedIndexPatternLayer): PersistedIndexPatternLayer;
 }
 
 // Layer

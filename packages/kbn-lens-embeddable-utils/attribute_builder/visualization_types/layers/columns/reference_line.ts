@@ -8,9 +8,9 @@
 
 import type { PersistedIndexPatternLayer } from '@kbn/lens-plugin/public';
 import type { ReferenceBasedIndexPatternColumn } from '@kbn/lens-plugin/public/datasources/form_based/operations/definitions/column_types';
-import type { FormulaConfig, ChartColumn } from '../../../types';
+import type { FormulaConfig, StaticChartColumn } from '../../../types';
 
-export class ReferenceLineColumn implements ChartColumn {
+export class ReferenceLineColumn implements StaticChartColumn {
   constructor(private formulaConfig: FormulaConfig) {}
 
   getFormulaConfig(): FormulaConfig {
