@@ -15,6 +15,7 @@ import { ClientPluginsStart } from '../../../plugin';
 import { initDurationAnomalyAlertType } from './duration_anomaly';
 
 export type AlertTypeInitializer<TAlertTypeModel = ObservabilityRuleTypeModel> = (dependencies: {
+  isHidden: boolean;
   core: CoreStart;
   plugins: ClientPluginsStart;
 }) => TAlertTypeModel;
