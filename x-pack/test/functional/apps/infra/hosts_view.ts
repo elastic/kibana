@@ -155,7 +155,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       return !!currentUrl.match(path);
     });
 
-  describe('Hosts View', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/162672
+  describe.skip('Hosts View', function () {
     before(async () => {
       await Promise.all([
         esArchiver.load('x-pack/test/functional/es_archives/infra/alerts'),
