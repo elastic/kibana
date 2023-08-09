@@ -6,7 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-// import type { RiskScore } from '@kbn/security-solution-plugin/server/lib/risk_engine/types';
 import { v4 as uuidv4 } from 'uuid';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import { deleteAllAlerts, deleteAllRules } from '../../../utils';
@@ -21,6 +20,7 @@ import {
   normalizeScores,
   riskEngineRouteHelpersFactory,
   updateRiskEngineConfigSO,
+  getRiskEngineTask,
 } from './utils';
 
 // eslint-disable-next-line import/no-default-export
@@ -123,6 +123,21 @@ export default ({ getService }: FtrProviderContext): void => {
               );
 
               expect(actualHostNames).to.eql([...expectedHostNames, ...expectedHostNames]);
+            });
+          });
+
+          describe('disabling the risk engine', () => {
+            beforeEach(async () => {
+              await waitForRiskScoresToBePresent({ es, log, scoreCount: 10 });
+            });
+
+            it('removes the risk scoring task', async () => {
+              const task = await getRiskEngineTask({ es });
+              expect(task).not.to.be(undefined);
+              await riskEngineRoutes.disable();
+              const disabledTask = await getRiskEngineTask({ es });
+
+              expect(disabledTask).to.eql(undefined);
             });
           });
 

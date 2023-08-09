@@ -6,6 +6,9 @@
  */
 
 import datemath from '@kbn/datemath';
+import { type Logger, SavedObjectsErrorHelpers } from '@kbn/core/server';
+import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+
 import type { Range } from '../../../../common/risk_engine';
 
 export const convertDateToISOString = (dateString: string): string => {
@@ -22,3 +25,22 @@ export const convertRangeToISO = (range: Range): Range => ({
   start: convertDateToISOString(range.start),
   end: convertDateToISOString(range.end),
 });
+
+export const removeRiskScoringTask = async ({
+  logger,
+  taskManager,
+  taskId,
+}: {
+  logger: Logger;
+  taskManager: TaskManagerStartContract;
+  taskId: string;
+}) => {
+  try {
+    await taskManager.remove(taskId);
+  } catch (err) {
+    if (!SavedObjectsErrorHelpers.isNotFoundError(err)) {
+      logger.error(`Failed to remove risk scoring task: ${err.message}`);
+      throw err;
+    }
+  }
+};
