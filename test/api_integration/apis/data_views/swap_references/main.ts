@@ -20,6 +20,7 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const title = 'logs-*';
   const prevDataViewId = '91200a00-9efd-11e7-acb3-3dab96693fab';
+  const PREVIEW_PATH = `${DATA_VIEW_SWAP_REFERENCES_PATH}/_preview`;
   let dataViewId = '';
 
   describe('main', () => {
@@ -49,7 +50,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('can preview', async () => {
       const res = await supertest
-        .post(DATA_VIEW_SWAP_REFERENCES_PATH)
+        .post(PREVIEW_PATH)
         .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
         .send({
           fromId: prevDataViewId,
@@ -60,7 +61,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('can preview specifying type', async () => {
       const res = await supertest
-        .post(DATA_VIEW_SWAP_REFERENCES_PATH)
+        .post(PREVIEW_PATH)
         .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
         .send({
           fromId: prevDataViewId,
@@ -73,7 +74,6 @@ export default function ({ getService }: FtrProviderContext) {
     it('can save changes', async () => {
       const res = await supertest
         .post(DATA_VIEW_SWAP_REFERENCES_PATH)
-        .query({ preview: false })
         .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
         .send({
           fromId: prevDataViewId,
@@ -88,7 +88,6 @@ export default function ({ getService }: FtrProviderContext) {
     it('can save changes and remove old saved object', async () => {
       const res = await supertest
         .post(DATA_VIEW_SWAP_REFERENCES_PATH)
-        .query({ preview: false })
         .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
         .send({
           fromId: prevDataViewId,
@@ -120,7 +119,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('can limit by id', async () => {
         // confirm this will find two items
         const res = await supertest
-          .post(DATA_VIEW_SWAP_REFERENCES_PATH)
+          .post(PREVIEW_PATH)
           .send({
             fromId: '8963ca30-3224-11e8-a572-ffca06da1357',
             toId: '91200a00-9efd-11e7-acb3-3dab96693fab',
@@ -132,7 +131,6 @@ export default function ({ getService }: FtrProviderContext) {
         // limit to one item
         const res2 = await supertest
           .post(DATA_VIEW_SWAP_REFERENCES_PATH)
-          .query({ preview: false })
           .send({
             fromId: '8963ca30-3224-11e8-a572-ffca06da1357',
             toId: '91200a00-9efd-11e7-acb3-3dab96693fab',
@@ -146,7 +144,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('can limit by type', async () => {
         // confirm this will find two items
         const res = await supertest
-          .post(DATA_VIEW_SWAP_REFERENCES_PATH)
+          .post(PREVIEW_PATH)
           .send({
             fromId: '8963ca30-3224-11e8-a572-ffca06da1357',
             toId: '91200a00-9efd-11e7-acb3-3dab96693fab',
@@ -158,7 +156,6 @@ export default function ({ getService }: FtrProviderContext) {
         // limit to one item
         const res2 = await supertest
           .post(DATA_VIEW_SWAP_REFERENCES_PATH)
-          .query({ preview: false })
           .send({
             fromId: '8963ca30-3224-11e8-a572-ffca06da1357',
             toId: '91200a00-9efd-11e7-acb3-3dab96693fab',
