@@ -58,7 +58,7 @@ export const WelcomeBanner: React.FC<WelcomeBannerProps> = ({
             <h2>
               {i18n.translate('searchApiPanels.welcomeBanner.header.greeting.title', {
                 defaultMessage: 'Hi {name}!',
-                values: { name: userProfile.user.full_name || userProfile.user.username },
+                values: { name: userProfile?.user?.full_name || userProfile?.user?.username },
               })}
             </h2>
           </EuiTitle>
