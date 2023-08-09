@@ -105,6 +105,8 @@ const initialPackagesTexts = Object.values(initialPackageMap);
 
 const additionalPackages = packages.slice(3);
 
+const expectedUncategorized = ['logs-gaming-*', 'logs-manufacturing-*', 'logs-retail-*'];
+
 export default function (providerContext: FtrProviderContext) {
   const { getService, getPageObjects } = providerContext;
   const browser = getService('browser');
@@ -530,7 +532,133 @@ export default function (providerContext: FtrProviderContext) {
         });
       });
 
-      // describe('when navigating into Uncategorized data streams', () => {
+      describe('when navigating into Uncategorized data streams', () => {
+        before(async () => {
+          await PageObjects.common.navigateToApp('discover', { hash: '/p/log-explorer' });
+        });
+
+        beforeEach(async () => {
+          await browser.refresh();
+          await PageObjects.discoverLogExplorer.openDatasetSelector();
+          await PageObjects.discoverLogExplorer.clearSearchField();
+        });
+
+        afterEach(async () => {
+          await PageObjects.discoverLogExplorer.closeDatasetSelector();
+        });
+
+        it('should display a list of available datasets', async () => {
+          const button = await PageObjects.discoverLogExplorer.getUnmanagedDatasetsButton();
+          await button.click();
+
+          await retry.try(async () => {
+            const panelTitleNode =
+              await PageObjects.discoverLogExplorer.getDatasetSelectorContextMenuPanelTitle();
+            const menuEntries = await PageObjects.discoverLogExplorer.getCurrentPanelEntries();
+
+            expect(await panelTitleNode.getVisibleText()).to.be('Uncategorized');
+            expect(await menuEntries[0].getVisibleText()).to.be(expectedUncategorized[0]);
+            expect(await menuEntries[1].getVisibleText()).to.be(expectedUncategorized[1]);
+            expect(await menuEntries[2].getVisibleText()).to.be(expectedUncategorized[2]);
+          });
+        });
+
+        it('should sort the datasets list by the clicked sorting option', async () => {
+          const button = await PageObjects.discoverLogExplorer.getUnmanagedDatasetsButton();
+          await button.click();
+
+          await retry.try(async () => {
+            const panelTitleNode =
+              await PageObjects.discoverLogExplorer.getDatasetSelectorContextMenuPanelTitle();
+
+            expect(await panelTitleNode.getVisibleText()).to.be('Uncategorized');
+          });
+
+          // Test ascending order
+          await PageObjects.discoverLogExplorer.clickSortButtonBy('asc');
+          await retry.try(async () => {
+            const menuEntries = await PageObjects.discoverLogExplorer.getCurrentPanelEntries();
+
+            expect(await menuEntries[0].getVisibleText()).to.be(expectedUncategorized[0]);
+            expect(await menuEntries[1].getVisibleText()).to.be(expectedUncategorized[1]);
+            expect(await menuEntries[2].getVisibleText()).to.be(expectedUncategorized[2]);
+          });
+
+          // Test descending order
+          await PageObjects.discoverLogExplorer.clickSortButtonBy('desc');
+          await retry.try(async () => {
+            const menuEntries = await PageObjects.discoverLogExplorer.getCurrentPanelEntries();
+
+            expect(await menuEntries[0].getVisibleText()).to.be(expectedUncategorized[2]);
+            expect(await menuEntries[1].getVisibleText()).to.be(expectedUncategorized[1]);
+            expect(await menuEntries[2].getVisibleText()).to.be(expectedUncategorized[0]);
+          });
+
+          // Test back ascending order
+          await PageObjects.discoverLogExplorer.clickSortButtonBy('asc');
+          await retry.try(async () => {
+            const menuEntries = await PageObjects.discoverLogExplorer.getCurrentPanelEntries();
+
+            expect(await menuEntries[0].getVisibleText()).to.be(expectedUncategorized[0]);
+            expect(await menuEntries[1].getVisibleText()).to.be(expectedUncategorized[1]);
+            expect(await menuEntries[2].getVisibleText()).to.be(expectedUncategorized[2]);
+          });
+        });
+
+        it('should filter the datasets list by the typed dataset name', async () => {
+          const button = await PageObjects.discoverLogExplorer.getUnmanagedDatasetsButton();
+          await button.click();
+
+          await retry.try(async () => {
+            const panelTitleNode =
+              await PageObjects.discoverLogExplorer.getDatasetSelectorContextMenuPanelTitle();
+
+            expect(await panelTitleNode.getVisibleText()).to.be('Uncategorized');
+          });
+
+          await retry.try(async () => {
+            const menuEntries = await PageObjects.discoverLogExplorer.getCurrentPanelEntries();
+
+            expect(await menuEntries[0].getVisibleText()).to.be(expectedUncategorized[0]);
+            expect(await menuEntries[1].getVisibleText()).to.be(expectedUncategorized[1]);
+            expect(await menuEntries[2].getVisibleText()).to.be(expectedUncategorized[2]);
+          });
+
+          await PageObjects.discoverLogExplorer.typeSearchFieldWith('retail');
+
+          await retry.try(async () => {
+            const menuEntries = await PageObjects.discoverLogExplorer.getCurrentPanelEntries();
+
+            expect(menuEntries.length).to.be(1);
+            expect(await menuEntries[0].getVisibleText()).to.be('logs-retail-*');
+          });
+        });
+
+        it('should update the current selection with the clicked dataset', async () => {
+          const button = await PageObjects.discoverLogExplorer.getUnmanagedDatasetsButton();
+          await button.click();
+
+          await retry.try(async () => {
+            const panelTitleNode =
+              await PageObjects.discoverLogExplorer.getDatasetSelectorContextMenuPanelTitle();
+
+            expect(await panelTitleNode.getVisibleText()).to.be('Uncategorized');
+          });
+
+          await retry.try(async () => {
+            const menuEntries = await PageObjects.discoverLogExplorer.getCurrentPanelEntries();
+
+            expect(await menuEntries[0].getVisibleText()).to.be('logs-gaming-*');
+            menuEntries[0].click();
+          });
+
+          await retry.try(async () => {
+            const selectorButton = await PageObjects.discoverLogExplorer.getDatasetSelectorButton();
+
+            expect(await selectorButton.getVisibleText()).to.be('logs-gaming-*');
+          });
+        });
+      });
       //   beforeEach(async () => {
       //     await PageObjects.discoverLogExplorer.openDatasetSelector();
       //   });
