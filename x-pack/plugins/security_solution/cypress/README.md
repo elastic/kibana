@@ -2,7 +2,7 @@
 
 The `security_solution/cypress` directory contains functional UI tests that execute using [Cypress](https://www.cypress.io/).
 
-Currently with Cypress you can develop `functional` tests and coming soon `CCS` and `Upgrade` functional tests.
+Currently with Cypress you can develop `functional` tests and coming soon `CCS` functional tests.
 
 If you are still having doubts, questions or queries, please feel free to ping our Cypress champions:
 
@@ -53,13 +53,11 @@ Run the tests with the following yarn scripts:
 | cypress | Runs the default Cypress command |
 | cypress:open | Opens the Cypress UI with all tests in the `e2e` directory. This also runs a local kibana and ES instance. The kibana instance will reload when you make code changes. This is the recommended way to debug and develop tests. |
 | cypress:open:ccs | Opens the Cypress UI and runs all tests in the `ccs_e2e` directory |
-| cypress:open:upgrade | Opens the Cypress UI and runs all tests in the `upgrade_e2e` directory |
 | cypress:run | Runs all tests in the `e2e` directory excluding `investigations` and `explore` directories in headless mode |
 | cypress:run:cases | Runs all tests under `explore/cases` in the `e2e` directory related to the Cases area team in headless mode |
 | cypress:run:reporter | Runs all tests with the specified configuration in headless mode and produces a report using `cypress-multi-reporters` |
 | cypress:run:respops | Runs all tests related to the Response Ops area team, specifically tests in `detection_alerts`, `detection_rules`, and `exceptions` directories in headless mode |
 | cypress:run:ccs | Runs all tests in the `ccs_e2e` directory in headless mode |
-| cypress:run:upgrade | Runs all tests in the `upgrade_e2e` directory in headless mode |
 | cypress:investigations:run | Runs all tests in the `e2e/investigations` directory in headless mode |
 | cypress:explore:run | Runs all tests in the `e2e/explore` directory in headless mode |
 | junit:merge | Merges individual test reports into a single report and moves the report to the `junit` directory |
