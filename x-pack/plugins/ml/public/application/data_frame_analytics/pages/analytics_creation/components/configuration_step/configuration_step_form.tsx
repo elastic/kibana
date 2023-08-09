@@ -579,8 +579,6 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
       fieldStatsServices={fieldStatsServices}
       timeRangeMs={indexData.timeRangeMs}
       dslQuery={jobConfigQuery}
-      // DFA wizard already filters out to populated fields
-      disablePopulatedFields={true}
     >
       <Fragment>
         <Messages messages={requestMessages} />
