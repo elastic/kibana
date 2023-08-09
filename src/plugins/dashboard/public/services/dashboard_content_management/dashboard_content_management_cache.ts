@@ -8,14 +8,15 @@
 
 import LRUCache from 'lru-cache';
 import { DashboardCrudTypes } from '../../../common/content_management';
+import { DASHBOARD_CACHE_SIZE, DASHBOARD_CACHE_TTL } from '../../dashboard_constants';
 
 export class DashboardContentManagementCache {
   private cache: LRUCache<string, DashboardCrudTypes['GetOut']>;
 
   constructor() {
     this.cache = new LRUCache<string, DashboardCrudTypes['GetOut']>({
-      max: 100, // only store 100 dashboards
-      maxAge: 1000 * 60 * 5, // 5 minutes
+      max: DASHBOARD_CACHE_SIZE,
+      maxAge: DASHBOARD_CACHE_TTL,
     });
   }
 
