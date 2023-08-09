@@ -97,7 +97,11 @@ import { _installPackage } from './_install_package';
 import { removeOldAssets } from './cleanup';
 import { getBundledPackages } from './bundled_packages';
 import { withPackageSpan } from './utils';
-import { convertStringToTitle, generateDescription } from './custom_integrations/utils';
+import {
+  convertStringToTitle,
+  generateDescription,
+  prefixPkgName,
+} from './custom_integrations/utils';
 import { INITIAL_VERSION } from './custom_integrations/constants';
 import { createAssets } from './custom_integrations';
 import { cacheAssets } from './custom_integrations/assets/cache';
@@ -775,12 +779,14 @@ export async function installCustomPackage(
     savedObjectsClient,
     esClient,
     spaceId,
-    pkgName,
+    pkgName: originalPkgName,
     force,
     authorizationHeader,
     datasets,
     kibanaVersion,
   } = args;
+
+  const pkgName = prefixPkgName(originalPkgName);
 
   // Validate that we can create this package, validations will throw if they don't pass
   await checkForNamingCollision(savedObjectsClient, pkgName);
@@ -789,7 +795,7 @@ export async function installCustomPackage(
   const packageInfo = {
     format_version: CUSTOM_INTEGRATION_PACKAGE_SPEC_VERSION,
     name: pkgName,
-    title: convertStringToTitle(pkgName),
+    title: convertStringToTitle(originalPkgName),
     description: generateDescription(datasets.map((dataset) => dataset.name)),
     version: INITIAL_VERSION,
     owner: { github: authorizationHeader?.username ?? 'unknown' },

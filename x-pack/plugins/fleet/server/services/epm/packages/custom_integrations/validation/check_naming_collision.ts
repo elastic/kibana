@@ -26,8 +26,6 @@ export const checkForNamingCollision = async (
         `${PACKAGES_SAVED_OBJECT_TYPE}.attributes.install_status`,
         installationStatuses.Installed
       ),
-      // Custom packages
-      nodeBuilder.is(`${PACKAGES_SAVED_OBJECT_TYPE}.attributes.install_source`, 'custom'),
     ]),
   });
 

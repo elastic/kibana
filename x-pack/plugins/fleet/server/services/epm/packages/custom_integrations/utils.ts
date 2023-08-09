@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { NAME_PREFIX } from './constants';
+
 export const convertStringToTitle = (name: string) => {
   return name
     .split('_')
@@ -16,3 +18,5 @@ export const convertStringToTitle = (name: string) => {
 
 export const generateDescription = (datasetNames: string[]) =>
   `Collect logs for the datasets: ${datasetNames.join(', ')}`;
+
+export const prefixPkgName = (pkgName: string) => `${NAME_PREFIX}${pkgName}`;
