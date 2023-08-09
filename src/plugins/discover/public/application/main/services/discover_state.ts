@@ -68,7 +68,7 @@ interface DiscoverStateContainerParams {
    * mode in which discover is running
    *
    * */
-  mode: DiscoverDisplayMode;
+  mode?: DiscoverDisplayMode;
 }
 
 export interface LoadParams {
@@ -193,7 +193,7 @@ export interface DiscoverStateContainer {
 export function getDiscoverStateContainer({
   history,
   services,
-  mode,
+  mode = 'standalone',
 }: DiscoverStateContainerParams): DiscoverStateContainer {
   const storeInSessionStorage = services.uiSettings.get('state:storeInSessionStorage');
   const toasts = services.core.notifications.toasts;
@@ -204,7 +204,7 @@ export function getDiscoverStateContainer({
   const stateStorage = createKbnUrlStateStorage({
     useHash: storeInSessionStorage,
     history,
-    useHashQuery: mode === 'standalone',
+    useHashQuery: mode !== 'embedded',
     ...(toasts && withNotifyOnErrors(toasts)),
   });
 

@@ -9,7 +9,6 @@
 import { useQuerySubscriber } from '@kbn/unified-field-list/src/hooks/use_query_subscriber';
 import {
   UnifiedHistogramApi,
-  UnifiedHistogramContainerProps,
   UnifiedHistogramFetchStatus,
   UnifiedHistogramState,
 } from '@kbn/unified-histogram-plugin/public';
@@ -51,7 +50,7 @@ export const useDiscoverHistogram = ({
   inspectorAdapters,
   hideChart,
   isPlainRecord,
-}: UseDiscoverHistogramProps): UnifiedHistogramContainerProps => {
+}: UseDiscoverHistogramProps) => {
   const services = useDiscoverServices();
   const savedSearchData$ = stateContainer.dataState.data$;
 
