@@ -42,7 +42,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await PageObjects.discover.expandTimeRangeAsSuggestedInNoResultsMessage();
 
-        await PageObjects.discover.waitForDocTableLoadingComplete();
         await retry.try(async () => {
           expect(await PageObjects.discover.getColumnHeaders()).to.eql(defaultLogColumns);
         });
@@ -55,7 +54,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await PageObjects.discover.expandTimeRangeAsSuggestedInNoResultsMessage();
 
-        await PageObjects.discover.waitForDocTableLoadingComplete();
         await retry.try(async () => {
           expect(await PageObjects.discover.getColumnHeaders()).to.eql([
             ...defaultLogColumns,
@@ -73,14 +71,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await PageObjects.discover.expandTimeRangeAsSuggestedInNoResultsMessage();
 
-        await PageObjects.discover.waitForDocTableLoadingComplete();
         await retry.try(async () => {
           expect(await PageObjects.discover.getColumnHeaders()).to.eql(defaultLogColumns);
         });
 
         // Remove message column, it shows Document since nothing is selected
         await PageObjects.unifiedFieldList.clickFieldListItemRemove('message');
-        await PageObjects.discover.waitForDocTableLoadingComplete();
         await retry.try(async () => {
           expect(await PageObjects.discover.getColumnHeaders()).to.eql(['@timestamp', 'Document']);
         });
@@ -95,7 +91,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           menuEntries[0].click();
         });
 
-        await PageObjects.discover.waitForDocTableLoadingComplete();
         await retry.try(async () => {
           expect(await PageObjects.discover.getColumnHeaders()).to.eql(defaultLogColumns);
         });
@@ -103,20 +98,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should keep the current table columns selection if exists', async () => {
         await PageObjects.common.navigateToApp('discover', {
-          hash: '/p/log-explorer',
+          hash: '/p/log-explorer?_a=(columns:!(message,data_stream.namespace))',
         });
 
         await PageObjects.discover.expandTimeRangeAsSuggestedInNoResultsMessage();
 
-        await PageObjects.discover.waitForDocTableLoadingComplete();
-        await retry.try(async () => {
-          expect(await PageObjects.discover.getColumnHeaders()).to.eql(defaultLogColumns);
-        });
-
-        // Add new column
-        await PageObjects.unifiedFieldList.clickFieldListItemAdd('data_stream.namespace');
-
-        await PageObjects.discover.waitForDocTableLoadingComplete();
         await retry.try(async () => {
           expect(await PageObjects.discover.getColumnHeaders()).to.eql([
             ...defaultLogColumns,
@@ -132,8 +118,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           const menuEntries = await PageObjects.discoverLogExplorer.getCurrentPanelEntries();
           menuEntries[0].click();
         });
-
-        await PageObjects.discover.waitForDocTableLoadingComplete();
 
         await retry.try(async () => {
           expect(await PageObjects.discover.getColumnHeaders()).to.eql([
