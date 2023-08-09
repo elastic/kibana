@@ -10,8 +10,10 @@ import { schema } from '@kbn/config-schema';
 const actionSchema = schema.object({ date: schema.string() });
 export const throttledActionSchema = schema.recordOf(schema.string(), actionSchema);
 // TODO: Add schema by rule type for alert state
+// https://github.com/elastic/kibana/issues/159344
 export const alertStateSchema = schema.recordOf(schema.string(), schema.maybe(schema.any()));
 // TODO: Add schema by rule type for rule state
+// https://github.com/elastic/kibana/issues/159344
 const ruleStateSchema = schema.recordOf(schema.string(), schema.maybe(schema.any()));
 
 export const lastScheduledActionsSchema = schema.object({
