@@ -6,10 +6,8 @@
  * Side Public License, v 1.
  */
 
-require('./no_transpilation');
+// enables Node 16 default DNS lookup behavior for the current thread
+require('dns').setDefaultResultOrder('ipv4first');
 
-// restore < Node 16 default DNS lookup behavior
-require('./dns_ipv4_first');
-
-// eslint-disable-next-line import/no-extraneous-dependencies
-require('@kbn/babel-register').registerNodeAutoTranspilation();
+// overrides current process node options, so it can be restored in worker threads too
+process.env.NODE_OPTIONS = `${process.env.NODE_OPTIONS || ''} --dns-result-order=ipv4first`;
