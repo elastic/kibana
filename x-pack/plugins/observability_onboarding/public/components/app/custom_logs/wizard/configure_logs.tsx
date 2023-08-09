@@ -581,24 +581,42 @@ export function ConfigureLogs() {
             />
           </EuiFormRow>
         </EuiForm>
-        {hasFailedCreatingIntegration &&
-          integrationError &&
-          integrationError.type === 'UnknownError' && (
-            <>
-              <EuiSpacer size="l" />
-              <EuiCallOut
-                title={i18n.translate(
-                  'xpack.observability_onboarding.configureLogs.integrationCreation.error.title',
-                  { defaultMessage: 'Sorry, there was an error' }
-                )}
-                color="danger"
-                iconType="error"
-              >
-                <p>{integrationError.message}</p>
-              </EuiCallOut>
-            </>
-          )}
+        {hasFailedCreatingIntegration && integrationError && (
+          <>
+            <EuiSpacer size="l" />
+            {getErrorCallout(integrationError)}
+          </>
+        )}
       </StepPanelContent>
     </StepPanel>
   );
 }
+
+const getErrorCallout = (integrationError: IntegrationError) => {
+  const title = i18n.translate(
+    'xpack.observability_onboarding.configureLogs.integrationCreation.error.title',
+    { defaultMessage: 'Sorry, there was an error' }
+  );
+
+  switch (integrationError.type) {
+    case 'AuthorizationError':
+      const authorizationDescription = i18n.translate(
+        'xpack.observability_onboarding.configureLogs.integrationCreation.error.authorization.description',
+        {
+          defaultMessage:
+            'This user does not have permissions to create an integration.',
+        }
+      );
+      return (
+        <EuiCallOut title={title} color="danger" iconType="error">
+          <p>{authorizationDescription}</p>
+        </EuiCallOut>
+      );
+    case 'UnknownError':
+      return (
+        <EuiCallOut title={title} color="danger" iconType="error">
+          <p>{integrationError.message}</p>
+        </EuiCallOut>
+      );
+  }
+};

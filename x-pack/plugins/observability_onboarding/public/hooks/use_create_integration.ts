@@ -27,7 +27,7 @@ const GENERIC_ERROR_MESSAGE = i18n.translate(
   }
 );
 
-type ErrorType = 'NamingCollision' | 'UnknownError';
+type ErrorType = 'NamingCollision' | 'AuthorizationError' | 'UnknownError';
 export interface IntegrationError {
   type: ErrorType;
   message: string;
@@ -77,6 +77,11 @@ export const useCreateIntegration = ({
           onIntegrationCreationFailure({
             type: 'NamingCollision' as const,
             message: requestError.body.message,
+          });
+        } else if (requestError?.body?.statusCode === 403) {
+          onIntegrationCreationFailure({
+            type: 'AuthorizationError' as const,
+            message: requestError?.body?.message,
           });
         } else {
           onIntegrationCreationFailure({
