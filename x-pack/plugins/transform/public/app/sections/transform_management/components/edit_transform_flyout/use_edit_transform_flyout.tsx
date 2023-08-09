@@ -540,8 +540,6 @@ const createEditTransformFlyoutStore = ({ config, dataViewId }: EditTransformFly
   const reducer = formReducerFactory(config);
   const initialState = getDefaultState(config);
 
-  // const isUpdateButtonDisabled = !formState.isFormValid || !formState.isFormTouched;
-
   return createStore<EditTransformFlyoutState>()((set) => ({
     config,
     dataViewId,
