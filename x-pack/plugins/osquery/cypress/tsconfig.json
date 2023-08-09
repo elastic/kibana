@@ -25,10 +25,10 @@
       "path": "../tsconfig.json",
       "force": true
     },
-    "@kbn/security-plugin",
     "@kbn/security-solution-plugin",
     "@kbn/fleet-plugin",
     "@kbn/cases-plugin",
-    "@kbn/security-solution-plugin/cypress"
+    "@kbn/security-solution-plugin/cypress",
+    "@kbn/security-solution-plugin/public/management/cypress"
   ]
 }
