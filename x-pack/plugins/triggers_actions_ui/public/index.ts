@@ -90,6 +90,7 @@ export {
   hasMustacheTokens,
   templateActionVariable,
   updateActionConnector,
+  executeAction,
 } from './application/lib';
 
 export type { ActionGroupWithCondition } from './application/sections';

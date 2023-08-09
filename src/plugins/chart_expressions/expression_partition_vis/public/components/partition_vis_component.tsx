@@ -20,7 +20,9 @@ import {
   PartitionElementEvent,
   SettingsProps,
   Tooltip,
+  TooltipValue,
 } from '@elastic/charts';
+import { i18n } from '@kbn/i18n';
 import { useEuiTheme } from '@elastic/eui';
 import type { PaletteRegistry } from '@kbn/coloring';
 import { LegendToggle, ChartsPluginSetup } from '@kbn/charts-plugin/public';
@@ -72,6 +74,7 @@ import {
 } from './partition_vis_component.styles';
 import { filterOutConfig } from '../utils/filter_out_config';
 import { ColumnCellValueActions, FilterEvent, StartDeps } from '../types';
+import { getMultiFilterCells } from '../utils/filter_helpers';
 
 declare global {
   interface Window {
@@ -205,6 +208,7 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
         splitChartDimension,
         splitChartFormatter
       );
+
       props.fireEvent({ name: 'filter', data: { data } });
     },
     [metricColumn.id, originalVisData, props, visParams.dimensions.metrics.length]
@@ -385,10 +389,7 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
   );
 
   const fixedViewPort = document.getElementById('app-fixed-viewport');
-  const tooltip: TooltipProps = {
-    ...(fixedViewPort ? { boundary: fixedViewPort } : {}),
-    type: visParams.addTooltip ? TooltipType.Follow : TooltipType.None,
-  };
+
   const legendPosition = visParams.legendPosition ?? Position.Right;
 
   const splitChartColumnAccessor = splitColumn
@@ -404,6 +405,49 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
     : splitRow
     ? getColumnByAccessor(splitRow[0], visData.columns)
     : undefined;
+
+  const hasTooltipActions =
+    interactive && bucketAccessors.filter((a) => a !== 'metric-name').length > 0;
+
+  const tooltip: TooltipProps = {
+    ...(fixedViewPort ? { boundary: fixedViewPort } : {}),
+    type: visParams.addTooltip ? TooltipType.Follow : TooltipType.None,
+    actions: hasTooltipActions
+      ? [
+          {
+            disabled: (selected) => selected.length < 1,
+            label: (selected) =>
+              selected.length === 0
+                ? i18n.translate('expressionPartitionVis.tooltipActions.emptyFilterSelection', {
+                    defaultMessage: 'Select at least one series to filter',
+                  })
+                : i18n.translate('expressionPartitionVis.tooltipActions.filterValues', {
+                    defaultMessage: 'Filter {seriesNumber} series',
+                    values: { seriesNumber: selected.length },
+                  }),
+            onSelect: (
+              tooltipSelectedValues: Array<
+                TooltipValue<Record<'key', string | number>, SeriesIdentifier>
+              >
+            ) => {
+              const cells = getMultiFilterCells(tooltipSelectedValues, bucketColumns, visData);
+
+              props.fireEvent({
+                name: 'multiFilter',
+                data: {
+                  data: [
+                    {
+                      table: visData,
+                      cells,
+                    },
+                  ],
+                },
+              });
+            },
+          },
+        ]
+      : undefined,
+  };
 
   /**
    * Checks whether data have all zero values.
