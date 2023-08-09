@@ -1225,7 +1225,7 @@ describe('terms', () => {
 
   describe('field input', () => {
     // @ts-expect-error
-    window['__react-beautiful-dnd-disable-dev-warnings'] = true; // issue with enzyme & react-beautiful-dnd throwing errors: https://github.com/atlassian/react-beautiful-dnd/issues/1593
+    window['__@hello-pangea/dnd-disable-dev-warnings'] = true; // issue with enzyme & @hello-pangea/dnd throwing errors: https://github.com/atlassian/react-beautiful-dnd/issues/1593
 
     const defaultFieldInputProps = {
       indexPattern: defaultProps.indexPattern,
@@ -2744,7 +2744,7 @@ describe('terms', () => {
                       <strong>
                         notExisting
                       </strong>
-                      
+
                     </React.Fragment>
                   </React.Fragment>,
                 }

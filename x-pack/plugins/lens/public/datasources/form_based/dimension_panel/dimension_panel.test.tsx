@@ -886,7 +886,7 @@ describe('FormBasedDimensionEditor', () => {
 
     it('should leave error state when switching from incomplete state to fieldless operation', async () => {
       // @ts-expect-error
-      window['__react-beautiful-dnd-disable-dev-warnings'] = true; // issue with enzyme & react-beautiful-dnd throwing errors: https://github.com/atlassian/react-beautiful-dnd/issues/1593
+      window['__@hello-pangea/dnd-disable-dev-warnings'] = true; // issue with enzyme & @hello-pangea/dnd throwing errors: https://github.com/atlassian/react-beautiful-dnd/issues/1593
       wrapper = mountWithServices(<FormBasedDimensionEditorComponent {...defaultProps} />);
 
       await act(async () => {

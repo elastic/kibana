@@ -8,7 +8,7 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { shallow } from 'enzyme';
 import React from 'react';
-import type { DraggableStateSnapshot, DraggingStyle } from 'react-beautiful-dnd';
+import type { DraggableStateSnapshot, DraggingStyle } from '@hello-pangea/dnd';
 
 import '../../mock/match_media';
 import { mockBrowserFields } from '../../containers/source/mock';

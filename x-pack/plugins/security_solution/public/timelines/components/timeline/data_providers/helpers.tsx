@@ -6,7 +6,7 @@
  */
 
 import { omit } from 'lodash/fp';
-import type { DraggableLocation } from 'react-beautiful-dnd';
+import type { DraggableLocation } from '@hello-pangea/dnd';
 import type { Dispatch } from 'redux';
 
 import { updateProviders } from '../../../store/timeline/actions';

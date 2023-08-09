@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useMemo, useState, useRef, useContext } from 'react';
-import type { DraggableProvided, DraggableStateSnapshot } from 'react-beautiful-dnd';
+import type { DraggableProvided, DraggableStateSnapshot } from '@hello-pangea/dnd';
 import { TimelineContext } from '../../../timelines/components/timeline';
 import { HoverActions } from '.';
 

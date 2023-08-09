@@ -6,7 +6,7 @@
  */
 
 import { omit } from 'lodash/fp';
-import type { DropResult } from 'react-beautiful-dnd';
+import type { DropResult } from '@hello-pangea/dnd';
 
 import type { IdToDataProvider } from '../../store/drag_and_drop/model';
 
