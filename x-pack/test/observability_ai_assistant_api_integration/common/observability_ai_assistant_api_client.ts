@@ -5,25 +5,25 @@
  * 2.0.
  */
 
-import { format } from 'url';
-import supertest from 'supertest';
-import request from 'superagent';
 import type {
-  ObservabilityAIAssistantAPIEndpoint,
-  ObservabilityAIAssistantAPIClientRequestParamsOf,
   APIReturnType,
+  ObservabilityAIAssistantAPIClientRequestParamsOf,
+  ObservabilityAIAssistantAPIEndpoint,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import { formatRequest } from '@kbn/server-route-repository';
+import supertest from 'supertest';
+import { format } from 'url';
+import { Subtract } from 'utility-types';
 
 export function createObservabilityAIAssistantApiClient(st: supertest.SuperTest<supertest.Test>) {
-  return async <TEndpoint extends ObservabilityAIAssistantAPIEndpoint>(
+  return <TEndpoint extends ObservabilityAIAssistantAPIEndpoint>(
     options: {
       type?: 'form-data';
       endpoint: TEndpoint;
     } & ObservabilityAIAssistantAPIClientRequestParamsOf<TEndpoint> & {
         params?: { query?: { _inspect?: boolean } };
       }
-  ): Promise<SupertestReturnType<TEndpoint>> => {
+  ): SupertestReturnType<TEndpoint> => {
     const { endpoint, type } = options;
 
     const params = 'params' in options ? (options.params as Record<string, any>) : {};
@@ -37,7 +37,7 @@ export function createObservabilityAIAssistantApiClient(st: supertest.SuperTest<
       headers['Elastic-Api-Version'] = version;
     }
 
-    let res: request.Response;
+    let res: supertest.Test;
     if (type === 'form-data') {
       const fields: Array<[string, any]> = Object.entries(params.body);
       const formDataRequest = st[method](url)
@@ -48,19 +48,14 @@ export function createObservabilityAIAssistantApiClient(st: supertest.SuperTest<
         formDataRequest.field(field[0], field[1]);
       }
 
-      res = await formDataRequest;
+      res = formDataRequest;
     } else if (params.body) {
-      res = await st[method](url).send(params.body).set(headers);
+      res = st[method](url).send(params.body).set(headers);
     } else {
-      res = await st[method](url).set(headers);
+      res = st[method](url).set(headers);
     }
 
-    // supertest doesn't throw on http errors
-    if (res?.status !== 200) {
-      throw new Error(`Request to ${endpoint} failed with status code ${res?.status ?? 0}`);
-    }
-
-    return res;
+    return res as unknown as SupertestReturnType<TEndpoint>;
   };
 }
 
@@ -68,8 +63,47 @@ export type ObservabilityAIAssistantAPIClient = ReturnType<
   typeof createObservabilityAIAssistantApiClient
 >;
 
-export interface SupertestReturnType<TEndpoint extends ObservabilityAIAssistantAPIEndpoint> {
-  text: string;
-  status: number;
-  body: APIReturnType<TEndpoint>;
+type WithoutPromise<T extends Promise<any>> = Subtract<T, Promise<any>>;
+
+// this is a little intense, but without it, method overrides are lost
+// e.g., {
+//  end(one:string)
+//  end(one:string, two:string)
+// }
+// would lose the first signature. This keeps up to four signatures.
+type OverloadedParameters<T> = T extends {
+  (...args: infer A1): any;
+  (...args: infer A2): any;
+  (...args: infer A3): any;
+  (...args: infer A4): any;
 }
+  ? A1 | A2 | A3 | A4
+  : T extends { (...args: infer A1): any; (...args: infer A2): any; (...args: infer A3): any }
+  ? A1 | A2 | A3
+  : T extends { (...args: infer A1): any; (...args: infer A2): any }
+  ? A1 | A2
+  : T extends (...args: infer A) => any
+  ? A
+  : any;
+
+type OverrideReturnType<T extends (...args: any[]) => any, TNextReturnType> = (
+  ...args: OverloadedParameters<T>
+) => WithoutPromise<ReturnType<T>> & TNextReturnType;
+
+type OverwriteThisMethods<T extends Record<string, any>, TNextReturnType> = TNextReturnType & {
+  [key in keyof T]: T[key] extends (...args: infer TArgs) => infer TReturnType
+    ? TReturnType extends Promise<any>
+      ? OverrideReturnType<T[key], TNextReturnType>
+      : (...args: TArgs) => TReturnType
+    : T[key];
+};
+
+export type SupertestReturnType<TEndpoint extends ObservabilityAIAssistantAPIEndpoint> =
+  OverwriteThisMethods<
+    WithoutPromise<supertest.Test>,
+    Promise<{
+      text: string;
+      status: number;
+      body: APIReturnType<TEndpoint>;
+    }>
+  >;
