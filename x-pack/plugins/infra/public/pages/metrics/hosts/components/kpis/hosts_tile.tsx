@@ -17,7 +17,7 @@ import { TooltipContent } from '../../../../../components/lens';
 const HOSTS_CHART: Omit<Props, 'loading' | 'value' | 'toolTip'> = {
   id: 'hostsViewKPI-hostsCount',
   color: '#6DCCB1',
-  title: i18n.translate('xpack.infra.hostsViewPage.metricTrend.hostCount.title', {
+  title: i18n.translate('xpack.infra.hostsViewPage.kpi.hostCount.title', {
     defaultMessage: 'Hosts',
   }),
 };
@@ -28,7 +28,7 @@ export const HostsTile = ({ height }: { height: number }) => {
 
   const getSubtitle = () => {
     return searchCriteria.limit < (hostCountData?.count.value ?? 0)
-      ? i18n.translate('xpack.infra.hostsViewPage.metricTrend.subtitle.hostCount.limit', {
+      ? i18n.translate('xpack.infra.hostsViewPage.kpi.subtitle.hostCount.limit', {
           defaultMessage: 'Limited to {limit}',
           values: {
             limit: searchCriteria.limit,

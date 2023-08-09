@@ -36,7 +36,7 @@ export const Tile = ({
 
   const getSubtitle = () => {
     return searchCriteria.limit < (hostCountData?.count.value ?? 0)
-      ? i18n.translate('xpack.infra.hostsViewPage.metricTrend.subtitle.average.limit', {
+      ? i18n.translate('xpack.infra.hostsViewPage.kpi.subtitle.average.limit', {
           defaultMessage: 'Average (of {limit} hosts)',
           values: {
             limit: searchCriteria.limit,
