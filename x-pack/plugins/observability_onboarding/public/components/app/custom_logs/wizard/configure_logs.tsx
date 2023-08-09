@@ -651,13 +651,13 @@ const getIntegrationNameError = (
 const getDatasetNameError = (datasetName: string, touched: boolean) => {
   if (touched && isEmpty(datasetName)) {
     return i18n.translate(
-      'xpack.observability_onboarding.configureLogs.dataset.error',
+      'xpack.observability_onboarding.configureLogs.dataset.emptyError',
       { defaultMessage: 'A dataset name is required.' }
     );
   }
   if (touched && !isLowerCase(datasetName)) {
     return i18n.translate(
-      'xpack.observability_onboarding.configureLogs.dataset.error',
+      'xpack.observability_onboarding.configureLogs.dataset.lowercaseError',
       { defaultMessage: 'A dataset name should be lowercase.' }
     );
   }
