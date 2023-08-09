@@ -114,6 +114,75 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404_response'
+    post:
+      summary: Updates a data view.
+      operationId: updateDataView
+      description: |
+        This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+      tags:
+        - data views
+      parameters:
+        - $ref: '#/components/parameters/kbn_xsrf'
+        - $ref: '#/components/parameters/view_id'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - data_view
+              properties:
+                data_view:
+                  type: object
+                  description: |
+                    The data view fields you want to update. Only the specified fields are updated in the data view. Unspecified fields stay as they are persisted.
+                  properties:
+                    allowNoIndex:
+                      type: boolean
+                    fieldFormats:
+                      type: object
+                    fields:
+                      type: object
+                    name:
+                      type: string
+                    runtimeFieldMap:
+                      type: object
+                    sourceFilters:
+                      type: array
+                    timeFieldName:
+                      type: string
+                    title:
+                      type: string
+                    type:
+                      type: string
+                    typeMeta:
+                      type: object
+                refresh_fields:
+                  type: boolean
+                  description: Reloads the data view fields after the data view is updated.
+                  default: false
+            examples:
+              updateDataViewRequest:
+                $ref: '#/components/examples/update_data_view_request'
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data_view:
+                    type: object
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400_response'
+      servers:
+        - url: https://localhost:5601
     servers:
       - url: https://localhost:5601
   /api/data_views/data_view/{viewId}/runtime_field/{fieldName}:
@@ -1175,6 +1244,15 @@ components:
           name: Kibana Sample Data eCommerce
           namespaces:
             - default
+    update_data_view_request:
+      summary: Update some properties for a data view.
+      value:
+        data_view:
+          title: kibana_sample_data_ecommerce
+          timeFieldName: order_date
+          allowNoIndex: false
+          name: Kibana Sample Data eCommerce
+        refresh_fields: true
     get_runtime_field_response:
       summary: Retrieve a runtime field named `hour_of_day` from the data view `d3d7af60-4c81-11e8-b3d7-01146121b73d`.
       value:
@@ -1692,6 +1770,13 @@ components:
       schema:
         type: string
         example: ff959d40-b880-11e8-a6d9-e546fe2bba5f
+    kbn_xsrf:
+      schema:
+        type: string
+      in: header
+      name: kbn-xsrf
+      description: Cross-site request forgery protection
+      required: true
     field_name:
       in: path
       name: fieldName
@@ -1700,13 +1785,6 @@ components:
       schema:
         type: string
         example: hour_of_day
-    kbn_xsrf:
-      schema:
-        type: string
-      in: header
-      name: kbn-xsrf
-      description: Cross-site request forgery protection
-      required: true
   schemas:
     404_response:
       type: object
@@ -1724,3 +1802,19 @@ components:
           example: 404
           enum:
             - 404
+    400_response:
+      title: Bad request
+      type: object
+      required:
+        - statusCode
+        - error
+        - message
+      properties:
+        statusCode:
+          type: number
+          example: 400
+        error:
+          type: string
+          example: Bad Request
+        message:
+          type: string

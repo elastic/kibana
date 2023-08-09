@@ -55,5 +55,77 @@ get:
         application/json:
           schema:
             $ref: '../components/schemas/404_response.yaml'
+
+post:
+  summary: Updates a data view.
+  operationId: updateDataView
+  description: >
+    This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+  tags:
+    - data views
+  parameters:
+    - $ref: '../components/headers/kbn_xsrf.yaml'
+    - $ref: '../components/parameters/view_id.yaml'
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - data_view
+          properties:
+            data_view:
+              type: object
+              description: >
+                The data view fields you want to update.
+                Only the specified fields are updated in the data view. Unspecified fields stay as they are persisted.
+              properties:
+                allowNoIndex:
+                  type: boolean
+                fieldFormats:
+                  type: object
+                fields:
+                  type: object
+                name:
+                  type: string
+                runtimeFieldMap:
+                  type: object
+                sourceFilters:
+                  type: array
+                timeFieldName:
+                  type: string
+                title:
+                  type: string
+                type:
+                  type: string
+                typeMeta:
+                  type: object
+            refresh_fields:
+              type: boolean
+              description: Reloads the data view fields after the data view is updated.
+              default: false
+        examples:
+          updateDataViewRequest:
+            $ref: '../components/examples/update_data_view_request.yaml'
+  responses:
+    '200':
+      description: Indicates a successful call.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data_view:
+                type: object
+    '400':
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/400_response.yaml'
+  servers:
+    - url: https://localhost:5601
+
 servers:
   - url: https://localhost:5601
