@@ -246,19 +246,16 @@ export function getEventFieldsToDisplay({
   eventRuleType?: string;
   highlightedFieldsOverride: string[];
 }): EventSummaryField[] {
-  if (highlightedFieldsOverride.length) {
-    return getHighlightedFieldsOverride(highlightedFieldsOverride);
-  } else {
-    const fields = [
-      ...alwaysDisplayedFields,
-      ...getFieldsByCategory(eventCategories),
-      ...getFieldsByEventCode(eventCode, eventCategories),
-      ...getFieldsByRuleType(eventRuleType),
-    ];
+  const fields = [
+    ...getHighlightedFieldsOverride(highlightedFieldsOverride),
+    ...alwaysDisplayedFields,
+    ...getFieldsByCategory(eventCategories),
+    ...getFieldsByEventCode(eventCode, eventCategories),
+    ...getFieldsByRuleType(eventRuleType),
+  ];
 
-    // Filter all fields by their id to make sure there are no duplicates
-    return uniqBy('id', fields);
-  }
+  // Filter all fields by their id to make sure there are no duplicates
+  return uniqBy('id', fields);
 }
 
 interface EventCategories {

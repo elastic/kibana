@@ -241,14 +241,16 @@ describe('Rule response schema', () => {
       const decoded = RuleResponse.decode(payload);
       const checked = exactCheck(payload, decoded);
       const message = pipe(checked, foldLeftRight);
-      const expected = getRulesSchemaMock();
+      const expected = { ...getRulesSchemaMock(), custom_highlighted_fields: ['foo', 'bar'] };
 
       expect(getPaths(left(message.errors))).toEqual([]);
       expect(message.schema).toEqual(expected);
     });
 
     test('it should NOT validate a string for "custom_highlighted_fields"', () => {
-      const payload: RuleResponse & { custom_highlighted_fields: string } = {
+      const payload: Omit<RuleResponse, 'custom_highlighted_fields'> & {
+        custom_highlighted_fields: string;
+      } = {
         ...getRulesSchemaMock(),
         custom_highlighted_fields: 'foo',
       };
@@ -257,7 +259,9 @@ describe('Rule response schema', () => {
       const checked = exactCheck(payload, decoded);
       const message = pipe(checked, foldLeftRight);
 
-      expect(getPaths(left(message.errors))).toEqual(['invalid keys "custom_highlighted_fields"']);
+      expect(getPaths(left(message.errors))).toEqual([
+        'Invalid value "foo" supplied to "custom_highlighted_fields"',
+      ]);
       expect(message.schema).toEqual({});
     });
   });
