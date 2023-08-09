@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import { useMemo, useState } from 'react';
 import { AbortableAsyncState, useAbortableAsync } from './use_abortable_async';
+import { useKibana } from './use_kibana';
 import { useObservabilityAIAssistant } from './use_observability_ai_assistant';
 
 export interface UseKnowledgeBaseResult {
@@ -22,6 +24,9 @@ export interface UseKnowledgeBaseResult {
 }
 
 export function useKnowledgeBase(): UseKnowledgeBaseResult {
+  const {
+    notifications: { toasts },
+  } = useKibana().services;
   const service = useObservabilityAIAssistant();
 
   const status = useAbortableAsync(({ signal }) => {
@@ -50,12 +55,17 @@ export function useKnowledgeBase(): UseKnowledgeBaseResult {
           })
           .catch((error) => {
             setInstallError(error);
+            toasts.addError(error, {
+              title: i18n.translate('xpack.observabilityAiAssistant.errorSettingUpKnowledgeBase', {
+                defaultMessage: 'Could not set up Knowledge Base',
+              }),
+            });
           })
           .finally(() => {
-            setIsInstalling(true);
+            setIsInstalling(false);
           });
       },
     }),
-    [status, service, isInstalling, installError]
+    [status, isInstalling, installError, service, toasts]
   );
 }
