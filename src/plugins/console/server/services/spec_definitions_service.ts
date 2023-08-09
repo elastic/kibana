@@ -12,6 +12,7 @@ import { basename, join } from 'path';
 import normalizePath from 'normalize-path';
 import { readFileSync } from 'fs';
 
+import { EndpointDefinition, EndpointDescription, EndpointsAvailability } from '../../common/types';
 import {
   AUTOCOMPLETE_DEFINITIONS_FOLDER,
   GENERATED_SUBFOLDER,
@@ -19,11 +20,6 @@ import {
   OVERRIDES_SUBFOLDER,
 } from '../../common/constants';
 import { jsSpecLoaders } from '../lib';
-import type {
-  EndpointsAvailability,
-  EndpointDescription,
-  EndpointDefinition,
-} from '../../common/types';
 
 export interface SpecDefinitionsDependencies {
   endpointsAvailability: EndpointsAvailability;

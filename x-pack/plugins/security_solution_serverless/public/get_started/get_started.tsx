@@ -10,6 +10,7 @@ import React from 'react';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { css } from '@emotion/react';
 
+import { NavigationProvider } from '@kbn/security-solution-navigation';
 import { WelcomePanel } from './welcome_panel';
 import { TogglePanel } from './toggle_panel';
 import {
@@ -20,6 +21,7 @@ import {
 import type { SecurityProductTypes } from '../../common/config';
 import { ProductSwitch } from './product_switch';
 import { useTogglePanel } from './use_toggle_panel';
+import { useKibana } from '../common/services';
 
 const CONTENT_WIDTH = 1150;
 
@@ -32,9 +34,19 @@ export const GetStartedComponent: React.FC<GetStartedProps> = ({ productTypes })
   const shadow = useEuiShadow('s');
   const {
     onProductSwitchChanged,
+    onCardClicked,
     onStepClicked,
-    state: { activeProducts, activeCards, finishedSteps },
+    onStepButtonClicked,
+    state: {
+      activeProducts,
+      activeSections,
+      finishedSteps,
+      totalActiveSteps,
+      totalStepsLeft,
+      expandedCardSteps,
+    },
   } = useTogglePanel({ productTypes });
+  const services = useKibana().services;
   return (
     <KibanaPageTemplate
       restrictWidth={false}
@@ -73,7 +85,7 @@ export const GetStartedComponent: React.FC<GetStartedProps> = ({ productTypes })
           </>
         }
       >
-        <WelcomePanel />
+        <WelcomePanel totalActiveSteps={totalActiveSteps} totalStepsLeft={totalStepsLeft} />
       </KibanaPageTemplate.Header>
       <KibanaPageTemplate.Section
         bottomBorder={false}
@@ -102,12 +114,17 @@ export const GetStartedComponent: React.FC<GetStartedProps> = ({ productTypes })
           padding: 0 ${euiTheme.base * 2.25}px;
         `}
       >
-        <TogglePanel
-          finishedSteps={finishedSteps}
-          activeCards={activeCards}
-          activeProducts={activeProducts}
-          onStepClicked={onStepClicked}
-        />
+        <NavigationProvider core={services}>
+          <TogglePanel
+            finishedSteps={finishedSteps}
+            activeSections={activeSections}
+            activeProducts={activeProducts}
+            expandedCardSteps={expandedCardSteps}
+            onStepClicked={onStepClicked}
+            onCardClicked={onCardClicked}
+            onStepButtonClicked={onStepButtonClicked}
+          />
+        </NavigationProvider>
       </KibanaPageTemplate.Section>
     </KibanaPageTemplate>
   );
