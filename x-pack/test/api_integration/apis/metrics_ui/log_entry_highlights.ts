@@ -45,7 +45,8 @@ export default function ({ getService }: FtrProviderContext) {
     after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/simple_logs'));
 
     describe('/log_entries/highlights', () => {
-      describe('with the default source', () => {
+      // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/163486
+      describe.skip('with the default source', () => {
         before(() => kibanaServer.savedObjects.cleanStandardList());
         after(() => kibanaServer.savedObjects.cleanStandardList());
 
