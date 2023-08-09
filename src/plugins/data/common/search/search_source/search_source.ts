@@ -797,6 +797,7 @@ export class SearchSource {
     // set defaults
     let fieldsFromSource = searchRequest.fieldsFromSource || [];
     body.fields = body.fields || [];
+    // maybe this is where the conditional goes
     body.script_fields = {
       ...body.script_fields,
       ...scriptFields,
