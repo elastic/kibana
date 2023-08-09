@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FormulaConfig } from '../../../types';
+import type { FormulaConfig } from '@kbn/visualization-utils';
 
 export const diskSpaceAvailability: FormulaConfig = {
   label: 'Disk Space Availability',

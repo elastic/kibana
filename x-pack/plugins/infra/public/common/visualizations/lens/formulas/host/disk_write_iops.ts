@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FormulaConfig } from '@kbn/visualization-utils';
+import type { FormulaConfig } from '@kbn/visualization-utils';
 
 export const diskIOWrite: FormulaConfig = {
   label: 'Disk Write IOPS',
