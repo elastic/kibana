@@ -43,6 +43,7 @@ function mergeSloWithSummary(sloList: SLO[], sloSummaryList: SLOSummary[]): SLOW
     .filter((sloSummary) => sloList.some((s) => s.id === sloSummary.id))
     .map((sloSummary) => ({
       ...sloList.find((s) => s.id === sloSummary.id)!,
+      instanceId: sloSummary.instanceId,
       summary: sloSummary.summary,
     }));
 }

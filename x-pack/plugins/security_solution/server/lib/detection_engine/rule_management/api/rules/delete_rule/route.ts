@@ -5,20 +5,17 @@
  * 2.0.
  */
 
-import { transformError } from '@kbn/securitysolution-es-utils';
-
 import type { IKibanaResponse } from '@kbn/core/server';
-import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constants';
+import { transformError } from '@kbn/securitysolution-es-utils';
 import type { DeleteRuleResponse } from '../../../../../../../common/api/detection_engine/rule_management';
 import {
-  QueryRuleByIds,
+  DeleteRuleRequestQuery,
   validateQueryRuleByIds,
 } from '../../../../../../../common/api/detection_engine/rule_management';
-
+import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 import { buildRouteValidation } from '../../../../../../utils/build_validation/route_validation';
 import { buildSiemResponse } from '../../../../routes/utils';
-
 import { deleteRules } from '../../../logic/crud/delete_rules';
 import { readRules } from '../../../logic/crud/read_rules';
 import { getIdError, transform } from '../../../utils/utils';
@@ -28,7 +25,7 @@ export const deleteRuleRoute = (router: SecuritySolutionPluginRouter) => {
     {
       path: DETECTION_ENGINE_RULES_URL,
       validate: {
-        query: buildRouteValidation(QueryRuleByIds),
+        query: buildRouteValidation(DeleteRuleRequestQuery),
       },
       options: {
         tags: ['access:securitySolution'],

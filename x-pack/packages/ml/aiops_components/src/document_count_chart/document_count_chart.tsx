@@ -27,14 +27,21 @@ import {
 
 import { i18n } from '@kbn/i18n';
 import { IUiSettingsClient } from '@kbn/core/public';
-import { getSnappedWindowParameters, getWindowParameters } from '@kbn/aiops-utils';
-import type { WindowParameters } from '@kbn/aiops-utils';
+import {
+  getLogRateAnalysisType,
+  getSnappedWindowParameters,
+  getWindowParameters,
+  type LogRateAnalysisType,
+  type LogRateHistogramItem,
+  type WindowParameters,
+} from '@kbn/aiops-utils';
 import { MULTILAYER_TIME_AXIS_STYLE } from '@kbn/charts-plugin/common';
-
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+
 import { DualBrush, DualBrushAnnotation } from '../..';
+
 import { BrushBadge } from './brush_badge';
 
 declare global {
@@ -49,20 +56,6 @@ declare global {
 interface TimeFilterRange {
   from: number;
   to: number;
-}
-
-/**
- * Datum for the bar chart
- */
-export interface DocumentCountChartPoint {
-  /**
-   * Time of bucket
-   */
-  time: number | string;
-  /**
-   * Number of doc count for that time bucket
-   */
-  value: number;
 }
 
 /**
@@ -84,6 +77,19 @@ export interface BrushSettings {
 }
 
 /**
+ * Callback function which gets called when the brush selection has changed
+ *
+ * @param windowParameters Baseline and deviation time ranges.
+ * @param force Force update
+ * @param logRateAnalysisType `spike` or `dip` based on median log rate bucket size
+ */
+export type BrushSelectionUpdateHandler = (
+  windowParameters: WindowParameters,
+  force: boolean,
+  logRateAnalysisType: LogRateAnalysisType
+) => void;
+
+/**
  * Props for document count chart
  */
 export interface DocumentCountChartProps {
@@ -94,14 +100,14 @@ export interface DocumentCountChartProps {
     fieldFormats: FieldFormatsStart;
     uiSettings: IUiSettingsClient;
   };
-  /** Optional callback function which gets called the brush selection has changed */
-  brushSelectionUpdateHandler?: (windowParameters: WindowParameters, force: boolean) => void;
+  /** Optional callback for handling brush selection updates */
+  brushSelectionUpdateHandler?: BrushSelectionUpdateHandler;
   /** Optional width */
   width?: number;
   /** Data chart points */
-  chartPoints: DocumentCountChartPoint[];
+  chartPoints: LogRateHistogramItem[];
   /** Data chart points split */
-  chartPointsSplit?: DocumentCountChartPoint[];
+  chartPointsSplit?: LogRateHistogramItem[];
   /** Start time range for the chart */
   timeRangeEarliest: number;
   /** Ending time range for the chart */
@@ -162,42 +168,30 @@ function getBaselineBadgeOverflow(
 /**
  * Document count chart with draggable brushes to select time ranges
  * by default use `Baseline` and `Deviation` for the badge names
- * @param dependencies - List of Kibana services that are required as dependencies
- * @param brushSelectionUpdateHandler - Optional callback function which gets called the brush selection has changed
- * @param width - Optional width
- * @param chartPoints - Data chart points
- * @param chartPointsSplit - Data chart points split
- * @param timeRangeEarliest - Start time range for the chart
- * @param timeRangeLatest - Ending time range for the chart
- * @param interval - Time interval for the document count buckets
- * @param chartPointsSplitLabel - Label to name the adjustedChartPointsSplit histogram
- * @param isBrushCleared - Whether or not brush has been reset
- * @param autoAnalysisStart - Timestamp for start of initial analysis
- * @param barColorOverride - Optional color override for the default bar color for charts
- * @param barStyleAccessor - Optional style to override bar chart
- * @param barHighlightColorOverride - Optional color override for the highlighted bar color for charts
- * @param deviationBrush - Optional settings override for the 'deviation' brush
- * @param baselineBrush - Optional settings override for the 'baseline' brush
- * @constructor
+ *
+ * @param props DocumentCountChart component props
+ * @returns The DocumentCountChart component.
  */
-export const DocumentCountChart: FC<DocumentCountChartProps> = ({
-  dependencies,
-  brushSelectionUpdateHandler,
-  width,
-  chartPoints,
-  chartPointsSplit,
-  timeRangeEarliest,
-  timeRangeLatest,
-  interval,
-  chartPointsSplitLabel,
-  isBrushCleared,
-  autoAnalysisStart,
-  barColorOverride,
-  barStyleAccessor,
-  barHighlightColorOverride,
-  deviationBrush = {},
-  baselineBrush = {},
-}) => {
+export const DocumentCountChart: FC<DocumentCountChartProps> = (props) => {
+  const {
+    dependencies,
+    brushSelectionUpdateHandler,
+    width,
+    chartPoints,
+    chartPointsSplit,
+    timeRangeEarliest,
+    timeRangeLatest,
+    interval,
+    chartPointsSplitLabel,
+    isBrushCleared,
+    autoAnalysisStart,
+    barColorOverride,
+    barStyleAccessor,
+    barHighlightColorOverride,
+    deviationBrush = {},
+    baselineBrush = {},
+  } = props;
+
   const { data, uiSettings, fieldFormats, charts } = dependencies;
 
   const chartTheme = charts.theme.useChartsTheme();
@@ -333,8 +327,13 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
           const wpSnap = getSnappedWindowParameters(wp, snapTimestamps);
           setOriginalWindowParameters(wpSnap);
           setWindowParameters(wpSnap);
+
           if (brushSelectionUpdateHandler !== undefined) {
-            brushSelectionUpdateHandler(wpSnap, true);
+            brushSelectionUpdateHandler(
+              wpSnap,
+              true,
+              getLogRateAnalysisType(adjustedChartPoints, wpSnap)
+            );
           }
         }
       }
@@ -385,7 +384,7 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
     }
     setWindowParameters(wp);
     setWindowParametersAsPixels(wpPx);
-    brushSelectionUpdateHandler(wp, false);
+    brushSelectionUpdateHandler(wp, false, getLogRateAnalysisType(adjustedChartPoints, wp));
   }
 
   const [mlBrushWidth, setMlBrushWidth] = useState<number>();
