@@ -16,7 +16,7 @@ import type { MetricLayerOptions } from '../../visualization_types';
 
 export const KPI_CHART_HEIGHT = 150;
 export const AVERAGE_SUBTITLE = i18n.translate(
-  'xpack.infra.assetDetailsEmbeddable.overview.metricTrend.subtitle.average',
+  'xpack.infra.assetDetailsEmbeddable.overview.kpi.subtitle.average',
   {
     defaultMessage: 'Average',
   }
@@ -30,7 +30,7 @@ export interface KPIChartProps extends Pick<TypedLensByValueInput, 'id' | 'title
 export const KPI_CHARTS: KPIChartProps[] = [
   {
     id: 'cpuUsage',
-    title: i18n.translate('xpack.infra.hostsViewPage.metricTrend.cpuUsage.title', {
+    title: i18n.translate('xpack.infra.assetDetailsEmbeddable.overview.kpi.cpuUsage.title', {
       defaultMessage: 'CPU Usage',
     }),
     layers: {
@@ -53,9 +53,12 @@ export const KPI_CHARTS: KPIChartProps[] = [
   },
   {
     id: 'normalizedLoad1m',
-    title: i18n.translate('xpack.infra.hostsViewPage.metricTrend.normalizedLoad1m.title', {
-      defaultMessage: 'CPU Usage',
-    }),
+    title: i18n.translate(
+      'xpack.infra.assetDetailsEmbeddable.overview.kpi.normalizedLoad1m.title',
+      {
+        defaultMessage: 'CPU Usage',
+      }
+    ),
     layers: {
       data: {
         ...hostLensFormulas.normalizedLoad1m,
@@ -76,7 +79,7 @@ export const KPI_CHARTS: KPIChartProps[] = [
   },
   {
     id: 'memoryUsage',
-    title: i18n.translate('xpack.infra.hostsViewPage.metricTrend.memoryUsage.title', {
+    title: i18n.translate('xpack.infra.assetDetailsEmbeddable.overview.kpi.memoryUsage.title', {
       defaultMessage: 'CPU Usage',
     }),
     layers: {
@@ -99,7 +102,7 @@ export const KPI_CHARTS: KPIChartProps[] = [
   },
   {
     id: 'diskSpaceUsage',
-    title: i18n.translate('xpack.infra.hostsViewPage.metricTrend.diskSpaceUsage.title', {
+    title: i18n.translate('xpack.infra.assetDetailsEmbeddable.overview.kpi.diskSpaceUsage.title', {
       defaultMessage: 'CPU Usage',
     }),
     layers: {
