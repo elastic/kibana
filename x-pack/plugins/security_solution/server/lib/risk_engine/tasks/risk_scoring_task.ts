@@ -63,7 +63,7 @@ export class RiskScoringTask {
   public start = async ({ taskManager }: { taskManager: TaskManagerStartContract }) => {
     const taskId = RiskScoringTask.getTaskId();
 
-    //TODO get config and use it here
+    // TODO get config and use it here
     this.log('attempting to schedule');
     try {
       await taskManager.ensureScheduled({
