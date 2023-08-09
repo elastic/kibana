@@ -143,7 +143,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       describe('when open on the first navigation level', () => {
-        it('should always display the all log datasets entry as first item', async () => {
+        it('should always display the "All log datasets" entry as the first item', async () => {
           const allLogDatasetButton =
             await PageObjects.discoverLogExplorer.getAllLogDatasetsButton();
           const menuEntries = await PageObjects.discoverLogExplorer.getCurrentPanelEntries();
@@ -155,7 +155,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           expect(allLogDatasetTitle).to.be(firstEntryTitle);
         });
 
-        it('should always display the unmanaged datasets entry as second item', async () => {
+        it('should always display the unmanaged datasets entry as the second item', async () => {
           const unamanagedDatasetButton =
             await PageObjects.discoverLogExplorer.getUnmanagedDatasetsButton();
           const menuEntries = await PageObjects.discoverLogExplorer.getCurrentPanelEntries();
@@ -283,7 +283,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await PageObjects.discoverLogExplorer.closeDatasetSelector();
         });
 
-        it('should always display the all log datasets entry as first item', async () => {
+        it('should always display the "All log datasets" entry as the first item', async () => {
           const allLogDatasetButton =
             await PageObjects.discoverLogExplorer.getAllLogDatasetsButton();
           const menuEntries = await PageObjects.discoverLogExplorer.getCurrentPanelEntries();
@@ -295,7 +295,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           expect(allLogDatasetTitle).to.be(firstEntryTitle);
         });
 
-        it('should always display the unmanaged datasets entry as second item', async () => {
+        it('should always display the unmanaged datasets entry as the second item', async () => {
           const unamanagedDatasetButton =
             await PageObjects.discoverLogExplorer.getUnmanagedDatasetsButton();
           const menuEntries = await PageObjects.discoverLogExplorer.getCurrentPanelEntries();
@@ -367,7 +367,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await PageObjects.discoverLogExplorer.assertNoIntegrationsPromptExists();
         });
 
-        it('should load more integrations scrolling to the end of the list', async () => {
+        it('should load more integrations by scrolling to the end of the list', async () => {
           // Install more integrations and reload the page
           logger.info(`Installing ${additionalPackages.length} integration packages.`);
           await Promise.all(additionalPackages.map(installPackage));
@@ -400,7 +400,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
-      describe('when click on an integration and moves into the second navigation level', () => {
+      describe('when clicking on integration and moving into the second navigation level', () => {
         before(async () => {
           await PageObjects.common.navigateToApp('discover', { hash: '/p/log-explorer' });
         });

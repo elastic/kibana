@@ -32,7 +32,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.existOrFail('datasetSelectorPopover');
       });
 
-      it('the TopNav bar should hide New, Open and Save options', async () => {
+      it('the TopNav bar should hide then New, Open and Save options', async () => {
         // Assert does not render on discover app
         await PageObjects.common.navigateToApp('discover');
         await testSubjects.existOrFail('discoverNewButton');

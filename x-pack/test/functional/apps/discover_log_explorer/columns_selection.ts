@@ -37,7 +37,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('when the log explorer profile loads', () => {
-      it('should initialize the table columns to logs default selection', async () => {
+      it("should initialize the table columns to logs' default selection", async () => {
         await PageObjects.common.navigateToApp('discover', { hash: '/p/log-explorer' });
 
         await PageObjects.discover.expandTimeRangeAsSuggestedInNoResultsMessage();
@@ -47,7 +47,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
-      it('should restore the table columns from the url state if exists', async () => {
+      it('should restore the table columns from the URL state if exists', async () => {
         await PageObjects.common.navigateToApp('discover', {
           hash: '/p/log-explorer?_a=(columns:!(message,data_stream.namespace))',
         });
@@ -63,7 +63,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('when switching dataset using the dataset selector', () => {
+    describe('when switching datasets using the dataset selector', () => {
       it('should set the table columns to logs default selection', async () => {
         await PageObjects.common.navigateToApp('discover', {
           hash: '/p/log-explorer',
