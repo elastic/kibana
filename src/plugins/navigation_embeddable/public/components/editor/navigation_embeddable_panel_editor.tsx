@@ -172,6 +172,17 @@ const NavigationEmbeddablePanelEditor = ({
             <NavigationEmbeddablePanelEditorEmptyPrompt addLink={() => addOrEditLink()} />
           ) : (
             <>
+              <EuiFormRow label={NavEmbeddableStrings.editor.panelEditor.getLayoutSettingsTitle()}>
+                <EuiButtonGroup
+                  options={layoutOptions}
+                  buttonSize="compressed"
+                  idSelected={currentLayout}
+                  onChange={(id) => {
+                    setCurrentLayout(id as NavigationLayoutType);
+                  }}
+                  legend={NavEmbeddableStrings.editor.panelEditor.getLayoutSettingsLegend()}
+                />
+              </EuiFormRow>
               <EuiFormRow label={NavEmbeddableStrings.editor.panelEditor.getLinksTitle()}>
                 <div>
                   <EuiDragDropContext onDragEnd={onDragEnd}>
@@ -210,17 +221,6 @@ const NavigationEmbeddablePanelEditor = ({
                     {NavEmbeddableStrings.editor.getAddButtonLabel()}
                   </EuiButtonEmpty>
                 </div>
-              </EuiFormRow>
-              <EuiFormRow label={NavEmbeddableStrings.editor.panelEditor.getLayoutSettingsTitle()}>
-                <EuiButtonGroup
-                  options={layoutOptions}
-                  buttonSize="compressed"
-                  idSelected={currentLayout}
-                  onChange={(id) => {
-                    setCurrentLayout(id as NavigationLayoutType);
-                  }}
-                  legend={NavEmbeddableStrings.editor.panelEditor.getLayoutSettingsLegend()}
-                />
               </EuiFormRow>
             </>
           )}
