@@ -52,6 +52,7 @@ const RuleAdd = ({
   hideInterval,
   metadata: initialMetadata,
   filteredRuleTypes,
+  validConsumers,
   ...props
 }: RuleAddProps) => {
   const onSaveHandler = onSave ?? reloadRules;
@@ -270,6 +271,7 @@ const RuleAdd = ({
                     defaultMessage: 'create',
                   }
                 )}
+                validConsumers={validConsumers}
                 actionTypeRegistry={actionTypeRegistry}
                 ruleTypeRegistry={ruleTypeRegistry}
                 metadata={metadata}
