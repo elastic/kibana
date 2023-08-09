@@ -14437,6 +14437,21 @@ elastic-apm-http-client@11.2.0:
     semver "^6.3.0"
     stream-chopper "^3.0.1"
 
+elastic-apm-http-client@^11.0.1:
+  version "11.4.0"
+  resolved "https://registry.yarnpkg.com/elastic-apm-http-client/-/elastic-apm-http-client-11.4.0.tgz#781a69d958628e11c51f94249131a3d04875962f"
+  integrity sha512-DxPy8MFrcL04qxMG4sxmI5yIKrFCIhJc2xx0eupE3qjCIIPHeLJaUrjFbQbsAnnuhC9sljWsEebtFweHj+Vmug==
+  dependencies:
+    agentkeepalive "^4.2.1"
+    breadth-filter "^2.0.0"
+    end-of-stream "^1.4.4"
+    fast-safe-stringify "^2.0.7"
+    fast-stream-to-buffer "^1.0.0"
+    object-filter-sequence "^1.0.0"
+    readable-stream "^3.4.0"
+    semver "^6.3.0"
+    stream-chopper "^3.0.1"
+
 elastic-apm-node@^3.38.0:
   version "3.42.0"
   resolved "https://registry.yarnpkg.com/elastic-apm-node/-/elastic-apm-node-3.42.0.tgz#22c11e98708a0df7a7de8c8fb195929b4fc90c00"
