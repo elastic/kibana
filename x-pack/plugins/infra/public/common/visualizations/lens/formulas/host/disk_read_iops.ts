@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FormulaConfig } from '../../../types';
+import { FormulaConfig } from '@kbn/visualization-utils';
 
 export const diskIORead: FormulaConfig = {
   label: 'Disk Read IOPS',
