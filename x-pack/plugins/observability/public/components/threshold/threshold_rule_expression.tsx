@@ -384,27 +384,41 @@ export default function Expressions(props: Props) {
       {ruleParams.criteria &&
         ruleParams.criteria.map((e, idx) => {
           return (
-            <ExpressionRow
-              canDelete={(ruleParams.criteria && ruleParams.criteria.length > 1) || false}
-              fields={derivedIndexPattern.fields as any}
-              remove={removeExpression}
-              addExpression={addExpression}
-              key={idx} // idx's don't usually make good key's but here the index has semantic meaning
-              expressionId={idx}
-              setRuleParams={updateParams}
-              errors={(errors[idx] as IErrorObject) || emptyError}
-              expression={e || {}}
-              dataView={derivedIndexPattern}
-            >
-              {/* Preview */}
-              <ExpressionChart
-                expression={e}
-                derivedIndexPattern={derivedIndexPattern}
-                filterQuery={ruleParams.filterQuery}
-                groupBy={ruleParams.groupBy}
-                timeFieldName={dataView?.timeFieldName}
-              />
-            </ExpressionRow>
+            <>
+              {/* index has semantic meaning, we show the condition title starting from the 2nd one  */}
+              {idx >= 1 && (
+                <EuiTitle size="xs">
+                  <h5>
+                    <FormattedMessage
+                      id="xpack.observability.threshold.rule.alertFlyout.condition"
+                      defaultMessage="Condition {conditionNumber}"
+                      values={{ conditionNumber: idx + 1 }}
+                    />
+                  </h5>
+                </EuiTitle>
+              )}
+              <ExpressionRow
+                canDelete={(ruleParams.criteria && ruleParams.criteria.length > 1) || false}
+                fields={derivedIndexPattern.fields as any}
+                remove={removeExpression}
+                addExpression={addExpression}
+                key={idx} // idx's don't usually make good key's but here the index has semantic meaning
+                expressionId={idx}
+                setRuleParams={updateParams}
+                errors={(errors[idx] as IErrorObject) || emptyError}
+                expression={e || {}}
+                dataView={derivedIndexPattern}
+              >
+                {/* Preview */}
+                <ExpressionChart
+                  expression={e}
+                  derivedIndexPattern={derivedIndexPattern}
+                  filterQuery={ruleParams.filterQuery}
+                  groupBy={ruleParams.groupBy}
+                  timeFieldName={dataView?.timeFieldName}
+                />
+              </ExpressionRow>
+            </>
           );
         })}
 
