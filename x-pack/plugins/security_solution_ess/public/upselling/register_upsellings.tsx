@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isAtLeast, SecurityPageName } from '@kbn/security-solution-plugin/common';
+import { SecurityPageName } from '@kbn/security-solution-plugin/common';
 import type { UpsellingService } from '@kbn/security-solution-plugin/public';
 import type {
   MessageUpsellings,
@@ -38,7 +38,7 @@ type UpsellingMessages = UpsellingsMessageConfig[];
 export const registerUpsellings = (upselling: UpsellingService, license: ILicense) => {
   const upsellingPagesToRegister = upsellingPages.reduce<PageUpsellings>(
     (pageUpsellings, { pageName, minimumLicenseRequired, component }) => {
-      if (!isAtLeast(license, minimumLicenseRequired)) {
+      if (!license.hasAtLeast(minimumLicenseRequired)) {
         pageUpsellings[pageName] = component;
       }
       return pageUpsellings;
@@ -48,7 +48,7 @@ export const registerUpsellings = (upselling: UpsellingService, license: ILicens
 
   const upsellingSectionsToRegister = upsellingSections.reduce<SectionUpsellings>(
     (sectionUpsellings, { id, minimumLicenseRequired, component }) => {
-      if (!isAtLeast(license, minimumLicenseRequired)) {
+      if (!license.hasAtLeast(minimumLicenseRequired)) {
         sectionUpsellings[id] = component;
       }
       return sectionUpsellings;
@@ -58,7 +58,7 @@ export const registerUpsellings = (upselling: UpsellingService, license: ILicens
 
   const upsellingMessagesToRegister = upsellingMessages.reduce<MessageUpsellings>(
     (messagesUpsellings, { id, minimumLicenseRequired, message }) => {
-      if (!isAtLeast(license, minimumLicenseRequired)) {
+      if (!license.hasAtLeast(minimumLicenseRequired)) {
         messagesUpsellings[id] = message;
       }
       return messagesUpsellings;
