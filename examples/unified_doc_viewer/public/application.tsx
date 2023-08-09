@@ -9,17 +9,17 @@
 import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
-import { DocViewer } from '@kbn/unified-doc-viewer';
-import { getDocViewsRegistry } from '@kbn/unified-doc-viewer-plugin/public';
-import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { DataView } from '@kbn/data-views-plugin/common';
-import {
-  UnifiedDocViewerServices,
-  useUnifiedDocViewerServices,
-} from '@kbn/unified-doc-viewer-plugin/public/hooks';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { buildDataTableRecord } from '@kbn/discover-utils';
-import { DataTableRecord } from '@kbn/discover-utils/src/types';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
+import { DocViewer } from '@kbn/unified-doc-viewer';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
+import {
+  getDocViewsRegistry,
+  useUnifiedDocViewerServices,
+} from '@kbn/unified-doc-viewer-plugin/public';
+import type { UnifiedDocViewerServices } from '@kbn/unified-doc-viewer-plugin/public/types';
 import type { StartDeps } from './plugin';
 
 export const renderApp = (core: CoreStart, deps: StartDeps, { element }: AppMountParameters) => {

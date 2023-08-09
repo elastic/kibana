@@ -9,8 +9,8 @@
     "browser": true,
     "requiredPlugins": [
       "data",
-      "fieldFormats",
       "developerExamples",
+      "fieldFormats",
       "kibanaReact",
       "kibanaUtils",
       "unifiedDocViewer"

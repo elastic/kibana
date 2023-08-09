@@ -6,10 +6,4 @@
  * Side Public License, v 1.
  */
 
-import { UnifiedDocViewerPublicPlugin } from './plugin';
-
-export { JsonCodeEditor } from './components';
-export { getDocViewsRegistry, setDocViewsRegistry } from './plugin';
-export { useEsDocSearch, useUnifiedDocViewerServices } from './hooks';
-
-export const plugin = () => new UnifiedDocViewerPublicPlugin();
+export type { UnifiedDocViewerServices } from './hooks';

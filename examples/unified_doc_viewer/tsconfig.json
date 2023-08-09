@@ -15,6 +15,11 @@
   ],
   "kbn_references": [
     "@kbn/core",
-    "@kbn/developer-examples-plugin"
+    "@kbn/developer-examples-plugin",
+    "@kbn/discover-utils",
+    "@kbn/kibana-react-plugin",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/unified-doc-viewer",
+    "@kbn/unified-doc-viewer-plugin",
   ]
 }
