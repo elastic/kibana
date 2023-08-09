@@ -23,6 +23,7 @@ import {
   runServerlessEsNode,
   SERVERLESS_IMG,
   setupServerlessVolumes,
+  stopServerlessCluster,
   verifyDockerInstalled,
 } from './docker';
 import { ToolingLog, ToolingLogCollectingWriter } from '@kbn/tooling-log';
@@ -374,6 +375,20 @@ describe('runServerlessCluster()', () => {
 
     // setupDocker execa calls then run three nodes
     expect(execa.mock.calls).toHaveLength(6);
+  });
+});
+
+describe('stopServerlessCluster()', () => {
+  test('should stop passed in nodes', async () => {
+    const nodes = ['es01', 'es02', 'es03'];
+    execa.mockImplementation(() => Promise.resolve({ stdout: '' }));
+
+    await stopServerlessCluster(log, nodes);
+
+    expect(execa.mock.calls[0][0]).toEqual('docker');
+    expect(execa.mock.calls[0][1]).toEqual(
+      expect.arrayContaining(['container', 'stop'].concat(nodes))
+    );
   });
 });
 
