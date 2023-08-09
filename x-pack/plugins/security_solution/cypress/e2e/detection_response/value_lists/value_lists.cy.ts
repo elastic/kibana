@@ -30,8 +30,8 @@ import {
   VALUE_LISTS_MODAL_ACTIVATOR,
 } from '../../../screens/lists';
 
-describe('value lists', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
-  describe('management modal', () => {
+describe('value lists', () => {
+  describe('management modal', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
     beforeEach(() => {
       login();
       createListsIndex();
@@ -223,17 +223,14 @@ describe('value lists', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
     });
   });
 
-  describe('user with restricted access role', () => {
-    before(() => {
-      login(ROLES.t1_analyst);
-      visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL, ROLES.t1_analyst);
-    });
-
+  describe('user with restricted access role', { tags: tag.ESS }, () => {
     after(() => {
       deleteRoleAndUser(ROLES.t1_analyst);
     });
 
     it('Does not allow a t1 analyst user to upload a value list', () => {
+      login(ROLES.t1_analyst);
+      visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL, ROLES.t1_analyst);
       cy.get(VALUE_LISTS_MODAL_ACTIVATOR).should('have.attr', 'disabled');
     });
   });
