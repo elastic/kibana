@@ -119,7 +119,7 @@ export function DashboardEditingToolbar({
     <AddFromLibraryButton
       onClick={() => dashboard.addFromLibrary()}
       size="s"
-      data-test-subj="dashboardAddPanelButton"
+      data-test-subj="dashboardAddFromLibraryButton"
     />,
   ];
   if (dashboard.controlGroup) {
