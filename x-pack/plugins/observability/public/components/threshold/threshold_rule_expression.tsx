@@ -407,15 +407,16 @@ export default function Expressions(props: Props) {
             </ExpressionRow>
           );
         })}
-      <div style={{ marginLeft: 28 }}>
-        <ForLastExpression
-          timeWindowSize={timeSize}
-          timeWindowUnit={timeUnit}
-          errors={emptyError}
-          onChangeWindowSize={updateTimeSize}
-          onChangeWindowUnit={updateTimeUnit}
-        />
-      </div>
+
+      <ForLastExpression
+        timeWindowSize={timeSize}
+        timeWindowUnit={timeUnit}
+        errors={emptyError}
+        onChangeWindowSize={updateTimeSize}
+        onChangeWindowUnit={updateTimeUnit}
+        display="fullWidth"
+      />
+
       <EuiSpacer size="m" />
       <div>
         <EuiButtonEmpty
