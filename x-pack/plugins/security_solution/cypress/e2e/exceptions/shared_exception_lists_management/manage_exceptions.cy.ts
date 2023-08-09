@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { cleanKibana } from '../../../tasks/common';
 import { getNewRule } from '../../../objects/rule';
 import { login, visitWithoutDateRange } from '../../../tasks/login';
 import { createRule } from '../../../tasks/api_calls/rules';
@@ -40,7 +41,8 @@ import {
 
 describe('Add, edit and delete exception', () => {
   before(() => {
-    cy.task('esArchiverResetKibana');
+    // cy.task('esArchiverResetKibana');
+    cleanKibana();
     cy.task('esArchiverLoad', 'exceptions');
 
     createRule(getNewRule());
