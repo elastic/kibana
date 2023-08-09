@@ -87,7 +87,11 @@ export function SloSummary({ slo, historicalSummary = [], historicalSummaryLoadi
                 defaultMessage: 'Budget remaining',
               })}
               textAlign="right"
-              title={numeral(errorBudgetRemaining).format(percentFormat)}
+              title={
+                slo.summary.status === 'NO_DATA'
+                  ? NOT_AVAILABLE_LABEL
+                  : numeral(errorBudgetRemaining).format(percentFormat)
+              }
               titleColor={titleColor}
               titleSize="m"
               reverse
