@@ -69,7 +69,7 @@
     "@kbn/logs-shared-plugin",
     "@kbn/licensing-plugin",
     "@kbn/aiops-utils",
-    "@kbn/visualization-utils"
+    "@kbn/lens-embeddable-utils"
   ],
   "exclude": ["target/**/*"]
 }
