@@ -12,12 +12,7 @@ import { BaseParamsV2, JobId } from '@kbn/reporting-common/types';
 import moment from 'moment';
 import React from 'react';
 import { JobTypes, JOB_STATUSES } from '../../common/constants';
-import type {
-  ReportApiJSON,
-  ReportFields,
-  ReportOutput,
-  ReportSource,
-} from '../../common/types';
+import type { ReportApiJSON, ReportFields, ReportOutput, ReportSource } from '../../common/types';
 
 const { COMPLETED, FAILED, PENDING, PROCESSING, WARNINGS } = JOB_STATUSES;
 
