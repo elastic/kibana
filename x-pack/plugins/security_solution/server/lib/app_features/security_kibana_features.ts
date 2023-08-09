@@ -177,6 +177,14 @@ export const getSecurityAppFeaturesConfig = (
 
     [AppFeatureSecurityKey.endpointHostManagement]: {
       subFeatureIds: [SecuritySubFeatureId.endpointList],
+      subFeaturesPrivileges: [
+        {
+          id: 'endpoint_list_all',
+          includeIn: 'all',
+          api: [`${APP_ID}-writeHostIsolationRelease`],
+          ui: ['writeHostIsolationRelease'],
+        },
+      ],
     },
 
     [AppFeatureSecurityKey.endpointPolicyManagement]: {
