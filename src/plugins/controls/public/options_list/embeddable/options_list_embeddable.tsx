@@ -258,10 +258,12 @@ export class OptionsListEmbeddable
         this.field = field.toSpec();
         this.dispatch.setField(this.field);
       } else {
-        this.dispatch.setErrorMessage(i18n.translate('controls.optionsList.errors.fieldNotFound', {
-          defaultMessage: 'Could not locate field: {fieldName}',
-          values: { fieldName },
-        }));
+        this.dispatch.setErrorMessage(
+          i18n.translate('controls.optionsList.errors.fieldNotFound', {
+            defaultMessage: 'Could not locate field: {fieldName}',
+            values: { fieldName },
+          })
+        );
       }
     }
 

@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { of } from 'rxjs';
 import { ControlGroupInput } from '../../../common';
 import { lazyLoadReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
 import { storybookFlightsDataView } from '@kbn/presentation-util-plugin/public/mocks';
@@ -96,11 +95,11 @@ describe('initialize', () => {
 
       injectStorybookDataView(storybookFlightsDataView);
 
-      const control = (await container.addOptionsListControl({
+      const control = await container.addOptionsListControl({
         dataViewId: 'demoDataFlights',
         fieldName: 'OriginCityName',
         selectedOptions: ['Seoul', 'Tokyo'],
-      }));
+      });
 
       expect(container.getInput().panels[control.getInput().id].type).toBe(OPTIONS_LIST_CONTROL);
       expect(container.getOutput().embeddableLoaded[control.getInput().id]).toBe(true);

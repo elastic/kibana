@@ -15,25 +15,28 @@ describe('runOptionsListRequest', () => {
         uiSettings: {
           get: () => {
             return undefined;
-          }
-        }
-      }
+          },
+        },
+      },
     };
     const mockData = {
       query: {
         timefilter: {
-          timefilter: {}
-        }
+          timefilter: {},
+        },
       },
     } as unknown as ControlsDataService;
     const mockHttp = {
       fetch: () => {
         throw new Error('Simulated network error');
-      }
+      },
     } as unknown as ControlsHTTPService;
-    const optionsListService = optionsListServiceFactory(mockCore, { data: mockData, http: mockHttp });
+    const optionsListService = optionsListServiceFactory(mockCore, {
+      data: mockData,
+      http: mockHttp,
+    });
 
-    const mockAbortSignal = {} as unknown as AbortSignal
+    const mockAbortSignal = {} as unknown as AbortSignal;
     const response = await optionsListService.runOptionsListRequest(
       {
         dataView: {
