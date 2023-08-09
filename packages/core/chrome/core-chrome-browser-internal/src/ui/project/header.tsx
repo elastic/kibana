@@ -278,6 +278,11 @@ export const ProjectHeader = ({
             </EuiHeaderSection>
           </EuiHeader>
 
+          {/* NOTE: It would be better to house this content in a location closer to the main page content,
+          rather than in the header area. Using the header to mount this content offers the convenience of
+          consistency, but could create accessbility issues if screenreaders announce this content as if it
+          were part of the header. Semantically, AppMenuBar is not part of the header.
+          See: https://github.com/elastic/kibana/pull/162002#discussion_r1287468143 */}
           {headerActionMenuMounter.mount && (
             <AppMenuBar
               isOpen={isOpen ?? false}
