@@ -35,7 +35,7 @@
   }
 
   // overriding `height` calculation of the project side nav, and flyouts
-  &.euiBody--headerIsFixed .euiCollapsibleNav
+  &.euiBody--headerIsFixed .euiCollapsibleNav,
   &.euiBody--headerIsFixed:not(.euiDataGrid__restrictBody) .euiFlyout {
     height: calc(100% - #{$kbnHeaderBannerHeight + $euiHeaderHeightCompensation});
   }
