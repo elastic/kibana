@@ -13,8 +13,8 @@ import { ControlsDataViewsService } from './types';
 
 export type DataViewsServiceFactory = PluginServiceFactory<ControlsDataViewsService>;
 
-let currentDataView: DataView;
-export const injectStorybookDataView = (dataView: DataView) => (currentDataView = dataView);
+let currentDataView: DataView | undefined;
+export const injectStorybookDataView = (dataView?: DataView) => (currentDataView = dataView);
 
 export const dataViewsServiceFactory: DataViewsServiceFactory = () => ({
   get: ((dataViewId) =>
@@ -39,7 +39,13 @@ export const dataViewsServiceFactory: DataViewsServiceFactory = () => ({
     ) as unknown) as DataViewsPublicPluginStart['get'],
   getIdsWithTitle: (() =>
     new Promise((resolve) =>
-      setTimeout(() => resolve([{ id: currentDataView.id, title: currentDataView.title }]), 100)
+      setTimeout(() => {
+        const idsWithTitle: Array<{ id: string | undefined, title: string }> = []
+        if (currentDataView) {
+          idsWithTitle.push({ id: currentDataView.id, title: currentDataView.title })
+        }
+        resolve(idsWithTitle);
+      }, 100)
     ) as unknown) as DataViewsPublicPluginStart['getIdsWithTitle'],
   getDefaultId: () => Promise.resolve(currentDataView?.id ?? null),
 });

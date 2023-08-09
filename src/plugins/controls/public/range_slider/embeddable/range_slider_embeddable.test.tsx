@@ -15,6 +15,7 @@ import { ControlGroupContainer } from '../../control_group/embeddable/control_gr
 import { pluginServices } from '../../services';
 import { injectStorybookDataView } from '../../services/data_views/data_views.story';
 import { RangeSliderEmbeddableFactory } from './range_slider_embeddable_factory';
+import { RangeSliderEmbeddable } from './range_slider_embeddable';
 
 let totalResults = 20;
 beforeEach(() => {
@@ -29,7 +30,7 @@ beforeEach(() => {
   pluginServices.getServices().data.searchSource.create = jest.fn().mockImplementation(() => {
     let isAggsRequest = false;
     return {
-      setField: (key) => {
+      setField: (key: string) => {
         if (key === 'aggs') {
           isAggsRequest = true;
         }
@@ -59,12 +60,12 @@ describe('initialize', () => {
       injectStorybookDataView(undefined);
 
       const slider = await container.addRangeSliderControl({
-        id: '34a689e9',
         dataViewId: 'demoDataFlights',
         fieldName: 'AvgTicketPrice',
       });
 
-      expect(container.getOutput().embeddableLoaded['34a689e9']).toBe(true);
+      expect(container.getInput().panels[slider.getInput().id].type).toBe(RANGE_SLIDER_CONTROL);
+      expect(container.getOutput().embeddableLoaded[slider.getInput().id]).toBe(true);
     });
   });
 
@@ -77,11 +78,10 @@ describe('initialize', () => {
       injectStorybookDataView(undefined);
 
       const slider = await container.addRangeSliderControl({
-        id: '34a689e9',
         dataViewId: 'demoDataFlights',
         fieldName: 'AvgTicketPrice',
         value: ['150', '300'],
-      });
+      }) as RangeSliderEmbeddable;
 
       // await redux dispatch
       await new Promise((resolve) => process.nextTick(resolve));
@@ -101,11 +101,10 @@ describe('initialize', () => {
       injectStorybookDataView(storybookFlightsDataView);
 
       const slider = await container.addRangeSliderControl({
-        id: '34a689e9',
         dataViewId: 'demoDataFlights',
         fieldName: 'myField',
         value: ['150', '300'],
-      });
+      }) as RangeSliderEmbeddable;
 
       // await redux dispatch
       await new Promise((resolve) => process.nextTick(resolve));
@@ -124,17 +123,16 @@ describe('initialize', () => {
       totalResults = 0;
 
       const slider = await container.addRangeSliderControl({
-        id: '34a689e9',
         dataViewId: 'demoDataFlights',
         fieldName: 'AvgTicketPrice',
         value: ['150', '300'],
-      });
+      }) as RangeSliderEmbeddable;
 
       // await redux dispatch
       await new Promise((resolve) => process.nextTick(resolve));
 
       const reduxState = slider.getState();
-      expect(reduxState.output.filters.length).toBe(0);
+      expect(reduxState.output.filters?.length).toBe(0);
       expect(reduxState.componentState.isInvalid).toBe(true);
     });
 
@@ -146,18 +144,17 @@ describe('initialize', () => {
       injectStorybookDataView(storybookFlightsDataView);
 
       const slider = await container.addRangeSliderControl({
-        id: '34a689e9',
         dataViewId: 'demoDataFlights',
         fieldName: 'AvgTicketPrice',
         value: ['150', '300'],
-      });
+      }) as RangeSliderEmbeddable;
 
       // await redux dispatch
       await new Promise((resolve) => process.nextTick(resolve));
 
       const reduxState = slider.getState();
-      expect(reduxState.output.filters.length).toBe(1);
-      expect(reduxState.output.filters[0].query).toEqual({
+      expect(reduxState.output.filters?.length).toBe(1);
+      expect(reduxState.output.filters?.[0].query).toEqual({
         range: {
           AvgTicketPrice: {
             gte: 150,
@@ -178,16 +175,13 @@ describe('initialize', () => {
       injectStorybookDataView(storybookFlightsDataView);
 
       const slider = await container.addRangeSliderControl({
-        id: '34a689e9',
         dataViewId: 'demoDataFlights',
         fieldName: 'AvgTicketPrice',
         value: ['150', '300'],
       });
 
-      // await redux dispatch
-      await new Promise((resolve) => process.nextTick(resolve));
-
-      expect(container.getOutput().embeddableLoaded['34a689e9']).toBe(true);
+      expect(container.getInput().panels[slider.getInput().id].type).toBe(RANGE_SLIDER_CONTROL);
+      expect(container.getOutput().embeddableLoaded[slider.getInput().id]).toBe(true);
     });
 
     test('should notify control group when initialization throws', async () => {
@@ -205,16 +199,13 @@ describe('initialize', () => {
       }));
 
       const slider = await container.addRangeSliderControl({
-        id: '34a689e9',
         dataViewId: 'demoDataFlights',
         fieldName: 'AvgTicketPrice',
         value: ['150', '300'],
       });
 
-      // await redux dispatch
-      await new Promise((resolve) => process.nextTick(resolve));
-
-      expect(container.getOutput().embeddableLoaded['34a689e9']).toBe(true);
+      expect(container.getInput().panels[slider.getInput().id].type).toBe(RANGE_SLIDER_CONTROL);
+      expect(container.getOutput().embeddableLoaded[slider.getInput().id]).toBe(true);
     });
   });
 });
