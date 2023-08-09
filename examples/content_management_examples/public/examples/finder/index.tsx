@@ -6,7 +6,4 @@
  * Side Public License, v 1.
  */
 
-export const registerRoutesMock = jest.fn();
-jest.doMock('./routes', () => ({
-  registerRoutes: registerRoutesMock,
-}));
+export { FinderApp } from './finder_app';

@@ -14,19 +14,14 @@ import type {
   UseFetchFieldValuePairWithAggregationResult,
 } from './use_fetch_field_value_pair_with_aggregation';
 import { useFetchFieldValuePairWithAggregation } from './use_fetch_field_value_pair_with_aggregation';
-import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
-import { useGlobalTime } from '../../../common/containers/use_global_time';
 
 jest.mock('@tanstack/react-query');
 jest.mock('../../../common/lib/kibana');
-jest.mock('../../../common/hooks/use_selector');
-jest.mock('../../../common/containers/use_global_time');
 
 const highlightedField = {
   name: 'field',
   values: ['values'],
 };
-const isActiveTimelines = true;
 const aggregationField = 'aggregationField';
 
 describe('useFetchFieldValuePairWithAggregation', () => {
@@ -39,8 +34,6 @@ describe('useFetchFieldValuePairWithAggregation', () => {
       data: { search: jest.fn() },
     },
   });
-  jest.mocked(useDeepEqualSelector).mockReturnValue({ to: '', from: '' });
-  (useGlobalTime as jest.Mock).mockReturnValue({ to: '', from: '' });
 
   it('should return loading true while data is being fetched', () => {
     (useQuery as jest.Mock).mockReturnValue({
@@ -52,7 +45,6 @@ describe('useFetchFieldValuePairWithAggregation', () => {
     hookResult = renderHook(() =>
       useFetchFieldValuePairWithAggregation({
         highlightedField,
-        isActiveTimelines,
         aggregationField,
       })
     );
@@ -72,7 +64,6 @@ describe('useFetchFieldValuePairWithAggregation', () => {
     hookResult = renderHook(() =>
       useFetchFieldValuePairWithAggregation({
         highlightedField,
-        isActiveTimelines,
         aggregationField,
       })
     );
@@ -92,7 +83,6 @@ describe('useFetchFieldValuePairWithAggregation', () => {
     hookResult = renderHook(() =>
       useFetchFieldValuePairWithAggregation({
         highlightedField,
-        isActiveTimelines,
         aggregationField,
       })
     );
