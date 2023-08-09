@@ -71,4 +71,12 @@ export class UpsellingService {
   getPageUpselling(id: SecurityPageName) {
     return this.pages.get(id);
   }
+
+  getSectionsValue() {
+    return this.sectionsSubject$.getValue();
+  }
+
+  getMessagesValue() {
+    return this.messagesSubject$.getValue();
+  }
 }

@@ -19,7 +19,7 @@ import { SloList } from './components/slo_list';
 import { AutoRefreshButton } from './components/auto_refresh_button';
 import { HeaderTitle } from './components/header_title';
 import { FeedbackButton } from '../../components/slo/feedback_button/feedback_button';
-import { paths } from '../../routes/paths';
+import { paths } from '../../../common/locators/paths';
 
 export function SlosPage() {
   const {

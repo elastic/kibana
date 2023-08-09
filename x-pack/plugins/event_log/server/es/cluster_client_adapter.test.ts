@@ -165,56 +165,6 @@ describe('buffering documents', () => {
   });
 });
 
-describe('doesIlmPolicyExist', () => {
-  // ElasticsearchError can be a bit random in shape, we need an any here
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const notFoundError = new Error('Not found') as any;
-  notFoundError.statusCode = 404;
-
-  test('should call cluster with proper arguments', async () => {
-    await clusterClientAdapter.doesIlmPolicyExist('foo');
-    expect(clusterClient.transport.request).toHaveBeenCalledWith({
-      method: 'GET',
-      path: '/_ilm/policy/foo',
-    });
-  });
-
-  test('should return false when 404 error is returned by Elasticsearch', async () => {
-    clusterClient.transport.request.mockRejectedValue(notFoundError);
-    await expect(clusterClientAdapter.doesIlmPolicyExist('foo')).resolves.toEqual(false);
-  });
-
-  test('should throw error when error is not 404', async () => {
-    clusterClient.transport.request.mockRejectedValue(new Error('Fail'));
-    await expect(
-      clusterClientAdapter.doesIlmPolicyExist('foo')
-    ).rejects.toThrowErrorMatchingInlineSnapshot(`"error checking existance of ilm policy: Fail"`);
-  });
-
-  test('should return true when no error is thrown', async () => {
-    await expect(clusterClientAdapter.doesIlmPolicyExist('foo')).resolves.toEqual(true);
-  });
-});
-
-describe('createIlmPolicy', () => {
-  test('should call cluster client with given policy', async () => {
-    clusterClient.transport.request.mockResolvedValue({ success: true });
-    await clusterClientAdapter.createIlmPolicy('foo', { args: true });
-    expect(clusterClient.transport.request).toHaveBeenCalledWith({
-      method: 'PUT',
-      path: '/_ilm/policy/foo',
-      body: { args: true },
-    });
-  });
-
-  test('should throw error when call cluster client throws', async () => {
-    clusterClient.transport.request.mockRejectedValue(new Error('Fail'));
-    await expect(
-      clusterClientAdapter.createIlmPolicy('foo', { args: true })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(`"error creating ilm policy: Fail"`);
-  });
-});
-
 describe('doesIndexTemplateExist', () => {
   test('should call cluster with proper arguments', async () => {
     await clusterClientAdapter.doesIndexTemplateExist('foo');

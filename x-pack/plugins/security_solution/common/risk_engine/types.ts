@@ -9,3 +9,17 @@ export enum RiskScoreEntity {
   host = 'host',
   user = 'user',
 }
+
+export enum RiskEngineStatus {
+  NOT_INSTALLED = 'NOT_INSTALLED',
+  DISABLED = 'DISABLED',
+  ENABLED = 'ENABLED',
+}
+
+export interface InitRiskEngineResult {
+  legacyRiskEngineDisabled: boolean;
+  riskEngineResourcesInstalled: boolean;
+  riskEngineConfigurationCreated: boolean;
+  riskEngineEnabled: boolean;
+  errors: string[];
+}

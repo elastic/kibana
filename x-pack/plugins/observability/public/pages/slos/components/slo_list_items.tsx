@@ -25,8 +25,10 @@ export function SloListItems({ sloList, loading, error }: Props) {
 
   const { data: activeAlertsBySlo } = useFetchActiveAlerts({ sloIds });
   const { data: rulesBySlo } = useFetchRulesForSlo({ sloIds });
-  const { isLoading: historicalSummaryLoading, data: historicalSummaryBySlo } =
-    useFetchHistoricalSummary({ sloIds });
+  const { isLoading: historicalSummaryLoading, data: historicalSummaries = [] } =
+    useFetchHistoricalSummary({
+      list: sloList.map((slo) => ({ sloId: slo.id, instanceId: slo.instanceId ?? ALL_VALUE })),
+    });
 
   if (!loading && !error && sloList.length === 0) {
     return <SloListEmpty />;
@@ -42,7 +44,13 @@ export function SloListItems({ sloList, loading, error }: Props) {
           <SloListItem
             activeAlerts={activeAlertsBySlo[slo.id]}
             rules={rulesBySlo?.[slo.id]}
-            historicalSummary={historicalSummaryBySlo?.[slo.id]}
+            historicalSummary={
+              historicalSummaries.find(
+                (historicalSummary) =>
+                  historicalSummary.sloId === slo.id &&
+                  historicalSummary.instanceId === (slo.instanceId ?? ALL_VALUE)
+              )?.data
+            }
             historicalSummaryLoading={historicalSummaryLoading}
             slo={slo}
           />
