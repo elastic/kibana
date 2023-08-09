@@ -23,6 +23,7 @@ const schemaLatest = schema.object(
       enabled: schema.boolean({ defaultValue: true }),
     }),
     enableIndexActions: schema.boolean({ defaultValue: true }),
+    enableLegacyTemplates: schema.boolean({ defaultValue: true }),
   },
   { defaultValue: undefined }
 );
@@ -31,6 +32,7 @@ const configLatest: PluginConfigDescriptor<IndexManagementConfig> = {
   exposeToBrowser: {
     ui: true,
     enableIndexActions: true,
+    enableLegacyTemplates: true,
   },
   schema: schemaLatest,
   deprecations: () => [],

@@ -23,6 +23,7 @@ import { useLoadIndexTemplate, updateTemplate } from '../../services/api';
 import { getTemplateDetailsLink } from '../../services/routing';
 import { TemplateForm } from '../../components';
 import { getIsLegacyFromQueryParams } from '../../lib/index_templates';
+import { useAppContext } from '../../app_context';
 
 interface MatchParams {
   name: string;
@@ -36,7 +37,9 @@ export const TemplateEdit: React.FunctionComponent<RouteComponentProps<MatchPara
   history,
 }) => {
   const decodedTemplateName = attemptToURIDecode(name)!;
-  const isLegacy = getIsLegacyFromQueryParams(location);
+  const { enableLegacyTemplates } = useAppContext();
+
+  const isLegacy = enableLegacyTemplates && getIsLegacyFromQueryParams(location);
 
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [saveError, setSaveError] = useState<any>(null);

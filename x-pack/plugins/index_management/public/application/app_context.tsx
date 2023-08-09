@@ -53,6 +53,7 @@ export interface AppDependencies {
   kibanaVersion: SemVer;
   theme$: Observable<CoreTheme>;
   enableIndexActions: boolean;
+  enableLegacyTemplates: boolean;
 }
 
 export const AppContextProvider = ({

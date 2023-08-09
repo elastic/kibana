@@ -17,7 +17,7 @@ import { getCloudManagedTemplatePrefix } from '../../../lib/get_managed_template
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '..';
 
-export function registerGetAllRoute({ router, lib: { handleEsError } }: RouteDependencies) {
+export function registerGetAllRoute({ router, config, lib: { handleEsError } }: RouteDependencies) {
   router.get(
     { path: addBasePath('/index_templates'), validate: false },
     async (context, request, response) => {
@@ -25,24 +25,29 @@ export function registerGetAllRoute({ router, lib: { handleEsError } }: RouteDep
 
       try {
         const cloudManagedTemplatePrefix = await getCloudManagedTemplatePrefix(client);
-
-        const legacyTemplatesEs = await client.asCurrentUser.indices.getTemplate();
         const { index_templates: templatesEs } =
           await client.asCurrentUser.indices.getIndexTemplate();
 
-        const legacyTemplates = deserializeLegacyTemplateList(
-          legacyTemplatesEs,
-          cloudManagedTemplatePrefix
-        );
         // @ts-expect-error TemplateSerialized.index_patterns not compatible with IndicesIndexTemplate.index_patterns
         const templates = deserializeTemplateList(templatesEs, cloudManagedTemplatePrefix);
 
-        const body = {
-          templates,
-          legacyTemplates,
-        };
+        // Only return legacy templates response if it is enabled
+        if (config.isLegacyTemplatesEnabled) {
+          const legacyTemplatesEs = await client.asCurrentUser.indices.getTemplate();
 
-        return response.ok({ body });
+          const legacyTemplates = deserializeLegacyTemplateList(
+            legacyTemplatesEs,
+            cloudManagedTemplatePrefix
+          );
+
+          const body = {
+            templates,
+            legacyTemplates,
+          };
+
+          return response.ok({ body });
+        }
+        return response.ok({ body: { templates } });
       } catch (error) {
         return handleEsError({ error, response });
       }
@@ -59,7 +64,7 @@ const querySchema = schema.object({
   legacy: schema.maybe(schema.oneOf([schema.literal('true'), schema.literal('false')])),
 });
 
-export function registerGetOneRoute({ router, lib: { handleEsError } }: RouteDependencies) {
+export function registerGetOneRoute({ router, config, lib: { handleEsError } }: RouteDependencies) {
   router.get(
     {
       path: addBasePath('/index_templates/{name}'),
@@ -68,7 +73,9 @@ export function registerGetOneRoute({ router, lib: { handleEsError } }: RouteDep
     async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
       const { name } = request.params as TypeOf<typeof paramsSchema>;
-      const isLegacy = (request.query as TypeOf<typeof querySchema>).legacy === 'true';
+      const isLegacy =
+        config.isLegacyTemplatesEnabled &&
+        (request.query as TypeOf<typeof querySchema>).legacy === 'true';
 
       try {
         const cloudManagedTemplatePrefix = await getCloudManagedTemplatePrefix(client);

@@ -14,6 +14,7 @@ import { ScopedHistory } from '@kbn/core/public';
 import {
   EuiEmptyPrompt,
   EuiSpacer,
+  EuiTitle,
   EuiText,
   EuiFlexItem,
   EuiFlexGroup,
@@ -31,6 +32,7 @@ import {
   reactRouterNavigate,
   useExecutionContext,
 } from '../../../../shared_imports';
+import { LegacyIndexTemplatesDeprecation } from '../../../components';
 import { useLoadIndexTemplates } from '../../../services/api';
 import { documentationService } from '../../../services/documentation';
 import { useAppContext, useServices } from '../../../app_context';
@@ -39,9 +41,11 @@ import {
   getTemplateListLink,
   getTemplateCloneLink,
 } from '../../../services/routing';
+import { getIsLegacyFromQueryParams } from '../../../lib/index_templates';
 import { FilterListButton, Filters } from '../components';
 import { TemplateTable } from './template_table';
 import { TemplateDetails } from './template_details';
+import { LegacyTemplateTable } from './legacy_templates/template_table';
 
 type FilterName = 'managed' | 'cloudManaged' | 'system';
 interface MatchParams {
@@ -57,10 +61,11 @@ function filterTemplates(templates: TemplateListItem[], types: string[]): Templa
   });
 }
 
-export const TemplateList: React.FunctionComponent<RouteComponentProps<MatchParams>> = ({
+export const TemplateListLegacy: React.FunctionComponent<RouteComponentProps<MatchParams>> = ({
   match: {
     params: { templateName },
   },
+  location,
   history,
 }) => {
   const { uiMetricService } = useServices();
@@ -99,7 +104,7 @@ export const TemplateList: React.FunctionComponent<RouteComponentProps<MatchPara
   const filteredTemplates = useMemo(() => {
     if (!allTemplates) {
       // If templates are not fetched, return empty arrays.
-      return { templates: [] };
+      return { templates: [], legacyTemplates: [] };
     }
 
     const visibleTemplateTypes = Object.entries(filters)
@@ -108,29 +113,31 @@ export const TemplateList: React.FunctionComponent<RouteComponentProps<MatchPara
 
     return {
       templates: filterTemplates(allTemplates.templates, visibleTemplateTypes),
+      legacyTemplates: filterTemplates(allTemplates.legacyTemplates, visibleTemplateTypes),
     };
   }, [allTemplates, filters]);
 
   const selectedTemplate = Boolean(templateName)
     ? {
         name: attemptToURIDecode(templateName!)!,
-        isLegacy: false,
+        isLegacy: getIsLegacyFromQueryParams(location),
       }
     : null;
 
   const isTemplateDetailsVisible = selectedTemplate !== null;
-  const hasTemplates = allTemplates && allTemplates.templates.length > 0;
+  const hasTemplates =
+    allTemplates && (allTemplates.legacyTemplates.length > 0 || allTemplates.templates.length > 0);
 
   const closeTemplateDetails = () => {
     history.push(getTemplateListLink());
   };
 
-  const editTemplate = (name: string) => {
-    history.push(getTemplateEditLink(name));
+  const editTemplate = (name: string, isLegacy?: boolean) => {
+    history.push(getTemplateEditLink(name, isLegacy));
   };
 
-  const cloneTemplate = (name: string) => {
-    history.push(getTemplateCloneLink(name));
+  const cloneTemplate = (name: string, isLegacy?: boolean) => {
+    history.push(getTemplateCloneLink(name, isLegacy));
   };
 
   const renderHeader = () => (
@@ -194,6 +201,34 @@ export const TemplateList: React.FunctionComponent<RouteComponentProps<MatchPara
       </>
     );
   };
+
+  const renderLegacyTemplatesTable = () => (
+    <>
+      <EuiSpacer size="xl" />
+      <EuiTitle size="s">
+        <h1>
+          <FormattedMessage
+            id="xpack.idxMgmt.home.legacyIndexTemplatesTitle"
+            defaultMessage="Legacy index templates"
+          />
+        </h1>
+      </EuiTitle>
+
+      <EuiSpacer size="s" />
+
+      <LegacyIndexTemplatesDeprecation />
+
+      <EuiSpacer size="m" />
+
+      <LegacyTemplateTable
+        templates={filteredTemplates.legacyTemplates}
+        reload={reload}
+        editTemplate={editTemplate}
+        cloneTemplate={cloneTemplate}
+        history={history as ScopedHistory}
+      />
+    </>
+  );
 
   // Track this component mounted.
   useEffect(() => {
@@ -268,6 +303,9 @@ export const TemplateList: React.FunctionComponent<RouteComponentProps<MatchPara
 
         {/* Composable index templates table */}
         {renderTemplatesTable()}
+
+        {/* Legacy index templates table. We discourage their adoption if the user isn't already using them. */}
+        {filteredTemplates.legacyTemplates.length > 0 && renderLegacyTemplatesTable()}
 
         {isTemplateDetailsVisible && (
           <TemplateDetails

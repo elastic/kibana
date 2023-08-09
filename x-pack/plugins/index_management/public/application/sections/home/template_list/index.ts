@@ -6,3 +6,4 @@
  */
 
 export { TemplateList } from './template_list';
+export { TemplateListLegacy } from './legacy_template_list';
