@@ -30,8 +30,13 @@ export interface FleetAuthzRouteConfig<
   fleetAuthz?: T;
 }
 
+export interface FleetVersionRouteConfig {
+  version?: string;
+}
+
 export type FleetRouteConfig<P, Q, B, Method extends RouteMethod> = RouteConfig<P, Q, B, Method> &
-  FleetAuthzRouteConfig;
+  FleetAuthzRouteConfig &
+  FleetVersionRouteConfig;
 
 // Fleet router that allow to add required access when registering route
 export interface FleetAuthzRouter<

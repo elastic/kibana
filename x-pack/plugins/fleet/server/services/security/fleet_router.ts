@@ -17,6 +17,15 @@ import type {
   RouteConfigOptions,
 } from '@kbn/core/server';
 
+import { routeValidationObject } from '@kbn/server-route-repository';
+
+import type { INTERNAL_API_ACCESS } from '../../../common/constants';
+import {
+  LATEST_PUBLIC_VERSION,
+  LATEST_INTERNAL_VERSION,
+  PUBLIC_API_ACCESS,
+} from '../../../common/constants';
+
 import type { FleetRequestHandlerContext } from '../..';
 
 import { getRequestStore } from '../request_store';
@@ -39,7 +48,7 @@ function withDefaultPublicAccess<P, Q, B, Method extends RouteMethod>(
   }
 
   if (!newOptions.access) {
-    newOptions.access = 'public';
+    newOptions.access = PUBLIC_API_ACCESS;
   }
   return {
     ...routeConfig,
@@ -124,12 +133,23 @@ export function makeRouterWithFleetAuthz<TContext extends FleetRequestHandlerCon
         }),
     });
   };
+  const getDefaultVersion = (access: typeof PUBLIC_API_ACCESS | typeof INTERNAL_API_ACCESS) =>
+    access === PUBLIC_API_ACCESS ? LATEST_PUBLIC_VERSION : LATEST_INTERNAL_VERSION;
+
+  const versionedRouter = router.versioned;
 
   const fleetAuthzRouter: FleetAuthzRouter<TContext> = {
-    get: ({ fleetAuthz: hasRequiredAuthz, ...options }, handler) => {
-      router.get(withDefaultPublicAccess(options), (context, request, response) =>
-        fleetHandlerWrapper({ context, request, response, handler, hasRequiredAuthz })
-      );
+    get: ({ fleetAuthz: hasRequiredAuthz, version, ...options }, handler) => {
+      const access = withDefaultPublicAccess(options).options?.access || PUBLIC_API_ACCESS;
+      const defaultVersion = getDefaultVersion(access);
+
+      return versionedRouter
+        .get({ access, path: options.path })
+        .addVersion(
+          { version: version || defaultVersion, validate: { request: routeValidationObject } },
+          (context, request, response) =>
+            fleetHandlerWrapper({ context, request, response, handler, hasRequiredAuthz })
+        );
     },
     delete: ({ fleetAuthz: hasRequiredAuthz, ...options }, handler) => {
       router.delete(withDefaultPublicAccess(options), (context, request, response) =>
