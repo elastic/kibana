@@ -7,29 +7,40 @@
 
 import { kea, MakeLogicType } from 'kea';
 
-import { CrawlerConfiguration, DomainConfig } from '../../../../api/crawler/types';
+import { CrawlerIndex } from '../../../../../../../common/types/indices';
 
-import { CrawlCustomSettingsFlyoutLogic, filterSeedUrlsByDomainUrls } from './crawl_custom_settings_flyout_logic';
+import { IndexViewLogic } from '../../index_view_logic';
+
+import { CrawlerConfiguration, CrawlSchedule, CrawlUnits } from '../../../../api/crawler/types';
+
+import { DEFAULT_VALUES as SCHEDULER_DEFAULT_VALUES } from '../automatic_crawl_scheduler/automatic_crawl_scheduler_logic'
+
+import { filterSeedUrlsByDomainUrls } from './crawl_custom_settings_flyout_logic';
 
 export interface CrawlCustomSettingsFlyoutLogicValues {
   crawlerConfigActiveTab: number;
   crawlerConfigurations: CrawlerConfiguration[],
+  index: CrawlerIndex;
 }
 
 export interface CrawlCustomSettingsFlyoutLogicActions {
   onAddCustomCrawler(crawler: CrawlerConfiguration): void;
   onDeleteCustomCrawler(index: number): { index: number };
-
-  onRecieveDomainConfigData(domainConfigs: DomainConfig[]): { domainConfigs: DomainConfig[] };
   onSelectCrawlerConfigActiveTab(crawlerConfigActiveTab: number): { crawlerConfigActiveTab: number };
-  onSelectCrawlType(crawlType: string): { crawlType: string };
   onSelectCustomEntryPointUrls(index: number, entryPointUrls: string[]): { index: number, entryPointUrls: string[] };
   onSelectCustomSitemapUrls(index: number, sitemapUrls: string[]): { index: number, sitemapUrls: string[] };
   onSelectDomainUrls(index: number, domainUrls: string[]): { index: number, domainUrls: string[] };
   onSelectEntryPointUrls(index: number, entryPointUrls: string[]): { index: number, entryPointUrls: string[] };
   onSelectMaxCrawlDepth(index: number, maxCrawlDepth: number): { index: number, maxCrawlDepth: number };
   onSelectSitemapUrls(index: number, sitemapUrls: string[]): { index: number, sitemapUrls: string[] };
-
+  setCrawlFrequency(index: number, crawlFrequency: CrawlSchedule['frequency']): {
+    index: number,
+    crawlFrequency: CrawlSchedule['frequency'];
+  };
+  setCrawlUnit(index: number, crawlUnit: CrawlSchedule['unit']): { index: number, crawlUnit: CrawlSchedule['unit'] };
+  setUseConnectorSchedule(index: number, useConnectorSchedule: CrawlSchedule['useConnectorSchedule']): {
+    index: number, useConnectorSchedule: CrawlSchedule['useConnectorSchedule'];
+  };
   toggleIncludeSitemapsInRobotsTxt(index: number): { index: number };
 }
 
@@ -41,30 +52,35 @@ const defaulCrawlerConfiguration: CrawlerConfiguration = {
   includeSitemapsInRobotsTxt: true,
   selectedDomainUrls: [],
   selectedEntryPointUrls: [],
-  selectedSitemapUrls: []
+  selectedSitemapUrls: [],
+  schedule: {
+    frequency: SCHEDULER_DEFAULT_VALUES.crawlFrequency,
+    unit: SCHEDULER_DEFAULT_VALUES.crawlUnit,
+    useConnectorSchedule: false
+  }
 }
 
 export const CrawlCustomSettingsFlyoutMultiCrawlLogic = kea<
   MakeLogicType<CrawlCustomSettingsFlyoutLogicValues, CrawlCustomSettingsFlyoutLogicActions>
 >({
   path: ['enterprise_search', 'crawler', 'crawl_custom_settings_flyout_multi_crawl_logic'],
+  connect: {
+    values: [IndexViewLogic, ['index']],
+  },
   actions: () => ({
-    fetchDomainConfigData: true,
-    hideFlyout: true,
     onAddCustomCrawler: (crawler) => ({ crawler }),
     onDeleteCustomCrawler: (index) => ({ index }),
-    onRecieveDomainConfigData: (domainConfigs) => ({ domainConfigs }),
     onSelectCrawlerConfigActiveTab: (crawlerConfigActiveTab) => ({ crawlerConfigActiveTab }),
-    onSelectCrawlType: (crawlType) => ({ crawlType }),
     onSelectCustomEntryPointUrls: (index, entryPointUrls) => ({ index, entryPointUrls }),
     onSelectCustomSitemapUrls: (index, sitemapUrls) => ({ index, sitemapUrls }),
     onSelectDomainUrls: (index, domainUrls) => ({ index, domainUrls }),
     onSelectEntryPointUrls: (index, entryPointUrls) => ({ index, entryPointUrls }),
     onSelectMaxCrawlDepth: (index, maxCrawlDepth) => ({ index, maxCrawlDepth }),
     onSelectSitemapUrls: (index, sitemapUrls) => ({ index, sitemapUrls }),
-    startCustomCrawl: true,
+    setCrawlFrequency: (index, crawlFrequency: string) => ({ index, crawlFrequency }),
+    setCrawlUnit: (index, crawlUnit: CrawlUnits) => ({ index, crawlUnit }),
+    setUseConnectorSchedule: (index, useConnectorSchedule) => ({ index, useConnectorSchedule }),
     toggleIncludeSitemapsInRobotsTxt: (index) => ({ index }),
-    showFlyout: true,
   }),
   reducers: () => ({
     crawlerConfigActiveTab: [
@@ -94,7 +110,6 @@ export const CrawlCustomSettingsFlyoutMultiCrawlLogic = kea<
           return state.map((crawler, i) => (i === index ? { ...crawler, includeSitemapsInRobotsTxt: !crawler.includeSitemapsInRobotsTxt } : crawler))
         },
         onSelectDomainUrls: (state, { index, domainUrls }) => {
-          console.log('Caaaaaalllling');
           return state.map((crawler, i) => (i === index ?
             {
               ...crawler, selectedDomainUrls: domainUrls,
@@ -107,6 +122,15 @@ export const CrawlCustomSettingsFlyoutMultiCrawlLogic = kea<
         },
         onSelectSitemapUrls: (state, { index, sitemapUrls }) => {
           return state.map((crawler, i) => (i === index ? { ...crawler, selectedSitemapUrls: sitemapUrls } : crawler))
+        },
+        setCrawlFrequency: (state, { index, crawlFrequency }) => {
+          return state.map((crawler, i) => (i === index ? { ...crawler, schedule: { ...crawler.schedule, frequency: crawlFrequency } } : crawler))
+        },
+        setCrawlUnit: (state, { index, crawlUnit }) => {
+          return state.map((crawler, i) => (i === index ? { ...crawler, schedule: { ...crawler.schedule, unit: crawlUnit } } : crawler))
+        },
+        setUseConnectorSchedule: (state, { index, useConnectorSchedule }) => {
+          return state.map((crawler, i) => (i === index ? { ...crawler, schedule: { ...crawler.schedule, useConnectorSchedule: useConnectorSchedule } } : crawler))
         },
       }
     ]

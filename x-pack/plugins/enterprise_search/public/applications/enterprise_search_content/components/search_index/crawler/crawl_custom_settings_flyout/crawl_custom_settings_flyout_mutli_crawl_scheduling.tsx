@@ -16,6 +16,7 @@ import {
 import { CrawlCustomSettingsFlyoutCrawlDepthPanel } from './crawl_custom_settings_flyout_crawl_depth_panel'
 import { CrawlCustomSettingsFlyoutDomainsPanel } from './crawl_custom_settings_flyout_domains_panel'
 import { CrawlCustomSettingsFlyoutSeedUrlsPanel } from './crawl_custom_settings_flyout_seed_urls_panel'
+import { MultiCrawlScheduler } from './crawl_custom_settings_flyout_multi_crawl_scheduler'
 
 import { i18n } from '@kbn/i18n';
 
@@ -34,6 +35,7 @@ export const CrawlCustomSettingsFlyoutMultiCrawlScheduling: React.FC = () => {
   const {
     crawlerConfigurations,
     crawlerConfigActiveTab,
+    index: crawlerIndex
   } = useValues(CrawlCustomSettingsFlyoutMultiCrawlLogic);
 
   const {
@@ -43,7 +45,10 @@ export const CrawlCustomSettingsFlyoutMultiCrawlScheduling: React.FC = () => {
     onSelectCustomSitemapUrls,
     onSelectEntryPointUrls,
     onSelectSitemapUrls,
-    toggleIncludeSitemapsInRobotsTxt
+    toggleIncludeSitemapsInRobotsTxt,
+    setCrawlFrequency,
+    setCrawlUnit,
+    setUseConnectorSchedule,
   } = useActions(CrawlCustomSettingsFlyoutMultiCrawlLogic);
 
   return crawlerConfigurations.map((config, index) => {
@@ -57,10 +62,7 @@ export const CrawlCustomSettingsFlyoutMultiCrawlScheduling: React.FC = () => {
         <CrawlCustomSettingsFlyoutDomainsPanel
           selectedDomainUrls={config.selectedDomainUrls}
           domainUrls={domainUrls}
-          onSelectDomainUrls={e => {
-            console.log(e)
-            return onSelectDomainUrls(index, e)
-          }}
+          onSelectDomainUrls={e => onSelectDomainUrls(index, e)}
         />
         <EuiSpacer />
         <CrawlCustomSettingsFlyoutSeedUrlsPanel
@@ -77,6 +79,17 @@ export const CrawlCustomSettingsFlyoutMultiCrawlScheduling: React.FC = () => {
           toggleIncludeSitemapsInRobotsTxt={() => toggleIncludeSitemapsInRobotsTxt(index)}
           entryPointUrls={multiCrawlerEntryPointUrls[index]}
           sitemapUrls={multiCrawlerSitemapUrls[index]}
+        />
+        <EuiSpacer />
+        <MultiCrawlScheduler
+          index={crawlerIndex}
+          crawlerId={index}
+          crawlFrequency={config.schedule.frequency}
+          crawlUnit={config.schedule.unit}
+          useConnectorSchedule={config.schedule.useConnectorSchedule}
+          setCrawlFrequency={e => setCrawlFrequency(index, e)}
+          setCrawlUnit={e => setCrawlUnit(index, e)}
+          setUseConnectorSchedule={e => setUseConnectorSchedule(index, e)}
         />
       </React.Fragment>
     }

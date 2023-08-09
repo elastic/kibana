@@ -118,10 +118,15 @@ export const CrawlCustomSettingsFlyout: React.FC = () => {
               disabled={isDataLoading}
               isLoading={isFormSubmitting}
             >
-              {i18n.translate(
+              {isSingleCrawlType ? i18n.translate(
                 'xpack.enterpriseSearch.crawler.crawlCustomSettingsFlyout.startCrawlButtonLabel',
                 {
                   defaultMessage: 'Apply and crawl now',
+                }
+              ) : i18n.translate(
+                'xpack.enterpriseSearch.crawler.crawlCustomSettingsFlyout.saveMultipleCrawlersConfiguration',
+                {
+                  defaultMessage: 'Save configuration',
                 }
               )}
             </EuiButton>
