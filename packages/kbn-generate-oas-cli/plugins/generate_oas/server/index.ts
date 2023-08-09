@@ -57,7 +57,7 @@ export class GenerateOasPlugin implements Plugin {
         post: {
           requestBody: {
             content: {
-              'application/json': {
+              'application/json; Elastic-Api-Version=2023-10-31': {
                 schema: this.getCreateSchema(ruleTypeParams),
               },
             },
@@ -66,7 +66,7 @@ export class GenerateOasPlugin implements Plugin {
         put: {
           requestBody: {
             content: {
-              'application/json': {
+              'application/json; Elastic-Api-Version=2023-10-31': {
                 schema: this.getUpdateSchema(ruleTypeParams),
               },
             },

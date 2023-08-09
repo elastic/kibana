@@ -8,9 +8,9 @@
 
 import Fsp from 'fs/promises';
 import Path from 'path';
-
 import { run } from '@kbn/dev-cli-runner';
 import axios from 'axios';
+import { merge } from 'lodash';
 import { CoreVersionedRouter } from '@kbn/core-http-router-server-internal';
 import { createTestServers } from '@kbn/core-test-helpers-kbn-server';
 
@@ -65,6 +65,8 @@ run(
         { title: 'Kibana OpenAPI spec', baseUrl: '/', version: '0.0.0' }
       );
 
+      log.info('Loading server side generated OpenAPI spec...');
+
       const { protocol, hostname, port } = coreStart.http.getServerInfo();
       const url = `${protocol}://${hostname}:${port}/oas/generate`;
       // TODO: Better way of doing it? Without waiting I get:
@@ -75,7 +77,9 @@ run(
         auth: { username: 'elastic', password: 'changeme' },
       });
 
-      const output = Object.assign({}, spec, { paths: data });
+      log.info('Merging OpenAPI specs...');
+
+      const output = merge(spec, { paths: data });
 
       log.info(`Writing OpenAPI spec ${OUTPUT_FILE}...`);
       await Fsp.writeFile(OUTPUT_FILE, JSON.stringify(output, null, 2));
