@@ -157,7 +157,7 @@ export const getTransformOptions = ({ dest, source }: { dest: string; source: st
   dest: {
     index: dest,
   },
-  frequency: '1m',
+  frequency: '1h',
   latest: {
     sort: '@timestamp',
     unique_key: [`host.name`, `user.name`],
