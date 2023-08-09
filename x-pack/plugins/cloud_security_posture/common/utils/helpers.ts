@@ -12,13 +12,15 @@ import {
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   PackagePolicy,
   PackagePolicyInput,
+  UpdatePackagePolicy,
 } from '@kbn/fleet-plugin/common';
 import {
   CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
   CLOUDBEAT_VANILLA,
   CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE,
+  AWS_CREDENTIALS_FIELD_MAP,
 } from '../constants';
-import type { BenchmarkId, Score, BaseCspSetupStatus } from '../types';
+import type { BenchmarkId, Score, BaseCspSetupStatus, AwsCredentialsType } from '../types';
 
 /**
  * @example
@@ -97,4 +99,30 @@ export const getStatusForIndexName = (indexName: string, status?: BaseCspSetupSt
   }
 
   return 'unknown';
+};
+
+export const cleanupCredentials = (packagePolicy: NewPackagePolicy | UpdatePackagePolicy) => {
+  const enabledInput = packagePolicy.inputs.find((i) => i.enabled);
+  const credentialType: AwsCredentialsType | undefined =
+    enabledInput?.streams?.[0].vars?.['aws.credentials.type'].value;
+
+  if (credentialType) {
+    const credsToKeep = AWS_CREDENTIALS_FIELD_MAP[credentialType];
+    const credsToClean: string[] = [];
+    Object.values(AWS_CREDENTIALS_FIELD_MAP).reduce((prev, cur) => {
+      cur.forEach((field) => {
+        if (!credsToKeep.includes(field) && !prev.includes(field)) {
+          prev.push(field);
+        }
+      });
+      return prev;
+    }, credsToClean);
+
+    credsToClean.forEach((field) => {
+      if (enabledInput?.streams?.[0]?.vars) {
+        enabledInput.streams[0].vars[field].value = undefined;
+      }
+    });
+  }
+  return packagePolicy;
 };

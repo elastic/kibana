@@ -24,7 +24,6 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import {
   getAwsCredentialsFormManualOptions,
-  AwsCredentialsType,
   AwsOptions,
   DEFAULT_MANUAL_AWS_CREDENTIALS_TYPE,
 } from './get_aws_credentials_form_options';
@@ -35,6 +34,7 @@ import {
   NewPackagePolicyPostureInput,
 } from '../utils';
 import { SetupFormat, useAwsCredentialsForm } from './hooks';
+import { AwsCredentialsType } from '../../../../common/types';
 
 interface AWSSetupInfoContentProps {
   integrationLink: string;
