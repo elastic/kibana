@@ -724,9 +724,17 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await cases.api.deleteAllCases();
       });
 
-      it('shows more actions on button click', async () => {
+      it('initially renders user actions list correctly', async () => {
         expect(testSubjects.missingOrFail('cases-show-more-user-actions'));
 
+        const userActionsLists = await find.allByCssSelector(
+          '[data-test-subj="user-actions-list"]'
+        );
+
+        expect(userActionsLists).length(1);
+      });
+
+      it('shows more actions on button click', async () => {
         await cases.api.generateUserActions({
           caseId: createdCase.id,
           caseVersion: createdCase.version,

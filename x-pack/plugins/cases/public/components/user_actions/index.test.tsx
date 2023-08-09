@@ -445,27 +445,6 @@ describe.skip(`UserActions`, () => {
       expect(screen.getAllByTestId('user-actions-list')).toHaveLength(1);
     });
 
-    it('renders only one action list when user actions are less than or equal to 10', async () => {
-      useFindCaseUserActionsMock.mockReturnValue({
-        ...defaultUseFindCaseUserActions,
-        data: { userActions: [] },
-      });
-      const props = {
-        ...defaultProps,
-        userActionsStats: {
-          total: 10,
-          totalComments: 6,
-          totalOtherActions: 4,
-        },
-      };
-
-      appMockRender.render(<UserActions {...props} />);
-
-      await waitForComponentToUpdate();
-
-      expect(screen.getAllByTestId('user-actions-list')).toHaveLength(1);
-    });
-
     it('shows more button visible when hasNext page is true', async () => {
       useInfiniteFindCaseUserActionsMock.mockReturnValue({
         ...defaultInfiniteUseFindCaseUserActions,
