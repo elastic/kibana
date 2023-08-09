@@ -128,7 +128,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should launch sample flights data set dashboard', async () => {
-      appMenu.clickLink('Dashboard', { category: 'kibana', closeCollapsibleNav: true });
+      await appMenu.clickLink('Dashboard', { category: 'kibana', closeCollapsibleNav: true });
       await PageObjects.dashboard.loadSavedDashboard('[Flights] Global Flight Dashboard');
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.timePicker.setCommonlyUsedTime('sample_data range');
