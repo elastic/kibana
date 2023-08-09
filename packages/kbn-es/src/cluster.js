@@ -580,13 +580,13 @@ exports.Cluster = class Cluster {
 
     this._serverlessNodes = await runServerlessCluster(this._log, options);
 
-    await Promise.all(
-      this._serverlessNodes.map(async (name) => {
-        return await execa('docker', ['logs', '-f', name], {
-          stdio: ['ignore', 'inherit', 'inherit'],
-        });
-      })
-    );
+    // await Promise.all(
+    //   this._serverlessNodes.map(async (name) => {
+    //     return await execa('docker', ['logs', '-f', name], {
+    //       stdio: ['ignore', 'inherit', 'inherit'],
+    //     });
+    //   })
+    // );
   }
 
   /**
