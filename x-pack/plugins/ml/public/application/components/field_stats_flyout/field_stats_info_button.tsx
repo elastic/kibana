@@ -33,7 +33,7 @@ export const FieldStatsInfoButton = ({
   const themeVars = useCurrentThemeVars();
   const emptyFieldMessage = isEmpty
     ? ' ' +
-      i18n.translate('xpack.ml.newJob.wizard.fieldContextPopover.inspectFieldStatsTooltip', {
+      i18n.translate('xpack.ml.newJob.wizard.fieldContextPopover.emptyFieldInSampleDocsMsg', {
         defaultMessage: '(no data found in 1000 sample records)',
       })
     : '';
