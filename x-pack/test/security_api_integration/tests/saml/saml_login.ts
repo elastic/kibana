@@ -593,7 +593,8 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('API access with missing access token document.', () => {
+    // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/163455
+    describe.skip('API access with missing access token document.', () => {
       let sessionCookie: Cookie;
 
       beforeEach(async () => {
