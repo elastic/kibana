@@ -37,7 +37,7 @@ describe('createService', () => {
     }
 
     function chat() {
-      return service.chat({ messages: [], connectorId: '' });
+      return service.chat({ messages: [], connectorId: '', knowledgeBaseAvailable: false });
     }
 
     beforeEach(() => {

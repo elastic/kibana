@@ -16,6 +16,7 @@ import { useObservabilityAIAssistant } from '../../hooks/use_observability_ai_as
 import { useObservabilityAIAssistantRouter } from '../../hooks/use_observability_ai_assistant_router';
 import { getConnectorsManagementHref } from '../../utils/get_connectors_management_href';
 import { ChatBody } from './chat_body';
+import { useKnowledgeBase } from '../../hooks/use_knowledge_base';
 
 const containerClassName = css`
   max-height: 100%;
@@ -51,6 +52,8 @@ export function ChatFlyout({
   const { euiTheme } = useEuiTheme();
 
   const router = useObservabilityAIAssistantRouter();
+
+  const knowledgeBase = useKnowledgeBase();
 
   return isOpen ? (
     <EuiFlyout onClose={onClose}>
@@ -94,6 +97,7 @@ export function ChatFlyout({
             messages={messages}
             currentUser={currentUser}
             connectorsManagementHref={getConnectorsManagementHref(http)}
+            knowledgeBase={knowledgeBase}
             onChatUpdate={(nextMessages) => {
               if (onChatUpdate) {
                 onChatUpdate(nextMessages);
