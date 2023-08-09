@@ -8,7 +8,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
-  const PageObjects = getPageObjects(['common']);
+  const PageObjects = getPageObjects(['common', 'navigationalSearch']);
   const testSubjects = getService('testSubjects');
 
   describe('Customizations', () => {
@@ -24,11 +24,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('DatasetSelector should replace the DataViewPicker', async () => {
         // Assert does not render on discover app
         await PageObjects.common.navigateToApp('discover');
-        await testSubjects.missingOrFail('dataset-selector-popover');
+        await testSubjects.missingOrFail('datasetSelectorPopover');
 
         // Assert it renders on log-explorer profile
         await PageObjects.common.navigateToApp('discover', { hash: '/p/log-explorer' });
-        await testSubjects.existOrFail('dataset-selector-popover');
+        await testSubjects.existOrFail('datasetSelectorPopover');
       });
 
       it('the TopNav bar should hide New, Open and Save options', async () => {
@@ -49,6 +49,24 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.existOrFail('discoverAlertsButton');
         await testSubjects.existOrFail('openInspectorButton');
         await testSubjects.missingOrFail('discoverSaveButton');
+      });
+
+      it('should add a searchable deep link to the profile page', async () => {
+        await PageObjects.common.navigateToApp('home');
+        await PageObjects.navigationalSearch.searchFor('discover log explorer');
+
+        const results = await PageObjects.navigationalSearch.getDisplayedResults();
+        expect(results[0].label).to.eql('Discover / Logs Explorer');
+      });
+
+      it('should render a filter controls section as part of the unified search bar', async () => {
+        // Assert does not render on discover app
+        await PageObjects.common.navigateToApp('discover');
+        await testSubjects.missingOrFail('datasetFiltersCustomization');
+
+        // Assert it renders on log-explorer profile
+        await PageObjects.common.navigateToApp('discover', { hash: '/p/log-explorer' });
+        await testSubjects.existOrFail('datasetFiltersCustomization', { allowHidden: true });
       });
     });
   });
