@@ -14,7 +14,10 @@ import { i18n } from '@kbn/i18n';
 import { useGetEsIngestPipelines } from '../../../../hooks';
 
 import { EditTransformFlyoutFormTextInput } from './edit_transform_flyout_form_text_input';
-import { useEditTransformFlyout } from './use_edit_transform_flyout';
+import {
+  useEditTransformFlyout,
+  useEditTransformFlyoutFormField,
+} from './use_edit_transform_flyout';
 
 const ingestPipelineLabel = i18n.translate(
   'xpack.transform.transformList.editFlyoutFormDestinationIngestPipelineLabel',
@@ -25,7 +28,7 @@ const ingestPipelineLabel = i18n.translate(
 
 export const EditTransformIngestPipeline: FC = () => {
   const { euiTheme } = useEuiTheme();
-  const { errorMessages, value } = useEditTransformFlyout('destinationIngestPipeline');
+  const { errorMessages, value } = useEditTransformFlyoutFormField('destinationIngestPipeline');
   const { formField } = useEditTransformFlyout('actions');
 
   const { data: esIngestPipelinesData, isLoading } = useGetEsIngestPipelines();
