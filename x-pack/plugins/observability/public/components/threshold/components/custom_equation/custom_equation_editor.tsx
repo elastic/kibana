@@ -213,7 +213,6 @@ export function CustomEquationEditor({
           </div>
         </EuiPopover>
       </EuiFlexItem>
-      <EuiSpacer size={'s'} />
     </div>
   );
 }

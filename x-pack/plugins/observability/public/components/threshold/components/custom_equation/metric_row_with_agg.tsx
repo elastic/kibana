@@ -14,7 +14,6 @@ import {
   EuiComboBoxOptionOption,
   EuiPopover,
   EuiExpression,
-  EuiSpacer,
 } from '@elastic/eui';
 import React, { useMemo, useCallback, useState } from 'react';
 import { get } from 'lodash';
@@ -216,7 +215,6 @@ export function MetricRowWithAgg({
         </EuiFlexItem>
         <MetricRowControls onDelete={handleDelete} disableDelete={disableDelete} />
       </EuiFlexGroup>
-      <EuiSpacer size="m" />
     </>
   );
 }

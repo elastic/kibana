@@ -384,7 +384,7 @@ export default function Expressions(props: Props) {
       {ruleParams.criteria &&
         ruleParams.criteria.map((e, idx) => {
           return (
-            <>
+            <div key={idx}>
               {/* index has semantic meaning, we show the condition title starting from the 2nd one  */}
               {idx >= 1 && (
                 <EuiTitle size="xs">
@@ -418,7 +418,7 @@ export default function Expressions(props: Props) {
                   timeFieldName={dataView?.timeFieldName}
                 />
               </ExpressionRow>
-            </>
+            </div>
           );
         })}
 
