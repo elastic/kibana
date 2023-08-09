@@ -215,18 +215,6 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
       return testSubjects.exists('assetDetailsAlertsTitle');
     },
 
-    async getActiveAlertsCountText() {
-      const container = await testSubjects.find('activeAlertCount');
-      const containerText = await container.getVisibleText();
-      return containerText;
-    },
-
-    async getTotalAlertsCountText() {
-      const container = await testSubjects.find('totalAlertCount');
-      const containerText = await container.getVisibleText();
-      return containerText;
-    },
-
     async getAssetDetailsMetricsCharts() {
       const container = await testSubjects.find('assetDetailsMetricsChartGrid');
       return container.findAllByCssSelector('[data-test-subj*="infraAssetDetailsMetricsChart"]');
