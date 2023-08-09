@@ -58,7 +58,7 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
       waitForRulesTableToBeLoaded();
     });
 
-    it.only('should install package from Fleet in the background', () => {
+    it('should install package from Fleet in the background', () => {
       /* Assert that the package in installed from Fleet */
       cy.wait('@installPackageBulk', {
         timeout: 60000,
