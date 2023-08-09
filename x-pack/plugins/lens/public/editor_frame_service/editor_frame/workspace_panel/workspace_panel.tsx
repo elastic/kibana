@@ -434,7 +434,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
         plugins.uiActions.getTrigger(VIS_EVENT_TO_TRIGGER[event.name]).exec({
           data: {
             ...event.data,
-            timeFieldName: inferTimeField(plugins.data.datatableUtilities, event.data),
+            timeFieldName: inferTimeField(plugins.data.datatableUtilities, event),
           },
         });
       }
@@ -442,7 +442,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
         plugins.uiActions.getTrigger(VIS_EVENT_TO_TRIGGER[event.name]).exec({
           data: {
             ...event.data,
-            timeFieldName: inferTimeField(plugins.data.datatableUtilities, event.data),
+            timeFieldName: inferTimeField(plugins.data.datatableUtilities, event),
           },
         });
       }
