@@ -24,7 +24,7 @@ export const advancedFilterFactory: StartInitializer<RendererFactory<{}>> =
     height: 50,
     render(domNode, _, handlers) {
       ReactDOM.render(
-        <KibanaThemeProvider theme$={{ theme$: core.theme.theme$ }}>
+        <KibanaThemeProvider theme={{ theme$: core.theme.theme$ }}>
           <AdvancedFilter
             commit={(filter) => handlers.event({ name: 'applyFilterAction', data: filter })}
             value={handlers.getFilter()}
