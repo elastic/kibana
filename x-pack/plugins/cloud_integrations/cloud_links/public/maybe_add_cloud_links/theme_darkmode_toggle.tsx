@@ -19,6 +19,8 @@ import type { SecurityPluginStart } from '@kbn/security-plugin/public';
 import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { UserProfilesKibanaProvider } from '@kbn/user-profile-components';
 import { CoreStart } from '@kbn/core-lifecycle-browser';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+
 import { useThemeDarkmodeToggle } from './theme_darkmode_hook';
 
 interface Props {
@@ -28,7 +30,7 @@ interface Props {
 
 export const ThemeDarkModeToggle = ({ security, core }: Props) => {
   return (
-    <UserProfilesKibanaProvider core={core} security={security}>
+    <UserProfilesKibanaProvider core={core} security={security} toMountPoint={toMountPoint}>
       <ThemeDarkModeToggleUi uiSettingsClient={core.uiSettings} />
     </UserProfilesKibanaProvider>
   );

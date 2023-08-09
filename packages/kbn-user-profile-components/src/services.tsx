@@ -7,9 +7,9 @@
  */
 
 import React, { FC, useContext } from 'react';
-import { NotificationsStart, ToastOptions } from '@kbn/core-notifications-browser';
-import { toMountPoint } from '@kbn/react-kibana-mount';
-import type { I18nStart } from '@kbn/core-i18n-browser';
+import type { Observable } from 'rxjs';
+import type { NotificationsStart, ToastOptions } from '@kbn/core-notifications-browser';
+import type { MountPoint } from '@kbn/core-mount-utils-browser';
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
 
 import type { UserProfileAPIClient } from './types';
@@ -40,12 +40,22 @@ export interface UserProfilesKibanaDependencies {
   /** CoreStart contract */
   core: {
     notifications: NotificationsStart;
-    i18n: I18nStart;
     theme: ThemeServiceStart;
   };
   security: {
     userProfiles: UserProfileAPIClient;
   };
+  /**
+   * Handler from the '@kbn/kibana-react-plugin/public' Plugin
+   *
+   * ```
+   * import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+   * ```
+   */
+  toMountPoint: (
+    node: React.ReactNode,
+    options?: { theme$: Observable<{ readonly darkMode: boolean }> }
+  ) => MountPoint;
 }
 
 /**
@@ -56,8 +66,9 @@ export const UserProfilesKibanaProvider: FC<UserProfilesKibanaDependencies> = ({
   ...services
 }) => {
   const {
-    core: { notifications, i18n, theme },
+    core: { notifications, theme },
     security: { userProfiles: userProfileApiClient },
+    toMountPoint,
   } = services;
 
   return (
@@ -71,7 +82,7 @@ export const UserProfilesKibanaProvider: FC<UserProfilesKibanaDependencies> = ({
         notifications.toasts.addSuccess(
           {
             title,
-            text: text ? toMountPoint(text, { i18n, theme }) : undefined,
+            text: text ? toMountPoint(text, { theme$: theme.theme$ }) : undefined,
           },
           toastOptions
         );

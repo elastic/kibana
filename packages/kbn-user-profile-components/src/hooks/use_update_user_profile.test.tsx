@@ -32,7 +32,11 @@ const security = {
 const { http, notifications } = core;
 
 const wrapper: WrapperComponent<void> = ({ children }) => (
-  <UserProfilesKibanaProvider core={core} security={security}>
+  <UserProfilesKibanaProvider
+    core={core}
+    security={security}
+    toMountPoint={() => () => () => undefined}
+  >
     {children}
   </UserProfilesKibanaProvider>
 );

@@ -21,7 +21,11 @@ import type {
 import { AppNavLinkStatus } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n-react';
-import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import {
+  KibanaContextProvider,
+  KibanaThemeProvider,
+  toMountPoint,
+} from '@kbn/kibana-react-plugin/public';
 import { Router } from '@kbn/shared-ux-router';
 import { UserProfilesKibanaProvider } from '@kbn/user-profile-components';
 
@@ -103,6 +107,7 @@ export const Providers: FunctionComponent<ProvidersProps> = ({
                   security={{
                     userProfiles: securityApiClients.userProfiles,
                   }}
+                  toMountPoint={toMountPoint}
                 >
                   {children}
                 </UserProfilesKibanaProvider>
