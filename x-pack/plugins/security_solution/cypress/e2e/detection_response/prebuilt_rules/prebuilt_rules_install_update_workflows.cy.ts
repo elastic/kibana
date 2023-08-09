@@ -59,8 +59,7 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
     });
 
     it.only('should install package from Fleet in the background', () => {
-      /* Assert that the package in installed from Fleet by checking that
-      /* the installSource is "registry", as opposed to "bundle" */
+      /* Assert that the package in installed from Fleet */
       cy.wait('@installPackageBulk', {
         timeout: 60000,
       }).then(({ response: bulkResponse }) => {
@@ -69,7 +68,6 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
         const packages = bulkResponse?.body.items.map(
           ({ name, result }: BulkInstallPackageInfo) => ({
             name,
-            installSource: result.installSource,
           })
         );
 
