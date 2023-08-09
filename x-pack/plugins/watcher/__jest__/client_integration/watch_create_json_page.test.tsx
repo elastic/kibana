@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React from 'react';
 import { act } from 'react-dom/test-utils';
 
 import { getExecuteDetails } from '../../__fixtures__';
@@ -16,12 +17,29 @@ import { WATCH } from './helpers/jest_constants';
 
 const { setup } = pageHelpers.watchCreateJsonPage;
 
+jest.mock('@kbn/kibana-react-plugin/public', () => {
+  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
+  return {
+    ...original,
+    // Mocking CodeEditor, which uses React Monaco under the hood
+    CodeEditor: (props: any) => (
+      <input
+        data-test-subj={props['data-test-subj'] || 'mockCodeEditor'}
+        data-currentvalue={props.value}
+        onChange={(e: any) => {
+          props.onChange(e.jsonContent);
+        }}
+      />
+    ),
+  };
+});
+
 describe('<JsonWatchEditPage /> create route', () => {
   const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
   let testBed: WatchCreateJsonTestBed;
 
   beforeAll(() => {
-    jest.useFakeTimers({ legacyFakeTimers: true });
+    jest.useFakeTimers();
   });
 
   afterAll(() => {
@@ -30,7 +48,10 @@ describe('<JsonWatchEditPage /> create route', () => {
 
   describe('on component mount', () => {
     beforeEach(async () => {
-      testBed = await setup(httpSetup);
+      await act(async () => {
+        testBed = await setup(httpSetup);
+      });
+
       testBed.component.update();
     });
 
@@ -47,13 +68,13 @@ describe('<JsonWatchEditPage /> create route', () => {
         expect(find('tab').map((t) => t.text())).toEqual(['Edit', 'Simulate']);
       });
 
-      test('should navigate to the "Simulate" tab', () => {
+      test('should navigate to the "Simulate" tab', async () => {
         const { exists, actions } = testBed;
 
         expect(exists('jsonWatchForm')).toBe(true);
         expect(exists('jsonWatchSimulateForm')).toBe(false);
 
-        actions.selectTab('simulate');
+        await actions.selectTab('simulate');
 
         expect(exists('jsonWatchForm')).toBe(false);
         expect(exists('jsonWatchSimulateForm')).toBe(true);
@@ -62,19 +83,19 @@ describe('<JsonWatchEditPage /> create route', () => {
 
     describe('create', () => {
       describe('form validation', () => {
-        test('should not allow empty ID field', () => {
+        test('should not allow empty ID field', async () => {
           const { form, actions } = testBed;
           form.setInputValue('idInput', '');
 
-          actions.clickSubmitButton();
+          await actions.clickSubmitButton();
 
           expect(form.getErrorsMessages()).toContain('ID is required');
         });
-        test('should not allow invalid characters for ID field', () => {
+        test('should not allow invalid characters for ID field', async () => {
           const { form, actions } = testBed;
           form.setInputValue('idInput', 'invalid$id*field/');
 
-          actions.clickSubmitButton();
+          await actions.clickSubmitButton();
 
           expect(form.getErrorsMessages()).toContain(
             'ID can only contain letters, underscores, dashes, periods and numbers.'
@@ -90,9 +111,7 @@ describe('<JsonWatchEditPage /> create route', () => {
           form.setInputValue('nameInput', watch.name);
           form.setInputValue('idInput', watch.id);
 
-          await act(async () => {
-            actions.clickSubmitButton();
-          });
+          await actions.clickSubmitButton();
 
           const DEFAULT_LOGGING_ACTION_ID = 'logging_1';
           const DEFAULT_LOGGING_ACTION_TYPE = 'logging';
@@ -125,7 +144,7 @@ describe('<JsonWatchEditPage /> create route', () => {
         });
 
         test('should surface the API errors from the "save" HTTP request', async () => {
-          const { form, actions, component, exists, find } = testBed;
+          const { form, actions, exists, find } = testBed;
           const { watch } = WATCH;
 
           form.setInputValue('nameInput', watch.name);
@@ -140,10 +159,7 @@ describe('<JsonWatchEditPage /> create route', () => {
 
           httpRequestsMockHelpers.setSaveWatchResponse(watch.id, undefined, error);
 
-          await act(async () => {
-            actions.clickSubmitButton();
-          });
-          component.update();
+          await actions.clickSubmitButton();
 
           expect(exists('sectionError')).toBe(true);
           expect(find('sectionError').text()).toContain(error.message);
@@ -152,12 +168,13 @@ describe('<JsonWatchEditPage /> create route', () => {
     });
 
     describe('simulate', () => {
-      beforeEach(() => {
+      beforeEach(async () => {
         const { actions, form } = testBed;
 
         // Set watch id (required field) and switch to simulate tab
         form.setInputValue('idInput', WATCH.watch.id);
-        actions.selectTab('simulate');
+
+        await actions.selectTab('simulate');
       });
 
       describe('form payload & API errors', () => {
@@ -167,9 +184,7 @@ describe('<JsonWatchEditPage /> create route', () => {
             watch: { id, type },
           } = WATCH;
 
-          await act(async () => {
-            actions.clickSimulateButton();
-          });
+          await actions.clickSimulateButton();
 
           const actionModes = Object.keys(defaultWatch.actions).reduce(
             (actionAccum: any, action) => {
@@ -202,7 +217,7 @@ describe('<JsonWatchEditPage /> create route', () => {
         });
 
         test('should execute a watch with a valid payload', async () => {
-          const { actions, form, find, exists, component } = testBed;
+          const { actions, form, find, exists } = testBed;
           const {
             watch: { id, type },
           } = WATCH;
@@ -228,10 +243,7 @@ describe('<JsonWatchEditPage /> create route', () => {
             },
           });
 
-          await act(async () => {
-            actions.clickSimulateButton();
-          });
-          component.update();
+          await actions.clickSimulateButton();
 
           const actionModes = Object.keys(defaultWatch.actions).reduce(
             (actionAccum: any, action) => {
@@ -303,7 +315,7 @@ describe('<JsonWatchEditPage /> create route', () => {
                 conditionMet ? 'when the condition is met' : 'when the condition is not met',
                 () => {
                   beforeEach(async () => {
-                    const { actions, component, form } = testBed;
+                    const { actions, form } = testBed;
                     form.setInputValue('actionModesSelect', actionMode);
 
                     httpRequestsMockHelpers.setLoadExecutionResultResponse({
@@ -335,10 +347,7 @@ describe('<JsonWatchEditPage /> create route', () => {
                       },
                     });
 
-                    await act(async () => {
-                      actions.clickSimulateButton();
-                    });
-                    component.update();
+                    await actions.clickSimulateButton();
                   });
 
                   test('should set the correct condition met status', () => {
