@@ -21,11 +21,19 @@ export const dataViewsServiceFactory: DataViewsServiceFactory = () => ({
     new Promise((resolve, reject) =>
       setTimeout(() => {
         if (!currentDataView) {
-          reject(new Error('mock DataViews service currentDataView is undefined, call injectStorybookDataView to set'));
+          reject(
+            new Error(
+              'mock DataViews service currentDataView is undefined, call injectStorybookDataView to set'
+            )
+          );
         } else if (currentDataView.id === dataViewId) {
-          resolve(currentDataView)
+          resolve(currentDataView);
         } else {
-          reject(new Error(`mock DataViews service currentDataView.id: ${currentDataView.id} does not match requested dataViewId: ${dataViewId}`));
+          reject(
+            new Error(
+              `mock DataViews service currentDataView.id: ${currentDataView.id} does not match requested dataViewId: ${dataViewId}`
+            )
+          );
         }
       }, 100)
     ) as unknown) as DataViewsPublicPluginStart['get'],

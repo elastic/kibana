@@ -211,10 +211,12 @@ export class RangeSliderEmbeddable
       if (this.field) {
         this.dispatch.setField(this.field?.toSpec());
       } else {
-        this.onLoadingError(i18n.translate('controls.rangeSlider.errors.fieldNotFound', {
-          defaultMessage: 'Could not locate field: {fieldName}',
-          values: { fieldName },
-        }));
+        this.onLoadingError(
+          i18n.translate('controls.rangeSlider.errors.fieldNotFound', {
+            defaultMessage: 'Could not locate field: {fieldName}',
+            values: { fieldName },
+          })
+        );
       }
     }
 

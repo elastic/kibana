@@ -7,7 +7,7 @@
  */
 
 import { of } from 'rxjs';
-import { ControlGroupInput } from '@kbn/controls-plugin/common';
+import { ControlGroupInput } from '../../../common';
 import { lazyLoadReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
 import { storybookFlightsDataView } from '@kbn/presentation-util-plugin/public/mocks';
 import { RANGE_SLIDER_CONTROL } from '../../../common';
@@ -26,29 +26,25 @@ beforeEach(() => {
       if (type === RANGE_SLIDER_CONTROL) return new RangeSliderEmbeddableFactory();
     });
 
-  pluginServices.getServices().data.searchSource.create = jest
-    .fn()
-    .mockImplementation(() => {
-      let isAggsRequest = false;
-      return {
-        setField: (key) => {
-          if (key === 'aggs') {
-            isAggsRequest = true;
-          }
-        },
-        fetch$: () => {
-          return isAggsRequest
-            ? 
-              of({
-                rawResponse: { aggregations: { minAgg: { value: 0 }, maxAgg: { value: 1000 } } },
-              })
-            : 
-              of({
-                rawResponse: { hits: { total: { value: totalResults  } } },
-              });
+  pluginServices.getServices().data.searchSource.create = jest.fn().mockImplementation(() => {
+    let isAggsRequest = false;
+    return {
+      setField: (key) => {
+        if (key === 'aggs') {
+          isAggsRequest = true;
         }
-      };
-    });
+      },
+      fetch$: () => {
+        return isAggsRequest
+          ? of({
+              rawResponse: { aggregations: { minAgg: { value: 0 }, maxAgg: { value: 1000 } } },
+            })
+          : of({
+              rawResponse: { hits: { total: { value: totalResults } } },
+            });
+      },
+    };
+  });
 });
 
 describe('initialize', () => {
@@ -89,10 +85,12 @@ describe('initialize', () => {
 
       // await redux dispatch
       await new Promise((resolve) => process.nextTick(resolve));
-      
+
       const reduxState = slider.getState();
       expect(reduxState.output.loading).toBe(false);
-      expect(reduxState.componentState.error).toBe('mock DataViews service currentDataView is undefined, call injectStorybookDataView to set');
+      expect(reduxState.componentState.error).toBe(
+        'mock DataViews service currentDataView is undefined, call injectStorybookDataView to set'
+      );
     });
 
     test('should set error message when field can not be found', async () => {
@@ -164,8 +162,8 @@ describe('initialize', () => {
           AvgTicketPrice: {
             gte: 150,
             lte: 300,
-          }
-        }
+          },
+        },
       });
       expect(reduxState.componentState.isInvalid).toBe(false);
       expect(reduxState.componentState.min).toBe(0);
@@ -199,14 +197,12 @@ describe('initialize', () => {
 
       injectStorybookDataView(storybookFlightsDataView);
 
-      pluginServices.getServices().data.searchSource.create = jest
-        .fn()
-        .mockImplementation(() => ({
-            setField: () => {},
-            fetch$: () => {
-              throw new Error('Simulated _search request error')
-            },
-          }));
+      pluginServices.getServices().data.searchSource.create = jest.fn().mockImplementation(() => ({
+        setField: () => {},
+        fetch$: () => {
+          throw new Error('Simulated _search request error');
+        },
+      }));
 
       const slider = await container.addRangeSliderControl({
         id: '34a689e9',
