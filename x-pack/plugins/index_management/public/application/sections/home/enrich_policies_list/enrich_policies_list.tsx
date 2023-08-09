@@ -12,6 +12,7 @@ import { EuiSpacer, EuiText, EuiLink } from '@elastic/eui';
 import { APP_WRAPPER_CLASS, useExecutionContext } from '../../../../shared_imports';
 import { useAppContext } from '../../../app_context';
 
+import { documentationService } from '../../../services/documentation';
 import { useLoadEnrichPolicies } from '../../../services/api';
 import { PageLoading, PageError } from '../../../../shared_imports';
 import { PoliciesTable } from './policies_table';
@@ -31,7 +32,7 @@ export const EnrichPoliciesList = () => {
   const [policyToDelete, setPolicyToDelete] = useState<string | undefined>();
   const [policyToExecute, setPolicyToExecute] = useState<string | undefined>();
 
-  const { error, isLoading, data, resendRequest: reload } = useLoadEnrichPolicies();
+  const { error, isLoading, data, resendRequest: reloadPolicies } = useLoadEnrichPolicies();
 
   if (isLoading) {
     return (
@@ -60,15 +61,18 @@ export const EnrichPoliciesList = () => {
   }
 
   return (
-    <div className={`${APP_WRAPPER_CLASS} im-snapshotTestSubject`} data-test-subj="indicesList">
+    <div className={APP_WRAPPER_CLASS} data-test-subj="enrichPoliciesList">
       <EuiText color="subdued">
         <FormattedMessage
           id="xpack.idxMgmt.enrich_policies.list.descriptionTitle"
           defaultMessage="Enrich policies allow you to enrich your data by adding context via additional data. {learnMoreLink}"
           values={{
             learnMoreLink: (
-              <EuiLink href={'/todo'} target="_blank" external>
-                Learn more
+              <EuiLink href={documentationService.getEnrichApisLink()} target="_blank" external>
+                <FormattedMessage
+                  id="xpack.idxMgmt.enrich_policies.list.docsLink"
+                  defaultMessage="Learn more"
+                />
               </EuiLink>
             ),
           }}
@@ -78,7 +82,7 @@ export const EnrichPoliciesList = () => {
 
       <PoliciesTable
         policies={serializeEnrichmentPolicies(data.policies)}
-        onReloadClick={reload}
+        onReloadClick={reloadPolicies}
         onDeletePolicyClick={setPolicyToDelete}
         onExecutePolicyClick={setPolicyToExecute}
       />
@@ -88,8 +92,7 @@ export const EnrichPoliciesList = () => {
           policyToDelete={policyToDelete}
           callback={(deleteResponse) => {
             if (deleteResponse?.hasDeletedPolicy) {
-              // reload policies list
-              reload();
+              reloadPolicies();
             }
             setPolicyToDelete(undefined);
           }}
@@ -101,8 +104,7 @@ export const EnrichPoliciesList = () => {
           policyToExecute={policyToExecute}
           callback={(executeResponse) => {
             if (executeResponse?.hasExecutedPolicy) {
-              // reload policies list
-              reload();
+              reloadPolicies();
             }
             setPolicyToExecute(undefined);
           }}
