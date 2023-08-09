@@ -8,6 +8,7 @@
 import React, { FC, useContext, useState, useEffect, useMemo } from 'react';
 import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
 import type { Field, Aggregation, AggFieldPair } from '@kbn/ml-anomaly-utils';
+import { EVENT_RATE_FIELD_ID } from '@kbn/ml-anomaly-utils';
 import { FieldStatsInfoButton } from '../../../../../../../components/field_stats_flyout/field_stats_info_button';
 import { JobCreatorContext } from '../../../job_creator_context';
 import { useFieldStatsTrigger } from '../../../../../../../components/field_stats_flyout/use_field_stats_trigger';
@@ -55,7 +56,8 @@ export const AggSelect: FC<Props> = ({ fields, changeHandler, selectedOptions, r
           // for more robust rendering
           label: (
             <FieldStatsInfoButton
-              isEmpty={!populatedFields?.has(f.name)}
+              hideTrigger={f.id === EVENT_RATE_FIELD_ID}
+              isEmpty={f.id === EVENT_RATE_FIELD_ID ? false : !populatedFields?.has(f.name)}
               field={f}
               label={f.name}
               onButtonClick={handleFieldStatsButtonClick}

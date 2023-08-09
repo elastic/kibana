@@ -13,7 +13,8 @@ import type { FieldStatsProps } from '@kbn/unified-field-list/src/components/fie
 import { useEffect } from 'react';
 import { getProcessedFields } from '@kbn/ml-data-grid';
 import { stringHash } from '@kbn/ml-string-hash';
-import { BehaviorSubject, lastValueFrom } from 'rxjs';
+import { lastValueFrom } from 'rxjs';
+import { useRef } from 'react';
 import { getMergedSampleDocsForPopulatedFieldsQuery } from './populated_fields/get_merged_populated_fields_query';
 import { useMlKibana } from '../../contexts/kibana';
 import { FieldStatsFlyout } from './field_stats_flyout';
@@ -48,67 +49,76 @@ export const FieldStatsFlyoutProvider: FC<{
     [isFieldStatsFlyoutVisible]
   );
   const [manager] = useState(new PopulatedFieldsCacheManager());
-  const [populatedFields$] = useState(new BehaviorSubject<Set<string>>(new Set()));
+  const [populatedFields, setPopulatedFields] = useState<Set<string> | undefined>();
+  const abortController = useRef(new AbortController());
 
-  useEffect(() => {
-    if (disablePopulatedFields) return;
-    const abortController = new AbortController();
+  useEffect(
+    function fetchSampleDocsEffect() {
+      if (disablePopulatedFields) return;
 
-    const queryAndRunTimeMappings = getMergedSampleDocsForPopulatedFieldsQuery({
-      searchQuery: dslQuery,
-      runtimeFields: dataView.getRuntimeMappings(),
-      datetimeField: dataView.getTimeField()?.name,
-      timeRange: timeRangeMs,
-    });
-    const indexPattern = dataView.getIndexPattern();
-    const esSearchRequestParams = {
-      index: indexPattern,
-      body: {
-        fields: ['*'],
-        _source: false,
-        ...queryAndRunTimeMappings,
-        size: 1000,
-      },
-    };
-    const cacheKey = stringHash(JSON.stringify(esSearchRequestParams)).toString();
+      const queryAndRunTimeMappings = getMergedSampleDocsForPopulatedFieldsQuery({
+        searchQuery: dslQuery,
+        runtimeFields: dataView.getRuntimeMappings(),
+        datetimeField: dataView.getTimeField()?.name,
+        timeRange: timeRangeMs,
+      });
+      const indexPattern = dataView.getIndexPattern();
+      const esSearchRequestParams = {
+        index: indexPattern,
+        body: {
+          fields: ['*'],
+          _source: false,
+          ...queryAndRunTimeMappings,
+          size: 1000,
+        },
+      };
+      const cacheKey = stringHash(JSON.stringify(esSearchRequestParams)).toString();
 
-    const fetchSampleDocuments = async function () {
-      try {
-        const resp = await lastValueFrom(
-          search.search(
-            {
-              params: esSearchRequestParams,
-            },
-            { abortSignal: abortController.signal }
-          )
-        );
+      const fetchSampleDocuments = async function () {
+        try {
+          const resp = await lastValueFrom(
+            search.search(
+              {
+                params: esSearchRequestParams,
+              },
+              { abortSignal: abortController.current.signal }
+            )
+          );
 
-        const docs = resp.rawResponse.hits.hits.map((d) => getProcessedFields(d.fields ?? {}));
+          const docs = resp.rawResponse.hits.hits.map((d) => getProcessedFields(d.fields ?? {}));
 
-        // Get all field names for each returned doc and flatten it
-        // to a list of unique field names used across all docs.
-        // const allDataViewFields = getFieldsFromKibanaIndexPattern(dataView);
-        const fieldsWithData = new Set(docs.map(Object.keys).flat(1));
-        manager.set(cacheKey, fieldsWithData);
-        populatedFields$.next(fieldsWithData);
-      } catch (e) {
-        // eslint-disable-next-line no-console
-        console.error(
-          `An error occurred fetching sample documents to determine populated field stats.
+          // Get all field names for each returned doc and flatten it
+          // to a list of unique field names used across all docs.
+          const fieldsWithData = new Set(docs.map(Object.keys).flat(1));
+          manager.set(cacheKey, fieldsWithData);
+          setPopulatedFields(fieldsWithData);
+        } catch (e) {
+          if (e.name !== 'AbortError') {
+            // eslint-disable-next-line no-console
+            console.error(
+              `An error occurred fetching sample documents to determine populated field stats.
           \nQuery:\n${JSON.stringify(esSearchRequestParams)}
           \nError:${e}`
-        );
-      }
-    };
+            );
+          }
+        }
+      };
 
-    const cachedResult = manager.get(cacheKey);
-    if (cachedResult) {
-      return cachedResult;
-    } else {
-      fetchSampleDocuments();
-    }
+      const cachedResult = manager.get(cacheKey);
+      if (cachedResult) {
+        return cachedResult;
+      } else {
+        fetchSampleDocuments();
+      }
+
+      return () => {
+        abortController.current.abort();
+        abortController.current = new AbortController();
+      };
+    },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [JSON.stringify({ query: dslQuery, dataViewId: dataView.id, timeRangeMs })]);
+    [JSON.stringify({ dslQuery, dataViewId: dataView.id, timeRangeMs })]
+  );
 
   return (
     <MLFieldStatsFlyoutContext.Provider
@@ -121,7 +131,7 @@ export const FieldStatsFlyoutProvider: FC<{
         setFieldValue,
         fieldValue,
         timeRangeMs,
-        populatedFields$,
+        populatedFields,
       }}
     >
       <FieldStatsFlyout

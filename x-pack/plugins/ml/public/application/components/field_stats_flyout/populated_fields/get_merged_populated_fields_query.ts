@@ -27,19 +27,6 @@ export const getMergedSampleDocsForPopulatedFieldsQuery = ({
 } => {
   let rangeFilter;
 
-  // if (timeRangeMs) {
-  //   return {
-  //     from: moment(timeRangeMs.from).toISOString(),
-  //     to: moment(timeRangeMs.to).toISOString(),
-  //   };
-  // }
-  //
-  // // If time range is available via jobCreator, use that
-  // // else mimic Discover and set timeRange to be now for data view without time field
-  // const now = moment();
-  // return { from: now.toISOString(), to: now.toISOString() };
-
-  console.log(`--@@searchQuery`, searchQuery);
   if (timeRange && datetimeField !== undefined) {
     if (isPopulatedObject(timeRange, ['from', 'to']) && timeRange.to > timeRange.from) {
       rangeFilter = {
@@ -59,7 +46,6 @@ export const getMergedSampleDocsForPopulatedFieldsQuery = ({
       ? getDefaultDSLQuery()
       : searchQuery
   );
-  console.log(`--@@query`, query);
 
   if (rangeFilter && isPopulatedObject<string, estypes.QueryDslBoolQuery>(query, ['bool'])) {
     if (Array.isArray(query.bool.filter)) {

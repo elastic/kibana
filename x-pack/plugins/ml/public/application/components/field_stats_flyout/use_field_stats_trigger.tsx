@@ -8,7 +8,6 @@
 import React, { ReactNode, useCallback } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import type { Field } from '@kbn/ml-anomaly-utils';
-import useObservable from 'react-use/lib/useObservable';
 import { optionCss } from './eui_combo_box_with_field_stats';
 import { useFieldStatsFlyoutContext } from '.';
 import { FieldForStats, FieldStatsInfoButton } from './field_stats_info_button';
@@ -17,7 +16,7 @@ interface Option extends EuiComboBoxOptionOption<string> {
 }
 
 export const useFieldStatsTrigger = () => {
-  const { setIsFlyoutVisible, setFieldName, populatedFields$ } = useFieldStatsFlyoutContext();
+  const { setIsFlyoutVisible, setFieldName, populatedFields } = useFieldStatsFlyoutContext();
 
   const closeFlyout = useCallback(() => setIsFlyoutVisible(false), [setIsFlyoutVisible]);
 
@@ -31,9 +30,6 @@ export const useFieldStatsTrigger = () => {
     [setFieldName, setIsFlyoutVisible]
   );
 
-  const populatedFields = useObservable(populatedFields$);
-
-  console.log(`--@@populatedFields`, populatedFields);
   const renderOption = useCallback(
     (option: EuiComboBoxOptionOption, searchValue: string): ReactNode => {
       const field = (option as Option).field;

@@ -9,7 +9,8 @@ import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip, EuiText } from '@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { FieldIcon } from '@kbn/react-field';
-import { EVENT_RATE_FIELD_ID, type Field } from '@kbn/ml-anomaly-utils';
+import { type Field } from '@kbn/ml-anomaly-utils';
+import { useCurrentThemeVars } from '../../contexts/kibana';
 import { getKbnFieldIconType } from '../../../../common/util/get_field_icon_types';
 
 export type FieldForStats = Pick<Field, 'id' | 'type'>;
@@ -19,6 +20,7 @@ export const FieldStatsInfoButton = ({
   onButtonClick,
   disabled,
   isEmpty = false,
+  hideTrigger = false,
 }: {
   field: FieldForStats;
   label: string;
@@ -26,49 +28,62 @@ export const FieldStatsInfoButton = ({
   disabled?: boolean;
   isEmpty?: boolean;
   onButtonClick?: (field: FieldForStats) => void;
+  hideTrigger?: boolean;
 }) => {
-  const isDisabled = disabled === true || field.id === EVENT_RATE_FIELD_ID;
+  const themeVars = useCurrentThemeVars();
+  const emptyMessage = isEmpty
+    ? ' ' +
+      i18n.translate('xpack.ml.newJob.wizard.fieldContextPopover.inspectFieldStatsTooltip', {
+        defaultMessage: '(no data in 1000 sample records)',
+      })
+    : '';
   return (
     <EuiFlexGroup gutterSize="none" alignItems="center">
       <EuiFlexItem grow={false}>
-        <EuiToolTip
-          content={i18n.translate(
-            'xpack.ml.newJob.wizard.fieldContextPopover.inspectFieldStatsTooltip',
-            {
-              defaultMessage: 'Inspect field statistics',
+        {!hideTrigger ? (
+          <EuiToolTip
+            content={
+              i18n.translate(
+                'xpack.ml.newJob.wizard.fieldContextPopover.inspectFieldStatsTooltip',
+                {
+                  defaultMessage: 'Inspect field statistics',
+                }
+              ) + emptyMessage
             }
-          )}
-        >
-          <EuiButtonIcon
-            data-test-subj={`mlInspectFieldStatsButton-${field.id}`}
-            // Only disable the button if explicitly disabled
-            disabled={isDisabled}
-            size="xs"
-            iconType="inspect"
-            css={{ color: isEmpty ? 'gray' : undefined }}
-            onClick={(ev: React.MouseEvent<HTMLButtonElement>) => {
-              if (ev.type === 'click') {
-                ev.currentTarget.focus();
-              }
-              ev.preventDefault();
-              ev.stopPropagation();
+          >
+            <EuiButtonIcon
+              data-test-subj={`mlInspectFieldStatsButton-${field.id}`}
+              // Only disable the button if explicitly disabled
+              disabled={disabled === true}
+              size="xs"
+              iconType="inspect"
+              css={{ color: isEmpty ? themeVars.euiTheme.euiColorDisabled : undefined }}
+              onClick={(ev: React.MouseEvent<HTMLButtonElement>) => {
+                if (ev.type === 'click') {
+                  ev.currentTarget.focus();
+                }
+                ev.preventDefault();
+                ev.stopPropagation();
 
-              if (onButtonClick) {
-                onButtonClick(field);
+                if (onButtonClick) {
+                  onButtonClick(field);
+                }
+              }}
+              aria-label={
+                i18n.translate(
+                  'xpack.ml.newJob.wizard.fieldContextPopover.inspectFieldStatsTooltipArialabel',
+                  {
+                    defaultMessage: 'Inspect field statistics',
+                  }
+                ) + emptyMessage
               }
-            }}
-            aria-label={i18n.translate(
-              'xpack.ml.newJob.wizard.fieldContextPopover.inspectFieldStatsTooltipArialabel',
-              {
-                defaultMessage: 'Inspect field statistics',
-              }
-            )}
-          />
-        </EuiToolTip>
+            />
+          </EuiToolTip>
+        ) : null}
       </EuiFlexItem>
-      <EuiFlexItem grow={false} css={{ paddingRight: '4px' }}>
+      <EuiFlexItem grow={false} css={{ paddingRight: themeVars.euiTheme.euiSizeXS }}>
         <FieldIcon
-          color={isEmpty ? 'gray' : undefined}
+          color={isEmpty ? themeVars.euiTheme.euiColorDisabled : undefined}
           type={getKbnFieldIconType(field.type)}
           fill="none"
         />

@@ -10,14 +10,10 @@ type UpdatedTimestamp = number;
 
 const DEFAULT_EXPIRATION_MS = 60000;
 export class PopulatedFieldsCacheManager {
-  private _expirationDurationMs = DEFAULT_EXPIRATION_MS; // duration in ms
-
   private _resultsCache = new Map<StringifiedQueryKey, any>();
-  _lastUpdatedTimestamps = new Map<StringifiedQueryKey, UpdatedTimestamp>();
+  private readonly _lastUpdatedTimestamps = new Map<StringifiedQueryKey, UpdatedTimestamp>();
 
-  constructor(expirationMs = DEFAULT_EXPIRATION_MS) {
-    this._expirationDurationMs = expirationMs;
-  }
+  constructor(private readonly _expirationDurationMs = DEFAULT_EXPIRATION_MS) {}
 
   private clearOldCacheIfNeeded() {
     if (this._resultsCache.size > 10) {
@@ -36,12 +32,13 @@ export class PopulatedFieldsCacheManager {
   }
 
   public get(key: StringifiedQueryKey) {
-    this.clearExpiredCache(key);
     return this._resultsCache.get(key);
   }
 
   public set(key: StringifiedQueryKey, value: any) {
+    this.clearExpiredCache(key);
     this.clearOldCacheIfNeeded();
+
     this._resultsCache.set(key, Date.now());
     this._resultsCache.set(key, value);
   }
