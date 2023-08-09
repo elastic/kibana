@@ -29,15 +29,14 @@ import { CoverageOverviewRuleListHeader } from './shared_components/popover_list
 import { CoverageOverviewMitreTechniquePanel } from './technique_panel';
 import * as i18n from './translations';
 import { RuleLink } from '../../components/rules_table/use_columns';
+import { useCoverageOverviewDashboardContext } from './coverage_overview_page';
 
 export interface CoverageOverviewMitreTechniquePanelPopoverProps {
   technique: CoverageOverviewMitreTechnique;
-  isExpanded: boolean;
 }
 
 const CoverageOverviewMitreTechniquePanelPopoverComponent = ({
   technique,
-  isExpanded,
 }: CoverageOverviewMitreTechniquePanelPopoverProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [isEnableButtonLoading, setIsDisableButtonLoading] = useState(false);
@@ -48,6 +47,10 @@ const CoverageOverviewMitreTechniquePanelPopoverComponent = ({
     () => technique.disabledRules.length === 0,
     [technique.disabledRules.length]
   );
+
+  const {
+    state: { showExpandedCells },
+  } = useCoverageOverviewDashboardContext();
 
   const handleEnableAllDisabled = useCallback(async () => {
     setIsDisableButtonLoading(true);
@@ -62,7 +65,7 @@ const CoverageOverviewMitreTechniquePanelPopoverComponent = ({
       setIsPopoverOpen={setIsPopoverOpen}
       isPopoverOpen={isPopoverOpen}
       technique={technique}
-      isExpanded={isExpanded}
+      isExpanded={showExpandedCells}
       coveredSubtechniques={coveredSubtechniques}
     />
   );

@@ -105,3 +105,38 @@ export const CoverageOverviewLegendRulesLabel = i18n.translate(
     defaultMessage: 'rules',
   }
 );
+
+export const CoverageOverviewEnabledRuleStatus = i18n.translate(
+  'xpack.securitySolution.coverageOverviewDashboard.enabledRuleStatus',
+  {
+    defaultMessage: 'Enabled rules',
+  }
+);
+
+export const CoverageOverviewDisabledRuleStatus = i18n.translate(
+  'xpack.securitySolution.coverageOverviewDashboard.disabledRuleStatus',
+  {
+    defaultMessage: 'Disabled rules',
+  }
+);
+
+export const CoverageOverviewElasticRuleType = i18n.translate(
+  'xpack.securitySolution.coverageOverviewDashboard.elasticRuleType',
+  {
+    defaultMessage: 'Elastic rules',
+  }
+);
+
+export const CoverageOverviewCustomizedRuleType = i18n.translate(
+  'xpack.securitySolution.coverageOverviewDashboard.customizedRuleType',
+  {
+    defaultMessage: 'Elastic customized rules',
+  }
+);
+
+export const CoverageOverviewCustomRuleType = i18n.translate(
+  'xpack.securitySolution.coverageOverviewDashboard.customRuleType',
+  {
+    defaultMessage: 'Custom rules',
+  }
+);

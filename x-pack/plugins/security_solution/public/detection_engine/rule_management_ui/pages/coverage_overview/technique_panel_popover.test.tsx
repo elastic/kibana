@@ -28,7 +28,7 @@ const renderTechniquePanelPopover = (
 ) => {
   return render(
     <TestProviders>
-      <CoverageOverviewMitreTechniquePanelPopover technique={technique} isExpanded={isExpanded} />
+      <CoverageOverviewMitreTechniquePanelPopover technique={technique} />
     </TestProviders>
   );
 };
