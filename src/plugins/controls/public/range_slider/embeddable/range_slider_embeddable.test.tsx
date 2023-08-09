@@ -77,11 +77,11 @@ describe('initialize', () => {
 
       injectStorybookDataView(undefined);
 
-      const slider = await container.addRangeSliderControl({
+      const slider = (await container.addRangeSliderControl({
         dataViewId: 'demoDataFlights',
         fieldName: 'AvgTicketPrice',
         value: ['150', '300'],
-      }) as RangeSliderEmbeddable;
+      })) as RangeSliderEmbeddable;
 
       // await redux dispatch
       await new Promise((resolve) => process.nextTick(resolve));
@@ -100,11 +100,11 @@ describe('initialize', () => {
 
       injectStorybookDataView(storybookFlightsDataView);
 
-      const slider = await container.addRangeSliderControl({
+      const slider = (await container.addRangeSliderControl({
         dataViewId: 'demoDataFlights',
         fieldName: 'myField',
         value: ['150', '300'],
-      }) as RangeSliderEmbeddable;
+      })) as RangeSliderEmbeddable;
 
       // await redux dispatch
       await new Promise((resolve) => process.nextTick(resolve));
@@ -122,11 +122,11 @@ describe('initialize', () => {
       injectStorybookDataView(storybookFlightsDataView);
       totalResults = 0;
 
-      const slider = await container.addRangeSliderControl({
+      const slider = (await container.addRangeSliderControl({
         dataViewId: 'demoDataFlights',
         fieldName: 'AvgTicketPrice',
         value: ['150', '300'],
-      }) as RangeSliderEmbeddable;
+      })) as RangeSliderEmbeddable;
 
       // await redux dispatch
       await new Promise((resolve) => process.nextTick(resolve));
@@ -143,11 +143,11 @@ describe('initialize', () => {
 
       injectStorybookDataView(storybookFlightsDataView);
 
-      const slider = await container.addRangeSliderControl({
+      const slider = (await container.addRangeSliderControl({
         dataViewId: 'demoDataFlights',
         fieldName: 'AvgTicketPrice',
         value: ['150', '300'],
-      }) as RangeSliderEmbeddable;
+      })) as RangeSliderEmbeddable;
 
       // await redux dispatch
       await new Promise((resolve) => process.nextTick(resolve));

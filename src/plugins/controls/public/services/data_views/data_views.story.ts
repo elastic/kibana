@@ -40,9 +40,9 @@ export const dataViewsServiceFactory: DataViewsServiceFactory = () => ({
   getIdsWithTitle: (() =>
     new Promise((resolve) =>
       setTimeout(() => {
-        const idsWithTitle: Array<{ id: string | undefined, title: string }> = []
+        const idsWithTitle: Array<{ id: string | undefined; title: string }> = [];
         if (currentDataView) {
-          idsWithTitle.push({ id: currentDataView.id, title: currentDataView.title })
+          idsWithTitle.push({ id: currentDataView.id, title: currentDataView.title });
         }
         resolve(idsWithTitle);
       }, 100)
