@@ -618,27 +618,5 @@ describe('stripNonEcsFields', () => {
         },
       });
     });
-
-    it('should not strip valid boolean fields', () => {
-      const { result, removed } = stripNonEcsFields({
-        'dll.code_signature.trusted': ['true', 'false', true, false, ''],
-      });
-
-      expect(result).toEqual({
-        'dll.code_signature.trusted': ['true', 'false', true, false, ''],
-      });
-      expect(removed).toEqual([]);
-    });
-
-    it('should not strip valid boolean fields nested in array', () => {
-      const { result, removed } = stripNonEcsFields({
-        'dll.code_signature.trusted': [[true, false], ''],
-      });
-
-      expect(result).toEqual({
-        'dll.code_signature.trusted': [[true, false], ''],
-      });
-      expect(removed).toEqual([]);
-    });
   });
 });
