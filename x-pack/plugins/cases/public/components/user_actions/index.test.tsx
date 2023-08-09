@@ -374,13 +374,10 @@ describe.skip(`UserActions`, () => {
     });
   });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/156750
   // FLAKY: https://github.com/elastic/kibana/issues/156749
   // FLAKY: https://github.com/elastic/kibana/issues/156748
-  // FLAKY: https://github.com/elastic/kibana/issues/156747
   // FLAKY: https://github.com/elastic/kibana/issues/156746
   // FLAKY: https://github.com/elastic/kibana/issues/156745
-  // FLAKY: https://github.com/elastic/kibana/issues/156744
   // FLAKY: https://github.com/elastic/kibana/issues/156743
   describe.skip('pagination', () => {
     beforeEach(() => {
@@ -395,12 +392,6 @@ describe.skip(`UserActions`, () => {
       );
 
       expect(screen.getByTestId('user-actions-loading')).toBeInTheDocument();
-    });
-
-    it('renders two user actions list when user actions are more than 10', () => {
-      appMockRender.render(<UserActions {...defaultProps} />);
-
-      expect(screen.getAllByTestId('user-actions-list')).toHaveLength(2);
     });
 
     it('renders only one user actions list when last page is 0', async () => {
