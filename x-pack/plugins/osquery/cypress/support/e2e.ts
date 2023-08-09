@@ -31,8 +31,8 @@ import type { ServerlessRoleName } from '../../../../test_serverless/shared/lib'
 export {};
 
 import 'cypress-react-selector';
+import { login } from '../tasks/login';
 // import './coverage';
-import { login } from '../../../../test_serverless/functional/test_suites/security/cypress/tasks/login';
 
 registerCypressGrep();
 
@@ -67,7 +67,7 @@ Cypress.Commands.add(
   () => cy.get('body').click(0, 0) // 0,0 here are the x and y coordinates
 );
 
-Cypress.Commands.add('loginKibana', (role?: ServerlessRoleName) => login(role));
+Cypress.Commands.add('loginKibana', login);
 
 // Alternatively you can use CommonJS syntax:
 // require('./commands')

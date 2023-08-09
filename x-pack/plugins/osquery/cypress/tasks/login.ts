@@ -70,7 +70,6 @@ export const login: CyLoginTask = (
 
   if (user && user !== 'elastic') {
     return cy.task('loadUserAndRole', { name: user }).then((loadedUser) => {
-      console.log({ loadedUser });
       username = loadedUser.username;
       password = loadedUser.password;
 
