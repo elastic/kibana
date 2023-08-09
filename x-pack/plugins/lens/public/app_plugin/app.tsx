@@ -289,6 +289,7 @@ export function App({
         },
       });
     }
+
     breadcrumbs.push({ text: currentDocTitle });
     if (serverless?.setBreadcrumbs) {
       serverless.setBreadcrumbs(breadcrumbs, { absolute: true });
