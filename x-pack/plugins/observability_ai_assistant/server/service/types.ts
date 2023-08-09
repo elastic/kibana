@@ -29,6 +29,12 @@ export interface IObservabilityAIAssistantClient {
   delete: (conversationId: string) => Promise<void>;
   recall: (query: string) => Promise<{ entries: KnowledgeBaseEntry[] }>;
   summarise: (options: { entry: Omit<KnowledgeBaseEntry, '@timestamp'> }) => Promise<void>;
+  getKnowledgeBaseStatus: () => Promise<{
+    ready: boolean;
+    error?: any;
+    deployment_state?: string;
+    allocation_state?: string;
+  }>;
   setupKnowledgeBase: () => Promise<void>;
 }
 

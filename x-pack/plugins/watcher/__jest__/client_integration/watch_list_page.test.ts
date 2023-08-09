@@ -76,6 +76,14 @@ describe('<WatchListPage />', () => {
           testBed.component.update();
         });
 
+        test('should show error callout if search is invalid', async () => {
+          const { exists, actions } = testBed;
+
+          actions.searchWatches('or');
+
+          expect(exists('watcherListSearchError')).toBe(true);
+        });
+
         test('should retain the search query', async () => {
           const { table, actions } = testBed;
 

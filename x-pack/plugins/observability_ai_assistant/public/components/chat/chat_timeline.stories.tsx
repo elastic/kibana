@@ -100,7 +100,7 @@ const defaultProps: ComponentProps<typeof Component> = {
       loading: true,
     }),
   ],
-  onEdit: () => {},
+  onEdit: async () => {},
   onFeedback: () => {},
   onRegenerate: () => {},
   onStopGenerating: () => {},

@@ -51,7 +51,11 @@ export interface PendingMessage {
 
 export interface ObservabilityAIAssistantService {
   isEnabled: () => boolean;
-  chat: (options: { messages: Message[]; connectorId: string }) => Observable<PendingMessage>;
+  chat: (options: {
+    messages: Message[];
+    connectorId: string;
+    knowledgeBaseAvailable: boolean;
+  }) => Observable<PendingMessage>;
   callApi: ObservabilityAIAssistantAPIClient;
   getCurrentUser: () => Promise<AuthenticatedUser>;
   getContexts: () => ContextDefinition[];

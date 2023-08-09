@@ -18,6 +18,7 @@ import type {
   ChatCompletionRequestMessage,
   CreateChatCompletionRequest,
 } from 'openai';
+import pRetry from 'p-retry';
 import { v4 } from 'uuid';
 import {
   type KnowledgeBaseEntry,
@@ -318,42 +319,96 @@ export class ObservabilityAIAssistantClient implements IObservabilityAIAssistant
     }
   };
 
+  getKnowledgeBaseStatus = async () => {
+    try {
+      const modelStats = await this.dependencies.esClient.ml.getTrainedModelsStats({
+        model_id: ELSER_MODEL_ID,
+      });
+      const elserModelStats = modelStats.trained_model_stats[0];
+      const deploymentState = elserModelStats.deployment_stats?.state;
+      const allocationState = elserModelStats.deployment_stats?.allocation_status.state;
+      return {
+        ready: deploymentState === 'started' && allocationState === 'fully_allocated',
+        deployment_state: deploymentState,
+        allocation_state: allocationState,
+      };
+    } catch (error) {
+      return {
+        error: error instanceof errors.ResponseError ? error.body.error : String(error),
+        ready: false,
+      };
+    }
+  };
+
   setupKnowledgeBase = async () => {
     // if this fails, it's fine to propagate the error to the user
-    await this.dependencies.esClient.ml.putTrainedModel({
-      model_id: ELSER_MODEL_ID,
-      input: {
-        field_names: ['text_field'],
-      },
-    });
+
+    const installModel = async () => {
+      this.dependencies.logger.info('Installing ELSER model');
+      await this.dependencies.esClient.ml.putTrainedModel(
+        {
+          model_id: ELSER_MODEL_ID,
+          input: {
+            field_names: ['text_field'],
+          },
+          // @ts-expect-error
+          wait_for_completion: true,
+        },
+        { requestTimeout: '20m' }
+      );
+      this.dependencies.logger.info('Finished installing ELSER model');
+    };
+
+    try {
+      const getResponse = await this.dependencies.esClient.ml.getTrainedModels({
+        model_id: ELSER_MODEL_ID,
+        include: 'definition_status',
+      });
+
+      if (!getResponse.trained_model_configs[0]?.fully_defined) {
+        this.dependencies.logger.info('Model is not fully defined');
+        await installModel();
+      }
+    } catch (error) {
+      if (
+        error instanceof errors.ResponseError &&
+        error.body.error.type === 'resource_not_found_exception'
+      ) {
+        await installModel();
+      } else {
+        throw error;
+      }
+    }
 
     try {
       await this.dependencies.esClient.ml.startTrainedModelDeployment({
         model_id: ELSER_MODEL_ID,
+        wait_for: 'fully_allocated',
       });
-
-      const modelStats = await this.dependencies.esClient.ml.getTrainedModelsStats({
-        model_id: ELSER_MODEL_ID,
-      });
-
-      const elserModelStats = modelStats.trained_model_stats[0];
-
-      if (elserModelStats?.deployment_stats?.state !== 'started') {
-        throwKnowledgeBaseNotReady({
-          message: `Deployment has not started`,
-          deployment_stats: elserModelStats.deployment_stats,
-        });
-      }
-      return;
     } catch (error) {
-      if (
-        (error instanceof errors.ResponseError &&
-          error.body.error.type === 'resource_not_found_exception') ||
-        error.body.error.type === 'status_exception'
-      ) {
-        throwKnowledgeBaseNotReady(error.body);
+      if (error instanceof errors.ResponseError && error.body.error.type === 'status_exception') {
+        await pRetry(
+          async () => {
+            const response = await this.dependencies.esClient.ml.getTrainedModelsStats({
+              model_id: ELSER_MODEL_ID,
+            });
+
+            if (
+              response.trained_model_stats[0]?.deployment_stats?.allocation_status.state ===
+              'fully_allocated'
+            ) {
+              return Promise.resolve();
+            }
+
+            this.dependencies.logger.debug('Model is not allocated yet');
+
+            return Promise.reject(new Error('Not Ready'));
+          },
+          { factor: 1, minTimeout: 10000, maxRetryTime: 20 * 60 * 1000 }
+        );
+      } else {
+        throw error;
       }
-      throw error;
     }
   };
 }

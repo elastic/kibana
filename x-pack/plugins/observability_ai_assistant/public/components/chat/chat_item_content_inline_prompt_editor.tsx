@@ -21,7 +21,7 @@ interface Props {
     | undefined;
   loading: boolean;
   editing: boolean;
-  onSubmit: (newPrompt: Message) => void;
+  onSubmit: (message: Message) => Promise<void>;
 }
 export function ChatItemContentInlinePromptEditor({
   content,
@@ -39,7 +39,7 @@ export function ChatItemContentInlinePromptEditor({
       initialPrompt={content}
       initialFunctionPayload={functionCall?.arguments}
       initialSelectedFunctionName={functionCall?.name}
-      onSubmit={async (newPrompt: Message) => onSubmit(newPrompt)}
+      onSubmit={onSubmit}
     />
   );
 }

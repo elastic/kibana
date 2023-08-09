@@ -6,9 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectsRouter } from '../types';
-import { registerFindRoute } from './find';
+import type { ServerlessPluginStart } from '@kbn/serverless/public';
 
-export const registerRoutes = (router: SavedObjectsRouter) => {
-  registerFindRoute(router);
-};
+export interface DashboardServerlessService {
+  setBreadcrumbs?: ServerlessPluginStart['setBreadcrumbs'];
+}

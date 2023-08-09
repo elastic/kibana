@@ -69,7 +69,7 @@ export function buildFunctionChatItem(params: Omit<ChatItemBuildProps, 'role'>) 
   return buildChatItem({
     role: MessageRole.User,
     title: 'executed a function',
-    functionCall: {
+    function_call: {
       name: 'leftpad',
       arguments: '{ foo: "bar" }',
       trigger: MessageRole.Assistant,

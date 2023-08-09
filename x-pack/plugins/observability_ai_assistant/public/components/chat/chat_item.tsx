@@ -22,10 +22,10 @@ import { ChatItemControls } from './chat_item_controls';
 import { ChatTimelineItem } from './chat_timeline';
 import { getRoleTranslation } from '../../utils/get_role_translation';
 import type { Feedback } from '../feedback_buttons';
-import type { Message } from '../../../common';
+import { Message } from '../../../common';
 
 export interface ChatItemProps extends ChatTimelineItem {
-  onEditSubmit: (newMessage: Message) => void;
+  onEditSubmit: (message: Message) => Promise<void>;
   onFeedbackClick: (feedback: Feedback) => void;
   onRegenerateClick: () => void;
   onStopGeneratingClick: () => void;
@@ -34,6 +34,10 @@ export interface ChatItemProps extends ChatTimelineItem {
 const normalMessageClassName = css`
   .euiCommentEvent__body {
     padding: 0;
+  }
+  /* targets .*euiTimelineItemEvent-top, makes sure text properly wraps and doesn't overflow */
+  > :last-child {
+    overflow-x: hidden;
   }
 `;
 
@@ -68,7 +72,7 @@ export function ChatItem({
   currentUser,
   element,
   error,
-  functionCall,
+  function_call: functionCall,
   loading,
   role,
   title,
@@ -107,9 +111,9 @@ export function ChatItem({
     setEditing(!editing);
   };
 
-  const handleInlineEditSubmit = (newPrompt: Message) => {
+  const handleInlineEditSubmit = (message: Message) => {
     handleToggleEdit();
-    onEditSubmit(newPrompt);
+    return onEditSubmit(message);
   };
 
   const handleCopyToClipboard = () => {
