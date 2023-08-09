@@ -48,15 +48,6 @@ export function ApmRuleKqlFilter({
     [onFilterChange]
   );
 
-  // const onToggleKqlFilter = (e: EuiSwitchEvent) => {
-  //     setRuleParams('serviceName', undefined);
-  //     setRuleParams('transactionType', undefined);
-  //     setRuleParams('transactionName', undefined);
-  //     setRuleParams('environment', ENVIRONMENT_ALL.value);
-  //     setRuleParams('filterQuery', undefined);
-  //     setRuleParams('useFilterQuery', e.target.checked);
-  // };
-
   const useKqlFilter = (
     <>
       <EuiSwitch

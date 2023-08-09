@@ -25,7 +25,6 @@ interface Props {
   defaultParams: Record<string, any>;
   fields: React.ReactNode[];
   groupAlertsBy?: React.ReactNode;
-  // useKqlFilter?: React.ReactNode;
   kqlFilter?: React.ReactNode;
   chartPreview?: React.ReactNode;
   minimumWindowSize?: MinimumWindowSize;
@@ -35,7 +34,6 @@ export function ApmRuleParamsContainer(props: Props) {
   const {
     fields,
     groupAlertsBy,
-    // useKqlFilter,
     kqlFilter,
     setRuleParams,
     defaultParams,
@@ -68,7 +66,6 @@ export function ApmRuleParamsContainer(props: Props) {
       )}
 
       <EuiSpacer size="l" />
-      {/* {useKqlFilter} */}
       {kqlFilter}
       <EuiFlexGrid gutterSize="l" direction="row" columns={2}>
         {fields.map((field, index) => (

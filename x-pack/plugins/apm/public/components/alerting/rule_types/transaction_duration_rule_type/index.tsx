@@ -273,76 +273,10 @@ export function TransactionDurationRuleType(props: Props) {
     />,
   ];
 
-  // const FILTER_TYPING_DEBOUNCE_MS = 500;
-
-  // const { dataView: derivedIndexPattern } = useApmDataView();
-
-  // const onFilterChange = useCallback(
-  //   (filter: string) => {
-  //     setRuleParams('filterQuery', filter);
-  //   },
-  //   [setRuleParams]
-  // );
-
-  // /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  // const debouncedOnFilterChange = useCallback(
-  //   debounce(onFilterChange, FILTER_TYPING_DEBOUNCE_MS),
-  //   [onFilterChange]
-  // );
-
-  // const onToggleKqlFilter = (e: EuiSwitchEvent) => {
-  //   setRuleParams('serviceName', undefined);
-  //   setRuleParams('transactionType', undefined);
-  //   setRuleParams('transactionName', undefined);
-  //   setRuleParams('environment', ENVIRONMENT_ALL.value);
-  //   setRuleParams('filterQuery', undefined);
-  //   setRuleParams('useFilterQuery', e.target.checked);
-  // };
-
   const fields = [
     ...(!ruleParams.useFilterQuery ? filterFields : []),
     ...criteriaFields,
   ];
-
-  // const useKqlFilter = (
-  //   <>
-  //     <EuiSwitch
-  //       label={i18n.translate(
-  //         'xpack.apm.rules.transactionDuration.useKqlFilter',
-  //         {
-  //           defaultMessage: 'Use KQL Filter',
-  //         }
-  //       )}
-  //       checked={ruleParams.useFilterQuery ? ruleParams.useFilterQuery : false}
-  //       onChange={onToggleKqlFilter}
-  //     />
-  //     <EuiSpacer size={'m'} />
-  //   </>
-  // );
-
-  // const kqlFilter = ruleParams.useFilterQuery ? (
-  //   <>
-  //     <EuiFormRow
-  //       label={i18n.translate('xpack.apm.rules.ruleFlyout.filterLabel', {
-  //         defaultMessage: 'Filter',
-  //       })}
-  //       helpText={i18n.translate('xpack.apm.rules.ruleFlyout.filterHelpText', {
-  //         defaultMessage:
-  //           'Use a KQL expression to limit the scope of your alert trigger.',
-  //       })}
-  //       fullWidth
-  //       display="rowCompressed"
-  //     >
-  //       <ApmKueryBar
-  //         derivedIndexPattern={derivedIndexPattern}
-  //         onChange={debouncedOnFilterChange}
-  //         onSubmit={onFilterChange}
-  //         value={ruleParams.filterQuery}
-  //       />
-  //     </EuiFormRow>
-  //     <EuiSpacer size={'m'} />
-  //   </>
-  // ) : null;
 
   const groupAlertsBy = (
     <>
@@ -404,7 +338,6 @@ export function TransactionDurationRuleType(props: Props) {
       defaultParams={params}
       fields={fields}
       groupAlertsBy={groupAlertsBy}
-      // useKqlFilter={useKqlFilter}
       kqlFilter={kqlFilter}
       setRuleParams={setRuleParams}
       setRuleProperty={setRuleProperty}
