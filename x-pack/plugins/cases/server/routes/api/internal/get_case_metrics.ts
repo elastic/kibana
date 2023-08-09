@@ -6,7 +6,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { SingleCaseMetricsFeatureField } from '../../../../common/api';
+
+import type { metricsApiV1 } from '../../../../common/types/api';
 
 import { INTERNAL_CASE_METRICS_DETAILS_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
@@ -30,15 +31,18 @@ export const getCaseMetricRoute = createCasesRoute({
     try {
       const caseContext = await context.cases;
       const client = await caseContext.getCasesClient();
-      const { features } = request.query;
+      const { features } = request.query as metricsApiV1.SingleCaseMetricsRequest;
 
-      return response.ok({
-        body: await client.metrics.getCaseMetrics({
+      const responseBody: metricsApiV1.SingleCaseMetricsResponse =
+        await client.metrics.getCaseMetrics({
           caseId: request.params.case_id,
           features: Array.isArray(features)
-            ? (features as SingleCaseMetricsFeatureField[])
-            : [features as SingleCaseMetricsFeatureField],
-        }),
+            ? (features as metricsApiV1.SingleCaseMetricsFeatureField[])
+            : [features as metricsApiV1.SingleCaseMetricsFeatureField],
+        });
+
+      return response.ok({
+        body: responseBody,
       });
     } catch (error) {
       throw createCaseError({

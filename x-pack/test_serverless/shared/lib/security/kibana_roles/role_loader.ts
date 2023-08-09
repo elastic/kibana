@@ -16,6 +16,7 @@ import {
   getServerlessSecurityKibanaRoleDefinitions,
   ServerlessSecurityRoles,
 } from './kibana_roles';
+import { STANDARD_HTTP_HEADERS } from '../default_http_headers';
 
 const ignoreHttp409Error = (error: AxiosError) => {
   if (error?.response?.status === 409) {
@@ -24,10 +25,6 @@ const ignoreHttp409Error = (error: AxiosError) => {
 
   throw error;
 };
-
-const DEFAULT_HEADERS = Object.freeze({
-  'x-elastic-internal-product': 'security-solution',
-});
 
 export interface LoadedRoleAndUser {
   role: string;
@@ -80,7 +77,7 @@ export class RoleAndUserLoader<R extends Record<string, Role> = Record<string, R
         method: 'PUT',
         path: `/api/security/role/${roleName}`,
         headers: {
-          ...DEFAULT_HEADERS,
+          ...STANDARD_HTTP_HEADERS,
         },
         body: roleDefinition,
       })
@@ -112,7 +109,7 @@ export class RoleAndUserLoader<R extends Record<string, Role> = Record<string, R
         method: 'POST',
         path: `/internal/security/users/${username}`,
         headers: {
-          ...DEFAULT_HEADERS,
+          ...STANDARD_HTTP_HEADERS,
         },
         body: user,
       })

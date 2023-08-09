@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CaseMetricsFeature } from '@kbn/cases-plugin/common/api';
+import { CaseMetricsFeature } from '@kbn/cases-plugin/common';
 
 export const CASE_ACTIONS = '[data-test-subj="property-actions-ellipses"]';
 

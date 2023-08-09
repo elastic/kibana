@@ -110,7 +110,7 @@ export interface Selector {
 export interface Response {
   match: string[];
   exclude?: string[];
-  actions: ResponseAction[];
+  actions?: ResponseAction[];
 
   // non yaml fields
   type: SelectorType;
