@@ -64,7 +64,6 @@ export abstract class Embeddable<
 
   constructor(input: TEmbeddableInput, output: TEmbeddableOutput, parent?: IContainer) {
     this.id = input.id;
-    this.input = input;
 
     this.output = {
       title: getPanelTitle(input, output),
@@ -163,14 +162,13 @@ export abstract class Embeddable<
     lastExplicitInput: Partial<TEmbeddableInput>
   ): Promise<boolean> {
     const currentExplicitInput = this.getExplicitInput();
-    const isEqual =
+    return (
       genericEmbeddableInputIsEqual(lastExplicitInput, currentExplicitInput) &&
       fastIsEqual(
         omitGenericEmbeddableInput(lastExplicitInput),
         omitGenericEmbeddableInput(currentExplicitInput)
-      );
-
-    return isEqual;
+      )
+    );
   }
 
   public getExplicitInput() {

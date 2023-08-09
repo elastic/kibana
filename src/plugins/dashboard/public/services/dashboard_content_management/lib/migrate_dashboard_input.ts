@@ -10,7 +10,7 @@ import {
   runEmbeddableFactoryMigrations,
   EmbeddableFactoryNotFoundError,
 } from '@kbn/embeddable-plugin/public';
-import { ControlGroupInput, CONTROL_GROUP_TYPE } from '@kbn/controls-plugin/common';
+import { ControlGroupInput } from '@kbn/controls-plugin/common';
 
 import { type DashboardEmbeddableService } from '../../embeddable/types';
 import { DashboardContainerInput, DashboardPanelState } from '../../../../common';
@@ -28,17 +28,11 @@ export const migrateDashboardInput = (
   let anyMigrationRun = false;
   if (!dashboardInput) return dashboardInput;
   if (dashboardInput.controlGroupInput) {
-    const controlGroupFactory = embeddable.getEmbeddableFactory(CONTROL_GROUP_TYPE);
-    if (!controlGroupFactory) throw new EmbeddableFactoryNotFoundError(CONTROL_GROUP_TYPE);
-    const { input: migratedControlGroupInput, migrationRun: controlGroupMigrationRun } =
-      runEmbeddableFactoryMigrations<ControlGroupInput>(
-        {
-          ...dashboardInput.controlGroupInput,
-        },
-        controlGroupFactory
-      );
-    dashboardInput.controlGroupInput = migratedControlGroupInput;
-    if (controlGroupMigrationRun) anyMigrationRun = true;
+    /**
+     * If any Control Group migrations are required, we will need to start storing a Control Group Input version
+     * string in Dashboard Saved Objects and then running the whole Control Group input through the embeddable
+     * factory migrations here.
+     */
 
     // Migrate all of the Control children as well.
     const migratedControls: ControlGroupInput['panels'] = {};
@@ -67,7 +61,7 @@ export const migrateDashboardInput = (
       );
       if (panelMigrationRun) anyMigrationRun = true;
       panel.explicitInput = newInput as DashboardPanelState['explicitInput'];
-    } else {
+    } else if (factory.latestVersion) {
       // by reference panels are always considered to be of the latest version
       panel.explicitInput.version = factory.latestVersion;
     }
