@@ -228,7 +228,7 @@ export class PluginsSystem<T extends PluginType> {
     while (this.satupPlugins.length > 0) {
       const pluginName = this.satupPlugins.pop()!;
 
-      this.log.debug(`Stopping plugin "${pluginName}"...`);
+      this.log.info(`Stopping plugin "${pluginName}"...`);
 
       const resultMaybe = await withTimeout({
         promise: this.plugins.get(pluginName)!.stop(),

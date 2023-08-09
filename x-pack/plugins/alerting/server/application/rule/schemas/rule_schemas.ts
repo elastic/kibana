@@ -46,6 +46,7 @@ export const ruleExecutionStatusSchema = schema.object({
         schema.literal(ruleExecutionStatusErrorReason.TIMEOUT),
         schema.literal(ruleExecutionStatusErrorReason.DISABLED),
         schema.literal(ruleExecutionStatusErrorReason.VALIDATE),
+        schema.literal(ruleExecutionStatusErrorReason.SHUTDOWN),
       ]),
       message: schema.string(),
     })
