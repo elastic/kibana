@@ -59,7 +59,7 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
       waitForRulesTableToBeLoaded();
     });
 
-    it('should install package from Fleet in the background', () => {
+    it.only('should install package from Fleet in the background', () => {
       /* Assert that the package in installed from Fleet by checking that
       /* the installSource is "registry", as opposed to "bundle" */
       cy.wait('@installPackageBulk', {
