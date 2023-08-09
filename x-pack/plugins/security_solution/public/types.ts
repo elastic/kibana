@@ -49,7 +49,6 @@ import type { CloudExperimentsPluginStart } from '@kbn/cloud-experiments-plugin/
 import type { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
 import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
-import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 
 import type { RouteProps } from 'react-router-dom';
 import type { DiscoverStart } from '@kbn/discover-plugin/public';
