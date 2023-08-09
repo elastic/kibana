@@ -7,11 +7,7 @@
  */
 
 import * as React from 'react';
-import {
-  EuiPageTemplate,
-  EuiPageSection,
-  EuiPageHeader,
-} from '@elastic/eui';
+import { EuiPageTemplate, EuiPageSection, EuiPageHeader } from '@elastic/eui';
 
 export interface PageProps {
   title?: React.ReactNode;
@@ -21,16 +17,12 @@ export interface PageProps {
 export const Page: React.FC<PageProps> = ({ title = 'Untitled', sidebar, children }) => {
   return (
     <EuiPageTemplate panelled={true} offset={0} grow={true}>
-      <EuiPageTemplate.Sidebar>
-        {sidebar}
-      </EuiPageTemplate.Sidebar>
+      <EuiPageTemplate.Sidebar>{sidebar}</EuiPageTemplate.Sidebar>
       <EuiPageTemplate.Header>
         <EuiPageHeader pageTitle={title} />
       </EuiPageTemplate.Header>
       <EuiPageTemplate.Section>
-        <EuiPageSection style={{ maxWidth: 800, margin: '0 auto' }}>
-          {children}
-        </EuiPageSection>
+        <EuiPageSection style={{ maxWidth: 800, margin: '0 auto' }}>{children}</EuiPageSection>
       </EuiPageTemplate.Section>
     </EuiPageTemplate>
   );
