@@ -15,7 +15,7 @@ import '@kbn/core-app-status-plugin/public/types';
 const getKibanaUrl = (pathname?: string, search?: string) =>
   Url.format({
     protocol: 'http:',
-    hostname: process.env.TEST_KIBANA_HOST || 'localhost',
+    hostname: process.env.TEST_KIBANA_HOST || '127.0.0.1',
     port: process.env.TEST_KIBANA_PORT || '5620',
     pathname,
     search,

@@ -13,7 +13,7 @@ export default function ({ getService }) {
   // Failing: See https://github.com/elastic/kibana/issues/131192
   describe.skip('kibana server with ssl', () => {
     it('redirects http requests at redirect port to https', async () => {
-      const host = process.env.TEST_KIBANA_HOST || 'localhost';
+      const host = process.env.TEST_KIBANA_HOST || '127.0.0.1';
       const port = process.env.TEST_KIBANA_PORT || '5620';
       const url = `https://${host}:${port}/`;
 

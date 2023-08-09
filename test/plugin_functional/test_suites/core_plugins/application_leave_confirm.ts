@@ -13,7 +13,7 @@ import { PluginFunctionalProviderContext } from '../../services';
 const getKibanaUrl = (pathname?: string, search?: string) =>
   url.format({
     protocol: 'http:',
-    hostname: process.env.TEST_KIBANA_HOST || 'localhost',
+    hostname: process.env.TEST_KIBANA_HOST || '127.0.0.1',
     port: process.env.TEST_KIBANA_PORT || '5620',
     pathname,
     search,
