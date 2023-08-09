@@ -11,14 +11,11 @@ import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { FormulaConfig, XYLayerOptions } from '@kbn/lens-embeddable-utils';
 import { buildCombinedHostsFilter } from '../../../../../utils/filters/build';
 import type { Layer } from '../../../../../hooks/use_lens_attributes';
 import { HostMetricsDocsLink, LensChart, type LensChartProps } from '../../../../lens';
-import {
-  type FormulaConfig,
-  hostLensFormulas,
-  type XYLayerOptions,
-} from '../../../../../common/visualizations';
+import { hostLensFormulas } from '../../../../../common/visualizations';
 import { METRIC_CHART_HEIGHT } from '../../../constants';
 
 type DataViewOrigin = 'logs' | 'metrics';
