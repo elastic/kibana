@@ -110,7 +110,7 @@ export const startRiskScoringTask = async ({
       schedule: {
         interval,
       },
-      state: defaultState,
+      state: defaultState, // TODO get space, add to state
       params: { version: VERSION },
     });
   } catch (e) {
