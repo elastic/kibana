@@ -11,17 +11,13 @@ import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common';
 import { useKibana } from '../../utils/kibana_react';
 import { sloKeys } from './query_key_factory';
 
-type SloId = string;
+type SloIdAndInstanceId = [string, string];
 
 interface Params {
-  sloIds: SloId[];
+  sloIdsAndInstanceIds: SloIdAndInstanceId[];
 }
 
-export interface ActiveAlerts {
-  count: number;
-}
-
-type ActiveAlertsMap = Record<SloId, ActiveAlerts>;
+type ActiveAlertsMap = Record<string, number>;
 
 export interface UseFetchActiveAlerts {
   data: ActiveAlertsMap;
@@ -34,20 +30,21 @@ interface FindApiResponse {
   aggregations: {
     perSloId: {
       buckets: Array<{
-        key: string;
+        key: SloIdAndInstanceId;
+        key_as_string: string;
         doc_count: number;
       }>;
     };
   };
 }
 
-const EMPTY_ACTIVE_ALERTS_MAP = {};
+const EMPTY_ACTIVE_ALERTS_MAP = {} as Record<string, number>;
 
-export function useFetchActiveAlerts({ sloIds = [] }: Params): UseFetchActiveAlerts {
+export function useFetchActiveAlerts({ sloIdsAndInstanceIds = [] }: Params): UseFetchActiveAlerts {
   const { http } = useKibana().services;
 
   const { isInitialLoading, isLoading, isError, isSuccess, isRefetching, data } = useQuery({
-    queryKey: sloKeys.activeAlert(sloIds),
+    queryKey: sloKeys.activeAlert(sloIdsAndInstanceIds),
     queryFn: async ({ signal }) => {
       try {
         const response = await http.post<FindApiResponse>(`${BASE_RAC_ALERTS_API_PATH}/find`, {
@@ -75,21 +72,22 @@ export function useFetchActiveAlerts({ sloIds = [] }: Params): UseFetchActiveAle
                     },
                   },
                 ],
-                should: [
-                  {
-                    terms: {
-                      'kibana.alert.rule.parameters.sloId': sloIds,
-                    },
+                should: sloIdsAndInstanceIds.map(([sloId, instanceId]) => ({
+                  bool: {
+                    filter: [
+                      { term: { 'slo.id': sloId } },
+                      { term: { 'slo.instanceId': instanceId } },
+                    ],
                   },
-                ],
+                })),
                 minimum_should_match: 1,
               },
             },
             aggs: {
               perSloId: {
-                terms: {
-                  size: sloIds.length,
-                  field: 'kibana.alert.rule.parameters.sloId',
+                multi_terms: {
+                  size: sloIdsAndInstanceIds.length,
+                  terms: [{ field: 'slo.id' }, { field: 'slo.instanceId' }],
                 },
               },
             },
@@ -97,15 +95,9 @@ export function useFetchActiveAlerts({ sloIds = [] }: Params): UseFetchActiveAle
           signal,
         });
 
-        return response.aggregations.perSloId.buckets.reduce(
-          (acc, bucket) => ({
-            ...acc,
-            [bucket.key]: {
-              count: bucket.doc_count ?? 0,
-            } as ActiveAlerts,
-          }),
-          {}
-        );
+        return response.aggregations.perSloId.buckets.reduce((acc, bucket) => {
+          return { ...acc, [bucket.key_as_string]: bucket.doc_count || 0 };
+        }, {} as Record<string, number>);
       } catch (error) {
         // ignore error
       }

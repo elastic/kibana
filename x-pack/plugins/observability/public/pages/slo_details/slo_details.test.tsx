@@ -27,6 +27,7 @@ import {
 } from '../../data/slo/historical_summary_data';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { buildApmAvailabilityIndicator } from '../../data/slo/indicator';
+import { ALL_VALUE } from '@kbn/slo-schema';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
@@ -299,7 +300,7 @@ describe('SLO Details Page', () => {
     useLicenseMock.mockReturnValue({ hasAtLeast: () => true });
     useFetchActiveAlertsMock.mockReturnValue({
       isLoading: false,
-      data: { [slo.id]: { count: 2, ruleIds: ['rule-1', 'rule-2'] } },
+      data: { [`${slo.id}|${ALL_VALUE}`]: 2 },
     });
 
     render(<SloDetailsPage />);
