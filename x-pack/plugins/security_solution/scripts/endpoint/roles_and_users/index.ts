@@ -9,7 +9,7 @@ import type { RunFn } from '@kbn/dev-cli-runner';
 import { run } from '@kbn/dev-cli-runner';
 import { createRuntimeServices } from '../common/stack_services';
 import type { RolesAndUsersType } from './load_roles_users';
-import { loadRolesAndUsers } from './load_roles_users';
+import { loadRolesAndUsers, SUPPORTED_ROLE_TYPES } from './load_roles_users';
 
 export const cli = () => {
   run(
@@ -36,7 +36,9 @@ export const cli = () => {
         --kibana            The url to Kibana (Default: http://127.0.0.1:5601)
         --elasticsearch     The url to Elasticsearch (Default: http://127.0.0.1:9200)
         --type              The type of roles/users to load. Valid values are:
-                            - serverless: loads roles and users used in the serverless projects
+                            ${Object.entries(SUPPORTED_ROLE_TYPES)
+                              .map(([type, description]) => `- ${type}: ${description}`)
+                              .join(' '.repeat(28))}
       `,
       },
     }

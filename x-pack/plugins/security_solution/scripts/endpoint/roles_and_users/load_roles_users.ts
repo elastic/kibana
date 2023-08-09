@@ -9,9 +9,15 @@ import { ToolingLog } from '@kbn/tooling-log';
 import type { KbnClient } from '@kbn/test';
 import { SecurityRoleAndUserLoader } from '../../../../../test_serverless/shared/lib';
 
-const VALID_TYPES = ['serverless'] as const;
+export const SUPPORTED_ROLE_TYPES = {
+  serverless: 'loads roles and users used in the serverless projects',
+} as const;
 
-export type RolesAndUsersType = typeof VALID_TYPES[number];
+const VALID_TYPES = Object.keys(SUPPORTED_ROLE_TYPES) as ReadonlyArray<
+  keyof typeof SUPPORTED_ROLE_TYPES
+>;
+
+export type RolesAndUsersType = keyof typeof SUPPORTED_ROLE_TYPES;
 
 export const loadRolesAndUsers = async (
   kbnClient: KbnClient,
