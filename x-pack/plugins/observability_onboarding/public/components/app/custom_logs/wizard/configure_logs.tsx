@@ -145,25 +145,25 @@ export function ConfigureLogs() {
       setDatasetName(getFilename(filepath));
     }
   }
-  const isDatasetNameInvalid = datasetNameTouched && isEmpty(datasetName);
+
+  const hasNamingCollision =
+    integrationError && integrationError.type === 'NamingCollision';
+
   const isIntegrationNameInvalid =
-    (integrationNameTouched && isEmpty(integrationName)) ||
-    (integrationError && integrationError.type === 'NamingCollision');
-  const datasetNameError = i18n.translate(
-    'xpack.observability_onboarding.configureLogs.dataset.error',
-    { defaultMessage: 'A dataset name is required.' }
+    (integrationNameTouched &&
+      (isEmpty(integrationName) || !isLowerCase(integrationName))) ||
+    hasNamingCollision;
+
+  const integrationNameError = getIntegrationNameError(
+    integrationName,
+    hasNamingCollision,
+    integrationNameTouched
   );
 
-  const integrationNameError =
-    integrationError && integrationError.type === 'NamingCollision'
-      ? i18n.translate(
-          'xpack.observability_onboarding.configureLogs.integration.namingCollisionError',
-          { defaultMessage: 'An integration with this name already exists.' }
-        )
-      : i18n.translate(
-          'xpack.observability_onboarding.configureLogs.integration.emptyError',
-          { defaultMessage: 'An integration name is required.' }
-        );
+  const isDatasetNameInvalid =
+    datasetNameTouched && (isEmpty(datasetName) || !isLowerCase(datasetName));
+
+  const datasetNameError = getDatasetNameError(datasetName, datasetNameTouched);
 
   return (
     <StepPanel
@@ -584,7 +584,7 @@ export function ConfigureLogs() {
         {hasFailedCreatingIntegration && integrationError && (
           <>
             <EuiSpacer size="l" />
-            {getErrorCallout(integrationError)}
+            {getIntegrationErrorCallout(integrationError)}
           </>
         )}
       </StepPanelContent>
@@ -592,7 +592,7 @@ export function ConfigureLogs() {
   );
 }
 
-const getErrorCallout = (integrationError: IntegrationError) => {
+const getIntegrationErrorCallout = (integrationError: IntegrationError) => {
   const title = i18n.translate(
     'xpack.observability_onboarding.configureLogs.integrationCreation.error.title',
     { defaultMessage: 'Sorry, there was an error' }
@@ -618,5 +618,47 @@ const getErrorCallout = (integrationError: IntegrationError) => {
           <p>{integrationError.message}</p>
         </EuiCallOut>
       );
+  }
+};
+
+const isLowerCase = (str: string) => str.toLowerCase() === str;
+
+const getIntegrationNameError = (
+  integrationName: string,
+  hasNamingCollision: boolean,
+  touched: boolean
+) => {
+  if (touched && isEmpty(integrationName)) {
+    return i18n.translate(
+      'xpack.observability_onboarding.configureLogs.integration.emptyError',
+      { defaultMessage: 'An integration name is required.' }
+    );
+  }
+  if (touched && !isLowerCase(integrationName)) {
+    return i18n.translate(
+      'xpack.observability_onboarding.configureLogs.integration.lowercaseError',
+      { defaultMessage: 'An integration name should be lowercase.' }
+    );
+  }
+  if (hasNamingCollision) {
+    return i18n.translate(
+      'xpack.observability_onboarding.configureLogs.integration.namingCollisionError',
+      { defaultMessage: 'An integration with this name already exists.' }
+    );
+  }
+};
+
+const getDatasetNameError = (datasetName: string, touched: boolean) => {
+  if (touched && isEmpty(datasetName)) {
+    return i18n.translate(
+      'xpack.observability_onboarding.configureLogs.dataset.error',
+      { defaultMessage: 'A dataset name is required.' }
+    );
+  }
+  if (touched && !isLowerCase(datasetName)) {
+    return i18n.translate(
+      'xpack.observability_onboarding.configureLogs.dataset.error',
+      { defaultMessage: 'A dataset name should be lowercase.' }
+    );
   }
 };
