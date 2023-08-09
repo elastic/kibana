@@ -137,7 +137,7 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
       .set('kbn-xsrf', 'xxx')
       .send(job);
   };
-  
+
   const generateCsv = async (
     job: JobParamsCSV,
     username = 'elastic',

@@ -7,7 +7,7 @@
 import { createUsageServices } from '../test_suites/reporting/services/usage';
 import { createScenarios } from '../test_suites/reporting/services/scenarios';
 import { FtrProviderContext } from '../ftr_provider_context';
-import { services as apiIntegrationServices } from '../services'
+import { services as apiIntegrationServices } from '.';
 
 export function ReportingApiProvider(context: FtrProviderContext) {
   return {
