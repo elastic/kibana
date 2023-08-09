@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import { resolve } from 'path';
 import Url from 'url';
-
-import { withProcRunner } from '@kbn/dev-proc-runner';
 
 import { FtrProviderContext } from '../common/ftr_provider_context';
 
@@ -34,28 +31,4 @@ export async function SecuritySolutionConfigurableCypressTestRunner({
     ELASTICSEARCH_USERNAME: config.get('servers.elasticsearch.username'),
     ELASTICSEARCH_PASSWORD: config.get('servers.elasticsearch.password'),
   };
-}
-
-export async function SecuritySolutionCypressCcsTestRunner({ getService }: FtrProviderContext) {
-  const log = getService('log');
-
-  await withProcRunner(log, async (procs) => {
-    await procs.run('cypress', {
-      cmd: 'yarn',
-      args: ['cypress:run:ccs'],
-      cwd: resolve(__dirname, '../../plugins/security_solution'),
-      env: {
-        FORCE_COLOR: '1',
-        CYPRESS_BASE_URL: process.env.TEST_KIBANA_URL,
-        CYPRESS_ELASTICSEARCH_URL: process.env.TEST_ES_URL,
-        CYPRESS_ELASTICSEARCH_USERNAME: process.env.ELASTICSEARCH_USERNAME,
-        CYPRESS_ELASTICSEARCH_PASSWORD: process.env.ELASTICSEARCH_PASSWORD,
-        CYPRESS_CCS_KIBANA_URL: process.env.TEST_KIBANA_URLDATA,
-        CYPRESS_CCS_ELASTICSEARCH_URL: process.env.TEST_ES_URLDATA,
-        CYPRESS_CCS_REMOTE_NAME: process.env.TEST_CCS_REMOTE_NAME,
-        ...process.env,
-      },
-      wait: true,
-    });
-  });
 }
