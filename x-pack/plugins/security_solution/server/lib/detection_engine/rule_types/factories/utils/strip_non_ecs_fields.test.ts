@@ -551,4 +551,94 @@ describe('stripNonEcsFields', () => {
       expect(removed).toEqual([]);
     });
   });
+
+  // geo_point is too complex so we going to skip its validation
+  describe('geo_point field', () => {
+    it('should not strip invalid geo_point field', () => {
+      const { result, removed } = stripNonEcsFields({
+        'client.location.geo': 'invalid geo_point',
+      });
+
+      expect(result).toEqual({
+        'client.location.geo': 'invalid geo_point',
+      });
+      expect(removed).toEqual([]);
+    });
+
+    it('should not strip valid geo_point fields', () => {
+      expect(
+        stripNonEcsFields({
+          'client.geo.location': [0, 90],
+        }).result
+      ).toEqual({
+        'client.geo.location': [0, 90],
+      });
+
+      expect(
+        stripNonEcsFields({
+          'client.geo.location': {
+            type: 'Point',
+            coordinates: [-88.34, 20.12],
+          },
+        }).result
+      ).toEqual({
+        'client.geo.location': {
+          type: 'Point',
+          coordinates: [-88.34, 20.12],
+        },
+      });
+
+      expect(
+        stripNonEcsFields({
+          'client.geo.location': 'POINT (-71.34 41.12)',
+        }).result
+      ).toEqual({
+        'client.geo.location': 'POINT (-71.34 41.12)',
+      });
+
+      expect(
+        stripNonEcsFields({
+          client: {
+            geo: {
+              location: {
+                lat: 41.12,
+                lon: -71.34,
+              },
+            },
+          },
+        }).result
+      ).toEqual({
+        client: {
+          geo: {
+            location: {
+              lat: 41.12,
+              lon: -71.34,
+            },
+          },
+        },
+      });
+    });
+
+    it('should not strip valid boolean fields', () => {
+      const { result, removed } = stripNonEcsFields({
+        'dll.code_signature.trusted': ['true', 'false', true, false, ''],
+      });
+
+      expect(result).toEqual({
+        'dll.code_signature.trusted': ['true', 'false', true, false, ''],
+      });
+      expect(removed).toEqual([]);
+    });
+
+    it('should not strip valid boolean fields nested in array', () => {
+      const { result, removed } = stripNonEcsFields({
+        'dll.code_signature.trusted': [[true, false], ''],
+      });
+
+      expect(result).toEqual({
+        'dll.code_signature.trusted': [[true, false], ''],
+      });
+      expect(removed).toEqual([]);
+    });
+  });
 });
