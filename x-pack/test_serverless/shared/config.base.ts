@@ -78,7 +78,7 @@ export default async () => {
           saml: { 'cloud-saml-kibana': { order: 1, realm: 'cloud-saml-kibana' } },
         })}`,
         // This ensures we can attempt to access the disabled anonymous routes without getting a 401
-        `--xpack.security.authc.http.schemes=${JSON.stringify(['ApiKey', 'Basic', 'Bearer'])}`,
+        // `--xpack.security.authc.http.schemes=${JSON.stringify(['ApiKey', 'Basic', 'Bearer'])}`,
       ],
     },
 
