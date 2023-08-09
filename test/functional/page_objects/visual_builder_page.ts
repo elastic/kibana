@@ -7,7 +7,6 @@
  */
 
 import type { DebugState } from '@elastic/charts';
-import expect from '@kbn/expect';
 import { FtrService } from '../ftr_provider_context';
 import { WebElementWrapper } from '../services/lib/web_element_wrapper';
 
@@ -845,10 +844,14 @@ export class VisualBuilderPageObject extends FtrService {
   ) {
     await this.setMetricsGroupBy('terms');
     await this.common.sleep(1000);
-    const byField = await this.testSubjects.find('groupByField');
-    await this.comboBox.setElement(byField, field);
-    const isSelected = await this.comboBox.isOptionSelected(byField, field);
-    expect(isSelected).to.be(true);
+    await this.retry.try(async () => {
+      const byField = await this.testSubjects.find('groupByField');
+      await this.comboBox.setElement(byField, field);
+      const isSelected = await this.comboBox.isOptionSelected(byField, field);
+      if (!isSelected) {
+        throw new Error(`setMetricsGroupByTerms: failed to set '${field}' field`);
+      }
+    });
     await this.setMetricsGroupByFiltering(filtering.include, filtering.exclude);
   }
 
