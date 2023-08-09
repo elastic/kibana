@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import constate from 'constate';
 import { isEqual, merge } from 'lodash';
-import { useMemo, useReducer } from 'react';
+import React, { useContext, useRef, type FC } from 'react';
+import { createStore, useStore } from 'zustand';
 
 import { i18n } from '@kbn/i18n';
 import { numberValidator } from '@kbn/ml-agg-utils';
 import { getNestedProperty, setNestedProperty } from '@kbn/ml-nested-property';
 
+import { createContext } from 'react';
 import { retentionPolicyMaxAgeInvalidErrorMessage } from '../../../../common/constants/validation_messages';
 import { PostTransformsUpdateRequestSchema } from '../../../../../../common/api_schemas/update_transforms';
 import {
@@ -245,7 +246,7 @@ export const initializeSection = (
   };
 };
 
-export interface EditTransformFlyoutState {
+export interface EditTransformFlyoutFormState {
   apiErrorMessage?: string;
   formFields: EditTransformFlyoutFieldsState;
   formSections: EditTransformFlyoutSectionsState;
@@ -280,7 +281,7 @@ type Action = ApiErrorAction | FormFieldAction | FormSectionAction;
 const getUpdateValue = (
   attribute: EditTransformFormFields,
   config: TransformConfigUnion,
-  formState: EditTransformFlyoutState,
+  formState: EditTransformFlyoutFormState,
   enforceFormValue = false
 ) => {
   const { formFields, formSections } = formState;
@@ -342,7 +343,7 @@ const getUpdateValue = (
 // transform update API endpoint.
 export const applyFormStateToTransformConfig = (
   config: TransformConfigUnion,
-  formState: EditTransformFlyoutState
+  formState: EditTransformFlyoutFormState
 ): PostTransformsUpdateRequestSchema =>
   // Iterates over all form fields and only if necessary applies them to
   // the request object used for updating the transform.
@@ -353,7 +354,7 @@ export const applyFormStateToTransformConfig = (
 
 // Takes in a transform configuration and returns
 // the default state to populate the form.
-export const getDefaultState = (config: TransformConfigUnion): EditTransformFlyoutState => ({
+export const getDefaultState = (config: TransformConfigUnion): EditTransformFlyoutFormState => ({
   formFields: {
     // top level attributes
     description: initializeField('description', 'description', config),
@@ -484,7 +485,7 @@ export const formReducerFactory = (config: TransformConfigUnion) => {
   const defaultFieldValues = getFieldValues(defaultState.formFields);
   const defaultSectionValues = getSectionValues(defaultState.formSections);
 
-  return (state: EditTransformFlyoutState, action: Action): EditTransformFlyoutState => {
+  return (state: EditTransformFlyoutFormState, action: Action): EditTransformFlyoutFormState => {
     const formFields =
       action.name === 'form_field'
         ? {
@@ -525,88 +526,92 @@ interface EditTransformFlyoutOptions {
   dataViewId?: string;
 }
 
-const useEditTransformFlyoutInternal = ({ config, dataViewId }: EditTransformFlyoutOptions) => {
-  const [formState, dispatch] = useReducer(formReducerFactory(config), getDefaultState(config));
+type EditTransformFlyoutStore = ReturnType<typeof createEditTransformFlyoutStore>;
+type EditTransformFlyoutState = {
+  formState: EditTransformFlyoutFormState;
+  actions: {
+    apiError: (payload: ApiErrorAction['payload']) => void;
+    formField: (payload: FormFieldAction['payload']) => void;
+    formSection: (payload: FormSectionAction['payload']) => void;
+  };
+} & EditTransformFlyoutOptions;
 
-  const actions = useMemo(
-    () => ({
-      apiError: (payload: ApiErrorAction['payload']) => dispatch({ name: 'api_error', payload }),
-      formField: (payload: FormFieldAction['payload']) =>
-        dispatch({
-          name: 'form_field',
-          payload,
-        }),
-      formSection: (payload: FormSectionAction['payload']) =>
-        dispatch({ name: 'form_section', payload }),
-    }),
-    []
-  );
+const createEditTransformFlyoutStore = ({ config, dataViewId }: EditTransformFlyoutOptions) => {
+  const reducer = formReducerFactory(config);
+  const initialState = getDefaultState(config);
 
-  const requestConfig = useMemo(
-    () => applyFormStateToTransformConfig(config, formState),
-    [config, formState]
-  );
+  // const isUpdateButtonDisabled = !formState.isFormValid || !formState.isFormTouched;
 
-  const isUpdateButtonDisabled = useMemo(
-    () => !formState.isFormValid || !formState.isFormTouched,
-    [formState.isFormValid, formState.isFormTouched]
-  );
-
-  return { config, dataViewId, formState, actions, requestConfig, isUpdateButtonDisabled };
+  return createStore<EditTransformFlyoutState>()((set) => ({
+    config,
+    dataViewId,
+    formState: initialState,
+    actions: {
+      apiError: (payload) =>
+        set((state) => ({
+          ...state,
+          formState: reducer(state.formState, { name: 'api_error', payload }),
+        })),
+      formField: (payload) =>
+        set((state) => ({
+          ...state,
+          formState: reducer(state.formState, {
+            name: 'form_field',
+            payload,
+          }),
+        })),
+      formSection: (payload) =>
+        set((state) => ({
+          ...state,
+          formState: reducer(state.formState, { name: 'form_section', payload }),
+        })),
+    },
+  }));
 };
 
-// wrap hook with the constate factory to create context provider and custom hooks based on selectors
-const [EditTransformFlyoutProvider, ...editTransformHooks] = constate(
-  useEditTransformFlyoutInternal,
-  (d) => d.config,
-  (d) => d.dataViewId,
-  (d) => d.actions,
-  (d) => d.formState.apiErrorMessage,
-  (d) => d.formState.formSections,
-  (d) => d.formState.formFields.description,
-  (d) => d.formState.formFields.destinationIndex,
-  (d) => d.formState.formFields.docsPerSecond,
-  (d) => d.formState.formFields.frequency,
-  (d) => d.formState.formFields.destinationIngestPipeline,
-  (d) => d.formState.formFields.maxPageSearchSize,
-  (d) => d.formState.formFields.numFailureRetries,
-  (d) => d.formState.formFields.retentionPolicyField,
-  (d) => d.formState.formFields.retentionPolicyMaxAge,
-  (d) => d.requestConfig,
-  (d) => d.isUpdateButtonDisabled
-);
+export const EditTransformFlyoutContext = createContext<EditTransformFlyoutStore | null>(null);
 
-export enum EDIT_TRANSFORM_HOOK_SELECTORS {
-  config,
-  dataViewId,
-  actions,
-  apiErrorMessage,
-  stateFormSection,
-  description,
-  destinationIndex,
-  docsPerSecond,
-  frequency,
-  destinationIngestPipeline,
-  maxPageSearchSize,
-  numFailureRetries,
-  retentionPolicyField,
-  retentionPolicyMaxAge,
-  requestConfig,
-  isUpdateButtonDisabled,
-}
+// Provider wrapper
+type EditTransformFlyoutProviderProps = React.PropsWithChildren<EditTransformFlyoutOptions>;
 
-export type EditTransformHookTextInputSelectors = Extract<
-  keyof typeof EDIT_TRANSFORM_HOOK_SELECTORS,
-  EditTransformFormFields
->;
-
-type EditTransformHookSelectors = keyof typeof EDIT_TRANSFORM_HOOK_SELECTORS;
-type EditTransformHooks = typeof editTransformHooks;
-
-export const useEditTransformFlyout = <K extends EditTransformHookSelectors>(hookKey: K) => {
-  return editTransformHooks[EDIT_TRANSFORM_HOOK_SELECTORS[hookKey]]() as ReturnType<
-    EditTransformHooks[typeof EDIT_TRANSFORM_HOOK_SELECTORS[K]]
-  >;
+export const EditTransformFlyoutProvider: FC<EditTransformFlyoutProviderProps> = ({
+  children,
+  ...props
+}) => {
+  const storeRef = useRef<EditTransformFlyoutStore>();
+  if (!storeRef.current) {
+    storeRef.current = createEditTransformFlyoutStore(props);
+  }
+  return (
+    <EditTransformFlyoutContext.Provider value={storeRef.current}>
+      {children}
+    </EditTransformFlyoutContext.Provider>
+  );
 };
 
-export { EditTransformFlyoutProvider };
+export const useEditTransformFlyout = <T extends keyof EditTransformFlyoutState>(
+  accessor: T
+): EditTransformFlyoutState[T] => {
+  const store = useContext(EditTransformFlyoutContext);
+  if (!store) throw new Error('Missing EditTransformFlyoutContext.Provider in the tree');
+
+  return useStore(store, (s) => s[accessor]);
+};
+
+export const useEditTransformFlyoutFormField = (field: EditTransformFormFields) => {
+  const store = useContext(EditTransformFlyoutContext);
+  if (!store) throw new Error('Missing EditTransformFlyoutContext.Provider in the tree');
+
+  return useStore(store, (s) => s.formState.formFields[field]);
+};
+
+export const useEditTransformFlyoutFormState = <
+  T extends keyof EditTransformFlyoutState['formState']
+>(
+  attr: T
+) => {
+  const store = useContext(EditTransformFlyoutContext);
+  if (!store) throw new Error('Missing EditTransformFlyoutContext.Provider in the tree');
+
+  return useStore(store, (s) => s.formState[attr]);
+};

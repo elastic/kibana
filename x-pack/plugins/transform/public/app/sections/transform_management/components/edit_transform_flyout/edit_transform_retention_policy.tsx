@@ -17,7 +17,11 @@ import { isLatestTransform, isPivotTransform } from '../../../../../../common/ty
 import { useGetTransformsPreview } from '../../../../hooks';
 
 import { EditTransformFlyoutFormTextInput } from './edit_transform_flyout_form_text_input';
-import { useEditTransformFlyout } from './use_edit_transform_flyout';
+import {
+  useEditTransformFlyout,
+  useEditTransformFlyoutFormState,
+  useEditTransformFlyoutFormField,
+} from './use_edit_transform_flyout';
 import { getErrorMessage } from '../../../../../../common/utils/errors';
 
 export const EditTransformRetentionPolicy: FC = () => {
@@ -26,8 +30,8 @@ export const EditTransformRetentionPolicy: FC = () => {
   const toastNotifications = useToastNotifications();
 
   const dataViewId = useEditTransformFlyout('dataViewId');
-  const formSections = useEditTransformFlyout('stateFormSection');
-  const retentionPolicyField = useEditTransformFlyout('retentionPolicyField');
+  const formSections = useEditTransformFlyoutFormState('formSections');
+  const retentionPolicyField = useEditTransformFlyoutFormField('retentionPolicyField');
   const { formField, formSection } = useEditTransformFlyout('actions');
   const requestConfig = useEditTransformFlyout('config');
 

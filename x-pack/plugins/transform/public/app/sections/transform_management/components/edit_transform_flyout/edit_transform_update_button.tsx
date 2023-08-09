@@ -15,16 +15,20 @@ import { getErrorMessage } from '../../../../../../common/utils/errors';
 
 import { useUpdateTransform } from '../../../../hooks';
 
-import { useEditTransformFlyout } from './use_edit_transform_flyout';
+import {
+  applyFormStateToTransformConfig,
+  useEditTransformFlyout,
+} from './use_edit_transform_flyout';
 
 interface EditTransformUpdateButtonProps {
   closeFlyout: () => void;
 }
 
 export const EditTransformUpdateButton: FC<EditTransformUpdateButtonProps> = ({ closeFlyout }) => {
-  const requestConfig = useEditTransformFlyout('requestConfig');
-  const isUpdateButtonDisabled = useEditTransformFlyout('isUpdateButtonDisabled');
   const config = useEditTransformFlyout('config');
+  const formState = useEditTransformFlyout('formState');
+  const requestConfig = applyFormStateToTransformConfig(config, formState);
+  const isUpdateButtonDisabled = !formState.isFormValid || !formState.isFormTouched;
   const { apiError } = useEditTransformFlyout('actions');
 
   const updateTransfrom = useUpdateTransform(config.id, requestConfig);
