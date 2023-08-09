@@ -21,12 +21,18 @@ import type {
 } from './types';
 import { applyEnrichmentsToEvents } from './utils/transforms';
 
-export const enrichEvents: EnrichEventsFunction = async ({ services, logger, events, spaceId }) => {
+export const enrichEvents: EnrichEventsFunction = async ({
+  services,
+  logger,
+  events,
+  spaceId,
+  experimentalFeatures,
+}) => {
   try {
     const enrichments = [];
 
     logger.debug('Alert enrichments started');
-    const isNewRiskScoreModuleAvailable = false;
+    const isNewRiskScoreModuleAvailable = experimentalFeatures?.riskScoringRoutesEnabled ?? false;
 
     const [isHostRiskScoreIndexExist, isUserRiskScoreIndexExist] = await Promise.all([
       getIsHostRiskScoreAvailable({ spaceId, services, isNewRiskScoreModuleAvailable }),
@@ -76,10 +82,11 @@ export const enrichEvents: EnrichEventsFunction = async ({ services, logger, eve
 
 export const createEnrichEventsFunction: CreateEnrichEventsFunction =
   ({ services, logger }) =>
-  (events, { spaceId }: { spaceId: string }) =>
+  (events, { spaceId }: { spaceId: string }, experimentalFeatures) =>
     enrichEvents({
       events,
       services,
       logger,
       spaceId,
+      experimentalFeatures,
     });

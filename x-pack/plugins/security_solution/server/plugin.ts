@@ -239,6 +239,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       ruleExecutionLoggerFactory:
         this.ruleMonitoringService.createRuleExecutionLogClientForExecutors,
       version: pluginContext.env.packageInfo.version,
+      experimentalFeatures: config.experimentalFeatures,
     };
 
     const queryRuleAdditionalOptions: CreateQueryRuleAdditionalOptions = {
