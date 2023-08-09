@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { FormulaConfig } from '@kbn/visualization-utils';
+import type { FormulaConfig } from '../../../types';
 
-export const diskReadThroughput: FormulaConfig = {
-  label: 'Disk Read Throughput',
-  value: "counter_rate(max(system.diskio.read.bytes), kql='system.diskio.read.bytes: *')",
+export const diskSpaceAvailability: FormulaConfig = {
+  label: 'Disk Space Availability',
+  value: '1 - average(system.filesystem.used.pct)',
   format: {
-    id: 'bytes',
+    id: 'percent',
     params: {
-      decimals: 1,
+      decimals: 0,
     },
   },
 };
