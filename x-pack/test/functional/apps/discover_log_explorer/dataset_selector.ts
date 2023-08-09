@@ -399,7 +399,7 @@ export default function (providerContext: FtrProviderContext) {
         });
       });
 
-      describe.only('when click on an integration and moves into the second navigation level', () => {
+      describe('when click on an integration and moves into the second navigation level', () => {
         before(async () => {
           await PageObjects.common.navigateToApp('discover', { hash: '/p/log-explorer' });
         });
