@@ -6,13 +6,13 @@
  */
 
 import { IRouter } from '@kbn/core/server';
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 import { ILicenseState } from '../lib';
 import { verifyAccessAndContext } from './lib';
 import { AlertingRequestHandlerContext, BASE_ALERTING_API_PATH } from '../types';
 
-const paramSchema = schema.object({
-  id: schema.string(),
+const paramSchema = z.object({
+  id: z.string(),
 });
 
 export const deleteRuleRoute = (
@@ -24,6 +24,9 @@ export const deleteRuleRoute = (
       path: `${BASE_ALERTING_API_PATH}/rule/{id}`,
       validate: {
         params: paramSchema,
+      },
+      options: {
+        isZod: true,
       },
     },
     router.handleLegacyErrors(

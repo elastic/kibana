@@ -22,41 +22,26 @@ type RuleTypeParams = [string, [z.ZodTypeAny, z.ZodTypeAny, ...z.ZodTypeAny[]]];
 export class GenerateOasPlugin implements Plugin {
   // private updateSchema: [z.ZodTypeAny, z.ZodTypeAny, ...z.ZodTypeAny[]] | undefined
   // private createSchema: Array<z.infer<typeof createBodySchema> | undefined
-  private updateSchema: OpenAPIV3.SchemaObject | undefined;
-  private createSchema: OpenAPIV3.SchemaObject | undefined;
+  private alerting: OpenAPIV3.PathsObject | undefined;
 
   public setup({ http }: CoreSetup, { alerting }: { alerting: AlertingPluginSetup }) {
     const router = http.createRouter();
     router.get(
       {
-        path: '/oas/alerting/create',
+        path: '/oas/generate',
         validate: {},
       },
       async (context, req, res) => {
-        if (!this.createSchema) throw new Error('paramsSchema is not initialized');
+        if (!this.alerting) throw new Error('alerting schema is not initialized');
 
         return res.ok({
-          body: this.createSchema,
-        });
-      }
-    );
-
-    router.get(
-      {
-        path: '/oas/alerting/update',
-        validate: {},
-      },
-      async (context, req, res) => {
-        if (!this.updateSchema) throw new Error('paramsSchema is not initialized');
-
-        return res.ok({
-          body: this.updateSchema,
+          body: this.alerting,
         });
       }
     );
   }
 
-  public start(core: CoreStart, { alerting }: { alerting: AlertingPluginStart }) {
+  public start(coreStart: CoreStart, { alerting }: { alerting: AlertingPluginStart }) {
     const ruleTypeParams = Array.from(
       alerting.listTypes({ addParamsValidationSchemas: true }).values()
     )
@@ -67,8 +52,28 @@ export class GenerateOasPlugin implements Plugin {
       })
       .filter(Boolean) as unknown as RuleTypeParams;
 
-    this.updateSchema = this.getUpdateSchema(ruleTypeParams);
-    this.createSchema = this.getCreateSchema(ruleTypeParams);
+    this.alerting = {
+      '/api/alerting/rule/{id}': {
+        post: {
+          requestBody: {
+            content: {
+              'application/json': {
+                schema: this.getCreateSchema(ruleTypeParams),
+              },
+            },
+          },
+        },
+        put: {
+          requestBody: {
+            content: {
+              'application/json': {
+                schema: this.getUpdateSchema(ruleTypeParams),
+              },
+            },
+          },
+        },
+      },
+    };
   }
 
   public stop() {}
@@ -78,10 +83,6 @@ export class GenerateOasPlugin implements Plugin {
    * Each rule type has its own schema for the params depending on the rule_type_id.
    */
   private getCreateSchema(ruleTypeParams: RuleTypeParams): OpenAPIV3.SchemaObject {
-    // const schema = ruleTypeParams.reduce((acc, [ruleTypeId, paramsSchema]) => {
-    //   return acc.merge(z.object({ [ruleTypeId]: paramsSchema }));
-    // }, createBodySchema);
-
     const schemas = ruleTypeParams.map(([ruleTypeId, paramsSchema]) => {
       return createBodySchema
         .merge(z.object({ rule_type_id: z.literal(ruleTypeId as string) }))

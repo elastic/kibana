@@ -10,6 +10,7 @@ import Fsp from 'fs/promises';
 import Path from 'path';
 import { run } from '@kbn/dev-cli-runner';
 import { set } from '@kbn/safer-lodash-set';
+import { merge } from 'lodash';
 import { createTestServers } from '@kbn/core-test-helpers-kbn-server';
 import { PLUGIN_SYSTEM_ENABLE_ALL_PLUGINS_CONFIG_PATH } from '@kbn/core-plugins-server-internal/src/constants';
 
@@ -73,25 +74,22 @@ run(
         version: '0.0.0',
       });
 
-      log.info(`Writing OpenAPI spec ${OUTPUT_FILE}...`);
-      await Fsp.writeFile(OUTPUT_FILE, JSON.stringify(spec, null, 2));
-
       const { protocol, hostname, port } = coreStart.http.getServerInfo();
-      const url = `${protocol}://${hostname}:${port}/oas/alerting`;
-
+      const url = `${protocol}://${hostname}:${port}/oas/generate`;
       // TODO: Better way of doing it? Without waiting I get:
       // License is not available, authentication is not possible
       await waitUntilAPIReady(url, log);
 
-      const update = await axios.get(`${url}/update`, {
+      const { data } = await axios.get(url, {
         auth: { username: 'elastic', password: 'changeme' },
       });
-      console.log(JSON.stringify(update.data, null, 2));
 
-      const create = await axios.get(`${url}/create`, {
-        auth: { username: 'elastic', password: 'changeme' },
-      });
-      console.log(JSON.stringify(create.data, null, 2));
+      console.log('data', JSON.stringify(data, null, 2));
+
+      const output = Object.assign({}, spec, { paths: data });
+
+      log.info(`Writing OpenAPI spec ${OUTPUT_FILE}...`);
+      await Fsp.writeFile(OUTPUT_FILE, JSON.stringify(output, null, 2));
 
       log.success('Done!');
       done = true;
