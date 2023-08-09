@@ -5,9 +5,16 @@
  * 2.0.
  */
 
-export { DocumentCountChart } from './document_count_chart';
-export type {
-  BrushSelectionUpdateHandler,
-  BrushSettings,
-  DocumentCountChartProps,
-} from './document_count_chart';
+/**
+ * Log rate histogram item
+ */
+export interface LogRateHistogramItem {
+  /**
+   * Time of bucket
+   */
+  time: number | string;
+  /**
+   * Number of doc count for that time bucket
+   */
+  value: number;
+}
