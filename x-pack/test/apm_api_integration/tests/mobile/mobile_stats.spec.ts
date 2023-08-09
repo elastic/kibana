@@ -122,7 +122,8 @@ async function generateData({
             .transaction('Start View - View Appearing', 'huaweiP2 Activity')
             .errors(
               huaweiP2.crash({ message: 'error' }).timestamp(timestamp),
-              huaweiP2.crash({ message: 'error' }).timestamp(timestamp))
+              huaweiP2.crash({ message: 'error' }).timestamp(timestamp)
+            )
             .timestamp(timestamp)
             .duration(20)
             .success(),
@@ -218,7 +219,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         const { value, timeseries } = response.currentPeriod.crashes;
         const timeseriesTotal = sumBy(timeseries, 'y');
         expect(value).to.be(timeseriesTotal);
-      })
+      });
     });
 
     describe('when filters are applied', () => {
@@ -239,7 +240,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(response.currentPeriod.requests.timeseries.every((item) => item.y === 0)).to.eql(
           true
         );
-        expect(response.currentPeriod.requests.timeseries.every((item)=> item.y === 0)).to.eql(
+        expect(response.currentPeriod.requests.timeseries.every((item) => item.y === 0)).to.eql(
           true
         );
       });
@@ -253,7 +254,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expect(response.currentPeriod.sessions.value).to.eql(3);
         expect(response.currentPeriod.requests.value).to.eql(0);
-        expect(response.currentPeriod.crashes.value).to.eql(1)
+        expect(response.currentPeriod.crashes.value).to.eql(1);
       });
 
       it('returns the correct values when multiple filters are applied', async () => {
@@ -264,8 +265,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expect(response.currentPeriod.sessions.value).to.eql(3);
         expect(response.currentPeriod.requests.value).to.eql(3);
-        expect(response.currentPeriod.crashes.value).to.eql(2)
-
+        expect(response.currentPeriod.crashes.value).to.eql(2);
       });
     });
   });
