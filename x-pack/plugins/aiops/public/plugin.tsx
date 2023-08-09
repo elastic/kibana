@@ -6,23 +6,42 @@
  */
 
 import type { CoreStart, Plugin } from '@kbn/core/public';
+import { type CoreSetup } from '@kbn/core/public';
 import { firstValueFrom } from 'rxjs';
-
-import {
+import type {
   AiopsPluginSetup,
   AiopsPluginSetupDeps,
   AiopsPluginStart,
   AiopsPluginStartDeps,
 } from './types';
+import { getEmbeddableChangePointChart } from './embeddable/embeddable_change_point_chart_component';
 
 export class AiopsPlugin
   implements Plugin<AiopsPluginSetup, AiopsPluginStart, AiopsPluginSetupDeps, AiopsPluginStartDeps>
 {
-  public setup() {
-    return {};
+  public setup(
+    core: CoreSetup<AiopsPluginStartDeps, AiopsPluginStart>,
+    { embeddable, cases, licensing }: AiopsPluginSetupDeps
+  ) {
+    firstValueFrom(licensing.license$).then(async (license) => {
+      if (license.hasAtLeast('platinum')) {
+        if (embeddable) {
+          const { registerEmbeddable } = await import('./embeddable/register_embeddable');
+          registerEmbeddable(core, embeddable);
+        }
+
+        if (cases) {
+          const [coreStart, pluginStart] = await core.getStartServices();
+          const { registerChangePointChartsAttachment } = await import(
+            './cases/register_change_point_charts_attachment'
+          );
+          registerChangePointChartsAttachment(cases, coreStart, pluginStart);
+        }
+      }
+    });
   }
 
-  public start(core: CoreStart, plugins: AiopsPluginStartDeps) {
+  public start(core: CoreStart, plugins: AiopsPluginStartDeps): AiopsPluginStart {
     // importing async to keep the aiops plugin size to a minimum
     Promise.all([
       import('@kbn/ui-actions-plugin/public'),
@@ -42,7 +61,9 @@ export class AiopsPlugin
       }
     });
 
-    return {};
+    return {
+      EmbeddableChangePointChart: getEmbeddableChangePointChart(core, plugins),
+    };
   }
 
   public stop() {}

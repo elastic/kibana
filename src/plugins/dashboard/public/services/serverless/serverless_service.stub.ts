@@ -5,6 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { IRouter, RequestHandlerContext } from '@kbn/core/server';
 
-export type SavedObjectsRouter = IRouter<RequestHandlerContext>;
+import { PluginServiceFactory } from '@kbn/presentation-util-plugin/public';
+import { DashboardServerlessService } from './types';
+
+export type ServerlessServiceFactory = PluginServiceFactory<DashboardServerlessService>;
+
+export const serverlessServiceFactory: ServerlessServiceFactory = () => {
+  return {};
+};
