@@ -682,7 +682,6 @@
     "cssnano": "5.0.0",
     "cypress": "^8.5.0",
     "cypress-axe": "^0.13.0",
-    "cypress-cucumber-preprocessor": "^2.5.2",
     "cypress-file-upload": "^5.0.8",
     "cypress-multi-reporters": "^1.5.0",
     "cypress-pipe": "^2.0.0",
