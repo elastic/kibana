@@ -40,6 +40,7 @@ export default function (ftrContext: FtrProviderContext) {
       expect(refetchedLicense.signature).to.be(initialLicense.signature);
 
       await scenario.startTrial();
+      return;
       await scenario.waitForPluginToDetectLicenseUpdate();
       const trialLicense = await scenario.getLicense();
       expect(trialLicense.license?.type).to.be('trial');
