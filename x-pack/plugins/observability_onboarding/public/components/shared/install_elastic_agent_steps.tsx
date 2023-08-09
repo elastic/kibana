@@ -268,6 +268,7 @@ export function InstallElasticAgentSteps<PlatformId extends string>({
                 <EuiCodeBlock
                   language="yaml"
                   isCopyable
+                  overflowHeight={150}
                   style={{
                     opacity: autoDownloadConfig ? '.5' : '1',
                   }}
