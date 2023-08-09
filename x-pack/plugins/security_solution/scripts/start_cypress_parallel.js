@@ -6,4 +6,5 @@
  */
 
 require('../../../../src/setup_node_env');
+process.env.NODE_OPTIONS = `${process.env.NODE_OPTIONS || ''} --dns-result-order=ipv4first`;
 require('./run_cypress/parallel').cli();
