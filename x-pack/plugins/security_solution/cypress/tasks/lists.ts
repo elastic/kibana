@@ -26,7 +26,11 @@ export const createListsIndex = () => {
 };
 
 export const waitForListsIndex = () => {
-  cy.request({ url: '/api/lists/index', retryOnStatusCodeFailure: true }).then((response) => {
+  cy.request({
+    url: '/api/lists/index',
+    headers: { 'x-elastic-internal-origin': 'security-solution' },
+    retryOnStatusCodeFailure: true,
+  }).then((response) => {
     if (response.status !== 200) {
       // eslint-disable-next-line cypress/no-unnecessary-waiting
       cy.wait(7500);
