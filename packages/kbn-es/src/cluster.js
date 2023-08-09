@@ -22,7 +22,7 @@ const {
   NativeRealm,
   parseTimeoutToMs,
   runServerlessCluster,
-  killServerlessCluster,
+  stopServerlessCluster,
   runDockerContainer,
 } = require('./utils');
 const { createCliError } = require('./errors');
@@ -296,8 +296,8 @@ exports.Cluster = class Cluster {
 
     this._stopCalled;
 
-    if (this._serverless) {
-      return await killServerlessCluster(this._log, this._serverlessNodes);
+    if (this._serverless?.length) {
+      return await stopServerlessCluster(this._log, this._serverlessNodes);
     }
 
     if (!this._process || !this._outcome) {
@@ -579,7 +579,6 @@ exports.Cluster = class Cluster {
     }
 
     this._serverlessNodes = await runServerlessCluster(this._log, options);
-    this._serverless = true;
 
     await Promise.all(
       this._serverlessNodes.map(async (name) => {
