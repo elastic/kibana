@@ -48,6 +48,7 @@ const FlyoutPaneComponent: React.FC<FlyoutPaneComponentProps> = ({
             min-width: 150px;
             height: 100%;
             top: 0;
+            left: 0;
             background: ${useEuiBackgroundColor('plain')};
             position: fixed;
             width: 100%;
