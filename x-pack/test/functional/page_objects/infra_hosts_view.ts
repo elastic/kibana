@@ -206,7 +206,7 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
     // Flyout Tabs
     async getAssetDetailsKPITileValue(type: string) {
       const container = await testSubjects.find('assetDetailsKPIGrid');
-      const element = await container.findByTestSubject(`assetDetailsKPI-${type}`);
+      const element = await container.findByTestSubject(`infraAssetDetailsKPI${type}`);
       const div = await element.findByClassName('echMetricText__value');
       return div.getAttribute('title');
     },
@@ -229,7 +229,7 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
 
     async getAssetDetailsMetricsCharts() {
       const container = await testSubjects.find('assetDetailsMetricsChartGrid');
-      return container.findAllByCssSelector('[data-test-subj*="assetDetailsMetricsChart"]');
+      return container.findAllByCssSelector('[data-test-subj*="infraAssetDetailsMetricsChart"]');
     },
 
     getMetadataTab() {
