@@ -7701,6 +7701,15 @@
               },
               "key": {
                 "type": "string"
+              },
+              "verification_mode": {
+                "type": "string",
+                "enum": [
+                  "none",
+                  "full",
+                  "certificate",
+                  "strict"
+                ]
               }
             }
           },
@@ -7750,6 +7759,13 @@
           },
           "auth_type": {
             "type": "string"
+          },
+          "connection_type": {
+            "type": "string",
+            "enum": [
+              "plaintext",
+              "encryption"
+            ]
           },
           "username": {
             "type": "string"
@@ -7826,11 +7842,8 @@
           "broker_timeout": {
             "type": "number"
           },
-          "broker_buffer_size": {
+          "required_acks": {
             "type": "number"
-          },
-          "broker_ack_reliability": {
-            "type": "string"
           }
         },
         "required": [
@@ -8103,6 +8116,15 @@
               },
               "key": {
                 "type": "string"
+              },
+              "verification_mode": {
+                "type": "string",
+                "enum": [
+                  "none",
+                  "full",
+                  "certificate",
+                  "strict"
+                ]
               }
             }
           },
@@ -8152,6 +8174,13 @@
           },
           "auth_type": {
             "type": "string"
+          },
+          "connection_type": {
+            "type": "string",
+            "enum": [
+              "plaintext",
+              "encryption"
+            ]
           },
           "username": {
             "type": "string"
@@ -8228,10 +8257,7 @@
           "broker_timeout": {
             "type": "number"
           },
-          "broker_ack_reliability": {
-            "type": "string"
-          },
-          "broker_buffer_size": {
+          "required_acks": {
             "type": "number"
           }
         },

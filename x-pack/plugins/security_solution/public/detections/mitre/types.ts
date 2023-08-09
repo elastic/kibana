@@ -24,3 +24,24 @@ export interface MitreTechniquesOptions extends MitreOptions {
 export interface MitreSubtechniquesOptions extends MitreTechniquesOptions {
   techniqueId: string;
 }
+
+export interface MitreTactic {
+  id: string;
+  name: string;
+  reference: string; // A link to the tactic's page
+}
+
+export interface MitreTechnique {
+  id: string;
+  name: string;
+  reference: string; // A link to the technique's page
+  tactics: string[]; // Tactics this technique assigned to (lowercase dash separated)
+}
+
+export interface MitreSubTechnique {
+  id: string;
+  name: string;
+  reference: string; // A link to the subtechnique's page
+  tactics: string[]; // Tactics this technique assigned to (lowercase dash separated)
+  techniqueId: string; // A technique id this subtechnique assigned to
+}

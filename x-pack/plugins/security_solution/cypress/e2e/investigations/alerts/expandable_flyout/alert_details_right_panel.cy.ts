@@ -111,12 +111,12 @@ describe(
       expandDocumentDetailsExpandableFlyoutLeftSection();
       cy.get(DOCUMENT_DETAILS_FLYOUT_COLLAPSE_DETAILS_BUTTON)
         .should('be.visible')
-        .and('have.text', 'Collapse alert details');
+        .and('have.text', 'Collapse details');
 
       collapseDocumentDetailsExpandableFlyoutLeftSection();
       cy.get(DOCUMENT_DETAILS_FLYOUT_EXPAND_DETAILS_BUTTON)
         .should('be.visible')
-        .and('have.text', 'Expand alert details');
+        .and('have.text', 'Expand details');
 
       cy.log('Verify the take action button is visible on all tabs');
 
