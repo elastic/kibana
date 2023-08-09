@@ -21,7 +21,7 @@ import { toTimestampRange } from '../../utils';
 import { useAssetDetailsStateContext } from '../../hooks/use_asset_details_state';
 
 export const Overview = () => {
-  const { node, nodeType, overrides, dateRange } = useAssetDetailsStateContext();
+  const { node, nodeType, overrides, dateRange, renderMode } = useAssetDetailsStateContext();
   const { logsDataView, metricsDataView } = overrides?.overview ?? {};
 
   const inventoryModel = findInventoryModel(nodeType);
@@ -71,7 +71,11 @@ export const Overview = () => {
             />
           </EuiCallOut>
         ) : (
-          <MetadataSummaryList metadata={metadata} metadataLoading={metadataLoading} />
+          <MetadataSummaryList
+            metadata={metadata}
+            metadataLoading={metadataLoading}
+            isCompactView={renderMode?.showInFlyout ?? false}
+          />
         )}
         <SectionSeparator />
       </EuiFlexItem>

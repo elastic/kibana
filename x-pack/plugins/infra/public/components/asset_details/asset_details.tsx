@@ -47,7 +47,16 @@ export const AssetDetails = ({
   },
 }: AssetDetailsProps) => {
   return (
-    <AssetDetailsStateProvider state={{ node, nodeType, overrides, onTabsStateChange, dateRange }}>
+    <AssetDetailsStateProvider
+      state={{
+        node,
+        nodeType,
+        overrides,
+        onTabsStateChange,
+        dateRange,
+        renderMode,
+      }}
+    >
       <TabSwitcherProvider
         initialActiveTabId={tabs.length > 0 ? activeTabId ?? tabs[0].id : undefined}
       >
