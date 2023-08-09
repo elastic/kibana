@@ -20,14 +20,18 @@ import React, { useMemo, useCallback, useState } from 'react';
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { ValidNormalizedTypes } from '@kbn/triggers-actions-ui-plugin/public';
+import { DataViewBase } from '@kbn/es-query';
 import { Aggregators, CustomMetricAggTypes } from '../../../../../common/threshold_rule/types';
 import { MetricRowControls } from './metric_row_controls';
 import { NormalizedFields, MetricRowBaseProps } from './types';
 import { ClosablePopoverTitle } from '../closable_popover_title';
+import { MetricsExplorerKueryBar } from '../kuery_bar';
 
 interface MetricRowWithAggProps extends MetricRowBaseProps {
   aggType?: CustomMetricAggTypes;
   field?: string;
+  dataView: DataViewBase;
+  filter?: string;
   fields: NormalizedFields;
 }
 
@@ -36,6 +40,8 @@ export function MetricRowWithAgg({
   aggType = Aggregators.AVERAGE,
   field,
   onDelete,
+  dataView,
+  filter,
   disableDelete,
   fields,
   aggregationTypes,
@@ -86,13 +92,24 @@ export function MetricRowWithAgg({
     [name, field, onChange]
   );
 
+  const handleFilterChange = useCallback(
+    (filterString: string) => {
+      onChange({
+        name,
+        filter: filterString,
+        aggType,
+      });
+    },
+    [name, aggType, onChange]
+  );
+
   const isAggInvalid = get(errors, ['customMetrics', name, 'aggType']) != null;
   const isFieldInvalid = get(errors, ['customMetrics', name, 'field']) != null || !field;
 
   return (
     <>
       <EuiFlexGroup gutterSize="xs" alignItems="flexEnd">
-        <EuiFlexItem grow={1}>
+        <EuiFlexItem grow>
           <EuiPopover
             button={
               <EuiFormRow
@@ -101,21 +118,18 @@ export function MetricRowWithAgg({
                   'xpack.observability.threshold.rule.alertFlyout.customEquationEditor.aggregationLabel',
                   { defaultMessage: 'Aggregation {name}', values: { name } }
                 )}
-                isInvalid={!field}
+                isInvalid={aggType !== Aggregators.COUNT && !field}
               >
-                <>
-                  <EuiSpacer size="xs" />
-                  <EuiExpression
-                    data-test-subj="aggregationName"
-                    description={aggregationTypes[aggType].text}
-                    value={field}
-                    isActive={aggTypePopoverOpen}
-                    display={'columns'}
-                    onClick={() => {
-                      setAggTypePopoverOpen(true);
-                    }}
-                  />
-                </>
+                <EuiExpression
+                  data-test-subj="aggregationName"
+                  description={aggregationTypes[aggType].text}
+                  value={aggType === Aggregators.COUNT ? filter : field}
+                  isActive={aggTypePopoverOpen}
+                  display={'columns'}
+                  onClick={() => {
+                    setAggTypePopoverOpen(true);
+                  }}
+                />
               </EuiFormRow>
             }
             isOpen={aggTypePopoverOpen}
@@ -136,7 +150,7 @@ export function MetricRowWithAgg({
               </ClosablePopoverTitle>
 
               <EuiFlexGroup gutterSize="l" alignItems="flexEnd">
-                <EuiFlexItem style={{ maxWidth: 145 }}>
+                <EuiFlexItem grow>
                   <EuiFormRow
                     label={i18n.translate(
                       'xpack.observability.threshold.rule.alertFlyout.customEquationEditor.aggregationLabel',
@@ -162,22 +176,39 @@ export function MetricRowWithAgg({
                   </EuiFormRow>
                 </EuiFlexItem>
                 <EuiFlexItem style={{ minWidth: 300 }}>
-                  <EuiFormRow
-                    label={i18n.translate(
-                      'xpack.observability.threshold.rule.alertFlyout.customEquationEditor.fieldLabel',
-                      { defaultMessage: 'Field name' }
-                    )}
-                    isInvalid={isFieldInvalid}
-                  >
-                    <EuiComboBox
-                      fullWidth
+                  {aggType === Aggregators.COUNT ? (
+                    <EuiFormRow
+                      label={i18n.translate(
+                        'xpack.observability.threshold.rule.alertFlyout.customEquationEditor.filterLabel',
+                        { defaultMessage: 'KQL Filter {name}', values: { name } }
+                      )}
+                    >
+                      <MetricsExplorerKueryBar
+                        placeholder={' '}
+                        derivedIndexPattern={dataView}
+                        onChange={handleFilterChange}
+                        onSubmit={handleFilterChange}
+                        value={filter}
+                      />
+                    </EuiFormRow>
+                  ) : (
+                    <EuiFormRow
+                      label={i18n.translate(
+                        'xpack.observability.threshold.rule.alertFlyout.customEquationEditor.fieldLabel',
+                        { defaultMessage: 'Field name' }
+                      )}
                       isInvalid={isFieldInvalid}
-                      singleSelection={{ asPlainText: true }}
-                      options={fieldOptions}
-                      selectedOptions={field ? [{ label: field }] : []}
-                      onChange={handleFieldChange}
-                    />
-                  </EuiFormRow>
+                    >
+                      <EuiComboBox
+                        fullWidth
+                        isInvalid={isFieldInvalid}
+                        singleSelection={{ asPlainText: true }}
+                        options={fieldOptions}
+                        selectedOptions={field ? [{ label: field }] : []}
+                        onChange={handleFieldChange}
+                      />
+                    </EuiFormRow>
+                  )}
                 </EuiFlexItem>
               </EuiFlexGroup>
             </div>

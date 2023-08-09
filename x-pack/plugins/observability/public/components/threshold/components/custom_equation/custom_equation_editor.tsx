@@ -30,7 +30,6 @@ import {
 import { MetricExpression } from '../../types';
 import { CustomMetrics, AggregationTypes, NormalizedFields } from './types';
 import { MetricRowWithAgg } from './metric_row_with_agg';
-import { MetricRowWithCount } from './metric_row_with_count';
 import { ClosablePopoverTitle } from '../closable_popover_title';
 import { CUSTOM_EQUATION, EQUATION_HELP_MESSAGE } from '../../i18n_strings';
 
@@ -110,42 +109,24 @@ export function CustomEquationEditor({
 
   const filteredAggregationTypes = omit(aggregationTypes, OMITTED_AGGREGATIONS_FOR_CUSTOM_METRICS);
 
-  const metricRows = customMetrics?.map((row) => {
-    if (row.aggType === Aggregators.COUNT) {
-      return (
-        <MetricRowWithCount
-          key={row.name}
-          name={row.name}
-          agg={row.aggType}
-          filter={row.filter}
-          onAdd={handleAddNewRow}
-          onDelete={handleDelete}
-          disableAdd={disableAdd}
-          aggregationTypes={filteredAggregationTypes}
-          disableDelete={disableDelete}
-          onChange={handleChange}
-          errors={errors}
-          dataView={dataView}
-        />
-      );
-    }
-    return (
-      <MetricRowWithAgg
-        key={row.name}
-        name={row.name}
-        aggType={row.aggType}
-        aggregationTypes={filteredAggregationTypes}
-        field={row.field}
-        fields={fields}
-        onAdd={handleAddNewRow}
-        onDelete={handleDelete}
-        disableAdd={disableAdd}
-        disableDelete={disableDelete}
-        onChange={handleChange}
-        errors={errors}
-      />
-    );
-  });
+  const metricRows = customMetrics?.map((row) => (
+    <MetricRowWithAgg
+      key={row.name}
+      name={row.name}
+      aggType={row.aggType}
+      aggregationTypes={filteredAggregationTypes}
+      field={row.field}
+      filter={row.filter}
+      fields={fields}
+      onAdd={handleAddNewRow}
+      onDelete={handleDelete}
+      disableAdd={disableAdd}
+      disableDelete={disableDelete}
+      onChange={handleChange}
+      errors={errors}
+      dataView={dataView}
+    />
+  ));
 
   const placeholder = useMemo(() => {
     return customMetrics?.map((row) => row.name).join(' + ');
