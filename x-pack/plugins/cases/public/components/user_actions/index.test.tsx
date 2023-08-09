@@ -378,20 +378,9 @@ describe.skip(`UserActions`, () => {
   // FLAKY: https://github.com/elastic/kibana/issues/156748
   // FLAKY: https://github.com/elastic/kibana/issues/156746
   // FLAKY: https://github.com/elastic/kibana/issues/156745
-  // FLAKY: https://github.com/elastic/kibana/issues/156743
   describe.skip('pagination', () => {
     beforeEach(() => {
       jest.clearAllMocks();
-    });
-
-    it('Loading spinner when user actions loading', () => {
-      useFindCaseUserActionsMock.mockReturnValue({ isLoading: true });
-      useInfiniteFindCaseUserActionsMock.mockReturnValue({ isLoading: true });
-      appMockRender.render(
-        <UserActions {...{ ...defaultProps, currentUserProfile: userProfiles[0] }} />
-      );
-
-      expect(screen.getByTestId('user-actions-loading')).toBeInTheDocument();
     });
 
     it('renders only one user actions list when last page is 0', async () => {

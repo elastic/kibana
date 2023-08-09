@@ -741,6 +741,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           totalUpdates: 4,
         });
 
+        expect(testSubjects.missingOrFail('user-actions-loading'));
+
         await header.waitUntilLoadingHasFinished();
 
         await testSubjects.click('case-refresh');
