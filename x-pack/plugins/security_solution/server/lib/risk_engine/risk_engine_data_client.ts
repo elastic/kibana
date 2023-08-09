@@ -98,7 +98,7 @@ export class RiskEngineDataClient {
     }
 
     try {
-      await this.enableRiskEngine({ riskScoreService, taskManager });
+      await this.enableRiskEngine({ taskManager });
       result.riskEngineEnabled = true;
     } catch (e) {
       result.errors.push(e.message);
@@ -147,28 +147,23 @@ export class RiskEngineDataClient {
     return { riskEngineStatus, legacyRiskEngineStatus };
   }
 
-  public async enableRiskEngine({
-    taskManager,
-    riskScoreService,
-  }: {
-    taskManager: TaskManagerStartContract;
-    riskScoreService: RiskScoreService;
-  }) {
-    new RiskScoringTask({ logger: this.options.logger }).start({
-      taskManager,
-      riskScoreService,
-    });
-
-    return updateSavedObjectAttribute({
+  public async enableRiskEngine({ taskManager }: { taskManager: TaskManagerStartContract }) {
+    const configurationResult = await updateSavedObjectAttribute({
       savedObjectsClient: this.options.soClient,
       attributes: {
         enabled: true,
       },
     });
+
+    new RiskScoringTask().start({
+      taskManager,
+    });
+
+    return configurationResult;
   }
 
-  public async disableRiskEngine() {
-    // code to stop task
+  public async disableRiskEngine({ taskManager }: { taskManager: TaskManagerStartContract }) {
+    await taskManager.removeIfExists(RiskScoringTask.getTaskId());
 
     return updateSavedObjectAttribute({
       savedObjectsClient: this.options.soClient,

@@ -24,44 +24,46 @@ import { INTERVAL, SCOPE, TIMEOUT, TYPE, VERSION } from './constants';
 import { convertRangeToISO } from './helpers';
 import { isRiskScoreCalculationComplete } from '../helpers';
 
-export class RiskScoringTask {
-  private readonly logger: Logger;
-  private riskScoreService: RiskScoreService | undefined;
+// const register = (taskManager: TaskManagerSetupContract) => {};
 
-  constructor({ logger }: { logger: Logger }) {
-    this.logger = logger;
-  }
+export class RiskScoringTask {
+  // private readonly logger: Logger;
+  // private riskScoreService: RiskScoreService | undefined;
+
+  // constructor({ logger }: { logger: Logger }) {
+  //   this.logger = logger;
+  // }
 
   private log = (message: string): void => {
-    this.logger.info(`[task ${this.getTaskId()}]: ${message}`);
+    console.log(`[task ${RiskScoringTask.getTaskId()}]: ${message}`); // TODO
   };
 
-  private getTaskId = (): string => {
+  static getTaskName = (): string => TYPE;
+
+  static getTaskId = (): string => {
     // TODO does this need to account for the space?
     return `${TYPE}:${VERSION}`;
   };
 
-  public register = (taskManager: TaskManagerSetupContract) => {
+  public register = (
+    taskManager: TaskManagerSetupContract,
+    logger: Logger,
+    riskScoreService: Promise<RiskScoreService>
+  ) => {
     taskManager.registerTaskDefinitions({
       [TYPE]: {
         title: 'Entity Analytics Risk Engine - Risk Scoring Task',
         timeout: TIMEOUT,
         stateSchemaByVersion,
-        createTaskRunner: this.createTaskRunner,
+        createTaskRunner: this.createCreateTaskRunner(logger, riskScoreService),
       },
     });
   };
 
-  public start = async ({
-    taskManager,
-    riskScoreService,
-  }: {
-    taskManager: TaskManagerStartContract;
-    riskScoreService: RiskScoreService;
-  }) => {
-    const taskId = this.getTaskId();
-    this.riskScoreService = riskScoreService;
+  public start = async ({ taskManager }: { taskManager: TaskManagerStartContract }) => {
+    const taskId = RiskScoringTask.getTaskId();
 
+    //TODO get config and use it here
     this.log('attempting to schedule');
     try {
       await taskManager.ensureScheduled({
@@ -75,11 +77,13 @@ export class RiskScoringTask {
         params: { version: VERSION },
       });
     } catch (e) {
-      this.logger.error(`[task ${taskId}]: error scheduling task, received ${e.message}`);
+      console.error(`[task ${taskId}]: error scheduling task, received ${e.message}`); // todo
     }
   };
 
   public runTask = async (
+    logger: Logger,
+    riskScoreService: RiskScoreService,
     taskInstance: ConcreteTaskInstance
   ): Promise<{
     state: RiskScoringTaskState;
@@ -99,17 +103,18 @@ export class RiskScoringTask {
       scoresWritten,
     };
 
-    if (taskId !== this.getTaskId()) {
+    if (taskId !== RiskScoringTask.getTaskId()) {
       this.log('outdated task');
       return { state: updatedState };
     }
 
-    if (!this.riskScoreService) {
+    if (!riskScoreService) {
       this.log('risk score service is not available; exiting task');
       return { state: updatedState };
     }
 
-    const configuration = await this.riskScoreService.getConfiguration();
+    const configuration = await riskScoreService.getConfiguration();
+    console.log('configuration', JSON.stringify(configuration, null, 2));
     if (configuration == null) {
       this.log(
         'risk engine configuration not found; exiting task. Please re-enable the risk engine and try again'
@@ -124,16 +129,16 @@ export class RiskScoringTask {
     }
 
     const range = convertRangeToISO(configuredRange);
-    const { index, runtimeMappings } = await this.riskScoreService.getRiskInputsIndex({
+    const { index, runtimeMappings } = await riskScoreService.getRiskInputsIndex({
       dataViewId,
     });
 
     let isWorkComplete = false;
     while (!isWorkComplete) {
-      const result = await this.riskScoreService.calculateAndPersistScores({
+      const result = await riskScoreService.calculateAndPersistScores({
         afterKeys,
         index,
-        filter,
+        filter: undefined, // TODO default of {} breaks things
         identifierType: 'host', // TODO
         pageSize,
         range,
@@ -153,10 +158,12 @@ export class RiskScoringTask {
     };
   };
 
-  private createTaskRunner = ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
-    return {
-      run: async () => this.runTask(taskInstance),
-      cancel: async () => {},
+  private createCreateTaskRunner =
+    (logger: Logger, riskScoreService: Promise<RiskScoreService>) =>
+    ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
+      return {
+        run: async () => this.runTask(logger, await riskScoreService, taskInstance),
+        cancel: async () => {},
+      };
     };
-  };
 }

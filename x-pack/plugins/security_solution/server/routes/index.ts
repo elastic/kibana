@@ -184,8 +184,8 @@ export const initRoutes = (
     riskScorePreviewRoute(router, logger);
     riskScoreCalculationRoute(router, logger);
     riskEngineInitRoute(router, logger, security, getStartServices);
-    riskEngineEnableRoute(router, logger, security);
+    riskEngineEnableRoute(router, logger, security, getStartServices);
     riskEngineStatusRoute(router, logger);
-    riskEngineDisableRoute(router, logger, security);
+    riskEngineDisableRoute(router, logger, security, getStartServices);
   }
 };
