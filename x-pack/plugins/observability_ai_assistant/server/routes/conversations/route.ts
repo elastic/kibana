@@ -21,7 +21,7 @@ const getConversationRoute = createObservabilityAIAssistantServerRoute({
   options: {
     tags: ['access:ai_assistant'],
   },
-  handler: async (resources): Promise<void> => {
+  handler: async (resources): Promise<Conversation> => {
     const { service, request, params } = resources;
 
     const client = await service.getClient({ request });
