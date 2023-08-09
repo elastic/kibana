@@ -13,18 +13,11 @@ import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import routeData from 'react-router';
 
 import { useUpdateComment } from '../../containers/use_update_comment';
-import {
-  basicCase,
-  caseUserActions,
-  getHostIsolationUserAction,
-  getUserAction,
-  hostIsolationComment,
-} from '../../containers/mock';
+import { basicCase, caseUserActions, getUserAction } from '../../containers/mock';
 import { UserActions } from '.';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
 import { UserActionActions } from '../../../common/types/domain';
-import { userProfiles, userProfilesMap } from '../../containers/user_profiles/api.mock';
 import { getCaseConnectorsMockResponse } from '../../common/mock/connectors';
 import type { UserActivityParams } from '../user_actions_activity_bar/types';
 import { useFindCaseUserActions } from '../../containers/use_find_case_user_actions';
