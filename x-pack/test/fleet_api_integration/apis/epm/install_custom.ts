@@ -8,9 +8,10 @@
 import expect from '@kbn/expect';
 import { PACKAGES_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 
+import { prefixPkgName } from '@kbn/fleet-plugin/server/services/epm/packages/custom_integrations';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 
-const INTEGRATION_NAME = 'my_custom_nginx';
+const INTEGRATION_NAME = 'my_nginx';
 const INTEGRATION_VERSION = '1.0.0';
 
 export default function (providerContext: FtrProviderContext) {
@@ -20,8 +21,9 @@ export default function (providerContext: FtrProviderContext) {
 
   const uninstallPackage = async () => {
     await supertest
-      .delete(`/api/fleet/epm/packages/${INTEGRATION_NAME}/${INTEGRATION_VERSION}`)
-      .set('kbn-xsrf', 'xxxx');
+      .delete(`/api/fleet/epm/packages/${prefixPkgName(INTEGRATION_NAME)}/${INTEGRATION_VERSION}`)
+      .set('kbn-xsrf', 'xxxx')
+      .send({ force: true });
   };
 
   describe('Installing custom integrations', async () => {
@@ -36,7 +38,7 @@ export default function (providerContext: FtrProviderContext) {
         .type('application/json')
         .send({
           force: true,
-          integrationName: 'my_custom_nginx',
+          integrationName: INTEGRATION_NAME,
           datasets: [
             { name: 'access', type: 'logs' },
             { name: 'error', type: 'metrics' },
@@ -46,22 +48,22 @@ export default function (providerContext: FtrProviderContext) {
         .expect(200);
 
       const expectedIngestPipelines = [
-        'logs-my_custom_nginx.access-1.0.0',
-        'metrics-my_custom_nginx.error-1.0.0',
-        'logs-my_custom_nginx.warning-1.0.0',
+        `logs-${prefixPkgName(INTEGRATION_NAME)}.access-1.0.0`,
+        `metrics-${prefixPkgName(INTEGRATION_NAME)}.error-1.0.0`,
+        `logs-${prefixPkgName(INTEGRATION_NAME)}.warning-1.0.0`,
       ];
       const expectedIndexTemplates = [
-        'logs-my_custom_nginx.access',
-        'metrics-my_custom_nginx.error',
-        'logs-my_custom_nginx.warning',
+        `logs-${prefixPkgName(INTEGRATION_NAME)}.access`,
+        `metrics-${prefixPkgName(INTEGRATION_NAME)}.error`,
+        `logs-${prefixPkgName(INTEGRATION_NAME)}.warning`,
       ];
       const expectedComponentTemplates = [
-        'logs-my_custom_nginx.access@package',
-        'logs-my_custom_nginx.access@custom',
-        'metrics-my_custom_nginx.error@package',
-        'metrics-my_custom_nginx.error@custom',
-        'logs-my_custom_nginx.warning@package',
-        'logs-my_custom_nginx.warning@custom',
+        `logs-${prefixPkgName(INTEGRATION_NAME)}.access@package`,
+        `logs-${prefixPkgName(INTEGRATION_NAME)}.access@custom`,
+        `metrics-${prefixPkgName(INTEGRATION_NAME)}.error@package`,
+        `metrics-${prefixPkgName(INTEGRATION_NAME)}.error@custom`,
+        `logs-${prefixPkgName(INTEGRATION_NAME)}.warning@package`,
+        `logs-${prefixPkgName(INTEGRATION_NAME)}.warning@custom`,
       ];
 
       expect(response.body._meta.install_source).to.be('custom');
@@ -90,13 +92,44 @@ export default function (providerContext: FtrProviderContext) {
 
       const installation = await kibanaServer.savedObjects.get({
         type: PACKAGES_SAVED_OBJECT_TYPE,
-        id: INTEGRATION_NAME,
+        id: prefixPkgName(INTEGRATION_NAME),
       });
-
-      expect(installation.attributes.name).to.be(INTEGRATION_NAME);
+      expect(installation.attributes.name).to.be(prefixPkgName(INTEGRATION_NAME));
       expect(installation.attributes.version).to.be(INTEGRATION_VERSION);
       expect(installation.attributes.install_source).to.be('custom');
       expect(installation.attributes.install_status).to.be('installed');
+    });
+
+    it('Throws an error when there is a naming collision', async () => {
+      await supertest
+        .post(`/api/fleet/epm/custom_integrations`)
+        .set('kbn-xsrf', 'xxxx')
+        .type('application/json')
+        .send({
+          force: true,
+          integrationName: INTEGRATION_NAME,
+          datasets: [
+            { name: 'access', type: 'logs' },
+            { name: 'error', type: 'metrics' },
+            { name: 'warning', type: 'logs' },
+          ],
+        })
+        .expect(200);
+
+      await supertest
+        .post(`/api/fleet/epm/custom_integrations`)
+        .set('kbn-xsrf', 'xxxx')
+        .type('application/json')
+        .send({
+          force: true,
+          integrationName: INTEGRATION_NAME,
+          datasets: [
+            { name: 'access', type: 'logs' },
+            { name: 'error', type: 'metrics' },
+            { name: 'warning', type: 'logs' },
+          ],
+        })
+        .expect(409);
     });
   });
 }
