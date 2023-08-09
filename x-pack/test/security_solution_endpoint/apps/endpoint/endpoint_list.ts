@@ -33,6 +33,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       'IP address',
       'Version',
       'Last active',
+      'Enrolled at',
       'Actions',
     ],
     [
@@ -42,6 +43,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       'Unsupported',
       'Windows',
       '10.20.160.71, 10.67.81.87',
+      'x',
       'x',
       'x',
       '',
@@ -55,6 +57,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       '10.244.187.97, 10.45.118.67',
       'x',
       'x',
+      'x',
       '',
     ],
     [
@@ -64,6 +67,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       'Warning',
       'macOS',
       '10.87.11.145, 10.117.106.109,10.242.136.97',
+      'x',
       'x',
       'x',
       '',
@@ -79,6 +83,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       tableData[i][2] = 'x';
       tableData[i][6] = 'x';
       tableData[i][7] = 'x';
+      tableData[i][8] = 'x';
     }
 
     return tableData;
@@ -166,6 +171,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
                 'IP address',
                 'Version',
                 'Last active',
+                'Enrolled at',
                 'Actions',
               ],
               ['No items found'],
