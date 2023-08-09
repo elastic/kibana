@@ -31,10 +31,10 @@ export const FieldStatsInfoButton = ({
   hideTrigger?: boolean;
 }) => {
   const themeVars = useCurrentThemeVars();
-  const emptyMessage = isEmpty
+  const emptyFieldMessage = isEmpty
     ? ' ' +
       i18n.translate('xpack.ml.newJob.wizard.fieldContextPopover.inspectFieldStatsTooltip', {
-        defaultMessage: '(no data in 1000 sample records)',
+        defaultMessage: '(no data found in 1000 sample records)',
       })
     : '';
   return (
@@ -48,7 +48,7 @@ export const FieldStatsInfoButton = ({
                 {
                   defaultMessage: 'Inspect field statistics',
                 }
-              ) + emptyMessage
+              ) + emptyFieldMessage
             }
           >
             <EuiButtonIcon
@@ -71,11 +71,11 @@ export const FieldStatsInfoButton = ({
               }}
               aria-label={
                 i18n.translate(
-                  'xpack.ml.newJob.wizard.fieldContextPopover.inspectFieldStatsTooltipArialabel',
+                  'xpack.ml.newJob.wizard.fieldContextPopover.inspectFieldStatsTooltipAriaLabel',
                   {
                     defaultMessage: 'Inspect field statistics',
                   }
-                ) + emptyMessage
+                ) + emptyFieldMessage
               }
             />
           </EuiToolTip>
