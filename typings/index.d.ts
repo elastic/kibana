@@ -62,3 +62,5 @@ declare module 'file-system-cache' {
     load(): Promise<{ files: Array<{ path: string; value: any }> }>;
   }
 }
+
+declare module 'find-cypress-specs';
