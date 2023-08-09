@@ -8,14 +8,11 @@
 import React from 'react';
 
 import {
-  EuiCheckableCard,
-  EuiFieldNumber,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
   EuiHorizontalRule,
   EuiLink,
-  EuiSelect,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -24,26 +21,14 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import {
-  HOURS_UNIT_LABEL,
-  DAYS_UNIT_LABEL,
-  WEEKS_UNIT_LABEL,
-  MONTHS_UNIT_LABEL,
-} from '../../../../../shared/constants';
 import { EnterpriseSearchCronEditor } from '../../../../../shared/cron_editor/enterprise_search_cron_editor';
 import { docLinks } from '../../../../../shared/doc_links/doc_links';
-import { CrawlUnits } from '../../../../api/crawler/types';
 import { isCrawlerIndex } from '../../../../utils/indices';
 
 export const MultiCrawlScheduler: React.FC = ({
   index,
-  crawlerId,
-  setCrawlFrequency,
-  setCrawlUnit,
-  setUseConnectorSchedule,
-  crawlFrequency,
-  crawlUnit,
-  useConnectorSchedule
+  interval,
+  setConnectorSchedulingInterval
 }) => {
 
   if (!isCrawlerIndex(index)) {
@@ -70,130 +55,33 @@ export const MultiCrawlScheduler: React.FC = ({
         <EuiSplitPanel.Inner>
           <EuiFlexGroup>
             <EuiFlexItem>
-              <EuiCheckableCard
-                id={`specificTimeSchedulingCard-multiCrawler-${crawlerId}`}
-                label={
-                  <>
-                    <EuiTitle size="xxs">
-                      <h5>
-                        {i18n.translate(
-                          'xpack.enterpriseSearch.crawler.automaticCrawlSchedule.cronSchedulingTitle',
-                          {
-                            defaultMessage: 'Specific time scheduling',
-                          }
-                        )}
-                      </h5>
-                    </EuiTitle>
-                    <EuiSpacer size="s" />
-                    <EuiText size="xs" color="subdued">
-                      {i18n.translate(
-                        'xpack.enterpriseSearch.crawler.automaticCrawlSchedule.cronSchedulingDescription',
-                        {
-                          defaultMessage:
-                            'Define the frequency and time for scheduled crawls. The crawler uses UTC as its timezone.',
-                        }
-                      )}
-                    </EuiText>
-                    <EuiHorizontalRule margin="s" />
-                  </>
-                }
-                checked={useConnectorSchedule}
-                onChange={() => setUseConnectorSchedule(true)}
-              >
-                <EnterpriseSearchCronEditor
-                  disabled={!useConnectorSchedule}
-                  scheduling={index.connector.scheduling.full}
-                  onChange={(newScheduling) => { console.log(newScheduling) }}
-                />
-              </EuiCheckableCard>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiCheckableCard
-                id={`intervalSchedulingCard-multiCrawler-${crawlerId}`}
-                label={
-                  <>
-                    <EuiTitle size="xxs">
-                      <h5>
-                        {i18n.translate(
-                          'xpack.enterpriseSearch.crawler.automaticCrawlSchedule.intervalSchedulingTitle',
-                          {
-                            defaultMessage: 'Interval scheduling',
-                          }
-                        )}
-                      </h5>
-                    </EuiTitle>
-                    <EuiSpacer size="s" />
-                    <EuiText size="xs" color="subdued">
-                      {i18n.translate(
-                        'xpack.enterpriseSearch.crawler.automaticCrawlSchedule.intervalSchedulingDescription',
-                        {
-                          defaultMessage: 'Define the frequency for scheduled crawls',
-                        }
-                      )}
-                    </EuiText>
-                    <EuiHorizontalRule margin="s" />
-                  </>
-                }
-                checked={!useConnectorSchedule}
-                onChange={() => setUseConnectorSchedule(false)}
-              >
-                <EuiFormRow display="rowCompressed" label="Frequency" fullWidth>
-                  <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
-                    <EuiFlexItem grow={false}>
-                      <EuiFieldNumber
-                        data-telemetry-id="entSearchContent-crawler-scheduleCrawl-crawlAutomatically-scheduleFrequency"
-                        aria-label={i18n.translate(
-                          'xpack.enterpriseSearch.crawler.automaticCrawlSchedule.scheduleFrequencyLabel',
-                          {
-                            defaultMessage: 'Schedule frequency',
-                          }
-                        )}
-                        disabled={useConnectorSchedule}
-                        min={0}
-                        max={99}
-                        compressed
-                        value={crawlFrequency}
-                        onChange={(e) => setCrawlFrequency(parseInt(e.target.value, 10))}
-                        prepend={'Every'}
-                      />
-                    </EuiFlexItem>
-                    <EuiFlexItem>
-                      <EuiSelect
-                        data-telemetry-id="entSearchContent-crawler-scheduleCrawl-crawlAutomatically-scheduleUnits"
-                        aria-label={i18n.translate(
-                          'xpack.enterpriseSearch.crawler.automaticCrawlSchedule.scheduleUnitsLabel',
-                          {
-                            defaultMessage: 'Schedule units of time',
-                          }
-                        )}
-                        disabled={useConnectorSchedule}
-                        fullWidth
-                        compressed
-                        options={[
-                          {
-                            text: HOURS_UNIT_LABEL,
-                            value: CrawlUnits.hours,
-                          },
-                          {
-                            text: DAYS_UNIT_LABEL,
-                            value: CrawlUnits.days,
-                          },
-                          {
-                            text: WEEKS_UNIT_LABEL,
-                            value: CrawlUnits.weeks,
-                          },
-                          {
-                            text: MONTHS_UNIT_LABEL,
-                            value: CrawlUnits.months,
-                          },
-                        ]}
-                        value={crawlUnit}
-                        onChange={(e) => setCrawlUnit(e.target.value as CrawlUnits)}
-                      />
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiFormRow>
-              </EuiCheckableCard>
+              <EuiTitle size="xxs">
+                <h5>
+                  {i18n.translate(
+                    'xpack.enterpriseSearch.crawler.automaticCrawlSchedule.cronSchedulingTitle',
+                    {
+                      defaultMessage: 'Specific time scheduling',
+                    }
+                  )}
+                </h5>
+              </EuiTitle>
+              <EuiSpacer size="s" />
+              <EuiText size="xs" color="subdued">
+                {i18n.translate(
+                  'xpack.enterpriseSearch.crawler.automaticCrawlSchedule.cronSchedulingDescription',
+                  {
+                    defaultMessage:
+                      'Define the frequency and time for scheduled crawls. The crawler uses UTC as its timezone.',
+                  }
+                )}
+              </EuiText>
+              <EuiHorizontalRule margin="s" />
+              <EnterpriseSearchCronEditor
+                scheduling={{
+                  interval: interval, enabled: true
+                }}
+                onChange={setConnectorSchedulingInterval}
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiSpacer />

@@ -7,13 +7,13 @@
 
 import { kea, MakeLogicType } from 'kea';
 
+import { ConnectorScheduling } from '../../../../../../../common/types/connectors';
+
 import { CrawlerIndex } from '../../../../../../../common/types/indices';
 
 import { IndexViewLogic } from '../../index_view_logic';
 
-import { CrawlerConfiguration, CrawlSchedule, CrawlUnits } from '../../../../api/crawler/types';
-
-import { DEFAULT_VALUES as SCHEDULER_DEFAULT_VALUES } from '../automatic_crawl_scheduler/automatic_crawl_scheduler_logic'
+import { CrawlerConfiguration } from '../../../../api/crawler/types';
 
 import { filterSeedUrlsByDomainUrls } from './crawl_custom_settings_flyout_logic';
 
@@ -33,13 +33,8 @@ export interface CrawlCustomSettingsFlyoutLogicActions {
   onSelectEntryPointUrls(index: number, entryPointUrls: string[]): { index: number, entryPointUrls: string[] };
   onSelectMaxCrawlDepth(index: number, maxCrawlDepth: number): { index: number, maxCrawlDepth: number };
   onSelectSitemapUrls(index: number, sitemapUrls: string[]): { index: number, sitemapUrls: string[] };
-  setCrawlFrequency(index: number, crawlFrequency: CrawlSchedule['frequency']): {
-    index: number,
-    crawlFrequency: CrawlSchedule['frequency'];
-  };
-  setCrawlUnit(index: number, crawlUnit: CrawlSchedule['unit']): { index: number, crawlUnit: CrawlSchedule['unit'] };
-  setUseConnectorSchedule(index: number, useConnectorSchedule: CrawlSchedule['useConnectorSchedule']): {
-    index: number, useConnectorSchedule: CrawlSchedule['useConnectorSchedule'];
+  setConnectorSchedulingInterval(index: number, newSchedule: ConnectorScheduling): {
+    index: number, newSchedule: ConnectorScheduling
   };
   toggleIncludeSitemapsInRobotsTxt(index: number): { index: number };
 }
@@ -53,11 +48,7 @@ const defaulCrawlerConfiguration: CrawlerConfiguration = {
   selectedDomainUrls: [],
   selectedEntryPointUrls: [],
   selectedSitemapUrls: [],
-  schedule: {
-    frequency: SCHEDULER_DEFAULT_VALUES.crawlFrequency,
-    unit: SCHEDULER_DEFAULT_VALUES.crawlUnit,
-    useConnectorSchedule: false
-  }
+  interval: '* * * * *'
 }
 
 export const CrawlCustomSettingsFlyoutMultiCrawlLogic = kea<
@@ -77,9 +68,7 @@ export const CrawlCustomSettingsFlyoutMultiCrawlLogic = kea<
     onSelectEntryPointUrls: (index, entryPointUrls) => ({ index, entryPointUrls }),
     onSelectMaxCrawlDepth: (index, maxCrawlDepth) => ({ index, maxCrawlDepth }),
     onSelectSitemapUrls: (index, sitemapUrls) => ({ index, sitemapUrls }),
-    setCrawlFrequency: (index, crawlFrequency: string) => ({ index, crawlFrequency }),
-    setCrawlUnit: (index, crawlUnit: CrawlUnits) => ({ index, crawlUnit }),
-    setUseConnectorSchedule: (index, useConnectorSchedule) => ({ index, useConnectorSchedule }),
+    setConnectorSchedulingInterval: (index, newSchedule) => ({ index, newSchedule }),
     toggleIncludeSitemapsInRobotsTxt: (index) => ({ index }),
   }),
   reducers: () => ({
@@ -123,15 +112,10 @@ export const CrawlCustomSettingsFlyoutMultiCrawlLogic = kea<
         onSelectSitemapUrls: (state, { index, sitemapUrls }) => {
           return state.map((crawler, i) => (i === index ? { ...crawler, selectedSitemapUrls: sitemapUrls } : crawler))
         },
-        setCrawlFrequency: (state, { index, crawlFrequency }) => {
-          return state.map((crawler, i) => (i === index ? { ...crawler, schedule: { ...crawler.schedule, frequency: crawlFrequency } } : crawler))
-        },
-        setCrawlUnit: (state, { index, crawlUnit }) => {
-          return state.map((crawler, i) => (i === index ? { ...crawler, schedule: { ...crawler.schedule, unit: crawlUnit } } : crawler))
-        },
-        setUseConnectorSchedule: (state, { index, useConnectorSchedule }) => {
-          return state.map((crawler, i) => (i === index ? { ...crawler, schedule: { ...crawler.schedule, useConnectorSchedule: useConnectorSchedule } } : crawler))
-        },
+        setConnectorSchedulingInterval: (state, { index, newSchedule }) => {
+          const { interval } = newSchedule;
+          return state.map((crawler, i) => (i === index ? { ...crawler, interval: interval } : crawler))
+        }
       }
     ]
   }),

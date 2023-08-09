@@ -46,10 +46,10 @@ export const CrawlCustomSettingsFlyoutMultiCrawlScheduling: React.FC = () => {
     onSelectEntryPointUrls,
     onSelectSitemapUrls,
     toggleIncludeSitemapsInRobotsTxt,
-    setCrawlFrequency,
-    setCrawlUnit,
-    setUseConnectorSchedule,
+    setConnectorSchedulingInterval
   } = useActions(CrawlCustomSettingsFlyoutMultiCrawlLogic);
+
+  console.log(crawlerConfigurations)
 
   return crawlerConfigurations.map((config, index) => {
     if (index === crawlerConfigActiveTab) {
@@ -83,13 +83,8 @@ export const CrawlCustomSettingsFlyoutMultiCrawlScheduling: React.FC = () => {
         <EuiSpacer />
         <MultiCrawlScheduler
           index={crawlerIndex}
-          crawlerId={index}
-          crawlFrequency={config.schedule.frequency}
-          crawlUnit={config.schedule.unit}
-          useConnectorSchedule={config.schedule.useConnectorSchedule}
-          setCrawlFrequency={e => setCrawlFrequency(index, e)}
-          setCrawlUnit={e => setCrawlUnit(index, e)}
-          setUseConnectorSchedule={e => setUseConnectorSchedule(index, e)}
+          interval={config.interval}
+          setConnectorSchedulingInterval={e => setConnectorSchedulingInterval(index, e)}
         />
       </React.Fragment>
     }

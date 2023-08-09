@@ -180,7 +180,7 @@ export interface CrawlerConfiguration {
   selectedDomainUrls: string[];
   selectedEntryPointUrls: string[];
   selectedSitemapUrls: string[];
-  schedule: CrawlSchedule;
+  interval: string; // interval has crontab syntax
 }
 
 export enum CustomCrawlType {
