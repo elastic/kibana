@@ -9,8 +9,8 @@ import type { FtrProviderContext } from '../../../functional/page_objects/svl_co
 
 export default ({ getService, getPageObject }: FtrProviderContext) => {
   // const svlCommonApi = getService('svlCommonApi');
-  const svlCommonNavigation = getPageObject('svlCommonNavigation')
-  const testSubjects = getService('testSubjects')
+  const svlCommonNavigation = getPageObject('svlCommonNavigation');
+  const testSubjects = getService('testSubjects');
 
   /**
    * Load sample data from the visualize library
@@ -20,7 +20,6 @@ export default ({ getService, getPageObject }: FtrProviderContext) => {
   // data-test-subj="showSampleDataButton"
   // data-test-subj="addSampleDataSetecommerce"
   // wait for toast Sample eCommerce orders installed
-
 
   const reportingFunctional = getService('reportingFunctional');
 
@@ -34,7 +33,6 @@ export default ({ getService, getPageObject }: FtrProviderContext) => {
     //   await reportingFunctional.teardownEcommerce();
     // });
     // this.tags(['skipSvlObt', 'skipSvlSec'], () => {})
-
 
     it('does not allow user that does not have reporting privileges', async () => {
       await reportingFunctional.loginDataAnalyst();

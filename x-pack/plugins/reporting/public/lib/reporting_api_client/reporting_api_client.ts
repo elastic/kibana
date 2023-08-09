@@ -106,7 +106,7 @@ export class ReportingAPIClient implements IReportingAPI {
 
   public downloadReport(jobId: string) {
     const location = this.getReportURL(jobId);
-// should we add headers http.get() vs navigating by the window? 
+    // should we add headers http.get() vs navigating by the window?
     window.open(location);
   }
 

@@ -26,5 +26,5 @@ export const pageObjects = {
   svlObltOverviewPage: SvlObltOverviewPageProvider,
   svlSearchLandingPage: SvlSearchLandingPageProvider,
   svlSecLandingPage: SvlSecLandingPageProvider,
-  svlReportingPage: SvlReportingProvider, 
+  svlReportingPage: SvlReportingProvider,
 };
