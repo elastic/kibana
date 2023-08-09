@@ -7,21 +7,20 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../../..',
-  /** all nested directories have their own Jest config file */
-  testMatch: [
-    '<rootDir>/x-pack/plugins/enterprise_search/public/applications/*.test.{js,mjs,ts,tsx}',
+  rootDir: '../../../../../..',
+  roots: [
+    '<rootDir>/x-pack/plugins/enterprise_search/public/applications/enterprise_search_content',
   ],
-  roots: ['<rootDir>/x-pack/plugins/enterprise_search/public'],
   collectCoverage: true,
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
-    '<rootDir>/x-pack/plugins/enterprise_search/public/applications/*.{ts,tsx}',
+    '<rootDir>/x-pack/plugins/enterprise_search/public/applications/**/*.{ts,tsx}',
     '!<rootDir>/x-pack/plugins/enterprise_search/public/*.ts',
     '!<rootDir>/x-pack/plugins/enterprise_search/server/*.ts',
     '!<rootDir>/x-pack/plugins/enterprise_search/public/applications/test_helpers/**/*.{ts,tsx}',
   ],
-  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/enterprise_search',
+  coverageDirectory:
+    '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/enterprise_search/public/applications/enterprise_search_content',
   modulePathIgnorePatterns: [
     '<rootDir>/x-pack/plugins/enterprise_search/public/applications/app_search/cypress',
     '<rootDir>/x-pack/plugins/enterprise_search/public/applications/workplace_search/cypress',
