@@ -145,7 +145,7 @@ describe('event details panel component', () => {
         application: {
           capabilities: {
             [ASSISTANT_FEATURE_ID]: {
-              isAssistantEnabled: true,
+              'ai-assistant': true,
             },
           },
         },

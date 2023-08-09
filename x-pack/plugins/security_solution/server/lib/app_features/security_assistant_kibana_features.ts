@@ -11,7 +11,7 @@ import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import type { AppFeaturesAssistantConfig, BaseKibanaFeatureConfig } from './types';
 import { APP_ID, ASSISTANT_FEATURE_ID } from '../../../common/constants';
 import { AppFeatureAssistantKey } from '../../../common/types/app_features';
-import { AssistantSubFeatureId } from './security_assistant_kibana_sub_features';
+import type { AssistantSubFeatureId } from './security_assistant_kibana_sub_features';
 
 export const getAssistantBaseKibanaFeature = (): BaseKibanaFeatureConfig => ({
   id: ASSISTANT_FEATURE_ID,
@@ -35,7 +35,7 @@ export const getAssistantBaseKibanaFeature = (): BaseKibanaFeatureConfig => ({
         all: [],
         read: [],
       },
-      ui: ['isAssistantEnabled'],
+      ui: [],
     },
     read: {
       // No read-only mode currently supported
@@ -50,7 +50,8 @@ export const getAssistantBaseKibanaFeature = (): BaseKibanaFeatureConfig => ({
 });
 
 export const getAssistantBaseKibanaSubFeatureIds = (): AssistantSubFeatureId[] => [
-  AssistantSubFeatureId.createConversation,
+  // This is a sample sub-feature that can be used for future implementations
+  // AssistantSubFeatureId.createConversation,
 ];
 
 /**
@@ -63,5 +64,11 @@ export const getAssistantBaseKibanaSubFeatureIds = (): AssistantSubFeatureId[] =
  * - `subFeaturesPrivileges`: the privileges that will be added into the existing Assistant subFeature with the privilege `id` specified.
  */
 export const getAssistantAppFeaturesConfig = (): AppFeaturesAssistantConfig => ({
-  [AppFeatureAssistantKey.assistant]: {},
+  [AppFeatureAssistantKey.assistant]: {
+    privileges: {
+      all: {
+        ui: ['ai-assistant'],
+      },
+    },
+  },
 });

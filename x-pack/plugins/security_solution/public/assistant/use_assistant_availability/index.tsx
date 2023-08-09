@@ -19,7 +19,7 @@ export interface UseAssistantAvailability {
 export const useAssistantAvailability = (): UseAssistantAvailability => {
   const isEnterprise = useLicense().isEnterprise();
   const capabilities = useKibana().services.application.capabilities;
-  const isAssistantEnabled = capabilities[ASSISTANT_FEATURE_ID]?.isAssistantEnabled === true;
+  const isAssistantEnabled = capabilities[ASSISTANT_FEATURE_ID]?.['ai-assistant'] === true;
 
   return {
     isAssistantEnabled: isEnterprise,

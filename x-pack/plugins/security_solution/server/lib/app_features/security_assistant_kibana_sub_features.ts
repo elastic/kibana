@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import type { SubFeatureConfig } from '@kbn/features-plugin/common';
 
+// This is a sample sub-feature that can be used for future implementations
 // @ts-expect-error unused variable
 const createConversationSubFeature: SubFeatureConfig = {
   name: i18n.translate(
