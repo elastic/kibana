@@ -74,7 +74,8 @@ export default async () => {
         // },
         '--xpack.cloud.id=ftr_fake_cloud_id',
         `--xpack.security.authc.providers=${JSON.stringify({
-          saml: { 'cloud-saml-kibana': { order: 0, realm: 'cloud-saml-kibana' } },
+          basic: { 'cloud-basic': { order: 0 } },
+          saml: { 'cloud-saml-kibana': { order: 1, realm: 'cloud-saml-kibana' } },
         })}`,
         // This ensures we can attempt to access the disabled anonymous routes without getting a 401
         `--xpack.security.authc.http.schemes=${JSON.stringify(['ApiKey', 'Basic', 'Bearer'])}`,
