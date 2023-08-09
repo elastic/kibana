@@ -155,7 +155,7 @@ export class RiskEngineDataClient {
       },
     });
 
-    new RiskScoringTask().start({
+    new RiskScoringTask({ logger: this.options.logger }).start({
       taskManager,
     });
 

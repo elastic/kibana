@@ -27,15 +27,14 @@ import { isRiskScoreCalculationComplete } from '../helpers';
 // const register = (taskManager: TaskManagerSetupContract) => {};
 
 export class RiskScoringTask {
-  // private readonly logger: Logger;
-  // private riskScoreService: RiskScoreService | undefined;
+  private readonly logger: Logger;
 
-  // constructor({ logger }: { logger: Logger }) {
-  //   this.logger = logger;
-  // }
+  constructor({ logger }: { logger: Logger }) {
+    this.logger = logger;
+  }
 
   private log = (message: string): void => {
-    console.log(`[task ${RiskScoringTask.getTaskId()}]: ${message}`); // TODO
+    this.logger.info(`[task ${RiskScoringTask.getTaskId()}]: ${message}`);
   };
 
   static getTaskName = (): string => TYPE;
@@ -77,7 +76,7 @@ export class RiskScoringTask {
         params: { version: VERSION },
       });
     } catch (e) {
-      console.error(`[task ${taskId}]: error scheduling task, received ${e.message}`); // todo
+      this.logger.warn(`[task ${taskId}]: error scheduling task, received ${e.message}`); // todo
     }
   };
 
@@ -114,7 +113,6 @@ export class RiskScoringTask {
     }
 
     const configuration = await riskScoreService.getConfiguration();
-    console.log('configuration', JSON.stringify(configuration, null, 2));
     if (configuration == null) {
       this.log(
         'risk engine configuration not found; exiting task. Please re-enable the risk engine and try again'
