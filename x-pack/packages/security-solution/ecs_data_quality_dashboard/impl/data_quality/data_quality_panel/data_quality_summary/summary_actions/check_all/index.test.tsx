@@ -315,7 +315,7 @@ describe('CheckAll', () => {
 
   describe('when all checks have completed', () => {
     const setIndexToCheck = jest.fn();
-
+    const onCheckCompleted = jest.fn();
     beforeEach(async () => {
       jest.clearAllMocks();
       jest.useFakeTimers();
@@ -327,7 +327,7 @@ describe('CheckAll', () => {
             formatNumber={mockFormatNumber}
             ilmPhases={ilmPhases}
             incrementCheckAllIndiciesChecked={jest.fn()}
-            onCheckCompleted={jest.fn()}
+            onCheckCompleted={onCheckCompleted}
             onCheckAllCompleted={jest.fn()}
             patternIndexNames={patternIndexNames}
             patterns={[]}
@@ -363,6 +363,10 @@ describe('CheckAll', () => {
 
     test('it invokes setIndexToCheck with `null` after all the checks have completed', () => {
       expect(setIndexToCheck).toBeCalledWith(null);
+    });
+
+    test('it invokes onCheckAllCompleted after all the checks have completed', () => {
+      expect(onCheckCompleted).toHaveBeenCalled();
     });
 
     // test all the patterns
