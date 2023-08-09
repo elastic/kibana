@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { LicenseType } from '@kbn/licensing-plugin/server';
+import type { LicenseType } from '@kbn/licensing-plugin/server';
 import {
   CancellationToken,
   decryptJobHeaders,

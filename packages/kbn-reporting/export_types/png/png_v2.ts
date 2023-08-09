@@ -7,7 +7,7 @@
  */
 
 import apm from 'elastic-apm-node';
-import { LicenseType } from '@kbn/licensing-plugin/server';
+import type { LicenseType } from '@kbn/licensing-plugin/server';
 import {
   CancellationToken,
   decryptJobHeaders,
@@ -39,8 +39,8 @@ import {
 } from 'rxjs';
 import { SerializableRecord } from '@kbn/utility-types';
 import { PNG_REPORT_TYPE_V2 } from '@kbn/reporting-common/report_types';
-import { PngScreenshotOptions, PngScreenshotResult } from '@kbn/screenshotting-plugin/server';
-import { Context } from '@kbn/screenshotting-plugin/server/browsers';
+import type { PngScreenshotOptions, PngScreenshotResult } from '@kbn/screenshotting-plugin/server';
+import type { Context } from '@kbn/screenshotting-plugin/server/browsers';
 import { JobParamsPNGV2, TaskPayloadPNGV2 } from './types';
 
 export class PngExportType extends ExportType<JobParamsPNGV2, TaskPayloadPNGV2> {
