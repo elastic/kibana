@@ -30,19 +30,19 @@ export interface MetricLayerOptions {
 interface MetricLayerConfig {
   data: FormulaConfig;
   options?: MetricLayerOptions;
-  formulaAPI: FormulaPublicApi;
 }
 
 export class MetricLayer implements ChartLayer<MetricVisualizationState> {
   private column: ChartColumn;
   constructor(private layerConfig: MetricLayerConfig) {
-    this.column = new FormulaColumn(layerConfig.data, layerConfig.formulaAPI);
+    this.column = new FormulaColumn(layerConfig.data);
   }
 
   getLayer(
     layerId: string,
     accessorId: string,
-    dataView: DataView
+    dataView: DataView,
+    formulaAPI: FormulaPublicApi
   ): FormBasedPersistedState['layers'] {
     const baseLayer: PersistedIndexPatternLayer = {
       columnOrder: [HISTOGRAM_COLUMN_NAME],
@@ -67,14 +67,15 @@ export class MetricLayer implements ChartLayer<MetricVisualizationState> {
             columnOrder: [],
             columns: {},
           },
-          dataView
+          dataView,
+          formulaAPI
         ),
       },
       ...(this.layerConfig.options?.showTrendLine
         ? {
             [`${layerId}_trendline`]: {
               linkToLayers: [layerId],
-              ...this.column.getData(`${accessorId}_trendline`, baseLayer, dataView),
+              ...this.column.getData(`${accessorId}_trendline`, baseLayer, dataView, formulaAPI),
             },
           }
         : {}),

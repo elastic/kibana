@@ -211,11 +211,11 @@ const chartFactory = <
 
       return new XYChart({
         dataView,
+        formulaAPI,
         layers: layers.map((layerItem) => {
           const Layer = getLayerClass(layerItem.layerType);
           return new Layer({
             data: layerItem.data,
-            formulaAPI,
             options: layerItem.options,
           });
         }),
@@ -229,9 +229,9 @@ const chartFactory = <
 
       return new MetricChart({
         dataView,
+        formulaAPI,
         layers: new MetricLayer({
           data: layers.data,
-          formulaAPI,
           options: layers.options,
         }),
         title,

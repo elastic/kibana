@@ -22,9 +22,9 @@ const metricChart = new MetricChart({
         },
       },
     },
-    formulaAPI,
   }),
   dataView,
+  formulaAPI
 });
 ```
 
@@ -45,9 +45,9 @@ const xyChart = new XYChart({
         },
       },
     }],
-    formulaAPI,
   })],
   dataView,
+  formulaAPI
 });
 ```
 
@@ -69,7 +69,6 @@ const xyChart = new XYChart({
           },
         },
       }],
-      formulaAPI,
     }),
     new XYReferenceLineLayer({
       data: [{
@@ -84,6 +83,7 @@ const xyChart = new XYChart({
     }),
   ],
   dataView,
+  formulaAPI
 });
 ```
 
@@ -114,10 +114,10 @@ const xyChart = new XYChart({
           decimals: 1,
         },
       },
-    }],
-    formulaAPI,
+    }]
   }),
   dataView,
+  formulaAPI
 });
 ```
 
@@ -150,10 +150,10 @@ const builder = new LensAttributesBuilder({
           },
         },
       },
-      formulaAPI,
     }),
     dataView,
-  })
+    formulaAPI
+  }),
 });
 
 const lensAttributes = builder.build();

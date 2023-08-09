@@ -107,10 +107,10 @@ describe('lens_attributes_builder', () => {
       const metriChart = new MetricChart({
         layers: new MetricLayer({
           data: getFormula(AVERAGE_CPU_USER_FORMULA),
-          formulaAPI,
         }),
 
         dataView: mockDataView,
+        formulaAPI,
       });
       const builder = new LensAttributesBuilder({ visualization: metriChart });
       const {
@@ -149,10 +149,10 @@ describe('lens_attributes_builder', () => {
           options: {
             showTrendLine: true,
           },
-          formulaAPI,
         }),
 
         dataView: mockDataView,
+        formulaAPI,
       });
       const builder = new LensAttributesBuilder({ visualization: metriChart });
       const {
@@ -205,10 +205,10 @@ describe('lens_attributes_builder', () => {
         layers: [
           new XYDataLayer({
             data: [getFormula(AVERAGE_CPU_USER_FORMULA)],
-            formulaAPI,
           }),
         ],
         dataView: mockDataView,
+        formulaAPI,
       });
       const builder = new LensAttributesBuilder({ visualization: xyChart });
       const {
@@ -249,13 +249,13 @@ describe('lens_attributes_builder', () => {
         layers: [
           new XYDataLayer({
             data: [getFormula(AVERAGE_CPU_USER_FORMULA)],
-            formulaAPI,
           }),
           new XYReferenceLinesLayer({
             data: [getFormula('1')],
           }),
         ],
         dataView: mockDataView,
+        formulaAPI,
       });
       const builder = new LensAttributesBuilder({ visualization: xyChart });
       const {
@@ -317,10 +317,10 @@ describe('lens_attributes_builder', () => {
         layers: [
           new XYDataLayer({
             data: [getFormula(AVERAGE_CPU_USER_FORMULA), getFormula(AVERAGE_CPU_SYSTEM_FORMULA)],
-            formulaAPI,
           }),
         ],
         dataView: mockDataView,
+        formulaAPI,
       });
       const builder = new LensAttributesBuilder({ visualization: xyChart });
       const {

@@ -33,13 +33,12 @@ export interface XYLayerOptions {
 interface XYLayerConfig {
   data: FormulaConfig[];
   options?: XYLayerOptions;
-  formulaAPI: FormulaPublicApi;
 }
 
 export class XYDataLayer implements ChartLayer<XYDataLayerConfig> {
   private column: ChartColumn[];
   constructor(private layerConfig: XYLayerConfig) {
-    this.column = layerConfig.data.map((p) => new FormulaColumn(p, layerConfig.formulaAPI));
+    this.column = layerConfig.data.map((dataItem) => new FormulaColumn(dataItem));
   }
 
   getName(): string | undefined {
@@ -71,7 +70,8 @@ export class XYDataLayer implements ChartLayer<XYDataLayerConfig> {
   getLayer(
     layerId: string,
     accessorId: string,
-    dataView: DataView
+    dataView: DataView,
+    formulaAPI: FormulaPublicApi
   ): FormBasedPersistedState['layers'] {
     const baseLayer: PersistedIndexPatternLayer = {
       columnOrder: [BREAKDOWN_COLUMN_NAME, HISTOGRAM_COLUMN_NAME],
@@ -84,7 +84,7 @@ export class XYDataLayer implements ChartLayer<XYDataLayerConfig> {
       [layerId]: this.column.reduce(
         (acc, curr, index) => ({
           ...acc,
-          ...curr.getData(`${accessorId}_${index}`, acc, dataView),
+          ...curr.getData(`${accessorId}_${index}`, acc, dataView, formulaAPI),
         }),
         baseLayer
       ),

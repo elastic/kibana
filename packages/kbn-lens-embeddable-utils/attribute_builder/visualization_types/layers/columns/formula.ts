@@ -11,7 +11,7 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import type { FormulaConfig, ChartColumn } from '../../../types';
 
 export class FormulaColumn implements ChartColumn {
-  constructor(private formulaConfig: FormulaConfig, private formulaAPI: FormulaPublicApi) {}
+  constructor(private formulaConfig: FormulaConfig) {}
 
   getFormulaConfig(): FormulaConfig {
     return this.formulaConfig;
@@ -20,10 +20,11 @@ export class FormulaColumn implements ChartColumn {
   getData(
     id: string,
     baseLayer: PersistedIndexPatternLayer,
-    dataView: DataView
+    dataView: DataView,
+    formulaAPI: FormulaPublicApi
   ): PersistedIndexPatternLayer {
     const { value, ...rest } = this.getFormulaConfig();
-    const formulaLayer = this.formulaAPI.insertOrReplaceFormulaColumn(
+    const formulaLayer = formulaAPI.insertOrReplaceFormulaColumn(
       id,
       { formula: value, ...rest },
       baseLayer,

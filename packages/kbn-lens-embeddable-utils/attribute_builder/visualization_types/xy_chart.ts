@@ -27,7 +27,12 @@ export class XYChart implements Chart<XYState> {
       const accessorId = `${ACCESSOR}_${index}`;
       return {
         ...acc,
-        ...curr.getLayer(layerId, accessorId, this.chartConfig.dataView),
+        ...curr.getLayer(
+          layerId,
+          accessorId,
+          this.chartConfig.dataView,
+          this.chartConfig.formulaAPI
+        ),
       };
     }, {});
   }
