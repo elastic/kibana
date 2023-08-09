@@ -7,7 +7,10 @@
 
 import { HttpSetup } from '@kbn/core/public';
 import type { CspFinding } from '../../../../common/schemas/csp_finding';
-import { LATEST_FINDINGS_INDEX_DEFAULT_NS } from '../../../../common/constants';
+import {
+  FINDINGS_INDEX_PATTERN,
+  LATEST_FINDINGS_RETENTION_POLICY,
+} from '../../../../common/constants';
 import { createDetectionRule } from '../../../common/api/create_detection_rule';
 
 const DEFAULT_RULE_RISK_SCORE = 0;
@@ -15,6 +18,7 @@ const DEFAULT_RULE_SEVERITY = 'low';
 const DEFAULT_RULE_ENABLED = true;
 const DEFAULT_RULE_AUTHOR = 'Elastic';
 const DEFAULT_RULE_LICENSE = 'Elastic License v2';
+const DEFAULT_MAX_ALERTS_PER_RULE = 100;
 const ALERT_SUPPRESSION_FIELD = 'resource.id';
 const ALERT_TIMESTAMP_FIELD = 'event.ingested';
 
@@ -40,7 +44,9 @@ const convertReferencesLinksToArray = (input: string | undefined) => {
   return matches.map((link) => link.replace(/^\d+\. /, '').replace(/\n/g, ''));
 };
 
-const STATIC_RULE_TAGS = ['Elastic', 'Cloud Security'];
+const CSP_RULE_TAG = 'Cloud Security';
+
+const STATIC_RULE_TAGS = [CSP_RULE_TAG];
 
 const generateMisconfigurationsTags = (finding: CspFinding) => {
   return [STATIC_RULE_TAGS]
@@ -78,8 +84,9 @@ export const createDetectionRuleFromFinding = async (http: HttpSetup, finding: C
       severity_mapping: [],
       threat: [],
       interval: '1h',
-      from: 'now-7200s',
+      from: `now-${LATEST_FINDINGS_RETENTION_POLICY}`,
       to: 'now',
+      max_signals: DEFAULT_MAX_ALERTS_PER_RULE,
       timestamp_override: ALERT_TIMESTAMP_FIELD,
       timestamp_override_fallback_disabled: false,
       actions: [],
@@ -88,7 +95,7 @@ export const createDetectionRuleFromFinding = async (http: HttpSetup, finding: C
         group_by: [ALERT_SUPPRESSION_FIELD],
         missing_fields_strategy: AlertSuppressionMissingFieldsStrategy.Suppress,
       },
-      index: [LATEST_FINDINGS_INDEX_DEFAULT_NS],
+      index: [FINDINGS_INDEX_PATTERN],
       query: generateMisconfigurationsRuleQuery(finding),
       references: convertReferencesLinksToArray(finding.rule.references),
       name: finding.rule.name,
