@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { RouteValidatorFullConfig, ZodRouteValidatorType } from './route_validator';
+import type { RouteValidatorFullConfig } from './route_validator';
 
 /**
  * The set of valid body.output
@@ -156,8 +156,6 @@ export interface RouteConfigOptions<Method extends RouteMethod> {
      */
     idleSocket?: number;
   };
-
-  isZod?: boolean;
 }
 
 /**
@@ -236,7 +234,7 @@ export interface RouteConfig<P, Q, B, Method extends RouteMethod> {
    * });
    * ```
    */
-  validate: RouteValidatorFullConfig<P, Q, B> | ZodRouteValidatorType<P, Q, B> | false;
+  validate: RouteValidatorFullConfig<P, Q, B> | false;
 
   /**
    * Additional route options {@link RouteConfigOptions}.

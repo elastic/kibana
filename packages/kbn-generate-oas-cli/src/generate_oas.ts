@@ -14,8 +14,9 @@ import type { OpenAPIV3 } from 'openapi-types';
 import z from 'zod';
 import zodToJsonSchema from 'zod-to-json-schema';
 
-import type { IRouter, RequestHandlerContextBase } from '@kbn/core-http-server';
-import { RouterRoute } from '@kbn/core-http-server';
+import type { CoreVersionedRouter } from '@kbn/core-http-router-server-internal';
+import { versionHandlerResolvers } from '@kbn/core-http-router-server-internal';
+import type { VersionedRouterRoute } from '@kbn/core-http-router-server-internal/src/versioned_router/types';
 import {
   instanceofZodType,
   instanceofZodTypeObject,
@@ -40,11 +41,10 @@ export interface GenerateOpenApiDocumentOptions {
 }
 
 export function generateOpenApiDocument(
-  appRouters: Array<IRouter<RequestHandlerContextBase>>,
+  appRouters: CoreVersionedRouter[],
   opts: GenerateOpenApiDocumentOptions
 ): OpenAPIV3.Document {
   const paths: OpenAPIV3.PathsObject = {};
-
   for (const appRouter of appRouters) {
     Object.assign(paths, getOpenApiPathsObject(appRouter));
   }
@@ -140,10 +140,9 @@ function extractParameterObjects(
       }
 
       if (instanceofZodTypeOptional(shapeSchema)) {
-        // // why?
-        // if (isPathParameter) {
-        //   throw new Error(`Path parameter: "${shapeKey}" must not be optional`);
-        // }
+        if (isPathParameter) {
+          throw new Error(`Path parameter: "${shapeKey}" must not be optional`);
+        }
         shapeSchema = shapeSchema.unwrap();
       }
 
@@ -159,22 +158,23 @@ function extractParameterObjects(
     });
 }
 
-function extractRequestBody(route: RouterRoute): OpenAPIV3.RequestBodyObject['content'] {
-  if (route.validate) {
-    return (
-      instanceofZodType(route.validate.body)
-        ? {
-            'application/json': {
-              schema: runtimeSchemaToJsonSchema(route.validate.body),
-            },
-          }
-        : {}
-    ) as OpenAPIV3.RequestBodyObject['content'];
-  }
-  return {};
+function extractRequestBody(route: VersionedRouterRoute): OpenAPIV3.RequestBodyObject['content'] {
+  return route.handlers.reduce<OpenAPIV3.RequestBodyObject['content']>((acc, handler) => {
+    if (!handler.options.validate) return acc;
+    if (!handler.options.validate.request) return acc;
+    const schema = instanceofZodType(handler.options.validate.request.body)
+      ? runtimeSchemaToJsonSchema(handler.options.validate.request.body)
+      : {};
+    return {
+      ...acc,
+      [getVersionedContentString(handler.options.version)]: {
+        schema,
+      },
+    };
+  }, {} as OpenAPIV3.RequestBodyObject['content']);
 }
 
-function extractResponses(route: RouterRoute): OpenAPIV3.ResponsesObject {
+function extractResponses(route: VersionedRouterRoute): OpenAPIV3.ResponsesObject {
   return route.handlers.reduce<OpenAPIV3.ResponsesObject>((acc, handler) => {
     if (!handler.options.validate) return acc;
     if (!handler.options.validate.response) return acc;
@@ -208,23 +208,20 @@ function getOperationId(name: string): string {
   return aliasedName;
 }
 
-function getOpenApiPathsObject(
-  appRouter: IRouter<RequestHandlerContextBase>
-): OpenAPIV3.PathsObject {
+function getOpenApiPathsObject(appRouter: CoreVersionedRouter): OpenAPIV3.PathsObject {
   const routes = appRouter
     .getRoutes()
-    // .filter((route) => route.options.access === 'public')
+    .filter((route) => route.options.access === 'public')
     .map((route) => ({
       ...route,
       path: route.path.replace('?', ''),
     }));
-
   const paths: OpenAPIV3.PathsObject = {};
   for (const route of routes) {
-    if (!route.options.isZod) continue;
-
     const pathParams = getPathParameters(route.path);
-    const hasBody = Boolean(route.options.body);
+    const hasBody = route.handlers.some(
+      (handler) => handler.options.validate !== false && handler.options.validate?.request?.body
+    );
 
     /**
      * Note: for a given route we accept that route params and query params remain BWC
@@ -233,50 +230,35 @@ function getOpenApiPathsObject(
      */
     let pathObjects: OpenAPIV3.ParameterObject[] = [];
     let queryObjects: OpenAPIV3.ParameterObject[] = [];
-
-    if (route.validate) {
-      const params = route.validate.params as any;
+    const version = versionHandlerResolvers.newest(
+      route.handlers.map(({ options: { version: v } }) => v)
+    );
+    const handler = route.handlers.find(({ options: { version: v } }) => v === version);
+    if (handler && handler.options.validate !== false) {
+      const params = handler.options.validate.request?.params as any;
       if (params && instanceofZodType(params)) {
         pathObjects = extractParameterObjects(params, pathParams, 'path') ?? [];
       }
-      const query = route.validate.query as any;
+      const query = handler.options.validate.request?.query as any;
       if (query && instanceofZodType(query)) {
         queryObjects = extractParameterObjects(query, pathParams, 'query') ?? [];
       }
-
-      const path: OpenAPIV3.PathItemObject = {
-        [route.method]: {
-          requestBody: hasBody
-            ? {
-                content: extractRequestBody(route),
-              }
-            : undefined,
-          responses: {
-            '200': {
-              description: 'Fake response, current router does not support this',
-              content: {
-                'application/json': {
-                  schema: {
-                    type: 'object',
-                    properties: {
-                      fake: {
-                        type: 'string',
-                      },
-                    },
-                    required: ['fake'],
-                    additionalProperties: false,
-                  },
-                },
-              },
-            },
-          },
-          parameters: pathObjects.concat(queryObjects),
-          operationId: getOperationId(route.path),
-        },
-      };
-
-      paths[route.path] = { ...paths[route.path], ...path };
     }
+
+    const path: OpenAPIV3.PathItemObject = {
+      [route.method]: {
+        requestBody: hasBody
+          ? {
+              content: extractRequestBody(route),
+            }
+          : undefined,
+        responses: extractResponses(route),
+        parameters: pathObjects.concat(queryObjects),
+        operationId: getOperationId(route.path),
+      },
+    };
+
+    paths[route.path] = { ...paths[route.path], ...path };
   }
   return paths;
 }

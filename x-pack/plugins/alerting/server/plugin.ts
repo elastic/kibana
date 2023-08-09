@@ -220,7 +220,6 @@ export class AlertingPlugin {
     core: CoreSetup<AlertingPluginsStart, unknown>,
     plugins: AlertingPluginsSetup
   ): PluginSetupContract {
-    console.log('setup the ALERTING plugin');
     this.kibanaBaseUrl = core.http.basePath.publicBaseUrl;
     this.licenseState = new LicenseState(plugins.licensing.license$);
     this.security = plugins.security;
@@ -411,7 +410,6 @@ export class AlertingPlugin {
   }
 
   public start(core: CoreStart, plugins: AlertingPluginsStart): PluginStartContract {
-    console.log('starting the ALERTING plugin');
     const {
       isESOCanEncrypt,
       logger,

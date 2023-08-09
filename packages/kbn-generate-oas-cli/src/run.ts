@@ -8,13 +8,14 @@
 
 import Fsp from 'fs/promises';
 import Path from 'path';
+
 import { run } from '@kbn/dev-cli-runner';
 import { set } from '@kbn/safer-lodash-set';
-import { merge } from 'lodash';
+import axios from 'axios';
+import { CoreVersionedRouter } from '@kbn/core-http-router-server-internal';
 import { createTestServers } from '@kbn/core-test-helpers-kbn-server';
 import { PLUGIN_SYSTEM_ENABLE_ALL_PLUGINS_CONFIG_PATH } from '@kbn/core-plugins-server-internal/src/constants';
 
-import axios from 'axios';
 import { generateOpenApiDocument } from './generate_oas';
 import { waitUntilAPIReady } from './wait_until_api_ready';
 
@@ -61,18 +62,22 @@ run(
       },
     });
 
-    await startES();
-
     let done = false;
+    let stopKibana;
+    let stopES;
+
     try {
-      const { coreSetup, coreStart } = await startKibana();
+      const { stop: _stopES } = await startES();
+      const { coreSetup, coreStart, stop: _stopKibana } = await startKibana();
+      stopKibana = _stopKibana;
+      stopES = _stopES;
+
       log.info('Generating OpenAPI spec...');
 
-      const spec = generateOpenApiDocument(coreSetup.http.getRegisteredRouters(), {
-        title: 'Kibana OpenAPI spec',
-        baseUrl: '/',
-        version: '0.0.0',
-      });
+      const spec = generateOpenApiDocument(
+        coreSetup.http.getRegisteredRouters().map((r) => r.versioned as CoreVersionedRouter),
+        { title: 'Kibana OpenAPI spec', baseUrl: '/', version: '0.0.0' }
+      );
 
       const { protocol, hostname, port } = coreStart.http.getServerInfo();
       const url = `${protocol}://${hostname}:${port}/oas/generate`;
@@ -84,8 +89,8 @@ run(
         auth: { username: 'elastic', password: 'changeme' },
       });
 
-      console.log('data', JSON.stringify(data, null, 2));
-
+      // TODO: Think of the best way to merge this objects, this will override the schemas
+      // but we might want to merge
       const output = Object.assign({}, spec, { paths: data });
 
       log.info(`Writing OpenAPI spec ${OUTPUT_FILE}...`);
@@ -97,7 +102,8 @@ run(
       log.error(e);
       throw e;
     } finally {
-      // await root.shutdown().catch(() => {});
+      if (stopES) await stopES();
+      if (stopKibana) await stopKibana();
       process.exit(done ? 0 : 1);
     }
   },
