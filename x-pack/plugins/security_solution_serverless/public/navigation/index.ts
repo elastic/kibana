@@ -13,7 +13,9 @@ import { SecurityPagePath } from './links/constants';
 import { subscribeNavigationTree } from './navigation_tree';
 import { getSecuritySideNavComponent } from './side_navigation';
 
-const SECURITY_MANAGEMENT_PATH = `${APP_PATH}${SecurityPagePath[SecurityPageName.projectSettings]}`;
+const SECURITY_PROJECT_SETTINGS_PATH = `${APP_PATH}${
+  SecurityPagePath[SecurityPageName.projectSettings]
+}`;
 
 export const configureNavigation = (
   services: Services,
@@ -23,7 +25,7 @@ export const configureNavigation = (
   securitySolution.setIsSidebarEnabled(false);
 
   if (!serverConfig.developer.disableManagementUrlRedirect) {
-    management.setLandingPageRedirect(SECURITY_MANAGEMENT_PATH);
+    management.setLandingPageRedirect(SECURITY_PROJECT_SETTINGS_PATH);
   }
 
   serverless.setProjectHome(APP_PATH);

@@ -150,7 +150,6 @@ describe('getProjectNavLinks', () => {
       title: 'Assets',
       links: [link2],
     };
-    // mockChromeNavLinksHas.mockReturnValue(true); // all links exist
     const testSecurityNavLinks$ = new BehaviorSubject([link1, linkAssets]);
 
     const projectNavLinks$ = createProjectNavLinks$(
@@ -197,7 +196,6 @@ describe('getProjectNavLinks', () => {
       title: 'Project settings',
       links: [link2],
     };
-    // mockChromeNavLinksHas.mockReturnValue(true); // all links exist
     const testSecurityNavLinks$ = new BehaviorSubject([link1, linkProjectSettings]);
 
     const projectNavLinks$ = createProjectNavLinks$(
@@ -208,9 +206,9 @@ describe('getProjectNavLinks', () => {
 
     const value = await firstValueFrom(projectNavLinks$.pipe(take(1)));
 
-    const expectedProjectSettingsNavLinks = projectSettingsNavLinks.map((link) =>
-      expect.objectContaining(link)
-    ); // ignore externalUrl property in cloud links, tested separately
+    const expectedProjectSettingsNavLinks = projectSettingsNavLinks.map(
+      (link) => expect.objectContaining(link) // ignore externalUrl property in cloud links, tested separately
+    );
 
     expect(value).toEqual([
       link1,
@@ -230,7 +228,6 @@ describe('getProjectNavLinks', () => {
       title: 'Project settings',
       links: [link2],
     };
-    // mockChromeNavLinksHas.mockReturnValue(true); // all links exist
     const testSecurityNavLinks$ = new BehaviorSubject([link1, linkProjectSettings]);
 
     const projectNavLinks$ = createProjectNavLinks$(

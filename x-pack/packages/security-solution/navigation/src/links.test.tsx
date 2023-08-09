@@ -15,7 +15,7 @@ import {
   getAppIdsFromId,
   formatPath,
   isModified,
-  mergePaths,
+  concatPaths,
 } from './links';
 import { mockGetAppUrl, mockNavigateTo } from '../mocks/navigation';
 
@@ -165,24 +165,24 @@ describe('links', () => {
     });
   });
 
-  describe('mergePaths', () => {
-    it('should merge undefined or empty paths', () => {
-      expect(mergePaths(undefined, undefined)).toEqual('');
-      expect(mergePaths('', '')).toEqual('');
+  describe('concatPaths', () => {
+    it('should return empty path for undefined or empty paths', () => {
+      expect(concatPaths(undefined, undefined)).toEqual('');
+      expect(concatPaths('', '')).toEqual('');
     });
     it('should return path if sub-path not defined or empty', () => {
-      expect(mergePaths('/main/path', undefined)).toEqual('/main/path');
-      expect(mergePaths('/main/path', '')).toEqual('/main/path');
+      expect(concatPaths('/main/path', undefined)).toEqual('/main/path');
+      expect(concatPaths('/main/path', '')).toEqual('/main/path');
     });
     it('should return sub-path if path not defined or empty', () => {
-      expect(mergePaths(undefined, '/some/sub-path')).toEqual('/some/sub-path');
-      expect(mergePaths('', '/some/sub-path')).toEqual('/some/sub-path');
+      expect(concatPaths(undefined, '/some/sub-path')).toEqual('/some/sub-path');
+      expect(concatPaths('', '/some/sub-path')).toEqual('/some/sub-path');
     });
-    it('should merge path and sub-path if defined', () => {
-      expect(mergePaths('/main/path', '/some/sub-path')).toEqual('/main/path/some/sub-path');
+    it('should concatenate path and sub-path if defined', () => {
+      expect(concatPaths('/main/path', '/some/sub-path')).toEqual('/main/path/some/sub-path');
     });
     it('should clean path before merging', () => {
-      expect(mergePaths('/main/path/', '/some/sub-path')).toEqual('/main/path/some/sub-path');
+      expect(concatPaths('/main/path/', '/some/sub-path')).toEqual('/main/path/some/sub-path');
     });
   });
 

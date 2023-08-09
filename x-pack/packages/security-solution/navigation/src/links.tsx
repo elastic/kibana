@@ -40,9 +40,9 @@ export const useGetLinkUrl = () => {
   const { getAppUrl } = useGetAppUrl();
 
   const getLinkUrl = useCallback<GetLinkUrl>(
-    ({ id, path: explicitPath = '', absolute = false, urlState }) => {
-      const { appId, deepLinkId, path: idPath = '' } = getAppIdsFromId(id);
-      const path = mergePaths(idPath, explicitPath);
+    ({ id, path: subPath = '', absolute = false, urlState }) => {
+      const { appId, deepLinkId, path: mainPath = '' } = getAppIdsFromId(id);
+      const path = concatPaths(mainPath, subPath);
       const formattedPath = urlState ? formatPath(path, urlState) : path;
       return getAppUrl({ deepLinkId, appId, path: formattedPath, absolute });
     },
@@ -128,7 +128,7 @@ export const getAppIdsFromId = (
   return { deepLinkId: linkId, path }; // undefined `appId` for internal Security Solution links
 };
 
-export const mergePaths = (path: string | undefined, subPath: string | undefined) => {
+export const concatPaths = (path: string | undefined, subPath: string | undefined) => {
   if (path && subPath) {
     return `${path.replace(/\/$/, '')}/${subPath.replace(/^\//, '')}`;
   }
