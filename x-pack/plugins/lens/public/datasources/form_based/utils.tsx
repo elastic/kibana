@@ -14,7 +14,7 @@ import { TimeRange } from '@kbn/es-query';
 import { EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
-import { groupBy, escape, uniq } from 'lodash';
+import { groupBy, escape, uniq, uniqBy } from 'lodash';
 import type { Query } from '@kbn/data-plugin/common';
 import { SearchRequest } from '@kbn/data-plugin/common';
 
@@ -40,16 +40,19 @@ import type { ReferenceBasedIndexPatternColumn } from './operations/definitions/
 
 import {
   operationDefinitionMap,
-  GenericIndexPatternColumn,
-  TermsIndexPatternColumn,
-  CountIndexPatternColumn,
+  type GenericIndexPatternColumn,
+  type TermsIndexPatternColumn,
+  type CountIndexPatternColumn,
   updateColumnParam,
   updateDefaultLabels,
-  RangeIndexPatternColumn,
-  FormulaIndexPatternColumn,
-  DateHistogramIndexPatternColumn,
-  MaxIndexPatternColumn,
-  MinIndexPatternColumn,
+  type RangeIndexPatternColumn,
+  type FormulaIndexPatternColumn,
+  type DateHistogramIndexPatternColumn,
+  type MaxIndexPatternColumn,
+  type MinIndexPatternColumn,
+  type GenericOperationDefinition,
+  FieldBasedIndexPatternColumn,
+  getReferenceRoot,
 } from './operations';
 
 import { getInvalidFieldMessage, isColumnOfType } from './operations/definitions/helpers';
@@ -336,6 +339,110 @@ export function getShardFailuresWarningMessages(
     }
   }
   return [];
+}
+
+export function getUnsupportedWarningMessage(
+  state: FormBasedPrivateState,
+  { activeData, dataViews }: FramePublicAPI,
+  docLinks: DocLinksStart
+) {
+  const warningMessages: UserMessage[] = [];
+  const columnsWithUnsupportedOperations: Array<
+    [FieldBasedIndexPatternColumn, ReferenceBasedIndexPatternColumn | undefined]
+  > = Object.values(state.layers).flatMap((layer) => {
+    const dataView = dataViews.indexPatterns[layer.indexPatternId];
+    const columnsEntries = Object.entries(layer.columns);
+    return columnsEntries
+      .filter(([_, column]) => {
+        if (!hasField(column)) {
+          return false;
+        }
+        const field = dataView.getFieldByName(column.sourceField);
+        if (!field) {
+          return false;
+        }
+        return (
+          !(
+            operationDefinitionMap[column.operationType] as Extract<
+              GenericOperationDefinition,
+              { input: 'field' }
+            >
+          ).getPossibleOperationForField(field) && field?.timeSeriesMetric === 'counter'
+        );
+      })
+      .map(
+        ([id, fieldColumn]) =>
+          [fieldColumn, layer.columns[getReferenceRoot(layer, id)]] as [
+            FieldBasedIndexPatternColumn,
+            ReferenceBasedIndexPatternColumn | undefined
+          ]
+      );
+  });
+  if (columnsWithUnsupportedOperations.length) {
+    // group the columns by field
+    // then group together columns of a formula/referenced operation who use the same field
+    const columnsGroupedByField = Object.values(
+      groupBy(columnsWithUnsupportedOperations, ([column]) => column.sourceField)
+    ).map((columnsList) => uniqBy(columnsList, ([column, rootColumn]) => rootColumn ?? column));
+
+    for (const columnsGrouped of columnsGroupedByField) {
+      const sourceField = columnsGrouped[0][0].sourceField;
+      warningMessages.push({
+        severity: 'warning',
+        fixableInEditor: false,
+        displayLocations: [{ id: 'toolbar' }, { id: 'embeddableBadge' }],
+        shortMessage: i18n.translate(
+          'xpack.lens.indexPattern.tsdbErrorWarning.unsupportedCounterOperationErrorWarning.shortMessage',
+          {
+            defaultMessage:
+              'The result of {count} {count, plural, one {operation} other {operations}} might be meaningless for {field}: {operations}',
+            values: {
+              count: columnsGrouped.length,
+              operations: columnsGrouped
+                .map(([affectedColumn, rootColumn]) => (rootColumn ?? affectedColumn).label)
+                .join(', '),
+              field: sourceField,
+            },
+          }
+        ),
+        longMessage: (
+          <>
+            <FormattedMessage
+              id="xpack.lens.indexPattern.unsupportedCounterOperationErrorWarning"
+              defaultMessage="While {count} {count, plural, one {operation} other {operations}} for {field} {count, plural, one {is} other {are}} allowed the result might be meaningless: {operations}. To learn more about this, {link}."
+              values={{
+                count: columnsGrouped.length,
+                operations: (
+                  <>
+                    {columnsGrouped.map(([affectedColumn, rootColumn], i) => (
+                      <>
+                        <strong>{(rootColumn ?? affectedColumn).label}</strong>
+                        {i < columnsGrouped.length - 1 ? ', ' : ''}
+                      </>
+                    ))}
+                  </>
+                ),
+                field: sourceField,
+                link: (
+                  <EuiLink
+                    href={docLinks.links.fleet.datastreamsTSDSMetrics}
+                    target="_blank"
+                    external={true}
+                  >
+                    <FormattedMessage
+                      defaultMessage="visit the Time series documentation"
+                      id="xpack.lens.indexPattern.unsupportedCounterOperationErrorWarning.link"
+                    />
+                  </EuiLink>
+                ),
+              }}
+            />
+          </>
+        ),
+      });
+    }
+  }
+  return warningMessages;
 }
 
 export function getPrecisionErrorWarningMessages(
