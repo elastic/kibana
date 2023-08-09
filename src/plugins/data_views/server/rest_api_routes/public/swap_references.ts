@@ -27,7 +27,10 @@ interface GetDataViewArgs {
 
 interface SwapRefResponse {
   result: Array<{ id: string; type: string }>;
-  deleteSuccess?: boolean;
+  deleteStatus?: {
+    remainingRefs: number;
+    deletePerformed: boolean;
+  };
 }
 
 export const swapReference = async ({
@@ -73,7 +76,12 @@ export const swapReferencesRoute =
             200: {
               body: schema.object({
                 result: schema.arrayOf(schema.object({ id: idSchema, type: schema.string() })),
-                deleteSuccess: schema.maybe(schema.boolean()),
+                deleteStatus: schema.maybe(
+                  schema.object({
+                    remainingRefs: schema.number(),
+                    deletePerformed: schema.boolean(),
+                  })
+                ),
               }),
             },
           },
@@ -158,10 +166,16 @@ export const swapReferencesRoute =
           if (req.body.delete) {
             const verifyNoMoreRefs = await savedObjectsClient.find(findParams);
             if (verifyNoMoreRefs.total > 0) {
-              body.deleteSuccess = false;
+              body.deleteStatus = {
+                remainingRefs: verifyNoMoreRefs.total,
+                deletePerformed: false,
+              };
             } else {
               await savedObjectsClient.delete(type, req.body.fromId, { refresh: 'wait_for' });
-              body.deleteSuccess = true;
+              body.deleteStatus = {
+                remainingRefs: verifyNoMoreRefs.total,
+                deletePerformed: true,
+              };
             }
           }
 

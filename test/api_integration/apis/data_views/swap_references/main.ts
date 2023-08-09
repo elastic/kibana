@@ -96,6 +96,8 @@ export default function ({ getService }: FtrProviderContext) {
         });
       expect(res).to.have.property('status', 200);
       expect(res.body.result.length).to.equal(1);
+      expect(res.body.deleteStatus.remainingRefs).to.equal(0);
+      expect(res.body.deleteStatus.deletePerformed).to.equal(true);
 
       const res2 = await supertest
         .get(SPECIFIC_DATA_VIEW_PATH.replace('{id}', prevDataViewId))
