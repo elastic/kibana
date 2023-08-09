@@ -1569,7 +1569,7 @@
           },
           ">; } & { transactionType?: string | undefined; }; }; }) => Promise<{ mostUsedCharts: { key: ",
           "MobilePropertyType",
-          "; options: { key: string | number; docCount: number; }[] & { key: string | number; docCount: number; }[]; }[]; }>; } & ",
+          "; options: { key: string | number; docCount: number; }[]; }[]; }>; } & ",
           "APMRouteCreateOptions",
           "; \"GET /internal/apm/services/{serviceName}/mobile/filters\": { endpoint: \"GET /internal/apm/services/{serviceName}/mobile/filters\"; params?: ",
           "TypeC",
