@@ -13,7 +13,6 @@ import type { RouteConfig, RouteMethod } from './route';
 import type { RequestHandler, RequestHandlerWrapper } from './request_handler';
 import type { RequestHandlerContextBase } from './request_handler_context';
 import type { RouteConfigOptions } from './route';
-import type { RouteValidatorFullConfig } from './route_validator';
 
 /**
  * Route handler common definition

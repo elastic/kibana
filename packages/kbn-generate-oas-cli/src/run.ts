@@ -10,11 +10,9 @@ import Fsp from 'fs/promises';
 import Path from 'path';
 
 import { run } from '@kbn/dev-cli-runner';
-import { set } from '@kbn/safer-lodash-set';
 import axios from 'axios';
 import { CoreVersionedRouter } from '@kbn/core-http-router-server-internal';
 import { createTestServers } from '@kbn/core-test-helpers-kbn-server';
-import { PLUGIN_SYSTEM_ENABLE_ALL_PLUGINS_CONFIG_PATH } from '@kbn/core-plugins-server-internal/src/constants';
 
 import { generateOpenApiDocument } from './generate_oas';
 import { waitUntilAPIReady } from './wait_until_api_ready';
@@ -24,14 +22,6 @@ const OUTPUT_FILE = Path.resolve(__dirname, '../openapi.json');
 run(
   async ({ log, addCleanupTask }) => {
     log.info('Registering all plugin routes...');
-
-    const settings = {
-      logging: {
-        loggers: [{ name: 'root', level: 'error', appenders: ['console'] }],
-      },
-    };
-
-    set(settings, PLUGIN_SYSTEM_ENABLE_ALL_PLUGINS_CONFIG_PATH, true);
 
     const { startES, startKibana } = createTestServers({
       adjustTimeout: () => {},
@@ -43,10 +33,6 @@ run(
           server: {
             port: 5620,
           },
-          // TODO: How to include the plugin only for this use case?
-          // plugins: {
-          //   paths: [Path.resolve(__dirname, '../plugins/')],
-          // },
           cliArgs: {
             basePath: false,
             cache: false,
@@ -89,8 +75,6 @@ run(
         auth: { username: 'elastic', password: 'changeme' },
       });
 
-      // TODO: Think of the best way to merge this objects, this will override the schemas
-      // but we might want to merge
       const output = Object.assign({}, spec, { paths: data });
 
       log.info(`Writing OpenAPI spec ${OUTPUT_FILE}...`);
@@ -102,8 +86,8 @@ run(
       log.error(e);
       throw e;
     } finally {
-      if (stopES) await stopES();
       if (stopKibana) await stopKibana();
+      if (stopES) await stopES();
       process.exit(done ? 0 : 1);
     }
   },

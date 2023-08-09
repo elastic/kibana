@@ -96,7 +96,6 @@ export class RouteValidator<P = {}, Q = {}, B = {}> {
     if (typeof validationRule === 'undefined') {
       return {};
     }
-
     let precheckedData = this.preValidateSchema(data).validate(data, {}, namespace);
 
     if (unsafe !== true) {

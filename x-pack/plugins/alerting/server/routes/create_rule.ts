@@ -108,51 +108,61 @@ const rewriteBodyRes: RewriteResponseCase<SanitizedRule<RuleTypeParams>> = ({
 });
 
 export const createRuleRoute = ({ router, licenseState, usageCounter }: RouteOptions) => {
-  router.post(
-    {
+  router.versioned
+    .post({
       path: `${BASE_ALERTING_API_PATH}/rule/{id?}`,
-      validate: {
-        params: z.optional(
-          z.object({
-            id: z.optional(z.string()),
-          })
-        ),
-        body: bodySchema,
+      access: 'public',
+      description: 'Create a rule',
+    })
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: {
+          request: {
+            params: z.optional(
+              z.object({
+                id: z.optional(z.string()),
+              })
+            ),
+            body: bodySchema,
+          },
+          response: {
+            200: {
+              body: z.object({}),
+            },
+          },
+        },
       },
-      options: {
-        isZod: true,
-      },
-    },
-    handleDisabledApiKeysError(
-      router.handleLegacyErrors(
-        verifyAccessAndContext(licenseState, async function (context, req, res) {
-          const rulesClient = (await context.alerting).getRulesClient();
-          const rule = req.body;
-          const params = req.params;
+      handleDisabledApiKeysError(
+        router.handleLegacyErrors(
+          verifyAccessAndContext(licenseState, async function (context, req, res) {
+            const rulesClient = (await context.alerting).getRulesClient();
+            const rule = req.body;
+            const params = req.params;
 
-          countUsageOfPredefinedIds({
-            predefinedId: params?.id,
-            spaceId: rulesClient.getSpaceId(),
-            usageCounter,
-          });
-
-          try {
-            const createdRule: SanitizedRule<RuleTypeParams> =
-              await rulesClient.create<RuleTypeParams>({
-                data: rewriteBodyReq(rule),
-                options: { id: params?.id },
-              });
-            return res.ok({
-              body: rewriteBodyRes(createdRule),
+            countUsageOfPredefinedIds({
+              predefinedId: params?.id,
+              spaceId: rulesClient.getSpaceId(),
+              usageCounter,
             });
-          } catch (e) {
-            if (e instanceof RuleTypeDisabledError) {
-              return e.sendResponse(res);
+
+            try {
+              const createdRule: SanitizedRule<RuleTypeParams> =
+                await rulesClient.create<RuleTypeParams>({
+                  data: rewriteBodyReq(rule),
+                  options: { id: params?.id },
+                });
+              return res.ok({
+                body: rewriteBodyRes(createdRule),
+              });
+            } catch (e) {
+              if (e instanceof RuleTypeDisabledError) {
+                return e.sendResponse(res);
+              }
+              throw e;
             }
-            throw e;
-          }
-        })
+          })
+        )
       )
-    )
-  );
+    );
 };
