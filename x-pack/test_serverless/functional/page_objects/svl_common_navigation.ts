@@ -23,8 +23,6 @@ export function SvlCommonNavigationProvider(ctx: FtrProviderContext) {
   const testSubjects = ctx.getService('testSubjects');
   const browser = ctx.getService('browser');
   const retry = ctx.getService('retry');
-  const config = ctx.getService('config');
-  const defaultFindTimeout = config.get('timeouts.find');
 
   async function getByVisibleText(
     selector: string | (() => Promise<WebElementWrapper[]>),
@@ -50,29 +48,6 @@ export function SvlCommonNavigationProvider(ctx: FtrProviderContext) {
     },
     async clickLogo() {
       await testSubjects.click('nav-header-logo');
-    },
-    async waitUntilLoadingHasFinished() {
-      try {
-        await this.isGlobalLoadingIndicatorVisible();
-      } catch (exception) {
-        if (exception.name === 'ElementNotVisible') {
-          // selenium might just have been too slow to catch it
-        } else {
-          throw exception;
-        }
-      }
-      await this.awaitGlobalLoadingIndicatorHidden();
-    },
-    async isGlobalLoadingIndicatorVisible() {
-      return await testSubjects.exists('nav-header-loading-spinner', {
-        timeout: 1500,
-      });
-    },
-    async awaitGlobalLoadingIndicatorHidden() {
-      await testSubjects.existOrFail('nav-header-logo', {
-        allowHidden: true,
-        timeout: defaultFindTimeout * 10,
-      });
     },
     // side nav related actions
     sidenav: {

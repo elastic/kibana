@@ -2,12 +2,28 @@
   "type": "doc",
   "value": {
     "id": "index-pattern:histogram-test",
-    "index": ".kibana_analytics",
+    "index": ".kibana_analytics_1",
     "source": {
       "index-pattern": {
-        "title": "histogram-test"
+        "fieldAttrs": "{}",
+        "title": "histogram-test",
+        "sourceFilters": "[]",
+        "fields": "[]",
+        "fieldFormatMap": "{}",
+        "typeMeta": "{}",
+        "runtimeFieldMap": "{}",
+        "name": "histogram-test"
       },
-      "type": "index-pattern"
+      "type": "index-pattern",
+      "references": [],
+      "managed": false,
+      "namespaces": [
+        "default"
+      ],
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "8.0.0",
+      "updated_at": "2023-08-05T05:41:10.360Z",
+      "created_at": "2023-08-05T05:41:10.360Z"
     }
   }
 }

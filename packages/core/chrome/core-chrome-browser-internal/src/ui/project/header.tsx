@@ -139,23 +139,9 @@ const Logo = (
     [fullHref, props.application]
   );
 
-  const isLoading = loadingCount !== 0;
-
   return (
-    <span
-      css={logo.container}
-      data-test-subj={`globalLoadingIndicator${isLoading ? '' : '-hidden'}`}
-    >
-      {isLoading ? (
-        <a onClick={navigateHome} href={fullHref} css={logo.spinner}>
-          <EuiLoadingSpinner
-            size="l"
-            aria-hidden={false}
-            onClick={navigateHome}
-            data-test-subj="nav-header-loading-spinner"
-          />
-        </a>
-      ) : (
+    <span css={logo.container}>
+      {loadingCount === 0 ? (
         <EuiHeaderLogo
           iconType="logoElastic"
           onClick={navigateHome}
@@ -164,6 +150,15 @@ const Logo = (
           data-test-subj="nav-header-logo"
           aria-label={headerStrings.logo.ariaLabel}
         />
+      ) : (
+        <a onClick={navigateHome} href={fullHref} css={logo.spinner}>
+          <EuiLoadingSpinner
+            size="l"
+            aria-hidden={false}
+            onClick={navigateHome}
+            data-test-subj="nav-header-loading-spinner"
+          />
+        </a>
       )}
     </span>
   );
