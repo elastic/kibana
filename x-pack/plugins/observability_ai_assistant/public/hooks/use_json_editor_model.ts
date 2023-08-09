@@ -7,6 +7,7 @@
 import { useMemo } from 'react';
 import { monaco } from '@kbn/monaco';
 import { useObservabilityAIAssistant } from './use_observability_ai_assistant';
+import { createInitializedObject } from '../utils/create_initialized_object';
 
 const { editor, languages, Uri } = monaco;
 
@@ -35,13 +36,7 @@ export const useJsonEditorModel = ({
     const initialJsonString = initialJson
       ? initialJson
       : functionDefinition.options.parameters.properties
-      ? Object.keys(functionDefinition.options.parameters.properties).reduce(
-          (acc, curr, index, arr) => {
-            const val = `${acc}  "${curr}": "",\n`;
-            return index === arr.length - 1 ? `${val}}` : val;
-          },
-          '{\n'
-        )
+      ? JSON.stringify(createInitializedObject(functionDefinition.options.parameters), null, 4)
       : '';
 
     languages.json.jsonDefaults.setDiagnosticsOptions({
