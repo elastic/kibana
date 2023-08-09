@@ -5,10 +5,9 @@
  * 2.0.
  */
 import { ElasticsearchClient } from '@kbn/core/server';
-import { groupBy, keyBy, sumBy } from 'lodash';
+import { groupBy, sumBy } from 'lodash';
 import {
   IndexLifecyclePhaseSelectOption,
-  StorageDetailsGroupedByIndex,
   StorageGroupedIndexNames,
 } from '../../../common/storage_explorer';
 import {
