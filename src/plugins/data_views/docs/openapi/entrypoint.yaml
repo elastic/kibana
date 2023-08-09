@@ -28,8 +28,8 @@ paths:
 #    $ref: 'paths/api@data_views@data_view@{viewid}@runtime_field.yaml'
   '/api/data_views/data_view/{viewId}/runtime_field/{fieldName}':
     $ref: 'paths/api@data_views@data_view@{viewid}@runtime_field@{fieldname}.yaml'
-#  '/api/data_views/default':
-#    $ref: 'paths/api@data_views@default.yaml'
+  '/api/data_views/default':
+    $ref: 'paths/api@data_views@default.yaml'
 # Non-default space
 #  '/s/{spaceId}/api/data_views':
 #    $ref: 'paths/s@{spaceid}@api@data_views.yaml'

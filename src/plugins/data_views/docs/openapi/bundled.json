@@ -249,6 +249,43 @@
           "url": "https://localhost:5601"
         }
       ]
+    },
+    "/api/data_views/default": {
+      "get": {
+        "summary": "Retrieves the default data view identifier.",
+        "operationId": "getDefaultDataView",
+        "description": "This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
+        "tags": [
+          "data views"
+        ],
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data_view_id": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "examples": {
+                  "getDefaultDataViewResponse": {
+                    "$ref": "#/components/examples/get_default_data_view_response"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "servers": [
+        {
+          "url": "https://localhost:5601"
+        }
+      ]
     }
   },
   "components": {
@@ -2069,6 +2106,12 @@
             "allowNoIndex": false,
             "name": "Kibana Sample Data Flights"
           }
+        }
+      },
+      "get_default_data_view_response": {
+        "summary": "Retrieve the default data view identifier.",
+        "value": {
+          "data_view_id": "ff959d40-b880-11e8-a6d9-e546fe2bba5f"
         }
       }
     },
