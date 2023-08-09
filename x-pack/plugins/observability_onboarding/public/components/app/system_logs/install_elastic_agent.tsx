@@ -15,19 +15,19 @@ import {
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { default as React, useCallback, useEffect, useState } from 'react';
-import { getSystemLogsDataStreams } from '../../../../common/elastic_agent_logs';
-import { ObservabilityOnboardingPluginSetupDeps } from '../../../plugin';
 import { useWizard } from '.';
+import { getSystemLogsDataStreams } from '../../../../common/elastic_agent_logs';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { useKibanaNavigation } from '../../../hooks/use_kibana_navigation';
+import { ObservabilityOnboardingPluginSetupDeps } from '../../../plugin';
 import {
   ElasticAgentPlatform,
   getElasticAgentSetupCommand,
 } from '../../shared/get_elastic_agent_setup_command';
 import {
+  EuiStepStatus,
   InstallElasticAgentSteps,
   ProgressStepId,
-  EuiStepStatus,
 } from '../../shared/install_elastic_agent_steps';
 import {
   StepPanel,
@@ -35,8 +35,8 @@ import {
   StepPanelFooter,
 } from '../../shared/step_panel';
 import { ApiKeyBanner } from '../custom_logs/wizard/api_key_banner';
-import { SystemIntegrationBanner } from './system_integration_banner';
 import { getDiscoverNavigationParams } from '../utils';
+import { SystemIntegrationBanner } from './system_integration_banner';
 
 export function InstallElasticAgent() {
   const {

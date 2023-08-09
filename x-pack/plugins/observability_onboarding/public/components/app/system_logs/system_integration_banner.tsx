@@ -115,37 +115,48 @@ export function SystemIntegrationBanner() {
               defaultMessage="System integration installed. {systemIntegrationTooltip}"
               values={{
                 systemIntegrationTooltip: (
-                  <PopoverTooltip
-                    title={i18n.translate(
-                      'xpack.observability_onboarding.systemIntegration.installed.tooltip.title',
-                      {
-                        defaultMessage: 'Title',
-                      }
-                    )}
-                  >
-                    {i18n.translate(
-                      'xpack.observability_onboarding.systemIntegration.installed.tooltip.description',
-                      {
-                        defaultMessage: 'A description goes here ',
-                      }
-                    )}
-                    <EuiLink
-                      data-test-subj="apmGetInstanceColumnsConfigurationOptionsLink"
-                      target="_blank"
-                      onClick={(event: MouseEvent) => {
-                        event.preventDefault();
-                        navigateToAppUrl(
-                          `/integrations/detail/system-${systemIntegrationData?.version}`
-                        );
-                      }}
-                    >
-                      {i18n.translate(
-                        'xpack.observability_onboarding.systemIntegration.installed.link.label',
-                        {
-                          defaultMessage: 'System integration.',
-                        }
-                      )}
-                    </EuiLink>
+                  <PopoverTooltip>
+                    <EuiFlexGroup direction="column" gutterSize="xs">
+                      <EuiFlexItem>
+                        {i18n.translate(
+                          'xpack.observability_onboarding.systemIntegration.installed.tooltip.description',
+                          {
+                            defaultMessage:
+                              'Integrations streamline connecting your data to the Elastic Stack.',
+                          }
+                        )}
+                      </EuiFlexItem>
+                      <EuiFlexItem
+                        style={{ flexDirection: 'row', alignItems: 'center' }}
+                      >
+                        <FormattedMessage
+                          id="xpack.observability_onboarding.systemIntegration.installed.tooltip.link"
+                          defaultMessage="{learnMoreLink} about the data you can collect using the Systems integration."
+                          values={{
+                            learnMoreLink: (
+                              <EuiLink
+                                data-test-subj="observabilityOnboardingSystemIntegrationLearnMore"
+                                target="_blank"
+                                style={{ marginRight: '3px' }}
+                                onClick={(event: MouseEvent) => {
+                                  event.preventDefault();
+                                  navigateToAppUrl(
+                                    `/integrations/detail/system-${systemIntegrationData?.version}`
+                                  );
+                                }}
+                              >
+                                {i18n.translate(
+                                  'xpack.observability_onboarding.systemIntegration.installed.tooltip.link.label',
+                                  {
+                                    defaultMessage: 'Learn more',
+                                  }
+                                )}
+                              </EuiLink>
+                            ),
+                          }}
+                        />
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
                   </PopoverTooltip>
                 ),
               }}
