@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiCommentList } from '@elastic/eui';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
-import { type Message, MessageRole } from '../../../common';
+import React from 'react';
+import { type Message } from '../../../common';
 import type { Feedback } from '../feedback_buttons';
 import { ChatItem } from './chat_item';
 
-export interface ChatTimelineItem extends Pick<Message['message'], 'role' | 'content'> {
+export interface ChatTimelineItem
+  extends Pick<Message['message'], 'role' | 'content' | 'function_call'> {
   id: string;
   title: string;
   loading: boolean;
@@ -20,13 +21,7 @@ export interface ChatTimelineItem extends Pick<Message['message'], 'role' | 'con
   canEdit: boolean;
   canGiveFeedback: boolean;
   canRegenerate: boolean;
-
   collapsed: boolean;
-  functionCall?: {
-    name: string;
-    arguments?: string;
-    trigger: MessageRole.Assistant | MessageRole.User | MessageRole.Elastic;
-  };
   element?: React.ReactNode;
   hide: boolean;
   currentUser?: Pick<AuthenticatedUser, 'username' | 'full_name'>;
@@ -35,7 +30,7 @@ export interface ChatTimelineItem extends Pick<Message['message'], 'role' | 'con
 
 export interface ChatTimelineProps {
   items: ChatTimelineItem[];
-  onEdit: (item: ChatTimelineItem, content: string) => void;
+  onEdit: (item: ChatTimelineItem, message: Message) => Promise<void>;
   onFeedback: (item: ChatTimelineItem, feedback: Feedback) => void;
   onRegenerate: (item: ChatTimelineItem) => void;
   onStopGenerating: () => void;
@@ -62,8 +57,8 @@ export function ChatTimeline({
             onRegenerateClick={() => {
               onRegenerate(item);
             }}
-            onEditSubmit={(content) => {
-              onEdit(item, content);
+            onEditSubmit={(message) => {
+              return onEdit(item, message);
             }}
             onStopGeneratingClick={onStopGenerating}
           />

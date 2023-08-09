@@ -175,8 +175,8 @@ export function useTimeline({
         content: pendingMessage.message.content,
         currentUser,
         error: pendingMessage.error,
-        functionCall: pendingMessage.message.function_call,
-        hide: Boolean(pendingMessage.message.isAssistantSetupMessage),
+        function_call: pendingMessage.message.function_call,
+        hide: pendingMessage.message.role === MessageRole.System,
         loading: !pendingMessage.aborted && !pendingMessage.error,
         role: pendingMessage.message.role,
         title: '',
@@ -194,7 +194,7 @@ export function useTimeline({
 
   return {
     items,
-    onEdit: (item, content) => {},
+    onEdit: async (item, content) => {},
     onFeedback: (item, feedback) => {},
     onRegenerate: (item) => {
       const indexOf = items.indexOf(item);

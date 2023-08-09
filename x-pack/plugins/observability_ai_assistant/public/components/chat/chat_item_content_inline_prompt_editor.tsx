@@ -8,7 +8,7 @@
 import React from 'react';
 import { MessageText } from '../message_panel/message_text';
 import { ChatPromptEditor } from './chat_prompt_editor';
-import { MessageRole } from '../../../common';
+import { Message, MessageRole } from '../../../common';
 
 interface Props {
   content: string | undefined;
@@ -21,7 +21,7 @@ interface Props {
     | undefined;
   loading: boolean;
   editing: boolean;
-  onSubmit: (newPrompt: string) => void;
+  onSubmit: (message: Message) => Promise<void>;
 }
 export function ChatItemContentInlinePromptEditor({
   content,
@@ -38,6 +38,8 @@ export function ChatItemContentInlinePromptEditor({
       initialFunctionPayload={functionCall?.arguments}
       initialSelectedFunctionName={functionCall?.name}
       onSubmit={onSubmit}
+      disabled={false}
+      loading={loading}
     />
   );
 }

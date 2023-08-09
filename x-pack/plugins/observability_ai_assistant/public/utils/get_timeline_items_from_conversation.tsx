@@ -120,7 +120,7 @@ export function getTimelineItemsfromConversation({
         functionCall: message.message.name
           ? messages[index - 1].message.function_call
           : message.message.function_call,
-        hide: Boolean(message.message.isAssistantSetupMessage),
+        hide: message.message.role === MessageRole.System,
         loading: false,
         role: message.message.role,
         title,
