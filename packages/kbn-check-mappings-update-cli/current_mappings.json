@@ -2960,6 +2960,9 @@
         "dynamic": false,
         "properties": {}
       },
+      "interval": {
+        "type": "keyword"
+      },
       "pageSize": {
         "type": "integer"
       },
