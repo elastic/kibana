@@ -44,20 +44,16 @@ export interface RuleResponse extends RuleCreateProps {
   id: string;
 }
 
-/**
- * Creates a detection rule
- *
- */
-export async function createDetectionRule({
+export const createDetectionRule = async ({
   http,
   rule,
 }: {
   http: HttpSetup;
   rule: RuleCreateProps;
-}): Promise<RuleResponse> {
+}): Promise<RuleResponse> => {
   const res = await http.post<RuleCreateProps>(DETECTION_ENGINE_RULES_URL, {
     body: JSON.stringify(rule),
   });
 
   return res as RuleResponse;
-}
+};
