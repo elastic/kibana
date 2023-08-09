@@ -8,8 +8,41 @@
 import { useQuery } from '@tanstack/react-query';
 import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common';
 
+import { ALL_VALUE, SLOResponse } from '@kbn/slo-schema';
 import { useKibana } from '../../utils/kibana_react';
 import { sloKeys } from './query_key_factory';
+
+type SLO = Pick<SLOResponse, 'id' | 'instanceId'>;
+
+export class ActiveAlerts {
+  private data: Map<string, number> = new Map();
+
+  constructor(initialData?: Record<string, number>) {
+    if (initialData) {
+      Object.keys(initialData).forEach((key) => this.data.set(key, initialData[key]));
+    }
+  }
+
+  set(slo: SLO, value: number) {
+    this.data.set(`${slo.id}|${slo.instanceId ?? ALL_VALUE}`, value);
+  }
+
+  get(slo: SLO) {
+    return this.data.get(`${slo.id}|${slo.instanceId ?? ALL_VALUE}`);
+  }
+
+  has(slo: SLO) {
+    return this.data.has(`${slo.id}|${slo.instanceId ?? ALL_VALUE}`);
+  }
+
+  delete(slo: SLO) {
+    return this.data.delete(`${slo.id}|${slo.instanceId ?? ALL_VALUE}`);
+  }
+
+  clear() {
+    return this.data.clear();
+  }
+}
 
 type SloIdAndInstanceId = [string, string];
 
@@ -17,10 +50,8 @@ interface Params {
   sloIdsAndInstanceIds: SloIdAndInstanceId[];
 }
 
-type ActiveAlertsMap = Record<string, number>;
-
 export interface UseFetchActiveAlerts {
-  data: ActiveAlertsMap;
+  data: ActiveAlerts;
   isLoading: boolean;
   isSuccess: boolean;
   isError: boolean;
@@ -38,7 +69,7 @@ interface FindApiResponse {
   };
 }
 
-const EMPTY_ACTIVE_ALERTS_MAP = {} as Record<string, number>;
+const EMPTY_ACTIVE_ALERTS_MAP = new ActiveAlerts();
 
 export function useFetchActiveAlerts({ sloIdsAndInstanceIds = [] }: Params): UseFetchActiveAlerts {
   const { http } = useKibana().services;
@@ -95,9 +126,10 @@ export function useFetchActiveAlerts({ sloIdsAndInstanceIds = [] }: Params): Use
           signal,
         });
 
-        return response.aggregations.perSloId.buckets.reduce((acc, bucket) => {
-          return { ...acc, [bucket.key_as_string]: bucket.doc_count || 0 };
+        const activeAlertsData = response.aggregations.perSloId.buckets.reduce((acc, bucket) => {
+          return { ...acc, [bucket.key_as_string]: bucket.doc_count ?? 0 };
         }, {} as Record<string, number>);
+        return new ActiveAlerts(activeAlertsData);
       } catch (error) {
         // ignore error
       }

@@ -46,7 +46,7 @@ export function SloListItems({ sloList, loading, error }: Props) {
       {sloList.map((slo) => (
         <EuiFlexItem key={`${slo.id}-${slo.instanceId ?? ALL_VALUE}`}>
           <SloListItem
-            activeAlerts={activeAlertsBySlo[`${slo.id}|${slo.instanceId ?? ALL_VALUE}`]}
+            activeAlerts={activeAlertsBySlo.get(slo)}
             rules={rulesBySlo?.[slo.id]}
             historicalSummary={
               historicalSummaries.find(

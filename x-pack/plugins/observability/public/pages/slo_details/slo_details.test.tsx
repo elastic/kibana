@@ -14,7 +14,7 @@ import { useLicense } from '../../hooks/use_license';
 import { useCapabilities } from '../../hooks/slo/use_capabilities';
 import { useFetchSloDetails } from '../../hooks/slo/use_fetch_slo_details';
 import { useFetchHistoricalSummary } from '../../hooks/slo/use_fetch_historical_summary';
-import { useFetchActiveAlerts } from '../../hooks/slo/use_fetch_active_alerts';
+import { ActiveAlerts, useFetchActiveAlerts } from '../../hooks/slo/use_fetch_active_alerts';
 import { useCloneSlo } from '../../hooks/slo/use_clone_slo';
 import { useDeleteSlo } from '../../hooks/slo/use_delete_slo';
 import { render } from '../../utils/test_helper';
@@ -110,7 +110,7 @@ describe('SLO Details Page', () => {
       isLoading: false,
       data: historicalSummaryData,
     });
-    useFetchActiveAlertsMock.mockReturnValue({ isLoading: false, data: {} });
+    useFetchActiveAlertsMock.mockReturnValue({ isLoading: false, data: new ActiveAlerts() });
     useCloneSloMock.mockReturnValue({ mutate: mockClone });
     useDeleteSloMock.mockReturnValue({ mutate: mockDelete });
     useLocationMock.mockReturnValue({ search: '' });
@@ -300,7 +300,7 @@ describe('SLO Details Page', () => {
     useLicenseMock.mockReturnValue({ hasAtLeast: () => true });
     useFetchActiveAlertsMock.mockReturnValue({
       isLoading: false,
-      data: { [`${slo.id}|${ALL_VALUE}`]: 2 },
+      data: new ActiveAlerts({ [`${slo.id}|${ALL_VALUE}`]: 2 }),
     });
 
     render(<SloDetailsPage />);
