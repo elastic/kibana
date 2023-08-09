@@ -84,6 +84,19 @@ interface GetEndpointListColumnsProps {
   getAppUrl: ReturnType<typeof useAppUrl>['getAppUrl'];
 }
 
+const columnWidths: Record<EndpointSortableField | 'actions', string> = {
+  [EndpointSortableField.HOSTNAME]: '15%',
+  [EndpointSortableField.HOST_STATUS]: '15%',
+  [EndpointSortableField.POLICY_NAME]: '15%',
+  [EndpointSortableField.POLICY_STATUS]: '150px',
+  [EndpointSortableField.HOST_OS_NAME]: '90px',
+  [EndpointSortableField.HOST_IP]: '17%',
+  [EndpointSortableField.AGENT_VERSION]: '8%',
+  [EndpointSortableField.LAST_SEEN]: '15%',
+  [EndpointSortableField.ENROLLED_AT]: '15%',
+  actions: '65px',
+};
+
 const getEndpointListColumns = ({
   canReadPolicyManagement,
   backToEndpointList,
@@ -103,7 +116,7 @@ const getEndpointListColumns = ({
   return [
     {
       field: EndpointSortableField.HOSTNAME,
-      width: '15%',
+      width: columnWidths[EndpointSortableField.HOSTNAME],
       name: i18n.translate('xpack.securitySolution.endpoint.list.hostname', {
         defaultMessage: 'Endpoint',
       }),
@@ -132,7 +145,7 @@ const getEndpointListColumns = ({
     },
     {
       field: EndpointSortableField.HOST_STATUS,
-      width: '14%',
+      width: columnWidths[EndpointSortableField.HOST_STATUS],
       name: i18n.translate('xpack.securitySolution.endpoint.list.hostStatus', {
         defaultMessage: 'Agent status',
       }),
@@ -149,7 +162,7 @@ const getEndpointListColumns = ({
     },
     {
       field: EndpointSortableField.POLICY_NAME,
-      width: '15%',
+      width: columnWidths[EndpointSortableField.POLICY_NAME],
       name: i18n.translate('xpack.securitySolution.endpoint.list.policy', {
         defaultMessage: 'Policy',
       }),
@@ -201,7 +214,7 @@ const getEndpointListColumns = ({
     },
     {
       field: EndpointSortableField.POLICY_STATUS,
-      width: '9%',
+      width: columnWidths[EndpointSortableField.POLICY_STATUS],
       name: i18n.translate('xpack.securitySolution.endpoint.list.policyStatus', {
         defaultMessage: 'Policy status',
       }),
@@ -236,7 +249,7 @@ const getEndpointListColumns = ({
     },
     {
       field: EndpointSortableField.HOST_OS_NAME,
-      width: '9%',
+      width: columnWidths[EndpointSortableField.HOST_OS_NAME],
       name: i18n.translate('xpack.securitySolution.endpoint.list.os', {
         defaultMessage: 'OS',
       }),
@@ -253,7 +266,7 @@ const getEndpointListColumns = ({
     },
     {
       field: EndpointSortableField.HOST_IP,
-      width: '12%',
+      width: columnWidths[EndpointSortableField.HOST_IP],
       name: i18n.translate('xpack.securitySolution.endpoint.list.ip', {
         defaultMessage: 'IP address',
       }),
@@ -272,7 +285,7 @@ const getEndpointListColumns = ({
     },
     {
       field: EndpointSortableField.AGENT_VERSION,
-      width: '9%',
+      width: columnWidths[EndpointSortableField.AGENT_VERSION],
       name: i18n.translate('xpack.securitySolution.endpoint.list.endpointVersion', {
         defaultMessage: 'Version',
       }),
@@ -289,8 +302,8 @@ const getEndpointListColumns = ({
     },
     {
       field: EndpointSortableField.LAST_SEEN,
+      width: columnWidths[EndpointSortableField.LAST_SEEN],
       name: lastActiveColumnName,
-      width: '9%',
       sortable: true,
       render(dateValue: HostInfo['last_checkin']) {
         return (
@@ -304,8 +317,8 @@ const getEndpointListColumns = ({
     },
     {
       field: EndpointSortableField.ENROLLED_AT,
+      width: columnWidths[EndpointSortableField.ENROLLED_AT],
       name: enrolledAtColumnName,
-      width: '9%',
       sortable: true,
       render(dateValue: HostInfo['enrolled_at']) {
         return (
@@ -319,7 +332,7 @@ const getEndpointListColumns = ({
     },
     {
       field: '',
-      width: '8%',
+      width: columnWidths.actions,
       name: i18n.translate('xpack.securitySolution.endpoint.list.actions', {
         defaultMessage: 'Actions',
       }),
