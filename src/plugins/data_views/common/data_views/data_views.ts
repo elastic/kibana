@@ -11,6 +11,7 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import { castEsToKbnFieldTypeName } from '@kbn/field-types';
 import { FieldFormatsStartCommon, FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
 import { v4 as uuidv4 } from 'uuid';
+import { rateLimitingForkJoin } from './utils';
 import { PersistenceAPI } from '../types';
 
 import { createDataViewCache } from '.';
@@ -516,31 +517,49 @@ export class DataViewsService {
    * @param indices index pattern list
    * @returns index pattern list
    */
-  getExistingIndices = async (indices: string[]): Promise<string[]> =>
-    await Promise.all(
-      indices.map(async (pattern) => {
-        try {
-          // when checking a negative pattern, check if the positive pattern exists
-          const indexToQuery = pattern.trim().startsWith('-')
-            ? pattern.trim().substring(1)
-            : pattern.trim();
-          const res = await this.getFieldsForWildcard({
+  getExistingIndices = async (indices: string[]): Promise<string[]> => {
+    const indicesObs = indices.map((pattern) => {
+      const indexToQuery = pattern.trim().startsWith('-')
+        ? pattern.trim().substring(1)
+        : pattern.trim();
+      return defer(() =>
+        from(
+          this.getFieldsForWildcard({
             // check one field to keep request fast/small
             fields: ['_id'],
             // true so no errors thrown in browser
             allowNoIndex: true,
             pattern: indexToQuery,
-          });
-          return res.length > 0;
-        } catch (e) {
-          return false;
-        }
-      })
-    )
-      .then((allPatterns) =>
-        indices.filter((pattern, i, self) => self.indexOf(pattern) === i && allPatterns[i])
-      )
-      .catch(() => indices);
+          })
+        )
+      );
+    });
+    const sub = rateLimitingForkJoin(indicesObs).subscribe();
+  };
+  // await Promise.all(
+  //   indices.map(async (pattern) => {
+  //     try {
+  //       // when checking a negative pattern, check if the positive pattern exists
+  //       const indexToQuery = pattern.trim().startsWith('-')
+  //         ? pattern.trim().substring(1)
+  //         : pattern.trim();
+  //       const res = await this.getFieldsForWildcard({
+  //         // check one field to keep request fast/small
+  //         fields: ['_id'],
+  //         // true so no errors thrown in browser
+  //         allowNoIndex: true,
+  //         pattern: indexToQuery,
+  //       });
+  //       return res.length > 0;
+  //     } catch (e) {
+  //       return false;
+  //     }
+  //   })
+  // )
+  //   .then((allPatterns) =>
+  //     indices.filter((pattern, i, self) => self.indexOf(pattern) === i && allPatterns[i])
+  //   )
+  //   .catch(() => indices);
 
   /**
    * Get field list by providing an index patttern (or spec).
