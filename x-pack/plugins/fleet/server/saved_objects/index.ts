@@ -175,37 +175,37 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
         allow_edit: { enabled: false },
         version: { type: 'keyword' },
         key: { type: 'keyword' },
-        compression: { type: 'keyword', index: false },
-        compression_level: { type: 'integer', index: false },
+        compression: { type: 'keyword' },
+        compression_level: { type: 'integer' },
         client_id: { type: 'keyword' },
-        auth_type: { type: 'keyword', index: false },
-        connection_type: { type: 'keyword', index: false },
+        auth_type: { type: 'keyword' },
+        connection_type: { type: 'keyword' },
         username: { type: 'keyword' },
         password: { type: 'text', index: false },
         sasl: {
           dynamic: false,
           properties: {
-            mechanism: { type: 'text', index: false },
+            mechanism: { type: 'text' },
           },
         },
-        partition: { type: 'keyword', index: false },
+        partition: { type: 'keyword' },
         random: {
           dynamic: false,
           properties: {
-            group_events: { type: 'integer', index: false },
+            group_events: { type: 'integer' },
           },
         },
         round_robin: {
           dynamic: false,
           properties: {
-            group_events: { type: 'integer', index: false },
+            group_events: { type: 'integer' },
           },
         },
         hash: {
           dynamic: false,
           properties: {
-            hash: { type: 'text', index: false },
-            random: { type: 'boolean', index: false },
+            hash: { type: 'text' },
+            random: { type: 'boolean' },
           },
         },
         topics: {
@@ -215,8 +215,8 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
             when: {
               dynamic: false,
               properties: {
-                type: { type: 'text', index: false },
-                condition: { type: 'text', index: false },
+                type: { type: 'text' },
+                condition: { type: 'text' },
               },
             },
           },
@@ -224,16 +224,16 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
         headers: {
           dynamic: false,
           properties: {
-            key: { type: 'text', index: false },
-            value: { type: 'text', index: false },
+            key: { type: 'text' },
+            value: { type: 'text' },
           },
         },
-        timeout: { type: 'integer', index: false },
-        broker_timeout: { type: 'integer', index: false },
-        broker_ack_reliability: { type: 'text', index: false },
-        broker_buffer_size: { type: 'integer', index: false },
-        required_acks: { type: 'integer', index: false },
-        channel_buffer_size: { type: 'integer', index: false },
+        timeout: { type: 'integer' },
+        broker_timeout: { type: 'integer' },
+        broker_ack_reliability: { type: 'text' },
+        broker_buffer_size: { type: 'integer' },
+        required_acks: { type: 'integer' },
+        channel_buffer_size: { type: 'integer' },
       },
     },
     modelVersions: {
