@@ -581,7 +581,7 @@ export default function ({
         addUrlParamsAutoCompleteSetToContext(context, pos);
         break;
       case 'method':
-        addMethodAutoCompleteSetToContext(context, pos);
+        addMethodAutoCompleteSetToContext(context);
         break;
       case 'body':
         addBodyAutoCompleteSetToContext(context, pos);
@@ -948,13 +948,8 @@ export default function ({
     context.suffixToAdd = '';
   }
 
-  function addMethodAutoCompleteSetToContext(context: AutoCompleteContext, pos: Position) {
-    const ret = getCurrentMethodAndTokenPaths(editor, pos, parser);
-    const methods =
-      ret.method && ret.method === ret.method?.toLowerCase()
-        ? ['get', 'put', 'post', 'delete', 'head']
-        : ['GET', 'PUT', 'POST', 'DELETE', 'HEAD'];
-    context.autoCompleteSet = methods.map((m, i) => ({
+  function addMethodAutoCompleteSetToContext(context: AutoCompleteContext) {
+    context.autoCompleteSet = ['GET', 'PUT', 'POST', 'DELETE', 'HEAD'].map((m, i) => ({
       name: m,
       score: -i,
       meta: i18n.translate('console.autocomplete.addMethodMetaText', { defaultMessage: 'method' }),
@@ -1090,10 +1085,26 @@ export default function ({
       return; // wait for the next typing.
     }
 
-    // if the column or the line number have changed for the last token or
-    // user did not provided a new value, then we should not show autocomplete
-    // this guards against triggering autocomplete when clicking around the editor
     if (
+      lastEvaluatedToken.position.column + 1 === currentToken.position.column &&
+      lastEvaluatedToken.position.lineNumber === currentToken.position.lineNumber &&
+      lastEvaluatedToken.type === 'url.slash' &&
+      currentToken.type === 'url.part' &&
+      currentToken.value.length === 1
+    ) {
+      // do not suppress autocomplete for a single character immediately following a slash in URL
+    } else if (
+      lastEvaluatedToken.position.column < currentToken.position.column &&
+      lastEvaluatedToken.position.lineNumber === currentToken.position.lineNumber &&
+      lastEvaluatedToken.type === 'method' &&
+      currentToken.type === 'url.part' &&
+      currentToken.value.length === 1
+    ) {
+      // do not suppress autocomplete for a single character following method in URL
+    } else if (
+      // if the column or the line number have changed for the last token or
+      // user did not provided a new value, then we should not show autocomplete
+      // this guards against triggering autocomplete when clicking around the editor
       lastEvaluatedToken.position.column !== currentToken.position.column ||
       lastEvaluatedToken.position.lineNumber !== currentToken.position.lineNumber ||
       lastEvaluatedToken.value === currentToken.value
