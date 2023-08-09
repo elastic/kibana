@@ -73,6 +73,7 @@ export function createTestConfig(options: CreateTestConfigOptions, testFiles?: s
             'riskScoringRoutesEnabled',
             'detectionsCoverageOverview',
           ])}`,
+          '--xpack.observability.enabled=false',
           '--xpack.task_manager.poll_interval=1000',
           `--xpack.actions.preconfigured=${JSON.stringify({
             'my-test-email': {
