@@ -128,13 +128,13 @@ const CoverageOverviewFiltersPanelComponent = ({
             `}
           >
             <DashboardFilterButtonComponent
-              title="Installed rule status"
+              title={i18n.CoverageOverviewRuleStatusFilterLabel}
               options={ruleStatusFilterOptions}
               onChange={handleRuleStatusFilterOnChange}
               isLoading={isLoading}
             />
             <DashboardFilterButtonComponent
-              title="Installed rule type"
+              title={i18n.CoverageOverviewRuleTypeFilterLabel}
               options={ruleTypeFilterOptions}
               onChange={handleRuleTypeFilterOnChange}
               isLoading={isLoading}

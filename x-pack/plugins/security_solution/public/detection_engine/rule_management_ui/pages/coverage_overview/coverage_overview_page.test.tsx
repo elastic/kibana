@@ -18,6 +18,8 @@ jest.mock('../../../rule_management/api/hooks/use_fetch_coverage_overview');
 
 (useFetchCoverageOverviewQuery as jest.Mock).mockReturnValue({
   data: getMockCoverageOverviewDashboard(),
+  isLoading: false,
+  refetch: () => {},
 });
 
 const renderCoverageOverviewDashboard = () => {

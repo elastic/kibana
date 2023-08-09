@@ -140,3 +140,17 @@ export const CoverageOverviewCustomRuleType = i18n.translate(
     defaultMessage: 'Custom rules',
   }
 );
+
+export const CoverageOverviewRuleStatusFilterLabel = i18n.translate(
+  'xpack.securitySolution.coverageOverviewDashboard.ruleStatusFilterLabel',
+  {
+    defaultMessage: 'Installed rule status',
+  }
+);
+
+export const CoverageOverviewRuleTypeFilterLabel = i18n.translate(
+  'xpack.securitySolution.coverageOverviewDashboard.ruleTypeFilterLabel',
+  {
+    defaultMessage: 'Installed rule type',
+  }
+);

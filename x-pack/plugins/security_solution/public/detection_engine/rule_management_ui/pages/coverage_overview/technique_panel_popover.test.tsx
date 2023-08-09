@@ -13,6 +13,8 @@ import { TestProviders } from '../../../../common/mock';
 import type { CoverageOverviewMitreTechnique } from '../../../rule_management/model/coverage_overview/mitre_technique';
 import { CoverageOverviewMitreTechniquePanelPopover } from './technique_panel_popover';
 import { useExecuteBulkAction } from '../../../rule_management/logic/bulk_actions/use_execute_bulk_action';
+import { CoverageOverviewDashboardContext } from './coverage_overview_page';
+import { initialState } from './reducer';
 
 jest.mock('../../../rule_management/logic/bulk_actions/use_execute_bulk_action');
 
@@ -23,12 +25,15 @@ const mockExecuteBulkAction = jest.fn();
 });
 
 const renderTechniquePanelPopover = (
-  technique: CoverageOverviewMitreTechnique = getMockCoverageOverviewMitreTechnique(),
-  isExpanded: boolean = false
+  technique: CoverageOverviewMitreTechnique = getMockCoverageOverviewMitreTechnique()
 ) => {
   return render(
     <TestProviders>
-      <CoverageOverviewMitreTechniquePanelPopover technique={technique} />
+      <CoverageOverviewDashboardContext.Provider
+        value={{ state: initialState, dispatch: () => {} }}
+      >
+        <CoverageOverviewMitreTechniquePanelPopover technique={technique} />
+      </CoverageOverviewDashboardContext.Provider>
     </TestProviders>
   );
 };
