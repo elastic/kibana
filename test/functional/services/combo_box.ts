@@ -333,7 +333,6 @@ export class ComboBoxService extends FtrService {
   ): Promise<boolean> {
     this.log.debug(`comboBox.isOptionSelected, value: ${value}`);
     const $ = await comboBoxElement.parseDomContent();
-    this.log.debug(`comboBox.isOptionSelected, parseDomContent called successfully`);
     const selectedOptions = $('.euiComboBoxPill')
       .toArray()
       .map((option) => $(option).text());
