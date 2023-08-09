@@ -114,6 +114,26 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404_response'
+    delete:
+      summary: Deletes a data view.
+      operationId: deleteDataView
+      description: |
+        WARNING: When you delete a data view, it cannot be recovered. This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+      tags:
+        - data views
+      parameters:
+        - $ref: '#/components/parameters/view_id'
+      responses:
+        '204':
+          description: Indicates a successful call.
+        '404':
+          description: Object is not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404_response'
+      servers:
+        - url: https://localhost:5601
     post:
       summary: Updates a data view.
       operationId: updateDataView
