@@ -38,13 +38,11 @@ import {
 } from './utils/saved_object_configuration';
 import { getRiskInputsIndex } from './get_risk_inputs_index';
 import { RiskScoringTask } from './tasks';
-import type { RiskScoreService } from './risk_score_service';
 import { removeRiskScoringTask } from './tasks/helpers';
 
 interface InitOpts {
   namespace: string;
   taskManager: TaskManagerStartContract;
-  riskScoreService: RiskScoreService;
 }
 
 interface InitializeRiskEngineResourcesOpts {
@@ -63,7 +61,7 @@ export class RiskEngineDataClient {
   private writerCache: Map<string, Writer> = new Map();
   constructor(private readonly options: RiskEngineDataClientOpts) {}
 
-  public async init({ namespace, riskScoreService, taskManager }: InitOpts) {
+  public async init({ namespace, taskManager }: InitOpts) {
     const result: InitRiskEngineResult = {
       legacyRiskEngineDisabled: false,
       riskEngineResourcesInstalled: false,
@@ -149,15 +147,15 @@ export class RiskEngineDataClient {
   }
 
   public async enableRiskEngine({ taskManager }: { taskManager: TaskManagerStartContract }) {
+    new RiskScoringTask({ logger: this.options.logger }).start({
+      taskManager,
+    });
+
     const configurationResult = await updateSavedObjectAttribute({
       savedObjectsClient: this.options.soClient,
       attributes: {
         enabled: true,
       },
-    });
-
-    new RiskScoringTask({ logger: this.options.logger }).start({
-      taskManager,
     });
 
     return configurationResult;

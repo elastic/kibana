@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Logger, StartServicesAccessor } from '@kbn/core/server';
+import type { StartServicesAccessor } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { RISK_ENGINE_DISABLE_URL, APP_ID } from '../../../../common/constants';
@@ -14,7 +14,6 @@ import type { SecuritySolutionPluginRouter } from '../../../types';
 
 export const riskEngineDisableRoute = (
   router: SecuritySolutionPluginRouter,
-  logger: Logger,
   getStartServices: StartServicesAccessor<StartPlugins>
 ) => {
   router.post(
@@ -36,7 +35,8 @@ export const riskEngineDisableRoute = (
         return siemResponse.error({
           statusCode: 400,
           body: {
-            message: 'Task Manager is not available',
+            message:
+              'Task Manager is unavailable, but is required to disable the risk engine. Please enable the taskManager plugin and try again.',
           },
         });
       }
