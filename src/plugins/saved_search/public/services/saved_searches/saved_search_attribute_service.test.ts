@@ -200,6 +200,7 @@ describe('getSavedSearchAttributeService', () => {
           "refreshInterval": undefined,
           "rowHeight": undefined,
           "rowsPerPage": undefined,
+          "sampleSize": undefined,
           "searchSource": Object {
             "create": [MockFunction],
             "createChild": [MockFunction],
