@@ -1131,7 +1131,15 @@
                 "section": "def-common.SavedObjectCommon",
                 "text": "SavedObjectCommon"
               },
-              "<unknown>; }) => void; onCreateNew: () => void; }) => JSX.Element"
+              "<",
+              {
+                "pluginId": "savedObjectsFinder",
+                "scope": "common",
+                "docId": "kibSavedObjectsFinderPluginApi",
+                "section": "def-common.FinderAttributes",
+                "text": "FinderAttributes"
+              },
+              ">; }) => void; onCreateNew: () => void; }) => JSX.Element"
             ],
             "path": "packages/kbn-event-annotation-components/types.ts",
             "deprecated": false,
@@ -1178,7 +1186,15 @@
                         "section": "def-common.SavedObjectCommon",
                         "text": "SavedObjectCommon"
                       },
-                      "<unknown>; }) => void"
+                      "<",
+                      {
+                        "pluginId": "savedObjectsFinder",
+                        "scope": "common",
+                        "docId": "kibSavedObjectsFinderPluginApi",
+                        "section": "def-common.FinderAttributes",
+                        "text": "FinderAttributes"
+                      },
+                      ">; }) => void"
                     ],
                     "path": "packages/kbn-event-annotation-components/types.ts",
                     "deprecated": false,
@@ -1237,13 +1253,21 @@
                             "description": [],
                             "signature": [
                               {
-                                "pluginId": "@kbn/core-saved-objects-common",
+                                "pluginId": "@kbn/content-management-utils",
                                 "scope": "common",
-                                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                                "section": "def-common.SavedObject",
-                                "text": "SavedObject"
+                                "docId": "kibKbnContentManagementUtilsPluginApi",
+                                "section": "def-common.SOWithMetadata",
+                                "text": "SOWithMetadata"
                               },
-                              "<unknown>"
+                              "<",
+                              {
+                                "pluginId": "savedObjectsFinder",
+                                "scope": "common",
+                                "docId": "kibSavedObjectsFinderPluginApi",
+                                "section": "def-common.FinderAttributes",
+                                "text": "FinderAttributes"
+                              },
+                              ">"
                             ],
                             "path": "packages/kbn-event-annotation-components/types.ts",
                             "deprecated": false,

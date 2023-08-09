@@ -74,7 +74,7 @@
                 "id": "def-common.SOContentStorage.Unnamed.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{\n    savedObjectType,\n    cmServicesDefinition,\n    createArgsToSoCreateOptions,\n    updateArgsToSoUpdateOptions,\n    searchArgsToSOFindOptions,\n    enableMSearch,\n    allowedSavedObjectAttributes,\n  }",
+                "label": "{\n    savedObjectType,\n    cmServicesDefinition,\n    createArgsToSoCreateOptions,\n    updateArgsToSoUpdateOptions,\n    searchArgsToSOFindOptions,\n    enableMSearch,\n    allowedSavedObjectAttributes,\n    mSearchAdditionalSearchFields,\n  }",
                 "description": [],
                 "signature": [
                   {
@@ -118,7 +118,7 @@
                 "section": "def-common.SavedObjectsFindResult",
                 "text": "SavedObjectsFindResult"
               },
-              "<unknown>) => Types[\"Item\"]; } | undefined"
+              "<unknown>) => Types[\"Item\"]; additionalSearchFields?: string[] | undefined; } | undefined"
             ],
             "path": "packages/kbn-content-management-utils/src/saved_object_content_storage.ts",
             "deprecated": false,
@@ -2861,6 +2861,20 @@
             "description": [],
             "signature": [
               "boolean | undefined"
+            ],
+            "path": "packages/kbn-content-management-utils/src/saved_object_content_storage.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-utils",
+            "id": "def-common.SOContentStorageConstrutorParams.mSearchAdditionalSearchFields",
+            "type": "Array",
+            "tags": [],
+            "label": "mSearchAdditionalSearchFields",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
             ],
             "path": "packages/kbn-content-management-utils/src/saved_object_content_storage.ts",
             "deprecated": false,
