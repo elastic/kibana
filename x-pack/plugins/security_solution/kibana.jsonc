@@ -6,7 +6,10 @@
     "id": "securitySolution",
     "server": true,
     "browser": true,
-    "configPath": ["xpack", "securitySolution"],
+    "configPath": [
+      "xpack",
+      "securitySolution"
+    ],
     "requiredPlugins": [
       "actions",
       "alerting",
@@ -29,6 +32,7 @@
       "lens",
       "licensing",
       "maps",
+      "navigation",
       "ruleRegistry",
       "sessionView",
       "spaces",
@@ -40,9 +44,12 @@
       "unifiedSearch",
       "files",
       "controls",
+      "dataViewEditor",
       "savedObjectsManagement",
       "expressions",
-      "stackConnectors"
+      "stackConnectors",
+      "discover",
+      "notifications"
     ],
     "optionalPlugins": [
       "cloudExperiments",
@@ -70,6 +77,8 @@
       "unifiedSearch",
       "cloudChat"
     ],
-    "extraPublicDirs": ["common"]
+    "extraPublicDirs": [
+      "common"
+    ]
   }
 }

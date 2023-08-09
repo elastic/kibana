@@ -13,7 +13,7 @@ import { TestProviders } from '../../../../../common/mock';
 import { EventColumnView } from './event_column_view';
 import { DefaultCellRenderer } from '../../cell_rendering/default_cell_renderer';
 import { TimelineTabs, TimelineId } from '../../../../../../common/types/timeline';
-import { TimelineType } from '../../../../../../common/types/timeline/api';
+import { TimelineType } from '../../../../../../common/api/timeline';
 import { useShallowEqualSelector } from '../../../../../common/hooks/use_selector';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { getDefaultControlColumn } from '../control_columns';

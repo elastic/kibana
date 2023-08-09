@@ -89,7 +89,7 @@ steps:
     trigger: gpctl-promote
     build:
       env:
-        SERVICE_COMMIT_HASH: $GIT_ABBREV_COMMIT
+        SERVICE_COMMIT_HASH: "$GIT_ABBREV_COMMIT"
         REMOTE_SERVICE_CONFIG: https://raw.githubusercontent.com/elastic/serverless-gitops/main/gen/gpctl/kibana/config.yaml
 
 EOF

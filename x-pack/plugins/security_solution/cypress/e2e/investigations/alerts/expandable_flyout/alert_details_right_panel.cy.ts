@@ -43,6 +43,7 @@ import {
   DOCUMENT_DETAILS_FLYOUT_HEADER_RISK_SCORE_VALUE,
   DOCUMENT_DETAILS_FLYOUT_HEADER_SEVERITY,
   DOCUMENT_DETAILS_FLYOUT_HEADER_SEVERITY_VALUE,
+  DOCUMENT_DETAILS_FLYOUT_HEADER_STATUS,
   DOCUMENT_DETAILS_FLYOUT_HEADER_TITLE,
   DOCUMENT_DETAILS_FLYOUT_JSON_TAB,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB,
@@ -85,6 +86,8 @@ describe(
 
       cy.get(DOCUMENT_DETAILS_FLYOUT_HEADER_CHAT_BUTTON).should('be.visible');
 
+      cy.get(DOCUMENT_DETAILS_FLYOUT_HEADER_STATUS).should('be.visible');
+
       cy.get(DOCUMENT_DETAILS_FLYOUT_HEADER_RISK_SCORE).should('be.visible');
       cy.get(DOCUMENT_DETAILS_FLYOUT_HEADER_RISK_SCORE_VALUE)
         .should('be.visible')
@@ -108,12 +111,12 @@ describe(
       expandDocumentDetailsExpandableFlyoutLeftSection();
       cy.get(DOCUMENT_DETAILS_FLYOUT_COLLAPSE_DETAILS_BUTTON)
         .should('be.visible')
-        .and('have.text', 'Collapse alert details');
+        .and('have.text', 'Collapse details');
 
       collapseDocumentDetailsExpandableFlyoutLeftSection();
       cy.get(DOCUMENT_DETAILS_FLYOUT_EXPAND_DETAILS_BUTTON)
         .should('be.visible')
-        .and('have.text', 'Expand alert details');
+        .and('have.text', 'Expand details');
 
       cy.log('Verify the take action button is visible on all tabs');
 

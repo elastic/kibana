@@ -23,7 +23,7 @@ import { getRuleExceptionsForExport } from './get_export_rule_exceptions';
 import { getRuleActionConnectorsForExport } from './get_export_rule_action_connectors';
 
 import { internalRuleToAPIResponse } from '../../normalization/rule_converters';
-import type { RuleResponse } from '../../../../../../common/detection_engine/rule_schema';
+import type { RuleResponse } from '../../../../../../common/api/detection_engine/model/rule_schema';
 
 interface ExportSuccessRule {
   statusCode: 200;

@@ -34,6 +34,7 @@ export class Root {
   private readonly server: Server;
   private loggingConfigSubscription?: Subscription;
   private apmConfigSubscription?: Subscription;
+  private shuttingDown: boolean = false;
 
   constructor(
     rawConfigProvider: RawConfigurationProvider,
@@ -81,6 +82,11 @@ export class Root {
   }
 
   public async shutdown(reason?: any) {
+    if (this.shuttingDown) {
+      return;
+    }
+    this.shuttingDown = true;
+
     this.log.info('Kibana is shutting down');
 
     if (reason) {

@@ -1,0 +1,4 @@
+description: >
+  This property is required when `groupBy` is `top`.
+  The name of the field that is used for grouping the aggregation.
+type: string

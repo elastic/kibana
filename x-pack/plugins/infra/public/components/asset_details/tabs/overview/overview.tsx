@@ -7,62 +7,41 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
+import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { DataView } from '@kbn/data-views-plugin/public';
-import type { InventoryItemType } from '../../../../../common/inventory_models/types';
+import { css } from '@emotion/react';
 import { findInventoryModel } from '../../../../../common/inventory_models';
-import type { MetricsTimeInput } from '../../../../pages/metrics/metric_detail/hooks/use_metrics_time';
 import { useMetadata } from '../../hooks/use_metadata';
 import { useSourceContext } from '../../../../containers/metrics_source';
-import { MetadataSummary } from './metadata_summary';
-import { KPIGrid } from './kpi_grid';
-import type { StringDateRange } from '../../types';
+import { MetadataSummaryList } from './metadata_summary/metadata_summary_list';
+import { AlertsSummaryContent } from './alerts';
+import { KPIGrid } from './kpis/kpi_grid';
+import { MetricsGrid } from './metrics/metrics_grid';
+import { toTimestampRange } from '../../utils';
+import { useAssetDetailsStateContext } from '../../hooks/use_asset_details_state';
 
-export interface MetadataSearchUrlState {
-  metadataSearchUrlState: string;
-  setMetadataSearchUrlState: (metadataSearch: { metadataSearch?: string }) => void;
-}
+export const Overview = () => {
+  const { node, nodeType, overrides, dateRange } = useAssetDetailsStateContext();
+  const { logsDataView, metricsDataView } = overrides?.overview ?? {};
 
-export interface KPIProps {
-  dateRange?: StringDateRange;
-  dataView?: DataView;
-}
-export interface OverviewProps extends KPIProps {
-  currentTimeRange: MetricsTimeInput;
-  nodeName: string;
-  nodeType: InventoryItemType;
-}
-
-const DEFAULT_DATE_RANGE = {
-  from: 'now-15m',
-  to: 'now',
-  mode: 'absolute' as const,
-};
-
-export const Overview = ({
-  nodeName,
-  currentTimeRange,
-  nodeType,
-  dateRange,
-  dataView,
-}: OverviewProps) => {
   const inventoryModel = findInventoryModel(nodeType);
   const { sourceId } = useSourceContext();
   const {
     loading: metadataLoading,
     error: fetchMetadataError,
     metadata,
-  } = useMetadata(nodeName, nodeType, inventoryModel.requiredMetrics, sourceId, currentTimeRange);
+  } = useMetadata(
+    node.name,
+    nodeType,
+    inventoryModel.requiredMetrics,
+    sourceId,
+    toTimestampRange(dateRange)
+  );
 
   return (
-    <EuiFlexGroup direction="column">
+    <EuiFlexGroup direction="column" gutterSize="m">
       <EuiFlexItem grow={false}>
-        <KPIGrid
-          nodeName={nodeName}
-          dateRange={dateRange ?? DEFAULT_DATE_RANGE}
-          dataView={dataView}
-        />
+        <KPIGrid nodeName={node.name} timeRange={dateRange} dataView={metricsDataView} />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         {fetchMetadataError ? (
@@ -92,9 +71,31 @@ export const Overview = ({
             />
           </EuiCallOut>
         ) : (
-          <MetadataSummary metadata={metadata} metadataLoading={metadataLoading} />
+          <MetadataSummaryList metadata={metadata} metadataLoading={metadataLoading} />
         )}
+        <SectionSeparator />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <AlertsSummaryContent nodeName={node.name} nodeType={nodeType} dateRange={dateRange} />
+        <SectionSeparator />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <MetricsGrid
+          timeRange={dateRange}
+          logsDataView={logsDataView}
+          metricsDataView={metricsDataView}
+          nodeName={node.name}
+        />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
 };
+
+const SectionSeparator = () => (
+  <EuiHorizontalRule
+    margin="m"
+    css={css`
+      margin-bottom: 0;
+    `}
+  />
+);

@@ -104,6 +104,7 @@ NOT : 'not';
 LIKE: L I K E;
 RLIKE: R L I K E;
 IN: I N;
+AS: A S;
 NULL : 'null';
 OR : 'or';
 RP : ')';
@@ -234,9 +235,11 @@ EXPR_WS
 mode SOURCE_IDENTIFIERS;
 
 SRC_PIPE : '|' -> type(PIPE), popMode;
+SRC_OPENING_BRACKET : '[' -> type(OPENING_BRACKET), pushMode(SOURCE_IDENTIFIERS), pushMode(SOURCE_IDENTIFIERS);
 SRC_CLOSING_BRACKET : ']' -> popMode, popMode, type(CLOSING_BRACKET);
 SRC_COMMA : ',' -> type(COMMA);
 SRC_ASSIGN : '=' -> type(ASSIGN);
+METADATA: M E T A D A T A;
 
 SRC_UNQUOTED_IDENTIFIER
     : SRC_UNQUOTED_IDENTIFIER_PART+

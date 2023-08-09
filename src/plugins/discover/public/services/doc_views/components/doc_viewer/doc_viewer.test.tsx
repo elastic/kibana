@@ -12,7 +12,7 @@ import { DocViewer } from './doc_viewer';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { getDocViewsRegistry } from '../../../../kibana_services';
 import { DocViewRenderProps } from '../../doc_views_types';
-import { buildDataTableRecord } from '../../../../utils/build_data_record';
+import { buildDataTableRecord } from '@kbn/discover-utils';
 
 jest.mock('../../../../kibana_services', () => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

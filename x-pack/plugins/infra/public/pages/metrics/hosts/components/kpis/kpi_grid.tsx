@@ -8,7 +8,7 @@ import React, { CSSProperties } from 'react';
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { EuiSpacer } from '@elastic/eui';
-import { HostMetricsDocsLink } from '../../../../../common/visualizations/metric_explanation/host_metrics_docs_link';
+import { HostMetricsDocsLink } from '../../../../../components/lens';
 import { Tile } from './tile';
 import { HostCountProvider } from '../../hooks/use_host_count';
 import { HostsTile } from './hosts_tile';
@@ -24,12 +24,7 @@ export const KPIGrid = () => {
     <HostCountProvider>
       <HostMetricsDocsLink />
       <EuiSpacer size="s" />
-      <EuiFlexGroup
-        direction="row"
-        gutterSize="s"
-        style={{ flexGrow: 0 }}
-        data-test-subj="hostsViewKPIGrid"
-      >
+      <EuiFlexGroup direction="row" gutterSize="s" data-test-subj="hostsViewKPIGrid">
         <EuiFlexItem>
           <HostsTile style={lensStyle} />
         </EuiFlexItem>

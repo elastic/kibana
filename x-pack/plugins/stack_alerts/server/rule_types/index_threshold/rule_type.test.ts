@@ -60,7 +60,7 @@ describe('ruleType', () => {
             "name": "group",
           },
           Object {
-            "description": "The date the alert exceeded the threshold.",
+            "description": "The date the alert met the threshold conditions.",
             "name": "date",
           },
           Object {
@@ -68,57 +68,57 @@ describe('ruleType', () => {
             "name": "value",
           },
           Object {
-            "description": "A string describing the threshold comparator and threshold",
+            "description": "A string describing the threshold comparator and threshold.",
             "name": "conditions",
           },
         ],
         "params": Array [
           Object {
-            "description": "An array of values to use as the threshold; 'between' and 'notBetween' require two values, the others require one.",
+            "description": "An array of rule threshold values. For between and notBetween thresholds, there are two values.",
             "name": "threshold",
           },
           Object {
-            "description": "A comparison function to use to determine if the threshold as been met.",
+            "description": "The comparison function for the threshold.",
             "name": "thresholdComparator",
           },
           Object {
-            "description": "index",
+            "description": "The indices the rule queries.",
             "name": "index",
           },
           Object {
-            "description": "timeField",
+            "description": "The field that is used to calculate the time window.",
             "name": "timeField",
           },
           Object {
-            "description": "aggType",
+            "description": "The type of aggregation.",
             "name": "aggType",
           },
           Object {
-            "description": "aggField",
+            "description": "The field that is used in the aggregation.",
             "name": "aggField",
           },
           Object {
-            "description": "groupBy",
+            "description": "Indicates whether the aggregation is applied over all documents or split into groups.",
             "name": "groupBy",
           },
           Object {
-            "description": "termField",
+            "description": "The field that is used for grouping the aggregation.",
             "name": "termField",
           },
           Object {
-            "description": "filterKuery",
+            "description": "A KQL expression that limits the scope of alerts.",
             "name": "filterKuery",
           },
           Object {
-            "description": "termSize",
+            "description": "The number of groups that are checked against the threshold.",
             "name": "termSize",
           },
           Object {
-            "description": "timeWindowSize",
+            "description": "The size of the time window, which determines how far back to search for documents.",
             "name": "timeWindowSize",
           },
           Object {
-            "description": "timeWindowUnit",
+            "description": "The type of units for the time window: seconds, minutes, hours, or days.",
             "name": "timeWindowUnit",
           },
         ],

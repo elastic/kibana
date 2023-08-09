@@ -8,7 +8,7 @@
 
 import React from 'react';
 
-export interface FlyoutPanel {
+export interface FlyoutPanelProps {
   /**
    * Unique key to identify the panel
    */
@@ -35,5 +35,5 @@ export interface Panel {
   /**
    * Component to be rendered
    */
-  component: (props: FlyoutPanel) => React.ReactElement;
+  component: (props: FlyoutPanelProps) => React.ReactElement;
 }

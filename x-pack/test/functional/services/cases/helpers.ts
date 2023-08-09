@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { CaseConnector, CasePostRequest } from '@kbn/cases-plugin/common/api';
+import { CasePostRequest } from '@kbn/cases-plugin/common/types/api';
+import { CaseConnector } from '@kbn/cases-plugin/common/types/domain';
 import { v4 as uuidv4 } from 'uuid';
 
 export function generateRandomCaseWithoutConnector(): CasePostRequest {

@@ -10,7 +10,7 @@ import { rootRequest } from '../common';
 const kibanaSettings = (body: Cypress.RequestBody) => {
   rootRequest({
     method: 'POST',
-    url: 'api/kibana/settings',
+    url: 'internal/kibana/settings',
     body,
     headers: { 'kbn-xsrf': 'cypress-creds' },
   });

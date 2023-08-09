@@ -12,14 +12,13 @@ import {
 } from '../../../tasks/alerts';
 import { cleanKibana } from '../../../tasks/common';
 import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
-import { esArchiverLoad, esArchiverUnload } from '../../../tasks/es_archiver';
 import { login, visit } from '../../../tasks/login';
 import { ALERTS_URL } from '../../../urls/navigation';
 
 describe('Alerts Table Action column', () => {
   before(() => {
     cleanKibana();
-    esArchiverLoad('process_ancestry');
+    cy.task('esArchiverLoad', 'process_ancestry');
   });
 
   beforeEach(() => {
@@ -29,7 +28,7 @@ describe('Alerts Table Action column', () => {
   });
 
   after(() => {
-    esArchiverUnload('process_ancestry');
+    cy.task('esArchiverUnload', 'process_ancestry');
   });
 
   it('should have session viewer button visible & open session viewer on click', () => {

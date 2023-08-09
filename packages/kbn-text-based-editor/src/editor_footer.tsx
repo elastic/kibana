@@ -177,6 +177,26 @@ export const EditorFooter = memo(function EditorFooter({
     >
       <EuiFlexItem grow={false}>
         <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
+          {errors && errors.length > 0 && (
+            <ErrorsWarningsPopover
+              isPopoverOpen={isPopoverOpen}
+              items={errors}
+              type="error"
+              refreshErrors={refreshErrors}
+              setIsPopoverOpen={setIsPopoverOpen}
+              onErrorClick={onErrorClick}
+            />
+          )}
+          {warning && warning.length > 0 && (
+            <ErrorsWarningsPopover
+              isPopoverOpen={isPopoverOpen}
+              items={warning}
+              type="warning"
+              refreshErrors={refreshErrors}
+              setIsPopoverOpen={setIsPopoverOpen}
+              onErrorClick={onErrorClick}
+            />
+          )}
           <EuiFlexItem grow={false} style={{ marginRight: '8px' }}>
             <EuiText size="xs" color="subdued" data-test-subj="TextBasedLangEditor-footer-lines">
               <p>
@@ -213,26 +233,6 @@ export const EditorFooter = memo(function EditorFooter({
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
-          {errors && errors.length > 0 && (
-            <ErrorsWarningsPopover
-              isPopoverOpen={isPopoverOpen}
-              items={errors}
-              type="error"
-              refreshErrors={refreshErrors}
-              setIsPopoverOpen={setIsPopoverOpen}
-              onErrorClick={onErrorClick}
-            />
-          )}
-          {warning && warning.length > 0 && (
-            <ErrorsWarningsPopover
-              isPopoverOpen={isPopoverOpen}
-              items={warning}
-              type="warning"
-              refreshErrors={refreshErrors}
-              setIsPopoverOpen={setIsPopoverOpen}
-              onErrorClick={onErrorClick}
-            />
-          )}
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>

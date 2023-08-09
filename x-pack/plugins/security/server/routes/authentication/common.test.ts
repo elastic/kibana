@@ -66,6 +66,7 @@ describe('Common authentication routes', () => {
 
     it('correctly defines route.', async () => {
       expect(routeConfig.options).toEqual({
+        access: 'public',
         authRequired: false,
         tags: [ROUTE_TAG_CAN_REDIRECT, ROUTE_TAG_AUTH_FLOW],
       });

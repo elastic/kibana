@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { AiopsExplainLogRateSpikesSchema } from '../../../common/api/explain_log_rate_spikes';
+import type { AiopsLogRateAnalysisSchema } from '../../../common/api/log_rate_analysis';
 
-export const getRequestBase = ({ index, includeFrozen }: AiopsExplainLogRateSpikesSchema) => ({
+export const getRequestBase = ({ index, includeFrozen }: AiopsLogRateAnalysisSchema) => ({
   index,
   ...(includeFrozen ? { ignore_throttled: false } : {}),
   ignore_unavailable: true,

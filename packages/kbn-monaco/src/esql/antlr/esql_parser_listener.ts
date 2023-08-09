@@ -31,6 +31,7 @@ import { FieldContext } from "./esql_parser";
 import { EnrichFieldIdentifierContext } from "./esql_parser";
 import { UserVariableContext } from "./esql_parser";
 import { FromCommandContext } from "./esql_parser";
+import { MetadataContext } from "./esql_parser";
 import { EvalCommandContext } from "./esql_parser";
 import { StatsCommandContext } from "./esql_parser";
 import { SourceIdentifierContext } from "./esql_parser";
@@ -377,6 +378,17 @@ export interface esql_parserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitFromCommand?: (ctx: FromCommandContext) => void;
+
+	/**
+	 * Enter a parse tree produced by `esql_parser.metadata`.
+	 * @param ctx the parse tree
+	 */
+	enterMetadata?: (ctx: MetadataContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.metadata`.
+	 * @param ctx the parse tree
+	 */
+	exitMetadata?: (ctx: MetadataContext) => void;
 
 	/**
 	 * Enter a parse tree produced by `esql_parser.evalCommand`.

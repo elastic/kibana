@@ -8,37 +8,28 @@ import React, { useMemo, useCallback } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { BrushTriggerEvent } from '@kbn/charts-plugin/public';
-import {
-  EuiIcon,
-  EuiPanel,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiText,
-  EuiI18n,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiIcon, EuiPanel, EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
 import styled from 'styled-components';
 import { Action } from '@kbn/ui-actions-plugin/public';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { LensWrapper, TooltipContent } from '../../../../../components/lens';
 import { KPIChartProps } from '../../../../../common/visualizations/lens/dashboards/host/kpi_grid_config';
-import {
-  buildCombinedHostsFilter,
-  buildExistsHostsFilter,
-} from '../../../../../utils/filters/build';
+import { buildCombinedHostsFilter } from '../../../../../utils/filters/build';
 import { useLensAttributes } from '../../../../../hooks/use_lens_attributes';
 import { useMetricsDataViewContext } from '../../hooks/use_data_view';
 import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
 import { useHostsViewContext } from '../../hooks/use_hosts_view';
-import { LensWrapper } from '../../../../../common/visualizations/lens/lens_wrapper';
 import { useHostCountContext } from '../../hooks/use_host_count';
 import { useAfterLoadedState } from '../../hooks/use_after_loaded_state';
-import { TooltipContent } from '../../../../../common/visualizations/metric_explanation/tooltip_content';
 import { KPI_CHART_MIN_HEIGHT } from '../../constants';
 
-export const Tile = ({ id, title, layers, style, toolTip, ...props }: KPIChartProps) => {
+export const Tile = ({ id, title, layers, style, toolTip }: KPIChartProps) => {
   const { searchCriteria, onSubmit } = useUnifiedSearchContext();
   const { dataView } = useMetricsDataViewContext();
   const { requestTs, hostNodes, loading: hostsLoading } = useHostsViewContext();
   const { data: hostCountData, isRequestRunning: hostCountLoading } = useHostCountContext();
+
+  const shouldUseSearchCriteria = hostNodes.length === 0;
 
   const getSubtitle = () => {
     return searchCriteria.limit < (hostCountData?.count.value ?? 0)
@@ -61,16 +52,43 @@ export const Tile = ({ id, title, layers, style, toolTip, ...props }: KPIChartPr
   });
 
   const filters = useMemo(() => {
-    return [
-      ...searchCriteria.filters,
-      buildCombinedHostsFilter({
-        field: 'host.name',
-        values: hostNodes.map((p) => p.name),
-        dataView,
+    return shouldUseSearchCriteria
+      ? searchCriteria.filters
+      : [
+          buildCombinedHostsFilter({
+            field: 'host.name',
+            values: hostNodes.map((p) => p.name),
+            dataView,
+          }),
+        ];
+  }, [shouldUseSearchCriteria, searchCriteria.filters, hostNodes, dataView]);
+
+  const loading = hostsLoading || !attributes || hostCountLoading;
+
+  // prevents requestTs and serchCriteria states from reloading the chart
+  // we want it to reload only once the host count and table have finished loading
+  const { afterLoadedState } = useAfterLoadedState(loading, {
+    attributes,
+    lastReloadRequestTime: requestTs,
+    ...searchCriteria,
+    filters,
+  });
+
+  const extraActions: Action[] = useMemo(
+    () =>
+      getExtraActions({
+        timeRange: afterLoadedState.dateRange,
+        query: shouldUseSearchCriteria ? afterLoadedState.query : undefined,
+        filters,
       }),
-      buildExistsHostsFilter({ field: 'host.name', dataView }),
-    ];
-  }, [searchCriteria.filters, hostNodes, dataView]);
+    [
+      afterLoadedState.dateRange,
+      afterLoadedState.query,
+      filters,
+      getExtraActions,
+      shouldUseSearchCriteria,
+    ]
+  );
 
   const handleBrushEnd = useCallback(
     ({ range }: BrushTriggerEvent['data']) => {
@@ -84,27 +102,6 @@ export const Tile = ({ id, title, layers, style, toolTip, ...props }: KPIChartPr
       });
     },
     [onSubmit]
-  );
-
-  const loading = hostsLoading || !attributes || hostCountLoading;
-
-  // prevents requestTs and serchCriteria states from reloading the chart
-  // we want it to reload only once the table has finished loading
-  const { afterLoadedState } = useAfterLoadedState(loading, {
-    attributes,
-    lastReloadRequestTime: requestTs,
-    ...searchCriteria,
-    filters,
-  });
-
-  const extraActions: Action[] = useMemo(
-    () =>
-      getExtraActions({
-        timeRange: afterLoadedState.dateRange,
-        query: searchCriteria.query,
-        filters,
-      }),
-    [afterLoadedState.dateRange, filters, getExtraActions, searchCriteria.query]
   );
 
   return (
@@ -126,9 +123,9 @@ export const Tile = ({ id, title, layers, style, toolTip, ...props }: KPIChartPr
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiText size="s" textAlign="center">
-              <EuiI18n
-                token="'xpack.infra.hostsViewPage.errorOnLoadingLensDependencies'"
-                default="There was an error trying to load Lens Plugin."
+              <FormattedMessage
+                id="xpack.infra.hostsViewPage.errorOnLoadingLensDependencies"
+                defaultMessage="There was an error trying to load Lens Plugin."
               />
             </EuiText>
           </EuiFlexItem>
@@ -148,9 +145,10 @@ export const Tile = ({ id, title, layers, style, toolTip, ...props }: KPIChartPr
               lastReloadRequestTime={afterLoadedState.lastReloadRequestTime}
               dateRange={afterLoadedState.dateRange}
               filters={afterLoadedState.filters}
-              query={afterLoadedState.query}
+              query={shouldUseSearchCriteria ? afterLoadedState.query : undefined}
               onBrushEnd={handleBrushEnd}
               loading={loading}
+              hidePanelTitles
             />
           </div>
         </EuiToolTip>
@@ -160,7 +158,7 @@ export const Tile = ({ id, title, layers, style, toolTip, ...props }: KPIChartPr
 };
 
 const EuiPanelStyled = styled(EuiPanel)`
-  min-height: ${KPI_CHART_MIN_HEIGHT};
+  min-height: ${KPI_CHART_MIN_HEIGHT}px;
   .echMetric {
     border-radius: ${({ theme }) => theme.eui.euiBorderRadius};
     pointer-events: none;

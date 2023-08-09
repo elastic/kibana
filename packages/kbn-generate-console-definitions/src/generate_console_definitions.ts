@@ -9,14 +9,16 @@
 import fs from 'fs';
 import Path, { join } from 'path';
 import { ToolingLog } from '@kbn/tooling-log';
-import { generateQueryParams } from './generate_query_params';
 import type {
-  AutocompleteBodyParams,
-  AutocompleteDefinition,
-  AutocompleteUrlParams,
-  SpecificationTypes,
-} from './types';
-import { findTypeDefinition } from './utils';
+  DefinitionUrlParams,
+  EndpointDefinition,
+  EndpointDescription,
+} from '@kbn/console-plugin/common/types';
+import { generateQueryParams } from './generate_query_params';
+import { generateAvailability } from './generate_availability';
+import type { SpecificationTypes } from './types';
+import { findTypeDefinition } from './helpers';
+import { generateUrlComponents } from './generate_url_components';
 
 const generateMethods = (endpoint: SpecificationTypes.Endpoint): string[] => {
   // this array consists of arrays of strings
@@ -41,11 +43,14 @@ const generatePatterns = (endpoint: SpecificationTypes.Endpoint): string[] => {
 const generateDocumentation = (endpoint: SpecificationTypes.Endpoint): string => {
   return endpoint.docUrl;
 };
-
-const generateParams = (
+interface GeneratedParameters {
+  urlParams: DefinitionUrlParams;
+  urlComponents: DefinitionUrlParams;
+}
+const generateParameters = (
   endpoint: SpecificationTypes.Endpoint,
   schema: SpecificationTypes.Model
-): { urlParams: AutocompleteUrlParams; bodyParams: AutocompleteBodyParams } | undefined => {
+): GeneratedParameters | undefined => {
   const { request } = endpoint;
   if (!request) {
     return;
@@ -54,27 +59,22 @@ const generateParams = (
   if (!requestType) {
     return;
   }
-  const urlParams = generateQueryParams(requestType as SpecificationTypes.Request, schema);
-  const bodyParams = generateBodyParams(requestType);
-  return { urlParams, bodyParams };
-};
 
-const generateBodyParams = (
-  requestType: SpecificationTypes.TypeDefinition
-): AutocompleteBodyParams => {
-  return {};
+  const urlParams = generateQueryParams(requestType as SpecificationTypes.Request, schema);
+  const urlComponents = generateUrlComponents(requestType as SpecificationTypes.Request, schema);
+  return { urlParams, urlComponents };
 };
 
 const addParams = (
-  definition: AutocompleteDefinition,
-  params: { urlParams: AutocompleteUrlParams; bodyParams: AutocompleteBodyParams }
-): AutocompleteDefinition => {
-  const { urlParams, bodyParams } = params;
-  if (urlParams && Object.keys(urlParams).length > 0) {
+  definition: EndpointDescription,
+  params: GeneratedParameters
+): EndpointDescription => {
+  const { urlParams, urlComponents } = params;
+  if (Object.keys(urlParams).length > 0) {
     definition.url_params = urlParams;
   }
-  if (bodyParams && Object.keys(bodyParams).length > 0) {
-    definition.data_autocomplete_rules = bodyParams;
+  if (Object.keys(urlComponents).length > 0) {
+    definition.url_components = urlComponents;
   }
   return definition;
 };
@@ -82,16 +82,17 @@ const addParams = (
 const generateDefinition = (
   endpoint: SpecificationTypes.Endpoint,
   schema: SpecificationTypes.Model
-): AutocompleteDefinition => {
+): EndpointDescription => {
   const methods = generateMethods(endpoint);
   const patterns = generatePatterns(endpoint);
   const documentation = generateDocumentation(endpoint);
-  let definition: AutocompleteDefinition = {};
-  const params = generateParams(endpoint, schema);
+  const availability = generateAvailability(endpoint);
+  let definition: EndpointDescription = {};
+  const params = generateParameters(endpoint, schema);
   if (params) {
     definition = addParams(definition, params);
   }
-  definition = { ...definition, methods, patterns, documentation };
+  definition = { ...definition, methods, patterns, documentation, availability };
 
   return definition;
 };
@@ -115,7 +116,7 @@ export function generateConsoleDefinitions({
     const { name } = endpoint;
     log.info(name);
     const definition = generateDefinition(endpoint, schema);
-    const fileContent: { [name: string]: AutocompleteDefinition } = {
+    const fileContent: EndpointDefinition = {
       [name]: definition,
     };
     fs.writeFileSync(

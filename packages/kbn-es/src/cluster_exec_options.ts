@@ -10,7 +10,7 @@ export interface EsClusterExecOptions {
   skipNativeRealmSetup?: boolean;
   reportTime?: (...args: any[]) => void;
   startTime?: number;
-  esArgs?: string[];
+  esArgs?: string[] | string;
   esJavaOpts?: string;
   password?: string;
   skipReadyCheck?: boolean;

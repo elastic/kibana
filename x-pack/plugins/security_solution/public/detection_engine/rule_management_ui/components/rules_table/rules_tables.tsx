@@ -6,6 +6,7 @@
  */
 
 import { EuiBasicTable, EuiConfirmModal, EuiEmptyPrompt, EuiProgress } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useMemo, useRef } from 'react';
 import { Loader } from '../../../../common/components/loader';
 import { useBoolState } from '../../../../common/hooks/use_bool_state';
@@ -33,7 +34,7 @@ import { BulkActionDuplicateExceptionsConfirmation } from './bulk_actions/bulk_d
 import { useStartMlJobs } from '../../../rule_management/logic/use_start_ml_jobs';
 import { RULES_TABLE_PAGE_SIZE_OPTIONS } from './constants';
 import { useRuleManagementFilters } from '../../../rule_management/logic/use_rule_management_filters';
-import type { FindRulesSortField } from '../../../../../common/detection_engine/rule_management';
+import type { FindRulesSortField } from '../../../../../common/api/detection_engine/rule_management';
 import { useIsUpgradingSecurityPackages } from '../../../rule_management/logic/use_upgrade_security_packages';
 
 const INITIAL_SORT_FIELD = 'enabled';
@@ -89,6 +90,9 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
     onInit: showDeleteConfirmation,
     onFinish: hideDeleteConfirmation,
   });
+
+  // If no rules are selected, we are deleting a single rule
+  const rulesToDeleteCount = isAllSelected ? pagination.total : selectedRuleIds.length || 1;
 
   const {
     bulkActionsDryRunResult,
@@ -153,13 +157,16 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
     mlJobs,
     startMlJobs,
     showExceptionsDuplicateConfirmation: showBulkDuplicateConfirmation,
+    confirmDeletion,
   });
+
   const monitoringColumns = useMonitoringColumns({
     hasCRUDPermissions: hasPermissions,
     isLoadingJobs,
     mlJobs,
     startMlJobs,
     showExceptionsDuplicateConfirmation: showBulkDuplicateConfirmation,
+    confirmDeletion,
   });
 
   const isSelectAllCalled = useRef(false);
@@ -260,16 +267,27 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
       {isTableEmpty && <PrePackagedRulesPrompt />}
       {isDeleteConfirmationVisible && (
         <EuiConfirmModal
-          title={i18n.DELETE_CONFIRMATION_TITLE}
+          title={
+            rulesToDeleteCount === 1
+              ? i18n.SINGLE_DELETE_CONFIRMATION_TITLE
+              : i18n.BULK_DELETE_CONFIRMATION_TITLE
+          }
           onCancel={handleDeletionCancel}
           onConfirm={handleDeletionConfirm}
           confirmButtonText={i18n.DELETE_CONFIRMATION_CONFIRM}
           cancelButtonText={i18n.DELETE_CONFIRMATION_CANCEL}
           buttonColor="danger"
           defaultFocusedButton="confirm"
-          data-test-subj="allRulesDeleteConfirmationModal"
+          data-test-subj="deleteRulesConfirmationModal"
         >
-          <p>{i18n.DELETE_CONFIRMATION_BODY}</p>
+          <FormattedMessage
+            id="xpack.securitySolution.detectionEngine.components.allRules.deleteConfirmationModalBody"
+            defaultMessage='This action will delete {rulesToDeleteCount, plural, one {the chosen rule} other {{rulesToDeleteCountStrong} rules}}. Click "Delete" to continue.'
+            values={{
+              rulesToDeleteCount,
+              rulesToDeleteCountStrong: <strong>{rulesToDeleteCount}</strong>,
+            }}
+          />
         </EuiConfirmModal>
       )}
       {isBulkActionConfirmationVisible && bulkAction && (

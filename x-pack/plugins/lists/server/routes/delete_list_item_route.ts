@@ -7,14 +7,14 @@
 
 import { validate } from '@kbn/securitysolution-io-ts-utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import {
-  deleteListItemSchema,
-  listItemArraySchema,
-  listItemSchema,
-} from '@kbn/securitysolution-io-ts-list-types';
 import { LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
 
 import type { ListsPluginRouter } from '../types';
+import {
+  deleteListItemArrayResponse,
+  deleteListItemRequestQuery,
+  deleteListItemResponse,
+} from '../../common/api';
 
 import { buildRouteValidation, buildSiemResponse } from './utils';
 
@@ -28,7 +28,7 @@ export const deleteListItemRoute = (router: ListsPluginRouter): void => {
       },
       path: LIST_ITEM_URL,
       validate: {
-        query: buildRouteValidation(deleteListItemSchema),
+        query: buildRouteValidation(deleteListItemRequestQuery),
       },
     },
     async (context, request, response) => {
@@ -44,7 +44,7 @@ export const deleteListItemRoute = (router: ListsPluginRouter): void => {
               statusCode: 404,
             });
           } else {
-            const [validated, errors] = validate(deleted, listItemSchema);
+            const [validated, errors] = validate(deleted, deleteListItemResponse);
             if (errors != null) {
               return siemResponse.error({ body: errors, statusCode: 500 });
             } else {
@@ -70,7 +70,7 @@ export const deleteListItemRoute = (router: ListsPluginRouter): void => {
                 statusCode: 404,
               });
             } else {
-              const [validated, errors] = validate(deleted, listItemArraySchema);
+              const [validated, errors] = validate(deleted, deleteListItemArrayResponse);
               if (errors != null) {
                 return siemResponse.error({ body: errors, statusCode: 500 });
               } else {

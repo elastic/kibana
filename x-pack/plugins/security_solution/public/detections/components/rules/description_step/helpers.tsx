@@ -35,7 +35,7 @@ import * as i18nRiskScore from '../risk_score_mapping/translations';
 import type {
   RequiredFieldArray,
   Threshold,
-} from '../../../../../common/detection_engine/rule_schema';
+} from '../../../../../common/api/detection_engine/model/rule_schema';
 
 import * as i18n from './translations';
 import type { BuildQueryBarDescription, BuildThreatDescription, ListItems } from './types';
@@ -50,7 +50,7 @@ import { defaultToEmptyTag } from '../../../../common/components/empty_value';
 import { ThreatEuiFlexGroup } from './threat_description';
 import { TechnicalPreviewBadge } from './technical_preview_badge';
 import type { LicenseService } from '../../../../../common/license';
-import { AlertSuppressionMissingFieldsStrategy } from '../../../../../common/detection_engine/rule_schema';
+import { AlertSuppressionMissingFieldsStrategy } from '../../../../../common/api/detection_engine/model/rule_schema';
 const NoteDescriptionContainer = styled(EuiFlexItem)`
   height: 105px;
   overflow-y: hidden;

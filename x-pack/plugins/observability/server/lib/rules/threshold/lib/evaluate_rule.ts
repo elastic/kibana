@@ -21,7 +21,6 @@ export interface EvaluatedRuleParams {
   criteria: MetricExpressionParams[];
   groupBy: string | undefined | string[];
   filterQuery?: string;
-  filterQueryText?: string;
 }
 
 export type Evaluation = Omit<MetricExpressionParams, 'metric'> & {
@@ -39,6 +38,7 @@ export const evaluateRule = async <Params extends EvaluatedRuleParams = Evaluate
   esClient: ElasticsearchClient,
   params: Params,
   dataView: string,
+  timeFieldName: string,
   compositeSize: number,
   alertOnGroupDisappear: boolean,
   logger: Logger,
@@ -64,6 +64,7 @@ export const evaluateRule = async <Params extends EvaluatedRuleParams = Evaluate
         esClient,
         criterion,
         dataView,
+        timeFieldName,
         groupBy,
         filterQuery,
         compositeSize,
@@ -77,6 +78,7 @@ export const evaluateRule = async <Params extends EvaluatedRuleParams = Evaluate
         esClient,
         criterion,
         dataView,
+        timeFieldName,
         groupBy,
         filterQuery,
         logger,

@@ -167,6 +167,23 @@ export function syntheticsAppPageProvider({ page, kibanaUrl }: { page: Page; kib
       }
     },
 
+    async selectFrequencyAddEdit({
+      value,
+      unit,
+    }: {
+      value: number;
+      unit: 'minute' | 'minutes' | 'hours';
+    }) {
+      await page.click(this.byTestId('syntheticsMonitorConfigSchedule'));
+
+      const optionLocator = page.locator(`text=Every ${value} ${unit}`);
+      await optionLocator.evaluate((element: HTMLOptionElement) => {
+        if (element && element.parentElement) {
+          (element.parentElement as HTMLSelectElement).selectedIndex = element.index;
+        }
+      });
+    },
+
     async fillFirstMonitorDetails({ url, locations }: { url: string; locations: string[] }) {
       await this.fillByTestSubj('urls-input', url);
       await page.click(this.byTestId('comboBoxInput'));

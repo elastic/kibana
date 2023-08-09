@@ -121,7 +121,7 @@ export const defaultNavigation: MlNodeDefinition = {
       }),
       children: [
         {
-          link: 'ml:explainLogRateSpikes',
+          link: 'ml:logRateAnalysis',
         },
         {
           link: 'ml:logPatternAnalysis',

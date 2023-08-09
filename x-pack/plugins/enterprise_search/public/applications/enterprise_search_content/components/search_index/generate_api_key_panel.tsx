@@ -135,7 +135,7 @@ export const GenerateApiKeyPanel: React.FC = () => {
                     onChange={(event) => setOptimizedRequest(event.target.checked)}
                     label={i18n.translate(
                       'xpack.enterpriseSearch.content.overview.optimizedRequest.label',
-                      { defaultMessage: 'View Enterprise Search optimized request' }
+                      { defaultMessage: 'View Search optimized request' }
                     )}
                     checked={optimizedRequest}
                   />

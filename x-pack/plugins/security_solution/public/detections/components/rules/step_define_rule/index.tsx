@@ -82,7 +82,7 @@ import { useLicense } from '../../../../common/hooks/use_license';
 import {
   minimumLicenseForSuppression,
   AlertSuppressionMissingFieldsStrategy,
-} from '../../../../../common/detection_engine/rule_schema';
+} from '../../../../../common/api/detection_engine/model/rule_schema';
 import { DurationInput } from '../duration_input';
 
 const CommonUseField = getUseField({ component: Field });
@@ -742,6 +742,16 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     [indexPattern]
   );
 
+  const selectRuleTypeProps = useMemo(
+    () => ({
+      describedByIds: ['detectionEngineStepDefineRuleType'],
+      isUpdateView,
+      hasValidLicense: hasMlLicense(mlCapabilities),
+      isMlAdmin: hasMlAdminPermissions(mlCapabilities),
+    }),
+    [isUpdateView, mlCapabilities]
+  );
+
   return (
     <>
       <StepContentWrapper addPadding={!isUpdateView}>
@@ -760,12 +770,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
           <UseField
             path="ruleType"
             component={SelectRuleType}
-            componentProps={{
-              describedByIds: ['detectionEngineStepDefineRuleType'],
-              isUpdateView,
-              hasValidLicense: hasMlLicense(mlCapabilities),
-              isMlAdmin: hasMlAdminPermissions(mlCapabilities),
-            }}
+            componentProps={selectRuleTypeProps}
           />
           <RuleTypeEuiFormRow $isVisible={!isMlRule(ruleType)} fullWidth>
             <>

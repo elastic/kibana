@@ -78,7 +78,7 @@ export function UXActionMenu({
           color="primary"
           iconType="indexOpen"
           iconSide="left"
-          href={application.getUrlForApp('/home#/tutorial/apm')}
+          href={application.getUrlForApp('/apm/tutorial')}
         >
           {i18n.translate('xpack.ux.addDataButtonLabel', {
             defaultMessage: 'Add data',

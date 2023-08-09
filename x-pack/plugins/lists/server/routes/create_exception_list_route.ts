@@ -6,12 +6,9 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
-import {
-  CreateExceptionListSchemaDecoded,
-  createExceptionListSchema,
-} from '@kbn/securitysolution-io-ts-list-types';
 import { EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
 
+import { CreateExceptionListRequestDecoded, createExceptionListRequest } from '../../common/api';
 import type { ListsPluginRouter } from '../types';
 import { createExceptionListHandler } from '../handlers/create_exception_list_handler';
 
@@ -26,9 +23,9 @@ export const createExceptionListRoute = (router: ListsPluginRouter): void => {
       path: EXCEPTION_LIST_URL,
       validate: {
         body: buildRouteValidation<
-          typeof createExceptionListSchema,
-          CreateExceptionListSchemaDecoded
-        >(createExceptionListSchema),
+          typeof createExceptionListRequest,
+          CreateExceptionListRequestDecoded
+        >(createExceptionListRequest),
       },
     },
     async (context, request, response) => {

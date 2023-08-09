@@ -6,12 +6,20 @@
  */
 
 import type { RuleAlertsItem, SeverityRuleAlertsAggsResponse } from './use_rule_alerts_items';
+import {
+  KIBANA_ALERT_SEVERITY,
+  KIBANA_RULE_ID,
+  KIBANA_RULE_NAME,
+  TIMESTAMP,
+} from './use_rule_alerts_items';
 
 export const from = '2022-04-05T12:00:00.000Z';
 export const to = '2022-04-08T12:00:00.000Z';
 
 export const severityRuleAlertsQuery = {
   size: 0,
+  _source: false,
+  fields: [KIBANA_RULE_NAME, KIBANA_RULE_ID, KIBANA_ALERT_SEVERITY, TIMESTAMP],
   query: {
     bool: {
       filter: [
@@ -62,11 +70,11 @@ export const mockSeverityRuleAlertsResponse: { aggregations: SeverityRuleAlertsA
               },
               hits: [
                 {
-                  _source: {
-                    'kibana.alert.rule.name': 'RULE_1',
-                    'kibana.alert.rule.uuid': '79ec0270-b4c5-11ec-970e-8f7c5a7144f7',
-                    '@timestamp': '2022-04-05T15:58:35.079Z',
-                    'kibana.alert.severity': 'critical',
+                  fields: {
+                    'kibana.alert.rule.name': ['RULE_1'],
+                    'kibana.alert.rule.uuid': ['79ec0270-b4c5-11ec-970e-8f7c5a7144f7'],
+                    '@timestamp': ['2022-04-05T15:58:35.079Z'],
+                    'kibana.alert.severity': ['critical'],
                   },
                 },
               ],
@@ -83,11 +91,11 @@ export const mockSeverityRuleAlertsResponse: { aggregations: SeverityRuleAlertsA
               },
               hits: [
                 {
-                  _source: {
-                    'kibana.alert.rule.uuid': '955c79d0-b403-11ec-b5a7-6dc1ed01bdd7',
-                    'kibana.alert.rule.name': 'RULE_2',
-                    '@timestamp': '2022-04-05T15:58:47.164Z',
-                    'kibana.alert.severity': 'high',
+                  fields: {
+                    'kibana.alert.rule.uuid': ['955c79d0-b403-11ec-b5a7-6dc1ed01bdd7'],
+                    'kibana.alert.rule.name': ['RULE_2'],
+                    '@timestamp': ['2022-04-05T15:58:47.164Z'],
+                    'kibana.alert.severity': ['high'],
                   },
                 },
               ],
@@ -104,11 +112,11 @@ export const mockSeverityRuleAlertsResponse: { aggregations: SeverityRuleAlertsA
               },
               hits: [
                 {
-                  _source: {
-                    'kibana.alert.rule.name': 'RULE_3',
-                    'kibana.alert.rule.uuid': '13bc7bc0-b1d6-11ec-a799-67811b37527a',
-                    '@timestamp': '2022-04-05T15:56:16.606Z',
-                    'kibana.alert.severity': 'low',
+                  fields: {
+                    'kibana.alert.rule.name': ['RULE_3'],
+                    'kibana.alert.rule.uuid': ['13bc7bc0-b1d6-11ec-a799-67811b37527a'],
+                    '@timestamp': ['2022-04-05T15:56:16.606Z'],
+                    'kibana.alert.severity': ['low'],
                   },
                 },
               ],

@@ -2049,6 +2049,41 @@
       },
       {
         "parentPluginId": "@kbn/es-query",
+        "id": "def-common.escapeQuotes",
+        "type": "Function",
+        "tags": [],
+        "label": "escapeQuotes",
+        "description": [
+          "\nEscapes backslashes and double-quotes. (Useful when putting a string in quotes to use as a value\nin a KQL expression. See the QuotedCharacter rule in kuery.peg.)"
+        ],
+        "signature": [
+          "(str: string) => string"
+        ],
+        "path": "packages/kbn-es-query/src/kuery/utils/escape_kuery.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/es-query",
+            "id": "def-common.escapeQuotes.$1",
+            "type": "string",
+            "tags": [],
+            "label": "str",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-es-query/src/kuery/utils/escape_kuery.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/es-query",
         "id": "def-common.extractTimeFilter",
         "type": "Function",
         "tags": [],
@@ -4038,6 +4073,55 @@
       },
       {
         "parentPluginId": "@kbn/es-query",
+        "id": "def-common.toKqlExpression",
+        "type": "Function",
+        "tags": [],
+        "label": "toKqlExpression",
+        "description": [
+          "\nGiven a KQL AST node, generate the corresponding KQL expression."
+        ],
+        "signature": [
+          "(node: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.KueryNode",
+            "text": "KueryNode"
+          },
+          ") => string"
+        ],
+        "path": "packages/kbn-es-query/src/kuery/ast/ast.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/es-query",
+            "id": "def-common.toKqlExpression.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "node",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.KueryNode",
+                "text": "KueryNode"
+              }
+            ],
+            "path": "packages/kbn-es-query/src/kuery/ast/ast.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/es-query",
         "id": "def-common.uniqFilters",
         "type": "Function",
         "tags": [],
@@ -5289,62 +5373,6 @@
               "boolean | undefined"
             ],
             "path": "packages/kbn-es-query/src/filters/helpers/compare_filters.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/es-query",
-        "id": "def-common.FunctionTypeBuildNode",
-        "type": "Interface",
-        "tags": [],
-        "label": "FunctionTypeBuildNode",
-        "description": [],
-        "path": "packages/kbn-es-query/src/kuery/node_types/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/es-query",
-            "id": "def-common.FunctionTypeBuildNode.type",
-            "type": "string",
-            "tags": [],
-            "label": "type",
-            "description": [],
-            "signature": [
-              "\"function\""
-            ],
-            "path": "packages/kbn-es-query/src/kuery/node_types/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/es-query",
-            "id": "def-common.FunctionTypeBuildNode.function",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "function",
-            "description": [],
-            "signature": [
-              "\"nested\" | \"exists\" | \"is\" | \"range\" | \"and\" | \"or\" | \"not\""
-            ],
-            "path": "packages/kbn-es-query/src/kuery/node_types/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/es-query",
-            "id": "def-common.FunctionTypeBuildNode.arguments",
-            "type": "Array",
-            "tags": [],
-            "label": "arguments",
-            "description": [],
-            "signature": [
-              "any[]"
-            ],
-            "path": "packages/kbn-es-query/src/kuery/node_types/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }

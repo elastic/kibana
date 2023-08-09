@@ -28,6 +28,10 @@ export function getAggregateQueryMode(query: AggregateQuery): Language {
   return Object.keys(query)[0] as Language;
 }
 
+export function getLanguageDisplayName(language: string): string {
+  return language === 'esql' ? 'es|ql' : language;
+}
+
 // retrieves the index pattern from the aggregate query
 export function getIndexPatternFromSQLQuery(sqlQuery?: string): string {
   let sql = sqlQuery?.replaceAll('"', '').replaceAll("'", '');

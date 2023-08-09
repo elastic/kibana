@@ -11,6 +11,7 @@ import type { AssetDetailsProps, RenderMode } from './types';
 import { Content } from './content/content';
 import { Header } from './header/header';
 import { TabSwitcherProvider } from './hooks/use_tab_switcher';
+import { AssetDetailsStateProvider } from './hooks/use_asset_details_state';
 
 interface ContentTemplateProps {
   header: React.ReactElement;
@@ -34,7 +35,7 @@ const ContentTemplate = ({ header, body, renderMode }: ContentTemplateProps) => 
 
 export const AssetDetails = ({
   node,
-  currentTimeRange,
+  dateRange,
   activeTabId,
   overrides,
   onTabsStateChange,
@@ -46,34 +47,17 @@ export const AssetDetails = ({
   },
 }: AssetDetailsProps) => {
   return (
-    <TabSwitcherProvider
-      initialActiveTabId={tabs.length > 0 ? activeTabId ?? tabs[0].id : undefined}
-      onTabsStateChange={onTabsStateChange}
-    >
-      <ContentTemplate
-        header={
-          <Header
-            node={node}
-            nodeType={nodeType}
-            currentTimeRange={currentTimeRange}
-            compact={renderMode.showInFlyout}
-            tabs={tabs}
-            links={links}
-            overrides={overrides}
-          />
-        }
-        body={
-          <Content
-            node={node}
-            nodeType={nodeType}
-            currentTimeRange={currentTimeRange}
-            overrides={overrides}
-            onTabsStateChange={onTabsStateChange}
-          />
-        }
-        renderMode={renderMode}
-      />
-    </TabSwitcherProvider>
+    <AssetDetailsStateProvider state={{ node, nodeType, overrides, onTabsStateChange, dateRange }}>
+      <TabSwitcherProvider
+        initialActiveTabId={tabs.length > 0 ? activeTabId ?? tabs[0].id : undefined}
+      >
+        <ContentTemplate
+          header={<Header compact={renderMode.showInFlyout} tabs={tabs} links={links} />}
+          body={<Content />}
+          renderMode={renderMode}
+        />
+      </TabSwitcherProvider>
+    </AssetDetailsStateProvider>
   );
 };
 

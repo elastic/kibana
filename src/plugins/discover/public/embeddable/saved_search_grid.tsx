@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import React, { useState, memo } from 'react';
-import { DataTableRecord } from '../types';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { DiscoverGrid, DiscoverGridProps } from '../components/discover_grid/discover_grid';
 import './saved_search_grid.scss';
 import { DiscoverGridFlyout } from '../components/discover_grid/discover_grid_flyout';

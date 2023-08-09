@@ -48,6 +48,7 @@ import {
   packageToPackagePolicy,
   policyHasFleetServer,
   policyHasAPMIntegration,
+  policyHasSyntheticsIntegration,
 } from '../../common/services';
 import {
   agentPolicyStatuses,
@@ -209,6 +210,10 @@ class AgentPolicyService {
 
   public hasFleetServerIntegration(agentPolicy: AgentPolicy) {
     return policyHasFleetServer(agentPolicy);
+  }
+
+  public hasSyntheticsIntegration(agentPolicy: AgentPolicy) {
+    return policyHasSyntheticsIntegration(agentPolicy);
   }
 
   public async create(

@@ -36,13 +36,13 @@ import type {
   AlertSuppressionMissingFields,
   EsqlSuppressionDuration,
   EsqlParams,
-} from '../../../../../common/detection_engine/rule_schema';
-import type { SortOrder } from '../../../../../common/detection_engine/schemas/common';
+} from '../../../../../common/api/detection_engine/model/rule_schema';
+import type { SortOrder } from '../../../../../common/api/detection_engine';
 import type { EqlOptionsSelected } from '../../../../../common/search_strategy';
 import type {
   RuleResponseAction,
   ResponseAction,
-} from '../../../../../common/detection_engine/rule_response_actions/schemas';
+} from '../../../../../common/api/detection_engine/model/rule_response_actions';
 
 export interface EuiBasicTableSortTypes {
   field: string;

@@ -21,6 +21,7 @@ export {
 export {
   mathOperatorsCommandsDefinitions,
   assignOperatorDefinition,
+  asOperatorDefinition,
   byOperatorDefinition,
   openBracketDefinition,
   closeBracketDefinition,

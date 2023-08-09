@@ -70,6 +70,7 @@ import {
   DiscoverStart,
   DiscoverSetup,
 } from '@kbn/discover-plugin/public/plugin';
+import type { ObservabilityAIAssistantPluginStart } from '@kbn/observability-ai-assistant-plugin/public';
 import { registerApmRuleTypes } from './components/alerting/rule_types/register_apm_rule_types';
 import {
   getApmEnrollmentFlyoutData,
@@ -130,6 +131,7 @@ export interface ApmPluginStartDeps {
   lens: LensPublicStart;
   uiActions: UiActionsStart;
   profiling?: ProfilingPluginStart;
+  observabilityAIAssistant: ObservabilityAIAssistantPluginStart;
 }
 
 const servicesTitle = i18n.translate('xpack.apm.navigation.servicesTitle', {
@@ -171,12 +173,20 @@ const apmStorageExplorerTitle = i18n.translate(
   }
 );
 
+const apmTutorialTitle = i18n.translate(
+  'xpack.apm.navigation.apmTutorialTitle',
+  {
+    defaultMessage: 'Tutorial',
+  }
+);
+
 export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
   constructor(
     private readonly initializerContext: PluginInitializerContext<ConfigSchema>
   ) {
     this.initializerContext = initializerContext;
   }
+
   public setup(core: CoreSetup, plugins: ApmPluginSetupDeps) {
     const config = this.initializerContext.config.get();
     const pluginSetupDeps = plugins;
@@ -369,6 +379,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
           path: '/storage-explorer',
           searchable: featureFlags.storageExplorerAvailable,
         },
+        { id: 'tutorial', title: apmTutorialTitle, path: '/tutorial' },
       ],
 
       async mount(appMountParameters: AppMountParameters<unknown>) {
@@ -399,6 +410,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       locator,
     };
   }
+
   public start(core: CoreStart, plugins: ApmPluginStartDeps) {
     const { fleet } = plugins;
     if (fleet) {

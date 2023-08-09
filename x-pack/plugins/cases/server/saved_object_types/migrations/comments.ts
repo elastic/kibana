@@ -17,8 +17,11 @@ import type {
 import { mergeSavedObjectMigrationMaps } from '@kbn/core/server';
 import type { LensServerPluginSetup } from '@kbn/lens-plugin/server';
 import type { SavedObjectMigrationParams } from '@kbn/core-saved-objects-server';
-import type { AttributesTypePersistableState, AttributesTypeUser } from '../../../common/api';
-import { CommentType } from '../../../common/api';
+import type {
+  PersistableStateAttachmentAttributes,
+  UserCommentAttachmentAttributes,
+} from '../../../common/types/domain';
+import { AttachmentType } from '../../../common/types/domain';
 import type { LensMarkdownNode, MarkdownNode } from '../../../common/utils/markdown_plugins/utils';
 import {
   isLensMarkdownNode,
@@ -44,12 +47,12 @@ import type { AttachmentPersistedAttributes } from '../../common/types/attachmen
 
 interface UnsanitizedComment {
   comment: string;
-  type?: CommentType;
+  type?: AttachmentType;
 }
 
 interface SanitizedComment {
   comment: string;
-  type: CommentType;
+  type: AttachmentType;
 }
 
 enum AssociationType {
@@ -82,7 +85,7 @@ export const createCommentsMigrations = (
         ...doc,
         attributes: {
           ...doc.attributes,
-          type: CommentType.user,
+          type: AttachmentType.user,
         },
         references: doc.references || [],
       };
@@ -95,9 +98,9 @@ export const createCommentsMigrations = (
         associationType: AssociationType.case,
       };
 
-      // only add the rule object for alert comments. Prior to 7.12 we only had CommentType.alert, generated alerts are
+      // only add the rule object for alert comments. Prior to 7.12 we only had AttachmentType.alert, generated alerts are
       // introduced in 7.12.
-      if (doc.attributes.type === CommentType.alert) {
+      if (doc.attributes.type === AttachmentType.alert) {
         attributes = { ...attributes, rule: { id: null, name: null } };
       }
 
@@ -159,7 +162,7 @@ const migrateLensComment = ({
   context,
 }: {
   migrate: MigrateFunction;
-  doc: SavedObjectUnsanitizedDoc<AttributesTypeUser>;
+  doc: SavedObjectUnsanitizedDoc<UserCommentAttachmentAttributes>;
   context: SavedObjectMigrationContext;
 }): SavedObjectSanitizedDoc<AttachmentPersistedAttributes> => {
   try {
@@ -196,7 +199,7 @@ const migratePersistableLensAttachment = ({
   context,
 }: {
   migrate: MigrateFunction;
-  doc: SavedObjectUnsanitizedDoc<AttributesTypePersistableState>;
+  doc: SavedObjectUnsanitizedDoc<PersistableStateAttachmentAttributes>;
   context: SavedObjectMigrationContext;
 }): SavedObjectSanitizedDoc<AttachmentPersistedAttributes> => {
   try {
@@ -243,7 +246,7 @@ export const stringifyCommentWithoutTrailingNewline = (
 export const removeRuleInformation = (
   doc: SavedObjectUnsanitizedDoc<Record<string, unknown>>
 ): SavedObjectSanitizedDoc<unknown> => {
-  if (doc.attributes.type === CommentType.alert || doc.attributes.type === GENERATED_ALERT) {
+  if (doc.attributes.type === AttachmentType.alert || doc.attributes.type === GENERATED_ALERT) {
     return {
       ...doc,
       attributes: {

@@ -15,12 +15,12 @@ import { IntegrationsPopover } from '../../../../../detections/components/rules/
 import { SeverityBadge } from '../../../../../detections/components/rules/severity_badge';
 import * as i18n from '../../../../../detections/pages/detection_engine/rules/translations';
 import type { Rule } from '../../../../rule_management/logic';
-import type { RuleInstallationInfoForReview } from '../../../../../../common/detection_engine/prebuilt_rules/api/review_rule_installation/response_schema';
+import type { RuleInstallationInfoForReview } from '../../../../../../common/api/detection_engine/prebuilt_rules';
 import { useUserData } from '../../../../../detections/components/user_info';
 import { hasUserCRUDPermission } from '../../../../../common/utils/privileges';
 import type { AddPrebuiltRulesTableActions } from './add_prebuilt_rules_table_context';
 import { useAddPrebuiltRulesTableContext } from './add_prebuilt_rules_table_context';
-import type { RuleSignatureId } from '../../../../../../common/detection_engine/rule_schema';
+import type { RuleSignatureId } from '../../../../../../common/api/detection_engine/model/rule_schema';
 import { getNormalizedSeverity } from '../helpers';
 
 export type TableColumn = EuiBasicTableColumn<RuleInstallationInfoForReview>;
@@ -98,6 +98,7 @@ const createInstallButtonColumn = (
         size="s"
         disabled={isInstallButtonDisabled}
         onClick={() => installOneRule(ruleId)}
+        data-test-subj={`installSinglePrebuiltRuleButton-${ruleId}`}
       >
         {isRuleInstalling ? <EuiLoadingSpinner size="s" /> : i18n.INSTALL_RULE_BUTTON}
       </EuiButtonEmpty>

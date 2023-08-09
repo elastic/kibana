@@ -27,7 +27,7 @@ import { GenericIndexPatternColumn } from './form_based';
 import { operationDefinitionMap } from './operations';
 import { FormBasedPrivateState, FormBasedLayer } from './types';
 import { DateHistogramIndexPatternColumn, RangeIndexPatternColumn } from './operations/definitions';
-import { FormattedIndexPatternColumn } from './operations/definitions/column_types';
+import type { FormattedIndexPatternColumn } from './operations/definitions/column_types';
 import { isColumnFormatted, isColumnOfType } from './operations/definitions/helpers';
 import type { IndexPattern, IndexPatternMap } from '../../types';
 import { dedupeAggs } from './dedupe_aggs';
@@ -351,6 +351,14 @@ function getExpressionForLayer(
           pattern:
             format?.params && 'pattern' in format.params && format.params.pattern
               ? [format.params.pattern]
+              : [],
+          fromUnit:
+            format?.params && 'fromUnit' in format.params && format.params.fromUnit
+              ? [format.params.fromUnit]
+              : [],
+          toUnit:
+            format?.params && 'toUnit' in format.params && format.params.toUnit
+              ? [format.params.toUnit]
               : [],
           parentFormat: parentFormat ? [JSON.stringify(parentFormat)] : [],
         },

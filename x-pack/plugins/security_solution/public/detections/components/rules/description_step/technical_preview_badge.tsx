@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiIcon, EuiToolTip, EuiBetaBadge } from '@elastic/eui';
 
 import type { LicenseService } from '../../../../../common/license';
-import { minimumLicenseForSuppression } from '../../../../../common/detection_engine/rule_schema';
+import { minimumLicenseForSuppression } from '../../../../../common/api/detection_engine/model/rule_schema';
 
 import * as i18n from './translations';
 

@@ -100,6 +100,7 @@ describe('StepAboutRuleComponent', () => {
         dataViewId={defineStepDefault.dataViewId}
         timestampOverride={stepAboutDefaultValue.timestampOverride}
         isLoading={false}
+        isActive={true}
         form={aboutStepForm}
       />
     );

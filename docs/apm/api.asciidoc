@@ -11,6 +11,7 @@ Some APM app features are provided via a REST API:
 * <<agent-config-api>>
 * <<apm-annotation-api>>
 * <<rum-sourcemap-api>>
+* <<android-sourcemap-api>>
 * <<agent-key-api>>
 
 [float]
@@ -703,6 +704,219 @@ curl -X DELETE "http://localhost:5601/api/apm/sourcemaps/apm:foo-1.0.0-644fd5a9"
 --------------------------------------------------
 
 [[apm-sourcemap-delete-body]]
+===== Response body
+
+[source,js]
+--------------------------------------------------
+{}
+--------------------------------------------------
+
+////
+*******************************************************
+*******************************************************
+////
+
+[role="xpack"]
+[[android-sourcemap-api]]
+=== Android source map API
+
+IMPORTANT: This endpoint is only compatible with the
+{apm-guide-ref}/index.html[APM integration for Elastic Agent].
+
+An Android source map (generated using Android's https://developer.android.com/build/shrink-code[R8 tool])
+allows obfuscated app stacktraces to be mapped back to original source code --
+allowing you to maintain the size and security of minimized code, without losing the ability to debug your application.
+
+For best results, uploading source maps should become a part of your deployment procedure,
+and not something you only do when you see unhelpful errors.
+That’s because uploading source maps after errors happen won’t make old errors magically readable --
+errors must occur again for source mapping to occur.
+
+The following APIs are available:
+
+* <<android-sourcemap-post>>
+* <<android-sourcemap-get>>
+* <<android-sourcemap-delete>>
+
+[float]
+[[use-android-sourcemap-api]]
+==== How to use APM APIs
+
+.Expand for required headers, privileges, and usage details
+[%collapsible%closed]
+======
+include::api.asciidoc[tag=using-the-APIs]
+======
+
+////
+*******************************************************
+////
+
+[[android-sourcemap-post]]
+==== Create or update an Android source map
+
+Create or update an Android source map for a specific app and version.
+
+[[android-sourcemap-post-privs]]
+===== Privileges
+
+The user accessing this endpoint requires `All` Kibana privileges for the {beat_kib_app} feature.
+For more information, see <<kibana-privileges>>.
+
+[[android-sourcemap-post-req]]
+===== Request
+
+`POST /api/apm/androidmaps`
+
+[role="child_attributes"]
+[[android-sourcemap-post-req-body]]
+===== Request body
+
+`service_name`::
+(required, string) The name of the Android app that the map should apply to.
+
+`service_version`::
+(required, string) The version of the Android app that the map should apply to.
+
+`map_file`::
+(required, string or file upload) The R8-generated map.
+
+[[android-sourcemap-post-example]]
+===== Examples
+
+The following example uploads a source map for a app named `foo` and a service version of `1.0.0`:
+
+[source,curl]
+--------------------------------------------------
+curl -X POST "http://localhost:5601/api/apm/androidmaps" \
+-H 'Content-Type: multipart/form-data' \
+-H 'kbn-xsrf: true' \
+-H 'Authorization: ApiKey ${YOUR_API_KEY}' \
+-F 'service_name="foo"' \
+-F 'service_version="1.0.0"' \
+-F 'map_file=@"/Path/to/the/file/mapping.txt"'
+--------------------------------------------------
+
+[[android-sourcemap-post-body]]
+===== Response body
+
+[source,js]
+--------------------------------------------------
+{
+  "type": "sourcemap",
+  "identifier": "foo-1.0.0-android",
+  "relative_url": "/api/fleet/artifacts/foo-1.0.0-android/644fd5a997d1ddd90ee131ba18e2b3d03931d89dd1fe4599143c0b3264b3e456",
+  "body": "eJyFkL1OwzAUhd/Fc+MbYMuCEBIbHRjKgBgc96R16tiWr1OQqr47NwqJxEK3q/PzWccXxchnZ7E1A1SjuhjVZtF2yOxiEPlO17oWox3D3uPFeSRTjmJQARfCPeiAgGx8NTKsYdAc1T3rwaSJGcds8Sp3c1HnhfywUZ3QhMTFFGepZxqMC9oex3CS9tpk1XyozgOlmoVKuJX1DqEQZ0su7PGtLU+V/3JPKc3cL7TJ2FNDRPov4bFta3MDM4f7W69lpJjLO9qdK8bzVPhcJz3HUCQ4LbO/p5hCSC4cZPByrp/wFqOklbpefwAhzpqI",
+  "created": "2021-07-09T20:47:44.812Z",
+  "id": "apm:foo-1.0.0-android-644fd5a997d1ddd90ee131ba18e2b3d03931d89dd1fe4599143c0b3264b3e456",
+  "compressionAlgorithm": "zlib",
+  "decodedSha256": "644fd5a997d1ddd90ee131ba18e2b3d03931d89dd1fe4599143c0b3264b3e456",
+  "decodedSize": 441,
+  "encodedSha256": "024c72749c3e3dd411b103f7040ae62633558608f480bce4b108cf5b2275bd24",
+  "encodedSize": 237,
+  "encryptionAlgorithm": "none",
+  "packageName": "apm"
+}
+--------------------------------------------------
+
+////
+*******************************************************
+////
+
+[[android-sourcemap-get]]
+==== Get source maps
+
+Returns an array of Fleet artifacts, including source map uploads.
+
+[[android-sourcemap-get-privs]]
+===== Privileges
+
+The user accessing this endpoint requires `Read` or `All` Kibana privileges for the {beat_kib_app} feature.
+For more information, see <<kibana-privileges>>.
+
+[[android-sourcemap-get-req]]
+===== Request
+
+`GET /api/apm/sourcemaps`
+
+[[android-sourcemap-get-example]]
+===== Example
+
+The following example requests all uploaded source maps:
+
+[source,curl]
+--------------------------------------------------
+curl -X GET "http://localhost:5601/api/apm/sourcemaps" \
+-H 'Content-Type: application/json' \
+-H 'kbn-xsrf: true' \
+-H 'Authorization: ApiKey ${YOUR_API_KEY}'
+--------------------------------------------------
+
+[[android-sourcemap-get-body]]
+===== Response body
+
+[source,js]
+--------------------------------------------------
+{
+  "artifacts": [
+    {
+      "type": "sourcemap",
+      "identifier": "foo-1.0.0-android",
+      "relative_url": "/api/fleet/artifacts/foo-1.0.0-android/644fd5a997d1ddd90ee131ba18e2b3d03931d89dd1fe4599143c0b3264b3e456",
+      "body": {
+        "serviceName": "foo",
+        "serviceVersion": "1.0.0",
+        "bundleFilepath": "android",
+        "sourceMap": "# compiler: R8\n# compiler_version: 3.2.47\n# min_api: 26\n..."
+      },
+      "created": "2021-07-09T20:47:44.812Z",
+      "id": "apm:foo-1.0.0-android-644fd5a997d1ddd90ee131ba18e2b3d03931d89dd1fe4599143c0b3264b3e456",
+      "compressionAlgorithm": "zlib",
+      "decodedSha256": "644fd5a997d1ddd90ee131ba18e2b3d03931d89dd1fe4599143c0b3264b3e456",
+      "decodedSize": 441,
+      "encodedSha256": "024c72749c3e3dd411b103f7040ae62633558608f480bce4b108cf5b2275bd24",
+      "encodedSize": 237,
+      "encryptionAlgorithm": "none",
+      "packageName": "apm"
+    }
+  ]
+}
+--------------------------------------------------
+
+////
+*******************************************************
+////
+
+[[android-sourcemap-delete]]
+==== Delete source map
+
+Delete a previously uploaded source map.
+
+[[android-sourcemap-delete-privs]]
+===== Privileges
+
+The user accessing this endpoint requires `All` Kibana privileges for the {beat_kib_app} feature.
+For more information, see <<kibana-privileges>>.
+
+[[android-sourcemap-delete-req]]
+===== Request
+
+`DELETE /api/apm/sourcemaps/:id`
+
+[[android-sourcemap-delete-example]]
+===== Example
+
+The following example deletes a source map with an id of `apm:foo-1.0.0-android-644fd5a9`:
+
+[source,curl]
+--------------------------------------------------
+curl -X DELETE "http://localhost:5601/api/apm/sourcemaps/apm:foo-1.0.0-android-644fd5a9" \
+-H 'Content-Type: application/json' \
+-H 'kbn-xsrf: true' \
+-H 'Authorization: ApiKey ${YOUR_API_KEY}'
+--------------------------------------------------
+
+[[android-sourcemap-delete-body]]
 ===== Response body
 
 [source,js]

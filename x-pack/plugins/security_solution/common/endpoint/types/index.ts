@@ -942,6 +942,9 @@ export interface PolicyConfig {
   meta: {
     license: string;
     cloud: boolean;
+    license_uid: string;
+    cluster_uuid: string;
+    cluster_name: string;
   };
   windows: {
     advanced?: {
@@ -967,7 +970,7 @@ export interface PolicyConfig {
     };
     malware: ProtectionFields & BlocklistFields;
     memory_protection: ProtectionFields & SupportedFields;
-    behavior_protection: ProtectionFields & SupportedFields;
+    behavior_protection: BehaviorProtectionFields & SupportedFields;
     ransomware: ProtectionFields & SupportedFields;
     logging: {
       file: string;
@@ -1007,7 +1010,7 @@ export interface PolicyConfig {
       network: boolean;
     };
     malware: ProtectionFields & BlocklistFields;
-    behavior_protection: ProtectionFields & SupportedFields;
+    behavior_protection: BehaviorProtectionFields & SupportedFields;
     memory_protection: ProtectionFields & SupportedFields;
     popup: {
       malware: {
@@ -1037,7 +1040,7 @@ export interface PolicyConfig {
       tty_io: boolean;
     };
     malware: ProtectionFields & BlocklistFields;
-    behavior_protection: ProtectionFields & SupportedFields;
+    behavior_protection: BehaviorProtectionFields & SupportedFields;
     memory_protection: ProtectionFields & SupportedFields;
     popup: {
       malware: {
@@ -1097,6 +1100,10 @@ export interface UIPolicyConfig {
 /** Policy:  Protection fields */
 export interface ProtectionFields {
   mode: ProtectionModes;
+}
+
+export interface BehaviorProtectionFields extends ProtectionFields {
+  reputation_service: boolean;
 }
 
 /** Policy:  Supported fields */
@@ -1340,3 +1347,5 @@ export interface AdditionalOnSwitchChangeParams {
 export type MetadataListResponse = BaseListResponse<HostInfo>;
 
 export type { EndpointPrivileges } from './authz';
+
+export type { EndpointHeartbeat } from './heartbeat';

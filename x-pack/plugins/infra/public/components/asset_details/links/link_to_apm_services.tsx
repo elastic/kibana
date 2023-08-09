@@ -36,14 +36,12 @@ export const LinkToApmServices = ({ nodeName, apmField }: LinkToApmServicesProps
       <EuiButtonEmpty
         data-test-subj="hostsView-flyout-apm-services-link"
         size="xs"
-        iconSide="left"
-        iconType="popout"
         flush="both"
         href={linkToApmServices}
       >
         <FormattedMessage
-          id="xpack.infra.hostsViewPage.flyout.apmServicesLinkLabel"
-          defaultMessage="APM Services"
+          id="xpack.infra.hostsViewPage.flyout.viewApmServicesLinkLabel"
+          defaultMessage="View APM Services"
         />
       </EuiButtonEmpty>
     </RedirectAppLinks>

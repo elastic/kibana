@@ -54,6 +54,7 @@ export const buildESQlTheme = (): monaco.editor.IStandaloneThemeData => ({
     ...buildRuleGroup(
       [
         'from',
+        'metadata',
         'mv_expand',
         'stats',
         'dissect',
@@ -70,6 +71,7 @@ export const buildESQlTheme = (): monaco.editor.IStandaloneThemeData => ({
         'like',
         'rlike',
         'in',
+        'as',
         'expr_ws',
         'row',
         'show',
