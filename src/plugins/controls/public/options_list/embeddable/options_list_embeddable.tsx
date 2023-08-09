@@ -253,22 +253,16 @@ export class OptionsListEmbeddable
     }
 
     if (this.dataView && (!this.field || this.field.name !== fieldName)) {
-      try {
-        const originalField = this.dataView.getFieldByName(fieldName);
-        if (!originalField) {
-          throw new Error(
-            i18n.translate('controls.optionsList.errors.fieldNotFound', {
-              defaultMessage: 'Could not locate field: {fieldName}',
-              values: { fieldName },
-            })
-          );
-        }
-
-        this.field = originalField.toSpec();
-      } catch (e) {
-        this.dispatch.setErrorMessage(e.message);
+      const field = this.dataView.getFieldByName(fieldName);
+      if (field) {
+        this.field = field.toSpec();
+        this.dispatch.setField(this.field);
+      } else {
+        this.dispatch.setErrorMessage(i18n.translate('controls.optionsList.errors.fieldNotFound', {
+          defaultMessage: 'Could not locate field: {fieldName}',
+          values: { fieldName },
+        }));
       }
-      this.dispatch.setField(this.field);
     }
 
     return { dataView: this.dataView, field: this.field };

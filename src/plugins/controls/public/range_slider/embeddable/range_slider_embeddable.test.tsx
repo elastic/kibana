@@ -49,7 +49,7 @@ beforeEach(() => {
 });
 
 describe('initialize', () => {
-  describe('without value', () => {
+  describe('without selected range', () => {
     test('should notify control group when initialization is finished', async () => {
       const reduxEmbeddablePackage = await lazyLoadReduxToolsPackage();
       const controlGroupInput = { chainingSystem: 'NONE', panels: {} } as ControlGroupInput;
@@ -59,17 +59,17 @@ describe('initialize', () => {
       // setInitializationFinished is called before fetching slider range when value is not provided
       injectStorybookDataView(undefined);
 
-      const slider = await container.addRangeSliderControl({
+      const control = await container.addRangeSliderControl({
         dataViewId: 'demoDataFlights',
         fieldName: 'AvgTicketPrice',
       });
 
-      expect(container.getInput().panels[slider.getInput().id].type).toBe(RANGE_SLIDER_CONTROL);
-      expect(container.getOutput().embeddableLoaded[slider.getInput().id]).toBe(true);
+      expect(container.getInput().panels[control.getInput().id].type).toBe(RANGE_SLIDER_CONTROL);
+      expect(container.getOutput().embeddableLoaded[control.getInput().id]).toBe(true);
     });
   });
 
-  describe('with value', () => {
+  describe('with selected range', () => {
     test('should set error message when data view can not be found', async () => {
       const reduxEmbeddablePackage = await lazyLoadReduxToolsPackage();
       const controlGroupInput = { chainingSystem: 'NONE', panels: {} } as ControlGroupInput;
@@ -77,7 +77,7 @@ describe('initialize', () => {
 
       injectStorybookDataView(undefined);
 
-      const slider = (await container.addRangeSliderControl({
+      const control = (await container.addRangeSliderControl({
         dataViewId: 'demoDataFlights',
         fieldName: 'AvgTicketPrice',
         value: ['150', '300'],
@@ -86,7 +86,7 @@ describe('initialize', () => {
       // await redux dispatch
       await new Promise((resolve) => process.nextTick(resolve));
 
-      const reduxState = slider.getState();
+      const reduxState = control.getState();
       expect(reduxState.output.loading).toBe(false);
       expect(reduxState.componentState.error).toBe(
         'mock DataViews service currentDataView is undefined, call injectStorybookDataView to set'
@@ -100,7 +100,7 @@ describe('initialize', () => {
 
       injectStorybookDataView(storybookFlightsDataView);
 
-      const slider = (await container.addRangeSliderControl({
+      const control = (await container.addRangeSliderControl({
         dataViewId: 'demoDataFlights',
         fieldName: 'myField',
         value: ['150', '300'],
@@ -109,7 +109,7 @@ describe('initialize', () => {
       // await redux dispatch
       await new Promise((resolve) => process.nextTick(resolve));
 
-      const reduxState = slider.getState();
+      const reduxState = control.getState();
       expect(reduxState.output.loading).toBe(false);
       expect(reduxState.componentState.error).toBe('Could not locate field: myField');
     });
@@ -122,7 +122,7 @@ describe('initialize', () => {
       injectStorybookDataView(storybookFlightsDataView);
       totalResults = 0;
 
-      const slider = (await container.addRangeSliderControl({
+      const control = (await container.addRangeSliderControl({
         dataViewId: 'demoDataFlights',
         fieldName: 'AvgTicketPrice',
         value: ['150', '300'],
@@ -131,7 +131,7 @@ describe('initialize', () => {
       // await redux dispatch
       await new Promise((resolve) => process.nextTick(resolve));
 
-      const reduxState = slider.getState();
+      const reduxState = control.getState();
       expect(reduxState.output.filters?.length).toBe(0);
       expect(reduxState.componentState.isInvalid).toBe(true);
     });
@@ -143,7 +143,7 @@ describe('initialize', () => {
 
       injectStorybookDataView(storybookFlightsDataView);
 
-      const slider = (await container.addRangeSliderControl({
+      const control = (await container.addRangeSliderControl({
         dataViewId: 'demoDataFlights',
         fieldName: 'AvgTicketPrice',
         value: ['150', '300'],
@@ -152,7 +152,7 @@ describe('initialize', () => {
       // await redux dispatch
       await new Promise((resolve) => process.nextTick(resolve));
 
-      const reduxState = slider.getState();
+      const reduxState = control.getState();
       expect(reduxState.output.filters?.length).toBe(1);
       expect(reduxState.output.filters?.[0].query).toEqual({
         range: {
@@ -174,14 +174,14 @@ describe('initialize', () => {
 
       injectStorybookDataView(storybookFlightsDataView);
 
-      const slider = await container.addRangeSliderControl({
+      const control = await container.addRangeSliderControl({
         dataViewId: 'demoDataFlights',
         fieldName: 'AvgTicketPrice',
         value: ['150', '300'],
       });
 
-      expect(container.getInput().panels[slider.getInput().id].type).toBe(RANGE_SLIDER_CONTROL);
-      expect(container.getOutput().embeddableLoaded[slider.getInput().id]).toBe(true);
+      expect(container.getInput().panels[control.getInput().id].type).toBe(RANGE_SLIDER_CONTROL);
+      expect(container.getOutput().embeddableLoaded[control.getInput().id]).toBe(true);
     });
 
     test('should notify control group when initialization throws', async () => {
@@ -198,14 +198,14 @@ describe('initialize', () => {
         },
       }));
 
-      const slider = await container.addRangeSliderControl({
+      const control = await container.addRangeSliderControl({
         dataViewId: 'demoDataFlights',
         fieldName: 'AvgTicketPrice',
         value: ['150', '300'],
       });
 
-      expect(container.getInput().panels[slider.getInput().id].type).toBe(RANGE_SLIDER_CONTROL);
-      expect(container.getOutput().embeddableLoaded[slider.getInput().id]).toBe(true);
+      expect(container.getInput().panels[control.getInput().id].type).toBe(RANGE_SLIDER_CONTROL);
+      expect(container.getOutput().embeddableLoaded[control.getInput().id]).toBe(true);
     });
   });
 });
