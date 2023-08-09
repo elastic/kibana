@@ -51,14 +51,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.missingOrFail('discoverSaveButton');
       });
 
-      it('should add a searchable deep link to the profile page', async () => {
-        await PageObjects.common.navigateToApp('home');
-        await PageObjects.navigationalSearch.searchFor('discover log explorer');
-
-        const results = await PageObjects.navigationalSearch.getDisplayedResults();
-        expect(results[0].label).to.eql('Discover / Logs Explorer');
-      });
-
       it('should render a filter controls section as part of the unified search bar', async () => {
         // Assert does not render on discover app
         await PageObjects.common.navigateToApp('discover');

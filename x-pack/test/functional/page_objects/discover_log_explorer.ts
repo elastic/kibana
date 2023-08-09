@@ -73,9 +73,9 @@ export function DiscoverLogExplorerPageObject({ getService }: FtrProviderContext
 
     async closeDatasetSelector() {
       const button = await this.getDatasetSelectorButton();
-      const content = await this.getDatasetSelectorContent();
+      const isOpen = await testSubjects.exists('datasetSelectorContent');
 
-      if (await content.isDisplayed()) return button.click();
+      if (isOpen) return button.click();
     },
 
     async clickSortButtonBy(direction: 'asc' | 'desc') {
@@ -89,6 +89,13 @@ export function DiscoverLogExplorerPageObject({ getService }: FtrProviderContext
       );
 
       return sortingButton.click();
+    },
+
+    async getSearchFieldValue() {
+      const searchControlsContainer = await this.getDatasetSelectorSearchControls();
+      const searchField = await searchControlsContainer.findByCssSelector('input[type=search]');
+
+      return searchField.getAttribute('value');
     },
 
     async typeSearchFieldWith(name: string) {
@@ -119,6 +126,13 @@ export function DiscoverLogExplorerPageObject({ getService }: FtrProviderContext
 
     async assertNoIntegrationsPromptExists() {
       const integrationStatus = await testSubjects.find('integrationStatusItem');
+      const promptTitle = await integrationStatus.findByTagName('h2');
+
+      expect(await promptTitle.getVisibleText()).to.be('No integrations found');
+    },
+
+    async assertNoIntegrationsErrorExists() {
+      const integrationStatus = await testSubjects.find('integrationsErrorPrompt');
       const promptTitle = await integrationStatus.findByTagName('h2');
 
       expect(await promptTitle.getVisibleText()).to.be('No integrations found');

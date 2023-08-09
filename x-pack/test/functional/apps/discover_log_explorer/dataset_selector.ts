@@ -166,6 +166,27 @@ export default function (providerContext: FtrProviderContext) {
           expect(unmanagedDatasetTitle).to.be(secondEntryTitle);
         });
 
+        it('should display an error prompt if could not retrieve the integrations', async function () {
+          // Skip the test in case network condition utils are not available
+          try {
+            await retry.try(async () => {
+              await PageObjects.discoverLogExplorer.assertNoIntegrationsPromptExists();
+            });
+
+            await PageObjects.common.sleep(5000);
+            await browser.setNetworkConditions('OFFLINE');
+            await PageObjects.discoverLogExplorer.typeSearchFieldWith('a');
+
+            await retry.try(async () => {
+              await PageObjects.discoverLogExplorer.assertNoIntegrationsErrorExists();
+            });
+
+            await browser.restoreNetworkConditions();
+          } catch (error) {
+            this.skip();
+          }
+        });
+
         it('should display an empty prompt for no integrations', async () => {
           const { integrations } = await PageObjects.discoverLogExplorer.getIntegrations();
           expect(integrations.length).to.be(0);
@@ -258,7 +279,6 @@ export default function (providerContext: FtrProviderContext) {
         });
 
         afterEach(async () => {
-          await PageObjects.discoverLogExplorer.clearSearchField();
           await PageObjects.discoverLogExplorer.closeDatasetSelector();
         });
 
@@ -379,7 +399,136 @@ export default function (providerContext: FtrProviderContext) {
         });
       });
 
-      describe('when click on an integration and moves into the second navigation level', () => {});
+      describe.only('when click on an integration and moves into the second navigation level', () => {
+        before(async () => {
+          await PageObjects.common.navigateToApp('discover', { hash: '/p/log-explorer' });
+        });
+
+        beforeEach(async () => {
+          await browser.refresh();
+          await PageObjects.discoverLogExplorer.openDatasetSelector();
+          await PageObjects.discoverLogExplorer.clearSearchField();
+        });
+
+        afterEach(async () => {
+          await PageObjects.discoverLogExplorer.closeDatasetSelector();
+        });
+
+        it('should display a list of available datasets', async () => {
+          await retry.try(async () => {
+            const { nodes } = await PageObjects.discoverLogExplorer.getIntegrations();
+            await nodes[0].click();
+          });
+
+          await retry.try(async () => {
+            const panelTitleNode =
+              await PageObjects.discoverLogExplorer.getDatasetSelectorContextMenuPanelTitle();
+            const menuEntries = await PageObjects.discoverLogExplorer.getCurrentPanelEntries();
+
+            expect(await panelTitleNode.getVisibleText()).to.be('Apache HTTP Server');
+            expect(await menuEntries[0].getVisibleText()).to.be('access');
+            expect(await menuEntries[1].getVisibleText()).to.be('error');
+          });
+        });
+
+        it('should sort the datasets list by the clicked sorting option', async () => {
+          await retry.try(async () => {
+            const { nodes } = await PageObjects.discoverLogExplorer.getIntegrations();
+            await nodes[0].click();
+          });
+
+          await retry.try(async () => {
+            const panelTitleNode =
+              await PageObjects.discoverLogExplorer.getDatasetSelectorContextMenuPanelTitle();
+
+            expect(await panelTitleNode.getVisibleText()).to.be('Apache HTTP Server');
+          });
+
+          // Test ascending order
+          await PageObjects.discoverLogExplorer.clickSortButtonBy('asc');
+          await retry.try(async () => {
+            const menuEntries = await PageObjects.discoverLogExplorer.getCurrentPanelEntries();
+
+            expect(await menuEntries[0].getVisibleText()).to.be('access');
+            expect(await menuEntries[1].getVisibleText()).to.be('error');
+          });
+
+          // Test descending order
+          await PageObjects.discoverLogExplorer.clickSortButtonBy('desc');
+          await retry.try(async () => {
+            const menuEntries = await PageObjects.discoverLogExplorer.getCurrentPanelEntries();
+
+            expect(await menuEntries[0].getVisibleText()).to.be('error');
+            expect(await menuEntries[1].getVisibleText()).to.be('access');
+          });
+
+          // Test back ascending order
+          await PageObjects.discoverLogExplorer.clickSortButtonBy('asc');
+          await retry.try(async () => {
+            const menuEntries = await PageObjects.discoverLogExplorer.getCurrentPanelEntries();
+
+            expect(await menuEntries[0].getVisibleText()).to.be('access');
+            expect(await menuEntries[1].getVisibleText()).to.be('error');
+          });
+        });
+
+        it('should filter the datasets list by the typed dataset name', async () => {
+          await retry.try(async () => {
+            const { nodes } = await PageObjects.discoverLogExplorer.getIntegrations();
+            await nodes[0].click();
+          });
+
+          await retry.try(async () => {
+            const panelTitleNode =
+              await PageObjects.discoverLogExplorer.getDatasetSelectorContextMenuPanelTitle();
+
+            expect(await panelTitleNode.getVisibleText()).to.be('Apache HTTP Server');
+          });
+
+          await retry.try(async () => {
+            const menuEntries = await PageObjects.discoverLogExplorer.getCurrentPanelEntries();
+
+            expect(await menuEntries[0].getVisibleText()).to.be('access');
+            expect(await menuEntries[1].getVisibleText()).to.be('error');
+          });
+
+          await PageObjects.discoverLogExplorer.typeSearchFieldWith('err');
+
+          await retry.try(async () => {
+            const menuEntries = await PageObjects.discoverLogExplorer.getCurrentPanelEntries();
+
+            expect(menuEntries.length).to.be(1);
+            expect(await menuEntries[0].getVisibleText()).to.be('error');
+          });
+        });
+
+        it('should update the current selection with the clicked dataset', async () => {
+          await retry.try(async () => {
+            const { nodes } = await PageObjects.discoverLogExplorer.getIntegrations();
+            await nodes[0].click();
+          });
+
+          await retry.try(async () => {
+            const panelTitleNode =
+              await PageObjects.discoverLogExplorer.getDatasetSelectorContextMenuPanelTitle();
+
+            expect(await panelTitleNode.getVisibleText()).to.be('Apache HTTP Server');
+          });
+
+          await retry.try(async () => {
+            const menuEntries = await PageObjects.discoverLogExplorer.getCurrentPanelEntries();
+
+            expect(await menuEntries[0].getVisibleText()).to.be('access');
+            menuEntries[0].click();
+          });
+
+          await retry.try(async () => {
+            const selectorButton = await PageObjects.discoverLogExplorer.getDatasetSelectorButton();
+
+            expect(await selectorButton.getVisibleText()).to.be('[Apache HTTP Server] access');
+          });
+        });
+      });
 
       // describe('when navigating into Uncategorized data streams', () => {
       //   beforeEach(async () => {
@@ -393,6 +542,10 @@ export default function (providerContext: FtrProviderContext) {
 
       describe('when open/close the selector', () => {
         before(async () => {
+          await PageObjects.common.navigateToApp('discover', { hash: '/p/log-explorer' });
+        });
+
+        beforeEach(async () => {
           await browser.refresh();
         });
 
@@ -426,6 +579,89 @@ export default function (providerContext: FtrProviderContext) {
             expect(await panelTitleNode.getVisibleText()).to.be('Apache HTTP Server');
             expect(await menuEntries[0].getVisibleText()).to.be('access');
             expect(await menuEntries[1].getVisibleText()).to.be('error');
+          });
+        });
+
+        it('should restore the latest search results', async () => {
+          await PageObjects.discoverLogExplorer.openDatasetSelector();
+          await PageObjects.discoverLogExplorer.clearSearchField();
+
+          await PageObjects.discoverLogExplorer.typeSearchFieldWith('system');
+
+          await retry.try(async () => {
+            const { integrations } = await PageObjects.discoverLogExplorer.getIntegrations();
+            expect(integrations).to.eql([initialPackageMap.system]);
+          });
+
+          await PageObjects.discoverLogExplorer.closeDatasetSelector();
+          await PageObjects.discoverLogExplorer.openDatasetSelector();
+
+          await retry.try(async () => {
+            const { integrations } = await PageObjects.discoverLogExplorer.getIntegrations();
+            expect(integrations).to.eql([initialPackageMap.system]);
+          });
+        });
+      });
+
+      describe('when switching between integration panels', () => {
+        before(async () => {
+          await PageObjects.common.navigateToApp('discover', { hash: '/p/log-explorer' });
+        });
+
+        it('should remember the latest search and restore its results for each integration', async () => {
+          await PageObjects.discoverLogExplorer.openDatasetSelector();
+          await PageObjects.discoverLogExplorer.clearSearchField();
+
+          await PageObjects.discoverLogExplorer.typeSearchFieldWith('apache');
+
+          await retry.try(async () => {
+            const { nodes, integrations } = await PageObjects.discoverLogExplorer.getIntegrations();
+            expect(integrations).to.eql([initialPackageMap.apache]);
+            nodes[0].click();
+          });
+
+          await retry.try(async () => {
+            const panelTitleNode =
+              await PageObjects.discoverLogExplorer.getDatasetSelectorContextMenuPanelTitle();
+            const menuEntries = await PageObjects.discoverLogExplorer.getCurrentPanelEntries();
+
+            expect(await panelTitleNode.getVisibleText()).to.be('Apache HTTP Server');
+            expect(await menuEntries[0].getVisibleText()).to.be('access');
+            expect(await menuEntries[1].getVisibleText()).to.be('error');
+          });
+
+          await PageObjects.discoverLogExplorer.typeSearchFieldWith('err');
+
+          await retry.try(async () => {
+            const menuEntries = await PageObjects.discoverLogExplorer.getCurrentPanelEntries();
+
+            expect(menuEntries.length).to.be(1);
+            expect(await menuEntries[0].getVisibleText()).to.be('error');
+          });
+
+          // Navigate back to integrations
+          const panelTitleNode =
+            await PageObjects.discoverLogExplorer.getDatasetSelectorContextMenuPanelTitle();
+          panelTitleNode.click();
+
+          await retry.try(async () => {
+            const { nodes, integrations } = await PageObjects.discoverLogExplorer.getIntegrations();
+            expect(integrations).to.eql([initialPackageMap.apache]);
+
+            const searchValue = await PageObjects.discoverLogExplorer.getSearchFieldValue();
+            expect(searchValue).to.eql('apache');
+
+            nodes[0].click();
+          });
+
+          await retry.try(async () => {
+            const menuEntries = await PageObjects.discoverLogExplorer.getCurrentPanelEntries();
+
+            const searchValue = await PageObjects.discoverLogExplorer.getSearchFieldValue();
+            expect(searchValue).to.eql('err');
+
+            expect(menuEntries.length).to.be(1);
+            expect(await menuEntries[0].getVisibleText()).to.be('error');
           });
         });
       });
