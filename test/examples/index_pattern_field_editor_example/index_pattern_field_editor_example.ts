@@ -12,7 +12,8 @@ import { PluginFunctionalProviderContext } from 'test/plugin_functional/services
 export default function ({ getService }: PluginFunctionalProviderContext) {
   const testSubjects = getService('testSubjects');
 
-  describe('', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/116463
+  describe.skip('', () => {
     it('finds an index pattern', async () => {
       await testSubjects.existOrFail('indexPatternTitle');
     });
