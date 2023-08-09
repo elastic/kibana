@@ -59,6 +59,7 @@ import { InfraClientStartExports } from '@kbn/infra-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { DashboardStart } from '@kbn/dashboard-plugin/public';
 import { UiActionsStart, UiActionsSetup } from '@kbn/ui-actions-plugin/public';
 import { ObservabilityTriggerId } from '@kbn/observability-shared-plugin/common';
 import { LicenseManagementUIPluginSetup } from '@kbn/license-management-plugin/public';
@@ -110,6 +111,7 @@ export interface ApmPluginStartDeps {
   alerting?: AlertingPluginPublicStart;
   charts?: ChartsPluginStart;
   data: DataPublicPluginStart;
+  dashboard?: DashboardStart;
   discover?: DiscoverStart;
   embeddable: EmbeddableStart;
   home: void;

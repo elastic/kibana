@@ -29,7 +29,8 @@
       "lens",
       "maps",
       "uiActions",
-      "observabilityAIAssistant"
+      "observabilityAIAssistant",
+      "presentationUtil"
     ],
     "optionalPlugins": [
       "actions",

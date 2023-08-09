@@ -28,6 +28,7 @@ import { InfraOverview } from '../../app/infra_overview';
 import { InfraTab } from '../../app/infra_overview/infra_tabs/use_tabs';
 import { Metrics } from '../../app/metrics';
 import { MetricsDetails } from '../../app/metrics_details';
+import { ServiceDashboardsView } from '../../app/service_dashboards';
 import { ServiceDependencies } from '../../app/service_dependencies';
 import { ServiceLogs } from '../../app/service_logs';
 import { ServiceMapServiceDetail } from '../../app/service_map';
@@ -365,6 +366,16 @@ export const serviceDetailRoute = {
           }),
         }),
       },
+      '/services/{serviceName}/dashboards': page({
+        element: <ServiceDashboardsView />,
+        tab: 'dashboards',
+        title: i18n.translate('xpack.apm.views.customDashboards.title', {
+          defaultMessage: 'Custom Dashboards',
+        }),
+        searchBarOptions: {
+          showTimeComparison: false,
+        },
+      }),
       '/services/{serviceName}/': {
         element: <RedirectToDefaultServiceRouteView />,
       },

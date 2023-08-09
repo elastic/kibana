@@ -8,6 +8,7 @@
 import * as t from 'io-ts';
 import { isoToEpochRt, toNumberRt } from '@kbn/io-ts-utils';
 import { ApmDocumentType } from '../../common/document_type';
+import { DashboardMappingTypeEnum } from '../../common/service_dashboards';
 import { RollupInterval } from '../../common/rollup';
 
 export { environmentRt } from '../../common/environment_rt';
@@ -21,6 +22,12 @@ export const probabilityRt = t.type({
   probability: toNumberRt,
 });
 export const kueryRt = t.type({ kuery: t.string });
+export const titleRt = t.type({ title: t.string });
+
+export const dashboardMappingTypeRt = t.union([
+  t.literal(DashboardMappingTypeEnum.single),
+  t.literal(DashboardMappingTypeEnum.multi),
+]);
 
 export const serviceTransactionDataSourceRt = t.type({
   documentType: t.union([
