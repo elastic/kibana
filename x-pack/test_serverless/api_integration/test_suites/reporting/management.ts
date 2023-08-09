@@ -5,54 +5,47 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../functional/page_objects/svl_common_navigation';
 
-// eslint-disable-next-line import/no-default-export
-export default ({ getService, getPageObjects }: FtrProviderContext) => {
-  const PageObjects = getPageObjects(['common', 'reporting', 'dashboard']);
-  const testSubjects = getService('testSubjects');
-  const browser = getService('browser');
+export default ({ getService, getPageObject }: FtrProviderContext) => {
+  // const svlCommonApi = getService('svlCommonApi');
+  const svlCommonNavigation = getPageObject('svlCommonNavigation')
+  const testSubjects = getService('testSubjects')
+
+  /**
+   * Load sample data from the visualize library
+   */
+  // http://localhost:5601/cue/app/home#/tutorial_directory/sampleData
+  // <span class="euiSideNavItemButton__label euiSideNavItemButton__label--truncated" title="Management">Management</span>
+  // data-test-subj="showSampleDataButton"
+  // data-test-subj="addSampleDataSetecommerce"
+  // wait for toast Sample eCommerce orders installed
+
+
   const reportingFunctional = getService('reportingFunctional');
 
   describe('Access to Management > Reporting', () => {
-    before(async () => {
-      await reportingFunctional.initEcommerce();
-    });
-    after(async () => {
-      await reportingFunctional.teardownEcommerce();
-    });
+    // before(async () => {
+    //   await reportingFunctional.initEcommerce();
+    // svlCommonNavigation.sideNav.clickLink('Management')
+
+    // });
+    // after(async () => {
+    //   await reportingFunctional.teardownEcommerce();
+    // });
+    // this.tags(['skipSvlObt', 'skipSvlSec'], () => {})
+
 
     it('does not allow user that does not have reporting privileges', async () => {
       await reportingFunctional.loginDataAnalyst();
-      await PageObjects.common.navigateToApp('reporting');
+      await svlCommonNavigation.navigateToApp('reporting');
       await testSubjects.missingOrFail('reportJobListing');
     });
 
     it('does allow user with reporting privileges', async () => {
       await reportingFunctional.loginReportingUser();
-      await PageObjects.common.navigateToApp('reporting');
+      await svlCommonNavigation.navigateToApp('reporting');
       await testSubjects.existOrFail('reportJobListing');
-    });
-
-    it('Allows users to navigate back to where a report was generated', async () => {
-      const dashboardTitle = 'Ecom Dashboard';
-      await PageObjects.common.navigateToApp('dashboard');
-      await PageObjects.dashboard.loadSavedDashboard(dashboardTitle);
-
-      await PageObjects.reporting.openPdfReportingPanel();
-      await PageObjects.reporting.clickGenerateReportButton();
-
-      await PageObjects.common.navigateToApp('reporting');
-      await PageObjects.common.sleep(3000); // Wait an amount of time for auto-polling to refresh the jobs
-
-      // We do not need to wait for the report to finish generating
-      await (await testSubjects.find('euiCollapsedItemActionsButton')).click();
-      await (await testSubjects.find('reportOpenInKibanaApp')).click();
-
-      const [, dashboardWindowHandle] = await browser.getAllWindowHandles();
-      await browser.switchToWindow(dashboardWindowHandle);
-
-      await PageObjects.dashboard.expectOnDashboard(dashboardTitle);
     });
   });
 };

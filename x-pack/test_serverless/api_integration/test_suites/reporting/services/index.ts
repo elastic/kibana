@@ -8,7 +8,6 @@ import { services as svlServices } from '../../../services'
 import { createUsageServices } from './usage';
 import { createScenarios } from './scenarios';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { services as apiIntegrationServices } from '../services'
 
 export function ReportingAPIProvider(context: FtrProviderContext) {
   return {
@@ -19,7 +18,7 @@ export function ReportingAPIProvider(context: FtrProviderContext) {
 
 export const services = {
   ...svlServices,
-  supertestWithoutAuth: apiIntegrationServices.supertestWithoutAuth,
-  usageAPI: apiIntegrationServices.usageAPI,
+  supertestWithoutAuth: svlServices.supertestWithoutAuth,
+  usageAPI: svlServices.usageAPI,
   reportingAPI: ReportingAPIProvider,
 };

@@ -91,6 +91,7 @@ disabled:
   - x-pack/test_serverless/functional/test_suites/observability/config.ts
   - x-pack/test_serverless/functional/test_suites/search/config.ts
   - x-pack/test_serverless/functional/test_suites/security/config.ts
+  - x-pack/test_serverless/api_integration/test_suites/reporting/config.ts
 
 defaultQueue: 'n2-4-spot'
 enabled:

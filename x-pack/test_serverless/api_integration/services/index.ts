@@ -9,7 +9,6 @@ import { GenericFtrProviderContext } from '@kbn/test';
 // eslint-disable-next-line @kbn/imports/no_boundary_crossing
 import { services as xpackApiIntegrationServices } from '../../../test/api_integration/services';
 import { services as svlSharedServices } from '../../shared/services';
-import { services as reportingApiServices } from '../../reporting_api_integration/services';
 
 import { SvlCommonApiServiceProvider } from './svl_common_api';
 import { AlertingApiProvider } from './alerting_api';
@@ -18,7 +17,6 @@ import { ReportingApiProvider } from './reporting_api';
 export const services = {
   ...xpackApiIntegrationServices,
   ...svlSharedServices,
-  ...reportingApiServices,
   svlCommonApi: SvlCommonApiServiceProvider,
   alertingApi: AlertingApiProvider,
   reportingApi: ReportingApiProvider,
