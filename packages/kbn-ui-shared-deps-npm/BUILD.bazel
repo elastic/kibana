@@ -24,6 +24,8 @@ SRCS = glob(
 
 # deps needed when importing this module from another location
 RUNTIME_DEPS = [
+  "@npm//babel-loader",
+  "@npm//@babel/plugin-proposal-optional-chaining",
   "@npm//loader-utils",
   "@npm//val-loader",
   "//packages/kbn-repo-info",
