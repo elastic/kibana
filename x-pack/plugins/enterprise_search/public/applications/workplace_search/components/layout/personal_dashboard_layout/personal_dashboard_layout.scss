@@ -18,14 +18,9 @@
   }
 
   &__body {
-    padding: 0px $euiSizeL;
-    margin: 0px $euiSize - 1;
+    padding-top:0;
     position: relative;
     width: 100%;
     height: 100%;
-    @include euiBreakpoint('s','m','l') {
-      margin: 0px;
-    }
-
   }
 }
