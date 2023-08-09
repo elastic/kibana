@@ -62,7 +62,7 @@ For details about this step, refer to {ref}/docker.html#docker-verify-signature[
 +
 [source,sh,subs="attributes"]
 ----
-docker run --name es-node01 --net elastic -p 9200:9200 -p 9300:9300 -t {es-docker-image}
+docker run --name es-node01 --net elastic -e "discovery.type=single-node" -p 9200:9200 -p 9300:9300 -t {es-docker-image}
 ----
 
 
