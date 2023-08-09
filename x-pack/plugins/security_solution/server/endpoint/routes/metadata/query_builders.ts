@@ -68,6 +68,8 @@ const getUnitedMetadataSortMethod = (
 
   if (sortField === EndpointSortableField.HOST_STATUS) {
     return [{ status: sortDirection }];
+  } else if (sortField === EndpointSortableField.ENROLLED_AT) {
+    return [{ 'united.agent.enrolled_at': { order: sortDirection, unmapped_type: 'date' } }];
   } else if (DATE_FIELDS.includes(sortField)) {
     return [{ [unitedMetadataSortField]: { order: sortDirection, unmapped_type: 'date' } }];
   } else {

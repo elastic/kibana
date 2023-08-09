@@ -59,10 +59,7 @@ describe('Endpoints page', () => {
     it('User can sort by any field', () => {
       loadPage(APP_ENDPOINTS_PATH);
 
-      const fields = Object.values(EndpointSortableField).filter(
-        // enrolled_at is not present in the table, it's just the default sorting
-        (value) => value !== EndpointSortableField.ENROLLED_AT
-      );
+      const fields = Object.values(EndpointSortableField);
 
       for (let i = 0; i < fields.length; i++) {
         const field = fields[i];

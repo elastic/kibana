@@ -298,8 +298,9 @@ export class EndpointMetadataService {
       },
       last_checkin:
         _last_checkin ||
-        _fleetAgent?.last_checkin ||
+        fleetAgent?.last_checkin ||
         new Date(endpointMetadata['@timestamp']).toISOString(),
+      enrolled_at: fleetAgent?.enrolled_at ?? 'unknown',
     };
   }
 

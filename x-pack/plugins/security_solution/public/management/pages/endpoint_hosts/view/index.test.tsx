@@ -310,6 +310,7 @@ describe('when on the endpoint list page', () => {
                 setup.policy
               ),
               last_checkin: hostListData[index].last_checkin,
+              enrolled_at: hostListData[index].enrolled_at,
             };
           });
           hostListData.forEach((item, index) => {
@@ -512,6 +513,7 @@ describe('when on the endpoint list page', () => {
       const {
         host_status: hostStatus,
         last_checkin: lastCheckin,
+        enrolled_at: enrolledAt,
         metadata: { agent, Endpoint, ...details },
       } = endpointDetails;
 
@@ -532,6 +534,7 @@ describe('when on the endpoint list page', () => {
           },
         },
         last_checkin: lastCheckin,
+        enrolled_at: enrolledAt,
       };
 
       const policy = docGenerator.generatePolicyPackagePolicy();
@@ -991,6 +994,7 @@ describe('when on the endpoint list page', () => {
             },
           },
           last_checkin: hosts[0].last_checkin,
+          enrolled_at: hosts[0].enrolled_at,
         },
         {
           host_status: hosts[1].host_status,
@@ -1017,6 +1021,7 @@ describe('when on the endpoint list page', () => {
             },
           },
           last_checkin: hosts[1].last_checkin,
+          enrolled_at: hosts[1].enrolled_at,
         },
       ];
 
@@ -1335,6 +1340,7 @@ describe('when on the endpoint list page', () => {
             },
           },
           last_checkin: hosts[0].last_checkin,
+          enrolled_at: hosts[0].enrolled_at,
         },
         {
           host_status: hosts[1].host_status,
@@ -1361,6 +1367,7 @@ describe('when on the endpoint list page', () => {
             },
           },
           last_checkin: hosts[1].last_checkin,
+          enrolled_at: hosts[1].enrolled_at,
         },
       ];
       setEndpointListApiMockImplementation(coreStart.http, {

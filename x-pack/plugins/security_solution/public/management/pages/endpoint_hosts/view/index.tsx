@@ -95,6 +95,9 @@ const getEndpointListColumns = ({
   const lastActiveColumnName = i18n.translate('xpack.securitySolution.endpoint.list.lastActive', {
     defaultMessage: 'Last active',
   });
+  const enrolledAtColumnName = i18n.translate('xpack.securitySolution.endpoint.list.enrolledAt', {
+    defaultMessage: 'Enrolled at',
+  });
   const padLeft: CSSProperties = { paddingLeft: '6px' };
 
   return [
@@ -289,10 +292,25 @@ const getEndpointListColumns = ({
       name: lastActiveColumnName,
       width: '9%',
       sortable: true,
-      render(dateValue: HostInfo['metadata']['@timestamp']) {
+      render(dateValue: HostInfo['last_checkin']) {
         return (
           <FormattedDate
             fieldName={lastActiveColumnName}
+            value={dateValue}
+            className="eui-textTruncate"
+          />
+        );
+      },
+    },
+    {
+      field: EndpointSortableField.ENROLLED_AT,
+      name: enrolledAtColumnName,
+      width: '9%',
+      sortable: true,
+      render(dateValue: HostInfo['enrolled_at']) {
+        return (
+          <FormattedDate
+            fieldName={enrolledAtColumnName}
             value={dateValue}
             className="eui-textTruncate"
           />

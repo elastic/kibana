@@ -160,16 +160,20 @@ describe('query builder', () => {
         expect(query.body.sort).toEqual([{ [mappedField]: 'asc' }]);
       });
 
-      it('uses `unmapped_type`: `date` for last_seen field', async () => {
+      it.each`
+        inputField                           | mappedField
+        ${EndpointSortableField.LAST_SEEN}   | ${EndpointSortableField.LAST_SEEN}
+        ${EndpointSortableField.ENROLLED_AT} | ${'united.agent.enrolled_at'}
+      `('correctly maps date field $inputField', async ({ inputField, mappedField }) => {
         const query = await buildUnitedIndexQuery(soClient, {
           page: 1,
           pageSize: 10,
-          sortField: EndpointSortableField.LAST_SEEN,
+          sortField: inputField,
           sortDirection: 'asc',
         });
 
         expect(query.body.sort).toEqual([
-          { [EndpointSortableField.LAST_SEEN]: { order: 'asc', unmapped_type: 'date' } },
+          { [mappedField]: { order: 'asc', unmapped_type: 'date' } },
         ]);
       });
     });
