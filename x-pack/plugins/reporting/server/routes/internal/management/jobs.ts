@@ -146,7 +146,7 @@ export function registerJobInfoRoutesInternal(reporting: ReportingCore) {
       {
         path,
         validate: jobHandlers.validate,
-        options: { tags: [ROUTE_TAG_CAN_REDIRECT], access: 'internal' },
+        options: { tags: [ROUTE_TAG_CAN_REDIRECT], access: 'public' },
       },
       authorizedUserPreRouting(reporting, async (user, context, req, res) => {
         return jobHandlers.handleDownloadReport({ path, user, context, req, res });
