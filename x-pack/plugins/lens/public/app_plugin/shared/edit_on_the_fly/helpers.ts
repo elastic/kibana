@@ -34,11 +34,10 @@ export const getLensDataFromQuery = async (
         })
       : dataView;
   const table = await fetchDataFromAggregateQuery(query, dv, deps.data, deps.expressions);
-  const columns = table?.columns?.map(({ name }) => name);
   const context = {
     dataViewSpec: dv?.toSpec(),
     fieldName: '',
-    contextualFields: columns,
+    textBasedColumns: table?.columns,
     query,
   };
 

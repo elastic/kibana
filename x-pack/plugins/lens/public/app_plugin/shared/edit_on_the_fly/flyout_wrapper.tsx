@@ -24,12 +24,14 @@ import { FormattedMessage } from '@kbn/i18n-react';
 interface FlyoutWrapperProps {
   datasourceId: 'formBased' | 'textBased';
   children: JSX.Element;
+  noChangesToApply?: boolean;
   onCancel?: () => void;
   closeFlyout?: () => void;
 }
 export const FlyoutWrapper = ({
   datasourceId,
   children,
+  noChangesToApply,
   onCancel,
   closeFlyout,
 }: FlyoutWrapperProps) => {
@@ -106,6 +108,7 @@ export const FlyoutWrapper = ({
                 })}
                 iconType="check"
                 data-test-subj="collapseFlyoutButton"
+                isDisabled={Boolean(noChangesToApply)}
               >
                 <FormattedMessage
                   id="xpack.lens.config.applyFlyoutLabel"

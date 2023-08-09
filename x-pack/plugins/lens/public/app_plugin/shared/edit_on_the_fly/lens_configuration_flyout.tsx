@@ -128,7 +128,12 @@ export function LensEditConfigurationFlyout({
           </EuiTitle>
         </EuiFlyoutHeader>
       )}
-      <FlyoutWrapper datasourceId={datasourceId} closeFlyout={closeFlyout} onCancel={onCancel}>
+      <FlyoutWrapper
+        datasourceId={datasourceId}
+        closeFlyout={closeFlyout}
+        onCancel={onCancel}
+        noChangesToApply={isEqual(previousAttributes.current, attributes)}
+      >
         <>
           {isOfAggregateQueryType(attributes.state.query) && (
             <TextBasedLangEditor
