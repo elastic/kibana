@@ -1,4 +1,4 @@
-summary: Retrieve information about a specific data view.
+summary: The get data view API returns a JSON object that contains information about the data view.
 value:
   {
     "data_view": {

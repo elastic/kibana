@@ -13,39 +13,7 @@ get:
       content:
         application/json:
           schema:
-            type: object
-            properties:
-              data_view:
-                type: object
-                properties:
-                  allowNoIndex:
-                    type: boolean
-                  fieldAttrs:
-                    type: object
-                  fieldFormats:
-                    type: object
-                  fields:
-                    type: object
-                  id:
-                    type: string
-                  name:
-                    type: string
-                  namespaces:
-                    type: array
-                    items:
-                      type: string
-                  runtimeFieldMap:
-                    type: object
-                  sourceFilters:
-                    type: array
-                  timeFieldName:
-                    type: string
-                  title:
-                    type: string
-                  typeMeta:
-                    type: object
-                  version:
-                    type: string
+            $ref: '../components/schemas/data_view_response_object.yaml'
           examples:
             getDataViewResponse:
               $ref: '../components/examples/get_data_view_response.yaml'
@@ -93,40 +61,7 @@ post:
     content:
       application/json:
         schema:
-          type: object
-          required:
-            - data_view
-          properties:
-            data_view:
-              type: object
-              description: >
-                The data view fields you want to update.
-                Only the specified fields are updated in the data view. Unspecified fields stay as they are persisted.
-              properties:
-                allowNoIndex:
-                  type: boolean
-                fieldFormats:
-                  type: object
-                fields:
-                  type: object
-                name:
-                  type: string
-                runtimeFieldMap:
-                  type: object
-                sourceFilters:
-                  type: array
-                timeFieldName:
-                  type: string
-                title:
-                  type: string
-                type:
-                  type: string
-                typeMeta:
-                  type: object
-            refresh_fields:
-              type: boolean
-              description: Reloads the data view fields after the data view is updated.
-              default: false
+          $ref: '../components/schemas/update_data_view_request_object.yaml'
         examples:
           updateDataViewRequest:
             $ref: '../components/examples/update_data_view_request.yaml'
@@ -136,10 +71,7 @@ post:
       content:
         application/json:
           schema:
-            type: object
-            properties:
-              data_view:
-                type: object
+            $ref: '../components/schemas/data_view_response_object.yaml'
     '400':
       description: Bad request
       content:

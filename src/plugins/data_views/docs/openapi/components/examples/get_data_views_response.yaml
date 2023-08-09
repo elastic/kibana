@@ -1,4 +1,4 @@
-summary: Retrieve the list of data views for Kibana sample data.
+summary: The get all data views API returns a list of data views.
 value:
   {
     "data_view": [

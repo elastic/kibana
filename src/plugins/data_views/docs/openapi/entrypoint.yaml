@@ -18,8 +18,8 @@ paths:
 # Default space
   '/api/data_views':
     $ref: 'paths/api@data_views.yaml'
-#  '/api/data_views/data_view':
-#    $ref: 'paths/api@data_views@data_view.yaml'
+  '/api/data_views/data_view':
+    $ref: 'paths/api@data_views@data_view.yaml'
   '/api/data_views/data_view/{viewId}':
     $ref: 'paths/api@data_views@data_view@{viewid}.yaml'
 #  '/api/data_views/data_view/{viewId}/fields':

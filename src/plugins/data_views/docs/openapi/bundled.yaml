@@ -56,6 +56,42 @@ paths:
                   $ref: '#/components/examples/get_data_views_response'
     servers:
       - url: https://localhost:5601
+  /api/data_views/data_view:
+    post:
+      summary: Creates a data view.
+      operationId: createDataView
+      description: |
+        This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+      tags:
+        - data views
+      parameters:
+        - $ref: '#/components/parameters/kbn_xsrf'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/create_data_view_request_object'
+            examples:
+              createDataViewRequest:
+                $ref: '#/components/examples/create_data_view_request'
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/data_view_response_object'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400_response'
+      servers:
+        - url: https://localhost:5601
+    servers:
+      - url: https://localhost:5601
   /api/data_views/data_view/{viewId}:
     get:
       summary: Retrieves a single data view by identifier.
@@ -72,39 +108,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  data_view:
-                    type: object
-                    properties:
-                      allowNoIndex:
-                        type: boolean
-                      fieldAttrs:
-                        type: object
-                      fieldFormats:
-                        type: object
-                      fields:
-                        type: object
-                      id:
-                        type: string
-                      name:
-                        type: string
-                      namespaces:
-                        type: array
-                        items:
-                          type: string
-                      runtimeFieldMap:
-                        type: object
-                      sourceFilters:
-                        type: array
-                      timeFieldName:
-                        type: string
-                      title:
-                        type: string
-                      typeMeta:
-                        type: object
-                      version:
-                        type: string
+                $ref: '#/components/schemas/data_view_response_object'
               examples:
                 getDataViewResponse:
                   $ref: '#/components/examples/get_data_view_response'
@@ -149,39 +153,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              required:
-                - data_view
-              properties:
-                data_view:
-                  type: object
-                  description: |
-                    The data view fields you want to update. Only the specified fields are updated in the data view. Unspecified fields stay as they are persisted.
-                  properties:
-                    allowNoIndex:
-                      type: boolean
-                    fieldFormats:
-                      type: object
-                    fields:
-                      type: object
-                    name:
-                      type: string
-                    runtimeFieldMap:
-                      type: object
-                    sourceFilters:
-                      type: array
-                    timeFieldName:
-                      type: string
-                    title:
-                      type: string
-                    type:
-                      type: string
-                    typeMeta:
-                      type: object
-                refresh_fields:
-                  type: boolean
-                  description: Reloads the data view fields after the data view is updated.
-                  default: false
+              $ref: '#/components/schemas/update_data_view_request_object'
             examples:
               updateDataViewRequest:
                 $ref: '#/components/examples/update_data_view_request'
@@ -191,10 +163,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  data_view:
-                    type: object
+                $ref: '#/components/schemas/data_view_response_object'
         '400':
           description: Bad request
           content:
@@ -318,7 +287,7 @@ components:
       name: ApiKey
   examples:
     get_data_views_response:
-      summary: Retrieve the list of data views for Kibana sample data.
+      summary: The get all data views API returns a list of data views.
       value:
         data_view:
           - id: ff959d40-b880-11e8-a6d9-e546fe2bba5f
@@ -337,8 +306,19 @@ components:
               - default
             title: kibana_sample_data_logs
             name: Kibana Sample Data Logs
+    create_data_view_request:
+      summary: Create a data view with runtime fields.
+      value:
+        data_view:
+          title: logstash-*
+          name: My Logstash data view
+          runtimeFieldMap:
+            runtime_shape_name:
+              type: keyword
+              script:
+                source: emit(doc['shape_name'].value)
     get_data_view_response:
-      summary: Retrieve information about a specific data view.
+      summary: The get data view API returns a JSON object that contains information about the data view.
       value:
         data_view:
           id: ff959d40-b880-11e8-a6d9-e546fe2bba5f
@@ -1274,7 +1254,7 @@ components:
           name: Kibana Sample Data eCommerce
         refresh_fields: true
     get_runtime_field_response:
-      summary: Retrieve a runtime field named `hour_of_day` from the data view `d3d7af60-4c81-11e8-b3d7-01146121b73d`.
+      summary: The get runtime field API returns a JSON object that contains information about the runtime field (`hour_of_day`) and the data view (`d3d7af60-4c81-11e8-b3d7-01146121b73d`).
       value:
         fields:
           - count: 0
@@ -1773,7 +1753,7 @@ components:
           allowNoIndex: false
           name: Kibana Sample Data Flights
     get_default_data_view_response:
-      summary: Retrieve the default data view identifier.
+      summary: The get default data view API returns the default data view identifier.
       value:
         data_view_id: ff959d40-b880-11e8-a6d9-e546fe2bba5f
     set_default_data_view_request:
@@ -1782,6 +1762,13 @@ components:
         data_view_id: ff959d40-b880-11e8-a6d9-e546fe2bba5f
         force: true
   parameters:
+    kbn_xsrf:
+      schema:
+        type: string
+      in: header
+      name: kbn-xsrf
+      description: Cross-site request forgery protection
+      required: true
     view_id:
       in: path
       name: viewId
@@ -1790,13 +1777,6 @@ components:
       schema:
         type: string
         example: ff959d40-b880-11e8-a6d9-e546fe2bba5f
-    kbn_xsrf:
-      schema:
-        type: string
-      in: header
-      name: kbn-xsrf
-      description: Cross-site request forgery protection
-      required: true
     field_name:
       in: path
       name: fieldName
@@ -1806,22 +1786,120 @@ components:
         type: string
         example: hour_of_day
   schemas:
-    404_response:
+    allownoindex:
+      type: boolean
+      description: Allows the data view saved object to exist before the data is available.
+    fieldattrs:
+      type: object
+      description: A map of field attributes by field name.
+    fieldformats:
+      type: object
+      description: A map of field formats by field name.
+    namespaces:
+      type: array
+      description: An array of space identifiers for sharing the data view between multiple spaces.
+      items:
+        type: string
+        default: default
+    runtimefieldmap:
+      type: object
+      description: A map of runtime field definitions by field name.
+    sourcefilters:
+      type: array
+      description: The array of field names you want to filter out in Discover.
+    timefieldname:
+      type: string
+      description: The timestamp field name, which you use for time-based data views.
+    title:
+      type: string
+      description: Comma-separated list of data streams, indices, and aliases that you want to search. Supports wildcards (`*`).
+    type:
+      type: string
+      description: When set to `rollup`, identifies the rollup data views.
+    typemeta:
+      type: object
+      description: When you use rollup indices, contains the field list for the rollup data view API endpoints.
+    create_data_view_request_object:
+      title: Create data view request
+      type: object
+      required:
+        - data_view
+      properties:
+        data_view:
+          type: object
+          required:
+            - title
+          description: The data view object.
+          properties:
+            allowNoIndex:
+              $ref: '#/components/schemas/allownoindex'
+            fieldAttrs:
+              $ref: '#/components/schemas/fieldattrs'
+            fieldFormats:
+              $ref: '#/components/schemas/fieldformats'
+            fields:
+              type: object
+            id:
+              type: string
+            name:
+              type: string
+              description: The data view name.
+            namespaces:
+              $ref: '#/components/schemas/namespaces'
+            runtimeFieldMap:
+              $ref: '#/components/schemas/runtimefieldmap'
+            sourceFilters:
+              $ref: '#/components/schemas/sourcefilters'
+            timeFieldName:
+              $ref: '#/components/schemas/timefieldname'
+            title:
+              $ref: '#/components/schemas/title'
+            type:
+              $ref: '#/components/schemas/type'
+            typeMeta:
+              $ref: '#/components/schemas/typemeta'
+            version:
+              type: string
+        override:
+          type: boolean
+          description: Override an existing data view if a data view with the provided title already exists.
+          default: false
+    data_view_response_object:
+      title: Data view response properties
       type: object
       properties:
-        error:
-          type: string
-          example: Not Found
-          enum:
-            - Not Found
-        message:
-          type: string
-          example: Saved object [index-pattern/caaad6d0-920c-11ed-b36a-874bd1548a00] not found
-        statusCode:
-          type: integer
-          example: 404
-          enum:
-            - 404
+        data_view:
+          type: object
+          properties:
+            allowNoIndex:
+              $ref: '#/components/schemas/allownoindex'
+            fieldAttrs:
+              $ref: '#/components/schemas/fieldattrs'
+            fieldFormats:
+              $ref: '#/components/schemas/fieldformats'
+            fields:
+              type: object
+            id:
+              type: string
+              example: ff959d40-b880-11e8-a6d9-e546fe2bba5f
+            name:
+              type: string
+              description: The data view name.
+            namespaces:
+              $ref: '#/components/schemas/namespaces'
+            runtimeFieldMap:
+              $ref: '#/components/schemas/runtimefieldmap'
+            sourceFilters:
+              $ref: '#/components/schemas/sourcefilters'
+            timeFieldName:
+              $ref: '#/components/schemas/timefieldname'
+            title:
+              $ref: '#/components/schemas/title'
+            typeMeta:
+              $ref: '#/components/schemas/typemeta'
+            version:
+              type: string
+              example: WzQ2LDJd
     400_response:
       title: Bad request
       type: object
@@ -1838,3 +1916,54 @@ components:
           example: Bad Request
         message:
           type: string
+    404_response:
+      type: object
+      properties:
+        error:
+          type: string
+          example: Not Found
+          enum:
+            - Not Found
+        message:
+          type: string
+          example: Saved object [index-pattern/caaad6d0-920c-11ed-b36a-874bd1548a00] not found
+        statusCode:
+          type: integer
+          example: 404
+          enum:
+            - 404
+    update_data_view_request_object:
+      title: Update data view request
+      type: object
+      required:
+        - data_view
+      properties:
+        data_view:
+          type: object
+          description: |
+            The data view properties you want to update. Only the specified properties are updated in the data view. Unspecified fields stay as they are persisted.
+          properties:
+            allowNoIndex:
+              $ref: '#/components/schemas/allownoindex'
+            fieldFormats:
+              $ref: '#/components/schemas/fieldformats'
+            fields:
+              type: object
+            name:
+              type: string
+            runtimeFieldMap:
+              $ref: '#/components/schemas/runtimefieldmap'
+            sourceFilters:
+              $ref: '#/components/schemas/sourcefilters'
+            timeFieldName:
+              $ref: '#/components/schemas/timefieldname'
+            title:
+              $ref: '#/components/schemas/title'
+            type:
+              $ref: '#/components/schemas/type'
+            typeMeta:
+              $ref: '#/components/schemas/typemeta'
+        refresh_fields:
+          type: boolean
+          description: Reloads the data view fields after the data view is updated.
+          default: false
