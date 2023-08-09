@@ -58,7 +58,7 @@ export const useCreateIntegration = ({
       createPromise: async (integrationOptions) => {
         if (lastCreatedIntegration && deletePreviousIntegration) {
           await http?.delete(
-            `/api/fleet/epm/packages/${lastCreatedIntegration.integrationName}/1.0.0`,
+            `/api/fleet/epm/packages/custom_${lastCreatedIntegration.integrationName}/1.0.0`,
             {}
           );
         }
