@@ -82,7 +82,7 @@ const SHARED_SERVERLESS_PARAMS = [
 
   '--rm',
 
-  // '--detach',
+  '--detach',
 
   // '--privileged',
 
@@ -136,7 +136,7 @@ const SERVERLESS_NODES: Array<Omit<ServerlessEsNodeArgs, 'image'>> = [
   {
     name: 'es02',
     params: [
-      '--detach',
+      // '--detach',
       '-p',
       '127.0.0.1:9202:9202',
 
@@ -154,7 +154,7 @@ const SERVERLESS_NODES: Array<Omit<ServerlessEsNodeArgs, 'image'>> = [
   {
     name: 'es03',
     params: [
-      '--detach',
+      // '--detach',
       '-p',
       '127.0.0.1:9203:9203',
 
@@ -330,7 +330,7 @@ export async function setupServerlessVolumes(log: ToolingLog, options: Serverles
 
   log.indent(-4);
 
-  return ['--volume', `${options.basePath}:/objectstore:Z`];
+  return ['--volume', `${options.basePath}:/objectstore:z`];
 }
 
 // async function setupUserPerm() {
