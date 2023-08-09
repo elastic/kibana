@@ -92,13 +92,13 @@ export const createGridColumns = (
           const filterForText = i18n.translate(
             'xpack.lens.table.tableCellFilter.filterForValueText',
             {
-              defaultMessage: 'Filter for value',
+              defaultMessage: 'Filter for',
             }
           );
           const filterForAriaLabel = i18n.translate(
             'xpack.lens.table.tableCellFilter.filterForValueAriaLabel',
             {
-              defaultMessage: 'Filter for value: {cellContent}',
+              defaultMessage: 'Filter for: {cellContent}',
               values: {
                 cellContent,
               },
@@ -132,13 +132,13 @@ export const createGridColumns = (
           const filterOutText = i18n.translate(
             'xpack.lens.table.tableCellFilter.filterOutValueText',
             {
-              defaultMessage: 'Filter out value',
+              defaultMessage: 'Filter out',
             }
           );
           const filterOutAriaLabel = i18n.translate(
             'xpack.lens.table.tableCellFilter.filterOutValueAriaLabel',
             {
-              defaultMessage: 'Filter out value: {cellContent}',
+              defaultMessage: 'Filter out: {cellContent}',
               values: {
                 cellContent,
               },
@@ -238,7 +238,7 @@ export const createGridColumns = (
           onClick: () => handleTransposedColumnClick(bucketValues, false),
           iconType: 'plusInCircle',
           label: i18n.translate('xpack.lens.table.columnFilter.filterForValueText', {
-            defaultMessage: 'Filter for column',
+            defaultMessage: 'Filter for',
           }),
           'data-test-subj': 'lensDatatableHide',
         });
@@ -249,7 +249,7 @@ export const createGridColumns = (
           onClick: () => handleTransposedColumnClick(bucketValues, true),
           iconType: 'minusInCircle',
           label: i18n.translate('xpack.lens.table.columnFilter.filterOutValueText', {
-            defaultMessage: 'Filter out column',
+            defaultMessage: 'Filter out',
           }),
           'data-test-subj': 'lensDatatableHide',
         });
