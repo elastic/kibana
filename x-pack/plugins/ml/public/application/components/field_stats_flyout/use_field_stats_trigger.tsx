@@ -33,6 +33,7 @@ export const useFieldStatsTrigger = () => {
 
   const populatedFields = useObservable(populatedFields$);
 
+  console.log(`--@@populatedFields`, populatedFields);
   const renderOption = useCallback(
     (option: EuiComboBoxOptionOption, searchValue: string): ReactNode => {
       const field = (option as Option).field;
@@ -40,7 +41,7 @@ export const useFieldStatsTrigger = () => {
         option.label
       ) : (
         <FieldStatsInfoButton
-          isEmpty={!populatedFields?.has(field.id)}
+          isEmpty={populatedFields && !populatedFields.has(field.id)}
           field={field}
           label={option.label}
           onButtonClick={handleFieldStatsButtonClick}

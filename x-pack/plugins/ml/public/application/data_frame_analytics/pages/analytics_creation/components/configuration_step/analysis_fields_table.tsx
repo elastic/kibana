@@ -60,7 +60,7 @@ export const AnalysisFieldsTable: FC<{
       itemsPerPage: number;
     }>({ pageIndex: 0, itemsPerPage: 5 });
 
-    const { handleFieldStatsButtonClick, populatedFields } = useFieldStatsTrigger();
+    const { handleFieldStatsButtonClick } = useFieldStatsTrigger();
 
     const columns = [
       {
@@ -88,7 +88,6 @@ export const AnalysisFieldsTable: FC<{
           return (
             <>
               <FieldStatsInfoButton
-                isEmpty={!populatedFields?.has(name)}
                 field={field}
                 label={name}
                 onButtonClick={handleFieldStatsButtonClick}

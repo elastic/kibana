@@ -18,7 +18,7 @@ export const FieldStatsInfoButton = ({
   label,
   onButtonClick,
   disabled,
-  isEmpty,
+  isEmpty = false,
 }: {
   field: FieldForStats;
   label: string;
