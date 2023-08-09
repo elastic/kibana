@@ -860,13 +860,17 @@ export class VisualBuilderPageObject extends FtrService {
     // In case of StaleElementReferenceError 'browser' service will try to find element again
     await fieldSelectAddButtonLast.click();
     await this.common.sleep(2000);
-    const selectedByField = await this.find.byXPath(
-      `(//*[@data-test-subj='fieldSelectItem'])[last()]`
-    );
 
-    await this.comboBox.setElement(selectedByField, field);
-    const isSelected = await this.comboBox.isOptionSelected(selectedByField, field);
-    expect(isSelected).to.be(true);
+    await this.retry.try(async () => {
+      const selectedByField = await this.find.byXPath(
+        `(//*[@data-test-subj='fieldSelectItem'])[last()]`
+      );
+      await this.comboBox.setElement(selectedByField, field);
+      const isSelected = await this.comboBox.isOptionSelected(selectedByField, field);
+      if (!isSelected) {
+        throw new Error(`setAnotherGroupByTermsField: failed to set '${field}' field`);
+      }
+    });
   }
 
   public async setMetricsGroupByFiltering(include?: string, exclude?: string) {
