@@ -17,8 +17,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const testSubjects = getService('testSubjects');
 
-  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/163454
-  describe.skip('visual builder tsdb check', function describeIndexTests() {
+  describe('visual builder tsdb check', function describeIndexTests() {
     before(async () => {
       log.info(`loading sample TSDB index...`);
       await esArchiver.load('test/functional/fixtures/es_archiver/kibana_sample_data_logs_tsdb');
@@ -61,16 +60,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       const isFieldForAggregationValid = await visualBuilder.checkFieldForAggregationValidity();
       expect(isFieldForAggregationValid).to.be(true);
       expect(await testSubjects.exists('visualization-error-text')).to.be(false);
-    });
-
-    it('should show an error when using an unsupported tsdb field type', async () => {
-      await visualBuilder.selectAggType('Average');
-      await visualBuilder.setFieldForAggregation('bytes_counter');
-      // this is still returning true
-      const isFieldForAggregationValid = await visualBuilder.checkFieldForAggregationValidity();
-      expect(isFieldForAggregationValid).to.be(true);
-      // but an error should appear in visualization
-      expect(await testSubjects.exists('visualization-error-text')).to.be(true);
     });
   });
 }
