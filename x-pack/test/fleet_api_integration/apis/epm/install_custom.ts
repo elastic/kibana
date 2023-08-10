@@ -8,7 +8,6 @@
 import expect from '@kbn/expect';
 import { PACKAGES_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 
-import { prefixPkgName } from '@kbn/fleet-plugin/server/services/epm/packages/custom_integrations';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 
 const INTEGRATION_NAME = 'my_nginx';
@@ -21,7 +20,7 @@ export default function (providerContext: FtrProviderContext) {
 
   const uninstallPackage = async () => {
     await supertest
-      .delete(`/api/fleet/epm/packages/${prefixPkgName(INTEGRATION_NAME)}/${INTEGRATION_VERSION}`)
+      .delete(`/api/fleet/epm/packages/${INTEGRATION_NAME}/${INTEGRATION_VERSION}`)
       .set('kbn-xsrf', 'xxxx')
       .send({ force: true });
   };
@@ -48,22 +47,22 @@ export default function (providerContext: FtrProviderContext) {
         .expect(200);
 
       const expectedIngestPipelines = [
-        `logs-${prefixPkgName(INTEGRATION_NAME)}.access-1.0.0`,
-        `metrics-${prefixPkgName(INTEGRATION_NAME)}.error-1.0.0`,
-        `logs-${prefixPkgName(INTEGRATION_NAME)}.warning-1.0.0`,
+        `logs-${INTEGRATION_NAME}.access-1.0.0`,
+        `metrics-${INTEGRATION_NAME}.error-1.0.0`,
+        `logs-${INTEGRATION_NAME}.warning-1.0.0`,
       ];
       const expectedIndexTemplates = [
-        `logs-${prefixPkgName(INTEGRATION_NAME)}.access`,
-        `metrics-${prefixPkgName(INTEGRATION_NAME)}.error`,
-        `logs-${prefixPkgName(INTEGRATION_NAME)}.warning`,
+        `logs-${INTEGRATION_NAME}.access`,
+        `metrics-${INTEGRATION_NAME}.error`,
+        `logs-${INTEGRATION_NAME}.warning`,
       ];
       const expectedComponentTemplates = [
-        `logs-${prefixPkgName(INTEGRATION_NAME)}.access@package`,
-        `logs-${prefixPkgName(INTEGRATION_NAME)}.access@custom`,
-        `metrics-${prefixPkgName(INTEGRATION_NAME)}.error@package`,
-        `metrics-${prefixPkgName(INTEGRATION_NAME)}.error@custom`,
-        `logs-${prefixPkgName(INTEGRATION_NAME)}.warning@package`,
-        `logs-${prefixPkgName(INTEGRATION_NAME)}.warning@custom`,
+        `logs-${INTEGRATION_NAME}.access@package`,
+        `logs-${INTEGRATION_NAME}.access@custom`,
+        `metrics-${INTEGRATION_NAME}.error@package`,
+        `metrics-${INTEGRATION_NAME}.error@custom`,
+        `logs-${INTEGRATION_NAME}.warning@package`,
+        `logs-${INTEGRATION_NAME}.warning@custom`,
       ];
 
       expect(response.body._meta.install_source).to.be('custom');
@@ -92,9 +91,9 @@ export default function (providerContext: FtrProviderContext) {
 
       const installation = await kibanaServer.savedObjects.get({
         type: PACKAGES_SAVED_OBJECT_TYPE,
-        id: prefixPkgName(INTEGRATION_NAME),
+        id: INTEGRATION_NAME,
       });
-      expect(installation.attributes.name).to.be(prefixPkgName(INTEGRATION_NAME));
+      expect(installation.attributes.name).to.be(INTEGRATION_NAME);
       expect(installation.attributes.version).to.be(INTEGRATION_VERSION);
       expect(installation.attributes.install_source).to.be('custom');
       expect(installation.attributes.install_status).to.be('installed');
