@@ -9,6 +9,7 @@ import {
   RULE_CHECKBOX,
   REFRESH_RULES_STATUS,
   RULES_TABLE_AUTOREFRESH_INDICATOR,
+  RULES_MANAGEMENT_TABLE,
 } from '../../../../screens/alerts_detection_rules';
 import {
   selectAllRules,
@@ -19,6 +20,7 @@ import {
   expectAutoRefreshIsDisabled,
   expectAutoRefreshIsEnabled,
   expectAutoRefreshIsDeactivated,
+  expectNumberOfRules,
 } from '../../../../tasks/alerts_detection_rules';
 import { login, visit, visitWithoutDateRange } from '../../../../tasks/login';
 
@@ -28,13 +30,14 @@ import { cleanKibana } from '../../../../tasks/common';
 import { getNewRule } from '../../../../objects/rule';
 
 const DEFAULT_RULE_REFRESH_INTERVAL_VALUE = 60000;
+const NUM_OF_TEST_RULES = 6;
 
 describe('Rules table: auto-refresh', () => {
   before(() => {
     cleanKibana();
     login();
 
-    for (let i = 1; i <= 6; ++i) {
+    for (let i = 1; i <= NUM_OF_TEST_RULES; ++i) {
       createRule(getNewRule({ name: `Test rule ${i}`, rule_id: `${i}` }));
     }
   });
@@ -47,6 +50,8 @@ describe('Rules table: auto-refresh', () => {
     mockGlobalClock();
     visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
 
+    expectNumberOfRules(RULES_MANAGEMENT_TABLE, NUM_OF_TEST_RULES);
+
     // // mock 1 minute passing to make sure refresh is conducted
     cy.get(RULES_TABLE_AUTOREFRESH_INDICATOR).should('not.exist');
     cy.tick(DEFAULT_RULE_REFRESH_INTERVAL_VALUE);
@@ -58,6 +63,8 @@ describe('Rules table: auto-refresh', () => {
   it('should prevent table from rules refetch if any rule selected', () => {
     mockGlobalClock();
     visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
+
+    expectNumberOfRules(RULES_MANAGEMENT_TABLE, NUM_OF_TEST_RULES);
 
     selectNumberOfRules(1);
 
@@ -75,6 +82,8 @@ describe('Rules table: auto-refresh', () => {
   it('should disable auto refresh when any rule selected and enable it after rules unselected', () => {
     visit(DETECTIONS_RULE_MANAGEMENT_URL);
 
+    expectNumberOfRules(RULES_MANAGEMENT_TABLE, NUM_OF_TEST_RULES);
+
     // check refresh settings if it's enabled before selecting
     expectAutoRefreshIsEnabled();
 
@@ -91,6 +100,8 @@ describe('Rules table: auto-refresh', () => {
 
   it('should not enable auto refresh after rules were unselected if auto refresh was disabled', () => {
     visit(DETECTIONS_RULE_MANAGEMENT_URL);
+
+    expectNumberOfRules(RULES_MANAGEMENT_TABLE, NUM_OF_TEST_RULES);
 
     disableAutoRefresh();
 
