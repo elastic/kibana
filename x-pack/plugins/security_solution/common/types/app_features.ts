@@ -23,7 +23,7 @@ export enum AppFeatureSecurityKey {
   endpointHostManagement = 'endpoint_host_management',
 
   /**
-   * Enables endpoint policy views that enables user to manage endpoint security policies
+   * Enables endpoint policy views that enable user to manage endpoint security policies
    */
   endpointPolicyManagement = 'endpoint_policy_management',
 
@@ -33,7 +33,7 @@ export enum AppFeatureSecurityKey {
   endpointPolicyProtections = 'endpoint_policy_protections',
 
   /**
-   * Enables management of all endpoint related artifacts (ex. Trusted Applications, Event Filters,
+   * Enables management of all endpoint-related artifacts (ex. Trusted Applications, Event Filters,
    * Host Isolation Exceptions, Blocklist.
    */
   endpointArtifactManagement = 'endpoint_artifact_management',
@@ -43,6 +43,11 @@ export enum AppFeatureSecurityKey {
    * process operations, command execution, etc.
    */
   endpointResponseActions = 'endpoint_response_actions',
+
+  /**
+   * Enables access to the Endpoint Exceptions List and associated views that allows its management
+   */
+  endpointExceptions = 'endpoint_exceptions',
 
   /**
    * Enables Threat Intelligence

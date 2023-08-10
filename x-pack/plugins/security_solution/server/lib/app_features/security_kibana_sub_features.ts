@@ -484,6 +484,61 @@ const fileOperationsSubFeature: SubFeatureConfig = {
   ],
 };
 
+const endpointExceptionsSubFeature: SubFeatureConfig = {
+  description: i18n.translate(
+    'xpack.securitySolution.featureRegistry.subFeatures.endpointExceptions.description',
+    {
+      defaultMessage: 'Manage Endpoint Exceptions on alerts and rules',
+    }
+  ),
+  name: i18n.translate(
+    'xpack.securitySolution.featureRegistry.subFeatures.endpointExceptions.name',
+    {
+      defaultMessage: 'Endpoint Exceptions',
+    }
+  ),
+  privilegeGroups: [
+    {
+      groupType: 'mutually_exclusive',
+      privileges: [
+        {
+          api: [
+            `${APP_ID}-readEndpointExceptions`,
+            `${APP_ID}-writeEndpointExceptions`,
+            `${APP_ID}-readRuleExceptions`,
+            `${APP_ID}-writeRuleExceptions`,
+          ],
+          id: 'endpoint_and_rule_exceptions_all',
+          includeIn: 'all', // we need this to be included when the main Security feature is `all` for existing roles
+          name: 'All',
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: [
+            'readEndpointExceptions',
+            'writeEndpointExceptions',
+            'readRuleExceptions',
+            'writeRuleExceptions',
+          ],
+        },
+        {
+          api: [`${APP_ID}-readEndpointExceptions`, `${APP_ID}-readRuleExceptions`],
+          id: 'endpoint_and_rule_exceptions_read',
+          includeIn: 'read', // we need this to be included when the main Security feature is `read` for existing roles
+          name: 'Read',
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: ['readEndpointExceptions', 'readRuleExceptions'],
+        },
+      ],
+    },
+  ],
+  requireAllSpaces: true,
+};
+
 // execute operations are not available in 8.7,
 // but will be available in 8.8
 const executeActionSubFeature: SubFeatureConfig = {
@@ -526,6 +581,7 @@ const executeActionSubFeature: SubFeatureConfig = {
 
 export enum SecuritySubFeatureId {
   endpointList = 'endpointListSubFeature',
+  endpointExceptions = 'endpointExceptionsSubFeature',
   trustedApplications = 'trustedApplicationsSubFeature',
   hostIsolationExceptions = 'hostIsolationExceptionsSubFeature',
   blocklist = 'blocklistSubFeature',
@@ -542,6 +598,7 @@ export enum SecuritySubFeatureId {
 export const securitySubFeaturesMap = Object.freeze(
   new Map<SecuritySubFeatureId, SubFeatureConfig>([
     [SecuritySubFeatureId.endpointList, endpointListSubFeature],
+    [SecuritySubFeatureId.endpointExceptions, endpointExceptionsSubFeature],
     [SecuritySubFeatureId.trustedApplications, trustedApplicationsSubFeature],
     [SecuritySubFeatureId.hostIsolationExceptions, hostIsolationExceptionsSubFeature],
     [SecuritySubFeatureId.blocklist, blocklistSubFeature],

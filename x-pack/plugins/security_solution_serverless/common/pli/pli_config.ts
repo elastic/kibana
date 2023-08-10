@@ -24,14 +24,14 @@ export const PLI_APP_FEATURES: PliAppFeatures = {
   },
   endpoint: {
     essentials: [
-      AppFeatureKey.endpointHostManagement,
-      AppFeatureKey.endpointPolicyManagement,
       AppFeatureKey.endpointPolicyProtections,
       AppFeatureKey.endpointArtifactManagement,
+      AppFeatureKey.endpointExceptions,
     ],
     complete: [
       AppFeatureKey.endpointResponseActions,
       AppFeatureKey.osqueryAutomatedResponseActions,
+      AppFeatureKey.endpointExceptions,
     ],
   },
   cloud: {

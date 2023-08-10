@@ -123,7 +123,7 @@ export const getSecurityBaseKibanaFeature = (): BaseKibanaFeatureConfig => ({
 });
 
 export const getSecurityBaseKibanaSubFeatureIds = (
-  _: ExperimentalFeatures // currently un-used, but left here as a convenience for possible future use
+  _: ExperimentalFeatures // currently unused, but left here as a convenience for possible future use
 ): SecuritySubFeatureId[] => [];
 
 /**
@@ -136,7 +136,7 @@ export const getSecurityBaseKibanaSubFeatureIds = (
  * - `subFeaturesPrivileges`: the privileges that will be added into the existing Security subFeature with the privilege `id` specified.
  */
 export const getSecurityAppFeaturesConfig = (
-  _: ExperimentalFeatures // currently un-used, but left here as a convenience for possible future use
+  _: ExperimentalFeatures // currently unused, but left here as a convenience for possible future use
 ): AppFeaturesSecurityConfig => {
   return {
     [AppFeatureSecurityKey.advancedInsights]: {
@@ -224,6 +224,32 @@ export const getSecurityAppFeaturesConfig = (
           id: 'host_isolation_all',
           api: [`${APP_ID}-writeHostIsolation`],
           ui: ['writeHostIsolation'],
+        },
+      ],
+    },
+
+    [AppFeatureSecurityKey.endpointExceptions]: {
+      subFeatureIds: [SecuritySubFeatureId.endpointExceptions],
+      subFeaturesPrivileges: [
+        {
+          id: 'endpoint_and_rule_exceptions_all',
+          api: [
+            `${APP_ID}-readEndpointExceptions`,
+            `${APP_ID}-writeEndpointExceptions`,
+            `${APP_ID}-readRuleExceptions`,
+            `${APP_ID}-writeRuleExceptions`,
+          ],
+          ui: [
+            'readEndpointExceptions',
+            'writeEndpointExceptions',
+            'readRuleExceptions',
+            'writeRuleExceptions',
+          ],
+        },
+        {
+          id: 'endpoint_and_rule_exceptions_read',
+          api: [`${APP_ID}-readEndpointExceptions`, `${APP_ID}-readRuleExceptions`],
+          ui: ['readEndpointExceptions', 'readRuleExceptions'],
         },
       ],
     },
