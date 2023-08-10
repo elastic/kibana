@@ -154,3 +154,11 @@ export const CoverageOverviewRuleTypeFilterLabel = i18n.translate(
     defaultMessage: 'Installed rule type',
   }
 );
+
+export const CoverageOverviewSearchBarPlaceholder = i18n.translate(
+  'xpack.securitySolution.coverageOverviewDashboard.searchBarPlaceholder',
+  {
+    defaultMessage:
+      'Search for the tactic, technique (e.g.,"defence evasion" or "TA0005") or rule name, index pattern (e.g.,"filebeat-*"...)',
+  }
+);

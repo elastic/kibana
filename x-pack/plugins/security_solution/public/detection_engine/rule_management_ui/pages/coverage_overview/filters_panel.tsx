@@ -128,12 +128,14 @@ const CoverageOverviewFiltersPanelComponent = ({
             `}
           >
             <DashboardFilterButtonComponent
+              dataTestSubj="coverageOverviewRuleStatusFilterButton"
               title={i18n.CoverageOverviewRuleStatusFilterLabel}
               options={ruleStatusFilterOptions}
               onChange={handleRuleStatusFilterOnChange}
               isLoading={isLoading}
             />
             <DashboardFilterButtonComponent
+              dataTestSubj="coverageOverviewRuleTypeFilterButton"
               title={i18n.CoverageOverviewRuleTypeFilterLabel}
               options={ruleTypeFilterOptions}
               onChange={handleRuleTypeFilterOnChange}
@@ -142,7 +144,13 @@ const CoverageOverviewFiltersPanelComponent = ({
           </EuiFlexGroup>
           <EuiFlexGroup alignItems="center">
             <EuiFlexItem>
-              <EuiSearchBar onChange={handleRuleSearchOnChange} />
+              <EuiSearchBar
+                box={{
+                  placeholder: i18n.CoverageOverviewSearchBarPlaceholder,
+                  'data-test-subj': 'coverageOverviewFilterSearchBar',
+                }}
+                onChange={handleRuleSearchOnChange}
+              />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiFilterGroup>

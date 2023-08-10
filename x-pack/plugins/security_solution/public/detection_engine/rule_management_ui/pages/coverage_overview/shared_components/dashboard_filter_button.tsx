@@ -16,6 +16,7 @@ export interface DashboardFilterButtonComponentProps {
   title: string;
   onChange: (options: EuiSelectableOption[]) => void;
   isLoading: boolean;
+  dataTestSubj?: string;
 }
 
 export const DashboardFilterButtonComponent = ({
@@ -23,6 +24,7 @@ export const DashboardFilterButtonComponent = ({
   title,
   onChange,
   isLoading,
+  dataTestSubj,
 }: DashboardFilterButtonComponentProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
@@ -49,6 +51,7 @@ export const DashboardFilterButtonComponent = ({
   const button = useMemo(
     () => (
       <EuiFilterButton
+        data-test-subj={dataTestSubj}
         isLoading={isLoading}
         iconType="arrowDown"
         onClick={onButtonClick}
@@ -68,6 +71,7 @@ export const DashboardFilterButtonComponent = ({
       options.length,
       title,
       isLoading,
+      dataTestSubj,
     ]
   );
   return (
@@ -83,7 +87,12 @@ export const DashboardFilterButtonComponent = ({
         closePopover={closePopover}
         panelPaddingSize="none"
       >
-        <EuiSelectable isLoading={isLoading} options={options} onChange={handleSelectableOnChange}>
+        <EuiSelectable
+          data-test-subj="coverageOverviewFilterList"
+          isLoading={isLoading}
+          options={options}
+          onChange={handleSelectableOnChange}
+        >
           {(list) => (
             <div
               css={css`
