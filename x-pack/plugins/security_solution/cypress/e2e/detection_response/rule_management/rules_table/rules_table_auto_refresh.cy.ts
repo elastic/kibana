@@ -8,20 +8,17 @@
 import {
   RULE_CHECKBOX,
   REFRESH_RULES_STATUS,
-  REFRESH_SETTINGS_SWITCH,
-  REFRESH_SETTINGS_SELECTION_NOTE,
+  RULES_TABLE_AUTOREFRESH_INDICATOR,
 } from '../../../../screens/alerts_detection_rules';
 import {
-  checkAutoRefresh,
-  waitForRulesTableToBeLoaded,
   selectAllRules,
-  openRefreshSettingsPopover,
   clearAllRuleSelection,
   selectNumberOfRules,
   mockGlobalClock,
   disableAutoRefresh,
-  checkAutoRefreshIsDisabled,
-  checkAutoRefreshIsEnabled,
+  expectAutoRefreshIsDisabled,
+  expectAutoRefreshIsEnabled,
+  expectAutoRefreshIsDeactivated,
 } from '../../../../tasks/alerts_detection_rules';
 import { login, visit, visitWithoutDateRange } from '../../../../tasks/login';
 
@@ -29,16 +26,15 @@ import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../../../urls/navigation';
 import { createRule } from '../../../../tasks/api_calls/rules';
 import { cleanKibana } from '../../../../tasks/common';
 import { getNewRule } from '../../../../objects/rule';
-import { setRowsPerPageTo } from '../../../../tasks/table_pagination';
 
 const DEFAULT_RULE_REFRESH_INTERVAL_VALUE = 60000;
 
-// TODO: See https://github.com/elastic/kibana/issues/154694
-describe.skip('Rules table: auto-refresh', () => {
+describe('Rules table: auto-refresh', () => {
   before(() => {
     cleanKibana();
     login();
-    for (let i = 1; i < 7; i += 1) {
+
+    for (let i = 1; i <= 6; ++i) {
       createRule(getNewRule({ name: `Test rule ${i}`, rule_id: `${i}` }));
     }
   });
@@ -48,31 +44,27 @@ describe.skip('Rules table: auto-refresh', () => {
   });
 
   it('Auto refreshes rules', () => {
+    mockGlobalClock();
     visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
 
-    waitForRulesTableToBeLoaded();
-
-    // ensure rules have rendered. As there is no user interaction in this test,
-    // rules were not rendered before test completes
-    cy.get(RULE_CHECKBOX).should('have.length', 6);
-
     // // mock 1 minute passing to make sure refresh is conducted
-    mockGlobalClock();
-    checkAutoRefresh(DEFAULT_RULE_REFRESH_INTERVAL_VALUE, 'be.visible');
+    cy.get(RULES_TABLE_AUTOREFRESH_INDICATOR).should('not.exist');
+    cy.tick(DEFAULT_RULE_REFRESH_INTERVAL_VALUE);
+    cy.get(RULES_TABLE_AUTOREFRESH_INDICATOR).should('be.visible');
 
     cy.contains(REFRESH_RULES_STATUS, 'Updated now');
   });
 
   it('should prevent table from rules refetch if any rule selected', () => {
+    mockGlobalClock();
     visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
-
-    waitForRulesTableToBeLoaded();
 
     selectNumberOfRules(1);
 
     // mock 1 minute passing to make sure refresh is not conducted
-    mockGlobalClock();
-    checkAutoRefresh(DEFAULT_RULE_REFRESH_INTERVAL_VALUE, 'not.exist');
+    cy.get(RULES_TABLE_AUTOREFRESH_INDICATOR).should('not.exist');
+    cy.tick(DEFAULT_RULE_REFRESH_INTERVAL_VALUE);
+    cy.get(RULES_TABLE_AUTOREFRESH_INDICATOR).should('not.exist');
 
     // ensure rule is still selected
     cy.get(RULE_CHECKBOX).first().should('be.checked');
@@ -82,50 +74,33 @@ describe.skip('Rules table: auto-refresh', () => {
 
   it('should disable auto refresh when any rule selected and enable it after rules unselected', () => {
     visit(DETECTIONS_RULE_MANAGEMENT_URL);
-    waitForRulesTableToBeLoaded();
-    setRowsPerPageTo(5);
 
     // check refresh settings if it's enabled before selecting
-    openRefreshSettingsPopover();
-    checkAutoRefreshIsEnabled();
+    expectAutoRefreshIsEnabled();
 
     selectAllRules();
 
-    // auto refresh should be disabled after rules selected
-    openRefreshSettingsPopover();
-    checkAutoRefreshIsDisabled();
-
-    // if any rule selected, refresh switch should be disabled and help note to users should displayed
-    cy.get(REFRESH_SETTINGS_SWITCH).should('be.disabled');
-    cy.contains(
-      REFRESH_SETTINGS_SELECTION_NOTE,
-      'Note: Refresh is disabled while there is an active selection.'
-    );
+    // auto refresh should be deactivated (which means disabled without an ability to enable it) after rules selected
+    expectAutoRefreshIsDeactivated();
 
     clearAllRuleSelection();
 
-    // after all rules unselected, auto refresh should renew
-    openRefreshSettingsPopover();
-    checkAutoRefreshIsEnabled();
+    // after all rules unselected, auto refresh should be reset to its previous state
+    expectAutoRefreshIsEnabled();
   });
 
   it('should not enable auto refresh after rules were unselected if auto refresh was disabled', () => {
     visit(DETECTIONS_RULE_MANAGEMENT_URL);
-    waitForRulesTableToBeLoaded();
-    setRowsPerPageTo(5);
 
-    openRefreshSettingsPopover();
     disableAutoRefresh();
 
     selectAllRules();
 
-    openRefreshSettingsPopover();
-    checkAutoRefreshIsDisabled();
+    expectAutoRefreshIsDeactivated();
 
     clearAllRuleSelection();
 
     // after all rules unselected, auto refresh should still be disabled
-    openRefreshSettingsPopover();
-    checkAutoRefreshIsDisabled();
+    expectAutoRefreshIsDisabled();
   });
 });
