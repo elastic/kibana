@@ -59,6 +59,16 @@ test('returns undefined when provided validation function returns redireted', as
   expect(dashboard).toBeUndefined();
 });
 
+test('does not get initial input when provided validation function returns redireted', async () => {
+  const creationOptions: DashboardCreationOptions = {
+    validateLoadedSavedObject: jest.fn().mockImplementation(() => 'redirected'),
+    getInitialInput: jest.fn(),
+  };
+  const dashboard = await createDashboard(creationOptions, 0, 'test-id');
+  expect(dashboard).toBeUndefined();
+  expect(creationOptions.getInitialInput).not.toHaveBeenCalled();
+});
+
 test('pulls state from dashboard saved object when given a saved object id', async () => {
   pluginServices.getServices().dashboardContentManagement.loadDashboardState = jest
     .fn()
