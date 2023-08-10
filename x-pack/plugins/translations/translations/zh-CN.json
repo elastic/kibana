@@ -24807,7 +24807,7 @@
     "xpack.ml.newJob.wizard.fieldContextFlyoutCloseButton": "关闭",
     "xpack.ml.newJob.wizard.fieldContextFlyoutTitle": "字段统计信息",
     "xpack.ml.newJob.wizard.fieldContextPopover.inspectFieldStatsTooltip": "检查字段统计信息",
-    "xpack.ml.newJob.wizard.fieldContextPopover.inspectFieldStatsTooltipArialabel": "检查字段统计信息",
+    "xpack.ml.newJob.wizard.fieldContextPopover.inspectFieldStatsTooltipAriaLabel": "检查字段统计信息",
     "xpack.ml.newJob.wizard.jobCreatorTitle.advanced": "高级",
     "xpack.ml.newJob.wizard.jobCreatorTitle.categorization": "归类",
     "xpack.ml.newJob.wizard.jobCreatorTitle.geo": "地理",
