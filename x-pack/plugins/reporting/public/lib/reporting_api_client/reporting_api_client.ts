@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import type { HttpFetchQuery } from '@kbn/core/public';
 import { HttpSetup, IUiSettingsClient } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
@@ -106,7 +107,6 @@ export class ReportingAPIClient implements IReportingAPI {
 
   public downloadReport(jobId: string) {
     const location = this.getReportURL(jobId);
-
     window.open(location);
   }
 
