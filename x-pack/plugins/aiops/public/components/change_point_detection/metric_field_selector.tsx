@@ -8,7 +8,7 @@
 import React, { type FC, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiComboBox, type EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
-import { useChangePointDetectionContext } from './change_point_detection_context';
+import { useChangePointDetectionControlsContext } from './change_point_detection_context';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 
 interface MetricFieldSelectorProps {
@@ -19,7 +19,7 @@ interface MetricFieldSelectorProps {
 export const MetricFieldSelector: FC<MetricFieldSelectorProps> = React.memo(
   ({ value, onChange }) => {
     const { fieldStats } = useAiopsAppContext();
-    const { metricFieldOptions } = useChangePointDetectionContext();
+    const { metricFieldOptions } = useChangePointDetectionControlsContext();
 
     const { renderOption, closeFlyout } = fieldStats!.useFieldStatsTrigger();
 
@@ -48,8 +48,9 @@ export const MetricFieldSelector: FC<MetricFieldSelectorProps> = React.memo(
 
     return (
       <>
-        <EuiFormRow>
+        <EuiFormRow fullWidth>
           <EuiComboBox
+            fullWidth
             compressed
             prepend={i18n.translate('xpack.aiops.changePointDetection.selectMetricFieldLabel', {
               defaultMessage: 'Metric field',

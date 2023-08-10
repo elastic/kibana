@@ -82,6 +82,7 @@ export const DataSourceContextProvider: FC<DataSourceContextProviderProps> = ({
   useEffect(() => {
     resolveDataSource()
       .then((result) => {
+        setError(undefined);
         setValue(result);
         if (onChange) {
           onChange({ dataViews: [result.dataView] });
@@ -90,7 +91,7 @@ export const DataSourceContextProvider: FC<DataSourceContextProviderProps> = ({
       .catch((e) => {
         setError(e);
       });
-  }, [resolveDataSource, onChange]);
+  }, [resolveDataSource, onChange, dataViewId]);
 
   if (!value && !error) return null;
 

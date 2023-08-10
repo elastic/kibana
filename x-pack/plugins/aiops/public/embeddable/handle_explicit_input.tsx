@@ -8,11 +8,16 @@
 import type { CoreStart } from '@kbn/core/public';
 import { toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
+import { FieldStatsFlyoutProvider, useFieldStatsTrigger } from '@kbn/ml-plugin/public';
+import { AiopsAppDependencies } from '..';
+import { AiopsAppContext } from '../hooks/use_aiops_app_context';
+import type { AiopsPluginStartDeps } from '../types';
 import { ChangePointChartInitializer } from './change_point_chart_initializer';
-import { EmbeddableChangePointChartInput } from './embeddable_change_point_chart';
+import type { EmbeddableChangePointChartInput } from './embeddable_change_point_chart';
 
 export async function resolveEmbeddableChangePointUserInput(
   coreStart: CoreStart,
+  pluginStart: AiopsPluginStartDeps,
   input?: EmbeddableChangePointChartInput
 ): Promise<Partial<EmbeddableChangePointChartInput>> {
   const { overlays } = coreStart;
@@ -21,24 +26,35 @@ export async function resolveEmbeddableChangePointUserInput(
     try {
       const title = input?.title;
       const { theme$ } = coreStart.theme;
+
       const modalSession = overlays.openModal(
         toMountPoint(
           wrapWithTheme(
-            <ChangePointChartInitializer
-              defaultTitle={title ?? ''}
-              initialInput={input}
-              onCreate={({ panelTitle, maxSeriesToPlot }) => {
-                modalSession.close();
-                resolve({
-                  title: panelTitle,
-                  maxSeriesToPlot,
-                });
-              }}
-              onCancel={() => {
-                modalSession.close();
-                reject();
-              }}
-            />,
+            <AiopsAppContext.Provider
+              value={
+                {
+                  ...coreStart,
+                  ...pluginStart,
+                  fieldStats: { useFieldStatsTrigger, FieldStatsFlyoutProvider },
+                } as unknown as AiopsAppDependencies
+              }
+            >
+              <ChangePointChartInitializer
+                defaultTitle={title ?? ''}
+                initialInput={input}
+                onCreate={({ panelTitle, maxSeriesToPlot }) => {
+                  modalSession.close();
+                  resolve({
+                    title: panelTitle,
+                    maxSeriesToPlot,
+                  });
+                }}
+                onCancel={() => {
+                  modalSession.close();
+                  reject();
+                }}
+              />
+            </AiopsAppContext.Provider>,
             theme$
           )
         )

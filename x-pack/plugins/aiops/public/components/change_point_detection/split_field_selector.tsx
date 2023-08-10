@@ -9,7 +9,7 @@ import React, { FC, useMemo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiComboBox, type EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
-import { useChangePointDetectionContext } from './change_point_detection_context';
+import { useChangePointDetectionControlsContext } from './change_point_detection_context';
 
 interface SplitFieldSelectorProps {
   value: string | undefined;
@@ -20,7 +20,7 @@ export const SplitFieldSelector: FC<SplitFieldSelectorProps> = React.memo(({ val
   const { fieldStats } = useAiopsAppContext();
   const { renderOption, closeFlyout } = fieldStats!.useFieldStatsTrigger();
 
-  const { splitFieldsOptions } = useChangePointDetectionContext();
+  const { splitFieldsOptions } = useChangePointDetectionControlsContext();
 
   const options = useMemo<EuiComboBoxOptionOption[]>(() => {
     return [
@@ -51,8 +51,9 @@ export const SplitFieldSelector: FC<SplitFieldSelectorProps> = React.memo(({ val
   );
 
   return (
-    <EuiFormRow>
+    <EuiFormRow fullWidth>
       <EuiComboBox
+        fullWidth
         compressed
         prepend={i18n.translate('xpack.aiops.changePointDetection.selectSpitFieldLabel', {
           defaultMessage: 'Split field',
