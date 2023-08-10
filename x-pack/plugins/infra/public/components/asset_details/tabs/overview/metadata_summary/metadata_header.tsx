@@ -46,7 +46,7 @@ export const MetadataHeader = ({ metadataValue }: MetadataSummaryProps) => {
         <EuiFlexItem grow={false}>
           <Popover
             icon="questionInCircle"
-            data-test-subj="assetDetailsMetadataSummaryPopoverButton"
+            data-test-subj="infraAssetDetailsMetadataSummaryPopoverButton"
           >
             <EuiText size="xs">
               {metadataValue.tooltipLink ? (
@@ -56,7 +56,7 @@ export const MetadataHeader = ({ metadataValue }: MetadataSummaryProps) => {
                   values={{
                     documentation: (
                       <EuiLink
-                        data-test-subj="assetDetailsTooltipDocumentationLink"
+                        data-test-subj="infraAssetDetailsTooltipMetadataDocumentationLink"
                         href={metadataValue.tooltipLink}
                         target="_blank"
                       >
