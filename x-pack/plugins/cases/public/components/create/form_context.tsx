@@ -86,7 +86,6 @@ export const FormContext: React.FC<Props> = ({
         const caseConnector = getConnectorById(dataConnectorId, connectors);
         const defaultOwner = owner[0] ?? availableOwners[0];
 
-
         startTransaction({ appId, attachments });
 
         const connectorToUpdate = caseConnector
@@ -135,6 +134,7 @@ export const FormContext: React.FC<Props> = ({
       attachments,
       postCase,
       owner,
+      availableOwners,
       afterCaseCreated,
       onSuccess,
       createAttachments,

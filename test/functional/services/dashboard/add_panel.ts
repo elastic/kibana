@@ -24,14 +24,18 @@ export class DashboardAddPanelService extends FtrService {
     await this.common.sleep(500);
   }
 
-  async clickCreateNewLink() {
+  async clickCreateNewLink(skipLoadingIndicatorHiddenCheck?: boolean) {
     this.log.debug('DashboardAddPanel.clickAddNewPanelButton');
     await this.retry.try(async () => {
       // prevent query bar auto suggest from blocking button
       await this.browser.pressKeys(this.browser.keys.ESCAPE);
       await this.testSubjects.click('dashboardAddNewPanelButton');
       await this.testSubjects.waitForDeleted('dashboardAddNewPanelButton');
-      await this.header.waitUntilLoadingHasFinished();
+      
+      if(!skipLoadingIndicatorHiddenCheck) {
+        await this.header.waitUntilLoadingHasFinished();
+      }
+
       await this.testSubjects.existOrFail('lnsApp', {
         timeout: 5000,
       });

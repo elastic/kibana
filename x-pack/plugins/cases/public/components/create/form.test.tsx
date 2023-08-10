@@ -77,7 +77,7 @@ describe('CreateCaseForm', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    useAvailableOwnersMock.mockReturnValue(['securitySolution', 'observability'])
+    useAvailableOwnersMock.mockReturnValue(['securitySolution', 'observability']);
     useGetTagsMock.mockReturnValue({ data: ['test'] });
     useGetConnectorsMock.mockReturnValue({ isLoading: false, data: connectorsMock });
     useCaseConfigureMock.mockImplementation(() => useCaseConfigureResponse);
@@ -140,7 +140,7 @@ describe('CreateCaseForm', () => {
   });
 
   it('does not render solution picker when only one owner is available', async () => {
-    useAvailableOwnersMock.mockReturnValue(['securitySolution'])
+    useAvailableOwnersMock.mockReturnValue(['securitySolution']);
 
     const wrapper = mount(
       <MockHookWrapperComponent>
