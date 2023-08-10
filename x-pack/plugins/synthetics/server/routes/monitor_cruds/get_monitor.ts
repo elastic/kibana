@@ -59,7 +59,7 @@ export const getSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
 
         const encryptedSavedObjectsClient = encryptedSavedObjects.getClient();
 
-        return getSyntheticsMonitor({
+        return await getSyntheticsMonitor({
           monitorId,
           encryptedSavedObjectsClient,
           savedObjectsClient,
