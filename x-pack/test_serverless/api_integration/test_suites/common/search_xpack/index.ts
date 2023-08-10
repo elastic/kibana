@@ -8,6 +8,8 @@
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
+  // TODO: This `search` folder was renamed to `search_xpack` to
+  // differentiate it from the oss `search` folder (now `search_oss`)
   describe('search', () => {
     loadTestFile(require.resolve('./search'));
     // TODO: Removed `session` since search
