@@ -8,7 +8,7 @@
 import { IScopedClusterClient } from '@kbn/core/server';
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '..';
-import * as enrichPolicies from '../../../lib/enrich_policies';
+import { enrichPoliciesActions } from '../../../lib/enrich_policies';
 
 export function registerListRoute({ router, lib: { handleEsError } }: RouteDependencies) {
   router.get(
@@ -16,7 +16,7 @@ export function registerListRoute({ router, lib: { handleEsError } }: RouteDepen
     async (context, request, response) => {
       const client = (await context.core).elasticsearch.client as IScopedClusterClient;
       try {
-        const policies = await enrichPolicies.fetchAll(client);
+        const policies = await enrichPoliciesActions.fetchAll(client);
         return response.ok({ body: policies });
       } catch (error) {
         return handleEsError({ error, response });

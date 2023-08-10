@@ -41,8 +41,12 @@ export const serializeEnrichmentPolicies = (
   });
 };
 
-export const fetchAll = async (client: IScopedClusterClient) => {
+const fetchAll = async (client: IScopedClusterClient) => {
   const res = await client.asCurrentUser.enrich.getPolicy();
 
   return serializeEnrichmentPolicies(res.policies);
+};
+
+export const enrichPoliciesActions = {
+  fetchAll,
 };
