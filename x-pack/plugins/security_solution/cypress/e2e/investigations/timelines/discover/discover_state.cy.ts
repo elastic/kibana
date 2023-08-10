@@ -32,46 +32,50 @@ import { CSP_FINDINGS, TIMELINES } from '../../../../screens/security_header';
 const INITIAL_START_DATE = 'Jan 18, 2021 @ 20:33:29.186';
 const INITIAL_END_DATE = 'Jan 19, 2024 @ 20:33:29.186';
 
-describe('Discover State', () => {
-  beforeEach(() => {
-    login();
-    visit(ALERTS_URL);
-    createNewTimeline();
-    gotToDiscoverTab();
-    updateDateRangeInLocalDatePickers(DISCOVER_CONTAINER, INITIAL_START_DATE, INITIAL_END_DATE);
-  });
-  it('should remember kql query when navigating away and back to discover ', () => {
-    const kqlQuery = '_id:*';
-    addDiscoverKqlQuery(kqlQuery);
-    submitDiscoverSearchBar();
-    navigateFromHeaderTo(CSP_FINDINGS);
-    navigateFromHeaderTo(TIMELINES);
-    openActiveTimeline();
-    gotToDiscoverTab();
-    cy.get(DISCOVER_QUERY_INPUT).should('have.text', kqlQuery);
-  });
-  it('should remember filters when navigating away and back to discover ', () => {
-    openAddDiscoverFilterPopover();
-    fillAddFilterForm({
-      key: 'agent.type',
-      value: 'winlogbeat',
+describe(
+  'Discover State',
+  { env: { ftrConfig: { enableExperimental: ['discoverInTimeline'] } } },
+  () => {
+    beforeEach(() => {
+      login();
+      visit(ALERTS_URL);
+      createNewTimeline();
+      gotToDiscoverTab();
+      updateDateRangeInLocalDatePickers(DISCOVER_CONTAINER, INITIAL_START_DATE, INITIAL_END_DATE);
     });
-    navigateFromHeaderTo(CSP_FINDINGS);
-    navigateFromHeaderTo(TIMELINES);
-    openActiveTimeline();
-    gotToDiscoverTab();
-    cy.get(DISCOVER_FILTER_BADGES).should('have.length', 1);
-  });
-  it('should remember dataView when navigating away and back to discover ', () => {
-    const dataviewName = '.kibana-event-log';
-    switchDataViewTo(dataviewName);
-    navigateFromHeaderTo(CSP_FINDINGS);
-    navigateFromHeaderTo(TIMELINES);
-    openActiveTimeline();
-    gotToDiscoverTab();
-    cy.get(DISCOVER_DATA_VIEW_SWITCHER.BTN).should('contain.text', dataviewName);
-  });
-  it('should remember timerange when navigating away and back to discover ', () => {});
-  it('should remember columns when navigating away and back to discover ', () => {});
-  it('should remember ad-hoc dataview when navigating away and back to discover ', () => {});
-});
+    it('should remember kql query when navigating away and back to discover ', () => {
+      const kqlQuery = '_id:*';
+      addDiscoverKqlQuery(kqlQuery);
+      submitDiscoverSearchBar();
+      navigateFromHeaderTo(CSP_FINDINGS);
+      navigateFromHeaderTo(TIMELINES);
+      openActiveTimeline();
+      gotToDiscoverTab();
+      cy.get(DISCOVER_QUERY_INPUT).should('have.text', kqlQuery);
+    });
+    it('should remember filters when navigating away and back to discover ', () => {
+      openAddDiscoverFilterPopover();
+      fillAddFilterForm({
+        key: 'agent.type',
+        value: 'winlogbeat',
+      });
+      navigateFromHeaderTo(CSP_FINDINGS);
+      navigateFromHeaderTo(TIMELINES);
+      openActiveTimeline();
+      gotToDiscoverTab();
+      cy.get(DISCOVER_FILTER_BADGES).should('have.length', 1);
+    });
+    it('should remember dataView when navigating away and back to discover ', () => {
+      const dataviewName = '.kibana-event-log';
+      switchDataViewTo(dataviewName);
+      navigateFromHeaderTo(CSP_FINDINGS);
+      navigateFromHeaderTo(TIMELINES);
+      openActiveTimeline();
+      gotToDiscoverTab();
+      cy.get(DISCOVER_DATA_VIEW_SWITCHER.BTN).should('contain.text', dataviewName);
+    });
+    it('should remember timerange when navigating away and back to discover ', () => {});
+    it('should remember columns when navigating away and back to discover ', () => {});
+    it('should remember ad-hoc dataview when navigating away and back to discover ', () => {});
+  }
+);

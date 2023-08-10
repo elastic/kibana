@@ -32,84 +32,88 @@ import { ALERTS_URL } from '../../../../urls/navigation';
 const INITIAL_START_DATE = 'Jan 18, 2021 @ 20:33:29.186';
 const INITIAL_END_DATE = 'Jan 19, 2024 @ 20:33:29.186';
 
-describe('Basic discover search and filter operations', () => {
-  beforeEach(() => {
-    login();
-    visit(ALERTS_URL);
-    createNewTimeline();
-    gotToDiscoverTab();
-    updateDateRangeInLocalDatePickers(DISCOVER_CONTAINER, INITIAL_START_DATE, INITIAL_END_DATE);
-  });
-  it('should change data when dataView is changed', () => {
-    switchDataViewTo('.kibana-event-log');
-    cy.get(DISCOVER_RESULT_HITS).should('have.text', '1');
-  });
-
-  it('should show data according to kql query', () => {
-    const kqlQuery = '_id:"invalid"';
-    addDiscoverKqlQuery(kqlQuery);
-    submitDiscoverSearchBar();
-    cy.get(DISCOVER_NO_RESULTS).should('be.visible');
-  });
-  it('should show correct data according to filter applied', () => {
-    openAddDiscoverFilterPopover();
-    fillAddFilterForm({
-      key: 'agent.type',
-      value: 'winlogbeat',
+describe(
+  'Basic discover search and filter operations',
+  { env: { ftrConfig: { enableExperimental: ['discoverInTimeline'] } } },
+  () => {
+    beforeEach(() => {
+      login();
+      visit(ALERTS_URL);
+      createNewTimeline();
+      gotToDiscoverTab();
+      updateDateRangeInLocalDatePickers(DISCOVER_CONTAINER, INITIAL_START_DATE, INITIAL_END_DATE);
     });
-    cy.get(DISCOVER_FILTER_BADGES).should('have.length', 1);
-    cy.get(DISCOVER_RESULT_HITS).should('have.text', '1');
-  });
-  it('should show correct data according to query DSL', () => {
-    const query = {
-      bool: {
-        filter: [
-          {
-            term: {
-              'agent.type': 'winlogbeat',
-            },
-          },
-        ],
-      },
-    };
-    openAddDiscoverFilterPopover();
-    fillAddFilterFormAsQueryDSL(JSON.stringify(query));
-    cy.get(DISCOVER_FILTER_BADGES).should('have.length', 1);
-    cy.get(DISCOVER_RESULT_HITS).should('have.text', '1');
-  });
+    it('should change data when dataView is changed', () => {
+      switchDataViewTo('.kibana-event-log');
+      cy.get(DISCOVER_RESULT_HITS).should('have.text', '1');
+    });
 
-  context('navigation', () => {
-    it('should remove the filter when back is pressed after adding a filter', () => {
+    it('should show data according to kql query', () => {
+      const kqlQuery = '_id:"invalid"';
+      addDiscoverKqlQuery(kqlQuery);
+      submitDiscoverSearchBar();
+      cy.get(DISCOVER_NO_RESULTS).should('be.visible');
+    });
+    it('should show correct data according to filter applied', () => {
       openAddDiscoverFilterPopover();
       fillAddFilterForm({
         key: 'agent.type',
         value: 'winlogbeat',
       });
       cy.get(DISCOVER_FILTER_BADGES).should('have.length', 1);
-      cy.go('back');
-      cy.get(DISCOVER_FILTER_BADGES).should('not.exist');
+      cy.get(DISCOVER_RESULT_HITS).should('have.text', '1');
     });
-    it('should removed the query when back is pressed after adding a query', () => {
-      const kqlQuery = '_id:"invalid"';
-      addDiscoverKqlQuery(kqlQuery);
-      submitDiscoverSearchBar();
-      cy.get(DISCOVER_QUERY_INPUT).should('have.text', kqlQuery);
-      cy.go('back');
-      cy.get(DISCOVER_QUERY_INPUT).should('not.have.text', kqlQuery);
+    it('should show correct data according to query DSL', () => {
+      const query = {
+        bool: {
+          filter: [
+            {
+              term: {
+                'agent.type': 'winlogbeat',
+              },
+            },
+          ],
+        },
+      };
+      openAddDiscoverFilterPopover();
+      fillAddFilterFormAsQueryDSL(JSON.stringify(query));
+      cy.get(DISCOVER_FILTER_BADGES).should('have.length', 1);
+      cy.get(DISCOVER_RESULT_HITS).should('have.text', '1');
     });
 
-    it('should changed the timerange to foo when back is pressed after modifying timerange from foo to baz ', () => {
-      const NEW_START_DATE = 'Jan 18, 2023 @ 20:33:29.186';
+    context('navigation', () => {
+      it('should remove the filter when back is pressed after adding a filter', () => {
+        openAddDiscoverFilterPopover();
+        fillAddFilterForm({
+          key: 'agent.type',
+          value: 'winlogbeat',
+        });
+        cy.get(DISCOVER_FILTER_BADGES).should('have.length', 1);
+        cy.go('back');
+        cy.get(DISCOVER_FILTER_BADGES).should('not.exist');
+      });
+      it('should removed the query when back is pressed after adding a query', () => {
+        const kqlQuery = '_id:"invalid"';
+        addDiscoverKqlQuery(kqlQuery);
+        submitDiscoverSearchBar();
+        cy.get(DISCOVER_QUERY_INPUT).should('have.text', kqlQuery);
+        cy.go('back');
+        cy.get(DISCOVER_QUERY_INPUT).should('not.have.text', kqlQuery);
+      });
 
-      setStartDate(NEW_START_DATE, DISCOVER_CONTAINER);
-      updateDates(DISCOVER_CONTAINER);
+      it('should changed the timerange to foo when back is pressed after modifying timerange from foo to baz ', () => {
+        const NEW_START_DATE = 'Jan 18, 2023 @ 20:33:29.186';
 
-      cy.go('back');
+        setStartDate(NEW_START_DATE, DISCOVER_CONTAINER);
+        updateDates(DISCOVER_CONTAINER);
 
-      cy.get(GET_LOCAL_DATE_PICKER_START_DATE_POPOVER_BUTTON(DISCOVER_CONTAINER)).should(
-        'have.text',
-        INITIAL_START_DATE
-      );
+        cy.go('back');
+
+        cy.get(GET_LOCAL_DATE_PICKER_START_DATE_POPOVER_BUTTON(DISCOVER_CONTAINER)).should(
+          'have.text',
+          INITIAL_START_DATE
+        );
+      });
     });
-  });
-});
+  }
+);

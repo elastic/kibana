@@ -22,57 +22,61 @@ const INITIAL_START_DATE = 'Jan 18, 2021 @ 20:33:29.186';
 const INITIAL_END_DATE = 'Jan 19, 2024 @ 20:33:29.186';
 const TIMESTAMP_COLUMN_NAME = '@timestamp';
 
-describe('Discover Datagrid Cell Actions', () => {
-  beforeEach(() => {
-    login();
-    visit(ALERTS_URL);
-    createNewTimeline();
-    gotToDiscoverTab();
-    updateDateRangeInLocalDatePickers(DISCOVER_CONTAINER, INITIAL_START_DATE, INITIAL_END_DATE);
-    waitForDiscoverGridToLoad();
-  });
-  it('Filter for', () => {
-    cy.get(GET_DISCOVER_DATA_GRID_CELL(TIMESTAMP_COLUMN_NAME, 0)).then((sub) => {
-      const selectedTimestamp = sub.text();
-      cy.get(GET_DISCOVER_DATA_GRID_CELL(TIMESTAMP_COLUMN_NAME, 0)).realHover();
-      cy.get(DISCOVER_CELL_ACTIONS.FILTER_FOR).should('be.visible').trigger('click');
+describe(
+  'Discover Datagrid Cell Actions',
+  { env: { ftrConfig: { enableExperimental: ['discoverInTimeline'] } } },
+  () => {
+    beforeEach(() => {
+      login();
+      visit(ALERTS_URL);
+      createNewTimeline();
+      gotToDiscoverTab();
+      updateDateRangeInLocalDatePickers(DISCOVER_CONTAINER, INITIAL_START_DATE, INITIAL_END_DATE);
+      waitForDiscoverGridToLoad();
+    });
+    it('Filter for', () => {
+      cy.get(GET_DISCOVER_DATA_GRID_CELL(TIMESTAMP_COLUMN_NAME, 0)).then((sub) => {
+        const selectedTimestamp = sub.text();
+        cy.get(GET_DISCOVER_DATA_GRID_CELL(TIMESTAMP_COLUMN_NAME, 0)).realHover();
+        cy.get(DISCOVER_CELL_ACTIONS.FILTER_FOR).should('be.visible').trigger('click');
 
-      cy.get(DISCOVER_FILTER_BADGES).should('have.length', 1);
-      cy.get(DISCOVER_FILTER_BADGES)
-        .first()
-        .should(
-          'have.text',
-          `${TIMESTAMP_COLUMN_NAME}: ${selectedTimestamp} to ${selectedTimestamp}`
-        );
+        cy.get(DISCOVER_FILTER_BADGES).should('have.length', 1);
+        cy.get(DISCOVER_FILTER_BADGES)
+          .first()
+          .should(
+            'have.text',
+            `${TIMESTAMP_COLUMN_NAME}: ${selectedTimestamp} to ${selectedTimestamp}`
+          );
+      });
     });
-  });
-  it('Filter out', () => {
-    cy.get(GET_DISCOVER_DATA_GRID_CELL(TIMESTAMP_COLUMN_NAME, 0)).then((sub) => {
-      const selectedTimestamp = sub.text();
-      cy.get(GET_DISCOVER_DATA_GRID_CELL(TIMESTAMP_COLUMN_NAME, 0)).realHover();
-      cy.get(DISCOVER_CELL_ACTIONS.FILTER_OUT).should('be.visible').trigger('click');
+    it('Filter out', () => {
+      cy.get(GET_DISCOVER_DATA_GRID_CELL(TIMESTAMP_COLUMN_NAME, 0)).then((sub) => {
+        const selectedTimestamp = sub.text();
+        cy.get(GET_DISCOVER_DATA_GRID_CELL(TIMESTAMP_COLUMN_NAME, 0)).realHover();
+        cy.get(DISCOVER_CELL_ACTIONS.FILTER_OUT).should('be.visible').trigger('click');
 
-      cy.get(DISCOVER_FILTER_BADGES).should('have.length', 1);
-      cy.get(DISCOVER_FILTER_BADGES)
-        .first()
-        .should(
-          'have.text',
-          `NOT ${TIMESTAMP_COLUMN_NAME}: ${selectedTimestamp} to ${selectedTimestamp}`
-        );
+        cy.get(DISCOVER_FILTER_BADGES).should('have.length', 1);
+        cy.get(DISCOVER_FILTER_BADGES)
+          .first()
+          .should(
+            'have.text',
+            `NOT ${TIMESTAMP_COLUMN_NAME}: ${selectedTimestamp} to ${selectedTimestamp}`
+          );
+      });
     });
-  });
-  it('Copy', () => {
-    grantClipboardReadPerm();
-    cy.get(GET_DISCOVER_DATA_GRID_CELL(TIMESTAMP_COLUMN_NAME, 0)).then((sub) => {
-      const selectedTimestamp = sub.text();
-      cy.get(GET_DISCOVER_DATA_GRID_CELL(TIMESTAMP_COLUMN_NAME, 0)).realHover();
-      cy.get(DISCOVER_CELL_ACTIONS.EXPAND_CELL_ACTIONS).should('be.visible').trigger('click');
-      cy.get(DISCOVER_CELL_ACTIONS.EXPANSION_POPOVER).should('be.visible');
-      cy.get(DISCOVER_CELL_ACTIONS.COPY).should('be.visible').trigger('click');
-      cy.window()
-        .its('navigator.clipboard')
-        .then((clipboard) => clipboard.readText())
-        .should('eq', selectedTimestamp);
+    it('Copy', () => {
+      grantClipboardReadPerm();
+      cy.get(GET_DISCOVER_DATA_GRID_CELL(TIMESTAMP_COLUMN_NAME, 0)).then((sub) => {
+        const selectedTimestamp = sub.text();
+        cy.get(GET_DISCOVER_DATA_GRID_CELL(TIMESTAMP_COLUMN_NAME, 0)).realHover();
+        cy.get(DISCOVER_CELL_ACTIONS.EXPAND_CELL_ACTIONS).should('be.visible').trigger('click');
+        cy.get(DISCOVER_CELL_ACTIONS.EXPANSION_POPOVER).should('be.visible');
+        cy.get(DISCOVER_CELL_ACTIONS.COPY).should('be.visible').trigger('click');
+        cy.window()
+          .its('navigator.clipboard')
+          .then((clipboard) => clipboard.readText())
+          .should('eq', selectedTimestamp);
+      });
     });
-  });
-});
+  }
+);
