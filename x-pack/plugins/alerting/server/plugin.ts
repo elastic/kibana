@@ -145,6 +145,7 @@ export interface PluginStartContract {
 
   getAllTypes: RuleTypeRegistry['getAllTypes'];
   getType: RuleTypeRegistry['get'];
+  getIndicesAlias: RuleTypeRegistry['getIndicesAlias'];
 
   getRulesClientWithRequest(request: KibanaRequest): RulesClientApi;
 
@@ -345,6 +346,7 @@ export class AlertingPlugin {
       router,
       licenseState: this.licenseState,
       usageCounter: this.usageCounter,
+      ruleTypeRegistry: this.ruleTypeRegistry,
       encryptedSavedObjects: plugins.encryptedSavedObjects,
       config$: plugins.unifiedSearch.autocomplete.getInitializerContextConfig().create(),
     });
@@ -556,6 +558,7 @@ export class AlertingPlugin {
       listTypes: ruleTypeRegistry!.list.bind(this.ruleTypeRegistry!),
       getType: ruleTypeRegistry!.get.bind(this.ruleTypeRegistry),
       getAllTypes: ruleTypeRegistry!.getAllTypes.bind(this.ruleTypeRegistry!),
+      getIndicesAlias: ruleTypeRegistry!.getIndicesAlias.bind(this.ruleTypeRegistry!),
       getAlertingAuthorizationWithRequest,
       getRulesClientWithRequest,
       getFrameworkHealth: async () =>

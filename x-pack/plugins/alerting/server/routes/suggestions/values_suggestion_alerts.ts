@@ -13,25 +13,26 @@ import { termsAggSuggestions } from '@kbn/unified-search-plugin/server/autocompl
 import type { ConfigSchema } from '@kbn/unified-search-plugin/config';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { getKbnServerError, reportServerError } from '@kbn/kibana-utils-plugin/server';
-import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server/src/saved_objects_index_pattern';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { ALERT_RULE_CONSUMER, ALERT_RULE_TYPE_ID, SPACE_IDS } from '@kbn/rule-data-utils';
 
 import { verifyAccessAndContext } from '../lib';
-import { ILicenseState } from '../../lib';
-import { AlertingRequestHandlerContext } from '../../types';
+import { RuleAuditAction, ruleAuditEvent } from '../../rules_client/common/audit_events';
 import {
   AlertingAuthorizationEntity,
   AlertingAuthorizationFilterOpts,
   AlertingAuthorizationFilterType,
 } from '../../authorization';
-import { RuleAuditAction, ruleAuditEvent } from '../../rules_client/common/audit_events';
+import { AlertingRequestHandlerContext } from '../../types';
+import { ILicenseState } from '../../lib';
+import { RuleTypeRegistry } from '../../rule_type_registry';
 
 const alertingAuthorizationFilterOpts: AlertingAuthorizationFilterOpts = {
   type: AlertingAuthorizationFilterType.ESDSL,
-  fieldNames: { ruleTypeId: 'alert.alertTypeId', consumer: 'alert.consumer' },
+  fieldNames: { ruleTypeId: ALERT_RULE_TYPE_ID, consumer: ALERT_RULE_CONSUMER },
 };
 
-export const RulesSuggestionsSchema = {
+export const AlertsSuggestionsSchema = {
   body: schema.object({
     field: schema.string(),
     query: schema.string(),
@@ -40,16 +41,17 @@ export const RulesSuggestionsSchema = {
   }),
 };
 
-export function registerRulesValueSuggestionsRoute(
+export function registerAlertsValueSuggestionsRoute(
   router: IRouter<AlertingRequestHandlerContext>,
   licenseState: ILicenseState,
   config$: Observable<ConfigSchema>,
+  ruleTypeRegistry: RuleTypeRegistry,
   usageCounter?: UsageCounter
 ) {
   router.post(
     {
-      path: '/internal/rules/suggestions/values',
-      validate: RulesSuggestionsSchema,
+      path: '/internal/alerts/suggestions/values',
+      validate: AlertsSuggestionsSchema,
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, request, response) {
@@ -60,13 +62,17 @@ export function registerRulesValueSuggestionsRoute(
 
         const rulesClient = (await context.alerting).getRulesClient();
         let authorizationTuple;
+        let authorizedRuleType = [];
         try {
           authorizationTuple = await rulesClient
             .getAuthorization()
             .getFindAuthorizationFilter(
-              AlertingAuthorizationEntity.Rule,
+              AlertingAuthorizationEntity.Alert,
               alertingAuthorizationFilterOpts
             );
+          authorizedRuleType = await rulesClient
+            .getAuthorization()
+            .getAuthorizedRuleType(AlertingAuthorizationEntity.Alert);
         } catch (error) {
           rulesClient.getAuditLogger()?.log(
             ruleAuditEvent({
@@ -76,13 +82,20 @@ export function registerRulesValueSuggestionsRoute(
           );
           throw error;
         }
-
+        const spaceId = rulesClient.getSpaceId();
         const { filter: authorizationFilter } = authorizationTuple;
         const filters = [
           ...(authorizationFilter != null ? [authorizationFilter] : []),
-          { term: { namespaces: rulesClient.getSpaceId() } },
+          { term: { [SPACE_IDS]: spaceId } },
         ] as estypes.QueryDslQueryContainer[];
-        const index = ALERTING_CASES_SAVED_OBJECT_INDEX;
+
+        const index = ruleTypeRegistry
+          .getIndicesAlias(
+            authorizedRuleType.map((art) => art.id),
+            spaceId
+          )
+          .join(',');
+
         try {
           const body = await termsAggSuggestions(
             config,

@@ -13,6 +13,7 @@ import { intersection } from 'lodash';
 import { Logger } from '@kbn/core/server';
 import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import { RunContext, TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
+import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import { rawRuleSchema } from './raw_rule_schema';
 import { TaskRunnerFactory } from './task_runner';
 import {
@@ -37,6 +38,7 @@ import { getRuleTypeFeatureUsageName } from './lib/get_rule_type_feature_usage_n
 import { InMemoryMetrics } from './monitoring';
 import { AlertingRulesConfig } from '.';
 import { AlertsService } from './alerts_service/alerts_service';
+import { getIndexTemplateAndPattern } from './alerts_service/resource_installer_utils';
 
 export interface ConstructorOptions {
   logger: Logger;
@@ -409,6 +411,21 @@ export class RuleTypeRegistry {
 
   public getAllTypes(): string[] {
     return [...this.ruleTypes.keys()];
+  }
+
+  public getIndicesAlias(rulesTypes: string[], spaceId?: string): string[] {
+    const aliases = new Set<string>();
+    rulesTypes.forEach((ruleTypeId) => {
+      const ruleType = this.get(ruleTypeId);
+      if (ruleType.alerts?.context) {
+        const indexTemplateAndPattern = getIndexTemplateAndPattern({
+          context: ruleType.alerts?.context,
+          namespace: ruleType.alerts?.isSpaceAware && spaceId ? spaceId : DEFAULT_NAMESPACE_STRING,
+        });
+        aliases.add(indexTemplateAndPattern.alias);
+      }
+    });
+    return Array.from(aliases);
   }
 }
 

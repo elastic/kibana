@@ -262,6 +262,19 @@ export class AlertingAuthorization {
     return this.getAuthorizationFilter(authorizationEntity, filterOpts, ReadOperations.Find);
   }
 
+  public async getAuthorizedRuleType(
+    authorizationEntity: AlertingAuthorizationEntity,
+    featuresIds?: Set<string>
+  ): Promise<RegistryAlertTypeWithAuth[]> {
+    const { authorizedRuleTypes } = await this.augmentRuleTypesWithAuthorization(
+      this.ruleTypeRegistry.list(),
+      [ReadOperations.Find],
+      authorizationEntity,
+      featuresIds
+    );
+    return Array.from(authorizedRuleTypes);
+  }
+
   public async getAuthorizationFilter(
     authorizationEntity: AlertingAuthorizationEntity,
     filterOpts: AlertingAuthorizationFilterOpts,

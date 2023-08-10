@@ -56,20 +56,24 @@ import { findMaintenanceWindowsRoute } from './maintenance_window/find_maintenan
 import { archiveMaintenanceWindowRoute } from './maintenance_window/archive_maintenance_window';
 import { finishMaintenanceWindowRoute } from './maintenance_window/finish_maintenance_window';
 import { activeMaintenanceWindowsRoute } from './maintenance_window/active_maintenance_windows';
-import { registerValueSuggestionsRoute } from './suggestions/values_suggestion_rules';
+import { registerRulesValueSuggestionsRoute } from './suggestions/values_suggestion_rules';
 import { registerFieldsRoute } from './suggestions/fields_rules';
 import { bulkGetMaintenanceWindowRoute } from './maintenance_window/bulk_get_maintenance_windows';
+import { registerAlertsValueSuggestionsRoute } from './suggestions/values_suggestion_alerts';
+import { RuleTypeRegistry } from '../rule_type_registry';
 
 export interface RouteOptions {
   router: IRouter<AlertingRequestHandlerContext>;
   licenseState: ILicenseState;
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
+  ruleTypeRegistry: RuleTypeRegistry;
   usageCounter?: UsageCounter;
   config$?: Observable<ConfigSchema>;
 }
 
 export function defineRoutes(opts: RouteOptions) {
-  const { router, licenseState, encryptedSavedObjects, usageCounter, config$ } = opts;
+  const { router, licenseState, encryptedSavedObjects, usageCounter, config$, ruleTypeRegistry } =
+    opts;
 
   defineLegacyRoutes(opts);
   createRuleRoute(opts);
@@ -116,7 +120,8 @@ export function defineRoutes(opts: RouteOptions) {
   archiveMaintenanceWindowRoute(router, licenseState);
   finishMaintenanceWindowRoute(router, licenseState);
   activeMaintenanceWindowsRoute(router, licenseState);
-  registerValueSuggestionsRoute(router, licenseState, config$!);
+  registerAlertsValueSuggestionsRoute(router, licenseState, config$!, ruleTypeRegistry);
+  registerRulesValueSuggestionsRoute(router, licenseState, config$!);
   registerFieldsRoute(router, licenseState);
   bulkGetMaintenanceWindowRoute(router, licenseState);
 }
