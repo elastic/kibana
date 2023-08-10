@@ -21,9 +21,9 @@ export interface MetadataSearchUrlState {
 }
 
 export interface MetadataProps {
+  assetName: string;
+  assetType: InventoryItemType;
   dateRange: TimeRange;
-  nodeName: string;
-  nodeType: InventoryItemType;
   showActionsColumn?: boolean;
   search?: string;
   onSearchChange?: (query: string) => void;
@@ -32,7 +32,6 @@ export interface MetadataProps {
 export const Metadata = () => {
   const { overrides, onTabsStateChange, metadataResponse } = useAssetDetailsStateContext();
   const { query, showActionsColumn = false } = overrides?.metadata ?? {};
-
   const { metadataLoading, fetchMetadataError, metadata } = metadataResponse;
 
   const fields = useMemo(() => getAllFields(metadata), [metadata]);
@@ -54,7 +53,7 @@ export const Metadata = () => {
         })}
         color="danger"
         iconType="error"
-        data-test-subj="infraMetadataErrorCallout"
+        data-test-subj="infraAssetDetailsMetadataErrorCallout"
       >
         <FormattedMessage
           id="xpack.infra.metadataEmbeddable.errorMessage"

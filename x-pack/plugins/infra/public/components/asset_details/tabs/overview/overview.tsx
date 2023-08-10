@@ -17,7 +17,7 @@ import { MetricsGrid } from './metrics/metrics_grid';
 import { useAssetDetailsStateContext } from '../../hooks/use_asset_details_state';
 
 export const Overview = () => {
-  const { node, nodeType, overrides, dateRange, renderMode, metadataResponse } =
+  const { asset, assetType, overrides, dateRange, renderMode, metadataResponse } =
     useAssetDetailsStateContext();
   const { logsDataView, metricsDataView } = overrides?.overview ?? {};
 
@@ -26,7 +26,7 @@ export const Overview = () => {
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
       <EuiFlexItem grow={false}>
-        <KPIGrid nodeName={node.name} timeRange={dateRange} dataView={metricsDataView} />
+        <KPIGrid nodeName={asset.name} timeRange={dateRange} dataView={metricsDataView} />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         {fetchMetadataError ? (
@@ -44,7 +44,7 @@ export const Overview = () => {
               values={{
                 reload: (
                   <EuiLink
-                    data-test-subj="infraMetadataReloadPageLink"
+                    data-test-subj="infraAssetDetailsMetadataReloadPageLink"
                     onClick={() => window.location.reload()}
                   >
                     {i18n.translate('xpack.infra.assetDetailsEmbeddable.overview.errorAction', {
@@ -59,13 +59,13 @@ export const Overview = () => {
           <MetadataSummaryList
             metadata={metadata}
             metadataLoading={metadataLoading}
-            isCompactView={renderMode?.showInFlyout ?? false}
+            isCompactView={renderMode?.mode === 'flyout' ?? false}
           />
         )}
         <SectionSeparator />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <AlertsSummaryContent nodeName={node.name} nodeType={nodeType} dateRange={dateRange} />
+        <AlertsSummaryContent assetName={asset.name} assetType={assetType} dateRange={dateRange} />
         <SectionSeparator />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
@@ -73,7 +73,7 @@ export const Overview = () => {
           timeRange={dateRange}
           logsDataView={logsDataView}
           metricsDataView={metricsDataView}
-          nodeName={node.name}
+          nodeName={asset.name}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

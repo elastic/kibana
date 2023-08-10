@@ -22,14 +22,14 @@ const DEFAULT_DATE_RANGE = {
 export interface UseAssetDetailsStateProps {
   state: Pick<
     AssetDetailsProps,
-    'node' | 'nodeType' | 'overrides' | 'dateRange' | 'onTabsStateChange' | 'renderMode'
+    'asset' | 'assetType' | 'overrides' | 'dateRange' | 'onTabsStateChange' | 'renderMode'
   >;
 }
 
 export function useAssetDetailsState({ state }: UseAssetDetailsStateProps) {
   const {
-    node,
-    nodeType,
+    asset,
+    assetType,
     dateRange: rawDateRange,
     onTabsStateChange,
     overrides,
@@ -45,17 +45,17 @@ export function useAssetDetailsState({ state }: UseAssetDetailsStateProps) {
 
   const dateRangeTs = toTimestampRange(dateRange);
 
-  const inventoryModel = findInventoryModel(nodeType);
+  const inventoryModel = findInventoryModel(assetType);
   const { sourceId } = useSourceContext();
   const {
     loading: metadataLoading,
     error: fetchMetadataError,
     metadata,
-  } = useMetadata(node.name, nodeType, inventoryModel.requiredMetrics, sourceId, dateRangeTs);
+  } = useMetadata(asset.name, assetType, inventoryModel.requiredMetrics, sourceId, dateRangeTs);
 
   return {
-    node,
-    nodeType,
+    asset,
+    assetType,
     dateRange,
     dateRangeTs,
     onTabsStateChange,
