@@ -35,7 +35,8 @@
     "@kbn/io-ts-utils",
     "@kbn/std",
     "@kbn/alerting-plugin",
-    "@kbn/features-plugin"
+    "@kbn/features-plugin",
+    "@kbn/react-kibana-context-theme"
   ],
   "exclude": ["target/**/*"]
 }
