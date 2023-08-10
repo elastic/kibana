@@ -175,6 +175,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       machineLearningStart: `${ENTERPRISE_SEARCH_DOCS}machine-learning-start.html`,
       mailService: `${ENTERPRISE_SEARCH_DOCS}mailer-configuration.html`,
       mlDocumentEnrichment: `${ENTERPRISE_SEARCH_DOCS}document-enrichment.html`,
+      mlDocumentEnrichmentUpdateMappings: `${ENTERPRISE_SEARCH_DOCS}document-enrichment.html#document-enrichment-update-mappings`,
       searchApplicationsTemplates: `${ENTERPRISE_SEARCH_DOCS}search-applications-templates.html`,
       searchApplicationsSearchApi: `${ENTERPRISE_SEARCH_DOCS}search-applications-safe-search.html`,
       searchApplications: `${ENTERPRISE_SEARCH_DOCS}search-applications.html`,
