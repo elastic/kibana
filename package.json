@@ -821,6 +821,7 @@
     "copy-to-clipboard": "^3.0.8",
     "core-js": "^3.31.0",
     "cronstrue": "^1.51.0",
+    "css-box-model": "^1.2.1",
     "cuid": "^2.1.8",
     "cytoscape": "^3.10.0",
     "cytoscape-dagre": "^2.2.2",
