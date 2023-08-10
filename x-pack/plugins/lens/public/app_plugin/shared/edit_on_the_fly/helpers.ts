@@ -45,6 +45,10 @@ export const getLensDataFromQuery = async (
 
     const allSuggestions =
       suggestionsApi({ context, dataView, datasourceMap, visualizationMap }) ?? [];
+
+    // Lens might not return suggestions for some cases, i.e. incomplete number of columns
+    if (!allSuggestions.length) return undefined;
+
     const firstSuggestion = allSuggestions[0];
 
     const attrs = getLensAttributes({
