@@ -42,10 +42,7 @@ export function App() {
   return (
     <EuiPage paddingSize="none" data-shared-items-container data-shared-items-count={1}>
       <EuiPageBody>
-        <EuiPageTemplate.Section
-          paddingSize="none"
-          className="eui-fullHeight"
-        >
+        <EuiPageTemplate.Section paddingSize="none" className="eui-fullHeight">
           <EuiPageSection className="eui-fullHeight">
             <EuiFlexGroup className="eui-fullHeight" gutterSize="none" direction="column">
               <EuiFlexItem className="eui-fullHeight">
