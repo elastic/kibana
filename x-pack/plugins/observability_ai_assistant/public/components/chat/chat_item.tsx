@@ -113,8 +113,8 @@ export function ChatItem({
   };
 
   const handleToggleEdit = () => {
-    if (collapsed) {
-      setExpanded(!expanded);
+    if (collapsed && !expanded) {
+      setExpanded(true);
     }
     setEditing(!editing);
   };

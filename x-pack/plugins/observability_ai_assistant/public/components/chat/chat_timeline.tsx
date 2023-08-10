@@ -7,7 +7,7 @@
 
 import { EuiCommentList } from '@elastic/eui';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
-import React from 'react';
+import React, { ReactNode } from 'react';
 import { type Message } from '../../../common';
 import type { Feedback } from '../feedback_buttons';
 import { ChatItem } from './chat_item';
@@ -16,7 +16,7 @@ export interface ChatTimelineItem
   extends Pick<Message, '@timestamp'>,
     Pick<Message['message'], 'role' | 'content' | 'function_call'> {
   id: string;
-  title: string;
+  title: ReactNode;
   loading: boolean;
   canCopy: boolean;
   canEdit: boolean;
