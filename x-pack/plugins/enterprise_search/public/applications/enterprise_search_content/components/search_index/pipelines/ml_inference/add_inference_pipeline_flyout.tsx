@@ -46,6 +46,7 @@ import { TestPipeline } from './test_pipeline';
 import { AddInferencePipelineSteps } from './types';
 
 import './add_inference_pipeline_flyout.scss';
+import { UpdateMappings } from './update_mappings';
 
 export interface AddInferencePipelineFlyoutProps {
   onClose: () => void;
@@ -130,6 +131,7 @@ export const AddInferencePipelineContent = ({ onClose }: AddInferencePipelineFly
         <EuiSpacer size="m" />
         {step === AddInferencePipelineSteps.Configuration && <ConfigurePipeline />}
         {step === AddInferencePipelineSteps.Fields && <ConfigureFields />}
+        {step === AddInferencePipelineSteps.Mapping && <UpdateMappings />}
         {step === AddInferencePipelineSteps.Test && <TestPipeline />}
         {step === AddInferencePipelineSteps.Review && <ReviewPipeline />}
       </EuiFlyoutBody>
@@ -151,7 +153,7 @@ export const AddInferencePipelineHorizontalSteps: React.FC = () => {
     {
       // Configure
       onClick: () => onAddInferencePipelineStepChange(AddInferencePipelineSteps.Configuration),
-      status: isConfigureStepValid ? 'complete' : 'disabled',
+      status: step > AddInferencePipelineSteps.Configuration ? 'complete' : 'current',
       title: i18n.translate(
         'xpack.enterpriseSearch.content.indices.transforms.addInferencePipelineModal.steps.configure.title',
         {
@@ -165,11 +167,37 @@ export const AddInferencePipelineHorizontalSteps: React.FC = () => {
         if (!isConfigureStepValid) return;
         onAddInferencePipelineStepChange(AddInferencePipelineSteps.Fields);
       },
-      status: isConfigureStepValid ? (isPipelineDataValid ? 'complete' : 'incomplete') : 'disabled',
+      status: isConfigureStepValid
+        ? step > AddInferencePipelineSteps.Fields
+          ? 'complete'
+          : step === AddInferencePipelineSteps.Fields
+          ? 'current'
+          : 'incomplete'
+        : 'disabled',
       title: i18n.translate(
         'xpack.enterpriseSearch.content.indices.transforms.addInferencePipelineModal.steps.fields.title',
         {
           defaultMessage: 'Fields',
+        }
+      ),
+    },
+    {
+      // Mappings
+      onClick: () => {
+        if (!isPipelineDataValid) return;
+        onAddInferencePipelineStepChange(AddInferencePipelineSteps.Mapping);
+      },
+      status: isPipelineDataValid
+        ? step > AddInferencePipelineSteps.Mapping
+          ? 'complete'
+          : step === AddInferencePipelineSteps.Mapping
+          ? 'current'
+          : 'incomplete'
+        : 'disabled',
+      title: i18n.translate(
+        'xpack.enterpriseSearch.content.indices.transforms.addInferencePipelineModal.steps.mapping.title',
+        {
+          defaultMessage: 'Mapping',
         }
       ),
     },
@@ -179,7 +207,13 @@ export const AddInferencePipelineHorizontalSteps: React.FC = () => {
         if (!isPipelineDataValid) return;
         onAddInferencePipelineStepChange(AddInferencePipelineSteps.Test);
       },
-      status: isPipelineDataValid ? 'incomplete' : 'disabled',
+      status: isPipelineDataValid
+        ? step > AddInferencePipelineSteps.Test
+          ? 'complete'
+          : step === AddInferencePipelineSteps.Test
+          ? 'current'
+          : 'incomplete'
+        : 'disabled',
       title: i18n.translate(
         'xpack.enterpriseSearch.content.indices.transforms.addInferencePipelineModal.steps.test.title',
         {
@@ -193,7 +227,11 @@ export const AddInferencePipelineHorizontalSteps: React.FC = () => {
         if (!isPipelineDataValid) return;
         onAddInferencePipelineStepChange(AddInferencePipelineSteps.Review);
       },
-      status: isPipelineDataValid ? 'incomplete' : 'disabled',
+      status: isPipelineDataValid
+        ? step === AddInferencePipelineSteps.Review
+          ? 'current'
+          : 'incomplete'
+        : 'disabled',
       title: i18n.translate(
         'xpack.enterpriseSearch.content.indices.transforms.addInferencePipelineModal.steps.review.title',
         {
@@ -202,20 +240,23 @@ export const AddInferencePipelineHorizontalSteps: React.FC = () => {
       ),
     },
   ];
-  switch (step) {
-    case AddInferencePipelineSteps.Configuration:
-      navSteps[0].status = isConfigureStepValid ? 'complete' : 'current';
-      break;
-    case AddInferencePipelineSteps.Fields:
-      navSteps[1].status = isPipelineDataValid ? 'complete' : 'current';
-      break;
-    case AddInferencePipelineSteps.Test:
-      navSteps[2].status = 'current';
-      break;
-    case AddInferencePipelineSteps.Review:
-      navSteps[3].status = 'current';
-      break;
-  }
+  // switch (step) {
+  //   case AddInferencePipelineSteps.Configuration:
+  //     navSteps[0].status = isConfigureStepValid ? 'complete' : 'current';
+  //     break;
+  //   case AddInferencePipelineSteps.Fields:
+  //     navSteps[1].status = isPipelineDataValid ? 'complete' : 'current';
+  //     break;
+  //   // case AddInferencePipelineSteps.Mapping:
+  //   //   navSteps[2].status = isPipelineDataValid ? 'complete' : 'current';
+  //   //   break;
+  //   // case AddInferencePipelineSteps.Test:
+  //   //   navSteps[3].status = 'current';
+  //   //   break;
+  //   case AddInferencePipelineSteps.Review:
+  //     navSteps[4].status = 'current';
+  //     break;
+  // }
   return <EuiStepsHorizontal steps={navSteps} />;
 };
 
@@ -240,13 +281,18 @@ export const AddInferencePipelineFooter: React.FC<
       isContinueButtonEnabled = isConfigureStepValid;
       break;
     case AddInferencePipelineSteps.Fields:
-      nextStep = AddInferencePipelineSteps.Test;
+      nextStep = AddInferencePipelineSteps.Mapping;
       previousStep = AddInferencePipelineSteps.Configuration;
       isContinueButtonEnabled = isPipelineDataValid;
       break;
+    case AddInferencePipelineSteps.Mapping:
+      nextStep = AddInferencePipelineSteps.Test;
+      previousStep = AddInferencePipelineSteps.Fields;
+      isContinueButtonEnabled = true;
+      break;
     case AddInferencePipelineSteps.Test:
       nextStep = AddInferencePipelineSteps.Review;
-      previousStep = AddInferencePipelineSteps.Fields;
+      previousStep = AddInferencePipelineSteps.Mapping;
       isContinueButtonEnabled = true;
       break;
     case AddInferencePipelineSteps.Review:
