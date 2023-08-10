@@ -57,7 +57,7 @@ export function ApmRuleKqlFilter({
             defaultMessage: 'Use KQL Filter',
           }
         )}
-        checked={ruleParams.useKqlFilter ? ruleParams.useKqlFilter : false}
+        checked={ruleParams.useKqlFilter ?? false}
         onChange={onToggleKqlFilter}
       />
       <EuiSpacer size={'m'} />
