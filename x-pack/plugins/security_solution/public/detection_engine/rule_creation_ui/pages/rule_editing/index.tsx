@@ -93,7 +93,6 @@ const EditRulePageComponent: FC<{ rule: Rule }> = ({ rule }) => {
   const collapseFn = useRef<() => void | undefined>();
   const [isQueryBarValid, setIsQueryBarValid] = useState(false);
   const [isThreatQueryBarValid, setIsThreatQueryBarValid] = useState(false);
-  const [failedToLoadSavedQuery, setFailedToLoadSavedQuery] = useState(false);
 
   useEffect(() => {
     const fetchDataViews = async () => {
@@ -163,9 +162,6 @@ const EditRulePageComponent: FC<{ rule: Rule }> = ({ rule }) => {
   const { isSavedQueryLoading, savedQuery } = useGetSavedQuery({
     savedQueryId: rule?.saved_id,
     ruleType: rule?.type,
-    onError: () => {
-      setFailedToLoadSavedQuery(true);
-    },
   });
 
   // Since in the edit step we start with an existing rule, we assume that
@@ -229,7 +225,6 @@ const EditRulePageComponent: FC<{ rule: Rule }> = ({ rule }) => {
                   indicesConfig={indicesConfig}
                   threatIndicesConfig={threatIndicesConfig}
                   defaultSavedQuery={savedQuery}
-                  failedToLoadSavedQuery={failedToLoadSavedQuery}
                   form={defineStepForm}
                   optionsSelected={eqlOptionsSelected}
                   setOptionsSelected={setEqlOptionsSelected}
@@ -355,7 +350,6 @@ const EditRulePageComponent: FC<{ rule: Rule }> = ({ rule }) => {
       indicesConfig,
       threatIndicesConfig,
       savedQuery,
-      failedToLoadSavedQuery,
       defineStepForm,
       eqlOptionsSelected,
       setEqlOptionsSelected,
