@@ -137,7 +137,7 @@ export const ControlFrame = ({
         fullWidth
         label={
           usingTwoLineLayout
-            ? title || ''
+            ? title || '...'
             : undefined
         }
       >
