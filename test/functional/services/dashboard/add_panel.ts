@@ -31,8 +31,8 @@ export class DashboardAddPanelService extends FtrService {
       await this.browser.pressKeys(this.browser.keys.ESCAPE);
       await this.testSubjects.click('dashboardAddNewPanelButton');
       await this.testSubjects.waitForDeleted('dashboardAddNewPanelButton');
-      
-      if(!skipLoadingIndicatorHiddenCheck) {
+
+      if (!skipLoadingIndicatorHiddenCheck) {
         await this.header.waitUntilLoadingHasFinished();
       }
 

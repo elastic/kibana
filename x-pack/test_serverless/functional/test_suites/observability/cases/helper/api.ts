@@ -37,7 +37,7 @@ export const setupAuth = ({
   }
 
   return apiCall;
-}
+};
 
 export const getSpaceUrlPrefix = (spaceId: string | undefined | null) => {
   return spaceId && spaceId !== 'default' ? `/s/${spaceId}` : ``;

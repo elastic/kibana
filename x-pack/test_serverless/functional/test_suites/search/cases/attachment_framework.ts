@@ -19,8 +19,16 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const svlCommonNavigation = getPageObject('svlCommonNavigation');
   const dashboardAddPanel = getService('dashboardAddPanel');
 
-  // duplicated from x-pack/test/functional/page_objects/lens_page.ts to convert args into object for better readability 
-  const goToTimeRange = async ({ fromTime, toTime, skipLoadingIndicatorHiddenCheck }: { fromTime?: string, toTime?: string, skipLoadingIndicatorHiddenCheck?: boolean }) => {
+  // duplicated from x-pack/test/functional/page_objects/lens_page.ts to convert args into object for better readability
+  const goToTimeRange = async ({
+    fromTime,
+    toTime,
+    skipLoadingIndicatorHiddenCheck,
+  }: {
+    fromTime?: string;
+    toTime?: string;
+    skipLoadingIndicatorHiddenCheck?: boolean;
+  }) => {
     await timePicker.ensureHiddenNoDataPopover();
     fromTime = fromTime || timePicker.defaultStartTime;
     toTime = toTime || timePicker.defaultEndTime;
@@ -53,13 +61,13 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           operation: 'date_histogram',
           field: '@timestamp',
         });
-  
+
         await lens.configureDimension({
           dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
           operation: 'average',
           field: 'bytes',
         });
-  
+
         await lens.configureDimension({
           dimension: 'lnsXY_splitDimensionPanel > lns-empty-dimension',
           operation: 'terms',
