@@ -4371,7 +4371,7 @@
         "label": "createOrUpdateIndex",
         "description": [],
         "signature": [
-          "({\n  index,\n  mappings,\n  settings,\n  client,\n  logger,\n}: { index: string; mappings: ",
+          "({\n  index,\n  mappings,\n  client,\n  logger,\n}: { index: string; mappings: ",
           "MappingTypeMapping",
           " & { date_detection?: boolean | undefined; dynamic?: ",
           "MappingDynamicMapping",
@@ -4391,9 +4391,7 @@
           "MappingSourceField",
           " | undefined; runtime?: ",
           "MappingRuntimeFields",
-          " | undefined; }; settings?: ",
-          "IndicesIndexSettings",
-          " | undefined; client: ",
+          " | undefined; }; client: ",
           {
             "pluginId": "@kbn/core-elasticsearch-server",
             "scope": "common",
@@ -4420,7 +4418,7 @@
             "id": "def-server.createOrUpdateIndex.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  index,\n  mappings,\n  settings,\n  client,\n  logger,\n}",
+            "label": "{\n  index,\n  mappings,\n  client,\n  logger,\n}",
             "description": [],
             "path": "x-pack/plugins/observability/server/utils/create_or_update_index.ts",
             "deprecated": false,
@@ -4465,21 +4463,6 @@
                   " | undefined; runtime?: ",
                   "MappingRuntimeFields",
                   " | undefined; }"
-                ],
-                "path": "x-pack/plugins/observability/server/utils/create_or_update_index.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.createOrUpdateIndex.$1.settings",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "settings",
-                "description": [],
-                "signature": [
-                  "IndicesIndexSettings",
-                  " | undefined"
                 ],
                 "path": "x-pack/plugins/observability/server/utils/create_or_update_index.ts",
                 "deprecated": false,
