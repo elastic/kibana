@@ -279,7 +279,7 @@ describe('ConditionalPortal', () => {
     it('returns a style with a transitionDuration when the snapshot is drop animating', () => {
       const snapshot: DraggableStateSnapshot = {
         isDragging: true,
-        isDropAnimating: false, // <-- NOT drop animating
+        isDropAnimating: true, // <-- it is drop animating
         isClone: false,
         dropAnimation: null,
         draggingOver: null,
