@@ -6,11 +6,8 @@
  */
 
 import { ActionGroupIdsOf } from '@kbn/alerting-plugin/common';
-import {
-  createLifecycleRuleTypeFactory,
-  GetViewInAppRelativeUrlFnOpts,
-  IRuleDataClient,
-} from '@kbn/rule-registry-plugin/server';
+import { GetViewInAppRelativeUrlFnOpts } from '@kbn/alerting-plugin/server';
+import { createLifecycleRuleTypeFactory, IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { asyncForEach } from '@kbn/std';
 import { ALERT_REASON, ALERT_UUID } from '@kbn/rule-data-utils';
 import {
