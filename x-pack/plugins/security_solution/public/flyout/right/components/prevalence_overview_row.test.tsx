@@ -18,7 +18,6 @@ const highlightedField = {
   name: 'field',
   values: ['values'],
 };
-const scopeId = 'scopeId';
 const dataTestSubj = 'test';
 const iconDataTestSubj = 'testIcon';
 const valueDataTestSubj = 'testValue';
@@ -41,7 +40,6 @@ describe('<PrevalenceOverviewRow />', () => {
     const { getByTestId, getAllByText, queryByTestId } = render(
       <PrevalenceOverviewRow
         highlightedField={highlightedField}
-        scopeId={scopeId}
         callbackIfNull={() => {}}
         data-test-subj={dataTestSubj}
       />
@@ -71,7 +69,6 @@ describe('<PrevalenceOverviewRow />', () => {
     const { queryAllByAltText } = render(
       <PrevalenceOverviewRow
         highlightedField={highlightedField}
-        scopeId={scopeId}
         callbackIfNull={callbackIfNull}
         data-test-subj={dataTestSubj}
       />
@@ -97,7 +94,6 @@ describe('<PrevalenceOverviewRow />', () => {
     const { queryAllByAltText } = render(
       <PrevalenceOverviewRow
         highlightedField={highlightedField}
-        scopeId={scopeId}
         callbackIfNull={callbackIfNull}
         data-test-subj={dataTestSubj}
       />
@@ -122,7 +118,6 @@ describe('<PrevalenceOverviewRow />', () => {
     const { getByTestId } = render(
       <PrevalenceOverviewRow
         highlightedField={highlightedField}
-        scopeId={scopeId}
         callbackIfNull={() => {}}
         data-test-subj={dataTestSubj}
       />

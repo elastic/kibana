@@ -58,8 +58,8 @@ import {
 } from './legacy_uptime/components/fleet_package';
 import { LazySyntheticsCustomAssetsExtension } from './legacy_uptime/components/fleet_package/lazy_synthetics_custom_assets_extension';
 import {
-  uptimeAlertTypeInitializers,
   legacyAlertTypeInitializers,
+  uptimeAlertTypeInitializers,
 } from './legacy_uptime/lib/alert_types';
 import { setStartServices } from './kibana_services';
 
@@ -203,33 +203,9 @@ export class UptimePlugin
   }
 
   public start(coreStart: CoreStart, pluginsStart: ClientPluginsStart): void {
-    const { triggersActionsUi } = pluginsStart;
-
     const { registerExtension } = pluginsStart.fleet;
     setStartServices(coreStart);
     registerUptimeFleetExtensions(registerExtension);
-
-    uptimeAlertTypeInitializers.forEach((init) => {
-      const { observabilityRuleTypeRegistry } = pluginsStart.observability;
-
-      const alertInitializer = init({
-        core: coreStart,
-        plugins: pluginsStart,
-      });
-      if (!triggersActionsUi.ruleTypeRegistry.has(alertInitializer.id)) {
-        observabilityRuleTypeRegistry.register(alertInitializer);
-      }
-    });
-
-    legacyAlertTypeInitializers.forEach((init) => {
-      const alertInitializer = init({
-        core: coreStart,
-        plugins: pluginsStart,
-      });
-      if (!triggersActionsUi.ruleTypeRegistry.has(alertInitializer.id)) {
-        triggersActionsUi.ruleTypeRegistry.register(alertInitializer);
-      }
-    });
 
     setUptimeAppStatus(coreStart, pluginsStart, this.uptimeAppUpdater);
   }
@@ -301,6 +277,7 @@ function setUptimeAppStatus(
     const isEnabled = coreStart.uiSettings.get<boolean>(enableLegacyUptimeApp);
     if (isEnabled) {
       registerUptimeRoutesWithNavigation(coreStart, pluginsStart);
+      registerAlertRules(coreStart, pluginsStart, false);
       updater.next(() => ({ status: AppStatus.accessible }));
     } else {
       const indexStatusPromise = UptimeDataHelper(coreStart).indexStatus('now-7d', 'now');
@@ -308,10 +285,42 @@ function setUptimeAppStatus(
         if (indexStatus.indexExists) {
           registerUptimeRoutesWithNavigation(coreStart, pluginsStart);
           updater.next(() => ({ status: AppStatus.accessible }));
+          registerAlertRules(coreStart, pluginsStart, false);
         } else {
           updater.next(() => ({ status: AppStatus.inaccessible }));
+          registerAlertRules(coreStart, pluginsStart, true);
         }
       });
+    }
+  });
+}
+
+function registerAlertRules(
+  coreStart: CoreStart,
+  pluginsStart: ClientPluginsStart,
+  isHidden = false
+) {
+  uptimeAlertTypeInitializers.forEach((init) => {
+    const { observabilityRuleTypeRegistry } = pluginsStart.observability;
+
+    const alertInitializer = init({
+      isHidden,
+      core: coreStart,
+      plugins: pluginsStart,
+    });
+    if (!pluginsStart.triggersActionsUi.ruleTypeRegistry.has(alertInitializer.id)) {
+      observabilityRuleTypeRegistry.register(alertInitializer);
+    }
+  });
+
+  legacyAlertTypeInitializers.forEach((init) => {
+    const alertInitializer = init({
+      isHidden,
+      core: coreStart,
+      plugins: pluginsStart,
+    });
+    if (!pluginsStart.triggersActionsUi.ruleTypeRegistry.has(alertInitializer.id)) {
+      pluginsStart.triggersActionsUi.ruleTypeRegistry.register(alertInitializer);
     }
   });
 }

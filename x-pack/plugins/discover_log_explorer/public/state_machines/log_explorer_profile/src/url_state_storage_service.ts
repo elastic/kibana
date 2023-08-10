@@ -9,6 +9,7 @@ import { pick, mapValues } from 'lodash';
 import deepEqual from 'fast-deep-equal';
 import { DiscoverStateContainer } from '@kbn/discover-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import { MESSAGE_FIELD } from '../../../../common/constants';
 import {
   AllDatasetSelection,
   decodeDatasetSelectionId,
@@ -169,6 +170,24 @@ export const updateControlPanels =
     return controlPanelsWithId;
   };
 
+export const updateStateContainer =
+  ({
+    stateContainer,
+  }: LogExplorerProfileUrlStateDependencies): InvokeCreator<
+    LogExplorerProfileContext,
+    LogExplorerProfileEvent
+  > =>
+  async () => {
+    const { columns } = stateContainer.appState.getState();
+
+    const shouldSetDefaultColumns =
+      stateContainer.appState.isEmptyURL() || !columns || columns.length === 0;
+
+    if (shouldSetDefaultColumns) {
+      stateContainer.appState.update({ columns: [MESSAGE_FIELD] }, true);
+    }
+  };
+
 /**
  * Utils
  */
@@ -185,7 +204,13 @@ const constructControlPanelsWithDataViewId = (
 
   const controlsPanelsWithId = mergeDefaultPanelsWithUrlConfig(dataView, validatedControlPanels!);
 
-  stateContainer.stateStorage.set(CONTROL_PANELS_URL_KEY, cleanControlPanels(controlsPanelsWithId));
+  if (!deepEqual(controlsPanelsWithId, stateContainer.stateStorage.get(CONTROL_PANELS_URL_KEY))) {
+    stateContainer.stateStorage.set(
+      CONTROL_PANELS_URL_KEY,
+      cleanControlPanels(controlsPanelsWithId),
+      { replace: true }
+    );
+  }
 
   return controlsPanelsWithId;
 };

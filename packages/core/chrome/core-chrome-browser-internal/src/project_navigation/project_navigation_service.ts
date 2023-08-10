@@ -16,7 +16,17 @@ import {
   ChromeProjectNavigationNode,
 } from '@kbn/core-chrome-browser';
 import type { HttpStart } from '@kbn/core-http-browser';
-import { BehaviorSubject, Observable, combineLatest, map, takeUntil, ReplaySubject } from 'rxjs';
+import {
+  BehaviorSubject,
+  Observable,
+  combineLatest,
+  map,
+  takeUntil,
+  ReplaySubject,
+  skip,
+  distinctUntilChanged,
+  skipWhile,
+} from 'rxjs';
 import type { Location } from 'history';
 import deepEqual from 'react-fast-compare';
 import classnames from 'classnames';
@@ -35,6 +45,7 @@ export class ProjectNavigationService {
     current: SideNavComponent | null;
   }>({ current: null });
   private projectHome$ = new BehaviorSubject<string | undefined>(undefined);
+  private projectsUrl$ = new BehaviorSubject<string | undefined>(undefined);
   private projectNavigation$ = new BehaviorSubject<ChromeProjectNavigation | undefined>(undefined);
   private activeNodes$ = new BehaviorSubject<ChromeProjectNavigationNode[][]>([]);
   private projectNavigationNavTreeFlattened: Record<string, ChromeProjectNavigationNode> = {};
@@ -54,10 +65,25 @@ export class ProjectNavigationService {
     this.onHistoryLocationChange(application.history.location);
     this.unlistenHistory = application.history.listen(this.onHistoryLocationChange.bind(this));
 
-    this.activeNodes$.pipe(takeUntil(this.stop$)).subscribe(() => {
-      // reset the breadcrumbs when the active nodes change
-      this.projectBreadcrumbs$.next({ breadcrumbs: [], params: { absolute: false } });
-    });
+    this.activeNodes$
+      .pipe(
+        takeUntil(this.stop$),
+        // skip while the project navigation is not set
+        skipWhile(() => !this.projectNavigation$.getValue()),
+        // only reset when the active breadcrumb path changes, use ids to get more stable reference
+        distinctUntilChanged((prevNodes, nextNodes) =>
+          deepEqual(
+            prevNodes?.[0]?.map((node) => node.id),
+            nextNodes?.[0]?.map((node) => node.id)
+          )
+        ),
+        // skip the initial state, we only want to reset the breadcrumbs when the active nodes change
+        skip(1)
+      )
+      .subscribe(() => {
+        // reset the breadcrumbs when the active nodes change
+        this.projectBreadcrumbs$.next({ breadcrumbs: [], params: { absolute: false } });
+      });
 
     return {
       setProjectHome: (homeHref: string) => {
@@ -65,6 +91,12 @@ export class ProjectNavigationService {
       },
       getProjectHome$: () => {
         return this.projectHome$.asObservable();
+      },
+      setProjectsUrl: (projectsUrl: string) => {
+        this.projectsUrl$.next(projectsUrl);
+      },
+      getProjectsUrl$: () => {
+        return this.projectsUrl$.asObservable();
       },
       setProjectNavigation: (projectNavigation: ChromeProjectNavigation) => {
         this.projectNavigation$.next(projectNavigation);

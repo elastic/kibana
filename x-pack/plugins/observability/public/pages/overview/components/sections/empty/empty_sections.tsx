@@ -13,7 +13,7 @@ import { HttpSetup } from '@kbn/core/public';
 import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
 
 import { useKibana } from '../../../../../utils/kibana_react';
-import { paths } from '../../../../../routes/paths';
+import { paths } from '../../../../../../common/locators/paths';
 import { useHasData } from '../../../../../hooks/use_has_data';
 import { EmptySection, Section } from './empty_section';
 

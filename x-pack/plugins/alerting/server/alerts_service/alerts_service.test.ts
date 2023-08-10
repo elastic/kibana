@@ -114,6 +114,7 @@ const getIndexTemplatePutBody = (opts?: GetIndexTemplatePutBodyOpts) => {
             name: '.alerts-ilm-policy',
             rollover_alias: `.alerts-${context ? context : 'test'}.alerts-${namespace}`,
           },
+          'index.mapping.ignore_malformed': true,
           'index.mapping.total_fields.limit': 2500,
         },
         mappings: {
@@ -640,6 +641,7 @@ describe('Alerts Service', () => {
                 name: '.alerts-ilm-policy',
                 rollover_alias: `.alerts-empty.alerts-default`,
               },
+              'index.mapping.ignore_malformed': true,
               'index.mapping.total_fields.limit': 2500,
             },
             mappings: {

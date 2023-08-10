@@ -14,7 +14,6 @@ import { useTestFlyoutOpen } from '../../test_now_mode/hooks/use_test_flyout_ope
 import { useMonitorDetailsPage } from '../use_monitor_details_page';
 import { useMonitorRangeFrom } from '../hooks/use_monitor_range_from';
 import { MonitorAlerts } from './monitor_alerts';
-import { useMonitorQueryId } from '../hooks/use_monitor_query_id';
 import { MonitorErrorSparklines } from './monitor_error_sparklines';
 import { MonitorStatusPanel } from '../monitor_status/monitor_status_panel';
 import { DurationSparklines } from './duration_sparklines';
@@ -32,7 +31,6 @@ import { MonitorPendingWrapper } from '../monitor_pending_wrapper';
 export const MonitorSummary = () => {
   const { from, to } = useMonitorRangeFrom();
 
-  const monitorId = useMonitorQueryId();
   const isFlyoutOpen = !!useTestFlyoutOpen();
 
   const dateLabel = from === 'now-30d/d' ? LAST_30_DAYS_LABEL : TO_DATE_LABEL;
@@ -81,24 +79,10 @@ export const MonitorSummary = () => {
               </EuiFlexGroup>
               <EuiFlexGroup gutterSize="s" wrap={false} responsive={false}>
                 <EuiFlexItem grow={false}>
-                  {monitorId && (
-                    <MonitorErrorsCount
-                      from={from}
-                      to={to}
-                      monitorId={[monitorId]}
-                      id="monitorErrorsCountSummary"
-                    />
-                  )}
+                  <MonitorErrorsCount from={from} to={to} id="monitorErrorsCountSummary" />
                 </EuiFlexItem>
                 <EuiFlexItem css={{ minWidth: 100 }}>
-                  {monitorId && (
-                    <MonitorErrorSparklines
-                      from={from}
-                      to={to}
-                      monitorId={[monitorId]}
-                      id="monitorErrorsSparklineSummary"
-                    />
-                  )}
+                  <MonitorErrorSparklines from={from} to={to} id="monitorErrorsSparklineSummary" />
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexGroup>

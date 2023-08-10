@@ -20,15 +20,15 @@
     ],
     "patterns": [
       "_nodes/stats",
-      "_nodes/{nodes}/stats",
-      "_nodes/stats/{metrics}",
-      "_nodes/{nodes}/stats/{metrics}",
-      "_nodes/stats/{metrics}/{index_metric}",
-      "_nodes/{nodes}/stats/{metrics}/{index_metric}"
+      "_nodes/{node_id}/stats",
+      "_nodes/stats/{metric}",
+      "_nodes/{node_id}/stats/{metric}",
+      "_nodes/stats/{metric}/{index_metric}",
+      "_nodes/{node_id}/stats/{metric}/{index_metric}"
     ],
     "url_components": {
-      "nodes": null,
-      "metrics": [
+      "node_id": null,
+      "metric": [
         "_all",
         "breaker",
         "discovery",

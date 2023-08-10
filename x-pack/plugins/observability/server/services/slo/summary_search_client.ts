@@ -6,6 +6,7 @@
  */
 
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { ALL_VALUE } from '@kbn/slo-schema';
 import { assertNever } from '@kbn/std';
 import _ from 'lodash';
 import { SLO_SUMMARY_DESTINATION_INDEX_PATTERN } from '../../assets/constants';
@@ -17,6 +18,7 @@ interface EsSummaryDocument {
   slo: {
     id: string;
     revision: number;
+    instanceId: string;
   };
   sliValue: number;
   errorBudgetConsumed: number;
@@ -37,6 +39,7 @@ export interface Paginated<T> {
 
 export interface SLOSummary {
   id: SLOId;
+  instanceId: string;
   summary: Summary;
 }
 
@@ -122,6 +125,7 @@ export class DefaultSummarySearchClient implements SummarySearchClient {
         page: pagination.page,
         results: finalResults.map((doc) => ({
           id: doc._source!.slo.id,
+          instanceId: doc._source!.slo.instanceId ?? ALL_VALUE,
           summary: {
             errorBudget: {
               initial: toHighPrecision(doc._source!.errorBudgetInitial),

@@ -42,16 +42,24 @@ export type LogExplorerProfileTypeState =
       context: WithDatasetSelection;
     }
   | {
+      value: 'initializingStateContainer';
+      context: WithDatasetSelection & WithControlPanels;
+    }
+  | {
       value: 'initialized';
       context: WithDatasetSelection & WithControlPanels;
     }
   | {
-      value: 'initialized.idle';
-      context: WithDatasetSelection & WithControlPanelGroupAPI & WithControlPanels;
+      value: 'initialized.datasetSelection.idle';
+      context: WithDatasetSelection & WithControlPanels;
     }
   | {
-      value: 'initialized.updatingDataView';
-      context: WithDatasetSelection;
+      value: 'initialized.datasetSelection.updatingDataView';
+      context: WithDatasetSelection & WithControlPanels;
+    }
+  | {
+      value: 'initialized.datasetSelection.updatingStateContainer';
+      context: WithDatasetSelection & WithControlPanels;
     }
   | {
       value: 'initialized.controlGroups.uninitialized';
