@@ -6,3 +6,4 @@
  */
 
 export const ASSET_DETAILS_FLYOUT_COMPONENT_NAME = 'infraAssetDetailsFlyout';
+export const METRIC_CHART_HEIGHT = 300;

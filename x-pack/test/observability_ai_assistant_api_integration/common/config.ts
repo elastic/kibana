@@ -38,6 +38,7 @@ export interface CreateTest {
   services: InheritedServices & {
     observabilityAIAssistantAPIClient: (context: InheritedFtrProviderContext) => Promise<{
       readUser: ObservabilityAIAssistantAPIClient;
+      writeUser: ObservabilityAIAssistantAPIClient;
     }>;
     observabilityAIAssistantFtrConfig: (
       context: InheritedFtrProviderContext
@@ -72,6 +73,9 @@ export function createTestConfig(
         observabilityAIAssistantAPIClient: async (_: InheritedFtrProviderContext) => {
           return {
             readUser: await getObservabilityAIAssistantAPIClient({
+              kibanaServer,
+            }),
+            writeUser: await getObservabilityAIAssistantAPIClient({
               kibanaServer,
             }),
           };
