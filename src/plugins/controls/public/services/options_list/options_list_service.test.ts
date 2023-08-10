@@ -7,7 +7,9 @@
  */
 
 import { DataView, FieldSpec } from '@kbn/data-views-plugin/common';
+import { KibanaPluginServiceParams } from '@kbn/presentation-util-plugin/public';
 import type { OptionsListRequest } from '../../../common/options_list/types';
+import type { ControlsPluginStartDeps } from '../../types';
 import type { ControlsHTTPService } from '../http/types';
 import type { ControlsDataService } from '../data/types';
 import { optionsListServiceFactory } from './options_list_service';
@@ -22,7 +24,7 @@ describe('runOptionsListRequest', () => {
           },
         },
       },
-    } as any;
+    } as unknown as KibanaPluginServiceParams<ControlsPluginStartDeps>;
     const mockData = {
       query: {
         timefilter: {
