@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { useEuiTheme, EuiButton, EuiRadio, EuiToolTip } from '@elastic/eui';
+import { useEuiTheme, EuiButton, EuiRadio, EuiToolTip, EuiBetaBadge } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 export interface CspRadioGroupProps {
@@ -23,6 +23,7 @@ interface CspRadioOption {
   label: string;
   icon?: string;
   tooltip?: string;
+  isBeta?: boolean;
 }
 
 export const RadioGroup = ({
@@ -58,6 +59,8 @@ export const RadioGroup = ({
             anchorProps={{
               style: {
                 flexGrow: 1,
+                /* Set Maximum width ONLY for Integration type buttons, we know this because only Integration Type has icons */
+                ...(option.icon && { maxWidth: `calc(${euiTheme.size.xxs} * 115)` }),
               },
             }}
           >
@@ -105,6 +108,15 @@ export const RadioGroup = ({
                 checked={isChecked}
                 onChange={() => {}}
               />
+              {option.isBeta && (
+                <div
+                  css={css`
+                    margin: auto;
+                  `}
+                >
+                  <EuiBetaBadge label="Beta" alignment="middle" />
+                </div>
+              )}
             </EuiButton>
           </EuiToolTip>
         );
