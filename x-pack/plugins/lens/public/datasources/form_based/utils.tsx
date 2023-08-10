@@ -341,9 +341,9 @@ export function getShardFailuresWarningMessages(
   return [];
 }
 
-export function getUnsupportedWarningMessage(
+export function getUnsupportedOperationsWarningMessage(
   state: FormBasedPrivateState,
-  { activeData, dataViews }: FramePublicAPI,
+  { dataViews }: FramePublicAPI,
   docLinks: DocLinksStart
 ) {
   const warningMessages: UserMessage[] = [];

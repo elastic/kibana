@@ -69,7 +69,7 @@ import {
   isColumnInvalid,
   cloneLayer,
   getNotifiableFeatures,
-  getUnsupportedWarningMessage,
+  getUnsupportedOperationsWarningMessage,
 } from './utils';
 import { getUniqueLabelGenerator, isDraggedDataViewField, nonNullable } from '../../utils';
 import { hasField, normalizeOperationDataType } from './pure_utils';
@@ -802,7 +802,7 @@ export function getFormBasedDatasource({
           core.docLinks,
           setState
         ),
-        ...getUnsupportedWarningMessage(state, frameDatasourceAPI, core.docLinks),
+        ...getUnsupportedOperationsWarningMessage(state, frameDatasourceAPI, core.docLinks),
       ];
 
       const infoMessages = getNotifiableFeatures(state, frameDatasourceAPI, visualizationInfo);
