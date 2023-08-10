@@ -48,11 +48,11 @@ export function ApmRuleKqlFilter({
     [onFilterChange]
   );
 
-  const useKqlFilter = (
+  const kqlFilterToggle = (
     <>
       <EuiSwitch
         label={i18n.translate(
-          'xpack.apm.rules.transactionDuration.useKqlFilter',
+          'xpack.apm.rules.transactionDuration.kqlFilterToggle',
           {
             defaultMessage: 'Use KQL Filter',
           }
@@ -90,7 +90,7 @@ export function ApmRuleKqlFilter({
 
   return (
     <>
-      {useKqlFilter}
+      {kqlFilterToggle}
       {kqlFilter}
     </>
   );
