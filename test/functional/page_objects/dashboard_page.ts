@@ -468,16 +468,13 @@ export class DashboardPageObject extends FtrService {
       await this.testSubjects.existOrFail('saveDashboardSuccess');
     });
     const message = await this.common.closeToast();
-
     await this.header.waitUntilLoadingHasFinished();
-
     await this.common.waitForSaveModalToClose();
 
     const isInViewMode = await this.testSubjects.exists('dashboardEditMode');
     if (saveOptions.exitFromEditMode && !isInViewMode) {
       await this.clickCancelOutOfEditMode();
     }
-
     await this.header.waitUntilLoadingHasFinished();
 
     return message;
@@ -568,9 +565,7 @@ export class DashboardPageObject extends FtrService {
     await this.listingTable.searchForItemWithName(dashboardName);
     await this.retry.try(async () => {
       await this.listingTable.clickItemLink('dashboard', dashboardName);
-
       await this.header.waitUntilLoadingHasFinished();
-
       // check Dashboard landing page is not present
       await this.testSubjects.missingOrFail('dashboardLandingPage', { timeout: 10000 });
     });

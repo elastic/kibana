@@ -31,9 +31,7 @@ export class DashboardAddPanelService extends FtrService {
       await this.browser.pressKeys(this.browser.keys.ESCAPE);
       await this.testSubjects.click('dashboardAddNewPanelButton');
       await this.testSubjects.waitForDeleted('dashboardAddNewPanelButton');
-
       await this.header.waitUntilLoadingHasFinished();
-
       await this.testSubjects.existOrFail('lnsApp', {
         timeout: 5000,
       });
