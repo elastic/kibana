@@ -35,7 +35,7 @@ export const KPIGrid = React.memo(({ nodeName, dataView, timeRange }: Props) => 
   }, [dataView, nodeName]);
 
   return (
-    <EuiFlexGroup direction="row" gutterSize="s" data-test-subj="assetDetailsKPIGrid">
+    <EuiFlexGroup direction="row" gutterSize="s" data-test-subj="infraAssetDetailsKPIGrid">
       {KPI_CHARTS.map(({ id, layers, title, toolTip }, index) => (
         <EuiFlexItem key={index}>
           <LensChart
