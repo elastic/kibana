@@ -45,6 +45,7 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
     login();
     resetRulesTableState();
     deleteAlertsAndRules();
+    cy.task('esArchiverResetKibana');
 
     visitWithoutDateRange(SECURITY_DETECTIONS_RULES_URL);
   });
