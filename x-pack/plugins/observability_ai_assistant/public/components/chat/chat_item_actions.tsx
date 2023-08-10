@@ -9,26 +9,21 @@ import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonIcon, EuiPopover, EuiText } from '@elastic/eui';
 
-export interface ChatItemAction {
-  id: string;
-  label: string;
-  icon: string;
-  handler: () => void;
-}
-
 export function ChatItemActions({
+  canCopy,
   canEdit,
   collapsed,
-  canCopy,
-  isCollapsed,
+  editing,
+  expanded,
   onToggleEdit,
   onToggleExpand,
   onCopyToClipboard,
 }: {
+  canCopy: boolean;
   canEdit: boolean;
   collapsed: boolean;
-  canCopy: boolean;
-  isCollapsed: boolean;
+  editing: boolean;
+  expanded: boolean;
   onToggleEdit: () => void;
   onToggleExpand: () => void;
   onCopyToClipboard: () => void;
@@ -47,85 +42,73 @@ export function ChatItemActions({
     };
   }, [isPopoverOpen]);
 
-  const actions: ChatItemAction[] = [
-    ...(canEdit
-      ? [
-          {
-            id: 'edit',
-            icon: 'documentEdit',
-            label: '',
-            handler: () => {
-              onToggleEdit();
-            },
-          },
-        ]
-      : []),
-    ...(collapsed
-      ? [
-          {
-            id: 'expand',
-            icon: isCollapsed ? 'eyeClosed' : 'eye',
-            label: '',
-            handler: () => {
-              onToggleExpand();
-            },
-          },
-        ]
-      : []),
-    ...(canCopy
-      ? [
-          {
-            id: 'copy',
-            icon: 'copyClipboard',
-            label: i18n.translate(
-              'xpack.observabilityAiAssistant.chatTimeline.actions.copyMessage',
-              {
-                defaultMessage: 'Copied message',
-              }
-            ),
-            handler: () => {
-              onCopyToClipboard();
-            },
-          },
-        ]
-      : []),
-  ];
   return (
     <>
-      {actions.map(({ id, icon, label, handler }) =>
-        label ? (
-          <EuiPopover
-            key={id}
-            button={
-              <EuiButtonIcon
-                aria-label={label}
-                key={id}
-                iconType={icon}
-                onClick={() => {
-                  setIsPopoverOpen(id);
-                  handler();
-                }}
-                color="text"
-              />
+      {canEdit ? (
+        <EuiButtonIcon
+          aria-label={i18n.translate(
+            'xpack.observabilityAiAssistant.chatTimeline.actions.editPrompt',
+            {
+              defaultMessage: 'Edit prompt',
             }
-            isOpen={isPopoverOpen === id}
-            closePopover={() => setIsPopoverOpen(undefined)}
-            panelPaddingSize="s"
-          >
-            <EuiText size="s">
-              <p>{label}</p>
-            </EuiText>
-          </EuiPopover>
-        ) : (
-          <EuiButtonIcon
-            aria-label={label}
-            key={id}
-            iconType={icon}
-            onClick={handler}
-            color="text"
-          />
-        )
-      )}
+          )}
+          color="text"
+          display={editing ? 'fill' : 'empty'}
+          iconType="documentEdit"
+          onClick={onToggleEdit}
+        />
+      ) : null}
+
+      {collapsed ? (
+        <EuiButtonIcon
+          aria-label={i18n.translate(
+            'xpack.observabilityAiAssistant.chatTimeline.actions.inspectPrompt',
+            {
+              defaultMessage: 'Inspect prompt',
+            }
+          )}
+          color="text"
+          display={expanded ? 'fill' : 'empty'}
+          iconType={expanded ? 'eyeClosed' : 'eye'}
+          onClick={onToggleExpand}
+        />
+      ) : null}
+
+      {canCopy ? (
+        <EuiPopover
+          button={
+            <EuiButtonIcon
+              aria-label={i18n.translate(
+                'xpack.observabilityAiAssistant.chatTimeline.actions.copyMessage',
+                {
+                  defaultMessage: 'Copy message',
+                }
+              )}
+              color="text"
+              iconType="copyClipboard"
+              display={isPopoverOpen === 'copy' ? 'fill' : 'empty'}
+              onClick={() => {
+                setIsPopoverOpen('copy');
+                onCopyToClipboard();
+              }}
+            />
+          }
+          isOpen={isPopoverOpen === 'copy'}
+          panelPaddingSize="s"
+          closePopover={() => setIsPopoverOpen(undefined)}
+        >
+          <EuiText size="s">
+            <p>
+              {i18n.translate(
+                'xpack.observabilityAiAssistant.chatTimeline.actions.copyMessageSuccessful',
+                {
+                  defaultMessage: 'Copied message',
+                }
+              )}
+            </p>
+          </EuiText>
+        </EuiPopover>
+      ) : null}
     </>
   );
 }

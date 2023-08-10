@@ -17,7 +17,7 @@ import type { ObservabilityAIAssistantService, PendingMessage } from '../types';
 import { getTimelineItemsfromConversation } from '../utils/get_timeline_items_from_conversation';
 import type { UseGenAIConnectorsResult } from './use_genai_connectors';
 import { getAssistantSetupMessage } from '../service/get_assistant_setup_message';
-
+import { useObservabilityAIAssistant } from './use_observability_ai_assistant';
 export function createNewConversation(): ConversationCreateRequest {
   return {
     '@timestamp': new Date().toISOString(),
@@ -54,6 +54,9 @@ export function useTimeline({
   onChatComplete: (messages: Message[]) => void;
   knowledgeBaseAvailable: boolean;
 }): UseTimelineResult {
+  const { getFunctions } = useObservabilityAIAssistant();
+  const functions = getFunctions();
+
   const connectorId = connectors.selectedConnector;
 
   const hasConnector = !!connectorId;
@@ -63,10 +66,11 @@ export function useTimeline({
       messages,
       currentUser,
       hasConnector,
+      functions,
     });
 
     return items;
-  }, [messages, currentUser, hasConnector]);
+  }, [messages, currentUser, hasConnector, functions]);
 
   const [subscription, setSubscription] = useState<Subscription | undefined>();
 
