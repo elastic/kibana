@@ -7,21 +7,20 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import type { SecurityPluginStart } from '@kbn/security-plugin/public';
 import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import { useUpdateUserProfile } from '@kbn/user-profile-components';
 
 interface Deps {
   uiSettingsClient: IUiSettingsClient;
-  security: SecurityPluginStart;
 }
 
-export const useThemeDarkmodeToggle = ({ uiSettingsClient, security }: Deps) => {
+export const useThemeDarkmodeToggle = ({ uiSettingsClient }: Deps) => {
   const [isDarkModeOn, setIsDarkModeOn] = useState(false);
   // If a value is set in kibana.yml (uiSettings.overrides.theme:darkMode)
   // we don't allow the user to change the theme color.
   const valueSetInKibanaConfig = uiSettingsClient.isOverridden('theme:darkMode');
 
-  const { userProfileData, isLoading, update } = security.hooks.useUpdateUserProfile({
+  const { userProfileData, isLoading, update } = useUpdateUserProfile({
     notificationSuccess: {
       title: i18n.translate('xpack.cloudLinks.userMenuLinks.darkMode.successNotificationTitle', {
         defaultMessage: 'Color theme updated',
