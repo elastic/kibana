@@ -212,26 +212,35 @@ export function InternalDashboardTopNav({
       !forceHide && (filterManager.getFilters().length > 0 || !fullScreenMode);
 
     const showTopNavMenu = shouldShowNavBarComponent(Boolean(embedSettings?.forceShowTopNavMenu));
-    const showQueryInput = shouldShowNavBarComponent(
-      Boolean(embedSettings?.forceShowQueryInput || viewMode === ViewMode.PRINT)
-    );
-    const showDatePicker = shouldShowNavBarComponent(Boolean(embedSettings?.forceShowDatePicker));
+    const showQueryInput = Boolean(embedSettings?.forceHideQueryInput)
+      ? false
+      : shouldShowNavBarComponent(
+          Boolean(embedSettings?.showQueryInput || viewMode === ViewMode.PRINT)
+        );
+    const showDatePicker = Boolean(embedSettings?.forceHideDatePicker)
+      ? false
+      : shouldShowNavBarComponent(Boolean(embedSettings?.showDatePicker));
     const showFilterBar = shouldShowFilterBar(Boolean(embedSettings?.forceHideFilterBar));
     const showQueryBar = showQueryInput || showDatePicker || showFilterBar;
     const showSearchBar = showQueryBar || showFilterBar;
-
+    const showBorderBottom = embedSettings?.showBorderBottom ?? true;
+    const showBackgroundColor = embedSettings?.showBackgroundColor ?? true;
+    const showFullScreenButton = embedSettings?.showFullScreenButton ?? true;
+    const editingToolBarCss = embedSettings?.editingToolBarCss ?? ({} as SerializedStyles);
+    const topNavMenuAlignRight = embedSettings?.topNavMenuAlignRight ?? false;
+    const showStickyTopNav = embedSettings?.showStickyTopNav ?? true;
     return {
       showTopNavMenu,
       showSearchBar,
       showFilterBar,
       showQueryInput,
       showDatePicker,
-      showBorderBottom: embedSettings?.showBorderBottom ?? true,
-      showBackgroundColor: embedSettings?.showBackgroundColor ?? true,
-      showFullScreenButton: embedSettings?.showFullScreenButton ?? true,
-      editingToolBarCss: embedSettings?.editingToolBarCss ?? ({} as SerializedStyles),
-      topNavMenuAlignRight: embedSettings?.topNavMenuAlignRight ?? false,
-      showStickyTopNav: embedSettings?.showStickyTopNav ?? true,
+      showBorderBottom,
+      showBackgroundColor,
+      showFullScreenButton,
+      editingToolBarCss,
+      topNavMenuAlignRight,
+      showStickyTopNav,
     };
   }, [embedSettings, filterManager, fullScreenMode, isChromeVisible, viewMode]);
 

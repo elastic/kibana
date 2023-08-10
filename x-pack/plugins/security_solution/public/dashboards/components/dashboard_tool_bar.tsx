@@ -10,7 +10,7 @@ import type { DashboardAPI } from '@kbn/dashboard-plugin/public';
 import { DashboardTopNav } from '@kbn/dashboard-plugin/public';
 import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
-import type { ViewMode } from '@kbn/embeddable-plugin/public';
+import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { APP_UI_ID, SecurityPageName } from '../../../common';
 import { useGetSecuritySolutionUrl } from '../../common/components/link_to';
 import { useNavigateTo } from '../../common/lib/kibana';
@@ -20,12 +20,13 @@ const DashboardToolBarComponent = ({
   onLoad,
   dashboardId,
 }: {
-  dashboardContainer: DashboardAPI;
+  dashboardContainer: DashboardAPI | undefined;
   onLoad: (mode: ViewMode) => void;
-  dashboardId: string;
+  dashboardId: string | undefined;
 }) => {
   const { euiTheme } = useEuiTheme();
-  const viewMode = dashboardContainer.select((state) => state.explicitInput.viewMode);
+  const viewMode =
+    dashboardContainer?.select((state) => state.explicitInput.viewMode) ?? ViewMode.VIEW;
 
   const { navigateTo } = useNavigateTo();
   const getSecuritySolutionUrl = useGetSecuritySolutionUrl();
@@ -36,11 +37,11 @@ const DashboardToolBarComponent = ({
       })}`,
     [getSecuritySolutionUrl]
   );
-  const getEditDashboardUrl = useCallback(
-    (id: string) =>
+  const getEditOrCreateDashboardUrl = useCallback(
+    (id: string | undefined) =>
       `${getSecuritySolutionUrl({
         deepLinkId: SecurityPageName.dashboards,
-        path: `${id}/edit`,
+        path: id ? `${id}/edit` : `/create`,
       })}`,
     [getSecuritySolutionUrl]
   );
@@ -51,38 +52,45 @@ const DashboardToolBarComponent = ({
         navigateTo({ url: dashboardListingUrl });
       }
       if (props.destination === 'dashboard' && props.id) {
-        navigateTo({ url: getEditDashboardUrl(props.id) });
+        navigateTo({ url: getEditOrCreateDashboardUrl(props.id) });
       }
     },
-    [dashboardListingUrl, getEditDashboardUrl, navigateTo]
+    [dashboardListingUrl, getEditOrCreateDashboardUrl, navigateTo]
   );
 
   useEffect(() => {
     onLoad(viewMode);
   }, [onLoad, viewMode]);
 
-  return (
+  const embedSettings = useMemo(
+    () => ({
+      forceHideFilterBar: true,
+      forceShowTopNavMenu: true,
+      showQueryInput: false,
+      forceHideQueryInput: true,
+      showDatePicker: false,
+      forceHideDatePicker: true,
+      showBorderBottom: false,
+      showFullScreenButton: false,
+      showBackgroundColor: false,
+      showStickyTopNav: false,
+      editingToolBarCss: css`
+        padding: ${euiTheme.size.s} 0 ${euiTheme.size.s} ${euiTheme.size.s};
+      `,
+      topNavMenuAlignRight: true,
+    }),
+    [euiTheme.size.s]
+  );
+
+  return dashboardContainer ? (
     <DashboardTopNav
       redirectTo={redirectTo}
       dashboardContainer={dashboardContainer}
-      embedSettings={{
-        forceHideFilterBar: true,
-        forceShowTopNavMenu: true,
-        forceShowQueryInput: false,
-        forceShowDatePicker: false,
-        showBorderBottom: false,
-        showFullScreenButton: false,
-        showBackgroundColor: false,
-        showStickyTopNav: false,
-        editingToolBarCss: css`
-          padding: ${euiTheme.size.s} 0 ${euiTheme.size.s} ${euiTheme.size.s};
-        `,
-        topNavMenuAlignRight: true,
-      }}
+      embedSettings={embedSettings}
       originatingApp={APP_UI_ID}
-      originatingPath={`dashboards/${dashboardId}/edit`}
+      originatingPath={dashboardId ? `dashboards/${dashboardId}/edit` : `dashboards/create`}
     />
-  );
+  ) : null;
 };
 
 export const DashboardToolBar = React.memo(DashboardToolBarComponent);

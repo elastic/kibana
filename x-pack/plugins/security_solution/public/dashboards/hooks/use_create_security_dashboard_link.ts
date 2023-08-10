@@ -7,12 +7,13 @@
 
 import { useMemo } from 'react';
 import { useSecurityTags } from '../context/dashboard_context';
-import { useKibana } from '../../common/lib/kibana';
+import { useGetSecuritySolutionUrl } from '../../common/components/link_to';
+import { SecurityPageName } from '../../../common';
 
 type UseCreateDashboard = () => { isLoading: boolean; url: string };
 
 export const useCreateSecurityDashboardLink: UseCreateDashboard = () => {
-  const { dashboard } = useKibana().services;
+  const getSecuritySolutionUrl = useGetSecuritySolutionUrl();
   const securityTags = useSecurityTags();
 
   const result = useMemo(() => {
@@ -22,9 +23,12 @@ export const useCreateSecurityDashboardLink: UseCreateDashboard = () => {
     }
     return {
       isLoading: false,
-      url: dashboard?.locator?.getRedirectUrl({ tags: [firstSecurityTagId] }) ?? '',
+      url: getSecuritySolutionUrl({
+        deepLinkId: SecurityPageName.dashboards,
+        path: 'create',
+      }),
     };
-  }, [securityTags, dashboard?.locator]);
+  }, [securityTags, getSecuritySolutionUrl]);
 
   return result;
 };

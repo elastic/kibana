@@ -17,6 +17,9 @@ const DashboardsContainerComponent = () => {
   return (
     <DashboardContextProvider>
       <Routes>
+        <Route strict path={`${DASHBOARDS_PATH}/create`}>
+          <DashboardView initialViewMode={ViewMode.EDIT} />
+        </Route>
         <Route strict path={`${DASHBOARDS_PATH}/:detailName/edit`}>
           <DashboardView initialViewMode={ViewMode.EDIT} />
         </Route>

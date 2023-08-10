@@ -15,6 +15,7 @@ import { InputsModelId } from '../../common/store/inputs/constants';
 import { inputsActions } from '../../common/store/inputs';
 import { useKibana } from '../../common/lib/kibana';
 import { APP_UI_ID } from '../../../common';
+import { useSecurityTags } from '../context/dashboard_context';
 
 const DashboardRendererComponent = ({
   canReadDashboard,
@@ -46,16 +47,27 @@ const DashboardRendererComponent = ({
 }) => {
   const { embeddable } = useKibana().services;
   const dispatch = useDispatch();
+
+  const securityTags = useSecurityTags();
+  const firstSecurityTagId = securityTags?.[0]?.id;
+  const isCreateDashboard = !savedObjectId;
+
   const getCreationOptions = useCallback(
     () =>
       Promise.resolve({
         useSessionStorageIntegration: true,
         useControlGroupIntegration: true,
-        getInitialInput: () => ({ timeRange, viewMode, query, filters }),
+        getInitialInput: () => ({
+          timeRange,
+          viewMode,
+          query,
+          filters,
+          ...(isCreateDashboard && firstSecurityTagId ? { tags: [firstSecurityTagId] } : {}),
+        }),
         getIncomingEmbeddable: () =>
           embeddable.getStateTransfer().getIncomingEmbeddablePackage(APP_UI_ID, true),
       }),
-    [embeddable, filters, query, timeRange, viewMode]
+    [embeddable, filters, firstSecurityTagId, isCreateDashboard, query, timeRange, viewMode]
   );
   const [dashboardContainerRenderer, setDashboardContainerRenderer] = useState<
     React.ReactElement | undefined
@@ -102,9 +114,7 @@ const DashboardRendererComponent = ({
     };
   }, [getCreationOptions, onDashboardContainerLoaded, savedObjectId]);
 
-  return savedObjectId && canReadDashboard ? (
-    <div ref={wrapperRef}>{dashboardContainerRenderer}</div>
-  ) : null;
+  return canReadDashboard ? <div ref={wrapperRef}>{dashboardContainerRenderer}</div> : null;
 };
 DashboardRendererComponent.displayName = 'DashboardRendererComponent';
 export const DashboardRenderer = React.memo(DashboardRendererComponent);

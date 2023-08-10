@@ -96,12 +96,14 @@ export const DashboardsLandingPage = () => {
       })}`,
     [getSecuritySolutionUrl]
   );
-  const { isLoading: loadingCreateDashboardUrl, url: createDashboardUrl } =
-    useCreateSecurityDashboardLink();
 
   const getHref = useCallback(
-    (id: string | undefined) => (id ? getSecuritySolutionDashboardUrl(id) : createDashboardUrl),
-    [createDashboardUrl, getSecuritySolutionDashboardUrl]
+    (id: string | undefined) =>
+      getSecuritySolutionUrl({
+        deepLinkId: SecurityPageName.dashboards,
+        path: id ?? 'create',
+      }),
+    [getSecuritySolutionUrl]
   );
 
   const goToDashboard = useCallback(
@@ -141,7 +143,7 @@ export const DashboardsLandingPage = () => {
           <EuiHorizontalRule margin="s" />
           <EuiSpacer size="m" />
           <DashboardListingTable
-            disableCreateDashboardButton={loadingCreateDashboardUrl}
+            disableCreateDashboardButton={!canCreateDashboard}
             getDashboardUrl={getSecuritySolutionDashboardUrl}
             goToDashboard={goToDashboard}
             initialFilter={initialFilter}

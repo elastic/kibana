@@ -7,7 +7,7 @@
  */
 
 import { css, SerializedStyles } from '@emotion/react';
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { useEuiTheme } from '@elastic/eui';
 
@@ -126,15 +126,17 @@ export function DashboardEditingToolbar({
     extraButtons.push(<ControlsToolbarButton controlGroup={dashboard.controlGroup} />);
   }
 
-  return (
-    <div
-      css={{
-        ...css`
-          padding: 0 ${euiTheme.size.s} ${euiTheme.size.s} ${euiTheme.size.s};
-        `,
+  const wrapperStyles = useMemo(
+    () =>
+      css({
+        padding: `0 ${euiTheme.size.s} ${euiTheme.size.s} ${euiTheme.size.s}`,
         ...(wrapperCss ?? {}),
-      }}
-    >
+      }),
+    [euiTheme.size.s, wrapperCss]
+  );
+
+  return (
+    <div css={wrapperStyles}>
       <Toolbar>
         {{
           primaryButton: (

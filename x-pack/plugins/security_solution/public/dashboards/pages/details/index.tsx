@@ -30,8 +30,9 @@ import { DASHBOARD_NOT_FOUND_TITLE } from './translations';
 import { inputsSelectors } from '../../../common/store';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { DashboardToolBar } from '../../components/dashboard_tool_bar';
-import { fetchTags } from '../../../common/containers/tags/api';
+import { fetchTags, isManagedTag } from '../../../common/containers/tags/api';
 import { REQUEST_NAMES, useFetch } from '../../../common/hooks/use_fetch';
+import { CREATE_DASHBOARD_TITLE } from '../translations';
 
 type DashboardDetails = Record<string, string>;
 
@@ -72,20 +73,29 @@ const DashboardViewComponent: React.FC<DashboardViewProps> = ({
     REQUEST_NAMES.FETCH_DASHBOARD_TAGS,
     fetchTags
   );
+  const { detailName: savedObjectId } = useParams<{ detailName?: string }>();
 
   const onDashboardToolBarLoad = useCallback((mode: ViewMode) => {
     setViewMode(mode);
   }, []);
-  const onDashboardContainerLoaded = useCallback((dashboard: DashboardAPI) => {
-    if (dashboard) {
-      const title = dashboard.getTitle().trim();
-      if (title) {
-        setDashboardDetails({ title });
-      } else {
-        setDashboardDetails({ title: DASHBOARD_NOT_FOUND_TITLE });
+  const onDashboardContainerLoaded = useCallback(
+    (dashboard: DashboardAPI) => {
+      if (!savedObjectId) {
+        setDashboardDetails({ title: CREATE_DASHBOARD_TITLE });
+        return;
       }
-    }
-  }, []);
+
+      if (dashboard) {
+        const title = dashboard.getTitle().trim();
+        if (title) {
+          setDashboardDetails({ title });
+        } else {
+          setDashboardDetails({ title: DASHBOARD_NOT_FOUND_TITLE });
+        }
+      }
+    },
+    [savedObjectId]
+  );
 
   const handleDashboardLoaded = useCallback(
     async (container: DashboardAPI) => {
@@ -93,11 +103,8 @@ const DashboardViewComponent: React.FC<DashboardViewProps> = ({
       onDashboardContainerLoaded(container);
       const tagIds = container?.getExplicitInput().tags;
       if (savedObjectsTagging) {
-        await fetchDashboardTags({
-          tagIds,
-          savedObjectsTaggingClient: savedObjectsTagging.client,
-        });
-        if (dashboardTags?.find(({ name }) => name === 'Managed')) {
+        await fetchDashboardTags({ tagIds, savedObjectsTaggingClient: savedObjectsTagging.client });
+        if (dashboardTags?.some(isManagedTag)) {
           setIsManaged(true);
         }
       }
@@ -106,7 +113,10 @@ const DashboardViewComponent: React.FC<DashboardViewProps> = ({
   );
 
   const dashboardExists = useMemo(() => dashboardDetails != null, [dashboardDetails]);
-  const { detailName: savedObjectId } = useParams<{ detailName?: string }>();
+  const shouldShowControl =
+    savedObjectId && dashboardExists
+      ? dashboardContainer && !isManaged && showWriteControls
+      : dashboardContainer && showWriteControls;
 
   return (
     <>
@@ -122,17 +132,13 @@ const DashboardViewComponent: React.FC<DashboardViewProps> = ({
         >
           <EuiFlexItem grow={false}>
             <HeaderPage border title={dashboardDetails?.title ?? <EuiLoadingSpinner size="m" />}>
-              {showWriteControls &&
-                dashboardExists &&
-                dashboardContainer &&
-                savedObjectId &&
-                !isManaged && (
-                  <DashboardToolBar
-                    dashboardContainer={dashboardContainer}
-                    onLoad={onDashboardToolBarLoad}
-                    dashboardId={savedObjectId}
-                  />
-                )}
+              {shouldShowControl && (
+                <DashboardToolBar
+                  dashboardContainer={dashboardContainer}
+                  onLoad={onDashboardToolBarLoad}
+                  dashboardId={savedObjectId}
+                />
+              )}
             </HeaderPage>
           </EuiFlexItem>
           {!errorState && (

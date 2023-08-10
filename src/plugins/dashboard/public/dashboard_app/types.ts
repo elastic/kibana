@@ -10,10 +10,12 @@ import { SerializedStyles } from '@emotion/react';
 import { AppMountParameters, ScopedHistory } from '@kbn/core-application-browser';
 
 export interface DashboardEmbedSettings {
+  forceHideDatePicker?: boolean;
   forceHideFilterBar?: boolean;
+  forceHideQueryInput?: boolean;
   forceShowTopNavMenu?: boolean;
-  forceShowQueryInput?: boolean;
-  forceShowDatePicker?: boolean;
+  showQueryInput?: boolean;
+  showDatePicker?: boolean;
   showBorderBottom?: boolean;
   showBackgroundColor?: boolean;
   showFullScreenButton?: boolean;
