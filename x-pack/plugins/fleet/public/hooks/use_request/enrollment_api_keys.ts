@@ -15,6 +15,8 @@ import type {
   PostEnrollmentAPIKeyResponse,
 } from '../../types';
 
+import { LATEST_PUBLIC_VERSION } from '../../../common/constants';
+
 import { useRequest, sendRequest, useConditionalRequest } from './use_request';
 import type { UseRequestConfig, SendConditionalRequestConfig } from './use_request';
 
@@ -25,6 +27,7 @@ export function useGetOneEnrollmentAPIKey(keyId: string | undefined) {
     method: 'get',
     path: keyId ? enrollmentAPIKeyRouteService.getInfoPath(keyId) : undefined,
     shouldSendRequest: !!keyId,
+    version: LATEST_PUBLIC_VERSION,
   } as SendConditionalRequestConfig);
 }
 
@@ -32,6 +35,7 @@ export function sendGetOneEnrollmentAPIKey(keyId: string, options?: RequestOptio
   return sendRequest<GetOneEnrollmentAPIKeyResponse>({
     method: 'get',
     path: enrollmentAPIKeyRouteService.getInfoPath(keyId),
+    version: LATEST_PUBLIC_VERSION,
     ...options,
   });
 }
@@ -40,6 +44,7 @@ export function sendDeleteOneEnrollmentAPIKey(keyId: string, options?: RequestOp
   return sendRequest({
     method: 'delete',
     path: enrollmentAPIKeyRouteService.getDeletePath(keyId),
+    version: LATEST_PUBLIC_VERSION,
     ...options,
   });
 }
@@ -51,6 +56,7 @@ export function sendGetEnrollmentAPIKeys(
   return sendRequest<GetEnrollmentAPIKeysResponse>({
     method: 'get',
     path: enrollmentAPIKeyRouteService.getListPath(),
+    version: LATEST_PUBLIC_VERSION,
     query,
     ...options,
   });
@@ -63,6 +69,7 @@ export function useGetEnrollmentAPIKeys(
   return useRequest<GetEnrollmentAPIKeysResponse>({
     method: 'get',
     path: enrollmentAPIKeyRouteService.getListPath(),
+    version: LATEST_PUBLIC_VERSION,
     query,
     ...options,
   });
@@ -72,6 +79,7 @@ export function sendCreateEnrollmentAPIKey(body: PostEnrollmentAPIKeyRequest['bo
   return sendRequest<PostEnrollmentAPIKeyResponse>({
     method: 'post',
     path: enrollmentAPIKeyRouteService.getCreatePath(),
+    version: LATEST_PUBLIC_VERSION,
     body,
   });
 }

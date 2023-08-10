@@ -142,7 +142,6 @@ export function makeRouterWithFleetAuthz<TContext extends FleetRequestHandlerCon
     get: ({ fleetAuthz: hasRequiredAuthz, version, ...options }, handler) => {
       const access = withDefaultPublicAccess(options).options?.access || PUBLIC_API_ACCESS;
       const defaultVersion = getDefaultVersion(access);
-
       return versionedRouter
         .get({ access, path: options.path })
         .addVersion(
@@ -151,25 +150,49 @@ export function makeRouterWithFleetAuthz<TContext extends FleetRequestHandlerCon
             fleetHandlerWrapper({ context, request, response, handler, hasRequiredAuthz })
         );
     },
-    delete: ({ fleetAuthz: hasRequiredAuthz, ...options }, handler) => {
-      router.delete(withDefaultPublicAccess(options), (context, request, response) =>
-        fleetHandlerWrapper({ context, request, response, handler, hasRequiredAuthz })
-      );
+    delete: ({ fleetAuthz: hasRequiredAuthz, version, ...options }, handler) => {
+      const access = withDefaultPublicAccess(options).options?.access || PUBLIC_API_ACCESS;
+      const defaultVersion = getDefaultVersion(access);
+      return versionedRouter
+        .delete({ access, path: options.path })
+        .addVersion(
+          { version: version || defaultVersion, validate: { request: routeValidationObject } },
+          (context, request, response) =>
+            fleetHandlerWrapper({ context, request, response, handler, hasRequiredAuthz })
+        );
     },
-    post: ({ fleetAuthz: hasRequiredAuthz, ...options }, handler) => {
-      router.post(withDefaultPublicAccess(options), (context, request, response) =>
-        fleetHandlerWrapper({ context, request, response, handler, hasRequiredAuthz })
-      );
+    post: ({ fleetAuthz: hasRequiredAuthz, version, ...options }, handler) => {
+      const access = withDefaultPublicAccess(options).options?.access || PUBLIC_API_ACCESS;
+      const defaultVersion = getDefaultVersion(access);
+      return versionedRouter
+        .post({ access, path: options.path })
+        .addVersion(
+          { version: version || defaultVersion, validate: { request: routeValidationObject } },
+          (context, request, response) =>
+            fleetHandlerWrapper({ context, request, response, handler, hasRequiredAuthz })
+        );
     },
-    put: ({ fleetAuthz: hasRequiredAuthz, ...options }, handler) => {
-      router.put(withDefaultPublicAccess(options), (context, request, response) =>
-        fleetHandlerWrapper({ context, request, response, handler, hasRequiredAuthz })
-      );
+    put: ({ fleetAuthz: hasRequiredAuthz, version, ...options }, handler) => {
+      const access = withDefaultPublicAccess(options).options?.access || PUBLIC_API_ACCESS;
+      const defaultVersion = getDefaultVersion(access);
+      return versionedRouter
+        .put({ access, path: options.path })
+        .addVersion(
+          { version: version || defaultVersion, validate: { request: routeValidationObject } },
+          (context, request, response) =>
+            fleetHandlerWrapper({ context, request, response, handler, hasRequiredAuthz })
+        );
     },
-    patch: ({ fleetAuthz: hasRequiredAuthz, ...options }, handler) => {
-      router.patch(withDefaultPublicAccess(options), (context, request, response) =>
-        fleetHandlerWrapper({ context, request, response, handler, hasRequiredAuthz })
-      );
+    patch: ({ fleetAuthz: hasRequiredAuthz, version, ...options }, handler) => {
+      const access = withDefaultPublicAccess(options).options?.access || PUBLIC_API_ACCESS;
+      const defaultVersion = getDefaultVersion(access);
+      return versionedRouter
+        .patch({ access, path: options.path })
+        .addVersion(
+          { version: version || defaultVersion, validate: { request: routeValidationObject } },
+          (context, request, response) =>
+            fleetHandlerWrapper({ context, request, response, handler, hasRequiredAuthz })
+        );
     },
     handleLegacyErrors: (handler) => router.handleLegacyErrors(handler),
     getRoutes: () => router.getRoutes(),

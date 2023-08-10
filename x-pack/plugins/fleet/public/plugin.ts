@@ -16,6 +16,10 @@ import type {
 import { i18n } from '@kbn/i18n';
 
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
+import {
+  ELASTIC_HTTP_VERSION_HEADER,
+  X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
+} from '@kbn/core-http-common';
 
 import type {
   CustomIntegrationsStart,
@@ -57,6 +61,8 @@ import type { FleetAuthz } from '../common';
 import type { ExperimentalFeatures } from '../common/experimental_features';
 
 import type { FleetConfigType } from '../common/types';
+
+import { LATEST_PUBLIC_VERSION } from '../common/constants';
 
 import { CUSTOM_LOGS_INTEGRATION_NAME, INTEGRATIONS_BASE_PATH } from './constants';
 import { licenseService } from './hooks';
@@ -281,7 +287,13 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
     ExperimentalFeaturesService.init(this.experimentalFeatures);
     const registerExtension = createExtensionRegistrationCallback(this.extensions);
     const getPermissions = once(() =>
-      core.http.get<CheckPermissionsResponse>(appRoutesService.getCheckPermissionsPath())
+      core.http.fetch<CheckPermissionsResponse>(appRoutesService.getCheckPermissionsPath(), {
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: LATEST_PUBLIC_VERSION,
+          [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
+        },
+        version: LATEST_PUBLIC_VERSION,
+      })
     );
 
     // Set up license service

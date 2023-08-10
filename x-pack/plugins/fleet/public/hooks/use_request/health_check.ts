@@ -7,6 +7,7 @@
 
 import type { PostHealthCheckRequest, PostHealthCheckResponse } from '../../types';
 import { appRoutesService } from '../../services';
+import { LATEST_PUBLIC_VERSION } from '../../../common/constants';
 
 import { sendRequest } from './use_request';
 
@@ -14,6 +15,7 @@ export function sendPostHealthCheck(body: PostHealthCheckRequest['body']) {
   return sendRequest<PostHealthCheckResponse>({
     method: 'post',
     path: appRoutesService.postHealthCheckPath(),
+    version: LATEST_PUBLIC_VERSION,
     body,
   });
 }

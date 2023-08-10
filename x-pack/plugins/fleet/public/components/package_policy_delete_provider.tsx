@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useStartServices, sendRequest, sendDeletePackagePolicy, useConfig } from '../hooks';
-import { AGENT_API_ROUTES, AGENTS_PREFIX } from '../../common/constants';
+import { AGENT_API_ROUTES, AGENTS_PREFIX, LATEST_PUBLIC_VERSION } from '../../common/constants';
 import type { AgentPolicy } from '../types';
 
 interface Props {
@@ -55,6 +55,7 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
           perPage: 1,
           kuery: `${AGENTS_PREFIX}.policy_id : ${agentPolicy.id}`,
         },
+        version: LATEST_PUBLIC_VERSION,
       });
       setAgentsCount(data?.total || 0);
       setIsLoadingAgentsCount(false);
