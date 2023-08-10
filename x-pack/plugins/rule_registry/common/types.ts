@@ -164,6 +164,22 @@ const bucketAggsTempsSchemas: t.Type<BucketAggsSchemas> = t.exact(
     nested: t.type({
       path: t.string,
     }),
+    multi_terms: t.exact(
+      t.partial({
+        terms: t.array(t.type({ field: t.string })),
+        collect_mode: t.string,
+        min_doc_count: t.number,
+        shard_min_doc_count: t.number,
+        size: t.number,
+        shard_size: t.number,
+        show_term_doc_count_error: t.boolean,
+        order: t.union([
+          sortOrderSchema,
+          t.record(t.string, sortOrderSchema),
+          t.array(t.record(t.string, sortOrderSchema)),
+        ]),
+      })
+    ),
     terms: t.exact(
       t.partial({
         field: t.string,
