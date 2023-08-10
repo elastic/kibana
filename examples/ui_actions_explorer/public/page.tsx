@@ -10,11 +10,9 @@ import React from 'react';
 
 import {
   EuiPageBody,
-  EuiPageContent_Deprecated as EuiPageContent,
-  EuiPageContentBody_Deprecated as EuiPageContentBody,
+  EuiPageTemplate,
+  EuiPageSection,
   EuiPageHeader,
-  EuiPageHeaderSection,
-  EuiTitle,
 } from '@elastic/eui';
 
 interface PageProps {
@@ -25,16 +23,12 @@ interface PageProps {
 export function Page({ title, children }: PageProps) {
   return (
     <EuiPageBody data-test-subj="searchTestPage">
-      <EuiPageHeader>
-        <EuiPageHeaderSection>
-          <EuiTitle size="l">
-            <h1>{title}</h1>
-          </EuiTitle>
-        </EuiPageHeaderSection>
-      </EuiPageHeader>
-      <EuiPageContent>
-        <EuiPageContentBody>{children}</EuiPageContentBody>
-      </EuiPageContent>
+      <EuiPageSection>
+        <EuiPageHeader pageTitle={title} />
+      </EuiPageSection>
+      <EuiPageTemplate.Section>
+        <EuiPageSection>{children}</EuiPageSection>
+      </EuiPageTemplate.Section>
     </EuiPageBody>
   );
 }
