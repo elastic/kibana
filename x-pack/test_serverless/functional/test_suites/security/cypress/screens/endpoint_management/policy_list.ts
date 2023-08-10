@@ -17,6 +17,10 @@ export const visitPolicyList = (): Cypress.Chainable => {
   return cy.visit(pageById.policyList);
 };
 
+export const visitPolicyDetails = (policyId: string): Cypress.Chainable => {
+  return cy.visit(pageById.policyList + `/${policyId}`);
+};
+
 export const ensurePolicyListPageAuthzAccess = (
   accessLevel: UserAuthzAccessLevel,
   visitPage: boolean = false
@@ -31,4 +35,24 @@ export const ensurePolicyListPageAuthzAccess = (
 
   // Read and All currently are the same
   return getNoPrivilegesPage().should('not.exist');
+};
+
+export const ensurePolicyDetailsPageAuthzAccess = (
+  policyId: string,
+  accessLevel: UserAuthzAccessLevel,
+  visitPage: boolean = false
+): Cypress.Chainable => {
+  if (visitPage) {
+    visitPolicyDetails(policyId);
+  }
+
+  if (accessLevel === 'none') {
+    return getNoPrivilegesPage().should('exist');
+  }
+
+  if (accessLevel === 'read') {
+    return cy.getByTestSubj('policyDetailsSaveButton').should('not.exist');
+  }
+
+  return cy.getByTestSubj('policyDetailsSaveButton').should('exist');
 };

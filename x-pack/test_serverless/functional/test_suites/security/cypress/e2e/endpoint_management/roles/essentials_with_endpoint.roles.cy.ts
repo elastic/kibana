@@ -16,6 +16,7 @@ import {
   ensureArtifactPageAuthzAccess,
   ensureEndpointListPageAuthzAccess,
   ensurePolicyListPageAuthzAccess,
+  ensurePolicyDetailsPageAuthzAccess,
 } from '../../../screens/endpoint_management';
 import {
   ensurePermissionDeniedScreen,
@@ -98,6 +99,7 @@ describe(
 
       it('should have read access to Endpoint Policy Management', () => {
         ensurePolicyListPageAuthzAccess('read', true);
+        ensurePolicyDetailsPageAuthzAccess(loadedEndpoints.integrationPolicies[0].id, 'read', true);
       });
 
       for (const { title, id } of artifactPagesFullAccess) {
@@ -173,6 +175,7 @@ describe(
 
       it('should have access to policy management', () => {
         ensurePolicyListPageAuthzAccess('all', true);
+        ensurePolicyDetailsPageAuthzAccess(loadedEndpoints.integrationPolicies[0].id, 'all', true);
       });
 
       it(`should NOT have access to Host Isolation Exceptions`, () => {
