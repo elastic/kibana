@@ -151,10 +151,12 @@ export function registerJobInfoRoutesInternal(reporting: ReportingCore) {
         enableQueryVersion: true,
         options: { tags: [ROUTE_TAG_CAN_REDIRECT] },
       })
-      .addVersion({ version: '1', validate: { request: jobHandlers.validate }},
-      authorizedUserPreRouting(reporting, async (user, context, req, res) => {
-        return jobHandlers.handleDownloadReport({ path, user, context, req, res });
-      }))
+      .addVersion(
+        { version: '1', validate: { request: jobHandlers.validate } },
+        authorizedUserPreRouting(reporting, async (user, context, req, res) => {
+          return jobHandlers.handleDownloadReport({ path, user, context, req, res });
+        })
+      );
   };
 
   const registerInternalDeleteReport = () => {
