@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-export { validateSnoozeSchedule } from './validate_snooze_schedule/latest';
-
-export { validateSnoozeSchedule as validateSnoozeScheduleV1 } from './validate_snooze_schedule/v1';
+export * from './v1';

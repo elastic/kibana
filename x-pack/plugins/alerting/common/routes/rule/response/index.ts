@@ -15,6 +15,8 @@ export {
   rRuleSchema,
   ruleResponseSchema,
   ruleSnoozeScheduleSchema,
+  notifyWhenSchema,
+  scheduleIdsSchema,
 } from './schemas/latest';
 
 export type { RuleParams, RuleResponse, RuleSnoozeSchedule } from './types/latest';
@@ -45,6 +47,8 @@ export {
   rRuleSchema as rRuleSchemaV1,
   ruleResponseSchema as ruleResponseSchemaV1,
   ruleSnoozeScheduleSchema as ruleSnoozeScheduleSchemaV1,
+  notifyWhenSchema as notifyWhenSchemaV1,
+  scheduleIdsSchema as scheduleIdsSchemaV1,
 } from './schemas/v1';
 
 export {

@@ -13,16 +13,20 @@ import {
   ruleExecutionStatusWarningReason as ruleExecutionStatusWarningReasonV1,
   ruleLastRunOutcomeValues as ruleLastRunOutcomeValuesV1,
 } from '../constants/v1';
+import { validateNotifyWhen as validateNotifyWhenV1 } from '../../validation';
 
 export const ruleParamsSchema = schema.recordOf(schema.string(), schema.maybe(schema.any()));
 export const actionParamsSchema = schema.recordOf(schema.string(), schema.maybe(schema.any()));
 export const mappedParamsSchema = schema.recordOf(schema.string(), schema.maybe(schema.any()));
 
-const notifyWhenSchema = schema.oneOf([
-  schema.literal(ruleNotifyWhenV1.CHANGE),
-  schema.literal(ruleNotifyWhenV1.ACTIVE),
-  schema.literal(ruleNotifyWhenV1.THROTTLE),
-]);
+export const notifyWhenSchema = schema.oneOf(
+  [
+    schema.literal(ruleNotifyWhenV1.CHANGE),
+    schema.literal(ruleNotifyWhenV1.ACTIVE),
+    schema.literal(ruleNotifyWhenV1.THROTTLE),
+  ],
+  { validate: validateNotifyWhenV1 }
+);
 
 const intervalScheduleSchema = schema.object({
   interval: schema.string(),
@@ -218,9 +222,9 @@ export const rRuleSchema = schema.object({
 });
 
 export const ruleSnoozeScheduleSchema = schema.object({
+  id: schema.maybe(schema.string()),
   duration: schema.number(),
   rRule: rRuleSchema,
-  id: schema.maybe(schema.string()),
   skipRecurrences: schema.maybe(schema.arrayOf(schema.string())),
 });
 
@@ -257,3 +261,5 @@ export const ruleResponseSchema = schema.object({
   running: schema.maybe(schema.nullable(schema.boolean())),
   view_in_app_relative_url: schema.maybe(schema.nullable(schema.string())),
 });
+
+export const scheduleIdsSchema = schema.maybe(schema.arrayOf(schema.string()));
