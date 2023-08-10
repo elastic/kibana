@@ -189,13 +189,7 @@ export const ProjectHeader = ({
       <SkipToMainContent />
 
       <HeaderTopBanner headerBanner$={observables.headerBanner$} />
-      <header
-        data-test-subj="kibanaProjectHeader"
-        css={css`
-          /* FIXME use a variable for the app bar height */
-          margin-bottom: ${headerActionMenuMounter.mount ? 48 : 0}px;
-        `}
-      >
+      <header data-test-subj="kibanaProjectHeader">
         <div id="globalHeaderBars" data-test-subj="headerGlobalNav" className="header__bars">
           <EuiHeader position="fixed" className="header__firstBar">
             <EuiHeaderSection grow={false}>
@@ -277,20 +271,12 @@ export const ProjectHeader = ({
               </EuiHeaderSectionItem>
             </EuiHeaderSection>
           </EuiHeader>
-
-          {/* NOTE: It would be better to house this content in a location closer to the main page content,
-          rather than in the header area. Using the header to mount this content offers the convenience of
-          consistency, but could create accessbility issues if screenreaders announce this content as if it
-          were part of the header. Semantically, AppMenuBar is not part of the header.
-          See: https://github.com/elastic/kibana/pull/162002#discussion_r1287468143 */}
-          {headerActionMenuMounter.mount && (
-            <AppMenuBar
-              isOpen={isOpen ?? false}
-              headerActionMenuMounter={headerActionMenuMounter}
-            />
-          )}
         </div>
       </header>
+
+      {headerActionMenuMounter.mount && (
+        <AppMenuBar isOpen={isOpen ?? false} headerActionMenuMounter={headerActionMenuMounter} />
+      )}
     </>
   );
 };
