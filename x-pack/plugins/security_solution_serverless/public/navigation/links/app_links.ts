@@ -41,7 +41,7 @@ export const projectAppLinksSwitcher: AppLinksSwitcher = (appLinks) => {
   projectAppLinks.push(mlAppLink);
 
   if (manageLinkItem) {
-    // Add assets link
+    // Add project settings link
     projectAppLinks.push(createProjectSettingsLinkFromManage(manageLinkItem));
   }
 

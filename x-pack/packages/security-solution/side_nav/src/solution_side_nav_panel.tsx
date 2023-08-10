@@ -189,7 +189,7 @@ const SolutionSideNavPanelCategories: React.FC<SolutionSideNavPanelCategoriesPro
   }
 );
 
-// Helper to retrieve the items for a given category
+/** Helper to retrieve the items for a given category */
 const useCategoryItems = ({
   items,
   linkIds,
@@ -367,7 +367,9 @@ const SolutionSideNavPanelItem: React.FC<SolutionSideNavPanelItemProps> = React.
   }
 );
 
-// Renders the navigation item label
+/**
+ * Renders the navigation item label
+ **/
 const ItemLabel: React.FC<{ item: SolutionSideNavItem }> = React.memo(function ItemLabel({
   item: { label, openInNewTab, isBeta, betaOptions },
 }) {

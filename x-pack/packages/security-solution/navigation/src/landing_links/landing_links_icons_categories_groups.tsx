@@ -6,10 +6,9 @@
  */
 import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
-import type { IconType, UseEuiTheme } from '@elastic/eui';
 import {
   useEuiTheme,
-  euiFontSize,
+  useEuiFontSize,
   EuiAccordion,
   EuiPanel,
   EuiFlexGroup,
@@ -17,6 +16,7 @@ import {
   EuiIcon,
   EuiSpacer,
   EuiTitle,
+  type IconType,
 } from '@elastic/eui';
 import type { NavigationLink, TitleLinkCategory, AccordionLinkCategory } from '../types';
 import { LandingColumnLinks } from './landing_links';
@@ -32,11 +32,12 @@ export interface LandingLinksIconsCategoriesGroupsProps {
 const stackManagementButtonClassName = 'stackManagementSection__button';
 const useStyle = () => {
   const { euiTheme } = useEuiTheme();
+  const accordionFontSize = useEuiFontSize('xs');
   return {
     accordionButton: css`
   .${stackManagementButtonClassName} {
     font-weight: ${euiTheme.font.weight.bold};
-    ${euiFontSize({ euiTheme } as UseEuiTheme<{}>, 'xs')}
+    ${accordionFontSize}
   }}
 `,
   };

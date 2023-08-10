@@ -90,24 +90,18 @@ export const LandingLinkIcon: React.FC<LandingLinkIconProps> = React.memo(functi
   );
 });
 
-const useLinksIconsStyles = () => {
-  return {
-    container: css`
-      min-width: 22em;
-    `,
-  };
-};
-
+const linkIconContainerStyles = css`
+  min-width: 22em;
+`;
 export const LandingLinksIcons: React.FC<LandingLinksIconsProps> = ({
   items,
   urlState,
   onLinkClick,
 }) => {
-  const styles = useLinksIconsStyles();
   return (
     <EuiFlexGroup gutterSize="xl" wrap>
       {items.map((item) => (
-        <EuiFlexItem key={item.id} grow={false} css={styles.container}>
+        <EuiFlexItem key={item.id} grow={false} css={linkIconContainerStyles}>
           <LandingLinkIcon item={item} urlState={urlState} onLinkClick={onLinkClick} />
         </EuiFlexItem>
       ))}

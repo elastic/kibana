@@ -20,6 +20,7 @@ import type { NavigationLink } from '../types';
 import { BetaBadge } from './beta_badge';
 import { getKibanaLinkProps } from './utils';
 
+const noop = () => {};
 export interface LandingLinksImagesProps {
   items: NavigationLink[];
   urlState?: string;
@@ -68,7 +69,7 @@ export const LandingLinksImages: React.FC<LandingLinksImagesProps> = React.memo(
             <EuiFlexItem key={id} data-test-subj="LandingItem">
               <LinkAnchor {...linkProps} tabIndex={-1} css={styles.link}>
                 {/* Empty onClick is to force hover style on `EuiPanel` */}
-                <EuiPanel hasBorder hasShadow={false} paddingSize="m" onClick={() => {}}>
+                <EuiPanel hasBorder hasShadow={false} paddingSize="m" onClick={noop}>
                   <EuiFlexGroup>
                     <EuiFlexItem grow={false} css={styles.image}>
                       {landingImage && (
