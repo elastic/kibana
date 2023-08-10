@@ -259,7 +259,7 @@ export const ControlEditor = ({
               <EuiFormRow
                 label={ControlGroupStrings.manageControl.displaySettings.getWidthInputTitle()}
               >
-                <>
+                <div>
                   <EuiButtonGroup
                     color="primary"
                     legend={ControlGroupStrings.management.controlWidth.getWidthSwitchLegend()}
@@ -275,7 +275,7 @@ export const ControlEditor = ({
                     onChange={() => setCurrentGrow(!currentGrow)}
                     data-test-subj="control-editor-grow-switch"
                   />
-                </>
+                </div>
               </EuiFormRow>
             )}
           </EuiDescribedFormGroup>

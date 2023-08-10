@@ -75,7 +75,8 @@ const createSearchFnMock = (nrOfHits: number) => {
 
 const dataViewMock = buildDataViewMock({ name: 'the-data-view', fields: deepMockedFields });
 
-describe('saved search embeddable', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/162997
+describe.skip('saved search embeddable', () => {
   let mountpoint: HTMLDivElement;
   let servicesMock: jest.Mocked<DiscoverServices>;
 
