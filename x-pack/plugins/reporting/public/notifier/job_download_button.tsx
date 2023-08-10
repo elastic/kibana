@@ -20,7 +20,7 @@ export const DownloadButton = ({ getUrl, job }: Props) => {
     <EuiButton
       size="s"
       data-test-subj="downloadCompletedReportButton"
-      href={getUrl(job.id)}
+      href={`${getUrl(job.id)}?apiVersion=1`}
       target="_blank"
     >
       <FormattedMessage
