@@ -9,7 +9,7 @@ import type { DataViewField, DataView } from '@kbn/data-views-plugin/common';
 import { UseAssetDetailsStateProps } from '../../../hooks/use_asset_details_state';
 
 export const assetDetailsState: UseAssetDetailsStateProps['state'] = {
-  node: {
+  asset: {
     name: 'host1',
     id: 'host1-macOS',
     ip: '192.168.0.1',
@@ -29,7 +29,7 @@ export const assetDetailsState: UseAssetDetailsStateProps['state'] = {
       showActionsColumn: true,
     },
   },
-  nodeType: 'host',
+  assetType: 'host',
   dateRange: {
     from: '2023-04-09T11:07:49Z',
     to: '2023-04-09T11:23:49Z',
