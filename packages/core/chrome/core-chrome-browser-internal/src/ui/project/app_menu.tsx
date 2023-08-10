@@ -34,7 +34,7 @@ export const AppMenuBar = ({ headerActionMenuMounter }: AppMenuBarProps) => {
         /* fixates the elements position in the viewport, removes the element from the flow of the page */
         position: sticky;
         /* position below the primary fixed EuiHeader in the viewport */
-        top: 0;
+        top: 48px;
       `}
     >
       <HeaderActionMenu mounter={headerActionMenuMounter} />
