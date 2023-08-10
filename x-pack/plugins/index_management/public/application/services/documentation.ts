@@ -58,6 +58,7 @@ class DocumentationService {
   private percolate: string = '';
   private runtimeFields: string = '';
   private indicesComponentTemplate: string = '';
+  private bulkIndexAlias: string = '';
 
   public setup(docLinks: DocLinksStart): void {
     const { links } = docLinks;
@@ -109,6 +110,7 @@ class DocumentationService {
     this.percolate = links.query.percolate;
     this.runtimeFields = links.runtimeFields.overview;
     this.indicesComponentTemplate = links.apis.putComponentTemplate;
+    this.bulkIndexAlias = links.apis.bulkIndexAlias;
   }
 
   public getEsDocsBase() {
@@ -303,6 +305,10 @@ class DocumentationService {
 
   public getRuntimeFields() {
     return this.runtimeFields;
+  }
+
+  public getBulkIdexAlias() {
+    return this.bulkIndexAlias;
   }
 
   public getWellKnownTextLink() {
