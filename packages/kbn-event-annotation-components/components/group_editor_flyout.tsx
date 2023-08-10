@@ -29,10 +29,14 @@ import type {
   EventAnnotationGroupConfig,
 } from '@kbn/event-annotation-common';
 import { css } from '@emotion/react';
-import type { EmbeddableComponent as LensEmbeddableComponent } from '@kbn/lens-plugin/public';
+import type {
+  EmbeddableComponent as LensEmbeddableComponent,
+  TypedLensByValueInput,
+} from '@kbn/lens-plugin/public';
 import { TimeRange } from '@kbn/es-query';
+import useDebounce from 'react-use/lib/useDebounce';
 import { GroupEditorControls, isGroupValid } from './group_editor_controls';
-import { lensAttributes } from './lens_attributes';
+import { getLensAttributes } from './lens_attributes';
 
 export const GroupEditorFlyout = ({
   group,
@@ -82,6 +86,18 @@ export const GroupEditorFlyout = ({
 
   const [chartTimeRange, setChartTimeRange] = useState<TimeRange>({ from: 'now-15m', to: 'now' });
 
+  const [lensAttributes, setLensAttributes] = useState<TypedLensByValueInput['attributes']>(
+    getLensAttributes(group)
+  );
+
+  useDebounce(
+    () => {
+      setLensAttributes(getLensAttributes(group));
+    },
+    250,
+    [group]
+  );
+
   const onClose = () => (selectedAnnotation ? setSelectedAnnotation(undefined) : parentOnClose());
 
   return (
@@ -95,7 +111,7 @@ export const GroupEditorFlyout = ({
         <EuiFlexItem
           grow={false}
           css={css`
-            min-width: 346px;
+            width: 360px;
           `}
         >
           <EuiFlyoutHeader hasBorder aria-labelledby={flyoutHeadingId}>

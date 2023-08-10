@@ -17,7 +17,7 @@ import { GroupEditorFlyout } from './group_editor_flyout';
 import { DataView } from '@kbn/data-views-plugin/common';
 import type { QueryInputServices } from '@kbn/visualization-ui-components';
 import { TimeRange } from '@kbn/es-query';
-import { EmbeddableComponent } from '@kbn/lens-plugin/public';
+import { EmbeddableComponent, TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { Datatable } from '@kbn/expressions-plugin/common';
 
 const simulateButtonClick = (component: ShallowWrapper, selector: string) => {
@@ -50,6 +50,18 @@ const assertChartTimeRange = (component: ShallowWrapper, expectedTimeRange: Time
 };
 
 describe('group editor flyout', () => {
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
+
+  afterEach(() => {
+    jest.clearAllTimers();
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+
   const annotation = getDefaultManualAnnotation('my-id', 'some-timestamp');
 
   const group: EventAnnotationGroupConfig = {
@@ -165,6 +177,21 @@ describe('group editor flyout', () => {
     assertChartTimeRange(component, {
       to: new Date(100).toISOString(),
       from: new Date(0).toISOString(),
+    });
+  });
+  describe('lens attributes', () => {
+    const getAttributes = () =>
+      component
+        .find(LensEmbeddableComponent)
+        .prop('attributes') as TypedLensByValueInput['attributes'];
+
+    const assertDataView = (id: string, attributes: TypedLensByValueInput['attributes']) =>
+      expect(attributes.references[0].id).toBe(id);
+
+    it('uses correct data view', () => {
+      assertDataView(group.indexPatternId, getAttributes());
+
+      component.setProps({ group: { ...group, indexPatternId: 'new-id' } });
     });
   });
 });

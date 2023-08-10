@@ -6,97 +6,122 @@
  * Side Public License, v 1.
  */
 
+import { EventAnnotationGroupConfig } from '@kbn/event-annotation-common';
 import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import { XYPersistedByValueAnnotationLayerConfig } from '@kbn/lens-plugin/public/async_services';
 
-export const lensAttributes = {
-  title: 'Count of records over time',
-  references: [
-    {
-      id: '90943e30-9a47-11e8-b64d-95841ca0b247',
-      name: 'indexpattern-datasource-current-indexpattern',
-      type: 'index-pattern',
-    },
-    {
-      id: '90943e30-9a47-11e8-b64d-95841ca0b247',
-      name: 'indexpattern-datasource-layer-layer1',
-      type: 'index-pattern',
-    },
-  ],
-  state: {
-    datasourceStates: {
-      formBased: {
-        layers: {
-          layer1: {
-            columnOrder: ['col1', 'col2'],
-            columns: {
-              col2: {
-                dataType: 'number',
-                isBucketed: false,
-                label: 'Count of records',
-                operationType: 'count',
-                scale: 'ratio',
-                sourceField: '___records___',
-              },
-              col1: {
-                dataType: 'date',
-                isBucketed: true,
-                label: '@timestamp',
-                operationType: 'date_histogram',
-                params: {
-                  interval: 'auto',
+export const getLensAttributes = (group: EventAnnotationGroupConfig) =>
+  ({
+    title: 'Line visualization with annotation layer', // TODO - should this be translated?
+    description: '',
+    visualizationType: 'lnsXY',
+    type: 'lens',
+    references: [
+      {
+        type: 'index-pattern',
+        id: group.indexPatternId,
+        name: 'indexpattern-datasource-layer-67ba3d9d-b4fc-431a-a95e-69101e1dec46',
+      },
+    ],
+    state: {
+      visualization: {
+        legend: {
+          isVisible: true,
+          position: 'right',
+        },
+        valueLabels: 'hide',
+        fittingFunction: 'None',
+        axisTitlesVisibilitySettings: {
+          x: true,
+          yLeft: true,
+          yRight: true,
+        },
+        tickLabelsVisibilitySettings: {
+          x: true,
+          yLeft: true,
+          yRight: true,
+        },
+        labelsOrientation: {
+          x: 0,
+          yLeft: 0,
+          yRight: 0,
+        },
+        gridlinesVisibilitySettings: {
+          x: true,
+          yLeft: true,
+          yRight: true,
+        },
+        preferredSeriesType: 'line',
+        layers: [
+          {
+            layerId: '67ba3d9d-b4fc-431a-a95e-69101e1dec46',
+            accessors: ['a7264a99-cd42-4b3f-855f-05364df71a71'],
+            position: 'top',
+            seriesType: 'line',
+            showGridlines: false,
+            layerType: 'data',
+            xAccessor: 'e9e2d5e2-0910-4a3b-8735-c8fe37efd7ac',
+          },
+          {
+            layerId: '2df639d4-7143-477a-b7ac-a487431c7e33',
+            layerType: 'annotations',
+            persistanceType: 'byValue',
+            ...group,
+          } as XYPersistedByValueAnnotationLayerConfig,
+        ],
+      },
+      query: {
+        query: '',
+        language: 'kuery',
+      },
+      filters: [],
+      datasourceStates: {
+        formBased: {
+          layers: {
+            '67ba3d9d-b4fc-431a-a95e-69101e1dec46': {
+              columns: {
+                'e9e2d5e2-0910-4a3b-8735-c8fe37efd7ac': {
+                  label: 'timestamp',
+                  dataType: 'date',
+                  operationType: 'date_histogram',
+                  sourceField: 'timestamp',
+                  isBucketed: true,
+                  scale: 'interval',
+                  params: {
+                    interval: 'auto',
+                    includeEmptyRows: true,
+                    dropPartials: false,
+                  },
                 },
-                scale: 'interval',
-                sourceField: 'timestamp',
+                'a7264a99-cd42-4b3f-855f-05364df71a71': {
+                  label: 'Count of records',
+                  dataType: 'number',
+                  operationType: 'count',
+                  isBucketed: false,
+                  scale: 'ratio',
+                  sourceField: '___records___',
+                  params: {
+                    emptyAsNull: true,
+                  },
+                },
               },
+              columnOrder: [
+                'e9e2d5e2-0910-4a3b-8735-c8fe37efd7ac',
+                'a7264a99-cd42-4b3f-855f-05364df71a71',
+              ],
+              incompleteColumns: {},
+              sampling: 1,
             },
           },
         },
-      },
-    },
-    filters: [],
-    query: {
-      language: 'kuery',
-      query: '',
-    },
-    visualization: {
-      axisTitlesVisibilitySettings: {
-        x: true,
-        yLeft: true,
-        yRight: true,
-      },
-      fittingFunction: 'None',
-      gridlinesVisibilitySettings: {
-        x: true,
-        yLeft: true,
-        yRight: true,
-      },
-      layers: [
-        {
-          accessors: ['col2'],
-          layerId: 'layer1',
-          layerType: 'data',
-          seriesType: 'line',
-          xAccessor: 'col1',
-          yConfig: [
-            {
-              forAccessor: 'col2',
-              color: '#54B399',
-            },
-          ],
+        indexpattern: {
+          layers: {},
         },
-      ],
-      legend: {
-        isVisible: true,
-        position: 'right',
+        textBased: {
+          layers: {},
+        },
       },
-      preferredSeriesType: 'line',
-      tickLabelsVisibilitySettings: {
-        x: true,
-        yLeft: true,
-        yRight: true,
-      },
-      valueLabels: 'hide',
+      internalReferences: [],
+      adHocDataViews: {},
     },
-  },
-  visualizationType: 'lnsXY',
-} as TypedLensByValueInput['attributes'];
+  } as TypedLensByValueInput['attributes']);
