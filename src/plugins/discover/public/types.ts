@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { type DatatableColumn } from '@kbn/expressions-plugin/common';
+import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
+import type { SearchResponseInterceptedWarning } from '@kbn/search-response-warnings';
 
 export type ValueToStringConverter = (
   rowIndex: number,
@@ -18,4 +19,5 @@ export type ValueToStringConverter = (
 export interface RecordsFetchResponse {
   records: DataTableRecord[];
   textBasedQueryColumns?: DatatableColumn[];
+  interceptedWarnings?: SearchResponseInterceptedWarning[];
 }
