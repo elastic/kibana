@@ -4,9 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { isEmpty } from 'lodash';
 import { ActionGroupIdsOf } from '@kbn/alerting-plugin/common';
-import { createLifecycleRuleTypeFactory, IRuleDataClient } from '@kbn/rule-registry-plugin/server';
+import { observabilityPaths } from '@kbn/observability-plugin/common';
+import {
+  createLifecycleRuleTypeFactory,
+  GetViewInAppRelativeUrlFnOpts,
+  IRuleDataClient,
+} from '@kbn/rule-registry-plugin/server';
 import { SyntheticsPluginsSetupDependencies, SyntheticsServerSetup } from '../../types';
 import { DOWN_LABEL, getMonitorAlertDocument, getMonitorSummary } from './message_utils';
 import {
@@ -155,5 +161,7 @@ export const registerSyntheticsStatusCheckRule = (
       };
     },
     alerts: UptimeRuleTypeAlertDefinition,
+    getViewInAppRelativeUrl: ({ rule }: GetViewInAppRelativeUrlFnOpts<{}>) =>
+      observabilityPaths.ruleDetails(rule.id),
   });
 };
