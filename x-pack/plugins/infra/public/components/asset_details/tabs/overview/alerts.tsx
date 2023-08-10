@@ -6,7 +6,7 @@
  */
 import React, { useMemo } from 'react';
 
-import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiPopover, EuiIcon, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useSummaryTimeRange } from '@kbn/observability-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
@@ -23,6 +23,7 @@ import { LinkToAlertsPage } from '../../links/link_to_alerts_page';
 import { AlertFlyout } from '../../../../alerting/inventory/components/alert_flyout';
 import { useBoolean } from '../../../../hooks/use_boolean';
 import { ALERT_STATUS_ALL } from '../../../../common/alerts/constants';
+import { Popover } from '../common/popover';
 
 export const AlertsSummaryContent = ({
   nodeName,
@@ -107,10 +108,8 @@ const MemoAlertSummaryWidget = React.memo(
 );
 
 const AlertsSectionTitle = () => {
-  const [isPopoverOpen, { off: closePopover, toggle: togglePopover }] = useBoolean(false);
-
   return (
-    <EuiFlexGroup gutterSize="xs">
+    <EuiFlexGroup gutterSize="xs" alignItems="center">
       <EuiFlexItem grow={false}>
         <EuiTitle data-test-subj="assetDetailsAlertsTitle" size="xxs">
           <h5>
@@ -122,21 +121,9 @@ const AlertsSectionTitle = () => {
         </EuiTitle>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiPopover
-          button={
-            <EuiIcon
-              data-test-subj="assetDetailsAlertsPopoverButton"
-              type="iInCircle"
-              onClick={togglePopover}
-            />
-          }
-          isOpen={isPopoverOpen}
-          closePopover={closePopover}
-          repositionOnScroll
-          anchorPosition="upCenter"
-        >
+        <Popover icon="iInCircle" data-test-subj="assetDetailsAlertsPopoverButton">
           <AlertsTooltipContent />
-        </EuiPopover>
+        </Popover>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

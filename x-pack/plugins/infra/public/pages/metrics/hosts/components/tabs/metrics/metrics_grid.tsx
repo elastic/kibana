@@ -6,16 +6,18 @@
  */
 import React from 'react';
 
-import { EuiFlexGrid, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGrid, EuiFlexItem, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup } from '@elastic/eui';
 import {
   hostLensFormulas,
   type XYVisualOptions,
   type XYLayerOptions,
 } from '../../../../../../common/visualizations';
-import { HostMetricsDocsLink } from '../../../../../../components/lens';
+import { HostMetricsExplanationContent } from '../../../../../../components/lens';
 import { MetricChart, MetricChartProps } from './metric_chart';
+import { Popover } from '../../table/popover';
 
 const DEFAULT_BREAKDOWN_SIZE = 20;
 const XY_LAYER_OPTIONS: XYLayerOptions = {
@@ -220,7 +222,17 @@ const CHARTS_IN_ORDER: MetricChartProps[] = [
 export const MetricsGrid = React.memo(() => {
   return (
     <>
-      <HostMetricsDocsLink />
+      <EuiFlexGroup gutterSize="xs" alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiText size="xs">Learn more about metrics</EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <Popover>
+            <HostMetricsExplanationContent />
+          </Popover>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
       <EuiSpacer size="s" />
       <EuiFlexGrid columns={2} gutterSize="s" data-test-subj="hostsView-metricChart">
         {CHARTS_IN_ORDER.map((chartProp, index) => (

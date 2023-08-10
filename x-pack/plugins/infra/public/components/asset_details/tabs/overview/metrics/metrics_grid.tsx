@@ -11,16 +11,18 @@ import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { HostMetricsExplanationContent } from '../../../../lens/metric_explanation/host_metrics_explanation_content';
 import { buildCombinedHostsFilter } from '../../../../../utils/filters/build';
 import type { Layer } from '../../../../../hooks/use_lens_attributes';
-import { HostMetricsDocsLink, LensChart, type LensChartProps } from '../../../../lens';
+import { LensChart, type LensChartProps } from '../../../../lens';
 import {
   type FormulaConfig,
   hostLensFormulas,
   type XYLayerOptions,
-  XYVisualOptions,
+  type XYVisualOptions,
 } from '../../../../../common/visualizations';
 import { METRIC_CHART_HEIGHT } from '../../../constants';
+import { Popover } from '../../common/popover';
 
 type DataViewOrigin = 'logs' | 'metrics';
 interface MetricChartConfig extends Pick<LensChartProps, 'id' | 'title' | 'overrides'> {
@@ -309,17 +311,9 @@ export const MetricsGrid = React.memo(
     return (
       <EuiFlexGroup gutterSize="m" direction="column">
         <EuiFlexItem grow={false}>
-          <EuiTitle size="xxs">
-            <h5>
-              <FormattedMessage
-                id="xpack.infra.assetDetails.overview.metricsSectionTitle"
-                defaultMessage="Metrics"
-              />
-            </h5>
-          </EuiTitle>
+          <MetricsSectionTitle />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <HostMetricsDocsLink />
           <EuiSpacer size="s" />
           <EuiFlexGrid columns={2} gutterSize="s" data-test-subj="assetDetailsMetricsChartGrid">
             {CHARTS_IN_ORDER.map(({ dataViewOrigin, id, layers, title, overrides }, index) => (
@@ -346,3 +340,25 @@ export const MetricsGrid = React.memo(
     );
   }
 );
+
+const MetricsSectionTitle = () => {
+  return (
+    <EuiFlexGroup gutterSize="xs" alignItems="center">
+      <EuiFlexItem grow={false}>
+        <EuiTitle size="xxs">
+          <h5>
+            <FormattedMessage
+              id="xpack.infra.assetDetails.overview.metricsSectionTitle"
+              defaultMessage="Metrics"
+            />
+          </h5>
+        </EuiTitle>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <Popover icon="iInCircle" data-test-subj="infraAssetDetailsMetricsPopoverButton">
+          <HostMetricsExplanationContent />
+        </Popover>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
