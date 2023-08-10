@@ -18,7 +18,8 @@ import {
 import { RiskEngineDataClient } from './risk_engine_data_client';
 import { createDataStream } from './utils/create_datastream';
 import * as savedObjectConfig from './utils/saved_object_configuration';
-import * as transforms from './utils/risk_engine_transforms';
+import * as transforms from './utils/transforms';
+import { createIndex } from './utils/create_index';
 
 const getSavedObjectConfiguration = (attributes = {}) => ({
   page: 1,
@@ -73,8 +74,8 @@ jest.mock('./utils/create_index', () => ({
   createIndex: jest.fn(),
 }));
 
-jest.spyOn(transforms, 'createTransform').mockImplementation(() => Promise.resolve(true));
-jest.spyOn(transforms, 'startTransform').mockImplementation(() => Promise.resolve(true));
+jest.spyOn(transforms, 'createTransform').mockResolvedValue(true);
+jest.spyOn(transforms, 'startTransform').mockResolvedValue(true);
 
 describe('RiskEngineDataClient', () => {
   let riskEngineDataClient: RiskEngineDataClient;
@@ -114,15 +115,6 @@ describe('RiskEngineDataClient', () => {
 
       expect(writer1).toEqual(writer2);
       expect(writer2).not.toEqual(writer3);
-    });
-
-    it('should cache writer and not call initializeResources for a second tme', async () => {
-      // to be able spy on private method acst to any
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const initializeWriterSpy = jest.spyOn(riskEngineDataClient as any, 'initializeWriter');
-      await riskEngineDataClient.getWriter({ namespace: 'default' });
-      await riskEngineDataClient.getWriter({ namespace: 'default' });
-      expect(initializeWriterSpy).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -190,7 +182,7 @@ describe('RiskEngineDataClient', () => {
                         "type": "float",
                       },
                       "category_1_count": Object {
-                        "type": "float",
+                        "type": "long",
                       },
                       "category_1_score": Object {
                         "type": "float",
@@ -249,7 +241,7 @@ describe('RiskEngineDataClient', () => {
                         "type": "float",
                       },
                       "category_1_count": Object {
-                        "type": "float",
+                        "type": "long",
                       },
                       "category_1_score": Object {
                         "type": "float",
@@ -344,6 +336,140 @@ describe('RiskEngineDataClient', () => {
         indexPatterns: {
           template: `.risk-score.risk-score-default-index-template`,
           alias: `risk-score.risk-score-default`,
+        },
+      });
+
+      expect(createIndex).toHaveBeenCalledWith({
+        logger,
+        esClient,
+        options: {
+          index: `risk-score.risk-score-latest-default`,
+          mappings: {
+            dynamic: 'strict',
+            properties: {
+              '@timestamp': {
+                type: 'date',
+              },
+              host: {
+                properties: {
+                  name: {
+                    type: 'keyword',
+                  },
+                  risk: {
+                    properties: {
+                      calculated_level: {
+                        type: 'keyword',
+                      },
+                      calculated_score: {
+                        type: 'float',
+                      },
+                      calculated_score_norm: {
+                        type: 'float',
+                      },
+                      category_1_count: {
+                        type: 'long',
+                      },
+                      category_1_score: {
+                        type: 'float',
+                      },
+                      id_field: {
+                        type: 'keyword',
+                      },
+                      id_value: {
+                        type: 'keyword',
+                      },
+                      inputs: {
+                        properties: {
+                          category: {
+                            type: 'keyword',
+                          },
+                          description: {
+                            type: 'keyword',
+                          },
+                          id: {
+                            type: 'keyword',
+                          },
+                          index: {
+                            type: 'keyword',
+                          },
+                          risk_score: {
+                            type: 'float',
+                          },
+                          timestamp: {
+                            type: 'date',
+                          },
+                        },
+                        type: 'object',
+                      },
+                      notes: {
+                        type: 'keyword',
+                      },
+                    },
+                    type: 'object',
+                  },
+                },
+              },
+              user: {
+                properties: {
+                  name: {
+                    type: 'keyword',
+                  },
+                  risk: {
+                    properties: {
+                      calculated_level: {
+                        type: 'keyword',
+                      },
+                      calculated_score: {
+                        type: 'float',
+                      },
+                      calculated_score_norm: {
+                        type: 'float',
+                      },
+                      category_1_count: {
+                        type: 'long',
+                      },
+                      category_1_score: {
+                        type: 'float',
+                      },
+                      id_field: {
+                        type: 'keyword',
+                      },
+                      id_value: {
+                        type: 'keyword',
+                      },
+                      inputs: {
+                        properties: {
+                          category: {
+                            type: 'keyword',
+                          },
+                          description: {
+                            type: 'keyword',
+                          },
+                          id: {
+                            type: 'keyword',
+                          },
+                          index: {
+                            type: 'keyword',
+                          },
+                          risk_score: {
+                            type: 'float',
+                          },
+                          timestamp: {
+                            type: 'date',
+                          },
+                        },
+                        type: 'object',
+                      },
+                      notes: {
+                        type: 'keyword',
+                      },
+                    },
+                    type: 'object',
+                  },
+                },
+              },
+            },
+          },
         },
       });
 

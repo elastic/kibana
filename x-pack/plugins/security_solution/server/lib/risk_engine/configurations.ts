@@ -57,7 +57,7 @@ const commonRiskFields: FieldMap = {
     required: false,
   },
   category_1_count: {
-    type: 'float',
+    type: 'long',
     array: false,
     required: false,
   },
@@ -143,7 +143,6 @@ export const riskScoreFieldMap: FieldMap = {
 export const ilmPolicyName = '.risk-score-ilm-policy';
 export const mappingComponentName = '.risk-score-mappings';
 export const totalFieldsLimit = 1000;
-export const indetTemplatePattern = `.${riskScoreBaseIndexName}.${riskScoreBaseIndexName}-*`;
 
 export const getIndexPatternDataStream = (namespace: string): IIndexPatternString => ({
   template: `.${riskScoreBaseIndexName}.${riskScoreBaseIndexName}-${namespace}-index-template`,

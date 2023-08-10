@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 
 export const TOP_RISK_SCORE_CONTRIBUTORS = i18n.translate(
-  'xpack.securitySolution.hosts.topRiskScoreContributorsAlerts.title',
+  'xpack.securitySolution.hosts.topRiskScoreContributorsTable.title',
   {
     defaultMessage: 'Top risk score contributors',
   }

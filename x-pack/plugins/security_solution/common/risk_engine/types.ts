@@ -48,8 +48,6 @@ export interface EcsRiskScore {
   };
 }
 
-// export type RiskInputs = SimpleRiskInput[] | RiskInput[];
-// what are riskinput?
 export type RiskInputs = SimpleRiskInput[];
 
 export interface RiskScore {
@@ -62,5 +60,5 @@ export interface RiskScore {
   category_1_score: number;
   category_1_count: number;
   notes: string[];
-  inputs: SimpleRiskInput[] | RiskInput[];
+  inputs: RiskInputs;
 }

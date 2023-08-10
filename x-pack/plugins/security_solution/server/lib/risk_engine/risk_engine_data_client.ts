@@ -36,7 +36,7 @@ import {
   removeLegacyTransforms,
   startTransform,
   createTransform,
-} from './utils/risk_engine_transforms';
+} from './utils/transforms';
 import {
   updateSavedObjectAttribute,
   getConfiguration,

@@ -27,6 +27,7 @@ export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');
   const supertest = getService('supertest');
   const kibanaServer = getService('kibanaServer');
+  const log = getService('log');
 
   describe('Risk Engine', () => {
     afterEach(async () => {
@@ -35,9 +36,11 @@ export default ({ getService }: FtrProviderContext) => {
       });
       await clearLegacyTransforms({
         es,
+        log,
       });
       await clearTransforms({
         es,
+        log,
       });
     });
 
@@ -73,7 +76,7 @@ export default ({ getService }: FtrProviderContext) => {
         const indexTemplateName = '.risk-score.risk-score-default-index-template';
         const dataStreamName = 'risk-score.risk-score-default';
         const latestIndexName = 'risk-score.risk-score-latest-default';
-        const tranformId = 'risk_score_latest_transform_default';
+        const transformId = 'risk_score_latest_transform_default';
 
         await initRiskEngine();
 
@@ -129,7 +132,7 @@ export default ({ getService }: FtrProviderContext) => {
                       type: 'float',
                     },
                     category_1_count: {
-                      type: 'float',
+                      type: 'long',
                     },
                     category_1_score: {
                       type: 'float',
@@ -188,7 +191,7 @@ export default ({ getService }: FtrProviderContext) => {
                       type: 'float',
                     },
                     category_1_count: {
-                      type: 'float',
+                      type: 'long',
                     },
                     category_1_score: {
                       type: 'float',
@@ -298,7 +301,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(indexExist).to.eql(true);
 
         const transformStats = await es.transform.getTransformStats({
-          transform_id: tranformId,
+          transform_id: transformId,
         });
 
         expect(transformStats.transforms[0].state).to.eql('started');

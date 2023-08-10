@@ -31,6 +31,7 @@ export interface TopRiskScoreContributorsAlertsProps {
   toggleQuery?: (status: boolean) => void;
   riskScore: HostRiskScore | UserRiskScore;
   riskEntity: RiskScoreEntity;
+  loading: boolean;
 }
 
 export const TopRiskScoreContributorsAlerts: React.FC<TopRiskScoreContributorsAlertsProps> = ({
@@ -38,6 +39,7 @@ export const TopRiskScoreContributorsAlerts: React.FC<TopRiskScoreContributorsAl
   toggleQuery,
   riskScore,
   riskEntity,
+  loading,
 }) => {
   const { to, from } = useGlobalTime();
   const [{ loading: userInfoLoading, signalIndexName, hasIndexWrite, hasIndexMaintenance }] =
@@ -53,11 +55,12 @@ export const TopRiskScoreContributorsAlerts: React.FC<TopRiskScoreContributorsAl
   const filters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
 
   const inputFilters = useMemo(() => {
-    const riskScoreByType =
+    const riskScoreEntity =
       riskEntity === RiskScoreEntity.host
         ? (riskScore as HostRiskScore).host
         : (riskScore as UserRiskScore).user;
-    const riskInputs = (riskScoreByType?.risk?.inputs ?? []) as RiskInputs;
+
+    const riskInputs = (riskScoreEntity?.risk?.inputs ?? []) as RiskInputs;
     return [
       {
         meta: {
@@ -115,7 +118,7 @@ export const TopRiskScoreContributorsAlerts: React.FC<TopRiskScoreContributorsAl
               globalQuery={query}
               hasIndexMaintenance={hasIndexMaintenance ?? false}
               hasIndexWrite={hasIndexWrite ?? false}
-              loading={userInfoLoading}
+              loading={userInfoLoading || loading}
               renderChildComponent={renderGroupedAlertTable}
               runtimeMappings={runtimeMappings}
               signalIndexName={signalIndexName}

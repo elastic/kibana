@@ -170,6 +170,7 @@ const RiskDetailsTabBodyComponent: React.FC<
                 toggleQuery={toggleContributorsQuery}
                 riskScore={data[0]}
                 riskEntity={riskEntity}
+                loading={loading}
               />
             )}
           </EuiFlexItem>
