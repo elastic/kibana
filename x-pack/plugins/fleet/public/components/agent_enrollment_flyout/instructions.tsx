@@ -80,8 +80,8 @@ export const Instructions = (props: InstructionProps) => {
       (fleetStatus.missingRequirements ?? []).some((r) => r === FLEET_SERVER_PACKAGE));
 
   useEffect(() => {
-    // If we have a cloudFormationTemplateUrl, we want to hide the selection type
-    if (props.cloudSecurityIntegration?.cloudformationUrl) {
+    // If we detect a CloudFormation integration, we want to hide the selection type
+    if (props.cloudSecurityIntegration?.isCloudFormation) {
       setSelectionType(undefined);
     } else if (!isIntegrationFlow && showAgentEnrollment) {
       setSelectionType('radio');
@@ -117,10 +117,7 @@ export const Instructions = (props: InstructionProps) => {
           {isFleetServerPolicySelected ? (
             <AdvancedTab selectedPolicyId={props.selectedPolicy?.id} onClose={() => undefined} />
           ) : (
-            <ManagedSteps
-              {...props}
-              cloudFormationTemplateUrl={props.cloudSecurityIntegration?.cloudformationUrl}
-            />
+            <ManagedSteps {...props} />
           )}
         </>
       );

@@ -56,7 +56,10 @@ export function useWaterfallFetcher({
     [traceId, start, end, transactionId]
   );
 
-  const waterfall = useMemo(() => getWaterfall(data), [data]);
+  const waterfall = useMemo(
+    () => getWaterfall(traceId ? data : INITIAL_DATA),
+    [data, traceId]
+  );
 
   return { waterfall, status, error };
 }
