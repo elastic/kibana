@@ -56,7 +56,7 @@ describe('ALL - Custom space', { tags: [tag.ESS] }, () => {
       });
 
       beforeEach(() => {
-        cy.login('soc_manager');
+        cy.loginKibana('soc_manager');
         navigateTo(`/s/${spaceId}/app/osquery`);
       });
 

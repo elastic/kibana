@@ -9,7 +9,7 @@ import { tag } from '../../tags';
 import { checkResults, submitQuery } from '../../tasks/live_query';
 import { loadRule, cleanupRule } from '../../tasks/api_fixtures';
 
-describe('Alert Test', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+describe('Alert Test', { tags: [tag.ESS] }, () => {
   let ruleId: string;
 
   before(() => {
