@@ -15,15 +15,13 @@ import {
   EuiImage,
   EuiPage,
   EuiPageBody,
-  EuiPageContent_Deprecated as EuiPageContent,
-  EuiPageContentBody_Deprecated as EuiPageContentBody,
+  EuiPageTemplate,
+  EuiPageSection,
   EuiPageHeader,
-  EuiPageHeaderSection,
   EuiSpacer,
   EuiStat,
   EuiText,
   EuiTextArea,
-  EuiTitle,
 } from '@elastic/eui';
 import { API_ENDPOINT, ScreenshottingExpressionResponse } from '../../common';
 import { HttpContext } from './http_context';
@@ -53,15 +51,11 @@ export function App() {
   return (
     <EuiPage>
       <EuiPageBody style={{ maxWidth: 1200, margin: '0 auto' }}>
-        <EuiPageHeader>
-          <EuiPageHeaderSection>
-            <EuiTitle size="l">
-              <h1>Screenshotting Demo</h1>
-            </EuiTitle>
-          </EuiPageHeaderSection>
-        </EuiPageHeader>
-        <EuiPageContent>
-          <EuiPageContentBody>
+        <EuiPageSection>
+          <EuiPageHeader pageTitle={'Screenshotting Demo'} />
+        </EuiPageSection>
+        <EuiPageTemplate.Section>
+          <EuiPageSection>
             <EuiText>
               <p>This example captures a screenshot of an expression provided below.</p>
             </EuiText>
@@ -129,8 +123,8 @@ export function App() {
                 )}
               </EuiFlexItem>
             </EuiFlexGroup>
-          </EuiPageContentBody>
-        </EuiPageContent>
+          </EuiPageSection>
+        </EuiPageTemplate.Section>
       </EuiPageBody>
     </EuiPage>
   );
