@@ -21,6 +21,8 @@ import {
   riskEngineRouteHelpersFactory,
   updateRiskEngineConfigSO,
   getRiskEngineTask,
+  cleanRiskEngineConfig,
+  waitForRiskEngineTaskToBeGone,
 } from './utils';
 
 // eslint-disable-next-line import/no-default-export
@@ -53,6 +55,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       beforeEach(async () => {
+        await cleanRiskEngineConfig({ kibanaServer });
         await deleteRiskEngineTask({ es, log });
         await deleteAllRiskScores(log, es);
         await deleteAllAlerts(supertest, log, es);
@@ -60,6 +63,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       afterEach(async () => {
+        await cleanRiskEngineConfig({ kibanaServer });
         await deleteRiskEngineTask({ es, log });
         await deleteAllRiskScores(log, es);
         await deleteAllAlerts(supertest, log, es);
@@ -135,6 +139,7 @@ export default ({ getService }: FtrProviderContext): void => {
               const task = await getRiskEngineTask({ es });
               expect(task).not.to.be(undefined);
               await riskEngineRoutes.disable();
+              await waitForRiskEngineTaskToBeGone({ es, log });
               const disabledTask = await getRiskEngineTask({ es });
 
               expect(disabledTask).to.eql(undefined);
@@ -184,6 +189,7 @@ export default ({ getService }: FtrProviderContext): void => {
               }))
           );
 
+          userId = uuidv4();
           const userEvent = buildDocument({ user: { name: 'user-1' } }, userId);
           await indexListOfDocuments(
             Array(10)

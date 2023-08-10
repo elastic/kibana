@@ -185,11 +185,9 @@ export const getRiskEngineTask = async ({
 
 export const deleteRiskEngineTask = async ({
   es,
-  log,
   index = ['.kibana_task_manager*'],
 }: {
   es: Client;
-  log: ToolingLog;
   index?: string[];
 }) => {
   await es.deleteByQuery({
@@ -201,6 +199,25 @@ export const deleteRiskEngineTask = async ({
     },
     conflicts: 'proceed',
   });
+};
+
+export const waitForRiskEngineTaskToBeGone = async ({
+  es,
+  log,
+  index = ['.kibana_task_manager*'],
+}: {
+  es: Client;
+  log: ToolingLog;
+  index?: string[];
+}): Promise<void> => {
+  await waitFor(
+    async () => {
+      const task = await getRiskEngineTask({ es, index });
+      return task == null;
+    },
+    'waitForRiskEngineTaskToBeGone',
+    log
+  );
 };
 
 export const getRiskEngineConfigSO = async ({ kibanaServer }: { kibanaServer: KbnClient }) => {

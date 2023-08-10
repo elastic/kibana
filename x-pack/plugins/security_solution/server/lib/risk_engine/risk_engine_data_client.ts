@@ -146,17 +146,17 @@ export class RiskEngineDataClient {
   }
 
   public async enableRiskEngine({ taskManager }: { taskManager: TaskManagerStartContract }) {
-    await startRiskScoringTask({
-      logger: this.options.logger,
-      riskEngineDataClient: this,
-      taskManager,
-    });
-
     const configurationResult = await updateSavedObjectAttribute({
       savedObjectsClient: this.options.soClient,
       attributes: {
         enabled: true,
       },
+    });
+
+    await startRiskScoringTask({
+      logger: this.options.logger,
+      riskEngineDataClient: this,
+      taskManager,
     });
 
     return configurationResult;
