@@ -45,7 +45,7 @@ const RuleAggregationType = {
   [LatencyAggregationType.p95]: AggregationType.P95,
 } as const;
 
-export async function getServiceTranactionGroupsAlerts({
+export async function getServiceTransactionGroupsAlerts({
   apmAlertsClient,
   kuery,
   transactionType,
@@ -117,8 +117,9 @@ export async function getServiceTranactionGroupsAlerts({
 
   const response = await apmAlertsClient.search(params);
 
-  const { buckets } = response.aggregations
-    ?.transaction_groups as ServiceTransactionGroupAlertsAggResponse;
+  const { buckets } = (response?.aggregations?.transaction_groups ?? {
+    buckets: [],
+  }) as ServiceTransactionGroupAlertsAggResponse;
 
   const servicesTransactionGroupsAlertsCount =
     buckets.map((bucket) => ({
