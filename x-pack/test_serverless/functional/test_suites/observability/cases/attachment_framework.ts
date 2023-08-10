@@ -107,6 +107,10 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           title: caseTitle,
           description: 'test description',
         });
+
+        // verify that solution picker is not visible
+        await testSubjects.missingOrFail('caseOwnerSelector');
+
         await testSubjects.click('create-case-submit');
   
         await cases.common.expectToasterToContain(`${caseTitle} has been updated`);
@@ -144,6 +148,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await testSubjects.click('embeddablePanelToggleMenuIcon');
         await testSubjects.click('embeddablePanelMore-mainMenu');
         await testSubjects.click('embeddablePanelAction-embeddable_addToExistingCase');
+
+        // verify that solution filter is not visible
+        await testSubjects.missingOrFail('solution-filter-popover-button');
   
         await testSubjects.click(`cases-table-row-select-${theCase.id}`);
   
