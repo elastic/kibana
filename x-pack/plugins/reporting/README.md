@@ -15,6 +15,6 @@ Although historically related to reporting, the CsvGenerator class has now be mo
 ## Serverless configuration
 There are several improvements made for reporting in serverless environments. Most changes are reflected in `reporting/server/config/schema.ts` for reference. 
 
-PNG and PDF reports are not possible in serverless. CSV reporting is enabled by default but can be set to `xpack.reporting.export_types.csv.enabled: false`. Image reporting will not be registered by the export types registry in the reporting plugin if not enabled in the config.
+PNG and PDF reports are currently not possible in serverless. Those export types are not enabled in serverless configuration, and are left out of Reporting's internal registry of export types.
 
-The deprecated setting `xpack.reporting.roles.enabled` is false by default for serverless. 
+The setting `xpack.reporting.roles.enabled` is `false` by default for serverless. This setting enables backwards-compatible functionality for reporting privileges, this type of BWC is not needed in serverless.
