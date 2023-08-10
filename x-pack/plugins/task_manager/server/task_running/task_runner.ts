@@ -47,7 +47,6 @@ import {
   FailedRunResult,
   FailedTaskResult,
   isFailedRunResult,
-  RunContext,
   SuccessfulRunResult,
   TaskDefinition,
   TaskStatus,
@@ -322,9 +321,9 @@ export class TaskManagerRunner implements TaskRunner {
 
       let taskParamsValidation;
       if (this.requeueInvalidTasksConfig.enabled) {
-        taskParamsValidation = this.validateTaskParams(modifiedContext);
+        taskParamsValidation = this.validateTaskParams();
         if (!taskParamsValidation.error) {
-          taskParamsValidation = await this.validateIndirectTaskParams(modifiedContext);
+          taskParamsValidation = await this.validateIndirectTaskParams();
         }
       }
 
@@ -360,9 +359,9 @@ export class TaskManagerRunner implements TaskRunner {
     }
   }
 
-  private validateTaskParams({ taskInstance }: RunContext) {
+  private validateTaskParams() {
     let error;
-    const { state, taskType, params, id, numSkippedRuns = 0 } = taskInstance;
+    const { state, taskType, params, id, numSkippedRuns = 0 } = this.instance.task;
     const { max_attempts: maxAttempts } = this.requeueInvalidTasksConfig;
 
     try {
@@ -384,9 +383,9 @@ export class TaskManagerRunner implements TaskRunner {
     return { ...(error ? { error } : {}), state };
   }
 
-  private async validateIndirectTaskParams({ taskInstance }: RunContext) {
+  private async validateIndirectTaskParams() {
     let error;
-    const { state, taskType, id, numSkippedRuns = 0 } = taskInstance;
+    const { state, taskType, id, numSkippedRuns = 0 } = this.instance.task;
     const { max_attempts: maxAttempts } = this.requeueInvalidTasksConfig;
     const indirectParamsSchema = this.definition.indirectParamsSchema;
 
@@ -736,30 +735,23 @@ export class TaskManagerRunner implements TaskRunner {
 
     await eitherAsync(
       result,
-      async ({ runAt, schedule, hasError }: SuccessfulRunResult) => {
-        const processedResult = {
-          task,
-          persistence:
-            schedule || task.schedule ? TaskPersistence.Recurring : TaskPersistence.NonRecurring,
-          result: await (runAt || schedule || task.schedule
-            ? this.processResultForRecurringTask(result)
-            : this.processResultWhenDone()),
-        };
-
-        // Alerting task runner returns SuccessfulRunResult with hasError=true
-        // when the alerting task fails, so we check for this condition in order
-        // to emit the correct task run event for metrics collection
-        const taskRunEvent = hasError
-          ? asTaskRunEvent(
-              this.id,
-              asErr({
-                ...processedResult,
-                error: new Error(`Alerting task failed to run.`),
-              }),
-              taskTiming
-            )
-          : asTaskRunEvent(this.id, asOk(processedResult), taskTiming);
-        this.onTaskEvent(taskRunEvent);
+      async ({ runAt, schedule }: SuccessfulRunResult) => {
+        this.onTaskEvent(
+          asTaskRunEvent(
+            this.id,
+            asOk({
+              task,
+              persistence:
+                schedule || task.schedule
+                  ? TaskPersistence.Recurring
+                  : TaskPersistence.NonRecurring,
+              result: await (runAt || schedule || task.schedule
+                ? this.processResultForRecurringTask(result)
+                : this.processResultWhenDone()),
+            }),
+            taskTiming
+          )
+        );
       },
       async ({ error }: FailedRunResult) => {
         this.onTaskEvent(
