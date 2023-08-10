@@ -6,15 +6,51 @@
  */
 
 import { IScopedClusterClient } from '@kbn/core/server';
+import type { EnrichSummary, EnrichPolicyType } from '@elastic/elasticsearch/lib/api/types';
+import type { SerializedEnrichPolicy } from '../../common/types';
 
-export const fetchAllEnrichPolicies = (client: IScopedClusterClient) => {
-  return client.asCurrentUser.enrich.getPolicy();
+const getPolicyType = (policy: EnrichSummary): EnrichPolicyType => {
+  if (policy.config.match) {
+    return 'match';
+  }
+
+  if (policy.config.geo_match) {
+    return 'geo_match';
+  }
+
+  if (policy.config.range) {
+    return 'range';
+  }
+
+  throw new Error('Unknown policy type');
 };
 
-export const executeEnrichPolicy = (client: IScopedClusterClient, policyName: string) => {
+export const serializeEnrichmentPolicies = (
+  policies: EnrichSummary[]
+): SerializedEnrichPolicy[] => {
+  return policies.map((policy: any) => {
+    const policyType = getPolicyType(policy);
+
+    return {
+      name: policy.config[policyType].name,
+      type: policyType,
+      sourceIndices: policy.config[policyType].indices,
+      matchField: policy.config[policyType].match_field,
+      enrichFields: policy.config[policyType].enrich_fields,
+    };
+  });
+};
+
+export const fetchAll = async (client: IScopedClusterClient) => {
+  const res = await client.asCurrentUser.enrich.getPolicy();
+
+  return serializeEnrichmentPolicies(res.policies);
+};
+
+export const execute = (client: IScopedClusterClient, policyName: string) => {
   return client.asCurrentUser.enrich.executePolicy({ name: policyName });
 };
 
-export const deleteEnrichPolicy = (client: IScopedClusterClient, policyName: string) => {
+export const remove = (client: IScopedClusterClient, policyName: string) => {
   return client.asCurrentUser.enrich.deletePolicy({ name: policyName });
 };

@@ -7,6 +7,7 @@
 
 import { addBasePath } from '..';
 import { RouterMock, routeDependencies, RequestMock } from '../../../test/helpers';
+import { serializeEnrichmentPolicies } from '../../../lib/enrich_policies';
 
 import { registerEnrichPoliciesRoute } from './register_enrich_policies_routes';
 
@@ -54,7 +55,7 @@ describe('deprecation logging API', () => {
       const res = await router.runRequest(mockRequest);
 
       expect(res).toEqual({
-        body: { policies: [mockedPolicy] },
+        body: serializeEnrichmentPolicies([mockedPolicy]),
       });
     });
 
