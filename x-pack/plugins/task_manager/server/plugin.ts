@@ -27,7 +27,7 @@ import { TaskDefinitionRegistry, TaskTypeDictionary, REMOVED_TYPES } from './tas
 import { AggregationOpts, FetchResult, SearchOpts, TaskStore } from './task_store';
 import { createManagedConfiguration } from './lib/create_managed_configuration';
 import { TaskScheduling } from './task_scheduling';
-import { backgroundTaskUtilizationRoute, healthRoute, metricsRoute } from './routes';
+import { backgroundTaskUtilizationRoute, healthRoute } from './routes';
 import { createMonitoringStats, MonitoringStats } from './monitoring';
 import { EphemeralTaskLifecycle } from './ephemeral_task_lifecycle';
 import { EphemeralTask, ConcreteTaskInstance } from './task';
@@ -35,7 +35,6 @@ import { registerTaskManagerUsageCollector } from './usage';
 import { TASK_MANAGER_INDEX } from './constants';
 import { AdHocTaskCounter } from './lib/adhoc_task_counter';
 import { setupIntervalLogging } from './lib/log_health_metrics';
-import { metricsStream, Metrics } from './metrics';
 
 export interface TaskManagerSetupContract {
   /**
@@ -83,8 +82,6 @@ export class TaskManagerPlugin
   private middleware: Middleware = createInitialMiddleware();
   private elasticsearchAndSOAvailability$?: Observable<boolean>;
   private monitoringStats$ = new Subject<MonitoringStats>();
-  private metrics$ = new Subject<Metrics>();
-  private resetMetrics$ = new Subject<boolean>();
   private shouldRunBackgroundTasks: boolean;
   private readonly kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
   private adHocTaskCounter: AdHocTaskCounter;
@@ -157,12 +154,6 @@ export class TaskManagerPlugin
       kibanaIndexName: core.savedObjects.getDefaultIndex(),
       getClusterClient: () =>
         startServicesPromise.then(({ elasticsearch }) => elasticsearch.client),
-    });
-    metricsRoute({
-      router,
-      metrics$: this.metrics$,
-      resetMetrics$: this.resetMetrics$,
-      taskManagerId: this.taskManagerId,
     });
 
     core.status.derivedStatus$.subscribe((status) =>
@@ -284,10 +275,6 @@ export class TaskManagerPlugin
       this.taskPollingLifecycle,
       this.ephemeralTaskLifecycle
     ).subscribe((stat) => this.monitoringStats$.next(stat));
-
-    metricsStream(this.config!, this.resetMetrics$, this.taskPollingLifecycle).subscribe((metric) =>
-      this.metrics$.next(metric)
-    );
 
     const taskScheduling = new TaskScheduling({
       logger: this.logger,
