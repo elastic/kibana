@@ -679,7 +679,7 @@
     "cpy": "^8.1.1",
     "css-loader": "^3.4.2",
     "cssnano": "5.0.0",
-    "cypress": "12.13.0",
+    "cypress": "9.7.0",
     "cypress-axe": "^1.4.0",
     "cypress-file-upload": "^5.0.8",
     "cypress-multi-reporters": "^1.6.3",
