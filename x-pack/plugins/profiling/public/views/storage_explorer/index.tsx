@@ -65,7 +65,13 @@ export function StorageExplorerView() {
   const hasDistinctProbabilisticValues = totalNumberOfDistinctProbabilisticValues > 1;
 
   return (
-    <ProfilingAppPageTemplate hideSearchBar>
+    <ProfilingAppPageTemplate
+      hideSearchBar
+      pageTitle={i18n.translate('xpack.profiling.storageExplorer.title', {
+        defaultMessage: 'Storage Explorer',
+      })}
+      showBetaBadge
+    >
       <EuiFlexGroup direction="column">
         <EuiFlexItem grow={false}>
           <EuiPanel hasShadow={false} color="subdued">
