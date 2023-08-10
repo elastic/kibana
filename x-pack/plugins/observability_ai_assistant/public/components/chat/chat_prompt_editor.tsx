@@ -103,7 +103,7 @@ export function ChatPromptEditor({
         await onSubmit({
           '@timestamp': new Date().toISOString(),
           message: {
-            role: MessageRole.Function,
+            role: MessageRole.User,
             function_call: {
               name: selectedFunctionName,
               trigger: MessageRole.User,
@@ -111,6 +111,9 @@ export function ChatPromptEditor({
             },
           },
         });
+
+        setFunctionPayload(undefined);
+        setSelectedFunctionName(undefined);
       } else {
         await onSubmit({
           '@timestamp': new Date().toISOString(),
@@ -126,8 +129,8 @@ export function ChatPromptEditor({
   useEffect(() => {
     const keyboardListener = (event: KeyboardEvent) => {
       if (!event.shiftKey && event.key === keys.ENTER) {
-        handleSubmit();
         event.preventDefault();
+        handleSubmit();
       }
     };
 
@@ -188,8 +191,6 @@ export function ChatPromptEditor({
                   fullWidth
                   height="120px"
                   languageId="json"
-                  value={functionPayload || ''}
-                  onChange={handleChangeFunctionPayload}
                   isCopyable
                   languageConfiguration={{
                     autoClosingPairs: [
@@ -198,6 +199,9 @@ export function ChatPromptEditor({
                         close: '}',
                       },
                     ],
+                  }}
+                  editorDidMount={(editor) => {
+                    editor.focus();
                   }}
                   options={{
                     accessibilitySupport: 'off',
@@ -223,18 +227,20 @@ export function ChatPromptEditor({
                     wrappingIndent: 'indent',
                   }}
                   transparentBackground
+                  value={functionPayload || ''}
+                  onChange={handleChangeFunctionPayload}
                 />
               </EuiPanel>
             ) : (
               <EuiTextArea
-                resize="vertical"
-                rows={1}
                 fullWidth
+                inputRef={textAreaRef}
                 placeholder={i18n.translate('xpack.observabilityAiAssistant.prompt.placeholder', {
                   defaultMessage: 'Press ‘$’ for function recommendations',
                 })}
+                resize="vertical"
+                rows={1}
                 value={prompt}
-                inputRef={textAreaRef}
                 onChange={handleChange}
               />
             )}
@@ -245,12 +251,12 @@ export function ChatPromptEditor({
         <EuiSpacer size="xl" />
         <EuiButtonIcon
           aria-label="Submit"
-          isLoading={loading}
           disabled={selectedFunctionName ? false : !prompt || loading || disabled}
           display={
             selectedFunctionName ? (functionPayload ? 'fill' : 'base') : prompt ? 'fill' : 'base'
           }
           iconType="kqlFunction"
+          isLoading={loading}
           size="m"
           onClick={handleSubmit}
         />

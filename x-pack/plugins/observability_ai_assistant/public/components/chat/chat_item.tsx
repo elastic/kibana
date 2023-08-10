@@ -32,6 +32,10 @@ export interface ChatItemProps extends ChatTimelineItem {
 }
 
 const normalMessageClassName = css`
+  .euiCommentEvent__header {
+    padding: 4px 8px;
+  }
+
   .euiCommentEvent__body {
     padding: 0;
   }
@@ -42,17 +46,17 @@ const normalMessageClassName = css`
 `;
 
 const noPanelMessageClassName = css`
+  .euiCommentEvent {
+    border: none;
+  }
+
   .euiCommentEvent__header {
     background: transparent;
     border-block-end: none;
   }
 
   .euiCommentEvent__body {
-    padding: 0;
-  }
-
-  .euiCommentEvent {
-    border: none;
+    display: none;
   }
 `;
 
@@ -89,6 +93,10 @@ export function ChatItem({
   const actions = [canCopy, collapsed, canCopy].filter(Boolean);
 
   const noBodyMessageClassName = css`
+    .euiCommentEvent__header {
+      padding: 4px 8px;
+    }
+
     .euiCommentEvent__body {
       padding: 0;
       height: ${expanded ? 'fit-content' : '0px'};
@@ -106,7 +114,7 @@ export function ChatItem({
 
   const handleToggleEdit = () => {
     if (collapsed) {
-      setExpanded(false);
+      setExpanded(!expanded);
     }
     setEditing(!editing);
   };
@@ -155,9 +163,10 @@ export function ChatItem({
       actions={
         <ChatItemActions
           canCopy={canCopy}
-          collapsed={collapsed}
           canEdit={canEdit}
-          isCollapsed={expanded}
+          collapsed={collapsed}
+          editing={editing}
+          expanded={expanded}
           onCopyToClipboard={handleCopyToClipboard}
           onToggleEdit={handleToggleEdit}
           onToggleExpand={handleToggleExpand}
