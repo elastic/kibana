@@ -181,6 +181,7 @@ export class TaskPollingLifecycle {
       if (areESAndSOAvailable) {
         // start polling for work
         poller.start();
+        this.logger.error(`!!!!!!!!!!!START POLLING!!!!!!!!  ${new Date().toISOString()}`);
       } else if (!areESAndSOAvailable) {
         poller.stop();
         this.pool.cancelRunningTasks();
