@@ -10,7 +10,7 @@
       "POST"
     ],
     "patterns": [
-      "{indices}/_fleet/_fleet_search"
+      "{index}/_fleet/_fleet_search"
     ]
   }
 }

@@ -44,6 +44,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         endpoint: 'POST /internal/observability_onboarding/logs/flow',
         params: {
           body: {
+            type: 'logFiles',
             name: 'name',
             state: {
               datasetName,
@@ -131,40 +132,107 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             });
 
             describe('when logs have been ingested', () => {
-              before(async () => {
-                await es.indices.createDataStream({
-                  name: `logs-${datasetName}-${namespace}`,
+              describe('and onboarding type is logFiles', () => {
+                before(async () => {
+                  await es.indices.createDataStream({
+                    name: `logs-${datasetName}-${namespace}`,
+                  });
+
+                  const doc = createLogDoc({
+                    time: new Date('06/28/2023').getTime(),
+                    logFilepath: '/my-service.log',
+                    serviceName: 'my-service',
+                    namespace,
+                    datasetName,
+                    message: 'This is a log message',
+                  });
+
+                  await es.bulk({
+                    body: [{ create: { _index: `logs-${datasetName}-${namespace}` } }, doc],
+                    refresh: 'wait_for',
+                  });
                 });
 
-                const doc = createLogDoc({
-                  time: new Date('06/28/2023').getTime(),
-                  logFilepath: '/my-service.log',
-                  serviceName: 'my-service',
-                  namespace,
-                  datasetName,
-                  message: 'This is a log message',
+                it('should return log-ingest as complete', async () => {
+                  const request = await callApi({
+                    onboardingId,
+                  });
+
+                  expect(request.status).to.be(200);
+
+                  const logsIngestProgress = request.body.progress['logs-ingest'];
+                  expect(logsIngestProgress).to.have.property('status', 'complete');
                 });
 
-                await es.bulk({
-                  body: [{ create: { _index: `logs-${datasetName}-${namespace}` } }, doc],
-                  refresh: 'wait_for',
+                after(async () => {
+                  await es.indices.deleteDataStream({
+                    name: `logs-${datasetName}-${namespace}`,
+                  });
                 });
               });
 
-              it('should return log-ingest as complete', async () => {
-                const request = await callApi({
-                  onboardingId,
+              describe('and onboarding type is systemLogs', () => {
+                let systemLogsOnboardingId: string;
+
+                before(async () => {
+                  const req = await observabilityOnboardingApiClient.logMonitoringUser({
+                    endpoint: 'POST /internal/observability_onboarding/logs/flow',
+                    params: {
+                      body: {
+                        type: 'systemLogs',
+                        name: 'name',
+                      },
+                    },
+                  });
+
+                  systemLogsOnboardingId = req.body.onboardingId;
+
+                  await observabilityOnboardingApiClient.logMonitoringUser({
+                    endpoint: 'POST /internal/observability_onboarding/flow/{id}/step/{name}',
+                    params: {
+                      path: {
+                        id: systemLogsOnboardingId,
+                        name: 'ea-status',
+                      },
+                      body: {
+                        status: 'complete',
+                      },
+                    },
+                  });
+
+                  await es.indices.createDataStream({
+                    name: `logs-system.syslog-${namespace}`,
+                  });
+
+                  const doc = createLogDoc({
+                    time: new Date('06/28/2023').getTime(),
+                    logFilepath: '/var/log/system.log',
+                    namespace,
+                    datasetName: 'system.syslog',
+                    message: 'This is a system log message',
+                  });
+
+                  await es.bulk({
+                    body: [{ create: { _index: `logs-system.syslog-${namespace}` } }, doc],
+                    refresh: 'wait_for',
+                  });
                 });
 
-                expect(request.status).to.be(200);
+                it('should return log-ingest as complete', async () => {
+                  const request = await callApi({
+                    onboardingId: systemLogsOnboardingId,
+                  });
 
-                const logsIngestProgress = request.body.progress['logs-ingest'];
-                expect(logsIngestProgress).to.have.property('status', 'complete');
-              });
+                  expect(request.status).to.be(200);
 
-              after(async () => {
-                await es.indices.deleteDataStream({
-                  name: `logs-${datasetName}-${namespace}`,
+                  const logsIngestProgress = request.body.progress['logs-ingest'];
+                  expect(logsIngestProgress).to.have.property('status', 'complete');
+                });
+
+                after(async () => {
+                  await es.indices.deleteDataStream({
+                    name: `logs-system.syslog-${namespace}`,
+                  });
                 });
               });
             });
