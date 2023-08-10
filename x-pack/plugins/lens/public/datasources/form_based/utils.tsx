@@ -349,35 +349,38 @@ export function getUnsupportedOperationsWarningMessage(
   const warningMessages: UserMessage[] = [];
   const columnsWithUnsupportedOperations: Array<
     [FieldBasedIndexPatternColumn, ReferenceBasedIndexPatternColumn | undefined]
-  > = Object.values(state.layers).flatMap((layer) => {
-    const dataView = dataViews.indexPatterns[layer.indexPatternId];
-    const columnsEntries = Object.entries(layer.columns);
-    return columnsEntries
-      .filter(([_, column]) => {
-        if (!hasField(column)) {
-          return false;
-        }
-        const field = dataView.getFieldByName(column.sourceField);
-        if (!field) {
-          return false;
-        }
-        return (
-          !(
-            operationDefinitionMap[column.operationType] as Extract<
-              GenericOperationDefinition,
-              { input: 'field' }
-            >
-          ).getPossibleOperationForField(field) && field?.timeSeriesMetric === 'counter'
+  > = Object.values(state.layers)
+    // filter layers without dataView loaded yet
+    .filter(({ indexPatternId }) => dataViews.indexPatterns[indexPatternId])
+    .flatMap((layer) => {
+      const dataView = dataViews.indexPatterns[layer.indexPatternId];
+      const columnsEntries = Object.entries(layer.columns);
+      return columnsEntries
+        .filter(([_, column]) => {
+          if (!hasField(column)) {
+            return false;
+          }
+          const field = dataView.getFieldByName(column.sourceField);
+          if (!field) {
+            return false;
+          }
+          return (
+            !(
+              operationDefinitionMap[column.operationType] as Extract<
+                GenericOperationDefinition,
+                { input: 'field' }
+              >
+            ).getPossibleOperationForField(field) && field?.timeSeriesMetric === 'counter'
+          );
+        })
+        .map(
+          ([id, fieldColumn]) =>
+            [fieldColumn, layer.columns[getReferenceRoot(layer, id)]] as [
+              FieldBasedIndexPatternColumn,
+              ReferenceBasedIndexPatternColumn | undefined
+            ]
         );
-      })
-      .map(
-        ([id, fieldColumn]) =>
-          [fieldColumn, layer.columns[getReferenceRoot(layer, id)]] as [
-            FieldBasedIndexPatternColumn,
-            ReferenceBasedIndexPatternColumn | undefined
-          ]
-      );
-  });
+    });
   if (columnsWithUnsupportedOperations.length) {
     // group the columns by field
     // then group together columns of a formula/referenced operation who use the same field
@@ -456,18 +459,18 @@ export function getPrecisionErrorWarningMessages(
 
   if (state && activeData) {
     Object.entries(activeData)
-      .reduce(
-        (acc, [layerId, { columns }]) => [
-          ...acc,
-          ...columns.map((column) => ({ layerId, column })),
-        ],
-        [] as Array<{ layerId: string; column: DatatableColumn }>
-      )
+      .reduce((acc, [layerId, { columns }]) => {
+        acc.push(...columns.map((column) => ({ layerId, column })));
+        return acc;
+      }, [] as Array<{ layerId: string; column: DatatableColumn }>)
       .forEach(({ layerId, column }) => {
         const currentLayer = state.layers[layerId];
         const currentColumn = currentLayer?.columns[column.id];
         if (currentLayer && currentColumn && datatableUtilities.hasPrecisionError(column)) {
           const indexPattern = dataViews.indexPatterns[currentLayer.indexPatternId];
+          if (!indexPattern) {
+            return;
+          }
           // currentColumnIsTerms is mostly a type guard. If there's a precision error,
           // we already know that we're dealing with a terms-based operation (at least for now).
           const currentColumnIsTerms = isColumnOfType<TermsIndexPatternColumn>(
