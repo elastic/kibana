@@ -55,7 +55,9 @@ export function ConfigureLogs() {
     wizardState.integrationName
   );
   const [integrationNameTouched, setIntegrationNameTouched] = useState(false);
-  const [integrationError, setIntegrationError] = useState<any | undefined>();
+  const [integrationError, setIntegrationError] = useState<
+    IntegrationError | undefined
+  >();
   const [datasetName, setDatasetName] = useState(wizardState.datasetName);
   const [serviceName, setServiceName] = useState(wizardState.serviceName);
   const [logFilePaths, setLogFilePaths] = useState(wizardState.logFilePaths);
@@ -156,8 +158,8 @@ export function ConfigureLogs() {
 
   const integrationNameError = getIntegrationNameError(
     integrationName,
-    hasNamingCollision,
-    integrationNameTouched
+    integrationNameTouched,
+    integrationError
   );
 
   const isDatasetNameInvalid =
@@ -625,8 +627,8 @@ const isLowerCase = (str: string) => str.toLowerCase() === str;
 
 const getIntegrationNameError = (
   integrationName: string,
-  hasNamingCollision: boolean,
-  touched: boolean
+  touched: boolean,
+  integrationError?: IntegrationError
 ) => {
   if (touched && isEmpty(integrationName)) {
     return i18n.translate(
@@ -640,11 +642,8 @@ const getIntegrationNameError = (
       { defaultMessage: 'An integration name should be lowercase.' }
     );
   }
-  if (hasNamingCollision) {
-    return i18n.translate(
-      'xpack.observability_onboarding.configureLogs.integration.namingCollisionError',
-      { defaultMessage: 'An integration with this name already exists.' }
-    );
+  if (integrationError && integrationError.type === 'NamingCollision') {
+    return integrationError.message;
   }
 };
 
