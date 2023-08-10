@@ -95,10 +95,6 @@ describe('Enrich policies tab', () => {
     });
 
     describe('policy actions', () => {
-      beforeEach(() => {
-        httpRequestsMockHelpers.setLoadEnrichPoliciesResponse(fixtures.enrichPolicies);
-      });
-
       describe('deletion', () => {
         it('can delete a policy', async () => {
           const { actions, exists } = testBed;
