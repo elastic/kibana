@@ -7,10 +7,12 @@
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { errors as EsErrors } from '@elastic/elasticsearch';
 import { createOrUpdateIlmPolicy } from './create_or_update_ilm_policy';
+import { getDataStreamAdapter } from './data_stream_adapter';
 
 const randomDelayMultiplier = 0.01;
 const logger = loggingSystemMock.createLogger();
 const clusterClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+const dataStreamAdapter = getDataStreamAdapter({ useDataStreamForAlerts: false });
 
 const IlmPolicy = {
   _meta: {
@@ -40,6 +42,7 @@ describe('createOrUpdateIlmPolicy', () => {
       esClient: clusterClient,
       name: 'test-policy',
       policy: IlmPolicy,
+      dataStreamAdapter,
     });
 
     expect(clusterClient.ilm.putLifecycle).toHaveBeenCalledWith({
@@ -58,6 +61,7 @@ describe('createOrUpdateIlmPolicy', () => {
       esClient: clusterClient,
       name: 'test-policy',
       policy: IlmPolicy,
+      dataStreamAdapter,
     });
 
     expect(clusterClient.ilm.putLifecycle).toHaveBeenCalledTimes(3);
@@ -71,6 +75,7 @@ describe('createOrUpdateIlmPolicy', () => {
         esClient: clusterClient,
         name: 'test-policy',
         policy: IlmPolicy,
+        dataStreamAdapter,
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"foo"`);
 
@@ -87,6 +92,7 @@ describe('createOrUpdateIlmPolicy', () => {
         esClient: clusterClient,
         name: 'test-policy',
         policy: IlmPolicy,
+        dataStreamAdapter,
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"generic error"`);
 

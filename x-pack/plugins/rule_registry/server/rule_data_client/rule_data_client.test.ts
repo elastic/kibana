@@ -55,6 +55,7 @@ function getRuleDataClientOptions({
     waitUntilReadyForWriting:
       waitUntilReadyForWriting ?? Promise.resolve(right(scopedClusterClient) as WaitResult),
     logger,
+    isUsingDataStreams: false,
   };
 }
 
@@ -106,6 +107,7 @@ describe('RuleDataClient', () => {
         body: query,
         ignore_unavailable: true,
         index: `.alerts-observability.apm.alerts*`,
+        seq_no_primary_term: true,
       });
     });
 
@@ -128,6 +130,7 @@ describe('RuleDataClient', () => {
         body: query,
         ignore_unavailable: true,
         index: `.alerts-observability.apm.alerts-test`,
+        seq_no_primary_term: true,
       });
     });
 
@@ -345,9 +348,13 @@ describe('RuleDataClient', () => {
       await delay();
 
       await expect(() => writer.bulk({})).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"something went wrong!"`
+        `"error writing to index: something went wrong!"`
       );
-      expect(logger.error).toHaveBeenNthCalledWith(1, error);
+      expect(logger.error).toHaveBeenNthCalledWith(
+        1,
+        'error writing to index: something went wrong!',
+        error
+      );
       expect(ruleDataClient.isWriteEnabled()).toBe(true);
     });
 

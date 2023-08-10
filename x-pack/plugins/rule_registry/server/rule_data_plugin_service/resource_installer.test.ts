@@ -13,6 +13,9 @@ import { AlertConsumers } from '@kbn/rule-data-utils';
 import { Dataset } from './index_options';
 import { IndexInfo } from './index_info';
 import { ECS_COMPONENT_TEMPLATE_NAME } from '@kbn/alerting-plugin/server';
+import type { DataStreamAdapter } from '@kbn/alerting-plugin/server';
+import { getDataStreamAdapter } from '@kbn/alerting-plugin/server/alerts_service/lib/data_stream_adapter';
+
 import { elasticsearchServiceMock, ElasticsearchClientMock } from '@kbn/core/server/mocks';
 import { TECHNICAL_COMPONENT_TEMPLATE_NAME } from '../../common/assets';
 
@@ -23,9 +26,11 @@ const frameworkAlertsService = {
 
 describe('resourceInstaller', () => {
   let pluginStop$: Subject<void>;
+  let dataStreamAdapter: DataStreamAdapter;
 
   beforeEach(() => {
     pluginStop$ = new ReplaySubject(1);
+    dataStreamAdapter = getDataStreamAdapter({ useDataStreamForAlerts: false });
   });
 
   afterEach(() => {
@@ -45,6 +50,7 @@ describe('resourceInstaller', () => {
         getClusterClient,
         frameworkAlerts: frameworkAlertsService,
         pluginStop$,
+        dataStreamAdapter,
       });
       installer.installCommonResources();
       expect(getClusterClient).not.toHaveBeenCalled();
@@ -62,6 +68,7 @@ describe('resourceInstaller', () => {
         getClusterClient,
         frameworkAlerts: frameworkAlertsService,
         pluginStop$,
+        dataStreamAdapter,
       });
       const indexOptions = {
         feature: AlertConsumers.LOGS,
@@ -93,6 +100,7 @@ describe('resourceInstaller', () => {
         getClusterClient,
         frameworkAlerts: frameworkAlertsService,
         pluginStop$,
+        dataStreamAdapter,
       });
 
       await installer.installCommonResources();
@@ -123,6 +131,7 @@ describe('resourceInstaller', () => {
           enabled: () => true,
         },
         pluginStop$,
+        dataStreamAdapter,
       });
 
       await installer.installCommonResources();
@@ -148,6 +157,7 @@ describe('resourceInstaller', () => {
         getClusterClient,
         frameworkAlerts: frameworkAlertsService,
         pluginStop$,
+        dataStreamAdapter,
       });
 
       const indexOptions = {
@@ -183,6 +193,7 @@ describe('resourceInstaller', () => {
           enabled: () => true,
         },
         pluginStop$,
+        dataStreamAdapter,
       });
 
       const indexOptions = {
@@ -239,6 +250,7 @@ describe('resourceInstaller', () => {
         getClusterClient,
         frameworkAlerts: frameworkAlertsService,
         pluginStop$,
+        dataStreamAdapter,
       });
 
       const indexOptions = {
@@ -290,6 +302,7 @@ describe('resourceInstaller', () => {
           getContextInitializationPromise: async () => ({ result: true }),
         },
         pluginStop$,
+        dataStreamAdapter,
       });
 
       const indexOptions = {
@@ -326,6 +339,7 @@ describe('resourceInstaller', () => {
           enabled: () => true,
         },
         pluginStop$,
+        dataStreamAdapter,
       });
 
       const indexOptions = {
@@ -367,6 +381,7 @@ describe('resourceInstaller', () => {
           getContextInitializationPromise: async () => ({ result: true }),
         },
         pluginStop$,
+        dataStreamAdapter,
       });
 
       const indexOptions = {
@@ -440,6 +455,7 @@ describe('resourceInstaller', () => {
         getClusterClient: async () => mockClusterClient,
         frameworkAlerts: frameworkAlertsService,
         pluginStop$,
+        dataStreamAdapter,
       };
       const indexOptions = {
         feature: AlertConsumers.OBSERVABILITY,
@@ -496,10 +512,10 @@ describe('resourceInstaller', () => {
       expect(errorMessages).toMatchInlineSnapshot(`
         Array [
           Array [
-            "Ignored PUT mappings for alias alias_1; error generating simulated mappings: expecting simulateIndexTemplate() to throw",
+            "Ignored PUT mappings for alias_1; error generating simulated mappings: expecting simulateIndexTemplate() to throw",
           ],
           Array [
-            "Ignored PUT mappings for alias alias_2; error generating simulated mappings: expecting simulateIndexTemplate() to throw",
+            "Ignored PUT mappings for alias_2; error generating simulated mappings: expecting simulateIndexTemplate() to throw",
           ],
         ]
       `);
@@ -522,10 +538,10 @@ describe('resourceInstaller', () => {
       expect(errorMessages).toMatchInlineSnapshot(`
         Array [
           Array [
-            "Ignored PUT mappings for alias alias_1; simulated mappings were empty",
+            "Ignored PUT mappings for alias_1; simulated mappings were empty",
           ],
           Array [
-            "Ignored PUT mappings for alias alias_2; simulated mappings were empty",
+            "Ignored PUT mappings for alias_2; simulated mappings were empty",
           ],
         ]
       `);

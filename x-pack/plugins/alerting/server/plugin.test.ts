@@ -36,30 +36,7 @@ jest.mock('./alerts_service/alerts_service', () => ({
 }));
 import { SharePluginStart } from '@kbn/share-plugin/server';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-
-const generateAlertingConfig = (): AlertingConfig => ({
-  healthCheck: {
-    interval: '5m',
-  },
-  enableFrameworkAlerts: false,
-  invalidateApiKeysTask: {
-    interval: '5m',
-    removalDelay: '1h',
-  },
-  maxEphemeralActionsPerAlert: 10,
-  cancelAlertsOnRuleTimeout: true,
-  rules: {
-    minimumScheduleInterval: { value: '1m', enforce: false },
-    run: {
-      actions: {
-        max: 1000,
-      },
-      alerts: {
-        max: 1000,
-      },
-    },
-  },
-});
+import { generateAlertingConfig } from './test_utils';
 
 const sampleRuleType: RuleType<never, never, {}, never, never, 'default', 'recovered', {}> = {
   id: 'test',
@@ -104,8 +81,8 @@ describe('Alerting Plugin', () => {
       );
       plugin = new AlertingPlugin(context);
 
-      // need await to test number of calls of setupMocks.status.set, because it is under async function which awaiting core.getStartServices()
-      await plugin.setup(setupMocks, mockPlugins);
+      plugin.setup(setupMocks, mockPlugins);
+      await waitForSetupComplete(setupMocks);
 
       expect(setupMocks.status.set).toHaveBeenCalledTimes(1);
       expect(encryptedSavedObjectsSetup.canEncrypt).toEqual(false);
@@ -123,7 +100,8 @@ describe('Alerting Plugin', () => {
       const usageCollectionSetup = createUsageCollectionSetupMock();
 
       // need await to test number of calls of setupMocks.status.set, because it is under async function which awaiting core.getStartServices()
-      await plugin.setup(setupMocks, { ...mockPlugins, usageCollection: usageCollectionSetup });
+      plugin.setup(setupMocks, { ...mockPlugins, usageCollection: usageCollectionSetup });
+      await waitForSetupComplete(setupMocks);
 
       expect(usageCollectionSetup.createUsageCounter).toHaveBeenCalled();
       expect(usageCollectionSetup.registerCollector).toHaveBeenCalled();
@@ -137,7 +115,8 @@ describe('Alerting Plugin', () => {
       plugin = new AlertingPlugin(context);
 
       // need await to test number of calls of setupMocks.status.set, because it is under async function which awaiting core.getStartServices()
-      const setupContract = await plugin.setup(setupMocks, mockPlugins);
+      const setupContract = plugin.setup(setupMocks, mockPlugins);
+      await waitForSetupComplete(setupMocks);
 
       expect(AlertsService).toHaveBeenCalled();
 
@@ -150,7 +129,8 @@ describe('Alerting Plugin', () => {
       );
       plugin = new AlertingPlugin(context);
 
-      const setupContract = await plugin.setup(setupMocks, mockPlugins);
+      const setupContract = plugin.setup(setupMocks, mockPlugins);
+      await waitForSetupComplete(setupMocks);
 
       expect(setupContract.getConfig()).toEqual({
         isUsingSecurity: false,
@@ -167,7 +147,8 @@ describe('Alerting Plugin', () => {
           generateAlertingConfig()
         );
         plugin = new AlertingPlugin(context);
-        setup = await plugin.setup(setupMocks, mockPlugins);
+        setup = plugin.setup(setupMocks, mockPlugins);
+        await waitForSetupComplete(setupMocks);
       });
 
       it('should throw error when license type is invalid', async () => {
@@ -427,4 +408,23 @@ function mockFeatures() {
     }),
   ]);
   return features;
+}
+
+type CoreSetupMocks = ReturnType<typeof coreMock.createSetup>;
+
+const WaitForSetupAttempts = 10;
+const WaitForSetupDelay = 200;
+const WaitForSetupSeconds = (WaitForSetupAttempts * WaitForSetupDelay) / 1000;
+
+// wait for setup to *really* complete: waiting for calls to
+// setupMocks.status.set, which needs to wait for core.getStartServices()
+export async function waitForSetupComplete(setupMocks: CoreSetupMocks) {
+  let attempts = 0;
+  while (setupMocks.status.set.mock.calls.length < 1) {
+    attempts++;
+    await new Promise((resolve) => setTimeout(resolve, WaitForSetupDelay));
+    if (attempts > WaitForSetupAttempts) {
+      throw new Error(`setupMocks.status.set was not called within ${WaitForSetupSeconds} seconds`);
+    }
+  }
 }
