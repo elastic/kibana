@@ -228,10 +228,11 @@ export function getDataStateContainer({
         useNewFieldsApi: !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE),
       };
 
-      if (options.fetchMore) {
-        abortControllerFetchMore?.abort();
-        abortControllerFetchMore = new AbortController();
+      abortController?.abort();
+      abortControllerFetchMore?.abort();
 
+      if (options.fetchMore) {
+        abortControllerFetchMore = new AbortController();
         await fetchMoreDocuments(dataSubjects, {
           abortController: abortControllerFetchMore,
           ...commonFetchDeps,
@@ -239,7 +240,6 @@ export function getDataStateContainer({
         return;
       }
 
-      abortController?.abort();
       abortController = new AbortController();
       const prevAutoRefreshDone = autoRefreshDone;
 
