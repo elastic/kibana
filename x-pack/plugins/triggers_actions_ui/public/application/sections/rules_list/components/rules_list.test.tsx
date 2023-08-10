@@ -104,6 +104,8 @@ jest.mock('react-router-dom', () => ({
     pathname: '/triggersActions/rules/',
   }),
 }));
+jest.mock('@kbn/alerts-ui-shared', () => ({ MaintenanceWindowCallout: jest.fn(() => <></>) }));
+
 jest.mock('../../../lib/capabilities', () => ({
   hasAllPrivilege: jest.fn(() => true),
   hasSaveRulesCapability: jest.fn(() => true),
