@@ -152,7 +152,7 @@ export function MetricRowWithAgg({
                 <EuiFlexItem grow>
                   <EuiFormRow
                     label={i18n.translate(
-                      'xpack.observability.threshold.rule.alertFlyout.customEquationEditor.aggregationLabel',
+                      'xpack.observability.threshold.rule.alertFlyout.customEquationEditor.aggregationType',
                       { defaultMessage: 'Aggregation type' }
                     )}
                     isInvalid={isAggInvalid}

@@ -190,10 +190,7 @@ export function CustomEquationEditor({
         >
           <div>
             <ClosablePopoverTitle onClose={() => setCustomEqPopoverOpen(false)}>
-              {i18n.translate(
-                'xpack.observability.threshold.rule.alertFlyout.customEquationEditor.aggregationLabel',
-                { defaultMessage: CUSTOM_EQUATION }
-              )}
+              {CUSTOM_EQUATION}
             </ClosablePopoverTitle>
             <EuiFormRow
               fullWidth
