@@ -18,8 +18,7 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
 
   describe('scroll_count', () => {
-    // FLAKY AND FAILING FORWARD ES COMPATIBILITY 8.7: https://github.com/elastic/kibana/issues/130305
-    describe.skip('with less than 10k objects', () => {
+    describe('with less than 10k objects', () => {
       before(async () => {
         await esArchiver.load(
           'test/api_integration/fixtures/es_archiver/management/saved_objects/scroll_count'
