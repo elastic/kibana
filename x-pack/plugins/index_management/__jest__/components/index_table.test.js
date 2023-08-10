@@ -519,7 +519,7 @@ describe('index table', () => {
 
   describe('Common index actions', () => {
     beforeEach(() => {
-      // Mock initialization of services
+      // Mock initialization of services; set enableIndexActions=false to verify config behavior
       setupMockComponent({ config: { enableIndexActions: false, enableLegacyTemplates: true } });
     });
 

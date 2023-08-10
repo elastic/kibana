@@ -270,7 +270,9 @@ describe('<IndexManagementHome />', () => {
     });
 
     test('should be able to open a closed index', async () => {
-      testBed = await setup(httpSetup);
+      await act(async () => {
+        testBed = await setup(httpSetup);
+      });
       const { component, find, actions } = testBed;
 
       component.update();

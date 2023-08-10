@@ -75,8 +75,9 @@ export function registerGetOneRoute({ router, config, lib: { handleEsError } }: 
     async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
       const { name } = request.params as TypeOf<typeof paramsSchema>;
+      // We don't expect the `legacy` query to be used when legacy templates are disabled, however, we add the `enableLegacyTemplates` check as a safeguard
       const isLegacy =
-        config.isLegacyTemplatesEnabled &&
+        config.isLegacyTemplatesEnabled !== false &&
         (request.query as TypeOf<typeof querySchema>).legacy === 'true';
 
       try {
