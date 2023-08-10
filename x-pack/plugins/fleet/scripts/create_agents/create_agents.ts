@@ -272,6 +272,8 @@ async function createAgentPolicy(id: string) {
       'Content-Type': 'application/json',
       'kbn-xsrf': 'kibana',
       'x-elastic-product-origin': 'fleet',
+      // Note: version can change in the future
+      'Elastic-Api-Version': '2023-10-31',
     },
   });
   const data = await res.json();

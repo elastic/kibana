@@ -50,6 +50,8 @@ async function getPackage(name: string, version: string, full: boolean = false) 
           'kbn-xsrf': 'xyz',
           Authorization:
             'Basic ' + Buffer.from(`${KIBANA_USERNAME}:${KIBANA_PASSWORD}`).toString('base64'),
+          // Note: version can change in the future
+          'Elastic-Api-Version': '2023-10-31',
         },
         method: 'GET',
       }

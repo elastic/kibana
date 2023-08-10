@@ -59,6 +59,8 @@ async function installPackage(name: string, version: string) {
       'content-type': 'application/json',
       'kbn-xsrf': 'xyz',
       Authorization,
+      // Note: version can change in the future
+      'Elastic-Api-Version': '2023-10-31',
     },
     body: JSON.stringify({ force: true }),
     method: 'POST',
@@ -77,6 +79,8 @@ async function deletePackage(name: string, version: string) {
       'content-type': 'application/json',
       'kbn-xsrf': 'xyz',
       Authorization,
+      // Note: version can change in the future
+      'Elastic-Api-Version': '2023-10-31',
     },
     method: 'DELETE',
   });
