@@ -21,6 +21,7 @@ import { TermsIndexPatternColumn } from './operations';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { FormBasedLayer } from './types';
+import { createMockedIndexPatternWithAdditionalFields } from './mocks';
 
 describe('indexpattern_datasource utils', () => {
   describe('getPrecisionErrorWarningMessages', () => {
@@ -246,7 +247,6 @@ describe('indexpattern_datasource utils', () => {
   });
 
   describe('getUnsupportedOperationsWarningMessage', () => {
-    let framePublicAPI: FramePublicAPI;
     let docLinks: DocLinksStart;
     const affectedOperations = [
       'sum',
@@ -258,21 +258,26 @@ describe('indexpattern_datasource utils', () => {
       'standard_deviation',
     ];
 
-    function createColumnsForField(field: string) {
+    function createColumnsForField(field: string, colOffset: number = 0) {
       return Object.fromEntries(
         affectedOperations.map((operationType, i) => [
-          `col_${i}`,
-          { operationType, sourceField: field },
+          `col_${i + colOffset}`,
+          { operationType, sourceField: field, label: `${operationType} of ${field}` },
         ])
       );
     }
 
-    function createState(field: string) {
+    function createState(fields: string[]) {
       return {
         layers: {
           id: {
             indexPatternId: '0',
-            columns: createColumnsForField(field),
+            columns: Object.assign(
+              {},
+              ...fields.map((field, i) =>
+                createColumnsForField(field, i * affectedOperations.length)
+              )
+            ),
           },
         },
       } as unknown as FormBasedPrivateState;
@@ -284,6 +289,30 @@ describe('indexpattern_datasource utils', () => {
           indexPatterns: Object.fromEntries([indexPattern].map((dataView, i) => [i, dataView])),
         },
       } as unknown as FramePublicAPI;
+    }
+
+    function createFormulaColumns(formulaParts: string[], field: string, colOffset: number = 0) {
+      const fullFormula = formulaParts.map((part) => `${part}(${field})`).join(' + ');
+      // just assume it's a sum of all the parts for testing
+      const rootId = `col-formula${colOffset}`;
+      return Object.fromEntries([
+        [
+          rootId,
+          {
+            operationType: 'formula',
+            label: `Formula: ${fullFormula}`,
+            params: { formula: fullFormula },
+          },
+        ],
+        ...formulaParts.map((part, i) => [
+          `${rootId}X${i}`,
+          { operationType: part, sourceField: field, label: 'Part of formula' },
+        ]),
+        [
+          `${rootId}X${formulaParts.length}`,
+          { operationType: 'math', references: formulaParts.map((_, i) => `${rootId}X${i}`) },
+        ],
+      ]);
     }
 
     beforeEach(() => {
@@ -300,7 +329,7 @@ describe('indexpattern_datasource utils', () => {
       'should return no warning for non-counter fields: %s',
       (fieldName: string) => {
         const warnings = getUnsupportedOperationsWarningMessage(
-          createState(fieldName),
+          createState([fieldName]),
           createFramePublic(
             createMockedIndexPatternWithAdditionalFields([
               {
@@ -315,13 +344,13 @@ describe('indexpattern_datasource utils', () => {
           ),
           docLinks
         );
-        expect(warnings).to.toHaveLength(0);
+        expect(warnings).toHaveLength(0);
       }
     );
 
     it('should return a warning for a counter field grouped by field', () => {
       const warnings = getUnsupportedOperationsWarningMessage(
-        createState('bytes_counter'),
+        createState(['bytes_counter']),
         createFramePublic(
           createMockedIndexPatternWithAdditionalFields([
             {
@@ -336,19 +365,49 @@ describe('indexpattern_datasource utils', () => {
         ),
         docLinks
       );
-      expect(warnings).to.toHaveLength(1);
+      expect(warnings).toHaveLength(1);
     });
 
     it('should group multiple warnings by field', () => {
+      const warnings = getUnsupportedOperationsWarningMessage(
+        createState(['bytes_counter', 'bytes_counter2']),
+        createFramePublic(
+          createMockedIndexPatternWithAdditionalFields([
+            {
+              name: 'bytes_counter',
+              displayName: 'bytes_counter',
+              type: 'number',
+              aggregatable: true,
+              searchable: true,
+              timeSeriesMetric: 'counter',
+            },
+            {
+              name: 'bytes_counter2',
+              displayName: 'bytes_counter2',
+              type: 'number',
+              aggregatable: true,
+              searchable: true,
+              timeSeriesMetric: 'counter',
+            },
+          ])
+        ),
+        docLinks
+      );
+      expect(warnings).toHaveLength(2);
+    });
+
+    it('should handle formula reporting only the top visible dimension', () => {
       const warnings = getUnsupportedOperationsWarningMessage(
         {
           layers: {
             id: {
               indexPatternId: '0',
-              columns: {
-                ...createColumnsForField('bytes_counter'),
-                ...createColumnsForField('bytes_counter2'),
-              },
+              columns: Object.assign(
+                {},
+                ...['bytes_counter', 'bytes_counter2'].map((field, i) =>
+                  createFormulaColumns(affectedOperations, field, i * affectedOperations.length)
+                )
+              ),
             },
           },
         } as unknown as FormBasedPrivateState,
@@ -374,7 +433,7 @@ describe('indexpattern_datasource utils', () => {
         ),
         docLinks
       );
-      expect(warnings).to.toHaveLength(2);
+      expect(warnings).toHaveLength(2);
     });
   });
 });
