@@ -59,7 +59,7 @@ export const Overview = () => {
           <MetadataSummaryList
             metadata={metadata}
             metadataLoading={metadataLoading}
-            isCompactView={renderMode?.mode === 'flyout' ?? false}
+            isCompactView={renderMode?.mode === 'flyout'}
           />
         )}
         <SectionSeparator />
