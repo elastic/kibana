@@ -53,9 +53,6 @@ export const FieldStatsContent: FC<{
 
   const showFieldStats = timeRange && isDefined(selectedDataView) && fieldForStats;
 
-  console.log(`--@@dslQuery`, dslQuery);
-  console.log(`--@@timeRange`, timeRange);
-
   return showFieldStats ? (
     <FieldStats
       key={fieldForStats.name}

@@ -53,7 +53,6 @@ export const FieldStatsInfoButton = ({
           >
             <EuiButtonIcon
               data-test-subj={`mlInspectFieldStatsButton-${field.id}`}
-              // Only disable the button if explicitly disabled
               disabled={disabled === true}
               size="xs"
               iconType="inspect"
