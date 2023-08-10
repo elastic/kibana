@@ -247,9 +247,12 @@ class AgentPolicyService {
 
     this.checkTamperProtectionLicense(agentPolicy);
 
+    const logger = appContextService.getLogger();
+
     if (agentPolicy?.is_protected) {
-      // throw new Error('Agent policy requires Elastic Defend integration');
-      // need to add messaging to show above instead of error
+      logger.warn(
+        'Agent policy requires Elastic Defend integration to set tamper protection to true'
+      );
     }
 
     await this.requireUniqueName(soClient, agentPolicy);
@@ -504,9 +507,12 @@ class AgentPolicyService {
 
     this.checkTamperProtectionLicense(agentPolicy);
 
+    const logger = appContextService.getLogger();
+
     if (agentPolicy?.is_protected && !policyHasEndpointSecurity(existingAgentPolicy)) {
-      // throw new Error('Agent policy requires Elastic Defend integration');
-      // need to add messaging to show above instead of error
+      logger.warn(
+        'Agent policy requires Elastic Defend integration to set tamper protection to true'
+      );
       // force agent policy to be false if elastic defend is not present
       agentPolicy.is_protected = false;
     }
