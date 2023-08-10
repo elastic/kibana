@@ -4,7 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ELASTIC_HTTP_VERSION_HEADER, X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
+import {
+  ELASTIC_HTTP_VERSION_HEADER,
+  X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
+} from '@kbn/core-http-common';
 import type { HttpFetchQuery } from '@kbn/core/public';
 import { HttpSetup, IUiSettingsClient } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
@@ -106,10 +109,12 @@ export class ReportingAPIClient implements IReportingAPI {
   }
 
   public downloadReport(jobId: string) {
-    const location = this.http.fetch(this.getReportURL(jobId), {headers: {
-      [ELASTIC_HTTP_VERSION_HEADER]: '1',
-      [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
-    }});
+    const location = this.http.fetch(this.getReportURL(jobId), {
+      headers: {
+        [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
+      },
+    });
 
     // window.open(location);
     return location;

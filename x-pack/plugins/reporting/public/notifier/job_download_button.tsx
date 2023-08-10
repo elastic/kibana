@@ -6,7 +6,10 @@
  */
 
 import { EuiButton } from '@elastic/eui';
-import { ELASTIC_HTTP_VERSION_HEADER, X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
+import {
+  ELASTIC_HTTP_VERSION_HEADER,
+  X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
+} from '@kbn/core-http-common';
 import { CoreStart } from '@kbn/core-lifecycle-browser';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
@@ -23,10 +26,14 @@ export const DownloadButton = ({ getUrl, job, core }: Props) => {
     <EuiButton
       size="s"
       data-test-subj="downloadCompletedReportButton"
-      onClick={() => { core.http.fetch(getUrl(job.id), {headers: {
-        [ELASTIC_HTTP_VERSION_HEADER]: '1',
-        [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
-      }})}}
+      onClick={() => {
+        core.http.fetch(getUrl(job.id), {
+          headers: {
+            [ELASTIC_HTTP_VERSION_HEADER]: '1',
+            [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
+          },
+        });
+      }}
       target="_blank"
     >
       <FormattedMessage
