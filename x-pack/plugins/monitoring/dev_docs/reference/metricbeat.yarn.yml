@@ -4,17 +4,6 @@ http.enabled: true
 http.host: "0.0.0.0"
 
 metricbeat.modules:
-  - module: system
-  - module: nginx
-    metricsets:
-      - stubstatus
-    period: 10s
-
-    # Nginx hosts
-    hosts: ["http://127.0.0.1:8080"]
-
-    # Path to server status. Default nginx_status
-    server_status_path: "nginx_status"
   - module: elasticsearch
     xpack.enabled: true
     period: 10s
@@ -27,7 +16,7 @@ metricbeat.modules:
     xpack.enabled: true
     basepath: "/ftw"
     period: 10s
-    hosts: ["host.docker.internal:5601"]
+    hosts: [ "host.docker.internal:5601" ]
     username: "elastic"
     password: "changeme"
 
@@ -47,6 +36,6 @@ metricbeat.modules:
       - "host.docker.internal:9600"
 
 output.elasticsearch:
-  hosts: ["host.docker.internal:9200"]
+  hosts: [ "host.docker.internal:9200" ]
   username: "elastic"
   password: "changeme"
