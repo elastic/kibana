@@ -19,7 +19,6 @@ import {
   EmbeddableStateTransfer,
   EmbeddableInput,
   Container,
-  isReferenceOrValueEmbeddable,
 } from '../..';
 
 export const ACTION_EDIT_PANEL = 'editPanel';
@@ -95,12 +94,7 @@ export class EditPanelAction implements Action<ActionContext> {
       const oldExplicitInput = embeddable.getExplicitInput();
       const newExplicitInput = await factory.getExplicitInput(oldExplicitInput, embeddable.parent);
       embeddable.parent?.replaceEmbeddable(embeddable.id, newExplicitInput);
-      if (
-        isReferenceOrValueEmbeddable(embeddable) &&
-        embeddable.inputIsRefType(embeddable.getInput())
-      ) {
-        embeddable.reload();
-      }
+
       return;
     }
 
