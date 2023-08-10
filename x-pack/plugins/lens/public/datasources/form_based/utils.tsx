@@ -605,7 +605,7 @@ function extractTimeRangeFromDateHistogram(
   return [
     {
       language: 'kuery',
-      query: `${column.sourceField} >= "${timeRange.from}" AND ${column.sourceField} <= "${timeRange.to}"`,
+      query: `"${column.sourceField}" >= "${timeRange.from}" AND "${column.sourceField}" <= "${timeRange.to}"`,
     },
   ];
 }
@@ -772,7 +772,7 @@ export function getFiltersInLayer(
           const fields = operationDefinitionMap[column.operationType]!.getCurrentFields!(column);
           return {
             kuery: fields.map((field) => ({
-              query: `${field}: *`,
+              query: `"${field}": *`,
               language: 'kuery',
             })),
           };
