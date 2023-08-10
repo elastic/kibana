@@ -28,7 +28,7 @@ export interface Message {
     function_call?: {
       name: string;
       arguments?: string;
-      trigger: MessageRole.Assistant | MessageRole.User | MessageRole.Elastic;
+      trigger: MessageRole;
     };
     data?: string;
   };

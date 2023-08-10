@@ -15,6 +15,7 @@ import {
   EuiSpacer,
   EuiPanel,
   keys,
+  EuiFocusTrap,
 } from '@elastic/eui';
 import { CodeEditor } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
@@ -42,6 +43,8 @@ export function ChatPromptEditor({
 }: ChatPromptEditorProps) {
   const { getFunctions } = useObservabilityAIAssistant();
   const functions = getFunctions();
+
+  const isFocusTrapEnabled = Boolean(initialPrompt);
 
   const [prompt, setPrompt] = useState(initialPrompt);
 
@@ -103,7 +106,8 @@ export function ChatPromptEditor({
         await onSubmit({
           '@timestamp': new Date().toISOString(),
           message: {
-            role: MessageRole.Function,
+            role: MessageRole.Assistant,
+            content: '',
             function_call: {
               name: selectedFunctionName,
               trigger: MessageRole.User,
@@ -111,6 +115,9 @@ export function ChatPromptEditor({
             },
           },
         });
+
+        setFunctionPayload(undefined);
+        setSelectedFunctionName(undefined);
       } else {
         await onSubmit({
           '@timestamp': new Date().toISOString(),
@@ -125,9 +132,9 @@ export function ChatPromptEditor({
 
   useEffect(() => {
     const keyboardListener = (event: KeyboardEvent) => {
-      if (!event.shiftKey && event.key === keys.ENTER) {
-        handleSubmit();
+      if (!event.shiftKey && event.key === keys.ENTER && (prompt || selectedFunctionName)) {
         event.preventDefault();
+        handleSubmit();
       }
     };
 
@@ -136,7 +143,7 @@ export function ChatPromptEditor({
     return () => {
       window.removeEventListener('keypress', keyboardListener);
     };
-  }, [handleSubmit]);
+  }, [handleSubmit, prompt, selectedFunctionName]);
 
   useEffect(() => {
     const textarea = textAreaRef.current;
@@ -152,109 +159,114 @@ export function ChatPromptEditor({
   });
 
   return (
-    <EuiFlexGroup gutterSize="s" responsive={false}>
-      <EuiFlexItem grow>
-        <EuiFlexGroup direction="column" gutterSize="s">
-          <EuiFlexItem>
-            <EuiFlexGroup responsive={false}>
-              <EuiFlexItem grow>
-                <FunctionListPopover
-                  functions={functions}
-                  selectedFunctionName={selectedFunctionName}
-                  onSelectFunction={handleSelectFunction}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                {selectedFunctionName ? (
-                  <EuiButtonEmpty
-                    iconType="cross"
-                    iconSide="right"
-                    size="xs"
-                    onClick={handleClearSelection}
-                  >
-                    {i18n.translate('xpack.observabilityAiAssistant.prompt.emptySelection', {
-                      defaultMessage: 'Empty selection',
-                    })}
-                  </EuiButtonEmpty>
-                ) : null}
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            {selectedFunctionName ? (
-              <EuiPanel borderRadius="none" color="subdued" hasShadow={false} paddingSize="xs">
-                <CodeEditor
-                  aria-label="payloadEditor"
+    <EuiFocusTrap disabled={!isFocusTrapEnabled}>
+      <EuiFlexGroup gutterSize="s" responsive={false}>
+        <EuiFlexItem grow>
+          <EuiFlexGroup direction="column" gutterSize="s">
+            <EuiFlexItem>
+              <EuiFlexGroup responsive={false}>
+                <EuiFlexItem grow>
+                  <FunctionListPopover
+                    functions={functions}
+                    selectedFunctionName={selectedFunctionName}
+                    onSelectFunction={handleSelectFunction}
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  {selectedFunctionName ? (
+                    <EuiButtonEmpty
+                      iconType="cross"
+                      iconSide="right"
+                      size="xs"
+                      onClick={handleClearSelection}
+                    >
+                      {i18n.translate('xpack.observabilityAiAssistant.prompt.emptySelection', {
+                        defaultMessage: 'Empty selection',
+                      })}
+                    </EuiButtonEmpty>
+                  ) : null}
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              {selectedFunctionName ? (
+                <EuiPanel borderRadius="none" color="subdued" hasShadow={false} paddingSize="xs">
+                  <CodeEditor
+                    aria-label="payloadEditor"
+                    fullWidth
+                    height="120px"
+                    languageId="json"
+                    isCopyable
+                    languageConfiguration={{
+                      autoClosingPairs: [
+                        {
+                          open: '{',
+                          close: '}',
+                        },
+                      ],
+                    }}
+                    editorDidMount={(editor) => {
+                      editor.focus();
+                    }}
+                    options={{
+                      accessibilitySupport: 'off',
+                      acceptSuggestionOnEnter: 'on',
+                      automaticLayout: true,
+                      autoClosingQuotes: 'always',
+                      autoIndent: 'full',
+                      contextmenu: true,
+                      fontSize: 12,
+                      formatOnPaste: true,
+                      formatOnType: true,
+                      inlineHints: { enabled: true },
+                      lineNumbers: 'on',
+                      minimap: { enabled: false },
+                      model,
+                      overviewRulerBorder: false,
+                      quickSuggestions: true,
+                      scrollbar: { alwaysConsumeMouseWheel: false },
+                      scrollBeyondLastLine: false,
+                      suggestOnTriggerCharacters: true,
+                      tabSize: 2,
+                      wordWrap: 'on',
+                      wrappingIndent: 'indent',
+                    }}
+                    transparentBackground
+                    value={functionPayload || ''}
+                    onChange={handleChangeFunctionPayload}
+                  />
+                </EuiPanel>
+              ) : (
+                <EuiTextArea
                   fullWidth
-                  height="120px"
-                  languageId="json"
-                  value={functionPayload || ''}
-                  onChange={handleChangeFunctionPayload}
-                  isCopyable
-                  languageConfiguration={{
-                    autoClosingPairs: [
-                      {
-                        open: '{',
-                        close: '}',
-                      },
-                    ],
-                  }}
-                  options={{
-                    accessibilitySupport: 'off',
-                    acceptSuggestionOnEnter: 'on',
-                    automaticLayout: true,
-                    autoClosingQuotes: 'always',
-                    autoIndent: 'full',
-                    contextmenu: true,
-                    fontSize: 12,
-                    formatOnPaste: true,
-                    formatOnType: true,
-                    inlineHints: { enabled: true },
-                    lineNumbers: 'on',
-                    minimap: { enabled: false },
-                    model,
-                    overviewRulerBorder: false,
-                    quickSuggestions: true,
-                    scrollbar: { alwaysConsumeMouseWheel: false },
-                    scrollBeyondLastLine: false,
-                    suggestOnTriggerCharacters: true,
-                    tabSize: 2,
-                    wordWrap: 'on',
-                    wrappingIndent: 'indent',
-                  }}
-                  transparentBackground
+                  inputRef={textAreaRef}
+                  placeholder={i18n.translate('xpack.observabilityAiAssistant.prompt.placeholder', {
+                    defaultMessage: 'Press ‘$’ for function recommendations',
+                  })}
+                  resize="vertical"
+                  rows={1}
+                  value={prompt}
+                  onChange={handleChange}
                 />
-              </EuiPanel>
-            ) : (
-              <EuiTextArea
-                resize="vertical"
-                rows={1}
-                fullWidth
-                placeholder={i18n.translate('xpack.observabilityAiAssistant.prompt.placeholder', {
-                  defaultMessage: 'Press ‘$’ for function recommendations',
-                })}
-                value={prompt}
-                inputRef={textAreaRef}
-                onChange={handleChange}
-              />
-            )}
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiSpacer size="xl" />
-        <EuiButtonIcon
-          aria-label="Submit"
-          isLoading={loading}
-          disabled={selectedFunctionName ? false : !prompt || loading || disabled}
-          display={
-            selectedFunctionName ? (functionPayload ? 'fill' : 'base') : prompt ? 'fill' : 'base'
-          }
-          iconType="kqlFunction"
-          size="m"
-          onClick={handleSubmit}
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+              )}
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiSpacer size="xl" />
+          <EuiButtonIcon
+            aria-label="Submit"
+            disabled={selectedFunctionName ? false : !prompt || loading || disabled}
+            display={
+              selectedFunctionName ? (functionPayload ? 'fill' : 'base') : prompt ? 'fill' : 'base'
+            }
+            iconType="kqlFunction"
+            isLoading={loading}
+            size="m"
+            onClick={handleSubmit}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiFocusTrap>
   );
 }

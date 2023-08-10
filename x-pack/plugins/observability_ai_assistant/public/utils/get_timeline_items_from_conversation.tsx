@@ -8,12 +8,14 @@ import React from 'react';
 import { v4 } from 'uuid';
 import { i18n } from '@kbn/i18n';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
-import { type Message, MessageRole } from '../../common';
-import type { ChatTimelineItem } from '../components/chat/chat_timeline';
 import { RenderFunction } from '../components/render_function';
+import type { ChatTimelineItem } from '../components/chat/chat_timeline';
+import { type Message, MessageRole } from '../../common';
+import type { FunctionDefinition } from '../../common/types';
 
 function convertFunctionParamsToMarkdownCodeBlock(object: Record<string, string | number>) {
-  return `\`\`\`
+  return `
+\`\`\`
 ${JSON.stringify(object, null, 4)}
 \`\`\``;
 }
@@ -22,10 +24,12 @@ export function getTimelineItemsfromConversation({
   currentUser,
   messages,
   hasConnector,
+  functions,
 }: {
   currentUser?: Pick<AuthenticatedUser, 'username' | 'full_name'>;
   messages: Message[];
   hasConnector: boolean;
+  functions: FunctionDefinition[];
 }): ChatTimelineItem[] {
   return [
     {
@@ -45,90 +49,132 @@ export function getTimelineItemsfromConversation({
       }),
     },
     ...messages.map((message, index) => {
-      const hasFunction = !!message.message.function_call?.name;
-      const isSystemPrompt = message.message.role === MessageRole.System;
+      const id = v4();
 
-      let title: string;
+      let title: string = '';
       let content: string | undefined;
       let element: React.ReactNode | undefined;
+
+      const role = message.message.name ? message.message.role : message.message.role;
+      const functionCall =
+        message.message.name && messages[index - 1] && messages[index - 1].message.function_call
+          ? messages[index - 1].message.function_call
+          : message.message.function_call;
+
+      let canCopy: boolean = false;
+      let canEdit: boolean = false;
+      let canGiveFeedback: boolean = false;
+      let canRegenerate: boolean = false;
       let collapsed: boolean = false;
+      let hide: boolean = false;
 
-      if (hasFunction) {
-        title = i18n.translate('xpack.observabilityAiAssistant.suggestedFunctionEvent', {
-          defaultMessage: 'suggested to use function {functionName}',
-          values: {
-            functionName: message.message.function_call!.name,
-          },
-        });
+      switch (role) {
+        case MessageRole.System:
+          hide = true;
+          break;
 
-        content = convertFunctionParamsToMarkdownCodeBlock({
-          name: message.message.function_call!.name,
-          arguments: JSON.parse(message.message.function_call?.arguments || '{}'),
-        });
+        case MessageRole.User:
+          // User executed a function:
+          if (functionCall) {
+            title = i18n.translate('xpack.observabilityAiAssistant.executedFunctionEvent', {
+              defaultMessage: 'executed the function {functionName}',
+              values: {
+                functionName: functionCall.name,
+              },
+            });
 
-        collapsed = true;
-      } else if (isSystemPrompt) {
-        title = i18n.translate('xpack.observabilityAiAssistant.addedSystemPromptEvent', {
-          defaultMessage: 'added a prompt',
-        });
-        content = '';
-        collapsed = true;
-      } else if (message.message.name) {
-        const prevMessage = messages[index - 1];
-        if (!prevMessage || !prevMessage.message.function_call) {
-          throw new Error('Could not find preceding message with function_call');
-        }
+            content = convertFunctionParamsToMarkdownCodeBlock({
+              name: functionCall.name,
+              arguments: JSON.parse(functionCall.arguments || '{}'),
+            });
 
-        title = i18n.translate('xpack.observabilityAiAssistant.executedFunctionEvent', {
-          defaultMessage: 'executed the function {functionName}',
-          values: {
-            functionName: prevMessage.message.function_call!.name,
-          },
-        });
+            const fn = functions.find((func) => func.options.name === message.message.name);
 
-        content = convertFunctionParamsToMarkdownCodeBlock(
-          JSON.parse(message.message.content || '{}')
-        );
+            element = fn?.render ? (
+              <RenderFunction
+                name={functionCall.name}
+                arguments={functionCall?.arguments}
+                response={message.message}
+              />
+            ) : null;
 
-        element = (
-          <RenderFunction
-            name={message.message.name}
-            arguments={prevMessage.message.function_call.arguments}
-            response={message.message}
-          />
-        );
-        collapsed = true;
-      } else {
-        title = '';
-        content = message.message.content;
-        collapsed = false;
+            canCopy = true;
+            canEdit = hasConnector;
+            canGiveFeedback = true;
+            canRegenerate = hasConnector;
+            collapsed = !Boolean(element);
+            hide = false;
+          } else {
+            // is a prompt by the user
+            title = '';
+            content = message.message.content;
+
+            canCopy = true;
+            canEdit = hasConnector;
+            canGiveFeedback = false;
+            canRegenerate = false;
+            collapsed = false;
+            hide = false;
+          }
+
+          break;
+
+        case MessageRole.Assistant:
+          // is a function suggestion by the assistant
+          if (!!functionCall?.name) {
+            title = i18n.translate('xpack.observabilityAiAssistant.suggestedFunctionEvent', {
+              defaultMessage: 'suggested to use function {functionName}',
+              values: {
+                functionName: functionCall!.name,
+              },
+            });
+            content =
+              i18n.translate('xpack.observabilityAiAssistant.responseWas', {
+                defaultMessage: 'Suggested the payload: ',
+              }) +
+              convertFunctionParamsToMarkdownCodeBlock({
+                name: functionCall!.name,
+                arguments: JSON.parse(functionCall?.arguments || '{}'),
+              });
+
+            canCopy = true;
+            canEdit = false;
+            canGiveFeedback = true;
+            canRegenerate = false;
+            collapsed = true;
+            hide = false;
+          } else {
+            // is an assistant response
+            title = '';
+            content = message.message.content;
+
+            canCopy = true;
+            canEdit = false;
+            canGiveFeedback = true;
+            canRegenerate = hasConnector;
+            collapsed = false;
+            hide = false;
+          }
+          break;
       }
 
-      const props = {
-        id: v4(),
+      return {
+        id,
         '@timestamp': message['@timestamp'],
-        canCopy: true,
-        canEdit: hasConnector && (message.message.role === MessageRole.User || hasFunction),
-        canGiveFeedback:
-          message.message.role === MessageRole.Assistant ||
-          message.message.role === MessageRole.Elastic,
-        canRegenerate:
-          (hasConnector && message.message.role === MessageRole.Assistant) ||
-          message.message.role === MessageRole.Elastic,
-        collapsed,
-        content,
-        currentUser,
-        element,
-        functionCall: message.message.name
-          ? messages[index - 1].message.function_call
-          : message.message.function_call,
-        hide: message.message.role === MessageRole.System,
-        loading: false,
-        role: message.message.role,
+        role,
         title,
+        content,
+        element,
+        canCopy,
+        canEdit,
+        canGiveFeedback,
+        canRegenerate,
+        collapsed,
+        currentUser,
+        function_call: functionCall,
+        hide,
+        loading: false,
       };
-
-      return props;
     }),
   ];
 }
