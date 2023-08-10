@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { v4 as uuidv4 } from 'uuid';
 import type { Client } from '@elastic/elasticsearch';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '@kbn/fleet-plugin/common';
@@ -114,7 +113,7 @@ export const indexEndpointAndFleetActionsForHost = async (
       user: options.alertIds ? { id: 'unknown' } : logsEndpointAction.user,
       rule: options.alertIds
         ? {
-            id: uuidv4(),
+            id: 'generated_rule_id',
             name: 'generated_rule_name',
           }
         : logsEndpointAction.rule,
