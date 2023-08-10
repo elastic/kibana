@@ -12,10 +12,8 @@ import { Dependencies } from './types';
 import { ApiRoutes } from './routes';
 import { IndexDataEnricher } from './services';
 import { handleEsError } from './shared_imports';
-import { enrichPoliciesActions } from './lib/enrich_policies';
 
 export interface IndexManagementPluginSetup {
-  enrichPoliciesActions: typeof enrichPoliciesActions;
   indexDataEnricher: {
     add: IndexDataEnricher['add'];
   };
@@ -61,7 +59,6 @@ export class IndexMgmtServerPlugin implements Plugin<IndexManagementPluginSetup,
     });
 
     return {
-      enrichPoliciesActions,
       indexDataEnricher: {
         add: this.indexDataEnricher.add.bind(this.indexDataEnricher),
       },

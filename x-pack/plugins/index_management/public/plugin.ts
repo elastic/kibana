@@ -11,7 +11,7 @@ import SemVer from 'semver/classes/semver';
 import { CoreSetup, PluginInitializerContext } from '@kbn/core/public';
 import { setExtensionsService } from './application/store/selectors/extension_service';
 
-import { ExtensionsService } from './services';
+import { ExtensionsService, PublicApiService } from './services';
 
 import {
   IndexManagementPluginSetup,
@@ -64,6 +64,7 @@ export class IndexMgmtUIPlugin {
     }
 
     return {
+      apiService: new PublicApiService(coreSetup.http),
       extensionsService: this.extensionsService.setup(),
     };
   }
