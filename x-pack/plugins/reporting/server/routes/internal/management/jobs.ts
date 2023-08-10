@@ -141,13 +141,13 @@ export function registerJobInfoRoutesInternal(reporting: ReportingCore) {
   const registerInternalDownloadReport = () => {
     // trigger a download of the output from a job
     const path = `${JOBS.DOWNLOAD_PREFIX}/{docId}`;
-    router.versioned.get(
-      {
+    router.versioned
+      .get({
         path,
         access: 'internal',
-      // NOTE:
-      // Because this API is used in the browser via `href` (ex. on link to download a file),
-      // we need to enable setting the version number via query params
+        // NOTE:
+        // Because this API is used in the browser via `href` (ex. on link to download a file),
+        // we need to enable setting the version number via query params
         enableQueryVersion: true,
         options: { tags: [ROUTE_TAG_CAN_REDIRECT] },
       })
