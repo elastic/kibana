@@ -493,7 +493,7 @@
             "label": "upgradeAssistant",
             "description": [],
             "signature": [
-              "{ readonly overview: string; readonly batchReindex: string; readonly remoteReindex: string; }"
+              "{ readonly overview: string; readonly batchReindex: string; readonly remoteReindex: string; readonly reindexWithPipeline: string; }"
             ],
             "path": "packages/kbn-doc-links/src/types.ts",
             "deprecated": false,
