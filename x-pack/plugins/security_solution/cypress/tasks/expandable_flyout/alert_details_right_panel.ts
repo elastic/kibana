@@ -22,14 +22,18 @@ import {
 /**
  * Expand the left section of the document details expandable flyout by clicking on the expand icon button
  */
-export const expandDocumentDetailsExpandableFlyoutLeftSection = () =>
+export const expandDocumentDetailsExpandableFlyoutLeftSection = () => {
+  cy.get(DOCUMENT_DETAILS_FLYOUT_EXPAND_DETAILS_BUTTON).scrollIntoView();
   cy.get(DOCUMENT_DETAILS_FLYOUT_EXPAND_DETAILS_BUTTON).click();
+};
 
 /**
  * Expand the left section of the document details expandable flyout by clicking on the collapse icon button
  */
-export const collapseDocumentDetailsExpandableFlyoutLeftSection = () =>
+export const collapseDocumentDetailsExpandableFlyoutLeftSection = () => {
+  cy.get(DOCUMENT_DETAILS_FLYOUT_COLLAPSE_DETAILS_BUTTON).scrollIntoView();
   cy.get(DOCUMENT_DETAILS_FLYOUT_COLLAPSE_DETAILS_BUTTON).click();
+};
 
 /**
  * Open the Overview tab in the document details expandable flyout right section

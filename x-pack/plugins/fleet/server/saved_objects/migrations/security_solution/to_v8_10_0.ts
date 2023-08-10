@@ -30,6 +30,9 @@ export const migratePackagePolicyToV8100: SavedObjectModelDataBackfillFn<
   if (input && input.config) {
     const policy = input.config.policy.value;
 
+    const newMetaValues = { license_uid: '', cluster_uuid: '', cluster_name: '' };
+    policy.meta = policy?.meta ? { ...policy.meta, ...newMetaValues } : newMetaValues;
+
     policy.windows.behavior_protection.reputation_service = false;
     policy.mac.behavior_protection.reputation_service = false;
     policy.linux.behavior_protection.reputation_service = false;
@@ -63,6 +66,7 @@ export const migratePackagePolicyEvictionsFromV8100: SavedObjectModelVersionForw
         'reputation_service',
       ]);
       policy.mac.behavior_protection = omit(policy.mac.behavior_protection, ['reputation_service']);
+      policy.meta = omit(policy.meta, ['license_uid', 'cluster_uuid', 'cluster_name']);
     }
 
     return updatedAttributes;

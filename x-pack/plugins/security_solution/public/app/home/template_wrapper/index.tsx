@@ -7,7 +7,7 @@
 
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
-import { EuiThemeProvider, useEuiTheme } from '@elastic/eui';
+import { EuiThemeProvider, useEuiTheme, type EuiThemeComputed } from '@elastic/eui';
 import { IS_DRAGGING_CLASS_NAME } from '@kbn/securitysolution-t-grid';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
@@ -32,16 +32,16 @@ const StyledKibanaPageTemplate = styled(KibanaPageTemplate)<
   Omit<KibanaPageTemplateProps, 'ref'> & {
     $isShowingTimelineOverlay?: boolean;
     $addBottomPadding?: boolean;
+    theme: EuiThemeComputed; // using computed EUI theme to be consistent with user profile theming
   }
 >`
   .kbnSolutionNav {
-    background-color: ${({ theme }) => theme.eui.euiColorEmptyShade};
+    background-color: ${({ theme }) => theme.colors.emptyShade};
   }
 
   .${BOTTOM_BAR_CLASSNAME} {
     animation: 'none !important'; // disable the default bottom bar slide animation
-    background: ${({ theme }) =>
-      theme.eui.euiColorEmptyShade}; // Override bottom bar black background
+    background: ${({ theme }) => theme.colors.emptyShade}; // Override bottom bar black background
     color: inherit; // Necessary to override the bottom bar 'white text'
     transform: ${(
       { $isShowingTimelineOverlay } // Since the bottom bar wraps the whole overlay now, need to override any transforms when it is open
@@ -65,7 +65,7 @@ export const SecuritySolutionTemplateWrapper: React.FC<Omit<KibanaPageTemplatePr
 
     // The bottomBar by default has a set 'dark' colorMode that doesn't match the global colorMode from the Advanced Settings
     // To keep the mode in sync, we pass in the globalColorMode to the bottom bar here
-    const { colorMode: globalColorMode } = useEuiTheme();
+    const { euiTheme, colorMode: globalColorMode } = useEuiTheme();
 
     /*
      * StyledKibanaPageTemplate is a styled EuiPageTemplate. Security solution currently passes the header
@@ -76,6 +76,7 @@ export const SecuritySolutionTemplateWrapper: React.FC<Omit<KibanaPageTemplatePr
     return (
       <SecuritySolutionFlyoutContextProvider>
         <StyledKibanaPageTemplate
+          theme={euiTheme}
           $isShowingTimelineOverlay={isShowingTimelineOverlay}
           paddingSize="none"
           solutionNav={solutionNavProps}

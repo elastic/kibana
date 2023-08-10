@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { Case } from '../../../../common/api';
+import type { Case } from '../../../../common/types/domain';
+import { CaseMetricsFeature } from '../../../../common/types/api';
 import { createCasesClientMock } from '../../mocks';
 import type { CasesClientArgs } from '../../types';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
@@ -48,7 +49,7 @@ describe('MTTR', () => {
   it('returns null when aggregation returns undefined', async () => {
     caseService.executeAggregations.mockResolvedValue(undefined);
     const handler = new MTTR(constructorOptions);
-    handler.setupFeature('mttr');
+    handler.setupFeature(CaseMetricsFeature.MTTR);
 
     expect(await handler.compute()).toEqual({ mttr: null });
   });
@@ -56,7 +57,7 @@ describe('MTTR', () => {
   it('returns null when aggregation returns empty object', async () => {
     caseService.executeAggregations.mockResolvedValue({});
     const handler = new MTTR(constructorOptions);
-    handler.setupFeature('mttr');
+    handler.setupFeature(CaseMetricsFeature.MTTR);
 
     expect(await handler.compute()).toEqual({ mttr: null });
   });
@@ -64,7 +65,7 @@ describe('MTTR', () => {
   it('returns null when aggregation returns empty mttr object', async () => {
     caseService.executeAggregations.mockResolvedValue({ mttr: {} });
     const handler = new MTTR(constructorOptions);
-    handler.setupFeature('mttr');
+    handler.setupFeature(CaseMetricsFeature.MTTR);
 
     expect(await handler.compute()).toEqual({ mttr: null });
   });
@@ -72,7 +73,7 @@ describe('MTTR', () => {
   it('returns values when there is a mttr value', async () => {
     caseService.executeAggregations.mockResolvedValue({ mttr: { value: 5 } });
     const handler = new MTTR(constructorOptions);
-    handler.setupFeature('mttr');
+    handler.setupFeature(CaseMetricsFeature.MTTR);
 
     expect(await handler.compute()).toEqual({ mttr: 5 });
   });
@@ -86,7 +87,7 @@ describe('MTTR', () => {
       owner: 'cases',
     });
 
-    handler.setupFeature('mttr');
+    handler.setupFeature(CaseMetricsFeature.MTTR);
     await handler.compute();
 
     expect(caseService.executeAggregations.mock.calls[0][0]).toMatchInlineSnapshot(`

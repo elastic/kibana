@@ -27,32 +27,24 @@ import {
   ProcessListContextProvider,
 } from '../../../../pages/metrics/inventory_view/hooks/use_process_list';
 import { getFieldByType } from '../../../../../common/inventory_models';
-import type { InventoryItemType } from '../../../../../common/inventory_models/types';
-
-export interface ProcessesProps {
-  nodeName: string;
-  nodeType: InventoryItemType;
-  currentTimestamp: number;
-  search?: string;
-  onSearchFilterChange?: (searchFilter: string) => void;
-}
+import { useAssetDetailsStateContext } from '../../hooks/use_asset_details_state';
 
 const options = Object.entries(STATE_NAMES).map(([value, view]: [string, string]) => ({
   value,
   view,
 }));
 
-export const Processes = ({
-  currentTimestamp,
-  nodeName,
-  nodeType,
-  search,
-  onSearchFilterChange,
-}: ProcessesProps) => {
-  const [searchText, setSearchText] = useState(search ?? '');
+export const Processes = () => {
+  const { asset, assetType, overrides, dateRangeTs, onTabsStateChange } =
+    useAssetDetailsStateContext();
+
+  const { query: overrideQuery } = overrides?.processes ?? {};
+
+  const [searchText, setSearchText] = useState(overrideQuery ?? '');
   const [searchBarState, setSearchBarState] = useState<Query>(() =>
     searchText ? Query.parse(searchText) : Query.MATCH_ALL
   );
+  const currentTimestamp = dateRangeTs.to;
 
   const [sortBy, setSortBy] = useState<SortBy>({
     name: 'cpu',
@@ -60,9 +52,9 @@ export const Processes = ({
   });
 
   const hostTerm = useMemo(() => {
-    const field = getFieldByType(nodeType) ?? nodeType;
-    return { [field]: nodeName };
-  }, [nodeName, nodeType]);
+    const field = getFieldByType(assetType) ?? assetType;
+    return { [field]: asset.name };
+  }, [asset.name, assetType]);
 
   const {
     loading,
@@ -73,12 +65,12 @@ export const Processes = ({
 
   const debouncedSearchOnChange = useMemo(() => {
     return debounce<(queryText: string) => void>((queryText) => {
-      if (onSearchFilterChange) {
-        onSearchFilterChange(queryText);
+      if (onTabsStateChange) {
+        onTabsStateChange({ processes: { query: queryText } });
       }
       setSearchText(queryText);
     }, 500);
-  }, [onSearchFilterChange]);
+  }, [onTabsStateChange]);
 
   const searchBarOnChange = useCallback(
     ({ query, queryText }) => {
@@ -90,11 +82,11 @@ export const Processes = ({
 
   const clearSearchBar = useCallback(() => {
     setSearchBarState(Query.MATCH_ALL);
-    if (onSearchFilterChange) {
-      onSearchFilterChange('');
+    if (onTabsStateChange) {
+      onTabsStateChange({ processes: { query: '' } });
     }
     setSearchText('');
-  }, [onSearchFilterChange]);
+  }, [onTabsStateChange]);
 
   return (
     <ProcessListContextProvider hostTerm={hostTerm} to={currentTimestamp}>
@@ -167,7 +159,7 @@ export const Processes = ({
           }
           actions={
             <EuiButton
-              data-test-subj="infraTabComponentTryAgainButton"
+              data-test-subj="infraAssetDetailsTabComponentTryAgainButton"
               color="primary"
               fill
               onClick={reload}

@@ -10,8 +10,8 @@ import React, { memo, useCallback, useMemo, useRef } from 'react';
 import './index.scss';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiText } from '@elastic/eui';
-import { usePager } from '@kbn/discover-utils';
-import { SAMPLE_SIZE_SETTING } from '../../../common';
+import { SAMPLE_SIZE_SETTING, usePager } from '@kbn/discover-utils';
+import type { SearchResponseInterceptedWarning } from '@kbn/search-response-warnings';
 import {
   ToolBarPagination,
   MAX_ROWS_PER_PAGE_OPTION,
@@ -23,6 +23,7 @@ import { SavedSearchEmbeddableBase } from '../../embeddable/saved_search_embedda
 export interface DocTableEmbeddableProps extends DocTableProps {
   totalHitCount: number;
   rowsPerPageState?: number;
+  interceptedWarnings?: SearchResponseInterceptedWarning[];
   onUpdateRowsPerPage?: (rowsPerPage?: number) => void;
 }
 
@@ -102,6 +103,7 @@ export const DocTableEmbeddable = (props: DocTableEmbeddableProps) => {
 
   return (
     <SavedSearchEmbeddableBase
+      interceptedWarnings={props.interceptedWarnings}
       totalHitCount={props.totalHitCount}
       isLoading={props.isLoading}
       prepend={

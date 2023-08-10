@@ -20,19 +20,20 @@ import { DataView } from '@kbn/data-views-plugin/public';
 import { SortOrder } from '@kbn/saved-search-plugin/public';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
-import { useInternalStateSelector } from '../../services/discover_internal_state_container';
-import { useAppStateSelector } from '../../services/discover_app_state_container';
-import { useDiscoverServices } from '../../../../hooks/use_discover_services';
-import { DocViewFilterFn } from '../../../../services/doc_views/doc_views_types';
-import { DiscoverGrid } from '../../../../components/discover_grid/discover_grid';
-import { FetchStatus } from '../../../types';
+import { SearchResponseWarnings } from '@kbn/search-response-warnings';
 import {
   DOC_HIDE_TIME_COLUMN_SETTING,
   DOC_TABLE_LEGACY,
   SAMPLE_SIZE_SETTING,
   SEARCH_FIELDS_FROM_SOURCE,
   HIDE_ANNOUNCEMENTS,
-} from '../../../../../common';
+} from '@kbn/discover-utils';
+import { useInternalStateSelector } from '../../services/discover_internal_state_container';
+import { useAppStateSelector } from '../../services/discover_app_state_container';
+import { useDiscoverServices } from '../../../../hooks/use_discover_services';
+import { DocViewFilterFn } from '../../../../services/doc_views/doc_views_types';
+import { DiscoverGrid } from '../../../../components/discover_grid/discover_grid';
+import { FetchStatus } from '../../../types';
 import { useColumns } from '../../../../hooks/use_data_grid_columns';
 import { RecordRawType } from '../../services/discover_data_state_container';
 import { DiscoverStateContainer } from '../../services/discover_state';
@@ -203,6 +204,13 @@ function DiscoverDocumentsComponent({
           <FormattedMessage id="discover.documentsAriaLabel" defaultMessage="Documents" />
         </h2>
       </EuiScreenReaderOnly>
+      {!!documentState.interceptedWarnings?.length && (
+        <SearchResponseWarnings
+          variant="callout"
+          interceptedWarnings={documentState.interceptedWarnings}
+          data-test-subj="dscInterceptedWarningsCallout"
+        />
+      )}
       {isLegacy && rows && rows.length && (
         <>
           {!hideAnnouncements && <DocumentExplorerCallout />}

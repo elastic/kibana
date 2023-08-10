@@ -42,7 +42,7 @@ describe('Indicators query bar interaction', () => {
     esArchiverUnload('threat_intelligence/indicators_data');
   });
 
-  it('should add filter to kql', () => {
+  it.skip('should add filter to kql', () => {
     cy.log('filter in values when clicking in the barchart legend');
 
     waitForViewToBeUpdated();

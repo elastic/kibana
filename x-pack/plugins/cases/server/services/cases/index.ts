@@ -23,13 +23,14 @@ import type {
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { nodeBuilder } from '@kbn/es-query';
 
+import type { Case, CaseStatuses, User } from '../../../common/types/domain';
+import { caseStatuses } from '../../../common/types/domain';
 import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
   MAX_DOCS_PER_PAGE,
 } from '../../../common/constants';
-import type { Case, User, CaseStatuses } from '../../../common/api';
-import { decodeOrThrow, caseStatuses } from '../../../common/api';
+import { decodeOrThrow } from '../../../common/api';
 import type { SavedObjectFindOptionsKueryNode, SOWithErrors } from '../../common/types';
 import { defaultSortField, flattenCaseSavedObject, isSOError } from '../../common/utils';
 import { DEFAULT_PAGE, DEFAULT_PER_PAGE } from '../../routes/api';

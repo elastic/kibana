@@ -6,31 +6,29 @@
  */
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { KPIChartProps } from '../../../../../common/visualizations/lens/dashboards/host/kpi_grid_config';
 import { hostLensFormulas } from '../../../../../common/visualizations';
 import { useHostCountContext } from '../../hooks/use_host_count';
 import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
 import { TOOLTIP } from '../../../../../common/visualizations/lens/dashboards/host/translations';
 
 import { type Props, MetricChartWrapper } from '../chart/metric_chart_wrapper';
-import { TooltipContent } from '../../../../../common/visualizations/metric_explanation/tooltip_content';
+import { TooltipContent } from '../../../../../components/lens';
 
 const HOSTS_CHART: Omit<Props, 'loading' | 'value' | 'toolTip'> = {
-  id: `metric-hostCount`,
+  id: 'hostsViewKPI-hostsCount',
   color: '#6DCCB1',
-  title: i18n.translate('xpack.infra.hostsViewPage.metricTrend.hostCount.title', {
+  title: i18n.translate('xpack.infra.hostsViewPage.kpi.hostCount.title', {
     defaultMessage: 'Hosts',
   }),
-  ['data-test-subj']: 'hostsViewKPI-hostsCount',
 };
 
-export const HostsTile = ({ style }: Pick<KPIChartProps, 'style'>) => {
+export const HostsTile = ({ height }: { height: number }) => {
   const { data: hostCountData, isRequestRunning: hostCountLoading } = useHostCountContext();
   const { searchCriteria } = useUnifiedSearchContext();
 
   const getSubtitle = () => {
     return searchCriteria.limit < (hostCountData?.count.value ?? 0)
-      ? i18n.translate('xpack.infra.hostsViewPage.metricTrend.subtitle.hostCount.limit', {
+      ? i18n.translate('xpack.infra.hostsViewPage.kpi.subtitle.hostCount.limit', {
           defaultMessage: 'Limited to {limit}',
           values: {
             limit: searchCriteria.limit,
@@ -42,7 +40,7 @@ export const HostsTile = ({ style }: Pick<KPIChartProps, 'style'>) => {
   return (
     <MetricChartWrapper
       {...HOSTS_CHART}
-      style={style}
+      style={{ height }}
       value={hostCountData?.count.value ?? 0}
       subtitle={getSubtitle()}
       toolTip={

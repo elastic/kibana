@@ -10,14 +10,14 @@ import expect from '@kbn/expect';
 import { ALERT_CASE_IDS, ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 
 import {
-  CommentType,
-  AttributesTypeUser,
-  AttributesTypeAlerts,
+  AttachmentType,
+  UserCommentAttachmentAttributes,
+  AlertAttachmentAttributes,
   CaseStatuses,
-  CommentRequestExternalReferenceSOType,
-  CommentRequestAlertType,
+  ExternalReferenceSOAttachmentPayload,
+  AlertAttachmentPayload,
   ExternalReferenceStorageType,
-} from '@kbn/cases-plugin/common/api';
+} from '@kbn/cases-plugin/common/types/domain';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   defaultUser,
@@ -95,7 +95,7 @@ export default ({ getService }: FtrProviderContext): void => {
           params: postCommentUserReq,
         });
         const comment = removeServerGeneratedPropertiesFromSavedObject(
-          patchedCase.comments![0] as AttributesTypeUser
+          patchedCase.comments![0] as UserCommentAttachmentAttributes
         );
 
         expect(comment).to.eql({
@@ -121,7 +121,7 @@ export default ({ getService }: FtrProviderContext): void => {
           params: postCommentAlertReq,
         });
         const comment = removeServerGeneratedPropertiesFromSavedObject(
-          patchedCase.comments![0] as AttributesTypeAlerts
+          patchedCase.comments![0] as AlertAttachmentAttributes
         );
 
         expect(comment).to.eql({
@@ -179,7 +179,7 @@ export default ({ getService }: FtrProviderContext): void => {
           });
 
           const fileAttachment =
-            caseWithAttachments.comments![0] as CommentRequestExternalReferenceSOType;
+            caseWithAttachments.comments![0] as ExternalReferenceSOAttachmentPayload;
 
           expect(caseWithAttachments.totalComment).to.be(1);
           expect(fileAttachment.externalReferenceMetadata).to.eql(fileAttachmentMetadata);
@@ -270,7 +270,7 @@ export default ({ getService }: FtrProviderContext): void => {
           caseId: postedCase.id,
           // @ts-expect-error
           params: {
-            type: CommentType.user,
+            type: AttachmentType.user,
           },
           expectedHttpCode: 400,
         });
@@ -327,7 +327,7 @@ export default ({ getService }: FtrProviderContext): void => {
             supertest,
             caseId: postedCase.id,
             params: {
-              type: CommentType.user,
+              type: AttachmentType.user,
               [attribute]: attribute,
               comment: 'a comment',
               owner: 'securitySolutionFixture',
@@ -341,7 +341,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const postedCase = await createCase(supertest, postCaseReq);
 
         const allRequestAttributes = {
-          type: CommentType.alert,
+          type: AttachmentType.alert,
           index: 'test-index',
           alertId: 'test-id',
           rule: {
@@ -371,7 +371,7 @@ export default ({ getService }: FtrProviderContext): void => {
             supertest,
             caseId: postedCase.id,
             params: {
-              type: CommentType.alert,
+              type: AttachmentType.alert,
               [attribute]: attribute,
               alertId: 'test-id',
               index: 'test-index',
@@ -475,7 +475,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const postedCase = await createCase(supertest, postCaseReq);
 
         const attachments = Array(100).fill({
-          type: CommentType.externalReference as const,
+          type: AttachmentType.externalReference as const,
           owner: 'securitySolutionFixture',
           externalReferenceAttachmentTypeId: '.test',
           externalReferenceId: 'so-id',
@@ -499,7 +499,7 @@ export default ({ getService }: FtrProviderContext): void => {
           params: {
             persistableStateAttachmentTypeId: '.test',
             persistableStateAttachmentState: {},
-            type: CommentType.persistableState as const,
+            type: AttachmentType.persistableState as const,
             owner: 'securitySolutionFixture',
           },
           expectedHttpCode: 400,
@@ -512,7 +512,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const attachments = Array(100).fill({
           persistableStateAttachmentTypeId: '.test',
           persistableStateAttachmentState: {},
-          type: CommentType.persistableState as const,
+          type: AttachmentType.persistableState as const,
           owner: 'securitySolutionFixture',
         });
 
@@ -527,7 +527,7 @@ export default ({ getService }: FtrProviderContext): void => {
           supertest,
           caseId: postedCase.id,
           params: {
-            type: CommentType.externalReference as const,
+            type: AttachmentType.externalReference as const,
             owner: 'securitySolutionFixture',
             externalReferenceAttachmentTypeId: '.test',
             externalReferenceId: 'so-id',
@@ -579,7 +579,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 name: 'name',
               },
               owner: 'securitySolutionFixture',
-              type: CommentType.alert,
+              type: AttachmentType.alert,
             },
             expectedHttpCode,
             auth,
@@ -873,7 +873,7 @@ export default ({ getService }: FtrProviderContext): void => {
                   name: 'name',
                 },
                 owner: 'observabilityFixture',
-                type: CommentType.alert,
+                type: AttachmentType.alert,
               },
             });
           }
@@ -915,7 +915,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 name: 'name',
               },
               owner: 'observabilityFixture',
-              type: CommentType.alert,
+              type: AttachmentType.alert,
             },
           });
 
@@ -948,7 +948,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 name: 'name',
               },
               owner: 'observabilityFixture',
-              type: CommentType.alert,
+              type: AttachmentType.alert,
             },
             expectedHttpCode: 400,
           });
@@ -977,7 +977,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 name: 'name',
               },
               owner: 'observabilityFixture',
-              type: CommentType.alert,
+              type: AttachmentType.alert,
             },
             auth: { user: obsOnlyReadAlerts, space: 'space1' },
             expectedHttpCode: 200,
@@ -1007,7 +1007,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 name: 'name',
               },
               owner: 'observabilityFixture',
-              type: CommentType.alert,
+              type: AttachmentType.alert,
             },
             auth: { user: obsSec, space: 'space1' },
             expectedHttpCode: 403,
@@ -1017,11 +1017,11 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     describe('alert format', () => {
-      type AlertComment = CommentType.alert;
+      type AlertComment = AttachmentType.alert;
 
       for (const [alertId, index, type] of [
-        ['1', ['index1', 'index2'], CommentType.alert],
-        [['1', '2'], 'index', CommentType.alert],
+        ['1', ['index1', 'index2'], AttachmentType.alert],
+        [['1', '2'], 'index', AttachmentType.alert],
       ]) {
         it(`throws an error with an alert comment with contents id: ${alertId} indices: ${index} type: ${type}`, async () => {
           const postedCase = await createCase(supertest, postCaseReq);
@@ -1035,8 +1035,8 @@ export default ({ getService }: FtrProviderContext): void => {
       }
 
       for (const [alertId, index, type] of [
-        ['1', ['index1'], CommentType.alert],
-        [['1', '2'], ['index', 'other-index'], CommentType.alert],
+        ['1', ['index1'], AttachmentType.alert],
+        [['1', '2'], ['index', 'other-index'], AttachmentType.alert],
       ]) {
         it(`does not throw an error with an alert comment with contents id: ${alertId} indices: ${index} type: ${type}`, async () => {
           const postedCase = await createCase(supertest, postCaseReq);
@@ -1116,7 +1116,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const attachments = await getAllComments({ supertest, caseId: postedCase.id });
         expect(attachments.length).to.eql(2);
 
-        const secondAttachment = attachments[1] as CommentRequestAlertType;
+        const secondAttachment = attachments[1] as AlertAttachmentPayload;
 
         expect(secondAttachment.alertId).to.eql(['test-id-3']);
         expect(secondAttachment.index).to.eql(['test-index-3']);

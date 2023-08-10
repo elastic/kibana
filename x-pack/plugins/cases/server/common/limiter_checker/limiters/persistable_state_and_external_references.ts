@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import type { AttachmentRequest } from '../../../../common/types/api';
+import { AttachmentType } from '../../../../common/types/domain';
 import type { AttachmentService } from '../../../services';
-import { CommentType } from '../../../../common/api';
-import type { CommentRequest } from '../../../../common/api';
 import { MAX_PERSISTABLE_STATE_AND_EXTERNAL_REFERENCES } from '../../../../common/constants';
 import { isFileAttachmentRequest, isPersistableStateOrExternalReference } from '../../utils';
 import { BaseLimiter } from '../base_limiter';
@@ -16,7 +16,7 @@ export class PersistableStateAndExternalReferencesLimiter extends BaseLimiter {
   constructor(private readonly attachmentService: AttachmentService) {
     super({
       limit: MAX_PERSISTABLE_STATE_AND_EXTERNAL_REFERENCES,
-      attachmentType: [CommentType.persistableState, CommentType.externalReference],
+      attachmentType: [AttachmentType.persistableState, AttachmentType.externalReference],
       attachmentNoun: 'persistable state and external reference attachments',
     });
   }
@@ -27,7 +27,7 @@ export class PersistableStateAndExternalReferencesLimiter extends BaseLimiter {
     });
   }
 
-  public countOfItemsInRequest(requests: CommentRequest[]): number {
+  public countOfItemsInRequest(requests: AttachmentRequest[]): number {
     const totalReferences = requests
       .filter(isPersistableStateOrExternalReference)
       .filter((request) => !isFileAttachmentRequest(request));

@@ -725,9 +725,13 @@ describe('bulkEdit()', () => {
           return { state: {} };
         },
         producer: 'alerts',
-        getSummarizedAlerts: jest.fn().mockResolvedValue({}),
         validate: {
           params: { validate: (params) => params },
+        },
+        alerts: {
+          context: 'test',
+          mappings: { fieldMap: { field: { type: 'keyword', required: false } } },
+          shouldWrite: true,
         },
       });
       const existingAction = {

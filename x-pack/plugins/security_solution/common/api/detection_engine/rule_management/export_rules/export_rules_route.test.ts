@@ -10,7 +10,6 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 
 import { ExportRulesRequestBody, ExportRulesRequestQuery } from './export_rules_route';
-import type { ExportRulesRequestQueryDecoded } from './export_rules_route';
 
 describe('Export rules request schema', () => {
   describe('ExportRulesRequestBody', () => {
@@ -81,7 +80,7 @@ describe('Export rules request schema', () => {
       const checked = exactCheck(payload, decoded);
       const message = pipe(checked, foldLeftRight);
       expect(getPaths(left(message.errors))).toEqual([]);
-      const expected: ExportRulesRequestQueryDecoded = {
+      const expected: ExportRulesRequestQuery = {
         file_name: 'export.ndjson',
         exclude_export_details: false,
       };
@@ -98,7 +97,7 @@ describe('Export rules request schema', () => {
       const checked = exactCheck(payload, decoded);
       const message = pipe(checked, foldLeftRight);
       expect(getPaths(left(message.errors))).toEqual([]);
-      const expected: ExportRulesRequestQueryDecoded = {
+      const expected: ExportRulesRequestQuery = {
         file_name: 'test.ndjson',
         exclude_export_details: false,
       };
@@ -129,7 +128,7 @@ describe('Export rules request schema', () => {
       const checked = exactCheck(payload, decoded);
       const message = pipe(checked, foldLeftRight);
       expect(getPaths(left(message.errors))).toEqual([]);
-      const expected: ExportRulesRequestQueryDecoded = {
+      const expected: ExportRulesRequestQuery = {
         exclude_export_details: true,
         file_name: 'export.ndjson',
       };

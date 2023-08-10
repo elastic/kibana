@@ -124,7 +124,7 @@ export const ConnectorCheckable: React.FC<ConnectorCheckableProps> = ({
           >
             {showNativeBadge && (
               <EuiFlexItem grow={false}>
-                <EuiBadge color="hollow" isDisabled={disabled}>
+                <EuiBadge isDisabled={disabled}>
                   <EuiText size="xs">{NATIVE_LABEL}</EuiText>
                 </EuiBadge>
               </EuiFlexItem>

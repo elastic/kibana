@@ -111,7 +111,6 @@ const getMigrationCheckRoute = createApmServerRoute({
   options: { tags: ['access:apm'] },
   handler: async (resources): Promise<RunMigrationCheckResponse> => {
     const { core, plugins, context, config, request } = resources;
-
     throwNotFoundIfFleetMigrationNotAvailable(resources.featureFlags);
 
     const { fleet, security } = plugins;

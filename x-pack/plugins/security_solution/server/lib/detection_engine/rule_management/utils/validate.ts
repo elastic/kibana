@@ -36,7 +36,7 @@ import type {
 
 export const transformValidate = (
   rule: PartialRule<RuleParams>
-): [RuleResponse | null, string | null] => {
+): [RuleResponse, null] | [null, string] => {
   const transformed = transform(rule);
   if (transformed == null) {
     return [null, 'Internal error transforming'];

@@ -105,8 +105,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       }
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/155451
-    describe.skip('from the Endpoint list and details', () => {
+    describe('from the Endpoint list and details', () => {
       before(async () => {
         await pageObjects.endpoint.navigateToEndpointList();
       });

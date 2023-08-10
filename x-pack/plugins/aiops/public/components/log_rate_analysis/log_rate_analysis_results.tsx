@@ -23,8 +23,12 @@ import {
 
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { ProgressControls } from '@kbn/aiops-components';
-import { useFetchStream } from '@kbn/aiops-utils';
-import type { WindowParameters } from '@kbn/aiops-utils';
+import { useFetchStream } from '@kbn/ml-response-stream/client';
+import {
+  LOG_RATE_ANALYSIS_TYPE,
+  type LogRateAnalysisType,
+  type WindowParameters,
+} from '@kbn/aiops-utils';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { SignificantTerm, SignificantTermGroup } from '@kbn/ml-agg-utils';
@@ -68,8 +72,15 @@ const groupResultsOnMessage = i18n.translate(
 const resultsGroupedOffId = 'aiopsLogRateAnalysisGroupingOff';
 const resultsGroupedOnId = 'aiopsLogRateAnalysisGroupingOn';
 
+/**
+ * Interface for log rate analysis results data.
+ */
 export interface LogRateAnalysisResultsData {
+  /** The type of analysis, whether it's a spike or dip */
+  analysisType: LogRateAnalysisType;
+  /** Statistically significant field/value items. */
   significantTerms: SignificantTerm[];
+  /** Statistically significant groups of field/value items. */
   significantTermsGroups: SignificantTermGroup[];
 }
 
@@ -79,6 +90,8 @@ export interface LogRateAnalysisResultsData {
 interface LogRateAnalysisResultsProps {
   /** The data view to analyze. */
   dataView: DataView;
+  /** The type of analysis, whether it's a spike or dip */
+  analysisType?: LogRateAnalysisType;
   /** Start timestamp filter */
   earliest: number;
   /** End timestamp filter */
@@ -104,6 +117,7 @@ interface LogRateAnalysisResultsProps {
 
 export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
   dataView,
+  analysisType = LOG_RATE_ANALYSIS_TYPE.SPIKE,
   earliest,
   isBrushCleared,
   latest,
@@ -117,10 +131,10 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
   onAnalysisCompleted,
 }) => {
   const { http } = useAiopsAppContext();
-  const basePath = http.basePath.get() ?? '';
 
   const { clearAllRowState } = useLogRateAnalysisResultsTableRowContext();
 
+  const [currentAnalysisType, setCurrentAnalysisType] = useState<LogRateAnalysisType | undefined>();
   const [currentAnalysisWindowParameters, setCurrentAnalysisWindowParameters] = useState<
     WindowParameters | undefined
   >();
@@ -158,8 +172,9 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
     data,
     isRunning,
     errors: streamErrors,
-  } = useFetchStream<AiopsApiLogRateAnalysis, typeof basePath>(
-    `${basePath}/internal/aiops/log_rate_analysis`,
+  } = useFetchStream(
+    http,
+    '/internal/aiops/log_rate_analysis',
     '1',
     {
       start: earliest,
@@ -170,7 +185,16 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
       index: dataView.getIndexPattern(),
       grouping: true,
       flushFix: true,
-      ...windowParameters,
+      // If analysis type is `spike`, pass on window parameters as is,
+      // if it's `dip`, swap baseline and deviation.
+      ...(analysisType === LOG_RATE_ANALYSIS_TYPE.SPIKE
+        ? windowParameters
+        : {
+            baselineMin: windowParameters.deviationMin,
+            baselineMax: windowParameters.deviationMax,
+            deviationMin: windowParameters.baselineMin,
+            deviationMax: windowParameters.baselineMax,
+          }),
       overrides,
       sampleProbability,
     },
@@ -197,6 +221,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
         setOverrides(undefined);
         if (onAnalysisCompleted) {
           onAnalysisCompleted({
+            analysisType,
             significantTerms: data.significantTerms,
             significantTermsGroups: data.significantTermsGroups,
           });
@@ -223,6 +248,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
       clearAllRowState();
     }
 
+    setCurrentAnalysisType(analysisType);
     setCurrentAnalysisWindowParameters(windowParameters);
 
     // We trigger hooks updates above so we cannot directly call `start()` here
@@ -239,6 +265,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
   }, [shouldStart]);
 
   useEffect(() => {
+    setCurrentAnalysisType(analysisType);
     setCurrentAnalysisWindowParameters(windowParameters);
     start();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -323,6 +350,40 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
           />
         </EuiFlexItem>
       </ProgressControls>
+      {showLogRateAnalysisResultsTable && (
+        <>
+          <EuiSpacer size="s" />
+          <EuiCallOut
+            title={
+              <span data-test-subj="aiopsAnalysisTypeCalloutTitle">
+                {currentAnalysisType === LOG_RATE_ANALYSIS_TYPE.SPIKE
+                  ? i18n.translate('xpack.aiops.analysis.analysisTypeSpikeCallOutTitle', {
+                      defaultMessage: 'Analysis type: Log rate spike',
+                    })
+                  : i18n.translate('xpack.aiops.analysis.analysisTypeDipCallOutTitle', {
+                      defaultMessage: 'Analysis type: Log rate dip',
+                    })}
+              </span>
+            }
+            color="primary"
+            iconType="pin"
+            size="s"
+          >
+            <EuiText size="s">
+              {currentAnalysisType === LOG_RATE_ANALYSIS_TYPE.SPIKE
+                ? i18n.translate('xpack.aiops.analysis.analysisTypeSpikeCallOutContent', {
+                    defaultMessage:
+                      'The median log rate in the selected deviation time range is higher than the baseline. Therefore, the analysis results table shows statistically significant items within the deviation time range that are contributors to the spike. The "doc count" column refers to the amount of documents in the deviation time range.',
+                  })
+                : i18n.translate('xpack.aiops.analysis.analysisTypeDipCallOutContent', {
+                    defaultMessage:
+                      'The median log rate in the selected deviation time range is lower than the baseline. Therefore, the analysis results table shows statistically significant items within the baseline time range that are less in number or missing within the deviation time range. The "doc count" column refers to the amount of documents in the baseline time range.',
+                  })}
+            </EuiText>
+          </EuiCallOut>
+          <EuiSpacer size="xs" />
+        </>
+      )}
       {errors.length > 0 ? (
         <>
           <EuiSpacer size="xs" />
@@ -384,7 +445,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
             <p>
               <FormattedMessage
                 id="xpack.aiops.logRateAnalysis.page.noResultsPromptBody"
-                defaultMessage="Try to adjust the baseline and deviation time ranges and rerun the analysis. If you still get no results, there might be no statistically significant entities contributing to this spike in log rates."
+                defaultMessage="Try to adjust the baseline and deviation time ranges and rerun the analysis. If you still get no results, there might be no statistically significant entities contributing to this deviation in log rate."
               />
             </p>
           }

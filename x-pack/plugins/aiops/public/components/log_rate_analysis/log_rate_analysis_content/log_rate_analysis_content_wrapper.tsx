@@ -31,6 +31,9 @@ import type { LogRateAnalysisResultsData } from '../log_rate_analysis_results';
 
 const localStorage = new Storage(window.localStorage);
 
+/**
+ * Props for the LogRateAnalysisContentWrapper component.
+ */
 export interface LogRateAnalysisContentWrapperProps {
   /** The data view to analyze. */
   dataView: DataView;
@@ -42,6 +45,7 @@ export interface LogRateAnalysisContentWrapperProps {
   setGlobalState?: any;
   /** Timestamp for start of initial analysis */
   initialAnalysisStart?: number | WindowParameters;
+  /** Optional time range */
   timeRange?: { min: Moment; max: Moment };
   /** Elasticsearch query to pass to analysis endpoint */
   esSearchQuery?: estypes.QueryDslQueryContainer;
@@ -49,7 +53,10 @@ export interface LogRateAnalysisContentWrapperProps {
   barColorOverride?: string;
   /** Optional color override for the highlighted bar color for charts */
   barHighlightColorOverride?: string;
-  /** Optional callback that exposes data of the completed analysis */
+  /**
+   * Optional callback that exposes data of the completed analysis
+   * @param d Log rate analysis results data
+   */
   onAnalysisCompleted?: (d: LogRateAnalysisResultsData) => void;
 }
 

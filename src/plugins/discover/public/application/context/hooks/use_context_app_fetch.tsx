@@ -11,7 +11,7 @@ import { MarkdownSimple, toMountPoint, wrapWithTheme } from '@kbn/kibana-react-p
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { SortDirection } from '@kbn/data-plugin/public';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
-import { CONTEXT_TIE_BREAKER_FIELDS_SETTING } from '../../../../common';
+import { CONTEXT_TIE_BREAKER_FIELDS_SETTING } from '@kbn/discover-utils';
 import { fetchAnchor } from '../services/anchor';
 import { fetchSurroundingDocs, SurrDocType } from '../services/context';
 import {
@@ -41,13 +41,8 @@ export function useContextAppFetch({
   appState,
   useNewFieldsApi,
 }: ContextAppFetchProps) {
-  const {
-    uiSettings: config,
-    data,
-    toastNotifications,
-    filterManager,
-    core,
-  } = useDiscoverServices();
+  const services = useDiscoverServices();
+  const { uiSettings: config, data, toastNotifications, filterManager, core } = services;
   const { theme$ } = core.theme;
 
   const searchSource = useMemo(() => {
@@ -95,9 +90,20 @@ export function useContextAppFetch({
         { [dataView.timeFieldName!]: SortDirection.desc },
         { [tieBreakerField]: SortDirection.desc },
       ];
-      const anchor = await fetchAnchor(anchorId, dataView, searchSource, sort, useNewFieldsApi);
-      setState({ anchor, anchorStatus: { value: LoadingStatus.LOADED } });
-      return anchor;
+      const result = await fetchAnchor(
+        anchorId,
+        dataView,
+        searchSource,
+        sort,
+        useNewFieldsApi,
+        services
+      );
+      setState({
+        anchor: result.anchorRow,
+        anchorInterceptedWarnings: result.interceptedWarnings,
+        anchorStatus: { value: LoadingStatus.LOADED },
+      });
+      return result.anchorRow;
     } catch (error) {
       setState(createError('anchorStatus', FailureReason.UNKNOWN, error));
       toastNotifications.addDanger({
@@ -106,6 +112,7 @@ export function useContextAppFetch({
       });
     }
   }, [
+    services,
     tieBreakerField,
     setState,
     toastNotifications,
@@ -124,13 +131,14 @@ export function useContextAppFetch({
         type === SurrDocType.PREDECESSORS ? appState.predecessorCount : appState.successorCount;
       const anchor = fetchedAnchor || fetchedState.anchor;
       const statusKey = `${type}Status`;
+      const warningsKey = `${type}InterceptedWarnings`;
       const errorTitle = i18n.translate('discover.context.unableToLoadDocumentDescription', {
         defaultMessage: 'Unable to load documents',
       });
 
       try {
         setState({ [statusKey]: { value: LoadingStatus.LOADING } });
-        const rows = anchor.id
+        const result = anchor.id
           ? await fetchSurroundingDocs(
               type,
               dataView,
@@ -140,10 +148,15 @@ export function useContextAppFetch({
               count,
               filters,
               data,
-              useNewFieldsApi
+              useNewFieldsApi,
+              services
             )
-          : [];
-        setState({ [type]: rows, [statusKey]: { value: LoadingStatus.LOADED } });
+          : { rows: [], interceptedWarnings: undefined };
+        setState({
+          [type]: result.rows,
+          [warningsKey]: result.interceptedWarnings,
+          [statusKey]: { value: LoadingStatus.LOADED },
+        });
       } catch (error) {
         setState(createError(statusKey, FailureReason.UNKNOWN, error));
         toastNotifications.addDanger({
@@ -155,6 +168,7 @@ export function useContextAppFetch({
       }
     },
     [
+      services,
       filterManager,
       appState,
       fetchedState.anchor,

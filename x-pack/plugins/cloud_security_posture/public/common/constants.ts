@@ -42,6 +42,7 @@ export const LOCAL_STORAGE_PAGE_SIZE_BENCHMARK_KEY = 'cloudPosture:benchmark:pag
 export const LOCAL_STORAGE_PAGE_SIZE_RULES_KEY = 'cloudPosture:rules:pageSize';
 export const LOCAL_STORAGE_DASHBOARD_CLUSTER_SORT_KEY =
   'cloudPosture:complianceDashboard:clusterSort';
+export const LOCAL_STORAGE_FINDINGS_LAST_SELECTED_TAB_KEY = 'cloudPosture:findings:lastSelectedTab';
 
 export type CloudPostureIntegrations = Record<
   CloudSecurityPolicyTemplate,
@@ -74,7 +75,7 @@ export const cloudPostureIntegrations: CloudPostureIntegrations = {
       {
         type: CLOUDBEAT_AWS,
         name: i18n.translate('xpack.csp.cspmIntegration.awsOption.nameTitle', {
-          defaultMessage: 'Amazon Web Services',
+          defaultMessage: 'AWS',
         }),
         benchmark: i18n.translate('xpack.csp.cspmIntegration.awsOption.benchmarkTitle', {
           defaultMessage: 'CIS AWS',
@@ -211,3 +212,5 @@ export const cloudPostureIntegrations: CloudPostureIntegrations = {
 };
 export const FINDINGS_DOCS_URL = 'https://ela.st/findings';
 export const MIN_VERSION_GCP_CIS = '1.5.0';
+
+export const NO_FINDINGS_STATUS_REFRESH_INTERVAL_MS = 10000;

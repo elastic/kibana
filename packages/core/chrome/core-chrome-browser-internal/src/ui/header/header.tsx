@@ -36,7 +36,6 @@ import type {
 } from '@kbn/core-chrome-browser';
 import { CustomBranding } from '@kbn/core-custom-branding-common';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
-import { LoadingIndicator } from '../loading_indicator';
 import type { OnIsLockedUpdate } from './types';
 import { CollapsibleNav } from './collapsible_nav';
 import { HeaderBadge } from './header_badge';
@@ -59,7 +58,6 @@ export interface HeaderProps {
   breadcrumbsAppendExtension$: Observable<ChromeBreadcrumbsAppendExtension | undefined>;
   customNavLink$: Observable<ChromeNavLink | undefined>;
   homeHref: string;
-  isVisible$: Observable<boolean>;
   kibanaDocLink: string;
   docLinks: DocLinksStart;
   navLinks$: Observable<ChromeNavLink[]>;
@@ -93,20 +91,10 @@ export function Header({
   customBranding$,
   ...observables
 }: HeaderProps) {
-  const isVisible = useObservable(observables.isVisible$, false);
   const [isNavOpen, setIsNavOpen] = useState(false);
   const [navId] = useState(htmlIdGenerator()());
   const breadcrumbsAppendExtension = useObservable(breadcrumbsAppendExtension$);
   const headerActionMenuMounter = useHeaderActionMenuMounter(application.currentActionMenu$);
-
-  if (!isVisible) {
-    return (
-      <>
-        <LoadingIndicator loadingCount$={observables.loadingCount$} showAsBar />
-        <HeaderTopBanner headerBanner$={observables.headerBanner$} />
-      </>
-    );
-  }
 
   const toggleCollapsibleNavRef = createRef<HTMLButtonElement & { euiAnimate: () => void }>();
   const className = classnames('hide-for-sharing', 'headerGlobalNav');
