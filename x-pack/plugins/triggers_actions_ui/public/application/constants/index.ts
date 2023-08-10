@@ -12,12 +12,11 @@ export {
   INTERNAL_BASE_ALERTING_API_PATH,
 } from '@kbn/alerting-plugin/common';
 export { BASE_ACTION_API_PATH, INTERNAL_BASE_ACTION_API_PATH } from '@kbn/actions-plugin/common';
-import {
-  OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
-  ES_QUERY_RULE_TYPE_ID,
-} from '@kbn/observability-plugin/common/constants';
 
 export type Section = 'connectors' | 'rules' | 'alerts' | 'logs';
+
+export const OBSERVABILITY_THRESHOLD_RULE_TYPE_ID = 'observability.rules.threshold';
+export const ES_QUERY_RULE_TYPE_ID = '.es-query';
 
 export const routeToHome = `/`;
 export const routeToConnectors = `/connectors`;
