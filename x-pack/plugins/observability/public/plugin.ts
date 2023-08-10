@@ -235,7 +235,6 @@ export class Plugin
       // Get start services
       const [coreStart, pluginsStart] = await coreSetup.getStartServices();
 
-      console.log(pluginsStart);
 
       const { ruleTypeRegistry, actionTypeRegistry } = pluginsStart.triggersActionsUi;
 
