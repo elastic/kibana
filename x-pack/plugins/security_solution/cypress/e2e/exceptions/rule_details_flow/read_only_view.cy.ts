@@ -14,7 +14,6 @@ import { goToExceptionsTab, goToAlertsTab } from '../../../tasks/rule_details';
 import { goToRuleDetails } from '../../../tasks/alerts_detection_rules';
 import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../../urls/navigation';
 import { cleanKibana, deleteAlertsAndRules } from '../../../tasks/common';
-// import { deleteAlertsAndRules } from '../../../tasks/common';
 import {
   NO_EXCEPTIONS_EXIST_PROMPT,
   EXCEPTION_ITEM_VIEWER_CONTAINER,
@@ -28,15 +27,12 @@ import {
   deleteExceptionList,
 } from '../../../tasks/api_calls/exceptions';
 
-// Cypress._.times(17, () => {
 describe('Exceptions viewer read only', () => {
   const exceptionList = getExceptionList();
 
   before(() => {
     cleanKibana();
     login();
-    // cleanKibana();
-    // cy.task('esArchiverResetKibana');
     // create rule with exceptions
     createExceptionList(exceptionList, exceptionList.list_id).then((response) => {
       createRule(
@@ -61,12 +57,8 @@ describe('Exceptions viewer read only', () => {
   beforeEach(() => {
     login(ROLES.reader);
     visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL, ROLES.reader);
-    // cy.intercept('GET', '/api/detection_engine/rules/*').as('getRuleDetails');
     goToRuleDetails();
     cy.url().should('contain', 'app/security/rules/id');
-    // cy.wait('@getRuleDetails', { timeout: 10000 }).then(({ response }) => {
-    //   cy.wrap(response?.statusCode).should('eql', 200);
-    // });
     goToExceptionsTab();
   });
 
@@ -116,4 +108,3 @@ describe('Exceptions viewer read only', () => {
     cy.get(ADD_EXCEPTIONS_BTN_FROM_VIEWER_HEADER).should('not.exist');
   });
 });
-// });
