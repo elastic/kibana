@@ -5,11 +5,15 @@
  * 2.0.
  */
 
+import { TypeOf } from '@kbn/config-schema';
 import { Frequency } from '@kbn/rrule';
 import moment from 'moment';
-import { RuleSnoozeScheduleV1 } from '../../apis/bulk_edit';
+import { rRuleSchema } from '../../../r_rule';
 
-export const validateSnoozeSchedule = (schedule: RuleSnoozeScheduleV1) => {
+export const validateSnoozeSchedule = (schedule: {
+  rRule: TypeOf<typeof rRuleSchema>;
+  duration: number;
+}) => {
   const intervalIsDaily = schedule.rRule.freq === Frequency.DAILY;
   const durationInDays = moment.duration(schedule.duration, 'milliseconds').asDays();
   if (intervalIsDaily && schedule.rRule.interval && durationInDays >= schedule.rRule.interval) {

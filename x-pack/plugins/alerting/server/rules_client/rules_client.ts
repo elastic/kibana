@@ -46,7 +46,7 @@ import { bulkDisableRules } from './methods/bulk_disable';
 import { updateApiKey } from './methods/update_api_key';
 import { enable } from './methods/enable';
 import { disable } from './methods/disable';
-import { snooze, SnoozeParams } from './methods/snooze';
+import { snooze, SnoozeParams } from '../application/rule/methods/snooze';
 import { unsnooze, UnsnoozeParams } from './methods/unsnooze';
 import { clearExpiredSnoozes } from './methods/clear_expired_snoozes';
 import { muteAll } from './methods/mute_all';
