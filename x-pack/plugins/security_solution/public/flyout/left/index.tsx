@@ -17,12 +17,13 @@ import type { LeftPanelTabsType } from './tabs';
 import { tabs } from './tabs';
 import { useLeftPanelContext } from './context';
 
-export type LeftPanelPaths = 'visualize' | 'insights' | 'investigation';
+export type LeftPanelPaths = 'visualize' | 'insights' | 'investigation' | 'response';
 export const LeftPanelKey: LeftPanelProps['key'] = 'document-details-left';
 
 export const LeftPanelVisualizeTabPath: LeftPanelProps['path'] = ['visualize'];
 export const LeftPanelInsightsTabPath: LeftPanelProps['path'] = ['insights'];
 export const LeftPanelInvestigationTabPath: LeftPanelProps['path'] = ['investigation'];
+export const LeftPanelResponseTabPath: LeftPanelProps['path'] = ['response'];
 
 export interface LeftPanelProps extends FlyoutPanelProps {
   key: 'document-details-left';
