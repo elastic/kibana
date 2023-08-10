@@ -152,6 +152,7 @@ export function RuleComponent({
             healthColor={healthColor}
             statusMessage={statusMessage}
             requestRefresh={requestRefresh}
+            refreshToken={refreshToken}
           />
         </EuiFlexItem>
         {suspendedComponentWithProps(
