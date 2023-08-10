@@ -30,7 +30,7 @@ export function KnowledgeBaseCallout({ knowledgeBase }: { knowledgeBase: UseKnow
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiText size="xs" color="subdued">
-            {i18n.translate('xpack.observabilityAIAssistant.checkingKbAvailability', {
+            {i18n.translate('xpack.observabilityAiAssistant.checkingKbAvailability', {
               defaultMessage: 'Checking availability of knowledge base',
             })}
           </EuiText>
@@ -50,7 +50,7 @@ export function KnowledgeBaseCallout({ knowledgeBase }: { knowledgeBase: UseKnow
     color = 'plain';
     content = (
       <EuiText size="xs" color="subdued">
-        {i18n.translate('xpack.observabilityAIAssistant.poweredByModel', {
+        {i18n.translate('xpack.observabilityAiAssistant.poweredByModel', {
           defaultMessage: 'Powered by {model}',
           values: {
             model: 'ELSER',
@@ -67,7 +67,7 @@ export function KnowledgeBaseCallout({ knowledgeBase }: { knowledgeBase: UseKnow
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiText size="xs" color={color}>
-            {i18n.translate('xpack.observabilityAIAssistant.installingKb', {
+            {i18n.translate('xpack.observabilityAiAssistant.installingKb', {
               defaultMessage: 'Setting up the knowledge base',
             })}
           </EuiText>
@@ -78,7 +78,7 @@ export function KnowledgeBaseCallout({ knowledgeBase }: { knowledgeBase: UseKnow
     color = 'danger';
     content = (
       <EuiText size="xs" color={color}>
-        {i18n.translate('xpack.observabilityAIAssistant.failedToSetupKnowledgeBase', {
+        {i18n.translate('xpack.observabilityAiAssistant.failedToSetupKnowledgeBase', {
           defaultMessage: 'Failed to set up knowledge base.',
         })}
       </EuiText>
@@ -91,7 +91,7 @@ export function KnowledgeBaseCallout({ knowledgeBase }: { knowledgeBase: UseKnow
         }}
       >
         <EuiText size="xs">
-          {i18n.translate('xpack.observabilityAIAssistant.setupKb', {
+          {i18n.translate('xpack.observabilityAiAssistant.setupKb', {
             defaultMessage: 'Improve your experience by setting up the knowledge base.',
           })}
         </EuiText>

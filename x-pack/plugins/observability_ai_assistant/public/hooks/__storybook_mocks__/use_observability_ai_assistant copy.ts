@@ -5,14 +5,10 @@
  * 2.0.
  */
 
-const service = {
-  start: async () => {
-    return {
-      getFunctions: [],
-    };
-  },
-};
-
-export function useObservabilityAIAssistant() {
-  return service;
+export function useObservabilityAIAssistantChatService() {
+  return {
+    getFunctions: () => {
+      return [];
+    },
+  };
 }

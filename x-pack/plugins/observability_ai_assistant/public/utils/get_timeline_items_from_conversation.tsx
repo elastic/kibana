@@ -4,14 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
-import { v4 } from 'uuid';
 import { i18n } from '@kbn/i18n';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
-import { RenderFunction } from '../components/render_function';
+import React from 'react';
+import { v4 } from 'uuid';
+import { Message, MessageRole } from '../../common';
 import type { ChatTimelineItem } from '../components/chat/chat_timeline';
-import { type Message, MessageRole } from '../../common';
-import type { FunctionDefinition } from '../../common/types';
+import { RenderFunction } from '../components/render_function';
 
 function convertFunctionParamsToMarkdownCodeBlock(object: Record<string, string | number>) {
   return `
@@ -24,17 +23,14 @@ export function getTimelineItemsfromConversation({
   currentUser,
   messages,
   hasConnector,
-  functions,
 }: {
   currentUser?: Pick<AuthenticatedUser, 'username' | 'full_name'>;
   messages: Message[];
   hasConnector: boolean;
-  functions: FunctionDefinition[];
 }): ChatTimelineItem[] {
   return [
     {
       id: v4(),
-      '@timestamp': '',
       canCopy: false,
       canEdit: false,
       canGiveFeedback: false,
@@ -88,15 +84,13 @@ export function getTimelineItemsfromConversation({
               arguments: JSON.parse(functionCall.arguments || '{}'),
             });
 
-            const fn = functions.find((func) => func.options.name === message.message.name);
-
-            element = fn?.render ? (
+            element = (
               <RenderFunction
                 name={functionCall.name}
                 arguments={functionCall?.arguments}
                 response={message.message}
               />
-            ) : null;
+            );
 
             canCopy = true;
             canEdit = hasConnector;
@@ -160,7 +154,6 @@ export function getTimelineItemsfromConversation({
 
       return {
         id,
-        '@timestamp': message['@timestamp'],
         role,
         title,
         content,

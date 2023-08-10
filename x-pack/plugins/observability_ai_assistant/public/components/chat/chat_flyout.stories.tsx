@@ -30,7 +30,7 @@ const Template: ComponentStory<typeof Component> = (props: ChatFlyoutProps) => {
 const defaultProps: ChatFlyoutProps = {
   isOpen: true,
   title: 'How is this working',
-  messages: [getAssistantSetupMessage()],
+  messages: [getAssistantSetupMessage({ contexts: [] })],
   onClose: () => {},
 };
 

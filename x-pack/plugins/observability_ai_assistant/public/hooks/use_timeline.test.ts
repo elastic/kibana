@@ -34,7 +34,7 @@ describe('useTimeline', () => {
             selectConnector: () => {},
             connectors: [{ id: 'OpenAI' }] as FindActionResult[],
           },
-          service: {},
+          chatService: {},
           messages: [],
           onChatComplete: jest.fn(),
           onChatUpdate: jest.fn(),
@@ -65,14 +65,12 @@ describe('useTimeline', () => {
         initialProps: {
           messages: [
             {
-              '@timestamp': new Date().toISOString(),
               message: {
                 role: MessageRole.User,
                 content: 'Hello',
               },
             },
             {
-              '@timestamp': new Date().toISOString(),
               message: {
                 role: MessageRole.Assistant,
                 content: 'Goodbye',
@@ -82,7 +80,7 @@ describe('useTimeline', () => {
           connectors: {
             selectedConnector: 'foo',
           },
-          service: {
+          chatService: {
             chat: () => {},
           },
         } as unknown as HookProps,
@@ -124,11 +122,11 @@ describe('useTimeline', () => {
   describe('when submitting a new prompt', () => {
     let subject: Subject<PendingMessage>;
 
-    let props: Omit<HookProps, 'onChatUpdate' | 'onChatComplete' | 'service'> & {
+    let props: Omit<HookProps, 'onChatUpdate' | 'onChatComplete' | 'chatService'> & {
       onChatUpdate: jest.MockedFn<HookProps['onChatUpdate']>;
       onChatComplete: jest.MockedFn<HookProps['onChatComplete']>;
-      service: Omit<HookProps['service'], 'executeFunction'> & {
-        executeFunction: jest.MockedFn<HookProps['service']['executeFunction']>;
+      chatService: Omit<HookProps['chatService'], 'executeFunction'> & {
+        executeFunction: jest.MockedFn<HookProps['chatService']['executeFunction']>;
       };
     };
 
@@ -138,7 +136,7 @@ describe('useTimeline', () => {
         connectors: {
           selectedConnector: 'foo',
         },
-        service: {
+        chatService: {
           chat: jest.fn().mockImplementation(() => {
             subject = new BehaviorSubject<PendingMessage>({
               message: {
@@ -361,7 +359,7 @@ describe('useTimeline', () => {
             subject.complete();
           });
 
-          props.service.executeFunction.mockResolvedValueOnce({
+          props.chatService.executeFunction.mockResolvedValueOnce({
             content: {
               message: 'my-response',
             },
@@ -385,7 +383,7 @@ describe('useTimeline', () => {
 
           expect(props.onChatComplete).not.toHaveBeenCalled();
 
-          expect(props.service.executeFunction).toHaveBeenCalledWith(
+          expect(props.chatService.executeFunction).toHaveBeenCalledWith(
             'my_function',
             '{}',
             expect.any(Object)

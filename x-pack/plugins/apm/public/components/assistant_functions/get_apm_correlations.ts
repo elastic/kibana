@@ -5,14 +5,10 @@
  * 2.0.
  */
 
-const service = {
-  start: async () => {
-    return {
-      getFunctions: [],
-    };
-  },
-};
+import type { RegisterFunctionDefinition } from '@kbn/observability-ai-assistant-plugin/common/types';
 
-export function useObservabilityAIAssistant() {
-  return service;
-}
+export function registerGetApmCorrelationsFunction({
+  registerFunction,
+}: {
+  registerFunction: RegisterFunctionDefinition;
+}) {}

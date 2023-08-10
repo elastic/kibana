@@ -15,7 +15,6 @@ type ChatItemBuildProps = Partial<ChatTimelineItem> & Pick<ChatTimelineItem, 'ro
 export function buildChatItem(params: ChatItemBuildProps): ChatTimelineItem {
   return {
     id: uniqueId(),
-    '@timestamp': new Date().toISOString(),
     title: '',
     canEdit: false,
     canGiveFeedback: false,
@@ -96,7 +95,7 @@ export function buildConversation(params?: Partial<Conversation>) {
       title: '',
       last_updated: '',
     },
-    messages: [getAssistantSetupMessage()],
+    messages: [getAssistantSetupMessage({ contexts: [] })],
     labels: {},
     numeric_labels: {},
     namespace: '',

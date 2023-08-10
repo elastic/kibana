@@ -4,19 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { CoreStart, HttpFetchOptions } from '@kbn/core/public';
-import { ReadableStream } from 'stream/web';
-import type { AuthenticatedUser } from '@kbn/security-plugin/common';
-import type { ObservabilityAIAssistantService } from '../types';
-import { createService } from './create_service';
-import { SecurityPluginStart } from '@kbn/security-plugin/public';
+import type { HttpFetchOptions } from '@kbn/core/public';
 import { lastValueFrom } from 'rxjs';
+import { ReadableStream } from 'stream/web';
+import type { ObservabilityAIAssistantChatService } from '../types';
+import { createChatService } from './create_chat_service';
 
-describe('createService', () => {
+describe('createChatService', () => {
   describe('chat', () => {
-    let service: ObservabilityAIAssistantService;
+    let service: ObservabilityAIAssistantChatService;
 
-    const httpPostSpy = jest.fn();
+    const clientSpy = jest.fn();
 
     function respondWithChunks({ chunks, status = 200 }: { status?: number; chunks: string[] }) {
       const response = {
@@ -33,33 +31,23 @@ describe('createService', () => {
         },
       };
 
-      httpPostSpy.mockResolvedValueOnce(response);
+      clientSpy.mockResolvedValueOnce(response);
     }
 
     function chat() {
-      return service.chat({ messages: [], connectorId: '', knowledgeBaseAvailable: false });
+      return service.chat({ messages: [], connectorId: '' });
     }
 
-    beforeEach(() => {
-      service = createService({
-        coreStart: {
-          http: {
-            post: httpPostSpy,
-          },
-        } as unknown as CoreStart,
-        securityStart: {
-          authc: {
-            getCurrentUser: () => Promise.resolve({ username: 'elastic' } as AuthenticatedUser),
-          },
-        } as unknown as SecurityPluginStart,
-        contextRegistry: new Map(),
-        functionRegistry: new Map(),
-        enabled: true,
+    beforeEach(async () => {
+      service = await createChatService({
+        client: clientSpy,
+        registrations: [],
+        signal: new AbortController().signal,
       });
     });
 
     afterEach(() => {
-      httpPostSpy.mockReset();
+      clientSpy.mockReset();
     });
 
     it('correctly parses a stream of JSON lines', async () => {
@@ -169,7 +157,7 @@ describe('createService', () => {
     });
 
     it('cancels a running http request when aborted', async () => {
-      httpPostSpy.mockImplementationOnce((endpoint: string, options: HttpFetchOptions) => {
+      clientSpy.mockImplementationOnce((endpoint: string, options: HttpFetchOptions) => {
         options.signal?.addEventListener('abort', () => {
           expect(options.signal?.aborted).toBeTruthy();
         });

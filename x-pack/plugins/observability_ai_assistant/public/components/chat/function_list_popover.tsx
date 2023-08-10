@@ -16,16 +16,17 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FunctionDefinition } from '../../../common/types';
+import { useObservabilityAIAssistantChatService } from '../../hooks/use_observability_ai_assistant_chat_service';
 
 export function FunctionListPopover({
-  functions,
   selectedFunctionName,
   onSelectFunction,
 }: {
-  functions: FunctionDefinition[];
   selectedFunctionName?: string;
   onSelectFunction: (func: string) => void;
 }) {
+  const chatService = useObservabilityAIAssistantChatService();
+
   const [isFunctionListOpen, setIsFunctionListOpen] = useState(false);
 
   const handleClickFunctionList = () => {
@@ -80,7 +81,7 @@ export function FunctionListPopover({
             {
               id: 0,
               width: 500,
-              items: functions.map((func) => ({
+              items: chatService.getFunctions().map((func) => ({
                 name: (
                   <>
                     <EuiText size="s">

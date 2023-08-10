@@ -5,16 +5,21 @@
  * 2.0.
  */
 import React from 'react';
-import { useObservabilityAIAssistant } from '../hooks/use_observability_ai_assistant';
+import { Message } from '../../common';
+import { useObservabilityAIAssistantChatService } from '../hooks/use_observability_ai_assistant_chat_service';
 
 interface Props {
   name: string;
   arguments: string | undefined;
-  response: { content?: string; data?: string };
+  response: Message['message'];
 }
 
 export function RenderFunction(props: Props) {
-  const service = useObservabilityAIAssistant();
+  const chatService = useObservabilityAIAssistantChatService();
 
-  return <>{service.renderFunction(props.name, props.arguments, props.response)}</>;
+  if (!chatService.getFunctions().find((fn) => fn.options.name === props.name)) {
+    return null;
+  }
+
+  return <>{chatService.renderFunction(props.name, props.arguments, props.response)}</>;
 }

@@ -7,10 +7,8 @@
 
 import { ComponentMeta, ComponentStoryObj } from '@storybook/react';
 import React from 'react';
-import { Observable } from 'rxjs';
 import { MessageRole } from '../../../common';
 import { getAssistantSetupMessage } from '../../service/get_assistant_setup_message';
-import { ObservabilityAIAssistantService } from '../../types';
 import { KibanaReactStorybookDecorator } from '../../utils/storybook_decorator';
 import { ChatBody as Component } from './chat_body';
 
@@ -25,7 +23,7 @@ const defaultProps: ComponentStoryObj<typeof Component> = {
   args: {
     title: 'My Conversation',
     messages: [
-      getAssistantSetupMessage(),
+      getAssistantSetupMessage({ contexts: [] }),
       {
         '@timestamp': new Date().toISOString(),
         message: {
@@ -66,11 +64,6 @@ const defaultProps: ComponentStoryObj<typeof Component> = {
     currentUser: {
       username: 'elastic',
     },
-    service: {
-      chat: () => {
-        return new Observable();
-      },
-    } as unknown as ObservabilityAIAssistantService,
     onChatUpdate: () => {},
     onChatComplete: () => {},
   },

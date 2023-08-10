@@ -6,20 +6,23 @@
  */
 import { EuiFlexGroup, EuiFlexItem, EuiFlyout, EuiLink, EuiPanel, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/css';
-import React from 'react';
 import { i18n } from '@kbn/i18n';
+import React, { useEffect } from 'react';
 import type { Message } from '../../../common/types';
 import { useCurrentUser } from '../../hooks/use_current_user';
 import { useGenAIConnectors } from '../../hooks/use_genai_connectors';
 import { useKibana } from '../../hooks/use_kibana';
-import { useObservabilityAIAssistant } from '../../hooks/use_observability_ai_assistant';
+import { useKnowledgeBase } from '../../hooks/use_knowledge_base';
 import { useObservabilityAIAssistantRouter } from '../../hooks/use_observability_ai_assistant_router';
 import { getConnectorsManagementHref } from '../../utils/get_connectors_management_href';
 import { ChatBody } from './chat_body';
-import { useKnowledgeBase } from '../../hooks/use_knowledge_base';
 
 const containerClassName = css`
   max-height: 100%;
+`;
+
+const bodyClassName = css`
+  overflow-y: auto;
 `;
 
 export function ChatFlyout({
@@ -47,13 +50,13 @@ export function ChatFlyout({
     services: { http },
   } = useKibana();
 
-  const service = useObservabilityAIAssistant();
-
   const { euiTheme } = useEuiTheme();
 
   const router = useObservabilityAIAssistantRouter();
 
   const knowledgeBase = useKnowledgeBase();
+
+  useEffect(() => {}, [knowledgeBase.status.value?.ready]);
 
   return isOpen ? (
     <EuiFlyout onClose={onClose}>
@@ -89,9 +92,8 @@ export function ChatFlyout({
             )}
           </EuiPanel>
         </EuiFlexItem>
-        <EuiFlexItem>
+        <EuiFlexItem grow className={bodyClassName}>
           <ChatBody
-            service={service}
             connectors={connectors}
             title={title}
             messages={messages}

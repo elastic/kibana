@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { Serializable } from '@kbn/utility-types';
 import type { FromSchema } from 'json-schema-to-ts';
 import type { JSONSchema } from 'json-schema-to-ts';
 import React from 'react';
@@ -28,7 +27,7 @@ export interface Message {
     function_call?: {
       name: string;
       arguments?: string;
-      trigger: MessageRole;
+      trigger: MessageRole.Assistant | MessageRole.User | MessageRole.Elastic;
     };
     data?: string;
   };
@@ -76,8 +75,8 @@ export interface ContextDefinition {
 }
 
 interface FunctionResponse {
-  content?: Serializable;
-  data?: Serializable;
+  content?: any;
+  data?: any;
 }
 
 interface FunctionOptions<TParameters extends CompatibleJSONSchema = CompatibleJSONSchema> {

@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useMemo } from 'react';
 import { monaco } from '@kbn/monaco';
-import { useObservabilityAIAssistant } from './use_observability_ai_assistant';
+import { useMemo } from 'react';
 import { createInitializedObject } from '../utils/create_initialized_object';
+import { useObservabilityAIAssistantChatService } from './use_observability_ai_assistant_chat_service';
 
 const { editor, languages, Uri } = monaco;
 
@@ -21,10 +21,11 @@ export const useJsonEditorModel = ({
   functionName: string | undefined;
   initialJson?: string | undefined;
 }) => {
-  const { getFunctions } = useObservabilityAIAssistant();
-  const functions = getFunctions();
+  const chatService = useObservabilityAIAssistantChatService();
 
-  const functionDefinition = functions.find((func) => func.options.name === functionName);
+  const functionDefinition = chatService
+    .getFunctions()
+    .find((func) => func.options.name === functionName);
 
   return useMemo(() => {
     if (!functionDefinition) {

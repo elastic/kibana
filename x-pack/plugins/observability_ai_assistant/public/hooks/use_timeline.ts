@@ -9,19 +9,28 @@ import { AbortError } from '@kbn/kibana-utils-plugin/common';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { Subscription } from 'rxjs';
-import { MessageRole, type ConversationCreateRequest, type Message } from '../../common/types';
+import {
+  ContextDefinition,
+  MessageRole,
+  type ConversationCreateRequest,
+  type Message,
+} from '../../common/types';
 import type { ChatPromptEditorProps } from '../components/chat/chat_prompt_editor';
 import type { ChatTimelineProps } from '../components/chat/chat_timeline';
 import { EMPTY_CONVERSATION_TITLE } from '../i18n';
-import type { ObservabilityAIAssistantService, PendingMessage } from '../types';
+import { getAssistantSetupMessage } from '../service/get_assistant_setup_message';
+import type { ObservabilityAIAssistantChatService, PendingMessage } from '../types';
 import { getTimelineItemsfromConversation } from '../utils/get_timeline_items_from_conversation';
 import type { UseGenAIConnectorsResult } from './use_genai_connectors';
-import { getAssistantSetupMessage } from '../service/get_assistant_setup_message';
-import { useObservabilityAIAssistant } from './use_observability_ai_assistant';
-export function createNewConversation(): ConversationCreateRequest {
+
+export function createNewConversation({
+  contexts,
+}: {
+  contexts: ContextDefinition[];
+}): ConversationCreateRequest {
   return {
     '@timestamp': new Date().toISOString(),
-    messages: [getAssistantSetupMessage()],
+    messages: [getAssistantSetupMessage({ contexts })],
     conversation: {
       title: EMPTY_CONVERSATION_TITLE,
     },
@@ -41,22 +50,17 @@ export function useTimeline({
   messages,
   connectors,
   currentUser,
-  service,
+  chatService,
   onChatUpdate,
   onChatComplete,
-  knowledgeBaseAvailable,
 }: {
   messages: Message[];
   connectors: UseGenAIConnectorsResult;
   currentUser?: Pick<AuthenticatedUser, 'full_name' | 'username'>;
-  service: ObservabilityAIAssistantService;
+  chatService: ObservabilityAIAssistantChatService;
   onChatUpdate: (messages: Message[]) => void;
   onChatComplete: (messages: Message[]) => void;
-  knowledgeBaseAvailable: boolean;
 }): UseTimelineResult {
-  const { getFunctions } = useObservabilityAIAssistant();
-  const functions = getFunctions();
-
   const connectorId = connectors.selectedConnector;
 
   const hasConnector = !!connectorId;
@@ -66,11 +70,10 @@ export function useTimeline({
       messages,
       currentUser,
       hasConnector,
-      functions,
     });
 
     return items;
-  }, [messages, currentUser, hasConnector, functions]);
+  }, [messages, currentUser, hasConnector]);
 
   const [subscription, setSubscription] = useState<Subscription | undefined>();
 
@@ -89,10 +92,9 @@ export function useTimeline({
 
       onChatUpdate(nextMessages);
 
-      const response$ = service.chat({
+      const response$ = chatService!.chat({
         messages: nextMessages,
         connectorId,
-        knowledgeBaseAvailable,
       });
 
       let pendingMessageLocal = pendingMessage;
@@ -135,7 +137,7 @@ export function useTimeline({
         const name = reply.message.function_call.name;
 
         try {
-          const message = await service.executeFunction(
+          const message = await chatService!.executeFunction(
             name,
             reply.message.function_call.arguments,
             controller.signal
@@ -177,7 +179,6 @@ export function useTimeline({
     if (pendingMessage) {
       return conversationItems.concat({
         id: '',
-        '@timestamp': new Date().toISOString(),
         canCopy: true,
         canEdit: false,
         canGiveFeedback: false,
@@ -206,8 +207,8 @@ export function useTimeline({
   return {
     items,
     onEdit: async (item, newMessage) => {
-      const index = messages.findIndex((message) => message['@timestamp'] === item['@timestamp']);
-      const sliced = messages.slice(0, index);
+      const indexOf = items.indexOf(item);
+      const sliced = messages.slice(0, indexOf - 1);
       const nextMessages = await chat(sliced.concat(newMessage));
       onChatComplete(nextMessages);
     },
