@@ -31,7 +31,7 @@ import { MetricExpression } from '../../types';
 import { CustomMetrics, AggregationTypes, NormalizedFields } from './types';
 import { MetricRowWithAgg } from './metric_row_with_agg';
 import { ClosablePopoverTitle } from '../closable_popover_title';
-import { CUSTOM_EQUATION, EQUATION_HELP_MESSAGE } from '../../i18n_strings';
+import { EQUATION_HELP_MESSAGE } from '../../i18n_strings';
 
 export interface CustomEquationEditorProps {
   onChange: (expression: MetricExpression) => void;
@@ -190,7 +190,10 @@ export function CustomEquationEditor({
         >
           <div>
             <ClosablePopoverTitle onClose={() => setCustomEqPopoverOpen(false)}>
-              {CUSTOM_EQUATION}
+              <FormattedMessage
+                id="xpack.observability.threshold.rule.alertFlyout.customEquationLabel"
+                defaultMessage="Custom equation"
+              />
             </ClosablePopoverTitle>
             <EuiFormRow
               fullWidth

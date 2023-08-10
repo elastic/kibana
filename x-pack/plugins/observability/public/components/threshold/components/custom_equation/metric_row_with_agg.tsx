@@ -20,6 +20,7 @@ import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { ValidNormalizedTypes } from '@kbn/triggers-actions-ui-plugin/public';
 import { DataViewBase } from '@kbn/es-query';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { Aggregators, CustomMetricAggTypes } from '../../../../../common/threshold_rule/types';
 import { MetricRowControls } from './metric_row_controls';
 import { NormalizedFields, MetricRowBaseProps } from './types';
@@ -142,10 +143,11 @@ export function MetricRowWithAgg({
           >
             <div>
               <ClosablePopoverTitle onClose={() => setAggTypePopoverOpen(false)}>
-                {i18n.translate(
-                  'xpack.observability.threshold.rule.alertFlyout.customEquationEditor.aggregationLabel',
-                  { defaultMessage: 'Aggregation {name}', values: { name } }
-                )}
+                <FormattedMessage
+                  id="xpack.observability.threshold.rule.alertFlyout.customEquationEditor.aggregationLabel"
+                  defaultMessage="Aggregation {name}"
+                  values={{ name }}
+                />
               </ClosablePopoverTitle>
 
               <EuiFlexGroup gutterSize="l" alignItems="flexEnd">
