@@ -11,7 +11,7 @@ import { policyFactory } from './policy_config';
 import {
   disableProtections,
   isPolicySetToEventCollectionOnly,
-  setPolicyToEventCollectionOnly,
+  ensureOnlyEventCollectionIsAllowed,
 } from './policy_config_helpers';
 import { set } from 'lodash';
 
@@ -128,156 +128,7 @@ describe('Policy Config helpers', () => {
 
   describe('setPolicyToEventCollectionOnly()', () => {
     it('should set the policy to event collection only', () => {
-      expect(setPolicyToEventCollectionOnly(policyFactory())).toEqual({
-        linux: {
-          advanced: {
-            capture_env_vars: 'LD_PRELOAD,LD_LIBRARY_PATH',
-          },
-          behavior_protection: {
-            mode: 'off',
-            reputation_service: false,
-            supported: true,
-          },
-          events: {
-            file: true,
-            network: true,
-            process: true,
-            session_data: false,
-            tty_io: false,
-          },
-          logging: {
-            file: 'info',
-          },
-          malware: {
-            blocklist: false,
-            mode: 'off',
-          },
-          memory_protection: {
-            mode: 'off',
-            supported: true,
-          },
-          popup: {
-            behavior_protection: {
-              enabled: false,
-              message: '',
-            },
-            malware: {
-              enabled: false,
-              message: '',
-            },
-            memory_protection: {
-              enabled: false,
-              message: '',
-            },
-          },
-        },
-        mac: {
-          advanced: {
-            capture_env_vars:
-              'DYLD_INSERT_LIBRARIES,DYLD_FRAMEWORK_PATH,DYLD_LIBRARY_PATH,LD_PRELOAD',
-          },
-          behavior_protection: {
-            mode: 'off',
-            reputation_service: false,
-            supported: true,
-          },
-          events: {
-            file: true,
-            network: true,
-            process: true,
-          },
-          logging: {
-            file: 'info',
-          },
-          malware: {
-            blocklist: false,
-            mode: 'off',
-          },
-          memory_protection: {
-            mode: 'off',
-            supported: true,
-          },
-          popup: {
-            behavior_protection: {
-              enabled: false,
-              message: '',
-            },
-            malware: {
-              enabled: false,
-              message: '',
-            },
-            memory_protection: {
-              enabled: false,
-              message: '',
-            },
-          },
-        },
-        meta: {
-          cloud: false,
-          cluster_name: '',
-          cluster_uuid: '',
-          license: '',
-          license_uid: '',
-        },
-        windows: {
-          antivirus_registration: {
-            enabled: false,
-          },
-          attack_surface_reduction: {
-            credential_hardening: {
-              enabled: false,
-            },
-          },
-          behavior_protection: {
-            mode: 'off',
-            reputation_service: false,
-            supported: true,
-          },
-          malware: {
-            blocklist: false,
-            mode: 'off',
-          },
-          memory_protection: {
-            mode: 'off',
-            supported: true,
-          },
-          ransomware: {
-            mode: 'off',
-            supported: true,
-          },
-          events: {
-            credential_access: true,
-            dll_and_driver_load: true,
-            dns: true,
-            file: true,
-            network: true,
-            process: true,
-            registry: true,
-            security: true,
-          },
-          logging: {
-            file: 'info',
-          },
-          popup: {
-            behavior_protection: {
-              enabled: false,
-              message: '',
-            },
-            malware: {
-              enabled: false,
-              message: '',
-            },
-            memory_protection: {
-              enabled: false,
-              message: '',
-            },
-            ransomware: {
-              enabled: false,
-              message: '',
-            },
-          },
-        },
-      });
+      expect(ensureOnlyEventCollectionIsAllowed(policyFactory())).toEqual(eventsOnlyPolicy());
     });
   });
 
@@ -285,7 +136,7 @@ describe('Policy Config helpers', () => {
     let policy: PolicyConfig;
 
     beforeEach(() => {
-      policy = setPolicyToEventCollectionOnly(policyFactory());
+      policy = ensureOnlyEventCollectionIsAllowed(policyFactory());
     });
 
     it.each([

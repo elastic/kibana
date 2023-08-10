@@ -17,7 +17,7 @@ import { Dataset } from '@kbn/rule-registry-plugin/server';
 import type { ListPluginSetup } from '@kbn/lists-plugin/server';
 import type { ILicense } from '@kbn/licensing-plugin/server';
 
-import { turnOffPolicyProtections } from './endpoint/migrations/turn_off_policy_protections';
+import { turnOffPolicyProtectionsIfNotSupported } from './endpoint/migrations/turn_off_policy_protections';
 import { endpointSearchStrategyProvider } from './search_strategy/endpoint';
 import { getScheduleNotificationResponseActionsService } from './lib/detection_engine/rule_response_actions/schedule_notification_response_actions';
 import { siemGuideId, siemGuideConfig } from '../common/guided_onboarding/siem_guide_config';
@@ -480,7 +480,7 @@ export class Plugin implements ISecuritySolutionPlugin {
           logger.error(new Error('User artifacts task not available.'));
         }
 
-        turnOffPolicyProtections(
+        turnOffPolicyProtectionsIfNotSupported(
           core.elasticsearch.client.asInternalUser,
           endpointFleetServicesFactory.asInternalUser(),
           this.appFeatures,

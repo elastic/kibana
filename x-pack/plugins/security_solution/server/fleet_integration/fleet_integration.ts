@@ -25,7 +25,7 @@ import type { InfoResponse } from '@elastic/elasticsearch/lib/api/types';
 import { AppFeatureSecurityKey } from '../../common/types/app_features';
 import {
   isPolicySetToEventCollectionOnly,
-  setPolicyToEventCollectionOnly,
+  ensureOnlyEventCollectionIsAllowed,
 } from '../../common/endpoint/models/policy_config_helpers';
 import type { AppFeatures } from '../lib/app_features';
 import type { NewPolicyData, PolicyConfig } from '../../common/endpoint/types';
@@ -244,7 +244,7 @@ export const getPackagePolicyUpdateCallback = (
       );
 
       endpointIntegrationData.inputs[0].config.policy.value =
-        setPolicyToEventCollectionOnly(newEndpointPackagePolicy);
+        ensureOnlyEventCollectionIsAllowed(newEndpointPackagePolicy);
     }
 
     return endpointIntegrationData;

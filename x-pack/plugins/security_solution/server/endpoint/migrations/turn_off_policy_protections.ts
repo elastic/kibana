@@ -10,7 +10,7 @@ import type { UpdatePackagePolicy } from '@kbn/fleet-plugin/common';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import {
   isPolicySetToEventCollectionOnly,
-  setPolicyToEventCollectionOnly,
+  ensureOnlyEventCollectionIsAllowed,
 } from '../../../common/endpoint/models/policy_config_helpers';
 import type { PolicyData } from '../../../common/endpoint/types';
 import { AppFeatureSecurityKey } from '../../../common/types/app_features';
@@ -18,7 +18,7 @@ import type { EndpointInternalFleetServicesInterface } from '../services/fleet';
 import type { AppFeatures } from '../../lib/app_features';
 import { getPolicyDataForUpdate } from '../../../common/endpoint/service/policy';
 
-export const turnOffPolicyProtections = async (
+export const turnOffPolicyProtectionsIfNotSupported = async (
   esClient: ElasticsearchClient,
   fleetServices: EndpointInternalFleetServicesInterface,
   appFeaturesService: AppFeatures,
@@ -66,7 +66,7 @@ export const turnOffPolicyProtections = async (
         );
 
         integrationPolicy.inputs[0].config.policy.value =
-          setPolicyToEventCollectionOnly(policySettings);
+          ensureOnlyEventCollectionIsAllowed(policySettings);
 
         updates.push({
           ...getPolicyDataForUpdate(integrationPolicy),

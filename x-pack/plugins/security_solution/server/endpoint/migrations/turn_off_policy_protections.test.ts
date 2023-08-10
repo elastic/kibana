@@ -12,12 +12,12 @@ import type { EndpointInternalFleetServicesInterface } from '../services/fleet';
 import type { AppFeatures } from '../../lib/app_features';
 import { createAppFeaturesMock } from '../../lib/app_features/mocks';
 import { ALL_APP_FEATURE_KEYS } from '../../../common';
-import { turnOffPolicyProtections } from './turn_off_policy_protections';
+import { turnOffPolicyProtectionsIfNotSupported } from './turn_off_policy_protections';
 import { FleetPackagePolicyGenerator } from '../../../common/endpoint/data_generators/fleet_package_policy_generator';
 import type { PolicyData } from '../../../common/endpoint/types';
 import type { PackagePolicyClient } from '@kbn/fleet-plugin/server';
 import type { PromiseResolvedValue } from '../../../common/endpoint/types/utility_types';
-import { setPolicyToEventCollectionOnly } from '../../../common/endpoint/models/policy_config_helpers';
+import { ensureOnlyEventCollectionIsAllowed } from '../../../common/endpoint/models/policy_config_helpers';
 
 describe('Turn Off Policy Protections Migration', () => {
   let esClient: ElasticsearchClient;
@@ -26,7 +26,7 @@ describe('Turn Off Policy Protections Migration', () => {
   let logger: Logger;
 
   const callTurnOffPolicyProtections = () =>
-    turnOffPolicyProtections(esClient, fleetServices, appFeatures, logger);
+    turnOffPolicyProtectionsIfNotSupported(esClient, fleetServices, appFeatures, logger);
 
   beforeEach(() => {
     const endpointContextStartContract = createMockEndpointAppContextServiceStartContract();
@@ -59,7 +59,7 @@ describe('Turn Off Policy Protections Migration', () => {
         return policy;
       }
 
-      policy.inputs[0].config.policy.value = setPolicyToEventCollectionOnly(
+      policy.inputs[0].config.policy.value = ensureOnlyEventCollectionIsAllowed(
         policy.inputs[0].config.policy.value
       );
 

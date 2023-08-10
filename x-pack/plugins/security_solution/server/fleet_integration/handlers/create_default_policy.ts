@@ -24,7 +24,7 @@ import {
 } from '../constants';
 import {
   disableProtections,
-  setPolicyToEventCollectionOnly,
+  ensureOnlyEventCollectionIsAllowed,
 } from '../../../common/endpoint/models/policy_config_helpers';
 
 /**
@@ -61,10 +61,9 @@ export const createDefaultPolicy = (
 
   // If no Policy Protection allowed (ex. serverless)
   if (!appFeatures.isEnabled(AppFeatureSecurityKey.endpointPolicyProtections)) {
-    defaultPolicyPerType = setPolicyToEventCollectionOnly(defaultPolicyPerType);
+    defaultPolicyPerType = ensureOnlyEventCollectionIsAllowed(defaultPolicyPerType);
   }
 
-  // Apply license limitations in the final step, so it's not overriden (see malware popup)
   return defaultPolicyPerType;
 };
 
