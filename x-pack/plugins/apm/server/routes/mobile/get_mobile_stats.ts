@@ -80,7 +80,7 @@ async function getMobileStats({
     crashes: {
       value: crashes.currentPeriod.value,
       timeseries: crashes.currentPeriod.timeseries as Timeseries[],
-    }
+    },
   };
 }
 
