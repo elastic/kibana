@@ -75,7 +75,10 @@ import {
   TimestampOverrideFallbackDisabled,
 } from '../../../../common/api/detection_engine/model/rule_schema';
 
-import type { PatchRuleRequestBody } from '../../../../common/api/detection_engine/rule_management';
+import type {
+  CoverageOverviewFilter,
+  PatchRuleRequestBody,
+} from '../../../../common/api/detection_engine/rule_management';
 import { FindRulesSortField } from '../../../../common/api/detection_engine/rule_management';
 import type {
   RuleCreateProps,
@@ -268,6 +271,11 @@ export interface FetchRuleProps {
 
 export interface FetchRuleSnoozingProps {
   ids: string[];
+  signal?: AbortSignal;
+}
+
+export interface FetchCoverageOverviewProps {
+  filter: CoverageOverviewFilter;
   signal?: AbortSignal;
 }
 

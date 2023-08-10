@@ -107,9 +107,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await retry.try(async () => {
         // show the tooltip actions
         await rightClickInChart(30, 5); // hardcoded position of bar, depends heavy on data and charts implementation
-        await (await find.byCssSelector('.echTooltipActions__action')).click();
+        await (await find.allByCssSelector('.echTooltipActions__action'))[1].click();
         const hasIpFilter = await filterBar.hasFilter('ip', '97.220.3.248');
         expect(hasIpFilter).to.be(true);
+        await rightClickInChart(35, 5); // hardcoded position of bar, depends heavy on data and charts implementation
+        await (await find.allByCssSelector('.echTooltipActions__action'))[0].click();
+        const time = await PageObjects.timePicker.getTimeConfig();
+        expect(time.start).to.equal('Sep 21, 2015 @ 09:00:00.000');
+        expect(time.end).to.equal('Sep 21, 2015 @ 12:00:00.000');
       });
     });
 

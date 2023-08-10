@@ -43,7 +43,7 @@ import type { PackagePolicyFormState } from '../../types';
 import { SelectedPolicyTab } from '../../components';
 import { useOnSaveNavigate } from '../../hooks';
 import { prepareInputPackagePolicyDataset } from '../../services/prepare_input_pkg_policy_dataset';
-import { getCloudFormationTemplateUrlFromPackagePolicy } from '../../../../../services';
+import { getCloudFormationPropsFromPackagePolicy } from '../../../../../services';
 
 async function createAgentPolicy({
   packagePolicy,
@@ -305,7 +305,7 @@ export function useOnSubmit({
       });
 
       const hasCloudFormation = data?.item
-        ? getCloudFormationTemplateUrlFromPackagePolicy(data.item)
+        ? getCloudFormationPropsFromPackagePolicy(data.item).templateUrl
         : false;
 
       const hasGoogleCloudShell = data?.item ? getCloudShellUrlFromPackagePolicy(data.item) : false;

@@ -20,3 +20,5 @@ declare module 'react-syntax-highlighter/dist/cjs/prism-light';
 declare module 'monaco-editor/esm/vs/basic-languages/markdown/markdown';
 declare module 'monaco-editor/esm/vs/basic-languages/css/css';
 declare module 'monaco-editor/esm/vs/basic-languages/yaml/yaml';
+
+declare module 'find-cypress-specs';
