@@ -6,7 +6,15 @@
  */
 
 import React, { useCallback, useState, useEffect, useRef } from 'react';
-import { EuiFlyoutHeader, EuiTitle, EuiAccordion, EuiSpacer } from '@elastic/eui';
+import {
+  EuiFlyoutHeader,
+  EuiTitle,
+  EuiAccordion,
+  EuiSpacer,
+  EuiBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
 import { isOfAggregateQueryType, type AggregateQuery, type Query } from '@kbn/es-query';
 import { isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
@@ -119,13 +127,24 @@ export function LensEditConfigurationFlyout({
     <>
       {isOfAggregateQueryType(attributes.state.query) && (
         <EuiFlyoutHeader hasBorder className="lnsDimensionContainer__header">
-          <EuiTitle size="xs">
-            <h2 id="Edit Lens configuration">
-              {i18n.translate('xpack.lens.config.editLabel', {
-                defaultMessage: 'Edit SQL visualization',
-              })}
-            </h2>
-          </EuiTitle>
+          <EuiFlexGroup justifyContent="spaceBetween">
+            <EuiFlexItem grow={false}>
+              <EuiTitle size="xs">
+                <h2 id="Edit Lens configuration">
+                  {i18n.translate('xpack.lens.config.editLabel', {
+                    defaultMessage: 'Edit SQL visualization',
+                  })}
+                </h2>
+              </EuiTitle>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiBadge color="hollow">
+                {i18n.translate('xpack.lens.config.techPreviewLabel', {
+                  defaultMessage: 'Technical preview',
+                })}
+              </EuiBadge>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlyoutHeader>
       )}
       <FlyoutWrapper
@@ -161,7 +180,7 @@ export function LensEditConfigurationFlyout({
           <EuiAccordion
             id="layer-configuration"
             buttonContent={
-              <EuiTitle size="xs">
+              <EuiTitle size="xxs">
                 <h5>
                   {i18n.translate('xpack.lens.config.layerConfigurationLabel', {
                     defaultMessage: 'Layer configuration',

@@ -20,6 +20,7 @@ import {
   EuiDescriptionList,
   EuiDescriptionListDescription,
   EuiButton,
+  useEuiTheme,
 } from '@elastic/eui';
 import { Interpolation, Theme, css } from '@emotion/react';
 import { css as classNameCss } from '@emotion/css';
@@ -51,6 +52,7 @@ export const EditorFooter = memo(function EditorFooter({
   refreshErrors,
 }: EditorFooterProps) {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const { euiTheme } = useEuiTheme();
   return (
     <EuiFlexGroup
       gutterSize="s"
@@ -224,14 +226,33 @@ export const EditorFooter = memo(function EditorFooter({
             onClick={refreshErrors}
             isDisabled={Boolean(disableSubmitAction)}
           >
-            <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="center">
+            <EuiFlexGroup
+              gutterSize="xs"
+              responsive={false}
+              alignItems="center"
+              justifyContent="spaceBetween"
+            >
               <EuiFlexItem grow={false}>
                 {i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.runQuery', {
                   defaultMessage: 'Run query',
                 })}
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiText size="xs">{COMMAND_KEY} ⏎</EuiText>
+                <EuiText
+                  size="xs"
+                  css={css`
+                    border: 1px solid
+                      ${Boolean(disableSubmitAction)
+                        ? euiTheme.colors.disabled
+                        : euiTheme.colors.emptyShade};
+                    padding: 0 ${euiTheme.size.xs};
+                    font-size: ${euiTheme.size.s};
+                    margin-left: ${euiTheme.size.xs};
+                    border-radius: ${euiTheme.size.xs};
+                  `}
+                >
+                  {COMMAND_KEY}⏎
+                </EuiText>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiButton>
