@@ -74,6 +74,9 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       fleetAuthz: {
         fleet: { readEnrollmentTokens: true },
       },
+      options: {
+        access: 'internal',
+      },
     },
     getOneEnrollmentApiKeyHandler
   );
@@ -84,6 +87,9 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       validate: DeleteEnrollmentAPIKeyRequestSchema,
       fleetAuthz: {
         fleet: { all: true },
+      },
+      options: {
+        access: 'internal',
       },
     },
     deleteEnrollmentApiKeyHandler
@@ -96,6 +102,9 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       fleetAuthz: {
         fleet: { readEnrollmentTokens: true },
       },
+      options: {
+        access: 'internal',
+      },
     },
     getEnrollmentApiKeysHandler
   );
@@ -106,6 +115,9 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       validate: PostEnrollmentAPIKeyRequestSchema,
       fleetAuthz: {
         fleet: { all: true },
+      },
+      options: {
+        access: 'internal',
       },
     },
     postEnrollmentApiKeyHandler

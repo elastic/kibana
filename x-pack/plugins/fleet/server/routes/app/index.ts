@@ -113,6 +113,9 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       fleetAuthz: {
         fleet: { all: true },
       },
+      options: {
+        access: 'internal',
+      },
     },
     generateServiceTokenHandler
   );

@@ -263,6 +263,9 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           fleetAuthz,
           getRouteRequiredAuthz('get', EPM_API_ROUTES.INFO_PATTERN_DEPRECATED)
         ).granted,
+      options: {
+        access: 'internal',
+      },
     },
     async (context, request, response) => {
       const newRequest = { ...request, params: splitPkgKey(request.params.pkgkey) } as any;
@@ -286,6 +289,9 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       fleetAuthz: {
         integrations: { upgradePackages: true, writePackageSettings: true },
       },
+      options: {
+        access: 'internal',
+      },
     },
     async (context, request, response) => {
       const newRequest = { ...request, params: splitPkgKey(request.params.pkgkey) } as any;
@@ -307,6 +313,9 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       validate: InstallPackageFromRegistryRequestSchemaDeprecated,
       fleetAuthz: {
         integrations: { installPackages: true },
+      },
+      options: {
+        access: 'internal',
       },
     },
     async (context, request, response) => {
@@ -333,6 +342,9 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       validate: DeletePackageRequestSchemaDeprecated,
       fleetAuthz: {
         integrations: { removePackages: true },
+      },
+      options: {
+        access: 'internal',
       },
     },
     async (context, request, response) => {

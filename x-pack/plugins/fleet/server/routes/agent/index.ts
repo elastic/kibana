@@ -280,6 +280,9 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
       fleetAuthz: {
         fleet: { all: true },
       },
+      options: {
+        access: 'internal',
+      },
     },
     getAgentStatusForAgentPolicyHandler
   );
