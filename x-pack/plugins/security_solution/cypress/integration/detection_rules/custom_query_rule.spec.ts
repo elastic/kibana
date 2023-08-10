@@ -306,6 +306,7 @@ describe.skip('Custom detection rules deletion and edition', () => {
 
           deleteRuleFromDetailsPage();
 
+          // @ts-expect-error
           cy.waitFor('@deleteRule').then(() => {
             cy.get(RULES_TABLE).should('exist');
             cy.get(RULES_TABLE).then(($table) => {
