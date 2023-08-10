@@ -128,7 +128,8 @@ export class JourneyFtrHarness {
     // Loading test data
     await Promise.all([
       asyncForEach(this.journeyConfig.getEsArchives(), async (esArchive) => {
-        await this.esArchiver.load(esArchive);
+        // load data only if index does not exist
+        await this.esArchiver.loadIfNeeded(esArchive);
       }),
       asyncForEach(this.journeyConfig.getKbnArchives(), async (kbnArchive) => {
         await this.kibanaServer.importExport.load(kbnArchive);
@@ -197,14 +198,16 @@ export class JourneyFtrHarness {
     // unloading the test data so that the scalability data extractor can focus on just the APM data produced
     // by Kibana running under test.
     await this.teardownApm();
-    await Promise.all([
-      asyncForEach(this.journeyConfig.getEsArchives(), async (esArchive) => {
+    const isWarmupPhase = process.env.TEST_PERFORMANCE_PHASE === 'WARMUP';
+    // If we run journey 2 times ('WARMUP' & 'TEST' phases), we keep ES data on warmup finish
+    if (!isWarmupPhase) {
+      await asyncForEach(this.journeyConfig.getEsArchives(), async (esArchive) => {
         await this.esArchiver.unload(esArchive);
-      }),
-      asyncForEach(this.journeyConfig.getKbnArchives(), async (kbnArchive) => {
-        await this.kibanaServer.importExport.unload(kbnArchive);
-      }),
-    ]);
+      });
+    }
+    await asyncForEach(this.journeyConfig.getKbnArchives(), async (kbnArchive) => {
+      await this.kibanaServer.importExport.unload(kbnArchive);
+    });
   }
 
   private async onStepSuccess(step: AnyStep) {
