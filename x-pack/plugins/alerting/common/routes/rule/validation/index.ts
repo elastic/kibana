@@ -7,7 +7,7 @@
 
 export { validateDuration } from './validate_duration/latest';
 export { validateHours } from './validate_hours/latest';
-export { validateNotifyWhen } from './validate_notify_when/latest';
+// export { validateNotifyWhen } from './validate_notify_when/latest';
 export { validateTimezone } from './validate_timezone/latest';
 export { validateSnoozeSchedule } from './validate_snooze_schedule/latest';
 

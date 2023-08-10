@@ -12,7 +12,7 @@ import {
   ruleExecutionStatusErrorReason as ruleExecutionStatusErrorReasonV1,
   ruleExecutionStatusWarningReason as ruleExecutionStatusWarningReasonV1,
   ruleLastRunOutcomeValues as ruleLastRunOutcomeValuesV1,
-} from '../constants/v1';
+} from '../../common/constants/v1';
 import { validateNotifyWhen as validateNotifyWhenV1 } from '../../validation';
 
 export const ruleParamsSchema = schema.recordOf(schema.string(), schema.maybe(schema.any()));
