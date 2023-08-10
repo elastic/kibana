@@ -16,6 +16,7 @@ import {
   expectTextsInDocument,
   expectTextsNotInDocument,
 } from '../../../../utils/test_helpers';
+import { noop } from 'lodash';
 
 function Wrapper({ children }: { children?: ReactNode }) {
   return (
@@ -35,8 +36,6 @@ const transaction = {
     type: 'tx type',
   },
 } as unknown as Transaction;
-
-function noop() {}
 
 describe('Custom links', () => {
   it('shows empty message when no custom link is available', () => {
