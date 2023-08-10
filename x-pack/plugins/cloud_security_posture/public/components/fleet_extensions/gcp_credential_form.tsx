@@ -25,7 +25,11 @@ import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import { NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { CLOUDBEAT_GCP } from '../../../common/constants';
+import {
+  CLOUDBEAT_GCP,
+  SETUP_ACCESS_CLOUD_SHELL,
+  SETUP_ACCESS_MANUAL,
+} from '../../../common/constants';
 import { RadioGroup } from './csp_boxed_radio_group';
 import {
   getCspmCloudShellDefaultValue,
@@ -162,14 +166,14 @@ const getSetupFormatOptions = (): Array<{
   disabled: boolean;
 }> => [
   {
-    id: 'google_cloud_shell',
+    id: SETUP_ACCESS_CLOUD_SHELL,
     label: i18n.translate('xpack.csp.gcpIntegration.setupFormatOptions.googleCloudShell', {
       defaultMessage: 'Google Cloud Shell',
     }),
     disabled: false,
   },
   {
-    id: 'manual',
+    id: SETUP_ACCESS_MANUAL,
     label: i18n.translate('xpack.csp.gcpIntegration.setupFormatOptions.manual', {
       defaultMessage: 'Manual',
     }),
@@ -214,13 +218,13 @@ const getSetupFormatFromInput = (
   const credentialsType = input.streams[0].vars?.setup_access?.value;
   // Google Cloud shell is the default value
   if (!credentialsType) {
-    return 'google_cloud_shell';
+    return SETUP_ACCESS_CLOUD_SHELL;
   }
-  if (credentialsType !== 'google_cloud_shell') {
-    return 'manual';
+  if (credentialsType !== SETUP_ACCESS_CLOUD_SHELL) {
+    return SETUP_ACCESS_MANUAL;
   }
 
-  return 'google_cloud_shell';
+  return SETUP_ACCESS_CLOUD_SHELL;
 };
 
 const getGoogleCloudShellUrl = (newPolicy: NewPackagePolicy) => {
@@ -263,7 +267,7 @@ const useCloudShellUrl = ({
   useEffect(() => {
     const policyInputCloudShellUrl = getGoogleCloudShellUrl(newPolicy);
 
-    if (setupFormat === 'manual') {
+    if (setupFormat === SETUP_ACCESS_MANUAL) {
       if (!!policyInputCloudShellUrl) {
         updateCloudShellUrl(newPolicy, updatePolicy, undefined);
       }
@@ -308,7 +312,7 @@ export const GcpCredentialsForm = ({
     setupFormat,
   });
   const onSetupFormatChange = (newSetupFormat: SetupFormatGCP) => {
-    if (newSetupFormat === 'google_cloud_shell') {
+    if (newSetupFormat === SETUP_ACCESS_CLOUD_SHELL) {
       // We need to store the current manual fields to restore them later
       fieldsSnapshot.current = Object.fromEntries(
         fields.map((field) => [field.id, { value: field.value }])
@@ -319,7 +323,7 @@ export const GcpCredentialsForm = ({
       updatePolicy(
         getPosturePolicy(newPolicy, input.type, {
           setup_access: {
-            value: 'google_cloud_shell',
+            value: SETUP_ACCESS_CLOUD_SHELL,
             type: 'text',
           },
           // Clearing fields from previous setup format to prevent exposing credentials
@@ -332,7 +336,7 @@ export const GcpCredentialsForm = ({
         getPosturePolicy(newPolicy, input.type, {
           setup_access: {
             // Restoring last manual credentials type or defaulting to the first option
-            value: lastSetupAccessType.current || 'manual',
+            value: lastSetupAccessType.current || SETUP_ACCESS_MANUAL,
             type: 'text',
           },
           // Restoring fields from manual setup format if any
@@ -343,7 +347,8 @@ export const GcpCredentialsForm = ({
   };
   // Integration is Invalid IF Version is not at least 1.5.0 OR Setup Access is manual but Project ID is empty
   useEffect(() => {
-    const isProjectIdEmpty = setupFormat === 'manual' && !getFieldById('project_id')?.value;
+    const isProjectIdEmpty =
+      setupFormat === SETUP_ACCESS_MANUAL && !getFieldById('project_id')?.value;
     const isInvalidPolicy = isInvalid || isProjectIdEmpty;
 
     setIsValid(!isInvalidPolicy);
@@ -379,7 +384,7 @@ export const GcpCredentialsForm = ({
         onChange={onSetupFormatChange}
       />
       <EuiSpacer size="l" />
-      {setupFormat === 'manual' ? (
+      {setupFormat === SETUP_ACCESS_MANUAL ? (
         <GcpInputVarFields
           fields={fields}
           onChange={(key, value) =>
