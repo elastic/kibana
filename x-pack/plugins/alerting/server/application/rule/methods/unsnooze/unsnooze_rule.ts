@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import { RawRule } from '../../types';
-import { WriteOperations, AlertingAuthorizationEntity } from '../../authorization';
-import { retryIfConflicts } from '../../lib/retry_if_conflicts';
-import { partiallyUpdateAlert } from '../../saved_objects';
-import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
-import { RulesClientContext } from '../types';
-import { updateMeta } from '../lib';
-import { getUnsnoozeAttributes } from '../common';
+import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
+import { RawRule } from '../../../../types';
+import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
+import { retryIfConflicts } from '../../../../lib/retry_if_conflicts';
+import { partiallyUpdateAlert } from '../../../../saved_objects';
+import { RulesClientContext } from '../../../../rules_client/types';
+import { getUnsnoozeAttributes } from '../../../../rules_client/common';
+import { updateMeta } from '../../../../rules_client/lib';
 
 export interface UnsnoozeParams {
   id: string;
   scheduleIds?: string[];
 }
 
-export async function unsnooze(
+export async function unsnoozeRule(
   context: RulesClientContext,
   { id, scheduleIds }: UnsnoozeParams
 ): Promise<void> {

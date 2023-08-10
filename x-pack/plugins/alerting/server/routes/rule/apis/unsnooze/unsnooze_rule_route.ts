@@ -6,24 +6,14 @@
  */
 
 import { IRouter } from '@kbn/core/server';
-import { schema } from '@kbn/config-schema';
-import { ILicenseState, RuleMutedError } from '../lib';
-import { verifyAccessAndContext, RewriteRequestCase } from './lib';
-import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../types';
-
-const paramSchema = schema.object({
-  id: schema.string(),
-});
-
-export const scheduleIdsSchema = schema.maybe(schema.arrayOf(schema.string()));
-
-const bodySchema = schema.object({
-  schedule_ids: scheduleIdsSchema,
-});
-
-const rewriteBodyReq: RewriteRequestCase<{ scheduleIds?: string[] }> = ({
-  schedule_ids: scheduleIds,
-}) => (scheduleIds ? { scheduleIds } : {});
+import {
+  unsnoozeBodySchema,
+  unsnoozeParamsSchema,
+} from '../../../../../common/routes/rule/apis/unsnooze';
+import { ILicenseState, RuleMutedError } from '../../../../lib';
+import { verifyAccessAndContext } from '../../../lib';
+import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../../../../types';
+import { transformUnsnoozeBodyV1 } from './transforms';
 
 export const unsnoozeRuleRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
@@ -33,15 +23,15 @@ export const unsnoozeRuleRoute = (
     {
       path: `${INTERNAL_BASE_ALERTING_API_PATH}/rule/{id}/_unsnooze`,
       validate: {
-        params: paramSchema,
-        body: bodySchema,
+        params: unsnoozeParamsSchema,
+        body: unsnoozeBodySchema,
       },
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         const rulesClient = (await context.alerting).getRulesClient();
         const params = req.params;
-        const body = rewriteBodyReq(req.body);
+        const body = transformUnsnoozeBodyV1(req.body);
         try {
           await rulesClient.unsnooze({ ...params, ...body });
           return res.noContent();

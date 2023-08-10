@@ -11,6 +11,8 @@ import { RulesClientContext, BulkOptions, MuteOptions } from './types';
 
 import { clone, CloneArguments } from './methods/clone';
 import { createRule, CreateRuleParams } from '../application/rule/methods/create';
+import { snoozeRule, SnoozeParams } from '../application/rule/methods/snooze';
+import { unsnoozeRule, UnsnoozeParams } from '../application/rule/methods/unsnooze';
 import { get, GetParams } from './methods/get';
 import { resolveRule, ResolveParams } from '../application/rule/methods/resolve';
 import { getAlertState, GetAlertStateParams } from './methods/get_alert_state';
@@ -46,8 +48,6 @@ import { bulkDisableRules } from './methods/bulk_disable';
 import { updateApiKey } from './methods/update_api_key';
 import { enable } from './methods/enable';
 import { disable } from './methods/disable';
-import { snooze, SnoozeParams } from '../application/rule/methods/snooze';
-import { unsnooze, UnsnoozeParams } from './methods/unsnooze';
 import { clearExpiredSnoozes } from './methods/clear_expired_snoozes';
 import { muteAll } from './methods/mute_all';
 import { unmuteAll } from './methods/unmute_all';
@@ -148,8 +148,8 @@ export class RulesClient {
   public enable = (options: { id: string }) => enable(this.context, options);
   public disable = (options: { id: string }) => disable(this.context, options);
 
-  public snooze = (options: SnoozeParams) => snooze(this.context, options);
-  public unsnooze = (options: UnsnoozeParams) => unsnooze(this.context, options);
+  public snooze = (options: SnoozeParams) => snoozeRule(this.context, options);
+  public unsnooze = (options: UnsnoozeParams) => unsnoozeRule(this.context, options);
 
   public clearExpiredSnoozes = (options: {
     rule: Pick<SanitizedRule<RuleTypeParams>, 'id' | 'snoozeSchedule'>;
