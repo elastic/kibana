@@ -12,7 +12,6 @@ import { css } from '@emotion/react';
 import {
   EuiFieldText,
   EuiFormRow,
-  EuiLink,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -34,6 +33,8 @@ import {
   NewPackagePolicyPostureInput,
 } from './utils';
 import { MIN_VERSION_GCP_CIS } from '../../common/constants';
+import { cspIntegrationDocsNavigation } from '../../common/navigation/constants';
+import { ReadDocumentation } from './aws_credentials_form/aws_credentials_form';
 
 export const CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS = {
   GOOGLE_CLOUD_SHELL_SETUP: 'google_cloud_shell_setup_test_id',
@@ -65,23 +66,6 @@ const GCPSetupInfoContent = () => (
       />
     </EuiText>
   </>
-);
-
-/* NEED TO FIND THE REAL URL HERE LATER */
-const DocsLink = (
-  <EuiText color={'subdued'} size="s">
-    <FormattedMessage
-      id="xpack.csp.gcpIntegration.docsLink"
-      defaultMessage="Read the {docs} for more details"
-      values={{
-        docs: (
-          <EuiLink href="https://ela.st/cspm-get-started" external>
-            documentation
-          </EuiLink>
-        ),
-      }}
-    />
-  </EuiText>
 );
 
 const GoogleCloudShellSetup = () => {
@@ -228,7 +212,7 @@ const getSetupFormatFromInput = (
   >
 ): SetupFormatGCP => {
   const credentialsType = input.streams[0].vars?.setup_access?.value;
-  // CloudFormation is the default setup format if the integration has a CloudFormation template
+  // Google Cloud shell is the default value
   if (!credentialsType) {
     return 'google_cloud_shell';
   }
@@ -406,7 +390,7 @@ export const GcpCredentialsForm = ({
         <GoogleCloudShellSetup />
       )}
       <EuiSpacer size="s" />
-      {DocsLink}
+      <ReadDocumentation url={cspIntegrationDocsNavigation.cspm.getStartedPath} />
       <EuiSpacer />
     </>
   );
