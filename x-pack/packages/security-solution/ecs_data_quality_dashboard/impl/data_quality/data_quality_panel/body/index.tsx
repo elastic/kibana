@@ -73,7 +73,6 @@ const BodyComponent: React.FC<Props> = ({
 }) => {
   const {
     onCheckCompleted,
-    onCheckAllCompleted,
     patternIndexNames,
     patternRollups,
     totalDocsCount,
@@ -109,7 +108,6 @@ const BodyComponent: React.FC<Props> = ({
           totalIndicesChecked={totalIndicesChecked}
           totalSizeInBytes={totalSizeInBytes}
           onCheckCompleted={onCheckCompleted}
-          onCheckAllCompleted={onCheckAllCompleted}
         />
         <EuiSpacer size="l" />
       </EuiFlexItem>

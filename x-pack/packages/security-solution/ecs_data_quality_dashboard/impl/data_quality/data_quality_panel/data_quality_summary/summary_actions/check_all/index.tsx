@@ -16,12 +16,7 @@ import { checkIndex } from './check_index';
 import { useDataQualityContext } from '../../../data_quality_context';
 import { getAllIndicesToCheck } from './helpers';
 import * as i18n from '../../../../translations';
-import type {
-  EcsMetadata,
-  IndexToCheck,
-  OnCheckCompleted,
-  OnCheckAllCompleted,
-} from '../../../../types';
+import type { EcsMetadata, IndexToCheck, OnCheckCompleted } from '../../../../types';
 
 const CheckAllButton = styled(EuiButton)`
   width: 112px;
@@ -43,7 +38,6 @@ interface Props {
   formatNumber: (value: number | undefined) => string;
   ilmPhases: string[];
   incrementCheckAllIndiciesChecked: () => void;
-  onCheckAllCompleted: OnCheckAllCompleted;
   onCheckCompleted: OnCheckCompleted;
   patternIndexNames: Record<string, string[]>;
   patterns: string[];
@@ -59,7 +53,6 @@ const CheckAllComponent: React.FC<Props> = ({
   formatNumber,
   ilmPhases,
   incrementCheckAllIndiciesChecked,
-  onCheckAllCompleted,
   onCheckCompleted,
   patternIndexNames,
   patterns,
@@ -88,6 +81,8 @@ const CheckAllComponent: React.FC<Props> = ({
       const allIndicesToCheck = getAllIndicesToCheck(patternIndexNames);
       const startTime = Date.now();
       const batchId = uuidv4();
+      let checked = 0;
+
       setCheckAllIndiciesChecked(0);
       setCheckAllTotalIndiciesToCheck(allIndicesToCheck.length);
 
@@ -100,20 +95,24 @@ const CheckAllComponent: React.FC<Props> = ({
 
           await checkIndex({
             abortController: abortController.current,
+            batchId,
+            checkAllStartTime: startTime,
             ecsMetadata: EcsFlat as unknown as Record<string, EcsMetadata>,
             formatBytes,
             formatNumber,
             httpFetch,
             indexName,
+            isLastCheck:
+              allIndicesToCheck.length > 0 ? checked === allIndicesToCheck.length - 1 : true,
             onCheckCompleted,
             pattern,
             version: EcsVersion,
-            batchId,
           });
 
           if (!abortController.current.signal.aborted) {
             await wait(DELAY_AFTER_EVERY_CHECK_COMPLETES);
             incrementCheckAllIndiciesChecked();
+            checked++;
           }
         }
       }
@@ -121,11 +120,6 @@ const CheckAllComponent: React.FC<Props> = ({
       if (!abortController.current.signal.aborted) {
         setIndexToCheck(null);
         setIsRunning(false);
-
-        onCheckAllCompleted({
-          requestTime: Date.now() - startTime,
-          batchId,
-        });
       }
     }
 
@@ -143,7 +137,6 @@ const CheckAllComponent: React.FC<Props> = ({
     httpFetch,
     incrementCheckAllIndiciesChecked,
     isRunning,
-    onCheckAllCompleted,
     onCheckCompleted,
     patternIndexNames,
     setCheckAllIndiciesChecked,

@@ -28,7 +28,6 @@ import type {
   DataQualityCheckResult,
   ErrorSummary,
   IndexToCheck,
-  OnCheckAllCompleted,
   OnCheckCompleted,
   PatternRollup,
 } from '../../../types';
@@ -140,7 +139,6 @@ export interface Props {
   errorSummary: ErrorSummary[];
   ilmPhases: string[];
   lastChecked: string;
-  onCheckAllCompleted: OnCheckAllCompleted;
   onCheckCompleted: OnCheckCompleted;
   openCreateCaseFlyout: ({
     comments,
@@ -168,7 +166,6 @@ const SummaryActionsComponent: React.FC<Props> = ({
   errorSummary,
   ilmPhases,
   lastChecked,
-  onCheckAllCompleted,
   onCheckCompleted,
   openCreateCaseFlyout,
   patternIndexNames,
@@ -235,7 +232,6 @@ const SummaryActionsComponent: React.FC<Props> = ({
             formatNumber={formatNumber}
             ilmPhases={ilmPhases}
             incrementCheckAllIndiciesChecked={incrementCheckAllIndiciesChecked}
-            onCheckAllCompleted={onCheckAllCompleted}
             onCheckCompleted={onCheckCompleted}
             patternIndexNames={patternIndexNames}
             patterns={patterns}

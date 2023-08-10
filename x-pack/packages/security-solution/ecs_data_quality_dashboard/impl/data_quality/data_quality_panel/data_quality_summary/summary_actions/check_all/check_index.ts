@@ -26,22 +26,26 @@ export const EMPTY_PARTITIONED_FIELD_METADATA: PartitionedFieldMetadata = {
 export async function checkIndex({
   abortController,
   batchId,
+  checkAllStartTime,
   ecsMetadata,
   formatBytes,
   formatNumber,
   httpFetch,
   indexName,
+  isLastCheck,
   onCheckCompleted,
   pattern,
   version,
 }: {
   abortController: AbortController;
   batchId: string;
+  checkAllStartTime: number;
   ecsMetadata: Record<string, EcsMetadata> | null;
   formatBytes: (value: number | undefined) => string;
   formatNumber: (value: number | undefined) => string;
   httpFetch: HttpHandler;
   indexName: string;
+  isLastCheck: boolean;
   onCheckCompleted: OnCheckCompleted;
   pattern: string;
   version: string;
@@ -86,6 +90,7 @@ export async function checkIndex({
 
     if (!abortController.signal.aborted) {
       onCheckCompleted({
+        checkAllStartTime,
         batchId,
         error: null,
         formatBytes,
@@ -95,11 +100,13 @@ export async function checkIndex({
         pattern,
         requestTime: Date.now() - startTime,
         version,
+        isLastCheck,
       });
     }
   } catch (error) {
     if (!abortController.signal.aborted) {
       onCheckCompleted({
+        checkAllStartTime,
         batchId,
         error: error != null ? error.message : i18n.AN_ERROR_OCCURRED_CHECKING_INDEX(indexName),
         formatBytes,
@@ -108,6 +115,7 @@ export async function checkIndex({
         partitionedFieldMetadata: null,
         pattern,
         version,
+        isLastCheck,
       });
     }
   }

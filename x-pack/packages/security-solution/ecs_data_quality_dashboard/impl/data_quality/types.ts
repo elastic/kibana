@@ -139,24 +139,26 @@ export interface IndexToCheck {
   indexName: string;
 }
 
-export type OnCheckAllCompleted = (params: { requestTime: number; batchId: string }) => void;
-
 export type OnCheckCompleted = ({
   batchId,
+  checkAllStartTime,
   error,
   formatBytes,
   formatNumber,
   indexName,
+  isLastCheck,
   partitionedFieldMetadata,
   pattern,
   version,
   requestTime,
 }: {
   batchId: string;
+  checkAllStartTime: number;
   error: string | null;
   formatBytes: (value: number | undefined) => string;
   formatNumber: (value: number | undefined) => string;
   indexName: string;
+  isLastCheck: boolean;
   partitionedFieldMetadata: PartitionedFieldMetadata | null;
   pattern: string;
   version: string;

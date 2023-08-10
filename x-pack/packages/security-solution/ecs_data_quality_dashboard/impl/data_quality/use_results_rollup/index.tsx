@@ -18,7 +18,7 @@ import {
   updateResultOnCheckCompleted,
 } from './helpers';
 
-import type { OnCheckAllCompleted, OnCheckCompleted, PatternRollup } from '../types';
+import type { OnCheckCompleted, PatternRollup } from '../types';
 import { getDocsCount, getIndexId, getSizeInBytes } from '../helpers';
 import { getIlmPhase, getIndexIncompatible } from '../data_quality_panel/pattern/helpers';
 import { useDataQualityContext } from '../data_quality_panel/data_quality_context';
@@ -33,7 +33,6 @@ interface Props {
 }
 interface UseResultsRollup {
   onCheckCompleted: OnCheckCompleted;
-  onCheckAllCompleted: OnCheckAllCompleted;
   patternIndexNames: Record<string, string[]>;
   patternRollups: Record<string, PatternRollup>;
   totalDocsCount: number | undefined;
@@ -83,6 +82,7 @@ export const useResultsRollup = ({ ilmPhases, patterns }: Props): UseResultsRoll
   const onCheckCompleted: OnCheckCompleted = useCallback(
     ({
       batchId,
+      checkAllStartTime,
       error,
       formatBytes,
       formatNumber,
@@ -90,12 +90,13 @@ export const useResultsRollup = ({ ilmPhases, patterns }: Props): UseResultsRoll
       partitionedFieldMetadata,
       pattern,
       requestTime,
+      isLastCheck,
     }) => {
       const indexId = getIndexId({ indexName, stats: patternRollups[pattern].stats });
       const ilmExplain = patternRollups[pattern].ilmExplain;
 
-      setPatternRollups((current) =>
-        updateResultOnCheckCompleted({
+      setPatternRollups((current) => {
+        const updated = updateResultOnCheckCompleted({
           error,
           formatBytes,
           formatNumber,
@@ -103,68 +104,59 @@ export const useResultsRollup = ({ ilmPhases, patterns }: Props): UseResultsRoll
           partitionedFieldMetadata,
           pattern,
           patternRollups: current,
-        })
-      );
-
-      if (
-        indexId != null &&
-        patternRollups[pattern].stats &&
-        patternRollups[pattern].results &&
-        requestTime != null &&
-        requestTime > 0 &&
-        partitionedFieldMetadata &&
-        ilmExplain
-      ) {
-        telemetryEvents.reportDataQualityIndexChecked?.({
-          batchId,
-          ecsVersion: EcsVersion,
-          errorCount: error ? 1 : 0,
-          ilmPhase: getIlmPhase(ilmExplain[indexName]),
-          indexId,
-          isCheckAll: true,
-          numberOfDocuments: getDocsCount({ indexName, stats: patternRollups[pattern].stats }),
-          numberOfIncompatibleFields: getIndexIncompatible({
-            indexName,
-            results: patternRollups[pattern].results,
-          }),
-          numberOfIndices: 1,
-          numberOfIndicesChecked: 1,
-          sizeInBytes: getSizeInBytes({ stats: patternRollups[pattern].stats, indexName }),
-          timeConsumedMs: requestTime,
-          unallowedMappingFields: getIncompatibleMappingsFields(
-            partitionedFieldMetadata.incompatible
-          ),
-          unallowedValueFields: getIncompatibleValuesFields(partitionedFieldMetadata.incompatible),
         });
-      }
+
+        if (
+          indexId != null &&
+          updated[pattern].stats &&
+          updated[pattern].results &&
+          requestTime != null &&
+          requestTime > 0 &&
+          partitionedFieldMetadata &&
+          ilmExplain
+        ) {
+          telemetryEvents.reportDataQualityIndexChecked?.({
+            batchId,
+            ecsVersion: EcsVersion,
+            errorCount: error ? 1 : 0,
+            ilmPhase: getIlmPhase(ilmExplain[indexName]),
+            indexId,
+            isCheckAll: true,
+            numberOfDocuments: getDocsCount({ indexName, stats: updated[pattern].stats }),
+            numberOfIncompatibleFields: getIndexIncompatible({
+              indexName,
+              results: updated[pattern].results,
+            }),
+            numberOfIndices: 1,
+            numberOfIndicesChecked: 1,
+            sizeInBytes: getSizeInBytes({ stats: updated[pattern].stats, indexName }),
+            timeConsumedMs: requestTime,
+            unallowedMappingFields: getIncompatibleMappingsFields(
+              partitionedFieldMetadata.incompatible
+            ),
+            unallowedValueFields: getIncompatibleValuesFields(
+              partitionedFieldMetadata.incompatible
+            ),
+          });
+        }
+
+        if (isLastCheck) {
+          telemetryEvents.reportDataQualityCheckAllCompleted?.({
+            batchId,
+            ecsVersion: EcsVersion,
+            isCheckAll: true,
+            numberOfDocuments: getTotalDocsCount(updated),
+            numberOfIncompatibleFields: getTotalIncompatible(updated),
+            numberOfIndices: getTotalIndices(updated),
+            numberOfIndicesChecked: getTotalIndicesChecked(updated),
+            sizeInBytes: getTotalSizeInBytes(updated),
+            timeConsumedMs: Date.now() - checkAllStartTime,
+          });
+        }
+        return updated;
+      });
     },
     [patternRollups, telemetryEvents]
-  );
-
-  const onCheckAllCompleted: OnCheckAllCompleted = useCallback(
-    ({ requestTime, batchId }) => {
-      if (totalIncompatible != null) {
-        telemetryEvents.reportDataQualityCheckAllCompleted?.({
-          batchId,
-          ecsVersion: EcsVersion,
-          isCheckAll: true,
-          numberOfDocuments: totalDocsCount,
-          numberOfIncompatibleFields: totalIncompatible,
-          numberOfIndices: totalIndices,
-          numberOfIndicesChecked: totalIndicesChecked,
-          sizeInBytes: totalSizeInBytes,
-          timeConsumedMs: requestTime,
-        });
-      }
-    },
-    [
-      telemetryEvents,
-      totalDocsCount,
-      totalIncompatible,
-      totalIndices,
-      totalIndicesChecked,
-      totalSizeInBytes,
-    ]
   );
 
   useEffect(() => {
@@ -175,7 +167,6 @@ export const useResultsRollup = ({ ilmPhases, patterns }: Props): UseResultsRoll
 
   return {
     onCheckCompleted,
-    onCheckAllCompleted,
     patternIndexNames,
     patternRollups,
     totalDocsCount,
