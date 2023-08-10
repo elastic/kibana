@@ -92,9 +92,14 @@ export class EditPanelAction implements Action<ActionContext> {
       }
 
       const oldExplicitInput = embeddable.getExplicitInput();
-      const newExplicitInput = await factory.getExplicitInput(oldExplicitInput, embeddable.parent);
+      let newExplicitInput: Awaited<ReturnType<typeof factory.getExplicitInput>>;
+      try {
+        newExplicitInput = await factory.getExplicitInput(oldExplicitInput, embeddable.parent);
+      } catch (e) {
+        // error likely means user canceled editing
+        return;
+      }
       embeddable.parent?.replaceEmbeddable(embeddable.id, newExplicitInput);
-
       return;
     }
 
