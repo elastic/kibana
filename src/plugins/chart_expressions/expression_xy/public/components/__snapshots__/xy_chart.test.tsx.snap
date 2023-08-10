@@ -565,6 +565,11 @@ exports[`XYChart component it renders area 1`] = `
               "label": [Function],
               "onSelect": [Function],
             },
+            Object {
+              "disabled": [Function],
+              "label": [Function],
+              "onSelect": [Function],
+            },
           ]
         }
         headerFormatter={[Function]}
@@ -1563,6 +1568,11 @@ exports[`XYChart component it renders bar 1`] = `
       <Tooltip
         actions={
           Array [
+            Object {
+              "disabled": [Function],
+              "label": [Function],
+              "onSelect": [Function],
+            },
             Object {
               "disabled": [Function],
               "label": [Function],
@@ -2571,6 +2581,11 @@ exports[`XYChart component it renders horizontal bar 1`] = `
               "label": [Function],
               "onSelect": [Function],
             },
+            Object {
+              "disabled": [Function],
+              "label": [Function],
+              "onSelect": [Function],
+            },
           ]
         }
         headerFormatter={[Function]}
@@ -3569,6 +3584,11 @@ exports[`XYChart component it renders line 1`] = `
       <Tooltip
         actions={
           Array [
+            Object {
+              "disabled": [Function],
+              "label": [Function],
+              "onSelect": [Function],
+            },
             Object {
               "disabled": [Function],
               "label": [Function],
@@ -4577,6 +4597,11 @@ exports[`XYChart component it renders stacked area 1`] = `
               "label": [Function],
               "onSelect": [Function],
             },
+            Object {
+              "disabled": [Function],
+              "label": [Function],
+              "onSelect": [Function],
+            },
           ]
         }
         headerFormatter={[Function]}
@@ -5580,6 +5605,11 @@ exports[`XYChart component it renders stacked bar 1`] = `
               "label": [Function],
               "onSelect": [Function],
             },
+            Object {
+              "disabled": [Function],
+              "label": [Function],
+              "onSelect": [Function],
+            },
           ]
         }
         headerFormatter={[Function]}
@@ -6578,6 +6608,11 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
       <Tooltip
         actions={
           Array [
+            Object {
+              "disabled": [Function],
+              "label": [Function],
+              "onSelect": [Function],
+            },
             Object {
               "disabled": [Function],
               "label": [Function],
@@ -7611,6 +7646,11 @@ exports[`XYChart component split chart should render split chart if both, splitR
       <Tooltip
         actions={
           Array [
+            Object {
+              "disabled": [Function],
+              "label": [Function],
+              "onSelect": [Function],
+            },
             Object {
               "disabled": [Function],
               "label": [Function],
@@ -8857,6 +8897,11 @@ exports[`XYChart component split chart should render split chart if splitColumnA
               "label": [Function],
               "onSelect": [Function],
             },
+            Object {
+              "disabled": [Function],
+              "label": [Function],
+              "onSelect": [Function],
+            },
           ]
         }
         headerFormatter={[Function]}
@@ -10086,6 +10131,11 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
       <Tooltip
         actions={
           Array [
+            Object {
+              "disabled": [Function],
+              "label": [Function],
+              "onSelect": [Function],
+            },
             Object {
               "disabled": [Function],
               "label": [Function],
