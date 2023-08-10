@@ -43,7 +43,7 @@ export const TextExpansionOutput: FC<{
       <EuiCallOut color="primary">
         <FormattedMessage
           id="xpack.ml.trainedModels.testModelsFlyout.textExpansion.output.info"
-          defaultMessage="The numbers below represent relevance scores for documents randomly selected from the index concerning the supplied query. Evaluating model recall is easier with a query which is related to the documents used."
+          defaultMessage="The numbers below represent relevance scores for documents randomly selected from the index concerning the supplied query. Evaluating model recall is simpler when using a query related to the documents."
         />
       </EuiCallOut>
 
