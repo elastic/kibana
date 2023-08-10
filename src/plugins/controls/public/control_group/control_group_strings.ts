@@ -9,16 +9,6 @@
 import { i18n } from '@kbn/i18n';
 
 export const ControlGroupStrings = {
-  emptyState: {
-    getAddControlButtonTitle: () =>
-      i18n.translate('controls.controlGroup.emptyState.addControlButtonTitle', {
-        defaultMessage: 'Add control',
-      }),
-    getTwoLineLoadingTitle: () =>
-      i18n.translate('controls.controlGroup.emptyState.twoLineLoadingTitle', {
-        defaultMessage: '...',
-      }),
-  },
   manageControl: {
     getFlyoutCreateTitle: () =>
       i18n.translate('controls.controlGroup.manageControl.createFlyoutTitle', {

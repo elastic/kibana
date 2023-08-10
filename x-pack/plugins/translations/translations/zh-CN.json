@@ -411,8 +411,6 @@
     "controls.optionsList.popover.suggestionsAriaLabel": "{fieldName} 的可用{optionCount, plural, other {选项}}",
     "controls.rangeSlider.errors.dataViewNotFound": "找不到数据视图：{dataViewId}",
     "controls.rangeSlider.errors.fieldNotFound": "找不到字段：{fieldName}",
-    "controls.controlGroup.emptyState.addControlButtonTitle": "添加控件",
-    "controls.controlGroup.emptyState.twoLineLoadingTitle": "...",
     "controls.controlGroup.floatingActions.clearTitle": "清除",
     "controls.controlGroup.floatingActions.editTitle": "编辑",
     "controls.controlGroup.floatingActions.removeTitle": "删除",
