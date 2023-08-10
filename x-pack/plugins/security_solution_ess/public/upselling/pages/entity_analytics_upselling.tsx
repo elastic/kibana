@@ -20,7 +20,7 @@ import {
 } from '@elastic/eui';
 // eslint-disable-next-line @kbn/eslint/module_migration
 import styled from 'styled-components';
-import { useNavigation } from '@kbn/security-solution-plugin/public';
+import { useNavigation } from '@kbn/security-solution-navigation';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import * as i18n from './translations';
 import paywallPng from '../../common/images/entity_paywall.png';

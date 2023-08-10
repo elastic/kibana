@@ -19,8 +19,6 @@ export type {
   UpsellingSectionId,
 } from './common/lib/upsellings';
 
-export { useNavigation } from './common/lib/kibana';
-
 export const plugin = (context: PluginInitializerContext): Plugin => new Plugin(context);
 
 export type { PluginSetup, PluginStart };
