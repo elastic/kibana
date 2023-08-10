@@ -7,6 +7,7 @@
 
 import { defineCypressConfig } from '@kbn/cypress-config';
 import { esArchiver } from './support/es_archiver';
+import { oldHeadless } from './support/old_headless';
 
 export default defineCypressConfig({
   defaultCommandTimeout: 60000,
@@ -24,6 +25,7 @@ export default defineCypressConfig({
     experimentalRunAllSpecs: true,
     experimentalMemoryManagement: true,
     setupNodeEvents(on, config) {
+      oldHeadless(on);
       esArchiver(on, config);
     },
   },

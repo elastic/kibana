@@ -25,6 +25,19 @@ export default defineCypressConfig({
     supportFile: './support/e2e.js',
     specPattern: './e2e/**/*.cy.ts',
     setupNodeEvents: (on, config) => {
+      // force old headless mode for chrome
+      on('before:browser:launch', (browser, launchOptions) => {
+        if (browser?.name === 'chrome' && browser?.isHeadless) {
+          launchOptions.args = launchOptions.args.map((arg) => {
+            if (arg === '--headless=new') {
+              return '--headless';
+            }
+
+            return arg;
+          });
+        }
+        return launchOptions;
+      });
       setupDataLoaderTasks(on, config);
     },
   },
