@@ -7,8 +7,11 @@
  */
 
 import { EventAnnotationGroupConfig } from '@kbn/event-annotation-common';
-import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import { FieldBasedIndexPatternColumn, TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { XYPersistedByValueAnnotationLayerConfig } from '@kbn/lens-plugin/public/async_services';
+
+const DATA_LAYER_ID = '0a700aa1-bc89-4189-991e-36eb0e950611';
+const ANNOTATION_LAYER_ID = '91b0c530-2172-42f1-a839-96d83313d110';
 
 export const getLensAttributes = (group: EventAnnotationGroupConfig) =>
   ({
@@ -16,13 +19,6 @@ export const getLensAttributes = (group: EventAnnotationGroupConfig) =>
     description: '',
     visualizationType: 'lnsXY',
     type: 'lens',
-    references: [
-      {
-        type: 'index-pattern',
-        id: group.indexPatternId,
-        name: 'indexpattern-datasource-layer-67ba3d9d-b4fc-431a-a95e-69101e1dec46',
-      },
-    ],
     state: {
       visualization: {
         legend: {
@@ -54,7 +50,7 @@ export const getLensAttributes = (group: EventAnnotationGroupConfig) =>
         preferredSeriesType: 'line',
         layers: [
           {
-            layerId: '67ba3d9d-b4fc-431a-a95e-69101e1dec46',
+            layerId: DATA_LAYER_ID,
             accessors: ['a7264a99-cd42-4b3f-855f-05364df71a71'],
             position: 'top',
             seriesType: 'line',
@@ -63,7 +59,7 @@ export const getLensAttributes = (group: EventAnnotationGroupConfig) =>
             xAccessor: 'e9e2d5e2-0910-4a3b-8735-c8fe37efd7ac',
           },
           {
-            layerId: '2df639d4-7143-477a-b7ac-a487431c7e33',
+            layerId: ANNOTATION_LAYER_ID,
             layerType: 'annotations',
             persistanceType: 'byValue',
             ...group,
@@ -78,7 +74,7 @@ export const getLensAttributes = (group: EventAnnotationGroupConfig) =>
       datasourceStates: {
         formBased: {
           layers: {
-            '67ba3d9d-b4fc-431a-a95e-69101e1dec46': {
+            [DATA_LAYER_ID]: {
               columns: {
                 'e9e2d5e2-0910-4a3b-8735-c8fe37efd7ac': {
                   label: 'timestamp',
@@ -92,7 +88,7 @@ export const getLensAttributes = (group: EventAnnotationGroupConfig) =>
                     includeEmptyRows: true,
                     dropPartials: false,
                   },
-                },
+                } as FieldBasedIndexPatternColumn,
                 'a7264a99-cd42-4b3f-855f-05364df71a71': {
                   label: 'Count of records',
                   dataType: 'number',
@@ -103,7 +99,7 @@ export const getLensAttributes = (group: EventAnnotationGroupConfig) =>
                   params: {
                     emptyAsNull: true,
                   },
-                },
+                } as FieldBasedIndexPatternColumn,
               },
               columnOrder: [
                 'e9e2d5e2-0910-4a3b-8735-c8fe37efd7ac',
@@ -114,14 +110,38 @@ export const getLensAttributes = (group: EventAnnotationGroupConfig) =>
             },
           },
         },
-        indexpattern: {
-          layers: {},
-        },
         textBased: {
           layers: {},
         },
       },
-      internalReferences: [],
-      adHocDataViews: {},
+
+      ...(group.dataViewSpec
+        ? {
+            internalReferences: [
+              {
+                type: 'index-pattern',
+                id: group.dataViewSpec.id!,
+                name: `indexpattern-datasource-layer-${DATA_LAYER_ID}`,
+              },
+              {
+                type: 'index-pattern',
+                id: group.dataViewSpec.id!,
+                name: `xy-visualization-layer-${ANNOTATION_LAYER_ID}`,
+              },
+            ],
+            adHocDataViews: {
+              [group.dataViewSpec.id!]: group.dataViewSpec,
+            },
+          }
+        : { internalReferences: [], adHocDataViews: {} }),
     },
+    references: group.dataViewSpec
+      ? []
+      : [
+          {
+            type: 'index-pattern',
+            id: group.indexPatternId,
+            name: 'indexpattern-datasource-layer-layer1',
+          },
+        ],
   } as TypedLensByValueInput['attributes']);
