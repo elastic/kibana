@@ -42,7 +42,11 @@ export async function cypressTestRunner({
   });
 
   // Ensure Fleet setup is complete
-  await axios.post(`${kibanaUrlWithAuth}/api/fleet/setup`, {}, { headers: { 'kbn-xsrf': true } });
+  await axios.post(
+    `${kibanaUrlWithAuth}/api/fleet/setup`,
+    {},
+    { headers: { 'kbn-xsrf': true, 'Elastic-Api-Version': '2023-10-31' } }
+  );
 
   const profilingResources = await axios.get<{ has_setup: boolean; has_data: boolean }>(
     `${kibanaUrlWithAuth}/internal/profiling/setup/es_resources`,

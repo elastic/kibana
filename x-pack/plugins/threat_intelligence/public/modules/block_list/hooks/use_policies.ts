@@ -30,6 +30,7 @@ export function usePolicies() {
         withAgentCount: true,
         kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: endpoint`,
       },
+      headers: { 'kbn-xsrf': 'kibana', 'Elastic-Api-Version': '2023-10-31' },
     });
 
   return useQuery(queryKey, fetchPolicies, {

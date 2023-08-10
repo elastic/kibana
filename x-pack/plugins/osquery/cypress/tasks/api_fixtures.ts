@@ -263,7 +263,13 @@ export const loadAgentPolicy = () =>
       inactivity_timeout: 1209600,
     },
     url: '/api/fleet/agent_policies',
+    headers: { 'Elastic-Api-Version': '2023-10-31' },
   }).then((response) => response.body.item);
 
 export const cleanupAgentPolicy = (agentPolicyId: string) =>
-  request({ method: 'POST', body: { agentPolicyId }, url: '/api/fleet/agent_policies/delete' });
+  request({
+    method: 'POST',
+    body: { agentPolicyId },
+    url: '/api/fleet/agent_policies/delete',
+    headers: { 'Elastic-Api-Version': '2023-10-31' },
+  });
