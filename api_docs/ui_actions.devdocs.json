@@ -2243,6 +2243,27 @@
           },
           {
             "parentPluginId": "uiActions",
+            "id": "def-public.VisualizeFieldContext.textBasedColumns",
+            "type": "Array",
+            "tags": [],
+            "label": "textBasedColumns",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.DatatableColumn",
+                "text": "DatatableColumn"
+              },
+              "[] | undefined"
+            ],
+            "path": "src/plugins/ui_actions/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "uiActions",
             "id": "def-public.VisualizeFieldContext.originatingApp",
             "type": "string",
             "tags": [],
