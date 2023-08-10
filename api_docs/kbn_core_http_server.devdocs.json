@@ -3377,18 +3377,6 @@
               },
               {
                 "plugin": "security",
-                "path": "x-pack/plugins/security/server/routes/api_keys/enabled.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/routes/api_keys/get.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/routes/api_keys/privileges.ts"
-              },
-              {
-                "plugin": "security",
                 "path": "x-pack/plugins/security/server/routes/authentication/common.ts"
               },
               {
@@ -3462,6 +3450,14 @@
               {
                 "plugin": "security",
                 "path": "x-pack/plugins/security/server/routes/views/login.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/plugins/security/server/routes/api_keys/enabled.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/plugins/security/server/routes/api_keys/get.ts"
               },
               {
                 "plugin": "monitoringCollection",
@@ -3604,18 +3600,6 @@
                 "path": "x-pack/plugins/alerting/server/routes/maintenance_window/active_maintenance_windows.ts"
               },
               {
-                "plugin": "guidedOnboarding",
-                "path": "src/plugins/guided_onboarding/server/routes/guide_state_routes.ts"
-              },
-              {
-                "plugin": "guidedOnboarding",
-                "path": "src/plugins/guided_onboarding/server/routes/plugin_state_routes.ts"
-              },
-              {
-                "plugin": "guidedOnboarding",
-                "path": "src/plugins/guided_onboarding/server/routes/config_routes.ts"
-              },
-              {
                 "plugin": "ruleRegistry",
                 "path": "x-pack/plugins/rule_registry/server/routes/get_alert_by_id.ts"
               },
@@ -3634,6 +3618,18 @@
               {
                 "plugin": "ruleRegistry",
                 "path": "x-pack/plugins/rule_registry/server/routes/get_aad_fields_by_rule_type.ts"
+              },
+              {
+                "plugin": "guidedOnboarding",
+                "path": "src/plugins/guided_onboarding/server/routes/guide_state_routes.ts"
+              },
+              {
+                "plugin": "guidedOnboarding",
+                "path": "src/plugins/guided_onboarding/server/routes/plugin_state_routes.ts"
+              },
+              {
+                "plugin": "guidedOnboarding",
+                "path": "src/plugins/guided_onboarding/server/routes/config_routes.ts"
               },
               {
                 "plugin": "observability",
@@ -4690,10 +4686,6 @@
               {
                 "plugin": "interactiveSetup",
                 "path": "src/plugins/interactive_setup/server/routes/status.ts"
-              },
-              {
-                "plugin": "savedObjectsFinder",
-                "path": "src/plugins/saved_objects_finder/server/routes/find.ts"
               },
               {
                 "plugin": "savedObjectsManagement",
@@ -5809,10 +5801,6 @@
               },
               {
                 "plugin": "security",
-                "path": "x-pack/plugins/security/server/routes/api_keys/privileges.test.ts"
-              },
-              {
-                "plugin": "security",
                 "path": "x-pack/plugins/security/server/routes/authentication/index.test.ts"
               },
               {
@@ -6215,14 +6203,6 @@
               },
               {
                 "plugin": "security",
-                "path": "x-pack/plugins/security/server/routes/api_keys/create.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/routes/api_keys/invalidate.ts"
-              },
-              {
-                "plugin": "security",
                 "path": "x-pack/plugins/security/server/routes/authentication/common.ts"
               },
               {
@@ -6280,6 +6260,14 @@
               {
                 "plugin": "security",
                 "path": "x-pack/plugins/security/server/routes/users/enable.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/plugins/security/server/routes/api_keys/create.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/plugins/security/server/routes/api_keys/invalidate.ts"
               },
               {
                 "plugin": "encryptedSavedObjects",
@@ -8593,11 +8581,11 @@
               },
               {
                 "plugin": "security",
-                "path": "x-pack/plugins/security/server/routes/api_keys/update.ts"
+                "path": "x-pack/plugins/security/server/routes/authorization/roles/put.ts"
               },
               {
                 "plugin": "security",
-                "path": "x-pack/plugins/security/server/routes/authorization/roles/put.ts"
+                "path": "x-pack/plugins/security/server/routes/api_keys/update.ts"
               },
               {
                 "plugin": "actions",
@@ -13787,10 +13775,6 @@
                 "path": "packages/core/http/core-http-router-server-mocks/src/versioned_router.mock.ts"
               },
               {
-                "plugin": "bfetch",
-                "path": "src/plugins/bfetch/server/plugin.ts"
-              },
-              {
                 "plugin": "dataViews",
                 "path": "src/plugins/data_views/server/rest_api_routes/public/runtime_fields/get_runtime_field.ts"
               },
@@ -13821,6 +13805,10 @@
               {
                 "plugin": "dataViews",
                 "path": "src/plugins/data_views/server/rest_api_routes/internal/has_data_views.ts"
+              },
+              {
+                "plugin": "bfetch",
+                "path": "src/plugins/bfetch/server/plugin.ts"
               },
               {
                 "plugin": "data",
@@ -14033,6 +14021,10 @@
               {
                 "plugin": "ml",
                 "path": "x-pack/plugins/ml/server/routes/system.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/server/routes/trained_models.ts"
               },
               {
                 "plugin": "ml",
@@ -14519,10 +14511,6 @@
                 "path": "packages/core/http/core-http-router-server-mocks/src/versioned_router.mock.ts"
               },
               {
-                "plugin": "bfetch",
-                "path": "src/plugins/bfetch/server/plugin.ts"
-              },
-              {
                 "plugin": "dataViews",
                 "path": "src/plugins/data_views/server/rest_api_routes/public/runtime_fields/put_runtime_field.ts"
               },
@@ -14533,6 +14521,10 @@
               {
                 "plugin": "dataViews",
                 "path": "src/plugins/data_views/server/rest_api_routes/internal/fields_for.ts"
+              },
+              {
+                "plugin": "bfetch",
+                "path": "src/plugins/bfetch/server/plugin.ts"
               },
               {
                 "plugin": "data",
@@ -14707,10 +14699,6 @@
                 "path": "packages/core/http/core-http-router-server-mocks/src/versioned_router.mock.ts"
               },
               {
-                "plugin": "bfetch",
-                "path": "src/plugins/bfetch/server/plugin.ts"
-              },
-              {
                 "plugin": "dataViews",
                 "path": "src/plugins/data_views/server/rest_api_routes/public/fields/update_fields.ts"
               },
@@ -14751,6 +14739,10 @@
                 "path": "src/plugins/data_views/server/rest_api_routes/internal/fields_for.ts"
               },
               {
+                "plugin": "bfetch",
+                "path": "src/plugins/bfetch/server/plugin.ts"
+              },
+              {
                 "plugin": "data",
                 "path": "src/plugins/data/server/search/routes/session.ts"
               },
@@ -14787,16 +14779,16 @@
                 "path": "src/plugins/data/server/kql_telemetry/route.ts"
               },
               {
+                "plugin": "unifiedSearch",
+                "path": "src/plugins/unified_search/server/autocomplete/value_suggestions_route.ts"
+              },
+              {
                 "plugin": "aiops",
                 "path": "x-pack/plugins/aiops/server/routes/log_rate_analysis.ts"
               },
               {
                 "plugin": "aiops",
                 "path": "x-pack/plugins/aiops/server/routes/log_categorization.ts"
-              },
-              {
-                "plugin": "unifiedSearch",
-                "path": "src/plugins/unified_search/server/autocomplete/value_suggestions_route.ts"
               },
               {
                 "plugin": "ml",
@@ -15061,6 +15053,10 @@
               {
                 "plugin": "ml",
                 "path": "x-pack/plugins/ml/server/routes/system.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/server/routes/trained_models.ts"
               },
               {
                 "plugin": "ml",
@@ -15427,10 +15423,6 @@
                 "path": "packages/core/http/core-http-router-server-mocks/src/versioned_router.mock.ts"
               },
               {
-                "plugin": "bfetch",
-                "path": "src/plugins/bfetch/server/plugin.ts"
-              },
-              {
                 "plugin": "dataViews",
                 "path": "src/plugins/data_views/server/rest_api_routes/public/runtime_fields/delete_runtime_field.ts"
               },
@@ -15441,6 +15433,10 @@
               {
                 "plugin": "dataViews",
                 "path": "src/plugins/data_views/server/rest_api_routes/public/delete_data_view.ts"
+              },
+              {
+                "plugin": "bfetch",
+                "path": "src/plugins/bfetch/server/plugin.ts"
               },
               {
                 "plugin": "data",
