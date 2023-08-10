@@ -355,13 +355,31 @@ const DraggableWrapperComponent: React.FC<Props> = ({
       >
         {truncate ? (
           <TruncatableText data-test-subj="render-truncatable-content">
-            {render(dataProvider, null, { isDragging: false, isDropAnimating: false })}
+            {render(dataProvider, null, {
+              isDragging: false,
+              isDropAnimating: false,
+              isClone: false,
+              dropAnimation: null,
+              draggingOver: null,
+              combineWith: null,
+              combineTargetFor: null,
+              mode: null,
+            })}
           </TruncatableText>
         ) : (
           <ProviderContentWrapper
             data-test-subj={`render-content-${dataProvider.queryMatch.field}`}
           >
-            {render(dataProvider, null, { isDragging: false, isDropAnimating: false })}
+            {render(dataProvider, null, {
+              isDragging: false,
+              isDropAnimating: false,
+              isClone: false,
+              dropAnimation: null,
+              draggingOver: null,
+              combineWith: null,
+              combineTargetFor: null,
+              mode: null,
+            })}
           </ProviderContentWrapper>
         )}
       </div>
