@@ -15,7 +15,8 @@ export const ADD_ENDPOINT_EXCEPTION_BTN = '[data-test-subj="add-endpoint-excepti
 export const ALERT_COUNT_TABLE_COLUMN = (column: number) =>
   `[data-test-subj="embeddablePanel"] [data-test-subj="dataGridRowCell"]:nth-child(${column}) [data-test-subj="lnsTableCellContent"]`;
 
-export const ALERT_EMBEDDABLE_PROGRESS_BAR = '[data-test-subj="embeddablePanel"] .euiProgress';
+export const ALERT_EMBEDDABLE_PROGRESS_BAR =
+  '[data-test-subj="chartPanels"] [data-test-subj="embeddablePanel"] .euiProgress';
 
 export const ALERT_EMBEDDABLE_EMPTY_PROMPT =
   '[data-test-subj="embeddablePanel"] [data-test-subj="emptyPlaceholder"]';

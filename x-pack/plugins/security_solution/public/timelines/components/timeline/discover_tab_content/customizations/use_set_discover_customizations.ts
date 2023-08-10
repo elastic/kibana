@@ -6,8 +6,8 @@
  */
 
 import type { CustomizationCallback } from '@kbn/discover-plugin/public/customizations/types';
-import { useHistogramCustomization } from './histogram';
-import { useSearchBarCustomizations } from './search_bar';
+import { useHistogramCustomization } from './use_histogram_customizations';
+import { useSearchBarCustomizations } from './use_search_bar_customizations';
 
 export const useSetDiscoverCustomizationCallbacks = (): CustomizationCallback[] => {
   const searchBarCustomizationCallback = useSearchBarCustomizations();

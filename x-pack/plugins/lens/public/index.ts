@@ -6,7 +6,6 @@
  */
 
 import { LensPlugin } from './plugin';
-export { inferTimeField } from './utils';
 
 export type {
   EmbeddableComponentProps,

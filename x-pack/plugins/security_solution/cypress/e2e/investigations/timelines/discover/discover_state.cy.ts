@@ -72,4 +72,6 @@ describe('Discover State', () => {
     cy.get(DISCOVER_DATA_VIEW_SWITCHER.BTN).should('contain.text', dataviewName);
   });
   it('should remember timerange when navigating away and back to discover ', () => {});
+  it('should remember columns when navigating away and back to discover ', () => {});
+  it('should remember ad-hoc dataview when navigating away and back to discover ', () => {});
 });
