@@ -8,7 +8,7 @@
 import { safeLoad as loadYaml } from 'js-yaml';
 import { readFileSync } from 'fs';
 import * as path from 'path';
-import { cloneDeep } from 'lodash';
+import { cloneDeep, merge } from 'lodash';
 import { FeaturesPrivileges, Role, RoleIndexPrivilege } from '@kbn/security-plugin/common';
 
 const ROLES_YAML_FILE_PATH = path.join(__dirname, 'project_controller_security_roles.yml');
@@ -24,6 +24,7 @@ const ROLE_NAMES = [
   'platform_engineer',
   'endpoint_operations_analyst',
   'endpoint_policy_manager',
+  'reader', // custom role to test lack of permissions
 ] as const;
 
 export type ServerlessRoleName = typeof ROLE_NAMES[number];
@@ -45,10 +46,14 @@ const roleDefinitions = loadYaml(readFileSync(ROLES_YAML_FILE_PATH, 'utf8')) as 
 
 export type ServerlessSecurityRoles = Record<ServerlessRoleName, Role>;
 
-export const getServerlessSecurityKibanaRoleDefinitions = (): ServerlessSecurityRoles => {
+export const getServerlessSecurityKibanaRoleDefinitions = (
+  additionalRoleDefinitions: any
+): ServerlessSecurityRoles => {
   const definitions = cloneDeep(roleDefinitions);
+  const mergedDefinitions = merge(definitions, additionalRoleDefinitions);
 
-  return Object.entries(definitions).reduce((roles, [roleName, definition]) => {
+  console.log({ mergedDefinitions: JSON.stringify(mergedDefinitions, null, 2) });
+  return Object.entries(mergedDefinitions).reduce((roles, [roleName, definition]) => {
     if (!ROLE_NAMES.includes(roleName as ServerlessRoleName)) {
       throw new Error(
         `Un-expected role [${roleName}] found in YAML file [${ROLES_YAML_FILE_PATH}]`

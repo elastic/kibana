@@ -38,7 +38,7 @@ describe('Add to Cases', { tags: [tag.ESS] }, () => {
         caseId = caseInfo.id;
         caseTitle = caseInfo.title;
       });
-      cy.loginKibana('soc_manager');
+      cy.login('soc_manager');
       navigateTo('/app/osquery');
     });
 
@@ -70,7 +70,7 @@ describe('Add to Cases', { tags: [tag.ESS] }, () => {
         caseId = caseInfo.id;
         caseTitle = caseInfo.title;
       });
-      cy.loginKibana('soc_manager');
+      cy.login('soc_manager');
       navigateTo('/app/osquery');
     });
 

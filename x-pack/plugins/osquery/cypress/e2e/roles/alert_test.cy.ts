@@ -19,7 +19,7 @@ describe('Alert Test', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
   });
 
   beforeEach(() => {
-    cy.loginKibana('t1_analyst');
+    cy.login('t1_analyst');
 
     cy.visit(`/app/security/rules/id/${ruleId}/alerts`);
     cy.getBySel('expand-event').first().click();

@@ -11,6 +11,7 @@ import { checkResults, inputQuery, submitQuery } from '../../tasks/live_query';
 import { loadSavedQuery, cleanupSavedQuery } from '../../tasks/api_fixtures';
 import { triggerLoadData } from '../../tasks/inventory';
 
+// skipped for now, as we have to see about serverless permissions in roles
 describe('ALL - Inventory', { tags: [tag.ESS] }, () => {
   let savedQueryName: string;
   let savedQueryId: string;
@@ -23,7 +24,7 @@ describe('ALL - Inventory', { tags: [tag.ESS] }, () => {
   });
 
   beforeEach(() => {
-    cy.loginKibana('soc_manager');
+    cy.login('soc_manager');
     navigateTo('/app/osquery');
   });
 

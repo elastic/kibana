@@ -80,7 +80,7 @@ describe('ALL - Live Query', { tags: [tag.SERVERLESS, tag.ESS] }, () => {
   });
 
   beforeEach(() => {
-    cy.loginKibana('soc_manager');
+    cy.login('soc_manager');
     navigateTo('/app/osquery');
   });
 

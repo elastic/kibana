@@ -43,7 +43,7 @@ describe('ALL - Add Integration', { tags: tag.ESS }, () => {
   });
 
   beforeEach(() => {
-    cy.loginKibana();
+    cy.login();
   });
 
   after(() => {

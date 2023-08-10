@@ -32,7 +32,7 @@ describe('ALL - Saved queries', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
   });
 
   beforeEach(() => {
-    cy.loginKibana('soc_manager');
+    cy.login('soc_manager');
     navigateTo('/app/osquery');
   });
 

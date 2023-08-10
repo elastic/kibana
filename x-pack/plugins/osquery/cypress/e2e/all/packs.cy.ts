@@ -111,7 +111,7 @@ describe('ALL - Packs', () => {
     });
 
     beforeEach(() => {
-      cy.loginKibana('soc_manager');
+      cy.login('soc_manager');
       navigateTo('/app/osquery');
     });
 
@@ -659,7 +659,7 @@ describe('ALL - Packs', () => {
     { tags: [tag.ESS] },
     () => {
       beforeEach(() => {
-        cy.loginKibana();
+        cy.login();
       });
       const AGENT_POLICY_NAME = `PackTest` + generateRandomStringName(1)[0];
       const REMOVING_PACK = 'removing-pack' + generateRandomStringName(1)[0];
@@ -712,7 +712,7 @@ describe('ALL - Packs', () => {
 
   describe('Load prebuilt packs', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
     beforeEach(() => {
-      cy.loginKibana('soc_manager');
+      cy.login('soc_manager');
       navigateTo('/app/osquery/packs');
     });
 
@@ -794,7 +794,7 @@ describe('ALL - Packs', () => {
 
   describe('Global packs', { tags: [tag.ESS] }, () => {
     beforeEach(() => {
-      cy.loginKibana();
+      cy.login();
       navigateTo('/app/osquery/packs');
     });
 

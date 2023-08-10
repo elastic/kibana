@@ -1,0 +1,63 @@
+
+#t1_analyst:
+#  applications:
+#    - application: discover
+#      privileges:
+#        - all
+#      resources: "*"
+#    - application: visualize
+#      privileges:
+#        - read
+#      resources: "*"
+#t2_analyst:
+#  cluster:
+#  applications:
+#    - application: discover
+#      privileges:
+#        - all
+#      resources: "*"
+#    - application: visualize
+#      privileges:
+#        - read
+#      resources: "*"
+soc_manager:
+  cluster:
+  indices:
+    - names:
+        - .alerts-security*
+        - .siem-signals-*
+        - .preview.alerts-security*
+        - .internal.preview.alerts-security*
+      privileges:
+        - read
+        - write
+        - manage
+        - view_index_metadata
+  applications:
+    - application: infrastructure
+      privileges:
+        - read
+      resources: "*"
+    - application: discover
+      privileges:
+        - all
+      resources: "*"
+    - application: visualize
+      privileges:
+        - read
+      resources: "*"
+
+# custom roles for osquery lack of permission testing
+reader:
+  cluster:
+  indices:
+    - names:
+        - logs-*
+      privileges:
+        - read
+        - write
+  applications:
+    - application: osquery
+      privileges:
+        - read
+      resources: "*"

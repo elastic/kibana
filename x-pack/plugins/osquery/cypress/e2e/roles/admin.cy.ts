@@ -12,7 +12,7 @@ import { checkResults, inputQuery, selectAllAgents, submitQuery } from '../../ta
 // figure out how to convert this tests to serverless roles
 describe.skip('Admin', { tags: [tag.ESS] }, () => {
   beforeEach(() => {
-    cy.loginKibana();
+    cy.login();
     navigateTo('/app/osquery');
   });
 

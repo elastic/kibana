@@ -1,14 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { createRuntimeServices } from '@kbn/security-solution-plugin/scripts/endpoint/common/stack_services';
-import { LoadUserAndRoleCyTaskOptions } from '../cypress';
-import { LoadedRoleAndUser, SecurityRoleAndUserLoader } from '../../../../../shared/lib';
+import { safeLoad as loadYaml } from 'js-yaml';
+import { readFileSync } from 'fs';
+import path from 'path';
+import { SecurityRoleAndUserLoader } from '../../../../test_serverless/shared/lib';
+import type { LoadedRoleAndUser } from '../../../../test_serverless/shared/lib';
+
+const ROLES_YAML_FILE_PATH = path.join(__dirname, 'project_controller_osquery_roles.yml');
+const roleDefinitions = loadYaml(readFileSync(ROLES_YAML_FILE_PATH, 'utf8')) as YamlRoleDefinitions;
 
 export const setupUserDataLoader = (
   on: Cypress.PluginEvents,
@@ -25,9 +30,7 @@ export const setupUserDataLoader = (
   });
 
   const roleAndUserLoaderPromise: Promise<SecurityRoleAndUserLoader> = stackServicesPromise.then(
-    ({ kbnClient, log }) => {
-      return new SecurityRoleAndUserLoader(kbnClient, log, {});
-    }
+    ({ kbnClient, log }) => new SecurityRoleAndUserLoader(kbnClient, log, roleDefinitions)
   );
 
   on('task', {
@@ -35,8 +38,7 @@ export const setupUserDataLoader = (
      * Loads a user/role into Kibana. Used from `login()` task.
      * @param name
      */
-    loadUserAndRole: async ({ name }: LoadUserAndRoleCyTaskOptions): Promise<LoadedRoleAndUser> => {
-      return (await roleAndUserLoaderPromise).load(name);
-    },
+    loadUserAndRole: async ({ name }): Promise<LoadedRoleAndUser> =>
+      (await roleAndUserLoaderPromise).load(name),
   });
 };

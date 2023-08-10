@@ -20,7 +20,7 @@ import {
 
 describe('EcsMapping', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
   beforeEach(() => {
-    cy.loginKibana('soc_manager');
+    cy.login('soc_manager');
   });
 
   it('should properly show static values in form and results', () => {

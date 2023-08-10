@@ -6,7 +6,6 @@
  */
 
 import { tag } from '../../tags';
-import { ROLE } from '../../tasks/login';
 import { navigateTo } from '../../tasks/navigation';
 import {
   cleanupPack,
@@ -17,7 +16,7 @@ import {
 } from '../../tasks/api_fixtures';
 
 // figure out how to convert this tests to serverless roles
-describe.skip('Reader - only READ', { tags: [tag.ESS] }, () => {
+describe('Reader - only READ', { tags: [tag.ESS] }, () => {
   let savedQueryName: string;
   let savedQueryId: string;
   let packName: string;
@@ -39,7 +38,7 @@ describe.skip('Reader - only READ', { tags: [tag.ESS] }, () => {
   });
 
   beforeEach(() => {
-    cy.loginKibana(ROLE.reader);
+    cy.login('reader');
   });
 
   after(() => {

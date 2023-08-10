@@ -52,7 +52,7 @@ const UUID_REGEX = '[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-
 
 describe('Alert Event Details', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
   beforeEach(() => {
-    cy.loginKibana('soc_manager');
+    cy.login('soc_manager');
   });
 
   describe('Packs and rules creation', () => {
