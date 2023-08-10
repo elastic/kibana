@@ -46,6 +46,7 @@ export const DatasetsPopover = ({
     <EuiPopover
       id={POPOVER_ID}
       data-test-subj="datasetSelectorPopover"
+      anchorPosition={isMobile ? 'downCenter' : 'downLeft'}
       button={
         <EuiButton
           css={buttonStyles}
