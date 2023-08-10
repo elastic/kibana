@@ -37,7 +37,7 @@ interface EditorFooterProps {
   detectTimestamp: boolean;
   onErrorClick: (error: MonacoError) => void;
   refreshErrors: () => void;
-  renderRunButton?: boolean;
+  editorIsInline?: boolean;
   disableSubmitAction?: boolean;
 }
 
@@ -46,7 +46,7 @@ export const EditorFooter = memo(function EditorFooter({
   containerCSS,
   errors,
   detectTimestamp,
-  renderRunButton,
+  editorIsInline,
   disableSubmitAction,
   onErrorClick,
   refreshErrors,
@@ -194,7 +194,7 @@ export const EditorFooter = memo(function EditorFooter({
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
-      {!Boolean(renderRunButton) && (
+      {!Boolean(editorIsInline) && (
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="center">
             <EuiFlexItem grow={false}>
@@ -217,7 +217,7 @@ export const EditorFooter = memo(function EditorFooter({
           </EuiFlexGroup>
         </EuiFlexItem>
       )}
-      {Boolean(renderRunButton) && (
+      {Boolean(editorIsInline) && (
         <EuiFlexItem grow={false}>
           <EuiButton
             color="text"

@@ -19,7 +19,7 @@ export const textBasedLanguagedEditorStyles = (
   isCodeEditorExpanded: boolean,
   hasErrors: boolean,
   isCodeEditorExpandedFocused: boolean,
-  renderRunButton?: boolean
+  editorIsInline?: boolean
 ) => {
   let position = isCompactFocused ? ('absolute' as 'absolute') : ('relative' as 'relative'); // cast string to type 'relative' | 'absolute'
   if (isCodeEditorExpanded) {
@@ -73,7 +73,7 @@ export const textBasedLanguagedEditorStyles = (
           : `2px solid ${bottomContainerBorderColor}`,
       backgroundColor: euiTheme.colors.lightestShade,
       paddingLeft: euiTheme.size.base,
-      paddingRight: renderRunButton ? euiTheme.size.xs : euiTheme.size.base,
+      paddingRight: editorIsInline ? euiTheme.size.xs : euiTheme.size.base,
       paddingTop: euiTheme.size.xs,
       paddingBottom: euiTheme.size.xs,
       width: 'calc(100% + 2px)',
@@ -81,13 +81,13 @@ export const textBasedLanguagedEditorStyles = (
       marginTop: 0,
       marginLeft: 0,
       marginBottom: 0,
-      borderBottomLeftRadius: '6px',
-      borderBottomRightRadius: '6px',
+      borderBottomLeftRadius: editorIsInline ? 0 : '6px',
+      borderBottomRightRadius: editorIsInline ? 0 : '6px',
     },
     topContainer: {
       border: euiTheme.border.thin,
-      borderTopLeftRadius: '6px',
-      borderTopRightRadius: '6px',
+      borderTopLeftRadius: editorIsInline ? 0 : '6px',
+      borderTopRightRadius: editorIsInline ? 0 : '6px',
       backgroundColor: euiTheme.colors.lightestShade,
       paddingLeft: euiTheme.size.base,
       paddingRight: euiTheme.size.base,

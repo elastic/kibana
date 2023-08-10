@@ -21,43 +21,49 @@ export const getLensDataFromQuery = async (
   datasourceMap: DatasourceMap,
   visualizationMap: VisualizationMap,
   datasourceId: 'formBased' | 'textBased',
-  setDataTable: (table: Datatable) => void
+  setDataTable: (table: Datatable) => void,
+  setErrors: (errors: Error[]) => void
 ) => {
-  let indexPattern = '';
-  if ('sql' in query) {
-    indexPattern = getIndexPatternFromSQLQuery(query.sql);
+  try {
+    let indexPattern = '';
+    if ('sql' in query) {
+      indexPattern = getIndexPatternFromSQLQuery(query.sql);
+    }
+    const dv =
+      indexPattern && indexPattern !== dataView.name
+        ? await deps.dataViews.create({
+            title: indexPattern,
+          })
+        : dataView;
+    const table = await fetchDataFromAggregateQuery(query, dv, deps.data, deps.expressions);
+    const context = {
+      dataViewSpec: dv?.toSpec(),
+      fieldName: '',
+      textBasedColumns: table?.columns,
+      query,
+    };
+
+    const allSuggestions =
+      suggestionsApi({ context, dataView, datasourceMap, visualizationMap }) ?? [];
+    const firstSuggestion = allSuggestions[0];
+
+    const attrs = getLensAttributes({
+      filters: [],
+      query,
+      dataView: dv,
+      suggestion: firstSuggestion,
+    });
+    if (table) {
+      const activeDatasource = datasourceMap[datasourceId];
+      const datasourceState = attrs.state.datasourceStates[datasourceId];
+      const fields = activeDatasource?.getColumns?.(datasourceState) ?? [];
+      const updatedTable = mapDataToColumns(table, fields);
+      setDataTable(updatedTable);
+    }
+
+    return attrs;
+  } catch (e) {
+    setErrors([e]);
   }
-  const dv =
-    indexPattern && indexPattern !== dataView.name
-      ? await deps.dataViews.create({
-          title: indexPattern,
-        })
-      : dataView;
-  const table = await fetchDataFromAggregateQuery(query, dv, deps.data, deps.expressions);
-  const context = {
-    dataViewSpec: dv?.toSpec(),
-    fieldName: '',
-    textBasedColumns: table?.columns,
-    query,
-  };
-
-  const allSuggestions =
-    suggestionsApi({ context, dataView, datasourceMap, visualizationMap }) ?? [];
-  const firstSuggestion = allSuggestions[0];
-
-  const attrs = getLensAttributes({
-    filters: [],
-    query,
-    dataView: dv,
-    suggestion: firstSuggestion,
-  });
-  if (table) {
-    const activeDatasource = datasourceMap[datasourceId];
-    const datasourceState = attrs.state.datasourceStates[datasourceId];
-    const fields = activeDatasource?.getColumns?.(datasourceState) ?? [];
-    const updatedTable = mapDataToColumns(table, fields);
-    setDataTable(updatedTable);
-  }
-
-  return attrs;
+  return undefined;
 };

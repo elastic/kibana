@@ -17,7 +17,6 @@ import {
   EuiButton,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -25,6 +24,7 @@ interface FlyoutWrapperProps {
   datasourceId: 'formBased' | 'textBased';
   children: JSX.Element;
   noChangesToApply?: boolean;
+  noPadding?: boolean;
   onCancel?: () => void;
   closeFlyout?: () => void;
 }
@@ -34,6 +34,7 @@ export const FlyoutWrapper = ({
   noChangesToApply,
   onCancel,
   closeFlyout,
+  noPadding,
 }: FlyoutWrapperProps) => {
   const { euiTheme } = useEuiTheme();
   return (
@@ -41,20 +42,8 @@ export const FlyoutWrapper = ({
       <EuiFlyoutBody
         className="lnsEditFlyoutBody"
         css={css`
-          // styles needed to display extra drop targets that are outside of the config panel main area while also allowing to scroll vertically
-          overflow-y: scroll;
-          padding-left: ${euiThemeVars.euiFormMaxWidth};
-          margin-left: -${euiThemeVars.euiFormMaxWidth};
-          pointer-events: none !important;
-          .euiFlyoutBody__overflow {
-            padding-left: inherit;
-            margin-left: inherit;
-            > * {
-              pointer-events: auto;
-            }
-          }
           .euiFlyoutBody__overflowContent {
-            padding: ${euiTheme.size.s};
+            padding: ${noPadding ? 0 : euiTheme.size.s};
           }
         `}
       >

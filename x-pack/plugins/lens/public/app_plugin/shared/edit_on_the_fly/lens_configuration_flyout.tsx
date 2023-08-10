@@ -10,11 +10,12 @@ import {
   EuiFlyoutHeader,
   EuiTitle,
   EuiAccordion,
-  EuiSpacer,
   EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
+  useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { isOfAggregateQueryType, type AggregateQuery, type Query } from '@kbn/es-query';
 import { isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
@@ -44,13 +45,16 @@ export function LensEditConfigurationFlyout({
   adaptersTables,
   canEditTextBasedQuery,
 }: EditConfigPanelProps) {
+  const { euiTheme } = useEuiTheme();
   const [queryTextBased, setQueryTextBased] = useState<AggregateQuery | Query>(
     attributes.state.query
   );
   const [dataTable, setDataTable] = useState<Datatable | undefined>();
+  const [errors, setErrors] = useState<Error[] | undefined>();
   const [suggestionsPanelIsClosed, setSuggestionsPanelIsClosed] = useState(true);
   const [fetchFromAdapters, setFetchFromAdapters] = useState(true);
   const previousAttributes = useRef<TypedLensByValueInput['attributes']>(attributes);
+  const prevQuery = useRef<AggregateQuery | Query>(attributes.state.query);
 
   const frameApi = useFramePublicApi({
     attributes,
@@ -87,10 +91,14 @@ export function LensEditConfigurationFlyout({
         datasourceMap,
         visualizationMap,
         datasourceId,
-        setDataTable
+        setDataTable,
+        setErrors
       );
-      updateAllAttributes?.(attrs);
-      setCurrentAttributes?.(attrs);
+      if (attrs) {
+        updateAllAttributes?.(attrs);
+        setCurrentAttributes?.(attrs);
+        setErrors([]);
+      }
     },
     [
       dataView,
@@ -126,7 +134,13 @@ export function LensEditConfigurationFlyout({
   return (
     <>
       {isOfAggregateQueryType(attributes.state.query) && (
-        <EuiFlyoutHeader hasBorder className="lnsDimensionContainer__header">
+        <EuiFlyoutHeader
+          hasBorder
+          css={css`
+            padding: ${euiTheme.size.base} !important;
+            background-color: ${euiTheme.colors.emptyShade};
+          `}
+        >
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
               <EuiTitle size="xs">
@@ -152,6 +166,7 @@ export function LensEditConfigurationFlyout({
         closeFlyout={closeFlyout}
         onCancel={onCancel}
         noChangesToApply={isEqual(previousAttributes.current, attributes)}
+        noPadding
       >
         <>
           {isOfAggregateQueryType(attributes.state.query) && (
@@ -159,14 +174,15 @@ export function LensEditConfigurationFlyout({
               query={attributes.state.query}
               onTextLangQueryChange={(q) => {
                 setQueryTextBased(q);
+                prevQuery.current = q;
               }}
               expandCodeEditor={(status: boolean) => {}}
               isCodeEditorExpanded={true}
               detectTimestamp={Boolean(dataView?.timeFieldName)}
-              errors={[]}
+              errors={errors}
               hideExpandButton={true}
-              renderRunButton={true}
-              disableSubmitAction={isEqual(queryTextBased, attributes.state.query)}
+              editorIsInline={true}
+              disableSubmitAction={isEqual(queryTextBased, prevQuery.current)}
               onTextLangQuerySubmit={(q) => {
                 setSuggestionsPanelIsClosed(true);
                 if (q) {
@@ -176,7 +192,6 @@ export function LensEditConfigurationFlyout({
               isDisabled={false}
             />
           )}
-          <EuiSpacer />
           <EuiAccordion
             id="layer-configuration"
             buttonContent={
@@ -189,6 +204,10 @@ export function LensEditConfigurationFlyout({
               </EuiTitle>
             }
             initialIsOpen={true}
+            css={css`
+              padding: ${euiTheme.size.s};
+              border-bottom: ${euiTheme.border.thin};
+            `}
           >
             <LayerConfiguration
               attributes={attributes}
@@ -200,26 +219,31 @@ export function LensEditConfigurationFlyout({
               framePublicAPI={frameApi}
             />
           </EuiAccordion>
-          <EuiSpacer />
-          <SuggestionPanel
-            ExpressionRenderer={startDependencies.expressions.ReactExpressionRenderer}
-            datasourceMap={datasourceMap}
-            visualizationMap={visualizationMap}
-            frame={frameApi}
-            nowProvider={startDependencies.data.nowProvider}
-            hiddenByDefault={suggestionsPanelIsClosed}
-            customSwitchSuggestionAction={(suggestion) => {
-              const attrs = getLensAttributes({
-                filters: [],
-                query: queryTextBased,
-                dataView,
-                suggestion,
-              });
-              updateAllAttributes?.(attrs);
-              setCurrentAttributes?.(attrs);
-              setSuggestionsPanelIsClosed(false);
-            }}
-          />
+          <div
+            css={css`
+              padding: ${euiTheme.size.s};
+            `}
+          >
+            <SuggestionPanel
+              ExpressionRenderer={startDependencies.expressions.ReactExpressionRenderer}
+              datasourceMap={datasourceMap}
+              visualizationMap={visualizationMap}
+              frame={frameApi}
+              nowProvider={startDependencies.data.nowProvider}
+              hiddenByDefault={suggestionsPanelIsClosed}
+              customSwitchSuggestionAction={(suggestion) => {
+                const attrs = getLensAttributes({
+                  filters: [],
+                  query: queryTextBased,
+                  dataView,
+                  suggestion,
+                });
+                updateAllAttributes?.(attrs);
+                setCurrentAttributes?.(attrs);
+                setSuggestionsPanelIsClosed(false);
+              }}
+            />
+          </div>
         </>
       </FlyoutWrapper>
     </>

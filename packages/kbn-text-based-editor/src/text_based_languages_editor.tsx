@@ -61,7 +61,7 @@ export interface TextBasedLanguagesEditorProps {
   isDarkMode?: boolean;
   dataTestSubj?: string;
   hideExpandButton?: boolean;
-  renderRunButton?: boolean;
+  editorIsInline?: boolean;
   disableSubmitAction?: boolean;
 }
 
@@ -96,7 +96,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   isDisabled,
   isDarkMode,
   hideExpandButton,
-  renderRunButton,
+  editorIsInline,
   disableSubmitAction,
   dataTestSubj,
 }: TextBasedLanguagesEditorProps) {
@@ -124,7 +124,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     isCodeEditorExpanded,
     Boolean(errors?.length),
     isCodeEditorExpandedFocused,
-    renderRunButton
+    editorIsInline
   );
   const isDark = isDarkMode;
   const editorModel = useRef<monaco.editor.ITextModel>();
@@ -557,7 +557,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                         onErrorClick={onErrorClick}
                         refreshErrors={onQuerySubmit}
                         detectTimestamp={detectTimestamp}
-                        renderRunButton={renderRunButton}
+                        editorIsInline={editorIsInline}
                         disableSubmitAction={disableSubmitAction}
                       />
                     )}
@@ -631,7 +631,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
           onErrorClick={onErrorClick}
           refreshErrors={onQuerySubmit}
           detectTimestamp={detectTimestamp}
-          renderRunButton={renderRunButton}
+          editorIsInline={editorIsInline}
           disableSubmitAction={disableSubmitAction}
         />
       )}
