@@ -13,11 +13,13 @@ import {
   inputQuery,
   selectAllAgents,
   submitQuery,
+  isServerless,
 } from '../../tasks/live_query';
 import { loadSpace, loadPack, cleanupPack, cleanupSpace } from '../../tasks/api_fixtures';
 
-describe('ALL - Custom space', { tags: [tag.ESS] }, () => {
-  ['default', 'custom-space'].forEach((spaceName) => {
+const spaces = isServerless ? ['default'] : ['default', 'custom-space'];
+describe('ALL - Custom space', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+  spaces.forEach((spaceName) => {
     describe(`[${spaceName}]`, () => {
       let packName: string;
       let packId: string;
@@ -56,7 +58,7 @@ describe('ALL - Custom space', { tags: [tag.ESS] }, () => {
       });
 
       beforeEach(() => {
-        cy.loginKibana('soc_manager');
+        cy.login('soc_manager');
         navigateTo(`/s/${spaceId}/app/osquery`);
       });
 
