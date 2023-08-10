@@ -31,10 +31,11 @@ export const EditTransformRetentionPolicy: FC = () => {
   const dataViewId = useEditTransformFlyout((s) => s.dataViewId);
   const formSections = useEditTransformFlyout((s) => s.formSections);
   const retentionPolicyField = useEditTransformFlyout((s) => s.formFields.retentionPolicyField);
-  const { formField, formSection } = useEditTransformFlyout((s) => s.actions);
   const config = useEditTransformFlyout((s) => s.config);
   const formState = useEditTransformFlyout((s) => s.formState);
   const requestConfig = applyFormStateToTransformConfig(config, formState);
+  const setFormField = useEditTransformFlyout((s) => s.setFormField);
+  const setFormSection = useEditTransformFlyout((s) => s.setFormSection);
 
   const previewRequest = useMemo(() => {
     return {
@@ -103,7 +104,7 @@ export const EditTransformRetentionPolicy: FC = () => {
           )}
           checked={formSections.retentionPolicy.enabled}
           onChange={(e) =>
-            formSection({
+            setFormSection({
               section: 'retentionPolicy',
               enabled: e.target.checked,
             })
@@ -147,7 +148,7 @@ export const EditTransformRetentionPolicy: FC = () => {
                   options={retentionDateFieldOptions}
                   value={retentionPolicyField.value}
                   onChange={(e) =>
-                    formField({ field: 'retentionPolicyField', value: e.target.value })
+                    setFormField({ field: 'retentionPolicyField', value: e.target.value })
                   }
                   hasNoInitialSelection={
                     !retentionDateFieldOptions

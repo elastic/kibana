@@ -28,7 +28,7 @@ export const EditTransformIngestPipeline: FC = () => {
   const { errorMessages, value } = useEditTransformFlyout(
     (s) => s.formFields.destinationIngestPipeline
   );
-  const formField = useEditTransformFlyout((s) => s.actions.formField);
+  const setFormField = useEditTransformFlyout((s) => s.setFormField);
 
   const { data: esIngestPipelinesData, isLoading } = useGetEsIngestPipelines();
   const ingestPipelineNames = esIngestPipelinesData?.map(({ name }) => name) ?? [];
@@ -68,7 +68,7 @@ export const EditTransformIngestPipeline: FC = () => {
                 options={ingestPipelineNames.map((label: string) => ({ label }))}
                 selectedOptions={[{ label: value }]}
                 onChange={(o) =>
-                  formField({ field: 'destinationIngestPipeline', value: o[0]?.label ?? '' })
+                  setFormField({ field: 'destinationIngestPipeline', value: o[0]?.label ?? '' })
                 }
               />
             </EuiSkeletonRectangle>
