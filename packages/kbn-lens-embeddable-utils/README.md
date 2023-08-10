@@ -55,9 +55,9 @@ const xyChart = new XYChart({
 
 #### Variations of the XY Chart
 
-To create an XY chart, use the `XYChart` class and provide the required configuration. Here's an example:
+XYChart has different series type variations. Here is an example of how to build a line (default) and area charts
 
-#### Line
+#### Line chart
 
 ```ts
 const xyChart = new XYChart({
@@ -74,7 +74,7 @@ const xyChart = new XYChart({
       
     }],
     options: {
-      seriesType: 'line' // default
+      seriesType: 'line' // default. it doesn't need to be informed.
     }
   })],
   dataView,
@@ -82,9 +82,7 @@ const xyChart = new XYChart({
 });
 ```
 
-![Alt text](image-1.png){ :width="400px;" }
-
-#### Area
+#### Area chart
 
 ```ts
 const xyChart = new XYChart({
@@ -108,9 +106,6 @@ const xyChart = new XYChart({
   formulaAPI
 });
 ```
-
-![Alt text](image.png)
-
 
 #### Adding Multiple Layers to an XY Chart
 
