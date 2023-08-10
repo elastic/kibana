@@ -9,12 +9,12 @@
 export { Lifecycle } from './lifecycle';
 export { LifecyclePhase } from './lifecycle_phase';
 export { readConfigFile, Config } from './config';
-export { readProviderSpec, ProviderCollection, Providers } from './providers';
+export { readProviderSpec, ProviderCollection } from './providers';
 // @internal
 export { runTests, setupMocha } from './mocha';
 export * from './test_metadata';
 export * from './docker_servers';
 export { SuiteTracker } from './suite_tracker';
 
-export type { Provider } from './providers';
+export type { Provider, Providers } from './providers';
 export * from './es_version';

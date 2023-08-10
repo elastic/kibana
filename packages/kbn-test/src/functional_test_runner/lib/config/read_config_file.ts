@@ -49,7 +49,6 @@ async function getConfigModule({
 }): Promise<ConfigModule> {
   let resolvedPath;
   try {
-    console.error('ssszzz', require.resolve('.'));
     resolvedPath = require.resolve(path);
   } catch (error) {
     if (error.code === 'MODULE_NOT_FOUND') {

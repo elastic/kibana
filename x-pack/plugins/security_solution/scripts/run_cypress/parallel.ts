@@ -155,8 +155,6 @@ export const cli = () => {
             const fleetServerPort: number = getFleetServerPort();
             const configFromTestFile = parseTestFileConfig(filePath);
 
-            console.error('sss', path.resolve(argv.ftrConfigFile));
-
             const config = await readConfigFile(
               log,
               EsVersion.getDefault(),
