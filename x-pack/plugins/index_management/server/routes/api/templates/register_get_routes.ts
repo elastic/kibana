@@ -31,23 +31,25 @@ export function registerGetAllRoute({ router, config, lib: { handleEsError } }: 
         // @ts-expect-error TemplateSerialized.index_patterns not compatible with IndicesIndexTemplate.index_patterns
         const templates = deserializeTemplateList(templatesEs, cloudManagedTemplatePrefix);
 
-        // Only return legacy templates response if it is enabled
-        if (config.isLegacyTemplatesEnabled) {
-          const legacyTemplatesEs = await client.asCurrentUser.indices.getTemplate();
-
-          const legacyTemplates = deserializeLegacyTemplateList(
-            legacyTemplatesEs,
-            cloudManagedTemplatePrefix
-          );
-
-          const body = {
-            templates,
-            legacyTemplates,
-          };
-
-          return response.ok({ body });
+        if (config.isLegacyTemplatesEnabled === false) {
+          // If isLegacyTemplatesEnabled=false, we do not want to fetch legacy templates and return an empty array;
+          // we retain the same response format to limit changes required on the client
+          return response.ok({ body: { templates, legacyTemplates: [] } });
         }
-        return response.ok({ body: { templates } });
+
+        const legacyTemplatesEs = await client.asCurrentUser.indices.getTemplate();
+
+        const legacyTemplates = deserializeLegacyTemplateList(
+          legacyTemplatesEs,
+          cloudManagedTemplatePrefix
+        );
+
+        const body = {
+          templates,
+          legacyTemplates,
+        };
+
+        return response.ok({ body });
       } catch (error) {
         return handleEsError({ error, response });
       }
