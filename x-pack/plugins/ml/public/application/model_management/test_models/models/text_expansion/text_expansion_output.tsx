@@ -20,9 +20,11 @@ import {
 
 import { roundToDecimalPlace } from '@kbn/ml-number-utils';
 import { i18n } from '@kbn/i18n';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useCurrentThemeVars } from '../../../../contexts/kibana';
 import type { TextExpansionInference, FormattedTextExpansionResponse } from '.';
+
+const MAX_TOKENS = 5;
 
 export const getTextExpansionOutputComponent = (inferrer: TextExpansionInference) => (
   <TextExpansionOutput inferrer={inferrer} />
@@ -56,10 +58,10 @@ export const DocumentResult: FC<{
   const tokens = response.adjustedTokenWeights
     .filter(({ value }) => value > 0)
     .sort((a, b) => b.value - a.value)
-    .slice(0, 5)
+    .slice(0, MAX_TOKENS)
     .map(({ token, value }) => ({ token, value: roundToDecimalPlace(value, 3) }));
 
-  const statInfo = getResultStatFormatting(response);
+  const statInfo = useResultStatFormatting(response);
 
   return (
     <>
@@ -102,9 +104,10 @@ export const DocumentResult: FC<{
             <EuiCallOut color="primary">
               <FormattedMessage
                 id="xpack.ml.trainedModels.testModelsFlyout.textExpansion.output.tokenHelpInfo"
-                defaultMessage="Extracted tokens, which are not synonyms of the query, represent linguistic elements
+                defaultMessage="Top {count} extracted tokens, which are not synonyms of the query, represent linguistic elements
               relevant to the search result. The weight value represents the relevancy of a given
               token."
+                values={{ count: MAX_TOKENS }}
               />
             </EuiCallOut>
             <EuiSpacer size="s" />
@@ -145,8 +148,12 @@ interface ResultStatFormatting {
   icon: string | null;
 }
 
-function getResultStatFormatting(response: FormattedTextExpansionResponse): ResultStatFormatting {
-  const { euiColorMediumShade, euiTextSubduedColor, euiTextColor } = euiThemeVars;
+const useResultStatFormatting = (
+  response: FormattedTextExpansionResponse
+): ResultStatFormatting => {
+  const {
+    euiTheme: { euiColorMediumShade, euiTextSubduedColor, euiTextColor },
+  } = useCurrentThemeVars();
 
   if (response.score >= 5) {
     return {
@@ -175,4 +182,4 @@ function getResultStatFormatting(response: FormattedTextExpansionResponse): Resu
     text: null,
     icon: null,
   };
-}
+};

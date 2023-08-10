@@ -87,6 +87,15 @@ export class TextExpansionInference extends InferenceBase<TextExpansionResponse>
         },
       },
     ]);
+
+    if (docs.length === 0) {
+      throw new Error(
+        i18n.translate('xpack.ml.trainedModels.testModelsFlyout.textExpansion.noDocsError', {
+          defaultMessage: 'No docs loaded',
+        })
+      );
+    }
+
     this.queryResults = docs[0].doc?._source[this.inferenceType].predicted_value ?? {};
 
     return this.runPipelineSimulate((doc) => {
@@ -149,7 +158,11 @@ function parseResponse(
   const [{ predicted_value: predictedValue }] = resp.inference_results;
 
   if (predictedValue === undefined) {
-    throw new Error('No results found');
+    throw new Error(
+      i18n.translate('xpack.ml.trainedModels.testModelsFlyout.textExpansion.noPredictionError', {
+        defaultMessage: 'No results found',
+      })
+    );
   }
 
   // extract token and value pairs
