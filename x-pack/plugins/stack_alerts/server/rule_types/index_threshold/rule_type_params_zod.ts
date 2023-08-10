@@ -7,7 +7,7 @@
 
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 
 enum Comparator {
   GT = 'gt',
