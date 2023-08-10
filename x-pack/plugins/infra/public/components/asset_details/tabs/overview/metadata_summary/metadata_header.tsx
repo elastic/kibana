@@ -55,7 +55,7 @@ export const MetadataHeader = ({ metadataValue }: MetadataSummaryProps) => {
           <EuiPopover
             button={
               <EuiIcon
-                data-test-subj="assetDetailsMetadataSummaryPopoverButton"
+                data-test-subj="infraAssetDetailsMetadataSummaryPopoverButton"
                 type="questionInCircle"
                 onClick={togglePopover}
               />
@@ -72,7 +72,7 @@ export const MetadataHeader = ({ metadataValue }: MetadataSummaryProps) => {
                 values={{
                   documentation: (
                     <EuiLink
-                      data-test-subj="assetDetailsTooltipDocumentationLink"
+                      data-test-subj="infraAssetDetailsTooltipMetadataDocumentationLink"
                       href={metadataValue.tooltipLink}
                       target="_blank"
                     >
