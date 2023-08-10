@@ -8,19 +8,11 @@
 import { addBasePath } from '..';
 import { RouterMock, routeDependencies, RequestMock } from '../../../test/helpers';
 import { serializeEnrichmentPolicies } from '../../../lib/enrich_policies';
+import { createTestESEnrichPolicy } from '../../../test/helpers';
 
 import { registerEnrichPoliciesRoute } from './register_enrich_policies_routes';
 
-const mockedPolicy = {
-  config: {
-    match: {
-      name: 'my-policy',
-      indices: ['users'],
-      match_field: 'email',
-      enrich_fields: ['first_name', 'last_name', 'city', 'zip', 'state'],
-    },
-  },
-};
+const mockedPolicy = createTestESEnrichPolicy('my-policy', 'match');
 
 describe('Enrich policies API', () => {
   const router = new RouterMock();
