@@ -13,7 +13,6 @@ import {
   EndpointArtifactPageId,
   ensureArtifactPageAuthzAccess,
   ensureEndpointListPageAuthzAccess,
-  ensurePolicyDetailsPageAuthzAccess,
   ensurePolicyListPageAuthzAccess,
   getArtifactListEmptyStateAddButton,
   getEndpointManagementPageList,
@@ -33,6 +32,7 @@ import {
   getConsoleHelpPanelResponseActionTestSubj,
   openConsoleHelpPanel,
 } from '../../../screens/endpoint_management/response_console';
+import { ensurePolicyDetailsPageAuthzAccess } from '../../../screens/endpoint_management/policy_details';
 
 describe(
   'User Roles for Security Complete PLI with Endpoint Complete addon',

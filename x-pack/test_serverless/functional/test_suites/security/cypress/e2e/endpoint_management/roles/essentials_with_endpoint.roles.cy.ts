@@ -16,7 +16,6 @@ import {
   ensureArtifactPageAuthzAccess,
   ensureEndpointListPageAuthzAccess,
   ensurePolicyListPageAuthzAccess,
-  ensurePolicyDetailsPageAuthzAccess,
 } from '../../../screens/endpoint_management';
 import {
   ensurePermissionDeniedScreen,
@@ -24,6 +23,7 @@ import {
   visitFleetAgentList,
 } from '../../../screens';
 import { ServerlessRoleName } from '../../../../../../../shared/lib';
+import { ensurePolicyDetailsPageAuthzAccess } from '../../../screens/endpoint_management/policy_details';
 
 describe(
   'Roles for Security Essential PLI with Endpoint Essentials addon',
