@@ -7,95 +7,6 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
-interface IntegrationPackage {
-  name: string;
-  version: string;
-}
-
-const packages: IntegrationPackage[] = [
-  {
-    name: 'apache',
-    version: '1.14.0',
-  },
-  {
-    name: 'aws',
-    version: '1.51.0',
-  },
-  {
-    name: 'system',
-    version: '1.38.1',
-  },
-  {
-    name: '1password',
-    version: '1.18.0',
-  },
-  {
-    name: 'activemq',
-    version: '0.13.0',
-  },
-  {
-    name: 'akamai',
-    version: '2.14.0',
-  },
-  {
-    name: 'apache_tomcat',
-    version: '0.12.1',
-  },
-  {
-    name: 'apm',
-    version: '8.10.0-preview-1689351101',
-  },
-  {
-    name: 'atlassian_bitbucket',
-    version: '1.14.0',
-  },
-  {
-    name: 'atlassian_confluence',
-    version: '1.15.0',
-  },
-  {
-    name: 'atlassian_jira',
-    version: '1.15.0',
-  },
-  {
-    name: 'auditd',
-    version: '3.12.0',
-  },
-  {
-    name: 'auditd_manager',
-    version: '1.12.0',
-  },
-  {
-    name: 'auth0',
-    version: '1.10.0',
-  },
-  {
-    name: 'aws_logs',
-    version: '0.5.0',
-  },
-  {
-    name: 'azure',
-    version: '1.5.28',
-  },
-  {
-    name: 'azure_app_service',
-    version: '0.0.1',
-  },
-  {
-    name: 'azure_blob_storage',
-    version: '0.5.0',
-  },
-  {
-    name: 'azure_frontdoor',
-    version: '1.1.0',
-  },
-  {
-    name: 'azure_functions',
-    version: '0.0.1',
-  },
-];
-
-const initialPackages = packages.slice(0, 3);
 const initialPackageMap = {
   apache: 'Apache HTTP Server',
   aws: 'AWS',
@@ -103,30 +14,19 @@ const initialPackageMap = {
 };
 const initialPackagesTexts = Object.values(initialPackageMap);
 
-const additionalPackages = packages.slice(3);
-
 const expectedUncategorized = ['logs-gaming-*', 'logs-manufacturing-*', 'logs-retail-*'];
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const esArchiver = getService('esArchiver');
-  const logger = getService('log');
   const retry = getService('retry');
-  const supertest = getService('supertest');
   const PageObjects = getPageObjects(['common', 'discoverLogExplorer']);
 
-  const uninstallPackage = ({ name, version }: IntegrationPackage) => {
-    return supertest.delete(`/api/fleet/epm/packages/${name}/${version}`).set('kbn-xsrf', 'xxxx');
-  };
-
-  const installPackage = ({ name, version }: IntegrationPackage) => {
-    return supertest
-      .post(`/api/fleet/epm/packages/${name}/${version}`)
-      .set('kbn-xsrf', 'xxxx')
-      .send({ force: true });
-  };
-
   describe('Dataset Selector', () => {
+    before(async () => {
+      await PageObjects.discoverLogExplorer.removeInstalledPackages();
+    });
+
     describe('without installed integrations or uncategorized data streams', () => {
       before(async () => {
         await PageObjects.common.navigateToApp('discover', { hash: '/p/log-explorer' });
@@ -248,21 +148,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('with installed integrations and uncategorized data streams', () => {
+      let cleanupIntegrationsSetup: () => Promise<void>;
+
       before(async () => {
         await esArchiver.load(
           'x-pack/test/functional/es_archives/discover_log_explorer/data_streams'
         );
-        logger.info(`Installing ${initialPackages.length} integration packages.`);
-        await Promise.all(initialPackages.map(installPackage));
+        cleanupIntegrationsSetup = await PageObjects.discoverLogExplorer.setupInitialIntegrations();
       });
 
       after(async () => {
         await esArchiver.unload(
           'x-pack/test/functional/es_archives/discover_log_explorer/data_streams'
         );
-
-        logger.info(`Uninstalling ${initialPackages.length} integration packages.`);
-        await Promise.all(initialPackages.map(uninstallPackage));
+        await cleanupIntegrationsSetup();
       });
 
       describe('when open on the first navigation level', () => {
@@ -361,8 +260,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         it('should load more integrations by scrolling to the end of the list', async () => {
           // Install more integrations and reload the page
-          logger.info(`Installing ${additionalPackages.length} integration packages.`);
-          await Promise.all(additionalPackages.map(installPackage));
+          const cleanupAdditionalSetup =
+            await PageObjects.discoverLogExplorer.setupAdditionalIntegrations();
           await browser.refresh();
 
           await PageObjects.discoverLogExplorer.openDatasetSelector();
@@ -387,8 +286,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             expect(nodes.length).to.be(20);
           });
 
-          logger.info(`Uninstalling ${additionalPackages.length} integration packages.`);
-          await Promise.all(additionalPackages.map(uninstallPackage));
+          cleanupAdditionalSetup();
         });
       });
 
@@ -640,14 +538,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           });
         });
       });
-      //   beforeEach(async () => {
-      //     await PageObjects.discoverLogExplorer.openDatasetSelector();
-      //   });
-
-      //   afterEach(async () => {
-      //     await PageObjects.discoverLogExplorer.closeDatasetSelector();
-      //   });
-      // });
 
       describe('when open/close the selector', () => {
         before(async () => {
