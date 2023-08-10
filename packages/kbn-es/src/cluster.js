@@ -277,7 +277,7 @@ exports.Cluster = class Cluster {
     }
     this._stopCalled = true;
 
-    if (this._serverless?.length) {
+    if (this._serverlessNodes?.length) {
       return await stopServerlessCluster(this._log, this._serverlessNodes);
     }
 
@@ -300,7 +300,7 @@ exports.Cluster = class Cluster {
 
     this._stopCalled;
 
-    if (this._serverless?.length) {
+    if (this._serverlessNodes?.length) {
       return await stopServerlessCluster(this._log, this._serverlessNodes);
     }
 
