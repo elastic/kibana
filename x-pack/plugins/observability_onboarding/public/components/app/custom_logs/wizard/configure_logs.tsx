@@ -493,7 +493,7 @@ export function ConfigureLogs() {
                       'xpack.observability_onboarding.configureLogs.integration.name.tooltip',
                       {
                         defaultMessage:
-                          "Provide a name for the integration that will be created to organise these custom logs. Defaults to the name of the log file, and will be prefixed with 'custom_'.",
+                          'Provide an integration name for the integration that will be created to organise these custom logs. Defaults to the name of the log file.',
                       }
                     )}
                     position="right"
