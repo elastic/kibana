@@ -45,7 +45,7 @@ export class TextExpansionInference extends InferenceBase<TextExpansionResponse>
     }),
   ];
 
-  public queryText$ = new BehaviorSubject<string>('');
+  private queryText$ = new BehaviorSubject<string>('');
   private queryResults: Record<string, number> = {};
 
   constructor(
