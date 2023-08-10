@@ -38,14 +38,11 @@ const ANALYZER_OPTIONS_WITHOUT_DEFAULT = (
 ).filter(({ value }) => value !== INDEX_DEFAULT);
 
 const getCustomAnalyzers = (indexSettings: IndexSettings): SelectOption[] | undefined => {
-  const settings: IndexSettingsInterface = {}.hasOwnProperty.call(indexSettings, 'index')
+  const settings: IndexSettingsInterface = Object.hasOwn(indexSettings, 'index')
     ? (indexSettings as { index: IndexSettingsInterface }).index
     : (indexSettings as IndexSettingsInterface);
 
-  if (
-    !{}.hasOwnProperty.call(settings, 'analysis') ||
-    !{}.hasOwnProperty.call(settings.analysis!, 'analyzer')
-  ) {
+  if (!Object.hasOwn(settings, 'analysis') || !Object.hasOwn(settings.analysis!, 'analyzer')) {
     return undefined;
   }
 

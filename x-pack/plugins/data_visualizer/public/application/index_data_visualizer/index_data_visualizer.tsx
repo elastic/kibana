@@ -201,7 +201,7 @@ export const DataVisualizerStateContextProvider: FC<DataVisualizerStateContextPr
       const urlState = parseUrlState(prevSearchString);
       const parsedQueryString = parse(prevSearchString, { sort: false });
 
-      if (!Object.prototype.hasOwnProperty.call(urlState, accessor)) {
+      if (!Object.hasOwn(urlState, accessor)) {
         urlState[accessor] = {};
       }
 

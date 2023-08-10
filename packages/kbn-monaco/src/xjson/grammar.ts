@@ -165,7 +165,7 @@ export const createParser = () => {
             ((key = string()),
             white(),
             next(':'),
-            Object.hasOwnProperty.call(object, key!) &&
+            Object.hasOwn(object, key!) &&
               warning('Duplicate key "' + key + '"', latchKeyStart),
             (object[key!] = value()),
             white(),

@@ -15,7 +15,7 @@ import { TemplateDeserialized, LegacyTemplateSerialized, TemplateSerialized } fr
 export const isLegacyTemplate = (
   template: TemplateDeserialized | LegacyTemplateSerialized | TemplateSerialized
 ): boolean => {
-  return {}.hasOwnProperty.call(template, 'template') ? false : true;
+  return Object.hasOwn(template, 'template') ? false : true;
 };
 
 export const getTemplateParameter = (

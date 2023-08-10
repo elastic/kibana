@@ -899,7 +899,7 @@
       if ("{" === ch) {
         if (next("{"), white(), "}" === ch) return next("}"), object;
         for (; ch;) {
-          if (key = string(), white(), next(":"), Object.hasOwnProperty.call(object, key) && error('Duplicate key "' + key + '"'), object[key] = value(), white(), "}" === ch) return next("}"), object;
+          if (key = string(), white(), next(":"), Object.hasOwn(object, key) && error('Duplicate key "' + key + '"'), object[key] = value(), white(), "}" === ch) return next("}"), object;
           next(","), white()
         }
       }
@@ -924,7 +924,7 @@
       return text = source, at = 0, ch = " ", result = value(), white(), ch && error("Syntax error"), "function" == typeof reviver ? function walk(holder, key) {
         var k, v, value = holder[key];
         if (value && "object" == typeof value)
-          for (k in value) Object.hasOwnProperty.call(value, k) && (v = walk(value, k), void 0 !== v ? value[k] = v : delete value[k]);
+          for (k in value) Object.hasOwn(value, k) && (v = walk(value, k), void 0 !== v ? value[k] = v : delete value[k]);
         return reviver.call(holder, key, value)
       }({
         "": result

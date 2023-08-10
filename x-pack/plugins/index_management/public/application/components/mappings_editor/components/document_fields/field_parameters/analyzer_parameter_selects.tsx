@@ -28,7 +28,7 @@ const areOptionsSuperSelect = (options: Options): boolean => {
     return false;
   }
   // `Select` options have a "text" property, `SuperSelect` options don't have it.
-  return {}.hasOwnProperty.call(options[0], 'text') === false;
+  return Object.hasOwn(options[0], 'text') === false;
 };
 
 interface Props {

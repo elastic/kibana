@@ -50,7 +50,7 @@ export const fieldSerializer: SerializerFunc<Field> = (field: Field) => {
   const updatedField: Field = Boolean(otherTypeJson) ? { ...otherTypeJson, ...rest } : { ...rest };
 
   // If a subType is present, use it as an Elasticsearch datatype
-  if ({}.hasOwnProperty.call(updatedField, 'subType')) {
+  if (Object.hasOwn(updatedField, 'subType')) {
     updatedField.type = updatedField.subType as DataType;
     delete updatedField.subType;
   }
@@ -77,8 +77,7 @@ export const fieldDeserializer: SerializerFunc<Field> = (field: Field): Field =>
      */
     field.otherTypeJson = otherTypeJson;
   } else {
-    (field as any).useSameAnalyzerForSearch =
-      {}.hasOwnProperty.call(field, 'search_analyzer') === false;
+    (field as any).useSameAnalyzerForSearch = Object.hasOwn(field, 'search_analyzer') === false;
   }
 
   return runParametersDeserializers(field);

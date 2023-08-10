@@ -2162,7 +2162,7 @@ ace.define(
             key = string();
             white();
             next(':');
-            if (Object.hasOwnProperty.call(object, key)) {
+            if (Object.hasOwn(object, key)) {
               error('Duplicate key "' + key + '"');
             }
             object[key] = value();
@@ -2283,7 +2283,7 @@ ace.define(
             value = holder[key];
           if (value && typeof value === 'object') {
             for (k in value) {
-              if (Object.hasOwnProperty.call(value, k)) {
+              if (Object.hasOwn(value, k)) {
                 v = walk(value, k);
                 if (v !== undefined) {
                   value[k] = v;

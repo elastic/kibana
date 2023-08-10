@@ -990,7 +990,7 @@ export const MAIN_DATA_TYPE_DEFINITION: {
  */
 export const SUB_TYPE_MAP_TO_MAIN = Object.entries(MAIN_DATA_TYPE_DEFINITION).reduce(
   (acc, [type, definition]) => {
-    if ({}.hasOwnProperty.call(definition, 'subTypes')) {
+    if (Object.hasOwn(definition, 'subTypes')) {
       definition.subTypes!.types.forEach((subType) => {
         acc[subType] = type;
       });

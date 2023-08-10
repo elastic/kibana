@@ -106,7 +106,7 @@ export const getPrivilegeDeprecationsService = ({
     }
     return {
       roles: kibanaRoles.filter((role) =>
-        role.kibana.find((privilege) => Object.hasOwnProperty.call(privilege.feature, featureId))
+        role.kibana.find((privilege) => Object.hasOwn(privilege.feature, featureId))
       ),
     };
   };
