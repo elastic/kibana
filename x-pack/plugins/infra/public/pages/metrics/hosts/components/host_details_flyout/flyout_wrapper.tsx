@@ -7,7 +7,6 @@
 
 import React from 'react';
 import useAsync from 'react-use/lib/useAsync';
-import type { InventoryItemType } from '../../../../../../common/inventory_models/types';
 import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
 import type { HostNodeRow } from '../../hooks/use_hosts_table';
 import { HostFlyout, useHostFlyoutUrlState } from '../../hooks/use_host_flyout_url_state';
@@ -20,8 +19,6 @@ export interface Props {
   node: HostNodeRow;
   closeFlyout: () => void;
 }
-
-const NODE_TYPE = 'host' as InventoryItemType;
 
 export const FlyoutWrapper = ({ node, closeFlyout }: Props) => {
   const { searchCriteria } = useUnifiedSearchContext();
@@ -39,8 +36,8 @@ export const FlyoutWrapper = ({ node, closeFlyout }: Props) => {
 
   return (
     <AssetDetails
-      node={node}
-      nodeType={NODE_TYPE}
+      asset={node}
+      assetType="host"
       dateRange={searchCriteria.dateRange}
       activeTabId={hostFlyoutState?.tabId}
       overrides={{
@@ -74,7 +71,7 @@ export const FlyoutWrapper = ({ node, closeFlyout }: Props) => {
       tabs={orderedFlyoutTabs}
       links={['apmServices', 'nodeDetails']}
       renderMode={{
-        showInFlyout: true,
+        mode: 'flyout',
         closeFlyout,
       }}
     />
