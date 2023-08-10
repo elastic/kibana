@@ -94,7 +94,6 @@ describe('<PrevalenceOverview />', () => {
     const { getByTestId } = render(renderPrevalenceOverview(panelContextValue('eventId', {}, [])));
 
     expect(getByTestId(INSIGHTS_PREVALENCE_TITLE_LINK_TEST_ID)).toHaveTextContent('Prevalence');
-    expect(getByTestId(INSIGHTS_PREVALENCE_TITLE_LINK_TEST_ID)).toHaveTextContent('Prevalence');
 
     const iconDataTestSubj = 'testIcon';
     const valueDataTestSubj = 'testValue';

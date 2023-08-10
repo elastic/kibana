@@ -88,31 +88,20 @@ export const INSIGHTS_ENTITIES_TITLE_TEXT_TEST_ID =
   EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID(INSIGHTS_ENTITIES_TEST_ID);
 export const INSIGHTS_ENTITIES_TITLE_ICON_TEST_ID =
   EXPANDABLE_PANEL_HEADER_TITLE_ICON_TEST_ID(INSIGHTS_ENTITIES_TEST_ID);
-export const INSIGHTS_ENTITIES_LOADING_TEST_ID =
-  EXPANDABLE_PANEL_LOADING_TEST_ID(INSIGHTS_ENTITIES_TEST_ID);
 export const INSIGHTS_ENTITIES_CONTENT_TEST_ID =
   EXPANDABLE_PANEL_CONTENT_TEST_ID(INSIGHTS_ENTITIES_TEST_ID);
-export const INSIGHTS_ENTITIES_CONTAINER_TEST_ID = `${INSIGHTS_ENTITIES_TEST_ID}Container`;
-export const ENTITIES_USER_CONTENT_TEST_ID =
-  'securitySolutionDocumentDetailsFlyoutEntitiesUserContent';
-export const ENTITIES_HOST_CONTENT_TEST_ID =
-  'securitySolutionDocumentDetailsFlyoutEntitiesHostContent';
-export const ENTITY_PANEL_CONTENT_TEST_ID =
-  'securitySolutionDocumentDetailsFlyoutEntityPanelContent';
 export const TECHNICAL_PREVIEW_ICON_TEST_ID =
   'securitySolutionDocumentDetailsFlyoutTechnicalPreviewIcon';
 export const ENTITIES_USER_OVERVIEW_TEST_ID =
   'securitySolutionDocumentDetailsFlyoutEntitiesUserOverview';
-export const ENTITIES_USER_OVERVIEW_IP_TEST_ID =
-  'securitySolutionDocumentDetailsFlyoutEntitiesUserOverviewIP';
-export const ENTITIES_USER_OVERVIEW_RISK_LEVEL_TEST_ID =
-  'securitySolutionDocumentDetailsFlyoutEntitiesUserOverviewRiskLevel';
+export const ENTITIES_USER_OVERVIEW_LINK_TEST_ID = `${ENTITIES_USER_OVERVIEW_TEST_ID}Link`;
+export const ENTITIES_USER_OVERVIEW_IP_TEST_ID = `${ENTITIES_USER_OVERVIEW_TEST_ID}IP`;
+export const ENTITIES_USER_OVERVIEW_RISK_LEVEL_TEST_ID = `${ENTITIES_USER_OVERVIEW_TEST_ID}RiskLevel`;
 export const ENTITIES_HOST_OVERVIEW_TEST_ID =
   'securitySolutionDocumentDetailsFlyoutEntitiesHostOverview';
-export const ENTITIES_HOST_OVERVIEW_IP_TEST_ID =
-  'securitySolutionDocumentDetailsFlyoutEntitiesHostOverviewIP';
-export const ENTITIES_HOST_OVERVIEW_RISK_LEVEL_TEST_ID =
-  'securitySolutionDocumentDetailsFlyoutEntitiesHostOverviewRiskLevel';
+export const ENTITIES_HOST_OVERVIEW_LINK_TEST_ID = `${ENTITIES_HOST_OVERVIEW_TEST_ID}Link`;
+export const ENTITIES_HOST_OVERVIEW_IP_TEST_ID = `${ENTITIES_HOST_OVERVIEW_TEST_ID}IP`;
+export const ENTITIES_HOST_OVERVIEW_RISK_LEVEL_TEST_ID = `${ENTITIES_HOST_OVERVIEW_TEST_ID}RiskLevel`;
 
 /* Insights Threat Intelligence */
 

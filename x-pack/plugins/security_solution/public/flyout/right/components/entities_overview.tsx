@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
 import { ExpandablePanel } from '../../shared/components/expandable_panel';
 import { useRightPanelContext } from '../context';
@@ -58,6 +58,7 @@ export const EntitiesOverview: React.FC = () => {
               <UserEntityOverview userName={userName} />
             </EuiFlexItem>
           )}
+          <EuiSpacer size="s" />
           {hostName && (
             <EuiFlexItem>
               <HostEntityOverview hostName={hostName} />
