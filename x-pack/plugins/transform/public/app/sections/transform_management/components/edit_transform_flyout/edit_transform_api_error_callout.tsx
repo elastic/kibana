@@ -14,7 +14,7 @@ import { i18n } from '@kbn/i18n';
 import { useEditTransformFlyout } from './use_edit_transform_flyout';
 
 export const EditTransformApiErrorCallout: FC = () => {
-  const apiErrorMessage = useEditTransformFlyout((s) => s.formState.apiErrorMessage);
+  const apiErrorMessage = useEditTransformFlyout((s) => s.apiErrorMessage);
 
   return (
     <>

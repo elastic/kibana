@@ -29,10 +29,8 @@ export const EditTransformRetentionPolicy: FC = () => {
   const toastNotifications = useToastNotifications();
 
   const dataViewId = useEditTransformFlyout((s) => s.dataViewId);
-  const formSections = useEditTransformFlyout((s) => s.formState.formSections);
-  const retentionPolicyField = useEditTransformFlyout(
-    (s) => s.formState.formFields.retentionPolicyField
-  );
+  const formSections = useEditTransformFlyout((s) => s.formSections);
+  const retentionPolicyField = useEditTransformFlyout((s) => s.formFields.retentionPolicyField);
   const { formField, formSection } = useEditTransformFlyout((s) => s.actions);
   const config = useEditTransformFlyout((s) => s.config);
   const formState = useEditTransformFlyout((s) => s.formState);
