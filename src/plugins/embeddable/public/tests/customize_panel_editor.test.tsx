@@ -20,9 +20,14 @@ import {
   TIME_RANGE_EMBEDDABLE,
 } from '../lib/test_samples';
 import { CustomizePanelEditor } from '../embeddable_panel/panel_actions/customize_panel_action/customize_panel_editor';
+import { embeddablePluginMock } from '../mocks';
+import { AggregateQuery, Filter, Query } from '@kbn/es-query';
 
 let container: TimeRangeContainer;
 let embeddable: TimeRangeEmbeddable;
+
+const mockGetFilters = jest.fn(async () => [] as Filter[]);
+const mockGetQuery = jest.fn(async () => undefined as Query | AggregateQuery | undefined);
 
 beforeEach(async () => {
   const { doStart, setup } = testPlugin(coreMock.createSetup(), coreMock.createStart());
@@ -46,10 +51,14 @@ beforeEach(async () => {
     description: 'This might be a neat line chart',
     viewMode: ViewMode.EDIT,
   });
+
   if (isErrorEmbeddable(timeRangeEmbeddable)) {
     throw new Error('Error creating new hello world embeddable');
   } else {
-    embeddable = timeRangeEmbeddable;
+    embeddable = embeddablePluginMock.mockFilterableEmbeddable(timeRangeEmbeddable, {
+      getFilters: mockGetFilters,
+      getQuery: mockGetQuery,
+    });
   }
 });
 

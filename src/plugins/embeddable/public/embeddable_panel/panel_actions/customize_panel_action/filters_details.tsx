@@ -29,25 +29,13 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { FilterableEmbeddable, IEmbeddable } from '../../..';
 import { EditPanelAction } from '../edit_panel_action/edit_panel_action';
 
-export const dashboardFilterNotificationActionStrings = {
-  getDisplayName: () =>
-    i18n.translate('dashboard.panel.filters', {
-      defaultMessage: 'Panel filters',
-    }),
-  getEditButtonTitle: () =>
-    i18n.translate('dashboard.panel.filters.modal.editButton', {
-      defaultMessage: 'Edit filters',
-    }),
-  getCloseButtonTitle: () =>
-    i18n.translate('dashboard.panel.filters.modal.closeButton', {
-      defaultMessage: 'Close',
-    }),
+export const filterDetailsActionStrings = {
   getQueryTitle: () =>
-    i18n.translate('dashboard.panel.filters.modal.queryTitle', {
+    i18n.translate('embeddableApi.panel.filters.queryTitle', {
       defaultMessage: 'Query',
     }),
   getFiltersTitle: () =>
-    i18n.translate('dashboard.panel.filters.modal.filtersTitle', {
+    i18n.translate('embeddableApi.panel.filters.filtersTitle', {
       defaultMessage: 'Filters',
     }),
 };
@@ -70,6 +58,7 @@ export function FiltersDetails({ embeddable, editMode, editPanelAction }: Filter
     [embeddable]
   );
 
+  console.log({ dataViews });
   useMount(() => {
     Promise.all([
       (embeddable as IEmbeddable & FilterableEmbeddable).getFilters(),
@@ -113,9 +102,9 @@ export function FiltersDetails({ embeddable, editMode, editPanelAction }: Filter
 
   return (
     <EuiSkeletonText isLoading={isLoading} lines={3}>
-      {queryString.trim().length > 0 && (
+      {queryString !== '' && (
         <EuiFormRow
-          label={dashboardFilterNotificationActionStrings.getQueryTitle()}
+          label={filterDetailsActionStrings.getQueryTitle()}
           display="rowCompressed"
           labelAppend={editMode && !disableEditbutton ? editVisButton : undefined}
         >
@@ -123,7 +112,7 @@ export function FiltersDetails({ embeddable, editMode, editPanelAction }: Filter
             language={queryLanguage}
             paddingSize="s"
             fontSize="s"
-            aria-labelledby={`${dashboardFilterNotificationActionStrings.getQueryTitle()}: ${queryString}`}
+            aria-labelledby={`${filterDetailsActionStrings.getQueryTitle()}: ${queryString}`}
             tabIndex={0} // focus so that keyboard controls will not skip over the code block
           >
             {queryString}
@@ -132,7 +121,7 @@ export function FiltersDetails({ embeddable, editMode, editPanelAction }: Filter
       )}
       {filters.length > 0 && (
         <EuiFormRow
-          label={dashboardFilterNotificationActionStrings.getFiltersTitle()}
+          label={filterDetailsActionStrings.getFiltersTitle()}
           labelAppend={editMode && !disableEditbutton ? editVisButton : undefined}
         >
           <EuiFlexGroup wrap={true} gutterSize="xs">
