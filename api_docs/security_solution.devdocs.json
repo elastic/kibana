@@ -411,7 +411,15 @@
             "description": [],
             "signature": [
               "Observable",
-              "<Map<\"entity_analytics_panel\", React.ComponentType<{}>>>"
+              "<Map<",
+              {
+                "pluginId": "securitySolution",
+                "scope": "public",
+                "docId": "kibSecuritySolutionPluginApi",
+                "section": "def-public.UpsellingSectionId",
+                "text": "UpsellingSectionId"
+              },
+              ", React.ComponentType<{}>>>"
             ],
             "path": "x-pack/plugins/security_solution/public/common/lib/upsellings/upselling_service.ts",
             "deprecated": false,
@@ -479,7 +487,15 @@
             "label": "registerSections",
             "description": [],
             "signature": [
-              "(sections: Partial<Record<\"entity_analytics_panel\", React.ComponentType<{}>>>) => void"
+              "(sections: Partial<Record<",
+              {
+                "pluginId": "securitySolution",
+                "scope": "public",
+                "docId": "kibSecuritySolutionPluginApi",
+                "section": "def-public.UpsellingSectionId",
+                "text": "UpsellingSectionId"
+              },
+              ", React.ComponentType<{}>>>) => void"
             ],
             "path": "x-pack/plugins/security_solution/public/common/lib/upsellings/upselling_service.ts",
             "deprecated": false,
@@ -493,7 +509,15 @@
                 "label": "sections",
                 "description": [],
                 "signature": [
-                  "Partial<Record<\"entity_analytics_panel\", React.ComponentType<{}>>>"
+                  "Partial<Record<",
+                  {
+                    "pluginId": "securitySolution",
+                    "scope": "public",
+                    "docId": "kibSecuritySolutionPluginApi",
+                    "section": "def-public.UpsellingSectionId",
+                    "text": "UpsellingSectionId"
+                  },
+                  ", React.ComponentType<{}>>>"
                 ],
                 "path": "x-pack/plugins/security_solution/public/common/lib/upsellings/upselling_service.ts",
                 "deprecated": false,
@@ -673,6 +697,46 @@
                 "isRequired": true
               }
             ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-public.UpsellingService.getSectionsValue",
+            "type": "Function",
+            "tags": [],
+            "label": "getSectionsValue",
+            "description": [],
+            "signature": [
+              "() => Map<",
+              {
+                "pluginId": "securitySolution",
+                "scope": "public",
+                "docId": "kibSecuritySolutionPluginApi",
+                "section": "def-public.UpsellingSectionId",
+                "text": "UpsellingSectionId"
+              },
+              ", React.ComponentType<{}>>"
+            ],
+            "path": "x-pack/plugins/security_solution/public/common/lib/upsellings/upselling_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-public.UpsellingService.getMessagesValue",
+            "type": "Function",
+            "tags": [],
+            "label": "getMessagesValue",
+            "description": [],
+            "signature": [
+              "() => Map<\"investigation_guide\", string>"
+            ],
+            "path": "x-pack/plugins/security_solution/public/common/lib/upsellings/upselling_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
             "returnComment": []
           }
         ],
@@ -2021,7 +2085,7 @@
         "label": "SectionUpsellings",
         "description": [],
         "signature": [
-          "{ entity_analytics_panel?: React.ComponentType<{}> | undefined; }"
+          "{ entity_analytics_panel?: React.ComponentType<{}> | undefined; endpointPolicyProtections?: React.ComponentType<{}> | undefined; osquery_automated_response_actions?: React.ComponentType<{}> | undefined; }"
         ],
         "path": "x-pack/plugins/security_solution/public/common/lib/upsellings/types.ts",
         "deprecated": false,
@@ -2036,7 +2100,7 @@
         "label": "UpsellingSectionId",
         "description": [],
         "signature": [
-          "\"entity_analytics_panel\""
+          "\"entity_analytics_panel\" | \"endpointPolicyProtections\" | \"osquery_automated_response_actions\""
         ],
         "path": "x-pack/plugins/security_solution/public/common/lib/upsellings/types.ts",
         "deprecated": false,

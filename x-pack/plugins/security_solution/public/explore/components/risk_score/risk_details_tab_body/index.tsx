@@ -32,6 +32,8 @@ import type { UsersComponentsQueryProps } from '../../../users/pages/navigation/
 import type { HostsComponentsQueryProps } from '../../../hosts/pages/navigation/types';
 import { useDashboardHref } from '../../../../common/hooks/use_dashboard_href';
 import { RiskScoresNoDataDetected } from '../risk_score_onboarding/risk_score_no_data_detected';
+import { useRiskEngineStatus } from '../../../../entity_analytics/api/hooks/use_risk_engine_status';
+import { RiskScoreUpdatePanel } from '../../../../entity_analytics/components/risk_score_update_panel';
 
 const StyledEuiFlexGroup = styled(EuiFlexGroup)`
   margin-top: ${({ theme }) => theme.eui.euiSizeL};
@@ -91,6 +93,8 @@ const RiskDetailsTabBodyComponent: React.FC<
       timerange,
     });
 
+  const { data: riskScoreEngineStatus } = useRiskEngineStatus();
+
   const rules = useMemo(() => {
     const lastRiskItem = data && data.length > 0 ? data[data.length - 1] : null;
     if (lastRiskItem) {
@@ -131,6 +135,10 @@ const RiskDetailsTabBodyComponent: React.FC<
 
   if (!isAuthorized) {
     return <>{'TODO: Add RiskScore Upsell'}</>;
+  }
+
+  if (riskScoreEngineStatus?.isUpdateAvailable) {
+    return <RiskScoreUpdatePanel />;
   }
 
   if (status.isDisabled || status.isDeprecated) {

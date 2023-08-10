@@ -23,7 +23,7 @@ import PageNotFound from '../404';
 import { SloDetails } from './components/slo_details';
 import { HeaderTitle } from './components/header_title';
 import { HeaderControl } from './components/header_control';
-import { paths } from '../../routes/paths';
+import { paths } from '../../../common/locators/paths';
 import type { SloDetailsPathParams } from './types';
 import { AutoRefreshButton } from '../slos/components/auto_refresh_button';
 import { FeedbackButton } from '../../components/slo/feedback_button/feedback_button';

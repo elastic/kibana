@@ -206,7 +206,7 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
     // Flyout Tabs
     async getAssetDetailsKPITileValue(type: string) {
       const container = await testSubjects.find('assetDetailsKPIGrid');
-      const element = await container.findByTestSubject(`assetDetailsKPI-${type}`);
+      const element = await container.findByTestSubject(`infraAssetDetailsKPI${type}`);
       const div = await element.findByClassName('echMetricText__value');
       return div.getAttribute('title');
     },
@@ -215,21 +215,9 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
       return testSubjects.exists('assetDetailsAlertsTitle');
     },
 
-    async getActiveAlertsCountText() {
-      const container = await testSubjects.find('activeAlertCount');
-      const containerText = await container.getVisibleText();
-      return containerText;
-    },
-
-    async getTotalAlertsCountText() {
-      const container = await testSubjects.find('totalAlertCount');
-      const containerText = await container.getVisibleText();
-      return containerText;
-    },
-
     async getAssetDetailsMetricsCharts() {
       const container = await testSubjects.find('assetDetailsMetricsChartGrid');
-      return container.findAllByCssSelector('[data-test-subj*="assetDetailsMetricsChart"]');
+      return container.findAllByCssSelector('[data-test-subj*="infraAssetDetailsMetricsChart"]');
     },
 
     getMetadataTab() {

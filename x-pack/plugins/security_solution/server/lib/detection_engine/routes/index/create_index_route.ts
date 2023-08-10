@@ -7,7 +7,7 @@
 
 import { chunk, get } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient, IKibanaResponse } from '@kbn/core/server';
 import {
   transformError,
   getBootstrapIndexExists,
@@ -20,6 +20,7 @@ import type {
   SecuritySolutionPluginRouter,
 } from '../../../../types';
 import { DETECTION_ENGINE_INDEX_URL } from '../../../../../common/constants';
+import type { CreateIndexResponse } from '../../../../../common/api/detection_engine';
 import { buildSiemResponse } from '../utils';
 import {
   getSignalsTemplate,
@@ -43,7 +44,7 @@ export const createIndexRoute = (router: SecuritySolutionPluginRouter) => {
         tags: ['access:securitySolution'],
       },
     },
-    async (context, _, response) => {
+    async (context, _, response): Promise<IKibanaResponse<CreateIndexResponse>> => {
       const siemResponse = buildSiemResponse(response);
 
       try {

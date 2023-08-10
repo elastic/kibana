@@ -754,7 +754,6 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           packageInfo: pkgInfo,
           esClient,
         });
-
         restOfPackagePolicy = secretsRes.packagePolicyUpdate;
         secretReferences = secretsRes.secretReferences;
         secretsToDelete = secretsRes.secretsToDelete;
