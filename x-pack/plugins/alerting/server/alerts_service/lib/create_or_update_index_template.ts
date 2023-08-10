@@ -54,6 +54,7 @@ export const getIndexTemplate = ({
             rollover_alias: indexPatterns.alias,
           },
           'index.mapping.total_fields.limit': totalFieldsLimit,
+          'index.mapping.ignore_malformed': true,
         },
         mappings: {
           dynamic: false,

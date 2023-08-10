@@ -17,7 +17,7 @@
     ],
     "patterns": [
       "_segments",
-      "{indices}/_segments"
+      "{index}/_segments"
     ],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-segments.html"
   }

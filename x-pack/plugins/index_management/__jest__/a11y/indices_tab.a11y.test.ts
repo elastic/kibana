@@ -8,12 +8,7 @@
 import { act } from 'react-dom/test-utils';
 import { expectToBeAccessible } from '@kbn/test-jest-helpers';
 import { IndicesTestBed, setup } from '../client_integration/home/indices_tab.helpers';
-import {
-  indexMappings,
-  indexSettings,
-  indexStats,
-  setupEnvironment,
-} from '../client_integration/helpers';
+import { setupEnvironment } from '../client_integration/helpers';
 import {
   createDataStreamBackingIndex,
   createNonDataStreamIndex,
@@ -51,45 +46,5 @@ describe('A11y Indices tab', () => {
     const { component } = testBed;
     component.update();
     await expectToBeAccessible(component);
-  });
-
-  // FLAKY: https://github.com/elastic/kibana/issues/128836
-  describe.skip('index details flyout', () => {
-    beforeEach(async () => {
-      httpRequestsMockHelpers.setLoadIndicesResponse([
-        createNonDataStreamIndex('non-data-stream-test-index'),
-      ]);
-      httpRequestsMockHelpers.setLoadIndexSettingsResponse(indexSettings);
-      httpRequestsMockHelpers.setLoadIndexMappingResponse(indexMappings);
-      httpRequestsMockHelpers.setLoadIndexStatsResponse(indexStats);
-      await act(async () => {
-        testBed = await setup(httpSetup);
-      });
-      const { component, find } = testBed;
-      component.update();
-      find('indexTableIndexNameLink').at(0).simulate('click');
-      component.update();
-    });
-
-    it('summary tab', async () => {
-      const { component, find } = testBed;
-      expect(find('detailPanelTabSelected').text()).toEqual('Summary');
-      await expectToBeAccessible(component);
-    });
-    ['settings', 'mappings', 'stats'].forEach((tab) => {
-      it(`${tab} tab`, async () => {
-        const { component, find, actions } = testBed;
-        await actions.selectIndexDetailsTab(tab as 'settings');
-        expect(find('detailPanelTabSelected').text().toLowerCase()).toEqual(tab);
-        await expectToBeAccessible(component);
-      });
-    });
-
-    it('edit settings tab', async () => {
-      const { component, find, actions } = testBed;
-      await actions.selectIndexDetailsTab('edit_settings');
-      expect(find('detailPanelTabSelected').text()).toEqual('Edit settings');
-      await expectToBeAccessible(component);
-    });
   });
 });

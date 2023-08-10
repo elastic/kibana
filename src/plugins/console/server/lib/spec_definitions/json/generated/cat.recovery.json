@@ -37,7 +37,7 @@
     ],
     "patterns": [
       "_cat/recovery",
-      "_cat/recovery/{indices}"
+      "_cat/recovery/{index}"
     ],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/cat-recovery.html"
   }

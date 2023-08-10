@@ -44,20 +44,12 @@ const wrapper = (children: React.ReactNode, panelContextValue: RightPanelContext
     </div>
   </RightPanelContext.Provider>
 );
-export const RuleExpand: Story<void> = () => {
+export const Rule: Story<void> = () => {
   const panelContextValue = {
     dataFormattedForFieldBrowser: [ruleUuid, ruleDescription],
   } as unknown as RightPanelContext;
 
   return wrapper(<Description />, panelContextValue);
-};
-
-export const RuleCollapse: Story<void> = () => {
-  const panelContextValue = {
-    dataFormattedForFieldBrowser: [ruleUuid, ruleDescription],
-  } as unknown as RightPanelContext;
-
-  return wrapper(<Description expanded={true} />, panelContextValue);
 };
 
 export const Document: Story<void> = () => {
@@ -90,11 +82,11 @@ export const EmptyDescription: Story<void> = () => {
     ],
   } as unknown as RightPanelContext;
 
-  return wrapper(<Description expanded={true} />, panelContextValue);
+  return wrapper(<Description />, panelContextValue);
 };
 
 export const Empty: Story<void> = () => {
   const panelContextValue = {} as unknown as RightPanelContext;
 
-  return wrapper(<Description expanded={true} />, panelContextValue);
+  return wrapper(<Description />, panelContextValue);
 };
