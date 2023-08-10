@@ -40,6 +40,8 @@ do
   LAST_CODE=$?
   set -e;
 
+  sleep 86400
+
   if [ $LAST_CODE -ne 0 ]; then
     EXIT_CODE=10
   fi

@@ -82,7 +82,7 @@ const SHARED_SERVERLESS_PARAMS = [
 
   '--rm',
 
-  // '--detach',
+  '--detach',
 
   // '--privileged',
 
@@ -388,7 +388,7 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
   await setupDocker(log, image);
 
   const volumeCmd = await setupServerlessVolumes(log, options);
-  const userCmd = await setupUserPerm();
+  // const userCmd = await setupUserPerm();
 
   const nodeNames = await Promise.all(
     SERVERLESS_NODES.map(async (node, i) => {
@@ -398,8 +398,8 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
         params: node.params.concat(
           resolveEsArgs(DEFAULT_SERVERLESS_ESARGS.concat(node.esArgs ?? []), options),
           i === 0 ? resolvePort(options) : [],
-          volumeCmd,
-          userCmd
+          volumeCmd
+          // userCmd
         ),
       });
       return node.name;
