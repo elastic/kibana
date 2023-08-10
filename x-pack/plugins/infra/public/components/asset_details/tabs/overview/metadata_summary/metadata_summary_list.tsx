@@ -40,6 +40,7 @@ const extendedMetadata = (metadataInfo: InfraMetadata['info']): MetadataData[] =
     field: 'cloudProvider',
     value: metadataInfo?.cloud?.provider,
     tooltipFieldLabel: 'cloud.provider',
+    tooltipLink: 'https://www.elastic.co/guide/en/ecs/current/ecs-cloud.html#field-cloud-provider',
   },
   {
     field: 'operatingSystem',
