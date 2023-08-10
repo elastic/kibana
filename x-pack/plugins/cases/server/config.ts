@@ -20,6 +20,9 @@ export const ConfigSchema = schema.object({
     // intentionally not setting a default here so that we can determine if the user set it
     maxSize: schema.maybe(schema.number({ min: 0 })),
   }),
+  stack: schema.object({
+    enabled: schema.boolean({ defaultValue: true }),
+  }),
 });
 
 export type ConfigType = TypeOf<typeof ConfigSchema>;

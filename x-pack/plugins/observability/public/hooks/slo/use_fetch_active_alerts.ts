@@ -19,7 +19,6 @@ interface Params {
 
 export interface ActiveAlerts {
   count: number;
-  ruleIds: string[];
 }
 
 type ActiveAlertsMap = Record<SloId, ActiveAlerts>;
@@ -37,7 +36,6 @@ interface FindApiResponse {
       buckets: Array<{
         key: string;
         doc_count: number;
-        perRuleId: { buckets: Array<{ key: string; doc_count: number }> };
       }>;
     };
   };
@@ -77,19 +75,21 @@ export function useFetchActiveAlerts({ sloIds = [] }: Params): UseFetchActiveAle
                     },
                   },
                 ],
+                should: [
+                  {
+                    terms: {
+                      'kibana.alert.rule.parameters.sloId': sloIds,
+                    },
+                  },
+                ],
+                minimum_should_match: 1,
               },
             },
             aggs: {
               perSloId: {
                 terms: {
+                  size: sloIds.length,
                   field: 'kibana.alert.rule.parameters.sloId',
-                },
-                aggs: {
-                  perRuleId: {
-                    terms: {
-                      field: 'kibana.alert.rule.uuid',
-                    },
-                  },
                 },
               },
             },
@@ -102,7 +102,6 @@ export function useFetchActiveAlerts({ sloIds = [] }: Params): UseFetchActiveAle
             ...acc,
             [bucket.key]: {
               count: bucket.doc_count ?? 0,
-              ruleIds: bucket.perRuleId.buckets.map((rule) => rule.key),
             } as ActiveAlerts,
           }),
           {}
