@@ -23,8 +23,7 @@ export class PluginBar
     return {
       sectionRegistry: sectionRegistry.setup,
     };
-    }
-  };
+  }
 
   public start(
     _core: CoreStart,
@@ -33,8 +32,7 @@ export class PluginBar
     return {
       sectionRegistry: sectionRegistry.start,
     };
-    }
-  };
+  }
 }
 
 export class PluginFoo
@@ -52,7 +50,7 @@ export class PluginFoo
     };
 
     sectionRegistry.setup.addGlobalSection(Component, queryMatch);
-  };
+  }
 }
 
 ```
