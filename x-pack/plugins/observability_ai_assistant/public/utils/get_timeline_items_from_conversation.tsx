@@ -14,7 +14,8 @@ import { type Message, MessageRole } from '../../common';
 import type { FunctionDefinition } from '../../common/types';
 
 function convertFunctionParamsToMarkdownCodeBlock(object: Record<string, string | number>) {
-  return `\`\`\`
+  return `
+\`\`\`
 ${JSON.stringify(object, null, 4)}
 \`\`\``;
 }
@@ -49,15 +50,16 @@ export function getTimelineItemsfromConversation({
     },
     ...messages.map((message, index) => {
       const id = v4();
-      const role = message.message.role;
 
       let title: string = '';
       let content: string | undefined;
       let element: React.ReactNode | undefined;
 
-      const functionCall = message.message.name
-        ? messages[index - 1].message.function_call
-        : message.message.function_call;
+      const role = message.message.name ? message.message.role : message.message.role;
+      const functionCall =
+        message.message.name && messages[index - 1] && messages[index - 1].message.function_call
+          ? messages[index - 1].message.function_call
+          : message.message.function_call;
 
       let canCopy: boolean = false;
       let canEdit: boolean = false;
@@ -72,41 +74,26 @@ export function getTimelineItemsfromConversation({
           break;
 
         case MessageRole.User:
-          // is a prompt by the user
-          if (!message.message.name) {
-            title = '';
-            content = message.message.content;
-
-            canCopy = true;
-            canEdit = hasConnector;
-            canGiveFeedback = false;
-            canRegenerate = false;
-            collapsed = false;
-            hide = false;
-          } else {
-            // user has executed a function
-            const prevMessage = messages[index - 1];
-            if (!prevMessage || !prevMessage.message.function_call) {
-              throw new Error('Could not find preceding message with function_call');
-            }
-
+          // User executed a function:
+          if (functionCall) {
             title = i18n.translate('xpack.observabilityAiAssistant.executedFunctionEvent', {
               defaultMessage: 'executed the function {functionName}',
               values: {
-                functionName: prevMessage.message.function_call!.name,
+                functionName: functionCall.name,
               },
             });
 
-            content = convertFunctionParamsToMarkdownCodeBlock(
-              JSON.parse(message.message.content || '{}')
-            );
+            content = convertFunctionParamsToMarkdownCodeBlock({
+              name: functionCall.name,
+              arguments: JSON.parse(functionCall.arguments || '{}'),
+            });
 
             const fn = functions.find((func) => func.options.name === message.message.name);
 
             element = fn?.render ? (
               <RenderFunction
-                name={message.message.name}
-                arguments={prevMessage.message.function_call.arguments}
+                name={functionCall.name}
+                arguments={functionCall?.arguments}
                 response={message.message}
               />
             ) : null;
@@ -117,22 +104,38 @@ export function getTimelineItemsfromConversation({
             canRegenerate = hasConnector;
             collapsed = !Boolean(element);
             hide = false;
+          } else {
+            // is a prompt by the user
+            title = '';
+            content = message.message.content;
+
+            canCopy = true;
+            canEdit = hasConnector;
+            canGiveFeedback = false;
+            canRegenerate = false;
+            collapsed = false;
+            hide = false;
           }
+
           break;
 
         case MessageRole.Assistant:
           // is a function suggestion by the assistant
-          if (!!message.message.function_call?.name) {
+          if (!!functionCall?.name) {
             title = i18n.translate('xpack.observabilityAiAssistant.suggestedFunctionEvent', {
               defaultMessage: 'suggested to use function {functionName}',
               values: {
-                functionName: message.message.function_call!.name,
+                functionName: functionCall!.name,
               },
             });
-            content = convertFunctionParamsToMarkdownCodeBlock({
-              name: message.message.function_call!.name,
-              arguments: JSON.parse(message.message.function_call?.arguments || '{}'),
-            });
+            content =
+              i18n.translate('xpack.observabilityAiAssistant.responseWas', {
+                defaultMessage: 'Suggested the payload: ',
+              }) +
+              convertFunctionParamsToMarkdownCodeBlock({
+                name: functionCall!.name,
+                arguments: JSON.parse(functionCall?.arguments || '{}'),
+              });
 
             canCopy = true;
             canEdit = false;
