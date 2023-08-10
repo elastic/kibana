@@ -235,6 +235,7 @@ module.exports = {
           'object-shorthand': 'error',
           'one-var': [ 'error', 'never' ],
           'prefer-const': 'error',
+          'prefer-object-has-own': 'error',
           'prefer-rest-params': 'error',
           'radix': 'error',
           'spaced-comment': ["error", "always", {

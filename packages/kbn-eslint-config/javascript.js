@@ -77,6 +77,7 @@ module.exports = {
         'no-with': 'error',
         'one-var': [ 'error', 'never' ],
         'prefer-const': 'error',
+        'prefer-object-has-own': 'error',
         strict: [ 'error', 'never' ],
         'valid-typeof': 'error',
         yoda: 'off',
