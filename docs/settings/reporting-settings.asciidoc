@@ -214,7 +214,7 @@ The following deployment configurations may lead to failed report jobs or incomp
 * Any shard needed for search is unavailable.
 * Data is stored on slow storage tiers. 
 * Network latency between nodes is high.
-* * {ccs-cap} is used.
+* {ccs-cap} is used.
 
 To export large amounts of data we recommend using {es} APIs directly, or Logstash CSV export. See {ref}/scroll-api.html[Scroll API], {ref}/point-in-time-api.html[Point in time API], and {ref}/sql-rest-format.html#_csv[CSV response format].
 ============
