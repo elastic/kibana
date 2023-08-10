@@ -93,6 +93,7 @@ export const Popover = ({ children }: { children: React.ReactNode }) => {
           : undefined
       }
       zIndex={Number(euiTheme.levels.header) - 1}
+      panelStyle={{ maxWidth: 350 }}
     >
       {children}
     </EuiPopover>
