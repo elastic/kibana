@@ -5,6 +5,11 @@
  * 2.0.
  */
 
-export { healthRoute } from './health';
-export { backgroundTaskUtilizationRoute } from './background_task_utilization';
-export { metricsRoute } from './metrics';
+import { TaskLifecycleEvent } from '../polling_lifecycle';
+
+export interface ITaskMetricsAggregator<T> {
+  initialMetric: () => T;
+  collect: () => T;
+  reset: () => void;
+  processTaskLifecycleEvent: (taskEvent: TaskLifecycleEvent) => void;
+}
