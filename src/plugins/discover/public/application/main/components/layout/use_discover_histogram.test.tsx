@@ -414,5 +414,37 @@ describe('useDiscoverHistogram', () => {
       });
       expect(api.refetch).not.toHaveBeenCalled();
     });
+
+    it('should skip the next refetch when fetching more', async () => {
+      const savedSearchFetch$ = new Subject<{
+        options: {
+          reset: boolean;
+          fetchMore: boolean;
+        };
+        searchSessionId: string;
+      }>();
+      const stateContainer = getStateContainer();
+      stateContainer.dataState.fetch$ = savedSearchFetch$;
+      const { hook } = await renderUseDiscoverHistogram({ stateContainer });
+      const api = createMockUnifiedHistogramApi();
+      act(() => {
+        hook.result.current.ref(api);
+      });
+      act(() => {
+        savedSearchFetch$.next({
+          options: { reset: false, fetchMore: true },
+          searchSessionId: '1234',
+        });
+      });
+      expect(api.refetch).not.toHaveBeenCalled();
+
+      act(() => {
+        savedSearchFetch$.next({
+          options: { reset: false, fetchMore: false },
+          searchSessionId: '1234',
+        });
+      });
+      expect(api.refetch).toHaveBeenCalled();
+    });
   });
 });
