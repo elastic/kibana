@@ -74,7 +74,7 @@ export const DOCKER_TAG = `${pkg.version}-SNAPSHOT`;
 export const DOCKER_IMG = `${DOCKER_REPO}:${DOCKER_TAG}`;
 
 export const SERVERLESS_REPO = `${DOCKER_REGISTRY}/elasticsearch-ci/elasticsearch-serverless`;
-export const SERVERLESS_TAG = 'latest';
+export const SERVERLESS_TAG = 'git-d82e148f6f28'; // 'latest';
 export const SERVERLESS_IMG = `${SERVERLESS_REPO}:${SERVERLESS_TAG}`;
 
 const SHARED_SERVERLESS_PARAMS = [
@@ -321,11 +321,11 @@ export async function setupServerlessVolumes(log: ToolingLog, options: Serverles
   }
 
   // Permissions are set separately from mkdir due to default umask
-  await Fsp.chmod(volumePath, 0o766).then((msg: any) => {
+  await Fsp.chmod(volumePath, 0o777).then((msg: any) => {
     if (msg) {
       log.warning(msg);
     }
-    log.info('Setup object store permissions (chmod 766).');
+    log.info('Setup object store permissions (chmod 777).');
   });
 
   log.indent(-4);
