@@ -32,7 +32,10 @@ export { ObservabilityAIAssistantProvider } from './context/observability_ai_ass
 
 export type { ObservabilityAIAssistantPluginSetup, ObservabilityAIAssistantPluginStart };
 
-export { useObservabilityAIAssistant } from './hooks/use_observability_ai_assistant';
+export {
+  useObservabilityAIAssistant,
+  useObservabilityAIAssistantOptional,
+} from './hooks/use_observability_ai_assistant';
 
 export type { Conversation, Message } from '../common';
 export { MessageRole } from '../common';
