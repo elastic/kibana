@@ -196,7 +196,7 @@ describe('<CspPolicyTemplateForm />', () => {
   it('renders CSPM input selector', () => {
     const { getByLabelText } = render(<WrappedComponent newPolicy={getMockPolicyAWS()} />);
 
-    const option1 = getByLabelText('Amazon Web Services');
+    const option1 = getByLabelText('AWS');
     const option2 = getByLabelText('GCP');
     const option3 = getByLabelText('Azure');
 
@@ -229,7 +229,7 @@ describe('<CspPolicyTemplateForm />', () => {
       <WrappedComponent newPolicy={getMockPolicyAWS()} edit={true} />
     );
 
-    const option1 = getByLabelText('Amazon Web Services');
+    const option1 = getByLabelText('AWS');
     const option2 = getByLabelText('GCP');
     const option3 = getByLabelText('Azure');
 
