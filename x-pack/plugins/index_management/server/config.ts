@@ -22,11 +22,18 @@ const schemaLatest = schema.object(
     ui: schema.object({
       enabled: schema.boolean({ defaultValue: true }),
     }),
-    enableIndexActions: schema.boolean({ defaultValue: true }),
+    enableIndexActions: schema.conditional(
+      schema.contextRef('serverless'),
+      true,
+      // Index actions are disabled in serverless; refer to the serverless.yml file as the source of truth
+      // We take this approach in order to have a central place (serverless.yml) for serverless config across Kibana
+      schema.boolean({ defaultValue: true }),
+      schema.never()
+    ),
     enableLegacyTemplates: schema.conditional(
       schema.contextRef('serverless'),
       true,
-      // Legacy templates functionality disabled in serverless; refer to the serverless.yml file as the source of truth
+      // Legacy templates functionality is disabled in serverless; refer to the serverless.yml file as the source of truth
       // We take this approach in order to have a central place (serverless.yml) for serverless config across Kibana
       schema.boolean({ defaultValue: true }),
       schema.never()
