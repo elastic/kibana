@@ -41,7 +41,7 @@ export function KnowledgeBaseCallout({ knowledgeBase }: { knowledgeBase: UseKnow
     color = 'danger';
     content = (
       <EuiText size="xs" color={color}>
-        {i18n.translate('xpack.observabilityAIAssistant.failedToGetStatus', {
+        {i18n.translate('xpack.observabilityAiAssistant.failedToGetStatus', {
           defaultMessage: 'Failed to get model status.',
         })}
       </EuiText>
