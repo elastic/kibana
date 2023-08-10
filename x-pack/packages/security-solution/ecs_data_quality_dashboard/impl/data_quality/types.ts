@@ -181,22 +181,13 @@ export interface SelectedIndex {
   pattern: string;
 }
 
-export interface DataQualityIndexCheckedParams {
-  batchId: string;
-  ecsVersion?: string;
+export type DataQualityIndexCheckedParams = DataQualityCheckAllCompletedParams & {
   errorCount?: number;
   ilmPhase?: string;
   indexId: string;
-  isCheckAll?: boolean;
-  numberOfDocuments?: number;
-  numberOfIncompatibleFields?: number;
-  numberOfIndices?: number;
-  numberOfIndicesChecked?: number;
-  sizeInBytes?: number;
-  timeConsumedMs?: number;
   unallowedMappingFields?: string[];
   unallowedValueFields?: string[];
-}
+};
 
 export interface DataQualityCheckAllCompletedParams {
   batchId: string;

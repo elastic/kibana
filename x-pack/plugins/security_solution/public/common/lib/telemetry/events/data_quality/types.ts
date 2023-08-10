@@ -8,22 +8,13 @@
 import type { RootSchema } from '@kbn/analytics-client';
 import type { TelemetryEventTypes } from '../../constants';
 
-export interface ReportDataQualityIndexCheckedParams {
-  batchId: string;
-  ecsVersion?: string;
+export type ReportDataQualityIndexCheckedParams = ReportDataQualityCheckAllCompletedParams & {
   errorCount?: number;
   indexId: string;
-  isCheckAll?: boolean;
   ilmPhase?: string;
-  numberOfDocuments?: number;
-  numberOfIncompatibleFields?: number;
-  numberOfIndices?: number;
-  numberOfIndicesChecked?: number;
-  sizeInBytes?: number;
-  timeConsumedMs?: number;
   unallowedMappingFields?: string[];
   unallowedValueFields?: string[];
-}
+};
 
 export interface ReportDataQualityCheckAllCompletedParams {
   batchId: string;

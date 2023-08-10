@@ -69,15 +69,15 @@ export const getIncompatibleMappings = (
 export const getIncompatibleMappingsFields = (
   enrichedFieldMetadata: EnrichedFieldMetadata[]
 ): string[] =>
-  enrichedFieldMetadata.reduce((acc, x) => {
-    if (!x.isEcsCompliant && x.type !== x.indexFieldType && x.indexFieldName != null) {
+  enrichedFieldMetadata.reduce<string[]>((acc, x) => {
+    if (!x.isEcsCompliant && x.type !== x.indexFieldType) {
       const field = escape(x.indexFieldName);
       if (field != null) {
-        acc.push(field);
+        return [...acc, field];
       }
     }
     return acc;
-  }, [] as string[]);
+  }, []);
 
 export const getIncompatibleValues = (
   enrichedFieldMetadata: EnrichedFieldMetadata[]
@@ -87,15 +87,15 @@ export const getIncompatibleValues = (
 export const getIncompatibleValuesFields = (
   enrichedFieldMetadata: EnrichedFieldMetadata[]
 ): string[] =>
-  enrichedFieldMetadata.reduce((acc, x) => {
-    if (!x.isEcsCompliant && x.indexInvalidValues.length > 0 && x.indexFieldName != null) {
+  enrichedFieldMetadata.reduce<string[]>((acc, x) => {
+    if (!x.isEcsCompliant && x.indexInvalidValues.length > 0) {
       const field = escape(x.indexFieldName);
       if (field != null) {
-        acc.push(field);
+        return [...acc, field];
       }
     }
     return acc;
-  }, [] as string[]);
+  }, []);
 
 export const getIncompatibleFieldsMarkdownTablesComment = ({
   incompatibleMappings,
