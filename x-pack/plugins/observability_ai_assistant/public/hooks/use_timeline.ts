@@ -7,6 +7,7 @@
 
 import { AbortError } from '@kbn/kibana-utils-plugin/common';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
+import { last } from 'lodash';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { Subscription } from 'rxjs';
 import {
@@ -85,13 +86,21 @@ export function useTimeline({
   function chat(nextMessages: Message[]): Promise<Message[]> {
     const controller = new AbortController();
 
-    return new Promise<PendingMessage>((resolve, reject) => {
+    return new Promise<PendingMessage | undefined>((resolve, reject) => {
       if (!connectorId) {
         reject(new Error('Can not add a message without a connector'));
         return;
       }
 
       onChatUpdate(nextMessages);
+
+      const lastMessage = last(nextMessages);
+
+      if (lastMessage?.message.function_call?.name) {
+        // the user has edited a function suggestion, no need to talk to
+        resolve(undefined);
+        return;
+      }
 
       const response$ = chatService!.chat({
         messages: nextMessages,
@@ -116,31 +125,35 @@ export function useTimeline({
         return nextSubscription;
       });
     }).then(async (reply) => {
-      if (reply.error) {
+      if (reply?.error) {
         return nextMessages;
       }
-      if (reply.aborted) {
+      if (reply?.aborted) {
         return nextMessages;
       }
 
       setPendingMessage(undefined);
 
-      const messagesAfterChat = nextMessages.concat({
-        '@timestamp': new Date().toISOString(),
-        message: {
-          ...reply.message,
-        },
-      });
+      const messagesAfterChat = reply
+        ? nextMessages.concat({
+            '@timestamp': new Date().toISOString(),
+            message: {
+              ...reply.message,
+            },
+          })
+        : nextMessages;
 
       onChatUpdate(messagesAfterChat);
 
-      if (reply?.message.function_call?.name) {
-        const name = reply.message.function_call.name;
+      const lastMessage = last(messagesAfterChat);
+
+      if (lastMessage?.message.function_call?.name) {
+        const name = lastMessage.message.function_call.name;
 
         try {
           const message = await chatService!.executeFunction(
             name,
-            reply.message.function_call.arguments,
+            lastMessage.message.function_call.arguments,
             controller.signal
           );
 
@@ -164,7 +177,7 @@ export function useTimeline({
                 name,
                 content: JSON.stringify({
                   message: error.toString(),
-                  ...error.body,
+                  error: error.body,
                 }),
               },
             })
