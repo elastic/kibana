@@ -49,35 +49,30 @@ async function createFtr({
     dryRun,
   },
 }: CreateFtrParams) {
-  const config = await readConfigFile(log, esVersion, configPath);
+  const config = await readConfigFile(log, esVersion, configPath, {}, (configModule) => ({
+    mochaOpts: {
+      bail: !!bail,
+      grep,
+      dryRun: !!dryRun,
+    },
+    kbnTestServer: {
+      installDir,
+    },
+    updateBaselines,
+    updateSnapshots,
+    suiteFiles: {
+      include: [...(suiteFiles?.include || []), ...configModule.get('suiteFiles.include')],
+      exclude: [...(suiteFiles?.exclude || []), ...configModule.get('suiteFiles.exclude')],
+    },
+    suiteTags: {
+      include: [...(suiteTags?.include || []), ...configModule.get('suiteTags.include')],
+      exclude: [...(suiteTags?.exclude || []), ...configModule.get('suiteTags.exclude')],
+    },
+  }));
 
   return {
     config,
-    ftr: new FunctionalTestRunner(
-      log,
-      configPath,
-      {
-        mochaOpts: {
-          bail: !!bail,
-          grep,
-          dryRun: !!dryRun,
-        },
-        kbnTestServer: {
-          installDir,
-        },
-        updateBaselines,
-        updateSnapshots,
-        suiteFiles: {
-          include: [...(suiteFiles?.include || []), ...config.get('suiteFiles.include')],
-          exclude: [...(suiteFiles?.exclude || []), ...config.get('suiteFiles.exclude')],
-        },
-        suiteTags: {
-          include: [...(suiteTags?.include || []), ...config.get('suiteTags.include')],
-          exclude: [...(suiteTags?.exclude || []), ...config.get('suiteTags.exclude')],
-        },
-      },
-      esVersion
-    ),
+    ftr: new FunctionalTestRunner(log, config, esVersion),
   };
 }
 
@@ -90,15 +85,15 @@ export async function assertNoneExcluded(params: CreateFtrParams) {
   }
 
   const stats = await ftr.getTestStats();
-  if (stats.testsExcludedByTag.length > 0) {
+  if (stats?.testsExcludedByTag.length > 0) {
     throw new CliError(`
-      ${stats.testsExcludedByTag.length} tests in the ${params.configPath} config
+      ${stats?.testsExcludedByTag.length} tests in the ${params.configPath} config
       are excluded when filtering by the tags run on CI. Make sure that all suites are
       tagged with one of the following tags:
 
       ${JSON.stringify(params.options.suiteTags)}
 
-      - ${stats.testsExcludedByTag.join('\n      - ')}
+      - ${stats?.testsExcludedByTag.join('\n      - ')}
     `);
   }
 }
@@ -122,5 +117,5 @@ export async function hasTests(params: CreateFtrParams) {
     return true;
   }
   const stats = await ftr.getTestStats();
-  return stats.testCount > 0;
+  return stats?.testCount && stats.testCount > 0;
 }

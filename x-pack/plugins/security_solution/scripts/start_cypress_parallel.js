@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export * from '../../../test/common/services';
+require('../../../../src/setup_node_env');
+require('./run_cypress/parallel').cli();

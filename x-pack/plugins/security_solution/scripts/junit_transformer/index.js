@@ -5,10 +5,5 @@
  * 2.0.
  */
 
-import { SecuritySolutionCypressUpgradeCliTestRunner } from './runner';
-
-export default async function () {
-  return {
-    testRunner: SecuritySolutionCypressUpgradeCliTestRunner,
-  };
-}
+require('../../../../../src/setup_node_env');
+require('./junit_transformer');
