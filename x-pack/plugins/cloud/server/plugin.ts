@@ -26,7 +26,11 @@ interface PluginsSetup {
  */
 export interface CloudSetup {
   /**
-   * The deployment's Cloud ID. Only available when running on Elastic Cloud.
+   * This is the ID of the Cloud deployment to which the Kibana instance belongs.
+   *
+   * @example `eastus2.azure.elastic-cloud.com:9243$59ef636c6917463db140321484d63cfa$a8b109c08adc43279ef48f29af1a3911`
+   *
+   * @note The `cloudId` is a concatenation of the deployment name and a hash. Users can update the deployment name, changing the `cloudId`. However, the changed `cloudId` will not be re-injected into `kibana.yml`. If you need the current `cloudId` the best approach is to split the injected `cloudId` on the semi-colon, and replace the first element with the `persistent.cluster.metadata.display_name` value as provided by a call to `GET _cluster/settings`.
    */
   cloudId?: string;
   /**
@@ -42,23 +46,27 @@ export interface CloudSetup {
    */
   kibanaUrl?: string;
   /**
-   * The full URL to the serverless projects.
+   * This is the URL to the "projects" interface on cloud.
+   *
+   * @example `https://cloud.elastic.co/projects`
    */
   projectsUrl?: string;
   /**
    * This is the URL of the Cloud interface.
+   *
+   * @example `https://cloud.elastic.co` (on the ESS production environment)
    */
   baseUrl?: string;
   /**
-   * {host} from the deployment url https://<deploymentId>.<application>.<host><?:port>
+   * {host} of the deployment url https://<deploymentId>.<application>.<host><?:port>
    */
   cloudHost?: string;
   /**
-   * {port} from the deployment url https://<deploymentId>.<application>.<host><?:port>
+   * {port} of the deployment url https://<deploymentId>.<application>.<host><?:port>
    */
   cloudDefaultPort?: string;
   /**
-   * `true` when running on Elastic Cloud.
+   * This is set to `true` for both ESS and ECE deployments.
    */
   isCloudEnabled: boolean;
   /**
@@ -102,15 +110,19 @@ export interface CloudSetup {
  */
 export interface CloudStart {
   /**
-   * `true` when running on Elastic Cloud.
+   * This is set to `true` for both ESS and ECE deployments.
    */
   isCloudEnabled: boolean;
   /**
-   * The full URL to the serverless projects.
+   * This is the URL to the "projects" interface on cloud.
+   *
+   * @example `https://cloud.elastic.co/projects`
    */
   projectsUrl?: string;
   /**
    * This is the URL of the Cloud interface.
+   *
+   * @example `https://cloud.elastic.co` (on the ESS production environment)
    */
   baseUrl?: string;
 }
