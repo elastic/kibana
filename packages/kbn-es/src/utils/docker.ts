@@ -84,10 +84,6 @@ const SHARED_SERVERLESS_PARAMS = [
 
   '--detach',
 
-  // '--privileged',
-
-  // '--userns=host',
-
   '--net',
   'elastic',
 
@@ -136,7 +132,6 @@ const SERVERLESS_NODES: Array<Omit<ServerlessEsNodeArgs, 'image'>> = [
   {
     name: 'es02',
     params: [
-      '--detach',
       '-p',
       '127.0.0.1:9202:9202',
 
@@ -154,7 +149,6 @@ const SERVERLESS_NODES: Array<Omit<ServerlessEsNodeArgs, 'image'>> = [
   {
     name: 'es03',
     params: [
-      '--detach',
       '-p',
       '127.0.0.1:9203:9203',
 
@@ -321,23 +315,13 @@ export async function setupServerlessVolumes(log: ToolingLog, options: Serverles
   }
 
   // Permissions are set separately from mkdir due to default umask
-  await Fsp.chmod(volumePath, 0o777).then((msg: any) => {
-    if (msg) {
-      log.warning(msg);
-    }
+  await Fsp.chmod(volumePath, 0o777).then(() => {
     log.info('Setup object store permissions (chmod 777).');
   });
 
   log.indent(-4);
 
   return ['--volume', `${options.basePath}:/objectstore:z`];
-}
-
-async function setupUserPerm() {
-  const pU = await execa('id', ['-u']);
-  const pG = await execa('id', ['-g']);
-
-  return ['-u', `${pU.stdout}:${pG.stdout}`];
 }
 
 /**
@@ -388,7 +372,6 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
   await setupDocker(log, image);
 
   const volumeCmd = await setupServerlessVolumes(log, options);
-  // const userCmd = await setupUserPerm();
 
   const nodeNames = await Promise.all(
     SERVERLESS_NODES.map(async (node, i) => {
@@ -399,7 +382,6 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
           resolveEsArgs(DEFAULT_SERVERLESS_ESARGS.concat(node.esArgs ?? []), options),
           i === 0 ? resolvePort(options) : [],
           volumeCmd
-          // userCmd
         ),
       });
       return node.name;

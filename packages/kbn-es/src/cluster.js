@@ -277,6 +277,10 @@ exports.Cluster = class Cluster {
     }
     this._stopCalled = true;
 
+    if (this._serverless?.length) {
+      return await stopServerlessCluster(this._log, this._serverlessNodes);
+    }
+
     if (!this._process || !this._outcome) {
       throw new Error('ES has not been started');
     }
@@ -580,6 +584,7 @@ exports.Cluster = class Cluster {
 
     this._serverlessNodes = await runServerlessCluster(this._log, options);
 
+    // TODO: keep?
     // await Promise.all(
     //   this._serverlessNodes.map(async (name) => {
     //     return await execa('docker', ['logs', '-f', name], {
