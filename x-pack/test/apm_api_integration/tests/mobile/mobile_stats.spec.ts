@@ -103,7 +103,7 @@ async function generateData({
         return [
           galaxy10
             .transaction('Start View - View Appearing', 'Android Activity')
-            .errors(galaxy10.crash({ message: 'error' }).timestamp(timestamp))
+            .errors(galaxy10.crash({ message: 'error  C' }).timestamp(timestamp))
             .timestamp(timestamp)
             .duration(500)
             .success()
@@ -121,8 +121,9 @@ async function generateData({
           huaweiP2
             .transaction('Start View - View Appearing', 'huaweiP2 Activity')
             .errors(
-              huaweiP2.crash({ message: 'error' }).timestamp(timestamp),
-              huaweiP2.crash({ message: 'error' }).timestamp(timestamp)
+              huaweiP2.crash({ message: 'error A' }).timestamp(timestamp),
+              huaweiP2.crash({ message: 'error B' }).timestamp(timestamp),
+              huaweiP2.crash({ message: 'error D' }).timestamp(timestamp)
             )
             .timestamp(timestamp)
             .duration(20)
@@ -215,7 +216,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(value).to.be(timeseriesTotal);
       });
 
-      it('returns same requests', () => {
+      it('returns same crashes', () => {
         const { value, timeseries } = response.currentPeriod.crashes;
         const timeseriesTotal = sumBy(timeseries, 'y');
         expect(value).to.be(timeseriesTotal);
@@ -240,7 +241,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(response.currentPeriod.requests.timeseries.every((item) => item.y === 0)).to.eql(
           true
         );
-        expect(response.currentPeriod.requests.timeseries.every((item) => item.y === 0)).to.eql(
+        expect(response.currentPeriod.crashes.timeseries.every((item) => item.y === 0)).to.eql(
           true
         );
       });
@@ -254,7 +255,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expect(response.currentPeriod.sessions.value).to.eql(3);
         expect(response.currentPeriod.requests.value).to.eql(0);
-        expect(response.currentPeriod.crashes.value).to.eql(1);
+        expect(response.currentPeriod.crashes.value).to.eql(9);
       });
 
       it('returns the correct values when multiple filters are applied', async () => {
@@ -262,10 +263,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           serviceName: 'synth-android',
           kuery: `service.version:"1.2" and service.environment: "production"`,
         });
-
         expect(response.currentPeriod.sessions.value).to.eql(3);
         expect(response.currentPeriod.requests.value).to.eql(3);
-        expect(response.currentPeriod.crashes.value).to.eql(2);
+        expect(response.currentPeriod.crashes.value).to.eql(3);
       });
     });
   });

@@ -254,7 +254,7 @@ export class MobileDevice extends Entity<ApmFields> {
     return new ApmError({
       ...this.fields,
       'error.type': 'crash',
-      'error.id' : generateLongId(message),
+      'error.id': generateLongId(message),
       'error.exception': [{ message, ...{ type: 'crash' } }],
       'error.grouping_name': groupingName || message,
     });

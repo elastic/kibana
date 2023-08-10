@@ -1,19 +1,27 @@
-import { Coordinate } from '@kbn/apm-plugin/typings/timeseries';
-import { Maybe } from '@kbn/apm-plugin/typings/common';
-import { APMEventClient } from '@kbn/apm-plugin/server/lib/helpers/create_es_client/create_apm_event_client';
-import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
-import { getBucketSize } from '../../../common/utils/get_bucket_size';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import {
   kqlQuery,
   rangeQuery,
   termQuery,
 } from '@kbn/observability-plugin/server';
+import { Coordinate } from '../../../typings/timeseries';
+import { Maybe } from '../../../typings/common';
+import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import { getBucketSize } from '../../../common/utils/get_bucket_size';
 import {
   ERROR_TYPE,
-  ERROR_ID
-} from '@kbn/apm-plugin/common/es_fields/apm';
-import { environmentQuery } from '@kbn/apm-plugin/common/utils/environment_query';
+  ERROR_ID,
+  SERVICE_NAME,
+} from '../../../common/es_fields/apm';
+import { environmentQuery } from '../../../common/utils/environment_query';
+import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
 import { offsetPreviousPeriodCoordinates } from '../../../common/utils/offset_previous_period_coordinate';
 
 export interface CrashRateTimeseries {
@@ -33,31 +41,31 @@ interface Props {
 }
 
 async function getMobileCrashTimeseries({
-                                           apmEventClient,
-                                           serviceName,
-                                           transactionName,
-                                           environment,
-                                           start,
-                                           end,
-                                           kuery,
-                                           offset,
-                                         }: Props){
-  const { startWithOffset, endWithOffset } = getOffsetInMs( {
+  apmEventClient,
+  serviceName,
+  transactionName,
+  environment,
+  start,
+  end,
+  kuery,
+  offset,
+}: Props) {
+  const { startWithOffset, endWithOffset } = getOffsetInMs({
     start,
     end,
     offset,
   });
 
-  const { intervalString} = getBucketSize({
+  const { intervalString } = getBucketSize({
     start: startWithOffset,
     end: endWithOffset,
     minBucketSize: 60,
   });
 
   const aggs = {
-  crashes: {
-     cardinality: { field: ERROR_ID }
-   },
+    crashes: {
+      cardinality: { field: ERROR_ID },
+    },
   };
 
   const response = await apmEventClient.search('get_mobile_crash_rate', {
@@ -70,7 +78,8 @@ async function getMobileCrashTimeseries({
       query: {
         bool: {
           filter: [
-            ...termQuery(ERROR_TYPE, "crash"),
+            ...termQuery(ERROR_TYPE, 'crash'),
+            ...termQuery(SERVICE_NAME, serviceName),
             ...rangeQuery(startWithOffset, endWithOffset),
             ...environmentQuery(environment),
             ...kqlQuery(kuery),
@@ -96,26 +105,26 @@ async function getMobileCrashTimeseries({
     response?.aggregations?.timeseries.buckets.map((bucket) => {
       return {
         x: bucket.key,
-        y: bucket.crashes.value
+        y: bucket.crashes.value,
       };
     }) ?? [];
 
   return {
     timeseries,
-    value: response.aggregations?.crashes?.value
+    value: response.aggregations?.crashes?.value,
   };
 }
 
 export async function getMobileCrashRate({
-                                           kuery,
-                                           apmEventClient,
-                                           serviceName,
-                                           transactionName,
-                                           environment,
-                                           start,
-                                           end,
-                                           offset,
-                                         }:Props): Promise<CrashRateTimeseries> {
+  kuery,
+  apmEventClient,
+  serviceName,
+  transactionName,
+  environment,
+  start,
+  end,
+  offset,
+}: Props): Promise<CrashRateTimeseries> {
   const options = {
     serviceName,
     transactionName,
@@ -130,13 +139,14 @@ export async function getMobileCrashRate({
     end,
   });
 
-  const previousPeriodPromise = offset ? getMobileCrashTimeseries({
-    ...options,
-    start,
-    end,
-    offset,
-  })
-    : {timeseries: [], value: null };
+  const previousPeriodPromise = offset
+    ? getMobileCrashTimeseries({
+        ...options,
+        start,
+        end,
+        offset,
+      })
+    : { timeseries: [], value: null };
 
   const [currentPeriod, previousPeriod] = await Promise.all([
     currentPeriodPromise,
@@ -153,4 +163,3 @@ export async function getMobileCrashRate({
     },
   };
 }
-
