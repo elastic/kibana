@@ -23,6 +23,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSuperDatePicker,
+  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TimeRange } from '@kbn/es-query';
@@ -32,6 +33,8 @@ import { TimeRangeInput } from './customize_panel_action';
 import { canInheritTimeRange } from './can_inherit_time_range';
 import { doesInheritTimeRange } from './does_inherit_time_range';
 import { IEmbeddable, Embeddable, CommonlyUsedRange, ViewMode } from '../../../lib';
+import { FiltersDetails } from './filters_details';
+import { EditPanelAction } from '../edit_panel_action/edit_panel_action';
 
 type PanelSettings = {
   title?: string;
@@ -46,10 +49,11 @@ interface CustomizePanelProps {
   dateFormat?: string;
   commonlyUsedRanges?: CommonlyUsedRange[];
   onClose: () => void;
+  editPanelAction: EditPanelAction;
 }
 
 export const CustomizePanelEditor = (props: CustomizePanelProps) => {
-  const { onClose, embeddable, dateFormat, timeRangeCompatible } = props;
+  const { onClose, embeddable, dateFormat, timeRangeCompatible, editPanelAction } = props;
   const editMode = embeddable.getInput().viewMode === ViewMode.EDIT;
   const [hideTitle, setHideTitle] = useState(embeddable.getInput().hidePanelTitles);
   const [panelDescription, setPanelDescription] = useState(
@@ -275,6 +279,12 @@ export const CustomizePanelEditor = (props: CustomizePanelProps) => {
         <EuiForm>
           {renderCustomTitleComponent()}
           {renderCustomTimeRangeComponent()}
+          <EuiSpacer size="m" />
+          <FiltersDetails
+            editPanelAction={editPanelAction}
+            embeddable={embeddable}
+            editMode={editMode}
+          />
         </EuiForm>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>

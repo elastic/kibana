@@ -9,11 +9,18 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { TimeRange } from '@kbn/es-query';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
-import { OverlayStart, ThemeServiceStart } from '@kbn/core/public';
+import { createKibanaReactContext, toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { ApplicationStart, OverlayStart, ThemeServiceStart } from '@kbn/core/public';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 
-import { IEmbeddable, Embeddable, EmbeddableInput, EmbeddableOutput } from '../../..';
+import { core, embeddableStart } from '../../../kibana_services';
+import {
+  IEmbeddable,
+  Embeddable,
+  EmbeddableInput,
+  EmbeddableOutput,
+  EditPanelAction,
+} from '../../..';
 import { ViewMode, CommonlyUsedRange } from '../../../lib/types';
 import { tracksOverlays } from '../track_overlays';
 import { CustomizePanelEditor } from './customize_panel_editor';
@@ -99,18 +106,31 @@ export class CustomizePanelAction implements Action<CustomizePanelActionContext>
     const rootEmbeddable = embeddable.getRoot();
     const overlayTracker = tracksOverlays(rootEmbeddable) ? rootEmbeddable : undefined;
 
+    const editPanelAction = new EditPanelAction(
+      embeddableStart.getEmbeddableFactory,
+      core.application as unknown as ApplicationStart,
+      embeddableStart.getStateTransfer()
+    );
+
+    const { Provider: KibanaReactContextProvider } = createKibanaReactContext({
+      uiSettings: core.uiSettings,
+    });
+
     const handle = this.overlays.openFlyout(
       toMountPoint(
-        <CustomizePanelEditor
-          embeddable={embeddable}
-          timeRangeCompatible={this.isTimeRangeCompatible({ embeddable })}
-          dateFormat={this.dateFormat}
-          commonlyUsedRanges={this.commonlyUsedRanges}
-          onClose={() => {
-            if (overlayTracker) overlayTracker.clearOverlays();
-            handle.close();
-          }}
-        />,
+        <KibanaReactContextProvider>
+          <CustomizePanelEditor
+            embeddable={embeddable}
+            timeRangeCompatible={this.isTimeRangeCompatible({ embeddable })}
+            dateFormat={this.dateFormat}
+            commonlyUsedRanges={this.commonlyUsedRanges}
+            onClose={() => {
+              if (overlayTracker) overlayTracker.clearOverlays();
+              handle.close();
+            }}
+            editPanelAction={editPanelAction}
+          />
+        </KibanaReactContextProvider>,
         { theme$: this.theme.theme$ }
       ),
       {
