@@ -11,7 +11,7 @@ import { PropsWithChildren, ReactElement, RefObject } from 'react';
 import React, { useMemo } from 'react';
 import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
 import { css } from '@emotion/css';
-import type { Datatable } from '@kbn/expressions-plugin/common';
+import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import type {
   EmbeddableComponentProps,
@@ -74,7 +74,7 @@ export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> 
   /**
    * The current columns
    */
-  columns?: string[];
+  columns?: DatatableColumn[];
   /**
    * Context object for requests made by Unified Histogram components -- optional
    */
