@@ -10,7 +10,10 @@ export const API_AUTH = Object.freeze({
   pass: Cypress.env('KIBANA_PASSWORD') ?? Cypress.env('ELASTICSEARCH_PASSWORD'),
 });
 
-export const COMMON_API_HEADERS = Object.freeze({ 'kbn-xsrf': 'cypress' });
+export const COMMON_API_HEADERS = Object.freeze({
+  'kbn-xsrf': 'cypress',
+  'x-elastic-internal-origin': 'security-solution',
+});
 
 export const waitForPageToBeLoaded = () => {
   cy.getByTestSubj('globalLoadingIndicator-hidden').should('exist');
