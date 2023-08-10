@@ -18,5 +18,5 @@ export type ValueToStringConverter = (
 export interface RecordsFetchResponse {
   records: DataTableRecord[];
   textBasedQueryColumns?: DatatableColumn[];
-  warning?: string;
+  textBasedHeaderWarning?: string;
 }

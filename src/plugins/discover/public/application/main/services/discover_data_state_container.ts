@@ -74,7 +74,7 @@ export interface DataMainMsg extends DataMsg {
 export interface DataDocumentsMsg extends DataMsg {
   result?: DataTableRecord[];
   textBasedQueryColumns?: DatatableColumn[]; // columns from text-based request
-  warning?: string;
+  textBasedHeaderWarning?: string;
 }
 
 export interface DataTotalHitsMsg extends DataMsg {

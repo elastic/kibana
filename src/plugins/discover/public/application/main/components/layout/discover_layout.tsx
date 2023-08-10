@@ -178,9 +178,9 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
 
   const textBasedLanguageModeWarning = useMemo(() => {
     if (isPlainRecord) {
-      return documentState.warning;
+      return documentState.textBasedHeaderWarning;
     }
-  }, [documentState.warning, isPlainRecord]);
+  }, [documentState.textBasedHeaderWarning, isPlainRecord]);
 
   const textBasedLanguageModeErrors = useMemo(() => {
     if (isPlainRecord) {
