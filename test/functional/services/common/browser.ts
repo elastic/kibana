@@ -669,7 +669,7 @@ class BrowserService extends FtrService {
    * Get the network simulation for chromium browsers if available.
    * https://www.selenium.dev/selenium/docs/api/javascript/module/selenium-webdriver/chrome_exports_Driver.html#getNetworkConditions
    *
-   * @return {Promise<void>}
+   * @return {Promise<NetworkOptions>}
    */
   public async getNetworkConditions() {
     if (this.isChromium()) {

@@ -12,7 +12,7 @@ const defaultLogColumns = ['@timestamp', 'message'];
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const retry = getService('retry');
-  const PageObjects = getPageObjects(['common', 'discover', 'discoverLogExplorer']);
+  const PageObjects = getPageObjects(['common', 'discover']);
 
   describe('Columns selection initialization and update', () => {
     before(async () => {
