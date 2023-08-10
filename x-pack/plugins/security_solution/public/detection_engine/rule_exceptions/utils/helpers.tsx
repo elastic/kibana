@@ -958,7 +958,7 @@ export const getAlertHighlightedFields = (alertData: AlertData): EventSummaryFie
   const eventCategory = get(alertData, EVENT_CATEGORY);
   const eventCode = get(alertData, EVENT_CODE);
   const eventRuleType = get(alertData, KIBANA_ALERT_RULE_TYPE);
-  const highlightedFieldsOverride = get(alertData, ALERT_RULE_CUSTOM_HIGHLIGHTED_FIELDS);
+  const highlightedFieldsOverride = get(alertData, ALERT_RULE_CUSTOM_HIGHLIGHTED_FIELDS) ?? [];
   const eventCategories = {
     primaryEventCategory: Array.isArray(eventCategory) ? eventCategory[0] : eventCategory,
     allEventCategories: [eventCategory],

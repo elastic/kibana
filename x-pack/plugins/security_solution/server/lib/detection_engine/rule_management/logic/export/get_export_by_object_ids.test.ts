@@ -523,6 +523,7 @@ describe('get_export_by_object_ids', () => {
             namespace: undefined,
             data_view_id: undefined,
             alert_suppression: undefined,
+            custom_highlighted_fields: undefined,
           },
         ],
       };
