@@ -9,7 +9,6 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
-  const kibanaServer = getService('kibanaServer');
   const retry = getService('retry');
   const PageObjects = getPageObjects([
     'common',
@@ -22,15 +21,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('Columns selection initialization and update', () => {
     before(async () => {
-      await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
       await esArchiver.load(
         'x-pack/test/functional/es_archives/discover_log_explorer/data_streams'
       );
-      await PageObjects.common.navigateToApp('discover', { hash: '/p/log-explorer' });
     });
 
     after(async () => {
-      await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover');
       await esArchiver.unload(
         'x-pack/test/functional/es_archives/discover_log_explorer/data_streams'
       );

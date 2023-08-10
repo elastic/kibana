@@ -138,10 +138,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discoverLogExplorer.openDatasetSelector();
       });
 
-      afterEach(async () => {
-        await PageObjects.discoverLogExplorer.closeDatasetSelector();
-      });
-
       describe('when open on the first navigation level', () => {
         it('should always display the "All log datasets" entry as the first item', async () => {
           const allLogDatasetButton =
@@ -254,17 +250,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('with installed integrations and uncategorized data streams', () => {
       before(async () => {
-        await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
         await esArchiver.load(
           'x-pack/test/functional/es_archives/discover_log_explorer/data_streams'
         );
         logger.info(`Installing ${initialPackages.length} integration packages.`);
         await Promise.all(initialPackages.map(installPackage));
-        await PageObjects.common.navigateToApp('discover', { hash: '/p/log-explorer' });
       });
 
       after(async () => {
-        await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover');
         await esArchiver.unload(
           'x-pack/test/functional/es_archives/discover_log_explorer/data_streams'
         );
@@ -274,13 +267,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       describe('when open on the first navigation level', () => {
-        beforeEach(async () => {
-          await PageObjects.discoverLogExplorer.openDatasetSelector();
-          await PageObjects.discoverLogExplorer.clearSearchField();
+        before(async () => {
+          await PageObjects.common.navigateToApp('discover', { hash: '/p/log-explorer' });
         });
 
-        afterEach(async () => {
-          await PageObjects.discoverLogExplorer.closeDatasetSelector();
+        beforeEach(async () => {
+          await browser.refresh();
+          await PageObjects.discoverLogExplorer.openDatasetSelector();
         });
 
         it('should always display the "All log datasets" entry as the first item', async () => {
@@ -408,11 +401,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         beforeEach(async () => {
           await browser.refresh();
           await PageObjects.discoverLogExplorer.openDatasetSelector();
-          await PageObjects.discoverLogExplorer.clearSearchField();
-        });
-
-        afterEach(async () => {
-          await PageObjects.discoverLogExplorer.closeDatasetSelector();
         });
 
         it('should display a list of available datasets', async () => {
@@ -539,11 +527,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         beforeEach(async () => {
           await browser.refresh();
           await PageObjects.discoverLogExplorer.openDatasetSelector();
-          await PageObjects.discoverLogExplorer.clearSearchField();
-        });
-
-        afterEach(async () => {
-          await PageObjects.discoverLogExplorer.closeDatasetSelector();
         });
 
         it('should display a list of available datasets', async () => {
@@ -674,12 +657,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         beforeEach(async () => {
           await browser.refresh();
+          await PageObjects.discoverLogExplorer.openDatasetSelector();
         });
 
         it('should restore the latest navigation panel', async () => {
-          await PageObjects.discoverLogExplorer.openDatasetSelector();
-          await PageObjects.discoverLogExplorer.clearSearchField();
-
           await retry.try(async () => {
             const { nodes } = await PageObjects.discoverLogExplorer.getIntegrations();
             await nodes[0].click();
@@ -710,9 +691,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         it('should restore the latest search results', async () => {
-          await PageObjects.discoverLogExplorer.openDatasetSelector();
-          await PageObjects.discoverLogExplorer.clearSearchField();
-
           await PageObjects.discoverLogExplorer.typeSearchFieldWith('system');
 
           await retry.try(async () => {
