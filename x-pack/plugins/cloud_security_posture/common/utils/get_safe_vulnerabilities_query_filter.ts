@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { VULNERABILITIES_ENUMERATION, VULNERABILITIES_SEVERITY } from '../constants';
+import { VULNERABILITIES_SEVERITY } from '../constants';
 
 export const getSafeVulnerabilitiesQueryFilter = (query?: QueryDslQueryContainer) => ({
   ...query,
@@ -29,7 +29,6 @@ export const getSafeVulnerabilitiesQueryFilter = (query?: QueryDslQueryContainer
       { exists: { field: 'vulnerability.severity' } },
       { exists: { field: 'resource.id' } },
       { exists: { field: 'resource.name' } },
-      { match_phrase: { 'vulnerability.enumeration': VULNERABILITIES_ENUMERATION } },
     ],
   },
 });

@@ -70,6 +70,11 @@ export const JobsListPage: FC<{
   const I18nContext = coreStart.i18n.Context;
   const theme$ = coreStart.theme.theme$;
 
+  const mlServices = useMemo(
+    () => getMlGlobalServices(coreStart.http, usageCollection),
+    [coreStart.http, usageCollection]
+  );
+
   const check = async () => {
     try {
       await checkGetManagementMlJobsResolver(mlApiServices);
@@ -122,7 +127,7 @@ export const JobsListPage: FC<{
               usageCollection,
               fieldFormats,
               spacesApi,
-              mlServices: getMlGlobalServices(coreStart.http, usageCollection),
+              mlServices,
             }}
           >
             <ContextWrapper feature={PLUGIN_ID}>
