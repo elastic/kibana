@@ -132,8 +132,7 @@ export class TimePickerPageObject extends FtrService {
   public async setAbsoluteRange(
     fromTime: string,
     toTime: string,
-    force = false,
-    skipLoadingIndicatorHiddenCheck = false
+    force = false
   ) {
     if (!force) {
       const currentUrl = decodeURI(await this.browser.getCurrentUrl());
@@ -197,9 +196,7 @@ export class TimePickerPageObject extends FtrService {
       await this.testSubjects.click('querySubmitButton');
     }
 
-    if (!skipLoadingIndicatorHiddenCheck) {
-      await this.header.awaitGlobalLoadingIndicatorHidden();
-    }
+    await this.header.awaitGlobalLoadingIndicatorHidden();
   }
 
   public async isOff() {

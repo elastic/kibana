@@ -454,8 +454,7 @@ export class DashboardPageObject extends FtrService {
    */
   public async saveDashboard(
     dashboardName: string,
-    saveOptions: SaveDashboardOptions = { waitDialogIsClosed: true, exitFromEditMode: true },
-    skipLoadingIndicatorHiddenCheck?: boolean
+    saveOptions: SaveDashboardOptions = { waitDialogIsClosed: true, exitFromEditMode: true }
   ) {
     await this.retry.try(async () => {
       await this.enterDashboardTitleAndClickSave(dashboardName, saveOptions);
@@ -470,9 +469,7 @@ export class DashboardPageObject extends FtrService {
     });
     const message = await this.common.closeToast();
 
-    if (!skipLoadingIndicatorHiddenCheck) {
-      await this.header.waitUntilLoadingHasFinished();
-    }
+    await this.header.waitUntilLoadingHasFinished();
 
     await this.common.waitForSaveModalToClose();
 
@@ -481,9 +478,7 @@ export class DashboardPageObject extends FtrService {
       await this.clickCancelOutOfEditMode();
     }
 
-    if (!skipLoadingIndicatorHiddenCheck) {
-      await this.header.waitUntilLoadingHasFinished();
-    }
+    await this.header.waitUntilLoadingHasFinished();
 
     return message;
   }
@@ -566,8 +561,7 @@ export class DashboardPageObject extends FtrService {
   // use the search filter box to narrow the results down to a single
   // entry, or at least to a single page of results
   public async loadSavedDashboard(
-    dashboardName: string,
-    skipLoadingIndicatorHiddenCheck?: boolean
+    dashboardName: string
   ) {
     this.log.debug(`Load Saved Dashboard ${dashboardName}`);
 
@@ -577,9 +571,7 @@ export class DashboardPageObject extends FtrService {
     await this.retry.try(async () => {
       await this.listingTable.clickItemLink('dashboard', dashboardName);
 
-      if (!skipLoadingIndicatorHiddenCheck) {
-        await this.header.waitUntilLoadingHasFinished();
-      }
+      await this.header.waitUntilLoadingHasFinished();
 
       // check Dashboard landing page is not present
       await this.testSubjects.missingOrFail('dashboardLandingPage', { timeout: 10000 });

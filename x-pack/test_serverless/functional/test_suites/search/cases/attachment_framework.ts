@@ -11,35 +11,14 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
-  const common = getPageObject('common');
   const dashboard = getPageObject('dashboard');
   const lens = getPageObject('lens');
-  const timePicker = getPageObject('timePicker');
   const svlSearchNavigation = getService('svlSearchNavigation');
   const svlCommonNavigation = getPageObject('svlCommonNavigation');
   const dashboardAddPanel = getService('dashboardAddPanel');
 
-  // duplicated from x-pack/test/functional/page_objects/lens_page.ts to convert args into object for better readability
-  const goToTimeRange = async ({
-    fromTime,
-    toTime,
-    skipLoadingIndicatorHiddenCheck,
-  }: {
-    fromTime?: string;
-    toTime?: string;
-    skipLoadingIndicatorHiddenCheck?: boolean;
-  }) => {
-    await timePicker.ensureHiddenNoDataPopover();
-    fromTime = fromTime || timePicker.defaultStartTime;
-    toTime = toTime || timePicker.defaultEndTime;
-    await timePicker.setAbsoluteRange(fromTime, toTime, false, skipLoadingIndicatorHiddenCheck);
-    await common.sleep(500);
-  };
-
   describe('persistable attachment', () => {
     describe('lens visualization', () => {
-      const skipLoadingIndicatorHiddenCheck = true;
-
       before(async () => {
         await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
         await kibanaServer.importExport.load(
@@ -52,9 +31,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await dashboard.clickNewDashboard();
 
-        await dashboardAddPanel.clickCreateNewLink(skipLoadingIndicatorHiddenCheck);
+        await dashboardAddPanel.clickCreateNewLink();
 
-        await goToTimeRange({ skipLoadingIndicatorHiddenCheck });
+        await lens.goToTimeRange();
 
         await lens.configureDimension({
           dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',

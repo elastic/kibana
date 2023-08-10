@@ -12,10 +12,8 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 import { createCase } from './helper/api';
 
 export default ({ getPageObject, getService }: FtrProviderContext) => {
-  const common = getPageObject('common');
   const dashboard = getPageObject('dashboard');
   const lens = getPageObject('lens');
-  const timePicker = getPageObject('timePicker');
   const svlCommonNavigation = getPageObject('svlCommonNavigation');
   const svlObltNavigation = getService('svlObltNavigation');
   const testSubjects = getService('testSubjects');
@@ -24,29 +22,10 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const dashboardAddPanel = getService('dashboardAddPanel');
   const cases = getService('cases');
   const find = getService('find');
-  const listingTable = getService('listingTable');
   const supertest = getService('supertest');
-
-  // duplicated from x-pack/test/functional/page_objects/lens_page.ts to convert args into object for better readability
-  const goToTimeRange = async ({
-    fromTime,
-    toTime,
-    skipLoadingIndicatorHiddenCheck,
-  }: {
-    fromTime?: string;
-    toTime?: string;
-    skipLoadingIndicatorHiddenCheck?: boolean;
-  }) => {
-    await timePicker.ensureHiddenNoDataPopover();
-    fromTime = fromTime || timePicker.defaultStartTime;
-    toTime = toTime || timePicker.defaultEndTime;
-    await timePicker.setAbsoluteRange(fromTime, toTime, false, skipLoadingIndicatorHiddenCheck);
-    await common.sleep(500);
-  };
 
   describe('persistable attachment', () => {
     describe('lens visualization', () => {
-      const skipLoadingIndicatorHiddenCheck = true;
       const myDashboardName = `My-dashboard-${uuidv4()}`;
 
       before(async () => {
@@ -61,9 +40,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await dashboard.clickNewDashboard();
 
-        await dashboardAddPanel.clickCreateNewLink(skipLoadingIndicatorHiddenCheck);
+        await dashboardAddPanel.clickCreateNewLink();
 
-        await goToTimeRange({ skipLoadingIndicatorHiddenCheck });
+        await lens.goToTimeRange();
 
         await lens.configureDimension({
           dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
@@ -85,7 +64,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await lens.saveAndReturn();
         await dashboard.waitForRenderComplete();
-        await dashboard.saveDashboard(myDashboardName, {}, skipLoadingIndicatorHiddenCheck);
+        await dashboard.saveDashboard(myDashboardName);
       });
 
       after(async () => {
