@@ -359,7 +359,7 @@ const MetricsSectionTitle = () => {
         </EuiTitle>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <Popover icon="iInCircle" data-test-subj="infraAssetDetailsMetricsPopoverButton">
+        <Popover icon="questionInCircle" data-test-subj="infraAssetDetailsMetricsPopoverButton">
           <HostMetricsExplanationContent />
         </Popover>
       </EuiFlexItem>

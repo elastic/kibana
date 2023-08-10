@@ -22,6 +22,7 @@ export const Popover = ({
   const [isPopoverOpen, { off: closePopover, toggle: togglePopover }] = useBoolean(false);
   return (
     <EuiPopover
+      panelPaddingSize="s"
       button={
         <EuiIcon
           data-test-subj={props['data-test-subj']}
