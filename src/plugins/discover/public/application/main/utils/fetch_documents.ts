@@ -11,7 +11,9 @@ import { lastValueFrom } from 'rxjs';
 import { isCompleteResponse, ISearchSource } from '@kbn/data-plugin/public';
 import { SAMPLE_SIZE_SETTING, buildDataTableRecordList } from '@kbn/discover-utils';
 import type { EsHitRecord } from '@kbn/discover-utils/types';
+import { getSearchResponseInterceptedWarnings } from '@kbn/search-response-warnings';
 import type { RecordsFetchResponse } from '../../../types';
+import { DISABLE_SHARD_FAILURE_WARNING } from '../../../../common/constants';
 import { FetchDeps } from './fetch_all';
 
 /**
@@ -35,6 +37,7 @@ export const fetchDocuments = (
   }
   const dataView = searchSource.getField('index')!;
   const isFetchingMore = Boolean(searchSource.getField('searchAfter'));
+  const disableShardFailureWarning = isFetchingMore ? false : DISABLE_SHARD_FAILURE_WARNING;
 
   const executionContext = {
     description: isFetchingMore ? 'fetch more documents' : 'fetch documents',
@@ -58,7 +61,7 @@ export const fetchDocuments = (
         }),
       },
       executionContext,
-      // TODO: after PR #161271, keep shard failures as toasts for "Load more"
+      disableShardFailureWarning,
     })
     .pipe(
       filter((res) => isCompleteResponse(res)),
@@ -67,5 +70,21 @@ export const fetchDocuments = (
       })
     );
 
-  return lastValueFrom(fetch$).then((records) => ({ records }));
+  return lastValueFrom(fetch$).then((records) => {
+    const adapter = inspectorAdapters.requests;
+    const interceptedWarnings = adapter
+      ? getSearchResponseInterceptedWarnings({
+          services,
+          adapter,
+          options: {
+            disableShardFailureWarning,
+          },
+        })
+      : [];
+
+    return {
+      records,
+      interceptedWarnings,
+    };
+  });
 };

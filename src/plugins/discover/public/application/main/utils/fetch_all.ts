@@ -100,7 +100,7 @@ export function fetchAll(
     const startTime = window.performance.now();
     // Handle results of the individual queries and forward the results to the corresponding dataSubjects
     response
-      .then(({ records, textBasedQueryColumns }) => {
+      .then(({ records, textBasedQueryColumns, interceptedWarnings }) => {
         if (services.analytics) {
           const duration = window.performance.now() - startTime;
           reportPerformanceMetricEvent(services.analytics, {
@@ -134,6 +134,7 @@ export function fetchAll(
           fetchStatus,
           result: records,
           textBasedQueryColumns,
+          interceptedWarnings,
           recordRawType,
           query,
         });

@@ -66,6 +66,7 @@
     "@kbn/core-saved-objects-server",
     "@kbn/discover-utils",
     "@kbn/field-types",
+    "@kbn/search-response-warnings",
     "@kbn/content-management-plugin",
   ],
   "exclude": [

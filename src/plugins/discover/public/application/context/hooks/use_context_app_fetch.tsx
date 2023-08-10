@@ -43,13 +43,8 @@ export function useContextAppFetch({
   appState,
   useNewFieldsApi,
 }: ContextAppFetchProps) {
-  const {
-    uiSettings: config,
-    data,
-    toastNotifications,
-    filterManager,
-    core,
-  } = useDiscoverServices();
+  const services = useDiscoverServices();
+  const { uiSettings: config, data, toastNotifications, filterManager, core } = services;
   const { theme$ } = core.theme;
 
   const searchSource = useMemo(() => {
@@ -99,9 +94,20 @@ export function useContextAppFetch({
         tieBreakerFieldName,
         isTimeNanosBased: dataView.isTimeNanosBased(),
       });
-      const anchor = await fetchAnchor(anchorId, dataView, searchSource, sort, useNewFieldsApi);
-      setState({ anchor, anchorStatus: { value: LoadingStatus.LOADED } });
-      return anchor;
+      const result = await fetchAnchor(
+        anchorId,
+        dataView,
+        searchSource,
+        sort,
+        useNewFieldsApi,
+        services
+      );
+      setState({
+        anchor: result.anchorRow,
+        anchorInterceptedWarnings: result.interceptedWarnings,
+        anchorStatus: { value: LoadingStatus.LOADED },
+      });
+      return result.anchorRow;
     } catch (error) {
       setState(createError('anchorStatus', FailureReason.UNKNOWN, error));
       toastNotifications.addDanger({
@@ -110,6 +116,7 @@ export function useContextAppFetch({
       });
     }
   }, [
+    services,
     tieBreakerFieldName,
     setState,
     toastNotifications,
@@ -128,13 +135,14 @@ export function useContextAppFetch({
         type === SurrDocType.PREDECESSORS ? appState.predecessorCount : appState.successorCount;
       const anchor = fetchedAnchor || fetchedState.anchor;
       const statusKey = `${type}Status`;
+      const warningsKey = `${type}InterceptedWarnings`;
       const errorTitle = i18n.translate('discover.context.unableToLoadDocumentDescription', {
         defaultMessage: 'Unable to load documents',
       });
 
       try {
         setState({ [statusKey]: { value: LoadingStatus.LOADING } });
-        const rows = anchor.id
+        const result = anchor.id
           ? await fetchSurroundingDocs(
               type,
               dataView,
@@ -144,10 +152,15 @@ export function useContextAppFetch({
               count,
               filters,
               data,
-              useNewFieldsApi
+              useNewFieldsApi,
+              services
             )
-          : [];
-        setState({ [type]: rows, [statusKey]: { value: LoadingStatus.LOADED } });
+          : { rows: [], interceptedWarnings: undefined };
+        setState({
+          [type]: result.rows,
+          [warningsKey]: result.interceptedWarnings,
+          [statusKey]: { value: LoadingStatus.LOADED },
+        });
       } catch (error) {
         setState(createError(statusKey, FailureReason.UNKNOWN, error));
         toastNotifications.addDanger({
@@ -159,6 +172,7 @@ export function useContextAppFetch({
       }
     },
     [
+      services,
       filterManager,
       appState,
       fetchedState.anchor,

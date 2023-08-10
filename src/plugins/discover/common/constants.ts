@@ -13,3 +13,5 @@ export enum VIEW_MODE {
   DOCUMENT_LEVEL = 'documents',
   AGGREGATED_LEVEL = 'aggregated',
 }
+
+export const DISABLE_SHARD_FAILURE_WARNING = true;
