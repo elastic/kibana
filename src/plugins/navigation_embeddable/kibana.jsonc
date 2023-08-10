@@ -16,6 +16,7 @@
     ],
     "optionalPlugins": ["triggersActionsUi"],
     "requiredBundles": [
+      "savedObjects"
     ]
   }
 }

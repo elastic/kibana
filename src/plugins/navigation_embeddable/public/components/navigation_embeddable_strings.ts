@@ -47,6 +47,10 @@ export const NavEmbeddableStrings = {
         i18n.translate('navigationEmbeddable.panelEditor.editFlyoutTitle', {
           defaultMessage: 'Edit links panel',
         }),
+      getApplyButtonLabel: () =>
+        i18n.translate('navigationEmbeddable.panelEditor.applyButtonLabel', {
+          defaultMessage: 'Apply',
+        }),
       getAddToDashboardButtonLabel: () =>
         i18n.translate('navigationEmbeddable.panelEditor.addToDashboardButtonLabel', {
           defaultMessage: 'Add to dashboard',
@@ -84,13 +88,9 @@ export const NavEmbeddableStrings = {
         i18n.translate('navigationEmbeddable.editor.dragHandleAriaLabel', {
           defaultMessage: 'Link drag handle',
         }),
-      getUnableToDeleteLinkToastTitle: () =>
-        i18n.translate('navigationEmbeddable.editor.unableToDeleteLinkToastTitle', {
-          defaultMessage: 'Unable to delete link',
-        }),
-      getMinimumLinksDeleteToastText: () =>
-        i18n.translate('navigationEmbeddable.editor.minimumLinksReachedError', {
-          defaultMessage: 'Links panels must have at least one link.',
+      getErrorDuringSaveToastTitle: () =>
+        i18n.translate('navigationEmbeddable.editor.unableToSaveToastTitle', {
+          defaultMessage: 'Error saving Link panel',
         }),
     },
     linkEditor: {

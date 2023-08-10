@@ -24,6 +24,7 @@ import {
 import { memoizedFetchDashboards } from '../components/dashboard_link/dashboard_link_tools';
 import { getNavigationEmbeddableAttributeService } from '../services/attribute_service';
 import { NavigationEmbeddableLink } from '../../common/content_management';
+import { runSaveToLibrary } from '../content_management/save_to_library';
 
 const LazyNavigationEmbeddablePanelEditor = React.lazy(
   () => import('../components/navigation_embeddable_panel_editor')
@@ -57,13 +58,10 @@ export async function openEditorFlyout(
       };
       const updatedInput = (initialInput as NavigationEmbeddableByReferenceInput).savedObjectId
         ? await attributeService.wrapAttributes(newAttributes, true, initialInput)
-        : await attributeService.getInputAsRefType(
-            {
-              ...initialInput,
-              attributes: newAttributes,
-            },
-            { showSaveModal: true }
-          );
+        : await runSaveToLibrary(newAttributes, initialInput);
+      if (!updatedInput) {
+        return;
+      }
       resolve(updatedInput);
       parentDashboard?.reload();
       editorFlyout.close();

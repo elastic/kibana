@@ -40,6 +40,7 @@ import { NavEmbeddableStrings } from './navigation_embeddable_strings';
 import { openLinkEditorFlyout } from '../editor/open_link_editor_flyout';
 import { memoizedGetOrderedLinkList } from '../editor/navigation_embeddable_editor_tools';
 import { NavigationEmbeddablePanelEditorLink } from './navigation_embeddable_panel_editor_link';
+import { TooltipWrapper } from './tooltip_wrapper';
 
 import noLinksIllustrationDark from '../assets/empty_links_dark.svg';
 import noLinksIllustrationLight from '../assets/empty_links_light.svg';
@@ -53,7 +54,7 @@ const NavigationEmbeddablePanelEditor = ({
   parentDashboard,
   isByReference,
 }: {
-  onSaveToLibrary: (newLinks: NavigationEmbeddableLink[]) => void;
+  onSaveToLibrary: (newLinks: NavigationEmbeddableLink[]) => Promise<void>;
   onAddToDashboard: (newLinks: NavigationEmbeddableLink[]) => void;
   onClose: () => void;
   initialLinks?: NavigationEmbeddableLink[];
@@ -118,20 +119,13 @@ const NavigationEmbeddablePanelEditor = ({
 
   const deleteLink = useCallback(
     (linkId: string) => {
-      if (orderedLinks.length <= 1) {
-        toasts.addDanger({
-          title: NavEmbeddableStrings.editor.panelEditor.getUnableToDeleteLinkToastTitle(),
-          text: NavEmbeddableStrings.editor.panelEditor.getMinimumLinksDeleteToastText(),
-        });
-        return;
-      }
       setOrderedLinks(
         orderedLinks.filter((link) => {
           return link.id !== linkId;
         })
       );
     },
-    [orderedLinks, toasts]
+    [orderedLinks]
   );
 
   return (
@@ -219,30 +213,25 @@ const NavigationEmbeddablePanelEditor = ({
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup>
+            <EuiFlexGroup gutterSize="m">
               {!isByReference ? (
                 <EuiFlexItem grow={false} css={{ 'margin-left': 'auto' }}>
-                  <EuiToolTip
-                    repositionOnScroll={false}
-                    position="top"
-                    content={
-                      <p>
-                        {NavEmbeddableStrings.editor.panelEditor.getAddToDashboardButtonTooltip()}
-                      </p>
-                    }
+                  <TooltipWrapper
+                    condition={!initialLinks}
+                    tooltipContent={NavEmbeddableStrings.editor.panelEditor.getAddToDashboardButtonTooltip()}
                   >
                     <EuiButton
                       disabled={orderedLinks.length === 0}
                       isLoading={isSaving}
-                      onClick={async () => {
-                        setIsSaving(true);
-                        await onAddToDashboard(orderedLinks);
-                        setIsSaving(false);
+                      onClick={() => {
+                        onAddToDashboard(orderedLinks);
                       }}
                     >
-                      {NavEmbeddableStrings.editor.panelEditor.getAddToDashboardButtonLabel()}
+                      {initialLinks
+                        ? NavEmbeddableStrings.editor.panelEditor.getApplyButtonLabel()
+                        : NavEmbeddableStrings.editor.panelEditor.getAddToDashboardButtonLabel()}
                     </EuiButton>
-                  </EuiToolTip>
+                  </TooltipWrapper>
                 </EuiFlexItem>
               ) : null}
               {!initialLinks || isByReference ? (
@@ -265,8 +254,16 @@ const NavigationEmbeddablePanelEditor = ({
                       isLoading={isSaving}
                       onClick={async () => {
                         setIsSaving(true);
-                        await onSaveToLibrary(orderedLinks);
-                        setIsSaving(false);
+                        onSaveToLibrary(orderedLinks)
+                          .catch((e) => {
+                            toasts.addError(e, {
+                              title:
+                                NavEmbeddableStrings.editor.panelEditor.getErrorDuringSaveToastTitle(),
+                            });
+                          })
+                          .finally(() => {
+                            setIsSaving(false);
+                          });
                       }}
                     >
                       {initialLinks
