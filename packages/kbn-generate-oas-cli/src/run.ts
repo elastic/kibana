@@ -68,7 +68,7 @@ run(
       log.info('Loading server side generated OpenAPI spec...');
 
       const { protocol, hostname, port } = coreStart.http.getServerInfo();
-      const url = `${protocol}://${hostname}:${port}/oas/generate`;
+      const url = `${protocol}://${hostname}:${port}/generate_oas`;
       // TODO: Better way of doing it? Without waiting I get:
       // License is not available, authentication is not possible
       await waitUntilAPIReady(url, log);

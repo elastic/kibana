@@ -16,19 +16,30 @@ import zodToJsonSchema from 'zod-to-json-schema';
 import { bodySchema as updateBodySchema } from '@kbn/alerting-plugin/server/routes/update_rule';
 import { bodySchema as createBodySchema } from '@kbn/alerting-plugin/server/routes/create_rule';
 import { OpenAPIV3 } from 'openapi-types';
+import { RegistryRuleType } from '@kbn/alerting-plugin/server/rule_type_registry';
 
-type RuleTypeParams = [string, [z.ZodTypeAny, z.ZodTypeAny, ...z.ZodTypeAny[]]];
+type RuleTypeParams = Array<[string, z.ZodTypeAny]>;
 
-export class GenerateOasPlugin implements Plugin {
-  // private updateSchema: [z.ZodTypeAny, z.ZodTypeAny, ...z.ZodTypeAny[]] | undefined
-  // private createSchema: Array<z.infer<typeof createBodySchema> | undefined
-  private alerting: OpenAPIV3.PathsObject | undefined;
+interface PathsObject {
+  [pattern: string]: PathItemObject;
+}
+
+type PathItemObject = {
+  [method in OpenAPIV3.HttpMethods]?: OperationObject;
+};
+
+interface OperationObject {
+  requestBody: OpenAPIV3.RequestBodyObject;
+}
+
+export class ApiDocsPlugin implements Plugin {
+  private alerting: PathsObject | undefined;
 
   public setup({ http }: CoreSetup, { alerting }: { alerting: AlertingPluginSetup }) {
     const router = http.createRouter();
     router.get(
       {
-        path: '/oas/generate',
+        path: '/generate_oas',
         validate: {},
       },
       async (context, req, res) => {
@@ -45,7 +56,7 @@ export class GenerateOasPlugin implements Plugin {
     const ruleTypeParams = Array.from(
       alerting.listTypes({ addParamsValidationSchemas: true }).values()
     )
-      .map((ruleType) => {
+      .map((ruleType: RegistryRuleType) => {
         if (ruleType.validate && instanceofZodType(ruleType.validate.params)) {
           return [ruleType.id, ruleType.validate.params];
         }
@@ -82,17 +93,22 @@ export class GenerateOasPlugin implements Plugin {
    * When creating a rule, the user can use one of the predefined rule types.
    * Each rule type has its own schema for the params depending on the rule_type_id.
    */
-  private getCreateSchema(ruleTypeParams: RuleTypeParams): OpenAPIV3.SchemaObject {
+  private getCreateSchema(ruleTypeParams: Array<[string, z.ZodTypeAny]>): OpenAPIV3.SchemaObject {
     const schemas = ruleTypeParams.map(([ruleTypeId, paramsSchema]) => {
       return createBodySchema
         .merge(z.object({ rule_type_id: z.literal(ruleTypeId as string) }))
         .merge(
           z.object({
-            params: paramsSchema as unknown as [z.ZodTypeAny, z.ZodTypeAny, ...z.ZodTypeAny[]],
+            params: paramsSchema,
           })
         );
-    }, []);
+    }) as unknown as [
+      z.ZodDiscriminatedUnionOption<'rule_type_id'>,
+      ...Array<z.ZodDiscriminatedUnionOption<'rule_type_id'>>
+    ];
 
+    // discriminated union is used here because we would to use the oneOf option
+    // this means that the valid params schema is different for each rule type
     return zodToJsonSchema(z.discriminatedUnion('rule_type_id', schemas)) as any;
   }
 
@@ -106,10 +122,11 @@ export class GenerateOasPlugin implements Plugin {
       z.ZodTypeAny,
       ...z.ZodTypeAny[]
     ];
+
     const schemaWithParams = updateBodySchema.merge(z.object({ params: z.union(paramSchemas) }));
 
     return zodToJsonSchema(schemaWithParams) as any;
   }
 }
 
-export const plugin = () => new GenerateOasPlugin();
+export const plugin = () => new ApiDocsPlugin();
