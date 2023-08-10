@@ -6,11 +6,4 @@
  * Side Public License, v 1.
  */
 
-// TODO - is this file needed?
-export { AnnotationEditorControls, annotationsIconSet } from './annotation_editor_controls';
-
-export * from './group_editor_flyout';
-
-export * from './get_annotation_accessor';
-
-export * from './table_list';
+export { GroupEditorFlyout } from './group_editor_flyout';
