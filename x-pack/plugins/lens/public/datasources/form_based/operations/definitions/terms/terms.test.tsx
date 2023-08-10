@@ -8,7 +8,14 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { shallow, mount } from 'enzyme';
-import { EuiButtonGroup, EuiComboBox, EuiFieldNumber, EuiSelect, EuiSwitch } from '@elastic/eui';
+import {
+  EuiButtonGroup,
+  EuiComboBox,
+  EuiComboBoxOptionOption,
+  EuiFieldNumber,
+  EuiSelect,
+  EuiSwitch,
+} from '@elastic/eui';
 import type { IUiSettingsClient, HttpSetup } from '@kbn/core/public';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
@@ -2479,7 +2486,7 @@ describe('terms', () => {
         .filter('[data-test-subj="indexPattern-reference-function"]');
       const option = functionComboBox
         .prop('options')!
-        .find(({ label }: { label: string }) => label === 'Average')!;
+        .find(({ label }: EuiComboBoxOptionOption) => label === 'Average')!;
 
       act(() => {
         functionComboBox.prop('onChange')!([option]);
@@ -2548,7 +2555,7 @@ describe('terms', () => {
 
       const option = fieldComboBox
         .prop('options')[0]
-        .options!.find(({ label }: { label: string }) => label === 'memory')!;
+        .options!.find(({ label }: EuiComboBoxOptionOption) => label === 'memory')!;
       act(() => {
         fieldComboBox.prop('onChange')!([option]);
       });
@@ -2631,7 +2638,7 @@ describe('terms', () => {
       );
       const option = functionComboBox
         .prop('options')!
-        .find(({ label }: { label: string }) => label === 'Average')!;
+        .find(({ label }: EuiComboBoxOptionOption) => label === 'Average')!;
       act(() => {
         functionComboBox.prop('onChange')!([option]);
       });
