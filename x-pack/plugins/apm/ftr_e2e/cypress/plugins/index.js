@@ -27,4 +27,4 @@ const plugin = () => {
   // `config` is the resolved Cypress config
 };
 
-module.exports = plugin;
+module.exports = { plugin };
