@@ -8,7 +8,7 @@
 import React, { useCallback, useLayoutEffect, useRef, useState } from 'react';
 import { EuiPopover, EuiIcon, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { APP_WRAPPER_CLASS } from '@kbn/core-application-common';
+import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { useBoolean } from '../../../../../hooks/use_boolean';
 import { useHostsTableContext } from '../../hooks/use_hosts_table';
 

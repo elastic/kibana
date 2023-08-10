@@ -69,7 +69,6 @@
     "@kbn/logs-shared-plugin",
     "@kbn/licensing-plugin",
     "@kbn/aiops-utils",
-    "@kbn/core-application-common",
   ],
   "exclude": ["target/**/*"]
 }

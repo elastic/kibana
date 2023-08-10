@@ -16,7 +16,7 @@ export const HostMetricsExplanationContent = () => {
       <p>
         <FormattedMessage
           id="xpack.infra.hostsViewPage.metricsExplanation"
-          defaultMessage="Showing metrics for your host"
+          defaultMessage="Showing metrics for your host(s)"
         />
       </p>
       <p>
