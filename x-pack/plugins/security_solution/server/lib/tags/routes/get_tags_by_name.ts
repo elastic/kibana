@@ -6,19 +6,16 @@
  */
 import type { Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import { schema } from '@kbn/config-schema';
 
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { getTagsByNameRequest } from '../../../../common/api/tags';
 import { INTERNAL_TAGS_URL } from '../../../../common/constants';
 import type { SetupPlugins } from '../../../plugin';
 import type { SecuritySolutionPluginRouter } from '../../../types';
+import { buildRouteValidationWithExcess } from '../../../utils/build_validation/route_validation';
 import { buildSiemResponse } from '../../detection_engine/routes/utils';
 import { buildFrameworkRequest } from '../../timeline/utils/common';
 import { findTagsByName } from '../saved_objects';
-
-const getTagsParamsSchema = schema.object({
-  name: schema.string(),
-});
 
 export const getTagsByNameRoute = (
   router: SecuritySolutionPluginRouter,
@@ -28,7 +25,7 @@ export const getTagsByNameRoute = (
   router.get(
     {
       path: INTERNAL_TAGS_URL,
-      validate: { query: getTagsParamsSchema },
+      validate: { query: buildRouteValidationWithExcess(getTagsByNameRequest) },
       options: {
         tags: ['access:securitySolution'],
       },
