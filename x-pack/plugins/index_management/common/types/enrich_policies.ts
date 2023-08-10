@@ -7,13 +7,6 @@
 
 import type { EnrichPolicyType } from '@elastic/elasticsearch/lib/api/types';
 
-export interface ESEnrichPolicyType {
-  name: string;
-  indices: string[];
-  match_field: string;
-  enrich_fields: string[];
-}
-
 export interface SerializedEnrichPolicy {
   type: EnrichPolicyType;
   name: string;
