@@ -7,7 +7,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiFlyout, EuiLink, EuiPanel, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
-import React, { useEffect } from 'react';
+import React from 'react';
 import type { Message } from '../../../common/types';
 import { useCurrentUser } from '../../hooks/use_current_user';
 import { useGenAIConnectors } from '../../hooks/use_genai_connectors';
@@ -55,8 +55,6 @@ export function ChatFlyout({
   const router = useObservabilityAIAssistantRouter();
 
   const knowledgeBase = useKnowledgeBase();
-
-  useEffect(() => {}, [knowledgeBase.status.value?.ready]);
 
   return isOpen ? (
     <EuiFlyout onClose={onClose}>

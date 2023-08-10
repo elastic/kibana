@@ -117,6 +117,9 @@ export async function createChatService({
     },
     getContexts,
     getFunctions,
+    hasRenderFunction: (name: string) => {
+      return getFunctions().some((fn) => fn.options.name === name);
+    },
     chat({ connectorId, messages }: { connectorId: string; messages: Message[] }) {
       const subject = new BehaviorSubject<PendingMessage>({
         message: {

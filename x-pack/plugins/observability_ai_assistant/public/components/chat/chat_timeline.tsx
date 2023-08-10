@@ -7,6 +7,7 @@
 
 import { EuiCommentList } from '@elastic/eui';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
+import { compact } from 'lodash';
 import React, { ReactNode } from 'react';
 import { type Message } from '../../../common';
 
@@ -46,24 +47,26 @@ export function ChatTimeline({
 }: ChatTimelineProps) {
   return (
     <EuiCommentList>
-      {items.map((item, index) =>
-        !item.hide ? (
-          <ChatItem
-            // use index, not id to prevent unmounting of component when message is persisted
-            key={index}
-            {...item}
-            onFeedbackClick={(feedback) => {
-              onFeedback(item, feedback);
-            }}
-            onRegenerateClick={() => {
-              onRegenerate(item);
-            }}
-            onEditSubmit={(message) => {
-              return onEdit(item, message);
-            }}
-            onStopGeneratingClick={onStopGenerating}
-          />
-        ) : null
+      {compact(
+        items.map((item, index) =>
+          !item.hide ? (
+            <ChatItem
+              // use index, not id to prevent unmounting of component when message is persisted
+              key={index}
+              {...item}
+              onFeedbackClick={(feedback) => {
+                onFeedback(item, feedback);
+              }}
+              onRegenerateClick={() => {
+                onRegenerate(item);
+              }}
+              onEditSubmit={(message) => {
+                return onEdit(item, message);
+              }}
+              onStopGeneratingClick={onStopGenerating}
+            />
+          ) : null
+        )
       )}
     </EuiCommentList>
   );

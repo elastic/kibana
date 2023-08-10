@@ -32,6 +32,7 @@ const chatService: ObservabilityAIAssistantChatService = {
   renderFunction: (name: string, args: string | undefined, response: {}) => (
     <div>Hello! {name}</div>
   ),
+  hasRenderFunction: () => true,
 };
 
 const service: ObservabilityAIAssistantService = {

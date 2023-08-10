@@ -70,10 +70,11 @@ export function useTimeline({
       messages,
       currentUser,
       hasConnector,
+      chatService,
     });
 
     return items;
-  }, [messages, currentUser, hasConnector]);
+  }, [messages, currentUser, hasConnector, chatService]);
 
   const [subscription, setSubscription] = useState<Subscription | undefined>();
 

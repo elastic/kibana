@@ -11,6 +11,7 @@ import { v4 } from 'uuid';
 import { Message, MessageRole } from '../../common';
 import type { ChatTimelineItem } from '../components/chat/chat_timeline';
 import { RenderFunction } from '../components/render_function';
+import type { ObservabilityAIAssistantChatService } from '../types';
 
 function convertFunctionParamsToMarkdownCodeBlock(object: Record<string, string | number>) {
   return `
@@ -23,10 +24,12 @@ export function getTimelineItemsfromConversation({
   currentUser,
   messages,
   hasConnector,
+  chatService,
 }: {
   currentUser?: Pick<AuthenticatedUser, 'username' | 'full_name'>;
   messages: Message[];
   hasConnector: boolean;
+  chatService: ObservabilityAIAssistantChatService;
 }): ChatTimelineItem[] {
   return [
     {
@@ -71,26 +74,26 @@ export function getTimelineItemsfromConversation({
 
         case MessageRole.User:
           // User executed a function:
-          if (functionCall) {
+          if (message.message.name && functionCall) {
             title = i18n.translate('xpack.observabilityAiAssistant.executedFunctionEvent', {
               defaultMessage: 'executed the function {functionName}',
               values: {
-                functionName: functionCall.name,
+                functionName: message.message.name,
               },
             });
 
             content = convertFunctionParamsToMarkdownCodeBlock({
-              name: functionCall.name,
+              name: message.message.name,
               arguments: JSON.parse(functionCall.arguments || '{}'),
             });
 
-            element = (
+            element = chatService.hasRenderFunction(message.message.name) ? (
               <RenderFunction
-                name={functionCall.name}
+                name={message.message.name}
                 arguments={functionCall?.arguments}
                 response={message.message}
               />
-            );
+            ) : null;
 
             canCopy = true;
             canEdit = hasConnector;

@@ -53,6 +53,7 @@ export interface ObservabilityAIAssistantChatService {
   chat: (options: { messages: Message[]; connectorId: string }) => Observable<PendingMessage>;
   getContexts: () => ContextDefinition[];
   getFunctions: (options?: { contexts?: string[]; filter?: string }) => FunctionDefinition[];
+  hasRenderFunction: (name: string) => boolean;
   executeFunction: (
     name: string,
     args: string | undefined,
