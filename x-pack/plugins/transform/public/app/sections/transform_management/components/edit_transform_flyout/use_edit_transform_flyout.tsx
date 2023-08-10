@@ -432,11 +432,6 @@ const updateFormField = (state: FormField, value: string): FormField =>
     d.value = value;
   });
 
-const updateFormSection = (state: FormSection, enabled: boolean): FormSection =>
-  produce(state, (d) => {
-    d.enabled = enabled;
-  });
-
 const getFieldValues = (fields: EditTransformFlyoutFieldsState) =>
   Object.values(fields).map((f) => f.value);
 const getSectionValues = (sections: EditTransformFlyoutSectionsState) =>
@@ -456,7 +451,9 @@ interface EditTransformFlyoutFormState {
 }
 
 interface EditTransformFlyoutActions {
-  actions: Record<string, (payload: any) => void>;
+  setApiError: (payload: string | undefined) => void;
+  setFormField: (payload: { field: EditTransformFormFields; value: string }) => void;
+  setFormSection: (payload: { section: EditTransformFormSections; enabled: boolean }) => void;
 }
 
 type EditTransformFlyoutState = EditTransformFlyoutOptions &
@@ -469,44 +466,40 @@ const createEditTransformFlyoutStore = ({ config, dataViewId }: EditTransformFly
   const defaultFieldValues = getFieldValues(defaultState.formFields);
   const defaultSectionValues = getSectionValues(defaultState.formSections);
 
-  return createStore<EditTransformFlyoutState>()((set) => ({
-    ...defaultState,
-    config,
-    dataViewId,
-    actions: {
-      apiError: (payload: string | undefined) =>
-        set((state) =>
-          produce(state, (d) => {
-            d.apiErrorMessage = payload;
-          })
-        ),
-      formField: (payload: { field: EditTransformFormFields; value: string }) =>
-        set((state) =>
-          produce(state, (d) => {
-            d.formFields[payload.field] = updateFormField(
-              state.formFields[payload.field],
-              payload.value
-            );
-            d.isFormTouched =
-              !isEqual(defaultFieldValues, getFieldValues(d.formFields)) ||
-              !isEqual(defaultSectionValues, getSectionValues(d.formSections));
-            d.isFormValid = isFormValid(d.formFields);
-          })
-        ),
-      formSection: (payload: { section: EditTransformFormSections; enabled: boolean }) =>
-        set((state) =>
-          produce(state, (d) => {
-            d.formSections[payload.section] = updateFormSection(
-              state.formSections[payload.section],
-              payload.enabled
-            );
-            d.isFormTouched =
-              !isEqual(defaultFieldValues, getFieldValues(d.formFields)) ||
-              !isEqual(defaultSectionValues, getSectionValues(d.formSections));
-          })
-        ),
-    },
-  }));
+  return createStore<EditTransformFlyoutState>()((set) => {
+    // a helper to wrap a callback in both zustand's set() and immer's produce()
+    const createAction = (cb: (d: EditTransformFlyoutState) => void) =>
+      set((state) => produce(state, cb));
+
+    const isFormTouched = (d: EditTransformFlyoutState) =>
+      !isEqual(defaultFieldValues, getFieldValues(d.formFields)) ||
+      !isEqual(defaultSectionValues, getSectionValues(d.formSections));
+
+    return {
+      ...defaultState,
+      config,
+      dataViewId,
+      setApiError: (payload) =>
+        createAction((d) => {
+          d.apiErrorMessage = payload;
+        }),
+      // Updates a form field with its new value, runs validation and
+      // populates `errorMessages` if any errors occur.
+      setFormField: (payload) =>
+        createAction((d) => {
+          d.formFields[payload.field] = updateFormField(d.formFields[payload.field], payload.value);
+          d.isFormTouched = isFormTouched(d);
+          d.isFormValid = isFormValid(d.formFields);
+        }),
+      // Updates a form section.
+      setFormSection: (payload) =>
+        createAction((d) => {
+          d.formSections[payload.section].enabled = payload.enabled;
+          d.isFormTouched = isFormTouched(d);
+          d.isFormValid = isFormValid(d.formFields);
+        }),
+    };
+  });
 };
 
 export const EditTransformFlyoutContext = createContext<EditTransformFlyoutStore | null>(null);

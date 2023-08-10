@@ -28,15 +28,15 @@ export const EditTransformUpdateButton: FC<EditTransformUpdateButtonProps> = ({ 
   const { config, formState, isFormValid, isFormTouched } = useEditTransformFlyout();
   const requestConfig = applyFormStateToTransformConfig(config, formState);
   const isUpdateButtonDisabled = !isFormValid || !isFormTouched;
-  const apiError = useEditTransformFlyout((s) => s.actions.apiError);
+  const setApiError = useEditTransformFlyout((s) => s.setApiError);
 
   const updateTransfrom = useUpdateTransform(config.id, requestConfig);
 
   async function submitFormHandler() {
-    apiError(undefined);
+    setApiError(undefined);
 
     updateTransfrom(undefined, {
-      onError: (error) => apiError(getErrorMessage(error)),
+      onError: (error) => setApiError(getErrorMessage(error)),
       onSuccess: () => closeFlyout(),
     });
   }

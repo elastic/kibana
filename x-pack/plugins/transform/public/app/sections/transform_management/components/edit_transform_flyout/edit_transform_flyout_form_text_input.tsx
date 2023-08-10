@@ -28,7 +28,7 @@ export const EditTransformFlyoutFormTextInput: FC<EditTransformFlyoutFormTextInp
   placeHolder = false,
 }) => {
   const { defaultValue, errorMessages, value } = useEditTransformFlyout((s) => s.formFields[field]);
-  const formField = useEditTransformFlyout((s) => s.actions.formField);
+  const setFormField = useEditTransformFlyout((s) => s.setFormField);
   const upperCaseField = capitalizeFirstLetter(field);
 
   return (
@@ -50,7 +50,7 @@ export const EditTransformFlyoutFormTextInput: FC<EditTransformFlyoutFormTextInp
         }
         isInvalid={errorMessages.length > 0}
         value={value}
-        onChange={(e) => formField({ field, value: e.target.value })}
+        onChange={(e) => setFormField({ field, value: e.target.value })}
         aria-label={label}
       />
     </EuiFormRow>

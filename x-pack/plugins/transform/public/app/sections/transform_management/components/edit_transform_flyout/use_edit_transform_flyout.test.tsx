@@ -233,7 +233,7 @@ describe('Transform: useEditTransformFlyout()', () => {
     const { result } = renderHook(() => useEditTransformFlyout(), { wrapper });
 
     act(() => {
-      result.current.actions.formField({
+      result.current.setFormField({
         field: 'description',
         value: 'the-updated-description',
       });
@@ -243,7 +243,7 @@ describe('Transform: useEditTransformFlyout()', () => {
     expect(result.current.isFormValid).toBe(true);
 
     act(() => {
-      result.current.actions.formField({
+      result.current.setFormField({
         field: 'description',
         value: transformConfigMock.description as string,
       });
@@ -253,7 +253,7 @@ describe('Transform: useEditTransformFlyout()', () => {
     expect(result.current.isFormValid).toBe(true);
 
     act(() => {
-      result.current.actions.formField({
+      result.current.setFormField({
         field: 'frequency',
         value: 'the-invalid-value',
       });
