@@ -10,7 +10,7 @@
 // So start investigating from earliest test failure in the file.
 
 import type { Client } from '@elastic/elasticsearch';
-import expect from '@kbn/expect/expect';
+import expect from '@kbn/expect';
 import { FullAgentPolicy } from '@kbn/fleet-plugin/common';
 import { GLOBAL_SETTINGS_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common/constants';
 import { v4 as uuidv4 } from 'uuid';
@@ -72,7 +72,7 @@ export default function (providerContext: FtrProviderContext) {
           },
         });
       } catch (err) {
-        // index doesnt exist
+        // index doesn't exist
       }
     };
 
