@@ -272,10 +272,21 @@ export async function extractAndUpdateSecrets(opts: {
     ...createdSecrets.map(({ id }) => ({ id })),
   ];
 
+  const secretsToDelete: PolicySecretReference[] = [];
+
+  toDelete.forEach((secretPath) => {
+    // check if the previous secret is actually a secret refrerence
+    // it may be that secrets were not enabled at the time of creation
+    // in which case they are just stored as plain text
+    if (secretPath.value.value.isSecretRef) {
+      secretsToDelete.push({ id: secretPath.value.value.id });
+    }
+  });
+
   return {
     packagePolicyUpdate: policyWithSecretRefs,
     secretReferences,
-    secretsToDelete: toDelete.map((secretPath) => ({ id: secretPath.value.value.id })),
+    secretsToDelete,
   };
 }
 
