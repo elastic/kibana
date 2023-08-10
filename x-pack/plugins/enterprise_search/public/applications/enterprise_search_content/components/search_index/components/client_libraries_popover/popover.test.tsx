@@ -10,7 +10,7 @@ import '../../../../../shared/doc_links/__mocks__/doc_links.mock';
 
 import React from 'react';
 
-import { shallow } from 'enzyme';
+import { shallow, ShallowWrapper } from 'enzyme';
 
 import { EuiContextMenuItem, EuiContextMenuPanel } from '@elastic/eui';
 
@@ -89,7 +89,7 @@ describe('ClientLibrariesPopover', () => {
 
     expect(contextMenuItems.length > 0).toBeTruthy();
 
-    contextMenuItems.forEach((item: any, index: number) => {
+    contextMenuItems.forEach((item: ShallowWrapper, index: number) => {
       const menuItem = item.find(EuiContextMenuItem);
       expect(menuItem.prop('href')).toEqual(librariesList[index].href);
     });
