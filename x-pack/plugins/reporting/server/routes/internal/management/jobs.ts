@@ -141,17 +141,20 @@ export function registerJobInfoRoutesInternal(reporting: ReportingCore) {
   const registerInternalDownloadReport = () => {
     // trigger a download of the output from a job
     const path = `${JOBS.DOWNLOAD_PREFIX}/{docId}`;
-
-    router.get(
+    router.versioned.get(
       {
         path,
-        validate: jobHandlers.validate,
-        options: { tags: [ROUTE_TAG_CAN_REDIRECT], access: 'public' },
-      },
+        access: 'internal',
+      // NOTE:
+      // Because this API is used in the browser via `href` (ex. on link to download a file),
+      // we need to enable setting the version number via query params
+        enableQueryVersion: true,
+        options: { tags: [ROUTE_TAG_CAN_REDIRECT] },
+      })
+      .addVersion({ version: '1',validate: { request: jobHandlers.validate }},
       authorizedUserPreRouting(reporting, async (user, context, req, res) => {
         return jobHandlers.handleDownloadReport({ path, user, context, req, res });
-      })
-    );
+      }))
   };
 
   const registerInternalDeleteReport = () => {
