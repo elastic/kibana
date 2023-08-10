@@ -10,7 +10,7 @@ import * as React from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { EuiPageTemplate } from '@elastic/eui';
 import { ThemeServiceSetup } from '@kbn/core/public';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
 import { Error } from './error';
 import { RedirectManager } from '../redirect_manager';
@@ -28,7 +28,7 @@ export const Page: React.FC<PageProps> = ({ manager, theme, customBranding }) =>
 
   if (error) {
     return (
-      <KibanaThemeProvider theme$={theme.theme$}>
+      <KibanaThemeProvider theme={{ theme$: theme.theme$ }}>
         <EuiPageTemplate>
           <Error error={error} />
         </EuiPageTemplate>
@@ -37,7 +37,7 @@ export const Page: React.FC<PageProps> = ({ manager, theme, customBranding }) =>
   }
 
   return (
-    <KibanaThemeProvider theme$={theme.theme$}>
+    <KibanaThemeProvider theme={{ theme$: theme.theme$ }}>
       <EuiPageTemplate>
         <Spinner showPlainSpinner={Boolean(hasCustomBranding)} />
       </EuiPageTemplate>
