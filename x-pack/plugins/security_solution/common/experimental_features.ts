@@ -116,7 +116,7 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables Discover embedded within timeline
    *
    * */
-  discoverInTimeline: true,
+  discoverInTimeline: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
