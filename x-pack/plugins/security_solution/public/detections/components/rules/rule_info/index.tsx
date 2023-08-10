@@ -17,7 +17,7 @@ interface CreatedByProps {
 }
 
 /**
- * Created by and created at text that are shown on rule details
+ * Created by and created at text that are shown on rule details and rule preview in expandable flyout
  */
 export const CreatedBy: React.FC<CreatedByProps> = ({
   createdBy,
@@ -49,7 +49,7 @@ interface UpdatedByProps {
 }
 
 /**
- * Updated by and updated at text that are shown on rule details
+ * Updated by and updated at text that are shown on rule details and rule preview in expandable flyout
  */
 export const UpdatedBy: React.FC<UpdatedByProps> = ({
   updatedBy,
