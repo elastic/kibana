@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ELASTIC_HTTP_VERSION_HEADER, X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import type { HttpFetchQuery } from '@kbn/core/public';
 import { HttpSetup, IUiSettingsClient } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
@@ -107,7 +108,18 @@ export class ReportingAPIClient implements IReportingAPI {
 
   public downloadReport(jobId: string) {
     const location = this.getReportURL(jobId);
-    window.open(location);
+    const options = {
+      method: 'GET' as 'GET',
+      headers: { 
+        [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
+      }
+    }
+
+    return this.http.fetch(location, options).then((res: Response) => res.blob()).then(blob => { 
+      const file = window.URL.createObjectURL(blob)
+      window.location.assign(file)
+    });
   }
 
   public async deleteReport(jobId: string) {
