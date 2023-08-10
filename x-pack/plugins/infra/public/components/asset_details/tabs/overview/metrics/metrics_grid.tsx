@@ -18,6 +18,7 @@ import {
   type FormulaConfig,
   hostLensFormulas,
   type XYLayerOptions,
+  XYVisualOptions,
 } from '../../../../../common/visualizations';
 import { METRIC_CHART_HEIGHT } from '../../../constants';
 
@@ -42,6 +43,11 @@ const LEGEND_SETTINGS: Pick<MetricChartConfig, 'overrides'>['overrides'] = {
     legendPosition: 'bottom',
     legendSize: 35,
   },
+};
+
+const XY_VISUAL_OPTIONS: XYVisualOptions = {
+  showDottedLine: true,
+  missingValues: 'Linear',
 };
 
 const CHARTS_IN_ORDER: Array<
@@ -324,6 +330,7 @@ export const MetricsGrid = React.memo(
                   dataView={getDataView(dataViewOrigin)}
                   dateRange={timeRange}
                   height={METRIC_CHART_HEIGHT}
+                  visualOptions={XY_VISUAL_OPTIONS}
                   layers={layers}
                   filters={getFilters(dataViewOrigin)}
                   title={title}

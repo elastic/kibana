@@ -9,7 +9,11 @@ import React from 'react';
 import { EuiFlexGrid, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer } from '@elastic/eui';
-import { hostLensFormulas, type XYLayerOptions } from '../../../../../../common/visualizations';
+import {
+  hostLensFormulas,
+  type XYVisualOptions,
+  type XYLayerOptions,
+} from '../../../../../../common/visualizations';
 import { HostMetricsDocsLink } from '../../../../../../components/lens';
 import { MetricChart, MetricChartProps } from './metric_chart';
 
@@ -21,6 +25,11 @@ const XY_LAYER_OPTIONS: XYLayerOptions = {
   },
 };
 
+const XY_VISUAL_OPTIONS: XYVisualOptions = {
+  showDottedLine: true,
+  missingValues: 'Linear',
+};
+
 const PERCENT_LEFT_AXIS: Pick<MetricChartProps, 'overrides'>['overrides'] = {
   axisLeft: {
     domain: {
@@ -28,6 +37,7 @@ const PERCENT_LEFT_AXIS: Pick<MetricChartProps, 'overrides'>['overrides'] = {
       max: 1,
     },
   },
+  settings: {},
 };
 
 const CHARTS_IN_ORDER: MetricChartProps[] = [
@@ -215,7 +225,7 @@ export const MetricsGrid = React.memo(() => {
       <EuiFlexGrid columns={2} gutterSize="s" data-test-subj="hostsView-metricChart">
         {CHARTS_IN_ORDER.map((chartProp, index) => (
           <EuiFlexItem key={index} grow={false}>
-            <MetricChart {...chartProp} />
+            <MetricChart {...chartProp} visualOptions={XY_VISUAL_OPTIONS} />
           </EuiFlexItem>
         ))}
       </EuiFlexGrid>
