@@ -49,7 +49,6 @@ export async function getTransactionErrorRateChartPreview({
     end,
     transactionName,
     groupBy: groupByFields,
-    useKqlFilter,
     kqlFilter,
   } = alertParams;
 
@@ -64,21 +63,20 @@ export async function getTransactionErrorRateChartPreview({
     groupByFields
   );
 
-  const termFilterQuery =
-    !useKqlFilter || useKqlFilter === 'false'
-      ? [
-          ...termQuery(SERVICE_NAME, serviceName, {
-            queryEmptyString: false,
-          }),
-          ...termQuery(TRANSACTION_TYPE, transactionType, {
-            queryEmptyString: false,
-          }),
-          ...termQuery(TRANSACTION_NAME, transactionName, {
-            queryEmptyString: false,
-          }),
-          ...environmentQuery(environment),
-        ]
-      : [];
+  const termFilterQuery = !kqlFilter
+    ? [
+        ...termQuery(SERVICE_NAME, serviceName, {
+          queryEmptyString: false,
+        }),
+        ...termQuery(TRANSACTION_TYPE, transactionType, {
+          queryEmptyString: false,
+        }),
+        ...termQuery(TRANSACTION_NAME, transactionName, {
+          queryEmptyString: false,
+        }),
+        ...environmentQuery(environment),
+      ]
+    : [];
 
   const params = {
     apm: {

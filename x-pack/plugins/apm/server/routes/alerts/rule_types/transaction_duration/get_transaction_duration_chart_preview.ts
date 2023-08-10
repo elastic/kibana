@@ -57,7 +57,6 @@ export async function getTransactionDurationChartPreview({
     start,
     end,
     groupBy: groupByFields,
-    useKqlFilter,
     kqlFilter,
   } = alertParams;
   const searchAggregatedTransactions = await getSearchTransactionsEvents({
@@ -66,21 +65,20 @@ export async function getTransactionDurationChartPreview({
     kuery: '',
   });
 
-  const termFilterQuery =
-    !useKqlFilter || useKqlFilter === 'false'
-      ? [
-          ...termQuery(SERVICE_NAME, serviceName, {
-            queryEmptyString: false,
-          }),
-          ...termQuery(TRANSACTION_TYPE, transactionType, {
-            queryEmptyString: false,
-          }),
-          ...termQuery(TRANSACTION_NAME, transactionName, {
-            queryEmptyString: false,
-          }),
-          ...environmentQuery(environment),
-        ]
-      : [];
+  const termFilterQuery = !kqlFilter
+    ? [
+        ...termQuery(SERVICE_NAME, serviceName, {
+          queryEmptyString: false,
+        }),
+        ...termQuery(TRANSACTION_TYPE, transactionType, {
+          queryEmptyString: false,
+        }),
+        ...termQuery(TRANSACTION_NAME, transactionName, {
+          queryEmptyString: false,
+        }),
+        ...environmentQuery(environment),
+      ]
+    : [];
 
   const query = {
     bool: {

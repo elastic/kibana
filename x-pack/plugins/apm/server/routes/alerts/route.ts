@@ -34,7 +34,6 @@ const alertParamsRt = t.intersection([
   }),
   t.partial({
     groupBy: t.array(t.string),
-    useKqlFilter: t.string,
     kqlFilter: t.string,
   }),
 ]);

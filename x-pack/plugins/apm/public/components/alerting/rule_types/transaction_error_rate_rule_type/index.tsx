@@ -107,7 +107,6 @@ export function TransactionErrorRateRuleType(props: Props) {
                 start,
                 end,
                 groupBy: params.groupBy,
-                useKqlFilter: params.useKqlFilter === true ? 'true' : 'false',
                 kqlFilter: params.kqlFilter,
               },
             },
@@ -123,7 +122,6 @@ export function TransactionErrorRateRuleType(props: Props) {
       params.windowSize,
       params.windowUnit,
       params.groupBy,
-      params.useKqlFilter,
       params.kqlFilter,
     ]
   );

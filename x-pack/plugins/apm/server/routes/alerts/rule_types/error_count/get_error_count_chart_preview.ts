@@ -39,7 +39,6 @@ export async function getTransactionErrorCountChartPreview({
     start,
     end,
     groupBy: groupByFields,
-    useKqlFilter,
     kqlFilter,
   } = alertParams;
 
@@ -48,18 +47,17 @@ export async function getTransactionErrorCountChartPreview({
     groupByFields
   );
 
-  const termFilterQuery =
-    !useKqlFilter || useKqlFilter === 'false'
-      ? [
-          ...termQuery(SERVICE_NAME, serviceName, {
-            queryEmptyString: false,
-          }),
-          ...termQuery(ERROR_GROUP_ID, errorGroupingKey, {
-            queryEmptyString: false,
-          }),
-          ...environmentQuery(environment),
-        ]
-      : [];
+  const termFilterQuery = !kqlFilter
+    ? [
+        ...termQuery(SERVICE_NAME, serviceName, {
+          queryEmptyString: false,
+        }),
+        ...termQuery(ERROR_GROUP_ID, errorGroupingKey, {
+          queryEmptyString: false,
+        }),
+        ...environmentQuery(environment),
+      ]
+    : [];
 
   const query = {
     bool: {

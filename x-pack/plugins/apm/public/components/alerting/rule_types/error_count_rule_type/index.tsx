@@ -105,7 +105,6 @@ export function ErrorCountRuleType(props: Props) {
                 start,
                 end,
                 groupBy: params.groupBy,
-                useKqlFilter: params.useKqlFilter === true ? 'true' : 'false',
                 kqlFilter: params.kqlFilter,
               },
             },
@@ -120,7 +119,6 @@ export function ErrorCountRuleType(props: Props) {
       params.serviceName,
       params.errorGroupingKey,
       params.groupBy,
-      params.useKqlFilter,
       params.kqlFilter,
     ]
   );
