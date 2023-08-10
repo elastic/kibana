@@ -969,7 +969,6 @@ export default function (providerContext: FtrProviderContext) {
           updated_by: 'elastic',
           inactivity_timeout: 1209600,
           package_policies: [],
-          is_protected: false,
           overrides: {
             agent: {
               logging: {
