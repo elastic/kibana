@@ -128,19 +128,25 @@ export function HostsTable({ data = [], hasDistinctProbabilisticValues }: Props)
               {probabilisticValues.map((value, index) => {
                 return (
                   <EuiFlexItem key={index} grow={false}>
-                    <EuiToolTip
-                      content={i18n.translate(
-                        'xpack.profiling.storageExplorer.hostsTable.probabilisticProfilingValues',
-                        {
-                          defaultMessage: 'Introduced on {date}',
-                          values: { date: asAbsoluteDateTime(value.date) },
-                        }
-                      )}
-                    >
+                    {value.date ? (
+                      <EuiToolTip
+                        content={i18n.translate(
+                          'xpack.profiling.storageExplorer.hostsTable.probabilisticProfilingValues',
+                          {
+                            defaultMessage: 'Introduced on {date}',
+                            values: { date: asAbsoluteDateTime(value.date) },
+                          }
+                        )}
+                      >
+                        <EuiBadge color="hollow" isDisabled={index > 0}>
+                          {value.value}
+                        </EuiBadge>
+                      </EuiToolTip>
+                    ) : (
                       <EuiBadge color="hollow" isDisabled={index > 0}>
                         {value.value}
                       </EuiBadge>
-                    </EuiToolTip>
+                    )}
                   </EuiFlexItem>
                 );
               })}
@@ -159,8 +165,8 @@ export function HostsTable({ data = [], hasDistinctProbabilisticValues }: Props)
       },
       {
         field: 'totalEventsSize',
-        name: i18n.translate('xpack.profiling.storageExplorer.hostsTable.eventsData', {
-          defaultMessage: 'Events data',
+        name: i18n.translate('xpack.profiling.storageExplorer.hostsTable.samplesData', {
+          defaultMessage: 'Samples data',
         }),
         sortable: true,
         width: '200',
@@ -174,7 +180,7 @@ export function HostsTable({ data = [], hasDistinctProbabilisticValues }: Props)
               defaultMessage: 'Total data',
             })}
             hint={i18n.translate('xpack.profiling.storageExplorer.hostsTable.totalData.hint', {
-              defaultMessage: 'The combined value of metrics and events.',
+              defaultMessage: 'The combined value of metrics and profiling samples.',
             })}
             labelSize="xs"
             labelStyle={{ fontWeight: 700 }}
@@ -186,7 +192,13 @@ export function HostsTable({ data = [], hasDistinctProbabilisticValues }: Props)
         render: (size: StorageExplorerHostDetails['totalSize']) => asDynamicBytes(size),
       },
     ],
-    [hasDistinctProbabilisticValues, probabilisticValuesCountPerProjectId]
+    [
+      hasDistinctProbabilisticValues,
+      probabilisticValuesCountPerProjectId,
+      profilingRouter,
+      rangeFrom,
+      rangeTo,
+    ]
   );
 
   return (

@@ -11,8 +11,8 @@ import { StorageGroupedIndexNames } from '../../../../common/storage_explorer';
 export function getGroupedIndexLabel(label: StorageGroupedIndexNames) {
   switch (label) {
     case 'events':
-      return i18n.translate('xpack.profiling.storageExplorer.dataBreakdown.chart.events', {
-        defaultMessage: 'Events',
+      return i18n.translate('xpack.profiling.storageExplorer.dataBreakdown.chart.samples', {
+        defaultMessage: 'Samples',
       });
     case 'executables':
       return i18n.translate('xpack.profiling.storageExplorer.dataBreakdown.chart.executables', {
