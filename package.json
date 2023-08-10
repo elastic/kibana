@@ -222,7 +222,7 @@
     "dedent": "^0.7.0",
     "deep-freeze-strict": "^1.1.1",
     "deepmerge": "^4.2.2",
-    "del": "^6.1.0",
+    "del": "^5.1.0",
     "elastic-apm-node": "^3.49.1",
     "email-addresses": "^5.0.0",
     "execa": "^4.0.2",
