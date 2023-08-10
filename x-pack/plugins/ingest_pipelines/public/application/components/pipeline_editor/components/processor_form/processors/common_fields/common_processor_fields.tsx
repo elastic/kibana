@@ -59,7 +59,7 @@ const tagConfig: FieldConfig = {
     defaultMessage: 'Tag (optional)',
   }),
   helpText: i18n.translate('xpack.ingestPipelines.pipelineEditor.commonFields.tagFieldHelpText', {
-    defaultMessage: 'A label for the processor. Useful for debugging and metrics.',
+    defaultMessage: 'An identifier for the processor. Useful for debugging and metrics.',
   }),
   type: FIELD_TYPES.TEXT,
 };

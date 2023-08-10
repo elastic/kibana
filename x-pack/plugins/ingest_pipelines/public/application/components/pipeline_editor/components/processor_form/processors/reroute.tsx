@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCode, EuiLink } from '@elastic/eui';
 
+import { DocumentationService } from '../../../../../services';
 import {
   ComboBoxField,
   FIELD_TYPES,
@@ -28,7 +29,7 @@ const { maxLengthField } = fieldValidators;
 const MAX_DATASET_LENGTH = 100;
 const MAX_NAMESPACE_LENGTH = 100;
 
-const getFieldsConfig = (esDocsBase: string): FieldsConfig => {
+const getFieldsConfig = (docService: DocumentationService): FieldsConfig => {
   return {
     /* Optional field configs */
     destination: {
@@ -40,7 +41,7 @@ const getFieldsConfig = (esDocsBase: string): FieldsConfig => {
       helpText: (
         <FormattedMessage
           id="xpack.ingestPipelines.pipelineEditor.reroute.destinationFieldHelperText"
-          defaultMessage="A static value for the target. Not available when {dataset} or {namespace} is set."
+          defaultMessage="A value for the target index. Not available when {dataset} or {namespace} is set."
           values={{
             dataset: <EuiCode>{'dataset'}</EuiCode>,
             namespace: <EuiCode>{'namespace'}</EuiCode>,
@@ -59,20 +60,24 @@ const getFieldsConfig = (esDocsBase: string): FieldsConfig => {
       helpText: (
         <FormattedMessage
           id="xpack.ingestPipelines.pipelineEditor.reroute.datasetFieldHelperText"
-          defaultMessage="Field references or a static value for the data stream name. Must meet the criteria for {indexNamesLink}. Cannot contain {dash}. 100 characters max."
+          defaultMessage="Field references or a static value for the dataset part of the {dataStreamNameLink}. Must meet the criteria for {indexNamesLink}. Cannot contain {dash}. 100 characters max."
           values={{
+            dataStreamNameLink: (
+              <EuiLink href={docService.getDataStreamsNamingSchemeUrl()} target="_blank" external>
+                {i18n.translate('xpack.ingestPipelines.pipelineEditor.reroute.dataStreamNameLink', {
+                  defaultMessage: 'data stream name',
+                })}
+              </EuiLink>
+            ),
             indexNamesLink: (
               <EuiLink
-                href={`${esDocsBase}/indices-create-index.html#indices-create-api-path-params`}
+                href={`${docService.getEsDocsBasePath()}/indices-create-index.html#indices-create-api-path-params`}
                 target="_blank"
                 external
               >
-                {i18n.translate(
-                  'xpack.ingestPipelines.pipelineEditor.reroute.datasetFieldHelperTextLink',
-                  {
-                    defaultMessage: 'index names',
-                  }
-                )}
+                {i18n.translate('xpack.ingestPipelines.pipelineEditor.reroute.indexNameLink', {
+                  defaultMessage: 'index names',
+                })}
               </EuiLink>
             ),
             dash: <EuiCode>{'-'}</EuiCode>,
@@ -104,20 +109,24 @@ const getFieldsConfig = (esDocsBase: string): FieldsConfig => {
       helpText: (
         <FormattedMessage
           id="xpack.ingestPipelines.pipelineEditor.reroute.namespaceFieldHelperText"
-          defaultMessage="Field references or a static value for the data stream name. Must meet the criteria for {indexNamesLink}. 100 characters max."
+          defaultMessage="Field references or a static value for the namespace part of the {dataStreamNameLink}. Must meet the criteria for {indexNamesLink}. 100 characters max."
           values={{
+            dataStreamNameLink: (
+              <EuiLink href={docService.getDataStreamsNamingSchemeUrl()} target="_blank" external>
+                {i18n.translate('xpack.ingestPipelines.pipelineEditor.reroute.dataStreamNameLink', {
+                  defaultMessage: 'data stream name',
+                })}
+              </EuiLink>
+            ),
             indexNamesLink: (
               <EuiLink
-                href={`${esDocsBase}/indices-create-index.html#indices-create-api-path-params`}
+                href={`${docService.getEsDocsBasePath()}/indices-create-index.html#indices-create-api-path-params`}
                 target="_blank"
                 external
               >
-                {i18n.translate(
-                  'xpack.ingestPipelines.pipelineEditor.reroute.namespaceFieldHelperTextLink',
-                  {
-                    defaultMessage: 'index names',
-                  }
-                )}
+                {i18n.translate('xpack.ingestPipelines.pipelineEditor.reroute.indexNameLink', {
+                  defaultMessage: 'index names',
+                })}
               </EuiLink>
             ),
           }}
@@ -144,7 +153,7 @@ export const Reroute: FunctionComponent = () => {
   const form = useFormContext();
   const [{ fields }] = useFormData({ watch: ['fields.dataset', 'fields.namespace'] });
   const { services } = useKibana();
-  const fieldsConfig = getFieldsConfig(services.documentation.getEsDocsBasePath());
+  const fieldsConfig = getFieldsConfig(services.documentation);
 
   useEffect(() => {
     if (
