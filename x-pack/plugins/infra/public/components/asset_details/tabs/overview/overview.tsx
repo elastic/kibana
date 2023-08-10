@@ -10,33 +10,18 @@ import { i18n } from '@kbn/i18n';
 import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
-import { findInventoryModel } from '../../../../../common/inventory_models';
-import { useMetadata } from '../../hooks/use_metadata';
-import { useSourceContext } from '../../../../containers/metrics_source';
 import { MetadataSummaryList } from './metadata_summary/metadata_summary_list';
 import { AlertsSummaryContent } from './alerts';
 import { KPIGrid } from './kpis/kpi_grid';
 import { MetricsGrid } from './metrics/metrics_grid';
-import { toTimestampRange } from '../../utils';
 import { useAssetDetailsStateContext } from '../../hooks/use_asset_details_state';
 
 export const Overview = () => {
-  const { node, nodeType, overrides, dateRange, renderMode } = useAssetDetailsStateContext();
+  const { node, nodeType, overrides, dateRange, renderMode, metadataResponse } =
+    useAssetDetailsStateContext();
   const { logsDataView, metricsDataView } = overrides?.overview ?? {};
 
-  const inventoryModel = findInventoryModel(nodeType);
-  const { sourceId } = useSourceContext();
-  const {
-    loading: metadataLoading,
-    error: fetchMetadataError,
-    metadata,
-  } = useMetadata(
-    node.name,
-    nodeType,
-    inventoryModel.requiredMetrics,
-    sourceId,
-    toTimestampRange(dateRange)
-  );
+  const { metadataLoading, fetchMetadataError, metadata } = metadataResponse;
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m">

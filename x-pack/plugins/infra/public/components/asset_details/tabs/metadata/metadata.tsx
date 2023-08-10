@@ -11,9 +11,6 @@ import { EuiCallOut, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { TimeRange } from '@kbn/es-query';
 import type { InventoryItemType } from '../../../../../common/inventory_models/types';
-import { findInventoryModel } from '../../../../../common/inventory_models';
-import { useMetadata } from '../../hooks/use_metadata';
-import { useSourceContext } from '../../../../containers/metrics_source';
 import { Table } from './table';
 import { getAllFields } from './utils';
 import { useAssetDetailsStateContext } from '../../hooks/use_asset_details_state';
@@ -33,17 +30,10 @@ export interface MetadataProps {
 }
 
 export const Metadata = () => {
-  const { node, nodeType, overrides, dateRangeTs, onTabsStateChange } =
-    useAssetDetailsStateContext();
+  const { overrides, onTabsStateChange, metadataResponse } = useAssetDetailsStateContext();
   const { query, showActionsColumn = false } = overrides?.metadata ?? {};
 
-  const inventoryModel = findInventoryModel(nodeType);
-  const { sourceId } = useSourceContext();
-  const {
-    loading: metadataLoading,
-    error: fetchMetadataError,
-    metadata,
-  } = useMetadata(node.name, nodeType, inventoryModel.requiredMetrics, sourceId, dateRangeTs);
+  const { metadataLoading, fetchMetadataError, metadata } = metadataResponse;
 
   const fields = useMemo(() => getAllFields(metadata), [metadata]);
 

@@ -7,6 +7,9 @@
 
 import createContainer from 'constate';
 import { useMemo } from 'react';
+import { findInventoryModel } from '../../../../common/inventory_models';
+import { useSourceContext } from '../../../containers/metrics_source';
+import { useMetadata } from './use_metadata';
 import { parseDateRange } from '../../../utils/datemath';
 import type { AssetDetailsProps } from '../types';
 import { toTimestampRange } from '../utils';
@@ -42,6 +45,14 @@ export function useAssetDetailsState({ state }: UseAssetDetailsStateProps) {
 
   const dateRangeTs = toTimestampRange(dateRange);
 
+  const inventoryModel = findInventoryModel(nodeType);
+  const { sourceId } = useSourceContext();
+  const {
+    loading: metadataLoading,
+    error: fetchMetadataError,
+    metadata,
+  } = useMetadata(node.name, nodeType, inventoryModel.requiredMetrics, sourceId, dateRangeTs);
+
   return {
     node,
     nodeType,
@@ -50,6 +61,11 @@ export function useAssetDetailsState({ state }: UseAssetDetailsStateProps) {
     onTabsStateChange,
     overrides,
     renderMode,
+    metadataResponse: {
+      metadataLoading,
+      fetchMetadataError,
+      metadata,
+    },
   };
 }
 
