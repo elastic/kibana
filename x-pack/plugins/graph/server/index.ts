@@ -16,6 +16,7 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
   exposeToBrowser: {
     canEditDrillDownUrls: true,
     savePolicy: true,
+    enabled: true,
   },
   schema: configSchema,
 };
