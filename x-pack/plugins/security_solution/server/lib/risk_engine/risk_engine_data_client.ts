@@ -25,6 +25,7 @@ import {
   ilmPolicy,
   getLatestTransformId,
   getTransformOptions,
+  MAX_SPACES_COUNT,
 } from './configurations';
 import { createDataStream } from './utils/create_datastream';
 import type { RiskEngineDataWriter as Writer } from './risk_engine_data_writer';
@@ -41,6 +42,7 @@ import {
   updateSavedObjectAttribute,
   getConfiguration,
   initSavedObjects,
+  getEnabledRiskEngineAmount,
 } from './utils/saved_object_configuration';
 import { createIndex } from './utils/create_index';
 
@@ -131,7 +133,8 @@ export class RiskEngineDataClient {
   public async getStatus({ namespace }: { namespace: string }) {
     const riskEngineStatus = await this.getCurrentStatus();
     const legacyRiskEngineStatus = await this.getLegacyStatus({ namespace });
-    return { riskEngineStatus, legacyRiskEngineStatus };
+    const isMaxAmountOfRiskEnginesReached = await this.getIsMaxAmountOfRiskEnginesReached();
+    return { riskEngineStatus, legacyRiskEngineStatus, isMaxAmountOfRiskEnginesReached };
   }
 
   public async enableRiskEngine() {
@@ -180,6 +183,19 @@ export class RiskEngineDataClient {
     }
 
     return RiskEngineStatus.NOT_INSTALLED;
+  }
+
+  private async getIsMaxAmountOfRiskEnginesReached() {
+    try {
+      const amountOfEnabledConfigurations = await getEnabledRiskEngineAmount({
+        savedObjectsClient: this.options.soClient,
+      });
+
+      return amountOfEnabledConfigurations >= MAX_SPACES_COUNT;
+    } catch (e) {
+      this.options.logger.error(`Error while getting amount of enabled risk engines: ${e.message}`);
+      return false;
+    }
   }
 
   private async getLegacyStatus({ namespace }: { namespace: string }) {

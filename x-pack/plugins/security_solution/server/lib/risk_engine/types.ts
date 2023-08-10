@@ -60,6 +60,7 @@ export interface CalculateScoresResponse {
 export interface GetRiskEngineStatusResponse {
   legacy_risk_engine_status: RiskEngineStatus;
   risk_engine_status: RiskEngineStatus;
+  is_max_amount_of_risk_engines_reached: boolean;
 }
 
 interface InitRiskEngineResultResponse {

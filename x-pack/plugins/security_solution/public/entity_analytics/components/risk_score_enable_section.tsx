@@ -187,6 +187,22 @@ export const RiskScoreEnableSection = () => {
       initRiskEngineErrors = [errorBody];
     }
   }
+
+  if (
+    currentRiskEngineStatus !== RiskEngineStatus.ENABLED &&
+    riskEngineStatus?.is_max_amount_of_risk_engines_reached
+  ) {
+    return (
+      <EuiCallOut
+        title={i18n.MAX_SPACE_PANEL_TITLE}
+        color="warning"
+        iconType="error"
+        data-test-subj="risk-score-warning-panel"
+      >
+        <p>{i18n.MAX_SPACE_PANEL_MESSAGE}</p>
+      </EuiCallOut>
+    );
+  }
   return (
     <>
       <>

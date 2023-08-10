@@ -74,8 +74,8 @@ jest.mock('./utils/create_index', () => ({
   createIndex: jest.fn(),
 }));
 
-jest.spyOn(transforms, 'createTransform').mockResolvedValue(true);
-jest.spyOn(transforms, 'startTransform').mockResolvedValue(true);
+jest.spyOn(transforms, 'createTransform');
+jest.spyOn(transforms, 'startTransform');
 
 describe('RiskEngineDataClient', () => {
   let riskEngineDataClient: RiskEngineDataClient;
@@ -526,6 +526,7 @@ describe('RiskEngineDataClient', () => {
         namespace: 'default',
       });
       expect(status).toEqual({
+        isMaxAmountOfRiskEnginesReached: false,
         riskEngineStatus: 'NOT_INSTALLED',
         legacyRiskEngineStatus: 'NOT_INSTALLED',
       });
@@ -551,6 +552,7 @@ describe('RiskEngineDataClient', () => {
           namespace: 'default',
         });
         expect(status).toEqual({
+          isMaxAmountOfRiskEnginesReached: false,
           riskEngineStatus: 'ENABLED',
           legacyRiskEngineStatus: 'NOT_INSTALLED',
         });
@@ -563,6 +565,7 @@ describe('RiskEngineDataClient', () => {
           namespace: 'default',
         });
         expect(status).toEqual({
+          isMaxAmountOfRiskEnginesReached: false,
           riskEngineStatus: 'DISABLED',
           legacyRiskEngineStatus: 'NOT_INSTALLED',
         });
@@ -598,6 +601,7 @@ describe('RiskEngineDataClient', () => {
         });
 
         expect(status).toEqual({
+          isMaxAmountOfRiskEnginesReached: false,
           riskEngineStatus: 'NOT_INSTALLED',
           legacyRiskEngineStatus: 'ENABLED',
         });

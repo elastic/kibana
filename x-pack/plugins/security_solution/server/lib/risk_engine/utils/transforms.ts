@@ -8,6 +8,8 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type {
   TransformGetTransformResponse,
+  TransformStartTransformResponse,
+  TransformPutTransformResponse,
   TransformGetTransformTransformSummary,
   TransformPutTransformRequest,
 } from '@elastic/elasticsearch/lib/api/types';
@@ -77,7 +79,7 @@ export const createTransform = async ({
   esClient: ElasticsearchClient;
   transform: TransformPutTransformRequest;
   logger: Logger;
-}) => {
+}): Promise<TransformPutTransformResponse | void> => {
   try {
     await esClient.transform.getTransform({
       transform_id: transform.transform_id,
@@ -85,7 +87,7 @@ export const createTransform = async ({
 
     logger.info(`Transform ${transform.transform_id} already exists`);
 
-    return true;
+    return;
   } catch (existErr) {
     const transformedError = transformError(existErr);
     if (transformedError.statusCode === 404) {
@@ -105,7 +107,7 @@ export const startTransform = async ({
 }: {
   esClient: ElasticsearchClient;
   transformId: string;
-}) => {
+}): Promise<TransformStartTransformResponse | void> => {
   const transformStats = await esClient.transform.getTransformStats({
     transform_id: transformId,
   });
@@ -116,7 +118,7 @@ export const startTransform = async ({
     transformStats.transforms[0].state === 'indexing' ||
     transformStats.transforms[0].state === 'started'
   ) {
-    return true;
+    return;
   }
   return esClient.transform.startTransform({ transform_id: transformId });
 };
