@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import type { CaseStatuses } from '../../../common/types/domain';
 import type { CaseUI } from '../../../common/ui/types';
-import { CaseMetricsFeature } from '../../../common/api';
+import { CaseMetricsFeature } from '../../../common/types/api';
 import * as i18n from '../case_view/translations';
 import { Actions } from './actions';
 import { StatusContextMenu } from './status_context_menu';

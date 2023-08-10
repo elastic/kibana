@@ -45,6 +45,10 @@ export interface CloudStart {
    */
   usersAndRolesUrl?: string;
   /**
+   * The full URL to the serverless projects page on Elastic Cloud. Undefined if not running in Serverless.
+   */
+  projectsUrl?: string;
+  /**
    * The full URL to the elasticsearch cluster.
    */
   elasticsearchUrl?: string;
@@ -90,6 +94,10 @@ export interface CloudSetup {
    * The full URL to the deployment management page on Elastic Cloud. Undefined if not running on Cloud.
    */
   deploymentUrl?: string;
+  /**
+   * The full URL to the serverless projects page on Elastic Cloud. Undefined if not running in Serverless.
+   */
+  projectsUrl?: string;
   /**
    * The full URL to the user profile page on Elastic Cloud. Undefined if not running on Cloud.
    */
