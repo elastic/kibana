@@ -161,11 +161,21 @@ export function DiscoverMainRoute({
             );
           }
 
-          chrome.setBreadcrumbs(
-            currentSavedSearch && currentSavedSearch.title
-              ? getSavedSearchBreadcrumbs({ id: currentSavedSearch.title, services })
-              : getRootBreadcrumbs({ services })
-          );
+          if (services.serverless) {
+            // in serverless only set breadcrumbs for saved searches
+            // the root breadcrumbs are set automatically by the serverless navigation
+            services.serverless.setBreadcrumbs(
+              currentSavedSearch && currentSavedSearch.title
+                ? { text: currentSavedSearch.title }
+                : []
+            );
+          } else {
+            chrome.setBreadcrumbs(
+              currentSavedSearch && currentSavedSearch.title
+                ? getSavedSearchBreadcrumbs({ id: currentSavedSearch.title, services })
+                : getRootBreadcrumbs({ services })
+            );
+          }
         }
         setLoading(false);
         if (services.analytics) {
