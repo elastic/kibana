@@ -10,10 +10,9 @@ import { Redirect, RouteComponentProps } from 'react-router-dom';
 import { Route, Routes } from '@kbn/shared-ux-router';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiPageHeader, EuiSpacer } from '@elastic/eui';
-import { useAppContext } from '../../../../app_context';
 import { Section } from '../../home';
 
-enum IndexDetailsSection {
+export enum IndexDetailsSection {
   Overview = 'overview',
   Documents = 'documents',
   Mappings = 'mappings',
@@ -58,8 +57,8 @@ export const DetailsPage: React.FunctionComponent<
   match: {
     params: { indexName, indexDetailsSection },
   },
+  history,
 }) => {
-  const { history } = useAppContext();
   const onSectionChange = useCallback(
     (newSection: IndexDetailsSection) => {
       return history.push(encodeURI(`/indices/${indexName}/${newSection}`));
@@ -69,46 +68,49 @@ export const DetailsPage: React.FunctionComponent<
   return (
     <>
       <EuiPageHeader
+        data-test-subj="indexDetailsHeader"
         pageTitle={indexName}
         bottomBorder
         rightSideItems={[]}
         tabs={tabs.map((tab) => ({
           onClick: () => onSectionChange(tab.id),
-          // isSelected: tab.id === section,
+          isSelected: tab.id === indexDetailsSection,
           key: tab.id,
-          // 'data-test-subj': `${tab.id}Tab`,
+          'data-test-subj': `indexDetailsTab-${tab.id}`,
           label: tab.name,
         }))}
       />
 
       <EuiSpacer size="l" />
 
-      <Routes>
-        <Route
-          path={`/${Section.Indices}/${indexName}/${IndexDetailsSection.Overview}`}
-          render={() => <div>Overview</div>}
-        />
-        <Route
-          path={`/${Section.Indices}/${indexName}/${IndexDetailsSection.Documents}`}
-          render={() => <div>Documents</div>}
-        />
-        <Route
-          path={`/${Section.Indices}/${indexName}/${IndexDetailsSection.Mappings}`}
-          render={() => <div>Mappings</div>}
-        />
-        <Route
-          path={`/${Section.Indices}/${indexName}/${IndexDetailsSection.Settings}`}
-          render={() => <div>Settings</div>}
-        />
-        <Route
-          path={`/${Section.Indices}/${indexName}/${IndexDetailsSection.Pipelines}`}
-          render={() => <div>Pipelines</div>}
-        />
-        <Redirect
-          from={`/${Section.Indices}/${indexName}`}
-          to={`/${Section.Indices}/${indexName}/${IndexDetailsSection.Overview}`}
-        />
-      </Routes>
+      <div data-test-subj={`indexDetailsContent`}>
+        <Routes>
+          <Route
+            path={`/${Section.Indices}/${indexName}/${IndexDetailsSection.Overview}`}
+            render={() => <div>Overview</div>}
+          />
+          <Route
+            path={`/${Section.Indices}/${indexName}/${IndexDetailsSection.Documents}`}
+            render={() => <div>Documents</div>}
+          />
+          <Route
+            path={`/${Section.Indices}/${indexName}/${IndexDetailsSection.Mappings}`}
+            render={() => <div>Mappings</div>}
+          />
+          <Route
+            path={`/${Section.Indices}/${indexName}/${IndexDetailsSection.Settings}`}
+            render={() => <div>Settings</div>}
+          />
+          <Route
+            path={`/${Section.Indices}/${indexName}/${IndexDetailsSection.Pipelines}`}
+            render={() => <div>Pipelines</div>}
+          />
+          <Redirect
+            from={`/${Section.Indices}/${indexName}`}
+            to={`/${Section.Indices}/${indexName}/${IndexDetailsSection.Overview}`}
+          />
+        </Routes>
+      </div>
     </>
   );
 };
