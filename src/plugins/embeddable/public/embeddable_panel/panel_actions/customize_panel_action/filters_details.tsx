@@ -113,7 +113,7 @@ export function FiltersDetails({ embeddable, editMode, editPanelAction }: Filter
 
   return (
     <EuiSkeletonText isLoading={isLoading} lines={3}>
-      {queryString !== '' && (
+      {queryString.trim().length > 0 && (
         <EuiFormRow
           label={dashboardFilterNotificationActionStrings.getQueryTitle()}
           display="rowCompressed"
@@ -130,7 +130,7 @@ export function FiltersDetails({ embeddable, editMode, editPanelAction }: Filter
           </EuiCodeBlock>
         </EuiFormRow>
       )}
-      {filters && filters.length > 0 && (
+      {filters.length > 0 && (
         <EuiFormRow
           label={dashboardFilterNotificationActionStrings.getFiltersTitle()}
           labelAppend={editMode && !disableEditbutton ? editVisButton : undefined}

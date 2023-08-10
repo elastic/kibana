@@ -9,10 +9,11 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { TimeRange } from '@kbn/es-query';
-import { createKibanaReactContext, toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { ApplicationStart, OverlayStart, ThemeServiceStart } from '@kbn/core/public';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { core, embeddableStart } from '../../../kibana_services';
 import {
   IEmbeddable,
@@ -131,7 +132,7 @@ export class CustomizePanelAction implements Action<CustomizePanelActionContext>
             editPanelAction={editPanelAction}
           />
         </KibanaReactContextProvider>,
-        { theme$: this.theme.theme$ }
+        { theme: this.theme, i18n: core.i18n }
       ),
       {
         size: 's',
