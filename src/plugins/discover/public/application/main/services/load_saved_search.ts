@@ -45,12 +45,8 @@ export const loadSavedSearch = async (
   addLog('[discoverState] loadSavedSearch');
   const { savedSearchId } = params ?? {};
   const { appStateContainer, internalStateContainer, savedSearchContainer, services } = deps;
-
-  // initialAppState can be supplied either by the URL or by the consuming application
-  const initialAppStateExists =
-    !appStateContainer.isEmptyURL() || !!appStateContainer.getState().index;
-
-  const appState = initialAppStateExists ? appStateContainer.getState() : undefined;
+  const appStateExists = !appStateContainer.isEmptyURL();
+  const appState = appStateExists ? appStateContainer.getState() : undefined;
 
   // Loading the saved search or creating a new one
   let nextSavedSearch = savedSearchId
@@ -66,7 +62,7 @@ export const loadSavedSearch = async (
   // reset appState in case a saved search with id is loaded and
   // the url is empty so the saved search is loaded in a clean
   // state else it might be updated by the previous app state
-  if (!initialAppStateExists) {
+  if (!appStateExists) {
     appStateContainer.set({});
   }
 

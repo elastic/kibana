@@ -84,9 +84,8 @@ export const DiscoverTabContent = () => {
       stateContainerRef.current = stateContainer;
 
       if (discoverAppState && discoverInternalState && discoverSavedSearchState) {
+        stateContainer.appState.syncState().start();
         stateContainer.appState.set(discoverAppState);
-        stateContainer.internalState.set(discoverInternalState);
-        stateContainer.savedSearchState.set(discoverSavedSearchState);
       } else {
         // set initial dataView Id
         if (dataView) stateContainer.actions.setDataView(dataView);

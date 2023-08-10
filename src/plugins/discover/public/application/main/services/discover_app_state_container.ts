@@ -280,7 +280,6 @@ export function getInitialState(
     savedSearch,
     services,
   });
-
   return handleSourceColumnState(
     stateStorageURL === null
       ? defaultAppState
