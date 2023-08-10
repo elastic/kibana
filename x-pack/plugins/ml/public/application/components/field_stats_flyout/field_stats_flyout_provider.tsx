@@ -56,6 +56,13 @@ export const FieldStatsFlyoutProvider: FC<{
     function fetchSampleDocsEffect() {
       if (disablePopulatedFields) return;
 
+      let unmounted = false;
+
+      if (abortController.current) {
+        abortController.current.abort();
+        abortController.current = new AbortController();
+      }
+
       const queryAndRunTimeMappings = getMergedSampleDocsForPopulatedFieldsQuery({
         searchQuery: dslQuery,
         runtimeFields: dataView.getRuntimeMappings(),
@@ -91,7 +98,9 @@ export const FieldStatsFlyoutProvider: FC<{
           // to a list of unique field names used across all docs.
           const fieldsWithData = new Set(docs.map(Object.keys).flat(1));
           manager.set(cacheKey, fieldsWithData);
-          setPopulatedFields(fieldsWithData);
+          if (!unmounted) {
+            setPopulatedFields(fieldsWithData);
+          }
         } catch (e) {
           if (e.name !== 'AbortError') {
             // eslint-disable-next-line no-console
@@ -112,8 +121,8 @@ export const FieldStatsFlyoutProvider: FC<{
       }
 
       return () => {
+        unmounted = true;
         abortController.current.abort();
-        abortController.current = new AbortController();
       };
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
