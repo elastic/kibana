@@ -27,9 +27,7 @@ export const EditTransformFlyoutFormTextInput: FC<EditTransformFlyoutFormTextInp
   helpText,
   placeHolder = false,
 }) => {
-  const { defaultValue, errorMessages, value } = useEditTransformFlyout(
-    (s) => s.formState.formFields[field]
-  );
+  const { defaultValue, errorMessages, value } = useEditTransformFlyout((s) => s.formFields[field]);
   const formField = useEditTransformFlyout((s) => s.actions.formField);
   const upperCaseField = capitalizeFirstLetter(field);
 

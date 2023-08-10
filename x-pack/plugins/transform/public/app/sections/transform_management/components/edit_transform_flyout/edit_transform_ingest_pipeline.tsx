@@ -26,7 +26,7 @@ const ingestPipelineLabel = i18n.translate(
 export const EditTransformIngestPipeline: FC = () => {
   const { euiTheme } = useEuiTheme();
   const { errorMessages, value } = useEditTransformFlyout(
-    (s) => s.formState.formFields.destinationIngestPipeline
+    (s) => s.formFields.destinationIngestPipeline
   );
   const formField = useEditTransformFlyout((s) => s.actions.formField);
 

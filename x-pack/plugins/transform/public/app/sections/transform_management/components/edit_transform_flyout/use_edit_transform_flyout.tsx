@@ -244,24 +244,16 @@ export const initializeFormSection = (
   };
 };
 
-export interface EditTransformFlyoutFormState {
-  apiErrorMessage?: string;
-  formFields: EditTransformFlyoutFieldsState;
-  formSections: EditTransformFlyoutSectionsState;
-  isFormTouched: boolean;
-  isFormValid: boolean;
-}
-
 // Takes a value from form state and applies it to the structure
 // of the expected final configuration request object.
 // Considers options like if a value is nullable or optional.
 const getUpdateValue = (
   attribute: EditTransformFormFields,
   config: TransformConfigUnion,
-  formState: EditTransformFlyoutFormState,
+  formFields: EditTransformFlyoutFieldsState,
+  formSections: EditTransformFlyoutSectionsState,
   enforceFormValue = false
 ) => {
-  const { formFields, formSections } = formState;
   const formStateAttribute = formFields[attribute];
   const fallbackValue = formStateAttribute.isNullable ? null : formStateAttribute.defaultValue;
 
@@ -283,7 +275,7 @@ const getUpdateValue = (
       ? formStateAttribute.dependsOn.reduce((_dependsOnConfig, dependsOnField) => {
           return merge(
             { ..._dependsOnConfig },
-            getUpdateValue(dependsOnField, config, formState, true)
+            getUpdateValue(dependsOnField, config, formFields, formSections, true)
           );
         }, {})
       : {};
@@ -320,12 +312,14 @@ const getUpdateValue = (
 // transform update API endpoint.
 export const applyFormStateToTransformConfig = (
   config: TransformConfigUnion,
-  formState: EditTransformFlyoutFormState
+  formFields: EditTransformFlyoutFieldsState,
+  formSections: EditTransformFlyoutSectionsState
 ): PostTransformsUpdateRequestSchema =>
   // Iterates over all form fields and only if necessary applies them to
   // the request object used for updating the transform.
-  (Object.keys(formState.formFields) as EditTransformFormFields[]).reduce(
-    (updateConfig, field) => merge({ ...updateConfig }, getUpdateValue(field, config, formState)),
+  (Object.keys(formFields) as EditTransformFormFields[]).reduce(
+    (updateConfig, field) =>
+      merge({ ...updateConfig }, getUpdateValue(field, config, formFields, formSections)),
     {}
   );
 
@@ -453,51 +447,62 @@ interface EditTransformFlyoutOptions {
   dataViewId?: string;
 }
 
-type EditTransformFlyoutStore = ReturnType<typeof createEditTransformFlyoutStore>;
-type EditTransformFlyoutState = {
-  formState: EditTransformFlyoutFormState;
-  actions: Record<string, (payload: any) => void>;
-} & EditTransformFlyoutOptions;
+interface EditTransformFlyoutFormState {
+  apiErrorMessage?: string;
+  formFields: EditTransformFlyoutFieldsState;
+  formSections: EditTransformFlyoutSectionsState;
+  isFormTouched: boolean;
+  isFormValid: boolean;
+}
 
+interface EditTransformFlyoutActions {
+  actions: Record<string, (payload: any) => void>;
+}
+
+type EditTransformFlyoutState = EditTransformFlyoutOptions &
+  EditTransformFlyoutFormState &
+  EditTransformFlyoutActions;
+
+type EditTransformFlyoutStore = ReturnType<typeof createEditTransformFlyoutStore>;
 const createEditTransformFlyoutStore = ({ config, dataViewId }: EditTransformFlyoutOptions) => {
   const defaultState = getDefaultState(config);
   const defaultFieldValues = getFieldValues(defaultState.formFields);
   const defaultSectionValues = getSectionValues(defaultState.formSections);
 
   return createStore<EditTransformFlyoutState>()((set) => ({
+    ...defaultState,
     config,
     dataViewId,
-    formState: defaultState,
     actions: {
       apiError: (payload: string | undefined) =>
         set((state) =>
           produce(state, (d) => {
-            d.formState.apiErrorMessage = payload;
+            d.apiErrorMessage = payload;
           })
         ),
       formField: (payload: { field: EditTransformFormFields; value: string }) =>
         set((state) =>
           produce(state, (d) => {
-            d.formState.formFields[payload.field] = updateFormField(
-              state.formState.formFields[payload.field],
+            d.formFields[payload.field] = updateFormField(
+              state.formFields[payload.field],
               payload.value
             );
-            d.formState.isFormTouched =
-              !isEqual(defaultFieldValues, getFieldValues(d.formState.formFields)) ||
-              !isEqual(defaultSectionValues, getSectionValues(d.formState.formSections));
-            d.formState.isFormValid = isFormValid(d.formState.formFields);
+            d.isFormTouched =
+              !isEqual(defaultFieldValues, getFieldValues(d.formFields)) ||
+              !isEqual(defaultSectionValues, getSectionValues(d.formSections));
+            d.isFormValid = isFormValid(d.formFields);
           })
         ),
       formSection: (payload: { section: EditTransformFormSections; enabled: boolean }) =>
         set((state) =>
           produce(state, (d) => {
-            d.formState.formSections[payload.section] = updateFormSection(
-              state.formState.formSections[payload.section],
+            d.formSections[payload.section] = updateFormSection(
+              state.formSections[payload.section],
               payload.enabled
             );
-            d.formState.isFormTouched =
-              !isEqual(defaultFieldValues, getFieldValues(d.formState.formFields)) ||
-              !isEqual(defaultSectionValues, getSectionValues(d.formState.formSections));
+            d.isFormTouched =
+              !isEqual(defaultFieldValues, getFieldValues(d.formFields)) ||
+              !isEqual(defaultSectionValues, getSectionValues(d.formSections));
           })
         ),
     },
