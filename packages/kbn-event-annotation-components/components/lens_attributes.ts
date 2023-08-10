@@ -13,7 +13,7 @@ import { XYPersistedByValueAnnotationLayerConfig } from '@kbn/lens-plugin/public
 const DATA_LAYER_ID = '0a700aa1-bc89-4189-991e-36eb0e950611';
 const ANNOTATION_LAYER_ID = '91b0c530-2172-42f1-a839-96d83313d110';
 
-export const getLensAttributes = (group: EventAnnotationGroupConfig) =>
+export const getLensAttributes = (group: EventAnnotationGroupConfig, timeField: string) =>
   ({
     title: 'Line visualization with annotation layer', // TODO - should this be translated?
     description: '',
@@ -80,7 +80,7 @@ export const getLensAttributes = (group: EventAnnotationGroupConfig) =>
                   label: 'timestamp',
                   dataType: 'date',
                   operationType: 'date_histogram',
-                  sourceField: 'timestamp',
+                  sourceField: timeField,
                   isBucketed: true,
                   scale: 'interval',
                   params: {
