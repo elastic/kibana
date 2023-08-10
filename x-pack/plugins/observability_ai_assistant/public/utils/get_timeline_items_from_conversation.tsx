@@ -6,6 +6,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
+import { isEmpty, omitBy } from 'lodash';
 import React from 'react';
 import { v4 } from 'uuid';
 import { Message, MessageRole } from '../../common';
@@ -13,11 +14,32 @@ import type { ChatTimelineItem } from '../components/chat/chat_timeline';
 import { RenderFunction } from '../components/render_function';
 import type { ObservabilityAIAssistantChatService } from '../types';
 
-function convertFunctionParamsToMarkdownCodeBlock(object: Record<string, string | number>) {
-  return `
-\`\`\`
-${JSON.stringify(object, null, 4)}
-\`\`\``;
+function convertMessageToMarkdownCodeBlock(message: Message['message']) {
+  let value: object;
+
+  if (!message.name) {
+    const name = message.function_call?.name;
+    const args = message.function_call?.arguments
+      ? JSON.parse(message.function_call.arguments)
+      : undefined;
+
+    value = {
+      name,
+      args,
+    };
+  } else {
+    const content = message.content ? JSON.parse(message.content) : undefined;
+    const data = message.data ? JSON.parse(message.data) : undefined;
+    value = omitBy(
+      {
+        content,
+        data,
+      },
+      isEmpty
+    );
+  }
+
+  return `\`\`\`\n${JSON.stringify(value, null, 2)}\n\`\`\``;
 }
 
 export function getTimelineItemsfromConversation({
@@ -73,50 +95,59 @@ export function getTimelineItemsfromConversation({
           break;
 
         case MessageRole.User:
+          canCopy = true;
+          canGiveFeedback = false;
+          canRegenerate = false;
+          hide = false;
           // User executed a function:
+
           if (message.message.name && functionCall) {
-            title = i18n.translate('xpack.observabilityAiAssistant.executedFunctionEvent', {
-              defaultMessage: 'executed the function {functionName}',
-              values: {
-                functionName: message.message.name,
-              },
-            });
+            const parsedContent = JSON.parse(message.message.content ?? 'null');
+            const isError = !!(parsedContent && 'error' in parsedContent);
 
-            content = convertFunctionParamsToMarkdownCodeBlock({
-              name: message.message.name,
-              arguments: JSON.parse(functionCall.arguments || '{}'),
-            });
+            title = !isError
+              ? i18n.translate('xpack.observabilityAiAssistant.executedFunctionEvent', {
+                  defaultMessage: 'executed the function {functionName}',
+                  values: {
+                    functionName: message.message.name,
+                  },
+                })
+              : i18n.translate('xpack.observabilityAiAssistant.executedFunctionFailureEvent', {
+                  defaultMessage: 'failed to execute the function {functionName}',
+                  values: {
+                    functionName: message.message.name,
+                  },
+                });
 
-            element = chatService.hasRenderFunction(message.message.name) ? (
-              <RenderFunction
-                name={message.message.name}
-                arguments={functionCall?.arguments}
-                response={message.message}
-              />
-            ) : null;
+            element =
+              !isError && chatService.hasRenderFunction(message.message.name) ? (
+                <RenderFunction
+                  name={message.message.name}
+                  arguments={functionCall?.arguments}
+                  response={message.message}
+                />
+              ) : undefined;
 
-            canCopy = true;
-            canEdit = hasConnector;
-            canGiveFeedback = true;
-            canRegenerate = hasConnector;
-            collapsed = !Boolean(element);
-            hide = false;
+            content = !element ? convertMessageToMarkdownCodeBlock(message.message) : undefined;
+
+            canEdit = false;
+            collapsed = !isError && !element;
           } else {
             // is a prompt by the user
             title = '';
             content = message.message.content;
 
-            canCopy = true;
             canEdit = hasConnector;
-            canGiveFeedback = false;
-            canRegenerate = false;
             collapsed = false;
-            hide = false;
           }
 
           break;
 
         case MessageRole.Assistant:
+          canRegenerate = hasConnector;
+          canCopy = true;
+          canGiveFeedback = true;
+          hide = false;
           // is a function suggestion by the assistant
           if (!!functionCall?.name) {
             title = i18n.translate('xpack.observabilityAiAssistant.suggestedFunctionEvent', {
@@ -125,32 +156,16 @@ export function getTimelineItemsfromConversation({
                 functionName: functionCall!.name,
               },
             });
-            content =
-              i18n.translate('xpack.observabilityAiAssistant.responseWas', {
-                defaultMessage: 'Suggested the payload: ',
-              }) +
-              convertFunctionParamsToMarkdownCodeBlock({
-                name: functionCall!.name,
-                arguments: JSON.parse(functionCall?.arguments || '{}'),
-              });
+            content = convertMessageToMarkdownCodeBlock(message.message);
 
-            canCopy = true;
-            canEdit = false;
-            canGiveFeedback = true;
-            canRegenerate = false;
             collapsed = true;
-            hide = false;
+            canEdit = true;
           } else {
             // is an assistant response
             title = '';
             content = message.message.content;
-
-            canCopy = true;
-            canEdit = false;
-            canGiveFeedback = true;
-            canRegenerate = hasConnector;
             collapsed = false;
-            hide = false;
+            canEdit = false;
           }
           break;
       }

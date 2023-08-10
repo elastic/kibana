@@ -22,7 +22,6 @@ export interface Message {
   message: {
     content?: string;
     name?: string;
-    event?: string;
     role: MessageRole;
     function_call?: {
       name: string;
