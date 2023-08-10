@@ -40,19 +40,19 @@ import type { ReferenceBasedIndexPatternColumn } from './operations/definitions/
 
 import {
   operationDefinitionMap,
+  getReferenceRoot,
+  updateColumnParam,
+  updateDefaultLabels,
   type GenericIndexPatternColumn,
   type TermsIndexPatternColumn,
   type CountIndexPatternColumn,
-  updateColumnParam,
-  updateDefaultLabels,
   type RangeIndexPatternColumn,
   type FormulaIndexPatternColumn,
   type DateHistogramIndexPatternColumn,
   type MaxIndexPatternColumn,
   type MinIndexPatternColumn,
   type GenericOperationDefinition,
-  FieldBasedIndexPatternColumn,
-  getReferenceRoot,
+  type FieldBasedIndexPatternColumn,
 } from './operations';
 
 import { getInvalidFieldMessage, isColumnOfType } from './operations/definitions/helpers';
