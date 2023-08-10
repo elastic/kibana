@@ -94,7 +94,11 @@ export interface CloudSetup {
    */
   isServerlessEnabled: boolean;
   /**
-   * Serverless configuration
+   * Serverless configuration.
+   *
+   * @note We decided to place any cloud URL values at the top level of this object
+   *       even if they contain serverless specific values. All other serverless
+   *       config should live in this object.
    */
   serverless: {
     /**
