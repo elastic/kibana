@@ -7,8 +7,8 @@
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
-export default ({ loadTestFile }: FtrProviderContext) => {
-  describe('Index Management', function () {
+export default function ({ loadTestFile }: FtrProviderContext) {
+  describe('Index Management APIs', function () {
     loadTestFile(require.resolve('./index_templates'));
   });
-};
+}

@@ -13,6 +13,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'indexManagement', 'header']);
   const browser = getService('browser');
   const security = getService('security');
+  const retry = getService('retry');
 
   describe('Index Templates', function () {
     before(async () => {
@@ -23,15 +24,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('renders the index templates tab', async () => {
-      await pageObjects.header.waitUntilLoadingHasFinished();
+      await retry.waitFor('index templates list to be visible', async () => {
+        return await testSubjects.exists('templateList');
+      });
 
-      // Verify url
       const url = await browser.getCurrentUrl();
       expect(url).to.contain(`/templates`);
-
-      // Verify content
-      const templateList = await testSubjects.exists('templateList');
-      expect(templateList).to.be(true);
     });
   });
 };
