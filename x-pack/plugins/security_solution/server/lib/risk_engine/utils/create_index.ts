@@ -6,7 +6,10 @@
  */
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import type { IndicesCreateRequest } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  IndicesCreateRequest,
+  IndicesCreateResponse,
+} from '@elastic/elasticsearch/lib/api/types';
 
 export const createIndex = async ({
   esClient,
@@ -16,14 +19,14 @@ export const createIndex = async ({
   esClient: ElasticsearchClient;
   logger: Logger;
   options: IndicesCreateRequest;
-}) => {
+}): Promise<IndicesCreateResponse | void> => {
   try {
     const isIndexExist = await esClient.indices.exists({
       index: options.index,
     });
     if (isIndexExist) {
       logger.info('${options.index} already exist');
-      return true;
+      return;
     }
 
     return esClient.indices.create(options);

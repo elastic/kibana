@@ -74,8 +74,8 @@ jest.mock('./utils/create_index', () => ({
   createIndex: jest.fn(),
 }));
 
-jest.spyOn(transforms, 'createTransform');
-jest.spyOn(transforms, 'startTransform');
+jest.spyOn(transforms, 'createTransform').mockResolvedValue(Promise.resolve());
+jest.spyOn(transforms, 'startTransform').mockResolvedValue(Promise.resolve());
 
 describe('RiskEngineDataClient', () => {
   let riskEngineDataClient: RiskEngineDataClient;
