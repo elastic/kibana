@@ -13,7 +13,7 @@ import { CoverageOverviewDashboardContext } from './coverage_overview_page';
 import { createCoverageOverviewDashboardReducer, initialState } from './reducer';
 import { renderHook, act } from '@testing-library/react-hooks';
 import { CoverageOverviewFiltersPanel } from './filters_panel';
-import { ruleStatusFilterOptions, ruleTypeFilterOptions } from './constants';
+import { ruleStatusFilterDefaultOptions, ruleTypeFilterDefaultOptions } from './constants';
 
 const renderFiltersPanel = () => {
   const { result } = renderHook(() =>
@@ -43,7 +43,7 @@ describe('CoverageOverviewFiltersPanel', () => {
     });
 
     expect(wrapper.getByTestId('coverageOverviewFilterList')).toBeInTheDocument();
-    ruleStatusFilterOptions.forEach((option) => {
+    ruleStatusFilterDefaultOptions.forEach((option) => {
       expect(
         within(wrapper.getByTestId('coverageOverviewFilterList')).getByText(option.label)
       ).toBeInTheDocument();
@@ -58,7 +58,7 @@ describe('CoverageOverviewFiltersPanel', () => {
     });
 
     expect(wrapper.getByTestId('coverageOverviewFilterList')).toBeInTheDocument();
-    ruleTypeFilterOptions.forEach((option) => {
+    ruleTypeFilterDefaultOptions.forEach((option) => {
       expect(
         within(wrapper.getByTestId('coverageOverviewFilterList')).getByText(option.label)
       ).toBeInTheDocument();
@@ -75,7 +75,7 @@ describe('CoverageOverviewFiltersPanel', () => {
     act(() => {
       fireEvent.click(
         within(wrapper.getByTestId('coverageOverviewFilterList')).getByText(
-          ruleStatusFilterOptions[0].label
+          ruleStatusFilterDefaultOptions[0].label
         )
       );
     });
@@ -98,7 +98,7 @@ describe('CoverageOverviewFiltersPanel', () => {
     act(() => {
       fireEvent.click(
         within(wrapper.getByTestId('coverageOverviewFilterList')).getByText(
-          ruleTypeFilterOptions[0].label
+          ruleTypeFilterDefaultOptions[0].label
         )
       );
     });

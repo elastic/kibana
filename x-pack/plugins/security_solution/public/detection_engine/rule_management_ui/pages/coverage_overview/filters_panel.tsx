@@ -28,6 +28,7 @@ import {
   getInitialRuleTypeFilter,
 } from './helpers';
 import * as i18n from './translations';
+import { ruleStatusFilterDefaultOptions, ruleTypeFilterDefaultOptions } from './constants';
 
 export interface CoverageOverviewFiltersPanelProps {
   isLoading: boolean;
@@ -111,6 +112,14 @@ const CoverageOverviewFiltersPanelComponent = ({
     [setRuleTypeFilter]
   );
 
+  const handleRuleStatusFilterOnClear = useCallback(() => {
+    handleRuleStatusFilterOnChange(ruleStatusFilterDefaultOptions);
+  }, [handleRuleStatusFilterOnChange]);
+
+  const handleRuleTypeFilterOnClear = useCallback(() => {
+    handleRuleTypeFilterOnChange(ruleTypeFilterDefaultOptions);
+  }, [handleRuleTypeFilterOnChange]);
+
   const handleRuleSearchOnChange = useCallback(
     ({ queryText }: { queryText: string }) => {
       setRuleSearchFilter(queryText);
@@ -132,6 +141,7 @@ const CoverageOverviewFiltersPanelComponent = ({
               title={i18n.CoverageOverviewRuleStatusFilterLabel}
               options={ruleStatusFilterOptions}
               onChange={handleRuleStatusFilterOnChange}
+              onClear={handleRuleStatusFilterOnClear}
               isLoading={isLoading}
             />
             <DashboardFilterButtonComponent
@@ -139,6 +149,7 @@ const CoverageOverviewFiltersPanelComponent = ({
               title={i18n.CoverageOverviewRuleTypeFilterLabel}
               options={ruleTypeFilterOptions}
               onChange={handleRuleTypeFilterOnChange}
+              onClear={handleRuleTypeFilterOnClear}
               isLoading={isLoading}
             />
           </EuiFlexGroup>

@@ -15,8 +15,8 @@ import type { CoverageOverviewMitreTactic } from '../../../rule_management/model
 import type { CoverageOverviewMitreTechnique } from '../../../rule_management/model/coverage_overview/mitre_technique';
 import {
   coverageOverviewCardColorThresholds,
-  ruleStatusFilterOptions,
-  ruleTypeFilterOptions,
+  ruleStatusFilterDefaultOptions,
+  ruleTypeFilterDefaultOptions,
 } from './constants';
 
 export const getNumOfCoveredTechniques = (tactic: CoverageOverviewMitreTactic): number =>
@@ -42,7 +42,7 @@ export const formatRuleFilterOptions = <
 };
 
 export const getInitialRuleStatusFilter = (filter: CoverageOverviewFilter): EuiSelectableOption[] =>
-  ruleStatusFilterOptions.map((option) => {
+  ruleStatusFilterDefaultOptions.map((option) => {
     if (filter.activity?.includes(option.key)) {
       return { ...option, checked: 'on' };
     }
@@ -50,7 +50,7 @@ export const getInitialRuleStatusFilter = (filter: CoverageOverviewFilter): EuiS
   });
 
 export const getInitialRuleTypeFilter = (filter: CoverageOverviewFilter): EuiSelectableOption[] =>
-  ruleTypeFilterOptions.map((option) => {
+  ruleTypeFilterDefaultOptions.map((option) => {
     if (filter.source?.includes(option.key)) {
       return { ...option, checked: 'on' };
     }

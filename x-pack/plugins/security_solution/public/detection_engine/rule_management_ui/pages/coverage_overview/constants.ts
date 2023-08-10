@@ -32,7 +32,7 @@ export const coverageOverviewCardColorThresholds = [
   { threshold: 1, color: coverageOverviewPaletteColors[0] },
 ];
 
-export const ruleStatusFilterOptions = [
+export const ruleStatusFilterDefaultOptions = [
   {
     label: i18n.CoverageOverviewEnabledRuleStatus,
     key: CoverageOverviewRuleActivity.Enabled,
@@ -43,7 +43,7 @@ export const ruleStatusFilterOptions = [
   },
 ];
 
-export const ruleTypeFilterOptions = [
+export const ruleTypeFilterDefaultOptions = [
   {
     label: i18n.CoverageOverviewElasticRuleType,
     key: CoverageOverviewRuleSource.Prebuilt,

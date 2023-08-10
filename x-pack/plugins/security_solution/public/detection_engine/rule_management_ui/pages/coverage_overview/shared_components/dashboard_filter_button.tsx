@@ -7,14 +7,24 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import type { EuiSelectableOption } from '@elastic/eui';
-import { EuiPopover, EuiFilterButton, EuiSelectable, EuiFilterGroup } from '@elastic/eui';
+import {
+  EuiPopover,
+  EuiFilterButton,
+  EuiSelectable,
+  EuiFilterGroup,
+  EuiPopoverTitle,
+  EuiButtonEmpty,
+  EuiPopoverFooter,
+} from '@elastic/eui';
 import { css } from '@emotion/css';
 import { coverageOverviewFilterWidth } from '../constants';
+import * as i18n from '../translations';
 
 export interface DashboardFilterButtonComponentProps {
   options: EuiSelectableOption[];
   title: string;
   onChange: (options: EuiSelectableOption[]) => void;
+  onClear: () => void;
   isLoading: boolean;
   dataTestSubj?: string;
 }
@@ -23,6 +33,7 @@ export const DashboardFilterButtonComponent = ({
   options,
   title,
   onChange,
+  onClear,
   isLoading,
   dataTestSubj,
 }: DashboardFilterButtonComponentProps) => {
@@ -48,6 +59,10 @@ export const DashboardFilterButtonComponent = ({
     [onChange]
   );
 
+  const handleOnClear = useCallback(() => {
+    onClear();
+  }, [onClear]);
+
   const button = useMemo(
     () => (
       <EuiFilterButton
@@ -56,7 +71,6 @@ export const DashboardFilterButtonComponent = ({
         iconType="arrowDown"
         onClick={onButtonClick}
         isSelected={isPopoverOpen}
-        numFilters={options.length}
         hasActiveFilters={hasActiveFilters}
         numActiveFilters={numActiveFilters}
       >
@@ -68,7 +82,6 @@ export const DashboardFilterButtonComponent = ({
       isPopoverOpen,
       numActiveFilters,
       onButtonClick,
-      options.length,
       title,
       isLoading,
       dataTestSubj,
@@ -87,6 +100,7 @@ export const DashboardFilterButtonComponent = ({
         closePopover={closePopover}
         panelPaddingSize="none"
       >
+        <EuiPopoverTitle paddingSize="s">{i18n.CoverageOverviewFilterPopoverTitle}</EuiPopoverTitle>
         <EuiSelectable
           data-test-subj="coverageOverviewFilterList"
           isLoading={isLoading}
@@ -103,6 +117,20 @@ export const DashboardFilterButtonComponent = ({
             </div>
           )}
         </EuiSelectable>
+        <EuiPopoverFooter paddingSize="xs">
+          <EuiButtonEmpty
+            css={css`
+              width: 100%;
+            `}
+            iconType="cross"
+            color="danger"
+            size="xs"
+            isDisabled={!hasActiveFilters || isLoading}
+            onClick={handleOnClear}
+          >
+            {i18n.CoverageOverviewFilterPopoverClearAll}
+          </EuiButtonEmpty>
+        </EuiPopoverFooter>
       </EuiPopover>
     </EuiFilterGroup>
   );
