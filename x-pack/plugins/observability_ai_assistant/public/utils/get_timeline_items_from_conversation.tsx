@@ -77,10 +77,11 @@ export function getTimelineItemsfromConversation({
       let element: React.ReactNode | undefined;
 
       const role = message.message.name ? message.message.role : message.message.role;
-      const functionCall =
+
+      const prevFunctionCall =
         message.message.name && messages[index - 1] && messages[index - 1].message.function_call
           ? messages[index - 1].message.function_call
-          : message.message.function_call;
+          : undefined;
 
       let canCopy: boolean = false;
       let canEdit: boolean = false;
@@ -101,7 +102,7 @@ export function getTimelineItemsfromConversation({
           hide = false;
           // User executed a function:
 
-          if (message.message.name && functionCall) {
+          if (message.message.name && prevFunctionCall) {
             const parsedContent = JSON.parse(message.message.content ?? 'null');
             const isError = !!(parsedContent && 'error' in parsedContent);
 
@@ -123,7 +124,7 @@ export function getTimelineItemsfromConversation({
               !isError && chatService.hasRenderFunction(message.message.name) ? (
                 <RenderFunction
                   name={message.message.name}
-                  arguments={functionCall?.arguments}
+                  arguments={prevFunctionCall?.arguments}
                   response={message.message}
                 />
               ) : undefined;
@@ -149,11 +150,11 @@ export function getTimelineItemsfromConversation({
           canGiveFeedback = true;
           hide = false;
           // is a function suggestion by the assistant
-          if (!!functionCall?.name) {
+          if (message.message.function_call?.name) {
             title = i18n.translate('xpack.observabilityAiAssistant.suggestedFunctionEvent', {
               defaultMessage: 'suggested to use function {functionName}',
               values: {
-                functionName: functionCall!.name,
+                functionName: message.message.function_call?.name,
               },
             });
             content = convertMessageToMarkdownCodeBlock(message.message);
@@ -182,7 +183,7 @@ export function getTimelineItemsfromConversation({
         canRegenerate,
         collapsed,
         currentUser,
-        function_call: functionCall,
+        function_call: message.message.function_call,
         hide,
         loading: false,
       };
