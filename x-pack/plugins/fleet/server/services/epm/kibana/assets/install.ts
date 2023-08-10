@@ -320,6 +320,7 @@ export async function installKibanaSavedObjects({
         readStream: createListStream(toBeSavedObjects),
         createNewCopies: false,
         refresh: false,
+        managed: true,
       })
     );
 
@@ -371,6 +372,7 @@ export async function installKibanaSavedObjects({
         await savedObjectsImporter.resolveImportErrors({
           readStream: createListStream(toBeSavedObjects),
           createNewCopies: false,
+          managed: true,
           retries,
         });
 
