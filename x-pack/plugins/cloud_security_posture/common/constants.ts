@@ -123,5 +123,3 @@ export const VULNERABILITIES_SEVERITY: Record<VulnSeverity, VulnSeverity> = {
   CRITICAL: 'CRITICAL',
   UNKNOWN: 'UNKNOWN',
 };
-
-export const VULNERABILITIES_ENUMERATION = 'CVE';
