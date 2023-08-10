@@ -94,7 +94,11 @@ export function useTextBasedQueryLanguage({
             initialFetch.current = false;
           } else {
             nextColumns = firstRowColumns;
-            if (initialFetch.current && !prev.current.columns.length) {
+            if (
+              initialFetch.current &&
+              !prev.current.columns.length &&
+              Boolean(dataViewObj?.id === index)
+            ) {
               prev.current.columns = firstRowColumns;
             }
           }
