@@ -1054,6 +1054,23 @@
       }
     }
   },
+  "navigation_embeddable": {
+    "properties": {
+      "id": {
+        "type": "text"
+      },
+      "title": {
+        "type": "text"
+      },
+      "description": {
+        "type": "text"
+      },
+      "links": {
+        "dynamic": false,
+        "properties": {}
+      }
+    }
+  },
   "lens": {
     "properties": {
       "title": {

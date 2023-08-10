@@ -21,11 +21,8 @@ import {
 } from '@elastic/eui';
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 
-import {
-  NavigationLinkInfo,
-  DASHBOARD_LINK_TYPE,
-  NavigationEmbeddableLink,
-} from '../embeddable/types';
+import { NavigationLinkInfo } from '../embeddable/types';
+import { DASHBOARD_LINK_TYPE, NavigationEmbeddableLink } from '../../common/content_management';
 import { fetchDashboard } from './dashboard_link/dashboard_link_tools';
 import { NavEmbeddableStrings } from './navigation_embeddable_strings';
 

@@ -17,7 +17,6 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiButton,
-  EuiToolTip,
   EuiFormRow,
   EuiFlexItem,
   EuiFlexGroup,
@@ -30,55 +29,63 @@ import {
   EuiFlyoutHeader,
   EuiDragDropContext,
   euiDragDropReorder,
+  EuiToolTip,
 } from '@elastic/eui';
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 
 import { coreServices } from '../services/kibana_services';
-import {
-  NavigationEmbeddableLink,
-  NavigationEmbeddableInput,
-  NavigationEmbeddableLinkList,
-} from '../embeddable/types';
+import { NavigationEmbeddableLink } from '../../common/content_management';
 import { NavEmbeddableStrings } from './navigation_embeddable_strings';
 
 import { openLinkEditorFlyout } from '../editor/open_link_editor_flyout';
 import { memoizedGetOrderedLinkList } from '../editor/navigation_embeddable_editor_tools';
 import { NavigationEmbeddablePanelEditorLink } from './navigation_embeddable_panel_editor_link';
+import { TooltipWrapper } from './tooltip_wrapper';
 
 import noLinksIllustrationDark from '../assets/empty_links_dark.svg';
 import noLinksIllustrationLight from '../assets/empty_links_light.svg';
-
 import './navigation_embeddable.scss';
 
 const NavigationEmbeddablePanelEditor = ({
-  onSave,
+  onSaveToLibrary,
+  onAddToDashboard,
   onClose,
-  initialInput,
+  initialLinks,
   parentDashboard,
+  isByReference,
 }: {
+  onSaveToLibrary: (newLinks: NavigationEmbeddableLink[]) => Promise<void>;
+  onAddToDashboard: (newLinks: NavigationEmbeddableLink[]) => void;
   onClose: () => void;
+  initialLinks?: NavigationEmbeddableLink[];
   parentDashboard?: DashboardContainer;
-  initialInput: Partial<NavigationEmbeddableInput>;
-  onSave: (input: Partial<NavigationEmbeddableInput>) => void;
+  isByReference: boolean;
 }) => {
   const isDarkTheme = useObservable(coreServices.theme.theme$)?.darkMode;
+  const toasts = coreServices.notifications.toasts;
   const editLinkFlyoutRef: React.RefObject<HTMLDivElement> = useMemo(() => React.createRef(), []);
 
   const [orderedLinks, setOrderedLinks] = useState<NavigationEmbeddableLink[]>([]);
+  const [isSaving, setIsSaving] = useState(false);
+
+  const isEditingExisting = initialLinks || isByReference;
 
   useEffect(() => {
-    const { links: initialLinks } = initialInput;
     if (!initialLinks) {
       setOrderedLinks([]);
       return;
     }
     setOrderedLinks(memoizedGetOrderedLinkList(initialLinks));
-  }, [initialInput]);
+  }, [initialLinks]);
 
   const onDragEnd = useCallback(
     ({ source, destination }) => {
       if (source && destination) {
-        const newList = euiDragDropReorder(orderedLinks, source.index, destination.index);
+        const newList = euiDragDropReorder(orderedLinks, source.index, destination.index).map(
+          (link, i) => {
+            return { ...link, order: i };
+          }
+        );
         setOrderedLinks(newList);
       }
     },
@@ -121,39 +128,13 @@ const NavigationEmbeddablePanelEditor = ({
     [orderedLinks]
   );
 
-  const saveButtonComponent = useMemo(() => {
-    const canSave = orderedLinks.length !== 0;
-
-    const button = (
-      <EuiButton
-        disabled={!canSave}
-        onClick={() => {
-          const newLinks = orderedLinks.reduce((prev, link, i) => {
-            return { ...prev, [link.id]: { ...link, order: i } };
-          }, {} as NavigationEmbeddableLinkList);
-          onSave({ links: newLinks });
-        }}
-      >
-        {NavEmbeddableStrings.editor.panelEditor.getSaveButtonLabel()}
-      </EuiButton>
-    );
-
-    return canSave ? (
-      button
-    ) : (
-      <EuiToolTip content={NavEmbeddableStrings.editor.panelEditor.getEmptyLinksTooltip()}>
-        {button}
-      </EuiToolTip>
-    );
-  }, [onSave, orderedLinks]);
-
   return (
     <>
       <div ref={editLinkFlyoutRef} />
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
           <h2>
-            {initialInput.links && Object.keys(initialInput.links).length > 0
+            {isEditingExisting
               ? NavEmbeddableStrings.editor.panelEditor.getEditFlyoutTitle()
               : NavEmbeddableStrings.editor.panelEditor.getCreateFlyoutTitle()}
           </h2>
@@ -227,11 +208,73 @@ const NavigationEmbeddablePanelEditor = ({
       <EuiFlyoutFooter>
         <EuiFlexGroup responsive={false} justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={onClose} iconType="cross">
+            <EuiButtonEmpty onClick={onClose} iconType="cross" flush="left">
               {NavEmbeddableStrings.editor.getCancelButtonLabel()}
             </EuiButtonEmpty>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>{saveButtonComponent}</EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup gutterSize="m">
+              {!isByReference ? (
+                <EuiFlexItem grow={false} css={{ 'margin-left': 'auto' }}>
+                  <TooltipWrapper
+                    condition={!initialLinks}
+                    tooltipContent={NavEmbeddableStrings.editor.panelEditor.getAddToDashboardButtonTooltip()}
+                  >
+                    <EuiButton
+                      disabled={orderedLinks.length === 0}
+                      isLoading={isSaving}
+                      onClick={() => {
+                        onAddToDashboard(orderedLinks);
+                      }}
+                    >
+                      {initialLinks
+                        ? NavEmbeddableStrings.editor.panelEditor.getApplyButtonLabel()
+                        : NavEmbeddableStrings.editor.panelEditor.getAddToDashboardButtonLabel()}
+                    </EuiButton>
+                  </TooltipWrapper>
+                </EuiFlexItem>
+              ) : null}
+              {!initialLinks || isByReference ? (
+                <EuiFlexItem grow={false}>
+                  <EuiToolTip
+                    repositionOnScroll={false}
+                    position="top"
+                    content={
+                      <p>
+                        {initialLinks
+                          ? NavEmbeddableStrings.editor.panelEditor.getUpdateLibraryItemButtonTooltip()
+                          : NavEmbeddableStrings.editor.panelEditor.getSaveToLibraryButtonTooltip()}
+                      </p>
+                    }
+                  >
+                    <EuiButton
+                      fill
+                      iconType="folderCheck"
+                      disabled={orderedLinks.length === 0}
+                      isLoading={isSaving}
+                      onClick={async () => {
+                        setIsSaving(true);
+                        onSaveToLibrary(orderedLinks)
+                          .catch((e) => {
+                            toasts.addError(e, {
+                              title:
+                                NavEmbeddableStrings.editor.panelEditor.getErrorDuringSaveToastTitle(),
+                            });
+                          })
+                          .finally(() => {
+                            setIsSaving(false);
+                          });
+                      }}
+                    >
+                      {initialLinks
+                        ? NavEmbeddableStrings.editor.panelEditor.getUpdateLibraryItemButtonLabel()
+                        : NavEmbeddableStrings.editor.panelEditor.getSaveToLibraryButtonLabel()}
+                    </EuiButton>
+                  </EuiToolTip>
+                </EuiFlexItem>
+              ) : null}
+            </EuiFlexGroup>
+          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutFooter>
     </>

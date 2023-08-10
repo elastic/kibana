@@ -6,20 +6,26 @@
  * Side Public License, v 1.
  */
 
-import { DashboardStart } from '@kbn/dashboard-plugin/public';
 import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import {
+  ContentManagementPublicSetup,
+  ContentManagementPublicStart,
+} from '@kbn/content-management-plugin/public';
+import { DashboardStart } from '@kbn/dashboard-plugin/public';
 import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
-
-import { NAVIGATION_EMBEDDABLE_TYPE } from './embeddable';
-import { setKibanaServices } from './services/kibana_services';
 import { NavigationEmbeddableFactoryDefinition } from './embeddable';
+import { CONTENT_ID, LATEST_VERSION } from '../common';
+import { APP_NAME } from '../common';
+import { setKibanaServices } from './services/kibana_services';
 
 export interface NavigationEmbeddableSetupDependencies {
   embeddable: EmbeddableSetup;
+  contentManagement: ContentManagementPublicSetup;
 }
 
 export interface NavigationEmbeddableStartDependencies {
   embeddable: EmbeddableStart;
+  contentManagement: ContentManagementPublicStart;
   dashboard: DashboardStart;
 }
 
@@ -40,14 +46,23 @@ export class NavigationEmbeddablePlugin
   ) {
     core.getStartServices().then(([_, deps]) => {
       plugins.embeddable.registerEmbeddableFactory(
-        NAVIGATION_EMBEDDABLE_TYPE,
-        new NavigationEmbeddableFactoryDefinition()
+        CONTENT_ID,
+        new NavigationEmbeddableFactoryDefinition(deps.embeddable)
       );
+
+      plugins.contentManagement.registry.register({
+        id: CONTENT_ID,
+        version: {
+          latest: LATEST_VERSION,
+        },
+        name: APP_NAME,
+      });
     });
   }
 
   public start(core: CoreStart, plugins: NavigationEmbeddableStartDependencies) {
     setKibanaServices(core, plugins);
+    return {};
   }
 
   public stop() {}

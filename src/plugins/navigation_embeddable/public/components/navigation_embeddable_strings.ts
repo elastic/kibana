@@ -47,9 +47,38 @@ export const NavEmbeddableStrings = {
         i18n.translate('navigationEmbeddable.panelEditor.editFlyoutTitle', {
           defaultMessage: 'Edit links panel',
         }),
-      getSaveButtonLabel: () =>
-        i18n.translate('navigationEmbeddable.panelEditor.saveButtonLabel', {
-          defaultMessage: 'Save',
+      getApplyButtonLabel: () =>
+        i18n.translate('navigationEmbeddable.panelEditor.applyButtonLabel', {
+          defaultMessage: 'Apply',
+        }),
+      getAddToDashboardButtonLabel: () =>
+        i18n.translate('navigationEmbeddable.panelEditor.addToDashboardButtonLabel', {
+          defaultMessage: 'Add to dashboard',
+        }),
+      getAddToDashboardButtonTooltip: () =>
+        i18n.translate('navigationEmbeddable.panelEditor.addToDashboardButtonTooltip', {
+          defaultMessage: 'Add this links panel directly to this dashboard.',
+        }),
+      getSaveToLibraryButtonLabel: () =>
+        i18n.translate('navigationEmbeddable.panelEditor.saveToLibraryButtonLabel', {
+          defaultMessage: 'Save to library',
+        }),
+      getSaveToLibraryButtonTooltip: () =>
+        i18n.translate('navigationEmbeddable.panelEditor.saveToLibraryButtonTooltip', {
+          defaultMessage:
+            'Save this links panel to the library so you can easily add it to other dashboards.',
+        }),
+      getUpdateLibraryItemButtonLabel: () =>
+        i18n.translate('navigationEmbeddable.panelEditor.updateLibraryItemButtonLabel', {
+          defaultMessage: 'Update library item',
+        }),
+      getUpdateLibraryItemButtonTooltip: () =>
+        i18n.translate('navigationEmbeddable.panelEditor.updateLibraryItemButtonTooltip', {
+          defaultMessage: 'Editing this panel might affect other dashboards.',
+        }),
+      getTitleInputLabel: () =>
+        i18n.translate('navigationEmbeddable.panelEditor.titleInputLabel', {
+          defaultMessage: 'Title',
         }),
       getLinkLoadingAriaLabel: () =>
         i18n.translate('navigationEmbeddable.linkEditor.linkLoadingAriaLabel', {
@@ -58,6 +87,10 @@ export const NavEmbeddableStrings = {
       getDragHandleAriaLabel: () =>
         i18n.translate('navigationEmbeddable.editor.dragHandleAriaLabel', {
           defaultMessage: 'Link drag handle',
+        }),
+      getErrorDuringSaveToastTitle: () =>
+        i18n.translate('navigationEmbeddable.editor.unableToSaveToastTitle', {
+          defaultMessage: 'Error saving Link panel',
         }),
     },
     linkEditor: {

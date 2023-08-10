@@ -7,16 +7,27 @@
  */
 
 import React, { createContext, useContext } from 'react';
+import { Subscription } from 'rxjs';
 
-import { Embeddable, EmbeddableOutput } from '@kbn/embeddable-plugin/public';
+import {
+  AttributeService,
+  Embeddable,
+  ReferenceOrValueEmbeddable,
+  SavedObjectEmbeddableInput,
+} from '@kbn/embeddable-plugin/public';
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 import { ReduxEmbeddableTools, ReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
 
 import { navigationEmbeddableReducers } from './navigation_embeddable_reducers';
-import { NavigationEmbeddableInput, NavigationEmbeddableReduxState } from './types';
+import {
+  NavigationEmbeddableByReferenceInput,
+  NavigationEmbeddableByValueInput,
+  NavigationEmbeddableReduxState,
+} from './types';
 import { NavigationEmbeddableComponent } from '../components/navigation_embeddable_component';
-
-export const NAVIGATION_EMBEDDABLE_TYPE = 'navigation';
+import { NavigationEmbeddableInput, NavigationEmbeddableOutput } from './types';
+import { NavigationEmbeddableAttributes } from '../../common/content_management';
+import { CONTENT_ID } from '../../common';
 
 export const NavigationEmbeddableContext = createContext<NavigationEmbeddable | null>(null);
 export const useNavigationEmbeddable = (): NavigationEmbeddable => {
@@ -36,8 +47,19 @@ export interface NavigationEmbeddableConfig {
   editable: boolean;
 }
 
-export class NavigationEmbeddable extends Embeddable<NavigationEmbeddableInput, EmbeddableOutput> {
-  public readonly type = NAVIGATION_EMBEDDABLE_TYPE;
+export class NavigationEmbeddable
+  extends Embeddable<NavigationEmbeddableInput, NavigationEmbeddableOutput>
+  implements
+    ReferenceOrValueEmbeddable<
+      NavigationEmbeddableByValueInput,
+      NavigationEmbeddableByReferenceInput
+    >
+{
+  public readonly type = CONTENT_ID;
+  deferEmbeddableLoad = true;
+
+  private isDestroyed?: boolean;
+  private subscriptions: Subscription = new Subscription();
 
   // state management
   public select: NavigationReduxEmbeddableTools['select'];
@@ -51,6 +73,7 @@ export class NavigationEmbeddable extends Embeddable<NavigationEmbeddableInput, 
     reduxToolsPackage: ReduxToolsPackage,
     config: NavigationEmbeddableConfig,
     initialInput: NavigationEmbeddableInput,
+    private attributeService: AttributeService<NavigationEmbeddableAttributes>,
     parent?: DashboardContainer
   ) {
     super(
@@ -77,17 +100,66 @@ export class NavigationEmbeddable extends Embeddable<NavigationEmbeddableInput, 
     this.dispatch = reduxEmbeddableTools.dispatch;
     this.cleanupStateTools = reduxEmbeddableTools.cleanup;
     this.onStateChange = reduxEmbeddableTools.onStateChange;
-    this.setInitializationFinished();
+
+    this.initializeSavedLinks(initialInput)
+      .then(() => this.setInitializationFinished())
+      .catch((e: Error) => this.onFatalError(e));
   }
 
-  public async reload() {}
+  private async initializeSavedLinks(input: NavigationEmbeddableInput) {
+    const { attributes } = await this.attributeService.unwrapAttributes(input);
+    if (this.isDestroyed) return;
+
+    // TODO handle metaInfo
+
+    this.updateInput({ attributes });
+
+    await this.initializeOutput();
+  }
+
+  private async initializeOutput() {
+    const { attributes } = this.getInput() as NavigationEmbeddableByValueInput;
+    const { title, description } = this.getInput();
+    this.updateOutput({
+      defaultTitle: attributes.title,
+      defaultDescription: attributes.description,
+      title: title ?? attributes.title,
+      description: description ?? attributes.description,
+    });
+  }
+
+  public inputIsRefType(
+    input: NavigationEmbeddableByValueInput | NavigationEmbeddableByReferenceInput
+  ): input is NavigationEmbeddableByReferenceInput {
+    return this.attributeService.inputIsRefType(input);
+  }
+
+  public async getInputAsRefType(): Promise<SavedObjectEmbeddableInput> {
+    return this.attributeService.getInputAsRefType(this.getExplicitInput(), {
+      showSaveModal: true,
+      saveModalTitle: this.getTitle(),
+    });
+  }
+
+  public async getInputAsValueType(): Promise<NavigationEmbeddableByValueInput> {
+    return this.attributeService.getInputAsValueType(this.getExplicitInput());
+  }
+
+  public async reload() {
+    if (this.isDestroyed) return;
+    await this.initializeSavedLinks(this.getInput());
+    this.render();
+  }
 
   public destroy() {
+    this.isDestroyed = true;
     super.destroy();
+    this.subscriptions.unsubscribe();
     this.cleanupStateTools();
   }
 
   public render() {
+    if (this.isDestroyed) return;
     return (
       <NavigationEmbeddableContext.Provider value={this}>
         <NavigationEmbeddableComponent />

@@ -13,7 +13,7 @@ import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 
 import { coreServices } from '../services/kibana_services';
-import { NavigationEmbeddableLink } from '../embeddable/types';
+import { NavigationEmbeddableLink } from '../../common/content_management';
 import { NavigationEmbeddableLinkEditor } from '../components/navigation_embeddable_link_editor';
 
 export interface LinkEditorProps {

@@ -1,14 +1,23 @@
 {
   "type": "plugin",
-  "owner": "@elastic/kibana-presentation",
   "id": "@kbn/navigation-embeddable-plugin",
+  "owner": "@elastic/kibana-presentation",
   "description": "An embeddable for quickly navigating between dashboards.",
   "plugin": {
     "id": "navigationEmbeddable",
-    "server": false,
+    "server": true,
     "browser": true,
-    "requiredPlugins": ["dashboard", "embeddable", "kibanaReact", "presentationUtil"],
+    "requiredPlugins": [
+      "contentManagement",
+      "dashboard",
+      "embeddable",
+      "kibanaReact",
+      "presentationUtil"
+    ],
     "optionalPlugins": ["triggersActionsUi"],
-    "requiredBundles": []
+    "requiredBundles": [
+      "savedObjects"
+    ]
   }
 }
+

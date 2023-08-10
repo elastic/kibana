@@ -10,17 +10,22 @@ import React, { useMemo } from 'react';
 
 import { EuiPanel } from '@elastic/eui';
 
-import { DASHBOARD_LINK_TYPE } from '../embeddable/types';
+import { DASHBOARD_LINK_TYPE } from '../../common/content_management';
 import { useNavigationEmbeddable } from '../embeddable/navigation_embeddable';
 import { ExternalLinkComponent } from './external_link/external_link_component';
 import { DashboardLinkComponent } from './dashboard_link/dashboard_link_component';
 import { memoizedGetOrderedLinkList } from '../editor/navigation_embeddable_editor_tools';
+import { NavigationEmbeddableByValueInput } from '../embeddable/types';
 
 export const NavigationEmbeddableComponent = () => {
   const navEmbeddable = useNavigationEmbeddable();
 
-  const links = navEmbeddable.select((state) => state.explicitInput.links);
+  const links = navEmbeddable.select(
+    (state) => (state.explicitInput as NavigationEmbeddableByValueInput).attributes?.links
+  );
+
   const orderedLinks = useMemo(() => {
+    if (!links) return [];
     return memoizedGetOrderedLinkList(links);
   }, [links]);
 

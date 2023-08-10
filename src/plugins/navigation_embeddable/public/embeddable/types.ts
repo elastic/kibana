@@ -6,46 +6,26 @@
  * Side Public License, v 1.
  */
 
-import { DashboardAttributes } from '@kbn/dashboard-plugin/common';
 import { ReduxEmbeddableState } from '@kbn/presentation-util-plugin/public';
-import { EmbeddableInput, EmbeddableOutput } from '@kbn/embeddable-plugin/public';
+import {
+  EmbeddableInput,
+  EmbeddableOutput,
+  SavedObjectEmbeddableInput,
+} from '@kbn/embeddable-plugin/public';
 
+import { DashboardAttributes } from '@kbn/dashboard-plugin/common';
 import { ExternalLinkEmbeddableStrings } from '../components/external_link/external_link_strings';
 import { DashboardLinkEmbeddableStrings } from '../components/dashboard_link/dashboard_link_strings';
+import {
+  DASHBOARD_LINK_TYPE,
+  EXTERNAL_LINK_TYPE,
+  NavigationLinkType,
+  NavigationEmbeddableAttributes,
+} from '../../common/content_management';
 
-/**
- * Dashboard to dashboard links
- */
-export const DASHBOARD_LINK_TYPE = 'dashboardLink';
 export interface DashboardItem {
   id: string;
   attributes: DashboardAttributes;
-}
-
-/**
- * External URL links
- */
-export const EXTERNAL_LINK_TYPE = 'externalLink';
-
-/**
- * Navigation embeddable explicit input
- */
-export type NavigationLinkType = typeof DASHBOARD_LINK_TYPE | typeof EXTERNAL_LINK_TYPE;
-
-export interface NavigationEmbeddableLink {
-  id: string;
-  type: NavigationLinkType;
-  destination: string;
-  label?: string;
-  order: number;
-}
-
-export interface NavigationEmbeddableLinkList {
-  [id: string]: NavigationEmbeddableLink;
-}
-
-export interface NavigationEmbeddableInput extends EmbeddableInput {
-  links: NavigationEmbeddableLinkList;
 }
 
 export const NavigationLinkInfo: {
@@ -63,6 +43,20 @@ export const NavigationLinkInfo: {
   },
 };
 
+export type NavigationEmbeddableByValueInput = {
+  attributes: NavigationEmbeddableAttributes;
+} & EmbeddableInput;
+
+export type NavigationEmbeddableByReferenceInput = SavedObjectEmbeddableInput;
+
+export type NavigationEmbeddableInput =
+  | NavigationEmbeddableByValueInput
+  | NavigationEmbeddableByReferenceInput;
+
+export type NavigationEmbeddableOutput = EmbeddableOutput & {
+  attributes?: NavigationEmbeddableAttributes;
+};
+
 /**
  *  Navigation embeddable redux state
  */
@@ -70,6 +64,6 @@ export const NavigationLinkInfo: {
 
 export type NavigationEmbeddableReduxState = ReduxEmbeddableState<
   NavigationEmbeddableInput,
-  EmbeddableOutput,
+  NavigationEmbeddableOutput,
   {} // We currently don't have any component state - TODO: Replace with `NavigationEmbeddableComponentState` if necessary
 >;
