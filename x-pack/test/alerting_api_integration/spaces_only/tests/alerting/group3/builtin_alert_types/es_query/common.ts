@@ -6,6 +6,7 @@
  */
 
 import { ESTestIndexTool, ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
+import { ES_QUERY_AAD_INDEX } from '@kbn/stack-alerts-plugin/server/rule_types/es_query/constants';
 import { FtrProviderContext } from '../../../../../../common/ftr_provider_context';
 import { Spaces } from '../../../../../scenarios';
 import { getUrlPrefix, ObjectRemover } from '../../../../../../common/lib';
@@ -69,6 +70,11 @@ export function getRuleServices(getService: FtrProviderContext['getService']) {
   const esTestIndexTool = new ESTestIndexTool(es, retry);
   const esTestIndexToolOutput = new ESTestIndexTool(es, retry, ES_TEST_OUTPUT_INDEX_NAME);
   const esTestIndexToolDataStream = new ESTestIndexTool(es, retry, ES_TEST_DATA_STREAM_NAME);
+  const esTestIndexToolAAD = new ESTestIndexTool(
+    es,
+    retry,
+    `.internal.alerts-${ES_QUERY_AAD_INDEX}.alerts-default-000001`
+  );
 
   async function createEsDocumentsInGroups(
     groups: number,
@@ -112,6 +118,14 @@ export function getRuleServices(getService: FtrProviderContext['getService']) {
     );
   }
 
+  async function getAllAADDocs(size: number): Promise<any> {
+    return await esTestIndexToolAAD.getAll(size);
+  }
+
+  async function removeAllAADDocs(): Promise<any> {
+    return await esTestIndexToolAAD.removeAll();
+  }
+
   return {
     retry,
     es,
@@ -121,5 +135,7 @@ export function getRuleServices(getService: FtrProviderContext['getService']) {
     createEsDocumentsInGroups,
     createGroupedEsDocumentsInGroups,
     waitForDocs,
+    getAllAADDocs,
+    removeAllAADDocs,
   };
 }

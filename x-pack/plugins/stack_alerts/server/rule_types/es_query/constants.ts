@@ -8,3 +8,4 @@
 export const ES_QUERY_ID = '.es-query';
 export const ActionGroupId = 'query matched';
 export const ConditionMetAlertInstanceId = 'query matched';
+export const ES_QUERY_AAD_INDEX = 'stack.threshold';

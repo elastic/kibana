@@ -22,7 +22,7 @@ import {
 } from './rule_type_params';
 import { STACK_ALERTS_FEATURE_ID } from '../../../common';
 import { ExecutorOptions } from './types';
-import { ActionGroupId, ES_QUERY_ID } from './constants';
+import { ActionGroupId, ES_QUERY_AAD_INDEX, ES_QUERY_ID } from './constants';
 import { executor } from './executor';
 import { isEsQueryRule } from './util';
 
@@ -142,7 +142,7 @@ export function getRuleType(
   );
 
   const alerts: IRuleTypeAlerts<StackEsqueryAlert> = {
-    context: 'stack.esquery',
+    context: ES_QUERY_AAD_INDEX,
     mappings: {
       fieldMap: {
         [ALERT_URL]: { type: 'text', array: false, required: false },
