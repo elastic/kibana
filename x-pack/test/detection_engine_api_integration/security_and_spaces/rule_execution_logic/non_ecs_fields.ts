@@ -258,8 +258,8 @@ export default ({ getService }: FtrProviderContext) => {
 
     // we don't validate it because geo_point is very complex type with many various representations: array, different object, string with few valid patterns
     // more on geo_point type https://www.elastic.co/guide/en/elasticsearch/reference/current/geo-point.html
-    // since .alerts-* indices allow _ignore_malformed option, alert will be created for this document
-    it('should not fail creating alert when ECS field mapping is geo_point', async () => {
+    // since .alerts-* indices allow _ignore_malformed option, alert will be indexed for this document
+    it('should fail creating alert when ECS field mapping is geo_point', async () => {
       const document = {
         client: {
           geo: {
