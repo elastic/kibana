@@ -36,6 +36,15 @@ import {
   type Validator,
 } from '../../../../common/validators';
 
+type DefaultParser = (v: string) => string;
+type NullableNumberParser = (v: string) => number | null;
+type NumberParser = (v: string) => number;
+type ValueParser = DefaultParser | NullableNumberParser | NumberParser;
+
+const defaultParser: DefaultParser = (v) => v;
+const nullableNumberParser: NullableNumberParser = (v) => (v === '' ? null : +v);
+const numberParser: NumberParser = (v) => +v;
+
 // This custom hook uses `zustand` to provide a generic framework to manage form state
 // and apply it to a final possibly nested configuration object suitable for passing on
 // directly to an API call. For now this is only used for the transform edit form.
@@ -69,7 +78,7 @@ export interface FormField {
   section?: EditTransformFormSections;
   validator: Validator;
   value: string;
-  valueParser: (value: string) => any;
+  valueParser: ValueParser;
 }
 
 // Defining these sections is only necessary for options where a reset/deletion of that part of the
@@ -123,7 +132,7 @@ export const initializeFormField = (
     isOptional: true,
     validator: stringValidator,
     value,
-    valueParser: (v) => v,
+    valueParser: defaultParser,
     ...(overloads !== undefined ? { ...overloads } : {}),
   };
 };
@@ -256,7 +265,7 @@ export const getDefaultState = (config: TransformConfigUnion): EditTransformFlyo
       isNullable: true,
       isOptional: true,
       validator: integerAboveZeroValidator,
-      valueParser: (v) => (v === '' ? null : +v),
+      valueParser: nullableNumberParser,
     }),
     maxPageSearchSize: initializeFormField(
       'maxPageSearchSize',
@@ -267,7 +276,7 @@ export const getDefaultState = (config: TransformConfigUnion): EditTransformFlyo
         isNullable: true,
         isOptional: true,
         validator: transformSettingsPageSearchSizeValidator,
-        valueParser: (v) => +v,
+        valueParser: numberParser,
       }
     ),
     numFailureRetries: initializeFormField(
@@ -279,7 +288,7 @@ export const getDefaultState = (config: TransformConfigUnion): EditTransformFlyo
         isNullable: true,
         isOptional: true,
         validator: transformSettingsNumberOfRetriesValidator,
-        valueParser: (v) => +v,
+        valueParser: numberParser,
       }
     ),
 
@@ -318,10 +327,7 @@ export const getDefaultState = (config: TransformConfigUnion): EditTransformFlyo
 // Checks each form field for error messages to return
 // if the overall form is valid or not.
 const isFormValid = (fieldsState: EditTransformFlyoutFieldsState) =>
-  (Object.keys(fieldsState) as EditTransformFormFields[]).reduce(
-    (p, c) => p && fieldsState[c].errorMessages.length === 0,
-    true
-  );
+  Object.values(fieldsState).every((d) => d.errorMessages.length === 0);
 
 // Updates a form field with its new value,
 // runs validation and populates `errorMessages` if any errors occur.
@@ -339,7 +345,7 @@ const getFieldValues = (fields: EditTransformFlyoutFieldsState) =>
 const getSectionValues = (sections: EditTransformFlyoutSectionsState) =>
   Object.values(sections).map((s) => s.enabled);
 
-interface EditTransformFlyoutOptions {
+interface EditTransformFlyoutProviderProps {
   config: TransformConfigUnion;
   dataViewId?: string;
 }
@@ -358,12 +364,17 @@ interface EditTransformFlyoutActions {
   setFormSection: (payload: { section: EditTransformFormSections; enabled: boolean }) => void;
 }
 
-type EditTransformFlyoutState = EditTransformFlyoutOptions &
+// The state we manage via zustand combines the provider props,
+// the form state and the zustand actions.
+type EditTransformFlyoutState = EditTransformFlyoutProviderProps &
   EditTransformFlyoutFormState &
   EditTransformFlyoutActions;
 
 type EditTransformFlyoutStore = ReturnType<typeof createEditTransformFlyoutStore>;
-const createEditTransformFlyoutStore = ({ config, dataViewId }: EditTransformFlyoutOptions) => {
+const createEditTransformFlyoutStore = ({
+  config,
+  dataViewId,
+}: EditTransformFlyoutProviderProps) => {
   const defaultState = getDefaultState(config);
   const defaultFieldValues = getFieldValues(defaultState.formFields);
   const defaultSectionValues = getSectionValues(defaultState.formSections);
@@ -407,12 +418,9 @@ const createEditTransformFlyoutStore = ({ config, dataViewId }: EditTransformFly
 export const EditTransformFlyoutContext = createContext<EditTransformFlyoutStore | null>(null);
 
 // Provider wrapper
-type EditTransformFlyoutProviderProps = React.PropsWithChildren<EditTransformFlyoutOptions>;
-
-export const EditTransformFlyoutProvider: FC<EditTransformFlyoutProviderProps> = ({
-  children,
-  ...props
-}) => {
+export const EditTransformFlyoutProvider: FC<
+  React.PropsWithChildren<EditTransformFlyoutProviderProps>
+> = ({ children, ...props }) => {
   const storeRef = useRef<EditTransformFlyoutStore>();
   if (!storeRef.current) {
     storeRef.current = createEditTransformFlyoutStore(props);
