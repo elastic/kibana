@@ -8,6 +8,7 @@
 import { isEqual, merge } from 'lodash';
 import React, { useContext, useRef, type FC } from 'react';
 import { createStore, useStore } from 'zustand';
+import { produce } from 'immer';
 
 import { i18n } from '@kbn/i18n';
 import { numberValidator } from '@kbn/ml-agg-utils';
@@ -31,14 +32,14 @@ import {
   Validator,
 } from '../../../../common/validators';
 
-// This custom hook uses nested reducers to provide a generic framework to manage form state
+// This custom hook uses `zustand` to provide a generic framework to manage form state
 // and apply it to a final possibly nested configuration object suitable for passing on
 // directly to an API call. For now this is only used for the transform edit form.
 // Once we apply the functionality to other places, e.g. the transform creation wizard,
 // the generic framework code in this file should be moved to a dedicated location.
 
-// The outer most level reducer defines a flat structure of names for form fields.
-// This is a flat structure regardless of whether the final request object will be nested.
+// The form state defines a flat structure of names for form fields.
+// This is a flat structure regardless of whether the final config object will be nested.
 // For example, `destinationIndex` and `destinationIngestPipeline` will later be nested under `dest`.
 export type EditTransformFormFields =
   | 'description'
@@ -83,15 +84,12 @@ export interface FormSection {
 
 type EditTransformFlyoutSectionsState = Record<EditTransformFormSections, FormSection>;
 
-// The reducers and utility functions in this file provide the following features:
+// The utility functions in this file provide the following features:
 // - getDefaultState()
 //   Sets up the initial form state. It supports overrides to apply a pre-existing configuration.
 //   The implementation of this function is the only one that's specifically required to define
 //   the features of the transform edit form. All other functions are generic and could be reused
 //   in the future for other forms.
-//
-// - formReducerFactory() / formFieldReducer()
-//   These nested reducers take care of updating and validating the form state.
 //
 // - applyFormStateToTransformConfig() (iterates over getUpdateValue())
 //   Once a user hits the update button, these functions take care of extracting the information
@@ -203,7 +201,7 @@ const validate = {
   retentionPolicyMaxAgeValidator,
 } as const;
 
-export const initializeField = (
+export const initializeFormField = (
   formFieldName: EditTransformFormFields,
   configFieldName: string,
   config: TransformConfigUnion,
@@ -228,7 +226,7 @@ export const initializeField = (
   };
 };
 
-export const initializeSection = (
+export const initializeFormSection = (
   formSectionName: EditTransformFormSections,
   configFieldName: string,
   config: TransformConfigUnion,
@@ -253,27 +251,6 @@ export interface EditTransformFlyoutFormState {
   isFormTouched: boolean;
   isFormValid: boolean;
 }
-
-// Actions
-interface ApiErrorAction {
-  name: 'api_error';
-  payload: string | undefined;
-}
-interface FormFieldAction {
-  name: 'form_field';
-  payload: {
-    field: EditTransformFormFields;
-    value: string;
-  };
-}
-interface FormSectionAction {
-  name: 'form_section';
-  payload: {
-    section: EditTransformFormSections;
-    enabled: boolean;
-  };
-}
-type Action = ApiErrorAction | FormFieldAction | FormSectionAction;
 
 // Takes a value from form state and applies it to the structure
 // of the expected final configuration request object.
@@ -357,18 +334,18 @@ export const applyFormStateToTransformConfig = (
 export const getDefaultState = (config: TransformConfigUnion): EditTransformFlyoutFormState => ({
   formFields: {
     // top level attributes
-    description: initializeField('description', 'description', config),
-    frequency: initializeField('frequency', 'frequency', config, {
+    description: initializeFormField('description', 'description', config),
+    frequency: initializeFormField('frequency', 'frequency', config, {
       defaultValue: DEFAULT_TRANSFORM_FREQUENCY,
       validator: 'frequency',
     }),
 
     // dest.*
-    destinationIndex: initializeField('destinationIndex', 'dest.index', config, {
+    destinationIndex: initializeFormField('destinationIndex', 'dest.index', config, {
       dependsOn: ['destinationIngestPipeline'],
       isOptional: false,
     }),
-    destinationIngestPipeline: initializeField(
+    destinationIngestPipeline: initializeFormField(
       'destinationIngestPipeline',
       'dest.pipeline',
       config,
@@ -379,13 +356,13 @@ export const getDefaultState = (config: TransformConfigUnion): EditTransformFlyo
     ),
 
     // settings.*
-    docsPerSecond: initializeField('docsPerSecond', 'settings.docs_per_second', config, {
+    docsPerSecond: initializeFormField('docsPerSecond', 'settings.docs_per_second', config, {
       isNullable: true,
       isOptional: true,
       validator: 'integerAboveZero',
       valueParser: (v) => (v === '' ? null : +v),
     }),
-    maxPageSearchSize: initializeField(
+    maxPageSearchSize: initializeFormField(
       'maxPageSearchSize',
       'settings.max_page_search_size',
       config,
@@ -397,7 +374,7 @@ export const getDefaultState = (config: TransformConfigUnion): EditTransformFlyo
         valueParser: (v) => +v,
       }
     ),
-    numFailureRetries: initializeField(
+    numFailureRetries: initializeFormField(
       'numFailureRetries',
       'settings.num_failure_retries',
       config,
@@ -411,7 +388,7 @@ export const getDefaultState = (config: TransformConfigUnion): EditTransformFlyo
     ),
 
     // retention_policy.*
-    retentionPolicyField: initializeField(
+    retentionPolicyField: initializeFormField(
       'retentionPolicyField',
       'retention_policy.time.field',
       config,
@@ -422,7 +399,7 @@ export const getDefaultState = (config: TransformConfigUnion): EditTransformFlyo
         section: 'retentionPolicy',
       }
     ),
-    retentionPolicyMaxAge: initializeField(
+    retentionPolicyMaxAge: initializeFormField(
       'retentionPolicyMaxAge',
       'retention_policy.time.max_age',
       config,
@@ -436,7 +413,7 @@ export const getDefaultState = (config: TransformConfigUnion): EditTransformFlyo
     ),
   },
   formSections: {
-    retentionPolicy: initializeSection('retentionPolicy', 'retention_policy', config),
+    retentionPolicy: initializeFormSection('retentionPolicy', 'retention_policy', config),
   },
   isFormTouched: false,
   isFormValid: true,
@@ -451,75 +428,25 @@ const isFormValid = (fieldsState: EditTransformFlyoutFieldsState) =>
   );
 
 // Updates a form field with its new value,
-// runs validation and populates
-// `errorMessages` if any errors occur.
-const formFieldReducer = (state: FormField, value: string): FormField => {
-  return {
-    ...state,
-    errorMessages:
+// runs validation and populates `errorMessages` if any errors occur.
+const updateFormField = (state: FormField, value: string): FormField =>
+  produce(state, (d) => {
+    d.errorMessages =
       state.isOptional && typeof value === 'string' && value.length === 0
         ? []
-        : validate[state.validator](value, state.isOptional),
-    value,
-  };
-};
+        : validate[state.validator](value, state.isOptional);
+    d.value = value;
+  });
 
-const formSectionReducer = (state: FormSection, enabled: boolean): FormSection => {
-  return {
-    ...state,
-    enabled,
-  };
-};
+const updateFormSection = (state: FormSection, enabled: boolean): FormSection =>
+  produce(state, (d) => {
+    d.enabled = enabled;
+  });
 
 const getFieldValues = (fields: EditTransformFlyoutFieldsState) =>
   Object.values(fields).map((f) => f.value);
 const getSectionValues = (sections: EditTransformFlyoutSectionsState) =>
   Object.values(sections).map((s) => s.enabled);
-
-// Main form reducer triggers
-// - `formFieldReducer` to update the actions field
-// - compares the most recent state against the original one to update `isFormTouched`
-// - sets `isFormValid` to have a flag if any of the form fields contains an error.
-export const formReducerFactory = (config: TransformConfigUnion) => {
-  const defaultState = getDefaultState(config);
-  const defaultFieldValues = getFieldValues(defaultState.formFields);
-  const defaultSectionValues = getSectionValues(defaultState.formSections);
-
-  return (state: EditTransformFlyoutFormState, action: Action): EditTransformFlyoutFormState => {
-    const formFields =
-      action.name === 'form_field'
-        ? {
-            ...state.formFields,
-            [action.payload.field]: formFieldReducer(
-              state.formFields[action.payload.field],
-              action.payload.value
-            ),
-          }
-        : state.formFields;
-
-    const formSections =
-      action.name === 'form_section'
-        ? {
-            ...state.formSections,
-            [action.payload.section]: formSectionReducer(
-              state.formSections[action.payload.section],
-              action.payload.enabled
-            ),
-          }
-        : state.formSections;
-
-    return {
-      ...state,
-      apiErrorMessage: action.name === 'api_error' ? action.payload : state.apiErrorMessage,
-      formFields,
-      formSections,
-      isFormTouched:
-        !isEqual(defaultFieldValues, getFieldValues(formFields)) ||
-        !isEqual(defaultSectionValues, getSectionValues(formSections)),
-      isFormValid: isFormValid(formFields),
-    };
-  };
-};
 
 interface EditTransformFlyoutOptions {
   config: TransformConfigUnion;
@@ -529,40 +456,50 @@ interface EditTransformFlyoutOptions {
 type EditTransformFlyoutStore = ReturnType<typeof createEditTransformFlyoutStore>;
 type EditTransformFlyoutState = {
   formState: EditTransformFlyoutFormState;
-  actions: {
-    apiError: (payload: ApiErrorAction['payload']) => void;
-    formField: (payload: FormFieldAction['payload']) => void;
-    formSection: (payload: FormSectionAction['payload']) => void;
-  };
+  actions: Record<string, (payload: any) => void>;
 } & EditTransformFlyoutOptions;
 
 const createEditTransformFlyoutStore = ({ config, dataViewId }: EditTransformFlyoutOptions) => {
-  const reducer = formReducerFactory(config);
-  const initialState = getDefaultState(config);
+  const defaultState = getDefaultState(config);
+  const defaultFieldValues = getFieldValues(defaultState.formFields);
+  const defaultSectionValues = getSectionValues(defaultState.formSections);
 
   return createStore<EditTransformFlyoutState>()((set) => ({
     config,
     dataViewId,
-    formState: initialState,
+    formState: defaultState,
     actions: {
-      apiError: (payload) =>
-        set((state) => ({
-          ...state,
-          formState: reducer(state.formState, { name: 'api_error', payload }),
-        })),
-      formField: (payload) =>
-        set((state) => ({
-          ...state,
-          formState: reducer(state.formState, {
-            name: 'form_field',
-            payload,
-          }),
-        })),
-      formSection: (payload) =>
-        set((state) => ({
-          ...state,
-          formState: reducer(state.formState, { name: 'form_section', payload }),
-        })),
+      apiError: (payload: string | undefined) =>
+        set((state) =>
+          produce(state, (d) => {
+            d.formState.apiErrorMessage = payload;
+          })
+        ),
+      formField: (payload: { field: EditTransformFormFields; value: string }) =>
+        set((state) =>
+          produce(state, (d) => {
+            d.formState.formFields[payload.field] = updateFormField(
+              state.formState.formFields[payload.field],
+              payload.value
+            );
+            d.formState.isFormTouched =
+              !isEqual(defaultFieldValues, getFieldValues(d.formState.formFields)) ||
+              !isEqual(defaultSectionValues, getSectionValues(d.formState.formSections));
+            d.formState.isFormValid = isFormValid(d.formState.formFields);
+          })
+        ),
+      formSection: (payload: { section: EditTransformFormSections; enabled: boolean }) =>
+        set((state) =>
+          produce(state, (d) => {
+            d.formState.formSections[payload.section] = updateFormSection(
+              state.formState.formSections[payload.section],
+              payload.enabled
+            );
+            d.formState.isFormTouched =
+              !isEqual(defaultFieldValues, getFieldValues(d.formState.formFields)) ||
+              !isEqual(defaultSectionValues, getSectionValues(d.formState.formSections));
+          })
+        ),
     },
   }));
 };
@@ -587,29 +524,19 @@ export const EditTransformFlyoutProvider: FC<EditTransformFlyoutProviderProps> =
   );
 };
 
-export const useEditTransformFlyout = <T extends keyof EditTransformFlyoutState>(
-  accessor: T
-): EditTransformFlyoutState[T] => {
+// This approach with overloads is necessary for TS support of the selector callback.
+// `zustand` TypeScript guide for reference: https://docs.pmnd.rs/zustand/guides/typescript#bounded-usestore-hook-for-vanilla-stores
+export function useEditTransformFlyout(): EditTransformFlyoutState;
+export function useEditTransformFlyout<T>(
+  selector: (state: EditTransformFlyoutState) => T,
+  equals?: (a: T, b: T) => boolean
+): T;
+export function useEditTransformFlyout<T>(
+  selector?: (state: EditTransformFlyoutState) => T,
+  equals?: (a: T, b: T) => boolean
+) {
   const store = useContext(EditTransformFlyoutContext);
   if (!store) throw new Error('Missing EditTransformFlyoutContext.Provider in the tree');
 
-  return useStore(store, (s) => s[accessor]);
-};
-
-export const useEditTransformFlyoutFormField = (field: EditTransformFormFields) => {
-  const store = useContext(EditTransformFlyoutContext);
-  if (!store) throw new Error('Missing EditTransformFlyoutContext.Provider in the tree');
-
-  return useStore(store, (s) => s.formState.formFields[field]);
-};
-
-export const useEditTransformFlyoutFormState = <
-  T extends keyof EditTransformFlyoutState['formState']
->(
-  attr: T
-) => {
-  const store = useContext(EditTransformFlyoutContext);
-  if (!store) throw new Error('Missing EditTransformFlyoutContext.Provider in the tree');
-
-  return useStore(store, (s) => s.formState[attr]);
-};
+  return useStore(store, selector!, equals);
+}
