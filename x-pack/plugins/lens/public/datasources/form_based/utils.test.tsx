@@ -8,9 +8,13 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 import { createDatatableUtilitiesMock } from '@kbn/data-plugin/common/mocks';
-import { getPrecisionErrorWarningMessages, cloneLayer } from './utils';
+import {
+  getPrecisionErrorWarningMessages,
+  cloneLayer,
+  getUnsupportedOperationsWarningMessage,
+} from './utils';
 import type { FormBasedPrivateState, GenericIndexPatternColumn } from './types';
-import type { FramePublicAPI } from '../../types';
+import type { FramePublicAPI, IndexPattern } from '../../types';
 import type { DocLinksStart } from '@kbn/core/public';
 import { EuiLink } from '@elastic/eui';
 import { TermsIndexPatternColumn } from './operations';
@@ -238,6 +242,139 @@ describe('indexpattern_datasource utils', () => {
           (id) => id + 'C'
         )
       ).toMatchSnapshot();
+    });
+  });
+
+  describe('getUnsupportedOperationsWarningMessage', () => {
+    let framePublicAPI: FramePublicAPI;
+    let docLinks: DocLinksStart;
+    const affectedOperations = [
+      'sum',
+      'average',
+      'percentile',
+      'percentile_rank',
+      'count',
+      'unique_count',
+      'standard_deviation',
+    ];
+
+    function createColumnsForField(field: string) {
+      return Object.fromEntries(
+        affectedOperations.map((operationType, i) => [
+          `col_${i}`,
+          { operationType, sourceField: field },
+        ])
+      );
+    }
+
+    function createState(field: string) {
+      return {
+        layers: {
+          id: {
+            indexPatternId: '0',
+            columns: createColumnsForField(field),
+          },
+        },
+      } as unknown as FormBasedPrivateState;
+    }
+
+    function createFramePublic(indexPattern: IndexPattern): FramePublicAPI {
+      return {
+        dataViews: {
+          indexPatterns: Object.fromEntries([indexPattern].map((dataView, i) => [i, dataView])),
+        },
+      } as unknown as FramePublicAPI;
+    }
+
+    beforeEach(() => {
+      docLinks = {
+        links: {
+          fleet: {
+            datastreamsTSDSMetrics: 'http://tsdb_metric_doc',
+          },
+        },
+      } as DocLinksStart;
+    });
+
+    it.each([['bytes'], ['bytes_gauge']])(
+      'should return no warning for non-counter fields: %s',
+      (fieldName: string) => {
+        const warnings = getUnsupportedOperationsWarningMessage(
+          createState(fieldName),
+          createFramePublic(
+            createMockedIndexPatternWithAdditionalFields([
+              {
+                name: 'bytes_gauge',
+                displayName: 'bytes_gauge',
+                type: 'number',
+                aggregatable: true,
+                searchable: true,
+                timeSeriesMetric: 'gauge',
+              },
+            ])
+          ),
+          docLinks
+        );
+        expect(warnings).to.toHaveLength(0);
+      }
+    );
+
+    it('should return a warning for a counter field grouped by field', () => {
+      const warnings = getUnsupportedOperationsWarningMessage(
+        createState('bytes_counter'),
+        createFramePublic(
+          createMockedIndexPatternWithAdditionalFields([
+            {
+              name: 'bytes_counter',
+              displayName: 'bytes_counter',
+              type: 'number',
+              aggregatable: true,
+              searchable: true,
+              timeSeriesMetric: 'counter',
+            },
+          ])
+        ),
+        docLinks
+      );
+      expect(warnings).to.toHaveLength(1);
+    });
+
+    it('should group multiple warnings by field', () => {
+      const warnings = getUnsupportedOperationsWarningMessage(
+        {
+          layers: {
+            id: {
+              indexPatternId: '0',
+              columns: {
+                ...createColumnsForField('bytes_counter'),
+                ...createColumnsForField('bytes_counter2'),
+              },
+            },
+          },
+        } as unknown as FormBasedPrivateState,
+        createFramePublic(
+          createMockedIndexPatternWithAdditionalFields([
+            {
+              name: 'bytes_counter',
+              displayName: 'bytes_counter',
+              type: 'number',
+              aggregatable: true,
+              searchable: true,
+              timeSeriesMetric: 'counter',
+            },
+            {
+              name: 'bytes_counter2',
+              displayName: 'bytes_counter2',
+              type: 'number',
+              aggregatable: true,
+              searchable: true,
+              timeSeriesMetric: 'counter',
+            },
+          ])
+        ),
+        docLinks
+      );
+      expect(warnings).to.toHaveLength(2);
     });
   });
 });
