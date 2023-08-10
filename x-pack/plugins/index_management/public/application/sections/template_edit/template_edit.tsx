@@ -39,6 +39,7 @@ export const TemplateEdit: React.FunctionComponent<RouteComponentProps<MatchPara
   const decodedTemplateName = attemptToURIDecode(name)!;
   const { enableLegacyTemplates } = useAppContext();
 
+  // We don't expect the `legacy` query to be used when legacy templates are disabled, however, we add the enableLegacyTemplates check as a safeguard
   const isLegacy = enableLegacyTemplates && getIsLegacyFromQueryParams(location);
 
   const [isSaving, setIsSaving] = useState<boolean>(false);
