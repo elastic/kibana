@@ -7,11 +7,11 @@
 
 import { validate } from '@kbn/securitysolution-io-ts-utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { findListSchema, foundListSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { LIST_URL } from '@kbn/securitysolution-list-constants';
 
 import type { ListsPluginRouter } from '../types';
 import { decodeCursor } from '../services/utils';
+import { findListRequestQuery, findListResponse } from '../../common/api';
 
 import { buildRouteValidation, buildSiemResponse, getListClient } from './utils';
 
@@ -23,7 +23,7 @@ export const findListRoute = (router: ListsPluginRouter): void => {
       },
       path: `${LIST_URL}/_find`,
       validate: {
-        query: buildRouteValidation(findListSchema),
+        query: buildRouteValidation(findListRequestQuery),
       },
     },
     async (context, request, response) => {
@@ -68,7 +68,7 @@ export const findListRoute = (router: ListsPluginRouter): void => {
             sortField,
             sortOrder,
           });
-          const [validated, errors] = validate(exceptionList, foundListSchema);
+          const [validated, errors] = validate(exceptionList, findListResponse);
           if (errors != null) {
             return siemResponse.error({ body: errors, statusCode: 500 });
           } else {

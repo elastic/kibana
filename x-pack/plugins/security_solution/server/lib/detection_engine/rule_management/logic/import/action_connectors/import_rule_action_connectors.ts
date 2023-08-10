@@ -9,8 +9,8 @@ import { Readable } from 'stream';
 import type { SavedObjectsImportResponse } from '@kbn/core-saved-objects-common';
 import type { SavedObject } from '@kbn/core-saved-objects-server';
 
-import type { RuleToImport } from '../../../../../../../common/detection_engine/rule_management';
-import type { WarningSchema } from '../../../../../../../common/detection_engine/schemas/response';
+import type { RuleToImport } from '../../../../../../../common/api/detection_engine/rule_management';
+import type { WarningSchema } from '../../../../../../../common/api/detection_engine';
 import {
   checkIfActionsHaveMissingConnectors,
   filterExistingActionConnectors,

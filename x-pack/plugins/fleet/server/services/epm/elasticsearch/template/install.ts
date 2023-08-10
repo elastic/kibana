@@ -9,7 +9,10 @@ import { merge, concat, uniqBy, omit } from 'lodash';
 import Boom from '@hapi/boom';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
-import type { IndicesCreateRequest } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  IndicesCreateRequest,
+  ClusterPutComponentTemplateRequest,
+} from '@elastic/elasticsearch/lib/api/types';
 
 import { ElasticsearchAssetType } from '../../../../types';
 import {
@@ -44,6 +47,8 @@ import {
   applyDocOnlyValueToMapping,
   forEachMappings,
 } from '../../../experimental_datastream_features_helper';
+
+import { appContextService } from '../../../app_context';
 
 import {
   generateMappings,
@@ -265,7 +270,16 @@ function putComponentTemplate(
   const { name, body, create = false } = params;
   return {
     clusterPromise: retryTransientEsErrors(
-      () => esClient.cluster.putComponentTemplate({ name, body, create }, { ignore: [404] }),
+      () =>
+        esClient.cluster.putComponentTemplate(
+          // @ts-expect-error lifecycle is not yet supported here
+          {
+            name,
+            body,
+            create,
+          } as ClusterPutComponentTemplateRequest,
+          { ignore: [404] }
+        ),
       { logger }
     ),
     name,
@@ -286,6 +300,7 @@ export function buildComponentTemplates(params: {
   pipelineName?: string;
   defaultSettings: IndexTemplate['template']['settings'];
   experimentalDataStreamFeature?: ExperimentalDataStreamFeature;
+  lifecycle?: IndexTemplate['template']['lifecycle'];
 }) {
   const {
     templateName,
@@ -295,6 +310,7 @@ export function buildComponentTemplates(params: {
     mappings,
     pipelineName,
     experimentalDataStreamFeature,
+    lifecycle,
   } = params;
   const packageTemplateName = `${templateName}${PACKAGE_TEMPLATE_SUFFIX}`;
   const userSettingsTemplateName = `${templateName}${USER_SETTINGS_TEMPLATE_SUFFIX}`;
@@ -375,6 +391,7 @@ export function buildComponentTemplates(params: {
             }
           : {}),
       },
+      ...(lifecycle ? { lifecycle } : {}),
     },
     _meta,
   };
@@ -522,6 +539,9 @@ export function prepareTemplate({
   const templateIndexPattern = generateTemplateIndexPattern(dataStream);
   const templatePriority = getTemplatePriority(dataStream);
 
+  const isILMPolicyDisabled = appContextService.getConfig()?.internal?.disableILMPolicies ?? false;
+  const lifecyle = isILMPolicyDisabled && dataStream.lifecycle ? dataStream.lifecycle : undefined;
+
   const pipelineName = getPipelineNameForDatastream({ dataStream, packageVersion });
 
   const defaultSettings = buildDefaultSettings({
@@ -540,6 +560,7 @@ export function prepareTemplate({
     pipelineName,
     registryElasticsearch: dataStream.elasticsearch,
     experimentalDataStreamFeature,
+    lifecycle: lifecyle,
   });
 
   const template = getTemplate({

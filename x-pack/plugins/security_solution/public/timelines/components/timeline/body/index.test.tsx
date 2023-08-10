@@ -44,6 +44,10 @@ jest.mock(
   '../../../../detections/components/alerts_table/timeline_actions/use_add_to_case_actions'
 );
 
+jest.mock('../../../../common/hooks/use_upselling', () => ({
+  useUpsellingMessage: jest.fn(),
+}));
+
 jest.mock('../../../../common/components/user_privileges', () => {
   return {
     useUserPrivileges: () => ({

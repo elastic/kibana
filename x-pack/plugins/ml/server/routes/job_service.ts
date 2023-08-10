@@ -7,11 +7,12 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { schema } from '@kbn/config-schema';
+import { categorizationExamplesProvider } from '@kbn/ml-category-validator';
 import { ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
 import { wrapError } from '../client/error_wrapper';
 import type { RouteInitialization } from '../types';
 import {
-  categorizationFieldExamplesSchema,
+  categorizationFieldValidationSchema,
   basicChartSchema,
   populationChartSchema,
   datafeedIdsSchema,
@@ -32,7 +33,6 @@ import {
 import { jobIdSchema } from './schemas/anomaly_detectors_schema';
 
 import { jobServiceProvider } from '../models/job_service';
-import { categorizationExamplesProvider } from '../models/job_service/new_job';
 import { getAuthorizationHeader } from '../lib/request_authorization';
 import type { Datafeed, Job } from '../../common/types/anomaly_detection_jobs';
 
@@ -897,15 +897,15 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
   /**
    * @apiGroup JobService
    *
-   * @api {post} /internal/ml/jobs/categorization_field_examples Get categorization field examples
-   * @apiName ValidateCategoryExamples
-   * @apiDescription Validates category examples
+   * @api {post} /internal/ml/jobs/categorization_field_validation Get categorization field examples
+   * @apiName ValidateCategoryValidation
+   * @apiDescription Validates a field for categorization
    *
-   * @apiSchema (body) categorizationFieldExamplesSchema
+   * @apiSchema (body) categorizationFieldValidationSchema
    */
   router.versioned
     .post({
-      path: `${ML_INTERNAL_BASE_PATH}/jobs/categorization_field_examples`,
+      path: `${ML_INTERNAL_BASE_PATH}/jobs/categorization_field_validation`,
       access: 'internal',
       options: {
         tags: ['access:ml:canCreateJob'],
@@ -916,7 +916,7 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
         version: '1',
         validate: {
           request: {
-            body: schema.object(categorizationFieldExamplesSchema),
+            body: schema.object(categorizationFieldValidationSchema),
           },
         },
       },

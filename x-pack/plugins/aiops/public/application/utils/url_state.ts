@@ -8,9 +8,8 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import type { Filter, Query } from '@kbn/es-query';
-import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
-import { SEARCH_QUERY_LANGUAGE, SearchQueryLanguage } from './search_utils';
+import { SEARCH_QUERY_LANGUAGE, type SearchQueryLanguage } from '@kbn/ml-query-utils';
 
 const defaultSearchQuery = {
   match_all: {},
@@ -40,6 +39,20 @@ export const getDefaultAiOpsListState = (
   ...overrides,
 });
 
-export const isFullAiOpsListState = (arg: unknown): arg is AiOpsFullIndexBasedAppState => {
-  return isPopulatedObject(arg, Object.keys(getDefaultAiOpsListState()));
+export interface LogCategorizationPageUrlState {
+  pageKey: 'logCategorization';
+  pageUrlState: LogCategorizationAppState;
+}
+
+export interface LogCategorizationAppState extends AiOpsFullIndexBasedAppState {
+  field: string | undefined;
+}
+
+export const getDefaultLogCategorizationAppState = (
+  overrides?: Partial<LogCategorizationAppState>
+): LogCategorizationAppState => {
+  return {
+    field: undefined,
+    ...getDefaultAiOpsListState(overrides),
+  };
 };

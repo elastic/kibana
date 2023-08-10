@@ -211,7 +211,7 @@ docker.elastic.co/observability/profiling-agent:${hostAgentVersion} /root/pf-hos
           }),
           content: (
             <EuiCodeBlock paddingSize="s" isCopyable>
-              {`echo -e "project-id 1\nsecret-token ${secretToken}\ncollection-agent ${collectionAgentHost}" | sudo tee -a /etc/prodfiler/prodfiler.conf`}
+              {`echo -e "project-id 1\nsecret-token ${secretToken}\ncollection-agent ${collectionAgentHost}" | sudo tee -a /etc/Elastic/universal-profiling/pf-host-agent.conf`}
             </EuiCodeBlock>
           ),
         },
@@ -264,7 +264,7 @@ docker.elastic.co/observability/profiling-agent:${hostAgentVersion} /root/pf-hos
           }),
           content: (
             <EuiCodeBlock paddingSize="s" isCopyable>
-              {`echo -e "project-id 1\nsecret-token ${secretToken}\ncollection-agent ${collectionAgentHost}" | sudo tee -a /etc/prodfiler/prodfiler.conf`}
+              {`echo -e "project-id 1\nsecret-token ${secretToken}\ncollection-agent ${collectionAgentHost}" | sudo tee -a /etc/Elastic/universal-profiling/pf-host-agent.conf`}
             </EuiCodeBlock>
           ),
         },

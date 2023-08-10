@@ -5,23 +5,22 @@
  * 2.0.
  */
 
+import type { IKibanaResponse } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
-
-import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constants';
+import type { PatchRuleResponse } from '../../../../../../../common/api/detection_engine/rule_management';
 import {
   PatchRuleRequestBody,
   validatePatchRuleRequestBody,
-} from '../../../../../../../common/detection_engine/rule_management';
-
-import { buildRouteValidationNonExact } from '../../../../../../utils/build_validation/route_validation';
-import type { SecuritySolutionPluginRouter } from '../../../../../../types';
+} from '../../../../../../../common/api/detection_engine/rule_management';
+import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constants';
 import type { SetupPlugins } from '../../../../../../plugin';
+import type { SecuritySolutionPluginRouter } from '../../../../../../types';
+import { buildRouteValidationNonExact } from '../../../../../../utils/build_validation/route_validation';
 import { buildMlAuthz } from '../../../../../machine_learning/authz';
 import { throwAuthzError } from '../../../../../machine_learning/validation';
 import { buildSiemResponse } from '../../../../routes/utils';
-
-import { readRules } from '../../../logic/crud/read_rules';
 import { patchRules } from '../../../logic/crud/patch_rules';
+import { readRules } from '../../../logic/crud/read_rules';
 import { checkDefaultRuleExceptionListReferences } from '../../../logic/exceptions/check_for_default_rule_exception_list';
 import { validateRuleDefaultExceptionList } from '../../../logic/exceptions/validate_rule_default_exception_list';
 import { getIdError } from '../../../utils/utils';
@@ -41,7 +40,7 @@ export const patchRuleRoute = (router: SecuritySolutionPluginRouter, ml: SetupPl
         tags: ['access:securitySolution'],
       },
     },
-    async (context, request, response) => {
+    async (context, request, response): Promise<IKibanaResponse<PatchRuleResponse>> => {
       const siemResponse = buildSiemResponse(response);
       const validationErrors = validatePatchRuleRequestBody(request.body);
       if (validationErrors.length) {

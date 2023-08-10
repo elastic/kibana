@@ -4,12 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  KibanaRequest,
-  SavedObject,
-  SavedObjectsClientContract,
-  SavedObjectsFindResult,
-} from '@kbn/core/server';
+import { SavedObject, SavedObjectsClientContract, SavedObjectsFindResult } from '@kbn/core/server';
 import { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
 import { RouteContext } from '../../routes/types';
 import { SyntheticsServerSetup } from '../../types';
@@ -20,36 +15,41 @@ import {
   SyntheticsPrivateLocation,
 } from '../private_location/synthetics_private_location';
 import { SyntheticsService } from '../synthetics_service';
-
 import {
-  EncryptedSyntheticsMonitor,
+  ConfigKey,
+  EncryptedSyntheticsMonitorAttributes,
   HeartbeatConfig,
   MonitorFields,
   MonitorServiceLocation,
-  PrivateLocation,
+  ScheduleUnit,
   SyntheticsMonitorWithId,
-  SyntheticsMonitorWithSecrets,
+  SyntheticsMonitorWithSecretsAttributes,
 } from '../../../common/runtime_types';
 import {
   ConfigData,
   formatHeartbeatRequest,
   mixParamsWithGlobalParams,
 } from '../formatters/public_formatters/format_configs';
+import type { PrivateLocationAttributes } from '../../runtime_types/private_locations';
+export const LIGHTWEIGHT_TEST_NOW_RUN = 'LIGHTWEIGHT_SYNTHETICS_TEST_NOW_RUN';
+export const BROWSER_TEST_NOW_RUN = 'BROWSER_SYNTHETICS_TEST_NOW_RUN';
+const LONG_TIME_MONTH = '43800';
 
 export class SyntheticsMonitorClient {
+  public server: SyntheticsServerSetup;
   public syntheticsService: SyntheticsService;
   public privateLocationAPI: SyntheticsPrivateLocation;
 
   constructor(syntheticsService: SyntheticsService, server: SyntheticsServerSetup) {
+    this.server = server;
     this.syntheticsService = syntheticsService;
     this.privateLocationAPI = new SyntheticsPrivateLocation(server);
   }
 
   async addMonitors(
     monitors: Array<{ monitor: MonitorFields; id: string }>,
-    request: KibanaRequest,
     savedObjectsClient: SavedObjectsClientContract,
-    allPrivateLocations: PrivateLocation[],
+    allPrivateLocations: PrivateLocationAttributes[],
     spaceId: string
   ) {
     const privateConfigs: PrivateConfig[] = [];
@@ -76,7 +76,6 @@ export class SyntheticsMonitorClient {
 
     const newPolicies = this.privateLocationAPI.createPackagePolicies(
       privateConfigs,
-      request,
       allPrivateLocations,
       spaceId
     );
@@ -90,14 +89,13 @@ export class SyntheticsMonitorClient {
     monitors: Array<{
       monitor: MonitorFields;
       id: string;
-      previousMonitor: SavedObject<EncryptedSyntheticsMonitor>;
-      decryptedPreviousMonitor: SavedObject<SyntheticsMonitorWithSecrets>;
+      previousMonitor: SavedObject<EncryptedSyntheticsMonitorAttributes>;
+      decryptedPreviousMonitor: SavedObject<SyntheticsMonitorWithSecretsAttributes>;
     }>,
     routeContext: RouteContext,
-    allPrivateLocations: PrivateLocation[],
+    allPrivateLocations: PrivateLocationAttributes[],
     spaceId: string
   ) {
-    const { request } = routeContext;
     const privateConfigs: Array<{ config: HeartbeatConfig; globalParams: Record<string, string> }> =
       [];
 
@@ -144,7 +142,6 @@ export class SyntheticsMonitorClient {
 
     const privateEditPromise = this.privateLocationAPI.editMonitors(
       privateConfigs,
-      request,
       allPrivateLocations,
       spaceId
     );
@@ -162,11 +159,10 @@ export class SyntheticsMonitorClient {
   }
   async deleteMonitors(
     monitors: SyntheticsMonitorWithId[],
-    request: KibanaRequest,
     savedObjectsClient: SavedObjectsClientContract,
     spaceId: string
   ) {
-    const privateDeletePromise = this.privateLocationAPI.deleteMonitors(monitors, request, spaceId);
+    const privateDeletePromise = this.privateLocationAPI.deleteMonitors(monitors, spaceId);
 
     const publicDeletePromise = this.syntheticsService.deleteConfigs(
       monitors.map((monitor) => ({ monitor, configId: monitor.config_id, params: {} }))
@@ -176,7 +172,63 @@ export class SyntheticsMonitorClient {
     return pubicResponse;
   }
 
-  hasPrivateLocations(previousMonitor: SavedObject<EncryptedSyntheticsMonitor>) {
+  async testNowConfigs(
+    monitor: { monitor: MonitorFields; id: string; testRunId: string },
+    savedObjectsClient: SavedObjectsClientContract,
+    allPrivateLocations: PrivateLocationAttributes[],
+    spaceId: string,
+    runOnce?: true
+  ) {
+    let privateConfig: PrivateConfig | undefined;
+    let publicConfig: ConfigData | undefined;
+
+    const paramsBySpace = await this.syntheticsService.getSyntheticsParams({ spaceId });
+
+    const { formattedConfig, params, config } = await this.formatConfigWithParams(
+      monitor,
+      spaceId,
+      paramsBySpace
+    );
+
+    const { privateLocations, publicLocations } = this.parseLocations(formattedConfig);
+    if (privateLocations.length > 0) {
+      privateConfig = {
+        config: {
+          ...formattedConfig,
+          [ConfigKey.SCHEDULE]: {
+            number: LONG_TIME_MONTH,
+            unit: ScheduleUnit.MINUTES,
+          },
+          [ConfigKey.ENABLED]: true,
+        },
+        globalParams: params,
+      };
+    }
+
+    if (publicLocations.length > 0) {
+      publicConfig = config;
+      // making it enabled, even if it's disabled in the UI
+      publicConfig.monitor.enabled = true;
+      publicConfig.testRunId = monitor.testRunId;
+      if (runOnce) {
+        publicConfig.runOnce = true;
+      }
+    }
+
+    const newPolicies = this.privateLocationAPI.createPackagePolicies(
+      privateConfig ? [privateConfig] : [],
+      allPrivateLocations,
+      spaceId,
+      monitor.testRunId,
+      runOnce
+    );
+
+    const syncErrors = this.syntheticsService.runOnceConfigs(publicConfig);
+
+    return await Promise.all([newPolicies, syncErrors]);
+  }
+
+  hasPrivateLocations(previousMonitor: SavedObject<EncryptedSyntheticsMonitorAttributes>) {
     const { locations } = previousMonitor.attributes;
 
     return locations.some((loc) => !loc.isServiceManaged);
@@ -184,7 +236,7 @@ export class SyntheticsMonitorClient {
 
   hasDeletedPublicLocations(
     updatedLocations: MonitorServiceLocation[],
-    decryptedPreviousMonitor: SavedObject<SyntheticsMonitorWithSecrets>
+    decryptedPreviousMonitor: SavedObject<SyntheticsMonitorWithSecretsAttributes>
   ) {
     const { locations } = decryptedPreviousMonitor.attributes;
 
@@ -214,16 +266,12 @@ export class SyntheticsMonitorClient {
   }
 
   async syncGlobalParams({
-    request,
     spaceId,
-    savedObjectsClient,
     allPrivateLocations,
     encryptedSavedObjects,
   }: {
     spaceId: string;
-    request: KibanaRequest;
-    allPrivateLocations: PrivateLocation[];
-    savedObjectsClient: SavedObjectsClientContract;
+    allPrivateLocations: PrivateLocationAttributes[];
     encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   }) {
     const privateConfigs: Array<{ config: HeartbeatConfig; globalParams: Record<string, string> }> =
@@ -246,12 +294,7 @@ export class SyntheticsMonitorClient {
       }
     }
     if (privateConfigs.length > 0) {
-      await this.privateLocationAPI.editMonitors(
-        privateConfigs,
-        request,
-        allPrivateLocations,
-        spaceId
-      );
+      await this.privateLocationAPI.editMonitors(privateConfigs, allPrivateLocations, spaceId);
     }
 
     if (publicConfigs.length > 0) {
@@ -287,10 +330,10 @@ export class SyntheticsMonitorClient {
   }) {
     const encryptedClient = encryptedSavedObjects.getClient();
 
-    const monitors: Array<SavedObjectsFindResult<SyntheticsMonitorWithSecrets>> = [];
+    const monitors: Array<SavedObjectsFindResult<SyntheticsMonitorWithSecretsAttributes>> = [];
 
     const finder =
-      await encryptedClient.createPointInTimeFinderDecryptedAsInternalUser<SyntheticsMonitorWithSecrets>(
+      await encryptedClient.createPointInTimeFinderDecryptedAsInternalUser<SyntheticsMonitorWithSecretsAttributes>(
         {
           type: syntheticsMonitorType,
           perPage: 1000,
@@ -312,19 +355,22 @@ export class SyntheticsMonitorClient {
 
   mixParamsWithMonitors(
     spaceId: string,
-    monitors: Array<SavedObjectsFindResult<SyntheticsMonitorWithSecrets>>,
+    monitors: Array<SavedObjectsFindResult<SyntheticsMonitorWithSecretsAttributes>>,
     paramsBySpace: Record<string, Record<string, string>>
   ) {
     const heartbeatConfigs: HeartbeatConfig[] = [];
 
     for (const monitor of monitors) {
-      const attributes = monitor.attributes as unknown as MonitorFields;
-      const { str: paramsString } = mixParamsWithGlobalParams(paramsBySpace[spaceId], attributes);
+      const normalizedMonitor = normalizeSecrets(monitor).attributes as MonitorFields;
+      const { str: paramsString } = mixParamsWithGlobalParams(
+        paramsBySpace[spaceId],
+        normalizedMonitor
+      );
 
       heartbeatConfigs.push(
         formatHeartbeatRequest(
           {
-            monitor: normalizeSecrets(monitor).attributes,
+            monitor: normalizedMonitor,
             configId: monitor.id,
           },
           paramsString
@@ -358,7 +404,7 @@ export class SyntheticsMonitorClient {
 
   async inspectMonitor(
     monitorObj: { monitor: MonitorFields; id: string },
-    allPrivateLocations: PrivateLocation[],
+    allPrivateLocations: PrivateLocationAttributes[],
     spaceId: string,
     hideParams: boolean,
     canSave: boolean

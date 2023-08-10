@@ -27,7 +27,7 @@ import {
   DragDropBuckets,
   DraggableBucketContainer,
   NewBucketButton,
-} from '@kbn/visualization-ui-components/public';
+} from '@kbn/visualization-ui-components';
 import { useDebounceWithOptions } from '../../../../../shared_components';
 import { RangeTypeLens, isValidRange } from './ranges';
 import { FROM_PLACEHOLDER, TO_PLACEHOLDER, TYPING_DEBOUNCE_TIME } from './constants';

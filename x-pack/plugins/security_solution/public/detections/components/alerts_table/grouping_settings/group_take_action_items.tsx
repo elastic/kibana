@@ -8,7 +8,7 @@
 import React, { useCallback, useMemo } from 'react';
 import { EuiContextMenuItem } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { Status } from '../../../../../common/detection_engine/schemas/common';
+import type { Status } from '../../../../../common/api/detection_engine';
 import type { inputsModel } from '../../../../common/store';
 import { inputsSelectors } from '../../../../common/store';
 import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';

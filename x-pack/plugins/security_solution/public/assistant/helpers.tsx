@@ -52,6 +52,26 @@ export const getPromptContextFromEventDetailsItem = (data: TimelineEventsDetails
 const sendToTimelineEligibleQueryTypes: Array<CodeBlockDetails['type']> = ['kql', 'dsl', 'eql'];
 
 /**
+ * Returns message contents with replacements applied.
+ *
+ * @param message
+ * @param replacements
+ */
+export const getMessageContentWithReplacements = ({
+  messageContent,
+  replacements,
+}: {
+  messageContent: string;
+  replacements: Record<string, string> | undefined;
+}): string =>
+  replacements != null
+    ? Object.keys(replacements).reduce(
+        (acc, replacement) => acc.replaceAll(replacement, replacements[replacement]),
+        messageContent
+      )
+    : messageContent;
+
+/**
  * Augments the messages in a conversation with code block details, including
  * the start and end indices of the code block in the message, the type of the
  * code block, and the button to add the code block to the timeline.
@@ -61,7 +81,14 @@ const sendToTimelineEligibleQueryTypes: Array<CodeBlockDetails['type']> = ['kql'
 export const augmentMessageCodeBlocks = (
   currentConversation: Conversation
 ): CodeBlockDetails[][] => {
-  const cbd = currentConversation.messages.map(({ content }) => analyzeMarkdown(content));
+  const cbd = currentConversation.messages.map(({ content }) =>
+    analyzeMarkdown(
+      getMessageContentWithReplacements({
+        messageContent: content,
+        replacements: currentConversation.replacements,
+      })
+    )
+  );
 
   const output = cbd.map((codeBlocks, messageIndex) =>
     codeBlocks.map((codeBlock, codeBlockIndex) => {

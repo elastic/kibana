@@ -37,9 +37,11 @@ export interface Props {
   isEditing?: boolean;
   isDisabled?: boolean;
   isOpen?: boolean;
+  isSettingsModalVisible: boolean;
   setIsEditing?: React.Dispatch<React.SetStateAction<boolean>>;
+  setIsSettingsModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
   showTitles?: boolean;
-  onSystemPromptSelectionChange?: (promptId: string) => void;
+  onSystemPromptSelectionChange?: (promptId: string | undefined) => void;
 }
 
 const ADD_NEW_SYSTEM_PROMPT = 'ADD_NEW_SYSTEM_PROMPT';
@@ -54,12 +56,13 @@ const SelectSystemPromptComponent: React.FC<Props> = ({
   isEditing = false,
   isDisabled = false,
   isOpen = false,
+  isSettingsModalVisible,
   onSystemPromptSelectionChange,
   setIsEditing,
+  setIsSettingsModalVisible,
   showTitles = false,
 }) => {
-  const { isSettingsModalVisible, setIsSettingsModalVisible, setSelectedSettingsTab } =
-    useAssistantContext();
+  const { setSelectedSettingsTab } = useAssistantContext();
   const { setApiConfig } = useConversation();
 
   const [isOpenLocal, setIsOpenLocal] = useState<boolean>(isOpen);

@@ -12,7 +12,9 @@ import React from 'react';
 import styled from 'styled-components';
 
 import { css } from '@emotion/react';
+import { isEmpty } from 'lodash/fp';
 import type { Prompt } from '../../types';
+import { EMPTY_PROMPT } from './translations';
 
 const Strong = styled.strong`
   margin-right: ${({ theme }) => theme.eui.euiSizeS};
@@ -44,9 +46,10 @@ export const getOptionFromPrompt = ({
     <>
       <Strong data-test-subj="name">{name}</Strong>
 
-      <EuiToolTip content={content}>
+      {/* Empty content tooltip gets around :hover styles from SuperSelectOptionButton */}
+      <EuiToolTip content={undefined}>
         <EuiText color="subdued" data-test-subj="content" size="s">
-          <p>{content}</p>
+          {isEmpty(content) ? <p>{EMPTY_PROMPT}</p> : <p>{content}</p>}
         </EuiText>
       </EuiToolTip>
     </>

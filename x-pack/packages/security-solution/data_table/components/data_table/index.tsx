@@ -137,6 +137,7 @@ const memoizedGetColumnHeaders: (
   isEventRenderedView: boolean
 ) => ColumnHeaderOptions[] = memoizeOne(getColumnHeaders);
 
+// eslint-disable-next-line react/display-name
 export const DataTableComponent = React.memo<DataTableProps>(
   ({
     additionalControls,

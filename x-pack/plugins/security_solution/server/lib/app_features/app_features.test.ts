@@ -6,9 +6,9 @@
  */
 
 import { AppFeatures } from '.';
-import type { Logger } from '@kbn/core/server';
 import type { AppFeatureKeys, ExperimentalFeatures } from '../../../common';
 import type { PluginSetupContract } from '@kbn/features-plugin/server';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
 const SECURITY_BASE_CONFIG = {
   foo: 'foo',
@@ -85,7 +85,7 @@ describe('AppFeatures', () => {
     const appFeatureKeys = ['test-base-feature'] as unknown as AppFeatureKeys;
 
     const appFeatures = new AppFeatures(
-      {} as unknown as Logger,
+      loggingSystemMock.create().get('mock'),
       [] as unknown as ExperimentalFeatures
     );
     appFeatures.init(featuresSetup);
@@ -106,7 +106,7 @@ describe('AppFeatures', () => {
     const appFeatureKeys = ['test-cases-feature'] as unknown as AppFeatureKeys;
 
     const appFeatures = new AppFeatures(
-      {} as unknown as Logger,
+      loggingSystemMock.create().get('mock'),
       [] as unknown as ExperimentalFeatures
     );
     appFeatures.init(featuresSetup);

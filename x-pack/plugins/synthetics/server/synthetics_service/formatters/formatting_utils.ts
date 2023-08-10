@@ -24,10 +24,17 @@ export const replaceStringWithParams = (
   try {
     if (typeof value !== 'string') {
       const strValue = JSON.stringify(value);
+      if (hasNoParams(strValue)) {
+        return value as string | null;
+      }
+
       const parsedVars: ParsedVars = variableParser.parse(strValue);
 
       const parseValue = replaceVarsWithParams(parsedVars, params);
       return JSON.parse(parseValue);
+    }
+    if (hasNoParams(value)) {
+      return value as string | null;
     }
 
     const parsedVars: ParsedVars = variableParser.parse(value);
@@ -38,6 +45,11 @@ export const replaceStringWithParams = (
   }
 
   return value as string | null;
+};
+
+export const hasNoParams = (strVal: string) => {
+  const shellParamsRegex = /\$\{[a-zA-Z_][a-zA-Z0-9_]*\}/g;
+  return strVal.match(shellParamsRegex) === null;
 };
 
 export const secondsToCronFormatter: FormatterFn = (fields, key) => {

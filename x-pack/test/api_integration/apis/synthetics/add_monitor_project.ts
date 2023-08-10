@@ -1216,7 +1216,7 @@ export default function ({ getService }: FtrProviderContext) {
           [ConfigKey.PORT]: 443,
         };
 
-        const modifiedMonitor = { ...monitors[0]?.attributes, ...updates };
+        const modifiedMonitor = { ...monitors[0], ...updates };
 
         await supertest
           .put(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '/' + monitors[0]?.config_id)

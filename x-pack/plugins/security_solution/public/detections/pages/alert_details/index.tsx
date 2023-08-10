@@ -29,6 +29,7 @@ import { AlertDetailsErrorPage } from './components/error_page';
 import { AlertDetailsHeader } from './components/header';
 import { DetailsSummaryTab } from './tabs/summary';
 
+// eslint-disable-next-line react/display-name
 export const AlertDetailsPage = memo(() => {
   const { detailName: eventId } = useParams<{ detailName: string }>();
   const dispatch = useDispatch();

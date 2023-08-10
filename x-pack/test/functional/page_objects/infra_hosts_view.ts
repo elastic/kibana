@@ -40,8 +40,20 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
       return testSubjects.click('euiFlyoutCloseButton');
     },
 
+    async clickOverviewFlyoutTab() {
+      return testSubjects.click('hostsView-flyout-tabs-overview');
+    },
+
     async clickMetadataFlyoutTab() {
       return testSubjects.click('hostsView-flyout-tabs-metadata');
+    },
+
+    async clickOverviewLinkToAlerts() {
+      return testSubjects.click('assetDetails-flyout-alerts-link');
+    },
+
+    async clickOverviewOpenAlertsFlyout() {
+      return testSubjects.click('infraNodeContextPopoverCreateInventoryRuleButton');
     },
 
     async clickProcessesFlyoutTab() {
@@ -194,9 +206,18 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
     // Flyout Tabs
     async getAssetDetailsKPITileValue(type: string) {
       const container = await testSubjects.find('assetDetailsKPIGrid');
-      const element = await container.findByTestSubject(`assetDetailsKPI-${type}`);
+      const element = await container.findByTestSubject(`infraAssetDetailsKPI${type}`);
       const div = await element.findByClassName('echMetricText__value');
       return div.getAttribute('title');
+    },
+
+    overviewAlertsTitleExist() {
+      return testSubjects.exists('assetDetailsAlertsTitle');
+    },
+
+    async getAssetDetailsMetricsCharts() {
+      const container = await testSubjects.find('assetDetailsMetricsChartGrid');
+      return container.findAllByCssSelector('[data-test-subj*="infraAssetDetailsMetricsChart"]');
     },
 
     getMetadataTab() {

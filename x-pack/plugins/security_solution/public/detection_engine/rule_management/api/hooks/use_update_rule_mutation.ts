@@ -9,13 +9,14 @@ import { useMutation } from '@tanstack/react-query';
 import type {
   RuleResponse,
   RuleUpdateProps,
-} from '../../../../../common/detection_engine/rule_schema';
+} from '../../../../../common/api/detection_engine/model/rule_schema';
 import { transformOutput } from '../../../../detections/containers/detection_engine/rules/transforms';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { updateRule } from '../api';
 import { useInvalidateFindRulesQuery } from './use_find_rules_query';
 import { useInvalidateFetchRuleByIdQuery } from './use_fetch_rule_by_id_query';
 import { useInvalidateFetchRuleManagementFiltersQuery } from './use_fetch_rule_management_filters_query';
+import { useInvalidateFetchCoverageOverviewQuery } from './use_fetch_coverage_overview';
 
 export const UPDATE_RULE_MUTATION_KEY = ['PUT', DETECTION_ENGINE_RULES_URL];
 
@@ -25,6 +26,7 @@ export const useUpdateRuleMutation = (
   const invalidateFindRulesQuery = useInvalidateFindRulesQuery();
   const invalidateFetchRuleManagementFilters = useInvalidateFetchRuleManagementFiltersQuery();
   const invalidateFetchRuleByIdQuery = useInvalidateFetchRuleByIdQuery();
+  const invalidateFetchCoverageOverviewQuery = useInvalidateFetchCoverageOverviewQuery();
 
   return useMutation<RuleResponse, Error, RuleUpdateProps>(
     (rule: RuleUpdateProps) => updateRule({ rule: transformOutput(rule) }),
@@ -35,6 +37,7 @@ export const useUpdateRuleMutation = (
         invalidateFindRulesQuery();
         invalidateFetchRuleByIdQuery();
         invalidateFetchRuleManagementFilters();
+        invalidateFetchCoverageOverviewQuery();
 
         if (options?.onSettled) {
           options.onSettled(...args);

@@ -31,7 +31,7 @@ import { TestProviders } from '../../../../common/mock';
 import {
   getRulesEqlSchemaMock,
   getRulesSchemaMock,
-} from '../../../../../common/detection_engine/rule_schema/mocks';
+} from '../../../../../common/api/detection_engine/model/rule_schema/mocks';
 import type { AlertData } from '../../utils/types';
 import { useFindRules } from '../../../rule_management/logic/use_find_rules';
 import { useFindExceptionListReferences } from '../../logic/use_find_references';
@@ -144,7 +144,6 @@ describe('When the add exception modal is opened', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
-    jest.restoreAllMocks();
   });
 
   describe('when the modal is loading', () => {

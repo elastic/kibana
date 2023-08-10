@@ -28,7 +28,7 @@ import type {
   EqlBuildingBlockFieldsLatest,
   EqlShellFieldsLatest,
   WrappedFieldsLatest,
-} from '../../../../../common/detection_engine/schemas/alerts';
+} from '../../../../../common/api/detection_engine/model/alerts';
 
 /**
  * Takes N raw documents from ES that form a sequence and builds them into N+1 signals ready to be indexed -

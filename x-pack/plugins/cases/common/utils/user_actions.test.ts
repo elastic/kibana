@@ -6,7 +6,7 @@
  */
 
 import { omit } from 'lodash';
-import { ActionTypes } from '../api';
+import { UserActionTypes } from '../types/domain';
 import {
   isConnectorUserAction,
   isTitleUserAction,
@@ -22,13 +22,13 @@ import {
 
 describe('user action utils', () => {
   const predicateMap = {
-    [ActionTypes.connector]: isConnectorUserAction,
-    [ActionTypes.title]: isTitleUserAction,
-    [ActionTypes.status]: isStatusUserAction,
-    [ActionTypes.tags]: isTagsUserAction,
-    [ActionTypes.comment]: isCommentUserAction,
-    [ActionTypes.description]: isDescriptionUserAction,
-    [ActionTypes.category]: isCategoryUserAction,
+    [UserActionTypes.connector]: isConnectorUserAction,
+    [UserActionTypes.title]: isTitleUserAction,
+    [UserActionTypes.status]: isStatusUserAction,
+    [UserActionTypes.tags]: isTagsUserAction,
+    [UserActionTypes.comment]: isCommentUserAction,
+    [UserActionTypes.description]: isDescriptionUserAction,
+    [UserActionTypes.category]: isCategoryUserAction,
   };
 
   const tests = (Object.keys(predicateMap) as Array<keyof typeof predicateMap>).map((key) => [key]);
@@ -53,7 +53,7 @@ describe('user action utils', () => {
   describe('isPushedUserAction', () => {
     it('returns true if the user action is pushed', () => {
       expect(
-        isPushedUserAction({ type: ActionTypes.pushed, payload: { externalService: {} } })
+        isPushedUserAction({ type: UserActionTypes.pushed, payload: { externalService: {} } })
       ).toBe(true);
     });
 
@@ -82,7 +82,7 @@ describe('user action utils', () => {
     it('returns true if the user action is create_case', () => {
       expect(
         isCreateCaseUserAction({
-          type: ActionTypes.create_case,
+          type: UserActionTypes.create_case,
           payload,
         })
       ).toBe(true);

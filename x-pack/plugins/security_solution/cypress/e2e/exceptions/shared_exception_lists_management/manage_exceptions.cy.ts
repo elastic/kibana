@@ -4,11 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  esArchiverLoad,
-  esArchiverUnload,
-  esArchiverResetKibana,
-} from '../../../tasks/es_archiver';
+
 import { getNewRule } from '../../../objects/rule';
 import { login, visitWithoutDateRange } from '../../../tasks/login';
 import { createRule } from '../../../tasks/api_calls/rules';
@@ -44,8 +40,8 @@ import {
 
 describe('Add, edit and delete exception', () => {
   before(() => {
-    esArchiverResetKibana();
-    esArchiverLoad('exceptions');
+    cy.task('esArchiverResetKibana');
+    cy.task('esArchiverLoad', 'exceptions');
 
     createRule(getNewRule());
   });
@@ -56,7 +52,7 @@ describe('Add, edit and delete exception', () => {
     waitForExceptionsTableToBeLoaded();
   });
   after(() => {
-    esArchiverUnload('exceptions');
+    cy.task('esArchiverUnload', 'exceptions');
   });
 
   const exceptionName = 'My item name';

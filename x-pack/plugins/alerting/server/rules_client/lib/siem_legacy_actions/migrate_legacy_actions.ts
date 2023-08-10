@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
+import { i18n } from '@kbn/i18n';
+
 import { AlertConsumers } from '@kbn/rule-data-utils';
 
 import type { SavedObjectReference } from '@kbn/core/server';
@@ -49,15 +52,14 @@ export const migrateLegacyActions: MigrateLegacyActions = async (
       };
     }
 
-    const { legacyActions, legacyActionsReferences } = await retrieveMigratedLegacyActions(
-      context,
-      {
-        ruleId,
+    const validateLegacyActions = async (
+      legacyActions: RawRuleAction[],
+      legacyActionsReferences: SavedObjectReference[]
+    ) => {
+      // sometimes we don't need to validate legacy actions. For example, when delete rules or update rule from payload
+      if (skipActionsValidation === true) {
+        return;
       }
-    );
-
-    // sometimes we don't need to validate legacy actions. For example, when delete rules or update rule from payload
-    if (skipActionsValidation !== true) {
       const ruleType = context.ruleTypeRegistry.get(attributes.alertTypeId);
       await validateActions(context, ruleType, {
         ...attributes,
@@ -66,7 +68,15 @@ export const migrateLegacyActions: MigrateLegacyActions = async (
         notifyWhen: undefined,
         actions: injectReferencesIntoActions(ruleId, legacyActions, legacyActionsReferences),
       });
-    }
+    };
+
+    const { legacyActions, legacyActionsReferences } = await retrieveMigratedLegacyActions(
+      context,
+      {
+        ruleId,
+      },
+      validateLegacyActions
+    );
 
     // fix references for a case when actions present in a rule
     if (actions.length) {
@@ -103,11 +113,14 @@ export const migrateLegacyActions: MigrateLegacyActions = async (
     context.logger.error(
       `migrateLegacyActions(): Failed to migrate legacy actions for SIEM rule ${ruleId}: ${e.message}`
     );
-
-    return {
-      resultedActions: [],
-      hasLegacyActions: false,
-      resultedReferences: [],
-    };
+    throw Boom.badRequest(
+      i18n.translate('xpack.alerting.rulesClient.validateLegacyActions.errorSummary', {
+        defaultMessage: 'Failed to migrate legacy actions for SIEM rule {ruleId}: {errorMessage}',
+        values: {
+          ruleId,
+          errorMessage: e.message,
+        },
+      })
+    );
   }
 };

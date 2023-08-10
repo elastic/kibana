@@ -14,22 +14,16 @@ import {
   withEmbeddableSubscription,
   ContainerInput,
   ContainerOutput,
-  EmbeddableStart,
-  EmbeddableChildPanel,
+  EmbeddablePanel,
 } from '@kbn/embeddable-plugin/public';
 
 interface Props {
   embeddable: IContainer;
   input: ContainerInput;
   output: ContainerOutput;
-  embeddableServices: EmbeddableStart;
 }
 
-function renderList(
-  embeddable: IContainer,
-  panels: ContainerInput['panels'],
-  embeddableServices: EmbeddableStart
-) {
+function renderList(embeddable: IContainer, panels: ContainerInput['panels']) {
   let number = 0;
   const list = Object.values(panels).map((panel) => {
     number++;
@@ -42,10 +36,8 @@ function renderList(
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem>
-            <EmbeddableChildPanel
-              PanelComponent={embeddableServices.EmbeddablePanel}
-              embeddableId={panel.explicitInput.id}
-              container={embeddable}
+            <EmbeddablePanel
+              embeddable={() => embeddable.untilEmbeddableLoaded(panel.explicitInput.id)}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -55,12 +47,12 @@ function renderList(
   return list;
 }
 
-export function ListContainerComponentInner({ embeddable, input, embeddableServices }: Props) {
+export function ListContainerComponentInner({ embeddable, input }: Props) {
   return (
     <div>
       <h2 data-test-subj="listContainerTitle">{embeddable.getTitle()}</h2>
       <EuiSpacer size="l" />
-      {renderList(embeddable, input.panels, embeddableServices)}
+      {renderList(embeddable, input.panels)}
     </div>
   );
 }
@@ -73,6 +65,5 @@ export function ListContainerComponentInner({ embeddable, input, embeddableServi
 export const ListContainerComponent = withEmbeddableSubscription<
   ContainerInput,
   ContainerOutput,
-  IContainer,
-  { embeddableServices: EmbeddableStart }
+  IContainer
 >(ListContainerComponentInner);

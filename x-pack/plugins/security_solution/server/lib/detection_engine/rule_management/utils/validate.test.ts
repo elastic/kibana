@@ -11,7 +11,7 @@ import { getRuleMock } from '../../routes/__mocks__/request_responses';
 import { getListArrayMock } from '../../../../../common/detection_engine/schemas/types/lists.mock';
 import { getThreatMock } from '../../../../../common/detection_engine/schemas/types/threat.mock';
 import { getQueryRuleParams } from '../../rule_schema/mocks';
-import type { RuleResponse } from '../../../../../common/detection_engine/rule_schema';
+import type { RuleResponse } from '../../../../../common/api/detection_engine/model/rule_schema';
 
 export const ruleOutput = (): RuleResponse => ({
   actions: [],

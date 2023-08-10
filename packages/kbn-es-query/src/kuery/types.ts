@@ -8,11 +8,15 @@
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { SerializableRecord } from '@kbn/utility-types';
+import { KQL_NODE_TYPE_FUNCTION } from './node_types/function';
 import { KQL_NODE_TYPE_LITERAL } from './node_types/literal';
 import { KQL_NODE_TYPE_WILDCARD } from './node_types/wildcard';
 
 /** @public */
-export type KqlNodeType = typeof KQL_NODE_TYPE_LITERAL | 'function' | typeof KQL_NODE_TYPE_WILDCARD;
+export type KqlNodeType =
+  | typeof KQL_NODE_TYPE_LITERAL
+  | typeof KQL_NODE_TYPE_FUNCTION
+  | typeof KQL_NODE_TYPE_WILDCARD;
 
 /** @public */
 export interface KueryNode {

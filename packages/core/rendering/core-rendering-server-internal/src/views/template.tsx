@@ -8,7 +8,7 @@
 
 import React, { FunctionComponent, createElement } from 'react';
 
-import { EUI_STYLES_GLOBAL } from '@kbn/core-base-common';
+import { EUI_STYLES_GLOBAL, EUI_STYLES_UTILS } from '@kbn/core-base-common';
 import { RenderingMetadata } from '../types';
 import { Fonts } from './fonts';
 import { Styles } from './styles';
@@ -59,6 +59,8 @@ export const Template: FunctionComponent<Props> = ({
         {/* Inject stylesheets into the <head> before scripts so that KP plugins with bundled styles will override them */}
         <meta name="add-styles-here" />
         <meta name="add-scripts-here" />
+        {/* Inject EUI CSS utilties after all other styles for CSS specificity */}
+        <meta name={EUI_STYLES_UTILS} />
       </head>
       <body>
         {createElement('kbn-csp', {

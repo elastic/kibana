@@ -123,8 +123,8 @@ export const guideCards: GuideCardConstants[] = [
       />
     ),
     navigateTo: {
-      appId: 'home',
-      path: '#/tutorial/apm',
+      appId: 'apm',
+      path: '/tutorial',
     },
     telemetryId: 'onboarding--observability--apm',
     order: 5,

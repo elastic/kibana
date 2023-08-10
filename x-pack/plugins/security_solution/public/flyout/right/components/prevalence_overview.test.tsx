@@ -26,7 +26,6 @@ const highlightedField = {
   name: 'field',
   values: ['values'],
 };
-const scopeId = 'scopeId';
 const callbackIfNull = jest.fn();
 
 const panelContextValue = {
@@ -61,7 +60,6 @@ describe('<PrevalenceOverview />', () => {
       prevalenceRows: [
         <PrevalenceOverviewRow
           highlightedField={highlightedField}
-          scopeId={scopeId}
           callbackIfNull={callbackIfNull}
           data-test-subj={'test'}
         />,
@@ -106,7 +104,6 @@ describe('<PrevalenceOverview />', () => {
       prevalenceRows: [
         <PrevalenceOverviewRow
           highlightedField={highlightedField}
-          scopeId={scopeId}
           callbackIfNull={callbackIfNull}
           data-test-subj={'test'}
         />,

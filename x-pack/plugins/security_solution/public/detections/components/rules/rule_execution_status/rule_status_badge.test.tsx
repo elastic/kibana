@@ -8,7 +8,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 
-import { RuleExecutionStatus } from '../../../../../common/detection_engine/rule_monitoring';
+import { RuleExecutionStatus } from '../../../../../common/api/detection_engine/rule_monitoring';
 import { RuleStatusBadge } from './rule_status_badge';
 
 describe('RuleStatusBadge', () => {
