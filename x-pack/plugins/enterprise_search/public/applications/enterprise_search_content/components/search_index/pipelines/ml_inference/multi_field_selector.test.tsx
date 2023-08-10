@@ -186,7 +186,7 @@ describe('SelectedFieldMappings', () => {
 
     expect(wrapper.find(EuiBasicTable)).toHaveLength(1);
     const table = wrapper.find(EuiBasicTable);
-    expect(table.prop('columns').map((c: EuiBasicTableColumn<'name'>) => c.name)).toEqual([
+    expect(table.prop('columns').map((c: EuiBasicTableColumn<{}>) => c.name)).toEqual([
       'Source text field',
       '',
       'Target field',
