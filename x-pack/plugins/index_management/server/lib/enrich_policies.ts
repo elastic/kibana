@@ -46,11 +46,3 @@ export const fetchAll = async (client: IScopedClusterClient) => {
 
   return serializeEnrichmentPolicies(res.policies);
 };
-
-export const execute = (client: IScopedClusterClient, policyName: string) => {
-  return client.asCurrentUser.enrich.executePolicy({ name: policyName });
-};
-
-export const remove = (client: IScopedClusterClient, policyName: string) => {
-  return client.asCurrentUser.enrich.deletePolicy({ name: policyName });
-};
