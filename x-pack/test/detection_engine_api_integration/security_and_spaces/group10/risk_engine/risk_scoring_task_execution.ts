@@ -66,7 +66,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await deleteAllRules(supertest, log);
       });
 
-      describe('with some alerts', () => {
+      describe('with some alerts containing hosts', () => {
         let documentId: string;
 
         beforeEach(async () => {
@@ -141,12 +141,12 @@ export default ({ getService }: FtrProviderContext): void => {
             });
           });
 
-          describe('when config values are overwritten', () => {
+          describe('modifying configuration', () => {
             beforeEach(async () => {
               await riskEngineRoutes.disable();
             });
 
-            describe('when task interval configuration is modified', () => {
+            describe('when task interval is modified', () => {
               beforeEach(async () => {
                 await updateRiskEngineConfigSO({
                   attributes: {
@@ -165,6 +165,54 @@ export default ({ getService }: FtrProviderContext): void => {
               });
             });
           });
+        });
+      });
+
+      describe('with some alerts containing hosts and others containing users', () => {
+        let hostId: string;
+        let userId: string;
+
+        beforeEach(async () => {
+          hostId = uuidv4();
+          const hostEvent = buildDocument({ host: { name: 'host-1' } }, hostId);
+          await indexListOfDocuments(
+            Array(10)
+              .fill(hostEvent)
+              .map((event, index) => ({
+                ...event,
+                'host.name': `host-${index}`,
+              }))
+          );
+
+          const userEvent = buildDocument({ user: { name: 'user-1' } }, userId);
+          await indexListOfDocuments(
+            Array(10)
+              .fill(userEvent)
+              .map((event, index) => ({
+                ...event,
+                'user.name': `user-${index}`,
+              }))
+          );
+
+          await createAndSyncRuleAndAlerts({
+            query: `id: ${userId} or id: ${hostId}`,
+            alerts: 20,
+            riskScore: 40,
+          });
+
+          await riskEngineRoutes.init();
+        });
+
+        it('calculates and persists risk scores for both types of entities', async () => {
+          await waitForRiskScoresToBePresent({ es, log, scoreCount: 20 });
+          const riskScores = await readRiskScores(es);
+
+          expect(riskScores.length).to.eql(20);
+          const scoredIdentifiers = normalizeScores(riskScores).map(
+            ({ id_field: idField }) => idField
+          );
+          expect(scoredIdentifiers.includes('host.name')).to.be(true);
+          expect(scoredIdentifiers.includes('user.name')).to.be(true);
         });
       });
     });

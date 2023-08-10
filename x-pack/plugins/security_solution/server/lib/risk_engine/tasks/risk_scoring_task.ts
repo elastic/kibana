@@ -6,6 +6,7 @@
  */
 
 import moment from 'moment';
+import { asyncForEach } from '@kbn/std';
 import {
   type Logger,
   SavedObjectsErrorHelpers,
@@ -17,7 +18,7 @@ import type {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 
-import type { AfterKeys } from '../../../../common/risk_engine';
+import type { AfterKeys, IdentifierType } from '../../../../common/risk_engine';
 import type { StartPlugins } from '../../../plugin';
 import { type RiskScoreService, riskScoreServiceFactory } from '../risk_score_service';
 import { RiskEngineDataClient } from '../risk_engine_data_client';
@@ -29,6 +30,7 @@ import {
 } from './state';
 import { INTERVAL, SCOPE, TIMEOUT, TYPE, VERSION } from './constants';
 import { convertRangeToISO } from './helpers';
+import { RiskScoreEntity } from '../../../../common/risk_engine/types';
 
 const logFactory =
   (logger: Logger, taskId: string) =>
@@ -152,7 +154,6 @@ export const runTask = async ({
   const log = logFactory(logger, taskId);
   const taskExecutionTime = moment().utc().toISOString();
 
-  let afterKeys: AfterKeys = {};
   let scoresWritten = 0;
   const updatedState = {
     lastExecutionTimestamp: taskExecutionTime,
@@ -180,7 +181,14 @@ export const runTask = async ({
     return { state: updatedState };
   }
 
-  const { dataViewId, enabled, filter, range: configuredRange, pageSize } = configuration;
+  const {
+    dataViewId,
+    enabled,
+    filter,
+    identifierType: configuredIdentifierType,
+    range: configuredRange,
+    pageSize,
+  } = configuration;
   if (!enabled) {
     log('risk engine is not enabled, exiting task');
     return { state: updatedState };
@@ -190,24 +198,30 @@ export const runTask = async ({
   const { index, runtimeMappings } = await riskScoreService.getRiskInputsIndex({
     dataViewId,
   });
+  const identifierTypes: IdentifierType[] = configuredIdentifierType
+    ? [configuredIdentifierType]
+    : [RiskScoreEntity.host, RiskScoreEntity.user];
 
-  let isWorkComplete = false;
-  while (!isWorkComplete) {
-    const result = await riskScoreService.calculateAndPersistScores({
-      afterKeys,
-      index,
-      filter,
-      identifierType: 'host', // TODO
-      pageSize,
-      range,
-      runtimeMappings,
-      weights: [],
-    });
+  await asyncForEach(identifierTypes, async (identifierType) => {
+    let isWorkComplete = false;
+    let afterKeys: AfterKeys = {};
+    while (!isWorkComplete) {
+      const result = await riskScoreService.calculateAndPersistScores({
+        afterKeys,
+        index,
+        filter,
+        identifierType,
+        pageSize,
+        range,
+        runtimeMappings,
+        weights: [],
+      });
 
-    isWorkComplete = isRiskScoreCalculationComplete(result);
-    afterKeys = result.after_keys;
-    scoresWritten += result.scores_written;
-  }
+      isWorkComplete = isRiskScoreCalculationComplete(result);
+      afterKeys = result.after_keys;
+      scoresWritten += result.scores_written;
+    }
+  });
 
   updatedState.scoresWritten = scoresWritten;
 

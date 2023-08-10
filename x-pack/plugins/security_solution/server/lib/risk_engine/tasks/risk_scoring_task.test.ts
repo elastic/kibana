@@ -136,6 +136,7 @@ describe('Risk Scoring Task', () => {
         dataViewId: 'data_view_id',
         enabled: true,
         filter: {},
+        identifierType: 'host',
         interval: '1h',
         pageSize: 10_000,
         range: { start: 'now-30d', end: 'now' },
@@ -206,6 +207,7 @@ describe('Risk Scoring Task', () => {
           filter: {
             term: { 'host.name': 'SUSPICIOUS' },
           },
+          identifierType: 'host',
           interval: '2h',
           pageSize: 11_111,
           range: { start: 'now-30d', end: 'now' },
@@ -221,6 +223,7 @@ describe('Risk Scoring Task', () => {
             filter: {
               term: { 'host.name': 'SUSPICIOUS' },
             },
+            identifierType: 'host',
             pageSize: 11_111,
             range: {
               start: expect.stringMatching(ISO_8601_PATTERN),
@@ -228,6 +231,52 @@ describe('Risk Scoring Task', () => {
             },
           })
         );
+      });
+
+      describe('when no identifier type is configured', () => {
+        beforeEach(() => {
+          mockRiskScoreService.getConfiguration.mockResolvedValue({
+            dataViewId: 'data_view_id',
+            enabled: true,
+            filter: {},
+            identifierType: undefined,
+            interval: '1h',
+            pageSize: 10_000,
+            range: { start: 'now-30d', end: 'now' },
+          });
+          // add additional mock responses for the additional identifier calls
+          mockRiskScoreService.calculateAndPersistScores
+            .mockResolvedValueOnce({
+              after_keys: { host: { 'user.name': 'value' } },
+              scores_written: 5,
+              errors: [],
+            })
+            .mockResolvedValueOnce({
+              after_keys: {},
+              scores_written: 5,
+              errors: [],
+            });
+        });
+
+        it('invokes the risk score service once for type of identifier', async () => {
+          await runTask({
+            getRiskScoreService,
+            logger: mockLogger,
+            taskInstance: riskScoringTaskInstanceMock,
+          });
+          expect(mockRiskScoreService.calculateAndPersistScores).toHaveBeenCalledTimes(4);
+
+          expect(mockRiskScoreService.calculateAndPersistScores).toHaveBeenCalledWith(
+            expect.objectContaining({
+              identifierType: 'host',
+            })
+          );
+          expect(mockRiskScoreService.calculateAndPersistScores).toHaveBeenCalledWith(
+            expect.objectContaining({
+              identifierType: 'user',
+            })
+          );
+        });
       });
 
       it.todo('updates the task state');
@@ -240,6 +289,7 @@ describe('Risk Scoring Task', () => {
             filter: {
               term: { 'host.name': 'SUSPICIOUS' },
             },
+            identifierType: undefined,
             interval: '2h',
             pageSize: 11_111,
             range: { start: 'now-30d', end: 'now' },
