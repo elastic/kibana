@@ -60,10 +60,10 @@ describe('Exceptions viewer read only', () => {
     visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL, ROLES.reader);
     cy.intercept('GET', '/api/detection_engine/rules/*').as('getRuleDetails');
     goToRuleDetails();
-    cy.wait('@getRuleDetails', { timeout: 10000 }).then(({ response }) =>
-      cy.wrap(response?.statusCode).should('eql', 200)
-    );
-    goToExceptionsTab();
+    cy.wait('@getRuleDetails', { timeout: 10000 }).then(({ response }) => {
+      cy.wrap(response?.statusCode).should('eql', 200);
+      goToExceptionsTab();
+    });
   });
 
   after(() => {
