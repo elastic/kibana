@@ -29,5 +29,5 @@ export interface ClientConfigType {
     enabled: boolean;
   };
   enableIndexActions?: boolean;
-  enableLegacyTemplates: boolean;
+  enableLegacyTemplates?: boolean;
 }

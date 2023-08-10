@@ -23,7 +23,9 @@ import { useAppContext } from '../../app_context';
 export const TemplateCreate: React.FunctionComponent<RouteComponentProps> = ({ history }) => {
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [saveError, setSaveError] = useState<any>(null);
-  const { enableLegacyTemplates } = useAppContext();
+  const {
+    config: { enableLegacyTemplates },
+  } = useAppContext();
   const search = parse(useLocation().search.substring(1));
   // We don't expect the `legacy` query to be used when legacy templates are disabled, however, we add the `enableLegacyTemplates` check as a safeguard
   const isLegacy = enableLegacyTemplates && Boolean(search.legacy);
