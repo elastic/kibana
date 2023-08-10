@@ -57,8 +57,8 @@ export interface ErrorCountRuleParams {
   environment?: string;
   groupBy?: string[] | undefined;
   errorGroupingKey?: string;
-  useFilterQuery?: boolean;
-  filterQuery?: string;
+  useKqlFilter?: boolean;
+  kqlFilter?: string;
 }
 
 interface Props {
@@ -105,9 +105,8 @@ export function ErrorCountRuleType(props: Props) {
                 start,
                 end,
                 groupBy: params.groupBy,
-                useFilterQuery:
-                  params.useFilterQuery === true ? 'true' : 'false',
-                filterQuery: params.filterQuery,
+                useKqlFilter: params.useKqlFilter === true ? 'true' : 'false',
+                kqlFilter: params.kqlFilter,
               },
             },
           }
@@ -121,8 +120,8 @@ export function ErrorCountRuleType(props: Props) {
       params.serviceName,
       params.errorGroupingKey,
       params.groupBy,
-      params.useFilterQuery,
-      params.filterQuery,
+      params.useKqlFilter,
+      params.kqlFilter,
     ]
   );
 
@@ -186,7 +185,7 @@ export function ErrorCountRuleType(props: Props) {
   ];
 
   const fields = [
-    ...(!ruleParams.useFilterQuery ? filterFields : []),
+    ...(!ruleParams.useKqlFilter ? filterFields : []),
     ...criteriaFields,
   ];
 
@@ -247,8 +246,8 @@ export function ErrorCountRuleType(props: Props) {
     setRuleParams('serviceName', undefined);
     setRuleParams('errorGroupingKey', undefined);
     setRuleParams('environment', ENVIRONMENT_ALL.value);
-    setRuleParams('filterQuery', undefined);
-    setRuleParams('useFilterQuery', e.target.checked);
+    setRuleParams('kqlFilter', undefined);
+    setRuleParams('useKqlFilter', e.target.checked);
   };
 
   const kqlFilter = (

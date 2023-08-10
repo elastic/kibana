@@ -32,8 +32,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         transactionType: 'request',
         environment: 'ENVIRONMENT_ALL',
         interval: '5m',
-        useFilterQuery: 'false',
-        filterQuery: '',
+        useKqlFilter: 'false',
+        kqlFilter: '',
       },
     },
   });
@@ -44,8 +44,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         start: new Date(start).toISOString(),
         end: new Date(end).toISOString(),
         interval: '5m',
-        useFilterQuery: 'true',
-        filterQuery: 'service.name: synth-go and transaction.type: request',
+        useKqlFilter: 'true',
+        kqlFilter: 'service.name: synth-go and transaction.type: request',
         serviceName: undefined,
         transactionType: undefined,
         transactionName: undefined,
@@ -324,7 +324,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           params: {
             query: {
               ...getOptionsWithFilterQuery().params.query,
-              filterQuery:
+              kqlFilter:
                 'service.name: synth-go and transaction.type: request and transaction.name: GET /banana',
               groupBy: [SERVICE_NAME, SERVICE_ENVIRONMENT, TRANSACTION_TYPE],
             },
@@ -350,7 +350,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           params: {
             query: {
               ...getOptionsWithFilterQuery().params.query,
-              filterQuery:
+              kqlFilter:
                 'service.name: synth-go and transaction.type: request and transaction.name: foo',
               groupBy: [SERVICE_NAME, SERVICE_ENVIRONMENT, TRANSACTION_TYPE],
             },
@@ -441,7 +441,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           params: {
             query: {
               ...getOptionsWithFilterQuery().params.query,
-              filterQuery:
+              kqlFilter:
                 'service.name: synth-go and transaction.type: request and transaction.name: GET /apple',
               groupBy: [SERVICE_NAME, SERVICE_ENVIRONMENT, TRANSACTION_TYPE, TRANSACTION_NAME],
             },
@@ -468,7 +468,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           params: {
             query: {
               ...getOptionsWithFilterQuery().params.query,
-              filterQuery: '',
+              kqlFilter: '',
             },
           },
         };
@@ -495,7 +495,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           params: {
             query: {
               ...getOptionsWithFilterQuery().params.query,
-              filterQuery: '',
+              kqlFilter: '',
               groupBy: [SERVICE_NAME, SERVICE_ENVIRONMENT, TRANSACTION_TYPE, TRANSACTION_NAME],
             },
           },

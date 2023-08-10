@@ -57,8 +57,8 @@ export async function getTransactionDurationChartPreview({
     start,
     end,
     groupBy: groupByFields,
-    useFilterQuery,
-    filterQuery,
+    useKqlFilter,
+    kqlFilter,
   } = alertParams;
   const searchAggregatedTransactions = await getSearchTransactionsEvents({
     config,
@@ -67,7 +67,7 @@ export async function getTransactionDurationChartPreview({
   });
 
   const termFilterQuery =
-    !useFilterQuery || useFilterQuery === 'false'
+    !useKqlFilter || useKqlFilter === 'false'
       ? [
           ...termQuery(SERVICE_NAME, serviceName, {
             queryEmptyString: false,
@@ -86,7 +86,7 @@ export async function getTransactionDurationChartPreview({
     bool: {
       filter: [
         ...termFilterQuery,
-        ...getParsedFilterQuery(filterQuery),
+        ...getParsedFilterQuery(kqlFilter),
         ...rangeQuery(start, end),
         ...getDocumentTypeFilterForTransactions(searchAggregatedTransactions),
       ] as QueryDslQueryContainer[],

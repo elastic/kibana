@@ -40,8 +40,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         start: new Date(start).toISOString(),
         end: new Date(end).toISOString(),
         interval: '5m',
-        useFilterQuery: 'true',
-        filterQuery: 'service.name: synth-go',
+        useKqlFilter: 'true',
+        kqlFilter: 'service.name: synth-go',
         serviceName: undefined,
         errorGroupingKey: undefined,
         environment: 'ENVIRONMENT_ALL',
@@ -328,7 +328,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           params: {
             query: {
               ...getOptionsWithFilterQuery().params.query,
-              filterQuery:
+              kqlFilter:
                 'service.name: synth-go and error.grouping_key: 98b75903135eac35ad42419bd3b45cf8b4270c61cbd0ede0f7e8c8a9ac9fdb03',
             },
           },
@@ -429,7 +429,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           params: {
             query: {
               ...getOptionsWithFilterQuery().params.query,
-              filterQuery:
+              kqlFilter:
                 'service.name: synth-go and error.grouping_key: cf676a2665c3c548caaab78db6d23af63aed81bff4360a5b9873c07443aee78c',
               groupBy: [SERVICE_NAME, SERVICE_ENVIRONMENT, ERROR_GROUP_ID],
             },
@@ -461,7 +461,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           params: {
             query: {
               ...getOptionsWithFilterQuery().params.query,
-              filterQuery: '',
+              kqlFilter: '',
             },
           },
         };
@@ -488,7 +488,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           params: {
             query: {
               ...getOptionsWithFilterQuery().params.query,
-              filterQuery: '',
+              kqlFilter: '',
               groupBy: [SERVICE_NAME, SERVICE_ENVIRONMENT, ERROR_GROUP_ID],
             },
           },

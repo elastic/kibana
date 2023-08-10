@@ -327,8 +327,8 @@ describe('registerTransactionDurationRuleType', () => {
       transactionType: undefined,
       serviceName: undefined,
       aggregationType: 'avg',
-      useFilterQuery: true,
-      filterQuery: 'service.name: opbeans-java and transaction.type: request',
+      useKqlFilter: true,
+      kqlFilter: 'service.name: opbeans-java and transaction.type: request',
       groupBy: ['service.name', 'service.environment', 'transaction.type'],
     };
 

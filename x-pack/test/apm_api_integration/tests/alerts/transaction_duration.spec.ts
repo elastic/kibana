@@ -106,8 +106,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             serviceName: 'opbeans-java',
             environment: 'production',
             aggregationType: AggregationType.Avg,
-            useFilterQuery: false,
-            filterQuery: '',
+            useKqlFilter: false,
+            kqlFilter: '',
             groupBy: [
               'service.name',
               'service.environment',
@@ -209,8 +209,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             serviceName: undefined,
             environment: 'ENVIRONMENT_ALL',
             aggregationType: AggregationType.Avg,
-            useFilterQuery: true,
-            filterQuery:
+            useKqlFilter: true,
+            kqlFilter:
               'service.name: opbeans-node and transaction.type: request and service.environment: production',
             groupBy: [
               'service.name',

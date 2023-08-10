@@ -58,8 +58,8 @@ export interface ErrorRateRuleParams {
   transactionName?: string;
   environment?: string;
   groupBy?: string[] | undefined;
-  useFilterQuery?: boolean;
-  filterQuery?: string;
+  useKqlFilter?: boolean;
+  kqlFilter?: string;
 }
 
 export interface Props {
@@ -107,9 +107,8 @@ export function TransactionErrorRateRuleType(props: Props) {
                 start,
                 end,
                 groupBy: params.groupBy,
-                useFilterQuery:
-                  params.useFilterQuery === true ? 'true' : 'false',
-                filterQuery: params.filterQuery,
+                useKqlFilter: params.useKqlFilter === true ? 'true' : 'false',
+                kqlFilter: params.kqlFilter,
               },
             },
           }
@@ -124,8 +123,8 @@ export function TransactionErrorRateRuleType(props: Props) {
       params.windowSize,
       params.windowUnit,
       params.groupBy,
-      params.useFilterQuery,
-      params.filterQuery,
+      params.useKqlFilter,
+      params.kqlFilter,
     ]
   );
 
@@ -193,7 +192,7 @@ export function TransactionErrorRateRuleType(props: Props) {
   ];
 
   const fields = [
-    ...(!ruleParams.useFilterQuery ? filterFields : []),
+    ...(!ruleParams.useKqlFilter ? filterFields : []),
     ...criteriaFields,
   ];
 
@@ -259,8 +258,8 @@ export function TransactionErrorRateRuleType(props: Props) {
     setRuleParams('transactionType', undefined);
     setRuleParams('transactionName', undefined);
     setRuleParams('environment', ENVIRONMENT_ALL.value);
-    setRuleParams('filterQuery', undefined);
-    setRuleParams('useFilterQuery', e.target.checked);
+    setRuleParams('kqlFilter', undefined);
+    setRuleParams('useKqlFilter', e.target.checked);
   };
 
   const kqlFilter = (

@@ -37,7 +37,7 @@ export function ApmRuleKqlFilter({
 
   const onFilterChange = useCallback(
     (filter: string) => {
-      setRuleParams('filterQuery', filter);
+      setRuleParams('kqlFilter', filter);
     },
     [setRuleParams]
   );
@@ -57,14 +57,14 @@ export function ApmRuleKqlFilter({
             defaultMessage: 'Use KQL Filter',
           }
         )}
-        checked={ruleParams.useFilterQuery ? ruleParams.useFilterQuery : false}
+        checked={ruleParams.useKqlFilter ? ruleParams.useKqlFilter : false}
         onChange={onToggleKqlFilter}
       />
       <EuiSpacer size={'m'} />
     </>
   );
 
-  const kqlFilter = ruleParams.useFilterQuery ? (
+  const kqlFilter = ruleParams.useKqlFilter ? (
     <>
       <EuiFormRow
         label={i18n.translate('xpack.apm.rules.ruleFlyout.filterLabel', {
@@ -81,7 +81,7 @@ export function ApmRuleKqlFilter({
           derivedIndexPattern={derivedIndexPattern}
           onChange={debouncedOnFilterChange}
           onSubmit={onFilterChange}
-          value={ruleParams.filterQuery}
+          value={ruleParams.kqlFilter}
         />
       </EuiFormRow>
       <EuiSpacer size={'m'} />
