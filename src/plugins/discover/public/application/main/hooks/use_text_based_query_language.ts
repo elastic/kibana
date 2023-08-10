@@ -6,12 +6,7 @@
  * Side Public License, v 1.
  */
 import { isEqual } from 'lodash';
-import {
-  isOfAggregateQueryType,
-  AggregateQuery,
-  Query,
-  getAggregateQueryMode,
-} from '@kbn/es-query';
+import { isOfAggregateQueryType, getAggregateQueryMode } from '@kbn/es-query';
 import { useCallback, useEffect, useRef } from 'react';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/public';
@@ -35,14 +30,13 @@ export function useTextBasedQueryLanguage({
   dataViews: DataViewsContract;
 }) {
   const prev = useRef<{
-    query: AggregateQuery | Query | undefined;
+    query: string;
     columns: string[];
   }>({
     columns: [],
-    query: undefined,
+    query: '',
   });
-  const queryString = useRef<string>('');
-  const isPrevTransformationalMode = useRef<boolean>(true);
+  const initialFetch = useRef<boolean>(true);
   const savedSearch = useSavedSearchInitial();
 
   const cleanup = useCallback(() => {
@@ -50,15 +44,8 @@ export function useTextBasedQueryLanguage({
       // cleanup when it's not a text based query lang
       prev.current = {
         columns: [],
-        query: undefined,
+        query: '',
       };
-    }
-    if (queryString.current) {
-      queryString.current = '';
-    }
-
-    if (isPrevTransformationalMode.current) {
-      isPrevTransformationalMode.current = true;
     }
   }, []);
 
@@ -74,14 +61,13 @@ export function useTextBasedQueryLanguage({
           fetchStatus: FetchStatus.COMPLETE,
         });
       };
-      const { columns: stateColumns, index, viewMode } = stateContainer.appState.getState();
+      const { index, viewMode } = stateContainer.appState.getState();
       let nextColumns: string[] = [];
       const isTextBasedQueryLang =
         recordRawType === 'plain' &&
         isOfAggregateQueryType(query) &&
         ('sql' in query || 'esql' in query);
       const hasResults = Boolean(next.result?.length);
-      const initialFetch = !prev.current.columns.length;
       let queryHasTransformationalCommands = 'sql' in query;
       if ('esql' in query) {
         TRANSFORMATIONAL_COMMANDS.forEach((command: string) => {
@@ -104,44 +90,27 @@ export function useTextBasedQueryLanguage({
           const firstRow = next.result![0];
           const firstRowColumns = Object.keys(firstRow.raw).slice(0, MAX_NUM_OF_COLUMNS);
           if (!queryHasTransformationalCommands) {
-            const cols = dataViewObj.timeFieldName ? [dataViewObj.timeFieldName] : [];
-            // prev.current = { columns: stateColumns?.length ? stateColumns : cols, query };
-            // nextColumns = stateColumns?.length ? stateColumns : cols;
-            prev.current = { columns: cols, query };
-            nextColumns = cols;
+            nextColumns = [];
+            initialFetch.current = false;
           } else {
-            if (
-              !isEqual(firstRowColumns, prev.current.columns) &&
-              !isEqual(query, prev.current.query)
-            ) {
-              prev.current = { columns: firstRowColumns, query };
-              nextColumns = firstRowColumns;
-            }
-
-            if (firstRowColumns && initialFetch) {
-              prev.current = { columns: firstRowColumns, query };
+            nextColumns = firstRowColumns;
+            if (initialFetch.current && !prev.current.columns.length) {
+              prev.current.columns = firstRowColumns;
             }
           }
         }
-
-        // don't set the columns on initial fetch, to prevent overwriting existing state
-        const addColumnsToState = Boolean(
-          ((nextColumns.length && queryHasTransformationalCommands) ||
-            !queryHasTransformationalCommands) &&
-            (!stateColumns?.length || !initialFetch || !isPrevTransformationalMode.current)
-        );
-
-        const queryChanged = query[language] !== queryString.current;
+        const addColumnsToState = !isEqual(nextColumns, prev.current.columns);
+        const queryChanged = query[language] !== prev.current.query;
         // no need to reset index to state if it hasn't changed
         const addDataViewToState = Boolean(dataViewObj?.id !== index);
-        if (!queryChanged && !addColumnsToState && !addDataViewToState) {
+        if (!queryChanged || (!addDataViewToState && !addColumnsToState)) {
           sendComplete();
           return;
         }
 
         if (queryChanged) {
-          queryString.current = query[language];
-          isPrevTransformationalMode.current = queryHasTransformationalCommands;
+          prev.current.query = query[language];
+          prev.current.columns = nextColumns;
         }
         const nextState = {
           ...(addDataViewToState && { index: dataViewObj.id }),
@@ -152,7 +121,6 @@ export function useTextBasedQueryLanguage({
         };
         await stateContainer.appState.replaceUrlState(nextState);
         sendComplete();
-        // }
       } else {
         // cleanup for a "regular" query
         cleanup();

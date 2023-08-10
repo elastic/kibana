@@ -103,19 +103,17 @@ describe('useTextBasedQueryLanguage', () => {
     const { replaceUrlState, stateContainer } = renderHookWithContext(true);
 
     await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
+    await waitFor(() => {
+      expect(replaceUrlState).toHaveBeenCalledWith({
+        index: 'the-data-view-id',
+      });
+    });
     expect(replaceUrlState).toHaveBeenCalledWith({ index: 'the-data-view-id' });
 
     replaceUrlState.mockReset();
 
     stateContainer.dataState.data$.documents$.next(msgComplete);
-    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
-
-    await waitFor(() => {
-      expect(replaceUrlState).toHaveBeenCalledWith({
-        index: 'the-data-view-id',
-        columns: ['field1', 'field2'],
-      });
-    });
+    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(0));
   });
   test('should change viewMode to DOCUMENT_LEVEL if it was AGGREGATED_LEVEL', async () => {
     const { replaceUrlState } = renderHookWithContext(false, {
@@ -132,7 +130,7 @@ describe('useTextBasedQueryLanguage', () => {
     const { replaceUrlState, stateContainer } = renderHookWithContext(false);
     const documents$ = stateContainer.dataState.data$.documents$;
     stateContainer.dataState.data$.documents$.next(msgComplete);
-    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(2));
+    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
     replaceUrlState.mockReset();
 
     documents$.next({
@@ -162,7 +160,7 @@ describe('useTextBasedQueryLanguage', () => {
     const documents$ = stateContainer.dataState.data$.documents$;
 
     documents$.next(msgComplete);
-    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(2));
+    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
     replaceUrlState.mockReset();
 
     documents$.next({
@@ -200,7 +198,7 @@ describe('useTextBasedQueryLanguage', () => {
     const documents$ = stateContainer.dataState.data$.documents$;
 
     documents$.next(msgComplete);
-    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(2));
+    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
     replaceUrlState.mockReset();
 
     documents$.next({
@@ -268,7 +266,7 @@ describe('useTextBasedQueryLanguage', () => {
       ],
       query: { sql: 'SELECT field1 from the-data-view-title' },
     });
-    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(3));
+    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
     expect(replaceUrlState).toHaveBeenCalledWith({
       columns: ['field1'],
     });
@@ -286,7 +284,7 @@ describe('useTextBasedQueryLanguage', () => {
       fetchStatus: FetchStatus.LOADING,
       query: { sql: 'SELECT * from the-data-view-title WHERE field1=2' },
     });
-    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(0));
     documents$.next({
       recordRawType: RecordRawType.PLAIN,
       fetchStatus: FetchStatus.PARTIAL,
@@ -299,7 +297,7 @@ describe('useTextBasedQueryLanguage', () => {
       ],
       query: { sql: 'SELECT * from the-data-view-title WHERE field1=2' },
     });
-    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(2));
+    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(0));
     stateContainer.appState.getState = jest.fn(() => {
       return { columns: ['field1', 'field2'], index: 'the-data-view-id' };
     });
@@ -350,7 +348,7 @@ describe('useTextBasedQueryLanguage', () => {
     renderHook(() => useTextBasedQueryLanguage(props), { wrapper: getHookContext(stateContainer) });
 
     documents$.next(msgComplete);
-    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(2));
+    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
     replaceUrlState.mockReset();
 
     documents$.next({
