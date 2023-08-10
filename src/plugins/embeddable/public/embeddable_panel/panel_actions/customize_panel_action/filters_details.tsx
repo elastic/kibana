@@ -111,8 +111,6 @@ export function FiltersDetails({ embeddable, editMode, editPanelAction }: Filter
     </EuiButtonEmpty>
   );
 
-  console.log({ FilterItems, filters });
-
   return (
     <EuiSkeletonText isLoading={isLoading} lines={3}>
       {queryString !== '' && (
