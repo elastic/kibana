@@ -91,11 +91,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       after(async () => {
         await cases.api.deleteAllCases();
 
-        await testSubjects.click('solutionSideNavItemLink-dashboards');
-
-        await listingTable.checkListingSelectAllCheckbox();
-        await listingTable.clickDeleteSelected();
-
         await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
         await kibanaServer.importExport.unload(
           'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
@@ -110,10 +105,13 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await testSubjects.click('embeddablePanelMore-mainMenu');
         await testSubjects.click('embeddablePanelAction-embeddable_addToNewCase');
 
-        await cases.create.createCase({
-          title: caseTitle,
-          description: 'test description',
-        });
+        await testSubjects.existOrFail('create-case-flyout');
+
+        await testSubjects.setValue('input', caseTitle);
+
+        const descriptionArea = await find.byCssSelector('textarea.euiMarkdownEditorTextArea');
+        await descriptionArea.focus();
+        await descriptionArea.type('test description');
 
         // verify that solution picker is not visible
         await testSubjects.missingOrFail('caseOwnerSelector');

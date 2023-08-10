@@ -91,13 +91,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       after(async () => {
         await cases.api.deleteAllCases();
 
-        await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'dashboards' });
-
-        await testSubjects.click('~breadcrumb-deepLinkId-dashboards');
-
-        await listingTable.checkListingSelectAllCheckbox();
-        await listingTable.clickDeleteSelected();
-
         await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
         await kibanaServer.importExport.unload(
           'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
