@@ -70,143 +70,149 @@ export function CheckSetup({ children }: { children: React.ReactElement }) {
 
   const displayLoadingScreen = status !== AsyncStatus.Settled;
 
-  // if (displayLoadingScreen) {
-  //   return (
-  //     <ProfilingAppPageTemplate hideSearchBar tabs={[]}>
-  //       <EuiFlexGroup alignItems="center" justifyContent="center">
-  //         <EuiFlexItem grow={false}>
-  //           <EuiLoadingSpinner size="xxl" />
-  //         </EuiFlexItem>
-  //         <EuiFlexItem grow={false}>
-  //           <EuiText>
-  //             {i18n.translate('xpack.profiling.noDataConfig.loading.loaderText', {
-  //               defaultMessage: 'Loading data sources',
-  //             })}
-  //           </EuiText>
-  //         </EuiFlexItem>
-  //       </EuiFlexGroup>
-  //     </ProfilingAppPageTemplate>
-  //   );
-  // }
+  if (displayLoadingScreen) {
+    return (
+      <ProfilingAppPageTemplate hideSearchBar tabs={[]}>
+        <EuiFlexGroup alignItems="center" justifyContent="center">
+          <EuiFlexItem grow={false}>
+            <EuiLoadingSpinner size="xxl" />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiText>
+              {i18n.translate('xpack.profiling.noDataConfig.loading.loaderText', {
+                defaultMessage: 'Loading data sources',
+              })}
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </ProfilingAppPageTemplate>
+    );
+  }
 
-  // if (displayUi) {
-  //   return children;
-  // }
+  if (displayUi) {
+    return children;
+  }
 
-  // if (displayAddDataInstructions) {
-  //   // when there's no data redirect the user to the add data instructions page
-  //   router.push('/add-data-instructions', {
-  //     path: {},
-  //     query: { selectedTab: NoDataTabs.Kubernetes },
-  //   });
-  //   return null;
-  // }
+  if (displayAddDataInstructions) {
+    // when there's no data redirect the user to the add data instructions page
+    router.push('/add-data-instructions', {
+      path: {},
+      query: { selectedTab: NoDataTabs.Kubernetes },
+    });
+    return null;
+  }
 
-  // if (displaySetupScreen) {
-  return (
-    <ProfilingAppPageTemplate
-      tabs={[]}
-      noDataConfig={{
-        docsLink: `${docLinks.ELASTIC_WEBSITE_URL}/guide/en/observability/${docLinks.DOC_LINK_VERSION}/profiling-get-started.html`,
-        logo: 'logoObservability',
-        pageTitle: i18n.translate('xpack.profiling.noDataConfig.pageTitle', {
-          defaultMessage: 'Universal Profiling',
-        }),
-        action: {
-          elasticAgent: {
-            description: (
-              <EuiFlexGrid gutterSize="s">
-                <EuiText>
-                  {i18n.translate('xpack.profiling.noDataConfig.action.title', {
-                    defaultMessage: `Universal Profiling provides fleet-wide, whole-system, continuous profiling with zero instrumentation.
+  if (displaySetupScreen) {
+    return (
+      <ProfilingAppPageTemplate
+        tabs={[]}
+        noDataConfig={{
+          docsLink: `${docLinks.ELASTIC_WEBSITE_URL}/guide/en/observability/${docLinks.DOC_LINK_VERSION}/profiling-get-started.html`,
+          logo: 'logoObservability',
+          pageTitle: i18n.translate('xpack.profiling.noDataConfig.pageTitle', {
+            defaultMessage: 'Universal Profiling',
+          }),
+          action: {
+            elasticAgent: {
+              description: (
+                <EuiFlexGrid gutterSize="s">
+                  <EuiText>
+                    {i18n.translate('xpack.profiling.noDataConfig.action.title', {
+                      defaultMessage: `Universal Profiling provides fleet-wide, whole-system, continuous profiling with zero instrumentation.
               Understand what lines of code are consuming compute resources, at all times, and across your entire infrastructure.`,
-                  })}
-                </EuiText>
-                <EuiCallOut
-                  size="s"
-                  color="warning"
-                  title={i18n.translate('xpack.profiling.noDataConfig.action.permissionsWarning', {
-                    defaultMessage:
-                      'To setup Universal Profiling, you must be logged in as a superuser.',
-                  })}
-                />
-                <EuiText size={'xs'}>
-                  <ul>
-                    <li>
-                      <FormattedMessage
-                        id="xpack.profiling.noDataConfig.action.dataRetention"
-                        defaultMessage="Normal data storage costs apply for profiling data stored in Elasticsearch. Learn more about {dataRetentionLink}."
-                        values={{
-                          dataRetentionLink: (
-                            <EuiLink
-                              href={`${docLinks.ELASTIC_WEBSITE_URL}/guide/en/elasticsearch/reference/${docLinks.DOC_LINK_VERSION}/set-up-lifecycle-policy.html`}
-                              target="_blank"
-                            >
-                              {i18n.translate(
-                                'xpack.profiling.noDataConfig.action.dataRetention.link',
-                                { defaultMessage: 'controlling data retention' }
-                              )}
-                            </EuiLink>
-                          ),
-                        }}
-                      />
-                    </li>
-                  </ul>
-                </EuiText>
-                <EuiText size={'xs'} />
-              </EuiFlexGrid>
-            ),
-            onClick: (event: React.MouseEvent<HTMLElement, MouseEvent>) => {
-              event.preventDefault();
-            },
-            button: (
-              <EuiButton
-                disabled={postSetupLoading}
-                onClick={(event) => {
-                  event.preventDefault();
-
-                  setPostSetupLoading(true);
-
-                  postSetupResources({ http })
-                    .then(() => refresh())
-                    .catch((err) => {
-                      const message = err?.body?.message ?? err.message ?? String(err);
-
-                      notifications.toasts.addError(err, {
-                        title: i18n.translate('xpack.profiling.checkSetup.setupFailureToastTitle', {
-                          defaultMessage: 'Failed to complete setup',
-                        }),
-                        toastMessage: message,
-                      });
-                    })
-                    .finally(() => {
-                      setPostSetupLoading(false);
-                    });
-                }}
-                fill
-                isLoading={postSetupLoading}
-              >
-                {!postSetupLoading
-                  ? i18n.translate('xpack.profiling.noDataConfig.action.buttonLabel', {
-                      defaultMessage: 'Set up Universal Profiling',
-                    })
-                  : i18n.translate('xpack.profiling.noDataConfig.action.buttonLoadingLabel', {
-                      defaultMessage: 'Setting up Universal Profiling...',
                     })}
-              </EuiButton>
-            ),
-          },
-        },
-        solution: i18n.translate('xpack.profiling.noDataConfig.solutionName', {
-          defaultMessage: 'Universal Profiling',
-        }),
-      }}
-      hideSearchBar
-    >
-      <></>
-    </ProfilingAppPageTemplate>
-  );
-  // }
+                  </EuiText>
+                  <EuiCallOut
+                    size="s"
+                    color="warning"
+                    title={i18n.translate(
+                      'xpack.profiling.noDataConfig.action.permissionsWarning',
+                      {
+                        defaultMessage:
+                          'To setup Universal Profiling, you must be logged in as a superuser.',
+                      }
+                    )}
+                  />
+                  <EuiText size={'xs'}>
+                    <ul>
+                      <li>
+                        <FormattedMessage
+                          id="xpack.profiling.noDataConfig.action.dataRetention"
+                          defaultMessage="Normal data storage costs apply for profiling data stored in Elasticsearch. Learn more about {dataRetentionLink}."
+                          values={{
+                            dataRetentionLink: (
+                              <EuiLink
+                                href={`${docLinks.ELASTIC_WEBSITE_URL}/guide/en/elasticsearch/reference/${docLinks.DOC_LINK_VERSION}/set-up-lifecycle-policy.html`}
+                                target="_blank"
+                              >
+                                {i18n.translate(
+                                  'xpack.profiling.noDataConfig.action.dataRetention.link',
+                                  { defaultMessage: 'controlling data retention' }
+                                )}
+                              </EuiLink>
+                            ),
+                          }}
+                        />
+                      </li>
+                    </ul>
+                  </EuiText>
+                  <EuiText size={'xs'} />
+                </EuiFlexGrid>
+              ),
+              onClick: (event: React.MouseEvent<HTMLElement, MouseEvent>) => {
+                event.preventDefault();
+              },
+              button: (
+                <EuiButton
+                  disabled={postSetupLoading}
+                  onClick={(event) => {
+                    event.preventDefault();
 
-  // throw new Error('Invalid state');
+                    setPostSetupLoading(true);
+
+                    postSetupResources({ http })
+                      .then(() => refresh())
+                      .catch((err) => {
+                        const message = err?.body?.message ?? err.message ?? String(err);
+
+                        notifications.toasts.addError(err, {
+                          title: i18n.translate(
+                            'xpack.profiling.checkSetup.setupFailureToastTitle',
+                            {
+                              defaultMessage: 'Failed to complete setup',
+                            }
+                          ),
+                          toastMessage: message,
+                        });
+                      })
+                      .finally(() => {
+                        setPostSetupLoading(false);
+                      });
+                  }}
+                  fill
+                  isLoading={postSetupLoading}
+                >
+                  {!postSetupLoading
+                    ? i18n.translate('xpack.profiling.noDataConfig.action.buttonLabel', {
+                        defaultMessage: 'Set up Universal Profiling',
+                      })
+                    : i18n.translate('xpack.profiling.noDataConfig.action.buttonLoadingLabel', {
+                        defaultMessage: 'Setting up Universal Profiling...',
+                      })}
+                </EuiButton>
+              ),
+            },
+          },
+          solution: i18n.translate('xpack.profiling.noDataConfig.solutionName', {
+            defaultMessage: 'Universal Profiling',
+          }),
+        }}
+        hideSearchBar
+      >
+        <></>
+      </ProfilingAppPageTemplate>
+    );
+  }
+
+  throw new Error('Invalid state');
 }
