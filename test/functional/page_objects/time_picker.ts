@@ -129,11 +129,7 @@ export class TimePickerPageObject extends FtrService {
    * @param {String} toTime MMM D, YYYY @ HH:mm:ss.SSS
    * @param {Boolean} force time picker force update, default is false
    */
-  public async setAbsoluteRange(
-    fromTime: string,
-    toTime: string,
-    force = false
-  ) {
+  public async setAbsoluteRange(fromTime: string, toTime: string, force = false) {
     if (!force) {
       const currentUrl = decodeURI(await this.browser.getCurrentUrl());
       const DEFAULT_DATE_FORMAT = 'MMM D, YYYY @ HH:mm:ss.SSS';

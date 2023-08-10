@@ -560,9 +560,7 @@ export class DashboardPageObject extends FtrService {
 
   // use the search filter box to narrow the results down to a single
   // entry, or at least to a single page of results
-  public async loadSavedDashboard(
-    dashboardName: string
-  ) {
+  public async loadSavedDashboard(dashboardName: string) {
     this.log.debug(`Load Saved Dashboard ${dashboardName}`);
 
     await this.gotoDashboardLandingPage();
