@@ -61,7 +61,7 @@ export interface CasesUiConfigType {
   };
   stack: {
     enabled: boolean;
-  }
+  };
 }
 
 export const StatusAll = 'all' as const;

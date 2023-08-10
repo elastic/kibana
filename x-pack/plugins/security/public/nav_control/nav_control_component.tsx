@@ -22,9 +22,8 @@ import type { Observable } from 'rxjs';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { UserAvatar } from '@kbn/user-profile-components';
+import { UserAvatar, type UserProfileAvatarData } from '@kbn/user-profile-components';
 
-import type { UserProfileAvatarData } from '../../common';
 import { getUserDisplayName, isUserAnonymous } from '../../common/model';
 import { useCurrentUser, useUserProfile } from '../components';
 

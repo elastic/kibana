@@ -21,8 +21,8 @@ export const ConfigSchema = schema.object({
     maxSize: schema.maybe(schema.number({ min: 0 })),
   }),
   stack: schema.object({
-    enabled: schema.boolean({ defaultValue: true}),
-  })
+    enabled: schema.boolean({ defaultValue: true }),
+  }),
 });
 
 export type ConfigType = TypeOf<typeof ConfigSchema>;
