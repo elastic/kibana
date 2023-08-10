@@ -122,9 +122,14 @@ export const getSecurityBaseKibanaFeature = (): BaseKibanaFeatureConfig => ({
   },
 });
 
+/**
+ * Returns the list of Security SubFeature IDs that should be loaded and available in
+ * kibana regardless of PLI or License level.
+ * @param _
+ */
 export const getSecurityBaseKibanaSubFeatureIds = (
   _: ExperimentalFeatures // currently un-used, but left here as a convenience for possible future use
-): SecuritySubFeatureId[] => [];
+): SecuritySubFeatureId[] => [SecuritySubFeatureId.hostIsolation];
 
 /**
  * Maps the AppFeatures keys to Kibana privileges that will be merged
@@ -177,14 +182,6 @@ export const getSecurityAppFeaturesConfig = (
 
     [AppFeatureSecurityKey.endpointHostManagement]: {
       subFeatureIds: [SecuritySubFeatureId.endpointList],
-      subFeaturesPrivileges: [
-        {
-          id: 'endpoint_list_all',
-          includeIn: 'all',
-          api: [`${APP_ID}-writeHostIsolationRelease`],
-          ui: ['writeHostIsolationRelease'],
-        },
-      ],
     },
 
     [AppFeatureSecurityKey.endpointPolicyManagement]: {
@@ -222,7 +219,6 @@ export const getSecurityAppFeaturesConfig = (
         SecuritySubFeatureId.hostIsolationExceptions,
 
         SecuritySubFeatureId.responseActionsHistory,
-        SecuritySubFeatureId.hostIsolation,
         SecuritySubFeatureId.processOperations,
         SecuritySubFeatureId.fileOperations,
         SecuritySubFeatureId.executeAction,
