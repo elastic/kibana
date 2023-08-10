@@ -47,6 +47,7 @@ export const AgentPolicyBaseSchema = {
       })
     )
   ),
+  is_protected: schema.maybe(schema.boolean()),
   overrides: schema.maybe(
     schema.nullable(
       schema.recordOf(schema.string(), schema.any(), {

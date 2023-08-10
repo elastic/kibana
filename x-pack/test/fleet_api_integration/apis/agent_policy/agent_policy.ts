@@ -450,6 +450,7 @@ export default function (providerContext: FtrProviderContext) {
           schema_version: FLEET_AGENT_POLICIES_SCHEMA_VERSION,
           updated_by: 'elastic',
           package_policies: [],
+          is_protected: false,
         });
       });
 
@@ -969,6 +970,7 @@ export default function (providerContext: FtrProviderContext) {
           updated_by: 'elastic',
           inactivity_timeout: 1209600,
           package_policies: [],
+          is_protected: false,
           overrides: {
             agent: {
               logging: {

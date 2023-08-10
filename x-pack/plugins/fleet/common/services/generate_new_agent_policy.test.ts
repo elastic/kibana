@@ -17,6 +17,7 @@ describe('generateNewAgentPolicyWithDefaults', () => {
       namespace: 'default',
       monitoring_enabled: ['logs', 'metrics'],
       inactivity_timeout: 1209600,
+      is_protected: false,
     });
   });
 
@@ -34,6 +35,7 @@ describe('generateNewAgentPolicyWithDefaults', () => {
       namespace: 'test-namespace',
       monitoring_enabled: ['logs'],
       inactivity_timeout: 1209600,
+      is_protected: false,
     });
   });
 });

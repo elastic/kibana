@@ -46,10 +46,7 @@ import type { ValidationResults } from '../agent_policy_validation';
 
 import { ExperimentalFeaturesService, policyHasFleetServer } from '../../../../services';
 
-import {
-  isAgentPolicy as isAgentPolicyType,
-  policyHasEndpointSecurity as hasElasticDefend,
-} from '../../../../../../../common/services';
+import { policyHasEndpointSecurity as hasElasticDefend } from '../../../../../../../common/services';
 
 import {
   useOutputOptions,
@@ -343,7 +340,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
                 )}
               </>
             }
-            checked={isAgentPolicyType(agentPolicy) ? agentPolicy.is_protected : false}
+            checked={agentPolicy.is_protected ?? false}
             onChange={(e) => {
               updateAgentPolicy({ is_protected: e.target.checked });
             }}
@@ -357,11 +354,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
                 onClick={() => {
                   setIsUninstallCommandFlyoutOpen(true);
                 }}
-                disabled={
-                  isAgentPolicyType(agentPolicy)
-                    ? agentPolicy.is_protected !== true || !policyHasElasticDefend
-                    : false
-                }
+                disabled={!agentPolicy.is_protected || !policyHasElasticDefend}
                 data-test-subj="uninstallCommandLink"
               >
                 {i18n.translate('xpack.fleet.agentPolicyForm.tamperingUninstallLink', {

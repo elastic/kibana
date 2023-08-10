@@ -13,12 +13,6 @@ import {
   FLEET_ENDPOINT_PACKAGE,
 } from '../constants';
 
-export function isAgentPolicy(
-  policy: Partial<NewAgentPolicy | AgentPolicy>
-): policy is AgentPolicy {
-  return (policy as AgentPolicy).revision !== undefined;
-}
-
 export function policyHasFleetServer(agentPolicy: AgentPolicy) {
   if (!agentPolicy.package_policies) {
     return false;
@@ -38,11 +32,7 @@ export function policyHasSyntheticsIntegration(agentPolicy: AgentPolicy) {
 }
 
 export function policyHasEndpointSecurity(agentPolicy: Partial<NewAgentPolicy | AgentPolicy>) {
-  if (!isAgentPolicy(agentPolicy)) {
-    return false;
-  } else {
-    return policyHasIntegration(agentPolicy, FLEET_ENDPOINT_PACKAGE);
-  }
+  return policyHasIntegration(agentPolicy as AgentPolicy, FLEET_ENDPOINT_PACKAGE);
 }
 
 function policyHasIntegration(agentPolicy: AgentPolicy, packageName: string) {

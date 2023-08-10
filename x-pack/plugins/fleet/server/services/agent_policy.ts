@@ -245,6 +245,13 @@ class AgentPolicyService {
       savedObjectType: AGENT_POLICY_SAVED_OBJECT_TYPE,
     });
 
+    this.checkTamperProtectionLicense(agentPolicy);
+
+    if (agentPolicy?.is_protected) {
+      // throw new Error('Agent policy requires Elastic Defend integration');
+      // need to add messaging to show above instead of error
+    }
+
     await this.requireUniqueName(soClient, agentPolicy);
 
     await validateOutputForPolicy(soClient, agentPolicy);
@@ -259,6 +266,7 @@ class AgentPolicyService {
         updated_at: new Date().toISOString(),
         updated_by: options?.user?.username || 'system',
         schema_version: FLEET_AGENT_POLICIES_SCHEMA_VERSION,
+        is_protected: false,
       } as AgentPolicy,
       options
     );
@@ -497,7 +505,10 @@ class AgentPolicyService {
     this.checkTamperProtectionLicense(agentPolicy);
 
     if (agentPolicy?.is_protected && !policyHasEndpointSecurity(existingAgentPolicy)) {
-      throw new Error('Agent policy requires Elastic Defend integration');
+      // throw new Error('Agent policy requires Elastic Defend integration');
+      // need to add messaging to show above instead of error
+      // force agent policy to be false if elastic defend is not present
+      agentPolicy.is_protected = false;
     }
 
     if (existingAgentPolicy.is_managed && !options?.force) {
