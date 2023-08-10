@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SavedObjectReference } from '@kbn/core-saved-objects-common';
+import type { SavedObjectReference } from '@kbn/core/server';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type {
   FormulaPublicApi,
@@ -45,7 +45,7 @@ export class XYDataLayer implements ChartLayer<XYDataLayerConfig> {
     return this.column[0].getFormulaConfig().label;
   }
 
-  getBaseColumnColumn(dataView: DataView, options?: XYLayerOptions) {
+  getBaseLayer(dataView: DataView, options?: XYLayerOptions) {
     return {
       ...getHistogramColumn({
         columnName: HISTOGRAM_COLUMN_NAME,
@@ -75,7 +75,7 @@ export class XYDataLayer implements ChartLayer<XYDataLayerConfig> {
     const baseLayer: PersistedIndexPatternLayer = {
       columnOrder: [BREAKDOWN_COLUMN_NAME, HISTOGRAM_COLUMN_NAME],
       columns: {
-        ...this.getBaseColumnColumn(dataView, this.layerConfig.options),
+        ...this.getBaseLayer(dataView, this.layerConfig.options),
       },
     };
 

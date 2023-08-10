@@ -21,12 +21,14 @@
       "licensing",
       "observability",
       "observabilityShared",
+      "observabilityAIAssistant",
       "unifiedSearch",
       "share"
     ],
     "requiredBundles": [
       "kibanaReact",
       "kibanaUtils",
+      "observabilityAIAssistant",
     ]
   }
 }

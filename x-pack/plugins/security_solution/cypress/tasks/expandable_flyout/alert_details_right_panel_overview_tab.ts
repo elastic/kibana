@@ -15,6 +15,9 @@ import {
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_THREAT_INTELLIGENCE_VIEW_ALL_BUTTON,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_PREVALENCE_VIEW_ALL_BUTTON,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INVESTIGATION_GUIDE_BUTTON,
+  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_DESCRIPTION_TITLE,
+  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_OPEN_RULE_PREVIEW_BUTTON,
+  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_RESPONSE_SECTION_HEADER,
 } from '../../screens/expandable_flyout/alert_details_right_panel_overview_tab';
 
 /* About section */
@@ -106,6 +109,14 @@ export const toggleOverviewTabVisualizationsSection = () => {
 };
 
 /**
+ * Toggle the Overview tab response section in the document details expandable flyout right section
+ */
+export const toggleOverviewTabResponseSection = () => {
+  cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_RESPONSE_SECTION_HEADER).scrollIntoView();
+  cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_RESPONSE_SECTION_HEADER).should('be.visible').click();
+};
+
+/**
  * Click on the investigation guide button under the right section, Visualization
  */
 export const clickInvestigationGuideButton = () => {
@@ -113,4 +124,17 @@ export const clickInvestigationGuideButton = () => {
   cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INVESTIGATION_GUIDE_BUTTON)
     .should('be.visible')
     .click();
+};
+
+/**
+ * Click `Rule summary` button to open rule preview panel
+ */
+export const clickRuleSummaryButton = () => {
+  cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_DESCRIPTION_TITLE)
+    .should('be.visible')
+    .within(() => {
+      cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_OPEN_RULE_PREVIEW_BUTTON)
+        .should('be.visible')
+        .click();
+    });
 };

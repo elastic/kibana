@@ -88,7 +88,7 @@ export const HostPanel = React.memo(
       );
     }, [browserFields, data, id]);
 
-    const { data: hostRisk, isLicenseValid: isRiskLicenseValid } = useRiskScore({
+    const { data: hostRisk, isAuthorized: isRiskScoreAuthorized } = useRiskScore({
       riskEntity: RiskScoreEntity.host,
       skip: hostName == null,
     });
@@ -149,7 +149,7 @@ export const HostPanel = React.memo(
               )}
             </EuiFlexGroup>
             <EuiSpacer size="l" />
-            {isRiskLicenseValid && (
+            {isRiskScoreAuthorized && (
               <>
                 <EuiFlexGroup data-test-subj="host-panel-risk">
                   {hostRiskScore && (

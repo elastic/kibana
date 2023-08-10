@@ -9,48 +9,30 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { TimeRange } from '@kbn/es-query';
-import type { DataView } from '@kbn/data-views-plugin/public';
 import { css } from '@emotion/react';
-import type { InventoryItemType } from '../../../../../common/inventory_models/types';
 import { findInventoryModel } from '../../../../../common/inventory_models';
 import { useMetadata } from '../../hooks/use_metadata';
 import { useSourceContext } from '../../../../containers/metrics_source';
-import { MetadataSummary } from './metadata_summary';
+import { MetadataSummaryList } from './metadata_summary/metadata_summary_list';
 import { AlertsSummaryContent } from './alerts';
 import { KPIGrid } from './kpis/kpi_grid';
 import { MetricsGrid } from './metrics/metrics_grid';
 import { toTimestampRange } from '../../utils';
+import { useAssetDetailsStateContext } from '../../hooks/use_asset_details_state';
 
-export interface MetadataSearchUrlState {
-  metadataSearchUrlState: string;
-  setMetadataSearchUrlState: (metadataSearch: { metadataSearch?: string }) => void;
-}
+export const Overview = () => {
+  const { asset, assetType, overrides, dateRange } = useAssetDetailsStateContext();
+  const { logsDataView, metricsDataView } = overrides?.overview ?? {};
 
-export interface OverviewProps {
-  dateRange: TimeRange;
-  nodeName: string;
-  nodeType: InventoryItemType;
-  metricsDataView?: DataView;
-  logsDataView?: DataView;
-}
-
-export const Overview = ({
-  nodeName,
-  dateRange,
-  nodeType,
-  metricsDataView,
-  logsDataView,
-}: OverviewProps) => {
-  const inventoryModel = findInventoryModel(nodeType);
+  const inventoryModel = findInventoryModel(assetType);
   const { sourceId } = useSourceContext();
   const {
     loading: metadataLoading,
     error: fetchMetadataError,
     metadata,
   } = useMetadata(
-    nodeName,
-    nodeType,
+    asset.name,
+    assetType,
     inventoryModel.requiredMetrics,
     sourceId,
     toTimestampRange(dateRange)
@@ -59,7 +41,7 @@ export const Overview = ({
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
       <EuiFlexItem grow={false}>
-        <KPIGrid nodeName={nodeName} timeRange={dateRange} dataView={metricsDataView} />
+        <KPIGrid nodeName={asset.name} timeRange={dateRange} dataView={metricsDataView} />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         {fetchMetadataError ? (
@@ -77,7 +59,7 @@ export const Overview = ({
               values={{
                 reload: (
                   <EuiLink
-                    data-test-subj="infraMetadataReloadPageLink"
+                    data-test-subj="infraAssetDetailsMetadataReloadPageLink"
                     onClick={() => window.location.reload()}
                   >
                     {i18n.translate('xpack.infra.assetDetailsEmbeddable.overview.errorAction', {
@@ -89,12 +71,12 @@ export const Overview = ({
             />
           </EuiCallOut>
         ) : (
-          <MetadataSummary metadata={metadata} metadataLoading={metadataLoading} />
+          <MetadataSummaryList metadata={metadata} metadataLoading={metadataLoading} />
         )}
         <SectionSeparator />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <AlertsSummaryContent nodeName={nodeName} nodeType={nodeType} dateRange={dateRange} />
+        <AlertsSummaryContent assetName={asset.name} assetType={assetType} dateRange={dateRange} />
         <SectionSeparator />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
@@ -102,7 +84,7 @@ export const Overview = ({
           timeRange={dateRange}
           logsDataView={logsDataView}
           metricsDataView={metricsDataView}
-          nodeName={nodeName}
+          nodeName={asset.name}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

@@ -5,12 +5,9 @@
  * 2.0.
  */
 
-import type { CasesStatusRequest, CasesStatusResponse } from '../../../common/api';
-import {
-  CasesStatusRequestRt,
-  decodeWithExcessOrThrow,
-  CasesStatusResponseRt,
-} from '../../../common/api';
+import type { CasesStatusRequest, CasesStatusResponse } from '../../../common/types/api';
+import { CasesStatusRequestRt, CasesStatusResponseRt } from '../../../common/types/api';
+import { decodeWithExcessOrThrow } from '../../../common/api';
 import type { CasesClientArgs } from '../types';
 import { Operations } from '../../authorization';
 import { constructQueryOptions } from '../utils';

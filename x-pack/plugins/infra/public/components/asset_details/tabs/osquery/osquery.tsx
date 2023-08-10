@@ -7,29 +7,22 @@
 
 import { EuiSkeletonText } from '@elastic/eui';
 import React, { useMemo } from 'react';
-import { TimeRange } from '@kbn/es-query';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { useSourceContext } from '../../../../containers/metrics_source';
 import { findInventoryModel } from '../../../../../common/inventory_models';
-import type { InventoryItemType } from '../../../../../common/inventory_models/types';
 import { useMetadata } from '../../hooks/use_metadata';
-import { toTimestampRange } from '../../utils';
+import { useAssetDetailsStateContext } from '../../hooks/use_asset_details_state';
 
-export interface OsqueryProps {
-  nodeName: string;
-  nodeType: InventoryItemType;
-  dateRange: TimeRange;
-}
-
-export const Osquery = ({ nodeName, nodeType, dateRange }: OsqueryProps) => {
-  const inventoryModel = findInventoryModel(nodeType);
+export const Osquery = () => {
+  const { asset, assetType, dateRangeTs } = useAssetDetailsStateContext();
+  const inventoryModel = findInventoryModel(assetType);
   const { sourceId } = useSourceContext();
   const { loading, metadata } = useMetadata(
-    nodeName,
-    nodeType,
+    asset.name,
+    assetType,
     inventoryModel.requiredMetrics,
     sourceId,
-    toTimestampRange(dateRange)
+    dateRangeTs
   );
   const {
     services: { osquery },

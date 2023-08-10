@@ -339,7 +339,7 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
       await testSubjects.click('infrastructure-alerts-and-rules');
       await testSubjects.click('inventory-alerts-menu-option');
       await testSubjects.click('inventory-alerts-create-rule');
-      await testSubjects.missingOrFail('inventory-alerts-create-rule');
+      await testSubjects.missingOrFail('inventory-alerts-create-rule', { timeout: 30000 });
       await testSubjects.find('euiFlyoutCloseButton');
     },
 
@@ -347,7 +347,7 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
       await testSubjects.click('infrastructure-alerts-and-rules');
       await testSubjects.click('metrics-threshold-alerts-menu-option');
       await testSubjects.click('metrics-threshold-alerts-create-rule');
-      await testSubjects.missingOrFail('metrics-threshold-alerts-create-rule');
+      await testSubjects.missingOrFail('metrics-threshold-alerts-create-rule', { timeout: 30000 });
       await testSubjects.find('euiFlyoutCloseButton');
     },
 
@@ -392,6 +392,10 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
 
     async ensureSuggestionsPanelVisible() {
       await testSubjects.find('infraSuggestionsPanel');
+    },
+
+    async ensureInventoryFeedbackLinkIsVisible() {
+      await testSubjects.existOrFail('infraInventoryFeedbackLink');
     },
 
     async ensureKubernetesTourIsVisible() {

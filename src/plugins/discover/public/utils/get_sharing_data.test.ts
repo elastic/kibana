@@ -15,7 +15,7 @@ import {
   DOC_HIDE_TIME_COLUMN_SETTING,
   SORT_DEFAULT_ORDER_SETTING,
   SEARCH_FIELDS_FROM_SOURCE,
-} from '../../common';
+} from '@kbn/discover-utils';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { getSharingData, showPublicUrlSwitch } from './get_sharing_data';
 

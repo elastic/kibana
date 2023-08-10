@@ -14,7 +14,6 @@ import {
   EuiDataGridRefProps,
   EuiDataGridSorting,
   EuiScreenReaderOnly,
-  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { last } from 'lodash';
@@ -26,7 +25,6 @@ import { CPULabelWithHint } from '../cpu_label_with_hint';
 import { FrameInformationTooltip } from '../frame_information_window/frame_information_tooltip';
 import { LabelWithHint } from '../label_with_hint';
 import { FunctionRow } from './function_row';
-import { TotalSamplesStat } from './total_samples_stat';
 import { getFunctionsRows, IFunctionRow } from './utils';
 
 interface Props {
@@ -90,15 +88,8 @@ export const TopNFunctionsGrid = forwardRef(
         comparisonScaleFactor,
         comparisonTopNFunctions,
         topNFunctions,
-        totalSeconds,
       });
-    }, [
-      topNFunctions,
-      comparisonTopNFunctions,
-      totalSeconds,
-      comparisonScaleFactor,
-      baselineScaleFactor,
-    ]);
+    }, [topNFunctions, comparisonTopNFunctions, comparisonScaleFactor, baselineScaleFactor]);
 
     const { columns, leadingControlColumns } = useMemo(() => {
       const gridColumns: EuiDataGridColumn[] = [
@@ -263,13 +254,6 @@ export const TopNFunctionsGrid = forwardRef(
 
     return (
       <>
-        <TotalSamplesStat
-          baselineTotalSamples={totalCount}
-          baselineScaleFactor={baselineScaleFactor}
-          comparisonTotalSamples={comparisonTopNFunctions?.TotalCount}
-          comparisonScaleFactor={comparisonScaleFactor}
-        />
-        <EuiSpacer size="s" />
         <EuiDataGrid
           ref={ref}
           aria-label="TopN functions"

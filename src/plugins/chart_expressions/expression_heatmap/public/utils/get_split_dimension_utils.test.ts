@@ -136,7 +136,7 @@ describe('createSplitPoint', () => {
     const point = createSplitPoint(splitDimension, 'c', defaultFormatter, data);
 
     expect(defaultFormatter).toHaveBeenCalledTimes(1);
-    expect(point).toStrictEqual({ column: 2, row: 1, value: 'c' });
+    expect(point).toStrictEqual({ column: 2, row: 1, value: 'c', table: data });
   });
 
   it('returns undefined if value is not found in the table', () => {

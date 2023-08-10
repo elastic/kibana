@@ -7,9 +7,22 @@
 
 import { schema } from '@kbn/config-schema';
 
+import { validateKuery } from '../../routes/utils/filter_utils';
+
+import { AGENTS_PREFIX, AGENT_MAPPINGS } from '../../constants';
+
 export const GetTagsRequestSchema = {
   query: schema.object({
-    kuery: schema.maybe(schema.string()),
+    kuery: schema.maybe(
+      schema.string({
+        validate: (value: string) => {
+          const validationObj = validateKuery(value, [AGENTS_PREFIX], AGENT_MAPPINGS, true);
+          if (validationObj?.error) {
+            return validationObj?.error;
+          }
+        },
+      })
+    ),
     showInactive: schema.boolean({ defaultValue: false }),
   }),
 };

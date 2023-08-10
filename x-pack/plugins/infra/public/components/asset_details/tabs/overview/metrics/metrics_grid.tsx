@@ -4,18 +4,30 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { useCallback } from 'react';
 
 import { EuiFlexGrid, EuiFlexItem, EuiTitle, EuiSpacer, EuiFlexGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { TimeRange } from '@kbn/es-query';
+import type { TimeRange } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { HostMetricsDocsLink } from '../../../../../common/visualizations/metric_explanation/host_metrics_docs_link';
-import { MetricChart, type MetricChartProps } from './metric_chart';
-import { hostLensFormulas } from '../../../../../common/visualizations';
+import { buildCombinedHostsFilter } from '../../../../../utils/filters/build';
+import type { Layer } from '../../../../../hooks/use_lens_attributes';
+import { HostMetricsDocsLink, LensChart, type LensChartProps } from '../../../../lens';
+import {
+  type FormulaConfig,
+  hostLensFormulas,
+  type XYLayerOptions,
+} from '../../../../../common/visualizations';
+import { METRIC_CHART_HEIGHT } from '../../../constants';
 
-const PERCENT_LEFT_AXIS: Pick<MetricChartProps, 'overrides'>['overrides'] = {
+type DataViewOrigin = 'logs' | 'metrics';
+interface MetricChartConfig extends Pick<LensChartProps, 'id' | 'title' | 'overrides'> {
+  layers: Array<Layer<XYLayerOptions, FormulaConfig[]>>;
+  toolTip: string;
+}
+
+const PERCENT_LEFT_AXIS: Pick<MetricChartConfig, 'overrides'>['overrides'] = {
   axisLeft: {
     domain: {
       min: 0,
@@ -24,7 +36,7 @@ const PERCENT_LEFT_AXIS: Pick<MetricChartProps, 'overrides'>['overrides'] = {
   },
 };
 
-const LEGEND_SETTINGS: Pick<MetricChartProps, 'overrides'>['overrides'] = {
+const LEGEND_SETTINGS: Pick<MetricChartConfig, 'overrides'>['overrides'] = {
   settings: {
     showLegend: true,
     legendPosition: 'bottom',
@@ -33,8 +45,8 @@ const LEGEND_SETTINGS: Pick<MetricChartProps, 'overrides'>['overrides'] = {
 };
 
 const CHARTS_IN_ORDER: Array<
-  Pick<MetricChartProps, 'id' | 'title' | 'layers' | 'overrides'> & {
-    dataViewType: 'logs' | 'metrics';
+  Pick<MetricChartConfig, 'id' | 'title' | 'layers' | 'overrides'> & {
+    dataViewOrigin: DataViewOrigin;
   }
 > = [
   {
@@ -49,7 +61,7 @@ const CHARTS_IN_ORDER: Array<
         layerType: 'data',
       },
     ],
-    dataViewType: 'metrics',
+    dataViewOrigin: 'metrics',
     overrides: {
       axisLeft: PERCENT_LEFT_AXIS.axisLeft,
     },
@@ -65,7 +77,7 @@ const CHARTS_IN_ORDER: Array<
         layerType: 'data',
       },
     ],
-    dataViewType: 'metrics',
+    dataViewOrigin: 'metrics',
     overrides: {
       axisLeft: PERCENT_LEFT_AXIS.axisLeft,
     },
@@ -96,7 +108,7 @@ const CHARTS_IN_ORDER: Array<
         layerType: 'referenceLine',
       },
     ],
-    dataViewType: 'metrics',
+    dataViewOrigin: 'metrics',
   },
   {
     id: 'logRate',
@@ -109,7 +121,7 @@ const CHARTS_IN_ORDER: Array<
         layerType: 'data',
       },
     ],
-    dataViewType: 'logs',
+    dataViewOrigin: 'logs',
   },
   {
     id: 'diskSpaceUsageAvailable',
@@ -126,7 +138,7 @@ const CHARTS_IN_ORDER: Array<
             }),
           },
           {
-            ...hostLensFormulas.diskSpaceAvailable,
+            ...hostLensFormulas.diskSpaceAvailability,
             label: i18n.translate(
               'xpack.infra.assetDetails.metricsCharts.diskSpace.label.available',
               {
@@ -152,44 +164,12 @@ const CHARTS_IN_ORDER: Array<
       axisLeft: PERCENT_LEFT_AXIS.axisLeft,
       settings: LEGEND_SETTINGS.settings,
     },
-    dataViewType: 'metrics',
+    dataViewOrigin: 'metrics',
   },
   {
     id: 'diskThroughputReadWrite',
     title: i18n.translate('xpack.infra.assetDetails.metricsCharts.diskIOPS', {
       defaultMessage: 'Disk IOPS',
-    }),
-    layers: [
-      {
-        data: [
-          {
-            ...hostLensFormulas.diskReadThroughput,
-            label: i18n.translate('xpack.infra.assetDetails.metricsCharts.metric.label.read', {
-              defaultMessage: 'Read',
-            }),
-          },
-          {
-            ...hostLensFormulas.diskWriteThroughput,
-            label: i18n.translate('xpack.infra.assetDetails.metricsCharts.metric.label.write', {
-              defaultMessage: 'Write',
-            }),
-          },
-        ],
-        layerType: 'data',
-        options: {
-          seriesType: 'area',
-        },
-      },
-    ],
-    overrides: {
-      settings: LEGEND_SETTINGS.settings,
-    },
-    dataViewType: 'metrics',
-  },
-  {
-    id: 'diskIOReadWrite',
-    title: i18n.translate('xpack.infra.assetDetails.metricsCharts.diskThroughput', {
-      defaultMessage: 'Disk Throughput',
     }),
     layers: [
       {
@@ -216,7 +196,39 @@ const CHARTS_IN_ORDER: Array<
     overrides: {
       settings: LEGEND_SETTINGS.settings,
     },
-    dataViewType: 'metrics',
+    dataViewOrigin: 'metrics',
+  },
+  {
+    id: 'diskIOReadWrite',
+    title: i18n.translate('xpack.infra.assetDetails.metricsCharts.diskThroughput', {
+      defaultMessage: 'Disk Throughput',
+    }),
+    layers: [
+      {
+        data: [
+          {
+            ...hostLensFormulas.diskReadThroughput,
+            label: i18n.translate('xpack.infra.assetDetails.metricsCharts.metric.label.read', {
+              defaultMessage: 'Read',
+            }),
+          },
+          {
+            ...hostLensFormulas.diskWriteThroughput,
+            label: i18n.translate('xpack.infra.assetDetails.metricsCharts.metric.label.write', {
+              defaultMessage: 'Write',
+            }),
+          },
+        ],
+        layerType: 'data',
+        options: {
+          seriesType: 'area',
+        },
+      },
+    ],
+    overrides: {
+      settings: LEGEND_SETTINGS.settings,
+    },
+    dataViewOrigin: 'metrics',
   },
   {
     id: 'rxTx',
@@ -248,7 +260,7 @@ const CHARTS_IN_ORDER: Array<
     overrides: {
       settings: LEGEND_SETTINGS.settings,
     },
-    dataViewType: 'metrics',
+    dataViewOrigin: 'metrics',
   },
 ];
 
@@ -259,8 +271,35 @@ export interface MetricsGridProps {
   logsDataView?: DataView;
 }
 
+export interface MetricsGridProps {
+  nodeName: string;
+  timeRange: TimeRange;
+  metricsDataView?: DataView;
+  logsDataView?: DataView;
+}
+
 export const MetricsGrid = React.memo(
   ({ nodeName, metricsDataView, logsDataView, timeRange }: MetricsGridProps) => {
+    const getDataView = useCallback(
+      (dataViewOrigin: DataViewOrigin) => {
+        return dataViewOrigin === 'metrics' ? metricsDataView : logsDataView;
+      },
+      [logsDataView, metricsDataView]
+    );
+
+    const getFilters = useCallback(
+      (dataViewOrigin: DataViewOrigin) => {
+        return [
+          buildCombinedHostsFilter({
+            field: 'host.name',
+            values: [nodeName],
+            dataView: getDataView(dataViewOrigin),
+          }),
+        ];
+      },
+      [getDataView, nodeName]
+    );
+
     return (
       <EuiFlexGroup gutterSize="m" direction="column">
         <EuiFlexItem grow={false}>
@@ -276,14 +315,25 @@ export const MetricsGrid = React.memo(
         <EuiFlexItem grow={false}>
           <HostMetricsDocsLink />
           <EuiSpacer size="s" />
-          <EuiFlexGrid columns={2} gutterSize="s" data-test-subj="assetDetailsMetricsChartGrid">
-            {CHARTS_IN_ORDER.map(({ dataViewType, ...chartProp }, index) => (
+          <EuiFlexGrid
+            columns={2}
+            gutterSize="s"
+            data-test-subj="infraAssetDetailsMetricsChartGrid"
+          >
+            {CHARTS_IN_ORDER.map(({ dataViewOrigin, id, layers, title, overrides }, index) => (
               <EuiFlexItem key={index} grow={false}>
-                <MetricChart
-                  nodeName={nodeName}
-                  dataView={dataViewType === 'metrics' ? metricsDataView : logsDataView}
-                  timeRange={timeRange}
-                  {...chartProp}
+                <LensChart
+                  id={`infraAssetDetailsMetricsChart${id}`}
+                  borderRadius="m"
+                  dataView={getDataView(dataViewOrigin)}
+                  dateRange={timeRange}
+                  height={METRIC_CHART_HEIGHT}
+                  layers={layers}
+                  filters={getFilters(dataViewOrigin)}
+                  title={title}
+                  overrides={overrides}
+                  visualizationType="lnsXY"
+                  disableTriggers
                 />
               </EuiFlexItem>
             ))}

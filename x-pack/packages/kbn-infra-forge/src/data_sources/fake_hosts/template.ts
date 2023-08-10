@@ -165,6 +165,49 @@ export const template = {
             type: 'keyword',
             ignore_above: 256,
           },
+          cpu: {
+            properties: {
+              cores: {
+                type: 'long',
+              },
+              total: {
+                properties: {
+                  norm: {
+                    properties: {
+                      pct: {
+                        scaling_factor: 1000,
+                        type: 'scaled_float',
+                      },
+                    },
+                  },
+                },
+              },
+              user: {
+                properties: {
+                  pct: {
+                    scaling_factor: 1000,
+                    type: 'scaled_float',
+                  },
+                  norm: {
+                    properties: {
+                      pct: {
+                        scaling_factor: 1000,
+                        type: 'scaled_float',
+                      },
+                    },
+                  },
+                },
+              },
+              system: {
+                properties: {
+                  pct: {
+                    scaling_factor: 1000,
+                    type: 'scaled_float',
+                  },
+                },
+              },
+            },
+          },
         },
       },
     },

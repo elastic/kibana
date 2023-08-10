@@ -98,7 +98,7 @@ export const UserOverview = React.memo<UserSummaryProps>(
       [from, to]
     );
 
-    const { data: userRisk, isLicenseValid } = useRiskScore({
+    const { data: userRisk, isAuthorized } = useRiskScore({
       filterQuery,
       skip: userName == null,
       timerange,
@@ -291,7 +291,7 @@ export const UserOverview = React.memo<UserSummaryProps>(
             )}
           </OverviewWrapper>
         </InspectButtonContainer>
-        {isLicenseValid && (
+        {isAuthorized && (
           <UserRiskOverviewWrapper
             gutterSize={isInDetailsSidePanel ? 'm' : 'none'}
             direction={isInDetailsSidePanel ? 'column' : 'row'}

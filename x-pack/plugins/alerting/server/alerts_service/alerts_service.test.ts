@@ -114,6 +114,7 @@ const getIndexTemplatePutBody = (opts?: GetIndexTemplatePutBodyOpts) => {
             name: '.alerts-ilm-policy',
             rollover_alias: `.alerts-${context ? context : 'test'}.alerts-${namespace}`,
           },
+          'index.mapping.ignore_malformed': true,
           'index.mapping.total_fields.limit': 2500,
         },
         mappings: {
@@ -179,7 +180,7 @@ const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
 
 const ruleTypeWithAlertDefinition: jest.Mocked<UntypedNormalizedRuleType> = {
   ...ruleType,
-  alerts: TestRegistrationContext,
+  alerts: TestRegistrationContext as IRuleTypeAlerts<{}>,
 };
 
 describe('Alerts Service', () => {
@@ -640,6 +641,7 @@ describe('Alerts Service', () => {
                 name: '.alerts-ilm-policy',
                 rollover_alias: `.alerts-empty.alerts-default`,
               },
+              'index.mapping.ignore_malformed': true,
               'index.mapping.total_fields.limit': 2500,
             },
             mappings: {
@@ -1816,55 +1818,6 @@ describe('Alerts Service', () => {
       expect(logger.warn).toHaveBeenCalledWith(
         `There was an error in the framework installing namespace-level resources and creating concrete indices for context "test" - Original error: Failure during installation. No mappings would be generated for .alerts-test.alerts-default-index-template, possibly due to failed/misconfigured bootstrapping; Error after retry: Failure during installation. fail index template`
       );
-    });
-
-    test('should return null if shouldWrite is false', async () => {
-      alertsService = new AlertsService({
-        logger,
-        elasticsearchClientPromise: Promise.resolve(clusterClient),
-        pluginStop$,
-        kibanaVersion: '8.8.0',
-      });
-
-      await retryUntil(
-        'alert service initialized',
-        async () => alertsService.isInitialized() === true
-      );
-      alertsService.register(TestRegistrationContext);
-      await retryUntil(
-        'context initialized',
-        async () => (await getContextInitialized(alertsService)) === true
-      );
-      const result = await alertsService.createAlertsClient({
-        logger,
-        ruleType: {
-          ...ruleType,
-          alerts: {
-            context: 'test',
-            mappings: { fieldMap: { field: { type: 'keyword', required: false } } },
-            shouldWrite: false,
-          },
-        },
-        namespace: 'default',
-        rule: {
-          consumer: 'bar',
-          executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
-          id: '1',
-          name: 'rule-name',
-          parameters: {
-            bar: true,
-          },
-          revision: 0,
-          spaceId: 'default',
-          tags: ['rule-', '-tags'],
-        },
-      });
-
-      expect(result).toBe(null);
-      expect(logger.debug).toHaveBeenCalledWith(
-        `Resources registered and installed for test context but "shouldWrite" is set to false.`
-      );
-      expect(AlertsClient).not.toHaveBeenCalled();
     });
   });
 

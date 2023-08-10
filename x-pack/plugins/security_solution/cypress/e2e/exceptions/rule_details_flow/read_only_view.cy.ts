@@ -9,7 +9,6 @@ import { getExceptionList } from '../../../objects/exception';
 import { getNewRule } from '../../../objects/rule';
 import { ROLES } from '../../../../common/test';
 import { createRule } from '../../../tasks/api_calls/rules';
-import { esArchiverResetKibana } from '../../../tasks/es_archiver';
 import { login, visitWithoutDateRange } from '../../../tasks/login';
 import { goToExceptionsTab, goToAlertsTab } from '../../../tasks/rule_details';
 import { goToRuleDetails } from '../../../tasks/alerts_detection_rules';
@@ -32,7 +31,7 @@ describe('Exceptions viewer read only', () => {
   const exceptionList = getExceptionList();
 
   before(() => {
-    esArchiverResetKibana();
+    cy.task('esArchiverResetKibana');
     // create rule with exceptions
     createExceptionList(exceptionList, exceptionList.list_id).then((response) => {
       createRule(

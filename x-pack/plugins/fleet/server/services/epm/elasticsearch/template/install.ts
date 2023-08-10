@@ -9,7 +9,10 @@ import { merge, concat, uniqBy, omit } from 'lodash';
 import Boom from '@hapi/boom';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
-import type { IndicesCreateRequest } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  IndicesCreateRequest,
+  ClusterPutComponentTemplateRequest,
+} from '@elastic/elasticsearch/lib/api/types';
 
 import { ElasticsearchAssetType } from '../../../../types';
 import {
@@ -267,7 +270,16 @@ function putComponentTemplate(
   const { name, body, create = false } = params;
   return {
     clusterPromise: retryTransientEsErrors(
-      () => esClient.cluster.putComponentTemplate({ name, body, create }, { ignore: [404] }),
+      () =>
+        esClient.cluster.putComponentTemplate(
+          // @ts-expect-error lifecycle is not yet supported here
+          {
+            name,
+            body,
+            create,
+          } as ClusterPutComponentTemplateRequest,
+          { ignore: [404] }
+        ),
       { logger }
     ),
     name,

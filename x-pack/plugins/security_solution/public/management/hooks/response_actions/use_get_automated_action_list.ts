@@ -124,11 +124,9 @@ export const useGetAutomatedActionResponseList = (
         )
       );
 
-      const action = responseData.edges[0]?._source;
-
       return {
         action_id: actionId,
-        completedAt: action?.EndpointActions.completed_at,
+        completedAt: responseData.edges[0]?.fields?.['EndpointActions.completed_at']?.[0],
         isExpired: responseData.isExpired,
         wasSuccessful: responseData.wasSuccessful,
         isCompleted: responseData.isCompleted,

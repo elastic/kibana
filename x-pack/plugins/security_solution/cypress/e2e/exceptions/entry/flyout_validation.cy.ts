@@ -11,11 +11,6 @@ import { RULE_STATUS } from '../../../screens/create_new_rule';
 
 import { createRule } from '../../../tasks/api_calls/rules';
 import { goToRuleDetails } from '../../../tasks/alerts_detection_rules';
-import {
-  esArchiverLoad,
-  esArchiverResetKibana,
-  esArchiverUnload,
-} from '../../../tasks/es_archiver';
 import { login, visitWithoutDateRange } from '../../../tasks/login';
 import {
   openExceptionFlyoutFromEmptyViewerPrompt,
@@ -72,14 +67,14 @@ import { getExceptionList } from '../../../objects/exception';
 // ensure the most basic logic holds.
 describe.skip('Exceptions flyout', { testIsolation: false }, () => {
   before(() => {
-    esArchiverResetKibana();
+    cy.task('esArchiverResetKibana');
     // this is a made-up index that has just the necessary
     // mappings to conduct tests, avoiding loading large
     // amounts of data like in auditbeat_exceptions
-    esArchiverLoad('exceptions');
+    cy.task('esArchiverLoad', 'exceptions');
     // Comment the Conflicts here as they are skipped
-    // esArchiverLoad('conflicts_1');
-    // esArchiverLoad('conflicts_2');
+    // cy.task('esArchiverLoad', 'conflicts_1');
+    // cy.task('esArchiverLoad', 'conflicts_2');
     login();
     createExceptionList(getExceptionList(), getExceptionList().list_id).then((response) =>
       createRule(
@@ -110,7 +105,7 @@ describe.skip('Exceptions flyout', { testIsolation: false }, () => {
   });
 
   after(() => {
-    esArchiverUnload('exceptions');
+    cy.task('esArchiverUnload', 'exceptions');
   });
 
   it('Validates empty entry values correctly', () => {

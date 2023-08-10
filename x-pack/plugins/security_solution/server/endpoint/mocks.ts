@@ -42,6 +42,7 @@ import {
 import { createFleetAuthzMock } from '@kbn/fleet-plugin/common/mocks';
 import type { RequestFixtureOptions, RouterMock } from '@kbn/core-http-router-server-mocks';
 import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { casesPluginMock } from '@kbn/cases-plugin/server/mocks';
 import { createCasesClientMock } from '@kbn/cases-plugin/server/client/mocks';
 import type { VersionedRouteConfig, AddVersionOpts } from '@kbn/core-http-server';
@@ -210,6 +211,7 @@ export const createMockEndpointAppContextServiceStartContract =
       messageSigningService: createMessageSigningServiceMock(),
       actionCreateService: undefined,
       createFleetActionsClient: jest.fn((_) => fleetActionsClientMock),
+      esClient: elasticsearchClientMock.createElasticsearchClient(),
     };
   };
 

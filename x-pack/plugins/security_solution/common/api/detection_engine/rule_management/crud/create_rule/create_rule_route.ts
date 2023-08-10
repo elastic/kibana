@@ -6,7 +6,10 @@
  */
 
 import type * as t from 'io-ts';
-import { RuleCreateProps } from '../../../model';
+import { RuleCreateProps, RuleResponse } from '../../../model';
 
 export const CreateRuleRequestBody = RuleCreateProps;
 export type CreateRuleRequestBody = t.TypeOf<typeof CreateRuleRequestBody>;
+
+export const CreateRuleResponse = RuleResponse;
+export type CreateRuleResponse = t.TypeOf<typeof CreateRuleResponse>;

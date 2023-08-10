@@ -16,6 +16,7 @@ get:
         application/json:
           schema:
             type: array
+            maxItems: 10000
             items:
               type: object
               properties:

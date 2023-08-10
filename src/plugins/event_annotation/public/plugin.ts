@@ -11,7 +11,6 @@ import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/
 import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
 import type { ExpressionsSetup } from '@kbn/expressions-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import {
   ContentManagementPublicSetup,
   ContentManagementPublicStart,
@@ -34,7 +33,6 @@ import { ANNOTATIONS_LISTING_VIEW_ID } from '../common/constants';
 import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
 
 export interface EventAnnotationStartDependencies {
-  savedObjectsManagement: SavedObjectsManagementPluginStart;
   data: DataPublicPluginStart;
   savedObjectsTagging: SavedObjectTaggingPluginStart;
   presentationUtil: PresentationUtilPluginStart;
@@ -89,8 +87,7 @@ export class EventAnnotationPlugin
 
         const eventAnnotationService = await new EventAnnotationService(
           coreStart,
-          pluginsStart.contentManagement,
-          pluginsStart.savedObjectsManagement
+          pluginsStart.contentManagement
         ).getService();
 
         const ids = await pluginsStart.dataViews.getIds();
@@ -125,10 +122,6 @@ export class EventAnnotationPlugin
     core: CoreStart,
     startDependencies: EventAnnotationStartDependencies
   ): EventAnnotationService {
-    return new EventAnnotationService(
-      core,
-      startDependencies.contentManagement,
-      startDependencies.savedObjectsManagement
-    );
+    return new EventAnnotationService(core, startDependencies.contentManagement);
   }
 }

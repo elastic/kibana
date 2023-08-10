@@ -9,7 +9,6 @@ import { httpServiceMock } from '@kbn/core/public/mocks';
 import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common';
 import { KibanaServices } from '../common/lib/kibana';
 
-import { CommentType, CaseStatuses, CaseSeverity } from '../../common/api';
 import {
   CASES_INTERNAL_URL,
   CASES_URL,
@@ -73,8 +72,12 @@ import { getCaseConnectorsMockResponse } from '../common/mock/connectors';
 import { set } from '@kbn/safer-lodash-set';
 import { cloneDeep, omit } from 'lodash';
 import type { CaseUserActionTypeWithAll } from './types';
-import { ConnectorTypes } from '../../common/types/domain';
-
+import {
+  CaseSeverity,
+  CaseStatuses,
+  ConnectorTypes,
+  AttachmentType,
+} from '../../common/types/domain';
 const abortCtrl = new AbortController();
 const mockKibanaServices = KibanaServices.get as jest.Mock;
 jest.mock('../common/lib/kibana');
@@ -753,7 +756,7 @@ describe('Cases API', () => {
         method: 'PATCH',
         body: JSON.stringify({
           comment: 'updated comment',
-          type: CommentType.user,
+          type: AttachmentType.user,
           id: basicCase.comments[0].id,
           version: basicCase.comments[0].version,
           owner: SECURITY_SOLUTION_OWNER,
@@ -855,7 +858,7 @@ describe('Cases API', () => {
       {
         comment: 'comment',
         owner: SECURITY_SOLUTION_OWNER,
-        type: CommentType.user as const,
+        type: AttachmentType.user as const,
       },
       {
         alertId: 'test-id',
@@ -865,7 +868,7 @@ describe('Cases API', () => {
           name: 'Test',
         },
         owner: SECURITY_SOLUTION_OWNER,
-        type: CommentType.alert as const,
+        type: AttachmentType.alert as const,
       },
     ];
 
@@ -1011,7 +1014,7 @@ describe('Cases API', () => {
 
     const data = {
       comment: 'Solve this fast!',
-      type: CommentType.user as const,
+      type: AttachmentType.user as const,
       owner: SECURITY_SOLUTION_OWNER,
     };
 

@@ -5,6 +5,8 @@
  * 2.0.
  */
 import * as t from 'io-ts';
+import { sumBy } from 'lodash';
+import { calculateImpactEstimates } from './calculate_impact_estimates';
 import { createFrameGroupID, FrameGroupID } from './frame_group';
 import {
   createStackFrameMetadata,
@@ -30,23 +32,42 @@ interface TopNFunctionAndFrameGroup {
 type TopNFunction = Pick<
   TopNFunctionAndFrameGroup,
   'Frame' | 'CountExclusive' | 'CountInclusive'
-> & { Id: string; Rank: number };
+> & {
+  Id: string;
+  Rank: number;
+  impactEstimates?: ReturnType<typeof calculateImpactEstimates>;
+  selfCPUPerc: number;
+  totalCPUPerc: number;
+};
 
 export interface TopNFunctions {
   TotalCount: number;
   TopN: TopNFunction[];
   SamplingRate: number;
+  impactEstimates?: ReturnType<typeof calculateImpactEstimates>;
+  selfCPUPerc: number;
+  totalCPUPerc: number;
 }
 
-export function createTopNFunctions(
-  events: Map<StackTraceID, number>,
-  stackTraces: Map<StackTraceID, StackTrace>,
-  stackFrames: Map<StackFrameID, StackFrame>,
-  executables: Map<FileID, Executable>,
-  startIndex: number,
-  endIndex: number,
-  samplingRate: number
-): TopNFunctions {
+export function createTopNFunctions({
+  endIndex,
+  events,
+  executables,
+  samplingRate,
+  stackFrames,
+  stackTraces,
+  startIndex,
+  totalSeconds,
+}: {
+  endIndex: number;
+  events: Map<StackTraceID, number>;
+  executables: Map<FileID, Executable>;
+  samplingRate: number;
+  stackFrames: Map<StackFrameID, StackFrame>;
+  stackTraces: Map<StackTraceID, StackTrace>;
+  startIndex: number;
+  totalSeconds: number;
+}): TopNFunctions {
   // The `count` associated with a frame provides the total number of
   // traces in which that node has appeared at least once. However, a
   // frame may appear multiple times in a trace, and thus to avoid
@@ -143,17 +164,55 @@ export function createTopNFunctions(
     endIndex = topN.length;
   }
 
-  const framesAndCountsAndIds = topN.slice(startIndex, endIndex).map((frameAndCount, i) => ({
-    Rank: i + 1,
-    Frame: frameAndCount.Frame,
-    CountExclusive: frameAndCount.CountExclusive,
-    CountInclusive: frameAndCount.CountInclusive,
-    Id: frameAndCount.FrameGroupID,
-  }));
+  const framesAndCountsAndIds = topN.slice(startIndex, endIndex).map((frameAndCount, i) => {
+    const countExclusive = frameAndCount.CountExclusive;
+    const countInclusive = frameAndCount.CountInclusive;
+    const totalCPUPerc = (countInclusive / totalCount) * 100;
+    const selfCPUPerc = (countExclusive / totalCount) * 100;
+
+    const impactEstimates =
+      totalSeconds > 0
+        ? calculateImpactEstimates({
+            countExclusive,
+            countInclusive,
+            totalSamples: totalCount,
+            totalSeconds,
+          })
+        : undefined;
+    return {
+      Rank: i + 1,
+      Frame: frameAndCount.Frame,
+      CountExclusive: countExclusive,
+      selfCPUPerc,
+      CountInclusive: countInclusive,
+      totalCPUPerc,
+      Id: frameAndCount.FrameGroupID,
+      impactEstimates,
+    };
+  });
+
+  const sumSelfCPU = sumBy(framesAndCountsAndIds, 'CountExclusive');
+  const selfCPUPerc = (sumSelfCPU / totalCount) * 100;
+  const sumTotalCPU = sumBy(framesAndCountsAndIds, 'CountInclusive');
+  const totalCPUPerc = (sumTotalCPU / totalCount) * 100;
+
+  const impactEstimates =
+    totalSeconds > 0
+      ? calculateImpactEstimates({
+          countExclusive: sumSelfCPU,
+          countInclusive: sumTotalCPU,
+          totalSamples: totalCount,
+          totalSeconds,
+        })
+      : undefined;
+
   return {
     TotalCount: totalCount,
     TopN: framesAndCountsAndIds,
     SamplingRate: samplingRate,
+    impactEstimates,
+    selfCPUPerc,
+    totalCPUPerc,
   };
 }
 

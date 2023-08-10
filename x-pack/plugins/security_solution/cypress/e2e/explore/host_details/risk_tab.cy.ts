@@ -8,13 +8,12 @@
 import { login, visitHostDetailsPage } from '../../../tasks/login';
 
 import { cleanKibana, waitForTableToLoad } from '../../../tasks/common';
-import { esArchiverLoad, esArchiverUnload } from '../../../tasks/es_archiver';
 import { TABLE_CELL, TABLE_ROWS } from '../../../screens/alerts_details';
 
 describe('risk tab', () => {
   before(() => {
     cleanKibana();
-    esArchiverLoad('risk_hosts');
+    cy.task('esArchiverLoad', 'risk_hosts');
   });
 
   beforeEach(() => {
@@ -22,7 +21,7 @@ describe('risk tab', () => {
   });
 
   after(() => {
-    esArchiverUnload('risk_hosts');
+    cy.task('esArchiverUnload', 'risk_hosts');
   });
 
   it('renders risk tab', () => {

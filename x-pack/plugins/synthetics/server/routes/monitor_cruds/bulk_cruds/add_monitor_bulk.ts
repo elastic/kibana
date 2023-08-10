@@ -10,6 +10,7 @@ import { SavedObjectsBulkResponse } from '@kbn/core-saved-objects-api-server';
 import { v4 as uuidV4 } from 'uuid';
 import { NewPackagePolicy } from '@kbn/fleet-plugin/common';
 import { SavedObjectError } from '@kbn/core-saved-objects-common';
+import { PrivateLocationAttributes } from '../../../runtime_types/private_locations';
 import { SyntheticsServerSetup } from '../../../types';
 import { RouteContext } from '../../types';
 import { deleteMonitorIfCreated } from '../add_monitor';
@@ -19,9 +20,8 @@ import { formatSecrets } from '../../../synthetics_service/utils';
 import { syntheticsMonitorType } from '../../../../common/types/saved_objects';
 import {
   ConfigKey,
-  EncryptedSyntheticsMonitor,
+  EncryptedSyntheticsMonitorAttributes,
   MonitorFields,
-  PrivateLocation,
   ServiceLocationErrors,
   SyntheticsMonitor,
 } from '../../../../common/runtime_types';
@@ -44,13 +44,14 @@ export const createNewSavedObjectMonitorBulk = async ({
     }),
   }));
 
-  const result = await soClient.bulkCreate<EncryptedSyntheticsMonitor>(newMonitors);
+  const result = await soClient.bulkCreate<EncryptedSyntheticsMonitorAttributes>(newMonitors);
   return result.saved_objects;
 };
 
-type MonitorSavedObject = SavedObject<EncryptedSyntheticsMonitor>;
+type MonitorSavedObject = SavedObject<EncryptedSyntheticsMonitorAttributes>;
 
-type CreatedMonitors = SavedObjectsBulkResponse<EncryptedSyntheticsMonitor>['saved_objects'];
+type CreatedMonitors =
+  SavedObjectsBulkResponse<EncryptedSyntheticsMonitorAttributes>['saved_objects'];
 
 export const syncNewMonitorBulk = async ({
   routeContext,
@@ -60,10 +61,10 @@ export const syncNewMonitorBulk = async ({
 }: {
   routeContext: RouteContext;
   normalizedMonitors: SyntheticsMonitor[];
-  privateLocations: PrivateLocation[];
+  privateLocations: PrivateLocationAttributes[];
   spaceId: string;
 }) => {
-  const { server, savedObjectsClient, syntheticsMonitorClient, request } = routeContext;
+  const { server, savedObjectsClient, syntheticsMonitorClient } = routeContext;
   let newMonitors: CreatedMonitors | null = null;
 
   const monitorsToCreate = normalizedMonitors.map((monitor) => {
@@ -87,7 +88,6 @@ export const syncNewMonitorBulk = async ({
       }),
       syntheticsMonitorClient.addMonitors(
         monitorsToCreate,
-        request,
         savedObjectsClient,
         privateLocations,
         spaceId
@@ -169,7 +169,7 @@ const rollBackNewMonitorBulk = async (
 
 const sendNewMonitorTelemetry = (
   server: SyntheticsServerSetup,
-  monitors: Array<SavedObject<EncryptedSyntheticsMonitor>>,
+  monitors: Array<SavedObject<EncryptedSyntheticsMonitorAttributes>>,
   errors?: ServiceLocationErrors | null
 ) => {
   for (const monitor of monitors) {

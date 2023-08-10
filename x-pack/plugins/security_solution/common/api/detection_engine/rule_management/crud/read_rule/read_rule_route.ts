@@ -6,7 +6,11 @@
  */
 
 import type * as t from 'io-ts';
+import { RuleResponse } from '../../../model';
 import { QueryRuleByIds } from '../../model/query_rule_by_ids';
 
 export const ReadRuleRequestQuery = QueryRuleByIds;
 export type ReadRuleRequestQuery = t.TypeOf<typeof ReadRuleRequestQuery>;
+
+export const ReadRuleResponse = RuleResponse;
+export type ReadRuleResponse = t.TypeOf<typeof ReadRuleResponse>;

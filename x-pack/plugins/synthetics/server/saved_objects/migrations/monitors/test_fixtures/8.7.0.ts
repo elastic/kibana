@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { SavedObjectUnsanitizedDoc } from '@kbn/core/server';
-import { SyntheticsMonitorWithSecrets } from '../../../../../common/runtime_types';
+import { SyntheticsMonitorWithSecretsAttributes } from '../../../../../common/runtime_types';
 
 export const browserUI = {
   type: 'synthetics-monitor',
@@ -68,7 +68,7 @@ export const browserUI = {
   updated_at: '2023-03-31T20:31:24.177Z',
   created_at: '2023-03-31T20:31:24.177Z',
   typeMigrationVersion: '8.6.0',
-} as SavedObjectUnsanitizedDoc<SyntheticsMonitorWithSecrets>;
+} as SavedObjectUnsanitizedDoc<SyntheticsMonitorWithSecretsAttributes>;
 export const browserSinglePageUI = {
   type: 'synthetics-monitor',
   id: '7a72e681-6033-444e-b402-bddbe4a9fc4e',
@@ -123,7 +123,7 @@ export const browserSinglePageUI = {
   updated_at: '2023-03-31T20:32:01.498Z',
   created_at: '2023-03-31T20:32:01.498Z',
   typeMigrationVersion: '8.6.0',
-} as SavedObjectUnsanitizedDoc<SyntheticsMonitorWithSecrets>;
+} as SavedObjectUnsanitizedDoc<SyntheticsMonitorWithSecretsAttributes>;
 export const httpUI = {
   type: 'synthetics-monitor',
   id: '8f4ad634-205b-440b-80c6-27aa6ef57bba',
@@ -166,7 +166,7 @@ export const httpUI = {
   updated_at: '2023-03-31T20:32:14.362Z',
   created_at: '2023-03-31T20:32:14.362Z',
   typeMigrationVersion: '8.6.0',
-} as SavedObjectUnsanitizedDoc<SyntheticsMonitorWithSecrets>;
+} as SavedObjectUnsanitizedDoc<SyntheticsMonitorWithSecretsAttributes>;
 export const tcpUI = {
   type: 'synthetics-monitor',
   id: 'b56a8fab-9a69-4435-b368-cc4fe6cdc6b0',
@@ -205,7 +205,7 @@ export const tcpUI = {
   updated_at: '2023-03-31T20:32:27.678Z',
   created_at: '2023-03-31T20:32:27.678Z',
   typeMigrationVersion: '8.6.0',
-} as SavedObjectUnsanitizedDoc<SyntheticsMonitorWithSecrets>;
+} as SavedObjectUnsanitizedDoc<SyntheticsMonitorWithSecretsAttributes>;
 const icmpUI = {
   type: 'synthetics-monitor',
   id: '1b625301-fe0b-46c0-9980-21347c58a6f8',
@@ -236,7 +236,7 @@ const icmpUI = {
   updated_at: '2023-03-31T20:32:39.147Z',
   created_at: '2023-03-31T20:32:39.147Z',
   typeMigrationVersion: '8.6.0',
-} as SavedObjectUnsanitizedDoc<SyntheticsMonitorWithSecrets>;
+} as SavedObjectUnsanitizedDoc<SyntheticsMonitorWithSecretsAttributes>;
 export const browserUptimeUI = {
   type: 'synthetics-monitor',
   id: '9bf12063-271f-47b1-9121-db1d14a71bb3',
@@ -299,7 +299,7 @@ export const browserUptimeUI = {
   updated_at: '2023-03-31T20:35:34.916Z',
   created_at: '2023-03-31T20:35:34.916Z',
   typeMigrationVersion: '8.6.0',
-} as SavedObjectUnsanitizedDoc<SyntheticsMonitorWithSecrets>;
+} as SavedObjectUnsanitizedDoc<SyntheticsMonitorWithSecretsAttributes>;
 export const tcpUptimeUI = {
   type: 'synthetics-monitor',
   id: '726d3f74-7760-4045-ad8d-87642403c721',
@@ -345,7 +345,7 @@ export const tcpUptimeUI = {
   updated_at: '2023-03-31T20:38:29.582Z',
   created_at: '2023-03-31T20:38:29.582Z',
   typeMigrationVersion: '8.6.0',
-} as SavedObjectUnsanitizedDoc<SyntheticsMonitorWithSecrets>;
+} as SavedObjectUnsanitizedDoc<SyntheticsMonitorWithSecretsAttributes>;
 export const httpUptimeUI = {
   type: 'synthetics-monitor',
   id: '35b2d765-4a62-4511-91c8-d5d52fdf4639',
@@ -395,7 +395,7 @@ export const httpUptimeUI = {
   updated_at: '2023-03-31T20:37:24.093Z',
   created_at: '2023-03-31T20:37:24.093Z',
   typeMigrationVersion: '8.6.0',
-} as SavedObjectUnsanitizedDoc<SyntheticsMonitorWithSecrets>;
+} as SavedObjectUnsanitizedDoc<SyntheticsMonitorWithSecretsAttributes>;
 export const icmpUptimeUI = {
   type: 'synthetics-monitor',
   id: '28b14c99-4a39-475d-9545-21b35b35751d',
@@ -433,7 +433,7 @@ export const icmpUptimeUI = {
   updated_at: '2023-03-31T20:40:28.889Z',
   created_at: '2023-03-31T20:39:13.783Z',
   typeMigrationVersion: '8.6.0',
-} as SavedObjectUnsanitizedDoc<SyntheticsMonitorWithSecrets>;
+} as SavedObjectUnsanitizedDoc<SyntheticsMonitorWithSecretsAttributes>;
 export const browserProject = {
   type: 'synthetics-monitor',
   id: 'ea123f46-eb02-4a8a-b3ce-53e645ce4aef',
@@ -497,7 +497,7 @@ export const browserProject = {
   updated_at: '2023-03-31T20:43:35.214Z',
   created_at: '2023-03-31T20:43:35.214Z',
   typeMigrationVersion: '8.6.0',
-} as SavedObjectUnsanitizedDoc<SyntheticsMonitorWithSecrets>;
+} as SavedObjectUnsanitizedDoc<SyntheticsMonitorWithSecretsAttributes>;
 export const httpProject = {
   type: 'synthetics-monitor',
   id: '316c0df8-56fc-428a-a477-7bf580f6cb4c',
@@ -550,7 +550,7 @@ export const httpProject = {
   updated_at: '2023-03-31T20:43:35.214Z',
   created_at: '2023-03-31T20:43:35.214Z',
   typeMigrationVersion: '8.6.0',
-} as SavedObjectUnsanitizedDoc<SyntheticsMonitorWithSecrets>;
+} as SavedObjectUnsanitizedDoc<SyntheticsMonitorWithSecretsAttributes>;
 export const icmpProject = {
   type: 'synthetics-monitor',
   id: 'e21a30b5-6d40-4458-8cff-9003d7b83eb6',
@@ -591,7 +591,7 @@ export const icmpProject = {
   updated_at: '2023-03-31T20:43:35.214Z',
   created_at: '2023-03-31T20:43:35.214Z',
   typeMigrationVersion: '8.6.0',
-} as SavedObjectUnsanitizedDoc<SyntheticsMonitorWithSecrets>;
+} as SavedObjectUnsanitizedDoc<SyntheticsMonitorWithSecretsAttributes>;
 export const tcpProject = {
   type: 'synthetics-monitor',
   id: '9f5d6206-9a1d-47fb-bd67-c7895b07f716',
@@ -640,7 +640,7 @@ export const tcpProject = {
   updated_at: '2023-03-31T20:47:15.781Z',
   created_at: '2023-03-31T20:43:35.214Z',
   typeMigrationVersion: '8.6.0',
-} as SavedObjectUnsanitizedDoc<SyntheticsMonitorWithSecrets>;
+} as SavedObjectUnsanitizedDoc<SyntheticsMonitorWithSecretsAttributes>;
 
 export const testMonitors = [
   browserUI,

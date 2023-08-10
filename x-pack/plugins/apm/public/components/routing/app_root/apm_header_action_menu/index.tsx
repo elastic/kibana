@@ -77,7 +77,7 @@ export function ApmHeaderActionMenu() {
       )}
       <EuiHeaderLink
         color="primary"
-        href={kibanaHref('/app/home#/tutorial/apm')}
+        href={kibanaHref('/app/apm/tutorial')}
         iconType="indexOpen"
         data-test-subj="apmAddDataHeaderLink"
       >
