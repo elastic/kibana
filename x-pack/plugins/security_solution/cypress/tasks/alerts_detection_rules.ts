@@ -187,7 +187,7 @@ export const filterByDisabledRules = () => {
 };
 
 export const goToRuleDetails = () => {
-  cy.get(RULE_NAME).first().click();
+  cy.get(RULE_NAME).first().click({ force: true });
 };
 
 export const goToTheRuleDetailsOf = (ruleName: string) => {

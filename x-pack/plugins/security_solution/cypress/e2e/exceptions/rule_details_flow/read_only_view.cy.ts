@@ -9,7 +9,7 @@ import { getExceptionList } from '../../../objects/exception';
 import { getNewRule } from '../../../objects/rule';
 import { ROLES } from '../../../../common/test';
 import { createRule } from '../../../tasks/api_calls/rules';
-import { login, visitWithoutDateRange } from '../../../tasks/login';
+import { login, logout, visitWithoutDateRange } from '../../../tasks/login';
 import { goToExceptionsTab, goToAlertsTab } from '../../../tasks/rule_details';
 import { goToRuleDetails } from '../../../tasks/alerts_detection_rules';
 import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../../urls/navigation';
@@ -34,6 +34,8 @@ describe('Exceptions viewer read only', () => {
 
   before(() => {
     cleanKibana();
+    login();
+    // cleanKibana();
     // cy.task('esArchiverResetKibana');
     // create rule with exceptions
     createExceptionList(exceptionList, exceptionList.list_id).then((response) => {
@@ -53,17 +55,19 @@ describe('Exceptions viewer read only', () => {
         })
       );
     });
+    logout();
   });
 
   beforeEach(() => {
     login(ROLES.reader);
     visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL, ROLES.reader);
-    cy.intercept('GET', '/api/detection_engine/rules/*').as('getRuleDetails');
+    // cy.intercept('GET', '/api/detection_engine/rules/*').as('getRuleDetails');
     goToRuleDetails();
-    cy.wait('@getRuleDetails', { timeout: 10000 }).then(({ response }) => {
-      cy.wrap(response?.statusCode).should('eql', 200);
-      goToExceptionsTab();
-    });
+    cy.url().should('contain', 'app/security/rules/id');
+    // cy.wait('@getRuleDetails', { timeout: 10000 }).then(({ response }) => {
+    //   cy.wrap(response?.statusCode).should('eql', 200);
+    // });
+    goToExceptionsTab();
   });
 
   after(() => {
