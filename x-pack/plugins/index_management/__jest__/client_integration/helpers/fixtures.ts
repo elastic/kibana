@@ -48,7 +48,6 @@ export const indexStats = {
   },
 };
 
-
 export const createTestEnrichPolicy = (name: string, type: EnrichPolicyType) => ({
   name,
   type,

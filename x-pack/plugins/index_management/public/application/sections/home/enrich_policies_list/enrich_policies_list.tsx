@@ -31,7 +31,12 @@ export const EnrichPoliciesList = () => {
   const [policyToDelete, setPolicyToDelete] = useState<string | undefined>();
   const [policyToExecute, setPolicyToExecute] = useState<string | undefined>();
 
-  const { error, isLoading, data: policies, resendRequest: reloadPolicies } = useLoadEnrichPolicies();
+  const {
+    error,
+    isLoading,
+    data: policies,
+    resendRequest: reloadPolicies,
+  } = useLoadEnrichPolicies();
 
   if (isLoading) {
     return (
