@@ -44,6 +44,7 @@ export class MlCapabilitiesService {
   private _updateRequested$ = new BehaviorSubject<number>(Date.now());
 
   private _capabilities$ = new BehaviorSubject<MlCapabilities | null>(null);
+  private _capabilitiesObs$ = this._capabilities$.asObservable();
 
   public capabilities$ = this._capabilities$.pipe(distinctUntilChanged(isEqual));
 
@@ -81,7 +82,7 @@ export class MlCapabilitiesService {
   }
 
   public getCapabilities$() {
-    return this._capabilities$.asObservable();
+    return this._capabilitiesObs$;
   }
 
   public refreshCapabilities() {
