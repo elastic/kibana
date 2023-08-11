@@ -433,7 +433,7 @@ ${JSON.stringify(cyCustomEnv, null, 2)}
           concurrency: (argv.concurrency as number | undefined)
             ? (argv.concurrency as number)
             : !isOpen
-            ? 2
+            ? 1
             : 1,
         }
       ).then((results) => {
