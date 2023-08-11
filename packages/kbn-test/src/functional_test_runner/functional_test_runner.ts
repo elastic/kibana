@@ -247,7 +247,7 @@ export class FunctionalTestRunner {
       const coreProviders = readProviderSpec('Service', {
         lifecycle: () => lifecycle,
         log: () => this.log,
-        testMetadata: () => this.testMetadata,
+        testMetadata: () => testMetadata,
         config: () => this.config,
         dockerServers: () => dockerServers,
         esVersion: () => this.esVersion,
