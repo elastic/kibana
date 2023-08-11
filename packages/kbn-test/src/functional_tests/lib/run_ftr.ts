@@ -49,26 +49,34 @@ async function createFtr({
     dryRun,
   },
 }: CreateFtrParams) {
-  const config = await readConfigFile(log, esVersion, configPath, {}, (configModule) => ({
-    mochaOpts: {
-      bail: !!bail,
-      grep,
-      dryRun: !!dryRun,
-    },
-    kbnTestServer: {
-      installDir,
-    },
-    updateBaselines,
-    updateSnapshots,
-    suiteFiles: {
-      include: [...(suiteFiles?.include || []), ...configModule.get('suiteFiles.include')],
-      exclude: [...(suiteFiles?.exclude || []), ...configModule.get('suiteFiles.exclude')],
-    },
-    suiteTags: {
-      include: [...(suiteTags?.include || []), ...configModule.get('suiteTags.include')],
-      exclude: [...(suiteTags?.exclude || []), ...configModule.get('suiteTags.exclude')],
-    },
-  }));
+  const config = await readConfigFile(log, esVersion, configPath, {}, (configModule) => {
+
+    // TODO: remove console logs
+    // eslint-disable-next-line
+    console.log(typeof configModule);
+    // eslint-disable-next-line
+    console.log(configModule);
+    return {
+      mochaOpts: {
+        bail: !!bail,
+        grep,
+        dryRun: !!dryRun,
+      },
+      kbnTestServer: {
+        installDir,
+      },
+      updateBaselines,
+      updateSnapshots,
+      suiteFiles: {
+        include: [...(suiteFiles?.include || []), ...configModule.get('suiteFiles.include')],
+        exclude: [...(suiteFiles?.exclude || []), ...configModule.get('suiteFiles.exclude')],
+      },
+      suiteTags: {
+        include: [...(suiteTags?.include || []), ...configModule.get('suiteTags.include')],
+        exclude: [...(suiteTags?.exclude || []), ...configModule.get('suiteTags.exclude')],
+      },
+    }
+  });
 
   return {
     config,
