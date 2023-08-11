@@ -79,7 +79,11 @@ export function InstallElasticAgentSteps<PlatformId extends string>({
       Object.keys(installProgressSteps),
       Object.keys(PROGRESS_STEP_TITLES(selectedPlatform))
     ).length > 0;
-  const autoDownloadConfigStep = getStep('ea-config', installProgressSteps, selectedPlatform);
+  const autoDownloadConfigStep = getStep(
+    'ea-config',
+    installProgressSteps,
+    selectedPlatform
+  );
 
   const customInstallStep = installAgentPlatformOptions.find(
     (step) => step.id === selectedPlatform
@@ -334,7 +338,7 @@ export function InstallElasticAgentSteps<PlatformId extends string>({
 function getStep(
   id: ProgressStepId,
   installProgressSteps: Props<string>['installProgressSteps'],
-  selectedPlatform: string,
+  selectedPlatform: string
 ): { title: string; status: EuiStepStatus; message?: string } {
   const { loadingTitle, completedTitle, incompleteTitle } =
     PROGRESS_STEP_TITLES(selectedPlatform)[id];
@@ -360,7 +364,9 @@ function getStep(
   };
 }
 
-const PROGRESS_STEP_TITLES: (selectedPlatform: string) => Record<
+const PROGRESS_STEP_TITLES: (
+  selectedPlatform: string
+) => Record<
   ProgressStepId,
   Record<'incompleteTitle' | 'loadingTitle' | 'completedTitle', string>
 > = (selectedPlatform: string) => ({
@@ -438,10 +444,11 @@ const PROGRESS_STEP_TITLES: (selectedPlatform: string) => Record<
       {
         defaultMessage: 'Elastic Agent config written to {configPath}',
         values: {
-          configPath: selectedPlatform === 'macos'
-            ? '/Library/Elastic/Agent/elastic-agent.yml'
-            : '/opt/Elastic/Agent/elastic-agent.yml',
-          },
+          configPath:
+            selectedPlatform === 'macos'
+              ? '/Library/Elastic/Agent/elastic-agent.yml'
+              : '/opt/Elastic/Agent/elastic-agent.yml',
+        },
       }
     ),
   },
