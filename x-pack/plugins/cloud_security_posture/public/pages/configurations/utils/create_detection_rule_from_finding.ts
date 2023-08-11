@@ -67,11 +67,12 @@ const generateMisconfigurationsTags = (finding: CspFinding) => {
 };
 
 const generateMisconfigurationsRuleQuery = (finding: CspFinding) => {
-  return `
-    rule.benchmark.rule_number: "${finding.rule.benchmark.rule_number}"
+  const currentTimestamp = new Date().toISOString();
+
+  return `rule.benchmark.rule_number: "${finding.rule.benchmark.rule_number}"
     AND rule.benchmark.id: "${finding.rule.benchmark.id}"
     AND result.evaluation: "failed"
-  `;
+    AND event.ingested >= "${currentTimestamp}"`;
 };
 
 /*
