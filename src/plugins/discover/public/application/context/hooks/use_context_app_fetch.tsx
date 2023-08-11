@@ -43,7 +43,7 @@ export function useContextAppFetch({
   useNewFieldsApi,
 }: ContextAppFetchProps) {
   const services = useDiscoverServices();
-  const { uiSettings: config, data, toastNotifications, filterManager, core } = services;
+  const { uiSettings: config, data, toastNotifications, filterManager } = services;
 
   const searchSource = useMemo(() => {
     return data.search.searchSource.createEmpty();
