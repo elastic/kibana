@@ -63,7 +63,7 @@ import type {
   CreateRuleOptions,
   CreateQueryRuleAdditionalOptions,
 } from './lib/detection_engine/rule_types/types';
-// eslint-disable-next-line no-restricted-imports
+
 import {
   legacyRulesNotificationAlertType,
   legacyIsNotificationAlertExecutor,
@@ -97,7 +97,8 @@ import {
 } from '../common/endpoint/constants';
 import { RiskEngineDataClient } from './lib/risk_engine/risk_engine_data_client';
 
-import { AppFeatures } from './lib/app_features';
+// import { AppFeatures } from './lib/app_features';
+import { AppFeaturesService } from './lib/app_features_service/app_features_service';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
@@ -106,7 +107,7 @@ export class Plugin implements ISecuritySolutionPlugin {
   private readonly config: ConfigType;
   private readonly logger: Logger;
   private readonly appClientFactory: AppClientFactory;
-  private readonly appFeatures: AppFeatures;
+  private readonly appFeatures: AppFeaturesService;
 
   private readonly ruleMonitoringService: IRuleMonitoringService;
   private readonly endpointAppContextService = new EndpointAppContextService();
@@ -130,7 +131,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     this.config = serverConfig;
     this.logger = context.logger.get();
     this.appClientFactory = new AppClientFactory();
-    this.appFeatures = new AppFeatures(this.logger, this.config.experimentalFeatures);
+    this.appFeatures = new AppFeaturesService(this.logger, this.config.experimentalFeatures);
 
     this.ruleMonitoringService = createRuleMonitoringService(this.config, this.logger);
     this.telemetryEventsSender = new TelemetryEventsSender(this.logger);
@@ -403,7 +404,9 @@ export class Plugin implements ISecuritySolutionPlugin {
     plugins.guidedOnboarding.registerGuideConfig(siemGuideId, siemGuideConfig);
 
     return {
-      setAppFeatures: this.appFeatures.set.bind(this.appFeatures),
+      setAppFeaturesConfigurator: this.appFeatures.setAppFeaturesConfigurator.bind(
+        this.appFeatures
+      ),
     };
   }
 

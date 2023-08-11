@@ -27,7 +27,6 @@ import {
   isPolicySetToEventCollectionOnly,
   ensureOnlyEventCollectionIsAllowed,
 } from '../../common/endpoint/models/policy_config_helpers';
-import type { AppFeatures } from '../lib/app_features';
 import type { NewPolicyData, PolicyConfig } from '../../common/endpoint/types';
 import type { LicenseService } from '../../common/license';
 import type { ManifestManager } from '../endpoint/services';
@@ -44,6 +43,7 @@ import { notifyProtectionFeatureUsage } from './notify_protection_feature_usage'
 import type { AnyPolicyCreateConfig } from './types';
 import { ENDPOINT_INTEGRATION_CONFIG_KEY } from './constants';
 import { createEventFilters } from './handlers/create_event_filters';
+import type { AppFeaturesService } from '../lib/app_features_service/app_features_service';
 
 const isEndpointPackagePolicy = <T extends { package?: { name: string } }>(
   packagePolicy: T
@@ -79,7 +79,7 @@ export const getPackagePolicyCreateCallback = (
   licenseService: LicenseService,
   exceptionsClient: ExceptionListClient | undefined,
   cloud: CloudSetup,
-  appFeatures: AppFeatures
+  appFeatures: AppFeaturesService
 ): PostPackagePolicyCreateCallback => {
   return async (
     newPackagePolicy,
@@ -184,7 +184,7 @@ export const getPackagePolicyUpdateCallback = (
   endpointMetadataService: EndpointMetadataService,
   cloud: CloudSetup,
   esClient: ElasticsearchClient,
-  appFeatures: AppFeatures
+  appFeatures: AppFeaturesService
 ): PutPackagePolicyUpdateCallback => {
   return async (newPackagePolicy: NewPackagePolicy): Promise<UpdatePackagePolicy> => {
     if (!isEndpointPackagePolicy(newPackagePolicy)) {

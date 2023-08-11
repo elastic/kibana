@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AppFeatureKey, type AppFeatureKeys } from '@kbn/security-solution-plugin/common';
+import { AppFeatureKey, type AppFeatureKeys } from '@kbn/security-solution-features';
 import type { SecurityProductLine, SecurityProductTier } from '../config';
 
 type PliAppFeatures = Readonly<
@@ -20,6 +20,7 @@ export const PLI_APP_FEATURES: PliAppFeatures = {
       AppFeatureKey.investigationGuide,
       AppFeatureKey.threatIntelligence,
       AppFeatureKey.casesConnectors,
+      AppFeatureKey.rulesTest,
     ],
   },
   endpoint: {

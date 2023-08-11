@@ -12,6 +12,7 @@ import {
   EXCEPTIONS_PATH,
   RULES_LANDING_PATH,
   RULES_ADD_PATH,
+  SERVER_APP_ID,
 } from '../../common/constants';
 import { ADD_RULES, CREATE_NEW_RULE, EXCEPTIONS, RULES, SIEM_RULES } from '../app/translations';
 import { SecurityPageName } from '../app/types';
@@ -26,6 +27,7 @@ export const links: LinkItem = {
   path: RULES_LANDING_PATH,
   hideTimeline: true,
   skipUrlState: true,
+  capabilities: [`${SERVER_APP_ID}.readRules`],
   links: [
     {
       id: SecurityPageName.rules,
