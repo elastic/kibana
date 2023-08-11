@@ -40,6 +40,7 @@ export const ProjectNavigation: React.FC<ProjectNavigationProps> = ({
 
   return (
     <EuiCollapsibleNav
+      className="projectLayoutSideNav"
       css={collabsibleNavCSS}
       isOpen={isVisible}
       showButtonIfDocked={true}
