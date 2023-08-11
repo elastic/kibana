@@ -307,7 +307,7 @@ class DocumentationService {
     return this.runtimeFields;
   }
 
-  public getBulkIdexAlias() {
+  public getBulkIndexAlias() {
     return this.bulkIndexAlias;
   }
 

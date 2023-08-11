@@ -66,7 +66,7 @@ export const StepAliases: React.FunctionComponent<Props> = React.memo(
             <EuiButtonEmpty
               size="s"
               flush="right"
-              href={documentationService.getBulkIdexAlias()}
+              href={documentationService.getBulkIndexAlias()}
               target="_blank"
               iconType="help"
             >
