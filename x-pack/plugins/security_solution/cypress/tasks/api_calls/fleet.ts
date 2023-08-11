@@ -44,7 +44,7 @@ const deletePackagePolicies = () => {
   return rootRequest<{ items: Array<{ id: string }> }>({
     method: 'GET',
     url: 'api/fleet/package_policies',
-    headers: { 'kbn-xsrf': 'cypress-creds', },
+    headers: { 'kbn-xsrf': 'cypress-creds' },
   }).then((response) => {
     rootRequest({
       method: 'POST',
