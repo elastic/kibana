@@ -238,7 +238,7 @@ describe('Endpoint Authz service', () => {
 
         // Having ONLY host isolation Release response action can only be true in a
         // downgrade scenario, where we allow the user to continue to release isolated
-        // hosts. In that scenario, we don't show access tot he response console
+        // hosts. In that scenario, we don't show access to the response console
         if (responseConsolePrivilege === 'writeHostIsolationRelease') {
           expect(authz.canAccessResponseConsole).toBe(false);
         } else {
