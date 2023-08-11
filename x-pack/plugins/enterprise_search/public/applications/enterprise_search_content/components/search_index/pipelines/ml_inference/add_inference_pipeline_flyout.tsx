@@ -160,7 +160,11 @@ export const AddInferencePipelineHorizontalSteps: React.FC = () => {
     currentStep: AddInferencePipelineSteps,
     otherStep: AddInferencePipelineSteps
   ) => {
-    return currentStep > otherStep ? 'complete' : currentStep === otherStep ? 'current' : 'incomplete';
+    return currentStep > otherStep
+      ? 'complete'
+      : currentStep === otherStep
+      ? 'current'
+      : 'incomplete';
   };
 
   const navSteps: EuiStepsHorizontalProps['steps'] = [
