@@ -43,7 +43,7 @@ import { auditLoggingService } from './audit_logging';
 import { appContextService } from './app_context';
 import { packagePolicyService } from './package_policy';
 import { settingsService } from '.';
-import { allFleetServerVersionsAreAbove } from './fleet_server';
+import { allFleetServerVersionsAreAtLeast } from './fleet_server';
 
 export async function createSecrets(opts: {
   esClient: ElasticsearchClient;
@@ -389,7 +389,7 @@ export async function isSecretStorageEnabled(
 
   // otherwise check if we have the minimum fleet server version and enable secrets if so
   if (
-    await allFleetServerVersionsAreAbove(esClient, soClient, SECRETS_MINIMUM_FLEET_SERVER_VERSION)
+    await allFleetServerVersionsAreAtLeast(esClient, soClient, SECRETS_MINIMUM_FLEET_SERVER_VERSION)
   ) {
     logger.debug('Enabling secrets storage as minimum fleet server version has been met');
     try {
@@ -404,7 +404,7 @@ export async function isSecretStorageEnabled(
     return true;
   }
 
-  logger.debug('Secrets storage is disabled as minimum fleet server version has not been met');
+  logger.info('Secrets storage is disabled as minimum fleet server version has not been met');
   return false;
 }
 

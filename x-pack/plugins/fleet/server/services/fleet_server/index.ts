@@ -28,7 +28,7 @@ export async function hasFleetServers(esClient: ElasticsearchClient) {
   return (res.hits.total as number) > 0;
 }
 
-export async function allFleetServerVersionsAreAbove(
+export async function allFleetServerVersionsAreAtLeast(
   esClient: ElasticsearchClient,
   soClient: SavedObjectsClientContract,
   version: string

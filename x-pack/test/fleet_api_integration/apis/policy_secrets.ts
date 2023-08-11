@@ -158,6 +158,7 @@ export default function (providerContext: FtrProviderContext) {
       try {
         await es.deleteByQuery({
           index: '.fleet-agents',
+          refresh: true,
           body: {
             query: {
               match_all: {},
