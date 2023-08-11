@@ -60,16 +60,18 @@ describe('Agent policy advanced options content', () => {
     if (newAgentPolicy) {
       mockAgentPolicy = generateNewAgentPolicyWithDefaults();
     } else {
-      mockAgentPolicy = createAgentPolicyMock();
+      mockAgentPolicy = {
+        ...createAgentPolicyMock(),
+        package_policies: packagePolicy,
+        id: policyId,
+      };
     }
 
     renderResult = testRender.render(
       <AgentPolicyAdvancedOptionsContent
         agentPolicy={{
           ...mockAgentPolicy,
-          package_policies: packagePolicy,
           is_protected: isProtected,
-          id: policyId,
         }}
         updateAgentPolicy={mockUpdateAgentPolicy}
         validation={mockValidation}
