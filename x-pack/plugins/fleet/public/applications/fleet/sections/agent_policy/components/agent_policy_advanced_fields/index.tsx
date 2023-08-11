@@ -333,7 +333,10 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
                       color="subdued"
                       content={i18n.translate(
                         'xpack.fleet.agentPolicyForm.tamperingSwitchLabel.disabledWarning',
-                        { defaultMessage: 'this is why its disabled' }
+                        {
+                          defaultMessage:
+                            'Elastic Defend integration is required to enable this feature',
+                        }
                       )}
                     />
                   </span>
