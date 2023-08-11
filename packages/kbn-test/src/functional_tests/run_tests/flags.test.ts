@@ -41,7 +41,7 @@ describe('parse runTest flags', () => {
           <absolute path>/foo,
         ],
         "dryRun": false,
-        "esFrom": "snapshot",
+        "esFrom": undefined,
         "esVersion": <EsVersion 9.9.9>,
         "grep": undefined,
         "installDir": undefined,
