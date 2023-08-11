@@ -17,7 +17,7 @@ export default ({ getPageObjects }: FtrProviderContext) => {
     let findings: typeof PageObjects.findings;
     let noFindingsVulnerabilities: typeof findings.notInstalledVulnerabilities;
 
-    it('shows `not-installed` state for vulnerabilities and navigates to the CNVM integration installation page when clicking on the `No integrations installed` prompt action button - `install CNVM`', async () => {
+    it('clicking on the `No integrations installed` prompt action button - `install CNVM`: navigates to the CNVM integration installation page', async () => {
       findings = PageObjects.findings;
       noFindingsVulnerabilities = findings.notInstalledVulnerabilities;
 
