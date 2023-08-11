@@ -11,7 +11,7 @@ import * as yaml from 'js-yaml';
 import type { UrlObject } from 'url';
 import Url from 'url';
 import type { Role } from '@kbn/security-plugin/common';
-import { isLocalhost } from '../../../../scripts/endpoint/common/is_localhost';
+import { isLocalhost } from '@kbn/securitysolution-runtime-services';
 import { getWithResponseActionsRole } from '../../../../scripts/endpoint/common/roles_users/with_response_actions_role';
 import { getNoResponseActionsRole } from '../../../../scripts/endpoint/common/roles_users/without_response_actions_role';
 import { request } from './common';

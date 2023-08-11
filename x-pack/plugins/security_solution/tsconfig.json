@@ -17,7 +17,7 @@
   ],
   "exclude": [
     "target/**/*",
-    "**/cypress/**",
+    "**/cypress/e2e/**",
     "public/management/cypress_endpoint.config.ts",
     "public/management/cypress.config.ts"
   ],
@@ -169,5 +169,6 @@
     "@kbn/alerts-ui-shared",
     "@kbn/core-logging-server-mocks",
     "@kbn/core-lifecycle-browser",
+    "@kbn/cypress-config"
   ]
 }

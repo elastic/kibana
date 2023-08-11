@@ -5,7 +5,5 @@
  * 2.0.
  */
 
-export const STANDARD_HTTP_HEADERS = Object.freeze({
-  'kbn-xsrf': 'cypress-creds-via-env',
-  'x-elastic-internal-origin': 'security-solution',
-});
+export const generateRandomStringName = (length: number) =>
+  Array.from({ length }, () => Math.random().toString(36).substring(2));

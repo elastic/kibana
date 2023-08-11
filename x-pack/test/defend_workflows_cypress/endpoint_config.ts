@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getLocalhostRealIp } from '@kbn/security-solution-plugin/scripts/endpoint/common/localhost_services';
+import { getLocalhostRealIp } from '@kbn/securitysolution-runtime-services';
 import { FtrConfigProviderContext } from '@kbn/test';
 
 import { ExperimentalFeatures } from '@kbn/security-solution-plugin/common/experimental_features';

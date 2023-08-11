@@ -24,7 +24,7 @@ import {
 } from '../../tasks/api_fixtures';
 
 describe(`T1 and T2 analysts`, { tags: [tag.ESS, tag.SERVERLESS] }, () => {
-  ['t1_analyst', 't2_analyst'].forEach((role) => {
+  ['t1_analyst', 't2_analyst'].forEach((role: string) => {
     describe(`${role}- READ + runSavedQueries `, { tags: [tag.ESS, tag.SERVERLESS] }, () => {
       let savedQueryName: string;
       let savedQueryId: string;
@@ -47,6 +47,7 @@ describe(`T1 and T2 analysts`, { tags: [tag.ESS, tag.SERVERLESS] }, () => {
       });
 
       beforeEach(() => {
+        // @ts-expect-error
         cy.login(role);
       });
 

@@ -11,3 +11,4 @@ export * from './src/kibana_roles';
 export * from './src/security_user_services';
 export * from './src/is_localhost';
 export * from './src/localhost_services';
+export * from './src/default_http_headers';

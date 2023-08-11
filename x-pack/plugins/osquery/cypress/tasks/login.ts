@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { request } from '@kbn/security-solution-plugin/public/management/cypress/tasks/common';
+// import { request } from '@kbn/security-solution-plugin/public/management/cypress/tasks/common';
 import { STANDARD_HTTP_HEADERS, isLocalhost } from '@kbn/securitysolution-runtime-services';
-import type { ServerlessRoleName } from '@kbn/securitysolution-runtime-services';
-
+import type { ServerlessRoleName, LoadedRoleAndUser } from '@kbn/securitysolution-runtime-services';
+import { request } from './common';
 /**
  * Send login via API
  * @param username
@@ -68,7 +68,8 @@ export const login: CyLoginTask = (
   let password = Cypress.env('KIBANA_PASSWORD');
 
   if (user && user !== 'elastic') {
-    return cy.task('loadUserAndRole', { name: user }).then((loadedUser) => {
+    // @ts-expect-error update type
+    return cy.task('loadUserAndRole', { name: user }).then((loadedUser: LoadedRoleAndUser) => {
       username = loadedUser.username;
       password = loadedUser.password;
 

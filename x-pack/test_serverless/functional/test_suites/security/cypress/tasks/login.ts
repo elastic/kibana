@@ -1,14 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { request } from '@kbn/security-solution-plugin/public/management/cypress/tasks/common';
-import { isLocalhost } from '@kbn/security-solution-plugin/scripts/endpoint/common/is_localhost';
-import type { ServerlessRoleName } from '../../../../../shared/lib';
-import { STANDARD_HTTP_HEADERS } from '../../../../../shared/lib/security/default_http_headers';
+import {
+  isLocalhost,
+  STANDARD_HTTP_HEADERS,
+  ServerlessRoleName,
+} from '@kbn/securitysolution-runtime-services';
 
 /**
  * Send login via API
