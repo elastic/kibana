@@ -59,13 +59,6 @@ const TYPE_LABELS_INVERTED = Object.entries(TYPE_LABELS).reduce<Record<MlSavedOb
   {} as Record<MlSavedObjectType, string>
 );
 
-// const TYPE_OPTIONS: EuiComboBoxOptionOption[] = Object.entries(TYPE_LABELS).map(
-//   ([label, type]) => ({
-//     label,
-//     color: getMemoryItemColor(type),
-//   })
-// );
-
 export const JobMemoryTreeMap: FC<Props> = ({ node, type, height }) => {
   const {
     services: { theme: themeService },
