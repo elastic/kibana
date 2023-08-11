@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { tag } from '@kbn/security-solution-plugin/cypress/tags';
+import { tag } from '../../tags';
 import {
   cleanupPack,
   cleanupAgentPolicy,
