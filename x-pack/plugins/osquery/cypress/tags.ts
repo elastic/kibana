@@ -5,6 +5,8 @@
  * 2.0.
  */
 
-import { tag as securitySolutionTags } from '@kbn/security-solution-plugin/cypress/tags';
-
-export const tag = securitySolutionTags;
+export const tag = {
+  SERVERLESS: '@serverless',
+  ESS: '@ess',
+  BROKEN_IN_SERVERLESS: '@brokenInServerless',
+};
