@@ -125,7 +125,6 @@ export const deleteIntegrations = async (integrationName: string) => {
     .then(() => {
       cy.request({
         url: `/api/fleet/package_policies/delete`,
-        headers: { 'kbn-xsrf': 'cypress', 'Elastic-Api-Version': '2023-10-31' },
         body: `{ "packagePolicyIds": ${JSON.stringify(ids)} }`,
         method: 'POST',
       });
@@ -135,7 +134,6 @@ export const deleteIntegrations = async (integrationName: string) => {
 export const installPackageWithVersion = (integration: string, version: string) => {
   cy.request({
     url: `/api/fleet/epm/packages/${integration}-${version}`,
-    headers: { 'kbn-xsrf': 'cypress', 'Elastic-Api-Version': '2023-10-31' },
     body: '{ "force": true }',
     method: 'POST',
   });

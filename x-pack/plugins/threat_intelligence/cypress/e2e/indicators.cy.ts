@@ -151,7 +151,6 @@ describe('Indicators', () => {
       cy.request({
         method: 'GET',
         url: '/api/fleet/epm/packages',
-        headers: { 'kbn-xsrf': 'cypress', 'Elastic-Api-Version': '2023-10-31' },
       }).should((response) => expect(response.status).to.eq(200));
     });
   });

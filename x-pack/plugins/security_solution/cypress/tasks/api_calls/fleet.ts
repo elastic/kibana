@@ -31,7 +31,6 @@ const deleteAgentPolicies = () => {
       rootRequest({
         method: 'POST',
         url: `api/fleet/agent_policies/delete`,
-        headers: { 'kbn-xsrf': 'cypress-creds', 'Elastic-Api-Version': '2023-10-31' },
         body: {
           agentPolicyId: item.id,
         },
@@ -49,7 +48,6 @@ const deletePackagePolicies = () => {
     rootRequest({
       method: 'POST',
       url: `api/fleet/package_policies/delete`,
-      headers: { 'kbn-xsrf': 'cypress-creds', 'Elastic-Api-Version': '2023-10-31' },
       body: {
         packagePolicyIds: response.body.items.map((item: { id: string }) => item.id),
       },
@@ -68,7 +66,6 @@ const deletePackages = () => {
         rootRequest({
           method: 'DELETE',
           url: `api/fleet/epm/packages/${item.name}/${item.version}`,
-          headers: { 'kbn-xsrf': 'cypress-creds', 'Elastic-Api-Version': '2023-10-31' },
         });
       }
     });
