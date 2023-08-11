@@ -33,7 +33,7 @@ import { AGENT_POLICY_NAME_LINK } from '../../screens/integrations';
 import { cleanupAgentPolicies, unenrollAgent } from '../../tasks/cleanup';
 import { setFleetServerHost } from '../../tasks/fleet_server';
 
-import { LATEST_PUBLIC_VERSION } from '../../../common/constants';
+import { OLDEST_PUBLIC_VERSION } from '../../../common/constants';
 
 describe('Home page', () => {
   before(() => {
@@ -154,7 +154,7 @@ describe('Home page', () => {
         method: 'POST',
         url: '/api/fleet/agent_policies',
         body: { name: 'Agent policy for A11y test', namespace: 'default', id: 'agent-policy-a11y' },
-        headers: { 'kbn-xsrf': 'cypress', 'Elastic-Api-Version': `${LATEST_PUBLIC_VERSION}` },
+        headers: { 'kbn-xsrf': 'cypress', 'Elastic-Api-Version': `${OLDEST_PUBLIC_VERSION}` },
       });
     });
     beforeEach(() => {
@@ -166,7 +166,7 @@ describe('Home page', () => {
         method: 'POST',
         url: '/api/fleet/agent_policies/delete',
         body: { agentPolicyId: 'agent-policy-a11y' },
-        headers: { 'kbn-xsrf': 'kibana', 'Elastic-Api-Version': `${LATEST_PUBLIC_VERSION}` },
+        headers: { 'kbn-xsrf': 'kibana', 'Elastic-Api-Version': `${OLDEST_PUBLIC_VERSION}` },
       });
     });
     it('Uninstall Tokens Table', () => {

@@ -266,8 +266,4 @@ export const loadAgentPolicy = () =>
   }).then((response) => response.body.item);
 
 export const cleanupAgentPolicy = (agentPolicyId: string) =>
-  request({
-    method: 'POST',
-    body: { agentPolicyId },
-    url: '/api/fleet/agent_policies/delete',
-  });
+  request({ method: 'POST', body: { agentPolicyId }, url: '/api/fleet/agent_policies/delete' });

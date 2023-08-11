@@ -12,7 +12,7 @@ import type {
   PutDownloadSourceRequest,
 } from '../../types';
 
-import { LATEST_PUBLIC_VERSION } from '../../../common/constants';
+import { OLDEST_PUBLIC_VERSION } from '../../../common/constants';
 
 import { useRequest, sendRequest } from './use_request';
 
@@ -20,7 +20,7 @@ export function useGetDownloadSources() {
   return useRequest<GetDownloadSourceResponse>({
     method: 'get',
     path: downloadSourceRoutesService.getListPath(),
-    version: LATEST_PUBLIC_VERSION,
+    version: OLDEST_PUBLIC_VERSION,
   });
 }
 
@@ -38,7 +38,7 @@ export function sendPutDownloadSource(
   return sendRequest({
     method: 'put',
     path: downloadSourceRoutesService.getUpdatePath(downloadSourceId),
-    version: LATEST_PUBLIC_VERSION,
+    version: OLDEST_PUBLIC_VERSION,
     body,
   });
 }
@@ -47,7 +47,7 @@ export function sendPostDownloadSource(body: PostDownloadSourceRequest['body']) 
   return sendRequest({
     method: 'post',
     path: downloadSourceRoutesService.getCreatePath(),
-    version: LATEST_PUBLIC_VERSION,
+    version: OLDEST_PUBLIC_VERSION,
     body,
   });
 }
@@ -56,6 +56,6 @@ export function sendDeleteDownloadSource(downloadSourceId: string) {
   return sendRequest({
     method: 'delete',
     path: downloadSourceRoutesService.getDeletePath(downloadSourceId),
-    version: LATEST_PUBLIC_VERSION,
+    version: OLDEST_PUBLIC_VERSION,
   });
 }

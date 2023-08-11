@@ -11,7 +11,7 @@ import { cleanupAgentPolicies } from '../tasks/cleanup';
 import { UNINSTALL_TOKENS } from '../screens/fleet';
 import type { GetUninstallTokenResponse } from '../../common/types/rest_spec/uninstall_token';
 
-import { LATEST_PUBLIC_VERSION } from '../../common/constants';
+import { OLDEST_PUBLIC_VERSION } from '../../common/constants';
 
 describe('Uninstall token page', () => {
   before(() => {
@@ -80,7 +80,7 @@ describe('Uninstall token page', () => {
         method: 'POST',
         url: '/api/fleet/agent_policies',
         body: { name: `Agent policy ${i}00`, namespace: 'default', id: `agent-policy-${i}00` },
-        headers: { 'kbn-xsrf': 'cypress', 'Elastic-Api-Version': `${LATEST_PUBLIC_VERSION}` },
+        headers: { 'kbn-xsrf': 'cypress', 'Elastic-Api-Version': `${OLDEST_PUBLIC_VERSION}` },
       });
     }
   };

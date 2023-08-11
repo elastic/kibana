@@ -21,8 +21,8 @@ import { routeValidationObject } from '@kbn/server-route-repository';
 
 import type { INTERNAL_API_ACCESS } from '../../../common/constants';
 import {
-  LATEST_PUBLIC_VERSION,
-  LATEST_INTERNAL_VERSION,
+  OLDEST_PUBLIC_VERSION,
+  OLDEST_INTERNAL_VERSION,
   PUBLIC_API_ACCESS,
 } from '../../../common/constants';
 
@@ -134,7 +134,7 @@ export function makeRouterWithFleetAuthz<TContext extends FleetRequestHandlerCon
     });
   };
   const getDefaultVersion = (access: typeof PUBLIC_API_ACCESS | typeof INTERNAL_API_ACCESS) =>
-    access === PUBLIC_API_ACCESS ? LATEST_PUBLIC_VERSION : LATEST_INTERNAL_VERSION;
+    access === PUBLIC_API_ACCESS ? OLDEST_PUBLIC_VERSION : OLDEST_INTERNAL_VERSION;
 
   const fleetAuthzRouter: FleetAuthzRouter<TContext> = {
     get: ({ fleetAuthz: hasRequiredAuthz, version: headerVersion, ...options }, handler) => {

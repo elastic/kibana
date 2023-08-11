@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { LATEST_PUBLIC_VERSION } from '../../common/constants';
+import { OLDEST_PUBLIC_VERSION } from '../../common/constants';
 
 import { createAgentDoc } from './agents';
 
@@ -18,7 +18,7 @@ export function setupFleetServer() {
   cy.request({
     method: 'POST',
     url: '/api/fleet/agent_policies',
-    headers: { 'kbn-xsrf': 'xx', 'Elastic-Api-Version': `${LATEST_PUBLIC_VERSION}` },
+    headers: { 'kbn-xsrf': 'xx', 'Elastic-Api-Version': `${OLDEST_PUBLIC_VERSION}` },
     body: {
       id: FLEET_SERVER_POLICY_ID,
       name: 'Fleet Server policy',
@@ -63,7 +63,7 @@ export function setFleetServerHost(host = 'https://fleetserver:8220') {
   cy.request({
     method: 'POST',
     url: '/api/fleet/fleet_server_hosts',
-    headers: { 'kbn-xsrf': 'xx', 'Elastic-Api-Version': `${LATEST_PUBLIC_VERSION}` },
+    headers: { 'kbn-xsrf': 'xx', 'Elastic-Api-Version': `${OLDEST_PUBLIC_VERSION}` },
     body: {
       name: 'Default host',
       host_urls: [host],

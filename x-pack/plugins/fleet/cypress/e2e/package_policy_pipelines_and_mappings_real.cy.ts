@@ -17,7 +17,7 @@ const INPUT_TEST_PACKAGE = 'input_package-1.0.0';
 const INTEGRATION_TEST_PACKAGE = 'logs_integration-1.0.0';
 const INTEGRATION_TEST_PACKAGE_NO_DATASET = 'logs_int_no_dataset-1.0.0';
 
-import { LATEST_PUBLIC_VERSION } from '../../common/constants';
+import { OLDEST_PUBLIC_VERSION } from '../../common/constants';
 
 describe('Input package create and edit package policy', () => {
   const agentPolicyId = 'test-input-package-policy';
@@ -47,7 +47,7 @@ describe('Input package create and edit package policy', () => {
         namespace: 'default',
         monitoring_enabled: [],
       },
-      headers: { 'kbn-xsrf': 'cypress', 'Elastic-Api-Version': `${LATEST_PUBLIC_VERSION}` },
+      headers: { 'kbn-xsrf': 'cypress', 'Elastic-Api-Version': `${OLDEST_PUBLIC_VERSION}` },
     });
   });
   after(() => {
@@ -55,7 +55,7 @@ describe('Input package create and edit package policy', () => {
     cy.request({
       method: 'POST',
       url: `/api/fleet/agent_policies/delete`,
-      headers: { 'kbn-xsrf': 'cypress', 'Elastic-Api-Version': `${LATEST_PUBLIC_VERSION}` },
+      headers: { 'kbn-xsrf': 'cypress', 'Elastic-Api-Version': `${OLDEST_PUBLIC_VERSION}` },
       body: JSON.stringify({
         agentPolicyId,
       }),
@@ -122,7 +122,7 @@ describe('Integration package with custom dataset create and edit package policy
         namespace: 'default',
         monitoring_enabled: [],
       },
-      headers: { 'kbn-xsrf': 'cypress', 'Elastic-Api-Version': `${LATEST_PUBLIC_VERSION}` },
+      headers: { 'kbn-xsrf': 'cypress', 'Elastic-Api-Version': `${OLDEST_PUBLIC_VERSION}` },
     });
   });
   after(() => {
@@ -130,7 +130,7 @@ describe('Integration package with custom dataset create and edit package policy
     cy.request({
       method: 'POST',
       url: `/api/fleet/agent_policies/delete`,
-      headers: { 'kbn-xsrf': 'cypress', 'Elastic-Api-Version': `${LATEST_PUBLIC_VERSION}` },
+      headers: { 'kbn-xsrf': 'cypress', 'Elastic-Api-Version': `${OLDEST_PUBLIC_VERSION}` },
       body: JSON.stringify({
         agentPolicyId,
       }),
@@ -186,7 +186,7 @@ describe('Integration package with fixed dataset create and edit package policy'
         namespace: 'default',
         monitoring_enabled: [],
       },
-      headers: { 'kbn-xsrf': 'cypress', 'Elastic-Api-Version': `${LATEST_PUBLIC_VERSION}` },
+      headers: { 'kbn-xsrf': 'cypress', 'Elastic-Api-Version': `${OLDEST_PUBLIC_VERSION}` },
     });
   });
   after(() => {
@@ -194,7 +194,7 @@ describe('Integration package with fixed dataset create and edit package policy'
     cy.request({
       method: 'POST',
       url: `/api/fleet/agent_policies/delete`,
-      headers: { 'kbn-xsrf': 'cypress', 'Elastic-Api-Version': `${LATEST_PUBLIC_VERSION}` },
+      headers: { 'kbn-xsrf': 'cypress', 'Elastic-Api-Version': `${OLDEST_PUBLIC_VERSION}` },
       body: JSON.stringify({
         agentPolicyId,
       }),

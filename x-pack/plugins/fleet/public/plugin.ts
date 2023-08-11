@@ -62,7 +62,7 @@ import type { ExperimentalFeatures } from '../common/experimental_features';
 
 import type { FleetConfigType } from '../common/types';
 
-import { LATEST_PUBLIC_VERSION } from '../common/constants';
+import { OLDEST_PUBLIC_VERSION } from '../common/constants';
 
 import { CUSTOM_LOGS_INTEGRATION_NAME, INTEGRATIONS_BASE_PATH } from './constants';
 import { licenseService } from './hooks';
@@ -289,10 +289,10 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
     const getPermissions = once(() =>
       core.http.fetch<CheckPermissionsResponse>(appRoutesService.getCheckPermissionsPath(), {
         headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: LATEST_PUBLIC_VERSION,
+          [ELASTIC_HTTP_VERSION_HEADER]: OLDEST_PUBLIC_VERSION,
           [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
         },
-        version: LATEST_PUBLIC_VERSION,
+        version: OLDEST_PUBLIC_VERSION,
       })
     );
 

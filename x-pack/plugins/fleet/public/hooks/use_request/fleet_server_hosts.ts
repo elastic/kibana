@@ -7,7 +7,7 @@
 
 import { fleetServerHostsRoutesService } from '../../../common/services';
 
-import { LATEST_PUBLIC_VERSION } from '../../../common/constants';
+import { OLDEST_PUBLIC_VERSION } from '../../../common/constants';
 
 import type {
   GetFleetServerHostsResponse,
@@ -22,7 +22,7 @@ export function useGetFleetServerHosts() {
   return useRequest<GetFleetServerHostsResponse>({
     method: 'get',
     path: fleetServerHostsRoutesService.getListPath(),
-    version: LATEST_PUBLIC_VERSION,
+    version: OLDEST_PUBLIC_VERSION,
   });
 }
 
@@ -30,7 +30,7 @@ export function sendDeleteFleetServerHost(itemId: string) {
   return sendRequest({
     method: 'delete',
     path: fleetServerHostsRoutesService.getDeletePath(itemId),
-    version: LATEST_PUBLIC_VERSION,
+    version: OLDEST_PUBLIC_VERSION,
   });
 }
 
@@ -38,7 +38,7 @@ export function sendPutFleetServerHost(itemId: string, body: PutFleetServerHosts
   return sendRequest({
     method: 'put',
     path: fleetServerHostsRoutesService.getUpdatePath(itemId),
-    version: LATEST_PUBLIC_VERSION,
+    version: OLDEST_PUBLIC_VERSION,
     body,
   });
 }
@@ -47,7 +47,7 @@ export function sendPostFleetServerHost(body: PostFleetServerHostsRequest['body'
   return sendRequest<PostFleetServerHostsResponse>({
     method: 'post',
     path: fleetServerHostsRoutesService.getCreatePath(),
-    version: LATEST_PUBLIC_VERSION,
+    version: OLDEST_PUBLIC_VERSION,
     body,
   });
 }

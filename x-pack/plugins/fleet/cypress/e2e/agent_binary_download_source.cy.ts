@@ -15,7 +15,7 @@ import { cleanupDownloadSources } from '../tasks/cleanup';
 import { FLEET, navigateTo } from '../tasks/navigation';
 import { CONFIRM_MODAL } from '../screens/navigation';
 
-import { LATEST_PUBLIC_VERSION } from '../../common/constants';
+import { OLDEST_PUBLIC_VERSION } from '../../common/constants';
 
 describe('Agent binary download source section', () => {
   beforeEach(() => {
@@ -82,7 +82,7 @@ describe('Agent binary download source section', () => {
         id: 'fleet-local-registry',
         host: 'https://new-custom-host.co',
       },
-      headers: { 'kbn-xsrf': 'kibana', 'Elastic-Api-Version': `${LATEST_PUBLIC_VERSION}` },
+      headers: { 'kbn-xsrf': 'kibana', 'Elastic-Api-Version': `${OLDEST_PUBLIC_VERSION}` },
     });
     cy.request({
       method: 'POST',
@@ -95,7 +95,7 @@ describe('Agent binary download source section', () => {
         id: 'new-agent-policy',
         download_source_id: 'fleet-local-registry',
       },
-      headers: { 'kbn-xsrf': 'kibana', 'Elastic-Api-Version': `${LATEST_PUBLIC_VERSION}` },
+      headers: { 'kbn-xsrf': 'kibana', 'Elastic-Api-Version': `${OLDEST_PUBLIC_VERSION}` },
     }).then((response: any) => {
       navigateTo('app/fleet/policies/new-agent-policy/settings');
       cy.getBySel(AGENT_POLICY_FORM.DOWNLOAD_SOURCE_SELECT).contains('Custom Host');

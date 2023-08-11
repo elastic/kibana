@@ -15,6 +15,7 @@ const DEFAULT_KIBANA_URL = 'http://localhost:5601';
 const DEFAULT_KIBANA_USERNAME = 'elastic';
 const DEFAULT_KIBANA_PASSWORD = 'changeme';
 const KIBANA_VERSION = kibanaPackageJson.version;
+const OLDEST_PUBLIC_VERSION = '2023-10-31';
 
 const logger = new ToolingLog({
   level: 'info',
@@ -60,7 +61,7 @@ async function installPackage(name: string, version: string) {
       'kbn-xsrf': 'xyz',
       Authorization,
       // Note: version can change in the future
-      'Elastic-Api-Version': '2023-10-31',
+      'Elastic-Api-Version': OLDEST_PUBLIC_VERSION,
     },
     body: JSON.stringify({ force: true }),
     method: 'POST',
@@ -80,7 +81,7 @@ async function deletePackage(name: string, version: string) {
       'kbn-xsrf': 'xyz',
       Authorization,
       // Note: version can change in the future
-      'Elastic-Api-Version': '2023-10-31',
+      'Elastic-Api-Version': OLDEST_PUBLIC_VERSION,
     },
     method: 'DELETE',
   });

@@ -13,7 +13,7 @@ import type {
   PostLogstashApiKeyResponse,
 } from '../../types';
 
-import { LATEST_PUBLIC_VERSION } from '../../../common/constants';
+import { OLDEST_PUBLIC_VERSION } from '../../../common/constants';
 
 import { sendRequest, useRequest } from './use_request';
 
@@ -35,7 +35,7 @@ export function sendPutOutput(outputId: string, body: PutOutputRequest['body']) 
   return sendRequest({
     method: 'put',
     path: outputRoutesService.getUpdatePath(outputId),
-    version: LATEST_PUBLIC_VERSION,
+    version: OLDEST_PUBLIC_VERSION,
     body,
   });
 }
@@ -44,7 +44,7 @@ export function sendPostLogstashApiKeys() {
   return sendRequest<PostLogstashApiKeyResponse>({
     method: 'post',
     path: outputRoutesService.getCreateLogstashApiKeyPath(),
-    version: LATEST_PUBLIC_VERSION,
+    version: OLDEST_PUBLIC_VERSION,
   });
 }
 
@@ -52,7 +52,7 @@ export function sendPostOutput(body: PostOutputRequest['body']) {
   return sendRequest({
     method: 'post',
     path: outputRoutesService.getCreatePath(),
-    version: LATEST_PUBLIC_VERSION,
+    version: OLDEST_PUBLIC_VERSION,
     body,
   });
 }
@@ -61,6 +61,6 @@ export function sendDeleteOutput(outputId: string) {
   return sendRequest({
     method: 'delete',
     path: outputRoutesService.getDeletePath(outputId),
-    version: LATEST_PUBLIC_VERSION,
+    version: OLDEST_PUBLIC_VERSION,
   });
 }

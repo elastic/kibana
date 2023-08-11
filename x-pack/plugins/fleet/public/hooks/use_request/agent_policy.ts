@@ -7,7 +7,7 @@
 import { useQuery } from '@tanstack/react-query';
 
 import { agentPolicyRouteService } from '../../services';
-import { LATEST_PUBLIC_VERSION, LATEST_INTERNAL_VERSION } from '../../../common/constants';
+import { OLDEST_PUBLIC_VERSION, OLDEST_INTERNAL_VERSION } from '../../../common/constants';
 
 import type {
   GetAgentPoliciesRequest,
@@ -32,7 +32,7 @@ export const useGetAgentPolicies = (query?: GetAgentPoliciesRequest['query']) =>
     path: agentPolicyRouteService.getListPath(),
     method: 'get',
     query,
-    version: LATEST_PUBLIC_VERSION,
+    version: OLDEST_PUBLIC_VERSION,
   });
 };
 
@@ -42,7 +42,7 @@ export const useGetAgentPoliciesQuery = (query?: GetAgentPoliciesRequest['query'
       path: agentPolicyRouteService.getListPath(),
       method: 'get',
       query,
-      version: LATEST_PUBLIC_VERSION,
+      version: OLDEST_PUBLIC_VERSION,
     })
   );
 };
@@ -52,7 +52,7 @@ export const sendGetAgentPolicies = (query?: GetAgentPoliciesRequest['query']) =
     path: agentPolicyRouteService.getListPath(),
     method: 'get',
     query,
-    version: LATEST_PUBLIC_VERSION,
+    version: OLDEST_PUBLIC_VERSION,
   });
 };
 
@@ -61,7 +61,7 @@ export const useGetOneAgentPolicy = (agentPolicyId: string | undefined) => {
     path: agentPolicyId ? agentPolicyRouteService.getInfoPath(agentPolicyId) : undefined,
     method: 'get',
     shouldSendRequest: !!agentPolicyId,
-    version: LATEST_PUBLIC_VERSION,
+    version: OLDEST_PUBLIC_VERSION,
   } as SendConditionalRequestConfig);
 };
 
@@ -69,7 +69,7 @@ export const useGetOneAgentPolicyFull = (agentPolicyId: string) => {
   return useRequest<GetFullAgentPolicyResponse>({
     path: agentPolicyRouteService.getInfoFullPath(agentPolicyId),
     method: 'get',
-    version: LATEST_PUBLIC_VERSION,
+    version: OLDEST_PUBLIC_VERSION,
   });
 };
 
@@ -81,7 +81,7 @@ export const sendGetOneAgentPolicyFull = (
     path: agentPolicyRouteService.getInfoFullPath(agentPolicyId),
     method: 'get',
     query,
-    version: LATEST_PUBLIC_VERSION,
+    version: OLDEST_PUBLIC_VERSION,
   });
 };
 
@@ -89,7 +89,7 @@ export const sendGetOneAgentPolicy = (agentPolicyId: string) => {
   return sendRequest<GetOneAgentPolicyResponse>({
     path: agentPolicyRouteService.getInfoPath(agentPolicyId),
     method: 'get',
-    version: LATEST_PUBLIC_VERSION,
+    version: OLDEST_PUBLIC_VERSION,
   });
 };
 
@@ -102,7 +102,7 @@ export const sendCreateAgentPolicy = (
     method: 'post',
     body: JSON.stringify(body),
     query: withSysMonitoring ? { sys_monitoring: true } : {},
-    version: LATEST_PUBLIC_VERSION,
+    version: OLDEST_PUBLIC_VERSION,
   });
 };
 
@@ -114,7 +114,7 @@ export const sendUpdateAgentPolicy = (
     path: agentPolicyRouteService.getUpdatePath(agentPolicyId),
     method: 'put',
     body: JSON.stringify(body),
-    version: LATEST_PUBLIC_VERSION,
+    version: OLDEST_PUBLIC_VERSION,
   });
 };
 
@@ -134,7 +134,7 @@ export const sendDeleteAgentPolicy = (body: DeleteAgentPolicyRequest['body']) =>
     path: agentPolicyRouteService.getDeletePath(),
     method: 'post',
     body: JSON.stringify(body),
-    version: LATEST_PUBLIC_VERSION,
+    version: OLDEST_PUBLIC_VERSION,
   });
 };
 
@@ -143,7 +143,7 @@ export const sendResetOnePreconfiguredAgentPolicy = (agentPolicyId: string) => {
     path: agentPolicyRouteService.getResetOnePreconfiguredAgentPolicyPath(agentPolicyId),
     method: 'post',
     body: JSON.stringify({}),
-    version: LATEST_INTERNAL_VERSION,
+    version: OLDEST_INTERNAL_VERSION,
   });
 };
 
@@ -152,6 +152,6 @@ export const sendResetAllPreconfiguredAgentPolicies = () => {
     path: agentPolicyRouteService.getResetAllPreconfiguredAgentPolicyPath(),
     method: 'post',
     body: JSON.stringify({}),
-    version: LATEST_INTERNAL_VERSION,
+    version: OLDEST_INTERNAL_VERSION,
   });
 };
