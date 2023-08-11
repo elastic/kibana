@@ -6,6 +6,11 @@
 
 experimental[] Get a runtime field
 
+[NOTE]
+====
+For the most up-to-date API details, refer to the
+{kib-repo}/tree/{branch}/src/plugins/data_views/docs/openapi[open API specification].
+====
 
 [[data-views-runtime-field-get-request]]
 ==== Request
