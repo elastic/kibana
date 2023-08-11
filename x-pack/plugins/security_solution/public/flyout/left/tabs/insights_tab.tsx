@@ -10,7 +10,6 @@ import React, { memo, useCallback, useState, useEffect } from 'react';
 import { EuiButtonGroup, EuiSpacer } from '@elastic/eui';
 import type { EuiButtonGroupOptionProps } from '@elastic/eui/src/components/button/button_group/button_group';
 import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
-import { RESPONSE_TAB_ID, ResponseDetails } from '../components/response_details';
 import {
   INSIGHTS_TAB_BUTTON_GROUP_TEST_ID,
   INSIGHTS_TAB_ENTITIES_BUTTON_TEST_ID,

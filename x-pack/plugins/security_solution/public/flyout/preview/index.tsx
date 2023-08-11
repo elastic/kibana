@@ -6,7 +6,6 @@
  */
 
 import React, { memo, useMemo } from 'react';
-import { css } from '@emotion/react';
 import type { FlyoutPanelProps, PanelPath } from '@kbn/expandable-flyout';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { panels } from './panels';
