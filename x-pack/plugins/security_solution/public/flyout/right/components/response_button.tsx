@@ -33,7 +33,7 @@ export const ResponseButton: React.FC = () => {
   const goToResponseTab = useCallback(() => {
     openLeftPanel({
       id: LeftPanelKey,
-      path: {tab: LeftPanelResponseTab},
+      path: { tab: LeftPanelResponseTab },
       params: {
         id: eventId,
         indexName,

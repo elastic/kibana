@@ -145,7 +145,7 @@ describe('<UserEntityOverview />', () => {
       getByTestId(ENTITIES_USER_OVERVIEW_LINK_TEST_ID).click();
       expect(flyoutContextValue.openLeftPanel).toHaveBeenCalledWith({
         id: LeftPanelKey,
-        path: {tab: LeftPanelInsightsTab, subTba: ENTITIES_TAB_ID},
+        path: { tab: LeftPanelInsightsTab, subTba: ENTITIES_TAB_ID },
         params: {
           id: panelContextValue.eventId,
           indexName: panelContextValue.indexName,

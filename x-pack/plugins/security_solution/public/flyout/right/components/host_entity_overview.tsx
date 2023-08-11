@@ -66,7 +66,7 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({ hostName
   const goToEntitiesTab = useCallback(() => {
     openLeftPanel({
       id: LeftPanelKey,
-      path: {tab: LeftPanelInsightsTab, subTab: ENTITIES_TAB_ID},
+      path: { tab: LeftPanelInsightsTab, subTab: ENTITIES_TAB_ID },
       params: {
         id: eventId,
         indexName,
