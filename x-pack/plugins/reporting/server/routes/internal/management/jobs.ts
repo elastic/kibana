@@ -149,6 +149,7 @@ export function registerJobInfoRoutesInternal(reporting: ReportingCore) {
         // Because this API is used in the browser via `href` (ex. on link to download a file),
         // we need to enable setting the version number via query params
         enableQueryVersion: true,
+        elasticInternalOrigin: true,
         options: { tags: [ROUTE_TAG_CAN_REDIRECT] },
       })
       .addVersion(
