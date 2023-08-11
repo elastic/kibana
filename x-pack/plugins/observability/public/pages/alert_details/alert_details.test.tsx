@@ -49,6 +49,7 @@ const mockKibana = () => {
   useKibanaMock.mockReturnValue({
     services: {
       ...kibanaStartMock.startContract(),
+      theme: {},
       cases: casesPluginMock.createStartContract(),
       http: {
         basePath: {
