@@ -178,7 +178,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'vis_type_vislib.readOnly (any)',
         'vis_type_xy.readOnly (any)',
         // boolean flag
-        'xpack.graph.enabled(any)',
+        'xpack.graph.enabled (any)',
         'vis_type_vega.enableExternalUrls (boolean)',
         'xpack.actions.email.domain_allowlist (array)',
         'xpack.apm.serviceMapEnabled (boolean)',
