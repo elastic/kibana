@@ -118,6 +118,22 @@ export default function ({ getService }: FtrProviderContext) {
         );
       });
 
+      it("won't delete if reference remains", async () => {
+        const res = await supertest
+          .post(DATA_VIEW_SWAP_REFERENCES_PATH)
+          .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
+          .send({
+            fromId: '8963ca30-3224-11e8-a572-ffca06da1357',
+            toId: '91200a00-9efd-11e7-acb3-3dab96693fab',
+            forId: ['960372e0-3224-11e8-a572-ffca06da1357'],
+            delete: true,
+          });
+        expect(res).to.have.property('status', 200);
+        expect(res.body.result.length).to.equal(1);
+        expect(res.body.deleteStatus.remainingRefs).to.equal(1);
+        expect(res.body.deleteStatus.deletePerformed).to.equal(false);
+      });
+
       it('can limit by id', async () => {
         // confirm this will find two items
         const res = await supertest
