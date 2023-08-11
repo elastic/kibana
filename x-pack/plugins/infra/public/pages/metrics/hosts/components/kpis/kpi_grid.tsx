@@ -20,7 +20,7 @@ import {
 export const KPIGrid = () => {
   return (
     <HostCountProvider>
-      <HostMetricsDocsLink />
+      <HostMetricsDocsLink type="metrics" />
       <EuiSpacer size="s" />
       <EuiFlexGroup direction="row" gutterSize="s" data-test-subj="hostsViewKPIGrid">
         <EuiFlexItem>

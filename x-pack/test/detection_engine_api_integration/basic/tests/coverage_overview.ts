@@ -351,7 +351,7 @@ export default ({ getService }: FtrProviderContext): void => {
               threat: generateThreatArray(1),
             }),
           ]);
-          await installPrebuiltRulesAndTimelines(supertest);
+          await installPrebuiltRulesAndTimelines(es, supertest);
 
           const expectedRule = await createRule(supertest, log, {
             ...getSimpleRule('rule-1'),
