@@ -20,6 +20,7 @@ import {
   type LensAttributes,
   type StaticValueConfig,
   type LensVisualizationState,
+  type XYVisualOptions,
   type Chart,
   LensAttributesBuilder,
   XYDataLayer,
@@ -64,6 +65,7 @@ interface UseLensAttributesBaseParams {
 interface UseLensAttributesXYChartParams extends UseLensAttributesBaseParams {
   layers: UseLensAttributesXYLayerConfig;
   visualizationType: 'lnsXY';
+  visualOptions?: XYVisualOptions;
 }
 
 interface UseLensAttributesMetricChartParams extends UseLensAttributesBaseParams {
@@ -174,16 +176,14 @@ export const useLensAttributes = ({ dataView, ...params }: UseLensAttributesPara
 const chartFactory = ({
   dataView,
   formulaAPI,
-  layers,
-  title,
-  visualizationType,
+  ...params
 }: {
   dataView: DataView;
   formulaAPI: FormulaPublicApi;
 } & UseLensAttributesParams): Chart<LensVisualizationState> => {
-  switch (visualizationType) {
+  switch (params.visualizationType) {
     case 'lnsXY':
-      if (!Array.isArray(layers)) {
+      if (!Array.isArray(params.layers)) {
         throw new Error(`Invalid layers type. Expected an array of layers.`);
       }
 
@@ -208,14 +208,15 @@ const chartFactory = ({
       return new XYChart({
         dataView,
         formulaAPI,
-        layers: layers.map((layerItem) => {
+        layers: params.layers.map((layerItem) => {
           return xyLayerFactory(layerItem);
         }),
-        title,
+        title: params.title,
+        visualOptions: params.visualOptions,
       });
 
     case 'lnsMetric':
-      if (Array.isArray(layers)) {
+      if (Array.isArray(params.layers)) {
         throw new Error(`Invalid layers type. Expected a single layer object.`);
       }
 
@@ -223,13 +224,13 @@ const chartFactory = ({
         dataView,
         formulaAPI,
         layers: new MetricLayer({
-          data: layers.data,
-          options: layers.options,
+          data: params.layers.data,
+          options: params.layers.options,
         }),
-        title,
+        title: params.title,
       });
     default:
-      throw new Error(`Unsupported chart type: ${visualizationType}`);
+      throw new Error(`Unsupported chart type`);
   }
 };
 

@@ -8,7 +8,11 @@
 
 export * from './attribute_builder/types';
 
-export type { MetricLayerOptions, XYLayerOptions } from './attribute_builder/visualization_types';
+export type {
+  MetricLayerOptions,
+  XYLayerOptions,
+  XYVisualOptions,
+} from './attribute_builder/visualization_types';
 
 export {
   FormulaDataColumn,

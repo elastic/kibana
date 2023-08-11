@@ -11,12 +11,13 @@ import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { XYLayerOptions } from '@kbn/lens-embeddable-utils';
+import type { XYLayerOptions, XYVisualOptions } from '@kbn/lens-embeddable-utils';
 import { UseLensAttributesXYLayerConfig } from '../../../../../hooks/use_lens_attributes';
 import { buildCombinedHostsFilter } from '../../../../../utils/filters/build';
-import { HostMetricsDocsLink, LensChart, type LensChartProps } from '../../../../lens';
+import { LensChart, type LensChartProps, HostMetricsExplanationContent } from '../../../../lens';
 import { hostLensFormulas } from '../../../../../common/visualizations';
 import { METRIC_CHART_HEIGHT } from '../../../constants';
+import { Popover } from '../../common/popover';
 
 type DataViewOrigin = 'logs' | 'metrics';
 interface MetricChartConfig extends Pick<LensChartProps, 'id' | 'title' | 'overrides'> {
@@ -45,6 +46,11 @@ const LEGEND_SETTINGS: Pick<MetricChartConfig, 'overrides'>['overrides'] = {
     legendPosition: 'bottom',
     legendSize: 35,
   },
+};
+
+const XY_VISUAL_OPTIONS: XYVisualOptions = {
+  showDottedLine: true,
+  missingValues: 'Linear',
 };
 
 const CHARTS_IN_ORDER: Array<
@@ -315,19 +321,15 @@ export const MetricsGrid = React.memo(
     return (
       <EuiFlexGroup gutterSize="m" direction="column">
         <EuiFlexItem grow={false}>
-          <EuiTitle size="xxs">
-            <h5>
-              <FormattedMessage
-                id="xpack.infra.assetDetails.overview.metricsSectionTitle"
-                defaultMessage="Metrics"
-              />
-            </h5>
-          </EuiTitle>
+          <MetricsSectionTitle />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <HostMetricsDocsLink />
           <EuiSpacer size="s" />
-          <EuiFlexGrid columns={2} gutterSize="s" data-test-subj="assetDetailsMetricsChartGrid">
+          <EuiFlexGrid
+            columns={2}
+            gutterSize="s"
+            data-test-subj="infraAssetDetailsMetricsChartGrid"
+          >
             {CHARTS_IN_ORDER.map(({ dataViewOrigin, id, layers, title, overrides }, index) => (
               <EuiFlexItem key={index} grow={false}>
                 <LensChart
@@ -336,6 +338,7 @@ export const MetricsGrid = React.memo(
                   dataView={getDataView(dataViewOrigin)}
                   dateRange={timeRange}
                   height={METRIC_CHART_HEIGHT}
+                  visualOptions={XY_VISUAL_OPTIONS}
                   layers={layers}
                   filters={getFilters(dataViewOrigin)}
                   title={title}
@@ -351,3 +354,25 @@ export const MetricsGrid = React.memo(
     );
   }
 );
+
+const MetricsSectionTitle = () => {
+  return (
+    <EuiFlexGroup gutterSize="xs" alignItems="center">
+      <EuiFlexItem grow={false}>
+        <EuiTitle size="xxs">
+          <h5>
+            <FormattedMessage
+              id="xpack.infra.assetDetails.overview.metricsSectionTitle"
+              defaultMessage="Metrics"
+            />
+          </h5>
+        </EuiTitle>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <Popover icon="questionInCircle" data-test-subj="infraAssetDetailsMetricsPopoverButton">
+          <HostMetricsExplanationContent />
+        </Popover>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};

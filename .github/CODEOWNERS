@@ -589,7 +589,9 @@ examples/screenshot_mode_example @elastic/kibana-app-services
 src/plugins/screenshot_mode @elastic/appex-sharedux
 x-pack/examples/screenshotting_example @elastic/appex-sharedux
 x-pack/plugins/screenshotting @elastic/kibana-reporting-services
+packages/kbn-search-api-panels @elastic/enterprise-search-frontend
 examples/search_examples @elastic/kibana-data-discovery
+packages/kbn-search-response-warnings @elastic/kibana-data-discovery
 x-pack/plugins/searchprofiler @elastic/platform-deployment-management
 x-pack/test/security_api_integration/packages/helpers @elastic/kibana-core
 x-pack/plugins/security @elastic/kibana-security
@@ -752,6 +754,7 @@ src/plugins/url_forwarding @elastic/kibana-visualizations
 packages/kbn-url-state @elastic/security-threat-hunting-investigations
 src/plugins/usage_collection @elastic/kibana-core
 test/plugin_functional/plugins/usage_collection @elastic/kibana-core
+packages/kbn-use-tracked-promise @elastic/infra-monitoring-ui
 packages/kbn-user-profile-components @elastic/kibana-security
 examples/user_profile_examples @elastic/kibana-security
 x-pack/test/security_api_integration/plugins/user_profiles_consumer @elastic/kibana-security
@@ -1146,6 +1149,11 @@ x-pack/plugins/cloud_integrations/cloud_full_story/server/config.ts @elastic/kib
 /x-pack/plugins/stack_connectors/public/connector_types/gen_ai @elastic/security-threat-hunting-explore
 /x-pack/plugins/stack_connectors/server/connector_types/gen_ai @elastic/security-threat-hunting-explore
 /x-pack/plugins/stack_connectors/common/gen_ai @elastic/security-threat-hunting-explore
+
+## Defend Workflows owner connectors
+/x-pack/plugins/stack_connectors/public/connector_types/sentinelone @elastic/security-defend-workflows
+/x-pack/plugins/stack_connectors/server/connector_types/sentinelone @elastic/security-defend-workflows
+/x-pack/plugins/stack_connectors/common/sentinelone @elastic/security-defend-workflows
 
 ## Security Solution sub teams - Detection Rule Management
 /x-pack/plugins/security_solution/common/api/detection_engine/model/rule_schema @elastic/security-detection-rule-management @elastic/security-detection-engine
