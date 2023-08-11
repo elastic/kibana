@@ -51,7 +51,7 @@ test('throws error when provided validation function returns invalid', async () 
   }).rejects.toThrow('Dashboard failed saved object result validation');
 });
 
-test('returns undefined when provided validation function returns redireted', async () => {
+test('returns undefined when provided validation function returns redirected', async () => {
   const creationOptions: DashboardCreationOptions = {
     validateLoadedSavedObject: jest.fn().mockImplementation(() => 'redirected'),
   };
@@ -59,7 +59,7 @@ test('returns undefined when provided validation function returns redireted', as
   expect(dashboard).toBeUndefined();
 });
 
-test('does not get initial input when provided validation function returns redireted', async () => {
+test('does not get initial input when provided validation function returns redirected', async () => {
   const creationOptions: DashboardCreationOptions = {
     validateLoadedSavedObject: jest.fn().mockImplementation(() => 'redirected'),
     getInitialInput: jest.fn(),
