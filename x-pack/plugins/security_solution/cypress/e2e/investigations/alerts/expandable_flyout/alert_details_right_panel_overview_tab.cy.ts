@@ -147,7 +147,6 @@ describe('Alert details expandable flyout right panel overview tab', () => {
   describe('investigation section', () => {
     it('should display investigation section', () => {
       toggleOverviewTabAboutSection();
-      toggleOverviewTabInvestigationSection();
 
       cy.log('header and content');
 
@@ -206,6 +205,7 @@ describe('Alert details expandable flyout right panel overview tab', () => {
   describe('insights section', () => {
     it('should display entities section', () => {
       toggleOverviewTabAboutSection();
+      toggleOverviewTabInvestigationSection();
       toggleOverviewTabInsightsSection();
 
       cy.log('header and content');
@@ -224,9 +224,9 @@ describe('Alert details expandable flyout right panel overview tab', () => {
       // cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_ENTITIES_CONTENT).should('be.visible');
     });
 
-    // TODO: skipping this due to flakiness
-    it.skip('should display threat intelligence section', () => {
+    it('should display threat intelligence section', () => {
       toggleOverviewTabAboutSection();
+      toggleOverviewTabInvestigationSection();
       toggleOverviewTabInsightsSection();
 
       cy.log('header and content');
@@ -270,6 +270,7 @@ describe('Alert details expandable flyout right panel overview tab', () => {
       createNewCaseFromExpandableFlyout();
 
       toggleOverviewTabAboutSection();
+      toggleOverviewTabInvestigationSection();
       toggleOverviewTabInsightsSection();
 
       cy.log('header and content');
@@ -311,6 +312,7 @@ describe('Alert details expandable flyout right panel overview tab', () => {
     //  we need to generate enough data to have at least one field with prevalence
     it.skip('should display prevalence section', () => {
       toggleOverviewTabAboutSection();
+      toggleOverviewTabInvestigationSection();
       toggleOverviewTabInsightsSection();
 
       cy.log('header and content');
@@ -338,6 +340,7 @@ describe('Alert details expandable flyout right panel overview tab', () => {
   describe('response section', () => {
     it('should display empty message', () => {
       toggleOverviewTabAboutSection();
+      toggleOverviewTabInvestigationSection();
       toggleOverviewTabResponseSection();
 
       cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_RESPONSE_SECTION_EMPTY_RESPONSE).should(
