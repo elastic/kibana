@@ -153,14 +153,14 @@ export const AddInferencePipelineHorizontalSteps: React.FC = () => {
   /**
    * Convenience function for determining the status of a step in the horizontal nav.
    * @param currentStep The current step in the pipeline.
-   * @param step The step to compare against.
+   * @param otherStep The step to compare against.
    * @returns The status of the step.
    */
   const getStepStatus = (
     currentStep: AddInferencePipelineSteps,
-    step: AddInferencePipelineSteps
+    otherStep: AddInferencePipelineSteps
   ) => {
-    return currentStep > step ? 'complete' : currentStep === step ? 'current' : 'incomplete';
+    return currentStep > otherStep ? 'complete' : currentStep === otherStep ? 'current' : 'incomplete';
   };
 
   const navSteps: EuiStepsHorizontalProps['steps'] = [
