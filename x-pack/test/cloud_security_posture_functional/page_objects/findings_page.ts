@@ -92,9 +92,7 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
     },
 
     async navigateToAction(actionTestSubject: string) {
-      const element = await this.getElement();
-      const button = await element.findByCssSelector(`[data-test-subj="${actionTestSubject}"]`);
-      await button.click();
+      await testSubjects.click(actionTestSubject);
     },
   });
 
