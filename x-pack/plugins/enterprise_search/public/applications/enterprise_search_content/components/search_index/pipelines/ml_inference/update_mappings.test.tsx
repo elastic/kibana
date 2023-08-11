@@ -11,8 +11,13 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { UpdateMappings, UpdateMappingsAutomatic, UpdateMappingsInstructions } from './update_mappings';
 import { EuiBasicTable } from '@elastic/eui';
+
+import {
+  UpdateMappings,
+  UpdateMappingsAutomatic,
+  UpdateMappingsInstructions,
+} from './update_mappings';
 
 describe('UpdateMappings', () => {
   const DEFAULT_VALUES = {
