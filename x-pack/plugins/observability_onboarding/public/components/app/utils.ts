@@ -9,7 +9,11 @@ import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { Filter, FilterStateStore } from '@kbn/es-query';
 
-type DiscoverPropertiesToPick = 'dataViewId' | 'dataViewSpec' | 'filters';
+type DiscoverPropertiesToPick =
+  | 'dataViewId'
+  | 'dataViewSpec'
+  | 'filters'
+  | 'refreshInterval';
 
 type DiscoverNavigationParams = Pick<
   DiscoverAppLocatorParams,
@@ -50,6 +54,10 @@ const getDefaultDatasetFilter = (datasets: string[]): Filter[] => [
 export const getDiscoverNavigationParams = (
   datasets: string[]
 ): DiscoverNavigationParams => ({
+  refreshInterval: {
+    pause: false,
+    value: 10000,
+  },
   dataViewId: defaultLogsDataViewId,
   dataViewSpec: defaultLogsDataView,
   filters: getDefaultDatasetFilter(datasets),
