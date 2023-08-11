@@ -11,11 +11,11 @@ import { debounce } from 'lodash';
 import { EuiSwitch } from '@elastic/eui';
 import { EuiFormRow } from '@elastic/eui';
 import { EuiSpacer } from '@elastic/eui';
-import { useApmDataView } from '../../../../hooks/use_apm_data_view';
-import { ApmKueryBar } from './kuery_bar';
-import { TransactionDurationRuleParams } from '../../rule_types/transaction_duration_rule_type';
-import { ErrorRateRuleParams } from '../../rule_types/transaction_error_rate_rule_type';
-import { ErrorCountRuleParams } from '../../rule_types/error_count_rule_type';
+import { RuleFlyoutKueryBar } from '@kbn/observability-plugin/public';
+import { useApmDataView } from '../../../hooks/use_apm_data_view';
+import { TransactionDurationRuleParams } from '../rule_types/transaction_duration_rule_type';
+import { ErrorRateRuleParams } from '../rule_types/transaction_error_rate_rule_type';
+import { ErrorCountRuleParams } from '../rule_types/error_count_rule_type';
 
 interface Props {
   ruleParams:
@@ -48,6 +48,13 @@ export function ApmRuleKqlFilter({
     [onFilterChange]
   );
 
+  const placeHolder = i18n.translate(
+    'xpack.apm.rule.kqlSearchFieldPlaceholder',
+    {
+      defaultMessage: 'Search for APM data… (e.g. service.name: service-1)',
+    }
+  );
+
   const kqlFilterToggle = (
     <>
       <EuiSwitch
@@ -64,29 +71,34 @@ export function ApmRuleKqlFilter({
     </>
   );
 
-  const kqlFilter = ruleParams.useKqlFilter ? (
-    <>
-      <EuiFormRow
-        label={i18n.translate('xpack.apm.rules.ruleFlyout.filterLabel', {
-          defaultMessage: 'Filter',
-        })}
-        helpText={i18n.translate('xpack.apm.rules.ruleFlyout.filterHelpText', {
-          defaultMessage:
-            'Use a KQL expression to limit the scope of your alert trigger.',
-        })}
-        fullWidth
-        display="rowCompressed"
-      >
-        <ApmKueryBar
-          derivedIndexPattern={derivedIndexPattern}
-          onChange={debouncedOnFilterChange}
-          onSubmit={onFilterChange}
-          value={ruleParams.kqlFilter}
-        />
-      </EuiFormRow>
-      <EuiSpacer size={'m'} />
-    </>
-  ) : null;
+  const kqlFilter =
+    ruleParams.useKqlFilter && derivedIndexPattern ? (
+      <>
+        <EuiFormRow
+          label={i18n.translate('xpack.apm.rules.ruleFlyout.filterLabel', {
+            defaultMessage: 'Filter',
+          })}
+          helpText={i18n.translate(
+            'xpack.apm.rules.ruleFlyout.filterHelpText',
+            {
+              defaultMessage:
+                'Use a KQL expression to limit the scope of your alert trigger.',
+            }
+          )}
+          fullWidth
+          display="rowCompressed"
+        >
+          <RuleFlyoutKueryBar
+            placeholder={placeHolder}
+            derivedIndexPattern={derivedIndexPattern}
+            onChange={debouncedOnFilterChange}
+            onSubmit={onFilterChange}
+            value={ruleParams.kqlFilter}
+          />
+        </EuiFormRow>
+        <EuiSpacer size={'m'} />
+      </>
+    ) : null;
 
   return (
     <>

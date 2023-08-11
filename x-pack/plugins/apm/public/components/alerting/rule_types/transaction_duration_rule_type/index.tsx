@@ -54,7 +54,7 @@ import {
   LoadingState,
   NoDataState,
 } from '../../ui_components/chart_preview/chart_preview_helper';
-import { ApmRuleKqlFilter } from '../../ui_components/apm_rule_kql_filter/rule_kql_filter';
+import { ApmRuleKqlFilter } from '../../ui_components/apm_rule_kql_filter';
 
 export interface TransactionDurationRuleParams {
   aggregationType: AggregationType;
