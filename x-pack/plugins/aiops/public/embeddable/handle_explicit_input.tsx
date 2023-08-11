@@ -9,6 +9,7 @@ import type { CoreStart } from '@kbn/core/public';
 import { toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
 import { FieldStatsFlyoutProvider, useFieldStatsTrigger } from '@kbn/ml-plugin/public';
+import { EmbeddableChangePointChartExplicitInput } from './types';
 import { AiopsAppDependencies } from '..';
 import { AiopsAppContext } from '../hooks/use_aiops_app_context';
 import type { AiopsPluginStartDeps } from '../types';
@@ -19,7 +20,7 @@ export async function resolveEmbeddableChangePointUserInput(
   coreStart: CoreStart,
   pluginStart: AiopsPluginStartDeps,
   input?: EmbeddableChangePointChartInput
-): Promise<Partial<EmbeddableChangePointChartInput>> {
+): Promise<EmbeddableChangePointChartExplicitInput> {
   const { overlays } = coreStart;
 
   return new Promise(async (resolve, reject) => {
@@ -42,12 +43,9 @@ export async function resolveEmbeddableChangePointUserInput(
               <ChangePointChartInitializer
                 defaultTitle={title ?? ''}
                 initialInput={input}
-                onCreate={({ panelTitle, maxSeriesToPlot }) => {
+                onCreate={(update: EmbeddableChangePointChartExplicitInput) => {
                   modalSession.close();
-                  resolve({
-                    title: panelTitle,
-                    maxSeriesToPlot,
-                  });
+                  resolve(update);
                 }}
                 onCancel={() => {
                   modalSession.close();

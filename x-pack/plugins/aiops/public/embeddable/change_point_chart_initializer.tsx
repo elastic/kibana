@@ -9,8 +9,6 @@ import React, { FC, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiFieldNumber,
-  EuiFieldText,
   EuiForm,
   EuiFormRow,
   EuiModal,
@@ -21,6 +19,8 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { type EmbeddableChangePointChartExplicitInput } from './types';
+import { MaxSeriesControl } from '../components/change_point_detection/max_series_control';
 import { SplitFieldSelector } from '../components/change_point_detection/split_field_selector';
 import { MetricFieldSelector } from '../components/change_point_detection/metric_field_selector';
 import { ChangePointDetectionControlsContextProvider } from '../components/change_point_detection/change_point_detection_context';
@@ -29,23 +29,19 @@ import { EmbeddableChangePointChartInput } from './embeddable_change_point_chart
 import { FunctionPicker } from '../components/change_point_detection/function_picker';
 import { DataSourceContextProvider } from '../hooks/use_data_source';
 
-export const MAX_ANOMALY_CHARTS_ALLOWED = 50;
-
 export const DEFAULT_MAX_SERIES_TO_PLOT = 6;
 
 export interface AnomalyChartsInitializerProps {
   defaultTitle: string;
   initialInput?: Partial<EmbeddableChangePointChartInput>;
-  onCreate: (props: { panelTitle: string; maxSeriesToPlot?: number }) => void;
+  onCreate: (props: EmbeddableChangePointChartExplicitInput) => void;
   onCancel: () => void;
 }
 
 export const ChangePointChartInitializer: FC<AnomalyChartsInitializerProps> = ({
-  defaultTitle,
   initialInput,
   onCreate,
   onCancel,
-  children,
 }) => {
   const {
     unifiedSearch: {
@@ -53,20 +49,15 @@ export const ChangePointChartInitializer: FC<AnomalyChartsInitializerProps> = ({
     },
   } = useAiopsAppContext();
 
-  const [panelTitle, setPanelTitle] = useState(defaultTitle);
   const [dataViewId, setDataViewId] = useState(initialInput?.dataViewId ?? '');
   const [maxSeriesToPlot, setMaxSeriesToPlot] = useState(
     initialInput?.maxSeriesToPlot ?? DEFAULT_MAX_SERIES_TO_PLOT
   );
 
+  const [isFormValid, setIsFormValid] = useState(false);
   const [fn, setFn] = useState<string>(initialInput?.fn ?? 'avg');
   const [metricField, setMetricField] = useState(initialInput?.metricField);
   const [splitField, setSplitField] = useState(initialInput?.splitField);
-
-  const isPanelTitleValid = panelTitle.length > 0;
-  const isMaxSeriesToPlotValid =
-    maxSeriesToPlot >= 1 && maxSeriesToPlot <= MAX_ANOMALY_CHARTS_ALLOWED;
-  const isFormValid = isPanelTitleValid && isMaxSeriesToPlotValid;
 
   return (
     <EuiModal
@@ -108,27 +99,6 @@ export const ChangePointChartInitializer: FC<AnomalyChartsInitializerProps> = ({
                 fullWidth
                 label={
                   <FormattedMessage
-                    id="xpack.aiops.embeddableChangePointChart.panelTitleLabel"
-                    defaultMessage="Panel title"
-                  />
-                }
-                isInvalid={!isPanelTitleValid}
-              >
-                <EuiFieldText
-                  data-test-subj="panelTitleInput"
-                  id="panelTitle"
-                  name="panelTitle"
-                  value={panelTitle}
-                  onChange={(e) => setPanelTitle(e.target.value)}
-                  isInvalid={!isPanelTitleValid}
-                  fullWidth
-                />
-              </EuiFormRow>
-
-              <EuiFormRow
-                fullWidth
-                label={
-                  <FormattedMessage
                     id="xpack.aiops.embeddableChangePointChart.functionLabel"
                     defaultMessage="Function"
                   />
@@ -141,40 +111,21 @@ export const ChangePointChartInitializer: FC<AnomalyChartsInitializerProps> = ({
 
               <SplitFieldSelector value={splitField} onChange={setSplitField} />
 
-              <EuiFormRow
-                isInvalid={!isMaxSeriesToPlotValid}
-                error={
-                  !isMaxSeriesToPlotValid ? (
-                    <FormattedMessage
-                      id="xpack.aiops.embeddableChangePointChart.maxSeriesToPlotError"
-                      defaultMessage="Maximum number of series to plot must be between 1 and 50."
-                    />
-                  ) : undefined
-                }
-                label={
-                  <FormattedMessage
-                    id="xpack.aiops.embeddableChangePointChart.maxSeriesToPlotLabel"
-                    defaultMessage="Maximum number of series to plot"
-                  />
-                }
-              >
-                <EuiFieldNumber
-                  data-test-subj="mlAnomalyChartsInitializerMaxSeries"
-                  id="selectMaxSeriesToPlot"
-                  name="selectMaxSeriesToPlot"
-                  value={maxSeriesToPlot}
-                  onChange={(e) => setMaxSeriesToPlot(parseInt(e.target.value, 10))}
-                  min={1}
-                  max={MAX_ANOMALY_CHARTS_ALLOWED}
-                />
-              </EuiFormRow>
+              <MaxSeriesControl
+                value={maxSeriesToPlot}
+                onChange={setMaxSeriesToPlot}
+                onValidationChange={(result) => setIsFormValid(result === null)}
+              />
             </ChangePointDetectionControlsContextProvider>
           </DataSourceContextProvider>
         </EuiForm>
       </EuiModalBody>
 
       <EuiModalFooter>
-        <EuiButtonEmpty onClick={onCancel} data-test-subj="mlAnomalyChartsInitializerCancelButton">
+        <EuiButtonEmpty
+          onClick={onCancel}
+          data-test-subj="aiopsChangePointChartsInitializerCancelButton"
+        >
           <FormattedMessage
             id="xpack.aiops.embeddableChangePointChart.setupModal.cancelButtonLabel"
             defaultMessage="Cancel"
@@ -182,11 +133,28 @@ export const ChangePointChartInitializer: FC<AnomalyChartsInitializerProps> = ({
         </EuiButtonEmpty>
 
         <EuiButton
-          data-test-subj="mlAnomalyChartsInitializerConfirmButton"
+          data-test-subj="aiopsChangePointChartsInitializerConfirmButton"
           isDisabled={!isFormValid}
           onClick={onCreate.bind(null, {
-            panelTitle,
+            title: i18n.translate('xpack.aiops.changePointDetection.attachmentTitle', {
+              defaultMessage: 'Change point: {function}({metric}){splitBy}',
+              values: {
+                function: fn,
+                metric: metricField,
+                splitBy: splitField
+                  ? i18n.translate('xpack.aiops.changePointDetection.splitByTitle', {
+                      defaultMessage: ' split by "{splitField}"',
+                      values: { splitField },
+                    })
+                  : '',
+              },
+            }),
             maxSeriesToPlot,
+            dataViewId,
+            fn,
+            // @ts-ignore
+            metricField,
+            splitField,
           })}
           fill
         >
