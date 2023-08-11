@@ -133,7 +133,7 @@ export const UpdateMappingsAutomatic: React.FC = () => (
           }
         )}
       </EuiLink>
-    </EuiFlexItem>    
+    </EuiFlexItem>
   </EuiFlexGroup>
 );
 
@@ -143,27 +143,32 @@ export const UpdateMappings: React.FC = () => {
     isTextExpansionModelSelected,
   } = useValues(MLInferenceLogic);
 
+  const areMappingsAutoUpdated = isTextExpansionModelSelected && !configuration.existingPipeline;
+
   const columns: Array<EuiBasicTableColumn<FieldMapping>> = [
     {
       field: 'targetField',
-      name: i18n.translate(
-        'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.mapping.targetFieldHeader',
-        {
-          defaultMessage: 'Required target fields',
-        }
-      ),
+      name: areMappingsAutoUpdated
+        ? i18n.translate(
+            'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.updateMappings.fieldMappings',
+            {
+              defaultMessage: 'Field mappings',
+            }
+          )
+        : i18n.translate(
+            'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.updateMappings.fieldMappingsRequired',
+            {
+              defaultMessage: 'Required field mappings',
+            }
+          ),
     },
   ];
 
   return (
     <>
-      <EuiFlexGroup alignItems='flexStart'>
+      <EuiFlexGroup alignItems="flexStart">
         <EuiFlexItem grow={3}>
-          {isTextExpansionModelSelected ? (
-            <UpdateMappingsAutomatic />
-          ) : (
-            <UpdateMappingsInstructions />
-          )}
+          {areMappingsAutoUpdated ? <UpdateMappingsAutomatic /> : <UpdateMappingsInstructions />}
         </EuiFlexItem>
         <EuiFlexItem grow={7}>
           <EuiPanel hasBorder={true}>
