@@ -9,7 +9,7 @@
 import React from 'react';
 
 import { EuiListGroupItem } from '@elastic/eui';
-import { NavigationEmbeddableLink } from '../../embeddable/types';
+import { NavigationEmbeddableLink } from '../../../common/content_management';
 
 export const ExternalLinkComponent = ({ link }: { link: NavigationEmbeddableLink }) => {
   return (

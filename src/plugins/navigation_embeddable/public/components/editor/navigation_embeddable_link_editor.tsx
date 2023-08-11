@@ -29,14 +29,13 @@ import {
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 
 import {
-  NavigationLinkInfo,
   NavigationLinkType,
   EXTERNAL_LINK_TYPE,
   DASHBOARD_LINK_TYPE,
   NavigationEmbeddableLink,
-  DashboardItem,
-} from '../../embeddable/types';
+} from '../../../common/content_management';
 import { NavEmbeddableStrings } from '../navigation_embeddable_strings';
+import { DashboardItem, NavigationLinkInfo } from '../../embeddable/types';
 import { NavigationEmbeddableUnorderedLink } from '../../editor/open_link_editor_flyout';
 import { ExternalLinkDestinationPicker } from '../external_link/external_link_destination_picker';
 import { DashboardLinkDestinationPicker } from '../dashboard_link/dashboard_link_destination_picker';
@@ -177,7 +176,7 @@ export const NavigationEmbeddableLinkEditor = ({
 
         {/* TODO: As part of https://github.com/elastic/kibana/issues/154381, we should pull in the custom settings for each link type.
             Refer to `x-pack/examples/ui_actions_enhanced_examples/public/drilldowns/dashboard_to_discover_drilldown/collect_config_container.tsx`
-            for the dashboard drilldown settings, for example. 
+            for the dashboard drilldown settings, for example.
 
             Open question: It probably makes sense to re-use these components so any changes made to the drilldown architecture
             trickle down to the navigation embeddable - this would require some refactoring, though. Is this a goal for MVP?

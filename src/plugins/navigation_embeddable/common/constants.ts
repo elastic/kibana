@@ -6,11 +6,14 @@
  * Side Public License, v 1.
  */
 
-export type { NavigationEmbeddableFactory } from './embeddable';
-export { NavigationEmbeddableFactoryDefinition, NavigationEmbeddable } from './embeddable';
+import { i18n } from '@kbn/i18n';
 
-import { NavigationEmbeddablePlugin } from './plugin';
+export const LATEST_VERSION = 1;
 
-export function plugin() {
-  return new NavigationEmbeddablePlugin();
-}
+export const CONTENT_ID = 'navigation_embeddable';
+
+export const APP_ICON = 'link';
+
+export const APP_NAME = i18n.translate('navigationEmbeddable.visTypeAlias.title', {
+  defaultMessage: 'Links',
+});

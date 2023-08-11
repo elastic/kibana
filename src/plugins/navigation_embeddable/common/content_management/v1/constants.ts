@@ -6,11 +6,14 @@
  * Side Public License, v 1.
  */
 
-export type { NavigationEmbeddableFactory } from './embeddable';
-export { NavigationEmbeddableFactoryDefinition, NavigationEmbeddable } from './embeddable';
+/**
+ * Link types
+ */
+export const DASHBOARD_LINK_TYPE = 'dashboardLink';
+export const EXTERNAL_LINK_TYPE = 'externalLink';
 
-import { NavigationEmbeddablePlugin } from './plugin';
-
-export function plugin() {
-  return new NavigationEmbeddablePlugin();
-}
+/**
+ * Layout options
+ */
+export const NAV_HORIZONTAL_LAYOUT = 'horizontal';
+export const NAV_VERTICAL_LAYOUT = 'vertical';

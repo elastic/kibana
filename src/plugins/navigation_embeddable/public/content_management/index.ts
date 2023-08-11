@@ -6,11 +6,5 @@
  * Side Public License, v 1.
  */
 
-export type { NavigationEmbeddableFactory } from './embeddable';
-export { NavigationEmbeddableFactoryDefinition, NavigationEmbeddable } from './embeddable';
-
-import { NavigationEmbeddablePlugin } from './plugin';
-
-export function plugin() {
-  return new NavigationEmbeddablePlugin();
-}
+export { navigationEmbeddableClient } from './navigation_embeddable_content_management_client.ts';
+export { checkForDuplicateTitle } from './duplicate_title_check';

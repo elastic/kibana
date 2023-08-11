@@ -13,13 +13,13 @@ import React, { useMemo, useState } from 'react';
 import { EuiButtonEmpty, EuiListGroupItem, EuiToolTip } from '@elastic/eui';
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 
+import {
+  NavigationEmbeddableLink,
+  NavigationLayoutType,
+  NAV_VERTICAL_LAYOUT,
+} from '../../../common/content_management';
 import { fetchDashboard } from './dashboard_link_tools';
 import { DashboardLinkStrings } from './dashboard_link_strings';
-import {
-  NAV_VERTICAL_LAYOUT,
-  NavigationLayoutType,
-  NavigationEmbeddableLink,
-} from '../../embeddable/types';
 import { useNavigationEmbeddable } from '../../embeddable/navigation_embeddable';
 
 export const DashboardLinkComponent = ({

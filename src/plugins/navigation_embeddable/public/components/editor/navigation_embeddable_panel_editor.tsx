@@ -29,54 +29,71 @@ import {
 } from '@elastic/eui';
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 
+import { NavigationLayoutInfo } from '../../embeddable/types';
 import {
-  NavigationLayoutType,
   NavigationEmbeddableLink,
-  NavigationEmbeddableInput,
-  NavigationEmbeddableLinkList,
+  NavigationLayoutType,
   NAV_HORIZONTAL_LAYOUT,
   NAV_VERTICAL_LAYOUT,
-  NavigationLayoutInfo,
-} from '../../embeddable/types';
+} from '../../../common/content_management';
+import { coreServices } from '../../services/kibana_services';
 import { NavEmbeddableStrings } from '../navigation_embeddable_strings';
 import { openLinkEditorFlyout } from '../../editor/open_link_editor_flyout';
 import { memoizedGetOrderedLinkList } from '../../editor/navigation_embeddable_editor_tools';
 import { NavigationEmbeddablePanelEditorLink } from './navigation_embeddable_panel_editor_link';
 import { NavigationEmbeddablePanelEditorEmptyPrompt } from './navigation_embeddable_panel_editor_empty_prompt';
 
+import { TooltipWrapper } from '../tooltip_wrapper';
+
 import './navigation_embeddable_editor.scss';
 
 const NavigationEmbeddablePanelEditor = ({
-  onSave,
+  onSaveToLibrary,
+  onAddToDashboard,
   onClose,
-  initialInput,
+  initialLinks,
+  initialLayout,
   parentDashboard,
+  isByReference,
 }: {
+  onSaveToLibrary: (
+    newLinks: NavigationEmbeddableLink[],
+    newLayout: NavigationLayoutType
+  ) => Promise<void>;
+  onAddToDashboard: (newLinks: NavigationEmbeddableLink[], newLayout: NavigationLayoutType) => void;
   onClose: () => void;
+  initialLinks?: NavigationEmbeddableLink[];
+  initialLayout?: NavigationLayoutType;
   parentDashboard?: DashboardContainer;
-  initialInput: Partial<NavigationEmbeddableInput>;
-  onSave: (input: Partial<NavigationEmbeddableInput>) => void;
+  isByReference: boolean;
 }) => {
+  const toasts = coreServices.notifications.toasts;
   const editLinkFlyoutRef: React.RefObject<HTMLDivElement> = useMemo(() => React.createRef(), []);
 
   const [currentLayout, setCurrentLayout] = useState<NavigationLayoutType>(
-    initialInput.layout ?? NAV_VERTICAL_LAYOUT
+    initialLayout ?? NAV_VERTICAL_LAYOUT
   );
   const [orderedLinks, setOrderedLinks] = useState<NavigationEmbeddableLink[]>([]);
+  const [isSaving, setIsSaving] = useState(false);
+
+  const isEditingExisting = initialLinks || isByReference;
 
   useEffect(() => {
-    const { links: initialLinks } = initialInput;
     if (!initialLinks) {
       setOrderedLinks([]);
       return;
     }
     setOrderedLinks(memoizedGetOrderedLinkList(initialLinks));
-  }, [initialInput]);
+  }, [initialLinks]);
 
   const onDragEnd = useCallback(
     ({ source, destination }) => {
       if (source && destination) {
-        const newList = euiDragDropReorder(orderedLinks, source.index, destination.index);
+        const newList = euiDragDropReorder(orderedLinks, source.index, destination.index).map(
+          (link, i) => {
+            return { ...link, order: i };
+          }
+        );
         setOrderedLinks(newList);
       }
     },
@@ -119,32 +136,6 @@ const NavigationEmbeddablePanelEditor = ({
     [orderedLinks]
   );
 
-  const saveButtonComponent = useMemo(() => {
-    const canSave = orderedLinks.length !== 0;
-
-    const button = (
-      <EuiButton
-        disabled={!canSave}
-        onClick={() => {
-          const newLinks = orderedLinks.reduce((prev, link, i) => {
-            return { ...prev, [link.id]: { ...link, order: i } };
-          }, {} as NavigationEmbeddableLinkList);
-          onSave({ links: newLinks, layout: currentLayout });
-        }}
-      >
-        {NavEmbeddableStrings.editor.panelEditor.getSaveButtonLabel()}
-      </EuiButton>
-    );
-
-    return canSave ? (
-      button
-    ) : (
-      <EuiToolTip content={NavEmbeddableStrings.editor.panelEditor.getEmptyLinksTooltip()}>
-        {button}
-      </EuiToolTip>
-    );
-  }, [onSave, orderedLinks, currentLayout]);
-
   const layoutOptions: EuiButtonGroupOptionProps[] = useMemo(() => {
     return ([NAV_VERTICAL_LAYOUT, NAV_HORIZONTAL_LAYOUT] as NavigationLayoutType[]).map((type) => {
       return {
@@ -160,7 +151,7 @@ const NavigationEmbeddablePanelEditor = ({
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
           <h2>
-            {initialInput.links && Object.keys(initialInput.links).length > 0
+            {isEditingExisting
               ? NavEmbeddableStrings.editor.panelEditor.getEditFlyoutTitle()
               : NavEmbeddableStrings.editor.panelEditor.getCreateFlyoutTitle()}
           </h2>
@@ -229,11 +220,73 @@ const NavigationEmbeddablePanelEditor = ({
       <EuiFlyoutFooter>
         <EuiFlexGroup responsive={false} justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={onClose} iconType="cross">
+            <EuiButtonEmpty onClick={onClose} iconType="cross" flush="left">
               {NavEmbeddableStrings.editor.getCancelButtonLabel()}
             </EuiButtonEmpty>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>{saveButtonComponent}</EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup gutterSize="m">
+              {!isByReference ? (
+                <EuiFlexItem grow={false} css={{ 'margin-left': 'auto' }}>
+                  <TooltipWrapper
+                    condition={!initialLinks}
+                    tooltipContent={NavEmbeddableStrings.editor.panelEditor.getAddToDashboardButtonTooltip()}
+                  >
+                    <EuiButton
+                      disabled={orderedLinks.length === 0}
+                      isLoading={isSaving}
+                      onClick={() => {
+                        onAddToDashboard(orderedLinks, currentLayout);
+                      }}
+                    >
+                      {initialLinks
+                        ? NavEmbeddableStrings.editor.panelEditor.getApplyButtonLabel()
+                        : NavEmbeddableStrings.editor.panelEditor.getAddToDashboardButtonLabel()}
+                    </EuiButton>
+                  </TooltipWrapper>
+                </EuiFlexItem>
+              ) : null}
+              {!initialLinks || isByReference ? (
+                <EuiFlexItem grow={false}>
+                  <EuiToolTip
+                    repositionOnScroll={false}
+                    position="top"
+                    content={
+                      <p>
+                        {initialLinks
+                          ? NavEmbeddableStrings.editor.panelEditor.getUpdateLibraryItemButtonTooltip()
+                          : NavEmbeddableStrings.editor.panelEditor.getSaveToLibraryButtonTooltip()}
+                      </p>
+                    }
+                  >
+                    <EuiButton
+                      fill
+                      iconType="folderCheck"
+                      disabled={orderedLinks.length === 0}
+                      isLoading={isSaving}
+                      onClick={async () => {
+                        setIsSaving(true);
+                        onSaveToLibrary(orderedLinks, currentLayout)
+                          .catch((e) => {
+                            toasts.addError(e, {
+                              title:
+                                NavEmbeddableStrings.editor.panelEditor.getErrorDuringSaveToastTitle(),
+                            });
+                          })
+                          .finally(() => {
+                            setIsSaving(false);
+                          });
+                      }}
+                    >
+                      {initialLinks
+                        ? NavEmbeddableStrings.editor.panelEditor.getUpdateLibraryItemButtonLabel()
+                        : NavEmbeddableStrings.editor.panelEditor.getSaveToLibraryButtonLabel()}
+                    </EuiButton>
+                  </EuiToolTip>
+                </EuiFlexItem>
+              ) : null}
+            </EuiFlexGroup>
+          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutFooter>
     </>

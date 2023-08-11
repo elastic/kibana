@@ -6,35 +6,65 @@
  * Side Public License, v 1.
  */
 
-import { isEmpty } from 'lodash';
-
-import { i18n } from '@kbn/i18n';
 import {
   ACTION_ADD_PANEL,
   EmbeddableFactory,
   EmbeddableFactoryDefinition,
+  EmbeddablePackageState,
+  ErrorEmbeddable,
 } from '@kbn/embeddable-plugin/public';
 import { lazyLoadReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
+import { EmbeddablePersistableStateService } from '@kbn/embeddable-plugin/common';
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 
-import { NAVIGATION_EMBEDDABLE_TYPE } from './navigation_embeddable';
-import { NavigationEmbeddableInput, NAV_VERTICAL_LAYOUT } from './types';
+import { APP_ICON, APP_NAME, CONTENT_ID } from '../../common';
+import type { NavigationEmbeddable } from './navigation_embeddable';
+import { NAV_VERTICAL_LAYOUT } from '../../common/content_management';
+import { getNavigationEmbeddableAttributeService } from '../services/attribute_service';
 import { coreServices, untilPluginStartServicesReady } from '../services/kibana_services';
+import {
+  NavigationEmbeddableByValueInput,
+  NavigationEmbeddableByReferenceInput,
+  NavigationEmbeddableInput,
+} from './types';
 
 export type NavigationEmbeddableFactory = EmbeddableFactory;
 
+export interface NavigationEmbeddableCreationOptions {
+  getInitialInput?: () => Partial<NavigationEmbeddableInput>;
+  getIncomingEmbeddable?: () => EmbeddablePackageState | undefined;
+}
+
 // TODO: Replace string 'OPEN_FLYOUT_ADD_DRILLDOWN' with constant as part of https://github.com/elastic/kibana/issues/154381
-const getDefaultNavigationEmbeddableInput = (): Omit<NavigationEmbeddableInput, 'id'> => ({
-  links: {},
-  layout: NAV_VERTICAL_LAYOUT,
+const getDefaultNavigationEmbeddableInput = (): Omit<NavigationEmbeddableByValueInput, 'id'> => ({
+  attributes: {
+    title: '',
+    layout: NAV_VERTICAL_LAYOUT,
+  },
   disabledActions: [ACTION_ADD_PANEL, 'OPEN_FLYOUT_ADD_DRILLDOWN'],
 });
 
 export class NavigationEmbeddableFactoryDefinition
   implements EmbeddableFactoryDefinition<NavigationEmbeddableInput>
 {
-  public readonly type = NAVIGATION_EMBEDDABLE_TYPE;
-  public isContainerType = false;
+  public readonly type = CONTENT_ID;
+
+  public readonly isContainerType = false;
+
+  public readonly savedObjectMetaData = {
+    name: APP_NAME,
+    type: CONTENT_ID,
+    getIconForSavedObject: () => APP_ICON,
+  };
+
+  // TODO create<Inject|Extract> functions
+  // public inject: EmbeddablePersistableStateService['inject'];
+  // public extract: EmbeddablePersistableStateService['extract'];
+
+  constructor(persistableStateService: EmbeddablePersistableStateService) {
+    // this.inject = createInject(this.persistableStateService);
+    // this.extract = createExtract(this.persistableStateService);
+  }
 
   public async isEditable() {
     await untilPluginStartServicesReady();
@@ -49,12 +79,18 @@ export class NavigationEmbeddableFactoryDefinition
     return getDefaultNavigationEmbeddableInput();
   }
 
-  public async create(initialInput: NavigationEmbeddableInput, parent: DashboardContainer) {
-    if (!initialInput.links || isEmpty(initialInput.links)) {
-      // don't create an empty navigation embeddable - it should always have at least one link
-      return;
+  public async createFromSavedObject(
+    savedObjectId: string,
+    input: NavigationEmbeddableInput,
+    parent: DashboardContainer
+  ): Promise<NavigationEmbeddable | ErrorEmbeddable> {
+    if (!(input as NavigationEmbeddableByReferenceInput).savedObjectId) {
+      (input as NavigationEmbeddableByReferenceInput).savedObjectId = savedObjectId;
     }
+    return this.create(input, parent);
+  }
 
+  public async create(initialInput: NavigationEmbeddableInput, parent: DashboardContainer) {
     await untilPluginStartServicesReady();
 
     const reduxEmbeddablePackage = await lazyLoadReduxToolsPackage();
@@ -65,32 +101,32 @@ export class NavigationEmbeddableFactoryDefinition
       reduxEmbeddablePackage,
       { editable },
       { ...getDefaultNavigationEmbeddableInput(), ...initialInput },
+      getNavigationEmbeddableAttributeService(),
       parent
     );
   }
 
   public async getExplicitInput(
-    initialInput?: NavigationEmbeddableInput,
+    initialInput: NavigationEmbeddableInput,
     parent?: DashboardContainer
-  ) {
+  ): Promise<Omit<NavigationEmbeddableInput, 'id'>> {
     if (!parent) return {};
 
     const { openEditorFlyout } = await import('../editor/open_editor_flyout');
 
     const input = await openEditorFlyout(
-      { ...getDefaultNavigationEmbeddableInput(), ...initialInput },
+      {
+        ...getDefaultNavigationEmbeddableInput(),
+        ...initialInput,
+      },
       parent
-    ).catch(() => {
-      // swallow the promise rejection that happens when the flyout is closed
-      return {};
-    });
+    );
+
     return input;
   }
 
   public getDisplayName() {
-    return i18n.translate('navigationEmbeddable.navigationEmbeddableFactory.displayName', {
-      defaultMessage: 'Links',
-    });
+    return APP_NAME;
   }
 
   public getIconType() {

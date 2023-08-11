@@ -6,70 +6,41 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
-import { DashboardAttributes } from '@kbn/dashboard-plugin/common';
 import { ReduxEmbeddableState } from '@kbn/presentation-util-plugin/public';
-import { EmbeddableInput, EmbeddableOutput } from '@kbn/embeddable-plugin/public';
+import {
+  EmbeddableInput,
+  EmbeddableOutput,
+  SavedObjectEmbeddableInput,
+} from '@kbn/embeddable-plugin/public';
 
-import { ExternalLinkEmbeddableStrings } from '../components/external_link/external_link_strings';
+import { DashboardAttributes } from '@kbn/dashboard-plugin/common';
+import {
+  NavigationLinkType,
+  EXTERNAL_LINK_TYPE,
+  DASHBOARD_LINK_TYPE,
+  NAV_VERTICAL_LAYOUT,
+  NavigationLayoutType,
+  NAV_HORIZONTAL_LAYOUT,
+  NavigationEmbeddableAttributes,
+} from '../../common/content_management';
 import { DashboardLinkStrings } from '../components/dashboard_link/dashboard_link_strings';
-
-/**
- * Dashboard to dashboard links
- */
-export const DASHBOARD_LINK_TYPE = 'dashboardLink';
-export interface DashboardItem {
-  id: string;
-  attributes: DashboardAttributes;
-}
-
-/**
- * External URL links
- */
-export const EXTERNAL_LINK_TYPE = 'externalLink';
-
-/**
- * Layouts for embeddable rendering
- */
-export const NAV_HORIZONTAL_LAYOUT = 'horizontal';
-export const NAV_VERTICAL_LAYOUT = 'vertical';
-export type NavigationLayoutType = typeof NAV_HORIZONTAL_LAYOUT | typeof NAV_VERTICAL_LAYOUT;
+import { ExternalLinkStrings } from '../components/external_link/external_link_strings';
+import { NavEmbeddableStrings } from '../components/navigation_embeddable_strings';
 
 export const NavigationLayoutInfo: {
   [id in NavigationLayoutType]: { displayName: string };
 } = {
   [NAV_HORIZONTAL_LAYOUT]: {
-    displayName: i18n.translate('navigationEmbeddable.editor.horizontalLayout', {
-      defaultMessage: 'Horizontal',
-    }),
+    displayName: NavEmbeddableStrings.editor.panelEditor.getHorizontalLayoutLabel(),
   },
   [NAV_VERTICAL_LAYOUT]: {
-    displayName: i18n.translate('navigationEmbeddable.editor.verticalLayout', {
-      defaultMessage: 'Vertical',
-    }),
+    displayName: NavEmbeddableStrings.editor.panelEditor.getVerticalLayoutLabel(),
   },
 };
 
-/**
- * Navigation embeddable explicit input
- */
-export type NavigationLinkType = typeof DASHBOARD_LINK_TYPE | typeof EXTERNAL_LINK_TYPE;
-
-export interface NavigationEmbeddableLink {
+export interface DashboardItem {
   id: string;
-  type: NavigationLinkType;
-  destination: string;
-  label?: string;
-  order: number;
-}
-
-export interface NavigationEmbeddableLinkList {
-  [id: string]: NavigationEmbeddableLink;
-}
-
-export interface NavigationEmbeddableInput extends EmbeddableInput {
-  links: NavigationEmbeddableLinkList;
-  layout: NavigationLayoutType;
+  attributes: DashboardAttributes;
 }
 
 export const NavigationLinkInfo: {
@@ -88,10 +59,24 @@ export const NavigationLinkInfo: {
   },
   [EXTERNAL_LINK_TYPE]: {
     icon: 'link',
-    type: ExternalLinkEmbeddableStrings.getType(),
-    displayName: ExternalLinkEmbeddableStrings.getDisplayName(),
-    description: ExternalLinkEmbeddableStrings.getDescription(),
+    type: ExternalLinkStrings.getType(),
+    displayName: ExternalLinkStrings.getDisplayName(),
+    description: ExternalLinkStrings.getDescription(),
   },
+};
+
+export type NavigationEmbeddableByValueInput = {
+  attributes: NavigationEmbeddableAttributes;
+} & EmbeddableInput;
+
+export type NavigationEmbeddableByReferenceInput = SavedObjectEmbeddableInput;
+
+export type NavigationEmbeddableInput =
+  | NavigationEmbeddableByValueInput
+  | NavigationEmbeddableByReferenceInput;
+
+export type NavigationEmbeddableOutput = EmbeddableOutput & {
+  attributes?: NavigationEmbeddableAttributes;
 };
 
 /**
@@ -101,6 +86,6 @@ export const NavigationLinkInfo: {
 
 export type NavigationEmbeddableReduxState = ReduxEmbeddableState<
   NavigationEmbeddableInput,
-  EmbeddableOutput,
+  NavigationEmbeddableOutput,
   {} // We currently don't have any component state - TODO: Replace with `NavigationEmbeddableComponentState` if necessary
 >;
