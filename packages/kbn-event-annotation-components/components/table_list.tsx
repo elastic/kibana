@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { TableListViewTable } from '@kbn/content-management-table-list-view-table';
 import type { TableListTabParentProps } from '@kbn/content-management-tabbed-table-list-view';
 import { i18n } from '@kbn/i18n';
@@ -23,6 +23,7 @@ import type {
   EventAnnotationGroupConfig,
   EventAnnotationGroupContent,
 } from '@kbn/event-annotation-common';
+import { ISessionService } from '@kbn/data-plugin/public';
 import type { EventAnnotationServiceType } from '../types';
 import { GroupEditorFlyout } from './group_editor_flyout';
 
@@ -54,6 +55,7 @@ const getCustomColumn = (dataViews: DataView[]) => {
 export const EventAnnotationGroupTableList = ({
   uiSettings,
   eventAnnotationService,
+  sessionService,
   visualizeCapabilities,
   savedObjectsTagging,
   parentProps,
@@ -66,6 +68,7 @@ export const EventAnnotationGroupTableList = ({
 }: {
   uiSettings: IUiSettingsClient;
   eventAnnotationService: EventAnnotationServiceType;
+  sessionService: ISessionService;
   visualizeCapabilities: Record<string, boolean | Record<string, boolean>>;
   savedObjectsTagging: SavedObjectsTaggingApi;
   parentProps: TableListTabParentProps;
@@ -78,6 +81,18 @@ export const EventAnnotationGroupTableList = ({
 }) => {
   const listingLimit = uiSettings.get(SAVED_OBJECTS_LIMIT_SETTING);
   const initialPageSize = uiSettings.get(SAVED_OBJECTS_PER_PAGE_SETTING);
+
+  const [searchSessionId, setSearchSessionId] = useState<string>(sessionService.start());
+
+  const refreshSearchSession = useCallback(() => {
+    setSearchSessionId(sessionService.start());
+  }, [sessionService]);
+
+  useEffect(() => {
+    return () => {
+      sessionService.clear();
+    };
+  }, [sessionService]);
 
   const [refreshListBouncer, setRefreshListBouncer] = useState(false);
 
@@ -143,6 +158,8 @@ export const EventAnnotationGroupTableList = ({
       createDataView={createDataView}
       LensEmbeddableComponent={LensEmbeddableComponent}
       queryInputServices={queryInputServices}
+      searchSessionId={searchSessionId}
+      refreshSearchSession={refreshSearchSession}
     />
   ) : undefined;
 

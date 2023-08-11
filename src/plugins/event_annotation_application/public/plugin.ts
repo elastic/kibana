@@ -76,6 +76,7 @@ export class EventAnnotationPlugin
           PresentationUtilContextProvider: pluginsStart.presentationUtil.ContextProvider,
           dataViews,
           createDataView: pluginsStart.dataViews.create.bind(pluginsStart.dataViews),
+          sessionService: pluginsStart.data.search.session,
           queryInputServices: {
             http: coreStart.http,
             docLinks: coreStart.docLinks,

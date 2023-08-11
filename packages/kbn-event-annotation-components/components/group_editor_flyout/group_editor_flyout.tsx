@@ -42,6 +42,8 @@ export const GroupEditorFlyout = ({
   createDataView,
   LensEmbeddableComponent,
   queryInputServices,
+  searchSessionId,
+  refreshSearchSession,
 }: {
   group: EventAnnotationGroupConfig;
   updateGroup: (newGroup: EventAnnotationGroupConfig) => void;
@@ -52,6 +54,8 @@ export const GroupEditorFlyout = ({
   createDataView: (spec: DataViewSpec) => Promise<DataView>;
   LensEmbeddableComponent: LensEmbeddableComponent;
   queryInputServices: QueryInputServices;
+  searchSessionId: string;
+  refreshSearchSession: () => void;
 }) => {
   const flyoutHeadingId = useMemo(() => htmlIdGenerator()(), []);
   const flyoutBodyOverflowRef = useRef<Element | null>(null);
@@ -172,6 +176,8 @@ export const GroupEditorFlyout = ({
             group={group}
             dataViews={dataViews}
             LensEmbeddableComponent={LensEmbeddableComponent}
+            searchSessionId={searchSessionId}
+            refreshSearchSession={refreshSearchSession}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

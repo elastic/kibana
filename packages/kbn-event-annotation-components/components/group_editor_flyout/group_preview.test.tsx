@@ -56,6 +56,10 @@ class EuiSuperDatePickerTestHarness {
     // I have verified that this fixed on the latest version of the @testing-library/user-event package
     fireEvent.click(await screen.findByText(label));
   }
+
+  static refresh() {
+    userEvent.click(screen.getByRole('button', { name: 'Refresh' }));
+  }
 }
 
 describe('group editor preview', () => {
@@ -75,6 +79,7 @@ describe('group editor preview', () => {
   const LensEmbeddableComponent: EmbeddableComponent = (props) => (
     <div>
       <div data-test-subj="chartTimeRange">{JSON.stringify(props.timeRange)}</div>
+      <div data-test-subj="chartSearchSessionId">{props.searchSessionId}</div>
       <div data-test-subj="lensAttributes">
         {JSON.stringify((props as LensByValueInput).attributes)}
       </div>
@@ -95,6 +100,10 @@ describe('group editor preview', () => {
   const getEmbeddableTimeRange = () => {
     const serialized = screen.getByTestId('chartTimeRange').textContent;
     return serialized ? JSON.parse(serialized) : null;
+  };
+
+  const getEmbeddableSearchSessionId = () => {
+    return screen.getByTestId('chartSearchSessionId').textContent;
   };
 
   const getLensAttributes = () => {
@@ -126,6 +135,8 @@ describe('group editor preview', () => {
       } as DataView,
     ],
     LensEmbeddableComponent,
+    searchSessionId: 'some-search-session-id',
+    refreshSearchSession: jest.fn(),
   };
 
   beforeEach(() => {
@@ -177,6 +188,23 @@ describe('group editor preview', () => {
     await waitFor(() => {
       expect(getCurrentTimeField(getLensAttributes())).toBe('other-time-field');
     });
+  });
+
+  it('refreshes the chart data', () => {
+    expect(defaultProps.refreshSearchSession).not.toHaveBeenCalled();
+    expect(getEmbeddableSearchSessionId()).toBe(defaultProps.searchSessionId);
+
+    EuiSuperDatePickerTestHarness.refresh();
+
+    expect(defaultProps.refreshSearchSession).toHaveBeenCalled();
+
+    rerender(
+      <I18nProvider>
+        <GroupPreview {...defaultProps} searchSessionId="new-search-session-id" />
+      </I18nProvider>
+    );
+
+    expect(getEmbeddableSearchSessionId()).toBe('new-search-session-id');
   });
 
   describe('lens attributes', () => {

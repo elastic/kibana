@@ -34,10 +34,14 @@ export const GroupPreview = ({
   group,
   dataViews,
   LensEmbeddableComponent,
+  searchSessionId,
+  refreshSearchSession,
 }: {
   group: EventAnnotationGroupConfig;
   dataViews: DataView[];
   LensEmbeddableComponent: LensEmbeddableComponent;
+  searchSessionId: string;
+  refreshSearchSession: () => void;
 }) => {
   const [chartTimeRange, setChartTimeRange] = useState<TimeRange>({ from: 'now-15m', to: 'now' });
 
@@ -106,13 +110,18 @@ export const GroupPreview = ({
             grow={false}
           >
             <EuiSuperDatePicker
-              onTimeChange={({ start: from, end: to }) => {
+              onTimeChange={({ start: from, end: to }) => setChartTimeRange({ from, to })}
+              onRefresh={({ start: from, end: to }) => {
                 setChartTimeRange({ from, to });
+                refreshSearchSession();
               }}
               start={chartTimeRange.from}
               end={chartTimeRange.to}
-              showUpdateButton={false}
               compressed
+              updateButtonProps={{
+                iconOnly: true,
+                fill: false,
+              }}
               customQuickSelectRender={customQuickSelectRender}
               customQuickSelectPanels={[
                 {
@@ -157,6 +166,7 @@ export const GroupPreview = ({
                 to: new Date(range[1]).toISOString(),
               })
             }
+            searchSessionId={searchSessionId}
           />
         </div>
       </EuiFlyoutBody>

@@ -31,6 +31,7 @@ import { DataView } from '@kbn/data-views-plugin/common';
 import { QueryInputServices } from '@kbn/visualization-ui-components';
 import { toastsServiceMock } from '@kbn/core-notifications-browser-mocks/src/toasts_service.mock';
 import { IToasts } from '@kbn/core-notifications-browser';
+import { ISessionService } from '@kbn/data-plugin/public';
 
 describe('annotation list view', () => {
   const adHocDVId = 'ad-hoc';
@@ -51,6 +52,7 @@ describe('annotation list view', () => {
   let wrapper: ShallowWrapper<typeof EventAnnotationGroupTableList>;
   let mockEventAnnotationService: EventAnnotationServiceType;
   let mockToasts: IToasts;
+  const searchSessionStartMethod = jest.fn<string, []>(() => 'some-session-id');
 
   beforeEach(() => {
     mockEventAnnotationService = {
@@ -95,6 +97,10 @@ describe('annotation list view', () => {
         queryInputServices={{} as QueryInputServices}
         toasts={mockToasts}
         navigateToLens={() => {}}
+        LensEmbeddableComponent={() => <div />}
+        sessionService={
+          { start: searchSessionStartMethod } as Partial<ISessionService> as ISessionService
+        }
       />
     );
   });
@@ -190,6 +196,7 @@ describe('annotation list view', () => {
       expect(mockEventAnnotationService.loadAnnotationGroup).toHaveBeenCalledWith('1234');
 
       expect(wrapper.find(GroupEditorFlyout).exists()).toBeTruthy();
+      expect(wrapper.find(GroupEditorFlyout).prop('searchSessionId')).toBe('some-session-id');
 
       const updatedGroup = { ...group, tags: ['my-new-tag'] };
 
@@ -208,6 +215,24 @@ describe('annotation list view', () => {
       expect(wrapper.find(TableListViewTable).prop('refreshListBouncer')).not.toBe(
         initialBouncerValue
       ); // (should refresh list)
+    });
+
+    it('refreshes the search session', async () => {
+      act(() => {
+        wrapper.find(TableListViewTable).prop('editItem')!({
+          id: '1234',
+        } as UserContentCommonSchema);
+      });
+
+      // wait one tick to give promise time to settle
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      expect(wrapper.find(GroupEditorFlyout).prop('searchSessionId')).toBe('some-session-id');
+
+      searchSessionStartMethod.mockReturnValue('new-session-id');
+      wrapper.find(GroupEditorFlyout).prop('refreshSearchSession')();
+
+      expect(wrapper.find(GroupEditorFlyout).prop('searchSessionId')).toBe('new-session-id');
     });
 
     it('opens editor when title is clicked', async () => {
