@@ -20,7 +20,7 @@ import {
 } from './visualization_types';
 import type { FormulaPublicApi, GenericIndexPatternColumn } from '@kbn/lens-plugin/public';
 import { ReferenceBasedIndexPatternColumn } from '@kbn/lens-plugin/public/datasources/form_based/operations/definitions/column_types';
-import type { FormulaConfig } from './types';
+import type { FormulaValueConfig } from './types';
 
 const mockDataView = {
   id: 'mock-id',
@@ -86,7 +86,8 @@ const REFERENCE_LINE_LAYER: ReferenceBasedIndexPatternColumn = {
   scale: 'ratio',
 };
 
-const getFormula = (value: string): FormulaConfig => ({
+const getFormula = (value: string): FormulaValueConfig => ({
+  type: 'formula',
   value,
   format: {
     id: 'percent',
@@ -205,6 +206,9 @@ describe('lens_attributes_builder', () => {
         layers: [
           new XYDataLayer({
             data: [getFormula(AVERAGE_CPU_USER_FORMULA)],
+            options: {
+              buckets: { type: 'date_histogram' },
+            },
           }),
         ],
         dataView: mockDataView,
@@ -249,9 +253,20 @@ describe('lens_attributes_builder', () => {
         layers: [
           new XYDataLayer({
             data: [getFormula(AVERAGE_CPU_USER_FORMULA)],
+            options: {
+              buckets: { type: 'date_histogram' },
+            },
           }),
           new XYReferenceLinesLayer({
-            data: [getFormula('1')],
+            data: [
+              {
+                type: 'static_value',
+                value: '1',
+                format: {
+                  id: 'percent',
+                },
+              },
+            ],
           }),
         ],
         dataView: mockDataView,
@@ -317,6 +332,9 @@ describe('lens_attributes_builder', () => {
         layers: [
           new XYDataLayer({
             data: [getFormula(AVERAGE_CPU_USER_FORMULA), getFormula(AVERAGE_CPU_SYSTEM_FORMULA)],
+            options: {
+              buckets: { type: 'date_histogram' },
+            },
           }),
         ],
         dataView: mockDataView,

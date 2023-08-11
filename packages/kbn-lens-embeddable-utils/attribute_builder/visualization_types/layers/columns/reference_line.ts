@@ -8,17 +8,17 @@
 
 import type { PersistedIndexPatternLayer } from '@kbn/lens-plugin/public';
 import type { ReferenceBasedIndexPatternColumn } from '@kbn/lens-plugin/public/datasources/form_based/operations/definitions/column_types';
-import type { FormulaConfig, StaticChartColumn } from '../../../types';
+import type { StaticChartColumn, StaticValueConfig } from '../../../types';
 
 export class ReferenceLineColumn implements StaticChartColumn {
-  constructor(private formulaConfig: FormulaConfig) {}
+  constructor(private valueConfig: StaticValueConfig) {}
 
-  getFormulaConfig(): FormulaConfig {
-    return this.formulaConfig;
+  getValueConfig(): StaticValueConfig {
+    return this.valueConfig;
   }
 
   getData(id: string, baseLayer: PersistedIndexPatternLayer): PersistedIndexPatternLayer {
-    const { label, ...params } = this.getFormulaConfig();
+    const { label, type: _type, ...params } = this.getValueConfig();
     return {
       linkToLayers: [],
       columnOrder: [...baseLayer.columnOrder, id],

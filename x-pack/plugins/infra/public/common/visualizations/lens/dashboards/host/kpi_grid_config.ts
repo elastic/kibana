@@ -6,9 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { FormulaConfig, MetricLayerOptions } from '@kbn/lens-embeddable-utils';
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
-import type { Layer } from '../../../../../hooks/use_lens_attributes';
+import { UseLensAttributesMetricLayerConfig } from '../../../../../hooks/use_lens_attributes';
 import { hostLensFormulas } from '../../../constants';
 import { TOOLTIP } from './translations';
 
@@ -21,7 +20,7 @@ export const AVERAGE_SUBTITLE = i18n.translate(
 );
 
 export interface KPIChartProps extends Pick<TypedLensByValueInput, 'id' | 'title' | 'overrides'> {
-  layers: Layer<MetricLayerOptions, FormulaConfig, 'data'>;
+  layers: UseLensAttributesMetricLayerConfig;
   toolTip: string;
 }
 
@@ -34,12 +33,14 @@ export const KPI_CHARTS: KPIChartProps[] = [
     layers: {
       data: {
         ...hostLensFormulas.cpuUsage,
-        format: {
-          ...hostLensFormulas.cpuUsage.format,
-          params: {
-            decimals: 1,
-          },
-        },
+        format: hostLensFormulas.cpuUsage.format
+          ? {
+              ...hostLensFormulas.cpuUsage.format,
+              params: {
+                decimals: 1,
+              },
+            }
+          : undefined,
       },
       layerType: 'data',
       options: {
@@ -60,12 +61,14 @@ export const KPI_CHARTS: KPIChartProps[] = [
     layers: {
       data: {
         ...hostLensFormulas.normalizedLoad1m,
-        format: {
-          ...hostLensFormulas.normalizedLoad1m.format,
-          params: {
-            decimals: 1,
-          },
-        },
+        format: hostLensFormulas.normalizedLoad1m.format
+          ? {
+              ...hostLensFormulas.normalizedLoad1m.format,
+              params: {
+                decimals: 1,
+              },
+            }
+          : undefined,
       },
       layerType: 'data',
       options: {
@@ -83,12 +86,14 @@ export const KPI_CHARTS: KPIChartProps[] = [
     layers: {
       data: {
         ...hostLensFormulas.memoryUsage,
-        format: {
-          ...hostLensFormulas.memoryUsage.format,
-          params: {
-            decimals: 1,
-          },
-        },
+        format: hostLensFormulas.memoryUsage.format
+          ? {
+              ...hostLensFormulas.memoryUsage.format,
+              params: {
+                decimals: 1,
+              },
+            }
+          : undefined,
       },
       layerType: 'data',
       options: {
@@ -106,12 +111,14 @@ export const KPI_CHARTS: KPIChartProps[] = [
     layers: {
       data: {
         ...hostLensFormulas.diskSpaceUsage,
-        format: {
-          ...hostLensFormulas.diskSpaceUsage.format,
-          params: {
-            decimals: 1,
-          },
-        },
+        format: hostLensFormulas.diskSpaceUsage.format
+          ? {
+              ...hostLensFormulas.diskSpaceUsage.format,
+              params: {
+                decimals: 1,
+              },
+            }
+          : undefined,
       },
       layerType: 'data',
       options: {

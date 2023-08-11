@@ -13,12 +13,12 @@ import type {
   PersistedIndexPatternLayer,
   XYReferenceLineLayerConfig,
 } from '@kbn/lens-plugin/public';
-import type { StaticChartColumn, ChartLayer, FormulaConfig } from '../../types';
+import type { ChartLayer, StaticValueConfig, StaticChartColumn } from '../../types';
 import { getDefaultReferences } from '../../utils';
 import { ReferenceLineColumn } from './columns/reference_line';
 
 interface XYReferenceLinesLayerConfig {
-  data: FormulaConfig[];
+  data: StaticValueConfig[];
 }
 
 export class XYReferenceLinesLayer implements ChartLayer<XYReferenceLineLayerConfig> {
@@ -28,7 +28,7 @@ export class XYReferenceLinesLayer implements ChartLayer<XYReferenceLineLayerCon
   }
 
   getName(): string | undefined {
-    return this.column[0].getFormulaConfig().label;
+    return this.column[0].getValueConfig().label;
   }
 
   getLayer(layerId: string, accessorId: string): FormBasedPersistedState['layers'] {
@@ -53,7 +53,7 @@ export class XYReferenceLinesLayer implements ChartLayer<XYReferenceLineLayerCon
       layerType: 'referenceLine',
       accessors: this.column.map((_, index) => `${accessorId}_${index}_reference_column`),
       yConfig: this.column.map((layer, index) => ({
-        color: layer.getFormulaConfig().color,
+        color: layer.getValueConfig().color,
         forAccessor: `${accessorId}_${index}_reference_column`,
         axisMode: 'left',
       })),

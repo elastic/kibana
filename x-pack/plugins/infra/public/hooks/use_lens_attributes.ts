@@ -12,60 +12,62 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { i18n } from '@kbn/i18n';
 import useAsync from 'react-use/lib/useAsync';
-import { FormulaPublicApi, LayerType as LensLayerType } from '@kbn/lens-plugin/public';
+import { FormulaPublicApi } from '@kbn/lens-plugin/public';
 import {
   type XYLayerOptions,
   type MetricLayerOptions,
-  type FormulaConfig,
+  type FormulaValueConfig,
   type LensAttributes,
+  type StaticValueConfig,
+  type LensVisualizationState,
+  type Chart,
   LensAttributesBuilder,
   XYDataLayer,
   MetricLayer,
   XYChart,
   MetricChart,
   XYReferenceLinesLayer,
-  Chart,
-  LensVisualizationState,
 } from '@kbn/lens-embeddable-utils';
 
 import { InfraClientSetupDeps } from '../types';
 import { useLazyRef } from './use_lazy_ref';
 
 type Options = XYLayerOptions | MetricLayerOptions;
-type ChartType = 'lnsXY' | 'lnsMetric';
-export type LayerType = Exclude<LensLayerType, 'annotations' | 'metricTrendline'>;
-export interface Layer<
-  TOptions extends Options,
-  TFormulaConfig extends FormulaConfig | FormulaConfig[],
-  TLayerType extends LayerType = LayerType
-> {
-  layerType: TLayerType;
-  data: TFormulaConfig;
-  options?: TOptions;
+
+interface StaticValueLayer {
+  data: StaticValueConfig[];
+  layerType: 'referenceLine';
 }
 
-interface UseLensAttributesBaseParams<
+interface FormulaValueLayer<
   TOptions extends Options,
-  TLayers extends Array<Layer<TOptions, FormulaConfig[]>> | Layer<TOptions, FormulaConfig>
+  TData extends FormulaValueConfig[] | FormulaValueConfig
 > {
+  options?: TOptions;
+  data: TData;
+  layerType: 'data';
+}
+
+type XYLayerConfig = StaticValueLayer | FormulaValueLayer<XYLayerOptions, FormulaValueConfig[]>;
+
+export type UseLensAttributesXYLayerConfig = XYLayerConfig | XYLayerConfig[];
+export type UseLensAttributesMetricLayerConfig = FormulaValueLayer<
+  MetricLayerOptions,
+  FormulaValueConfig
+>;
+
+interface UseLensAttributesBaseParams {
   dataView?: DataView;
-  layers: TLayers;
   title?: string;
 }
 
-interface UseLensAttributesXYChartParams
-  extends UseLensAttributesBaseParams<
-    XYLayerOptions,
-    Array<Layer<XYLayerOptions, FormulaConfig[], 'data' | 'referenceLine'>>
-  > {
+interface UseLensAttributesXYChartParams extends UseLensAttributesBaseParams {
+  layers: UseLensAttributesXYLayerConfig;
   visualizationType: 'lnsXY';
 }
 
-interface UseLensAttributesMetricChartParams
-  extends UseLensAttributesBaseParams<
-    MetricLayerOptions,
-    Layer<MetricLayerOptions, FormulaConfig, 'data'>
-  > {
+interface UseLensAttributesMetricChartParams extends UseLensAttributesBaseParams {
+  layers: UseLensAttributesMetricLayerConfig;
   visualizationType: 'lnsMetric';
 }
 
@@ -73,12 +75,7 @@ export type UseLensAttributesParams =
   | UseLensAttributesXYChartParams
   | UseLensAttributesMetricChartParams;
 
-export const useLensAttributes = ({
-  dataView,
-  layers,
-  title,
-  visualizationType,
-}: UseLensAttributesParams) => {
+export const useLensAttributes = ({ dataView, ...params }: UseLensAttributesParams) => {
   const {
     services: { lens },
   } = useKibana<InfraClientSetupDeps>();
@@ -95,9 +92,7 @@ export const useLensAttributes = ({
       visualization: chartFactory({
         dataView,
         formulaAPI,
-        layers,
-        title,
-        visualizationType,
+        ...params,
       }),
     });
 
@@ -158,9 +153,9 @@ export const useLensAttributes = ({
   );
 
   const getFormula = () => {
-    const firstDataLayer = [...(Array.isArray(layers) ? layers : [layers])].find(
-      (p) => p.layerType === 'data'
-    );
+    const firstDataLayer = [
+      ...(Array.isArray(params.layers) ? params.layers : [params.layers]),
+    ].find((p) => p.layerType === 'data');
 
     if (!firstDataLayer) {
       return '';
@@ -176,10 +171,7 @@ export const useLensAttributes = ({
   return { formula: getFormula(), attributes: attributes.current, getExtraActions, error };
 };
 
-const chartFactory = <
-  TOptions,
-  TLayers extends Array<Layer<TOptions, FormulaConfig[]>> | Layer<TOptions, FormulaConfig>
->({
+const chartFactory = ({
   dataView,
   formulaAPI,
   layers,
@@ -188,26 +180,28 @@ const chartFactory = <
 }: {
   dataView: DataView;
   formulaAPI: FormulaPublicApi;
-  visualizationType: ChartType;
-  layers: TLayers;
-  title?: string;
-}): Chart<LensVisualizationState> => {
+} & UseLensAttributesParams): Chart<LensVisualizationState> => {
   switch (visualizationType) {
     case 'lnsXY':
       if (!Array.isArray(layers)) {
         throw new Error(`Invalid layers type. Expected an array of layers.`);
       }
 
-      const getLayerClass = (layerType: LayerType) => {
-        switch (layerType) {
+      const xyLayerFactory = (layer: XYLayerConfig) => {
+        switch (layer.layerType) {
           case 'data': {
-            return XYDataLayer;
+            return new XYDataLayer({
+              data: layer.data,
+              options: layer.options,
+            });
           }
           case 'referenceLine': {
-            return XYReferenceLinesLayer;
+            return new XYReferenceLinesLayer({
+              data: layer.data,
+            });
           }
           default:
-            throw new Error(`Invalid layerType: ${layerType}`);
+            throw new Error(`Invalid layerType`);
         }
       };
 
@@ -215,11 +209,7 @@ const chartFactory = <
         dataView,
         formulaAPI,
         layers: layers.map((layerItem) => {
-          const Layer = getLayerClass(layerItem.layerType);
-          return new Layer({
-            data: layerItem.data,
-            options: layerItem.options,
-          });
+          return xyLayerFactory(layerItem);
         }),
         title,
       });
@@ -246,7 +236,6 @@ const chartFactory = <
 const getOpenInLensAction = (onExecute: () => void): Action => {
   return {
     id: 'openInLens',
-
     getDisplayName(_context: ActionExecutionContext): string {
       return i18n.translate('xpack.infra.hostsViewPage.tabs.metricsCharts.actions.openInLines', {
         defaultMessage: 'Open in Lens',

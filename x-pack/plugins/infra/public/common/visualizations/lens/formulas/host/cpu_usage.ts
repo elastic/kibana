@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import type { FormulaConfig } from '@kbn/lens-embeddable-utils';
+import type { FormulaValueConfig } from '@kbn/lens-embeddable-utils';
 
-export const cpuUsage: FormulaConfig = {
+export const cpuUsage: FormulaValueConfig = {
+  type: 'formula',
   label: 'CPU Usage',
   value: '(average(system.cpu.user.pct) + average(system.cpu.system.pct)) / max(system.cpu.cores)',
   format: {

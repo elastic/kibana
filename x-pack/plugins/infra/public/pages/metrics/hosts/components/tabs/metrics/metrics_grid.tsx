@@ -16,9 +16,15 @@ import { MetricChart, MetricChartProps } from './metric_chart';
 
 const DEFAULT_BREAKDOWN_SIZE = 20;
 const XY_LAYER_OPTIONS: XYLayerOptions = {
+  buckets: {
+    type: 'date_histogram',
+  },
   breakdown: {
-    size: DEFAULT_BREAKDOWN_SIZE,
-    sourceField: 'host.name',
+    type: 'top_values',
+    field: 'host.name',
+    params: {
+      size: DEFAULT_BREAKDOWN_SIZE,
+    },
   },
 };
 
@@ -60,6 +66,7 @@ const CHARTS_IN_ORDER: MetricChartProps[] = [
       {
         data: [
           {
+            type: 'static_value',
             value: '1',
             format: {
               id: 'percent',

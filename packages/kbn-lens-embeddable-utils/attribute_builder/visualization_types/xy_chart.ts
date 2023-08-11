@@ -15,14 +15,27 @@ import { DEFAULT_LAYER_ID } from '../utils';
 const ACCESSOR = 'formula_accessor';
 
 export class XYChart implements Chart<XYState> {
-  constructor(private chartConfig: ChartConfig<Array<ChartLayer<XYLayerConfig>>>) {}
+  private _layers: Array<ChartLayer<XYLayerConfig>> | null = null;
+  constructor(
+    private chartConfig: ChartConfig<ChartLayer<XYLayerConfig> | Array<ChartLayer<XYLayerConfig>>>
+  ) {}
 
   getVisualizationType(): string {
     return 'lnsXY';
   }
 
+  private get layers() {
+    if (!this._layers) {
+      this._layers = Array.isArray(this.chartConfig.layers)
+        ? this.chartConfig.layers
+        : [this.chartConfig.layers];
+    }
+
+    return this._layers;
+  }
+
   getLayers(): FormBasedPersistedState['layers'] {
-    return this.chartConfig.layers.reduce((acc, curr, index) => {
+    return this.layers.reduce((acc, curr, index) => {
       const layerId = `${DEFAULT_LAYER_ID}_${index}`;
       const accessorId = `${ACCESSOR}_${index}`;
       return {
@@ -39,18 +52,16 @@ export class XYChart implements Chart<XYState> {
 
   getVisualizationState(): XYState {
     return getXYVisualizationState({
-      layers: [
-        ...this.chartConfig.layers.map((layerItem, index) => {
-          const layerId = `${DEFAULT_LAYER_ID}_${index}`;
-          const accessorId = `${ACCESSOR}_${index}`;
-          return layerItem.getLayerConfig(layerId, accessorId);
-        }),
-      ],
+      layers: this.layers.map((layerItem, index) => {
+        const layerId = `${DEFAULT_LAYER_ID}_${index}`;
+        const accessorId = `${ACCESSOR}_${index}`;
+        return layerItem.getLayerConfig(layerId, accessorId);
+      }),
     });
   }
 
   getReferences(): SavedObjectReference[] {
-    return this.chartConfig.layers.flatMap((p, index) => {
+    return this.layers.flatMap((p, index) => {
       const layerId = `${DEFAULT_LAYER_ID}_${index}`;
       return p.getReference(layerId, this.chartConfig.dataView);
     });
@@ -61,7 +72,7 @@ export class XYChart implements Chart<XYState> {
   }
 
   getTitle(): string {
-    return this.chartConfig.title ?? this.chartConfig.layers[0].getName() ?? '';
+    return this.chartConfig.title ?? this.layers[0].getName() ?? '';
   }
 }
 

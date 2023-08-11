@@ -8,13 +8,13 @@
 
 import type { FormulaPublicApi, PersistedIndexPatternLayer } from '@kbn/lens-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { FormulaConfig, ChartColumn } from '../../../types';
+import type { FormulaValueConfig, ChartColumn } from '../../../types';
 
 export class FormulaColumn implements ChartColumn {
-  constructor(private formulaConfig: FormulaConfig) {}
+  constructor(private valueConfig: FormulaValueConfig) {}
 
-  getFormulaConfig(): FormulaConfig {
-    return this.formulaConfig;
+  getValueConfig(): FormulaValueConfig {
+    return this.valueConfig;
   }
 
   getData(
@@ -23,7 +23,7 @@ export class FormulaColumn implements ChartColumn {
     dataView: DataView,
     formulaAPI: FormulaPublicApi
   ): PersistedIndexPatternLayer {
-    const { value, ...rest } = this.getFormulaConfig();
+    const { value, ...rest } = this.getValueConfig();
     const formulaLayer = formulaAPI.insertOrReplaceFormulaColumn(
       id,
       { formula: value, ...rest },

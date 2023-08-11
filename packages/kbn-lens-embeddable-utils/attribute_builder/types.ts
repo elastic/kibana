@@ -27,11 +27,11 @@ export interface VisualizationAttributesBuilder {
 }
 
 // Column
-export interface BaseChartColumn {
-  getFormulaConfig(): FormulaConfig;
+export interface BaseChartColumn<TValueConfig extends StaticValueConfig | FormulaValueConfig> {
+  getValueConfig(): TValueConfig;
 }
 
-export interface ChartColumn extends BaseChartColumn {
+export interface ChartColumn extends BaseChartColumn<FormulaValueConfig> {
   getData(
     id: string,
     baseLayer: PersistedIndexPatternLayer,
@@ -40,7 +40,7 @@ export interface ChartColumn extends BaseChartColumn {
   ): PersistedIndexPatternLayer;
 }
 
-export interface StaticChartColumn extends BaseChartColumn {
+export interface StaticChartColumn extends BaseChartColumn<StaticValueConfig> {
   getData(id: string, baseLayer: PersistedIndexPatternLayer): PersistedIndexPatternLayer;
 }
 
@@ -79,8 +79,14 @@ export interface ChartConfig<
 
 // Formula
 type LensFormula = Parameters<FormulaPublicApi['insertOrReplaceFormulaColumn']>[1];
-export type FormulaConfig = Omit<LensFormula, 'format' | 'formula'> & {
+export type FormulaValueConfig = Omit<LensFormula, 'formula'> & {
+  type: 'formula';
   color?: string;
-  format: NonNullable<LensFormula['format']>;
+  value: string;
+};
+
+export type StaticValueConfig = Omit<LensFormula, 'formula'> & {
+  type: 'static_value';
+  color?: string;
   value: string;
 };

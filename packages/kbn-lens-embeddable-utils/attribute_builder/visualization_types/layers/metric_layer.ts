@@ -14,7 +14,7 @@ import type {
   MetricVisualizationState,
   PersistedIndexPatternLayer,
 } from '@kbn/lens-plugin/public';
-import type { ChartColumn, ChartLayer, FormulaConfig } from '../../types';
+import type { ChartColumn, ChartLayer, FormulaValueConfig } from '../../types';
 import { getDefaultReferences, getHistogramColumn } from '../../utils';
 import { FormulaColumn } from './columns/formula';
 
@@ -28,7 +28,7 @@ export interface MetricLayerOptions {
 }
 
 interface MetricLayerConfig {
-  data: FormulaConfig;
+  data: FormulaValueConfig;
   options?: MetricLayerOptions;
 }
 
@@ -48,7 +48,7 @@ export class MetricLayer implements ChartLayer<MetricVisualizationState> {
       columnOrder: [HISTOGRAM_COLUMN_NAME],
       columns: getHistogramColumn({
         columnName: HISTOGRAM_COLUMN_NAME,
-        overrides: {
+        options: {
           sourceField: dataView.timeFieldName,
           params: {
             interval: 'auto',
@@ -109,6 +109,6 @@ export class MetricLayer implements ChartLayer<MetricVisualizationState> {
     };
   }
   getName(): string | undefined {
-    return this.column.getFormulaConfig().label;
+    return this.column.getValueConfig().label;
   }
 }

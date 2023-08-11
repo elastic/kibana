@@ -6,9 +6,8 @@
  */
 import React, { useMemo } from 'react';
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
-import type { FormulaConfig, XYLayerOptions } from '@kbn/lens-embeddable-utils';
 import { LensChart } from '../../../../../../components/lens';
-import type { Layer } from '../../../../../../hooks/use_lens_attributes';
+import type { UseLensAttributesXYLayerConfig } from '../../../../../../hooks/use_lens_attributes';
 import { useMetricsDataViewContext } from '../../../hooks/use_data_view';
 import { useUnifiedSearchContext } from '../../../hooks/use_unified_search';
 import { useHostsViewContext } from '../../../hooks/use_hosts_view';
@@ -19,7 +18,7 @@ import { METRIC_CHART_HEIGHT } from '../../../constants';
 
 export interface MetricChartProps extends Pick<TypedLensByValueInput, 'id' | 'overrides'> {
   title: string;
-  layers: Array<Layer<XYLayerOptions, FormulaConfig[]>>;
+  layers: UseLensAttributesXYLayerConfig;
 }
 
 export const MetricChart = ({ id, title, layers, overrides }: MetricChartProps) => {

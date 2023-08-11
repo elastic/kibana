@@ -11,18 +11,24 @@ import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { FormulaConfig, XYLayerOptions } from '@kbn/lens-embeddable-utils';
+import type { XYLayerOptions } from '@kbn/lens-embeddable-utils';
+import { UseLensAttributesXYLayerConfig } from '../../../../../hooks/use_lens_attributes';
 import { buildCombinedHostsFilter } from '../../../../../utils/filters/build';
-import type { Layer } from '../../../../../hooks/use_lens_attributes';
 import { HostMetricsDocsLink, LensChart, type LensChartProps } from '../../../../lens';
 import { hostLensFormulas } from '../../../../../common/visualizations';
 import { METRIC_CHART_HEIGHT } from '../../../constants';
 
 type DataViewOrigin = 'logs' | 'metrics';
 interface MetricChartConfig extends Pick<LensChartProps, 'id' | 'title' | 'overrides'> {
-  layers: Array<Layer<XYLayerOptions, FormulaConfig[]>>;
+  layers: UseLensAttributesXYLayerConfig;
   toolTip: string;
 }
+
+const XY_LAYER_OPTIONS: XYLayerOptions = {
+  buckets: {
+    type: 'date_histogram',
+  },
+};
 
 const PERCENT_LEFT_AXIS: Pick<MetricChartConfig, 'overrides'>['overrides'] = {
   axisLeft: {
@@ -56,6 +62,7 @@ const CHARTS_IN_ORDER: Array<
       {
         data: [hostLensFormulas.cpuUsage],
         layerType: 'data',
+        options: XY_LAYER_OPTIONS,
       },
     ],
     dataViewOrigin: 'metrics',
@@ -72,6 +79,7 @@ const CHARTS_IN_ORDER: Array<
       {
         data: [hostLensFormulas.memoryUsage],
         layerType: 'data',
+        options: XY_LAYER_OPTIONS,
       },
     ],
     dataViewOrigin: 'metrics',
@@ -88,10 +96,12 @@ const CHARTS_IN_ORDER: Array<
       {
         data: [hostLensFormulas.normalizedLoad1m],
         layerType: 'data',
+        options: XY_LAYER_OPTIONS,
       },
       {
         data: [
           {
+            type: 'static_value',
             value: '1',
             format: {
               id: 'percent',
@@ -116,6 +126,7 @@ const CHARTS_IN_ORDER: Array<
       {
         data: [hostLensFormulas.logRate],
         layerType: 'data',
+        options: XY_LAYER_OPTIONS,
       },
     ],
     dataViewOrigin: 'logs',
@@ -147,6 +158,7 @@ const CHARTS_IN_ORDER: Array<
         layerType: 'data',
         options: {
           seriesType: 'area',
+          ...XY_LAYER_OPTIONS,
         },
       },
     ],
@@ -187,6 +199,7 @@ const CHARTS_IN_ORDER: Array<
         layerType: 'data',
         options: {
           seriesType: 'area',
+          ...XY_LAYER_OPTIONS,
         },
       },
     ],
@@ -219,6 +232,7 @@ const CHARTS_IN_ORDER: Array<
         layerType: 'data',
         options: {
           seriesType: 'area',
+          ...XY_LAYER_OPTIONS,
         },
       },
     ],
@@ -251,6 +265,7 @@ const CHARTS_IN_ORDER: Array<
         layerType: 'data',
         options: {
           seriesType: 'area',
+          ...XY_LAYER_OPTIONS,
         },
       },
     ],

@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import type { FormulaConfig } from '@kbn/lens-embeddable-utils';
+import type { FormulaValueConfig } from '@kbn/lens-embeddable-utils';
 
-export const normalizedLoad1m: FormulaConfig = {
+export const normalizedLoad1m: FormulaValueConfig = {
+  type: 'formula',
   label: 'Normalized Load',
   value: 'average(system.load.1) / max(system.load.cores)',
   format: {
