@@ -59,7 +59,10 @@ export const SummaryTable = ({ processSummary, isLoading }: Props) => {
       <EuiFlexGroup gutterSize="m" responsive={false} wrap={true}>
         {Object.entries(processCount).map(([field, value]) => (
           <EuiFlexItem key={field}>
-            <EuiDescriptionList data-test-subj="infraProcessesSummaryTableItem" compressed>
+            <EuiDescriptionList
+              data-test-subj="infraAssetDetailsProcessesSummaryTableItem"
+              compressed
+            >
               <ColumnTitle>{columnTitles[field as keyof SummaryRecord]}</ColumnTitle>
               <EuiDescriptionListDescription>
                 {value === -1 ? <LoadingSpinner /> : value}
