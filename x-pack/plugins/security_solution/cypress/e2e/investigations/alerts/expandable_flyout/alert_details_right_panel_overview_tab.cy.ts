@@ -43,6 +43,7 @@ import {
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_SESSION_PREVIEW,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_HIGHLIGHTED_FIELDS_TABLE_FIELD_CELL,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_HIGHLIGHTED_FIELDS_TABLE_VALUE_CELL,
+  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_RESPONSE_SECTION_EMPTY_RESPONSE,
 } from '../../../../screens/expandable_flyout/alert_details_right_panel_overview_tab';
 import {
   clickCorrelationsViewAllButton,
@@ -53,6 +54,7 @@ import {
   toggleOverviewTabAboutSection,
   toggleOverviewTabInsightsSection,
   toggleOverviewTabInvestigationSection,
+  toggleOverviewTabResponseSection,
   toggleOverviewTabVisualizationsSection,
 } from '../../../../tasks/expandable_flyout/alert_details_right_panel_overview_tab';
 import { cleanKibana } from '../../../../tasks/common';
@@ -341,6 +343,17 @@ describe(
 
         clickPrevalenceViewAllButton();
         cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_ENTITIES_CONTENT).should('be.visible'); // TODO update when we can navigate to Prevalence sub tab directly
+      });
+    });
+
+    describe('response section', () => {
+      it('should display empty message', () => {
+        toggleOverviewTabAboutSection();
+        toggleOverviewTabResponseSection();
+
+        cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_RESPONSE_SECTION_EMPTY_RESPONSE).should(
+          'be.visible'
+        );
       });
     });
   }

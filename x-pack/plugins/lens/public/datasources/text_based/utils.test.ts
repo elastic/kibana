@@ -144,6 +144,22 @@ describe('Text based languages utils', () => {
   });
 
   describe('getStateFromAggregateQuery', () => {
+    const textBasedQueryColumns = [
+      {
+        id: 'bytes',
+        name: 'bytes',
+        meta: {
+          type: 'number',
+        },
+      },
+      {
+        id: 'dest',
+        name: 'dest',
+        meta: {
+          type: 'string',
+        },
+      },
+    ] as DatatableColumn[];
     it('should return the correct state', async () => {
       const state = {
         layers: {
@@ -157,7 +173,7 @@ describe('Text based languages utils', () => {
         indexPatternRefs: [],
         fieldList: [],
         initialContext: {
-          contextualFields: ['bytes', 'dest'],
+          textBasedColumns: textBasedQueryColumns,
           query: { sql: 'SELECT * FROM "foo"' },
           fieldName: '',
           dataViewSpec: {
@@ -205,7 +221,7 @@ describe('Text based languages utils', () => {
 
       expect(updatedState).toStrictEqual({
         initialContext: {
-          contextualFields: ['bytes', 'dest'],
+          textBasedColumns: textBasedQueryColumns,
           query: { sql: 'SELECT * FROM "foo"' },
           fieldName: '',
           dataViewSpec: {
@@ -309,7 +325,7 @@ describe('Text based languages utils', () => {
         indexPatternRefs: [],
         fieldList: [],
         initialContext: {
-          contextualFields: ['bytes', 'dest'],
+          textBasedColumns: textBasedQueryColumns,
           query: { sql: 'SELECT * FROM "foo"' },
           fieldName: '',
           dataViewSpec: {
@@ -362,7 +378,7 @@ describe('Text based languages utils', () => {
 
       expect(updatedState).toStrictEqual({
         initialContext: {
-          contextualFields: ['bytes', 'dest'],
+          textBasedColumns: textBasedQueryColumns,
           query: { sql: 'SELECT * FROM "foo"' },
           fieldName: '',
           dataViewSpec: {

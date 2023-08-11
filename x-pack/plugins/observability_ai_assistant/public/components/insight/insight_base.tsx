@@ -122,7 +122,9 @@ export function InsightBase({
         onToggle={onToggle}
       >
         <EuiSpacer size="m" />
-        {children}
+        <EuiPanel hasBorder={false} hasShadow={false} color="subdued">
+          {children}
+        </EuiPanel>
       </EuiAccordion>
     </EuiPanel>
   );

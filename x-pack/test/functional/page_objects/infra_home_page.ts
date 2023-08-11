@@ -394,6 +394,10 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
       await testSubjects.find('infraSuggestionsPanel');
     },
 
+    async ensureInventoryFeedbackLinkIsVisible() {
+      await testSubjects.existOrFail('infraInventoryFeedbackLink');
+    },
+
     async ensureKubernetesTourIsVisible() {
       const container = await testSubjects.find('infra-kubernetesTour-text');
       const containerText = await container.getVisibleText();

@@ -75,7 +75,7 @@ export const cloudPostureIntegrations: CloudPostureIntegrations = {
       {
         type: CLOUDBEAT_AWS,
         name: i18n.translate('xpack.csp.cspmIntegration.awsOption.nameTitle', {
-          defaultMessage: 'Amazon Web Services',
+          defaultMessage: 'AWS',
         }),
         benchmark: i18n.translate('xpack.csp.cspmIntegration.awsOption.benchmarkTitle', {
           defaultMessage: 'CIS AWS',
@@ -212,3 +212,5 @@ export const cloudPostureIntegrations: CloudPostureIntegrations = {
 };
 export const FINDINGS_DOCS_URL = 'https://ela.st/findings';
 export const MIN_VERSION_GCP_CIS = '1.5.0';
+
+export const NO_FINDINGS_STATUS_REFRESH_INTERVAL_MS = 10000;

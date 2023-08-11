@@ -15,7 +15,9 @@ import type {
   MeteringCallback,
   SecurityUsageReportingTaskStartContract,
   SecurityUsageReportingTaskSetupContract,
+  UsageRecord,
 } from '../types';
+import type { ServerlessSecurityConfig } from '../config';
 
 const SCOPE = ['serverlessSecurity'];
 const TIMEOUT = '1m';
@@ -29,11 +31,13 @@ export class SecurityUsageReportingTask {
   private version: string;
   private logger: Logger;
   private abortController = new AbortController();
+  private config: ServerlessSecurityConfig;
 
   constructor(setupContract: SecurityUsageReportingTaskSetupContract) {
     const {
       core,
       logFactory,
+      config,
       taskManager,
       cloudSetup,
       taskType,
@@ -46,6 +50,7 @@ export class SecurityUsageReportingTask {
     this.taskType = taskType;
     this.version = version;
     this.logger = logFactory.get(this.taskId);
+    this.config = config;
 
     try {
       taskManager.registerTaskDefinitions({
@@ -114,14 +119,21 @@ export class SecurityUsageReportingTask {
 
     const lastSuccessfulReport = taskInstance.state.lastSuccessfulReport;
 
-    const usageRecords = await meteringCallback({
-      esClient,
-      cloudSetup: this.cloudSetup,
-      logger: this.logger,
-      taskId: this.taskId,
-      lastSuccessfulReport,
-      abortController: this.abortController,
-    });
+    let usageRecords: UsageRecord[] = [];
+    try {
+      usageRecords = await meteringCallback({
+        esClient,
+        cloudSetup: this.cloudSetup,
+        logger: this.logger,
+        taskId: this.taskId,
+        lastSuccessfulReport,
+        abortController: this.abortController,
+        config: this.config,
+      });
+    } catch (err) {
+      this.logger.error(`failed to retrieve usage records: ${JSON.stringify(err)}`);
+      return;
+    }
 
     this.logger.debug(`received usage records: ${JSON.stringify(usageRecords)}`);
 
