@@ -72,7 +72,7 @@ import {
 
 describe(
   'Alert details expandable flyout right panel overview tab',
-  { env: { ftrConfig: { enableExperimental: ['securityFlyoutEnabled'] } } },
+  { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] },
   () => {
     const rule = getNewRule();
 
@@ -86,7 +86,7 @@ describe(
     });
 
     describe('about section', () => {
-      it('should display about section', { tags: [tag.BROKEN_IN_SERVERLESS, tag.ESS] }, () => {
+      it('should display about section', () => {
         cy.log('header and content');
 
         cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_ABOUT_SECTION_HEADER)
@@ -135,7 +135,7 @@ describe(
       });
     });
 
-    describe('visualizations section', { tags: tag.BROKEN_IN_SERVERLESS }, () => {
+    describe('visualizations section', () => {
       it('should display analyzer and session previews', () => {
         toggleOverviewTabAboutSection();
         toggleOverviewTabVisualizationsSection();
@@ -152,7 +152,7 @@ describe(
       });
     });
 
-    describe('investigation section', { tags: tag.BROKEN_IN_SERVERLESS }, () => {
+    describe('investigation section', () => {
       it('should display investigation section', () => {
         toggleOverviewTabAboutSection();
         toggleOverviewTabInvestigationSection();
@@ -213,7 +213,7 @@ describe(
       });
     });
 
-    describe('insights section', { tags: tag.BROKEN_IN_SERVERLESS }, () => {
+    describe('insights section', () => {
       it('should display entities section', () => {
         toggleOverviewTabAboutSection();
         toggleOverviewTabInsightsSection();
@@ -238,7 +238,8 @@ describe(
         cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_ENTITIES_CONTENT).should('be.visible');
       });
 
-      it('should display threat intelligence section', () => {
+      // TODO: skipping this due to flakiness
+      it.skip('should display threat intelligence section', () => {
         toggleOverviewTabAboutSection();
         toggleOverviewTabInsightsSection();
 

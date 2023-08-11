@@ -54,6 +54,9 @@ import { createMockPolicyData } from '../endpoint/services/feature_usage/mocks';
 import { ALL_ENDPOINT_ARTIFACT_LIST_IDS } from '../../common/endpoint/service/artifacts/constants';
 import { ENDPOINT_EVENT_FILTERS_LIST_ID } from '@kbn/securitysolution-list-constants';
 import { disableProtections } from '../../common/endpoint/models/policy_config_helpers';
+import type { AppFeatures } from '../lib/app_features';
+import { createAppFeaturesMock } from '../lib/app_features/mocks';
+import { ALL_APP_FEATURE_KEYS } from '../../common';
 
 jest.mock('uuid', () => ({
   v4: (): string => 'NEW_UUID',
@@ -74,6 +77,7 @@ describe('ingest_integration tests ', () => {
   });
   const generator = new EndpointDocGenerator();
   const cloudService = cloudMock.createSetup();
+  let appFeatures: AppFeatures;
 
   beforeEach(() => {
     endpointAppContextMock = createMockEndpointAppContextServiceStartContract();
@@ -82,6 +86,7 @@ describe('ingest_integration tests ', () => {
     licenseEmitter = new Subject();
     licenseService = new LicenseService();
     licenseService.start(licenseEmitter);
+    appFeatures = endpointAppContextMock.appFeatures;
 
     jest
       .spyOn(endpointAppContextMock.endpointMetadataService, 'getFleetEndpointPackagePolicy')
@@ -129,7 +134,8 @@ describe('ingest_integration tests ', () => {
         endpointAppContextMock.alerting,
         licenseService,
         exceptionListClient,
-        cloudService
+        cloudService,
+        appFeatures
       );
 
       return callback(
@@ -363,6 +369,7 @@ describe('ingest_integration tests ', () => {
       );
     });
   });
+
   describe('package policy update callback (when the license is below platinum)', () => {
     const soClient = savedObjectsClientMock.create();
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
@@ -379,7 +386,8 @@ describe('ingest_integration tests ', () => {
         endpointAppContextMock.featureUsageService,
         endpointAppContextMock.endpointMetadataService,
         cloudService,
-        esClient
+        esClient,
+        appFeatures
       );
       const policyConfig = generator.generatePolicyPackagePolicy();
       policyConfig.inputs[0]!.config!.policy.value = mockPolicy;
@@ -397,7 +405,8 @@ describe('ingest_integration tests ', () => {
         endpointAppContextMock.featureUsageService,
         endpointAppContextMock.endpointMetadataService,
         cloudService,
-        esClient
+        esClient,
+        appFeatures
       );
       const policyConfig = generator.generatePolicyPackagePolicy();
       policyConfig.inputs[0]!.config!.policy.value = mockPolicy;
@@ -419,6 +428,7 @@ describe('ingest_integration tests ', () => {
     beforeEach(() => {
       licenseEmitter.next(Platinum); // set license level to platinum
     });
+
     it('updates successfully when paid features are turned on', async () => {
       const mockPolicy = policyFactory();
       mockPolicy.windows.popup.malware.message = 'paid feature';
@@ -429,7 +439,8 @@ describe('ingest_integration tests ', () => {
         endpointAppContextMock.featureUsageService,
         endpointAppContextMock.endpointMetadataService,
         cloudService,
-        esClient
+        esClient,
+        appFeatures
       );
       const policyConfig = generator.generatePolicyPackagePolicy();
       policyConfig.inputs[0]!.config!.policy.value = mockPolicy;
@@ -441,6 +452,50 @@ describe('ingest_integration tests ', () => {
         req
       );
       expect(updatedPolicyConfig.inputs[0]!.config!.policy.value).toEqual(mockPolicy);
+    });
+
+    it('should turn off protections if endpointPolicyProtections appFeature is disabled', async () => {
+      appFeatures = createAppFeaturesMock(
+        ALL_APP_FEATURE_KEYS.filter((key) => key !== 'endpoint_policy_protections')
+      );
+      const callback = getPackagePolicyUpdateCallback(
+        endpointAppContextMock.logger,
+        licenseService,
+        endpointAppContextMock.featureUsageService,
+        endpointAppContextMock.endpointMetadataService,
+        cloudService,
+        esClient,
+        appFeatures
+      );
+
+      const updatedPolicy = await callback(
+        generator.generatePolicyPackagePolicy(),
+        soClient,
+        esClient,
+        requestContextMock.convertContext(ctx),
+        req
+      );
+
+      expect(updatedPolicy.inputs?.[0]?.config?.policy.value).toMatchObject({
+        linux: {
+          behavior_protection: { mode: 'off' },
+          malware: { mode: 'off' },
+          memory_protection: { mode: 'off' },
+        },
+        mac: {
+          behavior_protection: { mode: 'off' },
+          malware: { mode: 'off' },
+          memory_protection: { mode: 'off' },
+        },
+        windows: {
+          antivirus_registration: { enabled: false },
+          attack_surface_reduction: { credential_hardening: { enabled: false } },
+          behavior_protection: { mode: 'off' },
+          malware: { blocklist: false },
+          memory_protection: { mode: 'off' },
+          ransomware: { mode: 'off' },
+        },
+      });
     });
   });
 
@@ -486,7 +541,8 @@ describe('ingest_integration tests ', () => {
         endpointAppContextMock.featureUsageService,
         endpointAppContextMock.endpointMetadataService,
         cloudService,
-        esClient
+        esClient,
+        appFeatures
       );
       const policyConfig = generator.generatePolicyPackagePolicy();
 
@@ -520,7 +576,8 @@ describe('ingest_integration tests ', () => {
         endpointAppContextMock.featureUsageService,
         endpointAppContextMock.endpointMetadataService,
         cloudService,
-        esClient
+        esClient,
+        appFeatures
       );
       const policyConfig = generator.generatePolicyPackagePolicy();
       // values should be updated

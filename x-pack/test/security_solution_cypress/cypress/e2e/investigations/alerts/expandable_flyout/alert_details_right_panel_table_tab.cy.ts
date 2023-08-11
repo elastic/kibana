@@ -34,7 +34,7 @@ import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
 
 describe(
   'Alert details expandable flyout right panel table tab',
-  { env: { ftrConfig: { enableExperimental: ['securityFlyoutEnabled'] } } },
+  { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] },
   () => {
     beforeEach(() => {
       cleanKibana();
@@ -46,7 +46,7 @@ describe(
       openTableTab();
     });
 
-    it('should display and filter the table', { tags: [tag.BROKEN_IN_SERVERLESS, tag.ESS] }, () => {
+    it('should display and filter the table', () => {
       cy.get(DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_TIMESTAMP_ROW).should('be.visible');
       cy.get(DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_ID_ROW).should('be.visible');
       filterTableTabTable('timestamp');
@@ -54,7 +54,7 @@ describe(
       clearFilterTableTabTable();
     });
 
-    it('should test cell actions', { tags: [tag.BROKEN_IN_SERVERLESS, tag.ESS] }, () => {
+    it('should test cell actions', () => {
       cy.log('cell actions filter in');
 
       filterInTableTabTable();

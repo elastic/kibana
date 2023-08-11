@@ -25,7 +25,7 @@ import { DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_THREAT_INTELLIGENCE_BUTTON } from 
 
 describe(
   'Expandable flyout left panel threat intelligence',
-  { env: { ftrConfig: { enableExperimental: ['securityFlyoutEnabled'] } } },
+  { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] },
   () => {
     beforeEach(() => {
       cleanKibana();
@@ -39,7 +39,7 @@ describe(
       openThreatIntelligenceTab();
     });
 
-    it('should serialize its state to url', { tags: [tag.BROKEN_IN_SERVERLESS, tag.ESS] }, () => {
+    it('should serialize its state to url', () => {
       cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB)
         .should('be.visible')
         .and('have.text', 'Insights');

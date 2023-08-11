@@ -17,6 +17,7 @@ import type {
 import type { PluginStartContract as AlertsPluginStartContract } from '@kbn/alerting-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { FleetActionsClientInterface } from '@kbn/fleet-plugin/server/services/actions/types';
+import type { AppFeatures } from '../lib/app_features';
 import {
   getPackagePolicyCreateCallback,
   getPackagePolicyUpdateCallback,
@@ -69,6 +70,7 @@ export interface EndpointAppContextServiceStartContract {
   actionCreateService: ActionCreateService | undefined;
   cloud: CloudSetup;
   esClient: ElasticsearchClient;
+  appFeatures: AppFeatures;
 }
 
 /**
@@ -106,6 +108,7 @@ export class EndpointAppContextService {
         featureUsageService,
         endpointMetadataService,
         esClient,
+        appFeatures,
       } = dependencies;
 
       registerIngestCallback(
@@ -117,7 +120,8 @@ export class EndpointAppContextService {
           alerting,
           licenseService,
           exceptionListsClient,
-          cloud
+          cloud,
+          appFeatures
         )
       );
 
@@ -134,7 +138,8 @@ export class EndpointAppContextService {
           featureUsageService,
           endpointMetadataService,
           cloud,
-          esClient
+          esClient,
+          appFeatures
         )
       );
 

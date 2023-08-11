@@ -7,6 +7,7 @@
 import { AlertsCasesTourSteps } from '@kbn/security-solution-plugin/public/common/components/guided_onboarding_tour/tour_config';
 import { tag } from '../../../tags';
 
+import { disableExpandableFlyout } from '../../../tasks/api_calls/kibana_advanced_settings';
 import { navigateFromHeaderTo } from '../../../tasks/security_header';
 import { ALERTS, TIMELINES } from '../../../screens/security_header';
 import { closeAlertFlyout, expandFirstAlert } from '../../../tasks/alerts';
@@ -37,6 +38,7 @@ describe('Guided onboarding tour', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] }
   });
   beforeEach(() => {
     login();
+    disableExpandableFlyout();
     startAlertsCasesTour();
     visit(ALERTS_URL);
     waitForAlertsToPopulate();

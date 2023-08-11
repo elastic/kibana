@@ -26,6 +26,7 @@ import {
   scrollAlertTableColumnIntoView,
   closeAlertFlyout,
 } from '../../tasks/alerts';
+import { disableExpandableFlyout } from '../../tasks/api_calls/kibana_advanced_settings';
 
 import { login, visit } from '../../tasks/login';
 
@@ -43,6 +44,7 @@ describe('Enrichment', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
 
   describe('Custom query rule', () => {
     beforeEach(() => {
+      disableExpandableFlyout();
       cy.task('esArchiverLoad', 'risk_hosts');
       deleteAlertsAndRules();
       createRule(getNewRule({ rule_id: 'rule1' }));

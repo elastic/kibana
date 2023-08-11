@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { upperFirst } from 'lodash';
 import { tag } from '../../../../tags';
 
@@ -68,7 +69,7 @@ import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
 
 describe(
   'Alert details expandable flyout right panel',
-  { env: { ftrConfig: { enableExperimental: ['securityFlyoutEnabled'] } } },
+  { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] },
   () => {
     const rule = getNewRule();
 
@@ -80,7 +81,7 @@ describe(
       waitForAlertsToPopulate();
     });
 
-    it('should display header and footer basics', { tags: tag.ESS }, () => {
+    it('should display header and footer basics', () => {
       expandFirstAlertExpandableFlyout();
 
       cy.get(DOCUMENT_DETAILS_FLYOUT_HEADER_TITLE).should('be.visible').and('have.text', rule.name);
@@ -112,12 +113,12 @@ describe(
       expandDocumentDetailsExpandableFlyoutLeftSection();
       cy.get(DOCUMENT_DETAILS_FLYOUT_COLLAPSE_DETAILS_BUTTON)
         .should('be.visible')
-        .and('have.text', 'Collapse alert details');
+        .and('have.text', 'Collapse details');
 
       collapseDocumentDetailsExpandableFlyoutLeftSection();
       cy.get(DOCUMENT_DETAILS_FLYOUT_EXPAND_DETAILS_BUTTON)
         .should('be.visible')
-        .and('have.text', 'Expand alert details');
+        .and('have.text', 'Expand details');
 
       cy.log('Verify the take action button is visible on all tabs');
 

@@ -22,7 +22,7 @@ import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
 
 describe(
   'Alert details expandable flyout left panel investigation',
-  { env: { ftrConfig: { enableExperimental: ['securityFlyoutEnabled'] } } },
+  { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] },
   () => {
     beforeEach(() => {
       cleanKibana();
@@ -35,7 +35,7 @@ describe(
       openInvestigationTab();
     });
 
-    it('should display investigation guide', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] }, () => {
+    it('should display investigation guide', () => {
       cy.get(DOCUMENT_DETAILS_FLYOUT_INVESTIGATION_TAB)
         .should('be.visible')
         .and('have.text', 'Investigation');
