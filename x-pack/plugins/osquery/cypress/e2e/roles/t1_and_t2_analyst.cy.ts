@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ServerlessRoleName } from '@kbn/securitysolution-runtime-services';
 import { tag } from '../../tags';
 import { SAVED_QUERY_ID } from '../../../public/saved_queries/constants';
 import { navigateTo } from '../../tasks/navigation';
@@ -47,8 +48,7 @@ describe(`T1 and T2 analysts`, { tags: [tag.ESS, tag.SERVERLESS] }, () => {
       });
 
       beforeEach(() => {
-        // @ts-expect-error
-        cy.login(role);
+        cy.login(role as ServerlessRoleName);
       });
 
       after(() => {
