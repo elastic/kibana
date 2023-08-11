@@ -315,11 +315,13 @@ const configureFleetIfNeeded = async () => {
 
             log.info(`Updating Fleet Settings for Output [${output.name} (${id})]`);
 
-            await kbnClient.request<GetOneOutputResponse>({
-              method: 'PUT',
-              path: outputRoutesService.getUpdatePath(id),
-              body: update,
-            });
+            await kbnClient
+              .request<GetOneOutputResponse>({
+                method: 'PUT',
+                path: outputRoutesService.getUpdatePath(id),
+                body: update,
+              })
+              .catch(catchAxiosErrorFormatAndThrow);
           }
         }
       }
