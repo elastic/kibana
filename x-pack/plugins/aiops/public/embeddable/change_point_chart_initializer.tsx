@@ -23,6 +23,7 @@ import { i18n } from '@kbn/i18n';
 import usePrevious from 'react-use/lib/usePrevious';
 import { pick } from 'lodash';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import { PartitionsSelector } from '../components/change_point_detection/partitions_selector';
 import { DEFAULT_SERIES } from './const';
 import { EmbeddableChangePointChartProps } from './embeddable_change_point_chart_component';
 import { type EmbeddableChangePointChartExplicitInput } from './types';
@@ -110,7 +111,7 @@ export const ChangePointChartInitializer: FC<AnomalyChartsInitializerProps> = ({
               prepend={i18n.translate('xpack.aiops.embeddableChangePointChart.dataViewLabel', {
                 defaultMessage: 'Data view',
               })}
-              autoFocus
+              autoFocus={!dataViewId}
               fullWidth
               compressed
               indexPatternId={dataViewId}
@@ -186,8 +187,8 @@ export const FormControls: FC<{
       onChange({
         fn: formInput?.fn ?? DEFAULT_AGG_FUNCTION,
         metricField: metricFieldOptions[0]?.name,
-        splitField: undefined,
-        partitions: undefined,
+        splitField: formInput?.splitField,
+        partitions: formInput?.partitions,
         maxSeriesToPlot: formInput?.maxSeriesToPlot ?? DEFAULT_SERIES,
       });
     },
@@ -229,6 +230,14 @@ export const FormControls: FC<{
         value={formInput.splitField}
         onChange={(v) => updateCallback({ splitField: v })}
       />
+
+      {formInput.splitField ? (
+        <PartitionsSelector
+          value={formInput.partitions ?? []}
+          onChange={(v) => updateCallback({ partitions: v })}
+          splitField={formInput.splitField}
+        />
+      ) : null}
 
       <MaxSeriesControl
         value={formInput.maxSeriesToPlot!}
