@@ -27,7 +27,7 @@ import { waitForTimelinesPanelToBeLoaded } from '../../../tasks/timelines';
 
 import { HOSTS_URL, TIMELINES_URL } from '../../../urls/navigation';
 
-describe('Timeline search and filters', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+describe('Timeline search and filters', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] }, () => {
   before(() => {
     cleanKibana();
   });

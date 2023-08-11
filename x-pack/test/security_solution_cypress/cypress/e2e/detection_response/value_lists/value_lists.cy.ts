@@ -8,7 +8,7 @@
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
 import { tag } from '../../../tags';
 
-import { deleteRoleAndUser, login, visitWithoutDateRange } from '../../../tasks/login';
+import { login, visitWithoutDateRange } from '../../../tasks/login';
 import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../../urls/navigation';
 import {
   createListsIndex,
@@ -224,10 +224,6 @@ describe('value lists', () => {
   });
 
   describe('user with restricted access role', { tags: tag.ESS }, () => {
-    after(() => {
-      deleteRoleAndUser(ROLES.t1_analyst);
-    });
-
     it('Does not allow a t1 analyst user to upload a value list', () => {
       login(ROLES.t1_analyst);
       visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL, ROLES.t1_analyst);
