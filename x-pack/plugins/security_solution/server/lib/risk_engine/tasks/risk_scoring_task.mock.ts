@@ -14,7 +14,7 @@ const createRiskScoringTaskInstanceMock = (
   overrides: Partial<ConcreteTaskInstance> = {}
 ): ConcreteTaskInstance =>
   taskManagerMock.createTask({
-    id: `${TYPE}:${VERSION}`,
+    id: `${TYPE}:default:${VERSION}`,
     runAt: new Date(),
     attempts: 0,
     ownerId: '',

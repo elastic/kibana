@@ -39,8 +39,7 @@ const logFactory =
 
 const getTaskName = (): string => TYPE;
 
-// TODO does this need to account for the space?
-const getTaskId = (): string => `${TYPE}:${VERSION}`;
+const getTaskId = (namespace: string): string => `${TYPE}:${namespace}:${VERSION}`;
 
 type GetRiskScoreService = (namespace: string) => Promise<RiskScoreService>;
 
@@ -92,14 +91,16 @@ export const registerRiskScoringTask = ({
 
 export const startRiskScoringTask = async ({
   logger,
+  namespace,
   riskEngineDataClient,
   taskManager,
 }: {
   logger: Logger;
+  namespace: string;
   riskEngineDataClient: RiskEngineDataClient;
   taskManager: TaskManagerStartContract;
 }) => {
-  const taskId = getTaskId();
+  const taskId = getTaskId(namespace);
   const log = logFactory(logger, taskId);
   const interval = (await riskEngineDataClient.getConfiguration())?.interval ?? INTERVAL;
 
@@ -107,12 +108,12 @@ export const startRiskScoringTask = async ({
   try {
     await taskManager.ensureScheduled({
       id: taskId,
-      taskType: TYPE,
+      taskType: getTaskName(),
       scope: SCOPE,
       schedule: {
         interval,
       },
-      state: defaultState, // TODO get space, add to state
+      state: { ...defaultState, namespace },
       params: { version: VERSION },
     });
   } catch (e) {
@@ -122,13 +123,15 @@ export const startRiskScoringTask = async ({
 
 export const removeRiskScoringTask = async ({
   logger,
+  namespace,
   taskManager,
 }: {
   logger: Logger;
+  namespace: string;
   taskManager: TaskManagerStartContract;
 }) => {
   try {
-    await taskManager.remove(getTaskId());
+    await taskManager.remove(getTaskId(namespace));
   } catch (err) {
     if (!SavedObjectsErrorHelpers.isNotFoundError(err)) {
       logger.error(`Failed to remove risk scoring task: ${err.message}`);
@@ -162,7 +165,7 @@ export const runTask = async ({
     scoresWritten,
   };
 
-  if (taskId !== getTaskId()) {
+  if (taskId !== getTaskId(state.namespace)) {
     log('outdated task');
     return { state: updatedState };
   }

@@ -155,6 +155,7 @@ export class RiskEngineDataClient {
 
     await startRiskScoringTask({
       logger: this.options.logger,
+      namespace: this.options.namespace,
       riskEngineDataClient: this,
       taskManager,
     });
@@ -164,6 +165,7 @@ export class RiskEngineDataClient {
 
   public async disableRiskEngine({ taskManager }: { taskManager: TaskManagerStartContract }) {
     await removeRiskScoringTask({
+      namespace: this.options.namespace,
       taskManager,
       logger: this.options.logger,
     });

@@ -68,6 +68,7 @@ describe('Risk Scoring Task', () => {
     it('schedules the task', async () => {
       await startRiskScoringTask({
         logger: mockLogger,
+        namespace: 'default',
         taskManager: mockTaskManagerStart,
         riskEngineDataClient: mockRiskEngineDataClient,
       });
@@ -79,16 +80,48 @@ describe('Risk Scoring Task', () => {
         })
       );
     });
+
+    it('schedules the task for a particular namespace', async () => {
+      await startRiskScoringTask({
+        logger: mockLogger,
+        namespace: 'other',
+        taskManager: mockTaskManagerStart,
+        riskEngineDataClient: mockRiskEngineDataClient,
+      });
+
+      expect(mockTaskManagerStart.ensureScheduled).toHaveBeenCalledWith(
+        expect.objectContaining({
+          schedule: { interval: '1h' },
+          taskType: 'risk_engine:risk_scoring',
+          state: expect.objectContaining({ namespace: 'other' }),
+        })
+      );
+    });
   });
 
   describe('removeRiskScoringTask()', () => {
     it('removes the task', async () => {
       await removeRiskScoringTask({
+        namespace: 'default',
         logger: mockLogger,
         taskManager: mockTaskManagerStart,
       });
 
-      expect(mockTaskManagerStart.remove).toHaveBeenCalledWith('risk_engine:risk_scoring:0.0.1');
+      expect(mockTaskManagerStart.remove).toHaveBeenCalledWith(
+        'risk_engine:risk_scoring:default:0.0.1'
+      );
+    });
+
+    it('removes the task for a non-default namespace', async () => {
+      await removeRiskScoringTask({
+        namespace: 'other',
+        logger: mockLogger,
+        taskManager: mockTaskManagerStart,
+      });
+
+      expect(mockTaskManagerStart.remove).toHaveBeenCalledWith(
+        'risk_engine:risk_scoring:other:0.0.1'
+      );
     });
 
     it('does nothing if task was not found', async () => {
@@ -96,6 +129,7 @@ describe('Risk Scoring Task', () => {
         SavedObjectsErrorHelpers.createGenericNotFoundError('type', 'id')
       );
       await removeRiskScoringTask({
+        namespace: 'default',
         logger: mockLogger,
         taskManager: mockTaskManagerStart,
       });
@@ -108,6 +142,7 @@ describe('Risk Scoring Task', () => {
 
       await expect(
         removeRiskScoringTask({
+          namespace: 'default',
           logger: mockLogger,
           taskManager: mockTaskManagerStart,
         })
@@ -124,6 +159,7 @@ describe('Risk Scoring Task', () => {
     beforeEach(async () => {
       await startRiskScoringTask({
         logger: mockLogger,
+        namespace: 'default',
         taskManager: mockTaskManagerStart,
         riskEngineDataClient: mockRiskEngineDataClient,
       });
