@@ -32,13 +32,6 @@ export type ServiceTransactionGroupAlertsResponse = Array<{
   alertsCount: number;
 }>;
 
-interface ServiceTransactionGroupAlertsAggResponse {
-  buckets: Array<{
-    key: string;
-    doc_count: number;
-  }>;
-}
-
 const RuleAggregationType = {
   [LatencyAggregationType.avg]: AggregationType.Avg,
   [LatencyAggregationType.p99]: AggregationType.P99,
@@ -117,9 +110,9 @@ export async function getServiceTransactionGroupsAlerts({
 
   const response = await apmAlertsClient.search(params);
 
-  const { buckets } = (response?.aggregations?.transaction_groups ?? {
+  const { buckets } = response?.aggregations?.transaction_groups ?? {
     buckets: [],
-  }) as ServiceTransactionGroupAlertsAggResponse;
+  };
 
   const servicesTransactionGroupsAlertsCount =
     buckets.map((bucket) => ({
