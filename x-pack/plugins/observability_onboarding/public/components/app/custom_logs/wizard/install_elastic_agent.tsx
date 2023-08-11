@@ -309,7 +309,7 @@ export function InstallElasticAgent() {
               ),
               id: 'windows',
               disableSteps: true,
-              children: <WindowsInstallStep />
+              children: <WindowsInstallStep />,
             },
           ]}
           onSelectPlatform={(id) => setElasticAgentPlatform(id)}

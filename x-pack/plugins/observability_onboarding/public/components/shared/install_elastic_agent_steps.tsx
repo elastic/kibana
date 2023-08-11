@@ -81,8 +81,12 @@ export function InstallElasticAgentSteps<PlatformId extends string>({
     ).length > 0;
   const autoDownloadConfigStep = getStep('ea-config', installProgressSteps, selectedPlatform);
 
-  const customInstallStep = installAgentPlatformOptions.find((step) => step.id === selectedPlatform)?.children;
-  const disableSteps = installAgentPlatformOptions.find((step) => step.id === selectedPlatform)?.disableSteps;
+  const customInstallStep = installAgentPlatformOptions.find(
+    (step) => step.id === selectedPlatform
+  )?.children;
+  const disableSteps = installAgentPlatformOptions.find(
+    (step) => step.id === selectedPlatform
+  )?.disableSteps;
 
   const installStepDefault = (
     <>
@@ -95,12 +99,7 @@ export function InstallElasticAgentSteps<PlatformId extends string>({
           <EuiSpacer size="m" />
           <EuiFlexGroup direction="column" gutterSize="m">
             {(
-              [
-                'ea-download',
-                'ea-extract',
-                'ea-install',
-                'ea-status',
-              ] as const
+              ['ea-download', 'ea-extract', 'ea-install', 'ea-status'] as const
             ).map((stepId) => {
               const { title, status, message } = getStep(
                 stepId,
@@ -120,7 +119,7 @@ export function InstallElasticAgentSteps<PlatformId extends string>({
         </>
       )}
     </>
-  )
+  );
 
   const configureStep = (
     <>
@@ -201,7 +200,7 @@ export function InstallElasticAgentSteps<PlatformId extends string>({
       ) : null}
     </>
   );
-  
+
   return (
     <EuiSteps
       steps={[
@@ -322,7 +321,11 @@ export function InstallElasticAgentSteps<PlatformId extends string>({
           status: disableSteps ? 'disabled' : configureAgentStatus,
           children: disableSteps ? <></> : configureStep,
         },
-        ...appendedSteps.map((euiStep) => ({ children: null, ...euiStep, status: disableSteps ? 'disabled' : euiStep.status })),
+        ...appendedSteps.map((euiStep) => ({
+          children: null,
+          ...euiStep,
+          status: disableSteps ? 'disabled' : euiStep.status,
+        })),
       ]}
     />
   );
