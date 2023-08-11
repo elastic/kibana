@@ -29,12 +29,12 @@ export function getSortForSearchSource({
   sort,
   dataView,
   uiSettings,
-  skipTieBreaker = false,
+  includeTieBreaker = false,
 }: {
   sort: SortOrder[] | undefined;
   dataView: DataView | undefined;
   uiSettings: Pick<IUiSettingsClient, 'get'>;
-  skipTieBreaker?: boolean;
+  includeTieBreaker?: boolean;
 }): EsQuerySortValue[] {
   const defaultDirection = uiSettings.get(SORT_DEFAULT_ORDER_SETTING) || 'desc';
 
@@ -62,7 +62,7 @@ export function getSortForSearchSource({
   });
 
   // This tie breaker is skipped for CSV reports as it uses PIT
-  if (!skipTieBreaker && timeFieldName && sortPairs.length) {
+  if (includeTieBreaker && timeFieldName && sortPairs.length) {
     const firstSortPair = sortPairs[0];
     const firstPairSortDir = Array.isArray(firstSortPair)
       ? firstSortPair[1]

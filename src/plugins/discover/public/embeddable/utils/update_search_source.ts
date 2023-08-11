@@ -23,7 +23,10 @@ export const updateSearchSource = (
 ) => {
   const { sampleSize } = defaults;
   searchSource.setField('size', sampleSize);
-  searchSource.setField('sort', getSortForSearchSource({ sort, dataView, uiSettings }));
+  searchSource.setField(
+    'sort',
+    getSortForSearchSource({ sort, dataView, uiSettings, includeTieBreaker: true })
+  );
   if (useNewFieldsApi) {
     searchSource.removeField('fieldsFromSource');
     const fields: Record<string, string> = { field: '*', include_unmapped: 'true' };

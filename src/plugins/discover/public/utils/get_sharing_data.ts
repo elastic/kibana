@@ -42,7 +42,6 @@ export async function getSharingData(
       sort: state.sort as SortOrder[],
       dataView: index,
       uiSettings,
-      skipTieBreaker: true,
     })
   );
 
