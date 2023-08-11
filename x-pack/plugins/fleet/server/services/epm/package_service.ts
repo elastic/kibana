@@ -27,7 +27,8 @@ import type {
   ArchivePackage,
   BundledPackage,
 } from '../../types';
-import { checkSuperuser } from '../security';
+import type { FleetAuthzRouteConfig } from '../security/types';
+import { checkSuperuser, getAuthzFromRequest, doesNotHaveRequiredFleetAuthz } from '../security';
 import { FleetUnauthorizedError } from '../../errors';
 
 import { installTransforms, isTransform } from './elasticsearch/transform/install';
@@ -86,8 +87,17 @@ export class PackageServiceImpl implements PackageService {
   ) {}
 
   public asScoped(request: KibanaRequest) {
-    const preflightCheck = () => {
-      if (!checkSuperuser(request)) {
+    const preflightCheck = async (requiredAuthz?: FleetAuthzRouteConfig['fleetAuthz']) => {
+      if (requiredAuthz) {
+        const requestedAuthz = await getAuthzFromRequest(request);
+
+        const noRequiredAuthz = doesNotHaveRequiredFleetAuthz(requestedAuthz, requiredAuthz);
+        if (noRequiredAuthz === undefined || noRequiredAuthz === true) {
+          throw new FleetUnauthorizedError(
+            `User does not have adequate permissions to access Fleet packages.`
+          );
+        }
+      } else if (!checkSuperuser(request)) {
         throw new FleetUnauthorizedError(
           `User does not have adequate permissions to access Fleet packages.`
         );
@@ -115,7 +125,9 @@ class PackageClientImpl implements PackageClient {
     private readonly internalEsClient: ElasticsearchClient,
     private readonly internalSoClient: SavedObjectsClientContract,
     private readonly logger: Logger,
-    private readonly preflightCheck?: () => void | Promise<void>,
+    private readonly preflightCheck?: (
+      requiredAuthz?: FleetAuthzRouteConfig['fleetAuthz']
+    ) => void | Promise<void>,
     private readonly request?: KibanaRequest
   ) {}
 
@@ -139,7 +151,9 @@ class PackageClientImpl implements PackageClient {
     pkgVersion?: string;
     spaceId?: string;
   }): Promise<Installation | undefined> {
-    await this.#runPreflight();
+    await this.#runPreflight({
+      integrations: { installPackages: true },
+    });
 
     return ensureInstalledPackage({
       ...options,
@@ -222,9 +236,9 @@ class PackageClientImpl implements PackageClient {
     return installedTransforms;
   }
 
-  #runPreflight() {
+  async #runPreflight(requiredAuthz?: FleetAuthzRouteConfig['fleetAuthz']) {
     if (this.preflightCheck) {
-      return this.preflightCheck();
+      return await this.preflightCheck(requiredAuthz);
     }
   }
 }
