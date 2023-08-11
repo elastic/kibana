@@ -7,9 +7,9 @@
 
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 
-export const getParsedFilterQuery: (
-  filter: string | undefined
-) => Array<Record<string, any>> = (filter) => {
+export const getParsedFilterQuery: (filter: string | undefined) => Array<Record<string, any>> = (
+  filter
+) => {
   if (!filter) return [];
 
   try {
