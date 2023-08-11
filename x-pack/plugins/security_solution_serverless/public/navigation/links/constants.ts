@@ -27,7 +27,7 @@ export enum ExternalPageName {
   mlNodes = 'ml:nodes',
   mlFileUpload = 'ml:fileUpload',
   mlIndexDataVisualizer = 'ml:indexDataVisualizer',
-  mlExplainLogRateSpikes = 'ml:explainLogRateSpikes',
+  mlExplainLogRateSpikes = 'ml:logRateAnalysis',
   mlLogPatternAnalysis = 'ml:logPatternAnalysis',
   mlChangePointDetections = 'ml:changePointDetections',
   // Dev Tools

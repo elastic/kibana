@@ -51,7 +51,7 @@ import { MlLocatorDefinition, type MlLocator } from './locator';
 import { setDependencyCache } from './application/util/dependency_cache';
 import { registerFeature } from './register_feature';
 import { isFullLicense, isMlEnabled } from '../common/license';
-import { PLUGIN_ICON_SOLUTION, PLUGIN_ID } from '../common/constants/app';
+import { ML_APP_ROUTE, PLUGIN_ICON_SOLUTION, PLUGIN_ID } from '../common/constants/app';
 import type { MlCapabilities } from './shared';
 
 export interface MlStartDependencies {
@@ -110,12 +110,11 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
       }),
       order: 5000,
       euiIconType: PLUGIN_ICON_SOLUTION,
-      appRoute: '/app/ml',
+      appRoute: ML_APP_ROUTE,
       category: DEFAULT_APP_CATEGORIES.kibana,
       updater$: this.appUpdater$,
       mount: async (params: AppMountParameters) => {
         const [coreStart, pluginsStart] = await core.getStartServices();
-        const kibanaVersion = this.initializerContext.env.packageInfo.version;
         const { renderApp } = await import('./application/app');
         return renderApp(
           coreStart,
@@ -133,7 +132,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
             embeddable: { ...pluginsSetup.embeddable, ...pluginsStart.embeddable },
             maps: pluginsStart.maps,
             uiActions: pluginsStart.uiActions,
-            kibanaVersion,
+            kibanaVersion: this.initializerContext.env.packageInfo.version,
             triggersActionsUi: pluginsStart.triggersActionsUi,
             dataVisualizer: pluginsStart.dataVisualizer,
             usageCollection: pluginsSetup.usageCollection,
@@ -164,6 +163,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
       const fullLicense = isFullLicense(license);
       const [coreStart, pluginStart] = await core.getStartServices();
       const { capabilities } = coreStart.application;
+      const mlCapabilities = capabilities.ml as MlCapabilities;
 
       if (mlEnabled) {
         // add ML to home page
@@ -188,27 +188,30 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
         registerCasesAttachments,
       } = await import('./register_helper');
 
-      if (pluginsSetup.maps) {
-        // Pass capabilites.ml.canGetJobs as minimum permission to show anomalies card in maps layers
-        const canGetJobs = capabilities.ml?.canGetJobs === true;
-        const canCreateJobs = capabilities.ml?.canCreateJob === true;
-        await registerMapExtension(pluginsSetup.maps, core, { canGetJobs, canCreateJobs });
-      }
-
       if (mlEnabled) {
-        registerSearchLinks(this.appUpdater$, fullLicense, capabilities.ml as MlCapabilities);
+        registerSearchLinks(this.appUpdater$, fullLicense, mlCapabilities);
 
         if (fullLicense) {
-          registerEmbeddables(pluginsSetup.embeddable, core);
           registerMlUiActions(pluginsSetup.uiActions, core);
 
-          if (pluginsSetup.cases) {
-            registerCasesAttachments(pluginsSetup.cases, coreStart, pluginStart);
-          }
+          if (mlCapabilities.isADEnabled) {
+            registerEmbeddables(pluginsSetup.embeddable, core);
 
-          const canUseMlAlerts = capabilities.ml?.canUseMlAlerts;
-          if (pluginsSetup.triggersActionsUi && canUseMlAlerts) {
-            registerMlAlerts(pluginsSetup.triggersActionsUi, pluginsSetup.alerting);
+            if (pluginsSetup.cases) {
+              registerCasesAttachments(pluginsSetup.cases, coreStart, pluginStart);
+            }
+
+            if (pluginsSetup.triggersActionsUi && mlCapabilities.canUseMlAlerts) {
+              registerMlAlerts(pluginsSetup.triggersActionsUi, pluginsSetup.alerting);
+            }
+
+            if (pluginsSetup.maps) {
+              // Pass canGetJobs as minimum permission to show anomalies card in maps layers
+              await registerMapExtension(pluginsSetup.maps, core, {
+                canGetJobs: mlCapabilities.canGetJobs,
+                canCreateJobs: mlCapabilities.canCreateJob,
+              });
+            }
           }
         }
       }

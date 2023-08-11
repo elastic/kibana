@@ -13,5 +13,6 @@ export const PLUGIN_ICON_SOLUTION = 'logoKibana';
 export const ML_APP_NAME = i18n.translate('xpack.ml.navMenu.mlAppNameText', {
   defaultMessage: 'Machine Learning',
 });
+export const ML_APP_ROUTE = '/app/ml';
 export const ML_INTERNAL_BASE_PATH = '/internal/ml';
 export const ML_EXTERNAL_BASE_PATH = '/api/ml';

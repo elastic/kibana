@@ -51,8 +51,6 @@ export const MemoryUsagePage: FC = () => {
       <SavedObjectsWarning onCloseFlyout={refresh} />
 
       {isADEnabled && isDFAEnabled && isNLPEnabled ? (
-        <JobMemoryTreeMap />
-      ) : (
         <>
           <EuiTabs>
             <EuiTab
@@ -70,6 +68,8 @@ export const MemoryUsagePage: FC = () => {
           </EuiTabs>
           {selectedTab === TAB.NODES ? <NodesList /> : <MemoryPage />}
         </>
+      ) : (
+        <JobMemoryTreeMap />
       )}
     </>
   );

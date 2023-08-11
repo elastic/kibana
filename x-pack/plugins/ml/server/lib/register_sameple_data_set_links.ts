@@ -7,10 +7,13 @@
 
 import { i18n } from '@kbn/i18n';
 import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
-import { MlLicense } from '../../../common/license';
+import type { MlFeatures } from '../types';
 
-export function initSampleDataSets(mlLicense: MlLicense, home: HomeServerPluginSetup) {
-  if (mlLicense.isMlEnabled() && mlLicense.isFullLicense()) {
+export function registerSampleDataSetLinks(
+  enabledFeatures: MlFeatures,
+  home: HomeServerPluginSetup
+) {
+  if (enabledFeatures.ad === true) {
     const sampleDataLinkLabel = i18n.translate('xpack.ml.sampleDataLinkLabel', {
       defaultMessage: 'ML jobs',
     });

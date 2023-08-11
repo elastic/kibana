@@ -6,8 +6,15 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { BehaviorSubject, combineLatest, from, type Subscription, timer } from 'rxjs';
-import { distinctUntilChanged, retry, switchMap, tap } from 'rxjs/operators';
+import {
+  BehaviorSubject,
+  combineLatest,
+  from,
+  type Subscription,
+  timer,
+  firstValueFrom,
+} from 'rxjs';
+import { distinctUntilChanged, filter, retry, switchMap, tap } from 'rxjs/operators';
 import { isEqual } from 'lodash';
 import useObservable from 'react-use/lib/useObservable';
 import { useMemo, useRef } from 'react';
@@ -21,6 +28,7 @@ import {
 } from '../../../common/types/capabilities';
 import { getCapabilities } from './get_capabilities';
 import { type MlApiServices } from '../services/ml_api_service';
+import { getMlGlobalServices } from '../app';
 
 let _capabilities: MlCapabilities = getDefaultCapabilities();
 
@@ -72,6 +80,10 @@ export class MlCapabilitiesService {
     return this._capabilities$.getValue();
   }
 
+  public getCapabilities$() {
+    return this._capabilities$.asObservable();
+  }
+
   public refreshCapabilities() {
     this._updateRequested$.next(Date.now());
   }
@@ -111,23 +123,33 @@ export function usePermissionCheck<T extends MlCapabilitiesKey | MlCapabilitiesK
   }, [capabilities]);
 }
 
-export function checkGetManagementMlJobsResolver({ checkMlCapabilities }: MlApiServices) {
-  return new Promise<{ mlFeatureEnabledInSpace: boolean }>((resolve, reject) => {
-    checkMlCapabilities()
-      .then(({ capabilities, isPlatinumOrTrialLicense, mlFeatureEnabledInSpace }) => {
-        _capabilities = capabilities;
-        // Loop through all capabilities to ensure they are all set to true.
-        const isManageML = Object.values(_capabilities).every((p) => p === true);
-
-        if (isManageML === true && isPlatinumOrTrialLicense === true) {
-          return resolve({ mlFeatureEnabledInSpace });
-        } else {
-          return reject({ capabilities, isPlatinumOrTrialLicense, mlFeatureEnabledInSpace });
-        }
-      })
-      .catch((e) => {
-        return reject();
-      });
+export function checkGetManagementMlJobsResolver({
+  mlCapabilities,
+}: ReturnType<typeof getMlGlobalServices>) {
+  return new Promise<void>(async (resolve, reject) => {
+    try {
+      firstValueFrom(mlCapabilities.getCapabilities$().pipe(filter((c) => !!c)))
+        .then((capabilities) => {
+          if (capabilities === null) {
+            return reject();
+          }
+          _capabilities = capabilities;
+          const isManageML =
+            (capabilities.isADEnabled && capabilities.canCreateJob) ||
+            (capabilities.isDFAEnabled && capabilities.canCreateDataFrameAnalytics) ||
+            (capabilities.isNLPEnabled && capabilities.canCreateTrainedModels);
+          if (isManageML === true) {
+            return resolve();
+          } else {
+            return reject();
+          }
+        })
+        .catch((e) => {
+          return reject();
+        });
+    } catch (error) {
+      reject(error);
+    }
   });
 }
 

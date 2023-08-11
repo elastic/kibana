@@ -37,18 +37,25 @@ import {
   GetAnalyticsModelIdArg,
 } from './types';
 import type { MlClient } from '../../lib/ml_client';
+import { MlFeatures } from '../../types';
 
 export class AnalyticsManager {
   private _trainedModels: estypes.MlTrainedModelConfig[] = [];
   private _jobs: estypes.MlDataframeAnalyticsSummary[] = [];
   private _transforms?: TransformGetTransformTransformSummary[];
 
-  constructor(private _mlClient: MlClient, private _client: IScopedClusterClient) {}
+  constructor(
+    private _mlClient: MlClient,
+    private _client: IScopedClusterClient,
+    private _enabledFeatures: MlFeatures
+  ) {}
 
   private async initData() {
     const [models, jobs] = await Promise.all([
-      this._mlClient.getTrainedModels(),
-      this._mlClient.getDataFrameAnalytics({ size: 1000 }),
+      this._enabledFeatures.nlp ? this._mlClient.getTrainedModels() : { trained_model_configs: [] },
+      this._enabledFeatures.dfa
+        ? this._mlClient.getDataFrameAnalytics({ size: 1000 })
+        : { data_frame_analytics: [] },
     ]);
     this._trainedModels = models.trained_model_configs;
     this._jobs = jobs.data_frame_analytics;

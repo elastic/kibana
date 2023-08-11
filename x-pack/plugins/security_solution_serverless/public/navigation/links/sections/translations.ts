@@ -201,16 +201,16 @@ export const INDEX_DATA_VISUALIZER_DESC = i18n.translate(
     defaultMessage: 'Data view Page',
   }
 );
-export const EXPLAIN_LOG_RATE_SPIKES_TITLE = i18n.translate(
+export const LOG_RATE_ANALYSIS_TITLE = i18n.translate(
   'xpack.securitySolutionServerless.navLinks.ml.explainLogRateSpikes.title',
   {
-    defaultMessage: 'Explain Log Rate Spikes',
+    defaultMessage: 'Log Rate Analysis',
   }
 );
-export const EXPLAIN_LOG_RATE_SPIKES_DESC = i18n.translate(
+export const LOG_RATE_ANALYSIS_DESC = i18n.translate(
   'xpack.securitySolutionServerless.navLinks.ml.explainLogRateSpikes.desc',
   {
-    defaultMessage: 'Explain Log Rate Spikes Page',
+    defaultMessage: 'Log Rate Analysis Page',
   }
 );
 export const LOG_PATTERN_ANALYSIS_TITLE = i18n.translate(

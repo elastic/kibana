@@ -41,9 +41,7 @@ import { JobSpacesSyncFlyout } from '../../../../components/job_spaces_sync';
 import { getMlGlobalServices } from '../../../../app';
 import { ExportJobsFlyout, ImportJobsFlyout } from '../../../../components/import_export_jobs';
 import type { MlSavedObjectType } from '../../../../../../common/types/saved_objects';
-import { mlApiServicesProvider } from '../../../../services/ml_api_service';
 
-import { HttpService } from '../../../../services/http_service';
 import { SpaceManagement } from './space_management';
 import { DocsLink } from './docs_link';
 
@@ -58,10 +56,6 @@ export const JobsListPage: FC<{
   usageCollection?: UsageCollectionSetup;
   fieldFormats: FieldFormatsStart;
 }> = ({ coreStart, share, history, spacesApi, data, usageCollection, fieldFormats }) => {
-  const mlApiServices = useMemo(
-    () => mlApiServicesProvider(new HttpService(coreStart.http)),
-    [coreStart.http]
-  );
   const [initialized, setInitialized] = useState(false);
   const [accessDenied, setAccessDenied] = useState(false);
   const [isPlatinumOrTrialLicense, setIsPlatinumOrTrialLicense] = useState(true);
@@ -70,9 +64,14 @@ export const JobsListPage: FC<{
   const I18nContext = coreStart.i18n.Context;
   const theme$ = coreStart.theme.theme$;
 
+  const mlServices = useMemo(
+    () => getMlGlobalServices(coreStart.http, usageCollection),
+    [coreStart.http, usageCollection]
+  );
+
   const check = async () => {
     try {
-      await checkGetManagementMlJobsResolver(mlApiServices);
+      await checkGetManagementMlJobsResolver(mlServices);
     } catch (e) {
       if (e.mlFeatureEnabledInSpace && e.isPlatinumOrTrialLicense === false) {
         setIsPlatinumOrTrialLicense(false);
@@ -122,7 +121,7 @@ export const JobsListPage: FC<{
               usageCollection,
               fieldFormats,
               spacesApi,
-              mlServices: getMlGlobalServices(coreStart.http, usageCollection),
+              mlServices,
             }}
           >
             <ContextWrapper feature={PLUGIN_ID}>
