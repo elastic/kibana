@@ -18,7 +18,7 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 
-import { remoteClustersUrl } from '../../../services/documentation';
+import * as docs from '../../../services/documentation';
 import { AppContext } from '../../../app_context';
 import { ConfirmTrustSetupModal } from './confirm_modal';
 
@@ -53,10 +53,9 @@ const i18nTexts = {
 };
 
 const docLinks = {
-  apiKey: remoteClustersUrl,
-  apiKeyCloud: remoteClustersUrl,
-  cert: remoteClustersUrl,
-  certCloud: remoteClustersUrl,
+  cert: docs.onPremSetupTrustWithCertUrl,
+  apiKey: docs.onPremSetupTrustWithApiKeyUrl,
+  cloud: docs.cloudSetupTrustUrl,
 };
 
 interface Props {
@@ -99,7 +98,7 @@ export const RemoteClusterSetupTrust = ({ onBack, onSubmit, isSaving }: Props) =
               </EuiText>
               <EuiSpacer size="xl" />
               <EuiButton
-                href={isCloudEnabled ? docLinks.apiKeyCloud : docLinks.apiKey}
+                href={isCloudEnabled ? docLinks.cloud : docLinks.apiKey}
                 target="_blank"
                 data-test-subj="setupTrustApiKeyCardDocs"
               >
@@ -138,7 +137,7 @@ export const RemoteClusterSetupTrust = ({ onBack, onSubmit, isSaving }: Props) =
             </EuiText>
             <EuiSpacer size="xl" />
             <EuiButton
-              href={isCloudEnabled ? docLinks.certCloud : docLinks.cert}
+              href={isCloudEnabled ? docLinks.cloud : docLinks.cert}
               target="_blank"
               data-test-subj="setupTrustCertCardDocs"
             >
