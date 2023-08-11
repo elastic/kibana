@@ -5,9 +5,11 @@
  * 2.0.
  */
 
+import { GetViewInAppRelativeUrlFnOpts } from '@kbn/alerting-plugin/server';
 import {
   formatDurationFromTimeUnitChar,
   getAlertUrl,
+  observabilityPaths,
   ProcessorEvent,
   TimeUnitChar,
 } from '@kbn/observability-plugin/common';
@@ -254,6 +256,8 @@ export function registerErrorCountRuleType({
         return { state: {} };
       },
       alerts: ApmRuleTypeAlertDefinition,
+      getViewInAppRelativeUrl: ({ rule }: GetViewInAppRelativeUrlFnOpts<{}>) =>
+        observabilityPaths.ruleDetails(rule.id),
     })
   );
 }
