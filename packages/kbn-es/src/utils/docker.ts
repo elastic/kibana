@@ -74,7 +74,7 @@ export const DOCKER_TAG = `${pkg.version}-SNAPSHOT`;
 export const DOCKER_IMG = `${DOCKER_REPO}:${DOCKER_TAG}`;
 
 export const SERVERLESS_REPO = `${DOCKER_REGISTRY}/elasticsearch-ci/elasticsearch-serverless`;
-export const SERVERLESS_TAG = 'git-d82e148f6f28'; // 'latest';
+export const SERVERLESS_TAG = 'latest';
 export const SERVERLESS_IMG = `${SERVERLESS_REPO}:${SERVERLESS_TAG}`;
 
 const SHARED_SERVERLESS_PARAMS = [
@@ -101,6 +101,10 @@ const SHARED_SERVERLESS_PARAMS = [
 
   '--env',
   'path.repo=/objectstore',
+
+  // Temp workaround for ES crashing on latest (2023-07-26)
+  '--env',
+  'data_streams.lifecycle_only.mode=true',
 ];
 
 // only allow certain ES args to be overwrote by options
