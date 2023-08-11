@@ -72,6 +72,7 @@
     "@kbn/core-http-router-server-internal",
     "@kbn/actions-plugin",
     "@kbn/core-saved-objects-server",
+    "@kbn/observability-ai-assistant-plugin",
   ],
   "exclude": [
     "target/**/*",
