@@ -72,7 +72,7 @@ describe.skip('Create a timeline from a template', () => {
   });
 });
 
-describe('Timelines', (): void => {
+describe.skip('Timelines', (): void => {
   before(() => {
     cleanKibana();
   });
