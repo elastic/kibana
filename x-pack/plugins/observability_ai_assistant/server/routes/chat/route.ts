@@ -5,7 +5,6 @@
  * 2.0.
  */
 import * as t from 'io-ts';
-import type { IncomingMessage } from 'http';
 import { notImplemented } from '@hapi/boom';
 import { createObservabilityAIAssistantServerRoute } from '../create_observability_ai_assistant_server_route';
 import { messageRt } from '../runtime_types';
@@ -28,7 +27,7 @@ const chatRoute = createObservabilityAIAssistantServerRoute({
       ),
     }),
   }),
-  handler: async (resources): Promise<IncomingMessage> => {
+  handler: async (resources) => {
     const { request, params, service } = resources;
 
     const client = await service.getClient({ request });

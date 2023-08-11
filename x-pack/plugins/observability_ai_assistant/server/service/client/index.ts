@@ -17,6 +17,7 @@ import type {
   ChatCompletionFunctions,
   ChatCompletionRequestMessage,
   CreateChatCompletionRequest,
+  CreateChatCompletionResponse,
 } from 'openai';
 import pRetry from 'p-retry';
 import { v4 } from 'uuid';
@@ -138,15 +139,17 @@ export class ObservabilityAIAssistantClient implements IObservabilityAIAssistant
     });
   };
 
-  chat = async ({
+  chat = async <TStream extends boolean | undefined = true>({
     messages,
     connectorId,
     functions,
+    stream = true,
   }: {
     messages: Message[];
     connectorId: string;
-    functions: Array<Pick<FunctionDefinition['options'], 'name' | 'description' | 'parameters'>>;
-  }): Promise<IncomingMessage> => {
+    functions?: Array<Pick<FunctionDefinition['options'], 'name' | 'description' | 'parameters'>>;
+    stream?: TStream;
+  }): Promise<TStream extends false ? CreateChatCompletionResponse : IncomingMessage> => {
     const messagesForOpenAI: ChatCompletionRequestMessage[] = compact(
       messages
         .filter((message) => message.message.content || message.message.function_call?.name)
@@ -165,7 +168,7 @@ export class ObservabilityAIAssistantClient implements IObservabilityAIAssistant
         })
     );
 
-    const functionsForOpenAI: ChatCompletionFunctions[] = functions;
+    const functionsForOpenAI: ChatCompletionFunctions[] | undefined = functions;
 
     const request: Omit<CreateChatCompletionRequest, 'model'> & { model?: string } = {
       messages: messagesForOpenAI,
@@ -177,10 +180,10 @@ export class ObservabilityAIAssistantClient implements IObservabilityAIAssistant
     const executeResult = await this.dependencies.actionsClient.execute({
       actionId: connectorId,
       params: {
-        subAction: 'stream',
+        subAction: stream ? 'stream' : 'run',
         subActionParams: {
           body: JSON.stringify(request),
-          stream: true,
+          ...(stream ? { stream: true } : {}),
         },
       },
     });
@@ -189,7 +192,7 @@ export class ObservabilityAIAssistantClient implements IObservabilityAIAssistant
       throw internal(`${executeResult?.message} - ${executeResult?.serviceMessage}`);
     }
 
-    return executeResult.data as IncomingMessage;
+    return executeResult.data as any;
   };
 
   find = async (options?: { query?: string }): Promise<{ conversations: Conversation[] }> => {

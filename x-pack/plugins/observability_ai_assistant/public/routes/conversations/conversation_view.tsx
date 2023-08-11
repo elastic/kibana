@@ -33,13 +33,13 @@ const chatBodyContainerClassNameWithError = css`
 `;
 
 export function ConversationView() {
-  const connectors = useGenAIConnectors();
-
-  const knowledgeBase = useKnowledgeBase();
-
   const currentUser = useCurrentUser();
 
   const service = useObservabilityAIAssistant();
+
+  const connectors = useGenAIConnectors();
+
+  const knowledgeBase = useKnowledgeBase();
 
   const observabilityAIAssistantRouter = useObservabilityAIAssistantRouter();
 
@@ -75,6 +75,7 @@ export function ConversationView() {
   const { conversation, displayedMessages, setDisplayedMessages, save } = useConversation({
     conversationId,
     chatService: chatService.value,
+    connectorId: connectors.selectedConnector,
   });
 
   const conversations = useAbortableAsync(
@@ -111,11 +112,15 @@ export function ConversationView() {
     );
   }
 
+  function handleRefreshConversations() {
+    conversations.refresh();
+  }
+
   return (
     <>
       {confirmDeleteElement}
       <EuiFlexGroup direction="row" className={containerClassName}>
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem grow={false} style={{ minWidth: 300, maxWidth: 300 }}>
           <ConversationList
             selected={conversationId ?? ''}
             loading={conversations.loading || isUpdatingList}
@@ -210,7 +215,7 @@ export function ConversationView() {
               })}
             </EuiCallOut>
           ) : null}
-          {chatService.loading || conversation.loading ? (
+          {chatService.loading ? (
             <EuiFlexGroup direction="column" alignItems="center" gutterSize="l">
               <EuiFlexItem grow={false}>
                 <EuiSpacer size="xl" />
@@ -218,27 +223,27 @@ export function ConversationView() {
               </EuiFlexItem>
             </EuiFlexGroup>
           ) : null}
-          {!conversation.error && conversation.value && chatService.value ? (
+          {conversation.value && chatService.value && !conversation.error ? (
             <ObservabilityAIAssistantChatServiceProvider value={chatService.value}>
               <ChatBody
-                currentUser={currentUser}
                 connectors={connectors}
-                knowledgeBase={knowledgeBase}
-                title={conversation.value.conversation.title}
                 connectorsManagementHref={getConnectorsManagementHref(http)}
+                currentUser={currentUser}
+                knowledgeBase={knowledgeBase}
                 messages={displayedMessages}
+                title={conversation.value.conversation.title}
+                onChatUpdate={(messages) => {
+                  setDisplayedMessages(messages);
+                }}
                 onChatComplete={(messages) => {
-                  save(messages)
+                  save(messages, handleRefreshConversations)
                     .then((nextConversation) => {
                       conversations.refresh();
-                      if (!conversationId) {
+                      if (!conversationId && nextConversation?.conversation?.id) {
                         navigateToConversation(nextConversation.conversation.id);
                       }
                     })
-                    .catch(() => {});
-                }}
-                onChatUpdate={(messages) => {
-                  setDisplayedMessages(messages);
+                    .catch((e) => {});
                 }}
               />
             </ObservabilityAIAssistantChatServiceProvider>

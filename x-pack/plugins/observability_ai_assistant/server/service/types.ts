@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { IncomingMessage } from 'http';
 import { KibanaRequest } from '@kbn/core/server';
 import type {
   Conversation,
@@ -15,13 +14,15 @@ import type {
   KnowledgeBaseEntry,
   Message,
 } from '../../common/types';
+import { ObservabilityAIAssistantClient } from './client';
 
 export interface IObservabilityAIAssistantClient {
   chat: (options: {
     messages: Message[];
     connectorId: string;
-    functions: Array<Pick<FunctionDefinition['options'], 'name' | 'description' | 'parameters'>>;
-  }) => Promise<IncomingMessage>;
+    functions?: Array<Pick<FunctionDefinition['options'], 'name' | 'description' | 'parameters'>>;
+    stream?: boolean | undefined;
+  }) => ReturnType<ObservabilityAIAssistantClient['chat']>;
   get: (conversationId: string) => Promise<Conversation>;
   find: (options?: { query?: string }) => Promise<{ conversations: Conversation[] }>;
   create: (conversation: ConversationCreateRequest) => Promise<Conversation>;

@@ -101,6 +101,7 @@ export function ConversationList({
                       isActive={conversation.id === selected}
                       isDisabled={loading}
                       href={conversation.href}
+                      wrapText
                       extraAction={
                         conversation.id
                           ? {
