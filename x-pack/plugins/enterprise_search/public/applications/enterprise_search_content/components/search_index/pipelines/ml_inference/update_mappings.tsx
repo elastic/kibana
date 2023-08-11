@@ -45,21 +45,16 @@ export const UpdateMappingsInstructions: React.FC = () => (
       </EuiTitle>
     </EuiFlexItem>
     <EuiFlexItem>
-      <EuiFlexGroup>
-        <EuiFlexItem grow={false}>
-          <EuiBadge color="warning" iconType="warning">
-            {i18n.translate(
-              'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.updateMappings.required',
-              {
-                defaultMessage: 'Required',
-              }
-            )}
-          </EuiBadge>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiFlexItem>
-    <EuiFlexItem>
-      <EuiCallOut color="warning">
+      <EuiCallOut
+        color="warning"
+        iconType="warning"
+        title={i18n.translate(
+          'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.updateMappings.required',
+          {
+            defaultMessage: 'Required',
+          }
+        )}
+      >
         <p>
           {i18n.translate(
             'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.updateMappings.description',
