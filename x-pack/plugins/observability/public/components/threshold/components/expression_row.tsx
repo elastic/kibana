@@ -24,7 +24,7 @@ import {
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { DataViewBase } from '@kbn/es-query';
 import { debounce } from 'lodash';
-import { Aggregators, Comparator } from '../../../../common/threshold_rule/types';
+import { Comparator } from '../../../../common/threshold_rule/types';
 import { AGGREGATION_TYPES, DerivedIndexPattern, MetricExpression } from '../types';
 import { CustomEquationEditor } from './custom_equation';
 import { CUSTOM_EQUATION, LABEL_HELP_MESSAGE, LABEL_LABEL } from '../i18n_strings';
@@ -74,12 +74,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
     canDelete,
   } = props;
 
-  const {
-    aggType = AGGREGATION_TYPES.MAX,
-    metric,
-    comparator = Comparator.GT,
-    threshold = [],
-  } = expression;
+  const { metric, comparator = Comparator.GT, threshold = [] } = expression;
 
   const isMetricPct = useMemo(() => Boolean(metric && metric.endsWith('.pct')), [metric]);
   const [label, setLabel] = useState<string | undefined>(expression?.label || undefined);
@@ -141,43 +136,39 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
     },
     [debouncedLabelChange, expression]
   );
-
   return (
     <>
       <EuiFlexGroup gutterSize="xs">
         <EuiFlexItem grow>
-          <StyledExpressionRow style={{ gap: aggType !== 'custom' ? 24 : 12 }} />
-
-          {aggType === Aggregators.CUSTOM && (
-            <>
-              <EuiSpacer size={'xs'} />
-              <CustomEquationEditor
-                expression={expression}
-                fields={normalizedFields}
-                aggregationTypes={aggregationType}
-                onChange={handleCustomMetricChange}
-                errors={errors}
-                dataView={dataView}
-              />
-              {criticalThresholdExpression}
-              <EuiSpacer size={'s'} />
-              <EuiFlexGroup>
-                <EuiFlexItem>
-                  <EuiFormRow label={LABEL_LABEL} fullWidth helpText={LABEL_HELP_MESSAGE}>
-                    <EuiFieldText
-                      data-test-subj="thresholdRuleCustomEquationEditorFieldText"
-                      compressed
-                      fullWidth
-                      value={label}
-                      placeholder={CUSTOM_EQUATION}
-                      onChange={handleLabelChange}
-                    />
-                  </EuiFormRow>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-              <EuiSpacer size="s" />
-            </>
-          )}
+          <StyledExpressionRow style={{ gap: 24 }} />
+          <>
+            <EuiSpacer size={'xs'} />
+            <CustomEquationEditor
+              expression={expression}
+              fields={normalizedFields}
+              aggregationTypes={aggregationType}
+              onChange={handleCustomMetricChange}
+              errors={errors}
+              dataView={dataView}
+            />
+            {criticalThresholdExpression}
+            <EuiSpacer size={'s'} />
+            <EuiFlexGroup>
+              <EuiFlexItem>
+                <EuiFormRow label={LABEL_LABEL} fullWidth helpText={LABEL_HELP_MESSAGE}>
+                  <EuiFieldText
+                    data-test-subj="thresholdRuleCustomEquationEditorFieldText"
+                    compressed
+                    fullWidth
+                    value={label}
+                    placeholder={CUSTOM_EQUATION}
+                    onChange={handleLabelChange}
+                  />
+                </EuiFormRow>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer size="s" />
+          </>
         </EuiFlexItem>
         {canDelete && (
           <EuiFlexItem grow={false}>

@@ -169,7 +169,10 @@ export function CustomEquationEditor({
                 <EuiSpacer size="xs" />
                 <EuiExpression
                   data-test-subj="customEquation"
-                  description={'Equation'}
+                  description={i18n.translate(
+                    'xpack.observability.threshold.rule.alertFlyout.customEquationEditor.equationLabel',
+                    { defaultMessage: 'Equation' }
+                  )}
                   value={equation ?? placeholder}
                   display={'columns'}
                   onClick={() => {
