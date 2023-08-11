@@ -31,16 +31,14 @@ import {
   getConsoleHelpPanelResponseActionTestSubj,
   openConsoleHelpPanel,
 } from '../../../screens/endpoint_management/response_console';
+import { SECURITY_COMPLETE_WITH_ENDPOINT_COMPLETE } from '../utils/product_types';
 
 describe(
   'User Roles for Security Complete PLI with Endpoint Complete addon',
   {
     env: {
       ftrConfig: {
-        productTypes: [
-          { product_line: 'security', product_tier: 'complete' },
-          { product_line: 'endpoint', product_tier: 'complete' },
-        ],
+        productTypes: SECURITY_COMPLETE_WITH_ENDPOINT_COMPLETE,
       },
     },
   },

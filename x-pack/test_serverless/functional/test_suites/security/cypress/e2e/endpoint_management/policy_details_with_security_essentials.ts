@@ -8,13 +8,14 @@
 import { IndexedFleetEndpointPolicyResponse } from '@kbn/security-solution-plugin/common/endpoint/data_loaders/index_fleet_endpoint_policy';
 import { login } from '../../tasks/login';
 import { visitPolicyDetails } from '../../screens/endpoint_management/policy_details';
+import { SECURITY_ESSENTIALS_NO_ENDPOINT } from './utils/product_types';
 
 describe(
   'When displaying the Policy Details in Security Essentials PLI',
   {
     env: {
       ftrConfig: {
-        productTypes: [{ product_line: 'security', product_tier: 'essentials' }],
+        productTypes: SECURITY_ESSENTIALS_NO_ENDPOINT,
       },
     },
   },

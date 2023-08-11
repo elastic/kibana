@@ -10,16 +10,14 @@ import { login } from '../../../tasks/login';
 import { getAgentListTable, visitFleetAgentList } from '../../../screens';
 import { getEndpointManagementPageList } from '../../../screens/endpoint_management';
 import { ensureResponseActionAuthzAccess } from '../../../tasks/endpoint_management';
+import { SECURITY_COMPLETE_WITH_ENDPOINT_COMPLETE } from '../utils/product_types';
 
 describe(
   'App Features for Security Complete PLI with Endpoint Complete Addon',
   {
     env: {
       ftrConfig: {
-        productTypes: [
-          { product_line: 'security', product_tier: 'complete' },
-          { product_line: 'endpoint', product_tier: 'complete' },
-        ],
+        productTypes: SECURITY_COMPLETE_WITH_ENDPOINT_COMPLETE,
       },
     },
   },
