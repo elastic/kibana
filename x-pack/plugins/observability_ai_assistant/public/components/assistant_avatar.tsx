@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { ReactNode } from 'react';
 
 export interface AssistantAvatarProps {
-  size: keyof typeof sizeMap;
+  size?: keyof typeof sizeMap;
+  children?: ReactNode;
 }
 
 export const sizeMap = {
@@ -18,7 +19,7 @@ export const sizeMap = {
   xs: 16,
 };
 
-export function AssistantAvatar({ size }: AssistantAvatarProps) {
+export function AssistantAvatar({ size = 's' }: AssistantAvatarProps) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
