@@ -23,7 +23,7 @@ import {
   getAggregateQueryMode,
   isOfQueryType,
 } from '@kbn/es-query';
-import { DashboardAPI } from '@kbn/dashboard-plugin/public';
+import type { DashboardAPI } from '@kbn/dashboard-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { FilterableEmbeddable, IEmbeddable } from '../../..';
@@ -51,7 +51,6 @@ export function FiltersDetails({ embeddable, editMode, onEdit }: FiltersDetailsP
   const [queryString, setQueryString] = useState<string>('');
   const [queryLanguage, setQueryLanguage] = useState<'sql' | 'esql' | undefined>();
   const [disableEditbutton, setDisableEditButton] = useState(false);
-
   const dataViews = useMemo(
     () => (embeddable.getRoot() as DashboardAPI)?.getAllDataViews(),
     [embeddable]
