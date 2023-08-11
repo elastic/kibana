@@ -58,9 +58,7 @@ export const RadioGroup = ({
             content={option.tooltip}
             anchorProps={{
               style: {
-                flexGrow: 1,
-                /* Set Maximum width ONLY for Integration type buttons, we know this because only Integration Type has icons */
-                ...(option.icon && { maxWidth: `calc(${euiTheme.size.xxs} * 115)` }),
+                flex: '1 1 0',
               },
             }}
           >
