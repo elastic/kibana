@@ -20,5 +20,5 @@ export const createSpace = (id: string) => {
 };
 
 export const removeSpace = (id: string) => {
-  rootRequest(`/api/spaces/space/${id}`);
+  rootRequest({ url: `/api/spaces/space/${id}` });
 };

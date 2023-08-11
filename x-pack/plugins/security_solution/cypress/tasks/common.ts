@@ -84,19 +84,16 @@ export const reload = () => {
 export const cleanKibana = () => {
   const kibanaIndexUrl = `${Cypress.env('ELASTICSEARCH_URL')}/.kibana_\*`;
 
-  rootRequest({ method: 'GET', url: '/api/detection_engine/rules/_find' }).then((response) => {
-    const rules: RuleEcs[] = response.body.data;
-
-    if (response.body.data.length > 0) {
-      rules.forEach((rule) => {
-        const jsonRule = rule;
-        rootRequest({
-          method: 'DELETE',
-          url: `/api/detection_engine/rules?rule_id=${jsonRule.rule_id}`,
-          headers: { 'kbn-xsrf': 'cypress-creds-via-config' },
-        });
-      });
-    }
+  rootRequest({
+    method: 'POST',
+    url: '/api/detection_engine/rules/_bulk_action',
+    body: {
+      query: '',
+      action: 'delete',
+    },
+    failOnStatusCode: false,
+    headers: { 'kbn-xsrf': 'cypress-creds', 'x-elastic-internal-origin': 'security-solution' },
+    timeout: 300000,
   });
 
   rootRequest({

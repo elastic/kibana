@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import { TimelineResponse } from '../../common/types/timeline';
 import { CompleteTimeline } from '../../objects/timeline';
+import { rootRequest } from '../common';
 
 export const createTimeline = (timeline: CompleteTimeline) =>
-  rootRequest({
+  rootRequest<TimelineResponse>({
     method: 'POST',
     url: 'api/timeline',
     body: {

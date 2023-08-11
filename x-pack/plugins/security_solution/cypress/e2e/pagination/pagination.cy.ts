@@ -16,7 +16,7 @@ import { waitForAuthenticationsToBeLoaded } from '../../tasks/hosts/authenticati
 import { openAuthentications, openUncommonProcesses } from '../../tasks/hosts/main';
 import { waitForUncommonProcessesToBeLoaded } from '../../tasks/hosts/uncommon_processes';
 import { loginAndWaitForPage } from '../../tasks/login';
-import { goToFirstPage, goToThirdPage } from '../../tasks/pagination';
+import { goToThirdPage } from '../../tasks/pagination';
 import { refreshPage } from '../../tasks/security_header';
 
 import { HOSTS_PAGE_TAB_URLS } from '../../urls/navigation';

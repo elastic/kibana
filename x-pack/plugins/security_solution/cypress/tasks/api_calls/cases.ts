@@ -6,10 +6,9 @@
  */
 
 import { TestCase } from '../../objects/case';
-import { rootRequest } from '../common';
 
 export const createCase = (newCase: TestCase) =>
-  rootRequest({
+  cy.request({
     method: 'POST',
     url: 'api/cases',
     body: {
