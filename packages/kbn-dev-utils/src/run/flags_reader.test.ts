@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { createAbsolutePathSerializer } from '@kbn/jest-serializers';
+import { createAbsolutePathSerializer } from '@kbn/dev-utils';
 
 import { getFlags } from './flags';
 import { FlagsReader } from './flags_reader';
