@@ -291,7 +291,6 @@ export function transformOutputToFullPolicyOutput(
       key,
       compression,
       compression_level,
-      auth_type,
       username,
       password,
       sasl,
@@ -303,31 +302,69 @@ export function transformOutputToFullPolicyOutput(
       headers,
       timeout,
       broker_timeout,
-      broker_buffer_size,
-      broker_ack_reliability,
+      required_acks,
     } = output;
-    /* eslint-enable @typescript-eslint/naming-convention */
 
+    const transformPartition = () => {
+      if (!partition) return {};
+      switch (partition) {
+        case 'random':
+          return {
+            random: {
+              ...(random?.group_events
+                ? { group_events: random.group_events }
+                : { group_events: 1 }),
+            },
+          };
+        case 'round_robin':
+          return {
+            round_robin: {
+              ...(round_robin?.group_events
+                ? { group_events: round_robin.group_events }
+                : { group_events: 1 }),
+            },
+          };
+        case 'hash':
+        default:
+          return { hash: { ...(hash?.hash ? { hash: hash.hash } : { hash: '' }) } };
+      }
+    };
+
+    /* eslint-enable @typescript-eslint/naming-convention */
     kafkaData = {
       client_id,
       version,
       key,
       compression,
       compression_level,
-      auth_type,
-      username,
-      password,
-      sasl,
-      partition,
-      random,
-      round_robin,
-      hash,
-      topics,
-      headers,
+      ...(username ? { username } : {}),
+      ...(password ? { password } : {}),
+      ...(sasl ? { sasl } : {}),
+      partition: transformPartition(),
+      topics: (topics ?? []).map((topic) => {
+        const { topic: topicName, ...rest } = topic;
+        const whenKeys = Object.keys(rest);
+
+        if (whenKeys.length === 0) {
+          return { topic: topicName };
+        }
+        if (rest.when && rest.when.condition) {
+          const [keyName, value] = rest.when.condition.split(':');
+
+          return {
+            topic: topicName,
+            when: {
+              [rest.when.type as string]: {
+                [keyName.replace(/\s/g, '')]: value.replace(/\s/g, ''),
+              },
+            },
+          };
+        }
+      }),
+      headers: (headers ?? []).filter((item) => item.key !== '' || item.value !== ''),
       timeout,
       broker_timeout,
-      broker_buffer_size,
-      broker_ack_reliability,
+      required_acks,
     };
   }
 

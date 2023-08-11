@@ -82,6 +82,7 @@ class DocLinks {
   public connectorsSharepoint: string;
   public connectorsSharepointOnline: string;
   public connectorsWorkplaceSearch: string;
+  public consoleGuide: string;
   public crawlerExtractionRules: string;
   public crawlerManaging: string;
   public crawlerOverview: string;
@@ -114,6 +115,7 @@ class DocLinks {
   public mlDocumentEnrichment: string;
   public pluginsIngestAttachment: string;
   public queryDsl: string;
+  public restApis: string;
   public rrf: string;
   public searchApplications: string;
   public searchApplicationsSearch: string;
@@ -238,6 +240,7 @@ class DocLinks {
     this.connectorsSharepoint = '';
     this.connectorsSharepointOnline = '';
     this.connectorsWorkplaceSearch = '';
+    this.consoleGuide = '';
     this.crawlerExtractionRules = '';
     this.crawlerManaging = '';
     this.crawlerOverview = '';
@@ -270,6 +273,7 @@ class DocLinks {
     this.mlDocumentEnrichment = '';
     this.pluginsIngestAttachment = '';
     this.queryDsl = '';
+    this.restApis = '';
     this.rrf = '';
     this.searchUIAppSearch = '';
     this.searchUIElasticsearch = '';
@@ -396,6 +400,7 @@ class DocLinks {
     this.connectorsSharepoint = docLinks.links.enterpriseSearch.connectorsSharepoint;
     this.connectorsSharepointOnline = docLinks.links.enterpriseSearch.connectorsSharepointOnline;
     this.connectorsWorkplaceSearch = docLinks.links.enterpriseSearch.connectorsWorkplaceSearch;
+    this.consoleGuide = docLinks.links.console.guide;
     this.crawlerExtractionRules = docLinks.links.enterpriseSearch.crawlerExtractionRules;
     this.crawlerManaging = docLinks.links.enterpriseSearch.crawlerManaging;
     this.crawlerOverview = docLinks.links.enterpriseSearch.crawlerOverview;
@@ -428,6 +433,7 @@ class DocLinks {
     this.mlDocumentEnrichment = docLinks.links.enterpriseSearch.mlDocumentEnrichment;
     this.pluginsIngestAttachment = docLinks.links.plugins.ingestAttachment;
     this.queryDsl = docLinks.links.query.queryDsl;
+    this.restApis = docLinks.links.apis.restApis;
     this.rrf = docLinks.links.elasticsearch.rrf;
     this.searchUIAppSearch = docLinks.links.searchUI.appSearch;
     this.searchUIElasticsearch = docLinks.links.searchUI.elasticsearch;
