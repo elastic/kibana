@@ -6,15 +6,12 @@
  */
 
 import React from 'react';
-import {
-  EuiButtonEmpty,
-  EuiFlexGroup,
-} from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 export function TroubleshootingLink() {
   return (
-    <EuiFlexGroup alignItems='center' justifyContent='center'>
+    <EuiFlexGroup alignItems="center" justifyContent="center">
       <EuiButtonEmpty
         iconType="help"
         color="primary"
