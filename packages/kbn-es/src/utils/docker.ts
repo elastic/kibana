@@ -123,9 +123,9 @@ const DEFAULT_SERVERLESS_ESARGS: Array<[string, string]> = [
 
   ['xpack.security.enabled', 'false'],
 
-  ['xpack.watcher.enabled', 'false'],
-
   ['xpack.security.operator_privileges.enabled', 'true'],
+
+  ['xpack.watcher.enabled', 'false'],
 ];
 
 const SERVERLESS_NODES: Array<Omit<ServerlessEsNodeArgs, 'image'>> = [
