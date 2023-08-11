@@ -15,11 +15,12 @@ import { ToolingLog } from '@kbn/tooling-log';
 import type { KbnClientOptions } from '@kbn/test';
 import { KbnClient } from '@kbn/test';
 import type { Role } from '@kbn/security-plugin/common';
+import { fetchStackVersion } from '@kbn/securitysolution-runtime-services';
 import { METADATA_DATASTREAM } from '../../common/endpoint/constants';
 import { EndpointMetadataGenerator } from '../../common/endpoint/data_generators/endpoint_metadata_generator';
 import { indexHostsAndAlerts } from '../../common/endpoint/index_data';
 import { ANCESTRY_LIMIT, EndpointDocGenerator } from '../../common/endpoint/generate_data';
-import { fetchStackVersion } from './common/stack_services';
+
 import { ENDPOINT_ALERTS_INDEX, ENDPOINT_EVENTS_INDEX } from './common/constants';
 import { getWithResponseActionsRole } from './common/roles_users/with_response_actions_role';
 import { getNoResponseActionsRole } from './common/roles_users/without_response_actions_role';

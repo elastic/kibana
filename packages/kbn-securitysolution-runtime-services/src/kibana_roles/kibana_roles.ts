@@ -1,15 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { safeLoad as loadYaml } from 'js-yaml';
 import { readFileSync } from 'fs';
 import * as path from 'path';
 import { cloneDeep, merge } from 'lodash';
-import { FeaturesPrivileges, Role, RoleIndexPrivilege } from '@kbn/security-plugin/common';
+// import { FeaturesPrivileges, Role, RoleIndexPrivilege } from '@kbn/security-plugin/common';
 
 const ROLES_YAML_FILE_PATH = path.join(__dirname, 'project_controller_security_roles.yml');
 
@@ -33,7 +34,7 @@ type YamlRoleDefinitions = Record<
   ServerlessRoleName,
   {
     cluster: string[] | null;
-    indices: RoleIndexPrivilege[];
+    indices: any[];
     applications: Array<{
       application: string;
       privileges: string[];
@@ -44,7 +45,7 @@ type YamlRoleDefinitions = Record<
 
 const roleDefinitions = loadYaml(readFileSync(ROLES_YAML_FILE_PATH, 'utf8')) as YamlRoleDefinitions;
 
-export type ServerlessSecurityRoles = Record<ServerlessRoleName, Role>;
+export type ServerlessSecurityRoles = Record<ServerlessRoleName, any>;
 
 export const getServerlessSecurityKibanaRoleDefinitions = (
   additionalRoleDefinitions: any
@@ -52,7 +53,6 @@ export const getServerlessSecurityKibanaRoleDefinitions = (
   const definitions = cloneDeep(roleDefinitions);
   const mergedDefinitions = merge(definitions, additionalRoleDefinitions);
 
-  console.log({ mergedDefinitions: JSON.stringify(mergedDefinitions, null, 2) });
   return Object.entries(mergedDefinitions).reduce((roles, [roleName, definition]) => {
     if (!ROLE_NAMES.includes(roleName as ServerlessRoleName)) {
       throw new Error(
@@ -60,18 +60,18 @@ export const getServerlessSecurityKibanaRoleDefinitions = (
       );
     }
 
-    const kibanaRole: Role = {
+    const kibanaRole: any = {
       name: roleName,
       elasticsearch: {
-        cluster: definition.cluster ?? [],
-        indices: definition.indices ?? [],
+        cluster: (definition as any).cluster ?? [],
+        indices: (definition as any).indices ?? [],
         run_as: [],
       },
       kibana: [
         {
           base: [],
           spaces: ['*'],
-          feature: definition.applications.reduce((features, application) => {
+          feature: (definition as any).applications.reduce((features: any, application: any) => {
             if (application.resources !== '*') {
               throw new Error(
                 `YAML role definition parser does not currently support 'application.resource = ${application.resources}' for ${application.application} `
@@ -80,7 +80,7 @@ export const getServerlessSecurityKibanaRoleDefinitions = (
 
             features[application.application] = application.privileges;
             return features;
-          }, {} as FeaturesPrivileges),
+          }, {} as any),
         },
       ],
     };

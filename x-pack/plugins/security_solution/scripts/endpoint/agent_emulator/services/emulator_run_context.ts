@@ -10,11 +10,11 @@
 import type { KbnClient } from '@kbn/test';
 import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
+import { createRuntimeServices } from '@kbn/securitysolution-runtime-services';
 import type { AgentEmulatorSettings } from '../types';
 import { SettingsStorage } from '../../common/settings_storage';
 import { AgentKeepAliveService } from './agent_keep_alive';
 import { ActionResponderService } from './action_responder';
-import { createRuntimeServices } from '../../common/stack_services';
 
 export interface EmulatorRunContextConstructorOptions {
   username: string;

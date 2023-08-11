@@ -17,5 +17,6 @@
     "@kbn/tooling-log",
     "@kbn/test",
     "@kbn/core-status-common-internal",
+    "@kbn/i18n",
   ]
 }

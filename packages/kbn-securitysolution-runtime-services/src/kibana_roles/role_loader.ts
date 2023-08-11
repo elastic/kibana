@@ -10,15 +10,14 @@
 
 import { KbnClient } from '@kbn/test';
 import { ToolingLog } from '@kbn/tooling-log';
+// import { Role } from '@kbn/security-plugin/common';
 import { inspect } from 'util';
 import { AxiosError } from 'axios';
-import { Role } from '../model/role';
 import {
   getServerlessSecurityKibanaRoleDefinitions,
   ServerlessSecurityRoles,
 } from './kibana_roles';
 import { STANDARD_HTTP_HEADERS } from '../default_http_headers';
-
 const ignoreHttp409Error = (error: AxiosError) => {
   if (error?.response?.status === 409) {
     return;
@@ -33,7 +32,7 @@ export interface LoadedRoleAndUser {
   password: string;
 }
 
-export class RoleAndUserLoader<R extends Record<string, Role> = Record<string, Role>> {
+export class RoleAndUserLoader<R extends Record<string, any> = Record<string, any>> {
   protected readonly logPromiseError: (error: Error) => never;
 
   constructor(
@@ -68,7 +67,7 @@ export class RoleAndUserLoader<R extends Record<string, Role> = Record<string, R
     };
   }
 
-  private async createRole(role: Role): Promise<void> {
+  private async createRole(role: any): Promise<void> {
     const { name: roleName, ...roleDefinition } = role;
 
     this.logger.debug(`creating role:`, roleDefinition);
