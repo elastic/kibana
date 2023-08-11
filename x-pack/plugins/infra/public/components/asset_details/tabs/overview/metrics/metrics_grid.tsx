@@ -49,8 +49,7 @@ const LEGEND_SETTINGS: Pick<MetricChartConfig, 'overrides'>['overrides'] = {
 
 const XY_VISUAL_OPTIONS: XYVisualOptions = {
   showDottedLine: true,
-  missingValues: 'Carry',
-  endValues: 'Zero',
+  missingValues: 'Linear',
 };
 
 const CHARTS_IN_ORDER: Array<
