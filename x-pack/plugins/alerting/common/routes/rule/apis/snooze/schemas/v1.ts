@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { ruleSnoozeScheduleSchema } from '../../../response';
+import { ruleSnoozeScheduleSchema } from '../../../request';
 
 export const snoozeParamsSchema = schema.object({
   id: schema.string(),
