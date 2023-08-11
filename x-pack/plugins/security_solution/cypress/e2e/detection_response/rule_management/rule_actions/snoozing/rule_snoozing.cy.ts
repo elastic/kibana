@@ -35,7 +35,6 @@ import { duplicateFirstRule, importRules } from '../../../../../tasks/alerts_det
 import { goToActionsStepTab } from '../../../../../tasks/create_new_rule';
 import { goToRuleEditSettings } from '../../../../../tasks/rule_details';
 import { actionFormSelector } from '../../../../../screens/common/rule_actions';
-import { RULE_INDICES } from '../../../../../screens/create_new_rule';
 import { addEmailConnectorAndRuleAction } from '../../../../../tasks/common/rule_actions';
 import { saveEditedRule } from '../../../../../tasks/edit_rule';
 import { DISABLED_SNOOZE_BADGE } from '../../../../../screens/rule_snoozing';
@@ -169,8 +168,7 @@ describe('rule snoozing', () => {
     });
   });
 
-  // SKIPPED: https://github.com/elastic/kibana/issues/159349
-  describe.skip('Rule editing page / actions tab', () => {
+  describe('Rule editing page / actions tab', () => {
     beforeEach(() => {
       deleteConnectors();
     });
@@ -178,8 +176,6 @@ describe('rule snoozing', () => {
     it('adds an action to a snoozed rule', () => {
       createSnoozedRule(getNewRule({ name: 'Snoozed rule' })).then(({ body: rule }) => {
         visitWithoutDateRange(ruleEditUrl(rule.id));
-        // Wait for rule data being loaded
-        cy.get(RULE_INDICES).should('be.visible');
         goToActionsStepTab();
 
         addEmailConnectorAndRuleAction('abc@example.com', 'Test action');
