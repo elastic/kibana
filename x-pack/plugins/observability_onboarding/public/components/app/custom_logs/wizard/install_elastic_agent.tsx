@@ -10,6 +10,7 @@ import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHorizontalRule,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
@@ -36,6 +37,7 @@ import {
 import { ApiKeyBanner } from './api_key_banner';
 import { BackButton } from './back_button';
 import { getDiscoverNavigationParams } from '../../utils';
+import { TroubleshootingLink } from '../../../shared/troubleshooting_link';
 
 export function InstallElasticAgent() {
   const {
@@ -348,6 +350,8 @@ export function InstallElasticAgent() {
           appendedSteps={[getCheckLogsStep()]}
         />
       </StepPanelContent>
+      <EuiHorizontalRule />
+      <TroubleshootingLink />
     </StepPanel>
   );
 }
