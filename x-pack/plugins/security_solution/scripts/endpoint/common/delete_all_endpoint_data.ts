@@ -6,9 +6,8 @@
  */
 
 import type { Client, estypes } from '@elastic/elasticsearch';
+import { createEsClient, createSecuritySuperuser } from '@kbn/securitysolution-runtime-services';
 import assert from 'assert';
-import { createEsClient } from './stack_services';
-import { createSecuritySuperuser } from './security_user_services';
 
 export interface DeleteAllEndpointDataResponse {
   count: number;

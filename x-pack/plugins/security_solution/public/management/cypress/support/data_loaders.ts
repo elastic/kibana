@@ -8,6 +8,8 @@
 // / <reference types="cypress" />
 
 import type { CasePostRequest } from '@kbn/cases-plugin/common';
+import { createRuntimeServices } from '@kbn/securitysolution-runtime-services';
+
 import execa from 'execa';
 import { startRuntimeServices } from '../../../../scripts/endpoint/endpoint_agent_runner/runtime';
 import { runFleetServerIfNeeded } from '../../../../scripts/endpoint/endpoint_agent_runner/fleet_server';
@@ -35,7 +37,6 @@ import type {
 } from '../../../../common/endpoint/data_loaders/index_endpoint_rule_alerts';
 import type { IndexedHostsAndAlertsResponse } from '../../../../common/endpoint/index_data';
 import type { IndexedCase } from '../../../../common/endpoint/data_loaders/index_case';
-import { createRuntimeServices } from '../../../../scripts/endpoint/common/stack_services';
 import type { IndexedFleetEndpointPolicyResponse } from '../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
 import {
   indexFleetEndpointPolicy,

@@ -6,10 +6,10 @@
  */
 
 import { ToolingLog } from '@kbn/tooling-log';
+import type { RuntimeServices } from '@kbn/securitysolution-runtime-services';
+import { createRuntimeServices } from '@kbn/securitysolution-runtime-services';
 import { getAgentVersionMatchingCurrentStack } from '../common/fleet_services';
 import type { StartRuntimeServicesOptions } from './types';
-import type { RuntimeServices } from '../common/stack_services';
-import { createRuntimeServices } from '../common/stack_services';
 
 interface EndpointRunnerRuntimeServices extends RuntimeServices {
   options: Omit<

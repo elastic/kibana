@@ -65,6 +65,7 @@
     "@kbn/std",
     "@kbn/rule-data-utils",
     "@kbn/securitysolution-t-grid",
+    "@kbn/securitysolution-runtime-services",
     "@kbn/rule-registry-plugin",
     "@kbn/securitysolution-utils",
     "@kbn/securitysolution-list-constants",

@@ -1226,6 +1226,8 @@
       "@kbn/securitysolution-list-utils/*": ["packages/kbn-securitysolution-list-utils/*"],
       "@kbn/securitysolution-rules": ["packages/kbn-securitysolution-rules"],
       "@kbn/securitysolution-rules/*": ["packages/kbn-securitysolution-rules/*"],
+      "@kbn/securitysolution-runtime-services": ["packages/kbn-securitysolution-runtime-services"],
+      "@kbn/securitysolution-runtime-services/*": ["packages/kbn-securitysolution-runtime-services/*"],
       "@kbn/securitysolution-t-grid": ["packages/kbn-securitysolution-t-grid"],
       "@kbn/securitysolution-t-grid/*": ["packages/kbn-securitysolution-t-grid/*"],
       "@kbn/securitysolution-utils": ["packages/kbn-securitysolution-utils"],

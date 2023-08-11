@@ -36,7 +36,7 @@ import type {
   PostFleetServerHostsResponse,
 } from '@kbn/fleet-plugin/common/types/rest_spec/fleet_server_hosts';
 import chalk from 'chalk';
-import { isLocalhost } from '../common/is_localhost';
+import { isLocalhost } from '@kbn/securitysolution-runtime-services';
 import { dump } from './utils';
 import { fetchFleetServerUrl, waitForHostToEnroll } from '../common/fleet_services';
 import { getRuntimeServices } from './runtime';

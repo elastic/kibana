@@ -33,8 +33,8 @@ import {
 
 import { createFailError } from '@kbn/dev-cli-errors';
 import pRetry from 'p-retry';
+import { getLocalhostRealIp } from '@kbn/securitysolution-runtime-services/src/localhost_services';
 import { renderSummaryTable } from './print_run';
-import { getLocalhostRealIp } from '../endpoint/common/localhost_services';
 import { parseTestFileConfig } from './utils';
 
 /**

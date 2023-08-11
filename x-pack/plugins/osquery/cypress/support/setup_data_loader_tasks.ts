@@ -5,15 +5,17 @@
  * 2.0.
  */
 
-import { createRuntimeServices } from '@kbn/security-solution-plugin/scripts/endpoint/common/stack_services';
 import { safeLoad as loadYaml } from 'js-yaml';
 import { readFileSync } from 'fs';
 import path from 'path';
-import { SecurityRoleAndUserLoader } from '../../../../test_serverless/shared/lib';
-import type { LoadedRoleAndUser } from '../../../../test_serverless/shared/lib';
+import type { LoadedRoleAndUser } from '@kbn/securitysolution-runtime-services';
+import {
+  createRuntimeServices,
+  SecurityRoleAndUserLoader,
+} from '@kbn/securitysolution-runtime-services';
 
 const ROLES_YAML_FILE_PATH = path.join(__dirname, 'project_controller_osquery_roles.yml');
-const roleDefinitions = loadYaml(readFileSync(ROLES_YAML_FILE_PATH, 'utf8')) as YamlRoleDefinitions;
+const roleDefinitions = loadYaml(readFileSync(ROLES_YAML_FILE_PATH, 'utf8'));
 
 export const setupUserDataLoader = (
   on: Cypress.PluginEvents,

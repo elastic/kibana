@@ -8,13 +8,12 @@
 // / <reference types="cypress" />
 
 import { get } from 'lodash';
-
+import { createRuntimeServices } from '@kbn/securitysolution-runtime-services';
 import {
   getLatestActionDoc,
   updateActionDoc,
   waitForNewActionDoc,
 } from '../../../../scripts/endpoint/common/response_actions';
-import { createRuntimeServices } from '../../../../scripts/endpoint/common/stack_services';
 
 export const responseActionTasks = (
   on: Cypress.PluginEvents,
