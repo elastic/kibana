@@ -67,11 +67,8 @@ const accordionButtonClassName = css`
 `;
 
 export function ChatItem({
-  canCopy,
-  canEdit,
-  canGiveFeedback,
-  canRegenerate,
-  collapsed,
+  actions: { canCopy, canEdit, canGiveFeedback, canRegenerate },
+  display: { collapsed },
   content,
   currentUser,
   element,

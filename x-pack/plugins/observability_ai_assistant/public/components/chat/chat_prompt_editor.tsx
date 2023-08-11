@@ -29,6 +29,7 @@ export interface ChatPromptEditorProps {
   initialPrompt?: string;
   initialSelectedFunctionName?: string;
   initialFunctionPayload?: string;
+  trigger?: MessageRole;
   onSubmit: (message: Message) => Promise<void>;
 }
 

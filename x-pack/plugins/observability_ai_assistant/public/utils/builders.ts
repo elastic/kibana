@@ -16,15 +16,19 @@ export function buildChatItem(params: ChatItemBuildProps): ChatTimelineItem {
   return {
     id: uniqueId(),
     title: '',
-    canEdit: false,
-    canGiveFeedback: false,
-    canCopy: true,
-    collapsed: false,
-    canRegenerate: params.role === MessageRole.User,
+    actions: {
+      canCopy: true,
+      canEdit: false,
+      canGiveFeedback: false,
+      canRegenerate: params.role === MessageRole.User,
+    },
+    display: {
+      collapsed: false,
+      hide: false,
+    },
     currentUser: {
       username: 'elastic',
     },
-    hide: false,
     loading: false,
     ...params,
   };
@@ -41,7 +45,12 @@ export function buildChatInitItem() {
   return buildChatItem({
     role: MessageRole.User,
     title: 'started a conversation',
-    canRegenerate: false,
+    actions: {
+      canEdit: false,
+      canCopy: true,
+      canGiveFeedback: false,
+      canRegenerate: false,
+    },
   });
 }
 
@@ -49,7 +58,12 @@ export function buildUserChatItem(params?: Omit<ChatItemBuildProps, 'role'>) {
   return buildChatItem({
     role: MessageRole.User,
     content: "What's a function?",
-    canEdit: true,
+    actions: {
+      canCopy: true,
+      canEdit: true,
+      canGiveFeedback: false,
+      canRegenerate: true,
+    },
     ...params,
   });
 }
@@ -59,8 +73,12 @@ export function buildAssistantChatItem(params?: Omit<ChatItemBuildProps, 'role'>
     role: MessageRole.Assistant,
     content: `In computer programming and mathematics, a function is a fundamental concept that represents a relationship between input values and output values. It takes one or more input values (also known as arguments or parameters) and processes them to produce a result, which is the output of the function. The input values are passed to the function, and the function performs a specific set of operations or calculations on those inputs to produce the desired output.
     A function is often defined with a name, which serves as an identifier to call and use the function in the code. It can be thought of as a reusable block of code that can be executed whenever needed, and it helps in organizing code and making it more modular and maintainable.`,
-    canRegenerate: true,
-    canGiveFeedback: true,
+    actions: {
+      canCopy: true,
+      canEdit: false,
+      canRegenerate: true,
+      canGiveFeedback: true,
+    },
     ...params,
   });
 }

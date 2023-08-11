@@ -39,6 +39,7 @@ export function ChatItemContentInlinePromptEditor({
       initialPrompt={content}
       initialFunctionPayload={functionCall?.arguments}
       initialSelectedFunctionName={functionCall?.name}
+      trigger={functionCall?.trigger}
       onSubmit={onSubmit}
     />
   );
