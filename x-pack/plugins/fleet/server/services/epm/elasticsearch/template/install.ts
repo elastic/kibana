@@ -530,7 +530,7 @@ export function prepareTemplate({
 
   const isIndexModeTimeSeries =
     dataStream.elasticsearch?.index_mode === 'time_series' ||
-    experimentalDataStreamFeature?.features.tsdb;
+    !!experimentalDataStreamFeature?.features.tsdb;
 
   const validFields = processFields(fields);
 
@@ -568,10 +568,12 @@ export function prepareTemplate({
     packageName,
     composedOfTemplates: Object.keys(componentTemplates),
     templatePriority,
-    hidden: dataStream.hidden,
+    hidden: !!dataStream.hidden,
     registryElasticsearch: dataStream.elasticsearch,
     mappings,
     isIndexModeTimeSeries,
+    isILMPolicyDisabled,
+    type: dataStream.type
   });
 
   return {

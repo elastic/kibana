@@ -57,10 +57,13 @@ describe('EPM template', () => {
 
     const template = getTemplate({
       templateIndexPattern,
+      type: 'logs',
       packageName: 'nginx',
       composedOfTemplates: [],
       templatePriority: 200,
       mappings: { properties: [] },
+      isIndexModeTimeSeries: false,
+      isILMPolicyDisabled: false
     });
     expect(template.index_patterns).toStrictEqual([templateIndexPattern]);
   });
@@ -69,16 +72,56 @@ describe('EPM template', () => {
     const composedOfTemplates = ['component1', 'component2'];
 
     const template = getTemplate({
-      templateIndexPattern: 'name-*',
+      templateIndexPattern: 'logs-*',
+      type: 'logs',
       packageName: 'nginx',
       composedOfTemplates,
       templatePriority: 200,
       mappings: { properties: [] },
+      isIndexModeTimeSeries: false,
+      isILMPolicyDisabled: false
     });
     expect(template.composed_of).toStrictEqual([
+      'logs-settings',
       ...composedOfTemplates,
       ...FLEET_COMPONENT_TEMPLATES_NAMES,
     ]);
+  });
+
+  it('supplies metrics-tsdb-settings for time series', () => {
+    const composedOfTemplates = ['component1', 'component2'];
+
+    const template = getTemplate({
+      templateIndexPattern: 'metrics-*',
+      type: 'metrics',
+      packageName: 'nginx',
+      composedOfTemplates,
+      templatePriority: 200,
+      mappings: { properties: [] },
+      isIndexModeTimeSeries: true,
+      isILMPolicyDisabled: false
+    });
+    expect(template.composed_of).toStrictEqual([
+      'metrics-tsdb-settings',
+      ...composedOfTemplates,
+      ...FLEET_COMPONENT_TEMPLATES_NAMES,
+    ]);
+  });
+
+  it('sets lifecycle policy to null when ILM is disabled', () => {
+    const composedOfTemplates = ['component1', 'component2'];
+
+    const template = getTemplate({
+      templateIndexPattern: 'logs-*',
+      type: 'logs',
+      packageName: 'nginx',
+      composedOfTemplates,
+      templatePriority: 200,
+      mappings: { properties: [] },
+      isIndexModeTimeSeries: false,
+      isILMPolicyDisabled: true
+    });
+    expect(template.template.settings.index.lifecycle).toBeNull()
   });
 
   it('does not create fleet agent id verification component template if agentIdVerification is disabled', () => {
@@ -90,13 +133,17 @@ describe('EPM template', () => {
     const composedOfTemplates = ['component1', 'component2'];
 
     const template = getTemplate({
-      templateIndexPattern: 'name-*',
+      templateIndexPattern: 'logs-*',
+      type: 'logs',
       packageName: 'nginx',
       composedOfTemplates,
       templatePriority: 200,
       mappings: { properties: [] },
+      isIndexModeTimeSeries: false,
+      isILMPolicyDisabled: false
     });
     expect(template.composed_of).toStrictEqual([
+      'logs-settings',
       ...composedOfTemplates,
       FLEET_GLOBALS_COMPONENT_TEMPLATE_NAME,
     ]);
@@ -106,13 +153,16 @@ describe('EPM template', () => {
     const composedOfTemplates: string[] = [];
 
     const template = getTemplate({
-      templateIndexPattern: 'name-*',
+      templateIndexPattern: 'logs-*',
+      type: 'logs',
       packageName: 'nginx',
       composedOfTemplates,
       templatePriority: 200,
       mappings: { properties: [] },
+      isIndexModeTimeSeries: false,
+      isILMPolicyDisabled: false
     });
-    expect(template.composed_of).toStrictEqual(FLEET_COMPONENT_TEMPLATES_NAMES);
+    expect(template.composed_of).toStrictEqual(['logs-settings', ...FLEET_COMPONENT_TEMPLATES_NAMES]);
   });
 
   it('adds hidden field correctly', () => {
@@ -120,20 +170,26 @@ describe('EPM template', () => {
 
     const templateWithHidden = getTemplate({
       templateIndexPattern,
+      type: 'logs',
       packageName: 'nginx',
       composedOfTemplates: [],
       templatePriority: 200,
       hidden: true,
       mappings: { properties: [] },
+      isIndexModeTimeSeries: false,
+      isILMPolicyDisabled: false
     });
     expect(templateWithHidden.data_stream.hidden).toEqual(true);
 
     const templateWithoutHidden = getTemplate({
       templateIndexPattern,
+      type: 'logs',
       packageName: 'nginx',
       composedOfTemplates: [],
       templatePriority: 200,
       mappings: { properties: [] },
+      isIndexModeTimeSeries: false,
+      isILMPolicyDisabled: false
     });
     expect(templateWithoutHidden.data_stream.hidden).toEqual(undefined);
   });
@@ -143,6 +199,7 @@ describe('EPM template', () => {
 
     const templateWithGlobalAndDataStreamHidden = getTemplate({
       templateIndexPattern,
+      type: 'logs',
       packageName: 'nginx',
       composedOfTemplates: [],
       templatePriority: 200,
@@ -153,11 +210,14 @@ describe('EPM template', () => {
           hidden: true,
         },
       },
+      isIndexModeTimeSeries: false,
+      isILMPolicyDisabled: false
     });
     expect(templateWithGlobalAndDataStreamHidden.data_stream.hidden).toEqual(true);
 
     const templateWithDataStreamHidden = getTemplate({
       templateIndexPattern,
+      type: 'logs',
       packageName: 'nginx',
       composedOfTemplates: [],
       templatePriority: 200,
@@ -167,21 +227,27 @@ describe('EPM template', () => {
           hidden: true,
         },
       },
+      isIndexModeTimeSeries: false,
+      isILMPolicyDisabled: false
     });
     expect(templateWithDataStreamHidden.data_stream.hidden).toEqual(true);
 
     const templateWithoutDataStreamHidden = getTemplate({
       templateIndexPattern,
+      type: 'logs',
       packageName: 'nginx',
       composedOfTemplates: [],
       templatePriority: 200,
       hidden: true,
       mappings: { properties: [] },
+      isIndexModeTimeSeries: false,
+      isILMPolicyDisabled: false
     });
     expect(templateWithoutDataStreamHidden.data_stream.hidden).toEqual(true);
 
     const templateWithGlobalHiddenTrueAndDataStreamHiddenFalse = getTemplate({
       templateIndexPattern,
+      type: 'logs',
       packageName: 'nginx',
       composedOfTemplates: [],
       templatePriority: 200,
@@ -192,15 +258,20 @@ describe('EPM template', () => {
           hidden: false,
         },
       },
+      isIndexModeTimeSeries: false,
+      isILMPolicyDisabled: false
     });
     expect(templateWithGlobalHiddenTrueAndDataStreamHiddenFalse.data_stream.hidden).toEqual(true);
 
     const templateWithoutHidden = getTemplate({
       templateIndexPattern,
+      type: 'logs',
       packageName: 'nginx',
       composedOfTemplates: [],
       templatePriority: 200,
       mappings: { properties: [] },
+      isIndexModeTimeSeries: false,
+      isILMPolicyDisabled: false
     });
     expect(templateWithoutHidden.data_stream.hidden).toEqual(undefined);
   });

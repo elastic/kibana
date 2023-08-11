@@ -76,15 +76,19 @@ export function getTemplate({
   registryElasticsearch,
   mappings,
   isIndexModeTimeSeries,
+  isILMPolicyDisabled,
+  type,
 }: {
   templateIndexPattern: string;
   packageName: string;
   composedOfTemplates: string[];
   templatePriority: number;
   mappings: IndexTemplateMappings;
+  type: string;
+  isIndexModeTimeSeries: boolean;
+  isILMPolicyDisabled: boolean;
   hidden?: boolean;
   registryElasticsearch?: RegistryElasticsearch | undefined;
-  isIndexModeTimeSeries?: boolean;
 }): IndexTemplate {
   const template = getBaseTemplate({
     templateIndexPattern,
@@ -100,7 +104,10 @@ export function getTemplate({
     throw new Error(`Error template for ${templateIndexPattern} contains a final_pipeline`);
   }
 
+  const esBaseComponents = getBaseEsComponents(type, isIndexModeTimeSeries);
+
   template.composed_of = [
+    ...esBaseComponents,
     ...(template.composed_of || []),
     FLEET_GLOBALS_COMPONENT_TEMPLATE_NAME,
     ...(appContextService.getConfig()?.agentIdVerificationEnabled
@@ -108,7 +115,23 @@ export function getTemplate({
       : []),
   ];
 
+  // For now, if stack templates are disabled just ignore it
+  template.ignore_missing_component_templates = esBaseComponents;
+
+  if (isILMPolicyDisabled) {
+    // Explicitly set ILM policy to null when it's disabled globally
+    template.template.settings.index.lifecycle = null;
+  }
+
   return template;
+}
+
+const getBaseEsComponents = (type: string, isIndexModeTimeSeries: boolean): string[] => {
+  if (type === 'metrics' && isIndexModeTimeSeries) {
+    return [`metrics-tsdb-settings`];
+  }
+
+  return [`${type}-settings`];
 }
 
 /**

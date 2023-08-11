@@ -38,6 +38,7 @@ export function buildDefaultSettings({
   packageName: string;
   ilmPolicy?: string | undefined;
   fields: Field[];
+  stackTemplatesDisabled?: boolean
 }) {
   const logger = appContextService.getLogger();
   // Find all field names to set `index.query.default_field` to, which will be
@@ -63,6 +64,19 @@ export function buildDefaultSettings({
 
   const isILMPolicyDisabled = appContextService.getConfig()?.internal?.disableILMPolicies ?? false;
 
+  // TODO populate old defaults when stack templates are disabled?
+  const fallbackDefaults = {
+    codec: 'best_compression',
+    // setting `ignore_malformed` only for data_stream for logs
+    ...(type === 'logs'
+      ? {
+          mapping: {
+            ignore_malformed: true,
+          },
+        }
+      : {}),
+  };
+
   return {
     index: {
       ...(isILMPolicyDisabled
@@ -73,16 +87,6 @@ export function buildDefaultSettings({
               name: ilmPolicy ? ilmPolicy : type,
             },
           }),
-      // What should be our default for the compression?
-      codec: 'best_compression',
-      // setting `ignore_malformed` only for data_stream for logs
-      ...(type === 'logs'
-        ? {
-            mapping: {
-              ignore_malformed: true,
-            },
-          }
-        : {}),
       // All the default fields which should be queried have to be added here.
       // So far we add all keyword and text fields here if there are any, otherwise
       // this setting is skipped.
