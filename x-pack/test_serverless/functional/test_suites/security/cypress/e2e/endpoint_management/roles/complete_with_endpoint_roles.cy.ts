@@ -30,7 +30,6 @@ import {
   getConsoleHelpPanelResponseActionTestSubj,
   openConsoleHelpPanel,
 } from '../../../screens/endpoint_management/response_console';
-import { SECURITY_COMPLETE_WITH_ENDPOINT_COMPLETE } from '../utils/product_types';
 import {
   CyIndexEndpointHosts,
   indexEndpointHosts,
@@ -41,7 +40,10 @@ describe(
   {
     env: {
       ftrConfig: {
-        productTypes: SECURITY_COMPLETE_WITH_ENDPOINT_COMPLETE,
+        productTypes: [
+          { product_line: 'security', product_tier: 'complete' },
+          { product_line: 'endpoint', product_tier: 'complete' },
+        ],
       },
     },
   },

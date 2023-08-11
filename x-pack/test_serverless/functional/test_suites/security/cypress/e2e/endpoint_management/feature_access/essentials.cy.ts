@@ -10,14 +10,13 @@ import { login } from '../../../tasks/login';
 import { getNoPrivilegesPage } from '../../../screens/endpoint_management/common';
 import { ensureResponseActionAuthzAccess } from '../../../tasks/endpoint_management';
 import { getEndpointManagementPageList } from '../../../screens/endpoint_management';
-import { SECURITY_ESSENTIALS_NO_ENDPOINT } from '../utils/product_types';
 
 describe(
   'App Features for Security Essential PLI',
   {
     env: {
       ftrConfig: {
-        productTypes: SECURITY_ESSENTIALS_NO_ENDPOINT,
+        productTypes: [{ product_line: 'security', product_tier: 'essentials' }],
       },
     },
   },

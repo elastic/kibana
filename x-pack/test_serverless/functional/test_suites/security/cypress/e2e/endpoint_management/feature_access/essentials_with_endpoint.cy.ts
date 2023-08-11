@@ -10,14 +10,16 @@ import { login } from '../../../tasks/login';
 import { getAgentListTable, visitFleetAgentList } from '../../../screens';
 import { getEndpointManagementPageMap } from '../../../screens/endpoint_management';
 import { ensureResponseActionAuthzAccess } from '../../../tasks/endpoint_management';
-import { SECURITY_ESSENTIALS_WITH_ENDPOINT_ESSENTIALS } from '../utils/product_types';
 
 describe(
   'App Features for Security Essentials PLI with Endpoint Essentials Addon',
   {
     env: {
       ftrConfig: {
-        productTypes: SECURITY_ESSENTIALS_WITH_ENDPOINT_ESSENTIALS,
+        productTypes: [
+          { product_line: 'security', product_tier: 'essentials' },
+          { product_line: 'endpoint', product_tier: 'essentials' },
+        ],
       },
     },
   },

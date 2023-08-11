@@ -22,7 +22,6 @@ import {
   visitFleetAgentList,
 } from '../../../screens';
 import { ServerlessRoleName } from '../../../../../../../shared/lib';
-import { SECURITY_ESSENTIALS_WITH_ENDPOINT_ESSENTIALS } from '../utils/product_types';
 import {
   CyIndexEndpointHosts,
   indexEndpointHosts,
@@ -33,7 +32,10 @@ describe(
   {
     env: {
       ftrConfig: {
-        productTypes: SECURITY_ESSENTIALS_WITH_ENDPOINT_ESSENTIALS,
+        productTypes: [
+          { product_line: 'security', product_tier: 'essentials' },
+          { product_line: 'endpoint', product_tier: 'essentials' },
+        ],
       },
     },
   },
