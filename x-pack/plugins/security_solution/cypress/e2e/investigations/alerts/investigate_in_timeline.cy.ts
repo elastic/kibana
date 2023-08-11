@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { disableExpandableFlyout } from '../../../tasks/api_calls/kibana_advanced_settings';
 import { getNewRule } from '../../../objects/rule';
 import { PROVIDER_BADGE, QUERY_TAB_BUTTON, TIMELINE_TITLE } from '../../../screens/timeline';
 import { FILTER_BADGE } from '../../../screens/alerts';
@@ -53,6 +54,7 @@ describe('Investigate in timeline', () => {
   describe('From alerts details flyout', () => {
     beforeEach(() => {
       login();
+      disableExpandableFlyout();
       visit(ALERTS_URL);
       waitForAlertsToPopulate();
       expandFirstAlert();
