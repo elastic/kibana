@@ -12,7 +12,7 @@ import React from 'react';
 import { DataView, DataViewFieldMap, IIndexPatternFieldList } from '@kbn/data-views-plugin/common';
 import { EmbeddableComponent, TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { Datatable } from '@kbn/expressions-plugin/common';
-import { render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -38,13 +38,17 @@ class EuiSuperDatePickerTestHarness {
   }
 
   static async togglePopover() {
-    await userEvent.click(screen.getByRole('button', { name: 'Date quick select' }));
+    userEvent.click(screen.getByRole('button', { name: 'Date quick select' }));
   }
 
   static async selectCommonlyUsedRange(label: string) {
-    if (!screen.queryByText('Commonly used')) await this.togglePopover();
+    if (!screen.queryByText('Commonly used')) this.togglePopover();
 
-    await userEvent.click(await screen.findByText(label));
+    // Using fireEvent here because userEvent erroneously claims that
+    // pointer-events is set to 'none'.
+    //
+    // I have verified that this fixed on the latest version of the @testing-library/user-event package
+    fireEvent.click(await screen.findByText(label));
   }
 }
 
@@ -130,7 +134,7 @@ describe('group editor preview', () => {
     expect(getEmbeddableTimeRange()).toEqual({ from: 'now/d', to: 'now/d' });
 
     // from chart brush
-    await userEvent.click(screen.getByTestId('brushEnd'));
+    userEvent.click(screen.getByTestId('brushEnd'));
 
     expect(EuiSuperDatePickerTestHarness.currentRange).toEqual({
       from: 'Dec 31, 1969 @ 17:00:00.000',
