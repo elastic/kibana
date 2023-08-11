@@ -13,7 +13,7 @@ import {
   ruleExecutionStatusWarningReason as ruleExecutionStatusWarningReasonV1,
   ruleLastRunOutcomeValues as ruleLastRunOutcomeValuesV1,
 } from '../../common/constants/v1';
-import { validateNotifyWhen as validateNotifyWhenV1 } from '../../validation';
+import { validateNotifyWhenV1 } from '../../validation';
 
 export const ruleParamsSchema = schema.recordOf(schema.string(), schema.maybe(schema.any()));
 export const actionParamsSchema = schema.recordOf(schema.string(), schema.maybe(schema.any()));
