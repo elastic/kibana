@@ -72,6 +72,7 @@ import {
   EVENT_ACTION,
   EVENT_KIND,
   TAGS,
+  ALERT_RULE_CUSTOM_HIGHLIGHTED_FIELDS,
 } from './legacy_alerts_as_data';
 
 // The following fields were identified as technical field names but were not defined in the
@@ -92,8 +93,6 @@ const ALERT_EVALUATION_VALUES = `${ALERT_NAMESPACE}.evaluation.values` as const;
 // Fields pertaining to the rule associated with the alert
 const ALERT_RULE_EXCEPTIONS_LIST = `${ALERT_RULE_NAMESPACE}.exceptions_list` as const;
 const ALERT_RULE_NAMESPACE_FIELD = `${ALERT_RULE_NAMESPACE}.namespace` as const;
-const ALERT_RULE_CUSTOM_HIGHLIGHTED_FIELDS =
-  `${ALERT_RULE_NAMESPACE}.custom_highlighted_fields` as const;
 
 // Fields pertaining to the threat tactic associated with the rule
 const ALERT_THREAT_FRAMEWORK = `${ALERT_RULE_THREAT_NAMESPACE}.framework` as const;
@@ -201,7 +200,6 @@ export {
   ALERT_BUILDING_BLOCK_TYPE,
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
-  ALERT_RULE_CUSTOM_HIGHLIGHTED_FIELDS,
   ALERT_CONTEXT,
   ALERT_EVALUATION_VALUES,
   ALERT_RULE_EXCEPTIONS_LIST,

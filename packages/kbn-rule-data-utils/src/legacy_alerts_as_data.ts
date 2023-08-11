@@ -36,6 +36,8 @@ const ALERT_RULE_TYPE = `${ALERT_RULE_NAMESPACE}.type` as const;
 const ALERT_RULE_UPDATED_AT = `${ALERT_RULE_NAMESPACE}.updated_at` as const;
 const ALERT_RULE_UPDATED_BY = `${ALERT_RULE_NAMESPACE}.updated_by` as const;
 const ALERT_RULE_VERSION = `${ALERT_RULE_NAMESPACE}.version` as const;
+const ALERT_RULE_CUSTOM_HIGHLIGHTED_FIELDS =
+  `${ALERT_RULE_NAMESPACE}.custom_highlighted_fields` as const;
 const ALERT_SEVERITY = `${ALERT_NAMESPACE}.severity` as const;
 const ALERT_SUPPRESSION_META = `${ALERT_NAMESPACE}.suppression` as const;
 const ALERT_SUPPRESSION_TERMS = `${ALERT_SUPPRESSION_META}.terms` as const;
@@ -81,4 +83,5 @@ export {
   EVENT_ACTION,
   EVENT_KIND,
   TAGS,
+  ALERT_RULE_CUSTOM_HIGHLIGHTED_FIELDS,
 };

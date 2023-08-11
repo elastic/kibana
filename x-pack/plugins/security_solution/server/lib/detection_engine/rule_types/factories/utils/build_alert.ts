@@ -78,7 +78,6 @@ import {
   ALERT_RULE_THREAT,
   ALERT_RULE_EXCEPTIONS_LIST,
   ALERT_RULE_IMMUTABLE,
-  ALERT_RULE_CUSTOM_HIGHLIGHTED_FIELDS,
 } from '../../../../../../common/field_maps/field_names';
 import type { CompleteRule, RuleParams } from '../../../rule_schema';
 import { commonParamsCamelToSnake, typeSpecificCamelToSnake } from '../../../rule_management';
@@ -213,7 +212,6 @@ export const buildAlert = (
     [ALERT_RISK_SCORE]: overrides?.riskScoreOverride ?? params.riskScore,
     [ALERT_RULE_PARAMETERS]: ruleParamsSnakeCase,
     [ALERT_RULE_ACTIONS]: actions.map(transformAlertToRuleAction),
-    [ALERT_RULE_CUSTOM_HIGHLIGHTED_FIELDS]: params.customHighlightedFields,
     [ALERT_RULE_AUTHOR]: params.author,
     [ALERT_RULE_CREATED_AT]: createdAt.toISOString(),
     [ALERT_RULE_CREATED_BY]: createdBy ?? '',
@@ -255,6 +253,7 @@ export const buildAlert = (
     'kibana.alert.rule.risk_score': params.riskScore,
     'kibana.alert.rule.severity': params.severity,
     'kibana.alert.rule.building_block_type': params.buildingBlockType,
+    'kibana.alert.rule.custom_highlighted_fields': params.customHighlightedFields,
   };
 };
 

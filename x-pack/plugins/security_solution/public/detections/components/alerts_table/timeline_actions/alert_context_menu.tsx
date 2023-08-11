@@ -431,8 +431,6 @@ export const AddExceptionFlyoutWrapper: React.FC<AddExceptionFlyoutWrapperProps>
     return ruleDataViewId;
   }, [enrichedAlert, ruleDataViewId]);
 
-  // TODO: Do we want to notify user when they are working off of an older version of a rule
-  // if they select to add an exception from an alert referencing an older rule version?
   const memoRule = useMemo(() => {
     if (maybeRule) {
       return [maybeRule];
