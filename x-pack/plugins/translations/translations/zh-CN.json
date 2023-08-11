@@ -31180,7 +31180,6 @@
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.ruleTypeField.threatMatchTitle": "指标匹配",
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.ruleTypeField.thresholdTypeDescription": "聚合查询结果以检测匹配数目何时超过阈值。",
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.ruleTypeField.thresholdTypeTitle": "阈值",
-    "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.savedQueryFieldRequiredError": "无法加载已保存查询。选择新查询或添加定制查询。",
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.SavedQueryFormRowLabel": "已保存查询",
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.source": "源",
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.suppressionMissingFieldsLabel": "如果阻止字段缺失",
