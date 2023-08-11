@@ -13,12 +13,12 @@ import type { TakeActionDropdownProps } from '.';
 import { TakeActionDropdown } from '.';
 import { generateAlertDetailsDataMock } from '../../../common/components/event_details/__mocks__';
 import { getDetectionAlertMock } from '../../../common/mock/mock_detection_alerts';
-import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
+import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import { TimelineId } from '../../../../common/types/timeline';
 import { TestProviders } from '../../../common/mock';
 import { mockTimelines } from '../../../common/mock/mock_timelines_plugin';
 import { createStartServicesMock } from '../../../common/lib/kibana/kibana_react.mock';
-import { useKibana, useGetUserCasesPermissions, useHttp } from '../../../common/lib/kibana';
+import { useGetUserCasesPermissions, useHttp, useKibana } from '../../../common/lib/kibana';
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 import { initialUserPrivilegesState as mockInitialUserPrivilegesState } from '../../../common/components/user_privileges/user_privileges_context';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
@@ -30,15 +30,17 @@ import {
 import { endpointMetadataHttpMocks } from '../../../management/pages/endpoint_hosts/mocks';
 import type { HttpSetup } from '@kbn/core/public';
 import {
-  isAlertFromEndpointEvent,
   isAlertFromEndpointAlert,
+  isAlertFromEndpointEvent,
 } from '../../../common/utils/endpoint_alert_check';
 import { getUserPrivilegesMockDefaultValue } from '../../../common/components/user_privileges/__mocks__';
 import { allCasesPermissions } from '../../../cases_test_utils';
 import { HostStatus } from '../../../../common/endpoint/types';
 import { ENDPOINT_CAPABILITIES } from '../../../../common/endpoint/service/response_actions/constants';
 import { ALERT_TAGS_CONTEXT_MENU_ITEM_TITLE } from '../../../common/components/toolbar/bulk_actions/translations';
+import { useListsConfig } from '../../containers/detection_engine/lists/use_lists_config';
 
+jest.mock('../../containers/detection_engine/lists/use_lists_config');
 jest.mock('../../../common/components/user_privileges');
 
 jest.mock('../user_info', () => ({
@@ -92,6 +94,11 @@ jest.mock('../../containers/detection_engine/alerts/use_host_isolation_status', 
 
 jest.mock('../../../common/components/user_privileges');
 
+const mockUseHasSecurityCapability = jest.fn().mockReturnValue(false);
+jest.mock('../../../helper_hooks', () => ({
+  useHasSecurityCapability: () => mockUseHasSecurityCapability(),
+}));
+
 describe('take action dropdown', () => {
   let defaultProps: TakeActionDropdownProps;
   let mockStartServicesMock: ReturnType<typeof createStartServicesMock>;
@@ -131,6 +138,12 @@ describe('take action dropdown', () => {
     });
 
     (useHttp as jest.Mock).mockReturnValue(mockStartServicesMock.http);
+
+    (useListsConfig as jest.Mock).mockImplementation(() => ({
+      loading: false,
+      needsConfiguration: false,
+    }));
+    mockUseHasSecurityCapability.mockReturnValue(true);
   });
 
   afterEach(() => {
@@ -206,6 +219,7 @@ describe('take action dropdown', () => {
         ).toEqual('Add Endpoint exception');
       });
     });
+
     test('should render "Add rule exception"', async () => {
       await waitFor(() => {
         expect(wrapper.find('[data-test-subj="add-exception-menu-item"]').first().text()).toEqual(

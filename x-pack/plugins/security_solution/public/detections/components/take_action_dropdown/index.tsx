@@ -10,6 +10,7 @@ import { EuiButton, EuiContextMenu, EuiPopover } from '@elastic/eui';
 import type { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { TableId } from '@kbn/securitysolution-data-table';
+import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import { GuidedOnboardingTourStep } from '../../../common/components/guided_onboarding_tour/tour_step';
 import {
   AlertsCasesTourSteps,
@@ -17,9 +18,8 @@ import {
 } from '../../../common/components/guided_onboarding_tour/tour_config';
 import { isActiveTimeline } from '../../../helpers';
 import { useResponderActionItem } from '../endpoint_responder';
-import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
 import { TAKE_ACTION } from '../alerts_table/additional_filters_action/translations';
-import { useExceptionActions } from '../alerts_table/timeline_actions/use_add_exception_actions';
+import { useAlertExceptionActions } from '../alerts_table/timeline_actions/use_add_exception_actions';
 import { useAlertsActions } from '../alerts_table/timeline_actions/use_alerts_actions';
 import { useInvestigateInTimeline } from '../alerts_table/timeline_actions/use_investigate_in_timeline';
 
@@ -157,7 +157,7 @@ export const TakeActionDropdown = React.memo(
       [onAddExceptionTypeClick]
     );
 
-    const { exceptionActionItems } = useExceptionActions({
+    const { exceptionActionItems } = useAlertExceptionActions({
       isEndpointAlert: isAlertFromEndpointAlert({ ecsData }),
       onAddExceptionTypeClick: handleOnAddExceptionTypeClick,
     });

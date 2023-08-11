@@ -16,6 +16,14 @@ import { initialUserPrivilegesState as mockInitialUserPrivilegesState } from '..
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { TableId } from '@kbn/securitysolution-data-table';
 import { TimelineId } from '../../../../../common/types/timeline';
+import { useListsConfig } from '../../../containers/detection_engine/lists/use_lists_config';
+
+jest.mock('../../../containers/detection_engine/lists/use_lists_config');
+
+const mockUseHasSecurityCapability = jest.fn().mockReturnValue(false);
+jest.mock('../../../../helper_hooks', () => ({
+  useHasSecurityCapability: () => mockUseHasSecurityCapability(),
+}));
 
 jest.mock('../../../../common/components/user_privileges');
 
@@ -98,6 +106,14 @@ const openAlertDetailsPageButton = '[data-test-subj="open-alert-details-page-men
 const applyAlertTagsButton = '[data-test-subj="alert-tags-context-menu-item"]';
 
 describe('Alert table context menu', () => {
+  beforeEach(() => {
+    (useListsConfig as jest.Mock).mockImplementation(() => ({
+      loading: false,
+      needsConfiguration: false,
+    }));
+    mockUseHasSecurityCapability.mockReturnValue(true);
+  });
+
   describe('Case actions', () => {
     test('it render AddToCase context menu item if timelineId === TimelineId.detectionsPage', () => {
       const wrapper = mount(<AlertContextMenu {...props} scopeId={TableId.alertsOnAlertsPage} />, {
