@@ -54,7 +54,18 @@ const getRegisterRouteDependencies = () => {
       },
       logger,
       config: {} as APMConfig,
-      plugins: {},
+      plugins: {
+        apmDataAccess: {
+          setup: {
+            indices: {
+              errorIndices: 'apm-*',
+              metricsIndices: 'apm-*',
+              spanIndices: 'apm-*',
+              transactionIndices: 'apm-*',
+            },
+          },
+        },
+      },
     } as unknown as RegisterRouteDependencies,
   };
 };
@@ -208,9 +219,7 @@ describe('createApi', () => {
         } = initApi([
           {
             endpoint: 'GET /foo',
-            options: {
-              tags: [],
-            },
+            options: { tags: [] },
             handler: handlerMock,
           },
         ]);

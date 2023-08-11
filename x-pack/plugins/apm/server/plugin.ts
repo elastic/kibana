@@ -197,7 +197,7 @@ export class APMPlugin
         alerting: plugins.alerting,
         basePath: core.http.basePath,
         apmIndicesConfig,
-        config$,
+        apmConfig: currentConfig,
         logger: this.logger!.get('rule'),
         ml: plugins.ml,
         observability: plugins.observability,

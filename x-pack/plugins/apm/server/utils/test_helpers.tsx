@@ -53,7 +53,7 @@ export async function inspectSearchParams(
   let error;
   const mockApmEventClient = { search: spy } as any;
   const indices: {
-    [Property in keyof APMConfig['indices']]: string;
+    [Property in keyof ApmIndicesConfig]: string;
   } = {
     error: 'myIndex',
     onboarding: 'myIndex',
@@ -61,6 +61,7 @@ export async function inspectSearchParams(
     transaction: 'myIndex',
     metric: 'myIndex',
   };
+
   const mockConfig = new Proxy(
     {},
     {
@@ -73,8 +74,6 @@ export async function inspectSearchParams(
         switch (key) {
           default:
             return 'myIndex';
-          case 'indices':
-            return indices;
           case 'ui':
             return {
               enabled: true,

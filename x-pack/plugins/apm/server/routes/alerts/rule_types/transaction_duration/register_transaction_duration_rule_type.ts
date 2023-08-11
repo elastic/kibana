@@ -26,7 +26,6 @@ import {
 } from '@kbn/rule-data-utils';
 import { createLifecycleRuleTypeFactory } from '@kbn/rule-registry-plugin/server';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
-import { firstValueFrom } from 'rxjs';
 import { getGroupByTerms } from '../utils/get_groupby_terms';
 import { SearchAggregatedTransactionSetting } from '../../../../../common/aggregated_transactions';
 import { getEnvironmentEsField } from '../../../../../common/environment_filter_values';
@@ -77,7 +76,7 @@ export function registerTransactionDurationRuleType({
   alerting,
   ruleDataClient,
   apmIndicesConfig,
-  config$,
+  apmConfig,
   logger,
   basePath,
 }: RegisterRuleDependencies) {
@@ -115,8 +114,6 @@ export function registerTransactionDurationRuleType({
         ruleParams.groupBy
       );
 
-      const config = await firstValueFrom(config$);
-
       const { getAlertUuid, savedObjectsClient, scopedClusterClient } =
         services;
 
@@ -129,7 +126,7 @@ export function registerTransactionDurationRuleType({
       // to prevent (likely) unnecessary blocking request
       // in rule execution
       const searchAggregatedTransactions =
-        config.searchAggregatedTransactions !==
+        apmConfig.searchAggregatedTransactions !==
         SearchAggregatedTransactionSetting.never;
 
       const index = searchAggregatedTransactions

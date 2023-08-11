@@ -7,7 +7,6 @@
 
 import type { AlertsLocatorParams } from '@kbn/observability-plugin/common';
 import { LocatorPublic } from '@kbn/share-plugin/common';
-import { Observable } from 'rxjs';
 import { IBasePath, Logger } from '@kbn/core/server';
 import {
   PluginSetupContract as AlertingPluginSetupContract,
@@ -93,7 +92,7 @@ export interface RegisterRuleDependencies {
   alerting: AlertingPluginSetupContract;
   basePath: IBasePath;
   apmIndicesConfig: ApmIndicesConfig;
-  config$: Observable<APMConfig>;
+  apmConfig: APMConfig;
   logger: Logger;
   ml?: MlPluginSetup;
   observability: ObservabilityPluginSetup;
