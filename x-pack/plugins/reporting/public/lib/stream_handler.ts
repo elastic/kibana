@@ -50,7 +50,7 @@ export class ReportingNotifierStreamHandler {
     private apiClient: ReportingAPIClient,
     private theme: ThemeServiceStart,
     private docLinks: DocLinksStart,
-    private httpFetch: Pick<CoreStart['http'], 'fetch'>
+    private http: Pick<CoreStart['http'], 'fetch'>
   ) {}
 
   /*
@@ -97,12 +97,7 @@ export class ReportingNotifierStreamHandler {
           );
         } else {
           this.notifications.toasts.addSuccess(
-            getSuccessToast(
-              job,
-              this.apiClient.getManagementLink,
-              this.httpFetch,
-              this.theme
-            ),
+            getSuccessToast(job, this.apiClient.getManagementLink, this.http, this.theme),
             completedOptions
           );
         }

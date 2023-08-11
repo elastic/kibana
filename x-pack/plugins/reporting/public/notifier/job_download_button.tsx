@@ -7,7 +7,10 @@
 
 import { EuiButton } from '@elastic/eui';
 import { CoreStart } from '@kbn/core/public';
-import { ELASTIC_HTTP_VERSION_HEADER, X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
+import {
+  ELASTIC_HTTP_VERSION_HEADER,
+  X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
+} from '@kbn/core-http-common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { JobSummary } from '../../common/types';
@@ -22,9 +25,14 @@ export const DownloadButton = ({ http, job }: Props) => {
     <EuiButton
       size="s"
       data-test-subj="downloadCompletedReportButton"
-      onClick={() => http.fetch(`/internal/reporting/jobs/download/${job.id}`, { headers: { [ELASTIC_HTTP_VERSION_HEADER]: '1',
-      [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
-      }})}
+      onClick={() =>
+        http.fetch(`/internal/reporting/jobs/download//${job.id}`, {
+          headers: {
+            [ELASTIC_HTTP_VERSION_HEADER]: '1',
+            [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
+          },
+        })
+      }
       target="_blank"
     >
       <FormattedMessage
