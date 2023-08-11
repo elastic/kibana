@@ -215,7 +215,7 @@ in Kibana, e.g. visualizations. It has the form of a flyout panel.
 
 
 |{kib-repo}blob/{branch}/src/plugins/interactive_setup/README.md[interactiveSetup]
-|The plugin provides UI and APIs for the interactive setup mode.
+|This plugin provides UI and APIs for interactive setup mode a.k.a "enrollment flow".
 
 
 |{kib-repo}blob/{branch}/src/plugins/kibana_overview/README.md[kibanaOverview]
