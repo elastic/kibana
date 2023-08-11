@@ -1,9 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
+
+import React from 'react';
 
 import {
   EuiFlexGroup,
@@ -13,15 +16,17 @@ import {
   EuiPanel,
   EuiTitle,
   EuiLink,
+  EuiPanelProps,
 } from '@elastic/eui';
-import React from 'react';
-import { LEARN_MORE_LABEL } from '../../../../common/i18n_string';
+import { LEARN_MORE_LABEL } from '../constants';
 
 interface OverviewPanelProps {
   description?: React.ReactNode | string;
-  leftPanelContent: React.ReactNode;
+  leftPanelContent?: React.ReactNode;
   links?: Array<{ label: string; href: string }>;
+  rightPanelContent?: React.ReactNode;
   title: string;
+  overviewPanelProps?: Partial<EuiPanelProps>;
 }
 
 export const OverviewPanel: React.FC<OverviewPanelProps> = ({
@@ -29,15 +34,17 @@ export const OverviewPanel: React.FC<OverviewPanelProps> = ({
   description,
   leftPanelContent,
   links,
+  rightPanelContent,
   title,
+  overviewPanelProps,
 }) => {
   return (
     <>
       <EuiSpacer size="xxl" />
       <EuiFlexGroup alignItems="center">
-        <EuiFlexItem grow={6}>{leftPanelContent}</EuiFlexItem>
+        {leftPanelContent && <EuiFlexItem grow={6}>{leftPanelContent}</EuiFlexItem>}
         <EuiFlexItem grow={4}>
-          <EuiPanel color="subdued">
+          <EuiPanel color="subdued" {...overviewPanelProps}>
             <EuiTitle>
               <h2>{title}</h2>
             </EuiTitle>
@@ -62,6 +69,7 @@ export const OverviewPanel: React.FC<OverviewPanelProps> = ({
             ) : null}
           </EuiPanel>
         </EuiFlexItem>
+        {rightPanelContent && <EuiFlexItem grow={6}> {rightPanelContent}</EuiFlexItem>}
       </EuiFlexGroup>
       <EuiSpacer size="xxl" />
     </>

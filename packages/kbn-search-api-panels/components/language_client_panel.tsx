@@ -1,9 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
+
+import React from 'react';
+
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -14,24 +18,29 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 
-import React from 'react';
-import { PLUGIN_ID } from '../../../../common';
-import { useKibanaServices } from '../../hooks/use_kibana';
-import { LanguageDefinition } from '../languages/types';
+import type { HttpStart } from '@kbn/core-http-browser';
+
+import { LanguageDefinition } from '../types';
 import './select_client.scss';
+
 interface SelectClientProps {
   language: LanguageDefinition;
   setSelectedLanguage: (language: LanguageDefinition) => void;
   isSelectedLanguage: boolean;
+  http: HttpStart;
+  pluginId?: string;
+  src?: string;
 }
 
 export const LanguageClientPanel: React.FC<SelectClientProps> = ({
   language,
   setSelectedLanguage,
   isSelectedLanguage,
+  http,
+  pluginId,
+  src,
 }) => {
   const { euiTheme } = useEuiTheme();
-  const { http } = useKibanaServices();
 
   return (
     <EuiFlexGroup gutterSize="xs" direction="row">
@@ -51,7 +60,9 @@ export const LanguageClientPanel: React.FC<SelectClientProps> = ({
             <EuiFlexItem grow={false}>
               <EuiImage
                 alt=""
-                src={http.basePath.prepend(`/plugins/${PLUGIN_ID}/assets/${language.iconType}`)}
+                src={
+                  src || http.basePath.prepend(`/plugins/${pluginId}/assets/${language.iconType}`)
+                }
                 height={euiTheme.size.xl}
                 width={euiTheme.size.xl}
               />
