@@ -741,6 +741,7 @@
     "@kbn/url-state": "link:packages/kbn-url-state",
     "@kbn/usage-collection-plugin": "link:src/plugins/usage_collection",
     "@kbn/usage-collection-test-plugin": "link:test/plugin_functional/plugins/usage_collection",
+    "@kbn/use-tracked-promise": "link:packages/kbn-use-tracked-promise",
     "@kbn/user-profile-components": "link:packages/kbn-user-profile-components",
     "@kbn/user-profile-examples-plugin": "link:examples/user_profile_examples",
     "@kbn/user-profiles-consumer-plugin": "link:x-pack/test/security_api_integration/plugins/user_profiles_consumer",

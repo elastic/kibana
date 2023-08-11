@@ -5884,6 +5884,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/use-tracked-promise@link:packages/kbn-use-tracked-promise":
+  version "0.0.0"
+  uid ""
+
 "@kbn/user-profile-components@link:packages/kbn-user-profile-components":
   version "0.0.0"
   uid ""
