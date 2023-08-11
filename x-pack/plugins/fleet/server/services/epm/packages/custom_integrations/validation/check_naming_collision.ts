@@ -10,8 +10,6 @@ import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-ser
 
 import { i18n } from '@kbn/i18n';
 
-import { PackageNotFoundError } from '../../../../../errors';
-
 import { auditLoggingService } from '../../../../audit_logging';
 import { PACKAGES_SAVED_OBJECT_TYPE, type Installation } from '../../../../../../common';
 import * as Registry from '../../../registry';
@@ -20,8 +18,18 @@ export const checkForNamingCollision = async (
   savedObjectsClient: SavedObjectsClientContract,
   integrationName: string
 ) => {
-  try {
-    await Registry.fetchFindLatestPackageOrThrow(integrationName);
+  await checkForRegistryNamingCollision(savedObjectsClient, integrationName);
+  await checkForInstallationNamingCollision(savedObjectsClient, integrationName);
+};
+
+export const checkForRegistryNamingCollision = async (
+  savedObjectsClient: SavedObjectsClientContract,
+  integrationName: string
+) => {
+  const registryOrBundledPackage = await Registry.fetchFindLatestPackageOrUndefined(
+    integrationName
+  );
+  if (registryOrBundledPackage) {
     const registryConflictMessage = i18n.translate(
       'xpack.fleet.customIntegrations.namingCollisionError.registryOrBundle',
       {
@@ -33,27 +41,10 @@ export const checkForNamingCollision = async (
       }
     );
     throw new NamingCollisionError(registryConflictMessage);
-  } catch (error) {
-    if (error instanceof NamingCollisionError) {
-      throw error;
-    }
-    if (error instanceof PackageNotFoundError) {
-      await checkForCustomNamingCollision(savedObjectsClient, integrationName);
-    } else {
-      // Unlikely case, but just in case the registry can't be reached etc
-      const unknownStatusConflictMessage = i18n.translate(
-        'xpack.fleet.customIntegrations.namingCollisionError.unknownStatus',
-        {
-          defaultMessage:
-            'Failed to create the integration as it could not be determined if this package name exists in the registry or as a bundled package.',
-        }
-      );
-      throw new NamingCollisionError(unknownStatusConflictMessage);
-    }
   }
 };
 
-export const checkForCustomNamingCollision = async (
+export const checkForInstallationNamingCollision = async (
   savedObjectsClient: SavedObjectsClientContract,
   integrationName: string
 ) => {
@@ -62,23 +53,21 @@ export const checkForCustomNamingCollision = async (
     perPage: 1,
     filter: nodeBuilder.and([
       nodeBuilder.is(`${PACKAGES_SAVED_OBJECT_TYPE}.attributes.name`, integrationName),
-      // Custom packages
-      nodeBuilder.is(`${PACKAGES_SAVED_OBJECT_TYPE}.attributes.install_source`, 'custom'),
     ]),
   });
 
   if (result.saved_objects.length > 0) {
-    const customIntegrationConflictMessage = i18n.translate(
-      'xpack.fleet.customIntegrations.namingCollisionError.customIntegration',
+    const installationConflictMessage = i18n.translate(
+      'xpack.fleet.customIntegrations.namingCollisionError.installationConflictMessage',
       {
         defaultMessage:
-          'Failed to create the integration as a custom integration with the name {integrationName} already exists.',
+          'Failed to create the integration as an installation with the name {integrationName} already exists.',
         values: {
           integrationName,
         },
       }
     );
-    throw new NamingCollisionError(customIntegrationConflictMessage);
+    throw new NamingCollisionError(installationConflictMessage);
   }
 
   for (const savedObject of result.saved_objects) {

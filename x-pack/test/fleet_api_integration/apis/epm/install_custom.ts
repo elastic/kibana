@@ -99,7 +99,7 @@ export default function (providerContext: FtrProviderContext) {
       expect(installation.attributes.install_status).to.be('installed');
     });
 
-    it('Throws an error when there is a naming collision', async () => {
+    it('Throws an error when there is a naming collision with a current package installation', async () => {
       await supertest
         .post(`/api/fleet/epm/custom_integrations`)
         .set('kbn-xsrf', 'xxxx')
@@ -115,7 +115,7 @@ export default function (providerContext: FtrProviderContext) {
         })
         .expect(200);
 
-      await supertest
+      const response = await supertest
         .post(`/api/fleet/epm/custom_integrations`)
         .set('kbn-xsrf', 'xxxx')
         .type('application/json')
@@ -129,6 +129,29 @@ export default function (providerContext: FtrProviderContext) {
           ],
         })
         .expect(409);
+
+      expect(response.body.message).to.be(
+        `Failed to create the integration as an installation with the name ${INTEGRATION_NAME} already exists.`
+      );
+    });
+
+    it('Throws an error when there is a naming collision with a registry package', async () => {
+      const pkgName = 'apache';
+
+      const response = await supertest
+        .post(`/api/fleet/epm/custom_integrations`)
+        .set('kbn-xsrf', 'xxxx')
+        .type('application/json')
+        .send({
+          force: true,
+          integrationName: pkgName,
+          datasets: [{ name: 'error', type: 'logs' }],
+        })
+        .expect(409);
+
+      expect(response.body.message).to.be(
+        `Failed to create the integration as an integration with the name ${pkgName} already exists in the package registry or as a bundled package.`
+      );
     });
   });
 }
