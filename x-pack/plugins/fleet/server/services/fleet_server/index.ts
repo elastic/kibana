@@ -52,13 +52,15 @@ export async function allFleetServerVersionsAreAtLeast(
     }
   }
 
-  // there must be at least one fleet server for this check to pass
-  if (policyIds.size === 0) {
+  const versionCounts = await getAgentVersionsForAgentPolicyIds(esClient, [...policyIds]);
+  const versions = Object.keys(versionCounts);
+
+  // there must be at least one fleet server agent for this check to pass
+  if (versions.length === 0) {
     return false;
   }
 
-  const versionCounts = await getAgentVersionsForAgentPolicyIds(esClient, [...policyIds]);
-  return _allVersionsAreAtLeast(version, Object.keys(versionCounts));
+  return _allVersionsAreAtLeast(version, versions);
 }
 
 function _allVersionsAreAtLeast(version: string, versions: string[]) {

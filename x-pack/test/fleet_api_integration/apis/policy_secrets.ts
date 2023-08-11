@@ -135,6 +135,7 @@ export default function (providerContext: FtrProviderContext) {
     ) => {
       const agentResponse = await es.index({
         index: '.fleet-agents',
+        refresh: true,
         body: {
           access_api_key_id: 'api-key-3',
           active: true,
@@ -225,8 +226,6 @@ export default function (providerContext: FtrProviderContext) {
           },
           overwrite: false,
         });
-        // sleep to wait for refresh
-        await new Promise((resolve) => setTimeout(resolve, 2000));
       } catch (e) {
         throw e;
       }
@@ -585,19 +584,21 @@ export default function (providerContext: FtrProviderContext) {
       expect(searchRes.hits.hits.length).to.eql(0);
     });
 
-    let fleetServerCheckPolicy: any;
     it('should not store secrets if fleet server does not meet minimum version', async () => {
       await createFleetServerAgent(fleetServerAgentPolicyId, 'server_1', '7.0.0');
       await disableSecrets();
-      const { body: createResBody } = await createPolicyWithSecrets();
 
-      const createdPolicy = createResBody.item;
+      const createdPolicy = await createPolicyWSecretVar();
 
       // secret should be in plain text i.e not a secret refrerence
       expect(createdPolicy.vars.package_var_secret.value).eql('package_secret_val');
-
-      fleetServerCheckPolicy = createdPolicy;
     });
+
+    async function createPolicyWSecretVar() {
+      const { body: createResBody } = await createPolicyWithSecrets();
+      const createdPolicy = createResBody.item;
+      return createdPolicy;
+    }
 
     it('should not store secrets if there are no fleet servers', async () => {
       await clearAgents();
@@ -611,19 +612,19 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     it('should convert plain text values to secrets once fleet server requirements are met', async () => {
-      if (!fleetServerCheckPolicy) {
-        throw new Error('fleetServerCheckPolicy not set, previous test must have failed');
-      }
       await clearAgents();
+
+      const createdPolicy = await createPolicyWSecretVar();
+
       await createFleetServerAgent(fleetServerAgentPolicyId, 'server_2', '9.0.0');
 
-      const updatedPolicy = createdPolicyToUpdatePolicy(fleetServerCheckPolicy);
+      const updatedPolicy = createdPolicyToUpdatePolicy(createdPolicy);
       delete updatedPolicy.name;
 
       updatedPolicy.vars.package_var_secret.value = 'package_secret_val_2';
 
       const updateRes = await supertest
-        .put(`/api/fleet/package_policies/${fleetServerCheckPolicy.id}`)
+        .put(`/api/fleet/package_policies/${createdPolicy.id}`)
         .set('kbn-xsrf', 'xxxx')
         .send(updatedPolicy)
         .expect(200);
@@ -640,9 +641,7 @@ export default function (providerContext: FtrProviderContext) {
     it('should not revert to plaintext values if the user adds an out of date fleet server', async () => {
       await createFleetServerAgent(fleetServerAgentPolicyId, 'server_3', '7.0.0');
 
-      const { body: createResBody } = await createPolicyWithSecrets();
-
-      const createdPolicy = createResBody.item;
+      const createdPolicy = await createPolicyWSecretVar();
 
       expect(createdPolicy.vars.package_var_secret.value.isSecretRef).eql(true);
     });

@@ -384,6 +384,7 @@ export async function isSecretStorageEnabled(
   const settings = await settingsService.getSettings(soClient);
 
   if (settings.secret_storage_requirements_met) {
+    logger.debug('Secrets storage already met, turned on is settings');
     return true;
   }
 
