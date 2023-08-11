@@ -67,7 +67,7 @@ export const DataSourceContextProvider: FC<DataSourceContextProviderProps> = ({
     };
 
     // support only data views for now
-    if (dataViewId !== undefined) {
+    if (dataViewId) {
       dataViewAndSavedSearch.dataView = await dataViews.get(dataViewId);
     }
 
@@ -93,7 +93,7 @@ export const DataSourceContextProvider: FC<DataSourceContextProviderProps> = ({
       });
   }, [resolveDataSource, onChange, dataViewId]);
 
-  if (!value && !error) return null;
+  if ((!value || !value?.dataView) && !error) return null;
 
   if (error) {
     return (
