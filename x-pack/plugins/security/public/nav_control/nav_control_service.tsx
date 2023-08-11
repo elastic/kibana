@@ -13,6 +13,7 @@ import type { Observable, Subscription } from 'rxjs';
 import { BehaviorSubject, ReplaySubject } from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
 
+import type { BuildFlavor } from '@kbn/config/src/types';
 import type { CoreStart, CoreTheme } from '@kbn/core/public';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
@@ -59,6 +60,8 @@ export class SecurityNavControlService {
 
   private readonly stop$ = new ReplaySubject<void>(1);
   private userMenuLinks$ = new BehaviorSubject<UserMenuLink[]>([]);
+
+  constructor(private readonly buildFlavor: BuildFlavor) {}
 
   public setup({ securityLicense, logoutUrl, securityApiClients }: SetupDeps) {
     this.securityLicense = securityLicense;
@@ -133,6 +136,7 @@ export class SecurityNavControlService {
               editProfileUrl={core.http.basePath.prepend('/security/account')}
               logoutUrl={this.logoutUrl}
               userMenuLinks$={this.userMenuLinks$}
+              buildFlavour={this.buildFlavor}
             />
           </Providers>,
           element
