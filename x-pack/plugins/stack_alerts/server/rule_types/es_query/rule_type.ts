@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { CoreSetup } from '@kbn/core/server';
 import { extractReferences, injectReferences } from '@kbn/data-plugin/common';
 import { IRuleTypeAlerts } from '@kbn/alerting-plugin/server';
-import { ALERT_EVALUATION_VALUE, ALERT_REASON, ALERT_URL } from '@kbn/rule-data-utils';
+import { ALERT_EVALUATION_VALUE } from '@kbn/rule-data-utils';
 import { StackAlert } from '@kbn/alerts-as-data-utils';
 import { STACK_AAD_INDEX_NAME } from '..';
 import { ALERT_TITLE, ALERT_EVALUATION_CONDITIONS } from './fields';
@@ -146,9 +146,7 @@ export function getRuleType(
     context: STACK_AAD_INDEX_NAME,
     mappings: {
       fieldMap: {
-        [ALERT_URL]: { type: 'text', array: false, required: false },
         [ALERT_TITLE]: { type: 'keyword', array: false, required: false },
-        [ALERT_REASON]: { type: 'keyword', array: false, required: false },
         [ALERT_EVALUATION_CONDITIONS]: { type: 'keyword', array: false, required: false },
         [ALERT_EVALUATION_VALUE]: { type: 'keyword', array: false, required: false },
       },

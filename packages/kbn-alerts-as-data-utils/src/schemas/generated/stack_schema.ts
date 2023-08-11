@@ -75,9 +75,7 @@ const StackAlertOptional = rt.partial({
         conditions: schemaString,
         value: schemaString,
       }),
-      reason: schemaString,
       title: schemaString,
-      url: schemaString,
     }),
   }),
 });
