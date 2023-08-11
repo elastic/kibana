@@ -19,7 +19,7 @@ export const kibanaStartMock = {
         ...observabilityPublicPluginsStartMock.createStart(),
         storage: coreMock.createStorage(),
         cases: { ...casesPluginMock.createStartContract() },
-        charts: {theme: {useChartsTheme: ()=>{}, useChartsBaseTheme: ()=>{}}}
+        charts: { theme: { useChartsTheme: () => {}, useChartsBaseTheme: () => {} } },
       },
     };
   },
