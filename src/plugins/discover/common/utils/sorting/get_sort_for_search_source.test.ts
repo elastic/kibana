@@ -28,6 +28,7 @@ describe('getSortForSearchSource function', function () {
     const cols = [['bytes', 'desc']] as SortOrder[];
     expect(getSortForSearchSource({ sort: cols, dataView: stubDataView, uiSettings })).toEqual([
       { bytes: 'desc' },
+      { _doc: 'desc' },
     ]);
     expect(
       getSortForSearchSource({
@@ -35,18 +36,18 @@ describe('getSortForSearchSource function', function () {
         dataView: stubDataView,
         uiSettings: uiSettingWithAscSorting,
       })
-    ).toEqual([{ bytes: 'desc' }]);
+    ).toEqual([{ bytes: 'desc' }, { _doc: 'desc' }]);
 
     expect(
       getSortForSearchSource({ sort: cols, dataView: stubDataViewWithoutTimeField, uiSettings })
-    ).toEqual([{ bytes: 'desc' }]);
+    ).toEqual([{ bytes: 'desc' }, { _doc: 'desc' }]);
     expect(
       getSortForSearchSource({
         sort: cols,
         dataView: stubDataViewWithoutTimeField,
         uiSettings: uiSettingWithAscSorting,
       })
-    ).toEqual([{ bytes: 'desc' }]);
+    ).toEqual([{ bytes: 'desc' }, { _doc: 'desc' }]);
   });
 
   test('should return an object to use for searchSource when no columns are given', function () {

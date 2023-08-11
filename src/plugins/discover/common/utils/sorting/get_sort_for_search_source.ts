@@ -62,7 +62,7 @@ export function getSortForSearchSource({
   // NB: Changing the tie breaker here can affect CSV reports
   // as it will change the ordering of returned documents.
 
-  if (timeFieldName && sortPairs.length) {
+  if (sortPairs.length) {
     const firstSortPair = sortPairs[0];
     const firstPairSortDir = Array.isArray(firstSortPair)
       ? firstSortPair[1]
