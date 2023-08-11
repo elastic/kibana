@@ -9,7 +9,7 @@ import { cleanKibana } from '../../../tasks/common';
 import {
   navigateToHostRiskDetailTab,
   openRiskTableFilterAndSelectTheCriticalOption,
-  removeCriticalFilter,
+  removeCriticalFilterAndCloseRiskTableFilter,
   selectFiveItemsPerPageOption,
 } from '../../../tasks/host_risk';
 import {
@@ -50,7 +50,7 @@ describe('risk tab', () => {
 
     cy.get(HOST_BY_RISK_TABLE_CELL).eq(3).should('not.have.text', 'siem-kibana');
 
-    removeCriticalFilter();
+    removeCriticalFilterAndCloseRiskTableFilter();
   });
 
   it('should be able to change items count per page', () => {

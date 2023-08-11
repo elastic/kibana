@@ -40,19 +40,19 @@ interface Package {
 
 const packages: Package[] = [
   {
+    // Tip: use `scripts/download_re2.sh` to download binary artifacts from GitHub
     name: 're2',
-    version: '1.17.7',
+    version: '1.20.1',
     destinationPath: 'node_modules/re2/build/Release/re2.node',
     extractMethod: 'gunzip',
     archives: {
       'linux-x64': {
-        url: 'https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/node-re2/uhop/node-re2/releases/download/1.17.7/linux-x64-108.gz',
-        sha256: 'e0b62ff7c415c95f57232f2726711c0fd71056c848538f095ba3fa1126ef5e31',
+        url: 'https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/node-re2/uhop/node-re2/releases/download/1.20.1/linux-x64-108.gz',
+        sha256: 'e14f274f73ede22f170bfe9e57a0645ebf7ed320042a27361fa158bc239a5563',
       },
-
-      // ARM builds are currently done manually as Github Actions used in upstream project
-      // do not natively support an ARM target.
-
+      // Linux ARM builds are currently done manually as Github Actions used in upstream project
+      // do not natively support an Linux ARM target.
+      //
       // From an AWS Graviton instance running Ubuntu or a GCE T2A instance running Debian:
       // * install build-essential package: `sudo apt-get update` + `sudo apt install build-essential`
       // * install nvm and the node version used by the Kibana repository
@@ -63,29 +63,20 @@ const packages: Package[] = [
       // * capture the sha256 with: `shasum -a 256 linux-arm64-*`
       // * upload the `linux-arm64-*.gz` artifact to the `yarn-prebuilt-artifacts` bucket in GCS using the correct version number
       'linux-arm64': {
-        url: 'https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/node-re2/uhop/node-re2/releases/download/1.17.7/linux-arm64-108.gz',
-        sha256: 'e2025ead87be9f1ec4a9d892d1cce69c573101762720d56f52b1d52ed7ae0fef',
+        url: 'https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/node-re2/uhop/node-re2/releases/download/1.20.1/linux-arm64-108.gz',
+        sha256: 'cbdf3f75a331c601ac0bd34715814d0a1fd17612c6d6b5269f176d46044defd5',
       },
-
       'darwin-x64': {
-        url: 'https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/node-re2/uhop/node-re2/releases/download/1.17.7/darwin-x64-108.gz',
-        sha256: '4ed378c5a7fe6134b717afe7642254aff1ed7a881cbcaa53a012ac3efab49f99',
+        url: 'https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/node-re2/uhop/node-re2/releases/download/1.20.1/darwin-x64-108.gz',
+        sha256: 'f88c09e98f152ac15c593b3b923b7fbe28d448cfde5986da40c34461bede5a09',
       },
-
-      // A similar process is necessary for building on ARM macs:
-      // * bootstrap and re2 will build itself on install
-      // * `cp node_modules/re2/build/Release/re2.node darwin-arm64-$(node -e "console.log(process.versions.modules)")`
-      // * `gzip darwin-arm64-*`
-      // * capture the sha256 with: `shasum -a 256 darwin-arm64-*`
-      // * upload the `darwin-arm64-*.gz` artifact to the `yarn-prebuilt-artifacts` bucket in GCS using the correct version number
       'darwin-arm64': {
-        url: 'https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/node-re2/uhop/node-re2/releases/download/1.17.7/darwin-arm64-108.gz',
-        sha256: '42afc32137ff5c5bebae5d68347a9786906748c2f28e06194d8950707f2ae90e',
+        url: 'https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/node-re2/uhop/node-re2/releases/download/1.20.1/darwin-arm64-108.gz',
+        sha256: '80700aecbe63052149aba721449a8ce30c24d884e414025124bb4602efe708be',
       },
-
       'win32-x64': {
-        url: 'https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/node-re2/uhop/node-re2/releases/download/1.17.7/win32-x64-108.gz',
-        sha256: 'ff72fe02de652262659c8e17e44a932f3c873362233756b40d1a97538d05de92',
+        url: 'https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/node-re2/uhop/node-re2/releases/download/1.20.1/win32-x64-108.gz',
+        sha256: 'cadc4713907f3ad1de45f470810ec8e13e08f32c1a1e45e5d5ab5e9d7fcb9763',
       },
     },
   },

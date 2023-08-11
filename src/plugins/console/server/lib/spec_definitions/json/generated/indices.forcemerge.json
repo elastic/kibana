@@ -20,7 +20,7 @@
     ],
     "patterns": [
       "_forcemerge",
-      "{indices}/_forcemerge"
+      "{index}/_forcemerge"
     ],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-forcemerge.html"
   }
