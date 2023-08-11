@@ -224,6 +224,8 @@ export const getSecurityAppFeaturesConfig = (
         SecuritySubFeatureId.executeAction,
       ],
       subFeaturesPrivileges: [
+        // Adds the privilege to Isolate hosts to the already loaded `host_isolation_all`
+        // sub-feature (always loaded), which included the `release` privilege already
         {
           id: 'host_isolation_all',
           api: [`${APP_ID}-writeHostIsolation`],

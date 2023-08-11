@@ -403,8 +403,8 @@ const hostIsolationSubFeature: SubFeatureConfig = {
             all: [],
             read: [],
           },
-          // FYI: The current set of values below cover only `release`. There is a second set
-          // of values for API and UI that are added later if `endpointResponseActions`
+          // FYI: The current set of values below (`api`, `ui`) cover only `release` response action.
+          // There is a second set of values for API and UI that are added later if `endpointResponseActions`
           // appFeature is enabled. Needed to ensure that in a downgrade of license condition,
           // users are still able to un-isolate a host machine.
           api: [`${APP_ID}-writeHostIsolationRelease`],
