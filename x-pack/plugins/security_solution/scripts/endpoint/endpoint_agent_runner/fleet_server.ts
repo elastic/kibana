@@ -36,6 +36,8 @@ import type {
   PostFleetServerHostsResponse,
 } from '@kbn/fleet-plugin/common/types/rest_spec/fleet_server_hosts';
 import chalk from 'chalk';
+import type { FormattedAxiosError } from '../common/format_axios_error';
+import { catchAxiosErrorFormatAndThrow } from '../common/format_axios_error';
 import { isLocalhost } from '../common/is_localhost';
 import { dump } from './utils';
 import { fetchFleetServerUrl, waitForHostToEnroll } from '../common/fleet_services';
@@ -353,6 +355,25 @@ const addFleetServerHostToFleetSettings = async (
         method: 'POST',
         path: fleetServerHostsRoutesService.getCreatePath(),
         body: newFleetHostEntry,
+      })
+      .catch(catchAxiosErrorFormatAndThrow)
+      .catch((error: FormattedAxiosError) => {
+        if (
+          error.response.status === 403 &&
+          ((error.response?.data?.message as string) ?? '').includes('disabled')
+        ) {
+          log.error(`Update failed with [403: ${error.response.data.message}].
+
+${chalk.red('Are you running this utility against a Serverless project?')}
+If so, the following entry should be added to your local
+'config/serverless.[project_type].dev.yml' (ex. 'serverless.security.dev.yml'):
+
+${chalk.bold(chalk.cyan('xpack.fleet.internal.fleetServerStandalone: false'))}
+
+`);
+        }
+
+        throw error;
       })
       .then((response) => response.data);
 
