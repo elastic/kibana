@@ -22,7 +22,7 @@ export const MetricFieldSelector: FC<MetricFieldSelectorProps> = React.memo(
     const { fieldStats } = useAiopsAppContext();
     const { metricFieldOptions } = useChangePointDetectionControlsContext();
 
-    const { renderOption, closeFlyout } = fieldStats!.useFieldStatsTrigger();
+    const { renderOption, closeFlyout } = fieldStats?.useFieldStatsTrigger() ?? {};
 
     const options = useMemo<EuiComboBoxOptionOption[]>(() => {
       return metricFieldOptions.map((v) => {
@@ -42,7 +42,9 @@ export const MetricFieldSelector: FC<MetricFieldSelectorProps> = React.memo(
         if (typeof option !== 'undefined') {
           onChange(option.value as string);
         }
-        closeFlyout();
+        if (closeFlyout) {
+          closeFlyout();
+        }
       },
       [onChange, closeFlyout]
     );

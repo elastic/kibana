@@ -20,7 +20,7 @@ interface SplitFieldSelectorProps {
 export const SplitFieldSelector: FC<SplitFieldSelectorProps> = React.memo(
   ({ value, onChange, inline = true }) => {
     const { fieldStats } = useAiopsAppContext();
-    const { renderOption, closeFlyout } = fieldStats!.useFieldStatsTrigger();
+    const { renderOption, closeFlyout } = fieldStats?.useFieldStatsTrigger() ?? {};
 
     const { splitFieldsOptions } = useChangePointDetectionControlsContext();
 
@@ -47,7 +47,9 @@ export const SplitFieldSelector: FC<SplitFieldSelectorProps> = React.memo(
         const option = selectedOptions[0];
         const newValue = option?.value as string;
         onChange(newValue);
-        closeFlyout();
+        if (closeFlyout) {
+          closeFlyout();
+        }
       },
       [onChange, closeFlyout]
     );

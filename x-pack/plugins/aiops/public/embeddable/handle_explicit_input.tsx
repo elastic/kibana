@@ -8,7 +8,6 @@
 import type { CoreStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import React from 'react';
-import { FieldStatsFlyoutProvider, useFieldStatsTrigger } from '@kbn/ml-plugin/public';
 import { EmbeddableChangePointChartExplicitInput } from './types';
 import { AiopsAppDependencies } from '..';
 import { AiopsAppContext } from '../hooks/use_aiops_app_context';
@@ -32,7 +31,6 @@ export async function resolveEmbeddableChangePointUserInput(
               {
                 ...coreStart,
                 ...pluginStart,
-                fieldStats: { useFieldStatsTrigger, FieldStatsFlyoutProvider },
               } as unknown as AiopsAppDependencies
             }
           >

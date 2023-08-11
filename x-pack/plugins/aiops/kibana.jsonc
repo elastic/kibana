@@ -27,8 +27,7 @@
       "kibanaReact",
       "kibanaUtils",
       "embeddable",
-      "cases",
-      "ml"
+      "cases"
     ],
     "extraPublicDirs": [
       "common"

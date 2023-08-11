@@ -56,8 +56,3 @@ export {
   MlNodeAvailableWarningShared,
   useMlNodeAvailableCheck,
 } from './application/components/node_available_warning';
-
-export {
-  useFieldStatsTrigger,
-  FieldStatsFlyoutProvider,
-} from './application/components/field_stats_flyout';
