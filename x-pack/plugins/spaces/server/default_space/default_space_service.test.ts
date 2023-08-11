@@ -15,12 +15,12 @@ import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { nextTick } from '@kbn/test-jest-helpers';
 import type { Writable } from '@kbn/utility-types';
 
-import { SpacesLicenseService } from '../../common/licensing';
 import {
   DefaultSpaceService,
   RETRY_DURATION_MAX,
   RETRY_SCALE_DURATION,
 } from './default_space_service';
+import { SpacesLicenseService } from '../../common/licensing';
 
 const advanceRetry = async (initializeCount: number) => {
   await Promise.resolve();

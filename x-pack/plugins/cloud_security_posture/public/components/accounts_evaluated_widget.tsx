@@ -10,6 +10,7 @@ import { CIS_AWS, CIS_GCP } from '../../common/constants';
 import { Cluster } from '../../common/types';
 import { CISBenchmarkIcon } from './cis_benchmark_icon';
 import { CompactFormattedNumber } from './compact_formatted_number';
+import { useNavigateFindings } from '../common/hooks/use_navigate_findings';
 
 export const AccountsEvaluatedWidget = ({
   clusters,
@@ -23,6 +24,12 @@ export const AccountsEvaluatedWidget = ({
     return clusters?.filter((obj) => obj?.meta.benchmark.id === benchmarkId) || [];
   };
 
+  const navToFindings = useNavigateFindings();
+
+  const navToFindingsByCloudProvider = (provider: string) => {
+    navToFindings({ 'cloud.provider': provider });
+  };
+
   const cisAwsClusterAmount = filterClustersById(CIS_AWS).length;
   const cisGcpClusterAmount = filterClustersById(CIS_GCP).length;
 
@@ -32,32 +39,46 @@ export const AccountsEvaluatedWidget = ({
   return (
     <>
       <EuiFlexGroup gutterSize="s">
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup gutterSize="xs">
-            <EuiFlexItem>
-              <CISBenchmarkIcon type={CIS_AWS} name={cisAwsBenchmarkName} />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <CompactFormattedNumber
-                number={cisAwsClusterAmount}
-                abbreviateAbove={benchmarkAbbreviateAbove}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiFlexGroup gutterSize="xs">
-            <EuiFlexItem grow={false}>
-              <CISBenchmarkIcon type={CIS_GCP} name={cisGcpBenchmarkName} />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <CompactFormattedNumber
-                number={cisGcpClusterAmount}
-                abbreviateAbove={benchmarkAbbreviateAbove}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
+        {cisAwsClusterAmount > 0 && (
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup gutterSize="xs">
+              <EuiFlexItem>
+                <CISBenchmarkIcon type={CIS_AWS} name={cisAwsBenchmarkName} />
+              </EuiFlexItem>
+              <EuiFlexItem
+                grow={false}
+                onClick={() => {
+                  navToFindingsByCloudProvider('aws');
+                }}
+              >
+                <CompactFormattedNumber
+                  number={cisAwsClusterAmount}
+                  abbreviateAbove={benchmarkAbbreviateAbove}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        )}
+        {cisGcpClusterAmount > 0 && (
+          <EuiFlexItem>
+            <EuiFlexGroup gutterSize="xs">
+              <EuiFlexItem>
+                <CISBenchmarkIcon type={CIS_GCP} name={cisGcpBenchmarkName} />
+              </EuiFlexItem>
+              <EuiFlexItem
+                grow={false}
+                onClick={() => {
+                  navToFindingsByCloudProvider('gcp');
+                }}
+              >
+                <CompactFormattedNumber
+                  number={cisGcpClusterAmount}
+                  abbreviateAbove={benchmarkAbbreviateAbove}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     </>
   );
