@@ -10,8 +10,9 @@ import { EventAnnotationGroupConfig } from '@kbn/event-annotation-common';
 import { FieldBasedIndexPatternColumn, TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { XYPersistedByValueAnnotationLayerConfig } from '@kbn/lens-plugin/public/async_services';
 
-const DATA_LAYER_ID = '0a700aa1-bc89-4189-991e-36eb0e950611';
-const ANNOTATION_LAYER_ID = '91b0c530-2172-42f1-a839-96d83313d110';
+const DATA_LAYER_ID = 'data-layer-id';
+const DATE_HISTOGRAM_COLUMN_ID = 'date-histogram-column-id';
+const ANNOTATION_LAYER_ID = 'annotation-layer-id';
 
 export const getLensAttributes = (group: EventAnnotationGroupConfig, timeField: string) =>
   ({
@@ -56,7 +57,7 @@ export const getLensAttributes = (group: EventAnnotationGroupConfig, timeField: 
             seriesType: 'line',
             showGridlines: false,
             layerType: 'data',
-            xAccessor: 'e9e2d5e2-0910-4a3b-8735-c8fe37efd7ac',
+            xAccessor: [DATE_HISTOGRAM_COLUMN_ID],
           },
           {
             layerId: ANNOTATION_LAYER_ID,
@@ -76,7 +77,7 @@ export const getLensAttributes = (group: EventAnnotationGroupConfig, timeField: 
           layers: {
             [DATA_LAYER_ID]: {
               columns: {
-                'e9e2d5e2-0910-4a3b-8735-c8fe37efd7ac': {
+                [DATE_HISTOGRAM_COLUMN_ID]: {
                   label: 'timestamp',
                   dataType: 'date',
                   operationType: 'date_histogram',
@@ -101,10 +102,7 @@ export const getLensAttributes = (group: EventAnnotationGroupConfig, timeField: 
                   },
                 } as FieldBasedIndexPatternColumn,
               },
-              columnOrder: [
-                'e9e2d5e2-0910-4a3b-8735-c8fe37efd7ac',
-                'a7264a99-cd42-4b3f-855f-05364df71a71',
-              ],
+              columnOrder: [DATE_HISTOGRAM_COLUMN_ID, 'a7264a99-cd42-4b3f-855f-05364df71a71'],
               incompleteColumns: {},
               sampling: 1,
             },
@@ -145,3 +143,11 @@ export const getLensAttributes = (group: EventAnnotationGroupConfig, timeField: 
           },
         ],
   } as TypedLensByValueInput['attributes']);
+
+export const getCurrentTimeField = (attributes: TypedLensByValueInput['attributes']) => {
+  return (
+    attributes.state.datasourceStates.formBased.layers[DATA_LAYER_ID].columns[
+      DATE_HISTOGRAM_COLUMN_ID
+    ] as FieldBasedIndexPatternColumn
+  ).sourceField;
+};

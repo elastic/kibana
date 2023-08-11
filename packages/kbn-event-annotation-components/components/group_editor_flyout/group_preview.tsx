@@ -121,6 +121,9 @@ export const GroupPreview = ({
                   }),
                   content: (
                     <EuiSelect
+                      aria-label={i18n.translate('eventAnnotationComponents.timeField', {
+                        defaultMessage: 'Time field',
+                      })}
                       options={timeFieldNames.map((name) => ({
                         text: name,
                       }))}

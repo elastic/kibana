@@ -9,7 +9,12 @@
 import { getDefaultManualAnnotation } from '@kbn/event-annotation-common';
 import type { EventAnnotationGroupConfig } from '@kbn/event-annotation-common';
 import React from 'react';
-import { DataView, DataViewFieldMap, IIndexPatternFieldList } from '@kbn/data-views-plugin/common';
+import {
+  DataView,
+  DataViewField,
+  DataViewFieldMap,
+  IIndexPatternFieldList,
+} from '@kbn/data-views-plugin/common';
 import { EmbeddableComponent, TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { Datatable } from '@kbn/expressions-plugin/common';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
@@ -18,6 +23,7 @@ import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
 import { GroupPreview } from './group_preview';
 import { LensByValueInput } from '@kbn/lens-plugin/public/embeddable';
+import { getCurrentTimeField } from './lens_attributes';
 
 class EuiSuperDatePickerTestHarness {
   public static get currentCommonlyUsedRange() {
@@ -37,7 +43,7 @@ class EuiSuperDatePickerTestHarness {
     };
   }
 
-  static async togglePopover() {
+  static togglePopover() {
     userEvent.click(screen.getByRole('button', { name: 'Date quick select' }));
   }
 
@@ -104,8 +110,18 @@ describe('group editor preview', () => {
       {
         id: 'some-id',
         title: 'My Data View',
+        timeFieldName: '@timestamp',
         fields: {
-          getByType: jest.fn(() => []),
+          getByType: jest.fn<DataViewField[], []>(() => [
+            {
+              type: 'date',
+              name: '@timestamp',
+            } as DataViewField,
+            {
+              type: 'date',
+              name: 'other-time-field',
+            } as DataViewField,
+          ]),
         } as unknown as IIndexPatternFieldList & { toSpec: () => DataViewFieldMap },
       } as DataView,
     ],
@@ -143,6 +159,23 @@ describe('group editor preview', () => {
     expect(getEmbeddableTimeRange()).toEqual({
       from: new Date(BRUSH_RANGE[0]).toISOString(),
       to: new Date(BRUSH_RANGE[1]).toISOString(),
+    });
+  });
+
+  it('updates the time field', async () => {
+    EuiSuperDatePickerTestHarness.togglePopover();
+
+    const select = screen.getByRole('combobox', { name: 'Time field' });
+
+    expect(select).toHaveValue('@timestamp');
+    expect(getCurrentTimeField(getLensAttributes())).toBe('@timestamp');
+
+    userEvent.selectOptions(select, 'other-time-field');
+
+    expect(select).toHaveValue('other-time-field');
+
+    await waitFor(() => {
+      expect(getCurrentTimeField(getLensAttributes())).toBe('other-time-field');
     });
   });
 
