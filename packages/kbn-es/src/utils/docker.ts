@@ -77,6 +77,8 @@ export const SERVERLESS_REPO = `${DOCKER_REGISTRY}/elasticsearch-ci/elasticsearc
 export const SERVERLESS_TAG = 'latest';
 export const SERVERLESS_IMG = `${SERVERLESS_REPO}:${SERVERLESS_TAG}`;
 
+// See for default cluster settings
+// https://github.com/elastic/elasticsearch-serverless/blob/main/serverless-build-tools/src/main/kotlin/elasticsearch.serverless-run.gradle.kts
 const SHARED_SERVERLESS_PARAMS = [
   'run',
 
@@ -86,6 +88,9 @@ const SHARED_SERVERLESS_PARAMS = [
 
   '--net',
   'elastic',
+
+  '--env',
+  'path.repo=/objectstore',
 
   '--env',
   'cluster.initial_master_nodes=es01,es02,es03',
@@ -99,9 +104,6 @@ const SHARED_SERVERLESS_PARAMS = [
   '--env',
   'stateless.object_store.bucket=stateless',
 
-  '--env',
-  'path.repo=/objectstore',
-
   // Temp workaround for ES crashing on latest (2023-07-26)
   '--env',
   'data_streams.lifecycle_only.mode=true',
@@ -111,11 +113,19 @@ const SHARED_SERVERLESS_PARAMS = [
 const DEFAULT_SERVERLESS_ESARGS: Array<[string, string]> = [
   ['ES_JAVA_OPTS', '-Xms1g -Xmx1g'],
 
-  ['xpack.security.enabled', 'false'],
+  ['ES_LOG_STYLE', 'file'],
 
   ['cluster.name', 'stateless'],
 
-  ['ES_LOG_STYLE', 'file'],
+  ['ingest.geoip.downloader.enabled', 'false'],
+
+  ['xpack.ml.enabled', 'true'],
+
+  ['xpack.security.enabled', 'false'],
+
+  ['xpack.watcher.enabled', 'false'],
+
+  ['xpack.security.operator_privileges.enabled', 'true'],
 ];
 
 const SERVERLESS_NODES: Array<Omit<ServerlessEsNodeArgs, 'image'>> = [
@@ -129,9 +139,13 @@ const SERVERLESS_NODES: Array<Omit<ServerlessEsNodeArgs, 'image'>> = [
       'discovery.seed_hosts=es02,es03',
 
       '--env',
-      'node.roles=["master","index"]',
+      'node.roles=["master","remote_cluster_client","ingest","index"]',
     ],
-    esArgs: [['xpack.searchable.snapshot.shared_cache.size', '1gb']],
+    esArgs: [
+      ['xpack.searchable.snapshot.shared_cache.size', '16MB'],
+
+      ['xpack.searchable.snapshot.shared_cache.region_size', '256K'],
+    ],
   },
   {
     name: 'es02',
@@ -146,9 +160,13 @@ const SERVERLESS_NODES: Array<Omit<ServerlessEsNodeArgs, 'image'>> = [
       'discovery.seed_hosts=es01,es03',
 
       '--env',
-      'node.roles=["master","search"]',
+      'node.roles=["master","remote_cluster_client","search"]',
     ],
-    esArgs: [['xpack.searchable.snapshot.shared_cache.size', '1gb']],
+    esArgs: [
+      ['xpack.searchable.snapshot.shared_cache.size', '16MB'],
+
+      ['xpack.searchable.snapshot.shared_cache.region_size', '256K'],
+    ],
   },
   {
     name: 'es03',
@@ -163,7 +181,7 @@ const SERVERLESS_NODES: Array<Omit<ServerlessEsNodeArgs, 'image'>> = [
       'discovery.seed_hosts=es01,es02',
 
       '--env',
-      'node.roles=["master"]',
+      'node.roles=["master","remote_cluster_client","ml","transform"]',
     ],
   },
 ];
