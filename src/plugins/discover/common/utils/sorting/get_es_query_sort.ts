@@ -80,6 +80,11 @@ export function getESQuerySortForTieBreaker({
 }
 
 /**
+ * The default tie breaker for Discover
+ */
+export const DEFAULT_TIE_BREAKER_NAME = '_doc';
+
+/**
  * The list of field names that are allowed for sorting, but not included in
  * data view fields.
  */
