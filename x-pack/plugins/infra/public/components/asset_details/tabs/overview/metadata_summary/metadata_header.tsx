@@ -5,20 +5,14 @@
  * 2.0.
  */
 
-import {
-  EuiDescriptionListTitle,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiLink,
-  EuiPopover,
-} from '@elastic/eui';
+import { EuiDescriptionListTitle, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useBoolean } from '../../../../../hooks/use_boolean';
+import { EuiText } from '@elastic/eui';
 import type { MetadataData } from './metadata_summary_list';
+import { Popover } from '../../common/popover';
 
 const columnTitles = {
   hostIp: i18n.translate('xpack.infra.assetDetailsEmbeddable.overview.metadataHostIpHeading', {
@@ -30,6 +24,18 @@ const columnTitles = {
       defaultMessage: 'Host OS version',
     }
   ),
+  cloudProvider: i18n.translate(
+    'xpack.infra.assetDetailsEmbeddable.overview.metadataCloudProviderHeading',
+    {
+      defaultMessage: 'Cloud provider',
+    }
+  ),
+  operatingSystem: i18n.translate(
+    'xpack.infra.assetDetailsEmbeddable.overview.metadataOperatingSystemHeading',
+    {
+      defaultMessage: 'Operating system',
+    }
+  ),
 };
 
 type MetadataFields = 'hostIp' | 'hostOsVersion';
@@ -39,52 +45,43 @@ interface MetadataSummaryProps {
 }
 
 export const MetadataHeader = ({ metadataValue }: MetadataSummaryProps) => {
-  const [isPopoverOpen, { off: closePopover, toggle: togglePopover }] = useBoolean(false);
-
   return (
     <EuiDescriptionListTitle
       css={css`
         white-space: nowrap;
       `}
     >
-      <EuiFlexGroup gutterSize="xs">
+      <EuiFlexGroup gutterSize="xs" alignItems="center">
         <EuiFlexItem grow={false}>
           {columnTitles[metadataValue.field as MetadataFields]}
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiPopover
-            button={
-              <EuiIcon
-                data-test-subj="assetDetailsMetadataSummaryPopoverButton"
-                type="questionInCircle"
-                onClick={togglePopover}
-              />
-            }
-            isOpen={isPopoverOpen}
-            closePopover={closePopover}
-            repositionOnScroll
-            anchorPosition="upCenter"
+          <Popover
+            icon="questionInCircle"
+            data-test-subj="infraAssetDetailsMetadataSummaryPopoverButton"
           >
-            {metadataValue.tooltipLink ? (
-              <FormattedMessage
-                id="xpack.infra.assetDetails.overviewMetadata.tooltip.documentationLabel"
-                defaultMessage="See {documentation} for more details."
-                values={{
-                  documentation: (
-                    <EuiLink
-                      data-test-subj="assetDetailsTooltipDocumentationLink"
-                      href={metadataValue.tooltipLink}
-                      target="_blank"
-                    >
-                      <code>{metadataValue.tooltipFieldLabel}</code>
-                    </EuiLink>
-                  ),
-                }}
-              />
-            ) : (
-              <code>{metadataValue.tooltipFieldLabel}</code>
-            )}
-          </EuiPopover>
+            <EuiText size="xs">
+              {metadataValue.tooltipLink ? (
+                <FormattedMessage
+                  id="xpack.infra.assetDetails.overviewMetadata.tooltip.documentationLabel"
+                  defaultMessage="See {documentation} for more details."
+                  values={{
+                    documentation: (
+                      <EuiLink
+                        data-test-subj="infraAssetDetailsTooltipMetadataDocumentationLink"
+                        href={metadataValue.tooltipLink}
+                        target="_blank"
+                      >
+                        <code>{metadataValue.tooltipFieldLabel}</code>
+                      </EuiLink>
+                    ),
+                  }}
+                />
+              ) : (
+                <code>{metadataValue.tooltipFieldLabel}</code>
+              )}
+            </EuiText>
+          </Popover>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiDescriptionListTitle>

@@ -59,6 +59,7 @@ export interface CloudPostureIntegrationProps {
     disabled?: boolean;
     icon?: string;
     tooltip?: string;
+    isBeta?: boolean;
   }>;
 }
 
@@ -75,7 +76,7 @@ export const cloudPostureIntegrations: CloudPostureIntegrations = {
       {
         type: CLOUDBEAT_AWS,
         name: i18n.translate('xpack.csp.cspmIntegration.awsOption.nameTitle', {
-          defaultMessage: 'Amazon Web Services',
+          defaultMessage: 'AWS',
         }),
         benchmark: i18n.translate('xpack.csp.cspmIntegration.awsOption.benchmarkTitle', {
           defaultMessage: 'CIS AWS',
@@ -91,6 +92,7 @@ export const cloudPostureIntegrations: CloudPostureIntegrations = {
           defaultMessage: 'CIS GCP',
         }),
         icon: 'logoGCP',
+        isBeta: true,
       },
       {
         type: CLOUDBEAT_AZURE,

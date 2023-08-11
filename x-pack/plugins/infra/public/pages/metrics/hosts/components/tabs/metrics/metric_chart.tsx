@@ -10,7 +10,11 @@ import { LensChart } from '../../../../../../components/lens';
 import type { Layer } from '../../../../../../hooks/use_lens_attributes';
 import { useMetricsDataViewContext } from '../../../hooks/use_data_view';
 import { useUnifiedSearchContext } from '../../../hooks/use_unified_search';
-import type { FormulaConfig, XYLayerOptions } from '../../../../../../common/visualizations';
+import type {
+  FormulaConfig,
+  XYLayerOptions,
+  XYVisualOptions,
+} from '../../../../../../common/visualizations';
 import { useHostsViewContext } from '../../../hooks/use_hosts_view';
 import { buildCombinedHostsFilter } from '../../../../../../utils/filters/build';
 import { useHostsTableContext } from '../../../hooks/use_hosts_table';
@@ -20,9 +24,10 @@ import { METRIC_CHART_HEIGHT } from '../../../constants';
 export interface MetricChartProps extends Pick<TypedLensByValueInput, 'id' | 'overrides'> {
   title: string;
   layers: Array<Layer<XYLayerOptions, FormulaConfig[]>>;
+  visualOptions?: XYVisualOptions;
 }
 
-export const MetricChart = ({ id, title, layers, overrides }: MetricChartProps) => {
+export const MetricChart = ({ id, title, layers, visualOptions, overrides }: MetricChartProps) => {
   const { searchCriteria } = useUnifiedSearchContext();
   const { dataView } = useMetricsDataViewContext();
   const { requestTs, loading } = useHostsViewContext();
@@ -58,6 +63,7 @@ export const MetricChart = ({ id, title, layers, overrides }: MetricChartProps) 
       dateRange={afterLoadedState.dateRange}
       height={METRIC_CHART_HEIGHT}
       layers={layers}
+      visualOptions={visualOptions}
       lastReloadRequestTime={afterLoadedState.lastReloadRequestTime}
       loading={loading}
       filters={filters}

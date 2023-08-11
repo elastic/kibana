@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { RouteDefinitionParams } from '..';
 import { defineBulkGetUserProfilesRoute } from './bulk_get';
 import { defineGetCurrentUserProfileRoute } from './get_current';
 import { defineUpdateUserProfileDataRoute } from './update';
+import type { RouteDefinitionParams } from '..';
 
 export function defineUserProfileRoutes(params: RouteDefinitionParams) {
   defineUpdateUserProfileDataRoute(params);
