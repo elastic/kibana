@@ -324,8 +324,8 @@ ${JSON.stringify(config.getAll(), null, 2)}
               type: 'elasticsearch' | 'kibana' | 'fleetserver',
               withAuth: boolean = false
             ): string => {
-              const getKeyPath = (path: string = ''): string => {
-                return `servers.${type}${path ? `.${path}` : ''}`;
+              const getKeyPath = (pathString: string = ''): string => {
+                return `servers.${type}${pathString ? `.${pathString}` : ''}`;
               };
 
               if (!config.get(getKeyPath())) {

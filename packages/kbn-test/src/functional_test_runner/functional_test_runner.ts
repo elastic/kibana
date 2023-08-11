@@ -43,7 +43,6 @@ export class FunctionalTestRunner {
 
   async run(abortSignal?: AbortSignal) {
     const testStats = await this.getTestStats();
-    console.error('this,errr', this.config);
 
     return await this.runHarness(async (lifecycle, coreProviders) => {
       SuiteTracker.startTracking(lifecycle, this.config.path);
