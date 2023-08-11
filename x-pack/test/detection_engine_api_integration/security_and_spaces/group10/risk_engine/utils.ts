@@ -185,20 +185,31 @@ export const getRiskEngineTask = async ({
 
 export const deleteRiskEngineTask = async ({
   es,
+  log,
   index = ['.kibana_task_manager*'],
 }: {
   es: Client;
+  log: ToolingLog;
   index?: string[];
 }) => {
-  await es.deleteByQuery({
-    index,
-    query: {
-      match: {
-        'task.taskType': 'risk_engine:risk_scoring',
-      },
+  await countDownTest(
+    async () => {
+      await es.deleteByQuery({
+        index,
+        query: {
+          match: {
+            'task.taskType': 'risk_engine:risk_scoring',
+          },
+        },
+        conflicts: 'proceed',
+      });
+      return {
+        passed: true,
+      };
     },
-    conflicts: 'proceed',
-  });
+    'deleteRiskEngineTask',
+    log
+  );
 };
 
 export const waitForRiskEngineTaskToBeGone = async ({
