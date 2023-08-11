@@ -12,6 +12,8 @@ import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { useControlPanels } from '../hooks/use_control_panels';
 import { LogExplorerProfileStateService } from '../state_machines/log_explorer_profile';
 
+const DATASET_FILTERS_CUSTOMIZATION_ID = 'datasetFiltersCustomization';
+
 interface CustomDatasetFiltersProps {
   logExplorerProfileStateService: LogExplorerProfileStateService;
   data: DataPublicPluginStart;
@@ -27,7 +29,7 @@ const CustomDatasetFilters = ({
   );
 
   return (
-    <ControlGroupContainer>
+    <ControlGroupContainer data-test-subj={DATASET_FILTERS_CUSTOMIZATION_ID}>
       <ControlGroupRenderer
         ref={setControlGroupAPI}
         getCreationOptions={getInitialInput}
