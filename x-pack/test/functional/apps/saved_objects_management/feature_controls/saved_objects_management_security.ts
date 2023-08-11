@@ -15,10 +15,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   let version: string = '';
 
-  // FLAKY: https://github.com/elastic/kibana/issues/118272
-  describe.skip('feature controls saved objects management', () => {
+  describe('feature controls saved objects management', () => {
     before(async () => {
-      version = await kibanaServer.version.get();
+      // version = await kibanaServer.version.get();
+      // Using the version below instead because we don't need the extra `-SNAPSHOT` bit
+      version = (await kibanaServer.status.get()).version.number;
       await kibanaServer.importExport.load(
         'x-pack/test/functional/fixtures/kbn_archiver/saved_objects_management/feature_controls/security'
       );
@@ -75,10 +76,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         it('shows all saved objects', async () => {
           const objects = await PageObjects.savedObjects.getRowTitles();
           expect(objects).to.eql([
-            `Advanced Settings [${version}]`,
-            'A Dashboard',
             'logstash-*',
             'A Pie',
+            'A Dashboard',
+            `Global Settings [${version}]`,
+            `Advanced Settings [${version}]`,
           ]);
         });
 
@@ -86,20 +88,24 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           const bools = await PageObjects.savedObjects.getTableSummary();
           expect(bools).to.eql([
             {
-              title: `Advanced Settings [${version}]`,
-              canViewInApp: false,
-            },
-            {
-              title: 'A Dashboard',
-              canViewInApp: true,
-            },
-            {
               title: 'logstash-*',
               canViewInApp: true,
             },
             {
               title: 'A Pie',
               canViewInApp: true,
+            },
+            {
+              title: 'A Dashboard',
+              canViewInApp: true,
+            },
+            {
+              title: `Global Settings [${version}]`,
+              canViewInApp: false,
+            },
+            {
+              title: `Advanced Settings [${version}]`,
+              canViewInApp: false,
             },
           ]);
         });
@@ -190,10 +196,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         it('shows all saved objects', async () => {
           const objects = await PageObjects.savedObjects.getRowTitles();
           expect(objects).to.eql([
-            `Advanced Settings [${version}]`,
-            'A Dashboard',
             'logstash-*',
             'A Pie',
+            'A Dashboard',
+            `Global Settings [${version}]`,
+            `Advanced Settings [${version}]`,
           ]);
         });
 
@@ -201,7 +208,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           const bools = await PageObjects.savedObjects.getTableSummary();
           expect(bools).to.eql([
             {
-              title: `Advanced Settings [${version}]`,
+              title: 'logstash-*',
+              canViewInApp: false,
+            },
+            {
+              title: 'A Pie',
               canViewInApp: false,
             },
             {
@@ -209,11 +220,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
               canViewInApp: false,
             },
             {
-              title: 'logstash-*',
+              title: `Global Settings [${version}]`,
               canViewInApp: false,
             },
             {
-              title: 'A Pie',
+              title: `Advanced Settings [${version}]`,
               canViewInApp: false,
             },
           ]);
