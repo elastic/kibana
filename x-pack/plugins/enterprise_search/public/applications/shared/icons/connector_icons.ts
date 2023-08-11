@@ -10,6 +10,7 @@ import confluence_cloud from '../../../assets/source_icons/confluence_cloud.svg'
 import custom from '../../../assets/source_icons/custom.svg';
 import dropbox from '../../../assets/source_icons/dropbox.svg';
 import github from '../../../assets/source_icons/github.svg';
+import gmail from '../../../assets/source_icons/gmail.svg';
 import google_cloud_storage from '../../../assets/source_icons/google_cloud_storage.svg';
 import google_drive from '../../../assets/source_icons/google_drive.svg';
 import jira_cloud from '../../../assets/source_icons/jira_cloud.svg';
@@ -23,6 +24,7 @@ import amazon_s3 from '../../../assets/source_icons/s3.svg';
 import servicenow from '../../../assets/source_icons/servicenow.svg';
 import sharepoint from '../../../assets/source_icons/sharepoint.svg';
 import sharepoint_online from '../../../assets/source_icons/sharepoint_online.svg';
+import slack from '../../../assets/source_icons/slack.svg';
 
 export const CONNECTOR_ICONS = {
   amazon_s3,
@@ -31,6 +33,7 @@ export const CONNECTOR_ICONS = {
   custom,
   dropbox,
   github,
+  gmail,
   google_cloud_storage,
   google_drive,
   jira_cloud,
@@ -43,4 +46,5 @@ export const CONNECTOR_ICONS = {
   servicenow,
   sharepoint,
   sharepoint_online,
+  slack,
 };
