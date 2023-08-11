@@ -7,6 +7,10 @@
 
 import type * as t from 'io-ts';
 import { RuleResponse } from '../../../model';
+import { QueryRuleByIds } from '../../model/query_rule_by_ids';
+
+export const DeleteRuleRequestQuery = QueryRuleByIds;
+export type DeleteRuleRequestQuery = t.TypeOf<typeof DeleteRuleRequestQuery>;
 
 export const DeleteRuleResponse = RuleResponse;
 export type DeleteRuleResponse = t.TypeOf<typeof DeleteRuleResponse>;

@@ -119,12 +119,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             "actions": "",
             "createdAt": "2021-07-19 @ 06:38 PM",
             "report": "[Flights] Global Flight Dashboard",
-            "status": "Done, warnings detected",
-          },
-          Object {
-            "actions": "",
-            "createdAt": "2021-07-19 @ 06:38 PM",
-            "report": "[Flights] Global Flight Dashboard",
             "status": "Done",
           },
           Object {
@@ -138,6 +132,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             "createdAt": "2021-07-19 @ 02:41 PM",
             "report": "[Flights] Global Flight Dashboard",
             "status": "Failed",
+          },
+          Object {
+            "actions": "",
+            "createdAt": "2020-04-21 @ 07:01 PM",
+            "report": "[Logs] File Type Scatter Plot",
+            "status": "Done",
           },
         ]
       `);

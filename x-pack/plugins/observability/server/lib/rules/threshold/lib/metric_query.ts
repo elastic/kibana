@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import moment from 'moment';
 import { Aggregators, MetricExpressionParams } from '../../../../../common/threshold_rule/types';
 import { isCustom, isNotCountOrCustom } from './metric_expression_params';
@@ -25,7 +26,13 @@ const getParsedFilterQuery: (filterQuery: string | undefined) => Array<Record<st
   filterQuery
 ) => {
   if (!filterQuery) return [];
-  return [JSON.parse(filterQuery)];
+
+  try {
+    const parsedQuery = toElasticsearchQuery(fromKueryExpression(filterQuery));
+    return [parsedQuery];
+  } catch (error) {
+    return [];
+  }
 };
 
 export const calculateCurrentTimeframe = (

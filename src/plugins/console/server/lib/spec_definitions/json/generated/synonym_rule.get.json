@@ -1,0 +1,11 @@
+{
+  "synonym_rule.get": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_synonyms/{synonyms_set}/{synonym_rule}"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/get-synonym-rule.html"
+  }
+}

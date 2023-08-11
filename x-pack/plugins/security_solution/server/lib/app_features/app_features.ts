@@ -59,7 +59,7 @@ export class AppFeatures {
     return this.appFeatures.has(appFeatureKey);
   }
 
-  private registerEnabledKibanaFeatures() {
+  protected registerEnabledKibanaFeatures() {
     if (this.featuresSetup == null) {
       throw new Error(
         'Cannot sync kibana features as featuresSetup is not present. Did you call init?'
@@ -73,13 +73,15 @@ export class AppFeatures {
     const enabledSecurityAppFeaturesConfigs = this.getEnabledAppFeaturesConfigs(
       getSecurityAppFeaturesConfig(this.experimentalFeatures)
     );
-    this.featuresSetup.registerKibanaFeature(
-      this.securityFeatureConfigMerger.mergeAppFeatureConfigs(
-        securityBaseKibanaFeature,
-        securityBaseKibanaSubFeatureIds,
-        enabledSecurityAppFeaturesConfigs
-      )
+    const completeAppFeatureConfig = this.securityFeatureConfigMerger.mergeAppFeatureConfigs(
+      securityBaseKibanaFeature,
+      securityBaseKibanaSubFeatureIds,
+      enabledSecurityAppFeaturesConfigs
     );
+
+    this.logger.debug(JSON.stringify(completeAppFeatureConfig));
+
+    this.featuresSetup.registerKibanaFeature(completeAppFeatureConfig);
 
     // register security cases Kibana features
     const securityCasesBaseKibanaFeature = getCasesBaseKibanaFeature();
@@ -87,13 +89,15 @@ export class AppFeatures {
     const enabledCasesAppFeaturesConfigs = this.getEnabledAppFeaturesConfigs(
       getCasesAppFeaturesConfig()
     );
-    this.featuresSetup.registerKibanaFeature(
-      this.casesFeatureConfigMerger.mergeAppFeatureConfigs(
-        securityCasesBaseKibanaFeature,
-        securityCasesBaseKibanaSubFeatureIds,
-        enabledCasesAppFeaturesConfigs
-      )
+    const completeCasesAppFeatureConfig = this.casesFeatureConfigMerger.mergeAppFeatureConfigs(
+      securityCasesBaseKibanaFeature,
+      securityCasesBaseKibanaSubFeatureIds,
+      enabledCasesAppFeaturesConfigs
     );
+
+    this.logger.info(JSON.stringify(completeCasesAppFeatureConfig));
+
+    this.featuresSetup.registerKibanaFeature(completeCasesAppFeatureConfig);
   }
 
   private getEnabledAppFeaturesConfigs(

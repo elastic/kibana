@@ -12,8 +12,6 @@ import { SavedObjectsUtils } from '@kbn/core/server';
 import type { Case } from '../../../common/types/domain';
 import { CaseSeverity, UserActionTypes, CaseRt } from '../../../common/types/domain';
 import { decodeWithExcessOrThrow } from '../../../common/api';
-import { MAX_ASSIGNEES_PER_CASE } from '../../../common/constants';
-import { areTotalAssigneesInvalid } from '../../../common/utils/validators';
 
 import { Operations } from '../../authorization';
 import { createCaseError } from '../../common/error';
@@ -61,12 +59,6 @@ export const create = async (data: CasePostRequest, clientArgs: CasesClientArgs)
       }
 
       licensingService.notifyUsage(LICENSING_CASE_ASSIGNMENT_FEATURE);
-    }
-
-    if (areTotalAssigneesInvalid(query.assignees)) {
-      throw Boom.badRequest(
-        `You cannot assign more than ${MAX_ASSIGNEES_PER_CASE} assignees to a case.`
-      );
     }
 
     const newCase = await caseService.postNewCase({

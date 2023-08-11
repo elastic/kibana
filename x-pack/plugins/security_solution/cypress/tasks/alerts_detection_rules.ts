@@ -12,7 +12,6 @@ import {
   DELETE_RULE_ACTION_BTN,
   RULES_SELECTED_TAG,
   RULES_TABLE_INITIAL_LOADING_INDICATOR,
-  RULES_TABLE_AUTOREFRESH_INDICATOR,
   RULE_CHECKBOX,
   RULE_NAME,
   RULE_SWITCH,
@@ -37,7 +36,6 @@ import {
   RULES_TAGS_POPOVER_WRAPPER,
   INTEGRATIONS_POPOVER,
   SELECTED_RULES_NUMBER_LABEL,
-  REFRESH_SETTINGS_POPOVER,
   REFRESH_SETTINGS_SWITCH,
   ELASTIC_RULES_BTN,
   TOASTER_ERROR_BTN,
@@ -56,6 +54,8 @@ import {
   RULE_LAST_RUN,
   TOASTER_CLOSE_ICON,
   ADD_ELASTIC_RULES_EMPTY_PROMPT_BTN,
+  CONFIRM_DELETE_RULE_BTN,
+  AUTO_REFRESH_POPOVER_TRIGGER_BUTTON,
 } from '../screens/alerts_detection_rules';
 import type { RULES_MONITORING_TABLE } from '../screens/alerts_detection_rules';
 import { EUI_CHECKBOX } from '../screens/common/controls';
@@ -115,6 +115,7 @@ export const checkDuplicatedRule = () => {
 export const deleteFirstRule = () => {
   cy.get(COLLAPSED_ACTION_BTN).first().click();
   cy.get(DELETE_RULE_ACTION_BTN).click();
+  cy.get(CONFIRM_DELETE_RULE_BTN).click();
 };
 
 export const deleteRuleFromDetailsPage = () => {
@@ -129,6 +130,7 @@ export const deleteRuleFromDetailsPage = () => {
   cy.get(ALL_ACTIONS).click();
   cy.get(RULE_DETAILS_DELETE_BTN).click();
   cy.get(RULE_DETAILS_DELETE_BTN).should('not.be.visible');
+  cy.get(CONFIRM_DELETE_RULE_BTN).click();
 };
 
 export const exportRule = (name: string) => {
@@ -302,12 +304,6 @@ export const waitForRuleToUpdate = () => {
   cy.get(RULE_SWITCH_LOADER, { timeout: 300000 }).should('not.exist');
 };
 
-export const checkAutoRefresh = (ms: number, condition: string) => {
-  cy.get(RULES_TABLE_AUTOREFRESH_INDICATOR).should('not.exist');
-  cy.tick(ms);
-  cy.get(RULES_TABLE_AUTOREFRESH_INDICATOR).should(condition);
-};
-
 export const importRules = (rulesFile: string) => {
   cy.get(RULE_IMPORT_MODAL).click();
   cy.get(INPUT_FILE).click({ force: true });
@@ -456,22 +452,45 @@ export const testMultipleSelectedRulesLabel = (rulesCount: number) => {
   cy.get(SELECTED_RULES_NUMBER_LABEL).should('have.text', `Selected ${rulesCount} rules`);
 };
 
-export const openRefreshSettingsPopover = () => {
-  cy.get(REFRESH_SETTINGS_POPOVER).click();
+const openRefreshSettingsPopover = () => {
+  cy.get(REFRESH_SETTINGS_SWITCH).should('not.exist');
+  cy.get(AUTO_REFRESH_POPOVER_TRIGGER_BUTTON).click();
   cy.get(REFRESH_SETTINGS_SWITCH).should('be.visible');
 };
 
-export const checkAutoRefreshIsDisabled = () => {
-  cy.get(REFRESH_SETTINGS_SWITCH).should('have.attr', 'aria-checked', 'false');
+const closeRefreshSettingsPopover = () => {
+  cy.get(REFRESH_SETTINGS_SWITCH).should('be.visible');
+  cy.get(AUTO_REFRESH_POPOVER_TRIGGER_BUTTON).click();
+  cy.get(REFRESH_SETTINGS_SWITCH).should('not.exist');
 };
 
-export const checkAutoRefreshIsEnabled = () => {
+export const expectAutoRefreshIsDisabled = () => {
+  cy.get(AUTO_REFRESH_POPOVER_TRIGGER_BUTTON).should('be.enabled');
+  cy.get(AUTO_REFRESH_POPOVER_TRIGGER_BUTTON).should('have.text', 'Off');
+  openRefreshSettingsPopover();
+  cy.get(REFRESH_SETTINGS_SWITCH).should('have.attr', 'aria-checked', 'false');
+  closeRefreshSettingsPopover();
+};
+
+export const expectAutoRefreshIsEnabled = () => {
+  cy.get(AUTO_REFRESH_POPOVER_TRIGGER_BUTTON).should('be.enabled');
+  cy.get(AUTO_REFRESH_POPOVER_TRIGGER_BUTTON).should('have.text', 'On');
+  openRefreshSettingsPopover();
   cy.get(REFRESH_SETTINGS_SWITCH).should('have.attr', 'aria-checked', 'true');
+  closeRefreshSettingsPopover();
+};
+
+// Expects the auto refresh to be deactivated which means it's disabled without an ability to enable it
+// so it's even impossible to open the popover
+export const expectAutoRefreshIsDeactivated = () => {
+  cy.get(AUTO_REFRESH_POPOVER_TRIGGER_BUTTON).should('be.disabled');
+  cy.get(AUTO_REFRESH_POPOVER_TRIGGER_BUTTON).should('have.text', 'Off');
 };
 
 export const disableAutoRefresh = () => {
+  openRefreshSettingsPopover();
   cy.get(REFRESH_SETTINGS_SWITCH).click();
-  checkAutoRefreshIsDisabled();
+  expectAutoRefreshIsDisabled();
 };
 
 export const mockGlobalClock = () => {

@@ -12,11 +12,10 @@ import type { TypeOf } from '@kbn/config-schema';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import type { ConfigSchema } from '@kbn/unified-search-plugin/config';
 import { termsEnumSuggestions } from '@kbn/unified-search-plugin/server/autocomplete/terms_enum';
-import { EXCEPTIONABLE_ENDPOINT_EVENT_FIELDS } from '../../../../common/endpoint/exceptions/exceptionable_endpoint_event_fields';
 import {
   type EndpointSuggestionsBody,
   EndpointSuggestionsSchema,
-} from '../../../../common/endpoint/schema/suggestions';
+} from '../../../../common/api/endpoint';
 import type {
   SecuritySolutionPluginRouter,
   SecuritySolutionRequestHandlerContext,
@@ -71,11 +70,6 @@ export const getEndpointSuggestionsRequestHandler = (
     let index = '';
 
     if (request.params.suggestion_type === 'eventFilters') {
-      if (!EXCEPTIONABLE_ENDPOINT_EVENT_FIELDS.includes(fieldName)) {
-        return response.badRequest({
-          body: `Unsupported field name: ${fieldName}`,
-        });
-      }
       index = eventsIndexPattern;
     } else {
       return response.badRequest({

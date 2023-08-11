@@ -6,6 +6,7 @@
  */
 
 import { merge } from 'lodash';
+import type { CaseMetricsFeature } from '../../../common/types/api';
 import { BaseHandler } from './base_handler';
 import type { AggregationBuilder, AggregationResponse, BaseHandlerCommonOptions } from './types';
 
@@ -19,11 +20,11 @@ export abstract class AggregationHandler<R> extends BaseHandler<R> {
     super(options);
   }
 
-  getFeatures(): Set<string> {
-    return new Set(this.aggregations.keys());
+  getFeatures(): Set<CaseMetricsFeature> {
+    return new Set(this.aggregations.keys() as unknown as CaseMetricsFeature[]);
   }
 
-  public setupFeature(feature: string) {
+  public setupFeature(feature: CaseMetricsFeature) {
     const aggregation = this.aggregations.get(feature);
     if (aggregation) {
       this.aggregationBuilders.push(aggregation);

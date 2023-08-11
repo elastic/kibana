@@ -12,8 +12,7 @@ import type {
   READ_CASES_CAPABILITY,
   UPDATE_CASES_CAPABILITY,
 } from '..';
-import type { SingleCaseMetricsResponse, CasesMetricsResponse } from '../api';
-import type { PUSH_CASES_CAPABILITY } from '../constants';
+import type { CASES_CONNECTORS_CAPABILITY, PUSH_CASES_CAPABILITY } from '../constants';
 import type { SnakeToCamelCase } from '../types';
 import type {
   CaseSeverity,
@@ -36,6 +35,9 @@ import type {
   GetCaseUsersResponse,
   UserActionFindRequestTypes,
   UserActionFindResponse,
+  CaseMetricsFeature,
+  CasesMetricsResponse,
+  SingleCaseMetricsResponse,
 } from '../types/api';
 
 type DeepRequired<T> = { [K in keyof T]: DeepRequired<T[K]> } & Required<T>;
@@ -56,6 +58,9 @@ export interface CasesUiConfigType {
   files: {
     maxSize?: number;
     allowedMimeTypes: string[];
+  };
+  stack: {
+    enabled: boolean;
   };
 }
 
@@ -153,13 +158,7 @@ export interface FilterOptions {
 export type PartialFilterOptions = Partial<FilterOptions>;
 
 export type SingleCaseMetrics = SingleCaseMetricsResponse;
-export type SingleCaseMetricsFeature =
-  | 'alerts.count'
-  | 'alerts.users'
-  | 'alerts.hosts'
-  | 'actions.isolateHost'
-  | 'connectors'
-  | 'lifespan';
+export type SingleCaseMetricsFeature = Exclude<CaseMetricsFeature, CaseMetricsFeature.MTTR>;
 
 export enum SortFieldCase {
   closedAt = 'closedAt',
@@ -289,6 +288,7 @@ export interface CasesPermissions {
   update: boolean;
   delete: boolean;
   push: boolean;
+  connectors: boolean;
 }
 
 export interface CasesCapabilities {
@@ -297,4 +297,5 @@ export interface CasesCapabilities {
   [UPDATE_CASES_CAPABILITY]: boolean;
   [DELETE_CASES_CAPABILITY]: boolean;
   [PUSH_CASES_CAPABILITY]: boolean;
+  [CASES_CONNECTORS_CAPABILITY]: boolean;
 }

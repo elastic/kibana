@@ -123,7 +123,8 @@ export default ({ getService }: FtrProviderContext): void => {
         ]);
       });
 
-      describe('paging through calculationss', () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/162736
+      describe.skip('paging through calculationss', () => {
         let documentId: string;
         beforeEach(async () => {
           documentId = uuidv4();

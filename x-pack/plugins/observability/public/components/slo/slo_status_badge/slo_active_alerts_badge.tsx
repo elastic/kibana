@@ -10,12 +10,11 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 
-import { paths } from '../../../routes/paths';
+import { paths } from '../../../../common/locators/paths';
 import { useKibana } from '../../../utils/kibana_react';
-import { ActiveAlerts } from '../../../hooks/slo/use_fetch_active_alerts';
 
 export interface Props {
-  activeAlerts?: ActiveAlerts;
+  activeAlerts?: number;
   slo: SLOWithSummaryResponse;
 }
 
@@ -53,7 +52,7 @@ export function SloActiveAlertsBadge({ slo, activeAlerts }: Props) {
       >
         {i18n.translate('xpack.observability.slo.slo.activeAlertsBadge.label', {
           defaultMessage: '{count, plural, one {# alert} other {# alerts}}',
-          values: { count: activeAlerts.count },
+          values: { count: activeAlerts },
         })}
       </EuiBadge>
     </EuiFlexItem>

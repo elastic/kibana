@@ -58,13 +58,13 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       it('edits a case title from the case view page', async () => {
         const newTitle = `test-${uuidv4()}`;
 
-        await testSubjects.click('editable-title-edit-icon');
+        await testSubjects.click('editable-title-header-value');
         await testSubjects.setValue('editable-title-input-field', newTitle);
         await testSubjects.click('editable-title-submit-btn');
 
         // wait for backend response
         await retry.tryForTime(5000, async () => {
-          const title = await find.byCssSelector('[data-test-subj="header-page-title"]');
+          const title = await find.byCssSelector('[data-test-subj="editable-title-header-value"]');
           expect(await title.getVisibleText()).equal(newTitle);
         });
 
@@ -75,7 +75,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       it('shows error message when title is more than 160 characters', async () => {
         const longTitle = Array(161).fill('x').toString();
 
-        await testSubjects.click('editable-title-edit-icon');
+        await testSubjects.click('editable-title-header-value');
         await testSubjects.setValue('editable-title-input-field', longTitle);
         await testSubjects.click('editable-title-submit-btn');
 
@@ -724,12 +724,24 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await cases.api.deleteAllCases();
       });
 
+      it('initially renders user actions list correctly', async () => {
+        expect(testSubjects.missingOrFail('cases-show-more-user-actions'));
+
+        const userActionsLists = await find.allByCssSelector(
+          '[data-test-subj="user-actions-list"]'
+        );
+
+        expect(userActionsLists).length(1);
+      });
+
       it('shows more actions on button click', async () => {
         await cases.api.generateUserActions({
           caseId: createdCase.id,
           caseVersion: createdCase.version,
           totalUpdates: 4,
         });
+
+        expect(testSubjects.missingOrFail('user-actions-loading'));
 
         await header.waitUntilLoadingHasFinished();
 
