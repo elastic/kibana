@@ -6,7 +6,7 @@
  */
 
 import type { CoreStart } from '@kbn/core/public';
-import { toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import React from 'react';
 import { FieldStatsFlyoutProvider, useFieldStatsTrigger } from '@kbn/ml-plugin/public';
 import { EmbeddableChangePointChartExplicitInput } from './types';
@@ -25,36 +25,30 @@ export async function resolveEmbeddableChangePointUserInput(
 
   return new Promise(async (resolve, reject) => {
     try {
-      const title = input?.title;
-      const { theme$ } = coreStart.theme;
-
       const modalSession = overlays.openModal(
         toMountPoint(
-          wrapWithTheme(
-            <AiopsAppContext.Provider
-              value={
-                {
-                  ...coreStart,
-                  ...pluginStart,
-                  fieldStats: { useFieldStatsTrigger, FieldStatsFlyoutProvider },
-                } as unknown as AiopsAppDependencies
-              }
-            >
-              <ChangePointChartInitializer
-                defaultTitle={title ?? ''}
-                initialInput={input}
-                onCreate={(update: EmbeddableChangePointChartExplicitInput) => {
-                  modalSession.close();
-                  resolve(update);
-                }}
-                onCancel={() => {
-                  modalSession.close();
-                  reject();
-                }}
-              />
-            </AiopsAppContext.Provider>,
-            theme$
-          )
+          <AiopsAppContext.Provider
+            value={
+              {
+                ...coreStart,
+                ...pluginStart,
+                fieldStats: { useFieldStatsTrigger, FieldStatsFlyoutProvider },
+              } as unknown as AiopsAppDependencies
+            }
+          >
+            <ChangePointChartInitializer
+              initialInput={input}
+              onCreate={(update: EmbeddableChangePointChartExplicitInput) => {
+                modalSession.close();
+                resolve(update);
+              }}
+              onCancel={() => {
+                modalSession.close();
+                reject();
+              }}
+            />
+          </AiopsAppContext.Provider>,
+          { theme: coreStart.theme, i18n: coreStart.i18n }
         )
       );
     } catch (error) {

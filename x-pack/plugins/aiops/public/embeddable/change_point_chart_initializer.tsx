@@ -32,7 +32,6 @@ import { DataSourceContextProvider } from '../hooks/use_data_source';
 export const DEFAULT_MAX_SERIES_TO_PLOT = 6;
 
 export interface AnomalyChartsInitializerProps {
-  defaultTitle: string;
   initialInput?: Partial<EmbeddableChangePointChartInput>;
   onCreate: (props: EmbeddableChangePointChartExplicitInput) => void;
   onCancel: () => void;
@@ -60,11 +59,7 @@ export const ChangePointChartInitializer: FC<AnomalyChartsInitializerProps> = ({
   const [splitField, setSplitField] = useState(initialInput?.splitField);
 
   return (
-    <EuiModal
-      initialFocus="[name=panelTitle]"
-      onClose={onCancel}
-      data-test-subj={'aiopsChangePointChartEmbeddableInitializer'}
-    >
+    <EuiModal onClose={onCancel} data-test-subj={'aiopsChangePointChartEmbeddableInitializer'}>
       <EuiModalHeader>
         <EuiModalHeaderTitle>
           <FormattedMessage
@@ -78,6 +73,7 @@ export const ChangePointChartInitializer: FC<AnomalyChartsInitializerProps> = ({
         <EuiForm>
           <EuiFormRow fullWidth>
             <IndexPatternSelect
+              autoFocus
               fullWidth
               compressed
               indexPatternId={dataViewId}
