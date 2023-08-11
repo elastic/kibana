@@ -428,7 +428,8 @@ class DocLinks {
     this.licenseManagement = docLinks.links.enterpriseSearch.licenseManagement;
     this.machineLearningStart = docLinks.links.enterpriseSearch.machineLearningStart;
     this.mlDocumentEnrichment = docLinks.links.enterpriseSearch.mlDocumentEnrichment;
-    this.mlDocumentEnrichmentUpdateMappings = docLinks.links.enterpriseSearch.mlDocumentEnrichmentUpdateMappings;
+    this.mlDocumentEnrichmentUpdateMappings =
+      docLinks.links.enterpriseSearch.mlDocumentEnrichmentUpdateMappings;
     this.pluginsIngestAttachment = docLinks.links.plugins.ingestAttachment;
     this.queryDsl = docLinks.links.query.queryDsl;
     this.rrf = docLinks.links.elasticsearch.rrf;

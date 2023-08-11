@@ -171,7 +171,7 @@ export const UpdateMappings: React.FC = () => {
           {areMappingsAutoUpdated ? <UpdateMappingsAutomatic /> : <UpdateMappingsInstructions />}
         </EuiFlexItem>
         <EuiFlexItem grow={7}>
-          <EuiPanel hasBorder={true}>
+          <EuiPanel hasBorder>
             <EuiBasicTable
               columns={columns}
               items={configuration.fieldMappings ?? []}
