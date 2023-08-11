@@ -240,6 +240,7 @@ export const FormControls: FC<{
       ) : null}
 
       <MaxSeriesControl
+        disabled={!!formInput?.partitions?.length}
         value={formInput.maxSeriesToPlot!}
         onChange={(v) => updateCallback({ maxSeriesToPlot: v })}
         onValidationChange={(result) => onValidationChange(result === null)}

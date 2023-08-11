@@ -126,14 +126,16 @@ export const PartitionsSelector: FC<PartitionsSelectorProps> = ({
   const onSearchChange = useMemo(() => debounce(fetchResults, 500), [fetchResults]);
 
   return (
-    <EuiFormRow fullWidth>
+    <EuiFormRow
+      fullWidth
+      label={i18n.translate('xpack.aiops.changePointDetection.partitionsLabel', {
+        defaultMessage: 'Partitions',
+      })}
+    >
       <EuiComboBox<string>
         isLoading={isLoading}
         fullWidth
         compressed
-        prepend={i18n.translate('xpack.aiops.changePointDetection.partitionsLabel', {
-          defaultMessage: 'Partitions',
-        })}
         options={options}
         selectedOptions={selectedOptions}
         onChange={onChangeCallback}

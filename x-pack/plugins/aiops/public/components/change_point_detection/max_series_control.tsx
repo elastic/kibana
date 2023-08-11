@@ -15,10 +15,11 @@ import { MAX_SERIES } from '../../embeddable/const';
 const maxSeriesValidator = numberValidator({ min: 1, max: MAX_SERIES, integerOnly: true });
 
 export const MaxSeriesControl: FC<{
+  disabled?: boolean;
   value: number;
   onChange: (update: number) => void;
   onValidationChange?: (result: NumberValidationResult | null) => void;
-}> = ({ value, onChange, onValidationChange }) => {
+}> = ({ value, onChange, onValidationChange, disabled }) => {
   const maxSeriesValidationResult = maxSeriesValidator(value);
   const maxSeriesInvalid = maxSeriesValidationResult !== null;
 
@@ -35,6 +36,7 @@ export const MaxSeriesControl: FC<{
       }
     >
       <EuiFieldNumber
+        disabled={disabled}
         prepend={i18n.translate('xpack.aiops.changePointDetection.maxSeriesToPlotLabel', {
           defaultMessage: 'Max series',
         })}
