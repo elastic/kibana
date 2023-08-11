@@ -60,24 +60,26 @@ import {
   getMachineLearningRule,
   getNewTermsRule,
 } from '../../../../../objects/rule';
-import { excessivelyInstallAllPrebuiltRules } from '../../../../../tasks/api_calls/prebuilt_rules';
+import {
+  createAndInstallMockedPrebuiltRules,
+  excessivelyInstallAllPrebuiltRules,
+  preventPrebuiltRulesPackageInstallation,
+} from '../../../../../tasks/api_calls/prebuilt_rules';
+import { createRuleAssetSavedObject } from '@kbn/security-solution-plugin/cypress/helpers/rules';
 
 const ruleNameToAssert = 'Custom rule name with actions';
 const expectedNumberOfCustomRulesToBeEdited = 7;
-// 7 custom rules of different types + 3 prebuilt.
+// 7 custom rules of different types + 2 prebuilt.
 // number of selected rules doesn't matter, we only want to make sure they will be edited an no modal window displayed as for other actions
-const expectedNumberOfRulesToBeEdited = expectedNumberOfCustomRulesToBeEdited + 3;
+const expectedNumberOfRulesToBeEdited = expectedNumberOfCustomRulesToBeEdited + 2;
 
 const expectedExistingSlackMessage = 'Existing slack action';
 const expectedSlackMessage = 'Slack action test message';
 
 describe('Detection rules, bulk edit of rule actions', () => {
-  before(() => {
+  beforeEach(() => {
     cleanKibana();
     login();
-  });
-
-  beforeEach(() => {
     deleteAlertsAndRules();
     deleteConnectors();
     cy.task('esArchiverResetKibana');
@@ -110,6 +112,20 @@ describe('Detection rules, bulk edit of rule actions', () => {
     createRule(getNewRule({ saved_id: 'mocked', rule_id: '7' }));
 
     createSlackConnector();
+
+    // Prevent prebuilt rules package installation and mock two prebuilt rules
+    preventPrebuiltRulesPackageInstallation();
+
+    const RULE_1 = createRuleAssetSavedObject({
+      name: 'Test rule 1',
+      rule_id: 'rule_1',
+    });
+    const RULE_2 = createRuleAssetSavedObject({
+      name: 'Test rule 2',
+      rule_id: 'rule_2',
+    });
+
+    createAndInstallMockedPrebuiltRules({rules: [RULE_1, RULE_2]});
   });
 
   context('Restricted action privileges', () => {
@@ -129,6 +145,7 @@ describe('Detection rules, bulk edit of rule actions', () => {
 
   context('All actions privileges', () => {
     beforeEach(() => {
+      login();
       visitWithoutDateRange(SECURITY_DETECTIONS_RULES_URL);
       waitForRulesTableToBeLoaded();
     });
@@ -138,8 +155,6 @@ describe('Detection rules, bulk edit of rule actions', () => {
         throttle: 1,
         throttleUnit: 'd',
       };
-
-      excessivelyInstallAllPrebuiltRules();
 
       // select both custom and prebuilt rules
       selectNumberOfRules(expectedNumberOfRulesToBeEdited);
