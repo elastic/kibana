@@ -356,9 +356,6 @@ export class CsvGenerator {
         // set the latest pit, which could be different from the last request
         searchSource.setField('pit', { id: pitId, keep_alive: settings.scroll.duration });
 
-        // TODO: should we skip `_doc` (the tie breaker from Discover) from searchSource `sort` field when generating CSV?
-        // According to docs, the default `_shard_doc` is a better option when PIT is used.
-
         const results = await this.doSearch(searchSource, settings, searchAfter);
 
         const { hits } = results;
