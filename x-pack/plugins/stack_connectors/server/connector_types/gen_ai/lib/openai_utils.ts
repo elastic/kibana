@@ -17,8 +17,8 @@ const APIS_ALLOWING_STREAMING = new Set<string>([OPENAI_CHAT_URL, OPENAI_LEGACY_
  * The stream parameter is accepted in the ChatCompletion
  * API and the Completion API only
  */
-export const sanitizeRequest = (url: string, body: string): string => {
-  return getRequestWithStreamOption(url, body, false);
+export const sanitizeRequest = (url: string, body: string, defaultModel: string): string => {
+  return getRequestWithStreamOption(url, body, false, defaultModel);
 };
 
 /**
@@ -27,7 +27,12 @@ export const sanitizeRequest = (url: string, body: string): string => {
  * The stream parameter is accepted in the ChatCompletion
  * API and the Completion API only
  */
-export const getRequestWithStreamOption = (url: string, body: string, stream: boolean): string => {
+export const getRequestWithStreamOption = (
+  url: string,
+  body: string,
+  stream: boolean,
+  defaultModel: string
+): string => {
   if (!APIS_ALLOWING_STREAMING.has(url)) {
     return body;
   }
@@ -36,6 +41,7 @@ export const getRequestWithStreamOption = (url: string, body: string, stream: bo
     const jsonBody = JSON.parse(body);
     if (jsonBody) {
       jsonBody.stream = stream;
+      jsonBody.model = jsonBody.model || defaultModel;
     }
 
     return JSON.stringify(jsonBody);

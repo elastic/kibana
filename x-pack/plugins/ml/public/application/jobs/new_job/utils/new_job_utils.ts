@@ -19,7 +19,7 @@ import type { Filter } from '@kbn/es-query';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import { getEsQueryConfig } from '@kbn/data-plugin/public';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
-import { SEARCH_QUERY_LANGUAGE } from '../../../../../common/constants/search';
+import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
 import { getQueryFromSavedSearchObject } from '../../../util/index_utils';
 
 // Provider for creating the items used for searching and job creation.

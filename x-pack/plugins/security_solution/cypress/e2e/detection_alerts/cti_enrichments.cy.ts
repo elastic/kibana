@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { disableExpandableFlyout } from '../../tasks/api_calls/kibana_advanced_settings';
 import { getNewThreatIndicatorRule, indicatorRuleMatchingDoc } from '../../objects/rule';
 import { cleanKibana } from '../../tasks/common';
 import { login, visitWithoutDateRange } from '../../tasks/login';
@@ -34,6 +35,7 @@ describe('CTI Enrichment', () => {
     cy.task('esArchiverLoad', 'suspicious_source_event');
     login();
     createRule({ ...getNewThreatIndicatorRule(), rule_id: 'rule_testing', enabled: true });
+    disableExpandableFlyout();
   });
 
   after(() => {
@@ -47,7 +49,8 @@ describe('CTI Enrichment', () => {
     goToRuleDetails();
   });
 
-  it('Displays enrichment matched.* fields on the timeline', () => {
+  // Skipped: https://github.com/elastic/kibana/issues/162818
+  it.skip('Displays enrichment matched.* fields on the timeline', () => {
     const expectedFields = {
       'threat.enrichments.matched.atomic': indicatorRuleMatchingDoc.atomic,
       'threat.enrichments.matched.type': indicatorRuleMatchingDoc.matchedType,

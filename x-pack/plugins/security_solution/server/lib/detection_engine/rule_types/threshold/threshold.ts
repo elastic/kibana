@@ -38,6 +38,7 @@ import {
 import { withSecuritySpan } from '../../../../utils/with_security_span';
 import { buildThresholdSignalHistory } from './build_signal_history';
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
+import { getSignalHistory } from './utils';
 
 export const thresholdExecutor = async ({
   inputIndex,
@@ -98,22 +99,10 @@ export const thresholdExecutor = async ({
           ruleDataReader,
         });
 
-    if (state.initialized) {
-      // Clean up any signal history that has fallen outside the window
-      const toDelete: string[] = [];
-      for (const [hash, entry] of Object.entries(signalHistory)) {
-        if (entry.lastSignalTimestamp < tuple.from.valueOf()) {
-          toDelete.push(hash);
-        }
-      }
-      for (const hash of toDelete) {
-        delete signalHistory[hash];
-      }
-    }
-
+    const validSignalHistory = getSignalHistory(state, signalHistory, tuple);
     // Eliminate dupes
     const bucketFilters = await getThresholdBucketFilters({
-      signalHistory,
+      signalHistory: validSignalHistory,
       aggregatableTimestampField,
     });
 
@@ -157,7 +146,7 @@ export const thresholdExecutor = async ({
       signalsIndex: ruleParams.outputIndex,
       startedAt,
       from: tuple.from.toDate(),
-      signalHistory,
+      signalHistory: validSignalHistory,
       bulkCreate,
       wrapHits,
       ruleExecutionLogger,
@@ -191,7 +180,7 @@ export const thresholdExecutor = async ({
         ...state,
         initialized: true,
         signalHistory: {
-          ...signalHistory,
+          ...validSignalHistory,
           ...newSignalHistory,
         },
       },

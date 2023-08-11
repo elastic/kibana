@@ -19,6 +19,9 @@ export const DISABLED_RULES_BTN = '[data-test-subj="showDisabledRulesFilterButto
 
 export const DELETE_RULE_ACTION_BTN = '[data-test-subj="deleteRuleAction"]';
 
+export const CONFIRM_DELETE_RULE_BTN =
+  '[data-test-subj="deleteRulesConfirmationModal"] [data-test-subj="confirmModalConfirmButton"]';
+
 export const EDIT_RULE_ACTION_BTN = '[data-test-subj="editRuleAction"]';
 
 export const DUPLICATE_RULE_ACTION_BTN = '[data-test-subj="duplicateRuleAction"]';
@@ -103,7 +106,7 @@ export const SELECT_ALL_RULES_BTN = '[data-test-subj="selectAllRules"]';
 
 export const RULES_EMPTY_PROMPT = '[data-test-subj="rulesEmptyPrompt"]';
 
-export const RULES_DELETE_CONFIRMATION_MODAL = '[data-test-subj="allRulesDeleteConfirmationModal"]';
+export const RULES_DELETE_CONFIRMATION_MODAL = '[data-test-subj="deleteRulesConfirmationModal"]';
 
 export const MODAL_CONFIRMATION_BTN = '[data-test-subj="confirmModalConfirmButton"]';
 
@@ -155,7 +158,7 @@ export const RULES_SELECTED_TAG = '.euiSelectableListItem[aria-checked="true"]';
 
 export const SELECTED_RULES_NUMBER_LABEL = '[data-test-subj="selectedRules"]';
 
-export const REFRESH_SETTINGS_POPOVER = '[data-test-subj="refreshSettings-popover"]';
+export const AUTO_REFRESH_POPOVER_TRIGGER_BUTTON = '[data-test-subj="autoRefreshButton"]';
 
 export const REFRESH_RULES_TABLE_BUTTON = '[data-test-subj="refreshRulesAction-linkIcon"]';
 

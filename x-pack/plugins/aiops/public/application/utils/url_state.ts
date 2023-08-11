@@ -9,7 +9,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import type { Filter, Query } from '@kbn/es-query';
 
-import { SEARCH_QUERY_LANGUAGE, SearchQueryLanguage } from './search_utils';
+import { SEARCH_QUERY_LANGUAGE, type SearchQueryLanguage } from '@kbn/ml-query-utils';
 
 const defaultSearchQuery = {
   match_all: {},

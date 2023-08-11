@@ -41,7 +41,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('redirect endpoint response contains default security headers', async () => {
       const { header } = await supertest
         .get(`/logout`)
-        .set(svlCommonApi.getCommonRequestHeader())
+        .set(svlCommonApi.getInternalRequestHeader())
         .expect(200);
 
       expect(header).toBeDefined();

@@ -30,7 +30,7 @@ Array [
       "timeSize": 15,
       "timeUnit": "m",
     },
-    "filterQuery": undefined,
+    "filterQuery": "host.hostname: Users-System.local and service.type: system",
     "groupBy": Array [
       "host.hostname",
     ],

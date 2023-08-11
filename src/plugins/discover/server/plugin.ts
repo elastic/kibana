@@ -8,12 +8,14 @@
 
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
 import type { PluginSetup as DataPluginSetup } from '@kbn/data-plugin/server';
+import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/common';
 import type { SharePluginSetup } from '@kbn/share-plugin/server';
 import type { DiscoverServerPluginStart, DiscoverServerPluginStartDeps } from '.';
 import { DiscoverAppLocatorDefinition } from '../common/locator';
 import { capabilitiesProvider } from './capabilities_provider';
+import { createSearchEmbeddableFactory } from './embeddable';
 import { initializeLocatorServices } from './locator';
 import { registerSampleData } from './sample_data';
 import { getUiSettings } from './ui_settings';
@@ -25,6 +27,7 @@ export class DiscoverServerPlugin
     core: CoreSetup,
     plugins: {
       data: DataPluginSetup;
+      embeddable: EmbeddableSetup;
       home?: HomeServerPluginSetup;
       share?: SharePluginSetup;
     }
@@ -41,6 +44,8 @@ export class DiscoverServerPlugin
         new DiscoverAppLocatorDefinition({ useHash: false, setStateToKbnUrl })
       );
     }
+
+    plugins.embeddable.registerEmbeddableFactory(createSearchEmbeddableFactory());
 
     return {};
   }

@@ -19,6 +19,8 @@ import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { SecuritySolutionEssPluginSetup } from '@kbn/security-solution-ess/server';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 
+import type { ServerlessSecurityConfig } from './config';
+
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SecuritySolutionServerlessPluginSetup {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -66,6 +68,7 @@ export interface UsageSource {
 export interface SecurityUsageReportingTaskSetupContract {
   core: CoreSetup;
   logFactory: LoggerFactory;
+  config: ServerlessSecurityConfig;
   taskManager: TaskManagerSetupContract;
   cloudSetup: CloudSetup;
   taskType: string;
@@ -90,6 +93,7 @@ export interface MeteringCallbackInput {
   taskId: string;
   lastSuccessfulReport: Date;
   abortController: AbortController;
+  config: ServerlessSecurityConfig;
 }
 
 export interface MetringTaskProperties {
