@@ -28,5 +28,5 @@ export interface ClientConfigType {
   ui: {
     enabled: boolean;
   };
-  enableIndexActions: boolean;
+  enableIndexActions?: boolean;
 }
