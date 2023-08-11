@@ -7,5 +7,9 @@
  */
 
 require('./no_transpilation');
+
+// restore < Node 16 default DNS lookup behavior
+require('./dns_ipv4_first');
+
 // eslint-disable-next-line import/no-extraneous-dependencies
 require('@kbn/babel-register').registerNodeAutoTranspilation();

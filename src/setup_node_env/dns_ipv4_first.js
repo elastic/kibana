@@ -6,4 +6,8 @@
  * Side Public License, v 1.
  */
 
-export * from './visual_testing';
+// enables Node 16 default DNS lookup behavior for the current thread
+require('dns').setDefaultResultOrder('ipv4first');
+
+// overrides current process node options, so it can be restored in worker threads too
+process.env.NODE_OPTIONS = `${process.env.NODE_OPTIONS || ''} --dns-result-order=ipv4first`;
