@@ -82,7 +82,6 @@ const defaultProps: Props = {
   lastChecked,
   openCreateCaseFlyout: jest.fn(),
   onCheckCompleted: jest.fn(),
-  onCheckAllCompleted: jest.fn(),
   patternIndexNames,
   patternRollups,
   patterns,

@@ -80,7 +80,6 @@ const defaultProps: Props = {
   totalIndicesChecked,
   totalSizeInBytes,
   onCheckCompleted: jest.fn(),
-  onCheckAllCompleted: jest.fn(),
 };
 
 describe('DataQualitySummary', () => {
