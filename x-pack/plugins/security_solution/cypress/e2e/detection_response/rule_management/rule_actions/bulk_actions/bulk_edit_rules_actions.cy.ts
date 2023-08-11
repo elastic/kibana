@@ -113,7 +113,7 @@ describe('Detection rules, bulk edit of rule actions', () => {
   });
 
   context('Restricted action privileges', () => {
-    it.only("User with no privileges can't add rule actions", () => {
+    it("User with no privileges can't add rule actions", () => {
       login(ROLES.hunter_no_actions);
       visitWithoutDateRange(SECURITY_DETECTIONS_RULES_URL, ROLES.hunter_no_actions);
       waitForCallOutToBeShown(MISSING_PRIVILEGES_CALLOUT, 'primary');

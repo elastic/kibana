@@ -206,7 +206,7 @@ export const openIntegrationsPopover = () => {
  */
 export const selectNumberOfRules = (numberOfRules: number) => {
   for (let i = 0; i < numberOfRules; i++) {
-    cy.get(RULE_CHECKBOX).eq(i).scrollIntoView().check();
+    cy.get(RULE_CHECKBOX).eq(i).check();
     cy.get(RULE_CHECKBOX).eq(i).should('be.checked');
   }
 };
