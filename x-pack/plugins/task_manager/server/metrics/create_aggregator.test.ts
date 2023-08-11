@@ -111,47 +111,47 @@ describe('createAggregator', () => {
           .subscribe((metrics: Array<AggregatedStat<TaskClaimMetric>>) => {
             expect(metrics[0]).toEqual({
               key: 'task_claim',
-              value: { success: 1, total: 1, duration: { counts: [1], values: [100] } },
+              value: { success: 1, total: 1 },
             });
             expect(metrics[1]).toEqual({
               key: 'task_claim',
-              value: { success: 2, total: 2, duration: { counts: [2], values: [100] } },
+              value: { success: 2, total: 2 },
             });
             expect(metrics[2]).toEqual({
               key: 'task_claim',
-              value: { success: 3, total: 3, duration: { counts: [3], values: [100] } },
+              value: { success: 3, total: 3 },
             });
             expect(metrics[3]).toEqual({
               key: 'task_claim',
-              value: { success: 4, total: 4, duration: { counts: [4], values: [100] } },
+              value: { success: 4, total: 4 },
             });
             expect(metrics[4]).toEqual({
               key: 'task_claim',
-              value: { success: 4, total: 5, duration: { counts: [4], values: [100] } },
+              value: { success: 4, total: 5 },
             });
             expect(metrics[5]).toEqual({
               key: 'task_claim',
-              value: { success: 5, total: 6, duration: { counts: [5], values: [100] } },
+              value: { success: 5, total: 6 },
             });
             expect(metrics[6]).toEqual({
               key: 'task_claim',
-              value: { success: 6, total: 7, duration: { counts: [6], values: [100] } },
+              value: { success: 6, total: 7 },
             });
             expect(metrics[7]).toEqual({
               key: 'task_claim',
-              value: { success: 7, total: 8, duration: { counts: [7], values: [100] } },
+              value: { success: 7, total: 8 },
             });
             expect(metrics[8]).toEqual({
               key: 'task_claim',
-              value: { success: 8, total: 9, duration: { counts: [8], values: [100] } },
+              value: { success: 8, total: 9 },
             });
             expect(metrics[9]).toEqual({
               key: 'task_claim',
-              value: { success: 8, total: 10, duration: { counts: [8], values: [100] } },
+              value: { success: 8, total: 10 },
             });
             expect(metrics[10]).toEqual({
               key: 'task_claim',
-              value: { success: 9, total: 11, duration: { counts: [9], values: [100] } },
+              value: { success: 9, total: 11 },
             });
             resolve();
           });
@@ -206,48 +206,48 @@ describe('createAggregator', () => {
           .subscribe((metrics: Array<AggregatedStat<TaskClaimMetric>>) => {
             expect(metrics[0]).toEqual({
               key: 'task_claim',
-              value: { success: 1, total: 1, duration: { counts: [1], values: [100] } },
+              value: { success: 1, total: 1 },
             });
             expect(metrics[1]).toEqual({
               key: 'task_claim',
-              value: { success: 2, total: 2, duration: { counts: [2], values: [100] } },
+              value: { success: 2, total: 2 },
             });
             expect(metrics[2]).toEqual({
               key: 'task_claim',
-              value: { success: 3, total: 3, duration: { counts: [3], values: [100] } },
+              value: { success: 3, total: 3 },
             });
             expect(metrics[3]).toEqual({
               key: 'task_claim',
-              value: { success: 4, total: 4, duration: { counts: [4], values: [100] } },
+              value: { success: 4, total: 4 },
             });
             expect(metrics[4]).toEqual({
               key: 'task_claim',
-              value: { success: 4, total: 5, duration: { counts: [4], values: [100] } },
+              value: { success: 4, total: 5 },
             });
             expect(metrics[5]).toEqual({
               key: 'task_claim',
-              value: { success: 5, total: 6, duration: { counts: [5], values: [100] } },
+              value: { success: 5, total: 6 },
             });
             // reset event should have been received here
             expect(metrics[6]).toEqual({
               key: 'task_claim',
-              value: { success: 1, total: 1, duration: { counts: [1], values: [100] } },
+              value: { success: 1, total: 1 },
             });
             expect(metrics[7]).toEqual({
               key: 'task_claim',
-              value: { success: 1, total: 2, duration: { counts: [1], values: [100] } },
+              value: { success: 1, total: 2 },
             });
             expect(metrics[8]).toEqual({
               key: 'task_claim',
-              value: { success: 1, total: 3, duration: { counts: [1], values: [100] } },
+              value: { success: 1, total: 3 },
             });
             expect(metrics[9]).toEqual({
               key: 'task_claim',
-              value: { success: 2, total: 4, duration: { counts: [2], values: [100] } },
+              value: { success: 2, total: 4 },
             });
             expect(metrics[10]).toEqual({
               key: 'task_claim',
-              value: { success: 3, total: 5, duration: { counts: [3], values: [100] } },
+              value: { success: 3, total: 5 },
             });
             resolve();
           });
@@ -310,48 +310,48 @@ describe('createAggregator', () => {
           .subscribe((metrics: Array<AggregatedStat<TaskClaimMetric>>) => {
             expect(metrics[0]).toEqual({
               key: 'task_claim',
-              value: { success: 1, total: 1, duration: { counts: [1], values: [100] } },
+              value: { success: 1, total: 1 },
             });
             expect(metrics[1]).toEqual({
               key: 'task_claim',
-              value: { success: 2, total: 2, duration: { counts: [2], values: [100] } },
+              value: { success: 2, total: 2 },
             });
             expect(metrics[2]).toEqual({
               key: 'task_claim',
-              value: { success: 3, total: 3, duration: { counts: [3], values: [100] } },
+              value: { success: 3, total: 3 },
             });
             expect(metrics[3]).toEqual({
               key: 'task_claim',
-              value: { success: 4, total: 4, duration: { counts: [4], values: [100] } },
+              value: { success: 4, total: 4 },
             });
             expect(metrics[4]).toEqual({
               key: 'task_claim',
-              value: { success: 4, total: 5, duration: { counts: [4], values: [100] } },
+              value: { success: 4, total: 5 },
             });
             expect(metrics[5]).toEqual({
               key: 'task_claim',
-              value: { success: 5, total: 6, duration: { counts: [5], values: [100] } },
+              value: { success: 5, total: 6 },
             });
             // reset interval should have fired here
             expect(metrics[6]).toEqual({
               key: 'task_claim',
-              value: { success: 1, total: 1, duration: { counts: [1], values: [100] } },
+              value: { success: 1, total: 1 },
             });
             expect(metrics[7]).toEqual({
               key: 'task_claim',
-              value: { success: 1, total: 2, duration: { counts: [1], values: [100] } },
+              value: { success: 1, total: 2 },
             });
             expect(metrics[8]).toEqual({
               key: 'task_claim',
-              value: { success: 1, total: 3, duration: { counts: [1], values: [100] } },
+              value: { success: 1, total: 3 },
             });
             expect(metrics[9]).toEqual({
               key: 'task_claim',
-              value: { success: 2, total: 4, duration: { counts: [2], values: [100] } },
+              value: { success: 2, total: 4 },
             });
             expect(metrics[10]).toEqual({
               key: 'task_claim',
-              value: { success: 3, total: 5, duration: { counts: [3], values: [100] } },
+              value: { success: 3, total: 5 },
             });
             resolve();
           });
