@@ -113,7 +113,7 @@ import { activatesRule } from '../../tasks/rule_details';
 
 import { ALERTS_URL } from '../../urls/navigation';
 
-describe.skip('Custom detection rules creation', () => {
+describe('Custom detection rules creation', () => {
   const expectedUrls = getNewRule().referenceUrls.join('');
   const expectedFalsePositives = getNewRule().falsePositivesExamples.join('');
   const expectedTags = getNewRule().tags.join('');
@@ -221,7 +221,7 @@ describe.skip('Custom detection rules creation', () => {
   });
 });
 
-describe.skip('Custom detection rules deletion and edition', () => {
+describe('Custom detection rules deletion and edition', () => {
   context('Deletion', () => {
     beforeEach(() => {
       cleanKibana();
