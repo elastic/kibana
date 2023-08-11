@@ -5,11 +5,12 @@
  * 2.0.
  */
 
+import { observabilityPaths } from '@kbn/observability-plugin/common';
 import moment from 'moment';
 import { schema } from '@kbn/config-schema';
 import { ActionGroupIdsOf } from '@kbn/alerting-plugin/common';
 import { AlertInstanceContext } from '@kbn/alerting-plugin/common';
-import { Alert } from '@kbn/alerting-plugin/server';
+import { Alert, GetViewInAppRelativeUrlFnOpts } from '@kbn/alerting-plugin/server';
 import { UptimeAlertTypeFactory } from './types';
 import { updateState } from './common';
 import { CLIENT_ALERT_TYPES, TLS_LEGACY } from '../../../../common/constants/uptime_alerts';
@@ -166,4 +167,6 @@ export const tlsLegacyAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (_s
 
     return { state: updateState(state, foundCerts) };
   },
+  getViewInAppRelativeUrl: ({ rule }: GetViewInAppRelativeUrlFnOpts<{}>) =>
+    observabilityPaths.ruleDetails(rule.id),
 });

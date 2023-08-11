@@ -68,7 +68,7 @@ export class ObservabilityAIAssistantPlugin
           title: i18n.translate('xpack.observabilityAiAssistant.conversationsDeepLinkTitle', {
             defaultMessage: 'Conversations',
           }),
-          path: '/conversations',
+          path: '/conversations/new',
         },
       ],
 
