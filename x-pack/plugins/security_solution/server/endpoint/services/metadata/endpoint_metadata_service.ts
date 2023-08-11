@@ -439,7 +439,7 @@ export class EndpointMetadataService {
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         const endpointPolicy = endpointPoliciesMap[_agent.policy_id!];
 
-        const runtimeFields = {
+        const runtimeFields: Partial<typeof _agent> = {
           status: doc?.fields?.status?.[0] as AgentStatus,
           last_checkin: doc?.fields?.last_checkin?.[0] as string | undefined,
         };
