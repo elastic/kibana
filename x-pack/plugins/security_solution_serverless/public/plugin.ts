@@ -53,6 +53,7 @@ export class SecuritySolutionServerlessPlugin
     const services = createServices(core, startDeps);
 
     securitySolution.setGetStartedPage(getSecurityGetStartedComponent(services, productTypes));
+    securitySolution.setIsILMAvailable(false);
 
     configureNavigation(services, this.config);
     setRoutes(services);

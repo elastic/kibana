@@ -20,7 +20,7 @@ export interface UseStats {
 }
 
 export const useStats = (pattern: string): UseStats => {
-  const { httpFetch } = useDataQualityContext();
+  const { httpFetch, isILMAvailable } = useDataQualityContext();
   const [stats, setStats] = useState<Record<string, IndicesStatsIndicesStats> | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -33,7 +33,7 @@ export const useStats = (pattern: string): UseStats => {
         const encodedIndexName = encodeURIComponent(`${pattern}`);
 
         const response = await httpFetch<Record<string, IndicesStatsIndicesStats>>(
-          `${STATS_ENDPOINT}/${encodedIndexName}`,
+          `${STATS_ENDPOINT}/${encodedIndexName}?isILMAvailable=${isILMAvailable}`,
           {
             method: 'GET',
             signal: abortController.signal,
@@ -59,7 +59,7 @@ export const useStats = (pattern: string): UseStats => {
     return () => {
       abortController.abort();
     };
-  }, [httpFetch, pattern, setError]);
+  }, [httpFetch, isILMAvailable, pattern, setError]);
 
   return { stats, error, loading };
 };

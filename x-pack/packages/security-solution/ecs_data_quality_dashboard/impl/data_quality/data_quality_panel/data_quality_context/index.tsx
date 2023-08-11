@@ -10,6 +10,7 @@ import React, { useMemo } from 'react';
 
 interface DataQualityProviderProps {
   httpFetch: HttpHandler;
+  isILMAvailable: boolean;
 }
 
 const DataQualityContext = React.createContext<DataQualityProviderProps | undefined>(undefined);
@@ -17,12 +18,14 @@ const DataQualityContext = React.createContext<DataQualityProviderProps | undefi
 export const DataQualityProvider: React.FC<DataQualityProviderProps> = ({
   children,
   httpFetch,
+  isILMAvailable,
 }) => {
   const value = useMemo(
     () => ({
       httpFetch,
+      isILMAvailable,
     }),
-    [httpFetch]
+    [httpFetch, isILMAvailable]
   );
 
   return <DataQualityContext.Provider value={value}>{children}</DataQualityContext.Provider>;

@@ -44,6 +44,7 @@ interface Props {
   httpFetch: HttpHandler;
   ilmPhases: string[];
   isAssistantEnabled: boolean;
+  isILMAvailable: boolean;
   lastChecked: string;
   openCreateCaseFlyout: ({
     comments,
@@ -68,6 +69,7 @@ const DataQualityPanelComponent: React.FC<Props> = ({
   httpFetch,
   ilmPhases,
   isAssistantEnabled,
+  isILMAvailable,
   lastChecked,
   openCreateCaseFlyout,
   patterns,
@@ -88,7 +90,7 @@ const DataQualityPanelComponent: React.FC<Props> = ({
   );
 
   return (
-    <DataQualityProvider httpFetch={httpFetch}>
+    <DataQualityProvider httpFetch={httpFetch} isILMAvailable={isILMAvailable}>
       <Body
         addSuccessToast={addSuccessToast}
         canUserCreateAndReadCases={canUserCreateAndReadCases}

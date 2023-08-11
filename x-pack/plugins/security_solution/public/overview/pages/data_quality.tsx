@@ -28,6 +28,7 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
+import useObservable from 'react-use/lib/useObservable';
 
 import { useAssistantAvailability } from '../../assistant/use_assistant_availability';
 import { SecurityPageName } from '../../app/types';
@@ -145,7 +146,8 @@ const DataQualityComponent: React.FC = () => {
   const [selectedOptions, setSelectedOptions] = useState<EuiComboBoxOptionOption[]>(defaultOptions);
   const { indicesExist, loading: isSourcererLoading, selectedPatterns } = useSourcererDataView();
   const { signalIndexName, loading: isSignalIndexNameLoading } = useSignalIndex();
-
+  const { isILMAvailable$ } = useKibana().services;
+  const isILMAvailable = useObservable(isILMAvailable$);
   const alertsAndSelectedPatterns = useMemo(
     () =>
       signalIndexName != null ? [signalIndexName, ...selectedPatterns] : [...selectedPatterns],
@@ -210,7 +212,7 @@ const DataQualityComponent: React.FC = () => {
 
   return (
     <>
-      {indicesExist ? (
+      {indicesExist && isILMAvailable != null ? (
         <SecuritySolutionPageWrapper data-test-subj="ecsDataQualityDashboardPage">
           <HeaderPage subtitle={subtitle} title={i18n.DATA_QUALITY_TITLE}>
             <EuiToolTip content={INDEX_LIFECYCLE_MANAGEMENT_PHASES}>
@@ -238,6 +240,7 @@ const DataQualityComponent: React.FC = () => {
             httpFetch={httpFetch}
             ilmPhases={ilmPhases}
             isAssistantEnabled={hasAssistantPrivilege}
+            isILMAvailable={isILMAvailable}
             lastChecked={lastChecked}
             openCreateCaseFlyout={openCreateCaseFlyout}
             patterns={alertsAndSelectedPatterns}

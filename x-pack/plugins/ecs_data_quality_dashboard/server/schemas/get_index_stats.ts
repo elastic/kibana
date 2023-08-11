@@ -6,7 +6,12 @@
  */
 
 import * as t from 'io-ts';
+import { DefaultStringBooleanFalse } from '@kbn/securitysolution-io-ts-types';
 
 export const GetIndexStatsParams = t.type({
   pattern: t.string,
+});
+
+export const GetIndexStatsQuery = t.type({
+  isILMAvailable: DefaultStringBooleanFalse,
 });

@@ -40,6 +40,8 @@ export class SecuritySolutionEssPlugin
     const services = createServices(core, startDeps);
 
     securitySolution.setGetStartedPage(getSecurityGetStartedComponent(services));
+    securitySolution.setIsILMAvailable(true);
+
     subscribeBreadcrumbs(services);
 
     return {};
