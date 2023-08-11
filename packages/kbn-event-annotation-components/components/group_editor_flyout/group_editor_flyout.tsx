@@ -17,9 +17,6 @@ import {
   EuiButtonEmpty,
   EuiButton,
   htmlIdGenerator,
-  EuiSuperDatePicker,
-  EuiSuperDatePickerProps,
-  EuiSelect,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -31,15 +28,9 @@ import type {
   EventAnnotationGroupConfig,
 } from '@kbn/event-annotation-common';
 import { css } from '@emotion/react';
-import type {
-  EmbeddableComponent as LensEmbeddableComponent,
-  TypedLensByValueInput,
-} from '@kbn/lens-plugin/public';
-import { TimeRange } from '@kbn/es-query';
-import useDebounce from 'react-use/lib/useDebounce';
-import { i18n } from '@kbn/i18n';
+import type { EmbeddableComponent as LensEmbeddableComponent } from '@kbn/lens-plugin/public';
 import { GroupEditorControls, isGroupValid } from './group_editor_controls';
-import { getLensAttributes } from './lens_attributes';
+import { GroupPreview } from './group_preview';
 
 export const GroupEditorFlyout = ({
   group,
@@ -86,54 +77,7 @@ export const GroupEditorFlyout = ({
     },
     [resetContentScroll, selectedAnnotation]
   );
-
-  const [chartTimeRange, setChartTimeRange] = useState<TimeRange>({ from: 'now-15m', to: 'now' });
-
   const onClose = () => (selectedAnnotation ? setSelectedAnnotation(undefined) : parentOnClose());
-
-  const customQuickSelectRender = useCallback<
-    Required<EuiSuperDatePickerProps>['customQuickSelectRender']
-  >(
-    ({ quickSelect, commonlyUsedRanges, customQuickSelectPanels }) =>
-      (
-        <>
-          {customQuickSelectPanels}
-          {quickSelect}
-          {commonlyUsedRanges}
-        </>
-      ) as React.ReactNode,
-    []
-  );
-
-  const currentDataView = useMemo(
-    () => dataViews.find((dataView) => dataView.id === group.indexPatternId) || dataViews[0],
-    [dataViews, group.indexPatternId]
-  );
-
-  const timeFieldNames = useMemo(
-    () => currentDataView.fields.getByType('date').map((field) => field.name),
-    [currentDataView.fields]
-  );
-
-  // We can assume that there is at least one time field because we don't allow annotation groups to be created without one
-  const defaultTimeFieldName = useMemo(
-    () => currentDataView.timeFieldName ?? timeFieldNames[0],
-    [currentDataView.timeFieldName, timeFieldNames]
-  );
-
-  const [currentTimeFieldName, setCurrentTimeFieldName] = useState<string>(defaultTimeFieldName);
-
-  const [lensAttributes, setLensAttributes] = useState<TypedLensByValueInput['attributes']>(
-    getLensAttributes(group, currentTimeFieldName)
-  );
-
-  useDebounce(
-    () => {
-      setLensAttributes(getLensAttributes(group, currentTimeFieldName));
-    },
-    250,
-    [group, currentTimeFieldName]
-  );
 
   return (
     <EuiFlyout onClose={onClose} size="l">
@@ -224,76 +168,11 @@ export const GroupEditorFlyout = ({
           </EuiFlyoutFooter>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFlyoutHeader>
-            <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
-              <EuiFlexItem>
-                <EuiTitle size="s">
-                  <h4>
-                    <FormattedMessage
-                      id="eventAnnotationComponents.groupEditor.preview"
-                      defaultMessage="Preview"
-                    />
-                  </h4>
-                </EuiTitle>
-              </EuiFlexItem>
-              <EuiFlexItem
-                css={css`
-                  width: 310px;
-                `}
-                grow={false}
-              >
-                <EuiSuperDatePicker
-                  onTimeChange={({ start: from, end: to }) => {
-                    setChartTimeRange({ from, to });
-                  }}
-                  start={chartTimeRange.from}
-                  end={chartTimeRange.to}
-                  showUpdateButton={false}
-                  compressed={true}
-                  customQuickSelectRender={customQuickSelectRender}
-                  customQuickSelectPanels={[
-                    {
-                      title: i18n.translate('eventAnnotationComponents.timeField', {
-                        defaultMessage: 'Time field',
-                      }),
-                      content: (
-                        <EuiSelect
-                          options={timeFieldNames.map((name) => ({
-                            text: name,
-                          }))}
-                          value={currentTimeFieldName}
-                          onChange={(e) => setCurrentTimeFieldName(e.target.value)}
-                        />
-                      ),
-                    },
-                  ]}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlyoutHeader>
-          <EuiFlyoutBody>
-            <div
-              css={css`
-                & > div {
-                  height: 400px;
-                  width: 100%;
-                }
-              `}
-            >
-              <LensEmbeddableComponent
-                data-test-subj="chart"
-                id="annotation-library-preview"
-                timeRange={chartTimeRange}
-                attributes={lensAttributes}
-                onBrushEnd={({ range }) =>
-                  setChartTimeRange({
-                    from: new Date(range[0]).toISOString(),
-                    to: new Date(range[1]).toISOString(),
-                  })
-                }
-              />
-            </div>
-          </EuiFlyoutBody>
+          <GroupPreview
+            group={group}
+            dataViews={dataViews}
+            LensEmbeddableComponent={LensEmbeddableComponent}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiFlyout>

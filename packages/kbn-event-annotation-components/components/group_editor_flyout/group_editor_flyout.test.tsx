@@ -50,18 +50,6 @@ const assertChartTimeRange = (component: ShallowWrapper, expectedTimeRange: Time
 };
 
 describe('group editor flyout', () => {
-  beforeAll(() => {
-    jest.useFakeTimers();
-  });
-
-  afterEach(() => {
-    jest.clearAllTimers();
-  });
-
-  afterAll(() => {
-    jest.useRealTimers();
-  });
-
   const annotation = getDefaultManualAnnotation('my-id', 'some-timestamp');
 
   const group: EventAnnotationGroupConfig = {
