@@ -252,6 +252,8 @@ export class AlertingPlugin {
       );
     }
 
+    this.logger.info(`trivial change`);
+
     this.eventLogger = plugins.eventLog.getLogger({
       event: { provider: EVENT_LOG_PROVIDER },
     });
