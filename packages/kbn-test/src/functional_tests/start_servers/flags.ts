@@ -40,7 +40,7 @@ export function parseFlags(flags: FlagsReader) {
 
   return {
     config: configs[0],
-    esFrom: flags.enum('esFrom', ['source', 'snapshot']),
+    esFrom: flags.enum('esFrom', ['source', 'snapshot', 'serverless']),
     esVersion: EsVersion.getDefault(),
     installDir: flags.string('kibana-install-dir'),
     logsDir: flags.boolean('logToFile')

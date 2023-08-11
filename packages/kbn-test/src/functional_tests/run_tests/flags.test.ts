@@ -108,7 +108,7 @@ describe('parse runTest flags', () => {
 
   it('validates esFrom', () => {
     expect(() => test({ esFrom: 'foo' })).toThrowErrorMatchingInlineSnapshot(
-      `"invalid --esFrom, expected one of \\"snapshot\\", \\"source\\""`
+      `"invalid --esFrom, expected one of \\"snapshot\\", \\"source\\", \\"serverless\\""`
     );
   });
 

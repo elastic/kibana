@@ -74,7 +74,7 @@ export function parseFlags(flags: FlagsReader) {
     logsDir: flags.boolean('logToFile')
       ? Path.resolve(REPO_ROOT, 'data/ftr_servers_logs', uuidV4())
       : undefined,
-    esFrom: flags.enum('esFrom', ['snapshot', 'source']) ?? 'snapshot',
+    esFrom: flags.enum('esFrom', ['snapshot', 'source', 'serverless']) ?? 'snapshot',
     installDir: flags.path('kibana-install-dir'),
     grep: flags.string('grep'),
     suiteTags: {
