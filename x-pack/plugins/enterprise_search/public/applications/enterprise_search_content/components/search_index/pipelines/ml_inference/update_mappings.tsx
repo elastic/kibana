@@ -175,7 +175,7 @@ export const UpdateMappings: React.FC = () => {
             <EuiBasicTable
               columns={columns}
               items={configuration.fieldMappings ?? []}
-              rowHeader="sourceField"
+              rowHeader="targetField"
             />
           </EuiPanel>
         </EuiFlexItem>
