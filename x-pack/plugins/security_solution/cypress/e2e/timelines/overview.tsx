@@ -27,7 +27,9 @@ import { TIMELINES_URL } from '../../urls/navigation';
 describe('timeline overview search', () => {
   before(() => {
     cleanKibana();
+  });
 
+  beforeEach(() => {
     createTimeline(getFavoritedTimeline())
       .then((response) => response.body.data.persistTimeline.timeline.savedObjectId)
       .then((timelineId) => favoriteTimeline({ timelineId, timelineType: 'default' }));

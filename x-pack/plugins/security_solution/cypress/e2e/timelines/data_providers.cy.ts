@@ -23,6 +23,9 @@ import { cleanKibana, scrollToBottom } from '../../tasks/common';
 describe.skip('timeline data providers', () => {
   before(() => {
     cleanKibana();
+  });
+
+  beforeEach(() => {
     loginAndWaitForPage(HOSTS_URL);
     waitForAllHostsToBeLoaded();
     scrollToBottom();

@@ -25,8 +25,11 @@ const loadDetectionsPage = (role: ROLES) => {
 
 describe('Alerts timeline', () => {
   before(() => {
-    // First we login as a privileged user to create alerts.
     cleanKibana();
+  });
+
+  beforeEach(() => {
+    // First we login as a privileged user to create alerts.
     loginAndWaitForPage(ALERTS_URL, ROLES.platform_engineer);
     waitForAlertsPanelToBeLoaded();
     waitForAlertsIndexToBeCreated();

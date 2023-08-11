@@ -35,6 +35,9 @@ import { TIMELINES_URL } from '../../urls/navigation';
 describe('Timeline query tab', () => {
   before(() => {
     cleanKibana();
+  });
+
+  beforeEach(() => {
     loginAndWaitForPageWithoutDateRange(TIMELINES_URL);
     waitForTimelinesPanelToBeLoaded();
 

@@ -28,6 +28,7 @@ describe('Overflow items', () => {
     before(() => {
       cleanKibana();
     });
+
     beforeEach(() => {
       loginAndWaitForPage(NETWORK_URL);
     });

@@ -54,6 +54,9 @@ import { cleanKibana } from '../../tasks/common';
 describe('top-level navigation common to all pages in the Security app', () => {
   before(() => {
     cleanKibana();
+  });
+
+  beforeEach(() => {
     loginAndWaitForPage(TIMELINES_URL);
   });
 

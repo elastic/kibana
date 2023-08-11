@@ -115,8 +115,11 @@ describe('Timelines', (): void => {
 
 describe('Create a timeline from a template', () => {
   before(() => {
-    cy.intercept('/api/timeline*').as('timeline');
     cleanKibana();
+  });
+
+  beforeEach(() => {
+    cy.intercept('/api/timeline*').as('timeline');
     createTimelineTemplate(getTimeline());
     loginAndWaitForPageWithoutDateRange(TIMELINE_TEMPLATES_URL);
     waitForTimelinesPanelToBeLoaded();

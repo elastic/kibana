@@ -47,6 +47,9 @@ describe('Events Viewer', () => {
   context('Fields rendering', () => {
     before(() => {
       cleanKibana();
+    });
+
+    beforeEach(() => {
       loginAndWaitForPage(HOSTS_URL);
       openEvents();
     });
@@ -74,6 +77,9 @@ describe('Events Viewer', () => {
   context('Events viewer query modal', () => {
     before(() => {
       cleanKibana();
+    });
+
+    beforeEach(() => {
       loginAndWaitForPage(HOSTS_URL);
       openEvents();
     });
@@ -88,6 +94,9 @@ describe('Events Viewer', () => {
   context('Events viewer fields behaviour', () => {
     before(() => {
       cleanKibana();
+    });
+
+    beforeEach(() => {
       loginAndWaitForPage(HOSTS_URL);
       openEvents();
     });
@@ -120,6 +129,9 @@ describe('Events Viewer', () => {
   context('Events behavior', () => {
     before(() => {
       cleanKibana();
+    });
+
+    beforeEach(() => {
       loginAndWaitForPage(HOSTS_URL);
       openEvents();
       waitsForEventsToBeLoaded();

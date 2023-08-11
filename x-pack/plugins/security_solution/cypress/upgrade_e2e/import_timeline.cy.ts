@@ -92,6 +92,10 @@ describe('Import timeline after upgrade', () => {
     setKibanaTimezoneToUTC();
   });
 
+  beforeEach(() => {
+    loginAndWaitForPageWithoutDateRange(TIMELINES_URL);
+  });
+
   after(() => {
     closeTimeline();
     deleteTimeline();

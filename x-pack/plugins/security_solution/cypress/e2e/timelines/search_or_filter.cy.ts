@@ -52,12 +52,12 @@ describe('timeline search or filter KQL bar', () => {
 describe('Update kqlMode for timeline', () => {
   before(() => {
     cleanKibana();
-    loginAndWaitForPageWithoutDateRange(TIMELINES_URL);
-    waitForTimelinesPanelToBeLoaded();
-    openTimelineUsingToggle();
   });
 
   beforeEach(() => {
+    loginAndWaitForPageWithoutDateRange(TIMELINES_URL);
+    waitForTimelinesPanelToBeLoaded();
+    openTimelineUsingToggle();
     cy.intercept('PATCH', '/api/timeline').as('update');
     cy.get(TIMELINE_SEARCH_OR_FILTER)
       .pipe(($el) => $el.trigger('click'))

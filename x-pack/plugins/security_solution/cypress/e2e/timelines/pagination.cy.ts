@@ -26,6 +26,9 @@ const defaultPageSize = 25;
 describe('Pagination', () => {
   before(() => {
     cleanKibana();
+  });
+
+  beforeEach(() => {
     loginAndWaitForPage(HOSTS_URL);
     openTimelineUsingToggle();
     populateTimeline();

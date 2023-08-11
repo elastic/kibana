@@ -24,12 +24,11 @@ import { HOSTS_PAGE_TAB_URLS } from '../../urls/navigation';
 describe('Pagination', () => {
   before(() => {
     cleanKibana();
-    loginAndWaitForPage(HOSTS_PAGE_TAB_URLS.uncommonProcesses);
-    waitForUncommonProcessesToBeLoaded();
   });
 
-  afterEach(() => {
-    goToFirstPage();
+  beforeEach(() => {
+    loginAndWaitForPage(HOSTS_PAGE_TAB_URLS.uncommonProcesses);
+    waitForUncommonProcessesToBeLoaded();
   });
 
   it('pagination updates results and page number', () => {

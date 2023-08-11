@@ -78,7 +78,7 @@ const rule = {
 };
 
 describe('After an upgrade, the custom query rule', () => {
-  before(() => {
+  beforeEach(() => {
     loginAndWaitForPage(DETECTIONS_RULE_MANAGEMENT_URL);
     waitForRulesTableToBeLoaded();
     goToRuleDetailsByName(rule.name);

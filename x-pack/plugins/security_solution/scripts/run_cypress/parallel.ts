@@ -11,7 +11,6 @@ import _ from 'lodash';
 import globby from 'globby';
 import pMap from 'p-map';
 import cypress from 'cypress';
-import path from 'path';
 
 import {
   EsVersion,

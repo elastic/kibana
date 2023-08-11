@@ -20,6 +20,9 @@ import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
 describe('Overview Page', () => {
   before(() => {
     cleanKibana();
+  });
+
+  beforeEach(() => {
     esArchiverLoad('overview');
     loginAndWaitForPage(OVERVIEW_URL);
   });

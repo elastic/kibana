@@ -17,6 +17,9 @@ import { cleanKibana } from '../../tasks/common';
 describe('SearchBar', () => {
   before(() => {
     cleanKibana();
+  });
+
+  beforeEach(() => {
     loginAndWaitForPage(HOSTS_URL);
     waitForAllHostsToBeLoaded();
   });

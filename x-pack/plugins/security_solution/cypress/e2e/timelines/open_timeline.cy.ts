@@ -36,6 +36,9 @@ import { TIMELINES_URL } from '../../urls/navigation';
 describe('Open timeline', () => {
   before(() => {
     cleanKibana();
+  });
+
+  beforeEach(() => {
     loginAndWaitForPageWithoutDateRange(TIMELINES_URL);
     waitForTimelinesPanelToBeLoaded();
 

@@ -57,11 +57,7 @@ export function runFtrCli() {
         updateSnapshots: flagsReader.boolean('updateSnapshots') || flagsReader.boolean('u'),
       };
 
-      console.error('configPaths', configPaths);
-
       const config = await readConfigFile(log, esVersion, configPaths[0], settingOverrides);
-
-      console.error('configPatssshs', config);
 
       const functionalTestRunner = new FunctionalTestRunner(log, config, esVersion);
 

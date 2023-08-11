@@ -50,6 +50,9 @@ describe('Fields Browser', () => {
   context('Fields Browser rendering', () => {
     before(() => {
       cleanKibana();
+    });
+
+    beforeEach(() => {
       loginAndWaitForPage(HOSTS_URL);
       openTimelineUsingToggle();
       populateTimeline();
@@ -116,6 +119,9 @@ describe('Fields Browser', () => {
   context('Editing the timeline', () => {
     before(() => {
       cleanKibana();
+    });
+
+    beforeEach(() => {
       loginAndWaitForPage(HOSTS_URL);
       openTimelineUsingToggle();
       populateTimeline();

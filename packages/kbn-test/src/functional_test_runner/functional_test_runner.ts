@@ -23,6 +23,7 @@ import {
   Config,
   SuiteTracker,
   EsVersion,
+  TestMetadata,
 } from './lib';
 import { createEsClientForFtrConfig } from '../es';
 
@@ -225,6 +226,7 @@ export class FunctionalTestRunner {
   ): Promise<T> {
     let runErrorOccurred = false;
     const lifecycle = new Lifecycle(this.log);
+    const metadata = new TestMetadata(lifecycle);
 
     try {
       if (
@@ -245,6 +247,7 @@ export class FunctionalTestRunner {
       const coreProviders = readProviderSpec('Service', {
         lifecycle: () => lifecycle,
         log: () => this.log,
+        testMetadata: () => this.testMetadata,
         config: () => this.config,
         dockerServers: () => dockerServers,
         esVersion: () => this.esVersion,

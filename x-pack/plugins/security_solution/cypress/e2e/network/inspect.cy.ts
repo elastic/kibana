@@ -17,8 +17,12 @@ describe('Inspect', () => {
   context('Network stats and tables', () => {
     before(() => {
       cleanKibana();
+    });
+
+    beforeEach(() => {
       loginAndWaitForPage(NETWORK_URL);
     });
+
     afterEach(() => {
       closesModal();
     });

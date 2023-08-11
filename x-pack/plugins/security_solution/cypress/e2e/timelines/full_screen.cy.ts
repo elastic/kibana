@@ -21,6 +21,9 @@ import { HOSTS_URL } from '../../urls/navigation';
 describe('Toggle full screen', () => {
   before(() => {
     cleanKibana();
+  });
+
+  beforeEach(() => {
     loginAndWaitForPage(HOSTS_URL);
     openTimelineUsingToggle();
     populateTimeline();

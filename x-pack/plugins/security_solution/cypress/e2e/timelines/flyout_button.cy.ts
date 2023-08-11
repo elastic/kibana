@@ -26,6 +26,9 @@ import { HOSTS_URL } from '../../urls/navigation';
 describe('timeline flyout button', () => {
   before(() => {
     cleanKibana();
+  });
+
+  before(() => {
     loginAndWaitForPage(HOSTS_URL);
     waitForAllHostsToBeLoaded();
   });

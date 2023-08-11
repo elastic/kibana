@@ -42,6 +42,9 @@ import { cleanKibana } from '../../tasks/common';
 describe('Exceptions modal', () => {
   before(() => {
     cleanKibana();
+  });
+
+  beforeEach(() => {
     loginAndWaitForPageWithoutDateRange(ALERTS_URL);
     waitForAlertsIndexToBeCreated();
     createCustomRule(getNewRule());

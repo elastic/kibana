@@ -19,7 +19,7 @@ describe('Inspect', () => {
     cleanKibana();
   });
   context('Hosts stats and tables', () => {
-    before(() => {
+    beforeEach(() => {
       loginAndWaitForPage(HOSTS_URL);
     });
     afterEach(() => {
@@ -35,7 +35,7 @@ describe('Inspect', () => {
   });
 
   context('Hosts details', () => {
-    before(() => {
+    beforeEach(() => {
       loginAndWaitForHostDetailsPage();
     });
     afterEach(() => {
