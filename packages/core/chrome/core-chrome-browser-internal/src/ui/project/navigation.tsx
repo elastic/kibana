@@ -35,21 +35,26 @@ export const ProjectNavigation: React.FC<ProjectNavigationProps> = ({
   const isVisible = isOpen;
 
   return (
-    <EuiCollapsibleNav
-      hidden={!isVisible}
-      className="projectLayoutSideNav"
-      css={collabsibleNavCSS}
-      isOpen={isVisible}
-      showButtonIfDocked={true}
-      onClose={closeNav}
-      isDocked={true}
-      size={isVisible ? SIZE_EXPANDED : SIZE_COLLAPSED}
-      hideCloseButton={false}
-      dockedBreakpoint={DOCKED_BREAKPOINT}
-      ownFocus={false}
-      button={button}
-    >
-      {children}
-    </EuiCollapsibleNav>
+    <>
+      {
+        /* must render the tree to initialize the navigation, even if it shouldn't be visible */
+        !isOpen && <div hidden>{children}</div>
+      }
+      <EuiCollapsibleNav
+        className="projectLayoutSideNav"
+        css={collabsibleNavCSS}
+        isOpen={isVisible /* only affects docked state */}
+        showButtonIfDocked={true}
+        onClose={closeNav}
+        isDocked={true}
+        size={isVisible ? SIZE_EXPANDED : SIZE_COLLAPSED}
+        hideCloseButton={false}
+        dockedBreakpoint={DOCKED_BREAKPOINT}
+        ownFocus={false}
+        button={button}
+      >
+        {isOpen && children}
+      </EuiCollapsibleNav>
+    </>
   );
 };
