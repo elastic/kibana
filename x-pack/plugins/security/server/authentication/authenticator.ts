@@ -10,6 +10,26 @@ import { CoreKibanaRequest } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
+import { AuthenticationResult } from './authentication_result';
+import { canRedirectRequest } from './can_redirect_request';
+import { DeauthenticationResult } from './deauthentication_result';
+import { HTTPAuthorizationHeader } from './http_authentication';
+import type {
+  AuthenticationProviderOptions,
+  AuthenticationProviderSpecificOptions,
+  BaseAuthenticationProvider,
+} from './providers';
+import {
+  AnonymousAuthenticationProvider,
+  BasicAuthenticationProvider,
+  HTTPAuthenticationProvider,
+  KerberosAuthenticationProvider,
+  OIDCAuthenticationProvider,
+  PKIAuthenticationProvider,
+  SAMLAuthenticationProvider,
+  TokenAuthenticationProvider,
+} from './providers';
+import { Tokens } from './tokens';
 import type { AuthenticatedUser, AuthenticationProvider, SecurityLicense } from '../../common';
 import {
   AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER,
@@ -33,26 +53,6 @@ import {
   type SessionValue,
 } from '../session_management';
 import type { UserProfileServiceStartInternal } from '../user_profile';
-import { AuthenticationResult } from './authentication_result';
-import { canRedirectRequest } from './can_redirect_request';
-import { DeauthenticationResult } from './deauthentication_result';
-import { HTTPAuthorizationHeader } from './http_authentication';
-import type {
-  AuthenticationProviderOptions,
-  AuthenticationProviderSpecificOptions,
-  BaseAuthenticationProvider,
-} from './providers';
-import {
-  AnonymousAuthenticationProvider,
-  BasicAuthenticationProvider,
-  HTTPAuthenticationProvider,
-  KerberosAuthenticationProvider,
-  OIDCAuthenticationProvider,
-  PKIAuthenticationProvider,
-  SAMLAuthenticationProvider,
-  TokenAuthenticationProvider,
-} from './providers';
-import { Tokens } from './tokens';
 
 /**
  * List of query string parameters used to pass various authentication related metadata that should

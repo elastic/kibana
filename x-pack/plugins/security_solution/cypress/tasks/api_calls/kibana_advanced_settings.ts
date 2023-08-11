@@ -27,3 +27,8 @@ export const enableRelatedIntegrations = () => {
 export const disableRelatedIntegrations = () => {
   kibanaSettings(relatedIntegrationsBody(false));
 };
+
+export const disableExpandableFlyout = () => {
+  const body = { changes: { 'securitySolution:enableExpandableFlyout': false } };
+  kibanaSettings(body);
+};
