@@ -86,14 +86,14 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
       testSubjects.click(type === 'failed' ? 'distribution_bar_failed' : 'distribution_bar_passed'),
   };
 
-  const createNoInstalledObject = (notInstalledSubject: string) => ({
+  const createNotInstalledObject = (notInstalledSubject: string) => ({
     getElement() {
       return testSubjects.find(notInstalledSubject);
     },
 
-    async navigateToAction() {
+    async navigateToAction(actionTestSubject: string) {
       const element = await this.getElement();
-      const button = await element.findByCssSelector('[data-test-subj="not-installed-action"');
+      const button = await element.findByCssSelector(`[data-test-subj="${actionTestSubject}"]`);
       await button.click();
     },
   });
@@ -215,6 +215,14 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
     );
   };
 
+  const navigateToMisconfigurations = async () => {
+    await PageObjects.common.navigateToUrl(
+      'securitySolution', // Defined in Security Solution plugin
+      'cloud_security_posture/findings/configurations',
+      { shouldUseHashForSubUrl: false }
+    );
+  };
+
   const latestFindingsTable = createTableObject('latest_findings_table');
   const resourceFindingsTable = createTableObject('resource_findings_table');
   const findingsByResourceTable = {
@@ -230,15 +238,18 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
       await link.click();
     },
   };
-  const notInstalledVulnerabilities = createNoInstalledObject('cnvm-integration-not-installed');
+  const notInstalledVulnerabilities = createNotInstalledObject('cnvm-integration-not-installed');
+  const notInstalledCSP = createNotInstalledObject('cloud_posture_page_package_not_installed');
 
   return {
     navigateToLatestFindingsPage,
     navigateToVulnerabilities,
+    navigateToMisconfigurations,
     latestFindingsTable,
     resourceFindingsTable,
     findingsByResourceTable,
     notInstalledVulnerabilities,
+    notInstalledCSP,
     index,
     waitForPluginInitialized,
     distributionBar,

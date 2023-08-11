@@ -15,20 +15,45 @@ export default ({ getPageObjects }: FtrProviderContext) => {
   describe('Findings Page onboarding', function () {
     this.tags(['cloud_security_posture_findings_onboarding']);
     let findings: typeof PageObjects.findings;
-    let noFindingsVulnerabilities: typeof findings.notInstalledVulnerabilities;
+    let notInstalledVulnerabilities: typeof findings.notInstalledVulnerabilities;
+    let notInstalledCSP: typeof findings.notInstalledCSP;
 
-    it('clicking on the `No integrations installed` prompt action button - `install CNVM`: navigates to the CNVM integration installation page', async () => {
+    beforeEach(async () => {
       findings = PageObjects.findings;
-      noFindingsVulnerabilities = findings.notInstalledVulnerabilities;
+      notInstalledVulnerabilities = findings.notInstalledVulnerabilities;
+      notInstalledCSP = findings.notInstalledCSP;
 
       await findings.waitForPluginInitialized();
+    });
 
+    it('clicking on the `No integrations installed` prompt action button - `install CNVM`: navigates to the CNVM integration installation page', async () => {
       await findings.navigateToVulnerabilities();
-      const element = await noFindingsVulnerabilities.getElement();
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      const element = await notInstalledVulnerabilities.getElement();
       expect(element).to.not.be(null);
 
-      await noFindingsVulnerabilities.navigateToAction();
-      await PageObjects.common.waitUntilUrlIncludes('integrations/cloud_security_posture');
+      await notInstalledVulnerabilities.navigateToAction('cnvm-not-installed-action');
+      await PageObjects.common.waitUntilUrlIncludes('add-integration/vuln_mgmt');
+    });
+
+    it('clicking on the `No integrations installed` prompt action button - `install cloud posture intergation`: navigates to the CSPM integration installation page', async () => {
+      await findings.navigateToMisconfigurations();
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      const element = await notInstalledCSP.getElement();
+      expect(element).to.not.be(null);
+
+      await notInstalledCSP.navigateToAction('cspm-not-installed-action');
+      await PageObjects.common.waitUntilUrlIncludes('add-integration/cspm');
+    });
+
+    it('clicking on the `No integrations installed` prompt action button - `install kubernetes posture intergation`: navigates to the KSPM integration installation page', async () => {
+      await findings.navigateToMisconfigurations();
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      const element = await notInstalledCSP.getElement();
+      expect(element).to.not.be(null);
+
+      await notInstalledCSP.navigateToAction('kspm-not-installed-action');
+      await PageObjects.common.waitUntilUrlIncludes('add-integration/kspm');
     });
   });
 };
