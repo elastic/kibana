@@ -211,9 +211,7 @@ export class EndpointMetadataService {
       | MaybeImmutable<AgentPolicy>
       | MaybeImmutable<AgentPolicyWithPackagePolicies>,
     /** If undefined, it will be retrieved from Fleet using the ID in the endpointMetadata */
-    _endpointPackagePolicy?: MaybeImmutable<PackagePolicy>,
-    /** If undefined, it will be retrieved from _fleetAgent or endpointMetadata */
-    _last_checkin?: string
+    _endpointPackagePolicy?: MaybeImmutable<PackagePolicy>
   ): Promise<HostInfo> {
     let fleetAgentId = endpointMetadata.elastic.agent.id;
     // casting below is done only to remove `immutable<>` from the object if they are defined as such
@@ -297,9 +295,7 @@ export class EndpointMetadataService {
         },
       },
       last_checkin:
-        _last_checkin ||
-        fleetAgent?.last_checkin ||
-        new Date(endpointMetadata['@timestamp']).toISOString(),
+        fleetAgent?.last_checkin || new Date(endpointMetadata['@timestamp']).toISOString(),
     };
   }
 
@@ -442,23 +438,18 @@ export class EndpointMetadataService {
         const agentPolicy = agentPoliciesMap[_agent.policy_id!];
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         const endpointPolicy = endpointPoliciesMap[_agent.policy_id!];
-        // add the agent status from the fleet runtime field to
-        // the agent object
+
+        const runtimeFields = {
+          status: doc?.fields?.status?.[0] as AgentStatus,
+          last_checkin: doc?.fields?.last_checkin?.[0] as string | undefined,
+        };
         const agent: typeof _agent = {
           ..._agent,
-          status: doc?.fields?.status?.[0] as AgentStatus,
+          ...runtimeFields,
         };
-        const lastCheckin = doc?.fields?.last_checkin?.[0] as string | undefined;
 
         hosts.push(
-          await this.enrichHostMetadata(
-            fleetServices,
-            metadata,
-            agent,
-            agentPolicy,
-            endpointPolicy,
-            lastCheckin
-          )
+          await this.enrichHostMetadata(fleetServices, metadata, agent, agentPolicy, endpointPolicy)
         );
       }
     }
