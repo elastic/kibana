@@ -17,6 +17,7 @@ import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { generateFilters } from '@kbn/data-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
+import { removeInterceptedWarningDuplicates } from '@kbn/search-response-warnings';
 import { DOC_TABLE_LEGACY, SEARCH_FIELDS_FROM_SOURCE } from '@kbn/discover-utils';
 import { ContextErrorMessage } from './components/context_error_message';
 import { LoadingStatus } from './services/context_query_state';
@@ -172,6 +173,20 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
     [fetchedState.predecessors, fetchedState.anchor, fetchedState.successors]
   );
 
+  const interceptedWarnings = useMemo(
+    () =>
+      removeInterceptedWarningDuplicates([
+        ...(fetchedState.predecessorsInterceptedWarnings || []),
+        ...(fetchedState.anchorInterceptedWarnings || []),
+        ...(fetchedState.successorsInterceptedWarnings || []),
+      ]),
+    [
+      fetchedState.predecessorsInterceptedWarnings,
+      fetchedState.anchorInterceptedWarnings,
+      fetchedState.successorsInterceptedWarnings,
+    ]
+  );
+
   const addFilter = useCallback(
     async (field: DataViewField | string, values: unknown, operation: string) => {
       const newFilters = generateFilters(filterManager, field, values, operation, dataView);
@@ -251,6 +266,7 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
                 anchorStatus={fetchedState.anchorStatus.value}
                 predecessorsStatus={fetchedState.predecessorsStatus.value}
                 successorsStatus={fetchedState.successorsStatus.value}
+                interceptedWarnings={interceptedWarnings}
               />
             </EuiPageBody>
           </EuiPage>
