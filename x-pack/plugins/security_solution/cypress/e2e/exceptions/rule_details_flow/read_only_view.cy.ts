@@ -9,7 +9,7 @@ import { getExceptionList } from '../../../objects/exception';
 import { getNewRule } from '../../../objects/rule';
 import { ROLES } from '../../../../common/test';
 import { createRule } from '../../../tasks/api_calls/rules';
-import { login, logout, visitWithoutDateRange } from '../../../tasks/login';
+import { login, visitWithoutDateRange } from '../../../tasks/login';
 import { goToExceptionsTab, goToAlertsTab } from '../../../tasks/rule_details';
 import { goToRuleDetails } from '../../../tasks/alerts_detection_rules';
 import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../../urls/navigation';
@@ -32,7 +32,6 @@ describe('Exceptions viewer read only', () => {
 
   before(() => {
     cleanKibana();
-    login();
     // create rule with exceptions
     createExceptionList(exceptionList, exceptionList.list_id).then((response) => {
       createRule(
@@ -51,7 +50,6 @@ describe('Exceptions viewer read only', () => {
         })
       );
     });
-    logout();
   });
 
   beforeEach(() => {
