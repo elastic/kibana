@@ -41,19 +41,17 @@ export default function ({ getService }: FtrProviderContext) {
     let ruleId: string;
 
     afterEach(async () => {
-      await supertest.delete(`/api/actions/connector/${actionId}`).set('kbn-xsrf', 'foo');
-      await supertest.delete(`/api/alerting/rule/${ruleId}`).set('kbn-xsrf', 'foo');
+      await supertest
+        .delete(`/api/actions/connector/${actionId}`)
+        .set('kbn-xsrf', 'foo')
+        .set('x-elastic-internal-origin', 'foo');
+      await supertest
+        .delete(`/api/alerting/rule/${ruleId}`)
+        .set('kbn-xsrf', 'foo')
+        .set('x-elastic-internal-origin', 'foo');
       await esClient.deleteByQuery({
         index: '.kibana-event-log-*',
         query: { term: { 'kibana.alert.rule.consumer': 'alerts' } },
-      });
-      await esClient.deleteByQuery({
-        index: '.kibana_task_manager*',
-        query: { term: { 'task.scope': 'actions' } },
-      });
-      await esClient.deleteByQuery({
-        index: '.kibana_task_manager*',
-        query: { term: { 'task.scope': 'alerting' } },
       });
       await esDeleteAllIndices([ALERT_ACTION_INDEX]);
     });
