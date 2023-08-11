@@ -59,7 +59,7 @@ export class AppFeatures {
     return this.appFeatures.has(appFeatureKey);
   }
 
-  private registerEnabledKibanaFeatures() {
+  protected registerEnabledKibanaFeatures() {
     if (this.featuresSetup == null) {
       throw new Error(
         'Cannot sync kibana features as featuresSetup is not present. Did you call init?'
