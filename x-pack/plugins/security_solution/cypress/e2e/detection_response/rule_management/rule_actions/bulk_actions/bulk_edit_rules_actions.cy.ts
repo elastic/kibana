@@ -6,6 +6,7 @@
  */
 
 import type { RuleActionArray } from '@kbn/securitysolution-io-ts-alerting-types';
+import { createRuleAssetSavedObject } from '../../../../../helpers/rules';
 import {
   waitForCallOutToBeShown,
   MISSING_PRIVILEGES_CALLOUT,
@@ -65,7 +66,6 @@ import {
   excessivelyInstallAllPrebuiltRules,
   preventPrebuiltRulesPackageInstallation,
 } from '../../../../../tasks/api_calls/prebuilt_rules';
-import { createRuleAssetSavedObject } from '@kbn/security-solution-plugin/cypress/helpers/rules';
 
 const ruleNameToAssert = 'Custom rule name with actions';
 const expectedNumberOfCustomRulesToBeEdited = 7;
@@ -125,7 +125,7 @@ describe('Detection rules, bulk edit of rule actions', () => {
       rule_id: 'rule_2',
     });
 
-    createAndInstallMockedPrebuiltRules({rules: [RULE_1, RULE_2]});
+    createAndInstallMockedPrebuiltRules({ rules: [RULE_1, RULE_2] });
   });
 
   context('Restricted action privileges', () => {
