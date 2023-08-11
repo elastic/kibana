@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { SECURITY_ESSENTIALS_NO_ENDPOINT } from './utils/product_types';
 import { login } from '../../tasks/login';
 import {
   getConsoleActionMenuItem,
@@ -23,7 +22,7 @@ describe(
   {
     env: {
       ftrConfig: {
-        productTypes: SECURITY_ESSENTIALS_NO_ENDPOINT,
+        productTypes: [{ product_line: 'security', product_tier: 'essentials' }],
       },
     },
   },
