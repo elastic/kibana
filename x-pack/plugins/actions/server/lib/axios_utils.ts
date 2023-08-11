@@ -6,7 +6,7 @@
  */
 
 import { isObjectLike, isEmpty } from 'lodash';
-import { AxiosInstance, Method, AxiosResponse, AxiosRequestConfig } from 'axios';
+import { AxiosInstance, Method, AxiosResponse, AxiosRequestConfig, AxiosHeaders } from 'axios';
 import { Logger } from '@kbn/core/server';
 import { getCustomAgents } from './get_custom_agents';
 import { ActionsConfigurationUtilities } from '../actions_config';
@@ -29,7 +29,7 @@ export const request = async <T = unknown>({
   method?: Method;
   data?: T;
   configurationUtilities: ActionsConfigurationUtilities;
-  headers?: Record<string, string> | null;
+  headers?: AxiosHeaders;
   sslOverrides?: SSLSettings;
 } & AxiosRequestConfig): Promise<AxiosResponse> => {
   const { httpAgent, httpsAgent } = getCustomAgents(
@@ -44,7 +44,7 @@ export const request = async <T = unknown>({
     ...config,
     method,
     // Axios doesn't support `null` value for `headers` property.
-    headers: headers ?? undefined,
+    headers,
     data: data ?? {},
     // use httpAgent and httpsAgent and set axios proxy: false, to be able to handle fail on invalid certs
     httpAgent,
@@ -149,6 +149,10 @@ export const createAxiosResponse = (res: Partial<AxiosResponse>): AxiosResponse 
   status: 200,
   statusText: 'OK',
   headers: { ['content-type']: 'application/json' },
-  config: { method: 'GET', url: 'https://example.com' },
+  config: {
+    method: 'GET',
+    url: 'https://example.com',
+    headers: new AxiosHeaders(),
+  },
   ...res,
 });
