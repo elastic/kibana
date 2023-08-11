@@ -20,7 +20,11 @@ import type { ILicense } from '@kbn/licensing-plugin/server';
 import { turnOffPolicyProtectionsIfNotSupported } from './endpoint/migrations/turn_off_policy_protections';
 import { endpointSearchStrategyProvider } from './search_strategy/endpoint';
 import { getScheduleNotificationResponseActionsService } from './lib/detection_engine/rule_response_actions/schedule_notification_response_actions';
-import { siemGuideId, siemGuideConfig } from '../common/guided_onboarding/siem_guide_config';
+import {
+  siemGuideId,
+  getSiemGuideConfig,
+  defaultGuideTranslations,
+} from '../common/guided_onboarding/siem_guide_config';
 import {
   createEqlAlertType,
   createIndicatorMatchAlertType,
@@ -377,6 +381,36 @@ export class Plugin implements ISecuritySolutionPlugin {
       );
 
       plugins.data.search.registerSearchStrategy(ENDPOINT_SEARCH_STRATEGY, endpointSearchStrategy);
+
+      /**
+       * Register a config for the security guide
+       */
+      console.log('depsStart', depsStart);
+      if (depsStart.cloudExperiments) {
+        console.log('in cloud experiments');
+        try {
+          depsStart.cloudExperiments
+            .getVariation('security-solutions.guided-onboarding-content', defaultGuideTranslations)
+            .then((variation) => {
+              console.log('variation', variation);
+              plugins.guidedOnboarding.registerGuideConfig(
+                siemGuideId,
+                getSiemGuideConfig(variation)
+              );
+            });
+        } catch {
+          plugins.guidedOnboarding.registerGuideConfig(
+            siemGuideId,
+            getSiemGuideConfig(defaultGuideTranslations)
+          );
+        }
+      } else {
+        console.log('NOT in cloud experiments');
+        plugins.guidedOnboarding.registerGuideConfig(
+          siemGuideId,
+          getSiemGuideConfig(defaultGuideTranslations)
+        );
+      }
     });
 
     setIsElasticCloudDeployment(plugins.cloud.isCloudEnabled ?? false);
@@ -397,11 +431,6 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     featureUsageService.setup(plugins.licensing);
 
-    /**
-     * Register a config for the security guide
-     */
-    plugins.guidedOnboarding.registerGuideConfig(siemGuideId, siemGuideConfig);
-
     return {
       setAppFeatures: this.appFeatures.set.bind(this.appFeatures),
     };
@@ -411,6 +440,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     core: SecuritySolutionPluginCoreStartDependencies,
     plugins: SecuritySolutionPluginStartDependencies
   ): SecuritySolutionPluginStart {
+    console.log('PLUGS HERE', Object.keys(plugins));
     const { config, logger } = this;
 
     this.ruleMonitoringService.start(core, plugins);

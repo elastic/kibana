@@ -21,6 +21,7 @@ export enum FEATURE_FLAG_NAMES {
    * It resolves the URL that the button "Add Integrations" will point to.
    */
   'security-solutions.add-integrations-url' = 'security-solutions.add-integrations-url',
+  'security-solutions.guided-onboarding-content' = 'security-solutions.guided-onboarding-content',
 }
 
 /**
