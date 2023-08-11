@@ -169,8 +169,7 @@ exports[`guide cards snapshots should render all cards 1`] = `
             Object {
               "icon": "logstashInput",
               "navigateTo": Object {
-                "appId": "integrations",
-                "path": "/browse?q=log",
+                "appId": "observabilityOnboarding",
               },
               "order": 2,
               "solution": "observability",
