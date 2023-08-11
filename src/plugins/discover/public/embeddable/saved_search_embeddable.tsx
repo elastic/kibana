@@ -45,6 +45,10 @@ import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-pl
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { CellActionsProvider } from '@kbn/cell-actions';
+import {
+  getSearchResponseInterceptedWarnings,
+  type SearchResponseInterceptedWarning,
+} from '@kbn/search-response-warnings';
 import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils/types';
 import {
   DOC_HIDE_TIME_COLUMN_SETTING,
@@ -55,7 +59,7 @@ import {
   SORT_DEFAULT_ORDER_SETTING,
   buildDataTableRecord,
 } from '@kbn/discover-utils';
-import { VIEW_MODE } from '../../common/constants';
+import { VIEW_MODE, DISABLE_SHARD_FAILURE_WARNING } from '../../common/constants';
 import type { ISearchEmbeddable, SearchInput, SearchOutput } from './types';
 import type { DiscoverServices } from '../build_services';
 import { getSortForEmbeddable, SortPair } from '../utils/sorting';
@@ -86,6 +90,7 @@ export type SearchProps = Partial<DiscoverGridProps> &
     filter?: (field: DataViewField, value: string[], operator: string) => void;
     hits?: DataTableRecord[];
     totalHitCount?: number;
+    interceptedWarnings?: SearchResponseInterceptedWarning[];
     onMoveColumn?: (column: string, index: number) => void;
     onUpdateRowHeight?: (rowHeight?: number) => void;
     onUpdateRowsPerPage?: (rowsPerPage?: number) => void;
@@ -279,6 +284,7 @@ export class SavedSearchEmbeddable
     this.inspectorAdapters.requests!.reset();
 
     searchProps.isLoading = true;
+    searchProps.interceptedWarnings = undefined;
 
     const wasAlreadyRendered = this.getOutput().rendered;
 
@@ -357,8 +363,19 @@ export class SavedSearchEmbeddable
             }),
           },
           executionContext,
+          disableShardFailureWarning: DISABLE_SHARD_FAILURE_WARNING,
         })
       );
+
+      if (this.inspectorAdapters.requests) {
+        searchProps.interceptedWarnings = getSearchResponseInterceptedWarnings({
+          services: this.services,
+          adapter: this.inspectorAdapters.requests,
+          options: {
+            disableShardFailureWarning: DISABLE_SHARD_FAILURE_WARNING,
+          },
+        });
+      }
 
       this.updateOutput({
         ...this.getOutput(),
