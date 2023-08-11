@@ -9,11 +9,11 @@ import * as Rx from 'rxjs';
 
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 
-import type { ConfigType } from '../config';
-import { spacesConfig } from '../lib/__fixtures__';
 import type { ISpacesClient } from './spaces_client';
 import { SpacesClient } from './spaces_client';
 import { SpacesClientService } from './spaces_client_service';
+import type { ConfigType } from '../config';
+import { spacesConfig } from '../lib/__fixtures__';
 
 const debugLogger = jest.fn();
 
