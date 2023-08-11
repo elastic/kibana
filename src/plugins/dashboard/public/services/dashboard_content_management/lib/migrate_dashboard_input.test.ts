@@ -62,7 +62,7 @@ describe('Migrate dashboard input', () => {
     // migration run should be true because the runEmbeddableFactoryMigrations mock above returns true.
     expect(result.anyMigrationRun).toBe(true);
 
-    expect(embeddableService.getEmbeddableFactory).toHaveBeenCalledTimes(8); // should be called 4 times for the panels, 3 times for the controls and once for the control group
+    expect(embeddableService.getEmbeddableFactory).toHaveBeenCalledTimes(7); // should be called 4 times for the panels, and 3 times for the controls
     expect(embeddableService.getEmbeddableFactory).toHaveBeenCalledWith('superLens');
     expect(embeddableService.getEmbeddableFactory).toHaveBeenCalledWith('ultraDiscover');
     expect(embeddableService.getEmbeddableFactory).toHaveBeenCalledWith('optionsListControl');
