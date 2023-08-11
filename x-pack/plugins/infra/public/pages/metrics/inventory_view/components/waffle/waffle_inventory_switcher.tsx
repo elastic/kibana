@@ -86,6 +86,7 @@ export const WaffleInventorySwitcher: React.FC = () => {
             {
               name: 'AWS',
               panel: 'awsPanel',
+              'data-test-subj': 'goToAWS-open',
             },
           ],
         },
@@ -96,18 +97,22 @@ export const WaffleInventorySwitcher: React.FC = () => {
             {
               name: getDisplayNameForType('awsEC2'),
               onClick: goToAwsEC2,
+              'data-test-subj': 'goToAWS-EC2',
             },
             {
               name: getDisplayNameForType('awsS3'),
               onClick: goToAwsS3,
+              'data-test-subj': 'goToAWS-S3',
             },
             {
               name: getDisplayNameForType('awsRDS'),
               onClick: goToAwsRDS,
+              'data-test-subj': 'goToAWS-RDS',
             },
             {
               name: getDisplayNameForType('awsSQS'),
               onClick: goToAwsSQS,
+              'data-test-subj': 'goToAWS-SQS',
             },
           ],
         },
