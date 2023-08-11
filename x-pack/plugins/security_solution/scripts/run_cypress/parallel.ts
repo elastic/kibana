@@ -402,7 +402,7 @@ ${JSON.stringify(cyCustomEnv, null, 2)}
             } else {
               try {
                 result = await cypress.run({
-                  browser: 'chrome',
+                  browser: 'electron',
                   spec: filePath,
                   configFile: cypressConfigFilePath,
                   reporter: argv.reporter as string,
@@ -411,9 +411,9 @@ ${JSON.stringify(cyCustomEnv, null, 2)}
                   config: {
                     e2e: {
                       baseUrl,
+                      experimentalMemoryManagement: true,
+                      numTestsKeptInMemory: 0,
                     },
-                    experimentalMemoryManagement: true,
-                    numTestsKeptInMemory: 0,
                     env: cyCustomEnv,
                   },
                 });

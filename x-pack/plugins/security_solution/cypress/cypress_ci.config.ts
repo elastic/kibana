@@ -26,6 +26,7 @@ export default defineConfig({
   e2e: {
     baseUrl: 'http://localhost:5601',
     experimentalMemoryManagement: true,
+    numTestsKeptInMemory: 0,
     specPattern: './cypress/e2e/**/*.cy.ts',
     setupNodeEvents(on, config) {
       esArchiver(on, config);
