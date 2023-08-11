@@ -5,8 +5,17 @@
  * 2.0.
  */
 
+import { IEmbeddable } from '@kbn/embeddable-plugin/public';
+import {
+  EmbeddableChangePointChartInput,
+  EmbeddableChangePointChartOutput,
+} from './embeddable_change_point_chart';
 import { EmbeddableChangePointChartProps } from './embeddable_change_point_chart_component';
 
 export type EmbeddableChangePointChartExplicitInput = {
   title: string;
 } & Omit<EmbeddableChangePointChartProps, 'timeRange'>;
+
+export interface EditChangePointChartsPanelContext {
+  embeddable: IEmbeddable<EmbeddableChangePointChartInput, EmbeddableChangePointChartOutput>;
+}
