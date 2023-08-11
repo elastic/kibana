@@ -61,11 +61,13 @@ function getMockOptions({
   http = {},
   selector,
   accessAgreementMessage,
+  customLogoutURL,
 }: {
   providers?: Record<string, unknown> | string[];
   http?: Partial<AuthenticatorOptions['config']['authc']['http']>;
   selector?: AuthenticatorOptions['config']['authc']['selector'];
   accessAgreementMessage?: string;
+  customLogoutURL?: string;
 } = {}) {
   const auditService = auditServiceMock.create();
   auditLogger = auditLoggerMock.create();
@@ -95,6 +97,7 @@ function getMockOptions({
     featureUsageService: securityFeatureUsageServiceMock.createStartContract(),
     userProfileService: userProfileServiceMock.createStart(),
     isElasticCloudDeployment: jest.fn().mockReturnValue(false),
+    customLogoutURL,
   };
 }
 
@@ -248,6 +251,33 @@ describe('Authenticator', () => {
         ).toBe(
           '/mock-server-basepath/security/logged_out?next=%2Fapp%2Fml%2Fencode+me&msg=SESSION_EXPIRED'
         );
+      });
+
+      it('points to a custom URL if `customLogoutURL` is specified', () => {
+        const authenticationProviderMock =
+          jest.requireMock(`./providers/saml`).SAMLAuthenticationProvider;
+        authenticationProviderMock.mockClear();
+        new Authenticator(
+          getMockOptions({
+            selector: { enabled: false },
+            providers: { saml: { saml1: { order: 0, realm: 'realm' } } },
+            customLogoutURL: 'https://some-logout-origin/logout',
+          })
+        );
+        const getLoggedOutURL = authenticationProviderMock.mock.calls[0][0].urls.loggedOut;
+
+        expect(getLoggedOutURL(httpServerMock.createKibanaRequest())).toBe(
+          'https://some-logout-origin/logout'
+        );
+
+        // We don't forward any Kibana specific query string parameters to the external logout URL.
+        expect(
+          getLoggedOutURL(
+            httpServerMock.createKibanaRequest({
+              query: { next: '/app/ml/encode me', msg: 'SESSION_EXPIRED' },
+            })
+          )
+        ).toBe('https://some-logout-origin/logout');
       });
     });
 
