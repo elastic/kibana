@@ -75,6 +75,11 @@ export default function ({ getService }: FtrProviderContext) {
           previousTaskClaimTimestamp = metrics?.task_claim?.timestamp!;
           previousTaskClaimSuccess = metrics?.task_claim?.value.success!;
           previousTaskClaimTotal = metrics?.task_claim?.value.total!;
+
+          // check that duration histogram exists
+          expect(metrics?.task_claim?.value.duration).not.to.be(null);
+          expect(Array.isArray(metrics?.task_claim?.value.duration.counts)).to.be(true);
+          expect(Array.isArray(metrics?.task_claim?.value.duration.values)).to.be(true);
         }
       });
 
@@ -128,6 +133,11 @@ export default function ({ getService }: FtrProviderContext) {
           expect(metrics?.task_claim?.value.total).to.equal(1);
 
           previousTaskClaimTimestamp = metrics?.task_claim?.timestamp!;
+
+          // check that duration histogram exists
+          expect(metrics?.task_claim?.value.duration).not.to.be(null);
+          expect(Array.isArray(metrics?.task_claim?.value.duration.counts)).to.be(true);
+          expect(Array.isArray(metrics?.task_claim?.value.duration.values)).to.be(true);
         }
       });
     });
