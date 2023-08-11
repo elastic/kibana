@@ -11,6 +11,7 @@ import {
   ERROR_GROUP_ID,
 } from '@kbn/apm-plugin/common/es_fields/apm';
 import type { PreviewChartResponseItem } from '@kbn/apm-plugin/server/routes/alerts/route';
+import { getErrorGroupingKey } from '@kbn/apm-synthtrace-client/src/lib/apm/instance';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { generateErrorData } from './generate_data';
@@ -94,7 +95,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               start: new Date(start).toISOString(),
               end: new Date(end).toISOString(),
               serviceName: 'synth-go',
-              errorGroupingKey: '98b75903135eac35ad42419bd3b45cf8b4270c61cbd0ede0f7e8c8a9ac9fdb03',
+              errorGroupingKey: `${getErrorGroupingKey('Error 1')}`,
               environment: 'ENVIRONMENT_ALL',
               interval: '5m',
             },
@@ -181,11 +182,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           }))
         ).to.eql([
           {
-            name: 'synth-go_production_98b75903135eac35ad42419bd3b45cf8b4270c61cbd0ede0f7e8c8a9ac9fdb03',
+            name: `synth-go_production_${getErrorGroupingKey('Error 1')}`,
             y: 250,
           },
           {
-            name: 'synth-go_production_cf676a2665c3c548caaab78db6d23af63aed81bff4360a5b9873c07443aee78c',
+            name: `synth-go_production_${getErrorGroupingKey('Error 0')}`,
             y: 125,
           },
         ]);
@@ -196,7 +197,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           params: {
             query: {
               ...getOptions().params.query,
-              errorGroupingKey: 'cf676a2665c3c548caaab78db6d23af63aed81bff4360a5b9873c07443aee78c',
+              errorGroupingKey: `${getErrorGroupingKey('Error 0')}`,
               groupBy: [SERVICE_NAME, SERVICE_ENVIRONMENT, ERROR_GROUP_ID],
             },
           },
@@ -216,7 +217,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           }))
         ).to.eql([
           {
-            name: 'synth-go_production_cf676a2665c3c548caaab78db6d23af63aed81bff4360a5b9873c07443aee78c',
+            name: `synth-go_production_${getErrorGroupingKey('Error 0')}`,
             y: 125,
           },
         ]);
@@ -277,19 +278,19 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           }))
         ).to.eql([
           {
-            name: 'synth-go_production_98b75903135eac35ad42419bd3b45cf8b4270c61cbd0ede0f7e8c8a9ac9fdb03',
+            name: `synth-go_production_${getErrorGroupingKey('Error 1')}`,
             y: 250,
           },
           {
-            name: 'synth-java_production_98b75903135eac35ad42419bd3b45cf8b4270c61cbd0ede0f7e8c8a9ac9fdb03',
+            name: `synth-java_production_${getErrorGroupingKey('Error 1')}`,
             y: 250,
           },
           {
-            name: 'synth-go_production_cf676a2665c3c548caaab78db6d23af63aed81bff4360a5b9873c07443aee78c',
+            name: `synth-go_production_${getErrorGroupingKey('Error 0')}`,
             y: 125,
           },
           {
-            name: 'synth-java_production_cf676a2665c3c548caaab78db6d23af63aed81bff4360a5b9873c07443aee78c',
+            name: `synth-java_production_${getErrorGroupingKey('Error 0')}`,
             y: 125,
           },
         ]);
@@ -327,8 +328,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           params: {
             query: {
               ...getOptionsWithFilterQuery().params.query,
-              kqlFilter:
-                'service.name: synth-go and error.grouping_key: 98b75903135eac35ad42419bd3b45cf8b4270c61cbd0ede0f7e8c8a9ac9fdb03',
+              kqlFilter: `service.name: synth-go and error.grouping_key: ${getErrorGroupingKey(
+                'Error 1'
+              )}`,
             },
           },
         };
@@ -413,11 +415,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           }))
         ).to.eql([
           {
-            name: 'synth-go_production_98b75903135eac35ad42419bd3b45cf8b4270c61cbd0ede0f7e8c8a9ac9fdb03',
+            name: `synth-go_production_${getErrorGroupingKey('Error 1')}`,
             y: 250,
           },
           {
-            name: 'synth-go_production_cf676a2665c3c548caaab78db6d23af63aed81bff4360a5b9873c07443aee78c',
+            name: `synth-go_production_${getErrorGroupingKey('Error 0')}`,
             y: 125,
           },
         ]);
@@ -428,8 +430,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           params: {
             query: {
               ...getOptionsWithFilterQuery().params.query,
-              kqlFilter:
-                'service.name: synth-go and error.grouping_key: cf676a2665c3c548caaab78db6d23af63aed81bff4360a5b9873c07443aee78c',
+              kqlFilter: `service.name: synth-go and error.grouping_key: ${getErrorGroupingKey(
+                'Error 0'
+              )}`,
               groupBy: [SERVICE_NAME, SERVICE_ENVIRONMENT, ERROR_GROUP_ID],
             },
           },
@@ -449,7 +452,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           }))
         ).to.eql([
           {
-            name: 'synth-go_production_cf676a2665c3c548caaab78db6d23af63aed81bff4360a5b9873c07443aee78c',
+            name: `synth-go_production_${getErrorGroupingKey('Error 0')}`,
             y: 125,
           },
         ]);
@@ -506,19 +509,19 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           }))
         ).to.eql([
           {
-            name: 'synth-go_production_98b75903135eac35ad42419bd3b45cf8b4270c61cbd0ede0f7e8c8a9ac9fdb03',
+            name: `synth-go_production_${getErrorGroupingKey('Error 1')}`,
             y: 250,
           },
           {
-            name: 'synth-java_production_98b75903135eac35ad42419bd3b45cf8b4270c61cbd0ede0f7e8c8a9ac9fdb03',
+            name: `synth-java_production_${getErrorGroupingKey('Error 1')}`,
             y: 250,
           },
           {
-            name: 'synth-go_production_cf676a2665c3c548caaab78db6d23af63aed81bff4360a5b9873c07443aee78c',
+            name: `synth-go_production_${getErrorGroupingKey('Error 0')}`,
             y: 125,
           },
           {
-            name: 'synth-java_production_cf676a2665c3c548caaab78db6d23af63aed81bff4360a5b9873c07443aee78c',
+            name: `synth-java_production_${getErrorGroupingKey('Error 0')}`,
             y: 125,
           },
         ]);
