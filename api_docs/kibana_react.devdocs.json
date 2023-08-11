@@ -581,18 +581,6 @@
             "path": "src/plugins/home/public/application/components/tutorial/tutorial.js"
           },
           {
-            "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/public/components/home/home.component.tsx"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/public/components/home/home.component.tsx"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/public/components/home/home.component.tsx"
-          },
-          {
             "plugin": "osquery",
             "path": "x-pack/plugins/osquery/public/components/empty_state.tsx"
           },
@@ -917,6 +905,18 @@
             "path": "src/plugins/visualizations/public/visualize_app/index.tsx"
           },
           {
+            "plugin": "serverless",
+            "path": "x-pack/plugins/serverless/public/plugin.tsx"
+          },
+          {
+            "plugin": "serverless",
+            "path": "x-pack/plugins/serverless/public/plugin.tsx"
+          },
+          {
+            "plugin": "serverless",
+            "path": "x-pack/plugins/serverless/public/plugin.tsx"
+          },
+          {
             "plugin": "controls",
             "path": "src/plugins/controls/public/options_list/embeddable/options_list_embeddable.tsx"
           },
@@ -1137,18 +1137,6 @@
             "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx"
           },
           {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/public/application/maintenance_windows.tsx"
-          },
-          {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/public/application/maintenance_windows.tsx"
-          },
-          {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/public/application/maintenance_windows.tsx"
-          },
-          {
             "plugin": "security",
             "path": "x-pack/plugins/security/public/authentication/access_agreement/access_agreement_page.tsx"
           },
@@ -1269,6 +1257,18 @@
             "path": "x-pack/plugins/security/public/nav_control/nav_control_service.tsx"
           },
           {
+            "plugin": "alerting",
+            "path": "x-pack/plugins/alerting/public/application/maintenance_windows.tsx"
+          },
+          {
+            "plugin": "alerting",
+            "path": "x-pack/plugins/alerting/public/application/maintenance_windows.tsx"
+          },
+          {
+            "plugin": "alerting",
+            "path": "x-pack/plugins/alerting/public/application/maintenance_windows.tsx"
+          },
+          {
             "plugin": "triggersActionsUi",
             "path": "x-pack/plugins/triggers_actions_ui/public/application/app.tsx"
           },
@@ -1293,18 +1293,6 @@
             "path": "x-pack/plugins/triggers_actions_ui/public/application/connectors_app.tsx"
           },
           {
-            "plugin": "serverless",
-            "path": "x-pack/plugins/serverless/public/plugin.tsx"
-          },
-          {
-            "plugin": "serverless",
-            "path": "x-pack/plugins/serverless/public/plugin.tsx"
-          },
-          {
-            "plugin": "serverless",
-            "path": "x-pack/plugins/serverless/public/plugin.tsx"
-          },
-          {
             "plugin": "cases",
             "path": "x-pack/plugins/cases/public/application.tsx"
           },
@@ -1315,6 +1303,18 @@
           {
             "plugin": "cases",
             "path": "x-pack/plugins/cases/public/application.tsx"
+          },
+          {
+            "plugin": "aiops",
+            "path": "x-pack/plugins/aiops/public/embeddable/embeddable_change_point_chart.tsx"
+          },
+          {
+            "plugin": "aiops",
+            "path": "x-pack/plugins/aiops/public/embeddable/embeddable_change_point_chart.tsx"
+          },
+          {
+            "plugin": "aiops",
+            "path": "x-pack/plugins/aiops/public/embeddable/embeddable_change_point_chart.tsx"
           },
           {
             "plugin": "discover",
@@ -1371,6 +1371,18 @@
           {
             "plugin": "exploratoryView",
             "path": "x-pack/plugins/exploratory_view/public/application/index.tsx"
+          },
+          {
+            "plugin": "observabilityAIAssistant",
+            "path": "x-pack/plugins/observability_ai_assistant/public/application.tsx"
+          },
+          {
+            "plugin": "observabilityAIAssistant",
+            "path": "x-pack/plugins/observability_ai_assistant/public/application.tsx"
+          },
+          {
+            "plugin": "observabilityAIAssistant",
+            "path": "x-pack/plugins/observability_ai_assistant/public/application.tsx"
           },
           {
             "plugin": "fleet",
@@ -1581,54 +1593,6 @@
             "path": "x-pack/plugins/apm/public/application/index.tsx"
           },
           {
-            "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/canvas_plugin_src/renderers/embeddable/embeddable.tsx"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/canvas_plugin_src/renderers/embeddable/embeddable.tsx"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/canvas_plugin_src/renderers/embeddable/embeddable.tsx"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/canvas_plugin_src/renderers/filters/advanced_filter/index.tsx"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/canvas_plugin_src/renderers/filters/advanced_filter/index.tsx"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/canvas_plugin_src/renderers/filters/advanced_filter/index.tsx"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/canvas_plugin_src/renderers/filters/dropdown_filter/index.tsx"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/canvas_plugin_src/renderers/filters/dropdown_filter/index.tsx"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/canvas_plugin_src/renderers/filters/dropdown_filter/index.tsx"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/canvas_plugin_src/renderers/filters/time_filter/index.tsx"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/canvas_plugin_src/renderers/filters/time_filter/index.tsx"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/canvas_plugin_src/renderers/filters/time_filter/index.tsx"
-          },
-          {
             "plugin": "expressionImage",
             "path": "src/plugins/expression_image/public/expression_renderers/image_renderer.tsx"
           },
@@ -1723,62 +1687,6 @@
           {
             "plugin": "expressionShape",
             "path": "src/plugins/expression_shape/public/expression_renderers/progress_renderer.tsx"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/canvas_plugin_src/renderers/markdown/index.tsx"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/canvas_plugin_src/renderers/markdown/index.tsx"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/canvas_plugin_src/renderers/markdown/index.tsx"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/canvas_plugin_src/renderers/text.tsx"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/canvas_plugin_src/renderers/text.tsx"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/canvas_plugin_src/renderers/text.tsx"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/canvas_plugin_src/renderers/table.tsx"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/canvas_plugin_src/renderers/table.tsx"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/canvas_plugin_src/renderers/table.tsx"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/public/application.tsx"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/public/application.tsx"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/public/application.tsx"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/public/application.tsx"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/public/application.tsx"
           },
           {
             "plugin": "indexManagement",
@@ -3635,11 +3543,103 @@
             "path": "x-pack/plugins/lens/public/trigger_actions/open_lens_config/helpers.ts"
           },
           {
+            "plugin": "security",
+            "path": "x-pack/plugins/security/public/account_management/account_management_app.tsx"
+          },
+          {
+            "plugin": "security",
+            "path": "x-pack/plugins/security/public/account_management/account_management_app.tsx"
+          },
+          {
+            "plugin": "security",
+            "path": "x-pack/plugins/security/public/session/session_expiration_toast.tsx"
+          },
+          {
+            "plugin": "security",
+            "path": "x-pack/plugins/security/public/session/session_expiration_toast.tsx"
+          },
+          {
+            "plugin": "triggersActionsUi",
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/hooks/use_bulk_edit_response.tsx"
+          },
+          {
+            "plugin": "triggersActionsUi",
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/hooks/use_bulk_edit_response.tsx"
+          },
+          {
+            "plugin": "triggersActionsUi",
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/hooks/use_bulk_edit_response.tsx"
+          },
+          {
+            "plugin": "triggersActionsUi",
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/hooks/use_bulk_operation_toast.tsx"
+          },
+          {
+            "plugin": "triggersActionsUi",
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/hooks/use_bulk_operation_toast.tsx"
+          },
+          {
+            "plugin": "triggersActionsUi",
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/hooks/use_bulk_operation_toast.tsx"
+          },
+          {
+            "plugin": "triggersActionsUi",
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/rule_details/components/rule_details.tsx"
+          },
+          {
+            "plugin": "triggersActionsUi",
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/rule_details/components/rule_details.tsx"
+          },
+          {
+            "plugin": "cases",
+            "path": "x-pack/plugins/cases/public/common/use_cases_toast.tsx"
+          },
+          {
+            "plugin": "cases",
+            "path": "x-pack/plugins/cases/public/common/use_cases_toast.tsx"
+          },
+          {
+            "plugin": "cases",
+            "path": "x-pack/plugins/cases/public/common/use_cases_toast.tsx"
+          },
+          {
+            "plugin": "cases",
+            "path": "x-pack/plugins/cases/public/components/visualizations/actions/add_to_new_case.tsx"
+          },
+          {
+            "plugin": "cases",
+            "path": "x-pack/plugins/cases/public/components/visualizations/actions/add_to_new_case.tsx"
+          },
+          {
+            "plugin": "cases",
+            "path": "x-pack/plugins/cases/public/components/visualizations/actions/add_to_existing_case.tsx"
+          },
+          {
+            "plugin": "cases",
+            "path": "x-pack/plugins/cases/public/components/visualizations/actions/add_to_existing_case.tsx"
+          },
+          {
             "plugin": "@kbn/ml-date-picker",
             "path": "x-pack/packages/ml/date_picker/src/hooks/use_date_picker_context.tsx"
           },
           {
             "plugin": "aiops",
+            "path": "x-pack/plugins/aiops/public/embeddable/embeddable_change_point_chart.tsx"
+          },
+          {
+            "plugin": "aiops",
+            "path": "x-pack/plugins/aiops/public/embeddable/embeddable_change_point_chart.tsx"
+          },
+          {
+            "plugin": "aiops",
+            "path": "x-pack/plugins/aiops/public/embeddable/handle_explicit_input.tsx"
+          },
+          {
+            "plugin": "aiops",
+            "path": "x-pack/plugins/aiops/public/embeddable/handle_explicit_input.tsx"
+          },
+          {
+            "plugin": "aiops",
             "path": "x-pack/plugins/aiops/public/components/log_categorization/log_categorization_app_state.tsx"
           },
           {
@@ -3681,82 +3681,6 @@
           {
             "plugin": "aiops",
             "path": "x-pack/plugins/aiops/public/components/change_point_detection/change_point_detection_root.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/account_management/user_profile/use_update_user_profile.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/account_management/user_profile/use_update_user_profile.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/session/session_expiration_toast.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/session/session_expiration_toast.tsx"
-          },
-          {
-            "plugin": "triggersActionsUi",
-            "path": "x-pack/plugins/triggers_actions_ui/public/application/hooks/use_bulk_edit_response.tsx"
-          },
-          {
-            "plugin": "triggersActionsUi",
-            "path": "x-pack/plugins/triggers_actions_ui/public/application/hooks/use_bulk_edit_response.tsx"
-          },
-          {
-            "plugin": "triggersActionsUi",
-            "path": "x-pack/plugins/triggers_actions_ui/public/application/hooks/use_bulk_edit_response.tsx"
-          },
-          {
-            "plugin": "triggersActionsUi",
-            "path": "x-pack/plugins/triggers_actions_ui/public/application/hooks/use_bulk_operation_toast.tsx"
-          },
-          {
-            "plugin": "triggersActionsUi",
-            "path": "x-pack/plugins/triggers_actions_ui/public/application/hooks/use_bulk_operation_toast.tsx"
-          },
-          {
-            "plugin": "triggersActionsUi",
-            "path": "x-pack/plugins/triggers_actions_ui/public/application/hooks/use_bulk_operation_toast.tsx"
-          },
-          {
-            "plugin": "triggersActionsUi",
-            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/rule_details/components/rule_details.tsx"
-          },
-          {
-            "plugin": "triggersActionsUi",
-            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/rule_details/components/rule_details.tsx"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/public/common/use_cases_toast.tsx"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/public/common/use_cases_toast.tsx"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/public/common/use_cases_toast.tsx"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/public/components/visualizations/actions/add_to_new_case.tsx"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/public/components/visualizations/actions/add_to_new_case.tsx"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/public/components/visualizations/actions/add_to_existing_case.tsx"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/public/components/visualizations/actions/add_to_existing_case.tsx"
           },
           {
             "plugin": "observabilityShared",
@@ -3992,14 +3916,6 @@
           },
           {
             "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/embeddables/job_creation/common/create_flyout.tsx"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/embeddables/job_creation/common/create_flyout.tsx"
-          },
-          {
-            "plugin": "ml",
             "path": "x-pack/plugins/ml/public/embeddables/common/resolve_job_selection.tsx"
           },
           {
@@ -4008,19 +3924,27 @@
           },
           {
             "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/embeddables/anomaly_charts/anomaly_charts_setup_flyout.tsx"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/embeddables/anomaly_charts/anomaly_charts_setup_flyout.tsx"
-          },
-          {
-            "plugin": "ml",
             "path": "x-pack/plugins/ml/public/embeddables/anomaly_swimlane/anomaly_swimlane_setup_flyout.tsx"
           },
           {
             "plugin": "ml",
             "path": "x-pack/plugins/ml/public/embeddables/anomaly_swimlane/anomaly_swimlane_setup_flyout.tsx"
+          },
+          {
+            "plugin": "ml",
+            "path": "x-pack/plugins/ml/public/embeddables/job_creation/common/create_flyout.tsx"
+          },
+          {
+            "plugin": "ml",
+            "path": "x-pack/plugins/ml/public/embeddables/job_creation/common/create_flyout.tsx"
+          },
+          {
+            "plugin": "ml",
+            "path": "x-pack/plugins/ml/public/embeddables/anomaly_charts/anomaly_charts_setup_flyout.tsx"
+          },
+          {
+            "plugin": "ml",
+            "path": "x-pack/plugins/ml/public/embeddables/anomaly_charts/anomaly_charts_setup_flyout.tsx"
           },
           {
             "plugin": "ml",
@@ -4137,6 +4061,14 @@
           {
             "plugin": "timelines",
             "path": "x-pack/plugins/timelines/public/components/hover_actions/actions/add_to_timeline.tsx"
+          },
+          {
+            "plugin": "cloudSecurityPosture",
+            "path": "x-pack/plugins/cloud_security_posture/public/components/take_action.tsx"
+          },
+          {
+            "plugin": "cloudSecurityPosture",
+            "path": "x-pack/plugins/cloud_security_posture/public/components/take_action.tsx"
           },
           {
             "plugin": "runtimeFields",
@@ -4513,6 +4445,14 @@
           {
             "plugin": "uptime",
             "path": "x-pack/plugins/uptime/public/legacy_uptime/components/monitor/ml/ml_flyout_container.tsx"
+          },
+          {
+            "plugin": "cloudLinks",
+            "path": "x-pack/plugins/cloud_integrations/cloud_links/public/maybe_add_cloud_links/theme_darkmode_toggle.tsx"
+          },
+          {
+            "plugin": "cloudLinks",
+            "path": "x-pack/plugins/cloud_integrations/cloud_links/public/maybe_add_cloud_links/theme_darkmode_toggle.tsx"
           },
           {
             "plugin": "console",

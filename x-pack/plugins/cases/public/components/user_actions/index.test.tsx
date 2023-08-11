@@ -13,18 +13,11 @@ import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import routeData from 'react-router';
 
 import { useUpdateComment } from '../../containers/use_update_comment';
-import {
-  basicCase,
-  caseUserActions,
-  getHostIsolationUserAction,
-  getUserAction,
-  hostIsolationComment,
-} from '../../containers/mock';
+import { basicCase, caseUserActions, getUserAction } from '../../containers/mock';
 import { UserActions } from '.';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
 import { UserActionActions } from '../../../common/types/domain';
-import { userProfiles, userProfilesMap } from '../../containers/user_profiles/api.mock';
 import { getCaseConnectorsMockResponse } from '../../common/mock/connectors';
 import type { UserActivityParams } from '../user_actions_activity_bar/types';
 import { useFindCaseUserActions } from '../../containers/use_find_case_user_actions';
@@ -323,54 +316,6 @@ describe.skip(`UserActions`, () => {
 
     await waitFor(() => {
       expect(screen.getAllByTestId('add-comment')[1].textContent).toContain(newComment);
-    });
-  });
-
-  // FLAKY: https://github.com/elastic/kibana/issues/156742
-  describe.skip('Host isolation action', () => {
-    it('renders in the cases details view', async () => {
-      const isolateAction = [getHostIsolationUserAction()];
-      const props = {
-        ...defaultProps,
-        data: { ...defaultProps.data, comments: [...basicCase.comments, hostIsolationComment()] },
-      };
-
-      useFindCaseUserActionsMock.mockReturnValue({
-        ...defaultUseFindCaseUserActions,
-        data: { userActions: isolateAction },
-      });
-
-      appMockRender.render(<UserActions {...props} />);
-      await waitFor(() => {
-        expect(screen.getByTestId('endpoint-action')).toBeInTheDocument();
-      });
-    });
-
-    it('shows the correct username', async () => {
-      const isolateAction = [
-        getHostIsolationUserAction({ createdBy: { profileUid: userProfiles[0].uid } }),
-      ];
-      const props = {
-        ...defaultProps,
-        userProfiles: userProfilesMap,
-        data: {
-          ...defaultProps.data,
-          comments: [hostIsolationComment({ createdBy: { profileUid: userProfiles[0].uid } })],
-        },
-      };
-
-      useFindCaseUserActionsMock.mockReturnValue({
-        ...defaultUseFindCaseUserActions,
-        data: { userActions: isolateAction },
-      });
-
-      appMockRender.render(<UserActions {...props} />);
-
-      expect(
-        screen.getAllByTestId('case-user-profile-avatar-damaged_raccoon')[0]
-      ).toBeInTheDocument();
-      expect(screen.getAllByText('DR')[0]).toBeInTheDocument();
-      expect(screen.getAllByText('Damaged Raccoon')[0]).toBeInTheDocument();
     });
   });
 });
