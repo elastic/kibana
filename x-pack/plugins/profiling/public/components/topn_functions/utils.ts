@@ -13,9 +13,9 @@ export function getColorLabel(percent: number) {
   const color = percent < 0 ? 'success' : 'danger';
   const icon = percent < 0 ? 'sortUp' : 'sortDown';
   const isSmallPercent = Math.abs(percent) <= 0.01;
-  const label = isSmallPercent ? '<0.01' : Math.abs(percent).toFixed(2) + '%';
+  const value = isSmallPercent ? '<0.01' : Math.abs(percent).toFixed(2);
 
-  return { color, label, icon: isSmallPercent ? undefined : icon };
+  return { color, label: `${value}%`, icon };
 }
 
 export function scaleValue({ value, scaleFactor = 1 }: { value: number; scaleFactor?: number }) {
@@ -47,11 +47,13 @@ export function getFunctionsRows({
   comparisonScaleFactor,
   comparisonTopNFunctions,
   topNFunctions,
+  totalSeconds,
 }: {
   baselineScaleFactor?: number;
   comparisonScaleFactor?: number;
   comparisonTopNFunctions?: TopNFunctions;
   topNFunctions?: TopNFunctions;
+  totalSeconds: number;
 }): IFunctionRow[] {
   if (!topNFunctions || !topNFunctions.TotalCount || topNFunctions.TotalCount === 0) {
     return [];
@@ -64,26 +66,43 @@ export function getFunctionsRows({
   return topNFunctions.TopN.filter((topN) => topN.CountExclusive > 0).map((topN, i) => {
     const comparisonRow = comparisonDataById?.[topN.Id];
 
-    const topNCountExclusiveScaled = scaleValue({
+    const scaledSelfCPU = scaleValue({
       value: topN.CountExclusive,
       scaleFactor: baselineScaleFactor,
     });
 
+    const totalCPUPerc = (topN.CountInclusive / topNFunctions.TotalCount) * 100;
+    const selfCPUPerc = (topN.CountExclusive / topNFunctions.TotalCount) * 100;
+
+    const impactEstimates =
+      totalSeconds > 0
+        ? calculateImpactEstimates({
+            countExclusive: topN.CountExclusive,
+            countInclusive: topN.CountInclusive,
+            totalSamples: topNFunctions.TotalCount,
+            totalSeconds,
+          })
+        : undefined;
+
     function calculateDiff() {
       if (comparisonTopNFunctions && comparisonRow) {
-        const comparisonCountExclusiveScaled = scaleValue({
+        const comparisonScaledSelfCPU = scaleValue({
           value: comparisonRow.CountExclusive,
           scaleFactor: comparisonScaleFactor,
         });
 
+        const scaledDiffSamples = scaledSelfCPU - comparisonScaledSelfCPU;
+
         return {
           rank: topN.Rank - comparisonRow.Rank,
-          samples: topNCountExclusiveScaled - comparisonCountExclusiveScaled,
+          samples: scaledDiffSamples,
           selfCPU: comparisonRow.CountExclusive,
           totalCPU: comparisonRow.CountInclusive,
-          selfCPUPerc: topN.selfCPUPerc - comparisonRow.selfCPUPerc,
-          totalCPUPerc: topN.totalCPUPerc - comparisonRow.totalCPUPerc,
-          impactEstimates: comparisonRow.impactEstimates,
+          selfCPUPerc:
+            selfCPUPerc - (comparisonRow.CountExclusive / comparisonTopNFunctions.TotalCount) * 100,
+          totalCPUPerc:
+            totalCPUPerc -
+            (comparisonRow.CountInclusive / comparisonTopNFunctions.TotalCount) * 100,
         };
       }
     }
@@ -91,12 +110,12 @@ export function getFunctionsRows({
     return {
       rank: topN.Rank,
       frame: topN.Frame,
-      samples: topNCountExclusiveScaled,
-      selfCPUPerc: topN.selfCPUPerc,
-      totalCPUPerc: topN.totalCPUPerc,
+      samples: scaledSelfCPU,
+      selfCPUPerc,
+      totalCPUPerc,
       selfCPU: topN.CountExclusive,
       totalCPU: topN.CountInclusive,
-      impactEstimates: topN.impactEstimates,
+      impactEstimates,
       diff: calculateDiff(),
     };
   });
