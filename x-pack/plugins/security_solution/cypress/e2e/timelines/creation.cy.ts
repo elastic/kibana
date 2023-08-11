@@ -32,7 +32,6 @@ import {
   addNameAndDescriptionToTimeline,
   addNotesToTimeline,
   clickingOnCreateTimelineFormTemplateBtn,
-  closeTimeline,
   createNewTimeline,
   expandEventAction,
   goToQueryTab,
@@ -46,32 +45,26 @@ import { waitForTimelinesPanelToBeLoaded } from '../../tasks/timelines';
 describe('Timelines', (): void => {
   before(() => {
     cleanKibana();
+  });
+
+  beforeEach(() => {
     loginAndWaitForPage(OVERVIEW_URL);
   });
 
   describe('Toggle create timeline from plus icon', () => {
-    after(() => {
-      closeTimeline();
-    });
-
     it('toggle create timeline ', () => {
+      loginAndWaitForPage(OVERVIEW_URL);
       createNewTimeline();
       cy.get(TIMELINE_PANEL).should('be.visible');
     });
   });
 
   describe('Creates a timeline by clicking untitled timeline from bottom bar', () => {
-    after(() => {
-      closeTimeline();
-    });
-
-    before(() => {
+    beforeEach(() => {
+      loginAndWaitForPage(OVERVIEW_URL);
       openTimelineUsingToggle();
       addNameAndDescriptionToTimeline(getTimeline());
       populateTimeline();
-    });
-
-    beforeEach(() => {
       goToQueryTab();
     });
 

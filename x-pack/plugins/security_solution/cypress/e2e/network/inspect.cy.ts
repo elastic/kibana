@@ -8,7 +8,7 @@
 import { INSPECT_MODAL, INSPECT_NETWORK_BUTTONS_IN_SECURITY } from '../../screens/inspect';
 import { cleanKibana } from '../../tasks/common';
 
-import { closesModal, openStatsAndTables } from '../../tasks/inspect';
+import { openStatsAndTables } from '../../tasks/inspect';
 import { loginAndWaitForPage } from '../../tasks/login';
 
 import { NETWORK_URL } from '../../urls/navigation';
@@ -17,14 +17,11 @@ describe('Inspect', () => {
   context('Network stats and tables', () => {
     before(() => {
       cleanKibana();
+      cy.task('esArchiverLoad', 'network');
     });
 
     beforeEach(() => {
       loginAndWaitForPage(NETWORK_URL);
-    });
-
-    afterEach(() => {
-      closesModal();
     });
 
     INSPECT_NETWORK_BUTTONS_IN_SECURITY.forEach((table) =>

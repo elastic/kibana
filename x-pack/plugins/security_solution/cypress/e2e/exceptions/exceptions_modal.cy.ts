@@ -40,11 +40,8 @@ import { cleanKibana } from '../../tasks/common';
 // bugs. As the complexity within the builder grows, these should
 // ensure the most basic logic holds.
 describe('Exceptions modal', () => {
-  before(() => {
-    cleanKibana();
-  });
-
   beforeEach(() => {
+    cleanKibana();
     loginAndWaitForPageWithoutDateRange(ALERTS_URL);
     waitForAlertsIndexToBeCreated();
     createCustomRule(getNewRule());
