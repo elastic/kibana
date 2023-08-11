@@ -22,11 +22,7 @@ import type { ManagementSetup, ManagementStart } from '@kbn/management-plugin/pu
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 
-import type { SecurityLicense } from '../common/licensing';
-import { SecurityLicenseService } from '../common/licensing';
-import type { UpdateUserProfileHook } from './account_management';
 import { accountManagementApp, UserProfileAPIClient } from './account_management';
-import { getUseUpdateUserProfile } from './account_management/user_profile/use_update_user_profile';
 import { AnalyticsService } from './analytics';
 import { AnonymousAccessService } from './anonymous_access';
 import type { AuthenticationServiceSetup, AuthenticationServiceStart } from './authentication';
@@ -40,6 +36,8 @@ import { SecurityCheckupService } from './security_checkup';
 import { SessionExpired, SessionTimeout, UnauthorizedResponseHttpInterceptor } from './session';
 import type { UiApi } from './ui_api';
 import { getUiApi } from './ui_api';
+import { SecurityLicenseService } from '../common/licensing';
+import type { SecurityLicense } from '../common/licensing';
 
 export interface PluginSetupDependencies {
   licensing: LicensingPluginSetup;
@@ -213,12 +211,6 @@ export class SecurityPlugin
         ),
         userProfile$: this.securityApiClients.userProfiles.userProfile$,
       },
-      hooks: {
-        useUpdateUserProfile: getUseUpdateUserProfile({
-          apiClient: this.securityApiClients.userProfiles,
-          notifications: core.notifications,
-        }),
-      },
     };
   }
 
@@ -262,13 +254,6 @@ export interface SecurityPluginStart {
     UserProfileAPIClient,
     'getCurrent' | 'bulkGet' | 'suggest' | 'update' | 'userProfile$'
   >;
-
-  /**
-   * A set of hooks to work with Kibana user profiles
-   */
-  hooks: {
-    useUpdateUserProfile: UpdateUserProfileHook;
-  };
 
   /**
    * Exposes UI components that will be loaded asynchronously.

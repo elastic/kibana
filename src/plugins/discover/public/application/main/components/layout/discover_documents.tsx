@@ -20,6 +20,7 @@ import { DataView } from '@kbn/data-views-plugin/public';
 import { SortOrder } from '@kbn/saved-search-plugin/public';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
+import { SearchResponseWarnings } from '@kbn/search-response-warnings';
 import {
   DOC_HIDE_TIME_COLUMN_SETTING,
   DOC_TABLE_LEGACY,
@@ -203,6 +204,13 @@ function DiscoverDocumentsComponent({
           <FormattedMessage id="discover.documentsAriaLabel" defaultMessage="Documents" />
         </h2>
       </EuiScreenReaderOnly>
+      {!!documentState.interceptedWarnings?.length && (
+        <SearchResponseWarnings
+          variant="callout"
+          interceptedWarnings={documentState.interceptedWarnings}
+          data-test-subj="dscInterceptedWarningsCallout"
+        />
+      )}
       {isLegacy && rows && rows.length && (
         <>
           {!hideAnnouncements && <DocumentExplorerCallout />}
