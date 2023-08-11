@@ -6,7 +6,6 @@
  */
 
 import { esArchiverResetKibana } from './es_archiver';
-import { RuleEcs } from '../../common/ecs/rule';
 import { LOADING_INDICATOR } from '../screens/security_header';
 
 const primaryButton = 0;

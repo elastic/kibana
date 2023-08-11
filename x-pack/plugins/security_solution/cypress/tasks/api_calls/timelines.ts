@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TimelineResponse } from '../../common/types/timeline';
+import { TimelineResponse } from '../../../common/types/timeline';
 import { CompleteTimeline } from '../../objects/timeline';
 import { rootRequest } from '../common';
 

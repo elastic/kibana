@@ -26,7 +26,7 @@ describe('Export timelines', () => {
     }).as('export');
     createTimelineTemplate(getTimelineTemplate()).then((response) => {
       cy.wrap(response).as('templateResponse');
-      cy.wrap(response.body.data.persistTimeline.timeline.savedObjectId).as('templateId');
+      cy.wrap((response.body as any).data.persistTimeline.timeline.savedObjectId).as('templateId');
     });
   });
 
