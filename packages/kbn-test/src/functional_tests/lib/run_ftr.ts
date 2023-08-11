@@ -50,11 +50,8 @@ async function createFtr({
   },
 }: CreateFtrParams) {
   const config = await readConfigFile(log, esVersion, configPath, {}, (configModule) => {
-
     // TODO: remove console logs
-    // eslint-disable-next-line
     console.log(typeof configModule);
-    // eslint-disable-next-line
     console.log(configModule);
     return {
       mochaOpts: {
@@ -75,7 +72,7 @@ async function createFtr({
         include: [...(suiteTags?.include || []), ...configModule.get('suiteTags.include')],
         exclude: [...(suiteTags?.exclude || []), ...configModule.get('suiteTags.exclude')],
       },
-    }
+    };
   });
 
   return {
