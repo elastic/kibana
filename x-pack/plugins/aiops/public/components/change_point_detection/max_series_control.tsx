@@ -19,9 +19,14 @@ export const MaxSeriesControl: FC<{
   value: number;
   onChange: (update: number) => void;
   onValidationChange?: (result: NumberValidationResult | null) => void;
-}> = ({ value, onChange, onValidationChange, disabled }) => {
+  inline?: boolean;
+}> = ({ value, onChange, onValidationChange, disabled, inline = true }) => {
   const maxSeriesValidationResult = maxSeriesValidator(value);
   const maxSeriesInvalid = maxSeriesValidationResult !== null;
+
+  const label = i18n.translate('xpack.aiops.changePointDetection.maxSeriesToPlotLabel', {
+    defaultMessage: 'Max series',
+  });
 
   return (
     <EuiFormRow
@@ -34,12 +39,11 @@ export const MaxSeriesControl: FC<{
           values={{ minValue: 1, maxValue: MAX_SERIES }}
         />
       }
+      label={inline ? undefined : label}
     >
       <EuiFieldNumber
         disabled={disabled}
-        prepend={i18n.translate('xpack.aiops.changePointDetection.maxSeriesToPlotLabel', {
-          defaultMessage: 'Max series',
-        })}
+        prepend={inline ? label : undefined}
         append={
           <EuiToolTip
             content={i18n.translate('xpack.aiops.changePointDetection.maxSeriesToPlotDescription', {

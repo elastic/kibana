@@ -106,11 +106,13 @@ export const ChangePointChartInitializer: FC<AnomalyChartsInitializerProps> = ({
 
       <EuiModalBody>
         <EuiForm>
-          <EuiFormRow fullWidth>
+          <EuiFormRow
+            fullWidth
+            label={i18n.translate('xpack.aiops.embeddableChangePointChart.dataViewLabel', {
+              defaultMessage: 'Data view',
+            })}
+          >
             <IndexPatternSelect
-              prepend={i18n.translate('xpack.aiops.embeddableChangePointChart.dataViewLabel', {
-                defaultMessage: 'Data view',
-              })}
               autoFocus={!dataViewId}
               fullWidth
               compressed
@@ -222,11 +224,13 @@ export const FormControls: FC<{
       </EuiFormRow>
 
       <MetricFieldSelector
+        inline={false}
         value={formInput.metricField}
         onChange={(v) => updateCallback({ metricField: v })}
       />
 
       <SplitFieldSelector
+        inline={false}
         value={formInput.splitField}
         onChange={(v) => updateCallback({ splitField: v })}
       />
@@ -240,6 +244,7 @@ export const FormControls: FC<{
       ) : null}
 
       <MaxSeriesControl
+        inline={false}
         disabled={!!formInput?.partitions?.length}
         value={formInput.maxSeriesToPlot!}
         onChange={(v) => updateCallback({ maxSeriesToPlot: v })}

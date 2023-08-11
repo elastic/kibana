@@ -14,10 +14,11 @@ import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 interface MetricFieldSelectorProps {
   value: string;
   onChange: (value: string) => void;
+  inline?: boolean;
 }
 
 export const MetricFieldSelector: FC<MetricFieldSelectorProps> = React.memo(
-  ({ value, onChange }) => {
+  ({ value, onChange, inline = true }) => {
     const { fieldStats } = useAiopsAppContext();
     const { metricFieldOptions } = useChangePointDetectionControlsContext();
 
@@ -46,15 +47,17 @@ export const MetricFieldSelector: FC<MetricFieldSelectorProps> = React.memo(
       [onChange, closeFlyout]
     );
 
+    const label = i18n.translate('xpack.aiops.changePointDetection.selectMetricFieldLabel', {
+      defaultMessage: 'Metric field',
+    });
+
     return (
       <>
-        <EuiFormRow fullWidth>
+        <EuiFormRow fullWidth label={inline ? undefined : label}>
           <EuiComboBox
             fullWidth
             compressed
-            prepend={i18n.translate('xpack.aiops.changePointDetection.selectMetricFieldLabel', {
-              defaultMessage: 'Metric field',
-            })}
+            prepend={inline ? label : undefined}
             singleSelection={{ asPlainText: true }}
             options={options}
             selectedOptions={selection}
