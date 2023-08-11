@@ -192,8 +192,6 @@ describe('Security links', () => {
         title: 'Network',
         path: '/network',
         capabilities: [`${CASES_FEATURE_ID}.read_cases`, `${CASES_FEATURE_ID}.write_cases`],
-        experimentalKey: 'flagEnabled' as unknown as keyof typeof mockExperimentalDefaults,
-        hideWhenExperimentalKey: 'flagDisabled' as unknown as keyof typeof mockExperimentalDefaults,
         licenseType: 'basic' as const,
       };
 
@@ -250,7 +248,7 @@ describe('Security links', () => {
       expect(result.current).toStrictEqual([{ ...networkLinkItem, unauthorized: true }]);
     });
 
-    it('should return invalid page when page has upselling (ESS)', async () => {
+    it('should return unauthorized page when page has upselling (ESS)', async () => {
       const upselling = new UpsellingService();
       upselling.setRegisteredPages({ [SecurityPageName.network]: () => <span /> });
       const { result, waitForNextUpdate } = renderUseAppLinks();
@@ -275,6 +273,37 @@ describe('Security links', () => {
         await waitForNextUpdate();
       });
       expect(result.current).toStrictEqual([{ ...hostLinkItem, unauthorized: true }]);
+
+      // cleanup
+      mockUpselling.setRegisteredPages({});
+    });
+
+    it('should filter out experimental page even if it has upselling', async () => {
+      const upselling = new UpsellingService();
+      upselling.setRegisteredPages({ [SecurityPageName.network]: () => <span /> });
+      const { result, waitForNextUpdate } = renderUseAppLinks();
+      const hostLinkItem = {
+        id: SecurityPageName.hosts,
+        title: 'Hosts',
+        path: '/hosts',
+        licenseType: 'platinum' as const,
+        experimentalKey: 'flagEnabled' as unknown as keyof typeof mockExperimentalDefaults,
+      };
+
+      mockUpselling.setRegisteredPages({
+        [SecurityPageName.hosts]: () => <span />,
+      });
+
+      await act(async () => {
+        updateAppLinks([hostLinkItem], {
+          capabilities: mockCapabilities,
+          experimentalFeatures: mockExperimentalDefaults,
+          license: { hasAtLeast: licenseBasicMock } as unknown as ILicense,
+          upselling: mockUpselling,
+        });
+        await waitForNextUpdate();
+      });
+      expect(result.current).toStrictEqual([]);
 
       // cleanup
       mockUpselling.setRegisteredPages({});
