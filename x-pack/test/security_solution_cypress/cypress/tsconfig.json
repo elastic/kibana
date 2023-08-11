@@ -42,5 +42,6 @@
     "@kbn/tooling-log",
     "@kbn/fleet-plugin",
     "@kbn/cases-components",
+    "@kbn/security-solution-plugin",
   ]
 }
