@@ -13,7 +13,7 @@ import { AppFeatures } from './app_features';
 import type { AppFeatureKeys, ExperimentalFeatures } from '../../../common';
 import { ALL_APP_FEATURE_KEYS, allowedExperimentalValues } from '../../../common';
 
-class AppFeaturesMock extends AppFeatures {
+export class AppFeaturesMock extends AppFeatures {
   protected registerEnabledKibanaFeatures() {
     // NOOP
   }
