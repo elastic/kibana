@@ -46,9 +46,10 @@
 
     .navigationLink {
       &.navigationLinkCurrent {
-        box-shadow: $euiColorPrimary 0 (-.5 * $euiSizeXS) 0 inset;
+        padding: 0 $euiSizeS;
 
         .euiListGroupItem__text {
+          box-shadow: $euiColorPrimary 0 (-.5 * $euiSizeXS) inset;
           padding-inline: 0;
         }
       }
