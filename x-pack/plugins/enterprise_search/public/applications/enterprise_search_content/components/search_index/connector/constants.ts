@@ -37,6 +37,12 @@ export const CONNECTORS_DICT: Record<string, ConnectorClientSideDefinition> = {
     externalDocsUrl: '',
     icon: CONNECTOR_ICONS.dropbox,
   },
+  gmail: {
+    docsUrl: '', // TODO
+    externalAuthDocsUrl: '',
+    externalDocsUrl: '',
+    icon: CONNECTOR_ICONS.gmail,
+  },
   google_cloud_storage: {
     docsUrl: docLinks.connectorsGoogleCloudStorage,
     externalAuthDocsUrl: 'https://cloud.google.com/storage/docs/authentication',
@@ -116,6 +122,13 @@ export const CONNECTORS_DICT: Record<string, ConnectorClientSideDefinition> = {
     externalAuthDocsUrl: '',
     externalDocsUrl: '',
     icon: CONNECTOR_ICONS.sharepoint_online,
+    platinumOnly: true,
+  },
+  slack: {
+    docsUrl: '', // TODO
+    externalAuthDocsUrl: '',
+    externalDocsUrl: '',
+    icon: CONNECTOR_ICONS.slack,
     platinumOnly: true,
   },
 };
