@@ -226,7 +226,7 @@ export class FunctionalTestRunner {
   ): Promise<T> {
     let runErrorOccurred = false;
     const lifecycle = new Lifecycle(this.log);
-    const metadata = new TestMetadata(lifecycle);
+    const testMetadata = new TestMetadata(lifecycle);
 
     try {
       if (
