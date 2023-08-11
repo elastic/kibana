@@ -193,16 +193,20 @@ export function useTimeline({
     if (pendingMessage) {
       return conversationItems.concat({
         id: '',
-        canCopy: true,
-        canEdit: false,
-        canGiveFeedback: false,
-        canRegenerate: pendingMessage.aborted || !!pendingMessage.error,
-        collapsed: false,
+        actions: {
+          canCopy: true,
+          canEdit: false,
+          canGiveFeedback: false,
+          canRegenerate: pendingMessage.aborted || !!pendingMessage.error,
+        },
+        display: {
+          collapsed: false,
+          hide: pendingMessage.message.role === MessageRole.System,
+        },
         content: pendingMessage.message.content,
         currentUser,
         error: pendingMessage.error,
         function_call: pendingMessage.message.function_call,
-        hide: pendingMessage.message.role === MessageRole.System,
         loading: !pendingMessage.aborted && !pendingMessage.error,
         role: pendingMessage.message.role,
         title: '',

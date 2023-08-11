@@ -18,14 +18,18 @@ export interface ChatTimelineItem
   extends Pick<Message['message'], 'role' | 'content' | 'function_call'> {
   id: string;
   title: ReactNode;
+  actions: {
+    canCopy: boolean;
+    canEdit: boolean;
+    canGiveFeedback: boolean;
+    canRegenerate: boolean;
+  };
+  display: {
+    collapsed: boolean;
+    hide?: boolean;
+  };
   loading: boolean;
-  canCopy: boolean;
-  canEdit: boolean;
-  canGiveFeedback: boolean;
-  canRegenerate: boolean;
-  collapsed: boolean;
   element?: React.ReactNode;
-  hide: boolean;
   currentUser?: Pick<AuthenticatedUser, 'username' | 'full_name'>;
   error?: any;
 }
@@ -49,7 +53,7 @@ export function ChatTimeline({
     <EuiCommentList>
       {compact(
         items.map((item, index) =>
-          !item.hide ? (
+          !item.display.hide ? (
             <ChatItem
               // use index, not id to prevent unmounting of component when message is persisted
               key={index}
