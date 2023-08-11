@@ -368,7 +368,7 @@ export class RangeSliderEmbeddable
       }
 
       const resp = await lastValueFrom(searchSource.fetch$());
-      const total = get(resp, 'rawResponse.hits.total');
+      const total = resp?.rawResponse?.hits?.total;
 
       const docCount = typeof total === 'number' ? total : total?.value;
       if (!docCount) {
