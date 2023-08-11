@@ -7,18 +7,15 @@
 
 import { IScopedClusterClient } from '@kbn/core/server';
 
+import { CONNECTORS_INDEX } from '../..';
 import { Connector } from '../../../common/types/connectors';
 
-import { CONNECTORS_INDEX } from '../..'
-
-const CUSTOM_SCHEDULING = 'custom_scheduling'
-
+const CUSTOM_SCHEDULING = 'custom_scheduling';
 
 export const fetchCrawlerCustomSchedulingByIndexName = async (
   client: IScopedClusterClient,
   indexName: string
 ): Promise<Connector | undefined> => {
-
   const crawlerResult = await client.asCurrentUser.search<Connector>({
     index: CONNECTORS_INDEX,
     query: { term: { index_name: indexName } },

@@ -17,7 +17,7 @@ import {
   EuiText,
   EuiTitle,
   EuiSplitPanel,
-  EuiSwitch
+  EuiSwitch,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -31,9 +31,8 @@ export const MultiCrawlScheduler: React.FC = ({
   interval,
   schedulingEnabled,
   setConnectorSchedulingInterval,
-  onSetConnectorSchedulingEnabled
+  onSetConnectorSchedulingEnabled,
 }) => {
-
   if (!isCrawlerIndex(index)) {
     return <></>;
   }
@@ -97,7 +96,8 @@ export const MultiCrawlScheduler: React.FC = ({
               <EnterpriseSearchCronEditor
                 disabled={!schedulingEnabled}
                 scheduling={{
-                  interval: interval, enabled: schedulingEnabled
+                  interval,
+                  enabled: schedulingEnabled,
                 }}
                 onChange={setConnectorSchedulingInterval}
               />

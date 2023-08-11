@@ -9,21 +9,15 @@ import { schema } from '@kbn/config-schema';
 
 import { i18n } from '@kbn/i18n';
 
-import { RouteDependencies } from '../../../plugin';
-
 import { ErrorCode } from '../../../../common/types/error_codes';
 
+import { fetchCrawlerCustomSchedulingByIndexName } from '../../../lib/crawler/fetch_crawler_multiple_schedules';
+import { postCrawlerCustomScheduling } from '../../../lib/crawler/post_crawler_multiple_schedules';
+import { RouteDependencies } from '../../../plugin';
+import { createError } from '../../../utils/create_error';
 import { elasticsearchErrorHandler } from '../../../utils/elasticsearch_error_handler';
 
-import { createError } from '../../../utils/create_error';
-
-import { fetchCrawlerCustomSchedulingByIndexName } from '../../../lib/crawler/fetch_crawler_multiple_schedules'
-import { postCrawlerCustomScheduling } from '../../../lib/crawler/post_crawler_multiple_schedules'
-
-export function registerCrawlerMultipleSchedulesRoutes({
-  router,
-  log
-}: RouteDependencies) {
+export function registerCrawlerMultipleSchedulesRoutes({ router, log }: RouteDependencies) {
   router.post(
     {
       path: '/internal/enterprise_search/indices/{indexName}/crawler/custom_scheduling',
@@ -31,28 +25,31 @@ export function registerCrawlerMultipleSchedulesRoutes({
         params: schema.object({
           indexName: schema.string(),
         }),
-        body: schema.mapOf(schema.string(), schema.object({
-          name: schema.string(),
-          interval: schema.string(),
-          enabled: schema.boolean(),
-          configuration_overrides: schema.object({
-            max_crawl_depth: schema.maybe(schema.number()),
-            sitemap_discovery_disabled: schema.maybe(schema.boolean()),
-            domain_allowlist: schema.maybe(schema.arrayOf(schema.string())),
-            sitemap_urls: schema.maybe(schema.arrayOf(schema.string())),
-            seed_urls: schema.maybe(schema.arrayOf(schema.string())),
+        body: schema.mapOf(
+          schema.string(),
+          schema.object({
+            name: schema.string(),
+            interval: schema.string(),
+            enabled: schema.boolean(),
+            configuration_overrides: schema.object({
+              max_crawl_depth: schema.maybe(schema.number()),
+              sitemap_discovery_disabled: schema.maybe(schema.boolean()),
+              domain_allowlist: schema.maybe(schema.arrayOf(schema.string())),
+              sitemap_urls: schema.maybe(schema.arrayOf(schema.string())),
+              seed_urls: schema.maybe(schema.arrayOf(schema.string())),
+            }),
           })
-        })),
+        ),
       },
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
       const { params, body } = request;
-      console.log('Inside proxy')
-      console.log(body)
-      const postCustomSchedulingResult = await postCrawlerCustomScheduling(client, params.indexName, body);
-      console.log('Custom schedulleeeeeeeee')
-      console.log(postCustomSchedulingResult)
+      const postCustomSchedulingResult = await postCrawlerCustomScheduling(
+        client,
+        params.indexName,
+        body
+      );
       return response.ok({ postCustomSchedulingResult });
     })
   );
@@ -70,13 +67,16 @@ export function registerCrawlerMultipleSchedulesRoutes({
       const { client } = (await context.core).elasticsearch;
       try {
         const { params } = request;
-        const customScheduling = await fetchCrawlerCustomSchedulingByIndexName(client, params.indexName);
-        console.log(customScheduling)
-        return response.ok({ body: customScheduling, headers: { 'content-type': 'application/json' }, });
+        const customScheduling = await fetchCrawlerCustomSchedulingByIndexName(
+          client,
+          params.indexName
+        );
+        return response.ok({
+          body: customScheduling,
+          headers: { 'content-type': 'application/json' },
+        });
       } catch (error) {
-        if (
-          (error as Error).message === ErrorCode.DOCUMENT_NOT_FOUND
-        ) {
+        if ((error as Error).message === ErrorCode.DOCUMENT_NOT_FOUND) {
           return createError({
             errorCode: (error as Error).message as ErrorCode,
             message: i18n.translate(
@@ -86,7 +86,7 @@ export function registerCrawlerMultipleSchedulesRoutes({
               }
             ),
             response,
-            statusCode: 409,
+            statusCode: 404,
           });
         }
 

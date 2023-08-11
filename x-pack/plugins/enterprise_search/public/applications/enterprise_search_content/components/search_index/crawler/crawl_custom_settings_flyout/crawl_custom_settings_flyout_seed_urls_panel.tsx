@@ -51,22 +51,24 @@ export const CrawlCustomSettingsFlyoutSeedUrlsPanelConnected: React.FC = () => {
     toggleIncludeSitemapsInRobotsTxt,
   } = useActions(CrawlCustomSettingsFlyoutLogic);
 
-  return <CrawlCustomSettingsFlyoutSeedUrlsPanel
-    customEntryPointUrls={customEntryPointUrls}
-    customSitemapUrls={customSitemapUrls}
-    includeSitemapsInRobotsTxt={includeSitemapsInRobotsTxt}
-    selectedDomainUrls={selectedDomainUrls}
-    selectedEntryPointUrls={selectedEntryPointUrls}
-    selectedSitemapUrls={selectedSitemapUrls}
-    onSelectCustomEntryPointUrls={onSelectCustomEntryPointUrls}
-    onSelectCustomSitemapUrls={onSelectCustomSitemapUrls}
-    onSelectEntryPointUrls={onSelectEntryPointUrls}
-    onSelectSitemapUrls={onSelectSitemapUrls}
-    toggleIncludeSitemapsInRobotsTxt={toggleIncludeSitemapsInRobotsTxt}
-    entryPointUrls={entryPointUrls}
-    sitemapUrls={sitemapUrls}
-  />
-}
+  return (
+    <CrawlCustomSettingsFlyoutSeedUrlsPanel
+      customEntryPointUrls={customEntryPointUrls}
+      customSitemapUrls={customSitemapUrls}
+      includeSitemapsInRobotsTxt={includeSitemapsInRobotsTxt}
+      selectedDomainUrls={selectedDomainUrls}
+      selectedEntryPointUrls={selectedEntryPointUrls}
+      selectedSitemapUrls={selectedSitemapUrls}
+      onSelectCustomEntryPointUrls={onSelectCustomEntryPointUrls}
+      onSelectCustomSitemapUrls={onSelectCustomSitemapUrls}
+      onSelectEntryPointUrls={onSelectEntryPointUrls}
+      onSelectSitemapUrls={onSelectSitemapUrls}
+      toggleIncludeSitemapsInRobotsTxt={toggleIncludeSitemapsInRobotsTxt}
+      entryPointUrls={entryPointUrls}
+      sitemapUrls={sitemapUrls}
+    />
+  );
+};
 
 export const CrawlCustomSettingsFlyoutSeedUrlsPanel: React.FC = ({
   customEntryPointUrls,
@@ -81,9 +83,8 @@ export const CrawlCustomSettingsFlyoutSeedUrlsPanel: React.FC = ({
   onSelectSitemapUrls,
   toggleIncludeSitemapsInRobotsTxt,
   entryPointUrls,
-  sitemapUrls
+  sitemapUrls,
 }) => {
-
   const totalSeedUrls =
     customEntryPointUrls.length +
     customSitemapUrls.length +
@@ -169,11 +170,11 @@ export const CrawlCustomSettingsFlyoutSeedUrlsPanel: React.FC = ({
                     emptyMessage={
                       selectedDomainUrls.length === 0
                         ? i18n.translate(
-                          'xpack.enterpriseSearch.crawler.crawlCustomSettingsFlyout.emptyDomainsMessage',
-                          {
-                            defaultMessage: 'Please select a domain.',
-                          }
-                        )
+                            'xpack.enterpriseSearch.crawler.crawlCustomSettingsFlyout.emptyDomainsMessage',
+                            {
+                              defaultMessage: 'Please select a domain.',
+                            }
+                          )
                         : undefined
                     }
                   />
@@ -211,11 +212,11 @@ export const CrawlCustomSettingsFlyoutSeedUrlsPanel: React.FC = ({
                     emptyMessage={
                       selectedDomainUrls.length === 0
                         ? i18n.translate(
-                          'xpack.enterpriseSearch.crawler.crawlCustomSettingsFlyout.emptyDomainsMessage',
-                          {
-                            defaultMessage: 'Please select a domain.',
-                          }
-                        )
+                            'xpack.enterpriseSearch.crawler.crawlCustomSettingsFlyout.emptyDomainsMessage',
+                            {
+                              defaultMessage: 'Please select a domain.',
+                            }
+                          )
                         : undefined
                     }
                   />

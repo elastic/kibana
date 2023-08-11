@@ -32,7 +32,7 @@ import {
   CrawlScheduleFromServer,
   CrawlSchedule,
   CrawlerCustomSchedulesFromServer,
-  CrawlerCustomSchedule
+  CrawlerCustomSchedule,
 } from './types';
 
 export function crawlerDomainServerToClient(payload: CrawlerDomainFromServer): CrawlerDomain {
@@ -241,27 +241,22 @@ export const domainConfigServerToClient = (
 
 export const crawlerCustomSchedulingServerToClient = (
   customSchedulingFromServer: CrawlerCustomSchedulesFromServer
-): CrawlerCustomSchedule[] => (
+): CrawlerCustomSchedule[] =>
   Object.entries(customSchedulingFromServer.custom_scheduling).map(([_, schedule]) => {
-    const {
-      name,
-      interval,
-      configuration_overrides,
-      enabled
-    } = schedule;
+    const { name, interval, configuration_overrides, enabled } = schedule;
 
     const {
       max_crawl_depth = 2,
       sitemap_discovery_disabled = false,
       domain_allowlist = [],
       sitemap_urls = [],
-      seed_urls = []
+      seed_urls = [],
     } = configuration_overrides;
 
     return {
-      name: name,
-      interval: interval,
-      enabled: enabled,
+      name,
+      interval,
+      enabled,
       maxCrawlDepth: max_crawl_depth,
       includeSitemapsInRobotsTxt: !sitemap_discovery_disabled,
       selectedDomainUrls: domain_allowlist,
@@ -269,8 +264,8 @@ export const crawlerCustomSchedulingServerToClient = (
       selectedSitemapUrls: [],
       customEntryPointUrls: seed_urls,
       customSitemapUrls: sitemap_urls,
-    }
-  }));
+    };
+  });
 
 export const crawlerDomainsWithMetaServerToClient = ({
   results,

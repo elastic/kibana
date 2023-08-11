@@ -30,12 +30,20 @@ export const CrawlCustomSettingsFlyoutDomainsPanelConnected: React.FC = () => {
   const { domainUrls, selectedDomainUrls } = useValues(CrawlCustomSettingsFlyoutLogic);
   const { onSelectDomainUrls } = useActions(CrawlCustomSettingsFlyoutLogic);
 
-  return <CrawlCustomSettingsFlyoutDomainsPanel domainUrls={domainUrls} selectedDomainUrls={selectedDomainUrls} onSelectDomainUrls={onSelectDomainUrls} />
+  return (
+    <CrawlCustomSettingsFlyoutDomainsPanel
+      domainUrls={domainUrls}
+      selectedDomainUrls={selectedDomainUrls}
+      onSelectDomainUrls={onSelectDomainUrls}
+    />
+  );
+};
 
-}
-
-export const CrawlCustomSettingsFlyoutDomainsPanel: React.FC = ({ domainUrls, selectedDomainUrls, onSelectDomainUrls }) => {
-
+export const CrawlCustomSettingsFlyoutDomainsPanel: React.FC = ({
+  domainUrls,
+  selectedDomainUrls,
+  onSelectDomainUrls,
+}) => {
   return (
     <EuiPanel hasBorder>
       <EuiAccordion

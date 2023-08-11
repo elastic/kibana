@@ -5,37 +5,34 @@
  * 2.0.
  */
 
-import React, { ChangeEvent } from 'react';
+import React from 'react';
 
 import { useValues, useActions } from 'kea';
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormFieldset,
-  EuiRadio
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFormFieldset, EuiRadio } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { CrawlCustomSettingsFlyoutLogic } from './crawl_custom_settings_flyout_logic';
 import { CustomCrawlType } from '../../../../api/crawler/types';
 
+import { CrawlCustomSettingsFlyoutLogic } from './crawl_custom_settings_flyout_logic';
 
 export const CrawlCustomSettingsFlyoutCrawlTypeSelection: React.FC = () => {
   const { crawlType } = useValues(CrawlCustomSettingsFlyoutLogic);
   const { onSelectCrawlType } = useActions(CrawlCustomSettingsFlyoutLogic);
 
   return (
-    <EuiFormFieldset legend={{
-      children: i18n.translate(
-        'xpack.enterpriseSearch.crawler.crawlCustomSettingsFlyout.crawlTypeGroupLabel',
-        {
-          defaultMessage: 'Crawl type',
-        }
-      )
-    }}>
-      <EuiFlexGroup direction="row" >
+    <EuiFormFieldset
+      legend={{
+        children: i18n.translate(
+          'xpack.enterpriseSearch.crawler.crawlCustomSettingsFlyout.crawlTypeGroupLabel',
+          {
+            defaultMessage: 'Crawl type',
+          }
+        ),
+      }}
+    >
+      <EuiFlexGroup direction="row">
         <EuiFlexItem grow={false}>
           <EuiRadio
             id={CustomCrawlType.ONE_TIME}

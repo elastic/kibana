@@ -7,31 +7,22 @@
 
 import { IScopedClusterClient } from '@kbn/core/server';
 
-
-import {
-  Connector,
-} from '../../../common/types/connectors';
-
-import { CONNECTORS_INDEX } from '../..'
+import { CONNECTORS_INDEX } from '../..';
+import { Connector } from '../../../common/types/connectors';
 
 export const postCrawlerCustomScheduling = async (
   client: IScopedClusterClient,
   indexName: string,
-  customSchedules: Object,
+  customSchedules: Object
 ): Promise<Connector | undefined> => {
-
-  console.log('Inside postCrawlerCustomScheduling')
-  console.log(customSchedules)
-
-  const connectorId = await fetchCrawlerDocumentIdByIndexName(client, indexName)
+  const connectorId = await fetchCrawlerDocumentIdByIndexName(client, indexName);
   const crawlerResult = await client.asCurrentUser.update<Connector>({
     index: CONNECTORS_INDEX,
     id: connectorId,
     doc: {
-      custom_scheduling: Object.fromEntries(customSchedules)
-    }
+      custom_scheduling: Object.fromEntries(customSchedules),
+    },
   });
-  console.log(crawlerResult)
   return crawlerResult;
 };
 
@@ -39,7 +30,6 @@ export const fetchCrawlerDocumentIdByIndexName = async (
   client: IScopedClusterClient,
   indexName: string
 ): Promise<string> => {
-
   const crawlerResult = await client.asCurrentUser.search<Connector>({
     index: CONNECTORS_INDEX,
     query: { term: { index_name: indexName } },

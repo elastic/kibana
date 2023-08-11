@@ -9,12 +9,7 @@ import React from 'react';
 
 import { useValues, useActions } from 'kea';
 
-import {
-  EuiTab,
-  EuiTabs,
-  EuiSpacer,
-  EuiIcon,
-} from '@elastic/eui';
+import { EuiTab, EuiTabs, EuiSpacer, EuiIcon } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
@@ -25,30 +20,39 @@ const CRAWLER_TAB_PREFIX = i18n.translate(
   {
     defaultMessage: 'Crawl',
   }
-)
+);
 
 export const CrawlCustomSettingsFlyoutMultipleCrawlTabs: React.FC = () => {
-  const { crawlerConfigActiveTab, crawlerConfigurations } = useValues(CrawlCustomSettingsFlyoutMultiCrawlLogic);
-  const { onAddCustomCrawler, onSelectCrawlerConfigActiveTab } = useActions(CrawlCustomSettingsFlyoutMultiCrawlLogic);
+  const { crawlerConfigActiveTab, crawlerConfigurations } = useValues(
+    CrawlCustomSettingsFlyoutMultiCrawlLogic
+  );
+  const { onAddCustomCrawler, onSelectCrawlerConfigActiveTab } = useActions(
+    CrawlCustomSettingsFlyoutMultiCrawlLogic
+  );
 
   const crawlerTabData = crawlerConfigurations.map((_, index) => ({
     key: `crawl_${index}`,
-    index: index,
+    index,
     label: `${CRAWLER_TAB_PREFIX} ${index + 1}`,
   }));
 
-  return <>
-    <EuiTabs>
-      {crawlerTabData.map((tab) => (
-        <EuiTab key={tab.key} isSelected={crawlerConfigActiveTab === tab.index} onClick={() => onSelectCrawlerConfigActiveTab(tab.index)}>
-          {tab.label}
+  return (
+    <>
+      <EuiTabs>
+        {crawlerTabData.map((tab) => (
+          <EuiTab
+            key={tab.key}
+            isSelected={crawlerConfigActiveTab === tab.index}
+            onClick={() => onSelectCrawlerConfigActiveTab(tab.index)}
+          >
+            {tab.label}
+          </EuiTab>
+        ))}
+        <EuiTab onClick={() => onAddCustomCrawler(crawlerConfigurations.length)}>
+          <EuiIcon type="plus" />
         </EuiTab>
-      ))}
-      <EuiTab onClick={() => onAddCustomCrawler(crawlerConfigurations.length)}>
-        <EuiIcon type="plus" />
-      </EuiTab>
-    </EuiTabs>
-    <EuiSpacer />
-  </>
-
+      </EuiTabs>
+      <EuiSpacer />
+    </>
+  );
 };
