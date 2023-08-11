@@ -29,7 +29,8 @@ const XY_LAYER_OPTIONS: XYLayerOptions = {
 
 const XY_VISUAL_OPTIONS: XYVisualOptions = {
   showDottedLine: true,
-  missingValues: 'Linear',
+  missingValues: 'Carry',
+  endValues: 'Zero',
 };
 
 const PERCENT_LEFT_AXIS: Pick<MetricChartProps, 'overrides'>['overrides'] = {

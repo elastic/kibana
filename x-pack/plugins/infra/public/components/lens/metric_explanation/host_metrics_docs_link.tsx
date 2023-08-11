@@ -10,7 +10,7 @@ import { EuiLink, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
   HOST_METRICS_DOC_HREF,
-  HOST_METRICS_DOTTED_LINE_DOC_HREF,
+  HOST_METRICS_DOTTED_LINES_DOC_HREF,
 } from '../../../common/visualizations/constants';
 
 const DocLinks = {
@@ -21,7 +21,7 @@ const DocLinks = {
     }),
   },
   dottedLines: {
-    href: HOST_METRICS_DOTTED_LINE_DOC_HREF,
+    href: HOST_METRICS_DOTTED_LINES_DOC_HREF,
     label: i18n.translate('xpack.infra.hostsViewPage.tooltip.whyAmISeeingDottedLines', {
       defaultMessage: 'Why am I seeing dotted lines?',
     }),
