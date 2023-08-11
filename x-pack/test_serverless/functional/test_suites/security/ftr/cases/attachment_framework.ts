@@ -6,7 +6,6 @@
  */
 
 import { expect } from 'expect';
-import { v4 as uuidv4 } from 'uuid';
 import { ConnectorTypes } from '@kbn/cases-plugin/common/types/domain';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 import { createCase } from './helper/api';
@@ -18,16 +17,13 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
-  const dashboardAddPanel = getService('dashboardAddPanel');
   const cases = getService('cases');
   const find = getService('find');
-  const listingTable = getService('listingTable');
   const supertest = getService('supertest');
+  const retry = getService('retry');
 
   describe('persistable attachment', () => {
     describe('lens visualization', () => {
-      const myDashboardName = `My-dashboard-${uuidv4()}`;
-
       before(async () => {
         await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
         await kibanaServer.importExport.load(
@@ -40,9 +36,13 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await dashboard.clickNewDashboard();
 
-        await dashboardAddPanel.clickCreateNewLink();
+        await retry.try(async () => {
+          await testSubjects.click('dashboardAddNewPanelButton');
+        });
 
-        await lens.goToTimeRange();
+        await retry.try(async () => {
+          await lens.goToTimeRange();
+        });
 
         await lens.configureDimension({
           dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
@@ -65,7 +65,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await lens.saveAndReturn();
 
         await dashboard.waitForRenderComplete();
-        await dashboard.saveDashboard(myDashboardName);
       });
 
       after(async () => {
@@ -100,6 +99,11 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await testSubjects.click('toaster-content-case-view-link');
 
+        if (await testSubjects.exists('appLeaveConfirmModal')) {
+          await testSubjects.exists('confirmModalConfirmButton');
+          await testSubjects.click('confirmModalConfirmButton');
+        }
+
         const title = await find.byCssSelector('[data-test-subj="editable-title-header-value"]');
         expect(await title.getVisibleText()).toEqual(caseTitle);
 
@@ -128,8 +132,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await testSubjects.click('solutionSideNavItemLink-dashboards');
 
-        await listingTable.searchForItemWithName(myDashboardName);
-        await listingTable.clickItemLink('dashboard', myDashboardName);
+        if (await testSubjects.exists('edit-unsaved-New-Dashboard')) {
+          await testSubjects.click('edit-unsaved-New-Dashboard');
+        }
 
         await testSubjects.click('embeddablePanelToggleMenuIcon');
         await testSubjects.click('embeddablePanelMore-mainMenu');
@@ -142,6 +147,11 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await cases.common.expectToasterToContain(`${theCaseTitle} has been updated`);
         await testSubjects.click('toaster-content-case-view-link');
+
+        if (await testSubjects.exists('appLeaveConfirmModal')) {
+          await testSubjects.exists('confirmModalConfirmButton');
+          await testSubjects.click('confirmModalConfirmButton');
+        }
 
         const title = await find.byCssSelector('[data-test-subj="editable-title-header-value"]');
         expect(await title.getVisibleText()).toEqual(theCaseTitle);

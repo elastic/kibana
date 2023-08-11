@@ -15,7 +15,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const lens = getPageObject('lens');
   const svlSearchNavigation = getService('svlSearchNavigation');
   const svlCommonNavigation = getPageObject('svlCommonNavigation');
-  const dashboardAddPanel = getService('dashboardAddPanel');
+  const retry = getService('retry');
 
   describe('persistable attachment', () => {
     describe('lens visualization', () => {
@@ -31,9 +31,13 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await dashboard.clickNewDashboard();
 
-        await dashboardAddPanel.clickCreateNewLink();
+        await retry.try(async () => {
+          await testSubjects.click('dashboardAddNewPanelButton');
+        });
 
-        await lens.goToTimeRange();
+        await retry.try(async () => {
+          await lens.goToTimeRange();
+        });
 
         await lens.configureDimension({
           dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
