@@ -6,8 +6,6 @@ This plugin provides UI and APIs for interactive setup mode a.k.a "enrollment fl
 
 Kibana does not start interactive setup mode if it detects that an Elasticsearch connection has already been configured. This is always the case when running `yarn start` so in order to trigger interactive setup we need to run Elasticsearch manually and pass a special command line flag to the Kibana start command.
 
-Note: End-users do not need to do this since they will be running the Kibana binary directly. 
-
 1. Start a clean copy of Elasticsearch from inside your Kibana working directory:
 
     ```
@@ -40,4 +38,6 @@ Note: End-users do not need to do this since they will be running the Kibana bin
     Go to http://localhost:5601/tcu/?code=651822 to get started.
     ```
 
-3. Copy the enrollment token from Elasticsearch when prompted to complete setup.
+3. Open the link and copy the enrollment token from Elasticsearch when prompted to complete setup.
+
+Note: If you want to go through the enrollment flow again you will need to clear all Elasticsearch settings (`elasticsearch.*`) from your `kibana.yml` file and trash your Elasticsearch folder before starting with Step 1. 
