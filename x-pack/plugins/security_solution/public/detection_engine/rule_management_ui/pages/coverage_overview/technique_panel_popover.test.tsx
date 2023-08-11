@@ -25,13 +25,12 @@ const mockExecuteBulkAction = jest.fn();
 });
 
 const renderTechniquePanelPopover = (
-  technique: CoverageOverviewMitreTechnique = getMockCoverageOverviewMitreTechnique()
+  technique: CoverageOverviewMitreTechnique = getMockCoverageOverviewMitreTechnique(),
+  state = initialState
 ) => {
   return render(
     <TestProviders>
-      <CoverageOverviewDashboardContext.Provider
-        value={{ state: initialState, dispatch: () => {} }}
-      >
+      <CoverageOverviewDashboardContext.Provider value={{ state, dispatch: () => {} }}>
         <CoverageOverviewMitreTechniquePanelPopover technique={technique} />
       </CoverageOverviewDashboardContext.Provider>
     </TestProviders>
@@ -39,6 +38,23 @@ const renderTechniquePanelPopover = (
 };
 
 describe('CoverageOverviewMitreTechniquePanelPopover', () => {
+  test('it renders panel with collapsed view', () => {
+    const wrapper = renderTechniquePanelPopover();
+
+    expect(wrapper.getByTestId('coverageOverviewTechniquePanel')).toBeInTheDocument();
+    expect(wrapper.queryByTestId('coverageOverviewPanelMetadata')).not.toBeInTheDocument();
+  });
+
+  test('it renders panel with expanded view', () => {
+    const wrapper = renderTechniquePanelPopover(getMockCoverageOverviewMitreTechnique(), {
+      ...initialState,
+      showExpandedCells: true,
+    });
+
+    expect(wrapper.getByTestId('coverageOverviewTechniquePanel')).toBeInTheDocument();
+    expect(wrapper.getByTestId('coverageOverviewPanelMetadata')).toBeInTheDocument();
+  });
+
   test('it renders all rules in correct areas', () => {
     const wrapper = renderTechniquePanelPopover();
 

@@ -24,8 +24,8 @@ import { DashboardFilterButtonComponent } from './shared_components/dashboard_fi
 import { CoverageOverviewLegend } from './shared_components/dashboard_legend';
 import {
   formatRuleFilterOptions,
-  getInitialRuleStatusFilter,
-  getInitialRuleTypeFilter,
+  getInitialRuleStatusFilterOptions,
+  getInitialRuleTypeFilterOptions,
 } from './helpers';
 import * as i18n from './translations';
 import { ruleStatusFilterDefaultOptions, ruleTypeFilterDefaultOptions } from './constants';
@@ -85,8 +85,14 @@ const CoverageOverviewFiltersPanelComponent = ({
   const handleExpandCellsFilterClick = () => setShowExpandedCells(true);
   const handleCollapseCellsFilterClick = () => setShowExpandedCells(false);
 
-  const ruleStatusFilterInitalValue = useMemo(() => getInitialRuleStatusFilter(filter), [filter]);
-  const ruleTypeFilterInitalValue = useMemo(() => getInitialRuleTypeFilter(filter), [filter]);
+  const ruleStatusFilterInitalValue = useMemo(
+    () => getInitialRuleStatusFilterOptions(filter),
+    [filter]
+  );
+  const ruleTypeFilterInitalValue = useMemo(
+    () => getInitialRuleTypeFilterOptions(filter),
+    [filter]
+  );
 
   const [ruleStatusFilterOptions, setRuleStatusFilterOptions] = useState(
     ruleStatusFilterInitalValue

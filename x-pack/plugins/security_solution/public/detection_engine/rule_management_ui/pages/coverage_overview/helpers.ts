@@ -36,12 +36,14 @@ export const getCardBackgroundColor = (value: number) => {
 export const formatRuleFilterOptions = <
   T extends CoverageOverviewRuleSource | CoverageOverviewRuleActivity
 >(
-  options: Array<{ checked: string; key: T }>
+  options: Array<{ checked?: string; key: T }>
 ): T[] => {
   return options.filter((option) => option.checked === 'on').map((option) => option.key);
 };
 
-export const getInitialRuleStatusFilter = (filter: CoverageOverviewFilter): EuiSelectableOption[] =>
+export const getInitialRuleStatusFilterOptions = (
+  filter: CoverageOverviewFilter
+): EuiSelectableOption[] =>
   ruleStatusFilterDefaultOptions.map((option) => {
     if (filter.activity?.includes(option.key)) {
       return { ...option, checked: 'on' };
@@ -49,7 +51,9 @@ export const getInitialRuleStatusFilter = (filter: CoverageOverviewFilter): EuiS
     return option;
   });
 
-export const getInitialRuleTypeFilter = (filter: CoverageOverviewFilter): EuiSelectableOption[] =>
+export const getInitialRuleTypeFilterOptions = (
+  filter: CoverageOverviewFilter
+): EuiSelectableOption[] =>
   ruleTypeFilterDefaultOptions.map((option) => {
     if (filter.source?.includes(option.key)) {
       return { ...option, checked: 'on' };
