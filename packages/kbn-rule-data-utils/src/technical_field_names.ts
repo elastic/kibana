@@ -72,7 +72,6 @@ import {
   EVENT_ACTION,
   EVENT_KIND,
   TAGS,
-  ALERT_RULE_CUSTOM_HIGHLIGHTED_FIELDS,
 } from './legacy_alerts_as_data';
 
 // The following fields were identified as technical field names but were not defined in the
@@ -162,7 +161,6 @@ const fields = {
   ALERT_RULE_TYPE_ID,
   ALERT_RULE_UPDATED_AT,
   ALERT_RULE_UPDATED_BY,
-  ALERT_RULE_CUSTOM_HIGHLIGHTED_FIELDS,
   ALERT_RULE_VERSION,
   ALERT_START,
   ALERT_TIME_RANGE,
