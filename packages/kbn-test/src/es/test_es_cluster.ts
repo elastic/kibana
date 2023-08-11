@@ -168,7 +168,6 @@ export function createTestEsCluster<
     ssl,
     transportPort,
     onEarlyExit,
-    serverless,
   } = options;
 
   const clusterName = `${CI_PARALLEL_PROCESS_PREFIX}${customClusterName}`;
