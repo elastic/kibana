@@ -30,6 +30,18 @@ const columnTitles = {
       defaultMessage: 'Host OS version',
     }
   ),
+  cloudProvider: i18n.translate(
+    'xpack.infra.assetDetailsEmbeddable.overview.metadataCloudProviderHeading',
+    {
+      defaultMessage: 'Cloud provider',
+    }
+  ),
+  operatingSystem: i18n.translate(
+    'xpack.infra.assetDetailsEmbeddable.overview.metadataOperatingSystemHeading',
+    {
+      defaultMessage: 'Operating system',
+    }
+  ),
 };
 
 type MetadataFields = 'hostIp' | 'hostOsVersion';
@@ -55,7 +67,7 @@ export const MetadataHeader = ({ metadataValue }: MetadataSummaryProps) => {
           <EuiPopover
             button={
               <EuiIcon
-                data-test-subj="assetDetailsMetadataSummaryPopoverButton"
+                data-test-subj="infraAssetDetailsMetadataSummaryPopoverButton"
                 type="questionInCircle"
                 onClick={togglePopover}
               />
@@ -72,7 +84,7 @@ export const MetadataHeader = ({ metadataValue }: MetadataSummaryProps) => {
                 values={{
                   documentation: (
                     <EuiLink
-                      data-test-subj="assetDetailsTooltipDocumentationLink"
+                      data-test-subj="infraAssetDetailsTooltipMetadataDocumentationLink"
                       href={metadataValue.tooltipLink}
                       target="_blank"
                     >
