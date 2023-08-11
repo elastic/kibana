@@ -32,7 +32,6 @@ describe('Exceptions viewer read only', () => {
 
   before(() => {
     cleanKibana();
-    login();
     // create rule with exceptions
     createExceptionList(exceptionList, exceptionList.list_id).then((response) => {
       createRule(
@@ -51,7 +50,6 @@ describe('Exceptions viewer read only', () => {
         })
       );
     });
-    logout();
   });
 
   beforeEach(() => {
@@ -65,6 +63,7 @@ describe('Exceptions viewer read only', () => {
   after(() => {
     deleteAlertsAndRules();
     deleteExceptionList(exceptionList.list_id, exceptionList.namespace_type);
+    logout();
   });
 
   it('Cannot add an exception from empty viewer screen', () => {
