@@ -7,7 +7,6 @@
  */
 
 import { delay } from 'bluebird';
-import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import { cloneDeepWith, isString } from 'lodash';
 import { Key, Origin, WebDriver } from 'selenium-webdriver';
 import { Driver as ChromiumWebDriver } from 'selenium-webdriver/chrome';
