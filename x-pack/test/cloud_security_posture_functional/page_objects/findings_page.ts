@@ -86,6 +86,18 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
       testSubjects.click(type === 'failed' ? 'distribution_bar_failed' : 'distribution_bar_passed'),
   };
 
+  const createNoInstalledObject = (notInstalledSubject: string) => ({
+    getElement() {
+      return testSubjects.find(notInstalledSubject);
+    },
+
+    async navigateToAction() {
+      const element = await this.getElement();
+      const button = await element.findByCssSelector('[data-test-subj="not-installed-action"');
+      await button.click();
+    },
+  });
+
   const createTableObject = (tableTestSubject: string) => ({
     getElement() {
       return testSubjects.find(tableTestSubject);
@@ -195,6 +207,14 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
     );
   };
 
+  const navigateToVulnerabilities = async () => {
+    await PageObjects.common.navigateToUrl(
+      'securitySolution', // Defined in Security Solution plugin
+      'cloud_security_posture/findings/vulnerabilities',
+      { shouldUseHashForSubUrl: false }
+    );
+  };
+
   const latestFindingsTable = createTableObject('latest_findings_table');
   const resourceFindingsTable = createTableObject('resource_findings_table');
   const findingsByResourceTable = {
@@ -210,12 +230,15 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
       await link.click();
     },
   };
+  const notInstalledVulnerabilities = createNoInstalledObject('cnvm-integration-not-installed');
 
   return {
     navigateToLatestFindingsPage,
+    navigateToVulnerabilities,
     latestFindingsTable,
     resourceFindingsTable,
     findingsByResourceTable,
+    notInstalledVulnerabilities,
     index,
     waitForPluginInitialized,
     distributionBar,
