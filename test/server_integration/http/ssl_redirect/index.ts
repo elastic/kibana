@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-export default function ({ getService }) {
+import { FtrProviderContext } from '../../services/types';
+
+export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
-  // Failing: See https://github.com/elastic/kibana/issues/131192
-  // Failing: See https://github.com/elastic/kibana/issues/131192
-  describe.skip('kibana server with ssl', () => {
+  describe('kibana server with ssl', () => {
     it('redirects http requests at redirect port to https', async () => {
       const host = process.env.TEST_KIBANA_HOST || 'localhost';
       const port = process.env.TEST_KIBANA_PORT || '5620';
