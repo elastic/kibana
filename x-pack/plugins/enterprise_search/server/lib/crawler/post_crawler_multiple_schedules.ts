@@ -14,8 +14,6 @@ import {
 
 import { CONNECTORS_INDEX } from '../..'
 
-const CUSTOM_SCHEDULING = 'custom_scheduling'
-
 export const postCrawlerCustomScheduling = async (
   client: IScopedClusterClient,
   indexName: string,
@@ -23,28 +21,17 @@ export const postCrawlerCustomScheduling = async (
 ): Promise<Connector | undefined> => {
 
   console.log('Inside postCrawlerCustomScheduling')
-  console.log(indexName)
+  console.log(customSchedules)
 
   const connectorId = await fetchCrawlerDocumentIdByIndexName(client, indexName)
-
-  console.log('Here')
-  console.log(connectorId)
-
   const crawlerResult = await client.asCurrentUser.update<Connector>({
     index: CONNECTORS_INDEX,
     id: connectorId,
     doc: {
-      [CUSTOM_SCHEDULING]: {
-        my_custom_schedule: {
-          "name": "My Schedule",
-          "interval": "0 0 12 * * ?",
-          "enabled": true,
-          "last_synced": null,
-          "configuration_overrides": {}
-        }
-      }
+      custom_scheduling: Object.fromEntries(customSchedules)
     }
   });
+  console.log(crawlerResult)
   return crawlerResult;
 };
 

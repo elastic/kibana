@@ -41,13 +41,13 @@ export const CrawlCustomSettingsFlyout: React.FC = () => {
   const { isDataLoading, isFormSubmitting, isFlyoutVisible, isSingleCrawlType } = useValues(
     CrawlCustomSettingsFlyoutLogic
   );
-  const { hideFlyout, startCustomCrawl, postCustomScheduling } = useActions(CrawlCustomSettingsFlyoutLogic);
+  const { hideFlyout, startCustomCrawl, saveCustomSchedulingConfiguration } = useActions(CrawlCustomSettingsFlyoutLogic);
 
   if (!isFlyoutVisible) {
     return null;
   }
 
-  const submitFunctionLogic = isSingleCrawlType ? startCustomCrawl : postCustomScheduling;
+  const submitFunctionLogic = isSingleCrawlType ? startCustomCrawl : saveCustomSchedulingConfiguration;
 
   return (
     <EuiFlyout ownFocus onClose={hideFlyout} size="m">

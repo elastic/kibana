@@ -170,9 +170,28 @@ export interface CrawlScheduleFromServer {
   use_connector_schedule: boolean;
 }
 
+
+export interface CrawlerCustomScheduleConfigOverridesFromServer {
+  max_crawl_depth: number;
+  sitemap_discovery_disabled: true;
+  domain_allowlist: string[]
+  sitemap_urls: string[]
+  seed_urls: string[]
+}
+
+export interface CrawlerCustomSchedulesFromServer {
+  custom_scheduling: Map<string, {
+    name: string,
+    interval: string,
+    last_synced: string,
+    configuration_overrides: CrawlerCustomScheduleConfigOverridesFromServer
+    enabled: boolean
+  }>
+}
+
 // Client
 
-export interface CrawlerConfiguration {
+export interface CrawlerCustomSchedule {
   name: string;
   customEntryPointUrls: string[];
   customSitemapUrls: string[];

@@ -35,12 +35,12 @@ export function registerCrawlerMultipleSchedulesRoutes({
           name: schema.string(),
           interval: schema.string(),
           enabled: schema.boolean(),
-          configurationOverrides: schema.object({
-            maxCrawlDepth: schema.maybe(schema.number()),
-            sitemapDiscoveryDisabled: schema.maybe(schema.boolean()),
-            domainAllowlist: schema.maybe(schema.arrayOf(schema.string())),
-            sitemapUrls: schema.maybe(schema.arrayOf(schema.string())),
-            seedUrls: schema.maybe(schema.arrayOf(schema.string())),
+          configuration_overrides: schema.object({
+            max_crawl_depth: schema.maybe(schema.number()),
+            sitemap_discovery_disabled: schema.maybe(schema.boolean()),
+            domain_allowlist: schema.maybe(schema.arrayOf(schema.string())),
+            sitemap_urls: schema.maybe(schema.arrayOf(schema.string())),
+            seed_urls: schema.maybe(schema.arrayOf(schema.string())),
           })
         })),
       },
@@ -49,6 +49,7 @@ export function registerCrawlerMultipleSchedulesRoutes({
       const { client } = (await context.core).elasticsearch;
       const { params, body } = request;
       console.log('Inside proxy')
+      console.log(body)
       const postCustomSchedulingResult = await postCrawlerCustomScheduling(client, params.indexName, body);
       console.log('Custom schedulleeeeeeeee')
       console.log(postCustomSchedulingResult)
@@ -70,9 +71,8 @@ export function registerCrawlerMultipleSchedulesRoutes({
       try {
         const { params } = request;
         const customScheduling = await fetchCrawlerCustomSchedulingByIndexName(client, params.indexName);
-        console.log('Got custom schedulleeeeeeeee')
         console.log(customScheduling)
-        return response.ok({ customScheduling });
+        return response.ok({ body: customScheduling, headers: { 'content-type': 'application/json' }, });
       } catch (error) {
         if (
           (error as Error).message === ErrorCode.DOCUMENT_NOT_FOUND

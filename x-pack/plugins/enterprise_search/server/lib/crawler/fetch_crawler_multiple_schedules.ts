@@ -24,6 +24,6 @@ export const fetchCrawlerCustomSchedulingByIndexName = async (
     query: { term: { index_name: indexName } },
     _source: CUSTOM_SCHEDULING,
   });
-  const crawler = crawlerResult.hits.hits[0]?._source;
-  return crawler;
+  const result = crawlerResult.hits.hits[0]?._source;
+  return result;
 };

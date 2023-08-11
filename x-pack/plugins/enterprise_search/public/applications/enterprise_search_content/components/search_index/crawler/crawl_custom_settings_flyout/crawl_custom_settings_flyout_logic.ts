@@ -41,9 +41,8 @@ export interface CrawlCustomSettingsFlyoutLogicValues {
 
 export interface CrawlCustomSettingsFlyoutLogicActions {
   fetchDomainConfigData(): void;
-  fetchCustomScheduling(): void;
-  postCustomScheduling(): void;
   hideFlyout(): void;
+  saveCustomSchedulingConfiguration(): void;
   onRecieveDomainConfigData(domainConfigs: DomainConfig[]): { domainConfigs: DomainConfig[] };
   onSelectCrawlType(crawlType: string): { crawlType: string };
   onSelectCustomEntryPointUrls(entryPointUrls: string[]): { entryPointUrls: string[] };
@@ -75,13 +74,12 @@ export const CrawlCustomSettingsFlyoutLogic = kea<
 >({
   path: ['enterprise_search', 'crawler', 'crawl_custom_settings_flyout_logic'],
   connect: {
-    actions: [CrawlerLogic, ['startCrawl']],
+    actions: [CrawlerLogic, ['startCrawl'], CrawlCustomSettingsFlyoutMultiCrawlLogic, ['fetchCustomScheduling', 'postCustomScheduling']],
     values: [CrawlCustomSettingsFlyoutMultiCrawlLogic, ['crawlerConfigurations']]
   },
   actions: () => ({
     fetchDomainConfigData: true,
-    fetchCustomScheduling: true,
-    postCustomScheduling: true,
+    saveCustomSchedulingConfiguration: true,
     hideFlyout: true,
     onRecieveDomainConfigData: (domainConfigs) => ({ domainConfigs }),
     onSelectCrawlType: (crawlType) => ({ crawlType }),
@@ -267,45 +265,12 @@ export const CrawlCustomSettingsFlyoutLogic = kea<
         flashAPIErrors(e);
       }
     },
-    fetchCustomScheduling: async () => {
-      const { http } = HttpLogic.values;
-      const { indexName } = IndexNameLogic.values;
-
-      let customSchedules = []
-
-      try {
-        const {
-          results
-        } = await http.get<{
-          meta: Meta;
-          results: DomainConfigFromServer[];
-        }>(`/internal/enterprise_search/indices/${indexName}/crawler/custom_scheduling`);
-
-        console.log(results);
-      } catch (e) {
-        flashAPIErrors(e);
-      }
-
-    },
-    postCustomScheduling: async () => {
-      const { http } = HttpLogic.values;
-      const { indexName } = IndexNameLogic.values;
-
-      try {
-        const {
-          results
-        } = await http.post<{
-          meta: Meta;
-          results: DomainConfigFromServer[];
-        }>(`/internal/enterprise_search/indices/${indexName}/crawler/custom_scheduling`,
-          { body: JSON.stringify({ crawler_1: { name: 'Chuj', enabled: true, interval: "0 0 12 * * ?", configurationOverrides: {} } }) });
-      } catch (e) {
-        flashAPIErrors(e);
-      }
-    },
     showFlyout: () => {
       actions.fetchDomainConfigData();
       actions.fetchCustomScheduling();
+    },
+    saveCustomSchedulingConfiguration: () => {
+      actions.postCustomScheduling();
     },
     startCustomCrawl: () => {
       const overrides: CrawlRequestOverrides = {
