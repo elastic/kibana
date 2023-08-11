@@ -9,7 +9,7 @@
     ],
     "patterns": [
       "_cluster/stats",
-      "_cluster/stats/nodes/{nodes}"
+      "_cluster/stats/nodes/{node_id}"
     ],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/cluster-stats.html"
   }

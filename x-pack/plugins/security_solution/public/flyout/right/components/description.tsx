@@ -61,7 +61,7 @@ export const Description: FC = () => {
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
             size="s"
-            iconType="arrowRight"
+            iconType="expand"
             onClick={openRulePreview}
             iconSide="right"
             data-test-subj={RULE_SUMMARY_BUTTON_TEST_ID}

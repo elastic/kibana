@@ -99,6 +99,11 @@ export const addExceptionEntryFieldValue = (field: string, index = 0) => {
   cy.get(EXCEPTION_FLYOUT_TITLE).click();
 };
 
+export const addExceptionEntryFieldValueAndSelectSuggestion = (field: string, index = 0) => {
+  cy.get(FIELD_INPUT).eq(index).type(`${field}`);
+  cy.get(`button[title="${field}"]`).click();
+};
+
 export const addExceptionEntryOperatorValue = (operator: string, index = 0) => {
   cy.get(OPERATOR_INPUT).eq(index).type(`${operator}{enter}`);
   cy.get(EXCEPTION_FLYOUT_TITLE).click();

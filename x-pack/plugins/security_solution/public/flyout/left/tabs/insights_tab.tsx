@@ -17,7 +17,6 @@ import {
   INSIGHTS_TAB_THREAT_INTELLIGENCE_BUTTON_TEST_ID,
   INSIGHTS_TAB_PREVALENCE_BUTTON_TEST_ID,
   INSIGHTS_TAB_CORRELATIONS_BUTTON_TEST_ID,
-  INSIGHTS_TAB_RESPONSE_BUTTON_TEST_ID,
 } from './test_ids';
 import { useLeftPanelContext } from '../context';
 import { LeftPanelKey } from '..';
@@ -27,7 +26,6 @@ import {
   THREAT_INTELLIGENCE_BUTTON,
   PREVALENCE_BUTTON,
   CORRELATIONS_BUTTON,
-  RESPONSE_BUTTON,
 } from './translations';
 import { ENTITIES_TAB_ID, EntitiesDetails } from '../components/entities_details';
 import {
@@ -57,11 +55,6 @@ const insightsButtons: EuiButtonGroupOptionProps[] = [
     id: CORRELATIONS_TAB_ID,
     label: CORRELATIONS_BUTTON,
     'data-test-subj': INSIGHTS_TAB_CORRELATIONS_BUTTON_TEST_ID,
-  },
-  {
-    id: RESPONSE_TAB_ID,
-    label: RESPONSE_BUTTON,
-    'data-test-subj': INSIGHTS_TAB_RESPONSE_BUTTON_TEST_ID,
   },
 ];
 
@@ -118,7 +111,6 @@ export const InsightsTab: React.FC = memo(() => {
       {activeInsightsId === THREAT_INTELLIGENCE_TAB_ID && <ThreatIntelligenceDetails />}
       {activeInsightsId === PREVALENCE_TAB_ID && <PrevalenceDetails />}
       {activeInsightsId === CORRELATIONS_TAB_ID && <CorrelationsDetails />}
-      {activeInsightsId === RESPONSE_TAB_ID && <ResponseDetails />}
     </>
   );
 });

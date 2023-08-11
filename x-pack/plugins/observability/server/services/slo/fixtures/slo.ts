@@ -6,7 +6,7 @@
  */
 
 import { SavedObject } from '@kbn/core-saved-objects-server';
-import { CreateSLOParams, HistogramIndicator, sloSchema } from '@kbn/slo-schema';
+import { ALL_VALUE, CreateSLOParams, HistogramIndicator, sloSchema } from '@kbn/slo-schema';
 import { cloneDeep } from 'lodash';
 import { v1 as uuidv1 } from 'uuid';
 import {
@@ -129,6 +129,7 @@ const defaultSLO: Omit<SLO, 'id' | 'revision' | 'createdAt' | 'updatedAt'> = {
   },
   tags: ['critical', 'k8s'],
   enabled: true,
+  groupBy: ALL_VALUE,
 };
 
 const defaultCreateSloParams: CreateSLOParams = {

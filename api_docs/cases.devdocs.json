@@ -1091,7 +1091,7 @@
           "\nReturn the UI capabilities for each type of operation. These strings must match the values defined in the UI\nhere: x-pack/plugins/cases/public/client/helpers/capabilities.ts"
         ],
         "signature": [
-          "() => { all: readonly [\"create_cases\", \"read_cases\", \"update_cases\", \"push_cases\"]; read: readonly [\"read_cases\"]; delete: readonly [\"delete_cases\"]; }"
+          "() => { all: readonly [\"create_cases\", \"read_cases\", \"update_cases\", \"push_cases\", \"cases_connectors\"]; read: readonly [\"read_cases\", \"cases_connectors\"]; delete: readonly [\"delete_cases\"]; }"
         ],
         "path": "x-pack/plugins/cases/common/utils/capabilities.ts",
         "deprecated": false,
@@ -1108,7 +1108,7 @@
         "label": "getApiTags",
         "description": [],
         "signature": [
-          "(owner: \"cases\" | \"observability\" | \"securitySolution\") => { all: readonly [\"casesSuggestUserProfiles\", \"bulkGetUserProfiles\", string, string]; read: readonly [\"casesSuggestUserProfiles\", \"bulkGetUserProfiles\", string]; delete: readonly [string]; }"
+          "(owner: \"cases\" | \"observability\" | \"securitySolution\") => { all: readonly [\"casesSuggestUserProfiles\", \"bulkGetUserProfiles\", \"casesGetConnectorsConfigure\", string, string]; read: readonly [\"casesSuggestUserProfiles\", \"bulkGetUserProfiles\", \"casesGetConnectorsConfigure\", string]; delete: readonly [string]; }"
         ],
         "path": "x-pack/plugins/cases/common/utils/api_tags.ts",
         "deprecated": false,
@@ -1312,6 +1312,17 @@
             "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cases",
+            "id": "def-common.CasesPermissions.connectors",
+            "type": "boolean",
+            "tags": [],
+            "label": "connectors",
+            "description": [],
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1409,7 +1420,7 @@
         "tags": [],
         "label": "CaseMetricsFeature",
         "description": [],
-        "path": "x-pack/plugins/cases/common/api/metrics/case.ts",
+        "path": "x-pack/plugins/cases/common/types/api/metrics/v1.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2373,6 +2384,21 @@
       },
       {
         "parentPluginId": "cases",
+        "id": "def-common.CasesMetricsResponse",
+        "type": "Type",
+        "tags": [],
+        "label": "CasesMetricsResponse",
+        "description": [],
+        "signature": [
+          "{ mttr?: number | null | undefined; }"
+        ],
+        "path": "x-pack/plugins/cases/common/types/api/metrics/v1.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cases",
         "id": "def-common.CasesStatus",
         "type": "Type",
         "tags": [],
@@ -2791,6 +2817,21 @@
           "\"securitySolution\""
         ],
         "path": "x-pack/plugins/cases/common/constants/owners.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cases",
+        "id": "def-common.SingleCaseMetricsResponse",
+        "type": "Type",
+        "tags": [],
+        "label": "SingleCaseMetricsResponse",
+        "description": [],
+        "signature": [
+          "{ alerts?: { count?: number | undefined; hosts?: { total: number; values: { name: string | undefined; id: string; count: number; }[]; } | undefined; users?: { total: number; values: { name: string; count: number; }[]; } | undefined; } | undefined; connectors?: { total: number; } | undefined; actions?: { isolateHost?: { isolate: { total: number; }; unisolate: { total: number; }; } | undefined; } | undefined; lifespan?: { creationDate: string; closeDate: string | null; statusInfo: { openDuration: number; inProgressDuration: number; reopenDates: string[]; }; } | undefined; }"
+        ],
+        "path": "x-pack/plugins/cases/common/types/api/metrics/v1.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
