@@ -15,9 +15,15 @@ describe('Config', () => {
         services: {
           foo: () => 42,
         },
+        servers: {
+          elasticsearch: {
+            port: 1234,
+          },
+        },
       },
       primary: true,
       path: process.cwd(),
+      module: {} as any,
     });
 
     expect(config.has('services.foo')).toEqual(true);

@@ -115,12 +115,11 @@ describe('top-level navigation common to all pages in the Security app', () => {
 });
 
 describe('Kibana navigation to all pages in the Security app ', () => {
-  before(() => {
-    loginAndWaitForPage(KIBANA_HOME);
-  });
   beforeEach(() => {
+    loginAndWaitForPage(KIBANA_HOME);
     openKibanaNavigation();
   });
+
   it('navigates to the Overview page', () => {
     navigateFromKibanaCollapsibleTo(OVERVIEW_PAGE);
     cy.url().should('include', OVERVIEW_URL);

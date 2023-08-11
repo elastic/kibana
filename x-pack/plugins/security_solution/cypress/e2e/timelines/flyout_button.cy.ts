@@ -28,7 +28,7 @@ describe('timeline flyout button', () => {
     cleanKibana();
   });
 
-  before(() => {
+  beforeEach(() => {
     loginAndWaitForPage(HOSTS_URL);
     waitForAllHostsToBeLoaded();
   });

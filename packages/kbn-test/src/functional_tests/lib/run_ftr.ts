@@ -49,54 +49,26 @@ async function createFtr({
     dryRun,
   },
 }: CreateFtrParams) {
-  console.error('configPath', configPath);
-
-  const config = await readConfigFile(
-    log,
-    esVersion,
-    configPath,
-    {},
-    (configModule) => {
-      console.error('cc', configModule);
-      return configModule;
-    }
-    // {
-    //   mochaOpts: {
-    //     bail: !!bail,
-    //     grep,
-    //     dryRun: !!dryRun,
-    //   },
-    //   kbnTestServer: {
-    //     installDir,
-    //   },
-    //   updateBaselines,
-    //   updateSnapshots,
-    //   suiteFiles: {
-    //     include: suiteFiles?.include || [],
-    //     exclude: suiteFiles?.exclude || [],
-    //   },
-    //   suiteTags: {
-    //     include: suiteTags?.include || [],
-    //     exclude: suiteTags?.exclude || [],
-    //   },
-    // }
-    // (configModule) => {
-    //   console.error('cc', configModule);
-    //   return configModule;
-    //   // return {
-    //   //   suiteFiles: {
-    //   //     include: [...(suiteFiles?.include || []), ...configModule.get('suiteFiles.include')],
-    //   //     exclude: [...(suiteFiles?.exclude || []), ...configModule.get('suiteFiles.exclude')],
-    //   //   },
-    //   //   suiteTags: {
-    //   //     include: [...(suiteTags?.include || []), ...configModule.get('suiteTags.include')],
-    //   //     exclude: [...(suiteTags?.exclude || []), ...configModule.get('suiteTags.exclude')],
-    //   //   },
-    //   // };
-    // }
-  );
-
-  console.error('config', config);
+  const config = await readConfigFile(log, esVersion, configPath, {
+    mochaOpts: {
+      bail: !!bail,
+      grep,
+      dryRun: !!dryRun,
+    },
+    kbnTestServer: {
+      installDir,
+    },
+    updateBaselines,
+    updateSnapshots,
+    suiteFiles: {
+      include: suiteFiles?.include || [],
+      exclude: suiteFiles?.exclude || [],
+    },
+    suiteTags: {
+      include: suiteTags?.include || [],
+      exclude: suiteTags?.exclude || [],
+    },
+  });
 
   return {
     config,

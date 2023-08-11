@@ -61,12 +61,14 @@ describe('Display not found page', () => {
     cy.get(NOT_FOUND).should('exist');
   });
 
-  it('navigates to the endpoints page with incorrect link', () => {
+  // Fleet requires superuser
+  it.skip('navigates to the endpoints page with incorrect link', () => {
     loginAndWaitForPage(`${ENDPOINTS_URL}/randomUrl`);
     cy.get(NOT_FOUND).should('exist');
   });
 
-  it('navigates to the trusted applications page with incorrect link', () => {
+  // Fleet requires superuser
+  it.skip('navigates to the trusted applications page with incorrect link', () => {
     loginAndWaitForPage(`${TRUSTED_APPS_URL}/randomUrl`);
     cy.get(NOT_FOUND).should('exist');
   });

@@ -30,7 +30,7 @@ import { waitForTimelinesPanelToBeLoaded } from '../../tasks/timelines';
 
 import { TIMELINES_URL } from '../../urls/navigation';
 
-const text = 'elastic';
+const text = 'system_indices_superuser';
 const link = 'https://www.elastic.co/';
 
 describe('Timeline notes tab', () => {

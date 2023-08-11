@@ -22,7 +22,6 @@ import { cleanKibana } from '../../tasks/common';
 
 import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
 import {
-  closeOpenTimelineModal,
   markAsFavorite,
   openTimelineById,
   openTimelineFromSettings,
@@ -61,12 +60,8 @@ describe('Open timeline', () => {
   });
 
   describe('Open timeline modal', () => {
-    before(() => {
+    beforeEach(() => {
       openTimelineFromSettings();
-    });
-
-    after(() => {
-      closeOpenTimelineModal();
     });
 
     it('should open a modal', () => {
