@@ -64,16 +64,17 @@ const getUnitedMetadataSortMethod = (
 ): estypes.SortCombinations[] => {
   const DATE_FIELDS = [EndpointSortableField.LAST_SEEN, EndpointSortableField.ENROLLED_AT];
 
-  const unitedMetadataSortField = sortField.replace('metadata.', 'united.endpoint.');
+  const mappedUnitedMetadataSortField =
+    sortField === EndpointSortableField.HOST_STATUS
+      ? 'status'
+      : sortField === EndpointSortableField.ENROLLED_AT
+      ? 'united.agent.enrolled_at'
+      : sortField.replace('metadata.', 'united.endpoint.');
 
-  if (sortField === EndpointSortableField.HOST_STATUS) {
-    return [{ status: sortDirection }];
-  } else if (sortField === EndpointSortableField.ENROLLED_AT) {
-    return [{ 'united.agent.enrolled_at': { order: sortDirection, unmapped_type: 'date' } }];
-  } else if (DATE_FIELDS.includes(sortField)) {
-    return [{ [unitedMetadataSortField]: { order: sortDirection, unmapped_type: 'date' } }];
+  if (DATE_FIELDS.includes(sortField)) {
+    return [{ [mappedUnitedMetadataSortField]: { order: sortDirection, unmapped_type: 'date' } }];
   } else {
-    return [{ [unitedMetadataSortField]: sortDirection }];
+    return [{ [mappedUnitedMetadataSortField]: sortDirection }];
   }
 };
 
