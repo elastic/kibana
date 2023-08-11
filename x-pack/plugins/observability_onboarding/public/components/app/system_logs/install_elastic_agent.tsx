@@ -15,7 +15,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { default as React, useCallback, useEffect, useState } from 'react';
-import { getSystemLogsDataStreams } from '../../../../common/elastic_agent_logs';
 import { ObservabilityOnboardingPluginSetupDeps } from '../../../plugin';
 import { useWizard } from '.';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
@@ -35,12 +34,11 @@ import {
   StepPanelFooter,
 } from '../../shared/step_panel';
 import { ApiKeyBanner } from '../custom_logs/wizard/api_key_banner';
-import { getDiscoverNavigationParams } from '../utils';
 
 export function InstallElasticAgent() {
   const {
     services: {
-      discover: { locator },
+      discoverLogExplorer: { locators },
     },
   } = useKibana<ObservabilityOnboardingPluginSetupDeps>();
 
@@ -56,11 +54,10 @@ export function InstallElasticAgent() {
     navigateToKibanaUrl('/app/observabilityOnboarding');
   }
   async function onContinue() {
-    const dataStreams = getSystemLogsDataStreams();
-    const dataSets = dataStreams.map(
-      (dataSream) => dataSream.data_stream.dataset
-    );
-    await locator?.navigate(getDiscoverNavigationParams(dataSets));
+    await locators.singleDatasetLocator.navigate({
+      integration: 'system',
+      dataset: 'syslog',
+    });
   }
 
   function onAutoDownloadConfig() {

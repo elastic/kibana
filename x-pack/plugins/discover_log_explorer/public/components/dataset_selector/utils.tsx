@@ -20,7 +20,7 @@ import {
 } from './constants';
 import { DatasetSelectionHandler } from './types';
 import { LoadDatasets } from '../../hooks/use_datasets';
-import { dynamic } from '../../utils/dynamic';
+import { dynamic } from '../../../common/utils/dynamic';
 import type { IntegrationsListStatusProps } from './sub_components/integrations_list_status';
 
 const IntegrationsListStatus = dynamic(() => import('./sub_components/integrations_list_status'));

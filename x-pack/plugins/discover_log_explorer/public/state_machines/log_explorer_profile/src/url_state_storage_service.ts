@@ -15,7 +15,7 @@ import {
   decodeDatasetSelectionId,
   hydrateDatasetSelection,
   isDatasetSelection,
-} from '../../../utils/dataset_selection';
+} from '../../../../common/utils/dataset_selection';
 import {
   ControlPanelRT,
   ControlPanels,

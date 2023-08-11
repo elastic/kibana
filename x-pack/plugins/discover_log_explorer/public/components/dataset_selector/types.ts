@@ -15,7 +15,10 @@ import {
   SearchIntegrations,
 } from '../../hooks/use_integrations';
 import { INTEGRATION_PANEL_ID, UNMANAGED_STREAMS_PANEL_ID } from './constants';
-import type { DatasetSelection, DatasetSelectionChange } from '../../utils/dataset_selection';
+import type {
+  DatasetSelection,
+  DatasetSelectionChange,
+} from '../../../common/utils/dataset_selection';
 
 export interface DatasetSelectorProps {
   /* The generic data stream list */

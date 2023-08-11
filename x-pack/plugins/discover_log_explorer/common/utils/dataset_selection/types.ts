@@ -6,7 +6,7 @@
  */
 import { DataViewSpec } from '@kbn/data-views-plugin/common';
 import * as rt from 'io-ts';
-import { datasetRT } from '../../../common/datasets';
+import { datasetRT } from '../../datasets';
 
 export const allDatasetSelectionPlainRT = rt.type({
   selectionType: rt.literal('all'),

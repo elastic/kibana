@@ -8,7 +8,7 @@
 import { EuiContextMenu, EuiHorizontalRule } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { useIntersectionRef } from '../../hooks/use_intersection_ref';
-import { dynamic } from '../../utils/dynamic';
+import { dynamic } from '../../../common/utils/dynamic';
 import {
   contextMenuStyles,
   DATA_VIEW_POPOVER_CONTENT_WIDTH,

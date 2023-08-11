@@ -8,7 +8,10 @@
 import * as rt from 'io-ts';
 import { ControlGroupAPI } from '@kbn/controls-plugin/public';
 import { DoneInvokeEvent } from 'xstate';
-import type { DatasetEncodingError, DatasetSelection } from '../../../utils/dataset_selection';
+import type {
+  DatasetEncodingError,
+  DatasetSelection,
+} from '../../../../common/utils/dataset_selection';
 
 export interface WithDatasetSelection {
   datasetSelection: DatasetSelection;

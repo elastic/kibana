@@ -9,7 +9,7 @@ import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import { CustomizationCallback } from '@kbn/discover-plugin/public';
 import React from 'react';
-import { dynamic } from '../utils/dynamic';
+import { dynamic } from '../../common/utils/dynamic';
 
 const LazyCustomDatasetSelector = dynamic(() => import('./custom_dataset_selector'));
 const LazyCustomDatasetFilters = dynamic(() => import('./custom_dataset_filters'));

@@ -23,7 +23,7 @@ import {
   DataPublicPluginSetup,
   DataPublicPluginStart,
 } from '@kbn/data-plugin/public';
-import type { DiscoverSetup } from '@kbn/discover-plugin/public';
+import type { DiscoverLogExplorerPluginSetup } from '@kbn/discover-log-explorer-plugin/public';
 import type { ObservabilityOnboardingConfig } from '../server';
 
 export type ObservabilityOnboardingPluginSetup = void;
@@ -32,7 +32,7 @@ export type ObservabilityOnboardingPluginStart = void;
 export interface ObservabilityOnboardingPluginSetupDeps {
   data: DataPublicPluginSetup;
   observability: ObservabilityPublicSetup;
-  discover: DiscoverSetup;
+  discoverLogExplorer: DiscoverLogExplorerPluginSetup;
 }
 
 export interface ObservabilityOnboardingPluginStartDeps {

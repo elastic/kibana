@@ -6,7 +6,10 @@
  */
 
 import { actions, assign, createMachine, raise } from 'xstate';
-import { AllDatasetSelection, SingleDatasetSelection } from '../../../utils/dataset_selection';
+import {
+  AllDatasetSelection,
+  SingleDatasetSelection,
+} from '../../../../common/utils/dataset_selection';
 import { UNMANAGED_STREAMS_PANEL_ID } from '../constants';
 import { defaultSearch, DEFAULT_CONTEXT } from './defaults';
 import {

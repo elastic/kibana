@@ -18,7 +18,7 @@ import {
   AllDatasetSelection,
   DatasetSelection,
   DatasetSelectionChange,
-} from '../../utils/dataset_selection';
+} from '../../../common/utils/dataset_selection';
 
 const meta: Meta<typeof DatasetSelector> = {
   component: DatasetSelector,

@@ -8,7 +8,7 @@
 import { IToasts } from '@kbn/core/public';
 import { DiscoverStateContainer } from '@kbn/discover-plugin/public';
 import { actions, createMachine, interpret, InterpreterFrom, raise } from 'xstate';
-import { isDatasetSelection } from '../../../utils/dataset_selection';
+import { isDatasetSelection } from '../../../../common/utils/dataset_selection';
 import { createAndSetDataView } from './data_view_service';
 import { DEFAULT_CONTEXT } from './defaults';
 import {

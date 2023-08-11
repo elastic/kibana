@@ -6,6 +6,7 @@
  */
 
 import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
+import { SingleDatasetSelection } from '../../utils/dataset_selection';
 import { LOG_EXPLORER_PROFILE_ID } from '../../constants';
 import { SINGLE_DATASET_LOCATOR_ID } from './constants';
 import { SingleDatasetLocatorDependencies, SingleDatasetLocatorParams } from './types';
@@ -20,13 +21,33 @@ export class SingleDatasetLocatorDefinition
   constructor(protected readonly deps: SingleDatasetLocatorDependencies) {}
 
   public readonly getLocation = async (params: SingleDatasetLocatorParams) => {
-    const { integration, dataStream, ...discoverParams } = params;
+    const { integration, dataset, ...discoverParams } = params;
+
+    const dataViewId = await this.generateDataViewId(integration, dataset);
 
     const discoverDeepLink = await this.deps.discover.locator?.getLocation({
       ...discoverParams,
+      dataViewId,
       profile: LOG_EXPLORER_PROFILE_ID,
     });
 
     return discoverDeepLink!;
   };
+
+  private async generateDataViewId(integration: string, dataset: string) {
+    const { items } = await this.deps.datasetsService.client.findIntegrations({
+      nameQuery: integration,
+    });
+
+    // There should only be one matching integration with the given name
+    const installedIntegration = items[0];
+
+    const datasetSelection = SingleDatasetSelection.create(
+      installedIntegration.datasets.find((d) => d.title === dataset)!
+    );
+
+    const dataViewId = datasetSelection.toDataviewSpec().id;
+
+    return dataViewId;
+  }
 }

@@ -7,6 +7,7 @@
 
 import { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import type { DiscoverSetup } from '@kbn/discover-plugin/public';
+import type { DatasetsServiceSetup } from '../../../public/services/datasets';
 
 type DiscoverPropertiesToOmit =
   | 'savedSearchId'
@@ -23,11 +24,12 @@ export interface SingleDatasetLocatorParams extends DiscoverLocatorUsablePropert
    */
   integration: string;
   /**
-   * Datastream name to be selected.
+   * Dataset name to be selected.
    */
-  dataStream: string;
+  dataset: string;
 }
 
 export interface SingleDatasetLocatorDependencies {
   discover: DiscoverSetup;
+  datasetsService: DatasetsServiceSetup;
 }

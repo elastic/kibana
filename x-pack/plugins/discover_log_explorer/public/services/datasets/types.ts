@@ -13,7 +13,13 @@ import {
   FindIntegrationsValue,
 } from '../../../common/latest';
 
-export type DatasetsServiceSetup = void;
+export interface DatasetsServiceSetup {
+  client: IDatasetsClient;
+}
+
+export interface DatasetsServiceSetupDeps {
+  http: HttpStart;
+}
 
 export interface DatasetsServiceStart {
   client: IDatasetsClient;

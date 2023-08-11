@@ -36,12 +36,11 @@ import {
 } from '../../../shared/step_panel';
 import { ApiKeyBanner } from './api_key_banner';
 import { BackButton } from './back_button';
-import { getDiscoverNavigationParams } from '../../utils';
 
 export function InstallElasticAgent() {
   const {
     services: {
-      discover: { locator },
+      discoverLogExplorer: { locators },
     },
   } = useKibana<ObservabilityOnboardingPluginSetupDeps>();
   const { goBack, goToStep, getState, setState } = useWizard();
@@ -53,9 +52,10 @@ export function InstallElasticAgent() {
     goToStep('inspect');
   }
   async function onContinue() {
-    await locator?.navigate(
-      getDiscoverNavigationParams([wizardState.datasetName])
-    );
+    await locators.singleDatasetLocator.navigate({
+      integration: wizardState.integrationName,
+      dataset: wizardState.datasetName,
+    });
   }
 
   function onAutoDownloadConfig() {
