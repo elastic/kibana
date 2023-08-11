@@ -20,10 +20,11 @@ import { lastValueFrom } from '@kbn/std';
 import { PROJECTS } from '../typescript/projects';
 import { Project } from '../typescript/project';
 
+import { eslintBinPath } from './eslint_bin_path';
+
 export function runEslintWithTypes() {
   run(
     async ({ log, flags }) => {
-      const eslintPath = require.resolve('eslint/bin/eslint');
       const ignoreFilePath = Path.resolve(REPO_ROOT, '.eslintignore');
       const configTemplate = Fs.readFileSync(
         Path.resolve(__dirname, 'types.eslint.config.template.js'),
@@ -77,7 +78,7 @@ export function runEslintWithTypes() {
             const proc = await execa(
               process.execPath,
               [
-                Path.relative(project.directory, eslintPath),
+                Path.relative(project.directory, eslintBinPath),
                 ...project.getIncludePatterns().map((p) => (p.endsWith('*') ? `${p}.{ts,tsx}` : p)),
                 ...project.getExcludePatterns().flatMap((p) => ['--ignore-pattern', p]),
                 ...['--ignore-pattern', '**/*.json'],

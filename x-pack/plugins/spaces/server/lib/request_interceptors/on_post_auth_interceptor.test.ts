@@ -7,7 +7,6 @@
 
 import Boom from '@hapi/boom';
 
-// @ts-ignore
 import { kibanaTestUser } from '@kbn/test';
 import type { CoreSetup, IBasePath, IRouter } from 'src/core/server';
 import { coreMock, elasticsearchServiceMock, loggingSystemMock } from 'src/core/server/mocks';
