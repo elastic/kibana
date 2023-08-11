@@ -19,8 +19,8 @@ describe('Top N functions: Utils', () => {
     it('returns correct value when percentage is 0', () => {
       expect(getColorLabel(0)).toEqual({
         color: 'danger',
-        label: '<0.01',
-        icon: undefined,
+        label: '<0.01%',
+        icon: 'sortDown',
       });
     });
 
