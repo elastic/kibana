@@ -104,7 +104,11 @@ jest.mock('react-router-dom', () => ({
     pathname: '/triggersActions/rules/',
   }),
 }));
-jest.mock('@kbn/alerts-ui-shared', () => ({ MaintenanceWindowCallout: jest.fn(() => <></>) }));
+jest.mock('@kbn/alerts-ui-shared', () => ({
+  MaintenanceWindowCallout: jest.fn(() => (
+    <div data-test-subj="mocked-MaintenanceWindowCallout-component" />
+  )),
+}));
 
 jest.mock('../../../lib/capabilities', () => ({
   hasAllPrivilege: jest.fn(() => true),
@@ -244,6 +248,13 @@ describe('rules_list component empty', () => {
   it('renders empty list', async () => {
     renderWithProviders(<RulesList />);
     expect(await screen.findByTestId('createFirstRuleEmptyPrompt')).toBeInTheDocument();
+  });
+
+  it('renders MaintenanceWindowCallout mocked component', async () => {
+    renderWithProviders(<RulesList />);
+    expect(
+      await screen.findByTestId('mocked-MaintenanceWindowCallout-component')
+    ).toBeInTheDocument();
   });
 
   it('renders Create rule button', async () => {
