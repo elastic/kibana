@@ -102,6 +102,7 @@ export interface SuggestionPanelProps {
   getUserMessages?: UserMessagesGetter;
   nowProvider: DataPublicPluginStart['nowProvider'];
   customSwitchSuggestionAction?: (s: Suggestion) => void;
+  showOnlyIcons?: boolean;
 }
 
 const PreviewRenderer = ({
@@ -156,6 +157,65 @@ const PreviewRenderer = ({
     </div>
   );
 };
+
+// export const SuggestionIconTiles = ({
+//   preview,
+//   ExpressionRenderer: ExpressionRendererComponent,
+//   selected,
+//   onSelect,
+//   showTitleAsLabel,
+//   onRender,
+// }: {
+//   onSelect: () => void;
+//   preview: {
+//     expression?: Ast | null;
+//     icon: IconType;
+//     title: string;
+//     error?: boolean;
+//   };
+//   ExpressionRenderer: ReactExpressionRendererType;
+//   selected: boolean;
+//   showTitleAsLabel?: boolean;
+//   onRender: () => void;
+// }) => {
+//   return (
+//     <EuiToolTip content={preview.title}>
+//       <div data-test-subj={`lnsSuggestion-${camelCase(preview.title)}`}>
+//         <EuiPanel
+//           hasBorder={true}
+//           hasShadow={false}
+//           className={classNames('lnsSuggestionPanel__button', {
+//             'lnsSuggestionPanel__button-isSelected': selected,
+//           })}
+//           paddingSize="none"
+//           data-test-subj="lnsSuggestion"
+//           onClick={onSelect}
+//           aria-current={!!selected}
+//           aria-label={preview.title}
+//           element="button"
+//           role="listitem"
+//         >
+//           {preview.expression || preview.error ? (
+//             <PreviewRenderer
+//               ExpressionRendererComponent={ExpressionRendererComponent}
+//               expression={preview.expression && toExpression(preview.expression)}
+//               withLabel={Boolean(showTitleAsLabel)}
+//               hasError={Boolean(preview.error)}
+//               onRender={onRender}
+//             />
+//           ) : (
+//             <span className="lnsSuggestionPanel__suggestionIcon">
+//               <EuiIcon size="xxl" type={preview.icon} />
+//             </span>
+//           )}
+//           {showTitleAsLabel && (
+//             <span className="lnsSuggestionPanel__buttonLabel">{preview.title}</span>
+//           )}
+//         </EuiPanel>
+//       </div>
+//     </EuiToolTip>
+//   );
+// };
 
 export const SuggestionPreview = ({
   preview,
@@ -229,6 +289,7 @@ export function SuggestionPanel({
   getUserMessages,
   nowProvider,
   customSwitchSuggestionAction,
+  showOnlyIcons,
 }: SuggestionPanelProps) {
   const dispatchLens = useLensDispatch();
   const activeDatasourceId = useLensSelector(selectActiveDatasourceId);
@@ -435,7 +496,7 @@ export function SuggestionPanel({
           <SuggestionPreview
             preview={{
               error: currentStateError,
-              expression: currentStateExpression,
+              expression: !showOnlyIcons ? currentStateExpression : undefined,
               icon:
                 visualizationMap[currentVisualization.activeId].getDescription(
                   currentVisualization.state
@@ -456,12 +517,13 @@ export function SuggestionPanel({
             return (
               <SuggestionPreview
                 preview={{
-                  expression: suggestion.previewExpression,
+                  expression: !showOnlyIcons ? suggestion.previewExpression : undefined,
                   icon: suggestion.previewIcon,
                   title: suggestion.title,
                 }}
                 ExpressionRenderer={AutoRefreshExpressionRenderer}
                 key={index}
+                showTitleAsLabel={showOnlyIcons}
                 onSelect={() => {
                   if (lastSelectedSuggestion === index) {
                     rollbackToCurrentVisualization();

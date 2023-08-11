@@ -228,6 +228,7 @@ export function LensEditConfigurationFlyout({
               visualizationMap={visualizationMap}
               frame={frameApi}
               nowProvider={startDependencies.data.nowProvider}
+              showOnlyIcons
               customSwitchSuggestionAction={(suggestion) => {
                 const attrs = getLensAttributes({
                   filters: [],
