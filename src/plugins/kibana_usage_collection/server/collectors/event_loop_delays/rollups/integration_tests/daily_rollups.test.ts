@@ -57,8 +57,8 @@ function createRawObject(date: moment.MomentInput): SavedObject<EventLoopDelaysD
 
 function createRawEventLoopDelaysDailyDocs() {
   const rawEventLoopDelaysDaily = [
-    createRawObject(moment.now()),
-    createRawObject(moment.now()),
+    createRawObject(moment()),
+    createRawObject(moment()),
     createRawObject(moment().subtract(1, 'days')),
     createRawObject(moment().subtract(3, 'days')),
   ];
