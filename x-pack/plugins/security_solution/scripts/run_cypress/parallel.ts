@@ -412,6 +412,7 @@ ${JSON.stringify(cyCustomEnv, null, 2)}
                     e2e: {
                       baseUrl,
                     },
+                    experimentalMemoryManagement: true,
                     numTestsKeptInMemory: 0,
                     env: cyCustomEnv,
                   },
