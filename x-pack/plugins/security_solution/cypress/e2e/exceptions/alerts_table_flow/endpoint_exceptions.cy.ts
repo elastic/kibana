@@ -21,7 +21,6 @@ import {
   waitForAlertsToPopulate,
   waitForTheRuleToBeExecuted,
 } from '../../../tasks/create_new_rule';
-import { esArchiverLoad } from '../../../tasks/es_archiver';
 import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../../urls/navigation';
 import {
   addExceptionEntryFieldValue,
@@ -50,7 +49,7 @@ describe('Endpoint Exceptions workflows from Alert', () => {
     cy.task('esArchiverResetKibana');
     login();
     deleteAlertsAndRules();
-    esArchiverLoad('endpoint');
+    cy.task('esArchiverLoad', 'endpoint');
     createRule(getEndpointRule());
     visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
     goToRuleDetails();
