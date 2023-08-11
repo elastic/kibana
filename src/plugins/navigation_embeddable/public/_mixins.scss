@@ -26,17 +26,13 @@
 
 @mixin euiFlyout {
   @include kibanaFullBodyHeight();
-  border-left: $euiBorderThin;
   position: fixed;
-  z-index: $euiZFlyout;
-  background: $euiColorEmptyShade;
   display: flex;
-  flex-direction: column;
-  align-items: stretch;
   inline-size: 50vw;
-
-  @media only screen and (max-width: 767px) {
-    inline-size: $euiSizeXL * 13; // 424px
-    max-inline-size: 90vw;
-  }
+  z-index: $euiZFlyout;
+  align-items: stretch;
+  flex-direction: column;
+  border-left: $euiBorderThin;
+  background: $euiColorEmptyShade;
+  min-width: ($euiSizeXL * 13) + $euiSizeS; // 424px
 }

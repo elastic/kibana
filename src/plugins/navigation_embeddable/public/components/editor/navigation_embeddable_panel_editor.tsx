@@ -47,6 +47,17 @@ import { TooltipWrapper } from '../tooltip_wrapper';
 
 import './navigation_embeddable_editor.scss';
 
+const layoutOptions: EuiButtonGroupOptionProps[] = [
+  {
+    id: NAV_VERTICAL_LAYOUT,
+    label: NavigationLayoutInfo[NAV_VERTICAL_LAYOUT].displayName,
+  },
+  {
+    id: NAV_HORIZONTAL_LAYOUT,
+    label: NavigationLayoutInfo[NAV_HORIZONTAL_LAYOUT].displayName,
+  },
+];
+
 const NavigationEmbeddablePanelEditor = ({
   onSaveToLibrary,
   onAddToDashboard,
@@ -136,15 +147,6 @@ const NavigationEmbeddablePanelEditor = ({
     [orderedLinks]
   );
 
-  const layoutOptions: EuiButtonGroupOptionProps[] = useMemo(() => {
-    return ([NAV_VERTICAL_LAYOUT, NAV_HORIZONTAL_LAYOUT] as NavigationLayoutType[]).map((type) => {
-      return {
-        id: type,
-        label: NavigationLayoutInfo[type].displayName,
-      };
-    });
-  }, []);
-
   return (
     <>
       <div ref={editLinkFlyoutRef} />
@@ -175,6 +177,8 @@ const NavigationEmbeddablePanelEditor = ({
                 />
               </EuiFormRow>
               <EuiFormRow label={NavEmbeddableStrings.editor.panelEditor.getLinksTitle()}>
+                {/* Needs to be surrounded by a div rather than a fragment so the EuiFormRow can respond
+                    to the focus of the inner elements */}
                 <div>
                   <EuiDragDropContext onDragEnd={onDragEnd}>
                     <EuiDroppable
