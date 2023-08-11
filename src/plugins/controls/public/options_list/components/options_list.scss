@@ -1,7 +1,3 @@
-.optionsList__popoverAnchorOverride {
-  max-inline-size: none;
-}
-
 .optionsList--filterGroup {
   width: 100%;
   height: $euiSizeXXL;
@@ -14,7 +10,8 @@
   border-bottom-right-radius: $euiBorderRadius - 1px;
 
   .optionsList--filterBtn {
-    border-radius: 0;
+    border-radius: 0 !important;
+    height: $euiButtonHeight;
 
     &.optionsList--filterBtnPlaceholder {
       color: $euiTextSubduedColor;
@@ -26,10 +23,6 @@
       text-decoration: line-through;
       margin-left: $euiSizeS;
       font-weight: $euiFontWeightRegular;
-    }
-
-    .optionsList__existsFilter {
-      font-style: italic;
     }
 
     .optionsList__negateLabel {
@@ -50,26 +43,17 @@
   width: $euiSizeXL * 7;
 }
 
+.optionsList__existsFilter {
+  font-style: italic;
+}
+
+.optionsList__popoverOverride {
+  @include euiBottomShadowMedium;
+  filter: none; // overwrite the default popover shadow
+  transform: translateY(-$euiSizeS) translateX(0); // prevent "slide in" animation on open/close
+}
+
 .optionsList__popover {
-  &.optionsList--smallPopover {
-    .optionsList__searchSortRow {
-      flex-direction: column;
-      align-items: stretch;
-
-      .optionsList__sortButtonWrapper {
-        flex-grow: 1;
-
-        .optionsList__sortButtonPopoverAnchor {
-          width: 100%;
-        }
-
-        .optionsList__sortButton {
-          width: 100%;
-        }
-      }
-    }
-  }
-
   .optionsList__actions {
     padding: $euiSizeS;
     padding-bottom: 0;

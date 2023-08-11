@@ -88,12 +88,6 @@ $controlMinWidth: $euiSize * 14;
     }
   }
 
-  &:not(.controlFrameWrapper-isEditable) {
-    .controlFrameFormControlLayout--twoLine .euiFormControlLayout__childrenWrapper {
-      border-radius: $euiBorderRadius 0 0 $euiBorderRadius;
-    }
-  }
-
   .controlFrame__formControlLayout {
     width: 100%;
     min-width: $controlMinWidth;
@@ -113,18 +107,9 @@ $controlMinWidth: $euiSize * 14;
     .controlFrame__control {
       height: 100%;
       transition: opacity .1s;
-      background-color: $euiFormBackgroundColor;
+      background-color: $euiFormBackgroundColor !important;
 
-      &.controlFrame--oneLine {
-        border-top-left-radius: 0;
-        border-bottom-left-radius: 0;
-        border-top-right-radius: $euiBorderRadius - 1px;
-        border-bottom-right-radius: $euiBorderRadius - 1px;
-      }
-
-      &.controlFrame--twoLine {
-        width: 100%;
-      }
+      @include euiFormControlSideBorderRadius($euiFormControlBorderRadius, $side: 'right', $internal: true);
     }
 
     .controlFrame--controlLoading {

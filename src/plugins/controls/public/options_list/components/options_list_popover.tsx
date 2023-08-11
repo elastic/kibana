@@ -7,7 +7,6 @@
  */
 
 import { isEmpty } from 'lodash';
-import classNames from 'classnames';
 import React, { useState } from 'react';
 
 import { OptionsListStrings } from './options_list_strings';
@@ -44,33 +43,36 @@ export const OptionsListPopover = ({
   const [showOnlySelected, setShowOnlySelected] = useState(false);
 
   return (
-    <div
-      id={`control-popover-${id}`}
-      data-test-subj={`optionsList-control-popover`}
-      aria-label={OptionsListStrings.popover.getAriaLabel(fieldName)}
-      className={classNames('optionsList__popover', { 'optionsList--smallPopover': width < 300 })}
-    >
-      {field?.type !== 'boolean' && !hideActionBar && (
-        <OptionsListPopoverActionBar
-          showOnlySelected={showOnlySelected}
-          updateSearchString={updateSearchString}
-          setShowOnlySelected={setShowOnlySelected}
-        />
-      )}
+    <>
       <div
-        data-test-subj={`optionsList-control-available-options`}
-        data-option-count={isLoading ? 0 : Object.keys(availableOptions ?? {}).length}
-        style={{ width: '100%', height: '100%' }}
+        id={`control-popover-${id}`}
+        className={'optionsList__popover'}
+        style={{ width, minWidth: 300 }}
+        data-test-subj={`optionsList-control-popover`}
+        aria-label={OptionsListStrings.popover.getAriaLabel(fieldName)}
       >
-        <OptionsListPopoverSuggestions
-          loadMoreSuggestions={loadMoreSuggestions}
-          showOnlySelected={showOnlySelected}
-        />
-        {!showOnlySelected && invalidSelections && !isEmpty(invalidSelections) && (
-          <OptionsListPopoverInvalidSelections />
+        {field?.type !== 'boolean' && !hideActionBar && (
+          <OptionsListPopoverActionBar
+            showOnlySelected={showOnlySelected}
+            updateSearchString={updateSearchString}
+            setShowOnlySelected={setShowOnlySelected}
+          />
         )}
+        <div
+          data-test-subj={`optionsList-control-available-options`}
+          data-option-count={isLoading ? 0 : Object.keys(availableOptions ?? {}).length}
+          style={{ width: '100%', height: '100%' }}
+        >
+          <OptionsListPopoverSuggestions
+            loadMoreSuggestions={loadMoreSuggestions}
+            showOnlySelected={showOnlySelected}
+          />
+          {!showOnlySelected && invalidSelections && !isEmpty(invalidSelections) && (
+            <OptionsListPopoverInvalidSelections />
+          )}
+        </div>
+        {!hideExclude && <OptionsListPopoverFooter isLoading={isLoading} />}
       </div>
-      {!hideExclude && <OptionsListPopoverFooter isLoading={isLoading} />}
-    </div>
+    </>
   );
 };

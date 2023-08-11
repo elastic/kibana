@@ -9,9 +9,9 @@
 import { Subject } from 'rxjs';
 import classNames from 'classnames';
 import { debounce, isEmpty } from 'lodash';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 
-import { EuiFilterButton, EuiFilterGroup, EuiInputPopover, useResizeObserver } from '@elastic/eui';
+import { EuiFilterButton, EuiFilterGroup, EuiPopover, useResizeObserver } from '@elastic/eui';
 
 import { MAX_OPTIONS_LIST_REQUEST_SIZE } from '../types';
 import { OptionsListStrings } from './options_list_strings';
@@ -28,9 +28,9 @@ export const OptionsListControl = ({
   typeaheadSubject: Subject<string>;
   loadMoreSubject: Subject<number>;
 }) => {
+  const resizeRef = useRef(null);
   const optionsList = useOptionsList();
-  const widthRef = useRef<HTMLDivElement | null>(null);
-  const dimensions = useResizeObserver(widthRef.current);
+  const dimensions = useResizeObserver(resizeRef.current);
 
   const error = optionsList.select((state) => state.componentState.error);
   const isPopoverOpen = optionsList.select((state) => state.componentState.popoverOpen);
@@ -41,6 +41,7 @@ export const OptionsListControl = ({
   const exclude = optionsList.select((state) => state.explicitInput.exclude);
   const fieldName = optionsList.select((state) => state.explicitInput.fieldName);
   const placeholder = optionsList.select((state) => state.explicitInput.placeholder);
+  const controlStyle = optionsList.select((state) => state.explicitInput.controlStyle);
   const singleSelect = optionsList.select((state) => state.explicitInput.singleSelect);
   const existsSelected = optionsList.select((state) => state.explicitInput.existsSelected);
   const selectedOptions = optionsList.select((state) => state.explicitInput.selectedOptions);
@@ -123,50 +124,57 @@ export const OptionsListControl = ({
   }, [exclude, existsSelected, validSelections, invalidSelections]);
 
   const button = (
-    <div ref={widthRef}>
-      <EuiFilterGroup className={'optionsList--filterGroup'}>
-        <EuiFilterButton
-          badgeColor="success"
-          iconType="arrowDown"
-          isLoading={debouncedLoading}
-          className={classNames('optionsList--filterBtn', {
-            'optionsList--filterBtnPlaceholder': !hasSelections,
-          })}
-          data-test-subj={`optionsList-control-${id}`}
-          onClick={() => optionsList.dispatch.setPopoverOpen(!isPopoverOpen)}
-          isSelected={isPopoverOpen}
-          numActiveFilters={validSelectionsCount}
-          hasActiveFilters={Boolean(validSelectionsCount)}
-        >
-          {hasSelections || existsSelected
-            ? selectionDisplayNode
-            : placeholder ?? OptionsListStrings.control.getPlaceholder()}
-        </EuiFilterButton>
-      </EuiFilterGroup>
+    <div className="optionsList--filterBtnWrapper" ref={resizeRef}>
+      <EuiFilterButton
+        badgeColor="success"
+        iconType="arrowDown"
+        isLoading={debouncedLoading}
+        className={classNames('optionsList--filterBtn', {
+          'optionsList--filterBtnSingle': controlStyle !== 'twoLine',
+          'optionsList--filterBtnPlaceholder': !hasSelections,
+        })}
+        data-test-subj={`optionsList-control-${id}`}
+        onClick={() => optionsList.dispatch.setPopoverOpen(!isPopoverOpen)}
+        isSelected={isPopoverOpen}
+        numActiveFilters={validSelectionsCount}
+        hasActiveFilters={Boolean(validSelectionsCount)}
+      >
+        {hasSelections || existsSelected
+          ? selectionDisplayNode
+          : placeholder ?? OptionsListStrings.control.getPlaceholder()}
+      </EuiFilterButton>
     </div>
   );
 
   return error ? (
     <ControlError error={error} />
   ) : (
-    <EuiInputPopover
-      ownFocus
-      input={button}
-      repositionOnScroll
-      isOpen={isPopoverOpen}
-      panelPaddingSize="none"
-      anchorPosition="downCenter"
-      className="optionsList__popoverAnchorOverride"
-      closePopover={() => optionsList.dispatch.setPopoverOpen(false)}
-      aria-label={OptionsListStrings.popover.getAriaLabel(fieldName)}
-      initialFocus={'[data-test-subj=optionsList-control-search-input]'}
+    <EuiFilterGroup
+      className={classNames('optionsList--filterGroup', {
+        'optionsList--filterGroupSingle': controlStyle !== 'twoLine',
+      })}
     >
-      <OptionsListPopover
-        width={dimensions.width}
-        isLoading={debouncedLoading}
-        updateSearchString={updateSearchString}
-        loadMoreSuggestions={loadMoreSuggestions}
-      />
-    </EuiInputPopover>
+      <EuiPopover
+        ownFocus
+        button={button}
+        hasArrow={false}
+        repositionOnScroll
+        isOpen={isPopoverOpen}
+        // attachToAnchor
+        panelPaddingSize="none"
+        anchorPosition="downCenter"
+        initialFocus={'[data-test-subj=optionsList-control-search-input]'}
+        closePopover={() => optionsList.dispatch.setPopoverOpen(false)}
+        aria-label={OptionsListStrings.popover.getAriaLabel(fieldName)}
+        panelClassName="optionsList__popoverOverride"
+      >
+        <OptionsListPopover
+          width={dimensions.width}
+          isLoading={debouncedLoading}
+          updateSearchString={updateSearchString}
+          loadMoreSuggestions={loadMoreSuggestions}
+        />
+      </EuiPopover>
+    </EuiFilterGroup>
   );
 };
