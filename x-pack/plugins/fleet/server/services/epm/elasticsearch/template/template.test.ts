@@ -63,7 +63,7 @@ describe('EPM template', () => {
       templatePriority: 200,
       mappings: { properties: [] },
       isIndexModeTimeSeries: false,
-      isILMPolicyDisabled: false
+      isILMPolicyDisabled: false,
     });
     expect(template.index_patterns).toStrictEqual([templateIndexPattern]);
   });
@@ -79,7 +79,7 @@ describe('EPM template', () => {
       templatePriority: 200,
       mappings: { properties: [] },
       isIndexModeTimeSeries: false,
-      isILMPolicyDisabled: false
+      isILMPolicyDisabled: false,
     });
     expect(template.composed_of).toStrictEqual([
       'logs-settings',
@@ -99,7 +99,7 @@ describe('EPM template', () => {
       templatePriority: 200,
       mappings: { properties: [] },
       isIndexModeTimeSeries: true,
-      isILMPolicyDisabled: false
+      isILMPolicyDisabled: false,
     });
     expect(template.composed_of).toStrictEqual([
       'metrics-tsdb-settings',
@@ -119,9 +119,9 @@ describe('EPM template', () => {
       templatePriority: 200,
       mappings: { properties: [] },
       isIndexModeTimeSeries: false,
-      isILMPolicyDisabled: true
+      isILMPolicyDisabled: true,
     });
-    expect(template.template.settings.index.lifecycle).toBeNull()
+    expect(template.template.settings.index.lifecycle).toBeNull();
   });
 
   it('does not create fleet agent id verification component template if agentIdVerification is disabled', () => {
@@ -140,7 +140,7 @@ describe('EPM template', () => {
       templatePriority: 200,
       mappings: { properties: [] },
       isIndexModeTimeSeries: false,
-      isILMPolicyDisabled: false
+      isILMPolicyDisabled: false,
     });
     expect(template.composed_of).toStrictEqual([
       'logs-settings',
@@ -160,9 +160,12 @@ describe('EPM template', () => {
       templatePriority: 200,
       mappings: { properties: [] },
       isIndexModeTimeSeries: false,
-      isILMPolicyDisabled: false
+      isILMPolicyDisabled: false,
     });
-    expect(template.composed_of).toStrictEqual(['logs-settings', ...FLEET_COMPONENT_TEMPLATES_NAMES]);
+    expect(template.composed_of).toStrictEqual([
+      'logs-settings',
+      ...FLEET_COMPONENT_TEMPLATES_NAMES,
+    ]);
   });
 
   it('adds hidden field correctly', () => {
@@ -177,7 +180,7 @@ describe('EPM template', () => {
       hidden: true,
       mappings: { properties: [] },
       isIndexModeTimeSeries: false,
-      isILMPolicyDisabled: false
+      isILMPolicyDisabled: false,
     });
     expect(templateWithHidden.data_stream.hidden).toEqual(true);
 
@@ -189,7 +192,7 @@ describe('EPM template', () => {
       templatePriority: 200,
       mappings: { properties: [] },
       isIndexModeTimeSeries: false,
-      isILMPolicyDisabled: false
+      isILMPolicyDisabled: false,
     });
     expect(templateWithoutHidden.data_stream.hidden).toEqual(undefined);
   });
@@ -211,7 +214,7 @@ describe('EPM template', () => {
         },
       },
       isIndexModeTimeSeries: false,
-      isILMPolicyDisabled: false
+      isILMPolicyDisabled: false,
     });
     expect(templateWithGlobalAndDataStreamHidden.data_stream.hidden).toEqual(true);
 
@@ -228,7 +231,7 @@ describe('EPM template', () => {
         },
       },
       isIndexModeTimeSeries: false,
-      isILMPolicyDisabled: false
+      isILMPolicyDisabled: false,
     });
     expect(templateWithDataStreamHidden.data_stream.hidden).toEqual(true);
 
@@ -241,7 +244,7 @@ describe('EPM template', () => {
       hidden: true,
       mappings: { properties: [] },
       isIndexModeTimeSeries: false,
-      isILMPolicyDisabled: false
+      isILMPolicyDisabled: false,
     });
     expect(templateWithoutDataStreamHidden.data_stream.hidden).toEqual(true);
 
@@ -259,7 +262,7 @@ describe('EPM template', () => {
         },
       },
       isIndexModeTimeSeries: false,
-      isILMPolicyDisabled: false
+      isILMPolicyDisabled: false,
     });
     expect(templateWithGlobalHiddenTrueAndDataStreamHiddenFalse.data_stream.hidden).toEqual(true);
 
@@ -271,7 +274,7 @@ describe('EPM template', () => {
       templatePriority: 200,
       mappings: { properties: [] },
       isIndexModeTimeSeries: false,
-      isILMPolicyDisabled: false
+      isILMPolicyDisabled: false,
     });
     expect(templateWithoutHidden.data_stream.hidden).toEqual(undefined);
   });

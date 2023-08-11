@@ -573,7 +573,7 @@ export function prepareTemplate({
     mappings,
     isIndexModeTimeSeries,
     isILMPolicyDisabled,
-    type: dataStream.type
+    type: dataStream.type,
   });
 
   return {

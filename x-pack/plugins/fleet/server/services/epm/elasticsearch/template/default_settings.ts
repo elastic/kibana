@@ -38,7 +38,7 @@ export function buildDefaultSettings({
   packageName: string;
   ilmPolicy?: string | undefined;
   fields: Field[];
-  stackTemplatesDisabled?: boolean
+  stackTemplatesDisabled?: boolean;
 }) {
   const logger = appContextService.getLogger();
   // Find all field names to set `index.query.default_field` to, which will be

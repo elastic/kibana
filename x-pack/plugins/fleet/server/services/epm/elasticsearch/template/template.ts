@@ -132,7 +132,7 @@ const getBaseEsComponents = (type: string, isIndexModeTimeSeries: boolean): stri
   }
 
   return [`${type}-settings`];
-}
+};
 
 /**
  * Generate mapping takes the given nested fields array and creates the Elasticsearch
