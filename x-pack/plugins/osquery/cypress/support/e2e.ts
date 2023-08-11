@@ -26,7 +26,7 @@
 import registerCypressGrep from '@cypress/grep';
 
 // force ESM in this module
-import type { ServerlessRoleName } from '../../../../test_serverless/shared/lib';
+import type { ServerlessRoleName } from '@kbn/securitysolution-runtime-services';
 
 export {};
 

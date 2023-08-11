@@ -6,9 +6,8 @@
  */
 
 import { request } from '@kbn/security-solution-plugin/public/management/cypress/tasks/common';
-import { isLocalhost } from '@kbn/securitysolution-runtime-services/src/is_localhost';
-import { STANDARD_HTTP_HEADERS } from '../../../../test_serverless/shared/lib/security/default_http_headers';
-import type { ServerlessRoleName } from '../../../../test_serverless/shared/lib';
+import { STANDARD_HTTP_HEADERS, isLocalhost } from '@kbn/securitysolution-runtime-services';
+import type { ServerlessRoleName } from '@kbn/securitysolution-runtime-services';
 
 /**
  * Send login via API
