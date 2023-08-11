@@ -97,12 +97,7 @@ export class ReportingNotifierStreamHandler {
           );
         } else {
           this.notifications.toasts.addSuccess(
-            getSuccessToast(
-              job,
-              this.apiClient.getManagementLink,
-              this.http,
-              this.theme
-            ),
+            getSuccessToast(job, this.apiClient.getManagementLink, this.http, this.theme),
             completedOptions
           );
         }
