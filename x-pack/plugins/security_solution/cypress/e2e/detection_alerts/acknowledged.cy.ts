@@ -30,8 +30,11 @@ import { refreshPage } from '../../tasks/security_header';
 import { ALERTS_URL } from '../../urls/navigation';
 
 describe('Marking alerts as acknowledged', () => {
-  beforeEach(() => {
+  before(() => {
     cleanKibana();
+  });
+
+  beforeEach(() => {
     loginAndWaitForPage(ALERTS_URL);
     waitForAlertsPanelToBeLoaded();
     waitForAlertsIndexToBeCreated();
@@ -70,8 +73,11 @@ describe('Marking alerts as acknowledged', () => {
 });
 
 describe('Marking alerts as acknowledged with read only role', () => {
-  beforeEach(() => {
+  before(() => {
     cleanKibana();
+  });
+
+  beforeEach(() => {
     loginAndWaitForPage(ALERTS_URL, ROLES.t2_analyst);
     createCustomRuleActivated(getNewRule());
     refreshPage();

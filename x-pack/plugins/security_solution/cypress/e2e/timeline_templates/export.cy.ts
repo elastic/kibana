@@ -24,8 +24,7 @@ describe('Export timelines', () => {
       method: 'POST',
       path: '/api/timeline/_export?file_name=timelines_export.ndjson',
     }).as('export');
-    // eslint-disable-next-line
-    createTimelineTemplate(getTimelineTemplate()).then((response: Cypress.Response<any>) => {
+    createTimelineTemplate(getTimelineTemplate()).then((response) => {
       cy.wrap(response).as('templateResponse');
       cy.wrap(response.body.data.persistTimeline.timeline.savedObjectId).as('templateId');
     });

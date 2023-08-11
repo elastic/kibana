@@ -37,6 +37,7 @@ describe('Toggle full screen', () => {
   });
 
   it('Should show timeline header and tab list area', () => {
+    enterFullScreenMode();
     exitFullScreenMode();
     cy.get(TIMELINE_TABS).should('exist');
     cy.get(TIMELINE_HEADER).should('be.visible');
