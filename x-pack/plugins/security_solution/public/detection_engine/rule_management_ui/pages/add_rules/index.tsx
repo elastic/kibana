@@ -20,7 +20,6 @@ import { useListsConfig } from '../../../../detections/containers/detection_engi
 import * as i18n from './translations';
 import { AddPrebuiltRulesTable } from '../../components/rules_table/add_prebuilt_rules_table/add_prebuilt_rules_table';
 import { AddPrebuiltRulesTableContextProvider } from '../../components/rules_table/add_prebuilt_rules_table/add_prebuilt_rules_table_context';
-import { AddPrebuiltRulesFlyoutContextProvider } from '../../components/rules_table/add_prebuilt_rules_table/use_rule_details_flyout';
 import { AddPrebuiltRulesHeaderButtons } from '../../components/rules_table/add_prebuilt_rules_table/add_prebuilt_rules_header_buttons';
 import { APP_UI_ID } from '../../../../../common';
 import { NeedAdminForUpdateRulesCallOut } from '../../../../detections/components/callouts/need_admin_for_update_callout';
@@ -54,14 +53,12 @@ const AddRulesPageComponent: React.FC = () => {
       <MissingPrivilegesCallOut />
 
       <AddPrebuiltRulesTableContextProvider>
-        <AddPrebuiltRulesFlyoutContextProvider>
-          <SecuritySolutionPageWrapper>
-            <HeaderPage title={i18n.PAGE_TITLE}>
-              <AddPrebuiltRulesHeaderButtons />
-            </HeaderPage>
-            <AddPrebuiltRulesTable />
-          </SecuritySolutionPageWrapper>
-        </AddPrebuiltRulesFlyoutContextProvider>
+        <SecuritySolutionPageWrapper>
+          <HeaderPage title={i18n.PAGE_TITLE}>
+            <AddPrebuiltRulesHeaderButtons />
+          </HeaderPage>
+          <AddPrebuiltRulesTable />
+        </SecuritySolutionPageWrapper>
       </AddPrebuiltRulesTableContextProvider>
 
       <SpyRoute pageName={SecurityPageName.rulesAdd} />

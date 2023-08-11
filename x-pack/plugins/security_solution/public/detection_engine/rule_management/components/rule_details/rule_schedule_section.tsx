@@ -6,25 +6,46 @@
  */
 
 import React from 'react';
-import { EuiDescriptionList, EuiSpacer } from '@elastic/eui';
+import { EuiDescriptionList, EuiSpacer, EuiText } from '@elastic/eui';
+import type { RuleResponse } from '../../../../../common/api/detection_engine/model/rule_schema/rule_schemas';
+import { getHumanizedDuration } from '../../../../detections/pages/detection_engine/rules/helpers';
+import * as i18n from './translations';
 
-import { schema } from '../../../../detections/components/rules/step_schedule_rule/schema';
-
-export interface RuleScheduleSectionProps {
+interface IntervalProps {
   interval: string;
-  lookback: string;
 }
 
-export const RuleScheduleSection = ({ interval, lookback }: RuleScheduleSectionProps) => {
-  const listItems = [
-    { title: schema.interval.label, description: interval },
-    { title: schema.from.label, description: lookback }, // TODO: Convert to minutes
+const Interval = ({ interval }: IntervalProps) => <EuiText>{interval}</EuiText>;
+
+interface FromProps {
+  from: string;
+  interval: string;
+}
+
+const From = ({ from, interval }: FromProps) => (
+  <EuiText>{getHumanizedDuration(from, interval)}</EuiText>
+);
+
+export interface RuleScheduleSectionProps {
+  rule: RuleResponse;
+}
+
+export const RuleScheduleSection = ({ rule }: RuleScheduleSectionProps) => {
+  const ruleSectionListItems = [
+    {
+      title: i18n.INTERVAL_FIELD_LABEL,
+      description: <Interval interval={rule.interval} />,
+    },
+    {
+      title: i18n.FROM_FIELD_LABEL,
+      description: <From from={rule.from} interval={rule.interval} />,
+    },
   ];
 
   return (
     <div>
       <EuiSpacer size="m" />
-      <EuiDescriptionList type="column" listItems={listItems} />
+      <EuiDescriptionList type="column" listItems={ruleSectionListItems} />
     </div>
   );
 };

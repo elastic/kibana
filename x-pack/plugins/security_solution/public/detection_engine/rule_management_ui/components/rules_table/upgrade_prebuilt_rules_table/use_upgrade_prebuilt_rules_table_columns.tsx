@@ -22,7 +22,6 @@ import type { Rule } from '../../../../rule_management/logic';
 import { getNormalizedSeverity } from '../helpers';
 import type { UpgradePrebuiltRulesTableActions } from './upgrade_prebuilt_rules_table_context';
 import { useUpgradePrebuiltRulesTableContext } from './upgrade_prebuilt_rules_table_context';
-import { useRuleDetailsFlyoutContext } from '../add_prebuilt_rules_table/use_rule_details_flyout';
 
 export type TableColumn = EuiBasicTableColumn<RuleUpgradeInfoForReview>;
 
@@ -34,7 +33,7 @@ interface RuleNameProps {
 const RuleName = ({ name, ruleId }: RuleNameProps) => {
   const {
     actions: { openFlyoutForRuleId },
-  } = useRuleDetailsFlyoutContext();
+  } = useUpgradePrebuiltRulesTableContext();
 
   return (
     <EuiLink

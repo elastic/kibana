@@ -22,7 +22,7 @@ import { AddPrebuiltRulesTableNoItemsMessage } from './add_prebuilt_rules_no_ite
 import { useAddPrebuiltRulesTableContext } from './add_prebuilt_rules_table_context';
 import { AddPrebuiltRulesTableFilters } from './add_prebuilt_rules_table_filters';
 import { useAddPrebuiltRulesTableColumns } from './use_add_prebuilt_rules_table_columns';
-import { AddPrebuiltRuleFlyout } from '../../../../rule_management/components/rule_details/rule_details_flyout';
+import { AddPrebuiltRulesFlyout } from './add_prebuilt_rules_flyout';
 
 /**
  * Table Component for displaying new rules that are available to be installed
@@ -98,7 +98,7 @@ export const AddPrebuiltRulesTable = React.memo(() => {
                 columns={rulesColumns}
               />
 
-              <AddPrebuiltRuleFlyout />
+              <AddPrebuiltRulesFlyout />
             </>
           )
         }

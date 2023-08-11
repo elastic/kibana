@@ -6,60 +6,342 @@
  */
 
 import React from 'react';
-import { EuiDescriptionList, EuiSpacer } from '@elastic/eui';
-import type { Threats } from '@kbn/securitysolution-io-ts-alerting-types';
+import styled from 'styled-components';
+import { isEmpty } from 'lodash/fp';
+import {
+  EuiDescriptionList,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiToolTip,
+  EuiIcon,
+  EuiText,
+  EuiLink,
+  EuiSpacer,
+} from '@elastic/eui';
 
-import { getDescriptionItem } from '../../../../detections/components/rules/description_step';
+import type { EuiDescriptionListProps } from '@elastic/eui';
+
 import type {
-  AboutStepRule,
-  AboutStepSeverity,
-  AboutStepRiskScore,
-} from '../../../../detections/pages/detection_engine/rules/types';
-import { schema } from '../../../../detections/components/rules/step_about_rule/schema';
+  SeverityMappingItem as SeverityMappingItemType,
+  RiskScoreMappingItem as RiskScoreMappingItemType,
+  Threats,
+} from '@kbn/securitysolution-io-ts-alerting-types';
 
-export interface RuleAboutSectionProps {
+import { ALERT_RISK_SCORE } from '@kbn/rule-data-utils';
+
+import type { RuleResponse } from '../../../../../common/api/detection_engine/model/rule_schema/rule_schemas';
+import { SeverityBadge } from '../../../../detections/components/rules/severity_badge';
+
+import { defaultToEmptyTag } from '../../../../common/components/empty_value';
+
+import { filterEmptyThreats } from '../../../rule_creation_ui/pages/rule_creation/helpers';
+import { ThreatEuiFlexGroup } from '../../../../detections/components/rules/description_step/threat_description';
+
+import { BadgeList } from './badge_list';
+import * as i18n from './translations';
+
+const OverrideColumn = styled(EuiFlexItem)`
+  width: 125px;
+  max-width: 125px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+`;
+
+const OverrideValueColumn = styled(EuiFlexItem)`
+  width: 30px;
+  max-width: 30px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+`;
+
+const StyledEuiLink = styled(EuiLink)`
+  word-break: break-word;
+`;
+
+interface DescriptionProps {
   description: string;
+}
+
+const Description = ({ description }: DescriptionProps) => <EuiText>{description}</EuiText>;
+
+interface AuthorProps {
   author: string[];
-  severity: AboutStepSeverity;
-  riskScore: AboutStepRiskScore;
-  ruleNameOverride: string;
+}
+
+const Author = ({ author }: AuthorProps) => <BadgeList badges={author} />;
+
+const BuildingBlock = () => i18n.BUILDING_BLOCK_FIELD_DESCRIPTION;
+
+interface SeverityMappingItemProps {
+  severityMappingItem: SeverityMappingItemType;
+}
+
+const SeverityMappingItem = ({ severityMappingItem }: SeverityMappingItemProps) => (
+  <EuiFlexGroup alignItems="center" gutterSize="s">
+    <OverrideColumn>
+      <EuiToolTip
+        content={severityMappingItem.field}
+        data-test-subj={`severityOverrideField-${severityMappingItem.value}`}
+      >
+        <>{`${severityMappingItem.field}:`}</>
+      </EuiToolTip>
+    </OverrideColumn>
+    <OverrideValueColumn>
+      <EuiToolTip
+        content={severityMappingItem.value}
+        data-test-subj={`severityOverrideValue-${severityMappingItem.value}`}
+      >
+        {defaultToEmptyTag(severityMappingItem.value)}
+      </EuiToolTip>
+    </OverrideValueColumn>
+    <EuiFlexItem grow={false}>
+      <EuiIcon type={'sortRight'} />
+    </EuiFlexItem>
+    <EuiFlexItem>
+      <SeverityBadge
+        data-test-subj={`severityOverrideSeverity-${severityMappingItem.value}`}
+        value={severityMappingItem.severity}
+      />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+);
+
+interface RiskScoreProps {
+  riskScore: number;
+}
+
+const RiskScore = ({ riskScore }: RiskScoreProps) => <EuiText>{riskScore}</EuiText>;
+
+interface RiskScoreMappingItemProps {
+  riskScoreMappingItem: RiskScoreMappingItemType;
+}
+
+const RiskScoreMappingItem = ({ riskScoreMappingItem }: RiskScoreMappingItemProps) => (
+  <EuiFlexGroup alignItems="center" gutterSize="s">
+    <OverrideColumn>
+      <EuiToolTip
+        content={riskScoreMappingItem.field}
+        data-test-subj={`riskScoreOverrideField-${riskScoreMappingItem.value}`}
+      >
+        <>{riskScoreMappingItem.field}</>
+      </EuiToolTip>
+    </OverrideColumn>
+    <EuiFlexItem grow={false}>
+      <EuiIcon type={'sortRight'} />
+    </EuiFlexItem>
+    <EuiFlexItem>{ALERT_RISK_SCORE}</EuiFlexItem>
+  </EuiFlexGroup>
+);
+
+interface ReferencesProps {
+  references: string[];
+}
+
+const References = ({ references }: ReferencesProps) => (
+  <EuiText size="s">
+    <ul>
+      {references
+        .filter((reference) => !isEmpty(reference))
+        .map((reference, index) => (
+          <li data-test-subj="urlsDescriptionReferenceLinkItem" key={`${index}-${reference}`}>
+            <StyledEuiLink href={reference} external target="_blank">
+              {reference}
+            </StyledEuiLink>
+          </li>
+        ))}
+    </ul>
+  </EuiText>
+);
+
+const FalsePositives = ({ falsePositives }: { falsePositives: string[] }) => (
+  <EuiText size="s">
+    <ul>
+      {falsePositives.map((falsePositivesItem) => (
+        <li
+          data-test-subj="unorderedListArrayDescriptionItem"
+          key={`falsePositives-${falsePositivesItem}`}
+        >
+          {falsePositivesItem}
+        </li>
+      ))}
+    </ul>
+  </EuiText>
+);
+
+interface LicenseProps {
   license: string;
+}
+
+const License = ({ license }: LicenseProps) => <EuiText>{license}</EuiText>;
+
+interface RuleNameOverrideProps {
+  ruleNameOverride: string;
+}
+
+const RuleNameOverride = ({ ruleNameOverride }: RuleNameOverrideProps) => (
+  <EuiText>{ruleNameOverride}</EuiText>
+);
+
+interface ThreatProps {
   threat: Threats;
 }
 
-export const RuleAboutSection = ({
-  description,
-  author,
-  severity,
-  riskScore,
-  ruleNameOverride,
-  license,
-  threat,
-}: RuleAboutSectionProps) => {
-  const data: Partial<AboutStepRule> = {
-    description,
-    author,
-    severity,
-    riskScore,
-    ruleNameOverride,
-    license,
-    threat,
-  };
+const Threat = ({ threat }: ThreatProps) => (
+  <ThreatEuiFlexGroup threat={filterEmptyThreats(threat)} label="" />
+);
 
-  const labels = Object.keys(schema).reduce((result, key) => {
-    return { ...result, [key]: schema[key].label };
-  }, {});
+interface ThreatIndicatorPathProps {
+  threatIndicatorPath: string;
+}
 
-  const listItems = Object.keys(data).reduce(
-    (result, key) => [...result, ...getDescriptionItem(key, labels[key], data)],
-    []
-  );
+const ThreatIndicatorPath = ({ threatIndicatorPath }: ThreatIndicatorPathProps) => (
+  <EuiText>{threatIndicatorPath}</EuiText>
+);
+
+interface TimestampOverrideProps {
+  timestampOverride: string;
+}
+
+const TimestampOverride = ({ timestampOverride }: TimestampOverrideProps) => (
+  <EuiText>{timestampOverride}</EuiText>
+);
+
+interface TagsProps {
+  tags: string[];
+}
+
+const Tags = ({ tags }: TagsProps) => <BadgeList badges={tags} />;
+
+const prepareAboutSectionListItems = (rule: RuleResponse): EuiDescriptionListProps['listItems'] => {
+  const aboutSectionListItems: EuiDescriptionListProps['listItems'] = [];
+
+  aboutSectionListItems.push({
+    title: i18n.AUTHOR_FIELD_LABEL,
+    description: <Author author={rule.author} />,
+  });
+
+  if (rule.building_block_type) {
+    aboutSectionListItems.push({
+      title: i18n.BUILDING_BLOCK_FIELD_LABEL,
+      description: <BuildingBlock />,
+    });
+  }
+
+  aboutSectionListItems.push({
+    title: i18n.SEVERITY_FIELD_LABEL,
+    description: <SeverityBadge value={rule.severity} />,
+  });
+
+  if (rule.severity_mapping.length > 0) {
+    aboutSectionListItems.push(
+      ...rule.severity_mapping
+        .filter((severityMappingItem) => severityMappingItem.field !== '')
+        .map((severityMappingItem, index) => {
+          return {
+            title: index === 0 ? i18n.SEVERITY_MAPPING_FIELD_LABEL : '',
+            description: <SeverityMappingItem severityMappingItem={severityMappingItem} />,
+          };
+        })
+    );
+  }
+
+  aboutSectionListItems.push({
+    title: i18n.RISK_SCORE_FIELD_LABEL,
+    description: <RiskScore riskScore={rule.risk_score} />,
+  });
+
+  if (rule.risk_score_mapping.length > 0) {
+    aboutSectionListItems.push(
+      ...rule.risk_score_mapping
+        .filter((riskScoreMappingItem) => riskScoreMappingItem.field !== '')
+        .map((riskScoreMappingItem, index) => {
+          return {
+            title: index === 0 ? i18n.RISK_SCORE_MAPPING_FIELD_LABEL : '',
+            description: <RiskScoreMappingItem riskScoreMappingItem={riskScoreMappingItem} />,
+          };
+        })
+    );
+  }
+
+  if (rule.references.length > 0) {
+    aboutSectionListItems.push({
+      title: i18n.REFERENCES_FIELD_LABEL,
+      description: <References references={rule.references} />,
+    });
+  }
+
+  if (rule.false_positives.length > 0) {
+    aboutSectionListItems.push({
+      title: i18n.FALSE_POSITIVES_FIELD_LABEL,
+      description: <FalsePositives falsePositives={rule.false_positives} />,
+    });
+  }
+
+  if (rule.license) {
+    aboutSectionListItems.push({
+      title: i18n.LICENSE_FIELD_LABEL,
+      description: <License license={rule.license} />,
+    });
+  }
+
+  if (rule.rule_name_override) {
+    aboutSectionListItems.push({
+      title: i18n.RULE_NAME_OVERRIDE_FIELD_LABEL,
+      description: <RuleNameOverride ruleNameOverride={rule.rule_name_override} />,
+    });
+  }
+
+  if (rule.threat.length > 0) {
+    aboutSectionListItems.push({
+      title: i18n.THREAT_FIELD_LABEL,
+      description: <Threat threat={rule.threat} />,
+    });
+  }
+
+  if ('threat_indicator_path' in rule && rule.threat_indicator_path) {
+    aboutSectionListItems.push({
+      title: i18n.THREAT_INDICATOR_PATH_LABEL,
+      description: <ThreatIndicatorPath threatIndicatorPath={rule.threat_indicator_path} />,
+    });
+  }
+
+  if (rule.timestamp_override) {
+    aboutSectionListItems.push({
+      title: i18n.TIMESTAMP_OVERRIDE_FIELD_LABEL,
+      description: <TimestampOverride timestampOverride={rule.timestamp_override} />,
+    });
+  }
+
+  if (rule.tags.length > 0) {
+    aboutSectionListItems.push({
+      title: i18n.TAGS_FIELD_LABEL,
+      description: <Tags tags={rule.tags} />,
+    });
+  }
+
+  return aboutSectionListItems;
+};
+
+export interface RuleAboutSectionProps {
+  rule: RuleResponse;
+}
+
+export const RuleAboutSection = ({ rule }: RuleAboutSectionProps) => {
+  const aboutSectionListItems = prepareAboutSectionListItems(rule);
 
   return (
     <div>
-      <EuiDescriptionList listItems={[{ title: 'Description', description }]} />
       <EuiSpacer size="m" />
-      <EuiDescriptionList type="column" listItems={listItems} />
+      <EuiDescriptionList
+        listItems={[
+          {
+            title: i18n.DESCRIPTION_FIELD_LABEL,
+            description: <Description description={rule.description} />,
+          },
+        ]}
+      />
+      <EuiSpacer size="m" />
+      <EuiDescriptionList type="column" listItems={aboutSectionListItems} />
     </div>
   );
 };

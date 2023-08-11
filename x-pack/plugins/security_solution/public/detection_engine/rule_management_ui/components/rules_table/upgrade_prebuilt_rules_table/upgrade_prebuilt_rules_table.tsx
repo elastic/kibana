@@ -23,7 +23,7 @@ import { UpgradePrebuiltRulesTableButtons } from './upgrade_prebuilt_rules_table
 import { useUpgradePrebuiltRulesTableContext } from './upgrade_prebuilt_rules_table_context';
 import { UpgradePrebuiltRulesTableFilters } from './upgrade_prebuilt_rules_table_filters';
 import { useUpgradePrebuiltRulesTableColumns } from './use_upgrade_prebuilt_rules_table_columns';
-import { UpgradePrebuiltRuleFlyout } from '../../../../rule_management/components/rule_details/rule_details_flyout';
+import { UpgradePrebuiltRulesFlyout } from './upgrade_prebuilt_rules_flyout';
 
 const NO_ITEMS_MESSAGE = (
   <EuiEmptyPrompt
@@ -120,7 +120,7 @@ export const UpgradePrebuiltRulesTable = React.memo(() => {
                 columns={rulesColumns}
               />
 
-              <UpgradePrebuiltRuleFlyout />
+              <UpgradePrebuiltRulesFlyout />
             </>
           )
         }

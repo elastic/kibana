@@ -22,7 +22,6 @@ import type { AddPrebuiltRulesTableActions } from './add_prebuilt_rules_table_co
 import { useAddPrebuiltRulesTableContext } from './add_prebuilt_rules_table_context';
 import type { RuleSignatureId } from '../../../../../../common/api/detection_engine/model/rule_schema';
 import { getNormalizedSeverity } from '../helpers';
-import { useRuleDetailsFlyoutContext } from './use_rule_details_flyout';
 
 export type TableColumn = EuiBasicTableColumn<RuleInstallationInfoForReview>;
 
@@ -34,7 +33,7 @@ interface RuleNameProps {
 const RuleName = ({ name, ruleId }: RuleNameProps) => {
   const {
     actions: { openFlyoutForRuleId },
-  } = useRuleDetailsFlyoutContext();
+  } = useAddPrebuiltRulesTableContext();
 
   return (
     <EuiLink
