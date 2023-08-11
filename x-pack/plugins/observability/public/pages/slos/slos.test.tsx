@@ -67,6 +67,7 @@ const mockGetAddRuleFlyout = jest.fn().mockReturnValue(() => <div>Add rule flyou
 const mockKibana = () => {
   useKibanaMock.mockReturnValue({
     services: {
+      theme: {},
       application: { navigateToUrl: mockNavigate },
       charts: chartPluginMock.createSetupContract(),
       data: {
