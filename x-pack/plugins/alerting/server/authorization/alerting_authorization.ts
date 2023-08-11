@@ -262,7 +262,7 @@ export class AlertingAuthorization {
     return this.getAuthorizationFilter(authorizationEntity, filterOpts, ReadOperations.Find);
   }
 
-  public async getAuthorizedRuleType(
+  public async getAuthorizedRuleTypes(
     authorizationEntity: AlertingAuthorizationEntity,
     featuresIds?: Set<string>
   ): Promise<RegistryAlertTypeWithAuth[]> {

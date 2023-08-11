@@ -412,21 +412,6 @@ export class RuleTypeRegistry {
   public getAllTypes(): string[] {
     return [...this.ruleTypes.keys()];
   }
-
-  public getIndicesAlias(rulesTypes: string[], spaceId?: string): string[] {
-    const aliases = new Set<string>();
-    rulesTypes.forEach((ruleTypeId) => {
-      const ruleType = this.get(ruleTypeId);
-      if (ruleType.alerts?.context) {
-        const indexTemplateAndPattern = getIndexTemplateAndPattern({
-          context: ruleType.alerts?.context,
-          namespace: ruleType.alerts?.isSpaceAware && spaceId ? spaceId : DEFAULT_NAMESPACE_STRING,
-        });
-        aliases.add(indexTemplateAndPattern.alias);
-      }
-    });
-    return Array.from(aliases);
-  }
 }
 
 function normalizedActionVariables(actionVariables: RuleType['actionVariables']) {

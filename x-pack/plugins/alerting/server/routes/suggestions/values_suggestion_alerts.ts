@@ -24,8 +24,7 @@ import {
   AlertingAuthorizationFilterType,
 } from '../../authorization';
 import { AlertingRequestHandlerContext } from '../../types';
-import { ILicenseState } from '../../lib';
-import { RuleTypeRegistry } from '../../rule_type_registry';
+import { GetAlertIndicesAlias, ILicenseState } from '../../lib';
 
 const alertingAuthorizationFilterOpts: AlertingAuthorizationFilterOpts = {
   type: AlertingAuthorizationFilterType.ESDSL,
@@ -45,7 +44,7 @@ export function registerAlertsValueSuggestionsRoute(
   router: IRouter<AlertingRequestHandlerContext>,
   licenseState: ILicenseState,
   config$: Observable<ConfigSchema>,
-  ruleTypeRegistry: RuleTypeRegistry,
+  getAlertIndicesAlias?: GetAlertIndicesAlias,
   usageCounter?: UsageCounter
 ) {
   router.post(
@@ -72,7 +71,7 @@ export function registerAlertsValueSuggestionsRoute(
             );
           authorizedRuleType = await rulesClient
             .getAuthorization()
-            .getAuthorizedRuleType(AlertingAuthorizationEntity.Alert);
+            .getAuthorizedRuleTypes(AlertingAuthorizationEntity.Alert);
         } catch (error) {
           rulesClient.getAuditLogger()?.log(
             ruleAuditEvent({
@@ -89,12 +88,10 @@ export function registerAlertsValueSuggestionsRoute(
           { term: { [SPACE_IDS]: spaceId } },
         ] as estypes.QueryDslQueryContainer[];
 
-        const index = ruleTypeRegistry
-          .getIndicesAlias(
-            authorizedRuleType.map((art) => art.id),
-            spaceId
-          )
-          .join(',');
+        const index = getAlertIndicesAlias!(
+          authorizedRuleType.map((art) => art.id),
+          spaceId
+        ).join(',');
 
         try {
           const body = await termsAggSuggestions(

@@ -83,7 +83,7 @@ export const ruleRegistrySearchStrategyProvider = (
             ReadOperations.Find
           )) as estypes.QueryDslQueryContainer;
         }
-        const authorizedRuleTypes = await authorization.getAuthorizedRuleType(
+        const authorizedRuleTypes = await authorization.getAuthorizedRuleTypes(
           AlertingAuthorizationEntity.Alert,
           new Set(featureIds)
         );
@@ -92,7 +92,7 @@ export const ruleRegistrySearchStrategyProvider = (
       return from(getAsync(request.featureIds)).pipe(
         mergeMap(({ space, authzFilter, authorizedRuleTypes }) => {
           const indices = alerting
-            .getIndicesAlias(
+            .getAlertIndicesAlias(
               authorizedRuleTypes.map((art: { id: any }) => art.id),
               space?.id
             )
