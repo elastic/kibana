@@ -122,7 +122,7 @@ export function registerErrorCountRuleType({
           savedObjectsClient,
         });
 
-        const termFilterQuery = !ruleParams.useKqlFilter
+        const termFilterQuery = !ruleParams.kqlFilter
           ? [
               ...termQuery(SERVICE_NAME, ruleParams.serviceName, {
                 queryEmptyString: false,

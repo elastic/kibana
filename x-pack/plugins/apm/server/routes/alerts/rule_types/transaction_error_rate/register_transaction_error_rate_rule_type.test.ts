@@ -481,7 +481,6 @@ describe('Transaction error rate alert', () => {
       threshold: 10,
       windowSize: 5,
       windowUnit: 'm',
-      useKqlFilter: true,
       kqlFilter:
         'service.name: bar and service.environment: env-bar and transaction.type: type-bar',
       groupBy: ['service.name', 'service.environment', 'transaction.type'],

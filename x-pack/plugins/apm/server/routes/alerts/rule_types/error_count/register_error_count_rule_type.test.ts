@@ -709,7 +709,6 @@ describe('Error count alert', () => {
       windowSize: 5,
       windowUnit: 'm',
       serviceName: undefined,
-      useKqlFilter: true,
       kqlFilter: 'service.name: foo and service.environment: env-foo',
       groupBy: ['service.name', 'service.environment'],
     };

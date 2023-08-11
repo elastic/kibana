@@ -42,7 +42,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         start: new Date(start).toISOString(),
         end: new Date(end).toISOString(),
         interval: '5m',
-        useKqlFilter: 'true',
         kqlFilter: 'service.name: synth-go and transaction.type: request',
         serviceName: undefined,
         transactionType: undefined,
