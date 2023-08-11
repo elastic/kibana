@@ -22,34 +22,28 @@ import {
 } from '../../../../screens/expandable_flyout/alert_details_left_panel';
 import { DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_THREAT_INTELLIGENCE_BUTTON } from '../../../../screens/expandable_flyout/alert_details_left_panel_threat_intelligence_tab';
 
-describe(
-  'Expandable flyout left panel threat intelligence',
-  { env: { ftrConfig: { enableExperimental: ['securityFlyoutEnabled'] } } },
-  () => {
-    beforeEach(() => {
-      cleanKibana();
-      login();
-      createRule(getNewRule());
-      visit(ALERTS_URL);
-      waitForAlertsToPopulate();
-      expandFirstAlertExpandableFlyout();
-      expandDocumentDetailsExpandableFlyoutLeftSection();
-      openInsightsTab();
-      openThreatIntelligenceTab();
-    });
+describe('Expandable flyout left panel threat intelligence', () => {
+  beforeEach(() => {
+    cleanKibana();
+    login();
+    createRule(getNewRule());
+    visit(ALERTS_URL);
+    waitForAlertsToPopulate();
+    expandFirstAlertExpandableFlyout();
+    expandDocumentDetailsExpandableFlyoutLeftSection();
+    openInsightsTab();
+    openThreatIntelligenceTab();
+  });
 
-    it('should serialize its state to url', () => {
-      cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB)
-        .should('be.visible')
-        .and('have.text', 'Insights');
+  it('should serialize its state to url', () => {
+    cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB).should('be.visible').and('have.text', 'Insights');
 
-      cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_BUTTON_GROUP).should('be.visible');
+    cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_BUTTON_GROUP).should('be.visible');
 
-      cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_THREAT_INTELLIGENCE_BUTTON)
-        .should('be.visible')
-        .and('have.text', 'Threat Intelligence');
+    cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_THREAT_INTELLIGENCE_BUTTON)
+      .should('be.visible')
+      .and('have.text', 'Threat Intelligence');
 
-      cy.get(INDICATOR_MATCH_ENRICHMENT_SECTION).should('be.visible');
-    });
-  }
-);
+    cy.get(INDICATOR_MATCH_ENRICHMENT_SECTION).should('be.visible');
+  });
+});

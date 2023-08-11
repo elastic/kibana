@@ -19,32 +19,35 @@ import {
   type MetricLayerOptions,
   type FormulaConfig,
   type LensAttributes,
+  type XYVisualOptions,
+  type Chart,
   LensAttributesBuilder,
   XYDataLayer,
   MetricLayer,
   XYChart,
   MetricChart,
   XYReferenceLinesLayer,
-  Chart,
   LensVisualizationState,
 } from '../common/visualizations';
 import { useLazyRef } from './use_lazy_ref';
 
-type Options = XYLayerOptions | MetricLayerOptions;
+type LayerOptions = XYLayerOptions | MetricLayerOptions;
 type ChartType = 'lnsXY' | 'lnsMetric';
+type VisualOptions = XYVisualOptions;
 export type LayerType = Exclude<LensLayerType, 'annotations' | 'metricTrendline'>;
+
 export interface Layer<
-  TOptions extends Options,
+  TLayerOptions extends LayerOptions,
   TFormulaConfig extends FormulaConfig | FormulaConfig[],
   TLayerType extends LayerType = LayerType
 > {
   layerType: TLayerType;
   data: TFormulaConfig;
-  options?: TOptions;
+  options?: TLayerOptions;
 }
 
 interface UseLensAttributesBaseParams<
-  TOptions extends Options,
+  TOptions extends LayerOptions,
   TLayers extends Array<Layer<TOptions, FormulaConfig[]>> | Layer<TOptions, FormulaConfig>
 > {
   dataView?: DataView;
@@ -58,6 +61,7 @@ interface UseLensAttributesXYChartParams
     Array<Layer<XYLayerOptions, FormulaConfig[], 'data' | 'referenceLine'>>
   > {
   visualizationType: 'lnsXY';
+  visualOptions?: XYVisualOptions;
 }
 
 interface UseLensAttributesMetricChartParams
@@ -68,13 +72,16 @@ interface UseLensAttributesMetricChartParams
   visualizationType: 'lnsMetric';
 }
 
-type UseLensAttributesParams = UseLensAttributesXYChartParams | UseLensAttributesMetricChartParams;
+export type UseLensAttributesParams =
+  | UseLensAttributesXYChartParams
+  | UseLensAttributesMetricChartParams;
 
 export const useLensAttributes = ({
   dataView,
   layers,
   title,
   visualizationType,
+  ...extraParams
 }: UseLensAttributesParams) => {
   const {
     services: { lens },
@@ -95,6 +102,7 @@ export const useLensAttributes = ({
         layers,
         title,
         visualizationType,
+        ...extraParams,
       }),
     });
 
@@ -182,12 +190,14 @@ const chartFactory = <
   layers,
   title,
   visualizationType,
+  visualOptions,
 }: {
   dataView: DataView;
   formulaAPI: FormulaPublicApi;
   visualizationType: ChartType;
   layers: TLayers;
   title?: string;
+  visualOptions?: VisualOptions;
 }): Chart<LensVisualizationState> => {
   switch (visualizationType) {
     case 'lnsXY':
@@ -219,6 +229,7 @@ const chartFactory = <
           });
         }),
         title,
+        visualOptions,
       });
 
     case 'lnsMetric':
