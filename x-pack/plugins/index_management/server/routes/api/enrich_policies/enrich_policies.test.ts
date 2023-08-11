@@ -7,26 +7,14 @@
 
 import { addBasePath } from '..';
 import { RouterMock, routeDependencies, RequestMock } from '../../../test/helpers';
+import { serializeEnrichmentPolicies } from '../../../lib/enrich_policies';
+import { createTestESEnrichPolicy } from '../../../test/helpers';
 
 import { registerEnrichPoliciesRoute } from './register_enrich_policies_routes';
 
-const mockedPolicy = {
-  config: {
-    match: {
-      name: 'my-policy',
-      indices: ['users'],
-      match_field: 'email',
-      enrich_fields: ['first_name', 'last_name', 'city', 'zip', 'state'],
-    },
-  },
-};
+const mockedPolicy = createTestESEnrichPolicy('my-policy', 'match');
 
-/**
- * Since these route callbacks are so thin, these serve simply as integration tests
- * to ensure they're wired up to the lib functions correctly. Business logic is tested
- * more thoroughly in the es_deprecation_logging_apis test.
- */
-describe('deprecation logging API', () => {
+describe('Enrich policies API', () => {
   const router = new RouterMock();
 
   beforeEach(() => {
@@ -54,7 +42,7 @@ describe('deprecation logging API', () => {
       const res = await router.runRequest(mockRequest);
 
       expect(res).toEqual({
-        body: { policies: [mockedPolicy] },
+        body: serializeEnrichmentPolicies([mockedPolicy]),
       });
     });
 

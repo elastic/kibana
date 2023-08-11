@@ -17,7 +17,6 @@ import { useLoadEnrichPolicies } from '../../../services/api';
 import { PageLoading, PageError } from '../../../../shared_imports';
 import { PoliciesTable } from './policies_table';
 import { DeletePolicyModal, ExecutePolicyModal } from './confirm_modals';
-import { serializeEnrichmentPolicies } from '../../../lib/enrich_policy_serializer';
 
 export const EnrichPoliciesList = () => {
   const {
@@ -32,7 +31,7 @@ export const EnrichPoliciesList = () => {
   const [policyToDelete, setPolicyToDelete] = useState<string | undefined>();
   const [policyToExecute, setPolicyToExecute] = useState<string | undefined>();
 
-  const { error, isLoading, data, resendRequest: reloadPolicies } = useLoadEnrichPolicies();
+  const { error, isLoading, data: policies, resendRequest: reloadPolicies } = useLoadEnrichPolicies();
 
   if (isLoading) {
     return (
@@ -81,7 +80,7 @@ export const EnrichPoliciesList = () => {
       <EuiSpacer size="l" />
 
       <PoliciesTable
-        policies={serializeEnrichmentPolicies(data.policies)}
+        policies={policies}
         onReloadClick={reloadPolicies}
         onDeletePolicyClick={setPolicyToDelete}
         onExecutePolicyClick={setPolicyToExecute}

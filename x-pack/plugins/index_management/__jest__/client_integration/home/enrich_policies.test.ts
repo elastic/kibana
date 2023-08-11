@@ -6,11 +6,10 @@
  */
 
 import { act } from 'react-dom/test-utils';
-
-import * as fixtures from '../helpers/fixtures';
-import { setupEnvironment } from '../helpers';
-
 import { notificationServiceMock } from '@kbn/core/public/mocks';
+
+import { setupEnvironment } from '../helpers';
+import { createTestEnrichPolicy } from '../helpers/fixtures';
 import { EnrichPoliciesTestBed, setup } from './enrich_policies.helpers';
 
 const toastsMock = notificationServiceMock.createStartContract().toasts;
@@ -63,7 +62,10 @@ describe('Enrich policies tab', () => {
 
   describe('policies list', () => {
     beforeEach(async () => {
-      httpRequestsMockHelpers.setLoadEnrichPoliciesResponse(fixtures.enrichPolicies);
+      httpRequestsMockHelpers.setLoadEnrichPoliciesResponse([
+        createTestEnrichPolicy('policy-match', 'match'),
+        createTestEnrichPolicy('policy-range', 'range'),
+      ]);
 
       testBed = await setup(httpSetup, { toasts: toastsMock });
 
@@ -95,6 +97,20 @@ describe('Enrich policies tab', () => {
     });
 
     describe('policy actions', () => {
+      beforeEach(async () => {
+        httpRequestsMockHelpers.setLoadEnrichPoliciesResponse([
+          createTestEnrichPolicy('policy-match', 'match'),
+        ]);
+
+        testBed = await setup(httpSetup, { toasts: toastsMock });
+
+        await act(async () => {
+          testBed.actions.goToEnrichPoliciesTab();
+        });
+
+        testBed.component.update();
+      });
+
       describe('deletion', () => {
         it('can delete a policy', async () => {
           const { actions, exists } = testBed;

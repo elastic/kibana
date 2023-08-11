@@ -5,28 +5,19 @@
  * 2.0.
  */
 
-import { serializeEnrichmentPolicies } from './enrich_policy_serializer';
-
-const mockedESPolicy = {
-  config: {
-    match: {
-      name: 'my-policy',
-      indices: ['users'],
-      match_field: 'email',
-      enrich_fields: ['first_name', 'last_name', 'city', 'zip', 'state'],
-    },
-  },
-};
+import { serializeEnrichmentPolicies } from './enrich_policies';
+import { createTestESEnrichPolicy } from '../test/helpers';
 
 describe('serializeEnrichmentPolicies', () => {
   it('knows how to serialize a list of policies', async () => {
+    const mockedESPolicy = createTestESEnrichPolicy('my-policy', 'match');
     expect(serializeEnrichmentPolicies([mockedESPolicy])).toEqual([
       {
         name: 'my-policy',
         type: 'match',
         sourceIndices: ['users'],
         matchField: 'email',
-        enrichFields: ['first_name', 'last_name', 'city', 'zip', 'state'],
+        enrichFields: ['first_name', 'last_name', 'city'],
       },
     ]);
   });

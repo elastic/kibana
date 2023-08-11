@@ -10,6 +10,7 @@ import { schema } from '@kbn/config-schema';
 import { IScopedClusterClient } from '@kbn/core/server';
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '..';
+import { enrichPoliciesActions } from '../../../lib/enrich_policies';
 
 const paramsSchema = schema.object({
   name: schema.string(),
@@ -26,7 +27,7 @@ export function registerDeleteRoute({ router, lib: { handleEsError } }: RouteDep
       const client = (await context.core).elasticsearch.client as IScopedClusterClient;
 
       try {
-        const res = await client.asCurrentUser.enrich.deletePolicy({ name });
+        const res = await enrichPoliciesActions.remove(client, name);
         return response.ok({ body: res });
       } catch (error) {
         return handleEsError({ error, response });

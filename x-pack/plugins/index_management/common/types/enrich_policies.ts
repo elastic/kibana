@@ -5,8 +5,12 @@
  * 2.0.
  */
 
-export type { ExtensionsSetup } from './extensions_service';
-export { ExtensionsService } from './extensions_service';
+import type { EnrichPolicyType } from '@elastic/elasticsearch/lib/api/types';
 
-export type { PublicApiServiceSetup } from './public_api_service';
-export { PublicApiService } from './public_api_service';
+export interface SerializedEnrichPolicy {
+  type: EnrichPolicyType;
+  name: string;
+  sourceIndices: string[];
+  matchField: string;
+  enrichFields: string[];
+}
