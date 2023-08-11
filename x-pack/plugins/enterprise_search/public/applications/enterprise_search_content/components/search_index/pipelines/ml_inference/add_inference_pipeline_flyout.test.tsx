@@ -26,14 +26,14 @@ import {
   AddInferencePipelineHorizontalSteps,
   AddInferencePipelineFooter,
 } from './add_inference_pipeline_flyout';
-import { ConfigurePipeline } from './configure_pipeline';
 import { ConfigureFields } from './configure_fields';
+import { ConfigurePipeline } from './configure_pipeline';
 import { EMPTY_PIPELINE_CONFIGURATION } from './ml_inference_logic';
 import { NoModelsPanel } from './no_models';
-import { UpdateMappings } from './update_mappings';
 import { ReviewPipeline } from './review_pipeline';
 import { TestPipeline } from './test_pipeline';
 import { AddInferencePipelineSteps } from './types';
+import { UpdateMappings } from './update_mappings';
 
 const supportedMLModels: TrainedModelConfigResponse[] = [
   {
