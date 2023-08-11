@@ -93,3 +93,6 @@ input_control_vis.readOnly: true
 
 # Disable cases in stack management
 xpack.cases.stack.enabled: false
+
+# Task Manager
+xpack.task_manager.allow_reading_invalid_state: false
