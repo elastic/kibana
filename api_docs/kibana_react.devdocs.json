@@ -581,18 +581,6 @@
             "path": "src/plugins/home/public/application/components/tutorial/tutorial.js"
           },
           {
-            "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/public/components/home/home.component.tsx"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/public/components/home/home.component.tsx"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/public/components/home/home.component.tsx"
-          },
-          {
             "plugin": "osquery",
             "path": "x-pack/plugins/osquery/public/components/empty_state.tsx"
           },
@@ -1605,54 +1593,6 @@
             "path": "x-pack/plugins/apm/public/application/index.tsx"
           },
           {
-            "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/canvas_plugin_src/renderers/embeddable/embeddable.tsx"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/canvas_plugin_src/renderers/embeddable/embeddable.tsx"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/canvas_plugin_src/renderers/embeddable/embeddable.tsx"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/canvas_plugin_src/renderers/filters/advanced_filter/index.tsx"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/canvas_plugin_src/renderers/filters/advanced_filter/index.tsx"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/canvas_plugin_src/renderers/filters/advanced_filter/index.tsx"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/canvas_plugin_src/renderers/filters/dropdown_filter/index.tsx"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/canvas_plugin_src/renderers/filters/dropdown_filter/index.tsx"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/canvas_plugin_src/renderers/filters/dropdown_filter/index.tsx"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/canvas_plugin_src/renderers/filters/time_filter/index.tsx"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/canvas_plugin_src/renderers/filters/time_filter/index.tsx"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/canvas_plugin_src/renderers/filters/time_filter/index.tsx"
-          },
-          {
             "plugin": "expressionImage",
             "path": "src/plugins/expression_image/public/expression_renderers/image_renderer.tsx"
           },
@@ -1747,62 +1687,6 @@
           {
             "plugin": "expressionShape",
             "path": "src/plugins/expression_shape/public/expression_renderers/progress_renderer.tsx"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/canvas_plugin_src/renderers/markdown/index.tsx"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/canvas_plugin_src/renderers/markdown/index.tsx"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/canvas_plugin_src/renderers/markdown/index.tsx"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/canvas_plugin_src/renderers/text.tsx"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/canvas_plugin_src/renderers/text.tsx"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/canvas_plugin_src/renderers/text.tsx"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/canvas_plugin_src/renderers/table.tsx"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/canvas_plugin_src/renderers/table.tsx"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/canvas_plugin_src/renderers/table.tsx"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/public/application.tsx"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/public/application.tsx"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/public/application.tsx"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/public/application.tsx"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/public/application.tsx"
           },
           {
             "plugin": "indexManagement",

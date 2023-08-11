@@ -5,11 +5,6 @@
  * 2.0.
  */
 
-import { TaskLifecycleEvent } from '../polling_lifecycle';
-
-export interface ITaskMetricsAggregator<T> {
-  initialMetric: () => T;
-  collect: () => T;
-  reset: () => void;
-  processTaskLifecycleEvent: (taskEvent: TaskLifecycleEvent) => void;
+export function useObservabilityAIAssistant() {
+  return {};
 }
