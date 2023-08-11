@@ -132,8 +132,8 @@ const findTestUtils = (
                 ...(match.last_run ? { last_run: match.last_run } : {}),
                 ...(describeType === 'internal'
                   ? {
-                      monitoring: match?.monitoring,
-                      snooze_schedule: match?.snooze_schedule,
+                      monitoring: match.monitoring,
+                      snooze_schedule: match.snooze_schedule,
                       ...(hasActiveSnoozes && { active_snoozes: activeSnoozes }),
                     }
                   : {}),
