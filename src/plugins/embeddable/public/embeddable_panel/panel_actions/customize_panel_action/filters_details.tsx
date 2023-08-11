@@ -27,7 +27,6 @@ import { DashboardAPI } from '@kbn/dashboard-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { FilterableEmbeddable, IEmbeddable } from '../../..';
-import { EditPanelAction } from '../edit_panel_action/edit_panel_action';
 
 export const filterDetailsActionStrings = {
   getQueryTitle: () =>
@@ -43,10 +42,10 @@ export const filterDetailsActionStrings = {
 export interface FiltersDetailsProps {
   embeddable: IEmbeddable;
   editMode: boolean;
-  editPanelAction: EditPanelAction;
+  onEdit: () => void;
 }
 
-export function FiltersDetails({ embeddable, editMode, editPanelAction }: FiltersDetailsProps) {
+export function FiltersDetails({ embeddable, editMode, onEdit }: FiltersDetailsProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [filters, setFilters] = useState<Filter[]>([]);
   const [queryString, setQueryString] = useState<string>('');
@@ -58,7 +57,6 @@ export function FiltersDetails({ embeddable, editMode, editPanelAction }: Filter
     [embeddable]
   );
 
-  console.log({ dataViews });
   useMount(() => {
     Promise.all([
       (embeddable as IEmbeddable & FilterableEmbeddable).getFilters(),
@@ -83,9 +81,7 @@ export function FiltersDetails({ embeddable, editMode, editPanelAction }: Filter
     <EuiButtonEmpty
       size="xs"
       data-test-subj="resetCustomEmbeddablePanelTitleButton"
-      onClick={() => {
-        editPanelAction.execute({ embeddable });
-      }}
+      onClick={onEdit}
       aria-label={i18n.translate(
         'embeddableApi.customizePanel.flyout.optionsMenuForm.editFiltersButtonAriaLabel',
         {

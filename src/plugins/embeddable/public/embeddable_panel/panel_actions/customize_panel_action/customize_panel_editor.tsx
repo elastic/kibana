@@ -34,7 +34,6 @@ import { canInheritTimeRange } from './can_inherit_time_range';
 import { doesInheritTimeRange } from './does_inherit_time_range';
 import { IEmbeddable, Embeddable, CommonlyUsedRange, ViewMode } from '../../../lib';
 import { FiltersDetails } from './filters_details';
-import { EditPanelAction } from '../edit_panel_action/edit_panel_action';
 
 type PanelSettings = {
   title?: string;
@@ -49,11 +48,11 @@ interface CustomizePanelProps {
   dateFormat?: string;
   commonlyUsedRanges?: CommonlyUsedRange[];
   onClose: () => void;
-  editPanelAction: EditPanelAction;
+  onEdit: () => void;
 }
 
 export const CustomizePanelEditor = (props: CustomizePanelProps) => {
-  const { onClose, embeddable, dateFormat, timeRangeCompatible, editPanelAction } = props;
+  const { onClose, embeddable, dateFormat, timeRangeCompatible, onEdit } = props;
   const editMode = embeddable.getInput().viewMode === ViewMode.EDIT;
   const [hideTitle, setHideTitle] = useState(embeddable.getInput().hidePanelTitles);
   const [panelDescription, setPanelDescription] = useState(
@@ -280,11 +279,7 @@ export const CustomizePanelEditor = (props: CustomizePanelProps) => {
           {renderCustomTitleComponent()}
           {renderCustomTimeRangeComponent()}
           <EuiSpacer size="m" />
-          <FiltersDetails
-            editPanelAction={editPanelAction}
-            embeddable={embeddable}
-            editMode={editMode}
-          />
+          <FiltersDetails onEdit={onEdit} embeddable={embeddable} editMode={editMode} />
         </EuiForm>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>

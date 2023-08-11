@@ -117,6 +117,10 @@ export class CustomizePanelAction implements Action<CustomizePanelActionContext>
       uiSettings: core.uiSettings,
     });
 
+    const onEdit = () => {
+      editPanelAction.execute({ embeddable });
+    };
+
     const handle = this.overlays.openFlyout(
       toMountPoint(
         <KibanaReactContextProvider>
@@ -129,7 +133,7 @@ export class CustomizePanelAction implements Action<CustomizePanelActionContext>
               if (overlayTracker) overlayTracker.clearOverlays();
               handle.close();
             }}
-            editPanelAction={editPanelAction}
+            onEdit={onEdit}
           />
         </KibanaReactContextProvider>,
         { theme: this.theme, i18n: core.i18n }
