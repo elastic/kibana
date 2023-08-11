@@ -66,9 +66,9 @@ export const schemaGeoPoint = rt.union([
 ]);
 export const schemaGeoPointArray = rt.array(schemaGeoPoint);
 // prettier-ignore
-const StackThresholdAlertRequired = rt.type({
+const StackAlertRequired = rt.type({
 });
-const StackThresholdAlertOptional = rt.partial({
+const StackAlertOptional = rt.partial({
   kibana: rt.partial({
     alert: rt.partial({
       evaluation: rt.partial({
@@ -83,6 +83,6 @@ const StackThresholdAlertOptional = rt.partial({
 });
 
 // prettier-ignore
-export const StackThresholdAlertSchema = rt.intersection([StackThresholdAlertRequired, StackThresholdAlertOptional, AlertSchema]);
+export const StackAlertSchema = rt.intersection([StackAlertRequired, StackAlertOptional, AlertSchema]);
 // prettier-ignore
-export type StackThresholdAlert = rt.TypeOf<typeof StackThresholdAlertSchema>;
+export type StackAlert = rt.TypeOf<typeof StackAlertSchema>;

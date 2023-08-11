@@ -6,7 +6,7 @@
  */
 
 import { ESTestIndexTool, ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
-import { ES_QUERY_AAD_INDEX } from '@kbn/stack-alerts-plugin/server/rule_types/es_query/constants';
+import { STACK_AAD_INDEX_NAME } from '@kbn/stack-alerts-plugin/server/rule_types';
 import { FtrProviderContext } from '../../../../../../common/ftr_provider_context';
 import { Spaces } from '../../../../../scenarios';
 import { getUrlPrefix, ObjectRemover } from '../../../../../../common/lib';
@@ -73,7 +73,7 @@ export function getRuleServices(getService: FtrProviderContext['getService']) {
   const esTestIndexToolAAD = new ESTestIndexTool(
     es,
     retry,
-    `.internal.alerts-${ES_QUERY_AAD_INDEX}.alerts-default-000001`
+    `.internal.alerts-${STACK_AAD_INDEX_NAME}.alerts-default-000001`
   );
 
   async function createEsDocumentsInGroups(

@@ -10,7 +10,8 @@ import { CoreSetup } from '@kbn/core/server';
 import { extractReferences, injectReferences } from '@kbn/data-plugin/common';
 import { IRuleTypeAlerts } from '@kbn/alerting-plugin/server';
 import { ALERT_EVALUATION_VALUE, ALERT_REASON, ALERT_URL } from '@kbn/rule-data-utils';
-import { StackThresholdAlert } from '@kbn/alerts-as-data-utils';
+import { StackAlert } from '@kbn/alerts-as-data-utils';
+import { STACK_AAD_INDEX_NAME } from '..';
 import { ALERT_TITLE, ALERT_EVALUATION_CONDITIONS } from './fields';
 import { RuleType } from '../../types';
 import { ActionContext } from './action_context';
@@ -22,7 +23,7 @@ import {
 } from './rule_type_params';
 import { STACK_ALERTS_FEATURE_ID } from '../../../common';
 import { ExecutorOptions } from './types';
-import { ActionGroupId, ES_QUERY_AAD_INDEX, ES_QUERY_ID } from './constants';
+import { ActionGroupId, ES_QUERY_ID } from './constants';
 import { executor } from './executor';
 import { isEsQueryRule } from './util';
 
@@ -36,7 +37,7 @@ export function getRuleType(
   ActionContext,
   typeof ActionGroupId,
   never,
-  StackThresholdAlert
+  StackAlert
 > {
   const ruleTypeName = i18n.translate('xpack.stackAlerts.esQuery.alertTypeTitle', {
     defaultMessage: 'Elasticsearch query',
@@ -141,8 +142,8 @@ export function getRuleType(
     }
   );
 
-  const alerts: IRuleTypeAlerts<StackThresholdAlert> = {
-    context: ES_QUERY_AAD_INDEX,
+  const alerts: IRuleTypeAlerts<StackAlert> = {
+    context: STACK_AAD_INDEX_NAME,
     mappings: {
       fieldMap: {
         [ALERT_URL]: { type: 'text', array: false, required: false },
