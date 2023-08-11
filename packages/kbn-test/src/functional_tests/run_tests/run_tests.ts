@@ -42,6 +42,9 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
       dryRun: options.dryRun,
       grep: options.grep,
     },
+    esTestCluster: {
+      from: options.esFrom,
+    },
     kbnTestServer: {
       installDir: options.installDir,
     },
