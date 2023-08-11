@@ -77,9 +77,9 @@ export function InstallElasticAgentSteps<PlatformId extends string>({
   const isInstallStarted =
     intersection(
       Object.keys(installProgressSteps),
-      Object.keys(PROGRESS_STEP_TITLES)
+      Object.keys(PROGRESS_STEP_TITLES(selectedPlatform))
     ).length > 0;
-  const autoDownloadConfigStep = getStep('ea-config', installProgressSteps);
+  const autoDownloadConfigStep = getStep('ea-config', installProgressSteps, selectedPlatform);
 
   const customInstallStep = installAgentPlatformOptions.find((step) => step.id === selectedPlatform)?.children;
   const disableSteps = installAgentPlatformOptions.find((step) => step.id === selectedPlatform)?.disableSteps;
@@ -104,7 +104,8 @@ export function InstallElasticAgentSteps<PlatformId extends string>({
             ).map((stepId) => {
               const { title, status, message } = getStep(
                 stepId,
-                installProgressSteps
+                installProgressSteps,
+                selectedPlatform
               );
               return (
                 <StepStatus
@@ -329,10 +330,11 @@ export function InstallElasticAgentSteps<PlatformId extends string>({
 
 function getStep(
   id: ProgressStepId,
-  installProgressSteps: Props<string>['installProgressSteps']
+  installProgressSteps: Props<string>['installProgressSteps'],
+  selectedPlatform: string,
 ): { title: string; status: EuiStepStatus; message?: string } {
   const { loadingTitle, completedTitle, incompleteTitle } =
-    PROGRESS_STEP_TITLES[id];
+    PROGRESS_STEP_TITLES(selectedPlatform)[id];
   const stepProgress = installProgressSteps[id];
   if (stepProgress) {
     const { status, message } = stepProgress;
@@ -355,10 +357,10 @@ function getStep(
   };
 }
 
-const PROGRESS_STEP_TITLES: Record<
+const PROGRESS_STEP_TITLES: (selectedPlatform: string) => Record<
   ProgressStepId,
   Record<'incompleteTitle' | 'loadingTitle' | 'completedTitle', string>
-> = {
+> = (selectedPlatform: string) => ({
   'ea-download': {
     incompleteTitle: i18n.translate(
       'xpack.observability_onboarding.installElasticAgent.progress.eaDownload.incompleteTitle',
@@ -432,8 +434,12 @@ const PROGRESS_STEP_TITLES: Record<
       'xpack.observability_onboarding.installElasticAgent.progress.eaConfig.completedTitle',
       {
         defaultMessage: 'Elastic Agent config written to {configPath}',
-        values: { configPath: '/opt/Elastic/Agent/elastic-agent.yml' },
+        values: {
+          configPath: selectedPlatform === 'macos'
+            ? '/Library/Elastic/Agent/elastic-agent.yml'
+            : '/opt/Elastic/Agent/elastic-agent.yml',
+          },
       }
     ),
   },
-};
+});
