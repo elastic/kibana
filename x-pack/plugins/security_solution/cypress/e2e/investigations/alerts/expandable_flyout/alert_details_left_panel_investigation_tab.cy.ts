@@ -19,27 +19,23 @@ import { getNewRule } from '../../../../objects/rule';
 import { ALERTS_URL } from '../../../../urls/navigation';
 import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
 
-describe(
-  'Alert details expandable flyout left panel investigation',
-  { env: { ftrConfig: { enableExperimental: ['securityFlyoutEnabled'] } } },
-  () => {
-    beforeEach(() => {
-      cleanKibana();
-      login();
-      createRule(getNewRule());
-      visit(ALERTS_URL);
-      waitForAlertsToPopulate();
-      expandFirstAlertExpandableFlyout();
-      expandDocumentDetailsExpandableFlyoutLeftSection();
-      openInvestigationTab();
-    });
+describe('Alert details expandable flyout left panel investigation', () => {
+  beforeEach(() => {
+    cleanKibana();
+    login();
+    createRule(getNewRule());
+    visit(ALERTS_URL);
+    waitForAlertsToPopulate();
+    expandFirstAlertExpandableFlyout();
+    expandDocumentDetailsExpandableFlyoutLeftSection();
+    openInvestigationTab();
+  });
 
-    it('should display investigation guide', () => {
-      cy.get(DOCUMENT_DETAILS_FLYOUT_INVESTIGATION_TAB)
-        .should('be.visible')
-        .and('have.text', 'Investigation');
+  it('should display investigation guide', () => {
+    cy.get(DOCUMENT_DETAILS_FLYOUT_INVESTIGATION_TAB)
+      .should('be.visible')
+      .and('have.text', 'Investigation');
 
-      cy.get(DOCUMENT_DETAILS_FLYOUT_INVESTIGATION_TAB_CONTENT).should('be.visible');
-    });
-  }
-);
+    cy.get(DOCUMENT_DETAILS_FLYOUT_INVESTIGATION_TAB_CONTENT).should('be.visible');
+  });
+});

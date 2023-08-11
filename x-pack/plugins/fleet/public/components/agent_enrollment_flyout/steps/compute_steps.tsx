@@ -200,7 +200,6 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
   isK8s,
   cloudSecurityIntegration,
   installedPackagePolicy,
-  cloudFormationTemplateUrl,
 }) => {
   const kibanaVersion = useKibanaVersion();
   const core = useStartServices();
@@ -247,14 +246,13 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
       );
     }
 
-    if (cloudFormationTemplateUrl) {
+    if (cloudSecurityIntegration?.isCloudFormation) {
       steps.push(
         InstallCloudFormationManagedAgentStep({
           apiKeyData,
           selectedApiKeyId,
           enrollToken,
-          cloudFormationTemplateUrl,
-          agentPolicy,
+          cloudSecurityIntegration,
         })
       );
     } else {
@@ -314,7 +312,6 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
     link,
     agentDataConfirmed,
     installedPackagePolicy,
-    cloudFormationTemplateUrl,
   ]);
 
   return <EuiSteps steps={instructionsSteps} />;

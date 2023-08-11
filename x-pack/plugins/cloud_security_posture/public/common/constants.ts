@@ -75,7 +75,7 @@ export const cloudPostureIntegrations: CloudPostureIntegrations = {
       {
         type: CLOUDBEAT_AWS,
         name: i18n.translate('xpack.csp.cspmIntegration.awsOption.nameTitle', {
-          defaultMessage: 'Amazon Web Services',
+          defaultMessage: 'AWS',
         }),
         benchmark: i18n.translate('xpack.csp.cspmIntegration.awsOption.benchmarkTitle', {
           defaultMessage: 'CIS AWS',
