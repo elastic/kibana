@@ -12,7 +12,7 @@ import { getEndpointManagementPageMap } from '../../../screens/endpoint_manageme
 import { ensureResponseActionAuthzAccess } from '../../../tasks/endpoint_management';
 
 describe(
-  'App Features for Essentials PLI with Endpoint Essentials',
+  'App Features for Security Essentials PLI with Endpoint Essentials Addon',
   {
     env: {
       ftrConfig: {
