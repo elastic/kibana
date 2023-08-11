@@ -27,6 +27,7 @@ export function createTestConfig(options: CreateTestConfigOptions) {
         serverArgs: [
           ...svlSharedConfig.get('kbnTestServer.serverArgs'),
           `--serverless=${options.serverlessProject}`,
+          '--xpack.encryptedSavedObjects.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"',
         ],
       },
       testFiles: options.testFiles,
