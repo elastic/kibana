@@ -7,11 +7,11 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 
+import type { AuthenticationProviderOptions } from './base';
+import { BaseAuthenticationProvider } from './base';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
 import { HTTPAuthorizationHeader } from '../http_authentication';
-import type { AuthenticationProviderOptions } from './base';
-import { BaseAuthenticationProvider } from './base';
 
 interface HTTPAuthenticationProviderOptions {
   supportedSchemes: Set<string>;
