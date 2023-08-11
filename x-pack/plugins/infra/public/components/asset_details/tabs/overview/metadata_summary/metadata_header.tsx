@@ -30,6 +30,18 @@ const columnTitles = {
       defaultMessage: 'Host OS version',
     }
   ),
+  cloudProvider: i18n.translate(
+    'xpack.infra.assetDetailsEmbeddable.overview.metadataCloudProviderHeading',
+    {
+      defaultMessage: 'Cloud provider',
+    }
+  ),
+  operatingSystem: i18n.translate(
+    'xpack.infra.assetDetailsEmbeddable.overview.metadataOperatingSystemHeading',
+    {
+      defaultMessage: 'Operating system',
+    }
+  ),
 };
 
 type MetadataFields = 'hostIp' | 'hostOsVersion';
