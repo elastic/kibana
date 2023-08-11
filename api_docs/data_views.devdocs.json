@@ -180,6 +180,10 @@
                 "path": "x-pack/plugins/security_solution/public/flyout/left/hooks/use_threat_intelligence_details.test.ts"
               },
               {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/flyout/preview/mocks/mock_preview_panel_context.ts"
+              },
+              {
                 "plugin": "threatIntelligence",
                 "path": "x-pack/plugins/threat_intelligence/public/mocks/mock_security_context.tsx"
               },
@@ -8068,6 +8072,10 @@
                 "path": "x-pack/plugins/security_solution/public/flyout/left/hooks/use_threat_intelligence_details.test.ts"
               },
               {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/flyout/preview/mocks/mock_preview_panel_context.ts"
+              },
+              {
                 "plugin": "threatIntelligence",
                 "path": "x-pack/plugins/threat_intelligence/public/mocks/mock_security_context.tsx"
               },
@@ -15107,6 +15115,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/public/flyout/left/hooks/use_threat_intelligence_details.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/flyout/preview/mocks/mock_preview_panel_context.ts"
               },
               {
                 "plugin": "threatIntelligence",
