@@ -41,19 +41,21 @@ export const turnOffPolicyProtectionsIfNotSupported = async (
   const { packagePolicy, internalSoClient, endpointPolicyKuery } = fleetServices;
   const updates: UpdatePackagePolicy[] = [];
   const messages: string[] = [];
+  const perPage = 1000;
   let hasMoreData = true;
   let total = 0;
   let page = 1;
 
   do {
+    const currentPage = page++;
     const { items, total: totalPolicies } = await packagePolicy.list(internalSoClient, {
-      page: page++,
+      page: currentPage,
       kuery: endpointPolicyKuery,
-      perPage: 1000,
+      perPage,
     });
 
     total = totalPolicies;
-    hasMoreData = items.length > 0;
+    hasMoreData = currentPage * perPage < total;
 
     for (const item of items) {
       const integrationPolicy = item as PolicyData;

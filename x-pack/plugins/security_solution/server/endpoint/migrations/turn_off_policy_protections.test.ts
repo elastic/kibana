@@ -93,12 +93,6 @@ describe('Turn Off Policy Protections Migration', () => {
             perPage: 1000,
             items: page2Items,
           };
-        })
-        .mockResolvedValueOnce({
-          total: 1500,
-          page: 3,
-          perPage: 1000,
-          items: [],
         });
 
       bulkUpdateResponse = {
@@ -114,7 +108,7 @@ describe('Turn Off Policy Protections Migration', () => {
     it('should update only policies that have protections turn on', async () => {
       await callTurnOffPolicyProtections();
 
-      expect(fleetServices.packagePolicy.list as jest.Mock).toHaveBeenCalledTimes(3);
+      expect(fleetServices.packagePolicy.list as jest.Mock).toHaveBeenCalledTimes(2);
       expect(fleetServices.packagePolicy.bulkUpdate as jest.Mock).toHaveBeenCalledWith(
         fleetServices.internalSoClient,
         esClient,
