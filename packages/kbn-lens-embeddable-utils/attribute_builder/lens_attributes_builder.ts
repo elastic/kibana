@@ -42,7 +42,11 @@ export class LensAttributesBuilder<T extends Chart<LensVisualizationState>>
         query: { language: 'kuery', query: '' },
         visualization: visualization.getVisualizationState(),
         // Getting the spec from a data view is a heavy operation, that's why the result is cached.
-        adHocDataViews: getAdhocDataView(this.dataViewCache.getSpec(visualization.getDataView())),
+        adHocDataViews: getAdhocDataView(
+          visualization
+            .getDataViews()
+            .reduce((acc, curr) => ({ ...acc, ...this.dataViewCache.getSpec(curr) }), {})
+        ),
       },
     };
   }

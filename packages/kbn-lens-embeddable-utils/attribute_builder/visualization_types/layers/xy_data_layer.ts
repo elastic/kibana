@@ -134,8 +134,8 @@ export class XYDataLayer implements ChartLayer<XYDataLayerConfig> {
     };
   }
 
-  getReference(layerId: string, dataView: DataView): SavedObjectReference[] {
-    return getDefaultReferences(dataView, layerId);
+  getReference(layerId: string, chartDataView: DataView): SavedObjectReference[] {
+    return getDefaultReferences(this.layerConfig.dataView ?? chartDataView, layerId);
   }
 
   getLayerConfig(layerId: string, accessorId: string): XYDataLayerConfig {
@@ -158,5 +158,9 @@ export class XYDataLayer implements ChartLayer<XYDataLayerConfig> {
           ? BREAKDOWN_COLUMN_NAME
           : undefined,
     };
+  }
+
+  getDataView(): DataView | undefined {
+    return this.layerConfig.dataView;
   }
 }

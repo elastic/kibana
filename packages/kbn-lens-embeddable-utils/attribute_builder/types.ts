@@ -57,6 +57,7 @@ export interface ChartLayer<TLayerConfig extends LensLayerConfig> {
   ): FormBasedPersistedState['layers'];
   getReference(layerId: string, dataView: DataView): SavedObjectReference[];
   getLayerConfig(layerId: string, acessorId: string): TLayerConfig;
+  getDataView(): DataView | undefined;
 }
 
 // Chart
@@ -66,7 +67,7 @@ export interface Chart<TVisualizationState extends LensVisualizationState> {
   getLayers(): FormBasedPersistedState['layers'];
   getVisualizationState(): TVisualizationState;
   getReferences(): SavedObjectReference[];
-  getDataView(): DataView;
+  getDataViews(): DataView[];
 }
 export interface ChartConfig<
   TLayer extends ChartLayer<LensLayerConfig> | Array<ChartLayer<LensLayerConfig>>

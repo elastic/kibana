@@ -30,6 +30,10 @@ export interface MetricLayerOptions {
 interface MetricLayerConfig {
   data: FormulaValueConfig;
   options?: MetricLayerOptions;
+  /**
+   * It is possible to define a specific dataView for the layer. It will override the global chart one
+   **/
+  dataView?: DataView;
 }
 
 export class MetricLayer implements ChartLayer<MetricVisualizationState> {
@@ -41,7 +45,7 @@ export class MetricLayer implements ChartLayer<MetricVisualizationState> {
   getLayer(
     layerId: string,
     accessorId: string,
-    dataView: DataView,
+    chartDataView: DataView,
     formulaAPI: FormulaPublicApi
   ): FormBasedPersistedState['layers'] {
     const baseLayer: PersistedIndexPatternLayer = {
@@ -49,7 +53,7 @@ export class MetricLayer implements ChartLayer<MetricVisualizationState> {
       columns: getHistogramColumn({
         columnName: HISTOGRAM_COLUMN_NAME,
         options: {
-          sourceField: dataView.timeFieldName,
+          sourceField: (this.layerConfig.dataView ?? chartDataView).timeFieldName,
           params: {
             interval: 'auto',
             includeEmptyRows: true,
@@ -67,7 +71,7 @@ export class MetricLayer implements ChartLayer<MetricVisualizationState> {
             columnOrder: [],
             columns: {},
           },
-          dataView,
+          this.layerConfig.dataView ?? chartDataView,
           formulaAPI
         ),
       },
@@ -75,16 +79,21 @@ export class MetricLayer implements ChartLayer<MetricVisualizationState> {
         ? {
             [`${layerId}_trendline`]: {
               linkToLayers: [layerId],
-              ...this.column.getData(`${accessorId}_trendline`, baseLayer, dataView, formulaAPI),
+              ...this.column.getData(
+                `${accessorId}_trendline`,
+                baseLayer,
+                this.layerConfig.dataView ?? chartDataView,
+                formulaAPI
+              ),
             },
           }
         : {}),
     };
   }
-  getReference(layerId: string, dataView: DataView): SavedObjectReference[] {
+  getReference(layerId: string, chartDataView: DataView): SavedObjectReference[] {
     return [
-      ...getDefaultReferences(dataView, layerId),
-      ...getDefaultReferences(dataView, `${layerId}_trendline`),
+      ...getDefaultReferences(this.layerConfig.dataView ?? chartDataView, layerId),
+      ...getDefaultReferences(this.layerConfig.dataView ?? chartDataView, `${layerId}_trendline`),
     ];
   }
 
@@ -110,5 +119,9 @@ export class MetricLayer implements ChartLayer<MetricVisualizationState> {
   }
   getName(): string | undefined {
     return this.column.getValueConfig().label;
+  }
+
+  getDataView(): DataView | undefined {
+    return this.layerConfig.dataView;
   }
 }

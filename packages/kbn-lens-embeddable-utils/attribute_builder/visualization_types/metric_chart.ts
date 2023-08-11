@@ -38,8 +38,10 @@ export class MetricChart implements Chart<MetricVisualizationState> {
     return this.chartConfig.layers.getReference(DEFAULT_LAYER_ID, this.chartConfig.dataView);
   }
 
-  getDataView(): DataView {
-    return this.chartConfig.dataView;
+  getDataViews(): DataView[] {
+    return [this.chartConfig.dataView, this.chartConfig.layers.getDataView()].filter(
+      (x): x is DataView => !!x
+    );
   }
 
   getTitle(): string {

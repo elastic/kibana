@@ -90,8 +90,11 @@ export class XYChart implements Chart<XYState> {
     });
   }
 
-  getDataView(): DataView {
-    return this.chartConfig.dataView;
+  getDataViews(): DataView[] {
+    return [
+      this.chartConfig.dataView,
+      ...this.chartConfig.layers.map((p) => p.getDataView()).filter((x): x is DataView => !!x),
+    ];
   }
 
   getTitle(): string {

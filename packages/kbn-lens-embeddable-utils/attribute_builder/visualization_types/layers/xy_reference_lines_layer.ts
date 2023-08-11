@@ -19,11 +19,15 @@ import { ReferenceLineColumn } from './columns/reference_line';
 
 interface XYReferenceLinesLayerConfig {
   data: StaticValueConfig[];
+  /**
+   * It is possible to define a specific dataView for the layer. It will override the global chart one
+   **/
+  dataView?: DataView;
 }
 
 export class XYReferenceLinesLayer implements ChartLayer<XYReferenceLineLayerConfig> {
   private column: StaticChartColumn[];
-  constructor(layerConfig: XYReferenceLinesLayerConfig) {
+  constructor(private layerConfig: XYReferenceLinesLayerConfig) {
     this.column = layerConfig.data.map((p) => new ReferenceLineColumn(p));
   }
 
@@ -43,8 +47,8 @@ export class XYReferenceLinesLayer implements ChartLayer<XYReferenceLineLayerCon
     };
   }
 
-  getReference(layerId: string, dataView: DataView): SavedObjectReference[] {
-    return getDefaultReferences(dataView, `${layerId}_reference`);
+  getReference(layerId: string, chartDataView: DataView): SavedObjectReference[] {
+    return getDefaultReferences(this.layerConfig.dataView ?? chartDataView, `${layerId}_reference`);
   }
 
   getLayerConfig(layerId: string, accessorId: string): XYReferenceLineLayerConfig {
@@ -58,5 +62,9 @@ export class XYReferenceLinesLayer implements ChartLayer<XYReferenceLineLayerCon
         axisMode: 'left',
       })),
     };
+  }
+
+  getDataView(): DataView | undefined {
+    return this.layerConfig.dataView;
   }
 }
