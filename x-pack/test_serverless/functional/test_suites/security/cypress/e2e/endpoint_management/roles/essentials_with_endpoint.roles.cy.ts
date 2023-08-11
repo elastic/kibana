@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { IndexedHostsAndAlertsResponse } from '@kbn/security-solution-plugin/common/endpoint/index_data';
 import { login } from '../../../tasks/login';
 import {
   getNoPrivilegesPage,
@@ -24,6 +23,10 @@ import {
 } from '../../../screens';
 import { ServerlessRoleName } from '../../../../../../../shared/lib';
 import { SECURITY_ESSENTIALS_WITH_ENDPOINT_ESSENTIALS } from '../utils/product_types';
+import {
+  CyIndexEndpointHosts,
+  indexEndpointHosts,
+} from '../../../tasks/endpoint_management/index_endpoint_hosts';
 
 describe(
   'Roles for Security Essential PLI with Endpoint Essentials addon',
@@ -38,17 +41,17 @@ describe(
     const allPages = getEndpointManagementPageList();
     const pageById = getEndpointManagementPageMap();
 
-    let loadedEndpoints: IndexedHostsAndAlertsResponse;
+    let loadedEndpoints: CyIndexEndpointHosts;
 
     before(() => {
-      cy.task('indexEndpointHosts', {}, { timeout: 240000 }).then((response) => {
+      indexEndpointHosts().then((response) => {
         loadedEndpoints = response;
       });
     });
 
     after(() => {
       if (loadedEndpoints) {
-        cy.task('deleteIndexedEndpointHosts', loadedEndpoints);
+        loadedEndpoints.cleanup();
       }
     });
 

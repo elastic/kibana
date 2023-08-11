@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { IndexedHostsAndAlertsResponse } from '@kbn/security-solution-plugin/common/endpoint/index_data';
 import { pick } from 'lodash';
 import { login } from '../../../tasks/login';
 import { ServerlessRoleName } from '../../../../../../../shared/lib';
@@ -32,6 +31,10 @@ import {
   openConsoleHelpPanel,
 } from '../../../screens/endpoint_management/response_console';
 import { SECURITY_COMPLETE_WITH_ENDPOINT_COMPLETE } from '../utils/product_types';
+import {
+  CyIndexEndpointHosts,
+  indexEndpointHosts,
+} from '../../../tasks/endpoint_management/index_endpoint_hosts';
 
 describe(
   'User Roles for Security Complete PLI with Endpoint Complete addon',
@@ -47,17 +50,17 @@ describe(
     const pageById = getEndpointManagementPageMap();
     const consoleHelpPanelResponseActionsTestSubj = getConsoleHelpPanelResponseActionTestSubj();
 
-    let loadedEndpoints: IndexedHostsAndAlertsResponse;
+    let loadedEndpoints: CyIndexEndpointHosts;
 
     before(() => {
-      cy.task('indexEndpointHosts', {}, { timeout: 240000 }).then((response) => {
+      indexEndpointHosts().then((response) => {
         loadedEndpoints = response;
       });
     });
 
     after(() => {
       if (loadedEndpoints) {
-        cy.task('deleteIndexedEndpointHosts', loadedEndpoints);
+        loadedEndpoints.cleanup();
       }
     });
 
