@@ -68,6 +68,8 @@
     "@kbn/field-types",
     "@kbn/search-response-warnings",
     "@kbn/content-management-plugin",
+    "@kbn/react-kibana-mount",
+    "@kbn/react-kibana-context-render"
   ],
   "exclude": [
     "target/**/*"

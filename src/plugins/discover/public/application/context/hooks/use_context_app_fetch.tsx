@@ -7,7 +7,8 @@
  */
 import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { MarkdownSimple, toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
+import { MarkdownSimple } from '@kbn/kibana-react-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { SortDirection } from '@kbn/data-plugin/public';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
@@ -44,8 +45,7 @@ export function useContextAppFetch({
   useNewFieldsApi,
 }: ContextAppFetchProps) {
   const services = useDiscoverServices();
-  const { uiSettings: config, data, toastNotifications, filterManager, core } = services;
-  const { theme$ } = core.theme;
+  const { uiSettings: config, data, toastNotifications, filterManager } = services;
 
   const searchSource = useMemo(() => {
     return data.search.searchSource.createEmpty();
@@ -72,16 +72,9 @@ export function useContextAppFetch({
       setState(createError('anchorStatus', FailureReason.INVALID_TIEBREAKER));
       toastNotifications.addDanger({
         title: errorTitle,
-        text: toMountPoint(
-          wrapWithTheme(
-            <MarkdownSimple>
-              {i18n.translate('discover.context.invalidTieBreakerFiledSetting', {
-                defaultMessage: 'Invalid tie breaker field setting',
-              })}
-            </MarkdownSimple>,
-            theme$
-          )
-        ),
+        text: i18n.translate('discover.context.invalidTieBreakerFiledSetting', {
+          defaultMessage: 'Invalid tie breaker field setting',
+        }),
       });
       return;
     }
@@ -112,7 +105,10 @@ export function useContextAppFetch({
       setState(createError('anchorStatus', FailureReason.UNKNOWN, error));
       toastNotifications.addDanger({
         title: errorTitle,
-        text: toMountPoint(wrapWithTheme(<MarkdownSimple>{error.message}</MarkdownSimple>, theme$)),
+        text: toMountPoint(<MarkdownSimple>{error.message}</MarkdownSimple>, {
+          theme: services.core.theme,
+          i18n: services.core.i18n,
+        }),
       });
     }
   }, [
@@ -124,7 +120,6 @@ export function useContextAppFetch({
     anchorId,
     searchSource,
     useNewFieldsApi,
-    theme$,
   ]);
 
   const fetchSurroundingRows = useCallback(
@@ -165,9 +160,10 @@ export function useContextAppFetch({
         setState(createError(statusKey, FailureReason.UNKNOWN, error));
         toastNotifications.addDanger({
           title: errorTitle,
-          text: toMountPoint(
-            wrapWithTheme(<MarkdownSimple>{error.message}</MarkdownSimple>, theme$)
-          ),
+          text: toMountPoint(<MarkdownSimple>{error.message}</MarkdownSimple>, {
+            theme: services.core.theme,
+            i18n: services.core.i18n,
+          }),
         });
       }
     },
@@ -181,7 +177,6 @@ export function useContextAppFetch({
       dataView,
       toastNotifications,
       useNewFieldsApi,
-      theme$,
       data,
     ]
   );
