@@ -17,7 +17,6 @@ import {
   EuiPanel,
   EuiBasicTableColumn,
   EuiBasicTable,
-  EuiBadge,
   EuiCallOut,
   EuiLink,
 } from '@elastic/eui';
