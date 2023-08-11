@@ -87,6 +87,20 @@ export function InstallElasticAgent() {
   }, []);
 
   const {
+    data: systemIntegrationData,
+    status: systemIntegrationStatus,
+    error: systemIntegrationError,
+  } = useFetcher(
+    (callApi) => {
+      return callApi(
+        'POST /internal/observability_onboarding/logs/system/integration'
+      );
+    },
+    [],
+    { showToastOnError: false }
+  );
+
+  const {
     data: installShipperSetup,
     status: installShipperSetupStatus,
     error,
@@ -225,7 +239,11 @@ export function InstallElasticAgent() {
           </p>
         </EuiText>
         <EuiSpacer size="m" />
-        <SystemIntegrationBanner />
+        <SystemIntegrationBanner
+          payload={systemIntegrationData}
+          status={systemIntegrationStatus}
+          error={systemIntegrationError}
+        />
         <EuiSpacer size="m" />
         {apiKeyEncoded && onboardingId ? (
           <ApiKeyBanner

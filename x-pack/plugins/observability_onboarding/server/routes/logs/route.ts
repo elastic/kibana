@@ -12,6 +12,7 @@ import { hasLogMonitoringPrivileges } from './api_key/has_log_monitoring_privile
 import { saveObservabilityOnboardingFlow } from '../../lib/state';
 import { createShipperApiKey } from './api_key/create_shipper_api_key';
 import { ObservabilityOnboardingFlow } from '../../saved_objects/observability_onboarding_status';
+import { systemLogsOnboardingRouteRepository } from './system/route';
 
 const logMonitoringPrivilegesRoute = createObservabilityOnboardingServerRoute({
   endpoint: 'GET /internal/observability_onboarding/logs/setup/privileges',
@@ -115,4 +116,5 @@ export const logsOnboardingRouteRepository = {
   ...logMonitoringPrivilegesRoute,
   ...installShipperSetupRoute,
   ...createFlowRoute,
+  ...systemLogsOnboardingRouteRepository,
 };
