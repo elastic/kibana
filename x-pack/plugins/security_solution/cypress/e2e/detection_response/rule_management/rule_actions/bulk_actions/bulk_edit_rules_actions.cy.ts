@@ -6,6 +6,10 @@
  */
 
 import type { RuleActionArray } from '@kbn/securitysolution-io-ts-alerting-types';
+import {
+  waitForCallOutToBeShown,
+  MISSING_PRIVILEGES_CALLOUT,
+} from '../../../../../tasks/common/callouts';
 import { ROLES } from '../../../../../../common/test';
 
 import {
@@ -57,7 +61,6 @@ import {
   getNewTermsRule,
 } from '../../../../../objects/rule';
 import { excessivelyInstallAllPrebuiltRules } from '../../../../../tasks/api_calls/prebuilt_rules';
-import { waitForCallOutToBeShown, MISSING_PRIVILEGES_CALLOUT } from '@kbn/security-solution-plugin/cypress/tasks/common/callouts';
 
 const ruleNameToAssert = 'Custom rule name with actions';
 const expectedNumberOfCustomRulesToBeEdited = 7;

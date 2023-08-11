@@ -13,7 +13,11 @@ import { PAGE_TITLE } from '../../screens/common/page';
 import { login, visitWithoutDateRange, waitForPageWithoutDateRange } from '../../tasks/login';
 import { goToRuleDetails } from '../../tasks/alerts_detection_rules';
 import { createRule, deleteCustomRule } from '../../tasks/api_calls/rules';
-import { getCallOut, waitForCallOutToBeShown, NEED_ADMIN_FOR_UPDATE_CALLOUT } from '../../tasks/common/callouts';
+import {
+  getCallOut,
+  waitForCallOutToBeShown,
+  NEED_ADMIN_FOR_UPDATE_CALLOUT,
+} from '../../tasks/common/callouts';
 
 const loadPageAsPlatformEngineerUser = (url: string) => {
   login(ROLES.soc_manager);
