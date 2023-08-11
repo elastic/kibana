@@ -7,7 +7,7 @@
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
-import { HttpSetup, ThemeServiceStart, ToastInput } from '@kbn/core/public';
+import {  CoreStart, ThemeServiceStart, ToastInput } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { JobSummary } from '../../common/types';
 import { DownloadButton } from './job_download_button';
@@ -16,7 +16,7 @@ import { ReportLink } from './report_link';
 export const getSuccessToast = (
   job: JobSummary,
   getReportLink: () => string,
-  http: HttpSetup,
+  http: Pick<CoreStart['http'], 'fetch'>,
   theme: ThemeServiceStart
 ): ToastInput => ({
   title: toMountPoint(

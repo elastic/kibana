@@ -172,7 +172,6 @@ export class ReportingAPIClient implements IReportingAPI {
     const params = stringify({
       jobParams: rison.encode(jobParams),
     });
-    console.log('here in reporting-api-client getreportingpub job path')
     return `${this.http.basePath.prepend(PUBLIC_ROUTES.GENERATE_PREFIX)}/${exportType}?${params}`;
   }
 

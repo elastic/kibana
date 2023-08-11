@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import * as Rx from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
-import { NotificationsSetup, ThemeServiceStart, DocLinksStart, HttpSetup } from '@kbn/core/public';
+import { NotificationsSetup, ThemeServiceStart, DocLinksStart, CoreStart } from '@kbn/core/public';
 import { JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY, JOB_STATUSES } from '../../common/constants';
 import { JobId, JobSummary, JobSummarySet } from '../../common/types';
 import {
@@ -50,7 +50,7 @@ export class ReportingNotifierStreamHandler {
     private apiClient: ReportingAPIClient,
     private theme: ThemeServiceStart,
     private docLinks: DocLinksStart,
-    private http: HttpSetup
+    private httpFetch: Pick<CoreStart['http'], 'fetch'>
   ) {}
 
   /*
@@ -100,7 +100,7 @@ export class ReportingNotifierStreamHandler {
             getSuccessToast(
               job,
               this.apiClient.getManagementLink,
-              this.http,
+              this.httpFetch,
               this.theme
             ),
             completedOptions
