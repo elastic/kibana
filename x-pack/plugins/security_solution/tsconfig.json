@@ -134,7 +134,6 @@
     "@kbn/dev-cli-errors",
     "@kbn/dev-utils",
     "@kbn/tooling-log",
-    "@kbn/core-status-common-internal",
     "@kbn/repo-info",
     "@kbn/storybook",
     "@kbn/controls-plugin",
