@@ -18,7 +18,7 @@ export const ReportLink = ({ getUrl }: Props) => (
     defaultMessage="Download it now, or get it later in {path}."
     values={{
       path: (
-        <a href={`${getUrl()}?apiVersion=1`}>
+        <a href={getUrl()}>
           <FormattedMessage
             id="xpack.reporting.publicNotifier.reportLink.reportingSectionUrlLinkLabel"
             defaultMessage="Stack Management &gt; Reporting"

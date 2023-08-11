@@ -7,16 +7,16 @@
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
-import { ThemeServiceStart, ToastInput } from '@kbn/core/public';
+import { HttpSetup, ThemeServiceStart, ToastInput } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
-import { JobId, JobSummary } from '../../common/types';
+import { JobSummary } from '../../common/types';
 import { DownloadButton } from './job_download_button';
 import { ReportLink } from './report_link';
 
 export const getSuccessToast = (
   job: JobSummary,
   getReportLink: () => string,
-  getDownloadLink: (jobId: JobId) => string,
+  http: HttpSetup,
   theme: ThemeServiceStart
 ): ToastInput => ({
   title: toMountPoint(
@@ -33,7 +33,7 @@ export const getSuccessToast = (
       <p>
         <ReportLink getUrl={getReportLink} />
       </p>
-      <DownloadButton getUrl={getDownloadLink} job={job} />
+      <DownloadButton http={http} job={job} />
     </>,
     { theme$: theme.theme$ }
   ),
