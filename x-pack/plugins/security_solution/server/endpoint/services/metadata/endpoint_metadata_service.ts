@@ -13,7 +13,7 @@ import type {
 } from '@kbn/core/server';
 
 import type { SearchResponse, SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
-import type { Agent, AgentPolicy, AgentStatus, PackagePolicy } from '@kbn/fleet-plugin/common';
+import type { Agent, AgentPolicy, PackagePolicy } from '@kbn/fleet-plugin/common';
 import type { AgentPolicyServiceInterface, PackagePolicyClient } from '@kbn/fleet-plugin/server';
 import { AgentNotFoundError } from '@kbn/fleet-plugin/server';
 import type {
@@ -440,8 +440,8 @@ export class EndpointMetadataService {
         const endpointPolicy = endpointPoliciesMap[_agent.policy_id!];
 
         const runtimeFields: Partial<typeof _agent> = {
-          status: doc?.fields?.status?.[0] as AgentStatus,
-          last_checkin: doc?.fields?.last_checkin?.[0] as string | undefined,
+          status: doc?.fields?.status?.[0],
+          last_checkin: doc?.fields?.last_checkin?.[0],
         };
         const agent: typeof _agent = {
           ..._agent,
