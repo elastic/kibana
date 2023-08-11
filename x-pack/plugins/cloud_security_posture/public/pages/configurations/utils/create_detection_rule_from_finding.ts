@@ -45,14 +45,23 @@ const convertReferencesLinksToArray = (input: string | undefined) => {
 };
 
 const CSP_RULE_TAG = 'Cloud Security';
+const CNVM_RULE_TAG_USE_CASE = 'Use Case: Configuration Audit';
+const CNVM_RULE_TAG_DATA_SOURCE_PREFIX = 'Data Source: ';
 
-const STATIC_RULE_TAGS = [CSP_RULE_TAG];
+const STATIC_RULE_TAGS = [CSP_RULE_TAG, CNVM_RULE_TAG_USE_CASE];
 
 const generateMisconfigurationsTags = (finding: CspFinding) => {
   return [STATIC_RULE_TAGS]
-    .concat(finding.rule.tags)
+    .concat()
     .concat(
-      finding.rule.benchmark.posture_type ? [finding.rule.benchmark.posture_type.toUpperCase()] : []
+      finding.rule.benchmark.posture_type
+        ? [
+            `${CNVM_RULE_TAG_DATA_SOURCE_PREFIX}${finding.rule.benchmark.posture_type.toUpperCase()}`,
+          ]
+        : []
+    )
+    .concat(
+      finding.rule.benchmark.posture_type === 'cspm' ? ['Domain: Cloud'] : ['Domain: Container']
     )
     .flat();
 };
