@@ -7,14 +7,7 @@
 
 import React, { type FC } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  EuiFieldNumber,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiIcon,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiFieldNumber, EuiFormRow, EuiIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { type NumberValidationResult, numberValidator } from '@kbn/ml-agg-utils';
 import { MAX_SERIES } from '../../embeddable/const';
@@ -40,30 +33,20 @@ export const MaxSeriesControl: FC<{
           values={{ minValue: 1, maxValue: MAX_SERIES }}
         />
       }
-      label={
-        <EuiFlexGroup gutterSize={'xs'} alignItems={'center'}>
-          <EuiFlexItem grow={false}>
-            <FormattedMessage
-              id="xpack.aiops.changePointDetection.maxSeriesToPlotLabel"
-              defaultMessage="Max series"
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiToolTip
-              content={i18n.translate(
-                'xpack.aiops.changePointDetection.maxSeriesToPlotDescription',
-                {
-                  defaultMessage: 'The maximum number of change points to visualize.',
-                }
-              )}
-            >
-              <EuiIcon type={'questionInCircle'} />
-            </EuiToolTip>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      }
     >
       <EuiFieldNumber
+        prepend={i18n.translate('xpack.aiops.changePointDetection.maxSeriesToPlotLabel', {
+          defaultMessage: 'Max series',
+        })}
+        append={
+          <EuiToolTip
+            content={i18n.translate('xpack.aiops.changePointDetection.maxSeriesToPlotDescription', {
+              defaultMessage: 'The maximum number of change points to visualize.',
+            })}
+          >
+            <EuiIcon type={'questionInCircle'} />
+          </EuiToolTip>
+        }
         compressed
         fullWidth
         isInvalid={maxSeriesInvalid}

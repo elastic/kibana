@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import React, { FC, useState } from 'react';
+import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
   EuiForm,
   EuiFormRow,
+  EuiHorizontalRule,
   EuiModal,
   EuiModalBody,
   EuiModalFooter,
@@ -19,17 +20,24 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import usePrevious from 'react-use/lib/usePrevious';
+import { pick } from 'lodash';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import { DEFAULT_SERIES } from './const';
+import { EmbeddableChangePointChartProps } from './embeddable_change_point_chart_component';
 import { type EmbeddableChangePointChartExplicitInput } from './types';
 import { MaxSeriesControl } from '../components/change_point_detection/max_series_control';
 import { SplitFieldSelector } from '../components/change_point_detection/split_field_selector';
 import { MetricFieldSelector } from '../components/change_point_detection/metric_field_selector';
-import { ChangePointDetectionControlsContextProvider } from '../components/change_point_detection/change_point_detection_context';
+import {
+  ChangePointDetectionControlsContextProvider,
+  useChangePointDetectionControlsContext,
+} from '../components/change_point_detection/change_point_detection_context';
 import { useAiopsAppContext } from '../hooks/use_aiops_app_context';
 import { EmbeddableChangePointChartInput } from './embeddable_change_point_chart';
 import { FunctionPicker } from '../components/change_point_detection/function_picker';
 import { DataSourceContextProvider } from '../hooks/use_data_source';
-
-export const DEFAULT_MAX_SERIES_TO_PLOT = 6;
+import { DEFAULT_AGG_FUNCTION } from '../components/change_point_detection/constants';
 
 export interface AnomalyChartsInitializerProps {
   initialInput?: Partial<EmbeddableChangePointChartInput>;
@@ -49,14 +57,40 @@ export const ChangePointChartInitializer: FC<AnomalyChartsInitializerProps> = ({
   } = useAiopsAppContext();
 
   const [dataViewId, setDataViewId] = useState(initialInput?.dataViewId ?? '');
-  const [maxSeriesToPlot, setMaxSeriesToPlot] = useState(
-    initialInput?.maxSeriesToPlot ?? DEFAULT_MAX_SERIES_TO_PLOT
+
+  const [formInput, setFormInput] = useState<FormControlsProps>(
+    pick(initialInput ?? {}, [
+      'fn',
+      'metricField',
+      'splitField',
+      'maxSeriesToPlot',
+      'partitions',
+    ]) as FormControlsProps
   );
 
-  const [isFormValid, setIsFormValid] = useState(false);
-  const [fn, setFn] = useState<string>(initialInput?.fn ?? 'avg');
-  const [metricField, setMetricField] = useState(initialInput?.metricField);
-  const [splitField, setSplitField] = useState(initialInput?.splitField);
+  const [isFormValid, setIsFormValid] = useState(true);
+
+  const updatedProps = useMemo(() => {
+    return {
+      ...formInput,
+      title: isPopulatedObject(formInput)
+        ? i18n.translate('xpack.aiops.changePointDetection.attachmentTitle', {
+            defaultMessage: 'Change point: {function}({metric}){splitBy}',
+            values: {
+              function: formInput.fn,
+              metric: formInput?.metricField,
+              splitBy: formInput?.splitField
+                ? i18n.translate('xpack.aiops.changePointDetection.splitByTitle', {
+                    defaultMessage: ' split by "{splitField}"',
+                    values: { splitField: formInput.splitField },
+                  })
+                : '',
+            },
+          })
+        : '',
+      dataViewId,
+    };
+  }, [formInput, dataViewId]);
 
   return (
     <EuiModal onClose={onCancel} data-test-subj={'aiopsChangePointChartEmbeddableInitializer'}>
@@ -73,6 +107,9 @@ export const ChangePointChartInitializer: FC<AnomalyChartsInitializerProps> = ({
         <EuiForm>
           <EuiFormRow fullWidth>
             <IndexPatternSelect
+              prepend={i18n.translate('xpack.aiops.embeddableChangePointChart.dataViewLabel', {
+                defaultMessage: 'Data view',
+              })}
               autoFocus
               fullWidth
               compressed
@@ -90,27 +127,12 @@ export const ChangePointChartInitializer: FC<AnomalyChartsInitializerProps> = ({
           </EuiFormRow>
 
           <DataSourceContextProvider dataViewId={dataViewId}>
+            <EuiHorizontalRule margin={'s'} />
             <ChangePointDetectionControlsContextProvider>
-              <EuiFormRow
-                fullWidth
-                label={
-                  <FormattedMessage
-                    id="xpack.aiops.embeddableChangePointChart.functionLabel"
-                    defaultMessage="Function"
-                  />
-                }
-              >
-                <FunctionPicker value={fn} onChange={setFn} />
-              </EuiFormRow>
-
-              <MetricFieldSelector value={metricField!} onChange={setMetricField} />
-
-              <SplitFieldSelector value={splitField} onChange={setSplitField} />
-
-              <MaxSeriesControl
-                value={maxSeriesToPlot}
-                onChange={setMaxSeriesToPlot}
-                onValidationChange={(result) => setIsFormValid(result === null)}
+              <FormControls
+                formInput={formInput}
+                onChange={setFormInput}
+                onValidationChange={setIsFormValid}
               />
             </ChangePointDetectionControlsContextProvider>
           </DataSourceContextProvider>
@@ -130,28 +152,8 @@ export const ChangePointChartInitializer: FC<AnomalyChartsInitializerProps> = ({
 
         <EuiButton
           data-test-subj="aiopsChangePointChartsInitializerConfirmButton"
-          isDisabled={!isFormValid}
-          onClick={onCreate.bind(null, {
-            title: i18n.translate('xpack.aiops.changePointDetection.attachmentTitle', {
-              defaultMessage: 'Change point: {function}({metric}){splitBy}',
-              values: {
-                function: fn,
-                metric: metricField,
-                splitBy: splitField
-                  ? i18n.translate('xpack.aiops.changePointDetection.splitByTitle', {
-                      defaultMessage: ' split by "{splitField}"',
-                      values: { splitField },
-                    })
-                  : '',
-              },
-            }),
-            maxSeriesToPlot,
-            dataViewId,
-            fn,
-            // @ts-ignore
-            metricField,
-            splitField,
-          })}
+          isDisabled={!isFormValid || !dataViewId}
+          onClick={onCreate.bind(null, updatedProps)}
           fill
         >
           <FormattedMessage
@@ -161,5 +163,78 @@ export const ChangePointChartInitializer: FC<AnomalyChartsInitializerProps> = ({
         </EuiButton>
       </EuiModalFooter>
     </EuiModal>
+  );
+};
+
+export type FormControlsProps = Pick<
+  EmbeddableChangePointChartProps,
+  'metricField' | 'splitField' | 'fn' | 'maxSeriesToPlot' | 'partitions'
+>;
+
+export const FormControls: FC<{
+  formInput?: FormControlsProps;
+  onChange: (update: FormControlsProps) => void;
+  onValidationChange: (isValid: boolean) => void;
+}> = ({ formInput, onChange, onValidationChange }) => {
+  const { metricFieldOptions } = useChangePointDetectionControlsContext();
+  const prevMetricFieldOptions = usePrevious(metricFieldOptions);
+
+  useEffect(
+    function setDefaultOnDataViewChange() {
+      if (metricFieldOptions === prevMetricFieldOptions) return;
+
+      onChange({
+        fn: formInput?.fn ?? DEFAULT_AGG_FUNCTION,
+        metricField: metricFieldOptions[0]?.name,
+        splitField: undefined,
+        partitions: undefined,
+        maxSeriesToPlot: formInput?.maxSeriesToPlot ?? DEFAULT_SERIES,
+      });
+    },
+    [metricFieldOptions, prevMetricFieldOptions, formInput, onChange]
+  );
+
+  const updateCallback = useCallback(
+    (update: Partial<FormControlsProps>) => {
+      onChange({
+        ...formInput,
+        ...update,
+      } as FormControlsProps);
+    },
+    [formInput, onChange]
+  );
+
+  if (!isPopulatedObject(formInput)) return null;
+
+  return (
+    <>
+      <EuiFormRow
+        fullWidth
+        label={
+          <FormattedMessage
+            id="xpack.aiops.embeddableChangePointChart.functionLabel"
+            defaultMessage="Function"
+          />
+        }
+      >
+        <FunctionPicker value={formInput.fn} onChange={(v) => updateCallback({ fn: v })} />
+      </EuiFormRow>
+
+      <MetricFieldSelector
+        value={formInput.metricField}
+        onChange={(v) => updateCallback({ metricField: v })}
+      />
+
+      <SplitFieldSelector
+        value={formInput.splitField}
+        onChange={(v) => updateCallback({ splitField: v })}
+      />
+
+      <MaxSeriesControl
+        value={formInput.maxSeriesToPlot!}
+        onChange={(v) => updateCallback({ maxSeriesToPlot: v })}
+        onValidationChange={(result) => onValidationChange(result === null)}
+      />
+    </>
   );
 };
