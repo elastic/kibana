@@ -192,7 +192,9 @@ export const cli = () => {
             const config = await readConfigFile(
               log,
               EsVersion.getDefault(),
-              _.isArray(argv.ftrConfigFile) ? _.last(argv.ftrConfigFile) : argv.ftrConfigFile,
+              path.resolve(
+                _.isArray(argv.ftrConfigFile) ? _.last(argv.ftrConfigFile) : argv.ftrConfigFile
+              ),
               {
                 servers: {
                   elasticsearch: {
