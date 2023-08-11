@@ -15,12 +15,13 @@ const defaultTypes = ['visualization', 'index-pattern', 'search', 'dashboard'];
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest') as SuperTest<Test>;
+  const kibanaServer = getService('kibanaServer');
   const esArchiver = getService('esArchiver');
 
   describe('scroll_count', () => {
-    // FLAKY AND FAILING FORWARD ES COMPATIBILITY 8.7: https://github.com/elastic/kibana/issues/130305
-    describe.skip('with less than 10k objects', () => {
+    describe('with less than 10k objects', () => {
       before(async () => {
+        await kibanaServer.savedObjects.cleanStandardList();
         await esArchiver.load(
           'test/api_integration/fixtures/es_archiver/management/saved_objects/scroll_count'
         );
@@ -29,6 +30,7 @@ export default function ({ getService }: FtrProviderContext) {
         await esArchiver.unload(
           'test/api_integration/fixtures/es_archiver/management/saved_objects/scroll_count'
         );
+        await kibanaServer.savedObjects.cleanStandardList();
       });
 
       it('returns the count for each included types', async () => {
