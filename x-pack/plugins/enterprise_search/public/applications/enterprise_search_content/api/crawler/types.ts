@@ -173,6 +173,7 @@ export interface CrawlScheduleFromServer {
 // Client
 
 export interface CrawlerConfiguration {
+  name: string;
   customEntryPointUrls: string[];
   customSitemapUrls: string[];
   includeSitemapsInRobotsTxt: boolean;
@@ -181,6 +182,7 @@ export interface CrawlerConfiguration {
   selectedEntryPointUrls: string[];
   selectedSitemapUrls: string[];
   interval: string; // interval has crontab syntax
+  enabled: boolean;
 }
 
 export enum CustomCrawlType {

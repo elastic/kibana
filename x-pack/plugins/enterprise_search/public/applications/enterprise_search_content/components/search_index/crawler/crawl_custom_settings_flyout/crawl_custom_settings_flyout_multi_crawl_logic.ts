@@ -24,7 +24,7 @@ export interface CrawlCustomSettingsFlyoutLogicValues {
 }
 
 export interface CrawlCustomSettingsFlyoutLogicActions {
-  onAddCustomCrawler(crawler: CrawlerConfiguration): void;
+  onAddCustomCrawler(index: number): { index: number };
   onDeleteCustomCrawler(index: number): { index: number };
   onSelectCrawlerConfigActiveTab(crawlerConfigActiveTab: number): { crawlerConfigActiveTab: number };
   onSelectCustomEntryPointUrls(index: number, entryPointUrls: string[]): { index: number, entryPointUrls: string[] };
@@ -36,11 +36,15 @@ export interface CrawlCustomSettingsFlyoutLogicActions {
   setConnectorSchedulingInterval(index: number, newSchedule: ConnectorScheduling): {
     index: number, newSchedule: ConnectorScheduling
   };
+  onSetConnectorSchedulingEnabled(index: number, enable: boolean): {
+    index: number, newSchedule: ConnectorScheduling
+  };
   toggleIncludeSitemapsInRobotsTxt(index: number): { index: number };
 }
 
 
 const defaulCrawlerConfiguration: CrawlerConfiguration = {
+  name: 'Crawler 0',
   maxCrawlDepth: 2,
   customEntryPointUrls: [],
   customSitemapUrls: [],
@@ -48,7 +52,8 @@ const defaulCrawlerConfiguration: CrawlerConfiguration = {
   selectedDomainUrls: [],
   selectedEntryPointUrls: [],
   selectedSitemapUrls: [],
-  interval: '* * * * *'
+  interval: '* * * * *',
+  enabled: false
 }
 
 export const CrawlCustomSettingsFlyoutMultiCrawlLogic = kea<
@@ -59,7 +64,7 @@ export const CrawlCustomSettingsFlyoutMultiCrawlLogic = kea<
     values: [IndexViewLogic, ['index']],
   },
   actions: () => ({
-    onAddCustomCrawler: (crawler) => ({ crawler }),
+    onAddCustomCrawler: (index) => ({ index }),
     onDeleteCustomCrawler: (index) => ({ index }),
     onSelectCrawlerConfigActiveTab: (crawlerConfigActiveTab) => ({ crawlerConfigActiveTab }),
     onSelectCustomEntryPointUrls: (index, entryPointUrls) => ({ index, entryPointUrls }),
@@ -68,6 +73,7 @@ export const CrawlCustomSettingsFlyoutMultiCrawlLogic = kea<
     onSelectEntryPointUrls: (index, entryPointUrls) => ({ index, entryPointUrls }),
     onSelectMaxCrawlDepth: (index, maxCrawlDepth) => ({ index, maxCrawlDepth }),
     onSelectSitemapUrls: (index, sitemapUrls) => ({ index, sitemapUrls }),
+    onSetConnectorSchedulingEnabled: (index, enabled) => ({ index, enabled }),
     setConnectorSchedulingInterval: (index, newSchedule) => ({ index, newSchedule }),
     toggleIncludeSitemapsInRobotsTxt: (index) => ({ index }),
   }),
@@ -82,7 +88,7 @@ export const CrawlCustomSettingsFlyoutMultiCrawlLogic = kea<
     crawlerConfigurations: [
       [defaulCrawlerConfiguration],
       {
-        onAddCustomCrawler: (state, _) => [...state, defaulCrawlerConfiguration],
+        onAddCustomCrawler: (state, { index }) => [...state, { ...defaulCrawlerConfiguration, name: `Crawler ${index}` }],
         onDeleteCustomCrawler: (state, { index }) => {
           return state.filter((_, i) => i !== index)
         },
@@ -112,6 +118,9 @@ export const CrawlCustomSettingsFlyoutMultiCrawlLogic = kea<
         onSelectSitemapUrls: (state, { index, sitemapUrls }) => {
           return state.map((crawler, i) => (i === index ? { ...crawler, selectedSitemapUrls: sitemapUrls } : crawler))
         },
+        onSetConnectorSchedulingEnabled: (state, { index, enabled }) => {
+          return state.map((crawler, i) => (i === index ? { ...crawler, enabled: enabled } : crawler))
+        },
         setConnectorSchedulingInterval: (state, { index, newSchedule }) => {
           const { interval } = newSchedule;
           return state.map((crawler, i) => (i === index ? { ...crawler, interval: interval } : crawler))
@@ -119,80 +128,4 @@ export const CrawlCustomSettingsFlyoutMultiCrawlLogic = kea<
       }
     ]
   }),
-  // selectors: () => ({
-  //   multiCrawlerEntryPointUrls: [
-  //     (selectors) => [selectors.domainUrls, selectors.crawlerConfigurations],
-  //     (domainConfigMap: { [key: string]: DomainConfig }, crawlerConfigs: CrawlerConfiguration[]): string[][] =>
-  //       crawlerConfigs.map(c =>
-  //         c.selectedDomainUrls.flatMap(
-  //           (selectedDomainUrl) => domainConfigMap[selectedDomainUrl].seedUrls
-  //         )),
-  //   ],
-  //   multiCrawlerSitemapUrls: [
-  //     (selectors) => [selectors.domainUrls, selectors.crawlerConfigurations],
-  //     (domainConfigMap: { [key: string]: DomainConfig }, crawlerConfigs: CrawlerConfiguration[]): string[][] =>
-  //       crawlerConfigs.map(c =>
-  //         c.selectedDomainUrls.flatMap(
-  //           (selectedDomainUrl) => domainConfigMap[selectedDomainUrl].sitemapUrls
-  //         )),
-  //   ],
-  // }),
-  // listeners: ({ actions, values }) => ({
-  //   fetchDomainConfigData: async () => {
-  //     const { http } = HttpLogic.values;
-  //     const { indexName } = IndexNameLogic.values;
-
-  //     let domainConfigs: DomainConfig[] = [];
-  //     let totalPages: number = 1;
-  //     let nextPage: number = 1;
-  //     let pageSize: number = 100;
-
-  //     try {
-  //       while (nextPage <= totalPages) {
-  //         const {
-  //           results,
-  //           meta: { page },
-  //         } = await http.get<{
-  //           meta: Meta;
-  //           results: DomainConfigFromServer[];
-  //         }>(`/internal/enterprise_search/indices/${indexName}/crawler/domain_configs`, {
-  //           query: { 'page[current]': nextPage, 'page[size]': pageSize },
-  //         });
-
-  //         domainConfigs = [...domainConfigs, ...results.map(domainConfigServerToClient)];
-
-  //         nextPage = page.current + 1;
-  //         totalPages = page.total_pages;
-  //         pageSize = page.size;
-  //       }
-
-  //       actions.onRecieveDomainConfigData(domainConfigs);
-  //     } catch (e) {
-  //       flashAPIErrors(e);
-  //     }
-  //   },
-  //   showFlyout: () => {
-  //     actions.fetchDomainConfigData();
-  //   },
-  //   startCustomCrawl: () => {
-  //     const overrides: CrawlRequestOverrides = {
-  //       sitemap_discovery_disabled: !values.includeSitemapsInRobotsTxt,
-  //       max_crawl_depth: values.maxCrawlDepth,
-  //       domain_allowlist: values.selectedDomainUrls,
-  //     };
-
-  //     const seedUrls = [...values.selectedEntryPointUrls, ...values.customEntryPointUrls];
-  //     if (seedUrls.length > 0) {
-  //       overrides.seed_urls = seedUrls;
-  //     }
-
-  //     const sitemapUrls = [...values.selectedSitemapUrls, ...values.customSitemapUrls];
-  //     if (sitemapUrls.length > 0) {
-  //       overrides.sitemap_urls = sitemapUrls;
-  //     }
-
-  //     actions.startCrawl(overrides);
-  //   },
-
-  // }),
 });

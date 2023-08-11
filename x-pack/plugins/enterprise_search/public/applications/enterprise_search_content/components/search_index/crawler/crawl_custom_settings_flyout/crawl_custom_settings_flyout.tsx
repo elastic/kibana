@@ -41,11 +41,13 @@ export const CrawlCustomSettingsFlyout: React.FC = () => {
   const { isDataLoading, isFormSubmitting, isFlyoutVisible, isSingleCrawlType } = useValues(
     CrawlCustomSettingsFlyoutLogic
   );
-  const { hideFlyout, startCustomCrawl } = useActions(CrawlCustomSettingsFlyoutLogic);
+  const { hideFlyout, startCustomCrawl, postCustomScheduling } = useActions(CrawlCustomSettingsFlyoutLogic);
 
   if (!isFlyoutVisible) {
     return null;
   }
+
+  const submitFunctionLogic = isSingleCrawlType ? startCustomCrawl : postCustomScheduling;
 
   return (
     <EuiFlyout ownFocus onClose={hideFlyout} size="m">
@@ -114,7 +116,7 @@ export const CrawlCustomSettingsFlyout: React.FC = () => {
             <EuiButton
               data-telemetry-id="entSearchContent-crawler-customCrawlSettings-startCrawl"
               fill
-              onClick={startCustomCrawl}
+              onClick={submitFunctionLogic}
               disabled={isDataLoading}
               isLoading={isFormSubmitting}
             >

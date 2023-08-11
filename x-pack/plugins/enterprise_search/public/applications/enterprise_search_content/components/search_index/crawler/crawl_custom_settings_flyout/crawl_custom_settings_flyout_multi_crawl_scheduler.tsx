@@ -16,7 +16,8 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
-  EuiSplitPanel
+  EuiSplitPanel,
+  EuiSwitch
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -28,7 +29,9 @@ import { isCrawlerIndex } from '../../../../utils/indices';
 export const MultiCrawlScheduler: React.FC = ({
   index,
   interval,
-  setConnectorSchedulingInterval
+  schedulingEnabled,
+  setConnectorSchedulingInterval,
+  onSetConnectorSchedulingEnabled
 }) => {
 
   if (!isCrawlerIndex(index)) {
@@ -50,6 +53,21 @@ export const MultiCrawlScheduler: React.FC = ({
                 )}
               </h3>
             </EuiTitle>
+          </EuiFormRow>
+        </EuiSplitPanel.Inner>
+        <EuiSplitPanel.Inner grow={false} color="subdued">
+          <EuiFormRow display="rowCompressed">
+            <EuiSwitch
+              checked={schedulingEnabled}
+              label={i18n.translate(
+                'xpack.enterpriseSearch.crawler.automaticCrawlSchedule.crawlAutomaticallySwitchLabel',
+                {
+                  defaultMessage: 'Enable recurring crawls with the following schedule',
+                }
+              )}
+              onChange={(e) => onSetConnectorSchedulingEnabled(e.target.checked)}
+              compressed
+            />
           </EuiFormRow>
         </EuiSplitPanel.Inner>
         <EuiSplitPanel.Inner>
@@ -77,8 +95,9 @@ export const MultiCrawlScheduler: React.FC = ({
               </EuiText>
               <EuiHorizontalRule margin="s" />
               <EnterpriseSearchCronEditor
+                disabled={!schedulingEnabled}
                 scheduling={{
-                  interval: interval, enabled: true
+                  interval: interval, enabled: schedulingEnabled
                 }}
                 onChange={setConnectorSchedulingInterval}
               />

@@ -26,6 +26,7 @@ import { elasticsearchErrorHandler } from '../../../utils/elasticsearch_error_ha
 import { registerCrawlerCrawlRulesRoutes } from './crawler_crawl_rules';
 import { registerCrawlerEntryPointRoutes } from './crawler_entry_points';
 import { registerCrawlerSitemapRoutes } from './crawler_sitemaps';
+import { registerCrawlerMultipleSchedulesRoutes } from './crawler_multiple_schedules';
 
 export function registerCrawlerRoutes(routeDependencies: RouteDependencies) {
   const { router, enterpriseSearchRequestHandler, log } = routeDependencies;
@@ -464,4 +465,5 @@ export function registerCrawlerRoutes(routeDependencies: RouteDependencies) {
   registerCrawlerCrawlRulesRoutes(routeDependencies);
   registerCrawlerEntryPointRoutes(routeDependencies);
   registerCrawlerSitemapRoutes(routeDependencies);
+  registerCrawlerMultipleSchedulesRoutes(routeDependencies);
 }

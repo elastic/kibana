@@ -41,6 +41,8 @@ export interface CrawlCustomSettingsFlyoutLogicValues {
 
 export interface CrawlCustomSettingsFlyoutLogicActions {
   fetchDomainConfigData(): void;
+  fetchCustomScheduling(): void;
+  postCustomScheduling(): void;
   hideFlyout(): void;
   onRecieveDomainConfigData(domainConfigs: DomainConfig[]): { domainConfigs: DomainConfig[] };
   onSelectCrawlType(crawlType: string): { crawlType: string };
@@ -78,6 +80,8 @@ export const CrawlCustomSettingsFlyoutLogic = kea<
   },
   actions: () => ({
     fetchDomainConfigData: true,
+    fetchCustomScheduling: true,
+    postCustomScheduling: true,
     hideFlyout: true,
     onRecieveDomainConfigData: (domainConfigs) => ({ domainConfigs }),
     onSelectCrawlType: (crawlType) => ({ crawlType }),
@@ -263,8 +267,45 @@ export const CrawlCustomSettingsFlyoutLogic = kea<
         flashAPIErrors(e);
       }
     },
+    fetchCustomScheduling: async () => {
+      const { http } = HttpLogic.values;
+      const { indexName } = IndexNameLogic.values;
+
+      let customSchedules = []
+
+      try {
+        const {
+          results
+        } = await http.get<{
+          meta: Meta;
+          results: DomainConfigFromServer[];
+        }>(`/internal/enterprise_search/indices/${indexName}/crawler/custom_scheduling`);
+
+        console.log(results);
+      } catch (e) {
+        flashAPIErrors(e);
+      }
+
+    },
+    postCustomScheduling: async () => {
+      const { http } = HttpLogic.values;
+      const { indexName } = IndexNameLogic.values;
+
+      try {
+        const {
+          results
+        } = await http.post<{
+          meta: Meta;
+          results: DomainConfigFromServer[];
+        }>(`/internal/enterprise_search/indices/${indexName}/crawler/custom_scheduling`,
+          { body: JSON.stringify({ crawler_1: { name: 'Chuj', enabled: true, interval: "0 0 12 * * ?", configurationOverrides: {} } }) });
+      } catch (e) {
+        flashAPIErrors(e);
+      }
+    },
     showFlyout: () => {
       actions.fetchDomainConfigData();
+      actions.fetchCustomScheduling();
     },
     startCustomCrawl: () => {
       const overrides: CrawlRequestOverrides = {

@@ -46,7 +46,8 @@ export const CrawlCustomSettingsFlyoutMultiCrawlScheduling: React.FC = () => {
     onSelectEntryPointUrls,
     onSelectSitemapUrls,
     toggleIncludeSitemapsInRobotsTxt,
-    setConnectorSchedulingInterval
+    setConnectorSchedulingInterval,
+    onSetConnectorSchedulingEnabled
   } = useActions(CrawlCustomSettingsFlyoutMultiCrawlLogic);
 
   console.log(crawlerConfigurations)
@@ -84,7 +85,9 @@ export const CrawlCustomSettingsFlyoutMultiCrawlScheduling: React.FC = () => {
         <MultiCrawlScheduler
           index={crawlerIndex}
           interval={config.interval}
+          schedulingEnabled={config.enabled}
           setConnectorSchedulingInterval={e => setConnectorSchedulingInterval(index, e)}
+          onSetConnectorSchedulingEnabled={e => onSetConnectorSchedulingEnabled(index, e)}
         />
       </React.Fragment>
     }

@@ -44,7 +44,7 @@ export const CrawlCustomSettingsFlyoutMultipleCrawlTabs: React.FC = () => {
           {tab.label}
         </EuiTab>
       ))}
-      <EuiTab onClick={onAddCustomCrawler}>
+      <EuiTab onClick={() => onAddCustomCrawler(crawlerConfigurations.length)}>
         <EuiIcon type="plus" />
       </EuiTab>
     </EuiTabs>
