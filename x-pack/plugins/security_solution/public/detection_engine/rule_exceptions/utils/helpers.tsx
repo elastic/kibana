@@ -46,10 +46,7 @@ import * as i18n from './translations';
 import type { AlertData, Flattened } from './types';
 
 import { WithCopyToClipboard } from '../../../common/lib/clipboard/with_copy_to_clipboard';
-import {
-  ALERT_ORIGINAL_EVENT,
-  ALERT_RULE_CUSTOM_HIGHLIGHTED_FIELDS,
-} from '../../../../common/field_maps/field_names';
+import { ALERT_ORIGINAL_EVENT } from '../../../../common/field_maps/field_names';
 import {
   EVENT_CODE,
   EVENT_CATEGORY,
@@ -911,11 +908,13 @@ export const buildExceptionEntriesFromAlertFields = ({
 export const getPrepopulatedRuleExceptionWithHighlightFields = ({
   alertData,
   exceptionItemName,
+  ruleCustomHighlightedFields,
 }: {
   alertData: AlertData;
   exceptionItemName: string;
+  ruleCustomHighlightedFields: string[];
 }): ExceptionsBuilderExceptionItem | null => {
-  const highlightedFields = getAlertHighlightedFields(alertData);
+  const highlightedFields = getAlertHighlightedFields(alertData, ruleCustomHighlightedFields);
   if (!highlightedFields.length) return null;
 
   const exceptionEntries = buildExceptionEntriesFromAlertFields({ highlightedFields, alertData });
@@ -954,11 +953,13 @@ export const filterHighlightedFields = (
  * * Alert field ids filters
  * @param alertData The Alert data object
  */
-export const getAlertHighlightedFields = (alertData: AlertData): EventSummaryField[] => {
+export const getAlertHighlightedFields = (
+  alertData: AlertData,
+  ruleCustomHighlightedFields: string[]
+): EventSummaryField[] => {
   const eventCategory = get(alertData, EVENT_CATEGORY);
   const eventCode = get(alertData, EVENT_CODE);
   const eventRuleType = get(alertData, KIBANA_ALERT_RULE_TYPE);
-  const highlightedFieldsOverride = get(alertData, ALERT_RULE_CUSTOM_HIGHLIGHTED_FIELDS) ?? [];
   const eventCategories = {
     primaryEventCategory: Array.isArray(eventCategory) ? eventCategory[0] : eventCategory,
     allEventCategories: [eventCategory],
@@ -968,7 +969,7 @@ export const getAlertHighlightedFields = (alertData: AlertData): EventSummaryFie
     eventCategories,
     eventCode,
     eventRuleType,
-    highlightedFieldsOverride,
+    highlightedFieldsOverride: ruleCustomHighlightedFields,
   });
   return filterHighlightedFields(fieldsToDisplay, highlightedFieldsPrefixToExclude, alertData);
 };

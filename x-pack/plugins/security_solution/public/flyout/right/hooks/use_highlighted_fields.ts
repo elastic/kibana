@@ -7,7 +7,7 @@
 
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import { find, isEmpty } from 'lodash/fp';
-import { ALERT_RULE_CUSTOM_HIGHLIGHTED_FIELDS, ALERT_RULE_TYPE } from '@kbn/rule-data-utils';
+import { ALERT_RULE_TYPE } from '@kbn/rule-data-utils';
 import { isAlertFromEndpointEvent } from '../../../common/utils/endpoint_alert_check';
 import {
   getEventCategoriesFromData,
@@ -19,6 +19,10 @@ export interface UseHighlightedFieldsParams {
    * An array of field objects with category and value
    */
   dataFormattedForFieldBrowser: TimelineEventsDetailsItem[] | null;
+  /**
+   * An array of fields user has selected to highlight, defined on rule
+   */
+  customHighlightedFields?: string[];
 }
 
 export interface UseHighlightedFieldsResult {
@@ -43,6 +47,7 @@ export interface UseHighlightedFieldsResult {
  */
 export const useHighlightedFields = ({
   dataFormattedForFieldBrowser,
+  customHighlightedFields,
 }: UseHighlightedFieldsParams): UseHighlightedFieldsResult[] => {
   if (!dataFormattedForFieldBrowser) return [];
 
@@ -61,10 +66,6 @@ export const useHighlightedFields = ({
     { category: 'kibana', field: ALERT_RULE_TYPE },
     dataFormattedForFieldBrowser
   );
-  const highlightedFieldsOverride = find(
-    { category: 'kibana', field: ALERT_RULE_CUSTOM_HIGHLIGHTED_FIELDS },
-    dataFormattedForFieldBrowser
-  );
 
   const eventRuleType = Array.isArray(eventRuleTypeField?.originalValue)
     ? eventRuleTypeField?.originalValue?.[0]
@@ -74,8 +75,7 @@ export const useHighlightedFields = ({
     eventCategories,
     eventCode,
     eventRuleType,
-    highlightedFieldsOverride:
-      highlightedFieldsOverride != null ? highlightedFieldsOverride.originalValue : [],
+    highlightedFieldsOverride: customHighlightedFields ?? [],
   });
 
   return tableFields.reduce<UseHighlightedFieldsResult[]>((acc, field) => {

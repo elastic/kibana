@@ -346,6 +346,8 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
           const populatedException = getPrepopulatedRuleExceptionWithHighlightFields({
             alertData,
             exceptionItemName,
+            ruleCustomHighlightedFields:
+              rules != null && rules.length ? rules[0].custom_highlighted_fields ?? [] : [],
           });
           if (populatedException) {
             setComment(i18n.ADD_RULE_EXCEPTION_FROM_ALERT_COMMENT(alertData._id));
@@ -354,7 +356,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
         }
       }
     }
-  }, [listType, exceptionItemName, alertData, setInitialExceptionItems, setComment]);
+  }, [listType, exceptionItemName, alertData, rules, setInitialExceptionItems, setComment]);
 
   const osTypesSelection = useMemo((): OsTypeArray => {
     return hasAlertData ? retrieveAlertOsTypes(alertData) : selectedOs ? [...selectedOs] : [];

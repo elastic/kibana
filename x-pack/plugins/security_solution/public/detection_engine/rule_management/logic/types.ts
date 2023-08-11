@@ -181,7 +181,6 @@ export const RuleSchema = t.intersection([
     output_index: AlertsIndex,
     query: RuleQuery,
     rule_name_override: RuleNameOverride,
-    custom_highlighted_fields: RuleCustomHighlightedFieldArray,
     saved_id: t.string,
     threshold: Threshold,
     threat_query,
@@ -203,6 +202,7 @@ export const RuleSchema = t.intersection([
     version: RuleVersion,
     execution_summary: RuleExecutionSummary,
     alert_suppression: AlertSuppression,
+    custom_highlighted_fields: RuleCustomHighlightedFieldArray,
   }),
 ]);
 

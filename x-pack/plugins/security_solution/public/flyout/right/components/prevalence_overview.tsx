@@ -22,8 +22,14 @@ import { LeftPanelKey, LeftPanelInsightsTabPath } from '../../left';
  * and the SummaryPanel component for data rendering.
  */
 export const PrevalenceOverview: FC = () => {
-  const { eventId, indexName, browserFields, dataFormattedForFieldBrowser, scopeId } =
-    useRightPanelContext();
+  const {
+    eventId,
+    indexName,
+    browserFields,
+    dataFormattedForFieldBrowser,
+    scopeId,
+    customHighlightedFields,
+  } = useRightPanelContext();
   const { openLeftPanel } = useExpandableFlyoutContext();
 
   const goToCorrelationsTab = useCallback(() => {
@@ -42,6 +48,7 @@ export const PrevalenceOverview: FC = () => {
     eventId,
     browserFields,
     dataFormattedForFieldBrowser,
+    customHighlightedFields,
     scopeId,
   });
 

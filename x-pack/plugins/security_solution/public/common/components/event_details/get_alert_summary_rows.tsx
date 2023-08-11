@@ -23,7 +23,6 @@ import {
   ALERT_NEW_TERMS_FIELDS,
   ALERT_NEW_TERMS,
   ALERT_THRESHOLD_RESULT,
-  ALERT_RULE_CUSTOM_HIGHLIGHTED_FIELDS,
 } from '../../../../common/field_maps/field_names';
 import {
   AGENT_STATUS_FIELD_NAME,
@@ -294,11 +293,13 @@ export const getSummaryRows = ({
   eventId,
   isDraggable = false,
   isReadOnly = false,
+  customHighlightedFields,
 }: {
   data: TimelineEventsDetailsItem[];
   browserFields: BrowserFields;
   scopeId: string;
   eventId: string;
+  customHighlightedFields: string[];
   isDraggable?: boolean;
   isReadOnly?: boolean;
 }) => {
@@ -315,17 +316,11 @@ export const getSummaryRows = ({
     ? eventRuleTypeField?.originalValue?.[0]
     : eventRuleTypeField?.originalValue;
 
-  const customRuleHighlightedFieldsField = find(
-    { category: 'kibana', field: ALERT_RULE_CUSTOM_HIGHLIGHTED_FIELDS },
-    data
-  );
-  const customRuleHighlightedFields = customRuleHighlightedFieldsField?.originalValue ?? [];
-
   const tableFields = getEventFieldsToDisplay({
     eventCategories,
     eventCode,
     eventRuleType,
-    highlightedFieldsOverride: customRuleHighlightedFields,
+    highlightedFieldsOverride: customHighlightedFields,
   });
 
   return data != null

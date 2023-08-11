@@ -29,6 +29,10 @@ export interface UsePrevalenceParams {
    * Maintain backwards compatibility // TODO remove when possible
    */
   scopeId: string;
+  /**
+   * User defined fields to highlight (defined on rule)
+   */
+  customHighlightedFields: string[];
 }
 export interface UsePrevalenceResult {
   /**
@@ -51,6 +55,7 @@ export const usePrevalence = ({
   eventId,
   browserFields,
   dataFormattedForFieldBrowser,
+  customHighlightedFields,
   scopeId,
 }: UsePrevalenceParams): UsePrevalenceResult => {
   const [count, setCount] = useState(0); // TODO this needs to be changed at it causes a re-render when the count is updated
@@ -61,11 +66,12 @@ export const usePrevalence = ({
       getSummaryRows({
         browserFields: browserFields || {},
         data: dataFormattedForFieldBrowser || [],
+        customHighlightedFields,
         eventId,
         scopeId,
         isReadOnly: false,
       }),
-    [browserFields, dataFormattedForFieldBrowser, eventId, scopeId]
+    [browserFields, customHighlightedFields, dataFormattedForFieldBrowser, eventId, scopeId]
   );
 
   const prevalenceRows = useMemo(
