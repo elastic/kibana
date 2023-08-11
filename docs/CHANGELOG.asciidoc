@@ -73,11 +73,10 @@ APM::
 * Fixes transaction action menu for Trace Explorer and dependency operations ({kibana-pull}162213[#162213]).
 Canvas::
 * Fixes embeddables not rendering in Canvas ({kibana-pull}163013[#163013]).
-Data Discovery::
-* Make share links and search session information shorter for temporary data views ({kibana-pull}161180[#161180]).
 Discover::
 * Fixes grid styles to enable better content wrapping ({kibana-pull}162325[#162325]).
 * Fixes search sessions using temporary data views ({kibana-pull}161029[#161029]).
+* Make share links and search session information shorter for temporary data views ({kibana-pull}161180[#161180]).
 Elastic Security::
 For the Elastic Security 8.9.1 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
 Fleet::
