@@ -84,16 +84,18 @@ interface GetEndpointListColumnsProps {
   getAppUrl: ReturnType<typeof useAppUrl>['getAppUrl'];
 }
 
-const columnWidths: Record<EndpointSortableField | 'actions', string> = {
-  [EndpointSortableField.HOSTNAME]: '15%',
+const columnWidths: Record<
+  Exclude<EndpointSortableField, EndpointSortableField.ENROLLED_AT> | 'actions',
+  string
+> = {
+  [EndpointSortableField.HOSTNAME]: '18%',
   [EndpointSortableField.HOST_STATUS]: '15%',
-  [EndpointSortableField.POLICY_NAME]: '15%',
+  [EndpointSortableField.POLICY_NAME]: '20%',
   [EndpointSortableField.POLICY_STATUS]: '150px',
   [EndpointSortableField.HOST_OS_NAME]: '90px',
-  [EndpointSortableField.HOST_IP]: '17%',
-  [EndpointSortableField.AGENT_VERSION]: '8%',
+  [EndpointSortableField.HOST_IP]: '22%',
+  [EndpointSortableField.AGENT_VERSION]: '10%',
   [EndpointSortableField.LAST_SEEN]: '15%',
-  [EndpointSortableField.ENROLLED_AT]: '15%',
   actions: '65px',
 };
 
@@ -107,9 +109,6 @@ const getEndpointListColumns = ({
 }: GetEndpointListColumnsProps): Array<EuiBasicTableColumn<Immutable<HostInfo>>> => {
   const lastActiveColumnName = i18n.translate('xpack.securitySolution.endpoint.list.lastActive', {
     defaultMessage: 'Last active',
-  });
-  const enrolledAtColumnName = i18n.translate('xpack.securitySolution.endpoint.list.enrolledAt', {
-    defaultMessage: 'Enrolled at',
   });
   const padLeft: CSSProperties = { paddingLeft: '6px' };
 
@@ -309,21 +308,6 @@ const getEndpointListColumns = ({
         return (
           <FormattedDate
             fieldName={lastActiveColumnName}
-            value={dateValue}
-            className="eui-textTruncate"
-          />
-        );
-      },
-    },
-    {
-      field: EndpointSortableField.ENROLLED_AT,
-      width: columnWidths[EndpointSortableField.ENROLLED_AT],
-      name: enrolledAtColumnName,
-      sortable: true,
-      render(dateValue: HostInfo['enrolled_at']) {
-        return (
-          <FormattedDate
-            fieldName={enrolledAtColumnName}
             value={dateValue}
             className="eui-textTruncate"
           />

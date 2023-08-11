@@ -300,7 +300,6 @@ export class EndpointMetadataService {
         _last_checkin ||
         fleetAgent?.last_checkin ||
         new Date(endpointMetadata['@timestamp']).toISOString(),
-      enrolled_at: fleetAgent?.enrolled_at ?? 'unknown',
     };
   }
 

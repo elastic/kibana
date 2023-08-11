@@ -139,14 +139,12 @@ describe('EndpointMetadataService', () => {
       ];
 
       const newDate = new Date();
-      const enrolledAtDate = new Date(newDate.getTime() - 6666);
       const agentPolicyIds = agentPolicies.map((policy) => policy.id);
       const endpointMetadataDoc = endpointDocGenerator.generateHostMetadata(newDate.getTime());
       const mockAgent = {
         policy_id: agentPolicies[0].id,
         policy_revision: agentPolicies[0].revision,
         last_checkin: newDate.toISOString(),
-        enrolled_at: enrolledAtDate.toISOString(),
       } as unknown as Agent;
       const mockDoc = unitedMetadataSearchResponseMock(endpointMetadataDoc, mockAgent);
       esClient.search.mockResponse(mockDoc);
@@ -209,7 +207,6 @@ describe('EndpointMetadataService', () => {
               },
             },
             last_checkin: newDate.toISOString(),
-            enrolled_at: enrolledAtDate.toISOString(),
           },
         ],
         total: 1,

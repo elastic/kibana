@@ -501,10 +501,6 @@ export interface HostInfoInterface {
    * if `Agent.last_checkin` value is `undefined`
    */
   last_checkin: string;
-  /**
-   * The time when Elastic Agent is enrolled with fleet.
-   */
-  enrolled_at: string;
 }
 
 export type HostInfo = Immutable<HostInfoInterface>;
@@ -1340,6 +1336,7 @@ export interface AdditionalOnSwitchChangeParams {
  * returned `HostInfoInterface` data type (and not on the internal data structure).
  */
 export enum EndpointSortableField {
+  ENROLLED_AT = 'enrolled_at',
   HOSTNAME = 'metadata.host.hostname',
   HOST_STATUS = 'host_status',
   POLICY_NAME = 'metadata.Endpoint.policy.applied.name',
@@ -1348,7 +1345,6 @@ export enum EndpointSortableField {
   HOST_IP = 'metadata.host.ip',
   AGENT_VERSION = 'metadata.agent.version',
   LAST_SEEN = 'last_checkin',
-  ENROLLED_AT = 'enrolled_at',
 }
 
 /**

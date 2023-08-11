@@ -62,7 +62,6 @@ export const mockEndpointResultList: (options?: {
       metadata,
       host_status: HostStatus.UNHEALTHY,
       last_checkin: newDate.toISOString(),
-      enrolled_at: newDate.toISOString(),
     });
   }
   const mock: MetadataListResponse = {
@@ -86,7 +85,6 @@ export const mockEndpointDetailsApiResult = (): HostInfo => {
     metadata,
     host_status: HostStatus.UNHEALTHY,
     last_checkin: newDate.toISOString(),
-    enrolled_at: newDate.toISOString(),
   };
 };
 

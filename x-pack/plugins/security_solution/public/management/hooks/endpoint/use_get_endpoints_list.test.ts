@@ -170,7 +170,6 @@ describe('useGetEndpointsList hook', () => {
             metadata: generator.generateHostMetadata(newDate.getTime()),
             host_status: HostStatus.UNHEALTHY,
             last_checkin: newDate.toISOString(),
-            enrolled_at: newDate.toISOString(),
           };
 
           generator.updateCommonInfo();
@@ -209,7 +208,6 @@ describe('useGetEndpointsList hook', () => {
             metadata: generator.generateHostMetadata(newDate.getTime()),
             host_status: HostStatus.UNHEALTHY,
             last_checkin: newDate.toISOString(),
-            enrolled_at: newDate.toISOString(),
           };
 
           generator.updateCommonInfo();
