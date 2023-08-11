@@ -35,19 +35,6 @@ const workplaceSearchIntegrations: WorkplaceSearchIntegration[] = [
     categories: ['enterprise_search', 'workplace_search_content_source'],
   },
   {
-    id: 'gmail',
-    title: i18n.translate('xpack.enterpriseSearch.workplaceSearch.integrations.gmailName', {
-      defaultMessage: 'Gmail',
-    }),
-    description: i18n.translate(
-      'xpack.enterpriseSearch.workplaceSearch.integrations.gmailDescription',
-      {
-        defaultMessage: 'Search over your emails managed by Gmail with Workplace Search.',
-      }
-    ),
-    categories: ['enterprise_search', 'google_cloud', 'workplace_search_content_source'],
-  },
-  {
     id: 'onedrive',
     title: i18n.translate('xpack.enterpriseSearch.workplaceSearch.integrations.onedriveName', {
       defaultMessage: 'OneDrive',
@@ -73,19 +60,6 @@ const workplaceSearchIntegrations: WorkplaceSearchIntegration[] = [
       'xpack.enterpriseSearch.workplaceSearch.integrations.salesforceSandboxDescription',
       {
         defaultMessage: 'Search over your content on Salesforce Sandbox with Workplace Search.',
-      }
-    ),
-    categories: ['enterprise_search', 'workplace_search_content_source'],
-  },
-  {
-    id: 'slack',
-    title: i18n.translate('xpack.enterpriseSearch.workplaceSearch.integrations.slackName', {
-      defaultMessage: 'Slack',
-    }),
-    description: i18n.translate(
-      'xpack.enterpriseSearch.workplaceSearch.integrations.slackDescription',
-      {
-        defaultMessage: 'Search over your messages on Slack with Workplace Search.',
       }
     ),
     categories: ['enterprise_search', 'workplace_search_content_source'],
@@ -297,6 +271,27 @@ export const registerEnterpriseSearchIntegrations = (
           src: http.basePath.prepend(
             '/plugins/enterpriseSearch/assets/source_icons/github_enterprise_server.svg'
           ),
+        },
+      ],
+      shipper: 'enterprise_search',
+      isBeta: false,
+    });
+
+    customIntegrations.registerCustomIntegration({
+      id: 'gmail',
+      title: i18n.translate('xpack.enterpriseSearch.content.integrations.gmail', {
+        defaultMessage: 'Gmail',
+      }),
+      description: i18n.translate('xpack.enterpriseSearch.content.integrations.gmailDescription', {
+        defaultMessage: 'Search over your content on Gmail.',
+      }),
+      categories: ['enterprise_search', 'elastic_stack', 'connector', 'connector_client'],
+      uiInternalPath:
+        '/app/enterprise_search/content/search_indices/new_index/connector?service_type=gmail',
+      icons: [
+        {
+          type: 'svg',
+          src: http.basePath.prepend('/plugins/enterpriseSearch/assets/source_icons/gmail.svg'),
         },
       ],
       shipper: 'enterprise_search',
@@ -541,6 +536,27 @@ export const registerEnterpriseSearchIntegrations = (
           src: http.basePath.prepend(
             '/plugins/enterpriseSearch/assets/source_icons/sharepoint_server.svg'
           ),
+        },
+      ],
+      shipper: 'enterprise_search',
+      isBeta: false,
+    });
+
+    customIntegrations.registerCustomIntegration({
+      id: 'slack',
+      title: i18n.translate('xpack.enterpriseSearch.content.integrations.slack', {
+        defaultMessage: 'Slack',
+      }),
+      description: i18n.translate('xpack.enterpriseSearch.content.integrations.slackDescription', {
+        defaultMessage: 'Search over your content on Slack.',
+      }),
+      categories: ['enterprise_search', 'elastic_stack', 'connector', 'connector_client'],
+      uiInternalPath:
+        '/app/enterprise_search/content/search_indices/new_index/connector?service_type=slack',
+      icons: [
+        {
+          type: 'svg',
+          src: http.basePath.prepend('/plugins/enterpriseSearch/assets/source_icons/slack.svg'),
         },
       ],
       shipper: 'enterprise_search',
