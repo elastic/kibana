@@ -158,6 +158,7 @@ export function searchSourceFromLocatorFactory(services: LocatorServicesDeps) {
         sort: savedSearch.sort as Array<[string, string]>,
         dataView: index,
         uiSettings: uiSettingsSyncReplacement,
+        skipTieBreaker: true,
       });
       searchSource.setField('sort', sort);
     }

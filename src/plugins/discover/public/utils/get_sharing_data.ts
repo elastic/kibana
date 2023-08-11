@@ -38,7 +38,12 @@ export async function getSharingData(
 
   searchSource.setField(
     'sort',
-    getSortForSearchSource({ sort: state.sort as SortOrder[], dataView: index, uiSettings })
+    getSortForSearchSource({
+      sort: state.sort as SortOrder[],
+      dataView: index,
+      uiSettings,
+      skipTieBreaker: true,
+    })
   );
 
   searchSource.removeField('filter');
