@@ -616,6 +616,7 @@ packages/kbn-securitysolution-list-constants @elastic/security-detection-engine
 packages/kbn-securitysolution-list-hooks @elastic/security-detection-engine
 packages/kbn-securitysolution-list-utils @elastic/security-detection-engine
 packages/kbn-securitysolution-rules @elastic/security-detection-engine
+packages/kbn-securitysolution-runtime-services @elastic/security-defend-workflows
 packages/kbn-securitysolution-t-grid @elastic/security-detection-engine
 packages/kbn-securitysolution-utils @elastic/security-detection-engine
 packages/kbn-server-http-tools @elastic/kibana-core
