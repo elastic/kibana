@@ -62,7 +62,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(event.properties.value4).to.be.a('number');
       expect(event.properties.value5).to.be.a('number');
 
-      if (browser.isChromium) {
+      if (browser.isChromium()) {
         // Kibana Loaded memory
         expect(meta).to.have.property('jsHeapSizeLimit');
         expect(meta.jsHeapSizeLimit).to.be.a('number');
