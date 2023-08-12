@@ -191,7 +191,6 @@ export function ConversationView() {
                 });
             }}
           />
-          <EuiSpacer size="m" />
         </EuiFlexItem>
         <EuiFlexItem
           grow
@@ -248,7 +247,6 @@ export function ConversationView() {
               />
             </ObservabilityAIAssistantChatServiceProvider>
           ) : null}
-          <EuiSpacer size="m" />
         </EuiFlexItem>
       </EuiFlexGroup>
     </>
