@@ -10,7 +10,7 @@
 require('./setup_env');
 
 // restore < Node 16 default DNS lookup behavior
-require('dns').setDefaultResultOrder('ipv4first');
+require('./dns_ipv4_first');
 
 require('@kbn/babel-register').install();
 require('./polyfill');

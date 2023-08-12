@@ -5,10 +5,21 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiBetaBadge } from '@elastic/eui';
+import React, { useCallback, useMemo } from 'react';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiBetaBadge,
+  EuiIcon,
+  EuiLink,
+  useEuiTheme,
+  useEuiFontSize,
+} from '@elastic/eui';
+import { css } from '@emotion/css';
 import { getOr } from 'lodash/fp';
-import styled from 'styled-components';
+import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
+import { LeftPanelInsightsTabPath, LeftPanelKey } from '../../left';
+import { useRightPanelContext } from '../context';
 import type { DescriptionList } from '../../../../common/utility_types';
 import {
   buildUserNamesFilter,
@@ -31,13 +42,11 @@ import {
   ENTITIES_USER_OVERVIEW_TEST_ID,
   ENTITIES_USER_OVERVIEW_IP_TEST_ID,
   ENTITIES_USER_OVERVIEW_RISK_LEVEL_TEST_ID,
+  ENTITIES_USER_OVERVIEW_LINK_TEST_ID,
 } from './test_ids';
 import { useObservedUserDetails } from '../../../explore/users/containers/users/observed_details';
 
-const StyledEuiBetaBadge = styled(EuiBetaBadge)`
-  margin-left: ${({ theme }) => theme.eui.euiSizeXS};
-`;
-
+const USER_ICON = 'user';
 const CONTEXT_ID = `flyout-user-entity-overview`;
 
 export interface UserEntityOverviewProps {
@@ -51,6 +60,20 @@ export interface UserEntityOverviewProps {
  * User preview content for the entities preview in right flyout. It contains ip addresses and risk classification
  */
 export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ userName }) => {
+  const { eventId, indexName, scopeId } = useRightPanelContext();
+  const { openLeftPanel } = useExpandableFlyoutContext();
+  const goToEntitiesTab = useCallback(() => {
+    openLeftPanel({
+      id: LeftPanelKey,
+      path: LeftPanelInsightsTabPath,
+      params: {
+        id: eventId,
+        indexName,
+        scopeId,
+      },
+    });
+  }, [eventId, openLeftPanel, indexName, scopeId]);
+
   const { from, to } = useGlobalTime();
   const { selectedPatterns } = useSourcererDataView();
 
@@ -97,6 +120,9 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ userName
     [data]
   );
 
+  const { euiTheme } = useEuiTheme();
+  const xsFontSize = useEuiFontSize('xs').fontSize;
+
   const [userRiskLevel] = useMemo(() => {
     const userRiskData = userRisk && userRisk.length > 0 ? userRisk[0] : undefined;
 
@@ -105,7 +131,10 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ userName
         title: (
           <>
             {i18n.USER_RISK_CLASSIFICATION}
-            <StyledEuiBetaBadge
+            <EuiBetaBadge
+              css={css`
+                margin-left: ${euiTheme.size.xs};
+              `}
               label={TECHNICAL_PREVIEW_TITLE}
               size="s"
               iconType="beaker"
@@ -127,23 +156,46 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ userName
         ),
       },
     ];
-  }, [userRisk]);
+  }, [euiTheme.size.xs, userRisk]);
 
   return (
-    <EuiFlexGroup data-test-subj={ENTITIES_USER_OVERVIEW_TEST_ID}>
+    <EuiFlexGroup direction="column" gutterSize="s" data-test-subj={ENTITIES_USER_OVERVIEW_TEST_ID}>
       <EuiFlexItem>
-        <OverviewDescriptionList
-          dataTestSubj={ENTITIES_USER_OVERVIEW_IP_TEST_ID}
-          descriptionList={descriptionList}
-        />
+        <EuiFlexGroup gutterSize="m">
+          <EuiFlexItem grow={false}>
+            <EuiIcon type={USER_ICON} />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiLink
+              data-test-subj={ENTITIES_USER_OVERVIEW_LINK_TEST_ID}
+              css={css`
+                font-size: ${xsFontSize};
+                font-weight: ${euiTheme.font.weight.bold};
+              `}
+              onClick={goToEntitiesTab}
+            >
+              {userName}
+            </EuiLink>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem>
-        {isAuthorized && (
-          <DescriptionListStyled
-            data-test-subj={ENTITIES_USER_OVERVIEW_RISK_LEVEL_TEST_ID}
-            listItems={[userRiskLevel]}
-          />
-        )}
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <OverviewDescriptionList
+              dataTestSubj={ENTITIES_USER_OVERVIEW_IP_TEST_ID}
+              descriptionList={descriptionList}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            {isAuthorized && (
+              <DescriptionListStyled
+                data-test-subj={ENTITIES_USER_OVERVIEW_RISK_LEVEL_TEST_ID}
+                listItems={[userRiskLevel]}
+              />
+            )}
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
