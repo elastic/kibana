@@ -11,9 +11,9 @@ import type { Plugin } from '@kbn/core/public';
 import { DOC_TABLE_LEGACY } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
 import { createGetterSetter } from '@kbn/kibana-utils-plugin/public';
-import { DeferredSpinner, DocViewsRegistry } from '@kbn/unified-doc-viewer';
-import { EuiSkeletonText } from '@elastic/eui';
+import { EuiDelayRender, EuiSkeletonText } from '@elastic/eui';
 import { useUnifiedDocViewerServices } from './hooks';
+import { DocViewsRegistry } from './doc_views_registry';
 
 const DocViewerLegacyTable = React.lazy(() => import('./components/doc_viewer_table/legacy'));
 const DocViewerTable = React.lazy(() => import('./components/doc_viewer_table'));
@@ -44,9 +44,9 @@ export class UnifiedDocViewerPublicPlugin implements Plugin<{}, {}, object, {}> 
         return (
           <React.Suspense
             fallback={
-              <DeferredSpinner>
+              <EuiDelayRender>
                 <EuiSkeletonText />
-              </DeferredSpinner>
+              </EuiDelayRender>
             }
           >
             <DocView {...props} />
@@ -63,9 +63,9 @@ export class UnifiedDocViewerPublicPlugin implements Plugin<{}, {}, object, {}> 
         return (
           <React.Suspense
             fallback={
-              <DeferredSpinner>
+              <EuiDelayRender>
                 <EuiSkeletonText />
-              </DeferredSpinner>
+              </EuiDelayRender>
             }
           >
             <SourceViewer

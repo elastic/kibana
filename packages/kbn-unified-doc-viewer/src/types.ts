@@ -12,4 +12,6 @@ export type {
   DocViewRenderFn,
   DocViewRenderProps,
   FieldRecordLegacy,
+  DocViewInput,
+  DocViewInputFn,
 } from './services/types';

@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { DocViewsRegistry, ElasticRequestState } from './doc_views_registry';
+export { ElasticRequestState } from './doc_views_registry';

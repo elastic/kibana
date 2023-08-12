@@ -7,4 +7,11 @@
  */
 
 export type { ElasticRequestState } from '.';
-export type { DocViewFilterFn, DocViewRenderProps, FieldRecordLegacy } from './src/types';
+export type {
+  DocViewFilterFn,
+  DocViewRenderProps,
+  FieldRecordLegacy,
+  DocView,
+  DocViewInput,
+  DocViewInputFn,
+} from './src/types';

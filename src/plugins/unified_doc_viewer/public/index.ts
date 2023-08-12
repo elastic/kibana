@@ -13,3 +13,4 @@ export { getDocViewsRegistry, setDocViewsRegistry } from './plugin';
 export { useEsDocSearch, useUnifiedDocViewerServices } from './hooks';
 
 export const plugin = () => new UnifiedDocViewerPublicPlugin();
+export {DocViewsRegistry} from "@kbn/unified-doc-viewer-plugin/public/doc_views_registry";

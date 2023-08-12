@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { DeferredSpinner, DocViewer, DocViewsRegistry, ElasticRequestState } from './src';
+export { DeferredSpinner, DocViewer, ElasticRequestState } from './src';
