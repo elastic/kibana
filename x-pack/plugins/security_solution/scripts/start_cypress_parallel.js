@@ -6,4 +6,4 @@
  */
 
 require('../../../../src/setup_node_env');
-require('./run_cypress/parallel').cli();
+require('../cypress/scripts/run_cypress/parallel').cli();

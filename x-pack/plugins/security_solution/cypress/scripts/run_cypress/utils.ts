@@ -11,7 +11,7 @@ import * as parser from '@babel/parser';
 import generate from '@babel/generator';
 import type { ExpressionStatement, ObjectExpression, ObjectProperty } from '@babel/types';
 import { schema, type TypeOf } from '@kbn/config-schema';
-import { getExperimentalAllowedValues } from '../../common/experimental_features';
+import { getExperimentalAllowedValues } from '../../../common/experimental_features';
 
 export const parseTestFileConfig = (filePath: string): SecuritySolutionDescribeBlockFtrConfig => {
   const testFile = fs.readFileSync(filePath, { encoding: 'utf8' });

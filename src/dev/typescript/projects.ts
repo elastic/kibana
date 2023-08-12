@@ -37,7 +37,7 @@ export const PROJECTS = [
   createProject('x-pack/plugins/drilldowns/url_drilldown/tsconfig.json', {
     name: 'security_solution/cypress',
   }),
-  createProject('x-pack/plugins/security_solution/tsconfig.cypress.json', {
+  createProject('x-pack/plugins/security_solution/cypress/tsconfig.json', {
     name: 'security_solution/cypress',
   }),
   createProject(

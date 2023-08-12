@@ -18,7 +18,6 @@
   ],
   "exclude": [
     "target/**/*",
-    "scripts/run_cypress/*",
     "**/cypress/**",
     "public/management/cypress_endpoint.config.ts",
     "public/management/cypress.config.ts"

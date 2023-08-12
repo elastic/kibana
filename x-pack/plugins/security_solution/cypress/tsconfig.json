@@ -1,17 +1,16 @@
 {
-  "extends": "../../../tsconfig.base.json",
+  "extends": "../../../../tsconfig.base.json",
   "include": [
-    "cypress/**/*",
-    "cypress/fixtures/**/*.json",
-    "scripts/run_cypress/*"
+    "**/*",
+    "fixtures/**/*.json",
   ],
   "exclude": [
-    "cypress/target/**/*"
+    "target/**/*"
   ],
   "compilerOptions": {
     "baseUrl": "../",
     "target": "ES2019",
-    "outDir": "cypress/target/types",
+    "outDir": "./target/types",
     "types": [
       "cypress",
       "cypress-file-upload",
@@ -20,6 +19,6 @@
     ],
   },
   "references": [
-    { "path": "./tsconfig.json" }
+    { "path": "../tsconfig.json" }
   ]
 }
