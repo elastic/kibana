@@ -27,6 +27,7 @@ export const links: LinkItem = {
   path: RULES_LANDING_PATH,
   hideTimeline: true,
   skipUrlState: true,
+  capabilities: [`${SERVER_APP_ID}.showRules`],
   links: [
     {
       id: SecurityPageName.rules,
@@ -37,7 +38,6 @@ export const links: LinkItem = {
       }),
       landingIcon: IconRollup,
       path: RULES_PATH,
-      capabilities: [`${SERVER_APP_ID}.readRules`],
       globalSearchKeywords: [
         i18n.translate('xpack.securitySolution.appLinks.rules', {
           defaultMessage: 'Rules',
