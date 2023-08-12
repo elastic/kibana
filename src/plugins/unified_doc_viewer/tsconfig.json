@@ -16,7 +16,6 @@
     "@kbn/unified-field-list",
     "@kbn/kibana-utils-plugin",
     "@kbn/data-plugin",
-    "@kbn/react-field",
     "@kbn/core-analytics-browser",
     "@kbn/field-formats-plugin",
     "@kbn/core-ui-settings-browser",
