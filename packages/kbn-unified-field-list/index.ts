@@ -48,7 +48,6 @@ export type {
   AddFieldFilterHandler,
   FieldListGroups,
   FieldsGroupDetails,
-  FieldTypeKnown,
   FieldListItem,
   GetCustomFieldType,
   RenderFieldItemParams,
@@ -89,7 +88,6 @@ export {
 export {
   getFieldTypeName,
   getFieldTypeDescription,
-  KNOWN_FIELD_TYPES,
   getFieldType,
   getFieldIconType,
 } from './src/utils/field_types';
