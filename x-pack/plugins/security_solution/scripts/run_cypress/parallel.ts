@@ -272,11 +272,13 @@ ${JSON.stringify(config.getAll(), null, 2)}
 
             const lifecycle = new Lifecycle();
 
-            const providers = new ProviderCollection(log, readProviderSpec('Service', {
-              lifecycle: () => lifecycle,
-              log: () => log,
-              config: () => config,
-              ...config.get('services'),
+            const providers = new ProviderCollection(
+              log,
+              readProviderSpec('Service', {
+                lifecycle: () => lifecycle,
+                log: () => log,
+                config: () => config,
+                ...config.get('services'),
               })
             );
 
@@ -303,21 +305,12 @@ ${JSON.stringify(config.getAll(), null, 2)}
               options: {
                 installDir: options?.installDir,
                 extraKbnOpts:
-                  options?.installDir || options?.ci || !isOpen
-                    ? []
-                    : [
-                        '--dev',
-                        '--no-dev-config',
-                        // '--no-dev-credentials'
-                      ],
+                  options?.installDir || options?.ci || !isOpen ? [] : ['--dev', '--no-dev-config'],
               },
               onEarlyExit,
             });
-            
-            console.error('config,', JSON.stringify(config,null, 2));
 
             await providers.loadAll();
-
 
             const functionalTestRunner = new FunctionalTestRunner(
               log,

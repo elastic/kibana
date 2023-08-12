@@ -12,7 +12,7 @@ import { inspect } from 'util';
 import { run, createFlagError, Flags, ToolingLog, getTimeReporter } from '@kbn/dev-utils';
 import exitHook from 'exit-hook';
 
-import { readConfigFile, EsVersion } from './lib'
+import { readConfigFile, EsVersion } from './lib';
 import { FunctionalTestRunner } from './functional_test_runner';
 
 const makeAbsolutePath = (v: string) => resolve(process.cwd(), v);
@@ -43,28 +43,32 @@ export function runFtrCli() {
 
       const functionalTestRunner = new FunctionalTestRunner(
         log,
-        await readConfigFile(log, esVersion ? new EsVersion(esVersion) : EsVersion.getDefault(), makeAbsolutePath(flags.config as string),
-        {
-          mochaOpts: {
-            bail: flags.bail,
-            dryRun: flags['dry-run'],
-            grep: flags.grep || undefined,
-            invert: flags.invert,
-          },
-          kbnTestServer: {
-            installDir: parseInstallDir(flags),
-          },
-          suiteFiles: {
-            include: toArray(flags.include as string | string[]).map(makeAbsolutePath),
-            exclude: toArray(flags.exclude as string | string[]).map(makeAbsolutePath),
-          },
-          suiteTags: {
-            include: toArray(flags['include-tag'] as string | string[]),
-            exclude: toArray(flags['exclude-tag'] as string | string[]),
-          },
-          updateBaselines: flags.updateBaselines || flags.u,
-          updateSnapshots: flags.updateSnapshots || flags.u,
-        }),
+        await readConfigFile(
+          log,
+          esVersion ? new EsVersion(esVersion) : EsVersion.getDefault(),
+          makeAbsolutePath(flags.config as string),
+          {
+            mochaOpts: {
+              bail: flags.bail,
+              dryRun: flags['dry-run'],
+              grep: flags.grep || undefined,
+              invert: flags.invert,
+            },
+            kbnTestServer: {
+              installDir: parseInstallDir(flags),
+            },
+            suiteFiles: {
+              include: toArray(flags.include as string | string[]).map(makeAbsolutePath),
+              exclude: toArray(flags.exclude as string | string[]).map(makeAbsolutePath),
+            },
+            suiteTags: {
+              include: toArray(flags['include-tag'] as string | string[]),
+              exclude: toArray(flags['exclude-tag'] as string | string[]),
+            },
+            updateBaselines: flags.updateBaselines || flags.u,
+            updateSnapshots: flags.updateSnapshots || flags.u,
+          }
+        )
       );
 
       if (flags.throttle) {

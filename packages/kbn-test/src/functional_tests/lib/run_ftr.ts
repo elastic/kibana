@@ -51,7 +51,7 @@ async function createFtr({
     dryRun,
   },
 }: CreateFtrParams) {
-  const config = await readConfigFile(log, esVersion, configPath,       {
+  const config = await readConfigFile(log, esVersion, configPath, {
     mochaOpts: {
       bail: !!bail,
       grep,
@@ -70,15 +70,11 @@ async function createFtr({
       include: suiteTags?.include || [],
       exclude: suiteTags?.exclude || [],
     },
-  }
-  );
+  });
 
   return {
     config,
-    ftr: new FunctionalTestRunner(
-      log,
-      config
-    ),
+    ftr: new FunctionalTestRunner(log, config),
   };
 }
 
