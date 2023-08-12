@@ -9,7 +9,7 @@ import { CoreStart } from '@kbn/core/public';
 import {
   RegisterContextDefinition,
   RegisterFunctionDefinition,
-} from '../../../../observability_ai_assistant/common/types';
+} from '@kbn/observability-ai-assistant-plugin/common/types';
 import { ApmPluginStartDeps } from '../../plugin';
 import { createCallApmApi } from '../../services/rest/create_call_apm_api';
 import { registerGetApmCorrelationsFunction } from './get_apm_correlations';
