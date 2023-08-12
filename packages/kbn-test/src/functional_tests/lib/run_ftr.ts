@@ -5,7 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import type { ToolingLog } from '@kbn/dev-utils';
+import { defaultsDeep } from 'lodash';
 import { FunctionalTestRunner, readConfigFile, EsVersion } from '../../functional_test_runner';
 import { CliError } from './run_cli';
 
@@ -49,26 +51,28 @@ async function createFtr({
     dryRun,
   },
 }: CreateFtrParams) {
-  const config = await readConfigFile(log, esVersion, configPath, {
-    mochaOpts: {
-      bail: !!bail,
-      grep,
-      dryRun: !!dryRun,
-    },
-    kbnTestServer: {
-      installDir,
-    },
-    updateBaselines,
-    updateSnapshots,
-    suiteFiles: {
-      include: suiteFiles?.include || [],
-      exclude: suiteFiles?.exclude || [],
-    },
-    suiteTags: {
-      include: suiteTags?.include || [],
-      exclude: suiteTags?.exclude || [],
-    },
-  });
+  const config = await readConfigFile(log, esVersion, configPath, {}, (vars) =>
+    defaultsDeep({}, vars, {
+      mochaOpts: {
+        bail: !!bail,
+        grep,
+        dryRun: !!dryRun,
+      },
+      kbnTestServer: {
+        installDir,
+      },
+      updateBaselines,
+      updateSnapshots,
+      suiteFiles: {
+        include: suiteFiles?.include || [],
+        exclude: suiteFiles?.exclude || [],
+      },
+      suiteTags: {
+        include: suiteTags?.include || [],
+        exclude: suiteTags?.exclude || [],
+      },
+    })
+  );
 
   return {
     config,

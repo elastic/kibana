@@ -60,11 +60,7 @@ export class FunctionalTestRunner {
         : this.getStubProviderCollection(coreProviders);
 
       if (realServices) {
-        // Skip ES version validation for serverless project
-        if (
-          // !this.config.get('serverless') &&
-          providers.hasService('es')
-        ) {
+        if (providers.hasService('es')) {
           await this.validateEsVersion();
         }
         await providers.loadAll();
