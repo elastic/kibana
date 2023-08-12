@@ -73,7 +73,8 @@ describe('Display not found page', () => {
     cy.get(NOT_FOUND).should('exist');
   });
 
-  it('navigates to the event filters page with incorrect link', () => {
+  // Fleet requires superuser
+  it.skip('navigates to the event filters page with incorrect link', () => {
     loginAndWaitForPage(`${EVENT_FILTERS_URL}/randomUrl`);
     cy.get(NOT_FOUND).should('exist');
   });

@@ -19,9 +19,9 @@ import { waitForAlertsIndexToBeCreated } from '../../tasks/alerts';
 import { goToRuleDetails } from '../../tasks/alerts_detection_rules';
 import { createCustomRule, deleteCustomRule } from '../../tasks/api_calls/rules';
 import { getCallOut, waitForCallOutToBeShown } from '../../tasks/common/callouts';
-import { cleanKibana } from '../../tasks/common';
 
 const loadPageAsPlatformEngineerUser = (url: string) => {
+  login(ROLES.soc_manager);
   waitForPageWithoutDateRange(url, ROLES.soc_manager);
   waitForPageTitleToBeShown();
 };
@@ -36,12 +36,9 @@ describe('Detections > Need Admin Callouts indicating an admin is needed to migr
   before(() => {
     // First, we have to open the app on behalf of a privileged user in order to initialize it.
     // Otherwise the app will be disabled and show a "welcome"-like page.
-    cleanKibana();
-    loginAndWaitForPageWithoutDateRange(ALERTS_URL, ROLES.platform_engineer);
+    loginAndWaitForPageWithoutDateRange(ALERTS_URL);
     waitForAlertsIndexToBeCreated();
-
-    // After that we can login as a soc manager.
-    login(ROLES.soc_manager);
+    waitForPageTitleToBeShown();
   });
 
   context(
