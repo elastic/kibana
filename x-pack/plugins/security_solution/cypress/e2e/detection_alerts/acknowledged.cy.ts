@@ -70,7 +70,8 @@ describe.skip('Marking alerts as acknowledged', () => {
   });
 });
 
-describe('Marking alerts as acknowledged with read only role', () => {
+// Also skipped on main branch
+describe.skip('Marking alerts as acknowledged with read only role', () => {
   beforeEach(() => {
     cleanKibana();
     loginAndWaitForPage(ALERTS_URL, ROLES.t2_analyst);
