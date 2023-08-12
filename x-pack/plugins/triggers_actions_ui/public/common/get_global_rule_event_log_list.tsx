@@ -7,8 +7,15 @@
 
 import React from 'react';
 import { GlobalRuleEventLogList } from '../application/sections';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { GlobalRuleEventLogListProps } from '../application/sections/rule_details/components/global_rule_event_log_list';
 
+const queryClient = new QueryClient();
+
 export const getGlobalRuleEventLogListLazy = (props: GlobalRuleEventLogListProps) => {
-  return <GlobalRuleEventLogList {...props} />;
+  return (
+    <QueryClientProvider client={queryClient}>
+      <GlobalRuleEventLogList {...props} />;
+    </QueryClientProvider>
+  );
 };

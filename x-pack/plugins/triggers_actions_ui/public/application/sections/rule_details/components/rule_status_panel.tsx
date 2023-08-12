@@ -29,7 +29,7 @@ import { RulesListNotifyBadge } from '../../rules_list/components/notify_badge';
 import { useLoadRuleEventLogs } from '../../../hooks/use_load_rule_event_logs';
 import { RefreshToken } from './types';
 
-export interface RuleStatusPanelProps {
+export interface RuleStatusPanelBasedProps {
   rule: any;
   isEditable: boolean;
   requestRefresh: () => void;
@@ -38,13 +38,13 @@ export interface RuleStatusPanelProps {
   refreshToken?: RefreshToken;
 }
 
-type ComponentOpts = Pick<
+export type RuleStatusPanelProps = Pick<
   RuleApis,
   'bulkDisableRules' | 'bulkEnableRules' | 'snoozeRule' | 'unsnoozeRule'
 > &
-  RuleStatusPanelProps;
+  RuleStatusPanelBasedProps;
 
-export const RuleStatusPanel: React.FC<ComponentOpts> = ({
+export const RuleStatusPanel: React.FC<RuleStatusPanelProps> = ({
   rule,
   bulkEnableRules,
   bulkDisableRules,

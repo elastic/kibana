@@ -13,7 +13,7 @@ import { useKibana } from '../../../../common/lib/kibana';
 const getEmptyFunctionComponent: React.FC<SpacesContextProps> = ({ children }) => <>{children}</>;
 
 export interface GlobalRuleEventLogListProps {
-  setHeaderActions: RuleEventLogListCommonProps['setHeaderActions'];
+  setHeaderActions?: RuleEventLogListCommonProps['setHeaderActions'];
   localStorageKey?: RuleEventLogListCommonProps['localStorageKey'];
 }
 
