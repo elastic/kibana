@@ -5,5 +5,6 @@
  * 2.0.
  */
 export { AppFeatures } from './src/app_features';
+export { AppFeaturesPrivileges } from './src/app_features_privileges';
 export * from './src/app_features_keys';
 export * from './src/types';

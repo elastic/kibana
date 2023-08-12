@@ -9,10 +9,14 @@ import { APP_ID } from './constants';
 import { AppFeatureKey } from './app_features_keys';
 
 export const AppFeaturesPrivileges = {
-  [AppFeatureKey.advancedInsights]: {
+  [AppFeatureKey.rulesTest]: {
     all: {
-      ui: ['advancedInsights'],
-      api: [`${APP_ID}-advancedInsights`],
+      ui: ['showRules', 'crudRules'],
+      api: [`${APP_ID}-showRules`, `${APP_ID}-crudRules`],
+    },
+    read: {
+      ui: ['showRules'],
+      api: [`${APP_ID}-showRules`],
     },
   },
 };

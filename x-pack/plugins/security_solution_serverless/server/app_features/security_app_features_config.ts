@@ -12,6 +12,7 @@ import {
   type AppFeatureKibanaConfig,
   type AppFeaturesSecurityConfig,
   type AppFeatureKeys,
+  type AppFeatureKey,
 } from '@kbn/security-solution-features';
 
 export const getSecurityAppFeaturesConfigurator =
@@ -19,8 +20,9 @@ export const getSecurityAppFeaturesConfigurator =
   (
     _: ExperimentalFeatures // currently un-used, but left here as a convenience for possible future use
   ): AppFeaturesSecurityConfig => {
-    const securityEnabledAppFeatureKeys = enabledAppFeatureKeys.filter(
-      (appFeatureKey) => appFeatureKey in AppFeatureSecurityKey
+    const securityAppFeatureValues: AppFeatureKey[] = Object.values(AppFeatureSecurityKey);
+    const securityEnabledAppFeatureKeys = enabledAppFeatureKeys.filter((appFeatureKey) =>
+      securityAppFeatureValues.includes(appFeatureKey)
     ) as AppFeatureSecurityKey[];
 
     return new Map(

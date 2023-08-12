@@ -12,6 +12,7 @@ import {
   type AppFeaturesCasesConfig,
   type AppFeatureKeys,
   type CasesSubFeatureId,
+  type AppFeatureKey,
 } from '@kbn/security-solution-features';
 
 import {
@@ -21,8 +22,9 @@ import {
 
 export const getCasesAppFeaturesConfigurator =
   (enabledAppFeatureKeys: AppFeatureKeys) => (): AppFeaturesCasesConfig => {
-    const casesEnabledAppFeatureKeys = enabledAppFeatureKeys.filter(
-      (appFeatureKey) => appFeatureKey in AppFeatureCasesKey
+    const casesAppFeatureValues: AppFeatureKey[] = Object.values(AppFeatureCasesKey);
+    const casesEnabledAppFeatureKeys = enabledAppFeatureKeys.filter((appFeatureKey) =>
+      casesAppFeatureValues.includes(appFeatureKey)
     ) as AppFeatureCasesKey[];
 
     return new Map(casesEnabledAppFeatureKeys.map((key) => [key, casesAppFeaturesConfig[key]]));

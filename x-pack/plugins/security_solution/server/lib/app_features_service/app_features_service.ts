@@ -13,6 +13,7 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type { AppFeatureSecurityKey } from '@kbn/security-solution-features';
 import { AppFeatures } from '@kbn/security-solution-features';
 import type { AppFeatureKey, ExperimentalFeatures } from '../../../common';
 import type { AppFeaturesConfigurator } from './types';
@@ -69,10 +70,7 @@ export class AppFeaturesService {
     const casesAppFeaturesConfig = configurator.cases();
     this.casesAppFeatures.setConfig(casesAppFeaturesConfig);
 
-    this.appFeatures = new Set<AppFeatureKey>([
-      ...securityAppFeaturesConfig.keys(),
-      ...casesAppFeaturesConfig.keys(),
-    ]);
+    this.appFeatures = new Set<AppFeatureKey>(Object.freeze([...securityAppFeaturesConfig.keys(), ...casesAppFeaturesConfig.keys()]) as readonly AppFeatureKey[]);
   }
 
   public isEnabled(appFeatureKey: AppFeatureKey): boolean {

@@ -514,7 +514,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     const { upsellingService, extraAppLinks$ } = this.contract;
 
     registerDeepLinksUpdater(this.appUpdater$);
-
+    console.log(core.application.capabilities.siem);
     const baseLinksPermissions: LinksPermissions = {
       experimentalFeatures: this.experimentalFeatures,
       upselling: upsellingService,

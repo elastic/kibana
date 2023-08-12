@@ -8,7 +8,11 @@
 import { i18n } from '@kbn/i18n';
 import type { SubFeatureConfig } from '@kbn/features-plugin/common';
 import { EXCEPTION_LIST_NAMESPACE_AGNOSTIC } from '@kbn/securitysolution-list-constants';
-import { SecuritySubFeatureId } from '@kbn/security-solution-features';
+import {
+  AppFeatureKey,
+  AppFeaturesPrivileges,
+  SecuritySubFeatureId,
+} from '@kbn/security-solution-features';
 import { APP_ID } from '../../../common';
 
 const endpointListSubFeature: SubFeatureConfig = {
@@ -547,26 +551,26 @@ const rulesTestSubFeature: SubFeatureConfig = {
       groupType: 'mutually_exclusive',
       privileges: [
         {
-          api: [`${APP_ID}-writeRules`, `${APP_ID}-readRules`],
-          id: 'actions_log_management_all',
+          id: 'rules_management_all',
           includeIn: 'all',
           name: 'All',
           savedObject: {
             all: [],
             read: [],
           },
-          ui: ['writeRules', 'readRules'],
+          api: AppFeaturesPrivileges[AppFeatureKey.rulesTest].all.api,
+          ui: AppFeaturesPrivileges[AppFeatureKey.rulesTest].all.ui,
         },
         {
-          api: [`${APP_ID}-readRules`],
-          id: 'actions_log_management_read',
+          id: 'rules_management_read',
           includeIn: 'read',
           name: 'Read',
           savedObject: {
             all: [],
             read: [],
           },
-          ui: ['readRules'],
+          api: AppFeaturesPrivileges[AppFeatureKey.rulesTest].read.api,
+          ui: AppFeaturesPrivileges[AppFeatureKey.rulesTest].read.api,
         },
       ],
     },

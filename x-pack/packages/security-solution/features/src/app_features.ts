@@ -37,15 +37,7 @@ export class AppFeatures<T extends string = string, S extends string = string> {
     if (this.appFeatures) {
       throw new Error('AppFeatures has already been registered');
     }
-    this.appFeatures = new Set([...config.keys()]);
     this.registerEnabledKibanaFeatures(config);
-  }
-
-  public isEnabled(appFeatureKey: AppFeatureKey): boolean {
-    if (!this.appFeatures) {
-      throw new Error('AppFeatures has not been initialized');
-    }
-    return this.appFeatures.has(appFeatureKey);
   }
 
   private registerEnabledKibanaFeatures(appFeatureConfig: AppFeaturesConfig) {
@@ -64,18 +56,4 @@ export class AppFeatures<T extends string = string, S extends string = string> {
 
     this.featuresSetup.registerKibanaFeature(completeAppFeatureConfig);
   }
-
-  // private getEnabledAppFeaturesConfigs(
-  //   appFeaturesConfigs: Partial<AppFeaturesConfig>
-  // ): AppFeatureKibanaConfig[] {
-  //   return Object.entries(appFeaturesConfigs).reduce<AppFeatureKibanaConfig[]>(
-  //     (acc, [appFeatureKey, appFeatureConfig]) => {
-  //       if (this.isEnabled(appFeatureKey as AppFeatureKey)) {
-  //         acc.push(appFeatureConfig);
-  //       }
-  //       return acc;
-  //     },
-  //     []
-  //   );
-  // }
 }

@@ -12,6 +12,8 @@ import {
   type AppFeatureKibanaConfig,
   type AppFeaturesSecurityConfig,
   type AppFeatureKeys,
+  AppFeatureKey,
+  AppFeaturesPrivileges,
 } from '@kbn/security-solution-features';
 
 export const getSecurityAppFeaturesConfigurator =
@@ -19,8 +21,9 @@ export const getSecurityAppFeaturesConfigurator =
   (
     _: ExperimentalFeatures // currently un-used, but left here as a convenience for possible future use
   ): AppFeaturesSecurityConfig => {
-    const securityEnabledAppFeatureKeys = enabledAppFeatureKeys.filter(
-      (appFeatureKey) => appFeatureKey in AppFeatureSecurityKey
+    const securityAppFeatureValues: AppFeatureKey[] = Object.values(AppFeatureSecurityKey);
+    const securityEnabledAppFeatureKeys = enabledAppFeatureKeys.filter((appFeatureKey) =>
+      securityAppFeatureValues.includes(appFeatureKey)
     ) as AppFeatureSecurityKey[];
 
     return new Map(
@@ -131,10 +134,12 @@ const securityAppFeaturesConfig: Record<
   [AppFeatureSecurityKey.rulesTest]: {
     privileges: {
       all: {
-        ui: ['writeRules', 'readRules'],
+        api: AppFeaturesPrivileges[AppFeatureKey.rulesTest].all.api,
+        ui: AppFeaturesPrivileges[AppFeatureKey.rulesTest].all.ui,
       },
       read: {
-        ui: ['readRules'],
+        api: AppFeaturesPrivileges[AppFeatureKey.rulesTest].read.api,
+        ui: AppFeaturesPrivileges[AppFeatureKey.rulesTest].read.ui,
       },
     },
   },
