@@ -228,20 +228,22 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
               }}
             />
             <UseField
-              path="customHighlightedFields"
-              component={MultiSelectFieldsAutocomplete}
-              componentProps={{
-                browserFields: indexPattern.fields,
-                isDisabled: isLoading || indexPatternLoading,
-              }}
-            />
-            <UseField
               path="threat"
               component={AddMitreAttackThreat}
               componentProps={{
                 idAria: 'detectionEngineStepAboutRuleMitreThreat',
                 isDisabled: isLoading,
                 dataTestSubj: 'detectionEngineStepAboutRuleMitreThreat',
+              }}
+            />
+            <EuiSpacer size="l" />
+            <UseField
+              path="customHighlightedFields"
+              component={MultiSelectFieldsAutocomplete}
+              componentProps={{
+                browserFields: indexPattern.fields,
+                isDisabled: isLoading || indexPatternLoading,
+                fullWidth: true,
               }}
             />
             <EuiSpacer size="l" />

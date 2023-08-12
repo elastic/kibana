@@ -17,18 +17,20 @@ interface MultiSelectAutocompleteProps {
   browserFields: DataViewFieldBase[];
   isDisabled: boolean;
   field: FieldHook;
+  fullWidth?: boolean;
   disabledText?: string;
 }
 
 const FIELD_COMBO_BOX_WIDTH = 410;
 
-const fieldDescribedByIds = 'detectionEngineStepDefineRuleGroupByField';
+const fieldDescribedByIds = 'detectionEngineMultiSelectAutocompleteField';
 
 export const MultiSelectAutocompleteComponent: React.FC<MultiSelectAutocompleteProps> = ({
   browserFields,
   disabledText,
   isDisabled,
   field,
+  fullWidth = false,
 }: MultiSelectAutocompleteProps) => {
   const fieldEuiFieldProps = useMemo(
     () => ({
@@ -37,10 +39,10 @@ export const MultiSelectAutocompleteComponent: React.FC<MultiSelectAutocompleteP
       options: browserFields.map((browserField) => ({ label: browserField.name })),
       placeholder: FIELD_PLACEHOLDER,
       onCreateOption: undefined,
-      style: { width: `${FIELD_COMBO_BOX_WIDTH}px` },
+      ...(fullWidth ? {} : { style: { width: `${FIELD_COMBO_BOX_WIDTH}px` } }),
       isDisabled,
     }),
-    [browserFields, isDisabled]
+    [browserFields, isDisabled, fullWidth]
   );
   const fieldComponent = (
     <Field field={field} idAria={fieldDescribedByIds} euiFieldProps={fieldEuiFieldProps} />

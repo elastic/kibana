@@ -234,6 +234,19 @@ describe('Rule response schema', () => {
   });
 
   describe('custom_highlighted_fields', () => {
+    test('it should validate rule with empty array for "custom_highlighted_fields"', () => {
+      const payload = getRulesSchemaMock();
+      payload.custom_highlighted_fields = [];
+
+      const decoded = RuleResponse.decode(payload);
+      const checked = exactCheck(payload, decoded);
+      const message = pipe(checked, foldLeftRight);
+      const expected = { ...getRulesSchemaMock(), custom_highlighted_fields: [] };
+
+      expect(getPaths(left(message.errors))).toEqual([]);
+      expect(message.schema).toEqual(expected);
+    });
+
     test('it should validate rule with "custom_highlighted_fields"', () => {
       const payload = getRulesSchemaMock();
       payload.custom_highlighted_fields = ['foo', 'bar'];
@@ -245,6 +258,24 @@ describe('Rule response schema', () => {
 
       expect(getPaths(left(message.errors))).toEqual([]);
       expect(message.schema).toEqual(expected);
+    });
+
+    test('it should NOT validate undefined for "custom_highlighted_fields"', () => {
+      const payload: Omit<RuleResponse, 'custom_highlighted_fields'> & {
+        custom_highlighted_fields: undefined;
+      } = {
+        ...getRulesSchemaMock(),
+        custom_highlighted_fields: undefined,
+      };
+
+      const decoded = RuleResponse.decode(payload);
+      const checked = exactCheck(payload, decoded);
+      const message = pipe(checked, foldLeftRight);
+
+      expect(getPaths(left(message.errors))).toEqual([
+        'Invalid value "foo" supplied to "custom_highlighted_fields"',
+      ]);
+      expect(message.schema).toEqual({});
     });
 
     test('it should NOT validate a string for "custom_highlighted_fields"', () => {
