@@ -662,11 +662,7 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
   }, [refreshToken]);
 
   return (
-    <EuiFlexGroup 
-      gutterSize="none" 
-      direction="column"
-      data-test-subj='ruleEventLogListTable'
-    >
+    <EuiFlexGroup gutterSize="none" direction="column" data-test-subj="ruleEventLogListTable">
       <EuiFlexItem grow={false}>
         <EuiFlexGroup alignItems="center">
           <EuiFlexItem grow={false}>
