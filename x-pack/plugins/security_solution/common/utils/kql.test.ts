@@ -5,85 +5,61 @@
  * 2.0.
  */
 
-import { convertRulesFilterToKQL } from './kql';
+import { escapeKQLStringParam } from './kql';
 
-describe('convertRulesFilterToKQL', () => {
-  const filterOptions = {
-    filter: '',
-    showCustomRules: false,
-    showElasticRules: false,
-    tags: [],
-  };
-
-  it('returns empty string if filter options are empty', () => {
-    const kql = convertRulesFilterToKQL(filterOptions);
-
-    expect(kql).toBe('');
+describe('Kuery param escape', () => {
+  it('should not remove white spaces quotes', () => {
+    const value = ' netcat';
+    const expected = ' netcat';
+    expect(escapeKQLStringParam(value)).toBe(expected);
   });
 
-  it('handles presence of "filter" properly', () => {
-    const kql = convertRulesFilterToKQL({ ...filterOptions, filter: 'foo' });
+  it('should escape quotes', () => {
+    const value = 'I said, "Hello."';
+    const expected = 'I said, \\"Hello.\\"';
 
-    expect(kql).toBe(
-      '(alert.attributes.name: "foo" OR alert.attributes.params.index: "foo" OR alert.attributes.params.threat.tactic.id: "foo" OR alert.attributes.params.threat.tactic.name: "foo" OR alert.attributes.params.threat.technique.id: "foo" OR alert.attributes.params.threat.technique.name: "foo" OR alert.attributes.params.threat.technique.subtechnique.id: "foo" OR alert.attributes.params.threat.technique.subtechnique.name: "foo")'
-    );
+    expect(escapeKQLStringParam(value)).toBe(expected);
   });
 
-  it('escapes "filter" value properly', () => {
-    const kql = convertRulesFilterToKQL({ ...filterOptions, filter: '" OR (foo: bar)' });
-
-    expect(kql).toBe(
-      '(alert.attributes.name: "\\" \\OR \\(foo\\: bar\\)" OR alert.attributes.params.index: "\\" \\OR \\(foo\\: bar\\)" OR alert.attributes.params.threat.tactic.id: "\\" \\OR \\(foo\\: bar\\)" OR alert.attributes.params.threat.tactic.name: "\\" \\OR \\(foo\\: bar\\)" OR alert.attributes.params.threat.technique.id: "\\" \\OR \\(foo\\: bar\\)" OR alert.attributes.params.threat.technique.name: "\\" \\OR \\(foo\\: bar\\)" OR alert.attributes.params.threat.technique.subtechnique.id: "\\" \\OR \\(foo\\: bar\\)" OR alert.attributes.params.threat.technique.subtechnique.name: "\\" \\OR \\(foo\\: bar\\)")'
-    );
+  it('should escape special characters', () => {
+    const value = `This \\ has (a lot of) <special> characters, don't you *think*? "Yes."`;
+    const expected = `This \\ has (a lot of) <special> characters, don't you *think*? \\"Yes.\\"`;
+    expect(escapeKQLStringParam(value)).toBe(expected);
   });
 
-  it('handles presence of "showCustomRules" properly', () => {
-    const kql = convertRulesFilterToKQL({ ...filterOptions, showCustomRules: true });
-
-    expect(kql).toBe(`alert.attributes.params.immutable: false`);
+  it('should NOT escape keywords', () => {
+    const value = 'foo and bar or baz not qux';
+    const expected = 'foo and bar or baz not qux';
+    expect(escapeKQLStringParam(value)).toBe(expected);
   });
 
-  it('handles presence of "showElasticRules" properly', () => {
-    const kql = convertRulesFilterToKQL({ ...filterOptions, showElasticRules: true });
-
-    expect(kql).toBe(`alert.attributes.params.immutable: true`);
+  it('should NOT escape keywords next to each other', () => {
+    const value = 'foo and bar or not baz';
+    const expected = 'foo and bar or not baz';
+    expect(escapeKQLStringParam(value)).toBe(expected);
   });
 
-  it('handles presence of "showElasticRules" and "showCustomRules" at the same time properly', () => {
-    const kql = convertRulesFilterToKQL({
-      ...filterOptions,
-      showElasticRules: true,
-      showCustomRules: true,
-    });
-
-    expect(kql).toBe('');
+  it('should not escape keywords without surrounding spaces', () => {
+    const value = 'And this has keywords, or does it not?';
+    const expected = 'And this has keywords, or does it not?';
+    expect(escapeKQLStringParam(value)).toBe(expected);
   });
 
-  it('handles presence of "tags" properly', () => {
-    const kql = convertRulesFilterToKQL({ ...filterOptions, tags: ['tag1', 'tag2'] });
-
-    expect(kql).toBe('alert.attributes.tags:("tag1" AND "tag2")');
+  it('should NOT escape uppercase keywords', () => {
+    const value = 'foo AND bar';
+    const expected = 'foo AND bar';
+    expect(escapeKQLStringParam(value)).toBe(expected);
   });
 
-  it('handles combination of different properties properly', () => {
-    const kql = convertRulesFilterToKQL({
-      ...filterOptions,
-      filter: 'foo',
-      showElasticRules: true,
-      tags: ['tag1', 'tag2'],
-    });
-
-    expect(kql).toBe(
-      `(alert.attributes.name: "foo" OR alert.attributes.params.index: "foo" OR alert.attributes.params.threat.tactic.id: "foo" OR alert.attributes.params.threat.tactic.name: "foo" OR alert.attributes.params.threat.technique.id: "foo" OR alert.attributes.params.threat.technique.name: "foo" OR alert.attributes.params.threat.technique.subtechnique.id: "foo" OR alert.attributes.params.threat.technique.subtechnique.name: "foo") AND alert.attributes.params.immutable: true AND alert.attributes.tags:(\"tag1\" AND \"tag2\")`
-    );
+  it('should escape special characters and NOT keywords', () => {
+    const value = 'Hello, "world", and <nice> to meet you!';
+    const expected = 'Hello, \\"world\\", and <nice> to meet you!';
+    expect(escapeKQLStringParam(value)).toBe(expected);
   });
 
-  it('handles presence of "excludeRuleTypes" properly', () => {
-    const kql = convertRulesFilterToKQL({
-      ...filterOptions,
-      excludeRuleTypes: ['machine_learning', 'saved_query'],
-    });
-
-    expect(kql).toBe('NOT alert.attributes.params.type: ("machine_learning" OR "saved_query")');
+  it('should escape newlines and tabs', () => {
+    const value = 'This\nhas\tnewlines\r\nwith\ttabs';
+    const expected = 'This\\nhas\\tnewlines\\r\\nwith\\ttabs';
+    expect(escapeKQLStringParam(value)).toBe(expected);
   });
 });

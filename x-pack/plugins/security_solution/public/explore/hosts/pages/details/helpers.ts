@@ -6,7 +6,7 @@
  */
 
 import type { Filter } from '@kbn/es-query';
-import { escapeQueryValue } from '../../../../common/lib/kuery';
+import { prepareKQLStringParam } from '../../../../../common/utils/kql';
 
 /** Returns the kqlQueryExpression for the `Events` widget on the `Host Details` page */
 export const getHostDetailsEventsKqlQueryExpression = ({
@@ -18,10 +18,10 @@ export const getHostDetailsEventsKqlQueryExpression = ({
 }): string => {
   if (filterQueryExpression.length) {
     return `${filterQueryExpression}${
-      hostName.length ? ` and host.name: ${escapeQueryValue(hostName)}` : ''
+      hostName.length ? ` and host.name: ${prepareKQLStringParam(hostName)}` : ''
     }`;
   } else {
-    return hostName.length ? `host.name: ${escapeQueryValue(hostName)}` : '';
+    return hostName.length ? `host.name: ${prepareKQLStringParam(hostName)}` : '';
   }
 };
 
