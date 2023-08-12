@@ -65,8 +65,8 @@ export const cli = () => {
       const { argv } = yargs(process.argv.slice(2));
 
       const isOpen = argv._[0] === 'open';
-      const cypressConfigFilePath = require.resolve(`../../${argv.configFile}`) as string;
-      const cypressConfigFile = await import(require.resolve(`../../${argv.configFile}`));
+      const cypressConfigFilePath = require.resolve(`../../../${argv.configFile}`) as string;
+      const cypressConfigFile = await import(require.resolve(`../../../${argv.configFile}`));
       const spec: string | undefined = argv?.spec as string;
       const files = retrieveIntegrations(spec ? [spec] : cypressConfigFile?.e2e?.specPattern);
 
