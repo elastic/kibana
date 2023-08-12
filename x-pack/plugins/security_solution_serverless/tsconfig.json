@@ -35,6 +35,8 @@
     "@kbn/kibana-utils-plugin",
     "@kbn/task-manager-plugin",
     "@kbn/cloud-plugin",
-    "@kbn/cloud-security-posture-plugin"
+    "@kbn/cloud-security-posture-plugin",
+    "@kbn/security-solution-features",
+    "@kbn/cases-plugin"
   ]
 }
