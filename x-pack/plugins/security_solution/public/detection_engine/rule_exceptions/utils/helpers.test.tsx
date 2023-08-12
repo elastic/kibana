@@ -1841,7 +1841,7 @@ describe('Exception helpers', () => {
       });
       it('should include custom highlighted fields', () => {
         const res = getAlertHighlightedFields(alertData, ['event.type']);
-        expect(res).toEqual([...allHighlightFields, { id: 'event.type' }]);
+        expect(res).toEqual([{ id: 'event.type' }, ...allHighlightFields]);
       });
     });
     describe('getPrepopulatedRuleExceptionWithHighlightFields', () => {

@@ -805,12 +805,17 @@ describe('helpers', () => {
         false_positives: ['test'],
         license: 'Elastic License',
         name: 'Query with rule-id',
+        note: '# this is some markdown documentation',
         references: ['www.test.co'],
         risk_score: 21,
         risk_score_mapping: [],
         severity: 'low',
         severity_mapping: [],
         tags: ['tag1', 'tag2'],
+        rule_name_override: undefined,
+        threat_indicator_path: undefined,
+        timestamp_override: undefined,
+        timestamp_override_fallback_disabled: undefined,
         threat: getThreatMock(),
         custom_highlighted_fields: [],
       };
@@ -830,6 +835,7 @@ describe('helpers', () => {
         false_positives: ['test'],
         license: 'Elastic License',
         name: 'Query with rule-id',
+        note: '# this is some markdown documentation',
         references: ['www.test.co'],
         risk_score: 21,
         risk_score_mapping: [],
@@ -838,6 +844,9 @@ describe('helpers', () => {
         tags: ['tag1', 'tag2'],
         threat: getThreatMock(),
         custom_highlighted_fields: ['foo', 'bar'],
+        threat_indicator_path: undefined,
+        timestamp_override: undefined,
+        timestamp_override_fallback_disabled: undefined,
       };
 
       expect(result).toEqual(expected);
@@ -855,6 +864,7 @@ describe('helpers', () => {
         false_positives: ['test'],
         license: 'Elastic License',
         name: 'Query with rule-id',
+        note: '# this is some markdown documentation',
         references: ['www.test.co'],
         risk_score: 21,
         risk_score_mapping: [],
@@ -863,6 +873,9 @@ describe('helpers', () => {
         tags: ['tag1', 'tag2'],
         threat: getThreatMock(),
         custom_highlighted_fields: [],
+        threat_indicator_path: undefined,
+        timestamp_override: undefined,
+        timestamp_override_fallback_disabled: undefined,
       };
 
       expect(result).toEqual(expected);

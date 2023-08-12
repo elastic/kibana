@@ -299,7 +299,7 @@ export const getSummaryRows = ({
   browserFields: BrowserFields;
   scopeId: string;
   eventId: string;
-  customHighlightedFields: string[];
+  customHighlightedFields?: string[];
   isDraggable?: boolean;
   isReadOnly?: boolean;
 }) => {
@@ -320,7 +320,7 @@ export const getSummaryRows = ({
     eventCategories,
     eventCode,
     eventRuleType,
-    highlightedFieldsOverride: customHighlightedFields,
+    highlightedFieldsOverride: customHighlightedFields ?? [],
   });
 
   return data != null

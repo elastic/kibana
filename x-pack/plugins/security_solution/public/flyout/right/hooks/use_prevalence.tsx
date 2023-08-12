@@ -32,7 +32,7 @@ export interface UsePrevalenceParams {
   /**
    * User defined fields to highlight (defined on rule)
    */
-  customHighlightedFields: string[];
+  customHighlightedFields?: string[];
 }
 export interface UsePrevalenceResult {
   /**
@@ -66,7 +66,7 @@ export const usePrevalence = ({
       getSummaryRows({
         browserFields: browserFields || {},
         data: dataFormattedForFieldBrowser || [],
-        customHighlightedFields,
+        customHighlightedFields: customHighlightedFields || [],
         eventId,
         scopeId,
         isReadOnly: false,
