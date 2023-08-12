@@ -10,6 +10,7 @@ import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { last } from 'lodash';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { Subscription } from 'rxjs';
+import { i18n } from '../../../../../packages/kbn-i18n';
 import {
   ContextDefinition,
   MessageRole,
@@ -23,6 +24,7 @@ import { getAssistantSetupMessage } from '../service/get_assistant_setup_message
 import type { ObservabilityAIAssistantChatService, PendingMessage } from '../types';
 import { getTimelineItemsfromConversation } from '../utils/get_timeline_items_from_conversation';
 import type { UseGenAIConnectorsResult } from './use_genai_connectors';
+import { useKibana } from './use_kibana';
 
 export function createNewConversation({
   contexts,
@@ -65,6 +67,10 @@ export function useTimeline({
   const connectorId = connectors.selectedConnector;
 
   const hasConnector = !!connectorId;
+
+  const {
+    services: { notifications },
+  } = useKibana();
 
   const conversationItems = useMemo(() => {
     const items = getTimelineItemsfromConversation({
@@ -116,6 +122,13 @@ export function useTimeline({
         },
         error: reject,
         complete: () => {
+          if (pendingMessageLocal?.error) {
+            notifications.toasts.addError(pendingMessageLocal?.error, {
+              title: i18n.translate('xpack.observabilityAiAssistant.failedToLoadResponse', {
+                defaultMessage: 'Failed to load response from the AI Assistant',
+              }),
+            });
+          }
           resolve(pendingMessageLocal!);
         },
       });
@@ -190,6 +203,10 @@ export function useTimeline({
   }
 
   const items = useMemo(() => {
+    console.log({
+      conversationItems,
+      pendingMessage,
+    });
     if (pendingMessage) {
       return conversationItems.concat({
         id: '',
