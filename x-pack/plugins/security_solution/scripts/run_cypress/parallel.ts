@@ -154,10 +154,14 @@ export const cli = () => {
             const fleetServerPort: number = getFleetServerPort();
             const configFromTestFile = parseTestFileConfig(filePath);
 
+            const ftrConfigFile = _.isArray(argv.ftrConfigFile)
+              ? _.last(argv.ftrConfigFile)
+              : argv.ftrConfigFile;
+
             const config = await readConfigFile(
               log,
               EsVersion.getDefault(),
-              _.isArray(argv.ftrConfigFile) ? _.last(argv.ftrConfigFile) : argv.ftrConfigFile,
+              ftrConfigFile,
               {
                 servers: {
                   elasticsearch: {
@@ -266,16 +270,15 @@ ${JSON.stringify(config.getAll(), null, 2)}
 ----------------------------------------------
 `);
 
-            const lifecycle = new Lifecycle(log);
+            const lifecycle = new Lifecycle();
 
-            const providers = new ProviderCollection(log, [
-              ...readProviderSpec('Service', {
-                lifecycle: () => lifecycle,
-                log: () => log,
-                config: () => config,
-              }),
-              ...readProviderSpec('Service', config.get('services')),
-            ]);
+            const providers = new ProviderCollection(log, readProviderSpec('Service', {
+              lifecycle: () => lifecycle,
+              log: () => log,
+              config: () => config,
+              ...config.get('services'),
+              })
+            );
 
             const options = {
               installDir: process.env.KIBANA_INSTALL_DIR,
@@ -310,8 +313,11 @@ ${JSON.stringify(config.getAll(), null, 2)}
               },
               onEarlyExit,
             });
+            
+            console.error('config,', JSON.stringify(config,null, 2));
 
             await providers.loadAll();
+
 
             const functionalTestRunner = new FunctionalTestRunner(
               log,

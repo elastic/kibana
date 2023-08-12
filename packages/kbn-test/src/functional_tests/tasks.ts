@@ -132,7 +132,7 @@ export async function runTests(options: RunTestsParams) {
           if (abortCtrl.signal.aborted) {
             return;
           }
-          await runFtr({ configPath, options: { ...options, log } }, abortCtrl.signal);
+          await runFtr({ configPath, options: { ...options, log }, signal: abortCtrl.signal });
         } finally {
           try {
             const delay = config.get('kbnTestServer.delayShutdown');
