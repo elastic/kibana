@@ -792,6 +792,81 @@ describe('helpers', () => {
 
       expect(result).toEqual(expected);
     });
+
+    test('returns formatted object if custom_highlighted_fields is empty array', () => {
+      const mockStepData: AboutStepRule = {
+        ...mockData,
+        customHighlightedFields: [],
+      };
+      const result = formatAboutStepData(mockStepData);
+      const expected: AboutStepRuleJson = {
+        author: ['Elastic'],
+        description: '24/7',
+        false_positives: ['test'],
+        license: 'Elastic License',
+        name: 'Query with rule-id',
+        references: ['www.test.co'],
+        risk_score: 21,
+        risk_score_mapping: [],
+        severity: 'low',
+        severity_mapping: [],
+        tags: ['tag1', 'tag2'],
+        threat: getThreatMock(),
+        custom_highlighted_fields: [],
+      };
+
+      expect(result).toEqual(expected);
+    });
+
+    test('returns formatted object with custom_highlighted_fields', () => {
+      const mockStepData: AboutStepRule = {
+        ...mockData,
+        customHighlightedFields: ['foo', 'bar'],
+      };
+      const result = formatAboutStepData(mockStepData);
+      const expected: AboutStepRuleJson = {
+        author: ['Elastic'],
+        description: '24/7',
+        false_positives: ['test'],
+        license: 'Elastic License',
+        name: 'Query with rule-id',
+        references: ['www.test.co'],
+        risk_score: 21,
+        risk_score_mapping: [],
+        severity: 'low',
+        severity_mapping: [],
+        tags: ['tag1', 'tag2'],
+        threat: getThreatMock(),
+        custom_highlighted_fields: ['foo', 'bar'],
+      };
+
+      expect(result).toEqual(expected);
+    });
+
+    test('returns formatted object if custom_highlighted_fields includes empty string', () => {
+      const mockStepData: AboutStepRule = {
+        ...mockData,
+        customHighlightedFields: [' '],
+      };
+      const result = formatAboutStepData(mockStepData);
+      const expected: AboutStepRuleJson = {
+        author: ['Elastic'],
+        description: '24/7',
+        false_positives: ['test'],
+        license: 'Elastic License',
+        name: 'Query with rule-id',
+        references: ['www.test.co'],
+        risk_score: 21,
+        risk_score_mapping: [],
+        severity: 'low',
+        severity_mapping: [],
+        tags: ['tag1', 'tag2'],
+        threat: getThreatMock(),
+        custom_highlighted_fields: [],
+      };
+
+      expect(result).toEqual(expected);
+    });
   });
 
   describe('formatActionsStepData', () => {
