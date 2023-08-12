@@ -19,5 +19,6 @@
     "@kbn/discover-utils",
     "@kbn/data-views-plugin",
     "@kbn/es-query",
+    "@kbn/unified-doc-viewer-plugin",
   ]
 }
