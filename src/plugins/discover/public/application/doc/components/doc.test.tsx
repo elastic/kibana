@@ -16,7 +16,7 @@ import { Doc, DocProps } from './doc';
 import { SEARCH_FIELDS_FROM_SOURCE as mockSearchFieldsFromSource } from '@kbn/discover-utils';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import {DocViewsRegistry, setDocViewsRegistry} from '@kbn/unified-doc-viewer-plugin/public';
+import { DocViewsRegistry, setDocViewsRegistry } from '@kbn/unified-doc-viewer-plugin/public';
 
 const mockSearchApi = jest.fn();
 

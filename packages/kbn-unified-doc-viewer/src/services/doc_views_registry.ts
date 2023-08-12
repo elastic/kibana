@@ -13,4 +13,3 @@ export enum ElasticRequestState {
   Error,
   NotFoundDataView,
 }
-

@@ -9,7 +9,7 @@
 import React from 'react';
 import { mountWithIntl, findTestSubject } from '@kbn/test-jest-helpers';
 import { TableRow, TableRowProps } from './table_row';
-import {DocViewsRegistry, setDocViewsRegistry} from '@kbn/unified-doc-viewer-plugin/public';
+import { DocViewsRegistry, setDocViewsRegistry } from '@kbn/unified-doc-viewer-plugin/public';
 import { createFilterManagerMock } from '@kbn/data-plugin/public/query/filter_manager/filter_manager.mock';
 import { dataViewWithTimefieldMock } from '../../../__mocks__/data_view_with_timefield';
 import { DocViewer } from '@kbn/unified-doc-viewer';

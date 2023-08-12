@@ -12,7 +12,7 @@ import { DocViewer } from './doc_viewer';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import type { DocViewRenderProps } from '../../types';
 import { buildDataTableRecord } from '@kbn/discover-utils';
-import {DocViewsRegistry} from "@kbn/unified-doc-viewer-plugin/public";
+import { DocViewsRegistry } from '@kbn/unified-doc-viewer-plugin/public';
 
 describe('<DocViewer />', () => {
   test('Render <DocViewer/> with 3 different tabs', () => {
