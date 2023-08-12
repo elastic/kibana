@@ -95,7 +95,7 @@ export function HeaderActions({ alert }: HeaderActionsProps) {
           <EuiButtonEmpty
             size="s"
             color="text"
-            disabled={!alert?.fields[ALERT_RULE_UUID]}
+            disabled={!alert?.fields[ALERT_RULE_UUID] || !rule}
             onClick={handleViewRuleDetails}
             data-test-subj="view-rule-details-button"
           >

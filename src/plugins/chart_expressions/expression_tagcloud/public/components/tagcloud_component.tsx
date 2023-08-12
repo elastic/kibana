@@ -145,7 +145,10 @@ export const TagCloudChart = ({
   const onRenderChange = useCallback<RenderChangeListener>(
     (isRendered) => {
       if (isRendered) {
-        renderComplete();
+        // this requestAnimationFrame call is a temporary fix for https://github.com/elastic/elastic-charts/issues/2124
+        window.requestAnimationFrame(() => {
+          renderComplete();
+        });
       }
     },
     [renderComplete]
