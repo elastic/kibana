@@ -61,8 +61,19 @@ interface XYLayerConfig {
 
 export class XYDataLayer implements ChartLayer<XYDataLayerConfig> {
   private column: ChartColumn[];
-  constructor(private layerConfig: XYLayerConfig) {
+  private layerConfig: XYLayerConfig;
+  constructor(layerConfig: XYLayerConfig) {
     this.column = layerConfig.data.map((dataItem) => new FormulaColumn(dataItem));
+    this.layerConfig = {
+      ...layerConfig,
+      options: {
+        ...layerConfig.options,
+        buckets: {
+          type: 'date_histogram',
+          ...layerConfig.options?.buckets,
+        },
+      },
+    };
   }
 
   getName(): string | undefined {

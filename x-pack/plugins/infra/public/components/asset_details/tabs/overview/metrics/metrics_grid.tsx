@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { XYLayerOptions, XYVisualOptions } from '@kbn/lens-embeddable-utils';
+import type { XYVisualOptions } from '@kbn/lens-embeddable-utils';
 import { UseLensAttributesXYLayerConfig } from '../../../../../hooks/use_lens_attributes';
 import { buildCombinedHostsFilter } from '../../../../../utils/filters/build';
 import { LensChart, type LensChartProps, HostMetricsExplanationContent } from '../../../../lens';
@@ -24,12 +24,6 @@ interface MetricChartConfig extends Pick<LensChartProps, 'id' | 'title' | 'overr
   layers: UseLensAttributesXYLayerConfig;
   toolTip: string;
 }
-
-const XY_LAYER_OPTIONS: XYLayerOptions = {
-  buckets: {
-    type: 'date_histogram',
-  },
-};
 
 const PERCENT_LEFT_AXIS: Pick<MetricChartConfig, 'overrides'>['overrides'] = {
   axisLeft: {
@@ -68,7 +62,6 @@ const CHARTS_IN_ORDER: Array<
       {
         data: [hostLensFormulas.cpuUsage],
         layerType: 'data',
-        options: XY_LAYER_OPTIONS,
       },
     ],
     dataViewOrigin: 'metrics',
@@ -85,7 +78,6 @@ const CHARTS_IN_ORDER: Array<
       {
         data: [hostLensFormulas.memoryUsage],
         layerType: 'data',
-        options: XY_LAYER_OPTIONS,
       },
     ],
     dataViewOrigin: 'metrics',
@@ -102,7 +94,6 @@ const CHARTS_IN_ORDER: Array<
       {
         data: [hostLensFormulas.normalizedLoad1m],
         layerType: 'data',
-        options: XY_LAYER_OPTIONS,
       },
       {
         data: [
@@ -132,7 +123,6 @@ const CHARTS_IN_ORDER: Array<
       {
         data: [hostLensFormulas.logRate],
         layerType: 'data',
-        options: XY_LAYER_OPTIONS,
       },
     ],
     dataViewOrigin: 'logs',
@@ -164,7 +154,6 @@ const CHARTS_IN_ORDER: Array<
         layerType: 'data',
         options: {
           seriesType: 'area',
-          ...XY_LAYER_OPTIONS,
         },
       },
     ],
@@ -205,7 +194,6 @@ const CHARTS_IN_ORDER: Array<
         layerType: 'data',
         options: {
           seriesType: 'area',
-          ...XY_LAYER_OPTIONS,
         },
       },
     ],
@@ -238,7 +226,6 @@ const CHARTS_IN_ORDER: Array<
         layerType: 'data',
         options: {
           seriesType: 'area',
-          ...XY_LAYER_OPTIONS,
         },
       },
     ],
@@ -271,7 +258,6 @@ const CHARTS_IN_ORDER: Array<
         layerType: 'data',
         options: {
           seriesType: 'area',
-          ...XY_LAYER_OPTIONS,
         },
       },
     ],

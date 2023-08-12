@@ -16,9 +16,6 @@ import { Popover } from '../../table/popover';
 
 const DEFAULT_BREAKDOWN_SIZE = 20;
 const XY_LAYER_OPTIONS: XYLayerOptions = {
-  buckets: {
-    type: 'date_histogram',
-  },
   breakdown: {
     type: 'top_values',
     field: 'host.name',

@@ -60,7 +60,6 @@ export const App = (props: {
           ],
           options: {
             seriesType: 'bar_stacked',
-            buckets: { type: 'date_histogram' },
           },
         }),
       ],
