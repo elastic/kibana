@@ -33,7 +33,7 @@ describe('Exceptions viewer read only', () => {
   before(() => {
     cleanKibana();
     // create rule with exceptions
-    createExceptionList(exceptionList, exceptionList.list_id).then(response => {
+    createExceptionList(exceptionList, exceptionList.list_id).then((response) => {
       createRule(
         getNewRule({
           query: 'agent.name:*',
