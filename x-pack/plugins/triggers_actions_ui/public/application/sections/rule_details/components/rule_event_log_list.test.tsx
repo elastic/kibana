@@ -14,6 +14,7 @@ import { RuleEventLogList, RuleEventLogListProps } from './rule_event_log_list';
 import { mockRule, mockRuleType, mockRuleSummary, mockLogResponse } from './test_helpers';
 import { RuleType } from '../../../../types';
 import { loadActionErrorLog } from '../../../lib/rule_api/load_action_error_log';
+import { getJsDomPerformanceFix } from '../../test_utils';
 
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 jest.mock('../../../../common/lib/kibana');
@@ -74,6 +75,16 @@ const mockErrorLogResponse = {
 };
 
 const onChangeDurationMock = jest.fn();
+
+const { fix, cleanup: cleanupJsDomePerformanceFix } = getJsDomPerformanceFix();
+
+beforeAll(() => {
+  fix();
+});
+
+afterAll(() => {
+  cleanupJsDomePerformanceFix();
+});
 
 const mockLoadEventLog = jest.fn();
 describe('rule_event_log_list', () => {

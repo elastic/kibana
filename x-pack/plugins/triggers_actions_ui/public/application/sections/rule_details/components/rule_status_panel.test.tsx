@@ -9,7 +9,7 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
-import { RuleStatusPanel, RuleStatusPanelProps } from './rule_status_panel';
+import { RuleStatusPanel, RuleStatusPanelWithApiProps } from './rule_status_panel';
 import { mockRule } from './test_helpers';
 
 jest.mock('../../../lib/rule_api/load_execution_log_aggregations', () => ({
@@ -29,7 +29,7 @@ const queryClient = new QueryClient({
   },
 });
 
-const RuleStatusPanelWithProvider = (props: RuleStatusPanelProps) => {
+const RuleStatusPanelWithProvider = (props: RuleStatusPanelWithApiProps) => {
   return (
     <QueryClientProvider client={queryClient}>
       <RuleStatusPanel {...props} />

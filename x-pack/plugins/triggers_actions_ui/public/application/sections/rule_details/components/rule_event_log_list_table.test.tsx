@@ -16,6 +16,7 @@ import {
   GLOBAL_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS,
 } from '../../../constants';
 import { mockRule, mockLogResponse } from './test_helpers';
+import { getJsDomPerformanceFix } from '../../test_utils';
 import { loadActionErrorLog } from '../../../lib/rule_api/load_action_error_log';
 
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
@@ -65,6 +66,16 @@ const mockErrorLogResponse = {
 };
 
 const mockLoadEventLog = jest.fn();
+
+const { fix, cleanup: cleanupJsDomePerformanceFix } = getJsDomPerformanceFix();
+
+beforeAll(() => {
+  fix();
+});
+
+afterAll(() => {
+  cleanupJsDomePerformanceFix();
+});
 
 describe('rule_event_log_list_table', () => {
   beforeEach(() => {

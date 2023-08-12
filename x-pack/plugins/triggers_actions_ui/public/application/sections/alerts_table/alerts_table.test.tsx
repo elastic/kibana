@@ -33,7 +33,7 @@ import { bulkActionsReducer } from './bulk_actions/reducer';
 import { BrowserFields } from '@kbn/rule-registry-plugin/common';
 import { getCasesMockMap } from './cases/index.mock';
 import { getMaintenanceWindowMockMap } from './maintenance_windows/index.mock';
-import { createAppMockRenderer } from '../test_utils';
+import { createAppMockRenderer, getJsDomPerformanceFix } from '../test_utils';
 import { createCasesServiceMock } from './index.mock';
 import { useCaseViewNavigation } from './cases/use_case_view_navigation';
 import { act } from 'react-dom/test-utils';
@@ -196,41 +196,14 @@ const mockedUseCellActions: UseCellActions = () => {
   };
 };
 
-const originalGetComputedStyle = Object.assign({}, window.getComputedStyle);
+const { fix, cleanup } = getJsDomPerformanceFix();
 
 beforeAll(() => {
-  // The JSDOM implementation is too slow
-  // Especially for dropdowns that try to position themselves
-  // perf issue - https://github.com/jsdom/jsdom/issues/3234
-  Object.defineProperty(window, 'getComputedStyle', {
-    value: (el: HTMLElement) => {
-      /**
-       * This is based on the jsdom implementation of getComputedStyle
-       * https://github.com/jsdom/jsdom/blob/9dae17bf0ad09042cfccd82e6a9d06d3a615d9f4/lib/jsdom/browser/Window.js#L779-L820
-       *
-       * It is missing global style parsing and will only return styles applied directly to an element.
-       * Will not return styles that are global or from emotion
-       */
-      const declaration = new CSSStyleDeclaration();
-      const { style } = el;
-
-      Array.prototype.forEach.call(style, (property: string) => {
-        declaration.setProperty(
-          property,
-          style.getPropertyValue(property),
-          style.getPropertyPriority(property)
-        );
-      });
-
-      return declaration;
-    },
-    configurable: true,
-    writable: true,
-  });
+  fix();
 });
 
 afterAll(() => {
-  Object.defineProperty(window, 'getComputedStyle', originalGetComputedStyle);
+  cleanup();
 });
 
 describe('AlertsTable', () => {
