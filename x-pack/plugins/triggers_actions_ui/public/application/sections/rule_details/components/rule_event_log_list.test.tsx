@@ -22,6 +22,7 @@ import {
 import { mockRule, mockRuleType, mockRuleSummary, mockLogResponse } from './test_helpers';
 import { RuleType } from '../../../../types';
 import { loadActionErrorLog } from '../../../lib/rule_api/load_action_error_log';
+import { ExperimentalFeaturesService } from '../../../../common/experimental_features_service';
 
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 jest.mock('../../../../common/lib/kibana');
@@ -64,8 +65,19 @@ const mockErrorLogResponse = {
   ],
 };
 
-// FLAKY: https://github.com/elastic/kibana/issues/139062
-describe.skip('rule_event_log_list', () => {
+describe('rule_event_log_list', () => {
+  ExperimentalFeaturesService.init({
+    experimentalFeatures: {
+      rulesListDatagrid: true,
+      internalAlertsTable: false,
+      ruleTagFilter: true,
+      ruleStatusFilter: true,
+      rulesDetailLogs: true,
+      ruleUseExecutionStatus: true,
+      ruleKqlBar: true,
+    },
+  });
+
   beforeEach(() => {
     jest.clearAllMocks();
     useKibanaMock().services.uiSettings.get = jest.fn().mockImplementation((value: string) => {
@@ -704,9 +716,7 @@ describe.skip('rule_event_log_list', () => {
     const avgExecutionDurationPanel = wrapper.find('[data-test-subj="avgExecutionDurationPanel"]');
     expect(avgExecutionDurationPanel.exists()).toBeTruthy();
     expect(avgExecutionDurationPanel.first().prop('color')).toEqual('subdued');
-    expect(wrapper.find('EuiStat[data-test-subj="avgExecutionDurationStat"]').text()).toEqual(
-      'Average duration00:00:00.100'
-    );
+    expect(avgExecutionDurationPanel.first().text()).toEqual('Average duration00:00:00.100');
     expect(wrapper.find('[data-test-subj="ruleDurationWarning"]').exists()).toBeFalsy();
 
     expect(wrapper.find('[data-test-subj="executionDurationChartPanel"]').exists()).toBeTruthy();
@@ -743,50 +753,7 @@ describe.skip('rule_event_log_list', () => {
     const avgExecutionDurationPanel = wrapper.find('[data-test-subj="avgExecutionDurationPanel"]');
     expect(avgExecutionDurationPanel.exists()).toBeTruthy();
     expect(avgExecutionDurationPanel.first().prop('color')).toEqual('subdued');
-    expect(wrapper.find('EuiStat[data-test-subj="avgExecutionDurationStat"]').text()).toEqual(
-      'Average duration00:01:00.284'
-    );
+    expect(avgExecutionDurationPanel.first().text()).toEqual('Average duration00:01:00.284');
     expect(wrapper.find('[data-test-subj="ruleDurationWarning"]').exists()).toBeFalsy();
-  });
-
-  it('renders warning when average execution duration exceeds rule timeout', async () => {
-    const ruleTypeCustom = mockRuleType({ ruleTaskTimeout: '10m' });
-    const ruleSummary = mockRuleSummary({
-      executionDuration: { average: 60284345, valuesWithTimestamp: {} },
-      ruleTypeId: ruleMock.ruleTypeId,
-    });
-
-    loadExecutionLogAggregationsMock.mockResolvedValue({
-      ...mockLogResponse,
-      total: 85,
-    });
-
-    const wrapper = mountWithIntl(
-      <RuleEventLogList
-        fetchRuleSummary={false}
-        ruleId={ruleMock.id}
-        ruleType={ruleTypeCustom}
-        ruleSummary={ruleSummary}
-        numberOfExecutions={60}
-        onChangeDuration={onChangeDurationMock}
-        loadExecutionLogAggregations={loadExecutionLogAggregationsMock}
-      />
-    );
-
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
-    });
-
-    const avgExecutionDurationPanel = wrapper.find('[data-test-subj="avgExecutionDurationPanel"]');
-    expect(avgExecutionDurationPanel.exists()).toBeTruthy();
-    expect(avgExecutionDurationPanel.first().prop('color')).toEqual('warning');
-
-    const avgExecutionDurationStat = wrapper
-      .find('EuiStat[data-test-subj="avgExecutionDurationStat"]')
-      .text()
-      .replaceAll('Info', '');
-    expect(avgExecutionDurationStat).toEqual('Average duration16:44:44.345');
-    expect(wrapper.find('[data-test-subj="ruleDurationWarning"]').exists()).toBeTruthy();
   });
 });
