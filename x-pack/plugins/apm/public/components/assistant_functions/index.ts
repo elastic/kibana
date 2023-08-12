@@ -6,6 +6,10 @@
  */
 
 import { CoreStart } from '@kbn/core/public';
+import {
+  RegisterContextDefinition,
+  RegisterFunctionDefinition,
+} from '../../../../observability_ai_assistant/common/types';
 import { ApmPluginStartDeps } from '../../plugin';
 import { createCallApmApi } from '../../services/rest/create_call_apm_api';
 import { registerGetApmCorrelationsFunction } from './get_apm_correlations';
@@ -17,37 +21,39 @@ import { registerGetApmTimeseriesFunction } from './get_apm_timeseries';
 export function registerAssistantFunctions({
   pluginsStart,
   coreStart,
+  registerContext,
+  registerFunction,
 }: {
   pluginsStart: ApmPluginStartDeps;
   coreStart: CoreStart;
+  registerFunction: RegisterFunctionDefinition;
+  registerContext: RegisterContextDefinition;
 }) {
   createCallApmApi(coreStart);
 
-  pluginsStart.observabilityAIAssistant.register(
-    async ({ signal, registerContext, registerFunction }) => {
-      registerGetApmTimeseriesFunction({
-        registerFunction,
-      });
+  registerGetApmTimeseriesFunction({
+    registerFunction,
+  });
 
-      registerGetApmErrorDocumentFunction({
-        registerFunction,
-      });
+  registerGetApmErrorDocumentFunction({
+    registerFunction,
+  });
 
-      registerGetApmCorrelationsFunction({
-        registerFunction,
-      });
+  registerGetApmCorrelationsFunction({
+    registerFunction,
+  });
 
-      registerGetApmDownstreamDependenciesFunction({
-        registerFunction,
-      });
+  registerGetApmDownstreamDependenciesFunction({
+    registerFunction,
+  });
 
-      registerGetApmServiceSummaryFunction({
-        registerFunction,
-      });
+  registerGetApmServiceSummaryFunction({
+    registerFunction,
+  });
 
-      registerContext({
-        name: 'apm',
-        description: `
+  registerContext({
+    name: 'apm',
+    description: `
 There are four important data types in Elastic APM. Each of them have the 
 following fields:
 - service.name: the name of the service
@@ -122,7 +128,5 @@ dependencies, by grouping by \`span.destination.service.resource\`. Repeat this
 process over the next service its downstream dependencies until you identify a 
 root cause. If you can not find any similar changes, use correlations or 
 grouping to find attributes that could be causes for the change.`,
-      });
-    }
-  );
+  });
 }
