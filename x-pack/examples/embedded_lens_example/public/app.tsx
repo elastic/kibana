@@ -23,7 +23,7 @@ import type { LensEmbeddableInput, FormulaPublicApi } from '@kbn/lens-plugin/pub
 
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
-import { LensAttributesBuilder, MetricChart, MetricLayer } from '@kbn/lens-embeddable-utils';
+import { LensAttributesBuilder, XYChart, XYDataLayer } from '@kbn/lens-embeddable-utils';
 import type { StartDependencies } from './plugin';
 
 export const App = (props: {
@@ -47,33 +47,23 @@ export const App = (props: {
   const LensSaveModalComponent = props.plugins.lens.SaveModalComponent;
 
   const attributes = new LensAttributesBuilder({
-    // visualization: new XYChart({
-    //   layers: new XYDataLayer({
-    //     data: [
-    //       {
-    //         type: 'formula',
-    //         label: 'Count of Records',
-    //         value: 'count()',
-    //         color,
-    //       },
-    //     ],
-    //     options: {
-    //       seriesType: 'bar_stacked',
-    //       buckets: { type: 'date_histogram' },
-    //     },
-    //   }),
-    //   dataView: props.defaultDataView,
-    //   formulaAPI: props.formula,
-    // }),
-    visualization: new MetricChart({
-      layers: new MetricLayer({
-        data: {
-          type: 'formula',
-          label: 'Count of Records',
-          value: 'count()',
-          color,
-        },
-      }),
+    visualization: new XYChart({
+      layers: [
+        new XYDataLayer({
+          data: [
+            {
+              type: 'formula',
+              label: 'Count of Records',
+              value: 'count()',
+              color,
+            },
+          ],
+          options: {
+            seriesType: 'bar_stacked',
+            buckets: { type: 'date_histogram' },
+          },
+        }),
+      ],
       dataView: props.defaultDataView,
       formulaAPI: props.formula,
     }),
