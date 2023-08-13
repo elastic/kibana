@@ -132,6 +132,7 @@ describe('get_export_by_object_ids', () => {
           note: '# Investigative notes',
           version: 1,
           exceptions_list: getListArrayMock(),
+          custom_highlighted_fields: [],
         },
         exportDetails: {
           exported_exception_list_count: 0,
@@ -327,6 +328,7 @@ describe('get_export_by_object_ids', () => {
         version: 1,
         revision: 0,
         exceptions_list: getListArrayMock(),
+        custom_highlighted_fields: [],
       });
       expect(detailsJson).toEqual({
         exported_exception_list_count: 0,
@@ -523,7 +525,7 @@ describe('get_export_by_object_ids', () => {
             namespace: undefined,
             data_view_id: undefined,
             alert_suppression: undefined,
-            custom_highlighted_fields: undefined,
+            custom_highlighted_fields: [],
           },
         ],
       };

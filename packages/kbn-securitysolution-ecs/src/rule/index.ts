@@ -11,7 +11,6 @@ export interface RuleEcs {
   rule_id?: string[];
   name?: string[];
   false_positives?: string[];
-  custom_highlighted_fields?: string[];
   saved_id?: string[];
   timeline_id?: string[];
   timeline_title?: string[];

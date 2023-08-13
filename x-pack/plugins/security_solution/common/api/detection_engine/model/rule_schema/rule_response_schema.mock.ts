@@ -27,7 +27,6 @@ const getResponseBaseParams = (anchorDate: string = ANCHOR_DATE): SharedResponse
   description: 'some description',
   enabled: true,
   false_positives: ['false positive 1', 'false positive 2'],
-  custom_highlighted_fields: [],
   from: 'now-6m',
   immutable: false,
   name: 'Query with a rule id',
@@ -65,6 +64,7 @@ const getResponseBaseParams = (anchorDate: string = ANCHOR_DATE): SharedResponse
   timestamp_override: undefined,
   timestamp_override_fallback_disabled: undefined,
   namespace: undefined,
+  custom_highlighted_fields: undefined,
 });
 
 export const getRulesSchemaMock = (anchorDate: string = ANCHOR_DATE): QueryRule => ({
