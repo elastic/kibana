@@ -5,11 +5,47 @@
  * 2.0.
  */
 
+import type * as t from 'io-ts';
 import { parseDuration } from '@kbn/alerting-plugin/common/parse_duration';
 
-import type { DiffableRule } from '../api/detection_engine/prebuilt_rules/model/diff/diffable_rule/diffable_rule';
-import type { RuleSchedule } from '../api/detection_engine/prebuilt_rules/model/diff/diffable_rule/diffable_field_types';
-import type { RuleResponse } from '../api/detection_engine/model/rule_schema/rule_schemas';
+import type {
+  DiffableRule,
+  DiffableCustomQueryFields,
+  DiffableSavedQueryFields,
+  DiffableEqlFields,
+  DiffableThreatMatchFields,
+  DiffableThresholdFields,
+  DiffableMachineLearningFields,
+  DiffableNewTermsFields,
+} from '../api/detection_engine/prebuilt_rules/model/diff/diffable_rule/diffable_rule';
+import type {
+  RuleSchedule,
+  SavedKqlQuery,
+  RuleDataSource as DiffableRuleDataSource,
+  RuleKqlQuery as DiffableRuleKqlQuery,
+} from '../api/detection_engine/prebuilt_rules/model/diff/diffable_rule/diffable_field_types';
+import type {
+  RuleResponse,
+  querySchema,
+  savedQuerySchema,
+  eqlSchema,
+  threatMatchSchema,
+  thresholdSchema,
+  machineLearningSchema,
+  newTermsSchema,
+  SharedResponseProps,
+  KqlQueryLanguage,
+} from '../api/detection_engine/model/rule_schema/rule_schemas';
+import type { RuleFilterArray } from '../api/detection_engine/model/rule_schema/common_attributes';
+import { assertUnreachable } from '../utility_types';
+
+type RuleResponseCustomQueryFields = t.TypeOf<typeof querySchema.create>;
+type RuleResponseSavedQueryFields = t.TypeOf<typeof savedQuerySchema.create>;
+type RuleResponseEqlFields = t.TypeOf<typeof eqlSchema.create>;
+type RuleResponseThreatMatchFields = t.TypeOf<typeof threatMatchSchema.create>;
+type RuleResponseThresholdFields = t.TypeOf<typeof thresholdSchema.create>;
+type RuleResponseMachineLearningFields = t.TypeOf<typeof machineLearningSchema.create>;
+type RuleResponseNewTermsFields = t.TypeOf<typeof newTermsSchema.create>;
 
 interface RuleResponseScheduleFields {
   from: string;
@@ -17,8 +53,8 @@ interface RuleResponseScheduleFields {
   interval: string;
 }
 
-const extractRuleScheduleFields = (ruleSchedule: RuleSchedule): RuleResponseScheduleFields => {
-  const { interval, lookback } = ruleSchedule; // But can also be `Cannot parse: interval="${interval}"`. Should I default to smth?
+const extractRuleSchedule = (ruleSchedule: RuleSchedule): RuleResponseScheduleFields => {
+  const { interval, lookback } = ruleSchedule;
   const lookbackSeconds = Math.floor(parseDuration(lookback) / 1000);
   const intervalSeconds = Math.floor(parseDuration(interval) / 1000);
   const totalSeconds = lookbackSeconds + intervalSeconds;
@@ -36,22 +72,52 @@ const extractRuleScheduleFields = (ruleSchedule: RuleSchedule): RuleResponseSche
 
   return {
     from,
-    to: 'now', // TODO: When is it not `now`?
+    to: 'now',
     interval,
   };
 };
 
-const extractCommonFields = (diffableRule: DiffableRule) => {
-  const { from, to, interval } = extractRuleScheduleFields(diffableRule.rule_schedule);
+type RuleResponseDataSource = { index: string[] } | { data_view_id: string };
 
-  const commonFields = {
-    // --------------------- REQUIRED FIELDS
-    // Technical fields
+const extractDataSource = (
+  diffableRuleDataSource: DiffableRuleDataSource
+): RuleResponseDataSource => {
+  if (diffableRuleDataSource.type === 'index_patterns') {
+    return { index: diffableRuleDataSource.index_patterns };
+  } else if (diffableRuleDataSource.type === 'data_view') {
+    return { data_view_id: diffableRuleDataSource.data_view_id };
+  }
+
+  return assertUnreachable(diffableRuleDataSource);
+};
+
+type RuleResponseKqlQuery =
+  | { query: string; language: KqlQueryLanguage; filters: RuleFilterArray }
+  | { saved_id: string };
+
+const extractKqlQuery = (diffableRuleKqlQuery: DiffableRuleKqlQuery): RuleResponseKqlQuery => {
+  if (diffableRuleKqlQuery.type === 'inline_query') {
+    return {
+      query: diffableRuleKqlQuery.query,
+      language: diffableRuleKqlQuery.language,
+      filters: diffableRuleKqlQuery.filters,
+    };
+  }
+
+  if (diffableRuleKqlQuery.type === 'saved_query') {
+    return { saved_id: diffableRuleKqlQuery.saved_query_id };
+  }
+
+  return assertUnreachable(diffableRuleKqlQuery);
+};
+
+const extractCommonFields = (diffableRule: DiffableRule): Partial<SharedResponseProps> => {
+  const { from, to, interval } = extractRuleSchedule(diffableRule.rule_schedule);
+
+  const commonFields: Partial<SharedResponseProps> = {
     rule_id: diffableRule.rule_id,
     version: diffableRule.version,
     meta: diffableRule.meta,
-
-    // Main domain fields
     name: diffableRule.name,
     tags: diffableRule.tags,
     description: diffableRule.description,
@@ -59,8 +125,6 @@ const extractCommonFields = (diffableRule: DiffableRule) => {
     severity_mapping: diffableRule.severity_mapping,
     risk_score: diffableRule.risk_score,
     risk_score_mapping: diffableRule.risk_score_mapping,
-
-    // About -> Advanced settings
     references: diffableRule.references,
     false_positives: diffableRule.false_positives,
     threat: diffableRule.threat,
@@ -69,8 +133,6 @@ const extractCommonFields = (diffableRule: DiffableRule) => {
     required_fields: diffableRule.required_fields,
     author: diffableRule.author,
     license: diffableRule.license,
-
-    // Other domain fields
     from,
     to,
     interval,
@@ -109,25 +171,14 @@ const extractCommonFields = (diffableRule: DiffableRule) => {
   return commonFields;
 };
 
-const extractCustomQueryFields = (diffableRule: DiffableRule) => {
-  if (diffableRule.type !== 'query') {
-    return {};
-  }
-
-  const customQueryFields = {
+const extractCustomQueryFields = (
+  diffableRule: DiffableCustomQueryFields
+): RuleResponseCustomQueryFields => {
+  const customQueryFields: RuleResponseCustomQueryFields = {
     type: diffableRule.type,
-    query: diffableRule.kql_query.query ?? '',
-    language: diffableRule.kql_query.language ?? '',
-    filters: diffableRule.kql_query.filters ?? [],
+    ...(diffableRule.data_source ? extractDataSource(diffableRule.data_source) : {}),
+    ...(diffableRule.kql_query ? extractKqlQuery(diffableRule.kql_query) : {}),
   };
-
-  if (diffableRule.data_source?.type === 'index_patterns') {
-    customQueryFields.index = diffableRule.data_source.index_patterns;
-  }
-
-  if (diffableRule.data_source?.type === 'data_view') {
-    customQueryFields.data_view_id = diffableRule.data_source.data_view_id;
-  }
 
   if (diffableRule.alert_suppression) {
     customQueryFields.alert_suppression = diffableRule.alert_suppression;
@@ -136,28 +187,17 @@ const extractCustomQueryFields = (diffableRule: DiffableRule) => {
   return customQueryFields;
 };
 
-const extractSavedQueryFields = (diffableRule: DiffableRule) => {
-  if (diffableRule.type !== 'saved_query') {
-    return {};
-  }
+const extractSavedQueryFields = (
+  diffableRule: DiffableSavedQueryFields
+): RuleResponseSavedQueryFields => {
+  /* Typecasting to SavedKqlQuery because a "save_query" DiffableRule can only have "kql_query" of type SavedKqlQuery */
+  const diffableRuleKqlQuery = diffableRule.kql_query as SavedKqlQuery;
 
-  const savedQueryFields = {
+  const savedQueryFields: RuleResponseSavedQueryFields = {
     type: diffableRule.type,
-    saved_id: diffableRule.kql_query.saved_query_id,
+    saved_id: diffableRuleKqlQuery.saved_query_id,
+    ...(diffableRule.data_source ? extractDataSource(diffableRule.data_source) : {}),
   };
-
-  if (diffableRule.kql_query?.language) {
-    // "lucene" language disappears when you run convertRuleToDiffable
-    savedQueryFields.language = diffableRule.kql_query.language;
-  }
-
-  if (diffableRule.data_source?.type === 'index_patterns') {
-    savedQueryFields.index = diffableRule.data_source.index_patterns;
-  }
-
-  if (diffableRule.data_source?.type === 'data_view') {
-    savedQueryFields.data_view_id = diffableRule.data_source.data_view_id;
-  }
 
   if (diffableRule.alert_suppression) {
     savedQueryFields.alert_suppression = diffableRule.alert_suppression;
@@ -166,12 +206,8 @@ const extractSavedQueryFields = (diffableRule: DiffableRule) => {
   return savedQueryFields;
 };
 
-const extractEqlFields = (diffableRule: DiffableRule) => {
-  if (diffableRule.type !== 'eql') {
-    return {};
-  }
-
-  const eqlFields = {
+const extractEqlFields = (diffableRule: DiffableEqlFields): RuleResponseEqlFields => {
+  const eqlFields: RuleResponseEqlFields = {
     type: diffableRule.type,
     query: diffableRule.eql_query.query,
     language: diffableRule.eql_query.language,
@@ -179,35 +215,27 @@ const extractEqlFields = (diffableRule: DiffableRule) => {
     event_category_override: diffableRule.event_category_override,
     timestamp_field: diffableRule.timestamp_field,
     tiebreaker_field: diffableRule.tiebreaker_field,
+    ...(diffableRule.data_source ? extractDataSource(diffableRule.data_source) : {}),
   };
-
-  if (diffableRule.data_source?.type === 'index_patterns') {
-    eqlFields.index = diffableRule.data_source.index_patterns;
-  }
-
-  if (diffableRule.data_source?.type === 'data_view') {
-    eqlFields.data_view_id = diffableRule.data_source.data_view_id;
-  }
 
   return eqlFields;
 };
 
-const extractThreatMatchFields = (diffableRule: DiffableRule) => {
-  if (diffableRule.type !== 'threat_match') {
-    return {};
-  }
-
-  const threatMatchFields = {
+const extractThreatMatchFields = (
+  diffableRule: DiffableThreatMatchFields
+): RuleResponseThreatMatchFields => {
+  const threatMatchFields: RuleResponseThreatMatchFields = {
     type: diffableRule.type,
-    query: diffableRule.kql_query.query ?? '',
-    language: diffableRule.kql_query.language ?? '',
-    filters: diffableRule.kql_query.filters ?? [],
+    query:
+      '' /* Indicator match rules have a "query" equal to an empty string if saved query is used */,
     threat_query: diffableRule.threat_query.query ?? '',
     threat_language: diffableRule.threat_query.language ?? '',
     threat_filters: diffableRule.threat_query.filters ?? [],
     threat_index: diffableRule.threat_index,
     threat_mapping: diffableRule.threat_mapping,
     threat_indicator_path: diffableRule.threat_indicator_path,
+    ...(diffableRule.data_source ? extractDataSource(diffableRule.data_source) : {}),
+    ...(diffableRule.kql_query ? extractKqlQuery(diffableRule.kql_query) : {}),
   };
 
   if (diffableRule.concurrent_searches) {
@@ -218,54 +246,27 @@ const extractThreatMatchFields = (diffableRule: DiffableRule) => {
     threatMatchFields.items_per_search = diffableRule.items_per_search;
   }
 
-  if (diffableRule.data_source?.type === 'index_patterns') {
-    threatMatchFields.index = diffableRule.data_source.index_patterns;
-  }
-
-  if (diffableRule.data_source?.type === 'data_view') {
-    threatMatchFields.data_view_id = diffableRule.data_source.data_view_id;
-  }
-
   return threatMatchFields;
 };
 
-const extractThresholdFields = (diffableRule: DiffableRule) => {
-  if (diffableRule.type !== 'threshold') {
-    return {};
-  }
-
-  const thresholdFields = {
+const extractThresholdFields = (
+  diffableRule: DiffableThresholdFields
+): RuleResponseThresholdFields => {
+  const thresholdFields: RuleResponseThresholdFields = {
     type: diffableRule.type,
-    query: diffableRule.kql_query.query ?? '',
-    filters: diffableRule.kql_query.filters ?? [],
+    query: '' /* Threshold rules have a "query" equal to an empty string if saved query is used */,
     threshold: diffableRule.threshold,
+    ...(diffableRule.data_source ? extractDataSource(diffableRule.data_source) : {}),
+    ...(diffableRule.kql_query ? extractKqlQuery(diffableRule.kql_query) : {}),
   };
-
-  if (diffableRule.kql_query?.language) {
-    thresholdFields.language = diffableRule.kql_query.language; // Also "filters" gets removed when converting to DiffableRule
-  }
-
-  if (diffableRule.kql_query?.type === 'saved_query') {
-    thresholdFields.saved_id = diffableRule.kql_query.saved_query_id;
-  }
-
-  if (diffableRule.data_source?.type === 'index_patterns') {
-    thresholdFields.index = diffableRule.data_source.index_patterns;
-  }
-
-  if (diffableRule.data_source?.type === 'data_view') {
-    thresholdFields.data_view_id = diffableRule.data_source.data_view_id;
-  }
 
   return thresholdFields;
 };
 
-const extractMachineLearningFields = (diffableRule: DiffableRule) => {
-  if (diffableRule.type !== 'machine_learning') {
-    return {};
-  }
-
-  const machineLearningFields = {
+const extractMachineLearningFields = (
+  diffableRule: DiffableMachineLearningFields
+): RuleResponseMachineLearningFields => {
+  const machineLearningFields: RuleResponseMachineLearningFields = {
     type: diffableRule.type,
     machine_learning_job_id: diffableRule.machine_learning_job_id,
     anomaly_threshold: diffableRule.anomaly_threshold,
@@ -274,32 +275,23 @@ const extractMachineLearningFields = (diffableRule: DiffableRule) => {
   return machineLearningFields;
 };
 
-const extractNewTermsFields = (diffableRule: DiffableRule) => {
-  if (diffableRule.type !== 'new_terms') {
-    return {};
-  }
-
-  const newTermsFields = {
+const extractNewTermsFields = (
+  diffableRule: DiffableNewTermsFields
+): RuleResponseNewTermsFields => {
+  const newTermsFields: RuleResponseNewTermsFields = {
     type: diffableRule.type,
-    query: diffableRule.kql_query.query ?? '',
-    language: diffableRule.kql_query.language ?? '',
-    filters: diffableRule.kql_query.filters ?? [],
+    query: diffableRule.kql_query.query,
+    language: diffableRule.kql_query.language,
+    filters: diffableRule.kql_query.filters,
     new_terms_fields: diffableRule.new_terms_fields,
     history_window_start: diffableRule.history_window_start,
+    ...(diffableRule.data_source ? extractDataSource(diffableRule.data_source) : {}),
   };
-
-  if (diffableRule.data_source?.type === 'index_patterns') {
-    newTermsFields.index = diffableRule.data_source.index_patterns;
-  }
-
-  if (diffableRule.data_source?.type === 'data_view') {
-    newTermsFields.data_view_id = diffableRule.data_source.data_view_id;
-  }
 
   return newTermsFields;
 };
 
-export const diffableRuleToRuleResponse = (diffableRule: DiffableRule): RuleResponse => {
+export const diffableRuleToRuleResponse = (diffableRule: DiffableRule): Partial<RuleResponse> => {
   const commonFields = extractCommonFields(diffableRule);
 
   if (diffableRule.type === 'query') {
@@ -351,7 +343,5 @@ export const diffableRuleToRuleResponse = (diffableRule: DiffableRule): RuleResp
     };
   }
 
-  return {
-    ...commonFields,
-  };
+  return assertUnreachable(diffableRule);
 };

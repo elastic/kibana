@@ -23,7 +23,7 @@ export const AddPrebuiltRulesFlyout = () => {
     return null;
   }
 
-  const ruleResponse: RuleResponse = diffableRuleToRuleResponse(flyoutRule);
+  const ruleResponse: Partial<RuleResponse> = diffableRuleToRuleResponse(flyoutRule);
 
   return (
     <RuleDetailsFlyout

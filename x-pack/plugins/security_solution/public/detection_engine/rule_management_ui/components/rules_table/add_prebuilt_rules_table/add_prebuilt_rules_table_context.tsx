@@ -142,7 +142,9 @@ export const AddPrebuiltRulesTableContextProvider = ({
   const { mutateAsync: installAllRulesRequest } = usePerformInstallAllRules();
   const { mutateAsync: installSpecificRulesRequest } = usePerformInstallSpecificRules();
 
-  const { openFlyoutForRuleId, closeFlyout, flyoutRule } = useRuleDetailsFlyout(rules);
+  const filteredRules = useFilterPrebuiltRulesToInstall({ filterOptions, rules });
+
+  const { openFlyoutForRuleId, closeFlyout, flyoutRule } = useRuleDetailsFlyout(filteredRules);
   const isFlyoutInstallButtonDisabled = Boolean(
     (flyoutRule?.rule_id && loadingRules.includes(flyoutRule.rule_id)) ||
       isRefetching ||
@@ -209,8 +211,6 @@ export const AddPrebuiltRulesTableContextProvider = ({
       closeFlyout,
     ]
   );
-
-  const filteredRules = useFilterPrebuiltRulesToInstall({ filterOptions, rules });
 
   const providerValue = useMemo<AddPrebuiltRulesContextType>(() => {
     return {

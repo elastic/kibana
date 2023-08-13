@@ -139,8 +139,10 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
   const { mutateAsync: upgradeAllRulesRequest } = usePerformUpgradeAllRules();
   const { mutateAsync: upgradeSpecificRulesRequest } = usePerformUpgradeSpecificRules();
 
+  const filteredRules = useFilterPrebuiltRulesToUpgrade({ filterOptions, rules });
+
   const { openFlyoutForRuleId, closeFlyout, flyoutRule } = useRuleDetailsFlyout(
-    rules.map(({ rule }) => rule)
+    filteredRules.map(({ rule }) => rule)
   );
   const isFlyoutInstallButtonDisabled = Boolean(
     (flyoutRule?.rule_id && loadingRules.includes(flyoutRule.rule_id)) ||
@@ -237,8 +239,6 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
       closeFlyout,
     ]
   );
-
-  const filteredRules = useFilterPrebuiltRulesToUpgrade({ filterOptions, rules });
 
   const providerValue = useMemo<UpgradePrebuiltRulesContextType>(() => {
     return {

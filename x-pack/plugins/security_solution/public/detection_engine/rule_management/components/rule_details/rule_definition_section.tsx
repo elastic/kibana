@@ -25,7 +25,7 @@ import { FieldIcon } from '@kbn/react-field';
 import { castEsToKbnFieldTypeName } from '@kbn/field-types';
 import type { RuleResponse } from '../../../../../common/api/detection_engine/model/rule_schema/rule_schemas';
 import type { Threshold as ThresholdType } from '../../../../../common/api/detection_engine/model/rule_schema/specific_attributes/threshold_attributes';
-import type { RequiredFieldArray } from '../../../../../common/api/detection_engine/model/rule_schema/common_attributes/required_fields';
+import type { RequiredFieldArray } from '../../../../../common/api/detection_engine/model/rule_schema/common_attributes';
 import { assertUnreachable } from '../../../../../common/utility_types';
 import * as descriptionStepI18n from '../../../../detections/components/rules/description_step/translations';
 import { MlJobsDescription } from '../../../../detections/components/rules/ml_jobs_description/ml_jobs_description';
@@ -166,7 +166,7 @@ const ThreatMapping = ({ threatMapping }: ThreatMappingProps) => {
 };
 
 const prepareDefinitionSectionListItems = (
-  rule: RuleResponse
+  rule: Partial<RuleResponse>
 ): EuiDescriptionListProps['listItems'] => {
   const definitionSectionListItems: EuiDescriptionListProps['listItems'] = [];
 
@@ -184,10 +184,12 @@ const prepareDefinitionSectionListItems = (
     });
   }
 
-  definitionSectionListItems.push({
-    title: i18n.RULE_TYPE_FIELD_LABEL,
-    description: <RuleType type={rule.type} />,
-  });
+  if (rule.type) {
+    definitionSectionListItems.push({
+      title: i18n.RULE_TYPE_FIELD_LABEL,
+      description: <RuleType type={rule.type} />,
+    });
+  }
 
   if ('machine_learning_job_id' in rule) {
     definitionSectionListItems.push({
@@ -196,7 +198,7 @@ const prepareDefinitionSectionListItems = (
     });
   }
 
-  if (rule.related_integrations.length > 0) {
+  if (rule.related_integrations && rule.related_integrations.length > 0) {
     definitionSectionListItems.push({
       title: i18n.RELATED_INTEGRATIONS_FIELD_LABEL,
       description: (
@@ -205,7 +207,7 @@ const prepareDefinitionSectionListItems = (
     });
   }
 
-  if (rule.required_fields.length > 0) {
+  if (rule.required_fields && rule.required_fields.length > 0) {
     definitionSectionListItems.push({
       title: i18n.REQUIRED_FIELDS_FIELD_LABEL,
       description: <RequiredFields requiredFields={rule.required_fields} />,
@@ -244,7 +246,7 @@ const prepareDefinitionSectionListItems = (
 };
 
 export interface RuleDefinitionSectionProps {
-  rule: RuleResponse;
+  rule: Partial<RuleResponse>;
 }
 
 export const RuleDefinitionSection = ({ rule }: RuleDefinitionSectionProps) => {

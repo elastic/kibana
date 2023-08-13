@@ -114,7 +114,7 @@ const ExpandableSection = ({ title, children }: ExpandableSectionProps) => {
 };
 
 interface RuleDetailsFlyoutProps {
-  rule: RuleResponse;
+  rule: Partial<RuleResponse>;
   actionButtonLabel: string;
   isActionButtonDisabled: boolean;
   onActionButtonClick: (ruleId: string) => void;
@@ -204,7 +204,7 @@ export const RuleDetailsFlyout = ({
             <EuiButton
               disabled={isActionButtonDisabled}
               onClick={() => {
-                onActionButtonClick(rule.rule_id);
+                onActionButtonClick(rule.rule_id ?? '');
                 closeFlyout();
               }}
               fill

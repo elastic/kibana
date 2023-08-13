@@ -212,13 +212,18 @@ interface TagsProps {
 
 const Tags = ({ tags }: TagsProps) => <BadgeList badges={tags} />;
 
-const prepareAboutSectionListItems = (rule: RuleResponse): EuiDescriptionListProps['listItems'] => {
+// eslint-disable-next-line complexity
+const prepareAboutSectionListItems = (
+  rule: Partial<RuleResponse>
+): EuiDescriptionListProps['listItems'] => {
   const aboutSectionListItems: EuiDescriptionListProps['listItems'] = [];
 
-  aboutSectionListItems.push({
-    title: i18n.AUTHOR_FIELD_LABEL,
-    description: <Author author={rule.author} />,
-  });
+  if (rule.author) {
+    aboutSectionListItems.push({
+      title: i18n.AUTHOR_FIELD_LABEL,
+      description: <Author author={rule.author} />,
+    });
+  }
 
   if (rule.building_block_type) {
     aboutSectionListItems.push({
@@ -227,12 +232,14 @@ const prepareAboutSectionListItems = (rule: RuleResponse): EuiDescriptionListPro
     });
   }
 
-  aboutSectionListItems.push({
-    title: i18n.SEVERITY_FIELD_LABEL,
-    description: <SeverityBadge value={rule.severity} />,
-  });
+  if (rule.severity) {
+    aboutSectionListItems.push({
+      title: i18n.SEVERITY_FIELD_LABEL,
+      description: <SeverityBadge value={rule.severity} />,
+    });
+  }
 
-  if (rule.severity_mapping.length > 0) {
+  if (rule.severity_mapping && rule.severity_mapping.length > 0) {
     aboutSectionListItems.push(
       ...rule.severity_mapping
         .filter((severityMappingItem) => severityMappingItem.field !== '')
@@ -245,12 +252,14 @@ const prepareAboutSectionListItems = (rule: RuleResponse): EuiDescriptionListPro
     );
   }
 
-  aboutSectionListItems.push({
-    title: i18n.RISK_SCORE_FIELD_LABEL,
-    description: <RiskScore riskScore={rule.risk_score} />,
-  });
+  if (rule.risk_score) {
+    aboutSectionListItems.push({
+      title: i18n.RISK_SCORE_FIELD_LABEL,
+      description: <RiskScore riskScore={rule.risk_score} />,
+    });
+  }
 
-  if (rule.risk_score_mapping.length > 0) {
+  if (rule.risk_score_mapping && rule.risk_score_mapping.length > 0) {
     aboutSectionListItems.push(
       ...rule.risk_score_mapping
         .filter((riskScoreMappingItem) => riskScoreMappingItem.field !== '')
@@ -263,14 +272,14 @@ const prepareAboutSectionListItems = (rule: RuleResponse): EuiDescriptionListPro
     );
   }
 
-  if (rule.references.length > 0) {
+  if (rule.references && rule.references.length > 0) {
     aboutSectionListItems.push({
       title: i18n.REFERENCES_FIELD_LABEL,
       description: <References references={rule.references} />,
     });
   }
 
-  if (rule.false_positives.length > 0) {
+  if (rule.false_positives && rule.false_positives.length > 0) {
     aboutSectionListItems.push({
       title: i18n.FALSE_POSITIVES_FIELD_LABEL,
       description: <FalsePositives falsePositives={rule.false_positives} />,
@@ -291,7 +300,7 @@ const prepareAboutSectionListItems = (rule: RuleResponse): EuiDescriptionListPro
     });
   }
 
-  if (rule.threat.length > 0) {
+  if (rule.threat && rule.threat.length > 0) {
     aboutSectionListItems.push({
       title: i18n.THREAT_FIELD_LABEL,
       description: <Threat threat={rule.threat} />,
@@ -312,7 +321,7 @@ const prepareAboutSectionListItems = (rule: RuleResponse): EuiDescriptionListPro
     });
   }
 
-  if (rule.tags.length > 0) {
+  if (rule.tags && rule.tags.length > 0) {
     aboutSectionListItems.push({
       title: i18n.TAGS_FIELD_LABEL,
       description: <Tags tags={rule.tags} />,
@@ -323,7 +332,7 @@ const prepareAboutSectionListItems = (rule: RuleResponse): EuiDescriptionListPro
 };
 
 export interface RuleAboutSectionProps {
-  rule: RuleResponse;
+  rule: Partial<RuleResponse>;
 }
 
 export const RuleAboutSection = ({ rule }: RuleAboutSectionProps) => {
@@ -332,14 +341,16 @@ export const RuleAboutSection = ({ rule }: RuleAboutSectionProps) => {
   return (
     <div>
       <EuiSpacer size="m" />
-      <EuiDescriptionList
-        listItems={[
-          {
-            title: i18n.DESCRIPTION_FIELD_LABEL,
-            description: <Description description={rule.description} />,
-          },
-        ]}
-      />
+      {rule.description && (
+        <EuiDescriptionList
+          listItems={[
+            {
+              title: i18n.DESCRIPTION_FIELD_LABEL,
+              description: <Description description={rule.description} />,
+            },
+          ]}
+        />
+      )}
       <EuiSpacer size="m" />
       <EuiDescriptionList type="column" listItems={aboutSectionListItems} />
     </div>

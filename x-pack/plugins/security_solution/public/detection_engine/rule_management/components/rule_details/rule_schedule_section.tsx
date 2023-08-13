@@ -27,20 +27,25 @@ const From = ({ from, interval }: FromProps) => (
 );
 
 export interface RuleScheduleSectionProps {
-  rule: RuleResponse;
+  rule: Partial<RuleResponse>;
 }
 
 export const RuleScheduleSection = ({ rule }: RuleScheduleSectionProps) => {
-  const ruleSectionListItems = [
-    {
+  const ruleSectionListItems = [];
+
+  if (rule.interval) {
+    ruleSectionListItems.push({
       title: i18n.INTERVAL_FIELD_LABEL,
       description: <Interval interval={rule.interval} />,
-    },
-    {
+    });
+  }
+
+  if (rule.interval && rule.from) {
+    ruleSectionListItems.push({
       title: i18n.FROM_FIELD_LABEL,
       description: <From from={rule.from} interval={rule.interval} />,
-    },
-  ];
+    });
+  }
 
   return (
     <div>
