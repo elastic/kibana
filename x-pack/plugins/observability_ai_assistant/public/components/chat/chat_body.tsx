@@ -15,7 +15,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import type { Message } from '../../../common/types';
 import type { UseGenAIConnectorsResult } from '../../hooks/use_genai_connectors';
 import type { UseKnowledgeBaseResult } from '../../hooks/use_knowledge_base';
@@ -73,11 +73,53 @@ export function ChatBody({
     onChatComplete,
   });
 
+  const timelineContainerRef = useRef<HTMLDivElement | null>(null);
+
   let footer: React.ReactNode;
 
   const isLoading = Boolean(
     connectors.loading || knowledgeBase.status.loading || last(timeline.items)?.loading
   );
+
+  useEffect(() => {
+    const parent = timelineContainerRef.current?.parentElement;
+    if (!parent) {
+      return;
+    }
+
+    let rafId: number | undefined;
+
+    const isAtBottom = () => parent.scrollTop >= parent.scrollHeight - parent.offsetHeight;
+
+    const stick = () => {
+      if (!isAtBottom()) {
+        parent.scrollTop = parent.scrollHeight - parent.offsetHeight;
+      }
+      rafId = requestAnimationFrame(stick);
+    };
+
+    const unstick = () => {
+      if (rafId) {
+        cancelAnimationFrame(rafId);
+        rafId = undefined;
+      }
+    };
+
+    const onScroll = (event: Event) => {
+      if (isAtBottom()) {
+        stick();
+      } else {
+        unstick();
+      }
+    };
+
+    parent.addEventListener('scroll', onScroll);
+
+    return () => {
+      unstick();
+      parent.removeEventListener('scroll', onScroll);
+    };
+  }, [timelineContainerRef.current]);
 
   if (connectors.loading || knowledgeBase.status.loading) {
     footer = (
@@ -96,15 +138,17 @@ export function ChatBody({
     footer = (
       <>
         <EuiFlexItem grow className={timelineClassName}>
-          <EuiPanel hasBorder={false} hasShadow={false} paddingSize="m">
-            <ChatTimeline
-              items={timeline.items}
-              onEdit={timeline.onEdit}
-              onFeedback={timeline.onFeedback}
-              onRegenerate={timeline.onRegenerate}
-              onStopGenerating={timeline.onStopGenerating}
-            />
-          </EuiPanel>
+          <div ref={timelineContainerRef}>
+            <EuiPanel hasBorder={false} hasShadow={false} paddingSize="m">
+              <ChatTimeline
+                items={timeline.items}
+                onEdit={timeline.onEdit}
+                onFeedback={timeline.onFeedback}
+                onRegenerate={timeline.onRegenerate}
+                onStopGenerating={timeline.onStopGenerating}
+              />
+            </EuiPanel>
+          </div>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiHorizontalRule margin="none" />
