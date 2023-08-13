@@ -64,6 +64,16 @@ describe('output preconfiguration', () => {
           hosts: ['http://es.co:80'],
           is_preconfigured: true,
         },
+        {
+          id: 'existing-kafka-output-1',
+          is_default: false,
+          is_default_monitoring: false,
+          name: 'Kafka Output 1',
+          // @ts-ignore
+          type: 'kafka',
+          hosts: ['kafka.co:80'],
+          is_preconfigured: true,
+        },
       ];
     });
   });
@@ -104,6 +114,25 @@ describe('output preconfiguration', () => {
         is_default: false,
         is_default_monitoring: false,
         hosts: ['http://test.fr'],
+      },
+    ]);
+
+    expect(mockedOutputService.create).toBeCalled();
+    expect(mockedOutputService.update).not.toBeCalled();
+    expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toBeCalled();
+  });
+
+  it('should create preconfigured kafka output that does not exists', async () => {
+    const soClient = savedObjectsClientMock.create();
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    await createOrUpdatePreconfiguredOutputs(soClient, esClient, [
+      {
+        id: 'non-existing-kafka-output-1',
+        name: 'Output 1',
+        type: 'kafka',
+        is_default: false,
+        is_default_monitoring: false,
+        hosts: ['test.fr:2000'],
       },
     ]);
 
@@ -238,6 +267,26 @@ describe('output preconfiguration', () => {
     expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).toBeCalled();
   });
 
+  it('should update output if preconfigured kafka output exists and changed', async () => {
+    const soClient = savedObjectsClientMock.create();
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    soClient.find.mockResolvedValue({ saved_objects: [], page: 0, per_page: 0, total: 0 });
+    await createOrUpdatePreconfiguredOutputs(soClient, esClient, [
+      {
+        id: 'existing-kafka-output-1',
+        is_default: false,
+        is_default_monitoring: false,
+        name: 'Kafka Output 1',
+        type: 'kafka',
+        hosts: ['kafka.co:8080'],
+      },
+    ]);
+
+    expect(mockedOutputService.create).not.toBeCalled();
+    expect(mockedOutputService.update).toBeCalled();
+    expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).toBeCalled();
+  });
+
   it('should not update output if preconfigured output exists and did not changed', async () => {
     const soClient = savedObjectsClientMock.create();
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
@@ -250,6 +299,26 @@ describe('output preconfiguration', () => {
         name: 'Output 1',
         type: 'elasticsearch',
         hosts: ['http://newhostichanged.co:9201'], // field that changed
+      },
+    ]);
+
+    expect(mockedOutputService.create).not.toBeCalled();
+    expect(mockedOutputService.update).toBeCalled();
+    expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).toBeCalled();
+  });
+
+  it('should not update output if preconfigured kafka output exists and did not change', async () => {
+    const soClient = savedObjectsClientMock.create();
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    soClient.find.mockResolvedValue({ saved_objects: [], page: 0, per_page: 0, total: 0 });
+    await createOrUpdatePreconfiguredOutputs(soClient, esClient, [
+      {
+        id: 'existing-kafka-output-1',
+        is_default: false,
+        is_default_monitoring: false,
+        name: 'Kafka Output 1',
+        type: 'kafka',
+        hosts: ['kafka.co:8080'],
       },
     ]);
 

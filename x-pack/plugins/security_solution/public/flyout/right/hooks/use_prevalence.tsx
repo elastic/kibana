@@ -7,10 +7,10 @@
 
 import type { BrowserFields, TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import type { ReactElement } from 'react';
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import { getSummaryRows } from '../../../common/components/event_details/get_alert_summary_rows';
 import { PrevalenceOverviewRow } from '../components/prevalence_overview_row';
-import { INSIGHTS_PREVALENCE_TEST_ID } from '../components/test_ids';
+import { INSIGHTS_PREVALENCE_ROW_TEST_ID } from '../components/test_ids';
 
 export interface UsePrevalenceParams {
   /**
@@ -30,16 +30,6 @@ export interface UsePrevalenceParams {
    */
   scopeId: string;
 }
-export interface UsePrevalenceResult {
-  /**
-   * Returns all row children to render
-   */
-  prevalenceRows: ReactElement[];
-  /**
-   * Returns true if all row children render null
-   */
-  empty: boolean;
-}
 
 /**
  * This hook retrieves the highlighted fields from the {@link getSummaryRows} method, then iterates through them
@@ -52,9 +42,7 @@ export const usePrevalence = ({
   browserFields,
   dataFormattedForFieldBrowser,
   scopeId,
-}: UsePrevalenceParams): UsePrevalenceResult => {
-  const [count, setCount] = useState(0); // TODO this needs to be changed at it causes a re-render when the count is updated
-
+}: UsePrevalenceParams): ReactElement[] => {
   // retrieves the highlighted fields
   const summaryRows = useMemo(
     () =>
@@ -68,7 +56,7 @@ export const usePrevalence = ({
     [browserFields, dataFormattedForFieldBrowser, eventId, scopeId]
   );
 
-  const prevalenceRows = useMemo(
+  return useMemo(
     () =>
       summaryRows.map((row) => {
         const highlightedField = {
@@ -79,17 +67,11 @@ export const usePrevalence = ({
         return (
           <PrevalenceOverviewRow
             highlightedField={highlightedField}
-            callbackIfNull={() => setCount((prevCount) => prevCount + 1)}
-            data-test-subj={INSIGHTS_PREVALENCE_TEST_ID}
+            data-test-subj={INSIGHTS_PREVALENCE_ROW_TEST_ID}
             key={row.description.data.field}
           />
         );
       }),
     [summaryRows]
   );
-
-  return {
-    prevalenceRows,
-    empty: count >= summaryRows.length,
-  };
 };

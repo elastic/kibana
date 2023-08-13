@@ -7,13 +7,13 @@
 
 import type { FC } from 'react';
 import React, { useCallback } from 'react';
-import { EuiButtonEmpty, EuiFlexGroup, EuiPanel } from '@elastic/eui';
+import { EuiFlexGroup } from '@elastic/eui';
 import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
+import { ExpandablePanel } from '../../shared/components/expandable_panel';
 import { usePrevalence } from '../hooks/use_prevalence';
 import { INSIGHTS_PREVALENCE_TEST_ID } from './test_ids';
-import { InsightsSubSection } from './insights_subsection';
 import { useRightPanelContext } from '../context';
-import { PREVALENCE_TEXT, PREVALENCE_TITLE, VIEW_ALL } from './translations';
+import { PREVALENCE_TITLE } from './translations';
 import { LeftPanelKey, LeftPanelInsightsTabPath } from '../../left';
 
 /**
@@ -38,34 +38,30 @@ export const PrevalenceOverview: FC = () => {
     });
   }, [eventId, openLeftPanel, indexName, scopeId]);
 
-  const { empty, prevalenceRows } = usePrevalence({
+  const prevalenceRows = usePrevalence({
     eventId,
     browserFields,
     dataFormattedForFieldBrowser,
     scopeId,
   });
 
-  if (!eventId || !browserFields || !dataFormattedForFieldBrowser || empty) {
+  if (!eventId || !browserFields || !dataFormattedForFieldBrowser) {
     return null;
   }
 
   return (
-    <InsightsSubSection title={PREVALENCE_TITLE} data-test-subj={INSIGHTS_PREVALENCE_TEST_ID}>
-      <EuiPanel hasShadow={false} hasBorder={true} paddingSize="s">
-        <EuiFlexGroup direction="column" gutterSize="none">
-          {prevalenceRows}
-        </EuiFlexGroup>
-      </EuiPanel>
-      <EuiButtonEmpty
-        onClick={goToCorrelationsTab}
-        iconType="arrowStart"
-        iconSide="left"
-        size="s"
-        data-test-subj={`${INSIGHTS_PREVALENCE_TEST_ID}ViewAllButton`}
-      >
-        {VIEW_ALL(PREVALENCE_TEXT)}
-      </EuiButtonEmpty>
-    </InsightsSubSection>
+    <ExpandablePanel
+      header={{
+        title: PREVALENCE_TITLE,
+        callback: goToCorrelationsTab,
+        iconType: 'arrowStart',
+      }}
+      data-test-subj={INSIGHTS_PREVALENCE_TEST_ID}
+    >
+      <EuiFlexGroup direction="column" gutterSize="none">
+        {prevalenceRows}
+      </EuiFlexGroup>
+    </ExpandablePanel>
   );
 };
 

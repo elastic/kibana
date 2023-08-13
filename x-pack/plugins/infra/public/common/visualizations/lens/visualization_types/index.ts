@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export { XYChart } from './xy_chart';
+export { XYChart, type XYVisualOptions } from './xy_chart';
 export { MetricChart } from './metric_chart';
 
 export * from './layers';

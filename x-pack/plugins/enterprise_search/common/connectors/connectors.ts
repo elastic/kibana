@@ -151,6 +151,17 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     serviceType: 'dropbox',
   },
   {
+    iconPath: 'gmail.svg',
+    isBeta: false,
+    isNative: false,
+    isTechPreview: true,
+    keywords: ['google', 'gmail', 'connector', 'mail'],
+    name: i18n.translate('xpack.enterpriseSearch.content.nativeConnectors.gmail.name', {
+      defaultMessage: 'Gmail',
+    }),
+    serviceType: 'gmail',
+  },
+  {
     iconPath: 'oracle.svg',
     isBeta: true,
     isNative: false,
@@ -180,6 +191,17 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
       defaultMessage: 'ServiceNow',
     }),
     serviceType: 'servicenow',
+  },
+  {
+    iconPath: 'slack.svg',
+    isBeta: false,
+    isNative: false,
+    isTechPreview: true,
+    keywords: ['slack', 'connector'],
+    name: i18n.translate('xpack.enterpriseSearch.content.nativeConnectors.slack.name', {
+      defaultMessage: 'Slack',
+    }),
+    serviceType: 'slack',
   },
   {
     iconPath: 'sharepoint_server.svg',
