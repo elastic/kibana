@@ -266,6 +266,13 @@ const OverrideColumn = styled(EuiFlexItem)`
   text-overflow: ellipsis;
 `;
 
+const OverrideValueColumn = styled(EuiFlexItem)`
+  width: 30px;
+  max-width: 30px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+`;
+
 export const buildSeverityDescription = (severity: AboutStepSeverity): ListItems[] => [
   {
     title: i18nSeverity.DEFAULT_SEVERITY,
@@ -278,7 +285,7 @@ export const buildSeverityDescription = (severity: AboutStepSeverity): ListItems
           return {
             title: index === 0 ? i18nSeverity.SEVERITY_MAPPING : '',
             description: (
-              <EuiFlexGroup alignItems="center">
+              <EuiFlexGroup alignItems="center" gutterSize="s">
                 <OverrideColumn>
                   <EuiToolTip
                     content={severityItem.field}
@@ -287,14 +294,14 @@ export const buildSeverityDescription = (severity: AboutStepSeverity): ListItems
                     <>{`${severityItem.field}:`}</>
                   </EuiToolTip>
                 </OverrideColumn>
-                <OverrideColumn>
+                <OverrideValueColumn>
                   <EuiToolTip
                     content={severityItem.value}
                     data-test-subj={`severityOverrideValue${index}`}
                   >
                     {defaultToEmptyTag(severityItem.value)}
                   </EuiToolTip>
-                </OverrideColumn>
+                </OverrideValueColumn>
                 <EuiFlexItem grow={false}>
                   <EuiIcon type={'sortRight'} />
                 </EuiFlexItem>
@@ -323,7 +330,7 @@ export const buildRiskScoreDescription = (riskScore: AboutStepRiskScore): ListIt
           return {
             title: index === 0 ? i18nRiskScore.RISK_SCORE_MAPPING : '',
             description: (
-              <EuiFlexGroup alignItems="center">
+              <EuiFlexGroup alignItems="center" gutterSize="s">
                 <OverrideColumn>
                   <EuiToolTip
                     content={riskScoreItem.field}

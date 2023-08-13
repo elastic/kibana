@@ -116,6 +116,7 @@ interface StepDefineRuleReadOnlyProps {
   descriptionColumns: 'multi' | 'single' | 'singleSplit';
   defaultValues: DefineStepRule;
   indexPattern: DataViewBase;
+  isInPanelView?: boolean; // Option to show description list in smaller font
 }
 
 export const MyLabelButton = styled(EuiButtonEmpty)`
@@ -909,6 +910,7 @@ const StepDefineRuleReadOnlyComponent: FC<StepDefineRuleReadOnlyProps> = ({
   defaultValues: data,
   descriptionColumns,
   indexPattern,
+  isInPanelView = false,
 }) => {
   const dataForDescription: Partial<DefineStepRule> = getStepDataDataSource(data);
 
@@ -919,6 +921,7 @@ const StepDefineRuleReadOnlyComponent: FC<StepDefineRuleReadOnlyProps> = ({
         schema={filterRuleFieldsForType(schema, data.ruleType)}
         data={filterRuleFieldsForType(dataForDescription, data.ruleType)}
         indexPatterns={indexPattern}
+        isInPanelView={isInPanelView}
       />
     </StepContentWrapper>
   );
