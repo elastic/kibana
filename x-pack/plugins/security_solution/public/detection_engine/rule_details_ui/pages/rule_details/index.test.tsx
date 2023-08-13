@@ -113,6 +113,9 @@ jest.mock('../../../../common/lib/kibana', () => {
               save: true,
               show: true,
             },
+            siem: {
+              'ai-assistant': true,
+            },
           },
         },
         data: {

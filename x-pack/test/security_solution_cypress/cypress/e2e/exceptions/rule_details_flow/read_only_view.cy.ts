@@ -14,7 +14,7 @@ import { login, visitWithoutDateRange } from '../../../tasks/login';
 import { goToExceptionsTab, goToAlertsTab } from '../../../tasks/rule_details';
 import { goToRuleDetails } from '../../../tasks/alerts_detection_rules';
 import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../../urls/navigation';
-import { deleteAlertsAndRules } from '../../../tasks/common';
+import { cleanKibana, deleteAlertsAndRules } from '../../../tasks/common';
 import {
   NO_EXCEPTIONS_EXIST_PROMPT,
   EXCEPTION_ITEM_VIEWER_CONTAINER,
@@ -32,7 +32,7 @@ describe('Exceptions viewer read only', { tags: tag.ESS }, () => {
   const exceptionList = getExceptionList();
 
   before(() => {
-    cy.task('esArchiverResetKibana');
+    cleanKibana();
     // create rule with exceptions
     createExceptionList(exceptionList, exceptionList.list_id).then((response) => {
       createRule(
@@ -57,6 +57,7 @@ describe('Exceptions viewer read only', { tags: tag.ESS }, () => {
     login(ROLES.reader);
     visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL, ROLES.reader);
     goToRuleDetails();
+    cy.url().should('contain', 'app/security/rules/id');
     goToExceptionsTab();
   });
 

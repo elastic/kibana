@@ -21,7 +21,6 @@ import { useLeftPanelContext } from '../context';
 import { useRouteSpy } from '../../../common/utils/route/use_route_spy';
 import { SecurityPageName } from '../../../../common';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
-import { EntityPanel } from '../../right/components/entity_panel';
 import { AlertsTable } from './correlations_details_alerts_table';
 import { ERROR_MESSAGE, ERROR_TITLE } from '../../shared/translations';
 import {
@@ -41,6 +40,7 @@ import {
   SESSION_ALERTS_HEADING,
   SOURCE_ALERTS_HEADING,
 } from './translations';
+import { ExpandablePanel } from '../../shared/components/expandable_panel';
 
 export const CORRELATIONS_TAB_ID = 'correlations-details';
 
@@ -105,56 +105,64 @@ export const CorrelationsDetails: React.FC = () => {
 
   return (
     <>
-      <EntityPanel
-        title={ANCESTRY_ALERTS_HEADING(ancestryAlertsIds.length)}
-        iconType={'warning'}
-        expandable={true}
+      <ExpandablePanel
+        header={{
+          title: ANCESTRY_ALERTS_HEADING(ancestryAlertsIds.length),
+          iconType: 'warning',
+        }}
+        expand={{ expandable: true }}
         data-test-subj={CORRELATIONS_DETAILS_BY_ANCESTRY_SECTION_TEST_ID}
       >
         <AlertsTable
           alertIds={ancestryAlertsIds}
           data-test-subj={CORRELATIONS_DETAILS_BY_ANCESTRY_TABLE_TEST_ID}
         />
-      </EntityPanel>
+      </ExpandablePanel>
 
       <EuiSpacer />
 
-      <EntityPanel
-        title={SOURCE_ALERTS_HEADING(sameSourceAlertsIds.length)}
-        iconType={'warning'}
-        expandable={true}
+      <ExpandablePanel
+        header={{
+          title: SOURCE_ALERTS_HEADING(sameSourceAlertsIds.length),
+          iconType: 'warning',
+        }}
+        expand={{ expandable: true }}
         data-test-subj={CORRELATIONS_DETAILS_BY_SOURCE_SECTION_TEST_ID}
       >
         <AlertsTable
           alertIds={sameSourceAlertsIds}
           data-test-subj={CORRELATIONS_DETAILS_BY_SOURCE_TABLE_TEST_ID}
         />
-      </EntityPanel>
+      </ExpandablePanel>
 
       <EuiSpacer />
 
-      <EntityPanel
-        title={SESSION_ALERTS_HEADING(alertsBySessionIds.length)}
-        iconType={'warning'}
-        expandable={true}
+      <ExpandablePanel
+        header={{
+          title: SESSION_ALERTS_HEADING(alertsBySessionIds.length),
+          iconType: 'warning',
+        }}
+        expand={{ expandable: true }}
         data-test-subj={CORRELATIONS_DETAILS_BY_SESSION_SECTION_TEST_ID}
       >
         <AlertsTable
           alertIds={alertsBySessionIds}
           data-test-subj={CORRELATIONS_DETAILS_BY_SESSION_TABLE_TEST_ID}
         />
-      </EntityPanel>
+      </ExpandablePanel>
 
       <EuiSpacer />
 
-      <EntityPanel
-        title={RELATED_CASES_HEADING(cases.length)}
-        iconType={'warning'}
-        expandable={true}
+      <ExpandablePanel
+        header={{
+          title: RELATED_CASES_HEADING(cases.length),
+          iconType: 'warning',
+        }}
+        expand={{ expandable: true }}
         data-test-subj={CORRELATIONS_DETAILS_CASES_SECTION_TEST_ID}
       >
         <CorrelationsCasesTable cases={cases} />
-      </EntityPanel>
+      </ExpandablePanel>
     </>
   );
 };
