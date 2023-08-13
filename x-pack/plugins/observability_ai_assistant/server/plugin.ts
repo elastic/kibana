@@ -31,7 +31,7 @@ import {
   ObservabilityAIAssistantPluginSetupDependencies,
   ObservabilityAIAssistantPluginStartDependencies,
 } from './types';
-import { addLensDocsToKb } from './service/kb_service/docs/lens';
+import { addLensDocsToKb } from './service/kb_service/kb_docs/lens';
 
 export class ObservabilityAIAssistantPlugin
   implements
