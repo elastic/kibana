@@ -18,8 +18,8 @@ import {
   EuiLink,
   EuiPage,
   EuiPageBody,
-  EuiPageTemplate,
-  EuiPageSection,
+  EuiPageContent_Deprecated as EuiPageContent,
+  EuiPageContentBody_Deprecated as EuiPageContentBody,
   EuiPageHeader,
   EuiPopover,
   EuiSpacer,
@@ -292,8 +292,8 @@ export const Main = ({ basename, reporting, screenshotMode }: ReportingExampleAp
                 <h1>Reporting Example</h1>
               </EuiTitle>
             </EuiPageHeader>
-            <EuiPageTemplate.Section>
-              <EuiPageSection>
+            <EuiPageContent>
+              <EuiPageContentBody>
                 <EuiTitle>
                   <h2>Example of a Sharing menu using components from Reporting</h2>
                 </EuiTitle>
@@ -370,8 +370,8 @@ export const Main = ({ basename, reporting, screenshotMode }: ReportingExampleAp
                     <p>Screenshot Mode is {screenshotMode.isScreenshotMode() ? 'ON' : 'OFF'}!</p>
                   </div>
                 </EuiText>
-              </EuiPageSection>
-            </EuiPageTemplate.Section>
+              </EuiPageContentBody>
+            </EuiPageContent>
           </EuiPageBody>
         </EuiPage>
       </I18nProvider>
