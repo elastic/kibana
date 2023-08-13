@@ -42,6 +42,7 @@ const loadingSpinnerContainerClassName = css`
 
 export function ChatBody({
   title,
+  loading,
   messages,
   connectors,
   knowledgeBase,
@@ -51,6 +52,7 @@ export function ChatBody({
   onChatComplete,
 }: {
   title: string;
+  loading: boolean;
   messages: Message[];
   connectors: UseGenAIConnectorsResult;
   knowledgeBase: UseKnowledgeBaseResult;
@@ -119,7 +121,7 @@ export function ChatBody({
     <EuiFlexGroup direction="column" gutterSize="none" className={containerClassName}>
       <EuiFlexItem grow={false}>
         <EuiPanel hasBorder={false} hasShadow={false} paddingSize="m">
-          <ChatHeader title={title} connectors={connectors} />
+          <ChatHeader title={title} connectors={connectors} loading={loading} />
         </EuiPanel>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>

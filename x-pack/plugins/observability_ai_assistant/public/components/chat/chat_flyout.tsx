@@ -92,6 +92,7 @@ export function ChatFlyout({
         </EuiFlexItem>
         <EuiFlexItem grow className={bodyClassName}>
           <ChatBody
+            loading={false}
             connectors={connectors}
             title={title}
             messages={messages}

@@ -204,7 +204,7 @@ export function useTimeline({
 
   const items = useMemo(() => {
     if (pendingMessage) {
-      return conversationItems.concat({
+      const nextItems = conversationItems.concat({
         id: '',
         actions: {
           canCopy: true,
@@ -224,6 +224,8 @@ export function useTimeline({
         role: pendingMessage.message.role,
         title: '',
       });
+
+      return nextItems;
     }
 
     return conversationItems;

@@ -126,15 +126,16 @@ export function ChatItem({
     navigator.clipboard.writeText(content || '');
   };
 
-  let contentElement: React.ReactNode = content ? (
-    <ChatItemContentInlinePromptEditor
-      content={content}
-      editing={editing}
-      functionCall={functionCall}
-      loading={loading}
-      onSubmit={handleInlineEditSubmit}
-    />
-  ) : null;
+  let contentElement: React.ReactNode =
+    content || loading ? (
+      <ChatItemContentInlinePromptEditor
+        content={content}
+        editing={editing}
+        functionCall={functionCall}
+        loading={loading}
+        onSubmit={handleInlineEditSubmit}
+      />
+    ) : null;
 
   if (collapsed) {
     contentElement = (
