@@ -203,10 +203,6 @@ export function useTimeline({
   }
 
   const items = useMemo(() => {
-    console.log({
-      conversationItems,
-      pendingMessage,
-    });
     if (pendingMessage) {
       return conversationItems.concat({
         id: '',
