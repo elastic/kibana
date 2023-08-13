@@ -8,22 +8,12 @@
 import { EuiSkeletonText } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
-import { useSourceContext } from '../../../../containers/metrics_source';
-import { findInventoryModel } from '../../../../../common/inventory_models';
-import { useMetadata } from '../../hooks/use_metadata';
 import { useAssetDetailsStateContext } from '../../hooks/use_asset_details_state';
 
 export const Osquery = () => {
-  const { asset, assetType, dateRangeTs } = useAssetDetailsStateContext();
-  const inventoryModel = findInventoryModel(assetType);
-  const { sourceId } = useSourceContext();
-  const { loading, metadata } = useMetadata(
-    asset.name,
-    assetType,
-    inventoryModel.requiredMetrics,
-    sourceId,
-    dateRangeTs
-  );
+  const { metadataResponse } = useAssetDetailsStateContext();
+
+  const { metadataLoading, metadata } = metadataResponse;
   const {
     services: { osquery },
   } = useKibanaContextForPlugin();
@@ -34,12 +24,12 @@ export const Osquery = () => {
   // avoids component rerender when resizing the popover
   const content = useMemo(() => {
     // TODO: Add info when Osquery plugin is not available
-    if (loading || !OsqueryAction) {
+    if (metadataLoading || !OsqueryAction) {
       return <EuiSkeletonText lines={10} />;
     }
 
     return <OsqueryAction agentId={metadata?.info?.agent?.id} hideAgentsField formType="simple" />;
-  }, [OsqueryAction, loading, metadata]);
+  }, [OsqueryAction, metadataLoading, metadata]);
 
   return content;
 };

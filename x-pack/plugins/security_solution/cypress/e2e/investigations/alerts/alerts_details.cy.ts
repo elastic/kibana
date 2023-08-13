@@ -6,6 +6,7 @@
  */
 
 import type { DataTableModel } from '@kbn/securitysolution-data-table';
+import { disableExpandableFlyout } from '../../../tasks/api_calls/kibana_advanced_settings';
 import {
   ALERT_FLYOUT,
   CELL_TEXT,
@@ -39,6 +40,7 @@ describe('Alert details flyout', () => {
     before(() => {
       cleanKibana();
       login();
+      disableExpandableFlyout();
       createRule(getNewRule());
       visitWithoutDateRange(ALERTS_URL);
       waitForAlertsToPopulate();
@@ -64,6 +66,7 @@ describe('Alert details flyout', () => {
 
     beforeEach(() => {
       login();
+      disableExpandableFlyout();
       visitWithoutDateRange(ALERTS_URL);
       waitForAlertsToPopulate();
       expandFirstAlert();
@@ -128,6 +131,7 @@ describe('Alert details flyout', () => {
 
     beforeEach(() => {
       login();
+      disableExpandableFlyout();
       visit(ALERTS_URL);
       waitForAlertsToPopulate();
       expandFirstAlert();
@@ -173,6 +177,7 @@ describe('Alert details flyout', () => {
 
     beforeEach(() => {
       login();
+      disableExpandableFlyout();
       visit(ALERTS_URL);
       waitForAlertsToPopulate();
       expandFirstAlert();

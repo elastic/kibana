@@ -31,13 +31,6 @@ export const SEVERITY_TITLE = i18n.translate(
   }
 );
 
-export const STATUS_TITLE = i18n.translate(
-  'xpack.securitySolution.flyout.documentDetails.statusTitle',
-  {
-    defaultMessage: 'Status',
-  }
-);
-
 export const RISK_SCORE_TITLE = i18n.translate(
   'xpack.securitySolution.flyout.documentDetails.riskScoreTitle',
   {
@@ -158,20 +151,6 @@ export const TECHNICAL_PREVIEW_MESSAGE = i18n.translate(
   }
 );
 
-export const ENTITIES_TEXT = i18n.translate(
-  'xpack.securitySolution.flyout.documentDetails.overviewTab.entitiesText',
-  {
-    defaultMessage: 'entities',
-  }
-);
-
-export const THREAT_INTELLIGENCE_TEXT = i18n.translate(
-  'xpack.securitySolution.flyout.documentDetails.overviewTab.threatIntelligenceText',
-  {
-    defaultMessage: 'fields of threat intelligence',
-  }
-);
-
 export const THREAT_MATCH_DETECTED = i18n.translate(
   'xpack.securitySolution.flyout.documentDetails.overviewTab.threatIntelligence.threatMatch',
   {
@@ -200,73 +179,6 @@ export const THREAT_ENRICHMENTS = i18n.translate(
   }
 );
 
-export const CORRELATIONS_TEXT = i18n.translate(
-  'xpack.securitySolution.flyout.documentDetails.overviewTab.correlationsText',
-  {
-    defaultMessage: 'fields of correlation',
-  }
-);
-
-export const CORRELATIONS_ANCESTRY_ALERT = i18n.translate(
-  'xpack.securitySolution.flyout.documentDetails.overviewTab.correlations.ancestryAlert',
-  {
-    defaultMessage: 'alert related by ancestry',
-  }
-);
-
-export const CORRELATIONS_ANCESTRY_ALERTS = i18n.translate(
-  'xpack.securitySolution.flyout.documentDetails.overviewTab.correlations.ancestryAlerts',
-  {
-    defaultMessage: 'alerts related by ancestry',
-  }
-);
-export const CORRELATIONS_SAME_SOURCE_EVENT_ALERT = i18n.translate(
-  'xpack.securitySolution.flyout.documentDetails.overviewTab.correlations.sameSourceEventAlert',
-  {
-    defaultMessage: 'alert related by the same source event',
-  }
-);
-
-export const CORRELATIONS_SAME_SOURCE_EVENT_ALERTS = i18n.translate(
-  'xpack.securitySolution.flyout.documentDetails.overviewTab.correlations.sameSourceEventAlerts',
-  {
-    defaultMessage: 'alerts related by the same source event',
-  }
-);
-export const CORRELATIONS_SAME_SESSION_ALERT = i18n.translate(
-  'xpack.securitySolution.flyout.documentDetails.overviewTab.correlations.sameSessionAlert',
-  {
-    defaultMessage: 'alert related by session',
-  }
-);
-
-export const CORRELATIONS_SAME_SESSION_ALERTS = i18n.translate(
-  'xpack.securitySolution.flyout.documentDetails.overviewTab.correlations.sameSessionAlerts',
-  {
-    defaultMessage: 'alerts related by session',
-  }
-);
-export const CORRELATIONS_RELATED_CASE = i18n.translate(
-  'xpack.securitySolution.flyout.documentDetails.overviewTab.correlations.relatedCase',
-  {
-    defaultMessage: 'related case',
-  }
-);
-
-export const CORRELATIONS_RELATED_CASES = i18n.translate(
-  'xpack.securitySolution.flyout.documentDetails.overviewTab.correlations.relatedCases',
-  {
-    defaultMessage: 'related cases',
-  }
-);
-
-export const PREVALENCE_TEXT = i18n.translate(
-  'xpack.securitySolution.flyout.documentDetails.overviewTab.prevalenceText',
-  {
-    defaultMessage: 'fields of prevalence',
-  }
-);
-
 export const PREVALENCE_ROW_UNCOMMON = i18n.translate(
   'xpack.securitySolution.flyout.documentDetails.overviewTab.prevalenceRowText',
   {
@@ -274,11 +186,6 @@ export const PREVALENCE_ROW_UNCOMMON = i18n.translate(
   }
 );
 
-export const VIEW_ALL = (text: string) =>
-  i18n.translate('xpack.securitySolution.flyout.documentDetails.overviewTab.viewAllButton', {
-    values: { text },
-    defaultMessage: 'View all {text}',
-  });
 export const VISUALIZATIONS_TITLE = i18n.translate(
   'xpack.securitySolution.flyout.documentDetails.visualizationsTitle',
   { defaultMessage: 'Visualizations' }
@@ -287,13 +194,6 @@ export const VISUALIZATIONS_TITLE = i18n.translate(
 export const ANALYZER_PREVIEW_TITLE = i18n.translate(
   'xpack.securitySolution.flyout.documentDetails.analyzerPreviewTitle',
   { defaultMessage: 'Analyzer preview' }
-);
-
-export const ANALYZER_PREVIEW_TEXT = i18n.translate(
-  'xpack.securitySolution.flyout.documentDetails.analyzerPreviewText',
-  {
-    defaultMessage: 'analyzer preview.',
-  }
 );
 
 export const SHARE = i18n.translate('xpack.securitySolution.flyout.documentDetails.share', {
@@ -346,13 +246,6 @@ export const RESPONSE_TITLE = i18n.translate(
   'xpack.securitySolution.flyout.documentDetails.responseSectionTitle',
   {
     defaultMessage: 'Response',
-  }
-);
-
-export const RESPONSE_BUTTON = i18n.translate(
-  'xpack.securitySolution.flyout.documentDetails.responseSectionButton',
-  {
-    defaultMessage: 'Response details',
   }
 );
 

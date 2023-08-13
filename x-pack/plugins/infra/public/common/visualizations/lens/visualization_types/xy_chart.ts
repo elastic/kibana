@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { FormBasedPersistedState, XYLayerConfig, XYState } from '@kbn/lens-plugin/public';
+import type {
+  FormBasedPersistedState,
+  XYArgs,
+  XYLayerConfig,
+  XYState,
+} from '@kbn/lens-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { SavedObjectReference } from '@kbn/core/server';
 import { DEFAULT_LAYER_ID } from '../utils';
@@ -13,8 +18,20 @@ import type { Chart, ChartConfig, ChartLayer } from '../../types';
 
 const ACCESSOR = 'formula_accessor';
 
+// This needs be more specialized by `preferredSeriesType`
+export interface XYVisualOptions {
+  lineInterpolation?: XYArgs['curveType'];
+  missingValues?: XYArgs['fittingFunction'];
+  endValues?: XYArgs['endValue'];
+  showDottedLine?: boolean;
+}
+
 export class XYChart implements Chart<XYState> {
-  constructor(private chartConfig: ChartConfig<Array<ChartLayer<XYLayerConfig>>>) {}
+  constructor(
+    private chartConfig: ChartConfig<Array<ChartLayer<XYLayerConfig>>> & {
+      visualOptions?: XYVisualOptions;
+    }
+  ) {}
 
   getVisualizationType(): string {
     return 'lnsXY';
@@ -32,15 +49,21 @@ export class XYChart implements Chart<XYState> {
   }
 
   getVisualizationState(): XYState {
-    return getXYVisualizationState({
-      layers: [
-        ...this.chartConfig.layers.map((layerItem, index) => {
-          const layerId = `${DEFAULT_LAYER_ID}_${index}`;
-          const accessorId = `${ACCESSOR}_${index}`;
-          return layerItem.getLayerConfig(layerId, accessorId);
-        }),
-      ],
-    });
+    return {
+      ...getXYVisualizationState({
+        layers: [
+          ...this.chartConfig.layers.map((layerItem, index) => {
+            const layerId = `${DEFAULT_LAYER_ID}_${index}`;
+            const accessorId = `${ACCESSOR}_${index}`;
+            return layerItem.getLayerConfig(layerId, accessorId);
+          }),
+        ],
+      }),
+      fittingFunction: this.chartConfig.visualOptions?.missingValues ?? 'Zero',
+      endValue: this.chartConfig.visualOptions?.endValues,
+      curveType: this.chartConfig.visualOptions?.lineInterpolation ?? 'LINEAR',
+      emphasizeFitting: !this.chartConfig.visualOptions?.showDottedLine,
+    };
   }
 
   getReferences(): SavedObjectReference[] {
@@ -68,8 +91,6 @@ export const getXYVisualizationState = (
     showSingleSeries: false,
   },
   valueLabels: 'show',
-  fittingFunction: 'Zero',
-  curveType: 'LINEAR',
   yLeftScale: 'linear',
   axisTitlesVisibilitySettings: {
     x: false,
@@ -93,7 +114,6 @@ export const getXYVisualizationState = (
   },
   preferredSeriesType: 'line',
   valuesInLegend: false,
-  emphasizeFitting: true,
   hideEndzones: true,
   ...custom,
 });

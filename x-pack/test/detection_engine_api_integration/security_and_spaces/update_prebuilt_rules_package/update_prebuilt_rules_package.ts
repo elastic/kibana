@@ -13,7 +13,6 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import JSON5 from 'json5';
 import expect from 'expect';
 import { PackageSpecManifest } from '@kbn/fleet-plugin/common';
-import { DETECTION_ENGINE_RULES_URL_FIND } from '@kbn/security-solution-plugin/common/constants';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   deleteAllPrebuiltRuleAssets,
@@ -24,6 +23,8 @@ import {
 } from '../../utils';
 import { reviewPrebuiltRulesToInstall } from '../../utils/prebuilt_rules/review_install_prebuilt_rules';
 import { reviewPrebuiltRulesToUpgrade } from '../../utils/prebuilt_rules/review_upgrade_prebuilt_rules';
+import { installPrebuiltRulesPackageByVersion } from '../../utils/prebuilt_rules/install_fleet_package_by_url';
+import { getInstalledRules } from '../../utils/prebuilt_rules/get_installed_rules';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -103,17 +104,14 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(statusBeforePackageInstallation.stats.num_prebuilt_rules_to_upgrade).toBe(0);
       expect(statusBeforePackageInstallation.stats.num_prebuilt_rules_total_in_package).toBe(0);
 
-      const EPM_URL_FOR_PREVIOUS_VERSION = `/api/fleet/epm/packages/security_detection_engine/${previousVersion}`;
+      const installPreviousPackageResponse = await installPrebuiltRulesPackageByVersion(
+        es,
+        supertest,
+        previousVersion
+      );
 
-      const installPreviousPackageResponse = await supertest
-        .post(EPM_URL_FOR_PREVIOUS_VERSION)
-        .set('kbn-xsrf', 'xxxx')
-        .type('application/json')
-        .send({ force: true })
-        .expect(200);
-
-      expect(installPreviousPackageResponse.body._meta.install_source).toBe('registry');
-      expect(installPreviousPackageResponse.body.items.length).toBeGreaterThan(0);
+      expect(installPreviousPackageResponse._meta.install_source).toBe('registry');
+      expect(installPreviousPackageResponse.items.length).toBeGreaterThan(0);
 
       // Verify that status is updated after the installation of package "N-1"
       const statusAfterPackageInstallation = await getPrebuiltRulesStatus(supertest);
@@ -132,7 +130,8 @@ export default ({ getService }: FtrProviderContext): void => {
 
       // Verify that the _perform endpoint returns the same number of installed rules as the status endpoint
       // and the _review endpoint
-      const installPrebuiltRulesResponse = await installPrebuiltRules(supertest);
+      const installPrebuiltRulesResponse = await installPrebuiltRules(es, supertest);
+
       expect(installPrebuiltRulesResponse.summary.succeeded).toBe(
         statusAfterPackageInstallation.stats.num_prebuilt_rules_to_install
       );
@@ -141,11 +140,7 @@ export default ({ getService }: FtrProviderContext): void => {
       );
 
       // Get installed rules
-      const { body: rulesResponse } = await supertest
-        .get(`${DETECTION_ENGINE_RULES_URL_FIND}?per_page=10000`)
-        .set('kbn-xsrf', 'true')
-        .send()
-        .expect(200);
+      const rulesResponse = await getInstalledRules(supertest);
 
       // Check that all prebuilt rules were actually installed
       expect(rulesResponse.total).toBe(installPrebuiltRulesResponse.summary.succeeded);
@@ -160,16 +155,13 @@ export default ({ getService }: FtrProviderContext): void => {
       );
 
       // PART 2: Now install the lastest (current) package, defined in fleet_packages.json
-      const EPM_URL_FOR_CURRENT_VERSION = `/api/fleet/epm/packages/security_detection_engine/${currentVersion}`;
 
-      const installLatestPackageResponse = await supertest
-        .post(EPM_URL_FOR_CURRENT_VERSION)
-        .set('kbn-xsrf', 'xxxx')
-        .type('application/json')
-        .send({ force: true })
-        .expect(200);
-
-      expect(installLatestPackageResponse.body.items.length).toBeGreaterThanOrEqual(0);
+      const installLatestPackageResponse = await installPrebuiltRulesPackageByVersion(
+        es,
+        supertest,
+        currentVersion
+      );
+      expect(installLatestPackageResponse.items.length).toBeGreaterThanOrEqual(0);
 
       // Verify status after intallation of the latest package
       const statusAfterLatestPackageInstallation = await getPrebuiltRulesStatus(supertest);
@@ -196,8 +188,10 @@ export default ({ getService }: FtrProviderContext): void => {
       // Install available rules and verify that the _perform endpoint returns the same number of
       // installed rules as the status endpoint and the _review endpoint
       const installPrebuiltRulesResponseAfterLatestPackageInstallation = await installPrebuiltRules(
+        es,
         supertest
       );
+
       expect(installPrebuiltRulesResponseAfterLatestPackageInstallation.summary.succeeded).toBe(
         statusAfterLatestPackageInstallation.stats.num_prebuilt_rules_to_install
       );
@@ -208,11 +202,7 @@ export default ({ getService }: FtrProviderContext): void => {
       );
 
       // Get installed rules
-      const { body: rulesResponseAfterPackageUpdate } = await supertest
-        .get(`${DETECTION_ENGINE_RULES_URL_FIND}?per_page=10000`)
-        .set('kbn-xsrf', 'true')
-        .send()
-        .expect(200);
+      const rulesResponseAfterPackageUpdate = await getInstalledRules(supertest);
 
       // Check that the expected new prebuilt rules from the latest package were actually installed
       expect(
@@ -239,8 +229,10 @@ export default ({ getService }: FtrProviderContext): void => {
       // Call the upgrade _perform endpoint and verify that the number of upgraded rules is the same as the one
       // returned by the _review endpoint and the status endpoint
       const upgradePrebuiltRulesResponseAfterLatestPackageInstallation = await upgradePrebuiltRules(
+        es,
         supertest
       );
+
       expect(upgradePrebuiltRulesResponseAfterLatestPackageInstallation.summary.succeeded).toEqual(
         statusAfterLatestPackageInstallation.stats.num_prebuilt_rules_to_upgrade
       );
@@ -249,11 +241,8 @@ export default ({ getService }: FtrProviderContext): void => {
       );
 
       // Get installed rules
-      const { body: rulesResponseAfterPackageUpdateAndRuleUpgrades } = await supertest
-        .get(`${DETECTION_ENGINE_RULES_URL_FIND}?per_page=10000`)
-        .set('kbn-xsrf', 'true')
-        .send()
-        .expect(200);
+
+      const rulesResponseAfterPackageUpdateAndRuleUpgrades = await getInstalledRules(supertest);
 
       // Check that the expected new prebuilt rules from the latest package were actually installed
       expect(
