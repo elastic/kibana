@@ -6,7 +6,7 @@
  */
 
 import type { RegisterFunctionDefinition } from '@kbn/observability-ai-assistant-plugin/common/types';
-import { callApmApi } from '../../services/rest/create_call_apm_api';
+import { callApmApi } from '../services/rest/create_call_apm_api';
 
 export function registerGetApmErrorDocumentFunction({
   registerFunction,

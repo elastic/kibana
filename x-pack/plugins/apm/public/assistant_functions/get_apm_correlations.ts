@@ -6,8 +6,8 @@
  */
 
 import type { RegisterFunctionDefinition } from '@kbn/observability-ai-assistant-plugin/common/types';
-import { CorrelationsEventType } from '../../../common/assistant/constants';
-import { callApmApi } from '../../services/rest/create_call_apm_api';
+import { CorrelationsEventType } from '../../common/assistant/constants';
+import { callApmApi } from '../services/rest/create_call_apm_api';
 
 export function registerGetApmCorrelationsFunction({
   registerFunction,

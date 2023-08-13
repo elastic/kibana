@@ -9,27 +9,27 @@ import type { RegisterFunctionDefinition } from '@kbn/observability-ai-assistant
 import { groupBy } from 'lodash';
 import React from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { FETCH_STATUS } from '../../hooks/use_fetcher';
-import { callApmApi } from '../../services/rest/create_call_apm_api';
-import { getTimeZone } from '../shared/charts/helper/timezone';
-import { TimeseriesChart } from '../shared/charts/timeseries_chart';
-import { ChartPointerEventContextProvider } from '../../context/chart_pointer_event/chart_pointer_event_context';
-import { ApmThemeProvider } from '../routing/app_root';
-import { Coordinate, TimeSeries } from '../../../typings/timeseries';
+import { FETCH_STATUS } from '../hooks/use_fetcher';
+import { callApmApi } from '../services/rest/create_call_apm_api';
+import { getTimeZone } from '../components/shared/charts/helper/timezone';
+import { TimeseriesChart } from '../components/shared/charts/timeseries_chart';
+import { ChartPointerEventContextProvider } from '../context/chart_pointer_event/chart_pointer_event_context';
+import { ApmThemeProvider } from '../components/routing/app_root';
+import { Coordinate, TimeSeries } from '../../typings/timeseries';
 import {
   ChartType,
   getTimeSeriesColor,
-} from '../shared/charts/helper/get_timeseries_color';
-import { LatencyAggregationType } from '../../../common/latency_aggregation_types';
+} from '../components/shared/charts/helper/get_timeseries_color';
+import { LatencyAggregationType } from '../../common/latency_aggregation_types';
 import {
   asPercent,
   asTransactionRate,
   getDurationFormatter,
-} from '../../../common/utils/formatters';
+} from '../../common/utils/formatters';
 import {
   getMaxY,
   getResponseTimeTickFormatter,
-} from '../shared/charts/transaction_charts/helper';
+} from '../components/shared/charts/transaction_charts/helper';
 
 export function registerGetApmTimeseriesFunction({
   registerFunction,

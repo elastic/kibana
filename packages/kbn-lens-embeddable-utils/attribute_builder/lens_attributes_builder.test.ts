@@ -1,8 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import 'jest-canvas-mock';
@@ -19,7 +20,7 @@ import {
 } from './visualization_types';
 import type { FormulaPublicApi, GenericIndexPatternColumn } from '@kbn/lens-plugin/public';
 import { ReferenceBasedIndexPatternColumn } from '@kbn/lens-plugin/public/datasources/form_based/operations/definitions/column_types';
-import type { FormulaConfig } from '../types';
+import type { FormulaValueConfig } from './types';
 
 const mockDataView = {
   id: 'mock-id',
@@ -85,7 +86,8 @@ const REFERENCE_LINE_LAYER: ReferenceBasedIndexPatternColumn = {
   scale: 'ratio',
 };
 
-const getFormula = (value: string): FormulaConfig => ({
+const getFormula = (value: string): FormulaValueConfig => ({
+  type: 'formula',
   value,
   format: {
     id: 'percent',
@@ -106,10 +108,10 @@ describe('lens_attributes_builder', () => {
       const metriChart = new MetricChart({
         layers: new MetricLayer({
           data: getFormula(AVERAGE_CPU_USER_FORMULA),
-          formulaAPI,
         }),
 
         dataView: mockDataView,
+        formulaAPI,
       });
       const builder = new LensAttributesBuilder({ visualization: metriChart });
       const {
@@ -148,10 +150,10 @@ describe('lens_attributes_builder', () => {
           options: {
             showTrendLine: true,
           },
-          formulaAPI,
         }),
 
         dataView: mockDataView,
+        formulaAPI,
       });
       const builder = new LensAttributesBuilder({ visualization: metriChart });
       const {
@@ -204,10 +206,13 @@ describe('lens_attributes_builder', () => {
         layers: [
           new XYDataLayer({
             data: [getFormula(AVERAGE_CPU_USER_FORMULA)],
-            formulaAPI,
+            options: {
+              buckets: { type: 'date_histogram' },
+            },
           }),
         ],
         dataView: mockDataView,
+        formulaAPI,
       });
       const builder = new LensAttributesBuilder({ visualization: xyChart });
       const {
@@ -248,13 +253,24 @@ describe('lens_attributes_builder', () => {
         layers: [
           new XYDataLayer({
             data: [getFormula(AVERAGE_CPU_USER_FORMULA)],
-            formulaAPI,
+            options: {
+              buckets: { type: 'date_histogram' },
+            },
           }),
           new XYReferenceLinesLayer({
-            data: [getFormula('1')],
+            data: [
+              {
+                type: 'static_value',
+                value: '1',
+                format: {
+                  id: 'percent',
+                },
+              },
+            ],
           }),
         ],
         dataView: mockDataView,
+        formulaAPI,
       });
       const builder = new LensAttributesBuilder({ visualization: xyChart });
       const {
@@ -316,10 +332,13 @@ describe('lens_attributes_builder', () => {
         layers: [
           new XYDataLayer({
             data: [getFormula(AVERAGE_CPU_USER_FORMULA), getFormula(AVERAGE_CPU_SYSTEM_FORMULA)],
-            formulaAPI,
+            options: {
+              buckets: { type: 'date_histogram' },
+            },
           }),
         ],
         dataView: mockDataView,
+        formulaAPI,
       });
       const builder = new LensAttributesBuilder({ visualization: xyChart });
       const {

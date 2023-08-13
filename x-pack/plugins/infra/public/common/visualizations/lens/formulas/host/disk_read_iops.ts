@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import type { FormulaConfig } from '../../../types';
+import type { FormulaValueConfig } from '@kbn/lens-embeddable-utils';
 
-export const diskIORead: FormulaConfig = {
+export const diskIORead: FormulaValueConfig = {
+  type: 'formula',
   label: 'Disk Read IOPS',
   value: "counter_rate(max(system.diskio.read.count), kql='system.diskio.read.count: *')",
   format: {

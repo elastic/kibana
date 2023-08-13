@@ -10,8 +10,8 @@ import {
   RegisterContextDefinition,
   RegisterFunctionDefinition,
 } from '@kbn/observability-ai-assistant-plugin/common/types';
-import { ApmPluginStartDeps } from '../../plugin';
-import { createCallApmApi } from '../../services/rest/create_call_apm_api';
+import { ApmPluginStartDeps } from '../plugin';
+import { createCallApmApi } from '../services/rest/create_call_apm_api';
 import { registerGetApmCorrelationsFunction } from './get_apm_correlations';
 import { registerGetApmDownstreamDependenciesFunction } from './get_apm_downstream_dependencies';
 import { registerGetApmErrorDocumentFunction } from './get_apm_error_document';
@@ -23,11 +23,13 @@ export function registerAssistantFunctions({
   coreStart,
   registerContext,
   registerFunction,
+  signal,
 }: {
   pluginsStart: ApmPluginStartDeps;
   coreStart: CoreStart;
-  registerFunction: RegisterFunctionDefinition;
   registerContext: RegisterContextDefinition;
+  registerFunction: RegisterFunctionDefinition;
+  signal: AbortSignal;
 }) {
   createCallApmApi(coreStart);
 

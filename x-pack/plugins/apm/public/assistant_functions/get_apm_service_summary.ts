@@ -6,31 +6,31 @@
  */
 
 import type { RegisterFunctionDefinition } from '@kbn/observability-ai-assistant-plugin/common/types';
-import { callApmApi } from '../../services/rest/create_call_apm_api';
+import { callApmApi } from '../services/rest/create_call_apm_api';
 
-export function registerGetApmDownstreamDependenciesFunction({
+export function registerGetApmServiceSummaryFunction({
   registerFunction,
 }: {
   registerFunction: RegisterFunctionDefinition;
 }) {
   registerFunction(
     {
-      name: 'get_apm_downstream_dependencies',
+      name: 'get_apm_service_summary',
       contexts: ['apm'],
-      description: `Get the downstream dependencies (services or uninstrumented backends) for a 
-      service. This allows you to map the dowstream dependency name to a service, by 
-      returning both span.destination.service.resource and service.name. Use this to 
-      drilldown further if needed.`,
-      descriptionForUser: `Get the downstream dependencies (services or uninstrumented backends) for a 
-      service. This allows you to map the dowstream dependency name to a service, by 
-      returning both span.destination.service.resource and service.name. Use this to 
-      drilldown further if needed.`,
+      description: `Gets a summary of a single service, including: the language, service version, 
+deployments, and the infrastructure that it is running in, for instance on how 
+many pods, and a list of its downstream dependencies. It also returns active 
+alerts and anomalies.`,
+      descriptionForUser: `Gets a summary of a single service, including: the language, service version, 
+deployments, and the infrastructure that it is running in, for instance on how 
+many pods, and a list of its downstream dependencies. It also returns active 
+alerts and anomalies.`,
       parameters: {
         type: 'object',
         properties: {
           'service.name': {
             type: 'string',
-            description: 'The name of the service',
+            description: 'The name of the service that should be summarized.',
           },
           'service.environment': {
             type: 'string',
@@ -51,15 +51,12 @@ export function registerGetApmDownstreamDependenciesFunction({
       } as const,
     },
     async ({ arguments: args }, signal) => {
-      return callApmApi(
-        'GET /internal/apm/assistant/get_downstream_dependencies',
-        {
-          signal,
-          params: {
-            query: args,
-          },
-        }
-      );
+      return callApmApi('GET /internal/apm/assistant/get_service_summary', {
+        signal,
+        params: {
+          query: args,
+        },
+      });
     }
   );
 }

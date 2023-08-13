@@ -42,6 +42,7 @@ export interface IObservabilityAIAssistantService {
   getClient: (options: {
     request: KibanaRequest;
   }) => Promise<IObservabilityAIAssistantClient | undefined>;
+  addToKnowledgeBase(documents: KnowledgeBaseEntry[]): void;
 }
 
 export interface ObservabilityAIAssistantResourceNames {

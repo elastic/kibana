@@ -31,6 +31,7 @@ import {
   ObservabilityAIAssistantPluginSetupDependencies,
   ObservabilityAIAssistantPluginStartDependencies,
 } from './types';
+import { addLensDocsToKb } from './service/kb_service/docs/lens';
 
 export class ObservabilityAIAssistantPlugin
   implements
@@ -44,12 +45,6 @@ export class ObservabilityAIAssistantPlugin
   logger: Logger;
   constructor(context: PluginInitializerContext<ObservabilityAIAssistantConfig>) {
     this.logger = context.logger.get();
-  }
-  public start(
-    core: CoreStart,
-    plugins: ObservabilityAIAssistantPluginStartDependencies
-  ): ObservabilityAIAssistantPluginStart {
-    return {};
   }
   public setup(
     core: CoreSetup<
@@ -126,7 +121,10 @@ export class ObservabilityAIAssistantPlugin
     const service = new ObservabilityAIAssistantService({
       logger: this.logger.get('service'),
       core,
+      taskManager: plugins.taskManager,
     });
+
+    addLensDocsToKb(service);
 
     registerServerRoutes({
       core,
@@ -137,6 +135,13 @@ export class ObservabilityAIAssistantPlugin
       },
     });
 
+    return {};
+  }
+
+  public start(
+    core: CoreStart,
+    plugins: ObservabilityAIAssistantPluginStartDependencies
+  ): ObservabilityAIAssistantPluginStart {
     return {};
   }
 }

@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import type { FormulaConfig } from '../../../types';
+import type { FormulaValueConfig } from '@kbn/lens-embeddable-utils';
 
-export const diskIOWrite: FormulaConfig = {
+export const diskIOWrite: FormulaValueConfig = {
+  type: 'formula',
   label: 'Disk Write IOPS',
   value: "counter_rate(max(system.diskio.write.count), kql='system.diskio.write.count: *')",
   format: {
