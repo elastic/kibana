@@ -179,8 +179,8 @@ export function ChatItem({
     >
       <EuiPanel hasShadow={false} paddingSize="s">
         {element ? <EuiErrorBoundary>{element}</EuiErrorBoundary> : null}
-        {error ? <FailedToLoadResponse /> : null}
         {contentElement}
+        {error ? <FailedToLoadResponse /> : null}
       </EuiPanel>
 
       <ChatItemControls
