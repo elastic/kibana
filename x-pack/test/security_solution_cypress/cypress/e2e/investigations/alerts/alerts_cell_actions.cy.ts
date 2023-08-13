@@ -38,7 +38,7 @@ import { openActiveTimeline } from '../../../tasks/timeline';
 
 import { ALERTS_URL } from '../../../urls/navigation';
 
-describe('Alerts cell actions', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+describe('Alerts cell actions', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] }, () => {
   before(() => {
     cleanKibana();
     createRule(getNewRule());

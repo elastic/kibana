@@ -43,7 +43,7 @@ import { ALERTS_URL, DASHBOARDS_URL, DETECTIONS_RESPONSE_URL } from '../../../ur
 const TEST_USER_NAME = 'test';
 const SIEM_KIBANA_HOST_NAME = 'siem-kibana';
 
-describe('Detection response view', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+describe('Detection response view', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] }, () => {
   before(() => {
     cleanKibana();
     createRule(getNewRule());

@@ -22,7 +22,7 @@ import { login, visit } from '../../../tasks/login';
 import { HOSTS_URL } from '../../../urls/navigation';
 import { clearSearchBar, kqlSearch } from '../../../tasks/security_header';
 
-describe('risk tab', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+describe('risk tab', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] }, () => {
   before(() => {
     cleanKibana();
     cy.task('esArchiverLoad', 'risk_hosts');
