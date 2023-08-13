@@ -10,7 +10,7 @@ import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { last } from 'lodash';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { Subscription } from 'rxjs';
-import { i18n } from '../../../../../packages/kbn-i18n';
+import { i18n } from '@kbn/i18n';
 import {
   ContextDefinition,
   MessageRole,

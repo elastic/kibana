@@ -4,16 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
-  EuiIcon,
-  EuiSpacer,
-  EuiText,
-} from '@elastic/eui';
+import { EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 import React from 'react';
-import { i18n } from '@kbn/i18n';
 import { FailedToLoadResponse } from './failed_to_load_response';
 
 interface Props {
