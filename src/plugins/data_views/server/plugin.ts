@@ -81,18 +81,20 @@ export class DataViewsServerPlugin
     { fieldFormats }: DataViewsServerPluginStartDependencies
   ) {
     const config = this.initializerContext.config.get<ClientConfigType>();
+    const scriptedFieldsEnabled = config.scriptedFieldsEnabled === false ? false : true; // accounting for null value
 
     const serviceFactory = dataViewsServiceFactory({
       logger: this.logger.get('indexPatterns'),
       uiSettings,
       fieldFormats,
       capabilities,
-      scriptedFieldsEnabled: config.scriptedFieldsEnabled === false ? false : true, // accounting for null value
+      scriptedFieldsEnabled,
       rollupsEnabled: this.rollupsEnabled,
     });
 
     return {
       dataViewsServiceFactory: serviceFactory,
+      getScriptedFieldsEnabled: () => scriptedFieldsEnabled,
     };
   }
 

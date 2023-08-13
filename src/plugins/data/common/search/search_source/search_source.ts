@@ -138,6 +138,7 @@ export const searchSourceRequiredUiSettings = [
 export interface SearchSourceDependencies extends FetchHandlers {
   aggs: AggsStart;
   search: ISearchGeneric;
+  scriptedFieldsEnabled: boolean;
 }
 
 interface ExpressionAstOptions {

@@ -71,4 +71,5 @@ export const createSearchSourceMock = (
         )
       ),
     onResponse: jest.fn().mockImplementation((req, res) => res),
+    scriptedFieldsEnabled: true,
   });

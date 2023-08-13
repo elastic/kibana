@@ -94,6 +94,7 @@ describe('SearchSource', () => {
       getConfig: getConfigMock,
       search: mockSearchMethod,
       onResponse: jest.fn().mockImplementation((_, res) => res),
+      scriptedFieldsEnabled: true,
     };
 
     searchSource = new SearchSource({}, searchSourceDependencies);
