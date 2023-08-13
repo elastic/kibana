@@ -129,6 +129,7 @@ describe('Task Runner', () => {
   const inMemoryMetrics = inMemoryMetricsMock.create();
   const dataViewsMock = {
     dataViewsServiceFactory: jest.fn().mockResolvedValue(dataViewPluginMocks.createStartContract()),
+    getScriptedFieldsEnabled: jest.fn().mockReturnValue(true),
   } as DataViewsServerPluginStart;
   const mockAlertsService = alertsServiceMock.create();
   const mockAlertsClient = alertsClientMock.create();
