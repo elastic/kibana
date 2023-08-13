@@ -13,7 +13,7 @@ import { BulkActionsDryRunErrCode } from '../../../../../../../common/constants'
 
 import { prepareSearchParams } from './prepare_search_params';
 
-jest.mock('../../../../../../../common/utils/kql', () => ({
+jest.mock('../../../../../../../common/detection_engine/rule_management/rule_filtering', () => ({
   convertRulesFilterToKQL: jest.fn().mockReturnValue('str'),
 }));
 
