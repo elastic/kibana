@@ -253,7 +253,6 @@ export const buildAlert = (
     'kibana.alert.rule.risk_score': params.riskScore,
     'kibana.alert.rule.severity': params.severity,
     'kibana.alert.rule.building_block_type': params.buildingBlockType,
-    'kibana.alert.rule.custom_highlighted_fields': params.customHighlightedFields,
   };
 };
 

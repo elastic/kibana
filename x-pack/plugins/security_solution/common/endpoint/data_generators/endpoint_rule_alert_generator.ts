@@ -321,7 +321,6 @@ export class EndpointRuleAlertGenerator extends BaseDataGenerator {
           timestamp_override: 'event.ingested',
           type: 'query',
           version: 100,
-          custom_highlighted_fields: [],
         },
         'kibana.alert.rule.producer': 'siem',
         'kibana.alert.rule.references': [],
