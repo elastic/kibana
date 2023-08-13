@@ -11,11 +11,11 @@ import {
   getMockCoverageOverviewMitreTactic,
   getMockCoverageOverviewMitreTechnique,
 } from '../../../rule_management/model/coverage_overview/__mocks__';
-import { ruleStatusFilterDefaultOptions, ruleTypeFilterDefaultOptions } from './constants';
+import { ruleActivityFilterDefaultOptions, ruleSourceFilterDefaultOptions } from './constants';
 import {
   formatRuleFilterOptions,
-  getInitialRuleStatusFilterOptions,
-  getInitialRuleTypeFilterOptions,
+  getInitialRuleActivityFilterOptions,
+  getInitialRuleSourceFilterOptions,
   getNumOfCoveredSubtechniques,
   getNumOfCoveredTechniques,
 } from './helpers';
@@ -59,68 +59,49 @@ describe('helpers', () => {
 
   describe('formatRuleFilterOptions', () => {
     it('returns empty array when no options are checked', () => {
-      const payload = ruleStatusFilterDefaultOptions;
+      const payload = ruleActivityFilterDefaultOptions;
       expect(formatRuleFilterOptions(payload)).toEqual([]);
     });
 
     it('returns checked options when present', () => {
       const payload = [
-        ...ruleStatusFilterDefaultOptions,
-        { ...ruleStatusFilterDefaultOptions[0], checked: 'on' },
+        ...ruleActivityFilterDefaultOptions,
+        { ...ruleActivityFilterDefaultOptions[0], checked: 'on' },
       ];
-      expect(formatRuleFilterOptions(payload)).toEqual([ruleStatusFilterDefaultOptions[0].key]);
+      expect(formatRuleFilterOptions(payload)).toEqual([ruleActivityFilterDefaultOptions[0].label]);
     });
   });
 
   describe('getInitialRuleStatusFilterOptions', () => {
     it('returns default status options when no filter is present', () => {
       const payload = {};
-      expect(getInitialRuleStatusFilterOptions(payload)).toEqual(ruleStatusFilterDefaultOptions);
+      expect(getInitialRuleActivityFilterOptions(payload)).toEqual(
+        ruleActivityFilterDefaultOptions
+      );
     });
 
     it('returns correct options checked when present in filter', () => {
       const payload = getCoverageOverviewFilterMock();
-      expect(getInitialRuleStatusFilterOptions(payload)).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "checked": "on",
-            "key": "enabled",
-            "label": "Enabled rules",
-          },
-          Object {
-            "key": "disabled",
-            "label": "Disabled rules",
-          },
-        ]
-      `);
+      expect(getInitialRuleActivityFilterOptions(payload)).toEqual([
+        { label: 'enabled', checked: 'on' },
+        { label: 'disabled' },
+      ]);
     });
   });
 
   describe('getInitialRuleTypeFilterOptions', () => {
     it('returns default type options when no filter is present', () => {
       const payload = {};
-      expect(getInitialRuleTypeFilterOptions(payload)).toEqual(ruleTypeFilterDefaultOptions);
+      expect(getInitialRuleSourceFilterOptions(payload)).toEqual(ruleSourceFilterDefaultOptions);
     });
 
     it('returns correct options checked when present in filter', () => {
       const payload = getCoverageOverviewFilterMock();
-      expect(getInitialRuleTypeFilterOptions(payload)).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "checked": "on",
-            "key": "prebuilt",
-            "label": "Elastic rules",
-          },
-          Object {
-            "key": "customized",
-            "label": "Elastic customized rules",
-          },
-          Object {
-            "key": "custom",
-            "label": "Custom rules",
-          },
-        ]
-      `);
+      expect(getInitialRuleSourceFilterOptions(payload)).toEqual([
+        { label: 'prebuilt', checked: 'on' },
+        { label: 'customized' },
+        { label: 'custom' },
+      ]);
     });
   });
 });

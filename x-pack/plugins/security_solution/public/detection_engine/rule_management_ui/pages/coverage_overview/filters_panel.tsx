@@ -13,118 +13,27 @@ import {
   EuiPanel,
   EuiSearchBar,
 } from '@elastic/eui';
-import React, { memo, useCallback, useMemo, useState } from 'react';
+import React, { memo, useCallback } from 'react';
 import { css } from '@emotion/css';
-import type {
-  CoverageOverviewRuleActivity,
-  CoverageOverviewRuleSource,
-} from '../../../../../common/api/detection_engine';
-import { useCoverageOverviewDashboardContext } from './coverage_overview_page';
-import { DashboardFilterButtonComponent } from './shared_components/dashboard_filter_button';
 import { CoverageOverviewLegend } from './shared_components/dashboard_legend';
-import {
-  formatRuleFilterOptions,
-  getInitialRuleStatusFilterOptions,
-  getInitialRuleTypeFilterOptions,
-} from './helpers';
 import * as i18n from './translations';
-import { ruleStatusFilterDefaultOptions, ruleTypeFilterDefaultOptions } from './constants';
+import { useCoverageOverviewDashboardContext } from './coverage_overview_dashboard_context';
+import { RuleActivityFilter } from './rule_activity_filter';
+import { RuleSourceFilter } from './rule_source_filter';
 
-export interface CoverageOverviewFiltersPanelProps {
-  isLoading: boolean;
-}
-
-const CoverageOverviewFiltersPanelComponent = ({
-  isLoading,
-}: CoverageOverviewFiltersPanelProps) => {
+const CoverageOverviewFiltersPanelComponent = () => {
   const {
-    dispatch,
-    state: { showExpandedCells, filter },
+    state: { filter, isLoading, showExpandedCells },
+    actions: {
+      setShowExpandedCells,
+      setRuleActivityFilter,
+      setRuleSourceFilter,
+      setRuleSearchFilter,
+    },
   } = useCoverageOverviewDashboardContext();
-
-  const setShowExpandedCells = useCallback(
-    (value: boolean): void => {
-      dispatch({
-        type: 'setShowExpandedCells',
-        value,
-      });
-    },
-    [dispatch]
-  );
-
-  const setRuleStatusFilter = useCallback(
-    (value: CoverageOverviewRuleActivity[]): void => {
-      dispatch({
-        type: 'setRuleStatusFilter',
-        value,
-      });
-    },
-    [dispatch]
-  );
-
-  const setRuleTypeFilter = useCallback(
-    (value: CoverageOverviewRuleSource[]): void => {
-      dispatch({
-        type: 'setRuleTypeFilter',
-        value,
-      });
-    },
-    [dispatch]
-  );
-
-  const setRuleSearchFilter = useCallback(
-    (value: string): void => {
-      dispatch({
-        type: 'setRuleSearchFilter',
-        value,
-      });
-    },
-    [dispatch]
-  );
 
   const handleExpandCellsFilterClick = () => setShowExpandedCells(true);
   const handleCollapseCellsFilterClick = () => setShowExpandedCells(false);
-
-  const ruleStatusFilterInitalValue = useMemo(
-    () => getInitialRuleStatusFilterOptions(filter),
-    [filter]
-  );
-  const ruleTypeFilterInitalValue = useMemo(
-    () => getInitialRuleTypeFilterOptions(filter),
-    [filter]
-  );
-
-  const [ruleStatusFilterOptions, setRuleStatusFilterOptions] = useState(
-    ruleStatusFilterInitalValue
-  );
-
-  const [ruleTypeFilterOptions, setRuleTypeFilterOptions] = useState(ruleTypeFilterInitalValue);
-
-  const handleRuleStatusFilterOnChange = useCallback(
-    (options) => {
-      setRuleStatusFilterOptions(options);
-      const formattedOptions = formatRuleFilterOptions<CoverageOverviewRuleActivity>(options);
-      setRuleStatusFilter(formattedOptions);
-    },
-    [setRuleStatusFilter]
-  );
-
-  const handleRuleTypeFilterOnChange = useCallback(
-    (options) => {
-      setRuleTypeFilterOptions(options);
-      const formattedOptions = formatRuleFilterOptions<CoverageOverviewRuleSource>(options);
-      setRuleTypeFilter(formattedOptions);
-    },
-    [setRuleTypeFilter]
-  );
-
-  const handleRuleStatusFilterOnClear = useCallback(() => {
-    handleRuleStatusFilterOnChange(ruleStatusFilterDefaultOptions);
-  }, [handleRuleStatusFilterOnChange]);
-
-  const handleRuleTypeFilterOnClear = useCallback(() => {
-    handleRuleTypeFilterOnChange(ruleTypeFilterDefaultOptions);
-  }, [handleRuleTypeFilterOnChange]);
 
   const handleRuleSearchOnChange = useCallback(
     ({ queryText }: { queryText: string }) => {
@@ -142,21 +51,15 @@ const CoverageOverviewFiltersPanelComponent = ({
               flex-grow: 0;
             `}
           >
-            <DashboardFilterButtonComponent
-              dataTestSubj="coverageOverviewRuleStatusFilterButton"
-              title={i18n.CoverageOverviewRuleStatusFilterLabel}
-              options={ruleStatusFilterOptions}
-              onChange={handleRuleStatusFilterOnChange}
-              onClear={handleRuleStatusFilterOnClear}
+            <RuleActivityFilter
+              onChange={setRuleActivityFilter}
               isLoading={isLoading}
+              filter={filter}
             />
-            <DashboardFilterButtonComponent
-              dataTestSubj="coverageOverviewRuleTypeFilterButton"
-              title={i18n.CoverageOverviewRuleTypeFilterLabel}
-              options={ruleTypeFilterOptions}
-              onChange={handleRuleTypeFilterOnChange}
-              onClear={handleRuleTypeFilterOnClear}
+            <RuleSourceFilter
+              onChange={setRuleSourceFilter}
               isLoading={isLoading}
+              filter={filter}
             />
           </EuiFlexGroup>
           <EuiFlexGroup alignItems="center">

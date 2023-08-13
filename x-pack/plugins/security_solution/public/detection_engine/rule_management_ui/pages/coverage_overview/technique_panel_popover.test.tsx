@@ -12,47 +12,50 @@ import { getMockCoverageOverviewMitreTechnique } from '../../../rule_management/
 import { TestProviders } from '../../../../common/mock';
 import type { CoverageOverviewMitreTechnique } from '../../../rule_management/model/coverage_overview/mitre_technique';
 import { CoverageOverviewMitreTechniquePanelPopover } from './technique_panel_popover';
-import { useExecuteBulkAction } from '../../../rule_management/logic/bulk_actions/use_execute_bulk_action';
-import { CoverageOverviewDashboardContext } from './coverage_overview_page';
-import { initialState } from './reducer';
+import { useCoverageOverviewDashboardContext } from './coverage_overview_dashboard_context';
 
-jest.mock('../../../rule_management/logic/bulk_actions/use_execute_bulk_action');
+jest.mock('./coverage_overview_dashboard_context');
 
-const mockExecuteBulkAction = jest.fn();
-
-(useExecuteBulkAction as jest.Mock).mockReturnValue({
-  executeBulkAction: mockExecuteBulkAction,
-});
+const mockEnableAllDisabled = jest.fn();
 
 const renderTechniquePanelPopover = (
-  technique: CoverageOverviewMitreTechnique = getMockCoverageOverviewMitreTechnique(),
-  state = initialState
+  technique: CoverageOverviewMitreTechnique = getMockCoverageOverviewMitreTechnique()
 ) => {
   return render(
     <TestProviders>
-      <CoverageOverviewDashboardContext.Provider value={{ state, dispatch: () => {} }}>
-        <CoverageOverviewMitreTechniquePanelPopover technique={technique} />
-      </CoverageOverviewDashboardContext.Provider>
+      <CoverageOverviewMitreTechniquePanelPopover technique={technique} />
     </TestProviders>
   );
 };
 
 describe('CoverageOverviewMitreTechniquePanelPopover', () => {
+  beforeEach(() => {
+    (useCoverageOverviewDashboardContext as jest.Mock).mockReturnValue({
+      state: { showExpandedCells: false },
+      actions: { enableAllDisabled: mockEnableAllDisabled },
+    });
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
   test('it renders panel with collapsed view', () => {
     const wrapper = renderTechniquePanelPopover();
 
     expect(wrapper.getByTestId('coverageOverviewTechniquePanel')).toBeInTheDocument();
-    expect(wrapper.queryByTestId('coverageOverviewPanelMetadata')).not.toBeInTheDocument();
+    expect(wrapper.queryByTestId('coverageOverviewPanelRuleStats')).not.toBeInTheDocument();
   });
 
   test('it renders panel with expanded view', () => {
-    const wrapper = renderTechniquePanelPopover(getMockCoverageOverviewMitreTechnique(), {
-      ...initialState,
-      showExpandedCells: true,
+    (useCoverageOverviewDashboardContext as jest.Mock).mockReturnValue({
+      state: { showExpandedCells: true },
+      actions: { enableAllDisabled: mockEnableAllDisabled },
     });
+    const wrapper = renderTechniquePanelPopover();
 
     expect(wrapper.getByTestId('coverageOverviewTechniquePanel')).toBeInTheDocument();
-    expect(wrapper.getByTestId('coverageOverviewPanelMetadata')).toBeInTheDocument();
+    expect(wrapper.getByTestId('coverageOverviewPanelRuleStats')).toBeInTheDocument();
   });
 
   test('it renders all rules in correct areas', () => {
@@ -85,7 +88,7 @@ describe('CoverageOverviewMitreTechniquePanelPopover', () => {
       fireEvent.click(wrapper.getByTestId('enableAllDisabledButton'));
     });
 
-    expect(mockExecuteBulkAction).toHaveBeenCalledWith({ ids: ['rule-id'], type: 'enable' });
+    expect(mockEnableAllDisabled).toHaveBeenCalledWith(['rule-id']);
   });
 
   test('"Enable all disabled" button is disabled when there are no disabled rules', async () => {

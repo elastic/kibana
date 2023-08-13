@@ -32,28 +32,34 @@ export const coverageOverviewCardColorThresholds = [
   { threshold: 1, color: coverageOverviewPaletteColors[0] },
 ];
 
-export const ruleStatusFilterDefaultOptions = [
+export const ruleActivityFilterDefaultOptions = [
   {
-    label: i18n.CoverageOverviewEnabledRuleStatus,
-    key: CoverageOverviewRuleActivity.Enabled,
+    label: CoverageOverviewRuleActivity.Enabled,
   },
   {
-    label: i18n.CoverageOverviewDisabledRuleStatus,
-    key: CoverageOverviewRuleActivity.Disabled,
+    label: CoverageOverviewRuleActivity.Disabled,
   },
 ];
 
-export const ruleTypeFilterDefaultOptions = [
+export const ruleActivityFilterLabelMap: { [key: string]: string } = {
+  [CoverageOverviewRuleActivity.Enabled]: i18n.CoverageOverviewEnabledRuleActivity,
+  [CoverageOverviewRuleActivity.Disabled]: i18n.CoverageOverviewDisabledRuleActivity,
+};
+
+export const ruleSourceFilterDefaultOptions = [
   {
-    label: i18n.CoverageOverviewElasticRuleType,
-    key: CoverageOverviewRuleSource.Prebuilt,
+    label: CoverageOverviewRuleSource.Prebuilt,
   },
   {
-    label: i18n.CoverageOverviewCustomizedRuleType,
-    key: CoverageOverviewRuleSource.Customized,
+    label: CoverageOverviewRuleSource.Customized,
   },
   {
-    label: i18n.CoverageOverviewCustomRuleType,
-    key: CoverageOverviewRuleSource.Custom,
+    label: CoverageOverviewRuleSource.Custom,
   },
 ];
+
+export const ruleSourceFilterLabelMap: { [key: string]: string } = {
+  [CoverageOverviewRuleSource.Prebuilt]: i18n.CoverageOverviewElasticRuleSource,
+  [CoverageOverviewRuleSource.Customized]: i18n.CoverageOverviewCustomizedRuleSource,
+  [CoverageOverviewRuleSource.Custom]: i18n.CoverageOverviewCustomRuleSource,
+};

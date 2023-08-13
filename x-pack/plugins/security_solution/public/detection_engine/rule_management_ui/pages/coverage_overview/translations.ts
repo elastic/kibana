@@ -106,50 +106,50 @@ export const CoverageOverviewLegendRulesLabel = i18n.translate(
   }
 );
 
-export const CoverageOverviewEnabledRuleStatus = i18n.translate(
-  'xpack.securitySolution.coverageOverviewDashboard.enabledRuleStatus',
+export const CoverageOverviewEnabledRuleActivity = i18n.translate(
+  'xpack.securitySolution.coverageOverviewDashboard.enabledRuleActivity',
   {
     defaultMessage: 'Enabled rules',
   }
 );
 
-export const CoverageOverviewDisabledRuleStatus = i18n.translate(
-  'xpack.securitySolution.coverageOverviewDashboard.disabledRuleStatus',
+export const CoverageOverviewDisabledRuleActivity = i18n.translate(
+  'xpack.securitySolution.coverageOverviewDashboard.disabledRuleActivity',
   {
     defaultMessage: 'Disabled rules',
   }
 );
 
-export const CoverageOverviewElasticRuleType = i18n.translate(
-  'xpack.securitySolution.coverageOverviewDashboard.elasticRuleType',
+export const CoverageOverviewElasticRuleSource = i18n.translate(
+  'xpack.securitySolution.coverageOverviewDashboard.elasticRuleSource',
   {
     defaultMessage: 'Elastic rules',
   }
 );
 
-export const CoverageOverviewCustomizedRuleType = i18n.translate(
-  'xpack.securitySolution.coverageOverviewDashboard.customizedRuleType',
+export const CoverageOverviewCustomizedRuleSource = i18n.translate(
+  'xpack.securitySolution.coverageOverviewDashboard.customizedRuleSource',
   {
     defaultMessage: 'Elastic customized rules',
   }
 );
 
-export const CoverageOverviewCustomRuleType = i18n.translate(
-  'xpack.securitySolution.coverageOverviewDashboard.customRuleType',
+export const CoverageOverviewCustomRuleSource = i18n.translate(
+  'xpack.securitySolution.coverageOverviewDashboard.customRuleSource',
   {
     defaultMessage: 'Custom rules',
   }
 );
 
-export const CoverageOverviewRuleStatusFilterLabel = i18n.translate(
-  'xpack.securitySolution.coverageOverviewDashboard.ruleStatusFilterLabel',
+export const CoverageOverviewRuleActivityFilterLabel = i18n.translate(
+  'xpack.securitySolution.coverageOverviewDashboard.ruleActivityFilterLabel',
   {
     defaultMessage: 'Installed rule status',
   }
 );
 
-export const CoverageOverviewRuleTypeFilterLabel = i18n.translate(
-  'xpack.securitySolution.coverageOverviewDashboard.ruleTypeFilterLabel',
+export const CoverageOverviewRuleSourceFilterLabel = i18n.translate(
+  'xpack.securitySolution.coverageOverviewDashboard.ruleSourceFilterLabel',
   {
     defaultMessage: 'Installed rule type',
   }

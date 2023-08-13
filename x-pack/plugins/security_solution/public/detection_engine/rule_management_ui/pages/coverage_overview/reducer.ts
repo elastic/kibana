@@ -10,21 +10,14 @@ import type {
   CoverageOverviewRuleActivity,
   CoverageOverviewRuleSource,
 } from '../../../../../common/api/detection_engine';
+import type { CoverageOverviewDashboard } from '../../../rule_management/model/coverage_overview/dashboard';
 
 export interface CoverageOverviewDashboardState {
   showExpandedCells: boolean;
   filter: CoverageOverviewFilter;
+  isLoading: boolean;
+  data: CoverageOverviewDashboard | undefined;
 }
-
-export interface CoverageOverviewDashboardContextType {
-  state: CoverageOverviewDashboardState;
-  dispatch: React.Dispatch<Action>;
-}
-
-export const initialState: CoverageOverviewDashboardState = {
-  showExpandedCells: false,
-  filter: {},
-};
 
 export type Action =
   | {
@@ -32,11 +25,11 @@ export type Action =
       value: boolean;
     }
   | {
-      type: 'setRuleStatusFilter';
+      type: 'setRuleActivityFilter';
       value: CoverageOverviewRuleActivity[];
     }
   | {
-      type: 'setRuleTypeFilter';
+      type: 'setRuleSourceFilter';
       value: CoverageOverviewRuleSource[];
     }
   | {
@@ -52,7 +45,7 @@ export const createCoverageOverviewDashboardReducer =
         const { value } = action;
         return { ...state, showExpandedCells: value };
       }
-      case 'setRuleStatusFilter': {
+      case 'setRuleActivityFilter': {
         const { value } = action;
         if (value.length === 0 || value.length === 2) {
           const updatedFilter = { ...state.filter, activity: undefined };
@@ -61,7 +54,7 @@ export const createCoverageOverviewDashboardReducer =
         const updatedFilter = { ...state.filter, activity: value };
         return { ...state, filter: updatedFilter };
       }
-      case 'setRuleTypeFilter': {
+      case 'setRuleSourceFilter': {
         const { value } = action;
         const updatedFilter = { ...state.filter, source: value.length !== 0 ? value : undefined };
         return { ...state, filter: updatedFilter };

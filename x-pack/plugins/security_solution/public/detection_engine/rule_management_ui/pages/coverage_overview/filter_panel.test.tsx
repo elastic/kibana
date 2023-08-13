@@ -6,113 +6,84 @@
  */
 
 import { fireEvent, render, within } from '@testing-library/react';
-import React, { useReducer } from 'react';
+import React from 'react';
 
 import { TestProviders } from '../../../../common/mock';
-import { CoverageOverviewDashboardContext } from './coverage_overview_page';
-import { createCoverageOverviewDashboardReducer, initialState } from './reducer';
-import { renderHook, act } from '@testing-library/react-hooks';
+import { act } from '@testing-library/react-hooks';
 import { CoverageOverviewFiltersPanel } from './filters_panel';
-import { ruleStatusFilterDefaultOptions, ruleTypeFilterDefaultOptions } from './constants';
+import {
+  ruleActivityFilterDefaultOptions,
+  ruleActivityFilterLabelMap,
+  ruleSourceFilterDefaultOptions,
+  ruleSourceFilterLabelMap,
+} from './constants';
+import {
+  initialState,
+  useCoverageOverviewDashboardContext,
+} from './coverage_overview_dashboard_context';
+
+jest.mock('./coverage_overview_dashboard_context');
+
+const setShowExpandedCells = jest.fn();
+const setRuleActivityFilter = jest.fn();
+const setRuleSourceFilter = jest.fn();
+const setRuleSearchFilter = jest.fn();
+
+const mockCoverageOverviewContextReturn = {
+  state: initialState,
+  actions: {
+    setShowExpandedCells,
+    setRuleActivityFilter,
+    setRuleSourceFilter,
+    setRuleSearchFilter,
+  },
+};
+
+(useCoverageOverviewDashboardContext as jest.Mock).mockReturnValue(
+  mockCoverageOverviewContextReturn
+);
 
 const renderFiltersPanel = () => {
-  const { result } = renderHook(() =>
-    useReducer(createCoverageOverviewDashboardReducer(), initialState)
+  return render(
+    <TestProviders>
+      <CoverageOverviewFiltersPanel />
+    </TestProviders>
   );
-
-  const [state, dispatch] = result.current;
-
-  return {
-    wrapper: render(
-      <TestProviders>
-        <CoverageOverviewDashboardContext.Provider value={{ state, dispatch }}>
-          <CoverageOverviewFiltersPanel isLoading={false} />
-        </CoverageOverviewDashboardContext.Provider>
-      </TestProviders>
-    ),
-    context: result,
-  };
 };
 
 describe('CoverageOverviewFiltersPanel', () => {
-  test('it renders all correct rule status filter options', () => {
-    const { wrapper } = renderFiltersPanel();
+  test('it correctly populates rule activity filter state', () => {
+    const wrapper = renderFiltersPanel();
 
-    act(() => {
-      fireEvent.click(wrapper.getByTestId('coverageOverviewRuleStatusFilterButton'));
-    });
-
-    expect(wrapper.getByTestId('coverageOverviewFilterList')).toBeInTheDocument();
-    ruleStatusFilterDefaultOptions.forEach((option) => {
-      expect(
-        within(wrapper.getByTestId('coverageOverviewFilterList')).getByText(option.label)
-      ).toBeInTheDocument();
-    });
-  });
-
-  test('it renders all correct rule type filter options', () => {
-    const { wrapper } = renderFiltersPanel();
-
-    act(() => {
-      fireEvent.click(wrapper.getByTestId('coverageOverviewRuleTypeFilterButton'));
-    });
-
-    expect(wrapper.getByTestId('coverageOverviewFilterList')).toBeInTheDocument();
-    ruleTypeFilterDefaultOptions.forEach((option) => {
-      expect(
-        within(wrapper.getByTestId('coverageOverviewFilterList')).getByText(option.label)
-      ).toBeInTheDocument();
-    });
-  });
-
-  test('it correctly populates rule status filter state', () => {
-    const { wrapper, context } = renderFiltersPanel();
-
-    act(() => {
-      fireEvent.click(wrapper.getByTestId('coverageOverviewRuleStatusFilterButton'));
-    });
+    wrapper.getByTestId('coverageOverviewRuleActivityFilterButton').click();
 
     act(() => {
       fireEvent.click(
         within(wrapper.getByTestId('coverageOverviewFilterList')).getByText(
-          ruleStatusFilterDefaultOptions[0].label
+          ruleActivityFilterLabelMap[ruleActivityFilterDefaultOptions[0].label]
         )
       );
     });
-    expect(context.current[0].filter).toMatchInlineSnapshot(`
-      Object {
-        "activity": Array [
-          "enabled",
-        ],
-      }
-    `);
+    expect(setRuleActivityFilter).toHaveBeenCalledWith([ruleActivityFilterDefaultOptions[0].label]);
   });
 
-  test('it correctly populates rule type filter state', () => {
-    const { wrapper, context } = renderFiltersPanel();
+  test('it correctly populates rule source filter state', () => {
+    const wrapper = renderFiltersPanel();
 
-    act(() => {
-      fireEvent.click(wrapper.getByTestId('coverageOverviewRuleTypeFilterButton'));
-    });
+    wrapper.getByTestId('coverageOverviewRuleSourceFilterButton').click();
 
     act(() => {
       fireEvent.click(
         within(wrapper.getByTestId('coverageOverviewFilterList')).getByText(
-          ruleTypeFilterDefaultOptions[0].label
+          ruleSourceFilterLabelMap[ruleSourceFilterDefaultOptions[0].label]
         )
       );
     });
-    expect(context.current[0].filter).toMatchInlineSnapshot(`
-      Object {
-        "source": Array [
-          "prebuilt",
-        ],
-      }
-    `);
+    expect(setRuleSourceFilter).toHaveBeenCalledWith([ruleSourceFilterDefaultOptions[0].label]);
   });
 
   test('it correctly populates search filter state', () => {
-    const { wrapper, context } = renderFiltersPanel();
+    const wrapper = renderFiltersPanel();
 
     act(() => {
       fireEvent.change(wrapper.getByTestId('coverageOverviewFilterSearchBar'), {
@@ -121,10 +92,6 @@ describe('CoverageOverviewFiltersPanel', () => {
       fireEvent.submit(wrapper.getByTestId('coverageOverviewFilterSearchBar'));
     });
 
-    expect(context.current[0].filter).toMatchInlineSnapshot(`
-      Object {
-        "search_term": "test",
-      }
-    `);
+    expect(setRuleSearchFilter).toHaveBeenCalledWith('test');
   });
 });

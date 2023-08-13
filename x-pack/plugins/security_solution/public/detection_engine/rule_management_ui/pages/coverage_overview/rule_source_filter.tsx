@@ -17,26 +17,26 @@ import {
   EuiPopoverFooter,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
-import { coverageOverviewFilterWidth } from '../constants';
-import * as i18n from '../translations';
+import type {
+  CoverageOverviewFilter,
+  CoverageOverviewRuleSource,
+} from '../../../../../common/api/detection_engine';
+import { coverageOverviewFilterWidth, ruleSourceFilterLabelMap } from './constants';
+import * as i18n from './translations';
+import { getInitialRuleSourceFilterOptions, formatRuleFilterOptions } from './helpers';
 
-export interface DashboardFilterButtonComponentProps {
-  options: EuiSelectableOption[];
-  title: string;
-  onChange: (options: EuiSelectableOption[]) => void;
-  onClear: () => void;
+export interface RuleSourceFilterComponentProps {
+  filter: CoverageOverviewFilter;
+  onChange: (options: CoverageOverviewRuleSource[]) => void;
   isLoading: boolean;
-  dataTestSubj?: string;
 }
 
-export const DashboardFilterButtonComponent = ({
-  options,
-  title,
+const RuleSourceFilterComponent = ({
+  filter,
   onChange,
-  onClear,
   isLoading,
-  dataTestSubj,
-}: DashboardFilterButtonComponentProps) => {
+}: RuleSourceFilterComponentProps) => {
+  const selected = useMemo(() => filter.source ?? [], [filter]);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const onButtonClick = useCallback(() => {
@@ -46,27 +46,29 @@ export const DashboardFilterButtonComponent = ({
     setIsPopoverOpen(false);
   };
 
-  const hasActiveFilters = useMemo(() => !!options.find((option) => option.checked), [options]);
-  const numActiveFilters = useMemo(
-    () => options.filter((option) => option.checked === 'on').length,
-    [options]
-  );
+  const hasActiveFilters = useMemo(() => selected.length !== 0, [selected]);
+  const numActiveFilters = useMemo(() => selected.length, [selected]);
+
+  const options = getInitialRuleSourceFilterOptions(filter);
 
   const handleSelectableOnChange = useCallback(
-    (newOptions: EuiSelectableOption[], event, changedOption: EuiSelectableOption) => {
-      onChange(newOptions);
+    (newOptions) => {
+      const formattedOptions = formatRuleFilterOptions<CoverageOverviewRuleSource>(newOptions);
+      onChange(formattedOptions);
     },
     [onChange]
   );
 
   const handleOnClear = useCallback(() => {
-    onClear();
-  }, [onClear]);
+    onChange([]);
+  }, [onChange]);
+
+  const renderOptionLabel = (option: EuiSelectableOption) => ruleSourceFilterLabelMap[option.label];
 
   const button = useMemo(
     () => (
       <EuiFilterButton
-        data-test-subj={dataTestSubj}
+        data-test-subj="coverageOverviewRuleSourceFilterButton"
         isLoading={isLoading}
         iconType="arrowDown"
         onClick={onButtonClick}
@@ -74,18 +76,10 @@ export const DashboardFilterButtonComponent = ({
         hasActiveFilters={hasActiveFilters}
         numActiveFilters={numActiveFilters}
       >
-        {title}
+        {i18n.CoverageOverviewRuleSourceFilterLabel}
       </EuiFilterButton>
     ),
-    [
-      hasActiveFilters,
-      isPopoverOpen,
-      numActiveFilters,
-      onButtonClick,
-      title,
-      isLoading,
-      dataTestSubj,
-    ]
+    [hasActiveFilters, isPopoverOpen, numActiveFilters, onButtonClick, isLoading]
   );
   return (
     <EuiFilterGroup
@@ -94,7 +88,7 @@ export const DashboardFilterButtonComponent = ({
       `}
     >
       <EuiPopover
-        id={`${title}_popover`}
+        id="ruleActivityFilterPopover"
         button={button}
         isOpen={isPopoverOpen}
         closePopover={closePopover}
@@ -106,6 +100,7 @@ export const DashboardFilterButtonComponent = ({
           isLoading={isLoading}
           options={options}
           onChange={handleSelectableOnChange}
+          renderOption={renderOptionLabel}
         >
           {(list) => (
             <div
@@ -135,3 +130,5 @@ export const DashboardFilterButtonComponent = ({
     </EuiFilterGroup>
   );
 };
+
+export const RuleSourceFilter = React.memo(RuleSourceFilterComponent);
