@@ -26,6 +26,7 @@ import { ChatHeader } from './chat_header';
 import { ChatPromptEditor } from './chat_prompt_editor';
 import { ChatTimeline } from './chat_timeline';
 import { KnowledgeBaseCallout } from './knowledge_base_callout';
+import { last } from 'lodash';
 
 const containerClassName = css`
   max-height: 100%;
@@ -74,6 +75,10 @@ export function ChatBody({
 
   let footer: React.ReactNode;
 
+  const isLoading = Boolean(
+    connectors.loading || knowledgeBase.status.loading || last(timeline.items)?.loading
+  );
+
   if (connectors.loading || knowledgeBase.status.loading) {
     footer = (
       <EuiFlexItem className={loadingSpinnerContainerClassName}>
@@ -107,7 +112,7 @@ export function ChatBody({
         <EuiFlexItem grow={false}>
           <EuiPanel hasBorder={false} hasShadow={false} paddingSize="m">
             <ChatPromptEditor
-              loading={false}
+              loading={isLoading}
               disabled={!connectors.selectedConnector}
               onSubmit={timeline.onSubmit}
             />

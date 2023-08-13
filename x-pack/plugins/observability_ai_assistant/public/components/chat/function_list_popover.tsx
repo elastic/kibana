@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import {
   EuiButtonEmpty,
   EuiContextMenu,
@@ -21,9 +21,11 @@ import { useObservabilityAIAssistantChatService } from '../../hooks/use_observab
 export function FunctionListPopover({
   selectedFunctionName,
   onSelectFunction,
+  disabled,
 }: {
   selectedFunctionName?: string;
   onSelectFunction: (func: string) => void;
+  disabled: boolean;
 }) {
   const chatService = useObservabilityAIAssistantChatService();
 
@@ -38,20 +40,6 @@ export function FunctionListPopover({
     onSelectFunction(func.options.name);
   };
 
-  useEffect(() => {
-    const keyboardListener = (event: KeyboardEvent) => {
-      if (event.shiftKey && event.code === 'Digit4') {
-        setIsFunctionListOpen(true);
-      }
-    };
-
-    window.addEventListener('keyup', keyboardListener);
-
-    return () => {
-      window.removeEventListener('keyup', keyboardListener);
-    };
-  }, []);
-
   return (
     <EuiPopover
       anchorPosition="downLeft"
@@ -61,6 +49,7 @@ export function FunctionListPopover({
           iconSide="right"
           size="xs"
           onClick={handleClickFunctionList}
+          disabled={disabled}
         >
           {selectedFunctionName
             ? selectedFunctionName
