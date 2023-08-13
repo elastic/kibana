@@ -23,6 +23,7 @@ import { mockRule, mockRuleType, mockRuleSummary, mockLogResponse } from './test
 import { RuleType } from '../../../../types';
 import { loadActionErrorLog } from '../../../lib/rule_api/load_action_error_log';
 import { ExperimentalFeaturesService } from '../../../../common/experimental_features_service';
+import { ExperimentalFeatures } from '../../../../../common';
 
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 jest.mock('../../../../common/lib/kibana');
@@ -68,14 +69,8 @@ const mockErrorLogResponse = {
 describe('rule_event_log_list', () => {
   ExperimentalFeaturesService.init({
     experimentalFeatures: {
-      rulesListDatagrid: true,
-      internalAlertsTable: false,
-      ruleTagFilter: true,
-      ruleStatusFilter: true,
-      rulesDetailLogs: true,
       ruleUseExecutionStatus: true,
-      ruleKqlBar: true,
-    },
+    } as ExperimentalFeatures,
   });
 
   beforeEach(() => {
@@ -141,7 +136,7 @@ describe('rule_event_log_list', () => {
     expect(wrapper.find(EuiDataGrid).props().rowCount).toEqual(mockLogResponse.total);
   });
 
-  it('can sort by single and/or multiple column(s)', async () => {
+  it('can sort by single column', async () => {
     const wrapper = mountWithIntl(
       <RuleEventLogList
         ruleId={ruleMock.id}
@@ -158,7 +153,7 @@ describe('rule_event_log_list', () => {
       wrapper.update();
     });
 
-    let headerCellButton = wrapper.find('[data-test-subj="dataGridHeaderCell-timestamp"] button');
+    const headerCellButton = wrapper.find('[data-test-subj="dataGridHeaderCell-timestamp"] button');
 
     headerCellButton.simulate('click');
 
@@ -207,21 +202,68 @@ describe('rule_event_log_list', () => {
         perPage: 10,
       })
     );
+  });
+
+  it('can sort by multiple column', async () => {
+    const wrapper = mountWithIntl(
+      <RuleEventLogList
+        ruleId={ruleMock.id}
+        ruleType={ruleType}
+        ruleSummary={mockRuleSummary({ ruleTypeId: ruleMock.ruleTypeId })}
+        numberOfExecutions={60}
+        onChangeDuration={onChangeDurationMock}
+        loadExecutionLogAggregations={loadExecutionLogAggregationsMock}
+      />
+    );
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    let headerCellButton = wrapper.find(
+      'div[data-test-subj="dataGridHeaderCell-timestamp"] button'
+    );
+
+    headerCellButton.simulate('click');
+
+    let headerAction = wrapper.find('ul[data-test-subj="dataGridHeaderCellActionGroup-timestamp"]');
+
+    expect(headerAction.exists()).toBeTruthy();
+
+    // Sort by the timestamp column
+    headerAction.find('button').first().simulate('click');
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    expect(loadExecutionLogAggregationsMock).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        id: ruleMock.id,
+        message: '',
+        outcomeFilter: [],
+        page: 0,
+        perPage: 10,
+        sort: [{ timestamp: { order: 'asc' } }],
+      })
+    );
 
     // Find another column
     headerCellButton = wrapper.find(
-      '[data-test-subj="dataGridHeaderCell-execution_duration"] button'
+      'div[data-test-subj="dataGridHeaderCell-execution_duration"] button'
     );
 
     // Open the popover again
     headerCellButton.simulate('click');
 
     headerAction = wrapper.find(
-      '[data-test-subj="dataGridHeaderCellActionGroup-execution_duration"]'
+      'ul[data-test-subj="dataGridHeaderCellActionGroup-execution_duration"]'
     );
 
     // Sort
-    headerAction.find('li').at(1).find('button').simulate('click');
+    headerAction.find('button').first().simulate('click');
 
     await act(async () => {
       await nextTick();
@@ -233,10 +275,10 @@ describe('rule_event_log_list', () => {
         id: ruleMock.id,
         sort: [
           {
-            timestamp: { order: 'desc' },
+            timestamp: { order: 'asc' },
           },
           {
-            execution_duration: { order: 'desc' },
+            execution_duration: { order: 'asc' },
           },
         ],
         outcomeFilter: [],
@@ -264,9 +306,13 @@ describe('rule_event_log_list', () => {
     });
 
     // Filter by success
-    wrapper.find('[data-test-subj="eventLogStatusFilterButton"]').at(0).simulate('click');
+    wrapper
+      .find('[data-test-subj="eventLogStatusFilterButton"]')
+      .first()
+      .find('button')
+      .simulate('click');
 
-    wrapper.find('[data-test-subj="eventLogStatusFilter-success"]').at(0).simulate('click');
+    wrapper.find('[data-test-subj="eventLogStatusFilter-success"]').first().simulate('click');
 
     await act(async () => {
       await nextTick();
@@ -284,9 +330,13 @@ describe('rule_event_log_list', () => {
     );
 
     // Filter by failure as well
-    wrapper.find('[data-test-subj="eventLogStatusFilterButton"]').at(0).simulate('click');
+    wrapper
+      .find('[data-test-subj="eventLogStatusFilterButton"]')
+      .first()
+      .find('button')
+      .simulate('click');
 
-    wrapper.find('[data-test-subj="eventLogStatusFilter-failure"]').at(0).simulate('click');
+    wrapper.find('[data-test-subj="eventLogStatusFilter-failure"]').first().simulate('click');
 
     await act(async () => {
       await nextTick();
@@ -515,7 +565,7 @@ describe('rule_event_log_list', () => {
     expect(wrapper.find(RefineSearchPrompt).exists()).toBeFalsy();
 
     // Go to the last page
-    wrapper.find('[data-test-subj="pagination-button-99"]').first().simulate('click');
+    wrapper.find('a[data-test-subj="pagination-button-99"]').simulate('click');
 
     await act(async () => {
       await nextTick();
@@ -528,7 +578,7 @@ describe('rule_event_log_list', () => {
     );
 
     // Go to the second last page
-    wrapper.find('[data-test-subj="pagination-button-98"]').first().simulate('click');
+    wrapper.find('a[data-test-subj="pagination-button-98"]').simulate('click');
 
     await act(async () => {
       await nextTick();
@@ -615,29 +665,29 @@ describe('rule_event_log_list', () => {
       wrapper.update();
     });
 
-    expect(wrapper.find('[data-test-subj="eventLogPaginationStatus"]').first().text()).toEqual(
+    expect(wrapper.find('div[data-test-subj="eventLogPaginationStatus"]').text()).toEqual(
       'Showing 1 - 10 of 85 log entries'
     );
 
-    wrapper.find('[data-test-subj="pagination-button-1"]').first().simulate('click');
+    wrapper.find('a[data-test-subj="pagination-button-1"]').simulate('click');
 
     await act(async () => {
       await nextTick();
       wrapper.update();
     });
 
-    expect(wrapper.find('[data-test-subj="eventLogPaginationStatus"]').first().text()).toEqual(
+    expect(wrapper.find('div[data-test-subj="eventLogPaginationStatus"]').text()).toEqual(
       'Showing 11 - 20 of 85 log entries'
     );
 
-    wrapper.find('[data-test-subj="pagination-button-8"]').first().simulate('click');
+    wrapper.find('a[data-test-subj="pagination-button-8"]').simulate('click');
 
     await act(async () => {
       await nextTick();
       wrapper.update();
     });
 
-    expect(wrapper.find('[data-test-subj="eventLogPaginationStatus"]').first().text()).toEqual(
+    expect(wrapper.find('div[data-test-subj="eventLogPaginationStatus"]').text()).toEqual(
       'Showing 81 - 85 of 85 log entries'
     );
   });
