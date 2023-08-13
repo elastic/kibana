@@ -105,11 +105,9 @@ export function convertRuleSearchTermToKQL(
 }
 
 export function convertRuleTagsToKQL(tags: string[]): string {
-  return `${TAGS_FIELD}:(${tags.map((tag) => prepareKQLStringParam(tag)).join(' AND ')})`;
+  return `${TAGS_FIELD}:(${tags.map(prepareKQLStringParam).join(' AND ')})`;
 }
 
 export function convertRuleTypesToKQL(ruleTypes: Type[]): string {
-  return `${PARAMS_TYPE_FIELD}: (${ruleTypes
-    .map((ruleType) => prepareKQLStringParam(ruleType))
-    .join(' OR ')})`;
+  return `${PARAMS_TYPE_FIELD}: (${ruleTypes.map(prepareKQLStringParam).join(' OR ')})`;
 }
