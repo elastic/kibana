@@ -28,7 +28,7 @@ xpack.actions.preconfigured:
       apiKey: <myApiKey>
 ```
 
-**Note**: The configured deployed model should [function calling](https://platform.openai.com/docs/guides/gpt/function-calling). For OpenAI, this is usually the case. For Azure, the minimum `apiVersion` is `2023-07-01-preview`. We also recommend a model with a pretty sizable token context length.
+**Note**: The configured deployed model should support [function calling](https://platform.openai.com/docs/guides/gpt/function-calling). For OpenAI, this is usually the case. For Azure, the minimum `apiVersion` is `2023-07-01-preview`. We also recommend a model with a pretty sizable token context length.
 
 #### **1.2. Feature controls**
 
