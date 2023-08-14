@@ -49,9 +49,13 @@ export const columns = [
 
 export interface AlertsTableProps {
   /**
+   * Whether the table is loading
+   */
+  loading: boolean;
+  /**
    * Ids of alerts to display in the table
    */
-  alertIds: string[];
+  alertIds: string[] | undefined;
   /**
    * Data test subject string for testing
    */
@@ -61,9 +65,20 @@ export interface AlertsTableProps {
 /**
  * Renders paginated alert array based on the provided alertIds
  */
-export const AlertsTable: FC<AlertsTableProps> = ({ alertIds, 'data-test-subj': dataTestSubj }) => {
-  const { setPagination, setSorting, data, loading, paginationConfig, sorting, error } =
-    usePaginatedAlerts(alertIds);
+export const AlertsTable: FC<AlertsTableProps> = ({
+  loading,
+  alertIds,
+  'data-test-subj': dataTestSubj,
+}) => {
+  const {
+    setPagination,
+    setSorting,
+    data,
+    loading: alertsLoading,
+    paginationConfig,
+    sorting,
+    error,
+  } = usePaginatedAlerts(alertIds || []);
 
   const onTableChange = useCallback(
     ({ page, sort }: Criteria<Record<string, unknown>>) => {
@@ -105,7 +120,7 @@ export const AlertsTable: FC<AlertsTableProps> = ({ alertIds, 'data-test-subj': 
   return (
     <EuiBasicTable<Record<string, unknown>>
       data-test-subj={dataTestSubj}
-      loading={loading}
+      loading={loading || alertsLoading}
       items={mappedData}
       columns={columns}
       pagination={paginationConfig}

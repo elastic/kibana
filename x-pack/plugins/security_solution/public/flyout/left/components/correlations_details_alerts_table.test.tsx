@@ -59,7 +59,7 @@ describe('AlertsTable', () => {
   });
 
   it('renders EuiBasicTable with correct props', () => {
-    render(<AlertsTable alertIds={alertIds} />);
+    render(<AlertsTable loading={false} alertIds={alertIds} />);
 
     expect(jest.mocked(usePaginatedAlerts)).toHaveBeenCalled();
 

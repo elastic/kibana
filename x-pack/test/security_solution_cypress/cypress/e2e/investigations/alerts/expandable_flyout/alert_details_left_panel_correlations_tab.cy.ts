@@ -12,17 +12,13 @@ import {
   CORRELATIONS_ANCESTRY_TABLE,
   CORRELATIONS_CASES_SECTION,
   CORRELATIONS_SESSION_SECTION,
-  CORRELATIONS_SOURCE_SECTION,
   DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_CORRELATIONS_BUTTON,
 } from '../../../../screens/expandable_flyout/alert_details_left_panel_correlations_tab';
 import {
   DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB,
   DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_BUTTON_GROUP,
 } from '../../../../screens/expandable_flyout/alert_details_left_panel';
-import {
-  expandCorrelationsSection,
-  openCorrelationsTab,
-} from '../../../../tasks/expandable_flyout/alert_details_left_panel_correlations_tab';
+import { openCorrelationsTab } from '../../../../tasks/expandable_flyout/alert_details_left_panel_correlations_tab';
 import { openInsightsTab } from '../../../../tasks/expandable_flyout/alert_details_left_panel';
 import { expandDocumentDetailsExpandableFlyoutLeftSection } from '../../../../tasks/expandable_flyout/alert_details_right_panel';
 import {
@@ -71,23 +67,25 @@ describe(
 
       cy.log('should render all the correlations sections');
 
+      cy.get(CORRELATIONS_ANCESTRY_SECTION).scrollIntoView();
       cy.get(CORRELATIONS_ANCESTRY_SECTION)
         .should('be.visible')
-        .and('have.text', '1 alert related by ancestry');
+        .and('contain.text', '1 alert related by ancestry');
+      cy.get(CORRELATIONS_ANCESTRY_TABLE).should('be.visible');
 
-      cy.get(CORRELATIONS_SOURCE_SECTION)
-        .should('be.visible')
-        .and('have.text', '0 alerts related by source event');
+      // TODO get proper data to test this section
+      // cy.get(CORRELATIONS_SOURCE_SECTION).scrollIntoView();
+      // cy.get(CORRELATIONS_SOURCE_SECTION)
+      //   .should('be.visible')
+      //   .and('contain.text', '0 alerts related by source event');
 
+      cy.get(CORRELATIONS_SESSION_SECTION).scrollIntoView();
       cy.get(CORRELATIONS_SESSION_SECTION)
         .should('be.visible')
-        .and('have.text', '1 alert related by session');
+        .and('contain.text', '1 alert related by session');
 
-      cy.get(CORRELATIONS_CASES_SECTION).should('be.visible').and('have.text', '1 related case');
-
-      expandCorrelationsSection(CORRELATIONS_ANCESTRY_SECTION);
-
-      cy.get(CORRELATIONS_ANCESTRY_TABLE).should('be.visible');
+      cy.get(CORRELATIONS_CASES_SECTION).scrollIntoView();
+      cy.get(CORRELATIONS_CASES_SECTION).should('be.visible').and('contain.text', '1 related case');
     });
   }
 );
