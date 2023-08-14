@@ -75,9 +75,3 @@ function getTargetDefinition(target: HTMLElement): string[] {
       .map((attr) => `${attr.name}=${attr.value}`),
   ];
 }
-
-/** security paths that contain user data */
-const SECURITY_PATHS = ['security/hosts/name'];
-function maskSecurityUrls(properties: string[]): string[] {
-  return properties.filter((attr) => !attr.includes(SECURITY_PATHS));
-}

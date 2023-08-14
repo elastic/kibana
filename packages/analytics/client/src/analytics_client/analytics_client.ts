@@ -126,14 +126,10 @@ export class AnalyticsClient implements IAnalyticsClient {
       );
     }
 
-    console.log('eventType!!!', eventType, eventData);
-    console.log('context!!!', this.context$.value);
-    console.log('eventData!!!', eventData);
-
     const event: Event = {
       timestamp,
       event_type: eventType,
-      context: this.context$.value,
+      context: maskSecurityUrls(this.context$.value),
       properties: eventData as unknown as Record<string, unknown>,
     };
 
@@ -363,4 +359,40 @@ export class AnalyticsClient implements IAnalyticsClient {
         this.sendToShipper(eventType, events);
       });
   }
+}
+
+/** security paths that contain user data */
+const SECURITY_PATHS = ['hosts/name', 'users/name', 'network/ip'];
+// this indicates a user query
+const queryMarker = `?_g=`;
+const fixUrl = (url: string) => {
+  if (url.includes(queryMarker)) {
+    url = url.substring(0, url.indexOf(queryMarker) + queryMarker.length);
+  }
+  const matchedKnownPiiData = SECURITY_PATHS.find((path) => url.includes(path));
+
+  if (matchedKnownPiiData) {
+    const res = url.split(matchedKnownPiiData);
+    return res[0] + matchedKnownPiiData + res[1].replace(/^\/[^\/\r\n]+(?=\/)/, '/MASKED');
+  }
+
+  return url;
+};
+
+export function maskSecurityUrls(properties: Partial<EventContext>): Record<string, unknown> {
+  const maskedProperties: Partial<EventContext> = {};
+  if (properties.page_url) {
+    maskedProperties.page_url = fixUrl(properties.page_url as string);
+  }
+  if (properties.page) {
+    maskedProperties.page = fixUrl(properties.page as string);
+  }
+  if (properties.pageName) {
+    maskedProperties.pageName = fixUrl(properties.pageName as string);
+  }
+
+  return {
+    ...properties,
+    ...maskedProperties,
+  };
 }

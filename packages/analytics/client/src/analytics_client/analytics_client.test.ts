@@ -229,6 +229,109 @@ describe('AnalyticsClient', () => {
         expect.any(Error)
       );
     });
+
+    describe('Masks User Data', () => {
+      const tests: Array<[string, { input: string; output: string }]> = [
+        [
+          'host name',
+          {
+            input: '/hosts/name/Stephs-MBP/uncommonProcesses',
+            output: '/hosts/name/MASKED/uncommonProcesses',
+          },
+        ],
+        [
+          'user name',
+          {
+            input: '/users/name/StephsUser/uncommonProcesses',
+            output: '/users/name/MASKED/uncommonProcesses',
+          },
+        ],
+        [
+          'network ip',
+          {
+            input: '/network/ip/142.250.72.78/destination/flows',
+            output: '/network/ip/MASKED/destination/flows',
+          },
+        ],
+        [
+          'network ip with query',
+          {
+            input:
+              '/network/ip/142.250.72.78/destination/flows?_g=sourcerer=(default:(id:security-solution-default,selectedPatterns:!(%27filebeat-*%27,%27packetbeat-*%27,%27-filebeat-*%27)))&query=(language:kuery,query:%27host.name:"Stephs-MBP"%20%27)&timerange=(global:(linkTo:!(timeline),timerange:(from:%272023-08-14T06:00:00.000Z%27,fromStr:now%2Fd,kind:relative,to:%272023-08-15T05:59:59.999Z%27,toStr:now%2Fd)),timeline:(linkTo:!(global),timerange:(from:%272023-08-14T06:00:00.000Z%27,fromStr:now%2Fd,kind:relative,to:%272023-08-15T05:59:59.999Z%27,toStr:now%2Fd)))',
+            output: '/network/ip/MASKED/destination/flows?_g=',
+          },
+        ],
+        [
+          'overview page with query',
+          {
+            input:
+              '/overview?_g=sourcerer=(default:(id:security-solution-default,selectedPatterns:!(%27filebeat-*%27,%27packetbeat-*%27,%27-filebeat-*%27)))&query=(language:kuery,query:%27host.name:"Stephs-MBP"%20%27)&timerange=(global:(linkTo:!(timeline),timerange:(from:%272023-08-14T06:00:00.000Z%27,fromStr:now%2Fd,kind:relative,to:%272023-08-15T05:59:59.999Z%27,toStr:now%2Fd)),timeline:(linkTo:!(global),timerange:(from:%272023-08-14T06:00:00.000Z%27,fromStr:now%2Fd,kind:relative,to:%272023-08-15T05:59:59.999Z%27,toStr:now%2Fd)))',
+            output: '/overview?_g=',
+          },
+        ],
+      ];
+      test.each(tests)('Masks %s data', (_, { input, output }) => {
+        const extendContextMock = jest.fn();
+        const { optIn, registerEventType, registerShipper, reportEvent } = analyticsClient;
+        const reportEventsMock = jest.fn().mockImplementation(() => {
+          throw new Error('Something went terribly wrong');
+        });
+        class MockedShipper extends shippersMock.MockedShipper {
+          reportEvents = reportEventsMock;
+        }
+
+        optIn({ global: { enabled: true } });
+        registerShipper(MockedShipper, { extendContextMock });
+        const context$ = new Subject<{ page_url: string; page: string; pageName: string }>();
+        analyticsClient.registerContextProvider({
+          name: 'contextProviderA',
+          schema: {
+            page_url: {
+              type: 'keyword',
+              _meta: {
+                description: 'page_url description',
+              },
+            },
+            page: {
+              type: 'keyword',
+              _meta: {
+                description: 'page description',
+              },
+            },
+            pageName: {
+              type: 'keyword',
+              _meta: {
+                description: 'pageName description',
+              },
+            },
+          },
+          context$,
+        });
+        context$.next({
+          page_url: `/app/security${input}`,
+          page: input,
+          pageName: `application:securitySolutionUI:${input}`,
+        });
+        registerEventType({
+          eventType: 'testEvent',
+          schema: {},
+        });
+        reportEvent('testEvent', {});
+
+        expect(reportEventsMock).toHaveBeenCalledWith([
+          {
+            timestamp: expect.any(String),
+            event_type: 'testEvent',
+            properties: {},
+            context: {
+              page_url: `/app/security${output}`,
+              page: output,
+              pageName: `application:securitySolutionUI:${output}`,
+            },
+          },
+        ]);
+      });
+    });
   });
 
   describe('registerShipper', () => {
