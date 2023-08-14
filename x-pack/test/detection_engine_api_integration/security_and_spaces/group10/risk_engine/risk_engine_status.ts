@@ -367,6 +367,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(status1.body).to.eql({
           risk_engine_status: 'NOT_INSTALLED',
           legacy_risk_engine_status: 'NOT_INSTALLED',
+          is_max_amount_of_risk_engines_reached: false
         });
 
         await initRiskEngine();
@@ -376,6 +377,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(status2.body).to.eql({
           risk_engine_status: 'ENABLED',
           legacy_risk_engine_status: 'NOT_INSTALLED',
+          is_max_amount_of_risk_engines_reached: false
         });
 
         await disableRiskEngine();
@@ -384,6 +386,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(status3.body).to.eql({
           risk_engine_status: 'DISABLED',
           legacy_risk_engine_status: 'NOT_INSTALLED',
+          is_max_amount_of_risk_engines_reached: false
         });
 
         await enableRiskEngine();
@@ -392,6 +395,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(status4.body).to.eql({
           risk_engine_status: 'ENABLED',
           legacy_risk_engine_status: 'NOT_INSTALLED',
+          is_max_amount_of_risk_engines_reached: false
         });
       });
 
@@ -402,6 +406,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(status1.body).to.eql({
           risk_engine_status: 'NOT_INSTALLED',
           legacy_risk_engine_status: 'ENABLED',
+          is_max_amount_of_risk_engines_reached: false
         });
 
         await initRiskEngine();
@@ -411,6 +416,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(status2.body).to.eql({
           risk_engine_status: 'ENABLED',
           legacy_risk_engine_status: 'NOT_INSTALLED',
+          is_max_amount_of_risk_engines_reached: false
         });
       });
     });
