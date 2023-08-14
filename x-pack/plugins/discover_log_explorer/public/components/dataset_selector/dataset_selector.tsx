@@ -168,6 +168,7 @@ export function DatasetSelector({
         onPanelChange={changePanel}
         className="eui-yScroll"
         css={contextMenuStyles}
+        data-test-subj="datasetSelectorContextMenu"
         size="s"
       />
     </DatasetsPopover>
