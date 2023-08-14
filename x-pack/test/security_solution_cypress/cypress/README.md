@@ -64,7 +64,7 @@ Run the tests with the following yarn scripts from `x-pack/test/security_solutio
 | cypress:open:serverless | Opens the Cypress UI with all tests in the `e2e` directory. This also runs a mocked serverless environment. The kibana instance will reload when you make code changes. This is the recommended way to debug and develop tests. |
 | cypress:run:ess | Runs all tests tagged as ESS placed in the `e2e` directory excluding `investigations` and `explore` directories in headless mode |
 | cypress:run:cases:ess | Runs all tests under `explore/cases` in the `e2e` directory related to the Cases area team in headless mode |
-| cypress:run:reporter | Runs all tests with the specified configuration in headless mode and produces a report using `cypress-multi-reporters` |
+| cypress:ess | Runs all ESS tests with the specified configuration in headless mode and produces a report using `cypress-multi-reporters` |
 | cypress:run:respops:ess | Runs all tests related to the Response Ops area team, specifically tests in `detection_alerts`, `detection_rules`, and `exceptions` directories in headless mode |
 | cypress:run:serverless | Runs all tests tagged as SERVERLESS in the `e2e` directory excluding `investigations` and `explore` directories in headless mode |
 | cypress:investigations:run:ess | Runs all tests tagged as ESS in the `e2e/investigations` directory in headless mode |
