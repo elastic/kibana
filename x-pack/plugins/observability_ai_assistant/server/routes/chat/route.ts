@@ -24,7 +24,6 @@ const chatRoute = createObservabilityAIAssistantServerRoute({
           name: t.string,
           description: t.string,
           parameters: t.any,
-          contexts: t.array(t.string),
         })
       ),
     }),
