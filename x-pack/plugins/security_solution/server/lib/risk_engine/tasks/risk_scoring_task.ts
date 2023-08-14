@@ -113,6 +113,7 @@ export const startRiskScoringTask = async ({
 }) => {
   const taskId = getTaskId(namespace);
   const log = logFactory(logger, taskId);
+  log('starting task');
   const interval = (await riskEngineDataClient.getConfiguration())?.interval ?? INTERVAL;
 
   log('attempting to schedule');
@@ -167,6 +168,7 @@ export const runTask = async ({
   const taskId = taskInstance.id;
   const log = logFactory(logger, taskId);
   const taskExecutionTime = moment().utc().toISOString();
+  log('running task');
 
   let scoresWritten = 0;
   const updatedState = {
@@ -177,7 +179,7 @@ export const runTask = async ({
   };
 
   if (taskId !== getTaskId(state.namespace)) {
-    log('outdated task');
+    log('outdated task; exiting');
     return { state: updatedState };
   }
 
@@ -239,6 +241,7 @@ export const runTask = async ({
 
   updatedState.scoresWritten = scoresWritten;
 
+  log('task run completed');
   return {
     state: updatedState,
   };
