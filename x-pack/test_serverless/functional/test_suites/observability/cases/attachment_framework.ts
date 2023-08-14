@@ -85,7 +85,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         const theCase = await cases.api.createCase({
           title: theCaseTitle,
           description: 'This is a test case to verify existing action scenario!!',
-          owner: 'observability'
+          owner: 'observability',
         });
 
         await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'dashboards' });
