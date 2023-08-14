@@ -26,9 +26,9 @@ export function runFtrCli() {
     async ({ flagsReader, log }) => {
       const esVersionInput = flagsReader.string('es-version');
 
-      const configPaths = [
-        ...(flagsReader.arrayOfStrings('config') ?? []),
-      ].map((rel) => resolve(rel));
+      const configPaths = [...(flagsReader.arrayOfStrings('config') ?? [])].map((rel) =>
+        resolve(rel)
+      );
       if (configPaths.length !== 1) {
         throw createFlagError(`Expected there to be exactly one --config flag`);
       }

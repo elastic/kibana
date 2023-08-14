@@ -20,12 +20,11 @@ interface LoadSettingsOptions {
   primary: boolean;
 }
 
-export type ConfigModule =
-  | {
-      type: 'config';
-      path: string;
-      provider: FtrConfigProvider;
-    };
+export interface ConfigModule {
+  type: 'config';
+  path: string;
+  provider: FtrConfigProvider;
+}
 
 async function getConfigModule({
   path,
