@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   EuiButtonEmpty,
   EuiHighlight,
@@ -32,6 +32,7 @@ export function FunctionListPopover({
   onSelectFunction: (func: string) => void;
 }) {
   const { getFunctions } = useObservabilityAIAssistantChatService();
+  const filterRef = useRef<HTMLInputElement | null>(null);
 
   const [functionOptions, setFunctionOptions] = useState<
     Array<EuiSelectableOption<FunctionListOption>>
@@ -61,6 +62,12 @@ export function FunctionListPopover({
       window.removeEventListener('keyup', keyboardListener);
     };
   }, []);
+
+  useEffect(() => {
+    if (isFunctionListOpen && filterRef.current) {
+      filterRef.current.focus();
+    }
+  }, [isFunctionListOpen]);
 
   useEffect(() => {
     const options = getFunctions().map((func) => ({
@@ -134,7 +141,8 @@ export function FunctionListPopover({
         renderOption={renderCountryOption}
         searchable
         searchProps={{
-          'data-test-subj': 'selectableSearchHere',
+          'data-test-subj': 'searchFiltersList',
+          inputRef: (node) => (filterRef.current = node),
           placeholder: i18n.translate('xpack.observabilityAiAssistant.prompt.functionList.filter', {
             defaultMessage: 'Filter',
           }),
