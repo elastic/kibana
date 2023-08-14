@@ -7,9 +7,6 @@
 
 import type { CoreSetup, Logger } from '@kbn/core/server';
 
-import type { SpacesServiceStart } from '../../../spaces_service';
-import type { SpacesRouter } from '../../../types';
-import type { UsageStatsServiceSetup } from '../../../usage_stats';
 import { initCopyToSpacesApi } from './copy_to_space';
 import { initDeleteSpacesApi } from './delete';
 import { initDisableLegacyUrlAliasesApi } from './disable_legacy_url_aliases';
@@ -19,6 +16,9 @@ import { initGetShareableReferencesApi } from './get_shareable_references';
 import { initPostSpacesApi } from './post';
 import { initPutSpacesApi } from './put';
 import { initUpdateObjectsSpacesApi } from './update_objects_spaces';
+import type { SpacesServiceStart } from '../../../spaces_service';
+import type { SpacesRouter } from '../../../types';
+import type { UsageStatsServiceSetup } from '../../../usage_stats';
 
 export interface ExternalRouteDeps {
   externalRouter: SpacesRouter;

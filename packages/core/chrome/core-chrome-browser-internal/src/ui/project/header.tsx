@@ -37,12 +37,13 @@ import React, { createRef, useCallback, useState } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import useObservable from 'react-use/lib/useObservable';
 import { debounceTime, Observable, of } from 'rxjs';
-import { HeaderActionMenu, useHeaderActionMenuMounter } from '../header/header_action_menu';
+import { useHeaderActionMenuMounter } from '../header/header_action_menu';
 import { HeaderBreadcrumbs } from '../header/header_breadcrumbs';
 import { HeaderHelpMenu } from '../header/header_help_menu';
 import { HeaderNavControls } from '../header/header_nav_controls';
 import { HeaderTopBanner } from '../header/header_top_banner';
 import { ScreenReaderRouteAnnouncements, SkipToMainContent } from '../header/screen_reader_a11y';
+import { AppMenuBar } from './app_menu';
 import { ProjectNavigation } from './navigation';
 
 const headerCss = {
@@ -140,14 +141,14 @@ const Logo = (
   );
 
   return (
-    <span css={logo.container}>
+    <span css={logo.container} data-test-subj="nav-header-logo">
       {loadingCount === 0 ? (
         <EuiHeaderLogo
           iconType="logoElastic"
           onClick={navigateHome}
           href={fullHref}
           css={logo}
-          data-test-subj="nav-header-logo"
+          data-test-subj="globalLoadingIndicator-hidden"
           aria-label={headerStrings.logo.ariaLabel}
         />
       ) : (
@@ -156,7 +157,7 @@ const Logo = (
             size="l"
             aria-hidden={false}
             onClick={navigateHome}
-            data-test-subj="nav-header-loading-spinner"
+            data-test-subj="globalLoadingIndicator"
           />
         </a>
       )}
@@ -270,23 +271,12 @@ export const ProjectHeader = ({
               </EuiHeaderSectionItem>
             </EuiHeaderSection>
           </EuiHeader>
-
-          <EuiHeader
-            position="fixed"
-            className="header__secondBar"
-            data-test-subj="kibanaProjectHeaderActionMenu"
-          >
-            <EuiHeaderSection />
-            {headerActionMenuMounter.mount && (
-              <EuiHeaderSection side="right">
-                <EuiHeaderSectionItem>
-                  <HeaderActionMenu mounter={headerActionMenuMounter} />
-                </EuiHeaderSectionItem>
-              </EuiHeaderSection>
-            )}
-          </EuiHeader>
         </div>
       </header>
+
+      {headerActionMenuMounter.mount && (
+        <AppMenuBar isOpen={isOpen ?? false} headerActionMenuMounter={headerActionMenuMounter} />
+      )}
     </>
   );
 };

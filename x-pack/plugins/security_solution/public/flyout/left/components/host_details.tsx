@@ -20,9 +20,9 @@ import {
   EuiIcon,
 } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
+import { ExpandablePanel } from '../../shared/components/expandable_panel';
 import type { RelatedUser } from '../../../../common/search_strategy/security_solution/related_entities/related_users';
 import type { RiskSeverity } from '../../../../common/search_strategy';
-import { EntityPanel } from '../../right/components/entity_panel';
 import { HostOverview } from '../../../overview/components/host_overview';
 import { AnomalyTableProvider } from '../../../common/components/ml/anomaly/anomaly_table_provider';
 import { InspectButton, InspectButtonContainer } from '../../../common/components/inspect';
@@ -210,12 +210,13 @@ export const HostDetails: React.FC<HostDetailsProps> = ({ hostName, timestamp })
         <h4>{i18n.HOSTS_TITLE}</h4>
       </EuiTitle>
       <EuiSpacer size="s" />
-      <EntityPanel
-        title={hostName}
-        iconType={'storage'}
-        expandable={true}
-        expanded={true}
-        headerContent={relatedUsersCount}
+      <ExpandablePanel
+        header={{
+          title: hostName,
+          iconType: 'storage',
+          headerContent: relatedUsersCount,
+        }}
+        expand={{ expandable: true, expandedOnFirstRender: true }}
         data-test-subj={HOST_DETAILS_TEST_ID}
       >
         <EuiTitle size="xxs">
@@ -284,7 +285,7 @@ export const HostDetails: React.FC<HostDetailsProps> = ({ hostName, timestamp })
             inspectIndex={0}
           />
         </RelatedUsersManage>
-      </EntityPanel>
+      </ExpandablePanel>
     </>
   );
 };
