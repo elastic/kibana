@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { isString } from 'lodash';
-import axios, { AxiosError, AxiosHeaders, AxiosResponse } from 'axios';
+import axios, { AxiosError, AxiosResponse } from 'axios';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { map, getOrElse } from 'fp-ts/lib/Option';
@@ -238,7 +238,7 @@ export async function executor(
       url,
       logger,
       ...basicAuth,
-      headers: new AxiosHeaders(headers || {}),
+      headers: headers!,
       data,
       configurationUtilities,
       sslOverrides,

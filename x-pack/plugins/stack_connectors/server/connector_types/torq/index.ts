@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { curry } from 'lodash';
-import axios, { AxiosError, AxiosHeaders, AxiosResponse } from 'axios';
+import axios, { AxiosError, AxiosResponse } from 'axios';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { map, getOrElse } from 'fp-ts/lib/Option';
@@ -57,6 +57,7 @@ const ParamsSchema = schema.object({
 });
 
 export const ActionTypeId = '.torq';
+
 // action type definition
 export function getActionType(): TorqActionType {
   return {
@@ -162,10 +163,10 @@ export async function executor(
       axios: axiosInstance,
       url: webhookIntegrationUrl,
       method: 'post',
-      headers: new AxiosHeaders({
+      headers: {
         'X-Torq-Token': token || '',
         'Content-Type': 'application/json',
-      }),
+      },
       data: body,
       configurationUtilities,
       logger: execOptions.logger,
@@ -366,7 +367,6 @@ function retryResult(actionId: string, serviceMessage: string): ActionTypeExecut
 function retryResultSeconds(
   actionId: string,
   serviceMessage: string,
-
   retryAfter: number
 ): ActionTypeExecutorResult<void> {
   const retryEpoch = Date.now() + retryAfter * 1000;

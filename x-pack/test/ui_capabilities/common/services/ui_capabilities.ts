@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import axios, { AxiosHeaders, AxiosInstance, AxiosRequestHeaders } from 'axios';
+import axios, { AxiosInstance } from 'axios';
 import type { Capabilities as UICapabilities } from '@kbn/core/types';
 import { format as formatUrl } from 'url';
 import util from 'util';
@@ -61,13 +61,13 @@ export class UICapabilitiesService {
     this.log.debug(
       `requesting ${spaceUrlPrefix}/api/core/capabilities to parse the uiCapabilities`
     );
-    const requestHeaders: AxiosRequestHeaders = credentials
-      ? new AxiosHeaders({
+    const requestHeaders: Record<string, string> = credentials
+      ? {
           Authorization: `Basic ${Buffer.from(
             `${credentials.username}:${credentials.password}`
           ).toString('base64')}`,
-        })
-      : new AxiosHeaders({});
+        }
+      : {};
     const response = await this.axios.post(
       `${spaceUrlPrefix}/api/core/capabilities`,
       { applications: [...applications, 'kibana:stack_management'] },

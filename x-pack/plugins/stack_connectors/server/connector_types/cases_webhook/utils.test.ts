@@ -61,7 +61,7 @@ describe('cases_webhook/utils', () => {
       config: {
         method: 'post',
         url: 'https://poster.com',
-        headers: new AxiosHeaders(),
+        headers: new AxiosHeaders({}),
       },
     };
     it('Throws error when missing content-type', () => {

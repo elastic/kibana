@@ -6,7 +6,7 @@
  */
 
 import { Logger } from '@kbn/logging';
-import axios, { AxiosHeaders } from 'axios';
+import axios from 'axios';
 
 import {
   getErrorMessage,
@@ -88,7 +88,7 @@ export const createExternalService = (
         axios: axiosInstance,
         configurationUtilities,
         data,
-        headers: new AxiosHeaders(headers),
+        headers,
         logger,
         method: 'post',
         url: getPostRecordUrl(appId),
@@ -128,7 +128,7 @@ export const createExternalService = (
         axios: axiosInstance,
         configurationUtilities,
         data,
-        headers: new AxiosHeaders(headers),
+        headers,
         logger,
         method: 'patch',
         url: getPostRecordIdUrl(appId, params.incidentId),
@@ -177,7 +177,7 @@ export const createExternalService = (
         axios: axiosInstance,
         configurationUtilities,
         data,
-        headers: new AxiosHeaders(headers),
+        headers,
         logger,
         method: 'post',
         url: getPostCommentUrl(appId, incidentId, fieldId),

@@ -6,7 +6,14 @@
  */
 
 import { isObjectLike, isEmpty } from 'lodash';
-import { AxiosInstance, Method, AxiosResponse, AxiosRequestConfig, AxiosHeaders } from 'axios';
+import {
+  AxiosInstance,
+  Method,
+  AxiosResponse,
+  AxiosRequestConfig,
+  AxiosHeaders,
+  AxiosHeaderValue,
+} from 'axios';
 import { Logger } from '@kbn/core/server';
 import { getCustomAgents } from './get_custom_agents';
 import { ActionsConfigurationUtilities } from '../actions_config';
@@ -29,7 +36,7 @@ export const request = async <T = unknown>({
   method?: Method;
   data?: T;
   configurationUtilities: ActionsConfigurationUtilities;
-  headers?: AxiosHeaders;
+  headers?: Record<string, AxiosHeaderValue>;
   sslOverrides?: SSLSettings;
 } & AxiosRequestConfig): Promise<AxiosResponse> => {
   const { httpAgent, httpsAgent } = getCustomAgents(

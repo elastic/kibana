@@ -6,7 +6,7 @@
  */
 
 import qs from 'query-string';
-import axios, { AxiosHeaders } from 'axios';
+import axios from 'axios';
 import stringify from 'json-stable-stringify';
 import { Logger } from '@kbn/core/server';
 import { request } from './axios_utils';
@@ -37,9 +37,9 @@ export async function requestOAuthToken<T>(
       ...bodyRequest,
       grant_type: grantType,
     }),
-    headers: new AxiosHeaders({
+    headers: {
       'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-    }),
+    },
     configurationUtilities,
     validateStatus: () => true,
   });

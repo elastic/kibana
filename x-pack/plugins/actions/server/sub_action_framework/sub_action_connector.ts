@@ -14,6 +14,7 @@ import axios, {
   AxiosError,
   AxiosRequestHeaders,
   AxiosHeaders,
+  AxiosHeaderValue,
 } from 'axios';
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
@@ -80,8 +81,8 @@ export abstract class SubActionConnector<Config, Secrets> {
     }
   }
 
-  private getHeaders(headers?: AxiosRequestHeaders) {
-    return headers?.set('Content-Type', 'application/json');
+  private getHeaders(headers?: AxiosRequestHeaders): Record<string, AxiosHeaderValue> {
+    return { ...headers, 'Content-Type': 'application/json' };
   }
 
   private validateResponse(responseSchema: Type<unknown>, data: unknown) {

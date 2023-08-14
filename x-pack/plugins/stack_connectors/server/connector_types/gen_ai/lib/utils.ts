@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AxiosHeaders, AxiosRequestHeaders, AxiosResponse, ResponseType } from 'axios';
+import { AxiosResponse, ResponseType } from 'axios';
 import { IncomingMessage } from 'http';
 import { OpenAiProviderType } from '../../../../common/gen_ai/constants';
 import {
@@ -77,24 +77,24 @@ export const getAxiosOptions = (
   provider: string,
   apiKey: string,
   stream: boolean
-): { headers: AxiosRequestHeaders; responseType?: ResponseType } => {
+): { headers: Record<string, string>; responseType?: ResponseType } => {
   const responseType = stream ? { responseType: 'stream' as ResponseType } : {};
   switch (provider) {
     case OpenAiProviderType.OpenAi:
       return {
-        headers: new AxiosHeaders({
+        headers: {
           Authorization: `Bearer ${apiKey}`,
           ['content-type']: 'application/json',
-        }),
+        },
         ...responseType,
       };
     case OpenAiProviderType.AzureAi:
       return {
-        headers: new AxiosHeaders({ ['api-key']: apiKey, ['content-type']: 'application/json' }),
+        headers: { ['api-key']: apiKey, ['content-type']: 'application/json' },
         ...responseType,
       };
     default:
-      return { headers: new AxiosHeaders() };
+      return { headers: {} };
   }
 };
 
