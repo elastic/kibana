@@ -11,18 +11,18 @@ import { useLinkProps } from '@kbn/observability-shared-plugin/public';
 import type { Tab } from '../types';
 
 export interface LinkToApmServicesProps extends Tab {
-  nodeName: string;
+  assetName: string;
   apmField: string;
 }
 
-export const TabToApmTraces = ({ nodeName, apmField, name, ...props }: LinkToApmServicesProps) => {
+export const TabToApmTraces = ({ assetName, apmField, name, ...props }: LinkToApmServicesProps) => {
   const { euiTheme } = useEuiTheme();
 
   const apmTracesMenuItemLinkProps = useLinkProps({
     app: 'apm',
     hash: 'traces',
     search: {
-      kuery: `${apmField}:"${nodeName}"`,
+      kuery: `${apmField}:"${assetName}"`,
     },
   });
 
@@ -30,7 +30,7 @@ export const TabToApmTraces = ({ nodeName, apmField, name, ...props }: LinkToApm
     <EuiTab
       {...props}
       {...apmTracesMenuItemLinkProps}
-      data-test-subj="hostsView-flyout-apm-services-link"
+      data-test-subj="infraAssetDetailsApmServicesLinkTab"
     >
       <EuiIcon
         type="popout"

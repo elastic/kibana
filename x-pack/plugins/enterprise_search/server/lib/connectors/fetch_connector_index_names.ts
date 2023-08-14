@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { isIndexNotFoundException } from '@kbn/core-saved-objects-migration-server-internal';
 import { IScopedClusterClient } from '@kbn/core/server';
+import { isIndexNotFoundException } from '@kbn/core-saved-objects-migration-server-internal';
 
 import { CONNECTORS_INDEX } from '../..';
 

@@ -39,8 +39,10 @@ import type { CoreStart, IUiSettingsClient } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { UserAvatar } from '@kbn/user-profile-components';
+import type { DarkModeValue, UserProfileData } from '@kbn/user-profile-components';
+import { UserAvatar, useUpdateUserProfile } from '@kbn/user-profile-components';
 
+import { createImageHandler, getRandomColor, IMAGE_FILE_TYPES, VALID_HEX_COLOR } from './utils';
 import type { AuthenticatedUser } from '../../../common';
 import {
   canUserChangeDetails,
@@ -48,11 +50,6 @@ import {
   getUserAvatarColor,
   getUserAvatarInitials,
 } from '../../../common/model';
-import type {
-  DarkModeValue,
-  UserProfileAvatarData,
-  UserSettingsData,
-} from '../../../common/model/user_profile';
 import { useSecurityApiClients } from '../../components';
 import { Breadcrumb } from '../../components/breadcrumb';
 import {
@@ -65,14 +62,6 @@ import { FormLabel } from '../../components/form_label';
 import { FormRow, OptionalText } from '../../components/form_row';
 import { ChangePasswordModal } from '../../management/users/edit_user/change_password_modal';
 import { isUserReserved } from '../../management/users/user_utils';
-import { getUseUpdateUserProfile } from './use_update_user_profile';
-import { createImageHandler, getRandomColor, IMAGE_FILE_TYPES, VALID_HEX_COLOR } from './utils';
-
-export interface UserProfileData {
-  avatar?: UserProfileAvatarData;
-  userSettings?: UserSettingsData;
-  [key: string]: unknown;
-}
 
 export interface UserProfileProps {
   user: AuthenticatedUser;
@@ -833,12 +822,11 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
 
 export function useUserProfileForm({ user, data }: UserProfileProps) {
   const { services } = useKibana<CoreStart>();
-  const { userProfiles, users } = useSecurityApiClients();
+  const { users } = useSecurityApiClients();
 
-  const { update, showSuccessNotification } = getUseUpdateUserProfile({
-    apiClient: userProfiles,
-    notifications: services.notifications,
-  })({ notificationSuccess: { enabled: false } });
+  const { update, showSuccessNotification } = useUpdateUserProfile({
+    notificationSuccess: { enabled: false },
+  });
 
   const [initialValues, resetInitialValues] = useState<UserProfileFormValues>({
     user: {
