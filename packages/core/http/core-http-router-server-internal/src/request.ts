@@ -115,29 +115,29 @@ export class CoreKibanaRequest<
     return { query, params, body };
   }
 
-  /** {@inheritDoc IKibanaRequest.id} */
+  /** {@inheritDoc KibanaRequest.id} */
   public readonly id: string;
-  /** {@inheritDoc IKibanaRequest.uuid} */
+  /** {@inheritDoc KibanaRequest.uuid} */
   public readonly uuid: string;
-  /** {@inheritDoc IKibanaRequest.url} */
+  /** {@inheritDoc KibanaRequest.url} */
   public readonly url: URL;
-  /** {@inheritDoc IKibanaRequest.route} */
+  /** {@inheritDoc KibanaRequest.route} */
   public readonly route: RecursiveReadonly<KibanaRequestRoute<Method>>;
-  /** {@inheritDoc IKibanaRequest.headers} */
+  /** {@inheritDoc KibanaRequest.headers} */
   public readonly headers: Headers;
-  /** {@inheritDoc IKibanaRequest.isSystemRequest} */
+  /** {@inheritDoc KibanaRequest.isSystemRequest} */
   public readonly isSystemRequest: boolean;
-  /** {@inheritDoc IKibanaRequest.socket} */
+  /** {@inheritDoc KibanaRequest.socket} */
   public readonly socket: IKibanaSocket;
-  /** {@inheritDoc IKibanaRequest.events} */
+  /** {@inheritDoc KibanaRequest.events} */
   public readonly events: KibanaRequestEvents;
-  /** {@inheritDoc IKibanaRequest.auth} */
+  /** {@inheritDoc KibanaRequest.auth} */
   public readonly auth: KibanaRequestAuth;
-  /** {@inheritDoc IKibanaRequest.isFakeRequest} */
+  /** {@inheritDoc KibanaRequest.isFakeRequest} */
   public readonly isFakeRequest: boolean;
-  /** {@inheritDoc IKibanaRequest.isInternalRequest} */
+  /** {@inheritDoc KibanaRequest.isInternalRequest} */
   public readonly isInternalRequest: boolean;
-  /** {@inheritDoc IKibanaRequest.rewrittenUrl} */
+  /** {@inheritDoc KibanaRequest.rewrittenUrl} */
   public readonly rewrittenUrl?: URL;
 
   /** @internal */
