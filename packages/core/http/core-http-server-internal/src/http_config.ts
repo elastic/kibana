@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ByteSizeValue, schema, TypeOf } from '@kbn/config-schema';
+import { ByteSizeValue, onServerless, schema, TypeOf } from '@kbn/config-schema';
 import { IHttpConfig, SslConfig, sslSchema } from '@kbn/server-http-tools';
 import type { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
 import { uuidRegexp } from '@kbn/core-base-server-internal';
@@ -168,12 +168,7 @@ const configSchema = schema.object(
       }
     ),
     // allow access to internal routes by default to prevent breaking changes in current offerings
-    restrictInternalApis: schema.conditional(
-      schema.contextRef('serverless'),
-      true,
-      schema.boolean({ defaultValue: false }),
-      schema.never()
-    ),
+    restrictInternalApis: onServerless(schema.boolean({ defaultValue: false })),
 
     versioned: schema.object({
       /**
