@@ -17,7 +17,7 @@ const UNAUTHORIZED_ERROR = i18n.translate(
     defaultMessage:
       'Required kibana privilege {requiredKibanaPrivileges} is missing, please add the required privilege to the role of the authenticated user.',
     values: {
-      requiredKibanaPrivileges: "['Fleet']",
+      requiredKibanaPrivileges: "['Fleet', 'Integrations']",
     },
   }
 );
@@ -44,7 +44,7 @@ export const useInstallSystemIntegration = ({
   const {
     services: { http },
   } = useKibana();
-  const [createIntegrationRequest, callCreateIntegration] = useTrackedPromise(
+  const [requestState, callPerformRequest] = useTrackedPromise(
     {
       cancelPreviousOn: 'creation',
       createPromise: async () => {
@@ -80,12 +80,12 @@ export const useInstallSystemIntegration = ({
     [onIntegrationCreationSuccess, onIntegrationCreationFailure]
   );
 
-  const createIntegration = useCallback(() => {
-    callCreateIntegration();
-  }, [callCreateIntegration]);
+  const performRequest = useCallback(() => {
+    callPerformRequest();
+  }, [callPerformRequest]);
 
   return {
-    createIntegration,
-    createIntegrationRequest,
+    performRequest,
+    requestState,
   };
 };

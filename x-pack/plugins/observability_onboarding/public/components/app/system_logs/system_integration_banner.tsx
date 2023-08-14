@@ -42,20 +42,18 @@ export function SystemIntegrationBanner() {
     []
   );
 
-  const { createIntegration, createIntegrationRequest } =
-    useInstallSystemIntegration({
-      onIntegrationCreationSuccess,
-      onIntegrationCreationFailure,
-    });
+  const { performRequest, requestState } = useInstallSystemIntegration({
+    onIntegrationCreationSuccess,
+    onIntegrationCreationFailure,
+  });
 
   useEffect(() => {
-    createIntegration();
-  }, [createIntegration]);
+    performRequest();
+  }, [performRequest]);
 
-  const isInstallingIntegration = createIntegrationRequest.state === 'pending';
-  const hasFailedInstallingIntegration =
-    createIntegrationRequest.state === 'rejected';
-  const hasInstalledIntegration = createIntegrationRequest.state === 'resolved';
+  const isInstallingIntegration = requestState.state === 'pending';
+  const hasFailedInstallingIntegration = requestState.state === 'rejected';
+  const hasInstalledIntegration = requestState.state === 'resolved';
 
   if (isInstallingIntegration) {
     return (
@@ -107,7 +105,14 @@ export function SystemIntegrationBanner() {
               defaultMessage="System integration installed. {systemIntegrationTooltip}"
               values={{
                 systemIntegrationTooltip: (
-                  <PopoverTooltip>
+                  <PopoverTooltip
+                    ariaLabel={i18n.translate(
+                      'xpack.observability_onboarding.systemIntegration.installed.tooltip.label',
+                      {
+                        defaultMessage: 'Integration details',
+                      }
+                    )}
+                  >
                     <EuiFlexGroup direction="column" gutterSize="xs">
                       <EuiFlexItem>
                         {i18n.translate(
