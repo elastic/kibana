@@ -127,7 +127,7 @@ function MountApmHeaderActionMenu() {
   );
 }
 
-function ApmThemeProvider({ children }: { children: React.ReactNode }) {
+export function ApmThemeProvider({ children }: { children: React.ReactNode }) {
   const [darkMode] = useUiSetting$<boolean>('theme:darkMode');
 
   return (

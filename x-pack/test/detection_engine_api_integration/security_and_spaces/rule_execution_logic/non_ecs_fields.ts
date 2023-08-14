@@ -56,6 +56,7 @@ export default ({ getService }: FtrProviderContext) => {
     };
   };
 
+  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/154277
   describe('Non ECS fields in alert document source', () => {
     before(async () => {
       await esArchiver.load(
@@ -258,7 +259,6 @@ export default ({ getService }: FtrProviderContext) => {
 
     // we don't validate it because geo_point is very complex type with many various representations: array, different object, string with few valid patterns
     // more on geo_point type https://www.elastic.co/guide/en/elasticsearch/reference/current/geo-point.html
-    // since .alerts-* indices allow _ignore_malformed option, alert will be indexed for this document
     it('should fail creating alert when ECS field mapping is geo_point', async () => {
       const document = {
         client: {
@@ -269,11 +269,12 @@ export default ({ getService }: FtrProviderContext) => {
         },
       };
 
-      const { errors, alertSource } = await indexAndCreatePreviewAlert(document);
+      const { errors } = await indexAndCreatePreviewAlert(document);
 
-      expect(errors).toEqual([]);
-
-      expect(alertSource).toHaveProperty('client.geo.location', 'test test');
+      expect(errors[0]).toContain('Bulk Indexing of signals failed');
+      expect(errors[0]).toContain(
+        'failed to parse field [client.geo.location] of type [geo_point]'
+      );
     });
 
     it('should strip invalid boolean values and left valid ones', async () => {

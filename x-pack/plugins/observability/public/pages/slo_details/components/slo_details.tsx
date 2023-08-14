@@ -40,7 +40,9 @@ type TabId = typeof OVERVIEW_TAB_ID | typeof ALERTS_TAB_ID;
 
 export function SloDetails({ slo, isAutoRefreshing }: Props) {
   const { search } = useLocation();
-  const { data: activeAlerts } = useFetchActiveAlerts({ sloIds: [slo.id] });
+  const { data: activeAlerts } = useFetchActiveAlerts({
+    sloIdsAndInstanceIds: [[slo.id, slo.instanceId ?? ALL_VALUE]],
+  });
   const { isLoading: historicalSummaryLoading, data: historicalSummaries = [] } =
     useFetchHistoricalSummary({
       list: [{ sloId: slo.id, instanceId: slo.instanceId ?? ALL_VALUE }],
@@ -104,7 +106,7 @@ export function SloDetails({ slo, isAutoRefreshing }: Props) {
       'data-test-subj': 'alertsTab',
       append: (
         <EuiNotificationBadge className="eui-alignCenter" size="m">
-          {(activeAlerts && activeAlerts[slo.id]?.count) ?? 0}
+          {(activeAlerts && activeAlerts.get(slo)) ?? 0}
         </EuiNotificationBadge>
       ),
       content: <SloDetailsAlerts slo={slo} />,
