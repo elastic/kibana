@@ -13,7 +13,7 @@ import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { CoreStart, CoreSetup, DocLinksStart } from '@kbn/core/public';
 
 import { telemetryManagementSectionWrapper } from './components/telemetry_management_section_wrapper';
-import { SEARCH_TERMS } from './components/telemetry_management_section';
+import { SEARCH_TERMS } from '../common';
 
 export interface TelemetryManagementSectionPluginDepsSetup {
   telemetry: TelemetryPluginSetup;

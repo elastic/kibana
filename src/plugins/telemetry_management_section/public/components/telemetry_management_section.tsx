@@ -27,26 +27,6 @@ import { OptInExampleFlyout } from './opt_in_example_flyout';
 
 type TelemetryService = TelemetryPluginSetup['telemetryService'];
 
-/**
- * These are the terms provided to Advanced Settings that map to this section. When searching,
- * Advanced Settings will match against these terms to show or hide the section.
- */
-export const SEARCH_TERMS: string[] = [
-  'telemetry',
-  'usage data', // Keeping this term for BWC
-  'usage collection',
-  i18n.translate('telemetry.telemetryConstant', {
-    defaultMessage: 'telemetry',
-  }),
-  i18n.translate('telemetry.usageCollectionConstant', {
-    defaultMessage: 'usage collection',
-  }),
-].flatMap((term) => {
-  // Automatically lower-case and split by space the terms from above
-  const lowerCased = term.toLowerCase();
-  return [lowerCased, ...lowerCased.split(' ')];
-});
-
 interface Props {
   telemetryService: TelemetryService;
   showAppliesSettingMessage: boolean;

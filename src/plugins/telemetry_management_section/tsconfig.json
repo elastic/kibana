@@ -5,6 +5,7 @@
     "isolatedModules": true
   },
   "include": [
+    "common/**/*",
     "public/**/*",
     "../../../typings/**/*"
   ],
