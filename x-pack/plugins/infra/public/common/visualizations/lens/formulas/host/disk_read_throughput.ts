@@ -8,7 +8,6 @@
 import type { FormulaValueConfig } from '@kbn/lens-embeddable-utils';
 
 export const diskReadThroughput: FormulaValueConfig = {
-  type: 'formula',
   label: 'Disk Read Throughput',
   value: "counter_rate(max(system.diskio.read.bytes), kql='system.diskio.read.bytes: *')",
   format: {

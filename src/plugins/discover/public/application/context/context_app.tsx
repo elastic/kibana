@@ -30,7 +30,7 @@ import { ContextAppContent } from './context_app_content';
 import { SurrDocType } from './services/context';
 import { DocViewFilterFn } from '../../services/doc_views/doc_views_types';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
-import { getRootBreadcrumbs } from '../../utils/breadcrumbs';
+import { setBreadcrumbs } from '../../utils/breadcrumbs';
 
 const ContextAppContentMemoized = memo(ContextAppContent);
 
@@ -78,14 +78,13 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
   });
 
   useEffect(() => {
-    services.chrome.setBreadcrumbs([
-      ...getRootBreadcrumbs({ breadcrumb: referrer, services }),
-      {
-        text: i18n.translate('discover.context.breadcrumb', {
-          defaultMessage: 'Surrounding documents',
-        }),
-      },
-    ]);
+    setBreadcrumbs({
+      services,
+      rootBreadcrumbPath: referrer,
+      titleBreadcrumbText: i18n.translate('discover.context.breadcrumb', {
+        defaultMessage: 'Surrounding documents',
+      }),
+    });
   }, [locator, referrer, services]);
 
   useExecutionContext(core.executionContext, {

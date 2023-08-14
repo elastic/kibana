@@ -126,6 +126,7 @@ export function FunctionListPopover({
         </EuiButtonEmpty>
       }
       closePopover={handleClickFunctionList}
+      css={{ maxWidth: 400 }}
       panelPaddingSize="none"
       isOpen={isFunctionListOpen}
     >

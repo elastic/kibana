@@ -127,7 +127,7 @@ export function ChatItem({
   };
 
   let contentElement: React.ReactNode =
-    content || loading ? (
+    content || loading || error ? (
       <ChatItemContentInlinePromptEditor
         content={content}
         editing={editing}

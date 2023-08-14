@@ -3,13 +3,14 @@
 
 ## Lens Attributes Builder
 
-The Lens Attributes Builder is a utility for creating JSON objects used to render charts with Lens. It simplifies the process of configuring and building the necessary attributes for different chart types.
+ The Lens Attributes Builder is a utility for creating JSON objects used to render charts with Lens. It simplifies the process of configuring and building the necessary attributes for different chart types.
 
 **Notes**:
-The tool has partial support of Lens charts, currently limited to XY and Metric charts.
-Layer data metrics are limited to formula columns.
-XY Bucket and Breakdown dimensions are limited respectively to Date Histogram and Top values.
-The tool is still in active development so do not expect the API to be stable yet.
+
+This utililty is primarily used by Infra Observability UI and not meant to be used as an official solution provided by the Lens team.
+
+- The tool has partial support of Lens charts, currently limited to XY and Metric charts.
+- XY Bucket and Breakdown dimensions are limited respectively to Date Histogram and Top values.
 
 ### Usage
 
@@ -21,7 +22,6 @@ To create a metric chart, use the `MetricChart` class and provide the required c
 const metricChart = new MetricChart({
   layers: new MetricLayer({
     data: {
-      type: 'formula',
       label: 'Disk Read Throughput',
       value: "counter_rate(max(system.diskio.read.count), kql='system.diskio.read.count: *')",
       format: {
@@ -45,7 +45,6 @@ To create an XY chart, use the `XYChart` class and provide the required configur
 const xyChart = new XYChart({
   layers: [new XYDataLayer({
     data: [{
-      type: 'formula',
       label: 'Normalized Load',
       value: "average(system.load.1) / max(system.load.cores)",
       format: {
@@ -74,7 +73,6 @@ XYChart has different series type variations. Here is an example of how to build
 const xyChart = new XYChart({
   layers: [new XYDataLayer({
     data: [{
-      type: 'formula',
       label: 'Inbound (RX)',
       value: "average(system.load.1) / max(system.load.cores)",
       format: {
@@ -101,7 +99,6 @@ const xyChart = new XYChart({
 const xyChart = new XYChart({
   layers: [new XYDataLayer({
     data: [{
-      type: 'formula',
       label: 'Inbound (RX)',
       value: "average(system.load.1) / max(system.load.cores)",
       format: {
@@ -131,7 +128,6 @@ const xyChart = new XYChart({
   layers: [
     new XYDataLayer({
       data: [{
-      type: 'formula',
         label: 'Disk Read Throughput',
         value: "average(system.load.1) / max(system.load.cores)",
         format: {
@@ -147,7 +143,7 @@ const xyChart = new XYChart({
     }),
     new XYReferenceLineLayer({
       data: [{
-        type: 'formula',
+
         value: "1",
         format: {
           id: 'percent',
@@ -173,7 +169,6 @@ To configure multiple data sources in an XY data layer, simply provide an array 
 const xyChart = new XYChart({
   layers: new YXDataLayer({
     data: [{
-      type: 'formula',
       label: 'RX',
       value: "average(host.network.ingress.bytes) * 8 / (max(metricset.period, kql='host.network.ingress.bytes: *') / 1000)",
       format: {
@@ -183,7 +178,6 @@ const xyChart = new XYChart({
         },
       },
     },{
-      type: 'formula',
       label: 'TX',
       value: "(average(host.network.egresss.bytes) * 8 / (max(metricset.period, kql='host.network.egresss.bytes: *') / 1000)",
       format: {
@@ -222,7 +216,6 @@ const builder = new LensAttributesBuilder({
   visualization: new MetricChart({
     layers: new MetricLayer({
       data: {
-        type: 'formula',
         label: 'Disk Read Throughput',
         value: "counter_rate(max(system.diskio.read.count), kql='system.diskio.read.count: *')",
         format: {

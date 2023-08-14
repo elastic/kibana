@@ -283,7 +283,7 @@ export class ObservabilityAIAssistantClient {
     await this.dependencies.esClient.update({
       id: document._id,
       index: document._index,
-      doc: updatedConversation,
+      doc: { conversation: { title } },
       refresh: 'wait_for',
     });
 

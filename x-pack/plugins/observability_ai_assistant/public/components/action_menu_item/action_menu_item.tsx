@@ -37,6 +37,7 @@ export function ObservabilityAIAssistantActionMenuItem() {
   const { conversation, displayedMessages, setDisplayedMessages, save } = useConversation({
     conversationId,
     connectorId: connectors.selectedConnector,
+    chatService: chatService.value,
   });
 
   if (!service.isEnabled()) {

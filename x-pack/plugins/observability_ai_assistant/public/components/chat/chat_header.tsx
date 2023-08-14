@@ -59,7 +59,7 @@ export function ChatHeader({
         responsive={false}
       >
         <EuiFlexItem grow={false}>
-          {loading ? <EuiLoadingSpinner size="l" /> : <AssistantAvatar size="l" />}
+          {loading ? <EuiLoadingSpinner size="l" /> : <AssistantAvatar size="m" />}
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiFlexGroup direction="column" gutterSize="none">
@@ -71,6 +71,7 @@ export function ChatHeader({
             >
               <EuiInlineEditTitle
                 heading="h2"
+                size="s"
                 defaultValue={displayedTitle}
                 className={css`
                   color: ${hasTitle
