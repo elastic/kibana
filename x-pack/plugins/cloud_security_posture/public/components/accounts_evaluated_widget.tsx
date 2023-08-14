@@ -43,7 +43,7 @@ export const AccountsEvaluatedWidget = ({
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="xs" alignItems="center">
               <EuiFlexItem>
-                <CISBenchmarkIcon type={CIS_AWS} name={cisAwsBenchmarkName} size={"l"}/>
+                <CISBenchmarkIcon type={CIS_AWS} name={cisAwsBenchmarkName} size={'l'} />
               </EuiFlexItem>
               <EuiFlexItem
                 grow={false}
@@ -63,7 +63,7 @@ export const AccountsEvaluatedWidget = ({
           <EuiFlexItem>
             <EuiFlexGroup gutterSize="xs" alignItems="center">
               <EuiFlexItem>
-                <CISBenchmarkIcon type={CIS_GCP} name={cisGcpBenchmarkName} size={"l"}/>
+                <CISBenchmarkIcon type={CIS_GCP} name={cisGcpBenchmarkName} size={'l'} />
               </EuiFlexItem>
               <EuiFlexItem
                 grow={false}
