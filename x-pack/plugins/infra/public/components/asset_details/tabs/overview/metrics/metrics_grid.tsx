@@ -11,22 +11,17 @@ import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { HostMetricsExplanationContent } from '../../../../lens/metric_explanation/host_metrics_explanation_content';
+import type { XYVisualOptions } from '@kbn/lens-embeddable-utils';
+import { UseLensAttributesXYLayerConfig } from '../../../../../hooks/use_lens_attributes';
 import { buildCombinedHostsFilter } from '../../../../../utils/filters/build';
-import type { Layer } from '../../../../../hooks/use_lens_attributes';
-import { LensChart, type LensChartProps } from '../../../../lens';
-import {
-  type FormulaConfig,
-  hostLensFormulas,
-  type XYLayerOptions,
-  type XYVisualOptions,
-} from '../../../../../common/visualizations';
+import { LensChart, type LensChartProps, HostMetricsExplanationContent } from '../../../../lens';
+import { hostLensFormulas } from '../../../../../common/visualizations';
 import { METRIC_CHART_HEIGHT } from '../../../constants';
 import { Popover } from '../../common/popover';
 
 type DataViewOrigin = 'logs' | 'metrics';
 interface MetricChartConfig extends Pick<LensChartProps, 'id' | 'title' | 'overrides'> {
-  layers: Array<Layer<XYLayerOptions, FormulaConfig[]>>;
+  layers: UseLensAttributesXYLayerConfig;
   toolTip: string;
 }
 

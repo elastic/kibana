@@ -1432,6 +1432,26 @@
             "path": "x-pack/plugins/exploratory_view/public/plugin.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "exploratoryView",
+            "id": "def-public.ExploratoryViewPublicPluginsStart.observabilityAIAssistant",
+            "type": "Object",
+            "tags": [],
+            "label": "observabilityAIAssistant",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "observabilityAIAssistant",
+                "scope": "public",
+                "docId": "kibObservabilityAIAssistantPluginApi",
+                "section": "def-public.ObservabilityAIAssistantPluginStart",
+                "text": "ObservabilityAIAssistantPluginStart"
+              }
+            ],
+            "path": "x-pack/plugins/exploratory_view/public/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
