@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { UnifiedHistogramContainerProps } from '@kbn/unified-histogram-plugin/public';
+import type { UnifiedHistogramContainerProps } from '@kbn/unified-histogram-plugin/public';
 
 interface UnifiedHistogramCustomizationId {
   id: 'unified_histogram';

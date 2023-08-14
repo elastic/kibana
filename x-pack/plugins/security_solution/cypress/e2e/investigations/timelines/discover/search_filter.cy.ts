@@ -18,12 +18,16 @@ import {
   DISCOVER_RESULT_HITS,
   DISCOVER_FILTER_BADGES,
   DISCOVER_QUERY_INPUT,
+  GET_DISCOVER_DATA_GRID_CELL_HEADER,
+  DISCOVER_DATA_VIEW_SWITCHER,
 } from '../../../../screens/discover';
 import {
   addDiscoverKqlQuery,
   switchDataViewTo,
   submitDiscoverSearchBar,
   openAddDiscoverFilterPopover,
+  addFieldToTable,
+  createAdHocDataView,
 } from '../../../../tasks/discover';
 import { createNewTimeline, gotToDiscoverTab } from '../../../../tasks/timeline';
 import { login, visit } from '../../../../tasks/login';
@@ -79,6 +83,20 @@ describe(
       fillAddFilterFormAsQueryDSL(JSON.stringify(query));
       cy.get(DISCOVER_FILTER_BADGES).should('have.length', 1);
       cy.get(DISCOVER_RESULT_HITS).should('have.text', '1');
+    });
+
+    it('should be able to create ad-hoc dataview without saving', () => {
+      const adHocDVName = 'adHocDataView';
+      const indexPattern = 'audit';
+      createAdHocDataView(adHocDVName, indexPattern);
+      cy.get(DISCOVER_DATA_VIEW_SWITCHER.BTN).should('contain.text', adHocDVName);
+    });
+
+    it('should be able to add fields to the table', () => {
+      addFieldToTable('host.name');
+      cy.get(GET_DISCOVER_DATA_GRID_CELL_HEADER('host.name')).should('be.visible');
+      addFieldToTable('user.name');
+      cy.get(GET_DISCOVER_DATA_GRID_CELL_HEADER('user.name')).should('be.visible');
     });
 
     context('navigation', () => {

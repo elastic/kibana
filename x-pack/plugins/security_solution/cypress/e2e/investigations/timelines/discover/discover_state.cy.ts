@@ -8,6 +8,7 @@
 import { fillAddFilterForm } from '../../../../tasks/search_bar';
 import {
   addDiscoverKqlQuery,
+  addFieldToTable,
   openAddDiscoverFilterPopover,
   submitDiscoverSearchBar,
   switchDataViewTo,
@@ -18,6 +19,7 @@ import {
   DISCOVER_QUERY_INPUT,
   DISCOVER_FILTER_BADGES,
   DISCOVER_DATA_VIEW_SWITCHER,
+  GET_DISCOVER_DATA_GRID_CELL_HEADER,
 } from '../../../../screens/discover';
 import { updateDateRangeInLocalDatePickers } from '../../../../tasks/date_picker';
 import { login, visit } from '../../../../tasks/login';
@@ -74,8 +76,15 @@ describe(
       gotToDiscoverTab();
       cy.get(DISCOVER_DATA_VIEW_SWITCHER.BTN).should('contain.text', dataviewName);
     });
-    it('should remember timerange when navigating away and back to discover ', () => {});
-    it('should remember columns when navigating away and back to discover ', () => {});
-    it('should remember ad-hoc dataview when navigating away and back to discover ', () => {});
+    it('should remember columns when navigating away and back to discover ', () => {
+      addFieldToTable('host.name');
+      addFieldToTable('user.name');
+      navigateFromHeaderTo(CSP_FINDINGS);
+      navigateFromHeaderTo(TIMELINES);
+      openActiveTimeline();
+      gotToDiscoverTab();
+      cy.get(GET_DISCOVER_DATA_GRID_CELL_HEADER('host.name')).should('be.visible');
+      cy.get(GET_DISCOVER_DATA_GRID_CELL_HEADER('user.name')).should('be.visible');
+    });
   }
 );

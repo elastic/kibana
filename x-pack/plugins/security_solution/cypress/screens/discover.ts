@@ -14,7 +14,17 @@ export const DISCOVER_DATA_VIEW_SWITCHER = {
   BTN: getDataTestSubjectSelector('discover-dataView-switch-link'),
   INPUT: getDataTestSubjectSelector('indexPattern-switcher--input'),
   GET_DATA_VIEW: (title: string) => `.euiSelectableListItem[role=option][title^="${title}"]`,
+  CREATE_NEW: getDataTestSubjectSelector('dataview-create-new'),
 };
+
+export const DISCOVER_DATA_VIEW_EDITOR_FLYOUT = {
+  MAIN: getDataTestSubjectSelector('indexPatternEditorFlyout'),
+  NAME_INPUT: getDataTestSubjectSelector('createIndexPatternNameInput'),
+  INDEX_PATTERN_INPUT: getDataTestSubjectSelector('createIndexPatternTitleInput'),
+  USE_WITHOUT_SAVING_BTN: getDataTestSubjectSelector('exploreIndexPatternButton'),
+  SAVE_DATA_VIEW_BTN: getDataTestSubjectSelector('saveIndexPatternButton'),
+};
+
 export const DISCOVER_QUERY_INPUT = `${DISCOVER_CONTAINER} ${getDataTestSubjectSelector(
   'unifiedQueryInput'
 )}`;
@@ -39,16 +49,6 @@ export const DISCOVER_DATA_GRID_LOADING = getDataTestSubjectSelector('discoverDa
 
 export const DISCOVER_NO_RESULTS = getDataTestSubjectSelector('discoverNoResults');
 
-export const DISCOVER_FILTER_FORM = {
-  ADD_FILTER_FORM_FIELD_INPUT: `${DISCOVER_CONTAINER} [data-test-subj="filterFieldSuggestionList"] input[data-test-subj="comboBoxSearchInput"]`,
-  ADD_FILTER_FORM_FIELD_OPTION: (value: string) =>
-    `${DISCOVER_CONTAINER} [data-test-subj="comboBoxOptionsList filterFieldSuggestionList-optionsList"] button[title="${value}"]`,
-  ADD_FILTER_FORM_OPERATOR_FIELD: `${DISCOVER_CONTAINER} [data-test-subj="filterOperatorList"] input[data-test-subj="comboBoxSearchInput"]`,
-  ADD_FILTER_FORM_OPERATOR_OPTION_IS: `${DISCOVER_CONTAINER} [data-test-subj="comboBoxOptionsList filterOperatorList-optionsList"] button[title="is"]`,
-  ADD_FILTER_FORM_FILTER_VALUE_INPUT: `${DISCOVER_CONTAINER} [data-test-subj="filterParams"] input`,
-  ADD_FILTER_FORM_SAVE_BUTTON: `${DISCOVER_CONTAINER} [data-test-subj="saveFilter"]`,
-};
-
 export const DISCOVER_TABLE = getDataTestSubjectSelector('docTable');
 
 export const GET_DISCOVER_DATA_GRID_CELL = (columnId: string, rowIndex: number) => {
@@ -57,6 +57,9 @@ export const GET_DISCOVER_DATA_GRID_CELL = (columnId: string, rowIndex: number) 
   )}[data-gridcell-column-id="${columnId}"][data-gridcell-row-index="${rowIndex}"] .dscDiscoverGrid__cellValue`;
 };
 
+export const GET_DISCOVER_DATA_GRID_CELL_HEADER = (columnId: string) =>
+  getDataTestSubjectSelector(`dataGridHeaderCell-${columnId}`);
+
 export const DISCOVER_CELL_ACTIONS = {
   FILTER_FOR: getDataTestSubjectSelector('filterForButton'),
   FILTER_OUT: getDataTestSubjectSelector('filterOutButton'),
@@ -64,3 +67,11 @@ export const DISCOVER_CELL_ACTIONS = {
   EXPANSION_POPOVER: getDataTestSubjectSelector('euiDataGridExpansionPopover'),
   COPY: getDataTestSubjectSelector('copyClipboardButton'),
 };
+
+export const GET_DISCOVER_COLUMN = (columnId: string) =>
+  `${getDataTestSubjectSelector(`dscFieldListPanelField-${columnId}`)}`;
+
+export const GET_DISCOVER_COLUMN_TOGGLE_BTN = (columnId: string) =>
+  `${getDataTestSubjectSelector(`fieldToggle-${columnId}`)}`;
+
+export const DISCOVER_FIELD_SEARCH = getDataTestSubjectSelector('fieldListFiltersFieldSearch');

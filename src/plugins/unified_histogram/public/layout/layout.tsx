@@ -201,6 +201,7 @@ export const UnifiedHistogramLayout = ({
   onFilter,
   onBrushEnd,
   children,
+  withDefaultActions,
 }: UnifiedHistogramLayoutProps) => {
   const { allSuggestions, currentSuggestion, suggestionUnsupported } = useLensSuggestions({
     dataView,
@@ -286,6 +287,7 @@ export const UnifiedHistogramLayout = ({
           onFilter={onFilter}
           onBrushEnd={onBrushEnd}
           lensTablesAdapter={lensTablesAdapter}
+          withDefaultActions={withDefaultActions}
         />
       </InPortal>
       <InPortal node={mainPanelNode}>{children}</InPortal>

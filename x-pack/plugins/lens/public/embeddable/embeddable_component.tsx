@@ -128,6 +128,7 @@ function EmbeddableRootWrapper({
   if (loading) {
     return <EuiLoadingChart />;
   }
+
   return <EmbeddableRoot embeddable={embeddable} loading={loading} error={error} input={input} />;
 }
 

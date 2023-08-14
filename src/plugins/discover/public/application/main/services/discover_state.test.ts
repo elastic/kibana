@@ -670,9 +670,6 @@ describe('Test discover state actions', () => {
     await state.actions.loadSavedSearch({ savedSearchId: savedSearchMock.id });
     expect(state.appState.get().filters).toHaveLength(1);
     state.appState.isEmptyURL = jest.fn().mockReturnValue(true);
-    // appState could have been updated from a consuming application.
-    // So setting index to undefined, so that appState is reset because of EmptyURL
-    state.appState.set({ index: undefined });
     await state.actions.loadSavedSearch();
     expect(state.appState.get().filters).toHaveLength(0);
   });

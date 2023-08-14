@@ -5,6 +5,20 @@
  * 2.0.
  */
 
+import { TestProviders } from '../../../../../common/mock';
+import { renderHook } from '@testing-library/react-hooks';
+import { useHistogramCustomization } from './use_histogram_customizations';
+
+const applyFilterMock = {
+  exec: jest.fn(),
+};
+
+const renderHookWithContext = () => {
+  renderHook(() => useHistogramCustomization(), {
+    wrapper: TestProviders,
+  });
+};
+
 describe('useHistogramCustomization', () => {
   describe('onFilterCallback', () => {
     it('should apply filter correctly, in case of single value click Trigger', () => {});

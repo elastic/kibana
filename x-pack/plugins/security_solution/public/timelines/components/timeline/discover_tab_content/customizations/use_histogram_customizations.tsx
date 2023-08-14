@@ -58,6 +58,7 @@ export const useHistogramCustomization = () => {
           negate: eventData.negate,
         });
       } else {
+        // no-op
         return;
       }
 
