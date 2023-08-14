@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { tag } from '../../tags';
 import { navigateTo } from '../../tasks/navigation';
-import { ROLE, login } from '../../tasks/login';
 import { checkResults, inputQuery, submitQuery } from '../../tasks/live_query';
 import { loadSavedQuery, cleanupSavedQuery } from '../../tasks/api_fixtures';
 import { triggerLoadData } from '../../tasks/inventory';
 
-describe('ALL - Inventory', () => {
+describe('ALL - Inventory', { tags: [tag.ESS] }, () => {
   let savedQueryName: string;
   let savedQueryId: string;
 
@@ -23,7 +23,7 @@ describe('ALL - Inventory', () => {
   });
 
   beforeEach(() => {
-    login(ROLE.soc_manager);
+    cy.login('soc_manager');
     navigateTo('/app/osquery');
   });
 

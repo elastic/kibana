@@ -6,47 +6,36 @@
  */
 
 import { defineCypressConfig } from '@kbn/cypress-config';
-
-// eslint-disable-next-line @kbn/imports/no_boundary_crossing
-import { setupUserDataLoader } from './cypress/support/setup_data_loader_tasks';
+import { setupUserDataLoader } from './support/setup_data_loader_tasks';
 
 export default defineCypressConfig({
   defaultCommandTimeout: 60000,
-  execTimeout: 120000,
-  pageLoadTimeout: 12000,
-
-  retries: {
-    runMode: 1,
-    openMode: 0,
-  },
-
-  screenshotsFolder: '../../../target/kibana-osquery/cypress/screenshots',
+  execTimeout: 60000,
+  pageLoadTimeout: 60000,
+  responseTimeout: 60000,
+  screenshotsFolder: '../../../../../../target/kibana-security-solution/cypress/screenshots',
   trashAssetsBeforeRuns: false,
   video: false,
-  videosFolder: '../../../target/kibana-osquery/cypress/videos',
-  viewportHeight: 900,
-  viewportWidth: 1440,
-  experimentalStudio: true,
-
+  viewportHeight: 946,
+  viewportWidth: 1680,
+  numTestsKeptInMemory: 10,
   env: {
     'cypress-react-selector': {
       root: '#osquery-app',
     },
     grepFilterSpecs: true,
-    grepTags: '@ess',
+    grepTags: '@serverless --@brokenInServerless',
   },
 
   e2e: {
-    specPattern: './cypress/e2e/**/*.cy.ts',
-    baseUrl: 'http://localhost:5601',
     experimentalRunAllSpecs: true,
     experimentalMemoryManagement: true,
-    numTestsKeptInMemory: 10,
-    setupNodeEvents(on, config) {
+    supportFile: './support/e2e.js',
+    specPattern: '../../../../../plugins/osquery/cypress/e2e/**/*.cy.ts',
+    setupNodeEvents: (on, config) => {
       setupUserDataLoader(on, config);
       // eslint-disable-next-line @typescript-eslint/no-var-requires
       require('@cypress/grep/src/plugin')(config);
-
       return config;
     },
   },

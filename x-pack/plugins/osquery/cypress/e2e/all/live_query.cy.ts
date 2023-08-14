@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ROLE, login } from '../../tasks/login';
+import { tag } from '../../tags';
 import { navigateTo } from '../../tasks/navigation';
 import {
   addToCase,
@@ -34,7 +34,7 @@ import {
   loadCase,
 } from '../../tasks/api_fixtures';
 
-describe('ALL - Live Query', () => {
+describe('ALL - Live Query', { tags: [tag.SERVERLESS, tag.ESS] }, () => {
   let packId: string;
   let packName: string;
   let savedQueryId: string;
@@ -80,7 +80,7 @@ describe('ALL - Live Query', () => {
   });
 
   beforeEach(() => {
-    login(ROLE.soc_manager);
+    cy.login('soc_manager');
     navigateTo('/app/osquery');
   });
 

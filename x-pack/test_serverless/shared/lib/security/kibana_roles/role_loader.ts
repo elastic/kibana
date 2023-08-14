@@ -123,7 +123,7 @@ export class RoleAndUserLoader<R extends Record<string, Role> = Record<string, R
 }
 
 export class SecurityRoleAndUserLoader extends RoleAndUserLoader<ServerlessSecurityRoles> {
-  constructor(kbnClient: KbnClient, logger: ToolingLog) {
-    super(kbnClient, logger, getServerlessSecurityKibanaRoleDefinitions());
+  constructor(kbnClient: KbnClient, logger: ToolingLog, additionalRoleDefinitions: any) {
+    super(kbnClient, logger, getServerlessSecurityKibanaRoleDefinitions(additionalRoleDefinitions));
   }
 }

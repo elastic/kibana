@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ROLE, login } from '../../tasks/login';
+import { tag } from '../../tags';
 import { navigateTo } from '../../tasks/navigation';
 import {
   checkActionItemsInResults,
@@ -13,11 +13,13 @@ import {
   inputQuery,
   selectAllAgents,
   submitQuery,
+  isServerless,
 } from '../../tasks/live_query';
 import { loadSpace, loadPack, cleanupPack, cleanupSpace } from '../../tasks/api_fixtures';
 
-describe('ALL - Custom space', () => {
-  ['default', 'custom-space'].forEach((spaceName) => {
+const spaces = isServerless ? ['default'] : ['default', 'custom-space'];
+describe('ALL - Custom space', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+  spaces.forEach((spaceName) => {
     describe(`[${spaceName}]`, () => {
       let packName: string;
       let packId: string;
@@ -56,7 +58,7 @@ describe('ALL - Custom space', () => {
       });
 
       beforeEach(() => {
-        login(ROLE.soc_manager);
+        cy.login('soc_manager');
         navigateTo(`/s/${spaceId}/app/osquery`);
       });
 

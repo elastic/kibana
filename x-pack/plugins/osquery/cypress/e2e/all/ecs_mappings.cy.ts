@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { tag } from '../../tags';
 import { getAdvancedButton } from '../../screens/integrations';
-import { ROLE, login } from '../../tasks/login';
 import { navigateTo } from '../../tasks/navigation';
 import {
   checkResults,
@@ -18,9 +18,9 @@ import {
   typeInOsqueryFieldInput,
 } from '../../tasks/live_query';
 
-describe('EcsMapping', () => {
+describe('EcsMapping', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
   beforeEach(() => {
-    login(ROLE.soc_manager);
+    cy.login('soc_manager');
   });
 
   it('should properly show static values in form and results', () => {

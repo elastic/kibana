@@ -22,21 +22,33 @@
 // https://on.cypress.io/configuration
 // ***********************************************************
 
+// @ts-expect-error check this
+import registerCypressGrep from '@cypress/grep';
+
 // force ESM in this module
+import type { ServerlessRoleName } from '../../../../test_serverless/shared/lib';
+
 export {};
 
 import 'cypress-react-selector';
+import { login } from '../tasks/login';
 // import './coverage';
+
+registerCypressGrep();
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace Cypress {
     interface Chainable {
       getBySel(...args: Parameters<Cypress.Chainable['get']>): Chainable<JQuery<HTMLElement>>;
+
       getBySelContains(
         ...args: Parameters<Cypress.Chainable['get']>
       ): Chainable<JQuery<HTMLElement>>;
+
       clickOutside(): Chainable<JQuery<HTMLBodyElement>>;
+
+      login(role?: ServerlessRoleName): void;
     }
   }
 }
@@ -54,6 +66,8 @@ Cypress.Commands.add(
   'clickOutside',
   () => cy.get('body').click(0, 0) // 0,0 here are the x and y coordinates
 );
+
+Cypress.Commands.add('login', login);
 
 // Alternatively you can use CommonJS syntax:
 // require('./commands')

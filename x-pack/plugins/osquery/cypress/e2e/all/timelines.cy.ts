@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import { tag } from '../../tags';
 import { takeOsqueryActionWithParams } from '../../tasks/live_query';
-import { ROLE, login } from '../../tasks/login';
 
-describe('ALL - Timelines', () => {
+describe('ALL - Timelines', { tags: [tag.ESS] }, () => {
   beforeEach(() => {
-    login(ROLE.soc_manager);
+    cy.login('soc_manager');
   });
 
   it('should substitute osquery parameter on non-alert event take action', () => {

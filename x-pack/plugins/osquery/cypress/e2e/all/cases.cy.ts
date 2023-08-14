@@ -5,19 +5,19 @@
  * 2.0.
  */
 
+import { tag } from '../../tags';
 import {
   addLiveQueryToCase,
   checkActionItemsInResults,
   viewRecentCaseAndCheckResults,
+  isServerless,
 } from '../../tasks/live_query';
 import { navigateTo } from '../../tasks/navigation';
-import { ROLE, login } from '../../tasks/login';
 import { loadLiveQuery, loadCase, cleanupCase } from '../../tasks/api_fixtures';
 
-describe('Add to Cases', () => {
+describe('Add to Cases', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
   let liveQueryId: string;
   let liveQueryQuery: string;
-
   before(() => {
     loadLiveQuery({
       agent_all: true,
@@ -31,33 +31,34 @@ describe('Add to Cases', () => {
   describe('observability', () => {
     let caseId: string;
     let caseTitle: string;
-
-    before(() => {
-      loadCase('observability').then((caseInfo) => {
-        caseId = caseInfo.id;
-        caseTitle = caseInfo.title;
+    if (!isServerless) {
+      before(() => {
+        loadCase('observability').then((caseInfo) => {
+          caseId = caseInfo.id;
+          caseTitle = caseInfo.title;
+        });
+        cy.login('soc_manager');
+        navigateTo('/app/osquery');
       });
-      login(ROLE.soc_manager);
-      navigateTo('/app/osquery');
-    });
 
-    after(() => {
-      cleanupCase(caseId);
-    });
-
-    it('should add result a case and not have add to timeline in result', () => {
-      addLiveQueryToCase(liveQueryId, caseId);
-      cy.contains(`${caseTitle} has been updated`);
-      viewRecentCaseAndCheckResults();
-
-      cy.contains(liveQueryQuery);
-      checkActionItemsInResults({
-        lens: true,
-        discover: true,
-        cases: false,
-        timeline: false,
+      after(() => {
+        cleanupCase(caseId);
       });
-    });
+
+      it('should add result a case and not have add to timeline in result', () => {
+        addLiveQueryToCase(liveQueryId, caseId);
+        cy.contains(`${caseTitle} has been updated`);
+        viewRecentCaseAndCheckResults();
+
+        cy.contains(liveQueryQuery);
+        checkActionItemsInResults({
+          lens: true,
+          discover: true,
+          cases: false,
+          timeline: false,
+        });
+      });
+    }
   });
 
   describe('security', () => {
@@ -69,7 +70,7 @@ describe('Add to Cases', () => {
         caseId = caseInfo.id;
         caseTitle = caseInfo.title;
       });
-      login(ROLE.soc_manager);
+      cy.login('soc_manager');
       navigateTo('/app/osquery');
     });
 
