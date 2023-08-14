@@ -36,6 +36,5 @@ export const RULE_PREVIEW_ACTIONS_HEADER_TEST_ID = RULE_PREVIEW_ACTIONS_TEST_ID 
 export const RULE_PREVIEW_ACTIONS_CONTENT_TEST_ID = RULE_PREVIEW_ACTIONS_TEST_ID + CONTENT_TEST_ID;
 export const RULE_PREVIEW_LOADING_TEST_ID =
   'securitySolutionDocumentDetailsFlyoutRulePreviewLoadingSpinner';
-export const RULE_PREVIEW_HEADER_TEST_ID = 'securitySolutionDocumentDetailsFlyoutRulePreviewHeader';
 export const RULE_PREVIEW_FOOTER_TEST_ID = 'securitySolutionDocumentDetailsFlyoutRulePreviewFooter';
 export const RULE_PREVIEW_NAVIGATE_TO_RULE_TEST_ID = 'goToRuleDetails';

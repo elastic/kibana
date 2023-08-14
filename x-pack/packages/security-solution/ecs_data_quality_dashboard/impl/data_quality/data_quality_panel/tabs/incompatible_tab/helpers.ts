@@ -16,6 +16,7 @@ import {
   getMarkdownTable,
   getSummaryTableMarkdownComment,
   getTabCountsMarkdownComment,
+  escape,
 } from '../../index_properties/markdown/helpers';
 import { getFillColor } from '../summary_tab/helpers';
 import * as i18n from '../../index_properties/translations';
@@ -65,10 +66,36 @@ export const getIncompatibleMappings = (
 ): EnrichedFieldMetadata[] =>
   enrichedFieldMetadata.filter((x) => !x.isEcsCompliant && x.type !== x.indexFieldType);
 
+export const getIncompatibleMappingsFields = (
+  enrichedFieldMetadata: EnrichedFieldMetadata[]
+): string[] =>
+  enrichedFieldMetadata.reduce<string[]>((acc, x) => {
+    if (!x.isEcsCompliant && x.type !== x.indexFieldType) {
+      const field = escape(x.indexFieldName);
+      if (field != null) {
+        return [...acc, field];
+      }
+    }
+    return acc;
+  }, []);
+
 export const getIncompatibleValues = (
   enrichedFieldMetadata: EnrichedFieldMetadata[]
 ): EnrichedFieldMetadata[] =>
   enrichedFieldMetadata.filter((x) => !x.isEcsCompliant && x.indexInvalidValues.length > 0);
+
+export const getIncompatibleValuesFields = (
+  enrichedFieldMetadata: EnrichedFieldMetadata[]
+): string[] =>
+  enrichedFieldMetadata.reduce<string[]>((acc, x) => {
+    if (!x.isEcsCompliant && x.indexInvalidValues.length > 0) {
+      const field = escape(x.indexFieldName);
+      if (field != null) {
+        return [...acc, field];
+      }
+    }
+    return acc;
+  }, []);
 
 export const getIncompatibleFieldsMarkdownTablesComment = ({
   incompatibleMappings,

@@ -17,11 +17,12 @@ import type {
   WordCloudElementEvent,
   XYChartElementEvent,
 } from '@elastic/charts';
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 
 import { Body } from './data_quality_panel/body';
 import { DataQualityProvider } from './data_quality_panel/data_quality_context';
 import { EMPTY_STAT } from './helpers';
+import { ReportDataQualityCheckAllCompleted, ReportDataQualityIndexChecked } from './types';
 
 interface Props {
   addSuccessToast: (toast: { title: string }) => void;
@@ -54,6 +55,8 @@ interface Props {
     headerContent?: React.ReactNode;
   }) => void;
   patterns: string[];
+  reportDataQualityIndexChecked?: ReportDataQualityIndexChecked;
+  reportDataQualityCheckAllCompleted?: ReportDataQualityCheckAllCompleted;
   setLastChecked: (lastChecked: string) => void;
   theme?: PartialTheme;
   baseTheme: Theme;
@@ -62,6 +65,7 @@ interface Props {
 /** Renders the `Data Quality` dashboard content */
 const DataQualityPanelComponent: React.FC<Props> = ({
   addSuccessToast,
+  baseTheme,
   canUserCreateAndReadCases,
   defaultBytesFormat,
   defaultNumberFormat,
@@ -73,9 +77,10 @@ const DataQualityPanelComponent: React.FC<Props> = ({
   lastChecked,
   openCreateCaseFlyout,
   patterns,
+  reportDataQualityIndexChecked,
+  reportDataQualityCheckAllCompleted,
   setLastChecked,
   theme,
-  baseTheme,
 }) => {
   const formatBytes = useCallback(
     (value: number | undefined): string =>
@@ -89,8 +94,17 @@ const DataQualityPanelComponent: React.FC<Props> = ({
     [defaultNumberFormat]
   );
 
+  const telemetryEvents = useMemo(
+    () => ({ reportDataQualityCheckAllCompleted, reportDataQualityIndexChecked }),
+    [reportDataQualityCheckAllCompleted, reportDataQualityIndexChecked]
+  );
+
   return (
-    <DataQualityProvider httpFetch={httpFetch} isILMAvailable={isILMAvailable}>
+    <DataQualityProvider
+      httpFetch={httpFetch}
+      telemetryEvents={telemetryEvents}
+      isILMAvailable={isILMAvailable}
+    >
       <Body
         addSuccessToast={addSuccessToast}
         canUserCreateAndReadCases={canUserCreateAndReadCases}

@@ -29,7 +29,10 @@ export const TestProvidersComponent: React.FC<Props> = ({ children, isILMAvailab
   const mockGetInitialConversations = jest.fn(() => ({}));
   const mockGetComments = jest.fn(() => []);
   const mockHttp = httpServiceMock.createStartContract({ basePath: '/test' });
-
+  const mockTelemetryEvents = {
+    reportDataQualityIndexChecked: jest.fn(),
+    reportDataQualityCheckAllCompleted: jest.fn(),
+  };
   return (
     <I18nProvider>
       <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
@@ -51,7 +54,11 @@ export const TestProvidersComponent: React.FC<Props> = ({ children, isILMAvailab
           setDefaultAllowReplacement={jest.fn()}
           http={mockHttp}
         >
-          <DataQualityProvider httpFetch={http.fetch} isILMAvailable={isILMAvailable}>
+          <DataQualityProvider
+            httpFetch={http.fetch}
+            isILMAvailable={isILMAvailable}
+            telemetryEvents={mockTelemetryEvents}
+          >
             {children}
           </DataQualityProvider>
         </AssistantProvider>
