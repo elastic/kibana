@@ -26,6 +26,17 @@ describe('generateAvailability', () => {
     stability: SpecificationTypes.Stability.stable,
   };
 
+  it('throws an error if `availability` if missing in the endpoint object', () => {
+    const endpointWithoutAvailability = {
+      ...mockEndpoint,
+      availability: undefined,
+    };
+
+    expect(() => generateAvailability(endpointWithoutAvailability)).toThrow(
+      'missing availability for test-endpoint'
+    );
+  });
+
   describe('converts to false if the availability object is missing for either stack or serverless', () => {
     it('if availability for stack is missing, the endpoint is not available there', () => {
       const endpoint = {
