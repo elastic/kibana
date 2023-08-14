@@ -26,6 +26,7 @@ import {
   getConnectorsFormDeserializer,
   getConnectorsFormSerializer,
 } from '../utils';
+import { useAvailableCasesOwners } from '../app/use_available_owners';
 import type { CaseAttachmentsWithoutOwner } from '../../types';
 import { useGetSupportedActionConnectors } from '../../containers/configure/use_get_supported_action_connectors';
 import { useCreateCaseWithAttachmentsTransaction } from '../../common/apm/use_cases_transactions';
@@ -68,6 +69,7 @@ export const FormContext: React.FC<Props> = ({
   const { mutateAsync: createAttachments } = useCreateAttachments();
   const { mutateAsync: pushCaseToExternalService } = usePostPushToService();
   const { startTransaction } = useCreateCaseWithAttachmentsTransaction();
+  const availableOwners = useAvailableCasesOwners();
 
   const submitCase = useCallback(
     async (
@@ -82,6 +84,7 @@ export const FormContext: React.FC<Props> = ({
       if (isValid) {
         const { selectedOwner, ...userFormData } = dataWithoutConnectorId;
         const caseConnector = getConnectorById(dataConnectorId, connectors);
+        const defaultOwner = owner[0] ?? availableOwners[0];
 
         startTransaction({ appId, attachments });
 
@@ -94,7 +97,7 @@ export const FormContext: React.FC<Props> = ({
             ...userFormData,
             connector: connectorToUpdate,
             settings: { syncAlerts },
-            owner: selectedOwner ?? owner[0],
+            owner: selectedOwner ?? defaultOwner,
           },
         });
 
@@ -131,6 +134,7 @@ export const FormContext: React.FC<Props> = ({
       attachments,
       postCase,
       owner,
+      availableOwners,
       afterCaseCreated,
       onSuccess,
       createAttachments,
