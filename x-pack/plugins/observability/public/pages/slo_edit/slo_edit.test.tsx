@@ -66,6 +66,7 @@ const mockBasePathPrepend = jest.fn();
 const mockKibana = () => {
   useKibanaMock.mockReturnValue({
     services: {
+      theme: {},
       application: {
         navigateToUrl: mockNavigate,
       },
