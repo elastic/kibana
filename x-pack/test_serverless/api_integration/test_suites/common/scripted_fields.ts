@@ -1,0 +1,45 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import expect from 'expect';
+import { DATA_VIEW_PATH } from '@kbn/data-views-plugin/server';
+import { FtrProviderContext } from '../../ftr_provider_context';
+
+export default function ({ getService }: FtrProviderContext) {
+  const supertest = getService('supertest');
+  const esArchiver = getService('esArchiver');
+
+  describe('scripted fields disabled', function () {
+    before(async () => {
+      await esArchiver.load('test/api_integration/fixtures/es_archiver/index_patterns/basic_index');
+    });
+
+    after(async () => {
+      await esArchiver.unload(
+        'test/api_integration/fixtures/es_archiver/index_patterns/basic_index'
+      );
+    });
+    it('scripted fields are ignore when disabled', async () => {
+      const id = 'abc';
+      const response = await supertest.post(DATA_VIEW_PATH).send({
+        title: 'basic_index',
+        id,
+        fields: {
+          foo: {
+            name: 'foo',
+            type: 'string',
+            scripted: true,
+            script: "doc['field_name'].value",
+          },
+        },
+      });
+
+      expect(response.status).toBe(200);
+      expect(response.body.fields.foo).toBeUndefined();
+    });
+  });
+}
