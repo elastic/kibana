@@ -32,7 +32,10 @@ export const navigationEmbeddableSavedObjectType: SavedObjectsType = {
         dynamic: false,
         properties: {},
       },
-      layout: { type: 'text' },
+      layout: {
+        index: false,
+        type: 'keyword',
+      },
     },
   },
   migrations: () => {
