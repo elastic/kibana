@@ -270,7 +270,7 @@ ${JSON.stringify(config.getAll(), null, 2)}
 ----------------------------------------------
 `);
 
-            const lifecycle = new Lifecycle();
+            const lifecycle = new Lifecycle(log);
 
             const providers = new ProviderCollection(
               log,

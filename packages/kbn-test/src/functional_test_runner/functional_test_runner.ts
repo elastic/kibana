@@ -221,7 +221,7 @@ export class FunctionalTestRunner {
     handler: (lifecycle: Lifecycle, coreProviders: Providers) => Promise<T>
   ): Promise<T> {
     let runErrorOccurred = false;
-    const lifecycle = new Lifecycle();
+    const lifecycle = new Lifecycle(this.log);
     const testMetadata = new TestMetadata(lifecycle);
 
     try {

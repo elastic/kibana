@@ -11,6 +11,7 @@ import { Lifecycle } from '../lifecycle';
 import { decorateSnapshotUi, expectSnapshot } from './decorate_snapshot_ui';
 import path from 'path';
 import fs from 'fs';
+import { ToolingLog } from '@kbn/dev-utils';
 
 const createRootSuite = () => {
   const suite = {
@@ -65,7 +66,7 @@ describe('decorateSnapshotUi', () => {
     let lifecycle: Lifecycle;
     let rootSuite: Suite;
     beforeEach(async () => {
-      lifecycle = new Lifecycle();
+      lifecycle = new Lifecycle(new ToolingLog());
       rootSuite = createRootSuite();
       decorateSnapshotUi({ lifecycle, updateSnapshots: false, isCi: false });
 
@@ -116,7 +117,7 @@ describe('decorateSnapshotUi', () => {
     let lifecycle: Lifecycle;
     let rootSuite: Suite;
     beforeEach(async () => {
-      lifecycle = new Lifecycle();
+      lifecycle = new Lifecycle(new ToolingLog());
       rootSuite = createRootSuite();
       decorateSnapshotUi({ lifecycle, updateSnapshots: false, isCi: false });
 
@@ -162,7 +163,7 @@ exports[\`Test2 1\`] = \`"bar"\`;
     let lifecycle: Lifecycle;
     let rootSuite: Suite;
     beforeEach(async () => {
-      lifecycle = new Lifecycle();
+      lifecycle = new Lifecycle(new ToolingLog());
       rootSuite = createRootSuite();
       decorateSnapshotUi({ lifecycle, updateSnapshots: true, isCi: false });
 
@@ -219,7 +220,7 @@ exports[\`Test2 1\`] = \`"bar"\`;
     let lifecycle: Lifecycle;
     let rootSuite: Suite;
     beforeEach(async () => {
-      lifecycle = new Lifecycle();
+      lifecycle = new Lifecycle(new ToolingLog());
       rootSuite = createRootSuite();
       decorateSnapshotUi({ lifecycle, updateSnapshots: false, isCi: true });
 
