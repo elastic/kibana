@@ -16,7 +16,8 @@ export const policyFactory = (
   cloud = false,
   licenseUid = '',
   clusterUuid = '',
-  clusterName = ''
+  clusterName = '',
+  serverless = false
 ): PolicyConfig => {
   return {
     meta: {
@@ -25,6 +26,7 @@ export const policyFactory = (
       cluster_uuid: clusterUuid,
       cluster_name: clusterName,
       cloud,
+      serverless,
     },
     windows: {
       events: {

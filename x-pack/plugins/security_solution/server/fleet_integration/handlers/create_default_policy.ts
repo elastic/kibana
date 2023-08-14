@@ -43,7 +43,8 @@ export const createDefaultPolicy = (
     cloud?.isCloudEnabled,
     licenseService.getLicenseUID(),
     esClientInfo?.cluster_uuid,
-    esClientInfo?.cluster_name
+    esClientInfo?.cluster_name,
+    cloud?.isServerlessEnabled
   );
 
   let defaultPolicyPerType: PolicyConfig =
