@@ -1,23 +1,24 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import type { PersistedIndexPatternLayer } from '@kbn/lens-plugin/public';
 import type { ReferenceBasedIndexPatternColumn } from '@kbn/lens-plugin/public/datasources/form_based/operations/definitions/column_types';
-import type { FormulaConfig, ChartColumn } from '../../../../types';
+import type { StaticChartColumn, StaticValueConfig } from '../../../types';
 
-export class ReferenceLineColumn implements ChartColumn {
-  constructor(private formulaConfig: FormulaConfig) {}
+export class ReferenceLineColumn implements StaticChartColumn {
+  constructor(private valueConfig: StaticValueConfig) {}
 
-  getFormulaConfig(): FormulaConfig {
-    return this.formulaConfig;
+  getValueConfig(): StaticValueConfig {
+    return this.valueConfig;
   }
 
   getData(id: string, baseLayer: PersistedIndexPatternLayer): PersistedIndexPatternLayer {
-    const { label, ...params } = this.getFormulaConfig();
+    const { label, ...params } = this.getValueConfig();
     return {
       linkToLayers: [],
       columnOrder: [...baseLayer.columnOrder, id],
