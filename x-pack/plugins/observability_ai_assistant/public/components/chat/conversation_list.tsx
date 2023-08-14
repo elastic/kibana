@@ -37,11 +37,11 @@ export function ConversationList({
   onClickDeleteConversation,
 }: {
   selected: string;
-  onClickConversation: (conversationId: string) => void;
-  onClickNewChat: () => void;
   loading: boolean;
   error?: any;
   conversations?: Array<{ id: string; label: string; href?: string }>;
+  onClickConversation: (conversationId: string) => void;
+  onClickNewChat: () => void;
   onClickDeleteConversation: (id: string) => void;
 }) {
   return (
