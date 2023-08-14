@@ -126,7 +126,7 @@ export const VULNERABILITIES_SEVERITY: Record<VulnSeverity, VulnSeverity> = {
 
 export const VULNERABILITIES_ENUMERATION = 'CVE';
 
-export const AWS_CREDENTIALS_FIELD_MAP: AwsCredentialsTypeFieldMap = {
+export const AWS_CREDENTIALS_TYPE_TO_FIELDS_MAP: AwsCredentialsTypeFieldMap = {
   assume_role: ['role_arn'],
   direct_access_keys: ['access_key_id', 'secret_access_key'],
   temporary_keys: ['access_key_id', 'secret_access_key', 'session_token'],
