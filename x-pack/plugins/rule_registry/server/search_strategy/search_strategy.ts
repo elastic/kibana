@@ -23,7 +23,6 @@ import {
   RuleRegistrySearchRequest,
   RuleRegistrySearchResponse,
 } from '../../common/search_strategy';
-import { IRuleDataService } from '..';
 import { MAX_ALERT_SEARCH_SIZE } from '../../common/constants';
 import { AlertAuditAction, alertAuditEvent } from '..';
 import { getSpacesFilter, getAuthzFilter } from '../lib';
@@ -38,7 +37,6 @@ export const RULE_SEARCH_STRATEGY_NAME = 'privateRuleRegistryAlertsSearchStrateg
 
 export const ruleRegistrySearchStrategyProvider = (
   data: PluginStart,
-  ruleDataService: IRuleDataService,
   alerting: AlertingStart,
   logger: Logger,
   security?: SecurityPluginSetup,
@@ -83,6 +81,7 @@ export const ruleRegistrySearchStrategyProvider = (
             ReadOperations.Find
           )) as estypes.QueryDslQueryContainer;
         }
+
         const authorizedRuleTypes = await authorization.getAuthorizedRuleTypes(
           AlertingAuthorizationEntity.Alert,
           new Set(featureIds)
@@ -91,12 +90,10 @@ export const ruleRegistrySearchStrategyProvider = (
       };
       return from(getAsync(request.featureIds)).pipe(
         mergeMap(({ space, authzFilter, authorizedRuleTypes }) => {
-          const indices = alerting
-            .getAlertIndicesAlias(
-              authorizedRuleTypes.map((art: { id: any }) => art.id),
-              space?.id
-            )
-            .join(',');
+          const indices = alerting.getAlertIndicesAlias(
+            authorizedRuleTypes.map((art: { id: any }) => art.id),
+            space?.id
+          );
 
           if (indices.length === 0) {
             return of(EMPTY_RESPONSE);

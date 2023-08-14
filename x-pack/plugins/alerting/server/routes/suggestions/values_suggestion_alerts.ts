@@ -63,15 +63,14 @@ export function registerAlertsValueSuggestionsRoute(
         let authorizationTuple;
         let authorizedRuleType = [];
         try {
-          authorizationTuple = await rulesClient
-            .getAuthorization()
-            .getFindAuthorizationFilter(
-              AlertingAuthorizationEntity.Alert,
-              alertingAuthorizationFilterOpts
-            );
-          authorizedRuleType = await rulesClient
-            .getAuthorization()
-            .getAuthorizedRuleTypes(AlertingAuthorizationEntity.Alert);
+          const authorization = rulesClient.getAuthorization();
+          authorizationTuple = await authorization.getFindAuthorizationFilter(
+            AlertingAuthorizationEntity.Alert,
+            alertingAuthorizationFilterOpts
+          );
+          authorizedRuleType = await authorization.getAuthorizedRuleTypes(
+            AlertingAuthorizationEntity.Alert
+          );
         } catch (error) {
           rulesClient.getAuditLogger()?.log(
             ruleAuditEvent({

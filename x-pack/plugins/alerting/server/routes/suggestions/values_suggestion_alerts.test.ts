@@ -32,6 +32,7 @@ describe('registerAlertsValueSuggestionsRoute', () => {
   let config$: Observable<ConfigSchema>;
 
   beforeEach(() => {
+    termsAggSuggestionsMock.mockClear();
     rulesClient.getSpaceId.mockReturnValue('space-x');
     config$ = dataPluginMock
       .createSetupContract()
@@ -42,8 +43,8 @@ describe('registerAlertsValueSuggestionsRoute', () => {
   test('happy path route registered', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
-
-    registerAlertsValueSuggestionsRoute(router, licenseState, config$);
+    const getAlertIndicesAliasMock = jest.fn().mockReturnValue(['alert-index']);
+    registerAlertsValueSuggestionsRoute(router, licenseState, config$, getAlertIndicesAliasMock);
 
     const [config, handler] = router.post.mock.calls[0];
 
@@ -76,7 +77,7 @@ describe('registerAlertsValueSuggestionsRoute', () => {
       expect.any(Object),
       expect.any(Object),
       expect.any(Object),
-      '.kibana_alerting_cases',
+      'alert-index',
       'alert.tags',
       'test-query',
       [{ term: { 'kibana.space_ids': 'space-x' } }],
