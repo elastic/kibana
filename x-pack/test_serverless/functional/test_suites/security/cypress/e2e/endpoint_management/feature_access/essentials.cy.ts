@@ -61,7 +61,7 @@ describe(
       });
     }
 
-    it('should have access to `unisoalte` api', () => {
+    it('should have access to `unisolate` api', () => {
       ensureResponseActionAuthzAccess('all', 'unisolate', username, password);
     });
   }
