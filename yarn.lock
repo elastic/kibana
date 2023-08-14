@@ -1542,12 +1542,12 @@
     "@elastic/transport" "^8.3.1"
     tslib "^2.4.0"
 
-"@elastic/elasticsearch@npm:@elastic/elasticsearch@8.9.0":
-  version "8.9.0"
-  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch/-/elasticsearch-8.9.0.tgz#d132021c6c12e4171fe14371609a5c69b535edd4"
-  integrity sha512-UyolnzjOYTRL2966TYS3IoJP4tQbvak/pmYmbP3JdphD53RjkyVDdxMpTBv+2LcNBRrvYPTzxQbpRW/nGSXA9g==
+"@elastic/elasticsearch@npm:@elastic/elasticsearch-canary@8.9.1-canary.1":
+  version "8.9.1-canary.1"
+  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch-canary/-/elasticsearch-canary-8.9.1-canary.1.tgz#7c1cdc6cc4129910544b2a3abd6a73b9fcc82ff3"
+  integrity sha512-pxFP57AEmbsgC6LsGv7xyAR4qCXiX6JXAGVdzBXDl2qEdz1p5y3htgyT6tGvyTV11Ma0AflsWx0jJ1vrp6bGew==
   dependencies:
-    "@elastic/transport" "^8.3.2"
+    "@elastic/transport" "^8.3.3"
     tslib "^2.4.0"
 
 "@elastic/ems-client@8.4.0":
@@ -1740,10 +1740,10 @@
     tslib "^2.4.0"
     undici "^5.5.1"
 
-"@elastic/transport@^8.3.2":
-  version "8.3.2"
-  resolved "https://registry.yarnpkg.com/@elastic/transport/-/transport-8.3.2.tgz#295e91f43e3a60a839f998ac3090a83ddb441592"
-  integrity sha512-ZiBYRVPj6pwYW99fueyNU4notDf7ZPs7Ix+4T1btIJsKJmeaORIItIfs+0O7KV4vV+DcvyMhkY1FXQx7kQOODw==
+"@elastic/transport@^8.3.3":
+  version "8.3.3"
+  resolved "https://registry.yarnpkg.com/@elastic/transport/-/transport-8.3.3.tgz#06c5b1b9566796775ac96d17959dafc269da5ec1"
+  integrity sha512-g5nc//dq/RQUTMkJUB8Ui8KJa/WflWmUa7yLl4SRZd67PPxIp3cn+OvGMNIhpiLRcfz1upanzgZHb/7Po2eEdQ==
   dependencies:
     debug "^4.3.4"
     hpagent "^1.0.0"
@@ -4716,6 +4716,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/lens-embeddable-utils@link:packages/kbn-lens-embeddable-utils":
+  version "0.0.0"
+  uid ""
+
 "@kbn/lens-plugin@link:x-pack/plugins/lens":
   version "0.0.0"
   uid ""
@@ -5981,10 +5985,6 @@
   uid ""
 
 "@kbn/visualization-ui-components@link:packages/kbn-visualization-ui-components":
-  version "0.0.0"
-  uid ""
-
-"@kbn/lens-embeddable-utils@link:packages/kbn-lens-embeddable-utils":
   version "0.0.0"
   uid ""
 
