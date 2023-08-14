@@ -14,6 +14,7 @@ import {
   loadPack,
   loadSavedQuery,
 } from '../../tasks/api_fixtures';
+import type { ServerlessRoleName } from '../../../../../test_serverless/shared/lib';
 
 describe('Reader - only READ', { tags: [tag.ESS] }, () => {
   let savedQueryName: string;
@@ -37,7 +38,7 @@ describe('Reader - only READ', { tags: [tag.ESS] }, () => {
   });
 
   beforeEach(() => {
-    cy.login('reader');
+    cy.login('reader' as ServerlessRoleName);
   });
 
   after(() => {

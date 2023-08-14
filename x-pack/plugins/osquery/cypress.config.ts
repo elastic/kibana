@@ -7,9 +7,17 @@
 
 import { defineCypressConfig } from '@kbn/cypress-config';
 
-// eslint-disable-next-line @kbn/imports/no_boundary_crossing
-import { setupUserDataLoader } from './cypress/support/setup_data_loader_tasks';
+import path from 'path';
+import { safeLoad as loadYaml } from 'js-yaml';
+import { readFileSync } from 'fs';
 
+// eslint-disable-next-line @kbn/imports/no_boundary_crossing
+import { setupUserDataLoader } from '../../test_serverless/functional/test_suites/security/cypress/support/setup_data_loader_tasks';
+const ROLES_YAML_FILE_PATH = path.join(
+  `${__dirname}/cypress/support`,
+  'project_controller_osquery_roles.yml'
+);
+const roleDefinitions = loadYaml(readFileSync(ROLES_YAML_FILE_PATH, 'utf8'));
 export default defineCypressConfig({
   defaultCommandTimeout: 60000,
   execTimeout: 120000,
@@ -43,7 +51,7 @@ export default defineCypressConfig({
     experimentalMemoryManagement: true,
     numTestsKeptInMemory: 10,
     setupNodeEvents(on, config) {
-      setupUserDataLoader(on, config);
+      setupUserDataLoader(on, config, roleDefinitions);
       // eslint-disable-next-line @typescript-eslint/no-var-requires
       require('@cypress/grep/src/plugin')(config);
 
