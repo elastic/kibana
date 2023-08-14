@@ -29,6 +29,7 @@ import type {
   ScopedHistory,
 } from 'src/core/public';
 
+import { EmptyPrompt } from './empty_prompt';
 import { reactRouterNavigate } from '../../../../../../../src/plugins/kibana_react/public';
 import type { Role, RoleMapping } from '../../../../common/model';
 import { DisabledBadge, EnabledBadge } from '../../badges';
@@ -42,7 +43,6 @@ import {
   SectionLoading,
 } from '../components';
 import type { RoleMappingsAPIClient } from '../role_mappings_api_client';
-import { EmptyPrompt } from './empty_prompt';
 
 interface Props {
   rolesAPIClient: PublicMethodsOf<RolesAPIClient>;

@@ -13,10 +13,10 @@ import React from 'react';
 import { nextTick } from '@kbn/test/jest';
 import { coreMock } from 'src/core/public/mocks';
 
-import { AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER } from '../../../common/constants';
-import type { LoginState } from '../../../common/login_state';
 import { DisabledLoginForm, LoginForm, LoginFormMessageType } from './components';
 import { LoginPage } from './login_page';
+import { AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER } from '../../../common/constants';
+import type { LoginState } from '../../../common/login_state';
 
 const createLoginState = (options?: Partial<LoginState>) => {
   return {

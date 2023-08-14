@@ -10,10 +10,10 @@ import Boom from '@hapi/boom';
 import { kibanaResponseFactory } from 'src/core/server';
 import { coreMock, httpServerMock } from 'src/core/server/mocks';
 
+import { defineCheckPrivilegesRoutes } from './privileges';
 import type { LicenseCheck } from '../../../../licensing/server';
 import { authenticationServiceMock } from '../../authentication/authentication_service.mock';
 import { routeDefinitionParamsMock } from '../index.mock';
-import { defineCheckPrivilegesRoutes } from './privileges';
 
 interface TestOptions {
   licenseCheckResult?: LicenseCheck;

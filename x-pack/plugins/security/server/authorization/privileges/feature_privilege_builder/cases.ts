@@ -7,8 +7,8 @@
 
 import { uniq } from 'lodash';
 
-import type { FeatureKibanaPrivileges, KibanaFeature } from '../../../../../features/server';
 import { BaseFeaturePrivilegeBuilder } from './feature_privilege_builder';
+import type { FeatureKibanaPrivileges, KibanaFeature } from '../../../../../features/server';
 
 // if you add a value here you'll likely also need to make changes here:
 // x-pack/plugins/cases/server/authorization/index.ts

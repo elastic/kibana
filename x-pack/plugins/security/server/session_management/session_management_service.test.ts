@@ -10,6 +10,12 @@ import { Subject } from 'rxjs';
 import { nextTick } from '@kbn/test/jest';
 import { coreMock, elasticsearchServiceMock, loggingSystemMock } from 'src/core/server/mocks';
 
+import { Session } from './session';
+import { SessionIndex } from './session_index';
+import {
+  SESSION_INDEX_CLEANUP_TASK_NAME,
+  SessionManagementService,
+} from './session_management_service';
 import type {
   TaskManagerStartContract,
   TaskRunCreatorFunction,
@@ -17,12 +23,6 @@ import type {
 import { taskManagerMock } from '../../../task_manager/server/mocks';
 import { ConfigSchema, createConfig } from '../config';
 import type { OnlineStatusRetryScheduler } from '../elasticsearch';
-import { Session } from './session';
-import { SessionIndex } from './session_index';
-import {
-  SESSION_INDEX_CLEANUP_TASK_NAME,
-  SessionManagementService,
-} from './session_management_service';
 
 describe('SessionManagementService', () => {
   let service: SessionManagementService;

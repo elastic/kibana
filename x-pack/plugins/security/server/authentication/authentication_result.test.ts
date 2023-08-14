@@ -7,8 +7,8 @@
 
 import Boom from '@hapi/boom';
 
-import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
 import { AuthenticationResult } from './authentication_result';
+import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
 
 describe('AuthenticationResult', () => {
   describe('notHandled', () => {

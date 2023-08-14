@@ -14,14 +14,14 @@ import type { CoreStatus, SavedObjectsRepository, ServiceStatusLevel } from 'src
 import { SavedObjectsErrorHelpers, ServiceStatusLevels } from 'src/core/server';
 import { coreMock, loggingSystemMock } from 'src/core/server/mocks';
 
-import type { ILicense } from '../../../licensing/server';
-import { licensingMock } from '../../../licensing/server/mocks';
-import { SpacesLicenseService } from '../../common/licensing';
 import {
   DefaultSpaceService,
   RETRY_DURATION_MAX,
   RETRY_SCALE_DURATION,
 } from './default_space_service';
+import type { ILicense } from '../../../licensing/server';
+import { licensingMock } from '../../../licensing/server/mocks';
+import { SpacesLicenseService } from '../../common/licensing';
 
 const advanceRetry = async (initializeCount: number) => {
   await Promise.resolve();

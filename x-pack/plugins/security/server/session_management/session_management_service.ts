@@ -9,6 +9,9 @@ import type { Observable, Subscription } from 'rxjs';
 
 import type { ElasticsearchClient, HttpServiceSetup, Logger } from 'src/core/server';
 
+import { Session } from './session';
+import { SessionCookie } from './session_cookie';
+import { SessionIndex } from './session_index';
 import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
 import type {
   TaskManagerSetupContract,
@@ -16,9 +19,6 @@ import type {
 } from '../../../task_manager/server';
 import type { ConfigType } from '../config';
 import type { OnlineStatusRetryScheduler } from '../elasticsearch';
-import { Session } from './session';
-import { SessionCookie } from './session_cookie';
-import { SessionIndex } from './session_index';
 
 export interface SessionManagementServiceSetupParams {
   readonly http: Pick<HttpServiceSetup, 'basePath' | 'createCookieSessionStorageFactory'>;

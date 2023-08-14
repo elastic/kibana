@@ -31,6 +31,8 @@ import {
   loggingSystemMock,
 } from 'src/core/server/mocks';
 
+import { AuthenticationResult } from './authentication_result';
+import { AuthenticationService } from './authentication_service';
 import type { SecurityLicense } from '../../common/licensing';
 import { licenseMock } from '../../common/licensing/index.mock';
 import type { AuthenticatedUser } from '../../common/model';
@@ -44,8 +46,6 @@ import { securityFeatureUsageServiceMock } from '../feature_usage/index.mock';
 import { ROUTE_TAG_AUTH_FLOW } from '../routes/tags';
 import type { Session } from '../session_management';
 import { sessionMock } from '../session_management/session.mock';
-import { AuthenticationResult } from './authentication_result';
-import { AuthenticationService } from './authentication_service';
 
 describe('AuthenticationService', () => {
   let service: AuthenticationService;

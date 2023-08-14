@@ -9,6 +9,7 @@ import Boom from '@hapi/boom';
 
 import type { KibanaRequest, SavedObjectsClientContract } from 'src/core/server';
 
+import type { LegacySpacesAuditLogger } from './legacy_audit_logger';
 import type {
   GetAllSpacesOptions,
   GetAllSpacesPurpose,
@@ -23,7 +24,6 @@ import type { AuthorizationServiceSetup } from '../authorization';
 import type { SecurityPluginSetup } from '../plugin';
 import type { EnsureAuthorizedDependencies, EnsureAuthorizedOptions } from '../saved_objects';
 import { ensureAuthorized, isAuthorizedForObjectInAllSpaces } from '../saved_objects';
-import type { LegacySpacesAuditLogger } from './legacy_audit_logger';
 
 const PURPOSE_PRIVILEGE_MAP: Record<
   GetAllSpacesPurpose,

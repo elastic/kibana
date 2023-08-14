@@ -10,14 +10,14 @@ import React from 'react';
 
 import { findTestSubject, mountWithIntl } from '@kbn/test/jest';
 
+import { PrivilegeSpaceForm } from './privilege_space_form';
+import { SpaceSelector } from './space_selector';
 import type { Space } from '../../../../../../../../spaces/public';
 import type { Role } from '../../../../../../../common/model';
 import { kibanaFeatures } from '../../../../__fixtures__/kibana_features';
 import { createKibanaPrivileges } from '../../../../__fixtures__/kibana_privileges';
 import { FeatureTable } from '../feature_table';
 import { getDisplayedFeaturePrivileges } from '../feature_table/__fixtures__';
-import { PrivilegeSpaceForm } from './privilege_space_form';
-import { SpaceSelector } from './space_selector';
 
 const createRole = (kibana: Role['kibana'] = []): Role => {
   return {

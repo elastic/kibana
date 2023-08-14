@@ -22,10 +22,10 @@ import type { InjectedIntl } from '@kbn/i18n/react';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import type { ApplicationStart, Capabilities } from 'src/core/public';
 
+import { ManageSpacesButton } from './manage_spaces_button';
 import type { Space } from '../../../common';
 import { addSpaceIdToPath, ENTER_SPACE_PATH, SPACE_SEARCH_COUNT_THRESHOLD } from '../../../common';
 import { getSpaceAvatarComponent } from '../../space_avatar';
-import { ManageSpacesButton } from './manage_spaces_button';
 
 // No need to wrap LazySpaceAvatar in an error boundary, because it is one of the first chunks loaded when opening Kibana.
 const LazySpaceAvatar = lazy(() =>

@@ -7,8 +7,8 @@
 
 import type { HttpServiceSetup, Logger } from 'src/core/server';
 
-import type { PluginSetupContract as FeaturesPluginSetup } from '../../../features/server';
 import type { AuthorizationServiceSetup } from './authorization_service';
+import type { PluginSetupContract as FeaturesPluginSetup } from '../../../features/server';
 
 class ProtectedApplications {
   private applications: Set<string> | null = null;

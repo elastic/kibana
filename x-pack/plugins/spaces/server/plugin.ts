@@ -17,12 +17,6 @@ import type {
 import type { HomeServerPluginSetup } from 'src/plugins/home/server';
 import type { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 
-import type {
-  PluginSetupContract as FeaturesPluginSetup,
-  PluginStartContract as FeaturesPluginStart,
-} from '../../features/server';
-import type { LicensingPluginSetup } from '../../licensing/server';
-import { SpacesLicenseService } from '../common/licensing';
 import { setupCapabilities } from './capabilities';
 import type { ConfigType } from './config';
 import { DefaultSpaceService } from './default_space';
@@ -39,6 +33,12 @@ import { SpacesService } from './spaces_service';
 import type { SpacesRequestHandlerContext } from './types';
 import { registerSpacesUsageCollector } from './usage_collection';
 import { UsageStatsService } from './usage_stats';
+import type {
+  PluginSetupContract as FeaturesPluginSetup,
+  PluginStartContract as FeaturesPluginStart,
+} from '../../features/server';
+import type { LicensingPluginSetup } from '../../licensing/server';
+import { SpacesLicenseService } from '../common/licensing';
 
 export interface PluginsSetup {
   features: FeaturesPluginSetup;

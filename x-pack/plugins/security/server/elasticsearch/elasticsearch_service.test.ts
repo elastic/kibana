@@ -12,9 +12,9 @@ import type { CoreStatus } from 'src/core/server';
 import { ServiceStatusLevels } from 'src/core/server';
 import { coreMock, loggingSystemMock } from 'src/core/server/mocks';
 
+import { ElasticsearchService } from './elasticsearch_service';
 import type { SecurityLicense, SecurityLicenseFeatures } from '../../common/licensing';
 import { licenseMock } from '../../common/licensing/index.mock';
-import { ElasticsearchService } from './elasticsearch_service';
 
 describe('ElasticsearchService', () => {
   let service: ElasticsearchService;

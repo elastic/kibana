@@ -14,10 +14,6 @@ import {
   loggingSystemMock,
 } from 'src/core/server/mocks';
 
-import type { SecurityLicenseFeatures } from '../../common/licensing';
-import { licenseMock } from '../../common/licensing/index.mock';
-import type { ConfigType } from '../config';
-import { ConfigSchema } from '../config';
 import type { AuditEvent } from './audit_events';
 import {
   AuditService,
@@ -25,6 +21,10 @@ import {
   filterEvent,
   RECORD_USAGE_INTERVAL,
 } from './audit_service';
+import type { SecurityLicenseFeatures } from '../../common/licensing';
+import { licenseMock } from '../../common/licensing/index.mock';
+import type { ConfigType } from '../config';
+import { ConfigSchema } from '../config';
 
 jest.useFakeTimers({ legacyFakeTimers: true });
 

@@ -14,6 +14,10 @@ import type { Capabilities } from 'src/core/public';
 import { coreMock, scopedHistoryMock } from 'src/core/public/mocks';
 import { dataPluginMock } from 'src/plugins/data/public/mocks';
 
+import { EditRolePage } from './edit_role_page';
+import { SimplePrivilegeSection } from './privileges/kibana/simple_privilege_section';
+import { SpaceAwarePrivilegeSection } from './privileges/kibana/space_aware_privilege_section';
+import { TransformErrorSection } from './privileges/kibana/transform_error_section';
 import { KibanaFeature } from '../../../../../features/public';
 import type { Space } from '../../../../../spaces/public';
 import { licenseMock } from '../../../../common/licensing/index.mock';
@@ -21,10 +25,6 @@ import type { Role } from '../../../../common/model';
 import { userAPIClientMock } from '../../users/index.mock';
 import { createRawKibanaPrivileges } from '../__fixtures__/kibana_privileges';
 import { indicesAPIClientMock, privilegesAPIClientMock, rolesAPIClientMock } from '../index.mock';
-import { EditRolePage } from './edit_role_page';
-import { SimplePrivilegeSection } from './privileges/kibana/simple_privilege_section';
-import { SpaceAwarePrivilegeSection } from './privileges/kibana/space_aware_privilege_section';
-import { TransformErrorSection } from './privileges/kibana/transform_error_section';
 
 const buildFeatures = () => {
   return [

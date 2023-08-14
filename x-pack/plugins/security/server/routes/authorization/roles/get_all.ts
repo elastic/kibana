@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import type { ElasticsearchRole } from './model';
+import { transformElasticsearchRoleToRole } from './model';
 import type { RouteDefinitionParams } from '../..';
 import { wrapIntoCustomErrorResponse } from '../../../errors';
 import { createLicensedRouteHandler } from '../../licensed_route_handler';
-import type { ElasticsearchRole } from './model';
-import { transformElasticsearchRoleToRole } from './model';
 
 export function defineGetAllRolesRoutes({ router, authz, logger }: RouteDefinitionParams) {
   router.get(

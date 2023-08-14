@@ -8,8 +8,8 @@
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 
-import { coreMock } from '../../../../../src/core/server/mocks';
 import { ResetSessionPage } from './reset_session_page';
+import { coreMock } from '../../../../../src/core/server/mocks';
 
 jest.mock('src/core/server/rendering/views/fonts', () => ({
   Fonts: () => <>MockedFonts</>,

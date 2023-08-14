@@ -18,10 +18,10 @@ import React, { Fragment, useState } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
+import { PrivilegeSummaryTable } from './privilege_summary_table';
 import type { Space, SpacesApiUi } from '../../../../../../../../spaces/public';
 import type { Role } from '../../../../../../../common/model';
 import type { KibanaPrivileges } from '../../../../model';
-import { PrivilegeSummaryTable } from './privilege_summary_table';
 
 interface Props {
   role: Role;

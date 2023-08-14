@@ -14,13 +14,13 @@ import type {
   PackageInfo,
 } from 'src/core/server';
 
+import { getPrivilegeDeprecationsService } from './privilege_deprecations';
 import type { SecurityLicense } from '../../common';
 import type {
   PrivilegeDeprecationsRolesResponse,
   PrivilegeDeprecationsService,
 } from '../../common/model';
 import { isRoleReserved } from '../../common/model';
-import { getPrivilegeDeprecationsService } from './privilege_deprecations';
 
 interface Deps {
   deprecationsService: DeprecationsServiceSetup;

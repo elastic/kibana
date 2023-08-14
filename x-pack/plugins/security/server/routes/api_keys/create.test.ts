@@ -12,11 +12,11 @@ import type { RequestHandler } from 'src/core/server';
 import { kibanaResponseFactory } from 'src/core/server';
 import { httpServerMock } from 'src/core/server/mocks';
 
+import { defineCreateApiKeyRoutes } from './create';
 import type { InternalAuthenticationServiceStart } from '../../authentication';
 import { authenticationServiceMock } from '../../authentication/authentication_service.mock';
 import type { SecurityRequestHandlerContext } from '../../types';
 import { routeDefinitionParamsMock } from '../index.mock';
-import { defineCreateApiKeyRoutes } from './create';
 
 describe('Create API Key route', () => {
   function getMockContext(

@@ -9,23 +9,6 @@ import type { Logger } from '@kbn/logging';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { IBasePath, IClusterClient, LoggerFactory } from 'src/core/server';
 
-import { KibanaRequest } from '../../../../../src/core/server';
-import {
-  AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER,
-  AUTH_URL_HASH_QUERY_STRING_PARAMETER,
-  LOGOUT_PROVIDER_QUERY_STRING_PARAMETER,
-  LOGOUT_REASON_QUERY_STRING_PARAMETER,
-  NEXT_URL_QUERY_STRING_PARAMETER,
-} from '../../common/constants';
-import type { SecurityLicense } from '../../common/licensing';
-import type { AuthenticatedUser, AuthenticationProvider } from '../../common/model';
-import { shouldProviderUseLoginForm } from '../../common/model';
-import type { AuditServiceSetup, SecurityAuditLogger } from '../audit';
-import { userLoginEvent, userLogoutEvent } from '../audit';
-import type { ConfigType } from '../config';
-import { getErrorStatusCode } from '../errors';
-import type { SecurityFeatureUsageServiceStart } from '../feature_usage';
-import type { Session, SessionValue } from '../session_management';
 import { AuthenticationResult } from './authentication_result';
 import { canRedirectRequest } from './can_redirect_request';
 import { DeauthenticationResult } from './deauthentication_result';
@@ -46,6 +29,23 @@ import {
   TokenAuthenticationProvider,
 } from './providers';
 import { Tokens } from './tokens';
+import { KibanaRequest } from '../../../../../src/core/server';
+import {
+  AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER,
+  AUTH_URL_HASH_QUERY_STRING_PARAMETER,
+  LOGOUT_PROVIDER_QUERY_STRING_PARAMETER,
+  LOGOUT_REASON_QUERY_STRING_PARAMETER,
+  NEXT_URL_QUERY_STRING_PARAMETER,
+} from '../../common/constants';
+import type { SecurityLicense } from '../../common/licensing';
+import type { AuthenticatedUser, AuthenticationProvider } from '../../common/model';
+import { shouldProviderUseLoginForm } from '../../common/model';
+import type { AuditServiceSetup, SecurityAuditLogger } from '../audit';
+import { userLoginEvent, userLogoutEvent } from '../audit';
+import type { ConfigType } from '../config';
+import { getErrorStatusCode } from '../errors';
+import type { SecurityFeatureUsageServiceStart } from '../feature_usage';
+import type { Session, SessionValue } from '../session_management';
 
 /**
  * List of query string parameters used to pass various authentication related metadata that should

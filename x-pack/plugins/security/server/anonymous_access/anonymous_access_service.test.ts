@@ -15,10 +15,10 @@ import {
   loggingSystemMock,
 } from 'src/core/server/mocks';
 
+import { AnonymousAccessService } from './anonymous_access_service';
 import { spacesMock } from '../../../spaces/server/mocks';
 import { ConfigSchema, createConfig } from '../config';
 import { securityMock } from '../mocks';
-import { AnonymousAccessService } from './anonymous_access_service';
 
 const createSecurityConfig = (config: Record<string, any> = {}) => {
   return createConfig(ConfigSchema.validate(config), loggingSystemMock.createLogger(), {

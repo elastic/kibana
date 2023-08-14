@@ -15,10 +15,10 @@ import type {
   StartServicesAccessor,
 } from 'src/core/server';
 
-import type { SecurityPluginSetup } from '../../../security/server';
-import type { EncryptedSavedObjectsService } from '../crypto';
 import { EncryptedSavedObjectsClientWrapper } from './encrypted_saved_objects_client_wrapper';
 import { getDescriptorNamespace, normalizeNamespace } from './get_descriptor_namespace';
+import type { SecurityPluginSetup } from '../../../security/server';
+import type { EncryptedSavedObjectsService } from '../crypto';
 
 export { normalizeNamespace };
 

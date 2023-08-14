@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { mockGroupsValues } from './__mocks__/groups_logic.mock';
 import {
   LogicMounter,
   mockFlashMessageHelpers,
@@ -13,7 +14,6 @@ import {
 import { contentSources } from '../../__mocks__/content_sources.mock';
 import { groups } from '../../__mocks__/groups.mock';
 import { users } from '../../__mocks__/users.mock';
-import { mockGroupsValues } from './__mocks__/groups_logic.mock';
 
 import { nextTick } from '@kbn/test/jest';
 

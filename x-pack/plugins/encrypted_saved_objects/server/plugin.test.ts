@@ -8,9 +8,9 @@
 import { coreMock, loggingSystemMock } from 'src/core/server/mocks';
 // import { loggingSystemMock } from '@kbn/core/server/mocks';
 
-import { securityMock } from '../../security/server/mocks';
 import { ConfigSchema } from './config';
 import { EncryptedSavedObjectsPlugin } from './plugin';
+import { securityMock } from '../../security/server/mocks';
 
 describe('EncryptedSavedObjects Plugin', () => {
   describe('setup()', () => {

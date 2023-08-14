@@ -7,9 +7,9 @@
 
 import type { HttpStart } from 'src/core/public';
 
+import { isGlobalPrivilegeDefinition } from './edit_role/privilege_utils';
 import type { Role, RoleIndexPrivilege } from '../../../common/model';
 import { copyRole } from '../../../common/model';
-import { isGlobalPrivilegeDefinition } from './edit_role/privilege_utils';
 
 export class RolesAPIClient {
   constructor(private readonly http: HttpStart) {}

@@ -33,6 +33,12 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { NotificationsStart } from 'src/core/public';
 
+import { ApiKeysEmptyPrompt } from './api_keys_empty_prompt';
+import { CreateApiKeyFlyout } from './create_api_key_flyout';
+import type { InvalidateApiKeys } from './invalidate_provider';
+import { InvalidateProvider } from './invalidate_provider';
+import { NotEnabled } from './not_enabled';
+import { PermissionDenied } from './permission_denied';
 import { APP_WRAPPER_CLASS } from '../../../../../../../src/core/public';
 import { SectionLoading } from '../../../../../../../src/plugins/es_ui_shared/public';
 import { reactRouterNavigate } from '../../../../../../../src/plugins/kibana_react/public';
@@ -40,12 +46,6 @@ import type { ApiKey, ApiKeyToInvalidate } from '../../../../common/model';
 import { Breadcrumb } from '../../../components/breadcrumb';
 import { SelectableTokenField } from '../../../components/token_field';
 import type { APIKeysAPIClient, CreateApiKeyResponse } from '../api_keys_api_client';
-import { ApiKeysEmptyPrompt } from './api_keys_empty_prompt';
-import { CreateApiKeyFlyout } from './create_api_key_flyout';
-import type { InvalidateApiKeys } from './invalidate_provider';
-import { InvalidateProvider } from './invalidate_provider';
-import { NotEnabled } from './not_enabled';
-import { PermissionDenied } from './permission_denied';
 
 interface Props {
   history: History;

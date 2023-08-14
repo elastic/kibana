@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { LogoutReason } from '../../common/types';
 import { SessionExpired } from './session_expired';
+import { LogoutReason } from '../../common/types';
 
 describe('#logout', () => {
   const mockGetItem = jest.fn().mockReturnValue(null);

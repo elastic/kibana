@@ -11,8 +11,8 @@ import React from 'react';
 import { findTestSubject, mountWithIntl, nextTick, shallowWithIntl } from '@kbn/test/jest';
 import { DEFAULT_APP_CATEGORIES } from 'src/core/public';
 
-import type { KibanaFeatureConfig } from '../../../../../features/public';
 import { EnabledFeatures } from './enabled_features';
+import type { KibanaFeatureConfig } from '../../../../../features/public';
 
 const features: KibanaFeatureConfig[] = [
   {

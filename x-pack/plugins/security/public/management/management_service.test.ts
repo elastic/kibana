@@ -15,14 +15,14 @@ import type {
 } from 'src/plugins/management/public';
 import { createManagementSectionMock } from 'src/plugins/management/public/mocks';
 
-import { licenseMock } from '../../common/licensing/index.mock';
-import type { SecurityLicenseFeatures } from '../../common/licensing/license_features';
-import { securityMock } from '../mocks';
 import { apiKeysManagementApp } from './api_keys';
 import { ManagementService } from './management_service';
 import { roleMappingsManagementApp } from './role_mappings';
 import { rolesManagementApp } from './roles';
 import { usersManagementApp } from './users';
+import { licenseMock } from '../../common/licensing/index.mock';
+import type { SecurityLicenseFeatures } from '../../common/licensing/license_features';
+import { securityMock } from '../mocks';
 
 const mockSection = createManagementSectionMock();
 

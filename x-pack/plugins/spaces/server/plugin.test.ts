@@ -9,10 +9,10 @@ import type { CoreSetup } from 'src/core/server';
 import { coreMock } from 'src/core/server/mocks';
 import { usageCollectionPluginMock } from 'src/plugins/usage_collection/server/mocks';
 
-import { featuresPluginMock } from '../../features/server/mocks';
-import { licensingMock } from '../../licensing/server/mocks';
 import type { PluginsStart } from './plugin';
 import { SpacesPlugin } from './plugin';
+import { featuresPluginMock } from '../../features/server/mocks';
+import { licensingMock } from '../../licensing/server/mocks';
 
 describe('Spaces plugin', () => {
   describe('#setup', () => {

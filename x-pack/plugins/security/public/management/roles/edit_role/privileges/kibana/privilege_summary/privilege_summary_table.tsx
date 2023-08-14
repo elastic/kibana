@@ -21,15 +21,15 @@ import React, { Fragment, useMemo, useState } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
+import type { EffectiveFeaturePrivileges } from './privilege_summary_calculator';
+import { PrivilegeSummaryCalculator } from './privilege_summary_calculator';
+import { PrivilegeSummaryExpandedRow } from './privilege_summary_expanded_row';
+import { SpaceColumnHeader } from './space_column_header';
 import type { Space, SpacesApiUi } from '../../../../../../../../spaces/public';
 import type { Role, RoleKibanaPrivilege } from '../../../../../../../common/model';
 import type { KibanaPrivileges, SecuredFeature } from '../../../../model';
 import { isGlobalPrivilegeDefinition } from '../../../privilege_utils';
 import { FeatureTableCell } from '../feature_table_cell';
-import type { EffectiveFeaturePrivileges } from './privilege_summary_calculator';
-import { PrivilegeSummaryCalculator } from './privilege_summary_calculator';
-import { PrivilegeSummaryExpandedRow } from './privilege_summary_expanded_row';
-import { SpaceColumnHeader } from './space_column_header';
 
 export interface PrivilegeSummaryTableProps {
   role: Role;

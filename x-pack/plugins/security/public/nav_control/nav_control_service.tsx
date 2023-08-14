@@ -14,10 +14,10 @@ import { map, takeUntil } from 'rxjs/operators';
 
 import type { CoreStart } from 'src/core/public';
 
-import type { SecurityLicense } from '../../common/licensing';
-import type { AuthenticationServiceSetup } from '../authentication';
 import type { UserMenuLink } from './nav_control_component';
 import { SecurityNavControl } from './nav_control_component';
+import type { SecurityLicense } from '../../common/licensing';
+import type { AuthenticationServiceSetup } from '../authentication';
 
 interface SetupDeps {
   securityLicense: SecurityLicense;

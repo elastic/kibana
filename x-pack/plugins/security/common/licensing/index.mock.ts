@@ -7,12 +7,12 @@
 
 import { of } from 'rxjs';
 
+import type { SecurityLicenseFeatures } from './license_features';
+import type { SecurityLicense } from './license_service';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { LICENSE_TYPE } from '../../../licensing/server';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import type { LicenseType } from '../../../licensing/server';
-import type { SecurityLicenseFeatures } from './license_features';
-import type { SecurityLicense } from './license_service';
 
 export const licenseMock = {
   create: (

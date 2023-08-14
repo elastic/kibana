@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { privilegesFactory } from './privileges';
 import { KibanaFeature } from '../../../../features/server';
 import { featuresPluginMock } from '../../../../features/server/mocks';
 import { licenseMock } from '../../../common/licensing/index.mock';
 import { Actions } from '../actions';
-import { privilegesFactory } from './privileges';
 
 const actions = new Actions('1.0.0-zeta1');
 

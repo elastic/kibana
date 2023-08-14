@@ -11,12 +11,12 @@ import React from 'react';
 import { mountWithIntl, shallowWithIntl } from '@kbn/test/jest';
 import { httpServiceMock, notificationServiceMock, scopedHistoryMock } from 'src/core/public/mocks';
 
+import { SpacesGridPage } from './spaces_grid_page';
 import { KibanaFeature } from '../../../../features/public';
 import { featuresPluginMock } from '../../../../features/public/mocks';
 import { SpaceAvatarInternal } from '../../space_avatar/space_avatar_internal';
 import type { SpacesManager } from '../../spaces_manager';
 import { spacesManagerMock } from '../../spaces_manager/mocks';
-import { SpacesGridPage } from './spaces_grid_page';
 
 const spaces = [
   {

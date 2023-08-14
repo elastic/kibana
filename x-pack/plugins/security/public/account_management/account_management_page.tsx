@@ -13,12 +13,12 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { CoreStart, NotificationsStart } from 'src/core/public';
 
+import { ChangePassword } from './change_password';
+import { PersonalInfo } from './personal_info';
 import type { AuthenticatedUser } from '../../common/model';
 import { getUserDisplayName } from '../../common/model';
 import type { AuthenticationServiceSetup } from '../authentication';
 import type { UserAPIClient } from '../management';
-import { ChangePassword } from './change_password';
-import { PersonalInfo } from './personal_info';
 
 interface Props {
   authc: AuthenticationServiceSetup;

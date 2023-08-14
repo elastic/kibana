@@ -9,8 +9,8 @@ import React from 'react';
 
 import type { AdvancedSettingsSetup } from 'src/plugins/advanced_settings/public';
 
-import type { Space } from '../../common';
 import { AdvancedSettingsSubtitle, AdvancedSettingsTitle } from './components';
+import type { Space } from '../../common';
 
 interface SetupDeps {
   getActiveSpace: () => Promise<Space>;

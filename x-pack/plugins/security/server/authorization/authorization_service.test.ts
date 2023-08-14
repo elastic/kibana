@@ -21,15 +21,15 @@ import {
   mockRegisterPrivilegesWithCluster,
 } from './service.test.mocks';
 
-import { featuresPluginMock } from '../../../features/server/mocks';
-import { licenseMock } from '../../common/licensing/index.mock';
-import type { OnlineStatusRetryScheduler } from '../elasticsearch';
 import { AuthorizationService } from './authorization_service';
 import { checkPrivilegesWithRequestFactory } from './check_privileges';
 import { checkPrivilegesDynamicallyWithRequestFactory } from './check_privileges_dynamically';
 import { checkSavedObjectsPrivilegesWithRequestFactory } from './check_saved_objects_privileges';
 import { authorizationModeFactory } from './mode';
 import { privilegesFactory } from './privileges';
+import { featuresPluginMock } from '../../../features/server/mocks';
+import { licenseMock } from '../../common/licensing/index.mock';
+import type { OnlineStatusRetryScheduler } from '../elasticsearch';
 
 const kibanaIndexName = '.a-kibana-index';
 const application = `kibana-${kibanaIndexName}`;

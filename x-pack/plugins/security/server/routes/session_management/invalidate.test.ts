@@ -8,6 +8,7 @@
 import type { ObjectType } from '@kbn/config-schema';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
+import { defineInvalidateSessionsRoutes } from './invalidate';
 import type { RequestHandler, RouteConfig } from '../../../../../../src/core/server';
 import { kibanaResponseFactory } from '../../../../../../src/core/server';
 import { httpServerMock } from '../../../../../../src/core/server/mocks';
@@ -15,7 +16,6 @@ import type { Session } from '../../session_management';
 import { sessionMock } from '../../session_management/session.mock';
 import type { SecurityRequestHandlerContext, SecurityRouter } from '../../types';
 import { routeDefinitionParamsMock } from '../index.mock';
-import { defineInvalidateSessionsRoutes } from './invalidate';
 
 describe('Invalidate sessions routes', () => {
   let router: jest.Mocked<SecurityRouter>;

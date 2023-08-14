@@ -13,11 +13,11 @@ import { findTestSubject, mountWithIntl } from '@kbn/test/jest';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { coreMock, scopedHistoryMock } from 'src/core/public/mocks';
 
+import { PermissionDenied } from './permission_denied';
+import { RolesGridPage } from './roles_grid_page';
 import { DisabledBadge, ReservedBadge } from '../../badges';
 import { rolesAPIClientMock } from '../index.mock';
 import type { RolesAPIClient } from '../roles_api_client';
-import { PermissionDenied } from './permission_denied';
-import { RolesGridPage } from './roles_grid_page';
 
 const mock403 = () => ({ body: { statusCode: 403 } });
 

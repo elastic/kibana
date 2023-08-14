@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { routeDefinitionParamsMock } from '../index.mock';
 import { defineViewRoutes } from './';
+import { routeDefinitionParamsMock } from '../index.mock';
 
 describe('View routes', () => {
   it('does not register Login routes if both `basic` and `token` providers are disabled', () => {

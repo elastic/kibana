@@ -8,8 +8,8 @@
 import { applyDeprecations, configDeprecationFactory } from '@kbn/config';
 import { deepFreeze } from '@kbn/std';
 
-import { configDeprecationsMock } from '../../../../src/core/server/mocks';
 import { spacesConfigDeprecationProvider } from './config';
+import { configDeprecationsMock } from '../../../../src/core/server/mocks';
 
 const deprecationContext = configDeprecationsMock.createContext();
 

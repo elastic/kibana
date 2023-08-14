@@ -8,8 +8,8 @@
 import type { Observable, Subscription } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import type { ILicense, LicenseType } from '../../../licensing/common/types';
 import type { SecurityLicenseFeatures } from './license_features';
+import type { ILicense, LicenseType } from '../../../licensing/common/types';
 
 export interface SecurityLicense {
   isLicenseAvailable(): boolean;

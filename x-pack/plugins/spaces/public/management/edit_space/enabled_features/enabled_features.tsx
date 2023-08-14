@@ -12,11 +12,11 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
+import { FeatureTable } from './feature_table';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import type { KibanaFeatureConfig } from '../../../../../features/public';
 import type { Space } from '../../../../common';
 import { SectionPanel } from '../section_panel';
-import { FeatureTable } from './feature_table';
 
 interface Props {
   space: Partial<Space>;

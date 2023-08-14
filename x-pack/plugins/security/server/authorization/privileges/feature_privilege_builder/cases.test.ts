@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { FeaturePrivilegeCasesBuilder } from './cases';
 import type { FeatureKibanaPrivileges } from '../../../../../features/server';
 import { KibanaFeature } from '../../../../../features/server';
 import { Actions } from '../../actions';
-import { FeaturePrivilegeCasesBuilder } from './cases';
 
 const version = '1.0.0-zeta1';
 

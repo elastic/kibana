@@ -7,6 +7,7 @@
 
 import { uniq } from 'lodash';
 
+import { featurePrivilegeBuilderFactory } from './feature_privilege_builder';
 import type {
   PluginSetupContract as FeaturesPluginSetup,
   KibanaFeature,
@@ -14,7 +15,6 @@ import type {
 import type { SecurityLicense } from '../../../common/licensing';
 import type { RawKibanaPrivileges } from '../../../common/model';
 import type { Actions } from '../actions';
-import { featurePrivilegeBuilderFactory } from './feature_privilege_builder';
 
 export interface PrivilegesService {
   get(): RawKibanaPrivileges;

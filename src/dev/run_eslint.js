@@ -6,9 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { parse } from 'eslint/lib/options';
+import yargs from 'yargs';
 
-const options = parse(process.argv);
+import { eslintBinPath } from './eslint';
+
+let quiet = true;
+if (process.argv.includes('--no-quiet')) {
+  quiet = false;
+} else {
+  process.argv.push('--quiet');
+}
+
+const options = yargs(process.argv).argv;
 process.env.KIBANA_RESOLVER_HARD_CACHE = 'true';
 
 if (!options._.length && !options.printConfig) {
@@ -24,4 +33,12 @@ if (!process.argv.includes('--ext')) {
 }
 
 // common-js is required so that logic before this executes before loading eslint
-require('eslint/bin/eslint');
+require(eslintBinPath); // eslint-disable-line import/no-dynamic-require
+
+if (quiet) {
+  process.on('exit', (code) => {
+    if (!code) {
+      console.log('✅ no eslint errors found');
+    }
+  });
+}

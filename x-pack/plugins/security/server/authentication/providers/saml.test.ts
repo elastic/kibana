@@ -10,6 +10,9 @@ import Boom from '@hapi/boom';
 
 import { elasticsearchServiceMock, httpServerMock } from 'src/core/server/mocks';
 
+import type { MockAuthenticationProviderOptions } from './base.mock';
+import { mockAuthenticationProviderOptions } from './base.mock';
+import { SAMLAuthenticationProvider, SAMLLogin } from './saml';
 import {
   AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER,
   AUTH_URL_HASH_QUERY_STRING_PARAMETER,
@@ -18,9 +21,6 @@ import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.
 import { securityMock } from '../../mocks';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
-import type { MockAuthenticationProviderOptions } from './base.mock';
-import { mockAuthenticationProviderOptions } from './base.mock';
-import { SAMLAuthenticationProvider, SAMLLogin } from './saml';
 
 describe('SAMLAuthenticationProvider', () => {
   let provider: SAMLAuthenticationProvider;

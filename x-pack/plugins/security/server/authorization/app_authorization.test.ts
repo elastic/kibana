@@ -12,10 +12,10 @@ import {
   loggingSystemMock,
 } from 'src/core/server/mocks';
 
-import type { PluginSetupContract as FeaturesSetupContract } from '../../../features/server';
-import { featuresPluginMock } from '../../../features/server/mocks';
 import { initAppAuthorization } from './app_authorization';
 import { authorizationMock } from './index.mock';
+import type { PluginSetupContract as FeaturesSetupContract } from '../../../features/server';
+import { featuresPluginMock } from '../../../features/server/mocks';
 
 const createFeaturesSetupContractMock = (): FeaturesSetupContract => {
   const mock = featuresPluginMock.createSetup();

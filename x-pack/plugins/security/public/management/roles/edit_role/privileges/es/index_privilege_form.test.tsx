@@ -11,13 +11,13 @@ import React from 'react';
 import { findTestSubject, mountWithIntl, nextTick, shallowWithIntl } from '@kbn/test/jest';
 import { coreMock } from 'src/core/public/mocks';
 
+import { IndexPrivilegeForm } from './index_privilege_form';
 import {
   CodeEditorField,
   KibanaContextProvider,
 } from '../../../../../../../../../src/plugins/kibana_react/public';
 import { indicesAPIClientMock } from '../../../index.mock';
 import { RoleValidator } from '../../validate_role';
-import { IndexPrivilegeForm } from './index_privilege_form';
 
 test('it renders without crashing', () => {
   const props = {

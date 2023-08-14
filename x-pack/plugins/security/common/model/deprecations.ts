@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import type { Role } from './role';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import type { DeprecationsDetails, GetDeprecationsContext } from '../../../../../src/core/server';
-import type { Role } from './role';
 
 export interface PrivilegeDeprecationsRolesResponse {
   roles?: Role[];

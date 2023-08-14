@@ -30,13 +30,6 @@ import type {
   SavedObjectsUpdateOptions,
 } from 'src/core/server';
 
-import { SavedObjectsErrorHelpers, SavedObjectsUtils } from '../../../../../src/core/server';
-import { ALL_SPACES_ID, UNKNOWN_SPACE } from '../../common/constants';
-import type { AuditLogger, SecurityAuditLogger } from '../audit';
-import { SavedObjectAction, savedObjectEvent } from '../audit';
-import type { Actions, CheckSavedObjectsPrivileges } from '../authorization';
-import type { CheckPrivilegesResponse } from '../authorization/types';
-import type { SpacesService } from '../plugin';
 import type {
   EnsureAuthorizedDependencies,
   EnsureAuthorizedOptions,
@@ -47,6 +40,13 @@ import {
   getEnsureAuthorizedActionResult,
   isAuthorizedForObjectInAllSpaces,
 } from './ensure_authorized';
+import { SavedObjectsErrorHelpers, SavedObjectsUtils } from '../../../../../src/core/server';
+import { ALL_SPACES_ID, UNKNOWN_SPACE } from '../../common/constants';
+import type { AuditLogger, SecurityAuditLogger } from '../audit';
+import { SavedObjectAction, savedObjectEvent } from '../audit';
+import type { Actions, CheckSavedObjectsPrivileges } from '../authorization';
+import type { CheckPrivilegesResponse } from '../authorization/types';
+import type { SpacesService } from '../plugin';
 
 interface SecureSavedObjectsClientWrapperOptions {
   actions: Actions;

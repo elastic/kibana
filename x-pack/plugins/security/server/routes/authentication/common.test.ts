@@ -11,6 +11,7 @@ import type { RequestHandler, RouteConfig } from 'src/core/server';
 import { kibanaResponseFactory } from 'src/core/server';
 import { httpServerMock } from 'src/core/server/mocks';
 
+import { defineCommonRoutes } from './common';
 import type { SecurityLicense, SecurityLicenseFeatures } from '../../../common/licensing';
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
 import type { InternalAuthenticationServiceStart } from '../../authentication';
@@ -24,7 +25,6 @@ import { authenticationServiceMock } from '../../authentication/authentication_s
 import type { SecurityRequestHandlerContext, SecurityRouter } from '../../types';
 import { routeDefinitionParamsMock } from '../index.mock';
 import { ROUTE_TAG_AUTH_FLOW, ROUTE_TAG_CAN_REDIRECT } from '../tags';
-import { defineCommonRoutes } from './common';
 
 describe('Common authentication routes', () => {
   let router: jest.Mocked<SecurityRouter>;

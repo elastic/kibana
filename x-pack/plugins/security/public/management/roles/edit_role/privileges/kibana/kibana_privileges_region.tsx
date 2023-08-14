@@ -9,14 +9,14 @@ import React, { Component } from 'react';
 
 import type { Capabilities } from 'src/core/public';
 
+import { SimplePrivilegeSection } from './simple_privilege_section';
+import { SpaceAwarePrivilegeSection } from './space_aware_privilege_section';
+import { TransformErrorSection } from './transform_error_section';
 import type { Space, SpacesApiUi } from '../../../../../../../spaces/public';
 import type { Role } from '../../../../../../common/model';
 import type { KibanaPrivileges } from '../../../model';
 import { CollapsiblePanel } from '../../collapsible_panel';
 import type { RoleValidator } from '../../validate_role';
-import { SimplePrivilegeSection } from './simple_privilege_section';
-import { SpaceAwarePrivilegeSection } from './space_aware_privilege_section';
-import { TransformErrorSection } from './transform_error_section';
 
 interface Props {
   role: Role;

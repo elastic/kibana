@@ -8,11 +8,11 @@
 import { kibanaResponseFactory } from 'src/core/server';
 import { httpServerMock } from 'src/core/server/mocks';
 
+import { defineGetPrivilegesRoutes } from './get';
 import type { LicenseCheck } from '../../../../../licensing/server';
 import type { RawKibanaPrivileges } from '../../../../common/model';
 import type { SecurityRequestHandlerContext } from '../../../types';
 import { routeDefinitionParamsMock } from '../../index.mock';
-import { defineGetPrivilegesRoutes } from './get';
 
 const createRawKibanaPrivileges: () => RawKibanaPrivileges = () => {
   return {

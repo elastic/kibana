@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { FeatureKibanaPrivileges } from '../../../../../features/server';
 import { BaseFeaturePrivilegeBuilder } from './feature_privilege_builder';
+import type { FeatureKibanaPrivileges } from '../../../../../features/server';
 
 export class FeaturePrivilegeNavlinkBuilder extends BaseFeaturePrivilegeBuilder {
   public getActions(privilegeDefinition: FeatureKibanaPrivileges): string[] {

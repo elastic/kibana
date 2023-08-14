@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { summarizeCopyResult } from './summarize_copy_result';
 import type { FailedImport, ProcessedImportResponse } from '../lib';
 import type { CopyToSpaceSavedObjectTarget } from '../types';
-import { summarizeCopyResult } from './summarize_copy_result';
 
 // Sample data references:
 //

@@ -17,10 +17,10 @@ import { findTestSubject, mountWithIntl } from '@kbn/test/jest';
 import { coreMock } from 'src/core/public/mocks';
 import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
 
-import { AllRule, FieldRule } from '../../model';
 import { JSONRuleEditor } from './json_rule_editor';
 import { RuleEditorPanel } from './rule_editor_panel';
 import { VisualRuleEditor } from './visual_rule_editor';
+import { AllRule, FieldRule } from '../../model';
 
 describe('RuleEditorPanel', () => {
   const renderView = (props: Omit<React.ComponentProps<typeof RuleEditorPanel>, 'docLinks'>) => {

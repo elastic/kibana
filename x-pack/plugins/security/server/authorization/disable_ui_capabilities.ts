@@ -11,14 +11,14 @@ import type { RecursiveReadonly, RecursiveReadonlyArray } from '@kbn/utility-typ
 import type { KibanaRequest, Logger } from 'src/core/server';
 import type { Capabilities as UICapabilities } from 'src/core/types';
 
+import type { AuthorizationServiceSetup } from './authorization_service';
+import type { CheckPrivilegesResponse } from './types';
 import type {
   ElasticsearchFeature,
   FeatureElasticsearchPrivileges,
   KibanaFeature,
 } from '../../../features/server';
 import type { AuthenticatedUser } from '../../common/model';
-import type { AuthorizationServiceSetup } from './authorization_service';
-import type { CheckPrivilegesResponse } from './types';
 
 export function disableUICapabilitiesFactory(
   request: KibanaRequest,

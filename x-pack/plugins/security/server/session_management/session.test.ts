@@ -11,13 +11,13 @@ import crypto from 'crypto';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { httpServerMock, loggingSystemMock } from 'src/core/server/mocks';
 
-import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
-import { ConfigSchema, createConfig } from '../config';
 import { sessionCookieMock, sessionIndexMock, sessionMock } from './index.mock';
 import type { SessionValueContentToEncrypt } from './session';
 import { Session } from './session';
 import type { SessionCookie } from './session_cookie';
 import type { SessionIndex } from './session_index';
+import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
+import { ConfigSchema, createConfig } from '../config';
 
 describe('Session', () => {
   const now = 123456;

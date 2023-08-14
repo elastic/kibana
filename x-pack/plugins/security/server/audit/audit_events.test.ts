@@ -9,8 +9,6 @@ import { URL } from 'url';
 
 import { httpServerMock } from 'src/core/server/mocks';
 
-import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
-import { AuthenticationResult } from '../authentication';
 import {
   httpRequestEvent,
   SavedObjectAction,
@@ -20,6 +18,8 @@ import {
   userLoginEvent,
   userLogoutEvent,
 } from './audit_events';
+import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
+import { AuthenticationResult } from '../authentication';
 
 describe('#savedObjectEvent', () => {
   test('creates event with `unknown` outcome', () => {

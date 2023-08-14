@@ -21,6 +21,8 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import type { Capabilities } from 'src/core/public';
 
+import { PrivilegeSpaceForm } from './privilege_space_form';
+import { PrivilegeSpaceTable } from './privilege_space_table';
 import type { Space, SpacesApiUi } from '../../../../../../../../spaces/public';
 import type { Role } from '../../../../../../../common/model';
 import { isRoleReserved } from '../../../../../../../common/model';
@@ -28,8 +30,6 @@ import type { KibanaPrivileges } from '../../../../model';
 import type { RoleValidator } from '../../../validate_role';
 import { PrivilegeFormCalculator } from '../privilege_form_calculator';
 import { PrivilegeSummary } from '../privilege_summary';
-import { PrivilegeSpaceForm } from './privilege_space_form';
-import { PrivilegeSpaceTable } from './privilege_space_table';
 
 interface Props {
   kibanaPrivileges: KibanaPrivileges;

@@ -7,12 +7,12 @@
 
 import type { ApiResponse } from '@elastic/elasticsearch';
 
-import { licenseMock } from '../common/licensing/index.mock';
-import type { MockAuthenticatedUserProps } from '../common/model/authenticated_user.mock';
-import { mockAuthenticatedUser } from '../common/model/authenticated_user.mock';
 import { auditServiceMock } from './audit/index.mock';
 import { authenticationServiceMock } from './authentication/authentication_service.mock';
 import { authorizationMock } from './authorization/index.mock';
+import { licenseMock } from '../common/licensing/index.mock';
+import type { MockAuthenticatedUserProps } from '../common/model/authenticated_user.mock';
+import { mockAuthenticatedUser } from '../common/model/authenticated_user.mock';
 
 function createSetupMock() {
   const mockAuthz = authorizationMock.create();

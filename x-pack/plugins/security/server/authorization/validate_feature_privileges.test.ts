@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { KibanaFeature } from '../../../features/server';
 import { validateFeaturePrivileges } from './validate_feature_privileges';
+import { KibanaFeature } from '../../../features/server';
 
 it('allows features to be defined without privileges', () => {
   const feature: KibanaFeature = new KibanaFeature({

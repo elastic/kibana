@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { routeDefinitionParamsMock } from '../index.mock';
 import { defineAuthenticationRoutes } from './';
+import { routeDefinitionParamsMock } from '../index.mock';
 
 describe('Authentication routes', () => {
   it('does not register any SAML related routes if SAML auth provider is not enabled', () => {

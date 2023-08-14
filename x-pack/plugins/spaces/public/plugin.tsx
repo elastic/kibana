@@ -10,7 +10,6 @@ import type { AdvancedSettingsSetup } from 'src/plugins/advanced_settings/public
 import type { HomePublicPluginSetup } from 'src/plugins/home/public';
 import type { ManagementSetup, ManagementStart } from 'src/plugins/management/public';
 
-import type { FeaturesPluginStart } from '../../features/public';
 import { AdvancedSettingsService } from './advanced_settings';
 import { createSpacesFeatureCatalogueEntry } from './create_feature_catalogue_entry';
 import { ManagementService } from './management';
@@ -19,6 +18,7 @@ import { spaceSelectorApp } from './space_selector';
 import { SpacesManager } from './spaces_manager';
 import type { SpacesApi } from './types';
 import { getUiApi } from './ui_api';
+import type { FeaturesPluginStart } from '../../features/public';
 
 export interface PluginsSetup {
   advancedSettings?: AdvancedSettingsSetup;

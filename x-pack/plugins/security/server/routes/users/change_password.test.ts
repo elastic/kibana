@@ -14,6 +14,7 @@ import type { Headers, RequestHandler, RouteConfig } from 'src/core/server';
 import { kibanaResponseFactory } from 'src/core/server';
 import { coreMock, httpServerMock } from 'src/core/server/mocks';
 
+import { defineChangeUserPasswordRoutes } from './change_password';
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
 import { AuthenticationResult } from '../../authentication';
 import type { InternalAuthenticationServiceStart } from '../../authentication';
@@ -23,7 +24,6 @@ import type { Session } from '../../session_management';
 import { sessionMock } from '../../session_management/session.mock';
 import type { SecurityRequestHandlerContext, SecurityRouter } from '../../types';
 import { routeDefinitionParamsMock } from '../index.mock';
-import { defineChangeUserPasswordRoutes } from './change_password';
 
 describe('Change password', () => {
   let router: jest.Mocked<SecurityRouter>;

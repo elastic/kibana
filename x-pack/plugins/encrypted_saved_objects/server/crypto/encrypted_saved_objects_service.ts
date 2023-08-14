@@ -11,10 +11,10 @@ import typeDetect from 'type-detect';
 
 import type { Logger } from 'src/core/server';
 
-import type { AuthenticatedUser } from '../../../security/common/model';
-import type { EncryptedSavedObjectsAuditLogger } from '../audit';
 import { EncryptedSavedObjectAttributesDefinition } from './encrypted_saved_object_type_definition';
 import { EncryptionError, EncryptionErrorOperation } from './encryption_error';
+import type { AuthenticatedUser } from '../../../security/common/model';
+import type { EncryptedSavedObjectsAuditLogger } from '../audit';
 
 /**
  * Describes the attributes to encrypt. By default, attribute values won't be exposed to end-users

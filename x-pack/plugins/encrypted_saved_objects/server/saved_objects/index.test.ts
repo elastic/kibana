@@ -18,12 +18,12 @@ import {
   savedObjectsTypeRegistryMock,
 } from 'src/core/server/mocks';
 
-import { securityMock } from '../../../security/server/mocks';
-import type { EncryptedSavedObjectsService } from '../crypto';
-import { encryptedSavedObjectsServiceMock } from '../crypto/index.mock';
 import type { ClientInstanciator } from './';
 import { setupSavedObjects } from './';
 import { EncryptedSavedObjectsClientWrapper } from './encrypted_saved_objects_client_wrapper';
+import { securityMock } from '../../../security/server/mocks';
+import type { EncryptedSavedObjectsService } from '../crypto';
+import { encryptedSavedObjectsServiceMock } from '../crypto/index.mock';
 
 describe('#setupSavedObjects', () => {
   let setupContract: ClientInstanciator;

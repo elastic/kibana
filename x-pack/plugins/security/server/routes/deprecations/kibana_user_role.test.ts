@@ -13,10 +13,10 @@ import type { RequestHandler, RouteConfig } from 'src/core/server';
 import { kibanaResponseFactory } from 'src/core/server';
 import { coreMock, httpServerMock } from 'src/core/server/mocks';
 
+import { defineKibanaUserRoleDeprecationRoutes } from './kibana_user_role';
 import { securityMock } from '../../mocks';
 import type { SecurityRequestHandlerContext, SecurityRouter } from '../../types';
 import { routeDefinitionParamsMock } from '../index.mock';
-import { defineKibanaUserRoleDeprecationRoutes } from './kibana_user_role';
 
 function createMockUser(user: Partial<SecurityUser> = {}) {
   return { enabled: true, username: 'userA', roles: ['roleA'], metadata: {}, ...user };

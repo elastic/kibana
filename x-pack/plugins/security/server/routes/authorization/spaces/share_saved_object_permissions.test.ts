@@ -10,11 +10,11 @@ import type { RequestHandler, RouteConfig } from 'src/core/server';
 import { kibanaResponseFactory } from 'src/core/server';
 import { httpServerMock } from 'src/core/server/mocks';
 
+import { defineShareSavedObjectPermissionRoutes } from './share_saved_object_permissions';
 import type { RouteDefinitionParams } from '../..';
 import type { CheckPrivileges } from '../../../authorization/types';
 import type { SecurityRequestHandlerContext, SecurityRouter } from '../../../types';
 import { routeDefinitionParamsMock } from '../../index.mock';
-import { defineShareSavedObjectPermissionRoutes } from './share_saved_object_permissions';
 
 describe('Share Saved Object Permissions', () => {
   let router: jest.Mocked<SecurityRouter>;

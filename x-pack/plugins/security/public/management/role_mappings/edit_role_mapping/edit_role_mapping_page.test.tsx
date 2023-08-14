@@ -17,15 +17,15 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import { coreMock, scopedHistoryMock } from 'src/core/public/mocks';
 import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
 
+import { EditRoleMappingPage } from './edit_role_mapping_page';
+import { JSONRuleEditor } from './rule_editor_panel/json_rule_editor';
+import { VisualRuleEditor } from './rule_editor_panel/visual_rule_editor';
 import type { Role } from '../../../../common/model';
 import { RoleComboBox } from '../../role_combo_box';
 import type { RolesAPIClient } from '../../roles';
 import { rolesAPIClientMock } from '../../roles/roles_api_client.mock';
 import { NoCompatibleRealms, PermissionDenied, SectionLoading } from '../components';
 import { roleMappingsAPIClientMock } from '../role_mappings_api_client.mock';
-import { EditRoleMappingPage } from './edit_role_mapping_page';
-import { JSONRuleEditor } from './rule_editor_panel/json_rule_editor';
-import { VisualRuleEditor } from './rule_editor_panel/visual_rule_editor';
 
 describe('EditRoleMappingPage', () => {
   const history = scopedHistoryMock.create();
