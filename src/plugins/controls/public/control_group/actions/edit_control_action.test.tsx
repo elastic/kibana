@@ -90,13 +90,13 @@ test('Execute should open a flyout', async () => {
 
   const emptyContainer = new ControlGroupContainer(mockedReduxEmbeddablePackage, controlGroupInput);
   await emptyContainer.untilInitialized();
-  const control = await emptyContainer.addOptionsListControl({
+  const control = (await emptyContainer.addOptionsListControl({
     dataViewId: 'test-data-view',
     title: 'test',
     fieldName: 'test-field',
     width: 'medium',
     grow: false,
-  }) as OptionsListEmbeddable;
+  })) as OptionsListEmbeddable;
   expect(emptyContainer.getInput().panels[control.getInput().id].type).toBe(OPTIONS_LIST_CONTROL);
 
   const editControlAction = new EditControlAction(deleteControlAction);
