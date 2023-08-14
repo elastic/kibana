@@ -17,20 +17,14 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiTabbedContent,
-  EuiAccordion,
   EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHorizontalRule,
-  useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { EuiTabbedContentTab } from '@elastic/eui';
 
 import type { RuleResponse } from '../../../../../common/api/detection_engine/model/rule_schema/rule_schemas';
-import { RuleAboutSection } from './rule_about_section';
-import { RuleDefinitionSection } from './rule_definition_section';
-import { RuleScheduleSection } from './rule_schedule_section';
-import { RuleSetupGuideSection } from './rule_setup_guide_section';
+import { RuleOverviewTab, useOverviewTabSections } from './rule_overview_tab';
 import { RuleInvestigationGuideTab } from './rule_investigation_guide_tab';
 
 import * as i18n from './translations';
@@ -86,33 +80,6 @@ const StyledEuiTabbedContent = styled(EuiTabbedContent)`
   }
 `;
 
-interface ExpandableSectionProps {
-  title: string;
-  children: React.ReactNode;
-}
-
-const ExpandableSection = ({ title, children }: ExpandableSectionProps) => {
-  const accordionId = useGeneratedHtmlId({ prefix: 'accordion' });
-
-  return (
-    <EuiAccordion
-      paddingSize="l"
-      id={accordionId}
-      buttonContent={
-        <EuiTitle size="m">
-          <h3>{title}</h3>
-        </EuiTitle>
-      }
-      initialIsOpen={true}
-    >
-      <EuiSpacer size="m" />
-      <EuiFlexGroup gutterSize="none" direction="column">
-        {children}
-      </EuiFlexGroup>
-    </EuiAccordion>
-  );
-};
-
 interface RuleDetailsFlyoutProps {
   rule: Partial<RuleResponse>;
   actionButtonLabel: string;
@@ -128,37 +95,21 @@ export const RuleDetailsFlyout = ({
   onActionButtonClick,
   closeFlyout,
 }: RuleDetailsFlyoutProps) => {
+  const { expandedOverviewSections, toggleOverviewSection } = useOverviewTabSections();
+
   const overviewTab: EuiTabbedContentTab = useMemo(
     () => ({
       id: 'overview',
       name: i18n.OVERVIEW_TAB_LABEL,
       content: (
-        <>
-          <EuiSpacer size="m" />
-          <ExpandableSection title={i18n.ABOUT_SECTION_LABEL}>
-            <RuleAboutSection rule={rule} />
-          </ExpandableSection>
-          <EuiHorizontalRule margin="l" />
-          <ExpandableSection title={i18n.DEFINITION_SECTION_LABEL}>
-            <RuleDefinitionSection rule={rule} />
-          </ExpandableSection>
-          <EuiHorizontalRule margin="l" />
-          <ExpandableSection title={i18n.SCHEDULE_SECTION_LABEL}>
-            <RuleScheduleSection rule={rule} />
-          </ExpandableSection>
-          <EuiHorizontalRule margin="l" />
-          {rule.setup && (
-            <>
-              <ExpandableSection title={i18n.SETUP_GUIDE_SECTION_LABEL}>
-                <RuleSetupGuideSection setup={rule.setup} />
-              </ExpandableSection>
-              <EuiHorizontalRule margin="l" />
-            </>
-          )}
-        </>
+        <RuleOverviewTab
+          rule={rule}
+          expandedOverviewSections={expandedOverviewSections}
+          toggleOverviewSection={toggleOverviewSection}
+        />
       ),
     }),
-    [rule]
+    [rule, expandedOverviewSections, toggleOverviewSection]
   );
 
   const investigationGuideTab: EuiTabbedContentTab = useMemo(

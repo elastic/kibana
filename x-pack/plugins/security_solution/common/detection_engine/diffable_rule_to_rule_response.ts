@@ -291,6 +291,10 @@ const extractNewTermsFields = (
   return newTermsFields;
 };
 
+/**
+ * Converts a rule of type DiffableRule to a rule of type RuleResponse.
+ * Note that DiffableRule doesn't include all the fields that RuleResponse has, so they will be missing from the returned object. These are meta fields like "enabled", "created_at", "created_by", "updated_at", "updated_by", "id", "immutable", "output_index", "revision"
+ */
 export const diffableRuleToRuleResponse = (diffableRule: DiffableRule): Partial<RuleResponse> => {
   const commonFields = extractCommonFields(diffableRule);
 

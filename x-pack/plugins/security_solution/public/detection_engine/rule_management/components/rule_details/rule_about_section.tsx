@@ -18,22 +18,16 @@ import {
   EuiLink,
   EuiSpacer,
 } from '@elastic/eui';
-
 import type { EuiDescriptionListProps } from '@elastic/eui';
-
 import type {
   SeverityMappingItem as SeverityMappingItemType,
   RiskScoreMappingItem as RiskScoreMappingItemType,
   Threats,
 } from '@kbn/securitysolution-io-ts-alerting-types';
-
 import { ALERT_RISK_SCORE } from '@kbn/rule-data-utils';
-
 import type { RuleResponse } from '../../../../../common/api/detection_engine/model/rule_schema/rule_schemas';
 import { SeverityBadge } from '../../../../detections/components/rules/severity_badge';
-
 import { defaultToEmptyTag } from '../../../../common/components/empty_value';
-
 import { filterEmptyThreats } from '../../../rule_creation_ui/pages/rule_creation/helpers';
 import { ThreatEuiFlexGroup } from '../../../../detections/components/rules/description_step/threat_description';
 
