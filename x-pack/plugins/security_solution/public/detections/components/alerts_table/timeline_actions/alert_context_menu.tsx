@@ -385,7 +385,7 @@ export const AddExceptionFlyoutWrapper: React.FC<AddExceptionFlyoutWrapperProps>
   alertStatus,
 }) => {
   const { loading: isSignalIndexLoading, signalIndexName } = useSignalIndex();
-  const { rule: maybeRule } = useRuleWithFallback(ruleId);
+  const { rule: maybeRule, loading: isRuleLoading } = useRuleWithFallback(ruleId);
 
   const { loading: isLoadingAlertData, data } = useQueryAlerts<EcsHit, {}>({
     query: buildGetAlertByIdQuery(eventId),
@@ -436,15 +436,7 @@ export const AddExceptionFlyoutWrapper: React.FC<AddExceptionFlyoutWrapperProps>
       return [maybeRule];
     }
 
-    return [
-      {
-        id: ruleId,
-        rule_id: ruleRuleId,
-        name: ruleName,
-        index: memoRuleIndices,
-        data_view_id: memoDataViewId,
-      },
-    ] as Rule[];
+    return null;
   }, [maybeRule, memoDataViewId, memoRuleIndices, ruleId, ruleName, ruleRuleId]);
 
   const isLoading =
@@ -457,7 +449,7 @@ export const AddExceptionFlyoutWrapper: React.FC<AddExceptionFlyoutWrapperProps>
       rules={memoRule}
       isEndpointItem={exceptionListType === ExceptionListTypeEnum.ENDPOINT}
       alertData={enrichedAlert}
-      isAlertDataLoading={isLoading}
+      isAlertDataLoading={isLoading || isRuleLoading}
       alertStatus={alertStatus}
       isBulkAction={false}
       showAlertCloseOptions
