@@ -64,8 +64,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('loads the indices empty state', async function () {
         await retry.waitFor(
-          'empty indices state visible',
-          async () => await testSubjects.exists('search-indices-empty-title')
+          'indices state visible',
+          async () => await testSubjects.exists('search-indices-title')
         );
         await a11y.testAppSnapshot();
       });
