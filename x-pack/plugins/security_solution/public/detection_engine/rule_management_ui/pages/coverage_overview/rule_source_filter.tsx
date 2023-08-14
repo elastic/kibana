@@ -24,7 +24,7 @@ import {
   ruleSourceFilterLabelMap,
 } from './constants';
 import * as i18n from './translations';
-import { getInitialFilterOptions, formatRuleFilterOptions } from './helpers';
+import { populateSelected, extractSelected } from './helpers';
 
 export interface RuleSourceFilterComponentProps {
   selected: CoverageOverviewRuleSource[];
@@ -48,11 +48,11 @@ const RuleSourceFilterComponent = ({
 
   const numActiveFilters = useMemo(() => selected.length, [selected]);
 
-  const options = getInitialFilterOptions(ruleSourceFilterDefaultOptions, selected);
+  const options = populateSelected(ruleSourceFilterDefaultOptions, selected);
 
   const handleSelectableOnChange = useCallback(
     (newOptions) => {
-      const formattedOptions = formatRuleFilterOptions<CoverageOverviewRuleSource>(newOptions);
+      const formattedOptions = extractSelected<CoverageOverviewRuleSource>(newOptions);
       onChange(formattedOptions);
     },
     [onChange]

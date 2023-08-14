@@ -5,19 +5,19 @@
  * 2.0.
  */
 
+import type { CoverageOverviewRuleActivity } from '../../../../../common/api/detection_engine';
 import { getCoverageOverviewFilterMock } from '../../../../../common/api/detection_engine/rule_management/coverage_overview/coverage_overview_route.mock';
 import {
   getMockCoverageOverviewMitreSubTechnique,
   getMockCoverageOverviewMitreTactic,
   getMockCoverageOverviewMitreTechnique,
 } from '../../../rule_management/model/coverage_overview/__mocks__';
-import { ruleActivityFilterDefaultOptions, ruleSourceFilterDefaultOptions } from './constants';
+import { ruleActivityFilterDefaultOptions } from './constants';
 import {
-  formatRuleFilterOptions,
-  getInitialRuleActivityFilterOptions,
-  getInitialRuleSourceFilterOptions,
+  extractSelected,
   getNumOfCoveredSubtechniques,
   getNumOfCoveredTechniques,
+  populateSelected,
 } from './helpers';
 
 describe('helpers', () => {
@@ -57,10 +57,10 @@ describe('helpers', () => {
     });
   });
 
-  describe('formatRuleFilterOptions', () => {
+  describe('extractSelected', () => {
     it('returns empty array when no options are checked', () => {
       const payload = ruleActivityFilterDefaultOptions;
-      expect(formatRuleFilterOptions(payload)).toEqual([]);
+      expect(extractSelected(payload)).toEqual([]);
     });
 
     it('returns checked options when present', () => {
@@ -68,39 +68,23 @@ describe('helpers', () => {
         ...ruleActivityFilterDefaultOptions,
         { ...ruleActivityFilterDefaultOptions[0], checked: 'on' },
       ];
-      expect(formatRuleFilterOptions(payload)).toEqual([ruleActivityFilterDefaultOptions[0].label]);
+      expect(extractSelected(payload)).toEqual([ruleActivityFilterDefaultOptions[0].label]);
     });
   });
 
-  describe('getInitialRuleStatusFilterOptions', () => {
+  describe('populateSelected', () => {
     it('returns default status options when no filter is present', () => {
-      const payload = {};
-      expect(getInitialRuleActivityFilterOptions(payload)).toEqual(
+      const payload: CoverageOverviewRuleActivity[] = [];
+      expect(populateSelected(ruleActivityFilterDefaultOptions, payload)).toEqual(
         ruleActivityFilterDefaultOptions
       );
     });
 
     it('returns correct options checked when present in filter', () => {
-      const payload = getCoverageOverviewFilterMock();
-      expect(getInitialRuleActivityFilterOptions(payload)).toEqual([
+      const payload = getCoverageOverviewFilterMock().activity;
+      expect(populateSelected(ruleActivityFilterDefaultOptions, payload)).toEqual([
         { label: 'enabled', checked: 'on' },
         { label: 'disabled' },
-      ]);
-    });
-  });
-
-  describe('getInitialRuleTypeFilterOptions', () => {
-    it('returns default type options when no filter is present', () => {
-      const payload = {};
-      expect(getInitialRuleSourceFilterOptions(payload)).toEqual(ruleSourceFilterDefaultOptions);
-    });
-
-    it('returns correct options checked when present in filter', () => {
-      const payload = getCoverageOverviewFilterMock();
-      expect(getInitialRuleSourceFilterOptions(payload)).toEqual([
-        { label: 'prebuilt', checked: 'on' },
-        { label: 'customized' },
-        { label: 'custom' },
       ]);
     });
   });

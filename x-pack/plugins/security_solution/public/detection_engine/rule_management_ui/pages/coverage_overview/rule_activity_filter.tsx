@@ -24,7 +24,7 @@ import {
   ruleActivityFilterLabelMap,
 } from './constants';
 import * as i18n from './translations';
-import { getInitialFilterOptions, formatRuleFilterOptions } from './helpers';
+import { populateSelected, extractSelected } from './helpers';
 
 export interface RuleActivityFilterComponentProps {
   selected: CoverageOverviewRuleActivity[];
@@ -48,11 +48,11 @@ const RuleActivityFilterComponent = ({
 
   const numActiveFilters = useMemo(() => selected.length, [selected]);
 
-  const options = getInitialFilterOptions(ruleActivityFilterDefaultOptions, selected);
+  const options = populateSelected(ruleActivityFilterDefaultOptions, selected);
 
   const handleSelectableOnChange = useCallback(
     (newOptions) => {
-      const formattedOptions = formatRuleFilterOptions<CoverageOverviewRuleActivity>(newOptions);
+      const formattedOptions = extractSelected<CoverageOverviewRuleActivity>(newOptions);
       onChange(formattedOptions);
     },
     [onChange]

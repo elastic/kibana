@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import type { CoverageOverviewFilter } from './coverage_overview_route';
 import {
   CoverageOverviewRuleSource,
   CoverageOverviewRuleActivity,
 } from './coverage_overview_route';
 
-export const getCoverageOverviewFilterMock = (): CoverageOverviewFilter => ({
+export const getCoverageOverviewFilterMock = () => ({
   search_term: 'test query',
   activity: [CoverageOverviewRuleActivity.Enabled],
   source: [CoverageOverviewRuleSource.Prebuilt],

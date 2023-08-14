@@ -7,17 +7,12 @@
 
 import type { EuiSelectableOption } from '@elastic/eui';
 import type {
-  CoverageOverviewFilter,
   CoverageOverviewRuleActivity,
   CoverageOverviewRuleSource,
 } from '../../../../../common/api/detection_engine';
 import type { CoverageOverviewMitreTactic } from '../../../rule_management/model/coverage_overview/mitre_tactic';
 import type { CoverageOverviewMitreTechnique } from '../../../rule_management/model/coverage_overview/mitre_technique';
-import {
-  coverageOverviewCardColorThresholds,
-  ruleActivityFilterDefaultOptions,
-  ruleSourceFilterDefaultOptions,
-} from './constants';
+import { coverageOverviewCardColorThresholds } from './constants';
 
 export const getNumOfCoveredTechniques = (tactic: CoverageOverviewMitreTactic): number =>
   tactic.techniques.filter((technique) => technique.enabledRules.length !== 0).length;
@@ -33,7 +28,7 @@ export const getCardBackgroundColor = (value: number) => {
   }
 };
 
-export const formatRuleFilterOptions = <
+export const extractSelected = <
   T extends CoverageOverviewRuleSource | CoverageOverviewRuleActivity
 >(
   options: Array<{ checked?: string; label: T }>
@@ -41,27 +36,7 @@ export const formatRuleFilterOptions = <
   return options.filter((option) => option.checked === 'on').map((option) => option.label);
 };
 
-export const getInitialRuleActivityFilterOptions = (
-  filter: CoverageOverviewFilter
-): EuiSelectableOption[] =>
-  ruleActivityFilterDefaultOptions.map((option) => {
-    if (filter.activity?.includes(option.label)) {
-      return { ...option, checked: 'on' };
-    }
-    return option;
-  });
-
-export const getInitialRuleSourceFilterOptions = (
-  filter: CoverageOverviewFilter
-): EuiSelectableOption[] =>
-  ruleSourceFilterDefaultOptions.map((option) => {
-    if (filter.source?.includes(option.label)) {
-      return { ...option, checked: 'on' };
-    }
-    return option;
-  });
-
-export const getInitialFilterOptions = (
+export const populateSelected = (
   allOptions: EuiSelectableOption[],
   selected: string[]
 ): EuiSelectableOption[] =>
