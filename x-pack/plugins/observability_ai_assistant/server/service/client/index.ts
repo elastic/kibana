@@ -20,11 +20,11 @@ import type {
 } from 'openai';
 import { v4 } from 'uuid';
 import {
+  type CompatibleJSONSchema,
   MessageRole,
   type Conversation,
   type ConversationCreateRequest,
   type ConversationUpdateRequest,
-  type FunctionDefinition,
   type KnowledgeBaseEntry,
   type Message,
 } from '../../../common/types';
@@ -112,7 +112,7 @@ export class ObservabilityAIAssistantClient {
   }: {
     messages: Message[];
     connectorId: string;
-    functions?: Array<Pick<FunctionDefinition['options'], 'name' | 'description' | 'parameters'>>;
+    functions?: Array<{ name: string; description: string; parameters: CompatibleJSONSchema }>;
     stream?: TStream;
   }): Promise<TStream extends false ? CreateChatCompletionResponse : IncomingMessage> => {
     const messagesForOpenAI: ChatCompletionRequestMessage[] = compact(

@@ -229,7 +229,6 @@ export function ConversationView() {
                 currentUser={currentUser}
                 connectors={connectors}
                 connectorsManagementHref={getConnectorsManagementHref(http)}
-                currentUser={currentUser}
                 knowledgeBase={knowledgeBase}
                 messages={displayedMessages}
                 title={conversation.value.conversation.title}
