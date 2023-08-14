@@ -12,6 +12,7 @@ import {
   EndpointArtifactPageId,
   ensureArtifactPageAuthzAccess,
   ensureEndpointListPageAuthzAccess,
+  ensurePolicyListPageAuthzAccess,
   getArtifactListEmptyStateAddButton,
   getEndpointManagementPageList,
   getEndpointManagementPageMap,
@@ -30,6 +31,7 @@ import {
   getConsoleHelpPanelResponseActionTestSubj,
   openConsoleHelpPanel,
 } from '../../../screens/endpoint_management/response_console';
+import { ensurePolicyDetailsPageAuthzAccess } from '../../../screens/endpoint_management/policy_details';
 import {
   CyIndexEndpointHosts,
   indexEndpointHosts,
@@ -133,6 +135,11 @@ describe(
 
       it('should have access to Endpoint list page', () => {
         ensureEndpointListPageAuthzAccess('all', true);
+      });
+
+      it('should have read access to Endpoint Policy Management', () => {
+        ensurePolicyListPageAuthzAccess('read', true);
+        ensurePolicyDetailsPageAuthzAccess(loadedEndpoints.integrationPolicies[0].id, 'read', true);
       });
 
       for (const { title, id } of artifactPagesFullAccess) {

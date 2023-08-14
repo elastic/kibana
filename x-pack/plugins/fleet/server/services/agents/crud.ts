@@ -444,6 +444,66 @@ export async function getAgentsById(
   );
 }
 
+// given a list of agentPolicyIds, return a map of agent version => count of agents
+// this is used to get all fleet server versions
+export async function getAgentVersionsForAgentPolicyIds(
+  esClient: ElasticsearchClient,
+  agentPolicyIds: string[]
+): Promise<Record<string, number>> {
+  const versionCount: Record<string, number> = {};
+
+  if (!agentPolicyIds.length) {
+    return versionCount;
+  }
+
+  try {
+    const res = esClient.search<
+      FleetServerAgent,
+      Record<'agent_versions', { buckets: Array<{ key: string; doc_count: number }> }>
+    >({
+      size: 0,
+      track_total_hits: false,
+      body: {
+        query: {
+          bool: {
+            filter: [
+              {
+                terms: {
+                  policy_id: agentPolicyIds,
+                },
+              },
+            ],
+          },
+        },
+        aggs: {
+          agent_versions: {
+            terms: {
+              field: 'local_metadata.elastic.agent.version.keyword',
+              size: 1000,
+            },
+          },
+        },
+      },
+      index: AGENTS_INDEX,
+      ignore_unavailable: true,
+    });
+
+    const { aggregations } = await res;
+
+    if (aggregations && aggregations.agent_versions) {
+      aggregations.agent_versions.buckets.forEach((bucket) => {
+        versionCount[bucket.key] = bucket.doc_count;
+      });
+    }
+  } catch (error) {
+    if (error.statusCode !== 404) {
+      throw error;
+    }
+  }
+
+  return versionCount;
+}
+
 export async function getAgentByAccessAPIKeyId(
   esClient: ElasticsearchClient,
   soClient: SavedObjectsClientContract,

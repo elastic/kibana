@@ -19,6 +19,9 @@ import type {
   PolicyCreateCloudConfig,
   PolicyCreateEndpointConfig,
 } from '../types';
+import type { AppFeatures } from '../../lib/app_features';
+import { createAppFeaturesMock } from '../../lib/app_features/mocks';
+import { ALL_APP_FEATURE_KEYS } from '../../../common';
 
 describe('Create Default Policy tests ', () => {
   const cloud = cloudMock.createSetup();
@@ -28,6 +31,7 @@ describe('Create Default Policy tests ', () => {
   const Gold = licenseMock.createLicense({ license: { type: 'gold', mode: 'gold', uid: '' } });
   let licenseEmitter: Subject<ILicense>;
   let licenseService: LicenseService;
+  let appFeatures: AppFeatures;
 
   const createDefaultPolicyCallback = async (
     config: AnyPolicyCreateConfig | undefined
@@ -35,7 +39,7 @@ describe('Create Default Policy tests ', () => {
     const esClientInfo = await elasticsearchServiceMock.createClusterClient().asInternalUser.info();
     esClientInfo.cluster_name = '';
     esClientInfo.cluster_uuid = '';
-    return createDefaultPolicy(licenseService, config, cloud, esClientInfo);
+    return createDefaultPolicy(licenseService, config, cloud, esClientInfo, appFeatures);
   };
 
   beforeEach(() => {
@@ -43,7 +47,9 @@ describe('Create Default Policy tests ', () => {
     licenseService = new LicenseService();
     licenseService.start(licenseEmitter);
     licenseEmitter.next(Platinum); // set license level to platinum
+    appFeatures = createAppFeaturesMock();
   });
+
   describe('When no config is set', () => {
     it('Should return PolicyConfig for events only when license is at least platinum', async () => {
       const defaultPolicy = policyFactory();
@@ -174,6 +180,7 @@ describe('Create Default Policy tests ', () => {
         });
       });
     });
+
     it('Should return process, file and network events enabled when preset is EDR Essential', async () => {
       const config = createEndpointConfig({ preset: 'EDREssential' });
       const policy = await createDefaultPolicyCallback(config);
@@ -190,6 +197,7 @@ describe('Create Default Policy tests ', () => {
         });
       });
     });
+
     it('Should return the default config when preset is EDR Complete', async () => {
       const config = createEndpointConfig({ preset: 'EDRComplete' });
       const policy = await createDefaultPolicyCallback(config);
@@ -199,7 +207,37 @@ describe('Create Default Policy tests ', () => {
       defaultPolicy.meta.cloud = true;
       expect(policy).toMatchObject(defaultPolicy);
     });
+
+    it('should set policy to event collection only if endpointPolicyProtections appFeature is disabled', async () => {
+      appFeatures = createAppFeaturesMock(
+        ALL_APP_FEATURE_KEYS.filter((key) => key !== 'endpoint_policy_protections')
+      );
+
+      await expect(
+        createDefaultPolicyCallback(createEndpointConfig({ preset: 'EDRComplete' }))
+      ).resolves.toMatchObject({
+        linux: {
+          behavior_protection: { mode: 'off' },
+          malware: { mode: 'off' },
+          memory_protection: { mode: 'off' },
+        },
+        mac: {
+          behavior_protection: { mode: 'off' },
+          malware: { mode: 'off' },
+          memory_protection: { mode: 'off' },
+        },
+        windows: {
+          antivirus_registration: { enabled: false },
+          attack_surface_reduction: { credential_hardening: { enabled: false } },
+          behavior_protection: { mode: 'off' },
+          malware: { blocklist: false },
+          memory_protection: { mode: 'off' },
+          ransomware: { mode: 'off' },
+        },
+      });
+    });
   });
+
   describe('When cloud config is set', () => {
     const createCloudConfig = (): PolicyCreateCloudConfig => ({
       type: 'cloud',
