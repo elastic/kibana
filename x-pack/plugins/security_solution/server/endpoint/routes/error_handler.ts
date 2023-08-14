@@ -21,13 +21,12 @@ export const errorHandler = <E extends Error>(
   res: KibanaResponseFactory,
   error: E
 ): IKibanaResponse => {
-
   const shouldLogToDebug = () => {
     return error instanceof EndpointHostNotFoundError;
-  }
+  };
 
-  if(shouldLogToDebug()) {
-    logger.debug(error.message)
+  if (shouldLogToDebug()) {
+    logger.debug(error.message);
   } else {
     logger.error(error);
   }
