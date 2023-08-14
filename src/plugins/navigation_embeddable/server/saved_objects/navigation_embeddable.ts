@@ -24,6 +24,7 @@ export const navigationEmbeddableSavedObjectType: SavedObjectsType = {
     },
   },
   mappings: {
+    dynamic: false,
     properties: {
       id: { type: 'text' },
       title: { type: 'text' },
@@ -31,10 +32,6 @@ export const navigationEmbeddableSavedObjectType: SavedObjectsType = {
       links: {
         dynamic: false,
         properties: {},
-      },
-      layout: {
-        index: false,
-        type: 'keyword',
       },
     },
   },
