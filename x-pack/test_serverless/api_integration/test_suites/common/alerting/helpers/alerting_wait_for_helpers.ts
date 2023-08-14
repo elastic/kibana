@@ -284,7 +284,7 @@ export async function waitForEventLog({
                 {
                   range: {
                     '@timestamp': {
-                      gte: filter,
+                      gte: filter.getTime().toString(),
                     },
                   },
                 },
