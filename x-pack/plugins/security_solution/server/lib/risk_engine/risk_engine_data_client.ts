@@ -25,13 +25,12 @@ import {
   ilmPolicy,
   getLatestTransformId,
   getTransformOptions,
-  MAX_SPACES_COUNT,
 } from './configurations';
 import { createDataStream } from './utils/create_datastream';
 import type { RiskEngineDataWriter as Writer } from './risk_engine_data_writer';
 import { RiskEngineDataWriter } from './risk_engine_data_writer';
 import type { InitRiskEngineResult } from '../../../common/risk_engine';
-import { RiskEngineStatus, getRiskScoreLatestIndex } from '../../../common/risk_engine';
+import { RiskEngineStatus, getRiskScoreLatestIndex, MAX_SPACES_COUNT, } from '../../../common/risk_engine';
 import {
   getLegacyTransforms,
   removeLegacyTransforms,

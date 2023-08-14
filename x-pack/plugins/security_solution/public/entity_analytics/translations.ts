@@ -245,10 +245,11 @@ export const UPDATE_PANEL_GO_TO_DISMISS = i18n.translate(
   }
 );
 
-export const MAX_SPACE_PANEL_TITLE = i18n.translate(
+export const getMaxSpaceTitle = (maxSpaces: number) => i18n.translate(
   'xpack.securitySolution.riskScore.maxSpacePanel.title',
   {
-    defaultMessage: 'Sorry, you reached the maximum amount of risk scoring.',
+    defaultMessage: 'Entity Risk Scoring in the current version can run in {maxSpaces} Kibana spaces.',
+    values: { maxSpaces },
   }
 );
 
@@ -256,6 +257,6 @@ export const MAX_SPACE_PANEL_MESSAGE = i18n.translate(
   'xpack.securitySolution.riskScore.maxSpacePanel.message',
   {
     defaultMessage:
-      'You can disable risk scoring in other spaces and then enable it in the current space.',
+      'Please disable a currently running engine before enabling it here.',
   }
 );

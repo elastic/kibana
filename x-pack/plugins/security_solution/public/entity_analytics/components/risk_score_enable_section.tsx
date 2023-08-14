@@ -38,7 +38,7 @@ import { useRiskEngineStatus } from '../api/hooks/use_risk_engine_status';
 import { useInitRiskEngineMutation } from '../api/hooks/use_init_risk_engine_mutation';
 import { useEnableRiskEngineMutation } from '../api/hooks/use_enable_risk_engine_mutation';
 import { useDisableRiskEngineMutation } from '../api/hooks/use_disable_risk_engine_mutation';
-import { RiskEngineStatus } from '../../../common/risk_engine/types';
+import { RiskEngineStatus, MAX_SPACES_COUNT } from '../../../common/risk_engine';
 
 const docsLinks = [
   {
@@ -194,7 +194,7 @@ export const RiskScoreEnableSection = () => {
   ) {
     return (
       <EuiCallOut
-        title={i18n.MAX_SPACE_PANEL_TITLE}
+        title={i18n.getMaxSpaceTitle(MAX_SPACES_COUNT)}
         color="warning"
         iconType="error"
         data-test-subj="risk-score-warning-panel"

@@ -1,0 +1,1 @@
+export const MAX_SPACES_COUNT = 2;

@@ -9,8 +9,6 @@ import type { IdentifierType } from '../../../common/risk_engine';
 import { RiskScoreEntity, riskScoreBaseIndexName } from '../../../common/risk_engine';
 import type { IIndexPatternString } from './utils/create_datastream';
 
-export const MAX_SPACES_COUNT = 2;
-
 export const ilmPolicy = {
   _meta: {
     managed: true,
