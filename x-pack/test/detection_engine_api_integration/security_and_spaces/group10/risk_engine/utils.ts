@@ -174,6 +174,7 @@ export const clearTransforms = async ({
   try {
     await es.transform.deleteTransform({
       transform_id: 'risk_score_latest_transform_default',
+      force: true,
     });
   } catch (e) {
     log.error(`Error deleting risk_score_latest_transform_default: ${e.message}`);
@@ -190,6 +191,7 @@ export const clearLegacyTransforms = async ({
   const transforms = legacyTransformIds.map((transform) =>
     es.transform.deleteTransform({
       transform_id: transform,
+      force: true,
     })
   );
   try {
