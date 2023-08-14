@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import {
+  ELASTIC_HTTP_VERSION_HEADER,
+  X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
+} from '@kbn/core-http-common';
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../ftr_provider_context';
 import { assertLogContains, isExecutionContextLog, ANY } from '../test_utils';
@@ -111,8 +115,10 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('propagates context for Telemetry collection', async () => {
       await supertest
-        .post('/api/telemetry/v2/clusters/_stats')
+        .post('/internal/telemetry/clusters/_stats')
         .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send({ unencrypted: false })
         .expect(200);
 

@@ -207,6 +207,7 @@ export const getPolicyTemplateInputOptions = (policyTemplate: CloudSecurityPolic
     label: o.name,
     icon: o.icon,
     disabled: o.disabled,
+    isBeta: o.isBeta,
   }));
 
 export const getMaxPackageName = (
@@ -224,4 +225,23 @@ export const getMaxPackageName = (
   );
 
   return `${packageName}-${maxPkgPolicyName + 1}`;
+};
+
+export const getCspmCloudShellDefaultValue = (packageInfo: PackageInfo): string => {
+  if (!packageInfo.policy_templates) return '';
+
+  const policyTemplate = packageInfo.policy_templates.find((p) => p.name === CSPM_POLICY_TEMPLATE);
+  if (!policyTemplate) return '';
+
+  const policyTemplateInputs = hasPolicyTemplateInputs(policyTemplate) && policyTemplate.inputs;
+
+  if (!policyTemplateInputs) return '';
+
+  const cloudShellUrl = policyTemplateInputs.reduce((acc, input): string => {
+    if (!input.vars) return acc;
+    const template = input.vars.find((v) => v.name === 'cloud_shell_url')?.default;
+    return template ? String(template) : acc;
+  }, '');
+
+  return cloudShellUrl;
 };

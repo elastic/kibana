@@ -8,8 +8,8 @@
 import { EuiButton } from '@elastic/eui';
 import React from 'react';
 
-import { customBrandingServiceMock } from '@kbn/core-custom-branding-browser-mocks';
 import { coreMock } from '@kbn/core/public/mocks';
+import { customBrandingServiceMock } from '@kbn/core-custom-branding-browser-mocks';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { LoggedOutPage } from './logged_out_page';

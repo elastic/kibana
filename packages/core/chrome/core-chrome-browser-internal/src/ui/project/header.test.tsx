@@ -61,7 +61,7 @@ describe('Header', () => {
     const toggleNav = async () => {
       fireEvent.click(await screen.findByTestId('toggleNavButton')); // click
 
-      expect(screen.queryAllByText('Hello, goodbye!')).toHaveLength(0); // title is not shown
+      expect(await screen.findByText('Hello, goodbye!')).not.toBeVisible();
 
       fireEvent.click(await screen.findByTestId('toggleNavButton')); // click again
 
