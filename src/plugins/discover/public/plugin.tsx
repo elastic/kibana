@@ -43,6 +43,7 @@ import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import { TRUNCATE_MAX_HEIGHT } from '@kbn/discover-utils';
+import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import { PLUGIN_ID } from '../common';
 import {
   setHeaderActionMenuMounter,
@@ -190,6 +191,7 @@ export interface DiscoverStartPlugins {
   unifiedSearch: UnifiedSearchPublicPluginStart;
   lens: LensPublicStart;
   contentManagement: ContentManagementPublicStart;
+  serverless?: ServerlessPluginStart;
 }
 
 /**

@@ -8,8 +8,10 @@
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHorizontalRule,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
@@ -36,6 +38,7 @@ import {
 import { ApiKeyBanner } from './api_key_banner';
 import { BackButton } from './back_button';
 import { getDiscoverNavigationParams } from '../../utils';
+import { TroubleshootingLink } from '../../../shared/troubleshooting_link';
 
 export function InstallElasticAgent() {
   const {
@@ -267,6 +270,24 @@ export function InstallElasticAgent() {
           </p>
         </EuiText>
         <EuiSpacer size="m" />
+        {wizardState.integrationName && (
+          <>
+            <EuiCallOut
+              title={i18n.translate(
+                'xpack.observability_onboarding.installElasticAgent.integrationSuccessCallout.title',
+                {
+                  defaultMessage: '{integrationName} integration installed.',
+                  values: {
+                    integrationName: wizardState.integrationName,
+                  },
+                }
+              )}
+              color="success"
+              iconType="check"
+            />
+            <EuiSpacer size="m" />
+          </>
+        )}
         {apiKeyEncoded && onboardingId ? (
           <ApiKeyBanner
             payload={{ apiKeyEncoded, onboardingId }}
@@ -348,6 +369,8 @@ export function InstallElasticAgent() {
           appendedSteps={[getCheckLogsStep()]}
         />
       </StepPanelContent>
+      <EuiHorizontalRule />
+      <TroubleshootingLink />
     </StepPanel>
   );
 }

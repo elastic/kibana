@@ -27,7 +27,7 @@
       "unifiedDocViewer",
       "unifiedSearch",
       "unifiedHistogram",
-      "contentManagement"
+      "contentManagement",
     ],
     "optionalPlugins": [
       "home",
@@ -36,7 +36,8 @@
       "spaces",
       "triggersActionsUi",
       "savedObjectsTaggingOss",
-      "lens"
+      "lens",
+      "serverless"
     ],
     "requiredBundles": ["kibanaUtils", "kibanaReact", "unifiedSearch"],
     "extraPublicDirs": ["common"]

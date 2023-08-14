@@ -8,12 +8,16 @@
 
 import React, { useState, Fragment, useMemo, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiHorizontalRule, EuiText } from '@elastic/eui';
+import { EuiHorizontalRule, EuiSpacer, EuiText } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { SortDirection } from '@kbn/data-plugin/public';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
+import {
+  SearchResponseWarnings,
+  type SearchResponseInterceptedWarning,
+} from '@kbn/search-response-warnings';
 import { CONTEXT_STEP_SETTING, DOC_HIDE_TIME_COLUMN_SETTING } from '@kbn/discover-utils';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { DocViewer } from '@kbn/unified-doc-viewer';
@@ -41,6 +45,7 @@ export interface ContextAppContentProps {
   anchorStatus: LoadingStatus;
   predecessorsStatus: LoadingStatus;
   successorsStatus: LoadingStatus;
+  interceptedWarnings: SearchResponseInterceptedWarning[] | undefined;
   useNewFieldsApi: boolean;
   isLegacy: boolean;
   setAppState: (newState: Partial<AppState>) => void;
@@ -71,6 +76,7 @@ export function ContextAppContent({
   anchorStatus,
   predecessorsStatus,
   successorsStatus,
+  interceptedWarnings,
   useNewFieldsApi,
   isLegacy,
   setAppState,
@@ -118,6 +124,16 @@ export function ContextAppContent({
 
   return (
     <Fragment>
+      {!!interceptedWarnings?.length && (
+        <>
+          <SearchResponseWarnings
+            variant="callout"
+            interceptedWarnings={interceptedWarnings}
+            data-test-subj="dscContextInterceptedWarnings"
+          />
+          <EuiSpacer size="s" />
+        </>
+      )}
       <ActionBarMemoized
         type={SurrDocType.PREDECESSORS}
         defaultStepSize={defaultStepSize}

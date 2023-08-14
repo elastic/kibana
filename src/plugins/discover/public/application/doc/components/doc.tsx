@@ -14,7 +14,7 @@ import { i18n } from '@kbn/i18n';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { DocViewer, ElasticRequestState } from '@kbn/unified-doc-viewer';
 import { getDocViewsRegistry, useEsDocSearch } from '@kbn/unified-doc-viewer-plugin/public';
-import { getRootBreadcrumbs } from '../../../utils/breadcrumbs';
+import { setBreadcrumbs } from '../../../utils/breadcrumbs';
 import { useDiscoverServices } from '../../../hooks/use_discover_services';
 
 export interface DocProps {
@@ -52,10 +52,11 @@ export function Doc(props: DocProps) {
   const indexExistsLink = docLinks.links.apis.indexExists;
 
   useEffect(() => {
-    chrome.setBreadcrumbs([
-      ...getRootBreadcrumbs({ breadcrumb: props.referrer, services }),
-      { text: `${props.index}#${props.id}` },
-    ]);
+    setBreadcrumbs({
+      services,
+      titleBreadcrumbText: `${props.index}#${props.id}`,
+      rootBreadcrumbPath: props.referrer,
+    });
   }, [chrome, props.referrer, props.index, props.id, dataView, locator, services]);
 
   return (

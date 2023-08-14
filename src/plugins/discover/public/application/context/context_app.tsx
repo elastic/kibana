@@ -17,6 +17,7 @@ import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { generateFilters } from '@kbn/data-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
+import { removeInterceptedWarningDuplicates } from '@kbn/search-response-warnings';
 import { DOC_TABLE_LEGACY, SEARCH_FIELDS_FROM_SOURCE } from '@kbn/discover-utils';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { ContextErrorMessage } from './components/context_error_message';
@@ -29,7 +30,7 @@ import { popularizeField } from '../../utils/popularize_field';
 import { ContextAppContent } from './context_app_content';
 import { SurrDocType } from './services/context';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
-import { getRootBreadcrumbs } from '../../utils/breadcrumbs';
+import { setBreadcrumbs } from '../../utils/breadcrumbs';
 
 const ContextAppContentMemoized = memo(ContextAppContent);
 
@@ -77,14 +78,13 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
   });
 
   useEffect(() => {
-    services.chrome.setBreadcrumbs([
-      ...getRootBreadcrumbs({ breadcrumb: referrer, services }),
-      {
-        text: i18n.translate('discover.context.breadcrumb', {
-          defaultMessage: 'Surrounding documents',
-        }),
-      },
-    ]);
+    setBreadcrumbs({
+      services,
+      rootBreadcrumbPath: referrer,
+      titleBreadcrumbText: i18n.translate('discover.context.breadcrumb', {
+        defaultMessage: 'Surrounding documents',
+      }),
+    });
   }, [locator, referrer, services]);
 
   useExecutionContext(core.executionContext, {
@@ -172,6 +172,20 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
     [fetchedState.predecessors, fetchedState.anchor, fetchedState.successors]
   );
 
+  const interceptedWarnings = useMemo(
+    () =>
+      removeInterceptedWarningDuplicates([
+        ...(fetchedState.predecessorsInterceptedWarnings || []),
+        ...(fetchedState.anchorInterceptedWarnings || []),
+        ...(fetchedState.successorsInterceptedWarnings || []),
+      ]),
+    [
+      fetchedState.predecessorsInterceptedWarnings,
+      fetchedState.anchorInterceptedWarnings,
+      fetchedState.successorsInterceptedWarnings,
+    ]
+  );
+
   const addFilter = useCallback(
     async (field: DataViewField | string, values: unknown, operation: string) => {
       const newFilters = generateFilters(filterManager, field, values, operation, dataView);
@@ -251,6 +265,7 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
                 anchorStatus={fetchedState.anchorStatus.value}
                 predecessorsStatus={fetchedState.predecessorsStatus.value}
                 successorsStatus={fetchedState.successorsStatus.value}
+                interceptedWarnings={interceptedWarnings}
               />
             </EuiPageBody>
           </EuiPage>

@@ -92,6 +92,8 @@
     "server": "src/legacy/server",
     "share": "src/plugins/share",
     "sharedUXPackages": "packages/shared-ux",
+    "searchApiPanels": "packages/kbn-search-api-panels/",
+    "searchResponseWarnings": "packages/kbn-search-response-warnings",
     "securitySolutionPackages": "x-pack/packages/security-solution",
     "serverlessPackages": "packages/serverless",
     "coloring": "packages/kbn-coloring/src",
