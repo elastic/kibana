@@ -10,7 +10,6 @@ import type { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
 import { BehaviorSubject, filter, firstValueFrom, map, merge, scan } from 'rxjs';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { isEqual } from 'lodash';
-import { i18n } from '@kbn/i18n';
 import type { DiscoverAppState } from '../services/discover_app_state_container';
 import { updateVolatileSearchSource } from './update_search_source';
 import { getRawRecordType } from './get_raw_record_type';
@@ -168,36 +167,36 @@ export function fetchAll(
   }
 }
 
-export function fetchMoreDocuments(
+export async function fetchMoreDocuments(
   dataSubjects: SavedSearchData,
   fetchDeps: FetchDeps
 ): Promise<void> {
-  const { getAppState, getInternalState, services, savedSearch } = fetchDeps;
-  const searchSource = savedSearch.searchSource.createChild();
-
   try {
+    const { getAppState, getInternalState, services, savedSearch } = fetchDeps;
+    const searchSource = savedSearch.searchSource.createChild();
+
     const dataView = searchSource.getField('index')!;
     const query = getAppState().query;
     const recordRawType = getRawRecordType(query);
 
     if (recordRawType === RecordRawType.PLAIN) {
       // not supported yet
-      return Promise.resolve();
+      return;
     }
 
     const lastDocuments = dataSubjects.documents$.getValue().result || [];
     const lastDocumentSort = lastDocuments[lastDocuments.length - 1]?.raw?.sort;
 
     if (!lastDocumentSort) {
-      return Promise.resolve();
+      return;
     }
 
     searchSource.setField('searchAfter', lastDocumentSort);
 
-    // Mark subjects as loading
+    // Mark as loading
     sendLoadingMoreMsg(dataSubjects.documents$);
 
-    // Update the base searchSource, base for all child fetches
+    // Update the searchSource
     updateVolatileSearchSource(searchSource, {
       dataView,
       services,
@@ -205,32 +204,15 @@ export function fetchMoreDocuments(
       customFilters: getInternalState().customFilters,
     });
 
-    // Start fetching all required requests
-    const response = fetchDocuments(searchSource, fetchDeps);
+    // Fetch more documents
+    const { records } = await fetchDocuments(searchSource, fetchDeps);
 
-    // Handle results of the individual queries and forward the results to the corresponding dataSubjects
-    response
-      .then(({ records }) => {
-        sendLoadingMoreFinishedMsg(dataSubjects.documents$, records);
-      })
-      .catch((error) => {
-        services.toastNotifications.addError(error, {
-          title: i18n.translate('discover.fetchMore.fetchingErrorTitle', {
-            defaultMessage: 'Error fetching more documents',
-          }),
-        });
-        sendLoadingMoreFinishedMsg(dataSubjects.documents$, []);
-      });
+    // Update the state and finish the loading state
+    sendLoadingMoreFinishedMsg(dataSubjects.documents$, records);
   } catch (error) {
-    services.toastNotifications.addError(error, {
-      title: i18n.translate('discover.fetchMore.requestErrorTitle', {
-        defaultMessage: 'Error requesting more documents',
-      }),
-    });
-    // We also want to return a resolved promise in an error case, since it just indicates we're done with querying.
     sendLoadingMoreFinishedMsg(dataSubjects.documents$, []);
+    sendErrorMsg(dataSubjects.main$, error);
   }
-  return Promise.resolve();
 }
 
 const fetchStatusByType = <T extends DataMsg>(subject: BehaviorSubject<T>, type: string) =>
