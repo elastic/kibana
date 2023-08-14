@@ -55,20 +55,20 @@ Please, before opening a PR with the new test, make sure that the test fails. If
 ### Run them locally
 When running the tests, FTR is used to spawn both a Kibana instance (http://localhost:5620) and an Elasticsearch instance (http://localhost:9220) with a preloaded minimum set of data (see preceding "Test data" section).
 
-Run the tests with the following yarn scripts from `x-pack/plugins/security_solution`:
+Run the tests with the following yarn scripts from `x-pack/test/security_solution_cypress`:
 
 | Script Name | Description |
 | ----------- | ----------- |
 | cypress | Runs the default Cypress command |
-| cypress:open | Opens the Cypress UI with all tests in the `e2e` directory. This also runs a local kibana and ES instance. The kibana instance will reload when you make code changes. This is the recommended way to debug and develop tests. |
+| cypress:open:ess | Opens the Cypress UI with all tests in the `e2e` directory. This also runs a local kibana and ES instance. The kibana instance will reload when you make code changes. This is the recommended way to debug and develop tests. |
 | cypress:open:serverless | Opens the Cypress UI with all tests in the `e2e` directory. This also runs a mocked serverless environment. The kibana instance will reload when you make code changes. This is the recommended way to debug and develop tests. |
-| cypress:run | Runs all tests tagged as ESS placed in the `e2e` directory excluding `investigations` and `explore` directories in headless mode |
-| cypress:run:cases | Runs all tests under `explore/cases` in the `e2e` directory related to the Cases area team in headless mode |
+| cypress:run:ess | Runs all tests tagged as ESS placed in the `e2e` directory excluding `investigations` and `explore` directories in headless mode |
+| cypress:run:cases:ess | Runs all tests under `explore/cases` in the `e2e` directory related to the Cases area team in headless mode |
 | cypress:run:reporter | Runs all tests with the specified configuration in headless mode and produces a report using `cypress-multi-reporters` |
-| cypress:run:respops | Runs all tests related to the Response Ops area team, specifically tests in `detection_alerts`, `detection_rules`, and `exceptions` directories in headless mode |
+| cypress:run:respops:ess | Runs all tests related to the Response Ops area team, specifically tests in `detection_alerts`, `detection_rules`, and `exceptions` directories in headless mode |
 | cypress:run:serverless | Runs all tests tagged as SERVERLESS in the `e2e` directory excluding `investigations` and `explore` directories in headless mode |
-| cypress:investigations:run | Runs all tests tagged as ESS in the `e2e/investigations` directory in headless mode |
-| cypress:explore:run | Runs all tests tagged as ESS in the `e2e/explore` directory in headless mode |
+| cypress:investigations:run:ess | Runs all tests tagged as ESS in the `e2e/investigations` directory in headless mode |
+| cypress:explore:run:ess | Runs all tests tagged as ESS in the `e2e/explore` directory in headless mode |
 | cypress:investigations:run:serverless | Runs all tests tagged as SERVERLESS in the `e2e/investigations` directory in headless mode |
 | cypress:explore:run:serverless | Runs all tests tagged as SERVERLESS in the `e2e/explore` directory in headless mode |
 | junit:merge | Merges individual test reports into a single report and moves the report to the `junit` directory |
@@ -166,7 +166,7 @@ We use es_archiver to manage the data that our Cypress tests need.
 
 1. Set up a clean instance of kibana and elasticsearch (if this is not possible, try to clean/minimize the data that you are going to archive).
 2. With the kibana and elasticsearch instance up and running, create the data that you need for your test.
-3. When you are sure that you have all the data you need run the following command from: `x-pack/plugins/security_solution`
+3. When you are sure that you have all the data you need run the following command from: `x-pack/test/security_solution_cypress`
 
 ```sh
 node ../../../scripts/es_archiver save <nameOfTheFolderWhereDataIsSaved> <indexPatternsToBeSaved>  --dir ../../test/security_solution_cypress/es_archives --config ../../../test/functional/config.base.js --es-url http://<elasticsearchUsername>:<elasticsearchPassword>@<elasticsearchHost>:<elasticsearchPort>
@@ -182,7 +182,7 @@ Note that the command will create the folder if it does not exist.
 
 ### Using an archive from within the Cypress tests
 
-Task [cypress/support/es_archiver.ts](https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/cypress/support/es_archiver.ts) provides helpers such as `esArchiverLoad` and `esArchiverUnload` by means of `es_archiver`'s CLI.
+Task [cypress/support/es_archiver.ts](https://github.com/elastic/kibana/blob/main/x-pack/test/security_solution_cypress/cypress/support/es_archiver.ts) provides helpers such as `esArchiverLoad` and `esArchiverUnload` by means of `es_archiver`'s CLI.
 
 ## Development Best Practices
 
