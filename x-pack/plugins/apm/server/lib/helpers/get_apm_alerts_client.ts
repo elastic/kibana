@@ -30,6 +30,7 @@ export async function getApmAlertsClient({
 
   type RequiredParams = ESSearchRequest & {
     size: number;
+    track_total_hits: boolean | number;
   };
 
   return {

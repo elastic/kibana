@@ -49,6 +49,7 @@ export async function getServicesAlerts({
 }): Promise<ServiceAlertsResponse> {
   const params = {
     size: 0,
+    track_total_hits: false,
     query: {
       bool: {
         filter: [
@@ -81,9 +82,7 @@ export async function getServicesAlerts({
 
   const result = await apmAlertsClient.search(params);
 
-  const { buckets: filterAggBuckets } = result.aggregations?.services ?? {
-    buckets: [],
-  };
+  const filterAggBuckets = result.aggregations?.services.buckets ?? [];
 
   const servicesAlertsCount: Array<{
     serviceName: string;

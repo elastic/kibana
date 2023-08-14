@@ -61,6 +61,7 @@ export async function getServiceTransactionGroupsAlerts({
 
   const params = {
     size: 0,
+    track_total_hits: false,
     query: {
       bool: {
         filter: [
@@ -110,9 +111,7 @@ export async function getServiceTransactionGroupsAlerts({
 
   const response = await apmAlertsClient.search(params);
 
-  const { buckets } = response?.aggregations?.transaction_groups ?? {
-    buckets: [],
-  };
+  const buckets = response?.aggregations?.transaction_groups.buckets ?? [];
 
   const servicesTransactionGroupsAlertsCount =
     buckets.map((bucket) => ({
