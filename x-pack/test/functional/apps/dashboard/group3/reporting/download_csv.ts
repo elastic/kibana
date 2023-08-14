@@ -114,7 +114,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('Downloads a saved search panel with a custom time range that does not intersect with dashboard time range', async function () {
-        await PageObjects.dashboard.loadSavedDashboard('Ecom Dashboard - 3 Day Period - custom time range');
+        await PageObjects.dashboard.loadSavedDashboard(
+          'Ecom Dashboard - 3 Day Period - custom time range'
+        );
 
         await clickActionsMenu('EcommerceData');
         await clickDownloadCsv();
