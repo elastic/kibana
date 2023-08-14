@@ -32,7 +32,13 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { TimeRangeInput } from './customize_panel_action';
 import { canInheritTimeRange } from './can_inherit_time_range';
 import { doesInheritTimeRange } from './does_inherit_time_range';
-import { IEmbeddable, Embeddable, CommonlyUsedRange, ViewMode } from '../../../lib';
+import {
+  IEmbeddable,
+  Embeddable,
+  CommonlyUsedRange,
+  ViewMode,
+  isFilterableEmbeddable,
+} from '../../../lib';
 import { FiltersDetails } from './filters_details';
 
 type PanelSettings = {
@@ -262,6 +268,16 @@ export const CustomizePanelEditor = (props: CustomizePanelProps) => {
     );
   };
 
+  const renderFilterDetails = () => {
+    if (!isFilterableEmbeddable(embeddable)) return null;
+    return (
+      <>
+        <EuiSpacer size="m" />
+        <FiltersDetails onEdit={onEdit} embeddable={embeddable} editMode={editMode} />
+      </>
+    );
+  };
+
   return (
     <>
       <EuiFlyoutHeader hasBorder>
@@ -278,8 +294,7 @@ export const CustomizePanelEditor = (props: CustomizePanelProps) => {
         <EuiForm>
           {renderCustomTitleComponent()}
           {renderCustomTimeRangeComponent()}
-          <EuiSpacer size="m" />
-          <FiltersDetails onEdit={onEdit} embeddable={embeddable} editMode={editMode} />
+          {renderFilterDetails()}
         </EuiForm>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>

@@ -23,10 +23,10 @@ import {
   getAggregateQueryMode,
   isOfQueryType,
 } from '@kbn/es-query';
-import type { DashboardAPI } from '@kbn/dashboard-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { FilterableEmbeddable, IEmbeddable } from '../../..';
+import { FilterableEmbeddable, IEmbeddable, isFilterableEmbeddable } from '../../..';
+import { DataView } from '@kbn/data-views-plugin/common';
 
 export const filterDetailsActionStrings = {
   getQueryTitle: () =>
@@ -52,11 +52,19 @@ export function FiltersDetails({ embeddable, editMode, onEdit }: FiltersDetailsP
   const [queryLanguage, setQueryLanguage] = useState<'sql' | 'esql' | undefined>();
   const [disableEditbutton, setDisableEditButton] = useState(false);
   const dataViews = useMemo(
-    () => (embeddable.getRoot() as DashboardAPI)?.getAllDataViews(),
+    ()=> (embeddable.getOutput() as {indexPatterns?:DataView[]}).indexPatterns || [],
     [embeddable]
   );
 
+  console.log({output: embeddable.getOutput(), dataViews})
+
+
   useMount(() => {
+    if(!isFilterableEmbeddable(embeddable)) {
+      setIsLoading(false); 
+      return;
+    }
+
     Promise.all([
       (embeddable as IEmbeddable & FilterableEmbeddable).getFilters(),
       (embeddable as IEmbeddable & FilterableEmbeddable).getQuery(),
