@@ -43,6 +43,13 @@ module.exports = (request, options) => {
     return module.exports(request.replace('@elastic/eui/lib/', '@elastic/eui/test-env/'), options);
   }
 
+  if (request === 'axios') {
+    return resolve.sync('axios/dist/node/axios.cjs', {
+      basedir: options.basedir,
+      extensions: options.extensions,
+    });
+  }
+
   if (request === `elastic-apm-node`) {
     return APM_AGENT_MOCK;
   }
