@@ -15,7 +15,9 @@ import {
   getIncompatibleFieldsMarkdownComment,
   getIncompatibleFieldsMarkdownTablesComment,
   getIncompatibleMappings,
+  getIncompatibleMappingsFields,
   getIncompatibleValues,
+  getIncompatibleValuesFields,
   showInvalidCallout,
 } from './helpers';
 import { EMPTY_STAT } from '../../../helpers';
@@ -109,6 +111,19 @@ ${MAPPINGS_THAT_CONFLICT_WITH_ECS}
 
     test('it filters-out ECS complaint fields', () => {
       expect(getIncompatibleMappings(mockPartitionedFieldMetadata.ecsCompliant)).toEqual([]);
+    });
+  });
+
+  describe('getIncompatibleMappingsFields', () => {
+    test('it (only) returns the fields where type !== indexFieldType', () => {
+      expect(getIncompatibleMappingsFields(mockPartitionedFieldMetadata.incompatible)).toEqual([
+        'host.name',
+        'source.ip',
+      ]);
+    });
+
+    test('it filters-out ECS complaint fields', () => {
+      expect(getIncompatibleMappingsFields(mockPartitionedFieldMetadata.ecsCompliant)).toEqual([]);
     });
   });
 
@@ -276,6 +291,18 @@ ${MAPPINGS_THAT_CONFLICT_WITH_ECS}
 
     test('it filters-out ECS complaint fields', () => {
       expect(getIncompatibleValues(mockPartitionedFieldMetadata.ecsCompliant)).toEqual([]);
+    });
+  });
+
+  describe('getIncompatibleValuesFields', () => {
+    test('it (only) returns the fields with indexInvalidValues', () => {
+      expect(getIncompatibleValuesFields(mockPartitionedFieldMetadata.incompatible)).toEqual([
+        'event.category',
+      ]);
+    });
+
+    test('it filters-out ECS complaint fields', () => {
+      expect(getIncompatibleValuesFields(mockPartitionedFieldMetadata.ecsCompliant)).toEqual([]);
     });
   });
 
