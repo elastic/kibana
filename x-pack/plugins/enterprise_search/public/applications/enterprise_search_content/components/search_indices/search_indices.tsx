@@ -208,7 +208,7 @@ export const SearchIndices: React.FC = () => {
             <EuiFlexItem>
               <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
                 <EuiFlexItem grow={false}>
-                  <EuiTitle data-test-subj="search-indices-title">
+                  <EuiTitle>
                     <h2>
                       {i18n.translate(
                         'xpack.enterpriseSearch.content.searchIndices.searchIndices.tableTitle',
