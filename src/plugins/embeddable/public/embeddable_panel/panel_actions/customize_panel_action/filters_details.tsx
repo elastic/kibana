@@ -25,8 +25,8 @@ import {
 } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { FilterableEmbeddable, IEmbeddable, isFilterableEmbeddable } from '../../..';
 import { DataView } from '@kbn/data-views-plugin/common';
+import { FilterableEmbeddable, IEmbeddable, isFilterableEmbeddable } from '../../..';
 
 export const filterDetailsActionStrings = {
   getQueryTitle: () =>
@@ -52,16 +52,13 @@ export function FiltersDetails({ embeddable, editMode, onEdit }: FiltersDetailsP
   const [queryLanguage, setQueryLanguage] = useState<'sql' | 'esql' | undefined>();
   const [disableEditbutton, setDisableEditButton] = useState(false);
   const dataViews = useMemo(
-    ()=> (embeddable.getOutput() as {indexPatterns?:DataView[]}).indexPatterns || [],
+    () => (embeddable.getOutput() as { indexPatterns?: DataView[] }).indexPatterns || [],
     [embeddable]
   );
 
-  console.log({output: embeddable.getOutput(), dataViews})
-
-
   useMount(() => {
-    if(!isFilterableEmbeddable(embeddable)) {
-      setIsLoading(false); 
+    if (!isFilterableEmbeddable(embeddable)) {
+      setIsLoading(false);
       return;
     }
 
@@ -84,32 +81,32 @@ export function FiltersDetails({ embeddable, editMode, onEdit }: FiltersDetailsP
     });
   });
 
-  const editVisButton = (
-    <EuiButtonEmpty
-      size="xs"
-      data-test-subj="resetCustomEmbeddablePanelTitleButton"
-      onClick={onEdit}
-      aria-label={i18n.translate(
-        'embeddableApi.customizePanel.flyout.optionsMenuForm.editFiltersButtonAriaLabel',
-        {
-          defaultMessage: 'Edit query and filters',
-        }
-      )}
-    >
-      <FormattedMessage
-        id="embeddableApi.customizePanel.flyout.optionsMenuForm.editFiltersButtonLabel"
-        defaultMessage="Edit"
-      />
-    </EuiButtonEmpty>
-  );
-
   return (
     <EuiSkeletonText isLoading={isLoading} lines={3}>
       {queryString !== '' && (
         <EuiFormRow
           label={filterDetailsActionStrings.getQueryTitle()}
           display="rowCompressed"
-          labelAppend={editMode && !disableEditbutton ? editVisButton : undefined}
+          labelAppend={
+            editMode && !disableEditbutton ? (
+              <EuiButtonEmpty
+                size="xs"
+                data-test-subj="customizePanelEditQueryButton"
+                onClick={onEdit}
+                aria-label={i18n.translate(
+                  'embeddableApi.customizePanel.flyout.optionsMenuForm.editQueryButtonAriaLabel',
+                  {
+                    defaultMessage: 'Edit query',
+                  }
+                )}
+              >
+                <FormattedMessage
+                  id="embeddableApi.customizePanel.flyout.optionsMenuForm.editQueryButtonLabel"
+                  defaultMessage="Edit"
+                />
+              </EuiButtonEmpty>
+            ) : undefined
+          }
         >
           <EuiCodeBlock
             language={queryLanguage}
@@ -125,7 +122,26 @@ export function FiltersDetails({ embeddable, editMode, onEdit }: FiltersDetailsP
       {filters.length > 0 && (
         <EuiFormRow
           label={filterDetailsActionStrings.getFiltersTitle()}
-          labelAppend={editMode && !disableEditbutton ? editVisButton : undefined}
+          labelAppend={
+            editMode && !disableEditbutton ? (
+              <EuiButtonEmpty
+                size="xs"
+                data-test-subj="customizePanelEditFiltersButton"
+                onClick={onEdit}
+                aria-label={i18n.translate(
+                  'embeddableApi.customizePanel.flyout.optionsMenuForm.editFiltersButtonAriaLabel',
+                  {
+                    defaultMessage: 'Edit filters',
+                  }
+                )}
+              >
+                <FormattedMessage
+                  id="embeddableApi.customizePanel.flyout.optionsMenuForm.editFiltersButtonLabel"
+                  defaultMessage="Edit"
+                />
+              </EuiButtonEmpty>
+            ) : undefined
+          }
         >
           <EuiFlexGroup wrap={true} gutterSize="xs">
             <FilterItems filters={filters} indexPatterns={dataViews} readOnly={true} />
