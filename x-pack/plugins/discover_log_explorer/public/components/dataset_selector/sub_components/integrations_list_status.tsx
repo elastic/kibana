@@ -34,6 +34,7 @@ export const IntegrationsListStatus = ({
   if (hasError) {
     return (
       <EuiEmptyPrompt
+        data-test-subj="integrationsErrorPrompt"
         iconType="warning"
         iconColor="danger"
         paddingSize="m"
