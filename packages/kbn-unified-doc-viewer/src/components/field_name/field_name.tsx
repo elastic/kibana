@@ -12,7 +12,8 @@ import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiToolTip, EuiHighlight } from '@
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { FieldIcon, FieldIconProps } from '@kbn/react-field';
-import { type DataViewField, getFieldSubtypeMulti } from '@kbn/data-views-plugin/public';
+import type { DataViewField } from '@kbn/data-views-plugin/public';
+import { getDataViewFieldSubtypeMulti } from '@kbn/es-query';
 import { getFieldTypeName } from '@kbn/discover-utils';
 
 interface Props {
@@ -36,7 +37,7 @@ export function FieldName({
   const displayName =
     fieldMapping && fieldMapping.displayName ? fieldMapping.displayName : fieldName;
   const tooltip = displayName !== fieldName ? `${fieldName} (${displayName})` : fieldName;
-  const subTypeMulti = fieldMapping && getFieldSubtypeMulti(fieldMapping.spec);
+  const subTypeMulti = fieldMapping && getDataViewFieldSubtypeMulti(fieldMapping.spec);
   const isMultiField = !!subTypeMulti?.multi;
 
   return (
