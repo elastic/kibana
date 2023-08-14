@@ -11,10 +11,13 @@ import type {
   CNVM_POLICY_TEMPLATE,
 } from '@kbn/cloud-security-posture-plugin/common/constants';
 import type { MeteringCallbackInput } from '../types';
+import { ProductTier } from '@kbn/security-solution-serverless/common/product';
+import { TiebreakerField } from '@kbn/security-solution-plugin/common/api/detection_engine';
+import { SecurityProductType } from '@kbn/security-solution-serverless/common/config';
 
 export interface ResourceCountAggregation {
   min_timestamp: MinTimestamp;
-  unique_resources: {
+  unique_assets: {
     value: number;
   };
 }
@@ -29,8 +32,14 @@ export type PostureType =
   | typeof KSPM_POLICY_TEMPLATE
   | typeof CNVM_POLICY_TEMPLATE;
 
+export type Tier = ProductTier | 'none';
+
+export type RegisteredProductTypes = SecurityProductType[];
+
 export interface CloudSecurityMeteringCallbackInput
   extends Omit<MeteringCallbackInput, 'cloudSetup' | 'abortController' | 'config'> {
   projectId: string;
   postureType: PostureType;
+  tier: TiebreakerField;
+  registeredProductTypes: RegisteredProductTypes;
 }

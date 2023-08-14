@@ -63,6 +63,7 @@ export interface UsageMetrics {
 export interface UsageSource {
   id: string;
   instance_group_id: string;
+  metadata?: object;
 }
 
 export interface SecurityUsageReportingTaskSetupContract {

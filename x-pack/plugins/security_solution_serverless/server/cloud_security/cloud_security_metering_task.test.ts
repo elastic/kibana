@@ -11,9 +11,11 @@ import {
   KSPM_POLICY_TEMPLATE,
   CNVM_POLICY_TEMPLATE,
 } from '@kbn/cloud-security-posture-plugin/common/constants';
-import { CLOUD_SECURITY_TASK_TYPE } from './cloud_security_metering';
+import { CLOUD_SECURITY_TASK_TYPE, getProductTier } from './cloud_security_metering';
 import { getCloudSecurityUsageRecord } from './cloud_security_metering_task';
-import type { PostureType } from './types';
+import type { PostureType, RegisteredProductTypes } from './types';
+import { ProductLine, ProductTier } from '@kbn/security-solution-serverless/common/product';
+import { ServerlessSecurityConfig } from '../config';
 
 const mockEsClient = elasticsearchServiceMock.createStart().client.asInternalUser;
 const logger: ReturnType<typeof loggingSystemMock.createLogger> = loggingSystemMock.createLogger();
@@ -25,7 +27,7 @@ const postureTypes: PostureType[] = [
   CNVM_POLICY_TEMPLATE,
 ];
 
-describe('getCspmUsageRecord', () => {
+describe('getCloudSecurityUsageRecord', () => {
   beforeEach(() => {
     jest.resetAllMocks();
   });
@@ -38,6 +40,11 @@ describe('getCspmUsageRecord', () => {
     const taskId = chance.guid();
     const postureType = CSPM_POLICY_TEMPLATE;
 
+    const tier = 'essentials';
+    const registeredProductTypes: RegisteredProductTypes = [
+      { product_line: 'security' as ProductLine, product_tier: 'complete' as ProductTier },
+    ];
+
     const result = await getCloudSecurityUsageRecord({
       esClient: mockEsClient,
       projectId,
@@ -45,6 +52,8 @@ describe('getCspmUsageRecord', () => {
       taskId,
       lastSuccessfulReport: new Date(),
       postureType,
+      tier,
+      registeredProductTypes,
     });
 
     expect(result).toBeUndefined();
@@ -56,7 +65,7 @@ describe('getCspmUsageRecord', () => {
       // @ts-ignore
       mockEsClient.search.mockResolvedValue({
         aggregations: {
-          unique_resources: {
+          unique_assets: {
             value: 10,
           },
           min_timestamp: {
@@ -68,6 +77,11 @@ describe('getCspmUsageRecord', () => {
       const projectId = chance.guid();
       const taskId = chance.guid();
 
+      const tier = 'essentials';
+      const registeredProductTypes: RegisteredProductTypes = [
+        { product_line: 'security' as ProductLine, product_tier: 'complete' as ProductTier },
+      ];
+
       const result = await getCloudSecurityUsageRecord({
         esClient: mockEsClient,
         projectId,
@@ -75,10 +89,12 @@ describe('getCspmUsageRecord', () => {
         taskId,
         lastSuccessfulReport: new Date(),
         postureType,
+        tier,
+        registeredProductTypes,
       });
 
       expect(result).toEqual({
-        id: `${CLOUD_SECURITY_TASK_TYPE}:${postureType}`,
+        id: expect.stringContaining(`${CLOUD_SECURITY_TASK_TYPE}_${postureType}_${projectId}`),
         usage_timestamp: '2023-07-30T15:11:41.738Z',
         creation_timestamp: expect.any(String), // Expect a valid ISO string
         usage: {
@@ -90,6 +106,19 @@ describe('getCspmUsageRecord', () => {
         source: {
           id: taskId,
           instance_group_id: projectId,
+          metadata: {
+            product_lines: [
+              {
+                product_line: 'security',
+                product_tier: 'complete',
+              },
+              {
+                product_line: 'endpoint',
+                product_tier: 'complete',
+              },
+            ],
+            tier: 'essentials',
+          },
         },
       });
     }
@@ -103,6 +132,12 @@ describe('getCspmUsageRecord', () => {
     const taskId = chance.guid();
     const postureType = CSPM_POLICY_TEMPLATE;
 
+    const tier = 'essentials';
+    const registeredProductTypes: RegisteredProductTypes = [
+      { product_line: 'security' as ProductLine, product_tier: 'complete' as ProductTier },
+      { product_line: 'endpoint' as ProductLine, product_tier: 'complete' as ProductTier },
+    ];
+
     const result = await getCloudSecurityUsageRecord({
       esClient: mockEsClient,
       projectId,
@@ -110,6 +145,8 @@ describe('getCspmUsageRecord', () => {
       taskId,
       lastSuccessfulReport: new Date(),
       postureType,
+      tier,
+      registeredProductTypes,
     });
 
     expect(result).toBeUndefined();
@@ -123,6 +160,12 @@ describe('getCspmUsageRecord', () => {
     const taskId = chance.guid();
     const postureType = CSPM_POLICY_TEMPLATE;
 
+    const tier = 'essentials';
+    const registeredProductTypes: RegisteredProductTypes = [
+      { product_line: 'security' as ProductLine, product_tier: 'complete' as ProductTier },
+      { product_line: 'endpoint' as ProductLine, product_tier: 'complete' as ProductTier },
+    ];
+
     const result = await getCloudSecurityUsageRecord({
       esClient: mockEsClient,
       projectId,
@@ -130,8 +173,39 @@ describe('getCspmUsageRecord', () => {
       taskId,
       lastSuccessfulReport: new Date(),
       postureType,
+      tier,
+      registeredProductTypes,
     });
 
     expect(result).toBeUndefined();
+  });
+});
+
+describe('should return the relevant product tier', () => {
+  it('should return the relevant product tier for cloud product line', async () => {
+    const serverlessSecurityConfig = {
+      enabled: true,
+      developer: {},
+      productTypes: [
+        { product_line: 'endpoint', product_tier: 'essentials' },
+        { product_line: 'cloud', product_tier: 'complete' },
+      ],
+    } as unknown as ServerlessSecurityConfig;
+
+    const tier = getProductTier(serverlessSecurityConfig);
+
+    expect(tier).toBe('complete');
+  });
+
+  it('should return none tier in case cloud product line is missing ', async () => {
+    const serverlessSecurityConfig = {
+      enabled: true,
+      developer: {},
+      productTypes: [{ product_line: 'endpoint', product_tier: 'complete' }],
+    } as unknown as ServerlessSecurityConfig;
+
+    const tier = getProductTier(serverlessSecurityConfig);
+
+    expect(tier).toBe('none');
   });
 });
