@@ -76,10 +76,6 @@ export const allowedExperimentalValues = Object.freeze({
    */
   alertsPageChartsEnabled: true,
   alertTypeEnabled: false,
-  /**
-   * Enables the new security flyout over the current alert details flyout
-   */
-  securityFlyoutEnabled: false,
 
   /*
    * Enables new Set of filters on the Alerts page.
