@@ -141,6 +141,12 @@ class AgentPolicyService {
       );
     }
 
+    const logger = appContextService.getLogger();
+
+    if (options.removeProtection) {
+      logger.warn(`Setting tamper protection for Agent Policy ${id} to false`);
+    }
+
     await validateOutputForPolicy(
       soClient,
       agentPolicy,
