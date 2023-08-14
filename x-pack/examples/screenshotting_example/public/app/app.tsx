@@ -53,7 +53,7 @@ export function App() {
   return (
     <EuiPage>
       <EuiPageBody style={{ maxWidth: 1200, margin: '0 auto' }}>
-      <EuiPageHeader>
+        <EuiPageHeader>
           <EuiPageHeaderSection>
             <EuiTitle size="l">
               <h1>Screenshotting Demo</h1>
