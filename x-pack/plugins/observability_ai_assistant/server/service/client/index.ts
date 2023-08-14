@@ -30,10 +30,7 @@ import {
   type FunctionDefinition,
   type Message,
 } from '../../../common/types';
-import type {
-  IObservabilityAIAssistantClient,
-  ObservabilityAIAssistantResourceNames,
-} from '../types';
+import type { ObservabilityAIAssistantResourceNames } from '../types';
 
 const ELSER_MODEL_ID = '.elser_model_1';
 
@@ -41,7 +38,7 @@ function throwKnowledgeBaseNotReady(body: any) {
   throw serverUnavailable(`Knowledge base is not ready yet`, body);
 }
 
-export class ObservabilityAIAssistantClient implements IObservabilityAIAssistantClient {
+export class ObservabilityAIAssistantClient {
   constructor(
     private readonly dependencies: {
       actionsClient: PublicMethodsOf<ActionsClient>;

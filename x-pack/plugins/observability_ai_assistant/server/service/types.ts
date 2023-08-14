@@ -6,43 +6,12 @@
  */
 
 import { KibanaRequest } from '@kbn/core/server';
-import type {
-  Conversation,
-  ConversationCreateRequest,
-  ConversationUpdateRequest,
-  FunctionDefinition,
-  KnowledgeBaseEntry,
-  Message,
-} from '../../common/types';
 import { ObservabilityAIAssistantClient } from './client';
-
-export interface IObservabilityAIAssistantClient {
-  chat: (options: {
-    messages: Message[];
-    connectorId: string;
-    functions?: Array<Pick<FunctionDefinition['options'], 'name' | 'description' | 'parameters'>>;
-    stream?: boolean | undefined;
-  }) => ReturnType<ObservabilityAIAssistantClient['chat']>;
-  get: (conversationId: string) => Promise<Conversation>;
-  find: (options?: { query?: string }) => Promise<{ conversations: Conversation[] }>;
-  create: (conversation: ConversationCreateRequest) => Promise<Conversation>;
-  update: (conversation: ConversationUpdateRequest) => Promise<Conversation>;
-  delete: (conversationId: string) => Promise<void>;
-  recall: (query: string) => Promise<{ entries: KnowledgeBaseEntry[] }>;
-  summarise: (options: { entry: Omit<KnowledgeBaseEntry, '@timestamp'> }) => Promise<void>;
-  getKnowledgeBaseStatus: () => Promise<{
-    ready: boolean;
-    error?: any;
-    deployment_state?: string;
-    allocation_state?: string;
-  }>;
-  setupKnowledgeBase: () => Promise<void>;
-}
 
 export interface IObservabilityAIAssistantService {
   getClient: (options: {
     request: KibanaRequest;
-  }) => Promise<IObservabilityAIAssistantClient | undefined>;
+  }) => Promise<ObservabilityAIAssistantClient | undefined>;
 }
 
 export interface ObservabilityAIAssistantResourceNames {

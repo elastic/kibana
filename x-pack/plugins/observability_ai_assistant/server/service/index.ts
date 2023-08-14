@@ -16,7 +16,6 @@ import { ObservabilityAIAssistantClient } from './client';
 import { conversationComponentTemplate } from './conversation_component_template';
 import { kbComponentTemplate } from './kb_component_template';
 import type {
-  IObservabilityAIAssistantClient,
   IObservabilityAIAssistantService,
   ObservabilityAIAssistantResourceNames,
 } from './types';
@@ -185,7 +184,7 @@ export class ObservabilityAIAssistantService implements IObservabilityAIAssistan
     request,
   }: {
     request: KibanaRequest;
-  }): Promise<IObservabilityAIAssistantClient> {
+  }): Promise<ObservabilityAIAssistantClient> {
     const [_, [coreStart, plugins]] = await Promise.all([
       this.init(),
       this.core.getStartServices() as Promise<
