@@ -5,12 +5,8 @@
  * 2.0.
  */
 
-import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
-import type {
-  KibanaRequest,
-  SavedObjectsClientContract,
-  SavedObjectsServiceStart,
-} from '@kbn/core/server';
+import type { SavedObjectsClientContract, SavedObjectsServiceStart } from '@kbn/core/server';
+import { createInternalSoClient } from './create_internal_so_client';
 import { EndpointError } from '../../../common/endpoint/errors';
 
 type SavedObjectsClientContractKeys = keyof SavedObjectsClientContract;
@@ -37,18 +33,7 @@ export class InternalReadonlySoClientMethodNotAllowedError extends EndpointError
 export const createInternalReadonlySoClient = (
   savedObjectsServiceStart: SavedObjectsServiceStart
 ): SavedObjectsClientContract => {
-  const fakeRequest = {
-    headers: {},
-    getBasePath: () => '',
-    path: '/',
-    route: { settings: {} },
-    url: { href: {} },
-    raw: { req: { url: '/' } },
-  } as unknown as KibanaRequest;
-
-  const internalSoClient = savedObjectsServiceStart.getScopedClient(fakeRequest, {
-    excludedExtensions: [SECURITY_EXTENSION_ID],
-  });
+  const internalSoClient = createInternalSoClient(savedObjectsServiceStart);
 
   return new Proxy(internalSoClient, {
     get(
