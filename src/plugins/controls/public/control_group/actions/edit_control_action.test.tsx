@@ -96,7 +96,7 @@ test('Execute should open a flyout', async () => {
     fieldName: 'test-field',
     width: 'medium',
     grow: false,
-  });
+  }) as OptionsListEmbeddable;
   expect(emptyContainer.getInput().panels[control.getInput().id].type).toBe(OPTIONS_LIST_CONTROL);
 
   const editControlAction = new EditControlAction(deleteControlAction);
