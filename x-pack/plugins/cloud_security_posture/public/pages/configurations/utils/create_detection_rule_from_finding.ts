@@ -45,19 +45,17 @@ const convertReferencesLinksToArray = (input: string | undefined) => {
 };
 
 const CSP_RULE_TAG = 'Cloud Security';
-const CNVM_RULE_TAG_USE_CASE = 'Use Case: Configuration Audit';
-const CNVM_RULE_TAG_DATA_SOURCE_PREFIX = 'Data Source: ';
+const CSP_RULE_TAG_USE_CASE = 'Use Case: Configuration Audit';
+const CSP_RULE_TAG_DATA_SOURCE_PREFIX = 'Data Source: ';
 
-const STATIC_RULE_TAGS = [CSP_RULE_TAG, CNVM_RULE_TAG_USE_CASE];
+const STATIC_RULE_TAGS = [CSP_RULE_TAG, CSP_RULE_TAG_USE_CASE];
 
-const generateMisconfigurationsTags = (finding: CspFinding) => {
+const generateFindingsTags = (finding: CspFinding) => {
   return [STATIC_RULE_TAGS]
-    .concat()
+    .concat(finding.rule.tags)
     .concat(
       finding.rule.benchmark.posture_type
-        ? [
-            `${CNVM_RULE_TAG_DATA_SOURCE_PREFIX}${finding.rule.benchmark.posture_type.toUpperCase()}`,
-          ]
+        ? [`${CSP_RULE_TAG_DATA_SOURCE_PREFIX}${finding.rule.benchmark.posture_type.toUpperCase()}`]
         : []
     )
     .concat(
@@ -66,7 +64,7 @@ const generateMisconfigurationsTags = (finding: CspFinding) => {
     .flat();
 };
 
-const generateMisconfigurationsRuleQuery = (finding: CspFinding) => {
+const generateFindingsRuleQuery = (finding: CspFinding) => {
   const currentTimestamp = new Date().toISOString();
 
   return `rule.benchmark.rule_number: "${finding.rule.benchmark.rule_number}"
@@ -106,11 +104,11 @@ export const createDetectionRuleFromFinding = async (http: HttpSetup, finding: C
         missing_fields_strategy: AlertSuppressionMissingFieldsStrategy.Suppress,
       },
       index: [FINDINGS_INDEX_PATTERN],
-      query: generateMisconfigurationsRuleQuery(finding),
+      query: generateFindingsRuleQuery(finding),
       references: convertReferencesLinksToArray(finding.rule.references),
       name: finding.rule.name,
       description: finding.rule.rationale,
-      tags: generateMisconfigurationsTags(finding),
+      tags: generateFindingsTags(finding),
     },
   });
 };
