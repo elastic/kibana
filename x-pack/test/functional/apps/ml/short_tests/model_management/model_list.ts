@@ -40,14 +40,31 @@ export default function ({ getService }: FtrProviderContext) {
 
     const modelWithoutPipelineDataExpectedValues = {
       name: `ml-inference-${modelWithoutPipelineData.modelId}`,
+      duplicateName: `ml-inference-${modelWithoutPipelineData.modelId}-duplicate`,
       description: `Uses the pre-trained data frame analytics model ${modelWithoutPipelineData.modelId} to infer against the data that is being ingested in the pipeline`,
+      duplicateDescription: 'Edited description',
       inferenceConfig: {
         regression: {
           results_field: 'predicted_value',
           num_top_feature_importance_values: 0,
         },
       },
+      inferenceConfigDuplicate: {
+        regression: {
+          results_field: 'predicted_value_for_duplicate',
+          num_top_feature_importance_values: 0,
+        },
+      },
+      editedInferenceConfig: {
+        regression: {
+          results_field: 'predicted_value_for_duplicate',
+          num_top_feature_importance_values: 0,
+        },
+      },
       fieldMap: {},
+      editedFieldMap: {
+        incoming_field: 'old_field',
+      },
     };
 
     before(async () => {
@@ -66,6 +83,9 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.api.stopAllTrainedModelDeploymentsES();
       await ml.api.deleteAllTrainedModelsES();
       await ml.api.deleteTrainedModelInferencePipeline(modelWithoutPipelineDataExpectedValues.name);
+      await ml.api.deleteTrainedModelInferencePipeline(
+        modelWithoutPipelineDataExpectedValues.duplicateName
+      );
       await ml.api.cleanMlIndices();
     });
 
@@ -132,7 +152,7 @@ export default function ({ getService }: FtrProviderContext) {
         await ml.trainedModelsTable.assertPipelinesTabContent(false);
       });
 
-      it('deploys the trained model', async () => {
+      it('deploys the trained model with default values', async () => {
         await ml.testExecution.logTestStep('should display the trained model in the table');
         await ml.trainedModelsTable.filterWithSearchString(modelWithoutPipelineData.modelId, 1);
         await ml.testExecution.logTestStep(
@@ -181,6 +201,74 @@ export default function ({ getService }: FtrProviderContext) {
                 ignore_failure: false,
                 inference_config: modelWithoutPipelineDataExpectedValues.inferenceConfig,
                 on_failure: getDefaultOnFailureConfiguration(),
+              },
+            },
+          ],
+        });
+      });
+
+      it('deploys the trained model with custom values', async () => {
+        await ml.testExecution.logTestStep('should display the trained model in the table');
+        await ml.trainedModelsTable.filterWithSearchString(modelWithoutPipelineData.modelId, 1);
+        await ml.testExecution.logTestStep(
+          'should not show collapsed actions menu for the model in the table'
+        );
+        await ml.trainedModelsTable.assertModelCollapsedActionsButtonExists(
+          modelWithoutPipelineData.modelId,
+          false
+        );
+        await ml.testExecution.logTestStep('should show deploy action for the model in the table');
+        await ml.trainedModelsTable.assertModelDeployActionButtonExists(
+          modelWithoutPipelineData.modelId,
+          true
+        );
+        await ml.testExecution.logTestStep('should open the deploy model flyout');
+        await ml.trainedModelsTable.openTrainedModelsInferenceFlyout(
+          modelWithoutPipelineData.modelId
+        );
+        await ml.testExecution.logTestStep('should complete the deploy model Details step');
+        await ml.trainedModelsTable.completeTrainedModelsInferenceFlyoutDetails(
+          {
+            name: modelWithoutPipelineDataExpectedValues.duplicateName,
+            description: modelWithoutPipelineDataExpectedValues.duplicateDescription,
+            targetField: 'myTargetField',
+          },
+          true
+        );
+        await ml.testExecution.logTestStep('should complete the deploy model Pipeline Config step');
+        await ml.trainedModelsTable.completeTrainedModelsInferenceFlyoutPipelineConfig(
+          {
+            inferenceConfig: modelWithoutPipelineDataExpectedValues.inferenceConfig,
+            editedInferenceConfig: modelWithoutPipelineDataExpectedValues.editedInferenceConfig,
+            fieldMap: modelWithoutPipelineDataExpectedValues.fieldMap,
+            editedFieldMap: modelWithoutPipelineDataExpectedValues.editedFieldMap,
+          },
+          true
+        );
+        await ml.testExecution.logTestStep(
+          'should complete the deploy model pipeline On Failure step'
+        );
+        await ml.trainedModelsTable.completeTrainedModelsInferenceFlyoutOnFailure(
+          getDefaultOnFailureConfiguration(),
+          true
+        );
+        await ml.testExecution.logTestStep(
+          'should complete the deploy model pipeline Create pipeline step'
+        );
+        await ml.trainedModelsTable.completeTrainedModelsInferenceFlyoutCreateStep({
+          description: modelWithoutPipelineDataExpectedValues.duplicateDescription,
+          processors: [
+            {
+              inference: {
+                field_map: {
+                  incoming_field: 'old_field',
+                },
+                ignore_failure: true,
+                if: "ctx?.network?.name == 'Guest'",
+                model_id: modelWithoutPipelineData.modelId,
+                inference_config: modelWithoutPipelineDataExpectedValues.inferenceConfigDuplicate,
+                tag: 'tag',
+                target_field: 'myTargetField',
               },
             },
           ],

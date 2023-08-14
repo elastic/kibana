@@ -248,11 +248,143 @@ export function TrainedModelsTableProvider(
       await this.assertDeployModelFlyoutExists();
     }
 
-    public async completeTrainedModelsInferenceFlyoutDetails(expectedValues: {
+    public async setTrainedModelsInferenceFlyoutCustomValue(target: string, customValue: string) {
+      await mlCommonUI.setValueWithChecks(target, customValue, {
+        clearWithKeyboard: true,
+      });
+    }
+
+    public async setTrainedModelsInferenceFlyoutCustomDetails(values: {
       name: string;
       description: string;
       targetField: string;
     }) {
+      await this.setTrainedModelsInferenceFlyoutCustomValue(
+        'mlTrainedModelsInferencePipelineNameInput',
+        values.name
+      );
+      await this.setTrainedModelsInferenceFlyoutCustomValue(
+        'mlTrainedModelsInferencePipelineDescriptionInput',
+        values.description
+      );
+      await this.setTrainedModelsInferenceFlyoutCustomValue(
+        'mlTrainedModelsInferencePipelineTargetFieldInput',
+        values.targetField
+      );
+    }
+
+    public async assertTrainedModelsInferenceFlyoutPipelineConfigValues(
+      inferenceConfig: any,
+      fieldMap: any,
+      condition: string = '',
+      tag: string = ''
+    ) {
+      const actualInferenceConfig = await testSubjects.getVisibleText(
+        'mlTrainedModelsInferencePipelineInferenceConfigBlock'
+      );
+      expect(JSON.parse(actualInferenceConfig)).to.eql(inferenceConfig);
+      const actualFieldMap = await testSubjects.getVisibleText(
+        'mlTrainedModelsInferencePipelineFieldMapBlock'
+      );
+      expect(JSON.parse(actualFieldMap)).to.eql(fieldMap);
+
+      if (condition || tag) {
+        await this.trainedModelsInferenceOpenAdditionalSettings();
+        const actualCondition = await testSubjects.getAttribute(
+          'mlTrainedModelsInferenceAdvancedSettingsConditionTextArea',
+          'value'
+        );
+        expect(actualCondition).to.eql(condition);
+        const actualTag = await testSubjects.getAttribute(
+          'mlTrainedModelsInferenceAdvancedSettingsTagInput',
+          'value'
+        );
+        expect(actualTag).to.eql(tag);
+      }
+    }
+
+    public async trainedModelsInferenceFlyoutSaveChanges() {
+      await testSubjects.existOrFail('mlTrainedModelsInferencePipelineFlyoutSaveChangesButton');
+      const saveChangesButton = await testSubjects.find(
+        'mlTrainedModelsInferencePipelineFlyoutSaveChangesButton'
+      );
+      await saveChangesButton.click();
+    }
+
+    public async setTrainedModelsInferenceFlyoutCustomEditorValues(
+      selector: string,
+      value: string
+    ) {
+      const configElement = await testSubjects.find(selector);
+      const editor = await configElement.findByClassName('kibanaCodeEditor');
+      await editor.click();
+      const input = await find.activeElement();
+      await input.clearValueWithKeyboard();
+
+      for (const chr of value) {
+        await retry.tryForTime(5000, async () => {
+          await input.type(chr, { charByChar: true });
+        });
+      }
+    }
+
+    public async setTrainedModelsInferenceFlyoutCustomPipelineConfig(values: {
+      condition: string;
+      editedInferenceConfig: any;
+      editedFieldMap: any;
+      tag: string;
+    }) {
+      // INFERENCE CONFIG
+      const editInferenceConfigButton = await testSubjects.find(
+        'mlTrainedModelsInferencePipelineInferenceConfigEditButton'
+      );
+      await editInferenceConfigButton.click();
+      await this.setTrainedModelsInferenceFlyoutCustomEditorValues(
+        'mlTrainedModelsInferencePipelineInferenceConfigEditor',
+        JSON.stringify(values.editedInferenceConfig)
+      );
+      await this.trainedModelsInferenceFlyoutSaveChanges();
+      // FIELD MAP
+      const editFieldMapButton = await testSubjects.find(
+        'mlTrainedModelsInferencePipelineFieldMapEditButton'
+      );
+      editFieldMapButton.click();
+      await this.setTrainedModelsInferenceFlyoutCustomEditorValues(
+        'mlTrainedModelsInferencePipelineFieldMapEdit',
+        JSON.stringify(values.editedFieldMap)
+      );
+      await this.trainedModelsInferenceFlyoutSaveChanges();
+      // OPEN ADVANCED SETTINGS
+      await this.trainedModelsInferenceOpenAdditionalSettings();
+      await this.setTrainedModelsInferenceFlyoutCustomValue(
+        'mlTrainedModelsInferenceAdvancedSettingsConditionTextArea',
+        values.condition
+      );
+      await this.setTrainedModelsInferenceFlyoutCustomValue(
+        'mlTrainedModelsInferenceAdvancedSettingsTagInput',
+        values.tag
+      );
+      await this.trainedModelsInferenceFlyoutSaveChanges();
+
+      await this.assertTrainedModelsInferenceFlyoutPipelineConfigValues(
+        values.editedInferenceConfig,
+        values.editedFieldMap,
+        values.condition,
+        values.tag
+      );
+    }
+
+    public async completeTrainedModelsInferenceFlyoutDetails(
+      expectedValues: {
+        name: string;
+        description: string;
+        targetField: string;
+      },
+      editDefaults: boolean = false
+    ) {
+      if (editDefaults) {
+        await this.setTrainedModelsInferenceFlyoutCustomDetails(expectedValues);
+      }
       const name = await testSubjects.getAttribute(
         'mlTrainedModelsInferencePipelineNameInput',
         'value'
@@ -271,30 +403,46 @@ export function TrainedModelsTableProvider(
       await this.deployModelsContinue('mlTrainedModelsInferencePipelineProcessorConfigStep');
     }
 
-    public async completeTrainedModelsInferenceFlyoutPipelineConfig(expectedValues: {
-      inferenceConfig: any;
-      fieldMap: any;
-    }) {
-      const defaultInferenceConfig = await testSubjects.getVisibleText(
-        'mlTrainedModelsInferencePipelineInferenceConfigBlock'
-      );
-      expect(JSON.parse(defaultInferenceConfig)).to.eql(expectedValues.inferenceConfig);
-      const defaultFieldMap = await testSubjects.getVisibleText(
-        'mlTrainedModelsInferencePipelineFieldMapBlock'
-      );
-      expect(JSON.parse(defaultFieldMap)).to.eql(expectedValues.fieldMap);
+    public async trainedModelsInferenceOpenAdditionalSettings() {
       await testSubjects.existOrFail('mlTrainedModelsInferenceAdvancedSettingsAccordion');
       await testSubjects.existOrFail('mlTrainedModelsInferenceAdvancedSettingsAccordion');
       const additionalSettingsAccordionButton = await testSubjects.find(
         'mlTrainedModelsInferenceAdvancedSettingsAccordionButton'
       );
-      additionalSettingsAccordionButton.click();
+      await additionalSettingsAccordionButton.click();
       await testSubjects.existOrFail('mlTrainedModelsInferenceAdvancedSettingsConditionTextArea');
       await testSubjects.existOrFail('mlTrainedModelsInferenceAdvancedSettingsTagInput');
+    }
+
+    public async completeTrainedModelsInferenceFlyoutPipelineConfig(
+      expectedValues: {
+        inferenceConfig: any;
+        editedInferenceConfig?: any;
+        fieldMap: any;
+        editedFieldMap?: any;
+      },
+      editDefaults: boolean = false
+    ) {
+      const { inferenceConfig, editedInferenceConfig, fieldMap, editedFieldMap } = expectedValues;
+      // Check all defaults
+      await this.assertTrainedModelsInferenceFlyoutPipelineConfigValues(inferenceConfig, fieldMap);
+
+      if (editDefaults) {
+        await this.setTrainedModelsInferenceFlyoutCustomPipelineConfig({
+          condition: "ctx?.network?.name == 'Guest'",
+          editedFieldMap,
+          editedInferenceConfig,
+          tag: 'tag',
+        });
+      }
+
       await this.deployModelsContinue('mlTrainedModelsInferenceOnFailureStep');
     }
 
-    public async completeTrainedModelsInferenceFlyoutOnFailure(expectedOnFailure: any) {
+    public async completeTrainedModelsInferenceFlyoutOnFailure(
+      expectedOnFailure: any,
+      editDefaults: boolean = false
+    ) {
       await retry.tryForTime(30 * 1000, async () => {
         // Switch should default to unchecked
         await testSubjects.existOrFail('mlTrainedModelsInferenceIgnoreFailureSwitch');
@@ -306,6 +454,16 @@ export function TrainedModelsTableProvider(
         'mlTrainedModelsInferenceOnFailureCodeBlock'
       );
       expect(JSON.parse(defaultOnFailure)).to.eql(expectedOnFailure);
+
+      if (editDefaults) {
+        // switch ignore failure to true
+        const ignoreFailureSwitch = await testSubjects.find(
+          'mlTrainedModelsInferenceIgnoreFailureSwitch'
+        );
+        await ignoreFailureSwitch.click();
+        // Switch should now be checked
+        await testSubjects.existOrFail('mlTrainedModelsInferenceIgnoreFailureSwitch checked');
+      }
       await this.deployModelsContinue('mlTrainedModelsInferenceTestStep');
       // skip test step
       await this.deployModelsContinue('mlTrainedModelsInferenceReviewAndCreateStep');
@@ -368,7 +526,7 @@ export function TrainedModelsTableProvider(
         'mlTrainedModelsInferencePipelineContinueButton'
       );
       await continueButton.isEnabled();
-      continueButton.click();
+      await continueButton.click();
       if (expectedStep) {
         await testSubjects.existOrFail(expectedStep);
       }
@@ -378,7 +536,7 @@ export function TrainedModelsTableProvider(
       await testSubjects.exists('mlTrainedModelsInferencePipelineCreateButton');
       const createButton = await testSubjects.find('mlTrainedModelsInferencePipelineCreateButton');
       await createButton.isEnabled();
-      createButton.click();
+      await createButton.click();
     }
 
     public async assertDeleteModalExists() {

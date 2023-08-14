@@ -196,6 +196,7 @@ export const ProcessorConfiguration: FC<Props> = memo(
                   <EuiFlexGroup gutterSize="xs" alignItems="center">
                     <EuiFlexItem grow={false}>
                       <EuiButtonEmpty
+                        data-test-subj="mlTrainedModelsInferencePipelineInferenceConfigEditButton"
                         iconType="pencil"
                         size="xs"
                         onClick={() => {
@@ -231,10 +232,10 @@ export const ProcessorConfiguration: FC<Props> = memo(
                 }
                 error={inferenceConfigError ?? inferenceConfigError}
                 isInvalid={inferenceConfigError !== undefined || inferenceConfigError !== undefined}
+                data-test-subj="mlTrainedModelsInferencePipelineInferenceConfigEditor"
               >
                 {editInferenceConfig ? (
                   <CodeEditor
-                    data-test-subj="mlTrainedModelsInferencePipelineInferenceConfigEditor"
                     height={300}
                     languageId="json"
                     options={{
@@ -318,6 +319,7 @@ export const ProcessorConfiguration: FC<Props> = memo(
                   <EuiFlexGroup gutterSize="xs" justifyContent="flexStart">
                     <EuiFlexItem grow={false}>
                       <EuiButtonEmpty
+                        data-test-subj="mlTrainedModelsInferencePipelineFieldMapEditButton"
                         iconType="pencil"
                         size="xs"
                         onClick={() => {
@@ -356,6 +358,7 @@ export const ProcessorConfiguration: FC<Props> = memo(
                 }
                 error={fieldMapError}
                 isInvalid={fieldMapError !== undefined}
+                data-test-subj="mlTrainedModelsInferencePipelineFieldMapEdit"
               >
                 <>
                   {!editFieldMapping ? (
@@ -371,7 +374,6 @@ export const ProcessorConfiguration: FC<Props> = memo(
                     <>
                       <EuiSpacer size="s" />
                       <CodeEditor
-                        data-test-subj="mlTrainedModelsInferencePipelineFieldMapEdit"
                         height={300}
                         languageId="json"
                         options={{
