@@ -56,6 +56,11 @@ const appDependencies = {
     executionContext: executionContextServiceMock.createStartContract(),
   },
   plugins: {},
+  // Default stateful configuration
+  config: {
+    enableLegacyTemplates: true,
+    enableIndexActions: true,
+  },
 } as any;
 
 export const kibanaVersion = new SemVer(MAJOR_VERSION);
@@ -82,7 +87,6 @@ export const WithAppDependencies =
   (props: any) => {
     httpService.setup(httpSetup);
     const mergedDependencies = merge({}, appDependencies, overridingDependencies);
-
     return (
       <KibanaReactContextProvider>
         <AppContextProvider value={mergedDependencies}>
