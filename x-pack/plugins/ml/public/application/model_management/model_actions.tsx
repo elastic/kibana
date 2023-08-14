@@ -450,7 +450,11 @@ export function useModelActions({
           onModelDeployRequest(model);
         },
         available: (item) => {
-          const isDfaTrainedModel = item.metadata?.analytics_config !== undefined;
+          const isDfaTrainedModel =
+            item.metadata?.analytics_config !== undefined ||
+            item.inference_config?.regression !== undefined ||
+            item.inference_config?.regression !== undefined;
+
           return (
             isDfaTrainedModel &&
             !isBuiltInModel(item) &&

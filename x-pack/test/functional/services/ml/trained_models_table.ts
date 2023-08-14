@@ -198,6 +198,19 @@ export function TrainedModelsTableProvider(
       );
     }
 
+    public async assertModelDeployActionButtonExists(modelId: string, expectedValue: boolean) {
+      const actionsExists = await testSubjects.exists(
+        this.rowSelector(modelId, 'mlModelsTableRowDeployAction')
+      );
+
+      expect(actionsExists).to.eql(
+        expectedValue,
+        `Expected row deploy action button for trained model '${modelId}' to be ${
+          expectedValue ? 'visible' : 'hidden'
+        } (got ${actionsExists ? 'visible' : 'hidden'})`
+      );
+    }
+
     public async assertModelTestButtonExists(modelId: string, expectedValue: boolean) {
       const actionExists = await testSubjects.exists(
         this.rowSelector(modelId, 'mlModelsTableRowTestAction')
@@ -224,6 +237,91 @@ export function TrainedModelsTableProvider(
       await this.assertTestFlyoutExists();
 
       await trainedModelsActions.testModelOutput(modelType, inputParams, expectedResult);
+    }
+
+    public async openTrainedModelsInferenceFlyout(modelId: string) {
+      await mlCommonUI.invokeTableRowAction(
+        this.rowSelector(modelId),
+        'mlModelsTableRowDeployAction',
+        false
+      );
+      await this.assertDeployModelFlyoutExists();
+    }
+
+    public async completeTrainedModelsInferenceFlyoutDetails(expectedValues: {
+      name: string;
+      description: string;
+      targetField: string;
+    }) {
+      const name = await testSubjects.getAttribute(
+        'mlTrainedModelsInferencePipelineNameInput',
+        'value'
+      );
+      expect(name).to.eql(expectedValues.name);
+      const description = await testSubjects.getAttribute(
+        'mlTrainedModelsInferencePipelineDescriptionInput',
+        'value'
+      );
+      expect(description).to.eql(expectedValues.description);
+      const targetField = await testSubjects.getAttribute(
+        'mlTrainedModelsInferencePipelineTargetFieldInput',
+        'value'
+      );
+      expect(targetField).to.eql(expectedValues.targetField);
+      await this.deployModelsContinue('mlTrainedModelsInferencePipelineProcessorConfigStep');
+    }
+
+    public async completeTrainedModelsInferenceFlyoutPipelineConfig(expectedValues: {
+      inferenceConfig: any;
+      fieldMap: any;
+    }) {
+      const defaultInferenceConfig = await testSubjects.getVisibleText(
+        'mlTrainedModelsInferencePipelineInferenceConfigBlock'
+      );
+      expect(JSON.parse(defaultInferenceConfig)).to.eql(expectedValues.inferenceConfig);
+      const defaultFieldMap = await testSubjects.getVisibleText(
+        'mlTrainedModelsInferencePipelineFieldMapBlock'
+      );
+      expect(JSON.parse(defaultFieldMap)).to.eql(expectedValues.fieldMap);
+      await testSubjects.existOrFail('mlTrainedModelsInferenceAdvancedSettingsAccordion');
+      await testSubjects.existOrFail('mlTrainedModelsInferenceAdvancedSettingsAccordion');
+      const additionalSettingsAccordionButton = await testSubjects.find(
+        'mlTrainedModelsInferenceAdvancedSettingsAccordionButton'
+      );
+      additionalSettingsAccordionButton.click();
+      await testSubjects.existOrFail('mlTrainedModelsInferenceAdvancedSettingsConditionTextArea');
+      await testSubjects.existOrFail('mlTrainedModelsInferenceAdvancedSettingsTagInput');
+      await this.deployModelsContinue('mlTrainedModelsInferenceOnFailureStep');
+    }
+
+    public async completeTrainedModelsInferenceFlyoutOnFailure(expectedOnFailure: any) {
+      await retry.tryForTime(30 * 1000, async () => {
+        // Switch should default to unchecked
+        await testSubjects.existOrFail('mlTrainedModelsInferenceIgnoreFailureSwitch');
+        // Switch should default to checked
+        await testSubjects.existOrFail('mlTrainedModelsInferenceTakeActionOnFailureSwitch checked');
+      });
+
+      const defaultOnFailure = await testSubjects.getVisibleText(
+        'mlTrainedModelsInferenceOnFailureCodeBlock'
+      );
+      expect(JSON.parse(defaultOnFailure)).to.eql(expectedOnFailure);
+      await this.deployModelsContinue('mlTrainedModelsInferenceTestStep');
+      // skip test step
+      await this.deployModelsContinue('mlTrainedModelsInferenceReviewAndCreateStep');
+    }
+
+    public async completeTrainedModelsInferenceFlyoutCreateStep(expectedConfig: any) {
+      const pipelineConfig = await testSubjects.getVisibleText(
+        'mlTrainedModelsInferenceReviewAndCreateStepConfigBlock'
+      );
+      expect(JSON.parse(pipelineConfig)).to.eql(expectedConfig);
+      await this.assertDeployModelsCreateButton();
+      await retry.tryForTime(30 * 1000, async () => {
+        await testSubjects.existOrFail('mlTrainedModelsInferenceReviewAndCreateStepSuccessCallout');
+      });
+      const closeButton = await testSubjects.find('mlTrainedModelsInferencePipelineCloseButton');
+      closeButton.click();
     }
 
     public async deleteModel(modelId: string) {
@@ -264,12 +362,37 @@ export function TrainedModelsTableProvider(
       );
     }
 
+    public async deployModelsContinue(expectedStep?: string) {
+      await testSubjects.exists('mlTrainedModelsInferencePipelineContinueButton');
+      const continueButton = await testSubjects.find(
+        'mlTrainedModelsInferencePipelineContinueButton'
+      );
+      await continueButton.isEnabled();
+      continueButton.click();
+      if (expectedStep) {
+        await testSubjects.existOrFail(expectedStep);
+      }
+    }
+
+    public async assertDeployModelsCreateButton(expectedStep?: string) {
+      await testSubjects.exists('mlTrainedModelsInferencePipelineCreateButton');
+      const createButton = await testSubjects.find('mlTrainedModelsInferencePipelineCreateButton');
+      await createButton.isEnabled();
+      createButton.click();
+    }
+
     public async assertDeleteModalExists() {
       await testSubjects.existOrFail('mlModelsDeleteModal', { timeout: 60 * 1000 });
     }
 
     public async assertTestFlyoutExists() {
       await testSubjects.existOrFail('mlTestModelsFlyout', { timeout: 60 * 1000 });
+    }
+
+    public async assertDeployModelFlyoutExists() {
+      await testSubjects.existOrFail('mlTrainedModelsInferencePipelineFlyout', {
+        timeout: 60 * 1000,
+      });
     }
 
     public async assertStartDeploymentModalExists(expectExist = true) {

@@ -156,7 +156,10 @@ export const ProcessorConfiguration: FC<Props> = memo(
     };
 
     return (
-      <EuiFlexGroup direction="column">
+      <EuiFlexGroup
+        direction="column"
+        data-test-subj="mlTrainedModelsInferencePipelineProcessorConfigStep"
+      >
         {/* INFERENCE CONFIG */}
         <EuiFlexItem>
           <EuiFlexGroup>
@@ -231,6 +234,7 @@ export const ProcessorConfiguration: FC<Props> = memo(
               >
                 {editInferenceConfig ? (
                   <CodeEditor
+                    data-test-subj="mlTrainedModelsInferencePipelineInferenceConfigEditor"
                     height={300}
                     languageId="json"
                     options={{
@@ -242,7 +246,10 @@ export const ProcessorConfiguration: FC<Props> = memo(
                     onChange={handleInferenceConfigChange}
                   />
                 ) : (
-                  <EuiCodeBlock isCopyable={true}>
+                  <EuiCodeBlock
+                    isCopyable={true}
+                    data-test-subj="mlTrainedModelsInferencePipelineInferenceConfigBlock"
+                  >
                     {JSON.stringify(inferenceConfig, null, 2)}
                   </EuiCodeBlock>
                 )}
@@ -352,7 +359,11 @@ export const ProcessorConfiguration: FC<Props> = memo(
               >
                 <>
                   {!editFieldMapping ? (
-                    <EuiCodeBlock isCopyable={true} overflowHeight={350}>
+                    <EuiCodeBlock
+                      isCopyable={true}
+                      overflowHeight={350}
+                      data-test-subj="mlTrainedModelsInferencePipelineFieldMapBlock"
+                    >
                       {JSON.stringify(fieldMap ?? {}, null, 2)}
                     </EuiCodeBlock>
                   ) : null}
@@ -360,6 +371,7 @@ export const ProcessorConfiguration: FC<Props> = memo(
                     <>
                       <EuiSpacer size="s" />
                       <CodeEditor
+                        data-test-subj="mlTrainedModelsInferencePipelineFieldMapEdit"
                         height={300}
                         languageId="json"
                         options={{
