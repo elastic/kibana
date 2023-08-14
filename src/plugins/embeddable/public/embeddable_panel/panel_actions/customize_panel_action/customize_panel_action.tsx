@@ -10,7 +10,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { TimeRange } from '@kbn/es-query';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
-import { ApplicationStart, OverlayStart, ThemeServiceStart } from '@kbn/core/public';
+import { OverlayStart, ThemeServiceStart } from '@kbn/core/public';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 
 import { toMountPoint } from '@kbn/react-kibana-mount';
@@ -60,8 +60,9 @@ export class CustomizePanelAction implements Action<CustomizePanelActionContext>
   constructor(
     protected readonly overlays: OverlayStart,
     protected readonly theme: ThemeServiceStart,
+    protected readonly editPanel: EditPanelAction,
     protected readonly commonlyUsedRanges?: CommonlyUsedRange[],
-    protected readonly dateFormat?: string
+    protected readonly dateFormat?: string,
   ) {}
 
   protected isTimeRangeCompatible({ embeddable }: CustomizePanelActionContext): boolean {
@@ -107,18 +108,12 @@ export class CustomizePanelAction implements Action<CustomizePanelActionContext>
     const rootEmbeddable = embeddable.getRoot();
     const overlayTracker = tracksOverlays(rootEmbeddable) ? rootEmbeddable : undefined;
 
-    const editPanelAction = new EditPanelAction(
-      embeddableStart.getEmbeddableFactory,
-      core.application as unknown as ApplicationStart,
-      embeddableStart.getStateTransfer()
-    );
-
     const { Provider: KibanaReactContextProvider } = createKibanaReactContext({
       uiSettings: core.uiSettings,
     });
 
     const onEdit = () => {
-      editPanelAction.execute({ embeddable });
+      this.editPanel.execute({ embeddable });
     };
 
     const handle = this.overlays.openFlyout(
