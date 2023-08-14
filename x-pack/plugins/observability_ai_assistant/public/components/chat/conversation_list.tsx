@@ -28,6 +28,10 @@ const titleClassName = css`
   text-transform: uppercase;
 `;
 
+const newChatButtonWrapperClassName = css`
+  padding-bottom: 5px;
+`;
+
 export function ConversationList({
   selected,
   onClickNewChat,
@@ -101,6 +105,7 @@ export function ConversationList({
                       isActive={conversation.id === selected}
                       isDisabled={loading}
                       href={conversation.href}
+                      wrapText
                       extraAction={
                         conversation.id
                           ? {
@@ -135,7 +140,7 @@ export function ConversationList({
         <EuiFlexItem grow={false}>
           <EuiPanel paddingSize="s" hasBorder={false} hasShadow={false}>
             <EuiFlexGroup alignItems="center">
-              <EuiFlexItem grow>
+              <EuiFlexItem grow className={newChatButtonWrapperClassName}>
                 <NewChatButton onClick={onClickNewChat} />
               </EuiFlexItem>
             </EuiFlexGroup>

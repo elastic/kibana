@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import { merge, omit } from 'lodash';
 import { Dispatch, SetStateAction, useState } from 'react';
-import type { Conversation, Message } from '../../common';
+import { type Conversation, type Message } from '../../common';
 import type { ConversationCreateRequest } from '../../common/types';
 import { ObservabilityAIAssistantChatService } from '../types';
 import { useAbortableAsync, type AbortableAsyncState } from './use_abortable_async';
@@ -18,14 +18,16 @@ import { createNewConversation } from './use_timeline';
 export function useConversation({
   conversationId,
   chatService,
+  connectorId,
 }: {
   conversationId?: string;
   chatService?: ObservabilityAIAssistantChatService;
+  connectorId: string | undefined;
 }): {
   conversation: AbortableAsyncState<ConversationCreateRequest | Conversation | undefined>;
   displayedMessages: Message[];
   setDisplayedMessages: Dispatch<SetStateAction<Message[]>>;
-  save: (messages: Message[]) => Promise<Conversation>;
+  save: (messages: Message[], handleRefreshConversations?: () => void) => Promise<Conversation>;
 } {
   const service = useObservabilityAIAssistant();
 
@@ -67,11 +69,12 @@ export function useConversation({
     conversation,
     displayedMessages,
     setDisplayedMessages,
-    save: (messages: Message[]) => {
+    save: (messages: Message[], handleRefreshConversations?: () => void) => {
       const conversationObject = conversation.value!;
+
       return conversationId
         ? service
-            .callApi(`POST /internal/observability_ai_assistant/conversation/{conversationId}`, {
+            .callApi(`PUT /internal/observability_ai_assistant/conversation/{conversationId}`, {
               signal: null,
               params: {
                 path: {
@@ -100,13 +103,37 @@ export function useConversation({
               throw err;
             })
         : service
-            .callApi(`PUT /internal/observability_ai_assistant/conversation`, {
+            .callApi(`POST /internal/observability_ai_assistant/conversation`, {
               signal: null,
               params: {
                 body: {
                   conversation: merge({}, conversationObject, { messages }),
                 },
               },
+            })
+            .then((nextConversation) => {
+              if (connectorId) {
+                service
+                  .callApi(
+                    `PUT /internal/observability_ai_assistant/conversation/{conversationId}/auto_title`,
+                    {
+                      signal: null,
+                      params: {
+                        path: {
+                          conversationId: nextConversation.conversation.id,
+                        },
+                        body: {
+                          connectorId,
+                        },
+                      },
+                    }
+                  )
+                  .then(() => {
+                    handleRefreshConversations?.();
+                    return conversation.refresh();
+                  });
+              }
+              return nextConversation;
             })
             .catch((err) => {
               notifications.toasts.addError(err, {
