@@ -48,7 +48,8 @@ export function TopNFunctionsSummary({
 
   const { co2EmissionDiff, costImpactDiff, totalSamplesDiff } = useMemo(() => {
     const baseImpactEstimates = baselineTopNFunctions
-      ? calculateImpactEstimates({
+      ? // Do NOT scale values here. This is intended to show the exact values spent throughout the year
+        calculateImpactEstimates({
           countExclusive: baselineTopNFunctions.selfCPU,
           countInclusive: baselineTopNFunctions.totalCPU,
           totalSamples: baselineTopNFunctions.TotalCount,
@@ -57,7 +58,8 @@ export function TopNFunctionsSummary({
       : undefined;
 
     const comparisonImpactEstimates = comparisonTopNFunctions
-      ? calculateImpactEstimates({
+      ? // Do NOT scale values here. This is intended to show the exact values spent throughout the year
+        calculateImpactEstimates({
           countExclusive: comparisonTopNFunctions.selfCPU,
           countInclusive: comparisonTopNFunctions.totalCPU,
           totalSamples: comparisonTopNFunctions.TotalCount,
