@@ -17,7 +17,7 @@ import { getCloudManagedTemplatePrefix } from '../../../lib/get_managed_template
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '..';
 
-export function registerGetAllRoute({ router, lib: { handleEsError } }: RouteDependencies) {
+export function registerGetAllRoute({ router, config, lib: { handleEsError } }: RouteDependencies) {
   router.get(
     { path: addBasePath('/index_templates'), validate: false },
     async (context, request, response) => {
@@ -25,17 +25,24 @@ export function registerGetAllRoute({ router, lib: { handleEsError } }: RouteDep
 
       try {
         const cloudManagedTemplatePrefix = await getCloudManagedTemplatePrefix(client);
-
-        const legacyTemplatesEs = await client.asCurrentUser.indices.getTemplate();
         const { index_templates: templatesEs } =
           await client.asCurrentUser.indices.getIndexTemplate();
+
+        // @ts-expect-error TemplateSerialized.index_patterns not compatible with IndicesIndexTemplate.index_patterns
+        const templates = deserializeTemplateList(templatesEs, cloudManagedTemplatePrefix);
+
+        if (config.isLegacyTemplatesEnabled === false) {
+          // If isLegacyTemplatesEnabled=false, we do not want to fetch legacy templates and return an empty array;
+          // we retain the same response format to limit changes required on the client
+          return response.ok({ body: { templates, legacyTemplates: [] } });
+        }
+
+        const legacyTemplatesEs = await client.asCurrentUser.indices.getTemplate();
 
         const legacyTemplates = deserializeLegacyTemplateList(
           legacyTemplatesEs,
           cloudManagedTemplatePrefix
         );
-        // @ts-expect-error TemplateSerialized.index_patterns not compatible with IndicesIndexTemplate.index_patterns
-        const templates = deserializeTemplateList(templatesEs, cloudManagedTemplatePrefix);
 
         const body = {
           templates,
@@ -59,7 +66,7 @@ const querySchema = schema.object({
   legacy: schema.maybe(schema.oneOf([schema.literal('true'), schema.literal('false')])),
 });
 
-export function registerGetOneRoute({ router, lib: { handleEsError } }: RouteDependencies) {
+export function registerGetOneRoute({ router, config, lib: { handleEsError } }: RouteDependencies) {
   router.get(
     {
       path: addBasePath('/index_templates/{name}'),
@@ -68,7 +75,10 @@ export function registerGetOneRoute({ router, lib: { handleEsError } }: RouteDep
     async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
       const { name } = request.params as TypeOf<typeof paramsSchema>;
-      const isLegacy = (request.query as TypeOf<typeof querySchema>).legacy === 'true';
+      // We don't expect the `legacy` query to be used when legacy templates are disabled, however, we add the `enableLegacyTemplates` check as a safeguard
+      const isLegacy =
+        config.isLegacyTemplatesEnabled !== false &&
+        (request.query as TypeOf<typeof querySchema>).legacy === 'true';
 
       try {
         const cloudManagedTemplatePrefix = await getCloudManagedTemplatePrefix(client);

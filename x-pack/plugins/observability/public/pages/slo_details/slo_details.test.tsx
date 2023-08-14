@@ -64,6 +64,7 @@ const mockDelete = jest.fn();
 const mockKibana = () => {
   useKibanaMock.mockReturnValue({
     services: {
+      theme: {},
       application: { navigateToUrl: mockNavigate },
       charts: chartPluginMock.createStartContract(),
       http: {
