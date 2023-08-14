@@ -501,7 +501,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
          * the comment. Otherwise, the test navigates to
          * fast to the cases table and the comment is not
          * persisted
-        */
+         */
         await setTimeoutAsync(2000);
 
         await header.waitUntilLoadingHasFinished();
