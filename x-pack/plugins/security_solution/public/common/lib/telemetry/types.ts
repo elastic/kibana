@@ -29,12 +29,14 @@ import type {
   ReportEntityRiskFilteredParams,
 } from './events/entity_analytics/types';
 import type {
+  AssistantTelemetryEvent,
   ReportAssistantTelemetryEventParams,
   ReportAssistantInvokedParams,
   ReportAssistantQuickPromptParams,
   ReportAssistantMessageSentParams,
 } from './events/ai_assistant/types';
 
+export * from './events/ai_assistant/types';
 export * from './events/alerts_grouping/types';
 export * from './events/data_quality/types';
 export type {
