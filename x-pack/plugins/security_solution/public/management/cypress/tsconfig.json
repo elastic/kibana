@@ -36,6 +36,5 @@
     "@kbn/repo-info",
     "@kbn/data-views-plugin",
     "@kbn/securitysolution-runtime-services",
-    "@kbn/osquery-plugin/cypress",
   ]
 }
