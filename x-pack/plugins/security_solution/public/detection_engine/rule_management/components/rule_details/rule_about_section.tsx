@@ -64,7 +64,7 @@ interface AuthorProps {
 
 const Author = ({ author }: AuthorProps) => <BadgeList badges={author} />;
 
-const BuildingBlock = () => i18n.BUILDING_BLOCK_FIELD_DESCRIPTION;
+const BuildingBlock = () => <EuiText>{i18n.BUILDING_BLOCK_FIELD_DESCRIPTION}</EuiText>;
 
 interface SeverityMappingItemProps {
   severityMappingItem: SeverityMappingItemType;
