@@ -19,10 +19,7 @@ import { ObservabilityAIAssistantClient } from './client';
 import { conversationComponentTemplate } from './conversation_component_template';
 import { kbComponentTemplate } from './kb_component_template';
 import { KnowledgeBaseService } from './kb_service';
-import type {
-  IObservabilityAIAssistantService,
-  ObservabilityAIAssistantResourceNames,
-} from './types';
+import type { ObservabilityAIAssistantResourceNames } from './types';
 
 function getResourceName(resource: string) {
   return `.kibana-observability-ai-assistant-${resource}`;
@@ -32,7 +29,7 @@ export const INDEX_QUEUED_DOCUMENTS_TASK_ID = 'observabilityAIAssistant:indexQue
 
 export const INDEX_QUEUED_DOCUMENTS_TASK_TYPE = INDEX_QUEUED_DOCUMENTS_TASK_ID + 'Type';
 
-export class ObservabilityAIAssistantService implements IObservabilityAIAssistantService {
+export class ObservabilityAIAssistantService {
   private readonly core: CoreSetup<ObservabilityAIAssistantPluginStartDependencies>;
   private readonly logger: Logger;
   private kbService?: KnowledgeBaseService;

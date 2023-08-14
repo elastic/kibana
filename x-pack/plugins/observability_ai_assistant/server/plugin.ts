@@ -85,6 +85,14 @@ export class ObservabilityAIAssistantPlugin
           },
           ui: ['show'],
         },
+        read: {
+          disabled: true,
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: [],
+        },
       },
     });
 
