@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import type { OpenApiDocument } from './openapi_types';
 
-export const ConfigSchema = schema.object({
-  enabled: schema.boolean({ defaultValue: true }),
-});
+export function getComponents(parsedSchema: OpenApiDocument) {
+  if (parsedSchema.components?.['x-codegen-enabled'] === false) {
+    return undefined;
+  }
+  return parsedSchema.components;
+}

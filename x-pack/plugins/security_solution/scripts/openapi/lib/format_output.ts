@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import execa from 'execa';
 
-export const ConfigSchema = schema.object({
-  enabled: schema.boolean({ defaultValue: true }),
-});
+export async function formatOutput(path: string) {
+  await execa('npx', ['prettier', '--write', path]);
+}

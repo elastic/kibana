@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+require('../../../../../src/setup_node_env');
+const { generate } = require('./openapi_generator');
 
-export const ConfigSchema = schema.object({
-  enabled: schema.boolean({ defaultValue: true }),
-});
+generate();
