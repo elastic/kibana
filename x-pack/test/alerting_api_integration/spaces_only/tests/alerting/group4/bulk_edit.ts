@@ -14,7 +14,7 @@ import {
   getUrlPrefix,
   getTestRuleData,
   ObjectRemover,
-  createWaitForExecutionCount,
+  getEventLog,
 } from '../../../../common/lib';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
@@ -34,10 +34,9 @@ const getSnoozeSchedule = () => {
 export default function createUpdateTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const retry = getService('retry');
-  const waitForExecutionCount = createWaitForExecutionCount(supertest, Spaces.space1.id);
 
   // Failing: See https://github.com/elastic/kibana/issues/138050
-  describe.skip('bulkEdit', () => {
+  describe('bulkEdit', () => {
     const objectRemover = new ObjectRemover(supertest);
 
     after(() => objectRemover.removeAll());
@@ -520,7 +519,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
         .post(`${getUrlPrefix(Spaces.other.id)}/internal/alerting/rules/_bulk_edit`)
         .set('kbn-xsrf', 'foo')
         .send(payload)
-        .expect(200, { rules: [], errors: [], total: 0 });
+        .expect(200, { rules: [], errors: [], skipped: [], total: 0 });
     });
 
     it('should return mapped params after bulk edit', async () => {
@@ -575,7 +574,16 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
 
       objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
 
-      await waitForExecutionCount(1, createdRule.id);
+      await retry.try(async () => {
+        return await getEventLog({
+          getService,
+          spaceId: Spaces.space1.id,
+          type: 'alert',
+          id: createdRule.id,
+          provider: 'alerting',
+          actions: new Map([['execute', { equal: 1 }]]),
+        });
+      });
 
       const monitoringData = (
         await supertest.get(

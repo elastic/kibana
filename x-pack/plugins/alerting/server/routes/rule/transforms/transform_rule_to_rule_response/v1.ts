@@ -48,6 +48,7 @@ export const transformRuleToRuleResponse = <Params extends RuleParams = never>(
     })
   ),
   params: rule.params,
+  ...(rule.mapped_params ? { mapped_params: rule.mapped_params } : {}),
   created_by: rule.createdBy,
   updated_by: rule.updatedBy,
   created_at: rule.createdAt.toISOString(),
