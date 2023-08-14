@@ -135,12 +135,13 @@ export class CoreKibanaRequest<
   public readonly auth: KibanaRequestAuth;
   /** {@inheritDoc IKibanaRequest.isFakeRequest} */
   public readonly isFakeRequest: boolean;
+  /** {@inheritDoc IKibanaRequest.isInternalRequest} */
+  public readonly isInternalRequest: boolean;
   /** {@inheritDoc IKibanaRequest.rewrittenUrl} */
   public readonly rewrittenUrl?: URL;
 
   /** @internal */
   protected readonly [requestSymbol]: Request;
-  public readonly isInternalRequest: boolean;
 
   constructor(
     request: RawRequest,
