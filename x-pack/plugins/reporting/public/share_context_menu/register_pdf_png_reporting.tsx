@@ -81,10 +81,12 @@ export const reportingScreenshotShareProvider = ({
 
     let capabilityHasDashboardScreenshotReporting = false;
     let capabilityHasVisualizeScreenshotReporting = false;
+    console.log({usesUiCapabilities})
     if (usesUiCapabilities) {
       // TODO: add abstractions in ExportTypeRegistry to use here?
       capabilityHasDashboardScreenshotReporting =
         application.capabilities.dashboard?.generateScreenshot === true;
+
       capabilityHasVisualizeScreenshotReporting =
         application.capabilities.visualize?.generateScreenshot === true;
     } else {
@@ -106,11 +108,12 @@ export const reportingScreenshotShareProvider = ({
       return [];
     }
 
-    if (isSupportedType && !capabilityHasVisualizeScreenshotReporting) {
+    if (isSupportedType && !capabilityHasVisualizeScreenshotReporting && !capabilityHasDashboardScreenshotReporting) {
       return [];
     }
 
     const { sharingData } = shareOpts as unknown as { sharingData: ReportingSharingData };
+    console.log({ sharingData })
     const shareActions = [];
 
     const pngPanelTitle = i18n.translate('xpack.reporting.shareContextMenu.pngReportsButtonLabel', {
@@ -195,6 +198,7 @@ export const reportingScreenshotShareProvider = ({
 
     shareActions.push(panelPng);
     shareActions.push(panelPdf);
+    console.log('shareActions', shareActions)
     return shareActions;
   };
 
