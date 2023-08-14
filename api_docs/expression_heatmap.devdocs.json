@@ -897,7 +897,23 @@
             "section": "def-common.Datatable",
             "text": "Datatable"
           },
-          "; column: number; range: number[]; timeFieldName?: string | undefined; }) => void; paletteService: ",
+          "; column: number; range: number[]; timeFieldName?: string | undefined; }) => void; onClickMultiValue: (data: { data: { table: Pick<",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.Datatable",
+            "text": "Datatable"
+          },
+          ", \"rows\" | \"columns\">; cells: { column: number; row: number; }[]; relation?: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.BooleanRelation",
+            "text": "BooleanRelation"
+          },
+          " | undefined; }[]; timeFieldName?: string | undefined; negate?: boolean | undefined; }) => void; paletteService: ",
           {
             "pluginId": "@kbn/coloring",
             "scope": "common",

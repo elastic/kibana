@@ -1350,7 +1350,15 @@
                 "section": "def-common.Datatable",
                 "text": "Datatable"
               },
-              ", \"rows\" | \"columns\">; column: number; value: any[]; }; timeFieldName?: string | undefined; negate?: boolean | undefined; }"
+              ", \"rows\" | \"columns\">; cells: { column: number; row: number; }[]; relation?: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.BooleanRelation",
+                "text": "BooleanRelation"
+              },
+              " | undefined; }[]; timeFieldName?: string | undefined; negate?: boolean | undefined; }"
             ],
             "path": "src/plugins/charts/public/index.ts",
             "deprecated": false,

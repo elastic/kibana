@@ -1,0 +1,74 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import {
+  IRouter,
+  RequestHandlerContext,
+  KibanaRequest,
+  IKibanaResponse,
+  KibanaResponseFactory,
+} from '@kbn/core/server';
+import { schema, TypeOf } from '@kbn/config-schema';
+import { Observable, Subject } from 'rxjs';
+import { Metrics } from '../metrics';
+
+export interface NodeMetrics {
+  process_uuid: string;
+  timestamp: string;
+  last_update: string;
+  metrics: Metrics['metrics'] | null;
+}
+
+export interface MetricsRouteParams {
+  router: IRouter;
+  metrics$: Observable<Metrics>;
+  resetMetrics$: Subject<boolean>;
+  taskManagerId: string;
+}
+
+const QuerySchema = schema.object({
+  reset: schema.boolean({ defaultValue: true }),
+});
+
+export function metricsRoute(params: MetricsRouteParams) {
+  const { router, metrics$, resetMetrics$, taskManagerId } = params;
+
+  let lastMetrics: NodeMetrics | null = null;
+
+  metrics$.subscribe((metrics) => {
+    lastMetrics = { process_uuid: taskManagerId, timestamp: new Date().toISOString(), ...metrics };
+  });
+
+  router.get(
+    {
+      path: `/api/task_manager/metrics`,
+      options: {
+        access: 'public',
+      },
+      // Uncomment when we determine that we can restrict API usage to Global admins based on telemetry
+      // options: { tags: ['access:taskManager'] },
+      validate: {
+        query: QuerySchema,
+      },
+    },
+    async function (
+      _: RequestHandlerContext,
+      req: KibanaRequest<unknown, TypeOf<typeof QuerySchema>, unknown>,
+      res: KibanaResponseFactory
+    ): Promise<IKibanaResponse> {
+      if (req.query.reset) {
+        resetMetrics$.next(true);
+      }
+
+      return res.ok({
+        body: lastMetrics
+          ? lastMetrics
+          : { process_uuid: taskManagerId, timestamp: new Date().toISOString(), metrics: {} },
+      });
+    }
+  );
+}

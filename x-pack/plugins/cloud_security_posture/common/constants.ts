@@ -133,3 +133,6 @@ export const AWS_CREDENTIALS_FIELD_MAP: AwsCredentialsTypeFieldMap = {
   shared_credentials: ['shared_credential_file', 'credential_profile_name'],
   cloud_formation: [],
 };
+
+export const SETUP_ACCESS_CLOUD_SHELL = 'google_cloud_shell';
+export const SETUP_ACCESS_MANUAL = 'manual';

@@ -15,43 +15,39 @@ import { closeFlyout } from '../../../../tasks/expandable_flyout/alert_details_r
 import { expandFirstAlertExpandableFlyout } from '../../../../tasks/expandable_flyout/common';
 import { DOCUMENT_DETAILS_FLYOUT_HEADER_TITLE } from '../../../../screens/expandable_flyout/alert_details_right_panel';
 
-describe(
-  'Expandable flyout state sync',
-  { env: { ftrConfig: { enableExperimental: ['securityFlyoutEnabled'] } } },
-  () => {
-    const rule = getNewRule();
+describe('Expandable flyout state sync', () => {
+  const rule = getNewRule();
 
-    beforeEach(() => {
-      cleanKibana();
-      login();
-      createRule(rule);
-      visit(ALERTS_URL);
-      waitForAlertsToPopulate();
-    });
+  beforeEach(() => {
+    cleanKibana();
+    login();
+    createRule(rule);
+    visit(ALERTS_URL);
+    waitForAlertsToPopulate();
+  });
 
-    it('should test flyout url sync', () => {
-      cy.url().should('not.include', 'eventFlyout');
+  it('should test flyout url sync', () => {
+    cy.url().should('not.include', 'eventFlyout');
 
-      expandFirstAlertExpandableFlyout();
+    expandFirstAlertExpandableFlyout();
 
-      cy.log('should serialize its state to url');
+    cy.log('should serialize its state to url');
 
-      cy.url().should('include', 'eventFlyout');
-      cy.get(DOCUMENT_DETAILS_FLYOUT_HEADER_TITLE).should('be.visible').and('have.text', rule.name);
+    cy.url().should('include', 'eventFlyout');
+    cy.get(DOCUMENT_DETAILS_FLYOUT_HEADER_TITLE).should('be.visible').and('have.text', rule.name);
 
-      cy.log('should reopen the flyout after browser refresh');
+    cy.log('should reopen the flyout after browser refresh');
 
-      cy.reload();
-      waitForAlertsToPopulate();
+    cy.reload();
+    waitForAlertsToPopulate();
 
-      cy.url().should('include', 'eventFlyout');
-      cy.get(DOCUMENT_DETAILS_FLYOUT_HEADER_TITLE).should('be.visible').and('have.text', rule.name);
+    cy.url().should('include', 'eventFlyout');
+    cy.get(DOCUMENT_DETAILS_FLYOUT_HEADER_TITLE).should('be.visible').and('have.text', rule.name);
 
-      cy.log('should clear the url state when flyout is closed');
+    cy.log('should clear the url state when flyout is closed');
 
-      closeFlyout();
+    closeFlyout();
 
-      cy.url().should('not.include', 'eventFlyout');
-    });
-  }
-);
+    cy.url().should('not.include', 'eventFlyout');
+  });
+});

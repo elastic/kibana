@@ -167,7 +167,7 @@ const Link = ({ children, url }: { children: React.ReactNode; url: string }) => 
   </EuiLink>
 );
 
-const ReadDocumentation = ({ url }: { url: string }) => {
+export const ReadDocumentation = ({ url }: { url: string }) => {
   return (
     <EuiText color="subdued" size="s">
       <FormattedMessage

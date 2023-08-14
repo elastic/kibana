@@ -12999,7 +12999,7 @@
                 "section": "def-server.DataPluginStart",
                 "text": "DataPluginStart"
               },
-              ">, { bfetch, expressions, usageCollection, fieldFormats, taskManager, security, }: ",
+              ">, { bfetch, expressions, usageCollection, fieldFormats, security }: ",
               "DataPluginSetupDependencies",
               ") => { search: ",
               "ISearchSetup",
@@ -13056,7 +13056,7 @@
                 "id": "def-server.DataServerPlugin.setup.$2",
                 "type": "Object",
                 "tags": [],
-                "label": "{\n      bfetch,\n      expressions,\n      usageCollection,\n      fieldFormats,\n      taskManager,\n      security,\n    }",
+                "label": "{ bfetch, expressions, usageCollection, fieldFormats, security }",
                 "description": [],
                 "signature": [
                   "DataPluginSetupDependencies"
@@ -13085,7 +13085,7 @@
                 "section": "def-common.CoreStart",
                 "text": "CoreStart"
               },
-              ", { fieldFormats, dataViews, taskManager }: ",
+              ", { fieldFormats, dataViews }: ",
               "DataPluginStartDependencies",
               ") => { datatableUtilities: ",
               "DatatableUtilitiesService",
@@ -13155,7 +13155,7 @@
                 "id": "def-server.DataServerPlugin.start.$2",
                 "type": "Object",
                 "tags": [],
-                "label": "{ fieldFormats, dataViews, taskManager }",
+                "label": "{ fieldFormats, dataViews }",
                 "description": [],
                 "signature": [
                   "DataPluginStartDependencies"
@@ -13365,6 +13365,10 @@
                 "path": "x-pack/plugins/security_solution/public/flyout/left/hooks/use_threat_intelligence_details.test.ts"
               },
               {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/flyout/preview/mocks/mock_preview_panel_context.ts"
+              },
+              {
                 "plugin": "threatIntelligence",
                 "path": "x-pack/plugins/threat_intelligence/public/mocks/mock_security_context.tsx"
               },
@@ -13569,6 +13573,10 @@
                 "path": "src/plugins/data_views/server/rest_api_routes/public/update_data_view.ts"
               },
               {
+                "plugin": "triggersActionsUi",
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/lib/data_apis.ts"
+              },
+              {
                 "plugin": "ml",
                 "path": "x-pack/plugins/ml/server/models/data_frame_analytics/index_patterns.ts"
               },
@@ -13603,10 +13611,6 @@
               {
                 "plugin": "apm",
                 "path": "x-pack/plugins/apm/server/routes/data_view/create_static_data_view.ts"
-              },
-              {
-                "plugin": "triggersActionsUi",
-                "path": "x-pack/plugins/triggers_actions_ui/public/common/lib/data_apis.ts"
               },
               {
                 "plugin": "exploratoryView",
@@ -16324,6 +16328,44 @@
           },
           {
             "parentPluginId": "data",
+            "id": "def-server.DataViewsService.getExistingIndices",
+            "type": "Function",
+            "tags": [],
+            "label": "getExistingIndices",
+            "description": [
+              "\nGet existing index pattern list by providing string array index pattern list."
+            ],
+            "signature": [
+              "(indices: string[]) => Promise<string[]>"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_views.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-server.DataViewsService.getExistingIndices.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "indices",
+                "description": [
+                  "index pattern list"
+                ],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_views.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "index pattern list"
+            ]
+          },
+          {
+            "parentPluginId": "data",
             "id": "def-server.DataViewsService.getFieldsForIndexPattern",
             "type": "Function",
             "tags": [],
@@ -17291,6 +17333,21 @@
                 "type": "boolean",
                 "tags": [],
                 "label": "allowNoIndices",
+                "description": [],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "src/plugins/data_views/server/fetcher/index_patterns_fetcher.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-server.IndexPatternsFetcher.Unnamed.$3",
+                "type": "boolean",
+                "tags": [],
+                "label": "rollupsEnabled",
                 "description": [],
                 "signature": [
                   "boolean"
@@ -21044,6 +21101,10 @@
                 "path": "x-pack/plugins/security_solution/public/flyout/left/hooks/use_threat_intelligence_details.test.ts"
               },
               {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/flyout/preview/mocks/mock_preview_panel_context.ts"
+              },
+              {
                 "plugin": "threatIntelligence",
                 "path": "x-pack/plugins/threat_intelligence/public/mocks/mock_security_context.tsx"
               },
@@ -21248,6 +21309,10 @@
                 "path": "src/plugins/data_views/server/rest_api_routes/public/update_data_view.ts"
               },
               {
+                "plugin": "triggersActionsUi",
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/lib/data_apis.ts"
+              },
+              {
                 "plugin": "ml",
                 "path": "x-pack/plugins/ml/server/models/data_frame_analytics/index_patterns.ts"
               },
@@ -21282,10 +21347,6 @@
               {
                 "plugin": "apm",
                 "path": "x-pack/plugins/apm/server/routes/data_view/create_static_data_view.ts"
-              },
-              {
-                "plugin": "triggersActionsUi",
-                "path": "x-pack/plugins/triggers_actions_ui/public/common/lib/data_apis.ts"
               },
               {
                 "plugin": "exploratoryView",
@@ -24874,6 +24935,44 @@
           },
           {
             "parentPluginId": "data",
+            "id": "def-common.DataViewsService.getExistingIndices",
+            "type": "Function",
+            "tags": [],
+            "label": "getExistingIndices",
+            "description": [
+              "\nGet existing index pattern list by providing string array index pattern list."
+            ],
+            "signature": [
+              "(indices: string[]) => Promise<string[]>"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_views.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-common.DataViewsService.getExistingIndices.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "indices",
+                "description": [
+                  "index pattern list"
+                ],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_views.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "index pattern list"
+            ]
+          },
+          {
+            "parentPluginId": "data",
             "id": "def-common.DataViewsService.getFieldsForIndexPattern",
             "type": "Function",
             "tags": [],
@@ -28292,7 +28391,7 @@
             "section": "def-common.FieldSpec",
             "text": "FieldSpec"
           },
-          "[]>; getFieldsForIndexPattern: (indexPattern: ",
+          "[]>; getExistingIndices: (indices: string[]) => Promise<string[]>; getFieldsForIndexPattern: (indexPattern: ",
           {
             "pluginId": "dataViews",
             "scope": "common",
