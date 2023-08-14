@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { GetViewInAppRelativeUrlFnOpts } from '@kbn/alerting-plugin/server';
 import { min } from 'lodash';
 import moment from 'moment';
 
@@ -19,6 +20,7 @@ import {
   AlertsLocatorParams,
   formatDurationFromTimeUnitChar,
   getAlertUrl,
+  observabilityPaths,
   TimeUnitChar,
 } from '@kbn/observability-plugin/common';
 import { LocatorPublic } from '@kbn/share-plugin/common';
@@ -28,7 +30,6 @@ import {
   StatusCheckFilters,
   Ping,
   GetMonitorAvailabilityParams,
-  OverviewPing,
 } from '../../../../common/runtime_types';
 import { CLIENT_ALERT_TYPES, MONITOR_STATUS } from '../../../../common/constants/uptime_alerts';
 import {
@@ -242,7 +243,7 @@ export const getStatusMessage = (
   return statusMessage + availabilityMessage;
 };
 
-export const getInstanceId = (monitorInfo: Ping | OverviewPing, monIdByLoc: string) => {
+export const getInstanceId = (monitorInfo: Ping, monIdByLoc: string) => {
   const normalizeText = (txt: string) => {
     // replace url and name special characters with -
     return txt.replace(/[^A-Z0-9]+/gi, '_').toLowerCase();
@@ -573,4 +574,6 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
     return { state: updateState(state, downMonitorsByLocation.length > 0) };
   },
   alerts: UptimeRuleTypeAlertDefinition,
+  getViewInAppRelativeUrl: ({ rule }: GetViewInAppRelativeUrlFnOpts<{}>) =>
+    observabilityPaths.ruleDetails(rule.id),
 });

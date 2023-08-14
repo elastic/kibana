@@ -22,12 +22,12 @@ export class PrivateLocationTestService {
   async installSyntheticsPackage() {
     await this.supertest.post('/api/fleet/setup').set('kbn-xsrf', 'true').send().expect(200);
     const response = await this.supertest
-      .get('/api/fleet/epm/packages/synthetics/1.0.3')
+      .get('/api/fleet/epm/packages/synthetics/1.0.4')
       .set('kbn-xsrf', 'true')
       .expect(200);
     if (response.body.item.status !== 'installed') {
       await this.supertest
-        .post('/api/fleet/epm/packages/synthetics/1.0.3')
+        .post('/api/fleet/epm/packages/synthetics/1.0.4')
         .set('kbn-xsrf', 'true')
         .send({ force: true })
         .expect(200);
