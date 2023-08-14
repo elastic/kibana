@@ -86,8 +86,6 @@ export const createTransform = async ({
     });
 
     logger.info(`Transform ${transform.transform_id} already exists`);
-
-    return;
   } catch (existErr) {
     const transformedError = transformError(existErr);
     if (transformedError.statusCode === 404) {
