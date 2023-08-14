@@ -70,6 +70,7 @@ function mountComponent() {
     lensAttributesContext: getMockLensAttributes(),
     onTotalHitsChange: jest.fn(),
     onChartLoad: jest.fn(),
+    withDefaultActions: undefined,
   };
 
   return {

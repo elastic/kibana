@@ -103,6 +103,7 @@ async function mountComponent({
     onResetChartHeight: jest.fn(),
     onChartHiddenChange: jest.fn(),
     onTimeIntervalChange: jest.fn(),
+    withDefaultActions: undefined,
   };
 
   let instance: ReactWrapper = {} as ReactWrapper;
