@@ -160,7 +160,6 @@ export const OptionsListControl = ({
         hasArrow={false}
         repositionOnScroll
         isOpen={isPopoverOpen}
-        // attachToAnchor
         panelPaddingSize="none"
         anchorPosition="downCenter"
         initialFocus={'[data-test-subj=optionsList-control-search-input]'}
