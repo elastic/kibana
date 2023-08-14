@@ -78,6 +78,7 @@ describe('AuthenticationService', () => {
     applicationName: 'kibana-.kibana';
     kibanaFeatures: [];
     isElasticCloudDeployment: jest.Mock;
+    customLogoutURL?: string;
   };
   beforeEach(() => {
     logger = loggingSystemMock.createLogger();
@@ -121,6 +122,7 @@ describe('AuthenticationService', () => {
       applicationName: 'kibana-.kibana',
       kibanaFeatures: [],
       isElasticCloudDeployment: jest.fn().mockReturnValue(false),
+      customLogoutURL: 'https://some-logout-origin/logout',
     };
     (mockStartAuthenticationParams.http.basePath.get as jest.Mock).mockImplementation(
       () => mockStartAuthenticationParams.http.basePath.serverBasePath
