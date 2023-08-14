@@ -14,7 +14,7 @@ import { KNOWN_FIELD_TYPES } from './field_types';
  * A user-friendly name of an unknown field type
  */
 export const UNKNOWN_FIELD_TYPE_MESSAGE = i18n.translate(
-  'unifiedFieldList.fieldNameIcons.unknownFieldAriaLabel',
+  'discover.fieldNameIcons.unknownFieldAriaLabel',
   {
     defaultMessage: 'Unknown field',
   }
