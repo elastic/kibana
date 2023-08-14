@@ -23,9 +23,9 @@ The **custom Metric** SLI requires an index pattern, an optional filter query, a
 
 We support **calendar aligned** and **rolling** time windows. Any duration greater than 1 day can be used: days, weeks, months, quarters, years.
 
-**Rolling time window:** Requires a duration, e.g. `1w` for one week, and `isRolling: true`. SLOs defined with such time window, will only considere the SLI data from the last duration period as a moving window.
+**Rolling time window:** Requires a duration, e.g. `1w` for one week, and `type: rolling`. SLOs defined with such time window, will only considere the SLI data from the last duration period as a moving window.
 
-**Calendar aligned time window:** Requires a duration, limited to `1M` for monthly or `1w` for weekly, and `isCalendar: true`.
+**Calendar aligned time window:** Requires a duration, limited to `1M` for monthly or `1w` for weekly, and `type: calendarAligned`.
 
 ### Budgeting method
 
@@ -46,8 +46,8 @@ If a **timeslices** budgeting method is used, we also need to define the **times
 
 The default settings should be sufficient for most users, but if needed, the following properties can be overwritten:
 
-- **syncDelay**: The ingest delay in the source data
-- **frequency**: How often do we query the source data
+- **syncDelay**: The ingest delay in the source data, defaults to `1m`
+- **frequency**: How often do we query the source data, defaults to `1m`
 
 ## Example
 
@@ -77,7 +77,7 @@ curl --request POST \
 	},
 	"timeWindow": {
 		"duration": "30d",
-		"isRolling": true
+		"type": "rolling"
 	},
 	"budgetingMethod": "occurrences",
 	"objective": {
@@ -112,7 +112,7 @@ curl --request POST \
 	},
 	"timeWindow": {
 		"duration": "1M",
-		"isCalendar": true
+		"type": "calendarAligned"
 	},
 	"budgetingMethod": "occurrences",
 	"objective": {
@@ -146,8 +146,8 @@ curl --request POST \
 		}
 	},
 	"timeWindow": {
-		"duration": "1w",
-		"isRolling": true
+		"duration": "7d",
+		"type": "rolling"
 	},
 	"budgetingMethod": "timeslices",
 	"objective": {
@@ -187,7 +187,7 @@ curl --request POST \
 	},
 	"timeWindow": {
 		"duration": "7d",
-		"isRolling": true
+		"type": "rolling"
 	},
 	"budgetingMethod": "occurrences",
 	"objective": {
@@ -223,7 +223,7 @@ curl --request POST \
 	},
 	"timeWindow": {
 		"duration": "7d",
-		"isRolling": true
+		"type": "rolling"
 	},
 	"budgetingMethod": "timeslices",
 	"objective": {
@@ -261,7 +261,7 @@ curl --request POST \
 	},
 	"timeWindow": {
 		"duration": "1w",
-		"isCalendar": true
+		"type": "calendarAligned"
 	},
 	"budgetingMethod": "timeslices",
 	"objective": {
@@ -300,7 +300,7 @@ curl --request POST \
 	},
 	"timeWindow": {
 		"duration": "7d",
-		"isRolling": true
+		"type": "rolling"
 	},
 	"budgetingMethod": "occurrences",
 	"objective": {
@@ -355,7 +355,7 @@ curl --request POST \
 	},
 	"timeWindow": {
 		"duration": "7d",
-		"isRolling": true
+		"type": "rolling"
 	},
 	"budgetingMethod": "occurrences",
 	"objective": {
