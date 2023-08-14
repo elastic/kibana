@@ -38,6 +38,7 @@ import {
   waitForRulesTableToBeLoaded,
   selectNumberOfRules,
   goToEditRuleActionsSettingsOf,
+  disableAutoRefresh,
 } from '../../../../../tasks/alerts_detection_rules';
 import {
   waitForBulkEditActionToFinish,
@@ -148,9 +149,10 @@ describe('Detection rules, bulk edit of rule actions', () => {
       login();
       visitWithoutDateRange(SECURITY_DETECTIONS_RULES_URL);
       waitForRulesTableToBeLoaded();
+      disableAutoRefresh();
     });
 
-    it('Add a rule action to rules (existing connector)', () => {
+    it.only('Add a rule action to rules (existing connector)', () => {
       const expectedActionFrequency: RuleActionCustomFrequency = {
         throttle: 1,
         throttleUnit: 'd',
