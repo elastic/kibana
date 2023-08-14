@@ -135,7 +135,7 @@ export function registerGetApmTimeseriesFunction({
                 'service.environment': {
                   type: 'string',
                   description:
-                    "The environment that the service is running in. If you don't know this, use ENVIRONMENT_ALL.",
+                    'The environment that the service is running in.',
                 },
                 filter: {
                   type: 'string',

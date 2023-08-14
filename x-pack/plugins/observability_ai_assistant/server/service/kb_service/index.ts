@@ -146,7 +146,7 @@ export class KnowledgeBaseService {
             ],
           },
         },
-        size: 5,
+        size: 3,
         _source: {
           includes: ['text', 'id'],
         },
