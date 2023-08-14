@@ -106,7 +106,11 @@ export const reportingScreenshotShareProvider = ({
       return [];
     }
 
-    if (isSupportedType && !capabilityHasVisualizeScreenshotReporting && !capabilityHasDashboardScreenshotReporting) {
+    if (
+      isSupportedType &&
+      !capabilityHasVisualizeScreenshotReporting &&
+      !capabilityHasDashboardScreenshotReporting
+    ) {
       return [];
     }
 
