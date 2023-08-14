@@ -72,7 +72,12 @@ export const EnrichPoliciesList = () => {
           defaultMessage="Enrich policies allow you to enrich your data by adding context via additional data. {learnMoreLink}"
           values={{
             learnMoreLink: (
-              <EuiLink href={documentationService.getEnrichApisLink()} target="_blank" external>
+              <EuiLink
+                href={documentationService.getEnrichApisLink()}
+                target="_blank"
+                external
+                data-test-subj="enrichPoliciesLearnMoreLink"
+              >
                 <FormattedMessage
                   id="xpack.idxMgmt.enrich_policies.list.docsLink"
                   defaultMessage="Learn more"
