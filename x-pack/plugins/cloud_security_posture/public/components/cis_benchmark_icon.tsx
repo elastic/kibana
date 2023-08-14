@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiIcon, EuiToolTip } from '@elastic/eui';
+import { EuiIcon, EuiToolTip, IconSize  } from '@elastic/eui';
 import { CSSInterpolation } from '@emotion/serialize';
 import type { BenchmarkId } from '../../common/types';
 import cisEksIcon from '../assets/icons/cis_eks_logo.svg';
@@ -16,6 +16,7 @@ interface Props {
   type: BenchmarkId;
   name?: string;
   style?: CSSInterpolation;
+  size?: IconSize;
 }
 
 const getBenchmarkIdIconType = (props: Props): string => {
@@ -34,6 +35,6 @@ const getBenchmarkIdIconType = (props: Props): string => {
 
 export const CISBenchmarkIcon = (props: Props) => (
   <EuiToolTip content={props.name}>
-    <EuiIcon type={getBenchmarkIdIconType(props)} size="xl" css={props.style} />
+    <EuiIcon type={getBenchmarkIdIconType(props)} size={props.size || "xl"} css={props.style} />
   </EuiToolTip>
 );
