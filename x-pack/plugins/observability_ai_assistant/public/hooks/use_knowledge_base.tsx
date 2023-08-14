@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { useMemo, useState } from 'react';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { AbortableAsyncState, useAbortableAsync } from './use_abortable_async';
 import { useKibana } from './use_kibana';
 import { useObservabilityAIAssistant } from './use_observability_ai_assistant';
@@ -41,7 +42,12 @@ export function useKnowledgeBase(): UseKnowledgeBaseResult {
 
   return useMemo(
     () => ({
-      status,
+      status: {
+        ...status,
+        value: {
+          ready: false,
+        },
+      },
       isInstalling,
       installError,
       install: () => {
@@ -52,6 +58,17 @@ export function useKnowledgeBase(): UseKnowledgeBaseResult {
           })
           .then(() => {
             status.refresh();
+            toasts.addSuccess({
+              title: i18n.translate('xpack.observabilityAiAssistant.knowledgeBaseReadyTitle', {
+                defaultMessage: 'Knowledge base is ready',
+              }),
+              text: i18n.translate(
+                'xpack.observabilityAiAssistant.knowledgeBaseReadyContentReload',
+                {
+                  defaultMessage: 'A page reload is needed to be able to use it.',
+                }
+              ),
+            });
           })
           .catch((error) => {
             setInstallError(error);

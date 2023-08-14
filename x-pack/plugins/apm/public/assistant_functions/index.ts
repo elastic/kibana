@@ -5,20 +5,23 @@
  * 2.0.
  */
 
-import { CoreStart } from '@kbn/core/public';
-import {
+import type { CoreStart } from '@kbn/core/public';
+import type {
   RegisterContextDefinition,
   RegisterFunctionDefinition,
 } from '@kbn/observability-ai-assistant-plugin/common/types';
-import { ApmPluginStartDeps } from '../plugin';
-import { createCallApmApi } from '../services/rest/create_call_apm_api';
+import type { ApmPluginStartDeps } from '../plugin';
+import {
+  createCallApmApi,
+  callApmApi,
+} from '../services/rest/create_call_apm_api';
 import { registerGetApmCorrelationsFunction } from './get_apm_correlations';
 import { registerGetApmDownstreamDependenciesFunction } from './get_apm_downstream_dependencies';
 import { registerGetApmErrorDocumentFunction } from './get_apm_error_document';
 import { registerGetApmServiceSummaryFunction } from './get_apm_service_summary';
 import { registerGetApmTimeseriesFunction } from './get_apm_timeseries';
 
-export function registerAssistantFunctions({
+export async function registerAssistantFunctions({
   pluginsStart,
   coreStart,
   registerContext,
@@ -32,6 +35,14 @@ export function registerAssistantFunctions({
   signal: AbortSignal;
 }) {
   createCallApmApi(coreStart);
+
+  const response = await callApmApi('GET /internal/apm/has_data', {
+    signal,
+  });
+
+  if (!response.hasData) {
+    return;
+  }
 
   registerGetApmTimeseriesFunction({
     registerFunction,

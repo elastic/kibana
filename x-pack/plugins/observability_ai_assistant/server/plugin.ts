@@ -85,23 +85,6 @@ export class ObservabilityAIAssistantPlugin
           },
           ui: ['show'],
         },
-        read: {
-          app: [OBSERVABILITY_AI_ASSISTANT_FEATURE_ID, 'kibana'],
-          api: [OBSERVABILITY_AI_ASSISTANT_FEATURE_ID, 'ai_assistant'],
-          catalogue: [OBSERVABILITY_AI_ASSISTANT_FEATURE_ID],
-          savedObject: {
-            all: [],
-            read: [
-              ACTION_SAVED_OBJECT_TYPE,
-              ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
-              CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
-            ],
-          },
-          management: {
-            insightsAndAlerting: ['triggersActionsConnectors'],
-          },
-          ui: ['show'],
-        },
       },
     });
 
