@@ -88,9 +88,7 @@ import { openFilterGroupContextMenu } from './common/filter_group';
 
 export const addExceptionFromFirstAlert = () => {
   expandFirstAlertActions();
-  cy.get(TIMELINE_CONTEXT_MENU_BTN)
-  .first()
-  .should('be.visible');
+  cy.get(TIMELINE_CONTEXT_MENU_BTN).first().should('be.visible');
   cy.get(ADD_EXCEPTION_BTN, { timeout: 10000 }).first().click();
   cy.get(LOADING_SPINNER).should('exist');
   cy.get(LOADING_SPINNER).should('not.exist');

@@ -10,7 +10,6 @@ import {
   waitForAlerts,
 } from '../../../../tasks/alerts';
 import { deleteAlertsAndRules, postDataView } from '../../../../tasks/common';
-import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
 import { login, visitWithoutDateRange } from '../../../../tasks/login';
 import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../../../urls/navigation';
 import { goToRuleDetails } from '../../../../tasks/alerts_detection_rules';
