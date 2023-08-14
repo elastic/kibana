@@ -14,6 +14,7 @@ import {
   GET_DISCOVER_COLUMN_TOGGLE_BTN,
   DISCOVER_FIELD_SEARCH,
   DISCOVER_DATA_VIEW_EDITOR_FLYOUT,
+  DISCOVER_FIELD_LIST_LOADING,
 } from '../screens/discover';
 import { GET_LOCAL_SEARCH_BAR_SUBMIT_BUTTON } from '../screens/search_bar';
 
@@ -32,6 +33,8 @@ export const openDataViewSwitcher = () => {
 export const waitForDiscoverGridToLoad = () => {
   cy.get(DISCOVER_DATA_GRID_UPDATING).should('be.visible');
   cy.get(DISCOVER_DATA_GRID_UPDATING).should('not.exist');
+  cy.get(DISCOVER_FIELD_LIST_LOADING).should('be.visible');
+  cy.get(DISCOVER_FIELD_LIST_LOADING).should('not.exist');
 };
 
 export const addDiscoverKqlQuery = (kqlQuery: string) => {
