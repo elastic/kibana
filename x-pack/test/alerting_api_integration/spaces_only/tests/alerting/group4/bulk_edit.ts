@@ -461,7 +461,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
       });
     });
 
-    it('should bulk update API key with apiKey operation', async () => {
+    it('should not bulk update API key with apiKey operation', async () => {
       const { body: createdRule } = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
@@ -491,8 +491,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
       expect(bulkApiKeyResponse.body.errors).to.have.length(0);
       expect(bulkApiKeyResponse.body.rules).to.have.length(1);
       expect(bulkApiKeyResponse.body.rules[0].api_key_owner).to.eql(null);
-      // Ensure revision is updated
-      expect(bulkApiKeyResponse.body.rules[0].revision).to.eql(1);
+      expect(bulkApiKeyResponse.body.rules[0].revision).to.eql(0);
     });
 
     it(`shouldn't bulk edit rule from another space`, async () => {
@@ -590,8 +589,8 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
         )
       ).body.monitoring;
 
-      // single rule execution is recorded in monitoring history
-      expect(monitoringData.execution.history).to.have.length(1);
+      // single rule run is recorded in monitoring history
+      expect(monitoringData.run.history).to.have.length(1);
 
       const payload = {
         ids: [createdRule.id],
