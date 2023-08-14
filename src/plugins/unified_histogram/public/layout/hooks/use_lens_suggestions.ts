@@ -5,13 +5,66 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { DataView } from '@kbn/data-views-plugin/common';
-import { AggregateQuery, isOfAggregateQueryType, Query } from '@kbn/es-query';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import {
+  AggregateQuery,
+  isOfAggregateQueryType,
+  Query,
+  TimeRange,
+  getAggregateQueryMode,
+} from '@kbn/es-query';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { LensSuggestionsApi, Suggestion } from '@kbn/lens-plugin/public';
 import { isEqual } from 'lodash';
 import { useEffect, useMemo, useRef, useState } from 'react';
+
+const roundInterval = (interval: number) => {
+  {
+    switch (true) {
+      case interval <= 500: // <= 0.5s
+        return '100 millisecond';
+      case interval <= 5000: // <= 5s
+        return '1 second';
+      case interval <= 7500: // <= 7.5s
+        return '5 second';
+      case interval <= 15000: // <= 15s
+        return '10 second';
+      case interval <= 45000: // <= 45s
+        return '30 second';
+      case interval <= 180000: // <= 3m
+        return '1 minute';
+      case interval <= 450000: // <= 9m
+        return '5 minute';
+      case interval <= 1200000: // <= 20m
+        return '10 minute';
+      case interval <= 2700000: // <= 45m
+        return '30 minute';
+      case interval <= 7200000: // <= 2h
+        return '1 hour';
+      case interval <= 21600000: // <= 6h
+        return '3 hour';
+      case interval <= 86400000: // <= 24h
+        return '12 hour';
+      case interval <= 604800000: // <= 1w
+        return '24 hour';
+      case interval <= 1814400000: // <= 3w
+        return '1 week';
+      case interval < 3628800000: // <  2y
+        return '30 day';
+      default:
+        return '1 year';
+    }
+  }
+};
+
+const computeInterval = (timeRange: TimeRange, data: DataPublicPluginStart): string => {
+  const bounds = data.query.timefilter.timefilter.calculateBounds(timeRange!);
+  const min = bounds.min!.valueOf();
+  const max = bounds.max!.valueOf();
+  const interval = (max - min) / 50;
+  return roundInterval(interval);
+};
 
 export const useLensSuggestions = ({
   dataView,
@@ -19,6 +72,8 @@ export const useLensSuggestions = ({
   originalSuggestion,
   isPlainRecord,
   columns,
+  timeRange,
+  data,
   lensSuggestionsApi,
   onSuggestionChange,
 }: {
@@ -27,6 +82,8 @@ export const useLensSuggestions = ({
   originalSuggestion?: Suggestion;
   isPlainRecord?: boolean;
   columns?: DatatableColumn[];
+  timeRange?: TimeRange;
+  data: DataPublicPluginStart;
   lensSuggestionsApi: LensSuggestionsApi;
   onSuggestionChange?: (suggestion: Suggestion | undefined) => void;
 }) => {
@@ -47,8 +104,51 @@ export const useLensSuggestions = ({
   }, [dataView, isPlainRecord, lensSuggestionsApi, query, columns]);
 
   const [allSuggestions, setAllSuggestions] = useState(suggestions.allSuggestions);
-  const currentSuggestion = originalSuggestion ?? suggestions.firstSuggestion;
+  let currentSuggestion = originalSuggestion ?? suggestions.firstSuggestion;
   const suggestionDeps = useRef(getSuggestionDeps({ dataView, query, columns }));
+  let isOnHistogramMode = false;
+
+  if (
+    !currentSuggestion &&
+    dataView.isTimeBased() &&
+    query &&
+    isOfAggregateQueryType(query) &&
+    getAggregateQueryMode(query) === 'esql' &&
+    timeRange
+  ) {
+    const language = getAggregateQueryMode(query);
+    const interval = computeInterval(timeRange, data);
+    const histogramQuery = `${query[language]} | eval uniqueName = 1
+      | EVAL timestamp=DATE_TRUNC(${dataView.timeFieldName}, ${interval}) | stats rows = count(uniqueName) by timestamp | rename timestamp as \`${dataView.timeFieldName} every ${interval}\``;
+    const context = {
+      dataViewSpec: dataView?.toSpec(),
+      fieldName: '',
+      textBasedColumns: [
+        {
+          id: `${dataView.timeFieldName} every ${interval}`,
+          name: `${dataView.timeFieldName} every ${interval}`,
+          meta: {
+            type: 'date',
+          },
+        },
+        {
+          id: 'rows',
+          name: 'rows',
+          meta: {
+            type: 'number',
+          },
+        },
+      ] as DatatableColumn[],
+      query: {
+        esql: histogramQuery,
+      },
+    };
+    const sug = isPlainRecord ? lensSuggestionsApi(context, dataView, ['lnsDatatable']) ?? [] : [];
+    if (sug.length) {
+      currentSuggestion = sug[0];
+      isOnHistogramMode = true;
+    }
+  }
 
   useEffect(() => {
     const newSuggestionsDeps = getSuggestionDeps({ dataView, query, columns });
@@ -71,7 +171,8 @@ export const useLensSuggestions = ({
   return {
     allSuggestions,
     currentSuggestion,
-    suggestionUnsupported: !currentSuggestion && !dataView.isTimeBased(),
+    suggestionUnsupported: isPlainRecord && !currentSuggestion,
+    isOnHistogramMode,
   };
 };
 
