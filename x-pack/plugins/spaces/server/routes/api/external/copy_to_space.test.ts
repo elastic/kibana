@@ -17,6 +17,7 @@ import {
   loggingSystemMock,
 } from 'src/core/server/mocks';
 
+import { initCopyToSpacesApi } from './copy_to_space';
 import { spacesConfig } from '../../../lib/__fixtures__';
 import { SpacesClientService } from '../../../spaces_client';
 import { SpacesService } from '../../../spaces_service';
@@ -32,7 +33,6 @@ import {
   mockRouteContext,
   mockRouteContextWithInvalidLicense,
 } from '../__fixtures__';
-import { initCopyToSpacesApi } from './copy_to_space';
 
 describe('copy to space', () => {
   const spacesSavedObjects = createSpaces();

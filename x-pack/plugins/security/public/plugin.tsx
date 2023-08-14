@@ -11,13 +11,6 @@ import type { DataPublicPluginStart } from 'src/plugins/data/public';
 import type { HomePublicPluginSetup } from 'src/plugins/home/public';
 import type { ManagementSetup, ManagementStart } from 'src/plugins/management/public';
 
-import { FeatureCatalogueCategory } from '../../../../src/plugins/home/public';
-import type { SharePluginSetup, SharePluginStart } from '../../../../src/plugins/share/public';
-import type { FeaturesPluginStart } from '../../features/public';
-import type { LicensingPluginSetup } from '../../licensing/public';
-import type { SpacesPluginStart } from '../../spaces/public';
-import { SecurityLicenseService } from '../common/licensing';
-import type { SecurityLicense } from '../common/licensing';
 import { accountManagementApp } from './account_management';
 import { AnonymousAccessService } from './anonymous_access';
 import type { AuthenticationServiceSetup, AuthenticationServiceStart } from './authentication';
@@ -30,6 +23,13 @@ import { SecurityCheckupService } from './security_checkup';
 import { SessionExpired, SessionTimeout, UnauthorizedResponseHttpInterceptor } from './session';
 import type { UiApi } from './ui_api';
 import { getUiApi } from './ui_api';
+import { FeatureCatalogueCategory } from '../../../../src/plugins/home/public';
+import type { SharePluginSetup, SharePluginStart } from '../../../../src/plugins/share/public';
+import type { FeaturesPluginStart } from '../../features/public';
+import type { LicensingPluginSetup } from '../../licensing/public';
+import type { SpacesPluginStart } from '../../spaces/public';
+import type { SecurityLicense } from '../common/licensing';
+import { SecurityLicenseService } from '../common/licensing';
 
 export interface PluginSetupDependencies {
   licensing: LicensingPluginSetup;

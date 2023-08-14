@@ -20,6 +20,11 @@ import {
   loggingSystemMock,
 } from 'src/core/server/mocks';
 
+import { AuthenticationResult } from './authentication_result';
+import type { AuthenticatorOptions } from './authenticator';
+import { Authenticator } from './authenticator';
+import { DeauthenticationResult } from './deauthentication_result';
+import type { BasicAuthenticationProvider, SAMLAuthenticationProvider } from './providers';
 import {
   AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER,
   AUTH_URL_HASH_QUERY_STRING_PARAMETER,
@@ -32,11 +37,6 @@ import { ConfigSchema, createConfig } from '../config';
 import { securityFeatureUsageServiceMock } from '../feature_usage/index.mock';
 import type { SessionValue } from '../session_management';
 import { sessionMock } from '../session_management/index.mock';
-import { AuthenticationResult } from './authentication_result';
-import type { AuthenticatorOptions } from './authenticator';
-import { Authenticator } from './authenticator';
-import { DeauthenticationResult } from './deauthentication_result';
-import type { BasicAuthenticationProvider, SAMLAuthenticationProvider } from './providers';
 
 function getMockOptions({
   providers,

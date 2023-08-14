@@ -23,6 +23,7 @@ import React, { Component } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
+import { PrivilegeDisplay } from './privilege_display';
 import type { Space } from '../../../../../../../../spaces/public';
 import { getSpaceColor } from '../../../../../../../../spaces/public';
 import type { FeaturesPrivileges, Role } from '../../../../../../../common/model';
@@ -30,7 +31,6 @@ import { copyRole } from '../../../../../../../common/model';
 import { isGlobalPrivilegeDefinition } from '../../../privilege_utils';
 import { CUSTOM_PRIVILEGE_VALUE } from '../constants';
 import type { PrivilegeFormCalculator } from '../privilege_form_calculator';
-import { PrivilegeDisplay } from './privilege_display';
 
 const SPACES_DISPLAY_COUNT = 4;
 

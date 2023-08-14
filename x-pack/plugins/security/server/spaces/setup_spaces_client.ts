@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import { LegacySpacesAuditLogger } from './legacy_audit_logger';
+import { SecureSpacesClientWrapper } from './secure_spaces_client_wrapper';
 import { SavedObjectsClient } from '../../../../../src/core/server';
 import type { SpacesPluginSetup } from '../../../spaces/server';
 import type { AuditServiceSetup } from '../audit';
 import type { AuthorizationServiceSetup } from '../authorization';
-import { LegacySpacesAuditLogger } from './legacy_audit_logger';
-import { SecureSpacesClientWrapper } from './secure_spaces_client_wrapper';
 
 interface Deps {
   audit: AuditServiceSetup;

@@ -14,8 +14,8 @@ import { act } from '@testing-library/react';
 import { coreMock, scopedHistoryMock } from 'src/core/public/mocks';
 import type { Unmount } from 'src/plugins/management/public/types';
 
-import { securityMock } from '../../mocks';
 import { apiKeysManagementApp } from './api_keys_management_app';
+import { securityMock } from '../../mocks';
 
 describe('apiKeysManagementApp', () => {
   it('create() returns proper management app descriptor', () => {

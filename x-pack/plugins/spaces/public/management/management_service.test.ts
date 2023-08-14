@@ -10,9 +10,9 @@ import { coreMock } from 'src/core/public/mocks';
 import type { ManagementSection } from 'src/plugins/management/public';
 import { managementPluginMock } from 'src/plugins/management/public/mocks';
 
+import { ManagementService } from './management_service';
 import type { PluginsStart } from '../plugin';
 import { spacesManagerMock } from '../spaces_manager/mocks';
-import { ManagementService } from './management_service';
 
 describe('ManagementService', () => {
   describe('#setup', () => {

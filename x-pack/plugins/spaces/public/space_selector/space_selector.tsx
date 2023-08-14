@@ -29,10 +29,10 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import type { CoreStart } from 'src/core/public';
 
+import { SpaceCards } from './components';
 import type { Space } from '../../common';
 import { SPACE_SEARCH_COUNT_THRESHOLD } from '../../common/constants';
 import type { SpacesManager } from '../spaces_manager';
-import { SpaceCards } from './components';
 
 interface Props {
   spacesManager: SpacesManager;

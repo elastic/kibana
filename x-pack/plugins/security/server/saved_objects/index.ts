@@ -7,11 +7,11 @@
 
 import type { CoreSetup } from 'src/core/server';
 
+import { SecureSavedObjectsClientWrapper } from './secure_saved_objects_client_wrapper';
 import { SavedObjectsClient } from '../../../../../src/core/server';
 import type { AuditServiceSetup, SecurityAuditLogger } from '../audit';
 import type { AuthorizationServiceSetupInternal } from '../authorization';
 import type { SpacesService } from '../plugin';
-import { SecureSavedObjectsClientWrapper } from './secure_saved_objects_client_wrapper';
 
 interface SetupSavedObjectsParams {
   legacyAuditLogger: SecurityAuditLogger;

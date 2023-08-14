@@ -9,8 +9,8 @@ import { nextTick } from '@kbn/test/jest';
 import type { DocLinksStart } from 'src/core/public';
 import { coreMock } from 'src/core/public/mocks';
 
-import type { ConfigType } from '../config';
 import { SecurityCheckupService } from './security_checkup_service';
+import type { ConfigType } from '../config';
 
 let mockOnDismissCallback: (persist: boolean) => void = jest.fn().mockImplementation(() => {
   throw new Error('expected callback to be replaced!');

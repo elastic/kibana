@@ -10,8 +10,8 @@ import React from 'react';
 
 import { mountWithIntl } from '@kbn/test/jest';
 
-import { SpaceAvatarInternal } from '../../../space_avatar/space_avatar_internal';
 import { AdvancedSettingsTitle } from './advanced_settings_title';
+import { SpaceAvatarInternal } from '../../../space_avatar/space_avatar_internal';
 
 describe('AdvancedSettingsTitle', () => {
   it('renders without crashing', async () => {

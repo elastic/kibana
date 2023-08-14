@@ -25,6 +25,8 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import type { CoreStart, FatalErrorsStart, HttpStart, NotificationsStart } from 'src/core/public';
 
+import type { LoginFormProps } from './components';
+import { DisabledLoginForm, LoginForm, LoginFormMessageType } from './components';
 import {
   AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER,
   LOGOUT_REASON_QUERY_STRING_PARAMETER,
@@ -32,8 +34,6 @@ import {
 import type { LoginState } from '../../../common/login_state';
 import type { LogoutReason } from '../../../common/types';
 import type { ConfigType } from '../../config';
-import type { LoginFormProps } from './components';
-import { DisabledLoginForm, LoginForm, LoginFormMessageType } from './components';
 
 interface Props {
   http: HttpStart;

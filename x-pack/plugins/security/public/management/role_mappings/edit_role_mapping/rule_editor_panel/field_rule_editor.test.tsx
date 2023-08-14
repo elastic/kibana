@@ -10,8 +10,8 @@ import React from 'react';
 
 import { findTestSubject, mountWithIntl } from '@kbn/test/jest';
 
-import { FieldRule } from '../../model';
 import { FieldRuleEditor } from './field_rule_editor';
+import { FieldRule } from '../../model';
 
 function assertField(wrapper: ReactWrapper<any, any, any>, index: number, field: string) {
   const isFirst = index === 0;

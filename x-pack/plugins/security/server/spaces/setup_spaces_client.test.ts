@@ -7,10 +7,10 @@
 
 import { coreMock, httpServerMock } from 'src/core/server/mocks';
 
+import { setupSpacesClient } from './setup_spaces_client';
 import { spacesMock } from '../../../spaces/server/mocks';
 import { auditServiceMock } from '../audit/index.mock';
 import { authorizationMock } from '../authorization/index.mock';
-import { setupSpacesClient } from './setup_spaces_client';
 
 describe('setupSpacesClient', () => {
   it('does not setup the spaces client when spaces is disabled', () => {

@@ -20,15 +20,6 @@ import type {
 } from 'src/core/server';
 import type { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 
-import type {
-  PluginSetupContract as FeaturesPluginSetup,
-  PluginStartContract as FeaturesPluginStart,
-} from '../../features/server';
-import type { LicensingPluginSetup, LicensingPluginStart } from '../../licensing/server';
-import type { SpacesPluginSetup, SpacesPluginStart } from '../../spaces/server';
-import type { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
-import type { AuthenticatedUser, PrivilegeDeprecationsService, SecurityLicense } from '../common';
-import { SecurityLicenseService } from '../common/licensing';
 import type { AnonymousAccessServiceStart } from './anonymous_access';
 import { AnonymousAccessService } from './anonymous_access';
 import type { AuditServiceSetup } from './audit';
@@ -58,6 +49,15 @@ import type { Session } from './session_management';
 import { SessionManagementService } from './session_management';
 import { setupSpacesClient } from './spaces';
 import { registerSecurityUsageCollector } from './usage_collector';
+import type {
+  PluginSetupContract as FeaturesPluginSetup,
+  PluginStartContract as FeaturesPluginStart,
+} from '../../features/server';
+import type { LicensingPluginSetup, LicensingPluginStart } from '../../licensing/server';
+import type { SpacesPluginSetup, SpacesPluginStart } from '../../spaces/server';
+import type { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
+import type { AuthenticatedUser, PrivilegeDeprecationsService, SecurityLicense } from '../common';
+import { SecurityLicenseService } from '../common/licensing';
 
 export type SpacesService = Pick<
   SpacesPluginSetup['spacesService'],

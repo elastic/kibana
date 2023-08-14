@@ -16,9 +16,9 @@ import {
   savedObjectsClientMock,
 } from 'src/core/server/mocks';
 
+import { registerKibanaDashboardOnlyRoleDeprecation } from './kibana_dashboard_only_role';
 import { licenseMock } from '../../common/licensing/index.mock';
 import { securityMock } from '../mocks';
-import { registerKibanaDashboardOnlyRoleDeprecation } from './kibana_dashboard_only_role';
 
 function getDepsMock() {
   return {

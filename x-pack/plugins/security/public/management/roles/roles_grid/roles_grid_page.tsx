@@ -26,6 +26,8 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { NotificationsStart, ScopedHistory } from 'src/core/public';
 
+import { ConfirmDelete } from './confirm_delete';
+import { PermissionDenied } from './permission_denied';
 import { reactRouterNavigate } from '../../../../../../../src/plugins/kibana_react/public';
 import type { Role } from '../../../../common/model';
 import {
@@ -37,8 +39,6 @@ import {
 } from '../../../../common/model';
 import { DeprecatedBadge, DisabledBadge, ReservedBadge } from '../../badges';
 import type { RolesAPIClient } from '../roles_api_client';
-import { ConfirmDelete } from './confirm_delete';
-import { PermissionDenied } from './permission_denied';
 
 interface Props {
   notifications: NotificationsStart;

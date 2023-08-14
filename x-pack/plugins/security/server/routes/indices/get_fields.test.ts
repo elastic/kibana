@@ -8,8 +8,8 @@
 import { kibanaResponseFactory } from 'src/core/server';
 import { coreMock, httpServerMock } from 'src/core/server/mocks';
 
-import { routeDefinitionParamsMock } from '../index.mock';
 import { defineGetFieldsRoutes } from './get_fields';
+import { routeDefinitionParamsMock } from '../index.mock';
 
 const createFieldMapping = (field: string, type: string) => ({
   [field]: { mapping: { [field]: { type } } },

@@ -12,10 +12,10 @@ import React from 'react';
 import { mountWithIntl, nextTick } from '@kbn/test/jest';
 import { coreMock } from 'src/core/public/mocks';
 
+import { OverwrittenSessionPage } from './overwritten_session_page';
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
 import { AuthenticationStatePage } from '../components/authentication_state_page';
 import { authenticationMock } from '../index.mock';
-import { OverwrittenSessionPage } from './overwritten_session_page';
 
 describe('OverwrittenSessionPage', () => {
   beforeAll(() => {

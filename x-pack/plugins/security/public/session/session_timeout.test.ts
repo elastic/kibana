@@ -10,6 +10,9 @@ import type { BroadcastChannel } from 'broadcast-channel';
 import type { ToastInputFields } from 'src/core/public';
 import { coreMock } from 'src/core/public/mocks';
 
+import { createSessionExpiredMock } from './session_expired.mock';
+import type { SessionState } from './session_timeout';
+import { SessionTimeout, startTimer } from './session_timeout';
 import {
   SESSION_CHECK_MS,
   SESSION_EXPIRATION_WARNING_MS,
@@ -18,9 +21,6 @@ import {
   SESSION_ROUTE,
 } from '../../common/constants';
 import type { SessionInfo } from '../../common/types';
-import { createSessionExpiredMock } from './session_expired.mock';
-import type { SessionState } from './session_timeout';
-import { SessionTimeout, startTimer } from './session_timeout';
 
 jest.mock('broadcast-channel');
 

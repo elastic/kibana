@@ -11,9 +11,9 @@ import type { AppMount } from 'src/core/public';
 import { AppNavLinkStatus } from 'src/core/public';
 import { coreMock, scopedHistoryMock } from 'src/core/public/mocks';
 
+import { accountManagementApp } from './account_management_app';
 import { UserAPIClient } from '../management';
 import { securityMock } from '../mocks';
-import { accountManagementApp } from './account_management_app';
 
 describe('accountManagementApp', () => {
   it('properly registers application', () => {

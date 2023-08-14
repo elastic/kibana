@@ -10,11 +10,11 @@ import nodeCrypto from '@elastic/node-crypto';
 
 import { loggingSystemMock } from 'src/core/server/mocks';
 
+import { EncryptedSavedObjectsService } from './encrypted_saved_objects_service';
+import { EncryptionError } from './encryption_error';
 import { mockAuthenticatedUser } from '../../../security/common/model/authenticated_user.mock';
 import type { EncryptedSavedObjectsAuditLogger } from '../audit';
 import { encryptedSavedObjectsAuditLoggerMock } from '../audit/index.mock';
-import { EncryptedSavedObjectsService } from './encrypted_saved_objects_service';
-import { EncryptionError } from './encryption_error';
 
 function createNodeCryptMock(encryptionKey: string) {
   const crypto = nodeCrypto({ encryptionKey });

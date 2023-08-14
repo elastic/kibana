@@ -17,11 +17,11 @@ import type {
 } from 'src/core/server';
 import { httpServerMock, savedObjectsClientMock } from 'src/core/server/mocks';
 
+import { SecureSavedObjectsClientWrapper } from './secure_saved_objects_client_wrapper';
 import type { AuditEvent } from '../audit';
 import { auditServiceMock, securityAuditLoggerMock } from '../audit/index.mock';
 import { Actions } from '../authorization';
 import type { SavedObjectActions } from '../authorization/actions/saved_object';
-import { SecureSavedObjectsClientWrapper } from './secure_saved_objects_client_wrapper';
 
 jest.mock('src/core/server/saved_objects/service/lib/utils', () => {
   const { SavedObjectsUtils } = jest.requireActual(

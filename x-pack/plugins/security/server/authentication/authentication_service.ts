@@ -15,6 +15,13 @@ import type {
   LoggerFactory,
 } from 'src/core/server';
 
+import { APIKeys } from './api_keys';
+import type { AuthenticationResult } from './authentication_result';
+import type { ProviderLoginAttempt } from './authenticator';
+import { Authenticator } from './authenticator';
+import { canRedirectRequest } from './can_redirect_request';
+import type { DeauthenticationResult } from './deauthentication_result';
+import { renderUnauthenticatedPage } from './unauthenticated_page';
 import { NEXT_URL_QUERY_STRING_PARAMETER } from '../../common/constants';
 import type { SecurityLicense } from '../../common/licensing';
 import type { AuthenticatedUser } from '../../common/model';
@@ -25,13 +32,6 @@ import { getDetailedErrorMessage, getErrorStatusCode } from '../errors';
 import type { SecurityFeatureUsageServiceStart } from '../feature_usage';
 import { ROUTE_TAG_AUTH_FLOW } from '../routes/tags';
 import type { Session } from '../session_management';
-import { APIKeys } from './api_keys';
-import type { AuthenticationResult } from './authentication_result';
-import type { ProviderLoginAttempt } from './authenticator';
-import { Authenticator } from './authenticator';
-import { canRedirectRequest } from './can_redirect_request';
-import type { DeauthenticationResult } from './deauthentication_result';
-import { renderUnauthenticatedPage } from './unauthenticated_page';
 
 interface AuthenticationServiceSetupParams {
   http: Pick<HttpServiceSetup, 'basePath' | 'csp' | 'registerAuth' | 'registerOnPreResponse'>;

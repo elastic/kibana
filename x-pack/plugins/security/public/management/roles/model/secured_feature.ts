@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { KibanaFeatureConfig } from '../../../../../features/common';
-import { KibanaFeature } from '../../../../../features/common';
 import { PrimaryFeaturePrivilege } from './primary_feature_privilege';
 import { SecuredSubFeature } from './secured_sub_feature';
 import type { SubFeaturePrivilege } from './sub_feature_privilege';
+import { KibanaFeature } from '../../../../../features/common';
+import type { KibanaFeatureConfig } from '../../../../../features/common';
 
 export class SecuredFeature extends KibanaFeature {
   private readonly primaryFeaturePrivileges: PrimaryFeaturePrivilege[];

@@ -15,12 +15,12 @@ import { mountWithIntl } from '@kbn/test/jest';
 import { DEFAULT_APP_CATEGORIES } from 'src/core/public';
 import { notificationServiceMock, scopedHistoryMock } from 'src/core/public/mocks';
 
+import { ConfirmAlterActiveSpaceModal } from './confirm_alter_active_space_modal';
+import { ManageSpacePage } from './manage_space_page';
 import { KibanaFeature } from '../../../../features/public';
 import { featuresPluginMock } from '../../../../features/public/mocks';
 import type { SpacesManager } from '../../spaces_manager';
 import { spacesManagerMock } from '../../spaces_manager/mocks';
-import { ConfirmAlterActiveSpaceModal } from './confirm_alter_active_space_modal';
-import { ManageSpacePage } from './manage_space_page';
 
 // To be resolved by EUI team.
 // https://github.com/elastic/eui/issues/3712

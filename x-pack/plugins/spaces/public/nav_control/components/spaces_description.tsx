@@ -13,8 +13,8 @@ import React from 'react';
 
 import type { ApplicationStart, Capabilities } from 'src/core/public';
 
-import { getSpacesFeatureDescription } from '../../constants';
 import { ManageSpacesButton } from './manage_spaces_button';
+import { getSpacesFeatureDescription } from '../../constants';
 
 interface Props {
   id: string;

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { FeaturePrivilegeAlertingBuilder } from './alerting';
 import type { FeatureKibanaPrivileges } from '../../../../../features/server';
 import { KibanaFeature } from '../../../../../features/server';
 import { Actions } from '../../actions';
-import { FeaturePrivilegeAlertingBuilder } from './alerting';
 
 const version = '1.0.0-zeta1';
 

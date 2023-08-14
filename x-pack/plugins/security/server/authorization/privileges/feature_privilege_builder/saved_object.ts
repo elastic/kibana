@@ -7,8 +7,8 @@
 
 import { flatten, uniq } from 'lodash';
 
-import type { FeatureKibanaPrivileges } from '../../../../../features/server';
 import { BaseFeaturePrivilegeBuilder } from './feature_privilege_builder';
+import type { FeatureKibanaPrivileges } from '../../../../../features/server';
 
 const readOperations: string[] = [
   'bulk_get',

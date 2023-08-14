@@ -11,10 +11,10 @@ import { catchError, mergeMap, switchMap, tap } from 'rxjs/operators';
 
 import type { CoreSetup, Logger, SavedObjectsServiceStart, ServiceStatus } from 'src/core/server';
 
+import { createDefaultSpace } from './create_default_space';
 import { ServiceStatusLevels } from '../../../../../src/core/server';
 import type { ILicense } from '../../../licensing/server';
 import type { SpacesLicense } from '../../common/licensing';
-import { createDefaultSpace } from './create_default_space';
 
 interface Deps {
   coreStatus: CoreSetup['status'];

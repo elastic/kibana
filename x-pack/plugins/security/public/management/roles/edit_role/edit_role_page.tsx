@@ -36,6 +36,11 @@ import type {
 } from 'src/core/public';
 import type { IndexPatternsContract } from 'src/plugins/data/public';
 
+import { DeleteRoleButton } from './delete_role_button';
+import { ElasticsearchPrivileges, KibanaPrivilegesRegion } from './privileges';
+import { ReservedRoleBadge } from './reserved_role_badge';
+import type { RoleValidationResult } from './validate_role';
+import { RoleValidator } from './validate_role';
 import { reactRouterNavigate } from '../../../../../../../src/plugins/kibana_react/public';
 import type { KibanaFeature } from '../../../../../features/common';
 import type { FeaturesPluginStart } from '../../../../../features/public';
@@ -60,11 +65,6 @@ import type { IndicesAPIClient } from '../indices_api_client';
 import { KibanaPrivileges } from '../model';
 import type { PrivilegesAPIClient } from '../privileges_api_client';
 import type { RolesAPIClient } from '../roles_api_client';
-import { DeleteRoleButton } from './delete_role_button';
-import { ElasticsearchPrivileges, KibanaPrivilegesRegion } from './privileges';
-import { ReservedRoleBadge } from './reserved_role_badge';
-import type { RoleValidationResult } from './validate_role';
-import { RoleValidator } from './validate_role';
 
 interface Props {
   action: 'edit' | 'clone';

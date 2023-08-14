@@ -11,9 +11,9 @@ import { noop } from 'lodash';
 import { coreMock, scopedHistoryMock } from 'src/core/public/mocks';
 import type { Unmount } from 'src/plugins/management/public/types';
 
+import { rolesManagementApp } from './roles_management_app';
 import { featuresPluginMock } from '../../../../features/public/mocks';
 import { licenseMock } from '../../../common/licensing/index.mock';
-import { rolesManagementApp } from './roles_management_app';
 
 jest.mock('./roles_grid', () => ({
   RolesGridPage: (props: any) => `Roles Page: ${JSON.stringify(props)}`,

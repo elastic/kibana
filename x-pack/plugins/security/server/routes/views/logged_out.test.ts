@@ -9,10 +9,10 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { HttpResourcesRequestHandler, RouteConfig } from 'src/core/server';
 import { httpResourcesMock, httpServerMock } from 'src/core/server/mocks';
 
+import { defineLoggedOutRoutes } from './logged_out';
 import type { Session } from '../../session_management';
 import { sessionMock } from '../../session_management/session.mock';
 import { routeDefinitionParamsMock } from '../index.mock';
-import { defineLoggedOutRoutes } from './logged_out';
 
 describe('LoggedOut view routes', () => {
   let session: jest.Mocked<PublicMethodsOf<Session>>;

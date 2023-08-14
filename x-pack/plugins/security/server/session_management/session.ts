@@ -13,10 +13,10 @@ import { promisify } from 'util';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { KibanaRequest, Logger } from 'src/core/server';
 
-import type { AuthenticationProvider } from '../../common/model';
-import type { ConfigType } from '../config';
 import type { SessionCookie } from './session_cookie';
 import type { SessionIndex, SessionIndexValue } from './session_index';
+import type { AuthenticationProvider } from '../../common/model';
+import type { ConfigType } from '../config';
 
 /**
  * The shape of the value that represents user's session information.

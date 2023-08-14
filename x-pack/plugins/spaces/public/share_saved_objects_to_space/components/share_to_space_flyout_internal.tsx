@@ -27,6 +27,10 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import type { SavedObjectReferenceWithContext, ToastsStart } from 'src/core/public';
 
+import { AliasTable } from './alias_table';
+import { RelativesFooter } from './relatives_footer';
+import { ShareToSpaceForm } from './share_to_space_form';
+import type { InternalLegacyUrlAliasTarget } from './types';
 import { ALL_SPACES_ID, UNKNOWN_SPACE } from '../../../common/constants';
 import { DEFAULT_OBJECT_NOUN } from '../../constants';
 import { getCopyToSpaceFlyoutComponent } from '../../copy_saved_objects_to_space';
@@ -38,10 +42,6 @@ import type {
   ShareToSpaceFlyoutProps,
   ShareToSpaceSavedObjectTarget,
 } from '../types';
-import { AliasTable } from './alias_table';
-import { RelativesFooter } from './relatives_footer';
-import { ShareToSpaceForm } from './share_to_space_form';
-import type { InternalLegacyUrlAliasTarget } from './types';
 
 // No need to wrap LazyCopyToSpaceFlyout in an error boundary, because the ShareToSpaceFlyoutInternal component itself is only ever used in
 // a lazy-loaded fashion with an error boundary.

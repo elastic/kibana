@@ -12,11 +12,11 @@ import React from 'react';
 import { mountWithIntl } from '@kbn/test/jest';
 import { coreMock } from 'src/core/public/mocks';
 
+import { SpaceListInternal } from './space_list_internal';
+import type { SpaceListProps } from './types';
 import type { Space } from '../../common';
 import { getSpacesContextProviderWrapper } from '../spaces_context';
 import { spacesManagerMock } from '../spaces_manager/mocks';
-import { SpaceListInternal } from './space_list_internal';
-import type { SpaceListProps } from './types';
 
 const ACTIVE_SPACE: Space = {
   id: 'default',

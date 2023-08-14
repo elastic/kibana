@@ -11,10 +11,10 @@ import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
 import type { ElasticsearchClient } from 'src/core/server';
 import { elasticsearchServiceMock, loggingSystemMock } from 'src/core/server/mocks';
 
-import { ConfigSchema, createConfig } from '../config';
-import { securityMock } from '../mocks';
 import { getSessionIndexTemplate, SessionIndex } from './session_index';
 import { sessionIndexMock } from './session_index.mock';
+import { ConfigSchema, createConfig } from '../config';
+import { securityMock } from '../mocks';
 
 describe('Session index', () => {
   let mockElasticsearchClient: DeeplyMockedKeys<ElasticsearchClient>;

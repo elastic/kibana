@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { SubFeaturePrivilegeGroupConfig } from '../../../../../features/common';
 import { SubFeaturePrivilege } from './sub_feature_privilege';
+import type { SubFeaturePrivilegeGroupConfig } from '../../../../../features/common';
 
 export class SubFeaturePrivilegeGroup {
   constructor(

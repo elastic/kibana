@@ -16,9 +16,9 @@ import {
   savedObjectsClientMock,
 } from 'src/core/server/mocks';
 
+import { registerMLPrivilegesDeprecation } from './ml_privileges';
 import { licenseMock } from '../../common/licensing/index.mock';
 import { securityMock } from '../mocks';
-import { registerMLPrivilegesDeprecation } from './ml_privileges';
 
 function getDepsMock() {
   return {

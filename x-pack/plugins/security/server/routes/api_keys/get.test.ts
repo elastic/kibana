@@ -10,9 +10,9 @@ import Boom from '@hapi/boom';
 import { kibanaResponseFactory } from 'src/core/server';
 import { coreMock, httpServerMock } from 'src/core/server/mocks';
 
+import { defineGetApiKeysRoutes } from './get';
 import type { LicenseCheck } from '../../../../licensing/server';
 import { routeDefinitionParamsMock } from '../index.mock';
-import { defineGetApiKeysRoutes } from './get';
 
 interface TestOptions {
   isAdmin?: boolean;

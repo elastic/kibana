@@ -9,8 +9,8 @@ import type { ReactElement } from 'react';
 
 import type { CoreStart } from 'src/core/public';
 
-import type { ChangePasswordProps, PersonalInfoProps } from '../account_management';
 import { getComponents } from './components';
+import type { ChangePasswordProps, PersonalInfoProps } from '../account_management';
 
 interface GetUiApiOptions {
   core: CoreStart;

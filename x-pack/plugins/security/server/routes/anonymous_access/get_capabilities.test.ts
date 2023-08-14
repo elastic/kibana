@@ -8,8 +8,8 @@
 import { kibanaResponseFactory } from 'src/core/server';
 import { httpServerMock } from 'src/core/server/mocks';
 
-import { routeDefinitionParamsMock, securityRequestHandlerContextMock } from '../index.mock';
 import { defineAnonymousAccessGetCapabilitiesRoutes } from './get_capabilities';
+import { routeDefinitionParamsMock, securityRequestHandlerContextMock } from '../index.mock';
 
 describe('GET /internal/security/anonymous_access/capabilities', () => {
   it('returns anonymous access state', async () => {

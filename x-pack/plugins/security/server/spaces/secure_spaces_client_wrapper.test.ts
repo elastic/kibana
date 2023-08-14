@@ -12,6 +12,12 @@ import type { EcsEventOutcome, SavedObjectsClientContract } from 'src/core/serve
 import { SavedObjectsErrorHelpers } from 'src/core/server';
 import { httpServerMock } from 'src/core/server/mocks';
 
+import type { LegacySpacesAuditLogger } from './legacy_audit_logger';
+import {
+  getAliasId,
+  LEGACY_URL_ALIAS_TYPE,
+  SecureSpacesClientWrapper,
+} from './secure_spaces_client_wrapper';
 import type { GetAllSpacesPurpose, LegacyUrlAliasTarget, Space } from '../../../spaces/server';
 import { spacesClientMock } from '../../../spaces/server/mocks';
 import type { AuditEvent, AuditLogger } from '../audit';
@@ -23,12 +29,6 @@ import type {
 } from '../authorization';
 import { authorizationMock } from '../authorization/index.mock';
 import type { CheckPrivilegesResponse } from '../authorization/types';
-import type { LegacySpacesAuditLogger } from './legacy_audit_logger';
-import {
-  getAliasId,
-  LEGACY_URL_ALIAS_TYPE,
-  SecureSpacesClientWrapper,
-} from './secure_spaces_client_wrapper';
 
 interface Opts {
   securityEnabled?: boolean;

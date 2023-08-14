@@ -11,10 +11,10 @@ import type { SavedObject, SavedObjectsType } from 'src/core/server';
 import { SavedObjectsErrorHelpers } from 'src/core/server';
 import { savedObjectsClientMock, savedObjectsTypeRegistryMock } from 'src/core/server/mocks';
 
+import { SpacesSavedObjectsClient } from './spaces_saved_objects_client';
 import { DEFAULT_SPACE_ID } from '../../common/constants';
 import { spacesClientMock } from '../spaces_client/spaces_client.mock';
 import { spacesServiceMock } from '../spaces_service/spaces_service.mock';
-import { SpacesSavedObjectsClient } from './spaces_saved_objects_client';
 
 const createMockRequest = () => ({});
 

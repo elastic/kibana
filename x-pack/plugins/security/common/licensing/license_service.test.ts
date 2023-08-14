@@ -7,8 +7,8 @@
 
 import { BehaviorSubject, of } from 'rxjs';
 
-import { licenseMock } from '../../../licensing/common/licensing.mock';
 import { SecurityLicenseService } from './license_service';
+import { licenseMock } from '../../../licensing/common/licensing.mock';
 
 describe('license features', function () {
   it('should display error when ES is unavailable', () => {

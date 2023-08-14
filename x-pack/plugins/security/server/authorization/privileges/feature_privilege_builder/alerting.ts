@@ -7,8 +7,8 @@
 
 import { get, uniq } from 'lodash';
 
-import type { FeatureKibanaPrivileges, KibanaFeature } from '../../../../../features/server';
 import { BaseFeaturePrivilegeBuilder } from './feature_privilege_builder';
+import type { FeatureKibanaPrivileges, KibanaFeature } from '../../../../../features/server';
 
 enum AlertingEntity {
   RULE = 'rule',

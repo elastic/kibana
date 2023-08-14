@@ -11,9 +11,9 @@ import { BehaviorSubject } from 'rxjs';
 
 import { findTestSubject, mountWithIntl, nextTick, shallowWithIntl } from '@kbn/test/jest';
 
+import { SecurityNavControl } from './nav_control_component';
 import type { AuthenticatedUser } from '../../common/model';
 import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
-import { SecurityNavControl } from './nav_control_component';
 
 describe('SecurityNavControl', () => {
   it(`renders a loading spinner when the user promise hasn't resolved yet.`, async () => {

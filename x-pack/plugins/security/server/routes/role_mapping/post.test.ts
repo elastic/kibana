@@ -8,8 +8,8 @@
 import { kibanaResponseFactory } from 'src/core/server';
 import { coreMock, httpServerMock } from 'src/core/server/mocks';
 
-import { routeDefinitionParamsMock } from '../index.mock';
 import { defineRoleMappingPostRoutes } from './post';
+import { routeDefinitionParamsMock } from '../index.mock';
 
 describe('POST role mappings', () => {
   it('allows a role mapping to be created', async () => {

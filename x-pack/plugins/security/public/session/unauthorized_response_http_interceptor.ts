@@ -12,8 +12,8 @@ import type {
   IHttpInterceptController,
 } from 'src/core/public';
 
-import { LogoutReason } from '../../common/types';
 import type { SessionExpired } from './session_expired';
+import { LogoutReason } from '../../common/types';
 
 export class UnauthorizedResponseHttpInterceptor implements HttpInterceptor {
   constructor(private sessionExpired: SessionExpired, private anonymousPaths: IAnonymousPaths) {}

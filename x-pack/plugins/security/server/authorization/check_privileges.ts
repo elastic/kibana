@@ -9,7 +9,6 @@ import { pick, transform, uniq } from 'lodash';
 
 import type { IClusterClient, KibanaRequest } from 'src/core/server';
 
-import { GLOBAL_RESOURCE } from '../../common/constants';
 import { ResourceSerializer } from './resource_serializer';
 import type {
   CheckPrivileges,
@@ -20,6 +19,7 @@ import type {
   HasPrivilegesResponseApplication,
 } from './types';
 import { validateEsPrivilegeResponse } from './validate_es_response';
+import { GLOBAL_RESOURCE } from '../../common/constants';
 
 interface CheckPrivilegesActions {
   login: string;

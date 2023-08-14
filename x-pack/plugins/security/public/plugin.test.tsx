@@ -13,11 +13,11 @@ import { coreMock } from 'src/core/public/mocks';
 import type { DataPublicPluginStart } from 'src/plugins/data/public';
 import { managementPluginMock } from 'src/plugins/management/public/mocks';
 
-import type { FeaturesPluginStart } from '../../features/public';
-import { licensingMock } from '../../licensing/public/mocks';
 import { ManagementService } from './management';
 import type { PluginStartDependencies } from './plugin';
 import { SecurityPlugin } from './plugin';
+import type { FeaturesPluginStart } from '../../features/public';
+import { licensingMock } from '../../licensing/public/mocks';
 
 describe('Security Plugin', () => {
   beforeAll(() => {
