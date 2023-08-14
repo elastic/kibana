@@ -115,6 +115,8 @@ export function ChatBody({
 
     parent.addEventListener('scroll', onScroll);
 
+    stick();
+
     return () => {
       unstick();
       parent.removeEventListener('scroll', onScroll);
