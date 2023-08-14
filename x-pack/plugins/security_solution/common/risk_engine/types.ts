@@ -36,8 +36,6 @@ export interface SimpleRiskInput {
   timestamp: string | undefined;
 }
 
-export type RiskInput = Ecs;
-
 export interface EcsRiskScore {
   '@timestamp': string;
   host?: {
