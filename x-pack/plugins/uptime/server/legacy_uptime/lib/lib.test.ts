@@ -147,7 +147,7 @@ describe('UptimeEsClient', () => {
           syntheticsIndexRemoved: true,
         },
       });
-      uptimeEsClient = new UptimeEsClient(savedObjectsClient, esClient, { isLegacyAlert: true });
+      uptimeEsClient = new UptimeEsClient(savedObjectsClient, esClient, { stackVersion: '8.9.0' });
 
       const mockSearchParams = {
         body: {
@@ -180,7 +180,7 @@ describe('UptimeEsClient', () => {
           settingsObjectId
         );
       });
-      uptimeEsClient = new UptimeEsClient(savedObjectsClient, esClient, { isLegacyAlert: true });
+      uptimeEsClient = new UptimeEsClient(savedObjectsClient, esClient, { stackVersion: '8.9.0' });
 
       const mockSearchParams = {
         body: {
@@ -201,6 +201,41 @@ describe('UptimeEsClient', () => {
       expect(esClient.search).toHaveBeenCalledWith(
         {
           index: 'heartbeat-8*,heartbeat-7*,synthetics-*',
+          ...mockSearchParams,
+        },
+        { meta: true }
+      );
+    });
+    it('does appends synthetics-* in index for stack version later than 8.10.0', async () => {
+      savedObjectsClient.get = jest.fn().mockImplementation(() => {
+        throw SavedObjectsErrorHelpers.createGenericNotFoundError(
+          umDynamicSettings.name,
+          settingsObjectId
+        );
+      });
+      uptimeEsClient = new UptimeEsClient(savedObjectsClient, esClient, {
+        stackVersion: '8.11.0',
+      });
+
+      const mockSearchParams = {
+        body: {
+          query: {
+            match_all: {},
+          },
+        },
+      };
+
+      await uptimeEsClient.search({
+        body: {
+          query: {
+            match_all: {},
+          },
+        },
+      });
+
+      expect(esClient.search).toHaveBeenCalledWith(
+        {
+          index: 'heartbeat-8*,heartbeat-7*',
           ...mockSearchParams,
         },
         { meta: true }
