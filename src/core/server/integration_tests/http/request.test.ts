@@ -191,7 +191,16 @@ describe('KibanaRequest', () => {
           // end required to send request
           .end();
 
-        setTimeout(() => incomingRequest.abort(), 50);
+        setTimeout(() => {
+          incomingRequest.abort();
+
+          // Hack to resolve superagent's bug https://github.com/ladjs/superagent/pull/1774
+          // Can be removed once a new version is published and we upgrade.
+          // @ts-expect-error
+          incomingRequest.req.destroyed = false;
+          // @ts-expect-error
+          incomingRequest.req.destroy();
+        }, 50);
         await done;
         expect(nextSpy).toHaveBeenCalledTimes(1);
       });
@@ -227,7 +236,16 @@ describe('KibanaRequest', () => {
           // end required to send request
           .end();
 
-        setTimeout(() => incomingRequest.abort(), 50);
+        setTimeout(() => {
+          incomingRequest.abort();
+
+          // Hack to resolve superagent's bug https://github.com/ladjs/superagent/pull/1774
+          // Can be removed once a new version is published and we upgrade.
+          // @ts-expect-error
+          incomingRequest.req.destroyed = false;
+          // @ts-expect-error
+          incomingRequest.req.destroy();
+        }, 50);
         await done;
         expect(nextSpy).toHaveBeenCalledTimes(1);
       });
@@ -366,7 +384,16 @@ describe('KibanaRequest', () => {
           .get('/')
           // end required to send request
           .end();
-        setTimeout(() => incomingRequest.abort(), 50);
+        setTimeout(() => {
+          incomingRequest.abort();
+
+          // Hack to resolve superagent's bug https://github.com/ladjs/superagent/pull/1774
+          // Can be removed once a new version is published and we upgrade.
+          // @ts-expect-error
+          incomingRequest.req.destroyed = false;
+          // @ts-expect-error
+          incomingRequest.req.destroy();
+        }, 50);
         await done;
         expect(nextSpy).toHaveBeenCalledTimes(1);
       });
@@ -401,7 +428,16 @@ describe('KibanaRequest', () => {
           .send({ foo: 'bar' })
           // end required to send request
           .end();
-        setTimeout(() => incomingRequest.abort(), 50);
+        setTimeout(() => {
+          incomingRequest.abort();
+
+          // Hack to resolve superagent's bug https://github.com/ladjs/superagent/pull/1774
+          // Can be removed once a new version is published and we upgrade.
+          // @ts-expect-error
+          incomingRequest.req.destroyed = false;
+          // @ts-expect-error
+          incomingRequest.req.destroy();
+        }, 50);
         await done;
         expect(nextSpy).toHaveBeenCalledTimes(1);
       });

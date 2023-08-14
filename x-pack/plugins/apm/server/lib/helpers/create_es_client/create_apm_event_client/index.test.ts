@@ -86,6 +86,13 @@ describe('APMEventClient', () => {
           }, 100);
         });
         incomingRequest.abort();
+
+        // Hack to resolve superagent's bug https://github.com/ladjs/superagent/pull/1774
+        // Can be removed once a new version is published and we upgrade.
+        // @ts-expect-error
+        incomingRequest.req.destroyed = false;
+        // @ts-expect-error
+        incomingRequest.req.destroy();
       }, 100);
     });
 

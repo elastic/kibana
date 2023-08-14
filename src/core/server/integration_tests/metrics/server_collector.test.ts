@@ -117,6 +117,12 @@ describe('ServerMetricsCollector', () => {
     const waitFor1stAbort = disconnectAborted$.pipe(take(1)).toPromise();
 
     discoReq1.abort();
+    // Hack to resolve superagent's bug https://github.com/ladjs/superagent/pull/1774
+    // Can be removed once a new version is published and we upgrade.
+    // @ts-expect-error
+    discoReq1.req.destroyed = false;
+    // @ts-expect-error
+    discoReq1.req.destroy();
 
     // Wait for the aborted$ event
     await waitFor1stAbort;
@@ -133,6 +139,12 @@ describe('ServerMetricsCollector', () => {
     const waitFor2ndAbort = disconnectAborted$.pipe(take(1)).toPromise();
 
     discoReq2.abort();
+    // Hack to resolve superagent's bug https://github.com/ladjs/superagent/pull/1774
+    // Can be removed once a new version is published and we upgrade.
+    // @ts-expect-error
+    discoReq2.req.destroyed = false;
+    // @ts-expect-error
+    discoReq2.req.destroy();
 
     // Wait for the aborted$ event
     await waitFor2ndAbort;
