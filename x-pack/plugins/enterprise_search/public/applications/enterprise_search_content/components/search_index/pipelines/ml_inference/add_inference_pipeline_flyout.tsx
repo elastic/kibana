@@ -23,6 +23,7 @@ import {
   EuiStepsHorizontalProps,
   EuiLoadingSpinner,
   EuiSpacer,
+  EuiStepStatus,
   EuiTitle,
 } from '@elastic/eui';
 
@@ -159,13 +160,8 @@ export const AddInferencePipelineHorizontalSteps: React.FC = () => {
   const getStepStatus = (
     currentStep: AddInferencePipelineSteps,
     otherStep: AddInferencePipelineSteps
-  ) => {
-    return currentStep > otherStep
-      ? 'complete'
-      : currentStep === otherStep
-      ? 'current'
-      : 'incomplete';
-  };
+  ): EuiStepStatus =>
+    currentStep > otherStep ? 'complete' : currentStep === otherStep ? 'current' : 'incomplete';
 
   const navSteps: EuiStepsHorizontalProps['steps'] = [
     {
