@@ -13,7 +13,6 @@ import { useGetUrlParams } from '../hooks';
 
 export interface UptimeSettingsContextValues {
   basePath: string;
-  stackVersion: string;
   dateRangeStart: string;
   dateRangeEnd: string;
   isApmAvailable: boolean;
@@ -39,26 +38,17 @@ const defaultContext: UptimeSettingsContextValues = {
   isInfraAvailable: true,
   isLogsAvailable: true,
   isDev: false,
-  stackVersion: '',
 };
 export const UptimeSettingsContext = createContext(defaultContext);
 
 export const UptimeSettingsContextProvider: React.FC<UptimeAppProps> = ({ children, ...props }) => {
-  const {
-    stackVersion,
-    basePath,
-    isApmAvailable,
-    isInfraAvailable,
-    isLogsAvailable,
-    commonlyUsedRanges,
-    isDev,
-  } = props;
+  const { basePath, isApmAvailable, isInfraAvailable, isLogsAvailable, commonlyUsedRanges, isDev } =
+    props;
 
   const { dateRangeStart, dateRangeEnd } = useGetUrlParams();
 
   const value = useMemo(() => {
     return {
-      stackVersion,
       isDev,
       basePath,
       isApmAvailable,
@@ -69,7 +59,6 @@ export const UptimeSettingsContextProvider: React.FC<UptimeAppProps> = ({ childr
       dateRangeEnd: dateRangeEnd ?? DATE_RANGE_END,
     };
   }, [
-    stackVersion,
     isDev,
     basePath,
     isApmAvailable,
