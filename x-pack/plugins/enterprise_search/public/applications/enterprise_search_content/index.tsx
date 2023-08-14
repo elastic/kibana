@@ -67,14 +67,6 @@ export const EnterpriseSearchContent: React.FC<InitialAppData> = (props) => {
   );
 };
 
-export const EnterpriseSearchContentUnconfigured: React.FC = () => (
-  <Routes>
-    <Route>
-      <Redirect to={SETUP_GUIDE_PATH} />
-    </Route>
-  </Routes>
-);
-
 export const EnterpriseSearchContentConfigured: React.FC<Required<InitialAppData>> = () => {
   return (
     <Routes>
