@@ -71,8 +71,8 @@ export const NewIndex: React.FC = () => {
                 <EuiFlexItem key={type}>
                   <NewIndexCard
                     disabled={Boolean(
-                      (type === INGESTION_METHOD_IDS.CRAWLER && errorConnectingMessage) ||
-                        !config.host
+                      type === INGESTION_METHOD_IDS.CRAWLER &&
+                        (errorConnectingMessage || !config.host)
                     )}
                     type={type}
                     onSelect={() => {
