@@ -21,6 +21,7 @@ import { usePageUrlState } from '@kbn/ml-url-state';
 import { useTimefilter, useTimeRangeUpdates } from '@kbn/ml-date-picker';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { type QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
+import { FilterQueryContextProvider } from '../../hooks/use_filters_query';
 import { type ChangePointType, DEFAULT_AGG_FUNCTION } from './constants';
 import {
   createMergedEsQuery,
@@ -254,7 +255,7 @@ export const ChangePointDetectionContextProvider: FC = ({ children }) => {
 
   return (
     <ChangePointDetectionContext.Provider value={value}>
-      {children}
+      <FilterQueryContextProvider>{children}</FilterQueryContextProvider>
     </ChangePointDetectionContext.Provider>
   );
 };

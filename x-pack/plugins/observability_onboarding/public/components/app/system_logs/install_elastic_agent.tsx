@@ -9,11 +9,15 @@ import {
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHorizontalRule,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { default as React, useCallback, useEffect, useState } from 'react';
+import { getSystemLogsDataStreams } from '../../../../common/elastic_agent_logs';
+import { ObservabilityOnboardingPluginSetupDeps } from '../../../plugin';
 import { useWizard } from '.';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { useKibanaNavigation } from '../../../hooks/use_kibana_navigation';
@@ -32,8 +36,16 @@ import {
   StepPanelFooter,
 } from '../../shared/step_panel';
 import { ApiKeyBanner } from '../custom_logs/wizard/api_key_banner';
+import { getDiscoverNavigationParams } from '../utils';
+import { TroubleshootingLink } from '../../shared/troubleshooting_link';
 
 export function InstallElasticAgent() {
+  const {
+    services: {
+      discover: { locator },
+    },
+  } = useKibana<ObservabilityOnboardingPluginSetupDeps>();
+
   const { navigateToKibanaUrl } = useKibanaNavigation();
   const { getState, setState } = useWizard();
   const wizardState = getState();
@@ -45,8 +57,12 @@ export function InstallElasticAgent() {
   function onBack() {
     navigateToKibanaUrl('/app/observabilityOnboarding');
   }
-  function onContinue() {
-    navigateToKibanaUrl('/app/logs/stream');
+  async function onContinue() {
+    const dataStreams = getSystemLogsDataStreams();
+    const dataSets = dataStreams.map(
+      (dataSream) => dataSream.data_stream.dataset
+    );
+    await locator?.navigate(getDiscoverNavigationParams(dataSets));
   }
 
   function onAutoDownloadConfig() {
@@ -272,6 +288,8 @@ export function InstallElasticAgent() {
           appendedSteps={[getCheckLogsStep()]}
         />
       </StepPanelContent>
+      <EuiHorizontalRule />
+      <TroubleshootingLink />
     </StepPanel>
   );
 }
