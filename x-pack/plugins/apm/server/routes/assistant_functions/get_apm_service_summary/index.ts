@@ -285,6 +285,7 @@ export async function getApmServiceSummary({
     }),
     apmAlertsClient.search({
       size: 100,
+      // @ts-expect-error types for apm alerts client needs to be reviewed
       query: {
         bool: {
           filter: [
