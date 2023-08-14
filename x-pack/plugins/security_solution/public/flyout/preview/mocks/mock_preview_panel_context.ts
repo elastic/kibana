@@ -15,4 +15,5 @@ export const mockContextValue: PreviewPanelContext = {
   indexName: 'index',
   scopeId: 'scopeId',
   ruleId: '',
+  indexPattern: { fields: [], title: 'test index' },
 };

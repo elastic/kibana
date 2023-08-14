@@ -55,15 +55,11 @@ export const HOST_DETAILS_INFO_TEST_ID = 'host-overview';
 export const HOST_DETAILS_RELATED_USERS_TABLE_TEST_ID =
   `${PREFIX}HostsDetailsRelatedUsersTable` as const;
 
-export const THREAT_INTELLIGENCE_DETAILS_TEST_ID = `${PREFIX}ThreatIntelligenceDetails` as const;
-export const PREVALENCE_DETAILS_TEST_ID = `${PREFIX}PrevalenceDetails` as const;
 export const CORRELATIONS_DETAILS_TEST_ID = `${PREFIX}CorrelationsDetails` as const;
 
 export const THREAT_INTELLIGENCE_DETAILS_ENRICHMENTS_TEST_ID = `threat-match-detected` as const;
 export const THREAT_INTELLIGENCE_DETAILS_SPINNER_TEST_ID =
   `${PREFIX}ThreatIntelligenceDetailsLoadingSpinner` as const;
-
-export const INVESTIGATION_TEST_ID = `${PREFIX}Investigation` as const;
 
 export const CORRELATIONS_DETAILS_ERROR_TEST_ID = `${CORRELATIONS_DETAILS_TEST_ID}Error` as const;
 

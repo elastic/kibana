@@ -46,6 +46,9 @@ export function metricsRoute(params: MetricsRouteParams) {
   router.get(
     {
       path: `/api/task_manager/metrics`,
+      options: {
+        access: 'public',
+      },
       // Uncomment when we determine that we can restrict API usage to Global admins based on telemetry
       // options: { tags: ['access:taskManager'] },
       validate: {
