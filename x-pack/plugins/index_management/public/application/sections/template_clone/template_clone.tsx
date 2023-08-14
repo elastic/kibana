@@ -19,6 +19,7 @@ import { getTemplateDetailsLink } from '../../services/routing';
 import { saveTemplate, useLoadIndexTemplate } from '../../services/api';
 import { getIsLegacyFromQueryParams } from '../../lib/index_templates';
 import { attemptToURIDecode } from '../../../shared_imports';
+import { useAppContext } from '../../app_context';
 
 interface MatchParams {
   name: string;
@@ -32,7 +33,11 @@ export const TemplateClone: React.FunctionComponent<RouteComponentProps<MatchPar
   history,
 }) => {
   const decodedTemplateName = attemptToURIDecode(name)!;
-  const isLegacy = getIsLegacyFromQueryParams(location);
+  const {
+    config: { enableLegacyTemplates },
+  } = useAppContext();
+  // We don't expect the `legacy` query to be used when legacy templates are disabled, however, we add the `enableLegacyTemplates` check as a safeguard
+  const isLegacy = enableLegacyTemplates && getIsLegacyFromQueryParams(location);
 
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [saveError, setSaveError] = useState<any>(null);
