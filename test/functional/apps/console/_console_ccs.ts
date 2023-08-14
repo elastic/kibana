@@ -32,8 +32,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await remoteEsArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
     });
 
-    // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/163365
-    describe.skip('Perform CCS Search in Console', () => {
+    describe('Perform CCS Search in Console', () => {
       before(async () => {
         await PageObjects.console.clearTextArea();
       });
