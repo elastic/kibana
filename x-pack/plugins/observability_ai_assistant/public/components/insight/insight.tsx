@@ -11,7 +11,6 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type { Subscription } from 'rxjs';
 import { MessageRole, type Message } from '../../../common/types';
 import { useGenAIConnectors } from '../../hooks/use_genai_connectors';
-import { useObservabilityAIAssistant } from '../../hooks/use_observability_ai_assistant';
 import type { PendingMessage } from '../../types';
 import { ChatFlyout } from '../chat/chat_flyout';
 import { ConnectorSelectorBase } from '../connector_selector/connector_selector_base';
@@ -23,6 +22,10 @@ import { StopGeneratingButton } from '../buttons/stop_generating_button';
 import { InsightBase } from './insight_base';
 import { MissingCredentialsCallout } from '../missing_credentials_callout';
 import { getConnectorsManagementHref } from '../../utils/get_connectors_management_href';
+import { useObservabilityAIAssistantChatService } from '../../hooks/use_observability_ai_assistant_chat_service';
+import { useObservabilityAIAssistant } from '../../hooks/use_observability_ai_assistant';
+import { useAbortableAsync } from '../../hooks/use_abortable_async';
+import { ObservabilityAIAssistantChatServiceProvider } from '../../context/observability_ai_assistant_chat_service_provider';
 
 function ChatContent({
   title,
@@ -33,7 +36,7 @@ function ChatContent({
   messages: Message[];
   connectorId: string;
 }) {
-  const service = useObservabilityAIAssistant();
+  const chatService = useObservabilityAIAssistantChatService();
 
   const [pendingMessage, setPendingMessage] = useState<PendingMessage | undefined>();
   const [loading, setLoading] = useState(false);
@@ -42,7 +45,7 @@ function ChatContent({
   const reloadReply = useCallback(() => {
     setLoading(true);
 
-    const nextSubscription = service.chat({ messages, connectorId }).subscribe({
+    const nextSubscription = chatService.chat({ messages, connectorId }).subscribe({
       next: (msg) => {
         setPendingMessage(() => msg);
       },
@@ -52,7 +55,7 @@ function ChatContent({
     });
 
     setSubscription(nextSubscription);
-  }, [messages, connectorId, service]);
+  }, [messages, connectorId, chatService]);
 
   useEffect(() => {
     reloadReply();
@@ -129,6 +132,15 @@ export function Insight({ messages, title }: { messages: Message[]; title: strin
 
   const connectors = useGenAIConnectors();
 
+  const service = useObservabilityAIAssistant();
+
+  const chatService = useAbortableAsync(
+    ({ signal }) => {
+      return service.start({ signal });
+    },
+    [service]
+  );
+
   const {
     services: { http },
   } = useKibana();
@@ -152,9 +164,13 @@ export function Insight({ messages, title }: { messages: Message[]; title: strin
         setHasOpened((prevHasOpened) => prevHasOpened || isOpen);
       }}
       controls={<ConnectorSelectorBase {...connectors} />}
-      loading={connectors.loading}
+      loading={connectors.loading || chatService.loading}
     >
-      {children}
+      {chatService.value ? (
+        <ObservabilityAIAssistantChatServiceProvider value={chatService.value}>
+          {children}
+        </ObservabilityAIAssistantChatServiceProvider>
+      ) : null}
     </InsightBase>
   );
 }

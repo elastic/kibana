@@ -8,6 +8,10 @@
 import type { ToolingLog } from '@kbn/tooling-log';
 import type SuperTest from 'supertest';
 import type { DetectionMetrics } from '@kbn/security-solution-plugin/server/usage/detections/types';
+import {
+  ELASTIC_HTTP_VERSION_HEADER,
+  X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
+} from '@kbn/core-http-common';
 
 import { getStatsUrl } from './get_stats_url';
 import { getDetectionMetricsFromBody } from './get_detection_metrics_from_body';
@@ -24,6 +28,8 @@ export const getStats = async (
   const response = await supertest
     .post(getStatsUrl())
     .set('kbn-xsrf', 'true')
+    .set(ELASTIC_HTTP_VERSION_HEADER, '2')
+    .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
     .send({ unencrypted: true, refreshCache: true });
   if (response.status !== 200) {
     log.error(

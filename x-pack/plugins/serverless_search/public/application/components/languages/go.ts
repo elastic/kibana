@@ -6,8 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { Languages, LanguageDefinition } from '@kbn/search-api-panels';
 import { docLinks } from '../../../../common/doc_links';
-import { LanguageDefinition, Languages } from './types';
 
 export const goDefinition: LanguageDefinition = {
   advancedConfig: docLinks.goAdvancedConfig,
