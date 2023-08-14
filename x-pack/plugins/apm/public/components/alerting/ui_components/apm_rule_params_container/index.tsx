@@ -64,7 +64,6 @@ export function ApmRuleParamsContainer(props: Props) {
       {showMinimumWindowSizeWarning && minimumWindowSize && (
         <MinimumWindowSizeWarning minimumWindowSize={minimumWindowSize} />
       )}
-      <EuiSpacer size="m" />
       {kqlFilter}
       <EuiFlexGrid gutterSize="l" direction="row" columns={2}>
         {fields.map((field, index) => (
