@@ -35,7 +35,6 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const retry = getService('retry');
 
-  // Failing: See https://github.com/elastic/kibana/issues/138050
   describe('bulkEdit', () => {
     const objectRemover = new ObjectRemover(supertest);
 
