@@ -437,7 +437,7 @@ export const AddExceptionFlyoutWrapper: React.FC<AddExceptionFlyoutWrapperProps>
     }
 
     return null;
-  }, [maybeRule, memoDataViewId, memoRuleIndices, ruleId, ruleName, ruleRuleId]);
+  }, [maybeRule]);
 
   const isLoading =
     (isLoadingAlertData && isSignalIndexLoading) ||

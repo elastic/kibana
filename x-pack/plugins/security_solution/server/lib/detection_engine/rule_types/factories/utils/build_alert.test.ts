@@ -359,6 +359,7 @@ describe('buildAlert', () => {
         index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
         query: 'user.name: root or user.name: admin',
         filters: [{ query: { match_phrase: { 'host.name': 'some-host' } } }],
+        custom_highlighted_fields: [],
       },
       ...flattenWithPrefix(ALERT_RULE_NAMESPACE, {
         actions: [],

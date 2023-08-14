@@ -48,7 +48,6 @@ describe('Close matching Alerts ', () => {
     });
     visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
     goToRuleDetails();
-    waitForAlertsToPopulate();
   });
   after(() => {
     cy.task('esArchiverUnload', 'exceptions');
