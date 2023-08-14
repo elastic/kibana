@@ -20,7 +20,7 @@ export interface IObservabilityAIAssistantClient {
   chat: (options: {
     messages: Message[];
     connectorId: string;
-    functions: Array<FunctionDefinition['options']>;
+    functions: Array<Pick<FunctionDefinition['options'], 'name' | 'description' | 'parameters'>>;
   }) => Promise<IncomingMessage>;
   get: (conversationId: string) => Promise<Conversation>;
   find: (options?: { query?: string }) => Promise<{ conversations: Conversation[] }>;
@@ -29,6 +29,12 @@ export interface IObservabilityAIAssistantClient {
   delete: (conversationId: string) => Promise<void>;
   recall: (query: string) => Promise<{ entries: KnowledgeBaseEntry[] }>;
   summarise: (options: { entry: Omit<KnowledgeBaseEntry, '@timestamp'> }) => Promise<void>;
+  getKnowledgeBaseStatus: () => Promise<{
+    ready: boolean;
+    error?: any;
+    deployment_state?: string;
+    allocation_state?: string;
+  }>;
   setupKnowledgeBase: () => Promise<void>;
 }
 
