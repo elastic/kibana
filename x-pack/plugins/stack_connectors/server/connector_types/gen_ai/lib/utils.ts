@@ -82,10 +82,7 @@ export const getAxiosOptions = (
   switch (provider) {
     case OpenAiProviderType.OpenAi:
       return {
-        headers: {
-          Authorization: `Bearer ${apiKey}`,
-          ['content-type']: 'application/json',
-        },
+        headers: { Authorization: `Bearer ${apiKey}`, ['content-type']: 'application/json' },
         ...responseType,
       };
     case OpenAiProviderType.AzureAi:

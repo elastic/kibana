@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import axios, {
-  AxiosHeaders,
-  AxiosInstance,
-  InternalAxiosRequestConfig,
-  AxiosResponse,
-} from 'axios';
+import axios, { AxiosHeaders, AxiosInstance, AxiosResponse } from 'axios';
 import { Logger } from '@kbn/core/server';
 import { addTimeZoneToDate, getErrorMessage } from '@kbn/actions-plugin/server/lib/axios_utils';
 import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
@@ -117,7 +112,7 @@ export const getAxiosInstance = ({
   } else {
     axiosInstance = axios.create();
     axiosInstance.interceptors.request.use(
-      async (axiosConfig: InternalAxiosRequestConfig) => {
+      async (axiosConfig) => {
         const accessToken = await getOAuthJwtAccessToken({
           connectorId,
           logger,

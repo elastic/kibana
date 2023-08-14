@@ -238,7 +238,7 @@ export async function executor(
       url,
       logger,
       ...basicAuth,
-      headers: headers!,
+      headers: headers ? headers : {},
       data,
       configurationUtilities,
       sslOverrides,

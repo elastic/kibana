@@ -57,7 +57,6 @@ const ParamsSchema = schema.object({
 });
 
 export const ActionTypeId = '.torq';
-
 // action type definition
 export function getActionType(): TorqActionType {
   return {

@@ -8,13 +8,7 @@
 
 import Url from 'url';
 
-import Axios, {
-  AxiosRequestConfig,
-  AxiosInstance,
-  AxiosHeaders,
-  RawAxiosResponseHeaders,
-  AxiosResponseHeaders,
-} from 'axios';
+import Axios, { AxiosRequestConfig, AxiosInstance, AxiosHeaders, AxiosHeaderValue } from 'axios';
 import { isAxiosResponseError, isAxiosRequestError } from '@kbn/dev-utils';
 import { ToolingLog } from '@kbn/tooling-log';
 
@@ -136,7 +130,7 @@ export class GithubApi {
   ): Promise<{
     status: number;
     statusText: string;
-    headers: RawAxiosResponseHeaders | AxiosResponseHeaders;
+    headers: Record<string, AxiosHeaderValue | undefined>;
     data: T;
   }> {
     const executeRequest = !this.dryRun || options.safeForDryRun;

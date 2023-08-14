@@ -33,7 +33,6 @@ const isAxiosError = (error: unknown): error is AxiosError => (error as AxiosErr
 
 export abstract class SubActionConnector<Config, Secrets> {
   [k: string]: ((params: unknown) => unknown) | unknown;
-
   private axiosInstance: AxiosInstance;
   private subActions: Map<string, SubAction> = new Map();
   private configurationUtilities: ActionsConfigurationUtilities;
