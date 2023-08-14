@@ -20,7 +20,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const cases = getService('cases');
   const find = getService('find');
   const supertest = getService('supertest');
-  const retry = getService('retry');
 
   describe('persistable attachment', () => {
     describe('lens visualization', () => {
@@ -36,33 +35,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await dashboard.clickNewDashboard();
 
-        await retry.try(async () => {
-          await testSubjects.click('dashboardAddNewPanelButton');
-        });
-
-        await retry.try(async () => {
-          await lens.goToTimeRange();
-        });
-
-        await lens.configureDimension({
-          dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
-          operation: 'date_histogram',
-          field: '@timestamp',
-        });
-
-        await lens.configureDimension({
-          dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
-          operation: 'average',
-          field: 'bytes',
-        });
-
-        await lens.configureDimension({
-          dimension: 'lnsXY_splitDimensionPanel > lns-empty-dimension',
-          operation: 'terms',
-          field: 'ip',
-        });
-
-        await lens.saveAndReturn();
+        await lens.createAndAddLensFromDashboard({});
 
         await dashboard.waitForRenderComplete();
       });
