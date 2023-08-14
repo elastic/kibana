@@ -85,12 +85,7 @@ export {
   type QuerySubscriberParams,
 } from './src/hooks/use_query_subscriber';
 
-export {
-  getFieldTypeName,
-  getFieldTypeDescription,
-  getFieldType,
-  getFieldIconType,
-} from './src/utils/field_types';
+export { getFieldTypeDescription, getFieldType, getFieldIconType } from './src/utils/field_types';
 
 export {
   UnifiedFieldListSidebarContainer,
