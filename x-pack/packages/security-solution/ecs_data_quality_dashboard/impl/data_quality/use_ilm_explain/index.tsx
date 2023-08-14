@@ -20,7 +20,7 @@ export interface UseIlmExplain {
 }
 
 export const useIlmExplain = (pattern: string): UseIlmExplain => {
-  const { httpFetch } = useDataQualityContext();
+  const { httpFetch, isILMAvailable } = useDataQualityContext();
   const [ilmExplain, setIlmExplain] = useState<Record<
     string,
     IlmExplainLifecycleLifecycleExplain
@@ -34,6 +34,9 @@ export const useIlmExplain = (pattern: string): UseIlmExplain => {
     async function fetchData() {
       try {
         const encodedIndexName = encodeURIComponent(`${pattern}`);
+        if (!isILMAvailable) {
+          abortController.abort();
+        }
 
         const response = await httpFetch<Record<string, IlmExplainLifecycleLifecycleExplain>>(
           `${ILM_EXPLAIN_ENDPOINT}/${encodedIndexName}`,
@@ -62,7 +65,7 @@ export const useIlmExplain = (pattern: string): UseIlmExplain => {
     return () => {
       abortController.abort();
     };
-  }, [httpFetch, pattern, setError]);
+  }, [httpFetch, isILMAvailable, pattern, setError]);
 
   return { ilmExplain, error, loading };
 };
