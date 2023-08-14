@@ -12,8 +12,8 @@ import {
   EuiFlexItem,
   EuiPage,
   EuiPageBody,
-  EuiPageTemplate,
-  EuiPageSection,
+  EuiPageContent_Deprecated as EuiPageContent,
+  EuiPageContentBody_Deprecated as EuiPageContentBody,
 } from '@elastic/eui';
 import type { ExpressionRendererParams } from '@kbn/expressions-plugin/public';
 import { useExpressionRenderer } from '@kbn/expressions-plugin/public';
@@ -42,8 +42,13 @@ export function App() {
   return (
     <EuiPage paddingSize="none" data-shared-items-container data-shared-items-count={1}>
       <EuiPageBody>
-        <EuiPageTemplate.Section paddingSize="none" className="eui-fullHeight">
-          <EuiPageSection className="eui-fullHeight">
+      <EuiPageContent
+          borderRadius="none"
+          hasShadow={false}
+          paddingSize="none"
+          className="eui-fullHeight"
+        >
+          <EuiPageContentBody className="eui-fullHeight">
             <EuiFlexGroup className="eui-fullHeight" gutterSize="none" direction="column">
               <EuiFlexItem className="eui-fullHeight">
                 <div
@@ -54,8 +59,8 @@ export function App() {
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
-          </EuiPageSection>
-        </EuiPageTemplate.Section>
+          </EuiPageContentBody>
+        </EuiPageContent>
       </EuiPageBody>
     </EuiPage>
   );
