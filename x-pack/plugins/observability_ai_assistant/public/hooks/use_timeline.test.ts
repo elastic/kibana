@@ -21,6 +21,18 @@ type HookProps = Parameters<typeof useTimeline>[0];
 
 const WAIT_OPTIONS = { timeout: 1500 };
 
+jest.mock('./use_kibana', () => ({
+  useKibana: () => ({
+    services: {
+      notifications: {
+        toasts: {
+          addError: jest.fn(),
+        },
+      },
+    },
+  }),
+}));
+
 describe('useTimeline', () => {
   let hookResult: RenderHookResult<HookProps, UseTimelineResult, Renderer<HookProps>>;
 

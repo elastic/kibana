@@ -16,6 +16,7 @@ import {
 import { css } from '@emotion/css';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import React, { useEffect, useRef } from 'react';
+import { last } from 'lodash';
 import type { Message } from '../../../common/types';
 import type { UseGenAIConnectorsResult } from '../../hooks/use_genai_connectors';
 import type { UseKnowledgeBaseResult } from '../../hooks/use_knowledge_base';
@@ -26,7 +27,6 @@ import { ChatHeader } from './chat_header';
 import { ChatPromptEditor } from './chat_prompt_editor';
 import { ChatTimeline } from './chat_timeline';
 import { KnowledgeBaseCallout } from './knowledge_base_callout';
-import { last } from 'lodash';
 
 const containerClassName = css`
   max-height: 100%;
@@ -119,6 +119,7 @@ export function ChatBody({
       unstick();
       parent.removeEventListener('scroll', onScroll);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [timelineContainerRef.current]);
 
   if (connectors.loading || knowledgeBase.status.loading) {
