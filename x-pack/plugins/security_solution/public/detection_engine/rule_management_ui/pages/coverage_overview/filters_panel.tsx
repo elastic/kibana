@@ -54,12 +54,12 @@ const CoverageOverviewFiltersPanelComponent = () => {
             <RuleActivityFilter
               onChange={setRuleActivityFilter}
               isLoading={isLoading}
-              filter={filter}
+              selected={filter.activity ?? []}
             />
             <RuleSourceFilter
               onChange={setRuleSourceFilter}
               isLoading={isLoading}
-              filter={filter}
+              selected={filter.source ?? []}
             />
           </EuiFlexGroup>
           <EuiFlexGroup alignItems="center">

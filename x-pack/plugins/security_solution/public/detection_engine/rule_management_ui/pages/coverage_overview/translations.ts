@@ -127,13 +127,6 @@ export const CoverageOverviewElasticRuleSource = i18n.translate(
   }
 );
 
-export const CoverageOverviewCustomizedRuleSource = i18n.translate(
-  'xpack.securitySolution.coverageOverviewDashboard.customizedRuleSource',
-  {
-    defaultMessage: 'Elastic customized rules',
-  }
-);
-
 export const CoverageOverviewCustomRuleSource = i18n.translate(
   'xpack.securitySolution.coverageOverviewDashboard.customRuleSource',
   {

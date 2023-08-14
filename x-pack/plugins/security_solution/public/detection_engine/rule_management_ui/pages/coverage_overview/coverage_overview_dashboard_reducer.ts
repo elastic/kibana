@@ -19,21 +19,27 @@ export interface CoverageOverviewDashboardState {
   data: CoverageOverviewDashboard | undefined;
 }
 
+// Action type names
+export const SET_SHOW_EXPANDED_CELLS = 'setShowExpandedCells' as const;
+export const SET_RULE_ACTIVITY_FILTER = 'setRuleActivityFilter' as const;
+export const SET_RULE_SOURCE_FILTER = 'setRuleSourceFilter' as const;
+export const SET_RULE_SEARCH_FILTER = 'setRuleSearchFilter' as const;
+
 export type Action =
   | {
-      type: 'setShowExpandedCells';
+      type: typeof SET_SHOW_EXPANDED_CELLS;
       value: boolean;
     }
   | {
-      type: 'setRuleActivityFilter';
+      type: typeof SET_RULE_ACTIVITY_FILTER;
       value: CoverageOverviewRuleActivity[];
     }
   | {
-      type: 'setRuleSourceFilter';
+      type: typeof SET_RULE_SOURCE_FILTER;
       value: CoverageOverviewRuleSource[];
     }
   | {
-      type: 'setRuleSearchFilter';
+      type: typeof SET_RULE_SEARCH_FILTER;
       value: string;
     };
 
@@ -41,25 +47,21 @@ export const createCoverageOverviewDashboardReducer =
   () =>
   (state: CoverageOverviewDashboardState, action: Action): CoverageOverviewDashboardState => {
     switch (action.type) {
-      case 'setShowExpandedCells': {
+      case SET_SHOW_EXPANDED_CELLS: {
         const { value } = action;
         return { ...state, showExpandedCells: value };
       }
-      case 'setRuleActivityFilter': {
+      case SET_RULE_ACTIVITY_FILTER: {
         const { value } = action;
-        if (value.length === 0 || value.length === 2) {
-          const updatedFilter = { ...state.filter, activity: undefined };
-          return { ...state, filter: updatedFilter };
-        }
-        const updatedFilter = { ...state.filter, activity: value };
+        const updatedFilter = { ...state.filter, activity: value.length !== 0 ? value : undefined };
         return { ...state, filter: updatedFilter };
       }
-      case 'setRuleSourceFilter': {
+      case SET_RULE_SOURCE_FILTER: {
         const { value } = action;
         const updatedFilter = { ...state.filter, source: value.length !== 0 ? value : undefined };
         return { ...state, filter: updatedFilter };
       }
-      case 'setRuleSearchFilter': {
+      case SET_RULE_SEARCH_FILTER: {
         const { value } = action;
         const updatedFilter = {
           ...state.filter,

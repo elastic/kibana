@@ -19,8 +19,14 @@ import type {
   CoverageOverviewRuleSource,
 } from '../../../../../common/api/detection_engine';
 import { BulkActionType } from '../../../../../common/api/detection_engine';
-import type { CoverageOverviewDashboardState } from './reducer';
-import { createCoverageOverviewDashboardReducer } from './reducer';
+import type { CoverageOverviewDashboardState } from './coverage_overview_dashboard_reducer';
+import {
+  SET_SHOW_EXPANDED_CELLS,
+  SET_RULE_ACTIVITY_FILTER,
+  SET_RULE_SOURCE_FILTER,
+  SET_RULE_SEARCH_FILTER,
+  createCoverageOverviewDashboardReducer,
+} from './coverage_overview_dashboard_reducer';
 import { useFetchCoverageOverviewQuery } from '../../../rule_management/api/hooks/use_fetch_coverage_overview';
 import { useExecuteBulkAction } from '../../../rule_management/logic/bulk_actions/use_execute_bulk_action';
 
@@ -66,7 +72,7 @@ export const CoverageOverviewDashboardContextProvider = ({
   const setShowExpandedCells = useCallback(
     (value: boolean): void => {
       dispatch({
-        type: 'setShowExpandedCells',
+        type: SET_SHOW_EXPANDED_CELLS,
         value,
       });
     },
@@ -76,7 +82,7 @@ export const CoverageOverviewDashboardContextProvider = ({
   const setRuleActivityFilter = useCallback(
     (value: CoverageOverviewRuleActivity[]): void => {
       dispatch({
-        type: 'setRuleActivityFilter',
+        type: SET_RULE_ACTIVITY_FILTER,
         value,
       });
     },
@@ -86,7 +92,7 @@ export const CoverageOverviewDashboardContextProvider = ({
   const setRuleSourceFilter = useCallback(
     (value: CoverageOverviewRuleSource[]): void => {
       dispatch({
-        type: 'setRuleSourceFilter',
+        type: SET_RULE_SOURCE_FILTER,
         value,
       });
     },
@@ -96,7 +102,7 @@ export const CoverageOverviewDashboardContextProvider = ({
   const setRuleSearchFilter = useCallback(
     (value: string): void => {
       dispatch({
-        type: 'setRuleSearchFilter',
+        type: SET_RULE_SEARCH_FILTER,
         value,
       });
     },
@@ -147,7 +153,7 @@ export const useCoverageOverviewDashboardContext = (): CoverageOverviewDashboard
   const dashboardContext = useContext(CoverageOverviewDashboardContext);
   invariant(
     dashboardContext,
-    'useCoverageOverviewDashboardContext should be used inside CoverageOverviewDashboardContext'
+    'useCoverageOverviewDashboardContext should be used inside CoverageOverviewDashboardContextProvider'
   );
 
   return dashboardContext;

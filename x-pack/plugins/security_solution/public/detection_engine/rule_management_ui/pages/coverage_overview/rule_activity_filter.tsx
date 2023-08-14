@@ -17,26 +17,26 @@ import {
   EuiPopoverFooter,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
-import type {
-  CoverageOverviewFilter,
-  CoverageOverviewRuleActivity,
-} from '../../../../../common/api/detection_engine';
-import { coverageOverviewFilterWidth, ruleActivityFilterLabelMap } from './constants';
+import type { CoverageOverviewRuleActivity } from '../../../../../common/api/detection_engine';
+import {
+  coverageOverviewFilterWidth,
+  ruleActivityFilterDefaultOptions,
+  ruleActivityFilterLabelMap,
+} from './constants';
 import * as i18n from './translations';
-import { getInitialRuleActivityFilterOptions, formatRuleFilterOptions } from './helpers';
+import { getInitialFilterOptions, formatRuleFilterOptions } from './helpers';
 
 export interface RuleActivityFilterComponentProps {
-  filter: CoverageOverviewFilter;
+  selected: CoverageOverviewRuleActivity[];
   onChange: (options: CoverageOverviewRuleActivity[]) => void;
   isLoading: boolean;
 }
 
 const RuleActivityFilterComponent = ({
-  filter,
+  selected,
   onChange,
   isLoading,
 }: RuleActivityFilterComponentProps) => {
-  const selected = useMemo(() => filter.activity ?? [], [filter]);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const onButtonClick = useCallback(() => {
@@ -46,10 +46,9 @@ const RuleActivityFilterComponent = ({
     setIsPopoverOpen(false);
   };
 
-  const hasActiveFilters = useMemo(() => selected.length !== 0, [selected]);
   const numActiveFilters = useMemo(() => selected.length, [selected]);
 
-  const options = getInitialRuleActivityFilterOptions(filter);
+  const options = getInitialFilterOptions(ruleActivityFilterDefaultOptions, selected);
 
   const handleSelectableOnChange = useCallback(
     (newOptions) => {
@@ -74,13 +73,13 @@ const RuleActivityFilterComponent = ({
         iconType="arrowDown"
         onClick={onButtonClick}
         isSelected={isPopoverOpen}
-        hasActiveFilters={hasActiveFilters}
+        hasActiveFilters={numActiveFilters > 0}
         numActiveFilters={numActiveFilters}
       >
         {i18n.CoverageOverviewRuleActivityFilterLabel}
       </EuiFilterButton>
     ),
-    [hasActiveFilters, isPopoverOpen, numActiveFilters, onButtonClick, isLoading]
+    [isPopoverOpen, numActiveFilters, onButtonClick, isLoading]
   );
   return (
     <EuiFilterGroup
@@ -121,7 +120,7 @@ const RuleActivityFilterComponent = ({
             iconType="cross"
             color="danger"
             size="xs"
-            isDisabled={!hasActiveFilters || isLoading}
+            isDisabled={numActiveFilters === 0 || isLoading}
             onClick={handleOnClear}
           >
             {i18n.CoverageOverviewFilterPopoverClearAll}

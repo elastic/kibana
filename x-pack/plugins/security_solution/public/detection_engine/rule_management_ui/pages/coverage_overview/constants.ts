@@ -41,7 +41,7 @@ export const ruleActivityFilterDefaultOptions = [
   },
 ];
 
-export const ruleActivityFilterLabelMap: { [key: string]: string } = {
+export const ruleActivityFilterLabelMap: Record<string, string> = {
   [CoverageOverviewRuleActivity.Enabled]: i18n.CoverageOverviewEnabledRuleActivity,
   [CoverageOverviewRuleActivity.Disabled]: i18n.CoverageOverviewDisabledRuleActivity,
 };
@@ -51,15 +51,11 @@ export const ruleSourceFilterDefaultOptions = [
     label: CoverageOverviewRuleSource.Prebuilt,
   },
   {
-    label: CoverageOverviewRuleSource.Customized,
-  },
-  {
     label: CoverageOverviewRuleSource.Custom,
   },
 ];
 
-export const ruleSourceFilterLabelMap: { [key: string]: string } = {
+export const ruleSourceFilterLabelMap: Record<string, string> = {
   [CoverageOverviewRuleSource.Prebuilt]: i18n.CoverageOverviewElasticRuleSource,
-  [CoverageOverviewRuleSource.Customized]: i18n.CoverageOverviewCustomizedRuleSource,
   [CoverageOverviewRuleSource.Custom]: i18n.CoverageOverviewCustomRuleSource,
 };

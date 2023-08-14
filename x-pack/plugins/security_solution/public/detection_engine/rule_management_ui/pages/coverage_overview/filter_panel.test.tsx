@@ -9,7 +9,6 @@ import { fireEvent, render, within } from '@testing-library/react';
 import React from 'react';
 
 import { TestProviders } from '../../../../common/mock';
-import { act } from '@testing-library/react-hooks';
 import { CoverageOverviewFiltersPanel } from './filters_panel';
 import {
   ruleActivityFilterDefaultOptions,
@@ -57,13 +56,9 @@ describe('CoverageOverviewFiltersPanel', () => {
 
     wrapper.getByTestId('coverageOverviewRuleActivityFilterButton').click();
 
-    act(() => {
-      fireEvent.click(
-        within(wrapper.getByTestId('coverageOverviewFilterList')).getByText(
-          ruleActivityFilterLabelMap[ruleActivityFilterDefaultOptions[0].label]
-        )
-      );
-    });
+    within(wrapper.getByTestId('coverageOverviewFilterList'))
+      .getByText(ruleActivityFilterLabelMap[ruleActivityFilterDefaultOptions[0].label])
+      .click();
     expect(setRuleActivityFilter).toHaveBeenCalledWith([ruleActivityFilterDefaultOptions[0].label]);
   });
 
@@ -72,25 +67,19 @@ describe('CoverageOverviewFiltersPanel', () => {
 
     wrapper.getByTestId('coverageOverviewRuleSourceFilterButton').click();
 
-    act(() => {
-      fireEvent.click(
-        within(wrapper.getByTestId('coverageOverviewFilterList')).getByText(
-          ruleSourceFilterLabelMap[ruleSourceFilterDefaultOptions[0].label]
-        )
-      );
-    });
+    within(wrapper.getByTestId('coverageOverviewFilterList'))
+      .getByText(ruleSourceFilterLabelMap[ruleSourceFilterDefaultOptions[0].label])
+      .click();
     expect(setRuleSourceFilter).toHaveBeenCalledWith([ruleSourceFilterDefaultOptions[0].label]);
   });
 
   test('it correctly populates search filter state', () => {
     const wrapper = renderFiltersPanel();
 
-    act(() => {
-      fireEvent.change(wrapper.getByTestId('coverageOverviewFilterSearchBar'), {
-        target: { value: 'test' },
-      });
-      fireEvent.submit(wrapper.getByTestId('coverageOverviewFilterSearchBar'));
+    fireEvent.change(wrapper.getByTestId('coverageOverviewFilterSearchBar'), {
+      target: { value: 'test' },
     });
+    fireEvent.submit(wrapper.getByTestId('coverageOverviewFilterSearchBar'));
 
     expect(setRuleSearchFilter).toHaveBeenCalledWith('test');
   });

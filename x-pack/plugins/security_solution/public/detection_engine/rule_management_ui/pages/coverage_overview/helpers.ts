@@ -60,3 +60,11 @@ export const getInitialRuleSourceFilterOptions = (
     }
     return option;
   });
+
+export const getInitialFilterOptions = (
+  allOptions: EuiSelectableOption[],
+  selected: string[]
+): EuiSelectableOption[] =>
+  allOptions.map((option) =>
+    selected.includes(option.label) ? { ...option, checked: 'on' } : option
+  );
