@@ -42,7 +42,7 @@ export function App() {
   return (
     <EuiPage paddingSize="none" data-shared-items-container data-shared-items-count={1}>
       <EuiPageBody>
-      <EuiPageContent
+        <EuiPageContent
           borderRadius="none"
           hasShadow={false}
           paddingSize="none"
