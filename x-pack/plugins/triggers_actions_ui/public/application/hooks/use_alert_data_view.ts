@@ -13,11 +13,13 @@ import useAsync from 'react-use/lib/useAsync';
 import { useMemo } from 'react';
 import { TriggersAndActionsUiServices } from '../..';
 
-export function useAlertDataView(featureIds: ValidFeatureId[]): {
-  value: DataView[];
+export interface UserAlertDataView {
+  value?: DataView[];
   loading: boolean;
   error?: Error;
-} {
+}
+
+export function useAlertDataView(featureIds: ValidFeatureId[]): UserAlertDataView {
   const { http } = useKibana<TriggersAndActionsUiServices>().services;
   const features = featureIds.sort().join(',');
 
@@ -44,18 +46,25 @@ export function useAlertDataView(featureIds: ValidFeatureId[]): {
 
   const dataview = useMemo(
     () =>
-      [
-        {
-          title: (indexNames.value ?? []).join(','),
-          fieldFormatMap: {},
-          fields: (fields.value ?? [])?.map((field) => {
-            return {
-              ...field,
-              ...(field.esTypes && field.esTypes.includes('flattened') ? { type: 'string' } : {}),
-            };
-          }),
-        },
-      ] as unknown as DataView[],
+      !fields.loading &&
+      !indexNames.loading &&
+      fields.error === undefined &&
+      indexNames.error === undefined
+        ? ([
+            {
+              title: (indexNames.value ?? []).join(','),
+              fieldFormatMap: {},
+              fields: (fields.value ?? [])?.map((field) => {
+                return {
+                  ...field,
+                  ...(field.esTypes && field.esTypes.includes('flattened')
+                    ? { type: 'string' }
+                    : {}),
+                };
+              }),
+            },
+          ] as unknown as DataView[])
+        : undefined,
     [fields, indexNames]
   );
 
