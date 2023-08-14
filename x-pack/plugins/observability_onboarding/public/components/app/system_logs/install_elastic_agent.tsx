@@ -268,7 +268,9 @@ export function InstallElasticAgent() {
               ),
               id: 'windows',
               disableSteps: true,
-              children: <WindowsInstallStep />,
+              children: (
+                <WindowsInstallStep docsLink="https://www.elastic.co/guide/en/welcome-to-elastic/current/getting-started-observability.html" />
+              ),
             },
           ]}
           onSelectPlatform={(id) => setElasticAgentPlatform(id)}
