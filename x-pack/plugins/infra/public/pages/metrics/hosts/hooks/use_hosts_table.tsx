@@ -256,7 +256,6 @@ export const useHostsTable = () => {
             label={TABLE_COLUMN_LABEL.cpuUsage}
             toolTip={TOOLTIP.cpuUsage}
             formula={hostLensFormulas.cpuUsage.value}
-            popoverContainerRef={popoverContainerRef}
           />
         ),
         field: 'cpu',
@@ -271,7 +270,6 @@ export const useHostsTable = () => {
             label={TABLE_COLUMN_LABEL.normalizedLoad1m}
             toolTip={TOOLTIP.normalizedLoad1m}
             formula={hostLensFormulas.normalizedLoad1m.value}
-            popoverContainerRef={popoverContainerRef}
           />
         ),
         field: 'normalizedLoad1m',
@@ -286,7 +284,6 @@ export const useHostsTable = () => {
             label={TABLE_COLUMN_LABEL.memoryUsage}
             toolTip={TOOLTIP.memoryUsage}
             formula={hostLensFormulas.memoryUsage.value}
-            popoverContainerRef={popoverContainerRef}
           />
         ),
         field: 'memory',
@@ -301,7 +298,6 @@ export const useHostsTable = () => {
             label={TABLE_COLUMN_LABEL.memoryFree}
             toolTip={TOOLTIP.memoryFree}
             formula={hostLensFormulas.memoryFree.value}
-            popoverContainerRef={popoverContainerRef}
           />
         ),
         field: 'memoryFree',
@@ -316,7 +312,6 @@ export const useHostsTable = () => {
             label={TABLE_COLUMN_LABEL.diskSpaceUsage}
             toolTip={TOOLTIP.diskSpaceUsage}
             formula={hostLensFormulas.diskSpaceUsage.value}
-            popoverContainerRef={popoverContainerRef}
           />
         ),
         field: 'diskSpaceUsage',
@@ -331,7 +326,6 @@ export const useHostsTable = () => {
             label={TABLE_COLUMN_LABEL.rx}
             toolTip={TOOLTIP.rx}
             formula={hostLensFormulas.rx.value}
-            popoverContainerRef={popoverContainerRef}
           />
         ),
         field: 'rx',
@@ -347,7 +341,6 @@ export const useHostsTable = () => {
             label={TABLE_COLUMN_LABEL.tx}
             toolTip={TOOLTIP.tx}
             formula={hostLensFormulas.tx.value}
-            popoverContainerRef={popoverContainerRef}
           />
         ),
         field: 'tx',
@@ -358,13 +351,7 @@ export const useHostsTable = () => {
         width: '120px',
       },
     ],
-    [
-      hostFlyoutState?.itemId,
-      reportHostEntryClick,
-      searchCriteria.dateRange,
-      setHostFlyoutState,
-      popoverContainerRef,
-    ]
+    [hostFlyoutState?.itemId, reportHostEntryClick, searchCriteria.dateRange, setHostFlyoutState]
   );
 
   const selection: EuiTableSelectionType<HostNodeRow> = {

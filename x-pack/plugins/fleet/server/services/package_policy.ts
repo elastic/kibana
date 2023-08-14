@@ -1161,13 +1161,22 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         ...new Set(result.filter((r) => r.success && r.policy_id).map((r) => r.policy_id!)),
       ];
 
+      const agentPoliciesWithEndpointPackagePolicies = result.reduce((acc, cur) => {
+        if (cur.success && cur.policy_id && cur.package?.name === 'endpoint') {
+          return acc.add(cur.policy_id);
+        }
+        return acc;
+      }, new Set());
+
       const agentPolicies = await agentPolicyService.getByIDs(soClient, uniquePolicyIdsR);
 
       for (const policyId of uniquePolicyIdsR) {
         const agentPolicy = agentPolicies.find((p) => p.id === policyId);
         if (agentPolicy) {
+          // is the agent policy attached to package policy with endpoint
           await agentPolicyService.bumpRevision(soClient, esClient, policyId, {
             user: options?.user,
+            removeProtection: agentPoliciesWithEndpointPackagePolicies.has(policyId),
           });
         }
       }
