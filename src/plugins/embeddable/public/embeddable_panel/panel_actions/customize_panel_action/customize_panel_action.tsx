@@ -14,7 +14,7 @@ import { OverlayStart, ThemeServiceStart } from '@kbn/core/public';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { core, embeddableStart } from '../../../kibana_services';
+import { core } from '../../../kibana_services';
 import {
   IEmbeddable,
   Embeddable,
@@ -62,7 +62,7 @@ export class CustomizePanelAction implements Action<CustomizePanelActionContext>
     protected readonly theme: ThemeServiceStart,
     protected readonly editPanel: EditPanelAction,
     protected readonly commonlyUsedRanges?: CommonlyUsedRange[],
-    protected readonly dateFormat?: string,
+    protected readonly dateFormat?: string
   ) {}
 
   protected isTimeRangeCompatible({ embeddable }: CustomizePanelActionContext): boolean {
