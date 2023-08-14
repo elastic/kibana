@@ -11,6 +11,7 @@ xpack.serverless.observability.enabled: false
 xpack.uptime.enabled: false
 enterpriseSearch.enabled: false
 monitoring.ui.enabled: false
+xpack.fleet.enabled: false
 
 ## Enable the Serverless Search plugin
 xpack.serverless.search.enabled: true
@@ -26,6 +27,3 @@ telemetry.labels.serverless: search
 
 # Alerts config
 xpack.actions.enabledActionTypes: ['.email', '.index', '.slack', '.jira', '.webhook', '.teams']
-
-# Fleet specific configuration
-xpack.fleet.internal.capabilities: ['serverless_search']
