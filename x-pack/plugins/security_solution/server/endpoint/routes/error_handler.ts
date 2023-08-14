@@ -8,7 +8,7 @@
 import type { IKibanaResponse, KibanaResponseFactory, Logger } from '@kbn/core/server';
 import { CustomHttpRequestError } from '../../utils/custom_http_request_error';
 import { NotFoundError } from '../errors';
-import { EndpointHostUnEnrolledError } from '../services/metadata';
+import { EndpointHostUnEnrolledError, EndpointHostNotFoundError } from '../services/metadata';
 
 /**
  * Default Endpoint Routes error handler
@@ -21,7 +21,12 @@ export const errorHandler = <E extends Error>(
   res: KibanaResponseFactory,
   error: E
 ): IKibanaResponse => {
-  logger.error(error);
+
+  const shouldLogToDebug = () => {
+    return error instanceof EndpointHostNotFoundError;
+  }
+
+  shouldLogToDebug() ? logger.debug(error.message) : logger.error(error);
 
   if (error instanceof CustomHttpRequestError) {
     return res.customError({
@@ -36,6 +41,10 @@ export const errorHandler = <E extends Error>(
 
   if (error instanceof EndpointHostUnEnrolledError) {
     return res.badRequest({ body: error });
+  }
+
+  if (error instanceof EndpointHostNotFoundError) {
+    return res.notFound({ body: error });
   }
 
   // Kibana CORE will take care of `500` errors when the handler `throw`'s, including logging the error
