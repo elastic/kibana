@@ -21,6 +21,5 @@
     "@kbn/developer-examples-plugin",
     "@kbn/data-views-plugin",
     "@kbn/ui-actions-plugin",
-    "@kbn/lens-embeddable-utils",
   ]
 }
