@@ -296,7 +296,7 @@ export const SearchIndices: React.FC = () => {
             <AddContentEmptyPrompt />
             <EuiSpacer size="xxl" />
             <>
-              <EuiTitle>
+              <EuiTitle data-test-subj="search-indices-empty-title">
                 <h2>
                   {i18n.translate(
                     'xpack.enterpriseSearch.content.searchIndices.searchIndices.stepsTitle',

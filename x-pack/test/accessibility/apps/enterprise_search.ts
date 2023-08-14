@@ -62,10 +62,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await common.navigateToApp('enterprise_search/content');
       });
 
-      it('loads a setup guide', async function () {
+      it('loads the indices empty state', async function () {
         await retry.waitFor(
-          'setup guide visible',
-          async () => await testSubjects.exists('setupGuide')
+          'empty indices state visible',
+          async () => await testSubjects.exists('search-indices-empty-title')
         );
         await a11y.testAppSnapshot();
       });
