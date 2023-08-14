@@ -1,5 +1,5 @@
 /**
- * `react-beautiful-dnd` relies on `transition` for functionality
+ * `@hello-pangea/dnd` relies on `transition` for functionality
  * https://github.com/elastic/kibana/issues/95133
  */
 *:not(.essentialAnimation):not([data-rbd-draggable-context-id]):not([data-rbd-droppable-context-id]),
