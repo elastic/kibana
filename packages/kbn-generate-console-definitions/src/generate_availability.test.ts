@@ -32,6 +32,7 @@ describe('generateAvailability', () => {
       availability: undefined,
     };
 
+    // @ts-expect-error according to types, availability is never missing
     expect(() => generateAvailability(endpointWithoutAvailability)).toThrow(
       'missing availability for test-endpoint'
     );
