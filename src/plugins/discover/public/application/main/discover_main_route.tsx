@@ -22,7 +22,7 @@ import { useSingleton } from './hooks/use_singleton';
 import { MainHistoryLocationState } from '../../../common/locator';
 import { DiscoverStateContainer, getDiscoverStateContainer } from './services/discover_state';
 import { DiscoverMainApp } from './discover_main_app';
-import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../../utils/breadcrumbs';
+import { setBreadcrumbs } from '../../utils/breadcrumbs';
 import { LoadingIndicator } from '../../components/common/loading_indicator';
 import { DiscoverError } from '../../components/common/error_alert';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
@@ -161,11 +161,7 @@ export function DiscoverMainRoute({
             );
           }
 
-          chrome.setBreadcrumbs(
-            currentSavedSearch && currentSavedSearch.title
-              ? getSavedSearchBreadcrumbs({ id: currentSavedSearch.title, services })
-              : getRootBreadcrumbs({ services })
-          );
+          setBreadcrumbs({ services, titleBreadcrumbText: currentSavedSearch?.title ?? undefined });
         }
         setLoading(false);
         if (services.analytics) {
