@@ -60,8 +60,6 @@ async function createFtr({
     kbnTestServer: {
       installDir,
     },
-    updateBaselines,
-    updateSnapshots,
     suiteFiles: {
       include: suiteFiles?.include || [],
       exclude: suiteFiles?.exclude || [],
@@ -70,11 +68,13 @@ async function createFtr({
       include: suiteTags?.include || [],
       exclude: suiteTags?.exclude || [],
     },
+    updateBaselines,
+    updateSnapshots,
   });
 
   return {
     config,
-    ftr: new FunctionalTestRunner(log, config),
+    ftr: new FunctionalTestRunner(log, config, esVersion),
   };
 }
 

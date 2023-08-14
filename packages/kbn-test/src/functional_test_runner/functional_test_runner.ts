@@ -226,7 +226,6 @@ export class FunctionalTestRunner {
 
     try {
       if (
-        this.config.module.type !== 'journey' &&
         (!this.config.get('testFiles') || this.config.get('testFiles').length === 0) &&
         !this.config.get('testRunner')
       ) {

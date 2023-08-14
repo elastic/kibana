@@ -10,7 +10,7 @@ import Path from 'path';
 import { ToolingLog, createFlagError, createFailError } from '@kbn/dev-utils';
 import { defaultsDeep } from 'lodash';
 
-import { FtrConfigProvider, GenericFtrProviderContext } from '../../public_types';
+import { FtrConfigProvider } from '../../public_types';
 import { Config } from './config';
 import { EsVersion } from '../es_version';
 
@@ -20,24 +20,11 @@ interface LoadSettingsOptions {
   primary: boolean;
 }
 
-interface Journey {
-  config: {
-    isSkipped(): boolean;
-  };
-  testProvider(ctx: GenericFtrProviderContext<any, any>): void;
-}
-
 export type ConfigModule =
   | {
       type: 'config';
       path: string;
       provider: FtrConfigProvider;
-    }
-  | {
-      type: 'journey';
-      path: string;
-      provider: FtrConfigProvider;
-      journey: Journey;
     };
 
 async function getConfigModule({
@@ -60,31 +47,16 @@ async function getConfigModule({
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   const exports = require(resolvedPath);
   const defaultExport = exports.__esModule ? exports.default : exports;
-  if (typeof defaultExport === 'function') {
-    return {
-      type: 'config',
-      path: resolvedPath,
-      provider: defaultExport,
-    };
-  }
-
-  const { journey } = exports;
-  if (
-    !journey.constructor ||
-    typeof journey.constructor !== 'function' ||
-    journey.constructor.name !== 'Journey'
-  ) {
-    const rel = Path.relative(process.cwd(), resolvedPath);
+  if (typeof defaultExport !== 'function') {
     throw createFailError(
-      `"journey" export in journey at [${rel}] is not a valid instance of Journey`
+      `default export must be a function in a ftr config otherwise is not a valid instance`
     );
   }
 
   return {
-    type: 'journey',
+    type: 'config',
     path: resolvedPath,
-    provider: journey.constructor.convertToFtrConfigProvider(journey),
-    journey,
+    provider: defaultExport,
   };
 }
 
