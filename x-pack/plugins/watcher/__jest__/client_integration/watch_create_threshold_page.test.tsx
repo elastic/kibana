@@ -233,7 +233,8 @@ describe('<ThresholdWatchEditPage /> create route', () => {
         });
       });
 
-      describe('actions', () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/163531
+      describe.skip('actions', () => {
         beforeEach(async () => {
           await act(async () => {
             testBed = await setup(httpSetup);
