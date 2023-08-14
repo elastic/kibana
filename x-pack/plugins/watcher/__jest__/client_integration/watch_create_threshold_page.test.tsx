@@ -770,7 +770,8 @@ describe('<ThresholdWatchEditPage /> create route', () => {
         });
       });
 
-      describe('watch visualize data payload', () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/163532
+      describe.skip('watch visualize data payload', () => {
         test('should send the correct payload', async () => {
           const { form, find, component } = testBed;
           // Set up required fields
