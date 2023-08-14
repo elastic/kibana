@@ -52,7 +52,6 @@ import {
   getDocumentTypeFilterForTransactions,
   getDurationFieldForTransactions,
 } from '../../../../lib/helpers/transactions';
-import { getApmIndices } from '../../../settings/apm_indices/get_apm_indices';
 import { apmActionVariables } from '../../action_variables';
 import { alertingEsClient } from '../../alerting_es_client';
 import {
@@ -75,7 +74,7 @@ const ruleTypeConfig = RULE_TYPES_CONFIG[ApmRuleType.TransactionDuration];
 export function registerTransactionDurationRuleType({
   alerting,
   ruleDataClient,
-  apmIndicesConfig,
+  getApmIndices,
   apmConfig,
   logger,
   basePath,
@@ -117,10 +116,7 @@ export function registerTransactionDurationRuleType({
       const { getAlertUuid, savedObjectsClient, scopedClusterClient } =
         services;
 
-      const indices = await getApmIndices({
-        apmIndicesConfig,
-        savedObjectsClient,
-      });
+      const indices = await getApmIndices(savedObjectsClient);
 
       // only query transaction events when set to 'never',
       // to prevent (likely) unnecessary blocking request

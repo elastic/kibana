@@ -6,7 +6,7 @@
  */
 
 import { APMInternalESClient } from '../../../lib/helpers/create_es_client/create_internal_es_client';
-import { APM_AGENT_CONFIGURATION_INDEX } from '../apm_indices/get_apm_indices';
+import { APM_AGENT_CONFIGURATION_INDEX } from '../apm_indices/apm_system_index_constants';
 
 export async function deleteConfiguration({
   configurationId,

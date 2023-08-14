@@ -6,25 +6,21 @@
  */
 
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
-import { APMRouteHandlerResources } from '../../routes/typings';
-import { getApmIndices } from '../../routes/settings/apm_indices/get_apm_indices';
 import { APMEventClient } from './create_es_client/create_apm_event_client';
 import { withApmSpan } from '../../utils/with_apm_span';
+import { APMRouteHandlerResources } from '../../routes/apm_routes/register_apm_server_routes';
 
 export async function getApmEventClient({
   context,
   params,
   config,
-  apmIndicesConfig,
+  getApmIndices,
   request,
 }: APMRouteHandlerResources): Promise<APMEventClient> {
   return withApmSpan('get_apm_event_client', async () => {
     const coreContext = await context.core;
     const [indices, includeFrozen] = await Promise.all([
-      getApmIndices({
-        savedObjectsClient: coreContext.savedObjects.client,
-        apmIndicesConfig,
-      }),
+      getApmIndices(),
       withApmSpan('get_ui_settings', () =>
         coreContext.uiSettings.client.get<boolean>(
           UI_SETTINGS.SEARCH_INCLUDE_FROZEN

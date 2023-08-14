@@ -13,13 +13,10 @@ import {
   IngestGetPipelineResponse,
   SecurityHasPrivilegesPrivileges,
 } from '@elastic/elasticsearch/lib/api/types';
+import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
 import * as t from 'io-ts';
 import { isoToEpochRt } from '@kbn/io-ts-utils';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
-import {
-  ApmIndicesConfig,
-  getApmIndices,
-} from '../settings/apm_indices/get_apm_indices';
 import { ApmEvent } from './bundle/get_apm_events';
 import { getDiagnosticsBundle } from './get_diagnostics_bundle';
 import { getFleetPackageInfo } from './get_fleet_package_info';
@@ -52,7 +49,7 @@ export type DiagnosticsBundle = Promise<{
     hasAllIndexPrivileges: boolean;
     hasAllPrivileges: boolean;
   };
-  apmIndices: ApmIndicesConfig;
+  apmIndices: APMIndices;
   apmIndexTemplates: Array<{
     name: string;
     isNonStandard: boolean;
@@ -137,11 +134,8 @@ const getDiagnosticsRoute = createApmServerRoute({
   }> => {
     const { start, end, kuery } = resources.params.query;
     const coreContext = await resources.context.core;
+    const apmIndices = await resources.getApmIndices();
     const { asCurrentUser: esClient } = coreContext.elasticsearch.client;
-    const apmIndices = await getApmIndices({
-      savedObjectsClient: coreContext.savedObjects.client,
-      apmIndicesConfig: resources.apmIndicesConfig,
-    });
 
     const bundle = await getDiagnosticsBundle({
       esClient,

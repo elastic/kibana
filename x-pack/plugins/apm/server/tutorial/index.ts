@@ -12,8 +12,8 @@ import {
   TutorialSchema,
 } from '@kbn/home-plugin/server';
 import { CloudSetup } from '@kbn/cloud-plugin/server';
+import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
 import { APMConfig } from '..';
-import { ApmIndicesConfig } from '../routes/settings/apm_indices/get_apm_indices';
 import { createElasticCloudInstructions } from './envs/elastic_cloud';
 import { onPremInstructions } from './envs/on_prem';
 
@@ -26,12 +26,12 @@ const moduleName = 'apm';
 export const tutorialProvider =
   ({
     apmConfig,
-    apmIndicesConfig,
+    apmIndices,
     cloud,
     isFleetPluginEnabled,
   }: {
     apmConfig: APMConfig;
-    apmIndicesConfig: ApmIndicesConfig;
+    apmIndices: APMIndices;
     cloud?: CloudSetup;
     isFleetPluginEnabled: boolean;
   }) =>
@@ -90,9 +90,9 @@ It allows you to monitor the performance of thousands of applications in real ti
       integrationBrowserCategories: ['observability', 'apm'],
       artifacts,
       customStatusCheckName: 'apm_fleet_server_status_check',
-      onPrem: onPremInstructions({ apmIndicesConfig, isFleetPluginEnabled }),
+      onPrem: onPremInstructions({ apmIndices, isFleetPluginEnabled }),
       elasticCloud: createElasticCloudInstructions({
-        apmIndicesConfig,
+        apmIndices,
         isFleetPluginEnabled,
         cloudSetup: cloud,
       }),

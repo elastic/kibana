@@ -29,10 +29,10 @@ const START_SERVER_UNIX_SYSV = createStartServerUnixSysv();
 const START_SERVER_UNIX_BINARI = createStartServerUnixBinari();
 
 export function getOnPremApmServerInstructionSet({
-  apmIndicesConfig,
+  apmIndices,
   isFleetPluginEnabled,
 }: {
-  apmIndicesConfig: APMDataAccessConfig['indices'];
+  apmIndices: APMDataAccessConfig['indices'];
   isFleetPluginEnabled: boolean;
 }): InstructionsSchema['instructionSets'][0] {
   return {
@@ -132,7 +132,7 @@ export function getOnPremApmServerInstructionSet({
         }
       ),
       esHitsCheck: {
-        index: apmIndicesConfig.onboarding,
+        index: apmIndices.onboarding,
         query: {
           bool: {
             filter: [{ term: { 'processor.event': 'onboarding' } }],

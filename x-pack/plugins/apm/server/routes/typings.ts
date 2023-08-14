@@ -8,23 +8,13 @@
 import {
   CoreSetup,
   CustomRequestHandlerContext,
-  Logger,
-  KibanaRequest,
   CoreStart,
   RouteConfigOptions,
 } from '@kbn/core/server';
-import { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { AlertingApiRequestHandlerContext } from '@kbn/alerting-plugin/server';
 import type { RacApiRequestHandlerContext } from '@kbn/rule-registry-plugin/server';
 import { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import type { APMDataAccessConfig } from '@kbn/apm-data-access-plugin/server';
-import { APMConfig } from '..';
-import {
-  APMPluginSetupDependencies,
-  APMPluginStartDependencies,
-} from '../types';
-import { ApmFeatureFlags } from '../../common/apm_feature_flags';
 
 export type ApmPluginRequestHandlerContext = CustomRequestHandlerContext<{
   licensing: LicensingApiRequestHandlerContext;
@@ -54,28 +44,4 @@ export type TelemetryUsageCounter = ReturnType<
 export interface APMCore {
   setup: CoreSetup;
   start: () => Promise<CoreStart>;
-}
-
-export interface APMRouteHandlerResources {
-  request: KibanaRequest;
-  context: ApmPluginRequestHandlerContext;
-  params: {
-    query: {
-      _inspect: boolean;
-    };
-  };
-  config: APMConfig;
-  featureFlags: ApmFeatureFlags;
-  logger: Logger;
-  core: APMCore;
-  plugins: {
-    [key in keyof APMPluginSetupDependencies]: {
-      setup: Required<APMPluginSetupDependencies>[key];
-      start: () => Promise<Required<APMPluginStartDependencies>[key]>;
-    };
-  };
-  ruleDataClient: IRuleDataClient;
-  telemetryUsageCounter?: TelemetryUsageCounter;
-  kibanaVersion: string;
-  apmIndicesConfig: APMDataAccessConfig['indices'];
 }

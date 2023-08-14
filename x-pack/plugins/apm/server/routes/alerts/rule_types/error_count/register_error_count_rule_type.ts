@@ -41,7 +41,6 @@ import {
 import { errorCountParamsSchema } from '../../../../../common/rules/schema';
 import { environmentQuery } from '../../../../../common/utils/environment_query';
 import { getAlertUrlErrorCount } from '../../../../../common/utils/formatters';
-import { getApmIndices } from '../../../settings/apm_indices/get_apm_indices';
 import { apmActionVariables } from '../../action_variables';
 import { alertingEsClient } from '../../alerting_es_client';
 import {
@@ -62,7 +61,7 @@ export function registerErrorCountRuleType({
   alerting,
   alertsLocator,
   basePath,
-  apmIndicesConfig,
+  getApmIndices,
   logger,
   ruleDataClient,
 }: RegisterRuleDependencies) {
@@ -114,10 +113,7 @@ export function registerErrorCountRuleType({
           scopedClusterClient,
         } = services;
 
-        const indices = await getApmIndices({
-          apmIndicesConfig,
-          savedObjectsClient,
-        });
+        const indices = await getApmIndices(savedObjectsClient);
 
         const termFilterQuery = !ruleParams.kqlFilter
           ? [

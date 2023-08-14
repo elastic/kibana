@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { Logger, CoreStart } from '@kbn/core/server';
+import {
+  Logger,
+  CoreStart,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 import {
   FleetStartContract,
   PostPackagePolicyCreateCallback,
@@ -14,7 +18,7 @@ import {
   PutPackagePolicyUpdateCallback,
 } from '@kbn/fleet-plugin/server';
 import { get } from 'lodash';
-import { APMRouteHandlerResources } from '../..';
+import type { APMDataAccessConfig } from '@kbn/apm-data-access-plugin/server';
 import { decoratePackagePolicyWithAgentConfigAndSourceMap } from './merge_package_policy_with_apm';
 import { addApiKeysToPackagePolicyIfMissing } from './api_keys/add_api_keys_to_policies_if_missing';
 import {
@@ -23,31 +27,30 @@ import {
 } from './get_package_policy_decorators';
 import { createInternalESClient } from '../../lib/helpers/create_es_client/create_internal_es_client';
 import { getInternalSavedObjectsClient } from '../../lib/helpers/get_internal_saved_objects_client';
-import { ApmIndicesConfig } from '../settings/apm_indices/get_apm_indices';
+import { APMRouteHandlerResources } from '../apm_routes/register_apm_server_routes';
 
 export async function registerFleetPolicyCallbacks({
   logger,
   coreStartPromise,
   plugins,
-  apmIndicesConfig,
 }: {
   logger: Logger;
   coreStartPromise: Promise<CoreStart>;
   plugins: APMRouteHandlerResources['plugins'];
-  apmIndicesConfig: ApmIndicesConfig;
 }) {
   if (!plugins.fleet) {
     return;
   }
 
   const fleetPluginStart = await plugins.fleet.start();
+  const { getApmIndices } = plugins.apmDataAccess.setup;
   const coreStart = await coreStartPromise;
 
   fleetPluginStart.registerExternalCallback(
     'packagePolicyUpdate',
     onPackagePolicyCreateOrUpdate({
       fleetPluginStart,
-      apmIndicesConfig,
+      getApmIndices,
       coreStart,
     })
   );
@@ -56,7 +59,7 @@ export async function registerFleetPolicyCallbacks({
     'packagePolicyCreate',
     onPackagePolicyCreateOrUpdate({
       fleetPluginStart,
-      apmIndicesConfig,
+      getApmIndices,
       coreStart,
     })
   );
@@ -152,11 +155,13 @@ function onPackagePolicyPostCreate({
  */
 function onPackagePolicyCreateOrUpdate({
   fleetPluginStart,
-  apmIndicesConfig,
+  getApmIndices,
   coreStart,
 }: {
   fleetPluginStart: FleetStartContract;
-  apmIndicesConfig: ApmIndicesConfig;
+  getApmIndices: (
+    soClient: SavedObjectsClientContract
+  ) => Promise<APMDataAccessConfig['indices']>;
   coreStart: CoreStart;
 }): PutPackagePolicyUpdateCallback & PostPackagePolicyCreateCallback {
   return async (packagePolicy) => {
@@ -166,10 +171,11 @@ function onPackagePolicyCreateOrUpdate({
 
     const { asInternalUser } = coreStart.elasticsearch.client;
     const savedObjectsClient = await getInternalSavedObjectsClient(coreStart);
+    const apmIndices = await getApmIndices(savedObjectsClient);
+
     const internalESClient = await createInternalESClient({
       debug: false,
-      apmIndicesConfig,
-      savedObjectsClient,
+      apmIndices,
       elasticsearchClient: asInternalUser,
     });
 

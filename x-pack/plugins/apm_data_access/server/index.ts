@@ -56,6 +56,7 @@ export const config: PluginConfigDescriptor<APMDataAccessConfig> = {
   schema: configSchema,
 };
 export type APMDataAccessConfig = TypeOf<typeof configSchema>;
+export type APMIndices = APMDataAccessConfig['indices'];
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new ApmDataAccessPlugin(initializerContext);

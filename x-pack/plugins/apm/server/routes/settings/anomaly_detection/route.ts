@@ -21,7 +21,6 @@ import { updateToV3 } from './update_to_v3';
 import { environmentStringRt } from '../../../../common/environment_rt';
 import { getMlJobsWithAPMGroup } from '../../../lib/anomaly_detection/get_ml_jobs_with_apm_group';
 import { getApmEventClient } from '../../../lib/helpers/get_apm_event_client';
-import { getApmIndices } from '../apm_indices/get_apm_indices';
 import { ApmMlJob } from '../../../../common/anomaly_detection/apm_ml_job';
 // get ML anomaly detection jobs for each environment
 const anomalyDetectionJobsRoute = createApmServerRoute({
@@ -68,18 +67,14 @@ const createAnomalyDetectionJobsRoute = createApmServerRoute({
     }),
   }),
   handler: async (resources): Promise<{ jobCreated: true }> => {
-    const { params, context, logger, apmIndicesConfig } = resources;
+    const { params, context, logger, getApmIndices } = resources;
     const { environments } = params.body;
     const licensingContext = await context.licensing;
-    const coreContext = await context.core;
     const esClient = (await context.core).elasticsearch.client;
 
     const [mlClient, indices] = await Promise.all([
       getMlClient(resources),
-      getApmIndices({
-        savedObjectsClient: coreContext.savedObjects.client,
-        apmIndicesConfig,
-      }),
+      getApmIndices(),
     ]);
 
     if (!isActivePlatinumLicense(licensingContext.license)) {
@@ -142,9 +137,9 @@ const anomalyDetectionUpdateToV3Route = createApmServerRoute({
     ],
   },
   handler: async (resources): Promise<{ update: boolean }> => {
-    const { apmIndicesConfig, context } = resources;
-    const coreContext = await context.core;
-    const [mlClient, esClient, indices] = await Promise.all([
+    const { getApmIndices } = resources;
+    const [indices, mlClient, esClient] = await Promise.all([
+      getApmIndices(),
       getMlClient(resources),
       resources.core
         .start()
@@ -152,10 +147,6 @@ const anomalyDetectionUpdateToV3Route = createApmServerRoute({
           (start): ElasticsearchClient =>
             start.elasticsearch.client.asInternalUser
         ),
-      getApmIndices({
-        apmIndicesConfig,
-        savedObjectsClient: coreContext.savedObjects.client,
-      }),
     ]);
 
     const { logger } = resources;

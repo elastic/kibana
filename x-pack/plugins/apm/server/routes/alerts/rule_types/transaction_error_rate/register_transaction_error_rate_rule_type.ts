@@ -50,7 +50,6 @@ import {
   getAlertUrlTransaction,
 } from '../../../../../common/utils/formatters';
 import { getDocumentTypeFilterForTransactions } from '../../../../lib/helpers/transactions';
-import { getApmIndices } from '../../../settings/apm_indices/get_apm_indices';
 import { apmActionVariables } from '../../action_variables';
 import { alertingEsClient } from '../../alerting_es_client';
 import {
@@ -71,7 +70,7 @@ export function registerTransactionErrorRateRuleType({
   alerting,
   alertsLocator,
   basePath,
-  apmIndicesConfig,
+  getApmIndices,
   apmConfig,
   logger,
   ruleDataClient,
@@ -124,10 +123,7 @@ export function registerTransactionErrorRateRuleType({
           scopedClusterClient,
         } = services;
 
-        const indices = await getApmIndices({
-          apmIndicesConfig,
-          savedObjectsClient,
-        });
+        const indices = await getApmIndices(savedObjectsClient);
 
         // only query transaction events when set to 'never',
         // to prevent (likely) unnecessary blocking request

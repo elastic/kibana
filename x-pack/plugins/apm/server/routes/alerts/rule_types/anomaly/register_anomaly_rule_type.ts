@@ -63,8 +63,8 @@ const ruleTypeConfig = RULE_TYPES_CONFIG[ApmRuleType.Anomaly];
 export function registerAnomalyRuleType({
   alerting,
   alertsLocator,
+  getApmIndices,
   basePath,
-  apmIndicesConfig,
   logger,
   ml,
   ruleDataClient,
@@ -107,6 +107,8 @@ export function registerAnomalyRuleType({
           savedObjectsClient,
           scopedClusterClient,
         } = services;
+
+        const apmIndices = await getApmIndices(savedObjectsClient);
 
         const ruleParams = params;
         const request = {} as KibanaRequest;
@@ -256,7 +258,7 @@ export function registerAnomalyRuleType({
           } = anomaly;
 
           const eventSourceFields = await getServiceGroupFieldsForAnomaly({
-            apmIndicesConfig,
+            apmIndices,
             scopedClusterClient,
             savedObjectsClient,
             serviceName,

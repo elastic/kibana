@@ -9,6 +9,7 @@ import {
   IScopedClusterClient,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
+import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
 import {
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
@@ -20,22 +21,17 @@ import {
   getServiceGroupFields,
   getServiceGroupFieldsAgg,
 } from '../get_service_group_fields';
-import {
-  ApmIndicesConfig,
-  getApmIndices,
-} from '../../../settings/apm_indices/get_apm_indices';
 
 export async function getServiceGroupFieldsForAnomaly({
-  apmIndicesConfig,
+  apmIndices,
   scopedClusterClient,
-  savedObjectsClient,
   serviceName,
   environment,
   transactionType,
   timestamp,
   bucketSpan,
 }: {
-  apmIndicesConfig: ApmIndicesConfig;
+  apmIndices: APMIndices;
   scopedClusterClient: IScopedClusterClient;
   savedObjectsClient: SavedObjectsClientContract;
   serviceName: string;
@@ -44,14 +40,8 @@ export async function getServiceGroupFieldsForAnomaly({
   timestamp: number;
   bucketSpan: number;
 }) {
-  const indices = await getApmIndices({
-    apmIndicesConfig,
-    savedObjectsClient,
-  });
-  const { transaction: index } = indices;
-
   const params = {
-    index,
+    index: apmIndices.transaction,
     body: {
       size: 0,
       track_total_hits: false,

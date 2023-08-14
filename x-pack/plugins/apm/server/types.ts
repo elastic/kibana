@@ -7,7 +7,6 @@
 
 import { SharePluginSetup } from '@kbn/share-plugin/server';
 import { Observable } from 'rxjs';
-import { KibanaRequest } from '@kbn/core/server';
 import {
   RuleRegistryPluginSetupContract,
   RuleRegistryPluginStartContract,
@@ -63,18 +62,9 @@ import {
   CustomIntegrationsPluginStart,
 } from '@kbn/custom-integrations-plugin/server';
 import { APMConfig } from '.';
-import { ApmIndicesConfig } from './routes/settings/apm_indices/get_apm_indices';
-import { APMEventClient } from './lib/helpers/create_es_client/create_apm_event_client';
-import { ApmPluginRequestHandlerContext } from './routes/typings';
 
 export interface APMPluginSetup {
   config$: Observable<APMConfig>;
-  getApmIndices: () => Promise<ApmIndicesConfig>;
-  createApmEventClient: (params: {
-    debug?: boolean;
-    request: KibanaRequest;
-    context: ApmPluginRequestHandlerContext;
-  }) => Promise<APMEventClient>;
 }
 
 export interface APMPluginSetupDependencies {

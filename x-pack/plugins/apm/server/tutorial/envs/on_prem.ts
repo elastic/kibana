@@ -27,16 +27,16 @@ import {
 import { getOnPremApmServerInstructionSet } from './on_prem_apm_server_instruction_set';
 
 export function onPremInstructions({
-  apmIndicesConfig,
+  apmIndices,
   isFleetPluginEnabled,
 }: {
-  apmIndicesConfig: APMDataAccessConfig['indices'];
+  apmIndices: APMDataAccessConfig['indices'];
   isFleetPluginEnabled: boolean;
 }): InstructionsSchema {
   return {
     instructionSets: [
       getOnPremApmServerInstructionSet({
-        apmIndicesConfig,
+        apmIndices,
         isFleetPluginEnabled,
       }),
       {
@@ -124,9 +124,9 @@ export function onPremInstructions({
           ),
           esHitsCheck: {
             index: [
-              apmIndicesConfig.error,
-              apmIndicesConfig.transaction,
-              apmIndicesConfig.metric,
+              apmIndices.error,
+              apmIndices.transaction,
+              apmIndices.metric,
             ],
             query: {
               bool: {

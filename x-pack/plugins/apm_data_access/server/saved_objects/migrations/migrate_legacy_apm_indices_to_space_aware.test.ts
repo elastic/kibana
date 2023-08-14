@@ -8,7 +8,7 @@ import type { CoreStart, Logger } from '@kbn/core/server';
 import {
   APM_INDEX_SETTINGS_SAVED_OBJECT_ID,
   APM_INDEX_SETTINGS_SAVED_OBJECT_TYPE,
-} from '../../../common/apm_saved_object_constants';
+} from '../apm_indices';
 import { migrateLegacyAPMIndicesToSpaceAware } from './migrate_legacy_apm_indices_to_space_aware';
 
 const loggerMock = {

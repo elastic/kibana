@@ -11,7 +11,6 @@ import {
 } from './create_static_data_view';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { getApmDataViewTitle } from './get_apm_data_view_title';
-import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 
 const staticDataViewRoute = createApmServerRoute({
@@ -43,15 +42,8 @@ const staticDataViewRoute = createApmServerRoute({
 const dataViewTitleRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/data_view/title',
   options: { tags: ['access:apm'] },
-  handler: async ({
-    context,
-    apmIndicesConfig,
-  }): Promise<{ apmDataViewTitle: string }> => {
-    const coreContext = await context.core;
-    const apmIndicies = await getApmIndices({
-      savedObjectsClient: coreContext.savedObjects.client,
-      apmIndicesConfig,
-    });
+  handler: async ({ getApmIndices }): Promise<{ apmDataViewTitle: string }> => {
+    const apmIndicies = await getApmIndices();
     const apmDataViewTitle = getApmDataViewTitle(apmIndicies);
 
     return { apmDataViewTitle };

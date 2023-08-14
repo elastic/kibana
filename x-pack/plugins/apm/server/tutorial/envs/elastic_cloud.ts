@@ -11,8 +11,8 @@ import {
   TutorialSchema,
   InstructionSetSchema,
 } from '@kbn/home-plugin/server';
-
 import { CloudSetup } from '@kbn/cloud-plugin/server';
+import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
 import {
   createNodeAgentInstructions,
   createDjangoAgentInstructions,
@@ -27,15 +27,14 @@ import {
   createOpenTelemetryAgentInstructions,
 } from '../../../common/tutorial/instructions/apm_agent_instructions';
 import { getOnPremApmServerInstructionSet } from './on_prem_apm_server_instruction_set';
-import { ApmIndicesConfig } from '../../routes/settings/apm_indices/get_apm_indices';
 
 export function createElasticCloudInstructions({
   cloudSetup,
-  apmIndicesConfig,
+  apmIndices,
   isFleetPluginEnabled,
 }: {
   cloudSetup?: CloudSetup;
-  apmIndicesConfig: ApmIndicesConfig;
+  apmIndices: APMIndices;
   isFleetPluginEnabled: boolean;
 }): TutorialSchema['elasticCloud'] {
   const apmServerUrl = cloudSetup?.apm.url;
@@ -46,7 +45,7 @@ export function createElasticCloudInstructions({
   }
 
   instructionSets.push(
-    getOnPremApmServerInstructionSet({ apmIndicesConfig, isFleetPluginEnabled })
+    getOnPremApmServerInstructionSet({ apmIndices, isFleetPluginEnabled })
   );
   instructionSets.push(getApmAgentInstructionSet(cloudSetup));
 

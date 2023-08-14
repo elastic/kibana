@@ -5,9 +5,18 @@
  * 2.0.
  */
 
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
+import {
+  PluginInitializerContext,
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 import { APMDataAccessConfig } from '.';
 import { ApmDataAccessPluginSetup, ApmDataAccessPluginStart } from './types';
+import { migrateLegacyAPMIndicesToSpaceAware } from '../../apm_data_access/server/saved_objects/migrations/migrate_legacy_apm_indices_to_space_aware';
+import { getApmIndicesFromSavedObjectsAndConfigFile } from './lib/get_apm_indices';
+import { apmIndicesSavedObjectDefinition } from './saved_objects/apm_indices';
 
 export class ApmDataAccessPlugin
   implements Plugin<ApmDataAccessPluginSetup, ApmDataAccessPluginStart>
@@ -17,15 +26,30 @@ export class ApmDataAccessPlugin
   }
 
   public setup(core: CoreSetup): ApmDataAccessPluginSetup {
-    // config
+    // retrieve APM indices from config
     const { indices } = this.initContext.config.get<APMDataAccessConfig>();
 
+    // register saved object
+    core.savedObjects.registerType(apmIndicesSavedObjectDefinition);
+
+    // expose
     return {
-      indices,
+      apmIndicesFromConfigFile: indices,
+      getApmIndices: async (savedObjectsClient: SavedObjectsClientContract) =>
+        getApmIndicesFromSavedObjectsAndConfigFile({
+          apmIndicesFromConfigFile: indices,
+          savedObjectsClient,
+        }),
     };
   }
 
   public start(core: CoreStart) {
+    const logger = this.initContext.logger.get();
+    // TODO: remove in 9.0
+    migrateLegacyAPMIndicesToSpaceAware({ coreStart: core, logger }).catch((e) => {
+      logger.error('Failed to run migration making APM indices space aware');
+      logger.error(e);
+    });
     return {};
   }
 

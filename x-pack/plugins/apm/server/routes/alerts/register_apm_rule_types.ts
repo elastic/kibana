@@ -7,7 +7,11 @@
 
 import type { AlertsLocatorParams } from '@kbn/observability-plugin/common';
 import { LocatorPublic } from '@kbn/share-plugin/common';
-import { IBasePath, Logger } from '@kbn/core/server';
+import {
+  IBasePath,
+  Logger,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 import {
   PluginSetupContract as AlertingPluginSetupContract,
   type IRuleTypeAlerts,
@@ -16,6 +20,7 @@ import { ObservabilityPluginSetup } from '@kbn/observability-plugin/server';
 import { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { MlPluginSetup } from '@kbn/ml-plugin/server';
 import { legacyExperimentalFieldMap } from '@kbn/alerts-as-data-utils';
+import type { APMDataAccessConfig } from '@kbn/apm-data-access-plugin/server';
 import {
   AGENT_NAME,
   ERROR_GROUP_ID,
@@ -32,7 +37,6 @@ import { registerAnomalyRuleType } from './rule_types/anomaly/register_anomaly_r
 import { registerErrorCountRuleType } from './rule_types/error_count/register_error_count_rule_type';
 import { APMConfig } from '../..';
 import { registerTransactionErrorRateRuleType } from './rule_types/transaction_error_rate/register_transaction_error_rate_rule_type';
-import { ApmIndicesConfig } from '../settings/apm_indices/get_apm_indices';
 
 export const APM_RULE_TYPE_ALERT_CONTEXT = 'observability.apm';
 
@@ -91,7 +95,9 @@ export const ApmRuleTypeAlertDefinition: IRuleTypeAlerts = {
 export interface RegisterRuleDependencies {
   alerting: AlertingPluginSetupContract;
   basePath: IBasePath;
-  apmIndicesConfig: ApmIndicesConfig;
+  getApmIndices: (
+    soClient: SavedObjectsClientContract
+  ) => Promise<APMDataAccessConfig['indices']>;
   apmConfig: APMConfig;
   logger: Logger;
   ml?: MlPluginSetup;

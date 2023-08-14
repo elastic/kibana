@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { CoreStart } from '@kbn/core/server';
-
-export async function getInternalSavedObjectsClient(coreStart: CoreStart) {
-  return coreStart.savedObjects.createInternalRepository();
-}
+export const APM_AGENT_CONFIGURATION_INDEX = '.apm-agent-configuration';
+export const APM_CUSTOM_LINK_INDEX = '.apm-custom-link';
+export const APM_SOURCE_MAP_INDEX = '.apm-source-map';

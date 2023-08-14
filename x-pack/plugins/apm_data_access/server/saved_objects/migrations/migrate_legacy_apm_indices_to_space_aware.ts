@@ -4,22 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type {
-  CoreStart,
-  Logger,
-  ISavedObjectsRepository,
-} from '@kbn/core/server';
+import type { CoreStart, Logger, ISavedObjectsRepository } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
+
 import {
+  APMIndicesSavedObjectBody,
   APM_INDEX_SETTINGS_SAVED_OBJECT_ID,
   APM_INDEX_SETTINGS_SAVED_OBJECT_TYPE,
-} from '../../../common/apm_saved_object_constants';
-import { ApmIndicesConfig } from '../../routes/settings/apm_indices/get_apm_indices';
-import { APMIndices } from '../apm_indices';
+} from '../apm_indices';
 
 async function fetchLegacyAPMIndices(repository: ISavedObjectsRepository) {
   try {
-    const apmIndices = await repository.get<Partial<APMIndices>>(
+    const apmIndices = await repository.get<Partial<APMIndicesSavedObjectBody>>(
       APM_INDEX_SETTINGS_SAVED_OBJECT_TYPE,
       APM_INDEX_SETTINGS_SAVED_OBJECT_ID
     );
@@ -66,15 +63,17 @@ export async function migrateLegacyAPMIndicesToSpaceAware({
     };
 
     // Calls create first to update the default space setting isSpaceAware to true
-    await repository.create<
-      Partial<ApmIndicesConfig & { isSpaceAware: boolean }>
-    >(APM_INDEX_SETTINGS_SAVED_OBJECT_TYPE, savedObjectAttributes, {
-      id: APM_INDEX_SETTINGS_SAVED_OBJECT_ID,
-      overwrite: true,
-    });
+    await repository.create<Partial<APMIndices & { isSpaceAware: boolean }>>(
+      APM_INDEX_SETTINGS_SAVED_OBJECT_TYPE,
+      savedObjectAttributes,
+      {
+        id: APM_INDEX_SETTINGS_SAVED_OBJECT_ID,
+        overwrite: true,
+      }
+    );
 
     // Create new APM indices space aware for all spaces available
-    await repository.bulkCreate<Partial<APMIndices>>(
+    await repository.bulkCreate<Partial<APMIndicesSavedObjectBody>>(
       spaces.saved_objects
         // Skip default space since it was already updated
         .filter(({ id: spaceId }) => spaceId !== 'default')

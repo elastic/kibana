@@ -6,11 +6,17 @@
  */
 
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import { CoreSetup, Logger, SavedObjectsErrorHelpers } from '@kbn/core/server';
+import {
+  CoreSetup,
+  Logger,
+  SavedObjectsClientContract,
+  SavedObjectsErrorHelpers,
+} from '@kbn/core/server';
 import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
+import { APMDataAccessConfig } from '@kbn/apm-data-access-plugin/server';
 import {
   APM_TELEMETRY_SAVED_OBJECT_ID,
   APM_TELEMETRY_SAVED_OBJECT_TYPE,
@@ -19,17 +25,13 @@ import { getInternalSavedObjectsClient } from '../helpers/get_internal_saved_obj
 import { collectDataTelemetry } from './collect_data_telemetry';
 import { APMUsage } from './types';
 import { apmSchema } from './schema';
-import {
-  ApmIndicesConfig,
-  getApmIndices,
-} from '../../routes/settings/apm_indices/get_apm_indices';
 import { getTelemetryClient } from './telemetry_client';
 
 export const APM_TELEMETRY_TASK_NAME = 'apm-telemetry-task';
 
 export async function createApmTelemetry({
   core,
-  apmIndicesConfig,
+  getApmIndices,
   usageCollector,
   taskManager,
   logger,
@@ -37,7 +39,9 @@ export async function createApmTelemetry({
   isProd,
 }: {
   core: CoreSetup;
-  apmIndicesConfig: ApmIndicesConfig;
+  getApmIndices: (
+    soClient: SavedObjectsClientContract
+  ) => Promise<APMDataAccessConfig['indices']>;
   usageCollector: UsageCollectionSetup;
   taskManager: TaskManagerSetupContract;
   logger: Logger;
@@ -58,14 +62,14 @@ export async function createApmTelemetry({
     },
   });
 
+  const telemetryClient = await getTelemetryClient({ core });
   const [coreStart] = await core.getStartServices();
   const savedObjectsClient = await getInternalSavedObjectsClient(coreStart);
-  const indices = await getApmIndices({ apmIndicesConfig, savedObjectsClient });
-  const telemetryClient = await getTelemetryClient({ core });
+  const apmIndices = await getApmIndices(savedObjectsClient);
 
   const collectAndStore = async () => {
     const dataTelemetry = await collectDataTelemetry({
-      indices,
+      indices: apmIndices,
       telemetryClient,
       logger,
       savedObjectsClient,

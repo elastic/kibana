@@ -50,8 +50,9 @@ const listCustomLinksRoute = createApmServerRoute({
   ): Promise<{
     customLinks: CustomLink[];
   }> => {
-    const { context, params, request, apmIndicesConfig } = resources;
+    const { context, params, request } = resources;
     const licensingContext = await context.licensing;
+    const apmIndices = await resources.getApmIndices();
 
     if (!isActiveGoldLicense(licensingContext.license)) {
       throw Boom.forbidden(INVALID_LICENSE);
@@ -63,7 +64,7 @@ const listCustomLinksRoute = createApmServerRoute({
       context,
       request,
       debug: resources.params.query._inspect,
-      apmIndicesConfig,
+      apmIndices,
     });
 
     // picks only the items listed in FILTER_OPTIONS
@@ -83,8 +84,9 @@ const createCustomLinkRoute = createApmServerRoute({
   }),
   options: { tags: ['access:apm', 'access:apm_write'] },
   handler: async (resources): Promise<void> => {
-    const { context, params, request, apmIndicesConfig } = resources;
+    const { context, params, request } = resources;
     const licensingContext = await context.licensing;
+    const apmIndices = await resources.getApmIndices();
 
     if (!isActiveGoldLicense(licensingContext.license)) {
       throw Boom.forbidden(INVALID_LICENSE);
@@ -94,7 +96,7 @@ const createCustomLinkRoute = createApmServerRoute({
       context,
       request,
       debug: resources.params.query._inspect,
-      apmIndicesConfig,
+      apmIndices,
     });
     const customLink = params.body;
 
@@ -119,8 +121,9 @@ const updateCustomLinkRoute = createApmServerRoute({
     tags: ['access:apm', 'access:apm_write'],
   },
   handler: async (resources): Promise<void> => {
-    const { params, context, request, apmIndicesConfig } = resources;
+    const { params, context, request } = resources;
     const licensingContext = await context.licensing;
+    const apmIndices = await resources.getApmIndices();
 
     if (!isActiveGoldLicense(licensingContext.license)) {
       throw Boom.forbidden(INVALID_LICENSE);
@@ -130,7 +133,7 @@ const updateCustomLinkRoute = createApmServerRoute({
       context,
       request,
       debug: resources.params.query._inspect,
-      apmIndicesConfig,
+      apmIndices,
     });
 
     const { id } = params.path;
@@ -155,8 +158,9 @@ const deleteCustomLinkRoute = createApmServerRoute({
     tags: ['access:apm', 'access:apm_write'],
   },
   handler: async (resources): Promise<{ result: string }> => {
-    const { context, params, request, apmIndicesConfig } = resources;
+    const { context, params, request } = resources;
     const licensingContext = await context.licensing;
+    const apmIndices = await resources.getApmIndices();
 
     if (!isActiveGoldLicense(licensingContext.license)) {
       throw Boom.forbidden(INVALID_LICENSE);
@@ -166,7 +170,7 @@ const deleteCustomLinkRoute = createApmServerRoute({
       context,
       request,
       debug: resources.params.query._inspect,
-      apmIndicesConfig,
+      apmIndices,
     });
     const { id } = params.path;
     const res = await deleteCustomLink({

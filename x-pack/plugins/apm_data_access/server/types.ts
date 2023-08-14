@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { APMDataAccessConfig } from '.';
 
 export interface ApmDataAccessPluginSetup {
-  indices: APMDataAccessConfig['indices'];
+  apmIndicesFromConfigFile: APMDataAccessConfig['indices'];
+  getApmIndices: (soClient: SavedObjectsClientContract) => Promise<APMDataAccessConfig['indices']>;
 }
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ApmDataAccessPluginStart {}

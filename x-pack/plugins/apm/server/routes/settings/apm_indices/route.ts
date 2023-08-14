@@ -7,12 +7,11 @@
 
 import * as t from 'io-ts';
 import { SavedObject } from '@kbn/core/server';
+import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
 import { createApmServerRoute } from '../../apm_routes/create_apm_server_route';
 import {
-  getApmIndices,
   getApmIndexSettings,
   ApmIndexSettingsResponse,
-  ApmIndicesConfig,
 } from './get_apm_indices';
 import { saveApmIndices } from './save_apm_indices';
 
@@ -34,18 +33,13 @@ const apmIndexSettingsRoute = createApmServerRoute({
 const apmIndicesRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/settings/apm-indices',
   options: { tags: ['access:apm'] },
-  handler: async (resources): Promise<ApmIndicesConfig> => {
-    const { context, apmIndicesConfig } = resources;
-    const savedObjectsClient = (await context.core).savedObjects.client;
-    return await getApmIndices({
-      savedObjectsClient,
-      apmIndicesConfig,
-    });
+  handler: async (resources): Promise<APMIndices> => {
+    return await resources.getApmIndices();
   },
 });
 
 type SaveApmIndicesBodySchema = {
-  [Property in keyof ApmIndicesConfig]: t.StringC;
+  [Property in keyof APMIndices]: t.StringC;
 };
 
 // save ui indices

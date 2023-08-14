@@ -57,13 +57,13 @@ export const createRuleTypeMocks = () => {
         serverBasePath: '/eyr',
       } as IBasePath,
       apmConfig: { searchAggregatedTransactions: true } as any as APMConfig,
-      apmIndicesConfig: {
+      getApmIndices: async () => ({
         error: 'apm-*',
         transaction: 'apm-*',
         span: 'apm-*',
         metric: 'apm-*',
         onboarding: 'apm-*',
-      },
+      }),
       observability: {
         getAlertDetailsConfig: jest.fn().mockReturnValue({ apm: true }),
       } as unknown as ObservabilityPluginSetup,

@@ -141,8 +141,7 @@ const createCloudApmPackagePolicyRoute = createApmServerRoute({
   ): Promise<{
     cloudApmPackagePolicy: PackagePolicy;
   }> => {
-    const { plugins, context, config, request, logger, apmIndicesConfig } =
-      resources;
+    const { plugins, context, config, request, logger } = resources;
     const cloudApmMigrationEnabled = config.agent.migrations.enabled;
 
     if (!plugins.fleet || !plugins.security) {
@@ -154,11 +153,13 @@ const createCloudApmPackagePolicyRoute = createApmServerRoute({
       coreStart,
       fleetPluginStart,
       securityPluginStart,
+      apmIndices,
     ] = await Promise.all([
       (await context.core).savedObjects.client,
       resources.core.start(),
       plugins.fleet.start(),
       plugins.security.start(),
+      resources.getApmIndices(),
     ]);
 
     const esClient = coreStart.elasticsearch.client.asScoped(
@@ -175,7 +176,7 @@ const createCloudApmPackagePolicyRoute = createApmServerRoute({
       context,
       request,
       debug: resources.params.query._inspect,
-      apmIndicesConfig,
+      apmIndices,
     });
 
     const cloudApmPackagePolicy = await createCloudApmPackgePolicy({
