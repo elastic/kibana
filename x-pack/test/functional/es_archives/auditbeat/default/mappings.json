@@ -4,6 +4,7 @@
     "index": "auditbeat-7.0.0-alpha1-2018.11.27",
     "settings": {
       "index": {
+        "auto_expand_replicas": "0-1",
         "codec": "best_compression",
         "mapping": {
           "total_fields": {

@@ -23,15 +23,6 @@ const disabledOnServerless = schema.conditional(
   schema.oneOf([schema.literal(true)], { defaultValue: true })
 );
 
-const enabledOnServerless = schema.conditional(
-  schema.contextRef('serverless'),
-  true,
-  schema.boolean({
-    defaultValue: true,
-  }),
-  schema.oneOf([schema.literal(false)], { defaultValue: false })
-);
-
 // All options should be documented in the APM configuration settings: https://github.com/elastic/kibana/blob/main/docs/settings/apm-settings.asciidoc
 // and be included on cloud allow list unless there are specific reasons not to
 const configSchema = schema.object({
@@ -97,7 +88,6 @@ const configSchema = schema.object({
     migrationToFleetAvailable: disabledOnServerless,
     sourcemapApiAvailable: disabledOnServerless,
     storageExplorerAvailable: disabledOnServerless,
-    fastRefreshAvailable: enabledOnServerless,
   }),
   serverless: schema.object({
     enabled: schema.conditional(

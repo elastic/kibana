@@ -42,8 +42,6 @@ export const SYNTHETIC_CHECK_STEPS_ROUTE = '/journey/:checkGroupId/steps';
 
 export const TEST_RUN_DETAILS_ROUTE = '/monitor/:monitorId/test-run/:checkGroupId';
 
-export const MAPPING_ERROR_ROUTE = '/mapping-error';
-
 export const ERROR_DETAILS_ROUTE = '/monitor/:monitorId/errors/:errorStateId';
 
 export enum STATUS {
@@ -61,10 +59,6 @@ export enum MONITOR_TYPES {
   BROWSER = 'browser',
 }
 
-export const ML_JOB_ID = 'high_latency_by_geo';
-
-export const ML_MODULE_ID = 'uptime_heartbeat';
-
 export const UNNAMED_LOCATION = 'Unnamed-location';
 
 export enum CERT_STATUS {
@@ -73,15 +67,6 @@ export enum CERT_STATUS {
   EXPIRED = 'EXPIRED',
   TOO_OLD = 'TOO_OLD',
 }
-
-export const KQL_SYNTAX_LOCAL_STORAGE = 'xpack.uptime.kql.syntax';
-
-export const FILTER_FIELDS = {
-  TAGS: 'tags',
-  PORT: 'url.port',
-  LOCATION: 'observer.geo.name',
-  TYPE: 'monitor.type',
-};
 
 export const SYNTHETICS_INDEX_PATTERN = 'synthetics-*';
 

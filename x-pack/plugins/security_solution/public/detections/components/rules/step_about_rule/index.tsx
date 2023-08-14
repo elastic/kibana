@@ -43,12 +43,21 @@ interface StepAboutRuleProps extends RuleStepProps {
   dataViewId: string | undefined;
   timestampOverride: string;
   form: FormHook<AboutStepRule>;
+
+  // TODO: https://github.com/elastic/kibana/issues/161456
+  // The About step page contains EuiRange component which does not work properly within memoized parents.
+  // EUI team suggested not to memoize EuiRange/EuiDualRange: https://github.com/elastic/eui/issues/6846
+  // Workaround: We introduced this additional property to be able to do extra re-render on switching to/from the About step page.
+  // NOTE: We should remove this workaround once EUI team fixed EuiRange.
+  // Related ticket: https://github.com/elastic/kibana/issues/160561
+  isActive: boolean;
 }
 
 interface StepAboutRuleReadOnlyProps {
   addPadding: boolean;
   descriptionColumns: 'multi' | 'single' | 'singleSplit';
   defaultValues: AboutStepRule;
+  isInPanelView?: boolean; // Option to show description list in smaller font
 }
 
 const ThreeQuartersContainer = styled.div`
@@ -69,6 +78,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
   index,
   dataViewId,
   timestampOverride,
+  isActive = false,
   isUpdateView = false,
   isLoading,
   form,
@@ -358,10 +368,16 @@ const StepAboutRuleReadOnlyComponent: FC<StepAboutRuleReadOnlyProps> = ({
   addPadding,
   defaultValues: data,
   descriptionColumns,
+  isInPanelView = false,
 }) => {
   return (
     <StepContentWrapper data-test-subj="aboutStep" addPadding={addPadding}>
-      <StepRuleDescription columns={descriptionColumns} schema={defaultSchema} data={data} />
+      <StepRuleDescription
+        columns={descriptionColumns}
+        schema={defaultSchema}
+        data={data}
+        isInPanelView={isInPanelView}
+      />
     </StepContentWrapper>
   );
 };

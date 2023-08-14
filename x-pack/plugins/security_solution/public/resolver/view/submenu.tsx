@@ -14,12 +14,11 @@ import { SideEffectContext } from './side_effect_context';
 import { FormattedCount } from '../../common/components/formatted_number';
 import { userSelectedResolverNode } from '../store/actions';
 
-/* eslint-disable react/display-name */
-
 /**
  * A Submenu that displays a collection of "pills" for each related event
  * category it has events for.
  */
+// eslint-disable-next-line react/display-name
 export const NodeSubMenuComponents = React.memo(
   ({
     id,

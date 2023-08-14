@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 
-import { RuleCreateProps } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
+import { RuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
 import { getCreateExceptionListMinimalSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_schema.mock';
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';

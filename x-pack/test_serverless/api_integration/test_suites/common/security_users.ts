@@ -17,7 +17,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('rejects request to create user', async () => {
       const { body, status } = await supertest
         .post(`/internal/security/users/some_testuser`)
-        .set(svlCommonApi.getCommonRequestHeader())
+        .set(svlCommonApi.getInternalRequestHeader())
         .send({ username: 'some_testuser', password: 'testpassword', roles: [] });
 
       // in a non-serverless environment this would succeed with a 200

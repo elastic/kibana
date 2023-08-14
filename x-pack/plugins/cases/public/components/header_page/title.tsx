@@ -28,12 +28,14 @@ const ExperimentalBadge: React.FC = () => (
 );
 
 ExperimentalBadge.displayName = 'ExperimentalBadge';
+export const TitleExperimentalBadge = React.memo(ExperimentalBadge);
 
 const BetaBadge: React.FC = () => (
   <EuiBetaBadge label={i18n.BETA_LABEL} tooltipContent={i18n.BETA_DESC} tooltipPosition="bottom" />
 );
 
 BetaBadge.displayName = 'BetaBadge';
+export const TitleBetaBadge = React.memo(BetaBadge);
 
 const TitleComponent: React.FC<Props> = ({ title, releasePhase, children }) => (
   <EuiFlexGroup alignItems="baseline" gutterSize="s" responsive={false}>

@@ -5,10 +5,20 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiBetaBadge } from '@elastic/eui';
+import React, { useCallback, useMemo } from 'react';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiBetaBadge,
+  EuiLink,
+  EuiIcon,
+  useEuiTheme,
+  useEuiFontSize,
+} from '@elastic/eui';
+import { css } from '@emotion/css';
 import { getOr } from 'lodash/fp';
-import styled from 'styled-components';
+import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
+import { useRightPanelContext } from '../context';
 import type { DescriptionList } from '../../../../common/utility_types';
 import {
   buildHostNamesFilter,
@@ -32,11 +42,11 @@ import {
   ENTITIES_HOST_OVERVIEW_TEST_ID,
   ENTITIES_HOST_OVERVIEW_IP_TEST_ID,
   ENTITIES_HOST_OVERVIEW_RISK_LEVEL_TEST_ID,
+  ENTITIES_HOST_OVERVIEW_LINK_TEST_ID,
 } from './test_ids';
+import { LeftPanelInsightsTabPath, LeftPanelKey } from '../../left';
 
-const StyledEuiBetaBadge = styled(EuiBetaBadge)`
-  margin-left: ${({ theme }) => theme.eui.euiSizeXS};
-`;
+const HOST_ICON = 'storage';
 const CONTEXT_ID = `flyout-host-entity-overview`;
 
 export interface HostEntityOverviewProps {
@@ -50,6 +60,20 @@ export interface HostEntityOverviewProps {
  * Host preview content for the entities preview in right flyout. It contains ip addresses and risk classification
  */
 export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({ hostName }) => {
+  const { eventId, indexName, scopeId } = useRightPanelContext();
+  const { openLeftPanel } = useExpandableFlyoutContext();
+  const goToEntitiesTab = useCallback(() => {
+    openLeftPanel({
+      id: LeftPanelKey,
+      path: LeftPanelInsightsTabPath,
+      params: {
+        id: eventId,
+        indexName,
+        scopeId,
+      },
+    });
+  }, [eventId, openLeftPanel, indexName, scopeId]);
+
   const { from, to } = useGlobalTime();
   const { selectedPatterns } = useSourcererDataView();
 
@@ -66,7 +90,7 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({ hostName
     [hostName]
   );
 
-  const { data: hostRisk, isLicenseValid } = useRiskScore({
+  const { data: hostRisk, isAuthorized } = useRiskScore({
     filterQuery,
     riskEntity: RiskScoreEntity.host,
     skip: hostName == null,
@@ -80,6 +104,9 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({ hostName
     endDate: to,
   });
 
+  const { euiTheme } = useEuiTheme();
+  const xsFontSize = useEuiFontSize('xs').fontSize;
+
   const [hostRiskLevel] = useMemo(() => {
     const hostRiskData = hostRisk && hostRisk.length > 0 ? hostRisk[0] : undefined;
     return [
@@ -87,7 +114,10 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({ hostName
         title: (
           <>
             {i18n.HOST_RISK_CLASSIFICATION}
-            <StyledEuiBetaBadge
+            <EuiBetaBadge
+              css={css`
+                margin-left: ${euiTheme.size.xs};
+              `}
               label={TECHNICAL_PREVIEW_TITLE}
               size="s"
               alignment="baseline"
@@ -109,7 +139,7 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({ hostName
         ),
       },
     ];
-  }, [hostRisk]);
+  }, [euiTheme.size.xs, hostRisk]);
 
   const descriptionList: DescriptionList[] = useMemo(
     () => [
@@ -130,20 +160,43 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({ hostName
   );
 
   return (
-    <EuiFlexGroup data-test-subj={ENTITIES_HOST_OVERVIEW_TEST_ID}>
+    <EuiFlexGroup direction="column" gutterSize="s" data-test-subj={ENTITIES_HOST_OVERVIEW_TEST_ID}>
       <EuiFlexItem>
-        <OverviewDescriptionList
-          dataTestSubj={ENTITIES_HOST_OVERVIEW_IP_TEST_ID}
-          descriptionList={descriptionList}
-        />
+        <EuiFlexGroup gutterSize="m">
+          <EuiFlexItem grow={false}>
+            <EuiIcon type={HOST_ICON} />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiLink
+              data-test-subj={ENTITIES_HOST_OVERVIEW_LINK_TEST_ID}
+              css={css`
+                font-size: ${xsFontSize};
+                font-weight: ${euiTheme.font.weight.bold};
+              `}
+              onClick={goToEntitiesTab}
+            >
+              {hostName}
+            </EuiLink>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem>
-        {isLicenseValid && (
-          <DescriptionListStyled
-            data-test-subj={ENTITIES_HOST_OVERVIEW_RISK_LEVEL_TEST_ID}
-            listItems={[hostRiskLevel]}
-          />
-        )}
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <OverviewDescriptionList
+              dataTestSubj={ENTITIES_HOST_OVERVIEW_IP_TEST_ID}
+              descriptionList={descriptionList}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            {isAuthorized && (
+              <DescriptionListStyled
+                data-test-subj={ENTITIES_HOST_OVERVIEW_RISK_LEVEL_TEST_ID}
+                listItems={[hostRiskLevel]}
+              />
+            )}
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

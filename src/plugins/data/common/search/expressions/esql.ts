@@ -33,6 +33,7 @@ interface Arguments {
   query: string;
   timezone?: string;
   timeField?: string;
+  locale?: string;
 }
 
 export type EsqlExpressionFunctionDefinition = ExpressionFunctionDefinition<
@@ -74,6 +75,7 @@ interface ESQLSearchParams {
   time_zone?: string;
   query: string;
   filter?: unknown;
+  locale?: string;
 }
 
 interface ESQLSearchReponse {
@@ -116,10 +118,17 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
           defaultMessage: 'The time field to use in the time range filter set in the context.',
         }),
       },
+      locale: {
+        aliases: ['locale'],
+        types: ['string'],
+        help: i18n.translate('data.search.essql.locale.help', {
+          defaultMessage: 'The locale to use.',
+        }),
+      },
     },
     fn(
       input,
-      { query, timezone, timeField },
+      { query, timezone, timeField, locale },
       { abortSignal, inspectorAdapters, getKibanaRequest }
     ) {
       return defer(() =>
@@ -139,6 +148,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
           const params: ESQLSearchParams = {
             query,
             time_zone: timezone,
+            locale,
           };
           if (input) {
             const esQueryConfigs = getEsQueryConfig(

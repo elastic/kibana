@@ -14,7 +14,8 @@ import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { Datatable } from '@kbn/expressions-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { textBasedQueryStateToAstWithValidation } from '@kbn/data-plugin/common';
-import type { RecordsFetchResponse, DataTableRecord } from '../../../types';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
+import { RecordsFetchResponse } from '../../../types';
 
 interface TextBasedErrorResponse {
   error: {
@@ -48,7 +49,7 @@ export function fetchTextBased(
         let finalData: DataTableRecord[] = [];
         let textBasedQueryColumns: Datatable['columns'] | undefined;
         let error: string | undefined;
-        let warning: string | undefined;
+        let textBasedHeaderWarning: string | undefined;
         execution.pipe(pluck('result')).subscribe((resp) => {
           const response = resp as Datatable | TextBasedErrorResponse;
           if (response.type === 'error') {
@@ -57,7 +58,7 @@ export function fetchTextBased(
             const table = response as Datatable;
             const rows = table?.rows ?? [];
             textBasedQueryColumns = table?.columns ?? undefined;
-            warning = table.warning ?? undefined;
+            textBasedHeaderWarning = table.warning ?? undefined;
             finalData = rows.map(
               (row: Record<string, string>, idx: number) =>
                 ({
@@ -75,7 +76,7 @@ export function fetchTextBased(
             return {
               records: finalData || [],
               textBasedQueryColumns,
-              warning,
+              textBasedHeaderWarning,
             };
           }
         });
@@ -83,7 +84,7 @@ export function fetchTextBased(
       return {
         records: [] as DataTableRecord[],
         textBasedQueryColumns: [],
-        warning: undefined,
+        textBasedHeaderWarning: undefined,
       };
     })
     .catch((err) => {

@@ -21,6 +21,7 @@ import {
   ENTERPRISE_SEARCH_CONTENT_PLUGIN,
   APP_SEARCH_PLUGIN,
   WORKPLACE_SEARCH_PLUGIN,
+  ESRE_PLUGIN,
 } from '../../common/constants';
 
 type ServiceDefinition =
@@ -113,6 +114,14 @@ export function getSearchResultProvider(
             }),
             serviceType: 'workplace_search',
             url: WORKPLACE_SEARCH_PLUGIN.URL,
+          },
+          {
+            keywords: ['esre', 'search'],
+            name: i18n.translate('xpack.enterpriseSearch.searchProvider.esre.name', {
+              defaultMessage: 'ESRE',
+            }),
+            serviceType: 'esre',
+            url: ESRE_PLUGIN.URL,
           },
         ],
       ];

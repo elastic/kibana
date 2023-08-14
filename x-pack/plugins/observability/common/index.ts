@@ -67,19 +67,6 @@ export const rulesLocatorID = 'RULES_LOCATOR';
 export const sloDetailsLocatorID = 'SLO_DETAILS_LOCATOR';
 export const sloEditLocatorID = 'SLO_EDIT_LOCATOR';
 
+import { paths } from './locators/paths';
+export const observabilityPaths = paths.observability;
 export type { AlertsLocatorParams } from './locators/alerts';
-
-export {
-  NETWORK_TIMINGS_FIELDS,
-  SYNTHETICS_BLOCKED_TIMINGS,
-  SYNTHETICS_CONNECT_TIMINGS,
-  SYNTHETICS_DNS_TIMINGS,
-  SYNTHETICS_RECEIVE_TIMINGS,
-  SYNTHETICS_SEND_TIMINGS,
-  SYNTHETICS_SSL_TIMINGS,
-  SYNTHETICS_STEP_DURATION,
-  SYNTHETICS_TOTAL_TIMINGS,
-  SYNTHETICS_WAIT_TIMINGS,
-} from './field_names/synthetics';
-
-export { CoPilotPromptId, loadCoPilotPrompts } from './co_pilot';

@@ -121,7 +121,19 @@ export {
   PROFILE_ALLOC_SPACE,
   PROFILE_INUSE_OBJECTS,
   PROFILE_INUSE_SPACE,
-} from './elasticsearch_fieldnames';
+} from './field_names/elasticsearch';
+
+export {
+  NETWORK_TIMINGS_FIELDS,
+  SYNTHETICS_BLOCKED_TIMINGS,
+  SYNTHETICS_CONNECT_TIMINGS,
+  SYNTHETICS_DNS_TIMINGS,
+  SYNTHETICS_RECEIVE_TIMINGS,
+  SYNTHETICS_SEND_TIMINGS,
+  SYNTHETICS_SSL_TIMINGS,
+  SYNTHETICS_TOTAL_TIMINGS,
+  SYNTHETICS_WAIT_TIMINGS,
+} from './field_names/synthetics';
 
 export { ObservabilityTriggerId } from './trigger_ids';
 export { getInspectResponse } from './utils/get_inspect_response';

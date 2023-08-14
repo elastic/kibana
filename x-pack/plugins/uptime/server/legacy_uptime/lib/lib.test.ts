@@ -8,7 +8,8 @@
 import { UptimeEsClient } from './lib';
 import { savedObjectsClientMock, uiSettingsServiceMock } from '@kbn/core/server/mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import { savedObjectsAdapter } from './saved_objects';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
+import { settingsObjectId, umDynamicSettings } from './saved_objects/uptime_settings';
 
 describe('UptimeEsClient', () => {
   let uptimeEsClient: UptimeEsClient;
@@ -140,9 +141,44 @@ describe('UptimeEsClient', () => {
   });
   describe('heartbeatIndices', () => {
     it('appends synthetics-* in index for legacy alerts', async () => {
-      savedObjectsAdapter.getUptimeDynamicSettings = jest.fn().mockResolvedValue({
-        heartbeatIndices: 'heartbeat-8*,heartbeat-7*',
-        syntheticsIndexRemoved: true,
+      savedObjectsClient.get = jest.fn().mockResolvedValue({
+        attributes: {
+          heartbeatIndices: 'heartbeat-8*,heartbeat-7*',
+          syntheticsIndexRemoved: true,
+        },
+      });
+      uptimeEsClient = new UptimeEsClient(savedObjectsClient, esClient, { isLegacyAlert: true });
+
+      const mockSearchParams = {
+        body: {
+          query: {
+            match_all: {},
+          },
+        },
+      };
+
+      await uptimeEsClient.search({
+        body: {
+          query: {
+            match_all: {},
+          },
+        },
+      });
+
+      expect(esClient.search).toHaveBeenCalledWith(
+        {
+          index: 'heartbeat-8*,heartbeat-7*,synthetics-*',
+          ...mockSearchParams,
+        },
+        { meta: true }
+      );
+    });
+    it('appends synthetics-* in index for legacy alerts when settings are never saved', async () => {
+      savedObjectsClient.get = jest.fn().mockImplementation(() => {
+        throw SavedObjectsErrorHelpers.createGenericNotFoundError(
+          umDynamicSettings.name,
+          settingsObjectId
+        );
       });
       uptimeEsClient = new UptimeEsClient(savedObjectsClient, esClient, { isLegacyAlert: true });
 

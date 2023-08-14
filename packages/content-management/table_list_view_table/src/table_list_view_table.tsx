@@ -108,6 +108,7 @@ export interface TableListViewTableProps<
   contentEditor?: ContentEditorConfig;
 
   tableCaption: string;
+  /** Flag to force a new fetch of the table items. Whenever it changes, the `findItems()` will be called. */
   refreshListBouncer?: boolean;
   onFetchSuccess: () => void;
   setPageDataTestSubject: (subject: string) => void;
@@ -115,6 +116,12 @@ export interface TableListViewTableProps<
 
 export interface State<T extends UserContentCommonSchema = UserContentCommonSchema> {
   items: T[];
+  /**
+   * Flag to indicate if there aren't any item when **no filteres are applied**.
+   * When there are no item we render an empty prompt.
+   * Default to `undefined` to indicate that we don't know yet if there are items or not.
+   */
+  hasNoItems: boolean | undefined;
   hasInitialFetchReturned: boolean;
   isFetchingItems: boolean;
   isDeletingItems: boolean;
@@ -293,6 +300,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
 
   const isMounted = useRef(false);
   const fetchIdx = useRef(0);
+
   /**
    * The "onTableSearchChange()" handler has an async behavior. We want to be able to discard
    * previsous search changes and only handle the last one. For that we keep a counter of the changes.
@@ -335,9 +343,10 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
   const initialState = useMemo<State<T>>(
     () => ({
       items: [],
+      hasNoItems: undefined,
       totalItems: 0,
       hasInitialFetchReturned: false,
-      isFetchingItems: false,
+      isFetchingItems: true,
       isDeletingItems: false,
       showDeleteModal: false,
       hasUpdatedAtMetadata: false,
@@ -364,6 +373,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
     hasInitialFetchReturned,
     isFetchingItems,
     items,
+    hasNoItems,
     fetchError,
     showDeleteModal,
     isDeletingItems,
@@ -374,8 +384,6 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
     tableSort,
   } = state;
 
-  const hasQuery = searchQuery.text !== '';
-  const hasNoItems = hasInitialFetchReturned && items.length === 0 && !hasQuery;
   const showFetchError = Boolean(fetchError);
   const showLimitError = !showFetchError && totalItems > listingLimit;
 
@@ -545,6 +553,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
           available: (v) => (showEditActionForItem ? showEditActionForItem(v) : true),
           enabled: (v) => !(v as unknown as { error: string })?.error,
           onClick: editItem,
+          'data-test-subj': `edit-action`,
         });
       }
 
@@ -567,9 +576,10 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
               defaultMessage: 'View details',
             }
           ),
-          icon: 'inspect',
+          icon: 'iInCircle',
           type: 'icon',
           onClick: inspectItem,
+          'data-test-subj': `inspect-action`,
         });
       }
 
@@ -857,17 +867,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
   // ------------
   // Effects
   // ------------
-  useDebounce(
-    () => {
-      // Do not call fetchItems on dependency changes when initial fetch does not load any items
-      // to avoid flashing between empty table and no items view
-      if (!hasNoItems) {
-        fetchItems();
-      }
-    },
-    300,
-    [fetchItems, refreshListBouncer]
-  );
+  useDebounce(fetchItems, 300, [fetchItems, refreshListBouncer]);
 
   useEffect(() => {
     if (!urlStateEnabled) {

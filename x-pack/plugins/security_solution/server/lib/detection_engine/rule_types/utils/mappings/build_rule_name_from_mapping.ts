@@ -12,7 +12,7 @@ import type {
   RuleMetadata,
   RuleName,
   RuleNameOverride,
-} from '../../../../../../common/detection_engine/rule_schema';
+} from '../../../../../../common/api/detection_engine/model/rule_schema';
 import type { SignalSource } from '../../types';
 
 interface BuildRuleNameFromMappingProps {

@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import { i18n } from '@kbn/i18n';
 import { buildExpressionFunction, ExpressionAstFunction } from '@kbn/expressions-plugin/common';
 import { AggregateQuery } from '../../query';
 import { EssqlExpressionFunctionDefinition } from './essql';
@@ -25,6 +25,7 @@ export const aggregateQueryToAst = (
     return buildExpressionFunction<EsqlExpressionFunctionDefinition>('esql', {
       query: query.esql,
       timeField,
+      locale: i18n.getLocale(),
     }).toAst();
   }
 };

@@ -167,7 +167,14 @@ const configSchema = schema.object(
         },
       }
     ),
-    restrictInternalApis: schema.boolean({ defaultValue: false }), // allow access to internal routes by default to prevent breaking changes in current offerings
+    // allow access to internal routes by default to prevent breaking changes in current offerings
+    restrictInternalApis: schema.conditional(
+      schema.contextRef('serverless'),
+      true,
+      schema.boolean({ defaultValue: false }),
+      schema.never()
+    ),
+
     versioned: schema.object({
       /**
        * Which handler resolution algo to use: "newest" or "oldest".
@@ -316,7 +323,8 @@ export class HttpConfig implements IHttpConfig {
     this.requestId = rawHttpConfig.requestId;
     this.shutdownTimeout = rawHttpConfig.shutdownTimeout;
 
-    this.restrictInternalApis = rawHttpConfig.restrictInternalApis;
+    // default to `false` to prevent breaking changes in current offerings
+    this.restrictInternalApis = rawHttpConfig.restrictInternalApis ?? false;
     this.eluMonitor = rawHttpConfig.eluMonitor;
     this.versioned = rawHttpConfig.versioned;
   }

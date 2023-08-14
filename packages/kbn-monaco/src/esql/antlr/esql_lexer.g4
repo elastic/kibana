@@ -104,6 +104,7 @@ NOT : 'not';
 LIKE: L I K E;
 RLIKE: R L I K E;
 IN: I N;
+AS: A S;
 NULL : 'null';
 OR : 'or';
 RP : ')';

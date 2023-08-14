@@ -8,7 +8,6 @@
 import { i18n } from '@kbn/i18n';
 import { Comparator } from '../../../../common/threshold_rule/types';
 import { formatDurationFromTimeUnitChar, TimeUnitChar } from '../../../../common';
-import { AlertStates } from './types';
 import { UNGROUPED_FACTORY_KEY } from './utils';
 
 export const DOCUMENT_COUNT_I18N = i18n.translate(
@@ -24,24 +23,6 @@ export const CUSTOM_EQUATION_I18N = i18n.translate(
     defaultMessage: 'Custom equation',
   }
 );
-
-export const stateToAlertMessage = {
-  [AlertStates.ALERT]: i18n.translate('xpack.observability.threshold.rule.threshold.alertState', {
-    defaultMessage: 'ALERT',
-  }),
-  [AlertStates.NO_DATA]: i18n.translate(
-    'xpack.observability.threshold.rule.threshold.noDataState',
-    {
-      defaultMessage: 'NO DATA',
-    }
-  ),
-  [AlertStates.ERROR]: i18n.translate('xpack.observability.threshold.rule.threshold.errorState', {
-    defaultMessage: 'ERROR',
-  }),
-  [AlertStates.OK]: i18n.translate('xpack.observability.threshold.rule.threshold.okState', {
-    defaultMessage: 'OK [Recovered]',
-  }),
-};
 
 const toNumber = (value: number | string) =>
   typeof value === 'string' ? parseFloat(value) : value;
@@ -152,25 +133,10 @@ export const buildErrorAlertReason = (metric: string) =>
     },
   });
 
-export const buildInvalidQueryAlertReason = (filterQueryText: string) =>
-  i18n.translate('xpack.observability.threshold.rule.threshold.queryErrorAlertReason', {
-    defaultMessage: 'Alert is using a malformed KQL query: {filterQueryText}',
-    values: {
-      filterQueryText,
-    },
-  });
-
 export const groupByKeysActionVariableDescription = i18n.translate(
   'xpack.observability.threshold.rule.groupByKeysActionVariableDescription',
   {
     defaultMessage: 'The object containing groups that are reporting data',
-  }
-);
-
-export const alertStateActionVariableDescription = i18n.translate(
-  'xpack.observability.threshold.rule.alertStateActionVariableDescription',
-  {
-    defaultMessage: 'Current state of the alert',
   }
 );
 
@@ -199,24 +165,7 @@ export const timestampActionVariableDescription = i18n.translate(
 export const valueActionVariableDescription = i18n.translate(
   'xpack.observability.threshold.rule.valueActionVariableDescription',
   {
-    defaultMessage:
-      'The value of the metric in the specified condition. Usage: (ctx.value.condition0, ctx.value.condition1, etc...).',
-  }
-);
-
-export const metricActionVariableDescription = i18n.translate(
-  'xpack.observability.threshold.rule.metricActionVariableDescription',
-  {
-    defaultMessage:
-      'The metric name in the specified condition. Usage: (ctx.metric.condition0, ctx.metric.condition1, etc...).',
-  }
-);
-
-export const thresholdActionVariableDescription = i18n.translate(
-  'xpack.observability.threshold.rule.thresholdActionVariableDescription',
-  {
-    defaultMessage:
-      'The threshold value of the metric for the specified condition. Usage: (ctx.threshold.condition0, ctx.threshold.condition1, etc...).',
+    defaultMessage: 'List of the condition values.',
   }
 );
 
@@ -266,21 +215,5 @@ export const tagsActionVariableDescription = i18n.translate(
   'xpack.observability.threshold.rule.tagsActionVariableDescription',
   {
     defaultMessage: 'List of tags associated with the entity where this alert triggered.',
-  }
-);
-
-export const originalAlertStateActionVariableDescription = i18n.translate(
-  'xpack.observability.threshold.rule.originalAlertStateActionVariableDescription',
-  {
-    defaultMessage:
-      'The state of the alert before it recovered. This is only available in the recovery context',
-  }
-);
-
-export const originalAlertStateWasActionVariableDescription = i18n.translate(
-  'xpack.observability.threshold.rule.originalAlertStateWasWARNINGActionVariableDescription',
-  {
-    defaultMessage:
-      'Boolean value of the state of the alert before it recovered. This can be used for template conditions. This is only available in the recovery context',
   }
 );

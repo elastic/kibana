@@ -14,11 +14,11 @@ import { euiThemeVars } from '@kbn/ui-theme';
 import React, { useCallback } from 'react';
 import { convertRulesFilterToKQL } from '../../../../../../common/utils/kql';
 import { DuplicateOptions } from '../../../../../../common/detection_engine/rule_management/constants';
-import type { BulkActionEditPayload } from '../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
+import type { BulkActionEditPayload } from '../../../../../../common/api/detection_engine/rule_management';
 import {
   BulkActionType,
   BulkActionEditType,
-} from '../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
+} from '../../../../../../common/api/detection_engine/rule_management';
 import { isMlRule } from '../../../../../../common/machine_learning/helpers';
 import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
 import { BULK_RULE_ACTIONS } from '../../../../../common/lib/apm/user_actions';
@@ -84,7 +84,6 @@ export const useBulkActions = ({
       const containsEnabled = selectedRules.some(({ enabled }) => enabled);
       const containsDisabled = selectedRules.some(({ enabled }) => !enabled);
       const containsLoading = selectedRuleIds.some((id) => loadingRuleIds.includes(id));
-      const containsImmutable = selectedRules.some(({ immutable }) => immutable);
 
       const missingActionPrivileges =
         !hasActionsPrivileges &&
@@ -152,11 +151,9 @@ export const useBulkActions = ({
       const handleDeleteAction = async () => {
         closePopover();
 
-        if (isAllSelected) {
-          // User has cancelled deletion
-          if ((await confirmDeletion()) === false) {
-            return;
-          }
+        if ((await confirmDeletion()) === false) {
+          // User has canceled deletion
+          return;
         }
 
         startTransaction({ name: BULK_RULE_ACTIONS.DELETE });
@@ -397,9 +394,6 @@ export const useBulkActions = ({
               'data-test-subj': 'deleteRuleBulk',
               disabled: isDeleteDisabled,
               onClick: handleDeleteAction,
-              toolTipContent: containsImmutable
-                ? i18n.BATCH_ACTION_DELETE_SELECTED_IMMUTABLE
-                : undefined,
               toolTipPosition: 'right',
               icon: undefined,
             },

@@ -7,12 +7,17 @@
 
 import React from 'react';
 import { EuiInMemoryTable } from '@elastic/eui';
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import type { RiskSeverity } from '../../../common/search_strategy';
 import { RiskScore } from '../../explore/components/risk_score/severity/common';
 
 import { HostDetailsLink, UserDetailsLink } from '../../common/components/links';
 import type { RiskScore as IRiskScore } from '../../../server/lib/risk_engine/types';
 import { RiskScoreEntity } from '../../../common/risk_engine/types';
+
+type RiskScoreColumn = EuiBasicTableColumn<IRiskScore> & {
+  field: keyof IRiskScore;
+};
 
 export const RiskScorePreviewTable = ({
   items,
@@ -21,9 +26,9 @@ export const RiskScorePreviewTable = ({
   items: IRiskScore[];
   type: RiskScoreEntity;
 }) => {
-  const columns = [
+  const columns: RiskScoreColumn[] = [
     {
-      field: 'identifierValue',
+      field: 'id_value',
       name: 'Name',
       render: (itemName: string) => {
         return type === RiskScoreEntity.host ? (
@@ -34,7 +39,7 @@ export const RiskScorePreviewTable = ({
       },
     },
     {
-      field: 'level',
+      field: 'calculated_level',
       name: 'Level',
       render: (risk: RiskSeverity | null) => {
         if (risk != null) {
@@ -45,7 +50,7 @@ export const RiskScorePreviewTable = ({
       },
     },
     {
-      field: 'totalScoreNormalized',
+      field: 'calculated_score_norm',
       // align: 'right',
       name: 'Score norm',
       render: (scoreNorm: number | null) => {

@@ -298,7 +298,15 @@
               "Interpolation",
               "<",
               "Theme",
-              ">; abbr?: string | undefined; footer?: string | React.ReactElement<any, string | React.JSXElementConstructor<any>> | ((props: ",
+              ">; field: (string & {}) | keyof ",
+              {
+                "pluginId": "savedObjectsManagement",
+                "scope": "public",
+                "docId": "kibSavedObjectsManagementPluginApi",
+                "section": "def-public.SavedObjectsManagementRecord",
+                "text": "SavedObjectsManagementRecord"
+              },
+              "; abbr?: string | undefined; footer?: string | React.ReactElement<any, string | React.JSXElementConstructor<any>> | ((props: ",
               "EuiTableFooterProps",
               "<",
               {
@@ -308,15 +316,7 @@
                 "section": "def-public.SavedObjectsManagementRecord",
                 "text": "SavedObjectsManagementRecord"
               },
-              ">) => React.ReactNode) | undefined; field: (string & {}) | keyof ",
-              {
-                "pluginId": "savedObjectsManagement",
-                "scope": "public",
-                "docId": "kibSavedObjectsManagementPluginApi",
-                "section": "def-public.SavedObjectsManagementRecord",
-                "text": "SavedObjectsManagementRecord"
-              },
-              "; width?: string | undefined; headers?: string | undefined; height?: string | number | undefined; readOnly?: boolean | undefined; dataType?: ",
+              ">) => React.ReactNode) | undefined; width?: string | undefined; headers?: string | undefined; height?: string | number | undefined; readOnly?: boolean | undefined; dataType?: ",
               "EuiTableDataType",
               " | undefined; render?: ((value: any, record: ",
               {
@@ -457,6 +457,153 @@
       }
     ],
     "functions": [
+      {
+        "parentPluginId": "savedObjectsManagement",
+        "id": "def-public.getTagFindReferences",
+        "type": "Function",
+        "tags": [],
+        "label": "getTagFindReferences",
+        "description": [],
+        "signature": [
+          "({ selectedTags, taggingApi, }: { selectedTags?: string[] | undefined; taggingApi?: ",
+          {
+            "pluginId": "savedObjectsTaggingOss",
+            "scope": "public",
+            "docId": "kibSavedObjectsTaggingOssPluginApi",
+            "section": "def-public.SavedObjectsTaggingApi",
+            "text": "SavedObjectsTaggingApi"
+          },
+          " | undefined; }) => ",
+          {
+            "pluginId": "@kbn/core-saved-objects-api-server",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+            "section": "def-common.SavedObjectsFindOptionsReference",
+            "text": "SavedObjectsFindOptionsReference"
+          },
+          "[] | undefined"
+        ],
+        "path": "src/plugins/saved_objects_management/public/lib/get_tag_references.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "savedObjectsManagement",
+            "id": "def-public.getTagFindReferences.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  selectedTags,\n  taggingApi,\n}",
+            "description": [],
+            "path": "src/plugins/saved_objects_management/public/lib/get_tag_references.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "savedObjectsManagement",
+                "id": "def-public.getTagFindReferences.$1.selectedTags",
+                "type": "Array",
+                "tags": [],
+                "label": "selectedTags",
+                "description": [],
+                "signature": [
+                  "string[] | undefined"
+                ],
+                "path": "src/plugins/saved_objects_management/public/lib/get_tag_references.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "savedObjectsManagement",
+                "id": "def-public.getTagFindReferences.$1.taggingApi",
+                "type": "Object",
+                "tags": [],
+                "label": "taggingApi",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "savedObjectsTaggingOss",
+                    "scope": "public",
+                    "docId": "kibSavedObjectsTaggingOssPluginApi",
+                    "section": "def-public.SavedObjectsTaggingApi",
+                    "text": "SavedObjectsTaggingApi"
+                  },
+                  " | undefined"
+                ],
+                "path": "src/plugins/saved_objects_management/public/lib/get_tag_references.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "savedObjectsManagement",
+        "id": "def-public.parseQuery",
+        "type": "Function",
+        "tags": [],
+        "label": "parseQuery",
+        "description": [],
+        "signature": [
+          "(query: ",
+          "Query",
+          ", types: ",
+          {
+            "pluginId": "savedObjectsManagement",
+            "scope": "common",
+            "docId": "kibSavedObjectsManagementPluginApi",
+            "section": "def-common.SavedObjectManagementTypeInfo",
+            "text": "SavedObjectManagementTypeInfo"
+          },
+          "[]) => ParsedQuery"
+        ],
+        "path": "src/plugins/saved_objects_management/public/lib/parse_query.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "savedObjectsManagement",
+            "id": "def-public.parseQuery.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "query",
+            "description": [],
+            "signature": [
+              "Query"
+            ],
+            "path": "src/plugins/saved_objects_management/public/lib/parse_query.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "savedObjectsManagement",
+            "id": "def-public.parseQuery.$2",
+            "type": "Array",
+            "tags": [],
+            "label": "types",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "savedObjectsManagement",
+                "scope": "common",
+                "docId": "kibSavedObjectsManagementPluginApi",
+                "section": "def-common.SavedObjectManagementTypeInfo",
+                "text": "SavedObjectManagementTypeInfo"
+              },
+              "[]"
+            ],
+            "path": "src/plugins/saved_objects_management/public/lib/parse_query.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "savedObjectsManagement",
         "id": "def-public.processImportResponse",

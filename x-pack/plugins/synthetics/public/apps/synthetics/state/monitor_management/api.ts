@@ -9,18 +9,19 @@ import { PackagePolicy } from '@kbn/fleet-plugin/common';
 import { apiService } from '../../../../utils/api_service';
 import {
   EncryptedSyntheticsMonitor,
-  ServiceLocationErrors,
   SyntheticsMonitor,
-  SyntheticsMonitorWithId,
   SyntheticsMonitorCodec,
+  ServiceLocationErrorsResponse,
 } from '../../../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../../../common/constants';
+
+export type UpsertMonitorResponse = ServiceLocationErrorsResponse | EncryptedSyntheticsMonitor;
 
 export const createMonitorAPI = async ({
   monitor,
 }: {
   monitor: SyntheticsMonitor | EncryptedSyntheticsMonitor;
-}): Promise<{ attributes: { errors: ServiceLocationErrors } } | SyntheticsMonitor> => {
+}): Promise<UpsertMonitorResponse> => {
   return await apiService.post(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS, monitor);
 };
 
@@ -47,7 +48,7 @@ export const updateMonitorAPI = async ({
 }: {
   monitor: SyntheticsMonitor | EncryptedSyntheticsMonitor;
   id: string;
-}): Promise<{ attributes: { errors: ServiceLocationErrors } } | SyntheticsMonitorWithId> => {
+}): Promise<UpsertMonitorResponse> => {
   return await apiService.put(`${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}/${id}`, monitor);
 };
 

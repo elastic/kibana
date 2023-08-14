@@ -30,17 +30,6 @@ you must also have `read` privileges for the *Management* >
 *{connectors-feature}* feature. For more details, refer to
 <<kibana-feature-privileges>>.
 
-=== {api-description-title}
-
-[WARNING]
-====
-* This API supports only
-<<token-api-authentication,token-based authentication>>.
-* When you create a rule, it identifies which roles you have at that point in time.
-Thereafter, when the rule performs queries, it uses those security privileges.
-If a user with different privileges updates the rule, its behavior might change.
-====
-
 [[create-rule-api-path-params]]
 === {api-path-parms-title}
 

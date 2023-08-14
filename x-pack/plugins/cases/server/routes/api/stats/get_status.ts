@@ -7,10 +7,10 @@
 
 import type { CaseRoute } from '../types';
 
-import type { CasesStatusRequest } from '../../../../common/api';
 import { CASE_STATUS_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
+import type { statsApiV1 } from '../../../../common/types/api';
 
 /**
  * @deprecated since version 8.1.0
@@ -23,8 +23,13 @@ export const getStatusRoute: CaseRoute = createCasesRoute({
     try {
       const caseContext = await context.cases;
       const client = await caseContext.getCasesClient();
+
+      const res: statsApiV1.CasesStatusResponse = await client.metrics.getStatusTotalsByType(
+        request.query as statsApiV1.CasesStatusRequest
+      );
+
       return response.ok({
-        body: await client.metrics.getStatusTotalsByType(request.query as CasesStatusRequest),
+        body: res,
       });
     } catch (error) {
       throw createCaseError({

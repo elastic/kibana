@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { Languages, LanguageDefinition } from '@kbn/search-api-panels';
 import { i18n } from '@kbn/i18n';
 import { docLinks } from '../../../../common/doc_links';
-import { LanguageDefinition, Languages } from './types';
 
 export const javascriptDefinition: LanguageDefinition = {
   advancedConfig: docLinks.jsAdvancedConfig,
@@ -85,7 +85,7 @@ console.log(result);
 `,
   installClient: 'npm install @elastic/elasticsearch@8',
   name: i18n.translate('xpack.serverlessSearch.languages.javascript', {
-    defaultMessage: 'JavaScript / Node.js',
+    defaultMessage: 'JavaScript',
   }),
   testConnection: `const resp = await client.info();
 

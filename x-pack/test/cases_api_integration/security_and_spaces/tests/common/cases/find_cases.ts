@@ -16,7 +16,12 @@ import {
   MAX_REPORTERS_FILTER_LENGTH,
   MAX_TAGS_FILTER_LENGTH,
 } from '@kbn/cases-plugin/common/constants';
-import { Case, CaseSeverity, CaseStatuses, CommentType } from '@kbn/cases-plugin/common/api';
+import {
+  Case,
+  CaseSeverity,
+  CaseStatuses,
+  AttachmentType,
+} from '@kbn/cases-plugin/common/types/domain';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
@@ -394,7 +399,7 @@ export default ({ getService }: FtrProviderContext): void => {
           expect(cases.cases[0].title).to.equal(uuid);
         });
 
-        it('should successfully find a case with a valid uuid in title', async () => {
+        it('should successfully find a case with a valid uuid in description', async () => {
           const uuid = uuidv1();
           await createCase(supertest, { ...postCaseReq, description: uuid });
 
@@ -459,6 +464,38 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       }
 
+      it('400s when trying to fetch with invalid searchField', async () => {
+        await findCases({
+          supertest,
+          query: { searchFields: 'closed_by.username', search: 'some search string*' },
+          expectedHttpCode: 400,
+        });
+      });
+
+      it('400s when trying to fetch with invalid array of searchFields', async () => {
+        await findCases({
+          supertest,
+          query: { searchFields: ['closed_by.username', 'title'], search: 'some search string*' },
+          expectedHttpCode: 400,
+        });
+      });
+
+      it('400s when trying to fetch with invalid sortField', async () => {
+        await findCases({
+          supertest,
+          query: { sortField: 'foobar', search: 'some search string*' },
+          expectedHttpCode: 400,
+        });
+      });
+
+      it('400s when trying to fetch with rootSearchFields', async () => {
+        await findCases({
+          supertest,
+          query: { rootSearchFields: ['_id'], search: 'some search string*' },
+          expectedHttpCode: 400,
+        });
+      });
+
       it(`400s when perPage > ${MAX_CASES_PER_PAGE} supplied`, async () => {
         await findCases({
           supertest,
@@ -501,7 +538,7 @@ export default ({ getService }: FtrProviderContext): void => {
               alertId,
               index: defaultSignalsIndex,
               rule: { id: 'test-rule-id', name: 'test-index-id' },
-              type: CommentType.alert,
+              type: AttachmentType.alert,
               owner: 'securitySolutionFixture',
             },
           });

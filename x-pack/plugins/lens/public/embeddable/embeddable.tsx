@@ -780,7 +780,7 @@ export class Embeddable
 
   async openConfingPanel(startDependencies: LensPluginStartDependencies) {
     const { getEditLensConfiguration } = await import('../async_services');
-    const Component = getEditLensConfiguration(
+    const Component = await getEditLensConfiguration(
       this.deps.coreStart,
       startDependencies,
       this.deps.visualizationMap,
@@ -1039,7 +1039,7 @@ export class Embeddable
               handleEvent={this.handleEvent}
               onData$={this.updateActiveData}
               onRender$={this.onRender}
-              interactive={!input.disableTriggers}
+              interactive={!input.disableTriggers && !this.isTextBasedLanguage()}
               renderMode={input.renderMode}
               syncColors={input.syncColors}
               syncTooltips={input.syncTooltips}
@@ -1055,6 +1055,7 @@ export class Embeddable
                 this.logError('runtime');
               }}
               noPadding={this.visDisplayOptions.noPadding}
+              docLinks={this.deps.coreStart.docLinks}
             />
           </KibanaThemeProvider>
           <MessagesBadge
@@ -1226,45 +1227,35 @@ export class Embeddable
     if (!this.deps.getTrigger || this.input.disableTriggers) {
       return;
     }
+
+    let eventHandler:
+      | LensBaseEmbeddableInput['onBrushEnd']
+      | LensBaseEmbeddableInput['onFilter']
+      | LensBaseEmbeddableInput['onTableRowClick'];
+    let shouldExecuteDefaultTriggers = true;
+
     if (isLensBrushEvent(event)) {
-      let shouldExecuteDefaultTriggers = true;
-      if (this.input.onBrushEnd) {
-        this.input.onBrushEnd({
-          ...event.data,
-          preventDefault: () => {
-            shouldExecuteDefaultTriggers = false;
-          },
-        });
-      }
-      if (shouldExecuteDefaultTriggers) {
-        this.deps.getTrigger(VIS_EVENT_TO_TRIGGER[event.name]).exec({
-          data: {
-            ...event.data,
-            timeFieldName:
-              event.data.timeFieldName ||
-              inferTimeField(this.deps.data.datatableUtilities, event.data),
-          },
-          embeddable: this,
-        });
-      }
+      eventHandler = this.input.onBrushEnd;
+    } else if (isLensFilterEvent(event) || isLensMultiFilterEvent(event)) {
+      eventHandler = this.input.onFilter;
+    } else if (isLensTableRowContextMenuClickEvent(event)) {
+      eventHandler = this.input.onTableRowClick;
     }
-    if (isLensFilterEvent(event) || isLensMultiFilterEvent(event)) {
-      let shouldExecuteDefaultTriggers = true;
-      if (this.input.onFilter) {
-        this.input.onFilter({
-          ...event.data,
-          preventDefault: () => {
-            shouldExecuteDefaultTriggers = false;
-          },
-        });
-      }
+
+    eventHandler?.({
+      ...event.data,
+      preventDefault: () => {
+        shouldExecuteDefaultTriggers = false;
+      },
+    });
+
+    if (isLensFilterEvent(event) || isLensMultiFilterEvent(event) || isLensBrushEvent(event)) {
       if (shouldExecuteDefaultTriggers) {
         this.deps.getTrigger(VIS_EVENT_TO_TRIGGER[event.name]).exec({
           data: {
             ...event.data,
             timeFieldName:
-              event.data.timeFieldName ||
-              inferTimeField(this.deps.data.datatableUtilities, event.data),
+              event.data.timeFieldName || inferTimeField(this.deps.data.datatableUtilities, event),
           },
           embeddable: this,
         });
@@ -1272,15 +1263,6 @@ export class Embeddable
     }
 
     if (isLensTableRowContextMenuClickEvent(event)) {
-      let shouldExecuteDefaultTriggers = true;
-      if (this.input.onTableRowClick) {
-        this.input.onTableRowClick({
-          ...event.data,
-          preventDefault: () => {
-            shouldExecuteDefaultTriggers = false;
-          },
-        });
-      }
       if (shouldExecuteDefaultTriggers) {
         this.deps.getTrigger(VIS_EVENT_TO_TRIGGER[event.name]).exec(
           {

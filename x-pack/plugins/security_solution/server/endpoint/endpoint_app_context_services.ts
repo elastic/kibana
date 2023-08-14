@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { KibanaRequest, Logger } from '@kbn/core/server';
+import type { KibanaRequest, Logger, ElasticsearchClient } from '@kbn/core/server';
 import type { ExceptionListClient, ListsServerExtensionRegistrar } from '@kbn/lists-plugin/server';
 import type { CasesClient, CasesStart } from '@kbn/cases-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
@@ -17,6 +17,7 @@ import type {
 import type { PluginStartContract as AlertsPluginStartContract } from '@kbn/alerting-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { FleetActionsClientInterface } from '@kbn/fleet-plugin/server/services/actions/types';
+import type { AppFeatures } from '../lib/app_features';
 import {
   getPackagePolicyCreateCallback,
   getPackagePolicyUpdateCallback,
@@ -68,6 +69,8 @@ export interface EndpointAppContextServiceStartContract {
   messageSigningService: MessageSigningServiceInterface | undefined;
   actionCreateService: ActionCreateService | undefined;
   cloud: CloudSetup;
+  esClient: ElasticsearchClient;
+  appFeatures: AppFeatures;
 }
 
 /**
@@ -104,6 +107,8 @@ export class EndpointAppContextService {
         exceptionListsClient,
         featureUsageService,
         endpointMetadataService,
+        esClient,
+        appFeatures,
       } = dependencies;
 
       registerIngestCallback(
@@ -115,7 +120,8 @@ export class EndpointAppContextService {
           alerting,
           licenseService,
           exceptionListsClient,
-          cloud
+          cloud,
+          appFeatures
         )
       );
 
@@ -131,7 +137,9 @@ export class EndpointAppContextService {
           licenseService,
           featureUsageService,
           endpointMetadataService,
-          cloud
+          cloud,
+          esClient,
+          appFeatures
         )
       );
 

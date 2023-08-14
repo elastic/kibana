@@ -198,7 +198,10 @@ describe('create()', () => {
         },
       });
 
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('create', 'my-action-type');
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
+        operation: 'create',
+        actionTypeId: 'my-action-type',
+      });
     });
 
     test('throws when user is not authorised to create this type of action', async () => {
@@ -242,7 +245,10 @@ describe('create()', () => {
         })
       ).rejects.toMatchInlineSnapshot(`[Error: Unauthorized to create a "my-action-type" action]`);
 
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('create', 'my-action-type');
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
+        operation: 'create',
+        actionTypeId: 'my-action-type',
+      });
     });
   });
 
@@ -847,7 +853,7 @@ describe('get()', () => {
 
       await actionsClient.get({ id: '1' });
 
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('get');
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({ operation: 'get' });
     });
 
     test('ensures user is authorised to get preconfigured type of action', async () => {
@@ -885,7 +891,7 @@ describe('get()', () => {
 
       await actionsClient.get({ id: 'testPreconfigured' });
 
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('get');
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({ operation: 'get' });
     });
 
     test('ensures user is authorised to get a system action', async () => {
@@ -917,9 +923,9 @@ describe('get()', () => {
         getEventLogClient,
       });
 
-      await actionsClient.get({ id: 'system-connector-.cases' });
+      await expect(actionsClient.get({ id: 'system-connector-.cases' })).rejects.toThrow();
 
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('get');
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({ operation: 'get' });
     });
 
     test('throws when user is not authorised to get the type of action', async () => {
@@ -943,7 +949,7 @@ describe('get()', () => {
         `[Error: Unauthorized to get a "my-action-type" action]`
       );
 
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('get');
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({ operation: 'get' });
     });
 
     test('throws when user is not authorised to get preconfigured of action', async () => {
@@ -987,7 +993,7 @@ describe('get()', () => {
         `[Error: Unauthorized to get a "my-action-type" action]`
       );
 
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('get');
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({ operation: 'get' });
     });
 
     test('throws when user is not authorised to get a system action', async () => {
@@ -1029,7 +1035,7 @@ describe('get()', () => {
         `[Error: Unauthorized to get a "system-connector-.cases" action]`
       );
 
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('get');
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({ operation: 'get' });
     });
   });
 
@@ -1158,7 +1164,7 @@ describe('get()', () => {
     expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
   });
 
-  it('return system action with id', async () => {
+  it('throws when getting a system action by default', async () => {
     actionsClient = new ActionsClient({
       logger,
       actionTypeRegistry,
@@ -1188,18 +1194,51 @@ describe('get()', () => {
       getEventLogClient,
     });
 
-    const result = await actionsClient.get({ id: 'system-connector-.cases' });
+    await expect(
+      actionsClient.get({ id: 'system-connector-.cases' })
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`"Connector system-connector-.cases not found"`);
+  });
 
-    expect(result).toEqual({
-      id: 'system-connector-.cases',
+  it('does not throw when getting a system action if throwIfSystemAction=false', async () => {
+    actionsClient = new ActionsClient({
+      logger,
+      actionTypeRegistry,
+      unsecuredSavedObjectsClient,
+      scopedClusterClient,
+      kibanaIndices,
+      actionExecutor,
+      executionEnqueuer,
+      ephemeralExecutionEnqueuer,
+      bulkExecutionEnqueuer,
+      request,
+      authorization: authorization as unknown as ActionsAuthorization,
+      inMemoryConnectors: [
+        {
+          id: 'system-connector-.cases',
+          actionTypeId: '.cases',
+          name: 'System action: .cases',
+          config: {},
+          secrets: {},
+          isDeprecated: false,
+          isMissingSecrets: false,
+          isPreconfigured: false,
+          isSystemAction: true,
+        },
+      ],
+      connectorTokenClient: connectorTokenClientMock.create(),
+      getEventLogClient,
+    });
+
+    expect(
+      await actionsClient.get({ id: 'system-connector-.cases', throwIfSystemAction: false })
+    ).toEqual({
       actionTypeId: '.cases',
-      isPreconfigured: false,
+      id: 'system-connector-.cases',
       isDeprecated: false,
+      isPreconfigured: false,
       isSystemAction: true,
       name: 'System action: .cases',
     });
-
-    expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
   });
 });
 
@@ -1270,7 +1309,7 @@ describe('getAll()', () => {
 
     test('ensures user is authorised to get the type of action', async () => {
       await getAllOperation();
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('get');
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({ operation: 'get' });
     });
 
     test('throws when user is not authorised to create the type of action', async () => {
@@ -1282,7 +1321,7 @@ describe('getAll()', () => {
         `[Error: Unauthorized to get all actions]`
       );
 
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('get');
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({ operation: 'get' });
     });
   });
 
@@ -1406,6 +1445,11 @@ describe('getAll()', () => {
             foo: 'bar',
           },
         },
+        /**
+         * System actions will not
+         * be returned from getAll
+         * if no options are provided
+         */
         {
           id: 'system-connector-.cases',
           actionTypeId: '.cases',
@@ -1426,12 +1470,111 @@ describe('getAll()', () => {
 
     expect(result).toEqual([
       {
-        id: 'system-connector-.cases',
+        id: '1',
+        name: 'test',
+        isMissingSecrets: false,
+        config: { foo: 'bar' },
+        isPreconfigured: false,
+        isDeprecated: false,
+        isSystemAction: false,
+        referencedByCount: 6,
+      },
+      {
+        id: 'testPreconfigured',
+        actionTypeId: '.slack',
+        name: 'test',
+        isPreconfigured: true,
+        isSystemAction: false,
+        isDeprecated: false,
+        referencedByCount: 2,
+      },
+    ]);
+  });
+
+  test('get system actions correctly', async () => {
+    const expectedResult = {
+      total: 1,
+      per_page: 10,
+      page: 1,
+      saved_objects: [
+        {
+          id: '1',
+          type: 'type',
+          attributes: {
+            name: 'test',
+            isMissingSecrets: false,
+            config: {
+              foo: 'bar',
+            },
+          },
+          score: 1,
+          references: [],
+        },
+      ],
+    };
+    unsecuredSavedObjectsClient.find.mockResolvedValueOnce(expectedResult);
+    scopedClusterClient.asInternalUser.search.mockResponse(
+      // @ts-expect-error not full search response
+      {
+        aggregations: {
+          '1': { doc_count: 6 },
+          testPreconfigured: { doc_count: 2 },
+          'system-connector-.cases': { doc_count: 2 },
+        },
+      }
+    );
+
+    actionsClient = new ActionsClient({
+      logger,
+      actionTypeRegistry,
+      unsecuredSavedObjectsClient,
+      scopedClusterClient,
+      kibanaIndices,
+      actionExecutor,
+      executionEnqueuer,
+      ephemeralExecutionEnqueuer,
+      bulkExecutionEnqueuer,
+      request,
+      authorization: authorization as unknown as ActionsAuthorization,
+      inMemoryConnectors: [
+        {
+          id: 'testPreconfigured',
+          actionTypeId: '.slack',
+          secrets: {},
+          isPreconfigured: true,
+          isDeprecated: false,
+          isSystemAction: false,
+          name: 'test',
+          config: {
+            foo: 'bar',
+          },
+        },
+        {
+          id: 'system-connector-.cases',
+          actionTypeId: '.cases',
+          name: 'System action: .cases',
+          config: {},
+          secrets: {},
+          isDeprecated: false,
+          isMissingSecrets: false,
+          isPreconfigured: false,
+          isSystemAction: true,
+        },
+      ],
+      connectorTokenClient: connectorTokenClientMock.create(),
+      getEventLogClient,
+    });
+
+    const result = await actionsClient.getAll({ includeSystemActions: true });
+
+    expect(result).toEqual([
+      {
         actionTypeId: '.cases',
-        name: 'System action: .cases',
+        id: 'system-connector-.cases',
+        isDeprecated: false,
         isPreconfigured: false,
         isSystemAction: true,
-        isDeprecated: false,
+        name: 'System action: .cases',
         referencedByCount: 2,
       },
       {
@@ -1516,12 +1659,12 @@ describe('getBulk()', () => {
         connectorTokenClient: connectorTokenClientMock.create(),
         getEventLogClient,
       });
-      return actionsClient.getBulk(['1', 'testPreconfigured']);
+      return actionsClient.getBulk({ ids: ['1', 'testPreconfigured'] });
     }
 
     test('ensures user is authorised to get the type of action', async () => {
       await getBulkOperation();
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('get');
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({ operation: 'get' });
     });
 
     test('throws when user is not authorised to create the type of action', async () => {
@@ -1533,7 +1676,7 @@ describe('getBulk()', () => {
         `[Error: Unauthorized to get all actions]`
       );
 
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('get');
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({ operation: 'get' });
     });
   });
 
@@ -1566,7 +1709,7 @@ describe('getBulk()', () => {
         }
       );
 
-      await actionsClient.getBulk(['1']);
+      await actionsClient.getBulk({ ids: ['1'] });
 
       expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -1582,7 +1725,7 @@ describe('getBulk()', () => {
     test('logs audit event when not authorised to bulk get connectors', async () => {
       authorization.ensureAuthorized.mockRejectedValue(new Error('Unauthorized'));
 
-      await expect(actionsClient.getBulk(['1'])).rejects.toThrow();
+      await expect(actionsClient.getBulk({ ids: ['1'] })).rejects.toThrow();
 
       expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -1667,11 +1810,7 @@ describe('getBulk()', () => {
       getEventLogClient,
     });
 
-    const result = await actionsClient.getBulk([
-      '1',
-      'testPreconfigured',
-      'system-connector-.cases',
-    ]);
+    const result = await actionsClient.getBulk({ ids: ['1', 'testPreconfigured'] });
 
     expect(result).toEqual([
       {
@@ -1685,17 +1824,6 @@ describe('getBulk()', () => {
         config: { foo: 'bar' },
       },
       {
-        id: 'system-connector-.cases',
-        actionTypeId: '.cases',
-        name: 'System action: .cases',
-        config: {},
-        secrets: {},
-        isDeprecated: false,
-        isMissingSecrets: false,
-        isPreconfigured: false,
-        isSystemAction: true,
-      },
-      {
         id: '1',
         actionTypeId: 'test',
         name: 'test',
@@ -1704,6 +1832,191 @@ describe('getBulk()', () => {
         isPreconfigured: false,
         isSystemAction: false,
         isDeprecated: false,
+      },
+    ]);
+  });
+
+  test('should throw an error if a system action is requested by default', async () => {
+    unsecuredSavedObjectsClient.bulkGet.mockResolvedValueOnce({
+      saved_objects: [
+        {
+          id: '1',
+          type: 'action',
+          attributes: {
+            actionTypeId: 'test',
+            name: 'test',
+            config: {
+              foo: 'bar',
+            },
+            isMissingSecrets: false,
+          },
+          references: [],
+        },
+      ],
+    });
+    scopedClusterClient.asInternalUser.search.mockResponse(
+      // @ts-expect-error not full search response
+      {
+        aggregations: {
+          '1': { doc_count: 6 },
+          testPreconfigured: { doc_count: 2 },
+          'system-connector-.cases': { doc_count: 2 },
+        },
+      }
+    );
+
+    actionsClient = new ActionsClient({
+      logger,
+      actionTypeRegistry,
+      unsecuredSavedObjectsClient,
+      scopedClusterClient,
+      kibanaIndices,
+      actionExecutor,
+      executionEnqueuer,
+      ephemeralExecutionEnqueuer,
+      bulkExecutionEnqueuer,
+      request,
+      authorization: authorization as unknown as ActionsAuthorization,
+      inMemoryConnectors: [
+        {
+          id: 'testPreconfigured',
+          actionTypeId: '.slack',
+          secrets: {},
+          isPreconfigured: true,
+          isDeprecated: false,
+          isSystemAction: false,
+          name: 'test',
+          config: {
+            foo: 'bar',
+          },
+        },
+        {
+          id: 'system-connector-.cases',
+          actionTypeId: '.cases',
+          name: 'System action: .cases',
+          config: {},
+          secrets: {},
+          isDeprecated: false,
+          isMissingSecrets: false,
+          isPreconfigured: false,
+          isSystemAction: true,
+        },
+      ],
+      connectorTokenClient: connectorTokenClientMock.create(),
+      getEventLogClient,
+    });
+
+    await expect(
+      actionsClient.getBulk({ ids: ['1', 'testPreconfigured', 'system-connector-.cases'] })
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`"Connector system-connector-.cases not found"`);
+  });
+
+  test('should throw an error if a system action is requested', async () => {
+    unsecuredSavedObjectsClient.bulkGet.mockResolvedValueOnce({
+      saved_objects: [
+        {
+          id: '1',
+          type: 'action',
+          attributes: {
+            actionTypeId: 'test',
+            name: 'test',
+            config: {
+              foo: 'bar',
+            },
+            isMissingSecrets: false,
+          },
+          references: [],
+        },
+      ],
+    });
+    scopedClusterClient.asInternalUser.search.mockResponse(
+      // @ts-expect-error not full search response
+      {
+        aggregations: {
+          '1': { doc_count: 6 },
+          testPreconfigured: { doc_count: 2 },
+          'system-connector-.cases': { doc_count: 2 },
+        },
+      }
+    );
+
+    actionsClient = new ActionsClient({
+      logger,
+      actionTypeRegistry,
+      unsecuredSavedObjectsClient,
+      scopedClusterClient,
+      kibanaIndices,
+      actionExecutor,
+      executionEnqueuer,
+      ephemeralExecutionEnqueuer,
+      bulkExecutionEnqueuer,
+      request,
+      authorization: authorization as unknown as ActionsAuthorization,
+      inMemoryConnectors: [
+        {
+          id: 'testPreconfigured',
+          actionTypeId: '.slack',
+          secrets: {},
+          isPreconfigured: true,
+          isDeprecated: false,
+          isSystemAction: false,
+          name: 'test',
+          config: {
+            foo: 'bar',
+          },
+        },
+        {
+          id: 'system-connector-.cases',
+          actionTypeId: '.cases',
+          name: 'System action: .cases',
+          config: {},
+          secrets: {},
+          isDeprecated: false,
+          isMissingSecrets: false,
+          isPreconfigured: false,
+          isSystemAction: true,
+        },
+      ],
+      connectorTokenClient: connectorTokenClientMock.create(),
+      getEventLogClient,
+    });
+
+    expect(
+      await actionsClient.getBulk({
+        ids: ['1', 'testPreconfigured', 'system-connector-.cases'],
+        throwIfSystemAction: false,
+      })
+    ).toEqual([
+      {
+        actionTypeId: '.slack',
+        config: { foo: 'bar' },
+        id: 'testPreconfigured',
+        isDeprecated: false,
+        isPreconfigured: true,
+        isSystemAction: false,
+        name: 'test',
+        secrets: {},
+      },
+      {
+        actionTypeId: '.cases',
+        config: {},
+        id: 'system-connector-.cases',
+        isDeprecated: false,
+        isMissingSecrets: false,
+        isPreconfigured: false,
+        isSystemAction: true,
+        name: 'System action: .cases',
+        secrets: {},
+      },
+      {
+        actionTypeId: 'test',
+        config: { foo: 'bar' },
+        id: '1',
+        isDeprecated: false,
+        isMissingSecrets: false,
+        isPreconfigured: false,
+        isSystemAction: false,
+        name: 'test',
       },
     ]);
   });
@@ -1762,7 +2075,7 @@ describe('getOAuthAccessToken()', () => {
           },
         },
       });
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('update');
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({ operation: 'update' });
     });
 
     test('throws when user is not authorised to create the type of action', async () => {
@@ -1786,7 +2099,7 @@ describe('getOAuthAccessToken()', () => {
         })
       ).rejects.toMatchInlineSnapshot(`[Error: Unauthorized to update actions]`);
 
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('update');
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({ operation: 'update' });
     });
   });
 
@@ -1809,7 +2122,7 @@ describe('getOAuthAccessToken()', () => {
       })
     ).rejects.toMatchInlineSnapshot(`[Error: Token URL must use http or https]`);
 
-    expect(authorization.ensureAuthorized).toHaveBeenCalledWith('update');
+    expect(authorization.ensureAuthorized).toHaveBeenCalledWith({ operation: 'update' });
   });
 
   test('throws when tokenUrl does not contain hostname', async () => {
@@ -1831,7 +2144,7 @@ describe('getOAuthAccessToken()', () => {
       })
     ).rejects.toMatchInlineSnapshot(`[Error: Token URL must contain hostname]`);
 
-    expect(authorization.ensureAuthorized).toHaveBeenCalledWith('update');
+    expect(authorization.ensureAuthorized).toHaveBeenCalledWith({ operation: 'update' });
   });
 
   test('throws when tokenUrl is not in allowed hosts', async () => {
@@ -1857,7 +2170,7 @@ describe('getOAuthAccessToken()', () => {
       })
     ).rejects.toMatchInlineSnapshot(`[Error: URI not allowed]`);
 
-    expect(authorization.ensureAuthorized).toHaveBeenCalledWith('update');
+    expect(authorization.ensureAuthorized).toHaveBeenCalledWith({ operation: 'update' });
     expect(configurationUtilities.ensureUriAllowed).toHaveBeenCalledWith(
       `https://testurl.service-now.com/oauth_token.do`
     );
@@ -2003,7 +2316,7 @@ describe('delete()', () => {
   describe('authorization', () => {
     test('ensures user is authorised to delete actions', async () => {
       await actionsClient.delete({ id: '1' });
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('delete');
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({ operation: 'delete' });
     });
 
     test('throws when user is not authorised to create the type of action', async () => {
@@ -2015,7 +2328,7 @@ describe('delete()', () => {
         `[Error: Unauthorized to delete all actions]`
       );
 
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('delete');
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({ operation: 'delete' });
     });
 
     test(`deletes any existing authorization tokens`, async () => {
@@ -2205,7 +2518,7 @@ describe('update()', () => {
   describe('authorization', () => {
     test('ensures user is authorised to update actions', async () => {
       await updateOperation();
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('update');
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({ operation: 'update' });
     });
 
     test('throws when user is not authorised to create the type of action', async () => {
@@ -2217,7 +2530,7 @@ describe('update()', () => {
         `[Error: Unauthorized to update all actions]`
       );
 
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('update');
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({ operation: 'update' });
     });
 
     test(`deletes any existing authorization tokens`, async () => {
@@ -2737,7 +3050,10 @@ describe('execute()', () => {
         },
         source: asHttpRequestExecutionSource(request),
       });
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('execute');
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
+        operation: 'execute',
+        additionalPrivileges: [],
+      });
     });
 
     test('throws when user is not authorised to create the type of action', async () => {
@@ -2758,7 +3074,10 @@ describe('execute()', () => {
         })
       ).rejects.toMatchInlineSnapshot(`[Error: Unauthorized to execute all actions]`);
 
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('execute');
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
+        operation: 'execute',
+        additionalPrivileges: [],
+      });
     });
 
     test('tracks legacy RBAC', async () => {
@@ -2775,6 +3094,200 @@ describe('execute()', () => {
       });
 
       expect(trackLegacyRBACExemption as jest.Mock).toBeCalledWith('execute', mockUsageCounter);
+      expect(authorization.ensureAuthorized).not.toHaveBeenCalled();
+    });
+
+    test('ensures that system actions privileges are being authorized correctly', async () => {
+      (getAuthorizationModeBySource as jest.Mock).mockImplementationOnce(() => {
+        return AuthorizationMode.RBAC;
+      });
+
+      actionsClient = new ActionsClient({
+        inMemoryConnectors: [
+          {
+            id: 'system-connector-.cases',
+            actionTypeId: '.cases',
+            name: 'System action: .cases',
+            config: {},
+            secrets: {},
+            isDeprecated: false,
+            isMissingSecrets: false,
+            isPreconfigured: false,
+            isSystemAction: true,
+          },
+        ],
+        logger,
+        actionTypeRegistry,
+        unsecuredSavedObjectsClient,
+        scopedClusterClient,
+        kibanaIndices,
+        actionExecutor,
+        executionEnqueuer,
+        ephemeralExecutionEnqueuer,
+        bulkExecutionEnqueuer,
+        request,
+        authorization: authorization as unknown as ActionsAuthorization,
+        auditLogger,
+        usageCounter: mockUsageCounter,
+        connectorTokenClient,
+        getEventLogClient,
+      });
+
+      actionTypeRegistry.register({
+        id: '.cases',
+        name: 'Cases',
+        minimumLicenseRequired: 'platinum',
+        supportedFeatureIds: ['alerting'],
+        getKibanaPrivileges: () => ['test/create'],
+        validate: {
+          config: { schema: schema.object({}) },
+          secrets: { schema: schema.object({}) },
+          params: { schema: schema.object({}) },
+        },
+        isSystemActionType: true,
+        executor,
+      });
+
+      await actionsClient.execute({
+        actionId: 'system-connector-.cases',
+        params: {},
+      });
+
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
+        operation: 'execute',
+        additionalPrivileges: ['test/create'],
+      });
+    });
+
+    test('does not authorize kibana privileges for non system actions', async () => {
+      (getAuthorizationModeBySource as jest.Mock).mockImplementationOnce(() => {
+        return AuthorizationMode.RBAC;
+      });
+
+      actionsClient = new ActionsClient({
+        inMemoryConnectors: [
+          {
+            id: 'testPreconfigured',
+            actionTypeId: 'my-action-type',
+            secrets: {
+              test: 'test1',
+            },
+            isPreconfigured: true,
+            isDeprecated: false,
+            isSystemAction: false,
+            name: 'test',
+            config: {
+              foo: 'bar',
+            },
+          },
+        ],
+        logger,
+        actionTypeRegistry,
+        unsecuredSavedObjectsClient,
+        scopedClusterClient,
+        kibanaIndices,
+        actionExecutor,
+        executionEnqueuer,
+        ephemeralExecutionEnqueuer,
+        bulkExecutionEnqueuer,
+        request,
+        authorization: authorization as unknown as ActionsAuthorization,
+        auditLogger,
+        usageCounter: mockUsageCounter,
+        connectorTokenClient,
+        getEventLogClient,
+      });
+
+      actionTypeRegistry.register({
+        id: '.cases',
+        name: 'Cases',
+        minimumLicenseRequired: 'platinum',
+        supportedFeatureIds: ['alerting'],
+        getKibanaPrivileges: () => ['test/create'],
+        validate: {
+          config: { schema: schema.object({}) },
+          secrets: { schema: schema.object({}) },
+          params: { schema: schema.object({}) },
+        },
+        isSystemActionType: true,
+        executor,
+      });
+
+      await actionsClient.execute({
+        actionId: 'testPreconfigured',
+        params: {},
+      });
+
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
+        operation: 'execute',
+        additionalPrivileges: [],
+      });
+    });
+
+    test('pass the params to the actionTypeRegistry when authorizing system actions', async () => {
+      (getAuthorizationModeBySource as jest.Mock).mockImplementationOnce(() => {
+        return AuthorizationMode.RBAC;
+      });
+
+      const getKibanaPrivileges = jest.fn().mockReturnValue(['test/create']);
+
+      actionsClient = new ActionsClient({
+        inMemoryConnectors: [
+          {
+            id: 'system-connector-.cases',
+            actionTypeId: '.cases',
+            name: 'System action: .cases',
+            config: {},
+            secrets: {},
+            isDeprecated: false,
+            isMissingSecrets: false,
+            isPreconfigured: false,
+            isSystemAction: true,
+          },
+        ],
+        logger,
+        actionTypeRegistry,
+        unsecuredSavedObjectsClient,
+        scopedClusterClient,
+        kibanaIndices,
+        actionExecutor,
+        executionEnqueuer,
+        ephemeralExecutionEnqueuer,
+        bulkExecutionEnqueuer,
+        request,
+        authorization: authorization as unknown as ActionsAuthorization,
+        auditLogger,
+        usageCounter: mockUsageCounter,
+        connectorTokenClient,
+        getEventLogClient,
+      });
+
+      actionTypeRegistry.register({
+        id: '.cases',
+        name: 'Cases',
+        minimumLicenseRequired: 'platinum',
+        supportedFeatureIds: ['alerting'],
+        getKibanaPrivileges,
+        validate: {
+          config: { schema: schema.object({}) },
+          secrets: { schema: schema.object({}) },
+          params: { schema: schema.object({}) },
+        },
+        isSystemActionType: true,
+        executor,
+      });
+
+      await actionsClient.execute({
+        actionId: 'system-connector-.cases',
+        params: { foo: 'bar' },
+      });
+
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
+        operation: 'execute',
+        additionalPrivileges: ['test/create'],
+      });
+
+      expect(getKibanaPrivileges).toHaveBeenCalledWith({ params: { foo: 'bar' } });
     });
   });
 
@@ -2888,7 +3401,9 @@ describe('enqueueExecution()', () => {
         apiKey: null,
         source: asHttpRequestExecutionSource(request),
       });
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('execute');
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
+        operation: 'execute',
+      });
     });
 
     test('throws when user is not authorised to create the type of action', async () => {
@@ -2910,7 +3425,9 @@ describe('enqueueExecution()', () => {
         })
       ).rejects.toMatchInlineSnapshot(`[Error: Unauthorized to execute all actions]`);
 
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('execute');
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
+        operation: 'execute',
+      });
     });
 
     test('tracks legacy RBAC', async () => {
@@ -2973,7 +3490,9 @@ describe('bulkEnqueueExecution()', () => {
           source: asHttpRequestExecutionSource(request),
         },
       ]);
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('execute');
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
+        operation: 'execute',
+      });
     });
 
     test('throws when user is not authorised to create the type of action', async () => {
@@ -3005,7 +3524,9 @@ describe('bulkEnqueueExecution()', () => {
         ])
       ).rejects.toMatchInlineSnapshot(`[Error: Unauthorized to execute all actions]`);
 
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('execute');
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
+        operation: 'execute',
+      });
     });
 
     test('tracks legacy RBAC', async () => {
@@ -3067,6 +3588,172 @@ describe('bulkEnqueueExecution()', () => {
     );
 
     expect(bulkExecutionEnqueuer).toHaveBeenCalledWith(unsecuredSavedObjectsClient, opts);
+  });
+});
+
+describe('listType()', () => {
+  it('filters action types by feature ID', async () => {
+    mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
+
+    actionTypeRegistry.register({
+      id: 'my-action-type',
+      name: 'My action type',
+      minimumLicenseRequired: 'basic',
+      supportedFeatureIds: ['alerting'],
+      validate: {
+        config: { schema: schema.object({}) },
+        secrets: { schema: schema.object({}) },
+        params: { schema: schema.object({}) },
+      },
+      executor,
+    });
+
+    actionTypeRegistry.register({
+      id: 'my-action-type-2',
+      name: 'My action type 2',
+      minimumLicenseRequired: 'basic',
+      supportedFeatureIds: ['cases'],
+      validate: {
+        config: { schema: schema.object({}) },
+        secrets: { schema: schema.object({}) },
+        params: { schema: schema.object({}) },
+      },
+      executor,
+    });
+
+    expect(await actionsClient.listTypes({ featureId: 'alerting' })).toEqual([
+      {
+        id: 'my-action-type',
+        name: 'My action type',
+        minimumLicenseRequired: 'basic',
+        enabled: true,
+        enabledInConfig: true,
+        enabledInLicense: true,
+        supportedFeatureIds: ['alerting'],
+        isSystemActionType: false,
+      },
+    ]);
+  });
+
+  it('filters out system action types when not defining options', async () => {
+    mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
+
+    actionTypeRegistry.register({
+      id: 'my-action-type',
+      name: 'My action type',
+      minimumLicenseRequired: 'basic',
+      supportedFeatureIds: ['alerting'],
+      validate: {
+        config: { schema: schema.object({}) },
+        secrets: { schema: schema.object({}) },
+        params: { schema: schema.object({}) },
+      },
+      executor,
+    });
+
+    actionTypeRegistry.register({
+      id: 'my-action-type-2',
+      name: 'My action type 2',
+      minimumLicenseRequired: 'basic',
+      supportedFeatureIds: ['cases'],
+      validate: {
+        config: { schema: schema.object({}) },
+        secrets: { schema: schema.object({}) },
+        params: { schema: schema.object({}) },
+      },
+      executor,
+    });
+
+    actionTypeRegistry.register({
+      id: '.cases',
+      name: 'Cases',
+      minimumLicenseRequired: 'platinum',
+      supportedFeatureIds: ['alerting'],
+      validate: {
+        config: { schema: schema.object({}) },
+        secrets: { schema: schema.object({}) },
+        params: { schema: schema.object({}) },
+      },
+      isSystemActionType: true,
+      executor,
+    });
+
+    expect(await actionsClient.listTypes()).toEqual([
+      {
+        id: 'my-action-type',
+        name: 'My action type',
+        minimumLicenseRequired: 'basic',
+        enabled: true,
+        enabledInConfig: true,
+        enabledInLicense: true,
+        supportedFeatureIds: ['alerting'],
+        isSystemActionType: false,
+      },
+      {
+        id: 'my-action-type-2',
+        name: 'My action type 2',
+        isSystemActionType: false,
+        minimumLicenseRequired: 'basic',
+        supportedFeatureIds: ['cases'],
+        enabled: true,
+        enabledInConfig: true,
+        enabledInLicense: true,
+      },
+    ]);
+  });
+
+  it('return system action types when defining options', async () => {
+    mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
+
+    actionTypeRegistry.register({
+      id: 'my-action-type',
+      name: 'My action type',
+      minimumLicenseRequired: 'basic',
+      supportedFeatureIds: ['alerting'],
+      validate: {
+        config: { schema: schema.object({}) },
+        secrets: { schema: schema.object({}) },
+        params: { schema: schema.object({}) },
+      },
+      executor,
+    });
+
+    actionTypeRegistry.register({
+      id: '.cases',
+      name: 'Cases',
+      minimumLicenseRequired: 'platinum',
+      supportedFeatureIds: ['alerting'],
+      validate: {
+        config: { schema: schema.object({}) },
+        secrets: { schema: schema.object({}) },
+        params: { schema: schema.object({}) },
+      },
+      isSystemActionType: true,
+      executor,
+    });
+
+    expect(await actionsClient.listTypes({ includeSystemActionTypes: true })).toEqual([
+      {
+        id: 'my-action-type',
+        name: 'My action type',
+        minimumLicenseRequired: 'basic',
+        enabled: true,
+        enabledInConfig: true,
+        enabledInLicense: true,
+        supportedFeatureIds: ['alerting'],
+        isSystemActionType: false,
+      },
+      {
+        id: '.cases',
+        name: 'Cases',
+        isSystemActionType: true,
+        minimumLicenseRequired: 'platinum',
+        supportedFeatureIds: ['alerting'],
+        enabled: true,
+        enabledInConfig: true,
+        enabledInLicense: true,
+      },
+    ]);
   });
 });
 
@@ -3341,7 +4028,7 @@ describe('getGlobalExecutionLogWithAuth()', () => {
         return AuthorizationMode.RBAC;
       });
       await actionsClient.getGlobalExecutionLogWithAuth(opts);
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('get');
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({ operation: 'get' });
     });
 
     test('throws when user is not authorised to access logs', async () => {
@@ -3354,7 +4041,7 @@ describe('getGlobalExecutionLogWithAuth()', () => {
         `[Error: Unauthorized to access logs]`
       );
 
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('get');
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({ operation: 'get' });
     });
   });
 
@@ -3396,7 +4083,7 @@ describe('getGlobalExecutionKpiWithAuth()', () => {
         return AuthorizationMode.RBAC;
       });
       await actionsClient.getGlobalExecutionKpiWithAuth(opts);
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('get');
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({ operation: 'get' });
     });
 
     test('throws when user is not authorised to access kpi', async () => {
@@ -3409,7 +4096,7 @@ describe('getGlobalExecutionKpiWithAuth()', () => {
         `[Error: Unauthorized to access kpi]`
       );
 
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('get');
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({ operation: 'get' });
     });
   });
 

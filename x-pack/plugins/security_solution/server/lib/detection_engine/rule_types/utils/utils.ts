@@ -30,9 +30,9 @@ import type {
 } from '@kbn/alerting-plugin/server';
 import { parseDuration } from '@kbn/alerting-plugin/server';
 import type { ExceptionListClient, ListClient, ListPluginSetup } from '@kbn/lists-plugin/server';
-import type { TimestampOverride } from '../../../../../common/detection_engine/rule_schema';
-import type { Privilege } from '../../../../../common/detection_engine/schemas/common';
-import { RuleExecutionStatus } from '../../../../../common/detection_engine/rule_monitoring';
+import type { TimestampOverride } from '../../../../../common/api/detection_engine/model/rule_schema';
+import type { Privilege } from '../../../../../common/api/detection_engine';
+import { RuleExecutionStatus } from '../../../../../common/api/detection_engine/rule_monitoring';
 import type {
   BulkResponseErrorAggregation,
   SignalHit,
@@ -61,7 +61,7 @@ import { withSecuritySpan } from '../../../../utils/with_security_span';
 import type {
   BaseFieldsLatest,
   DetectionAlert,
-} from '../../../../../common/detection_engine/schemas/alerts';
+} from '../../../../../common/api/detection_engine/model/alerts';
 import { ENABLE_CCS_READ_WARNING_SETTING } from '../../../../../common/constants';
 import type { GenericBulkCreateResponse } from '../factories';
 

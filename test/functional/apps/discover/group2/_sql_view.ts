@@ -72,8 +72,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await testSubjects.exists('showQueryBarMenu')).to.be(false);
         expect(await testSubjects.exists('addFilter')).to.be(false);
         expect(await testSubjects.exists('dscViewModeDocumentButton')).to.be(false);
-        // when Lens suggests a table, we render the histogram
-        expect(await testSubjects.exists('unifiedHistogramChart')).to.be(true);
+        // when Lens suggests a table, we render an ESQL based histogram
+        expect(await testSubjects.exists('unifiedHistogramChart')).to.be(false);
         expect(await testSubjects.exists('unifiedHistogramQueryHits')).to.be(true);
         expect(await testSubjects.exists('discoverAlertsButton')).to.be(false);
         expect(await testSubjects.exists('shareTopNavButton')).to.be(true);

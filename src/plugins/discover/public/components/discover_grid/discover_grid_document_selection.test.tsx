@@ -11,7 +11,7 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 import { DiscoverGridDocumentToolbarBtn, SelectButton } from './discover_grid_document_selection';
 import { discoverGridContextMock } from '../../__mocks__/grid_context';
 import { DiscoverGridContext } from './discover_grid_context';
-import { getDocId } from '../../utils/get_doc_id';
+import { getDocId } from '@kbn/discover-utils';
 
 describe('document selection', () => {
   describe('getDocId', () => {

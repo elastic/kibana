@@ -36,7 +36,7 @@ export const esqlSearchStrategyProvider = (
           {
             method: 'POST',
 
-            path: '/_esql',
+            path: '/_query',
             body: {
               ...requestParams,
             },

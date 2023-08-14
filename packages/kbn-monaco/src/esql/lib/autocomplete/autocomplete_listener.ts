@@ -31,6 +31,7 @@ import {
   assignOperatorDefinition,
   buildConstantsDefinitions,
   buildNewVarDefinition,
+  asOperatorDefinition,
 } from './autocomplete_definitions';
 
 import {
@@ -45,7 +46,6 @@ import {
   ProcessingCommandContext,
   SourceIdentifierContext,
   UserVariableContext,
-  RenameVariableContext,
   BooleanExpressionContext,
   RegexBooleanExpressionContext,
   WhereBooleanExpressionContext,
@@ -192,7 +192,6 @@ export class AutocompleteListener implements ESQLParserListener {
   }
 
   enterRenameCommand(ctx: RenameCommandContext) {
-    this.suggestions = [];
     this.parentContext = ESQLParser.RENAME;
   }
 
@@ -200,7 +199,11 @@ export class AutocompleteListener implements ESQLParserListener {
     const rc = ctx.renameClause();
     const commaExists = ctx.COMMA();
     if (!rc[0].exception) {
-      const qn = rc[0].qualifiedName();
+      const qn = rc[0].renameVariable();
+      const asExists = this.isTerminalNodeExists(rc[0].AS());
+      if (asExists && qn && !qn.text) {
+        this.suggestions = [];
+      }
       if (qn && qn.text) {
         if (!commaExists.length) {
           this.suggestions = this.getEndCommandSuggestions();
@@ -235,6 +238,12 @@ export class AutocompleteListener implements ESQLParserListener {
   exitQualifiedName(ctx: QualifiedNameContext) {
     const isInEval = this.parentContext === ESQLParser.EVAL;
     const isInStats = this.parentContext === ESQLParser.STATS;
+    const isInRename = this.parentContext === ESQLParser.RENAME;
+    if (this.parentContext && isInRename) {
+      if (!ctx.exception && ctx.text) {
+        this.suggestions = [asOperatorDefinition];
+      }
+    }
     if (this.parentContext && (isInStats || isInEval)) {
       this.suggestions = [
         ...this.getEndCommandSuggestions(),
@@ -273,21 +282,6 @@ export class AutocompleteListener implements ESQLParserListener {
       if (!hasAssign) {
         this.suggestions = [assignOperatorDefinition];
       }
-    }
-  }
-
-  enterRenameVariable?(ctx: RenameVariableContext) {
-    this.suggestions = [];
-  }
-
-  exitRenameVariable(ctx: RenameVariableContext) {
-    if (!ctx.exception && !ctx.text) {
-      this.suggestions = [buildNewVarDefinition(this.getNewVarName())];
-    }
-
-    if (!ctx.exception && ctx.text && ctx.text.slice(-1) !== '=') {
-      this.tables.at(-1)?.push(ctx.text);
-      this.suggestions = [assignOperatorDefinition];
     }
   }
 

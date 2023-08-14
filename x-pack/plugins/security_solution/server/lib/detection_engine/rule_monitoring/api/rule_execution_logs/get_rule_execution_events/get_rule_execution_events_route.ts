@@ -6,16 +6,17 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
+import type { IKibanaResponse } from '@kbn/core/server';
 import { buildRouteValidation } from '../../../../../../utils/build_validation/route_validation';
 import { buildSiemResponse } from '../../../../routes/utils';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 
-import type { GetRuleExecutionEventsResponse } from '../../../../../../../common/detection_engine/rule_monitoring';
+import type { GetRuleExecutionEventsResponse } from '../../../../../../../common/api/detection_engine/rule_monitoring';
 import {
   GET_RULE_EXECUTION_EVENTS_URL,
   GetRuleExecutionEventsRequestParams,
   GetRuleExecutionEventsRequestQuery,
-} from '../../../../../../../common/detection_engine/rule_monitoring';
+} from '../../../../../../../common/api/detection_engine/rule_monitoring';
 
 /**
  * Returns execution events of a given rule (e.g. status changes) from Event Log.
@@ -33,7 +34,11 @@ export const getRuleExecutionEventsRoute = (router: SecuritySolutionPluginRouter
         tags: ['access:securitySolution'],
       },
     },
-    async (context, request, response) => {
+    async (
+      context,
+      request,
+      response
+    ): Promise<IKibanaResponse<GetRuleExecutionEventsResponse>> => {
       const { params, query } = request;
       const siemResponse = buildSiemResponse(response);
 
@@ -49,9 +54,7 @@ export const getRuleExecutionEventsRoute = (router: SecuritySolutionPluginRouter
           perPage: query.per_page,
         });
 
-        const responseBody: GetRuleExecutionEventsResponse = executionEventsResponse;
-
-        return response.ok({ body: responseBody });
+        return response.ok({ body: executionEventsResponse });
       } catch (err) {
         const error = transformError(err);
         return siemResponse.error({

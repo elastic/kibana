@@ -28,6 +28,7 @@ const createPackageInfo = (parts: Partial<PackageInfo> = {}): PackageInfo => ({
   buildDate: new Date('2023-05-15T23:12:09.000Z'),
   dist: false,
   version: '8.0.0',
+  buildFlavor: 'traditional',
   ...parts,
 });
 

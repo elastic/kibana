@@ -16,14 +16,14 @@ import type {
 import type {
   RuleExecutionMetrics,
   RuleExecutionSettings,
-} from '../../../../../../../common/detection_engine/rule_monitoring';
+} from '../../../../../../../common/api/detection_engine/rule_monitoring';
 import {
   LogLevel,
   logLevelFromExecutionStatus,
   LogLevelSetting,
   logLevelToNumber,
   RuleExecutionStatus,
-} from '../../../../../../../common/detection_engine/rule_monitoring';
+} from '../../../../../../../common/api/detection_engine/rule_monitoring';
 
 import { assertUnreachable } from '../../../../../../../common/utility_types';
 import { withSecuritySpan } from '../../../../../../utils/with_security_span';

@@ -33,7 +33,7 @@ import {
 import type { CreateTimeline, UpdateTimelineLoading } from './types';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import type { DataProvider } from '../../../../common/types/timeline';
-import { TimelineType, TimelineStatus } from '../../../../common/types/timeline/api';
+import { TimelineType, TimelineStatus } from '../../../../common/api/timeline';
 import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
 import type { ISearchStart } from '@kbn/data-plugin/public';
 import { searchServiceMock } from '@kbn/data-plugin/public/search/mocks';

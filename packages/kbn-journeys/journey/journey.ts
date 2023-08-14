@@ -26,8 +26,11 @@ import { KibanaUrl } from '../services/kibana_url';
 import { JourneyFtrHarness } from './journey_ftr_harness';
 import { makeFtrConfigProvider } from './journey_ftr_config';
 import { JourneyConfig, JourneyConfigOptions } from './journey_config';
+import { KibanaPage } from '../services/page/kibana_page';
+import { ProjectPage } from '../services/page/project_page';
 
 export interface BaseStepCtx {
+  kibanaPage: KibanaPage | ProjectPage;
   page: Page;
   log: ToolingLog;
   inputDelays: InputDelays;
