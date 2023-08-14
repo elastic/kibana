@@ -10,8 +10,8 @@ import { AnomaliesTable } from '../../../../pages/metrics/inventory_view/compone
 import { useAssetDetailsStateContext } from '../../hooks/use_asset_details_state';
 
 export const Anomalies = () => {
-  const { node, overrides } = useAssetDetailsStateContext();
+  const { asset, overrides } = useAssetDetailsStateContext();
   const { onClose = () => {} } = overrides?.anomalies ?? {};
 
-  return <AnomaliesTable closeFlyout={onClose} hostName={node.name} />;
+  return <AnomaliesTable closeFlyout={onClose} hostName={asset.name} />;
 };
