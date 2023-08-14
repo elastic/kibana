@@ -100,3 +100,16 @@ export const fetchCrawlers = async (
     return crawlers;
   }
 };
+
+export const fetchCrawlerDocumentIdByIndexName = async (
+  client: IScopedClusterClient,
+  indexName: string
+): Promise<string> => {
+  const crawlerResult = await client.asCurrentUser.search<Connector>({
+    index: CONNECTORS_INDEX,
+    query: { term: { index_name: indexName } },
+    _source: '_id',
+  });
+  const crawlerId = crawlerResult.hits.hits[0]?._id;
+  return crawlerId;
+};

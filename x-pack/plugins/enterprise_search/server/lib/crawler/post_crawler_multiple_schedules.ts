@@ -10,6 +10,8 @@ import { IScopedClusterClient } from '@kbn/core/server';
 import { CONNECTORS_INDEX } from '../..';
 import { Connector } from '../../../common/types/connectors';
 
+import {fetchCrawlerDocumentIdByIndexName} from './fetch_crawlers';
+
 export const postCrawlerCustomScheduling = async (
   client: IScopedClusterClient,
   indexName: string,
@@ -24,17 +26,4 @@ export const postCrawlerCustomScheduling = async (
     },
   });
   return crawlerResult;
-};
-
-export const fetchCrawlerDocumentIdByIndexName = async (
-  client: IScopedClusterClient,
-  indexName: string
-): Promise<string> => {
-  const crawlerResult = await client.asCurrentUser.search<Connector>({
-    index: CONNECTORS_INDEX,
-    query: { term: { index_name: indexName } },
-    _source: '_id',
-  });
-  const crawlerId = crawlerResult.hits.hits[0]?._id;
-  return crawlerId;
 };

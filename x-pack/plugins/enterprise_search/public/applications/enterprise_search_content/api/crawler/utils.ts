@@ -242,7 +242,10 @@ export const domainConfigServerToClient = (
 export const crawlerCustomSchedulingServerToClient = (
   customSchedulingFromServer: CrawlerCustomSchedulesFromServer
 ): CrawlerCustomSchedule[] =>
-  Object.entries(customSchedulingFromServer.custom_scheduling).map(([_, schedule]) => {
+  Object.entries(customSchedulingFromServer.custom_scheduling)
+    .sort(([name, _])=> name)
+    .map(([_, schedule]) => {
+
     const { name, interval, configuration_overrides, enabled } = schedule;
 
     const {
@@ -266,6 +269,34 @@ export const crawlerCustomSchedulingServerToClient = (
       customSitemapUrls: sitemap_urls,
     };
   });
+
+
+export const crawlerCustomSchedulingClientToServer = (crawlerCustomScheduling: CrawlerCustomSchedule[]): any => {
+  const mapToServerFormat = (crawlConfig: CrawlerCustomSchedule): any => {
+    const configurationOverrides: CrawlerCustomScheduleConfigOverridesFromServer = {
+      max_crawl_depth: crawlConfig.maxCrawlDepth,
+      sitemap_discovery_disabled: !crawlConfig.includeSitemapsInRobotsTxt,
+      domain_allowlist: crawlConfig.selectedDomainUrls,
+      sitemap_urls: [...crawlConfig.selectedSitemapUrls, ...crawlConfig.customSitemapUrls],
+      seed_urls: [...crawlConfig.selectedEntryPointUrls, ...crawlConfig.customEntryPointUrls],
+    };
+
+    return {
+      name: crawlConfig.name,
+      interval: crawlConfig.interval,
+      configuration_overrides: configurationOverrides,
+      enabled: crawlConfig.enabled,
+    };
+  };
+
+  const customSchedulingMap = {}; // Use `any` to accommodate the dynamic nature of your structure
+
+  crawlerConfigurations.forEach((crawlConfig) => {
+    customSchedulingMap[crawlConfig.name.replace(/\s+/g, '_').toLowerCase()] =
+      mapToServerFormat(crawlConfig);
+  });
+
+}
 
 export const crawlerDomainsWithMetaServerToClient = ({
   results,

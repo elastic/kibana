@@ -121,7 +121,7 @@ export const CrawlCustomSettingsFlyout: React.FC = () => {
               data-telemetry-id="entSearchContent-crawler-customCrawlSettings-startCrawl"
               fill
               onClick={submitFunctionLogic}
-              disabled={isDataLoading}
+              disabled={isDataLoading || selectedDomainUrls.length === 0}
               isLoading={isFormSubmitting}
             >
               {isSingleCrawlType

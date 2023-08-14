@@ -21,7 +21,6 @@ export const CrawlCustomSettingsFlyoutMultipleCrawlDelete: React.FC = () => {
 
   return (
     <>
-      <EuiSpacer />
       <EuiButton
         iconType="trash"
         color="danger"

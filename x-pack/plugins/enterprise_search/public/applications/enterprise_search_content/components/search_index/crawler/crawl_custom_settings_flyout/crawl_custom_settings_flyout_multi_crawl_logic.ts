@@ -194,24 +194,28 @@ export const CrawlCustomSettingsFlyoutMultiCrawlLogic = kea<
       },
     ],
   }),
-  // selectors: () => ({
-  //   multiCrawlerEntryPointUrls: [
-  //     (selectors) => [selectors.domainConfigMap, selectors.crawlerConfigurations],
-  //     (domainConfigMap: { [key: string]: DomainConfig }, crawlerConfigs: CrawlerConfiguration[]): string[][] =>
-  //       crawlerConfigs.map(c =>
-  //         c.selectedDomainUrls.flatMap(
-  //           (selectedDomainUrl) => domainConfigMap[selectedDomainUrl].seedUrls
-  //         )),
-  //   ],
-  //   multiCrawlerSitemapUrls: [
-  //     (selectors) => [selectors.domainConfigMap, selectors.crawlerConfigurations],
-  //     (domainConfigMap: { [key: string]: DomainConfig }, crawlerConfigs: CrawlerConfiguration[]): string[][] =>
-  //       crawlerConfigs.map(c =>
-  //         c.selectedDomainUrls.flatMap(
-  //           (selectedDomainUrl) => domainConfigMap[selectedDomainUrl].sitemapUrls
-  //         ))
-  //   ],
-  // }),
+  selectors: () => ({
+    // multiCrawlerEntryPointUrls: [
+    //   (selectors) => [selectors.domainConfigMap, selectors.crawlerConfigurations],
+    //   (domainConfigMap: { [key: string]: DomainConfig }, crawlerConfigs: CrawlerConfiguration[]): string[][] =>
+    //     crawlerConfigs.map(c =>
+    //       c.selectedDomainUrls.flatMap(
+    //         (selectedDomainUrl) => domainConfigMap[selectedDomainUrl].seedUrls
+    //       )),
+    // ],
+    // multiCrawlerSitemapUrls: [
+    //   (selectors) => [selectors.domainConfigMap, selectors.crawlerConfigurations],
+    //   (domainConfigMap: { [key: string]: DomainConfig }, crawlerConfigs: CrawlerConfiguration[]): string[][] =>
+    //     crawlerConfigs.map(c =>
+    //       c.selectedDomainUrls.flatMap(
+    //         (selectedDomainUrl) => domainConfigMap[selectedDomainUrl].sitemapUrls
+    //       ))
+    // ],
+    testSelector: [
+      (selectors) => [selectors.crawlerConfigActiveTab],
+      (crawlerConfigActiveTab) => crawlerConfigActiveTab * -1
+    ]
+  }),
   listeners: ({ actions, values }) => ({
     fetchCustomScheduling: async () => {
       const { http } = HttpLogic.values;
@@ -260,7 +264,7 @@ export const CrawlCustomSettingsFlyoutMultiCrawlLogic = kea<
       try {
         await http.post(
           `/internal/enterprise_search/indices/${indexName}/crawler/custom_scheduling`,
-          { body: JSON.stringify(customSchedulingMap) }
+          { body: JSON.stringify(customScheduling) }
         );
       } catch (e) {
         flashAPIErrors(e);

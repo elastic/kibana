@@ -86,7 +86,7 @@ export const CrawlCustomSettingsFlyoutLogic = kea<
       CrawlCustomSettingsFlyoutMultiCrawlLogic,
       ['fetchCustomScheduling', 'postCustomScheduling'],
     ],
-    values: [CrawlCustomSettingsFlyoutMultiCrawlLogic, ['crawlerConfigurations']],
+    values: [CrawlCustomSettingsFlyoutMultiCrawlLogic, ['crawlerConfigurations', 'testSelector']],
   },
   actions: () => ({
     fetchDomainConfigData: true,
