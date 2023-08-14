@@ -44,7 +44,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.console.clickPlay();
         await retry.try(async () => {
           const actualResponse = await PageObjects.console.getResponse();
-          expect(actualResponse).to.contain('"_index": "ftr-remote:makelogs工程-0"');
+          expect(actualResponse).to.contain('"_index": "ftr-remote:logstash-2015.09.20"');
         });
       });
     });
