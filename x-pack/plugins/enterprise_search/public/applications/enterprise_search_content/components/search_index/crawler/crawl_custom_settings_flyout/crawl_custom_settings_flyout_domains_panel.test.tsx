@@ -15,9 +15,7 @@ import { EuiAccordion, EuiNotificationBadge } from '@elastic/eui';
 
 import { SimplifiedSelectable } from '../../../../../shared/simplified_selectable/simplified_selectable';
 
-import { rerender } from '../../../../../test_helpers';
-
-import { CrawlCustomSettingsFlyoutDomainsPanelWithLogicProps } from './crawl_custom_settings_flyout_domains_panel';
+import { CrawlCustomSettingsFlyoutDomainsPanel } from './crawl_custom_settings_flyout_domains_panel';
 
 const MOCK_VALUES = {
   // CrawlCustomSettingsFlyoutLogic
@@ -44,7 +42,13 @@ describe('CrawlCustomSettingsFlyoutDomainsPanel', () => {
     setMockValues(MOCK_VALUES);
     setMockActions(MOCK_ACTIONS);
 
-    wrapper = shallow(<CrawlCustomSettingsFlyoutDomainsPanelWithLogicProps />);
+    wrapper = shallow(
+      <CrawlCustomSettingsFlyoutDomainsPanel
+        domainUrls={MOCK_VALUES.domainUrls}
+        selectedDomainUrls={MOCK_VALUES.selectedDomainUrls}
+        onSelectDomainUrls={MOCK_ACTIONS.onSelectDomainUrls}
+      />
+    );
   });
 
   it('allows the user to select domains', () => {
@@ -65,12 +69,7 @@ describe('CrawlCustomSettingsFlyoutDomainsPanel', () => {
     expect(badge.render().text()).toContain('1');
     expect(badge.prop('color')).toEqual('accent');
 
-    setMockValues({
-      ...MOCK_VALUES,
-      selectedDomainUrls: [],
-    });
-
-    rerender(wrapper);
+    wrapper.setProps({ selectedDomainUrls: [] });
     badge = getAccordionBadge(wrapper);
 
     expect(badge.render().text()).toContain('0');

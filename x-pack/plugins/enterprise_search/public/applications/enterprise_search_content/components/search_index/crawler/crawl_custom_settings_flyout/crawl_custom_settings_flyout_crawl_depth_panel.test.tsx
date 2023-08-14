@@ -13,7 +13,7 @@ import { shallow } from 'enzyme';
 
 import { EuiFieldNumber } from '@elastic/eui';
 
-import { CrawlCustomSettingsFlyoutCrawlDepthPanelWithLogicProps } from './crawl_custom_settings_flyout_crawl_depth_panel';
+import { CrawlCustomSettingsFlyoutCrawlDepthPanel } from './crawl_custom_settings_flyout_crawl_depth_panel';
 
 const MOCK_VALUES = {
   // CrawlCustomSettingsFlyoutLogic
@@ -33,7 +33,12 @@ describe('CrawlCustomSettingsFlyoutCrawlDepthPanel', () => {
   });
 
   it('allows the user to set max crawl depth', () => {
-    const wrapper = shallow(<CrawlCustomSettingsFlyoutCrawlDepthPanelWithLogicProps />);
+    const wrapper = shallow(
+      <CrawlCustomSettingsFlyoutCrawlDepthPanel
+        maxCrawlDepth={MOCK_VALUES.maxCrawlDepth}
+        onSelectMaxCrawlDepth={MOCK_ACTIONS.onSelectMaxCrawlDepth}
+      />
+    );
     const crawlDepthField = wrapper.find(EuiFieldNumber);
 
     expect(crawlDepthField.prop('value')).toEqual(5);

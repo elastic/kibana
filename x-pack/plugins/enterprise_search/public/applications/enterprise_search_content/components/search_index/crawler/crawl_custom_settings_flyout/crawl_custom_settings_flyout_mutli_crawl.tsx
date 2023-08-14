@@ -12,10 +12,10 @@ import { useValues, useActions } from 'kea';
 import { EuiSpacer } from '@elastic/eui';
 
 import { CrawlCustomSettingsFlyoutCrawlDepthPanel } from './crawl_custom_settings_flyout_crawl_depth_panel';
+import { MultiCrawlScheduler } from './crawl_custom_settings_flyout_crawl_scheduler';
 import { CrawlCustomSettingsFlyoutDomainsPanel } from './crawl_custom_settings_flyout_domains_panel';
 import { CrawlCustomSettingsFlyoutLogic } from './crawl_custom_settings_flyout_logic';
 import { CrawlCustomSettingsFlyoutMultiCrawlLogic } from './crawl_custom_settings_flyout_multi_crawl_logic';
-import { MultiCrawlScheduler } from './crawl_custom_settings_flyout_multi_crawl_scheduler';
 import { CrawlCustomSettingsFlyoutSeedUrlsPanel } from './crawl_custom_settings_flyout_seed_urls_panel';
 
 export const CrawlCustomSettingsFlyoutMultiCrawlScheduling: React.FC = () => {

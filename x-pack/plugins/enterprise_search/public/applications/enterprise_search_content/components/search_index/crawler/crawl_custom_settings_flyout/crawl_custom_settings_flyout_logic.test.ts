@@ -14,13 +14,31 @@ import { DomainConfig } from '../../../../api/crawler/types';
 import { CrawlerLogic } from '../crawler_logic';
 
 import { CrawlCustomSettingsFlyoutLogic } from './crawl_custom_settings_flyout_logic';
+import { CrawlCustomSettingsFlyoutMultiCrawlLogic } from './crawl_custom_settings_flyout_multi_crawl_logic';
+import { IndexViewLogic } from '../../index_view_logic';
+import { IndexNameLogic } from '../../index_name_logic';
+import { StartSyncApiLogic } from '../../../../api/connector/start_sync_api_logic';
+import { CachedFetchIndexApiLogic } from '../../../../api/index/cached_fetch_index_api_logic';
 
 describe('CrawlCustomSettingsFlyoutLogic', () => {
   const { mount } = new LogicMounter(CrawlCustomSettingsFlyoutLogic);
+  const { mount: multiCrawlLogicMount } = new LogicMounter(
+    CrawlCustomSettingsFlyoutMultiCrawlLogic
+  );
+  const { mount: indexViewLogicMount } = new LogicMounter(IndexViewLogic);
+  const { mount: apiLogicMount } = new LogicMounter(StartSyncApiLogic);
+  const { mount: fetchIndexMount } = new LogicMounter(CachedFetchIndexApiLogic);
+  const { mount: indexNameMount } = new LogicMounter(IndexNameLogic);
+
   const { http } = mockHttpValues;
 
   beforeEach(() => {
     jest.clearAllMocks();
+    indexNameMount();
+    apiLogicMount();
+    fetchIndexMount();
+    indexViewLogicMount();
+    multiCrawlLogicMount();
     mount();
   });
 
