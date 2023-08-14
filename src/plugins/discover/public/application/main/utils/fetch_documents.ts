@@ -37,7 +37,6 @@ export const fetchDocuments = (
   }
   const dataView = searchSource.getField('index')!;
   const isFetchingMore = Boolean(searchSource.getField('searchAfter'));
-  const disableShardFailureWarning = isFetchingMore ? false : DISABLE_SHARD_FAILURE_WARNING;
 
   const executionContext = {
     description: isFetchingMore ? 'fetch more documents' : 'fetch documents',
@@ -61,7 +60,7 @@ export const fetchDocuments = (
         }),
       },
       executionContext,
-      disableShardFailureWarning,
+      disableShardFailureWarning: DISABLE_SHARD_FAILURE_WARNING,
     })
     .pipe(
       filter((res) => isCompleteResponse(res)),
@@ -77,7 +76,7 @@ export const fetchDocuments = (
           services,
           adapter,
           options: {
-            disableShardFailureWarning,
+            disableShardFailureWarning: DISABLE_SHARD_FAILURE_WARNING,
           },
         })
       : [];

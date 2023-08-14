@@ -8,6 +8,7 @@
 
 import type { BehaviorSubject } from 'rxjs';
 import type { DataTableRecord } from '@kbn/discover-utils/src/types';
+import type { SearchResponseInterceptedWarning } from '@kbn/search-response-warnings';
 import { FetchStatus } from '../../types';
 import type {
   DataDocuments$,
@@ -76,25 +77,37 @@ export function sendLoadingMsg<T extends DataMsg>(
 /**
  * Send LOADING_MORE message via main observable
  */
-export function sendLoadingMoreMsg<T extends DataMsg>(data$: BehaviorSubject<T>) {
-  if (data$.getValue().fetchStatus !== FetchStatus.LOADING_MORE) {
-    data$.next({
-      ...data$.getValue(),
+export function sendLoadingMoreMsg(documents$: DataDocuments$) {
+  if (documents$.getValue().fetchStatus !== FetchStatus.LOADING_MORE) {
+    documents$.next({
+      ...documents$.getValue(),
       fetchStatus: FetchStatus.LOADING_MORE,
-    } as T);
+    });
   }
 }
 
 /**
  * Finishing LOADING_MORE message
  */
-export function sendLoadingMoreFinishedMsg(data$: DataDocuments$, moreRecords: DataTableRecord[]) {
-  const currentValue = data$.getValue();
+export function sendLoadingMoreFinishedMsg(
+  documents$: DataDocuments$,
+  {
+    moreRecords,
+    interceptedWarnings,
+  }: {
+    moreRecords: DataTableRecord[];
+    interceptedWarnings: SearchResponseInterceptedWarning[] | undefined;
+  }
+) {
+  const currentValue = documents$.getValue();
   if (currentValue.fetchStatus === FetchStatus.LOADING_MORE) {
-    data$.next({
+    documents$.next({
       ...currentValue,
       fetchStatus: FetchStatus.COMPLETE,
-      result: [...(currentValue.result || []), ...moreRecords],
+      result: moreRecords?.length
+        ? [...(currentValue.result || []), ...moreRecords]
+        : currentValue.result,
+      interceptedWarnings,
     });
   }
 }

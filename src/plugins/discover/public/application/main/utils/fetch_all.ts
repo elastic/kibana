@@ -205,12 +205,18 @@ export async function fetchMoreDocuments(
     });
 
     // Fetch more documents
-    const { records } = await fetchDocuments(searchSource, fetchDeps);
+    const { records, interceptedWarnings } = await fetchDocuments(searchSource, fetchDeps);
 
     // Update the state and finish the loading state
-    sendLoadingMoreFinishedMsg(dataSubjects.documents$, records);
+    sendLoadingMoreFinishedMsg(dataSubjects.documents$, {
+      moreRecords: records,
+      interceptedWarnings,
+    });
   } catch (error) {
-    sendLoadingMoreFinishedMsg(dataSubjects.documents$, []);
+    sendLoadingMoreFinishedMsg(dataSubjects.documents$, {
+      moreRecords: [],
+      interceptedWarnings: undefined,
+    });
     sendErrorMsg(dataSubjects.main$, error);
   }
 }
