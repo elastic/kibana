@@ -6,7 +6,7 @@
  */
 
 import type { RootSchema } from '@kbn/analytics-client';
-import type { TelemetryEventTypes } from '../..';
+import type { TelemetryEventTypes } from '../../constants';
 
 export interface ReportAssistantInvokedParams {
   conversationId: string;
