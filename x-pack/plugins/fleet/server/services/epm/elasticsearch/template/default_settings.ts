@@ -38,7 +38,6 @@ export function buildDefaultSettings({
   packageName: string;
   ilmPolicy?: string | undefined;
   fields: Field[];
-  stackTemplatesDisabled?: boolean;
 }) {
   const logger = appContextService.getLogger();
   // Find all field names to set `index.query.default_field` to, which will be
@@ -63,19 +62,6 @@ export function buildDefaultSettings({
   ).map((field) => field.name);
 
   const isILMPolicyDisabled = appContextService.getConfig()?.internal?.disableILMPolicies ?? false;
-
-  // TODO populate old defaults when stack templates are disabled?
-  const fallbackDefaults = {
-    codec: 'best_compression',
-    // setting `ignore_malformed` only for data_stream for logs
-    ...(type === 'logs'
-      ? {
-          mapping: {
-            ignore_malformed: true,
-          },
-        }
-      : {}),
-  };
 
   return {
     index: {

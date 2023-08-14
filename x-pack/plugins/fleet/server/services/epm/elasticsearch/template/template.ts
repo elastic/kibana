@@ -85,8 +85,8 @@ export function getTemplate({
   templatePriority: number;
   mappings: IndexTemplateMappings;
   type: string;
-  isIndexModeTimeSeries: boolean;
-  isILMPolicyDisabled: boolean;
+  isIndexModeTimeSeries?: boolean;
+  isILMPolicyDisabled?: boolean;
   hidden?: boolean;
   registryElasticsearch?: RegistryElasticsearch | undefined;
 }): IndexTemplate {
@@ -104,7 +104,7 @@ export function getTemplate({
     throw new Error(`Error template for ${templateIndexPattern} contains a final_pipeline`);
   }
 
-  const esBaseComponents = getBaseEsComponents(type, isIndexModeTimeSeries);
+  const esBaseComponents = getBaseEsComponents(type, !!isIndexModeTimeSeries);
 
   template.composed_of = [
     ...esBaseComponents,
