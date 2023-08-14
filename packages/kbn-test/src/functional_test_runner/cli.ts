@@ -141,7 +141,7 @@ export function runFtrCli() {
           'dry-run',
         ],
         help: `
-          --config=path      path to a config file (required)
+          --config=path      path to a config file
           --bail             stop tests after the first failure
           --grep <pattern>   pattern used to select which tests to run
           --invert           invert grep to exclude tests
