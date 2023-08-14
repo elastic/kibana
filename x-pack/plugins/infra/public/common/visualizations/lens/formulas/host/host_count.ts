@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { FormulaConfig } from '../../../types';
+import type { FormulaValueConfig } from '@kbn/lens-embeddable-utils';
 
-export const hostCount: FormulaConfig = {
+export const hostCount: FormulaValueConfig = {
   label: 'Hosts',
   value: 'unique_count(host.name)',
   format: {

@@ -19,6 +19,8 @@ import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { SecuritySolutionEssPluginSetup } from '@kbn/security-solution-ess/server';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 
+import type { ProductTier } from '../common/product';
+
 import type { ServerlessSecurityConfig } from './config';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -63,6 +65,11 @@ export interface UsageMetrics {
 export interface UsageSource {
   id: string;
   instance_group_id: string;
+  metadata?: UsageSourceMetadata;
+}
+
+export interface UsageSourceMetadata {
+  tier?: ProductTier;
 }
 
 export interface SecurityUsageReportingTaskSetupContract {
