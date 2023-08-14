@@ -10,6 +10,7 @@ import { EuiIcon, EuiToolTip } from '@elastic/eui';
 import { CSSInterpolation } from '@emotion/serialize';
 import type { BenchmarkId } from '../../common/types';
 import cisEksIcon from '../assets/icons/cis_eks_logo.svg';
+import googleCloudLogo from '../assets/icons/google_cloud_logo.svg';
 
 interface Props {
   type: BenchmarkId;
@@ -24,7 +25,7 @@ const getBenchmarkIdIconType = (props: Props): string => {
     case 'cis_aws':
       return 'logoAWS';
     case 'cis_gcp':
-      return 'logoGCP';
+      return googleCloudLogo;
     case 'cis_k8s':
     default:
       return 'logoKubernetes';
