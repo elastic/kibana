@@ -3,23 +3,7 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": [
-    "../../../typings/**/*",
-    "common/**/*",
-    "public/**/*",
-    "scripts/**/*",
-    "server/**/*",
-    "typings/**/*",
-    "jest.config.js",
-    // have to declare *.json explicitly due to https://github.com/microsoft/TypeScript/issues/25636
-    "public/**/*.json",
-    "server/**/*.json"
-  ],
-  "exclude": [
-    "target/**/*"
-  ],
-  "kbn_references": [
-    "@kbn/config-schema",
-    "@kbn/core",
-  ]
+  "include": ["../../../typings/**/*", "common/**/*", "server/**/*", "jest.config.js"],
+  "exclude": ["target/**/*"],
+  "kbn_references": ["@kbn/config-schema", "@kbn/core"]
 }
