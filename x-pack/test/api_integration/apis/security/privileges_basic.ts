@@ -112,6 +112,8 @@ export default function ({ getService }: FtrProviderContext) {
               'all',
               'blocklist_all',
               'blocklist_read',
+              'endpoint_and_rule_exceptions_all',
+              'endpoint_and_rule_exceptions_read',
               'endpoint_list_all',
               'endpoint_list_read',
               'event_filters_all',
