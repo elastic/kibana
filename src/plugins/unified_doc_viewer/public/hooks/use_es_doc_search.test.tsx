@@ -9,7 +9,7 @@
 import { renderHook, act } from '@testing-library/react-hooks';
 import { type DocProps, buildSearchBody, useEsDocSearch } from './use_es_doc_search';
 import { Subject } from 'rxjs';
-import { DataView } from '@kbn/data-views-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { ElasticRequestState } from '@kbn/unified-doc-viewer';
 import {
   SEARCH_FIELDS_FROM_SOURCE as mockSearchFieldsFromSource,
