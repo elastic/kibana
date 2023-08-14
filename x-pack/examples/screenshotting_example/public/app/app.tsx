@@ -18,11 +18,12 @@ import {
   EuiPageContent_Deprecated as EuiPageContent,
   EuiPageContentBody_Deprecated as EuiPageContentBody,
   EuiPageHeader,
+  EuiPageHeaderSection,
   EuiSpacer,
   EuiStat,
   EuiText,
   EuiTextArea,
-  EuiPageSection,
+  EuiTitle,
 } from '@elastic/eui';
 import { API_ENDPOINT, ScreenshottingExpressionResponse } from '../../common';
 import { HttpContext } from './http_context';
@@ -52,9 +53,13 @@ export function App() {
   return (
     <EuiPage>
       <EuiPageBody style={{ maxWidth: 1200, margin: '0 auto' }}>
-        <EuiPageSection>
-          <EuiPageHeader pageTitle={'Screenshotting Demo'} />
-        </EuiPageSection>
+      <EuiPageHeader>
+          <EuiPageHeaderSection>
+            <EuiTitle size="l">
+              <h1>Screenshotting Demo</h1>
+            </EuiTitle>
+          </EuiPageHeaderSection>
+        </EuiPageHeader>
         <EuiPageContent>
           <EuiPageContentBody>
             <EuiText>
