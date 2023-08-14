@@ -5,33 +5,39 @@
  * 2.0.
  */
 
-import { uniqueId } from 'lodash';
+import { merge, uniqueId } from 'lodash';
 import { MessageRole, Conversation, FunctionDefinition } from '../../common/types';
 import { ChatTimelineItem } from '../components/chat/chat_timeline';
 import { getAssistantSetupMessage } from '../service/get_assistant_setup_message';
 
-type ChatItemBuildProps = Partial<ChatTimelineItem> & Pick<ChatTimelineItem, 'role'>;
+type ChatItemBuildProps = Omit<Partial<ChatTimelineItem>, 'actions' | 'display' | 'currentUser'> & {
+  actions?: Partial<ChatTimelineItem['actions']>;
+  display?: Partial<ChatTimelineItem['display']>;
+  currentUser?: Partial<ChatTimelineItem['currentUser']>;
+} & Pick<ChatTimelineItem, 'role'>;
 
 export function buildChatItem(params: ChatItemBuildProps): ChatTimelineItem {
-  return {
-    id: uniqueId(),
-    title: '',
-    actions: {
-      canCopy: true,
-      canEdit: false,
-      canGiveFeedback: false,
-      canRegenerate: params.role === MessageRole.User,
+  return merge(
+    {
+      id: uniqueId(),
+      title: '',
+      actions: {
+        canCopy: true,
+        canEdit: false,
+        canGiveFeedback: false,
+        canRegenerate: params.role === MessageRole.Assistant,
+      },
+      display: {
+        collapsed: false,
+        hide: false,
+      },
+      currentUser: {
+        username: 'elastic',
+      },
+      loading: false,
     },
-    display: {
-      collapsed: false,
-      hide: false,
-    },
-    currentUser: {
-      username: 'elastic',
-    },
-    loading: false,
-    ...params,
-  };
+    params
+  );
 }
 
 export function buildSystemChatItem(params?: Omit<ChatItemBuildProps, 'role'>) {

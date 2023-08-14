@@ -27,9 +27,11 @@ interface FunctionListOption {
 export function FunctionListPopover({
   selectedFunctionName,
   onSelectFunction,
+  disabled,
 }: {
   selectedFunctionName?: string;
   onSelectFunction: (func: string) => void;
+  disabled: boolean;
 }) {
   const { getFunctions } = useObservabilityAIAssistantChatService();
   const filterRef = useRef<HTMLInputElement | null>(null);
@@ -114,6 +116,7 @@ export function FunctionListPopover({
           iconSide="right"
           size="xs"
           onClick={handleClickFunctionList}
+          disabled={disabled}
         >
           {selectedFunctionName
             ? selectedFunctionName

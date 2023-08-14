@@ -30,7 +30,10 @@ function convertMessageToMarkdownCodeBlock(message: Message['message']) {
       args,
     };
   } else {
-    const content = message.content ? JSON.parse(message.content) : undefined;
+    const content =
+      message.role !== MessageRole.Assistant && message.content
+        ? JSON.parse(message.content)
+        : message.content;
     const data = message.data ? JSON.parse(message.data) : undefined;
     value = omitBy(
       {

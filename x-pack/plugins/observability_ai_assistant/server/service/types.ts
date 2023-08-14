@@ -7,11 +7,13 @@
 
 import { KibanaRequest } from '@kbn/core/server';
 import { ObservabilityAIAssistantClient } from './client';
+import type { KnowledgeBaseEntry } from '../../common/types';
 
 export interface IObservabilityAIAssistantService {
   getClient: (options: {
     request: KibanaRequest;
   }) => Promise<ObservabilityAIAssistantClient | undefined>;
+  addToKnowledgeBase(documents: KnowledgeBaseEntry[]): void;
 }
 
 export interface ObservabilityAIAssistantResourceNames {

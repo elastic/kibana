@@ -57,15 +57,22 @@ describe('useHostTable hook', () => {
             data: [normalizedLoad1m],
             layerType: 'data',
             options: {
+              buckets: {
+                type: 'date_histogram',
+              },
               breakdown: {
-                size: 10,
-                sourceField: 'host.name',
+                field: 'host.name',
+                type: 'top_values',
+                params: {
+                  size: 10,
+                },
               },
             },
           },
           {
             data: [
               {
+                type: 'static_value',
                 value: '1',
                 format: {
                   id: 'percent',

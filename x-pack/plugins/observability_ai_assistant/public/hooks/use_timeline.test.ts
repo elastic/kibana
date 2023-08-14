@@ -21,6 +21,18 @@ type HookProps = Parameters<typeof useTimeline>[0];
 
 const WAIT_OPTIONS = { timeout: 1500 };
 
+jest.mock('./use_kibana', () => ({
+  useKibana: () => ({
+    services: {
+      notifications: {
+        toasts: {
+          addError: jest.fn(),
+        },
+      },
+    },
+  }),
+}));
+
 describe('useTimeline', () => {
   let hookResult: RenderHookResult<HookProps, UseTimelineResult, Renderer<HookProps>>;
 
@@ -45,12 +57,16 @@ describe('useTimeline', () => {
       expect(hookResult.result.current.items.length).toEqual(1);
 
       expect(hookResult.result.current.items[0]).toEqual({
-        canCopy: false,
-        collapsed: false,
-        hide: false,
-        canEdit: false,
-        canRegenerate: false,
-        canGiveFeedback: false,
+        display: {
+          collapsed: false,
+          hide: false,
+        },
+        actions: {
+          canCopy: false,
+          canEdit: false,
+          canRegenerate: false,
+          canGiveFeedback: false,
+        },
         role: MessageRole.User,
         title: 'started a conversation',
         loading: false,
@@ -90,26 +106,34 @@ describe('useTimeline', () => {
       expect(hookResult.result.current.items.length).toEqual(3);
 
       expect(hookResult.result.current.items[1]).toEqual({
-        canCopy: true,
-        canEdit: true,
-        canRegenerate: false,
-        canGiveFeedback: false,
-        collapsed: false,
+        actions: {
+          canCopy: true,
+          canEdit: true,
+          canRegenerate: false,
+          canGiveFeedback: false,
+        },
+        display: {
+          collapsed: false,
+          hide: false,
+        },
         role: MessageRole.User,
         content: 'Hello',
-        hide: false,
         loading: false,
         id: expect.any(String),
         title: '',
       });
 
       expect(hookResult.result.current.items[2]).toEqual({
-        canCopy: true,
-        collapsed: false,
-        hide: false,
-        canEdit: false,
-        canRegenerate: true,
-        canGiveFeedback: true,
+        display: {
+          collapsed: false,
+          hide: false,
+        },
+        actions: {
+          canCopy: true,
+          canEdit: false,
+          canRegenerate: true,
+          canGiveFeedback: true,
+        },
         role: MessageRole.Assistant,
         content: 'Goodbye',
         loading: false,
@@ -186,8 +210,10 @@ describe('useTimeline', () => {
           role: MessageRole.Assistant,
           content: '',
           loading: true,
-          canRegenerate: false,
-          canGiveFeedback: false,
+          actions: {
+            canRegenerate: false,
+            canGiveFeedback: false,
+          },
         });
 
         expect(hookResult.result.current.items.length).toBe(3);
@@ -196,8 +222,10 @@ describe('useTimeline', () => {
           role: MessageRole.Assistant,
           content: '',
           loading: true,
-          canRegenerate: false,
-          canGiveFeedback: false,
+          actions: {
+            canRegenerate: false,
+            canGiveFeedback: false,
+          },
         });
 
         act(() => {
@@ -208,8 +236,10 @@ describe('useTimeline', () => {
           role: MessageRole.Assistant,
           content: 'Goodbye',
           loading: true,
-          canRegenerate: false,
-          canGiveFeedback: false,
+          actions: {
+            canRegenerate: false,
+            canGiveFeedback: false,
+          },
         });
 
         act(() => {
@@ -222,8 +252,10 @@ describe('useTimeline', () => {
           role: MessageRole.Assistant,
           content: 'Goodbye',
           loading: false,
-          canRegenerate: true,
-          canGiveFeedback: true,
+          actions: {
+            canRegenerate: true,
+            canGiveFeedback: true,
+          },
         });
       });
 
@@ -247,12 +279,16 @@ describe('useTimeline', () => {
           expect(hookResult.result.current.items.length).toBe(3);
 
           expect(hookResult.result.current.items[2]).toEqual({
-            canEdit: false,
-            canRegenerate: true,
-            canGiveFeedback: false,
-            canCopy: true,
-            collapsed: false,
-            hide: false,
+            actions: {
+              canEdit: false,
+              canRegenerate: true,
+              canGiveFeedback: false,
+              canCopy: true,
+            },
+            display: {
+              collapsed: false,
+              hide: false,
+            },
             content: 'My partial',
             id: expect.any(String),
             loading: false,
@@ -272,12 +308,16 @@ describe('useTimeline', () => {
 
           it('updates the last item in the array to be loading', () => {
             expect(hookResult.result.current.items[2]).toEqual({
-              canCopy: true,
-              hide: false,
-              collapsed: false,
-              canEdit: false,
-              canRegenerate: false,
-              canGiveFeedback: false,
+              display: {
+                hide: false,
+                collapsed: false,
+              },
+              actions: {
+                canCopy: true,
+                canEdit: false,
+                canRegenerate: false,
+                canGiveFeedback: false,
+              },
               content: '',
               id: expect.any(String),
               loading: true,
@@ -301,12 +341,16 @@ describe('useTimeline', () => {
               expect(hookResult.result.current.items.length).toBe(3);
 
               expect(hookResult.result.current.items[2]).toEqual({
-                canCopy: true,
-                collapsed: false,
-                hide: false,
-                canEdit: false,
-                canRegenerate: false,
-                canGiveFeedback: false,
+                actions: {
+                  canCopy: true,
+                  canEdit: false,
+                  canRegenerate: false,
+                  canGiveFeedback: false,
+                },
+                display: {
+                  collapsed: false,
+                  hide: false,
+                },
                 content: '',
                 id: expect.any(String),
                 loading: true,
@@ -324,12 +368,16 @@ describe('useTimeline', () => {
               expect(hookResult.result.current.items.length).toBe(3);
 
               expect(hookResult.result.current.items[2]).toEqual({
-                canCopy: true,
-                collapsed: false,
-                hide: false,
-                canEdit: false,
-                canRegenerate: true,
-                canGiveFeedback: true,
+                display: {
+                  collapsed: false,
+                  hide: false,
+                },
+                actions: {
+                  canCopy: true,
+                  canEdit: false,
+                  canRegenerate: true,
+                  canGiveFeedback: true,
+                },
                 content: 'Regenerated',
                 id: expect.any(String),
                 loading: false,

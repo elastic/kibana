@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import type { FormulaConfig } from '../../../types';
+import type { FormulaValueConfig } from '@kbn/lens-embeddable-utils';
 
-export const logRate: FormulaConfig = {
+export const logRate: FormulaValueConfig = {
+  type: 'formula',
   label: 'Log Rate',
   value: 'differences(cumulative_sum(count()))',
   format: {

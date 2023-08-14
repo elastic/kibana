@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiTitle, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiTitle, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { UseGenAIConnectorsResult } from '../../hooks/use_genai_connectors';
 import { AssistantAvatar } from '../assistant_avatar';
@@ -14,9 +14,11 @@ import { EMPTY_CONVERSATION_TITLE } from '../../i18n';
 
 export function ChatHeader({
   title,
+  loading,
   connectors,
 }: {
   title: string;
+  loading: boolean;
   connectors: UseGenAIConnectorsResult;
 }) {
   const hasTitle = !!title;
@@ -28,7 +30,7 @@ export function ChatHeader({
   return (
     <EuiFlexGroup alignItems="center" gutterSize="l">
       <EuiFlexItem grow={false}>
-        <AssistantAvatar size="l" />
+        {loading ? <EuiLoadingSpinner size="l" /> : <AssistantAvatar size="l" />}
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiFlexGroup direction="column" gutterSize="none" justifyContent="center">

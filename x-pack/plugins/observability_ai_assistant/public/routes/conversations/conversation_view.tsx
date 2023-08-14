@@ -214,7 +214,7 @@ export function ConversationView() {
               })}
             </EuiCallOut>
           ) : null}
-          {chatService.loading ? (
+          {!chatService.value ? (
             <EuiFlexGroup direction="column" alignItems="center" gutterSize="l">
               <EuiFlexItem grow={false}>
                 <EuiSpacer size="xl" />
@@ -225,6 +225,8 @@ export function ConversationView() {
           {conversation.value && chatService.value && !conversation.error ? (
             <ObservabilityAIAssistantChatServiceProvider value={chatService.value}>
               <ChatBody
+                loading={conversation.loading}
+                currentUser={currentUser}
                 connectors={connectors}
                 connectorsManagementHref={getConnectorsManagementHref(http)}
                 currentUser={currentUser}

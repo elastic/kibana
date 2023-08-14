@@ -15,7 +15,8 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
+import { last } from 'lodash';
 import type { Message } from '../../../common/types';
 import type { UseGenAIConnectorsResult } from '../../hooks/use_genai_connectors';
 import type { UseKnowledgeBaseResult } from '../../hooks/use_knowledge_base';
@@ -42,6 +43,7 @@ const loadingSpinnerContainerClassName = css`
 
 export function ChatBody({
   title,
+  loading,
   messages,
   connectors,
   knowledgeBase,
@@ -51,6 +53,7 @@ export function ChatBody({
   onChatComplete,
 }: {
   title: string;
+  loading: boolean;
   messages: Message[];
   connectors: UseGenAIConnectorsResult;
   knowledgeBase: UseKnowledgeBaseResult;
@@ -70,7 +73,54 @@ export function ChatBody({
     onChatComplete,
   });
 
+  const timelineContainerRef = useRef<HTMLDivElement | null>(null);
+
   let footer: React.ReactNode;
+
+  const isLoading = Boolean(
+    connectors.loading || knowledgeBase.status.loading || last(timeline.items)?.loading
+  );
+
+  useEffect(() => {
+    const parent = timelineContainerRef.current?.parentElement;
+    if (!parent) {
+      return;
+    }
+
+    let rafId: number | undefined;
+
+    const isAtBottom = () => parent.scrollTop >= parent.scrollHeight - parent.offsetHeight;
+
+    const stick = () => {
+      if (!isAtBottom()) {
+        parent.scrollTop = parent.scrollHeight - parent.offsetHeight;
+      }
+      rafId = requestAnimationFrame(stick);
+    };
+
+    const unstick = () => {
+      if (rafId) {
+        cancelAnimationFrame(rafId);
+        rafId = undefined;
+      }
+    };
+
+    const onScroll = (event: Event) => {
+      if (isAtBottom()) {
+        stick();
+      } else {
+        unstick();
+      }
+    };
+
+    parent.addEventListener('scroll', onScroll);
+
+    return () => {
+      unstick();
+      parent.removeEventListener('scroll', onScroll);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [timelineContainerRef.current]);
 
   if (connectors.loading || knowledgeBase.status.loading) {
     footer = (
@@ -89,15 +139,17 @@ export function ChatBody({
     footer = (
       <>
         <EuiFlexItem grow className={timelineClassName}>
-          <EuiPanel hasBorder={false} hasShadow={false} paddingSize="m">
-            <ChatTimeline
-              items={timeline.items}
-              onEdit={timeline.onEdit}
-              onFeedback={timeline.onFeedback}
-              onRegenerate={timeline.onRegenerate}
-              onStopGenerating={timeline.onStopGenerating}
-            />
-          </EuiPanel>
+          <div ref={timelineContainerRef}>
+            <EuiPanel hasBorder={false} hasShadow={false} paddingSize="m">
+              <ChatTimeline
+                items={timeline.items}
+                onEdit={timeline.onEdit}
+                onFeedback={timeline.onFeedback}
+                onRegenerate={timeline.onRegenerate}
+                onStopGenerating={timeline.onStopGenerating}
+              />
+            </EuiPanel>
+          </div>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiHorizontalRule margin="none" />
@@ -105,7 +157,7 @@ export function ChatBody({
         <EuiFlexItem grow={false}>
           <EuiPanel hasBorder={false} hasShadow={false} paddingSize="m">
             <ChatPromptEditor
-              loading={false}
+              loading={isLoading}
               disabled={!connectors.selectedConnector}
               onSubmit={timeline.onSubmit}
             />
@@ -119,7 +171,7 @@ export function ChatBody({
     <EuiFlexGroup direction="column" gutterSize="none" className={containerClassName}>
       <EuiFlexItem grow={false}>
         <EuiPanel hasBorder={false} hasShadow={false} paddingSize="m">
-          <ChatHeader title={title} connectors={connectors} />
+          <ChatHeader title={title} connectors={connectors} loading={loading} />
         </EuiPanel>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
