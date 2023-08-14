@@ -18,6 +18,7 @@ import type {
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { SecuritySolutionEssPluginSetup } from '@kbn/security-solution-ess/server';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
+import type { FleetStartContract } from '@kbn/fleet-plugin/server';
 
 import type { ProductTier } from '../common/product';
 
@@ -43,6 +44,7 @@ export interface SecuritySolutionServerlessPluginStartDeps {
   securitySolution: SecuritySolutionPluginStart;
   features: PluginStartContract;
   taskManager: TaskManagerStartContract;
+  fleet: FleetStartContract;
 }
 
 export interface UsageRecord {

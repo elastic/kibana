@@ -285,16 +285,18 @@ export async function getApmServiceSummary({
     }),
     apmAlertsClient.search({
       size: 100,
-      // @ts-expect-error types for apm alerts client needs to be reviewed
-      query: {
-        bool: {
-          filter: [
-            ...termQuery(ALERT_RULE_PRODUCER, 'apm'),
-            ...termQuery(ALERT_STATUS, ALERT_STATUS_ACTIVE),
-            ...rangeQuery(start, end),
-            ...termQuery(SERVICE_NAME, serviceName),
-            ...environmentQuery(environment),
-          ],
+      track_total_hits: false,
+      body: {
+        query: {
+          bool: {
+            filter: [
+              ...termQuery(ALERT_RULE_PRODUCER, 'apm'),
+              ...termQuery(ALERT_STATUS, ALERT_STATUS_ACTIVE),
+              ...rangeQuery(start, end),
+              ...termQuery(SERVICE_NAME, serviceName),
+              ...environmentQuery(environment),
+            ],
+          },
         },
       },
     }),
