@@ -13,6 +13,7 @@ import React from 'react';
 // eslint-disable-next-line @kbn/eslint/module_migration
 import { ThemeProvider } from 'styled-components';
 
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AssistantProvider } from '../../assistant_context';
 import { Conversation } from '../../assistant_context/types';
 
@@ -34,6 +35,13 @@ export const TestProvidersComponent: React.FC<Props> = ({
   const actionTypeRegistry = actionTypeRegistryMock.create();
   const mockGetComments = jest.fn(() => []);
   const mockHttp = httpServiceMock.createStartContract({ basePath: '/test' });
+  const mockQueryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: false,
+      },
+    },
+  });
 
   return (
     <I18nProvider>
@@ -56,7 +64,7 @@ export const TestProvidersComponent: React.FC<Props> = ({
           setDefaultAllowReplacement={jest.fn()}
           http={mockHttp}
         >
-          {children}
+          <QueryClientProvider client={mockQueryClient}>{children}</QueryClientProvider>
         </AssistantProvider>
       </ThemeProvider>
     </I18nProvider>

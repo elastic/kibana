@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSuperSelect, EuiText } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiSuperSelect,
+  EuiText,
+} from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 
 import { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
@@ -45,13 +52,19 @@ const inputContainerClassName = css`
     box-shadow: none;
     background: none;
     padding-left: 0;
-    min-width: 10px;
+  }
+
+  // Hide default down arrow so we can ensure it always shows right after text without a gap
+  .euiFormControlLayoutIcons {
+    display: none;
   }
 `;
 
 const inputDisplayClassName = css`
   overflow: hidden;
   text-overflow: ellipsis;
+  width: 400px;
+  max-width: 400px;
 `;
 
 /**
@@ -119,7 +132,7 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
             value: connector.id,
             inputDisplay: (
               <EuiText className={inputDisplayClassName} size="xs">
-                {connector.name}
+                {connector.name} <EuiIcon size={'s'} type={'arrowDown'} />
               </EuiText>
             ),
             dropdownDisplay: (
@@ -179,9 +192,9 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
 
     return (
       <EuiFlexGroup
+        alignItems="center"
         className={inputContainerClassName}
         direction="row"
-        alignItems="center"
         gutterSize="xs"
         responsive={false}
       >
