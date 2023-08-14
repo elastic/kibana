@@ -11,8 +11,6 @@ import { getPrivateLocationsForMonitor } from '../monitor_cruds/add_monitor';
 import { SyntheticsRestApiRouteFactory } from '../types';
 import { ConfigKey, MonitorFields } from '../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
-import { normalizeSecrets } from '../../synthetics_service/utils';
-import { getDecryptedMonitor } from '../../saved_objects/synthetics_monitor';
 import { validateMonitor } from '../monitor_cruds/monitor_validation';
 
 export const runOnceSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
@@ -44,25 +42,15 @@ export const runOnceSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () =
       return response.badRequest({ body: { message, attributes: { details, ...payload } } });
     }
 
-    let normalizedMonitor = decodedMonitor;
-    if (decodedMonitor[ConfigKey.CONFIG_ID]) {
-      const monitorWithSecrets = await getDecryptedMonitor(
-        server,
-        decodedMonitor[ConfigKey.CONFIG_ID],
-        spaceId
-      );
-      normalizedMonitor = normalizeSecrets(monitorWithSecrets).attributes;
-    }
-
     const privateLocations: PrivateLocationAttributes[] = await getPrivateLocationsForMonitor(
       savedObjectsClient,
-      normalizedMonitor
+      decodedMonitor
     );
 
     const [, errors] = await syntheticsMonitorClient.testNowConfigs(
       {
         monitor: {
-          ...normalizedMonitor,
+          ...decodedMonitor,
           [ConfigKey.CONFIG_ID]: monitorId,
           [ConfigKey.MONITOR_QUERY_ID]: monitorId,
         } as MonitorFields,
