@@ -5,22 +5,34 @@
  * 2.0.
  */
 import { EuiFlexGroup, EuiFlexItem, EuiHeaderLink, EuiHeaderLinks, EuiIcon } from '@elastic/eui';
-import React from 'react';
 import { i18n } from '@kbn/i18n';
+import qs from 'query-string';
+import React from 'react';
+import { useHistory } from 'react-router-dom';
+import url from 'url';
 import { useProfilingRouter } from '../hooks/use_profiling_router';
 import { NoDataTabs } from '../views/no_data_view';
-import { useProfilingDependencies } from './contexts/profiling_dependencies/use_profiling_dependencies';
 
 export function ProfilingHeaderActionMenu() {
   const router = useProfilingRouter();
-  const {
-    start: { core },
-  } = useProfilingDependencies();
+  const history = useHistory();
+
   return (
     <EuiHeaderLinks gutterSize="xs">
       <EuiHeaderLink
-        href={core.http.basePath.prepend('/app/profiling/storage-explorer')}
         color="text"
+        onClick={() => {
+          const query = qs.parse(window.location.search);
+          const storageExplorerURL = url.format({
+            pathname: '/storage-explorer',
+            query: {
+              kuery: query.kuery,
+              rangeFrom: query.rangeFrom,
+              rangeTo: query.rangeTo,
+            },
+          });
+          history.push(storageExplorerURL);
+        }}
       >
         <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
           <EuiFlexItem grow={false}>

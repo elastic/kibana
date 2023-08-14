@@ -24,7 +24,7 @@ interface Props {
 const hintMap: Partial<Record<StorageGroupedIndexNames, string>> = {
   events: i18n.translate('xpack.profiling.storageExplorer.dataBreakdown.events.hint', {
     defaultMessage:
-      'Profiling samples linearly correlate with the probabilistic profiling value. The lower the probabilistic profiling value, the fewer samples are collected.',
+      'Universal Profiling samples linearly correlate with the probabilistic profiling value. The lower the probabilistic profiling value, the fewer samples are collected.',
   }),
 };
 

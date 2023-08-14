@@ -69,7 +69,7 @@ export function HostsTable({ data = [], hasDistinctProbabilisticValues }: Props)
                         'xpack.profiling.storageExplorer.hostsTable.distinctProbabilisticValues',
                         {
                           defaultMessage:
-                            "We've identified distint probabilistic profiling values for the same project",
+                            "We've identified distinct probabilistic profiling values for the same project",
                         }
                       )}
                     >
@@ -180,7 +180,7 @@ export function HostsTable({ data = [], hasDistinctProbabilisticValues }: Props)
               defaultMessage: 'Total data',
             })}
             hint={i18n.translate('xpack.profiling.storageExplorer.hostsTable.totalData.hint', {
-              defaultMessage: 'The combined value of metrics and profiling samples.',
+              defaultMessage: 'The combined value of Universal Profiling metrics and samples.',
             })}
             labelSize="xs"
             labelStyle={{ fontWeight: 700 }}
