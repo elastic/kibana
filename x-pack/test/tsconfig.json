@@ -138,6 +138,7 @@
     "@kbn/ml-category-validator",
     "@kbn/observability-ai-assistant-plugin",
     "@kbn/stack-connectors-plugin",
-    "@kbn/aiops-utils"
+    "@kbn/aiops-utils",
+    "@kbn/securitysolution-runtime-services"
   ]
 }

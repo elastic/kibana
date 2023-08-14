@@ -169,6 +169,5 @@
     "@kbn/alerts-ui-shared",
     "@kbn/core-logging-server-mocks",
     "@kbn/core-lifecycle-browser",
-    "@kbn/cypress-config"
   ]
 }
