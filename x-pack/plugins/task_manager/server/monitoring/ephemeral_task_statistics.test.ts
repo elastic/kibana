@@ -26,7 +26,7 @@ import {
   SummarizedEphemeralTaskStat,
   EphemeralTaskStat,
 } from './ephemeral_task_statistics';
-import { AggregatedStat } from './runtime_statistics_aggregator';
+import { AggregatedStat } from '../lib/runtime_statistics_aggregator';
 import { ephemeralTaskLifecycleMock } from '../ephemeral_task_lifecycle.mock';
 import { times, takeRight, take as takeLeft } from 'lodash';
 

@@ -24,34 +24,30 @@ import { getNewRule } from '../../../../objects/rule';
 import { ALERTS_URL } from '../../../../urls/navigation';
 import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
 
-describe(
-  'Alert details expandable flyout left panel analyzer graph',
-  { env: { ftrConfig: { enableExperimental: ['securityFlyoutEnabled'] } } },
-  () => {
-    beforeEach(() => {
-      cleanKibana();
-      login();
-      createRule(getNewRule());
-      visit(ALERTS_URL);
-      waitForAlertsToPopulate();
-      expandFirstAlertExpandableFlyout();
-      expandDocumentDetailsExpandableFlyoutLeftSection();
-      openGraphAnalyzerTab();
-    });
+describe('Alert details expandable flyout left panel analyzer graph', () => {
+  beforeEach(() => {
+    cleanKibana();
+    login();
+    createRule(getNewRule());
+    visit(ALERTS_URL);
+    waitForAlertsToPopulate();
+    expandFirstAlertExpandableFlyout();
+    expandDocumentDetailsExpandableFlyoutLeftSection();
+    openGraphAnalyzerTab();
+  });
 
-    it('should display analyzer graph and node list under visualize', () => {
-      cy.get(DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB)
-        .should('be.visible')
-        .and('have.text', 'Visualize');
+  it('should display analyzer graph and node list under visualize', () => {
+    cy.get(DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB)
+      .should('be.visible')
+      .and('have.text', 'Visualize');
 
-      cy.get(DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB_BUTTON_GROUP).should('be.visible');
+    cy.get(DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB_BUTTON_GROUP).should('be.visible');
 
-      cy.get(DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB_GRAPH_ANALYZER_BUTTON)
-        .should('be.visible')
-        .and('have.text', 'Analyzer Graph');
+    cy.get(DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB_GRAPH_ANALYZER_BUTTON)
+      .should('be.visible')
+      .and('have.text', 'Analyzer Graph');
 
-      cy.get(DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB_GRAPH_ANALYZER_CONTENT).should('be.visible');
-      cy.get(ANALYZER_NODE).first().should('be.visible');
-    });
-  }
-);
+    cy.get(DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB_GRAPH_ANALYZER_CONTENT).should('be.visible');
+    cy.get(ANALYZER_NODE).first().should('be.visible');
+  });
+});

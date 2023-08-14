@@ -12,12 +12,12 @@ import { coreMock } from '@kbn/core/public/mocks';
 import type { ILicense } from '@kbn/licensing-plugin/public';
 import { nextTick } from '@kbn/test-jest-helpers';
 
+import { SecurityNavControlService } from './nav_control_service';
 import { SecurityLicenseService } from '../../common/licensing';
 import { UserProfileAPIClient } from '../account_management';
 import { authenticationMock } from '../authentication/index.mock';
 import * as UseCurrentUserImports from '../components/use_current_user';
 import { UserAPIClient } from '../management';
-import { SecurityNavControlService } from './nav_control_service';
 
 const useUserProfileMock = jest.spyOn(UseCurrentUserImports, 'useUserProfile');
 const useCurrentUserMock = jest.spyOn(UseCurrentUserImports, 'useCurrentUser');
@@ -55,7 +55,7 @@ describe('SecurityNavControlService', () => {
     const license$ = new BehaviorSubject<ILicense>(validLicense);
     const coreStart = coreMock.createStart();
 
-    const navControlService = new SecurityNavControlService();
+    const navControlService = new SecurityNavControlService('traditional');
     navControlService.setup({
       securityLicense: new SecurityLicenseService().setup({ license$ }).license,
       logoutUrl: '/some/logout/url',
@@ -128,7 +128,7 @@ describe('SecurityNavControlService', () => {
     const license$ = new BehaviorSubject<ILicense>({} as ILicense);
     const coreStart = coreMock.createStart();
 
-    const navControlService = new SecurityNavControlService();
+    const navControlService = new SecurityNavControlService('traditional');
     navControlService.setup({
       securityLicense: new SecurityLicenseService().setup({ license$ }).license,
       logoutUrl: '/some/logout/url',
@@ -148,7 +148,7 @@ describe('SecurityNavControlService', () => {
     const license$ = new BehaviorSubject<ILicense>(validLicense);
     const coreStart = coreMock.createStart();
 
-    const navControlService = new SecurityNavControlService();
+    const navControlService = new SecurityNavControlService('traditional');
     navControlService.setup({
       securityLicense: new SecurityLicenseService().setup({ license$ }).license,
       logoutUrl: '/some/logout/url',
@@ -165,7 +165,7 @@ describe('SecurityNavControlService', () => {
     const license$ = new BehaviorSubject<ILicense>(validLicense);
     const coreStart = coreMock.createStart();
 
-    const navControlService = new SecurityNavControlService();
+    const navControlService = new SecurityNavControlService('traditional');
     navControlService.setup({
       securityLicense: new SecurityLicenseService().setup({ license$ }).license,
       logoutUrl: '/some/logout/url',
@@ -187,7 +187,7 @@ describe('SecurityNavControlService', () => {
     const license$ = new BehaviorSubject<ILicense>(validLicense);
     const coreStart = coreMock.createStart();
 
-    const navControlService = new SecurityNavControlService();
+    const navControlService = new SecurityNavControlService('traditional');
     navControlService.setup({
       securityLicense: new SecurityLicenseService().setup({ license$ }).license,
       logoutUrl: '/some/logout/url',
@@ -210,7 +210,7 @@ describe('SecurityNavControlService', () => {
       const coreSetup = coreMock.createSetup();
       const license$ = new BehaviorSubject<ILicense>({} as ILicense);
 
-      navControlService = new SecurityNavControlService();
+      navControlService = new SecurityNavControlService('traditional');
       navControlService.setup({
         securityLicense: new SecurityLicenseService().setup({ license$ }).license,
         logoutUrl: '/some/logout/url',
