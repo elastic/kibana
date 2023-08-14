@@ -39,8 +39,8 @@ import {
   usePager,
 } from '@kbn/discover-utils';
 import type { DocViewRenderProps, FieldRecordLegacy } from '@kbn/unified-doc-viewer/types';
+import { FieldName } from '@kbn/unified-doc-viewer';
 import { useUnifiedDocViewerServices } from '../../hooks';
-import { FieldName } from '../field_name';
 import { TableFieldValue } from './table_cell_value';
 import { TableActions } from './table_cell_actions';
 
