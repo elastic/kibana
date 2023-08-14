@@ -495,6 +495,7 @@
     "@kbn/logstash-plugin": "link:x-pack/plugins/logstash",
     "@kbn/management-cards-navigation": "link:packages/kbn-management/cards_navigation",
     "@kbn/management-plugin": "link:src/plugins/management",
+    "@kbn/management-settings-section-registry": "link:packages/kbn-management/settings/section_registry",
     "@kbn/management-test-plugin": "link:test/plugin_functional/plugins/management_test_plugin",
     "@kbn/mapbox-gl": "link:packages/kbn-mapbox-gl",
     "@kbn/maps-custom-raster-source-plugin": "link:x-pack/examples/third_party_maps_source_example",
