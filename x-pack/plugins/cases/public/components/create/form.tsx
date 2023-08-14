@@ -86,9 +86,8 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
   ({ connectors, isLoadingConnectors, withSteps, owner, draftStorageKey }) => {
     const { isSubmitting } = useFormContext();
     const { isSyncAlertsEnabled, caseAssignmentAuthorized } = useCasesFeatures();
-
     const availableOwners = useAvailableCasesOwners();
-    const canShowCaseSolutionSelection = !owner.length && availableOwners.length;
+    const canShowCaseSolutionSelection = !owner.length && availableOwners.length > 1;
 
     const firstStep = useMemo(
       () => ({
