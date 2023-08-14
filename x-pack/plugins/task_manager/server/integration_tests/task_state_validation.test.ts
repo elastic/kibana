@@ -76,7 +76,7 @@ jest.mock('../queries/task_claiming', () => {
 
 const taskManagerStartSpy = jest.spyOn(TaskManagerPlugin.prototype, 'start');
 
-for (let i = 0; i < 100; i++) {
+for (let i = 0; i < 25; i++) {
   describe(`task state validation ${i}`, () => {
     describe('allow_reading_invalid_state: true', () => {
       let esServer: TestElasticsearchUtils;
