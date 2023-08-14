@@ -17,6 +17,7 @@ export const PLI_APP_FEATURES: PliAppFeatures = {
     essentials: [AppFeatureKey.endpointHostManagement, AppFeatureKey.endpointPolicyManagement],
     complete: [
       AppFeatureKey.advancedInsights,
+      AppFeatureKey.assistant,
       AppFeatureKey.investigationGuide,
       AppFeatureKey.threatIntelligence,
       AppFeatureKey.casesConnectors,
@@ -29,7 +30,10 @@ export const PLI_APP_FEATURES: PliAppFeatures = {
       AppFeatureKey.endpointPolicyProtections,
       AppFeatureKey.endpointArtifactManagement,
     ],
-    complete: [AppFeatureKey.endpointResponseActions],
+    complete: [
+      AppFeatureKey.endpointResponseActions,
+      AppFeatureKey.osqueryAutomatedResponseActions,
+    ],
   },
   cloud: {
     essentials: [],

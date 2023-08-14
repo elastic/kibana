@@ -10,7 +10,6 @@ import type { Plugin, CoreSetup, CoreStart } from '@kbn/core/public';
 import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
 import type { ExpressionsSetup } from '@kbn/expressions-plugin/public';
-import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import {
   ContentManagementPublicSetup,
   ContentManagementPublicStart,
@@ -31,7 +30,6 @@ import { getFetchEventAnnotations } from './fetch_event_annotations';
 import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
 
 export interface EventAnnotationStartDependencies {
-  savedObjectsManagement: SavedObjectsManagementPluginStart;
   data: DataPublicPluginStart;
   savedObjectsTagging: SavedObjectTaggingPluginStart;
   presentationUtil: PresentationUtilPluginStart;
@@ -81,10 +79,6 @@ export class EventAnnotationPlugin
     core: CoreStart,
     startDependencies: EventAnnotationStartDependencies
   ): EventAnnotationService {
-    return new EventAnnotationService(
-      core,
-      startDependencies.contentManagement,
-      startDependencies.savedObjectsManagement
-    );
+    return new EventAnnotationService(core, startDependencies.contentManagement);
   }
 }

@@ -14,6 +14,7 @@
   "kbn_references": [
     "@kbn/core",
     "@kbn/data-plugin",
+    "@kbn/discover-plugin",
     "@kbn/kibana-react-plugin",
     "@kbn/observability-plugin",
     "@kbn/i18n",
@@ -29,6 +30,9 @@
     "@kbn/core-http-server",
     "@kbn/security-plugin",
     "@kbn/std",
+    "@kbn/data-views-plugin",
+    "@kbn/es-query",
+    "@kbn/use-tracked-promise",
   ],
   "exclude": [
     "target/**/*",
