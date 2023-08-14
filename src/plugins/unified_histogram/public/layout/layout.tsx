@@ -195,12 +195,12 @@ export const UnifiedHistogramLayout = ({
 }: UnifiedHistogramLayoutProps) => {
   const { allSuggestions, currentSuggestion, suggestionUnsupported } = useLensSuggestions({
     dataView,
-    uiSettings: services.uiSettings,
     query,
     originalSuggestion,
     isPlainRecord,
     columns,
     timeRange,
+    data: services.data,
     lensSuggestionsApi,
     onSuggestionChange,
   });
