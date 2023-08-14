@@ -1,0 +1,29 @@
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: kibana
+  description: Kibana is a user interface that lets you visualize your Elasticsearch data and navigate the Elastic Stack.
+
+  annotations:
+    backstage.io/source-location: url:https://github.com/elastic/kibana/tree/main
+    github.com/project-slug: elastic/kibana
+    github.com/team-slug: elastic/kibana-core
+    buildkite.com/project-slug: elastic/kibana
+
+  tags:
+    - typescript
+    - javascript
+    - dashboards
+    - metrics
+    - visualizations
+    - observability
+
+  links:
+    - title: Documentation
+      url: https://www.elastic.co/guide/en/kibana/current/index.html
+
+spec:
+  type: service
+  owner: group:kibana-core
+  lifecycle: production
