@@ -9,6 +9,7 @@ import {
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHorizontalRule,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
@@ -36,6 +37,7 @@ import {
 } from '../../shared/step_panel';
 import { ApiKeyBanner } from '../custom_logs/wizard/api_key_banner';
 import { getDiscoverNavigationParams } from '../utils';
+import { TroubleshootingLink } from '../../shared/troubleshooting_link';
 
 export function InstallElasticAgent() {
   const {
@@ -286,6 +288,8 @@ export function InstallElasticAgent() {
           appendedSteps={[getCheckLogsStep()]}
         />
       </StepPanelContent>
+      <EuiHorizontalRule />
+      <TroubleshootingLink />
     </StepPanel>
   );
 }

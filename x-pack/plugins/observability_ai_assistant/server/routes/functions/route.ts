@@ -109,10 +109,36 @@ const functionSummariseRoute = createObservabilityAIAssistantServerRoute({
   },
 });
 
+const getKnowledgeBaseStatus = createObservabilityAIAssistantServerRoute({
+  endpoint: 'GET /internal/observability_ai_assistant/functions/kb_status',
+  options: {
+    tags: ['access:ai_assistant'],
+  },
+  handler: async (
+    resources
+  ): Promise<{
+    ready: boolean;
+    error?: any;
+    deployment_state?: string;
+    allocation_state?: string;
+  }> => {
+    const client = await resources.service.getClient({ request: resources.request });
+
+    if (!client) {
+      throw notImplemented();
+    }
+
+    return await client.getKnowledgeBaseStatus();
+  },
+});
+
 const setupKnowledgeBaseRoute = createObservabilityAIAssistantServerRoute({
   endpoint: 'POST /internal/observability_ai_assistant/functions/setup_kb',
   options: {
     tags: ['access:ai_assistant'],
+    timeout: {
+      idleSocket: 20 * 60 * 1000, // 20 minutes
+    },
   },
   handler: async (resources): Promise<void> => {
     const client = await resources.service.getClient({ request: resources.request });
@@ -130,4 +156,5 @@ export const functionRoutes = {
   ...functionRecallRoute,
   ...functionSummariseRoute,
   ...setupKnowledgeBaseRoute,
+  ...getKnowledgeBaseStatus,
 };
