@@ -8,8 +8,7 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { EuiFlyoutFooter, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { find } from 'lodash/fp';
-import type { ConnectedProps } from 'react-redux';
-import { connect } from 'react-redux';
+import { useSelector } from 'react-redux';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { isActiveTimeline } from '../../../../../helpers';
 import { TakeActionDropdown } from '../../../../../detections/components/take_action_dropdown';
@@ -23,6 +22,8 @@ import type { Status } from '../../../../../../common/api/detection_engine';
 import type { inputsModel, State } from '../../../../../common/store';
 import { inputsSelectors } from '../../../../../common/store';
 import { OsqueryFlyout } from '../../../../../detections/components/osquery/osquery_flyout';
+import { SentinelFlyout } from './sentinel_flyout';
+
 interface FlyoutFooterProps {
   detailsData: TimelineEventsDetailsItem[] | null;
   detailsEcsData: Ecs | null;
@@ -43,6 +44,9 @@ interface AddExceptionModalWrapperData {
   ruleName: string;
 }
 
+const getGlobalQueries = inputsSelectors.globalQuery();
+const getTimelineQuery = inputsSelectors.timelineQueryByIdSelector();
+
 // eslint-disable-next-line react/display-name
 export const FlyoutFooterComponent = React.memo(
   ({
@@ -54,10 +58,13 @@ export const FlyoutFooterComponent = React.memo(
     loadingEventDetails,
     onAddIsolationStatusClick,
     scopeId,
-    globalQuery,
-    timelineQuery,
     refetchFlyoutData,
-  }: FlyoutFooterProps & PropsFromRedux) => {
+  }: FlyoutFooterProps) => {
+    const globalQuery = useSelector(getGlobalQueries);
+    const timelineQuery = useSelector<State, ReturnType<typeof getTimelineQuery>>((state) =>
+      getTimelineQuery(state, scopeId)
+    );
+
     const alertId = detailsEcsData?.kibana?.alert ? detailsEcsData?._id : null;
     const ruleIndexRaw = useMemo(
       () =>
@@ -132,6 +139,12 @@ export const FlyoutFooterComponent = React.memo(
       null | string
     >(null);
 
+    const [isSentinelFlyoutOpen, setSentinelFlyoutOpen] = useState<boolean>(false);
+
+    const handleSentinelClick = useCallback(() => setSentinelFlyoutOpen(true), []);
+
+    const handleCloseSentinelFlyout = useCallback(() => setSentinelFlyoutOpen(false), []);
+
     const closeOsqueryFlyout = useCallback(() => {
       setOsqueryFlyoutOpenWithAgentId(null);
     }, [setOsqueryFlyoutOpenWithAgentId]);
@@ -159,6 +172,7 @@ export const FlyoutFooterComponent = React.memo(
                   refetch={refetchAll}
                   scopeId={scopeId}
                   onOsqueryClick={setOsqueryFlyoutOpenWithAgentId}
+                  onSentinelClick={handleSentinelClick}
                 />
               )}
             </EuiFlexItem>
@@ -191,25 +205,12 @@ export const FlyoutFooterComponent = React.memo(
             ecsData={detailsEcsData}
           />
         )}
+        {isSentinelFlyoutOpen && detailsEcsData != null && (
+          <SentinelFlyout ecsData={detailsEcsData} onClose={handleCloseSentinelFlyout} />
+        )}
       </>
     );
   }
 );
 
-const makeMapStateToProps = () => {
-  const getGlobalQueries = inputsSelectors.globalQuery();
-  const getTimelineQuery = inputsSelectors.timelineQueryByIdSelector();
-  const mapStateToProps = (state: State, { scopeId }: FlyoutFooterProps) => {
-    return {
-      globalQuery: getGlobalQueries(state),
-      timelineQuery: getTimelineQuery(state, scopeId),
-    };
-  };
-  return mapStateToProps;
-};
-
-const connector = connect(makeMapStateToProps);
-
-type PropsFromRedux = ConnectedProps<typeof connector>;
-
-export const FlyoutFooter = connector(React.memo(FlyoutFooterComponent));
+export const FlyoutFooter = React.memo(FlyoutFooterComponent);

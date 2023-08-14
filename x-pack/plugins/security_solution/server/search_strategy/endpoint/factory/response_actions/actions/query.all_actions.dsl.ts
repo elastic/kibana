@@ -11,7 +11,10 @@ import type { ISearchRequestParams } from '@kbn/data-plugin/common';
 import { OSQUERY_ACTIONS_INDEX } from '@kbn/osquery-plugin/common/constants';
 import type { EndpointAuthz } from '../../../../../../common/endpoint/types/authz';
 import type { ActionRequestOptions } from '../../../../../../common/search_strategy/endpoint/response_actions';
-import { ENDPOINT_ACTIONS_INDEX } from '../../../../../../common/endpoint/constants';
+import {
+  ENDPOINT_ACTIONS_INDEX,
+  KIBANA_EVENTS_LOGS_INDEX,
+} from '../../../../../../common/endpoint/constants';
 
 const EndpointFieldsLimited = [
   'EndpointActions.action_id',
@@ -30,19 +33,24 @@ export const buildResponseActionsQuery = (
 
   const dslQuery = {
     allow_no_indices: true,
-    index: [ENDPOINT_ACTIONS_INDEX, OSQUERY_ACTIONS_INDEX],
+    index: [ENDPOINT_ACTIONS_INDEX, OSQUERY_ACTIONS_INDEX, KIBANA_EVENTS_LOGS_INDEX],
     ignore_unavailable: true,
     body: {
       fields,
       _source: false,
       query: {
         bool: {
-          minimum_should_match: 2,
+          minimum_should_match: 1,
           should: [
-            { term: { type: 'INPUT_ACTION' } },
+            // { term: { type: 'INPUT_ACTION' } },
             { terms: { alert_ids: alertIds } },
             {
               terms: { 'data.alert_id': alertIds },
+            },
+            {
+              terms: {
+                'kibana.action.execution.sentinelone.params.subActionParams.alert_ids': alertIds,
+              },
             },
           ] as estypes.QueryDslQueryContainer[],
         },
@@ -54,6 +62,11 @@ export const buildResponseActionsQuery = (
           },
         },
       ],
+      runtime_mappings: {
+        'kibana.action.execution.sentinelone.params.subActionParams.alert_ids': {
+          type: 'keyword' as const,
+        },
+      },
     },
   };
 

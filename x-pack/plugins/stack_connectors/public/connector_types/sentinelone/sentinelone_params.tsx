@@ -68,7 +68,7 @@ const SentinelOneParamsFields: React.FunctionComponent<
   } = useSubAction<SentinelOneGetAgentsParams, SentinelOneGetAgentsResponse>({
     connectorId,
     subAction: SUB_ACTION.GET_AGENTS,
-    disabled: isTest,
+    disabled: !isTest,
   });
 
   const agentOptions = useMemo(

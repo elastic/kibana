@@ -44,6 +44,7 @@ export function getConnectorType(): ConnectorTypeModel<
     validateParams: async (
       actionParams: SentinelOneActionParams
     ): Promise<GenericValidationResult<ValidationErrors>> => {
+      console.error('xxx', actionParams);
       const translations = await import('./translations');
       const errors: ValidationErrors = {
         subAction: [],
@@ -53,7 +54,7 @@ export function getConnectorType(): ConnectorTypeModel<
       // The internal "subAction" param should always be valid, ensure it is only if "subActionParams" are valid
       if (!subAction) {
         errors.subAction.push(translations.ACTION_REQUIRED);
-      } else if (!(subAction in SUB_ACTION)) {
+      } else if (!Object.values(SUB_ACTION).includes(subAction)) {
         errors.subAction.push(translations.INVALID_ACTION);
       }
       return { errors };

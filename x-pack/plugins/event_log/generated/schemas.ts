@@ -208,6 +208,7 @@ export const EventSchema = schema.maybe(
               schema.object({
                 source: ecsString(),
                 uuid: ecsString(),
+                sentinelone: schema.maybe(schema.any()),
                 gen_ai: schema.maybe(
                   schema.object({
                     usage: schema.maybe(

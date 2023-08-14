@@ -42,6 +42,7 @@ export const useGetAutomatedActionList = (
   const { data } = useKibana().services;
 
   const { alertIds } = query;
+
   return useQuery({
     queryKey: [ACTIONS_QUERY_KEY, { alertId: alertIds[0] }],
     queryFn: async () => {
@@ -69,7 +70,10 @@ export const useGetAutomatedActionList = (
             fields: object;
           }
         ) => {
-          return expandDottedObject(edge.fields, true);
+          return {
+            ...expandDottedObject(edge.fields, true),
+            source: edge._source,
+          };
         }
       );
 

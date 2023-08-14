@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { map } from 'lodash';
 import { set } from '@kbn/safer-lodash-set/fp';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { ExecutorParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
@@ -19,6 +20,8 @@ export const renderParameterTemplates = (
   variables: Record<string, unknown>
 ) => {
   const context = variables?.context as Context;
+  const alertIds = map(context.alerts, '_id');
+
   if (params?.subAction === SUB_ACTION.KILL_PROCESS) {
     return {
       subAction: SUB_ACTION.KILL_PROCESS,
@@ -26,6 +29,7 @@ export const renderParameterTemplates = (
         processName: context.alerts[0].process?.name,
         computerName: context.alerts[0].host?.name,
       },
+      alertIds,
     };
   }
 
@@ -34,6 +38,7 @@ export const renderParameterTemplates = (
       subAction: SUB_ACTION.ISOLATE_AGENT,
       subActionParams: {
         computerName: context.alerts[0].host?.name,
+        alertIds,
       },
     };
   }
@@ -43,6 +48,7 @@ export const renderParameterTemplates = (
       subAction: SUB_ACTION.RELEASE_AGENT,
       subActionParams: {
         computerName: context.alerts[0].host?.name,
+        alertIds,
       },
     };
   }
@@ -53,6 +59,7 @@ export const renderParameterTemplates = (
       subActionParams: {
         computerName: context.alerts[0].host?.name,
         ...params.subActionParams,
+        alertIds,
       },
     };
   }

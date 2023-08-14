@@ -64,7 +64,7 @@ export const FullWidthFlexGroupTable = styled(EuiFlexGroup)<{ $visible: boolean 
 `;
 
 const EuiDataGridContainer = styled.div<GridContainerProps>`
-  ul.euiPagination__list {
+    ul.euiPagination__list {
     li.euiPagination__item:last-child {
       ${({ hideLastPage }) => {
         return `${hideLastPage ? 'display:none' : ''}`;

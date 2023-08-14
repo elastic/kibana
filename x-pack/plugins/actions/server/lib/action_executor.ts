@@ -7,6 +7,7 @@
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { Logger, KibanaRequest } from '@kbn/core/server';
+import { set } from '@kbn/safer-lodash-set';
 import { cloneDeep } from 'lodash';
 import { withSpan } from '@kbn/apm-utils';
 import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
@@ -312,6 +313,21 @@ export class ActionExecutor {
           };
         }
         // end gen_ai extension
+
+        if (actionTypeId === '.sentinelone') {
+          console.error(params);
+        }
+
+        // start sentinelone extension
+        if (
+          result.status === 'ok' &&
+          actionTypeId === '.sentinelone' &&
+          ['killProcess', 'executeScript', 'isolateAgent'].includes(params.subAction as string)
+        ) {
+          set(event, 'kibana.action.execution.sentinelone.data', result.data);
+          set(event, 'kibana.action.execution.sentinelone.params', params);
+        }
+        // end sentinelone extension
 
         const currentUser = security?.authc.getCurrentUser(request);
 

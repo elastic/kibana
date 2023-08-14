@@ -28,6 +28,7 @@ import { getTorqConnectorType } from './torq';
 import { getWebhookConnectorType } from './webhook';
 import { getXmattersConnectorType } from './xmatters';
 import { getD3SecurityConnectorType } from './d3security';
+import { getSentinelOneConnectorType } from './sentinelone';
 
 export interface RegistrationServices {
   validateEmailAddresses: (
@@ -64,4 +65,5 @@ export function registerConnectorTypes({
   connectorTypeRegistry.register(getTorqConnectorType());
   connectorTypeRegistry.register(getTinesConnectorType());
   connectorTypeRegistry.register(getD3SecurityConnectorType());
+  connectorTypeRegistry.register(getSentinelOneConnectorType());
 }
