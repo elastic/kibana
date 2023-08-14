@@ -149,7 +149,6 @@ export const useLensSuggestions = ({
         currentSuggestion = sug[0];
       }
     }
-    // const histogramQuery = `${query[language]} | eval uniqueName = 1 | stats countAll = count(uniqueName) by ${dataView.timeFieldName}`;
   }
 
   useEffect(() => {
