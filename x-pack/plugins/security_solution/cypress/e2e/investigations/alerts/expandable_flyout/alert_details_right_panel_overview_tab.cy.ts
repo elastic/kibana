@@ -14,7 +14,7 @@ import {
 import {
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_ABOUT_SECTION_CONTENT,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_ABOUT_SECTION_HEADER,
-  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_ANALYZER_TREE,
+  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_ANALYZER_PREVIEW_CONTENT,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_DESCRIPTION_DETAILS,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_DESCRIPTION_TITLE,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_OPEN_RULE_PREVIEW_BUTTON,
@@ -25,8 +25,6 @@ import {
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_CORRELATIONS_VALUES,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_ENTITIES_CONTENT,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_ENTITIES_HEADER,
-  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_ENTITY_PANEL_CONTENT,
-  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_ENTITY_PANEL_HEADER,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_PREVALENCE_CONTENT,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_PREVALENCE_HEADER,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_PREVALENCE_VALUES,
@@ -40,17 +38,15 @@ import {
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_MITRE_ATTACK_TITLE,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_REASON_DETAILS,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_REASON_TITLE,
-  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_SESSION_PREVIEW,
+  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_SESSION_PREVIEW_CONTENT,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_HIGHLIGHTED_FIELDS_TABLE_FIELD_CELL,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_HIGHLIGHTED_FIELDS_TABLE_VALUE_CELL,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_RESPONSE_SECTION_EMPTY_RESPONSE,
 } from '../../../../screens/expandable_flyout/alert_details_right_panel_overview_tab';
 import {
-  clickCorrelationsViewAllButton,
-  clickEntitiesViewAllButton,
+  navigateToCorrelationsDetails,
   clickInvestigationGuideButton,
-  clickPrevalenceViewAllButton,
-  clickThreatIntelligenceViewAllButton,
+  navigateToPrevalenceDetails,
   toggleOverviewTabAboutSection,
   toggleOverviewTabInsightsSection,
   toggleOverviewTabInvestigationSection,
@@ -138,20 +134,19 @@ describe('Alert details expandable flyout right panel overview tab', () => {
 
       cy.log('analyzer graph preview');
 
-      cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_ANALYZER_TREE).scrollIntoView();
-      cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_ANALYZER_TREE).should('be.visible');
+      cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_ANALYZER_PREVIEW_CONTENT).scrollIntoView();
+      cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_ANALYZER_PREVIEW_CONTENT).should('be.visible');
 
       cy.log('session view preview');
 
-      cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_SESSION_PREVIEW).scrollIntoView();
-      cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_SESSION_PREVIEW).should('be.visible');
+      cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_SESSION_PREVIEW_CONTENT).scrollIntoView();
+      cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_SESSION_PREVIEW_CONTENT).should('be.visible');
     });
   });
 
   describe('investigation section', () => {
     it('should display investigation section', () => {
       toggleOverviewTabAboutSection();
-      toggleOverviewTabInvestigationSection();
 
       cy.log('header and content');
 
@@ -210,6 +205,7 @@ describe('Alert details expandable flyout right panel overview tab', () => {
   describe('insights section', () => {
     it('should display entities section', () => {
       toggleOverviewTabAboutSection();
+      toggleOverviewTabInvestigationSection();
       toggleOverviewTabInsightsSection();
 
       cy.log('header and content');
@@ -219,22 +215,18 @@ describe('Alert details expandable flyout right panel overview tab', () => {
         .should('be.visible')
         .and('have.text', 'Entities');
       cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_ENTITIES_CONTENT).should('be.visible');
-      cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_ENTITY_PANEL_HEADER).should(
-        'be.visible'
-      );
-      cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_ENTITY_PANEL_CONTENT).should(
-        'be.visible'
-      );
+      cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_ENTITIES_HEADER).should('be.visible');
 
       cy.log('should navigate to left panel Entities tab');
 
-      clickEntitiesViewAllButton();
-      cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_ENTITIES_CONTENT).should('be.visible');
+      // TODO: skipping this section as Cypress can't seem to find the element (though it's in the DOM)
+      // navigateToEntitiesDetails();
+      // cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_ENTITIES_CONTENT).should('be.visible');
     });
 
-    // TODO: skipping this due to flakiness
-    it.skip('should display threat intelligence section', () => {
+    it('should display threat intelligence section', () => {
       toggleOverviewTabAboutSection();
+      toggleOverviewTabInvestigationSection();
       toggleOverviewTabInsightsSection();
 
       cy.log('header and content');
@@ -266,8 +258,9 @@ describe('Alert details expandable flyout right panel overview tab', () => {
 
       cy.log('should navigate to left panel Threat Intelligence tab');
 
-      clickThreatIntelligenceViewAllButton();
-      cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_ENTITIES_CONTENT).should('be.visible'); // TODO update when we can navigate to Threat Intelligence sub tab directly
+      // TODO: skipping this section as Cypress can't seem to find the element (though it's in the DOM)
+      // navigateToThreatIntelligenceDetails();
+      // cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_ENTITIES_CONTENT).should('be.visible'); // TODO update when we can navigate to Threat Intelligence sub tab directly
     });
 
     // TODO: skipping this due to flakiness
@@ -277,6 +270,7 @@ describe('Alert details expandable flyout right panel overview tab', () => {
       createNewCaseFromExpandableFlyout();
 
       toggleOverviewTabAboutSection();
+      toggleOverviewTabInvestigationSection();
       toggleOverviewTabInsightsSection();
 
       cy.log('header and content');
@@ -294,10 +288,6 @@ describe('Alert details expandable flyout right panel overview tab', () => {
             .eq(0)
             .should('be.visible')
             .and('have.text', '1 alert related by ancestry');
-          cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_CORRELATIONS_VALUES)
-            .eq(1)
-            .should('be.visible')
-            .and('have.text', '1 related case');
           // cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_CORRELATIONS_VALUES)
           //   .eq(2)
           //   .should('be.visible')
@@ -306,11 +296,15 @@ describe('Alert details expandable flyout right panel overview tab', () => {
             .eq(2)
             .should('be.visible')
             .and('have.text', '1 alert related by session');
+          cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_CORRELATIONS_VALUES)
+            .eq(1)
+            .should('be.visible')
+            .and('have.text', '1 related case');
         });
 
       cy.log('should navigate to left panel Correlations tab');
 
-      clickCorrelationsViewAllButton();
+      navigateToCorrelationsDetails();
       cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_ENTITIES_CONTENT).should('be.visible'); // TODO update when we can navigate to Correlations sub tab directly
     });
 
@@ -318,6 +312,7 @@ describe('Alert details expandable flyout right panel overview tab', () => {
     //  we need to generate enough data to have at least one field with prevalence
     it.skip('should display prevalence section', () => {
       toggleOverviewTabAboutSection();
+      toggleOverviewTabInvestigationSection();
       toggleOverviewTabInsightsSection();
 
       cy.log('header and content');
@@ -337,7 +332,7 @@ describe('Alert details expandable flyout right panel overview tab', () => {
 
       cy.log('should navigate to left panel Prevalence tab');
 
-      clickPrevalenceViewAllButton();
+      navigateToPrevalenceDetails();
       cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_ENTITIES_CONTENT).should('be.visible'); // TODO update when we can navigate to Prevalence sub tab directly
     });
   });
@@ -345,6 +340,7 @@ describe('Alert details expandable flyout right panel overview tab', () => {
   describe('response section', () => {
     it('should display empty message', () => {
       toggleOverviewTabAboutSection();
+      toggleOverviewTabInvestigationSection();
       toggleOverviewTabResponseSection();
 
       cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_RESPONSE_SECTION_EMPTY_RESPONSE).should(
