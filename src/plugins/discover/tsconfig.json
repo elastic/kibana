@@ -67,6 +67,7 @@
     "@kbn/discover-utils",
     "@kbn/search-response-warnings",
     "@kbn/content-management-plugin",
+    "@kbn/serverless",
     "@kbn/react-kibana-mount",
     "@kbn/react-kibana-context-render"
   ],
