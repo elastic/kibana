@@ -152,7 +152,7 @@ describe('Detection rules, bulk edit of rule actions', () => {
       disableAutoRefresh();
     });
 
-    it.only('Add a rule action to rules (existing connector)', () => {
+    it('Add a rule action to rules (existing connector)', () => {
       const expectedActionFrequency: RuleActionCustomFrequency = {
         throttle: 1,
         throttleUnit: 'd',
