@@ -17,6 +17,7 @@ import {
 } from '@kbn/kibana-react-plugin/public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { InspectorContextProvider } from '@kbn/observability-shared-plugin/public';
+import { ObservabilityAIAssistantProvider } from '@kbn/observability-ai-assistant-plugin/public';
 import { SyntheticsAppProps } from './contexts';
 
 import {
@@ -98,30 +99,32 @@ const Application = (props: SyntheticsAppProps) => {
                 fleet: startPlugins.fleet,
               }}
             >
-              <Router history={appMountParameters.history}>
-                <EuiThemeProvider darkMode={darkMode}>
-                  <SyntheticsRefreshContextProvider>
-                    <SyntheticsSettingsContextProvider {...props}>
-                      <SyntheticsThemeContextProvider darkMode={darkMode}>
-                        <SyntheticsStartupPluginsContextProvider {...startPlugins}>
-                          <div className={APP_WRAPPER_CLASS} data-test-subj="syntheticsApp">
-                            <RedirectAppLinks
-                              className={APP_WRAPPER_CLASS}
-                              application={core.application}
-                            >
-                              <InspectorContextProvider>
-                                <PageRouter />
-                                <ActionMenu appMountParameters={appMountParameters} />
-                                <TestNowModeFlyoutContainer />
-                              </InspectorContextProvider>
-                            </RedirectAppLinks>
-                          </div>
-                        </SyntheticsStartupPluginsContextProvider>
-                      </SyntheticsThemeContextProvider>
-                    </SyntheticsSettingsContextProvider>
-                  </SyntheticsRefreshContextProvider>
-                </EuiThemeProvider>
-              </Router>
+              <ObservabilityAIAssistantProvider value={startPlugins.observabilityAIAssistant}>
+                <Router history={appMountParameters.history}>
+                  <EuiThemeProvider darkMode={darkMode}>
+                    <SyntheticsRefreshContextProvider>
+                      <SyntheticsSettingsContextProvider {...props}>
+                        <SyntheticsThemeContextProvider darkMode={darkMode}>
+                          <SyntheticsStartupPluginsContextProvider {...startPlugins}>
+                            <div className={APP_WRAPPER_CLASS} data-test-subj="syntheticsApp">
+                              <RedirectAppLinks
+                                className={APP_WRAPPER_CLASS}
+                                application={core.application}
+                              >
+                                <InspectorContextProvider>
+                                  <PageRouter />
+                                  <ActionMenu appMountParameters={appMountParameters} />
+                                  <TestNowModeFlyoutContainer />
+                                </InspectorContextProvider>
+                              </RedirectAppLinks>
+                            </div>
+                          </SyntheticsStartupPluginsContextProvider>
+                        </SyntheticsThemeContextProvider>
+                      </SyntheticsSettingsContextProvider>
+                    </SyntheticsRefreshContextProvider>
+                  </EuiThemeProvider>
+                </Router>
+              </ObservabilityAIAssistantProvider>
             </KibanaContextProvider>
           </ReduxProvider>
         </KibanaThemeProvider>
