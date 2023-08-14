@@ -16,8 +16,9 @@ async function runRequest(
   mockRouter: IRouter<RequestHandlerContext>,
   body?: { unencrypted?: boolean; refreshCache?: boolean }
 ) {
-  expect(mockRouter.post).toBeCalled();
-  const [, handler] = (mockRouter.post as jest.Mock).mock.calls[0];
+  expect(mockRouter.versioned.post).toBeCalled();
+  const [, handler] = (mockRouter.versioned.post as jest.Mock).mock.results[0].value.addVersion.mock
+    .calls[0];
   const mockResponse = httpServerMock.createResponseFactory();
   const mockRequest = httpServerMock.createKibanaRequest({ body });
   await handler(null, mockRequest, mockResponse);
@@ -49,10 +50,10 @@ describe('registerTelemetryUsageStatsRoutes', () => {
   describe('clusters/_stats POST route', () => {
     it('registers _stats POST route and accepts body configs', () => {
       registerTelemetryUsageStatsRoutes(mockRouter, telemetryCollectionManager, true, getSecurity);
-      expect(mockRouter.post).toBeCalledTimes(1);
-      const [routeConfig, handler] = (mockRouter.post as jest.Mock).mock.calls[0];
-      expect(routeConfig.path).toMatchInlineSnapshot(`"/api/telemetry/v2/clusters/_stats"`);
-      expect(Object.keys(routeConfig.validate.body.props)).toEqual(['unencrypted', 'refreshCache']);
+      expect(mockRouter.versioned.post).toBeCalledTimes(1);
+      const [routeConfig, handler] = (mockRouter.versioned.post as jest.Mock).mock.results[0].value
+        .addVersion.mock.calls[0];
+      expect(routeConfig.version).toMatchInlineSnapshot(`"1"`);
       expect(handler).toBeInstanceOf(Function);
     });
 

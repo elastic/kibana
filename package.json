@@ -73,7 +73,7 @@
     "url": "https://github.com/elastic/kibana.git"
   },
   "engines": {
-    "node": "18.17.0",
+    "node": "18.17.1",
     "yarn": "^1.22.19"
   },
   "resolutions": {
@@ -481,6 +481,7 @@
     "@kbn/kibana-utils-plugin": "link:src/plugins/kibana_utils",
     "@kbn/kubernetes-security-plugin": "link:x-pack/plugins/kubernetes_security",
     "@kbn/language-documentation-popover": "link:packages/kbn-language-documentation-popover",
+    "@kbn/lens-embeddable-utils": "link:packages/kbn-lens-embeddable-utils",
     "@kbn/lens-plugin": "link:x-pack/plugins/lens",
     "@kbn/license-api-guard-plugin": "link:x-pack/plugins/license_api_guard",
     "@kbn/license-management-plugin": "link:x-pack/plugins/license_management",
@@ -494,6 +495,7 @@
     "@kbn/logstash-plugin": "link:x-pack/plugins/logstash",
     "@kbn/management-cards-navigation": "link:packages/kbn-management/cards_navigation",
     "@kbn/management-plugin": "link:src/plugins/management",
+    "@kbn/management-settings-section-registry": "link:packages/kbn-management/settings/section_registry",
     "@kbn/management-test-plugin": "link:test/plugin_functional/plugins/management_test_plugin",
     "@kbn/mapbox-gl": "link:packages/kbn-mapbox-gl",
     "@kbn/maps-custom-raster-source-plugin": "link:x-pack/examples/third_party_maps_source_example",
@@ -591,6 +593,7 @@
     "@kbn/screenshot-mode-plugin": "link:src/plugins/screenshot_mode",
     "@kbn/screenshotting-example-plugin": "link:x-pack/examples/screenshotting_example",
     "@kbn/screenshotting-plugin": "link:x-pack/plugins/screenshotting",
+    "@kbn/search-api-panels": "link:packages/kbn-search-api-panels",
     "@kbn/search-examples-plugin": "link:examples/search_examples",
     "@kbn/search-response-warnings": "link:packages/kbn-search-response-warnings",
     "@kbn/searchprofiler-plugin": "link:x-pack/plugins/searchprofiler",
@@ -741,6 +744,7 @@
     "@kbn/url-state": "link:packages/kbn-url-state",
     "@kbn/usage-collection-plugin": "link:src/plugins/usage_collection",
     "@kbn/usage-collection-test-plugin": "link:test/plugin_functional/plugins/usage_collection",
+    "@kbn/use-tracked-promise": "link:packages/kbn-use-tracked-promise",
     "@kbn/user-profile-components": "link:packages/kbn-user-profile-components",
     "@kbn/user-profile-examples-plugin": "link:examples/user_profile_examples",
     "@kbn/user-profiles-consumer-plugin": "link:x-pack/test/security_api_integration/plugins/user_profiles_consumer",
