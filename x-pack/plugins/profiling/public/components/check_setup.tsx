@@ -89,7 +89,7 @@ export function CheckSetup({ children }: { children: React.ReactElement }) {
           docsLink: `${docLinks.ELASTIC_WEBSITE_URL}/guide/en/observability/${docLinks.DOC_LINK_VERSION}/profiling-get-started.html`,
           logo: 'logoObservability',
           pageTitle: i18n.translate('xpack.profiling.noDataConfig.pageTitle', {
-            defaultMessage: 'Universal Profiling (now in Beta)',
+            defaultMessage: 'Universal Profiling',
           }),
           action: {
             elasticAgent: {
@@ -133,19 +133,6 @@ export function CheckSetup({ children }: { children: React.ReactElement }) {
                           }}
                         />
                       </li>
-                      <li>
-                        {i18n.translate('xpack.profiling.noDataConfig.action.legalBetaTerms', {
-                          defaultMessage: `By using this feature, you acknowledge that you have read and agree to `,
-                        })}
-                        <EuiLink
-                          target="_blank"
-                          href={`https://www.elastic.co/agreements/beta-release-terms`}
-                        >
-                          {i18n.translate('xpack.profiling.noDataConfig.betaTerms.linkLabel', {
-                            defaultMessage: 'Elastic Beta Release Terms',
-                          })}
-                        </EuiLink>
-                      </li>
                     </ul>
                   </EuiText>
                   <EuiText size={'xs'} />
@@ -170,7 +157,9 @@ export function CheckSetup({ children }: { children: React.ReactElement }) {
                         notifications.toasts.addError(err, {
                           title: i18n.translate(
                             'xpack.profiling.checkSetup.setupFailureToastTitle',
-                            { defaultMessage: 'Failed to complete setup' }
+                            {
+                              defaultMessage: 'Failed to complete setup',
+                            }
                           ),
                           toastMessage: message,
                         });

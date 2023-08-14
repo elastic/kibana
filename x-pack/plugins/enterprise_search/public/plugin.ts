@@ -22,6 +22,7 @@ import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/publi
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { LensPublicStart } from '@kbn/lens-plugin/public';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import { GetUserProfileResponse, UserProfileData } from '@kbn/security-plugin/common';
 import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
 import { SharePluginStart } from '@kbn/share-plugin/public';
 
@@ -65,6 +66,7 @@ export interface PluginsStart {
   licensing: LicensingPluginStart;
   security: SecurityPluginStart;
   share: SharePluginStart;
+  userProfile: GetUserProfileResponse<UserProfileData>;
 }
 
 export class EnterpriseSearchPlugin implements Plugin {
@@ -100,7 +102,8 @@ export class EnterpriseSearchPlugin implements Plugin {
       cloudSetup && (pluginsStart as PluginsStart).cloud
         ? { ...cloudSetup, ...(pluginsStart as PluginsStart).cloud }
         : undefined;
-    const plugins = { ...pluginsStart, cloud } as PluginsStart;
+    const userProfile = await (pluginsStart as PluginsStart).security.userProfiles.getCurrent();
+    const plugins = { ...pluginsStart, cloud, userProfile } as PluginsStart;
 
     coreStart.chrome
       .getChromeStyle$()
