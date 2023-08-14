@@ -93,7 +93,7 @@ export class PackageServiceImpl implements PackageService {
         const requestedAuthz = await getAuthzFromRequest(request);
 
         const noRequiredAuthz = doesNotHaveRequiredFleetAuthz(requestedAuthz, requiredAuthz);
-        if (noRequiredAuthz === undefined || noRequiredAuthz === true) {
+        if (noRequiredAuthz) {
           throw new FleetUnauthorizedError(
             `User does not have adequate permissions to access Fleet packages.`
           );
