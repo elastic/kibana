@@ -67,7 +67,7 @@ describe('EsqlQueryRuleTypeExpression', () => {
         ruleParams={defaultEsqlQueryExpressionParams}
         setRuleParams={() => {}}
         setRuleProperty={() => {}}
-        errors={{ esqlQuery: [], timeField: [] }}
+        errors={{ esqlQuery: [], timeField: [], timeWindowSize: [] }}
         data={dataMock}
         dataViews={dataViewMock}
         defaultActionGroupId=""
@@ -82,6 +82,8 @@ describe('EsqlQueryRuleTypeExpression', () => {
 
     expect(result.getByTestId('queryEsqlEditor')).toBeInTheDocument();
     expect(result.getByTestId('timeFieldSelect')).toBeInTheDocument();
+    expect(result.getByTestId('timeWindowSizeNumber')).toBeInTheDocument();
+    expect(result.getByTestId('timeWindowUnitSelect')).toBeInTheDocument();
     expect(result.queryByTestId('testQuerySuccess')).not.toBeInTheDocument();
     expect(result.queryByTestId('testQueryError')).not.toBeInTheDocument();
   });
@@ -97,7 +99,7 @@ describe('EsqlQueryRuleTypeExpression', () => {
         ruleParams={defaultEsqlQueryExpressionParams}
         setRuleParams={() => {}}
         setRuleProperty={() => {}}
-        errors={{ esqlQuery: [], timeField: [] }}
+        errors={{ esqlQuery: [], timeField: [], timeWindowSize: [] }}
         data={dataMock}
         dataViews={dataViewMock}
         defaultActionGroupId=""
@@ -140,7 +142,7 @@ describe('EsqlQueryRuleTypeExpression', () => {
         ruleParams={defaultEsqlQueryExpressionParams}
         setRuleParams={() => {}}
         setRuleProperty={() => {}}
-        errors={{ esqlQuery: [], timeField: [] }}
+        errors={{ esqlQuery: [], timeField: [], timeWindowSize: [] }}
         data={dataMock}
         dataViews={dataViewMock}
         defaultActionGroupId=""
@@ -172,7 +174,7 @@ describe('EsqlQueryRuleTypeExpression', () => {
         ruleParams={defaultEsqlQueryExpressionParams}
         setRuleParams={() => {}}
         setRuleProperty={() => {}}
-        errors={{ esqlQuery: [], timeField: [] }}
+        errors={{ esqlQuery: [], timeField: [], timeWindowSize: [] }}
         data={dataMock}
         dataViews={dataViewMock}
         defaultActionGroupId=""

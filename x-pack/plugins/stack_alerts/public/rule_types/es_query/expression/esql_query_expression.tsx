@@ -8,7 +8,15 @@
 import React, { useState, Fragment, useEffect, useCallback } from 'react';
 import { get } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiFormRow, EuiSelect, EuiSpacer, EuiTitle } from '@elastic/eui';
+import {
+  EuiFieldNumber,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiSelect,
+  EuiSpacer,
+  EuiTitle,
+} from '@elastic/eui';
 import { getFields, RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { TextBasedLangEditor } from '@kbn/text-based-languages/public';
 import { fetchFieldsFromESQL } from '@kbn/text-based-editor';
@@ -17,6 +25,7 @@ import { parseDuration } from '@kbn/alerting-plugin/common';
 import {
   firstFieldOption,
   getTimeFieldOptions,
+  getTimeOptions,
   parseAggregationResults,
 } from '@kbn/triggers-actions-ui-plugin/public/common';
 import { EsQueryRuleParams, EsQueryRuleMetaData, SearchType } from '../types';
@@ -36,8 +45,8 @@ export const EsqlQueryExpression: React.FC<
     EsQueryRuleParams<SearchType.esqlQuery>
   >({
     ...ruleParams,
-    timeWindowSize: DEFAULT_VALUES.TIME_WINDOW_SIZE,
-    timeWindowUnit: DEFAULT_VALUES.TIME_WINDOW_UNIT,
+    timeWindowSize: timeWindowSize ?? DEFAULT_VALUES.TIME_WINDOW_SIZE,
+    timeWindowUnit: timeWindowUnit ?? DEFAULT_VALUES.TIME_WINDOW_UNIT,
     // ESQL queries compare conditions within the ES query
     // so only 'met' results are returned, therefore the threshold should always be 0
     threshold: [0],
@@ -68,10 +77,14 @@ export const EsqlQueryExpression: React.FC<
   const setDefaultExpressionValues = async () => {
     setRuleProperty('params', currentRuleParams);
     setQuery(esqlQuery ?? { esql: '' });
+    if (timeField) {
+      setTimeFieldOptions([firstFieldOption, { text: timeField, value: timeField }]);
+    }
   };
   useEffect(() => {
     setDefaultExpressionValues();
-  });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const onTestQuery = useCallback(async () => {
     const window = `${timeWindowSize}${timeWindowUnit}`;
@@ -168,28 +181,68 @@ export const EsqlQueryExpression: React.FC<
       </EuiTitle>
       <EuiSpacer size="s" />
       <EuiFormRow
-        id="thresholdTimeField"
+        id="timeField"
         fullWidth
-        isInvalid={errors.timeField.length > 0 && timeField !== undefined}
+        isInvalid={errors.timeField.length > 0}
         error={errors.timeField}
       >
         <EuiSelect
           options={timeFieldOptions}
-          isInvalid={errors.timeField.length > 0 && timeField !== undefined}
+          isInvalid={errors.timeField.length > 0}
           fullWidth
-          name="thresholdTimeField"
+          name="timeField"
           data-test-subj="timeFieldSelect"
           value={timeField || ''}
           onChange={(e) => {
             setParam('timeField', e.target.value);
           }}
-          onBlur={() => {
-            if (timeField === undefined) {
-              setParam('timeField', '');
-            }
-          }}
         />
       </EuiFormRow>
+      <EuiSpacer />
+      <EuiTitle size="xs">
+        <h5>
+          <FormattedMessage
+            id="xpack.stackAlerts.esQuery.ui.setEsqlQueryTimeWindowPrompt"
+            defaultMessage="Set the time window"
+          />
+        </h5>
+      </EuiTitle>
+      <EuiSpacer size="s" />
+      <EuiFlexGroup>
+        <EuiFlexItem grow={false}>
+          <EuiFormRow
+            id="timeWindowSize"
+            isInvalid={errors.timeWindowSize.length > 0}
+            error={errors.timeWindowSize}
+          >
+            <EuiFieldNumber
+              name="timeWindowSize"
+              data-test-subj="timeWindowSizeNumber"
+              isInvalid={errors.timeWindowSize.length > 0}
+              min={0}
+              value={timeWindowSize || ''}
+              onChange={(e) => {
+                const { value } = e.target;
+                const timeWindowSizeVal = value !== '' ? parseInt(value, 10) : undefined;
+                setParam('timeWindowSize', timeWindowSizeVal);
+              }}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiFormRow id="timeWindowUnit">
+            <EuiSelect
+              name="timeWindowUnit"
+              data-test-subj="timeWindowUnitSelect"
+              value={timeWindowUnit}
+              onChange={(e) => {
+                setParam('timeWindowUnit', e.target.value);
+              }}
+              options={getTimeOptions(timeWindowSize ?? 1)}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+      </EuiFlexGroup>
       <EuiSpacer />
       <TestQueryRow
         fetch={onTestQuery}
