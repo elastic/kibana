@@ -15,26 +15,15 @@ import type {
   MessageUpsellings,
   UpsellingMessageId,
 } from '@kbn/security-solution-plugin/public/common/lib/upsellings/types';
-import React, { lazy } from 'react';
+import React from 'react';
 import { EndpointPolicyProtectionsLazy } from './sections/endpoint_management';
 import type { SecurityProductTypes } from '../../common/config';
 import { getProductAppFeatures } from '../../common/pli/pli_features';
 import { investigationGuideUpselling } from './messages/investigation_guide_upselling';
-const ThreatIntelligencePaywallLazy = lazy(() => import('./pages/threat_intelligence_paywall'));
-
-const OsqueryResponseActionsUpsellingSectionLazy = lazy(async () => {
-  const OsqueryResponseActionsUpsellingSection = (
-    await import('./pages/osquery_automated_response_actions')
-  ).default;
-
-  return {
-    default: () => (
-      <OsqueryResponseActionsUpsellingSection
-        requiredPLI={AppFeatureKey.osqueryAutomatedResponseActions}
-      />
-    ),
-  };
-});
+import {
+  OsqueryResponseActionsUpsellingSectionLazy,
+  ThreatIntelligencePaywallLazy,
+} from './lazy_upselling';
 
 interface UpsellingsConfig {
   pli: AppFeatureKey;
@@ -87,9 +76,9 @@ export const registerUpsellings = (
     {}
   );
 
-  upselling.setRegisteredPages(upsellingPagesToRegister);
-  upselling.setRegisteredSections(upsellingSectionsToRegister);
-  upselling.setRegisteredMessages(upsellingMessagesToRegister);
+  upselling.setPages(upsellingPagesToRegister);
+  upselling.setSections(upsellingSectionsToRegister);
+  upselling.setMessages(upsellingMessagesToRegister);
 };
 
 // Upsellings for entire pages, linked to a SecurityPageName
@@ -110,7 +99,11 @@ export const upsellingSections: UpsellingSections = [
   {
     id: 'osquery_automated_response_actions',
     pli: AppFeatureKey.osqueryAutomatedResponseActions,
-    component: OsqueryResponseActionsUpsellingSectionLazy,
+    component: () => (
+      <OsqueryResponseActionsUpsellingSectionLazy
+        requiredPLI={AppFeatureKey.osqueryAutomatedResponseActions}
+      />
+    ),
   },
   {
     id: 'endpointPolicyProtections',

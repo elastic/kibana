@@ -66,9 +66,9 @@ export const registerUpsellings = (upselling: UpsellingService, license: ILicens
     {}
   );
 
-  upselling.setRegisteredPages(upsellingPagesToRegister);
-  upselling.setRegisteredSections(upsellingSectionsToRegister);
-  upselling.setRegisteredMessages(upsellingMessagesToRegister);
+  upselling.setPages(upsellingPagesToRegister);
+  upselling.setSections(upsellingSectionsToRegister);
+  upselling.setMessages(upsellingMessagesToRegister);
 };
 
 // Upsellings for entire pages, linked to a SecurityPageName
