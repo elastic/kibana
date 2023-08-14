@@ -106,6 +106,7 @@ export const useLensSuggestions = ({
   const [allSuggestions, setAllSuggestions] = useState(suggestions.allSuggestions);
   let currentSuggestion = originalSuggestion ?? suggestions.firstSuggestion;
   const suggestionDeps = useRef(getSuggestionDeps({ dataView, query, columns }));
+  let isOnHistogramMode = false;
 
   if (
     !currentSuggestion &&
@@ -114,9 +115,9 @@ export const useLensSuggestions = ({
     isOfAggregateQueryType(query) &&
     timeRange
   ) {
-    const interval = computeInterval(timeRange, data);
     const language = getAggregateQueryMode(query);
     if (language === 'esql') {
+      const interval = computeInterval(timeRange, data);
       const histogramQuery = `${query[language]} | eval uniqueName = 1
       | EVAL timestamp=DATE_TRUNC(${dataView.timeFieldName}, ${interval}) | stats rows = count(uniqueName) by timestamp | rename timestamp as \`${dataView.timeFieldName} every ${interval}\``;
       const context = {
@@ -147,6 +148,7 @@ export const useLensSuggestions = ({
         : [];
       if (sug.length) {
         currentSuggestion = sug[0];
+        isOnHistogramMode = true;
       }
     }
   }
@@ -173,6 +175,7 @@ export const useLensSuggestions = ({
     allSuggestions,
     currentSuggestion,
     suggestionUnsupported: isPlainRecord && !currentSuggestion,
+    isOnHistogramMode,
   };
 };
 
