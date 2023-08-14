@@ -26,6 +26,7 @@
     "@kbn/data-views-plugin",
     "@kbn/datemath",
     "@kbn/discover-plugin",
+    "@kbn/discover-utils",
     "@kbn/embeddable-plugin",
     "@kbn/embeddable-plugin",
     "@kbn/es-query",
