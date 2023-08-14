@@ -153,7 +153,7 @@ const DataQualityComponent: React.FC = () => {
   const [selectedOptions, setSelectedOptions] = useState<EuiComboBoxOptionOption[]>(defaultOptions);
   const { indicesExist, loading: isSourcererLoading, selectedPatterns } = useSourcererDataView();
   const { signalIndexName, loading: isSignalIndexNameLoading } = useSignalIndex();
-  const { isILMAvailable$ } = useKibana().services;
+  const { isILMAvailable$, cases } = useKibana().services;
   const isILMAvailable = useObservable(isILMAvailable$);
   const alertsAndSelectedPatterns = useMemo(
     () =>
@@ -194,7 +194,6 @@ const DataQualityComponent: React.FC = () => {
     [userCasesPermissions.create, userCasesPermissions.read]
   );
 
-  const { cases } = useKibana().services;
   const createCaseFlyout = cases.hooks.useCasesAddToNewCaseFlyout({
     toastContent: i18n.ADD_TO_CASE_SUCCESS,
   });

@@ -26,6 +26,9 @@ describe('getIndexStatsRoute route', () => {
     params: {
       pattern: 'auditbeat-*',
     },
+    query: {
+      isILMAvailable: true,
+    },
   });
 
   beforeEach(() => {

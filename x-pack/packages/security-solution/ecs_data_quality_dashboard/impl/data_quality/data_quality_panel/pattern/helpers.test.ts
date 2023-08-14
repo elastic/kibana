@@ -415,12 +415,14 @@ describe('helpers', () => {
       '.ds-packetbeat-8.5.3-2023.02.04-000001',
       'auditbeat-custom-index-1',
     ];
+    const isILMAvailable = true;
 
     test('returns true when `indexNames` does NOT exist, and the required `stats` and `ilmExplain` are available', () => {
       expect(
         shouldCreateIndexNames({
           ilmExplain: mockIlmExplain,
           indexNames: undefined,
+          isILMAvailable,
           stats: mockStats,
         })
       ).toBe(true);
@@ -431,6 +433,7 @@ describe('helpers', () => {
         shouldCreateIndexNames({
           ilmExplain: mockIlmExplain,
           indexNames,
+          isILMAvailable,
           stats: mockStats,
         })
       ).toBe(false);
@@ -441,6 +444,7 @@ describe('helpers', () => {
         shouldCreateIndexNames({
           ilmExplain: mockIlmExplain,
           indexNames: undefined,
+          isILMAvailable,
           stats: null,
         })
       ).toBe(false);
@@ -451,6 +455,7 @@ describe('helpers', () => {
         shouldCreateIndexNames({
           ilmExplain: null,
           indexNames: undefined,
+          isILMAvailable,
           stats: mockStats,
         })
       ).toBe(false);
@@ -461,6 +466,7 @@ describe('helpers', () => {
         shouldCreateIndexNames({
           ilmExplain: null,
           indexNames: undefined,
+          isILMAvailable,
           stats: null,
         })
       ).toBe(false);
@@ -471,6 +477,7 @@ describe('helpers', () => {
         shouldCreateIndexNames({
           ilmExplain: null,
           indexNames,
+          isILMAvailable,
           stats: null,
         })
       ).toBe(false);
@@ -478,11 +485,14 @@ describe('helpers', () => {
   });
 
   describe('shouldCreatePatternRollup', () => {
+    const isILMAvailable = true;
+
     test('it returns false when the `patternRollup` already exists', () => {
       expect(
         shouldCreatePatternRollup({
           error: null,
           ilmExplain: mockIlmExplain,
+          isILMAvailable,
           patternRollup: auditbeatWithAllResults,
           stats: mockStats,
         })
@@ -493,6 +503,7 @@ describe('helpers', () => {
       expect(
         shouldCreatePatternRollup({
           error: null,
+          isILMAvailable,
           ilmExplain: mockIlmExplain,
           patternRollup: undefined,
           stats: mockStats,
@@ -505,6 +516,7 @@ describe('helpers', () => {
         shouldCreatePatternRollup({
           error: null,
           ilmExplain: null,
+          isILMAvailable,
           patternRollup: undefined,
           stats: mockStats,
         })
@@ -516,6 +528,7 @@ describe('helpers', () => {
         shouldCreatePatternRollup({
           error: null,
           ilmExplain: mockIlmExplain,
+          isILMAvailable,
           patternRollup: undefined,
           stats: null,
         })
@@ -527,6 +540,7 @@ describe('helpers', () => {
         shouldCreatePatternRollup({
           error: 'whoops',
           ilmExplain: null,
+          isILMAvailable,
           patternRollup: undefined,
           stats: null,
         })
@@ -538,6 +552,7 @@ describe('helpers', () => {
         shouldCreatePatternRollup({
           error: 'something went',
           ilmExplain: null,
+          isILMAvailable,
           patternRollup: undefined,
           stats: mockStats,
         })
@@ -549,6 +564,7 @@ describe('helpers', () => {
         shouldCreatePatternRollup({
           error: 'horribly wrong',
           ilmExplain: mockIlmExplain,
+          isILMAvailable,
           patternRollup: undefined,
           stats: null,
         })
@@ -560,6 +576,7 @@ describe('helpers', () => {
         shouldCreatePatternRollup({
           error: 'over here',
           ilmExplain: mockIlmExplain,
+          isILMAvailable,
           patternRollup: undefined,
           stats: mockStats,
         })

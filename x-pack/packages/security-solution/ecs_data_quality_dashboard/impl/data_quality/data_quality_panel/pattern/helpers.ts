@@ -177,21 +177,28 @@ export const getSummaryTableItems = ({
 export const shouldCreateIndexNames = ({
   ilmExplain,
   indexNames,
+  isILMAvailable,
   stats,
 }: {
   ilmExplain: Record<string, IlmExplainLifecycleLifecycleExplain> | null;
   indexNames: string[] | undefined;
+  isILMAvailable: boolean;
   stats: Record<string, IndicesStatsIndicesStats> | null;
-}): boolean => indexNames == null && stats != null && ilmExplain != null;
+}): boolean =>
+  indexNames == null &&
+  stats != null &&
+  ((isILMAvailable && ilmExplain != null) || !isILMAvailable);
 
 export const shouldCreatePatternRollup = ({
   error,
   ilmExplain,
+  isILMAvailable,
   patternRollup,
   stats,
 }: {
   error: string | null;
   ilmExplain: Record<string, IlmExplainLifecycleLifecycleExplain> | null;
+  isILMAvailable: boolean;
   patternRollup: PatternRollup | undefined;
   stats: Record<string, IndicesStatsIndicesStats> | null;
 }): boolean => {
@@ -199,7 +206,8 @@ export const shouldCreatePatternRollup = ({
     return false; // the rollup already exists
   }
 
-  const allDataLoaded: boolean = stats != null && ilmExplain != null;
+  const allDataLoaded: boolean =
+    stats != null && ((isILMAvailable && ilmExplain != null) || !isILMAvailable);
   const errorOccurred: boolean = error != null;
 
   return allDataLoaded || errorOccurred;

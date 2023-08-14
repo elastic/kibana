@@ -228,14 +228,14 @@ const PatternComponent: React.FC<Props> = ({
   );
 
   useEffect(() => {
-    if (shouldCreateIndexNames({ indexNames, stats, ilmExplain })) {
+    if (shouldCreateIndexNames({ indexNames, stats, ilmExplain, isILMAvailable })) {
       updatePatternIndexNames({
         indexNames: getIndexNames({ stats, ilmExplain, ilmPhases, isILMAvailable }),
         pattern,
       });
     }
 
-    if (shouldCreatePatternRollup({ error, patternRollup, stats, ilmExplain })) {
+    if (shouldCreatePatternRollup({ error, patternRollup, stats, ilmExplain, isILMAvailable })) {
       updatePatternRollup({
         docsCount: getTotalDocsCount({
           indexNames: getIndexNames({ stats, ilmExplain, ilmPhases, isILMAvailable }),

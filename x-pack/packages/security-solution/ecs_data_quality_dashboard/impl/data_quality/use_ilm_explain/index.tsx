@@ -54,9 +54,7 @@ export const useIlmExplain = (pattern: string): UseIlmExplain => {
           setError(i18n.ERROR_LOADING_ILM_EXPLAIN(e.message));
         }
       } finally {
-        if (!abortController.signal.aborted) {
-          setLoading(false);
-        }
+        setLoading(false);
       }
     }
 

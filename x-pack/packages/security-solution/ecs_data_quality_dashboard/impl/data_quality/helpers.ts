@@ -39,11 +39,11 @@ export const getIndexNames = ({
   isILMAvailable: boolean;
   stats: Record<string, IndicesStatsIndicesStats> | null;
 }): string[] => {
-  if (ilmExplain != null && stats != null) {
+  if (((isILMAvailable && ilmExplain != null) || !isILMAvailable) && stats != null) {
     const allIndexNames = Object.keys(stats);
     const filteredByIlmPhase = isILMAvailable
       ? allIndexNames.filter((indexName) =>
-          ilmPhases.includes(getIlmPhase(ilmExplain[indexName], isILMAvailable) ?? '')
+          ilmPhases.includes(getIlmPhase(ilmExplain?.[indexName], isILMAvailable) ?? '')
         )
       : allIndexNames;
 
