@@ -85,6 +85,7 @@
     "@kbn/event-annotation-components",
     "@kbn/text-based-languages",
     "@kbn/content-management-utils",
+    "@kbn/serverless",
   ],
   "exclude": [
     "target/**/*",

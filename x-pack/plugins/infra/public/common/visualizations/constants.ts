@@ -42,3 +42,4 @@ export const hostLensFormulas = {
 };
 
 export const HOST_METRICS_DOC_HREF = 'https://ela.st/docs-infra-host-metrics';
+export const HOST_METRICS_DOTTED_LINES_DOC_HREF = 'https://ela.st/docs-infra-why-dotted';
