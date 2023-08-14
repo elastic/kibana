@@ -223,7 +223,7 @@ To export large amounts of data we recommend using {es} APIs directly. See {ref}
 Number of documents retrieved from {es} for each scroll iteration during a CSV export. Defaults to `500`.
 [NOTE]
 ============
-If the default size of 500 covers a large number of shards in {es}, you may need to lower this setting. 
+You may need to lower this setting if the default number of documents creates a strain on network resources.
 ============
 
 `xpack.reporting.csv.scroll.duration`::
