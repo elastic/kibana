@@ -10,7 +10,7 @@ import { fromEvent } from 'rxjs';
 import type { AnalyticsClient } from '@kbn/analytics-client';
 
 /** HTML attributes that should be skipped from reporting because they might contain user data */
-const POTENTIAL_PII_HTML_ATTRIBUTES = ['data-provider-id', 'href', 'value'];
+const POTENTIAL_PII_HTML_ATTRIBUTES = ['data-href', 'data-provider-id', 'href', 'value'];
 
 /**
  * Registers the event type "click" in the analytics client.
