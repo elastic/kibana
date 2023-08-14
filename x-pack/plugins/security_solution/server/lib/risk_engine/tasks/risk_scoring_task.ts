@@ -17,6 +17,7 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
+import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 
 import type { AfterKeys, IdentifierType } from '../../../../common/risk_engine';
 import type { StartPlugins } from '../../../plugin';
@@ -43,6 +44,13 @@ const getTaskId = (namespace: string): string => `${TYPE}:${namespace}:${VERSION
 
 type GetRiskScoreService = (namespace: string) => Promise<RiskScoreService>;
 
+const buildSpaceExtensions = (namespace: string) => ({
+  spacesExtension: {
+    getCurrentNamespace: () => SavedObjectsUtils.namespaceStringToId(namespace),
+    getSearchableNamespaces: async () => [namespace],
+  },
+});
+
 export const registerRiskScoringTask = ({
   getStartServices,
   kibanaVersion,
@@ -62,7 +70,10 @@ export const registerRiskScoringTask = ({
   const getRiskScoreService: GetRiskScoreService = (namespace) =>
     getStartServices().then(([coreStart, _]) => {
       const esClient = coreStart.elasticsearch.client.asInternalUser;
-      const soClient = coreStart.savedObjects.createInternalRepository();
+      const soClient = coreStart.savedObjects.createInternalRepository(
+        undefined,
+        buildSpaceExtensions(namespace)
+      );
       const riskEngineDataClient = new RiskEngineDataClient({
         logger,
         kibanaVersion,
