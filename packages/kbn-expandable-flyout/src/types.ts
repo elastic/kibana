@@ -9,7 +9,13 @@
 import React from 'react';
 
 export interface PanelPath {
+  /**
+   * Top level tab that to be displayed
+   */
   tab: string;
+  /**
+   * Optional secondary level to be displayed under top level tab
+   */
   subTab?: string;
 }
 
@@ -23,7 +29,7 @@ export interface FlyoutPanelProps {
    */
   params?: Record<string, unknown>;
   /**
-   * Tracks the path for what to show in a panel. We may have multiple tabs or details..., so easiest to just use a stack
+   * Tracks the path for what to show in a panel, such as activated tab and subtab
    */
   path?: PanelPath;
   /**

@@ -11,6 +11,7 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { panels } from './panels';
 
 export type PreviewPanelPaths = 'rule-preview';
+export const RulePreviewPanel: PreviewPanelPaths = 'rule-preview';
 export const PreviewPanelKey: PreviewPanelProps['key'] = 'document-details-preview';
 
 export interface PreviewPanelProps extends FlyoutPanelProps {

@@ -18,7 +18,7 @@ import {
   INSIGHTS_TAB_CORRELATIONS_BUTTON_TEST_ID,
 } from './test_ids';
 import { useLeftPanelContext } from '../context';
-import { LeftPanelKey } from '..';
+import { LeftPanelKey, LeftPanelInsightsTab } from '..';
 import {
   INSIGHTS_BUTTONGROUP_OPTIONS,
   ENTITIES_BUTTON,
@@ -73,7 +73,7 @@ export const InsightsTab: React.FC = memo(() => {
       openLeftPanel({
         id: LeftPanelKey,
         path: {
-          tab: 'insights',
+          tab: LeftPanelInsightsTab,
           subTab: optionId,
         },
         params: {
