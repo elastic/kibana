@@ -139,7 +139,11 @@ describe(
 
       it('should have read access to Endpoint Policy Management', () => {
         ensurePolicyListPageAuthzAccess('read', true);
-        ensurePolicyDetailsPageAuthzAccess(loadedEndpoints.integrationPolicies[0].id, 'read', true);
+        ensurePolicyDetailsPageAuthzAccess(
+          loadedEndpoints.data.integrationPolicies[0].id,
+          'read',
+          true
+        );
       });
 
       for (const { title, id } of artifactPagesFullAccess) {
