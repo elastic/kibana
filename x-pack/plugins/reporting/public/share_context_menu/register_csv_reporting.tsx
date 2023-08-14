@@ -39,10 +39,12 @@ export const reportingCsvShareProvider = ({
     };
 
     const getJobParams = (forShareUrl?: boolean) => {
-      const absoluteTime = !forShareUrl;
       return {
         ...jobParams,
-        searchSource: getSearchSource(absoluteTime),
+        searchSource: getSearchSource({
+          addGlobalTimeFilter: true,
+          absoluteTime: !forShareUrl,
+        }),
       };
     };
 
