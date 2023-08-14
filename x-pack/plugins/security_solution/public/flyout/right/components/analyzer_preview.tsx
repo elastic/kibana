@@ -6,7 +6,6 @@
  */
 import React, { useEffect, useState } from 'react';
 import { find } from 'lodash/fp';
-import { ANALYZER_PREVIEW_TEST_ID } from './test_ids';
 import { useRightPanelContext } from '../context';
 import { useAlertPrevalenceFromProcessTree } from '../../../common/containers/alerts/use_alert_prevalence_from_process_tree';
 import type { StatsNode } from '../../../common/containers/alerts/use_alert_prevalence_from_process_tree';
@@ -50,19 +49,19 @@ export const AnalyzerPreview: React.FC = () => {
     }
   }, [statsNodes, setCache]);
 
+  if (!documentId || !index) {
+    return null;
+  }
+
   return (
-    <div data-test-subj={ANALYZER_PREVIEW_TEST_ID}>
-      {documentId && index && (
-        <AnalyzerTree
-          statsNodes={cache.statsNodes}
-          loading={loading}
-          error={error}
-          childCountLimit={CHILD_COUNT_LIMIT}
-          ancestorLevel={ANCESTOR_LEVEL}
-          descendantLevel={DESCENDANT_LEVEL}
-        />
-      )}
-    </div>
+    <AnalyzerTree
+      statsNodes={cache.statsNodes}
+      loading={loading}
+      error={error}
+      childCountLimit={CHILD_COUNT_LIMIT}
+      ancestorLevel={ANCESTOR_LEVEL}
+      descendantLevel={DESCENDANT_LEVEL}
+    />
   );
 };
 
