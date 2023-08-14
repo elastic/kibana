@@ -6,17 +6,34 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { act, render } from '@testing-library/react';
 import { CoreStart } from '@kbn/core/public';
+import { AppMountParameters } from '@kbn/core/public';
+import { TimeBuckets } from '@kbn/data-plugin/common';
+import { fetchActiveMaintenanceWindows } from '@kbn/alerts-ui-shared/src/maintenance_window_callout/api';
+import { RUNNING_MAINTENANCE_WINDOW_1 } from '@kbn/alerts-ui-shared/src/maintenance_window_callout/mock';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { MAINTENANCE_WINDOW_FEATURE_ID } from '@kbn/alerting-plugin/common/maintenance_window';
+
 import { ObservabilityPublicPluginsStart } from '../../plugin';
 import { AlertsPage } from './alerts';
 import { kibanaStartMock } from '../../utils/kibana_react.mock';
 import * as pluginContext from '../../hooks/use_plugin_context';
-import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import * as dataContext from '../../hooks/use_has_data';
 import { createObservabilityRuleTypeRegistryMock } from '../../rules/observability_rule_type_registry_mock';
-import { AppMountParameters } from '@kbn/core/public';
+import { ThemeProvider } from '@emotion/react';
+import { euiDarkVars } from '@kbn/ui-theme';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 const mockUseKibanaReturnValue = kibanaStartMock.startContract();
+mockUseKibanaReturnValue.services.application.capabilities = {
+  ...mockUseKibanaReturnValue.services.application.capabilities,
+  [MAINTENANCE_WINDOW_FEATURE_ID]: {
+    save: true,
+    show: true,
+  },
+};
 
 jest.mock('../../utils/kibana_react', () => ({
   __esModule: true,
@@ -27,9 +44,6 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
   useKibana: jest.fn(() => mockUseKibanaReturnValue),
 }));
 jest.mock('@kbn/observability-shared-plugin/public');
-jest.mock('@kbn/triggers-actions-ui-plugin/public', () => ({
-  useLoadRuleTypes: jest.fn(),
-}));
 jest.spyOn(pluginContext, 'usePluginContext').mockImplementation(() => ({
   appMountParameters: {} as AppMountParameters,
   config: {
@@ -59,15 +73,90 @@ jest.spyOn(pluginContext, 'usePluginContext').mockImplementation(() => ({
   kibanaFeatures: [],
   core: {} as CoreStart,
   plugins: {} as ObservabilityPublicPluginsStart,
+  hasAnyData: true,
+  isAllRequestsComplete: true,
 }));
 
+jest.spyOn(dataContext, 'useHasData').mockImplementation(() => ({
+  hasDataMap: {},
+  hasAnyData: true,
+  isAllRequestsComplete: true,
+  onRefreshTimeRange: jest.fn(),
+  forceUpdate: 'false',
+}));
+
+jest.mock('@kbn/alerts-ui-shared/src/maintenance_window_callout/api', () => ({
+  fetchActiveMaintenanceWindows: jest.fn(() => Promise.resolve([])),
+}));
+const fetchActiveMaintenanceWindowsMock = fetchActiveMaintenanceWindows as jest.Mock;
+
+jest.mock('../../hooks/use_time_buckets', () => ({
+  useTimeBuckets: jest.fn(),
+}));
+const { useTimeBuckets } = jest.requireMock('../../hooks/use_time_buckets');
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: false,
+      cacheTime: 0,
+    },
+  },
+});
+function AllTheProviders({ children }: { children: any }) {
+  return (
+    <ThemeProvider
+      theme={() => ({ eui: { ...euiDarkVars, euiColorLightShade: '#ece' }, darkMode: true })}
+    >
+      <IntlProvider locale="en">
+        <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+      </IntlProvider>
+    </ThemeProvider>
+  );
+}
+
 describe('AlertsPage with all capabilities', () => {
+  const timeBuckets = new TimeBuckets({
+    'histogram:maxBars': 12,
+    'histogram:barTarget': 10,
+    dateFormat: 'MMM D, YYYY @ HH:mm:ss.SSS',
+    'dateFormat:scaled': [
+      ['', 'HH:mm:ss.SSS'],
+      ['PT1S', 'HH:mm:ss'],
+      ['PT1M', 'HH:mm'],
+      ['PT1H', 'YYYY-MM-DD HH:mm'],
+      ['P1DT', 'YYYY-MM-DD'],
+      ['P1YT', 'YYYY'],
+    ],
+  });
+
   async function setup() {
-    return render(<AlertsPage />);
+    return render(<AlertsPage />, { wrapper: AllTheProviders });
   }
 
+  beforeAll(() => {
+    fetchActiveMaintenanceWindowsMock.mockResolvedValue([]);
+  });
+
+  beforeEach(() => {
+    fetchActiveMaintenanceWindowsMock.mockClear();
+    useTimeBuckets.mockReturnValue(timeBuckets);
+  });
+
   it('should render an alerts page template', async () => {
-    const wrapper = await setup();
-    expect(wrapper.getByTestId('alertsPage')).toBeInTheDocument();
+    await act(async () => {
+      const wrapper = await setup();
+      expect(wrapper.queryByText('Alerts')).toBeInTheDocument();
+    });
+  });
+
+  it('renders MaintenanceWindowCallout if one exists', async () => {
+    fetchActiveMaintenanceWindowsMock.mockResolvedValue([RUNNING_MAINTENANCE_WINDOW_1]);
+
+    await act(async () => {
+      const wrapper = await setup();
+      expect(await wrapper.findByText('Maintenance window is running')).toBeInTheDocument();
+      expect(fetchActiveMaintenanceWindowsMock).toHaveBeenCalledTimes(1);
+    });
   });
 });
