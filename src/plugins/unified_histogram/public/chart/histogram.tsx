@@ -133,10 +133,6 @@ export function Histogram({
       }
 
       const adapterTables = adapters?.tables?.tables;
-      // const totalHits =
-      //   isPlainRecord && hasLensSuggestions
-      //     ? Object.values(adapterTables ?? {})?.[0]?.rows?.length
-      //     : adapterTables?.unifiedHistogram?.meta?.statistics?.totalCount;
       const totalHits = computeTotalHits(hasLensSuggestions, adapterTables, isPlainRecord);
 
       onTotalHitsChange?.(
