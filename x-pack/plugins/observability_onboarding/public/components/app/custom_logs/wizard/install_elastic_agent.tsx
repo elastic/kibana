@@ -309,7 +309,7 @@ export function InstallElasticAgent() {
               ),
               id: 'windows',
               disableSteps: true,
-              children: <WindowsInstallStep />,
+              children: <WindowsInstallStep docsLink='https://www.elastic.co/guide/en/observability/current/logs-stream.html'/>,
             },
           ]}
           onSelectPlatform={(id) => setElasticAgentPlatform(id)}
