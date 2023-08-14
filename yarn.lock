@@ -1456,29 +1456,29 @@
   dependencies:
     tslib "^2.0.0"
 
-"@elastic/apm-rum-core@^5.18.0":
-  version "5.18.0"
-  resolved "https://registry.yarnpkg.com/@elastic/apm-rum-core/-/apm-rum-core-5.18.0.tgz#d1c25594c8e81a929b1f9444ecc081359a97b3d5"
-  integrity sha512-KGU+ZFtdXdD7pR+arDq0JRIC4IKIH0D16p+7SMkq9Lq8wq70Uy6r5SKZgW7X6ahnJP35hStMXT2mjStjD9a+wA==
+"@elastic/apm-rum-core@^5.19.0":
+  version "5.19.0"
+  resolved "https://registry.yarnpkg.com/@elastic/apm-rum-core/-/apm-rum-core-5.19.0.tgz#653a120e60549b2486c86919e5079df9fd779a67"
+  integrity sha512-vjddutdSY2L15I0hFd45PaStleemFfxmvXj1KjiFCbRGQRW2JhMoaNJ6YpFXP+L5rs96olwXGzYLHaztWs1ciQ==
   dependencies:
     error-stack-parser "^1.3.5"
     opentracing "^0.14.3"
     promise-polyfill "^8.1.3"
 
-"@elastic/apm-rum-react@^1.4.3":
-  version "1.4.3"
-  resolved "https://registry.yarnpkg.com/@elastic/apm-rum-react/-/apm-rum-react-1.4.3.tgz#cbbde9d8e0f9aaf8459e07626d88b15188f99d37"
-  integrity sha512-9OSy373fNkLfnf6g8lEBjycm03NJnTPeTYTLUh+Gvlf5NGic+mLZbm7d4dQvUxgIcjKzlx94et3SGysG6JzDrg==
+"@elastic/apm-rum-react@^1.4.4":
+  version "1.4.4"
+  resolved "https://registry.yarnpkg.com/@elastic/apm-rum-react/-/apm-rum-react-1.4.4.tgz#f716d9a5b44e2c8d89b47fb90ad24264c4e67cea"
+  integrity sha512-j6WZSDlA1SsWuAhn9bv2HGXFhoHe3TQVvOysUXdRvCyo2yzzdiwGQeqJs5Gl4dfxqZmyFnlutpAnoygTJVWdtQ==
   dependencies:
-    "@elastic/apm-rum" "^5.13.0"
+    "@elastic/apm-rum" "^5.14.0"
     hoist-non-react-statics "^3.3.0"
 
-"@elastic/apm-rum@^5.13.0":
-  version "5.13.0"
-  resolved "https://registry.yarnpkg.com/@elastic/apm-rum/-/apm-rum-5.13.0.tgz#a79df440a2e80a492b24e9c04b62c408a6863fa4"
-  integrity sha512-b3H9EEwUpDsGhtqY9oiVILR3nFh8jM9rA9LQGZxw155d2x1MEFyqOhI1uXkhgxirnC+RZHRuQKcfWxZtPQnrfA==
+"@elastic/apm-rum@^5.14.0":
+  version "5.14.0"
+  resolved "https://registry.yarnpkg.com/@elastic/apm-rum/-/apm-rum-5.14.0.tgz#a7d503a3ef3272767e383e9be780bf68a63c553f"
+  integrity sha512-JyJrKAtumXpQL9X3MTkR4YTw7CzYq5O7jqpB7nVZtqgmfkKgUBAQsmQ4kkpIYhDFDKGDI+45EBj+O0ZQ9QND9w==
   dependencies:
-    "@elastic/apm-rum-core" "^5.18.0"
+    "@elastic/apm-rum-core" "^5.19.0"
 
 "@elastic/app-search-javascript@^8.1.2":
   version "8.1.2"
@@ -5228,6 +5228,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/search-api-panels@link:packages/kbn-search-api-panels":
+  version "0.0.0"
+  uid ""
+
 "@kbn/search-examples-plugin@link:examples/search_examples":
   version "0.0.0"
   uid ""
@@ -5884,6 +5888,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/use-tracked-promise@link:packages/kbn-use-tracked-promise":
+  version "0.0.0"
+  uid ""
+
 "@kbn/user-profile-components@link:packages/kbn-user-profile-components":
   version "0.0.0"
   uid ""
@@ -5973,6 +5981,10 @@
   uid ""
 
 "@kbn/visualization-ui-components@link:packages/kbn-visualization-ui-components":
+  version "0.0.0"
+  uid ""
+
+"@kbn/lens-embeddable-utils@link:packages/kbn-lens-embeddable-utils":
   version "0.0.0"
   uid ""
 
@@ -10659,14 +10671,14 @@ ansi-regex@^2.0.0:
   integrity sha1-w7M6te42DYbg5ijwRorn7yfWVN8=
 
 ansi-regex@^3.0.0:
-  version "3.0.0"
-  resolved "https://registry.yarnpkg.com/ansi-regex/-/ansi-regex-3.0.0.tgz#ed0317c322064f79466c02966bddb605ab37d998"
-  integrity sha1-7QMXwyIGT3lGbAKWa922Bas32Zg=
+  version "3.0.1"
+  resolved "https://registry.yarnpkg.com/ansi-regex/-/ansi-regex-3.0.1.tgz#123d6479e92ad45ad897d4054e3c7ca7db4944e1"
+  integrity sha512-+O9Jct8wf++lXxxFc4hc8LsjaSq0HFzzL7cVsw8pRDIPdjKD2mT4ytDZlLuSBZ4cLKZFXIrMGO7DbQCtMJJMKw==
 
 ansi-regex@^4.1.0:
-  version "4.1.0"
-  resolved "https://registry.yarnpkg.com/ansi-regex/-/ansi-regex-4.1.0.tgz#8b9f8f08cf1acb843756a839ca8c7e3168c51997"
-  integrity sha512-1apePfXM1UOSqw0o9IiFAovVz9M5S1Dg+4TrDwfMewQ6p/rmMueb7tWZjQ1rx4Loy1ArBggoqGpfqqdI4rondg==
+  version "4.1.1"
+  resolved "https://registry.yarnpkg.com/ansi-regex/-/ansi-regex-4.1.1.tgz#164daac87ab2d6f6db3a29875e2d1766582dabed"
+  integrity sha512-ILlv4k/3f6vfQ4OoP2AGvirOktlQ98ZEL1k9FaQjxa3L1abBgbuTDAdPOpvbGncC0BTVQrl+OM8xZGK6tWXt7g==
 
 ansi-regex@^5.0.0, ansi-regex@^5.0.1:
   version "5.0.1"

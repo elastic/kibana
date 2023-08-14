@@ -138,6 +138,7 @@
     "@kbn/ml-category-validator",
     "@kbn/observability-ai-assistant-plugin",
     "@kbn/stack-connectors-plugin",
+    "@kbn/stack-alerts-plugin",
     "@kbn/aiops-utils"
   ]
 }
