@@ -184,7 +184,7 @@ describe('Security links', () => {
 
     it('should return unauthorized page when page has upselling (serverless)', async () => {
       const upselling = new UpsellingService();
-      upselling.setRegisteredPages({ [SecurityPageName.network]: () => <span /> });
+      upselling.setPages({ [SecurityPageName.network]: () => <span /> });
 
       const { result, waitForNextUpdate } = renderUseAppLinks();
       const networkLinkItem = {
@@ -250,7 +250,7 @@ describe('Security links', () => {
 
     it('should return unauthorized page when page has upselling (ESS)', async () => {
       const upselling = new UpsellingService();
-      upselling.setRegisteredPages({ [SecurityPageName.network]: () => <span /> });
+      upselling.setPages({ [SecurityPageName.network]: () => <span /> });
       const { result, waitForNextUpdate } = renderUseAppLinks();
       const hostLinkItem = {
         id: SecurityPageName.hosts,
@@ -259,7 +259,7 @@ describe('Security links', () => {
         licenseType: 'platinum' as const,
       };
 
-      mockUpselling.setRegisteredPages({
+      mockUpselling.setPages({
         [SecurityPageName.hosts]: () => <span />,
       });
 
@@ -275,12 +275,12 @@ describe('Security links', () => {
       expect(result.current).toStrictEqual([{ ...hostLinkItem, unauthorized: true }]);
 
       // cleanup
-      mockUpselling.setRegisteredPages({});
+      mockUpselling.setPages({});
     });
 
     it('should filter out experimental page even if it has upselling', async () => {
       const upselling = new UpsellingService();
-      upselling.setRegisteredPages({ [SecurityPageName.network]: () => <span /> });
+      upselling.setPages({ [SecurityPageName.network]: () => <span /> });
       const { result, waitForNextUpdate } = renderUseAppLinks();
       const hostLinkItem = {
         id: SecurityPageName.hosts,
@@ -290,7 +290,7 @@ describe('Security links', () => {
         experimentalKey: 'flagEnabled' as unknown as keyof typeof mockExperimentalDefaults,
       };
 
-      mockUpselling.setRegisteredPages({
+      mockUpselling.setPages({
         [SecurityPageName.hosts]: () => <span />,
       });
 
@@ -306,7 +306,7 @@ describe('Security links', () => {
       expect(result.current).toStrictEqual([]);
 
       // cleanup
-      mockUpselling.setRegisteredPages({});
+      mockUpselling.setPages({});
     });
   });
 

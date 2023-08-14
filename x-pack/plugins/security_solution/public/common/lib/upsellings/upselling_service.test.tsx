@@ -14,7 +14,7 @@ const TestComponent = () => <div>{'TEST component'}</div>;
 describe('UpsellingService', () => {
   it('registers sections', async () => {
     const service = new UpsellingService();
-    service.setRegisteredSections({
+    service.setSections({
       entity_analytics_panel: TestComponent,
     });
 
@@ -25,11 +25,11 @@ describe('UpsellingService', () => {
 
   it('overwrites registered sections when called twice', async () => {
     const service = new UpsellingService();
-    service.setRegisteredSections({
+    service.setSections({
       entity_analytics_panel: TestComponent,
     });
 
-    service.setRegisteredSections({
+    service.setSections({
       osquery_automated_response_actions: TestComponent,
     });
 
@@ -40,7 +40,7 @@ describe('UpsellingService', () => {
 
   it('registers pages', async () => {
     const service = new UpsellingService();
-    service.setRegisteredPages({
+    service.setPages({
       [SecurityPageName.hosts]: TestComponent,
     });
 
@@ -51,11 +51,11 @@ describe('UpsellingService', () => {
 
   it('overwrites registered pages when called twice', async () => {
     const service = new UpsellingService();
-    service.setRegisteredPages({
+    service.setPages({
       [SecurityPageName.hosts]: TestComponent,
     });
 
-    service.setRegisteredPages({
+    service.setPages({
       [SecurityPageName.users]: TestComponent,
     });
 
@@ -67,7 +67,7 @@ describe('UpsellingService', () => {
   it('registers messages', async () => {
     const testMessage = 'test message';
     const service = new UpsellingService();
-    service.setRegisteredMessages({
+    service.setMessages({
       investigation_guide: testMessage,
     });
 
@@ -79,11 +79,11 @@ describe('UpsellingService', () => {
   it('overwrites registered messages when called twice', async () => {
     const testMessage = 'test message';
     const service = new UpsellingService();
-    service.setRegisteredMessages({
+    service.setMessages({
       investigation_guide: testMessage,
     });
 
-    service.setRegisteredMessages({});
+    service.setMessages({});
 
     const value = await firstValueFrom(service.messages$);
 
@@ -92,7 +92,7 @@ describe('UpsellingService', () => {
 
   it('"isPageUpsellable" returns true when page is upsellable', () => {
     const service = new UpsellingService();
-    service.setRegisteredPages({
+    service.setPages({
       [SecurityPageName.hosts]: TestComponent,
     });
 
@@ -101,7 +101,7 @@ describe('UpsellingService', () => {
 
   it('"getPageUpselling" returns page component when page is upsellable', () => {
     const service = new UpsellingService();
-    service.setRegisteredPages({
+    service.setPages({
       [SecurityPageName.hosts]: TestComponent,
     });
 

@@ -35,7 +35,7 @@ const RenderWrapper: React.FunctionComponent = ({ children }) => {
 
 describe('use_upselling', () => {
   test('useUpsellingComponent returns sections', () => {
-    mockUpselling.setRegisteredSections({
+    mockUpselling.setSections({
       entity_analytics_panel: TestComponent,
     });
 
@@ -47,7 +47,7 @@ describe('use_upselling', () => {
   });
 
   test('useUpsellingPage returns pages', () => {
-    mockUpselling.setRegisteredPages({
+    mockUpselling.setPages({
       [SecurityPageName.hosts]: TestComponent,
     });
 
@@ -59,7 +59,7 @@ describe('use_upselling', () => {
 
   test('useUpsellingMessage returns messages', () => {
     const testMessage = 'test message';
-    mockUpselling.setRegisteredMessages({
+    mockUpselling.setPages({
       investigation_guide: testMessage,
     });
 
@@ -72,7 +72,7 @@ describe('use_upselling', () => {
 
   test('useUpsellingMessage returns null when upsellingMessageId not found', () => {
     const emptyMessages = {};
-    mockUpselling.setRegisteredMessages(emptyMessages);
+    mockUpselling.setPages(emptyMessages);
 
     const { result } = renderHook(
       () => useUpsellingMessage('my_fake_message_id' as 'investigation_guide'),

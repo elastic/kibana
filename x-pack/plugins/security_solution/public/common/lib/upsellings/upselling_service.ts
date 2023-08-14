@@ -43,7 +43,7 @@ export class UpsellingService {
     this.messages$ = this.messagesSubject$.asObservable();
   }
 
-  setRegisteredSections(sections: SectionUpsellings) {
+  setSections(sections: SectionUpsellings) {
     this.sections.clear();
 
     Object.entries(sections).forEach(([sectionId, component]) => {
@@ -53,7 +53,7 @@ export class UpsellingService {
     this.sectionsSubject$.next(this.sections);
   }
 
-  setRegisteredPages(pages: PageUpsellings) {
+  setPages(pages: PageUpsellings) {
     this.pages.clear();
 
     Object.entries(pages).forEach(([pageId, component]) => {
@@ -63,7 +63,7 @@ export class UpsellingService {
     this.pagesSubject$.next(this.pages);
   }
 
-  setRegisteredMessages(messages: MessageUpsellings) {
+  setMessages(messages: MessageUpsellings) {
     this.messages.clear();
 
     Object.entries(messages).forEach(([messageId, component]) => {
