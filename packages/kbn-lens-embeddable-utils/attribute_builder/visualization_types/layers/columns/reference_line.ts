@@ -18,7 +18,7 @@ export class ReferenceLineColumn implements StaticChartColumn {
   }
 
   getData(id: string, baseLayer: PersistedIndexPatternLayer): PersistedIndexPatternLayer {
-    const { label, type: _type, ...params } = this.getValueConfig();
+    const { label, ...params } = this.getValueConfig();
     return {
       linkToLayers: [],
       columnOrder: [...baseLayer.columnOrder, id],

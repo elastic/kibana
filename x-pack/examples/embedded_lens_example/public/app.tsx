@@ -19,12 +19,97 @@ import {
 
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
-import type { LensEmbeddableInput, FormulaPublicApi } from '@kbn/lens-plugin/public';
+import type {
+  TypedLensByValueInput,
+  PersistedIndexPatternLayer,
+  XYState,
+  LensEmbeddableInput,
+  FormulaPublicApi,
+  DateHistogramIndexPatternColumn,
+} from '@kbn/lens-plugin/public';
 
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
-import { LensAttributesBuilder, XYChart, XYDataLayer } from '@kbn/lens-embeddable-utils';
 import type { StartDependencies } from './plugin';
+
+// Generate a Lens state based on some app-specific input parameters.
+// `TypedLensByValueInput` can be used for type-safety - it uses the same interfaces as Lens-internal code.
+function getLensAttributes(
+  color: string,
+  dataView: DataView,
+  formula: FormulaPublicApi
+): TypedLensByValueInput['attributes'] {
+  const baseLayer: PersistedIndexPatternLayer = {
+    columnOrder: ['col1'],
+    columns: {
+      col1: {
+        dataType: 'date',
+        isBucketed: true,
+        label: '@timestamp',
+        operationType: 'date_histogram',
+        params: { interval: 'auto' },
+        scale: 'interval',
+        sourceField: dataView.timeFieldName!,
+      } as DateHistogramIndexPatternColumn,
+    },
+  };
+
+  const dataLayer = formula.insertOrReplaceFormulaColumn(
+    'col2',
+    { formula: 'count()' },
+    baseLayer,
+    dataView
+  );
+
+  const xyConfig: XYState = {
+    axisTitlesVisibilitySettings: { x: true, yLeft: true, yRight: true },
+    fittingFunction: 'None',
+    gridlinesVisibilitySettings: { x: true, yLeft: true, yRight: true },
+    layers: [
+      {
+        accessors: ['col2'],
+        layerId: 'layer1',
+        layerType: 'data',
+        seriesType: 'bar_stacked',
+        xAccessor: 'col1',
+        yConfig: [{ forAccessor: 'col2', color }],
+      },
+    ],
+    legend: { isVisible: true, position: 'right' },
+    preferredSeriesType: 'bar_stacked',
+    tickLabelsVisibilitySettings: { x: true, yLeft: true, yRight: true },
+    valueLabels: 'hide',
+  };
+
+  return {
+    visualizationType: 'lnsXY',
+    title: 'Prefilled from example app',
+    references: [
+      {
+        id: dataView.id!,
+        name: 'indexpattern-datasource-current-indexpattern',
+        type: 'index-pattern',
+      },
+      {
+        id: dataView.id!,
+        name: 'indexpattern-datasource-layer-layer1',
+        type: 'index-pattern',
+      },
+    ],
+    state: {
+      datasourceStates: {
+        formBased: {
+          layers: {
+            layer1: dataLayer!,
+          },
+        },
+      },
+      filters: [],
+      query: { language: 'kuery', query: '' },
+      visualization: xyConfig,
+    },
+  };
+}
 
 export const App = (props: {
   core: CoreStart;
@@ -46,27 +131,7 @@ export const App = (props: {
   const LensComponent = props.plugins.lens.EmbeddableComponent;
   const LensSaveModalComponent = props.plugins.lens.SaveModalComponent;
 
-  const attributes = new LensAttributesBuilder({
-    visualization: new XYChart({
-      layers: [
-        new XYDataLayer({
-          data: [
-            {
-              type: 'formula',
-              label: 'Count of Records',
-              value: 'count()',
-              color,
-            },
-          ],
-          options: {
-            seriesType: 'bar_stacked',
-          },
-        }),
-      ],
-      dataView: props.defaultDataView,
-      formulaAPI: props.formula,
-    }),
-  }).build();
+  const attributes = getLensAttributes(color, props.defaultDataView, props.formula);
 
   return (
     <EuiPage>

@@ -8,7 +8,6 @@
 import type { FormulaValueConfig } from '@kbn/lens-embeddable-utils';
 
 export const rx: FormulaValueConfig = {
-  type: 'formula',
   label: 'Network Inbound (RX)',
   value:
     "average(host.network.ingress.bytes) * 8 / (max(metricset.period, kql='host.network.ingress.bytes: *') / 1000)",

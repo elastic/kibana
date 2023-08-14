@@ -8,7 +8,6 @@
 import type { FormulaValueConfig } from '@kbn/lens-embeddable-utils';
 
 export const hostCount: FormulaValueConfig = {
-  type: 'formula',
   label: 'Hosts',
   value: 'unique_count(host.name)',
   format: {

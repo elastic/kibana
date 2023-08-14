@@ -81,13 +81,11 @@ export interface ChartConfig<
 // Formula
 type LensFormula = Parameters<FormulaPublicApi['insertOrReplaceFormulaColumn']>[1];
 export type FormulaValueConfig = Omit<LensFormula, 'formula'> & {
-  type: 'formula';
   color?: string;
   value: string;
 };
 
 export type StaticValueConfig = Omit<LensFormula, 'formula'> & {
-  type: 'static_value';
   color?: string;
   value: string;
 };

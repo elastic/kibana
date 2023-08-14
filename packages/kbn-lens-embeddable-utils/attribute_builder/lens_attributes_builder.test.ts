@@ -87,7 +87,6 @@ const REFERENCE_LINE_LAYER: ReferenceBasedIndexPatternColumn = {
 };
 
 const getFormula = (value: string): FormulaValueConfig => ({
-  type: 'formula',
   value,
   format: {
     id: 'percent',
@@ -260,7 +259,6 @@ describe('lens_attributes_builder', () => {
           new XYReferenceLinesLayer({
             data: [
               {
-                type: 'static_value',
                 value: '1',
                 format: {
                   id: 'percent',

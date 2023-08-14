@@ -69,7 +69,6 @@ const CHARTS_IN_ORDER: MetricChartProps[] = [
       {
         data: [
           {
-            type: 'static_value',
             value: '1',
             format: {
               id: 'percent',
