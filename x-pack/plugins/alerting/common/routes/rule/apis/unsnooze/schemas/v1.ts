@@ -11,7 +11,7 @@ export const unsnoozeParamsSchema = schema.object({
   id: schema.string(),
 });
 
-export const scheduleIdsSchema = schema.maybe(schema.arrayOf(schema.string()));
+const scheduleIdsSchema = schema.maybe(schema.arrayOf(schema.string()));
 
 export const unsnoozeBodySchema = schema.object({
   schedule_ids: scheduleIdsSchema,
