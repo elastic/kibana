@@ -15,6 +15,8 @@ import { getComplianceDashboardSchema } from './schemas/stats';
 
 export type Evaluation = 'passed' | 'failed' | 'NA';
 
+export type Integration_PostureTypes = 'cspm' | 'kspm' | 'vuln_mgmt' | 'all';
+
 export type PostureTypes = 'cspm' | 'kspm' | 'vuln_mgmt' | 'all';
 /** number between 1-100 */
 export type Score = number;

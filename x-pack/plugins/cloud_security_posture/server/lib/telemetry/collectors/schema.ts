@@ -156,4 +156,15 @@ export const cspmUsageSchema: MakeSchemaFrom<CspmUsage> = {
       account_type: { type: 'keyword' },
     },
   },
+  alerts_stats: {
+    type: 'array',
+    items: {
+      posture_type: { type: 'keyword' },
+      rules_count: { type: 'long' },
+      alerts_count: { type: 'long' },
+      open_alerts_count: { type: 'long' },
+      closed_alerts_count: { type: 'long' },
+      acknowledged_alerts_count: { type: 'long' },
+    },
+  },
 };
