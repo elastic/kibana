@@ -120,7 +120,7 @@ export function ConversationView() {
     <>
       {confirmDeleteElement}
       <EuiFlexGroup direction="row" className={containerClassName}>
-        <EuiFlexItem grow={false} style={{ minWidth: 300, maxWidth: 300 }}>
+        <EuiFlexItem grow={false} style={{ width: 250 }}>
           <ConversationList
             selected={conversationId ?? ''}
             loading={conversations.loading || isUpdatingList}
