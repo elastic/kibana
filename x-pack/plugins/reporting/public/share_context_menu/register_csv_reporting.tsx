@@ -28,8 +28,13 @@ export const reportingCsvShareProvider = ({
       return [];
     }
 
-    const getSearchSource = sharingData.getSearchSource as (
-      absoluteTime?: boolean
+    const getSearchSource = sharingData.getSearchSource as ({
+      addGlobalTimeFilter,
+      absoluteTime,
+    } : {
+      addGlobalTimeFilter?: boolean,
+      absoluteTime?: boolean,
+    }
     ) => SearchSourceFields;
 
     const jobParams = {
