@@ -11,7 +11,6 @@ import { getNewRule, getSavedQueryRule } from '../../../objects/rule';
 
 import {
   DEFINE_CONTINUE_BUTTON,
-  CUSTOM_QUERY_BAR,
   LOAD_QUERY_DYNAMICALLY_CHECKBOX,
   QUERY_BAR,
 } from '../../../screens/create_new_rule';
@@ -39,7 +38,7 @@ import {
 } from '../../../tasks/create_new_rule';
 import { saveEditedRule } from '../../../tasks/edit_rule';
 import { login, visit } from '../../../tasks/login';
-import { getDetails } from '../../../tasks/rule_details';
+import { assertDetailsNotExist, getDetails } from '../../../tasks/rule_details';
 import { createRule } from '../../../tasks/api_calls/rules';
 
 import { RULE_CREATION, SECURITY_DETECTIONS_RULES_URL } from '../../../urls/navigation';
@@ -112,12 +111,29 @@ describe('Custom saved_query rules', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS]
         cy.get(TOASTER).should('contain', FAILED_TO_LOAD_ERROR);
       });
 
-      // TODO: this error depended on the schema validation running. Can we show the error
-      // based on the saved query failing to load instead of relying on the schema validation?
-      it.skip('Shows validation error on rule edit when saved query can not be loaded', function () {
+      it('Shows validation error on rule edit when saved query can not be loaded', function () {
         editFirstRule();
 
-        cy.get(CUSTOM_QUERY_BAR).should('contain', FAILED_TO_LOAD_ERROR);
+        cy.get(TOASTER).should('contain', FAILED_TO_LOAD_ERROR);
+      });
+
+      it('Allows to update saved_query rule with non-existent query', () => {
+        editFirstRule();
+
+        cy.get(LOAD_QUERY_DYNAMICALLY_CHECKBOX).should('exist');
+
+        cy.intercept('PUT', '/api/detection_engine/rules').as('editedRule');
+        saveEditedRule();
+
+        cy.wait('@editedRule').then(({ response }) => {
+          // updated rule type shouldn't change
+          cy.wrap(response?.body.type).should('equal', 'saved_query');
+        });
+
+        cy.get(DEFINE_RULE_PANEL_PROGRESS).should('not.exist');
+
+        assertDetailsNotExist(SAVED_QUERY_NAME_DETAILS);
+        assertDetailsNotExist(SAVED_QUERY_DETAILS);
       });
     });
 
