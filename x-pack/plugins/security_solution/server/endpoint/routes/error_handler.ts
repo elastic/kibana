@@ -26,7 +26,11 @@ export const errorHandler = <E extends Error>(
     return error instanceof EndpointHostNotFoundError;
   }
 
-  shouldLogToDebug() ? logger.debug(error.message) : logger.error(error);
+  if(shouldLogToDebug()) {
+    logger.debug(error.message)
+  } else {
+    logger.error(error);
+  }
 
   if (error instanceof CustomHttpRequestError) {
     return res.customError({
