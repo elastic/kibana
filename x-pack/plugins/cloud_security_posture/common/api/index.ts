@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export * from './use_stats_api';
-export * from './use_fetch_detection_rules_by_tags';
+export * from './fetch_detection_engine_rules_by_tags';

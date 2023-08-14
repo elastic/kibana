@@ -27,10 +27,13 @@ const decodeRison = <T extends unknown>(query: string): T | undefined => {
 
 const QUERY_PARAM_KEY = 'cspq';
 
-export const encodeQuery = (query: any): LocationDescriptorObject['search'] => {
+export const encodeQuery = (
+  query: any,
+  queryParamKey = QUERY_PARAM_KEY
+): LocationDescriptorObject['search'] => {
   const risonQuery = encodeRison(query);
   if (!risonQuery) return;
-  return `${QUERY_PARAM_KEY}=${risonQuery}`;
+  return `${queryParamKey}=${risonQuery}`;
 };
 
 export const decodeQuery = <T extends unknown>(search?: string): Partial<T> | undefined => {

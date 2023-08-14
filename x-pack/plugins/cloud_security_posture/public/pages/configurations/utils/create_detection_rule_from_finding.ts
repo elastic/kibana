@@ -12,6 +12,7 @@ import {
   LATEST_FINDINGS_RETENTION_POLICY,
 } from '../../../../common/constants';
 import { createDetectionRule } from '../../../common/api/create_detection_rule';
+import { generateFindingsTags } from './generate_findings_tags';
 
 const DEFAULT_RULE_RISK_SCORE = 0;
 const DEFAULT_RULE_SEVERITY = 'low';
@@ -42,28 +43,6 @@ const convertReferencesLinksToArray = (input: string | undefined) => {
 
   // Remove the numbers and new lines
   return matches.map((link) => link.replace(/^\d+\. /, '').replace(/\n/g, ''));
-};
-
-const CSP_RULE_TAG = 'Cloud Security';
-const CNVM_RULE_TAG_USE_CASE = 'Use Case: Configuration Audit';
-const CNVM_RULE_TAG_DATA_SOURCE_PREFIX = 'Data Source: ';
-
-const STATIC_RULE_TAGS = [CSP_RULE_TAG, CNVM_RULE_TAG_USE_CASE];
-
-const generateMisconfigurationsTags = (finding: CspFinding) => {
-  return [STATIC_RULE_TAGS]
-    .concat()
-    .concat(
-      finding.rule.benchmark.posture_type
-        ? [
-            `${CNVM_RULE_TAG_DATA_SOURCE_PREFIX}${finding.rule.benchmark.posture_type.toUpperCase()}`,
-          ]
-        : []
-    )
-    .concat(
-      finding.rule.benchmark.posture_type === 'cspm' ? ['Domain: Cloud'] : ['Domain: Container']
-    )
-    .flat();
 };
 
 const generateMisconfigurationsRuleQuery = (finding: CspFinding) => {
@@ -110,7 +89,7 @@ export const createDetectionRuleFromFinding = async (http: HttpSetup, finding: C
       references: convertReferencesLinksToArray(finding.rule.references),
       name: finding.rule.name,
       description: finding.rule.rationale,
-      tags: generateMisconfigurationsTags(finding),
+      tags: generateFindingsTags(finding),
     },
   });
 };
