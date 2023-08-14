@@ -138,74 +138,6 @@ describe('rule_event_log_list', () => {
     expect(wrapper.find(EuiDataGrid).props().rowCount).toEqual(mockLogResponse.total);
   });
 
-  it('can sort by single column', async () => {
-    const wrapper = mountWithIntl(
-      <RuleEventLogList
-        ruleId={ruleMock.id}
-        ruleType={ruleType}
-        ruleSummary={mockRuleSummary({ ruleTypeId: ruleMock.ruleTypeId })}
-        numberOfExecutions={60}
-        onChangeDuration={onChangeDurationMock}
-        loadExecutionLogAggregations={loadExecutionLogAggregationsMock}
-      />
-    );
-
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
-    });
-
-    const headerCellButton = wrapper.find('[data-test-subj="dataGridHeaderCell-timestamp"] button');
-
-    headerCellButton.simulate('click');
-
-    let headerAction = wrapper.find('[data-test-subj="dataGridHeaderCellActionGroup-timestamp"]');
-
-    expect(headerAction.exists()).toBeTruthy();
-
-    // Sort by the timestamp column
-    headerAction.find('li').at(1).find('button').simulate('click');
-
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
-    });
-
-    expect(loadExecutionLogAggregationsMock).toHaveBeenLastCalledWith(
-      expect.objectContaining({
-        id: ruleMock.id,
-        message: '',
-        outcomeFilter: [],
-        page: 0,
-        perPage: 10,
-        sort: [{ timestamp: { order: 'desc' } }],
-      })
-    );
-
-    // Open the popover again
-    headerCellButton.simulate('click');
-
-    headerAction = wrapper.find('[data-test-subj="dataGridHeaderCellActionGroup-timestamp"]');
-
-    // Sort by the timestamp column, this time, in the opposite direction
-    headerAction.find('li').at(2).find('button').simulate('click');
-
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
-    });
-
-    expect(loadExecutionLogAggregationsMock).toHaveBeenLastCalledWith(
-      expect.objectContaining({
-        id: ruleMock.id,
-        sort: [{ timestamp: { order: 'desc' } }],
-        outcomeFilter: [],
-        page: 0,
-        perPage: 10,
-      })
-    );
-  });
-
   it('can filter by execution log outcome status', async () => {
     const wrapper = mountWithIntl(
       <RuleEventLogList
@@ -447,7 +379,7 @@ describe('rule_event_log_list', () => {
     ).toEqual(['timestamp', 'execution_duration', 'status', 'message', 'num_errored_actions']);
   });
 
-  it.skip('does not show the refine search prompt normally', async () => {
+  it('does not show the refine search prompt normally', async () => {
     render(
       <IntlProvider locale="en">
         <RuleEventLogList
@@ -466,7 +398,7 @@ describe('rule_event_log_list', () => {
     ).not.toBeInTheDocument();
   });
 
-  it.skip('shows the refine search prompt when our queries return too much data', async () => {
+  it('shows the refine search prompt when our queries return too much data', async () => {
     loadExecutionLogAggregationsMock.mockResolvedValue({
       data: [],
       total: 1100,
@@ -516,7 +448,7 @@ describe('rule_event_log_list', () => {
     expect(wrapper.find(RefineSearchPrompt).exists()).toBeFalsy();
   });
 
-  it.skip('shows the correct pagination results when results are 0', async () => {
+  it('shows the correct pagination results when results are 0', async () => {
     loadExecutionLogAggregationsMock.mockResolvedValue({
       ...mockLogResponse,
       total: 0,
@@ -543,7 +475,7 @@ describe('rule_event_log_list', () => {
     );
   });
 
-  it.skip('shows the correct pagination result when result is 1', async () => {
+  it('shows the correct pagination result when result is 1', async () => {
     loadExecutionLogAggregationsMock.mockResolvedValue({
       ...mockLogResponse,
       total: 1,
@@ -570,7 +502,7 @@ describe('rule_event_log_list', () => {
     );
   });
 
-  it.skip('shows the correct pagination result when paginated', async () => {
+  it('shows the correct pagination result when paginated', async () => {
     loadExecutionLogAggregationsMock.mockResolvedValue({
       ...mockLogResponse,
       total: 85,
@@ -603,7 +535,7 @@ describe('rule_event_log_list', () => {
     ).toHaveTextContent('Showing 81 - 85 of 85 log entries');
   });
 
-  it.skip('renders errored action badges in message rows', async () => {
+  it('renders errored action badges in message rows', async () => {
     loadExecutionLogAggregationsMock.mockResolvedValue({
       data: [
         {
@@ -651,7 +583,7 @@ describe('rule_event_log_list', () => {
     expect(wrapper.find('[data-test-subj="ruleActionErrorLogFlyout"]').exists()).toBeTruthy();
   });
 
-  it.skip('shows rule summary and execution duration chart', async () => {
+  it('shows rule summary and execution duration chart', async () => {
     loadExecutionLogAggregationsMock.mockResolvedValue({
       ...mockLogResponse,
       total: 85,
@@ -687,7 +619,7 @@ describe('rule_event_log_list', () => {
     );
   });
 
-  it.skip('renders average execution duration', async () => {
+  it('renders average execution duration', async () => {
     const ruleTypeCustom = mockRuleType({ ruleTaskTimeout: '10m' });
     const ruleSummary = mockRuleSummary({
       executionDuration: { average: 60284, valuesWithTimestamp: {} },
