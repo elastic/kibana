@@ -42,12 +42,7 @@ export function useKnowledgeBase(): UseKnowledgeBaseResult {
 
   return useMemo(
     () => ({
-      status: {
-        ...status,
-        value: {
-          ready: false,
-        },
-      },
+      status,
       isInstalling,
       installError,
       install: () => {
