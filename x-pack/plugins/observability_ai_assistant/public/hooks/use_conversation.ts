@@ -9,12 +9,19 @@ import { merge, omit } from 'lodash';
 import { Dispatch, SetStateAction, useState } from 'react';
 import type { Conversation, Message } from '../../common';
 import type { ConversationCreateRequest } from '../../common/types';
+import { ObservabilityAIAssistantChatService } from '../types';
 import { useAbortableAsync, type AbortableAsyncState } from './use_abortable_async';
 import { useKibana } from './use_kibana';
 import { useObservabilityAIAssistant } from './use_observability_ai_assistant';
 import { createNewConversation } from './use_timeline';
 
-export function useConversation(conversationId?: string): {
+export function useConversation({
+  conversationId,
+  chatService,
+}: {
+  conversationId?: string;
+  chatService?: ObservabilityAIAssistantChatService;
+}): {
   conversation: AbortableAsyncState<ConversationCreateRequest | Conversation | undefined>;
   displayedMessages: Message[];
   setDisplayedMessages: Dispatch<SetStateAction<Message[]>>;
@@ -32,7 +39,9 @@ export function useConversation(conversationId?: string): {
     useAbortableAsync(
       ({ signal }) => {
         if (!conversationId) {
-          const nextConversation = createNewConversation();
+          const nextConversation = createNewConversation({
+            contexts: chatService?.getContexts() || [],
+          });
           setDisplayedMessages(nextConversation.messages);
           return nextConversation;
         }
@@ -51,7 +60,7 @@ export function useConversation(conversationId?: string): {
             throw error;
           });
       },
-      [conversationId]
+      [conversationId, chatService]
     );
 
   return {

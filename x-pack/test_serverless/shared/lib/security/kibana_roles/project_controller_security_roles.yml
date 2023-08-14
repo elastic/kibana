@@ -165,7 +165,7 @@ t3_analyst:
         - event_filters_all
         - host_isolation_exceptions_all
         - blocklist_all
-        - policy_management_all # Elastic Defend Policy Management
+        - policy_management_read # Elastic Defend Policy Management
         - host_isolation_all
         - process_operations_all
         - actions_log_management_all # Response actions history
