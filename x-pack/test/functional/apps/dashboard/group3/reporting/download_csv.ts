@@ -67,7 +67,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await testSubjects.existOrFail('csvDownloadStarted'); // validate toast panel
   };
 
-  describe('Download CSV', () => {
+  describe.only('Download CSV', () => {
     before('initialize tests', async () => {
       log.debug('ReportingPage:initTests');
       await browser.setWindowSize(1600, 850);
@@ -82,9 +82,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('Default Saved Search Data', () => {
-      const dashboardAllDataHiddenTitles = 'Ecom Dashboard Hidden Panel Titles';
-      const dashboardPeriodOf2DaysData = 'Ecom Dashboard - 3 Day Period';
-
       before(async () => {
         await reporting.initEcommerce();
         await navigateToDashboardApp();
@@ -95,7 +92,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('Download CSV export of a saved search panel', async function () {
-        await PageObjects.dashboard.loadSavedDashboard(dashboardPeriodOf2DaysData);
+        await PageObjects.dashboard.loadSavedDashboard('Ecom Dashboard - 3 Day Period');
         await clickActionsMenu('EcommerceData');
         await clickDownloadCsv();
 
@@ -104,7 +101,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('Downloads a filtered CSV export of a saved search panel', async function () {
-        await PageObjects.dashboard.loadSavedDashboard(dashboardPeriodOf2DaysData);
+        await PageObjects.dashboard.loadSavedDashboard('Ecom Dashboard - 3 Day Period');
 
         // add a filter
         await filterBar.addFilter({ field: 'category', operation: 'is', value: `Men's Shoes` });
@@ -116,8 +113,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expectSnapshot(csvFile).toMatch();
       });
 
+      it('Downloads a saved search panel with a custom time range that does not intersect with dashboard time range', async function () {
+        await PageObjects.dashboard.loadSavedDashboard('Ecom Dashboard - 3 Day Period - custom time range');
+
+        await clickActionsMenu('EcommerceData');
+        await clickDownloadCsv();
+
+        const csvFile = await getDownload(getCsvPath('Ecommerce Data'));
+        expectSnapshot(csvFile).toMatch();
+      });
+
       it('Gets the correct filename if panel titles are hidden', async () => {
-        await PageObjects.dashboard.loadSavedDashboard(dashboardAllDataHiddenTitles);
+        await PageObjects.dashboard.loadSavedDashboard('Ecom Dashboard Hidden Panel Titles');
         const savedSearchPanel = await find.byCssSelector(
           '[data-test-embeddable-id="94eab06f-60ac-4a85-b771-3a8ed475c9bb"]'
         ); // panel title is hidden
