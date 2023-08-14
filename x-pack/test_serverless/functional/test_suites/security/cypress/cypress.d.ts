@@ -1,8 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 // / <reference types="cypress" />
@@ -33,7 +34,7 @@ import {
 } from '@kbn/security-solution-plugin/common/endpoint/types';
 import { IndexedEndpointPolicyResponse } from '@kbn/security-solution-plugin/common/endpoint/data_loaders/index_endpoint_policy_response';
 import { DeleteAllEndpointDataResponse } from '@kbn/security-solution-plugin/scripts/endpoint/common/delete_all_endpoint_data';
-import { LoadedRoleAndUser, ServerlessRoleName } from '../../../../shared/lib';
+import { LoadedRoleAndUser, ServerlessRoleName } from '@kbn/securitysolution-runtime-services';
 
 export interface LoadUserAndRoleCyTaskOptions {
   name: ServerlessRoleName;
