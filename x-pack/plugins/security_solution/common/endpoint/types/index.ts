@@ -945,6 +945,8 @@ export interface PolicyConfig {
     license_uid: string;
     cluster_uuid: string;
     cluster_name: string;
+    serverless: boolean;
+    heartbeatinterval?: number;
   };
   windows: {
     advanced?: {
