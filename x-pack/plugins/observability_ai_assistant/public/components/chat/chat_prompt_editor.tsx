@@ -127,7 +127,7 @@ export function ChatPromptEditor({
     } catch (_) {
       setPrompt(currentPrompt);
     }
-  }, [functionPayload, onSubmit, prompt, selectedFunctionName]);
+  }, [functionPayload, loading, onSubmit, prompt, selectedFunctionName]);
 
   useEffect(() => {
     const keyboardListener = (event: KeyboardEvent) => {

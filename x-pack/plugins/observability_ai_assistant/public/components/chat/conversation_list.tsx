@@ -29,7 +29,7 @@ const titleClassName = css`
 `;
 
 const newChatButtonWrapperClassName = css`
-  padding-bottom: 5px;
+  padding-bottom: 10px;
 `;
 
 export function ConversationList({
