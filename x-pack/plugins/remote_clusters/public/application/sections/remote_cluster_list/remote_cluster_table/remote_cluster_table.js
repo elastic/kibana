@@ -235,7 +235,7 @@ export class RemoteClusterTable extends Component {
         name: i18n.translate('xpack.remoteClusters.remoteClusterList.table.addressesColumnTitle', {
           defaultMessage: 'Addresses',
         }),
-        dataTestSubj: 'remoteClustersAddress',
+        'data-test-subj': 'remoteClustersAddress',
         truncateText: true,
         render: (mode, { seeds, proxyAddress }) => {
           const clusterAddressString = mode === PROXY_MODE ? proxyAddress : seeds.join(', ');
@@ -259,6 +259,7 @@ export class RemoteClusterTable extends Component {
         ),
         sortable: true,
         width: '160px',
+        align: 'right',
         render: (mode, { connectedNodesCount, connectedSocketsCount }) => {
           const remoteNodesCount =
             mode === PROXY_MODE ? connectedSocketsCount : connectedNodesCount;
