@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { v4 as uuidV4 } from 'uuid';
 import {
   type TestElasticsearchUtils,
   type TestKibanaUtils,
@@ -79,6 +80,7 @@ const taskManagerStartSpy = jest.spyOn(TaskManagerPlugin.prototype, 'start');
 for (let i = 0; i < 25; i++) {
   describe(`task state validation ${i}`, () => {
     describe('allow_reading_invalid_state: true', () => {
+      const taskIdsToRemove: string[] = [];
       let esServer: TestElasticsearchUtils;
       let kibanaServer: TestKibanaUtils;
       let taskManagerPlugin: TaskManagerStartContract;
@@ -110,7 +112,10 @@ for (let i = 0; i < 25; i++) {
       });
 
       afterEach(async () => {
-        await taskManagerPlugin.removeIfExists('foo');
+        while (taskIdsToRemove.length > 0) {
+          const id = taskIdsToRemove.pop();
+          await taskManagerPlugin.removeIfExists(id!);
+        }
       });
 
       it('should drop unknown fields from the task state', async () => {
@@ -118,8 +123,9 @@ for (let i = 0; i < 25; i++) {
           return { state: {} };
         });
 
+        const id = uuidV4();
         await injectTask(kibanaServer.coreStart.elasticsearch.client.asInternalUser, {
-          id: 'foo',
+          id,
           taskType: 'fooType',
           params: { foo: true },
           state: { foo: 'test', bar: 'test', baz: 'test', invalidProperty: 'invalid' },
@@ -133,6 +139,7 @@ for (let i = 0; i < 25; i++) {
           retryAt: null,
           ownerId: null,
         });
+        taskIdsToRemove.push(id);
 
         await retry(async () => {
           expect(mockTaskTypeRunFn).toHaveBeenCalled();
@@ -153,13 +160,13 @@ for (let i = 0; i < 25; i++) {
           return { state: { invalidField: true, foo: 'test', bar: 'test', baz: 'test' } };
         });
 
-        await taskManagerPlugin.schedule({
-          id: 'foo',
+        const task = await taskManagerPlugin.schedule({
           taskType: 'fooType',
           params: {},
           state: { foo: 'test', bar: 'test', baz: 'test' },
           schedule: { interval: '1d' },
         });
+        taskIdsToRemove.push(task.id);
 
         await retry(async () => {
           expect(mockTaskTypeRunFn).toHaveBeenCalled();
@@ -173,7 +180,7 @@ for (let i = 0; i < 25; i++) {
           baz: 'test',
         });
         expect(errorLogSpy).toHaveBeenCalledWith(
-          'Task fooType "foo" failed: Error: [invalidField]: definition for this key is missing',
+          `Task fooType "${task.id}" failed: Error: [invalidField]: definition for this key is missing`,
           expect.anything()
         );
       });
@@ -183,8 +190,9 @@ for (let i = 0; i < 25; i++) {
           return { state: {} };
         });
 
+        const id = uuidV4();
         await injectTask(kibanaServer.coreStart.elasticsearch.client.asInternalUser, {
-          id: 'foo',
+          id,
           taskType: 'fooType',
           params: { foo: true },
           state: {},
@@ -197,6 +205,7 @@ for (let i = 0; i < 25; i++) {
           retryAt: null,
           ownerId: null,
         });
+        taskIdsToRemove.push(id);
 
         await retry(async () => {
           expect(mockTaskTypeRunFn).toHaveBeenCalled();
@@ -217,8 +226,9 @@ for (let i = 0; i < 25; i++) {
           return { state: {} };
         });
 
+        const id = uuidV4();
         await injectTask(kibanaServer.coreStart.elasticsearch.client.asInternalUser, {
-          id: 'foo',
+          id,
           taskType: 'fooType',
           params: { foo: true },
           state: { foo: true, bar: 'test', baz: 'test' },
@@ -232,6 +242,7 @@ for (let i = 0; i < 25; i++) {
           retryAt: null,
           ownerId: null,
         });
+        taskIdsToRemove.push(id);
 
         await retry(async () => {
           expect(mockTaskTypeRunFn).toHaveBeenCalled();
@@ -246,12 +257,13 @@ for (let i = 0; i < 25; i++) {
         });
 
         expect(debugLogSpy).toHaveBeenCalledWith(
-          `[fooType][foo] Failed to validate the task's state. Allowing read operation to proceed because allow_reading_invalid_state is true. Error: [foo]: expected value of type [string] but got [boolean]`
+          `[fooType][${id}] Failed to validate the task's state. Allowing read operation to proceed because allow_reading_invalid_state is true. Error: [foo]: expected value of type [string] but got [boolean]`
         );
       });
     });
 
     describe('allow_reading_invalid_state: false', () => {
+      const taskIdsToRemove: string[] = [];
       let esServer: TestElasticsearchUtils;
       let kibanaServer: TestKibanaUtils;
       let taskManagerPlugin: TaskManagerStartContract;
@@ -289,14 +301,18 @@ for (let i = 0; i < 25; i++) {
       });
 
       afterEach(async () => {
-        await taskManagerPlugin.removeIfExists('foo');
+        while (taskIdsToRemove.length > 0) {
+          const id = taskIdsToRemove.pop();
+          await taskManagerPlugin.removeIfExists(id!);
+        }
       });
 
       it('should fail the task run when setting allow_reading_invalid_state:false and reading an invalid state', async () => {
         const errorLogSpy = jest.spyOn(pollingLifecycleOpts.logger, 'error');
 
+        const id = uuidV4();
         await injectTask(kibanaServer.coreStart.elasticsearch.client.asInternalUser, {
-          id: 'foo',
+          id,
           taskType: 'fooType',
           params: { foo: true },
           state: { foo: true, bar: 'test', baz: 'test' },
@@ -310,6 +326,7 @@ for (let i = 0; i < 25; i++) {
           retryAt: null,
           ownerId: null,
         });
+        taskIdsToRemove.push(id);
 
         await retry(async () => {
           expect(errorLogSpy).toHaveBeenCalledWith(
