@@ -233,7 +233,7 @@ describe('filters', () => {
           filters: [
             {
               input: {
-                query: 'bytes : *',
+                query: '"bytes" : *',
                 language: 'kuery',
               },
               label: '',
@@ -272,14 +272,14 @@ describe('filters', () => {
           filters: [
             {
               input: {
-                query: 'bytes : *',
+                query: '"bytes" : *',
                 language: 'kuery',
               },
               label: '',
             },
             {
               input: {
-                query: 'dest : *',
+                query: '"dest" : *',
                 language: 'kuery',
               },
               label: '',
