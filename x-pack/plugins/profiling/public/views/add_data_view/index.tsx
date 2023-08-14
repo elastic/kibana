@@ -33,7 +33,7 @@ import { AsyncStatus, useAsync } from '../../hooks/use_async';
 import { useProfilingDependencies } from '../../components/contexts/profiling_dependencies/use_profiling_dependencies';
 import { ProfilingAppPageTemplate } from '../../components/profiling_app_page_template';
 
-export enum NoDataTabs {
+export enum AddDataTabs {
   Kubernetes = 'kubernetes',
   Docker = 'docker',
   Binary = 'binary',
@@ -43,7 +43,7 @@ export enum NoDataTabs {
   Symbols = 'symbols',
 }
 
-export function NoDataView() {
+export function AddDataView() {
   const { query } = useProfilingParams('/add-data-instructions');
   const { selectedTab } = query;
   const profilingRouter = useProfilingRouter();
@@ -73,7 +73,7 @@ export function NoDataView() {
 
   const tabs = [
     {
-      key: NoDataTabs.Kubernetes,
+      key: AddDataTabs.Kubernetes,
       title: i18n.translate('xpack.profiling.tabs.kubernetesTitle', {
         defaultMessage: 'Kubernetes',
       }),
@@ -123,7 +123,7 @@ elastic/pf-host-agent`}
       ],
     },
     {
-      key: NoDataTabs.Docker,
+      key: AddDataTabs.Docker,
       title: i18n.translate('xpack.profiling.tabs.dockerTitle', {
         defaultMessage: 'Docker',
       }),
@@ -145,7 +145,7 @@ docker.elastic.co/observability/profiling-agent:${stackVersion} /root/pf-host-ag
       ],
     },
     {
-      key: NoDataTabs.Binary,
+      key: AddDataTabs.Binary,
       title: i18n.translate('xpack.profiling.tabs.binaryTitle', {
         defaultMessage: 'Binary',
       }),
@@ -193,7 +193,7 @@ docker.elastic.co/observability/profiling-agent:${stackVersion} /root/pf-host-ag
       ],
     },
     {
-      key: NoDataTabs.Deb,
+      key: AddDataTabs.Deb,
       title: i18n.translate('xpack.profiling.tabs.debTitle', {
         defaultMessage: 'DEB Package',
       }),
@@ -245,7 +245,7 @@ echo "deb https://artifacts.elastic.co/packages/${majorVersion}.x/apt stable mai
       ],
     },
     {
-      key: NoDataTabs.RPM,
+      key: AddDataTabs.RPM,
       title: i18n.translate('xpack.profiling.tabs.rpmTitle', {
         defaultMessage: 'RPM Package',
       }),
@@ -304,7 +304,7 @@ EOF`}
       ],
     },
     {
-      key: NoDataTabs.ElasticAgentIntegration,
+      key: AddDataTabs.ElasticAgentIntegration,
       title: i18n.translate('xpack.profiling.tabs.elasticAgentIntegration.title', {
         defaultMessage: 'Elastic Agent Integration',
       }),
@@ -364,7 +364,7 @@ EOF`}
       ],
     },
     {
-      key: NoDataTabs.Symbols,
+      key: AddDataTabs.Symbols,
       title: i18n.translate('xpack.profiling.tabs.symbols.title', {
         defaultMessage: 'Upload Symbols',
       }),
