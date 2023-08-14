@@ -777,7 +777,6 @@ export class SearchSource {
     return field;
   }
 
-  // todo
   private flatten() {
     const { getConfig } = this.dependencies;
     const searchRequest = this.mergeProps();
@@ -800,11 +799,13 @@ export class SearchSource {
     // set defaults
     let fieldsFromSource = searchRequest.fieldsFromSource || [];
     body.fields = body.fields || [];
-    // maybe this is where the conditional goes
-    body.script_fields = {
-      ...body.script_fields,
-      ...scriptFields,
-    };
+
+    if (this.dependencies.scriptedFieldsEnabled) {
+      body.script_fields = {
+        ...body.script_fields,
+        ...scriptFields,
+      };
+    }
     body.stored_fields = storedFields;
     body.runtime_mappings = runtimeFields || {};
 

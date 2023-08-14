@@ -597,7 +597,6 @@ export class DataViewsService {
   private refreshFieldsFn = async (indexPattern: DataView) => {
     const { fields, indices } = await this.getFieldsAndIndicesForDataView(indexPattern);
     fields.forEach((field) => (field.isMapped = true));
-    // todo - uh oh, lifecycle concerns! saving data view reads from whole field list
     const scripted = this.scriptedFieldsEnabled
       ? indexPattern.getScriptedFields().map((field) => field.spec)
       : [];
