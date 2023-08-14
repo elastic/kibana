@@ -93,3 +93,6 @@ input_control_vis.readOnly: true
 
 # Disable cases in stack management
 xpack.cases.stack.enabled: false
+
+## TaskManager requeue invalid tasks, supports ZDT
+xpack.task_manager.requeue_invalid_tasks.enabled: true
