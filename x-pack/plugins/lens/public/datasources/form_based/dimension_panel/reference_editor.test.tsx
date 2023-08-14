@@ -40,6 +40,13 @@ jest.mock('@kbn/unified-field-list/src/hooks/use_existing_fields', () => ({
 
 jest.mock('../operations');
 
+const getFieldSelectComboBox = (wrapper: ReactWrapper) =>
+  wrapper
+    .find(EuiComboBox)
+    .filter('[data-test-subj="indexPattern-dimension-field"]') as ReactWrapper<
+    EuiComboBoxProps<string | number | string[] | undefined>
+  >;
+
 describe('reference editor', () => {
   let wrapper: ReactWrapper | ShallowWrapper;
   let paramEditorUpdater: jest.Mock<ReferenceEditorProps['paramEditorUpdater']>;
@@ -124,10 +131,7 @@ describe('reference editor', () => {
       expect.objectContaining({ 'data-test-subj': expect.stringContaining('Incompatible') })
     );
 
-    const fields = wrapper
-      .find(EuiComboBox)
-      .filter('[data-test-subj="indexPattern-dimension-field"]')
-      .prop('options');
+    const fields = getFieldSelectComboBox(wrapper).prop('options');
 
     expect(fields![0].options).not.toContainEqual(
       expect.objectContaining({ 'data-test-subj': expect.stringContaining('Incompatible') })
@@ -163,15 +167,10 @@ describe('reference editor', () => {
       />
     );
 
-    const fields = wrapper
-      .find(EuiComboBox)
-      .filter('[data-test-subj="indexPattern-dimension-field"]')
-      .prop('options');
+    const fields = getFieldSelectComboBox(wrapper).prop('options');
 
     const findFieldDataTestSubj = (l: string) => {
-      return fields![0].options!.find(({ label }: EuiComboBoxOptionOption) => label === l)![
-        'data-test-subj'
-      ];
+      return fields![0].options!.find(({ label }) => label === l)!['data-test-subj'];
     };
     expect(findFieldDataTestSubj('timestampLabel')).toContain('Incompatible');
     expect(findFieldDataTestSubj('source')).toContain('Incompatible');
