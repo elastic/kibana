@@ -131,7 +131,7 @@ export class ReportingCsvPanelAction implements ActionDefinition<ActionContext> 
     const immediateJobParams = this.apiClient.getDecoratedJobParams({
       searchSource: getSearchSource({
         addGlobalTimeFilter: !embeddable.hasTimeRange(),
-        absoluteTime: true
+        absoluteTime: true,
       }),
       columns,
       title: savedSearch.title || '',
