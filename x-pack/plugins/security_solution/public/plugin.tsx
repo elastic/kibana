@@ -178,6 +178,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         _name: 'custom',
       };
 
+      // @ts-expect-error
+      customDataService.query.filterManager._name = 'customFilterManager';
+
       const services: StartServices = {
         ...coreStart,
         ...startPlugins,
