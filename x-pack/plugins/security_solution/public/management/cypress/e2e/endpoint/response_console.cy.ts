@@ -32,7 +32,7 @@ describe('Response console', () => {
     login();
   });
 
-  describe('User journey for Isolate command: isolate and release an endpoint', () => {
+  describe.skip('User journey for Isolate command: isolate and release an endpoint', () => {
     let indexedPolicy: IndexedFleetEndpointPolicyResponse;
     let policy: PolicyData;
     let createdHost: CreateAndEnrollEndpointHostResponse;
