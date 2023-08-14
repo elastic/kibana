@@ -5,7 +5,4 @@
  * 2.0.
  */
 
-export { XYChart, type XYVisualOptions } from './xy_chart';
-export { MetricChart } from './metric_chart';
-
-export * from './layers';
+export { RemoteClusterSetupTrust } from './remote_cluster_setup_trust';

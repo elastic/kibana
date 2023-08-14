@@ -1,8 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import type { SavedObjectReference } from '@kbn/core/server';
@@ -13,9 +14,9 @@ import type {
   MetricVisualizationState,
   PersistedIndexPatternLayer,
 } from '@kbn/lens-plugin/public';
-import type { ChartColumn, ChartLayer, FormulaConfig } from '../../../types';
+import type { ChartColumn, ChartLayer, FormulaValueConfig } from '../../types';
 import { getDefaultReferences, getHistogramColumn } from '../../utils';
-import { FormulaColumn } from './column/formula';
+import { FormulaColumn } from './columns/formula';
 
 const HISTOGRAM_COLUMN_NAME = 'x_date_histogram';
 
@@ -27,28 +28,32 @@ export interface MetricLayerOptions {
 }
 
 interface MetricLayerConfig {
-  data: FormulaConfig;
+  data: FormulaValueConfig;
   options?: MetricLayerOptions;
-  formulaAPI: FormulaPublicApi;
+  /**
+   * It is possible to define a specific dataView for the layer. It will override the global chart one
+   **/
+  dataView?: DataView;
 }
 
 export class MetricLayer implements ChartLayer<MetricVisualizationState> {
   private column: ChartColumn;
   constructor(private layerConfig: MetricLayerConfig) {
-    this.column = new FormulaColumn(layerConfig.data, layerConfig.formulaAPI);
+    this.column = new FormulaColumn(layerConfig.data);
   }
 
   getLayer(
     layerId: string,
     accessorId: string,
-    dataView: DataView
+    chartDataView: DataView,
+    formulaAPI: FormulaPublicApi
   ): FormBasedPersistedState['layers'] {
     const baseLayer: PersistedIndexPatternLayer = {
       columnOrder: [HISTOGRAM_COLUMN_NAME],
       columns: getHistogramColumn({
         columnName: HISTOGRAM_COLUMN_NAME,
-        overrides: {
-          sourceField: dataView.timeFieldName,
+        options: {
+          sourceField: (this.layerConfig.dataView ?? chartDataView).timeFieldName,
           params: {
             interval: 'auto',
             includeEmptyRows: true,
@@ -66,23 +71,29 @@ export class MetricLayer implements ChartLayer<MetricVisualizationState> {
             columnOrder: [],
             columns: {},
           },
-          dataView
+          this.layerConfig.dataView ?? chartDataView,
+          formulaAPI
         ),
       },
       ...(this.layerConfig.options?.showTrendLine
         ? {
             [`${layerId}_trendline`]: {
               linkToLayers: [layerId],
-              ...this.column.getData(`${accessorId}_trendline`, baseLayer, dataView),
+              ...this.column.getData(
+                `${accessorId}_trendline`,
+                baseLayer,
+                this.layerConfig.dataView ?? chartDataView,
+                formulaAPI
+              ),
             },
           }
         : {}),
     };
   }
-  getReference(layerId: string, dataView: DataView): SavedObjectReference[] {
+  getReference(layerId: string, chartDataView: DataView): SavedObjectReference[] {
     return [
-      ...getDefaultReferences(dataView, layerId),
-      ...getDefaultReferences(dataView, `${layerId}_trendline`),
+      ...getDefaultReferences(this.layerConfig.dataView ?? chartDataView, layerId),
+      ...getDefaultReferences(this.layerConfig.dataView ?? chartDataView, `${layerId}_trendline`),
     ];
   }
 
@@ -107,6 +118,10 @@ export class MetricLayer implements ChartLayer<MetricVisualizationState> {
     };
   }
   getName(): string | undefined {
-    return this.column.getFormulaConfig().label;
+    return this.column.getValueConfig().label;
+  }
+
+  getDataView(): DataView | undefined {
+    return this.layerConfig.dataView;
   }
 }

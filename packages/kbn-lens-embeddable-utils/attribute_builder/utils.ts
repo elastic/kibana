@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
-import {
+
+import type {
   DateHistogramIndexPatternColumn,
   PersistedIndexPatternLayer,
   TermsIndexPatternColumn,
@@ -17,12 +19,27 @@ export const DEFAULT_AD_HOC_DATA_VIEW_ID = 'infra_lens_ad_hoc_default';
 
 const DEFAULT_BREAKDOWN_SIZE = 10;
 
+export function nonNullable<T>(v: T): v is NonNullable<T> {
+  return v != null;
+}
+
+export type DateHistogramColumnParams = DateHistogramIndexPatternColumn['params'];
+
+export type TopValuesColumnParams = Pick<
+  TermsIndexPatternColumn['params'],
+  'size' | 'orderDirection' | 'orderBy'
+>;
+
 export const getHistogramColumn = ({
   columnName,
-  overrides,
+  options,
 }: {
   columnName: string;
-  overrides?: Partial<Pick<DateHistogramIndexPatternColumn, 'sourceField' | 'params'>>;
+  options?: Partial<
+    Pick<DateHistogramIndexPatternColumn, 'sourceField'> & {
+      params: DateHistogramColumnParams;
+    }
+  >;
 }) => {
   return {
     [columnName]: {
@@ -32,32 +49,32 @@ export const getHistogramColumn = ({
       operationType: 'date_histogram',
       scale: 'interval',
       sourceField: '@timestamp',
-      ...overrides,
-      params: { interval: 'auto', ...overrides?.params },
+      ...options,
+      params: { interval: 'auto', ...options?.params },
     } as DateHistogramIndexPatternColumn,
   };
 };
 
 export const getTopValuesColumn = ({
   columnName,
-  overrides,
+  field,
+  options,
 }: {
   columnName: string;
-  overrides?: Partial<Pick<TermsIndexPatternColumn, 'sourceField'>> & {
-    breakdownSize?: number;
-  };
+  field: string;
+  options?: Partial<TopValuesColumnParams>;
 }): PersistedIndexPatternLayer['columns'] => {
-  const { breakdownSize = DEFAULT_BREAKDOWN_SIZE, sourceField } = overrides ?? {};
+  const { size = DEFAULT_BREAKDOWN_SIZE, ...params } = options ?? {};
   return {
     [columnName]: {
-      label: `Top ${breakdownSize} values of ${sourceField}`,
+      label: `Top ${size} values of ${field}`,
       dataType: 'string',
       operationType: 'terms',
       scale: 'ordinal',
-      sourceField,
+      sourceField: field,
       isBucketed: true,
       params: {
-        size: breakdownSize,
+        size,
         orderBy: {
           type: 'alphabetical',
           fallback: false,
@@ -72,6 +89,7 @@ export const getTopValuesColumn = ({
         exclude: [],
         includeIsRegex: false,
         excludeIsRegex: false,
+        ...params,
       },
     } as TermsIndexPatternColumn,
   };
