@@ -55,7 +55,7 @@ export const MultiCrawlScheduler: React.FC<MultiCrawlSchedulerProps> = ({
             <EuiTitle size="xs">
               <h3>
                 {i18n.translate(
-                  'xpack.enterpriseSearch.crawler.crawlCustomSettingsFlyout.seedUrlsAccordionButtonLabel',
+                  'xpack.enterpriseSearch.crawler.crawlCustomSettingsFlyout.multiCrawlSchedulingFrequency',
                   {
                     defaultMessage: 'Crawl frequency',
                   }
@@ -69,7 +69,7 @@ export const MultiCrawlScheduler: React.FC<MultiCrawlSchedulerProps> = ({
             <EuiSwitch
               checked={schedulingEnabled}
               label={i18n.translate(
-                'xpack.enterpriseSearch.crawler.automaticCrawlSchedule.crawlAutomaticallySwitchLabel',
+                'xpack.enterpriseSearch.crawler.crawlCustomSettingsFlyout.multiCrawlSchedulingEnabled',
                 {
                   defaultMessage: 'Enable recurring crawls with the following schedule',
                 }
@@ -85,7 +85,7 @@ export const MultiCrawlScheduler: React.FC<MultiCrawlSchedulerProps> = ({
               <EuiTitle size="xxs">
                 <h5>
                   {i18n.translate(
-                    'xpack.enterpriseSearch.crawler.automaticCrawlSchedule.cronSchedulingTitle',
+                    'xpack.enterpriseSearch.crawler.crawlCustomSettingsFlyout.cronSchedulingTitle',
                     {
                       defaultMessage: 'Specific time scheduling',
                     }
@@ -95,7 +95,7 @@ export const MultiCrawlScheduler: React.FC<MultiCrawlSchedulerProps> = ({
               <EuiSpacer size="s" />
               <EuiText size="xs" color="subdued">
                 {i18n.translate(
-                  'xpack.enterpriseSearch.crawler.automaticCrawlSchedule.cronSchedulingDescription',
+                  'xpack.enterpriseSearch.crawler.crawlCustomSettingsFlyout.cronSchedulingDescription',
                   {
                     defaultMessage:
                       'Define the frequency and time for scheduled crawls. The crawler uses UTC as its timezone.',
@@ -116,7 +116,7 @@ export const MultiCrawlScheduler: React.FC<MultiCrawlSchedulerProps> = ({
           <EuiSpacer />
           <EuiText size="xs" color="subdued">
             {i18n.translate(
-              'xpack.enterpriseSearch.crawler.automaticCrawlSchedule.scheduleDescription',
+              'xpack.enterpriseSearch.crawler.crawlCustomSettingsFlyout.scheduleDescription',
               {
                 defaultMessage:
                   'The crawl schedule will perform a full crawl on every domain on this index.',
@@ -125,7 +125,7 @@ export const MultiCrawlScheduler: React.FC<MultiCrawlSchedulerProps> = ({
             <EuiSpacer size="s" />
             <EuiLink href={docLinks.crawlerManaging} target="_blank" external>
               {i18n.translate(
-                'xpack.enterpriseSearch.crawler.automaticCrawlSchedule.readMoreLink',
+                'xpack.enterpriseSearch.crawler.crawlCustomSettingsFlyout.readMoreLink',
                 {
                   defaultMessage: 'Learn more about scheduling',
                 }

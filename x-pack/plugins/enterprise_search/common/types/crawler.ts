@@ -86,3 +86,20 @@ export type CrawlerCustomScheduleMappingServer = Map<string, CrawlerCustomSchedu
 export interface CrawlerCustomSchedulesServer {
   custom_scheduling: CrawlerCustomScheduleMappingServer;
 }
+
+export interface CrawlerCustomScheduleConfigOverridesClient {
+  maxCrawlDepth?: number;
+  sitemapDiscoveryDisabled?: boolean;
+  domainAllowlist?: string[];
+  sitemapUrls?: string[];
+  seedUrls?: string[];
+}
+
+export interface CrawlerCustomScheduleClient {
+  name: string;
+  interval: string;
+  configurationOverrides: CrawlerCustomScheduleConfigOverridesClient;
+  enabled: boolean;
+}
+
+export type CrawlerCustomScheduleMappingClient = Map<string, CrawlerCustomScheduleClient>;

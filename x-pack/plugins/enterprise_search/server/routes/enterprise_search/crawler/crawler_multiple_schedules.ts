@@ -31,12 +31,12 @@ export function registerCrawlerMultipleSchedulesRoutes({ router, log }: RouteDep
             name: schema.string(),
             interval: schema.string(),
             enabled: schema.boolean(),
-            configuration_overrides: schema.object({
-              max_crawl_depth: schema.maybe(schema.number()),
-              sitemap_discovery_disabled: schema.maybe(schema.boolean()),
-              domain_allowlist: schema.maybe(schema.arrayOf(schema.string())),
-              sitemap_urls: schema.maybe(schema.arrayOf(schema.string())),
-              seed_urls: schema.maybe(schema.arrayOf(schema.string())),
+            configurationOverrides: schema.object({
+              maxCrawlDepth: schema.maybe(schema.number()),
+              sitemapDiscoveryDisabled: schema.maybe(schema.boolean()),
+              domainAllowlist: schema.maybe(schema.arrayOf(schema.string())),
+              sitemapUrls: schema.maybe(schema.arrayOf(schema.string())),
+              seedUrls: schema.maybe(schema.arrayOf(schema.string())),
             }),
           })
         ),
@@ -45,6 +45,7 @@ export function registerCrawlerMultipleSchedulesRoutes({ router, log }: RouteDep
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
       const { params, body } = request;
+      console.log(body);
       await postCrawlerCustomScheduling(client, params.indexName, body);
       return response.ok();
     })

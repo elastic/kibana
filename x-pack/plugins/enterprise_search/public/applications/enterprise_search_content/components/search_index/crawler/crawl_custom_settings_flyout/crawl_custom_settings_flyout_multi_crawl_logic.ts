@@ -10,7 +10,7 @@ import { kea, MakeLogicType } from 'kea';
 import { ConnectorScheduling } from '../../../../../../../common/types/connectors';
 import {
   CrawlerCustomSchedulesServer,
-  CrawlerCustomScheduleMappingServer,
+  CrawlerCustomScheduleClient,
 } from '../../../../../../../common/types/crawler';
 import { CrawlerIndex } from '../../../../../../../common/types/indices';
 import { flashAPIErrors } from '../../../../../shared/flash_messages';
@@ -221,7 +221,7 @@ export const CrawlCustomSettingsFlyoutMultiCrawlLogic = kea<
       const { crawlerConfigurations } = values;
       const customScheduling = crawlerCustomSchedulingClientToServer(crawlerConfigurations);
       try {
-        await http.post<CrawlerCustomScheduleMappingServer>(
+        await http.post<CrawlerCustomScheduleClient>(
           `/internal/enterprise_search/indices/${indexName}/crawler/custom_scheduling`,
           { body: JSON.stringify(Object.fromEntries(customScheduling)) }
         );
