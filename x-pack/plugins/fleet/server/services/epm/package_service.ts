@@ -30,6 +30,7 @@ import type {
 import type { FleetAuthzRouteConfig } from '../security/types';
 import { checkSuperuser, getAuthzFromRequest, doesNotHaveRequiredFleetAuthz } from '../security';
 import { FleetUnauthorizedError } from '../../errors';
+import { INSTALL_PACKAGES_AUTHZ, READ_PACKAGE_INFO_AUTHZ } from '../../routes/epm';
 
 import { installTransforms, isTransform } from './elasticsearch/transform/install';
 import type { FetchFindLatestPackageOptions } from './registry';
@@ -139,7 +140,7 @@ class PackageClientImpl implements PackageClient {
   }
 
   public async getInstallation(pkgName: string) {
-    await this.#runPreflight();
+    await this.#runPreflight(READ_PACKAGE_INFO_AUTHZ);
     return getInstallation({
       pkgName,
       savedObjectsClient: this.internalSoClient,
@@ -151,9 +152,7 @@ class PackageClientImpl implements PackageClient {
     pkgVersion?: string;
     spaceId?: string;
   }): Promise<Installation | undefined> {
-    await this.#runPreflight({
-      integrations: { installPackages: true },
-    });
+    await this.#runPreflight(INSTALL_PACKAGES_AUTHZ);
 
     return ensureInstalledPackage({
       ...options,
@@ -166,12 +165,12 @@ class PackageClientImpl implements PackageClient {
     packageName: string,
     options?: FetchFindLatestPackageOptions
   ): Promise<RegistryPackage | BundledPackage> {
-    await this.#runPreflight();
+    await this.#runPreflight(READ_PACKAGE_INFO_AUTHZ);
     return fetchFindLatestPackageOrThrow(packageName, options);
   }
 
   public async readBundledPackage(bundledPackage: BundledPackage) {
-    await this.#runPreflight();
+    await this.#runPreflight(READ_PACKAGE_INFO_AUTHZ);
     return generatePackageInfoFromArchiveBuffer(bundledPackage.buffer, 'application/zip');
   }
 
@@ -180,7 +179,7 @@ class PackageClientImpl implements PackageClient {
     packageVersion: string,
     options?: Parameters<typeof getPackage>['2']
   ) {
-    await this.#runPreflight();
+    await this.#runPreflight(READ_PACKAGE_INFO_AUTHZ);
     return getPackage(packageName, packageVersion, options);
   }
 
@@ -190,7 +189,7 @@ class PackageClientImpl implements PackageClient {
     prerelease?: false;
   }) {
     const { excludeInstallStatus, category, prerelease } = params || {};
-    await this.#runPreflight();
+    await this.#runPreflight(READ_PACKAGE_INFO_AUTHZ);
     return getPackages({
       savedObjectsClient: this.internalSoClient,
       excludeInstallStatus,
@@ -203,7 +202,7 @@ class PackageClientImpl implements PackageClient {
     packageInfo: InstallablePackage,
     assetPaths: string[]
   ): Promise<InstalledAssetType[]> {
-    await this.#runPreflight();
+    await this.#runPreflight(INSTALL_PACKAGES_AUTHZ);
     let installedAssets: InstalledAssetType[] = [];
 
     const transformPaths = assetPaths.filter(isTransform);
@@ -221,7 +220,7 @@ class PackageClientImpl implements PackageClient {
   }
 
   async #reinstallTransforms(packageInfo: InstallablePackage, paths: string[]) {
-    const authorizationHeader = await this.getAuthorizationHeader();
+    const authorizationHeader = this.getAuthorizationHeader();
 
     const { installedTransforms } = await installTransforms({
       installablePackage: packageInfo,
