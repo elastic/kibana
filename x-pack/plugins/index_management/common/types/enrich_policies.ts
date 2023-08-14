@@ -5,8 +5,12 @@
  * 2.0.
  */
 
-import { API_BASE_PATH, INTERNAL_API_BASE_PATH } from '../../../common';
+import type { EnrichPolicyType } from '@elastic/elasticsearch/lib/api/types';
 
-export const addBasePath = (uri: string): string => API_BASE_PATH + uri;
-
-export const addInternalBasePath = (uri: string): string => INTERNAL_API_BASE_PATH + uri;
+export interface SerializedEnrichPolicy {
+  type: EnrichPolicyType;
+  name: string;
+  sourceIndices: string[];
+  matchField: string;
+  enrichFields: string[];
+}
