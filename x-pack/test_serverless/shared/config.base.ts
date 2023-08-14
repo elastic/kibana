@@ -79,6 +79,7 @@ export default async () => {
         })}`,
         // This ensures we can attempt to access the disabled anonymous routes without getting a 401
         // `--xpack.security.authc.http.schemes=${JSON.stringify(['ApiKey', 'Basic', 'Bearer'])}`,
+        '--xpack.encryptedSavedObjects.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"',
       ],
     },
 

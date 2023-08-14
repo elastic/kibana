@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { CoreSetup, Plugin, CoreStart, PluginInitializerContext } from '@kbn/core/public';
+import { Subscription } from 'rxjs';
 
 import { PLUGIN } from '../common/constants';
 import { init as initBreadcrumbs } from './application/services/breadcrumb';
@@ -26,6 +27,9 @@ export class RemoteClustersUIPlugin
   implements Plugin<RemoteClustersPluginSetup, void, Dependencies, any>
 {
   constructor(private readonly initializerContext: PluginInitializerContext) {}
+
+  private canUseApiKeyTrustModel: boolean = false;
+  private licensingSubscription?: Subscription;
 
   setup(
     { notifications: { toasts }, http, getStartServices }: CoreSetup,
@@ -70,7 +74,12 @@ export class RemoteClustersUIPlugin
           const unmountAppCallback = await renderApp(
             element,
             i18nContext,
-            { isCloudEnabled, cloudBaseUrl, executionContext },
+            {
+              isCloudEnabled,
+              cloudBaseUrl,
+              executionContext,
+              canUseAPIKeyTrustModel: this.canUseApiKeyTrustModel,
+            },
             history,
             theme$
           );
@@ -94,7 +103,7 @@ export class RemoteClustersUIPlugin
     };
   }
 
-  start({ application }: CoreStart) {
+  start({ application }: CoreStart, { licensing }: Dependencies) {
     const {
       ui: { enabled: isRemoteClustersUiEnabled },
     } = this.initializerContext.config.get<ClientConfigType>();
@@ -102,7 +111,13 @@ export class RemoteClustersUIPlugin
     if (isRemoteClustersUiEnabled) {
       initRedirect(application.navigateToApp);
     }
+
+    this.licensingSubscription = licensing.license$.subscribe((next) => {
+      this.canUseApiKeyTrustModel = next.hasAtLeast('enterprise');
+    });
   }
 
-  stop() {}
+  stop() {
+    this.licensingSubscription?.unsubscribe();
+  }
 }

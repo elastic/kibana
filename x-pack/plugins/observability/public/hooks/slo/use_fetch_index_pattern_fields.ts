@@ -18,6 +18,8 @@ export interface UseFetchIndexPatternFieldsResponse {
 export interface Field {
   name: string;
   type: string;
+  aggregatable: boolean;
+  searchable: boolean;
 }
 
 export function useFetchIndexPatternFields(

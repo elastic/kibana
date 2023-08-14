@@ -11,7 +11,7 @@ import { closeAllToasts } from '../../tasks/toasts';
 import { toggleRuleOffAndOn, visitRuleAlerts } from '../../tasks/isolate';
 import { cleanupRule, loadRule } from '../../tasks/api_fixtures';
 import { login } from '../../tasks/login';
-import { loadPage } from '../../tasks/common';
+import { disableExpandableFlyoutAdvancedSettings, loadPage } from '../../tasks/common';
 import type { IndexedFleetEndpointPolicyResponse } from '../../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
 import { createAgentPolicyTask, getEndpointIntegrationVersion } from '../../tasks/fleet';
 import { changeAlertsFilter } from '../../tasks/alerts';
@@ -60,6 +60,7 @@ describe('Automated Response Actions', () => {
 
   beforeEach(() => {
     login();
+    disableExpandableFlyoutAdvancedSettings();
   });
 
   describe('From alerts', () => {

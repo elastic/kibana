@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { SavedObject } from '@kbn/core-saved-objects-server';
 import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
+import type { SavedObject } from '@kbn/core-saved-objects-server';
 
+import { SpacesClient } from './spaces_client';
 import type { GetAllSpacesPurpose, Space } from '../../common';
 import type { ConfigType } from '../config';
 import { ConfigSchema } from '../config';
-import { SpacesClient } from './spaces_client';
 
 const createMockDebugLogger = () => {
   return jest.fn();
