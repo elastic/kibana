@@ -36,7 +36,6 @@ function _InlineTextInput({
   const [textValue, setTextValue] = useState<string>(() => text ?? '');
 
   const containerClasses = classNames('pipelineProcessorsEditor__item__textContainer', {
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     'pipelineProcessorsEditor__item__textContainer--notEditing': !isShowingTextInput && !disabled,
   });
 

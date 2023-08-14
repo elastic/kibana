@@ -25,9 +25,7 @@ export const PercentageBadge = ({ timePercentage, label, valueType = 'percent' }
   return (
     <EuiBadge
       className={classNames({
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         'prfDevTool__percentBadge__progress--percent': valueType === 'percent',
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         'prfDevTool__percentBadge__progress--time': valueType === 'time',
         'euiTextAlign--center': true,
       })}

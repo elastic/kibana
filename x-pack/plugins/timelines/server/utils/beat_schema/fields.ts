@@ -7,7 +7,6 @@
 
 import { BeatFields } from '../../../common/search_strategy/index_fields';
 
-/* eslint-disable @typescript-eslint/naming-convention */
 export const fieldsBeat: BeatFields = {
   _id: {
     category: 'base',
