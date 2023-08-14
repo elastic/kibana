@@ -113,43 +113,40 @@ export const useLensSuggestions = ({
     dataView.isTimeBased() &&
     query &&
     isOfAggregateQueryType(query) &&
+    getAggregateQueryMode(query) === 'esql' &&
     timeRange
   ) {
     const language = getAggregateQueryMode(query);
-    if (language === 'esql') {
-      const interval = computeInterval(timeRange, data);
-      const histogramQuery = `${query[language]} | eval uniqueName = 1
+    const interval = computeInterval(timeRange, data);
+    const histogramQuery = `${query[language]} | eval uniqueName = 1
       | EVAL timestamp=DATE_TRUNC(${dataView.timeFieldName}, ${interval}) | stats rows = count(uniqueName) by timestamp | rename timestamp as \`${dataView.timeFieldName} every ${interval}\``;
-      const context = {
-        dataViewSpec: dataView?.toSpec(),
-        fieldName: '',
-        textBasedColumns: [
-          {
-            id: `${dataView.timeFieldName} every ${interval}`,
-            name: `${dataView.timeFieldName} every ${interval}`,
-            meta: {
-              type: 'date',
-            },
+    const context = {
+      dataViewSpec: dataView?.toSpec(),
+      fieldName: '',
+      textBasedColumns: [
+        {
+          id: `${dataView.timeFieldName} every ${interval}`,
+          name: `${dataView.timeFieldName} every ${interval}`,
+          meta: {
+            type: 'date',
           },
-          {
-            id: 'rows',
-            name: 'rows',
-            meta: {
-              type: 'number',
-            },
-          },
-        ] as DatatableColumn[],
-        query: {
-          esql: histogramQuery,
         },
-      };
-      const sug = isPlainRecord
-        ? lensSuggestionsApi(context, dataView, ['lnsDatatable']) ?? []
-        : [];
-      if (sug.length) {
-        currentSuggestion = sug[0];
-        isOnHistogramMode = true;
-      }
+        {
+          id: 'rows',
+          name: 'rows',
+          meta: {
+            type: 'number',
+          },
+        },
+      ] as DatatableColumn[],
+      query: {
+        esql: histogramQuery,
+      },
+    };
+    const sug = isPlainRecord ? lensSuggestionsApi(context, dataView, ['lnsDatatable']) ?? [] : [];
+    if (sug.length) {
+      currentSuggestion = sug[0];
+      isOnHistogramMode = true;
     }
   }
 
