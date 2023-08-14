@@ -5,5 +5,11 @@
   },
   "include": ["../../../typings/**/*", "common/**/*", "server/**/*", "jest.config.js"],
   "exclude": ["target/**/*"],
-  "kbn_references": ["@kbn/config-schema", "@kbn/core"]
+  "kbn_references": [
+    "@kbn/config-schema",
+    "@kbn/core",
+    "@kbn/apm-data-access-plugin",
+    "@kbn/i18n",
+    "@kbn/core-saved-objects-api-server",
+  ]
 }
