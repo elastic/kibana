@@ -8,7 +8,6 @@
 
 import { i18n } from '@kbn/i18n';
 import { ThemeServiceSetup } from '@kbn/core/public';
-import type { IEmbeddable } from '@kbn/embeddable-plugin/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { IncompatibleActionError, UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
 // for cleanup esFilters need to fix the issue https://github.com/elastic/kibana/issues/131292
@@ -22,7 +21,6 @@ export const ACTION_GLOBAL_APPLY_FILTER = 'ACTION_GLOBAL_APPLY_FILTER';
 export interface ApplyGlobalFilterActionContext {
   filters: Filter[];
   timeFieldName?: string;
-  embeddable?: IEmbeddable;
   // controlledBy is an optional key in filter.meta that identifies the owner of a filter
   // Pass controlledBy to cleanup an existing filter(s) owned by embeddable prior to adding new filters
   controlledBy?: string;
