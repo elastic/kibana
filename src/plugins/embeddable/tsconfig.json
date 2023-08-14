@@ -33,6 +33,7 @@
     "@kbn/content-management-plugin",
     "@kbn/react-kibana-mount",
     "@kbn/unified-search-plugin",
+    "@kbn/data-views-plugin",
   ],
   "exclude": ["target/**/*"]
 }
