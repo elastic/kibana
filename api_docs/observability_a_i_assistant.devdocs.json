@@ -45,6 +45,38 @@
       },
       {
         "parentPluginId": "observabilityAIAssistant",
+        "id": "def-public.ObservabilityAIAssistantActionMenuItem",
+        "type": "Function",
+        "tags": [],
+        "label": "ObservabilityAIAssistantActionMenuItem",
+        "description": [],
+        "signature": [
+          "React.ForwardRefExoticComponent<React.RefAttributes<{}>>"
+        ],
+        "path": "x-pack/plugins/observability_ai_assistant/public/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "observabilityAIAssistant",
+            "id": "def-public.ObservabilityAIAssistantActionMenuItem.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
         "id": "def-public.ObservabilityAIAssistantProvider",
         "type": "Function",
         "tags": [],
@@ -87,6 +119,25 @@
         "signature": [
           "() => ",
           "ObservabilityAIAssistantService"
+        ],
+        "path": "x-pack/plugins/observability_ai_assistant/public/hooks/use_observability_ai_assistant.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
+        "id": "def-public.useObservabilityAIAssistantOptional",
+        "type": "Function",
+        "tags": [],
+        "label": "useObservabilityAIAssistantOptional",
+        "description": [],
+        "signature": [
+          "() => ",
+          "ObservabilityAIAssistantService",
+          " | undefined"
         ],
         "path": "x-pack/plugins/observability_ai_assistant/public/hooks/use_observability_ai_assistant.ts",
         "deprecated": false,
