@@ -21,7 +21,7 @@ type ChatFlyoutProps = React.ComponentProps<typeof Component>;
 
 const Template: ComponentStory<typeof Component> = (props: ChatFlyoutProps) => {
   return (
-    <div style={{ display: 'flex', minHeight: 800 }}>
+    <div style={{ display: 'flex', minHeight: 800, maxWidth: 600 }}>
       <Component {...props} />
     </div>
   );
