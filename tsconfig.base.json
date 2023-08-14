@@ -1170,6 +1170,8 @@
       "@kbn/screenshotting-example-plugin/*": ["x-pack/examples/screenshotting_example/*"],
       "@kbn/screenshotting-plugin": ["x-pack/plugins/screenshotting"],
       "@kbn/screenshotting-plugin/*": ["x-pack/plugins/screenshotting/*"],
+      "@kbn/search-api-panels": ["packages/kbn-search-api-panels"],
+      "@kbn/search-api-panels/*": ["packages/kbn-search-api-panels/*"],
       "@kbn/search-examples-plugin": ["examples/search_examples"],
       "@kbn/search-examples-plugin/*": ["examples/search_examples/*"],
       "@kbn/search-response-warnings": ["packages/kbn-search-response-warnings"],
