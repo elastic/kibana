@@ -31,6 +31,7 @@ export interface CloudSecurityIntegration {
   isLoading: boolean;
   isCloudFormation: boolean;
   cloudFormationProps?: CloudFormationProps;
+  cloudShellUrl: string | undefined;
 }
 
 export interface BaseProps {
