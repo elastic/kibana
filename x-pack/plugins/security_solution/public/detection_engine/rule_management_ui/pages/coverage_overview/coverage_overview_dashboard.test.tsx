@@ -11,32 +11,35 @@ import { useFetchCoverageOverviewQuery } from '../../../rule_management/api/hook
 
 import { getMockCoverageOverviewDashboard } from '../../../rule_management/model/coverage_overview/__mocks__';
 import { TestProviders } from '../../../../common/mock';
-import { CoverageOverviewPage } from './coverage_overview_page';
+import { CoverageOverviewDashboard } from './coverage_overview_dashboard';
+import { CoverageOverviewDashboardContextProvider } from './coverage_overview_dashboard_context';
 
 jest.mock('../../../../common/utils/route/spy_routes', () => ({ SpyRoute: () => null }));
 jest.mock('../../../rule_management/api/hooks/use_fetch_coverage_overview');
 
 (useFetchCoverageOverviewQuery as jest.Mock).mockReturnValue({
   data: getMockCoverageOverviewDashboard(),
+  isLoading: false,
+  refetch: jest.fn(),
 });
 
 const renderCoverageOverviewDashboard = () => {
   return render(
     <TestProviders>
-      <CoverageOverviewPage />
+      <CoverageOverviewDashboardContextProvider>
+        <CoverageOverviewDashboard />
+      </CoverageOverviewDashboardContextProvider>
     </TestProviders>
   );
 };
 
-describe('CoverageOverviewPage', () => {
+describe('CoverageOverviewDashboard', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   test('it renders', () => {
-    const wrapper = renderCoverageOverviewDashboard();
-
-    expect(wrapper.getByTestId('coverageOverviewPage')).toBeInTheDocument();
+    renderCoverageOverviewDashboard();
     expect(useFetchCoverageOverviewQuery).toHaveBeenCalled();
   });
 });

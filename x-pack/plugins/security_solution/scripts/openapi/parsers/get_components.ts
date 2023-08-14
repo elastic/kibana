@@ -5,4 +5,11 @@
  * 2.0.
  */
 
-export { CoverageOverviewPage } from './coverage_overview_page';
+import type { OpenApiDocument } from './openapi_types';
+
+export function getComponents(parsedSchema: OpenApiDocument) {
+  if (parsedSchema.components?.['x-codegen-enabled'] === false) {
+    return undefined;
+  }
+  return parsedSchema.components;
+}

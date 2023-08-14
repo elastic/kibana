@@ -10,7 +10,7 @@ import { css, cx } from '@emotion/css';
 import React from 'react';
 import * as i18n from '../translations';
 
-export interface CoverageOverviewPanelMetadataProps {
+export interface CoverageOverviewPanelRuleStatsProps {
   disabledRules: number;
   enabledRules: number;
 }
@@ -21,12 +21,16 @@ const metadataLabelClass = css`
   text-overflow: ellipsis;
 `;
 
-export const CoverageOverviewPanelMetadata = ({
+export const CoverageOverviewPanelRuleStats = ({
   disabledRules,
   enabledRules,
-}: CoverageOverviewPanelMetadataProps) => {
+}: CoverageOverviewPanelRuleStatsProps) => {
   return (
-    <EuiFlexGroup data-test-subj="coverageOverviewPanelMetadata" direction="column" gutterSize="xs">
+    <EuiFlexGroup
+      data-test-subj="coverageOverviewPanelRuleStats"
+      direction="column"
+      gutterSize="xs"
+    >
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem>
           <EuiText className={cx(metadataLabelClass)} size="xs">
@@ -34,7 +38,7 @@ export const CoverageOverviewPanelMetadata = ({
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiNotificationBadge data-test-subj="metadataDisabledRulesCount" color="subdued">
+          <EuiNotificationBadge data-test-subj="ruleStatsDisabledRulesCount" color="subdued">
             {disabledRules}
           </EuiNotificationBadge>
         </EuiFlexItem>
@@ -47,7 +51,7 @@ export const CoverageOverviewPanelMetadata = ({
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiNotificationBadge data-test-subj="metadataEnabledRulesCount" color="subdued">
+          <EuiNotificationBadge data-test-subj="ruleStatsEnabledRulesCount" color="subdued">
             {enabledRules}
           </EuiNotificationBadge>
         </EuiFlexItem>

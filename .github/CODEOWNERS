@@ -1196,6 +1196,8 @@ x-pack/plugins/cloud_integrations/cloud_full_story/server/config.ts @elastic/kib
 /x-pack/plugins/security_solution/server/lib/detection_engine/rule_schema @elastic/security-detection-rule-management @elastic/security-detection-engine
 /x-pack/plugins/security_solution/server/utils @elastic/security-detection-rule-management
 
+/x-pack/plugins/security_solution/scripts/openapi @elastic/security-detection-rule-management
+
 ## Security Solution sub teams - Detection Engine
 
 /x-pack/plugins/security_solution/common/api/detection_engine @elastic/security-detection-engine
