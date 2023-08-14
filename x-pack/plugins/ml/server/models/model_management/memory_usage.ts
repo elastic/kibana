@@ -22,7 +22,7 @@ import type {
   NodeDeploymentStatsResponse,
   NodesOverviewResponse,
 } from '../../../common/types/trained_models';
-import { MlFeatures } from '../../types';
+import type { MlFeatures } from '../../types';
 
 // @ts-expect-error numeral missing value
 const AD_EXTRA_MEMORY = numeral('10MB').value();

@@ -45,9 +45,9 @@ export class AnalyticsManager {
   private _transforms?: TransformGetTransformTransformSummary[];
 
   constructor(
-    private _mlClient: MlClient,
-    private _client: IScopedClusterClient,
-    private _enabledFeatures: MlFeatures
+    private readonly _mlClient: MlClient,
+    private readonly _client: IScopedClusterClient,
+    private readonly _enabledFeatures: MlFeatures
   ) {}
 
   private async initData() {
