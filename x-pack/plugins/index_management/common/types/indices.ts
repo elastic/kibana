@@ -5,6 +5,12 @@
  * 2.0.
  */
 
+import {
+  HealthStatus,
+  IndicesStatsIndexMetadataState,
+  Uuid,
+} from '@elastic/elasticsearch/lib/api/types';
+
 interface IndexModule {
   number_of_shards: number | string;
   codec: string;
@@ -52,23 +58,22 @@ export interface IndexSettings {
 }
 
 interface IndexStats {
-  health: string;
-  status: string;
-  uuid: string;
+  health?: HealthStatus;
+  status?: IndicesStatsIndexMetadataState;
+  uuid?: Uuid;
   documents: number;
   size: string;
   primary_size: string;
+  documents_deleted: number;
 }
 
 export interface Index {
   name: string;
   primary?: number | string;
   replica?: number | string;
-  documents_deleted: number;
   isFrozen: boolean;
   hidden: boolean;
   aliases: string | string[];
   data_stream?: string;
-  [key: string]: any;
   stats?: IndexStats;
 }

@@ -42,6 +42,7 @@ async function fetchIndicesCall(
 
   const indicesNames = Object.keys(indices);
 
+  // Return response without index stats, if isIndexStatsEnabled === false
   if (config.isIndexStatsEnabled === false) {
     return indicesNames.map((indexName: string) => {
       const indexData = indices[indexName];
@@ -88,6 +89,7 @@ async function fetchIndicesCall(
           status: indexStats.status,
           uuid: indexStats.uuid,
           documents: indexStats.primaries?.docs?.count ?? 0,
+          documents_deleted: indexStats?.primaries?.docs?.deleted ?? 0,
           size: new ByteSizeValue(indexStats.total?.store?.size_in_bytes ?? 0).toString(),
           primary_size: new ByteSizeValue(
             indexStats.primaries?.store?.size_in_bytes ?? 0
@@ -95,6 +97,8 @@ async function fetchIndicesCall(
         },
       };
     }
+
+    return baseResponse;
   });
 }
 
