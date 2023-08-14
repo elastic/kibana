@@ -5228,6 +5228,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/search-api-panels@link:packages/kbn-search-api-panels":
+  version "0.0.0"
+  uid ""
+
 "@kbn/search-examples-plugin@link:examples/search_examples":
   version "0.0.0"
   uid ""
@@ -5881,6 +5885,10 @@
   uid ""
 
 "@kbn/usage-collection-test-plugin@link:test/plugin_functional/plugins/usage_collection":
+  version "0.0.0"
+  uid ""
+
+"@kbn/use-tracked-promise@link:packages/kbn-use-tracked-promise":
   version "0.0.0"
   uid ""
 
