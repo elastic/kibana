@@ -63,10 +63,10 @@ describe('Service map', () => {
         cy.visitKibana(serviceMapHref);
         // we need to dismiss the service-group call out first
         cy.contains('Dismiss').click();
-        cy.getByTestSubj('unifiedQueryInput').type('_id : foo{enter}');
+        cy.getByTestSubj('apmUnifiedSearchBar').type('_id : foo{enter}');
         cy.contains('No services available');
         // search bar is still visible
-        cy.getByTestSubj('unifiedQueryInput');
+        cy.getByTestSubj('apmUnifiedSearchBar');
       });
     });
   });
