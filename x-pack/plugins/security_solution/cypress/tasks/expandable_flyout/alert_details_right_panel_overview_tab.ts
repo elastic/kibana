@@ -6,14 +6,16 @@
  */
 
 import {
+  INSIGHTS_CORRELATIONS_TITLE_LINK_TEST_ID,
+  INSIGHTS_ENTITIES_TITLE_LINK_TEST_ID,
+  INSIGHTS_PREVALENCE_TITLE_LINK_TEST_ID,
+  INSIGHTS_THREAT_INTELLIGENCE_TITLE_LINK_TEST_ID,
+} from '../../../public/flyout/right/components/test_ids';
+import {
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_ABOUT_SECTION_HEADER,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_VISUALIZATIONS_SECTION_HEADER,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_SECTION_HEADER,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INVESTIGATION_SECTION_HEADER,
-  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_VIEW_ALL_ENTITIES_BUTTON,
-  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_CORRELATIONS_VIEW_ALL_BUTTON,
-  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_THREAT_INTELLIGENCE_VIEW_ALL_BUTTON,
-  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_PREVALENCE_VIEW_ALL_BUTTON,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INVESTIGATION_GUIDE_BUTTON,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_DESCRIPTION_TITLE,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_OPEN_RULE_PREVIEW_BUTTON,
@@ -53,47 +55,35 @@ export const toggleOverviewTabInsightsSection = () => {
 };
 
 /**
- * Click on the view all button under the right section, Insights, Entities
+ * Click on the header in the right section, Insights, Entities
  */
-export const clickEntitiesViewAllButton = () => {
-  cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_VIEW_ALL_ENTITIES_BUTTON).scrollIntoView();
-  cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_VIEW_ALL_ENTITIES_BUTTON)
-    .should('be.visible')
-    .click();
+export const navigateToEntitiesDetails = () => {
+  cy.get(INSIGHTS_ENTITIES_TITLE_LINK_TEST_ID).scrollIntoView();
+  cy.get(INSIGHTS_ENTITIES_TITLE_LINK_TEST_ID).should('be.visible').click();
 };
 
 /**
- * Click on the view all button under the right section, Insights, Threat Intelligence
+ * Click on the header in the right section, Insights, Threat Intelligence
  */
-export const clickThreatIntelligenceViewAllButton = () => {
-  cy.get(
-    DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_THREAT_INTELLIGENCE_VIEW_ALL_BUTTON
-  ).scrollIntoView();
-  cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_THREAT_INTELLIGENCE_VIEW_ALL_BUTTON)
-    .should('be.visible')
-    .click();
+export const navigateToThreatIntelligenceDetails = () => {
+  cy.get(INSIGHTS_THREAT_INTELLIGENCE_TITLE_LINK_TEST_ID).scrollIntoView();
+  cy.get(INSIGHTS_THREAT_INTELLIGENCE_TITLE_LINK_TEST_ID).should('be.visible').click();
 };
 
 /**
- * Click on the view all button under the right section, Insights, Correlations
+ * Click on the header in the right section, Insights, Correlations
  */
-export const clickCorrelationsViewAllButton = () => {
-  cy.get(
-    DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_CORRELATIONS_VIEW_ALL_BUTTON
-  ).scrollIntoView();
-  cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_CORRELATIONS_VIEW_ALL_BUTTON)
-    .should('be.visible')
-    .click();
+export const navigateToCorrelationsDetails = () => {
+  cy.get(INSIGHTS_CORRELATIONS_TITLE_LINK_TEST_ID).scrollIntoView();
+  cy.get(INSIGHTS_CORRELATIONS_TITLE_LINK_TEST_ID).should('be.visible').click();
 };
 
 /**
  * Click on the view all button under the right section, Insights, Prevalence
  */
-export const clickPrevalenceViewAllButton = () => {
-  cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_PREVALENCE_VIEW_ALL_BUTTON).scrollIntoView();
-  cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_PREVALENCE_VIEW_ALL_BUTTON)
-    .should('be.visible')
-    .click();
+export const navigateToPrevalenceDetails = () => {
+  cy.get(INSIGHTS_PREVALENCE_TITLE_LINK_TEST_ID).scrollIntoView();
+  cy.get(INSIGHTS_PREVALENCE_TITLE_LINK_TEST_ID).should('be.visible').click();
 };
 
 /* Visualizations section */

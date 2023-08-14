@@ -59,6 +59,7 @@ export interface CloudPostureIntegrationProps {
     disabled?: boolean;
     icon?: string;
     tooltip?: string;
+    isBeta?: boolean;
   }>;
 }
 
@@ -91,6 +92,7 @@ export const cloudPostureIntegrations: CloudPostureIntegrations = {
           defaultMessage: 'CIS GCP',
         }),
         icon: 'logoGCP',
+        isBeta: true,
       },
       {
         type: CLOUDBEAT_AZURE,
