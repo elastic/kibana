@@ -126,6 +126,10 @@ export class AnalyticsClient implements IAnalyticsClient {
       );
     }
 
+    console.log('eventType!!!', eventType, eventData);
+    console.log('context!!!', this.context$.value);
+    console.log('eventData!!!', eventData);
+
     const event: Event = {
       timestamp,
       event_type: eventType,

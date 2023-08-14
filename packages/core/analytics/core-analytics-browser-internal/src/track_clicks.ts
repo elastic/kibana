@@ -10,7 +10,7 @@ import { fromEvent } from 'rxjs';
 import type { AnalyticsClient } from '@kbn/analytics-client';
 
 /** HTML attributes that should be skipped from reporting because they might contain user data */
-const POTENTIAL_PII_HTML_ATTRIBUTES = ['value'];
+const POTENTIAL_PII_HTML_ATTRIBUTES = ['data-provider-id', 'href', 'value'];
 
 /**
  * Registers the event type "click" in the analytics client.
@@ -74,4 +74,10 @@ function getTargetDefinition(target: HTMLElement): string[] {
       .filter((attr) => !POTENTIAL_PII_HTML_ATTRIBUTES.includes(attr.name))
       .map((attr) => `${attr.name}=${attr.value}`),
   ];
+}
+
+/** security paths that contain user data */
+const SECURITY_PATHS = ['security/hosts/name'];
+function maskSecurityUrls(properties: string[]): string[] {
+  return properties.filter((attr) => !attr.includes(SECURITY_PATHS));
 }
