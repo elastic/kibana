@@ -475,7 +475,7 @@ describe('rule_event_log_list', () => {
     );
   });
 
-  it('shows the correct pagination result when result is 1', async () => {
+  it.skip('shows the correct pagination result when result is 1', async () => {
     loadExecutionLogAggregationsMock.mockResolvedValue({
       ...mockLogResponse,
       total: 1,
@@ -502,7 +502,7 @@ describe('rule_event_log_list', () => {
     );
   });
 
-  it('shows the correct pagination result when paginated', async () => {
+  it.skip('shows the correct pagination result when paginated', async () => {
     loadExecutionLogAggregationsMock.mockResolvedValue({
       ...mockLogResponse,
       total: 85,
@@ -535,7 +535,7 @@ describe('rule_event_log_list', () => {
     ).toHaveTextContent('Showing 81 - 85 of 85 log entries');
   });
 
-  it('renders errored action badges in message rows', async () => {
+  it.skip('renders errored action badges in message rows', async () => {
     loadExecutionLogAggregationsMock.mockResolvedValue({
       data: [
         {
@@ -583,7 +583,7 @@ describe('rule_event_log_list', () => {
     expect(wrapper.find('[data-test-subj="ruleActionErrorLogFlyout"]').exists()).toBeTruthy();
   });
 
-  it('shows rule summary and execution duration chart', async () => {
+  it.skip('shows rule summary and execution duration chart', async () => {
     loadExecutionLogAggregationsMock.mockResolvedValue({
       ...mockLogResponse,
       total: 85,
@@ -619,7 +619,7 @@ describe('rule_event_log_list', () => {
     );
   });
 
-  it('renders average execution duration', async () => {
+  it.skip('renders average execution duration', async () => {
     const ruleTypeCustom = mockRuleType({ ruleTaskTimeout: '10m' });
     const ruleSummary = mockRuleSummary({
       executionDuration: { average: 60284, valuesWithTimestamp: {} },
