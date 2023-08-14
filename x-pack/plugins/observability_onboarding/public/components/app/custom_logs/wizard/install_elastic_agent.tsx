@@ -8,6 +8,7 @@
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
@@ -268,6 +269,24 @@ export function InstallElasticAgent() {
           </p>
         </EuiText>
         <EuiSpacer size="m" />
+        {wizardState.integrationName && (
+          <>
+            <EuiCallOut
+              title={i18n.translate(
+                'xpack.observability_onboarding.installElasticAgent.integrationSuccessCallout.title',
+                {
+                  defaultMessage: '{integrationName} integration installed.',
+                  values: {
+                    integrationName: wizardState.integrationName,
+                  },
+                }
+              )}
+              color="success"
+              iconType="check"
+            />
+            <EuiSpacer size="m" />
+          </>
+        )}
         {apiKeyEncoded && onboardingId ? (
           <ApiKeyBanner
             payload={{ apiKeyEncoded, onboardingId }}

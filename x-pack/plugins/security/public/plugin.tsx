@@ -68,7 +68,7 @@ export class SecurityPlugin
   private readonly config: ConfigType;
   private sessionTimeout?: SessionTimeout;
   private readonly authenticationService = new AuthenticationService();
-  private readonly navControlService = new SecurityNavControlService();
+  private readonly navControlService;
   private readonly securityLicenseService = new SecurityLicenseService();
   private readonly managementService = new ManagementService();
   private readonly securityCheckupService: SecurityCheckupService;
@@ -80,6 +80,9 @@ export class SecurityPlugin
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config = this.initializerContext.config.get<ConfigType>();
     this.securityCheckupService = new SecurityCheckupService(this.config, localStorage);
+    this.navControlService = new SecurityNavControlService(
+      initializerContext.env.packageInfo.buildFlavor
+    );
   }
 
   public setup(
