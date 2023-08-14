@@ -232,7 +232,6 @@ export default ({ getService }: FtrProviderContext) => {
         'kibana.alert.original_event.origin': '/var/log/wtmp',
         'kibana.alert.original_event.outcome': 'success',
         'kibana.alert.original_event.type': 'authentication_success',
-        'kibana.alert.rule.custom_highlighted_fields': [],
       });
     });
 
