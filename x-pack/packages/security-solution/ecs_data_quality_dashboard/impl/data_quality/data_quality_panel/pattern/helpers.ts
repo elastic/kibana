@@ -46,9 +46,10 @@ export const getPhaseCount = ({
 };
 
 export const getIlmPhase = (
-  ilmExplainRecord: IlmExplainLifecycleLifecycleExplain | undefined
+  ilmExplainRecord: IlmExplainLifecycleLifecycleExplain | undefined,
+  isILMAvailable: boolean
 ): IlmPhase | undefined => {
-  if (ilmExplainRecord == null) {
+  if (ilmExplainRecord == null || !isILMAvailable) {
     return undefined;
   }
 
@@ -142,6 +143,7 @@ export const getIndexIncompatible = ({
 export const getSummaryTableItems = ({
   ilmExplain,
   indexNames,
+  isILMAvailable,
   pattern,
   patternDocsCount,
   results,
@@ -151,6 +153,7 @@ export const getSummaryTableItems = ({
 }: {
   ilmExplain: Record<string, IlmExplainLifecycleLifecycleExplain> | null;
   indexNames: string[];
+  isILMAvailable: boolean;
   pattern: string;
   patternDocsCount: number;
   results: Record<string, DataQualityCheckResult> | undefined;
@@ -162,7 +165,7 @@ export const getSummaryTableItems = ({
     docsCount: getDocsCount({ stats, indexName }),
     incompatible: getIndexIncompatible({ indexName, results }),
     indexName,
-    ilmPhase: ilmExplain != null ? getIlmPhase(ilmExplain[indexName]) : undefined,
+    ilmPhase: ilmExplain != null ? getIlmPhase(ilmExplain[indexName], isILMAvailable) : undefined,
     pattern,
     patternDocsCount,
     sizeInBytes: getSizeInBytes({ stats, indexName }),

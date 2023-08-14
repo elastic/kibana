@@ -215,20 +215,22 @@ const DataQualityComponent: React.FC = () => {
       {indicesExist && isILMAvailable != null ? (
         <SecuritySolutionPageWrapper data-test-subj="ecsDataQualityDashboardPage">
           <HeaderPage subtitle={subtitle} title={i18n.DATA_QUALITY_TITLE}>
-            <EuiToolTip content={INDEX_LIFECYCLE_MANAGEMENT_PHASES}>
-              <FormControlLayout prepend={ilmFormLabel}>
-                <EuiComboBox
-                  id={labelInputId}
-                  data-test-subj="selectIlmPhases"
-                  placeholder={SELECT_ONE_OR_MORE_ILM_PHASES}
-                  renderOption={renderOption}
-                  selectedOptions={selectedOptions}
-                  style={comboBoxStyle}
-                  options={options}
-                  onChange={setSelectedOptions}
-                />
-              </FormControlLayout>
-            </EuiToolTip>
+            {isILMAvailable && (
+              <EuiToolTip content={INDEX_LIFECYCLE_MANAGEMENT_PHASES}>
+                <FormControlLayout prepend={ilmFormLabel}>
+                  <EuiComboBox
+                    id={labelInputId}
+                    data-test-subj="selectIlmPhases"
+                    placeholder={SELECT_ONE_OR_MORE_ILM_PHASES}
+                    renderOption={renderOption}
+                    selectedOptions={selectedOptions}
+                    style={comboBoxStyle}
+                    options={options}
+                    onChange={setSelectedOptions}
+                  />
+                </FormControlLayout>
+              </EuiToolTip>
+            )}
           </HeaderPage>
 
           <DataQualityPanel

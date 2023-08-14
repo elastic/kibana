@@ -49,6 +49,7 @@ import * as i18n from './translations';
 import type { PatternRollup, SelectedIndex, SortConfig } from '../../types';
 import { useIlmExplain } from '../../use_ilm_explain';
 import { useStats } from '../../use_stats';
+import { useDataQualityContext } from '../data_quality_context';
 
 const IndexPropertiesContainer = styled.div`
   margin-bottom: ${euiThemeVars.euiSizeS};
@@ -121,6 +122,7 @@ const PatternComponent: React.FC<Props> = ({
   updatePatternRollup,
 }) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const { isILMAvailable } = useDataQualityContext();
   const [sorting, setSorting] = useState<SortConfig>(defaultSort);
   const [pageIndex, setPageIndex] = useState<number>(0);
   const [pageSize, setPageSize] = useState<number>(MIN_PAGE_SIZE);
@@ -153,7 +155,7 @@ const PatternComponent: React.FC<Props> = ({
                 formatNumber={formatNumber}
                 docsCount={getDocsCount({ stats, indexName })}
                 getGroupByFieldsOnClick={getGroupByFieldsOnClick}
-                ilmPhase={ilmExplain != null ? getIlmPhase(ilmExplain[indexName]) : undefined}
+                ilmPhase={getIlmPhase(ilmExplain?.[indexName], isILMAvailable)}
                 indexName={indexName}
                 isAssistantEnabled={isAssistantEnabled}
                 openCreateCaseFlyout={openCreateCaseFlyout}
@@ -169,31 +171,36 @@ const PatternComponent: React.FC<Props> = ({
       }
     },
     [
+      itemIdToExpandedRowMap,
       addSuccessToast,
       canUserCreateAndReadCases,
       formatBytes,
       formatNumber,
+      stats,
       getGroupByFieldsOnClick,
       ilmExplain,
+      isILMAvailable,
       isAssistantEnabled,
-      itemIdToExpandedRowMap,
       openCreateCaseFlyout,
       pattern,
       patternRollup,
-      stats,
       theme,
       baseTheme,
       updatePatternRollup,
     ]
   );
 
-  const ilmExplainPhaseCounts = useMemo(() => getIlmExplainPhaseCounts(ilmExplain), [ilmExplain]);
+  const ilmExplainPhaseCounts = useMemo(
+    () => (isILMAvailable ? getIlmExplainPhaseCounts(ilmExplain) : undefined),
+    [ilmExplain, isILMAvailable]
+  );
 
   const items = useMemo(
     () =>
       getSummaryTableItems({
         ilmExplain,
         indexNames: indexNames ?? EMPTY_INDEX_NAMES,
+        isILMAvailable,
         pattern,
         patternDocsCount: patternRollup?.docsCount ?? 0,
         results: patternRollup?.results,
@@ -204,6 +211,7 @@ const PatternComponent: React.FC<Props> = ({
     [
       ilmExplain,
       indexNames,
+      isILMAvailable,
       pattern,
       patternRollup?.docsCount,
       patternRollup?.results,
@@ -216,7 +224,7 @@ const PatternComponent: React.FC<Props> = ({
   useEffect(() => {
     if (shouldCreateIndexNames({ indexNames, stats, ilmExplain })) {
       updatePatternIndexNames({
-        indexNames: getIndexNames({ stats, ilmExplain, ilmPhases }),
+        indexNames: getIndexNames({ stats, ilmExplain, ilmPhases, isILMAvailable }),
         pattern,
       });
     }
@@ -224,17 +232,17 @@ const PatternComponent: React.FC<Props> = ({
     if (shouldCreatePatternRollup({ error, patternRollup, stats, ilmExplain })) {
       updatePatternRollup({
         docsCount: getTotalDocsCount({
-          indexNames: getIndexNames({ stats, ilmExplain, ilmPhases }),
+          indexNames: getIndexNames({ stats, ilmExplain, ilmPhases, isILMAvailable }),
           stats,
         }),
         error,
         ilmExplain,
         ilmExplainPhaseCounts,
-        indices: getIndexNames({ stats, ilmExplain, ilmPhases }).length,
+        indices: getIndexNames({ stats, ilmExplain, ilmPhases, isILMAvailable }).length,
         pattern,
         results: undefined,
         sizeInBytes: getTotalSizeInBytes({
-          indexNames: getIndexNames({ stats, ilmExplain, ilmPhases }),
+          indexNames: getIndexNames({ stats, ilmExplain, ilmPhases, isILMAvailable }),
           stats,
         }),
         stats,
@@ -246,6 +254,7 @@ const PatternComponent: React.FC<Props> = ({
     ilmExplainPhaseCounts,
     ilmPhases,
     indexNames,
+    isILMAvailable,
     pattern,
     patternRollup,
     stats,

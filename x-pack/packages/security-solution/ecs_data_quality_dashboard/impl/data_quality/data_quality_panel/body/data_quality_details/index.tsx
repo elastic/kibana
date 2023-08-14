@@ -22,6 +22,7 @@ import { IlmPhasesEmptyPrompt } from '../../../ilm_phases_empty_prompt';
 import { IndicesDetails } from './indices_details';
 import { StorageDetails } from './storage_details';
 import { PatternRollup, SelectedIndex } from '../../../types';
+import { useDataQualityContext } from '../../data_quality_context';
 
 export interface Props {
   addSuccessToast: (toast: { title: string }) => void;
@@ -82,13 +83,14 @@ const DataQualityDetailsComponent: React.FC<Props> = ({
   updatePatternIndexNames,
   updatePatternRollup,
 }) => {
+  const { isILMAvailable } = useDataQualityContext();
   const [selectedIndex, setSelectedIndex] = useState<SelectedIndex | null>(null);
 
   const onIndexSelected = useCallback(async ({ indexName, pattern }: SelectedIndex) => {
     setSelectedIndex({ indexName, pattern });
   }, []);
 
-  if (ilmPhases.length === 0) {
+  if (isILMAvailable && ilmPhases.length === 0) {
     return <IlmPhasesEmptyPrompt />;
   }
 

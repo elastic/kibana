@@ -423,7 +423,8 @@ describe('helpers', () => {
 
   describe('getSummaryTableMarkdownHeader', () => {
     test('it returns the expected header', () => {
-      expect(getSummaryTableMarkdownHeader()).toEqual(
+      const isILMAvailable = true;
+      expect(getSummaryTableMarkdownHeader(isILMAvailable)).toEqual(
         '| Result | Index | Docs | Incompatible fields | ILM Phase | Size |\n|--------|-------|------|---------------------|-----------|------|'
       );
     });
@@ -438,6 +439,7 @@ describe('helpers', () => {
           formatNumber,
           incompatible: 3,
           ilmPhase: 'unmanaged',
+          isILMAvailable: true,
           indexName: 'auditbeat-custom-index-1',
           patternDocsCount: 57410,
           sizeInBytes: 28413,
@@ -454,6 +456,7 @@ describe('helpers', () => {
           incompatible: undefined, // <--
           ilmPhase: undefined, // <--
           indexName: 'auditbeat-custom-index-1',
+          isILMAvailable: true,
           patternDocsCount: 57410,
           sizeInBytes: 28413,
         })
@@ -470,6 +473,7 @@ describe('helpers', () => {
           formatNumber,
           ilmPhase: 'unmanaged',
           indexName: 'auditbeat-custom-index-1',
+          isILMAvailable: true,
           partitionedFieldMetadata: mockPartitionedFieldMetadata,
           patternDocsCount: 57410,
           sizeInBytes: 28413,

@@ -102,6 +102,7 @@ describe('helpers', () => {
       const pattern = 'auditbeat-*';
       const flattenedBuckets = getFlattenedBuckets({
         ilmPhases,
+        isILMAvailable: true,
         patternRollups,
       });
 
@@ -135,6 +136,7 @@ describe('helpers', () => {
     test('it returns the expected legend items', () => {
       const flattenedBuckets = getFlattenedBuckets({
         ilmPhases,
+        isILMAvailable: true,
         patternRollups,
       });
 
@@ -205,6 +207,7 @@ describe('helpers', () => {
       expect(
         getFlattenedBuckets({
           ilmPhases,
+          isILMAvailable: true,
           patternRollups,
         })
       ).toEqual([
@@ -276,6 +279,7 @@ describe('helpers', () => {
     test('it returns the expected map', () => {
       const flattenedBuckets = getFlattenedBuckets({
         ilmPhases,
+        isILMAvailable: true,
         patternRollups,
       });
 
@@ -363,6 +367,7 @@ describe('helpers', () => {
     const layer0FillColor = 'transparent';
     const flattenedBuckets = getFlattenedBuckets({
       ilmPhases,
+      isILMAvailable: true,
       patternRollups,
     });
     const pathToFlattenedBucketMap = getPathToFlattenedBucketMap(flattenedBuckets);

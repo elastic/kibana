@@ -158,6 +158,7 @@ describe('helpers', () => {
           formatBytes,
           formatNumber,
           indexName: '.ds-packetbeat-8.6.1-2023.02.04-000001',
+          isILMAvailable: true,
           partitionedFieldMetadata: mockPartitionedFieldMetadata,
           pattern: 'packetbeat-*',
           patternRollups: {
@@ -257,6 +258,7 @@ describe('helpers', () => {
           formatBytes,
           formatNumber,
           indexName: '.ds-packetbeat-8.6.1-2023.02.04-000001',
+          isILMAvailable: true,
           partitionedFieldMetadata: mockPartitionedFieldMetadata,
           pattern: 'packetbeat-*',
           patternRollups: {
@@ -351,6 +353,7 @@ describe('helpers', () => {
           formatBytes,
           formatNumber,
           indexName: '.ds-packetbeat-8.6.1-2023.02.04-000001',
+          isILMAvailable: true,
           partitionedFieldMetadata: null, // <--
           pattern: 'packetbeat-*',
           patternRollups: {
@@ -444,6 +447,7 @@ describe('helpers', () => {
           formatBytes,
           formatNumber,
           indexName: '.ds-packetbeat-8.6.1-2023.02.04-000001',
+          isILMAvailable: true,
           partitionedFieldMetadata: mockPartitionedFieldMetadata,
           pattern: 'packetbeat-*',
           patternRollups: {
@@ -501,6 +505,7 @@ describe('helpers', () => {
           formatBytes,
           formatNumber,
           indexName: '.ds-packetbeat-8.6.1-2023.02.04-000001',
+          isILMAvailable: true,
           partitionedFieldMetadata: mockPartitionedFieldMetadata,
           pattern: 'this-pattern-is-not-in-pattern-rollups', // <--
           patternRollups: shouldNotBeModified,

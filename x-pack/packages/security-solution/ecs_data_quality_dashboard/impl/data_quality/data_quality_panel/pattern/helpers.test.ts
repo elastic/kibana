@@ -169,25 +169,26 @@ describe('helpers', () => {
   });
 
   describe('getIlmPhase', () => {
+    const isILMAvailable = true;
     test('it returns undefined when the `ilmExplainRecord` is undefined', () => {
-      expect(getIlmPhase(undefined)).toBeUndefined();
+      expect(getIlmPhase(undefined, isILMAvailable)).toBeUndefined();
     });
 
     describe('when the `ilmExplainRecord` is a `IlmExplainLifecycleLifecycleExplainManaged` record', () => {
       Object.keys(managed).forEach((phase) =>
         test(`it returns the expected phase when 'phase' is '${phase}'`, () => {
-          expect(getIlmPhase(managed[phase])).toEqual(phase);
+          expect(getIlmPhase(managed[phase], isILMAvailable)).toEqual(phase);
         })
       );
 
       test(`it returns undefined when the 'phase' is unknown`, () => {
-        expect(getIlmPhase(other)).toBeUndefined();
+        expect(getIlmPhase(other, isILMAvailable)).toBeUndefined();
       });
     });
 
     describe('when the `ilmExplainRecord` is a `IlmExplainLifecycleLifecycleExplainUnmanaged` record', () => {
       test('it returns `unmanaged`', () => {
-        expect(getIlmPhase(unmanaged)).toEqual('unmanaged');
+        expect(getIlmPhase(unmanaged, isILMAvailable)).toEqual('unmanaged');
       });
     });
   });
@@ -273,12 +274,14 @@ describe('helpers', () => {
         pattern: 'auditbeat-*',
       },
     };
+    const isILMAvailable = true;
 
     test('it returns the expected summary table items', () => {
       expect(
         getSummaryTableItems({
           ilmExplain: mockIlmExplain,
           indexNames,
+          isILMAvailable,
           pattern,
           patternDocsCount,
           results,
@@ -322,6 +325,7 @@ describe('helpers', () => {
         getSummaryTableItems({
           ilmExplain: mockIlmExplain,
           indexNames,
+          isILMAvailable,
           pattern,
           patternDocsCount,
           results,
@@ -365,6 +369,7 @@ describe('helpers', () => {
         getSummaryTableItems({
           ilmExplain: null, // <-- no data
           indexNames,
+          isILMAvailable,
           pattern,
           patternDocsCount,
           results: undefined, // <-- no data

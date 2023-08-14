@@ -12,6 +12,7 @@ import { getFlattenedBuckets } from './helpers';
 import { StorageTreemap } from '../../../storage_treemap';
 import { DEFAULT_MAX_CHART_HEIGHT, StorageTreemapContainer } from '../../../tabs/styles';
 import { PatternRollup, SelectedIndex } from '../../../../types';
+import { useDataQualityContext } from '../../../data_quality_context';
 
 export interface Props {
   formatBytes: (value: number | undefined) => string;
@@ -32,13 +33,16 @@ const StorageDetailsComponent: React.FC<Props> = ({
   theme,
   baseTheme,
 }) => {
+  const { isILMAvailable } = useDataQualityContext();
+
   const flattenedBuckets = useMemo(
     () =>
       getFlattenedBuckets({
         ilmPhases,
+        isILMAvailable,
         patternRollups,
       }),
-    [ilmPhases, patternRollups]
+    [ilmPhases, isILMAvailable, patternRollups]
   );
 
   return (

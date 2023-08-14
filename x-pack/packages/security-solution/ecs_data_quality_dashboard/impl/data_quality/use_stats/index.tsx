@@ -33,10 +33,13 @@ export const useStats = (pattern: string): UseStats => {
         const encodedIndexName = encodeURIComponent(`${pattern}`);
 
         const response = await httpFetch<Record<string, IndicesStatsIndicesStats>>(
-          `${STATS_ENDPOINT}/${encodedIndexName}?isILMAvailable=${isILMAvailable}`,
+          `${STATS_ENDPOINT}/${encodedIndexName}`,
           {
             method: 'GET',
             signal: abortController.signal,
+            query: {
+              isILMAvailable,
+            },
           }
         );
 

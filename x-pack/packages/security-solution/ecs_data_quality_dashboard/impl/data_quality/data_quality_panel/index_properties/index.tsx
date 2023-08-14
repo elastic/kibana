@@ -37,6 +37,7 @@ import type { EcsMetadata, IlmPhase, PartitionedFieldMetadata, PatternRollup } f
 import { useAddToNewCase } from '../../use_add_to_new_case';
 import { useMappings } from '../../use_mappings';
 import { useUnallowedValues } from '../../use_unallowed_values';
+import { useDataQualityContext } from '../data_quality_context';
 
 const EMPTY_MARKDOWN_COMMENTS: string[] = [];
 
@@ -94,6 +95,7 @@ const IndexPropertiesComponent: React.FC<Props> = ({
   updatePatternRollup,
 }) => {
   const { error: mappingsError, indexes, loading: loadingMappings } = useMappings(indexName);
+  const { isILMAvailable } = useDataQualityContext();
 
   const requestItems = useMemo(
     () =>
@@ -225,6 +227,7 @@ const IndexPropertiesComponent: React.FC<Props> = ({
                 formatNumber,
                 ilmPhase,
                 indexName,
+                isILMAvailable,
                 partitionedFieldMetadata,
                 patternDocsCount: patternRollup.docsCount ?? 0,
                 sizeInBytes: patternRollup.sizeInBytes,
@@ -254,6 +257,7 @@ const IndexPropertiesComponent: React.FC<Props> = ({
     formatNumber,
     ilmPhase,
     indexName,
+    isILMAvailable,
     loadingMappings,
     loadingUnallowedValues,
     mappingsError,

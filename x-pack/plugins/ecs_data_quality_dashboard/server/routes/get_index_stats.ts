@@ -58,7 +58,6 @@ export const getIndexStatsRoute = (router: IRouter) => {
         });
       } catch (err) {
         const error = transformError(err);
-
         return resp.error({
           body: error.message,
           statusCode: error.statusCode,
