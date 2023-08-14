@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import axios, { AxiosResponse } from 'axios';
+import axios, { AxiosHeaders, AxiosResponse } from 'axios';
 import { Logger } from '@kbn/core/server';
 import { Services } from '@kbn/actions-plugin/server/types';
 import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
@@ -33,7 +33,7 @@ export async function postPagerduty(
     method: 'post',
     logger,
     data,
-    headers,
+    headers: new AxiosHeaders(headers),
     configurationUtilities,
     validateStatus: () => true,
   });

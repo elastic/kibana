@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { curry } from 'lodash';
-import axios, { AxiosError, AxiosResponse } from 'axios';
+import axios, { AxiosError, AxiosHeaders, AxiosResponse } from 'axios';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { map, getOrElse } from 'fp-ts/lib/Option';
@@ -162,10 +162,10 @@ export async function executor(
       axios: axiosInstance,
       url: webhookIntegrationUrl,
       method: 'post',
-      headers: {
+      headers: new AxiosHeaders({
         'X-Torq-Token': token || '',
         'Content-Type': 'application/json',
-      },
+      }),
       data: body,
       configurationUtilities,
       logger: execOptions.logger,
