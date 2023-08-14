@@ -8,7 +8,6 @@
 import type { FormulaValueConfig } from '@kbn/lens-embeddable-utils';
 
 export const diskSpaceAvailability: FormulaValueConfig = {
-  type: 'formula',
   label: 'Disk Space Availability',
   value: '1 - average(system.filesystem.used.pct)',
   format: {

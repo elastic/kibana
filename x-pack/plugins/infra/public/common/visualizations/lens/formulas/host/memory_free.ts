@@ -8,7 +8,6 @@
 import type { FormulaValueConfig } from '@kbn/lens-embeddable-utils';
 
 export const memoryFree: FormulaValueConfig = {
-  type: 'formula',
   label: 'Memory Free',
   value: 'max(system.memory.total) - average(system.memory.actual.used.bytes)',
   format: {

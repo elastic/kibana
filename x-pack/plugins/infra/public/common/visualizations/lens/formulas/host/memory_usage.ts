@@ -8,7 +8,6 @@
 import type { FormulaValueConfig } from '@kbn/lens-embeddable-utils';
 
 export const memoryUsage: FormulaValueConfig = {
-  type: 'formula',
   label: 'Memory Usage',
   value: 'average(system.memory.actual.used.pct)',
   format: {
