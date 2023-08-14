@@ -1232,7 +1232,7 @@ describe('terms', () => {
 
   describe('field input', () => {
     // @ts-expect-error
-    window['__@hello-pangea/dnd-disable-dev-warnings'] = true; // issue with enzyme & @hello-pangea/dnd throwing errors: https://github.com/atlassian/react-beautiful-dnd/issues/1593
+    window['__@hello-pangea/dnd-disable-dev-warnings'] = true; // issue with enzyme & @hello-pangea/dnd throwing errors: https://github.com/hello-pangea/dnd/issues/644
 
     const defaultFieldInputProps = {
       indexPattern: defaultProps.indexPattern,
