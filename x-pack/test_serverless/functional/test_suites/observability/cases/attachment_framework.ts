@@ -6,9 +6,7 @@
  */
 
 import { expect } from 'expect';
-import { ConnectorTypes } from '@kbn/cases-plugin/common/types/domain';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { createCase } from './helper/api';
 
 export default ({ getPageObject, getService }: FtrProviderContext) => {
   const dashboard = getPageObject('dashboard');
@@ -20,7 +18,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const kibanaServer = getService('kibanaServer');
   const cases = getService('cases');
   const find = getService('find');
-  const supertest = getService('supertest');
 
   describe('persistable attachment', () => {
     describe('lens visualization', () => {
@@ -85,23 +82,11 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
       it('adds lens visualization to an existing case from dashboard', async () => {
         const theCaseTitle = 'case already exists in observability!!';
-        const postCaseReq = {
-          description: 'This is a test case to verify existing action scenario!!',
+        const theCase = await cases.api.createCase({
           title: theCaseTitle,
-          tags: ['defacement'],
-          connector: {
-            id: 'none',
-            name: 'none',
-            type: ConnectorTypes.none,
-            fields: null,
-          },
-          settings: {
-            syncAlerts: true,
-          },
-          owner: 'observability',
-          assignees: [],
-        };
-        const theCase = await createCase(supertest, postCaseReq);
+          description: 'This is a test case to verify existing action scenario!!',
+          owner: 'observability'
+        });
 
         await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'dashboards' });
 
