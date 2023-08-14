@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
 import { Route, Routes } from '@kbn/shared-ux-router';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiPageHeader, EuiSpacer } from '@elastic/eui';
+import { EuiPageHeader, EuiSpacer, EuiPageHeaderProps } from '@elastic/eui';
 import { Section } from '../../home';
 
 export enum IndexDetailsSection {
@@ -65,6 +65,17 @@ export const DetailsPage: React.FunctionComponent<
     },
     [history, indexName]
   );
+
+  const headerTabs = useMemo<EuiPageHeaderProps['tabs']>(() => {
+    return tabs.map((tab) => ({
+      onClick: () => onSectionChange(tab.id),
+      isSelected: tab.id === indexDetailsSection,
+      key: tab.id,
+      'data-test-subj': `indexDetailsTab-${tab.id}`,
+      label: tab.name,
+    }));
+  }, [indexDetailsSection, onSectionChange]);
+
   return (
     <>
       <EuiPageHeader
@@ -72,13 +83,7 @@ export const DetailsPage: React.FunctionComponent<
         pageTitle={indexName}
         bottomBorder
         rightSideItems={[]}
-        tabs={tabs.map((tab) => ({
-          onClick: () => onSectionChange(tab.id),
-          isSelected: tab.id === indexDetailsSection,
-          key: tab.id,
-          'data-test-subj': `indexDetailsTab-${tab.id}`,
-          label: tab.name,
-        }))}
+        tabs={headerTabs}
       />
 
       <EuiSpacer size="l" />
