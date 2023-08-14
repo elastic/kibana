@@ -58,12 +58,19 @@ const tabToHumanizedMap = {
   ),
 };
 
-const tabs = [TAB_SUMMARY, TAB_SETTINGS, TAB_MAPPING, TAB_STATS, TAB_EDIT_SETTINGS];
+const getTabs = (showStats) => {
+  const defaultTabs = [TAB_SUMMARY, TAB_SETTINGS, TAB_MAPPING, TAB_EDIT_SETTINGS];
+  if (showStats) {
+    return [...defaultTabs, TAB_STATS];
+  }
+  return defaultTabs;
+};
 
 export const DetailPanel = ({ panelType, indexName, index, openDetailPanel, closeDetailPanel }) => {
   const { extensionsService } = useServices();
 
-  const renderTabs = () => {
+  const renderTabs = (showStats) => {
+    const tabs = getTabs(showStats);
     return tabs.map((tab, i) => {
       const isSelected = tab === panelType;
       return (
@@ -162,7 +169,7 @@ export const DetailPanel = ({ panelType, indexName, index, openDetailPanel, clos
             {renderBadges(index, undefined, extensionsService)}
           </h2>
         </EuiTitle>
-        {index ? <EuiTabs>{renderTabs()}</EuiTabs> : null}
+        {index ? <EuiTabs>{renderTabs(Boolean(index.stats))}</EuiTabs> : null}
       </EuiFlyoutHeader>
       {content}
     </EuiFlyout>

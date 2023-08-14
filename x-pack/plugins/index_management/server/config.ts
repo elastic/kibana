@@ -38,6 +38,14 @@ const schemaLatest = schema.object(
       schema.boolean({ defaultValue: true }),
       schema.never()
     ),
+    enableIndexStats: schema.conditional(
+      schema.contextRef('serverless'),
+      true,
+      // Index stats information is disabled in serverless; refer to the serverless.yml file as the source of truth
+      // We take this approach in order to have a central place (serverless.yml) for serverless config across Kibana
+      schema.boolean({ defaultValue: true }),
+      schema.never()
+    ),
   },
   { defaultValue: undefined }
 );
@@ -47,6 +55,7 @@ const configLatest: PluginConfigDescriptor<IndexManagementConfig> = {
     ui: true,
     enableIndexActions: true,
     enableLegacyTemplates: true,
+    enableIndexStats: true,
   },
   schema: schemaLatest,
   deprecations: () => [],

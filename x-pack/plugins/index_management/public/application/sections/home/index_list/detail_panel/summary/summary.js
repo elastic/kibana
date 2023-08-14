@@ -21,36 +21,43 @@ import {
 import { DataHealth } from '../../../../../components';
 import { AppContextConsumer } from '../../../../../app_context';
 
-const getHeaders = () => {
-  return {
-    health: i18n.translate('xpack.idxMgmt.summary.headers.healthHeader', {
-      defaultMessage: 'Health',
-    }),
-    status: i18n.translate('xpack.idxMgmt.summary.headers.statusHeader', {
-      defaultMessage: 'Status',
-    }),
+const getHeaders = (showStats) => {
+  const baseHeaders = {
     primary: i18n.translate('xpack.idxMgmt.summary.headers.primaryHeader', {
       defaultMessage: 'Primaries',
     }),
     replica: i18n.translate('xpack.idxMgmt.summary.headers.replicaHeader', {
       defaultMessage: 'Replicas',
     }),
-    documents: i18n.translate('xpack.idxMgmt.summary.headers.documentsHeader', {
-      defaultMessage: 'Docs count',
-    }),
-    documents_deleted: i18n.translate('xpack.idxMgmt.summary.headers.deletedDocumentsHeader', {
-      defaultMessage: 'Docs deleted',
-    }),
-    size: i18n.translate('xpack.idxMgmt.summary.headers.storageSizeHeader', {
-      defaultMessage: 'Storage size',
-    }),
-    primary_size: i18n.translate('xpack.idxMgmt.summary.headers.primaryStorageSizeHeader', {
-      defaultMessage: 'Primary storage size',
-    }),
     aliases: i18n.translate('xpack.idxMgmt.summary.headers.aliases', {
       defaultMessage: 'Aliases',
     }),
   };
+
+  if (showStats) {
+    return {
+      ...baseHeaders,
+      health: i18n.translate('xpack.idxMgmt.summary.headers.healthHeader', {
+        defaultMessage: 'Health',
+      }),
+      status: i18n.translate('xpack.idxMgmt.summary.headers.statusHeader', {
+        defaultMessage: 'Status',
+      }),
+      documents: i18n.translate('xpack.idxMgmt.summary.headers.documentsHeader', {
+        defaultMessage: 'Docs count',
+      }),
+      documents_deleted: i18n.translate('xpack.idxMgmt.summary.headers.deletedDocumentsHeader', {
+        defaultMessage: 'Docs deleted',
+      }),
+      size: i18n.translate('xpack.idxMgmt.summary.headers.storageSizeHeader', {
+        defaultMessage: 'Storage size',
+      }),
+      primary_size: i18n.translate('xpack.idxMgmt.summary.headers.primaryStorageSizeHeader', {
+        defaultMessage: 'Primary storage size',
+      }),
+    };
+  }
+  return baseHeaders;
 };
 
 export class Summary extends React.PureComponent {

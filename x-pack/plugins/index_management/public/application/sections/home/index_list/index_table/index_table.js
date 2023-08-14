@@ -51,31 +51,41 @@ import { renderBadges } from '../../../../lib/render_badges';
 import { NoMatch, DataHealth } from '../../../../components';
 import { IndexActionsContextMenu } from '../index_actions_context_menu';
 
-const HEADERS = {
-  name: i18n.translate('xpack.idxMgmt.indexTable.headers.nameHeader', {
-    defaultMessage: 'Name',
-  }),
-  health: i18n.translate('xpack.idxMgmt.indexTable.headers.healthHeader', {
-    defaultMessage: 'Health',
-  }),
-  status: i18n.translate('xpack.idxMgmt.indexTable.headers.statusHeader', {
-    defaultMessage: 'Status',
-  }),
-  primary: i18n.translate('xpack.idxMgmt.indexTable.headers.primaryHeader', {
-    defaultMessage: 'Primaries',
-  }),
-  replica: i18n.translate('xpack.idxMgmt.indexTable.headers.replicaHeader', {
-    defaultMessage: 'Replicas',
-  }),
-  documents: i18n.translate('xpack.idxMgmt.indexTable.headers.documentsHeader', {
-    defaultMessage: 'Docs count',
-  }),
-  size: i18n.translate('xpack.idxMgmt.indexTable.headers.storageSizeHeader', {
-    defaultMessage: 'Storage size',
-  }),
-  data_stream: i18n.translate('xpack.idxMgmt.indexTable.headers.dataStreamHeader', {
-    defaultMessage: 'Data stream',
-  }),
+const getHeaders = (showStats) => {
+  const defaultHeaders = {
+    name: i18n.translate('xpack.idxMgmt.indexTable.headers.nameHeader', {
+      defaultMessage: 'Name',
+    }),
+    primary: i18n.translate('xpack.idxMgmt.indexTable.headers.primaryHeader', {
+      defaultMessage: 'Primaries',
+    }),
+    replica: i18n.translate('xpack.idxMgmt.indexTable.headers.replicaHeader', {
+      defaultMessage: 'Replicas',
+    }),
+    data_stream: i18n.translate('xpack.idxMgmt.indexTable.headers.dataStreamHeader', {
+      defaultMessage: 'Data stream',
+    }),
+  };
+
+  if (showStats) {
+    return {
+      ...defaultHeaders,
+      health: i18n.translate('xpack.idxMgmt.indexTable.headers.healthHeader', {
+        defaultMessage: 'Health',
+      }),
+      status: i18n.translate('xpack.idxMgmt.indexTable.headers.statusHeader', {
+        defaultMessage: 'Status',
+      }),
+      documents: i18n.translate('xpack.idxMgmt.indexTable.headers.documentsHeader', {
+        defaultMessage: 'Docs count',
+      }),
+      size: i18n.translate('xpack.idxMgmt.indexTable.headers.storageSizeHeader', {
+        defaultMessage: 'Storage size',
+      }),
+    };
+  }
+
+  return defaultHeaders;
 };
 
 export class IndexTable extends Component {
@@ -247,8 +257,9 @@ export class IndexTable extends Component {
   };
 
   buildHeader() {
-    const { sortField, isSortAscending } = this.props;
-    return Object.entries(HEADERS).map(([fieldName, label]) => {
+    const { sortField, isSortAscending, indices } = this.props;
+    const headers = getHeaders(Boolean(indices.stats));
+    return Object.entries(headers).map(([fieldName, label]) => {
       const isSorted = sortField === fieldName;
       return (
         <EuiTableHeaderCell
@@ -303,7 +314,8 @@ export class IndexTable extends Component {
   }
 
   buildRowCells(index, appServices) {
-    return Object.keys(HEADERS).map((fieldName) => {
+    const headers = getHeaders(Boolean(index.stats));
+    return Object.keys(headers).map((fieldName) => {
       const { name } = index;
       const value = index[fieldName];
 

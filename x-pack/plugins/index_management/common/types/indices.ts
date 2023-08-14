@@ -51,20 +51,24 @@ export interface IndexSettings {
   [key: string]: any;
 }
 
-export interface Index {
-  health?: string;
-  status?: string;
-  name: string;
-  uuid?: string;
-  primary?: number | string;
-  replica?: number | string;
+interface IndexStats {
+  health: string;
+  status: string;
+  uuid: string;
   documents: number;
-  documents_deleted: number;
   size: string;
   primary_size: string;
+}
+
+export interface Index {
+  name: string;
+  primary?: number | string;
+  replica?: number | string;
+  documents_deleted: number;
   isFrozen: boolean;
   hidden: boolean;
   aliases: string | string[];
   data_stream?: string;
   [key: string]: any;
+  stats?: IndexStats;
 }
