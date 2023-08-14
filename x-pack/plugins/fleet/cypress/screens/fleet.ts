@@ -121,6 +121,8 @@ export const SETTINGS_OUTPUTS = {
   NAME_INPUT: 'settingsOutputsFlyout.nameInput',
   TYPE_INPUT: 'settingsOutputsFlyout.typeInput',
   ADD_HOST_ROW_BTN: 'fleetServerHosts.multiRowInput.addRowButton',
+  WARNING_KAFKA_CALLOUT: 'settingsOutputsFlyout.kafkaOutputTypeCallout',
+  WARNING_ELASTICSEARCH_CALLOUT: 'settingsOutputsFlyout.elasticsearchOutputTypeCallout',
 };
 
 export const getSpecificSelectorId = (selector: string, id: number) => {
@@ -136,11 +138,16 @@ export const getSpecificSelectorId = (selector: string, id: number) => {
 export const SETTINGS_OUTPUTS_KAFKA = {
   VERSION_SELECT: 'settingsOutputsFlyout.kafkaVersionInput',
   AUTHENTICATION_SELECT: 'settingsOutputsFlyout.kafkaAuthenticationRadioInput',
+  AUTHENTICATION_NONE_OPTION: 'kafkaAuthenticationNoneRadioButton',
   AUTHENTICATION_USERNAME_PASSWORD_OPTION: 'kafkaAuthenticationUsernamePasswordRadioButton',
   AUTHENTICATION_SSL_OPTION: 'kafkaAuthenticationSSLRadioButton',
   AUTHENTICATION_KERBEROS_OPTION: 'kafkaAuthenticationKerberosRadioButton',
   AUTHENTICATION_USERNAME_INPUT: 'settingsOutputsFlyout.kafkaUsernameInput',
   AUTHENTICATION_PASSWORD_INPUT: 'settingsOutputsFlyout.kafkaPasswordInput',
+  AUTHENTICATION_VERIFICATION_MODE_INPUT: 'settingsOutputsFlyout.kafkaVerificationModeInput',
+  AUTHENTICATION_CONNECTION_TYPE_SELECT: 'settingsOutputsFlyout.kafkaConnectionTypeRadioInput',
+  AUTHENTICATION_CONNECTION_TYPE_PLAIN_OPTION: 'kafkaConnectionTypePlaintextRadioButton',
+  AUTHENTICATION_CONNECTION_TYPE_ENCRYPTION_OPTION: 'kafkaConnectionTypeEncryptionRadioButton',
   AUTHENTICATION_SASL_SELECT: 'settingsOutputsFlyout.kafkaSaslInput',
   AUTHENTICATION_SASL_PLAIN_OPTION: 'kafkaSaslPlainRadioButton',
   AUTHENTICATION_SASL_SCRAM_256_OPTION: 'kafkaSaslScramSha256RadioButton',
@@ -173,7 +180,6 @@ export const SETTINGS_OUTPUTS_KAFKA = {
   BROKER_PANEL: 'settingsOutputsFlyout.kafkaBrokerSettingsPanel',
   BROKER_TIMEOUT_SELECT: 'settingsOutputsFlyout.kafkaBrokerTimeoutInput',
   BROKER_REACHABILITY_TIMEOUT_SELECT: 'settingsOutputsFlyout.kafkaBrokerReachabilityTimeoutInput',
-  BROKER_CHANNEL_BUFFER_SIZE_SELECT: 'settingsOutputsFlyout.kafkaBrokerChannelBufferSizeInput',
   BROKER_ACK_RELIABILITY_SELECT: 'settingsOutputsFlyout.kafkaBrokerAckReliabilityInputLabel',
   KEY_INPUT: 'settingsOutputsFlyout.kafkaKeyInput',
 };
