@@ -68,6 +68,7 @@ const headerCss = {
     toggleNavButton: css`
       border-right: 1px solid #d3dae6;
       margin-left: -1px;
+      padding-right: 4px;
     `,
   },
 };
