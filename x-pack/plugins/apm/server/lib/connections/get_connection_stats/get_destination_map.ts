@@ -208,6 +208,7 @@ export const getDestinationMap = ({
           environment: mergedDestination.environment,
           id: objectHash({ serviceName: mergedDestination.serviceName }),
           type: NodeType.service,
+          dependencyName: mergedDestination.dependencyName,
         };
       } else {
         node = {
