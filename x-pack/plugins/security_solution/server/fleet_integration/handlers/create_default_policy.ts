@@ -38,7 +38,13 @@ export const createDefaultPolicy = (
   appFeatures: AppFeatures
 ): PolicyConfig => {
   // Pass license and cloud information to use in Policy creation
-  const factoryPolicy = policyConfigFactory(licenseService.getLicenseType(), cloud?.isCloudEnabled, licenseService.getLicenseUID(), esClientInfo?.cluster_uuid, esClientInfo?.cluster_name);
+  const factoryPolicy = policyConfigFactory(
+    licenseService.getLicenseType(),
+    cloud?.isCloudEnabled,
+    licenseService.getLicenseUID(),
+    esClientInfo?.cluster_uuid,
+    esClientInfo?.cluster_name
+  );
 
   let defaultPolicyPerType: PolicyConfig =
     config?.type === 'cloud'
