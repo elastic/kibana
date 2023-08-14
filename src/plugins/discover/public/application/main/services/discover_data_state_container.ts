@@ -233,9 +233,16 @@ export function getDataStateContainer({
 
       if (options.fetchMore) {
         abortControllerFetchMore = new AbortController();
+
+        const fetchMoreStartTime = window.performance.now();
         await fetchMoreDocuments(dataSubjects, {
           abortController: abortControllerFetchMore,
           ...commonFetchDeps,
+        });
+        const fetchMoreDuration = window.performance.now() - fetchMoreStartTime;
+        reportPerformanceMetricEvent(services.analytics, {
+          eventName: 'discoverFetchMore',
+          duration: fetchMoreDuration,
         });
         return;
       }
