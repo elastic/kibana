@@ -149,7 +149,7 @@ enabled:
   - test/plugin_functional/config.ts
   - test/server_integration/http/platform/config.status.ts
   - test/server_integration/http/platform/config.ts
-  - test/server_integration/http/ssl_redirect/config.js
+  - test/server_integration/http/ssl_redirect/config.ts
   - test/server_integration/http/ssl_with_p12_intermediate/config.js
   - test/server_integration/http/ssl_with_p12/config.js
   - test/server_integration/http/ssl/config.js

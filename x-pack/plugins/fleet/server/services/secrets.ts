@@ -34,7 +34,7 @@ import type {
 } from '../types';
 
 import { FleetError } from '../errors';
-import { SECRETS_ENDPOINT_PATH } from '../constants';
+import { SECRETS_ENDPOINT_PATH, SECRETS_MINIMUM_FLEET_SERVER_VERSION } from '../constants';
 
 import { retryTransientEsErrors } from './epm/elasticsearch/retry';
 
@@ -42,6 +42,8 @@ import { auditLoggingService } from './audit_logging';
 
 import { appContextService } from './app_context';
 import { packagePolicyService } from './package_policy';
+import { settingsService } from '.';
+import { allFleetServerVersionsAreAtLeast } from './fleet_server';
 
 export async function createSecrets(opts: {
   esClient: ElasticsearchClient;
@@ -270,10 +272,21 @@ export async function extractAndUpdateSecrets(opts: {
     ...createdSecrets.map(({ id }) => ({ id })),
   ];
 
+  const secretsToDelete: PolicySecretReference[] = [];
+
+  toDelete.forEach((secretPath) => {
+    // check if the previous secret is actually a secret refrerence
+    // it may be that secrets were not enabled at the time of creation
+    // in which case they are just stored as plain text
+    if (secretPath.value.value.isSecretRef) {
+      secretsToDelete.push({ id: secretPath.value.value.id });
+    }
+  });
+
   return {
     packagePolicyUpdate: policyWithSecretRefs,
     secretReferences,
-    secretsToDelete: toDelete.map((secretPath) => ({ id: secretPath.value.value.id })),
+    secretsToDelete,
   };
 }
 
@@ -342,6 +355,58 @@ export function getPolicySecretPaths(
   const inputSecretPaths = _getInputSecretPaths(packagePolicy, packageInfo);
 
   return [...packageLevelVarPaths, ...inputSecretPaths];
+}
+
+export async function isSecretStorageEnabled(
+  esClient: ElasticsearchClient,
+  soClient: SavedObjectsClientContract
+): Promise<boolean> {
+  const logger = appContextService.getLogger();
+
+  // first check if the feature flag is enabled, if not secrets are disabled
+  const { secretsStorage: secretsStorageEnabled } = appContextService.getExperimentalFeatures();
+  if (!secretsStorageEnabled) {
+    logger.debug('Secrets storage is disabled by feature flag');
+    return false;
+  }
+
+  // if serverless then secrets will always be supported
+  const isFleetServerStandalone =
+    appContextService.getConfig()?.internal?.fleetServerStandalone ?? false;
+
+  if (isFleetServerStandalone) {
+    logger.trace('Secrets storage is enabled as fleet server is standalone');
+    return true;
+  }
+
+  // now check the flag in settings to see if the fleet server requirement has already been met
+  // once the requirement has been met, secrets are always on
+  const settings = await settingsService.getSettings(soClient);
+
+  if (settings.secret_storage_requirements_met) {
+    logger.debug('Secrets storage already met, turned on is settings');
+    return true;
+  }
+
+  // otherwise check if we have the minimum fleet server version and enable secrets if so
+  if (
+    await allFleetServerVersionsAreAtLeast(esClient, soClient, SECRETS_MINIMUM_FLEET_SERVER_VERSION)
+  ) {
+    logger.debug('Enabling secrets storage as minimum fleet server version has been met');
+    try {
+      await settingsService.saveSettings(soClient, {
+        secret_storage_requirements_met: true,
+      });
+    } catch (err) {
+      // we can suppress this error as it will be retried on the next function call
+      logger.warn(`Failed to save settings after enabling secrets storage: ${err.message}`);
+    }
+
+    return true;
+  }
+
+  logger.info('Secrets storage is disabled as minimum fleet server version has not been met');
+  return false;
 }
 
 function _getPackageLevelSecretPaths(
