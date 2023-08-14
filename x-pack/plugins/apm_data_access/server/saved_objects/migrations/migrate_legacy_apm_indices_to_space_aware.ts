@@ -6,7 +6,7 @@
  */
 import type { CoreStart, Logger, ISavedObjectsRepository } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
+import type { APMIndices } from '../..';
 
 import {
   APMIndicesSavedObjectBody,

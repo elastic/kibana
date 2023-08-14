@@ -14,7 +14,7 @@ import {
 } from '@kbn/core/server';
 import { APMDataAccessConfig } from '.';
 import { ApmDataAccessPluginSetup, ApmDataAccessPluginStart } from './types';
-import { migrateLegacyAPMIndicesToSpaceAware } from '../../apm_data_access/server/saved_objects/migrations/migrate_legacy_apm_indices_to_space_aware';
+import { migrateLegacyAPMIndicesToSpaceAware } from './saved_objects/migrations/migrate_legacy_apm_indices_to_space_aware';
 import { getApmIndicesFromSavedObjectsAndConfigFile } from './lib/get_apm_indices';
 import { apmIndicesSavedObjectDefinition } from './saved_objects/apm_indices';
 
