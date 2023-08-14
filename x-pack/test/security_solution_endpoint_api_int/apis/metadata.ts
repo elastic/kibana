@@ -394,7 +394,8 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('get metadata transforms', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/160274
+    describe.skip('get metadata transforms', () => {
       const testRegex = /endpoint\.metadata_(united|current)-default-*/;
 
       it('should respond forbidden if no fleet access', async () => {
