@@ -5,4 +5,12 @@
  * 2.0.
  */
 
-export { CoverageOverviewPage } from './coverage_overview_page';
+import type { EnrichPolicyType } from '@elastic/elasticsearch/lib/api/types';
+
+export interface SerializedEnrichPolicy {
+  type: EnrichPolicyType;
+  name: string;
+  sourceIndices: string[];
+  matchField: string;
+  enrichFields: string[];
+}

@@ -49,6 +49,7 @@ export const createDefaultPolicy = (
     ? esClientInfo.cluster_uuid
     : factoryPolicy.meta.cluster_uuid;
   factoryPolicy.meta.license_uid = licenseService.getLicenseUID();
+  factoryPolicy.meta.serverless = cloud.isServerlessEnabled || false;
 
   let defaultPolicyPerType: PolicyConfig =
     config?.type === 'cloud'
