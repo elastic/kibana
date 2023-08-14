@@ -5228,6 +5228,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/search-api-panels@link:packages/kbn-search-api-panels":
+  version "0.0.0"
+  uid ""
+
 "@kbn/search-examples-plugin@link:examples/search_examples":
   version "0.0.0"
   uid ""
@@ -5884,6 +5888,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/use-tracked-promise@link:packages/kbn-use-tracked-promise":
+  version "0.0.0"
+  uid ""
+
 "@kbn/user-profile-components@link:packages/kbn-user-profile-components":
   version "0.0.0"
   uid ""
@@ -5973,6 +5981,10 @@
   uid ""
 
 "@kbn/visualization-ui-components@link:packages/kbn-visualization-ui-components":
+  version "0.0.0"
+  uid ""
+
+"@kbn/lens-embeddable-utils@link:packages/kbn-lens-embeddable-utils":
   version "0.0.0"
   uid ""
 
