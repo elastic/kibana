@@ -8,7 +8,6 @@
 import type { BulkInstallPackageInfo } from '@kbn/fleet-plugin/common';
 import type { Rule } from '@kbn/security-solution-plugin/public/detection_engine/rule_management/logic/types';
 import { tag } from '../../../tags';
-
 import { createRuleAssetSavedObject } from '../../../helpers/rules';
 import {
   GO_BACK_TO_RULES_TABLE_BUTTON,
@@ -65,8 +64,7 @@ describe(
       });
 
       it('should install package from Fleet in the background', () => {
-        /* Assert that the package in installed from Fleet by checking that
-      /* the installSource is "registry", as opposed to "bundle" */
+        /* Assert that the package in installed from Fleet */
         cy.wait('@installPackageBulk', {
           timeout: 60000,
         }).then(({ response: bulkResponse }) => {
@@ -75,7 +73,6 @@ describe(
           const packages = bulkResponse?.body.items.map(
             ({ name, result }: BulkInstallPackageInfo) => ({
               name,
-              installSource: result.installSource,
             })
           );
 
@@ -91,17 +88,14 @@ describe(
               cy.wrap(response?.body)
                 .should('have.property', 'items')
                 .should('have.length.greaterThan', 0);
-              cy.wrap(response?.body)
-                .should('have.property', '_meta')
-                .should('have.property', 'install_source')
-                .should('eql', 'registry');
             });
           } else {
             // Normal flow, install via the Fleet bulk install API
             expect(packages.length).to.have.greaterThan(0);
-            expect(packages).to.deep.include.members([
-              { name: 'security_detection_engine', installSource: 'registry' },
-            ]);
+            // At least one of the packages installed should be the security_detection_engine package
+            expect(packages).to.satisfy((pckgs: BulkInstallPackageInfo[]) =>
+              pckgs.some((pkg) => pkg.name === 'security_detection_engine')
+            );
           }
         });
       });

@@ -16,3 +16,5 @@ export * from './templates';
 export type { DataStreamFromEs, Health, DataStream, DataStreamIndex } from './data_streams';
 
 export * from './component_templates';
+
+export * from './enrich_policies';
