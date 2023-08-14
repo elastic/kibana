@@ -62,6 +62,12 @@ import { useRowHeightsOptions } from '../../hooks/use_row_heights_options';
 import { convertValueToString } from '../../utils/convert_value_to_string';
 import { getRowsPerPageOptions, getDefaultRowsPerPage } from '../../utils/rows_per_page';
 
+export enum DataLoadingState {
+  loading = 'loading',
+  loadingMore = 'loadingMore',
+  loaded = 'loaded',
+}
+
 const themeDefault = { darkMode: false };
 
 interface SortObj {
@@ -93,11 +99,7 @@ export interface DiscoverGridProps {
   /**
    * Determines if data is currently loaded
    */
-  isLoading: boolean;
-  /**
-   * Determines if it's loading more data (next chunk)
-   */
-  isLoadingMore?: boolean;
+  loadingState: DataLoadingState;
   /**
    * Function used to add a column in the document flyout
    */
@@ -248,8 +250,7 @@ export const DiscoverGrid = ({
   ariaLabelledBy,
   columns,
   dataView,
-  isLoading,
-  isLoadingMore,
+  loadingState,
   expandedDoc,
   onAddColumn,
   filters,
@@ -616,7 +617,9 @@ export const DiscoverGrid = ({
     onUpdateRowHeight,
   });
 
-  if (!rowCount && isLoading) {
+  const isRenderComplete = loadingState !== DataLoadingState.loading;
+
+  if (!rowCount && loadingState === DataLoadingState.loading) {
     return (
       <div className="euiDataGrid__loading">
         <EuiText size="xs" color="subdued">
@@ -632,7 +635,7 @@ export const DiscoverGrid = ({
     return (
       <div
         className="euiDataGrid__noResults"
-        data-render-complete={!isLoading}
+        data-render-complete={isRenderComplete}
         data-shared-item=""
         data-title={searchTitle}
         data-description={searchDescription}
@@ -669,7 +672,7 @@ export const DiscoverGrid = ({
       <span className="dscDiscoverGrid__inner">
         <div
           data-test-subj="discoverDocTable"
-          data-render-complete={!isLoading}
+          data-render-complete={isRenderComplete}
           data-shared-item=""
           data-title={searchTitle}
           data-description={searchDescription}
@@ -696,10 +699,10 @@ export const DiscoverGrid = ({
             gridStyle={GRID_STYLE}
           />
         </div>
-        {!isLoading &&
+        {loadingState !== DataLoadingState.loading &&
           isPaginationEnabled && ( // we hide the footer for Surrounding Documents page
             <DiscoverGridFooter
-              isLoadingMore={isLoadingMore}
+              isLoadingMore={loadingState === DataLoadingState.loadingMore}
               rowCount={rowCount}
               sampleSize={sampleSize}
               pageCount={pageCount}
