@@ -22,11 +22,21 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
+import { ConnectorScheduling } from '../../../../../../../common/types/connectors';
+import { CrawlerIndex } from '../../../../../../../common/types/indices';
 import { EnterpriseSearchCronEditor } from '../../../../../shared/cron_editor/enterprise_search_cron_editor';
 import { docLinks } from '../../../../../shared/doc_links/doc_links';
 import { isCrawlerIndex } from '../../../../utils/indices';
 
-export const MultiCrawlScheduler: React.FC = ({
+interface MultiCrawlSchedulerProps {
+  index: CrawlerIndex;
+  interval: string;
+  schedulingEnabled: boolean;
+  setConnectorSchedulingInterval: (interval: ConnectorScheduling) => void;
+  onSetConnectorSchedulingEnabled: (enabled: boolean) => void;
+}
+
+export const MultiCrawlScheduler: React.FC<MultiCrawlSchedulerProps> = ({
   index,
   interval,
   schedulingEnabled,

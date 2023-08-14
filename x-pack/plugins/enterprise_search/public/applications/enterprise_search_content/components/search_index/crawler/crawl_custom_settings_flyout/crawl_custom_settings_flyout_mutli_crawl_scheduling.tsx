@@ -41,46 +41,45 @@ export const CrawlCustomSettingsFlyoutMultiCrawlScheduling: React.FC = () => {
     onSetConnectorSchedulingEnabled,
   } = useActions(CrawlCustomSettingsFlyoutMultiCrawlLogic);
 
-  return crawlerConfigurations.map((config, index) => {
-    if (index === crawlerConfigActiveTab) {
-      return (
-        <React.Fragment key={index}>
-          <CrawlCustomSettingsFlyoutCrawlDepthPanel
-            maxCrawlDepth={config.maxCrawlDepth}
-            onSelectMaxCrawlDepth={(e) => onSelectMaxCrawlDepth(index, e)}
-          />
-          <EuiSpacer />
-          <CrawlCustomSettingsFlyoutDomainsPanel
-            selectedDomainUrls={config.selectedDomainUrls}
-            domainUrls={domainUrls}
-            onSelectDomainUrls={(e) => onSelectDomainUrls(index, e)}
-          />
-          <EuiSpacer />
-          <CrawlCustomSettingsFlyoutSeedUrlsPanel
-            customEntryPointUrls={config.customEntryPointUrls}
-            customSitemapUrls={config.customSitemapUrls}
-            includeSitemapsInRobotsTxt={config.includeSitemapsInRobotsTxt}
-            selectedDomainUrls={config.selectedDomainUrls}
-            selectedEntryPointUrls={config.selectedEntryPointUrls}
-            selectedSitemapUrls={config.selectedSitemapUrls}
-            onSelectCustomEntryPointUrls={(e) => onSelectCustomEntryPointUrls(index, e)}
-            onSelectCustomSitemapUrls={(e) => onSelectCustomSitemapUrls(index, e)}
-            onSelectEntryPointUrls={(e) => onSelectEntryPointUrls(index, e)}
-            onSelectSitemapUrls={(e) => onSelectSitemapUrls(index, e)}
-            toggleIncludeSitemapsInRobotsTxt={() => toggleIncludeSitemapsInRobotsTxt(index)}
-            entryPointUrls={multiCrawlerEntryPointUrls[index]}
-            sitemapUrls={multiCrawlerSitemapUrls[index]}
-          />
-          <EuiSpacer />
-          <MultiCrawlScheduler
-            index={crawlerIndex}
-            interval={config.interval}
-            schedulingEnabled={config.enabled}
-            setConnectorSchedulingInterval={(e) => setConnectorSchedulingInterval(index, e)}
-            onSetConnectorSchedulingEnabled={(e) => onSetConnectorSchedulingEnabled(index, e)}
-          />
-        </React.Fragment>
-      );
-    }
-  });
+  return (
+    <>
+      {crawlerConfigurations.map((config, index) => {
+        if (index === crawlerConfigActiveTab) {
+          return (
+            <React.Fragment key={index}>
+              <CrawlCustomSettingsFlyoutCrawlDepthPanel
+                maxCrawlDepth={config.maxCrawlDepth}
+                onSelectMaxCrawlDepth={(e) => onSelectMaxCrawlDepth(index, e)}
+              />
+              <EuiSpacer />
+              <CrawlCustomSettingsFlyoutDomainsPanel
+                selectedDomainUrls={config.selectedDomainUrls}
+                domainUrls={domainUrls}
+                onSelectDomainUrls={(e) => onSelectDomainUrls(index, e)}
+              />
+              <EuiSpacer />
+              <CrawlCustomSettingsFlyoutSeedUrlsPanel
+                scheduleConfig={config}
+                onSelectCustomEntryPointUrls={(e) => onSelectCustomEntryPointUrls(index, e)}
+                onSelectCustomSitemapUrls={(e) => onSelectCustomSitemapUrls(index, e)}
+                onSelectEntryPointUrls={(e) => onSelectEntryPointUrls(index, e)}
+                onSelectSitemapUrls={(e) => onSelectSitemapUrls(index, e)}
+                toggleIncludeSitemapsInRobotsTxt={() => toggleIncludeSitemapsInRobotsTxt(index)}
+                entryPointUrls={multiCrawlerEntryPointUrls[index]}
+                sitemapUrls={multiCrawlerSitemapUrls[index]}
+              />
+              <EuiSpacer />
+              <MultiCrawlScheduler
+                index={crawlerIndex}
+                interval={config.interval}
+                schedulingEnabled={config.enabled}
+                setConnectorSchedulingInterval={(e) => setConnectorSchedulingInterval(index, e)}
+                onSetConnectorSchedulingEnabled={(e) => onSetConnectorSchedulingEnabled(index, e)}
+              />
+            </React.Fragment>
+          );
+        }
+      })}
+    </>
+  );
 };

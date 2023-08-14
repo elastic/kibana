@@ -19,7 +19,7 @@ import { UrlComboBox } from '../../../../../shared/url_combo_box/url_combo_box';
 
 import { rerender } from '../../../../../test_helpers';
 
-import { CrawlCustomSettingsFlyoutSeedUrlsPanel } from './crawl_custom_settings_flyout_seed_urls_panel';
+import { CrawlCustomSettingsFlyoutSeedUrlsPanelWithLogicProps } from './crawl_custom_settings_flyout_seed_urls_panel';
 
 const MOCK_VALUES = {
   // CrawlCustomSettingsFlyoutLogic
@@ -64,7 +64,7 @@ describe('CrawlCustomSettingsFlyoutSeedUrlsPanel', () => {
     setMockValues(MOCK_VALUES);
     setMockActions(MOCK_ACTIONS);
 
-    wrapper = shallow(<CrawlCustomSettingsFlyoutSeedUrlsPanel />);
+    wrapper = shallow(<CrawlCustomSettingsFlyoutSeedUrlsPanelWithLogicProps />);
   });
 
   describe('sitemaps tab', () => {

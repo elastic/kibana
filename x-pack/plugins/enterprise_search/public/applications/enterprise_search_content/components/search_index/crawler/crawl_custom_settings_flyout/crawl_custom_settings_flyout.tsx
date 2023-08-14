@@ -28,19 +28,23 @@ import { i18n } from '@kbn/i18n';
 import { CANCEL_BUTTON_LABEL } from '../../../../../shared/constants';
 import { Loading } from '../../../../../shared/loading';
 
-import { CrawlCustomSettingsFlyoutCrawlDepthPanelConnected } from './crawl_custom_settings_flyout_crawl_depth_panel';
+import { CrawlCustomSettingsFlyoutCrawlDepthPanelWithLogicProps } from './crawl_custom_settings_flyout_crawl_depth_panel';
 import { CrawlCustomSettingsFlyoutCrawlTypeSelection } from './crawl_custom_settings_flyout_crawl_type_selection';
-import { CrawlCustomSettingsFlyoutDomainsPanelConnected } from './crawl_custom_settings_flyout_domains_panel';
+import { CrawlCustomSettingsFlyoutDomainsPanelWithLogicProps } from './crawl_custom_settings_flyout_domains_panel';
 import { CrawlCustomSettingsFlyoutLogic } from './crawl_custom_settings_flyout_logic';
 import { CrawlCustomSettingsFlyoutMultipleCrawlDelete } from './crawl_custom_settings_flyout_multi_crawl_delete';
 import { CrawlCustomSettingsFlyoutMultipleCrawlTabs } from './crawl_custom_settings_flyout_multi_crawl_tabs';
 import { CrawlCustomSettingsFlyoutMultiCrawlScheduling } from './crawl_custom_settings_flyout_mutli_crawl_scheduling';
-import { CrawlCustomSettingsFlyoutSeedUrlsPanelConnected } from './crawl_custom_settings_flyout_seed_urls_panel';
+import { CrawlCustomSettingsFlyoutSeedUrlsPanelWithLogicProps } from './crawl_custom_settings_flyout_seed_urls_panel';
 
 export const CrawlCustomSettingsFlyout: React.FC = () => {
-  const { isDataLoading, isFormSubmitting, isFlyoutVisible, isSingleCrawlType } = useValues(
-    CrawlCustomSettingsFlyoutLogic
-  );
+  const {
+    isDataLoading,
+    isFormSubmitting,
+    isFlyoutVisible,
+    isSingleCrawlType,
+    selectedDomainUrls,
+  } = useValues(CrawlCustomSettingsFlyoutLogic);
   const { hideFlyout, startCustomCrawl, saveCustomSchedulingConfiguration } = useActions(
     CrawlCustomSettingsFlyoutLogic
   );
@@ -88,11 +92,11 @@ export const CrawlCustomSettingsFlyout: React.FC = () => {
             <EuiSpacer />
             {isSingleCrawlType ? (
               <>
-                <CrawlCustomSettingsFlyoutCrawlDepthPanelConnected />
+                <CrawlCustomSettingsFlyoutCrawlDepthPanelWithLogicProps />
                 <EuiSpacer />
-                <CrawlCustomSettingsFlyoutDomainsPanelConnected />
+                <CrawlCustomSettingsFlyoutDomainsPanelWithLogicProps />
                 <EuiSpacer />
-                <CrawlCustomSettingsFlyoutSeedUrlsPanelConnected />
+                <CrawlCustomSettingsFlyoutSeedUrlsPanelWithLogicProps />
               </>
             ) : (
               <>

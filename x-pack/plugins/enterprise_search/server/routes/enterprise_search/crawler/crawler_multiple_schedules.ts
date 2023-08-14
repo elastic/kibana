@@ -45,12 +45,8 @@ export function registerCrawlerMultipleSchedulesRoutes({ router, log }: RouteDep
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
       const { params, body } = request;
-      const postCustomSchedulingResult = await postCrawlerCustomScheduling(
-        client,
-        params.indexName,
-        body
-      );
-      return response.ok({ postCustomSchedulingResult });
+      await postCrawlerCustomScheduling(client, params.indexName, body);
+      return response.ok();
     })
   );
 

@@ -17,7 +17,7 @@ import { SimplifiedSelectable } from '../../../../../shared/simplified_selectabl
 
 import { rerender } from '../../../../../test_helpers';
 
-import { CrawlCustomSettingsFlyoutDomainsPanel } from './crawl_custom_settings_flyout_domains_panel';
+import { CrawlCustomSettingsFlyoutDomainsPanelWithLogicProps } from './crawl_custom_settings_flyout_domains_panel';
 
 const MOCK_VALUES = {
   // CrawlCustomSettingsFlyoutLogic
@@ -44,7 +44,7 @@ describe('CrawlCustomSettingsFlyoutDomainsPanel', () => {
     setMockValues(MOCK_VALUES);
     setMockActions(MOCK_ACTIONS);
 
-    wrapper = shallow(<CrawlCustomSettingsFlyoutDomainsPanel />);
+    wrapper = shallow(<CrawlCustomSettingsFlyoutDomainsPanelWithLogicProps />);
   });
 
   it('allows the user to select domains', () => {

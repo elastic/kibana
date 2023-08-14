@@ -6,6 +6,13 @@
  */
 
 import {
+  CrawlerCustomScheduleConfigOverridesServer,
+  CrawlerCustomScheduleServer,
+  CrawlerCustomScheduleMappingServer,
+  CrawlerCustomSchedulesServer,
+} from '../../../../../common/types/crawler';
+
+import {
   CrawlerDomain,
   CrawlerDomainFromServer,
   CrawlerData,
@@ -31,7 +38,6 @@ import {
   RawCrawlerAuth,
   CrawlScheduleFromServer,
   CrawlSchedule,
-  CrawlerCustomSchedulesFromServer,
   CrawlerCustomSchedule,
 } from './types';
 
@@ -240,14 +246,10 @@ export const domainConfigServerToClient = (
 });
 
 export const crawlerCustomSchedulingServerToClient = (
-  customSchedulingFromServer: CrawlerCustomSchedulesFromServer
+  customSchedulingFromServer: CrawlerCustomSchedulesServer
 ): CrawlerCustomSchedule[] =>
-  Object.entries(customSchedulingFromServer.custom_scheduling)
-    .sort(([name, _])=> name)
-    .map(([_, schedule]) => {
-
-    const { name, interval, configuration_overrides, enabled } = schedule;
-
+  Object.entries(customSchedulingFromServer.custom_scheduling).map((scheduleMapping) => {
+    const { name, interval, configuration_overrides, enabled } = scheduleMapping[1];
     const {
       max_crawl_depth = 2,
       sitemap_discovery_disabled = false,
@@ -270,33 +272,41 @@ export const crawlerCustomSchedulingServerToClient = (
     };
   });
 
-
-export const crawlerCustomSchedulingClientToServer = (crawlerCustomScheduling: CrawlerCustomSchedule[]): any => {
-  const mapToServerFormat = (crawlConfig: CrawlerCustomSchedule): any => {
-    const configurationOverrides: CrawlerCustomScheduleConfigOverridesFromServer = {
-      max_crawl_depth: crawlConfig.maxCrawlDepth,
-      sitemap_discovery_disabled: !crawlConfig.includeSitemapsInRobotsTxt,
-      domain_allowlist: crawlConfig.selectedDomainUrls,
-      sitemap_urls: [...crawlConfig.selectedSitemapUrls, ...crawlConfig.customSitemapUrls],
-      seed_urls: [...crawlConfig.selectedEntryPointUrls, ...crawlConfig.customEntryPointUrls],
+export const crawlerCustomSchedulingClientToServer = (
+  crawlerCustomSchedules: CrawlerCustomSchedule[]
+): CrawlerCustomScheduleMappingServer => {
+  const mapToServerFormat = (
+    crawlerSchedule: CrawlerCustomSchedule
+  ): CrawlerCustomScheduleServer => {
+    const configurationOverrides: CrawlerCustomScheduleConfigOverridesServer = {
+      max_crawl_depth: crawlerSchedule.maxCrawlDepth,
+      sitemap_discovery_disabled: !crawlerSchedule.includeSitemapsInRobotsTxt,
+      domain_allowlist: crawlerSchedule.selectedDomainUrls,
+      sitemap_urls: [...crawlerSchedule.selectedSitemapUrls, ...crawlerSchedule.customSitemapUrls],
+      seed_urls: [
+        ...crawlerSchedule.selectedEntryPointUrls,
+        ...crawlerSchedule.customEntryPointUrls,
+      ],
     };
 
     return {
-      name: crawlConfig.name,
-      interval: crawlConfig.interval,
+      name: crawlerSchedule.name,
+      interval: crawlerSchedule.interval,
       configuration_overrides: configurationOverrides,
-      enabled: crawlConfig.enabled,
+      enabled: crawlerSchedule.enabled,
     };
   };
 
-  const customSchedulingMap = {}; // Use `any` to accommodate the dynamic nature of your structure
-
-  crawlerConfigurations.forEach((crawlConfig) => {
-    customSchedulingMap[crawlConfig.name.replace(/\s+/g, '_').toLowerCase()] =
-      mapToServerFormat(crawlConfig);
-  });
-
-}
+  const customSchedules: CrawlerCustomScheduleMappingServer = crawlerCustomSchedules.reduce(
+    (map, schedule) => {
+      const scheduleNameFormatted = schedule.name.replace(/\s+/g, '_').toLowerCase();
+      map.set(scheduleNameFormatted, mapToServerFormat(schedule));
+      return map;
+    },
+    new Map()
+  );
+  return customSchedules;
+};
 
 export const crawlerDomainsWithMetaServerToClient = ({
   results,

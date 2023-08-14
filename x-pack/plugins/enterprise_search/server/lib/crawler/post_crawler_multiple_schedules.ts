@@ -8,22 +8,22 @@
 import { IScopedClusterClient } from '@kbn/core/server';
 
 import { CONNECTORS_INDEX } from '../..';
-import { Connector } from '../../../common/types/connectors';
 
-import {fetchCrawlerDocumentIdByIndexName} from './fetch_crawlers';
+import { CrawlerCustomScheduleMappingServer } from '../../../common/types/crawler';
+
+import { fetchCrawlerDocumentIdByIndexName } from './fetch_crawlers';
 
 export const postCrawlerCustomScheduling = async (
   client: IScopedClusterClient,
   indexName: string,
-  customSchedules: Object
-): Promise<Connector | undefined> => {
+  customSchedules: CrawlerCustomScheduleMappingServer
+) => {
   const connectorId = await fetchCrawlerDocumentIdByIndexName(client, indexName);
-  const crawlerResult = await client.asCurrentUser.update<Connector>({
+  return await client.asCurrentUser.update({
     index: CONNECTORS_INDEX,
     id: connectorId,
     doc: {
       custom_scheduling: Object.fromEntries(customSchedules),
     },
   });
-  return crawlerResult;
 };

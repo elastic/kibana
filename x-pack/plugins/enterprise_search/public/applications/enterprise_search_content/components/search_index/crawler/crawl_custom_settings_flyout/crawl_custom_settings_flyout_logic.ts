@@ -14,6 +14,7 @@ import {
   CustomCrawlType,
   DomainConfig,
   DomainConfigFromServer,
+  CrawlerCustomSchedule,
 } from '../../../../api/crawler/types';
 import { domainConfigServerToClient } from '../../../../api/crawler/utils';
 import { IndexNameLogic } from '../../index_name_logic';
@@ -43,10 +44,15 @@ export interface CrawlCustomSettingsFlyoutLogicValues {
   selectedEntryPointUrls: string[];
   selectedSitemapUrls: string[];
   sitemapUrls: string[];
+  crawlerConfigurations: CrawlerCustomSchedule[];
+  multiCrawlerSitemapUrls: string[][];
+  multiCrawlerEntryPointUrls: string[][];
 }
 
 export interface CrawlCustomSettingsFlyoutLogicActions {
   fetchDomainConfigData(): void;
+  fetchCustomScheduling(): void;
+  postCustomScheduling(): void;
   hideFlyout(): void;
   saveCustomSchedulingConfiguration(): void;
   onRecieveDomainConfigData(domainConfigs: DomainConfig[]): { domainConfigs: DomainConfig[] };
@@ -86,7 +92,7 @@ export const CrawlCustomSettingsFlyoutLogic = kea<
       CrawlCustomSettingsFlyoutMultiCrawlLogic,
       ['fetchCustomScheduling', 'postCustomScheduling'],
     ],
-    values: [CrawlCustomSettingsFlyoutMultiCrawlLogic, ['crawlerConfigurations', 'testSelector']],
+    values: [CrawlCustomSettingsFlyoutMultiCrawlLogic, ['crawlerConfigurations']],
   },
   actions: () => ({
     fetchDomainConfigData: true,
@@ -230,7 +236,7 @@ export const CrawlCustomSettingsFlyoutLogic = kea<
       (selectors) => [selectors.domainConfigMap, selectors.crawlerConfigurations],
       (
         domainConfigMap: { [key: string]: DomainConfig },
-        crawlerConfigs: CrawlerConfiguration[]
+        crawlerConfigs: CrawlerCustomSchedule[]
       ): string[][] =>
         crawlerConfigs.map((c) =>
           c.selectedDomainUrls.flatMap(
@@ -242,7 +248,7 @@ export const CrawlCustomSettingsFlyoutLogic = kea<
       (selectors) => [selectors.domainConfigMap, selectors.crawlerConfigurations],
       (
         domainConfigMap: { [key: string]: DomainConfig },
-        crawlerConfigs: CrawlerConfiguration[]
+        crawlerConfigs: CrawlerCustomSchedule[]
       ): string[][] =>
         crawlerConfigs.map((c) =>
           c.selectedDomainUrls.flatMap(

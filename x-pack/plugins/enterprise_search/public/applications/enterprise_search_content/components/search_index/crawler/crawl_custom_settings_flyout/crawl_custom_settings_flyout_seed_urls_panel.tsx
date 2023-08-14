@@ -29,10 +29,32 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { SimplifiedSelectable } from '../../../../../shared/simplified_selectable/simplified_selectable';
 import { UrlComboBox } from '../../../../../shared/url_combo_box/url_combo_box';
+import { CrawlerCustomSchedule } from '../../../../api/crawler/types';
 
 import { CrawlCustomSettingsFlyoutLogic } from './crawl_custom_settings_flyout_logic';
 
-export const CrawlCustomSettingsFlyoutSeedUrlsPanelConnected: React.FC = () => {
+type CrawlerCustomScheduleConfig = Pick<
+  CrawlerCustomSchedule,
+  | 'customEntryPointUrls'
+  | 'customSitemapUrls'
+  | 'includeSitemapsInRobotsTxt'
+  | 'selectedDomainUrls'
+  | 'selectedEntryPointUrls'
+  | 'selectedSitemapUrls'
+>;
+
+interface CrawlCustomSettingsFlyoutSeedUrlsPanelProps {
+  scheduleConfig: CrawlerCustomScheduleConfig;
+  onSelectCustomEntryPointUrls: (urls: string[]) => void;
+  onSelectCustomSitemapUrls: (urls: string[]) => void;
+  onSelectEntryPointUrls: (urls: string[]) => void;
+  onSelectSitemapUrls: (urls: string[]) => void;
+  toggleIncludeSitemapsInRobotsTxt: () => void;
+  entryPointUrls: string[];
+  sitemapUrls: string[];
+}
+
+export const CrawlCustomSettingsFlyoutSeedUrlsPanelWithLogicProps: React.FC = () => {
   const {
     customEntryPointUrls,
     customSitemapUrls,
@@ -51,14 +73,18 @@ export const CrawlCustomSettingsFlyoutSeedUrlsPanelConnected: React.FC = () => {
     toggleIncludeSitemapsInRobotsTxt,
   } = useActions(CrawlCustomSettingsFlyoutLogic);
 
+  const scheduleConfig = {
+    customEntryPointUrls,
+    customSitemapUrls,
+    includeSitemapsInRobotsTxt,
+    selectedDomainUrls,
+    selectedEntryPointUrls,
+    selectedSitemapUrls,
+  };
+
   return (
     <CrawlCustomSettingsFlyoutSeedUrlsPanel
-      customEntryPointUrls={customEntryPointUrls}
-      customSitemapUrls={customSitemapUrls}
-      includeSitemapsInRobotsTxt={includeSitemapsInRobotsTxt}
-      selectedDomainUrls={selectedDomainUrls}
-      selectedEntryPointUrls={selectedEntryPointUrls}
-      selectedSitemapUrls={selectedSitemapUrls}
+      scheduleConfig={scheduleConfig}
       onSelectCustomEntryPointUrls={onSelectCustomEntryPointUrls}
       onSelectCustomSitemapUrls={onSelectCustomSitemapUrls}
       onSelectEntryPointUrls={onSelectEntryPointUrls}
@@ -70,13 +96,10 @@ export const CrawlCustomSettingsFlyoutSeedUrlsPanelConnected: React.FC = () => {
   );
 };
 
-export const CrawlCustomSettingsFlyoutSeedUrlsPanel: React.FC = ({
-  customEntryPointUrls,
-  customSitemapUrls,
-  includeSitemapsInRobotsTxt,
-  selectedDomainUrls,
-  selectedEntryPointUrls,
-  selectedSitemapUrls,
+export const CrawlCustomSettingsFlyoutSeedUrlsPanel: React.FC<
+  CrawlCustomSettingsFlyoutSeedUrlsPanelProps
+> = ({
+  scheduleConfig,
   onSelectCustomEntryPointUrls,
   onSelectCustomSitemapUrls,
   onSelectEntryPointUrls,
@@ -86,10 +109,10 @@ export const CrawlCustomSettingsFlyoutSeedUrlsPanel: React.FC = ({
   sitemapUrls,
 }) => {
   const totalSeedUrls =
-    customEntryPointUrls.length +
-    customSitemapUrls.length +
-    selectedEntryPointUrls.length +
-    selectedSitemapUrls.length;
+    scheduleConfig.customEntryPointUrls.length +
+    scheduleConfig.customSitemapUrls.length +
+    scheduleConfig.selectedEntryPointUrls.length +
+    scheduleConfig.selectedSitemapUrls.length;
 
   return (
     <EuiPanel hasBorder>
@@ -158,17 +181,17 @@ export const CrawlCustomSettingsFlyoutSeedUrlsPanel: React.FC = ({
                           }}
                         />
                       }
-                      checked={includeSitemapsInRobotsTxt}
+                      checked={scheduleConfig.includeSitemapsInRobotsTxt}
                       onChange={toggleIncludeSitemapsInRobotsTxt}
                     />
                   </EuiPanel>
                   <SimplifiedSelectable
                     data-telemetry-id="entSearchContent-crawler-customCrawlSettings-selectDomain"
                     options={sitemapUrls}
-                    selectedOptions={selectedSitemapUrls}
+                    selectedOptions={scheduleConfig.selectedSitemapUrls}
                     onChange={onSelectSitemapUrls}
                     emptyMessage={
-                      selectedDomainUrls.length === 0
+                      scheduleConfig.selectedDomainUrls.length === 0
                         ? i18n.translate(
                             'xpack.enterpriseSearch.crawler.crawlCustomSettingsFlyout.emptyDomainsMessage',
                             {
@@ -188,7 +211,7 @@ export const CrawlCustomSettingsFlyoutSeedUrlsPanel: React.FC = ({
                       }
                     )}
                     onChange={onSelectCustomSitemapUrls}
-                    selectedUrls={customSitemapUrls}
+                    selectedUrls={scheduleConfig.customSitemapUrls}
                   />
                 </>
               ),
@@ -207,10 +230,10 @@ export const CrawlCustomSettingsFlyoutSeedUrlsPanel: React.FC = ({
                   <SimplifiedSelectable
                     data-telemetry-id="entSearchContent-crawler-customCrawlSettings-selectDomain"
                     options={entryPointUrls}
-                    selectedOptions={selectedEntryPointUrls}
+                    selectedOptions={scheduleConfig.selectedEntryPointUrls}
                     onChange={onSelectEntryPointUrls}
                     emptyMessage={
-                      selectedDomainUrls.length === 0
+                      scheduleConfig.selectedDomainUrls.length === 0
                         ? i18n.translate(
                             'xpack.enterpriseSearch.crawler.crawlCustomSettingsFlyout.emptyDomainsMessage',
                             {
@@ -230,7 +253,7 @@ export const CrawlCustomSettingsFlyoutSeedUrlsPanel: React.FC = ({
                       }
                     )}
                     onChange={onSelectCustomEntryPointUrls}
-                    selectedUrls={customEntryPointUrls}
+                    selectedUrls={scheduleConfig.customEntryPointUrls}
                   />
                 </>
               ),
