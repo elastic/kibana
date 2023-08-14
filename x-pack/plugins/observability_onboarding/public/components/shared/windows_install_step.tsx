@@ -9,11 +9,14 @@ import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 
-const DEFAULT_STANDALONE_ELASTIC_AGENT_DOCS = "https://www.elastic.co/guide/en/fleet/current/install-standalone-elastic-agent.html";
+const DEFAULT_STANDALONE_ELASTIC_AGENT_DOCS =
+  'https://www.elastic.co/guide/en/fleet/current/install-standalone-elastic-agent.html';
 
 export function WindowsInstallStep({
-  docsLink = DEFAULT_STANDALONE_ELASTIC_AGENT_DOCS
-} :{ docsLink?: string }) {
+  docsLink = DEFAULT_STANDALONE_ELASTIC_AGENT_DOCS,
+}: {
+  docsLink?: string;
+}) {
   return (
     <EuiFlexGroup direction="column">
       <EuiFlexItem grow={false}>
