@@ -72,7 +72,6 @@ describe('useHostTable hook', () => {
           {
             data: [
               {
-                type: 'static_value',
                 value: '1',
                 format: {
                   id: 'percent',
