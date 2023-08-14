@@ -249,26 +249,31 @@ export const crawlerCustomSchedulingServerToClient = (
   customSchedulingFromServer: CrawlerCustomSchedulesServer
 ): CrawlerCustomSchedule[] =>
   Object.entries(customSchedulingFromServer.custom_scheduling).map((scheduleMapping) => {
-    const { name, interval, configuration_overrides, enabled } = scheduleMapping[1];
     const {
-      max_crawl_depth = 2,
-      sitemap_discovery_disabled = false,
-      domain_allowlist = [],
-      sitemap_urls = [],
-      seed_urls = [],
-    } = configuration_overrides;
+      name,
+      interval,
+      configuration_overrides: configurationOverrides,
+      enabled,
+    } = scheduleMapping[1];
+    const {
+      max_crawl_depth: maxCrawlDepth = 2,
+      sitemap_discovery_disabled: notIncludeSitemapsInRobotsTxt = false,
+      domain_allowlist: selectedDomainUrls = [],
+      sitemap_urls: customSitemapUrls = [],
+      seed_urls: customEntryPointUrls = [],
+    } = configurationOverrides;
 
     return {
       name,
       interval,
       enabled,
-      maxCrawlDepth: max_crawl_depth,
-      includeSitemapsInRobotsTxt: !sitemap_discovery_disabled,
-      selectedDomainUrls: domain_allowlist,
+      maxCrawlDepth,
+      includeSitemapsInRobotsTxt: !notIncludeSitemapsInRobotsTxt,
+      selectedDomainUrls,
       selectedEntryPointUrls: [],
       selectedSitemapUrls: [],
-      customEntryPointUrls: seed_urls,
-      customSitemapUrls: sitemap_urls,
+      customEntryPointUrls,
+      customSitemapUrls,
     };
   });
 
