@@ -1055,6 +1055,7 @@
     }
   },
   "navigation_embeddable": {
+    "dynamic": false,
     "properties": {
       "id": {
         "type": "text"
