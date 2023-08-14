@@ -38,6 +38,7 @@ import {
 import { ApiKeyBanner } from '../custom_logs/wizard/api_key_banner';
 import { getDiscoverNavigationParams } from '../utils';
 import { WindowsInstallStep } from '../../shared/windows_install_step';
+import { SystemIntegrationBanner } from './system_integration_banner';
 import { TroubleshootingLink } from '../../shared/troubleshooting_link';
 
 export function InstallElasticAgent() {
@@ -226,6 +227,8 @@ export function InstallElasticAgent() {
             )}
           </p>
         </EuiText>
+        <EuiSpacer size="m" />
+        <SystemIntegrationBanner />
         <EuiSpacer size="m" />
         {apiKeyEncoded && onboardingId ? (
           <ApiKeyBanner
