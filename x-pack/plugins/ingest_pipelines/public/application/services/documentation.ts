@@ -21,7 +21,6 @@ export class DocumentationService {
   private classificationUrl: string = '';
   private regressionUrl: string = '';
   private documentationUrl: string = '';
-  private dataStreamsNamingSchemeUrl: string = '';
 
   public setup(docLinks: DocLinksStart): void {
     const { DOC_LINK_VERSION, ELASTIC_WEBSITE_URL, links } = docLinks;
@@ -40,7 +39,6 @@ export class DocumentationService {
     this.classificationUrl = links.ingest.inferenceClassification;
     this.regressionUrl = links.ingest.inferenceRegression;
     this.documentationUrl = links.ingest.inference;
-    this.dataStreamsNamingSchemeUrl = links.fleet.datastreamsNamingScheme;
   }
 
   public getEsDocsBasePath() {
@@ -93,10 +91,6 @@ export class DocumentationService {
 
   public getDocumentationUrl() {
     return this.documentationUrl;
-  }
-
-  public getDataStreamsNamingSchemeUrl() {
-    return this.dataStreamsNamingSchemeUrl;
   }
 }
 

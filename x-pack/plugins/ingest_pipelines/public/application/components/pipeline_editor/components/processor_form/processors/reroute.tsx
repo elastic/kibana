@@ -60,15 +60,8 @@ const getFieldsConfig = (docService: DocumentationService): FieldsConfig => {
       helpText: (
         <FormattedMessage
           id="xpack.ingestPipelines.pipelineEditor.reroute.datasetFieldHelperText"
-          defaultMessage="Field references or a static value for the dataset part of the {dataStreamNameLink}. Must meet the criteria for {indexNamesLink}. Cannot contain {dash}. 100 characters max."
+          defaultMessage="Field references or a static value for the dataset part of the data stream name. Must meet the criteria for {indexNamesLink}. Cannot contain {dash}. 100 characters max."
           values={{
-            dataStreamNameLink: (
-              <EuiLink href={docService.getDataStreamsNamingSchemeUrl()} target="_blank" external>
-                {i18n.translate('xpack.ingestPipelines.pipelineEditor.reroute.dataStreamNameLink', {
-                  defaultMessage: 'data stream name',
-                })}
-              </EuiLink>
-            ),
             indexNamesLink: (
               <EuiLink
                 href={`${docService.getEsDocsBasePath()}/indices-create-index.html#indices-create-api-path-params`}
@@ -109,15 +102,8 @@ const getFieldsConfig = (docService: DocumentationService): FieldsConfig => {
       helpText: (
         <FormattedMessage
           id="xpack.ingestPipelines.pipelineEditor.reroute.namespaceFieldHelperText"
-          defaultMessage="Field references or a static value for the namespace part of the {dataStreamNameLink}. Must meet the criteria for {indexNamesLink}. 100 characters max."
+          defaultMessage="Field references or a static value for the namespace part of the data stream name. Must meet the criteria for {indexNamesLink}. 100 characters max."
           values={{
-            dataStreamNameLink: (
-              <EuiLink href={docService.getDataStreamsNamingSchemeUrl()} target="_blank" external>
-                {i18n.translate('xpack.ingestPipelines.pipelineEditor.reroute.dataStreamNameLink', {
-                  defaultMessage: 'data stream name',
-                })}
-              </EuiLink>
-            ),
             indexNamesLink: (
               <EuiLink
                 href={`${docService.getEsDocsBasePath()}/indices-create-index.html#indices-create-api-path-params`}
