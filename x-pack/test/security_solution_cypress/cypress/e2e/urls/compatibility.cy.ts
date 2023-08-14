@@ -38,6 +38,8 @@ const RULE_ID = '5a4a0460-d822-11eb-8962-bfd4aff0a9b3';
 describe('URL compatibility', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] }, () => {
   beforeEach(() => {
     login(ROLES.platform_engineer);
+    visit(SECURITY_DETECTIONS_URL);
+    login();
   });
 
   it('Redirects to alerts from old siem Detections URL', () => {
