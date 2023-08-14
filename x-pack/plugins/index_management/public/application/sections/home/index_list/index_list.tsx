@@ -17,7 +17,7 @@ import { IndexTable } from './index_table';
 export const IndexList: React.FunctionComponent<RouteComponentProps> = ({ history }) => {
   const {
     core: { executionContext },
-    enableIndexDetailsPage,
+    config: { enableIndexDetailsPage },
   } = useAppContext();
 
   useExecutionContext(executionContext, {

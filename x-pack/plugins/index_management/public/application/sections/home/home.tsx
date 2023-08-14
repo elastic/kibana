@@ -43,7 +43,9 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
   },
   history,
 }) => {
-  const { enableIndexDetailsPage } = useAppContext();
+  const {
+    config: { enableIndexDetailsPage },
+  } = useAppContext();
   const tabs = [
     {
       id: Section.Indices,
