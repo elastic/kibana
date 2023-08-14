@@ -87,7 +87,7 @@ export class CoreKibanaRequest<
   private static sanitizeRequest<P, Q, B>(
     req: Request
   ): { query: unknown; params: unknown; body: unknown } {
-    const { [ELASTIC_INTERNAL_ORIGIN_QUERY_PARAM]: __, ...query } = req.query;
+    const { [ELASTIC_INTERNAL_ORIGIN_QUERY_PARAM]: __, ...query } = req.query ?? {};
     return {
       query,
       params: req.params,
