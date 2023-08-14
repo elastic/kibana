@@ -70,7 +70,7 @@ export const useHostIsolationAction = ({
 
   const isolateHostHandler = useCallback(() => {
     closePopover();
-    if (isHostIsolated === false) {
+    if (!isHostIsolated) {
       onAddIsolationStatusClick('isolateHost');
     } else {
       onAddIsolationStatusClick('unisolateHost');
