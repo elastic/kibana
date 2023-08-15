@@ -51,7 +51,9 @@ export const PolicyDetailsFlyout: FunctionComponent<Props> = ({ policy, onClose 
                   defaultMessage: 'Type',
                 })}
               </EuiDescriptionListTitle>
-              <EuiDescriptionListDescription>{policy.type}</EuiDescriptionListDescription>
+              <EuiDescriptionListDescription data-test-subj="policyTypeValue">
+                {policy.type}
+              </EuiDescriptionListDescription>
             </>
           )}
 
@@ -63,7 +65,7 @@ export const PolicyDetailsFlyout: FunctionComponent<Props> = ({ policy, onClose 
                   defaultMessage: 'Source indices',
                 })}
               </EuiDescriptionListTitle>
-              <EuiDescriptionListDescription>
+              <EuiDescriptionListDescription data-test-subj="policyIndicesValue">
                 {policy.sourceIndices.join(', ')}
               </EuiDescriptionListDescription>
             </>
@@ -77,7 +79,9 @@ export const PolicyDetailsFlyout: FunctionComponent<Props> = ({ policy, onClose 
                   defaultMessage: 'Match field',
                 })}
               </EuiDescriptionListTitle>
-              <EuiDescriptionListDescription>{policy.matchField}</EuiDescriptionListDescription>
+              <EuiDescriptionListDescription data-test-subj="policyMatchFieldValue">
+                {policy.matchField}
+              </EuiDescriptionListDescription>
             </>
           )}
 
@@ -89,7 +93,7 @@ export const PolicyDetailsFlyout: FunctionComponent<Props> = ({ policy, onClose 
                   defaultMessage: 'Enrich fields',
                 })}
               </EuiDescriptionListTitle>
-              <EuiDescriptionListDescription>
+              <EuiDescriptionListDescription data-test-subj="policyEnrichFieldsValue">
                 {policy.enrichFields.join(', ')}
               </EuiDescriptionListDescription>
             </>

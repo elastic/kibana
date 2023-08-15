@@ -67,4 +67,9 @@ export type TestSubjects =
   | 'deletePolicyModal'
   | 'executePolicyModal'
   | 'policyDetailsFlyout'
+  | 'policyTypeValue'
+  | 'policyIndicesValue'
+  | 'policyMatchFieldValue'
+  | 'policyEnrichFieldsValue'
+  | 'queryEditor'
   | 'detailPanelTabSelected';

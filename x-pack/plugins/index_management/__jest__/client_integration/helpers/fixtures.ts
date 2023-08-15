@@ -54,4 +54,7 @@ export const createTestEnrichPolicy = (name: string, type: EnrichPolicyType) => 
   sourceIndices: ['users'],
   matchField: 'email',
   enrichFields: ['first_name', 'last_name', 'city'],
+  query: {
+    match_all: {},
+  },
 });
