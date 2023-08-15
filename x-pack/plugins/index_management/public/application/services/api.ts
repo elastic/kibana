@@ -8,6 +8,7 @@
 import { METRIC_TYPE } from '@kbn/analytics';
 import {
   API_BASE_PATH,
+  INTERNAL_API_BASE_PATH,
   UIM_UPDATE_SETTINGS,
   UIM_INDEX_CLEAR_CACHE,
   UIM_INDEX_CLEAR_CACHE_MANY,
@@ -314,7 +315,7 @@ export function useLoadNodesPlugins() {
 
 export const useLoadEnrichPolicies = () => {
   return useRequest({
-    path: `${API_BASE_PATH}/enrich_policies`,
+    path: `${INTERNAL_API_BASE_PATH}/enrich_policies`,
     method: 'get',
   });
 };
