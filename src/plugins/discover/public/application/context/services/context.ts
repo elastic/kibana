@@ -88,7 +88,7 @@ export async function fetchSurroundingDocs(
       break;
     }
 
-    const searchAfter = getEsQuerySearchAfter(type, rows, timeField, anchor);
+    const searchAfter = getEsQuerySearchAfter(type, rows, anchor);
 
     const sort = getEsQuerySort({
       timeFieldName: timeField,

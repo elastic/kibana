@@ -17,15 +17,13 @@ import { SurrDocType } from '../services/context';
  */
 export function getEsQuerySearchAfter(
   type: SurrDocType,
-  documents: DataTableRecord[],
-  timeFieldName: string,
+  rows: DataTableRecord[],
   anchor: DataTableRecord
 ): EsQuerySearchAfter {
-  if (documents.length) {
+  if (rows.length) {
     // already surrounding docs -> first or last record  is used
-    const afterTimeRecIdx =
-      type === SurrDocType.SUCCESSORS && documents.length ? documents.length - 1 : 0;
-    const afterTimeDocRaw = documents[afterTimeRecIdx].raw;
+    const afterTimeRecIdx = type === SurrDocType.SUCCESSORS && rows.length ? rows.length - 1 : 0;
+    const afterTimeDocRaw = rows[afterTimeRecIdx].raw;
     return [
       afterTimeDocRaw.sort?.[0] as string | number,
       afterTimeDocRaw.sort?.[1] as string | number,
