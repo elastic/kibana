@@ -396,9 +396,10 @@ curl --request POST \
             "index": "transactions,
             "timestampField": "custom_timestamp",
             "good": {
-                "aggregation": "value_count",
-                "field": "txn",
-                "filter": "latency < 300"
+                "aggregation": "range",
+                "field": "latency",
+                "from": 0,
+                "to": 300
             },
             "total": {
                 "aggregation": "value_count",
