@@ -65,6 +65,7 @@ export function defineRoutes(params: RouteDefinitionParams) {
   defineAuthorizationRoutes(params);
   defineSessionManagementRoutes(params);
   defineUserProfileRoutes(params);
+  defineUsersRoutes(params); // Temporarily allow user APIs (ToDo: move to non-serverless block below)
   defineViewRoutes(params);
 
   // In the serverless environment...
@@ -74,6 +75,6 @@ export function defineRoutes(params: RouteDefinitionParams) {
     defineIndicesRoutes(params); // the ES privileges form used to help define roles (only consumer) is disabled, so there is no need for these HTTP APIs
     defineRoleMappingRoutes(params); // role mappings are managed internally, based on configurations in control plane, these HTTP APIs are not needed
     defineSecurityCheckupGetStateRoutes(params); // security checkup is not applicable, these HTTP APIs are not needed
-    defineUsersRoutes(params); // the native realm is not enabled (there is only Elastic cloud SAML), no user HTTP API routes are needed
+    // defineUsersRoutes(params); // the native realm is not enabled (there is only Elastic cloud SAML), no user HTTP API routes are needed
   }
 }

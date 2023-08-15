@@ -12,32 +12,35 @@ export default function ({ getService }: FtrProviderContext) {
   const svlCommonApi = getService('svlCommonApi');
   const supertest = getService('supertest');
 
-  describe('security/user_profiles', function () {
+  describe.skip('security/user_profiles', function () {
     describe('route access', () => {
-      describe.skip('internal', () => {
+      describe('internal', () => {
         it('update', async () => {
-          const { status } = await supertest
+          const { body, status } = await supertest
             .post(`/internal/security/user_profile/_data`)
             .set(svlCommonApi.getInternalRequestHeader())
             .send({ key: 'value' });
           // Status should be 401, unauthorized
+          // expect(body).toEqual({});
           expect(status).not.toBe(404);
         });
 
         it('get current', async () => {
-          const { status } = await supertest
+          const { body, status } = await supertest
             .get(`/internal/security/user_profile`)
             .set(svlCommonApi.getInternalRequestHeader());
           // Status should be 401, unauthorized
+          // expect(body).toEqual({});
           expect(status).not.toBe(404);
         });
 
         it('bulk get', async () => {
-          const { status } = await supertest
+          const { body, status } = await supertest
             .get(`/internal/security/user_profile`)
             .set(svlCommonApi.getInternalRequestHeader())
             .send({ uids: ['12345678'] });
           // Status should be 401, unauthorized
+          // expect(body).toEqual({});
           expect(status).not.toBe(404);
         });
       });

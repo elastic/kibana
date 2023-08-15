@@ -63,23 +63,32 @@ export default async () => {
         // This ensures that we register the Security SAML API endpoints.
         // In the real world the SAML config is injected by control plane.
         // basic: { 'cloud-basic': { order: 0 } },
-        // anonymous: {
-        //   anonymous1: {
-        //     order: 1,
-        //     credentials: {
-        //       username: 'anonymous_service_account',
-        //       password: 'anonymous_service_account_password',
-        //     },
-        //   },
-        // },
         '--xpack.cloud.id=ftr_fake_cloud_id',
         `--xpack.security.authc.providers=${JSON.stringify({
           basic: { 'cloud-basic': { order: 0 } },
           saml: { 'cloud-saml-kibana': { order: 1, realm: 'cloud-saml-kibana' } },
         })}`,
-        // This ensures we can attempt to access the disabled anonymous routes without getting a 401
+        // This ensures we can attempt to access the disabled routes without getting a 401
         // `--xpack.security.authc.http.schemes=${JSON.stringify(['ApiKey', 'Basic', 'Bearer'])}`,
         '--xpack.encryptedSavedObjects.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"',
+
+        // //// LOGGERS
+        // '--logging.appenders.file.type=file',
+        // `--logging.appenders.file.fileName=/users/jeramysoucy/GitHub/kibana-1/logs/kibana.log`,
+        // '--logging.appenders.file.layout.type=json',
+
+        // `--logging.loggers=${JSON.stringify([
+        //   {
+        //     name: 'plugins.security',
+        //     level: 'debug',
+        //     appenders: ['file'],
+        //   },
+        //   {
+        //     name: 'http.server.response',
+        //     level: 'all',
+        //     appenders: ['file'],
+        //   },
+        // ])}`,
       ],
     },
 

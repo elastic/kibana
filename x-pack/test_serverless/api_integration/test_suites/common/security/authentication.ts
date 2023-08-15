@@ -15,13 +15,13 @@ export default function ({ getService }: FtrProviderContext) {
   describe('security/authentication', function () {
     describe('route access', () => {
       describe('disabled', () => {
-        // We are temporarily allowing the login API for testing purposes
-        it.skip('login', async () => {
-          const { body, status } = await supertest
-            .post('/internal/security/login')
-            .set(svlCommonApi.getInternalRequestHeader());
-          svlCommonApi.assertApiNotFound(body, status);
-        });
+        // ToDo: uncommment when we disable login
+        // it('login', async () => {
+        //   const { body, status } = await supertest
+        //     .post('/internal/security/login')
+        //     .set(svlCommonApi.getInternalRequestHeader());
+        //   svlCommonApi.assertApiNotFound(body, status);
+        // });
 
         it('logout (deprecated)', async () => {
           const { body, status } = await supertest
@@ -146,6 +146,14 @@ export default function ({ getService }: FtrProviderContext) {
             username: 'elastic',
           });
           expect(status).toBe(200);
+        });
+
+        // ToDo: remove when we disable login
+        it('login', async () => {
+          const { status } = await supertest
+            .post('/internal/security/login')
+            .set(svlCommonApi.getInternalRequestHeader());
+          expect(status).not.toBe(404);
         });
       });
 

@@ -29,33 +29,34 @@ export default function ({ getService }: FtrProviderContext) {
           svlCommonApi.assertApiNotFound(body, status);
         });
 
-        it('create/update role', async () => {
-          const { body, status } = await supertest
-            .put('/api/security/role/test')
-            .set(svlCommonApi.getInternalRequestHeader());
-          svlCommonApi.assertApiNotFound(body, status);
-        });
+        // ToDo: Uncomment when we disable role APIs
+        // it('create/update role', async () => {
+        //   const { body, status } = await supertest
+        //     .put('/api/security/role/test')
+        //     .set(svlCommonApi.getInternalRequestHeader());
+        //   svlCommonApi.assertApiNotFound(body, status);
+        // });
 
-        it('get role', async () => {
-          const { body, status } = await supertest
-            .get('/api/security/role/superuser')
-            .set(svlCommonApi.getInternalRequestHeader());
-          svlCommonApi.assertApiNotFound(body, status);
-        });
+        // it('get role', async () => {
+        //   const { body, status } = await supertest
+        //     .get('/api/security/role/superuser')
+        //     .set(svlCommonApi.getInternalRequestHeader());
+        //   svlCommonApi.assertApiNotFound(body, status);
+        // });
 
-        it('get all roles', async () => {
-          const { body, status } = await supertest
-            .get('/api/security/role')
-            .set(svlCommonApi.getInternalRequestHeader());
-          svlCommonApi.assertApiNotFound(body, status);
-        });
+        // it('get all roles', async () => {
+        //   const { body, status } = await supertest
+        //     .get('/api/security/role')
+        //     .set(svlCommonApi.getInternalRequestHeader());
+        //   svlCommonApi.assertApiNotFound(body, status);
+        // });
 
-        it('delete role', async () => {
-          const { body, status } = await supertest
-            .delete('/api/security/role/superuser')
-            .set(svlCommonApi.getInternalRequestHeader());
-          svlCommonApi.assertApiNotFound(body, status);
-        });
+        // it('delete role', async () => {
+        //   const { body, status } = await supertest
+        //     .delete('/api/security/role/superuser')
+        //     .set(svlCommonApi.getInternalRequestHeader());
+        //   svlCommonApi.assertApiNotFound(body, status);
+        // });
 
         it('get shared saved object permissions', async () => {
           const { body, status } = await supertest
@@ -64,6 +65,37 @@ export default function ({ getService }: FtrProviderContext) {
           svlCommonApi.assertApiNotFound(body, status);
         });
       });
+
+      // ToDo: remove when we disable role APIs
+      describe('internal', () => {
+        it('create/update role', async () => {
+          const { status } = await supertest
+            .put('/api/security/role/test')
+            .set(svlCommonApi.getInternalRequestHeader());
+          expect(status).not.toBe(404);
+        });
+
+        it('get role', async () => {
+          const { status } = await supertest
+            .get('/api/security/role/superuser')
+            .set(svlCommonApi.getInternalRequestHeader());
+          expect(status).not.toBe(404);
+        });
+
+        it('get all roles', async () => {
+          const { status } = await supertest
+            .get('/api/security/role')
+            .set(svlCommonApi.getInternalRequestHeader());
+          expect(status).not.toBe(404);
+        });
+
+        it('delete role', async () => {
+          const { status } = await supertest
+            .delete('/api/security/role/superuser')
+            .set(svlCommonApi.getInternalRequestHeader());
+          expect(status).not.toBe(404);
+        });
+      })
 
       describe('public', () => {
         it('reset session page', async () => {
