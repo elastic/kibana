@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import { fromKueryExpression } from '@kbn/es-query';
 import React, { useEffect, useState } from 'react';
 import { DataViewBase } from '@kbn/es-query';
 import { QuerySuggestion } from '@kbn/unified-search-plugin/public';
 
-import { WithKueryAutocompletion } from '../containers/with_kuery_autocompletion';
+import { WithKueryAutocompletion } from './with_kuery_autocompletion';
 import { AutocompleteField } from './autocomplete_field';
 
 type LoadSuggestionsFn = (
@@ -41,7 +40,7 @@ function validateQuery(query: string) {
   return true;
 }
 
-export function MetricsExplorerKueryBar({
+export function RuleFlyoutKueryBar({
   derivedIndexPattern,
   onSubmit,
   onChange,
@@ -73,13 +72,6 @@ export function MetricsExplorerKueryBar({
     fields: derivedIndexPattern.fields,
   };
 
-  const defaultPlaceholder = i18n.translate(
-    'xpack.observability.threshold.rule.homePage.toolbar.kqlSearchFieldPlaceholder',
-    {
-      defaultMessage: 'Search for infrastructure data… (e.g. host.name:host-1)',
-    }
-  );
-
   return (
     <WithKueryAutocompletion indexPattern={filteredDerivedIndexPattern}>
       {({ isLoadingSuggestions, loadSuggestions, suggestions }) => (
@@ -91,7 +83,7 @@ export function MetricsExplorerKueryBar({
           loadSuggestions={curryLoadSuggestions(loadSuggestions)}
           onChange={handleChange}
           onSubmit={onSubmit}
-          placeholder={placeholder || defaultPlaceholder}
+          placeholder={placeholder}
           suggestions={suggestions}
           value={draftQuery}
         />
