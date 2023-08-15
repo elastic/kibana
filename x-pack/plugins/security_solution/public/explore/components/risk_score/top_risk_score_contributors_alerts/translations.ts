@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-export * from './after_keys';
-export * from './risk_weights';
-export * from './identifier_types';
-export * from './types';
-export * from './indices';
-export * from './constants';
+import { i18n } from '@kbn/i18n';
+
+export const TOP_RISK_SCORE_CONTRIBUTORS = i18n.translate(
+  'xpack.securitySolution.hosts.topRiskScoreContributorsTable.title',
+  {
+    defaultMessage: 'Top risk score contributors',
+  }
+);
