@@ -107,7 +107,6 @@ export class ReportingAPIClient implements IReportingAPI {
 
 
   public downloadReport(job: Job) {
-    console.log({job})
     return this.http
       .fetch(`${INTERNAL_ROUTES.JOBS.DOWNLOAD_PREFIX}/${job.id}`, { version: '1' })
       .then((resp) => {
