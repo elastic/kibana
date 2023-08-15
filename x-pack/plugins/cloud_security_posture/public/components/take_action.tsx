@@ -19,9 +19,11 @@ import {
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import type { HttpSetup } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { RuleResponse } from '../common/types';
 import { CREATE_RULE_ACTION_SUBJ, TAKE_ACTION_SUBJ } from './test_subjects';
 import { useKibana } from '../common/hooks/use_kibana';
-import type { RuleResponse } from '../common/api/create_detection_rule';
+import { useQueryClient } from '@tanstack/react-query';
+import { DETECTION_ENGINE_ALERTS_KEY, DETECTION_ENGINE_RULES_KEY } from '../common/constants';
 
 const RULE_PAGE_PATH = '/app/security/rules/id/';
 
@@ -33,6 +35,7 @@ interface TakeActionProps {
  * It accepts a createRuleFn parameter which is used to create a rule in a generic way.
  */
 export const TakeAction = ({ createRuleFn }: TakeActionProps) => {
+  const queryClient = useQueryClient();
   const [isPopoverOpen, setPopoverOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const closePopover = () => {
@@ -114,6 +117,8 @@ export const TakeAction = ({ createRuleFn }: TakeActionProps) => {
               const ruleResponse = await createRuleFn(http);
               setIsLoading(false);
               showSuccessToast(ruleResponse);
+              queryClient.invalidateQueries([DETECTION_ENGINE_RULES_KEY]);
+              queryClient.invalidateQueries([DETECTION_ENGINE_ALERTS_KEY]);
             }}
             data-test-subj={CREATE_RULE_ACTION_SUBJ}
           >

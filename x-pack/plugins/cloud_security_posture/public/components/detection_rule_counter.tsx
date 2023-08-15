@@ -5,36 +5,40 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLink, EuiSkeletonText, EuiText } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 import { useFetchDetectionRulesAlertsStatus } from '../common/api/use_fetch_detection_rules_alerts_status';
-import { useFetchDetectionRulesByTags } from '../common/api';
+import { useFetchDetectionRulesByTags } from '../common/api/use_fetch_detection_rules_by_tags';
 
 const RULES_PAGE_PATH = '/rules/management';
+const ALERTS_PAGE_PATH = '/alerts';
 
 const RULES_TABLE_STATE_STORAGE_KEY = 'securitySolution.rulesTable';
 
 export const DetectionRuleCounter = ({ tags }: { tags: string[] }) => {
   const { data, isLoading } = useFetchDetectionRulesByTags(tags);
   const { data: alertsData, isLoading: alertsIsLoading } = useFetchDetectionRulesAlertsStatus(tags);
-
-  const rulesPagePath = RULES_PAGE_PATH;
-
   const history = useHistory();
 
   const [, setRulesTable] = useSessionStorage(RULES_TABLE_STATE_STORAGE_KEY);
 
-  const rulePageNavigation = async () => {
+  const rulePageNavigation = useCallback(async () => {
     await setRulesTable({
       tags,
     });
     history.push({
-      pathname: rulesPagePath,
+      pathname: RULES_PAGE_PATH,
     });
-  };
+  }, [history, setRulesTable, tags]);
+
+  const alertsPageNavigation = useCallback(() => {
+    history.push({
+      pathname: ALERTS_PAGE_PATH,
+    });
+  }, [history, tags]);
 
   return (
     <EuiSkeletonText lines={1} size="m" isLoading={isLoading || alertsIsLoading}>
@@ -47,18 +51,18 @@ export const DetectionRuleCounter = ({ tags }: { tags: string[] }) => {
         </EuiText>
       ) : (
         <>
-          <a href="#/detections/rules" data-test-subj="detectionsRulesLink">
+          <EuiLink onClick={alertsPageNavigation}>
             <FormattedMessage
               id="xpack.csp.findingsFlyout.alerts.alertCount"
               defaultMessage="{alertCount, plural, one {# alert} other {# alerts}}"
               values={{ alertCount: alertsData?.total }}
             />
-          </a>{' '}
+          </EuiLink>{' '}
           <FormattedMessage
             id="xpack.csp.findingsFlyout.alerts.detectedBy"
             defaultMessage="detected by"
           />{' '}
-          <EuiLink onClick={rulePageNavigation} data-test-subj="detectionsRulesLink">
+          <EuiLink onClick={rulePageNavigation}>
             <FormattedMessage
               id="xpack.csp.findingsFlyout.alerts.ruleCount"
               defaultMessage="{ruleCount, plural, one {# rule} other {# rules}}"
