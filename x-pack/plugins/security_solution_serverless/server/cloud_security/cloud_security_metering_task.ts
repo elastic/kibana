@@ -12,6 +12,7 @@ import {
   LATEST_FINDINGS_INDEX_PATTERN,
   LATEST_VULNERABILITIES_INDEX_PATTERN,
 } from '@kbn/cloud-security-posture-plugin/common/constants';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { UsageRecord } from '../types';
 
 import {
@@ -24,7 +25,6 @@ import type {
   PostureType,
   ResourceCountAggregation,
 } from './types';
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 
 const ASSETS_SAMPLE_GRANULARITY = '24h';
 

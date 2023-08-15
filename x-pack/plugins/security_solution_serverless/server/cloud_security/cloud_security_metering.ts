@@ -10,11 +10,11 @@ import {
   KSPM_POLICY_TEMPLATE,
   CNVM_POLICY_TEMPLATE,
 } from '@kbn/cloud-security-posture-plugin/common/constants';
+import { ProductLine } from '../../common/product';
 import { getCloudSecurityUsageRecord } from './cloud_security_metering_task';
-import type { PostureType, Tier } from './types';
-import type { MeteringCallbackInput, UsageRecord } from '../types';
-import { ProductLine } from '@kbn/security-solution-serverless/common/product';
-import { ServerlessSecurityConfig } from '../config';
+import type { PostureType } from './types';
+import type { MeteringCallbackInput, Tier, UsageRecord } from '../types';
+import type { ServerlessSecurityConfig } from '../config';
 
 export const CLOUD_SECURITY_TASK_TYPE = 'cloud_security';
 export const AGGREGATION_PRECISION_THRESHOLD = 40000;
@@ -33,7 +33,7 @@ export const cloudSecurityMetringCallback = async ({
     logger.error('no project id found');
   }
 
-  const tier: Tier = getProductTier(config);
+  const tier: Tier = getCloudProductTier(config);
 
   try {
     const postureTypes: PostureType[] = [
@@ -64,7 +64,7 @@ export const cloudSecurityMetringCallback = async ({
   }
 };
 
-export const getProductTier = (config: ServerlessSecurityConfig) => {
+export const getCloudProductTier = (config: ServerlessSecurityConfig): Tier => {
   const cloud = config.productTypes.find(
     (productType) => productType.product_line === ProductLine.cloud
   );

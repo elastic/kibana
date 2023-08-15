@@ -11,11 +11,12 @@ import {
   KSPM_POLICY_TEMPLATE,
   CNVM_POLICY_TEMPLATE,
 } from '@kbn/cloud-security-posture-plugin/common/constants';
-import { CLOUD_SECURITY_TASK_TYPE, getProductTier } from './cloud_security_metering';
+import { CLOUD_SECURITY_TASK_TYPE, getCloudProductTier } from './cloud_security_metering';
 import { getCloudSecurityUsageRecord } from './cloud_security_metering_task';
 
 import type { ServerlessSecurityConfig } from '../config';
 import type { PostureType } from './types';
+import type { ProductTier } from '../../common/product';
 
 const mockEsClient = elasticsearchServiceMock.createStart().client.asInternalUser;
 const logger: ReturnType<typeof loggingSystemMock.createLogger> = loggingSystemMock.createLogger();
@@ -40,7 +41,7 @@ describe('getCloudSecurityUsageRecord', () => {
     const taskId = chance.guid();
     const postureType = CSPM_POLICY_TEMPLATE;
 
-    const tier = 'essentials';
+    const tier = 'essentials' as ProductTier;
 
     const result = await getCloudSecurityUsageRecord({
       esClient: mockEsClient,
@@ -78,7 +79,7 @@ describe('getCloudSecurityUsageRecord', () => {
       const projectId = chance.guid();
       const taskId = chance.guid();
 
-      const tier = 'essentials';
+      const tier = 'essentials' as ProductTier;
 
       const result = await getCloudSecurityUsageRecord({
         esClient: mockEsClient,
@@ -119,7 +120,7 @@ describe('getCloudSecurityUsageRecord', () => {
     const taskId = chance.guid();
     const postureType = CSPM_POLICY_TEMPLATE;
 
-    const tier = 'essentials';
+    const tier = 'essentials' as ProductTier;
 
     const result = await getCloudSecurityUsageRecord({
       esClient: mockEsClient,
@@ -142,7 +143,7 @@ describe('getCloudSecurityUsageRecord', () => {
     const taskId = chance.guid();
     const postureType = CSPM_POLICY_TEMPLATE;
 
-    const tier = 'essentials';
+    const tier = 'essentials' as ProductTier;
 
     const result = await getCloudSecurityUsageRecord({
       esClient: mockEsClient,
@@ -169,7 +170,7 @@ describe('should return the relevant product tier', () => {
       ],
     } as unknown as ServerlessSecurityConfig;
 
-    const tier = getProductTier(serverlessSecurityConfig);
+    const tier = getCloudProductTier(serverlessSecurityConfig);
 
     expect(tier).toBe('complete');
   });
@@ -181,7 +182,7 @@ describe('should return the relevant product tier', () => {
       productTypes: [{ product_line: 'endpoint', product_tier: 'complete' }],
     } as unknown as ServerlessSecurityConfig;
 
-    const tier = getProductTier(serverlessSecurityConfig);
+    const tier = getCloudProductTier(serverlessSecurityConfig);
 
     expect(tier).toBe('none');
   });
