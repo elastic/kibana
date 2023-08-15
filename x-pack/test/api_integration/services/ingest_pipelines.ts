@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../functional/ftr_provider_context';
+import { FtrProviderContext } from '../ftr_provider_context';
 import { IngestPipelinesAPIProvider } from '../apis/management/ingest_pipelines/lib/api';
 import { IngestPipelinesFixturesProvider } from '../apis/management/ingest_pipelines/lib/fixtures';
 
