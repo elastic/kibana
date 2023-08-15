@@ -385,7 +385,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
-      describe('for rolled up metric (downsampled)', () => {
+      // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/163971
+      describe.skip('for rolled up metric (downsampled)', () => {
         it('defaults to average for rolled up metric', async () => {
           await PageObjects.lens.switchDataPanelIndexPattern(downsampleDataView.dataView);
           await PageObjects.lens.removeLayer();
