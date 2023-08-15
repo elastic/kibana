@@ -297,7 +297,7 @@ export const crawlerCustomSchedulingClientToServer = (
     return {
       name: crawlerSchedule.name,
       interval: crawlerSchedule.interval,
-      configurationOverrides: configurationOverrides,
+      configurationOverrides,
       enabled: crawlerSchedule.enabled,
     };
   };
