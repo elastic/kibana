@@ -8,7 +8,7 @@ metadata:
   annotations:
     backstage.io/source-location: url:https://github.com/elastic/kibana/tree/main
     github.com/project-slug: elastic/kibana
-    github.com/team-slug: elastic/kibana-core
+    github.com/team-slug: elastic/kibana-tech-leads
     buildkite.com/project-slug: elastic/kibana
 
   tags:
@@ -25,5 +25,5 @@ metadata:
 
 spec:
   type: service
-  owner: group:kibana-core
+  owner: group:kibana-tech-leads
   lifecycle: production
