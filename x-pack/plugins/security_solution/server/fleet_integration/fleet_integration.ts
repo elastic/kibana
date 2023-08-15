@@ -22,6 +22,12 @@ import type {
 } from '@kbn/fleet-plugin/common';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { InfoResponse } from '@elastic/elasticsearch/lib/api/types';
+import { AppFeatureSecurityKey } from '../../common/types/app_features';
+import {
+  isPolicySetToEventCollectionOnly,
+  ensureOnlyEventCollectionIsAllowed,
+} from '../../common/endpoint/models/policy_config_helpers';
+import type { AppFeatures } from '../lib/app_features';
 import type { NewPolicyData, PolicyConfig } from '../../common/endpoint/types';
 import type { LicenseService } from '../../common/license';
 import type { ManifestManager } from '../endpoint/services';
@@ -51,14 +57,16 @@ const shouldUpdateMetaValues = (
   currentCloudInfo: boolean,
   currentClusterName: string,
   currentClusterUUID: string,
-  currentLicenseUID: string
+  currentLicenseUID: string,
+  currentIsServerlessEnabled: boolean
 ) => {
   return (
     endpointPackagePolicy.meta.license !== currentLicenseType ||
     endpointPackagePolicy.meta.cloud !== currentCloudInfo ||
     endpointPackagePolicy.meta.cluster_name !== currentClusterName ||
     endpointPackagePolicy.meta.cluster_uuid !== currentClusterUUID ||
-    endpointPackagePolicy.meta.license_uid !== currentLicenseUID
+    endpointPackagePolicy.meta.license_uid !== currentLicenseUID ||
+    endpointPackagePolicy.meta.serverless !== currentIsServerlessEnabled
   );
 };
 
@@ -72,7 +80,8 @@ export const getPackagePolicyCreateCallback = (
   alerts: AlertsStartContract,
   licenseService: LicenseService,
   exceptionsClient: ExceptionListClient | undefined,
-  cloud: CloudSetup
+  cloud: CloudSetup,
+  appFeatures: AppFeatures
 ): PostPackagePolicyCreateCallback => {
   return async (
     newPackagePolicy,
@@ -140,7 +149,8 @@ export const getPackagePolicyCreateCallback = (
       licenseService,
       endpointIntegrationConfig,
       cloud,
-      esClientInfo
+      esClientInfo,
+      appFeatures
     );
 
     return {
@@ -175,38 +185,46 @@ export const getPackagePolicyUpdateCallback = (
   featureUsageService: FeatureUsageService,
   endpointMetadataService: EndpointMetadataService,
   cloud: CloudSetup,
-  esClient: ElasticsearchClient
+  esClient: ElasticsearchClient,
+  appFeatures: AppFeatures
 ): PutPackagePolicyUpdateCallback => {
   return async (newPackagePolicy: NewPackagePolicy): Promise<UpdatePackagePolicy> => {
     if (!isEndpointPackagePolicy(newPackagePolicy)) {
       return newPackagePolicy;
     }
 
+    const endpointIntegrationData = newPackagePolicy as NewPolicyData;
+
     // Validate that Endpoint Security policy is valid against current license
     validatePolicyAgainstLicense(
       // The cast below is needed in order to ensure proper typing for
       // the policy configuration specific for endpoint
-      newPackagePolicy.inputs[0].config?.policy?.value as PolicyConfig,
+      endpointIntegrationData.inputs[0].config?.policy?.value as PolicyConfig,
       licenseService,
       logger
     );
 
-    notifyProtectionFeatureUsage(newPackagePolicy, featureUsageService, endpointMetadataService);
+    notifyProtectionFeatureUsage(
+      endpointIntegrationData,
+      featureUsageService,
+      endpointMetadataService
+    );
 
-    const newEndpointPackagePolicy = newPackagePolicy.inputs[0].config?.policy
+    const newEndpointPackagePolicy = endpointIntegrationData.inputs[0].config?.policy
       ?.value as PolicyConfig;
 
     const esClientInfo: InfoResponse = await esClient.info();
 
     if (
-      newPackagePolicy.inputs[0].config?.policy?.value &&
+      endpointIntegrationData.inputs[0].config?.policy?.value &&
       shouldUpdateMetaValues(
         newEndpointPackagePolicy,
         licenseService.getLicenseType(),
         cloud?.isCloudEnabled,
         esClientInfo.cluster_name,
         esClientInfo.cluster_uuid,
-        licenseService.getLicenseUID()
+        licenseService.getLicenseUID(),
+        cloud?.isServerlessEnabled
       )
     ) {
       newEndpointPackagePolicy.meta.license = licenseService.getLicenseType();
@@ -214,10 +232,26 @@ export const getPackagePolicyUpdateCallback = (
       newEndpointPackagePolicy.meta.cluster_name = esClientInfo.cluster_name;
       newEndpointPackagePolicy.meta.cluster_uuid = esClientInfo.cluster_uuid;
       newEndpointPackagePolicy.meta.license_uid = licenseService.getLicenseUID();
-      newPackagePolicy.inputs[0].config.policy.value = newEndpointPackagePolicy;
+      newEndpointPackagePolicy.meta.serverless = cloud?.isServerlessEnabled;
+
+      endpointIntegrationData.inputs[0].config.policy.value = newEndpointPackagePolicy;
     }
 
-    return newPackagePolicy;
+    // If no Policy Protection allowed (ex. serverless)
+    const eventsOnlyPolicy = isPolicySetToEventCollectionOnly(newEndpointPackagePolicy);
+    if (
+      !appFeatures.isEnabled(AppFeatureSecurityKey.endpointPolicyProtections) &&
+      !eventsOnlyPolicy.isOnlyCollectingEvents
+    ) {
+      logger.warn(
+        `Endpoint integration policy [${endpointIntegrationData.id}][${endpointIntegrationData.name}] adjusted due to [endpointPolicyProtections] appFeature not being enabled. Trigger [${eventsOnlyPolicy.message}]`
+      );
+
+      endpointIntegrationData.inputs[0].config.policy.value =
+        ensureOnlyEventCollectionIsAllowed(newEndpointPackagePolicy);
+    }
+
+    return endpointIntegrationData;
   };
 };
 

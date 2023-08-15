@@ -44,6 +44,7 @@ export const DatasetsList = ({
   if (hasError) {
     return (
       <EuiEmptyPrompt
+        data-test-subj="datasetErrorPrompt"
         iconType="warning"
         iconColor="danger"
         paddingSize="m"
@@ -70,6 +71,7 @@ export const DatasetsList = ({
   if (isEmpty) {
     return (
       <EuiEmptyPrompt
+        data-test-subj="emptyDatasetPrompt"
         iconType="search"
         paddingSize="m"
         title={<h2>{noDatasetsLabel}</h2>}
