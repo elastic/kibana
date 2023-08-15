@@ -38,6 +38,7 @@ const schemaLatest = schema.object(
       schema.boolean({ defaultValue: true }),
       schema.never()
     ),
+    dev: schema.object({ enableIndexDetailsPage: schema.boolean({ defaultValue: false }) }),
     enableIndexStats: schema.conditional(
       schema.contextRef('serverless'),
       true,
@@ -55,6 +56,9 @@ const configLatest: PluginConfigDescriptor<IndexManagementConfig> = {
     ui: true,
     enableIndexActions: true,
     enableLegacyTemplates: true,
+    dev: {
+      enableIndexDetailsPage: true,
+    },
     enableIndexStats: true,
   },
   schema: schemaLatest,

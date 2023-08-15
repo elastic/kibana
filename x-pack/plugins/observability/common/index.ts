@@ -40,6 +40,7 @@ export {
   apmEnableContinuousRollups,
   enableCriticalPath,
   syntheticsThrottlingEnabled,
+  apmEnableProfilingIntegration,
 } from './ui_settings_keys';
 
 export {
