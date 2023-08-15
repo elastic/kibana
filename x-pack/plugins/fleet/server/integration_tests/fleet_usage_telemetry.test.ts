@@ -435,6 +435,7 @@ describe('fleet usage telemetry', () => {
           },
         ],
         components_status: [
+          /* To uncomment when ES new snapshot will be built 
           {
             id: 'filestream-monitoring',
             status: 'HEALTHY',
@@ -449,7 +450,7 @@ describe('fleet usage telemetry', () => {
             id: 'beat/metrics-monitoring',
             status: 'HEALTHY',
             count: 2,
-          },
+          }, */
         ],
         fleet_server_config: {
           policies: [
