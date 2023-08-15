@@ -31,7 +31,7 @@ import {
   ENDPOINTS,
   EVENT_FILTERS,
   HOST_ISOLATION_EXCEPTIONS,
-  SETTINGS,
+  MANAGE,
   POLICIES,
   RESPONSE_ACTIONS_HISTORY,
   TRUSTED_APPLICATIONS,
@@ -76,21 +76,21 @@ const categories = [
     label: i18n.translate('xpack.securitySolution.appLinks.category.cloudSecurity', {
       defaultMessage: 'Cloud Security',
     }),
-    linkIds: [cloudDefendLink.id],
+    linkIds: [SecurityPageName.cloudDefendPolicies],
   },
 ];
 
 export const links: LinkItem = {
   id: SecurityPageName.administration,
-  title: SETTINGS,
+  title: MANAGE,
   path: MANAGE_PATH,
   skipUrlState: true,
   hideTimeline: true,
   globalNavPosition: 8,
   capabilities: [`${SERVER_APP_ID}.show`],
   globalSearchKeywords: [
-    i18n.translate('xpack.securitySolution.appLinks.settings', {
-      defaultMessage: 'Settings',
+    i18n.translate('xpack.securitySolution.appLinks.manage', {
+      defaultMessage: 'Manage',
     }),
   ],
   categories,
@@ -178,6 +178,7 @@ export const links: LinkItem = {
       hideTimeline: true,
       capabilities: [`${SERVER_APP_ID}.entity-analytics`],
       experimentalKey: 'riskScoringRoutesEnabled',
+      licenseType: 'platinum',
     },
     {
       id: SecurityPageName.responseActionsHistory,
@@ -218,7 +219,7 @@ export const getManagementFilteredLinks = async (
     fleetAuthz && currentUser
       ? calculateEndpointAuthz(licenseService, fleetAuthz, currentUser.roles)
       : getEndpointAuthzInitialState();
-  const showEntityAnalytics = licenseService.isPlatinumPlus();
+
   const showHostIsolationExceptions =
     canAccessHostIsolationExceptions || // access host isolation exceptions is a paid feature, always show the link.
     // read host isolation exceptions is not a paid feature, to allow deleting exceptions after a downgrade scenario.
@@ -254,10 +255,6 @@ export const getManagementFilteredLinks = async (
 
   if (!canReadBlocklist) {
     linksToExclude.push(SecurityPageName.blocklist);
-  }
-
-  if (!showEntityAnalytics) {
-    linksToExclude.push(SecurityPageName.entityAnalyticsManagement);
   }
 
   return excludeLinks(linksToExclude);
