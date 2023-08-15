@@ -16,7 +16,7 @@ describe('Home page with empty state', () => {
     }).as('getEsResources');
     cy.visitKibana('/app/profiling');
     cy.wait('@getEsResources');
-    cy.contains('Universal Profiling (now in Beta)');
+    cy.contains('Universal Profiling');
     cy.contains('Set up Universal Profiling');
   });
 

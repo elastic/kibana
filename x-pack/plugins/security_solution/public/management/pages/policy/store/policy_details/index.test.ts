@@ -275,6 +275,7 @@ describe('policy details: ', () => {
                     license_uid: '',
                     cluster_name: '',
                     cluster_uuid: '',
+                    serverless: false,
                   },
                   windows: {
                     events: {
