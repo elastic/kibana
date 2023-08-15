@@ -56,7 +56,9 @@ export const HoverActionsPopover: React.FC<Props> = ({
   const [isExtraActionsPopoverOpen, setIsExtraActionsPopoverOpen] = useState(false);
   const [showHoverContent, setShowHoverContent] = useState(false);
 
-  const [{ value: actions }, loadActions] = useLoadActionsFn({ disabledActionTypes });
+  const [{ value: actions, loading: isLoadingActions }, loadActions] = useLoadActionsFn({
+    disabledActionTypes,
+  });
 
   const { visibleActions, extraActions } = useMemo(
     () => partitionActions(actions ?? [], visibleCellActions),
@@ -139,7 +141,10 @@ export const HoverActionsPopover: React.FC<Props> = ({
           aria-label={ACTIONS_AREA_LABEL}
         >
           {showHoverContent && (
-            <div css={hoverContentWrapperCSS}>
+            <div
+              css={hoverContentWrapperCSS}
+              data-test-subj={isLoadingActions ? `actions-loading` : `actions-ready`}
+            >
               <EuiScreenReaderOnly>
                 <p>
                   {YOU_ARE_IN_A_DIALOG_CONTAINING_OPTIONS(
