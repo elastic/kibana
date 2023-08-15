@@ -24,7 +24,7 @@ export const MetricFieldSelector: FC<MetricFieldSelectorProps> = React.memo(
 
     const { renderOption, closeFlyout } = fieldStats?.useFieldStatsTrigger() ?? {};
 
-    const options = useMemo<EuiComboBoxOptionOption[]>(() => {
+    const options = useMemo<Array<EuiComboBoxOptionOption<string>>>(() => {
       return metricFieldOptions.map((v) => {
         return {
           value: v.name,
@@ -66,7 +66,6 @@ export const MetricFieldSelector: FC<MetricFieldSelectorProps> = React.memo(
             onChange={onChangeCallback}
             isClearable={false}
             data-test-subj="aiopsChangePointMetricField"
-            // @ts-ignore
             renderOption={renderOption}
           />
         </EuiFormRow>

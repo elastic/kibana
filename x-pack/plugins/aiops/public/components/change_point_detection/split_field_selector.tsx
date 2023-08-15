@@ -24,7 +24,7 @@ export const SplitFieldSelector: FC<SplitFieldSelectorProps> = React.memo(
 
     const { splitFieldsOptions } = useChangePointDetectionControlsContext();
 
-    const options = useMemo<EuiComboBoxOptionOption[]>(() => {
+    const options = useMemo<Array<EuiComboBoxOptionOption<string>>>(() => {
       return [
         {
           value: undefined,
@@ -70,7 +70,6 @@ export const SplitFieldSelector: FC<SplitFieldSelectorProps> = React.memo(
           onChange={onChangeCallback}
           isClearable
           data-test-subj="aiopsChangePointSplitField"
-          // @ts-ignore
           renderOption={renderOption}
         />
       </EuiFormRow>
