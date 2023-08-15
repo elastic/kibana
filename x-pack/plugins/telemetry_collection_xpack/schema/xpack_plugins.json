@@ -31,6 +31,9 @@
             "__index": {
               "type": "long"
             },
+            "[__gen-ai]": {
+              "type": "long"
+            },
             "__pagerduty": {
               "type": "long"
             },
@@ -60,6 +63,19 @@
             }
           }
         },
+        "count_gen_ai_provider_types": {
+          "properties": {
+            "DYNAMIC_KEY": {
+              "type": "long"
+            },
+            "[Azure OpenAI]": {
+              "type": "long"
+            },
+            "[OpenAI]": {
+              "type": "long"
+            }
+          }
+        },
         "count_active_total": {
           "type": "long"
         },
@@ -78,6 +94,9 @@
               "type": "long"
             },
             "__index": {
+              "type": "long"
+            },
+            "[__gen-ai]": {
               "type": "long"
             },
             "__pagerduty": {
@@ -121,6 +140,9 @@
               "type": "long"
             },
             "__index": {
+              "type": "long"
+            },
+            "[__gen-ai]": {
               "type": "long"
             },
             "__pagerduty": {
@@ -194,6 +216,9 @@
             "__index": {
               "type": "long"
             },
+            "[__gen-ai]": {
+              "type": "long"
+            },
             "__pagerduty": {
               "type": "long"
             },
@@ -235,6 +260,9 @@
               "type": "long"
             },
             "__index": {
+              "type": "long"
+            },
+            "[__gen-ai]": {
               "type": "long"
             },
             "__pagerduty": {
