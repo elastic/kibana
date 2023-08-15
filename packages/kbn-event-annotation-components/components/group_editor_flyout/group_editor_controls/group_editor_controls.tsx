@@ -16,13 +16,13 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { SavedObjectsTaggingApiUiComponent } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { QueryInputServices } from '@kbn/visualization-ui-components';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import type {
   EventAnnotationConfig,
   EventAnnotationGroupConfig,
@@ -41,10 +41,10 @@ export const GroupEditorControls = ({
   setSelectedAnnotation: _setSelectedAnnotation,
   selectedAnnotation,
   TagSelector,
-  dataViews: globalDataViews,
-  createDataView,
+  dataViews,
   queryInputServices,
   showValidation,
+  isAdHocDataView,
 }: {
   group: EventAnnotationGroupConfig;
   update: (group: EventAnnotationGroupConfig) => void;
@@ -52,19 +52,10 @@ export const GroupEditorControls = ({
   setSelectedAnnotation: (annotation: EventAnnotationConfig) => void;
   TagSelector: SavedObjectsTaggingApiUiComponent['SavedObjectSaveModalTagSelector'];
   dataViews: DataView[];
-  createDataView: (spec: DataViewSpec) => Promise<DataView>;
   queryInputServices: QueryInputServices;
   showValidation: boolean;
+  isAdHocDataView: (id: string) => boolean;
 }) => {
-  // save the spec for the life of the component since the user might change their mind after selecting another data view
-  const [adHocDataView, setAdHocDataView] = useState<DataView>();
-
-  useEffect(() => {
-    if (group.dataViewSpec) {
-      createDataView(group.dataViewSpec).then(setAdHocDataView);
-    }
-  }, [createDataView, group.dataViewSpec]);
-
   const setSelectedAnnotation = useCallback(
     (newSelection: EventAnnotationConfig) => {
       update({
@@ -77,14 +68,6 @@ export const GroupEditorControls = ({
     },
     [_setSelectedAnnotation, group, update]
   );
-
-  const dataViews = useMemo(() => {
-    const items = [...globalDataViews];
-    if (adHocDataView) {
-      items.push(adHocDataView);
-    }
-    return items;
-  }, [adHocDataView, globalDataViews]);
 
   const currentDataView = useMemo(
     () => dataViews.find((dataView) => dataView.id === group.indexPatternId) || dataViews[0],
@@ -176,13 +159,21 @@ export const GroupEditorControls = ({
               text: name ?? title,
             }))}
             value={group.indexPatternId}
-            onChange={({ target: { value } }) =>
+            onChange={({ target: { value } }) => {
+              const selectedDataView = dataViews.find(({ id }) => id === value);
+
+              if (!selectedDataView?.id) {
+                return;
+              }
+
               update({
                 ...group,
                 indexPatternId: value,
-                dataViewSpec: value === adHocDataView?.id ? adHocDataView.toSpec(false) : undefined,
-              })
-            }
+                dataViewSpec: isAdHocDataView(selectedDataView.id)
+                  ? selectedDataView.toSpec(false)
+                  : undefined,
+              });
+            }}
           />
         </EuiFormRow>
         <EuiFormRow

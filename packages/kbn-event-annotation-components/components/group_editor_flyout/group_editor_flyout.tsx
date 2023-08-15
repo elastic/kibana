@@ -38,7 +38,7 @@ export const GroupEditorFlyout = ({
   onClose: parentOnClose,
   onSave,
   savedObjectsTagging,
-  dataViews,
+  dataViews: globalDataViews,
   createDataView,
   LensEmbeddableComponent,
   queryInputServices,
@@ -71,6 +71,23 @@ export const GroupEditorFlyout = ({
     () => flyoutBodyOverflowRef.current && flyoutBodyOverflowRef.current.scroll(0, 0),
     []
   );
+
+  // save the spec for the life of the component since the user might change their mind after selecting another data view
+  const [adHocDataView, setAdHocDataView] = useState<DataView>();
+
+  useEffect(() => {
+    if (group.dataViewSpec) {
+      createDataView(group.dataViewSpec).then(setAdHocDataView);
+    }
+  }, [createDataView, group.dataViewSpec]);
+
+  const dataViews = useMemo(() => {
+    const items = [...globalDataViews];
+    if (adHocDataView) {
+      items.push(adHocDataView);
+    }
+    return items;
+  }, [adHocDataView, globalDataViews]);
 
   const [selectedAnnotation, _setSelectedAnnotation] = useState<EventAnnotationConfig>();
   const setSelectedAnnotation = useCallback(
@@ -116,9 +133,9 @@ export const GroupEditorFlyout = ({
               setSelectedAnnotation={setSelectedAnnotation}
               TagSelector={savedObjectsTagging.ui.components.SavedObjectSaveModalTagSelector}
               dataViews={dataViews}
-              createDataView={createDataView}
               queryInputServices={queryInputServices}
               showValidation={hasAttemptedSave}
+              isAdHocDataView={(id) => id === adHocDataView?.id}
             />
           </EuiFlyoutBody>
 

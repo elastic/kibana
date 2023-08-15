@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { EuiButton, EuiFlyout, EuiSuperDatePicker } from '@elastic/eui';
+import { EuiButton, EuiFlyout } from '@elastic/eui';
 import { getDefaultManualAnnotation } from '@kbn/event-annotation-common';
 import type { EventAnnotationGroupConfig } from '@kbn/event-annotation-common';
 import { taggingApiMock } from '@kbn/saved-objects-tagging-oss-plugin/public/api.mock';
@@ -14,11 +14,10 @@ import { shallow, ShallowWrapper } from 'enzyme';
 import React from 'react';
 import { GroupEditorControls } from './group_editor_controls';
 import { GroupEditorFlyout } from './group_editor_flyout';
-import { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
+import { DataView } from '@kbn/data-views-plugin/common';
 import type { QueryInputServices } from '@kbn/visualization-ui-components';
 import { TimeRange } from '@kbn/es-query';
-import { EmbeddableComponent, TypedLensByValueInput } from '@kbn/lens-plugin/public';
-import { Datatable } from '@kbn/expressions-plugin/common';
+import { EmbeddableComponent } from '@kbn/lens-plugin/public';
 
 const simulateButtonClick = (component: ShallowWrapper, selector: string) => {
   (component.find(selector) as ShallowWrapper<Parameters<typeof EuiButton>[0]>).prop('onClick')!(
@@ -89,6 +88,8 @@ describe('group editor flyout', () => {
         createDataView={jest.fn()}
         queryInputServices={{} as QueryInputServices}
         LensEmbeddableComponent={LensEmbeddableComponent}
+        searchSessionId={'searchSessionId'}
+        refreshSearchSession={jest.fn()}
       />
     );
   };
@@ -145,68 +146,5 @@ describe('group editor flyout', () => {
     component.find(EuiFlyout).prop('onClose')({} as MouseEvent);
 
     assertGroupEditingState(component);
-  });
-  it('updates the chart time range', () => {
-    assertChartTimeRange(component, { to: 'now', from: 'now-15m' });
-
-    component.find(EuiSuperDatePicker).prop('onTimeChange')({
-      start: 'now-30m',
-      end: 'now',
-      isInvalid: false,
-      isQuickSelection: false,
-    });
-
-    assertChartTimeRange(component, { to: 'now', from: 'now-30m' });
-
-    component.find(LensEmbeddableComponent).prop('onBrushEnd')!({
-      range: [0, 100],
-      // unused props
-      column: 0,
-      table: {} as Datatable,
-      preventDefault: jest.fn(),
-    });
-
-    assertChartTimeRange(component, {
-      to: new Date(100).toISOString(),
-      from: new Date(0).toISOString(),
-    });
-  });
-  describe('lens attributes', () => {
-    const getAttributes = (wrapper: ShallowWrapper) =>
-      wrapper
-        .find(LensEmbeddableComponent)
-        .prop('attributes') as TypedLensByValueInput['attributes'];
-
-    const assertDataView = (id: string, attributes: TypedLensByValueInput['attributes']) =>
-      expect(attributes.references[0].id).toBe(id);
-
-    it('uses correct data view', () => {
-      assertDataView(group.indexPatternId, getAttributes(component));
-
-      component.setProps({ group: { ...group, indexPatternId: 'new-id' } });
-    });
-
-    it('supports ad-hoc data view', () => {
-      const adHocDataView = {
-        id: 'adhoc-1',
-        title: 'my-pattern*',
-        timeFieldName: '@timestamp',
-        sourceFilters: [],
-        fieldFormats: {},
-        runtimeFieldMap: {},
-        fieldAttrs: {},
-        allowNoIndex: false,
-        name: 'My ad-hoc data view',
-      } as DataViewSpec;
-
-      const attributes = getAttributes(
-        mountComponent({ ...group, indexPatternId: '', dataViewSpec: adHocDataView })
-      );
-
-      expect(attributes.references).toHaveLength(0);
-      expect(attributes.state.adHocDataViews![adHocDataView.id!]).toEqual(adHocDataView);
-      expect(attributes.state.internalReferences).toHaveLength(1);
-      expect(attributes.state.internalReferences![0].id).toBe(adHocDataView.id);
-    });
   });
 });

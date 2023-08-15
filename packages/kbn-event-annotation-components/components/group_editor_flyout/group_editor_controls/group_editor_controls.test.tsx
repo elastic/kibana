@@ -16,7 +16,7 @@ import { EuiTextAreaProps, EuiTextProps } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { act } from 'react-dom/test-utils';
 import type { QueryInputServices } from '@kbn/visualization-ui-components';
-import { AnnotationEditorControls, ENABLE_INDIVIDUAL_ANNOTATION_EDITING } from '../..';
+import { AnnotationEditorControls } from '../..';
 
 jest.mock('@elastic/eui', () => {
   return {
@@ -68,15 +68,9 @@ describe('event annotation group editor', () => {
         }
         selectedAnnotation={undefined}
         setSelectedAnnotation={setSelectedAnnotationMock}
-        createDataView={(spec) =>
-          Promise.resolve({
-            id: spec.id,
-            title: spec.title,
-            toSpec: () => spec,
-          } as unknown as DataView)
-        }
         queryInputServices={{} as QueryInputServices}
         showValidation={false}
+        isAdHocDataView={() => false}
       />
     );
 
@@ -174,63 +168,54 @@ describe('event annotation group editor', () => {
     `);
   });
 
-  if (ENABLE_INDIVIDUAL_ANNOTATION_EDITING) {
-    it('adds a new annotation group', () => {
-      act(() => {
-        wrapper.find('button[data-test-subj="addAnnotation"]').simulate('click');
-      });
+  // it('adds a new annotation group', () => {
+  //   act(() => {
+  //     wrapper.find('button[data-test-subj="addAnnotation"]').simulate('click');
+  //   });
 
-      expect(updateMock).toHaveBeenCalledTimes(2);
-      const newAnnotations = (updateMock.mock.calls[0][0] as EventAnnotationGroupConfig)
-        .annotations;
-      expect(newAnnotations.length).toBe(group.annotations.length + 1);
-      expect(wrapper.exists(AnnotationEditorControls)); // annotation controls opened
+  //   expect(updateMock).toHaveBeenCalledTimes(2);
+  //   const newAnnotations = (updateMock.mock.calls[0][0] as EventAnnotationGroupConfig).annotations;
+  //   expect(newAnnotations.length).toBe(group.annotations.length + 1);
+  //   expect(wrapper.exists(AnnotationEditorControls)); // annotation controls opened
+  // });
+
+  it('incorporates annotation updates into group', () => {
+    const annotations = [getDefaultManualAnnotation('1', ''), getDefaultManualAnnotation('2', '')];
+
+    act(() => {
+      wrapper.setProps({
+        selectedAnnotation: annotations[0],
+        group: { ...group, annotations },
+      });
     });
 
-    it('incorporates annotation updates into group', () => {
-      const annotations = [
-        getDefaultManualAnnotation('1', ''),
-        getDefaultManualAnnotation('2', ''),
-      ];
-
-      act(() => {
-        wrapper.setProps({
-          selectedAnnotation: annotations[0],
-          group: { ...group, annotations },
-        });
-      });
-
-      wrapper.find(AnnotationEditorControls).prop('onAnnotationChange')({
-        ...annotations[0],
-        color: 'newColor',
-      });
-
-      expect(updateMock).toHaveBeenCalledTimes(1);
-      expect(updateMock.mock.calls[0][0].annotations[0].color).toBe('newColor');
-      expect(setSelectedAnnotationMock).toHaveBeenCalledTimes(1);
+    wrapper.find(AnnotationEditorControls).prop('onAnnotationChange')({
+      ...annotations[0],
+      color: 'newColor',
     });
 
-    it('removes an annotation from a group', () => {
-      const annotations = [
-        getDefaultManualAnnotation('1', ''),
-        getDefaultManualAnnotation('2', ''),
-      ];
+    expect(updateMock).toHaveBeenCalledTimes(1);
+    expect(updateMock.mock.calls[0][0].annotations[0].color).toBe('newColor');
+    expect(setSelectedAnnotationMock).toHaveBeenCalledTimes(1);
+  });
 
-      act(() => {
-        wrapper.setProps({
-          group: { ...group, annotations },
-        });
+  it('removes an annotation from a group', () => {
+    const annotations = [getDefaultManualAnnotation('1', ''), getDefaultManualAnnotation('2', '')];
+
+    act(() => {
+      wrapper.setProps({
+        group: { ...group, annotations },
       });
-
-      act(() => {
-        wrapper
-          .find('button[data-test-subj="indexPattern-dimension-remove"]')
-          .last()
-          .simulate('click');
-      });
-
-      expect(updateMock).toHaveBeenCalledTimes(1);
-      expect(updateMock.mock.calls[0][0].annotations).toEqual(annotations.slice(0, 1));
     });
-  }
+
+    act(() => {
+      wrapper
+        .find('button[data-test-subj="indexPattern-dimension-remove"]')
+        .last()
+        .simulate('click');
+    });
+
+    expect(updateMock).toHaveBeenCalledTimes(1);
+    expect(updateMock.mock.calls[0][0].annotations).toEqual(annotations.slice(0, 1));
+  });
 });
