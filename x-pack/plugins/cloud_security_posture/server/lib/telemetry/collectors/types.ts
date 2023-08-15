@@ -94,7 +94,7 @@ export interface CloudSecurityAlertsStats {
   posture_type: string;
   rules_count: number;
   alerts_count: number;
-  open_alerts_count: number;
-  closed_alerts_count: number;
-  acknowledged_alerts_count: number;
+  alerts_open_count: number;
+  alerts_closed_count: number;
+  alerts_acknowledged_count: number;
 }

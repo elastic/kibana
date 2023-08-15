@@ -162,9 +162,9 @@ export const cspmUsageSchema: MakeSchemaFrom<CspmUsage> = {
       posture_type: { type: 'keyword' },
       rules_count: { type: 'long' },
       alerts_count: { type: 'long' },
-      open_alerts_count: { type: 'long' },
-      closed_alerts_count: { type: 'long' },
-      acknowledged_alerts_count: { type: 'long' },
+      alerts_open_count: { type: 'long' },
+      alerts_closed_count: { type: 'long' },
+      alerts_acknowledged_count: { type: 'long' },
     },
   },
 };
