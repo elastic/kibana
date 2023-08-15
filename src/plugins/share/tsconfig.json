@@ -14,6 +14,7 @@
     "@kbn/config-schema",
     "@kbn/core-custom-branding-browser",
     "@kbn/core-saved-objects-utils-server",
+    "@kbn/react-kibana-context-theme",
   ],
   "exclude": [
     "target/**/*",
