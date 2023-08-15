@@ -10,10 +10,13 @@ properties:
       - "null"
     description: >
       The type of authentication to use: basic, SSL, or none.
+  ca:
+    type: string
+    # description: An encrypted version of the certificate authority file, which is used to sign and validate certificates.
   certType:
     type: string
     description: >
-      If the `authType` is `webhook-authentication-ssl`, specifies whether the server certificate authentication data is in a CRT and key file format or a PFX file format.
+      If the `authType` is `webhook-authentication-ssl`, specifies whether the certificate authentication data is in a CRT and key file format or a PFX file format.
     enum:
       - ssl-crt-key
       - ssl-pfx
@@ -38,4 +41,13 @@ properties:
     description: >
       The request URL.
       If you are using the `xpack.actions.allowedHosts` setting, add the hostname to the allowed hosts.
-    
+  verificationMode:
+    type: string
+    enum:
+      - certificate
+      - full
+      - none
+    default: full
+    description: >
+      Controls the certificate verification for connections to the web service.
+      Use `full` to perform hostname verification, `certificate` to skip hostname verification, and `none` to skip verification.

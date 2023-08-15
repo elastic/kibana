@@ -1762,10 +1762,12 @@ components:
             - 'null'
           description: |
             The type of authentication to use: basic, SSL, or none.
+        ca:
+          type: string
         certType:
           type: string
           description: |
-            If the `authType` is `webhook-authentication-ssl`, specifies whether the server certificate authentication data is in a CRT and key file format or a PFX file format.
+            If the `authType` is `webhook-authentication-ssl`, specifies whether the certificate authentication data is in a CRT and key file format or a PFX file format.
           enum:
             - ssl-crt-key
             - ssl-pfx
@@ -1789,6 +1791,15 @@ components:
           type: string
           description: |
             The request URL. If you are using the `xpack.actions.allowedHosts` setting, add the hostname to the allowed hosts.
+        verificationMode:
+          type: string
+          enum:
+            - certificate
+            - full
+            - none
+          default: full
+          description: |
+            Controls the certificate verification for connections to the web service. Use `full` to perform hostname verification, `certificate` to skip hostname verification, and `none` to skip verification.
     secrets_properties_webhook:
       title: Connector secrets properties for a Webhook connector
       description: Defines secrets for connectors when type is `.webhook`.
@@ -1803,7 +1814,7 @@ components:
         password:
           type: string
           description: |
-            The password for HTTP basic authentication or the passphrase for the PFX file for SSL authentication. If `hasAuth` is set to `true` and `authType` is `webhook-authentication-basic`, this property is required.
+            The password for HTTP basic authentication or the passphrase for the SSL certificate files. If `hasAuth` is set to `true` and `authType` is `webhook-authentication-basic`, this property is required.
         user:
           type: string
           description: |
