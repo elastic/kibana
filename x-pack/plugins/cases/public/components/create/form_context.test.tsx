@@ -312,7 +312,7 @@ describe('Create case', () => {
         'This is a case description with empty spaces at the end!!             ';
       const category = 'security        ';
       const tags = ['coke     ', 'pepsi'];
-      
+
       useGetConnectorsMock.mockReturnValue({
         ...sampleConnectorData,
         data: connectorsMock,
