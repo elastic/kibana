@@ -385,14 +385,11 @@ export class Plugin implements ISecuritySolutionPlugin {
       /**
        * Register a config for the security guide
        */
-      console.log('depsStart', depsStart);
       if (depsStart.cloudExperiments) {
-        console.log('in cloud experiments');
         try {
           depsStart.cloudExperiments
             .getVariation('security-solutions.guided-onboarding-content', defaultGuideTranslations)
             .then((variation) => {
-              console.log('variation', variation);
               plugins.guidedOnboarding.registerGuideConfig(
                 siemGuideId,
                 getSiemGuideConfig(variation)
@@ -405,7 +402,6 @@ export class Plugin implements ISecuritySolutionPlugin {
           );
         }
       } else {
-        console.log('NOT in cloud experiments');
         plugins.guidedOnboarding.registerGuideConfig(
           siemGuideId,
           getSiemGuideConfig(defaultGuideTranslations)
@@ -440,7 +436,6 @@ export class Plugin implements ISecuritySolutionPlugin {
     core: SecuritySolutionPluginCoreStartDependencies,
     plugins: SecuritySolutionPluginStartDependencies
   ): SecuritySolutionPluginStart {
-    console.log('PLUGS HERE', Object.keys(plugins));
     const { config, logger } = this;
 
     this.ruleMonitoringService.start(core, plugins);
