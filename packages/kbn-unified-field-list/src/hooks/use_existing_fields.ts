@@ -198,7 +198,7 @@ export const useExistingFieldsFetcher = (
         reportPerformanceMetricEvent(params.services.core.analytics, {
           eventName: metricEventName,
           duration: window.performance.now() - startTime,
-          meta: { dataViewId },
+          meta: { dataViewsCount: 1 },
         });
         return;
       }
@@ -214,7 +214,7 @@ export const useExistingFieldsFetcher = (
       reportPerformanceMetricEvent(params.services.core.analytics, {
         eventName: metricEventName,
         duration: window.performance.now() - startTime,
-        meta: { dataViews: params.dataViews.map((v) => v.name) },
+        meta: { dataViewsCount: dataViews.length },
       });
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
