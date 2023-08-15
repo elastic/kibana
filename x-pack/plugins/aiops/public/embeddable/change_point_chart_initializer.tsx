@@ -180,8 +180,17 @@ export const FormControls: FC<{
   onChange: (update: FormControlsProps) => void;
   onValidationChange: (isValid: boolean) => void;
 }> = ({ formInput, onChange, onValidationChange }) => {
-  const { metricFieldOptions } = useChangePointDetectionControlsContext();
+  const { metricFieldOptions, splitFieldsOptions } = useChangePointDetectionControlsContext();
   const prevMetricFieldOptions = usePrevious(metricFieldOptions);
+
+  const enableSearch = useMemo<boolean>(() => {
+    const field = splitFieldsOptions.find((v) => v.name === formInput?.splitField);
+    if (field && field.esTypes) {
+      return field.esTypes?.some((t) => t === ES_FIELD_TYPES.KEYWORD);
+    } else {
+      return false;
+    }
+  }, [splitFieldsOptions, formInput?.splitField]);
 
   useEffect(
     function setDefaultOnDataViewChange() {
@@ -241,7 +250,7 @@ export const FormControls: FC<{
           value={formInput.partitions ?? []}
           onChange={(v) => updateCallback({ partitions: v })}
           splitField={formInput.splitField}
-          enableSearch={formInput.splitField === ES_FIELD_TYPES.KEYWORD}
+          enableSearch={enableSearch}
         />
       ) : null}
 
