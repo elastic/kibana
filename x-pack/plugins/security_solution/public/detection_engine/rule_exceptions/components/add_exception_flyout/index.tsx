@@ -346,6 +346,8 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
           const populatedException = getPrepopulatedRuleExceptionWithHighlightFields({
             alertData,
             exceptionItemName,
+            // With "rule_default" type, there is only ever one rule associated.
+            // That is why it's ok to pull just the first item from rules array here.
             ruleCustomHighlightedFields: rules?.[0]?.investigation_fields ?? [],
           });
           if (populatedException) {
