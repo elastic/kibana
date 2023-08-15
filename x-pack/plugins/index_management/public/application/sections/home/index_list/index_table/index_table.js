@@ -51,7 +51,7 @@ import { renderBadges } from '../../../../lib/render_badges';
 import { NoMatch, DataHealth } from '../../../../components';
 import { IndexActionsContextMenu } from '../index_actions_context_menu';
 
-const getHeaders = (showStats) => {
+const getHeaders = ({ showIndexStats }) => {
   const defaultHeaders = {
     name: i18n.translate('xpack.idxMgmt.indexTable.headers.nameHeader', {
       defaultMessage: 'Name',
@@ -67,7 +67,7 @@ const getHeaders = (showStats) => {
     }),
   };
 
-  if (showStats) {
+  if (showIndexStats) {
     return {
       ...defaultHeaders,
       health: i18n.translate('xpack.idxMgmt.indexTable.headers.healthHeader', {
@@ -256,9 +256,9 @@ export class IndexTable extends Component {
     return indexOfUnselectedItem === -1;
   };
 
-  buildHeader() {
-    const { sortField, isSortAscending, indices } = this.props;
-    const headers = getHeaders(Boolean(indices.stats));
+  buildHeader(config) {
+    const { sortField, isSortAscending } = this.props;
+    const headers = getHeaders({ showIndexStats: config.enableIndexStats });
     return Object.entries(headers).map(([fieldName, label]) => {
       const isSorted = sortField === fieldName;
       return (
@@ -313,8 +313,8 @@ export class IndexTable extends Component {
     return value;
   }
 
-  buildRowCells(index, appServices) {
-    const headers = getHeaders(Boolean(index.stats));
+  buildRowCells(index, appServices, config) {
+    const headers = getHeaders({ showIndexStats: config.enableIndexStats });
     return Object.keys(headers).map((fieldName) => {
       const { name } = index;
       const value = index[fieldName];
@@ -375,7 +375,7 @@ export class IndexTable extends Component {
     });
   }
 
-  buildRows(appServices) {
+  buildRows(appServices, config) {
     const { indices = [], detailPanelIndexName } = this.props;
     return indices.map((index) => {
       const { name } = index;
@@ -400,7 +400,7 @@ export class IndexTable extends Component {
               })}
             />
           </EuiTableRowCellCheckbox>
-          {this.buildRowCells(index, appServices)}
+          {this.buildRowCells(index, appServices, config)}
         </EuiTableRow>
       );
     });
@@ -504,7 +504,7 @@ export class IndexTable extends Component {
 
     return (
       <AppContextConsumer>
-        {({ services }) => {
+        {({ services, config }) => {
           const { extensionsService } = services;
 
           return (
@@ -664,10 +664,10 @@ export class IndexTable extends Component {
                           )}
                         />
                       </EuiTableHeaderCellCheckbox>
-                      {this.buildHeader()}
+                      {this.buildHeader(config)}
                     </EuiTableHeader>
 
-                    <EuiTableBody>{this.buildRows(services)}</EuiTableBody>
+                    <EuiTableBody>{this.buildRows(services, config)}</EuiTableBody>
                   </EuiTable>
                 </div>
               ) : (

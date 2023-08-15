@@ -74,9 +74,9 @@ export class Summary extends React.PureComponent {
     });
   }
 
-  buildRows() {
+  buildRows(config) {
     const { index } = this.props;
-    const headers = getHeaders();
+    const headers = getHeaders(config.enableIndexStats);
     const rows = {
       left: [],
       right: [],
@@ -110,8 +110,8 @@ export class Summary extends React.PureComponent {
   render() {
     return (
       <AppContextConsumer>
-        {({ services, core }) => {
-          const { left, right } = this.buildRows();
+        {({ services, core, config }) => {
+          const { left, right } = this.buildRows(config);
           const additionalContent = this.getAdditionalContent(
             services.extensionsService,
             core.getUrlForApp

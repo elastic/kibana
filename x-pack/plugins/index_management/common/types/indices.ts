@@ -56,17 +56,6 @@ export interface IndexSettings {
   analysis?: AnalysisModule;
   [key: string]: any;
 }
-
-interface IndexStats {
-  health?: HealthStatus;
-  status?: IndicesStatsIndexMetadataState;
-  uuid?: Uuid;
-  documents: number;
-  size: string;
-  primary_size: string;
-  documents_deleted: number;
-}
-
 export interface Index {
   name: string;
   primary?: number | string;
@@ -75,5 +64,11 @@ export interface Index {
   hidden: boolean;
   aliases: string | string[];
   data_stream?: string;
-  stats?: IndexStats;
+  health?: HealthStatus;
+  status?: IndicesStatsIndexMetadataState;
+  uuid?: Uuid;
+  documents?: number;
+  size?: string;
+  primary_size?: string;
+  documents_deleted?: number;
 }

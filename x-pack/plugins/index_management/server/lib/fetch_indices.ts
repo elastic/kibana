@@ -84,17 +84,15 @@ async function fetchIndicesCall(
 
       return {
         ...baseResponse,
-        stats: {
-          health: indexStats.health,
-          status: indexStats.status,
-          uuid: indexStats.uuid,
-          documents: indexStats.primaries?.docs?.count ?? 0,
-          documents_deleted: indexStats?.primaries?.docs?.deleted ?? 0,
-          size: new ByteSizeValue(indexStats.total?.store?.size_in_bytes ?? 0).toString(),
-          primary_size: new ByteSizeValue(
-            indexStats.primaries?.store?.size_in_bytes ?? 0
-          ).toString(),
-        },
+        health: indexStats?.health,
+        status: indexStats?.status,
+        uuid: indexStats?.uuid,
+        documents: indexStats?.primaries?.docs?.count ?? 0,
+        documents_deleted: indexStats?.primaries?.docs?.deleted ?? 0,
+        size: new ByteSizeValue(indexStats?.total?.store?.size_in_bytes ?? 0).toString(),
+        primary_size: new ByteSizeValue(
+          indexStats?.primaries?.store?.size_in_bytes ?? 0
+        ).toString(),
       };
     }
 

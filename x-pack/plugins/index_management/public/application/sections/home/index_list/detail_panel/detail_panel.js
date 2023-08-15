@@ -34,7 +34,7 @@ import { IndexActionsContextMenu } from '../index_actions_context_menu';
 import { ShowJson } from './show_json';
 import { Summary } from './summary';
 import { EditSettingsJson } from './edit_settings_json';
-import { useServices } from '../../../../app_context';
+import { useServices, useAppContext } from '../../../../app_context';
 import { renderDiscoverLink } from '../../../../lib/render_discover_link';
 
 const tabToHumanizedMap = {
@@ -68,9 +68,10 @@ const getTabs = (showStats) => {
 
 export const DetailPanel = ({ panelType, indexName, index, openDetailPanel, closeDetailPanel }) => {
   const { extensionsService } = useServices();
+  const { config } = useAppContext();
 
-  const renderTabs = (showStats) => {
-    const tabs = getTabs(showStats);
+  const renderTabs = () => {
+    const tabs = getTabs(config.enableIndexStats);
     return tabs.map((tab, i) => {
       const isSelected = tab === panelType;
       return (
@@ -169,7 +170,7 @@ export const DetailPanel = ({ panelType, indexName, index, openDetailPanel, clos
             {renderBadges(index, undefined, extensionsService)}
           </h2>
         </EuiTitle>
-        {index ? <EuiTabs>{renderTabs(Boolean(index.stats))}</EuiTabs> : null}
+        {index ? <EuiTabs>{renderTabs()}</EuiTabs> : null}
       </EuiFlyoutHeader>
       {content}
     </EuiFlyout>
