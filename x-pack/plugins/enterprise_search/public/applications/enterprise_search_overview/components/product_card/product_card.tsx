@@ -14,9 +14,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiLink,
-  EuiListGroup,
-  EuiListGroupItem,
   EuiPanel,
   EuiSpacer,
   EuiText,
@@ -25,30 +22,22 @@ import {
   IconSize,
 } from '@elastic/eui';
 
-import { i18n } from '@kbn/i18n';
-
 import { EuiButtonTo, EuiButtonEmptyTo } from '../../../shared/react_router_helpers';
 import { TelemetryLogic } from '../../../shared/telemetry';
 
 import './product_card.scss';
 
-interface ProductResourceLink {
-  label: string;
-  to: string;
-}
-
 export interface ProductCardProps {
   cta?: string;
   description: string;
   emptyCta?: boolean;
-  features: string[];
   hasBorder?: boolean;
   hasShadow?: boolean;
   icon: IconType;
   iconSize?: IconSize;
   name: string;
   productId: string;
-  resourceLinks: ProductResourceLink[];
+  rightPanelItems?: React.ReactNode[];
   url?: string;
 }
 
@@ -56,14 +45,13 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   cta,
   description,
   emptyCta = false,
-  features,
   hasBorder,
   hasShadow,
   icon,
   iconSize,
   productId,
+  rightPanelItems,
   name,
-  resourceLinks,
   url,
 }) => {
   const { sendEnterpriseSearchTelemetry } = useActions(TelemetryLogic);
@@ -86,8 +74,8 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           </EuiTitle>
           <EuiSpacer size="s" />
           <EuiText color="subdued" size="s">
-            {description}
-          </EuiText>
+            {description}{' '}
+          </EuiText>{' '}
           <EuiSpacer />
           {cta && url && (
             <div>
@@ -122,42 +110,19 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             </div>
           )}
         </EuiFlexItem>
-        <EuiFlexItem data-test-subj="productCard-features">
-          <EuiListGroup flush className="productCard-features">
-            {features.map((item: string, index: number) => (
-              <EuiListGroupItem
-                wrapText
-                key={index}
-                size="s"
-                label={item}
-                icon={<EuiIcon color="success" type="checkInCircleFilled" />}
-              />
-            ))}
-          </EuiListGroup>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiTitle size="xs">
-            <h4 data-test-subj="productCard-resources">
-              {i18n.translate('xpack.enterpriseSearch.productCard.resourcesTitle', {
-                defaultMessage: 'Resources',
+        {rightPanelItems ? (
+          <EuiFlexItem>
+            <EuiFlexGroup
+              direction="column"
+              gutterSize="m"
+              data-test-subj="productCard-rightPanelItems"
+            >
+              {rightPanelItems.map((rightPanelItem) => {
+                return <EuiFlexItem>{rightPanelItem}</EuiFlexItem>;
               })}
-            </h4>
-          </EuiTitle>
-          <EuiSpacer size="s" />
-          <EuiFlexGroup
-            direction="column"
-            gutterSize="m"
-            data-test-subj="productCard-resourceLinks"
-          >
-            {resourceLinks.map((resource, index) => (
-              <EuiFlexItem key={index} grow={false}>
-                <EuiLink href={resource.to} target="_blank" external>
-                  {resource.label}
-                </EuiLink>
-              </EuiFlexItem>
-            ))}
-          </EuiFlexGroup>
-        </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        ) : null}
       </EuiFlexGroup>
     </EuiPanel>
   );

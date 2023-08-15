@@ -1,6 +1,10 @@
 {
   "license.post": {
     "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
       "acknowledge": "__flag__"
     },
     "methods": [
@@ -10,6 +14,10 @@
     "patterns": [
       "_license"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/update-license.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/update-license.html",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
   }
 }

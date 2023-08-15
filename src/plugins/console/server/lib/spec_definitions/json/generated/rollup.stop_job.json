@@ -1,8 +1,15 @@
 {
   "rollup.stop_job": {
     "url_params": {
-      "wait_for_completion": "__flag__",
-      "timeout": ""
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "timeout": [
+        "-1",
+        "0"
+      ],
+      "wait_for_completion": "__flag__"
     },
     "methods": [
       "POST"
@@ -10,6 +17,10 @@
     "patterns": [
       "_rollup/job/{id}/_stop"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/rollup-stop-job.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/rollup-stop-job.html",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
   }
 }
