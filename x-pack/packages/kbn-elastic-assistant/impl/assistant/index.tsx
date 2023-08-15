@@ -5,7 +5,16 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import React, {
+  Dispatch,
+  SetStateAction,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -46,6 +55,7 @@ export interface Props {
   promptContextId?: string;
   shouldRefocusPrompt?: boolean;
   showTitle?: boolean;
+  setConversationId?: Dispatch<SetStateAction<string>>;
 }
 
 /**
@@ -58,9 +68,11 @@ const AssistantComponent: React.FC<Props> = ({
   promptContextId = '',
   shouldRefocusPrompt = false,
   showTitle = true,
+  setConversationId,
 }) => {
   const {
     actionTypeRegistry,
+    assistantTelemetry,
     augmentMessageCodeBlocks,
     conversations,
     defaultAllow,
@@ -111,6 +123,12 @@ const AssistantComponent: React.FC<Props> = ({
         conversationId ?? localStorageLastConversationId ?? WELCOME_CONVERSATION_TITLE
       : WELCOME_CONVERSATION_TITLE
   );
+
+  useEffect(() => {
+    if (setConversationId) {
+      setConversationId(selectedConversationId);
+    }
+  }, [selectedConversationId, setConversationId]);
 
   const currentConversation = useMemo(
     () =>
@@ -396,6 +414,16 @@ const AssistantComponent: React.FC<Props> = ({
     return chatbotComments;
   }, [connectorComments, isDisabled, chatbotComments]);
 
+  const trackPrompt = useCallback(
+    (promptTitle: string) => {
+      assistantTelemetry?.reportAssistantQuickPrompt({
+        conversationId: selectedConversationId,
+        promptTitle,
+      });
+    },
+    [assistantTelemetry, selectedConversationId]
+  );
+
   return (
     <>
       <EuiModalHeader
@@ -485,6 +513,7 @@ const AssistantComponent: React.FC<Props> = ({
           <QuickPrompts
             setInput={setUserPrompt}
             setIsSettingsModalVisible={setIsSettingsModalVisible}
+            trackPrompt={trackPrompt}
           />
         )}
       </EuiModalFooter>
