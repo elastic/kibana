@@ -95,7 +95,13 @@ const fetchActiveMaintenanceWindowsMock = fetchActiveMaintenanceWindows as jest.
 jest.mock('../../hooks/use_time_buckets', () => ({
   useTimeBuckets: jest.fn(),
 }));
+
+jest.mock('../../hooks/use_has_data', () => ({
+  useHasData: jest.fn(),
+}));
+
 const { useTimeBuckets } = jest.requireMock('../../hooks/use_time_buckets');
+const { useHasData } = jest.requireMock('../../hooks/use_has_data');
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -138,6 +144,20 @@ describe('AlertsPage with all capabilities', () => {
 
   beforeAll(() => {
     fetchActiveMaintenanceWindowsMock.mockResolvedValue([]);
+    useHasData.mockReturnValue({
+      hasDataMap: {
+        apm: { hasData: true, status: 'success' },
+        synthetics: { hasData: true, status: 'success' },
+        infra_logs: { hasData: undefined, status: 'success' },
+        infra_metrics: { hasData: true, status: 'success' },
+        ux: { hasData: undefined, status: 'success' },
+        alert: { hasData: false, status: 'success' },
+      },
+      hasAnyData: true,
+      isAllRequestsComplete: true,
+      onRefreshTimeRange: () => {},
+      forceUpdate: '',
+    });
   });
 
   beforeEach(() => {
