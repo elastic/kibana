@@ -65,11 +65,7 @@ export function AddDataView() {
   const collectionAgentHost = data?.collector?.host;
   const symbolUrl = data?.symbolizer?.host;
   const stackVersion = data?.stackVersion!;
-  let majorVersion: string;
-
-  if (status === 'settled') {
-    majorVersion = major(stackVersion).toString();
-  }
+  const majorVersion = stackVersion ? major(stackVersion).toString() : undefined;
 
   const tabs = [
     {
