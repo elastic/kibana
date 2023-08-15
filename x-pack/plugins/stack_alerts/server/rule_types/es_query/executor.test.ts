@@ -524,22 +524,47 @@ describe('es_query executor', () => {
         },
       });
 
-      expect(mockCreateAlert).toHaveBeenCalledTimes(1);
-      expect(mockCreateAlert).toHaveBeenNthCalledWith(1, 'query matched');
-      expect(scheduleActions).toHaveBeenCalledTimes(1);
-      expect(scheduleActions).toHaveBeenNthCalledWith(1, 'query matched', {
-        conditions: 'Query matched documents',
-        date: new Date(mockNow).toISOString(),
-        hits: [],
-        link: 'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
-        message: `rule 'test-rule-name' is active:
+      expect(mockReport).toHaveBeenCalledTimes(1);
+      expect(mockReport).toHaveBeenNthCalledWith(1, {
+        actionGroup: 'query matched',
+        context: {
+          conditions: 'Query matched documents',
+          date: new Date(mockNow).toISOString(),
+          hits: [],
+          link: 'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
+          message: `rule 'test-rule-name' is active:
 
 - Value: 198
 - Conditions Met: Query matched documents over 5m
 - Timestamp: ${new Date(mockNow).toISOString()}
 - Link: https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id`,
-        title: "rule 'test-rule-name' matched query",
-        value: 198,
+          title: "rule 'test-rule-name' matched query",
+          value: 198,
+        },
+        id: 'query matched',
+        payload: {
+          kibana: {
+            alert: {
+              evaluation: {
+                conditions: 'Query matched documents',
+                value: 198,
+              },
+              reason: `rule 'test-rule-name' is active:
+
+- Value: 198
+- Conditions Met: Query matched documents over 5m
+- Timestamp: ${new Date(mockNow).toISOString()}
+- Link: https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id`,
+              title: "rule 'test-rule-name' matched query",
+              url: 'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
+            },
+          },
+        },
+        state: {
+          dateEnd: new Date(mockNow).toISOString(),
+          dateStart: new Date(mockNow).toISOString(),
+          latestTimestamp: undefined,
+        },
       });
       expect(mockSetLimitReached).toHaveBeenCalledTimes(1);
       expect(mockSetLimitReached).toHaveBeenCalledWith(false);
@@ -772,11 +797,11 @@ describe('es_query executor', () => {
     });
 
     it('should correctly handle recovered alerts for ESQL alert', async () => {
-      const mockSetContext = jest.fn();
       mockGetRecoveredAlerts.mockReturnValueOnce([
         {
-          getId: () => 'query matched',
-          setContext: mockSetContext,
+          alert: {
+            getId: () => 'query matched',
+          },
         },
       ]);
       mockFetchEsqlQuery.mockResolvedValueOnce({
@@ -798,21 +823,42 @@ describe('es_query executor', () => {
         },
       });
 
-      expect(mockCreateAlert).not.toHaveBeenCalled();
-      expect(mockSetContext).toHaveBeenCalledTimes(1);
-      expect(mockSetContext).toHaveBeenNthCalledWith(1, {
-        conditions: 'Query did NOT match documents',
-        date: new Date(mockNow).toISOString(),
-        hits: [],
-        link: 'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
-        message: `rule 'test-rule-name' is recovered:
+      expect(mockReport).not.toHaveBeenCalled();
+      expect(mockSetAlertData).toHaveBeenCalledTimes(1);
+      expect(mockSetAlertData).toHaveBeenNthCalledWith(1, {
+        id: 'query matched',
+        context: {
+          conditions: 'Query did NOT match documents',
+          date: new Date(mockNow).toISOString(),
+          hits: [],
+          link: 'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
+          message: `rule 'test-rule-name' is recovered:
 
 - Value: 0
 - Conditions Met: Query did NOT match documents over 5m
 - Timestamp: ${new Date(mockNow).toISOString()}
 - Link: https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id`,
-        title: "rule 'test-rule-name' recovered",
-        value: 0,
+          title: "rule 'test-rule-name' recovered",
+          value: 0,
+        },
+        payload: {
+          kibana: {
+            alert: {
+              evaluation: {
+                conditions: 'Query did NOT match documents',
+                value: 0,
+              },
+              reason: `rule 'test-rule-name' is recovered:
+
+- Value: 0
+- Conditions Met: Query did NOT match documents over 5m
+- Timestamp: ${new Date(mockNow).toISOString()}
+- Link: https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id`,
+              title: "rule 'test-rule-name' recovered",
+              url: 'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
+            },
+          },
+        },
       });
       expect(mockSetLimitReached).toHaveBeenCalledTimes(1);
       expect(mockSetLimitReached).toHaveBeenCalledWith(false);
