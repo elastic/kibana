@@ -42,7 +42,7 @@ export const AddContentEmptyPrompt: React.FC<EmptyPromptProps> = ({ title, butto
   const { colorMode } = useEuiTheme();
 
   return (
-    <EuiPanel color="transparent" paddingSize="none" data-test-subj="search-indices-empty-title">
+    <EuiPanel color="transparent" paddingSize="none">
       <EuiFlexGroup className="addContentEmptyPrompt" justifyContent="spaceBetween" direction="row">
         <EuiFlexItem grow>
           <EuiFlexGroup direction="column" responsive={false}>
