@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
 import {
   addExceptionFromFirstAlert,
   goToClosedAlertsOnRuleDetailsPage,
@@ -55,9 +56,7 @@ describe('Close matching Alerts ', () => {
 
   it('Should create a Rule exception item from alert actions overflow menu and close all matching alerts', () => {
     cy.get(LOADING_INDICATOR).should('not.exist');
-    cy.log('addExceptionFromFirstAlert')
     addExceptionFromFirstAlert();
-    cy.log('addExceptionFromFirstAlert complete')
 
     addExceptionEntryFieldValue('agent.name', 0);
     addExceptionEntryOperatorValue('is', 0);
