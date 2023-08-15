@@ -8,41 +8,138 @@
 
 import { resolve } from 'path';
 import type { ToolingLog } from '@kbn/dev-utils';
-import { KIBANA_ROOT } from './paths';
-import type { Config } from '../../functional_test_runner/';
+import getPort from 'get-port';
+import { REPO_ROOT } from '@kbn/dev-utils';
+import type { Config } from '../../functional_test_runner';
 import { createTestEsCluster } from '../../es';
 
 interface RunElasticsearchOptions {
   log: ToolingLog;
   esFrom?: string;
-}
-export async function runElasticsearch({
-  config,
-  options,
-  onEarlyExit,
-}: {
   config: Config;
-  options: RunElasticsearchOptions;
   onEarlyExit?: (msg: string) => void;
-}) {
-  const { log, esFrom } = options;
-  const ssl = config.get('esTestCluster.ssl');
-  const license = config.get('esTestCluster.license');
-  const esArgs = config.get('esTestCluster.serverArgs');
-  const esJavaOpts = config.get('esTestCluster.esJavaOpts');
+  logsDir?: string;
+  name?: string;
+}
+
+interface CcsConfig {
+  remoteClusterUrl: string;
+}
+
+type EsConfig = ReturnType<typeof getEsConfig>;
+
+function getEsConfig({
+  config,
+  esFrom = config.get('esTestCluster.from'),
+}: RunElasticsearchOptions) {
+  const ssl = !!config.get('esTestCluster.ssl');
+  const license: 'basic' | 'trial' | 'gold' = config.get('esTestCluster.license');
+  const esArgs: string[] = config.get('esTestCluster.serverArgs');
+  const esJavaOpts: string | undefined = config.get('esTestCluster.esJavaOpts');
   const isSecurityEnabled = esArgs.includes('xpack.security.enabled=true');
 
-  const cluster = createTestEsCluster({
-    port: config.get('servers.elasticsearch.port'),
-    password: isSecurityEnabled ? 'changeme' : config.get('servers.elasticsearch.password'),
+  const port: number | undefined = config.get('servers.elasticsearch.port');
+  const ccsConfig: CcsConfig | undefined = undefined; // config.get('esTestCluster.ccs');
+
+  const password: string | undefined = isSecurityEnabled
+    ? 'changeme'
+    : config.get('servers.elasticsearch.password');
+
+  const dataArchive: string | undefined = config.get('esTestCluster.dataArchive');
+
+  return {
+    ssl,
     license,
-    log,
-    basePath: resolve(KIBANA_ROOT, '.es'),
-    esFrom: esFrom || config.get('esTestCluster.from'),
-    dataArchive: config.get('esTestCluster.dataArchive'),
     esArgs,
     esJavaOpts,
-    ssl,
+    isSecurityEnabled,
+    esFrom,
+    port,
+    password,
+    dataArchive,
+    ccsConfig,
+  };
+}
+
+export async function runElasticsearch(
+  options: RunElasticsearchOptions
+): Promise<() => Promise<void>> {
+  const { log, logsDir, name } = options;
+  const config = getEsConfig(options);
+
+  if (!config.ccsConfig) {
+    const node = await startEsNode({
+      log,
+      name: name ?? 'ftr',
+      logsDir,
+      config,
+    });
+    return async () => {
+      await node.cleanup();
+    };
+  }
+
+  const remotePort = await getPort();
+  const remoteNode = await startEsNode({
+    log,
+    name: name ?? 'ftr-remote',
+    logsDir,
+    config: {
+      ...config,
+      // @ts-expect-error
+      port: parseInt(new URL(config.ccsConfig.remoteClusterUrl).port, 10),
+      transportPort: remotePort,
+    },
+  });
+
+  const localNode = await startEsNode({
+    log,
+    name: name ?? 'ftr-local',
+    logsDir,
+    config: {
+      ...config,
+      esArgs: [...config.esArgs, `cluster.remote.ftr-remote.seeds=localhost:${remotePort}`],
+    },
+  });
+
+  return async () => {
+    await localNode.cleanup();
+    await remoteNode.cleanup();
+  };
+}
+
+async function startEsNode({
+  log,
+  name,
+  config,
+  onEarlyExit,
+  logsDir,
+}: {
+  log: ToolingLog;
+  name: string;
+  config: EsConfig & { transportPort?: number };
+  onEarlyExit?: (msg: string) => void;
+  logsDir?: string;
+}) {
+  const cluster = createTestEsCluster({
+    clusterName: `cluster-${name}`,
+    esArgs: config.esArgs,
+    esFrom: config.esFrom,
+    esJavaOpts: config.esJavaOpts,
+    license: config.license,
+    password: config.password,
+    port: config.port,
+    ssl: config.ssl,
+    log,
+    writeLogsToPath: logsDir ? resolve(logsDir, `es-cluster-${name}.log`) : undefined,
+    basePath: resolve(REPO_ROOT, '.es'),
+    nodes: [
+      {
+        name,
+        dataArchive: config.dataArchive,
+      },
+    ],
+    transportPort: config.transportPort,
     onEarlyExit,
   });
 
