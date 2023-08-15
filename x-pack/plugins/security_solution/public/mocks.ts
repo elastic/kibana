@@ -14,6 +14,7 @@ import type { PluginStart, PluginSetup } from './types';
 const setupMock = (): PluginSetup => ({
   resolver: jest.fn(),
   upselling: new UpsellingService(),
+  setAppLinksSwitcher: jest.fn(),
 });
 
 const startMock = (): PluginStart => ({
@@ -23,7 +24,6 @@ const startMock = (): PluginStart => ({
   getBreadcrumbsNav$: jest.fn(
     () => new BehaviorSubject<BreadcrumbsNav>({ leading: [], trailing: [] })
   ),
-  setExtraAppLinks: jest.fn(),
   setExtraRoutes: jest.fn(),
 });
 

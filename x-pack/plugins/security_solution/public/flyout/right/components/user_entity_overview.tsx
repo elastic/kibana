@@ -18,7 +18,8 @@ import {
 import { css } from '@emotion/css';
 import { getOr } from 'lodash/fp';
 import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
-import { LeftPanelInsightsTabPath, LeftPanelKey } from '../../left';
+import { LeftPanelInsightsTab, LeftPanelKey } from '../../left';
+import { ENTITIES_TAB_ID } from '../../left/components/entities_details';
 import { useRightPanelContext } from '../context';
 import type { DescriptionList } from '../../../../common/utility_types';
 import {
@@ -65,7 +66,7 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ userName
   const goToEntitiesTab = useCallback(() => {
     openLeftPanel({
       id: LeftPanelKey,
-      path: LeftPanelInsightsTabPath,
+      path: { tab: LeftPanelInsightsTab, subTab: ENTITIES_TAB_ID },
       params: {
         id: eventId,
         indexName,
