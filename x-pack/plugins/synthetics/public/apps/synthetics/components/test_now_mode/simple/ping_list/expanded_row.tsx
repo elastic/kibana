@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-// @ts-ignore formatNumber
-import { formatNumber } from '@elastic/eui/lib/services/format';
+import { formatNumber } from '@elastic/eui';
 import {
   EuiCallOut,
   EuiCodeBlock,
