@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { RISK_SCORE_CALCULATION_URL } from '@kbn/security-solution-plugin/common/constants';
-import type { RiskScore } from '@kbn/security-solution-plugin/server/lib/risk_engine/types';
+import type { RiskScore } from '@kbn/security-solution-plugin/common/risk_engine';
 import { v4 as uuidv4 } from 'uuid';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import { deleteAllAlerts, deleteAllRules } from '../../../utils';

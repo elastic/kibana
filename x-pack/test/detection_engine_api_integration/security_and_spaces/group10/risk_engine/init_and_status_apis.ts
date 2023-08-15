@@ -14,6 +14,7 @@ import {
   createLegacyTransforms,
   clearLegacyTransforms,
   riskEngineRouteHelpersFactory,
+  clearTransforms,
 } from './utils';
 
 // eslint-disable-next-line import/no-default-export
@@ -22,6 +23,7 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const kibanaServer = getService('kibanaServer');
   const riskEngineRoutes = riskEngineRouteHelpersFactory(supertest);
+  const log = getService('log');
 
   describe('Risk Engine', () => {
     afterEach(async () => {
@@ -30,6 +32,11 @@ export default ({ getService }: FtrProviderContext) => {
       });
       await clearLegacyTransforms({
         es,
+        log,
+      });
+      await clearTransforms({
+        es,
+        log,
       });
     });
 
@@ -51,7 +58,9 @@ export default ({ getService }: FtrProviderContext) => {
         const ilmPolicyName = '.risk-score-ilm-policy';
         const componentTemplateName = '.risk-score-mappings';
         const indexTemplateName = '.risk-score.risk-score-default-index-template';
-        const indexName = 'risk-score.risk-score-default';
+        const dataStreamName = 'risk-score.risk-score-default';
+        const latestIndexName = 'risk-score.risk-score-latest-default';
+        const transformId = 'risk_score_latest_transform_default';
 
         await riskEngineRoutes.init();
 
@@ -105,6 +114,9 @@ export default ({ getService }: FtrProviderContext) => {
                     },
                     calculated_score_norm: {
                       type: 'float',
+                    },
+                    category_1_count: {
+                      type: 'long',
                     },
                     category_1_score: {
                       type: 'float',
@@ -161,6 +173,9 @@ export default ({ getService }: FtrProviderContext) => {
                     },
                     calculated_score_norm: {
                       type: 'float',
+                    },
+                    category_1_count: {
+                      type: 'long',
                     },
                     category_1_score: {
                       type: 'float',
@@ -237,10 +252,12 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         const dsResponse = await es.indices.get({
-          index: indexName,
+          index: dataStreamName,
         });
 
-        const dataStream = Object.values(dsResponse).find((ds) => ds.data_stream === indexName);
+        const dataStream = Object.values(dsResponse).find(
+          (ds) => ds.data_stream === dataStreamName
+        );
 
         expect(dataStream?.mappings?._meta?.managed).to.eql(true);
         expect(dataStream?.mappings?._meta?.namespace).to.eql('default');
@@ -260,6 +277,18 @@ export default ({ getService }: FtrProviderContext) => {
         expect(dataStream?.settings?.index?.hidden).to.eql('true');
         expect(dataStream?.settings?.index?.number_of_shards).to.eql(1);
         expect(dataStream?.settings?.index?.auto_expand_replicas).to.eql('0-1');
+
+        const indexExist = await es.indices.exists({
+          index: latestIndexName,
+        });
+
+        expect(indexExist).to.eql(true);
+
+        const transformStats = await es.transform.getTransformStats({
+          transform_id: transformId,
+        });
+
+        expect(transformStats.transforms[0].state).to.eql('started');
       });
 
       it('should create configuration saved object', async () => {
@@ -331,6 +360,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(status1.body).to.eql({
           risk_engine_status: 'NOT_INSTALLED',
           legacy_risk_engine_status: 'NOT_INSTALLED',
+          is_max_amount_of_risk_engines_reached: false,
         });
 
         await riskEngineRoutes.init();
@@ -340,6 +370,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(status2.body).to.eql({
           risk_engine_status: 'ENABLED',
           legacy_risk_engine_status: 'NOT_INSTALLED',
+          is_max_amount_of_risk_engines_reached: false,
         });
 
         await riskEngineRoutes.disable();
@@ -348,6 +379,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(status3.body).to.eql({
           risk_engine_status: 'DISABLED',
           legacy_risk_engine_status: 'NOT_INSTALLED',
+          is_max_amount_of_risk_engines_reached: false,
         });
 
         await riskEngineRoutes.enable();
@@ -356,6 +388,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(status4.body).to.eql({
           risk_engine_status: 'ENABLED',
           legacy_risk_engine_status: 'NOT_INSTALLED',
+          is_max_amount_of_risk_engines_reached: false,
         });
       });
 
@@ -366,6 +399,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(status1.body).to.eql({
           risk_engine_status: 'NOT_INSTALLED',
           legacy_risk_engine_status: 'ENABLED',
+          is_max_amount_of_risk_engines_reached: false,
         });
 
         await riskEngineRoutes.init();
@@ -375,6 +409,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(status2.body).to.eql({
           risk_engine_status: 'ENABLED',
           legacy_risk_engine_status: 'NOT_INSTALLED',
+          is_max_amount_of_risk_engines_reached: false,
         });
       });
     });

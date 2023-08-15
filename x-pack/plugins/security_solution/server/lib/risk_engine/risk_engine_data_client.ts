@@ -19,25 +19,38 @@ import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 
 import {
   riskScoreFieldMap,
-  getIndexPattern,
+  getIndexPatternDataStream,
   totalFieldsLimit,
   mappingComponentName,
   ilmPolicyName,
   ilmPolicy,
+  getLatestTransformId,
+  getTransformOptions,
 } from './configurations';
 import { createDataStream } from './utils/create_datastream';
 import type { RiskEngineDataWriter as Writer } from './risk_engine_data_writer';
 import { RiskEngineDataWriter } from './risk_engine_data_writer';
-import type { InitRiskEngineResult } from '../../../common/risk_engine/types';
-import { RiskEngineStatus } from '../../../common/risk_engine/types';
-import { getLegacyTransforms, removeLegacyTransforms } from './utils/risk_engine_transforms';
+import type { InitRiskEngineResult } from '../../../common/risk_engine';
+import {
+  RiskEngineStatus,
+  getRiskScoreLatestIndex,
+  MAX_SPACES_COUNT,
+} from '../../../common/risk_engine';
+import {
+  getLegacyTransforms,
+  removeLegacyTransforms,
+  startTransform,
+  createTransform,
+} from './utils/transforms';
 import {
   updateSavedObjectAttribute,
   getConfiguration,
   initSavedObjects,
+  getEnabledRiskEngineAmount,
 } from './utils/saved_object_configuration';
 import { getRiskInputsIndex } from './get_risk_inputs_index';
 import { removeRiskScoringTask, startRiskScoringTask } from './tasks';
+import { createIndex } from './utils/create_index';
 
 interface InitOpts {
   namespace: string;
@@ -110,8 +123,8 @@ export class RiskEngineDataClient {
     if (this.writerCache.get(namespace)) {
       return this.writerCache.get(namespace) as Writer;
     }
-
-    await this.initializeResources({ namespace });
+    const indexPatterns = getIndexPatternDataStream(namespace);
+    await this.initializeWriter(namespace, indexPatterns.alias);
     return this.writerCache.get(namespace) as Writer;
   }
 
@@ -142,7 +155,8 @@ export class RiskEngineDataClient {
   public async getStatus({ namespace }: { namespace: string }) {
     const riskEngineStatus = await this.getCurrentStatus();
     const legacyRiskEngineStatus = await this.getLegacyStatus({ namespace });
-    return { riskEngineStatus, legacyRiskEngineStatus };
+    const isMaxAmountOfRiskEnginesReached = await this.getIsMaxAmountOfRiskEnginesReached();
+    return { riskEngineStatus, legacyRiskEngineStatus, isMaxAmountOfRiskEnginesReached };
   }
 
   public async enableRiskEngine({ taskManager }: { taskManager: TaskManagerStartContract }) {
@@ -205,6 +219,19 @@ export class RiskEngineDataClient {
     return RiskEngineStatus.NOT_INSTALLED;
   }
 
+  private async getIsMaxAmountOfRiskEnginesReached() {
+    try {
+      const amountOfEnabledConfigurations = await getEnabledRiskEngineAmount({
+        savedObjectsClient: this.options.soClient,
+      });
+
+      return amountOfEnabledConfigurations >= MAX_SPACES_COUNT;
+    } catch (e) {
+      this.options.logger.error(`Error while getting amount of enabled risk engines: ${e.message}`);
+      return false;
+    }
+  }
+
   private async getLegacyStatus({ namespace }: { namespace: string }) {
     const transforms = await getLegacyTransforms({ namespace, esClient: this.options.esClient });
 
@@ -221,7 +248,7 @@ export class RiskEngineDataClient {
     try {
       const esClient = this.options.esClient;
 
-      const indexPatterns = getIndexPattern(namespace);
+      const indexPatterns = getIndexPatternDataStream(namespace);
 
       const indexMetadata: Metadata = {
         kibana: {
@@ -290,7 +317,29 @@ export class RiskEngineDataClient {
         indexPatterns,
       });
 
-      await this.initializeWriter(namespace, indexPatterns.alias);
+      await createIndex({
+        esClient,
+        logger: this.options.logger,
+        options: {
+          index: getRiskScoreLatestIndex(namespace),
+          mappings: mappingFromFieldMap(riskScoreFieldMap, 'strict'),
+        },
+      });
+
+      const transformId = getLatestTransformId(namespace);
+      await createTransform({
+        esClient,
+        logger: this.options.logger,
+        transform: {
+          transform_id: transformId,
+          ...getTransformOptions({
+            dest: getRiskScoreLatestIndex(namespace),
+            source: [indexPatterns.alias],
+          }),
+        },
+      });
+
+      await startTransform({ esClient, transformId });
     } catch (error) {
       this.options.logger.error(`Error initializing risk engine resources: ${error.message}`);
       throw error;
