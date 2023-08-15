@@ -11,6 +11,10 @@ import * as t from 'io-ts';
 import React from 'react';
 import { TopNFunctionSortField, topNFunctionSortFieldRt } from '../../common/functions';
 import { StackTracesDisplayOption, TopNType } from '../../common/stack_traces';
+import {
+  indexLifecyclePhaseRt,
+  IndexLifecyclePhaseSelectOption,
+} from '../../common/storage_explorer';
 import { ComparisonMode, NormalizationMode } from '../components/normalization_menu';
 import { RedirectTo } from '../components/redirect_to';
 import { FlameGraphsView } from '../views/flamegraphs';
@@ -21,6 +25,7 @@ import { DifferentialTopNFunctionsView } from '../views/functions/differential_t
 import { TopNFunctionsView } from '../views/functions/topn';
 import { NoDataTabs, NoDataView } from '../views/no_data_view';
 import { StackTracesView } from '../views/stack_traces_view';
+import { StorageExplorerView } from '../views/storage_explorer';
 import { RouteBreadcrumb } from './route_breadcrumb';
 
 const routes = {
@@ -243,6 +248,26 @@ const routes = {
                     normalizationMode: NormalizationMode.Time,
                   },
                 },
+              },
+            },
+          },
+          '/storage-explorer': {
+            element: (
+              <RouteBreadcrumb
+                title={i18n.translate('xpack.profiling.breadcrumb.storageExplorer', {
+                  defaultMessage: 'Storage explorer',
+                })}
+                href="/storage-explorer"
+              >
+                <StorageExplorerView />
+              </RouteBreadcrumb>
+            ),
+            params: t.type({
+              query: indexLifecyclePhaseRt,
+            }),
+            defaults: {
+              query: {
+                indexLifecyclePhase: IndexLifecyclePhaseSelectOption.All,
               },
             },
           },
