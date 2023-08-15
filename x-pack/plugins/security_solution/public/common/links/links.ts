@@ -6,7 +6,7 @@
  */
 import { useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import { BehaviorSubject, combineLatest } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import type { SecurityPageName } from '../../../common/constants';
 import { hasCapabilities } from '../lib/capabilities';
 import type {
@@ -19,36 +19,15 @@ import type {
 } from './types';
 
 /**
- * Main app links updater, it stores the `mainAppLinksUpdater` recursive hierarchy and keeps
+ * App links updater, it stores the links recursive hierarchy and keeps
  * the value of the app links in sync with all application components.
  * It can be updated using `updateAppLinks`.
  */
-const mainAppLinksUpdater$ = new BehaviorSubject<AppLinkItems>([]);
-
-/**
- * Extra App links updater, it stores the `extraAppLinksUpdater`
- * that can be added externally to the app links.
- * It can be updated using `updatePublicAppLinks`.
- */
-const extraAppLinksUpdater$ = new BehaviorSubject<AppLinkItems>([]);
-
-// Combines internal and external appLinks, changes on any of them will trigger a new value
 const appLinksUpdater$ = new BehaviorSubject<AppLinkItems>([]);
 export const appLinks$ = appLinksUpdater$.asObservable();
 
 // stores a flatten normalized appLinkItems object for internal direct id access
 const normalizedAppLinksUpdater$ = new BehaviorSubject<NormalizedLinks>({});
-
-// Setup the appLinksUpdater$ to combine the internal and external appLinks
-combineLatest([mainAppLinksUpdater$, extraAppLinksUpdater$]).subscribe(
-  ([mainAppLinks, extraAppLinks]) => {
-    appLinksUpdater$.next(Object.freeze([...mainAppLinks, ...extraAppLinks]));
-  }
-);
-// Setup the normalizedAppLinksUpdater$ to update the normalized appLinks
-appLinks$.subscribe((appLinks) => {
-  normalizedAppLinksUpdater$.next(Object.freeze(getNormalizedLinks(appLinks)));
-});
 
 /**
  * Updates the internal app links applying the filter by permissions
@@ -56,15 +35,11 @@ appLinks$.subscribe((appLinks) => {
 export const updateAppLinks = (
   appLinksToUpdate: AppLinkItems,
   linksPermissions: LinksPermissions
-) => mainAppLinksUpdater$.next(Object.freeze(processAppLinks(appLinksToUpdate, linksPermissions)));
-
-/**
- * Updates the app links applying the filter by permissions
- */
-export const updateExtraAppLinks = (
-  appLinksToUpdate: AppLinkItems,
-  linksPermissions: LinksPermissions
-) => extraAppLinksUpdater$.next(Object.freeze(processAppLinks(appLinksToUpdate, linksPermissions)));
+) => {
+  const processedAppLinks = processAppLinks(appLinksToUpdate, linksPermissions);
+  appLinksUpdater$.next(Object.freeze(processedAppLinks));
+  normalizedAppLinksUpdater$.next(Object.freeze(getNormalizedLinks(processedAppLinks)));
+};
 
 /**
  * Hook to get the app links updated value

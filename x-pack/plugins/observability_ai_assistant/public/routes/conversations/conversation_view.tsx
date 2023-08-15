@@ -10,12 +10,14 @@ import { i18n } from '@kbn/i18n';
 import React, { useMemo, useState } from 'react';
 import { ChatBody } from '../../components/chat/chat_body';
 import { ConversationList } from '../../components/chat/conversation_list';
+import { ObservabilityAIAssistantChatServiceProvider } from '../../context/observability_ai_assistant_chat_service_provider';
 import { useAbortableAsync } from '../../hooks/use_abortable_async';
 import { useConfirmModal } from '../../hooks/use_confirm_modal';
 import { useConversation } from '../../hooks/use_conversation';
 import { useCurrentUser } from '../../hooks/use_current_user';
 import { useGenAIConnectors } from '../../hooks/use_genai_connectors';
 import { useKibana } from '../../hooks/use_kibana';
+import { useKnowledgeBase } from '../../hooks/use_knowledge_base';
 import { useObservabilityAIAssistant } from '../../hooks/use_observability_ai_assistant';
 import { useObservabilityAIAssistantParams } from '../../hooks/use_observability_ai_assistant_params';
 import { useObservabilityAIAssistantRouter } from '../../hooks/use_observability_ai_assistant_router';
@@ -32,6 +34,8 @@ const chatBodyContainerClassNameWithError = css`
 
 export function ConversationView() {
   const connectors = useGenAIConnectors();
+
+  const knowledgeBase = useKnowledgeBase();
 
   const currentUser = useCurrentUser();
 
@@ -59,10 +63,19 @@ export function ConversationView() {
 
   const [isUpdatingList, setIsUpdatingList] = useState(false);
 
+  const chatService = useAbortableAsync(
+    ({ signal }) => {
+      return service.start({ signal });
+    },
+    [service]
+  );
+
   const conversationId = 'conversationId' in path ? path.conversationId : undefined;
 
-  const { conversation, displayedMessages, setDisplayedMessages, save } =
-    useConversation(conversationId);
+  const { conversation, displayedMessages, setDisplayedMessages, save } = useConversation({
+    conversationId,
+    chatService: chatService.value,
+  });
 
   const conversations = useAbortableAsync(
     ({ signal }) => {
@@ -173,6 +186,7 @@ export function ConversationView() {
                 });
             }}
           />
+          <EuiSpacer size="m" />
         </EuiFlexItem>
         <EuiFlexItem
           grow
@@ -196,29 +210,38 @@ export function ConversationView() {
               })}
             </EuiCallOut>
           ) : null}
-          {conversation.loading ? <EuiLoadingSpinner /> : null}
-          {!conversation.error && conversation.value ? (
-            <ChatBody
-              currentUser={currentUser}
-              connectors={connectors}
-              title={conversation.value.conversation.title}
-              connectorsManagementHref={getConnectorsManagementHref(http)}
-              service={service}
-              messages={displayedMessages}
-              onChatComplete={(messages) => {
-                save(messages)
-                  .then((nextConversation) => {
-                    conversations.refresh();
-                    if (!conversationId) {
-                      navigateToConversation(nextConversation.conversation.id);
-                    }
-                  })
-                  .catch(() => {});
-              }}
-              onChatUpdate={(messages) => {
-                setDisplayedMessages(messages);
-              }}
-            />
+          {chatService.loading || conversation.loading ? (
+            <EuiFlexGroup direction="column" alignItems="center" gutterSize="l">
+              <EuiFlexItem grow={false}>
+                <EuiSpacer size="xl" />
+                <EuiLoadingSpinner size="l" />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          ) : null}
+          {!conversation.error && conversation.value && chatService.value ? (
+            <ObservabilityAIAssistantChatServiceProvider value={chatService.value}>
+              <ChatBody
+                currentUser={currentUser}
+                connectors={connectors}
+                knowledgeBase={knowledgeBase}
+                title={conversation.value.conversation.title}
+                connectorsManagementHref={getConnectorsManagementHref(http)}
+                messages={displayedMessages}
+                onChatComplete={(messages) => {
+                  save(messages)
+                    .then((nextConversation) => {
+                      conversations.refresh();
+                      if (!conversationId) {
+                        navigateToConversation(nextConversation.conversation.id);
+                      }
+                    })
+                    .catch(() => {});
+                }}
+                onChatUpdate={(messages) => {
+                  setDisplayedMessages(messages);
+                }}
+              />
+            </ObservabilityAIAssistantChatServiceProvider>
           ) : null}
           <EuiSpacer size="m" />
         </EuiFlexItem>

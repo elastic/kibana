@@ -226,7 +226,7 @@
         "label": "getRoutePaths",
         "description": [],
         "signature": [
-          "() => { TopN: string; TopNContainers: string; TopNDeployments: string; TopNFunctions: string; TopNHosts: string; TopNThreads: string; TopNTraces: string; Flamechart: string; HasSetupESResources: string; SetupDataCollectionInstructions: string; }"
+          "() => { TopN: string; TopNContainers: string; TopNDeployments: string; TopNFunctions: string; TopNHosts: string; TopNThreads: string; TopNTraces: string; Flamechart: string; HasSetupESResources: string; SetupDataCollectionInstructions: string; StorageExplorerSummary: string; StorageExplorerHostStorageDetails: string; StorageExplorerIndicesStorageDetails: string; }"
         ],
         "path": "x-pack/plugins/profiling/common/index.ts",
         "deprecated": false,
