@@ -53,7 +53,7 @@ export const CloudFormationGuide = ({
           {awsAccountType === 'organization-account' ? (
             <li>
               <FormattedMessage
-                id="xpack.fleet.cloudFormation.guide.steps.login"
+                id="xpack.fleet.cloudFormation.guide.steps.organizationLogin"
                 defaultMessage="Log in as an admin in the management account of the AWS Organization you want to onboard"
               />
             </li>
