@@ -6,17 +6,8 @@
  */
 import React from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
-import {
-  EuiBetaBadge,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiTab,
-  EuiTabs,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiSpacer, EuiTab, EuiTabs, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { css } from '@emotion/react';
 import { Redirect, useHistory, useLocation, matchPath } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
 import { Configurations } from '../configurations';
@@ -113,29 +104,10 @@ export const Findings = () => {
               onClick={navigateToVulnerabilitiesTab}
               isSelected={isVulnerabilitiesTabSelected(location.pathname)}
             >
-              <EuiFlexGroup responsive={false} alignItems="center" direction="row" gutterSize="s">
-                <EuiFlexItem grow={false}>
-                  <FormattedMessage
-                    id="xpack.csp.findings.tabs.vulnerabilities"
-                    defaultMessage="Vulnerabilities"
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiBetaBadge
-                    css={css`
-                      display: block;
-                    `}
-                    label="Beta"
-                    tooltipContent={
-                      <FormattedMessage
-                        id="xpack.csp.findings.betaLabel"
-                        defaultMessage="This functionality is in beta and is subject to change. The design and code is less mature than official generally available features and is being provided as-is with no warranties. Beta features are not subject to the support service level agreement of official generally available features."
-                      />
-                    }
-                    tooltipPosition="bottom"
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
+              <FormattedMessage
+                id="xpack.csp.findings.tabs.vulnerabilities"
+                defaultMessage="Vulnerabilities"
+              />
             </EuiTab>
             <EuiTab
               key="configurations"
