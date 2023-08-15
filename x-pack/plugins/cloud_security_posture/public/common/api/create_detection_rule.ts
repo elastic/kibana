@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { HttpSetup } from '@kbn/core/public';
-import { RuleCreateProps, RuleResponse } from '../../../common/schemas';
+import { RuleCreateProps, RuleResponse } from '../types';
 
 const DETECTION_ENGINE_URL = '/api/detection_engine' as const;
 const DETECTION_ENGINE_RULES_URL = `${DETECTION_ENGINE_URL}/rules` as const;
