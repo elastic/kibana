@@ -95,7 +95,7 @@ export default function ({ getService }: FtrProviderContext) {
             .set(svlCommonApi.getInternalRequestHeader());
           expect(status).not.toBe(404);
         });
-      })
+      });
 
       describe('public', () => {
         it('reset session page', async () => {
