@@ -6,7 +6,6 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { type createRoot, request } from '@kbn/core-test-helpers-kbn-server';
 import type {
   CoreSetup,
   IBasePath,
@@ -16,6 +15,7 @@ import type {
   RequestHandlerContext,
 } from '@kbn/core/server';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { type createRoot, request } from '@kbn/core-test-helpers-kbn-server';
 
 import { initSpacesOnRequestInterceptor } from './on_request_interceptor';
 

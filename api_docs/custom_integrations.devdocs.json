@@ -452,7 +452,7 @@
             "label": "shipper",
             "description": [],
             "signature": [
-              "\"other\" | \"beats\" | \"enterprise_search\" | \"language_clients\" | \"sample_data\" | \"tests\" | \"tutorial\" | \"placeholders\""
+              "\"beats\" | \"enterprise_search\" | \"language_clients\" | \"other\" | \"sample_data\" | \"tests\" | \"tutorial\" | \"placeholders\""
             ],
             "path": "src/plugins/custom_integrations/common/index.ts",
             "deprecated": false,
@@ -742,7 +742,7 @@
             "label": "shipper",
             "description": [],
             "signature": [
-              "\"other\" | \"beats\" | \"enterprise_search\" | \"language_clients\" | \"sample_data\" | \"tests\" | \"tutorial\" | \"placeholders\""
+              "\"beats\" | \"enterprise_search\" | \"language_clients\" | \"other\" | \"sample_data\" | \"tests\" | \"tutorial\" | \"placeholders\""
             ],
             "path": "src/plugins/custom_integrations/common/index.ts",
             "deprecated": false,
@@ -945,7 +945,7 @@
           "\nThe list of all known shippers."
         ],
         "signature": [
-          "(\"other\" | \"beats\" | \"enterprise_search\" | \"language_clients\" | \"sample_data\" | \"tests\" | \"tutorial\" | \"placeholders\")[]"
+          "(\"beats\" | \"enterprise_search\" | \"language_clients\" | \"other\" | \"sample_data\" | \"tests\" | \"tutorial\" | \"placeholders\")[]"
         ],
         "path": "src/plugins/custom_integrations/common/index.ts",
         "deprecated": false,
@@ -962,7 +962,7 @@
           "\nA shipper-- an internal or external system capable of storing data in ES/Kibana-- applicable to an Integration."
         ],
         "signature": [
-          "\"other\" | \"beats\" | \"enterprise_search\" | \"language_clients\" | \"sample_data\" | \"tests\" | \"tutorial\" | \"placeholders\""
+          "\"beats\" | \"enterprise_search\" | \"language_clients\" | \"other\" | \"sample_data\" | \"tests\" | \"tutorial\" | \"placeholders\""
         ],
         "path": "src/plugins/custom_integrations/common/index.ts",
         "deprecated": false,

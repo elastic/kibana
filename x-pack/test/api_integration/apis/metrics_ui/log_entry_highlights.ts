@@ -45,8 +45,7 @@ export default function ({ getService }: FtrProviderContext) {
     after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/simple_logs'));
 
     describe('/log_entries/highlights', () => {
-      // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/163486
-      describe.skip('with the default source', () => {
+      describe('with the default source', () => {
         before(() => kibanaServer.savedObjects.cleanStandardList());
         after(() => kibanaServer.savedObjects.cleanStandardList());
 
@@ -120,7 +119,7 @@ export default function ({ getService }: FtrProviderContext) {
           entries.forEach((entry) => {
             entry.columns.forEach((column) => {
               if ('message' in column && 'highlights' in column.message[0]) {
-                expect(column.message[0].highlights).to.eql(['message', 'of', 'document', '0']);
+                expect(column.message[0].highlights).to.eql(['message of document 0']);
               }
             });
           });

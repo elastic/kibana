@@ -7,12 +7,12 @@
 
 import { IScopedClusterClient } from '@kbn/core/server';
 import { RouteDependencies } from '../../../types';
-import { addBasePath } from '..';
+import { addInternalBasePath } from '..';
 import { enrichPoliciesActions } from '../../../lib/enrich_policies';
 
 export function registerListRoute({ router, lib: { handleEsError } }: RouteDependencies) {
   router.get(
-    { path: addBasePath('/enrich_policies'), validate: false },
+    { path: addInternalBasePath('/enrich_policies'), validate: false },
     async (context, request, response) => {
       const client = (await context.core).elasticsearch.client as IScopedClusterClient;
       try {

@@ -19,13 +19,13 @@ describe('Processor: Grok', () => {
   beforeAll(() => {
     jest.useFakeTimers({ legacyFakeTimers: true });
     // disable all react-beautiful-dnd development warnings
-    (window as any)['__react-beautiful-dnd-disable-dev-warnings'] = true;
+    (window as any)['__@hello-pangea/dnd-disable-dev-warnings'] = true;
   });
 
   afterAll(() => {
     jest.useRealTimers();
     // enable all react-beautiful-dnd development warnings
-    (window as any)['__react-beautiful-dnd-disable-dev-warnings'] = false;
+    (window as any)['__@hello-pangea/dnd-disable-dev-warnings'] = false;
   });
 
   beforeEach(async () => {

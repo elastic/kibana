@@ -45,6 +45,10 @@ export interface AppDependencies {
     httpService: HttpService;
     notificationService: NotificationService;
   };
+  config: {
+    enableIndexActions: boolean;
+    enableLegacyTemplates: boolean;
+  };
   history: ScopedHistory;
   setBreadcrumbs: ManagementAppMountParams['setBreadcrumbs'];
   uiSettings: IUiSettingsClient;

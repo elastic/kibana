@@ -6,11 +6,12 @@
  */
 
 import { HttpSetup } from '@kbn/core/public';
-import { sendRequest } from '../shared_imports';
+import { sendRequest, SendRequestResponse } from '../shared_imports';
 import { API_BASE_PATH } from '../../common/constants';
+import { SerializedEnrichPolicy } from '../../common/types';
 
 export interface PublicApiServiceSetup {
-  getAllEnrichPolicies(): void;
+  getAllEnrichPolicies(): Promise<SendRequestResponse<SerializedEnrichPolicy[]>>;
 }
 
 /**

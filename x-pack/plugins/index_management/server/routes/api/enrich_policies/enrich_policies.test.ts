@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { addBasePath } from '..';
+import { addInternalBasePath, addBasePath } from '..';
 import { RouterMock, routeDependencies, RequestMock } from '../../../test/helpers';
 import { serializeEnrichmentPolicies } from '../../../lib/enrich_policies';
 import { createTestESEnrichPolicy } from '../../../test/helpers';
@@ -28,13 +28,13 @@ describe('Enrich policies API', () => {
     jest.resetAllMocks();
   });
 
-  describe('Get all policies - GET /api/index_management/enrich_policies', () => {
+  describe('Get all policies - GET /internal/index_management/enrich_policies', () => {
     const getEnrichPolicies = router.getMockESApiFn('enrich.getPolicy');
 
     it('returns all available policies', async () => {
       const mockRequest: RequestMock = {
         method: 'get',
-        path: addBasePath('/enrich_policies'),
+        path: addInternalBasePath('/enrich_policies'),
       };
 
       getEnrichPolicies.mockResolvedValue({ policies: [mockedPolicy] });
@@ -49,7 +49,7 @@ describe('Enrich policies API', () => {
     it('should return an error if it fails', async () => {
       const mockRequest: RequestMock = {
         method: 'get',
-        path: addBasePath('/enrich_policies'),
+        path: addInternalBasePath('/enrich_policies'),
       };
 
       const error = new Error('Oh no!');
