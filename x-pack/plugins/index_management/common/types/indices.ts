@@ -64,6 +64,8 @@ export interface Index {
   hidden: boolean;
   aliases: string | string[];
   data_stream?: string;
+  // The types from here below represent information returned from the index stats API;
+  // treated optional as the stats API is not available on serverless
   health?: HealthStatus;
   status?: IndicesStatsIndexMetadataState;
   uuid?: Uuid;

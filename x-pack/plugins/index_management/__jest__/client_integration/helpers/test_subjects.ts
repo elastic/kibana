@@ -19,6 +19,7 @@ export type TestSubjects =
   | 'deleteSystemTemplateCallOut'
   | 'deleteTemplateButton'
   | 'deleteTemplatesConfirmation'
+  | 'descriptionTitle'
   | 'documentationLink'
   | 'emptyPrompt'
   | 'forcemergeIndexMenuButton'

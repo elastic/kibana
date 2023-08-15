@@ -91,7 +91,7 @@ export class Summary extends React.PureComponent {
         content = content.join(', ');
       }
       const cell = [
-        <EuiDescriptionListTitle key={fieldName}>
+        <EuiDescriptionListTitle key={fieldName} data-test-subj="descriptionTitle">
           <strong>{headers[fieldName]}</strong>
         </EuiDescriptionListTitle>,
         <EuiDescriptionListDescription key={fieldName + '_desc'}>

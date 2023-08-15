@@ -59,11 +59,10 @@ const tabToHumanizedMap = {
 };
 
 const getTabs = (showStats) => {
-  const defaultTabs = [TAB_SUMMARY, TAB_SETTINGS, TAB_MAPPING, TAB_EDIT_SETTINGS];
   if (showStats) {
-    return [...defaultTabs, TAB_STATS];
+    return [TAB_SUMMARY, TAB_SETTINGS, TAB_MAPPING, TAB_STATS, TAB_EDIT_SETTINGS];
   }
-  return defaultTabs;
+  return [TAB_SUMMARY, TAB_SETTINGS, TAB_MAPPING, TAB_EDIT_SETTINGS];
 };
 
 export const DetailPanel = ({ panelType, indexName, index, openDetailPanel, closeDetailPanel }) => {
