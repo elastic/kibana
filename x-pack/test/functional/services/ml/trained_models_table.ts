@@ -273,6 +273,22 @@ export function TrainedModelsTableProvider(
       );
     }
 
+    public async assertTrainedModelsInferenceFlyoutAdditionalSettings(condition?: string, tag?: string) {
+      if (condition || tag) {
+        await this.trainedModelsInferenceOpenAdditionalSettings();
+        const actualCondition = await testSubjects.getAttribute(
+          'mlTrainedModelsInferenceAdvancedSettingsConditionTextArea',
+          'value'
+        );
+        expect(actualCondition).to.eql(condition);
+        const actualTag = await testSubjects.getAttribute(
+          'mlTrainedModelsInferenceAdvancedSettingsTagInput',
+          'value'
+        );
+        expect(actualTag).to.eql(tag);
+      }
+    }
+
     public async assertTrainedModelsInferenceFlyoutPipelineConfigValues(
       inferenceConfig: any,
       fieldMap: any,
@@ -293,19 +309,7 @@ export function TrainedModelsTableProvider(
         expect(JSON.parse(actualFieldMap)).to.eql(fieldMap);
       });
 
-      if (condition || tag) {
-        await this.trainedModelsInferenceOpenAdditionalSettings();
-        const actualCondition = await testSubjects.getAttribute(
-          'mlTrainedModelsInferenceAdvancedSettingsConditionTextArea',
-          'value'
-        );
-        expect(actualCondition).to.eql(condition);
-        const actualTag = await testSubjects.getAttribute(
-          'mlTrainedModelsInferenceAdvancedSettingsTagInput',
-          'value'
-        );
-        expect(actualTag).to.eql(tag);
-      }
+      await this.assertTrainedModelsInferenceFlyoutAdditionalSettings(condition, tag);
     }
 
     public async trainedModelsInferenceFlyoutSaveChanges() {
