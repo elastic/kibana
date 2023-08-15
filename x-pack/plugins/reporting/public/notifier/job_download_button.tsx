@@ -26,7 +26,7 @@ export const DownloadButton = ({ http, job }: Props) => {
       size="s"
       data-test-subj="downloadCompletedReportButton"
       onClick={() =>
-        http.fetch(`/internal/reporting/jobs/download//${job.id}`, {
+        http.fetch(`/internal/reporting/jobs/download//${job.id}?apiVersion=1`, {
           headers: {
             [ELASTIC_HTTP_VERSION_HEADER]: '1',
             [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
