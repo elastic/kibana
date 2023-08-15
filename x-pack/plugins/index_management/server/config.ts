@@ -30,6 +30,15 @@ const schemaLatest = schema.object(
       schema.boolean({ defaultValue: true }),
       schema.never()
     ),
+    enableLegacyTemplates: schema.conditional(
+      schema.contextRef('serverless'),
+      true,
+      // Legacy templates functionality is disabled in serverless; refer to the serverless.yml file as the source of truth
+      // We take this approach in order to have a central place (serverless.yml) for serverless config across Kibana
+      schema.boolean({ defaultValue: true }),
+      schema.never()
+    ),
+    dev: schema.object({ enableIndexDetailsPage: schema.boolean({ defaultValue: false }) }),
   },
   { defaultValue: undefined }
 );
@@ -38,6 +47,10 @@ const configLatest: PluginConfigDescriptor<IndexManagementConfig> = {
   exposeToBrowser: {
     ui: true,
     enableIndexActions: true,
+    enableLegacyTemplates: true,
+    dev: {
+      enableIndexDetailsPage: true,
+    },
   },
   schema: schemaLatest,
   deprecations: () => [],

@@ -51,7 +51,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       .set('kbn-xsrf', 'true');
   };
 
-  describe('For each artifact list under management', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/159695
+  describe.skip('For each artifact list under management', function () {
     this.timeout(60_000 * 5);
     let indexedData: IndexedHostsAndAlertsResponse;
     let policyInfo: PolicyTestResourceInfo;

@@ -32,7 +32,7 @@ import {
   getServiceTransactionGroups,
   ServiceTransactionGroupsResponse,
 } from '../services/get_service_transaction_groups';
-import { getServiceTranactionGroupsAlerts } from '../services/get_service_transaction_groups_alerts';
+import { getServiceTransactionGroupsAlerts } from '../services/get_service_transaction_groups_alerts';
 import {
   getServiceTransactionGroupDetailedStatisticsPeriods,
   ServiceTransactionGroupDetailedStatisticsResponse,
@@ -128,7 +128,7 @@ const transactionGroupsMainStatisticsRoute = createApmServerRoute({
           useDurationSummary,
           ...commonProps,
         }),
-        getServiceTranactionGroupsAlerts({
+        getServiceTransactionGroupsAlerts({
           apmAlertsClient,
           ...commonProps,
         }),
