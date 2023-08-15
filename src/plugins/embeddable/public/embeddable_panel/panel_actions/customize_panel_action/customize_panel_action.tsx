@@ -140,6 +140,7 @@ export class CustomizePanelAction implements Action<CustomizePanelActionContext>
           if (overlayTracker) overlayTracker.clearOverlays();
           overlayRef.close();
         },
+        maxWidth: true,
       }
     );
     overlayTracker?.openOverlay(handle);
