@@ -8,6 +8,12 @@ import { HttpFetchQuery } from '@kbn/core/public';
 import { getRoutePaths } from '../common';
 import { BaseFlameGraph, createFlameGraph, ElasticFlameGraph } from '../common/flamegraph';
 import { TopNFunctions } from '../common/functions';
+import type {
+  IndexLifecyclePhaseSelectOption,
+  IndicesStorageDetailsAPIResponse,
+  StorageExplorerSummaryAPIResponse,
+  StorageHostDetailsAPIResponse,
+} from '../common/storage_explorer';
 import { TopNResponse } from '../common/topn';
 import type { SetupDataCollectionInstructions } from '../server/lib/setup/get_setup_instructions';
 import { AutoAbortedHttpService } from './hooks/use_auto_aborted_http_client';
@@ -41,6 +47,24 @@ export interface Services {
   setupDataCollectionInstructions: (params: {
     http: AutoAbortedHttpService;
   }) => Promise<SetupDataCollectionInstructions>;
+  fetchStorageExplorerSummary: (params: {
+    http: AutoAbortedHttpService;
+    timeFrom: number;
+    timeTo: number;
+    kuery: string;
+    indexLifecyclePhase: IndexLifecyclePhaseSelectOption;
+  }) => Promise<StorageExplorerSummaryAPIResponse>;
+  fetchStorageExplorerHostStorageDetails: (params: {
+    http: AutoAbortedHttpService;
+    timeFrom: number;
+    timeTo: number;
+    kuery: string;
+    indexLifecyclePhase: IndexLifecyclePhaseSelectOption;
+  }) => Promise<StorageHostDetailsAPIResponse>;
+  fetchStorageExplorerIndicesStorageDetails: (params: {
+    http: AutoAbortedHttpService;
+    indexLifecyclePhase: IndexLifecyclePhaseSelectOption;
+  }) => Promise<IndicesStorageDetailsAPIResponse>;
 }
 
 export function getServices(): Services {
@@ -92,6 +116,46 @@ export function getServices(): Services {
         {}
       )) as SetupDataCollectionInstructions;
       return instructions;
+    },
+    fetchStorageExplorerSummary: async ({ http, timeFrom, timeTo, kuery, indexLifecyclePhase }) => {
+      const query: HttpFetchQuery = {
+        timeFrom,
+        timeTo,
+        kuery,
+        indexLifecyclePhase,
+      };
+      const summary = (await http.get(paths.StorageExplorerSummary, {
+        query,
+      })) as StorageExplorerSummaryAPIResponse;
+      return summary;
+    },
+    fetchStorageExplorerHostStorageDetails: async ({
+      http,
+      timeFrom,
+      timeTo,
+      kuery,
+      indexLifecyclePhase,
+    }) => {
+      const query: HttpFetchQuery = {
+        timeFrom,
+        timeTo,
+        kuery,
+        indexLifecyclePhase,
+      };
+      const eventsMetricsSizeTimeseries = (await http.get(paths.StorageExplorerHostStorageDetails, {
+        query,
+      })) as StorageHostDetailsAPIResponse;
+      return eventsMetricsSizeTimeseries;
+    },
+    fetchStorageExplorerIndicesStorageDetails: async ({ http, indexLifecyclePhase }) => {
+      const query: HttpFetchQuery = {
+        indexLifecyclePhase,
+      };
+      const eventsMetricsSizeTimeseries = (await http.get(
+        paths.StorageExplorerIndicesStorageDetails,
+        { query }
+      )) as IndicesStorageDetailsAPIResponse;
+      return eventsMetricsSizeTimeseries;
     },
   };
 }

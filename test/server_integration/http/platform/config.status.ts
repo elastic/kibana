@@ -17,7 +17,6 @@ import { FtrConfigProviderContext, findTestPluginPaths } from '@kbn/test';
  *    and installing plugins against built Kibana. This test must be run against source only in order to build the
  *    fixture plugins
  */
-// eslint-disable-next-line import/no-default-export
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const httpConfig = await readConfigFile(require.resolve('../../config.base.js'));
 
