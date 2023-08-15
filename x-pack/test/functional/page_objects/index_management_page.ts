@@ -27,6 +27,11 @@ export function IndexManagementPageProvider({ getService }: FtrProviderContext) 
       await testSubjects.click('checkboxToggles-rollupToggle');
     },
 
+    async clickEnrichPolicyAt(indexOfRow: number): Promise<void> {
+      const deleteButons = await testSubjects.findAll('enrichPolicyDetailsLink');
+      await deleteButons[indexOfRow].click();
+    },
+
     async clickDeleteEnrichPolicyAt(indexOfRow: number): Promise<void> {
       const deleteButons = await testSubjects.findAll('deletePolicyButton');
       await deleteButons[indexOfRow].click();
