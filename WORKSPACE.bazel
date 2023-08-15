@@ -27,13 +27,13 @@ check_rules_nodejs_version(minimum_version_string = "3.8.0")
 # we can update that rule.
 node_repositories(
   node_repositories = {
-    "16.20.1-darwin_amd64": ("node-v16.20.1-darwin-x64.tar.gz", "node-v16.20.1-darwin-x64", "d1f9c2a7c3a0fe09860f701af5fb8ff9ac72d72faa7ebabfeb5794503e79f955"),
-    "16.20.1-darwin_arm64": ("node-v16.20.1-darwin-arm64.tar.gz", "node-v16.20.1-darwin-arm64", "5f6b31c5a75567d382ba67220f3d7a2d9bb0c03d8af9307cd35a9cb32a6fde9d"),
-    "16.20.1-linux_arm64": ("node-v16.20.1-linux-arm64.tar.xz", "node-v16.20.1-linux-arm64", "7fce19f3d1c2952599a0b47f9f5d8f497265ad577f37f256a8c6a03be6353234"),
-    "16.20.1-linux_amd64": ("node-v16.20.1-linux-x64.tar.xz", "node-v16.20.1-linux-x64", "b6c60e1e106ad7d8881e83945a5208c1b1d1b63e6901c04b9dafa607aff3a154"),
-    "16.20.1-windows_amd64": ("node-v16.20.1-win-x64.zip", "node-v16.20.1-win-x64", "2a7fde996c57a969f0498742f99385a520eb14aac864e0eff9c32e3f3633ff0a"),
+    "18.17.0-darwin_amd64": ("node-v18.17.0-darwin-x64.tar.gz", "node-v18.17.0-darwin-x64", "2f381442381f7fbde2ca644c3275bec9c9c2a8d361f467b40e39428acdd6ccff"),
+    "18.17.0-darwin_arm64": ("node-v18.17.0-darwin-arm64.tar.gz", "node-v18.17.0-darwin-arm64", "19731ef427e77ad9c5f476eb62bfb02a7f179d3012feed0bbded62e45f23e679"),
+    "18.17.0-linux_arm64": ("node-v18.17.0-linux-arm64.tar.xz", "node-v18.17.0-linux-arm64", "fbd2904178ee47da6e0386bc9704a12b1f613da6ad194878a517d4a69ba56544"),
+    "18.17.0-linux_amd64": ("node-v18.17.0-linux-x64.tar.xz", "node-v18.17.0-linux-x64", "f36facda28c4d5ce76b3a1b4344e688d29d9254943a47f2f1909b1a10acb1959"),
+    "18.17.0-windows_amd64": ("node-v18.17.0-win-x64.zip", "node-v18.17.0-win-x64", "06e30b4e70b18d794651ef132c39080e5eaaa1187f938721d57edae2824f4e96"),
   },
-  node_version = "16.20.1",
+  node_version = "18.17.0",
   node_urls = [
     "https://nodejs.org/dist/v{version}/{filename}",
   ],
