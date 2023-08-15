@@ -24,6 +24,7 @@ import type {
   PostureType,
   ResourceCountAggregation,
 } from './types';
+import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 
 const ASSETS_SAMPLE_GRANULARITY = '24h';
 
@@ -56,6 +57,8 @@ export const getCloudSecurityUsageRecord = async ({
       logger.error('posture type is missing');
       return;
     }
+
+    if (!(await indexHasDataInDateRange(esClient, postureType))) return;
 
     const response = await esClient.search<unknown, ResourceCountAggregation>(
       getAggQueryByPostureType(postureType)
@@ -103,7 +106,18 @@ export const getCloudSecurityUsageRecord = async ({
   }
 };
 
-export const getAggQueryByPostureType = (postureType: PostureType) => {
+const indexHasDataInDateRange = async (esClient: ElasticsearchClient, postureType: PostureType) => {
+  const response = await esClient.search({
+    index: queryParams[postureType].index,
+    size: 1,
+    _source: false,
+    query: getSearchQueryByPostureType(postureType),
+  });
+
+  return response.hits.hits.length > 0;
+};
+
+export const getSearchQueryByPostureType = (postureType: PostureType) => {
   const mustFilters = [];
 
   mustFilters.push({
@@ -122,13 +136,17 @@ export const getAggQueryByPostureType = (postureType: PostureType) => {
     });
   }
 
+  return {
+    bool: {
+      must: mustFilters,
+    },
+  };
+};
+
+export const getAggQueryByPostureType = (postureType: PostureType) => {
   const query = {
     index: queryParams[postureType].index,
-    query: {
-      bool: {
-        must: mustFilters,
-      },
-    },
+    query: getSearchQueryByPostureType(postureType),
     size: 0,
     aggs: {
       unique_assets: {
