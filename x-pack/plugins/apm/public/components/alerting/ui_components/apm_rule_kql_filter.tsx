@@ -76,7 +76,7 @@ export function ApmRuleKqlFilter({
       <>
         <EuiFormRow
           label={i18n.translate('xpack.apm.rules.ruleFlyout.filterLabel', {
-            defaultMessage: 'Filter',
+            defaultMessage: 'Filter (Technical Preview)',
           })}
           helpText={i18n.translate(
             'xpack.apm.rules.ruleFlyout.filterHelpText',
