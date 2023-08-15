@@ -18,7 +18,7 @@ export const getWarningToast = (
   getReportLink: () => string,
   getDownloadLink: (jobId: JobId) => string,
   theme: ThemeServiceStart,
-  http: Pick<CoreStart['http'], 'fetch'>,
+  http: Pick<CoreStart['http'], 'fetch'>
 ): ToastInput => ({
   title: toMountPoint(
     <FormattedMessage
