@@ -86,6 +86,10 @@ const SHARED_SERVERLESS_PARAMS = [
 
   '--detach',
 
+  '--interactive',
+
+  '--tty',
+
   '--net',
   'elastic',
 
@@ -103,10 +107,6 @@ const SHARED_SERVERLESS_PARAMS = [
 
   '--env',
   'stateless.object_store.bucket=stateless',
-
-  // Temp workaround for ES crashing on latest (2023-07-26)
-  '--env',
-  'data_streams.lifecycle_only.mode=true',
 ];
 
 // only allow certain ES args to be overwrote by options
