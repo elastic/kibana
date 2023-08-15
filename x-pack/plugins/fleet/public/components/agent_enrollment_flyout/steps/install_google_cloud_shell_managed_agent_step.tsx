@@ -13,7 +13,7 @@ import type { EuiContainedStepProps } from '@elastic/eui/src/components/steps/st
 
 import type { GetOneEnrollmentAPIKeyResponse } from '../../../../common/types/rest_spec/enrollment_api_key';
 
-import {GoogleCloudShellInstructions } from '../google_cloud_shell_instructions';
+import { GoogleCloudShellInstructions } from '../google_cloud_shell_instructions';
 
 export const InstallGoogleCloudShellManagedAgentStep = ({
   selectedApiKeyId,
@@ -22,29 +22,28 @@ export const InstallGoogleCloudShellManagedAgentStep = ({
   cloudShellUrl,
   cloudShellCommand,
 }: {
-    selectedApiKeyId?: string;
-    apiKeyData?: GetOneEnrollmentAPIKeyResponse | null;
-    isComplete?: boolean;
-    cloudShellUrl?: string | undefined;
-    cloudShellCommand?: string;
+  selectedApiKeyId?: string;
+  apiKeyData?: GetOneEnrollmentAPIKeyResponse | null;
+  isComplete?: boolean;
+  cloudShellUrl?: string | undefined;
+  cloudShellCommand?: string;
 }): EuiContainedStepProps => {
+  const nonCompleteStatus = selectedApiKeyId ? undefined : 'disabled';
+  const status = isComplete ? 'complete' : nonCompleteStatus;
 
-    const nonCompleteStatus = selectedApiKeyId ? undefined : 'disabled';
-    const status = isComplete ? 'complete' : nonCompleteStatus;
-
-    return {
-        status,
-        title: i18n.translate('xpack.fleet.agentEnrollment.cloudShell.stepEnrollAndRunAgentTitle', {
-          defaultMessage: 'Install Elastic Agent on your cloud',
-        }),
-        children:
-          selectedApiKeyId && apiKeyData && cloudShellUrl ? (
-            <GoogleCloudShellInstructions
-            cloudShellUrl={cloudShellUrl || ''}
-            cloudShellCommand={cloudShellCommand || ''}
-            />
-          ) : (
-            <React.Fragment />
-          ),
-      };
+  return {
+    status,
+    title: i18n.translate('xpack.fleet.agentEnrollment.cloudShell.stepEnrollAndRunAgentTitle', {
+      defaultMessage: 'Install Elastic Agent on your cloud',
+    }),
+    children:
+      selectedApiKeyId && apiKeyData && cloudShellUrl ? (
+        <GoogleCloudShellInstructions
+          cloudShellUrl={cloudShellUrl || ''}
+          cloudShellCommand={cloudShellCommand || ''}
+        />
+      ) : (
+        <React.Fragment />
+      ),
+  };
 };

@@ -256,7 +256,7 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
           cloudSecurityIntegration,
         })
       );
-    } else if (cloudSecurityIntegration?.cloudShellUrl){
+    } else if (cloudSecurityIntegration?.cloudShellUrl) {
       steps.push(
         InstallGoogleCloudShellManagedAgentStep({
           apiKeyData,
@@ -265,8 +265,7 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
           cloudShellCommand: installManagedCommands.googleCloudShell,
         })
       );
-    } 
-    else {
+    } else {
       steps.push(
         InstallManagedAgentStep({
           installCommand: installManagedCommands,
