@@ -9,7 +9,10 @@ import { i18n } from '@kbn/i18n';
 
 export const EQUATION_HELP_MESSAGE = i18n.translate(
   'xpack.observability.threshold.rule.alertFlyout.customEquationEditor.equationHelpMessage',
-  { defaultMessage: 'Supports basic math expressions' }
+  {
+    defaultMessage:
+      'Supports basic math equations, valid charaters are: A-Z, +, -, /, *, (, ), ?, !, &, :, |, >, <, =',
+  }
 );
 
 export const LABEL_LABEL = i18n.translate(
