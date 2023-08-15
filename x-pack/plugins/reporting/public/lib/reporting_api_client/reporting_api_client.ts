@@ -106,12 +106,13 @@ export class ReportingAPIClient implements IReportingAPI {
   }
 
   public downloadReport(jobId: string) {
-    this.http.fetch(
-      `${INTERNAL_ROUTES.JOBS.DOWNLOAD_PREFIX}/${jobId}`, { version: '1' }
-    ).then((resp) => { const csvBlob = new Blob([resp as string], { type: 'text/csv' }); 
-      fileSaver.saveAs(csvBlob, `${jobId}.csv`); 
-      return; 
-    });
+    this.http
+      .fetch(`${INTERNAL_ROUTES.JOBS.DOWNLOAD_PREFIX}/${jobId}`, { version: '1' })
+      .then((resp) => {
+        const csvBlob = new Blob([resp as string], { type: 'text/csv' });
+        fileSaver.saveAs(csvBlob, `${jobId}.csv`);
+        return;
+      });
   }
 
   public async deleteReport(jobId: string) {
