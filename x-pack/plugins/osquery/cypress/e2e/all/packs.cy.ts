@@ -405,7 +405,7 @@ describe('ALL - Packs', () => {
       });
     });
 
-    describe.skip('should open discover in new tab', () => {
+    describe('should open discover in new tab', () => {
       let packId: string;
       let packName: string;
 

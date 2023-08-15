@@ -95,7 +95,7 @@ describe('Alert Event Details', () => {
     });
   });
 
-  describe.skip('Response actions', () => {
+  describe('Response actions', () => {
     let multiQueryPackId: string;
     let multiQueryPackName: string;
     let ruleId: string;
@@ -365,6 +365,7 @@ describe('Alert Event Details', () => {
     it('should substitute parameters in investigation guide', () => {
       loadRuleAlerts(ruleName);
       cy.getBySel('expand-event').first().click();
+      cy.getBySel('securitySolutionDocumentDetailsFlyoutInvestigationGuideButton').click();
       cy.contains('Get processes').click();
       cy.getBySel('flyout-body-osquery').within(() => {
         cy.contains("SELECT * FROM os_version where name='Ubuntu';");
@@ -374,7 +375,7 @@ describe('Alert Event Details', () => {
     });
   });
 
-  describe.skip('Case creation', () => {
+  describe('Case creation', () => {
     let ruleId: string;
     let ruleName: string;
     let packId: string;
@@ -450,7 +451,8 @@ describe('Alert Event Details', () => {
     it('sees osquery results from last action and add to a case', () => {
       loadRuleAlerts(ruleName);
       cy.getBySel('expand-event').first().click();
-      cy.getBySel('responseActionsViewTab').click();
+      cy.getBySel('securitySolutionDocumentDetailsFlyoutResponseSectionHeader').click();
+      cy.getBySel('securitySolutionDocumentDetailsFlyoutResponseButton').click();
       cy.getBySel('responseActionsViewWrapper').should('exist');
       cy.contains('select * from users;');
       cy.contains("SELECT * FROM os_version where name='Ubuntu';");
@@ -500,7 +502,8 @@ describe('Alert Event Details', () => {
       const discoverRegex = new RegExp(`action_id: ${UUID_REGEX}`);
       loadRuleAlerts(ruleName);
       cy.getBySel('expand-event').first().click();
-      cy.getBySel('responseActionsViewTab').click();
+      cy.getBySel('securitySolutionDocumentDetailsFlyoutResponseSectionHeader').click();
+      cy.getBySel('securitySolutionDocumentDetailsFlyoutResponseButton').click();
       cy.getBySel('responseActionsViewWrapper').should('exist');
       checkActionItemsInResults({
         lens: true,
@@ -541,7 +544,8 @@ describe('Alert Event Details', () => {
       const lensRegex = new RegExp(`Action ${UUID_REGEX} results`);
       loadRuleAlerts(ruleName);
       cy.getBySel('expand-event').first().click();
-      cy.getBySel('responseActionsViewTab').click();
+      cy.getBySel('securitySolutionDocumentDetailsFlyoutResponseSectionHeader').click();
+      cy.getBySel('securitySolutionDocumentDetailsFlyoutResponseButton').click();
       cy.getBySel('responseActionsViewWrapper').should('exist');
       checkActionItemsInResults({
         lens: true,
@@ -591,7 +595,8 @@ describe('Alert Event Details', () => {
       const filterRegex = new RegExp(`action_id: "${UUID_REGEX}"`);
       loadRuleAlerts(ruleName);
       cy.getBySel('expand-event').first().click();
-      cy.getBySel('responseActionsViewTab').click();
+      cy.getBySel('securitySolutionDocumentDetailsFlyoutResponseSectionHeader').click();
+      cy.getBySel('securitySolutionDocumentDetailsFlyoutResponseButton').click();
       cy.getBySel('responseActionsViewWrapper').should('exist');
       checkActionItemsInResults({
         lens: true,
@@ -648,7 +653,8 @@ describe('Alert Event Details', () => {
           expect(initialNotificationCount).to.be.equal(updatedNotificationCount - 1);
         })
         .then(() => {
-          cy.getBySel('responseActionsViewTab').click();
+          cy.getBySel('securitySolutionDocumentDetailsFlyoutResponseSectionHeader').click();
+          cy.getBySel('securitySolutionDocumentDetailsFlyoutResponseButton').click();
           cy.getBySel('responseActionsViewWrapper').within(() => {
             cy.contains('tags');
             cy.getBySel('osquery-results-comment').should('have.length', updatedNotificationCount);

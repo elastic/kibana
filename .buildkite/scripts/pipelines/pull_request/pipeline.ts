@@ -80,6 +80,7 @@ const uploadPipeline = (pipelineContent: string | object) => {
         getPipeline('.buildkite/pipelines/pull_request/security_solution_explore.yml')
       );
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/defend_workflows.yml'));
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/osquery_cypress.yml'));
     }
 
     if (
