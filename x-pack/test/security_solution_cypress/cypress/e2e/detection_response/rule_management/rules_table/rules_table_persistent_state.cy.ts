@@ -100,7 +100,7 @@ function expectDefaultRulesTableState(): void {
   expectTablePage(1);
 }
 
-describe('Rules table: persistent state', () => {
+describe('Rules table: persistent state', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
   before(() => {
     cleanKibana();
     createTestRules();
@@ -111,7 +111,7 @@ describe('Rules table: persistent state', () => {
     resetRulesTableState();
   });
 
-  describe('while on a happy path', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+  describe('while on a happy path', () => {
     it('activates management tab by default', () => {
       visit(SECURITY_DETECTIONS_RULES_URL);
 
@@ -273,7 +273,7 @@ describe('Rules table: persistent state', () => {
     });
   });
 
-  describe('upon state format upgrade', { tags: [tag.ESS, tag.SERVERLESS] }, async () => {
+  describe('upon state format upgrade', async () => {
     beforeEach(() => {
       login();
     });
@@ -318,45 +318,41 @@ describe('Rules table: persistent state', () => {
     });
   });
 
-  describe(
-    'when persisted state is partially unavailable',
-    { tags: [tag.ESS, tag.SERVERLESS] },
-    () => {
-      describe('and on the rules management tab', () => {
-        beforeEach(() => {
-          login();
-          visit(SECURITY_DETECTIONS_RULES_MANAGEMENT_URL);
-        });
-
-        it('persists after clearing the session storage', () => {
-          changeRulesTableState();
-          goToTablePage(2);
-
-          cy.window().then((win) => {
-            win.sessionStorage.clear();
-          });
-          cy.reload();
-
-          expectRulesManagementTab();
-          expectRulesTableState();
-          expectTablePage(2);
-        });
-
-        it('persists after clearing the url state', () => {
-          changeRulesTableState();
-          goToTablePage(2);
-
-          visit(SECURITY_DETECTIONS_RULES_MANAGEMENT_URL);
-
-          expectRulesManagementTab();
-          expectRulesTableState();
-          expectTablePage(1);
-        });
+  describe('when persisted state is partially unavailable', () => {
+    describe('and on the rules management tab', () => {
+      beforeEach(() => {
+        login();
+        visit(SECURITY_DETECTIONS_RULES_MANAGEMENT_URL);
       });
-    }
-  );
 
-  describe('when corrupted', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+      it('persists after clearing the session storage', () => {
+        changeRulesTableState();
+        goToTablePage(2);
+
+        cy.window().then((win) => {
+          win.sessionStorage.clear();
+        });
+        cy.reload();
+
+        expectRulesManagementTab();
+        expectRulesTableState();
+        expectTablePage(2);
+      });
+
+      it('persists after clearing the url state', () => {
+        changeRulesTableState();
+        goToTablePage(2);
+
+        visit(SECURITY_DETECTIONS_RULES_MANAGEMENT_URL);
+
+        expectRulesManagementTab();
+        expectRulesTableState();
+        expectTablePage(1);
+      });
+    });
+  });
+
+  describe('when corrupted', () => {
     describe('and on the rules management tab', () => {
       beforeEach(() => {
         login();

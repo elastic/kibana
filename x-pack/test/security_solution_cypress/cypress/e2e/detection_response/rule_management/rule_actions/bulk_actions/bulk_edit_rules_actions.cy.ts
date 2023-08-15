@@ -71,7 +71,7 @@ const expectedSlackMessage = 'Slack action test message';
 // TODO: Fix flakiness and unskip https://github.com/elastic/kibana/issues/154721
 describe.skip(
   'Detection rules, bulk edit of rule actions',
-  { tags: [tag.ESS, tag.SERVERLESS] },
+  { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] },
   () => {
     before(() => {
       cleanKibana();
