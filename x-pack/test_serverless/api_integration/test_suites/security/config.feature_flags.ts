@@ -8,15 +8,13 @@
 import { createTestConfig } from '../../config.base';
 
 export default createTestConfig({
-  serverlessProject: 'es',
-  testFiles: [
-    require.resolve('../common'),
-    require.resolve('./snapshot_telemetry'),
-    require.resolve('./cases/post_case'),
-    require.resolve('./cases/find_cases'),
-  ],
+  serverlessProject: 'security',
   junit: {
-    reportName: 'Serverless Search API Integration Tests',
+    reportName: 'Serverless Security Feature Flags API Integration Tests',
   },
-  suiteTags: { exclude: ['skipSvlSearch'] },
+  suiteTags: { exclude: ['skipSvlSec'] },
+  // add feature flags
+  kbnServerArgs: [],
+  // import only tests that require feature flags
+  testFiles: [],
 });
