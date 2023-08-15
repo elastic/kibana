@@ -20,7 +20,8 @@ import { RightPanelContext } from '../context';
 import { mockContextValue } from '../mocks/mock_right_panel_context';
 import { mockDataFormattedForFieldBrowser } from '../mocks/mock_context';
 import { ExpandableFlyoutContext } from '@kbn/expandable-flyout/src/context';
-import { LeftPanelInsightsTabPath, LeftPanelKey } from '../../left';
+import { LeftPanelInsightsTab, LeftPanelKey } from '../../left';
+import { ENTITIES_TAB_ID } from '../../left/components/entities_details';
 
 const hostName = 'host';
 const ip = '10.200.000.000';
@@ -143,7 +144,7 @@ describe('<HostEntityContent />', () => {
       getByTestId(ENTITIES_HOST_OVERVIEW_LINK_TEST_ID).click();
       expect(flyoutContextValue.openLeftPanel).toHaveBeenCalledWith({
         id: LeftPanelKey,
-        path: LeftPanelInsightsTabPath,
+        path: { tab: LeftPanelInsightsTab, subTab: ENTITIES_TAB_ID },
         params: {
           id: panelContextValue.eventId,
           indexName: panelContextValue.indexName,
