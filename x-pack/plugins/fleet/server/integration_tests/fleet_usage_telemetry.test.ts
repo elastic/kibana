@@ -136,6 +136,16 @@ describe('fleet usage telemetry', () => {
               version: '22.04.2 LTS (Jammy Jellyfish)',
             },
           },
+          components: [
+            {
+              id: 'filestream-monitoring',
+              status: 'UNHEALTHY',
+            },
+            {
+              id: 'beat/metrics-monitoring',
+              status: 'HEALTHY',
+            },
+          ],
         },
         {
           create: {
@@ -156,6 +166,16 @@ describe('fleet usage telemetry', () => {
               version: '20.04.5 LTS (Focal Fossa)',
             },
           },
+          components: [
+            {
+              id: 'filestream-monitoring',
+              status: 'HEALTHY',
+            },
+            {
+              id: 'beat/metrics-monitoring',
+              status: 'HEALTHY',
+            },
+          ],
         },
         {
           create: {
@@ -176,6 +196,16 @@ describe('fleet usage telemetry', () => {
               version: '20.04.5 LTS (Focal Fossa)',
             },
           },
+          components: [
+            {
+              id: 'filestream-monitoring',
+              status: 'HEALTHY',
+            },
+            {
+              id: 'beat/metrics-monitoring',
+              status: 'HEALTHY',
+            },
+          ],
         },
       ],
       refresh: 'wait_for',
@@ -403,6 +433,24 @@ describe('fleet usage telemetry', () => {
             version: '22.04.2 LTS (Jammy Jellyfish)',
             count: 1,
           },
+        ],
+        components_status: [
+          /* To uncomment when ES new snapshot will be built 
+          {
+            id: 'filestream-monitoring',
+            status: 'HEALTHY',
+            count: 1,
+          },
+          {
+            id: 'filestream-monitoring',
+            status: 'UNHEALTHY',
+            count: 1,
+          },
+          {
+            id: 'beat/metrics-monitoring',
+            status: 'HEALTHY',
+            count: 2,
+          }, */
         ],
         fleet_server_config: {
           policies: [
