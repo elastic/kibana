@@ -15,13 +15,16 @@ import { AlertsSummaryContent } from './alerts';
 import { KPIGrid } from './kpis/kpi_grid';
 import { MetricsGrid } from './metrics/metrics_grid';
 import { useAssetDetailsStateContext } from '../../hooks/use_asset_details_state';
+import { useMetadataProviderContext } from '../../hooks/use_metadata_provider';
 
 export const Overview = () => {
-  const { asset, assetType, overrides, dateRange, renderMode, metadataResponse } =
-    useAssetDetailsStateContext();
+  const { asset, assetType, overrides, dateRange, renderMode } = useAssetDetailsStateContext();
+  const {
+    metadata,
+    loading: metadataLoading,
+    error: fetchMetadataError,
+  } = useMetadataProviderContext();
   const { logsDataView, metricsDataView } = overrides?.overview ?? {};
-
-  const { metadataLoading, fetchMetadataError, metadata } = metadataResponse;
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m">

@@ -6,55 +6,22 @@
  */
 
 import React from 'react';
-import { EuiFlyout, EuiFlyoutHeader, EuiFlyoutBody } from '@elastic/eui';
-import useEffectOnce from 'react-use/lib/useEffectOnce';
-import type { AssetDetailsProps, RenderMode } from './types';
-import { Content } from './content/content';
-import { Header } from './header/header';
-import { TabSwitcherProvider, useTabSwitcherContext } from './hooks/use_tab_switcher';
-import {
-  AssetDetailsStateProvider,
-  useAssetDetailsStateContext,
-} from './hooks/use_asset_details_state';
-import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
-import { ASSET_DETAILS_FLYOUT_COMPONENT_NAME } from './constants';
+import type { AssetDetailsProps, ContentTemplateProps, RenderMode } from './types';
+import { TabSwitcherProvider } from './hooks/use_tab_switcher';
+import { AssetDetailsStateProvider } from './hooks/use_asset_details_state';
+import { MetadataProvider } from './hooks/use_metadata_provider';
+import { DateRangeProvider } from './hooks/use_date_range_provider';
+import { Flyout } from './template/flyout';
+import { Page } from './template/page';
 
-interface ContentTemplateProps {
-  header: React.ReactElement;
-  body: React.ReactElement;
-  renderMode: RenderMode;
-}
-
-const ContentTemplate = ({ header, body, renderMode }: ContentTemplateProps) => {
-  const { assetType } = useAssetDetailsStateContext();
-  const { initialActiveTabId } = useTabSwitcherContext();
-  const {
-    services: { telemetry },
-  } = useKibanaContextForPlugin();
-
-  useEffectOnce(() => {
-    telemetry.reportAssetDetailsFlyoutViewed({
-      componentName: ASSET_DETAILS_FLYOUT_COMPONENT_NAME,
-      assetType,
-      tabId: initialActiveTabId,
-    });
-  });
-
+const ContentTemplate = ({
+  header,
+  renderMode,
+}: ContentTemplateProps & { renderMode: RenderMode }) => {
   return renderMode.mode === 'flyout' ? (
-    <EuiFlyout
-      onClose={renderMode.closeFlyout}
-      ownFocus={false}
-      data-component-name={ASSET_DETAILS_FLYOUT_COMPONENT_NAME}
-      data-asset-type={assetType}
-    >
-      <EuiFlyoutHeader hasBorder>{header}</EuiFlyoutHeader>
-      <EuiFlyoutBody>{body}</EuiFlyoutBody>
-    </EuiFlyout>
+    <Flyout header={header} closeFlyout={renderMode.closeFlyout} />
   ) : (
-    <>
-      {header}
-      {body}
-    </>
+    <Page header={header} />
   );
 };
 
@@ -72,26 +39,25 @@ export const AssetDetails = ({
   },
 }: AssetDetailsProps) => {
   return (
-    <AssetDetailsStateProvider
-      state={{
-        asset,
-        assetType,
-        overrides,
-        onTabsStateChange,
-        dateRange,
-        renderMode,
-      }}
-    >
-      <TabSwitcherProvider
-        initialActiveTabId={tabs.length > 0 ? activeTabId ?? tabs[0].id : undefined}
-      >
-        <ContentTemplate
-          header={<Header compact={renderMode.mode === 'flyout'} tabs={tabs} links={links} />}
-          body={<Content />}
-          renderMode={renderMode}
-        />
-      </TabSwitcherProvider>
-    </AssetDetailsStateProvider>
+    <DateRangeProvider dateRange={dateRange}>
+      <MetadataProvider asset={asset} assetType={assetType}>
+        <AssetDetailsStateProvider
+          state={{
+            asset,
+            assetType,
+            overrides,
+            onTabsStateChange,
+            renderMode,
+          }}
+        >
+          <TabSwitcherProvider
+            initialActiveTabId={tabs.length > 0 ? activeTabId ?? tabs[0].id : undefined}
+          >
+            <ContentTemplate header={{ tabs, links }} renderMode={renderMode} />
+          </TabSwitcherProvider>
+        </AssetDetailsStateProvider>
+      </MetadataProvider>
+    </DateRangeProvider>
   );
 };
 

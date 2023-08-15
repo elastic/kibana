@@ -4,8 +4,26 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { EuiErrorBoundary } from '@elastic/eui';
 import React from 'react';
+import { useRouteMatch } from 'react-router-dom';
+import type { InventoryItemType } from '../../../../common/inventory_models/types';
+import { AssetDetail } from './asset_detail_wrapper';
+import { MetricsTimeProvider } from './hooks/use_metrics_time';
+import { MetricDetail } from './metric_detail_wrapper';
 
 export const NodeDetail = () => {
-  return <></>;
+  const {
+    params: { type: nodeType },
+  } = useRouteMatch<{ type: InventoryItemType; node: string }>();
+
+  const PageContent = () => (nodeType === 'host' ? <AssetDetail /> : <MetricDetail />);
+
+  return (
+    <EuiErrorBoundary>
+      <MetricsTimeProvider>
+        <PageContent />
+      </MetricsTimeProvider>
+    </EuiErrorBoundary>
+  );
 };

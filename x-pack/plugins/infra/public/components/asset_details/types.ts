@@ -15,7 +15,7 @@ interface Metadata {
 }
 export type Asset = Metadata & {
   id: string;
-  name: string;
+  name?: string;
 };
 
 export enum FlyoutTabIds {
@@ -74,7 +74,7 @@ export interface Tab {
   name: string;
 }
 
-export type LinkOptions = 'alertRule' | 'nodeDetails' | 'apmServices';
+export type LinkOptions = 'alertRule' | 'nodeDetails' | 'apmServices' | 'uptime';
 
 export interface AssetDetailsProps {
   asset: Asset;
@@ -89,3 +89,7 @@ export interface AssetDetailsProps {
 }
 
 export type TabsStateChangeFn = (state: TabState & { activeTabId?: TabIds }) => void;
+
+export interface ContentTemplateProps {
+  header: Pick<AssetDetailsProps, 'tabs' | 'links'>;
+}

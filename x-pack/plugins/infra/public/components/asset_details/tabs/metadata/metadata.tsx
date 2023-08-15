@@ -13,6 +13,7 @@ import { TimeRange } from '@kbn/es-query';
 import type { InventoryItemType } from '../../../../../common/inventory_models/types';
 import { Table } from './table';
 import { getAllFields } from './utils';
+import { useMetadataProviderContext } from '../../hooks/use_metadata_provider';
 import { useAssetDetailsStateContext } from '../../hooks/use_asset_details_state';
 
 export interface MetadataSearchUrlState {
@@ -30,9 +31,13 @@ export interface MetadataProps {
 }
 
 export const Metadata = () => {
-  const { overrides, onTabsStateChange, metadataResponse } = useAssetDetailsStateContext();
+  const { overrides, onTabsStateChange } = useAssetDetailsStateContext();
+  const {
+    metadata,
+    loading: metadataLoading,
+    error: fetchMetadataError,
+  } = useMetadataProviderContext();
   const { query, showActionsColumn = false } = overrides?.metadata ?? {};
-  const { metadataLoading, fetchMetadataError, metadata } = metadataResponse;
 
   const fields = useMemo(() => getAllFields(metadata), [metadata]);
 
