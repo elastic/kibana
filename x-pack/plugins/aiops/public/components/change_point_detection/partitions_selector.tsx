@@ -20,6 +20,7 @@ export interface PartitionsSelectorProps {
   splitField: string;
   value: string[];
   onChange: (update: string[]) => void;
+  enableSearch?: boolean;
 }
 
 function getQueryPayload(
@@ -85,6 +86,7 @@ export const PartitionsSelector: FC<PartitionsSelectorProps> = ({
   value,
   onChange,
   splitField,
+  enableSearch = true,
 }) => {
   const { dataView } = useDataSource();
   const {
@@ -92,11 +94,13 @@ export const PartitionsSelector: FC<PartitionsSelectorProps> = ({
   } = useAiopsAppContext();
   const prevSplitField = usePrevious(splitField);
   const [options, setOptions] = useState<Array<EuiComboBoxOptionOption<string>>>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(enableSearch);
   const { runRequest, cancelRequest } = useCancellableSearch();
 
   const fetchResults = useCallback(
     async (searchValue: string) => {
+      if (!enableSearch) return;
+
       cancelRequest();
       setIsLoading(true);
       try {
@@ -131,7 +135,7 @@ export const PartitionsSelector: FC<PartitionsSelectorProps> = ({
       }
       setIsLoading(false);
     },
-    [cancelRequest, dataView, splitField, runRequest, toasts, value]
+    [enableSearch, cancelRequest, dataView, splitField, value, runRequest, toasts]
   );
 
   useEffect(
@@ -157,6 +161,13 @@ export const PartitionsSelector: FC<PartitionsSelectorProps> = ({
 
   const onSearchChange = useMemo(() => debounce(fetchResults, 500), [fetchResults]);
 
+  const onCreateOption = useCallback(
+    (v: string) => {
+      onChange([...value, v]);
+    },
+    [onChange, value]
+  );
+
   return (
     <EuiFormRow
       fullWidth
@@ -171,7 +182,8 @@ export const PartitionsSelector: FC<PartitionsSelectorProps> = ({
         options={options}
         selectedOptions={selectedOptions}
         onChange={onChangeCallback}
-        onSearchChange={onSearchChange}
+        onSearchChange={enableSearch ? onSearchChange : undefined}
+        onCreateOption={!enableSearch ? onCreateOption : undefined}
         isClearable
         data-test-subj="aiopsChangePointPartitions"
       />

@@ -23,6 +23,7 @@ import { i18n } from '@kbn/i18n';
 import usePrevious from 'react-use/lib/usePrevious';
 import { pick } from 'lodash';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { PartitionsSelector } from '../components/change_point_detection/partitions_selector';
 import { DEFAULT_SERIES } from './const';
 import { EmbeddableChangePointChartProps } from './embeddable_change_point_chart_component';
@@ -240,6 +241,7 @@ export const FormControls: FC<{
           value={formInput.partitions ?? []}
           onChange={(v) => updateCallback({ partitions: v })}
           splitField={formInput.splitField}
+          enableSearch={formInput.splitField === ES_FIELD_TYPES.KEYWORD}
         />
       ) : null}
 
