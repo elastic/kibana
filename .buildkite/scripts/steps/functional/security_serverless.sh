@@ -13,4 +13,4 @@ trap 'docker logout docker.elastic.co' EXIT
 
 echo "--- Security Serverless Cypress"
 
-yarn --cwd x-pack/test_serverless/functional/test_suites/security/cypress cypress:run
+yarn --cwd x-pack/test/security_solution_cypress cypress:run:serverless
