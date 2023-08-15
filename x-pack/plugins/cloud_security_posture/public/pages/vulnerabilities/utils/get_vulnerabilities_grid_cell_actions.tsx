@@ -38,7 +38,7 @@ export const getVulnerabilitiesGridCellActions = <
       return vulnerabilityRow.vulnerability?.id;
     }
     if (columnId === columns.cvss) {
-      return vulnerabilityRow.vulnerability?.score.base;
+      return vulnerabilityRow.vulnerability?.score?.base;
     }
     if (columnId === columns.resourceId) {
       return vulnerabilityRow.resource?.id;
