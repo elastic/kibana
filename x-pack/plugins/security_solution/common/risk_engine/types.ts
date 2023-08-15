@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import type { RiskCategories } from './risk_weights/types';
 
 export enum RiskScoreEntity {
