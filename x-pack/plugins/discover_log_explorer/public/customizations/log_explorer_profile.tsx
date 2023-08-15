@@ -10,6 +10,7 @@ import type { CoreStart } from '@kbn/core/public';
 import { CustomizationCallback } from '@kbn/discover-plugin/public';
 import React from 'react';
 import { dynamic } from '../../common/utils/dynamic';
+import { DatasetsServiceSetup } from '../services/datasets';
 
 const LazyCustomDatasetSelector = dynamic(() => import('./custom_dataset_selector'));
 const LazyCustomDatasetFilters = dynamic(() => import('./custom_dataset_filters'));
@@ -17,21 +18,22 @@ const LazyCustomDatasetFilters = dynamic(() => import('./custom_dataset_filters'
 interface CreateLogExplorerProfileCustomizationsDeps {
   core: CoreStart;
   data: DataPublicPluginStart;
+  datasetsClient: DatasetsServiceSetup['client'];
 }
 
 export const createLogExplorerProfileCustomizations =
-  ({ core, data }: CreateLogExplorerProfileCustomizationsDeps): CustomizationCallback =>
+  ({
+    core,
+    data,
+    datasetsClient,
+  }: CreateLogExplorerProfileCustomizationsDeps): CustomizationCallback =>
   async ({ customizations, stateContainer }) => {
     // Lazy load dependencies
-    const datasetServiceModuleLoadable = import('../services/datasets');
     const logExplorerMachineModuleLoadable = import('../state_machines/log_explorer_profile');
 
-    const [{ DatasetsService }, { initializeLogExplorerProfileStateService, waitForState }] =
-      await Promise.all([datasetServiceModuleLoadable, logExplorerMachineModuleLoadable]);
-
-    const datasetsService = new DatasetsService().start({
-      http: core.http,
-    });
+    const [{ initializeLogExplorerProfileStateService, waitForState }] = await Promise.all([
+      logExplorerMachineModuleLoadable,
+    ]);
 
     const logExplorerProfileStateService = initializeLogExplorerProfileStateService({
       stateContainer,
@@ -53,7 +55,7 @@ export const createLogExplorerProfileCustomizations =
       id: 'search_bar',
       CustomDataViewPicker: () => (
         <LazyCustomDatasetSelector
-          datasetsClient={datasetsService.client}
+          datasetsClient={datasetsClient}
           logExplorerProfileStateService={logExplorerProfileStateService}
         />
       ),

@@ -31,5 +31,5 @@ export interface SingleDatasetLocatorParams extends DiscoverLocatorUsablePropert
 
 export interface SingleDatasetLocatorDependencies {
   discover: DiscoverSetup;
-  datasetsService: DatasetsServiceSetup;
+  datasetsClient: DatasetsServiceSetup['client'];
 }

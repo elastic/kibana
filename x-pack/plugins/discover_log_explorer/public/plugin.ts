@@ -11,7 +11,7 @@ import { DiscoverLogExplorerLocators, SingleDatasetLocatorDefinition } from '../
 import { DiscoverLogExplorerConfig } from '../common/plugin_config';
 import { createLogExplorerProfileCustomizations } from './customizations/log_explorer_profile';
 import { getLogExplorerDeepLink } from './deep_links';
-import { DatasetsService } from './services/datasets';
+import { DatasetsService, DatasetsServiceSetup } from './services/datasets';
 import {
   DiscoverLogExplorerPluginSetup,
   DiscoverLogExplorerPluginStart,
@@ -24,20 +24,23 @@ export class DiscoverLogExplorerPlugin
 {
   private config: DiscoverLogExplorerConfig;
   private locators?: DiscoverLogExplorerLocators;
+  private datasetsService: DatasetsService;
+  private datasetsClient?: DatasetsServiceSetup['client'];
 
   constructor(context: PluginInitializerContext<DiscoverLogExplorerConfig>) {
     this.config = context.config.get();
+    this.datasetsService = new DatasetsService();
   }
 
   public setup(core: CoreSetup, plugins: DiscoverLogExplorerSetupDeps) {
     const { share, discover } = plugins;
 
-    const datasetsService = new DatasetsService().setup({
+    this.datasetsClient = this.datasetsService.setup({
       http: core.http,
-    });
+    }).client;
 
     const singleDatasetLocator = share.url.locators.create(
-      new SingleDatasetLocatorDefinition({ discover, datasetsService })
+      new SingleDatasetLocatorDefinition({ discover, datasetsClient: this.datasetsClient })
     );
 
     this.locators = {
@@ -53,7 +56,11 @@ export class DiscoverLogExplorerPlugin
     const { discover, data } = plugins;
 
     discover.registerCustomizationProfile(LOG_EXPLORER_PROFILE_ID, {
-      customize: createLogExplorerProfileCustomizations({ core, data }),
+      customize: createLogExplorerProfileCustomizations({
+        core,
+        data,
+        datasetsClient: this.datasetsClient!,
+      }),
       deepLinks: [getLogExplorerDeepLink({ isVisible: this.config.featureFlags.deepLinkVisible })],
     });
   }

@@ -35,7 +35,7 @@ export class SingleDatasetLocatorDefinition
   };
 
   private async generateDataViewId(integration: string, dataset: string) {
-    const { items } = await this.deps.datasetsService.client.findIntegrations({
+    const { items } = await this.deps.datasetsClient.findIntegrations({
       nameQuery: integration,
     });
 

@@ -21,13 +21,7 @@ export interface DatasetsServiceSetupDeps {
   http: HttpStart;
 }
 
-export interface DatasetsServiceStart {
-  client: IDatasetsClient;
-}
-
-export interface DatasetsServiceStartDeps {
-  http: HttpStart;
-}
+export type DatasetsServiceStart = void;
 
 export interface IDatasetsClient {
   findDatasets(params?: FindDatasetsRequestQuery): Promise<FindDatasetValue>;
