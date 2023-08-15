@@ -5,14 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiSuperSelect,
-  EuiText,
-} from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSuperSelect, EuiText } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 
 import { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
@@ -47,6 +40,10 @@ interface Config {
 const inputContainerClassName = css`
   height: 32px;
 
+  .euiSuperSelect {
+    width: 400px;
+  }
+
   .euiSuperSelectControl {
     border: none;
     box-shadow: none;
@@ -54,17 +51,26 @@ const inputContainerClassName = css`
     padding-left: 0;
   }
 
-  // Hide default down arrow so we can ensure it always shows right after text without a gap
   .euiFormControlLayoutIcons {
-    display: none;
+    right: 14px;
+    top: 2px;
   }
 `;
 
 const inputDisplayClassName = css`
   overflow: hidden;
   text-overflow: ellipsis;
-  width: 400px;
   max-width: 400px;
+`;
+
+const placeholderButtonClassName = css`
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 400px;
+  font-weight: normal;
+  padding-bottom: 5px;
+  padding-left: 0;
+  padding-top: 2px;
 `;
 
 /**
@@ -78,6 +84,7 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
     selectedConversation,
     onConnectorSelectionChange,
   }) => {
+    const [isOpen, setIsOpen] = useState<boolean>(false);
     const { actionTypeRegistry, http } = useAssistantContext();
     const { setApiConfig } = useConversation();
     // Connector Modal State
@@ -101,6 +108,9 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
       refetch: refetchConnectors,
     } = useLoadConnectors({ http });
     const isLoading = isLoadingActionTypes || isFetchingActionTypes;
+    const selectedConnectorName =
+      connectors?.find((c) => c.id === selectedConnectorId)?.name ??
+      i18n.INLINE_CONNECTOR_PLACEHOLDER;
 
     const addNewConnectorOption = useMemo(() => {
       return {
@@ -109,7 +119,7 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
         dropdownDisplay: (
           <EuiFlexGroup gutterSize="none" key={ADD_NEW_CONNECTOR}>
             <EuiFlexItem grow={true}>
-              <EuiButtonEmpty iconType="plus" size="xs">
+              <EuiButtonEmpty data-test-subj="addNewConnectorButton" iconType="plus" size="xs">
                 {i18n.ADD_NEW_CONNECTOR}
               </EuiButtonEmpty>
             </EuiFlexItem>
@@ -132,7 +142,7 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
             value: connector.id,
             inputDisplay: (
               <EuiText className={inputDisplayClassName} size="xs">
-                {connector.name} <EuiIcon size={'s'} type={'arrowDown'} />
+                {connector.name}
               </EuiText>
             ),
             dropdownDisplay: (
@@ -155,8 +165,16 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
       setIsConnectorModalVisible(false);
     }, [onConnectorModalVisibilityChange]);
 
+    const onConnectorClick = useCallback(() => {
+      setIsOpen(!isOpen);
+    }, [isOpen]);
+
+    const handleOnBlur = useCallback(() => setIsOpen(false), []);
+
     const onChange = useCallback(
       (connectorId: string, apiProvider?: OpenAiProviderType) => {
+        setIsOpen(false);
+
         if (connectorId === ADD_NEW_CONNECTOR) {
           onConnectorModalVisibilityChange?.(true);
           setIsConnectorModalVisible(true);
@@ -190,12 +208,22 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
       ]
     );
 
+    const placeholderComponent = useMemo(
+      () => (
+        <EuiText color="default" size={'xs'}>
+          {i18n.INLINE_CONNECTOR_PLACEHOLDER}
+        </EuiText>
+      ),
+      []
+    );
+
     return (
       <EuiFlexGroup
         alignItems="center"
         className={inputContainerClassName}
         direction="row"
         gutterSize="xs"
+        justifyContent={'flexStart'}
         responsive={false}
       >
         <EuiFlexItem grow={false}>
@@ -204,17 +232,36 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiSuperSelect
-            aria-label={i18n.CONNECTOR_SELECTOR_TITLE}
-            compressed={true}
-            disabled={isDisabled}
-            hasDividers={true}
-            isLoading={isLoading}
-            onChange={onChange}
-            options={[...connectorOptions, addNewConnectorOption]}
-            placeholder={i18n.INLINE_CONNECTOR_PLACEHOLDER}
-            valueOfSelected={selectedConnectorId}
-          />
+          {isOpen ? (
+            <EuiSuperSelect
+              aria-label={i18n.CONNECTOR_SELECTOR_TITLE}
+              compressed={true}
+              data-test-subj="connectorSelectorSuperSelect"
+              disabled={isDisabled}
+              hasDividers={true}
+              isLoading={isLoading}
+              isOpen={isOpen}
+              onBlur={handleOnBlur}
+              onChange={onChange}
+              options={[...connectorOptions, addNewConnectorOption]}
+              placeholder={placeholderComponent}
+              valueOfSelected={selectedConnectorId}
+            />
+          ) : (
+            <span>
+              <EuiButtonEmpty
+                className={placeholderButtonClassName}
+                color={'text'}
+                iconSide={'right'}
+                iconType="arrowDown"
+                isDisabled={isDisabled}
+                onClick={onConnectorClick}
+                size="xs"
+              >
+                {selectedConnectorName}
+              </EuiButtonEmpty>
+            </span>
+          )}
           {isConnectorModalVisible && (
             <ConnectorAddModal
               actionType={actionType}
