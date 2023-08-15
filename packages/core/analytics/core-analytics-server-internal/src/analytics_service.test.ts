@@ -21,9 +21,11 @@ const createCoreContext = () => {
 
 describe('AnalyticsService', () => {
   let analyticsService: AnalyticsService;
+  let coreContext: ReturnType<typeof createCoreContext>;
   beforeEach(() => {
     jest.clearAllMocks();
-    analyticsService = new AnalyticsService(createCoreContext());
+    coreContext = createCoreContext();
+    analyticsService = new AnalyticsService(coreContext);
   });
 
   test('should register the context provider `build info` on creation', async () => {
@@ -32,6 +34,7 @@ describe('AnalyticsService', () => {
       await firstValueFrom(analyticsClientMock.registerContextProvider.mock.calls[0][0].context$)
     ).toEqual({
       branch: packageInfo.branch,
+      buildFlavor: coreContext.env.packageInfo.buildFlavor,
       version: packageInfo.version,
       buildNum: packageInfo.build.number,
       buildSha: packageInfo.build.sha,
