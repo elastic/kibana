@@ -99,9 +99,7 @@ export const getDefaultAwsVarsGroup = (packageInfo: PackageInfo): AwsCredentials
 interface Props {
   newPolicy: NewPackagePolicy;
   input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_aws' }>;
-
   updatePolicy(updatedPolicy: NewPackagePolicy): void;
-
   packageInfo: PackageInfo;
   onChange: any;
   setIsValid: (isValid: boolean) => void;
