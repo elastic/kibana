@@ -28,7 +28,7 @@ interface ListExceptionItemsProps {
   exceptions: ExceptionListItemSchema[];
   listType: ExceptionListTypeEnum;
   lastUpdated: string | number | null;
-  pagination: Pagination;
+  pagination: Pagination & { pageSize: number };
   emptyViewerTitle?: string;
   emptyViewerBody?: string;
   emptyViewerButtonText?: string;

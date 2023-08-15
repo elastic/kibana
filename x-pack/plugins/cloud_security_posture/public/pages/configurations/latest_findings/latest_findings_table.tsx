@@ -31,7 +31,7 @@ type TableProps = Required<EuiBasicTableProps<CspFinding>>;
 interface Props {
   loading: boolean;
   items: CspFinding[];
-  pagination: Pagination;
+  pagination: Pagination & { pageSize: number };
   sorting: TableProps['sorting'];
   setTableOptions(options: CriteriaWithPagination<CspFinding>): void;
   onAddFilter: OnAddFilter;
