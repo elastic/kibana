@@ -15,6 +15,16 @@ import {
   TIME_RANGE_EMBEDDABLE,
 } from '../../../lib/test_samples/embeddables';
 import { CustomTimeRangeBadge } from './custom_time_range_badge';
+import { EditPanelAction } from '../edit_panel_action/edit_panel_action';
+import { embeddablePluginMock } from '../../../mocks';
+import { applicationServiceMock } from '@kbn/core/public/mocks';
+
+const { doStart } = embeddablePluginMock.createInstance();
+const start = doStart();
+const getFactory = start.getEmbeddableFactory;
+const applicationMock = applicationServiceMock.createStartContract();
+const stateTransferMock = embeddablePluginMock.createStartContract().getStateTransfer();
+const editPanelAction = new EditPanelAction(getFactory, applicationMock, stateTransferMock);
 
 test(`badge is not compatible with embeddable that inherits from parent`, async () => {
   const container = new TimeRangeContainer(
@@ -40,6 +50,7 @@ test(`badge is not compatible with embeddable that inherits from parent`, async 
   const compatible = await new CustomTimeRangeBadge(
     overlayServiceMock.createStartContract(),
     themeServiceMock.createStartContract(),
+    editPanelAction,
     [],
     'MM YYYY'
   ).isCompatible({
@@ -73,6 +84,7 @@ test(`badge is compatible with embeddable that has custom time range`, async () 
   const compatible = await new CustomTimeRangeBadge(
     overlayServiceMock.createStartContract(),
     themeServiceMock.createStartContract(),
+    editPanelAction,
     [],
     'MM YYYY'
   ).isCompatible({
@@ -105,6 +117,7 @@ test('Attempting to execute on incompatible embeddable throws an error', async (
   const badge = await new CustomTimeRangeBadge(
     overlayServiceMock.createStartContract(),
     themeServiceMock.createStartContract(),
+    editPanelAction,
     [],
     'MM YYYY'
   );
