@@ -55,28 +55,37 @@ import { ConnectorCheckable } from './connector_checkable';
 
 export const SelectConnector: React.FC = () => {
   const { search } = useLocation();
+  const { isCloud } = useValues(KibanaLogic);
+  const { hasPlatinumLicense } = useValues(LicensingLogic);
+  const hasNativeAccess = isCloud;
   const { service_type: serviceType } = parseQueryParams(search);
   const [useNativeFilter, setUseNativeFilter] = useState(false);
   const [useNonGAFilter, setUseNonGAFilter] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const filteredConnectors = useMemo(
-    () =>
-      CONNECTORS.filter((connector) =>
+  const filteredConnectors = useMemo(() => {
+    const nativeConnectors = hasNativeAccess
+      ? CONNECTORS.filter((connector) => connector.isNative).sort((a, b) =>
+          a.name.localeCompare(b.name)
+        )
+      : [];
+    const nonNativeConnectors = hasNativeAccess
+      ? CONNECTORS.filter((connector) => !connector.isNative).sort((a, b) =>
+          a.name.localeCompare(b.name)
+        )
+      : CONNECTORS.sort((a, b) => a.name.localeCompare(b.name));
+    const connectors = [...nativeConnectors, ...nonNativeConnectors];
+    return connectors
+      .filter((connector) =>
         useNonGAFilter ? true : !connector.isBeta && !connector.isTechPreview
       )
-        .filter((connector) => (useNativeFilter ? connector.isNative : true))
-        .filter((connector) =>
-          searchTerm ? connector.name.toLowerCase().includes(searchTerm.toLowerCase()) : true
-        ),
-    [useNonGAFilter, useNativeFilter, searchTerm]
-  );
+      .filter((connector) => (useNativeFilter ? connector.isNative : true))
+      .filter((connector) =>
+        searchTerm ? connector.name.toLowerCase().includes(searchTerm.toLowerCase()) : true
+      );
+  }, [useNonGAFilter, useNativeFilter, searchTerm]);
   const [selectedConnector, setSelectedConnector] = useState<string | null>(
     Array.isArray(serviceType) ? serviceType[0] : serviceType ?? null
   );
-  const { isCloud } = useValues(KibanaLogic);
-  const { hasPlatinumLicense } = useValues(LicensingLogic);
-
-  const hasNativeAccess = isCloud;
 
   return (
     <EnterpriseSearchContentPageTemplate
