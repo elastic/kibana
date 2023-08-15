@@ -9,8 +9,17 @@ import React, { useCallback, useMemo } from 'react';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
 import { Route, Routes } from '@kbn/shared-ux-router';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiPageHeader, EuiSpacer, EuiPageHeaderProps } from '@elastic/eui';
+import {
+  EuiPageHeader,
+  EuiSpacer,
+  EuiPageHeaderProps,
+  EuiPageSection,
+  EuiButton,
+} from '@elastic/eui';
+import { DetailsPageError } from './details_page_error';
+import { useLoadIndex } from '../../../../services';
 import { Section } from '../../home';
+import { DetailsPageLoading } from './details_page_loading';
 
 export enum IndexDetailsSection {
   Overview = 'overview',
@@ -76,8 +85,33 @@ export const DetailsPage: React.FunctionComponent<
     }));
   }, [indexDetailsSection, onSectionChange]);
 
+  const { isLoading, error, resendRequest } = useLoadIndex(indexName);
+  if (isLoading) {
+    return <DetailsPageLoading />;
+  }
+  if (error) {
+    return <DetailsPageError indexName={indexName} resendRequest={resendRequest} />;
+  }
+
   return (
     <>
+      <EuiPageSection paddingSize="none">
+        <EuiButton
+          color="text"
+          iconType="arrowLeft"
+          onClick={() => {
+            return history.push(encodeURI(`/indices`));
+          }}
+        >
+          <FormattedMessage
+            id="xpack.idxMgmt.indexDetails.backToIndicesButtonLabel"
+            defaultMessage="Back to all indices"
+          />
+        </EuiButton>
+      </EuiPageSection>
+
+      <EuiSpacer size="l" />
+
       <EuiPageHeader
         data-test-subj="indexDetailsHeader"
         pageTitle={indexName}
