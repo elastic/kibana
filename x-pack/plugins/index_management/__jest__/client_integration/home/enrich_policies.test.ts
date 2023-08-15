@@ -94,6 +94,16 @@ describe('Enrich policies tab', () => {
       expect(httpSetup.get.mock.calls).toHaveLength(1);
     });
 
+    describe('details flyout', () => {
+      it('can open the details flyout', async () => {
+        const { actions, exists } = testBed;
+
+        await actions.clickEnrichPolicyAt(0);
+
+        expect(exists('policyDetailsFlyout')).toBe(true);
+      });
+    });
+
     describe('policy actions', () => {
       const notificationsServiceMock = notificationServiceMock.createStartContract();
 
