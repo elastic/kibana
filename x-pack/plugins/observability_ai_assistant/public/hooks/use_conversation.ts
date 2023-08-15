@@ -28,6 +28,10 @@ export function useConversation({
   displayedMessages: Message[];
   setDisplayedMessages: Dispatch<SetStateAction<Message[]>>;
   save: (messages: Message[], handleRefreshConversations?: () => void) => Promise<Conversation>;
+  saveTitle: (
+    title: string,
+    handleRefreshConversations?: () => void
+  ) => Promise<Conversation | void>;
 } {
   const service = useObservabilityAIAssistant();
 
@@ -143,6 +147,26 @@ export function useConversation({
               });
               throw err;
             });
+    },
+    saveTitle: (title: string, handleRefreshConversations?: () => void) => {
+      if (conversationId) {
+        return service
+          .callApi('PUT /internal/observability_ai_assistant/conversation/{conversationId}/title', {
+            signal: null,
+            params: {
+              path: {
+                conversationId,
+              },
+              body: {
+                title,
+              },
+            },
+          })
+          .then(() => {
+            handleRefreshConversations?.();
+          });
+      }
+      return Promise.resolve();
     },
   };
 }

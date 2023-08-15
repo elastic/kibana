@@ -19,7 +19,7 @@ export default meta;
 
 export const ChatHeaderLoaded: ComponentStoryObj<typeof Component> = {
   args: {
-    title: 'My conversation',
+    title: 'My conversation jdhf lskdjhfsdlk jfh sdlkjfh sdlkfjhsd klfjhds flkjdsh flksdjh fl',
     connectors: {
       loading: false,
       selectedConnector: 'gpt-4',

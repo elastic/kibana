@@ -9,6 +9,7 @@ import React from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiLink,
   EuiLoadingSpinner,
   EuiPanel,
@@ -50,6 +51,7 @@ export function KnowledgeBaseCallout({ knowledgeBase }: { knowledgeBase: UseKnow
     color = 'plain';
     content = (
       <EuiText size="xs" color="subdued">
+        <EuiIcon type="iInCircle" />{' '}
         {i18n.translate('xpack.observabilityAiAssistant.poweredByModel', {
           defaultMessage: 'Powered by {model}',
           values: {
@@ -100,7 +102,13 @@ export function KnowledgeBaseCallout({ knowledgeBase }: { knowledgeBase: UseKnow
   }
 
   return (
-    <EuiPanel hasBorder={false} hasShadow={false} borderRadius="none" color={color} paddingSize="s">
+    <EuiPanel
+      hasBorder={false}
+      hasShadow={false}
+      borderRadius="none"
+      color={color}
+      paddingSize={knowledgeBase.status.value?.ready ? 'none' : 's'}
+    >
       {content}
     </EuiPanel>
   );

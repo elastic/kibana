@@ -208,6 +208,88 @@ export class ObservabilityAIAssistantClient {
     return updatedConversation;
   };
 
+  autoTitle = async ({
+    conversationId,
+    connectorId,
+  }: {
+    conversationId: string;
+    connectorId: string;
+  }) => {
+    const document = await this.getConversationWithMetaFields(conversationId);
+    if (!document) {
+      throw notFound();
+    }
+
+    const conversation = await this.get(conversationId);
+
+    if (!conversation) {
+      throw notFound();
+    }
+
+    const response = await this.chat({
+      messages: [
+        {
+          '@timestamp': new Date().toISOString(),
+          message: {
+            role: MessageRole.Assistant,
+            content: conversation.messages.slice(1).reduce((acc, curr) => {
+              return `${acc} ${curr.message.role}: ${curr.message.content}`;
+            }, 'You are a helpful assistant for Elastic Observability. Assume the following message is the start of a conversation between you and a user; give this conversation a title based on this content: '),
+          },
+        },
+      ],
+      connectorId,
+      stream: false,
+    });
+
+    if ('object' in response && response.object === 'chat.completion') {
+      const title =
+        response.choices[0].message?.content?.slice(1, -1) ||
+        `Conversation on ${conversation['@timestamp']}`;
+
+      const updatedConversation: Conversation = merge(
+        {},
+        conversation,
+        { conversation: { title } },
+        this.getConversationUpdateValues(new Date().toISOString())
+      );
+
+      await this.setTitle({ conversationId, title });
+
+      return updatedConversation;
+    }
+    return conversation;
+  };
+
+  setTitle = async ({ conversationId, title }: { conversationId: string; title: string }) => {
+    const document = await this.getConversationWithMetaFields(conversationId);
+    if (!document) {
+      throw notFound();
+    }
+
+    const conversation = await this.get(conversationId);
+
+    if (!conversation) {
+      throw notFound();
+    }
+
+    const updatedConversation: Conversation = merge(
+      {},
+      conversation,
+      { conversation: { title } },
+      this.getConversationUpdateValues(new Date().toISOString())
+    );
+
+    await this.dependencies.esClient.update({
+      id: document._id,
+      index: document._index,
+      doc: { conversation: { title } },
+      refresh: 'wait_for',
+    });
+
+    return updatedConversation;
+  };
+
   create = async (conversation: ConversationCreateRequest): Promise<Conversation> => {
     const now = new Date().toISOString();
 

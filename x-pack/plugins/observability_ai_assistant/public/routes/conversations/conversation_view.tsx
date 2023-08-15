@@ -72,11 +72,12 @@ export function ConversationView() {
 
   const conversationId = 'conversationId' in path ? path.conversationId : undefined;
 
-  const { conversation, displayedMessages, setDisplayedMessages, save } = useConversation({
-    conversationId,
-    chatService: chatService.value,
-    connectorId: connectors.selectedConnector,
-  });
+  const { conversation, displayedMessages, setDisplayedMessages, save, saveTitle } =
+    useConversation({
+      conversationId,
+      chatService: chatService.value,
+      connectorId: connectors.selectedConnector,
+    });
 
   const conversations = useAbortableAsync(
     ({ signal }) => {
@@ -120,7 +121,7 @@ export function ConversationView() {
     <>
       {confirmDeleteElement}
       <EuiFlexGroup direction="row" className={containerClassName}>
-        <EuiFlexItem grow={false} style={{ width: 250 }}>
+        <EuiFlexItem grow={false} style={{ minWidth: 250, width: 250 }}>
           <ConversationList
             selected={conversationId ?? ''}
             loading={conversations.loading || isUpdatingList}
@@ -191,7 +192,7 @@ export function ConversationView() {
                 });
             }}
           />
-          <EuiSpacer size="m" />
+          <EuiSpacer size="s" />
         </EuiFlexItem>
         <EuiFlexItem
           grow
@@ -230,6 +231,7 @@ export function ConversationView() {
                 currentUser={currentUser}
                 connectors={connectors}
                 connectorsManagementHref={getConnectorsManagementHref(http)}
+                conversationId={conversationId}
                 knowledgeBase={knowledgeBase}
                 messages={displayedMessages}
                 title={conversation.value.conversation.title}
@@ -245,6 +247,9 @@ export function ConversationView() {
                       }
                     })
                     .catch((e) => {});
+                }}
+                onSaveTitle={(title) => {
+                  saveTitle(title, handleRefreshConversations);
                 }}
               />
             </ObservabilityAIAssistantChatServiceProvider>
