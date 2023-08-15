@@ -55,7 +55,10 @@ const generateFindingsTags = (finding: CspFinding) => {
     .concat(finding.rule.tags)
     .concat(
       finding.rule.benchmark.posture_type
-        ? [`${CSP_RULE_TAG_DATA_SOURCE_PREFIX}${finding.rule.benchmark.posture_type.toUpperCase()}`]
+        ? [
+            finding.rule.benchmark.posture_type.toUpperCase(),
+            `${CSP_RULE_TAG_DATA_SOURCE_PREFIX}${finding.rule.benchmark.posture_type.toUpperCase()}`,
+          ]
         : []
     )
     .concat(
