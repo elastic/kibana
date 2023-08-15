@@ -282,9 +282,9 @@ it('rewrites cypress reports with minimal changes', async () => {
     -‹?xml version="1.0" encoding="UTF-8"?›
     +‹?xml version="1.0" encoding="utf-8"?›
      ‹testsuites name="Mocha Tests" time="16.198" tests="2" failures="1"›
-    -  ‹testsuite name="Root Suite" timestamp="2020-07-22T15:06:26" tests="0" file="cypress/integration/timeline_flyout_button.spec.ts" failures="0" time="0"›
+    -  ‹testsuite name="Root Suite" timestamp="2020-07-22T15:06:26" tests="0" file="cypress/e2e/timeline_flyout_button.cy.ts" failures="0" time="0"›
     -  ‹/testsuite›
-    +  ‹testsuite name="Root Suite" timestamp="2020-07-22T15:06:26" tests="0" file="cypress/integration/timeline_flyout_button.spec.ts" failures="0" time="0"/›
+    +  ‹testsuite name="Root Suite" timestamp="2020-07-22T15:06:26" tests="0" file="cypress/e2e/timeline_flyout_button.cy.ts" failures="0" time="0"/›
        ‹testsuite name="timeline flyout button" timestamp="2020-07-22T15:06:26" tests="2" failures="1" time="16.198"›
     -    ‹testcase name="timeline flyout button toggles open the timeline" time="8.099" classname="toggles open the timeline"›
     -    ‹/testcase›

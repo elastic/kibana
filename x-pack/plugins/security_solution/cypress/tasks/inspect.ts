@@ -12,7 +12,7 @@ export const closesModal = () => {
 };
 
 export const clickInspectButton = (container: string) => {
-  cy.get(`${container} ${INSPECT_BUTTON_ICON}`).trigger('click', { force: true });
+  cy.get(`${container} ${INSPECT_BUTTON_ICON}`).click({ force: true });
 };
 
 export const openStatsAndTables = (table: InspectButtonMetadata) => {
@@ -21,9 +21,7 @@ export const openStatsAndTables = (table: InspectButtonMetadata) => {
   }
   cy.get(table.id);
   if (table.altInspectId) {
-    cy.get(table.altInspectId).trigger('click', {
-      force: true,
-    });
+    cy.get(table.altInspectId).click({ force: true });
   } else {
     clickInspectButton(table.id);
   }

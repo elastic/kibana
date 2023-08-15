@@ -18,10 +18,12 @@ Cypress.Commands.add('loginAsPowerUser', () => {
 Cypress.Commands.add(
   'loginAs',
   ({ username, password }: { username: string; password: string }) => {
-    cy.log(`Logging in as ${username}`);
+    // cy.session(username, () => {
     const kibanaUrl = Cypress.env('KIBANA_URL');
+    cy.log(`Logging in as ${username} on ${kibanaUrl}`);
+    cy.visit('/');
     cy.request({
-      log: false,
+      log: true,
       method: 'POST',
       url: `${kibanaUrl}/internal/security/login`,
       body: {
@@ -33,7 +35,9 @@ Cypress.Commands.add(
       headers: {
         'kbn-xsrf': 'e2e_test',
       },
+      // });
     });
+    cy.visit('/');
   }
 );
 
