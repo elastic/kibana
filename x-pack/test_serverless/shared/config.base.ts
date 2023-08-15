@@ -65,7 +65,7 @@ export default async () => {
         // basic: { 'cloud-basic': { order: 0 } },
         '--xpack.cloud.id=ftr_fake_cloud_id',
         `--xpack.security.authc.providers=${JSON.stringify({
-          basic: { 'basic': { order: 0 } },
+          basic: { basic: { order: 0 } },
           saml: { 'cloud-saml-kibana': { order: 1, realm: 'cloud-saml-kibana' } },
         })}`,
         // This ensures we can attempt to access the disabled routes without getting a 401
