@@ -26,6 +26,7 @@ import {
   EuiDragDropContext,
   euiDragDropReorder,
   EuiButtonGroupOptionProps,
+  EuiSwitch,
 } from '@elastic/eui';
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 
@@ -84,8 +85,9 @@ const NavigationEmbeddablePanelEditor = ({
   const [currentLayout, setCurrentLayout] = useState<NavigationLayoutType>(
     initialLayout ?? NAV_VERTICAL_LAYOUT
   );
-  const [orderedLinks, setOrderedLinks] = useState<NavigationEmbeddableLink[]>([]);
   const [isSaving, setIsSaving] = useState(false);
+  const [orderedLinks, setOrderedLinks] = useState<NavigationEmbeddableLink[]>([]);
+  const [saveByReference, setSaveByReference] = useState(!initialLinks ? true : isByReference);
 
   const isEditingExisting = initialLinks || isByReference;
 
@@ -136,6 +138,10 @@ const NavigationEmbeddablePanelEditor = ({
     [editLinkFlyoutRef, orderedLinks, parentDashboard]
   );
 
+  const hasZeroLinks = useMemo(() => {
+    return orderedLinks.length === 0;
+  }, [orderedLinks]);
+
   const deleteLink = useCallback(
     (linkId: string) => {
       setOrderedLinks(
@@ -161,7 +167,7 @@ const NavigationEmbeddablePanelEditor = ({
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <EuiForm fullWidth>
-          {orderedLinks.length === 0 ? (
+          {hasZeroLinks ? (
             <NavigationEmbeddablePanelEditorEmptyPrompt addLink={() => addOrEditLink()} />
           ) : (
             <>
@@ -229,46 +235,33 @@ const NavigationEmbeddablePanelEditor = ({
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="m">
-              {!isByReference ? (
-                <EuiFlexItem grow={false} css={{ 'margin-left': 'auto' }}>
+            <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
+              {!initialLinks || !isByReference ? (
+                <EuiFlexItem grow={false}>
                   <TooltipWrapper
-                    condition={!initialLinks}
-                    tooltipContent={NavEmbeddableStrings.editor.panelEditor.getAddToDashboardButtonTooltip()}
+                    condition={!hasZeroLinks}
+                    tooltipContent={NavEmbeddableStrings.editor.panelEditor.getSaveToLibrarySwitchTooltip()}
                   >
-                    <EuiButton
-                      disabled={orderedLinks.length === 0}
-                      isLoading={isSaving}
-                      onClick={() => {
-                        onAddToDashboard(orderedLinks, currentLayout);
-                      }}
-                    >
-                      {initialLinks
-                        ? NavEmbeddableStrings.editor.panelEditor.getApplyButtonLabel()
-                        : NavEmbeddableStrings.editor.panelEditor.getAddToDashboardButtonLabel()}
-                    </EuiButton>
+                    <EuiSwitch
+                      label={NavEmbeddableStrings.editor.panelEditor.getSaveToLibrarySwitchLabel()}
+                      checked={saveByReference}
+                      disabled={hasZeroLinks}
+                      onChange={() => setSaveByReference(!saveByReference)}
+                    />
                   </TooltipWrapper>
                 </EuiFlexItem>
               ) : null}
-              {!initialLinks || isByReference ? (
-                <EuiFlexItem grow={false}>
-                  <EuiToolTip
-                    repositionOnScroll={false}
-                    position="top"
-                    content={
-                      <p>
-                        {initialLinks
-                          ? NavEmbeddableStrings.editor.panelEditor.getUpdateLibraryItemButtonTooltip()
-                          : NavEmbeddableStrings.editor.panelEditor.getSaveToLibraryButtonTooltip()}
-                      </p>
-                    }
-                  >
-                    <EuiButton
-                      fill
-                      iconType="folderCheck"
-                      disabled={orderedLinks.length === 0}
-                      isLoading={isSaving}
-                      onClick={async () => {
+              <EuiFlexItem grow={false}>
+                <TooltipWrapper
+                  condition={hasZeroLinks}
+                  tooltipContent={NavEmbeddableStrings.editor.panelEditor.getEmptyLinksTooltip()}
+                >
+                  <EuiButton
+                    fill
+                    isLoading={isSaving}
+                    disabled={hasZeroLinks}
+                    onClick={async () => {
+                      if (saveByReference) {
                         setIsSaving(true);
                         onSaveToLibrary(orderedLinks, currentLayout)
                           .catch((e) => {
@@ -280,15 +273,15 @@ const NavigationEmbeddablePanelEditor = ({
                           .finally(() => {
                             setIsSaving(false);
                           });
-                      }}
-                    >
-                      {initialLinks
-                        ? NavEmbeddableStrings.editor.panelEditor.getUpdateLibraryItemButtonLabel()
-                        : NavEmbeddableStrings.editor.panelEditor.getSaveToLibraryButtonLabel()}
-                    </EuiButton>
-                  </EuiToolTip>
-                </EuiFlexItem>
-              ) : null}
+                      } else {
+                        onAddToDashboard(orderedLinks, currentLayout);
+                      }
+                    }}
+                  >
+                    {NavEmbeddableStrings.editor.panelEditor.getSaveButtonLabel()}
+                  </EuiButton>
+                </TooltipWrapper>
+              </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
