@@ -6,3 +6,5 @@
  */
 
 export const MAX_SERIES = 50;
+
+export const DEFAULT_SERIES = 6;

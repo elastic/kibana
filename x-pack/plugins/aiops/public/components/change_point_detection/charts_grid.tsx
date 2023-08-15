@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC, useMemo, useState, useEffect, useRef } from 'react';
+import React, { type FC, useMemo, useState, useEffect, useRef, useCallback } from 'react';
 import {
   EuiBadge,
   EuiDescriptionList,
@@ -42,10 +42,28 @@ interface ChartsGridProps {
  * @param changePoints
  * @constructor
  */
-export const ChartsGrid: FC<{ changePoints: SelectedChangePoint[]; interval: string }> = ({
-  changePoints,
-  interval,
-}) => {
+export const ChartsGrid: FC<{
+  changePoints: SelectedChangePoint[];
+  interval: string;
+  onRenderComplete?: () => void;
+}> = ({ changePoints, interval, onRenderComplete }) => {
+  // Render is complete when all chart components in the grid are ready
+  const loadCounter = useRef<Record<number, boolean>>(
+    Object.fromEntries(changePoints.map((v, i) => [i, true]))
+  );
+
+  const onLoadCallback = useCallback(
+    (chartId: number, isLoading: boolean) => {
+      if (!onRenderComplete) return;
+      loadCounter.current[chartId] = isLoading;
+      const isLoadComplete = Object.values(loadCounter.current).every((v) => !v);
+      if (isLoadComplete) {
+        onRenderComplete();
+      }
+    },
+    [onRenderComplete]
+  );
+
   return (
     <EuiFlexGrid
       columns={changePoints.length >= 2 ? 2 : 1}
@@ -122,6 +140,9 @@ export const ChartsGrid: FC<{ changePoints: SelectedChangePoint[]; interval: str
                 fieldConfig={{ splitField: v.splitField, fn: v.fn, metricField: v.metricField }}
                 annotation={v}
                 interval={interval}
+                onLoading={(isLoading) => {
+                  onLoadCallback(index, isLoading);
+                }}
               />
             </EuiPanel>
           </EuiFlexItem>

@@ -109,12 +109,12 @@
           "trackAdoption": false,
           "references": [
             {
-              "plugin": "ml",
-              "path": "x-pack/plugins/ml/public/alerting/register_ml_alerts.ts"
-            },
-            {
               "plugin": "stackAlerts",
               "path": "x-pack/plugins/stack_alerts/public/rule_types/es_query/index.ts"
+            },
+            {
+              "plugin": "ml",
+              "path": "x-pack/plugins/ml/public/alerting/register_ml_alerts.ts"
             }
           ],
           "children": [
@@ -3076,10 +3076,6 @@
               {
                 "plugin": "stackAlerts",
                 "path": "x-pack/plugins/stack_alerts/server/rule_types/geo_containment/executor.ts"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/server/rule_types/es_query/executor.ts"
               },
               {
                 "plugin": "synthetics",

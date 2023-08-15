@@ -38,6 +38,7 @@ const schemaLatest = schema.object(
       schema.boolean({ defaultValue: true }),
       schema.never()
     ),
+    dev: schema.object({ enableIndexDetailsPage: schema.boolean({ defaultValue: false }) }),
   },
   { defaultValue: undefined }
 );
@@ -47,6 +48,9 @@ const configLatest: PluginConfigDescriptor<IndexManagementConfig> = {
     ui: true,
     enableIndexActions: true,
     enableLegacyTemplates: true,
+    dev: {
+      enableIndexDetailsPage: true,
+    },
   },
   schema: schemaLatest,
   deprecations: () => [],
