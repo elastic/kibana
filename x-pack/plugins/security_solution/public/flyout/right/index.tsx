@@ -7,7 +7,7 @@
 
 import type { FC } from 'react';
 import React, { memo, useMemo } from 'react';
-import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
+import type { FlyoutPanelProps, PanelPath } from '@kbn/expandable-flyout';
 import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
 import { useRightPanelContext } from './context';
 import { PanelHeader } from './header';
@@ -17,13 +17,11 @@ import { tabs } from './tabs';
 import { PanelFooter } from './footer';
 
 export type RightPanelPaths = 'overview' | 'table' | 'json';
-
 export const RightPanelKey: RightPanelProps['key'] = 'document-details-right';
-export const RightPanelTableTabPath: RightPanelProps['path'] = ['table'];
 
 export interface RightPanelProps extends FlyoutPanelProps {
   key: 'document-details-right';
-  path?: RightPanelPaths[];
+  path?: PanelPath;
   params?: {
     id: string;
     indexName: string;
@@ -41,13 +39,15 @@ export const RightPanel: FC<Partial<RightPanelProps>> = memo(({ path }) => {
   const selectedTabId = useMemo(() => {
     const defaultTab = tabs[0].id;
     if (!path) return defaultTab;
-    return tabs.map((tab) => tab.id).find((tabId) => tabId === path[0]) ?? defaultTab;
+    return tabs.map((tab) => tab.id).find((tabId) => tabId === path.tab) ?? defaultTab;
   }, [path]);
 
   const setSelectedTabId = (tabId: RightPanelTabsType[number]['id']) => {
     openRightPanel({
       id: RightPanelKey,
-      path: [tabId],
+      path: {
+        tab: tabId,
+      },
       params: {
         id: eventId,
         indexName,

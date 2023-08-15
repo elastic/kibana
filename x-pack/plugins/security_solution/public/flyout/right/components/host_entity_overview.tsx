@@ -37,6 +37,7 @@ import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useRiskScore } from '../../../explore/containers/risk_score';
 import { useHostDetails } from '../../../explore/hosts/containers/hosts/details';
 import * as i18n from '../../../overview/components/host_overview/translations';
+import { ENTITIES_TAB_ID } from '../../left/components/entities_details';
 import {
   ENTITIES_HOST_OVERVIEW_TEST_ID,
   ENTITIES_HOST_OVERVIEW_OS_FAMILY_TEST_ID,
@@ -44,7 +45,7 @@ import {
   ENTITIES_HOST_OVERVIEW_RISK_LEVEL_TEST_ID,
   ENTITIES_HOST_OVERVIEW_LINK_TEST_ID,
 } from './test_ids';
-import { LeftPanelInsightsTabPath, LeftPanelKey } from '../../left';
+import { LeftPanelInsightsTab, LeftPanelKey } from '../../left';
 
 const HOST_ICON = 'storage';
 const CONTEXT_ID = `flyout-host-entity-overview`;
@@ -65,7 +66,7 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({ hostName
   const goToEntitiesTab = useCallback(() => {
     openLeftPanel({
       id: LeftPanelKey,
-      path: LeftPanelInsightsTabPath,
+      path: { tab: LeftPanelInsightsTab, subTab: ENTITIES_TAB_ID },
       params: {
         id: eventId,
         indexName,

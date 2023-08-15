@@ -21,7 +21,8 @@ import { mockContextValue } from '../mocks/mock_right_panel_context';
 import { mockDataFormattedForFieldBrowser } from '../mocks/mock_context';
 import { ExpandableFlyoutContext } from '@kbn/expandable-flyout/src/context';
 import { RightPanelContext } from '../context';
-import { LeftPanelInsightsTabPath, LeftPanelKey } from '../../left';
+import { LeftPanelInsightsTab, LeftPanelKey } from '../../left';
+import { ENTITIES_TAB_ID } from '../../left/components/entities_details';
 
 const userName = 'user';
 const domain = 'n54bg2lfc7';
@@ -152,7 +153,7 @@ describe('<UserEntityOverview />', () => {
       getByTestId(ENTITIES_USER_OVERVIEW_LINK_TEST_ID).click();
       expect(flyoutContextValue.openLeftPanel).toHaveBeenCalledWith({
         id: LeftPanelKey,
-        path: LeftPanelInsightsTabPath,
+        path: { tab: LeftPanelInsightsTab, subTab: ENTITIES_TAB_ID },
         params: {
           id: panelContextValue.eventId,
           indexName: panelContextValue.indexName,
