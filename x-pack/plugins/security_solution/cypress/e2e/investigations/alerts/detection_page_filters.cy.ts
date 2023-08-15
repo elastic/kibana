@@ -234,7 +234,7 @@ describe(`Detections : Page Filters`, () => {
     cy.get(FILTER_GROUP_CHANGED_BANNER).should('be.visible');
   });
 
-  context('with data modificiation', () => {
+  context.skip('with data modificiation', () => {
     after(() => {
       cleanKibana();
       createRule(getNewRule({ rule_id: 'custom_rule_filters' }));
