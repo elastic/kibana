@@ -7,9 +7,11 @@
 
 import { i18n } from '@kbn/i18n';
 import {
+  copyToClipboard,
   EuiBasicTable,
   EuiBasicTableColumn,
   EuiButton,
+  EuiButtonIcon,
   EuiLink,
   EuiMarkdownFormat,
   EuiSpacer,
@@ -144,9 +146,19 @@ function ConfigurationValueColumn({
   }
 
   return (
-    <EuiText size="s" color="accent">
-      {value}
-    </EuiText>
+    <>
+      <EuiText size="s" color="accent">
+        {value}
+      </EuiText>
+      {value && (
+        <EuiButtonIcon
+          aria-label="Copy to clipboard"
+          color="text"
+          iconType="copy"
+          onClick={() => copyToClipboard(value)}
+        />
+      )}
+    </>
   );
 }
 
