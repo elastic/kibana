@@ -73,7 +73,7 @@
     "url": "https://github.com/elastic/kibana.git"
   },
   "engines": {
-    "node": "16.20.1",
+    "node": "16.20.2",
     "yarn": "^1.22.19"
   },
   "resolutions": {
@@ -816,7 +816,7 @@
     "deepmerge": "^4.2.2",
     "del": "^6.1.0",
     "elastic-apm-http-client": "^11.0.1",
-    "elastic-apm-node": "^3.46.0",
+    "elastic-apm-node": "^3.49.1",
     "email-addresses": "^5.0.0",
     "execa": "^4.0.2",
     "expiry-js": "0.1.7",
@@ -1372,7 +1372,7 @@
     "blob-polyfill": "^7.0.20220408",
     "callsites": "^3.1.0",
     "chance": "1.0.18",
-    "chromedriver": "^114.0.2",
+    "chromedriver": "^115.0.1",
     "clean-webpack-plugin": "^3.0.0",
     "cli-table3": "^0.6.1",
     "compression-webpack-plugin": "^4.0.0",
