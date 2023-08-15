@@ -1,11 +1,21 @@
 {
   "ml.put_calendar_job": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__"
+    },
     "methods": [
       "PUT"
     ],
     "patterns": [
       "_ml/calendars/{calendar_id}/jobs/{job_id}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/ml-put-calendar-job.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/ml-put-calendar-job.html",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
   }
 }
