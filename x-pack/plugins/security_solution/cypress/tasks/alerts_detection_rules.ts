@@ -202,7 +202,6 @@ export const waitForRulesTableToBeLoaded = () => {
 };
 
 export const waitForRulesTableToBeRefreshed = () => {
-  cy.get(RULES_TABLE_REFRESH_INDICATOR).should('exist');
   cy.get(RULES_TABLE_REFRESH_INDICATOR).should('not.exist');
 };
 

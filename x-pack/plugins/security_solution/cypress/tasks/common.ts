@@ -6,7 +6,6 @@
  */
 
 import { esArchiverResetKibana } from './es_archiver';
-import { RuleEcs } from '../../common/ecs/rule';
 import { LOADING_INDICATOR } from '../screens/security_header';
 
 const primaryButton = 0;
@@ -16,6 +15,22 @@ const primaryButton = 0;
  * https://github.com/atlassian/react-beautiful-dnd/blob/67b96c8d04f64af6b63ae1315f74fc02b5db032b/docs/sensors/mouse.md#sloppy-clicks-and-click-prevention-
  */
 const dndSloppyClickDetectionThreshold = 5;
+
+export const API_AUTH = Object.freeze({
+  user: Cypress.env('ELASTICSEARCH_USERNAME'),
+  pass: Cypress.env('ELASTICSEARCH_PASSWORD'),
+});
+
+export const API_HEADERS = Object.freeze({ 'kbn-xsrf': 'cypress' });
+
+export const rootRequest = <T = unknown>(
+  options: Partial<Cypress.RequestOptions>
+): Cypress.Chainable<Cypress.Response<T>> =>
+  cy.request<T>({
+    auth: API_AUTH,
+    headers: API_HEADERS,
+    ...options,
+  });
 
 /** Starts dragging the subject */
 export const drag = (subject: JQuery<HTMLElement>) => {
@@ -68,88 +83,97 @@ export const reload = () => {
 export const cleanKibana = () => {
   const kibanaIndexUrl = `${Cypress.env('ELASTICSEARCH_URL')}/.kibana_\*`;
 
-  cy.request('GET', '/api/detection_engine/rules/_find').then((response) => {
-    const rules: RuleEcs[] = response.body.data;
-
-    if (response.body.data.length > 0) {
-      rules.forEach((rule) => {
-        const jsonRule = rule;
-        cy.request({
-          method: 'DELETE',
-          url: `/api/detection_engine/rules?rule_id=${jsonRule.rule_id}`,
-          headers: { 'kbn-xsrf': 'cypress-creds-via-config' },
-        });
-      });
-    }
+  rootRequest({
+    method: 'POST',
+    url: '/api/detection_engine/rules/_bulk_action',
+    body: {
+      query: '',
+      action: 'delete',
+    },
+    failOnStatusCode: false,
+    headers: { 'kbn-xsrf': 'cypress-creds', 'x-elastic-internal-origin': 'security-solution' },
+    timeout: 300000,
   });
 
-  cy.request('POST', `${kibanaIndexUrl}/_delete_by_query?conflicts=proceed`, {
-    query: {
-      bool: {
-        filter: [
-          {
-            match: {
-              type: 'alert',
+  rootRequest({
+    method: 'POST',
+    url: `${kibanaIndexUrl}/_delete_by_query?conflicts=proceed`,
+    body: {
+      query: {
+        bool: {
+          filter: [
+            {
+              match: {
+                type: 'alert',
+              },
             },
-          },
-          {
-            match: {
-              'alert.alertTypeId': 'siem.signals',
+            {
+              match: {
+                'alert.alertTypeId': 'siem.signals',
+              },
             },
-          },
-          {
-            match: {
-              'alert.consumer': 'siem',
+            {
+              match: {
+                'alert.consumer': 'siem',
+              },
             },
-          },
-        ],
+          ],
+        },
       },
     },
   });
 
   deleteCases();
 
-  cy.request('POST', `${kibanaIndexUrl}/_delete_by_query?conflicts=proceed`, {
-    query: {
-      bool: {
-        filter: [
-          {
-            match: {
-              type: 'siem-ui-timeline',
+  rootRequest({
+    method: 'POST',
+    url: `${kibanaIndexUrl}/_delete_by_query?conflicts=proceed`,
+    body: {
+      query: {
+        bool: {
+          filter: [
+            {
+              match: {
+                type: 'siem-ui-timeline',
+              },
             },
-          },
-        ],
+          ],
+        },
       },
     },
   });
 
-  cy.request(
-    'POST',
-    `${Cypress.env(
+  rootRequest({
+    method: 'POST',
+    url: `${Cypress.env(
       'ELASTICSEARCH_URL'
     )}/.lists-*,.items-*,.siem-signals-*/_delete_by_query?conflicts=proceed&scroll_size=10000`,
-    {
+    body: {
       query: {
         match_all: {},
       },
-    }
-  );
+    },
+  });
 
   esArchiverResetKibana();
 };
 
 export const deleteCases = () => {
   const kibanaIndexUrl = `${Cypress.env('ELASTICSEARCH_URL')}/.kibana_\*`;
-  cy.request('POST', `${kibanaIndexUrl}/_delete_by_query?conflicts=proceed`, {
-    query: {
-      bool: {
-        filter: [
-          {
-            match: {
-              type: 'cases',
+  rootRequest({
+    method: 'POST',
+    url: `${kibanaIndexUrl}/_delete_by_query?conflicts=proceed`,
+    body: {
+      query: {
+        bool: {
+          filter: [
+            {
+              match: {
+                type: 'cases',
+              },
             },
-          },
-        ],
+          ],
+        },
       },
     },
   });

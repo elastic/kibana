@@ -9,6 +9,7 @@
 import { RunWithCommands } from './run_with_commands';
 import { ToolingLog, ToolingLogCollectingWriter } from '../tooling_log';
 import { ProcRunner } from '../proc_runner';
+import { FlagsReader } from './flags_reader';
 jest.mock('./metrics');
 
 const testLog = new ToolingLog();
@@ -44,6 +45,7 @@ it('extends the context using extendContext()', async () => {
   expect(context).toEqual({
     log: expect.any(ToolingLog),
     flags: expect.any(Object),
+    flagsReader: expect.any(FlagsReader),
     addCleanupTask: expect.any(Function),
     procRunner: expect.any(ProcRunner),
     statsMeta: undefined,

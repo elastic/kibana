@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import { rootRequest } from '../common';
+
 export const createSpace = (id: string) => {
-  cy.request({
+  rootRequest({
     method: 'POST',
     url: 'api/spaces/space',
     body: {
@@ -18,5 +20,5 @@ export const createSpace = (id: string) => {
 };
 
 export const removeSpace = (id: string) => {
-  cy.request(`/api/spaces/space/${id}`);
+  rootRequest({ url: `/api/spaces/space/${id}` });
 };
