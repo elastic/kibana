@@ -823,12 +823,13 @@ packages/kbn-yarn-lock-validator @elastic/kibana-operations
 /x-pack/test/stack_functional_integration/apps/management/_index_pattern_create.js @elastic/kibana-data-discovery
 /x-pack/test/upgrade/apps/discover @elastic/kibana-data-discovery
 
-# Vis Editors
+# Visualizations
 /src/plugins/visualize/ @elastic/kibana-visualizations
 /x-pack/test/functional/apps/lens @elastic/kibana-visualizations
 /x-pack/test/api_integration/apis/lens/ @elastic/kibana-visualizations
 /test/functional/apps/visualize/ @elastic/kibana-visualizations
 /x-pack/test/functional/apps/graph @elastic/kibana-visualizations
+/test/api_integraion/apis/event_annotations @elastic/kibana-visualizations
 
 # Global Experience
 
