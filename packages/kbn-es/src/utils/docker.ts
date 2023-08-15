@@ -30,6 +30,7 @@ export interface DockerOptions extends EsClusterExecOptions, BaseOptions {
 export interface ServerlessOptions extends EsClusterExecOptions, BaseOptions {
   clean?: boolean;
   basePath: string;
+  teardown?: boolean;
 }
 
 interface ServerlessEsNodeArgs {
@@ -417,10 +418,30 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
   return nodeNames;
 }
 
+/**
+ * Stop a serverless ES cluster by node names
+ */
 export async function stopServerlessCluster(log: ToolingLog, nodes: string[]) {
   log.info('Stopping serverless ES cluster.');
 
   await execa('docker', ['container', 'stop'].concat(nodes));
+}
+
+/**
+ * Kill any serverless ES nodes which are running.
+ */
+export function teardownServerlessClusterSync(log: ToolingLog) {
+  const { stdout } = execa.commandSync(
+    `docker ps --filter status=running --filter ancestor=${SERVERLESS_IMG} --quiet`
+  );
+  // Filter empty strings
+  const runningNodes = stdout.split(/\r?\n/).filter((s) => s);
+
+  if (runningNodes.length) {
+    log.info('Killing running serverless ES nodes.');
+
+    execa.commandSync(`docker kill ${runningNodes.join(' ')}`);
+  }
 }
 
 /**
@@ -446,7 +467,6 @@ export function resolveDockerCmd(options: DockerOptions, image: string = DOCKER_
 }
 
 /**
- *
  * Runs an Elasticsearch Docker Container
  */
 export async function runDockerContainer(log: ToolingLog, options: DockerOptions) {

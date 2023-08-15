@@ -16,14 +16,15 @@ const { Client } = require('@elastic/elasticsearch');
 const { downloadSnapshot, installSnapshot, installSource, installArchive } = require('./install');
 const { ES_BIN, ES_PLUGIN_BIN, ES_KEYSTORE_BIN } = require('./paths');
 const {
-  log: defaultLog,
-  parseEsLog,
   extractConfigFiles,
+  log: defaultLog,
   NativeRealm,
+  parseEsLog,
   parseTimeoutToMs,
+  runDockerContainer,
   runServerlessCluster,
   stopServerlessCluster,
-  runDockerContainer,
+  teardownServerlessClusterSync,
 } = require('./utils');
 const { createCliError } = require('./errors');
 const { promisify } = require('util');
@@ -583,6 +584,14 @@ exports.Cluster = class Cluster {
     }
 
     this._serverlessNodes = await runServerlessCluster(this._log, options);
+
+    if (options.teardown) {
+      /**
+       * Ideally would be async and an event like beforeExit or SIGINT,
+       * but those events are not being triggered in FTR child process.
+       */
+      process.on('exit', () => teardownServerlessClusterSync(this._log));
+    }
   }
 
   /**

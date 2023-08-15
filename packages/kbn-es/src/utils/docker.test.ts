@@ -24,6 +24,7 @@ import {
   SERVERLESS_IMG,
   setupServerlessVolumes,
   stopServerlessCluster,
+  teardownServerlessClusterSync,
   verifyDockerInstalled,
 } from './docker';
 import { ToolingLog, ToolingLogCollectingWriter } from '@kbn/tooling-log';
@@ -389,6 +390,31 @@ describe('stopServerlessCluster()', () => {
     expect(execa.mock.calls[0][1]).toEqual(
       expect.arrayContaining(['container', 'stop'].concat(nodes))
     );
+  });
+});
+
+describe('teardownServerlessClusterSync()', () => {
+  test('should kill running serverless nodes', () => {
+    const nodes = ['es01', 'es02', 'es03'];
+    execa.commandSync.mockImplementation(() => ({
+      stdout: nodes.join('\n'),
+    }));
+
+    teardownServerlessClusterSync(log);
+
+    expect(execa.commandSync.mock.calls).toHaveLength(2);
+    expect(execa.commandSync.mock.calls[0][0]).toEqual(expect.stringContaining(SERVERLESS_IMG));
+    expect(execa.commandSync.mock.calls[1][0]).toEqual(`docker kill ${nodes.join(' ')}`);
+  });
+
+  test('should not kill if no serverless nodes', () => {
+    execa.commandSync.mockImplementation(() => ({
+      stdout: '\n',
+    }));
+
+    teardownServerlessClusterSync(log);
+
+    expect(execa.commandSync.mock.calls).toHaveLength(1);
   });
 });
 
