@@ -14,11 +14,13 @@ import { useNavLink } from '../common/hooks/use_nav_links';
 
 export const MachineLearningRoute: React.FC = () => {
   const link = useNavLink(SecurityPageName.mlLanding);
-  const { links = [], categories = [], title, landingIcon } = link ?? {};
+  const { links = [], categories = [], title } = link ?? {};
+
   return (
     <KibanaPageTemplate restrictWidth={false} contentBorder={false} grow={true}>
       <KibanaPageTemplate.Section>
-        <EuiPageHeader pageTitle={title} iconType={landingIcon} />
+        <EuiPageHeader pageTitle={title} />
+        <EuiSpacer size="l" />
         <EuiSpacer size="xl" />
         <LandingLinksIconsCategories links={links} categories={categories} />
       </KibanaPageTemplate.Section>
