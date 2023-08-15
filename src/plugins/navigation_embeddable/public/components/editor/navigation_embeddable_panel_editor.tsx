@@ -12,7 +12,6 @@ import {
   EuiForm,
   EuiTitle,
   EuiButton,
-  EuiToolTip,
   EuiFormRow,
   EuiFlexItem,
   EuiFlexGroup,
