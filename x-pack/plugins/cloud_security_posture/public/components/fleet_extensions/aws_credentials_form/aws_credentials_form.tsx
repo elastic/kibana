@@ -18,7 +18,7 @@ import {
   EuiHorizontalRule,
 } from '@elastic/eui';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
-import {NewPackagePolicyInput, PackageInfo} from '@kbn/fleet-plugin/common';
+import { NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -99,7 +99,9 @@ export const getDefaultAwsVarsGroup = (packageInfo: PackageInfo): AwsCredentials
 interface Props {
   newPolicy: NewPackagePolicy;
   input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_aws' }>;
+
   updatePolicy(updatedPolicy: NewPackagePolicy): void;
+
   packageInfo: PackageInfo;
   onChange: any;
   setIsValid: (isValid: boolean) => void;
@@ -123,7 +125,7 @@ const CloudFormationSetup = ({
     );
   }
 
-  const accountType = input.streams?.[0]?.vars?.["aws.account_type"]?.value
+  const accountType = input.streams?.[0]?.vars?.['aws.account_type']?.value;
 
   return (
     <>
@@ -133,17 +135,21 @@ const CloudFormationSetup = ({
             list-style: auto;
           `}
         >
-          {accountType === AWS_ORGANIZATION_ACCOUNT ? <li>
-            <FormattedMessage
-              id="xpack.csp.awsIntegration.cloudFormationSetupStep.organizationLogin"
-              defaultMessage="Log in as an admin in your organization's AWS management account"
-            />
-          </li> : <li>
-            <FormattedMessage
-              id="xpack.csp.awsIntegration.cloudFormationSetupStep.login"
-              defaultMessage="Log in as an admin to the AWS Account you want to onboard"
-            />
-          </li>}
+          {accountType === AWS_ORGANIZATION_ACCOUNT ? (
+            <li>
+              <FormattedMessage
+                id="xpack.csp.awsIntegration.cloudFormationSetupStep.organizationLogin"
+                defaultMessage="Log in as an admin in your organization's AWS management account"
+              />
+            </li>
+          ) : (
+            <li>
+              <FormattedMessage
+                id="xpack.csp.awsIntegration.cloudFormationSetupStep.login"
+                defaultMessage="Log in as an admin to the AWS Account you want to onboard"
+              />
+            </li>
+          )}
           <li>
             <FormattedMessage
               id="xpack.csp.awsIntegration.cloudFormationSetupStep.save"
@@ -223,8 +229,6 @@ export const AwsCredentialsForm = ({
     updatePolicy,
   });
 
-  console.log({newPolicy, input, packageInfo})
-
   return (
     <>
       <AWSSetupInfoContent integrationLink={integrationLink} />
@@ -237,7 +241,7 @@ export const AwsCredentialsForm = ({
       />
       <EuiSpacer size="l" />
       {setupFormat === 'cloud_formation' && (
-        <CloudFormationSetup hasCloudFormationTemplate={hasCloudFormationTemplate} input={input}/>
+        <CloudFormationSetup hasCloudFormationTemplate={hasCloudFormationTemplate} input={input} />
       )}
       {setupFormat === 'manual' && (
         <>
