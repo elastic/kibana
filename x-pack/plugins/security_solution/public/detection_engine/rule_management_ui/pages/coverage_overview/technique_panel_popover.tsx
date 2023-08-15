@@ -21,48 +21,49 @@ import {
 } from '@elastic/eui';
 import { css, cx } from '@emotion/css';
 import React, { memo, useCallback, useMemo, useState } from 'react';
-import { BulkActionType } from '../../../../../common/api/detection_engine';
-import { useExecuteBulkAction } from '../../../rule_management/logic/bulk_actions/use_execute_bulk_action';
 import type { CoverageOverviewMitreTechnique } from '../../../rule_management/model/coverage_overview/mitre_technique';
 import { getNumOfCoveredSubtechniques } from './helpers';
 import { CoverageOverviewRuleListHeader } from './shared_components/popover_list_header';
 import { CoverageOverviewMitreTechniquePanel } from './technique_panel';
 import * as i18n from './translations';
 import { RuleLink } from '../../components/rules_table/use_columns';
+import { useCoverageOverviewDashboardContext } from './coverage_overview_dashboard_context';
 
 export interface CoverageOverviewMitreTechniquePanelPopoverProps {
   technique: CoverageOverviewMitreTechnique;
-  isExpanded: boolean;
 }
 
 const CoverageOverviewMitreTechniquePanelPopoverComponent = ({
   technique,
-  isExpanded,
 }: CoverageOverviewMitreTechniquePanelPopoverProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [isEnableButtonLoading, setIsDisableButtonLoading] = useState(false);
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
   const coveredSubtechniques = useMemo(() => getNumOfCoveredSubtechniques(technique), [technique]);
-  const { executeBulkAction } = useExecuteBulkAction();
   const isEnableButtonDisabled = useMemo(
     () => technique.disabledRules.length === 0,
     [technique.disabledRules.length]
   );
 
+  const {
+    state: { showExpandedCells },
+    actions: { enableAllDisabled },
+  } = useCoverageOverviewDashboardContext();
+
   const handleEnableAllDisabled = useCallback(async () => {
     setIsDisableButtonLoading(true);
     const ruleIds = technique.disabledRules.map((rule) => rule.id);
-    await executeBulkAction({ type: BulkActionType.enable, ids: ruleIds });
+    await enableAllDisabled(ruleIds);
     setIsDisableButtonLoading(false);
     closePopover();
-  }, [closePopover, executeBulkAction, technique.disabledRules]);
+  }, [closePopover, enableAllDisabled, technique.disabledRules]);
 
   const TechniquePanel = (
     <CoverageOverviewMitreTechniquePanel
       setIsPopoverOpen={setIsPopoverOpen}
       isPopoverOpen={isPopoverOpen}
       technique={technique}
-      isExpanded={isExpanded}
+      isExpanded={showExpandedCells}
       coveredSubtechniques={coveredSubtechniques}
     />
   );
