@@ -35,7 +35,6 @@ export const config: PluginConfigDescriptor<APMDataAccessConfig> = {
     renameFromRoot('apm_oss.metricsIndices', 'xpack.apm.indices.metric', {
       level: 'warning',
     }),
-
     // rename from apm to apm_data_access plugin
     renameFromRoot('xpack.apm.indices.transaction', 'xpack.apm_data_access.indices.transaction', {
       level: 'warning',
@@ -47,8 +46,13 @@ export const config: PluginConfigDescriptor<APMDataAccessConfig> = {
     renameFromRoot('xpack.apm.indices.error', 'xpack.apm_data_access.indices.error', {
       level: 'warning',
     }),
-
     renameFromRoot('xpack.apm.indices.metric', 'xpack.apm_data_access.indices.metric', {
+      level: 'warning',
+    }),
+    renameFromRoot('xpack.apm.indices.sourcemap', 'xpack.apm_data_access.indices.sourcemap', {
+      level: 'warning',
+    }),
+    renameFromRoot('xpack.apm.indices.onboarding', 'xpack.apm_data_access.indices.onboarding', {
       level: 'warning',
     }),
   ],
