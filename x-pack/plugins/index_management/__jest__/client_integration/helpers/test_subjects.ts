@@ -66,4 +66,5 @@ export type TestSubjects =
   | 'enrichPoliciesTable'
   | 'deletePolicyModal'
   | 'executePolicyModal'
+  | 'policyDetailsFlyout'
   | 'detailPanelTabSelected';

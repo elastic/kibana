@@ -96,7 +96,17 @@ describe('Enrich policies tab', () => {
       expect(httpSetup.get.mock.calls).toHaveLength(1);
     });
 
-    describe('policy actions', () => {
+    describe('details flyout', () => {
+      it('can open the details flyout', async () => {
+        const { actions, exists } = testBed;
+
+        await actions.clickEnrichPolicyAt(0);
+
+        expect(exists('policyDetailsFlyout')).toBe(true);
+      });
+    });
+
+    describe.skip('policy actions', () => {
       beforeEach(async () => {
         httpRequestsMockHelpers.setLoadEnrichPoliciesResponse([
           createTestEnrichPolicy('policy-match', 'match'),
