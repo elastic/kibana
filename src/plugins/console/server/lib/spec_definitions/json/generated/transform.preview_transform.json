@@ -1,7 +1,15 @@
 {
   "transform.preview_transform": {
     "url_params": {
-      "timeout": ""
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "timeout": [
+        "30s",
+        "-1",
+        "0"
+      ]
     },
     "methods": [
       "GET",
@@ -11,6 +19,10 @@
       "_transform/{transform_id}/_preview",
       "_transform/_preview"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/preview-transform.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/preview-transform.html",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
   }
 }
