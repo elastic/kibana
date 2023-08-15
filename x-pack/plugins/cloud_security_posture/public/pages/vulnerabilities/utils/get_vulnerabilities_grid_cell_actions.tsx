@@ -7,11 +7,13 @@
 import React from 'react';
 import { EuiDataGridColumn, EuiDataGridColumnCellAction, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { VulnerabilityRecord } from '../types';
+import { CspVulnerabilityFinding } from '../../../../common/schemas';
 import { getFilters } from './get_filters';
 import { FILTER_IN, FILTER_OUT } from '../translations';
 
-export const getVulnerabilitiesGridCellActions = <T extends Array<Partial<VulnerabilityRecord>>>({
+export const getVulnerabilitiesGridCellActions = <
+  T extends Array<Partial<CspVulnerabilityFinding>>
+>({
   data,
   columns,
   columnGridFn,
