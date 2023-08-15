@@ -21,9 +21,13 @@ jest.mock('../lib/kibana', () => ({
   useBasePath: () => '',
 }));
 
-jest.mock('react-router-dom', () => ({
-  useLocation: () => mockedUseLocation(),
-}));
+jest.mock('react-router-dom', () => {
+  const actual = jest.requireActual('react-router-dom');
+  return {
+    ...actual,
+    useLocation: () => mockedUseLocation(),
+  };
+});
 
 describe('useFindAppLinksByPath', () => {
   it('returns null when navLinks is undefined', () => {
@@ -49,14 +53,14 @@ describe('useFindAppLinksByPath', () => {
     expect(result.current).toBe(navItem);
   });
 
-  it('returns nav item when the pathname starts with the nav item url ', () => {
+  it('returns nav item when the pathname starts with the nav item url', () => {
     const navItem = { id: SecurityPageName.users, title: 'Test User page' };
     mockedUseLocation.mockReturnValue({ pathname: '/users/events' });
     const { result } = renderHook(() => useFindAppLinksByPath([navItem]));
     expect(result.current).toBe(navItem);
   });
 
-  it('returns leaf nav item when it matches the current pathname ', () => {
+  it('returns leaf nav item when it matches the current pathname', () => {
     const leafNavItem = { id: SecurityPageName.usersEvents, title: 'Test User Events page' };
     const navItem = {
       id: SecurityPageName.users,
@@ -66,5 +70,14 @@ describe('useFindAppLinksByPath', () => {
     mockedUseLocation.mockReturnValue({ pathname: '/users-events' });
     const { result } = renderHook(() => useFindAppLinksByPath([navItem]));
     expect(result.current).toBe(leafNavItem);
+  });
+
+  it('should not confuse pages with similar names (users and users-risk)', () => {
+    const usersNavItem = { id: SecurityPageName.users, title: 'Test User page' };
+    const usersRiskNavItem = { id: SecurityPageName.usersRisk, title: 'Test User Risk page' };
+
+    mockedUseLocation.mockReturnValue({ pathname: '/users-risk' });
+    const { result } = renderHook(() => useFindAppLinksByPath([usersNavItem, usersRiskNavItem]));
+    expect(result.current).toBe(usersRiskNavItem);
   });
 });

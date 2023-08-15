@@ -6,7 +6,7 @@
  */
 
 import { useCallback, useMemo } from 'react';
-import { useLocation } from 'react-router-dom';
+import { matchPath, useLocation } from 'react-router-dom';
 import { APP_PATH } from '../../../common';
 import { useBasePath, useAppUrl } from '../lib/kibana';
 import type { NavigationLink } from './types';
@@ -24,7 +24,7 @@ export const useFindAppLinksByPath = (navLinks: NavigationLink[] | undefined) =>
   const isCurrentPathItem = useCallback(
     (navItem: NavigationLink) => {
       const appUrl = getAppUrl({ deepLinkId: navItem.id });
-      return `${basePath}${APP_PATH}${pathname}`.startsWith(appUrl);
+      return !!matchPath(`${basePath}${APP_PATH}${pathname}`, { path: appUrl, strict: false });
     },
     [basePath, getAppUrl, pathname]
   );
