@@ -22,6 +22,7 @@ export function registerRecallFunction({
       contexts: ['core'],
       description:
         'Use this function to recall earlier learnings. Anything you will summarise can be retrieved again later via this function.',
+      descriptionForUser: 'This function allows the assistant to recall previous learnings.',
       parameters: {
         type: 'object',
         properties: {

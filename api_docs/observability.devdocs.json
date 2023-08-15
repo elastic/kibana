@@ -13400,6 +13400,96 @@
                 "trackAdoption": false
               }
             ]
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-server.uiSettings.apmEnableProfilingIntegration",
+            "type": "Object",
+            "tags": [],
+            "label": "[apmEnableProfilingIntegration]",
+            "description": [],
+            "path": "x-pack/plugins/observability/server/ui_settings.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmEnableProfilingIntegration.category",
+                "type": "Array",
+                "tags": [],
+                "label": "category",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmEnableProfilingIntegration.name",
+                "type": "Any",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "signature": [
+                  "any"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmEnableProfilingIntegration.value",
+                "type": "boolean",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "signature": [
+                  "false"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmEnableProfilingIntegration.schema",
+                "type": "Object",
+                "tags": [],
+                "label": "schema",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "common",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-common.Type",
+                    "text": "Type"
+                  },
+                  "<boolean>"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmEnableProfilingIntegration.requiresPageReload",
+                "type": "boolean",
+                "tags": [],
+                "label": "requiresPageReload",
+                "description": [],
+                "signature": [
+                  "false"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           }
         ],
         "initialIsOpen": false
@@ -13473,6 +13563,56 @@
     "functions": [
       {
         "parentPluginId": "observability",
+        "id": "def-common.asAbsoluteDateTime",
+        "type": "Function",
+        "tags": [],
+        "label": "asAbsoluteDateTime",
+        "description": [],
+        "signature": [
+          "(time: number, timeUnit: ",
+          "TimeUnit",
+          ") => string"
+        ],
+        "path": "x-pack/plugins/observability/common/utils/formatters/datetime.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observability",
+            "id": "def-common.asAbsoluteDateTime.$1",
+            "type": "number",
+            "tags": [],
+            "label": "time",
+            "description": [],
+            "signature": [
+              "number"
+            ],
+            "path": "x-pack/plugins/observability/common/utils/formatters/datetime.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-common.asAbsoluteDateTime.$2",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "timeUnit",
+            "description": [],
+            "signature": [
+              "TimeUnit"
+            ],
+            "path": "x-pack/plugins/observability/common/utils/formatters/datetime.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
         "id": "def-common.asDuration",
         "type": "Function",
         "tags": [],
@@ -13519,6 +13659,73 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
+        "id": "def-common.asDynamicBytes",
+        "type": "Function",
+        "tags": [],
+        "label": "asDynamicBytes",
+        "description": [],
+        "signature": [
+          "(val: ",
+          "Maybe",
+          "<number>) => string"
+        ],
+        "path": "x-pack/plugins/observability/common/utils/formatters/size.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "observability",
+            "id": "def-common.asDynamicBytes.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "val",
+            "description": [],
+            "signature": [
+              "number | null | undefined"
+            ],
+            "path": "x-pack/plugins/observability/common/utils/formatters/size.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
+        "id": "def-common.asInteger",
+        "type": "Function",
+        "tags": [],
+        "label": "asInteger",
+        "description": [],
+        "signature": [
+          "(value: number | null | undefined) => any"
+        ],
+        "path": "x-pack/plugins/observability/common/utils/formatters/formatters.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observability",
+            "id": "def-common.asInteger.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "signature": [
+              "number | null | undefined"
+            ],
+            "path": "x-pack/plugins/observability/common/utils/formatters/formatters.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -14302,6 +14509,21 @@
       },
       {
         "parentPluginId": "observability",
+        "id": "def-common.apmEnableProfilingIntegration",
+        "type": "string",
+        "tags": [],
+        "label": "apmEnableProfilingIntegration",
+        "description": [],
+        "signature": [
+          "\"observability:apmEnableProfilingIntegration\""
+        ],
+        "path": "x-pack/plugins/observability/common/ui_settings_keys.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
         "id": "def-common.apmEnableServiceMetrics",
         "type": "string",
         "tags": [],
@@ -14856,7 +15078,7 @@
         "label": "TimeUnitChar",
         "description": [],
         "signature": [
-          "\"m\" | \"s\" | \"d\" | \"h\""
+          "\"m\" | \"d\" | \"h\" | \"s\""
         ],
         "path": "x-pack/plugins/observability/common/utils/formatters/duration.ts",
         "deprecated": false,

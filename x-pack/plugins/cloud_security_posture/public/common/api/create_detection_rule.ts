@@ -38,6 +38,7 @@ interface RuleCreateProps {
   name: string;
   description: string;
   tags: string[];
+  max_signals: number;
 }
 
 export interface RuleResponse extends RuleCreateProps {
