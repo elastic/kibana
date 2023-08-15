@@ -270,6 +270,7 @@ export const CustomizePanelEditor = (props: CustomizePanelProps) => {
 
   const renderFilterDetails = () => {
     if (!isFilterableEmbeddable(embeddable)) return null;
+
     return (
       <>
         <EuiSpacer size="m" />

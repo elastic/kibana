@@ -52,7 +52,11 @@ export function FiltersNotificationPopoverContents({
       setFilters(embeddableFilters);
       if (embeddableQuery) {
         if (isOfQueryType(embeddableQuery)) {
-          setQueryString(embeddableQuery.query as string);
+          if (typeof embeddableQuery.query === 'string') {
+            setQueryString(embeddableQuery.query);
+          } else {
+            setQueryString(JSON.stringify(embeddableQuery.query, null, 2));
+          }
         } else {
           const language = getAggregateQueryMode(embeddableQuery);
           setQueryLanguage(language);
