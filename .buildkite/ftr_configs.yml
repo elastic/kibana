@@ -149,7 +149,7 @@ enabled:
   - test/plugin_functional/config.ts
   - test/server_integration/http/platform/config.status.ts
   - test/server_integration/http/platform/config.ts
-  - test/server_integration/http/ssl_redirect/config.js
+  - test/server_integration/http/ssl_redirect/config.ts
   - test/server_integration/http/ssl_with_p12_intermediate/config.js
   - test/server_integration/http/ssl_with_p12/config.js
   - test/server_integration/http/ssl/config.js
@@ -277,6 +277,7 @@ enabled:
   - x-pack/test/functional/apps/home/config.ts
   - x-pack/test/functional/apps/index_lifecycle_management/config.ts
   - x-pack/test/functional/apps/index_management/config.ts
+  - x-pack/test/functional/apps/index_management/index_details_page/config.ts
   - x-pack/test/functional/apps/infra/config.ts
   - x-pack/test/functional/apps/ingest_pipelines/config.ts
   - x-pack/test/functional/apps/lens/group1/config.ts
