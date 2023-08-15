@@ -22,7 +22,8 @@ import { AnalyzerTree } from './analyzer_tree';
 import { ExpandableFlyoutContext } from '@kbn/expandable-flyout/src/context';
 import { TestProviders } from '@kbn/timelines-plugin/public/mock';
 import { RightPanelContext } from '../context';
-import { LeftPanelKey, LeftPanelVisualizeTabPath } from '../../left';
+import { LeftPanelKey, LeftPanelVisualizeTab } from '../../left';
+import { ANALYZE_GRAPH_ID } from '../../left/components/analyze_graph';
 
 const defaultProps: AnalyzerTreeProps = {
   statsNodes: mock.mockStatsNodes,
@@ -92,7 +93,7 @@ describe('<AnalyzerTree />', () => {
     getByTestId(ANALYZER_PREVIEW_TITLE_LINK_TEST_ID).click();
     expect(flyoutContextValue.openLeftPanel).toHaveBeenCalledWith({
       id: LeftPanelKey,
-      path: LeftPanelVisualizeTabPath,
+      path: { tab: LeftPanelVisualizeTab, subTab: ANALYZE_GRAPH_ID },
       params: {
         id: panelContextValue.eventId,
         indexName: panelContextValue.indexName,

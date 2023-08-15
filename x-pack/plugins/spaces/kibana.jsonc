@@ -16,7 +16,6 @@
       "licensing"
     ],
     "optionalPlugins": [
-      "advancedSettings",
       "home",
       "management",
       "usageCollection"
