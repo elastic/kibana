@@ -45,6 +45,16 @@ export interface FleetUsage extends Usage {
   agent_logs_panics_last_hour: AgentPanicLogsData['agent_logs_panics_last_hour'];
   agent_logs_top_errors?: string[];
   fleet_server_logs_top_errors?: string[];
+  agents_per_os: Array<{
+    name: string;
+    version: string;
+    count: number;
+  }>;
+  components_status: Array<{
+    id: string;
+    status: string;
+    count: number;
+  }>;
 }
 
 export const fetchFleetUsage = async (
