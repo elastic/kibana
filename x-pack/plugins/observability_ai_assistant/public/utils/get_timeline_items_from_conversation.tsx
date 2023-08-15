@@ -116,8 +116,14 @@ export function getTimelineItemsfromConversation({
 
           // User executed a function:
           if (message.message.name && prevFunctionCall) {
-            const parsedContent = JSON.parse(message.message.content ?? 'null');
-            const isError = !!(parsedContent && 'error' in parsedContent);
+            let parsedContent;
+            try {
+              parsedContent = JSON.parse(message.message.content ?? 'null');
+            } catch (error) {
+              parsedContent = message.message.content;
+            }
+
+            const isError = typeof parsedContent === 'object' && 'error' in parsedContent;
 
             title = !isError ? (
               <FormattedMessage
@@ -180,7 +186,7 @@ export function getTimelineItemsfromConversation({
         case MessageRole.Assistant:
           actions.canRegenerate = hasConnector;
           actions.canCopy = true;
-          actions.canGiveFeedback = true;
+          actions.canGiveFeedback = false;
           display.hide = false;
 
           // is a function suggestion by the assistant

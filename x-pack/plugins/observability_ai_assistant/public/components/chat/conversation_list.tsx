@@ -38,7 +38,7 @@ const overflowScrollClassName = css`
 `;
 
 const newChatButtonWrapperClassName = css`
-  padding-bottom: 2px;
+  padding-bottom: 5px;
 `;
 
 export function ConversationList({
