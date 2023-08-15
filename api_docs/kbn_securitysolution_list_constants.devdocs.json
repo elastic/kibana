@@ -309,14 +309,6 @@
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/lib/telemetry/tasks/security_lists.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/lib/telemetry/tasks/security_lists.ts"
-          },
-          {
-            "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/server/endpoint/services/artifacts/manifest_manager/manifest_manager.ts"
           },
           {
@@ -342,6 +334,14 @@
           {
             "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/server/lists_integration/endpoint/validators/event_filter_validator.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/lib/telemetry/tasks/security_lists.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/lib/telemetry/tasks/security_lists.ts"
           },
           {
             "plugin": "securitySolution",
@@ -842,14 +842,6 @@
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/lib/telemetry/receiver.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/lib/telemetry/receiver.ts"
-          },
-          {
-            "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/server/endpoint/services/artifacts/manifest_manager/manifest_manager.ts"
           },
           {
@@ -863,6 +855,14 @@
           {
             "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/server/lists_integration/endpoint/validators/trusted_app_validator.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/lib/telemetry/receiver.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/lib/telemetry/receiver.ts"
           },
           {
             "plugin": "lists",

@@ -6,15 +6,10 @@
  */
 import React from 'react';
 
-import { EuiFlexGrid, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiFlexGrid, EuiFlexItem, EuiText, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EuiSpacer } from '@elastic/eui';
-import { EuiFlexGroup } from '@elastic/eui';
-import {
-  hostLensFormulas,
-  type XYVisualOptions,
-  type XYLayerOptions,
-} from '../../../../../../common/visualizations';
+import type { XYLayerOptions, XYVisualOptions } from '@kbn/lens-embeddable-utils';
+import { hostLensFormulas } from '../../../../../../common/visualizations';
 import { HostMetricsExplanationContent } from '../../../../../../components/lens';
 import { MetricChart, MetricChartProps } from './metric_chart';
 import { Popover } from '../../table/popover';
@@ -22,8 +17,11 @@ import { Popover } from '../../table/popover';
 const DEFAULT_BREAKDOWN_SIZE = 20;
 const XY_LAYER_OPTIONS: XYLayerOptions = {
   breakdown: {
-    size: DEFAULT_BREAKDOWN_SIZE,
-    sourceField: 'host.name',
+    type: 'top_values',
+    field: 'host.name',
+    params: {
+      size: DEFAULT_BREAKDOWN_SIZE,
+    },
   },
 };
 
