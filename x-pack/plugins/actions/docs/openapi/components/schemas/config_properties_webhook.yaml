@@ -49,5 +49,7 @@ properties:
       - none
     default: full
     description: >
-      Controls the certificate verification for connections to the web service.
-      Use `full` to perform hostname verification, `certificate` to skip hostname verification, and `none` to skip verification.
+      Controls the verification of certificates.
+      Use `full` to validate that the provided certificate has an issue date that is within the `not_before` and `not_after` dates, chains to a trusted certificate authority (CA), and has a hostname or IP address that matches the names within the certificate.
+      Use `certificate` to validate the provided certificate and verifies that it is signed by a trusted authority; this option does not check the certificate hostname.
+      Use `none` to skip certificate validation.
