@@ -215,7 +215,9 @@ export const getAgentData = async (
       count: bucket.doc_count,
     }));
 
-    const componentsStatus = ((response?.aggregations?.components as any).components_status?.buckets ?? []).map((bucket: any) => ({
+    const componentsStatus = (
+      (response?.aggregations?.components as any).components_status?.buckets ?? []
+    ).map((bucket: any) => ({
       id: bucket.key[0],
       status: bucket.key[1],
       count: bucket.doc_count,
