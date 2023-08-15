@@ -199,7 +199,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    describe('alerts flyouts', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/157711
+    describe.skip('alerts flyouts', () => {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
         await pageObjects.common.navigateToApp('infraOps');
