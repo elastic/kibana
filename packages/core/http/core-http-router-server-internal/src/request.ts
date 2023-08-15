@@ -166,7 +166,7 @@ export class CoreKibanaRequest<
     this.isFakeRequest = isFakeRawRequest(request);
     this.isInternalRequest =
       X_ELASTIC_INTERNAL_ORIGIN_REQUEST in this.headers ||
-      this.url.searchParams.has(ELASTIC_INTERNAL_ORIGIN_QUERY_PARAM);
+      Boolean(this.url?.searchParams?.has(ELASTIC_INTERNAL_ORIGIN_QUERY_PARAM));
     // prevent Symbol exposure via Object.getOwnPropertySymbols()
     Object.defineProperty(this, requestSymbol, {
       value: request,
