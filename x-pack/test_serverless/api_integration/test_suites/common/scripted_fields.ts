@@ -24,22 +24,25 @@ export default function ({ getService }: FtrProviderContext) {
       );
     });
     it('scripted fields are ignore when disabled', async () => {
-      const id = 'abc';
-      const response = await supertest.post(DATA_VIEW_PATH).send({
-        title: 'basic_index',
-        id,
-        fields: {
-          foo: {
-            name: 'foo',
-            type: 'string',
-            scripted: true,
-            script: "doc['field_name'].value",
+      const response = await supertest
+        .post(DATA_VIEW_PATH)
+        .set('kbn-xsrf', 'some-xsrf-token')
+        .send({
+          data_view: {
+            title: 'basic_index',
+            fields: {
+              foo: {
+                name: 'foo',
+                type: 'string',
+                scripted: true,
+                script: "doc['field_name'].value",
+              },
+            },
           },
-        },
-      });
+        });
 
       expect(response.status).toBe(200);
-      expect(response.body.fields.foo).toBeUndefined();
+      expect(response.body.data_view.fields.foo).toBeUndefined();
     });
   });
 }

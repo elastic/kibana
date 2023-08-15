@@ -663,7 +663,9 @@ export class DataViewsService {
     displayErrors: boolean = true
   ) => {
     const fieldsAsArr = Object.values(fields);
-    const scriptedFields = fieldsAsArr.filter((field) => field.scripted);
+    const scriptedFields = this.scriptedFieldsEnabled
+      ? fieldsAsArr.filter((field) => field.scripted)
+      : [];
     try {
       let updatedFieldList: FieldSpec[];
       const { fields: newFields, indices } = await this.getFieldsAndIndicesForWildcard(options);
