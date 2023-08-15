@@ -6,13 +6,13 @@
  */
 
 import React, { ReactNode } from 'react';
+import { css } from '@emotion/react';
 import { compact } from 'lodash';
-import { EuiCommentList, EuiSpacer } from '@elastic/eui';
+import { EuiCommentList } from '@elastic/eui';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { ChatItem } from './chat_item';
 import type { Feedback } from '../feedback_buttons';
 import type { Message } from '../../../common';
-import { css } from '@emotion/react';
 
 export interface ChatTimelineItem
   extends Pick<Message['message'], 'role' | 'content' | 'function_call'> {

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { useRef } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -19,8 +19,13 @@ import { AssistantAvatar } from '../assistant_avatar';
 import { ConnectorSelectorBase } from '../connector_selector/connector_selector_base';
 import { EMPTY_CONVERSATION_TITLE } from '../../i18n';
 import { KnowledgeBaseCallout } from './knowledge_base_callout';
+import { useUnmountAndRemountWhenPropChanges } from '../../hooks/use_unmount_and_remount_when_prop_changes';
 import type { UseGenAIConnectorsResult } from '../../hooks/use_genai_connectors';
 import type { UseKnowledgeBaseResult } from '../../hooks/use_knowledge_base';
+
+const minWidthClassName = css`
+  min-width: 0;
+`;
 
 export function ChatHeader({
   title,
@@ -41,6 +46,11 @@ export function ChatHeader({
 
   const theme = useEuiTheme();
 
+  // Component only works uncontrolled at the moment, so need to unmount and remount.
+  const shouldRender = useUnmountAndRemountWhenPropChanges(displayedTitle);
+
+  const inputRef = useRef<HTMLInputElement>(null);
+
   return (
     <EuiPanel
       paddingSize="s"
@@ -52,39 +62,32 @@ export function ChatHeader({
         padding-bottom: 16px;
       `}
     >
-      <EuiFlexGroup
-        alignItems="flexStart"
-        gutterSize="m"
-        justifyContent="spaceBetween"
-        responsive={false}
-      >
+      <EuiFlexGroup alignItems="flexStart" gutterSize="m" responsive={false}>
         <EuiFlexItem grow={false}>
-          {loading ? <EuiLoadingSpinner size="l" /> : <AssistantAvatar size="m" />}
+          {loading ? <EuiLoadingSpinner size="xl" /> : <AssistantAvatar size="m" />}
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup direction="column" gutterSize="none">
-            <EuiFlexItem
-              grow={false}
-              className={css`
-                width: 540px;
-              `}
-            >
-              <EuiInlineEditTitle
-                heading="h2"
-                size="s"
-                defaultValue={displayedTitle}
-                className={css`
-                  color: ${hasTitle
-                    ? theme.euiTheme.colors.text
-                    : theme.euiTheme.colors.subduedText};
-                `}
-                inputAriaLabel={i18n.translate(
-                  'xpack.observabilityAiAssistant.chatHeader.editConversationInput',
-                  { defaultMessage: 'Edit conversation' }
-                )}
-                isReadOnly={!Boolean(onSaveTitle)}
-                onSave={onSaveTitle}
-              />
+        <EuiFlexItem grow className={minWidthClassName}>
+          <EuiFlexGroup direction="column" gutterSize="none" className={minWidthClassName}>
+            <EuiFlexItem grow={false} className={minWidthClassName}>
+              {shouldRender ? (
+                <EuiInlineEditTitle
+                  heading="h2"
+                  size="s"
+                  defaultValue={displayedTitle}
+                  className={css`
+                    color: ${hasTitle
+                      ? theme.euiTheme.colors.text
+                      : theme.euiTheme.colors.subduedText};
+                  `}
+                  inputAriaLabel={i18n.translate(
+                    'xpack.observabilityAiAssistant.chatHeader.editConversationInput',
+                    { defaultMessage: 'Edit conversation' }
+                  )}
+                  editModeProps={{ inputProps: { inputRef } }}
+                  isReadOnly={!Boolean(onSaveTitle)}
+                  onSave={onSaveTitle}
+                />
+              ) : null}
             </EuiFlexItem>
             <EuiFlexItem>
               <KnowledgeBaseCallout knowledgeBase={knowledgeBase} />
