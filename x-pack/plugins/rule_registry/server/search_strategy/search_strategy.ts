@@ -82,10 +82,13 @@ export const ruleRegistrySearchStrategyProvider = (
           )) as estypes.QueryDslQueryContainer;
         }
 
-        const authorizedRuleTypes = await authorization.getAuthorizedRuleTypes(
-          AlertingAuthorizationEntity.Alert,
-          new Set(featureIds)
-        );
+        const authorizedRuleTypes =
+          featureIds.length > 0
+            ? await authorization.getAuthorizedRuleTypes(
+                AlertingAuthorizationEntity.Alert,
+                new Set(featureIds)
+              )
+            : [];
         return { space, authzFilter, authorizedRuleTypes };
       };
       return from(getAsync(request.featureIds)).pipe(
@@ -94,7 +97,6 @@ export const ruleRegistrySearchStrategyProvider = (
             authorizedRuleTypes.map((art: { id: any }) => art.id),
             space?.id
           );
-
           if (indices.length === 0) {
             return of(EMPTY_RESPONSE);
           }
