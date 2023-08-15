@@ -80,7 +80,7 @@ export const PoliciesTable: FunctionComponent<Props> = ({
       name: i18n.translate('xpack.idxMgmt.enrich_policies.table.sourceIndicesField', {
         defaultMessage: 'Source indices',
       }),
-      truncateText: true,
+      truncateText: false,
       render: (indices: string[]) => indices.join(', '),
     },
     {
