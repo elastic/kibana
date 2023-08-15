@@ -49,8 +49,7 @@
     "@kbn/core-saved-objects-server",
     "@kbn/share-plugin",
     "@kbn/core-http-server",
-    "@kbn/core-http-browser",
-    "@kbn/core-lifecycle-browser"
+    "@kbn/core-http-browser"
   ],
   "exclude": [
     "target/**/*",

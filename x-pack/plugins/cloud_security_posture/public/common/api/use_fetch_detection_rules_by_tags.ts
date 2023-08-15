@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CoreStart } from '@kbn/core-lifecycle-browser';
+import { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useQuery } from '@tanstack/react-query';
 import { RuleResponse } from '../types';
