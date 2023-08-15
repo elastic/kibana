@@ -178,8 +178,8 @@ export const BaseCreateProps = baseSchema.create;
 // with some variations for each route. These intersect with type specific schemas below
 // to create the full schema for each route.
 
-type SharedCreateProps = t.TypeOf<typeof SharedCreateProps>;
-const SharedCreateProps = t.intersection([
+export type SharedCreateProps = t.TypeOf<typeof SharedCreateProps>;
+export const SharedCreateProps = t.intersection([
   baseSchema.create,
   t.exact(t.partial({ rule_id: RuleSignatureId })),
 ]);
@@ -219,7 +219,7 @@ export const KqlQueryLanguage = t.keyof({ kuery: null, lucene: null });
 export type EqlQueryLanguage = t.TypeOf<typeof EqlQueryLanguage>;
 export const EqlQueryLanguage = t.literal('eql');
 
-const eqlSchema = buildRuleSchemas({
+export const eqlSchema = buildRuleSchemas({
   required: {
     type: t.literal('eql'),
     language: EqlQueryLanguage,
@@ -254,7 +254,7 @@ export const EqlPatchParams = eqlSchema.patch;
 // -------------------------------------------------------------------------------------------------
 // Indicator Match rule schema
 
-const threatMatchSchema = buildRuleSchemas({
+export const threatMatchSchema = buildRuleSchemas({
   required: {
     type: t.literal('threat_match'),
     query: RuleQuery,
@@ -305,7 +305,7 @@ export const ThreatMatchPatchParams = threatMatchSchema.patch;
 // -------------------------------------------------------------------------------------------------
 // Custom Query rule schema
 
-const querySchema = buildRuleSchemas({
+export const querySchema = buildRuleSchemas({
   required: {
     type: t.literal('query'),
   },
@@ -341,7 +341,7 @@ export const QueryPatchParams = querySchema.patch;
 // -------------------------------------------------------------------------------------------------
 // Saved Query rule schema
 
-const savedQuerySchema = buildRuleSchemas({
+export const savedQuerySchema = buildRuleSchemas({
   required: {
     type: t.literal('saved_query'),
     saved_id,
@@ -385,7 +385,7 @@ export const SavedQueryPatchParams = savedQuerySchema.patch;
 // -------------------------------------------------------------------------------------------------
 // Threshold rule schema
 
-const thresholdSchema = buildRuleSchemas({
+export const thresholdSchema = buildRuleSchemas({
   required: {
     type: t.literal('threshold'),
     query: RuleQuery,
@@ -420,7 +420,7 @@ export const ThresholdPatchParams = thresholdSchema.patch;
 // -------------------------------------------------------------------------------------------------
 // Machine Learning rule schema
 
-const machineLearningSchema = buildRuleSchemas({
+export const machineLearningSchema = buildRuleSchemas({
   required: {
     type: t.literal('machine_learning'),
     anomaly_threshold,
@@ -460,7 +460,7 @@ export const MachineLearningPatchParams = machineLearningSchema.patch;
 // -------------------------------------------------------------------------------------------------
 // New Terms rule schema
 
-const newTermsSchema = buildRuleSchemas({
+export const newTermsSchema = buildRuleSchemas({
   required: {
     type: t.literal('new_terms'),
     query: RuleQuery,
@@ -542,28 +542,3 @@ export const RulePatchProps = t.intersection([TypeSpecificPatchProps, SharedPatc
 
 export type RuleResponse = t.TypeOf<typeof RuleResponse>;
 export const RuleResponse = t.intersection([SharedResponseProps, TypeSpecificResponse]);
-
-// -------------------------------------------------------------------------------------------------
-// Rule preview schemas
-
-// TODO: Move to the rule_preview subdomain
-
-export type PreviewRulesSchema = t.TypeOf<typeof previewRulesSchema>;
-export const previewRulesSchema = t.intersection([
-  SharedCreateProps,
-  TypeSpecificCreateProps,
-  t.type({ invocationCount: t.number, timeframeEnd: t.string }),
-]);
-
-export interface RulePreviewLogs {
-  errors: string[];
-  warnings: string[];
-  startedAt?: string;
-  duration: number;
-}
-
-export interface PreviewResponse {
-  previewId: string | undefined;
-  logs: RulePreviewLogs[] | undefined;
-  isAborted: boolean | undefined;
-}

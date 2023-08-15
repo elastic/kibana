@@ -35,7 +35,7 @@ export const APM_FEATURE = {
   privileges: {
     all: {
       app: [APM_SERVER_FEATURE_ID, 'ux', 'kibana'],
-      api: [APM_SERVER_FEATURE_ID, 'apm_write', 'rac', 'ai_assistant'],
+      api: [APM_SERVER_FEATURE_ID, 'apm_write', 'rac'],
       catalogue: [APM_SERVER_FEATURE_ID],
       savedObject: {
         all: [],
@@ -56,7 +56,7 @@ export const APM_FEATURE = {
     },
     read: {
       app: [APM_SERVER_FEATURE_ID, 'ux', 'kibana'],
-      api: [APM_SERVER_FEATURE_ID, 'rac', 'ai_assistant'],
+      api: [APM_SERVER_FEATURE_ID, 'rac'],
       catalogue: [APM_SERVER_FEATURE_ID],
       savedObject: {
         all: [],

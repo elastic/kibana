@@ -30,5 +30,6 @@
     "@kbn/ml-plugin",
     "@kbn/management-cards-navigation",
     "@kbn/core-elasticsearch-server",
+    "@kbn/search-api-panels",
   ]
 }

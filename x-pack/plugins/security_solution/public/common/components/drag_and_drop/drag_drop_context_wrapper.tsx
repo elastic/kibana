@@ -7,8 +7,8 @@
 
 import { noop, pick } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
-import type { DropResult } from 'react-beautiful-dnd';
-import { DragDropContext } from 'react-beautiful-dnd';
+import type { DropResult } from '@hello-pangea/dnd';
+import { DragDropContext } from '@hello-pangea/dnd';
 import { useDispatch } from 'react-redux';
 import type { Dispatch } from 'redux';
 import deepEqual from 'fast-deep-equal';
@@ -44,7 +44,7 @@ import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 import { defaultAlertsHeaders } from '../events_viewer/default_alert_headers';
 
 // @ts-expect-error
-window['__react-beautiful-dnd-disable-dev-warnings'] = true;
+window['__@hello-pangea/dnd-disable-dev-warnings'] = true;
 
 interface Props {
   browserFields: BrowserFields;
