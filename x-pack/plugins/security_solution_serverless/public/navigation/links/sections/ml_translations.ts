@@ -8,40 +8,40 @@
 import { i18n } from '@kbn/i18n';
 
 export const ML_TITLE = i18n.translate('xpack.securitySolutionServerless.appLinks.ml.title', {
-  defaultMessage: 'Machine Learning',
+  defaultMessage: 'Machine learning',
 });
 export const ML_KEYWORD = i18n.translate('xpack.securitySolutionServerless.appLinks.ml.keyword', {
-  defaultMessage: 'Machine Learning',
+  defaultMessage: 'Machine learning',
 });
 
 export const ANOMALY_DETECTION_CATEGORY = i18n.translate(
   'xpack.securitySolutionServerless.navCategories.ml.anomalyDetection.title',
   {
-    defaultMessage: 'Anomaly Detection',
+    defaultMessage: 'Anomaly detection',
   }
 );
 export const DATA_FRAME_ANALYTICS_CATEGORY = i18n.translate(
   'xpack.securitySolutionServerless.navCategories.ml.dataFrameAnalyticstitle',
   {
-    defaultMessage: 'Data Frame Analytics',
+    defaultMessage: 'Data frame analytics',
   }
 );
 export const MODEL_MANAGEMENT_CATEGORY = i18n.translate(
   'xpack.securitySolutionServerless.navCategories.ml.modelManagement.title',
   {
-    defaultMessage: 'Model Management',
+    defaultMessage: 'Model management',
   }
 );
 export const DATA_VISUALIZER_CATEGORY = i18n.translate(
   'xpack.securitySolutionServerless.navCategories.ml.dataVisualizer.title',
   {
-    defaultMessage: 'Data Visualizer',
+    defaultMessage: 'Data visualizer',
   }
 );
 export const AIOPS_LABS_CATEGORY = i18n.translate(
   'xpack.securitySolutionServerless.navCategories.ml.aiopsLabs.title',
   {
-    defaultMessage: 'Aiops Labs',
+    defaultMessage: 'Aiops labs',
   }
 );
 
@@ -54,7 +54,7 @@ export const OVERVIEW_TITLE = i18n.translate(
 export const OVERVIEW_DESC = i18n.translate(
   'xpack.securitySolutionServerless.navLinks.ml.overview.desc',
   {
-    defaultMessage: 'Overview Page',
+    defaultMessage: 'Overview page',
   }
 );
 export const NOTIFICATIONS_TITLE = i18n.translate(
@@ -66,7 +66,7 @@ export const NOTIFICATIONS_TITLE = i18n.translate(
 export const NOTIFICATIONS_DESC = i18n.translate(
   'xpack.securitySolutionServerless.navLinks.ml.notifications.desc',
   {
-    defaultMessage: 'Notifications Page',
+    defaultMessage: 'Notifications page',
   }
 );
 export const ANOMALY_DETECTION_TITLE = i18n.translate(
@@ -78,31 +78,31 @@ export const ANOMALY_DETECTION_TITLE = i18n.translate(
 export const ANOMALY_DETECTION_DESC = i18n.translate(
   'xpack.securitySolutionServerless.navLinks.ml.anomalyDetection.desc',
   {
-    defaultMessage: 'Jobs Page',
+    defaultMessage: 'Jobs page',
   }
 );
 export const ANOMALY_EXPLORER_TITLE = i18n.translate(
   'xpack.securitySolutionServerless.navLinks.ml.anomalyExplorer.title',
   {
-    defaultMessage: 'Anomaly Explorer',
+    defaultMessage: 'Anomaly explorer',
   }
 );
 export const ANOMALY_EXPLORER_DESC = i18n.translate(
   'xpack.securitySolutionServerless.navLinks.ml.anomalyExplorer.desc',
   {
-    defaultMessage: 'Anomaly Explorer Page',
+    defaultMessage: 'Anomaly explorer Page',
   }
 );
 export const SINGLE_METRIC_VIEWER_TITLE = i18n.translate(
   'xpack.securitySolutionServerless.navLinks.ml.singleMetricViewer.title',
   {
-    defaultMessage: 'Single Metric Viewer',
+    defaultMessage: 'Single metric viewer',
   }
 );
 export const SINGLE_METRIC_VIEWER_DESC = i18n.translate(
   'xpack.securitySolutionServerless.navLinks.ml.singleMetricViewer.desc',
   {
-    defaultMessage: 'Single Metric Viewer Page',
+    defaultMessage: 'Single metric viewer page',
   }
 );
 export const SETTINGS_TITLE = i18n.translate(
@@ -114,7 +114,7 @@ export const SETTINGS_TITLE = i18n.translate(
 export const SETTINGS_DESC = i18n.translate(
   'xpack.securitySolutionServerless.navLinks.ml.settings.desc',
   {
-    defaultMessage: 'Settings Page',
+    defaultMessage: 'Settings page',
   }
 );
 export const DATA_FRAME_ANALYTICS_TITLE = i18n.translate(
@@ -126,43 +126,43 @@ export const DATA_FRAME_ANALYTICS_TITLE = i18n.translate(
 export const DATA_FRAME_ANALYTICS_DESC = i18n.translate(
   'xpack.securitySolutionServerless.navLinks.ml.dataFrameAnalytics.desc',
   {
-    defaultMessage: 'Jobs Page',
+    defaultMessage: 'Jobs page',
   }
 );
 export const RESULT_EXPLORER_TITLE = i18n.translate(
   'xpack.securitySolutionServerless.navLinks.ml.resultExplorer.title',
   {
-    defaultMessage: 'Result Explorer',
+    defaultMessage: 'Result explorer',
   }
 );
 export const RESULT_EXPLORER_DESC = i18n.translate(
   'xpack.securitySolutionServerless.navLinks.ml.resultExplorer.desc',
   {
-    defaultMessage: 'Result Explorer Page',
+    defaultMessage: 'Result explorer page',
   }
 );
 export const ANALYTICS_MAP_TITLE = i18n.translate(
   'xpack.securitySolutionServerless.navLinks.ml.analyticsMap.title',
   {
-    defaultMessage: 'Analytics Map',
+    defaultMessage: 'Analytics map',
   }
 );
 export const ANALYTICS_MAP_DESC = i18n.translate(
   'xpack.securitySolutionServerless.navLinks.ml.analyticsMap.desc',
   {
-    defaultMessage: 'Analytics Map Page',
+    defaultMessage: 'Analytics map page',
   }
 );
 export const NODES_OVERVIEW_TITLE = i18n.translate(
   'xpack.securitySolutionServerless.navLinks.ml.nodesOverview.title',
   {
-    defaultMessage: 'Nodes Overview',
+    defaultMessage: 'Nodes overview',
   }
 );
 export const NODES_OVERVIEW_DESC = i18n.translate(
   'xpack.securitySolutionServerless.navLinks.ml.nodesOverview.desc',
   {
-    defaultMessage: 'Nodes Overview Page',
+    defaultMessage: 'Nodes overview page',
   }
 );
 export const NODES_TITLE = i18n.translate(
@@ -174,7 +174,7 @@ export const NODES_TITLE = i18n.translate(
 export const NODES_DESC = i18n.translate(
   'xpack.securitySolutionServerless.navLinks.ml.nodes.desc',
   {
-    defaultMessage: 'Nodes Page',
+    defaultMessage: 'Nodes page',
   }
 );
 export const FILE_UPLOAD_TITLE = i18n.translate(
@@ -186,7 +186,7 @@ export const FILE_UPLOAD_TITLE = i18n.translate(
 export const FILE_UPLOAD_DESC = i18n.translate(
   'xpack.securitySolutionServerless.navLinks.ml.fileUpload.desc',
   {
-    defaultMessage: 'File Page',
+    defaultMessage: 'File page',
   }
 );
 export const INDEX_DATA_VISUALIZER_TITLE = i18n.translate(
@@ -198,49 +198,42 @@ export const INDEX_DATA_VISUALIZER_TITLE = i18n.translate(
 export const INDEX_DATA_VISUALIZER_DESC = i18n.translate(
   'xpack.securitySolutionServerless.navLinks.ml.indexDataVisualizer.desc',
   {
-    defaultMessage: 'Data view Page',
+    defaultMessage: 'Data view page',
   }
 );
 export const EXPLAIN_LOG_RATE_SPIKES_TITLE = i18n.translate(
   'xpack.securitySolutionServerless.navLinks.ml.explainLogRateSpikes.title',
   {
-    defaultMessage: 'Explain Log Rate Spikes',
+    defaultMessage: 'Explain log rate spikes',
   }
 );
 export const EXPLAIN_LOG_RATE_SPIKES_DESC = i18n.translate(
   'xpack.securitySolutionServerless.navLinks.ml.explainLogRateSpikes.desc',
   {
-    defaultMessage: 'Explain Log Rate Spikes Page',
+    defaultMessage: 'Explain log rate spikes page',
   }
 );
 export const LOG_PATTERN_ANALYSIS_TITLE = i18n.translate(
   'xpack.securitySolutionServerless.navLinks.ml.logPatternAnalysis.title',
   {
-    defaultMessage: 'Log Pattern Analysis',
+    defaultMessage: 'Log pattern analysis',
   }
 );
 export const LOG_PATTERN_ANALYSIS_DESC = i18n.translate(
   'xpack.securitySolutionServerless.navLinks.ml.logPatternAnalysis.desc',
   {
-    defaultMessage: 'Log Pattern Analysis Page',
+    defaultMessage: 'Log pattern analysis page',
   }
 );
 export const CHANGE_POINT_DETECTIONS_TITLE = i18n.translate(
   'xpack.securitySolutionServerless.navLinks.ml.changePointDetections.title',
   {
-    defaultMessage: 'Change Point Detections',
+    defaultMessage: 'Change point detections',
   }
 );
 export const CHANGE_POINT_DETECTIONS_DESC = i18n.translate(
   'xpack.securitySolutionServerless.navLinks.ml.changePointDetections.desc',
   {
-    defaultMessage: 'Change Point Detections Page',
-  }
-);
-
-export const DEV_TOOLS_TITLE = i18n.translate(
-  'xpack.securitySolutionServerless.navLinks.devTools.title',
-  {
-    defaultMessage: 'Dev Tools',
+    defaultMessage: 'Change point detections page',
   }
 );
