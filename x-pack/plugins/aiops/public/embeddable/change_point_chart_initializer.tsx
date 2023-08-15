@@ -194,14 +194,25 @@ export const FormControls: FC<{
 
   useEffect(
     function setDefaultOnDataViewChange() {
+      if (!isPopulatedObject(formInput)) {
+        onChange({
+          fn: DEFAULT_AGG_FUNCTION,
+          metricField: metricFieldOptions[0]?.name,
+          splitField: undefined,
+          partitions: undefined,
+          maxSeriesToPlot: DEFAULT_SERIES,
+        });
+        return;
+      }
+
       if (metricFieldOptions === prevMetricFieldOptions) return;
 
       onChange({
-        fn: formInput?.fn ?? DEFAULT_AGG_FUNCTION,
+        fn: formInput.fn,
         metricField: metricFieldOptions[0]?.name,
-        splitField: formInput?.splitField,
-        partitions: formInput?.partitions,
-        maxSeriesToPlot: formInput?.maxSeriesToPlot ?? DEFAULT_SERIES,
+        splitField: undefined,
+        partitions: undefined,
+        maxSeriesToPlot: formInput.maxSeriesToPlot,
       });
     },
     [metricFieldOptions, prevMetricFieldOptions, formInput, onChange]
