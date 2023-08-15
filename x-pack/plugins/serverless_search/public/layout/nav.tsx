@@ -135,6 +135,13 @@ const navigationTree: NavigationTreeDefinition = {
               }),
             },
             {
+              id: 'cloudLinkDeployment',
+              cloudLink: 'deployment',
+              title: i18n.translate('xpack.serverlessSearch.nav.performance', {
+                defaultMessage: 'Performance',
+              }),
+            },
+            {
               id: 'cloudLinkUserAndRoles',
               cloudLink: 'userAndRoles',
             },
