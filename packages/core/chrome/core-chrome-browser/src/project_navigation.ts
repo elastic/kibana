@@ -45,7 +45,7 @@ export type AppDeepLinkId =
   | ObservabilityLink;
 
 /** @public */
-export type CloudLinkId = 'userAndRoles' | 'performance' | 'billingAndSub';
+export type CloudLinkId = 'userAndRoles' | 'performance' | 'billingAndSub' | 'deployment';
 
 export type GetIsActiveFn = (params: {
   /** The current path name including the basePath + hash value but **without** any query params */
