@@ -82,7 +82,10 @@ const BodyComponent: React.FC<Props> = ({
     totalSizeInBytes,
     updatePatternIndexNames,
     updatePatternRollup,
-  } = useResultsRollup({ ilmPhases, patterns });
+  } = useResultsRollup({
+    ilmPhases,
+    patterns,
+  });
 
   return (
     <EuiFlexGroup data-test-subj="body" direction="column" gutterSize="none">

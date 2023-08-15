@@ -10,6 +10,9 @@ import React, { memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { ALERT_SEVERITY } from '@kbn/rule-data-utils';
 import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
+import { CellActionsMode } from '@kbn/cell-actions';
+import { SecurityCellActions } from '../../../common/components/cell_actions';
+import { SecurityCellActionsTrigger } from '../../../actions/constants';
 import { SEVERITY_TITLE } from './translations';
 import { useRightPanelContext } from '../context';
 import { SeverityBadge } from '../../../detections/components/rules/severity_badge';
@@ -46,7 +49,17 @@ export const DocumentSeverity: FC = memo(() => {
         </EuiTitle>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <SeverityBadge value={alertSeverity} />
+        <SecurityCellActions
+          data={{
+            field: ALERT_SEVERITY,
+            value: alertSeverity,
+          }}
+          mode={CellActionsMode.HOVER_RIGHT}
+          triggerId={SecurityCellActionsTrigger.DEFAULT}
+          visibleCellActions={6}
+        >
+          <SeverityBadge value={alertSeverity} />
+        </SecurityCellActions>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

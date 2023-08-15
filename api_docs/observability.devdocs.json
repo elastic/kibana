@@ -2207,6 +2207,26 @@
           },
           {
             "parentPluginId": "observability",
+            "id": "def-public.ObservabilityPublicPluginsSetup.observabilityAIAssistant",
+            "type": "Object",
+            "tags": [],
+            "label": "observabilityAIAssistant",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "observabilityAIAssistant",
+                "scope": "public",
+                "docId": "kibObservabilityAIAssistantPluginApi",
+                "section": "def-public.ObservabilityAIAssistantPluginSetup",
+                "text": "ObservabilityAIAssistantPluginSetup"
+              }
+            ],
+            "path": "x-pack/plugins/observability/public/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
             "id": "def-public.ObservabilityPublicPluginsSetup.share",
             "type": "CompoundType",
             "tags": [],
@@ -2650,6 +2670,26 @@
                 "text": "AppUpdater"
               },
               ">; }) => void; setIsSidebarEnabled: (isEnabled: boolean) => void; }"
+            ],
+            "path": "x-pack/plugins/observability/public/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.ObservabilityPublicPluginsStart.observabilityAIAssistant",
+            "type": "Object",
+            "tags": [],
+            "label": "observabilityAIAssistant",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "observabilityAIAssistant",
+                "scope": "public",
+                "docId": "kibObservabilityAIAssistantPluginApi",
+                "section": "def-public.ObservabilityAIAssistantPluginStart",
+                "text": "ObservabilityAIAssistantPluginStart"
+              }
             ],
             "path": "x-pack/plugins/observability/public/plugin.ts",
             "deprecated": false,
@@ -4371,7 +4411,7 @@
         "label": "createOrUpdateIndex",
         "description": [],
         "signature": [
-          "({\n  index,\n  mappings,\n  settings,\n  client,\n  logger,\n}: { index: string; mappings: ",
+          "({\n  index,\n  mappings,\n  client,\n  logger,\n}: { index: string; mappings: ",
           "MappingTypeMapping",
           " & { date_detection?: boolean | undefined; dynamic?: ",
           "MappingDynamicMapping",
@@ -4391,9 +4431,7 @@
           "MappingSourceField",
           " | undefined; runtime?: ",
           "MappingRuntimeFields",
-          " | undefined; }; settings?: ",
-          "IndicesIndexSettings",
-          " | undefined; client: ",
+          " | undefined; }; client: ",
           {
             "pluginId": "@kbn/core-elasticsearch-server",
             "scope": "common",
@@ -4420,7 +4458,7 @@
             "id": "def-server.createOrUpdateIndex.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  index,\n  mappings,\n  settings,\n  client,\n  logger,\n}",
+            "label": "{\n  index,\n  mappings,\n  client,\n  logger,\n}",
             "description": [],
             "path": "x-pack/plugins/observability/server/utils/create_or_update_index.ts",
             "deprecated": false,
@@ -4465,21 +4503,6 @@
                   " | undefined; runtime?: ",
                   "MappingRuntimeFields",
                   " | undefined; }"
-                ],
-                "path": "x-pack/plugins/observability/server/utils/create_or_update_index.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.createOrUpdateIndex.$1.settings",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "settings",
-                "description": [],
-                "signature": [
-                  "IndicesIndexSettings",
-                  " | undefined"
                 ],
                 "path": "x-pack/plugins/observability/server/utils/create_or_update_index.ts",
                 "deprecated": false,
@@ -14856,6 +14879,22 @@
         "initialIsOpen": false
       }
     ],
-    "objects": []
+    "objects": [
+      {
+        "parentPluginId": "observability",
+        "id": "def-common.observabilityPaths",
+        "type": "Object",
+        "tags": [],
+        "label": "observabilityPaths",
+        "description": [],
+        "signature": [
+          "{ alerts: string; alertDetails: (alertId: string) => string; rules: string; ruleDetails: (ruleId: string) => string; slos: string; slosWelcome: string; sloCreate: string; sloCreateWithEncodedForm: (encodedParams: string) => string; sloEdit: (sloId: string) => string; sloDetails: (sloId: string, instanceId?: string | undefined) => string; }"
+        ],
+        "path": "x-pack/plugins/observability/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ]
   }
 }

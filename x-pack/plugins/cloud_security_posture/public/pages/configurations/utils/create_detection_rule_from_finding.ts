@@ -45,7 +45,30 @@ const convertReferencesLinksToArray = (input: string | undefined) => {
   return matches.map((link) => link.replace(/^\d+\. /, '').replace(/\n/g, ''));
 };
 
-const generateMisconfigurationsRuleQuery = (finding: CspFinding) => {
+const CSP_RULE_TAG = 'Cloud Security';
+const CSP_RULE_TAG_USE_CASE = 'Use Case: Configuration Audit';
+const CSP_RULE_TAG_DATA_SOURCE_PREFIX = 'Data Source: ';
+
+const STATIC_RULE_TAGS = [CSP_RULE_TAG, CSP_RULE_TAG_USE_CASE];
+
+const generateFindingsTags = (finding: CspFinding) => {
+  return [STATIC_RULE_TAGS]
+    .concat(finding.rule.tags)
+    .concat(
+      finding.rule.benchmark.posture_type
+        ? [
+            finding.rule.benchmark.posture_type.toUpperCase(),
+            `${CSP_RULE_TAG_DATA_SOURCE_PREFIX}${finding.rule.benchmark.posture_type.toUpperCase()}`,
+          ]
+        : []
+    )
+    .concat(
+      finding.rule.benchmark.posture_type === 'cspm' ? ['Domain: Cloud'] : ['Domain: Container']
+    )
+    .flat();
+};
+
+const generateFindingsRuleQuery = (finding: CspFinding) => {
   const currentTimestamp = new Date().toISOString();
 
   return `rule.benchmark.rule_number: "${finding.rule.benchmark.rule_number}"
@@ -85,7 +108,7 @@ export const createDetectionRuleFromFinding = async (http: HttpSetup, finding: C
         missing_fields_strategy: AlertSuppressionMissingFieldsStrategy.Suppress,
       },
       index: [FINDINGS_INDEX_PATTERN],
-      query: generateMisconfigurationsRuleQuery(finding),
+      query: generateFindingsRuleQuery(finding),
       references: convertReferencesLinksToArray(finding.rule.references),
       name: finding.rule.name,
       description: finding.rule.rationale,

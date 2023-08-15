@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import type { ReactElement } from 'react';
 import { getSummaryRows } from '../../../common/components/event_details/get_alert_summary_rows';
-import type { UsePrevalenceResult } from './use_prevalence';
 import { usePrevalence } from './use_prevalence';
 import type { RenderHookResult } from '@testing-library/react-hooks';
 import { renderHook } from '@testing-library/react-hooks';
@@ -20,7 +20,7 @@ const dataFormattedForFieldBrowser = mockDataFormattedForFieldBrowser;
 const scopeId = 'scopeId';
 
 describe('usePrevalence', () => {
-  let hookResult: RenderHookResult<unknown, UsePrevalenceResult>;
+  let hookResult: RenderHookResult<unknown, ReactElement[]>;
 
   it('should return 1 row to render', () => {
     const mockSummaryRow = {
@@ -38,8 +38,7 @@ describe('usePrevalence', () => {
       usePrevalence({ browserFields, dataFormattedForFieldBrowser, eventId, scopeId })
     );
 
-    expect(hookResult.result.current.prevalenceRows.length).toEqual(1);
-    expect(hookResult.result.current.empty).toEqual(false);
+    expect(hookResult.result.current.length).toEqual(1);
   });
 
   it('should return empty true', () => {
@@ -49,7 +48,6 @@ describe('usePrevalence', () => {
       usePrevalence({ browserFields, dataFormattedForFieldBrowser, eventId, scopeId })
     );
 
-    expect(hookResult.result.current.prevalenceRows.length).toEqual(0);
-    expect(hookResult.result.current.empty).toEqual(true);
+    expect(hookResult.result.current.length).toEqual(0);
   });
 });

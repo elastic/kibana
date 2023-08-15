@@ -9,6 +9,9 @@ import { expandFirstAlertExpandableFlyout } from '../../../../tasks/expandable_f
 import {
   DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_SECTION,
   DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_HEADER,
+  DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_TITLE,
+  DOCUMENT_DETAILS_FLYOUT_CREATED_BY,
+  DOCUMENT_DETAILS_FLYOUT_UPDATED_BY,
   DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_BODY,
   DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_ABOUT_SECTION_HEADER,
   DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_ABOUT_SECTION_CONTENT,
@@ -31,60 +34,63 @@ import { getNewRule } from '../../../../objects/rule';
 import { ALERTS_URL } from '../../../../urls/navigation';
 import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
 
-describe(
-  'Alert details expandable flyout rule preview panel',
-  { env: { ftrConfig: { enableExperimental: ['securityFlyoutEnabled'] } } },
-  () => {
-    const rule = getNewRule();
+describe('Alert details expandable flyout rule preview panel', () => {
+  const rule = getNewRule();
 
-    beforeEach(() => {
-      cleanKibana();
-      login();
-      createRule(rule);
-      visit(ALERTS_URL);
-      waitForAlertsToPopulate();
-      expandFirstAlertExpandableFlyout();
-      clickRuleSummaryButton();
+  beforeEach(() => {
+    cleanKibana();
+    login();
+    createRule(rule);
+    visit(ALERTS_URL);
+    waitForAlertsToPopulate();
+    expandFirstAlertExpandableFlyout();
+    clickRuleSummaryButton();
+  });
+
+  describe('rule preview', () => {
+    it('should display rule preview and its sub sections', () => {
+      cy.log('rule preview panel');
+
+      cy.get(DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_SECTION).scrollIntoView();
+      cy.get(DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_HEADER).should('be.visible');
+      cy.get(DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_BODY).should('be.visible');
+
+      cy.log('title');
+
+      cy.get(DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_TITLE).scrollIntoView();
+      cy.get(DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_TITLE).should('be.visible');
+      cy.get(DOCUMENT_DETAILS_FLYOUT_CREATED_BY).should('be.visible');
+      cy.get(DOCUMENT_DETAILS_FLYOUT_UPDATED_BY).should('be.visible');
+
+      cy.log('about');
+
+      cy.get(DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_ABOUT_SECTION_HEADER)
+        .should('be.visible')
+        .and('contain.text', 'About');
+      cy.get(DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_ABOUT_SECTION_CONTENT).should('be.visible');
+      toggleRulePreviewAboutSection();
+
+      cy.log('definition');
+
+      toggleRulePreviewDefinitionSection();
+      cy.get(DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_DEFINITION_SECTION_HEADER)
+        .should('be.visible')
+        .and('contain.text', 'Definition');
+      cy.get(DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_DEFINITION_SECTION_CONTENT).should('be.visible');
+      toggleRulePreviewDefinitionSection();
+
+      cy.log('schedule');
+
+      toggleRulePreviewScheduleSection();
+      cy.get(DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_SCHEDULE_SECTION_HEADER)
+        .should('be.visible')
+        .and('contain.text', 'Schedule');
+      cy.get(DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_SCHEDULE_SECTION_CONTENT).should('be.visible');
+      toggleRulePreviewScheduleSection();
+
+      cy.log('footer');
+      cy.get(DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_FOOTER).scrollIntoView();
+      cy.get(DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_FOOTER).should('be.visible');
     });
-
-    describe('rule preview', () => {
-      it('should display rule preview and its sub sections', () => {
-        cy.log('rule preview panel');
-
-        cy.get(DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_SECTION).scrollIntoView();
-        cy.get(DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_SECTION).should('be.visible');
-        cy.get(DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_HEADER).should('be.visible');
-        cy.get(DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_BODY).should('be.visible');
-        cy.get(DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_FOOTER).should('be.visible');
-
-        cy.log('about');
-
-        cy.get(DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_ABOUT_SECTION_HEADER)
-          .should('be.visible')
-          .and('contain.text', 'About');
-        cy.get(DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_ABOUT_SECTION_CONTENT).should('be.visible');
-        toggleRulePreviewAboutSection();
-
-        cy.log('definition');
-
-        toggleRulePreviewDefinitionSection();
-        cy.get(DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_DEFINITION_SECTION_HEADER)
-          .should('be.visible')
-          .and('contain.text', 'Definition');
-        cy.get(DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_DEFINITION_SECTION_CONTENT).should(
-          'be.visible'
-        );
-        toggleRulePreviewDefinitionSection();
-
-        cy.log('schedule');
-
-        toggleRulePreviewScheduleSection();
-        cy.get(DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_SCHEDULE_SECTION_HEADER)
-          .should('be.visible')
-          .and('contain.text', 'Schedule');
-        cy.get(DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_SCHEDULE_SECTION_CONTENT).should('be.visible');
-        toggleRulePreviewScheduleSection();
-      });
-    });
-  }
-);
+  });
+});
