@@ -24,10 +24,15 @@ const convertCustomScheduleMappingClientToServer = (
     const { name, interval, configurationOverrides, enabled } = customSchedule;
 
     const {
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       maxCrawlDepth: max_crawl_depth,
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       sitemapDiscoveryDisabled: sitemap_discovery_disabled,
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       domainAllowlist: domain_allowlist,
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       sitemapUrls: sitemap_urls,
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       seedUrls: seed_urls,
     } = configurationOverrides;
 
