@@ -89,11 +89,7 @@ export const LandingLinksImageCards: React.FC<LandingLinksImagesProps> = React.m
                   </div>
                 }
                 titleElement="span"
-                description={
-                  <span css={styles.description}>
-                    {description}
-                  </span>
-                }
+                description={<span css={styles.description}>{description}</span>}
               />
             </EuiFlexItem>
           );
