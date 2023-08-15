@@ -24,7 +24,7 @@ interface Props {
   operation: string;
   type: string;
   probe: string;
-  providedDragHandleProps?: DraggableProvidedDragHandleProps;
+  providedDragHandleProps?: DraggableProvidedDragHandleProps | null;
   onDelete: (discoveryItemId: string) => void;
   onEdit: (discoveryItemId: string) => void;
   operationTypes: Operation[];
