@@ -6,11 +6,12 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
-import { useSideNavItems, useSideNavSelectedId } from './use_side_nav_items';
-import { SecurityPageName } from '@kbn/security-solution-plugin/common';
-import { mockServices, mockProjectNavLinks } from '../../common/__mocks__/services.mock';
+import { useSideNavItems } from './use_side_nav_items';
+import { SecurityPageName } from '@kbn/security-solution-navigation';
+import { mockServices, mockProjectNavLinks } from '../../common/services/__mocks__/services.mock';
+import { ExternalPageName } from '../links/constants';
 
-jest.mock('../../common/hooks/use_link_props');
+jest.mock('@kbn/security-solution-navigation/src/navigation');
 jest.mock('../../common/services');
 
 const mockUseLocation = jest.fn(() => ({ pathname: '/' }));
@@ -45,14 +46,12 @@ describe('useSideNavItems', () => {
         id: SecurityPageName.alerts,
         label: 'Alerts',
         position: 'top',
-        href: expect.any(String),
         onClick: expect.any(Function),
       },
       {
         id: SecurityPageName.case,
         label: 'Cases',
         position: 'top',
-        href: expect.any(String),
         onClick: expect.any(Function),
       },
     ]);
@@ -74,13 +73,11 @@ describe('useSideNavItems', () => {
         id: SecurityPageName.dashboards,
         label: 'Dashboards',
         position: 'top',
-        href: expect.any(String),
         onClick: expect.any(Function),
         items: [
           {
             id: SecurityPageName.detectionAndResponse,
             label: 'Detection & Response',
-            href: expect.any(String),
             onClick: expect.any(Function),
           },
         ],
@@ -105,87 +102,35 @@ describe('useSideNavItems', () => {
         id: SecurityPageName.landing,
         label: 'Get Started',
         position: 'bottom',
-        href: expect.any(String),
         onClick: expect.any(Function),
         iconType: 'launch',
         appendSeparator: true,
       },
     ]);
   });
-});
 
-describe('useSideNavSelectedId', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
-  it('should return empty string when no item selected', async () => {
-    const items = [
+  it('should openInNewTab for external (cloud) links', async () => {
+    mockProjectNavLinks.mockReturnValueOnce([
       {
-        id: SecurityPageName.dashboards,
-        label: 'Dashboards',
-        href: '/app/security/dashboards',
-        onClick: jest.fn(),
+        id: ExternalPageName.cloudUsersAndRoles,
+        externalUrl: 'https://cloud.elastic.co/users_roles',
+        title: 'Users & Roles',
+        sideNavIcon: 'someicon',
       },
+    ]);
+    const { result } = renderHook(useSideNavItems);
+
+    const items = result.current;
+
+    expect(items).toEqual([
       {
-        id: SecurityPageName.alerts,
-        label: 'Alerts',
-        href: '/app/security/alerts',
-        onClick: jest.fn(),
+        id: ExternalPageName.cloudUsersAndRoles,
+        href: 'https://cloud.elastic.co/users_roles',
+        label: 'Users & Roles',
+        openInNewTab: true,
+        iconType: 'someicon',
+        position: 'top',
       },
-    ];
-
-    const { result } = renderHook(useSideNavSelectedId, { initialProps: items });
-
-    const selectedId = result.current;
-    expect(selectedId).toEqual('');
-  });
-
-  it('should return the item with path selected', async () => {
-    mockUseLocation.mockReturnValueOnce({ pathname: '/app/security/alerts' });
-    const items = [
-      {
-        id: SecurityPageName.dashboards,
-        label: 'Dashboards',
-        href: '/app/security/dashboards',
-        onClick: jest.fn(),
-      },
-      {
-        id: SecurityPageName.alerts,
-        label: 'Alerts',
-        href: '/app/security/alerts',
-        onClick: jest.fn(),
-      },
-    ];
-
-    const { result } = renderHook(useSideNavSelectedId, { initialProps: items });
-
-    const selectedId = result.current;
-    expect(selectedId).toEqual(SecurityPageName.alerts);
-  });
-
-  it('should return the main item when nested path selected', async () => {
-    mockUseLocation.mockReturnValueOnce({ pathname: '/app/security/detection_response' });
-    const items = [
-      {
-        id: SecurityPageName.dashboards,
-        label: 'Dashboards',
-        href: '/app/security/dashboards',
-        onClick: jest.fn(),
-        items: [
-          {
-            id: SecurityPageName.detectionAndResponse,
-            label: 'Detection & Response',
-            href: '/app/security/detection_response',
-            onClick: jest.fn(),
-          },
-        ],
-      },
-    ];
-
-    const { result } = renderHook(useSideNavSelectedId, { initialProps: items });
-
-    const selectedId = result.current;
-    expect(selectedId).toEqual(SecurityPageName.dashboards);
+    ]);
   });
 });

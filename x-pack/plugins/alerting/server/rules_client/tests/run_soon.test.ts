@@ -115,7 +115,7 @@ describe('runSoon()', () => {
         operation: 'runSoon',
         ruleTypeId: 'myType',
       });
-      expect(actionsAuthorization.ensureAuthorized).toHaveBeenCalledWith('execute');
+      expect(actionsAuthorization.ensureAuthorized).toHaveBeenCalledWith({ operation: 'execute' });
     });
 
     test('throws when user is not authorised to run this type of rule ad hoc', async () => {

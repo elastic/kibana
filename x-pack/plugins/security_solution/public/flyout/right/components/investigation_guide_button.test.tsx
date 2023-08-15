@@ -11,7 +11,7 @@ import { InvestigationGuideButton } from './investigation_guide_button';
 import { RightPanelContext } from '../context';
 import { INVESTIGATION_GUIDE_BUTTON_TEST_ID } from './test_ids';
 import { mockContextValue } from '../mocks/mock_right_panel_context';
-import { mockFlyoutContextValue } from '../mocks/mock_flyout_context';
+import { mockFlyoutContextValue } from '../../shared/mocks/mock_flyout_context';
 import { ExpandableFlyoutContext } from '@kbn/expandable-flyout/src/context';
 import { useRuleWithFallback } from '../../../detection_engine/rule_management/logic/use_rule_with_fallback';
 
@@ -19,7 +19,7 @@ const mockUseRuleWithFallback = useRuleWithFallback as jest.Mock;
 jest.mock('../../../detection_engine/rule_management/logic/use_rule_with_fallback');
 
 describe('<InvestigationGuideButton />', () => {
-  it('should render investigation guide button corerctly', () => {
+  it('should render investigation guide button correctly', () => {
     mockUseRuleWithFallback.mockReturnValue({ rule: { note: 'test note' } });
     const { getByTestId } = render(
       <ExpandableFlyoutContext.Provider value={mockFlyoutContextValue}>

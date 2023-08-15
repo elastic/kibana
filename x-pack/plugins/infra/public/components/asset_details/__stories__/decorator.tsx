@@ -24,7 +24,8 @@ import type { AlertSummaryWidgetProps } from '@kbn/triggers-actions-ui-plugin/pu
 import type { PluginKibanaContextValue } from '../../../hooks/use_kibana';
 import { SourceProvider } from '../../../containers/metrics_source';
 import { getHttp } from './context/http';
-import { getLogEntries } from './context/fixtures';
+import { assetDetailsState, getLogEntries } from './context/fixtures';
+import { AssetDetailsStateProvider } from '../hooks/use_asset_details_state';
 
 const settings: Record<string, any> = {
   'dateFormat:scaled': [['', 'HH:mm:ss.SSS']],
@@ -114,6 +115,9 @@ export const DecorateWithKibanaContext: DecoratorFn = (story) => {
       navigateToPrefilledEditor: () => {},
       stateHelperApi: () => new Promise(() => {}),
     },
+    telemetry: {
+      reportAssetDetailsFlyoutViewed: () => {},
+    },
   };
 
   return (
@@ -123,4 +127,8 @@ export const DecorateWithKibanaContext: DecoratorFn = (story) => {
       </KibanaContextProvider>
     </I18nProvider>
   );
+};
+
+export const DecorateWithAssetDetailsStateContext: DecoratorFn = (story) => {
+  return <AssetDetailsStateProvider state={assetDetailsState}>{story()}</AssetDetailsStateProvider>;
 };

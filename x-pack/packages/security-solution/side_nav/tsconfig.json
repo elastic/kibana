@@ -17,6 +17,7 @@
     "@kbn/i18n",
     "@kbn/analytics",
     "@kbn/shared-ux-page-solution-nav",
+    "@kbn/security-solution-navigation",
   ],
   "exclude": ["target/**/*"]
 }

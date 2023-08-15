@@ -132,10 +132,7 @@ export const generateSavedObjectParams = ({
 
 export const GENERIC_ERROR_MESSAGE = 'GENERIC ERROR MESSAGE';
 
-export const getSummarizedAlertsMock = jest.fn();
-
 export const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
-  getSummarizedAlerts: getSummarizedAlertsMock,
   id: RULE_TYPE_ID,
   name: 'My test rule',
   actionGroups: [{ id: 'default', name: 'Default' }, RecoveredActionGroup],
@@ -150,6 +147,10 @@ export const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
   autoRecoverAlerts: true,
   validate: {
     params: { validate: (params) => params },
+  },
+  alerts: {
+    context: 'test',
+    mappings: { fieldMap: { field: { type: 'keyword', required: false } } },
   },
 };
 

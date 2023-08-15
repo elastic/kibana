@@ -7,4 +7,9 @@
  */
 
 export * from './build_data_record';
+export * from './format_hit';
+export * from './format_value';
 export * from './get_doc_id';
+export * from './get_ignored_reason';
+export * from './get_should_show_field_handler';
+export * from './nested_fields';

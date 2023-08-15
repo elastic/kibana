@@ -28,15 +28,14 @@ export interface ConstructorOptions {
   authorizationMode?: AuthorizationMode;
 }
 
-const operationAlias: Record<
-  string,
-  (authorization: SecurityPluginSetup['authz']) => string | string[]
-> = {
+const operationAlias: Record<string, (authorization: SecurityPluginSetup['authz']) => string[]> = {
   execute: (authorization) => [
     authorization.actions.savedObject.get(ACTION_SAVED_OBJECT_TYPE, 'get'),
     authorization.actions.savedObject.get(ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE, 'create'),
   ],
-  list: (authorization) => authorization.actions.savedObject.get(ACTION_SAVED_OBJECT_TYPE, 'find'),
+  list: (authorization) => [
+    authorization.actions.savedObject.get(ACTION_SAVED_OBJECT_TYPE, 'find'),
+  ],
 };
 
 const LEGACY_RBAC_EXEMPT_OPERATIONS = new Set(['get', 'execute']);
@@ -56,15 +55,26 @@ export class ActionsAuthorization {
     this.authorizationMode = authorizationMode;
   }
 
-  public async ensureAuthorized(operation: string, actionTypeId?: string) {
+  public async ensureAuthorized({
+    operation,
+    actionTypeId,
+    additionalPrivileges = [],
+  }: {
+    operation: string;
+    actionTypeId?: string;
+    additionalPrivileges?: string[];
+  }) {
     const { authorization } = this;
     if (authorization?.mode?.useRbacForRequest(this.request)) {
       if (!this.isOperationExemptDueToLegacyRbac(operation)) {
         const checkPrivileges = authorization.checkPrivilegesDynamicallyWithRequest(this.request);
+
+        const privileges = operationAlias[operation]
+          ? operationAlias[operation](authorization)
+          : [authorization.actions.savedObject.get(ACTION_SAVED_OBJECT_TYPE, operation)];
+
         const { hasAllRequested } = await checkPrivileges({
-          kibana: operationAlias[operation]
-            ? operationAlias[operation](authorization)
-            : authorization.actions.savedObject.get(ACTION_SAVED_OBJECT_TYPE, operation),
+          kibana: [...privileges, ...additionalPrivileges],
         });
         if (!hasAllRequested) {
           throw Boom.forbidden(

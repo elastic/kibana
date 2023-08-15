@@ -105,8 +105,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       }
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/155451
-    describe.skip('from the Endpoint list and details', () => {
+    describe('from the Endpoint list and details', () => {
       before(async () => {
         await pageObjects.endpoint.navigateToEndpointList();
       });
@@ -198,6 +197,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       let indexedAlerts: IndexedEndpointRuleAlerts;
 
       before(async () => {
+        await getService('kibanaServer').request({
+          path: `internal/kibana/settings`,
+          method: 'POST',
+          body: { changes: { 'securitySolution:enableExpandableFlyout': false } },
+        });
+
         indexedAlerts = await detectionsTestService.loadEndpointRuleAlerts(endpointAgentId);
 
         await detectionsTestService.waitForAlerts(

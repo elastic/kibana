@@ -6,6 +6,7 @@
  */
 
 import { defineCypressConfig } from '@kbn/cypress-config';
+import { setupDataLoaderTasks } from './support/setup_data_loader_tasks';
 
 export default defineCypressConfig({
   defaultCommandTimeout: 60000,
@@ -19,10 +20,12 @@ export default defineCypressConfig({
   viewportWidth: 1680,
   numTestsKeptInMemory: 10,
   e2e: {
-    baseUrl: 'http://localhost:5620/app/security/get_started',
     experimentalRunAllSpecs: true,
     experimentalMemoryManagement: true,
     supportFile: './support/e2e.js',
     specPattern: './e2e/**/*.cy.ts',
+    setupNodeEvents: (on, config) => {
+      setupDataLoaderTasks(on, config);
+    },
   },
 });

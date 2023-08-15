@@ -10,9 +10,10 @@
 
 import {
   EuiButtonIcon,
-  EuiLoadingSpinner,
+  EuiConfirmModal,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLoadingSpinner,
   EuiSpacer,
   EuiToolTip,
   EuiWindowEvent,
@@ -21,7 +22,6 @@ import type { Filter } from '@kbn/es-query';
 import { i18n as i18nTranslate } from '@kbn/i18n';
 import { Routes, Route } from '@kbn/shared-ux-router';
 
-import { FormattedMessage } from '@kbn/i18n-react';
 import { noop, omit } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
@@ -52,7 +52,6 @@ import {
 import { useKibana } from '../../../../common/lib/kibana';
 import type { UpdateDateRange } from '../../../../common/components/charts/common';
 import { FiltersGlobal } from '../../../../common/components/filters_global';
-import { FormattedDate } from '../../../../common/components/formatted_date';
 import {
   getDetectionEngineUrl,
   getRuleDetailsTabUrl,
@@ -80,6 +79,7 @@ import {
   getStepsData,
   redirectToDetections,
 } from '../../../../detections/pages/detection_engine/rules/helpers';
+import { CreatedBy, UpdatedBy } from '../../../../detections/components/rules/rule_info';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { inputsSelectors } from '../../../../common/store/inputs';
 import { setAbsoluteRangeDatePicker } from '../../../../common/store/inputs/actions';
@@ -117,6 +117,7 @@ import { ExecutionLogTable } from './execution_log_table/execution_log_table';
 
 import * as detectionI18n from '../../../../detections/pages/detection_engine/translations';
 import * as ruleI18n from '../../../../detections/pages/detection_engine/rules/translations';
+
 import { RuleDetailsContextProvider } from './rule_details_context';
 import { useGetSavedQuery } from '../../../../detections/pages/detection_engine/rules/use_get_saved_query';
 import * as i18n from './translations';
@@ -135,9 +136,11 @@ import { EditRuleSettingButtonLink } from '../../../../detections/pages/detectio
 import { useStartMlJobs } from '../../../rule_management/logic/use_start_ml_jobs';
 import { useBulkDuplicateExceptionsConfirmation } from '../../../rule_management_ui/components/rules_table/bulk_actions/use_bulk_duplicate_confirmation';
 import { BulkActionDuplicateExceptionsConfirmation } from '../../../rule_management_ui/components/rules_table/bulk_actions/bulk_duplicate_exceptions_confirmation';
+import { useAsyncConfirmation } from '../../../rule_management_ui/components/rules_table/rules_table/use_async_confirmation';
 import { RuleSnoozeBadge } from '../../../rule_management/components/rule_snooze_badge';
 import { useRuleIndexPattern } from '../../../rule_creation_ui/pages/form';
 import { DataSourceType } from '../../../../detections/pages/detection_engine/rules/types';
+import { useBoolState } from '../../../../common/hooks/use_bool_state';
 
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
@@ -290,6 +293,14 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   );
 
   const [pageTabs, setTabs] = useState<Partial<Record<RuleDetailTabs, NavTab>>>(ruleDetailTabs);
+
+  const [isDeleteConfirmationVisible, showDeleteConfirmation, hideDeleteConfirmation] =
+    useBoolState();
+
+  const [confirmDeletion, handleDeletionConfirm, handleDeletionCancel] = useAsyncConfirmation({
+    onInit: showDeleteConfirmation,
+    onFinish: hideDeleteConfirmation,
+  });
 
   const {
     aboutRuleData,
@@ -456,33 +467,9 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     () =>
       rule ? (
         [
-          <FormattedMessage
-            id="xpack.securitySolution.detectionEngine.ruleDetails.ruleCreationDescription"
-            defaultMessage="Created by: {by} on {date}"
-            values={{
-              by: rule?.created_by ?? i18n.UNKNOWN,
-              date: (
-                <FormattedDate
-                  value={rule?.created_at ?? new Date().toISOString()}
-                  fieldName="createdAt"
-                />
-              ),
-            }}
-          />,
+          <CreatedBy createdBy={rule?.created_by} createdAt={rule?.created_at} />,
           rule?.updated_by != null ? (
-            <FormattedMessage
-              id="xpack.securitySolution.detectionEngine.ruleDetails.ruleUpdateDescription"
-              defaultMessage="Updated by: {by} on {date}"
-              values={{
-                by: rule?.updated_by ?? i18n.UNKNOWN,
-                date: (
-                  <FormattedDate
-                    value={rule?.updated_at ?? new Date().toISOString()}
-                    fieldName="updatedAt"
-                  />
-                ),
-              }}
-            />
+            <UpdatedBy updatedBy={rule?.updated_by} updatedAt={rule?.updated_at} />
           ) : (
             ''
           ),
@@ -675,6 +662,20 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
           rulesCount={1}
         />
       )}
+      {isDeleteConfirmationVisible && (
+        <EuiConfirmModal
+          title={ruleI18n.SINGLE_DELETE_CONFIRMATION_TITLE}
+          onCancel={handleDeletionCancel}
+          onConfirm={handleDeletionConfirm}
+          confirmButtonText={ruleI18n.DELETE_CONFIRMATION_CONFIRM}
+          cancelButtonText={ruleI18n.DELETE_CONFIRMATION_CANCEL}
+          buttonColor="danger"
+          defaultFocusedButton="confirm"
+          data-test-subj="deleteRulesConfirmationModal"
+        >
+          {i18n.DELETE_CONFIRMATION_BODY}
+        </EuiConfirmModal>
+      )}
       <StyledFullHeightContainer onKeyDown={onKeyDown} ref={containerElement}>
         <EuiWindowEvent event="resize" handler={noop} />
         <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId })}>
@@ -760,6 +761,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                             hasActionsPrivileges
                           )}
                           showBulkDuplicateExceptionsConfirmation={showBulkDuplicateConfirmation}
+                          confirmDeletion={confirmDeletion}
                         />
                       </EuiFlexItem>
                     </EuiFlexGroup>

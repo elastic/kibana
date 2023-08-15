@@ -7,8 +7,16 @@
 
 import { i18n } from '@kbn/i18n';
 import { RawRule, RuleSnoozeSchedule } from '../../types';
+import {
+  RuleDomain,
+  RuleParams,
+  RuleSnoozeSchedule as RuleDomainSnoozeSchedule,
+} from '../../application/rule/types';
 import { getActiveScheduledSnoozes } from '../../lib/is_rule_snoozed';
 
+/**
+ * @deprecated TODO (http-versioning): Deprecate this once we fix all RawRule types
+ */
 export function getSnoozeAttributes(attributes: RawRule, snoozeSchedule: RuleSnoozeSchedule) {
   // If duration is -1, instead mute all
   const { id: snoozeId, duration } = snoozeSchedule;
@@ -16,34 +24,40 @@ export function getSnoozeAttributes(attributes: RawRule, snoozeSchedule: RuleSno
   if (duration === -1) {
     return {
       muteAll: true,
-      snoozeSchedule: clearUnscheduledSnooze(attributes),
+      snoozeSchedule: clearUnscheduledSnoozeAttributes(attributes),
     };
   }
   return {
     snoozeSchedule: (snoozeId
-      ? clearScheduledSnoozesById(attributes, [snoozeId])
-      : clearUnscheduledSnooze(attributes)
+      ? clearScheduledSnoozesAttributesById(attributes, [snoozeId])
+      : clearUnscheduledSnoozeAttributes(attributes)
     ).concat(snoozeSchedule),
     muteAll: false,
   };
 }
 
-export function getBulkSnoozeAttributes(attributes: RawRule, snoozeSchedule: RuleSnoozeSchedule) {
+export function getBulkSnooze<Params extends RuleParams>(
+  rule: RuleDomain<Params>,
+  snoozeSchedule: RuleDomainSnoozeSchedule
+): {
+  muteAll: RuleDomain<Params>['muteAll'];
+  snoozeSchedule: RuleDomain<Params>['snoozeSchedule'];
+} {
   // If duration is -1, instead mute all
   const { id: snoozeId, duration } = snoozeSchedule;
 
   if (duration === -1) {
     return {
       muteAll: true,
-      snoozeSchedule: clearUnscheduledSnooze(attributes),
+      snoozeSchedule: clearUnscheduledSnooze<Params>(rule),
     };
   }
 
   // Bulk adding snooze schedule, don't touch the existing snooze/indefinite snooze
   if (snoozeId) {
-    const existingSnoozeSchedules = attributes.snoozeSchedule || [];
+    const existingSnoozeSchedules = rule.snoozeSchedule || [];
     return {
-      muteAll: attributes.muteAll,
+      muteAll: rule.muteAll,
       snoozeSchedule: [...existingSnoozeSchedules, snoozeSchedule],
     };
   }
@@ -51,14 +65,17 @@ export function getBulkSnoozeAttributes(attributes: RawRule, snoozeSchedule: Rul
   // Bulk snoozing, don't touch the existing snooze schedules
   return {
     muteAll: false,
-    snoozeSchedule: [...clearUnscheduledSnooze(attributes), snoozeSchedule],
+    snoozeSchedule: [...(clearUnscheduledSnooze<Params>(rule) || []), snoozeSchedule],
   };
 }
 
+/**
+ * @deprecated TODO (http-versioning): Deprecate this once we fix all RawRule types
+ */
 export function getUnsnoozeAttributes(attributes: RawRule, scheduleIds?: string[]) {
   const snoozeSchedule = scheduleIds
-    ? clearScheduledSnoozesById(attributes, scheduleIds)
-    : clearCurrentActiveSnooze(attributes);
+    ? clearScheduledSnoozesAttributesById(attributes, scheduleIds)
+    : clearCurrentActiveSnoozeAttributes(attributes);
 
   return {
     snoozeSchedule,
@@ -66,43 +83,65 @@ export function getUnsnoozeAttributes(attributes: RawRule, scheduleIds?: string[
   };
 }
 
-export function getBulkUnsnoozeAttributes(attributes: RawRule, scheduleIds?: string[]) {
+export function getBulkUnsnooze<Params extends RuleParams>(
+  rule: RuleDomain<Params>,
+  scheduleIds?: string[]
+) {
   // Bulk removing snooze schedules, don't touch the current snooze/indefinite snooze
   if (scheduleIds) {
-    const newSchedules = clearScheduledSnoozesById(attributes, scheduleIds);
+    const newSchedules = clearScheduledSnoozesById(rule, scheduleIds);
     // Unscheduled snooze is also known as snooze now
-    const unscheduledSnooze =
-      attributes.snoozeSchedule?.filter((s) => typeof s.id === 'undefined') || [];
+    const unscheduledSnooze = rule.snoozeSchedule?.filter((s) => typeof s.id === 'undefined') || [];
 
     return {
       snoozeSchedule: [...unscheduledSnooze, ...newSchedules],
-      muteAll: attributes.muteAll,
+      muteAll: rule.muteAll,
     };
   }
 
   // Bulk unsnoozing, don't touch current snooze schedules that are NOT active
   return {
-    snoozeSchedule: clearCurrentActiveSnooze(attributes),
+    snoozeSchedule: clearCurrentActiveSnooze(rule),
     muteAll: false,
   };
 }
 
-export function clearUnscheduledSnooze(attributes: RawRule) {
+/**
+ * @deprecated TODO (http-versioning): Deprecate this once we fix all RawRule types
+ */
+export function clearUnscheduledSnoozeAttributes(attributes: RawRule) {
   // Clear any snoozes that have no ID property. These are "simple" snoozes created with the quick UI, e.g. snooze for 3 days starting now
   return attributes.snoozeSchedule
     ? attributes.snoozeSchedule.filter((s) => typeof s.id !== 'undefined')
     : [];
 }
 
-export function clearScheduledSnoozesById(attributes: RawRule, ids: string[]) {
+export function clearUnscheduledSnooze<Params extends RuleParams>(rule: RuleDomain<Params>) {
+  return rule.snoozeSchedule ? rule.snoozeSchedule.filter((s) => typeof s.id !== 'undefined') : [];
+}
+
+/**
+ * @deprecated TODO (http-versioning): Deprecate this once we fix all RawRule types
+ */
+export function clearScheduledSnoozesAttributesById(attributes: RawRule, ids: string[]) {
   return attributes.snoozeSchedule
     ? attributes.snoozeSchedule.filter((s) => s.id && !ids.includes(s.id))
     : [];
 }
 
-export function clearCurrentActiveSnooze(attributes: RawRule) {
+export function clearScheduledSnoozesById<Params extends RuleParams>(
+  rule: RuleDomain<Params>,
+  ids: string[]
+) {
+  return rule.snoozeSchedule ? rule.snoozeSchedule.filter((s) => s.id && !ids.includes(s.id)) : [];
+}
+
+/**
+ * @deprecated TODO (http-versioning): Deprecate this once we fix all RawRule types
+ */
+export function clearCurrentActiveSnoozeAttributes(attributes: RawRule) {
   // First attempt to cancel a simple (unscheduled) snooze
-  const clearedUnscheduledSnoozes = clearUnscheduledSnooze(attributes);
+  const clearedUnscheduledSnoozes = clearUnscheduledSnoozeAttributes(attributes);
   // Now clear any scheduled snoozes that are currently active and never recur
   const activeSnoozes = getActiveScheduledSnoozes(attributes);
   const activeSnoozeIds = activeSnoozes?.map((s) => s.id) ?? [];
@@ -127,8 +166,51 @@ export function clearCurrentActiveSnooze(attributes: RawRule) {
   return clearedSnoozesAndSkippedRecurringSnoozes;
 }
 
-export function verifySnoozeScheduleLimit(attributes: Partial<RawRule>) {
+export function clearCurrentActiveSnooze<Params extends RuleParams>(rule: RuleDomain<Params>) {
+  // First attempt to cancel a simple (unscheduled) snooze
+  const clearedUnscheduledSnoozes = clearUnscheduledSnooze(rule);
+  // Now clear any scheduled snoozes that are currently active and never recur
+  const activeSnoozes = getActiveScheduledSnoozes(rule);
+  const activeSnoozeIds = activeSnoozes?.map((s) => s.id) ?? [];
+  const recurringSnoozesToSkip: string[] = [];
+  const clearedNonRecurringActiveSnoozes = clearedUnscheduledSnoozes.filter((s) => {
+    if (!activeSnoozeIds.includes(s.id!)) return true;
+    // Check if this is a recurring snooze, and return true if so
+    if (s.rRule.freq && s.rRule.count !== 1) {
+      recurringSnoozesToSkip.push(s.id!);
+      return true;
+    }
+  });
+  const clearedSnoozesAndSkippedRecurringSnoozes = clearedNonRecurringActiveSnoozes.map((s) => {
+    if (s.id && !recurringSnoozesToSkip.includes(s.id)) return s;
+    const currentRecurrence = activeSnoozes?.find((a) => a.id === s.id)?.lastOccurrence;
+    if (!currentRecurrence) return s;
+    return {
+      ...s,
+      skipRecurrences: (s.skipRecurrences ?? []).concat(currentRecurrence.toISOString()),
+    };
+  });
+  return clearedSnoozesAndSkippedRecurringSnoozes;
+}
+
+/**
+ * @deprecated TODO (http-versioning): Deprecate this once we fix all RawRule types
+ */
+export function verifySnoozeAttributeScheduleLimit(attributes: Partial<RawRule>) {
   const schedules = attributes.snoozeSchedule?.filter((snooze) => snooze.id);
+  if (schedules && schedules.length > 5) {
+    throw Error(
+      i18n.translate('xpack.alerting.rulesClient.snoozeSchedule.limitReached', {
+        defaultMessage: 'Rule cannot have more than 5 snooze schedules',
+      })
+    );
+  }
+}
+
+export function verifySnoozeScheduleLimit<Params extends RuleParams>(
+  snoozeSchedule: RuleDomain<Params>['snoozeSchedule']
+) {
+  const schedules = snoozeSchedule?.filter((snooze) => snooze.id);
   if (schedules && schedules.length > 5) {
     throw Error(
       i18n.translate('xpack.alerting.rulesClient.snoozeSchedule.limitReached', {

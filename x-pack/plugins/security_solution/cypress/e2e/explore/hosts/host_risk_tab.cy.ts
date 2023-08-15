@@ -6,11 +6,10 @@
  */
 
 import { cleanKibana } from '../../../tasks/common';
-import { esArchiverLoad, esArchiverUnload } from '../../../tasks/es_archiver';
 import {
   navigateToHostRiskDetailTab,
   openRiskTableFilterAndSelectTheCriticalOption,
-  removeCriticalFilter,
+  removeCriticalFilterAndCloseRiskTableFilter,
   selectFiveItemsPerPageOption,
 } from '../../../tasks/host_risk';
 import {
@@ -25,7 +24,7 @@ import { clearSearchBar, kqlSearch } from '../../../tasks/security_header';
 describe('risk tab', () => {
   before(() => {
     cleanKibana();
-    esArchiverLoad('risk_hosts');
+    cy.task('esArchiverLoad', 'risk_hosts');
   });
 
   beforeEach(() => {
@@ -35,7 +34,7 @@ describe('risk tab', () => {
   });
 
   after(() => {
-    esArchiverUnload('risk_hosts');
+    cy.task('esArchiverUnload', 'risk_hosts');
   });
 
   it('renders the table', () => {
@@ -51,7 +50,7 @@ describe('risk tab', () => {
 
     cy.get(HOST_BY_RISK_TABLE_CELL).eq(3).should('not.have.text', 'siem-kibana');
 
-    removeCriticalFilter();
+    removeCriticalFilterAndCloseRiskTableFilter();
   });
 
   it('should be able to change items count per page', () => {

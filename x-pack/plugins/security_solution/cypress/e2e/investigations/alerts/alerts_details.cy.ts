@@ -6,6 +6,7 @@
  */
 
 import type { DataTableModel } from '@kbn/securitysolution-data-table';
+import { disableExpandableFlyout } from '../../../tasks/api_calls/kibana_advanced_settings';
 import {
   ALERT_FLYOUT,
   CELL_TEXT,
@@ -25,7 +26,6 @@ import {
 import { createRule } from '../../../tasks/api_calls/rules';
 import { cleanKibana } from '../../../tasks/common';
 import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
-import { esArchiverLoad, esArchiverUnload } from '../../../tasks/es_archiver';
 import { login, visit, visitWithoutDateRange } from '../../../tasks/login';
 import { getNewRule, getUnmappedRule } from '../../../objects/rule';
 import { ALERTS_URL } from '../../../urls/navigation';
@@ -40,6 +40,7 @@ describe('Alert details flyout', () => {
     before(() => {
       cleanKibana();
       login();
+      disableExpandableFlyout();
       createRule(getNewRule());
       visitWithoutDateRange(ALERTS_URL);
       waitForAlertsToPopulate();
@@ -59,19 +60,20 @@ describe('Alert details flyout', () => {
   describe('With unmapped fields', () => {
     before(() => {
       cleanKibana();
-      esArchiverLoad('unmapped_fields');
+      cy.task('esArchiverLoad', 'unmapped_fields');
       createRule(getUnmappedRule());
     });
 
     beforeEach(() => {
       login();
+      disableExpandableFlyout();
       visitWithoutDateRange(ALERTS_URL);
       waitForAlertsToPopulate();
       expandFirstAlert();
     });
 
     after(() => {
-      esArchiverUnload('unmapped_fields');
+      cy.task('esArchiverUnload', 'unmapped_fields');
     });
 
     it('should display the unmapped field on the JSON view', () => {
@@ -124,11 +126,12 @@ describe('Alert details flyout', () => {
   describe('Url state management', () => {
     before(() => {
       cleanKibana();
-      esArchiverLoad('query_alert');
+      cy.task('esArchiverLoad', 'query_alert');
     });
 
     beforeEach(() => {
       login();
+      disableExpandableFlyout();
       visit(ALERTS_URL);
       waitForAlertsToPopulate();
       expandFirstAlert();
@@ -169,11 +172,12 @@ describe('Alert details flyout', () => {
   describe('Localstorage management', () => {
     before(() => {
       cleanKibana();
-      esArchiverLoad('query_alert');
+      cy.task('esArchiverLoad', 'query_alert');
     });
 
     beforeEach(() => {
       login();
+      disableExpandableFlyout();
       visit(ALERTS_URL);
       waitForAlertsToPopulate();
       expandFirstAlert();

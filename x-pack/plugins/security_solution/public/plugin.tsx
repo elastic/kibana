@@ -16,8 +16,11 @@ import type {
   PluginInitializerContext,
   Plugin as IPlugin,
 } from '@kbn/core/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { FilterManager, NowProvider, QueryService } from '@kbn/data-plugin/public';
 import { DEFAULT_APP_CATEGORIES, AppNavLinkStatus } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
+import type { FleetUiExtensionGetterOptions } from './management/pages/policy/view/ingest_manager_integration/types';
 import type {
   PluginSetup,
   PluginStart,
@@ -41,7 +44,7 @@ import type { SecuritySolutionUiConfigType } from './common/types';
 import { ExperimentalFeaturesService } from './common/experimental_features_service';
 
 import { getLazyEndpointPolicyEditExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_policy_edit_extension';
-import { LazyEndpointPolicyCreateExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_policy_create_extension';
+import { getLazyEndpointPolicyCreateExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_policy_create_extension';
 import { LazyEndpointPolicyCreateMultiStepExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_policy_create_multi_step_extension';
 import { getLazyEndpointPackageCustomExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_package_custom_extension';
 import { getLazyEndpointPolicyResponseExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_policy_response_extension';
@@ -52,6 +55,7 @@ import { LazyEndpointCustomAssetsExtension } from './management/pages/policy/vie
 
 import type { SecurityAppStore } from './common/store/types';
 import { PluginContract } from './plugin_contract';
+import { TopValuesPopoverService } from './app/components/top_values_popover/top_values_popover_service';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   /**
@@ -79,6 +83,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   private telemetry: TelemetryService;
 
   readonly experimentalFeatures: ExperimentalFeatures;
+  private queryService: QueryService = new QueryService();
+  private nowProvider: NowProvider = new NowProvider();
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config = this.initializerContext.config.get<SecuritySolutionUiConfigType>();
@@ -90,6 +96,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     this.prebuiltRulesPackageVersion = this.config.prebuiltRulesPackageVersion;
     this.contract = new PluginContract();
     this.telemetry = new TelemetryService();
+    this.storage = new Storage(window.localStorage);
   }
   private appUpdater$ = new Subject<AppUpdater>();
 
@@ -124,6 +131,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     };
     this.telemetry.setup({ analytics: core.analytics }, telemetryContext);
 
+    this.queryService?.setup({
+      uiSettings: core.uiSettings,
+      storage: this.storage,
+      nowProvider: this.nowProvider,
+    });
+
     if (plugins.home) {
       plugins.home.featureCatalogue.registerSolution({
         id: APP_ID,
@@ -150,6 +163,23 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
       const { savedObjectsTaggingOss, ...startPlugins } = startPluginsDeps;
 
+      const query = this.queryService.start({
+        uiSettings: core.uiSettings,
+        storage: this.storage,
+        http: core.http,
+      });
+
+      const filterManager = new FilterManager(core.uiSettings);
+
+      // used for creating a custom stateful KQL Query Bar
+      const customDataService: DataPublicPluginStart = {
+        ...startPlugins.data,
+        query: {
+          ...query,
+          filterManager,
+        },
+      };
+
       const services: StartServices = {
         ...coreStart,
         ...startPlugins,
@@ -165,6 +195,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         },
         savedObjectsManagement: startPluginsDeps.savedObjectsManagement,
         telemetry: this.telemetry.start(),
+        discoverFilterManager: filterManager,
+        customDataService,
+        topValuesPopover: new TopValuesPopoverService(),
       };
       return services;
     };
@@ -244,29 +277,36 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
     if (plugins.fleet) {
       const { registerExtension } = plugins.fleet;
+      const registerOptions: FleetUiExtensionGetterOptions = {
+        coreStart: core,
+        depsStart: plugins,
+        services: {
+          upsellingService: this.contract.upsellingService,
+        },
+      };
 
       registerExtension({
         package: 'endpoint',
         view: 'package-policy-edit',
-        Component: getLazyEndpointPolicyEditExtension(core, plugins),
+        Component: getLazyEndpointPolicyEditExtension(registerOptions),
       });
 
       registerExtension({
         package: 'endpoint',
         view: 'package-policy-response',
-        Component: getLazyEndpointPolicyResponseExtension(core, plugins),
+        Component: getLazyEndpointPolicyResponseExtension(registerOptions),
       });
 
       registerExtension({
         package: 'endpoint',
         view: 'package-generic-errors-list',
-        Component: getLazyEndpointGenericErrorsListExtension(core, plugins),
+        Component: getLazyEndpointGenericErrorsListExtension(registerOptions),
       });
 
       registerExtension({
         package: 'endpoint',
         view: 'package-policy-create',
-        Component: LazyEndpointPolicyCreateExtension,
+        Component: getLazyEndpointPolicyCreateExtension(registerOptions),
       });
 
       registerExtension({
@@ -278,7 +318,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       registerExtension({
         package: 'endpoint',
         view: 'package-detail-custom',
-        Component: getLazyEndpointPackageCustomExtension(core, plugins),
+        Component: getLazyEndpointPackageCustomExtension(registerOptions),
       });
 
       registerExtension({
@@ -295,6 +335,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   }
 
   public stop() {
+    this.queryService.stop();
     licenseService.stop();
     return this.contract.getStopContract();
   }
@@ -470,27 +511,28 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   async registerAppLinks(core: CoreStart, plugins: StartPlugins) {
     const { links, getFilteredLinks } = await this.lazyApplicationLinks();
     const { license$ } = plugins.licensing;
-    const upselling = this.contract.upsellingService;
+    const { upsellingService, appLinksSwitcher } = this.contract;
 
     registerDeepLinksUpdater(this.appUpdater$);
 
+    const baseLinksPermissions: LinksPermissions = {
+      experimentalFeatures: this.experimentalFeatures,
+      upselling: upsellingService,
+      capabilities: core.application.capabilities,
+    };
+
     license$.subscribe(async (license) => {
       const linksPermissions: LinksPermissions = {
-        experimentalFeatures: this.experimentalFeatures,
-        upselling,
-        capabilities: core.application.capabilities,
+        ...baseLinksPermissions,
+        ...(license.type != null && { license }),
       };
 
-      if (license.type !== undefined) {
-        linksPermissions.license = license;
-      }
-
       // set initial links to not block rendering
-      updateAppLinks(links, linksPermissions);
+      updateAppLinks(appLinksSwitcher(links), linksPermissions);
 
       // set filtered links asynchronously
       const filteredLinks = await getFilteredLinks(core, plugins);
-      updateAppLinks(filteredLinks, linksPermissions);
+      updateAppLinks(appLinksSwitcher(filteredLinks), linksPermissions);
     });
   }
 }

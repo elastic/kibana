@@ -15,6 +15,7 @@ import {
   EuiTitle,
   EuiSelect,
   EuiCallOut,
+  EuiHorizontalRule,
 } from '@elastic/eui';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import { PackageInfo } from '@kbn/fleet-plugin/common';
@@ -23,7 +24,6 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import {
   getAwsCredentialsFormManualOptions,
-  AwsCredentialsType,
   AwsOptions,
   DEFAULT_MANUAL_AWS_CREDENTIALS_TYPE,
 } from './get_aws_credentials_form_options';
@@ -34,6 +34,7 @@ import {
   NewPackagePolicyPostureInput,
 } from '../utils';
 import { SetupFormat, useAwsCredentialsForm } from './hooks';
+import { AwsCredentialsType } from '../../../../common/types';
 
 interface AWSSetupInfoContentProps {
   integrationLink: string;
@@ -42,7 +43,7 @@ interface AWSSetupInfoContentProps {
 const AWSSetupInfoContent = ({ integrationLink }: AWSSetupInfoContentProps) => {
   return (
     <>
-      <EuiSpacer size="l" />
+      <EuiHorizontalRule margin="xxl" />
       <EuiTitle size="s">
         <h2>
           <FormattedMessage
@@ -166,7 +167,7 @@ const Link = ({ children, url }: { children: React.ReactNode; url: string }) => 
   </EuiLink>
 );
 
-const ReadDocumentation = ({ url }: { url: string }) => {
+export const ReadDocumentation = ({ url }: { url: string }) => {
   return (
     <EuiText color="subdued" size="s">
       <FormattedMessage

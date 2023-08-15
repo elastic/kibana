@@ -131,6 +131,7 @@ export class KbnClientRequester {
           headers: {
             ...options.headers,
             'kbn-xsrf': 'kbn-client',
+            'x-elastic-internal-origin': 'kbn-client',
           },
           httpsAgent: this.httpsAgent,
           responseType: options.responseType,

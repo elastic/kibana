@@ -20,7 +20,6 @@ import {
   openHoverActions,
 } from '../../../tasks/network/flows';
 import { openTimelineUsingToggle } from '../../../tasks/security_main';
-import { esArchiverLoad, esArchiverUnload } from '../../../tasks/es_archiver';
 
 const testDomain = 'myTest';
 
@@ -32,11 +31,11 @@ describe.skip('Hover actions', () => {
   };
 
   before(() => {
-    esArchiverLoad('network');
+    cy.task('esArchiverLoad', 'network');
   });
 
   after(() => {
-    esArchiverUnload('network');
+    cy.task('esArchiverUnload', 'network');
   });
 
   beforeEach(() => {

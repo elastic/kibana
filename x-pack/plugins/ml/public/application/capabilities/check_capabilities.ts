@@ -24,7 +24,7 @@ import { type MlApiServices } from '../services/ml_api_service';
 
 let _capabilities: MlCapabilities = getDefaultCapabilities();
 
-const CAPABILITIES_REFRESH_INTERVAL = 60000;
+const CAPABILITIES_REFRESH_INTERVAL = 5 * 60 * 1000; // 5min;
 
 export class MlCapabilitiesService {
   private _isLoading$ = new BehaviorSubject<boolean>(true);
@@ -104,7 +104,6 @@ export function usePermissionCheck<T extends MlCapabilitiesKey | MlCapabilitiesK
     mlCapabilitiesService.capabilities$,
     mlCapabilitiesService.getCapabilities()
   );
-
   return useMemo(() => {
     return Array.isArray(requestedCapabilities.current)
       ? requestedCapabilities.current.map((c) => capabilities[c])

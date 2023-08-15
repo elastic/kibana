@@ -270,6 +270,7 @@ export const VisualizeListing = () => {
       uiSettings,
       kbnUrlStateStorage,
       listingViewRegistry,
+      serverless,
     },
   } = useKibana<VisualizeServices>();
   const { pathname } = useLocation();
@@ -298,13 +299,20 @@ export const VisualizeListing = () => {
   useMount(() => {
     // Reset editor state for all apps if the visualize listing page is loaded.
     stateTransferService.clearEditorState();
-    chrome.setBreadcrumbs([
-      {
-        text: i18n.translate('visualizations.visualizeListingBreadcrumbsTitle', {
-          defaultMessage: 'Visualize Library',
-        }),
-      },
-    ]);
+    if (serverless?.setBreadcrumbs) {
+      // reset any deeper context breadcrumbs
+      // "Visualization" breadcrumb is set automatically by the serverless navigation
+      serverless.setBreadcrumbs([]);
+    } else {
+      chrome.setBreadcrumbs([
+        {
+          text: i18n.translate('visualizations.visualizeListingBreadcrumbsTitle', {
+            defaultMessage: 'Visualize Library',
+          }),
+        },
+      ]);
+    }
+
     chrome.docTitle.change(
       i18n.translate('visualizations.listingPageTitle', { defaultMessage: 'Visualize Library' })
     );
@@ -370,8 +378,10 @@ export const VisualizeListing = () => {
             entityNamePlural={i18n.translate('visualizations.listing.table.entityNamePlural', {
               defaultMessage: 'visualizations',
             })}
-            getDetailViewLink={({ attributes: { editApp, editUrl, error } }) =>
-              getVisualizeListItemLink(application, kbnUrlStateStorage, editApp, editUrl, error)
+            getDetailViewLink={({ attributes: { editApp, editUrl, error, readOnly } }) =>
+              readOnly
+                ? undefined
+                : getVisualizeListItemLink(application, kbnUrlStateStorage, editApp, editUrl, error)
             }
             tableCaption={visualizeLibraryTitle}
             {...tableViewProps}

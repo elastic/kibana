@@ -20,9 +20,9 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
+import { ExpandablePanel } from '../../shared/components/expandable_panel';
 import type { RelatedHost } from '../../../../common/search_strategy/security_solution/related_entities/related_hosts';
 import type { RiskSeverity } from '../../../../common/search_strategy';
-import { EntityPanel } from '../../right/components/entity_panel';
 import { UserOverview } from '../../../overview/components/user_overview';
 import { AnomalyTableProvider } from '../../../common/components/ml/anomaly/anomaly_table_provider';
 import { InspectButton, InspectButtonContainer } from '../../../common/components/inspect';
@@ -50,6 +50,7 @@ import { USER_DETAILS_RELATED_HOSTS_TABLE_TEST_ID, USER_DETAILS_TEST_ID } from '
 import { ENTITY_RISK_CLASSIFICATION } from '../../../explore/components/risk_score/translations';
 import { HOST_RISK_TOOLTIP } from '../../../explore/hosts/components/hosts_table/translations';
 import * as i18n from './translations';
+import { useHasSecurityCapability } from '../../../helper_hooks';
 
 const USER_DETAILS_ID = 'entities-users-details';
 const RELATED_HOSTS_ID = 'entities-users-related-hosts';
@@ -77,7 +78,11 @@ export const UserDetails: React.FC<UserDetailsProps> = ({ userName, timestamp })
   // create a unique, but stable (across re-renders) query id
   const userDetailsQueryId = useMemo(() => `${USER_DETAILS_ID}-${uuid()}`, []);
   const relatedHostsQueryId = useMemo(() => `${RELATED_HOSTS_ID}-${uuid()}`, []);
+
+  const hasEntityAnalyticsCapability = useHasSecurityCapability('entity-analytics');
   const isPlatinumOrTrialLicense = useMlCapabilities().isPlatinumOrTrialLicense;
+  const isEntityAnalyticsAuthorized = isPlatinumOrTrialLicense && hasEntityAnalyticsCapability;
+
   const narrowDateRange = useCallback(
     (score, interval) => {
       const fromTo = scoreIntervalToDateTime(score, interval);
@@ -151,7 +156,7 @@ export const UserDetails: React.FC<UserDetailsProps> = ({ userName, timestamp })
           );
         },
       },
-      ...(isPlatinumOrTrialLicense
+      ...(isEntityAnalyticsAuthorized
         ? [
             {
               field: 'risk',
@@ -176,7 +181,7 @@ export const UserDetails: React.FC<UserDetailsProps> = ({ userName, timestamp })
           ]
         : []),
     ],
-    [isPlatinumOrTrialLicense]
+    [isEntityAnalyticsAuthorized]
   );
 
   const relatedHostsCount = useMemo(
@@ -206,12 +211,16 @@ export const UserDetails: React.FC<UserDetailsProps> = ({ userName, timestamp })
         <h4>{i18n.USERS_TITLE}</h4>
       </EuiTitle>
       <EuiSpacer size="s" />
-      <EntityPanel
-        title={userName}
-        iconType={'user'}
-        expandable={true}
-        expanded={true}
-        headerContent={relatedHostsCount}
+      <ExpandablePanel
+        header={{
+          title: userName,
+          iconType: 'user',
+          headerContent: relatedHostsCount,
+        }}
+        expand={{
+          expandable: true,
+          expandedOnFirstRender: true,
+        }}
         data-test-subj={USER_DETAILS_TEST_ID}
       >
         <EuiTitle size="xxs">
@@ -279,7 +288,7 @@ export const UserDetails: React.FC<UserDetailsProps> = ({ userName, timestamp })
             inspectIndex={0}
           />
         </RelatedHostsManage>
-      </EntityPanel>
+      </ExpandablePanel>
     </>
   );
 };

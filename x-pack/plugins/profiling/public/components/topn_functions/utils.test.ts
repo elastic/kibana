@@ -12,7 +12,7 @@ describe('Top N functions: Utils', () => {
       expect(getColorLabel(-10)).toEqual({
         color: 'success',
         label: '10.00%',
-        icon: 'sortDown',
+        icon: 'sortUp',
       });
     });
 
@@ -28,7 +28,7 @@ describe('Top N functions: Utils', () => {
       expect(getColorLabel(10)).toEqual({
         color: 'danger',
         label: '10.00%',
-        icon: 'sortUp',
+        icon: 'sortDown',
       });
     });
   });

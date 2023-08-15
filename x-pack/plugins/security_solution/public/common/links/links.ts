@@ -19,28 +19,26 @@ import type {
 } from './types';
 
 /**
- * App links updater, it stores the `appLinkItems` recursive hierarchy and keeps
+ * App links updater, it stores the links recursive hierarchy and keeps
  * the value of the app links in sync with all application components.
  * It can be updated using `updateAppLinks`.
- * Read it using subscription or `useAppLinks` hook.
  */
 const appLinksUpdater$ = new BehaviorSubject<AppLinkItems>([]);
+export const appLinks$ = appLinksUpdater$.asObservable();
+
 // stores a flatten normalized appLinkItems object for internal direct id access
 const normalizedAppLinksUpdater$ = new BehaviorSubject<NormalizedLinks>({});
 
-// AppLinks observable
-export const appLinks$ = appLinksUpdater$.asObservable();
-
 /**
- * Updates the app links applying the filter by permissions
+ * Updates the internal app links applying the filter by permissions
  */
 export const updateAppLinks = (
   appLinksToUpdate: AppLinkItems,
   linksPermissions: LinksPermissions
 ) => {
-  const appLinks = processAppLinks(appLinksToUpdate, linksPermissions);
-  appLinksUpdater$.next(Object.freeze(appLinks));
-  normalizedAppLinksUpdater$.next(Object.freeze(getNormalizedLinks(appLinks)));
+  const processedAppLinks = processAppLinks(appLinksToUpdate, linksPermissions);
+  appLinksUpdater$.next(Object.freeze(processedAppLinks));
+  normalizedAppLinksUpdater$.next(Object.freeze(getNormalizedLinks(processedAppLinks)));
 };
 
 /**
@@ -134,11 +132,11 @@ export const getLinksWithHiddenTimeline = (): LinkInfo[] => {
 /**
  * Creates the `NormalizedLinks` structure from a `LinkItem` array
  */
-const getNormalizedLinks = (
+function getNormalizedLinks(
   currentLinks: AppLinkItems,
   parentId?: SecurityPageName
-): NormalizedLinks =>
-  currentLinks.reduce<NormalizedLinks>((normalized, { links, ...currentLink }) => {
+): NormalizedLinks {
+  return currentLinks.reduce<NormalizedLinks>((normalized, { links, ...currentLink }) => {
     normalized[currentLink.id] = {
       ...currentLink,
       parentId,
@@ -148,6 +146,7 @@ const getNormalizedLinks = (
     }
     return normalized;
   }, {});
+}
 
 const getNormalizedLink = (id: SecurityPageName): Readonly<NormalizedLink> | undefined =>
   normalizedAppLinksUpdater$.getValue()[id];

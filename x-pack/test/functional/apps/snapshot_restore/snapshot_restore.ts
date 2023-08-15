@@ -15,8 +15,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const es = getService('es');
   const security = getService('security');
 
-  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/160929
-  describe.skip('Snapshot restore', function () {
+  describe('Snapshot restore', function () {
     before(async () => {
       await security.testUser.setRoles(['snapshot_restore_user'], { skipBrowserRefresh: true });
       await pageObjects.common.navigateToApp('snapshotRestore');

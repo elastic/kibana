@@ -7,16 +7,19 @@
 
 import type { SavedObjectReference } from '@kbn/core/server';
 import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
+import type { CaseConnector, ExternalService, User } from '../../../common/types/domain';
 import { UserActionTypes } from '../../../common/types/domain';
-import { CASE_COMMENT_SAVED_OBJECT, CASE_SAVED_OBJECT } from '../../../common/constants';
+import {
+  CASE_COMMENT_SAVED_OBJECT,
+  CASE_SAVED_OBJECT,
+  NONE_CONNECTOR_ID,
+} from '../../../common/constants';
 import {
   CASE_REF_NAME,
   COMMENT_REF_NAME,
   CONNECTOR_ID_REFERENCE_NAME,
   PUSH_CONNECTOR_ID_REFERENCE_NAME,
 } from '../../common/constants';
-import type { CaseConnector, CaseExternalServiceBasic, User } from '../../../common/api';
-import { NONE_CONNECTOR_ID } from '../../../common/api';
 import type {
   BuilderDeps,
   BuilderParameters,
@@ -84,8 +87,8 @@ export abstract class UserActionBuilder {
   }
 
   protected extractConnectorIdFromExternalService(
-    externalService: CaseExternalServiceBasic
-  ): Omit<CaseExternalServiceBasic, 'connector_id'> {
+    externalService: ExternalService
+  ): Omit<ExternalService, 'connector_id'> {
     const { connector_id: connectorId, ...restExternalService } = externalService;
     return restExternalService;
   }
