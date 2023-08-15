@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { act, render } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
 import { CoreStart } from '@kbn/core/public';
 import { AppMountParameters } from '@kbn/core/public';
 import { TimeBuckets } from '@kbn/data-plugin/common';
@@ -45,7 +45,9 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
 }));
 jest.mock('@kbn/observability-shared-plugin/public');
 jest.spyOn(pluginContext, 'usePluginContext').mockImplementation(() => ({
-  appMountParameters: {} as AppMountParameters,
+  appMountParameters: {
+    setHeaderActionMenu: () => {},
+  } as unknown as AppMountParameters,
   config: {
     unsafe: {
       slo: { enabled: false },
@@ -144,18 +146,18 @@ describe('AlertsPage with all capabilities', () => {
   });
 
   it('should render an alerts page template', async () => {
-    await act(async () => {
-      const wrapper = await setup();
-      expect(wrapper.queryByText('Alerts')).toBeInTheDocument();
+    const wrapper = await setup();
+    await waitFor(() => {
+      expect(wrapper.getByText('Alerts')).toBeInTheDocument();
     });
   });
 
   it('renders MaintenanceWindowCallout if one exists', async () => {
     fetchActiveMaintenanceWindowsMock.mockResolvedValue([RUNNING_MAINTENANCE_WINDOW_1]);
+    const wrapper = await setup();
 
-    await act(async () => {
-      const wrapper = await setup();
-      expect(await wrapper.findByText('Maintenance window is running')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(wrapper.getByTestId('maintenanceWindowCallout')).toBeInTheDocument();
       expect(fetchActiveMaintenanceWindowsMock).toHaveBeenCalledTimes(1);
     });
   });
