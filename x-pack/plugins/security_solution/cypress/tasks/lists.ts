@@ -15,9 +15,10 @@ import {
   VALUE_LIST_FILE_UPLOAD_BUTTON,
   VALUE_LIST_TYPE_SELECTOR,
 } from '../screens/lists';
+import { rootRequest } from './common';
 
 export const waitForListsIndexToBeCreated = () => {
-  cy.request({ url: '/api/lists/index', retryOnStatusCodeFailure: true }).then((response) => {
+  rootRequest({ url: '/api/lists/index', retryOnStatusCodeFailure: true }).then((response) => {
     if (response.status !== 200) {
       cy.wait(7500);
     }
@@ -72,7 +73,7 @@ export const deleteValueLists = (
  * Ref: https://www.elastic.co/guide/en/security/current/lists-api-delete-container.html
  */
 export const deleteValueList = (list: string): Cypress.Chainable<Cypress.Response<unknown>> => {
-  return cy.request({
+  return rootRequest({
     method: 'DELETE',
     url: `api/lists?id=${list}`,
     headers: { 'kbn-xsrf': 'delete-lists' },
@@ -100,7 +101,7 @@ export const uploadListItemData = (
     .filter((line) => line.trim() !== '')
     .join('\n');
 
-  return cy.request({
+  return rootRequest({
     method: 'POST',
     url: `api/lists/items/_import?type=${type}`,
     encoding: 'binary',

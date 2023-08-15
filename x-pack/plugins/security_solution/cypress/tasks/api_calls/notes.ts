@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import { rootRequest } from '../common';
+
 export const addNoteToTimeline = (
   note: string,
   timelineId: string
 ): Cypress.Chainable<Cypress.Response<unknown>> =>
-  cy.request({
+  rootRequest({
     method: 'PATCH',
     url: '/api/note',
     body: {

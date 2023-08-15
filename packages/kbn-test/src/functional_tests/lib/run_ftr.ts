@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 import type { ToolingLog } from '@kbn/dev-utils';
-import { FunctionalTestRunner, readConfigFile, EsVersion } from '../../functional_test_runner';
-import { CliError } from './run_cli';
+import { createFailError } from '@kbn/dev-utils';
+
+import { EsVersion, readConfigFile, FunctionalTestRunner } from '../../functional_test_runner';
 
 export interface CreateFtrOptions {
   /** installation dir from which to run Kibana */
@@ -33,6 +34,7 @@ export interface CreateFtrOptions {
 export interface CreateFtrParams {
   configPath: string;
   options: CreateFtrOptions;
+  signal?: AbortSignal;
 }
 async function createFtr({
   configPath,
@@ -49,40 +51,35 @@ async function createFtr({
     dryRun,
   },
 }: CreateFtrParams) {
-  const config = await readConfigFile(log, esVersion, configPath);
+  const config = await readConfigFile(log, esVersion, configPath, {
+    mochaOpts: {
+      bail: !!bail,
+      grep,
+      dryRun: !!dryRun,
+    },
+    kbnTestServer: {
+      installDir,
+    },
+    suiteFiles: {
+      include: suiteFiles?.include || [],
+      exclude: suiteFiles?.exclude || [],
+    },
+    suiteTags: {
+      include: suiteTags?.include || [],
+      exclude: suiteTags?.exclude || [],
+    },
+    updateBaselines,
+    updateSnapshots,
+  });
 
   return {
     config,
-    ftr: new FunctionalTestRunner(
-      log,
-      configPath,
-      {
-        mochaOpts: {
-          bail: !!bail,
-          grep,
-          dryRun: !!dryRun,
-        },
-        kbnTestServer: {
-          installDir,
-        },
-        updateBaselines,
-        updateSnapshots,
-        suiteFiles: {
-          include: [...(suiteFiles?.include || []), ...config.get('suiteFiles.include')],
-          exclude: [...(suiteFiles?.exclude || []), ...config.get('suiteFiles.exclude')],
-        },
-        suiteTags: {
-          include: [...(suiteTags?.include || []), ...config.get('suiteTags.include')],
-          exclude: [...(suiteTags?.exclude || []), ...config.get('suiteTags.exclude')],
-        },
-      },
-      esVersion
-    ),
+    ftr: new FunctionalTestRunner(log, config, esVersion),
   };
 }
 
-export async function assertNoneExcluded(params: CreateFtrParams) {
-  const { config, ftr } = await createFtr(params);
+export async function assertNoneExcluded({ configPath, options }: CreateFtrParams) {
+  const { config, ftr } = await createFtr({ configPath, options });
 
   if (config.get('testRunner')) {
     // tests with custom test runners are not included in this check
@@ -90,37 +87,37 @@ export async function assertNoneExcluded(params: CreateFtrParams) {
   }
 
   const stats = await ftr.getTestStats();
-  if (stats.testsExcludedByTag.length > 0) {
-    throw new CliError(`
-      ${stats.testsExcludedByTag.length} tests in the ${params.configPath} config
+  if (stats?.testsExcludedByTag.length > 0) {
+    throw createFailError(`
+      ${stats?.testsExcludedByTag.length} tests in the ${configPath} config
       are excluded when filtering by the tags run on CI. Make sure that all suites are
       tagged with one of the following tags:
 
-      ${JSON.stringify(params.options.suiteTags)}
+      ${JSON.stringify(options.suiteTags)}
 
-      - ${stats.testsExcludedByTag.join('\n      - ')}
+      - ${stats?.testsExcludedByTag.join('\n      - ')}
     `);
   }
 }
 
-export async function runFtr(params: CreateFtrParams, signal?: AbortSignal) {
-  const { ftr } = await createFtr(params);
+export async function runFtr({ configPath, options, signal }: CreateFtrParams) {
+  const { ftr } = await createFtr({ configPath, options });
 
   const failureCount = await ftr.run(signal);
   if (failureCount > 0) {
-    throw new CliError(
+    throw createFailError(
       `${failureCount} functional test ${failureCount === 1 ? 'failure' : 'failures'}`
     );
   }
 }
 
-export async function hasTests(params: CreateFtrParams) {
-  const { ftr, config } = await createFtr(params);
+export async function hasTests({ configPath, options }: CreateFtrParams) {
+  const { ftr, config } = await createFtr({ configPath, options });
 
   if (config.get('testRunner')) {
     // configs with custom test runners are assumed to always have tests
     return true;
   }
   const stats = await ftr.getTestStats();
-  return stats.testCount > 0;
+  return stats?.testCount && stats?.testCount > 0;
 }

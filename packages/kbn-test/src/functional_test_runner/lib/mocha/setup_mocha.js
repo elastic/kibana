@@ -25,15 +25,15 @@ import { validateCiGroupTags } from './validate_ci_group_tags';
  *  @param  {EsVersion} esVersion
  *  @return {Promise<Mocha>}
  */
-export async function setupMocha(
+export async function setupMocha({
   lifecycle,
   log,
   config,
   providers,
   esVersion,
   reporter,
-  reporterOptions
-) {
+  reporterOptions,
+}) {
   // configure mocha
   const mocha = new Mocha({
     ...config.get('mochaOpts'),

@@ -134,19 +134,21 @@ export const deleteRoleAndUser = (role: ROLES) => {
 };
 
 export const loginWithUser = (user: User) => {
-  cy.request({
-    body: {
-      providerType: 'basic',
-      providerName: 'basic',
-      currentURL: '/',
-      params: {
-        username: user.username,
-        password: user.password,
+  cy.session(user, () => {
+    cy.request({
+      body: {
+        providerType: 'basic',
+        providerName: 'basic',
+        currentURL: '/',
+        params: {
+          username: user.username,
+          password: user.password,
+        },
       },
-    },
-    headers: { 'kbn-xsrf': 'cypress-creds-via-config' },
-    method: 'POST',
-    url: constructUrlWithUser(user, LOGIN_API_ENDPOINT),
+      headers: { 'kbn-xsrf': 'cypress-creds-via-config' },
+      method: 'POST',
+      url: constructUrlWithUser(user, LOGIN_API_ENDPOINT),
+    });
   });
 };
 
@@ -161,19 +163,21 @@ export const loginWithRole = async (role: ROLES) => {
     port: Cypress.env('configport'),
   } as UrlObject);
   cy.log(`origin: ${theUrl}`);
-  cy.request({
-    body: {
-      providerType: 'basic',
-      providerName: 'basic',
-      currentURL: '/',
-      params: {
-        username: role,
-        password: 'changeme',
+  cy.session(role, () => {
+    cy.request({
+      body: {
+        providerType: 'basic',
+        providerName: 'basic',
+        currentURL: '/',
+        params: {
+          username: role,
+          password: 'changeme',
+        },
       },
-    },
-    headers: { 'kbn-xsrf': 'cypress-creds-via-config' },
-    method: 'POST',
-    url: getUrlWithRoute(role, LOGIN_API_ENDPOINT),
+      headers: { 'kbn-xsrf': 'cypress-creds-via-config' },
+      method: 'POST',
+      url: getUrlWithRoute(role, LOGIN_API_ENDPOINT),
+    });
   });
 };
 
@@ -214,19 +218,25 @@ const loginViaEnvironmentCredentials = () => {
   );
 
   // programmatically authenticate without interacting with the Kibana login page
-  cy.request({
-    body: {
-      providerType: 'basic',
-      providerName: 'basic',
-      currentURL: '/',
-      params: {
-        username: Cypress.env(ELASTICSEARCH_USERNAME),
-        password: Cypress.env(ELASTICSEARCH_PASSWORD),
+  const params = {
+    username: Cypress.env(ELASTICSEARCH_USERNAME),
+    password: Cypress.env(ELASTICSEARCH_PASSWORD),
+  };
+  cy.session(params, () => {
+    cy.request({
+      body: {
+        providerType: 'basic',
+        providerName: 'basic',
+        currentURL: '/',
+        params: {
+          username: Cypress.env(ELASTICSEARCH_USERNAME),
+          password: Cypress.env(ELASTICSEARCH_PASSWORD),
+        },
       },
-    },
-    headers: { 'kbn-xsrf': 'cypress-creds-via-env' },
-    method: 'POST',
-    url: `${Cypress.config().baseUrl}${LOGIN_API_ENDPOINT}`,
+      headers: { 'kbn-xsrf': 'cypress-creds-via-env' },
+      method: 'POST',
+      url: `${Cypress.config().baseUrl}${LOGIN_API_ENDPOINT}`,
+    });
   });
 };
 
@@ -245,19 +255,21 @@ const loginViaConfig = () => {
     const config = yaml.safeLoad(kibanaDevYml);
 
     // programmatically authenticate without interacting with the Kibana login page
-    cy.request({
-      body: {
-        providerType: 'basic',
-        providerName: 'basic',
-        currentURL: '/',
-        params: {
-          username: config.elasticsearch.username,
-          password: config.elasticsearch.password,
+    cy.session(config, () => {
+      cy.request({
+        body: {
+          providerType: 'basic',
+          providerName: 'basic',
+          currentURL: '/',
+          params: {
+            username: config.elasticsearch.username,
+            password: config.elasticsearch.password,
+          },
         },
-      },
-      headers: { 'kbn-xsrf': 'cypress-creds-via-config' },
-      method: 'POST',
-      url: `${Cypress.config().baseUrl}${LOGIN_API_ENDPOINT}`,
+        headers: { 'kbn-xsrf': 'cypress-creds-via-config' },
+        method: 'POST',
+        url: `${Cypress.config().baseUrl}${LOGIN_API_ENDPOINT}`,
+      });
     });
   });
 };

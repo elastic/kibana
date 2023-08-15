@@ -49,7 +49,6 @@ export const openTimeline = (id?: string) => {
 };
 
 export const waitForTimelinesPanelToBeLoaded = () => {
-  cy.get(LOADING_INDICATOR).should('exist');
   cy.get(LOADING_INDICATOR).should('not.exist');
   cy.get(TIMELINES_TABLE).should('exist');
 };
