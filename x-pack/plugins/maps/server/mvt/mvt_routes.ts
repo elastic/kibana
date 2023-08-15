@@ -10,8 +10,6 @@ import { schema } from '@kbn/config-schema';
 import { KibanaRequest, KibanaResponseFactory, Logger } from 'src/core/server';
 import { IRouter } from 'src/core/server';
 import type { DataRequestHandlerContext } from 'src/plugins/data/server';
-// @ts-ignore not typed
-import { AbortController } from 'abortcontroller-polyfill/dist/cjs-ponyfill';
 import {
   MVT_GETTILE_API_PATH,
   API_ROOT_PATH,
