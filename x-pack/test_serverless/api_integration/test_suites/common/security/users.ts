@@ -74,7 +74,7 @@ export default function ({ getService }: FtrProviderContext) {
       // ToDo: remove when we disable user APIs
       describe('internal', () => {
         it('get', async () => {
-          const { body, status } = await supertest
+          const { status } = await supertest
             .get('/internal/security/users/elastic')
             .set(svlCommonApi.getInternalRequestHeader());
           expect(status).not.toBe(404);

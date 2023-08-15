@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { adminTestUser } from '@kbn/test';
 import expect from 'expect';
 import { parse as parseCookie } from 'tough-cookie';
 import { FtrProviderContext } from '../../../ftr_provider_context';
@@ -12,12 +13,10 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getService }: FtrProviderContext) {
   const svlCommonApi = getService('svlCommonApi');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
-  const security = getService('security');
 
   describe('security/user_profiles', function () {
-    const testUserName = 'user_with_profile';
-
     // ToDo: this test will need to change when we disable the login route
+    // Use SAML callback?
     async function login() {
       const response = await supertestWithoutAuth
         .post('/internal/security/login')
@@ -26,24 +25,11 @@ export default function ({ getService }: FtrProviderContext) {
           providerType: 'basic',
           providerName: 'basic',
           currentURL: '/',
-          params: { username: testUserName, password: 'changeme' },
+          params: { username: adminTestUser.username, password: adminTestUser.password },
         })
         .expect(200);
       return parseCookie(response.header['set-cookie'][0])!;
     }
-
-    before(async () => {
-      await security.user.create(testUserName, {
-        password: 'changeme',
-        roles: [`viewer`],
-        full_name: 'User With Profile',
-        email: 'user_with_profile@get_current_test',
-      });
-    });
-
-    after(async () => {
-      await security.user.delete(testUserName);
-    });
 
     describe('route access', () => {
       describe('internal', () => {
