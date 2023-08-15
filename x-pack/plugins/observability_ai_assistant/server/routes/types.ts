@@ -31,6 +31,9 @@ export interface ObservabilityAIAssistantRouteHandlerResources {
 
 export interface ObservabilityAIAssistantRouteCreateOptions {
   options: {
+    timeout?: {
+      idleSocket?: number;
+    };
     tags: Array<'access:ai_assistant'>;
   };
 }
