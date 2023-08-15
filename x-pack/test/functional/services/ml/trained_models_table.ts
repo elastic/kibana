@@ -279,14 +279,19 @@ export function TrainedModelsTableProvider(
       condition: string = '',
       tag: string = ''
     ) {
-      const actualInferenceConfig = await testSubjects.getVisibleText(
-        'mlTrainedModelsInferencePipelineInferenceConfigBlock'
-      );
-      expect(JSON.parse(actualInferenceConfig)).to.eql(inferenceConfig);
-      const actualFieldMap = await testSubjects.getVisibleText(
-        'mlTrainedModelsInferencePipelineFieldMapBlock'
-      );
-      expect(JSON.parse(actualFieldMap)).to.eql(fieldMap);
+      await retry.tryForTime(5000, async () => {
+        const actualInferenceConfig = await testSubjects.getVisibleText(
+          'mlTrainedModelsInferencePipelineInferenceConfigBlock'
+        );
+        expect(JSON.parse(actualInferenceConfig)).to.eql(inferenceConfig);
+      });
+
+      await retry.tryForTime(5000, async () => {
+        const actualFieldMap = await testSubjects.getVisibleText(
+          'mlTrainedModelsInferencePipelineFieldMapBlock'
+        );
+        expect(JSON.parse(actualFieldMap)).to.eql(fieldMap);
+      });
 
       if (condition || tag) {
         await this.trainedModelsInferenceOpenAdditionalSettings();
