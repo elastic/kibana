@@ -393,7 +393,7 @@ curl --request POST \
         "type": "sli.histogram.custom",
         "params": {
             "filter": "",
-            "index": "transactions,
+            "index": "transactions-*",
             "timestampField": "custom_timestamp",
             "good": {
                 "aggregation": "range",
