@@ -311,7 +311,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     log.info(`Indexed ${res.items.length} test data docs.`);
   };
 
-  describe('lens tsdb', function () {
+  // Failing ES promotion: https://github.com/elastic/kibana/issues/163970
+  describe.skip('lens tsdb', function () {
     const tsdbIndex = 'kibana_sample_data_logstsdb';
     const tsdbDataView = tsdbIndex;
     const tsdbEsArchive = 'test/functional/fixtures/es_archiver/kibana_sample_data_logs_tsdb';
