@@ -306,11 +306,13 @@ describe('Create case', () => {
       });
     });
 
-    it('should post a case on submit click with the trimmed value of title, description', async () => {
+    it('should post a case on submit click with the trimmed value of fields', async () => {
       const titleWithSpace = 'This is a title with spaces       ';
       const descriptionWithSpace =
         'This is a case description with empty spaces at the end!!             ';
-
+      const category = 'security        ';
+      const tags = ['coke     ', 'pepsi'];
+      
       useGetConnectorsMock.mockReturnValue({
         ...sampleConnectorData,
         data: connectorsMock,
@@ -334,41 +336,7 @@ describe('Create case', () => {
         'euiMarkdownEditorTextArea'
       );
       userEvent.clear(descInput);
-      userEvent.type(descInput, descriptionWithSpace);
-
-      userEvent.click(screen.getByTestId('create-case-submit'));
-
-      await waitFor(() => {
-        expect(postCase).toHaveBeenCalled();
-      });
-
-      expect(postCase).toBeCalledWith({
-        request: {
-          ...sampleDataWithoutTags,
-          title: titleWithSpace.trim(),
-          description: descriptionWithSpace.trim(),
-        },
-      });
-    });
-
-    it('should post a case on submit click with the trimmed value of category and tags', async () => {
-      const category = 'security        ';
-      const tags = ['coke     ', 'pepsi'];
-
-      useGetConnectorsMock.mockReturnValue({
-        ...sampleConnectorData,
-        data: connectorsMock,
-      });
-
-      appMockRender.render(
-        <FormContext onSuccess={onFormSubmitSuccess}>
-          <CreateCaseFormFields {...defaultCreateCaseForm} />
-          <SubmitCaseButton />
-        </FormContext>
-      );
-
-      await waitForFormToRender(screen);
-      await fillFormReactTestingLib({ renderer: screen });
+      userEvent.paste(descInput, descriptionWithSpace);
 
       const tagsInput = await within(screen.getByTestId('caseTags')).findByTestId('comboBoxInput');
       userEvent.type(tagsInput, `${tags[0]}{enter}`);
@@ -388,6 +356,8 @@ describe('Create case', () => {
       expect(postCase).toBeCalledWith({
         request: {
           ...sampleDataWithoutTags,
+          title: titleWithSpace.trim(),
+          description: descriptionWithSpace.trim(),
           tags: ['coke', 'pepsi'],
           category: 'security',
         },
