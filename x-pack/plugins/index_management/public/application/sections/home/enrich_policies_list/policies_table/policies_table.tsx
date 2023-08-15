@@ -80,8 +80,8 @@ export const PoliciesTable: FunctionComponent<Props> = ({
       name: i18n.translate('xpack.idxMgmt.enrich_policies.table.sourceIndicesField', {
         defaultMessage: 'Source indices',
       }),
-      truncateText: false,
-      render: (indices: string[]) => indices.join(', '),
+      truncateText: true,
+      render: (indices: string[]) => <span className="eui-textTruncate">{indices.join(', ')}</span>,
     },
     {
       field: 'matchField',
@@ -95,8 +95,8 @@ export const PoliciesTable: FunctionComponent<Props> = ({
       name: i18n.translate('xpack.idxMgmt.enrich_policies.table.enrichFieldsField', {
         defaultMessage: 'Enrich fields',
       }),
-      truncateText: false,
-      render: (fields: string[]) => fields.join(', '),
+      truncateText: true,
+      render: (fields: string[]) => <span className="eui-textTruncate">{fields.join(', ')}</span>,
     },
     {
       name: i18n.translate('xpack.idxMgmt.enrich_policies.table.actionsField', {
