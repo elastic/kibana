@@ -332,11 +332,11 @@ export const registerEnterpriseSearchIntegrations = (
 
     customIntegrations.registerCustomIntegration({
       id: 'onedrive',
-      title: i18n.translate('xpack.enterpriseSearch.integrations.salesforceSandboxTitle', {
+      title: i18n.translate('xpack.enterpriseSearch.integrations.oneDriveTitle', {
         defaultMessage: 'OneDrive',
       }),
       description: i18n.translate(
-        'xpack.enterpriseSearch.workplaceSearch.integrations.oneDriveTitle',
+        'xpack.enterpriseSearch.workplaceSearch.integrations.oneDriveDescription',
         {
           defaultMessage: 'Search over your content on OneDrive.',
         }
