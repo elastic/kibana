@@ -39,6 +39,10 @@ import { useWaffleTimeContext } from '../../hooks/use_waffle_time';
 import { useWaffleFiltersContext } from '../../hooks/use_waffle_filters';
 import { MetricExplorerSeriesChart } from '../../../metrics_explorer/components/series_chart';
 import { MetricsExplorerChartType } from '../../../metrics_explorer/hooks/use_metrics_explorer_options';
+<<<<<<< HEAD
+=======
+import { getTimelineChartThemes } from '../../../../../utils/get_chart_theme';
+>>>>>>> whats-new
 import { calculateDomain } from '../../../metrics_explorer/components/helpers/calculate_domain';
 import { InfraFormatter } from '../../../../../lib/lib';
 import { useMetricsHostsAnomaliesResults } from '../../hooks/use_metrics_hosts_anomalies';
@@ -293,13 +297,18 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
             domain={domain}
             ticks={6}
             gridLine={{ visible: true }}
+<<<<<<< HEAD
           />
           <Tooltip {...tooltipProps} />
           <Settings
             onElementClick={onClickPoint}
             baseTheme={chartTheme.baseTheme}
             theme={chartTheme.theme}
+=======
+>>>>>>> whats-new
           />
+          <Tooltip {...tooltipProps} />
+          <Settings onElementClick={onClickPoint} {...getTimelineChartThemes(isDarkMode)} />
         </Chart>
       </TimelineChartContainer>
     </TimelineContainer>

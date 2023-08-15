@@ -127,7 +127,11 @@ export const getSyntheticsMonitorOverviewRoute: SyntheticsRestApiRouteFactory = 
 });
 
 export function getOverviewConfigsPerLocation(
+<<<<<<< HEAD
   attributes: EncryptedSyntheticsMonitorAttributes,
+=======
+  attributes: EncryptedSyntheticsMonitor,
+>>>>>>> whats-new
   queriedLocations?: string | string[]
 ) {
   const id = attributes[ConfigKey.MONITOR_QUERY_ID];

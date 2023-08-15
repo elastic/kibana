@@ -9,7 +9,10 @@ import { assertUnreachable } from '../../../../../../../common/utility_types';
 import { invariant } from '../../../../../../../common/utils/invariant';
 
 import type {
+<<<<<<< HEAD
   AllFieldsDiff,
+=======
+>>>>>>> whats-new
   DiffableAllFields,
   DiffableCommonFields,
   DiffableCustomQueryFields,
@@ -20,6 +23,12 @@ import type {
   DiffableSavedQueryFields,
   DiffableThreatMatchFields,
   DiffableThresholdFields,
+<<<<<<< HEAD
+=======
+} from '../../../../../../../common/detection_engine/prebuilt_rules/model/diff/diffable_rule/diffable_rule';
+import type {
+  AllFieldsDiff,
+>>>>>>> whats-new
   CommonFieldsDiff,
   CustomQueryFieldsDiff,
   EqlFieldsDiff,

@@ -348,7 +348,11 @@ export interface RuleType<
   authorizedConsumers: Record<string, { read: boolean; all: boolean }>;
   enabledInLicense: boolean;
   hasFieldsForAAD?: boolean;
+<<<<<<< HEAD
   hasAlertsMappings?: boolean;
+=======
+  hasGetSummarizedAlerts?: boolean;
+>>>>>>> whats-new
 }
 
 export type SanitizedRuleType = Omit<RuleType, 'apiKey'>;

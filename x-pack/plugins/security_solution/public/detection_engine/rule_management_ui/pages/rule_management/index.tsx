@@ -6,7 +6,10 @@
  */
 
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+<<<<<<< HEAD
 import { MaintenanceWindowCallout } from '@kbn/alerts-ui-shared';
+=======
+>>>>>>> whats-new
 import React, { useCallback } from 'react';
 import { APP_UI_ID } from '../../../../../common/constants';
 import { SecurityPageName } from '../../../../app/types';
@@ -30,10 +33,17 @@ import * as i18n from '../../../../detections/pages/detection_engine/rules/trans
 import { useInvalidateFetchRuleManagementFiltersQuery } from '../../../rule_management/api/hooks/use_fetch_rule_management_filters_query';
 import { useInvalidateFindRulesQuery } from '../../../rule_management/api/hooks/use_find_rules_query';
 import { importRules } from '../../../rule_management/logic';
+<<<<<<< HEAD
 import { AllRules } from '../../components/rules_table';
 import { RulesTableContextProvider } from '../../components/rules_table/rules_table/rules_table_context';
 import { SuperHeader } from './super_header';
 import { useInvalidateFetchCoverageOverviewQuery } from '../../../rule_management/api/hooks/use_fetch_coverage_overview';
+=======
+import { MaintenanceWindowCallout } from '../../components/maintenance_window_callout/maintenance_window_callout';
+import { AllRules } from '../../components/rules_table';
+import { RulesTableContextProvider } from '../../components/rules_table/rules_table/rules_table_context';
+import { SuperHeader } from './super_header';
+>>>>>>> whats-new
 
 const RulesPageComponent: React.FC = () => {
   const [isImportModalVisible, showImportModal, hideImportModal] = useBoolState();
@@ -46,12 +56,16 @@ const RulesPageComponent: React.FC = () => {
   const invalidateRules = useCallback(() => {
     invalidateFindRulesQuery();
     invalidateFetchRuleManagementFilters();
+<<<<<<< HEAD
     invalidateFetchCoverageOverviewQuery();
   }, [
     invalidateFindRulesQuery,
     invalidateFetchRuleManagementFilters,
     invalidateFetchCoverageOverviewQuery,
   ]);
+=======
+  }, [invalidateFindRulesQuery, invalidateFetchRuleManagementFilters]);
+>>>>>>> whats-new
 
   const [
     {
@@ -150,7 +164,11 @@ const RulesPageComponent: React.FC = () => {
               </EuiFlexItem>
             </EuiFlexGroup>
           </SuperHeader>
+<<<<<<< HEAD
           <MaintenanceWindowCallout kibanaServices={kibanaServices} />
+=======
+          <MaintenanceWindowCallout />
+>>>>>>> whats-new
           <AllRules data-test-subj="all-rules" />
         </SecuritySolutionPageWrapper>
       </RulesTableContextProvider>

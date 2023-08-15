@@ -9,10 +9,15 @@ import type { Dispatch, SetStateAction } from 'react';
 import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
 import { useFetchPrebuiltRulesStatusQuery } from '../../../../rule_management/api/hooks/prebuilt_rules/use_fetch_prebuilt_rules_status_query';
 import { useIsUpgradingSecurityPackages } from '../../../../rule_management/logic/use_upgrade_security_packages';
+<<<<<<< HEAD
 import type {
   RuleInstallationInfoForReview,
   RuleSignatureId,
 } from '../../../../../../common/api/detection_engine';
+=======
+import type { RuleInstallationInfoForReview } from '../../../../../../common/detection_engine/prebuilt_rules/api/review_rule_installation/response_schema';
+import type { RuleSignatureId } from '../../../../../../common/detection_engine/rule_schema';
+>>>>>>> whats-new
 import { invariant } from '../../../../../../common/utils/invariant';
 import {
   usePerformInstallAllRules,

@@ -14,7 +14,11 @@ import {
   FLEET_CLOUD_SECURITY_POSTURE_PACKAGE,
   FLEET_CLOUD_DEFEND_PACKAGE,
 } from '../../../common';
+<<<<<<< HEAD
 import { getCloudShellUrlFromAgentPolicy } from '../../services';
+=======
+import { getCloudFormationTemplateUrlFromAgentPolicy } from '../../services';
+>>>>>>> whats-new
 
 import {
   getCloudFormationTemplateUrlFromPackageInfo,
@@ -104,8 +108,13 @@ export function useCloudSecurityIntegration(agentPolicy?: AgentPolicy) {
       return undefined;
     }
 
+<<<<<<< HEAD
     const integrationType = cloudSecurityPackagePolicy.inputs?.find((input) => input.enabled)
       ?.policy_template as CloudSecurityIntegrationType;
+=======
+    const integrationType = getCloudSecurityIntegrationTypeFromPackagePolicy(agentPolicy);
+    const cloudformationUrl = getCloudFormationTemplateUrlFromAgentPolicy(agentPolicy);
+>>>>>>> whats-new
 
     if (!integrationType) return undefined;
 

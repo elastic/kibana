@@ -242,6 +242,7 @@ function DiscoverDocumentsComponent({
             </DiscoverTourProvider>
           )}
           <div className="dscDiscoverGrid">
+<<<<<<< HEAD
             <CellActionsProvider
               getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}
             >
@@ -279,6 +280,41 @@ function DiscoverDocumentsComponent({
                 services={services}
               />
             </CellActionsProvider>
+=======
+            <DataGridMemoized
+              ariaLabelledBy="documentsAriaLabel"
+              columns={currentColumns}
+              expandedDoc={expandedDoc}
+              dataView={dataView}
+              isLoading={isDataLoading}
+              rows={rows}
+              sort={(sort as SortOrder[]) || []}
+              sampleSize={sampleSize}
+              searchDescription={savedSearch.description}
+              searchTitle={savedSearch.title}
+              setExpandedDoc={setExpandedDoc}
+              showTimeCol={showTimeCol}
+              settings={grid}
+              onAddColumn={onAddColumn}
+              onFilter={onAddFilter as DocViewFilterFn}
+              onRemoveColumn={onRemoveColumn}
+              onSetColumns={onSetColumns}
+              onSort={!isTextBasedQuery ? onSort : undefined}
+              onResize={onResizeDataGrid}
+              useNewFieldsApi={useNewFieldsApi}
+              rowHeightState={rowHeight}
+              onUpdateRowHeight={onUpdateRowHeight}
+              isSortEnabled={true}
+              isPlainRecord={isTextBasedQuery}
+              query={query}
+              rowsPerPageState={rowsPerPage}
+              onUpdateRowsPerPage={onUpdateRowsPerPage}
+              onFieldEdited={onFieldEdited}
+              savedSearchId={savedSearch.id}
+              DocumentView={DiscoverGridFlyout}
+              services={services}
+            />
+>>>>>>> whats-new
           </div>
         </>
       )}

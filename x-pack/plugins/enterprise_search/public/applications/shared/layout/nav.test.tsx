@@ -61,6 +61,19 @@ describe('useEnterpriseSearchContentNav', () => {
             id: 'esre',
             name: 'ESRE',
           },
+<<<<<<< HEAD
+=======
+          {
+            href: '/app/enterprise_search/vector_search',
+            id: 'vectorSearch',
+            name: 'Vector Search',
+          },
+          {
+            href: '/app/enterprise_search/search_experiences',
+            id: 'searchExperiences',
+            name: 'Search Experiences',
+          },
+>>>>>>> whats-new
         ],
         name: 'Overview',
       },
@@ -225,6 +238,19 @@ describe('useEnterpriseSearchApplicationNav', () => {
             id: 'esre',
             name: 'ESRE',
           },
+<<<<<<< HEAD
+=======
+          {
+            href: '/app/enterprise_search/vector_search',
+            id: 'vectorSearch',
+            name: 'Vector Search',
+          },
+          {
+            href: '/app/enterprise_search/search_experiences',
+            id: 'searchExperiences',
+            name: 'Search Experiences',
+          },
+>>>>>>> whats-new
         ],
         name: 'Overview',
       },
@@ -307,8 +333,13 @@ describe('useEnterpriseSearchApplicationNav', () => {
         "id": "searchApplicationId",
         "items": Array [
           Object {
+<<<<<<< HEAD
             "href": "/app/enterprise_search/applications/search_applications/my-test-engine/docs_explorer",
             "id": "enterpriseSearchApplicationDocsExplorer",
+=======
+            "href": "/app/enterprise_search/applications/search_applications/my-test-engine/preview",
+            "id": "enterpriseSearchApplicationPreview",
+>>>>>>> whats-new
             "items": undefined,
             "name": "Docs Explorer",
           },
@@ -417,6 +448,19 @@ describe('useEnterpriseSearchAnalyticsNav', () => {
           id: 'esre',
           name: 'ESRE',
         },
+<<<<<<< HEAD
+=======
+        {
+          href: '/app/enterprise_search/vector_search',
+          id: 'vectorSearch',
+          name: 'Vector Search',
+        },
+        {
+          href: '/app/enterprise_search/search_experiences',
+          id: 'searchExperiences',
+          name: 'Search Experiences',
+        },
+>>>>>>> whats-new
       ],
       name: 'Overview',
     },

@@ -55,6 +55,7 @@ artifact=elastic-agent-${ELASTIC_AGENT_VERSION}-${os}-${arch}
 updateStepProgress() {
   local STEPNAME="$1"
   local STATUS="$2" # "incomplete" | "complete" | "disabled" | "loading" | "warning" | "danger" | "current"
+<<<<<<< HEAD
   local MESSAGE=${3:-}
   curl --request POST \
     --url "${API_ENDPOINT}/flow/${ONBOARDING_ID}/step/${STEPNAME}" \
@@ -62,6 +63,14 @@ updateStepProgress() {
     --header "Content-Type: application/json" \
     --header "kbn-xsrf: true" \
     --data "{\"status\":\"${STATUS}\", \"message\":\"${MESSAGE}\"}" \
+=======
+  curl --request POST \
+    --url "${API_ENDPOINT}/custom_logs/${ONBOARDING_ID}/step/${STEPNAME}" \
+    --header "Authorization: ApiKey ${API_KEY_ENCODED}" \
+    --header "Content-Type: application/json" \
+    --header "kbn-xsrf: true" \
+    --data "{\"status\":\"${STATUS}\"}" \
+>>>>>>> whats-new
     --output /dev/null \
     --no-progress-meter
 }

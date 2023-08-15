@@ -49,6 +49,15 @@ jest.spyOn(pluginContext, 'usePluginContext').mockImplementation(() => ({
     compositeSlo: {
       enabled: false,
     },
+<<<<<<< HEAD
+=======
+    aiAssistant: {
+      enabled: false,
+      feedback: {
+        enabled: false,
+      },
+    },
+>>>>>>> whats-new
   },
   observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
   ObservabilityPageTemplate: KibanaPageTemplate,

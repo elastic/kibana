@@ -27,7 +27,10 @@ import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { isDefined } from '@kbn/ml-is-defined';
 import { TRAINED_MODEL_TYPE } from '@kbn/ml-trained-models-utils';
+<<<<<<< HEAD
 import { JobMap } from '../data_frame_analytics/pages/job_map';
+=======
+>>>>>>> whats-new
 import type { ModelItemFull } from './models_list';
 import { ModelPipelines } from './pipelines';
 import { AllocatedModels } from '../memory_usage/nodes_overview/allocated_models';
@@ -420,6 +423,7 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
             },
           ]
         : []),
+<<<<<<< HEAD
       {
         id: 'models_map',
         'data-test-subj': 'mlTrainedModelsMap',
@@ -443,6 +447,8 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
           </div>
         ),
       },
+=======
+>>>>>>> whats-new
     ];
   }, [
     analyticsConfig,
@@ -454,7 +460,10 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
     pipelines,
     restMetaData,
     stats,
+<<<<<<< HEAD
     item.model_id,
+=======
+>>>>>>> whats-new
   ]);
 
   const initialSelectedTab =

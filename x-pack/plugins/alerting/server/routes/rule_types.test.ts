@@ -87,7 +87,11 @@ describe('ruleTypesRoute', () => {
         },
         producer: 'test',
         enabled_in_license: true,
+<<<<<<< HEAD
         has_alerts_mappings: true,
+=======
+        has_get_summarized_alerts: true,
+>>>>>>> whats-new
         has_fields_for_a_a_d: false,
       },
     ];
@@ -114,8 +118,13 @@ describe('ruleTypesRoute', () => {
             "default_schedule_interval": "10m",
             "does_set_recovery_context": false,
             "enabled_in_license": true,
+<<<<<<< HEAD
             "has_alerts_mappings": true,
             "has_fields_for_a_a_d": false,
+=======
+            "has_fields_for_a_a_d": false,
+            "has_get_summarized_alerts": true,
+>>>>>>> whats-new
             "id": "1",
             "is_exportable": true,
             "minimum_license_required": "basic",

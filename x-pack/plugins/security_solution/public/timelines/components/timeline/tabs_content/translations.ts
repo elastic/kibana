@@ -43,6 +43,7 @@ export const SECURITY_ASSISTANT = i18n.translate(
   'xpack.securitySolution.timeline.tabs.securityAssistantTimelineTitle',
   {
     defaultMessage: 'Elastic AI Assistant',
+<<<<<<< HEAD
   }
 );
 
@@ -50,6 +51,8 @@ export const DISCOVER_IN_TIMELINE_TAB = i18n.translate(
   'xpack.securitySolution.timeline.tabs.discoverInTimeline',
   {
     defaultMessage: 'Discover',
+=======
+>>>>>>> whats-new
   }
 );
 

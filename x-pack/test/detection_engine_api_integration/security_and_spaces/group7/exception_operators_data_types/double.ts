@@ -489,6 +489,10 @@ export default ({ getService }: FtrProviderContext) => {
           expect(hits).to.eql([]);
         });
       });
+<<<<<<< HEAD
+=======
+
+>>>>>>> whats-new
       describe('working against string values in the data set', () => {
         it('will return 3 results if we have a list that includes 1 double', async () => {
           await importFile(supertest, log, 'double', ['1.0'], 'list_items.txt');

@@ -6,7 +6,11 @@
  */
 
 import expect from '@kbn/expect';
+<<<<<<< HEAD
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
+=======
+import { API_URLS, SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
+>>>>>>> whats-new
 import { SanitizedRule } from '@kbn/alerting-plugin/common';
 import { omit } from 'lodash';
 import { TlsTranslations } from '@kbn/synthetics-plugin/common/rules/synthetics/translations';
@@ -36,7 +40,11 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('creates rule when settings are configured', async () => {
       await supertest
+<<<<<<< HEAD
         .post(SYNTHETICS_API_URLS.DYNAMIC_SETTINGS)
+=======
+        .post(API_URLS.DYNAMIC_SETTINGS)
+>>>>>>> whats-new
         .set('kbn-xsrf', 'true')
         .send({
           heartbeatIndices: 'heartbeat-8*,heartbeat-7*',
@@ -76,7 +84,11 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('updates rules when settings are updated', async () => {
       await supertest
+<<<<<<< HEAD
         .post(SYNTHETICS_API_URLS.DYNAMIC_SETTINGS)
+=======
+        .post(API_URLS.DYNAMIC_SETTINGS)
+>>>>>>> whats-new
         .set('kbn-xsrf', 'true')
         .send({
           heartbeatIndices: 'heartbeat-8*,heartbeat-7*',

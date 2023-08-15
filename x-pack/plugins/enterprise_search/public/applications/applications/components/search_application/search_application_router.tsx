@@ -6,11 +6,19 @@
  */
 
 import React, { useEffect } from 'react';
+<<<<<<< HEAD
 import { Redirect, useParams } from 'react-router-dom';
 
 import { useActions } from 'kea';
 
 import { Routes, Route } from '@kbn/shared-ux-router';
+=======
+import { Redirect, Switch, useParams } from 'react-router-dom';
+
+import { useActions } from 'kea';
+
+import { Route } from '@kbn/shared-ux-router';
+>>>>>>> whats-new
 
 import { generateEncodedPath } from '../../../shared/encode_path_params';
 import {
@@ -41,18 +49,30 @@ export const SearchApplicationRouter: React.FC = () => {
   }, [searchApplicationName]);
 
   return (
+<<<<<<< HEAD
     <Routes>
+=======
+    <Switch>
+>>>>>>> whats-new
       <Redirect
         from={SEARCH_APPLICATION_PATH}
         to={generateEncodedPath(SEARCH_APPLICATION_TAB_PATH, {
           searchApplicationName,
+<<<<<<< HEAD
           tabId: SearchApplicationViewTabs.DOCS_EXPLORER,
+=======
+          tabId: SearchApplicationViewTabs.PREVIEW,
+>>>>>>> whats-new
         })}
         exact
       />
       <Route path={SEARCH_APPLICATION_TAB_PATH}>
         <SearchApplicationView />
       </Route>
+<<<<<<< HEAD
     </Routes>
+=======
+    </Switch>
+>>>>>>> whats-new
   );
 };

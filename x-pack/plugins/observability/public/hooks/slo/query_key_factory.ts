@@ -8,7 +8,11 @@
 import type { Indicator } from '@kbn/slo-schema';
 
 interface SloListFilter {
+<<<<<<< HEAD
   kqlQuery: string;
+=======
+  name: string;
+>>>>>>> whats-new
   page: number;
   sortBy: string;
   sortDirection: string;

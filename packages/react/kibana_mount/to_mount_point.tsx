@@ -8,11 +8,18 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
+<<<<<<< HEAD:packages/react/kibana_mount/to_mount_point.tsx
 import type { MountPoint } from '@kbn/core/public';
 import {
   KibanaRenderContextProvider,
   KibanaRenderContextProviderProps,
 } from '@kbn/react-kibana-context-render';
+=======
+import { Observable } from 'rxjs';
+import { I18nProvider } from '@kbn/i18n-react';
+import type { MountPoint, CoreTheme } from '@kbn/core/public';
+import { KibanaThemeProvider } from '../theme/kibana_theme_provider';
+>>>>>>> whats-new:src/plugins/kibana_react/public/util/to_mount_point.tsx
 
 export type ToMountPointParams = Pick<KibanaRenderContextProviderProps, 'i18n' | 'theme'>;
 

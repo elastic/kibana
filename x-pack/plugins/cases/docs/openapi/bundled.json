@@ -266,7 +266,10 @@
                   "properties": {
                     "cases": {
                       "type": "array",
+<<<<<<< HEAD
                       "maxItems": 10000,
+=======
+>>>>>>> whats-new
                       "items": {
                         "$ref": "#/components/schemas/case_response_properties"
                       }
@@ -346,7 +349,10 @@
               "application/json": {
                 "schema": {
                   "type": "array",
+<<<<<<< HEAD
                   "maxItems": 10000,
+=======
+>>>>>>> whats-new
                   "items": {
                     "type": "object",
                     "properties": {
@@ -956,7 +962,10 @@
               "application/json": {
                 "schema": {
                   "type": "array",
+<<<<<<< HEAD
                   "maxItems": 10000,
+=======
+>>>>>>> whats-new
                   "items": {
                     "type": "object",
                     "properties": {
@@ -1097,7 +1106,10 @@
               "application/json": {
                 "schema": {
                   "type": "array",
+<<<<<<< HEAD
                   "maxItems": 10000,
+=======
+>>>>>>> whats-new
                   "items": {
                     "type": "string"
                   }
@@ -1723,7 +1735,10 @@
                     },
                     "userActions": {
                       "type": "array",
+<<<<<<< HEAD
                       "maxItems": 10000,
+=======
+>>>>>>> whats-new
                       "items": {
                         "$ref": "#/components/schemas/user_actions_find_response_properties"
                       }
@@ -1813,8 +1828,12 @@
                         "type": "integer"
                       }
                     }
+<<<<<<< HEAD
                   },
                   "maxItems": 1000
+=======
+                  }
+>>>>>>> whats-new
                 },
                 "examples": {
                   "findConnectorResponse": {
@@ -3815,12 +3834,16 @@
         "in": "query",
         "required": true,
         "schema": {
+<<<<<<< HEAD
           "type": "array",
           "items": {
             "type": "string",
             "minItems": 1,
             "maxItems": 100
           }
+=======
+          "type": "string"
+>>>>>>> whats-new
         },
         "example": "d4e7abb0-b462-11ec-9a8d-698504725a43"
       },
@@ -3837,8 +3860,12 @@
               "type": "array",
               "items": {
                 "type": "string"
+<<<<<<< HEAD
               },
               "maxItems": 100
+=======
+              }
+>>>>>>> whats-new
             }
           ]
         }
@@ -3968,6 +3995,51 @@
           ]
         }
       },
+      "reporters": {
+        "in": "query",
+        "name": "reporters",
+        "description": "Filters the returned cases by the user name of the reporter.",
+        "schema": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          ]
+        },
+        "example": "elastic"
+      },
+      "search": {
+        "in": "query",
+        "name": "search",
+        "description": "An Elasticsearch simple_query_string query that filters the objects in the response.",
+        "schema": {
+          "type": "string"
+        }
+      },
+      "searchFields": {
+        "in": "query",
+        "name": "searchFields",
+        "description": "The fields to perform the simple_query_string parsed query against.",
+        "schema": {
+          "oneOf": [
+            {
+              "$ref": "#/components/schemas/searchFieldsType"
+            },
+            {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/searchFieldsType"
+              }
+            }
+          ]
+        }
+      },
       "severity": {
         "in": "query",
         "name": "severity",
@@ -3990,12 +4062,16 @@
           "type": "string",
           "enum": [
             "createdAt",
+<<<<<<< HEAD
             "updatedAt",
             "closedAt",
             "title",
             "category",
             "status",
             "severity"
+=======
+            "updatedAt"
+>>>>>>> whats-new
           ],
           "default": "createdAt"
         },
@@ -4042,8 +4118,12 @@
               "type": "array",
               "items": {
                 "type": "string"
+<<<<<<< HEAD
               },
               "maxItems": 100
+=======
+              }
+>>>>>>> whats-new
             }
           ]
         },

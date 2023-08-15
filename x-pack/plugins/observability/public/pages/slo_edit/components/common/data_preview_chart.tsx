@@ -6,6 +6,7 @@
  */
 
 import { AreaSeries, Axis, Chart, Position, ScaleType, Settings, Tooltip } from '@elastic/charts';
+<<<<<<< HEAD
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -16,6 +17,9 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
+=======
+import { EuiFlexItem, EuiIcon, EuiLoadingChart, EuiPanel } from '@elastic/eui';
+>>>>>>> whats-new
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
@@ -24,8 +28,16 @@ import { useFormContext } from 'react-hook-form';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '../../../../utils/kibana_react';
 import { useDebouncedGetPreviewData } from '../../hooks/use_preview';
+<<<<<<< HEAD
 import { useSectionFormValidation } from '../../hooks/use_section_form_validation';
 import { CreateSLOForm } from '../../types';
+=======
+import { CreateSLOForm } from '../../types';
+
+export function DataPreviewChart() {
+  const { watch, getFieldState } = useFormContext<CreateSLOForm>();
+  const { charts, uiSettings } = useKibana().services;
+>>>>>>> whats-new
 
 export function DataPreviewChart() {
   const { watch, getFieldState, formState, getValues } = useFormContext<CreateSLOForm>();
@@ -87,6 +99,7 @@ export function DataPreviewChart() {
 
   return (
     <EuiFlexItem>
+<<<<<<< HEAD
       {title}
       <EuiFormRow fullWidth>
         <EuiPanel hasBorder={true} hasShadow={false} style={{ minHeight: 194 }}>
@@ -125,6 +138,28 @@ export function DataPreviewChart() {
                   <EuiIcon type="visualizeApp" size="l" color="subdued" title="no results" />
                 }
               />
+=======
+      {isPreviewLoading && <EuiLoadingChart size="m" mono />}
+      {!isPreviewLoading && !!previewData && (
+        <EuiPanel hasBorder={true} hasShadow={false}>
+          <Chart size={{ height: 160, width: '100%' }}>
+            <Tooltip type="vertical" />
+            <Settings
+              baseTheme={baseTheme}
+              showLegend={false}
+              theme={[
+                {
+                  ...theme,
+                  lineSeriesStyle: {
+                    point: { visible: false },
+                  },
+                },
+              ]}
+              noResults={
+                <EuiIcon type="visualizeApp" size="l" color="subdued" title="no results" />
+              }
+            />
+>>>>>>> whats-new
 
               <Axis
                 id="y-axis"

@@ -16,6 +16,10 @@ import {
   histogramIndicatorSchema,
   historicalSummarySchema,
   indicatorSchema,
+<<<<<<< HEAD
+=======
+  indicatorTypesArraySchema,
+>>>>>>> whats-new
   indicatorTypesSchema,
   kqlCustomIndicatorSchema,
   metricCustomIndicatorSchema,
@@ -231,8 +235,11 @@ type HistoricalSummaryResponse = t.OutputOf<typeof historicalSummarySchema>;
 
 type GetPreviewDataParams = t.TypeOf<typeof getPreviewDataParamsSchema.props.body>;
 type GetPreviewDataResponse = t.OutputOf<typeof getPreviewDataResponseSchema>;
+<<<<<<< HEAD
 
 type GetSLOInstancesResponse = t.OutputOf<typeof getSLOInstancesResponseSchema>;
+=======
+>>>>>>> whats-new
 
 type GetSLOBurnRatesResponse = t.OutputOf<typeof getSLOBurnRatesResponseSchema>;
 type BudgetingMethod = t.OutputOf<typeof budgetingMethodSchema>;
@@ -290,7 +297,10 @@ export type {
   APMTransactionDurationIndicator,
   APMTransactionErrorRateIndicator,
   GetSLOBurnRatesResponse,
+<<<<<<< HEAD
   GetSLOInstancesResponse,
+=======
+>>>>>>> whats-new
   IndicatorType,
   Indicator,
   MetricCustomIndicator,

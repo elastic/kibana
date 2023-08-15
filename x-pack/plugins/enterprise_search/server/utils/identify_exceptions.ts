@@ -47,8 +47,11 @@ export const isVersionConflictEngineException = (error: ElasticsearchResponseErr
 
 export const isInvalidSearchApplicationNameException = (error: ElasticsearchResponseError) =>
   error.meta?.body?.error?.type === 'invalid_alias_name_exception';
+<<<<<<< HEAD
 
 export const isMissingAliasException = (error: ElasticsearchResponseError) =>
   error.meta?.statusCode === 404 &&
   typeof error.meta?.body?.error === 'string' &&
   MISSING_ALIAS_ERROR.test(error.meta?.body?.error);
+=======
+>>>>>>> whats-new

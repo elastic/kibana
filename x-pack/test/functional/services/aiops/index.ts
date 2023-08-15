@@ -16,10 +16,18 @@ import { ChangePointDetectionPageProvider } from './change_point_detection_page'
 import { MlTableServiceProvider } from '../ml/common_table_service';
 
 export function AiopsProvider(context: FtrProviderContext) {
+<<<<<<< HEAD
   const logRateAnalysisPage = LogRateAnalysisPageProvider(context);
   const logRateAnalysisResultsTable = LogRateAnalysisResultsTableProvider(context);
   const logRateAnalysisResultsGroupsTable = LogRateAnalysisResultsGroupsTableProvider(context);
   const logRateAnalysisDataGenerator = LogRateAnalysisDataGeneratorProvider(context);
+=======
+  const explainLogRateSpikesPage = ExplainLogRateSpikesPageProvider(context);
+  const explainLogRateSpikesAnalysisTable = ExplainLogRateSpikesAnalysisTableProvider(context);
+  const explainLogRateSpikesAnalysisGroupsTable =
+    ExplainLogRateSpikesAnalysisGroupsTableProvider(context);
+  const explainLogRateSpikesDataGenerator = ExplainLogRateSpikesDataGeneratorProvider(context);
+>>>>>>> whats-new
   const logPatternAnalysisPage = LogPatternAnalysisPageProvider(context);
 
   const tableService = MlTableServiceProvider(context);
@@ -28,10 +36,17 @@ export function AiopsProvider(context: FtrProviderContext) {
 
   return {
     changePointDetectionPage,
+<<<<<<< HEAD
     logRateAnalysisPage,
     logRateAnalysisResultsTable,
     logRateAnalysisResultsGroupsTable,
     logRateAnalysisDataGenerator,
+=======
+    explainLogRateSpikesPage,
+    explainLogRateSpikesAnalysisTable,
+    explainLogRateSpikesAnalysisGroupsTable,
+    explainLogRateSpikesDataGenerator,
+>>>>>>> whats-new
     logPatternAnalysisPage,
   };
 }

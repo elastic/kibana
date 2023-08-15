@@ -89,6 +89,12 @@ ${exceptionStacktrace}`
             'xpack.apm.errorGroupContextualInsight.explainErrorTitle',
             { defaultMessage: "What's this error?" }
           )}
+<<<<<<< HEAD:x-pack/plugins/apm/public/components/app/error_group_details/error_sampler/error_sample_contextual_insight.tsx
+=======
+          promptId={CoPilotPromptId.ApmExplainError}
+          params={promptParams}
+          feedbackEnabled={false}
+>>>>>>> whats-new:x-pack/plugins/apm/public/components/app/error_group_details/error_sampler/error_sample_co_pilot_prompt.tsx
         />
       </EuiFlexItem>
       <EuiSpacer size="s" />

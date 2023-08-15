@@ -10,6 +10,7 @@ import {
   SavedObjectsClientContract,
   KibanaRequest,
   CoreRequestHandlerContext,
+  SavedObjectsErrorHelpers,
 } from '@kbn/core/server';
 import chalk from 'chalk';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -18,9 +19,19 @@ import { RequestStatus } from '@kbn/inspector-plugin/common';
 import { InspectResponse } from '@kbn/observability-plugin/typings/common';
 import { enableInspectEsQueries } from '@kbn/observability-plugin/common';
 import { getInspectResponse } from '@kbn/observability-shared-plugin/common';
+<<<<<<< HEAD:x-pack/plugins/synthetics/server/lib.ts
 import { SYNTHETICS_API_URLS } from '../common/constants';
 import { SyntheticsServerSetup } from './types';
 import { savedObjectsAdapter } from './saved_objects/saved_objects';
+=======
+import { DYNAMIC_SETTINGS_DEFAULT_ATTRIBUTES } from '../../constants/settings';
+import { DynamicSettingsAttributes } from '../../runtime_types/settings';
+import { settingsObjectId, umDynamicSettings } from './saved_objects/uptime_settings';
+import { API_URLS } from '../../../common/constants';
+import { UptimeServerSetup } from './adapters';
+
+export type { UMServerLibs } from '../uptime_server';
+>>>>>>> whats-new:x-pack/plugins/synthetics/server/legacy_uptime/lib/lib.ts
 
 export interface CountResponse {
   result: {
@@ -46,6 +57,7 @@ export class UptimeEsClient {
   inspectableEsQueries: InspectResponse = [];
   uiSettings?: CoreRequestHandlerContext['uiSettings'];
   savedObjectsClient: SavedObjectsClientContract;
+  isLegacyAlert?: boolean;
 
   constructor(
     savedObjectsClient: SavedObjectsClientContract,
@@ -55,9 +67,17 @@ export class UptimeEsClient {
       uiSettings?: CoreRequestHandlerContext['uiSettings'];
       request?: KibanaRequest;
       heartbeatIndices?: string;
+      isLegacyAlert?: boolean;
     }
   ) {
-    const { isDev = false, uiSettings, request, heartbeatIndices = '' } = options ?? {};
+    const {
+      isLegacyAlert,
+      isDev = false,
+      uiSettings,
+      request,
+      heartbeatIndices = '',
+    } = options ?? {};
+    this.isLegacyAlert = isLegacyAlert;
     this.uiSettings = uiSettings;
     this.baseESClient = esClient;
     this.savedObjectsClient = savedObjectsClient;
@@ -188,11 +208,37 @@ export class UptimeEsClient {
   }
 
   async getIndices() {
+    // if isLegacyAlert appends synthetics-* if it's not already there
+    let indices = '';
+    let syntheticsIndexRemoved = false;
+    let settingsChangedByUser = true;
+    let settings: DynamicSettingsAttributes = DYNAMIC_SETTINGS_DEFAULT_ATTRIBUTES;
     if (this.heartbeatIndices) {
-      return this.heartbeatIndices;
+      indices = this.heartbeatIndices;
+    } else {
+      try {
+        const obj = await this.savedObjectsClient.get<DynamicSettingsAttributes>(
+          umDynamicSettings.name,
+          settingsObjectId
+        );
+        settings = obj.attributes;
+      } catch (getErr) {
+        if (SavedObjectsErrorHelpers.isNotFoundError(getErr)) {
+          settingsChangedByUser = false;
+        }
+      }
+
+      indices = settings?.heartbeatIndices || '';
+      syntheticsIndexRemoved = settings.syntheticsIndexRemoved ?? false;
     }
-    const settings = await savedObjectsAdapter.getUptimeDynamicSettings(this.savedObjectsClient);
-    return settings?.heartbeatIndices || '';
+    if (
+      this.isLegacyAlert &&
+      !indices.includes('synthetics-') &&
+      (syntheticsIndexRemoved || !settingsChangedByUser)
+    ) {
+      indices = indices + ',synthetics-*';
+    }
+    return indices;
   }
 }
 

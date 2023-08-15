@@ -18,7 +18,10 @@ import { useSavedSearchAliasMatchRedirect } from '../../hooks/saved_search_alias
 import { useSavedSearchInitial } from './services/discover_state_provider';
 import { useAdHocDataViews } from './hooks/use_adhoc_data_views';
 import { useTextBasedQueryLanguage } from './hooks/use_text_based_query_language';
+<<<<<<< HEAD
 import type { DiscoverDisplayMode } from '../types';
+=======
+>>>>>>> whats-new
 import { addLog } from '../../utils/add_log';
 
 const DiscoverLayoutMemoized = React.memo(DiscoverLayout);

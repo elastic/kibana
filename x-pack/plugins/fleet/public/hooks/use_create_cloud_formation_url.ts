@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
+<<<<<<< HEAD
 import type {
   CloudFormationProps,
   CloudSecurityIntegrationAwsAccountType,
@@ -23,6 +24,17 @@ export const useCreateCloudFormationUrl = ({
 }: {
   enrollmentAPIKey: string | undefined;
   cloudFormationProps: CloudFormationProps | undefined;
+=======
+import { useKibanaVersion } from './use_kibana_version';
+import { useGetSettings } from './use_request';
+
+export const useCreateCloudFormationUrl = ({
+  enrollmentAPIKey,
+  cloudFormationTemplateUrl,
+}: {
+  enrollmentAPIKey: string | undefined;
+  cloudFormationTemplateUrl: string;
+>>>>>>> whats-new
 }) => {
   const { data, isLoading } = useGetSettings();
 
@@ -49,6 +61,7 @@ export const useCreateCloudFormationUrl = ({
   }
 
   const cloudFormationUrl =
+<<<<<<< HEAD
     enrollmentAPIKey && fleetServerHost && cloudFormationProps?.templateUrl
       ? createCloudFormationUrl(
           cloudFormationProps?.templateUrl,
@@ -56,6 +69,14 @@ export const useCreateCloudFormationUrl = ({
           fleetServerHost,
           kibanaVersion,
           cloudFormationProps?.awsAccountType
+=======
+    enrollmentAPIKey && fleetServerHost && cloudFormationTemplateUrl
+      ? createCloudFormationUrl(
+          cloudFormationTemplateUrl,
+          enrollmentAPIKey,
+          fleetServerHost,
+          kibanaVersion
+>>>>>>> whats-new
         )
       : undefined;
 
@@ -71,16 +92,23 @@ const createCloudFormationUrl = (
   templateURL: string,
   enrollmentToken: string,
   fleetUrl: string,
+<<<<<<< HEAD
   kibanaVersion: string,
   awsAccountType: CloudSecurityIntegrationAwsAccountType | undefined
 ) => {
   let cloudFormationUrl;
 
   cloudFormationUrl = templateURL
+=======
+  kibanaVersion: string
+) => {
+  const cloudFormationUrl = templateURL
+>>>>>>> whats-new
     .replace('FLEET_ENROLLMENT_TOKEN', enrollmentToken)
     .replace('FLEET_URL', fleetUrl)
     .replace('KIBANA_VERSION', kibanaVersion);
 
+<<<<<<< HEAD
   if (cloudFormationUrl.includes('ACCOUNT_TYPE')) {
     cloudFormationUrl = cloudFormationUrl.replace(
       'ACCOUNT_TYPE',
@@ -94,3 +122,7 @@ const createCloudFormationUrl = (
 const getAwsAccountType = (awsAccountType: CloudSecurityIntegrationAwsAccountType | undefined) => {
   return awsAccountType ? awsAccountType : CLOUD_FORMATION_DEFAULT_ACCOUNT_TYPE;
 };
+=======
+  return new URL(cloudFormationUrl).toString();
+};
+>>>>>>> whats-new

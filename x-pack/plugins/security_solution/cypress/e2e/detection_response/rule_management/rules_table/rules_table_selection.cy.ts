@@ -4,7 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+<<<<<<< HEAD:x-pack/plugins/security_solution/cypress/e2e/detection_response/rule_management/rules_table/rules_table_selection.cy.ts
 import { createRuleAssetSavedObject } from '../../../../helpers/rules';
+=======
+import { createRuleAssetSavedObject } from '../../helpers/rules';
+>>>>>>> whats-new:x-pack/plugins/security_solution/cypress/e2e/detection_rules/rules_selection.cy.ts
 import {
   SELECTED_RULES_NUMBER_LABEL,
   SELECT_ALL_RULES_BTN,
@@ -18,10 +22,17 @@ import {
 import {
   getAvailablePrebuiltRulesCount,
   createAndInstallMockedPrebuiltRules,
+<<<<<<< HEAD:x-pack/plugins/security_solution/cypress/e2e/detection_response/rule_management/rules_table/rules_table_selection.cy.ts
 } from '../../../../tasks/api_calls/prebuilt_rules';
 import { cleanKibana } from '../../../../tasks/common';
 import { login, visitWithoutDateRange } from '../../../../tasks/login';
 import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../../../urls/navigation';
+=======
+} from '../../tasks/api_calls/prebuilt_rules';
+import { cleanKibana } from '../../tasks/common';
+import { login, visitWithoutDateRange } from '../../tasks/login';
+import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../urls/navigation';
+>>>>>>> whats-new:x-pack/plugins/security_solution/cypress/e2e/detection_rules/rules_selection.cy.ts
 
 const RULE_1 = createRuleAssetSavedObject({
   name: 'Test rule 1',
@@ -32,7 +43,11 @@ const RULE_2 = createRuleAssetSavedObject({
   rule_id: 'rule_2',
 });
 
+<<<<<<< HEAD:x-pack/plugins/security_solution/cypress/e2e/detection_response/rule_management/rules_table/rules_table_selection.cy.ts
 describe('Rules table: selection', () => {
+=======
+describe('Rules selection', () => {
+>>>>>>> whats-new:x-pack/plugins/security_solution/cypress/e2e/detection_rules/rules_selection.cy.ts
   before(() => {
     cleanKibana();
   });

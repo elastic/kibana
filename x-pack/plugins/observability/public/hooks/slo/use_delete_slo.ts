@@ -75,6 +75,12 @@ export function useDeleteSlo() {
             values: { name },
           })
         );
+<<<<<<< HEAD
+=======
+      },
+      onSettled: () => {
+        queryClient.invalidateQueries({ queryKey: sloKeys.lists(), exact: false });
+>>>>>>> whats-new
       },
     }
   );

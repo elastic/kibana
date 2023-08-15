@@ -14,7 +14,10 @@ import {
 import { TestProvider } from '../../test/test_provider';
 import {
   getMockPackageInfoCspmAWS,
+<<<<<<< HEAD
   getMockPackageInfoCspmGCP,
+=======
+>>>>>>> whats-new
   getMockPackageInfoVulnMgmtAWS,
   getMockPolicyAWS,
   getMockPolicyEKS,
@@ -719,6 +722,7 @@ describe('<CspPolicyTemplateForm />', () => {
   });
 
   describe('AWS Credentials input fields', () => {
+<<<<<<< HEAD
     it(`renders ${CLOUDBEAT_AWS} Account Type field, AWS Organization is enabled for supported versions`, () => {
       let policy = getMockPolicyAWS();
       policy = getPosturePolicy(policy, CLOUDBEAT_AWS, {
@@ -773,6 +777,8 @@ describe('<CspPolicyTemplateForm />', () => {
       expect(getByLabelText('AWS Organization')).toBeEnabled();
     });
 
+=======
+>>>>>>> whats-new
     it(`renders ${CLOUDBEAT_AWS} Assume Role fields`, () => {
       let policy = getMockPolicyAWS();
       policy = getPosturePolicy(policy, CLOUDBEAT_AWS, {

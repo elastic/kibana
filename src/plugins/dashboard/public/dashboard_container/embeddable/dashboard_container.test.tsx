@@ -10,6 +10,13 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { mount, ReactWrapper } from 'enzyme';
 
+<<<<<<< HEAD
+=======
+import type { TimeRange } from '@kbn/es-query';
+import { mockedReduxEmbeddablePackage } from '@kbn/presentation-util-plugin/public/mocks';
+import { findTestSubject, nextTick } from '@kbn/test-jest-helpers';
+import { I18nProvider } from '@kbn/i18n-react';
+>>>>>>> whats-new
 import {
   ViewMode,
   EmbeddablePanel,

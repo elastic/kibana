@@ -7,5 +7,9 @@ schema:
     - type: array
       items:
         type: string
+<<<<<<< HEAD
       maxItems: 100
 example: tag-1
+=======
+example: tag-1
+>>>>>>> whats-new

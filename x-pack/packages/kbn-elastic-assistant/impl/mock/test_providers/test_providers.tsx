@@ -13,14 +13,21 @@ import React from 'react';
 // eslint-disable-next-line @kbn/eslint/module_migration
 import { ThemeProvider } from 'styled-components';
 
+<<<<<<< HEAD
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AssistantProvider, AssistantProviderProps } from '../../assistant_context';
+=======
+import { AssistantProvider } from '../../assistant_context';
+>>>>>>> whats-new
 import { Conversation } from '../../assistant_context/types';
 
 interface Props {
   children: React.ReactNode;
   getInitialConversations?: () => Record<string, Conversation>;
+<<<<<<< HEAD
   providerContext?: Partial<AssistantProviderProps>;
+=======
+>>>>>>> whats-new
 }
 
 window.scrollTo = jest.fn();
@@ -32,7 +39,10 @@ const mockGetInitialConversations = () => ({});
 export const TestProvidersComponent: React.FC<Props> = ({
   children,
   getInitialConversations = mockGetInitialConversations,
+<<<<<<< HEAD
   providerContext,
+=======
+>>>>>>> whats-new
 }) => {
   const actionTypeRegistry = actionTypeRegistryMock.create();
   const mockGetComments = jest.fn(() => []);
@@ -53,6 +63,7 @@ export const TestProvidersComponent: React.FC<Props> = ({
   return (
     <I18nProvider>
       <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
+<<<<<<< HEAD
         <QueryClientProvider client={queryClient}>
           <AssistantProvider
             actionTypeRegistry={actionTypeRegistry}
@@ -76,6 +87,28 @@ export const TestProvidersComponent: React.FC<Props> = ({
             {children}
           </AssistantProvider>
         </QueryClientProvider>
+=======
+        <AssistantProvider
+          actionTypeRegistry={actionTypeRegistry}
+          augmentMessageCodeBlocks={jest.fn().mockReturnValue([])}
+          baseAllow={[]}
+          baseAllowReplacement={[]}
+          defaultAllow={[]}
+          defaultAllowReplacement={[]}
+          docLinks={{
+            ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
+            DOC_LINK_VERSION: 'current',
+          }}
+          getComments={mockGetComments}
+          getInitialConversations={getInitialConversations}
+          setConversations={jest.fn()}
+          setDefaultAllow={jest.fn()}
+          setDefaultAllowReplacement={jest.fn()}
+          http={mockHttp}
+        >
+          {children}
+        </AssistantProvider>
+>>>>>>> whats-new
       </ThemeProvider>
     </I18nProvider>
   );

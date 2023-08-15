@@ -481,6 +481,10 @@ export function getFormBasedDatasource({
         />
       );
     },
+<<<<<<< HEAD
+=======
+
+>>>>>>> whats-new
     uniqueLabels(state: FormBasedPrivateState, indexPatternsMap: IndexPatternMap) {
       const layers = state.layers;
       const columnLabelMap = {} as Record<string, string>;
@@ -507,7 +511,14 @@ export function getFormBasedDatasource({
       return columnLabelMap;
     },
 
+<<<<<<< HEAD
     DimensionTriggerComponent: (props: DatasourceDimensionTriggerProps<FormBasedPrivateState>) => {
+=======
+    renderDimensionTrigger: (
+      domElement: Element,
+      props: DatasourceDimensionTriggerProps<FormBasedPrivateState>
+    ) => {
+>>>>>>> whats-new
       const columnLabelMap = formBasedDatasource.uniqueLabels(props.state, props.indexPatterns);
       const uniqueLabel = columnLabelMap[props.columnId];
       const formattedLabel = wrapOnDot(uniqueLabel);
@@ -534,7 +545,56 @@ export function getFormBasedDatasource({
       );
     },
 
+<<<<<<< HEAD
     LayerPanelComponent: (props: DatasourceLayerPanelProps<FormBasedPrivateState>) => {
+=======
+    renderDimensionEditor: (
+      domElement: Element,
+      props: DatasourceDimensionEditorProps<FormBasedPrivateState>
+    ) => {
+      const columnLabelMap = formBasedDatasource.uniqueLabels(props.state, props.indexPatterns);
+
+      render(
+        <KibanaThemeProvider theme$={core.theme.theme$}>
+          <I18nProvider>
+            <KibanaContextProvider
+              services={{
+                appName: 'lens',
+                storage,
+                uiSettings,
+                settings,
+                data,
+                fieldFormats,
+                savedObjects: core.savedObjects,
+                docLinks: core.docLinks,
+                http: core.http,
+                unifiedSearch,
+              }}
+            >
+              <FormBasedDimensionEditor
+                uiSettings={uiSettings}
+                storage={storage}
+                fieldFormats={fieldFormats}
+                http={core.http}
+                data={data}
+                unifiedSearch={unifiedSearch}
+                dataViews={dataViews}
+                uniqueLabel={columnLabelMap[props.columnId]}
+                notifications={core.notifications}
+                {...props}
+              />
+            </KibanaContextProvider>
+          </I18nProvider>
+        </KibanaThemeProvider>,
+        domElement
+      );
+    },
+
+    renderLayerPanel: (
+      domElement: Element,
+      props: DatasourceLayerPanelProps<FormBasedPrivateState>
+    ) => {
+>>>>>>> whats-new
       const { onChangeIndexPattern, ...otherProps } = props;
       return (
         <LayerPanel

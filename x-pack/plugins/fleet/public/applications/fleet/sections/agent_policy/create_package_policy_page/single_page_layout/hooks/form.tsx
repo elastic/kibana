@@ -43,7 +43,11 @@ import type { PackagePolicyFormState } from '../../types';
 import { SelectedPolicyTab } from '../../components';
 import { useOnSaveNavigate } from '../../hooks';
 import { prepareInputPackagePolicyDataset } from '../../services/prepare_input_pkg_policy_dataset';
+<<<<<<< HEAD
 import { getCloudFormationPropsFromPackagePolicy } from '../../../../../services';
+=======
+import { getCloudFormationTemplateUrlFromPackagePolicy } from '../../../../../services';
+>>>>>>> whats-new
 
 async function createAgentPolicy({
   packagePolicy,
@@ -305,21 +309,30 @@ export function useOnSubmit({
       });
 
       const hasCloudFormation = data?.item
+<<<<<<< HEAD
         ? getCloudFormationPropsFromPackagePolicy(data.item).templateUrl
         : false;
 
       const hasGoogleCloudShell = data?.item ? getCloudShellUrlFromPackagePolicy(data.item) : false;
 
+=======
+        ? getCloudFormationTemplateUrlFromPackagePolicy(data.item)
+        : false;
+
+>>>>>>> whats-new
       if (hasCloudFormation) {
         setFormState(agentCount ? 'SUBMITTED' : 'SUBMITTED_CLOUD_FORMATION');
       } else {
         setFormState(agentCount ? 'SUBMITTED' : 'SUBMITTED_NO_AGENTS');
       }
+<<<<<<< HEAD
       if (hasGoogleCloudShell) {
         setFormState(agentCount ? 'SUBMITTED' : 'SUBMITTED_GOOGLE_CLOUD_SHELL');
       } else {
         setFormState(agentCount ? 'SUBMITTED' : 'SUBMITTED_NO_AGENTS');
       }
+=======
+>>>>>>> whats-new
       if (!error) {
         setSavedPackagePolicy(data!.item);
 
@@ -328,10 +341,13 @@ export function useOnSubmit({
           setFormState('SUBMITTED_CLOUD_FORMATION');
           return;
         }
+<<<<<<< HEAD
         if (!hasAgentsAssigned && hasGoogleCloudShell) {
           setFormState('SUBMITTED_GOOGLE_CLOUD_SHELL');
           return;
         }
+=======
+>>>>>>> whats-new
         if (!hasAgentsAssigned) {
           setFormState('SUBMITTED_NO_AGENTS');
           return;

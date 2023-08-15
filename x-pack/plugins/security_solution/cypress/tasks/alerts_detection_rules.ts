@@ -54,8 +54,11 @@ import {
   RULE_LAST_RUN,
   TOASTER_CLOSE_ICON,
   ADD_ELASTIC_RULES_EMPTY_PROMPT_BTN,
+<<<<<<< HEAD
   CONFIRM_DELETE_RULE_BTN,
   AUTO_REFRESH_POPOVER_TRIGGER_BUTTON,
+=======
+>>>>>>> whats-new
 } from '../screens/alerts_detection_rules';
 import type { RULES_MONITORING_TABLE } from '../screens/alerts_detection_rules';
 import { EUI_CHECKBOX } from '../screens/common/controls';

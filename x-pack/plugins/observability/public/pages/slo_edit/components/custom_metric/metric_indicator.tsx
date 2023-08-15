@@ -19,12 +19,24 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { first, range, xor } from 'lodash';
+<<<<<<< HEAD
 import React from 'react';
 import { Controller, useFieldArray, useFormContext } from 'react-hook-form';
 import { Field } from '../../../../hooks/slo/use_fetch_index_pattern_fields';
 import { createOptionsFromFields } from '../../helpers/create_options';
 import { CreateSLOForm } from '../../types';
 import { QueryBuilder } from '../common/query_builder';
+=======
+import React, { ReactNode } from 'react';
+import { Controller, useFieldArray, useFormContext } from 'react-hook-form';
+import { Field } from '../../../../hooks/slo/use_fetch_index_pattern_fields';
+import { CreateSLOForm } from '../../types';
+
+interface Option {
+  label: string;
+  value: string;
+}
+>>>>>>> whats-new
 
 interface MetricIndicatorProps {
   type: 'good' | 'total';
@@ -47,6 +59,7 @@ function createEquationFromMetric(names: string[]) {
   return names.join(' + ');
 }
 
+<<<<<<< HEAD
 const SUPPORTED_FIELD_TYPES = ['number', 'histogram'];
 
 export function MetricIndicator({ type, indexFields, isLoadingIndex }: MetricIndicatorProps) {
@@ -95,6 +108,20 @@ export function MetricIndicator({ type, indexFields, isLoadingIndex }: MetricInd
     SUPPORTED_FIELD_TYPES.includes(field.type)
   );
 
+=======
+export function MetricIndicator({
+  type,
+  indexFields,
+  isLoadingIndex,
+  metricLabel,
+  equationLabel,
+  metricTooltip,
+  equationTooltip,
+}: MetricIndicatorProps) {
+  const { control, watch, setValue, register } = useFormContext<CreateSLOForm>();
+  const metricFields = (indexFields ?? []).filter((field) => field.type === 'number');
+
+>>>>>>> whats-new
   const { fields, append, remove } = useFieldArray({
     control,
     name: `indicator.params.${type}.metrics`,
@@ -130,6 +157,7 @@ export function MetricIndicator({ type, indexFields, isLoadingIndex }: MetricInd
     <>
       <EuiFlexItem>
         {fields?.map((metric, index) => (
+<<<<<<< HEAD
           <EuiFlexGroup alignItems="center" gutterSize="xs" key={metric.id}>
             <input hidden {...register(`indicator.params.${type}.metrics.${index}.name`)} />
             <input hidden {...register(`indicator.params.${type}.metrics.${index}.aggregation`)} />
@@ -142,6 +170,25 @@ export function MetricIndicator({ type, indexFields, isLoadingIndex }: MetricInd
                   </span>
                 }
               >
+=======
+          <EuiFormRow
+            fullWidth
+            label={
+              <span>
+                {metricLabel} {metric.name} {metricTooltip}
+              </span>
+            }
+            key={metric.id}
+          >
+            <EuiFlexGroup alignItems="center" gutterSize="xs">
+              <EuiFlexItem>
+                <input hidden {...register(`indicator.params.${type}.metrics.${index}.name`)} />
+                <input
+                  hidden
+                  {...register(`indicator.params.${type}.metrics.${index}.aggregation`)}
+                />
+
+>>>>>>> whats-new
                 <Controller
                   name={`indicator.params.${type}.metrics.${index}.field`}
                   defaultValue=""

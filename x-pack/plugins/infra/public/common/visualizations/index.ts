@@ -11,4 +11,10 @@ export type {
   HostsLensLineChartFormulas,
 } from './types';
 
+<<<<<<< HEAD
 export { hostLensFormulas } from './constants';
+=======
+export { hostLensFormulas, visualizationTypes } from './constants';
+
+export { LensAttributesBuilder } from './lens/lens_attributes_builder';
+>>>>>>> whats-new

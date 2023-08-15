@@ -20,6 +20,10 @@ import moment from 'moment';
 import React from 'react';
 import { useTimelineChartTheme } from '../../../../../../../utils/use_timeline_chart_theme';
 import { MetricsExplorerSeries } from '../../../../../../../../common/http_api';
+<<<<<<< HEAD
+=======
+import { getTimelineChartThemes } from '../../../../../../../utils/get_chart_theme';
+>>>>>>> whats-new
 import { MetricExplorerSeriesChart } from '../../../../../metrics_explorer/components/series_chart';
 import {
   MetricsExplorerChartType,
@@ -90,13 +94,18 @@ export const ChartSection = ({
           domain={domain}
           ticks={6}
           gridLine={{ visible: true }}
+<<<<<<< HEAD
         />
         <Tooltip {...tooltipProps} />
         <Settings
           onPointerUpdate={onPointerUpdate}
           baseTheme={chartTheme.baseTheme}
           theme={chartTheme.theme}
+=======
+>>>>>>> whats-new
         />
+        <Tooltip {...tooltipProps} />
+        <Settings onPointerUpdate={onPointerUpdate} {...getTimelineChartThemes(isDarkMode)} />
       </Chart>
     </>
   );

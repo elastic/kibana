@@ -46,10 +46,17 @@ const getInitialConversations = (): Record<string, Conversation> => ({
   },
 });
 
+<<<<<<< HEAD
 const renderAssistant = (extraProps = {}) =>
   render(
     <TestProviders getInitialConversations={getInitialConversations}>
       <Assistant isAssistantEnabled {...extraProps} />
+=======
+const renderAssistant = () =>
+  render(
+    <TestProviders getInitialConversations={getInitialConversations}>
+      <Assistant isAssistantEnabled />
+>>>>>>> whats-new
     </TestProviders>
   );
 
@@ -143,6 +150,7 @@ describe('Assistant', () => {
       });
       expect(persistToLocalStorage).toHaveBeenLastCalledWith(WELCOME_CONVERSATION_TITLE);
     });
+<<<<<<< HEAD
     it('should call the setConversationId callback if it is defined and the conversation id changes', async () => {
       const connectors: unknown[] = [{}];
       const setConversationId = jest.fn();
@@ -159,6 +167,8 @@ describe('Assistant', () => {
 
       expect(setConversationId).toHaveBeenLastCalledWith('electric sheep');
     });
+=======
+>>>>>>> whats-new
   });
 
   describe('when no connectors are loaded', () => {

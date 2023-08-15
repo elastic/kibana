@@ -302,6 +302,10 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
       : undefined;
     // Handling validation state
     const [isValid, setIsValid] = useState(true);
+<<<<<<< HEAD
+=======
+
+>>>>>>> whats-new
     const input = getSelectedOption(newPolicy.inputs, integration);
 
     const updatePolicy = useCallback(

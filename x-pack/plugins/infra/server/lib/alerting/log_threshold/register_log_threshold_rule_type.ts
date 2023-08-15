@@ -6,8 +6,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
+<<<<<<< HEAD
 import { GetViewInAppRelativeUrlFnOpts, PluginSetupContract } from '@kbn/alerting-plugin/server';
 import { observabilityPaths } from '@kbn/observability-plugin/common';
+=======
+import { PluginSetupContract } from '@kbn/alerting-plugin/server';
+>>>>>>> whats-new
 import { O11Y_AAD_FIELDS } from '../../../../common/constants';
 import { createLogThresholdExecutor, FIRED_ACTIONS } from './log_threshold_executor';
 import { extractReferences, injectReferences } from './log_threshold_references_manager';
@@ -167,7 +171,10 @@ export async function registerLogThresholdRuleType(
     },
     alerts: LogsRulesTypeAlertDefinition,
     fieldsForAAD: O11Y_AAD_FIELDS,
+<<<<<<< HEAD
     getViewInAppRelativeUrl: ({ rule }: GetViewInAppRelativeUrlFnOpts<{}>) =>
       observabilityPaths.ruleDetails(rule.id),
+=======
+>>>>>>> whats-new
   });
 }

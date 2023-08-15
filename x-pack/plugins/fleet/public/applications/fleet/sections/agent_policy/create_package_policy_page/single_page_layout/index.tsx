@@ -60,7 +60,10 @@ import { generateNewAgentPolicyWithDefaults } from '../../../../../../../common/
 import { CreatePackagePolicySinglePageLayout, PostInstallAddAgentModal } from './components';
 import { useDevToolsRequest, useOnSubmit } from './hooks';
 import { PostInstallCloudFormationModal } from './components/post_install_cloud_formation_modal';
+<<<<<<< HEAD
 import { PostInstallGoogleCloudShellModal } from './components/post_install_google_cloud_shell_modal';
+=======
+>>>>>>> whats-new
 
 const StepsWithLessPadding = styled(EuiSteps)`
   .euiStep__content {
@@ -423,6 +426,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
             onCancel={() => navigateAddAgentHelp(savedPackagePolicy)}
           />
         )}
+<<<<<<< HEAD
         {formState === 'SUBMITTED_GOOGLE_CLOUD_SHELL' && agentPolicy && savedPackagePolicy && (
           <PostInstallGoogleCloudShellModal
             agentPolicy={agentPolicy}
@@ -431,6 +435,8 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
             onCancel={() => navigateAddAgentHelp(savedPackagePolicy)}
           />
         )}
+=======
+>>>>>>> whats-new
         {packageInfo && (
           <IntegrationBreadcrumb
             pkgTitle={integrationInfo?.title || packageInfo.title}

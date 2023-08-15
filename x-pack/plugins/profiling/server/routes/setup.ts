@@ -89,6 +89,7 @@ export function registerSetupRoute({
           });
         }
 
+<<<<<<< HEAD
         const verifyFunctionsForViewer = [
           validateCollectorPackagePolicy,
           validateSymbolizerPackagePolicy,
@@ -114,6 +115,13 @@ export function registerSetupRoute({
           areResourcesSetupForViewer(mergedStateForViewer) &&
           mergedStateForViewer.data.available
         ) {
+=======
+        state.data.available = await hasProfilingData({
+          ...setupOptions,
+          client: clientWithProfilingAuth,
+        });
+        if (state.data.available) {
+>>>>>>> whats-new
           return response.ok({
             body: {
               has_setup: true,
@@ -195,22 +203,37 @@ export function registerSetupRoute({
 
         const partialStates = await Promise.all(
           [
+<<<<<<< HEAD
+=======
+            isApmPackageInstalled,
+            validateApmPolicy,
+>>>>>>> whats-new
             validateCollectorPackagePolicy,
             validateMaximumBuckets,
             validateResourceManagement,
             validateSecurityRole,
             validateSymbolizerPackagePolicy,
+<<<<<<< HEAD
             validateProfilingInApmPackagePolicy,
+=======
+>>>>>>> whats-new
           ].map((fn) => fn(setupOptions))
         );
         const mergedState = mergePartialSetupStates(state, partialStates);
 
         const executeFunctions = [
+<<<<<<< HEAD
           ...(mergedState.policies.collector.installed ? [] : [createCollectorPackagePolicy]),
           ...(mergedState.policies.symbolizer.installed ? [] : [createSymbolizerPackagePolicy]),
           ...(mergedState.policies.apm.profilingEnabled
             ? [removeProfilingFromApmPackagePolicy]
             : []),
+=======
+          ...(mergedState.packages.installed ? [] : [installLatestApmPackage]),
+          ...(mergedState.policies.apm.installed ? [] : [updateApmPolicy]),
+          ...(mergedState.policies.collector.installed ? [] : [createCollectorPackagePolicy]),
+          ...(mergedState.policies.symbolizer.installed ? [] : [createSymbolizerPackagePolicy]),
+>>>>>>> whats-new
           ...(mergedState.resource_management.enabled ? [] : [enableResourceManagement]),
           ...(mergedState.permissions.configured ? [] : [setSecurityRole]),
           ...(mergedState.settings.configured ? [] : [setMaximumBuckets]),

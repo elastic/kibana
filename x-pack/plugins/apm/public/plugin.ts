@@ -66,12 +66,28 @@ import type {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
+<<<<<<< HEAD
 import { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import { from } from 'rxjs';
 import { map } from 'rxjs/operators';
 import type { ConfigSchema } from '.';
+=======
+import type { SecurityPluginStart } from '@kbn/security-plugin/public';
+import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import { InfraClientStartExports } from '@kbn/infra-plugin/public';
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { UiActionsStart, UiActionsSetup } from '@kbn/ui-actions-plugin/public';
+import { ObservabilityTriggerId } from '@kbn/observability-shared-plugin/common';
+import { LicenseManagementUIPluginSetup } from '@kbn/license-management-plugin/public';
+import {
+  DiscoverStart,
+  DiscoverSetup,
+} from '@kbn/discover-plugin/public/plugin';
+>>>>>>> whats-new
 import { registerApmRuleTypes } from './components/alerting/rule_types/register_apm_rule_types';
 import {
   getApmEnrollmentFlyoutData,

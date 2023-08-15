@@ -14,6 +14,7 @@ import { i18n } from '@kbn/i18n';
 import useAsync from 'react-use/lib/useAsync';
 import { FormulaPublicApi } from '@kbn/lens-plugin/public';
 import {
+<<<<<<< HEAD
   type XYLayerOptions,
   type MetricLayerOptions,
   type FormulaValueConfig,
@@ -38,6 +39,25 @@ type Options = XYLayerOptions | MetricLayerOptions;
 interface StaticValueLayer {
   data: StaticValueConfig[];
   layerType: 'referenceLine';
+=======
+  type HostsLensFormulas,
+  type HostsLensMetricChartFormulas,
+  type HostsLensLineChartFormulas,
+  type LineChartOptions,
+  type MetricChartOptions,
+  LensAttributesBuilder,
+  LensAttributes,
+  hostLensFormulas,
+  visualizationTypes,
+} from '../common/visualizations';
+import { useLazyRef } from './use_lazy_ref';
+
+type Options = LineChartOptions | MetricChartOptions;
+interface UseLensAttributesBaseParams<T extends HostsLensFormulas, O extends Options> {
+  dataView?: DataView;
+  type: T;
+  options?: O;
+>>>>>>> whats-new
 }
 
 interface FormulaValueLayer<
@@ -85,11 +105,18 @@ export const useLensAttributes = ({ dataView, ...params }: UseLensAttributesPara
   const { value, error } = useAsync(lens.stateHelperApi, [lens]);
   const { formula: formulaAPI } = value ?? {};
 
+<<<<<<< HEAD
+=======
+  const lensChartConfig = hostLensFormulas[type];
+  const Chart = visualizationTypes[visualizationType];
+
+>>>>>>> whats-new
   const attributes = useLazyRef(() => {
     if (!dataView || !formulaAPI) {
       return null;
     }
 
+<<<<<<< HEAD
     const builder = new LensAttributesBuilder({
       visualization: chartFactory({
         dataView,
@@ -120,6 +147,40 @@ export const useLensAttributes = ({ dataView, ...params }: UseLensAttributesPara
 
   const openInLensAction = useCallback(
     ({ timeRange, query, filters }: { timeRange: TimeRange; filters: Filter[]; query: Query }) =>
+=======
+    const builder = new LensAttributesBuilder(
+      new Chart(lensChartConfig, dataView, formulaAPI, options)
+    );
+
+    return builder.build();
+  });
+
+  const injectFilters = useCallback(
+    ({
+      filters,
+      query = { language: 'kuery', query: '' },
+    }: {
+      filters: Filter[];
+      query?: Query;
+    }): LensAttributes | null => {
+      if (!attributes.current) {
+        return null;
+      }
+      return {
+        ...attributes.current,
+        state: {
+          ...attributes.current.state,
+          query,
+          filters: [...attributes.current.state.filters, ...filters],
+        },
+      };
+    },
+    [attributes]
+  );
+
+  const openInLensAction = useCallback(
+    ({ timeRange, filters, query }: { timeRange: TimeRange; filters: Filter[]; query?: Query }) =>
+>>>>>>> whats-new
       () => {
         const injectedAttributes = injectFilters({ filters, query });
         if (injectedAttributes) {
@@ -137,6 +198,7 @@ export const useLensAttributes = ({ dataView, ...params }: UseLensAttributesPara
       },
     [injectFilters, navigateToPrefilledEditor]
   );
+<<<<<<< HEAD
 
   const getExtraActions = useCallback(
     ({
@@ -232,11 +294,31 @@ const chartFactory = ({
     default:
       throw new Error(`Unsupported chart type`);
   }
+=======
+
+  const getExtraActions = useCallback(
+    ({ timeRange, filters, query }: { timeRange: TimeRange; filters: Filter[]; query?: Query }) => {
+      const openInLens = getOpenInLensAction(openInLensAction({ timeRange, filters, query }));
+      return [openInLens];
+    },
+    [openInLensAction]
+  );
+
+  const {
+    formula: { formula },
+  } = lensChartConfig;
+
+  return { formula, attributes: attributes.current, getExtraActions, error };
+>>>>>>> whats-new
 };
 
 const getOpenInLensAction = (onExecute: () => void): Action => {
   return {
     id: 'openInLens',
+<<<<<<< HEAD
+=======
+
+>>>>>>> whats-new
     getDisplayName(_context: ActionExecutionContext): string {
       return i18n.translate('xpack.infra.hostsViewPage.tabs.metricsCharts.actions.openInLines', {
         defaultMessage: 'Open in Lens',

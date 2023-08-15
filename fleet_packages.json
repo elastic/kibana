@@ -24,7 +24,11 @@
 [
   {
     "name": "apm",
+<<<<<<< HEAD
     "version": "8.10.0-preview-1689351101",
+=======
+    "version": "8.9.0-preview-1686650721",
+>>>>>>> whats-new
     "forceAlignStackVersion": true,
     "allowSyncToPrerelease": true
   },
@@ -34,7 +38,11 @@
   },
   {
     "name": "endpoint",
+<<<<<<< HEAD
     "version": "8.9.1"
+=======
+    "version": "8.9.0"
+>>>>>>> whats-new
   },
   {
     "name": "fleet_server",
@@ -42,7 +50,17 @@
   },
   {
     "name": "profiler_symbolizer",
+<<<<<<< HEAD
     "version": "8.9.0-preview",
+=======
+    "version": "8.8.1-preview",
+    "forceAlignStackVersion": true,
+    "allowSyncToPrerelease": true
+  },
+  {
+    "name": "profiler_collector",
+    "version": "8.9.1-preview",
+>>>>>>> whats-new
     "forceAlignStackVersion": true,
     "allowSyncToPrerelease": true
   },
@@ -58,6 +76,10 @@
   },
   {
     "name": "security_detection_engine",
+<<<<<<< HEAD
     "version": "8.9.3"
+=======
+    "version": "8.8.4"
+>>>>>>> whats-new
   }
 ]

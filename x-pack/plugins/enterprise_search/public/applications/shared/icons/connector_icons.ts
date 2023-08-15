@@ -10,7 +10,10 @@ import confluence_cloud from '../../../assets/source_icons/confluence_cloud.svg'
 import custom from '../../../assets/source_icons/custom.svg';
 import dropbox from '../../../assets/source_icons/dropbox.svg';
 import github from '../../../assets/source_icons/github.svg';
+<<<<<<< HEAD
 import gmail from '../../../assets/source_icons/gmail.svg';
+=======
+>>>>>>> whats-new
 import google_cloud_storage from '../../../assets/source_icons/google_cloud_storage.svg';
 import google_drive from '../../../assets/source_icons/google_drive.svg';
 import jira_cloud from '../../../assets/source_icons/jira_cloud.svg';
@@ -33,7 +36,10 @@ export const CONNECTOR_ICONS = {
   custom,
   dropbox,
   github,
+<<<<<<< HEAD
   gmail,
+=======
+>>>>>>> whats-new
   google_cloud_storage,
   google_drive,
   jira_cloud,

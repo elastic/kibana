@@ -28,10 +28,13 @@
     "@kbn/core-notifications-browser",
     "@kbn/core-theme-browser",
     "@kbn/core-ui-settings-common",
+<<<<<<< HEAD
     "@kbn/config-schema",
     "@kbn/core-plugins-server",
     "@kbn/management-settings-section-registry",
     "@kbn/react-kibana-context-render",
+=======
+>>>>>>> whats-new
   ],
   "exclude": [
     "target/**/*",

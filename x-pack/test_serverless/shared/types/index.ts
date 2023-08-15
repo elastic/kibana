@@ -12,5 +12,8 @@ export interface CreateTestConfigOptions {
   testFiles: string[];
   junit: { reportName: string };
   suiteTags?: { include?: string[]; exclude?: string[] };
+<<<<<<< HEAD
   services?: InheritedServices;
+=======
+>>>>>>> whats-new
 }

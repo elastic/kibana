@@ -128,6 +128,7 @@
     "@kbn/core-http-common",
     "@kbn/slo-schema",
     "@kbn/lens-plugin",
+<<<<<<< HEAD
     "@kbn/notifications-plugin",
     "@kbn/logs-shared-plugin",
     "@kbn/telemetry-tools",
@@ -140,5 +141,9 @@
     "@kbn/stack-connectors-plugin",
     "@kbn/stack-alerts-plugin",
     "@kbn/aiops-utils"
+=======
+    "@kbn/telemetry-tools",
+    "@kbn/notifications-plugin",
+>>>>>>> whats-new
   ]
 }

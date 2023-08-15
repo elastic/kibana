@@ -23,8 +23,11 @@ import {
   PartialTheme,
   SettingsProps,
   Tooltip,
+<<<<<<< HEAD
   SeriesIdentifier,
   TooltipValue,
+=======
+>>>>>>> whats-new
 } from '@elastic/charts';
 import type { CustomPaletteState } from '@kbn/charts-plugin/public';
 import { search } from '@kbn/data-plugin/public';
@@ -678,6 +681,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
               splitColumnAccessor={splitChartColumnAccessor}
               splitRowAccessor={splitChartRowAccessor}
             />
+<<<<<<< HEAD
             <Tooltip<Record<string, string | number>, SeriesIdentifier>
               actions={
                 hasTooltipActions
@@ -703,6 +707,9 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
               }
               type={args.showTooltip ? TooltipType.Follow : TooltipType.None}
             />
+=======
+            <Tooltip {...tooltip} />
+>>>>>>> whats-new
             <Settings
               onRenderChange={onRenderChange}
               noResults={

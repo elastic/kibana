@@ -223,6 +223,7 @@ exports[`PartitionVisComponent should render correct structure for donut 1`] = `
       >
         <ChartSplit />
         <Tooltip
+<<<<<<< HEAD
           actions={
             Array [
               Object {
@@ -232,6 +233,8 @@ exports[`PartitionVisComponent should render correct structure for donut 1`] = `
               },
             ]
           }
+=======
+>>>>>>> whats-new
           type="follow"
         />
         <Settings
@@ -619,6 +622,7 @@ exports[`PartitionVisComponent should render correct structure for mosaic 1`] = 
       >
         <ChartSplit />
         <Tooltip
+<<<<<<< HEAD
           actions={
             Array [
               Object {
@@ -628,6 +632,8 @@ exports[`PartitionVisComponent should render correct structure for mosaic 1`] = 
               },
             ]
           }
+=======
+>>>>>>> whats-new
           type="follow"
         />
         <Settings
@@ -1075,6 +1081,7 @@ exports[`PartitionVisComponent should render correct structure for multi-metric 
       >
         <ChartSplit />
         <Tooltip
+<<<<<<< HEAD
           actions={
             Array [
               Object {
@@ -1084,6 +1091,8 @@ exports[`PartitionVisComponent should render correct structure for multi-metric 
               },
             ]
           }
+=======
+>>>>>>> whats-new
           type="follow"
         />
         <Settings
@@ -1533,6 +1542,7 @@ exports[`PartitionVisComponent should render correct structure for pie 1`] = `
       >
         <ChartSplit />
         <Tooltip
+<<<<<<< HEAD
           actions={
             Array [
               Object {
@@ -1542,6 +1552,8 @@ exports[`PartitionVisComponent should render correct structure for pie 1`] = `
               },
             ]
           }
+=======
+>>>>>>> whats-new
           type="follow"
         />
         <Settings
@@ -1929,6 +1941,7 @@ exports[`PartitionVisComponent should render correct structure for treemap 1`] =
       >
         <ChartSplit />
         <Tooltip
+<<<<<<< HEAD
           actions={
             Array [
               Object {
@@ -1938,6 +1951,8 @@ exports[`PartitionVisComponent should render correct structure for treemap 1`] =
               },
             ]
           }
+=======
+>>>>>>> whats-new
           type="follow"
         />
         <Settings
@@ -2280,6 +2295,7 @@ exports[`PartitionVisComponent should render correct structure for waffle 1`] = 
       >
         <ChartSplit />
         <Tooltip
+<<<<<<< HEAD
           actions={
             Array [
               Object {
@@ -2289,6 +2305,8 @@ exports[`PartitionVisComponent should render correct structure for waffle 1`] = 
               },
             ]
           }
+=======
+>>>>>>> whats-new
           type="follow"
         />
         <Settings

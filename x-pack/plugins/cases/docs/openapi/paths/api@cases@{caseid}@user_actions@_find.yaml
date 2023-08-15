@@ -29,7 +29,10 @@ get:
                 type: integer
               userActions:
                 type: array
+<<<<<<< HEAD
                 maxItems: 10000
+=======
+>>>>>>> whats-new
                 items:
                   $ref: '../components/schemas/user_actions_find_response_properties.yaml'
           examples:

@@ -393,6 +393,7 @@ value is 10000.
 [[apm-enable-service-overview]]`apm:enableServiceOverview`::
 When enabled, displays the *Overview* tab for services in *APM*.
 
+<<<<<<< HEAD
 [[apm-agent-explorer]]`observability:apmAgentExplorerView`::
 beta:[] Enables the Agent explorer view.
 
@@ -413,6 +414,8 @@ beta:[] Enables the usage of service transaction metrics, which are low cardinal
 Enable or disable the APM Labs button -- a quick way to enable and disable technical preview features in APM.
 See <<apm-labs>> to learn more.
 
+=======
+>>>>>>> whats-new
 [[observability-apm-critical-path]]`observability:apmEnableCriticalPath`::
 When enabled, displays the critical path of a trace.
 
@@ -421,6 +424,7 @@ preview:[] When enabled, uses progressive loading of some APM views.
 Data may be requested with a lower sampling rate first, with lower accuracy but faster response times,
 while the unsampled data loads in the background.
 
+<<<<<<< HEAD
 [[observability-apm-max-groups]]`observability:apmServiceGroupMaxNumberOfServices`::
 Limit the number of services in a given service group.
 
@@ -430,6 +434,11 @@ preview:[] Sorts services without anomaly detection rules on the APM Service inv
 [[observability-default-service-env]]`observability:apmDefaultServiceEnvironment`::
 Set the default environment for the APM app. When left empty, data from all environments will be displayed by default.
 
+=======
+[[observability-apm-optimized-sort]]`observability:apmServiceInventoryOptimizedSorting`::
+preview:[] Sorts services without anomaly detection rules on the APM Service inventory page by service name.
+
+>>>>>>> whats-new
 [[observability-enable-aws-lambda-metrics]]`observability:enableAwsLambdaMetrics`::
 preview:[] Display Amazon Lambda metrics in the service metrics tab.
 

@@ -22,7 +22,11 @@ import { useQuery } from '@tanstack/react-query';
 
 import type { AgentPolicy, PackagePolicy } from '../../../../../types';
 import { sendGetEnrollmentAPIKeys, useCreateCloudFormationUrl } from '../../../../../hooks';
+<<<<<<< HEAD
 import { getCloudFormationPropsFromPackagePolicy } from '../../../../../services';
+=======
+import { getCloudFormationTemplateUrlFromPackagePolicy } from '../../../../../services';
+>>>>>>> whats-new
 import { CloudFormationGuide } from '../../../../../components';
 
 export const PostInstallCloudFormationModal: React.FunctionComponent<{
@@ -39,11 +43,20 @@ export const PostInstallCloudFormationModal: React.FunctionComponent<{
     })
   );
 
+<<<<<<< HEAD
   const cloudFormationProps = getCloudFormationPropsFromPackagePolicy(packagePolicy);
 
   const { cloudFormationUrl, error, isError, isLoading } = useCreateCloudFormationUrl({
     enrollmentAPIKey: apyKeysData?.data?.items[0]?.api_key,
     cloudFormationProps,
+=======
+  const cloudFormationTemplateUrl =
+    getCloudFormationTemplateUrlFromPackagePolicy(packagePolicy) || '';
+
+  const { cloudFormationUrl, error, isError, isLoading } = useCreateCloudFormationUrl({
+    cloudFormationTemplateUrl,
+    enrollmentAPIKey: apyKeysData?.data?.items[0]?.api_key,
+>>>>>>> whats-new
   });
 
   return (

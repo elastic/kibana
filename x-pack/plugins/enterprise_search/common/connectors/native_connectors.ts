@@ -418,6 +418,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
     }),
     serviceType: 'confluence',
   },
+<<<<<<< HEAD
   dropbox: {
     configuration: {
       path: {
@@ -523,6 +524,8 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
     }),
     serviceType: 'dropbox',
   },
+=======
+>>>>>>> whats-new
   jira: {
     configuration: {
       data_source: {
@@ -1861,6 +1864,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         validations: [],
         value: false,
       },
+<<<<<<< HEAD
       fetch_drive_item_permissions: {
         default_value: true,
         depends_on: [
@@ -1923,6 +1927,8 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         validations: [],
         value: true,
       },
+=======
+>>>>>>> whats-new
     },
     features: {
       [FeatureName.SYNC_RULES]: {

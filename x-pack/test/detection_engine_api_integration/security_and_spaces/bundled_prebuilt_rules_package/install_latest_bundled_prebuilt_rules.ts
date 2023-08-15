@@ -11,11 +11,20 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import JSON5 from 'json5';
 import expect from 'expect';
 import { PackageSpecManifest } from '@kbn/fleet-plugin/common';
+<<<<<<< HEAD
 import { ALL_SAVED_OBJECT_INDICES } from '@kbn/core-saved-objects-server';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { deleteAllPrebuiltRuleAssets, deleteAllRules } from '../../utils';
 import { getPrebuiltRulesStatus } from '../../utils/prebuilt_rules/get_prebuilt_rules_status';
 import { installPrebuiltRulesPackageByVersion } from '../../utils/prebuilt_rules/install_fleet_package_by_url';
+=======
+import { FtrProviderContext } from '../../common/ftr_provider_context';
+import {
+  deleteAllPrebuiltRuleAssets,
+  deleteAllRules,
+  getPrebuiltRulesAndTimelinesStatus,
+} from '../../utils';
+>>>>>>> whats-new
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -51,6 +60,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
     it('should install prebuilt rules from the package that comes bundled with Kibana', async () => {
       // Verify that status is empty before package installation
+<<<<<<< HEAD
       const statusBeforePackageInstallation = await getPrebuiltRulesStatus(supertest);
       expect(statusBeforePackageInstallation.stats.num_prebuilt_rules_installed).toBe(0);
       expect(statusBeforePackageInstallation.stats.num_prebuilt_rules_to_install).toBe(0);
@@ -74,6 +84,30 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(statusAfterPackageInstallation.stats.num_prebuilt_rules_installed).toBe(0);
       expect(statusAfterPackageInstallation.stats.num_prebuilt_rules_to_install).toBeGreaterThan(0);
       expect(statusAfterPackageInstallation.stats.num_prebuilt_rules_to_upgrade).toBe(0);
+=======
+      const statusBeforePackageInstallation = await getPrebuiltRulesAndTimelinesStatus(supertest);
+      expect(statusBeforePackageInstallation.rules_installed).toBe(0);
+      expect(statusBeforePackageInstallation.rules_not_installed).toBe(0);
+      expect(statusBeforePackageInstallation.rules_not_updated).toBe(0);
+
+      const EPM_URL = `/api/fleet/epm/packages/security_detection_engine/99.0.0`;
+
+      const bundledInstallResponse = await supertest
+        .post(EPM_URL)
+        .set('kbn-xsrf', 'xxxx')
+        .type('application/json')
+        .send({ force: true })
+        .expect(200);
+
+      // As opposed to "registry"
+      expect(bundledInstallResponse.body._meta.install_source).toBe('bundled');
+
+      // Verify that status is updated after package installation
+      const statusAfterPackageInstallation = await getPrebuiltRulesAndTimelinesStatus(supertest);
+      expect(statusAfterPackageInstallation.rules_installed).toBe(0);
+      expect(statusAfterPackageInstallation.rules_not_installed).toBeGreaterThan(0);
+      expect(statusAfterPackageInstallation.rules_not_updated).toBe(0);
+>>>>>>> whats-new
     });
   });
 };

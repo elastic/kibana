@@ -14,8 +14,11 @@ import React, { lazy, memo, Suspense, useCallback, useEffect, useMemo, useState 
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
+<<<<<<< HEAD
 import { useAssistantTelemetry } from '../../../../assistant/use_assistant_telemetry';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+=======
+>>>>>>> whats-new
 import { useConversationStore } from '../../../../assistant/use_conversation_store';
 import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
 import type { SessionViewConfig } from '../../../../../common/types';
@@ -104,6 +107,7 @@ const AssistantTab: React.FC<{
   rowRenderers: RowRenderer[];
   timelineId: TimelineId;
   shouldRefocusPrompt: boolean;
+<<<<<<< HEAD
   setConversationId: Dispatch<SetStateAction<string>>;
 }> = memo(
   ({
@@ -114,12 +118,19 @@ const AssistantTab: React.FC<{
     shouldRefocusPrompt,
     setConversationId,
   }) => (
+=======
+}> = memo(
+  ({ isAssistantEnabled, renderCellValue, rowRenderers, timelineId, shouldRefocusPrompt }) => (
+>>>>>>> whats-new
     <Suspense fallback={<EuiSkeletonText lines={10} />}>
       <AssistantTabContainer>
         <Assistant
           isAssistantEnabled={isAssistantEnabled}
           conversationId={TIMELINE_CONVERSATION_TITLE}
+<<<<<<< HEAD
           setConversationId={setConversationId}
+=======
+>>>>>>> whats-new
           shouldRefocusPrompt={shouldRefocusPrompt}
         />
       </AssistantTabContainer>
@@ -145,7 +156,10 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
     setConversationId,
     showTimeline,
   }) => {
+<<<<<<< HEAD
     const isDiscoverInTimelineEnabled = useIsExperimentalFeatureEnabled('discoverInTimeline');
+=======
+>>>>>>> whats-new
     const { hasAssistantPrivilege, isAssistantEnabled } = useAssistantAvailability();
     const getTab = useCallback(
       (tab: TimelineTabs) => {
@@ -238,12 +252,16 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
                 renderCellValue={renderCellValue}
                 rowRenderers={rowRenderers}
                 timelineId={timelineId}
+<<<<<<< HEAD
                 setConversationId={setConversationId}
+=======
+>>>>>>> whats-new
                 shouldRefocusPrompt={
                   showTimeline && activeTimelineTab === TimelineTabs.securityAssistant
                 }
               />
             )}
+<<<<<<< HEAD
           </HideShowContainer>
         )}
         {isDiscoverInTimelineEnabled && (
@@ -252,6 +270,8 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
             data-test-subj={`timeline-tab-content-${TimelineTabs.discover}`}
           >
             <DiscoverTab />
+=======
+>>>>>>> whats-new
           </HideShowContainer>
         )}
       </>
@@ -291,7 +311,10 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
   sessionViewConfig,
   timelineDescription,
 }) => {
+<<<<<<< HEAD
   const isDiscoverInTimelineEnabled = useIsExperimentalFeatureEnabled('discoverInTimeline');
+=======
+>>>>>>> whats-new
   const { hasAssistantPrivilege } = useAssistantAvailability();
   const dispatch = useDispatch();
   const getActiveTab = useMemo(() => getActiveTabSelector(), []);

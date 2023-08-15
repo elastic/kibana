@@ -15,7 +15,11 @@ import {
   visitRuleActions,
 } from '../../../tasks/response_actions';
 import { cleanupRule, generateRandomStringName, loadRule } from '../../../tasks/api_fixtures';
+<<<<<<< HEAD
 import { RESPONSE_ACTION_TYPES } from '../../../../../../common/api/detection_engine';
+=======
+import { RESPONSE_ACTION_TYPES } from '../../../../../../common/detection_engine/rule_response_actions/schemas';
+>>>>>>> whats-new
 import { loginWithRole, ROLE } from '../../../tasks/login';
 
 describe('Form', () => {

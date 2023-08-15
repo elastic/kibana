@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+<<<<<<<< HEAD:x-pack/plugins/observability_ai_assistant/server/config.ts
 import { schema, type TypeOf } from '@kbn/config-schema';
 
 export const config = schema.object({
@@ -12,3 +13,12 @@ export const config = schema.object({
 });
 
 export type ObservabilityAIAssistantConfig = TypeOf<typeof config>;
+========
+import { FtrProviderContext } from '../../../ftr_provider_context';
+
+export default function ({ loadTestFile }: FtrProviderContext) {
+  describe('security cases', function () {
+    loadTestFile(require.resolve('./list_view'));
+  });
+}
+>>>>>>>> whats-new:x-pack/test/screenshot_creation/apps/response_ops_docs/security_cases/index.ts

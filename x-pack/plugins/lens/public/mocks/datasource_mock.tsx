@@ -51,6 +51,11 @@ export function createMockDatasource(
     removeColumn: jest.fn((props) => {}),
     getLayers: jest.fn((_state) => []),
     uniqueLabels: jest.fn((_state, dataViews) => ({})),
+<<<<<<< HEAD:x-pack/plugins/lens/public/mocks/datasource_mock.tsx
+=======
+    renderDimensionTrigger: jest.fn(),
+    renderDimensionEditor: jest.fn(),
+>>>>>>> whats-new:x-pack/plugins/lens/public/mocks/datasource_mock.ts
     getDropProps: jest.fn(),
     onDrop: jest.fn(),
     createEmptyLayer: jest.fn(),

@@ -44,7 +44,10 @@ export default function loadTests({ loadTestFile, getService }) {
     loadTestFile(require.resolve('./install_hidden_datastreams'));
     loadTestFile(require.resolve('./bulk_get_assets'));
     loadTestFile(require.resolve('./install_dynamic_template_metric'));
+<<<<<<< HEAD
     loadTestFile(require.resolve('./routing_rules'));
     loadTestFile(require.resolve('./install_runtime_field'));
+=======
+>>>>>>> whats-new
   });
 }

@@ -66,10 +66,14 @@
     "@kbn/aiops-plugin",
     "@kbn/field-formats-plugin",
     "@kbn/core-http-server",
+<<<<<<< HEAD
     "@kbn/logs-shared-plugin",
     "@kbn/licensing-plugin",
     "@kbn/aiops-utils",
     "@kbn/lens-embeddable-utils"
+=======
+    "@kbn/licensing-plugin",
+>>>>>>> whats-new
   ],
   "exclude": ["target/**/*"]
 }

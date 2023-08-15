@@ -98,7 +98,10 @@ const createInstallButtonColumn = (
         size="s"
         disabled={isInstallButtonDisabled}
         onClick={() => installOneRule(ruleId)}
+<<<<<<< HEAD
         data-test-subj={`installSinglePrebuiltRuleButton-${ruleId}`}
+=======
+>>>>>>> whats-new
       >
         {isRuleInstalling ? <EuiLoadingSpinner size="s" /> : i18n.INSTALL_RULE_BUTTON}
       </EuiButtonEmpty>

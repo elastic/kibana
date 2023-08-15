@@ -26,6 +26,14 @@ import { RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/serve
 import { SharePluginSetup } from '@kbn/share-plugin/server';
 import { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+<<<<<<< HEAD
+=======
+import { CloudSetup } from '@kbn/cloud-plugin/server';
+import {
+  kubernetesGuideId,
+  kubernetesGuideConfig,
+} from '../common/guided_onboarding/kubernetes_guide_config';
+>>>>>>> whats-new
 import { ObservabilityConfig } from '.';
 import { casesFeatureId, observabilityFeatureId, sloFeatureId } from '../common';
 import { SLO_BURN_RATE_RULE_TYPE_ID } from '../common/constants';

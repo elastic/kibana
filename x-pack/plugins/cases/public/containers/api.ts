@@ -447,7 +447,11 @@ export const createAttachments = async ({
   caseId,
   signal,
 }: {
+<<<<<<< HEAD
   attachments: BulkCreateAttachmentsRequest;
+=======
+  attachments: BulkCreateCommentRequest;
+>>>>>>> whats-new
   caseId: string;
   signal?: AbortSignal;
 }): Promise<CaseUI> => {

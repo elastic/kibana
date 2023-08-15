@@ -12,7 +12,11 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useSyntheticsRefreshContext } from '../../contexts';
 import { cleanMonitorListState, selectServiceLocationsState } from '../../state';
 import { showSyncErrors } from '../monitors_page/management/show_sync_errors';
+<<<<<<< HEAD
 import { createGettingStartedMonitor, UpsertMonitorResponse } from '../../state';
+=======
+import { createGettingStartedMonitor } from '../../state';
+>>>>>>> whats-new
 import { DEFAULT_FIELDS } from '../../../../../common/constants/monitor_defaults';
 import { ConfigKey } from '../../../../../common/constants/monitor_management';
 import {

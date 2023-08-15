@@ -21,8 +21,11 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import { ExpandableFlyoutProvider } from '@kbn/expandable-flyout';
+<<<<<<< HEAD
 import { useKibana } from '../lib/kibana';
 import { UpsellingProvider } from '../components/upselling_provider';
+=======
+>>>>>>> whats-new
 import { MockAssistantProvider } from './mock_assistant_provider';
 import { ConsoleManager } from '../../management/components/console';
 import type { State } from '../store';
@@ -63,6 +66,7 @@ export const TestProvidersComponent: React.FC<Props> = ({
   onDragEnd = jest.fn(),
   cellActions = [],
 }) => {
+<<<<<<< HEAD
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: {
@@ -93,6 +97,29 @@ export const TestProvidersComponent: React.FC<Props> = ({
             </ThemeProvider>
           </ReduxStoreProvider>
         </UpsellingProviderMock>
+=======
+  const queryClient = new QueryClient();
+  return (
+    <I18nProvider>
+      <MockKibanaContextProvider>
+        <ReduxStoreProvider store={store}>
+          <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
+            <MockAssistantProvider>
+              <QueryClientProvider client={queryClient}>
+                <ExpandableFlyoutProvider>
+                  <ConsoleManager>
+                    <CellActionsProvider
+                      getTriggerCompatibleActions={() => Promise.resolve(cellActions)}
+                    >
+                      <DragDropContext onDragEnd={onDragEnd}>{children}</DragDropContext>
+                    </CellActionsProvider>
+                  </ConsoleManager>
+                </ExpandableFlyoutProvider>
+              </QueryClientProvider>
+            </MockAssistantProvider>
+          </ThemeProvider>
+        </ReduxStoreProvider>
+>>>>>>> whats-new
       </MockKibanaContextProvider>
     </I18nProvider>
   );

@@ -55,10 +55,13 @@ export interface Conversation {
   theme?: ConversationTheme;
   isDefault?: boolean;
   excludeFromLastConversationStorage?: boolean;
+<<<<<<< HEAD
 }
 
 export interface AssistantTelemetry {
   reportAssistantInvoked: (params: { invokedBy: string; conversationId: string }) => void;
   reportAssistantMessageSent: (params: { conversationId: string; role: string }) => void;
   reportAssistantQuickPrompt: (params: { conversationId: string; promptTitle: string }) => void;
+=======
+>>>>>>> whats-new
 }

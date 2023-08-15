@@ -36,7 +36,10 @@ export interface TTYPlayerDeps {
   onJumpToEvent(event: ProcessEvent): void;
   autoSeekToEntityId?: string;
   canReadPolicyManagement?: boolean;
+<<<<<<< HEAD
   trackEvent(name: SessionViewTelemetryKey): void;
+=======
+>>>>>>> whats-new
 }
 
 export const TTYPlayer = ({
@@ -49,7 +52,10 @@ export const TTYPlayer = ({
   onJumpToEvent,
   autoSeekToEntityId,
   canReadPolicyManagement,
+<<<<<<< HEAD
   trackEvent,
+=======
+>>>>>>> whats-new
 }: TTYPlayerDeps) => {
   const ref = useRef<HTMLDivElement>(null);
   const { ref: scrollRef, height: containerHeight = 1 } = useResizeObserver<HTMLDivElement>({});

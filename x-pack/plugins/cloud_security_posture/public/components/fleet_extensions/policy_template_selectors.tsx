@@ -20,7 +20,10 @@ import { getPolicyTemplateInputOptions, type NewPackagePolicyPostureInput } from
 import { RadioGroup } from './csp_boxed_radio_group';
 import { AwsCredentialsForm } from './aws_credentials_form/aws_credentials_form';
 import { EksCredentialsForm } from './eks_credentials_form';
+<<<<<<< HEAD
 import { GcpCredentialsForm } from './gcp_credential_form';
+=======
+>>>>>>> whats-new
 
 interface PolicyTemplateSelectorProps {
   selectedTemplate: CloudSecurityPolicyTemplate;
@@ -80,8 +83,11 @@ export const PolicyTemplateVarsForm = ({ input, ...props }: PolicyTemplateVarsFo
       return <AwsCredentialsForm {...props} input={input} />;
     case 'cloudbeat/cis_eks':
       return <EksCredentialsForm {...props} input={input} />;
+<<<<<<< HEAD
     case 'cloudbeat/cis_gcp':
       return <GcpCredentialsForm {...props} input={input} />;
+=======
+>>>>>>> whats-new
     default:
       return null;
   }

@@ -76,6 +76,12 @@ export function useCloneSlo() {
             values: { name: slo.name },
           })
         );
+<<<<<<< HEAD
+=======
+      },
+      onSettled: () => {
+        queryClient.invalidateQueries({ queryKey: sloKeys.lists(), exact: false });
+>>>>>>> whats-new
       },
     }
   );

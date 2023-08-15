@@ -41,7 +41,10 @@ import { useInfiniteFindCaseUserActions } from '../../containers/use_infinite_fi
 import { useGetCaseUserActionsStats } from '../../containers/use_get_case_user_actions_stats';
 import { createQueryWithMarkup } from '../../common/test_utils';
 import { useCasesFeatures } from '../../common/use_cases_features';
+<<<<<<< HEAD
 import { CaseMetricsFeature } from '../../../common/types/api';
+=======
+>>>>>>> whats-new
 
 jest.mock('../../containers/use_get_action_license');
 jest.mock('../../containers/use_update_case');
@@ -177,7 +180,11 @@ describe('CaseViewPage', () => {
     useGetTagsMock.mockReturnValue({ data: [], isLoading: false });
     useGetCaseUsersMock.mockReturnValue({ isLoading: false, data: caseUsers });
     useCasesFeaturesMock.mockReturnValue({
+<<<<<<< HEAD
       metricsFeatures: [CaseMetricsFeature.ALERTS_COUNT],
+=======
+      metricsFeatures: ['alerts.count'],
+>>>>>>> whats-new
       pushToServiceAuthorized: true,
       caseAssignmentAuthorized: true,
       isAlertsEnabled: true,

@@ -33,7 +33,10 @@ import {
   UserMessagesGetter,
   AddLayerFunction,
   RegisterLibraryAnnotationGroupFunction,
+<<<<<<< HEAD
   DragDropOperation,
+=======
+>>>>>>> whats-new
 } from '../../../types';
 import { LayerSettings } from './layer_settings';
 import { LayerPanelProps, ActiveDimensionState } from './types';
@@ -347,7 +350,11 @@ export function LayerPanel(
       isOnlyLayer,
       isTextBasedLanguage,
       visualizationLayerSettings,
+<<<<<<< HEAD
       layerDatasource?.LayerSettingsComponent,
+=======
+      layerDatasource?.renderLayerSettings,
+>>>>>>> whats-new
       onCloneLayer,
       onRemoveLayer,
     ]

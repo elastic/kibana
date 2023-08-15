@@ -53,8 +53,12 @@ export const SessionView = ({
   investigatedAlertId,
   loadAlertDetails,
   canReadPolicyManagement,
+<<<<<<< HEAD
   trackEvent,
 }: SessionViewDeps & { trackEvent: (name: SessionViewTelemetryKey) => void }) => {
+=======
+}: SessionViewDeps) => {
+>>>>>>> whats-new
   // don't engage jumpTo if jumping to session leader.
   if (jumpToEntityId === sessionEntityId) {
     jumpToEntityId = undefined;
@@ -490,7 +494,10 @@ export const SessionView = ({
         onJumpToEvent={onJumpToEvent}
         autoSeekToEntityId={currentJumpToOutputEntityId}
         canReadPolicyManagement={canReadPolicyManagement}
+<<<<<<< HEAD
         trackEvent={trackEvent}
+=======
+>>>>>>> whats-new
       />
     </div>
   );

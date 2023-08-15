@@ -239,6 +239,7 @@ describe('SLO Details Page', () => {
 
     fireEvent.click(button!);
 
+<<<<<<< HEAD
     const {
       id,
       createdAt,
@@ -250,6 +251,9 @@ describe('SLO Details Page', () => {
       instanceId,
       ...newSlo
     } = slo;
+=======
+    const { id, createdAt, enabled, revision, summary, settings, updatedAt, ...newSlo } = slo;
+>>>>>>> whats-new
 
     expect(mockClone).toBeCalledWith({
       originalSloId: slo.id,

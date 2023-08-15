@@ -89,11 +89,15 @@ export const VectorSearchGuide: React.FC = () => {
               id="xpack.enterpriseSearch.vectorSearch.guide.description"
               defaultMessage="Elasticsearch can be used as a vector database, which enables vector search and semantic search use cases."
             />{' '}
+<<<<<<< HEAD
             <EuiLink
               href={docLinks.knnSearch}
               target="_blank"
               data-test-subj="vector-search-documentation-link"
             >
+=======
+            <EuiLink href={docLinks.knnSearch} target="_blank">
+>>>>>>> whats-new
               <FormattedMessage
                 id="xpack.enterpriseSearch.vectorSearch.guide.descriptionLink"
                 defaultMessage="Learn more about vector search."

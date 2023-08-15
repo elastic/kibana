@@ -79,6 +79,7 @@ const DataQualityPanelComponent: React.FC<Props> = ({
   reportDataQualityCheckAllCompleted,
   setLastChecked,
   theme,
+  baseTheme,
 }) => {
   const formatBytes = useCallback(
     (value: number | undefined): string =>

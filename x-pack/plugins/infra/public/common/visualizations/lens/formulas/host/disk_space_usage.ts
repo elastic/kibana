@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+<<<<<<< HEAD
 import type { FormulaValueConfig } from '@kbn/lens-embeddable-utils';
 
 export const diskSpaceUsage: FormulaValueConfig = {
@@ -16,4 +17,32 @@ export const diskSpaceUsage: FormulaValueConfig = {
       decimals: 0,
     },
   },
+=======
+import type { LensChartConfig, LensLineChartConfig } from '../../../types';
+import { getFilters } from './utils';
+
+export const diskSpaceUsageLineChart: LensLineChartConfig = {
+  extraVisualizationState: {
+    yLeftExtent: {
+      mode: 'custom',
+      lowerBound: 0,
+      upperBound: 1,
+    },
+  },
+};
+
+export const diskSpaceUsage: LensChartConfig = {
+  title: 'Disk Space Usage',
+  formula: {
+    formula: 'average(system.filesystem.used.pct)',
+    format: {
+      id: 'percent',
+      params: {
+        decimals: 0,
+      },
+    },
+  },
+  getFilters,
+  lineChartConfig: diskSpaceUsageLineChart,
+>>>>>>> whats-new
 };

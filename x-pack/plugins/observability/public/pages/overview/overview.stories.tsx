@@ -89,6 +89,15 @@ const withCore = makeDecorator({
         thresholdRule: { enabled: false },
       },
       compositeSlo: { enabled: false },
+<<<<<<< HEAD
+=======
+      aiAssistant: {
+        enabled: false,
+        feedback: {
+          enabled: false,
+        },
+      },
+>>>>>>> whats-new
     };
 
     return (

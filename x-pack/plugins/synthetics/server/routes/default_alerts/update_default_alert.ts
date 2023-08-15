@@ -5,8 +5,13 @@
  * 2.0.
  */
 
+<<<<<<< HEAD
 import { DefaultAlertService } from './default_alert_service';
 import { SyntheticsRestApiRouteFactory } from '../types';
+=======
+import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes';
+import { DefaultAlertService } from './default_alert_service';
+>>>>>>> whats-new
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 
 export const updateDefaultAlertingRoute: SyntheticsRestApiRouteFactory = () => ({

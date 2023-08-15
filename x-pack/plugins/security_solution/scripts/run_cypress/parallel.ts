@@ -162,6 +162,72 @@ export const cli = () => {
         _.pull(fleetServerPorts, fleetServerPort);
       };
 
+<<<<<<< HEAD
+=======
+      const parseTestFileConfig = (
+        filePath: string
+      ): Record<string, string | number | Record<string, string | number>> | undefined => {
+        const testFile = fs.readFileSync(filePath, { encoding: 'utf8' });
+
+        const ast = parser.parse(testFile, {
+          sourceType: 'module',
+          plugins: ['typescript'],
+        });
+
+        const expressionStatement = _.find(ast.program.body, ['type', 'ExpressionStatement']) as
+          | ExpressionStatement
+          | undefined;
+
+        const callExpression = expressionStatement?.expression;
+        // @ts-expect-error
+        if (expressionStatement?.expression?.arguments?.length === 3) {
+          // @ts-expect-error
+          const callExpressionArguments = _.find(callExpression?.arguments, [
+            'type',
+            'ObjectExpression',
+          ]) as ObjectExpression | undefined;
+
+          const callExpressionProperties = _.find(callExpressionArguments?.properties, [
+            'key.name',
+            'env',
+          ]) as ObjectProperty[] | undefined;
+          // @ts-expect-error
+          const ftrConfig = _.find(callExpressionProperties?.value?.properties, [
+            'key.name',
+            'ftrConfig',
+          ]);
+
+          if (!ftrConfig) {
+            return {};
+          }
+
+          return _.reduce(
+            ftrConfig.value.properties,
+            (acc: Record<string, string | number | Record<string, string>>, property) => {
+              const key = (property.key as Identifier).name;
+              let value;
+              if (property.value.type === 'ArrayExpression') {
+                value = _.map(property.value.elements, (element) => {
+                  if (element.type === 'StringLiteral') {
+                    return element.value as string;
+                  }
+                  return element.value as string;
+                });
+              } else if (property.value.type === 'StringLiteral') {
+                value = property.value.value;
+              }
+              if (key && value) {
+                acc[key] = value;
+              }
+              return acc;
+            },
+            {}
+          );
+        }
+        return undefined;
+      };
+
+>>>>>>> whats-new
       const log = new ToolingLog({
         level: 'info',
         writeTo: process.stdout,
@@ -248,6 +314,7 @@ export const cli = () => {
                 }
 
                 if (configFromTestFile?.license) {
+<<<<<<< HEAD
                   if (vars.serverless) {
                     log.warning(
                       `'ftrConfig.license' ignored. Value does not apply to kibana when running in serverless.\nFile: ${filePath}`
@@ -255,6 +322,9 @@ export const cli = () => {
                   } else {
                     vars.esTestCluster.license = configFromTestFile.license;
                   }
+=======
+                  vars.esTestCluster.license = configFromTestFile.license;
+>>>>>>> whats-new
                 }
 
                 if (hasFleetServerArgs) {

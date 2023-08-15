@@ -251,8 +251,11 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
         </EuiFlexGroup>
       </EuiFlyoutHeader>
       <EuiFlyoutBody data-test-subj="mlJobSelectorFlyoutBody">
+<<<<<<< HEAD
         <FieldValidationCallout validationResults={fieldValidationResult} />
 
+=======
+>>>>>>> whats-new
         {loading === true ? <LoadingCategorization onClose={onClose} /> : null}
 
         <InformationText

@@ -7,13 +7,23 @@
 
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { FindActionResult } from '@kbn/actions-plugin/server';
+<<<<<<< HEAD
 import { savedObjectsAdapter } from '../../saved_objects';
 import { populateAlertActions } from '../../../common/rules/alert_actions';
+=======
+import { savedObjectsAdapter } from '../../legacy_uptime/lib/saved_objects';
+import { UptimeServerSetup } from '../../legacy_uptime/lib/adapters';
+import { populateAlertActions } from '../../../common/rules/alert_actions';
+import { UptimeRequestHandlerContext } from '../../types';
+>>>>>>> whats-new
 import {
   SyntheticsMonitorStatusTranslations,
   TlsTranslations,
 } from '../../../common/rules/synthetics/translations';
+<<<<<<< HEAD
 import { SyntheticsServerSetup, UptimeRequestHandlerContext } from '../../types';
+=======
+>>>>>>> whats-new
 import {
   ACTION_GROUP_DEFINITIONS,
   SYNTHETICS_STATUS_RULE,
@@ -24,11 +34,19 @@ type DefaultRuleType = typeof SYNTHETICS_STATUS_RULE | typeof SYNTHETICS_TLS_RUL
 export class DefaultAlertService {
   context: UptimeRequestHandlerContext;
   soClient: SavedObjectsClientContract;
+<<<<<<< HEAD
   server: SyntheticsServerSetup;
 
   constructor(
     context: UptimeRequestHandlerContext,
     server: SyntheticsServerSetup,
+=======
+  server: UptimeServerSetup;
+
+  constructor(
+    context: UptimeRequestHandlerContext,
+    server: UptimeServerSetup,
+>>>>>>> whats-new
     soClient: SavedObjectsClientContract
   ) {
     this.context = context;

@@ -7,7 +7,11 @@
 
 import { IScopedClusterClient } from '@kbn/core/server';
 
+<<<<<<< HEAD
 import { CONNECTORS_INDEX, CURRENT_CONNECTORS_JOB_INDEX } from '../..';
+=======
+import { CONNECTORS_INDEX, CONNECTORS_JOBS_INDEX } from '../..';
+>>>>>>> whats-new
 import { isConfigEntry } from '../../../common/connectors/is_category_entry';
 
 import {

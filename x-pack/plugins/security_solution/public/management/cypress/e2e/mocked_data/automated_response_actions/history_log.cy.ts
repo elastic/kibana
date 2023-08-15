@@ -85,6 +85,10 @@ describe('Response actions history page', () => {
       cy.get('tbody .euiTableRow').eq(0).contains('Triggered by rule').click();
     });
     // check if we were moved to Rules app after clicking Triggered by rule
+<<<<<<< HEAD
     cy.getByTestSubj('breadcrumb last').contains('Detection rules (SIEM)');
+=======
+    cy.getByTestSubj('breadcrumb last').contains('Rules');
+>>>>>>> whats-new
   });
 });

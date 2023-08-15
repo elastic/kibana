@@ -84,7 +84,10 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
                   connector_type_id: '.email',
                   id: 'notification-email',
                   is_deprecated: false,
+<<<<<<< HEAD
                   is_system_action: false,
+=======
+>>>>>>> whats-new
                   is_preconfigured: true,
                   name: 'Notification Email Connector',
                   referenced_by_count: 0,
@@ -245,7 +248,10 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
                   id: 'notification-email',
                   is_deprecated: false,
                   is_preconfigured: true,
+<<<<<<< HEAD
                   is_system_action: false,
+=======
+>>>>>>> whats-new
                   name: 'Notification Email Connector',
                   referenced_by_count: 0,
                 },
@@ -368,7 +374,10 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
                   id: 'notification-email',
                   is_deprecated: false,
                   is_preconfigured: true,
+<<<<<<< HEAD
                   is_system_action: false,
+=======
+>>>>>>> whats-new
                   name: 'Notification Email Connector',
                   referenced_by_count: 0,
                 },

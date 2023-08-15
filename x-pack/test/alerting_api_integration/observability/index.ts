@@ -8,6 +8,7 @@
 // eslint-disable-next-line import/no-default-export
 export default function ({ loadTestFile }: any) {
   describe('Observability Rules', () => {
+<<<<<<< HEAD
     describe('Rules Endpoints', () => {
       loadTestFile(require.resolve('./metric_threshold_rule'));
       loadTestFile(require.resolve('./threshold_rule/avg_pct_fired'));
@@ -18,6 +19,13 @@ export default function ({ loadTestFile }: any) {
       loadTestFile(require.resolve('./threshold_rule/group_by_fired'));
       loadTestFile(require.resolve('./threshold_rule_data_view'));
     });
+=======
+    describe('MetricsUI Endpoints', () => {
+      loadTestFile(require.resolve('./metric_threshold_rule'));
+      loadTestFile(require.resolve('./threshold_rule'));
+    });
+
+>>>>>>> whats-new
     describe('Synthetics', () => {
       loadTestFile(require.resolve('./synthetics_rule'));
     });

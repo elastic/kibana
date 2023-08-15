@@ -330,7 +330,11 @@ const CriterionPreviewChart: React.FC<ChartProps> = ({
             tickFormat={yAxisFormatter}
             domain={chartDomain}
           />
+<<<<<<< HEAD
           <Settings baseTheme={chartTheme.baseTheme} />
+=======
+          <Settings theme={getChartTheme(isDarkMode)} />
+>>>>>>> whats-new
           <Tooltip {...tooltipProps} />
         </Chart>
       </ChartContainer>

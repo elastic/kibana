@@ -266,7 +266,10 @@ export function LayerPanels(
           !hidden && (
             <LayerPanel
               {...props}
+<<<<<<< HEAD
               onDropToDimension={handleDimensionDrop}
+=======
+>>>>>>> whats-new
               registerLibraryAnnotationGroup={registerLibraryAnnotationGroupFunction}
               dimensionGroups={groups}
               activeVisualization={activeVisualization}

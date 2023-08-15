@@ -16,8 +16,11 @@ import { isValidNamespace } from '@kbn/fleet-plugin/common';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { DefaultAlertService } from '../default_alerts/default_alert_service';
 import { triggerTestNow } from '../synthetics_service/test_now_monitor';
+<<<<<<< HEAD
 import { SyntheticsServerSetup } from '../../types';
 import { RouteContext, SyntheticsRestApiRouteFactory } from '../types';
+=======
+>>>>>>> whats-new
 import { syntheticsMonitorType } from '../../../common/types/saved_objects';
 import {
   ConfigKey,
@@ -37,7 +40,10 @@ import { validateMonitor } from './monitor_validation';
 import { sendTelemetryEvents, formatTelemetryEvent } from '../telemetry/monitor_upgrade_sender';
 import { formatSecrets } from '../../synthetics_service/utils/secrets';
 import { deleteMonitor } from './delete_monitor';
+<<<<<<< HEAD
 import { mapSavedObjectToMonitor } from './helper';
+=======
+>>>>>>> whats-new
 
 export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'POST',
@@ -97,7 +103,11 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
       initDefaultAlerts(newMonitor.attributes.name, routeContext);
       setupGettingStarted(newMonitor.id, routeContext);
 
+<<<<<<< HEAD
       return response.ok({ body: mapSavedObjectToMonitor(newMonitor) });
+=======
+      return response.ok({ body: newMonitor });
+>>>>>>> whats-new
     } catch (getErr) {
       server.logger.error(getErr);
       if (SavedObjectsErrorHelpers.isForbiddenError(getErr)) {

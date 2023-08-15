@@ -19,7 +19,11 @@ import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import {
   EventAnnotationGroupConfig,
   PointInTimeEventAnnotationConfig,
+<<<<<<< HEAD
 } from '@kbn/event-annotation-common';
+=======
+} from '@kbn/event-annotation-plugin/common';
+>>>>>>> whats-new
 import { SavedObjectSaveModal } from '@kbn/saved-objects-plugin/public';
 import { taggingApiMock } from '@kbn/saved-objects-tagging-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';

@@ -1004,6 +1004,7 @@ export type RegisterLibraryAnnotationGroupFunction = (groupInfo: {
   id: string;
   group: EventAnnotationGroupConfig;
 }) => void;
+<<<<<<< HEAD
 interface AddLayerButtonProps {
   supportedLayers: VisualizationLayerDescription[];
   addLayer: AddLayerFunction;
@@ -1011,6 +1012,8 @@ interface AddLayerButtonProps {
   registerLibraryAnnotationGroup: RegisterLibraryAnnotationGroupFunction;
 }
 
+=======
+>>>>>>> whats-new
 export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown> {
   /** Plugin ID, such as "lnsXY" */
   id: string;
@@ -1224,10 +1227,20 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
     columnId: string;
     label: string;
     hideTooltip?: boolean;
+<<<<<<< HEAD
   }) => null | ReactElement<{ columnId: string; label: string; hideTooltip?: boolean }>;
   getAddLayerButtonComponent?: (
     props: AddLayerButtonProps
   ) => null | ReactElement<AddLayerButtonProps>;
+=======
+  }) => JSX.Element | null;
+  getAddLayerButtonComponent?: (props: {
+    supportedLayers: VisualizationLayerDescription[];
+    addLayer: AddLayerFunction;
+    ensureIndexPattern: (specOrId: DataViewSpec | string) => Promise<void>;
+    registerLibraryAnnotationGroup: RegisterLibraryAnnotationGroupFunction;
+  }) => JSX.Element | null;
+>>>>>>> whats-new
   /**
    * Creates map of columns ids and unique lables. Used only for noDatasource layers
    */

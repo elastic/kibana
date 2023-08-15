@@ -37,6 +37,13 @@ import {
 import { generateAlertMessage, updateState, UptimeRuleTypeAlertDefinition } from '../common';
 import { ALERT_DETAILS_URL, getActionVariables } from '../action_variables';
 import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
+<<<<<<< HEAD
+=======
+import {
+  generateAlertMessage,
+  UptimeRuleTypeAlertDefinition,
+} from '../../legacy_uptime/lib/alerts/common';
+>>>>>>> whats-new
 
 export type ActionGroupIds = ActionGroupIdsOf<typeof TLS_CERTIFICATE>;
 

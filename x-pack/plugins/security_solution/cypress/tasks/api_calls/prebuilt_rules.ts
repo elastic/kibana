@@ -74,6 +74,7 @@ export const excessivelyInstallAllPrebuiltRules = () => {
   installAllPrebuiltRulesRequest();
 };
 
+<<<<<<< HEAD
 export const waitUntilAllRuleAssetsCreated = (
   rules: Array<typeof SAMPLE_PREBUILT_RULE>,
   index = '.kibana_security_solution'
@@ -109,6 +110,8 @@ export const waitUntilAllRuleAssetsCreated = (
     { interval: 500, timeout: 12000 }
   );
 
+=======
+>>>>>>> whats-new
 export const createNewRuleAsset = ({
   index = '.kibana_security_solution',
   rule = SAMPLE_PREBUILT_RULE,
@@ -119,7 +122,10 @@ export const createNewRuleAsset = ({
   const url = `${Cypress.env('ELASTICSEARCH_URL')}/${index}/_doc/security-rule:${
     rule['security-rule'].rule_id
   }`;
+<<<<<<< HEAD
   cy.log('URL', url);
+=======
+>>>>>>> whats-new
   cy.waitUntil(
     () => {
       return cy
@@ -227,13 +233,18 @@ export const createAndInstallMockedPrebuiltRules = ({
   rules?: Array<typeof SAMPLE_PREBUILT_RULE>;
   installToKibana?: boolean;
 }) => {
+<<<<<<< HEAD
   cy.log('Install prebuilt rules', rules?.length);
+=======
+  cy.log('Install prebuilt rules');
+>>>>>>> whats-new
   preventPrebuiltRulesPackageInstallation();
   // TODO: use this bulk method once the issue with Cypress is fixed
   // bulkCreateRuleAssets({ rules });
   rules?.forEach((rule) => {
     createNewRuleAsset({ rule });
   });
+<<<<<<< HEAD
 
   if (rules?.length) {
     waitUntilAllRuleAssetsCreated(rules);
@@ -241,5 +252,9 @@ export const createAndInstallMockedPrebuiltRules = ({
 
   if (installToKibana) {
     return installAllPrebuiltRulesRequest();
+=======
+  if (installToKibana) {
+    installAllPrebuiltRulesRequest();
+>>>>>>> whats-new
   }
 };

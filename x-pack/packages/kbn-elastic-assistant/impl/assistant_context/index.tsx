@@ -33,7 +33,10 @@ import {
   SYSTEM_PROMPT_LOCAL_STORAGE_KEY,
 } from './constants';
 import { CONVERSATIONS_TAB, SettingsTabs } from '../assistant/settings/assistant_settings';
+<<<<<<< HEAD
 import { AssistantTelemetry } from './types';
+=======
+>>>>>>> whats-new
 
 export interface ShowAssistantOverlayProps {
   showOverlay: boolean;

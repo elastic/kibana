@@ -52,6 +52,7 @@ export function ApmHeaderActionMenu() {
   return (
     <EuiHeaderLinks gutterSize="xs">
       {isLabsButtonEnabled && <Labs />}
+<<<<<<< HEAD
       {featureFlags.storageExplorerAvailable && (
         <EuiHeaderLink
           color="text"
@@ -68,6 +69,21 @@ export function ApmHeaderActionMenu() {
         </EuiHeaderLink>
       )}
 
+=======
+      <EuiHeaderLink
+        color="text"
+        href={apmHref('/storage-explorer')}
+        data-test-subj="apmStorageExplorerHeaderLink"
+      >
+        <EuiFlexGroup gutterSize="s" alignItems="center">
+          <EuiFlexItem grow={false}>
+            {i18n.translate('xpack.apm.storageExplorerLinkLabel', {
+              defaultMessage: 'Storage Explorer',
+            })}
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiHeaderLink>
+>>>>>>> whats-new
       {canCreateMlJobs && <AnomalyDetectionSetupLink />}
       {isAlertingAvailable && (
         <AlertingPopoverAndFlyout

@@ -20,6 +20,10 @@ import { useRefreshedRangeFromUrl } from '../../../hooks';
 export const ErrorsTabContent = ({
   errorStates,
   loading,
+<<<<<<< HEAD
+=======
+  location,
+>>>>>>> whats-new
   upStates,
 }: {
   errorStates: PingState[];
@@ -53,7 +57,16 @@ export const ErrorsTabContent = ({
       <EuiFlexGroup gutterSize="m" wrap={true}>
         <EuiFlexItem grow={2} css={{ minWidth: 260 }}>
           <PanelWithTitle title={ERRORS_LABEL}>
+<<<<<<< HEAD
             <ErrorsList errorStates={errorStates} upStates={upStates} loading={loading} />
+=======
+            <ErrorsList
+              location={location}
+              errorStates={errorStates}
+              upStates={upStates}
+              loading={loading}
+            />
+>>>>>>> whats-new
           </PanelWithTitle>
         </EuiFlexItem>
         <FailedTestsByStep time={time} />

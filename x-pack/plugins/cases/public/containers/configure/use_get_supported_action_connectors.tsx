@@ -21,7 +21,11 @@ export function useGetSupportedActionConnectors() {
   return useQuery(
     casesQueriesKeys.connectorsList(),
     async ({ signal }) => {
+<<<<<<< HEAD
       if (!actions.read || !permissions.connectors) {
+=======
+      if (!actions.read) {
+>>>>>>> whats-new
         return [];
       }
       return getSupportedActionConnectors({ signal });

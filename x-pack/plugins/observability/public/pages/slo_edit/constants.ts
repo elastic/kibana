@@ -7,11 +7,17 @@
 
 import { i18n } from '@kbn/i18n';
 import {
+<<<<<<< HEAD
   ALL_VALUE,
   APMTransactionDurationIndicator,
   APMTransactionErrorRateIndicator,
   BudgetingMethod,
   HistogramIndicator,
+=======
+  APMTransactionDurationIndicator,
+  APMTransactionErrorRateIndicator,
+  BudgetingMethod,
+>>>>>>> whats-new
   IndicatorType,
   KQLCustomIndicator,
   MetricCustomIndicator,
@@ -111,6 +117,7 @@ export const CUSTOM_KQL_DEFAULT_VALUES: KQLCustomIndicator = {
     good: '',
     total: '',
     timestampField: '',
+<<<<<<< HEAD
   },
 };
 
@@ -171,6 +178,66 @@ export const SLO_EDIT_FORM_DEFAULT_VALUES: CreateSLOForm = {
   name: '',
   description: '',
   indicator: CUSTOM_KQL_DEFAULT_VALUES,
+=======
+  },
+};
+
+export const CUSTOM_METRIC_DEFAULT_VALUES: MetricCustomIndicator = {
+  type: 'sli.metric.custom' as const,
+  params: {
+    index: '',
+    filter: '',
+    good: { metrics: [{ name: 'A', aggregation: 'sum' as const, field: '' }], equation: 'A' },
+    total: { metrics: [{ name: 'A', aggregation: 'sum' as const, field: '' }], equation: 'A' },
+    timestampField: '',
+  },
+};
+
+export const APM_LATENCY_DEFAULT_VALUES: APMTransactionDurationIndicator = {
+  type: 'sli.apm.transactionDuration' as const,
+  params: {
+    service: '',
+    environment: '',
+    transactionType: '',
+    transactionName: '',
+    threshold: 250,
+    filter: '',
+    index: '',
+  },
+};
+
+export const APM_AVAILABILITY_DEFAULT_VALUES: APMTransactionErrorRateIndicator = {
+  type: 'sli.apm.transactionErrorRate' as const,
+  params: {
+    service: '',
+    environment: '',
+    transactionType: '',
+    transactionName: '',
+    filter: '',
+    index: '',
+  },
+};
+
+export const SLO_EDIT_FORM_DEFAULT_VALUES: CreateSLOForm = {
+  name: '',
+  description: '',
+  indicator: CUSTOM_KQL_DEFAULT_VALUES,
+  timeWindow: {
+    duration: ROLLING_TIMEWINDOW_OPTIONS[1].value,
+    type: 'rolling',
+  },
+  tags: [],
+  budgetingMethod: BUDGETING_METHOD_OPTIONS[0].value,
+  objective: {
+    target: 99,
+  },
+};
+
+export const SLO_EDIT_FORM_DEFAULT_VALUES_CUSTOM_METRIC: CreateSLOForm = {
+  name: '',
+  description: '',
+  indicator: CUSTOM_METRIC_DEFAULT_VALUES,
+>>>>>>> whats-new
   timeWindow: {
     duration: ROLLING_TIMEWINDOW_OPTIONS[1].value,
     type: 'rolling',

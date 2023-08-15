@@ -19,8 +19,24 @@ import {
 import { i18n } from '@kbn/i18n';
 import { ALL_VALUE, HistoricalSummaryResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
+<<<<<<< HEAD
 import { useQueryClient } from '@tanstack/react-query';
 import React, { useState } from 'react';
+=======
+import { sloKeys } from '../../../hooks/slo/query_key_factory';
+import { useCapabilities } from '../../../hooks/slo/use_capabilities';
+import { useKibana } from '../../../utils/kibana_react';
+import { useCloneSlo } from '../../../hooks/slo/use_clone_slo';
+import { useGetFilteredRuleTypes } from '../../../hooks/use_get_filtered_rule_types';
+import { SloSummary } from './slo_summary';
+import { SloDeleteConfirmationModal } from './slo_delete_confirmation_modal';
+import { SloBadges } from './badges/slo_badges';
+import {
+  transformSloResponseToCreateSloForm,
+  transformCreateSLOFormToCreateSLOInput,
+} from '../../slo_edit/helpers/process_slo_form_values';
+import { SLO_BURN_RATE_RULE_TYPE_ID } from '../../../../common/constants';
+>>>>>>> whats-new
 import { rulesLocatorID, sloFeatureId } from '../../../../common';
 import { SLO_BURN_RATE_RULE_TYPE_ID } from '../../../../common/constants';
 import { sloKeys } from '../../../hooks/slo/query_key_factory';

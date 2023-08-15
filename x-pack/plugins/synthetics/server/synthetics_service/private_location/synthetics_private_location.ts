@@ -8,6 +8,7 @@ import { NewPackagePolicy } from '@kbn/fleet-plugin/common';
 import { NewPackagePolicyWithId } from '@kbn/fleet-plugin/server/services/package_policy';
 import { cloneDeep } from 'lodash';
 import { SavedObjectError } from '@kbn/core-saved-objects-common';
+<<<<<<< HEAD
 import {
   BROWSER_TEST_NOW_RUN,
   LIGHTWEIGHT_TEST_NOW_RUN,
@@ -15,6 +16,9 @@ import {
 import { scheduleCleanUpTask } from './clean_up_task';
 import { getAgentPoliciesAsInternalUser } from '../../routes/settings/private_locations/get_agent_policies';
 import { SyntheticsServerSetup } from '../../types';
+=======
+import { getAgentPoliciesAsInternalUser } from '../../routes/settings/private_locations/get_agent_policies';
+>>>>>>> whats-new
 import { formatSyntheticsPolicy } from '../formatters/private_formatters/format_synthetics_policy';
 import {
   ConfigKey,

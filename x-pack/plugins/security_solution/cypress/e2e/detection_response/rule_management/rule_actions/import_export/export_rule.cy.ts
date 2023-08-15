@@ -22,6 +22,7 @@ import {
   exportRule,
   importRules,
   expectManagementTableRules,
+<<<<<<< HEAD:x-pack/plugins/security_solution/cypress/e2e/detection_response/rule_management/rule_actions/import_export/export_rule.cy.ts
 } from '../../../../../tasks/alerts_detection_rules';
 import { bulkExportRules } from '../../../../../tasks/rules_bulk_actions';
 import {
@@ -45,6 +46,27 @@ import {
   preventPrebuiltRulesPackageInstallation,
 } from '../../../../../tasks/api_calls/prebuilt_rules';
 import { createRuleAssetSavedObject } from '../../../../../helpers/rules';
+=======
+} from '../../tasks/alerts_detection_rules';
+import { createExceptionList, deleteExceptionList } from '../../tasks/api_calls/exceptions';
+import { getExceptionList } from '../../objects/exception';
+import { createRule } from '../../tasks/api_calls/rules';
+import {
+  cleanKibana,
+  resetRulesTableState,
+  deleteAlertsAndRules,
+  reload,
+} from '../../tasks/common';
+import { login, visitWithoutDateRange } from '../../tasks/login';
+
+import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../urls/navigation';
+import {
+  createAndInstallMockedPrebuiltRules,
+  getAvailablePrebuiltRulesCount,
+  preventPrebuiltRulesPackageInstallation,
+} from '../../tasks/api_calls/prebuilt_rules';
+import { createRuleAssetSavedObject } from '../../helpers/rules';
+>>>>>>> whats-new:x-pack/plugins/security_solution/cypress/e2e/detection_rules/export_rule.cy.ts
 
 const EXPORTED_RULES_FILENAME = 'rules_export.ndjson';
 const exceptionList = getExceptionList();

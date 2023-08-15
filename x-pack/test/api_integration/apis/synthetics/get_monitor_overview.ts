@@ -9,7 +9,10 @@ import {
   ConfigKey,
   MonitorFields,
   MonitorOverviewItem,
+<<<<<<< HEAD
   EncryptedSyntheticsSavedMonitor,
+=======
+>>>>>>> whats-new
 } from '@kbn/synthetics-plugin/common/runtime_types';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import expect from '@kbn/expect';
@@ -257,7 +260,11 @@ export default function ({ getService }: FtrProviderContext) {
         ];
 
         expect(apiResponse.body.monitors).eql(expected);
+<<<<<<< HEAD
         expect(savedMonitors[1][ConfigKey.MONITOR_QUERY_ID]).eql(customHeartbeatId);
+=======
+        expect(savedMonitors[1].attributes[ConfigKey.MONITOR_QUERY_ID]).eql(customHeartbeatId);
+>>>>>>> whats-new
       } finally {
         await Promise.all(
           savedMonitors.map((monitor) => {

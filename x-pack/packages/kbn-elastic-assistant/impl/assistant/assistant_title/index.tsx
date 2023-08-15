@@ -5,7 +5,11 @@
  * 2.0.
  */
 
+<<<<<<< HEAD
 import React, { useCallback, useMemo, useState } from 'react';
+=======
+import React, { FunctionComponent, useMemo, useState } from 'react';
+>>>>>>> whats-new
 import {
   EuiButtonIcon,
   EuiFlexGroup,
@@ -20,6 +24,7 @@ import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import { FormattedMessage } from '@kbn/i18n-react';
 import * as i18n from '../translations';
 
+<<<<<<< HEAD
 /**
  * Renders a header title with an icon, a tooltip button, and a popover with
  * information about the assistant feature and access to documentation.
@@ -29,6 +34,12 @@ export const AssistantTitle: React.FC<{
   titleIcon: string;
   docLinks: Omit<DocLinksStart, 'links'>;
 }> = ({ title, titleIcon, docLinks }) => {
+=======
+export const AssistantTitle: FunctionComponent<{
+  currentTitle: { title: string | JSX.Element; titleIcon: string };
+  docLinks: Omit<DocLinksStart, 'links'>;
+}> = ({ currentTitle, docLinks }) => {
+>>>>>>> whats-new
   const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = docLinks;
   const url = `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/security-assistant.html`;
 
@@ -59,24 +70,39 @@ export const AssistantTitle: React.FC<{
     ),
     [documentationLink]
   );
+<<<<<<< HEAD
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const onButtonClick = useCallback(() => setIsPopoverOpen((isOpen: boolean) => !isOpen), []);
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
 
+=======
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const onButtonClick = () => setIsPopoverOpen((isOpen: boolean) => !isOpen);
+  const closePopover = () => setIsPopoverOpen(false);
+>>>>>>> whats-new
   return (
     <EuiModalHeaderTitle>
       <EuiFlexGroup gutterSize="xs" alignItems="center">
         <EuiFlexItem grow={false}>
+<<<<<<< HEAD
           <EuiIcon data-test-subj="titleIcon" type={titleIcon} size="xl" />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>{title}</EuiFlexItem>
+=======
+          <EuiIcon type={currentTitle.titleIcon} size="xl" />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>{currentTitle.title}</EuiFlexItem>
+>>>>>>> whats-new
         <EuiFlexItem grow={false}>
           <EuiPopover
             button={
               <EuiButtonIcon
                 aria-label={i18n.TOOLTIP_ARIA_LABEL}
+<<<<<<< HEAD
                 data-test-subj="tooltipIcon"
+=======
+>>>>>>> whats-new
                 iconSize="l"
                 iconType="iInCircle"
                 onClick={onButtonClick}
@@ -86,7 +112,11 @@ export const AssistantTitle: React.FC<{
             closePopover={closePopover}
             anchorPosition="upCenter"
           >
+<<<<<<< HEAD
             <EuiText data-test-subj="tooltipContent" grow={false} css={{ maxWidth: '400px' }}>
+=======
+            <EuiText grow={false} css={{ maxWidth: '400px' }}>
+>>>>>>> whats-new
               <h4>{i18n.TOOLTIP_TITLE}</h4>
               <p>{content}</p>
             </EuiText>

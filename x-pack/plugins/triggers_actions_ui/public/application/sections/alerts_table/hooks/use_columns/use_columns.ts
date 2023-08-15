@@ -235,6 +235,23 @@ export const useColumns = ({
     [id, storage, storageAlertsTable]
   );
 
+<<<<<<< HEAD
+=======
+  const setColumnsByColumnIds = useCallback(
+    (columnIds: string[]) => {
+      setVisibleColumns(columnIds);
+      persist({
+        id,
+        storage,
+        storageAlertsTable,
+        columns,
+        visibleColumns: columnIds,
+      });
+    },
+    [columns, id, storage, storageAlertsTable]
+  );
+
+>>>>>>> whats-new
   const onToggleColumn = useCallback(
     (columnId: string): void => {
       const column = euiColumnFactory(columnId, browserFields, defaultColumns);

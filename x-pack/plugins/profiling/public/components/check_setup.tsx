@@ -57,6 +57,20 @@ export function CheckSetup({ children }: { children: React.ReactElement }) {
     );
   }
 
+<<<<<<< HEAD
+=======
+  const displaySetupScreen =
+    (status === AsyncStatus.Settled && data?.has_setup !== true) || !!error;
+
+  const displayAddDataInstructions =
+    status === AsyncStatus.Settled && data?.has_setup === true && data?.has_data === false;
+
+  const displayUi =
+    // Display UI if there's data or if the user is opening the add data instruction page.
+    // does not use profiling router because that breaks as at this point the route might not have all required params
+    data?.has_data === true || history.location.pathname === '/add-data-instructions';
+
+>>>>>>> whats-new
   const displayLoadingScreen = status !== AsyncStatus.Settled;
 
   if (displayLoadingScreen) {
@@ -78,8 +92,23 @@ export function CheckSetup({ children }: { children: React.ReactElement }) {
     );
   }
 
+<<<<<<< HEAD
   const displaySetupScreen =
     (status === AsyncStatus.Settled && data?.has_setup !== true) || !!error;
+=======
+  if (displayUi) {
+    return children;
+  }
+
+  if (displayAddDataInstructions) {
+    // when there's no data redirect the user to the add data instructions page
+    router.push('/add-data-instructions', {
+      path: {},
+      query: { selectedTab: NoDataTabs.Kubernetes },
+    });
+    return null;
+  }
+>>>>>>> whats-new
 
   if (displaySetupScreen) {
     return (

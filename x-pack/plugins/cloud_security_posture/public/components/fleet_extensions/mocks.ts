@@ -51,9 +51,14 @@ export const getMockPackageInfoVulnMgmtAWS = () => {
   } as PackageInfo;
 };
 
+<<<<<<< HEAD
 export const getMockPackageInfoCspmAWS = (packageVersion = '1.5.0') => {
   return {
     version: packageVersion,
+=======
+export const getMockPackageInfoCspmAWS = () => {
+  return {
+>>>>>>> whats-new
     name: 'cspm',
     policy_templates: [
       {
@@ -80,6 +85,7 @@ export const getMockPackageInfoCspmAWS = (packageVersion = '1.5.0') => {
   } as PackageInfo;
 };
 
+<<<<<<< HEAD
 export const getMockPackageInfoCspmGCP = (packageVersion = '1.5.0') => {
   return {
     version: packageVersion,
@@ -102,6 +108,8 @@ export const getMockPackageInfoCspmGCP = (packageVersion = '1.5.0') => {
   } as PackageInfo;
 };
 
+=======
+>>>>>>> whats-new
 const getPolicyMock = (
   type: PostureInput,
   posture: string,

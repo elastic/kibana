@@ -9,5 +9,9 @@ schema:
     - type: string
     - type: array
       items:
+<<<<<<< HEAD
         type: string
       maxItems: 100
+=======
+        type: string
+>>>>>>> whats-new

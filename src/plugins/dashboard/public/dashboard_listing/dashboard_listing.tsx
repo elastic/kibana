@@ -7,7 +7,11 @@
  */
 
 import { FormattedRelative, I18nProvider } from '@kbn/i18n-react';
+<<<<<<< HEAD
 import React, { useMemo } from 'react';
+=======
+import React, { PropsWithChildren, useCallback, useMemo, useState } from 'react';
+>>>>>>> whats-new
 
 import { TableListView } from '@kbn/content-management-table-list-view';
 import {
@@ -56,6 +60,14 @@ export const DashboardListing = ({
       useSessionStorageIntegration,
       initialFilter,
     });
+
+  const savedObjectsTaggingFakePlugin = useMemo(() => {
+    return savedObjectsTagging.hasApi // TODO: clean up this logic once https://github.com/elastic/kibana/issues/140433 is resolved
+      ? ({
+          ui: savedObjectsTagging,
+        } as TableListViewKibanaDependencies['savedObjectsTagging'])
+      : undefined;
+  }, [savedObjectsTagging]);
 
   const savedObjectsTaggingFakePlugin = useMemo(() => {
     return savedObjectsTagging.hasApi // TODO: clean up this logic once https://github.com/elastic/kibana/issues/140433 is resolved

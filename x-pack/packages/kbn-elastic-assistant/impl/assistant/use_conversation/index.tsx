@@ -69,7 +69,11 @@ interface UseConversation {
 }
 
 export const useConversation = (): UseConversation => {
+<<<<<<< HEAD
   const { allSystemPrompts, assistantTelemetry, setConversations } = useAssistantContext();
+=======
+  const { allSystemPrompts, setConversations } = useAssistantContext();
+>>>>>>> whats-new
 
   /**
    * Append a message to the conversation[] for a given conversationId

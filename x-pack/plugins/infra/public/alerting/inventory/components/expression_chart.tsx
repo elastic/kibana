@@ -191,7 +191,11 @@ export const ExpressionChart: React.FC<Props> = ({
             tickFormat={dateFormatter}
           />
           <Axis id={'values'} position={Position.Left} tickFormat={yAxisFormater} domain={domain} />
+<<<<<<< HEAD
           <Settings baseTheme={chartTheme.baseTheme} />
+=======
+          <Settings theme={getChartTheme(isDarkMode)} />
+>>>>>>> whats-new
           <Tooltip {...tooltipProps} />
         </Chart>
       </ChartContainer>

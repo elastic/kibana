@@ -16,8 +16,15 @@ import {
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
+<<<<<<< HEAD
 import { useFetchIndexPatternFields } from '../../../../hooks/slo/use_fetch_index_pattern_fields';
 import { createOptionsFromFields } from '../../helpers/create_options';
+=======
+import {
+  Field,
+  useFetchIndexPatternFields,
+} from '../../../../hooks/slo/use_fetch_index_pattern_fields';
+>>>>>>> whats-new
 import { CreateSLOForm } from '../../types';
 import { DataPreviewChart } from '../common/data_preview_chart';
 import { GroupByFieldSelector } from '../common/group_by_field_selector';

@@ -5,7 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+<<<<<<< HEAD:src/plugins/unified_histogram/public/__mocks__/services.tsx
 import React from 'react';
+=======
+
+>>>>>>> whats-new:src/plugins/unified_histogram/public/__mocks__/services.ts
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';

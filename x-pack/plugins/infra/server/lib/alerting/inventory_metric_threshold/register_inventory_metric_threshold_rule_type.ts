@@ -148,7 +148,10 @@ export async function registerMetricInventoryThresholdRuleType(
     },
     alerts: MetricsRulesTypeAlertDefinition,
     fieldsForAAD: O11Y_AAD_FIELDS,
+<<<<<<< HEAD
     getViewInAppRelativeUrl: ({ rule }: GetViewInAppRelativeUrlFnOpts<{}>) =>
       observabilityPaths.ruleDetails(rule.id),
+=======
+>>>>>>> whats-new
   });
 }

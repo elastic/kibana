@@ -92,6 +92,7 @@ export function createDiscoverServicesMock(): DiscoverServices {
     return searchSource;
   });
 
+<<<<<<< HEAD
   const corePluginMock = coreMock.createStart();
 
   const uiSettingsMock: Partial<typeof corePluginMock.uiSettings> = {
@@ -133,14 +134,24 @@ export function createDiscoverServicesMock(): DiscoverServices {
     ...uiSettingsMock,
   };
 
+=======
+>>>>>>> whats-new
   const theme = {
     theme$: of({ darkMode: false }),
   };
 
+<<<<<<< HEAD
   corePluginMock.theme = theme;
 
   return {
     core: corePluginMock,
+=======
+  return {
+    core: {
+      ...coreMock.createStart(),
+      theme,
+    },
+>>>>>>> whats-new
     charts: chartPluginMock.createSetupContract(),
     chrome: chromeServiceMock.createStartContract(),
     history: () => ({

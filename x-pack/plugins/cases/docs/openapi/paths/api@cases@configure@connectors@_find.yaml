@@ -14,11 +14,18 @@ get:
         application/json:
           schema:
             type: array
+<<<<<<< HEAD
             items:
               type: object
               properties:
                 $ref: '../components/schemas/connector_response_properties.yaml'
             maxItems: 1000
+=======
+            items: 
+              type: object
+              properties:
+                $ref: '../components/schemas/connector_response_properties.yaml'
+>>>>>>> whats-new
           examples:
             findConnectorResponse:
               $ref: '../components/examples/find_connector_response.yaml'

@@ -12,8 +12,11 @@ import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import moment from 'moment';
 import { SUMMARY_FILTER } from '../../../common/constants/client_defaults';
+<<<<<<< HEAD
 import { formatFilterString } from '../common';
 import { SyntheticsServerSetup } from '../../types';
+=======
+>>>>>>> whats-new
 import { getSyntheticsCerts } from '../../queries/get_certs';
 import { TLSParams } from '../../../common/runtime_types/alerts/tls';
 import { savedObjectsAdapter } from '../../saved_objects';
@@ -22,10 +25,18 @@ import {
   getAllMonitors,
   processMonitors,
 } from '../../saved_objects/synthetics_monitor/get_all_monitors';
+<<<<<<< HEAD
 import {
   CertResult,
   ConfigKey,
   EncryptedSyntheticsMonitorAttributes,
+=======
+import { UptimeEsClient } from '../../legacy_uptime/lib/lib';
+import {
+  CertResult,
+  ConfigKey,
+  EncryptedSyntheticsMonitor,
+>>>>>>> whats-new
   Ping,
 } from '../../../common/runtime_types';
 import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
@@ -162,7 +173,11 @@ export class TLSRuleExecutor {
       latestPingsMap.set(ping.config_id!, ping);
     });
     return certs.filter((cert) => {
+<<<<<<< HEAD
       const lPing = latestPingsMap.get(cert.configId);
+=======
+      const lPing = latestPingsMap.get(cert.configId!);
+>>>>>>> whats-new
       if (!lPing) {
         return true;
       }

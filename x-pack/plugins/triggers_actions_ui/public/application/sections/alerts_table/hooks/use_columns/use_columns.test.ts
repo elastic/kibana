@@ -11,12 +11,17 @@ import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { act, renderHook } from '@testing-library/react-hooks';
 
 import { useColumns, UseColumnsArgs, UseColumnsResp } from './use_columns';
+<<<<<<< HEAD
 import { useFetchBrowserFieldCapabilities } from '../use_fetch_browser_fields_capabilities';
 import { BrowserFields } from '@kbn/rule-registry-plugin/common';
 import { AlertsTableStorage } from '../../alerts_table_state';
 
 jest.mock('../../../../../common/lib/kibana');
 jest.mock('../use_fetch_browser_fields_capabilities');
+=======
+
+jest.mock('../../../../../common/lib/kibana');
+>>>>>>> whats-new
 
 const setItemStorageMock = jest.fn();
 const mockStorage = {
@@ -30,6 +35,7 @@ describe('useColumn', () => {
   const id = 'useColumnTest';
   const featureIds: AlertConsumers[] = [AlertConsumers.LOGS, AlertConsumers.APM];
   let storage = { current: new Storage(mockStorage) };
+<<<<<<< HEAD
 
   const getStorageAlertsTableByDefaultColumns = (defaultColumns: EuiDataGridColumn[]) => {
     return {
@@ -41,12 +47,24 @@ describe('useColumn', () => {
     };
   };
 
+=======
+  const storageAlertsTable = {
+    current: {
+      columns: [],
+      visibleColumns: [],
+      sort: [],
+    },
+  };
+>>>>>>> whats-new
   const defaultColumns: EuiDataGridColumn[] = [
     {
       id: 'event.action',
       displayAsText: 'Alert status',
       initialWidth: 150,
+<<<<<<< HEAD
       schema: 'string',
+=======
+>>>>>>> whats-new
     },
     {
       id: '@timestamp',
@@ -63,6 +81,7 @@ describe('useColumn', () => {
     {
       id: 'kibana.alert.reason',
       displayAsText: 'Reason',
+<<<<<<< HEAD
       schema: 'string',
     },
   ];
@@ -98,10 +117,17 @@ describe('useColumn', () => {
     hookUseFetchBrowserFieldCapabilities.mockClear();
     hookUseFetchBrowserFieldCapabilities.mockImplementation(() => [true, browserFields]);
 
+=======
+    },
+  ];
+
+  beforeEach(() => {
+>>>>>>> whats-new
     setItemStorageMock.mockClear();
     storage = { current: new Storage(mockStorage) };
   });
 
+<<<<<<< HEAD
   test('onColumnResize', async () => {
     // storageTable will always be in sync with defualtColumns.
     // it is an invariant. If that is the case, that can be considered an issue
@@ -114,15 +140,62 @@ describe('useColumn', () => {
         storageAlertsTable: localStorageAlertsTable,
         storage,
       })
+=======
+  test('hide all columns with onChangeVisibleColumns', async () => {
+    const { result, waitForNextUpdate } = renderHook<UseColumnsArgs, UseColumnsResp>(() =>
+      useColumns({ defaultColumns, featureIds, id, storageAlertsTable, storage })
+    );
+
+    act(() => {
+      result.current.onChangeVisibleColumns([]);
+    });
+    await waitForNextUpdate();
+    expect(result.current.visibleColumns).toEqual([]);
+    expect(result.current.columns).toEqual(defaultColumns);
+  });
+
+  test('show all columns with onChangeVisibleColumns', async () => {
+    const { result, waitForNextUpdate } = renderHook<UseColumnsArgs, UseColumnsResp>(() =>
+      useColumns({ defaultColumns, featureIds, id, storageAlertsTable, storage })
+    );
+
+    act(() => {
+      result.current.onChangeVisibleColumns([]);
+    });
+
+    act(() => {
+      result.current.onChangeVisibleColumns(defaultColumns.map((dc) => dc.id));
+    });
+    await waitForNextUpdate();
+    expect(result.current.visibleColumns).toEqual([
+      'event.action',
+      '@timestamp',
+      'kibana.alert.duration.us',
+      'kibana.alert.reason',
+    ]);
+    expect(result.current.columns).toEqual(defaultColumns);
+  });
+
+  test('onColumnResize', async () => {
+    const { result, waitForNextUpdate } = renderHook<UseColumnsArgs, UseColumnsResp>(() =>
+      useColumns({ defaultColumns, featureIds, id, storageAlertsTable, storage })
+>>>>>>> whats-new
     );
 
     act(() => {
       result.current.onColumnResize({ columnId: '@timestamp', width: 100 });
     });
 
+<<<<<<< HEAD
     expect(setItemStorageMock).toHaveBeenCalledWith(
       'useColumnTest',
       '{"columns":[{"id":"event.action","displayAsText":"Alert status","initialWidth":150,"schema":"string"},{"id":"@timestamp","displayAsText":"Last updated","initialWidth":100,"schema":"datetime"},{"id":"kibana.alert.duration.us","displayAsText":"Duration","initialWidth":150,"schema":"numeric"},{"id":"kibana.alert.reason","displayAsText":"Reason","schema":"string"}],"visibleColumns":["event.action","@timestamp","kibana.alert.duration.us","kibana.alert.reason"],"sort":[]}'
+=======
+    await waitForNextUpdate();
+    expect(setItemStorageMock).toHaveBeenCalledWith(
+      'useColumnTest',
+      '{"columns":[{"id":"event.action","displayAsText":"Alert status","initialWidth":150},{"id":"@timestamp","displayAsText":"Last updated","initialWidth":100,"schema":"datetime"},{"id":"kibana.alert.duration.us","displayAsText":"Duration","initialWidth":150,"schema":"numeric"},{"id":"kibana.alert.reason","displayAsText":"Reason"}],"visibleColumns":["event.action","@timestamp","kibana.alert.duration.us","kibana.alert.reason"],"sort":[]}'
+>>>>>>> whats-new
     );
     expect(result.current.columns.find((c) => c.id === '@timestamp')).toEqual({
       displayAsText: 'Last updated',
@@ -131,6 +204,7 @@ describe('useColumn', () => {
       schema: 'datetime',
     });
   });
+<<<<<<< HEAD
 
   describe('visibleColumns', () => {
     test('hide all columns with onChangeVisibleColumns', async () => {
@@ -323,4 +397,6 @@ describe('useColumn', () => {
       );
     });
   });
+=======
+>>>>>>> whats-new
 });

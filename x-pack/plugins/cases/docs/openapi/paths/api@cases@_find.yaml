@@ -34,7 +34,10 @@ get:
             properties:
               cases:
                 type: array
+<<<<<<< HEAD
                 maxItems: 10000
+=======
+>>>>>>> whats-new
                 items:
                   $ref: '../components/schemas/case_response_properties.yaml'
               count_closed_cases:

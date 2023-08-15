@@ -333,6 +333,7 @@ export function getTextBasedDatasource({
       );
     },
 
+<<<<<<< HEAD
     DataPanelComponent(props: DatasourceDataPanelProps<TextBasedPrivateState>) {
       const layerFields = TextBasedDatasource?.getSelectedFields?.(props.state);
       return (
@@ -347,6 +348,12 @@ export function getTextBasedDatasource({
     },
 
     DimensionTriggerComponent: (props: DatasourceDimensionTriggerProps<TextBasedPrivateState>) => {
+=======
+    renderDimensionTrigger: (
+      domElement: Element,
+      props: DatasourceDimensionTriggerProps<TextBasedPrivateState>
+    ) => {
+>>>>>>> whats-new
       const columnLabelMap = TextBasedDatasource.uniqueLabels(props.state, props.indexPatterns);
       const layer = props.state.layers[props.layerId];
       const selectedField = layer?.allColumns?.find((column) => column.columnId === props.columnId);
@@ -485,8 +492,63 @@ export function getTextBasedDatasource({
 
       return columnLabelMap;
     },
+<<<<<<< HEAD
     getDropProps,
     onDrop,
+=======
+
+    getDropProps: (props) => {
+      const { source, target, state } = props;
+      if (!source) {
+        return;
+      }
+      if (target && target.isMetricDimension) {
+        const layerId = target.layerId;
+        const currentLayer = state.layers[layerId];
+        const field = currentLayer.allColumns.find((f) => f.columnId === source.id);
+        if (field?.meta?.type !== 'number') return;
+      }
+      const label = source.field as string;
+      return { dropTypes: ['field_add'], nextLabel: label };
+    },
+
+    onDrop: (props) => {
+      const { dropType, state, source, target } = props;
+      const { layers } = state;
+
+      if (dropType === 'field_add') {
+        Object.keys(layers).forEach((layerId) => {
+          const currentLayer = layers[layerId];
+          const field = currentLayer.allColumns.find((f) => f.columnId === source.id);
+          const newColumn = {
+            columnId: target.columnId,
+            fieldName: field?.fieldName ?? '',
+            meta: field?.meta,
+          };
+          const columns = currentLayer.columns.filter((c) => c.columnId !== target.columnId);
+          columns.push(newColumn);
+
+          const allColumns = currentLayer.allColumns.filter((c) => c.columnId !== target.columnId);
+          allColumns.push(newColumn);
+
+          props.setState({
+            ...props.state,
+            layers: {
+              ...props.state.layers,
+              [layerId]: {
+                ...props.state.layers[layerId],
+                columns,
+                allColumns,
+              },
+            },
+          });
+        });
+        return true;
+      }
+      return false;
+    },
+
+>>>>>>> whats-new
     getPublicAPI({ state, layerId, indexPatterns }: PublicAPIProps<TextBasedPrivateState>) {
       return {
         datasourceId: 'textBased',

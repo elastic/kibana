@@ -22,8 +22,12 @@ export type PackagePolicyFormState =
   | 'LOADING'
   | 'SUBMITTED'
   | 'SUBMITTED_NO_AGENTS'
+<<<<<<< HEAD
   | 'SUBMITTED_CLOUD_FORMATION'
   | 'SUBMITTED_GOOGLE_CLOUD_SHELL';
+=======
+  | 'SUBMITTED_CLOUD_FORMATION';
+>>>>>>> whats-new
 
 export interface AddToPolicyParams {
   pkgkey: string;

@@ -22,7 +22,11 @@ import moment from 'moment-timezone';
 import { useDateFormat, useTimeZone } from '../../../common/lib/kibana';
 import { mockDataFormattedForFieldBrowser, mockGetFieldsData } from '../mocks/mock_context';
 import { useAssistant } from '../hooks/use_assistant';
+<<<<<<< HEAD
 import { TestProvidersComponent } from '../../../common/mock';
+=======
+import { MockAssistantProvider } from '../../../common/mock/mock_assistant_provider';
+>>>>>>> whats-new
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('../hooks/use_assistant');
@@ -31,6 +35,7 @@ moment.suppressDeprecationWarnings = true;
 moment.tz.setDefault('UTC');
 
 const dateFormat = 'MMM D, YYYY @ HH:mm:ss.SSS';
+<<<<<<< HEAD
 
 const flyoutContextValue = {} as unknown as ExpandableFlyoutContext;
 
@@ -43,6 +48,16 @@ const renderHeader = (contextValue: RightPanelContext) =>
         </RightPanelContext.Provider>
       </ExpandableFlyoutContext.Provider>
     </TestProvidersComponent>
+=======
+
+const renderHeader = (contextValue: RightPanelContext) =>
+  render(
+    <MockAssistantProvider>
+      <RightPanelContext.Provider value={contextValue}>
+        <HeaderTitle />
+      </RightPanelContext.Provider>
+    </MockAssistantProvider>
+>>>>>>> whats-new
   );
 
 describe('<HeaderTitle />', () => {

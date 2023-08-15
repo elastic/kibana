@@ -150,7 +150,10 @@ paths:
                 properties:
                   cases:
                     type: array
+<<<<<<< HEAD
                     maxItems: 10000
+=======
+>>>>>>> whats-new
                     items:
                       $ref: '#/components/schemas/case_response_properties'
                   count_closed_cases:
@@ -197,7 +200,10 @@ paths:
             application/json:
               schema:
                 type: array
+<<<<<<< HEAD
                 maxItems: 10000
+=======
+>>>>>>> whats-new
                 items:
                   type: object
                   properties:
@@ -612,7 +618,10 @@ paths:
             application/json:
               schema:
                 type: array
+<<<<<<< HEAD
                 maxItems: 10000
+=======
+>>>>>>> whats-new
                 items:
                   type: object
                   properties:
@@ -699,7 +708,10 @@ paths:
             application/json:
               schema:
                 type: array
+<<<<<<< HEAD
                 maxItems: 10000
+=======
+>>>>>>> whats-new
                 items:
                   type: string
               examples:
@@ -1058,7 +1070,10 @@ paths:
                     type: integer
                   userActions:
                     type: array
+<<<<<<< HEAD
                     maxItems: 10000
+=======
+>>>>>>> whats-new
                     items:
                       $ref: '#/components/schemas/user_actions_find_response_properties'
               examples:
@@ -1114,7 +1129,10 @@ paths:
                       type: string
                     referencedByCount:
                       type: integer
+<<<<<<< HEAD
                 maxItems: 1000
+=======
+>>>>>>> whats-new
               examples:
                 findConnectorResponse:
                   $ref: '#/components/examples/find_connector_response'
@@ -2348,6 +2366,39 @@ components:
       description: he default operator to use for the simple_query_string.
       schema:
         type: string
+<<<<<<< HEAD
+=======
+      example: d4e7abb0-b462-11ec-9a8d-698504725a43
+    assignees:
+      in: query
+      name: assignees
+      description: |
+        Filters the returned cases by assignees. Valid values are `none` or unique identifiers for the user profiles. These identifiers can be found by using the suggest user profile API.
+      schema:
+        oneOf:
+          - type: string
+          - type: array
+            items:
+              type: string
+    category:
+      in: query
+      name: category
+      description: Filters the returned cases by category.
+      schema:
+        oneOf:
+          - type: string
+          - type: array
+            items:
+              type: string
+            maxItems: 100
+      example: my-category
+    defaultSearchOperator:
+      in: query
+      name: defaultSearchOperator
+      description: he default operator to use for the simple_query_string.
+      schema:
+        type: string
+>>>>>>> whats-new
         default: OR
       example: OR
     from:
@@ -2386,7 +2437,10 @@ components:
       schema:
         type: integer
         default: 20
+<<<<<<< HEAD
         maximum: 100
+=======
+>>>>>>> whats-new
     reporters:
       in: query
       name: reporters
@@ -2397,7 +2451,10 @@ components:
           - type: array
             items:
               type: string
+<<<<<<< HEAD
             maxItems: 100
+=======
+>>>>>>> whats-new
       example: elastic
     search:
       in: query
@@ -2435,11 +2492,14 @@ components:
         enum:
           - createdAt
           - updatedAt
+<<<<<<< HEAD
           - closedAt
           - title
           - category
           - status
           - severity
+=======
+>>>>>>> whats-new
         default: createdAt
       example: updatedAt
     sort_order:
@@ -2474,7 +2534,10 @@ components:
           - type: array
             items:
               type: string
+<<<<<<< HEAD
             maxItems: 100
+=======
+>>>>>>> whats-new
       example: tag-1
     to:
       in: query
@@ -4760,3 +4823,9 @@ components:
           isPreconfigured: false
           isDeprecated: false
           referencedByCount: 0
+<<<<<<< HEAD
+=======
+security:
+  - basicAuth: []
+  - apiKeyAuth: []
+>>>>>>> whats-new

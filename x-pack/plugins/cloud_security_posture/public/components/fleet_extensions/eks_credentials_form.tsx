@@ -24,7 +24,11 @@ import { getPosturePolicy, NewPackagePolicyPostureInput } from './utils';
 
 const AWSSetupInfoContent = () => (
   <>
+<<<<<<< HEAD
     <EuiHorizontalRule margin="xxl" />
+=======
+    <EuiSpacer size="l" />
+>>>>>>> whats-new
     <EuiTitle size="s">
       <h2>
         <FormattedMessage

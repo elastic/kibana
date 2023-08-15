@@ -176,11 +176,19 @@ export function FrameInformationWindow({ frame, totalSamples, totalSeconds, samp
         {aiAssistant.isEnabled() && promptMessages ? (
           <>
             <EuiFlexItem>
+<<<<<<< HEAD
               <ContextualInsight
                 messages={promptMessages}
+=======
+              <CoPilotPrompt
+                coPilot={coPilotService}
+                promptId={CoPilotPromptId.ProfilingOptimizeFunction}
+                params={promptParams}
+>>>>>>> whats-new
                 title={i18n.translate('xpack.profiling.frameInformationWindow.optimizeFunction', {
                   defaultMessage: 'Optimize function',
                 })}
+                feedbackEnabled={true}
               />
             </EuiFlexItem>
           </>

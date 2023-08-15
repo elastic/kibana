@@ -21,8 +21,11 @@ export enum ErrorCode {
   RESOURCE_NOT_FOUND = 'resource_not_found',
   SEARCH_APPLICATION_ALREADY_EXISTS = 'search_application_already_exists',
   SEARCH_APPLICATION_NAME_INVALID = 'search_application_name_invalid',
+<<<<<<< HEAD
   SEARCH_APPLICATION_NOT_FOUND = 'search_application_not_found',
   SEARCH_APPLICATION_ALIAS_NOT_FOUND = 'search_application_alias_not_found',
+=======
+>>>>>>> whats-new
   UNAUTHORIZED = 'unauthorized',
   UNCAUGHT_EXCEPTION = 'uncaught_exception',
 }

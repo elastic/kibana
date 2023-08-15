@@ -16,7 +16,11 @@ import { ROOT_PATH, SEARCH_APPLICATIONS_PATH } from './routes';
 
 export const Applications = () => {
   return (
+<<<<<<< HEAD
     <Routes>
+=======
+    <Switch>
+>>>>>>> whats-new
       <Redirect exact from={ROOT_PATH} to={SEARCH_APPLICATIONS_PATH} />
       <Route path={SEARCH_APPLICATIONS_PATH}>
         <SearchApplicationsRouter />

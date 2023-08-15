@@ -58,6 +58,7 @@ import { createDelayFn } from './common/utils';
 import type { TransformRawDocs } from './types';
 import * as Actions from './actions';
 import { REMOVED_TYPES } from './core';
+import { getIndexTypes } from './model/helpers';
 
 type ActionMap = ReturnType<typeof nextActionMap>;
 
@@ -201,6 +202,7 @@ export const nextActionMap = (
       Actions.checkTargetMappings({
         actualMappings: Option.toUndefined(state.sourceIndexMappings),
         expectedMappings: state.targetIndexMappings,
+        indexTypes: getIndexTypes(state),
       }),
     UPDATE_TARGET_MAPPINGS_PROPERTIES: (state: UpdateTargetMappingsPropertiesState) =>
       Actions.updateAndPickupMappings({

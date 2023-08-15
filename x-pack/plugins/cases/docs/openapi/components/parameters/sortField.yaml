@@ -6,10 +6,13 @@ schema:
   enum:
     - createdAt
     - updatedAt
+<<<<<<< HEAD
     - closedAt
     - title
     - category
     - status
     - severity
+=======
+>>>>>>> whats-new
   default: createdAt
 example: updatedAt

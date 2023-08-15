@@ -12,7 +12,12 @@ import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
 import { TOOLTIP } from '../../../../../common/visualizations/lens/dashboards/host/translations';
 
 import { type Props, MetricChartWrapper } from '../chart/metric_chart_wrapper';
+<<<<<<< HEAD
 import { TooltipContent } from '../../../../../components/lens';
+=======
+import { TooltipContent } from '../metric_explanation/tooltip_content';
+import { KPIChartProps } from './tile';
+>>>>>>> whats-new
 
 const HOSTS_CHART: Omit<Props, 'loading' | 'value' | 'toolTip'> = {
   id: 'hostsViewKPI-hostsCount',
@@ -22,7 +27,11 @@ const HOSTS_CHART: Omit<Props, 'loading' | 'value' | 'toolTip'> = {
   }),
 };
 
+<<<<<<< HEAD
 export const HostsTile = ({ height }: { height: number }) => {
+=======
+export const HostsTile = ({ style }: Pick<KPIChartProps, 'style'>) => {
+>>>>>>> whats-new
   const { data: hostCountData, isRequestRunning: hostCountLoading } = useHostCountContext();
   const { searchCriteria } = useUnifiedSearchContext();
 
@@ -40,7 +49,11 @@ export const HostsTile = ({ height }: { height: number }) => {
   return (
     <MetricChartWrapper
       {...HOSTS_CHART}
+<<<<<<< HEAD
       style={{ height }}
+=======
+      style={style}
+>>>>>>> whats-new
       value={hostCountData?.count.value ?? 0}
       subtitle={getSubtitle()}
       toolTip={

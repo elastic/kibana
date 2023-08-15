@@ -15,7 +15,10 @@ import {
   EuiTitle,
   EuiSelect,
   EuiCallOut,
+<<<<<<< HEAD
   EuiHorizontalRule,
+=======
+>>>>>>> whats-new
 } from '@elastic/eui';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import { PackageInfo } from '@kbn/fleet-plugin/common';
@@ -43,7 +46,11 @@ interface AWSSetupInfoContentProps {
 const AWSSetupInfoContent = ({ integrationLink }: AWSSetupInfoContentProps) => {
   return (
     <>
+<<<<<<< HEAD
       <EuiHorizontalRule margin="xxl" />
+=======
+      <EuiSpacer size="l" />
+>>>>>>> whats-new
       <EuiTitle size="s">
         <h2>
           <FormattedMessage
@@ -167,7 +174,11 @@ const Link = ({ children, url }: { children: React.ReactNode; url: string }) => 
   </EuiLink>
 );
 
+<<<<<<< HEAD
 export const ReadDocumentation = ({ url }: { url: string }) => {
+=======
+const ReadDocumentation = ({ url }: { url: string }) => {
+>>>>>>> whats-new
   return (
     <EuiText color="subdued" size="s">
       <FormattedMessage

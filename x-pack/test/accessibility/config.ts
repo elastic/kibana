@@ -33,9 +33,16 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       require.resolve('./apps/roles'),
       require.resolve('./apps/ingest_node_pipelines'),
       require.resolve('./apps/index_lifecycle_management'),
+<<<<<<< HEAD
       require.resolve('./apps/ml'),
       require.resolve('./apps/ml_anomaly_detection'),
       require.resolve('./apps/transform'),
+=======
+      // https://github.com/elastic/kibana/issues/153596
+      // https://github.com/elastic/kibana/issues/153592
+      require.resolve('./apps/ml'),
+      // require.resolve('./apps/transform'),
+>>>>>>> whats-new
       require.resolve('./apps/lens'),
       require.resolve('./apps/upgrade_assistant'),
       require.resolve('./apps/canvas'),

@@ -11,7 +11,11 @@ import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import * as i18n from './translations';
 
 export const UpgradeButtonsComponent = ({ basePath }: { basePath: string }) => (
+<<<<<<< HEAD
   <EuiFlexGroup gutterSize="s" wrap={true} data-test-subj="upgrade-buttons">
+=======
+  <EuiFlexGroup gutterSize="s" wrap={true}>
+>>>>>>> whats-new
     <EuiFlexItem grow={false}>
       <EuiButton
         href="https://www.elastic.co/subscriptions"

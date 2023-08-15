@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+<<<<<<<< HEAD:x-pack/plugins/observability_ai_assistant/public/hooks/__storybook_mocks__/use_observability_ai_assistant.ts
 const service = {
   start: async () => {
     return {
@@ -16,3 +17,13 @@ const service = {
 export function useObservabilityAIAssistant() {
   return service;
 }
+========
+import { i18n } from '@kbn/i18n';
+
+export const RULE_PREVIEW_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.rulePreviewTitle',
+  {
+    defaultMessage: 'Rule preview',
+  }
+);
+>>>>>>>> whats-new:x-pack/plugins/security_solution/public/detection_engine/rule_creation_ui/pages/translations.ts

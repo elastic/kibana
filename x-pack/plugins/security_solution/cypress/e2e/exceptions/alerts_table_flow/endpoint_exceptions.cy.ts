@@ -9,6 +9,10 @@ import { deleteAlertsAndRules } from '../../../tasks/common';
 import {
   expandFirstAlert,
   goToClosedAlertsOnRuleDetailsPage,
+<<<<<<< HEAD
+=======
+  goToOpenedAlertsOnRuleDetailsPage,
+>>>>>>> whats-new
   openAddEndpointExceptionFromAlertActionButton,
   openAddEndpointExceptionFromFirstAlert,
   waitForAlerts,
@@ -23,7 +27,11 @@ import {
 } from '../../../tasks/create_new_rule';
 import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../../urls/navigation';
 import {
+<<<<<<< HEAD
   addExceptionEntryFieldValueAndSelectSuggestion,
+=======
+  addExceptionEntryFieldValue,
+>>>>>>> whats-new
   addExceptionEntryFieldValueValue,
   addExceptionFlyoutItemName,
   editExceptionFlyoutItemName,
@@ -31,7 +39,18 @@ import {
   submitNewExceptionItem,
   validateExceptionConditionField,
 } from '../../../tasks/exceptions';
+<<<<<<< HEAD
 import { ALERTS_COUNT } from '../../../screens/alerts';
+=======
+import { ALERTS_COUNT, EMPTY_ALERT_TABLE } from '../../../screens/alerts';
+import {
+  ADD_AND_BTN,
+  EXCEPTION_CARD_ITEM_CONDITIONS,
+  EXCEPTION_CARD_ITEM_NAME,
+  EXCEPTION_ITEM_VIEWER_CONTAINER,
+  NO_EXCEPTIONS_EXIST_PROMPT,
+} from '../../../screens/exceptions';
+>>>>>>> whats-new
 import {
   ADD_AND_BTN,
   EXCEPTION_CARD_ITEM_CONDITIONS,
@@ -41,6 +60,7 @@ import {
 import { goToEndpointExceptionsTab } from '../../../tasks/rule_details';
 
 describe('Endpoint Exceptions workflows from Alert', () => {
+<<<<<<< HEAD
   const ITEM_NAME = 'Sample Exception List Item';
   const ITEM_NAME_EDIT = 'Sample Exception List Item';
   const ADDITIONAL_ENTRY = 'host.hostname';
@@ -48,6 +68,14 @@ describe('Endpoint Exceptions workflows from Alert', () => {
   beforeEach(() => {
     cy.task('esArchiverUnload', 'endpoint');
     cy.task('esArchiverResetKibana');
+=======
+  const expectedNumberOfAlerts = 1;
+  const ITEM_NAME = 'Sample Exception List Item';
+  const ITEM_NAME_EDIT = 'Sample Exception List Item';
+  const ADDITIONAL_ENTRY = 'host.hostname';
+  beforeEach(() => {
+    esArchiverResetKibana();
+>>>>>>> whats-new
     login();
     deleteAlertsAndRules();
     cy.task('esArchiverLoad', 'endpoint');
@@ -99,6 +127,41 @@ describe('Endpoint Exceptions workflows from Alert', () => {
     cy.get(ADD_AND_BTN).click();
     // edit conditions
     addExceptionEntryFieldValueAndSelectSuggestion(ADDITIONAL_ENTRY, 6);
+    addExceptionEntryFieldValueValue('foo', 4);
+
+    // Change the name again
+    editExceptionFlyoutItemName(ITEM_NAME_EDIT);
+
+    // validate the condition is still "agent.name" or got rest after the name is changed
+    validateExceptionConditionField(ADDITIONAL_ENTRY);
+
+    selectCloseSingleAlerts();
+    submitNewExceptionItem();
+
+    // Endpoint Exception will move to Endpoint List under Exception tab of rule
+    goToEndpointExceptionsTab();
+
+    // new exception item displays
+    cy.get(EXCEPTION_ITEM_VIEWER_CONTAINER).should('have.length', 1);
+    cy.get(EXCEPTION_CARD_ITEM_NAME).should('have.text', ITEM_NAME_EDIT);
+    cy.get(EXCEPTION_CARD_ITEM_CONDITIONS).contains('span', ADDITIONAL_ENTRY);
+  });
+
+  it('Should be able to create Endpoint exception from Alerts take action button, and change multiple exception items without resetting to initial auto-prefilled entries', () => {
+    // Open first Alert Summary
+    expandFirstAlert();
+
+    // The Endpoint should populated with predefined fields
+    openAddEndpointExceptionFromAlertActionButton();
+
+    // As the endpoint.alerts-* is used to trigger the alert the
+    // file.Ext.code_signature will be auto-populated
+    validateExceptionConditionField('file.Ext.code_signature');
+    addExceptionFlyoutItemName(ITEM_NAME);
+
+    cy.get(ADD_AND_BTN).click();
+    // edit conditions
+    addExceptionEntryFieldValue(ADDITIONAL_ENTRY, 6);
     addExceptionEntryFieldValueValue('foo', 4);
 
     // Change the name again

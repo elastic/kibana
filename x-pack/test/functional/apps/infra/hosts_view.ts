@@ -490,7 +490,69 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           const processesTotalValue =
             await pageObjects.infraHostsView.getProcessesTabContentTotalValue();
           const processValue = await processesTotalValue.getVisibleText();
+<<<<<<< HEAD
           expect(processValue).to.eql('N/A');
+=======
+          expect(processValue).to.eql('313');
+        });
+
+        it('should expand processes table row', async () => {
+          await pageObjects.infraHostsView.clickProcessesFlyoutTab();
+          await pageObjects.infraHostsView.getProcessesTable();
+          await pageObjects.infraHostsView.getProcessesTableBody();
+          await pageObjects.infraHostsView.clickProcessesTableExpandButton();
+        });
+      });
+
+      describe('Logs Tab', () => {
+        it('should render logs tab', async () => {
+          await pageObjects.infraHostsView.clickLogsFlyoutTab();
+          await testSubjects.existOrFail('infraAssetDetailsLogsTabContent');
+        });
+      });
+
+      describe('Flyout links', () => {
+        it('should navigate to Uptime after click', async () => {
+          await pageObjects.infraHostsView.clickFlyoutUptimeLink();
+          const url = parse(await browser.getCurrentUrl());
+
+          const search = 'search=host.name: "Jennys-MBP.fritz.box" OR host.ip: "192.168.1.79"';
+          const query = decodeURIComponent(url.query ?? '');
+
+          expect(url.pathname).to.eql('/app/uptime/');
+          expect(query).to.contain(search);
+
+          await returnTo(HOSTS_VIEW_PATH);
+        });
+
+        it('should navigate to APM services after click', async () => {
+          await pageObjects.infraHostsView.clickFlyoutApmServicesLink();
+          const url = parse(await browser.getCurrentUrl());
+          const query = decodeURIComponent(url.query ?? '');
+          const kuery = 'kuery=host.hostname:"Jennys-MBP.fritz.box"';
+
+          expect(url.pathname).to.eql('/app/apm/services');
+          expect(query).to.contain(kuery);
+
+          await returnTo(HOSTS_VIEW_PATH);
+        });
+      });
+
+      describe('Processes Tab', () => {
+        it('should render processes tab and with Total Value summary', async () => {
+          await pageObjects.infraHostsView.clickProcessesFlyoutTab();
+          const processesTotalValue =
+            await pageObjects.infraHostsView.getProcessesTabContentTotalValue();
+          const processValue = await processesTotalValue.getVisibleText();
+          expect(processValue).to.eql('313');
+        });
+
+        it('should expand processes table row', async () => {
+          await pageObjects.infraHostsView.clickProcessesFlyoutTab();
+          await pageObjects.infraHostsView.getProcessesTable();
+          await pageObjects.infraHostsView.getProcessesTableBody();
+          await pageObjects.infraHostsView.clickProcessesTableExpandButton();
+>>>>>>> whats-new
         });
       });
     });

@@ -170,10 +170,32 @@ export function DashboardTopNav({ embedSettings, redirectTo }: DashboardTopNavPr
             redirectTo({ destination: 'listing' });
           },
         },
+<<<<<<< HEAD
         ...dashboardTitleBreadcrumbs,
       ]);
     }
   }, [setBreadcrumbs, redirectTo, dashboardTitle, dashboard, viewMode, serverless]);
+=======
+      },
+      {
+        text:
+          viewMode === ViewMode.EDIT ? (
+            <>
+              {dashboardTitle} <EuiIcon size="s" type="pencil" />
+            </>
+          ) : (
+            dashboardTitle
+          ),
+        onClick:
+          viewMode === ViewMode.EDIT
+            ? () => {
+                dashboard.showSettings();
+              }
+            : undefined,
+      },
+    ]);
+  }, [setBreadcrumbs, redirectTo, dashboardTitle, dashboard, viewMode]);
+>>>>>>> whats-new
 
   /**
    * Build app leave handler whenever hasUnsavedChanges changes

@@ -5,8 +5,13 @@
  * 2.0.
  */
 
+<<<<<<< HEAD
 import { AlertTagIds } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { SetAlertTagsRequestBody } from '@kbn/security-solution-plugin/common/api/detection_engine';
+=======
+import { AlertTagIds } from '@kbn/security-solution-plugin/common/detection_engine/schemas/common';
+import { SetAlertTagsSchema } from '@kbn/security-solution-plugin/common/detection_engine/schemas/request/set_alert_tags_schema';
+>>>>>>> whats-new
 
 export const setAlertTags = ({
   tagsToAdd,
@@ -16,7 +21,11 @@ export const setAlertTags = ({
   tagsToAdd: string[];
   tagsToRemove: string[];
   ids: AlertTagIds;
+<<<<<<< HEAD
 }): SetAlertTagsRequestBody => ({
+=======
+}): SetAlertTagsSchema => ({
+>>>>>>> whats-new
   tags: {
     tags_to_add: tagsToAdd,
     tags_to_remove: tagsToRemove,

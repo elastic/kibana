@@ -16,7 +16,10 @@ import { ApmAvailabilityIndicatorTypeForm } from './apm_availability/apm_availab
 import { ApmLatencyIndicatorTypeForm } from './apm_latency/apm_latency_indicator_type_form';
 import { CustomKqlIndicatorTypeForm } from './custom_kql/custom_kql_indicator_type_form';
 import { CustomMetricIndicatorTypeForm } from './custom_metric/custom_metric_type_form';
+<<<<<<< HEAD
 import { HistogramIndicatorTypeForm } from './histogram/histogram_indicator_type_form';
+=======
+>>>>>>> whats-new
 import { maxWidth } from './slo_edit_form';
 
 interface SloEditFormIndicatorSectionProps {

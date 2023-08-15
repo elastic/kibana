@@ -36,8 +36,12 @@ export const AssistantOverlay = React.memo<Props>(({ isAssistantEnabled }) => {
     WELCOME_CONVERSATION_TITLE
   );
   const [promptContextId, setPromptContextId] = useState<string | undefined>();
+<<<<<<< HEAD
   const { assistantTelemetry, setShowAssistantOverlay, localStorageLastConversationId } =
     useAssistantContext();
+=======
+  const { setShowAssistantOverlay, localStorageLastConversationId } = useAssistantContext();
+>>>>>>> whats-new
 
   // Bind `showAssistantOverlay` in SecurityAssistantContext to this modal instance
   const showOverlay = useCallback(
@@ -67,6 +71,7 @@ export const AssistantOverlay = React.memo<Props>(({ isAssistantEnabled }) => {
     // Try to restore the last conversation on shortcut pressed
     if (!isModalVisible) {
       setConversationId(localStorageLastConversationId ?? WELCOME_CONVERSATION_TITLE);
+<<<<<<< HEAD
       assistantTelemetry?.reportAssistantInvoked({
         invokedBy: 'shortcut',
         conversationId: localStorageLastConversationId ?? WELCOME_CONVERSATION_TITLE,
@@ -75,6 +80,12 @@ export const AssistantOverlay = React.memo<Props>(({ isAssistantEnabled }) => {
 
     setIsModalVisible(!isModalVisible);
   }, [assistantTelemetry, isModalVisible, localStorageLastConversationId]);
+=======
+    }
+
+    setIsModalVisible(!isModalVisible);
+  }, [isModalVisible, localStorageLastConversationId]);
+>>>>>>> whats-new
 
   // Register keyboard listener to show the modal when cmd + ; is pressed
   const onKeyDown = useCallback(

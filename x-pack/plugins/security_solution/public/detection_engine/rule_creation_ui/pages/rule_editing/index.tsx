@@ -24,7 +24,11 @@ import { useParams } from 'react-router-dom';
 import type { DataViewListItem } from '@kbn/data-views-plugin/common';
 import { RulePreview } from '../../../../detections/components/rules/rule_preview';
 import { getIsRulePreviewDisabled } from '../../../../detections/components/rules/rule_preview/helpers';
+<<<<<<< HEAD
 import type { RuleUpdateProps } from '../../../../../common/api/detection_engine/model/rule_schema';
+=======
+import type { RuleUpdateProps } from '../../../../../common/detection_engine/rule_schema';
+>>>>>>> whats-new
 import type { Rule } from '../../../rule_management/logic';
 import { useRule, useUpdateRule } from '../../../rule_management/logic';
 import { useListsConfig } from '../../../../detections/containers/detection_engine/lists/use_lists_config';

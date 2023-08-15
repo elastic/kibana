@@ -15,7 +15,10 @@ import {
   GetViewInAppRelativeUrlFnOpts,
 } from '@kbn/alerting-plugin/server';
 import { RecoveredActionGroupId } from '@kbn/alerting-plugin/common';
+<<<<<<< HEAD
 import { observabilityPaths } from '@kbn/observability-plugin/common';
+=======
+>>>>>>> whats-new
 import { O11Y_AAD_FIELDS } from '../../../../common/constants';
 import {
   createMetricAnomalyExecutor,

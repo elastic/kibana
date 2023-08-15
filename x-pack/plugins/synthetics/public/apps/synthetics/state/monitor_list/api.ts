@@ -70,7 +70,11 @@ export const createGettingStartedMonitor = async ({
   monitor,
 }: {
   monitor: SyntheticsMonitor | EncryptedSyntheticsMonitor;
+<<<<<<< HEAD
 }): Promise<UpsertMonitorResponse> => {
+=======
+}): Promise<{ attributes: { errors: ServiceLocationErrors } } | SyntheticsMonitor> => {
+>>>>>>> whats-new
   return await apiService.post(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS, monitor, undefined, {
     gettingStarted: true,
   });

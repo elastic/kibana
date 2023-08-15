@@ -12,8 +12,11 @@ import { i18n } from '@kbn/i18n';
 
 import { useCreateCloudFormationUrl } from '../../hooks';
 import { CloudFormationGuide } from '../cloud_formation_guide';
+<<<<<<< HEAD
 
 import type { CloudSecurityIntegration } from './types';
+=======
+>>>>>>> whats-new
 
 interface Props {
   enrollmentAPIKey?: string;
@@ -26,7 +29,11 @@ export const CloudFormationInstructions: React.FunctionComponent<Props> = ({
 }) => {
   const { isLoading, cloudFormationUrl, error, isError } = useCreateCloudFormationUrl({
     enrollmentAPIKey,
+<<<<<<< HEAD
     cloudFormationProps: cloudSecurityIntegration?.cloudFormationProps,
+=======
+    cloudFormationTemplateUrl,
+>>>>>>> whats-new
   });
 
   if (error && isError) {

@@ -13,7 +13,10 @@ import {
   PartialTheme,
   Settings,
   Tooltip,
+<<<<<<< HEAD
   FlameSpec,
+=======
+>>>>>>> whats-new
 } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { Maybe } from '@kbn/observability-plugin/common/typings';
@@ -156,7 +159,10 @@ export function FlameGraph({
                           baselineScaleFactor={baseline}
                           comparisonScaleFactor={comparison}
                           onShowMoreClick={() => {
+<<<<<<< HEAD
                             trackProfilingEvent({ metric: 'flamegraph_node_details_click' });
+=======
+>>>>>>> whats-new
                             if (!showInformationWindow) {
                               toggleShowInformationWindow();
                             }

@@ -5,11 +5,19 @@
  * 2.0.
  */
 
+<<<<<<< HEAD
 import { getDefaultConnector, getBlockBotConversation } from './helpers';
 import { enterpriseMessaging } from './use_conversation/sample_conversations';
 import { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
 
 describe('getBlockBotConversation', () => {
+=======
+import { getDefaultConnector, getWelcomeConversation } from './helpers';
+import { enterpriseMessaging } from './use_conversation/sample_conversations';
+import { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
+
+describe('getWelcomeConversation', () => {
+>>>>>>> whats-new
   describe('isAssistantEnabled = false', () => {
     const isAssistantEnabled = false;
     it('When no conversation history, return only enterprise messaging', () => {
@@ -19,7 +27,11 @@ describe('getBlockBotConversation', () => {
         messages: [],
         apiConfig: {},
       };
+<<<<<<< HEAD
       const result = getBlockBotConversation(conversation, isAssistantEnabled);
+=======
+      const result = getWelcomeConversation(conversation, isAssistantEnabled);
+>>>>>>> whats-new
       expect(result.messages).toEqual(enterpriseMessaging);
       expect(result.messages.length).toEqual(1);
     });
@@ -41,7 +53,11 @@ describe('getBlockBotConversation', () => {
         ],
         apiConfig: {},
       };
+<<<<<<< HEAD
       const result = getBlockBotConversation(conversation, isAssistantEnabled);
+=======
+      const result = getWelcomeConversation(conversation, isAssistantEnabled);
+>>>>>>> whats-new
       expect(result.messages.length).toEqual(2);
     });
 
@@ -52,7 +68,11 @@ describe('getBlockBotConversation', () => {
         messages: enterpriseMessaging,
         apiConfig: {},
       };
+<<<<<<< HEAD
       const result = getBlockBotConversation(conversation, isAssistantEnabled);
+=======
+      const result = getWelcomeConversation(conversation, isAssistantEnabled);
+>>>>>>> whats-new
       expect(result.messages.length).toEqual(1);
       expect(result.messages).toEqual(enterpriseMessaging);
     });
@@ -75,7 +95,11 @@ describe('getBlockBotConversation', () => {
         ],
         apiConfig: {},
       };
+<<<<<<< HEAD
       const result = getBlockBotConversation(conversation, isAssistantEnabled);
+=======
+      const result = getWelcomeConversation(conversation, isAssistantEnabled);
+>>>>>>> whats-new
       expect(result.messages.length).toEqual(3);
     });
   });
@@ -89,7 +113,11 @@ describe('getBlockBotConversation', () => {
         messages: [],
         apiConfig: {},
       };
+<<<<<<< HEAD
       const result = getBlockBotConversation(conversation, isAssistantEnabled);
+=======
+      const result = getWelcomeConversation(conversation, isAssistantEnabled);
+>>>>>>> whats-new
       expect(result.messages.length).toEqual(3);
     });
     it('returns a conversation history with the welcome conversation appended', () => {
@@ -109,7 +137,11 @@ describe('getBlockBotConversation', () => {
         ],
         apiConfig: {},
       };
+<<<<<<< HEAD
       const result = getBlockBotConversation(conversation, isAssistantEnabled);
+=======
+      const result = getWelcomeConversation(conversation, isAssistantEnabled);
+>>>>>>> whats-new
       expect(result.messages.length).toEqual(4);
     });
   });
@@ -138,7 +170,10 @@ describe('getBlockBotConversation', () => {
           isDeprecated: false,
           referencedByCount: 0,
           isMissingSecrets: false,
+<<<<<<< HEAD
           isSystemAction: false,
+=======
+>>>>>>> whats-new
           secrets: {},
           id: 'c5f91dc0-2197-11ee-aded-897192c5d6f5',
           name: 'OpenAI',
@@ -161,7 +196,10 @@ describe('getBlockBotConversation', () => {
           isDeprecated: false,
           referencedByCount: 0,
           isMissingSecrets: false,
+<<<<<<< HEAD
           isSystemAction: false,
+=======
+>>>>>>> whats-new
           secrets: {},
           id: 'c5f91dc0-2197-11ee-aded-897192c5d6f5',
           name: 'OpenAI',
@@ -176,7 +214,10 @@ describe('getBlockBotConversation', () => {
           isDeprecated: false,
           referencedByCount: 0,
           isMissingSecrets: false,
+<<<<<<< HEAD
           isSystemAction: false,
+=======
+>>>>>>> whats-new
           secrets: {},
           id: 'c7f91dc0-2197-11ee-aded-897192c5d633',
           name: 'OpenAI',

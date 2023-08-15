@@ -177,6 +177,7 @@ export class AlertsService implements IAlertsService {
         }
       }
 
+<<<<<<< HEAD
       this.resourceInitializationHelper.retry(
         opts.ruleType.alerts as IRuleTypeAlerts,
         opts.namespace,
@@ -188,6 +189,15 @@ export class AlertsService implements IAlertsService {
         opts.ruleType.alerts.isSpaceAware ? opts.namespace : DEFAULT_NAMESPACE_STRING
       );
 
+=======
+      this.resourceInitializationHelper.retry(opts.ruleType.alerts, opts.namespace, initPromise);
+
+      const retryResult = await this.resourceInitializationHelper.getInitializedContext(
+        opts.ruleType.alerts.context,
+        opts.ruleType.alerts.isSpaceAware ? opts.namespace : DEFAULT_NAMESPACE_STRING
+      );
+
+>>>>>>> whats-new
       if (!retryResult.result) {
         const errorLogPrefix = `There was an error in the framework installing namespace-level resources and creating concrete indices for context "${opts.ruleType.alerts.context}" - `;
         // Retry also failed
@@ -202,6 +212,16 @@ export class AlertsService implements IAlertsService {
           `Resource installation for "${opts.ruleType.alerts.context}" succeeded after retry`
         );
       }
+<<<<<<< HEAD
+=======
+    }
+
+    if (!opts.ruleType.alerts.shouldWrite) {
+      this.options.logger.debug(
+        `Resources registered and installed for ${opts.ruleType.alerts.context} context but "shouldWrite" is set to false.`
+      );
+      return null;
+>>>>>>> whats-new
     }
 
     // TODO - when we replace the LegacyAlertsClient, we will need to decide whether to

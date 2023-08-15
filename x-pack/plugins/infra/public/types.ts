@@ -44,7 +44,10 @@ import {
 } from '@kbn/logs-shared-plugin/public';
 import { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/public';
+<<<<<<< HEAD
 import { ObservabilityAIAssistantPluginStart } from '@kbn/observability-ai-assistant-plugin/public';
+=======
+>>>>>>> whats-new
 import type { UnwrapPromise } from '../common/utility_types';
 import type {
   SourceProviderProps,

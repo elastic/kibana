@@ -6,11 +6,19 @@
  */
 
 import React, { useEffect, useLayoutEffect } from 'react';
+<<<<<<< HEAD
 import { useParams, Redirect } from 'react-router-dom';
 
 import { useValues, useActions } from 'kea';
 
 import { Routes, Route } from '@kbn/shared-ux-router';
+=======
+import { useParams, Redirect, Switch } from 'react-router-dom';
+
+import { useValues, useActions } from 'kea';
+
+import { Route } from '@kbn/shared-ux-router';
+>>>>>>> whats-new
 
 import { Status } from '../../../../../common/types/api';
 
@@ -28,11 +36,18 @@ import { EnterpriseSearchApplicationsPageTemplate } from '../layout/page_templat
 import { DeleteSearchApplicationModal } from '../search_applications/delete_search_application_modal';
 
 import { SearchApplicationConnect } from './connect/search_application_connect';
+<<<<<<< HEAD
 import { SearchApplicationDocsExplorer } from './docs_explorer/docs_explorer';
+=======
+>>>>>>> whats-new
 import { SearchApplicationHeaderDocsAction } from './header_docs_action';
 import { SearchApplicationContent } from './search_application_content';
 import { SearchApplicationError } from './search_application_error';
 import { SearchApplicationViewLogic } from './search_application_view_logic';
+<<<<<<< HEAD
+=======
+import { SearchApplicationSearchPreview } from './search_preview/search_preview';
+>>>>>>> whats-new
 
 export const SearchApplicationView: React.FC = () => {
   const { fetchSearchApplication, closeDeleteSearchApplicationModal } = useActions(
@@ -45,7 +60,11 @@ export const SearchApplicationView: React.FC = () => {
     hasSchemaConflicts,
     isDeleteModalVisible,
   } = useValues(SearchApplicationViewLogic);
+<<<<<<< HEAD
   const { tabId = SearchApplicationViewTabs.DOCS_EXPLORER } = useParams<{
+=======
+  const { tabId = SearchApplicationViewTabs.PREVIEW } = useParams<{
+>>>>>>> whats-new
     tabId?: string;
   }>();
   const { renderHeaderActions } = useValues(KibanaLogic);
@@ -88,11 +107,19 @@ export const SearchApplicationView: React.FC = () => {
           onClose={closeDeleteSearchApplicationModal}
         />
       ) : null}
+<<<<<<< HEAD
       <Routes>
         <Route
           exact
           path={`${SEARCH_APPLICATION_PATH}/${SearchApplicationViewTabs.DOCS_EXPLORER}`}
           component={SearchApplicationDocsExplorer}
+=======
+      <Switch>
+        <Route
+          exact
+          path={`${SEARCH_APPLICATION_PATH}/${SearchApplicationViewTabs.PREVIEW}`}
+          component={SearchApplicationSearchPreview}
+>>>>>>> whats-new
         />
         <Route path={SEARCH_APPLICATION_CONTENT_PATH} component={SearchApplicationContent} />
         <Redirect
@@ -120,7 +147,11 @@ export const SearchApplicationView: React.FC = () => {
             <SearchApplicationError notFound />
           </EnterpriseSearchApplicationsPageTemplate>
         </Route>
+<<<<<<< HEAD
       </Routes>
+=======
+      </Switch>
+>>>>>>> whats-new
     </>
   );
 };

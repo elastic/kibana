@@ -1441,22 +1441,34 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           updatedTypesQuery: Option.none,
         };
       } else if (isTypeof(left, 'compared_mappings_changed')) {
+<<<<<<< HEAD
         const rootFields = Object.keys(getBaseMappings().properties);
         const updatedRootFields = left.updatedHashes.filter((field) => rootFields.includes(field));
         const updatedTypesQuery = Option.fromNullable(buildPickupMappingsQuery(left.updatedHashes));
 
         if (updatedRootFields.length) {
+=======
+        if (left.updatedRootFields.length) {
+>>>>>>> whats-new
           // compatible migration: some core fields have been updated
           return {
             ...stateP,
             controlState: 'UPDATE_TARGET_MAPPINGS_PROPERTIES',
             // we must "pick-up" all documents on the index (by not providing a query)
+<<<<<<< HEAD
             updatedTypesQuery,
+=======
+            updatedTypesQuery: Option.none,
+>>>>>>> whats-new
             logs: [
               ...stateP.logs,
               {
                 level: 'info',
+<<<<<<< HEAD
                 message: `Kibana is performing a compatible upgrade and the mappings of some root fields have been changed. For Elasticsearch to pickup these mappings, all saved objects need to be updated. Updated root fields: ${updatedRootFields}.`,
+=======
+                message: `Kibana is performing a compatible upgrade and the mappings of some root fields have been changed. For Elasticsearch to pickup these mappings, all saved objects need to be updated. Updated root fields: ${left.updatedRootFields}.`,
+>>>>>>> whats-new
               },
             ],
           };
@@ -1466,12 +1478,24 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
             ...stateP,
             controlState: 'UPDATE_TARGET_MAPPINGS_PROPERTIES',
             // we can "pick-up" only the SO types that have changed
+<<<<<<< HEAD
             updatedTypesQuery,
+=======
+            updatedTypesQuery: Option.some({
+              bool: {
+                should: left.updatedTypes.map((type) => ({ term: { type } })),
+              },
+            }),
+>>>>>>> whats-new
             logs: [
               ...stateP.logs,
               {
                 level: 'info',
+<<<<<<< HEAD
                 message: `Kibana is performing a compatible upgrade and NO root fields have been udpated. Kibana will update the following SO types so that ES can pickup the updated mappings: ${left.updatedHashes}.`,
+=======
+                message: `Kibana is performing a compatible upgrade and NO root fields have been udpated. Kibana will update the following SO types so that ES can pickup the updated mappings: ${left.updatedTypes}.`,
+>>>>>>> whats-new
               },
             ],
           };

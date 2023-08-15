@@ -15,5 +15,8 @@ export default createTestConfig({
     reportName: 'Serverless Observability API Integration Tests',
   },
   suiteTags: { exclude: ['skipSvlOblt'] },
+<<<<<<< HEAD
   services,
+=======
+>>>>>>> whats-new
 });

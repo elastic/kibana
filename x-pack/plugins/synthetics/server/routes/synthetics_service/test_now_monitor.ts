@@ -6,12 +6,23 @@
  */
 import { schema } from '@kbn/config-schema';
 import { v4 as uuidv4 } from 'uuid';
+<<<<<<< HEAD
 import { getDecryptedMonitor } from '../../saved_objects/synthetics_monitor';
 import { PrivateLocationAttributes } from '../../runtime_types/private_locations';
 import { getPrivateLocationsForMonitor } from '../monitor_cruds/add_monitor';
 import { RouteContext, SyntheticsRestApiRouteFactory } from '../types';
 import { TestNowResponse } from '../../../common/types';
 import { ConfigKey, MonitorFields } from '../../../common/runtime_types';
+=======
+import { syntheticsMonitorType } from '../../../common/types/saved_objects';
+import { TestNowResponse } from '../../../common/types';
+import {
+  ConfigKey,
+  MonitorFields,
+  SyntheticsMonitorWithSecrets,
+} from '../../../common/runtime_types';
+import { RouteContext, SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes/types';
+>>>>>>> whats-new
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { normalizeSecrets } from '../../synthetics_service/utils/secrets';
 
@@ -31,16 +42,32 @@ export const testNowMonitorRoute: SyntheticsRestApiRouteFactory<TestNowResponse>
 
 export const triggerTestNow = async (
   monitorId: string,
+<<<<<<< HEAD
   routeContext: RouteContext
 ): Promise<TestNowResponse> => {
   const { server, spaceId, syntheticsMonitorClient, savedObjectsClient } = routeContext;
 
   const monitorWithSecrets = await getDecryptedMonitor(server, monitorId, spaceId);
+=======
+  { server, spaceId, syntheticsMonitorClient }: RouteContext
+): Promise<TestNowResponse> => {
+  const encryptedClient = server.encryptedSavedObjects.getClient();
+
+  const monitorWithSecrets =
+    await encryptedClient.getDecryptedAsInternalUser<SyntheticsMonitorWithSecrets>(
+      syntheticsMonitorType,
+      monitorId,
+      {
+        namespace: spaceId,
+      }
+    );
+>>>>>>> whats-new
   const normalizedMonitor = normalizeSecrets(monitorWithSecrets);
 
   const { [ConfigKey.SCHEDULE]: schedule, [ConfigKey.LOCATIONS]: locations } =
     monitorWithSecrets.attributes;
 
+<<<<<<< HEAD
   const privateLocations: PrivateLocationAttributes[] = await getPrivateLocationsForMonitor(
     savedObjectsClient,
     normalizedMonitor.attributes
@@ -57,6 +84,22 @@ export const triggerTestNow = async (
     privateLocations,
     spaceId
   );
+=======
+  const { syntheticsService } = syntheticsMonitorClient;
+
+  const testRunId = uuidv4();
+
+  const paramsBySpace = await syntheticsService.getSyntheticsParams({ spaceId });
+
+  const errors = await syntheticsService.runOnceConfigs({
+    // making it enabled, even if it's disabled in the UI
+    monitor: { ...normalizedMonitor.attributes, enabled: true },
+    configId: monitorId,
+    heartbeatId: (normalizedMonitor.attributes as MonitorFields)[ConfigKey.MONITOR_QUERY_ID],
+    testRunId,
+    params: paramsBySpace[spaceId],
+  });
+>>>>>>> whats-new
 
   if (errors && errors?.length > 0) {
     return {

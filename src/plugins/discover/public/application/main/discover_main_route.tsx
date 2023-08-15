@@ -152,6 +152,7 @@ export function DiscoverMainRoute({
           dataView: nextDataView,
           dataViewSpec: historyLocationState?.dataViewSpec,
         });
+<<<<<<< HEAD
         if (mode === 'standalone') {
           if (currentSavedSearch?.id) {
             chrome.recentlyAccessed.add(
@@ -162,6 +163,15 @@ export function DiscoverMainRoute({
           }
 
           setBreadcrumbs({ services, titleBreadcrumbText: currentSavedSearch?.title ?? undefined });
+=======
+
+        if (currentSavedSearch?.id) {
+          chrome.recentlyAccessed.add(
+            getSavedSearchFullPathUrl(currentSavedSearch.id),
+            currentSavedSearch.title ?? '',
+            currentSavedSearch.id
+          );
+>>>>>>> whats-new
         }
         setLoading(false);
         if (services.analytics) {

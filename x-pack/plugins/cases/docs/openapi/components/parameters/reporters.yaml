@@ -7,5 +7,9 @@ schema:
     - type: array
       items:
         type: string
+<<<<<<< HEAD
       maxItems: 100
 example: elastic
+=======
+example: elastic
+>>>>>>> whats-new

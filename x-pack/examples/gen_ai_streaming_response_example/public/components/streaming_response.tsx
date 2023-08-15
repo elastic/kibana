@@ -9,7 +9,13 @@ import React, { useEffect, useState } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
+<<<<<<< HEAD:x-pack/examples/gen_ai_streaming_response_example/public/components/streaming_response.tsx
   EuiAccordion,
+=======
+  EuiHorizontalRule,
+  EuiIcon,
+  EuiLoadingSpinner,
+>>>>>>> whats-new:x-pack/plugins/observability/public/components/co_pilot_prompt/co_pilot_prompt.tsx
   EuiPanel,
   EuiSpacer,
   EuiText,
@@ -18,9 +24,21 @@ import {
   EuiIcon,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+<<<<<<< HEAD:x-pack/examples/gen_ai_streaming_response_example/public/components/streaming_response.tsx
 import { css } from '@emotion/react';
 import { CoreStart } from '@kbn/core/public';
 import { useFetchStream } from '@kbn/ml-response-stream/client';
+=======
+import { TechnicalPreviewBadge } from '@kbn/observability-shared-plugin/public';
+import type { ChatCompletionRequestMessage } from 'openai';
+import React, { useMemo, useState } from 'react';
+import useObservable from 'react-use/lib/useObservable';
+import { catchError, Observable, of } from 'rxjs';
+import { CoPilotPromptId } from '../../../common';
+import type { PromptParamsOf } from '../../../common/co_pilot';
+import type { CoPilotService, PromptObservableState } from '../../typings/co_pilot';
+import { CoPilotPromptFeedback } from './co_pilot_prompt_feedback';
+>>>>>>> whats-new:x-pack/plugins/observability/public/components/co_pilot_prompt/co_pilot_prompt.tsx
 
 export interface StreamingResponseProps {
   http: CoreStart['http'];
@@ -63,6 +81,7 @@ const cursorCss = `
   background: rgba(0, 0, 0, 0.25);
 `;
 
+<<<<<<< HEAD:x-pack/examples/gen_ai_streaming_response_example/public/components/streaming_response.tsx
 export const StreamingResponse = ({
   http,
   prompt,
@@ -82,6 +101,25 @@ export const StreamingResponse = ({
     },
     { reducer: streamReducer, initialState: '' }
   );
+=======
+export interface CoPilotPromptProps<TPromptId extends CoPilotPromptId> {
+  title: string;
+  promptId: TPromptId;
+  coPilot: CoPilotService;
+  params: PromptParamsOf<TPromptId>;
+  feedbackEnabled: boolean;
+}
+
+// eslint-disable-next-line import/no-default-export
+export default function CoPilotPrompt<TPromptId extends CoPilotPromptId>({
+  title,
+  coPilot,
+  promptId,
+  params,
+  feedbackEnabled,
+}: CoPilotPromptProps<TPromptId>) {
+  const [hasOpened, setHasOpened] = useState(false);
+>>>>>>> whats-new:x-pack/plugins/observability/public/components/co_pilot_prompt/co_pilot_prompt.tsx
 
   // Start fetching when the accordion was opened
   useEffect(() => {
@@ -90,11 +128,49 @@ export const StreamingResponse = ({
     }
   }, [data, errors, hasOpened, isRunning, start]);
 
+<<<<<<< HEAD:x-pack/examples/gen_ai_streaming_response_example/public/components/streaming_response.tsx
   // Cancel fetching when the component unmounts
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => cancel, []);
 
   let content = data;
+=======
+  const [responseTime, setResponseTime] = useState<number | undefined>(undefined);
+
+  const conversation$ = useMemo(() => {
+    if (hasOpened) {
+      setResponseTime(undefined);
+
+      const now = Date.now();
+
+      const observable = coPilot.prompt(promptId, params).pipe(
+        catchError((err) =>
+          of({
+            messages: [] as ChatCompletionRequestMessage[],
+            loading: false,
+            error: err,
+            message: String(err.message),
+          })
+        )
+      );
+
+      observable.subscribe({
+        complete: () => {
+          setResponseTime(Date.now() - now);
+        },
+      });
+
+      return observable;
+    }
+
+    return new Observable<PromptObservableState & { error?: any }>(() => {});
+  }, [params, promptId, coPilot, hasOpened, setResponseTime]);
+
+  const conversation = useObservable(conversation$);
+
+  const content = conversation?.message ?? '';
+  const messages = conversation?.messages;
+>>>>>>> whats-new:x-pack/plugins/observability/public/components/co_pilot_prompt/co_pilot_prompt.tsx
 
   let state: 'init' | 'loading' | 'streaming' | 'error' | 'complete' = 'init';
 
@@ -111,10 +187,26 @@ export const StreamingResponse = ({
 
   if (state === 'complete' || state === 'streaming') {
     inner = (
-      <p style={{ whiteSpace: 'pre-wrap', lineHeight: 1.5 }}>
-        {content}
-        {state === 'streaming' ? <span className={cursorCss} /> : <></>}
-      </p>
+      <>
+        <p style={{ whiteSpace: 'pre-wrap', lineHeight: 1.5 }}>
+          {content}
+          {state === 'streaming' ? <span className={cursorCss} /> : undefined}
+        </p>
+        {state === 'complete' ? (
+          <>
+            <EuiSpacer size="m" />
+            {coPilot.isTrackingEnabled() && feedbackEnabled ? (
+              <CoPilotPromptFeedback
+                messages={messages}
+                response={content}
+                responseTime={responseTime!}
+                promptId={promptId}
+                coPilot={coPilot}
+              />
+            ) : undefined}
+          </>
+        ) : undefined}
+      </>
     );
   } else if (state === 'init' || state === 'loading') {
     inner = (
@@ -156,6 +248,7 @@ export const StreamingResponse = ({
         buttonContent={
           <EuiFlexGroup direction="row" alignItems="center">
             <EuiFlexItem grow>
+<<<<<<< HEAD:x-pack/examples/gen_ai_streaming_response_example/public/components/streaming_response.tsx
               <EuiText size="m" color={euiTheme.colors.primaryText}>
                 <strong>
                   {i18n.translate(
@@ -167,6 +260,26 @@ export const StreamingResponse = ({
                 </strong>
               </EuiText>
             </EuiFlexItem>
+=======
+              <EuiFlexGroup direction="column" gutterSize="none" justifyContent="center">
+                <EuiFlexItem grow={false}>
+                  <EuiText size="m" color={theme.euiTheme.colors.primaryText}>
+                    <strong>{title}</strong>
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiText size="s" color={theme.euiTheme.colors.primaryText}>
+                    {i18n.translate('xpack.observability.coPilotChatPrompt.subtitle', {
+                      defaultMessage: 'Get helpful insights from our Elastic AI Assistant',
+                    })}
+                  </EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <TechnicalPreviewBadge />
+            </EuiFlexItem>
+>>>>>>> whats-new:x-pack/plugins/observability/public/components/co_pilot_prompt/co_pilot_prompt.tsx
           </EuiFlexGroup>
         }
         initialIsOpen={initialIsOpen}
@@ -174,7 +287,9 @@ export const StreamingResponse = ({
           setHasOpened(true);
         }}
       >
-        <EuiSpacer size="s" />
+        <EuiSpacer size="m" />
+        <EuiHorizontalRule margin="none" />
+        <EuiSpacer size="m" />
         {inner}
       </EuiAccordion>
     </EuiPanel>

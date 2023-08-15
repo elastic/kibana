@@ -96,8 +96,11 @@ export const RULES_MONITORING_TABLE = '[data-test-subj="rules-monitoring-table"]
 
 export const RULES_UPDATES_TABLE = '[data-test-subj="rules-upgrades-table"]';
 
+<<<<<<< HEAD
 export const ADD_ELASTIC_RULES_TABLE = '[data-test-subj="add-prebuilt-rules-table"]';
 
+=======
+>>>>>>> whats-new
 export const RULES_ROW = '.euiTableRow';
 
 export const SEVERITY = '[data-test-subj="severity"]';
@@ -173,6 +176,7 @@ export const RULE_EXECUTION_STATUS_BADGE = '[data-test-subj="ruleExecutionStatus
 export const EXECUTION_STATUS_FILTER_BUTTON = '[data-test-subj="executionStatusFilterButton"]';
 
 export const EXECUTION_STATUS_FILTER_OPTION = '[data-test-subj="executionStatusFilterOption"]';
+<<<<<<< HEAD
 
 export const getInstallSingleRuleButtonByRuleId = (ruleId: string) => {
   return `[data-test-subj="installSinglePrebuiltRuleButton-${ruleId}"]`;
@@ -186,3 +190,5 @@ export const NO_RULES_AVAILABLE_FOR_INSTALL_MESSSAGE =
   '[data-test-subj="noPrebuiltRulesAvailableForInstall"]';
 export const NO_RULES_AVAILABLE_FOR_UPGRADE_MESSSAGE =
   '[data-test-subj="noPrebuiltRulesAvailableForUpgrade"]';
+=======
+>>>>>>> whats-new

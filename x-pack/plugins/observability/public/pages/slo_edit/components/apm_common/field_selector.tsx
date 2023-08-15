@@ -7,7 +7,10 @@
 
 import { EuiComboBox, EuiComboBoxOptionOption, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+<<<<<<< HEAD
 import { ALL_VALUE } from '@kbn/slo-schema';
+=======
+>>>>>>> whats-new
 import { debounce } from 'lodash';
 import React, { ReactNode, useState } from 'react';
 import { Controller, FieldPath, useFormContext } from 'react-hook-form';

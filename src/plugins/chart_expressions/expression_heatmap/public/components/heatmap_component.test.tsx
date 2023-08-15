@@ -14,8 +14,11 @@ import {
   GeometryValue,
   XYChartSeriesIdentifier,
   Tooltip,
+<<<<<<< HEAD
   TooltipAction,
   TooltipValue,
+=======
+>>>>>>> whats-new
 } from '@elastic/charts';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { EmptyPlaceholder } from '@kbn/charts-plugin/public';

@@ -15,10 +15,15 @@ import {
   APP_SEARCH_PLUGIN,
   ENTERPRISE_SEARCH_CONTENT_PLUGIN,
   ENTERPRISE_SEARCH_OVERVIEW_PLUGIN,
+<<<<<<< HEAD
   ENTERPRISE_SEARCH_PRODUCT_NAME,
   ESRE_PLUGIN,
   SEARCH_EXPERIENCES_PLUGIN,
   SEARCH_PRODUCT_NAME,
+=======
+  ESRE_PLUGIN,
+  SEARCH_EXPERIENCES_PLUGIN,
+>>>>>>> whats-new
   VECTOR_SEARCH_PLUGIN,
   WORKPLACE_SEARCH_PLUGIN,
 } from '../../../../common/constants';
@@ -155,6 +160,7 @@ export const useSearchExperiencesBreadcrumbs = (breadcrumbs: Breadcrumbs = []) =
   useSearchBreadcrumbs([{ text: SEARCH_EXPERIENCES_PLUGIN.NAV_TITLE, path: '/' }, ...breadcrumbs]);
 
 export const useEnterpriseSearchApplicationsBreadcrumbs = (breadcrumbs: Breadcrumbs = []) =>
+<<<<<<< HEAD
   useSearchBreadcrumbs(breadcrumbs);
 
 export const useEsreBreadcrumbs = (breadcrumbs: Breadcrumbs = []) =>
@@ -162,3 +168,12 @@ export const useEsreBreadcrumbs = (breadcrumbs: Breadcrumbs = []) =>
 
 export const useVectorSearchBreadcrumbs = (breadcrumbs: Breadcrumbs = []) =>
   useSearchBreadcrumbs([{ text: VECTOR_SEARCH_PLUGIN.NAV_TITLE, path: '/' }, ...breadcrumbs]);
+=======
+  useEnterpriseSearchBreadcrumbs(breadcrumbs);
+
+export const useEsreBreadcrumbs = (breadcrumbs: Breadcrumbs = []) =>
+  useEnterpriseSearchBreadcrumbs([{ text: ESRE_PLUGIN.NAME, path: '/' }, ...breadcrumbs]);
+
+export const useVectorSearchBreadcrumbs = (breadcrumbs: Breadcrumbs = []) =>
+  useEnterpriseSearchBreadcrumbs([{ text: VECTOR_SEARCH_PLUGIN.NAME, path: '/' }, ...breadcrumbs]);
+>>>>>>> whats-new

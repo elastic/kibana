@@ -112,7 +112,13 @@ export const ContextualInsightProcessRow = ({ command }: { command: string }) =>
             <EuiFlexItem grow={false}>
               <ContextualInsight
                 title={explainProcessMessageTitle}
+<<<<<<< HEAD
                 messages={explainProcessMessages}
+=======
+                params={explainProcessParams}
+                promptId={CoPilotPromptId.InfraExplainProcess}
+                feedbackEnabled={true}
+>>>>>>> whats-new
               />
             </EuiFlexItem>
           </EuiFlexItem>

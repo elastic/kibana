@@ -135,7 +135,8 @@ describe(`Detections : Page Filters`, () => {
       resetFilters();
     });
 
-    it('should be able to delete Controls', () => {
+    // TODO https://github.com/elastic/kibana/issues/160980
+    it.skip('should be able to delete Controls', () => {
       waitForPageFilters();
       editFilterGroupControls();
       deleteFilterGroupControl(3);
@@ -333,6 +334,10 @@ describe(`Detections : Page Filters`, () => {
     afterEach(() => {
       resetFilters();
     });
+<<<<<<< HEAD
+=======
+
+>>>>>>> whats-new
     it('should recover from invalid kql Query result', () => {
       // do an invalid search
       //

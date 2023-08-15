@@ -11,8 +11,13 @@
     "dashboarding"
   ],
   "private": true,
+<<<<<<< HEAD
   "version": "8.10.0",
   "branch": "main",
+=======
+  "version": "8.9.0",
+  "branch": "8.9",
+>>>>>>> whats-new
   "types": "./kibana.d.ts",
   "tsdocMetadata": "./build/tsdoc-metadata.json",
   "build": {
@@ -92,9 +97,15 @@
     "@dnd-kit/core": "^3.1.1",
     "@dnd-kit/sortable": "^4.0.0",
     "@dnd-kit/utilities": "^2.0.0",
+<<<<<<< HEAD
     "@elastic/apm-rum": "^5.14.0",
     "@elastic/apm-rum-react": "^1.4.4",
     "@elastic/charts": "59.1.0",
+=======
+    "@elastic/apm-rum": "^5.12.0",
+    "@elastic/apm-rum-react": "^1.4.2",
+    "@elastic/charts": "59.0.0",
+>>>>>>> whats-new
     "@elastic/datemath": "5.0.3",
     "@elastic/elasticsearch": "npm:@elastic/elasticsearch@8.9.0",
     "@elastic/ems-client": "8.4.0",

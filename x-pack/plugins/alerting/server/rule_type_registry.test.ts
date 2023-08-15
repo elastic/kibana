@@ -707,8 +707,13 @@ describe('Create Lifecycle', () => {
             "defaultScheduleInterval": undefined,
             "doesSetRecoveryContext": false,
             "enabledInLicense": false,
+<<<<<<< HEAD
             "hasAlertsMappings": true,
             "hasFieldsForAAD": false,
+=======
+            "hasFieldsForAAD": false,
+            "hasGetSummarizedAlerts": false,
+>>>>>>> whats-new
             "id": "test",
             "isExportable": true,
             "minimumLicenseRequired": "basic",

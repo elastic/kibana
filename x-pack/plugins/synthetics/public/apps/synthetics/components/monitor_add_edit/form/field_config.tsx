@@ -525,7 +525,11 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
     fieldKey: AlertConfigKey.TLS_ENABLED,
     component: Switch,
     controlled: true,
+<<<<<<< HEAD
     props: ({ setValue, field, trigger }): EuiSwitchProps => ({
+=======
+    props: ({ setValue, field }): EuiSwitchProps => ({
+>>>>>>> whats-new
       id: 'syntheticsMonitorConfigIsTlsAlertEnabled',
       label: field?.value
         ? i18n.translate('xpack.synthetics.monitorConfig.edit.alertTlsEnabled.label', {

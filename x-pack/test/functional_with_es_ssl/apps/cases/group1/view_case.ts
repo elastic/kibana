@@ -7,7 +7,12 @@
 
 import expect from '@kbn/expect';
 import { v4 as uuidv4 } from 'uuid';
+<<<<<<< HEAD
 import { AttachmentType, CaseSeverity, CaseStatuses } from '@kbn/cases-plugin/common/types/domain';
+=======
+import { CaseStatuses } from '@kbn/cases-plugin/common';
+import { CaseSeverity } from '@kbn/cases-plugin/common/api';
+>>>>>>> whats-new
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
@@ -993,6 +998,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         expect(lastBreadcrumb).to.be(theCase.title);
       });
     });
+<<<<<<< HEAD
 
     describe('reporter', () => {
       createOneCaseBeforeDeleteAllAfter(getPageObject, getService);
@@ -1068,6 +1074,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         expect(testUserText).to.be('test user');
       });
     });
+=======
+>>>>>>> whats-new
   });
 };
 

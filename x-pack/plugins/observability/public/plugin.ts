@@ -59,7 +59,11 @@ import { RulesLocatorDefinition } from './locators/rules';
 import { RuleDetailsLocatorDefinition } from './locators/rule_details';
 import { SloDetailsLocatorDefinition } from './locators/slo_details';
 import { SloEditLocatorDefinition } from './locators/slo_edit';
+<<<<<<< HEAD
 import { observabilityAppId, observabilityFeatureId } from '../common';
+=======
+import { observabilityAppId, observabilityFeatureId, casesPath } from '../common';
+>>>>>>> whats-new
 import { registerDataHandler } from './context/has_data_context/data_handler';
 import {
   createObservabilityRuleTypeRegistry,
@@ -97,6 +101,15 @@ export interface ConfigSchema {
     };
   };
   compositeSlo: { enabled: boolean };
+<<<<<<< HEAD
+=======
+  aiAssistant?: {
+    enabled: boolean;
+    feedback: {
+      enabled: boolean;
+    };
+  };
+>>>>>>> whats-new
 }
 
 export type ObservabilityPublicSetup = ReturnType<Plugin['setup']>;
@@ -343,6 +356,15 @@ export class Plugin
       )
     );
 
+<<<<<<< HEAD
+=======
+    this.coPilotService = createCoPilotService({
+      enabled: !!config.aiAssistant?.enabled,
+      http: coreSetup.http,
+      trackingEnabled: !!config.aiAssistant?.feedback.enabled,
+    });
+
+>>>>>>> whats-new
     return {
       dashboard: { register: registerDataHandler },
       observabilityRuleTypeRegistry: this.observabilityRuleTypeRegistry,
@@ -351,6 +373,10 @@ export class Plugin
       ruleDetailsLocator,
       sloDetailsLocator,
       sloEditLocator,
+<<<<<<< HEAD
+=======
+      getCoPilotService: () => this.coPilotService!,
+>>>>>>> whats-new
     };
   }
 

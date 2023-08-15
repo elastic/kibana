@@ -40,6 +40,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     await PageObjects.timePicker.setDefaultAbsoluteRange();
   }
 
+<<<<<<< HEAD
   function assertMatchesExpectedData(state: DebugState) {
     expect(state.legend?.items.map(({ name }) => name).sort()).to.eql([
       'css',
@@ -50,6 +51,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     ]);
   }
 
+=======
+>>>>>>> whats-new
   describe('discover field visualize button', () => {
     before(async () => {
       await kibanaServer.uiSettings.replace(defaultSettings);

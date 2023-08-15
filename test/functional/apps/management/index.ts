@@ -21,10 +21,17 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       await esArchiver.unload('test/functional/fixtures/es_archiver/makelogs');
     });
 
+<<<<<<< HEAD
     loadTestFile(require.resolve('./data_views/_create_index_pattern_wizard'));
     loadTestFile(require.resolve('./data_views/_data_view_create_delete'));
     loadTestFile(require.resolve('./data_views/_index_pattern_results_sort'));
     loadTestFile(require.resolve('./data_views/_index_pattern_popularity'));
+=======
+    loadTestFile(require.resolve('./_create_index_pattern_wizard'));
+    loadTestFile(require.resolve('./_data_view_create_delete'));
+    loadTestFile(require.resolve('./_index_pattern_results_sort'));
+    loadTestFile(require.resolve('./_index_pattern_popularity'));
+>>>>>>> whats-new
     loadTestFile(require.resolve('./_kibana_settings'));
     loadTestFile(require.resolve('./data_views/_scripted_fields_preview'));
     loadTestFile(require.resolve('./_mgmt_import_saved_objects'));

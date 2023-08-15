@@ -10,7 +10,6 @@ import { EuiFlexGroup, EuiFlexItem, EuiBadge, EuiPopover, EuiButtonEmpty } from 
 // eslint-disable-next-line @kbn/eslint/module_migration
 import styled from 'styled-components';
 
-import { QuickPrompt } from '../../..';
 import * as i18n from './translations';
 import { useAssistantContext } from '../../assistant_context';
 import { QUICK_PROMPTS_TAB } from '../settings/assistant_settings';
@@ -23,7 +22,10 @@ const COUNT_BEFORE_OVERFLOW = 5;
 interface QuickPromptsProps {
   setInput: (input: string) => void;
   setIsSettingsModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
+<<<<<<< HEAD
   trackPrompt: (prompt: string) => void;
+=======
+>>>>>>> whats-new
 }
 
 /**
@@ -32,7 +34,11 @@ interface QuickPromptsProps {
  * and localstorage for storing new and edited prompts.
  */
 export const QuickPrompts: React.FC<QuickPromptsProps> = React.memo(
+<<<<<<< HEAD
   ({ setInput, setIsSettingsModalVisible, trackPrompt }) => {
+=======
+  ({ setInput, setIsSettingsModalVisible }) => {
+>>>>>>> whats-new
     const { allQuickPrompts, promptContexts, setSelectedSettingsTab } = useAssistantContext();
 
     const contextFilteredQuickPrompts = useMemo(() => {
@@ -57,6 +63,7 @@ export const QuickPrompts: React.FC<QuickPromptsProps> = React.memo(
     );
     const closeOverflowPopover = useCallback(() => setIsOverflowPopoverOpen(false), []);
 
+<<<<<<< HEAD
     const onClickAddQuickPrompt = useCallback(
       (badge: QuickPrompt) => {
         setInput(badge.prompt);
@@ -75,6 +82,14 @@ export const QuickPrompts: React.FC<QuickPromptsProps> = React.memo(
         closeOverflowPopover();
       },
       [closeOverflowPopover, onClickAddQuickPrompt]
+=======
+    const onClickOverflowQuickPrompt = useCallback(
+      (prompt: string) => {
+        setInput(prompt);
+        closeOverflowPopover();
+      },
+      [closeOverflowPopover, setInput]
+>>>>>>> whats-new
     );
 
     const showQuickPromptSettings = useCallback(() => {
@@ -88,7 +103,11 @@ export const QuickPrompts: React.FC<QuickPromptsProps> = React.memo(
           <EuiFlexItem key={index} grow={false}>
             <EuiBadge
               color={badge.color}
+<<<<<<< HEAD
               onClick={() => onClickAddQuickPrompt(badge)}
+=======
+              onClick={() => setInput(badge.prompt)}
+>>>>>>> whats-new
               onClickAriaLabel={badge.title}
             >
               {badge.title}
@@ -115,7 +134,11 @@ export const QuickPrompts: React.FC<QuickPromptsProps> = React.memo(
                   <EuiFlexItem key={index} grow={false}>
                     <EuiBadge
                       color={badge.color}
+<<<<<<< HEAD
                       onClick={() => onClickOverflowQuickPrompt(badge)}
+=======
+                      onClick={() => onClickOverflowQuickPrompt(badge.prompt)}
+>>>>>>> whats-new
                       onClickAriaLabel={badge.title}
                     >
                       {badge.title}
@@ -127,12 +150,16 @@ export const QuickPrompts: React.FC<QuickPromptsProps> = React.memo(
           </EuiFlexItem>
         )}
         <EuiFlexItem grow={false}>
+<<<<<<< HEAD
           <EuiButtonEmpty
             data-test-subj="addQuickPrompt"
             onClick={showQuickPromptSettings}
             iconType="plus"
             size="xs"
           >
+=======
+          <EuiButtonEmpty onClick={showQuickPromptSettings} iconType="plus" size="xs">
+>>>>>>> whats-new
             {i18n.ADD_QUICK_PROMPT}
           </EuiButtonEmpty>
         </EuiFlexItem>

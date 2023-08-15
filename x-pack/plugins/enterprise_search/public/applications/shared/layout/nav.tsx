@@ -20,6 +20,10 @@ import {
   ENTERPRISE_SEARCH_CONTENT_PLUGIN,
   ENTERPRISE_SEARCH_OVERVIEW_PLUGIN,
   ESRE_PLUGIN,
+<<<<<<< HEAD
+=======
+  SEARCH_EXPERIENCES_PLUGIN,
+>>>>>>> whats-new
   VECTOR_SEARCH_PLUGIN,
   WORKPLACE_SEARCH_PLUGIN,
 } from '../../../../common/constants';
@@ -72,6 +76,27 @@ export const useEnterpriseSearchNav = () => {
             to: ESRE_PLUGIN.URL,
           }),
         },
+<<<<<<< HEAD
+=======
+        {
+          id: 'vectorSearch',
+          name: VECTOR_SEARCH_PLUGIN.NAME,
+          ...generateNavLink({
+            shouldNotCreateHref: true,
+            to: VECTOR_SEARCH_PLUGIN.URL,
+          }),
+        },
+        {
+          id: 'searchExperiences',
+          name: i18n.translate('xpack.enterpriseSearch.nav.searchExperiencesTitle', {
+            defaultMessage: 'Search Experiences',
+          }),
+          ...generateNavLink({
+            shouldNotCreateHref: true,
+            to: SEARCH_EXPERIENCES_PLUGIN.URL,
+          }),
+        },
+>>>>>>> whats-new
       ],
     },
     {
@@ -211,6 +236,7 @@ export const useEnterpriseSearchApplicationNav = (
           }),
           items: [
             {
+<<<<<<< HEAD
               id: 'enterpriseSearchApplicationDocsExplorer',
               name: i18n.translate(
                 'xpack.enterpriseSearch.nav.searchApplication.docsExplorerTitle',
@@ -221,6 +247,15 @@ export const useEnterpriseSearchApplicationNav = (
               ...generateNavLink({
                 shouldNotCreateHref: true,
                 to: `${searchApplicationPath}/${SearchApplicationViewTabs.DOCS_EXPLORER}`,
+=======
+              id: 'enterpriseSearchApplicationPreview',
+              name: i18n.translate('xpack.enterpriseSearch.nav.searchApplication.previewTitle', {
+                defaultMessage: 'Search Preview',
+              }),
+              ...generateNavLink({
+                shouldNotCreateHref: true,
+                to: `${searchApplicationPath}/${SearchApplicationViewTabs.PREVIEW}`,
+>>>>>>> whats-new
               }),
             },
             {

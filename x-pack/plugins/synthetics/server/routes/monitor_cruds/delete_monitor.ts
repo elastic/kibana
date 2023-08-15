@@ -6,8 +6,11 @@
  */
 import { schema } from '@kbn/config-schema';
 import { SavedObjectsClientContract, SavedObjectsErrorHelpers } from '@kbn/core/server';
+<<<<<<< HEAD
 import { SyntheticsServerSetup } from '../../types';
 import { RouteContext, SyntheticsRestApiRouteFactory } from '../types';
+=======
+>>>>>>> whats-new
 import { syntheticsMonitorType } from '../../../common/types/saved_objects';
 import {
   ConfigKey,
@@ -68,7 +71,11 @@ export const deleteMonitor = async ({
   routeContext: RouteContext;
   monitorId: string;
 }) => {
+<<<<<<< HEAD
   const { spaceId, savedObjectsClient, server, syntheticsMonitorClient } = routeContext;
+=======
+  const { spaceId, savedObjectsClient, server, syntheticsMonitorClient, request } = routeContext;
+>>>>>>> whats-new
   const { logger, telemetry, stackVersion } = server;
 
   const { monitor, monitorWithSecret } = await getMonitorToDelete(
@@ -138,7 +145,11 @@ export const deleteMonitor = async ({
 const getMonitorToDelete = async (
   monitorId: string,
   soClient: SavedObjectsClientContract,
+<<<<<<< HEAD
   server: SyntheticsServerSetup,
+=======
+  server: UptimeServerSetup,
+>>>>>>> whats-new
   spaceId: string
 ) => {
   const encryptedSOClient = server.encryptedSavedObjects.getClient();

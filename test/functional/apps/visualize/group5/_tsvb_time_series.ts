@@ -11,9 +11,22 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
+<<<<<<< HEAD
   const { visualize, visualBuilder, timeToVisualize, dashboard, common, visChart } = getPageObjects(
     ['visualBuilder', 'visualize', 'timeToVisualize', 'dashboard', 'header', 'common', 'visChart']
   );
+=======
+  const { visualize, visualBuilder, timeToVisualize, dashboard, header, common, visChart } =
+    getPageObjects([
+      'visualBuilder',
+      'visualize',
+      'timeToVisualize',
+      'dashboard',
+      'header',
+      'common',
+      'visChart',
+    ]);
+>>>>>>> whats-new
   const security = getService('security');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
@@ -219,11 +232,22 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             const expectedFilterPills = ['0, win 7'];
             await visualBuilder.setMetricsGroupByTerms('bytes');
             await visChart.waitForVisualizationRenderingStabilized();
+<<<<<<< HEAD
             await visualBuilder.setAnotherGroupByTermsField('machine.os.raw');
             await visChart.waitForVisualizationRenderingStabilized();
             await visualBuilder.clickSeriesOption();
             await visualBuilder.setChartType('Bar');
             await visChart.waitForVisualizationRenderingStabilized();
+=======
+            await header.waitUntilLoadingHasFinished();
+            await visualBuilder.setAnotherGroupByTermsField('machine.os.raw');
+            await visChart.waitForVisualizationRenderingStabilized();
+            await header.waitUntilLoadingHasFinished();
+            await visualBuilder.clickSeriesOption();
+            await visualBuilder.setChartType('Bar');
+            await visChart.waitForVisualizationRenderingStabilized();
+            await header.waitUntilLoadingHasFinished();
+>>>>>>> whats-new
             await visualBuilder.clickPanelOptions('timeSeries');
             await visualBuilder.setIntervalValue('1w');
 

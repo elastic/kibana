@@ -18,7 +18,10 @@ get:
         application/json:
           schema:
             type: array
+<<<<<<< HEAD
             maxItems: 10000
+=======
+>>>>>>> whats-new
             items: 
               type: object
               properties:

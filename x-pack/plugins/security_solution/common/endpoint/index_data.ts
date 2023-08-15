@@ -70,8 +70,12 @@ export async function indexHostsAndAlerts(
   DocGenerator: typeof EndpointDocGenerator = EndpointDocGenerator,
   withResponseActions = true,
   numResponseActions?: number,
+<<<<<<< HEAD
   alertIds?: string[],
   logger_?: ToolingLog
+=======
+  alertIds?: string[]
+>>>>>>> whats-new
 ): Promise<IndexedHostsAndAlertsResponse> {
   const random = seedrandom(seed);
   const logger = logger_ ?? new ToolingLog({ level: 'info', writeTo: process.stdout });

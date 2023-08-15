@@ -28,7 +28,11 @@ export const useFindCspRuleTemplates = (
     () => {
       return http.get<GetCspRuleTemplateResponse>(FIND_CSP_RULE_TEMPLATE_ROUTE_PATH, {
         query: { packagePolicyId, page, perPage, search },
+<<<<<<< HEAD
         version: FIND_CSP_RULE_TEMPLATE_API_CURRENT_VERSION,
+=======
+        version: '1',
+>>>>>>> whats-new
       });
     }
   );

@@ -100,6 +100,7 @@ const IndexPropertiesComponent: React.FC<Props> = ({
   pattern,
   patternRollup,
   theme,
+  baseTheme,
   updatePatternRollup,
 }) => {
   const { error: mappingsError, indexes, loading: loadingMappings } = useMappings(indexName);

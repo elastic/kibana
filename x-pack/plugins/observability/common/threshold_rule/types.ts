@@ -208,7 +208,10 @@ export interface ThresholdParams {
   alertOnNoData?: boolean;
   alertOnGroupDisappear?: boolean;
   searchConfiguration: SerializedSearchSourceFields;
+<<<<<<< HEAD
   groupBy?: string[];
+=======
+>>>>>>> whats-new
 }
 
 interface BaseMetricExpressionParams {

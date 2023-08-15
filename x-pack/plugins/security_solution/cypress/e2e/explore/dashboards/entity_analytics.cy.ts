@@ -326,8 +326,15 @@ describe('Entity Analytics Dashboard', () => {
           cy.get(ANOMALIES_TABLE_COUNT_COLUMN).should('include.text', '0');
         });
 
+<<<<<<< HEAD
       // Checks pagination
       cy.get(ANOMALIES_TABLE_ROWS, { timeout: 120000 }).should('have.length', 10);
+=======
+    // TODO https://github.com/elastic/kibana/issues/160980
+    it.skip('renders table with pagination', () => {
+      cy.get(ANOMALIES_TABLE).should('be.visible');
+      cy.get(ANOMALIES_TABLE_ROWS).should('have.length', 10);
+>>>>>>> whats-new
 
       // navigates to next page
       navigateToNextPage();

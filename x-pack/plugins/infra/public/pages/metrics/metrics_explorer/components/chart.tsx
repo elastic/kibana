@@ -164,7 +164,11 @@ export const MetricsExplorerChart = ({
               domain={domain}
             />
             <Tooltip {...tooltipProps} />
+<<<<<<< HEAD
             <Settings onBrushEnd={handleTimeChange} baseTheme={chartTheme.baseTheme} />
+=======
+            <Settings onBrushEnd={handleTimeChange} theme={getChartTheme(isDarkMode)} />
+>>>>>>> whats-new
           </Chart>
         ) : options.metrics.length > 0 ? (
           <MetricsExplorerEmptyChart />

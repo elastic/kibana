@@ -8,6 +8,7 @@
 import { RULES_ADD_PATH, RULES_UPDATES } from '../../common/constants';
 import {
   ADD_ELASTIC_RULES_BTN,
+<<<<<<< HEAD
   ADD_ELASTIC_RULES_TABLE,
   getInstallSingleRuleButtonByRuleId,
   getUpgradeSingleRuleButtonByRuleId,
@@ -23,6 +24,13 @@ import {
   UPGRADE_SELECTED_RULES_BUTTON,
 } from '../screens/alerts_detection_rules';
 import { BACK_TO_RULES_TABLE } from '../screens/rule_details';
+=======
+  RULES_ROW,
+  RULES_UPDATES_TAB,
+  RULES_UPDATES_TABLE,
+  UPGRADE_ALL_RULES_BUTTON,
+} from '../screens/alerts_detection_rules';
+>>>>>>> whats-new
 import type { SAMPLE_PREBUILT_RULE } from './api_calls/prebuilt_rules';
 
 export const addElasticRulesButtonClick = () => {
@@ -35,6 +43,7 @@ export const ruleUpdatesTabClick = () => {
   cy.location('pathname').should('include', RULES_UPDATES);
 };
 
+<<<<<<< HEAD
 interface RuleInstallUpgradeAssertionPayload {
   rules: Array<typeof SAMPLE_PREBUILT_RULE>;
   didRequestFail?: boolean;
@@ -221,4 +230,11 @@ const interceptUpgradeRequestToFail = (
       },
     }).as('updatePrebuiltRules');
   }
+=======
+export const assertRuleUpgradeAvailableAndUpgradeAll = (rule: typeof SAMPLE_PREBUILT_RULE) => {
+  cy.get(RULES_UPDATES_TABLE).find(RULES_ROW).should('have.length', 1);
+  cy.get(RULES_UPDATES_TABLE).contains(rule['security-rule'].name);
+  cy.get(UPGRADE_ALL_RULES_BUTTON).click();
+  cy.wait('@updatePrebuiltRules');
+>>>>>>> whats-new
 };

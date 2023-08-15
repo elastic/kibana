@@ -8,7 +8,10 @@
 import { Adapters } from '@kbn/inspector-plugin/common';
 import type { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
 import { BehaviorSubject, filter, firstValueFrom, map, merge, scan } from 'rxjs';
+<<<<<<< HEAD
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
+=======
+>>>>>>> whats-new
 import { isEqual } from 'lodash';
 import type { DiscoverAppState } from '../services/discover_app_state_container';
 import { updateVolatileSearchSource } from './update_search_source';

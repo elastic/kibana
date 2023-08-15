@@ -379,6 +379,10 @@ export class RuleTypeRegistry {
             defaultScheduleInterval,
             doesSetRecoveryContext,
             alerts,
+<<<<<<< HEAD
+=======
+            getSummarizedAlerts,
+>>>>>>> whats-new
             fieldsForAAD,
           },
         ]: [string, UntypedNormalizedRuleType]) => ({
@@ -399,8 +403,13 @@ export class RuleTypeRegistry {
             name,
             minimumLicenseRequired
           ).isValid,
+<<<<<<< HEAD
           hasFieldsForAAD: Boolean(fieldsForAAD),
           hasAlertsMappings: !!alerts,
+=======
+          hasGetSummarizedAlerts: !!getSummarizedAlerts,
+          hasFieldsForAAD: Boolean(fieldsForAAD),
+>>>>>>> whats-new
           ...(alerts ? { alerts } : {}),
         })
       )

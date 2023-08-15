@@ -25,7 +25,10 @@ import { createError } from '../../utils/create_error';
 import { elasticsearchErrorHandler } from '../../utils/elasticsearch_error_handler';
 import {
   isInvalidSearchApplicationNameException,
+<<<<<<< HEAD
   isMissingAliasException,
+=======
+>>>>>>> whats-new
   isNotFoundException,
   isVersionConflictEngineException,
 } from '../../utils/identify_exceptions';

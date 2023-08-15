@@ -402,8 +402,13 @@ export default function ({ getService }: FtrProviderContext) {
         .send(newMonitor)
         .expect(200);
 
+<<<<<<< HEAD
       const savedMonitor = response.body;
       const monitorId = savedMonitor[ConfigKey.CONFIG_ID];
+=======
+      const { id, attributes: savedMonitor } = response.body;
+      monitorId = id;
+>>>>>>> whats-new
       const toUpdate = {
         ...savedMonitor,
         urls: 'https://google.com',

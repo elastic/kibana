@@ -6,7 +6,10 @@
  */
 
 import { generateRandomStringName } from '@kbn/osquery-plugin/cypress/tasks/integrations';
+<<<<<<< HEAD
 import { disableExpandableFlyoutAdvancedSettings } from '../../../tasks/common';
+=======
+>>>>>>> whats-new
 import { APP_ALERTS_PATH } from '../../../../../../common/constants';
 import { closeAllToasts } from '../../../tasks/toasts';
 import { indexEndpointHosts } from '../../../tasks/index_endpoint_hosts';
@@ -53,7 +56,10 @@ describe('Results', () => {
   describe('see results when has RBAC', () => {
     before(() => {
       login(ROLE.endpoint_response_actions_access);
+<<<<<<< HEAD
       disableExpandableFlyoutAdvancedSettings();
+=======
+>>>>>>> whats-new
     });
 
     it('see endpoint action', () => {
@@ -69,7 +75,10 @@ describe('Results', () => {
   describe('do not see results results when does not have RBAC', () => {
     before(() => {
       login(ROLE.endpoint_response_actions_no_access);
+<<<<<<< HEAD
       disableExpandableFlyoutAdvancedSettings();
+=======
+>>>>>>> whats-new
     });
 
     it('show the permission denied callout', () => {

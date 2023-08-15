@@ -37,6 +37,7 @@ export const CertType = t.intersection([
     configId: t.string,
   }),
   t.partial({
+    configId: t.string,
     not_after: t.string,
     not_before: t.string,
     common_name: t.string,

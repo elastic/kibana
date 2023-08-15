@@ -36,6 +36,10 @@ export function QueryBuilder({
     useKibana().services;
 
   const { control, getFieldState } = useFormContext<CreateSLOForm>();
+<<<<<<< HEAD
+=======
+
+>>>>>>> whats-new
   const { dataView } = useCreateDataView({ indexPatternString });
 
   return (

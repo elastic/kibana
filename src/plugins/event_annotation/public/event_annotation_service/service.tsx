@@ -11,9 +11,19 @@ import { partition } from 'lodash';
 import { queryToAst } from '@kbn/data-plugin/common';
 import { ExpressionAstExpression } from '@kbn/expressions-plugin/common';
 import type { CoreStart, SavedObjectReference } from '@kbn/core/public';
+<<<<<<< HEAD
 import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
 import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import { type EventAnnotationServiceType } from '@kbn/event-annotation-components';
+=======
+import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
+import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
+import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
+import { defaultAnnotationLabel } from '../../common/manual_event_annotation';
+import { EventAnnotationGroupContent } from '../../common/types';
+import { EventAnnotationConfig, EventAnnotationGroupConfig } from '../../common';
+import { EventAnnotationServiceType } from './types';
+>>>>>>> whats-new
 import {
   defaultAnnotationColor,
   defaultAnnotationRangeColor,

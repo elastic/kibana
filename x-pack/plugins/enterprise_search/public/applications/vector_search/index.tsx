@@ -6,8 +6,11 @@
  */
 
 import React from 'react';
+<<<<<<< HEAD
 // switch is not available on shared-ux-router
 // eslint-disable-next-line no-restricted-imports
+=======
+>>>>>>> whats-new
 import { Switch } from 'react-router-dom';
 
 import { Route } from '@kbn/shared-ux-router';

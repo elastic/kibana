@@ -7,7 +7,11 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import { DETECTION_ENGINE_ALERT_TAGS_URL } from '../../../../common/constants';
+<<<<<<< HEAD
 import type { AlertTags } from '../../../../common/api/detection_engine';
+=======
+import type { AlertTags } from '../../../../common/detection_engine/schemas/common';
+>>>>>>> whats-new
 import { KibanaServices } from '../../lib/kibana';
 
 export const setAlertTags = async ({

@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+<<<<<<< HEAD:packages/kbn-event-annotation-components/types.ts
 import { ExpressionAstExpression } from '@kbn/expressions-plugin/common';
 import { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
 import type {
@@ -13,6 +14,12 @@ import type {
   EventAnnotationGroupConfig,
   EventAnnotationGroupContent,
 } from '@kbn/event-annotation-common';
+=======
+import { ExpressionAstExpression } from '@kbn/expressions-plugin/common/ast';
+import type { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
+import { EventAnnotationGroupContent } from '../../common/types';
+import { EventAnnotationConfig, EventAnnotationGroupConfig } from '../../common';
+>>>>>>> whats-new:src/plugins/event_annotation/public/event_annotation_service/types.ts
 
 export interface EventAnnotationServiceType {
   loadAnnotationGroup: (savedObjectId: string) => Promise<EventAnnotationGroupConfig>;

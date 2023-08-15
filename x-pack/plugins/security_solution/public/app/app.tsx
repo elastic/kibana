@@ -83,9 +83,12 @@ const StartAppComponent: FC<StartAppComponent> = ({
   const [darkMode] = useUiSetting$<boolean>(DEFAULT_DARK_MODE);
 
   const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = useKibana().services.docLinks;
+<<<<<<< HEAD
 
   const assistantTelemetry = useAssistantTelemetry();
 
+=======
+>>>>>>> whats-new
   return (
     <EuiErrorBoundary>
       <i18n.Context>

@@ -26,6 +26,10 @@
       "share",
       "unifiedSearch",
       "dataViews",
+<<<<<<< HEAD
+=======
+      "unifiedFieldList",
+>>>>>>> whats-new
       "lens",
       "maps",
       "uiActions",

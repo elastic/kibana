@@ -27,7 +27,11 @@ export const getMessageFromRawResponse = (rawResponse: string): Message => {
   }
 };
 
+<<<<<<< HEAD
 export const getBlockBotConversation = (
+=======
+export const getWelcomeConversation = (
+>>>>>>> whats-new
   conversation: Conversation,
   isAssistantEnabled: boolean
 ): Conversation => {

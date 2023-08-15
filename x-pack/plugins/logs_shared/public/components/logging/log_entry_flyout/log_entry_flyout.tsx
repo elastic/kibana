@@ -250,7 +250,13 @@ export const LogEntryFlyout = ({
               <EuiFlexItem grow={false}>
                 <ContextualInsight
                   title={explainLogMessageTitle}
+<<<<<<< HEAD:x-pack/plugins/logs_shared/public/components/logging/log_entry_flyout/log_entry_flyout.tsx
                   messages={explainLogMessageMessages}
+=======
+                  params={explainLogMessageParams}
+                  promptId={CoPilotPromptId.LogsExplainMessage}
+                  feedbackEnabled={false}
+>>>>>>> whats-new:x-pack/plugins/infra/public/components/logging/log_entry_flyout/log_entry_flyout.tsx
                 />
               </EuiFlexItem>
             ) : null}
@@ -258,7 +264,13 @@ export const LogEntryFlyout = ({
               <EuiFlexItem grow={false}>
                 <ContextualInsight
                   title={similarLogMessagesTitle}
+<<<<<<< HEAD:x-pack/plugins/logs_shared/public/components/logging/log_entry_flyout/log_entry_flyout.tsx
                   messages={similarLogMessageMessages}
+=======
+                  params={similarLogMessageParams}
+                  promptId={CoPilotPromptId.LogsFindSimilar}
+                  feedbackEnabled={false}
+>>>>>>> whats-new:x-pack/plugins/infra/public/components/logging/log_entry_flyout/log_entry_flyout.tsx
                 />
               </EuiFlexItem>
             ) : null}

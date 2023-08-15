@@ -47,7 +47,11 @@ export const deleteDataView = async ({
   id: string;
 }) => {
   const { body } = await supertest
+<<<<<<< HEAD
     .post(`/api/content_management/rpc/delete`)
+=======
+    .delete(`/api/content_management/rpc/create`)
+>>>>>>> whats-new
     .set('kbn-xsrf', 'foo')
     .send({
       contentTypeId: 'index-pattern',

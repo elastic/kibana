@@ -1,5 +1,10 @@
 [[storage-explorer]]
 === Storage Explorer
+<<<<<<< HEAD
+=======
+
+beta::[]
+>>>>>>> whats-new
 
 Analyze your APM data and manage costs with **storage explorer**.
 For example, analyze the storage footprint of each of your services to see which are producing

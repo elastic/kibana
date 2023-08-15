@@ -16,11 +16,18 @@ export interface Props extends Pick<MetricWTrend, 'title' | 'color' | 'extra' | 
   value: number;
   toolTip: React.ReactNode;
   style?: CSSProperties;
+<<<<<<< HEAD
+=======
+  ['data-test-subj']?: string;
+>>>>>>> whats-new
 }
 
 export const MetricChartWrapper = React.memo(
   ({ color, extra, id, loading, value, subtitle, title, toolTip, style, ...props }: Props) => {
+<<<<<<< HEAD
     const euiTheme = useEuiTheme();
+=======
+>>>>>>> whats-new
     const loadedOnce = useRef(false);
 
     useEffect(() => {
@@ -42,16 +49,22 @@ export const MetricChartWrapper = React.memo(
     };
 
     return (
+<<<<<<< HEAD
       <EuiPanel {...props} hasShadow={false} paddingSize="none" data-test-subj={id}>
         {loading && !loadedOnce.current ? (
           <ChartPlaceholder style={style} />
         ) : (
+=======
+      <EuiPanel hasShadow={false} paddingSize="none" {...props}>
+        <ChartLoader loading={loading} loadedOnce={loadedOnce.current} style={style}>
+>>>>>>> whats-new
           <EuiToolTip
             className="eui-fullWidth"
             delay="regular"
             content={toolTip}
             anchorClassName="eui-fullWidth"
           >
+<<<<<<< HEAD
             <Chart
               size={style}
               css={css`
@@ -67,5 +80,21 @@ export const MetricChartWrapper = React.memo(
         )}
       </EuiPanel>
     );
+=======
+            <KPIChartStyled size={style}>
+              <Metric id={id} data={[[metricsData]]} />
+            </KPIChartStyled>
+          </EuiToolTip>
+        </ChartLoader>
+      </EuiPanel>
+    );
+  }
+);
+
+const KPIChartStyled = styled(Chart)`
+  .echMetric {
+    border-radius: ${(p) => p.theme.eui.euiBorderRadius};
+    pointer-events: none;
+>>>>>>> whats-new
   }
 );

@@ -330,7 +330,11 @@ docker.elastic.co/observability/profiling-agent:${hostAgentVersion} /root/pf-hos
               iconType="gear"
               fill
               href={`${core.http.basePath.prepend(
+<<<<<<< HEAD
                 `/app/integrations/detail/profiler_agent-${data?.profilerAgent.version}/overview`
+=======
+                '/app/integrations/detail/profiler_agent-8.8.0-preview/overview?prerelease=true'
+>>>>>>> whats-new
               )}`}
             >
               {i18n.translate('xpack.profiling.tabs.elasticAgentIntegrarion.step2.button', {

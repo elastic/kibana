@@ -5,6 +5,10 @@
  * 2.0.
  */
 import expect from 'expect';
+<<<<<<< HEAD
+=======
+import { ALL_SAVED_OBJECT_INDICES } from '@kbn/core-saved-objects-server';
+>>>>>>> whats-new
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { deleteAllRules, getPrebuiltRulesAndTimelinesStatus } from '../../utils';
 import { deleteAllPrebuiltRuleAssets } from '../../utils/prebuilt_rules/delete_all_prebuilt_rule_assets';
@@ -35,7 +39,12 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(statusBeforePackageInstallation.rules_not_updated).toBe(0);
 
       // Install the package with 15000 prebuilt historical version of rules rules and 750 unique rules
+<<<<<<< HEAD
       await installPrebuiltRulesAndTimelines(es, supertest);
+=======
+      await installPrebuiltRulesAndTimelines(supertest);
+      await es.indices.refresh({ index: ALL_SAVED_OBJECT_INDICES });
+>>>>>>> whats-new
 
       // Verify that status is updated after package installation
       const statusAfterPackageInstallation = await getPrebuiltRulesAndTimelinesStatus(supertest);

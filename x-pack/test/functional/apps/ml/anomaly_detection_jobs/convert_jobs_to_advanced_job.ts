@@ -5,7 +5,11 @@
  * 2.0.
  */
 
+<<<<<<< HEAD
 import { CATEGORY_EXAMPLES_VALIDATION_STATUS } from '@kbn/ml-category-validator';
+=======
+import { CATEGORY_EXAMPLES_VALIDATION_STATUS } from '@kbn/ml-plugin/common/constants/categorization_job';
+>>>>>>> whats-new
 import type { PickFieldsConfig, DatafeedConfig, Detector } from './types';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 

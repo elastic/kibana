@@ -408,6 +408,14 @@
     "controls.optionsList.popover.invalidSelectionsSectionTitle": "已忽略{invalidSelectionCount, plural, other {选择的内容}}",
     "controls.optionsList.popover.suggestionsAriaLabel": "{fieldName} 的可用{optionCount, plural, other {选项}}",
     "controls.rangeSlider.errors.fieldNotFound": "找不到字段：{fieldName}",
+<<<<<<< HEAD
+=======
+    "controls.controlGroup.emptyState.addControlButtonTitle": "添加控件",
+    "controls.controlGroup.emptyState.badgeText": "新建",
+    "controls.controlGroup.emptyState.callToAction": "使用控件可以更有效地筛选数据，允许您仅显示要浏览的数据。",
+    "controls.controlGroup.emptyState.dismissButton": "关闭",
+    "controls.controlGroup.emptyState.twoLineLoadingTitle": "...",
+>>>>>>> whats-new
     "controls.controlGroup.floatingActions.clearTitle": "清除",
     "controls.controlGroup.floatingActions.editTitle": "编辑",
     "controls.controlGroup.floatingActions.removeTitle": "删除",
@@ -1039,6 +1047,10 @@
     "core.ui.overlays.banner.attentionTitle": "注意",
     "core.ui.overlays.banner.closeButtonLabel": "关闭",
     "core.ui.primaryNav.addData": "添加集成",
+<<<<<<< HEAD
+=======
+    "core.ui.primaryNav.cloud.linkToDeployments": "我的部署",
+>>>>>>> whats-new
     "core.ui.primaryNav.goToHome.ariaLabel": "前往主页",
     "core.ui.primaryNav.pinnedLinksAriaLabel": "置顶链接",
     "core.ui.primaryNav.screenReaderLabel": "主分片",
@@ -1193,6 +1205,10 @@
     "dashboard.emptyScreen.addFromLibrary": "从库中添加",
     "dashboard.emptyScreen.createVisualization": "创建可视化",
     "dashboard.emptyScreen.editDashboard": "编辑仪表板",
+<<<<<<< HEAD
+=======
+    "dashboard.emptyScreen.editModeSubtitle": "创建数据可视化，或从 Visualize 库中添加一个可视化。",
+>>>>>>> whats-new
     "dashboard.emptyScreen.editModeTitle": "此仪表板是空的。让我们来填充它！",
     "dashboard.emptyScreen.noPermissionsSubtitle": "您还需要其他权限，才能编辑此仪表板。",
     "dashboard.emptyScreen.noPermissionsTitle": "此仪表板是空的。",
@@ -4990,6 +5006,11 @@
     "savedObjectsManagement.view.indexPatternDoesNotExistErrorMessage": "与此对象关联的数据视图不再存在。",
     "savedObjectsManagement.view.savedObjectProblemErrorMessage": "此已保存对象有问题",
     "savedObjectsManagement.view.savedSearchDoesNotExistErrorMessage": "与此对象关联的已保存搜索已不存在。",
+<<<<<<< HEAD
+=======
+    "savedSearch.legacyURLConflict.errorMessage": "此搜索具有与旧版别名相同的 URL。请禁用别名以解决此错误：{json}",
+    "savedSearch.contentManagementType": "已保存搜索",
+>>>>>>> whats-new
     "securitySolutionPackages.dataTable.eventsTab.unit": "{totalCount, plural, =1 {告警} other {告警}}",
     "securitySolutionPackages.dataTable.unit": "{totalCount, plural, =1 {告警} other {告警}}",
     "securitySolutionPackages.ecsDataQualityDashboard.allTab.allFieldsTableTitle": "所有字段 - {indexName}",
@@ -7096,6 +7117,10 @@
     "visualizationUiComponents.colorPicker.seriesColor.label": "系列颜色",
     "visualizationUiComponents.colorPicker.tooltip.auto": "Lens 自动为您选取颜色，除非您指定定制颜色。",
     "visualizationUiComponents.colorPicker.tooltip.custom": "清除定制颜色以返回到“自动”模式。",
+<<<<<<< HEAD
+=======
+    "visualizationUiComponents.colorPicker.tooltip.disabled": "图层包括“细分方式”字段时，无法将定制颜色应用于各个序列。",
+>>>>>>> whats-new
     "visualizationUiComponents.configure.invalidConfigTooltip": "配置无效。",
     "visualizationUiComponents.configure.invalidConfigTooltipClick": "单击了解更多详情。",
     "visualizationUiComponents.customBucketContainer.dragToReorder": "拖动以重新排序",
@@ -7155,11 +7180,19 @@
     "xpack.aiops.categorizeFlyout.title": "{name} 的模式分析",
     "xpack.aiops.changePointDetection.cardinalityWarningMessage": "“{splitField}”字段基数为 {cardinality}，这超出了 {cardinalityLimit} 的限制。仅分析前 {cardinalityLimit} 个分区（按文档计数排序）。",
     "xpack.aiops.dataViewNotBasedOnTimeSeriesWarning.title": "数据视图“{dataViewTitle}”并非基于时间序列。",
+<<<<<<< HEAD
     "xpack.aiops.logRateAnalysis.loadingState.identifiedFieldCandidates": "已识别 {fieldCandidatesCount, plural, other {# 个字段候选项}}。",
     "xpack.aiops.logRateAnalysis.loadingState.identifiedFieldValuePairs": "已识别 {fieldValuePairsCount, plural, other {# 个重要的字段/值对}}。",
     "xpack.aiops.logRateAnalysis.resultsTableGroups.groupColumnTooltip": "显示多达 {maxItemCount} 个按唯一性和文档计数排序的组项目。展开行以查看所有字段/值对。",
     "xpack.aiops.logRateAnalysis.resultsTableGroups.groupItemsInfo": "正在显示 {valuesBadges} 个（共 {count} 个）项目。",
     "xpack.aiops.logRateAnalysis.resultsTableGroups.groupUniqueItemsInfo": "{count, plural, other {# 项}}对此组唯一。",
+=======
+    "xpack.aiops.explainLogRateSpikes.loadingState.identifiedFieldCandidates": "已识别 {fieldCandidatesCount, plural, other {# 个字段候选项}}。",
+    "xpack.aiops.explainLogRateSpikes.loadingState.identifiedFieldValuePairs": "已识别 {fieldValuePairsCount, plural, other {# 个重要的字段/值对}}。",
+    "xpack.aiops.explainLogRateSpikes.spikeAnalysisTableGroups.groupColumnTooltip": "显示多达 {maxItemCount} 个按唯一性和文档计数排序的组项目。展开行以查看所有字段/值对。",
+    "xpack.aiops.explainLogRateSpikes.spikeAnalysisTableGroups.groupItemsInfo": "正在显示 {valuesBadges} 个（共 {count} 个）项目。",
+    "xpack.aiops.explainLogRateSpikes.spikeAnalysisTableGroups.groupUniqueItemsInfo": "{count, plural, other {# 项}}对此组唯一。",
+>>>>>>> whats-new
     "xpack.aiops.index.dataLoader.internalServerErrorMessage": "加载索引 {index} 中的数据时出错。{message}。请求可能已超时。请尝试使用较小的样例大小或缩小时间范围。",
     "xpack.aiops.index.dataViewWithoutMetricNotificationTitle": "数据视图“{dataViewTitle}”不包含任何指标字段。",
     "xpack.aiops.index.errorLoadingDataMessage": "加载索引 {index} 中的数据时出错。{message}。",
@@ -7226,6 +7259,7 @@
     "xpack.aiops.dataGrid.field.documentCountChartSplit.seriesLabel": "其他文档计数",
     "xpack.aiops.documentCountChart.baselineBadgeLabel": "基线",
     "xpack.aiops.documentCountChart.deviationBadgeLabel": "偏差",
+<<<<<<< HEAD
     "xpack.aiops.logRateAnalysis.loadingState.doneMessage": "完成。",
     "xpack.aiops.logRateAnalysis.loadingState.groupingResults": "正在将重要的字段/值对转换到组中。",
     "xpack.aiops.logRateAnalysis.loadingState.loadingHistogramData": "正在加载直方图数据。",
@@ -7260,6 +7294,42 @@
     "xpack.aiops.logRateAnalysis.page.noResultsPromptBody": "尝试调整基线和偏差时间范围，然后重新运行分析。如果仍然没有结果，可能没有具有统计意义的实体导致了该日志速率峰值。",
     "xpack.aiops.logRateAnalysis.page.noResultsPromptTitle": "分析未返回任何结果。",
     "xpack.aiops.logRateAnalysis.page.tryToContinueAnalysisButtonText": "尝试继续分析",
+=======
+    "xpack.aiops.explainLogRateSpikes.loadingState.doneMessage": "完成。",
+    "xpack.aiops.explainLogRateSpikes.loadingState.groupingResults": "正在将重要的字段/值对转换到组中。",
+    "xpack.aiops.explainLogRateSpikes.loadingState.loadingHistogramData": "正在加载直方图数据。",
+    "xpack.aiops.explainLogRateSpikes.loadingState.loadingIndexInformation": "正在加载索引信息。",
+    "xpack.aiops.explainLogRateSpikes.spikeAnalysisTable.collapseAriaLabel": "折叠",
+    "xpack.aiops.explainLogRateSpikes.spikeAnalysisTable.docCountLabel": "文档计数",
+    "xpack.aiops.explainLogRateSpikes.spikeAnalysisTable.expandAriaLabel": "展开",
+    "xpack.aiops.explainLogRateSpikes.spikeAnalysisTable.fieldNameLabel": "字段名称",
+    "xpack.aiops.explainLogRateSpikes.spikeAnalysisTable.fieldValueLabel": "字段值",
+    "xpack.aiops.explainLogRateSpikes.spikeAnalysisTable.impactLabel": "影响",
+    "xpack.aiops.explainLogRateSpikes.spikeAnalysisTable.impactLabelColumnTooltip": "字段对消息速率差异的影响水平。",
+    "xpack.aiops.explainLogRateSpikes.spikeAnalysisTable.logRateColumnTooltip": "字段对消息速率差异的影响的视觉表示形式",
+    "xpack.aiops.explainLogRateSpikes.spikeAnalysisTable.logRateLabel": "日志速率",
+    "xpack.aiops.explainLogRateSpikes.spikeAnalysisTable.pValueColumnTooltip": "值的频率更改的意义；值越小表示变化越大；对此列排序会自动在文档计数列上进行二次排序。",
+    "xpack.aiops.explainLogRateSpikes.spikeAnalysisTable.pValueLabel": "p-value",
+    "xpack.aiops.explainLogRateSpikes.spikeAnalysisTable.uniqueColumnTooltip": "此字段/值对只在该分组中出现",
+    "xpack.aiops.explainLogRateSpikes.spikeAnalysisTableGroups.groupLabel": "组",
+    "xpack.aiops.explainLogRateSpikes.spikeAnalysisTableGroups.impactLabelColumnTooltip": "组对消息速率差异的影响水平",
+    "xpack.aiops.explainLogRateSpikes.spikeAnalysisTableGroups.logRateColumnTooltip": "组对消息速率差异的影响的视觉表示形式。",
+    "xpack.aiops.explainLogRateSpikes.spikeAnalysisTableGroups.logRateLabel": "日志速率",
+    "xpack.aiops.explainLogRateSpikes.spikeAnalysisTableGroups.pValueColumnTooltip": "值的频率更改的意义；值越小表示变化越大；对此列排序会自动在文档计数列上进行二次排序。",
+    "xpack.aiops.explainLogRateSpikes.spikeAnalysisTableGroups.pValueLabel": "p-value",
+    "xpack.aiops.explainLogRateSpikesPage.emptyPromptBody": "“解释日志速率峰值”功能会从统计上识别有助于达到日志速率峰值的重要字段/值组合。",
+    "xpack.aiops.explainLogRateSpikesPage.emptyPromptTitle": "单击直方图中的某个峰值可开始分析。",
+    "xpack.aiops.explainLogRateSpikesPage.fieldFilterApplyButtonLabel": "应用",
+    "xpack.aiops.explainLogRateSpikesPage.fieldFilterButtonLabel": "筛选字段",
+    "xpack.aiops.explainLogRateSpikesPage.fieldFilterHelpText": "取消选择非相关字段以将其从组中移除，然后单击“应用”按钮返回分组。 使用搜索栏筛选列表，然后通过以下操作选择/取消选择多个字段。",
+    "xpack.aiops.explainLogRateSpikesPage.fieldSelector.deselectAllFields": "取消选择所有字段",
+    "xpack.aiops.explainLogRateSpikesPage.fieldSelector.deselectAllSearchedFields": "取消选择已筛选字段",
+    "xpack.aiops.explainLogRateSpikesPage.fieldSelector.selectAllFields": "选择所有字段",
+    "xpack.aiops.explainLogRateSpikesPage.fieldSelector.selectAllSearchedFields": "选择已筛选字段",
+    "xpack.aiops.explainLogRateSpikesPage.noResultsPromptBody": "尝试调整基线和偏差时间范围，然后重新运行分析。如果仍然没有结果，可能没有具有统计意义的实体导致了该日志速率峰值。",
+    "xpack.aiops.explainLogRateSpikesPage.noResultsPromptTitle": "分析未返回任何结果。",
+    "xpack.aiops.explainLogRateSpikesPage.tryToContinueAnalysisButtonText": "尝试继续分析",
+>>>>>>> whats-new
     "xpack.aiops.fieldContextPopover.descriptionTooltipContent": "显示排名靠前字段值",
     "xpack.aiops.fieldContextPopover.notTopTenValueMessage": "选定的词未排名前 10",
     "xpack.aiops.fieldContextPopover.topFieldValuesAriaLabel": "显示排名靠前字段值",
@@ -7292,6 +7362,10 @@
     "xpack.aiops.logCategorization.randomSamplerSettingsPopUp.randomSamplerRowLabel": "随机采样",
     "xpack.aiops.logCategorization.runButton": "运行模式分析",
     "xpack.aiops.logCategorizationTimeSeriesWarning.description": "仅针对基于时间的索引运行日志模式分析。",
+<<<<<<< HEAD
+=======
+    "xpack.aiops.logRateSpikesTimeSeriesWarning.description": "仅针对基于时间的索引运行日志速率峰值。",
+>>>>>>> whats-new
     "xpack.aiops.miniHistogram.noDataLabel": "不可用",
     "xpack.aiops.progressAriaLabel": "进度",
     "xpack.aiops.rerunAnalysisButtonTitle": "运行分析",
@@ -7299,6 +7373,7 @@
     "xpack.aiops.resetLabel": "重置",
     "xpack.aiops.searchPanel.invalidSyntax": "语法无效",
     "xpack.aiops.searchPanel.queryBarPlaceholderText": "搜索……（例如，status:200 AND extension:\"PHP\"）",
+<<<<<<< HEAD
     "xpack.aiops.logRateAnalysis.page.documentCountStatsSplitGroupLabel": "选定的组",
     "xpack.aiops.logRateAnalysis.resultsTable.actionsColumnName": "操作",
     "xpack.aiops.logRateAnalysis.resultsTable.autoGeneratedDiscoverLinkErrorMessage": "无法链接到 Discover；此索引的数据视图不存在",
@@ -7313,6 +7388,25 @@
     "xpack.aiops.logRateAnalysis.resultsTable.linksMenu.viewInDiscover": "在 Discover 中查看",
     "xpack.aiops.logRateAnalysis.resultsTable.linksMenu.viewInLogPatternAnalysis": "在日志模式分析中查看",
     "xpack.aiops.logRateAnalysis.resultsTable.mlLocatorMissingErrorMessage": "未检测到用于日志模式分析的定位器",
+=======
+    "xpack.aiops.spikeAnalysisGroupsTable.actionsColumnName": "操作",
+    "xpack.aiops.spikeAnalysisPage.documentCountStatsSplitGroupLabel": "选定的组",
+    "xpack.aiops.spikeAnalysisTable.actionsColumnName": "操作",
+    "xpack.aiops.spikeAnalysisTable.autoGeneratedDiscoverLinkErrorMessage": "无法链接到 Discover；此索引的数据视图不存在",
+    "xpack.aiops.spikeAnalysisTable.autoGeneratedLogPatternAnalysisLinkErrorMessage": "无法链接到日志模式分析；此索引的数据视图不存在",
+    "xpack.aiops.spikeAnalysisTable.discoverLocatorMissingErrorMessage": "未检测到 Discover 的定位器",
+    "xpack.aiops.spikeAnalysisTable.discoverNotEnabledErrorMessage": "Discover 未启用",
+    "xpack.aiops.spikeAnalysisTable.groupedSwitchLabel.groupResults": "智能分组",
+    "xpack.aiops.spikeAnalysisTable.groupedSwitchLabel.groupResultsHelpMessage": "对组唯一的项目将用星号 (*) 标注。",
+    "xpack.aiops.spikeAnalysisTable.groupedSwitchLabel.groupResultsOff": "关闭",
+    "xpack.aiops.spikeAnalysisTable.groupedSwitchLabel.groupResultsOn": "开启",
+    "xpack.aiops.spikeAnalysisTable.linksMenu.copyToClipboardButtonLabel": "复制到剪贴板",
+    "xpack.aiops.spikeAnalysisTable.linksMenu.copyToClipboardGroupMessage": "将组项目作为 KQL 语法复制到剪贴板",
+    "xpack.aiops.spikeAnalysisTable.linksMenu.copyToClipboardSignificantTermMessage": "将字段/值对作为 KQL 语法复制到剪贴板",
+    "xpack.aiops.spikeAnalysisTable.linksMenu.viewInDiscover": "在 Discover 中查看",
+    "xpack.aiops.spikeAnalysisTable.linksMenu.viewInLogPatternAnalysis": "在日志模式分析中查看",
+    "xpack.aiops.spikeAnalysisTable.mlLocatorMissingErrorMessage": "未检测到用于日志模式分析的定位器",
+>>>>>>> whats-new
     "xpack.aiops.techPreviewBadge.label": "技术预览",
     "xpack.aiops.techPreviewBadge.tooltip": "此功能处于技术预览状态，在未来版本中可能会更改或完全移除。Elastic 将尽最大努力来修复任何问题，但处于技术预览状态的功能不受正式 GA 功能支持 SLA 的约束。",
     "xpack.alerting.alertNavigationRegistry.get.missingNavigationError": "在“{consumer}”内针对告警类型“{alertType}”的导航未注册。",
@@ -8057,6 +8151,7 @@
     "xpack.apm.errorGroup.tabs.exceptionStacktraceLabel": "异常堆栈跟踪",
     "xpack.apm.errorGroup.tabs.logStacktraceLabel": "日志堆栈跟踪",
     "xpack.apm.errorGroup.tabs.metadataLabel": "元数据",
+    "xpack.apm.errorGroupCoPilotPrompt.explainErrorTitle": "这是什么错误？",
     "xpack.apm.errorGroupDetails.culpritLabel": "原因",
     "xpack.apm.errorGroupDetails.exceptionMessageLabel": "异常消息",
     "xpack.apm.errorGroupDetails.logMessageLabel": "日志消息",
@@ -11347,6 +11442,10 @@
     "xpack.csp.vulnerabilities.vulnerabilitiesTableCell.addFilterButtonTooltip": "添加 {columnId} 筛选",
     "xpack.csp.vulnerabilities.vulnerabilitiesTableCell.addNegatedFilterButtonTooltip": "添加 {columnId} 作废筛选",
     "xpack.csp.vulnerabilities.vulnerabilitiesTableCell.addNegateFilterButton": "添加 {columnId} 作废筛选",
+<<<<<<< HEAD
+=======
+    "xpack.csp.vulnerabilities.vulnerabilityOverviewTab.descriptionText": "{description}",
+>>>>>>> whats-new
     "xpack.csp.vulnerabilities.vulnerabilityOverviewTile.publishedDateText": "{date}",
     "xpack.csp.vulnerabilitiesByResource.totalResources": "{total, plural, other {# 项资源}}",
     "xpack.csp.vulnerabilitiesByResource.totalVulnerabilities": "{total, plural, other {# 个漏洞}}",
@@ -11415,6 +11514,10 @@
     "xpack.csp.cnvmDashboardTable.section.topVulnerability.column.vulnerabilities": "漏洞",
     "xpack.csp.cnvmDashboardTable.section.topVulnerableResources.column.cve": "CVE",
     "xpack.csp.cnvmDashboardTable.section.topVulnerableResources.column.region": "地区",
+<<<<<<< HEAD
+=======
+    "xpack.csp.cnvmDashboardTable.section.topVulnerableResources.column.resource": "资源",
+>>>>>>> whats-new
     "xpack.csp.cnvmDashboardTable.section.topVulnerableResources.column.version": "CVSS",
     "xpack.csp.cnvmDashboardTable.section.topVulnerableResources.column.vulnerabilities": "漏洞",
     "xpack.csp.cnvmDashboardTable.section.topVulnerableResources.column.vulnerabilityCount": "漏洞",
@@ -11638,6 +11741,10 @@
     "xpack.csp.vulnerabilityTable.column.version": "版本",
     "xpack.csp.vulnerabilityTable.column.vulnerability": "漏洞",
     "xpack.csp.vulnerabilityTable.panel.buttonText": "查看所有漏洞",
+<<<<<<< HEAD
+=======
+    "xpack.csp.vulnerabilityTable.panel.tooltipText": "在结果中浏览",
+>>>>>>> whats-new
     "xpack.csp.vulnMgmtIntegration.awsOption.nameTitle": "Amazon Web Services",
     "xpack.csp.vulnMgmtIntegration.azureOption.nameTitle": "Azure",
     "xpack.csp.vulnMgmtIntegration.azureOption.tooltipContent": "即将推出",
@@ -12160,6 +12267,10 @@
     "xpack.enterpriseSearch.content.newIndex.newSearchIndexTemplate.isInvalid.error": "{indexName} 为无效索引名称",
     "xpack.enterpriseSearch.content.newIndex.newSearchIndexTemplate.nameInputHelpText.lineOne": "您的索引将命名为：{indexName}",
     "xpack.enterpriseSearch.content.newIndex.steps.buildConnector.confirmModal.description": "名为 {indexName} 的已删除索引最初绑定到现有连接器配置。是否要将现有连接器配置替换成新的？",
+<<<<<<< HEAD
+=======
+    "xpack.enterpriseSearch.content.overview.documentExample.description.text": "生成 API 密钥并阅读{documentation}，了解如何将文档发布到 Elasticsearch API 终端。将 Elastic {clients} 用于精简集成。",
+>>>>>>> whats-new
     "xpack.enterpriseSearch.content.searchIndex.documents.documentList.description": "显示 {results} 个，共 {total} 个。搜索结果最多包含 {maximum} 个文档。",
     "xpack.enterpriseSearch.content.searchIndex.documents.documentList.pagination.itemsPerPage": "每页文档数：{docPerPage}",
     "xpack.enterpriseSearch.content.searchIndex.documents.documentList.paginationOptions.option": "{docCount} 个文档",
@@ -13775,6 +13886,13 @@
     "xpack.enterpriseSearch.content.overview.documentExample.clientLibraries.python": "Python",
     "xpack.enterpriseSearch.content.overview.documentExample.clientLibraries.ruby": "Ruby",
     "xpack.enterpriseSearch.content.overview.documentExample.clientLibraries.rust": "Rust",
+<<<<<<< HEAD
+=======
+    "xpack.enterpriseSearch.content.overview.documentExample.description.clientsLink": "编程语言客户端",
+    "xpack.enterpriseSearch.content.overview.documentExample.description.documentationLink": "文档",
+    "xpack.enterpriseSearch.content.overview.documentExample.generateApiKeyButton.label": "管理 API 密钥",
+    "xpack.enterpriseSearch.content.overview.documentExample.title": "正在添加文档到您的索引",
+>>>>>>> whats-new
     "xpack.enterpriseSearch.content.overview.emptyPrompt.body": "不建议将文档添加到外部管理的索引。",
     "xpack.enterpriseSearch.content.overview.emptyPrompt.title": "外部管理的索引",
     "xpack.enterpriseSearch.content.overview.generateApiKeyModal.apiKeyWarning": "Elastic 不会存储 API 密钥。一旦生成，您只能查看密钥一次。请确保将其保存在某个安全位置。如果失去它的访问权限，您需要从此屏幕生成新的 API 密钥。",
@@ -13784,6 +13902,11 @@
     "xpack.enterpriseSearch.content.overview.generateApiKeyModal.info": "在开始将文档发布到 Elasticsearch 索引之前，您至少需要创建一个 API 密钥。",
     "xpack.enterpriseSearch.content.overview.generateApiKeyModal.learnMore": "进一步了解 API 密钥",
     "xpack.enterpriseSearch.content.overview.generateApiKeyModal.title": "生成 API 密钥",
+<<<<<<< HEAD
+=======
+    "xpack.enterpriseSearch.content.overview.optimizedRequest.label": "查看 Enterprise Search 优化的请求",
+    "xpack.enterpriseSearch.content.productName": "Enterprise Search",
+>>>>>>> whats-new
     "xpack.enterpriseSearch.content.searchIndex.cancelSyncs.successMessage": "已成功取消同步",
     "xpack.enterpriseSearch.content.searchIndex.configurationTabLabel": "配置",
     "xpack.enterpriseSearch.content.searchIndex.connectorErrorCallOut.title": "您的连接器报告了错误",
@@ -14549,6 +14672,11 @@
     "xpack.enterpriseSearch.server.routes.createApiIndex.connectorExistsError": "此索引的连接器已存在",
     "xpack.enterpriseSearch.server.routes.createApiIndex.crawlerExistsError": "此索引的网络爬虫已存在",
     "xpack.enterpriseSearch.server.routes.createApiIndex.indexExistsError": "此索引已存在",
+<<<<<<< HEAD
+=======
+    "xpack.enterpriseSearch.server.routes.createMlInferencePipeline.ParameterConflictError": "如果未提供 source_field、destination_field 和 model_id，应仅提供 pipeline_definition 和 field_mappings",
+    "xpack.enterpriseSearch.server.routes.createMlInferencePipeline.ParameterMissingError": "必须提供 pipeline_definition 和 fieldMappings，或 source_field 和 model_id",
+>>>>>>> whats-new
     "xpack.enterpriseSearch.server.routes.createSearchApplication.searchApplciationExistsError": "搜索应用程序名称已占用。请选择其他名称。",
     "xpack.enterpriseSearch.server.routes.indices.mlInference.pipelineProcessors.pipelineIsInUseError": "推理管道已用在不同索引的托管管道“{pipelineName}”中",
     "xpack.enterpriseSearch.server.routes.recreateConnector.connectorExistsError": "此索引的连接器已存在",
@@ -14861,9 +14989,22 @@
     "xpack.enterpriseSearch.workplaceSearch.integrations.azureBlobDescription": "使用 Enterprise Search 在 Azure Blob 存储上搜索您的内容。",
     "xpack.enterpriseSearch.workplaceSearch.integrations.boxDescription": "通过 Workplace Search 搜索存储在 Box 上的文件和文件夹。",
     "xpack.enterpriseSearch.workplaceSearch.integrations.boxName": "Box",
+<<<<<<< HEAD
     "xpack.enterpriseSearch.workplaceSearch.integrations.googleCloud": "Google Cloud Storage",
     "xpack.enterpriseSearch.workplaceSearch.integrations.googleCloudDescription": "使用 Enterprise Search 在 Google Cloud Storage 上搜索您的内容。",
     "xpack.enterpriseSearch.workplaceSearch.integrations.googleDriveDescription": "通过 Workplace Search 搜索 Google 云端硬盘上的文档。",
+=======
+    "xpack.enterpriseSearch.workplaceSearch.integrations.githubDescription": "通过 Workplace Search 搜索 GitHub 上的项目和存储库。",
+    "xpack.enterpriseSearch.workplaceSearch.integrations.githubEnterpriseServerDescription": "通过 Workplace Search 搜索 GitHub Enterprise Server 上的项目和存储库。",
+    "xpack.enterpriseSearch.workplaceSearch.integrations.githubEnterpriseServerName": "GitHub Enterprise Server",
+    "xpack.enterpriseSearch.workplaceSearch.integrations.githubName": "GitHub",
+    "xpack.enterpriseSearch.workplaceSearch.integrations.gmailDescription": "通过 Workplace Search 搜索由 Gmail 管理的电子邮件。",
+    "xpack.enterpriseSearch.workplaceSearch.integrations.gmailName": "Gmail",
+    "xpack.enterpriseSearch.workplaceSearch.integrations.googleCloud": "Google Cloud Storage",
+    "xpack.enterpriseSearch.workplaceSearch.integrations.googleCloudDescription": "使用 Enterprise Search 在 Google Cloud Storage 上搜索您的内容。",
+    "xpack.enterpriseSearch.workplaceSearch.integrations.googleDriveDescription": "通过 Workplace Search 搜索 Google 云端硬盘上的文档。",
+    "xpack.enterpriseSearch.workplaceSearch.integrations.googleDriveName": "Google 云端硬盘",
+>>>>>>> whats-new
     "xpack.enterpriseSearch.workplaceSearch.integrations.mongoDBDescription": "使用 Enterprise Search 搜索您的 MongoDB 内容。",
     "xpack.enterpriseSearch.workplaceSearch.integrations.mongoDBName": "MongoDB",
     "xpack.enterpriseSearch.workplaceSearch.integrations.msSqlDescription": "使用 Enterprise Search 在 Microsoft SQL Server 上搜索您的内容。",
@@ -18645,8 +18786,13 @@
     "xpack.infra.homePage.toolbar.showingLastOneMinuteDataText": "选定时间过去 {duration}的数据",
     "xpack.infra.hostsViewPage.errorOnCreateOrLoadDataview": "尝试创建以下数据视图时出错：{metricAlias}。尝试重新加载该页面。",
     "xpack.infra.hostsViewPage.landing.calloutRoleClarificationWithDocsLink": "他们将需要有权访问 Kibana 中的高级设置的角色。{docsLink}",
+<<<<<<< HEAD
     "xpack.infra.hostsViewPage.kpi.subtitle.average.limit": "平均值（属于 {limit} 台主机）",
     "xpack.infra.hostsViewPage.kpi.subtitle.hostCount.limit": "限定为 {limit}",
+=======
+    "xpack.infra.hostsViewPage.metricTrend.subtitle.average.limit": "平均值（属于 {limit} 台主机）",
+    "xpack.infra.hostsViewPage.metricTrend.subtitle.hostCount.limit": "限定为 {limit}",
+>>>>>>> whats-new
     "xpack.infra.hostsViewPage.table.selectedHostsButton": "已选定 {selectedHostsCount} 个{selectedHostsCount, plural, =1 {主机} other {主机}}",
     "xpack.infra.hostsViewPage.table.tooltip.documentationLabel": "请参阅 {documentation} 了解更多信息",
     "xpack.infra.inventoryTimeline.header": "平均值 {metricLabel}",
@@ -18655,6 +18801,11 @@
     "xpack.infra.kibanaMetrics.nodeDoesNotExistErrorMessage": "{nodeId} 不存在。",
     "xpack.infra.linkTo.hostWithIp.error": "未找到 IP 地址为“{hostIp}”的主机。",
     "xpack.infra.linkTo.hostWithIp.loading": "正在加载 IP 地址为“{hostIp}”的主机。",
+<<<<<<< HEAD
+=======
+    "xpack.infra.logFlyout.flyoutSubTitle": "从索引 {indexName}",
+    "xpack.infra.logFlyout.flyoutTitle": "日志条目 {logEntryId} 的详细信息",
+>>>>>>> whats-new
     "xpack.infra.logs.alertFlyout.groupByOptimizationWarning": "设置“分组依据”时，强烈建议将“{comparator}”比较符用于阈值。这会使性能有较大提升。",
     "xpack.infra.logs.alerting.threshold.groupedCountAlertReasonDescription": "对于 {groupName}，过去 {duration}中有 {actualCount, plural, other {{actualCount} 个日志条目}}。{comparator} {expectedCount} 时告警。",
     "xpack.infra.logs.alerting.threshold.groupedRatioAlertReasonDescription": "对于 {groupName}，过去 {duration}选定日志的比率为 {actualRatio}。{comparator} {expectedRatio} 时告警。",
@@ -18785,11 +18936,14 @@
     "xpack.infra.assetDetailsEmbeddable.description": "添加资产详情视图。",
     "xpack.infra.assetDetailsEmbeddable.displayName": "资产详情",
     "xpack.infra.assetDetailsEmbeddable.title": "资产详情",
+<<<<<<< HEAD
     "xpack.infra.assetDetailsEmbeddable.overview.kpi.cpuUsage.title": "CPU 使用率",
     "xpack.infra.assetDetailsEmbeddable.overview.kpi.diskSpaceUsage.title": "磁盘空间使用率",
     "xpack.infra.assetDetailsEmbeddable.overview.kpi.memoryUsage.title": "内存利用率",
     "xpack.infra.assetDetailsEmbeddable.overview.kpi.normalizedLoad1m.title": "标准化负载",
     "xpack.infra.assetDetailsEmbeddable.overview.kpi.subtitle.average": "平均值",
+=======
+>>>>>>> whats-new
     "xpack.infra.bottomDrawer.kubernetesDashboardsLink": "Kubernetes 仪表板",
     "xpack.infra.chartSection.missingMetricDataBody": "此图表的数据缺失。",
     "xpack.infra.chartSection.missingMetricDataText": "缺失数据",
@@ -18872,6 +19026,10 @@
     "xpack.infra.hostsViewPage.error.tryAgainButton": "重试",
     "xpack.infra.hostsViewPage.error.unknownErrorTitle": "发生错误",
     "xpack.infra.hostsViewPage.errorOnCreateOrLoadDataviewTitle": "创建数据视图时出错",
+<<<<<<< HEAD
+=======
+    "xpack.infra.hostsViewPage.flyout.uptimeLinkLabel": "运行时间",
+>>>>>>> whats-new
     "xpack.infra.hostsViewPage.hostLimit": "主机限制",
     "xpack.infra.hostsViewPage.hostLimit.tooltip": "为确保更快的查询性能，对返回的主机数量实施了限制",
     "xpack.infra.hostsViewPage.kpi.hostCount.title": "主机",
@@ -18891,6 +19049,15 @@
     "xpack.infra.hostsViewPage.metrics.tooltip.normalizedLoad1m": "1 分钟负载平均值，按 CPU 核心数进行标准化。",
     "xpack.infra.hostsViewPage.metrics.tooltip.rx": "主机的公共接口上每秒接收的字节数。",
     "xpack.infra.hostsViewPage.metrics.tooltip.tx": "主机的公共接口上每秒发送的字节数。",
+<<<<<<< HEAD
+=======
+    "xpack.infra.hostsViewPage.metricTrend.cpuUsage.title": "CPU 使用率",
+    "xpack.infra.hostsViewPage.metricTrend.diskSpaceUsage.title": "磁盘空间使用率",
+    "xpack.infra.hostsViewPage.metricTrend.hostCount.title": "主机",
+    "xpack.infra.hostsViewPage.metricTrend.memoryUsage.title": "内存利用率",
+    "xpack.infra.hostsViewPage.metricTrend.normalizedLoad1m.title": "标准化负载",
+    "xpack.infra.hostsViewPage.metricTrend.subtitle.average": "平均值",
+>>>>>>> whats-new
     "xpack.infra.hostsViewPage.table.addFilter": "添加筛选",
     "xpack.infra.hostsViewPage.table.cpuUsageColumnHeader": "CPU 使用率（平均值）",
     "xpack.infra.hostsViewPage.table.diskSpaceUsageColumnHeader": "磁盘空间使用率（平均值）",
@@ -18972,13 +19139,33 @@
     "xpack.infra.legendControls.switchLabel": "自动计算范围",
     "xpack.infra.legnedControls.boundRangeError": "最小值必须小于最大值",
     "xpack.infra.logAnomalies.logEntryExamplesMenuLabel": "查看日志条目的操作",
+<<<<<<< HEAD
+=======
+    "xpack.infra.logEntryActionsMenu.apmActionLabel": "在 APM 中查看",
+    "xpack.infra.logEntryActionsMenu.buttonLabel": "调查",
+    "xpack.infra.logEntryActionsMenu.uptimeActionLabel": "在Uptime 中查看状态",
+    "xpack.infra.logEntryItemView.logEntryActionsMenuToolTip": "查看适用于以下行的操作：",
+    "xpack.infra.logFlyout.explainLogMessageTitle": "此消息是什么？",
+    "xpack.infra.logFlyout.fieldColumnLabel": "字段",
+    "xpack.infra.logFlyout.filterAriaLabel": "筛选",
+    "xpack.infra.logFlyout.loadingErrorCalloutTitle": "搜索日志条目时出错",
+    "xpack.infra.logFlyout.loadingMessage": "正在分片中搜索日志条目",
+    "xpack.infra.logFlyout.setFilterTooltip": "使用筛选查看事件",
+    "xpack.infra.logFlyout.similarLogMessagesTitle": "我如何查找类似日志消息？",
+    "xpack.infra.logFlyout.valueColumnLabel": "值",
+>>>>>>> whats-new
     "xpack.infra.logs.alertDetails.chart.ratioTitle": "查询 A 到查询 B 的比率",
     "xpack.infra.logs.alertDetails.chartAnnotation.alertStarted": "已启动告警",
     "xpack.infra.logs.alertDetails.chartHistory.alertsTriggered": "已触发告警",
     "xpack.infra.logs.alertDetails.chartHistory.avgTimeToRecover": "恢复的平均时间",
     "xpack.infra.logs.alertDetails.chartHistory.chartTitle": "日志阈值告警历史记录",
     "xpack.infra.logs.alertDetails.chartHistory.last30days": "过去 30 天",
+<<<<<<< HEAD
     "xpack.infra.logs.alertDetails.logRateAnalysisTitle": "可能的原因和补救措施",
+=======
+    "xpack.infra.logs.alertDetails.explainLogRateSpikes.sectionTitle": "解释日志速率峰值",
+    "xpack.infra.logs.alertDetails.explainLogSpikeTitle": "可能的原因和补救措施",
+>>>>>>> whats-new
     "xpack.infra.logs.alertDropdown.inlineLogViewCreateAlertContent": "不支持通过内联日志视图创建告警",
     "xpack.infra.logs.alertDropdown.inlineLogViewCreateAlertTitle": "内联日志视图",
     "xpack.infra.logs.alertDropdown.readOnlyCreateAlertContent": "要创建告警，在此应用程序中需要更多权限。",
@@ -19171,6 +19358,11 @@
     "xpack.infra.logStreamEmbeddable.displayName": "日志流",
     "xpack.infra.logStreamEmbeddable.title": "日志流",
     "xpack.infra.metadataEmbeddable.AddFilterAriaLabel": "添加筛选",
+<<<<<<< HEAD
+=======
+    "xpack.infra.metadataEmbeddable.description": "添加资产元数据表。",
+    "xpack.infra.metadataEmbeddable.displayName": "元数据",
+>>>>>>> whats-new
     "xpack.infra.metadataEmbeddable.errorAction": "重新加载页面",
     "xpack.infra.metadataEmbeddable.errorTitle": "抱歉，有错误",
     "xpack.infra.metadataEmbeddable.field": "字段",
@@ -19181,6 +19373,10 @@
     "xpack.infra.metadataEmbeddable.searchForMetadata": "搜索元数据……",
     "xpack.infra.metadataEmbeddable.setFilterByValueTooltip": "按值筛选",
     "xpack.infra.metadataEmbeddable.setRemoveFilterTooltip": "移除筛选",
+<<<<<<< HEAD
+=======
+    "xpack.infra.metadataEmbeddable.title": "元数据",
+>>>>>>> whats-new
     "xpack.infra.metadataEmbeddable.value": "值",
     "xpack.infra.metricDetailPage.awsMetricsLayout.cpuUtilSection.percentSeriesLabel": "百分比",
     "xpack.infra.metricDetailPage.awsMetricsLayout.cpuUtilSection.sectionLabel": "CPU 使用率",
@@ -20537,6 +20733,7 @@
     "xpack.ingestPipelines.testPipelineFlyout.successNotificationText": "管道已执行",
     "xpack.ingestPipelines.testPipelineFlyout.title": "测试管道",
     "xpack.kubernetesSecurity.treeNavigation.loadMore": "显示更多 {name}",
+    "xpack.kubernetesSecurity.beta": "公测版",
     "xpack.kubernetesSecurity.chartsToggle.hide": "隐藏图表",
     "xpack.kubernetesSecurity.chartsToggle.show": "显示图表",
     "xpack.kubernetesSecurity.containerNameWidget.containerImage": "容器映像",
@@ -20612,6 +20809,7 @@
     "xpack.lens.indexPattern.cardinalityOf": "{name} 的唯一计数",
     "xpack.lens.indexPattern.CounterRateOf": "{name} 的计数率",
     "xpack.lens.indexPattern.cumulativeSumOf": "{name} 的累计和",
+    "xpack.lens.indexPattern.customFormat.description": "Numeral.js 格式模式（默认值：{defaultPattern}）",
     "xpack.lens.indexPattern.dateHistogram.autoLongerExplanation": "要选择时间间隔，Lens 按 {targetBarSetting} 高级设置分割指定的时间范围，并为您的数据计算最佳时间间隔。例如，当时间间隔为 4 天时，数据将分割为每小时存储桶。要配置最大条形数，请使用 {maxBarSetting} 高级设置。",
     "xpack.lens.indexPattern.dateHistogram.restrictedInterval": "由于聚合限制，时间间隔固定为 {intervalValue}。",
     "xpack.lens.indexPattern.derivativeOf": "{name} 的差异",
@@ -27160,6 +27358,7 @@
     "xpack.observability_onboarding.apiKeyBanner.field.label": "API 密钥",
     "xpack.observability_onboarding.apiKeyBanner.loading": "正在创建 API 密钥",
     "xpack.observability_onboarding.apiKeyBanner.noPermissions": "用户无权创建 API 密钥。",
+<<<<<<< HEAD
     "xpack.observability_onboarding.breadcrumbs.onboarding": "载入",
     "xpack.observability_onboarding.card.apm.title": "监测我的应用程序性能（APM/跟踪）",
     "xpack.observability_onboarding.card.customLogs.description.text": "选择要收集哪些日志，配置采集管道并浏览您的数据。",
@@ -27167,6 +27366,26 @@
     "xpack.observability_onboarding.card.integrations.title": "探索 300 多种利用集成采集数据的方法",
     "xpack.observability_onboarding.card.k8s.title": "监测我的 Kubernetes 集群",
     "xpack.observability_onboarding.card.systemLogs.description1": "载入日志数据并立即开始分析的最快路径。",
+=======
+    "xpack.observability_onboarding.breadcrumbs.logs": "日志",
+    "xpack.observability_onboarding.breadcrumbs.onboarding": "载入",
+    "xpack.observability_onboarding.card.apm.title": "监测我的应用程序性能（APM/跟踪）",
+    "xpack.observability_onboarding.card.customLogs.description.example.andMore": "......以及更多",
+    "xpack.observability_onboarding.card.customLogs.description.example.networkStream": "收集网络流日志",
+    "xpack.observability_onboarding.card.customLogs.description.example.streamlogs": "流式传输定制日志",
+    "xpack.observability_onboarding.card.customLogs.description.example.uploadLogFile": "上传日志文件",
+    "xpack.observability_onboarding.card.customLogs.description.text": "选择要收集哪些日志，配置采集管道并浏览您的数据。",
+    "xpack.observability_onboarding.card.customLogs.fewMinutesBadge": "几分钟后",
+    "xpack.observability_onboarding.card.customLogs.title": "收集定制日志",
+    "xpack.observability_onboarding.card.integrations.badgeLabel": "集成",
+    "xpack.observability_onboarding.card.integrations.title": "探索 300 多种利用集成采集数据的方法",
+    "xpack.observability_onboarding.card.k8s.title": "监测我的 Kubernetes 集群",
+    "xpack.observability_onboarding.card.sampleData.badgeLabel": "样例数据",
+    "xpack.observability_onboarding.card.sampleData.title": "浏览数据、可视化和仪表板样例",
+    "xpack.observability_onboarding.card.setupGuide": "设置指南",
+    "xpack.observability_onboarding.card.systemLogs.description1": "载入日志数据并立即开始分析的最快路径。",
+    "xpack.observability_onboarding.card.systemLogs.description2": "通过收集您机器中的日志来监测服务器、个人计算机等。",
+>>>>>>> whats-new
     "xpack.observability_onboarding.card.systemLogs.quickstartBadge": "快速入门",
     "xpack.observability_onboarding.card.systemLogs.title": "收集系统日志",
     "xpack.observability_onboarding.configureLogs.advancedSettings": "高级设置",
@@ -27185,6 +27404,10 @@
     "xpack.observability_onboarding.configureLogs.serviceName": "服务名称",
     "xpack.observability_onboarding.configureLogs.serviceName.helper": "命名将从中收集数据的服务。",
     "xpack.observability_onboarding.configureLogs.serviceName.placeholder": "为服务提供名称",
+<<<<<<< HEAD
+=======
+    "xpack.observability_onboarding.configureLogs.title": "将日志文件流式传输到 Elastic",
+>>>>>>> whats-new
     "xpack.observability_onboarding.exploreOtherIntegrations": "浏览其他集成",
     "xpack.observability_onboarding.fetcher.error.status": "错误",
     "xpack.observability_onboarding.fetcher.error.title": "提取资源时出错",
@@ -27201,6 +27424,10 @@
     "xpack.observability_onboarding.installElasticAgent.installStep.choosePlatform.linux": "Linux",
     "xpack.observability_onboarding.installElasticAgent.installStep.choosePlatform.macOS": "MacOS",
     "xpack.observability_onboarding.installElasticAgent.installStep.choosePlatform.windows": "Windows",
+<<<<<<< HEAD
+=======
+    "xpack.observability_onboarding.installElasticAgent.installStep.description": "选择平台并运行命令，以在您的终端上安装、注册并启动 Elastic 代理。对每台主机执行此操作。对于其他平台，请查阅我们的下载页面。 查看主机要求和其他安装选项。",
+>>>>>>> whats-new
     "xpack.observability_onboarding.installElasticAgent.installStep.title": "安装 Elastic 代理",
     "xpack.observability_onboarding.installElasticAgent.progress.eaConfig.incompleteTitle": "配置代理",
     "xpack.observability_onboarding.installElasticAgent.progress.eaConfig.loadingTitle": "正在下载 Elastic 代理配置",
@@ -27219,6 +27446,10 @@
     "xpack.observability_onboarding.installElasticAgent.progress.logsIngest.completedTitle": "正在传输日志！",
     "xpack.observability_onboarding.installElasticAgent.progress.logsIngest.incompleteTitle": "检查已传输的日志",
     "xpack.observability_onboarding.installElasticAgent.progress.logsIngest.loadingTitle": "等待传输日志",
+<<<<<<< HEAD
+=======
+    "xpack.observability_onboarding.installElasticAgent.title": "安装采集器以收集数据",
+>>>>>>> whats-new
     "xpack.observability_onboarding.selectLogs.chooseType": "您希望收集哪些日志？",
     "xpack.observability_onboarding.selectLogs.httpEndpointLogs": "HTTP 终端",
     "xpack.observability_onboarding.selectLogs.httpEndpointLogs.description": "从正在侦听的 HTTP 端口收集 JSON 数据。",
@@ -27232,21 +27463,43 @@
     "xpack.observability_onboarding.selectLogs.uploadLogFiles.description": "通过 CSV、TSV、JSON 或其他日志文件类型上传数据以进行分析。",
     "xpack.observability_onboarding.selectLogs.useOwnShipper": "获取 API 密钥",
     "xpack.observability_onboarding.selectLogs.useOwnShipper.description": "通过生成 API 密钥使用您自己的采集器来收集日志数据。",
+<<<<<<< HEAD
     "xpack.observability_onboarding.steps.back": "返回",
     "xpack.observability_onboarding.steps.continue": "继续",
     "xpack.observability_onboarding.steps.exploreLogs": "浏览日志",
     "xpack.observability_onboarding.steps.inspect": "检查",
     "xpack.observability_onboarding.title.collectCustomLogs": "收集定制日志",
+=======
+    "xpack.observability_onboarding.skipLinkLabel": "暂时跳过",
+    "xpack.observability_onboarding.steps.back": "返回",
+    "xpack.observability_onboarding.steps.configureLogs": "配置日志",
+    "xpack.observability_onboarding.steps.continue": "继续",
+    "xpack.observability_onboarding.steps.exploreLogs": "浏览日志",
+    "xpack.observability_onboarding.steps.inspect": "检查",
+    "xpack.observability_onboarding.steps.installShipper": "安装采集器",
+    "xpack.observability_onboarding.steps.selectLogs": "选择日志",
+    "xpack.observability_onboarding.title.collectCustomLogs": "收集定制日志",
+    "xpack.observability.alertsTable.showingAlertsTitle": "{totalAlerts, plural, =1 {告警} other {告警}}",
+>>>>>>> whats-new
     "xpack.observability.apmEnableContinuousRollupsDescription": "{betaLabel} 启用连续汇总/打包时，UI 将以适当分辨率选择指标。在更大时间范围内，将使用分辨率较低的指标，这会缩短加载时间。",
     "xpack.observability.apmEnableServiceMetricsDescription": "{betaLabel} 启用服务事务指标，这种是低基数指标，可供某些视图（如服务库存）使用来加快加载速度。",
     "xpack.observability.apmProgressiveLoadingDescription": "{technicalPreviewLabel} 是否以渐进方式为 APM 视图加载数据。可以先以较低的采样速率请求数据，这样的准确性较低，但响应时间更快，同时在后台加载未采样数据",
     "xpack.observability.apmServiceInventoryOptimizedSortingDescription": "{technicalPreviewLabel} 默认 APM 服务库存和 Storage Explorer 页面排序（对于未应用 Machine Learning 的服务）将按服务名称排序。",
+<<<<<<< HEAD
+=======
+    "xpack.observability.apmTraceExplorerTabDescription": "{technicalPreviewLabel} 启用 APM Trace Explorer 功能，它允许您通过 KQL 或 EQL 搜索和检查跟踪。",
+>>>>>>> whats-new
     "xpack.observability.enableAgentExplorerDescription": "{betaLabel} 启用代理浏览器视图。",
     "xpack.observability.enableAwsLambdaMetricsDescription": "{technicalPreviewLabel} 在服务指标选项卡中显示 Amazon Lambda 指标。",
     "xpack.observability.enableCriticalPathDescription": "{technicalPreviewLabel}（可选）显示跟踪的关键路径。",
     "xpack.observability.enableInfrastructureHostsViewDescription": "{betaLabel} 在 Infrastructure 应用中启用主机视图。",
     "xpack.observability.inspector.stats.queryTimeValue": "{queryTime}ms",
     "xpack.observability.pages.alertDetails.pageTitle.title": "{ruleCategory} {ruleCategory, select, Anomaly {已检测到} Inventory {超出阈值} other {超出}}",
+<<<<<<< HEAD
+=======
+    "xpack.observability.ruleDetails.executionLogError": "无法加载规则执行日志。原因：{message}",
+    "xpack.observability.ruleDetails.ruleLoadError": "无法加载规则。原因：{message}",
+>>>>>>> whats-new
     "xpack.observability.slo.alerting.burnRate.reason": "{actionGroupName}：过去 {longWindowDuration} 的消耗速度为 {longWindowBurnRate} 且过去 {shortWindowDuration} 为 {shortWindowBurnRate}。两个窗口超出 {burnRateThreshold} 时告警",
     "xpack.observability.slo.burnRateWindow.thresholdTip": "阈值为 {target}x",
     "xpack.observability.slo.clone.errorNotification": "无法克隆 {name}",
@@ -27258,6 +27511,10 @@
     "xpack.observability.slo.duration.minute": "{duration, plural, other {# 分钟}}",
     "xpack.observability.slo.duration.month": "{duration, plural, other {# 个月}}",
     "xpack.observability.slo.duration.week": "{duration, plural, other {# 周}}",
+<<<<<<< HEAD
+=======
+    "xpack.observability.slo.duration.year": "{duration, plural, other {# 年}}",
+>>>>>>> whats-new
     "xpack.observability.slo.indicatorTypeBadge.exploreInApm": "查看 {service} 详情",
     "xpack.observability.slo.list.sortByType": "按 {type} 排序",
     "xpack.observability.slo.rules.burnRate.errors.invalidThresholdValue": "消耗速度阈值必须介于 1 和 {maxBurnRate} 之间。",
@@ -27284,12 +27541,22 @@
     "xpack.observability.threshold.rule.alertDetailsAppSection.criterion.subtitle": "过去 {lookback} {timeLabel}",
     "xpack.observability.threshold.rule.alertFlyout.alertPerRedundantFilterError": "此规则可能针对低于预期的 {matchedGroups} 告警，因为筛选查询包含{groupCount, plural, other {这些字段}}的匹配项。有关更多信息，请参阅 {filteringAndGroupingLink}。",
     "xpack.observability.threshold.rule.alertFlyout.customEquationEditor.aggregationLabel": "聚合 {name}",
+<<<<<<< HEAD
     "xpack.observability.threshold.rule.alertFlyout.customEquationEditor.filterLabel": "KQL 筛选 {name}",
+=======
+    "xpack.observability.threshold.rule.alertFlyout.customEquationEditor.fieldLabel": "字段 {name}",
+    "xpack.observability.threshold.rule.alertFlyout.customEquationEditor.filterLabel": "KQL 筛选 {name}",
+    "xpack.observability.threshold.rule.alertFlyout.ofExpression.helpTextDetail": "找不到指标？{documentationLink}。",
+>>>>>>> whats-new
     "xpack.observability.threshold.rule.alerts.dataTimeRangeLabel": "过去 {lookback} {timeLabel}",
     "xpack.observability.threshold.rule.alerts.dataTimeRangeLabelWithGrouping": "{id} 过去 {lookback} {timeLabel}的数据",
     "xpack.observability.threshold.rule.threshold.errorAlertReason": "Elasticsearch 尝试查询 {metric} 的数据时出现故障",
     "xpack.observability.threshold.rule.threshold.firedAlertReason": "过去 {duration}{group}，{metric} 为 {currentValue}。{comparator} {threshold} 时告警。",
     "xpack.observability.threshold.rule.threshold.noDataAlertReason": "对于 {group}，{metric} 在过去 {interval}中未报告数据",
+<<<<<<< HEAD
+=======
+    "xpack.observability.threshold.rule.threshold.queryErrorAlertReason": "告警使用格式错误的 KQL 查询：{filterQueryText}",
+>>>>>>> whats-new
     "xpack.observability.threshold.rule.threshold.recoveredAlertReason": "对于 {group}，{metric} 现在{comparator}阈值 {threshold}（当前值为 {currentValue}）",
     "xpack.observability.threshold.rule.threshold.thresholdRange": "{a} 和 {b}",
     "xpack.observability.threshold.rule.thresholdExtraTitle": "{comparator} {threshold} 时告警",
@@ -27366,6 +27633,7 @@
     "xpack.observability.cases.caseFeatureNoPermissionsMessage": "要查看案例，必须对 Kibana 工作区中的案例功能有权限。有关详细信息，请联系您的 Kibana 管理员。",
     "xpack.observability.cases.caseFeatureNoPermissionsTitle": "需要 Kibana 功能权限",
     "xpack.observability.cases.caseView.goToDocumentationButton": "查看文档",
+    "xpack.observability.coPilotPrompt.chatLoading": "正在等待响应......",
     "xpack.observability.defaultApmServiceEnvironment": "默认服务环境",
     "xpack.observability.defaultApmServiceEnvironmentDescription": "为 APM 应用设置默认环境。如果留空，默认情况下将显示所有环境中的数据。",
     "xpack.observability.emptySection.apps.alert.description": "检测 Observability 内的复杂条件，并在满足那些条件时触发操作。",
@@ -27553,6 +27821,10 @@
     "xpack.observability.slo.duration.minutely": "每分钟",
     "xpack.observability.slo.duration.monthly": "每月",
     "xpack.observability.slo.duration.weekly": "每周",
+<<<<<<< HEAD
+=======
+    "xpack.observability.slo.duration.yearly": "每年",
+>>>>>>> whats-new
     "xpack.observability.slo.feedbackButtonLabel": "告诉我们您的看法！",
     "xpack.observability.slo.globalDiagnosis.errorNotification": "您没有适当权限，无法使用此功能。",
     "xpack.observability.slo.indicators.apmAvailability": "APM 可用性",
@@ -27566,6 +27838,11 @@
     "xpack.observability.slo.list.errorTitle": "无法加载 SLO",
     "xpack.observability.slo.list.search": "搜索",
     "xpack.observability.slo.list.sortBy": "排序依据",
+<<<<<<< HEAD
+=======
+    "xpack.observability.slo.list.sortBy.creationTime": "创建时间",
+    "xpack.observability.slo.list.sortBy.indicatorType": "指标类型",
+>>>>>>> whats-new
     "xpack.observability.slo.rules.actionGroupSelectorLabel": "操作组",
     "xpack.observability.slo.rules.addWindowAriaLabel": "添加窗口",
     "xpack.observability.slo.rules.addWIndowLabel": "添加窗口",
@@ -27679,11 +27956,25 @@
     "xpack.observability.slo.sloEdit.sliType.customMetric.deleteLabel": "删除指标",
     "xpack.observability.slo.sloEdit.sliType.customMetric.equation.invalidCharacters": "方程字段仅支持以下字符：A-Z、+、-、/、*、(、)、?、!、&、:、|、>、<、=",
     "xpack.observability.slo.sloEdit.sliType.customMetric.equationHelpText": "支持基本数学方程，有效字符包括：A-Z、+、-、/、*、(、)、?、!、&、:、|、>、<、=",
+<<<<<<< HEAD
+=======
+    "xpack.observability.slo.sloEdit.sliType.customMetric.goodEquation.tooltip": "这支持基本数学 (A + B / C) 和布尔逻辑 (A < B ?A :B)。",
+    "xpack.observability.slo.sloEdit.sliType.customMetric.goodEquationLabel": "适用方程",
+    "xpack.observability.slo.sloEdit.sliType.customMetric.goodMetric.tooltip": "来自该字段的此类数据将使用“求和”聚合进行汇总。",
+    "xpack.observability.slo.sloEdit.sliType.customMetric.goodMetricLabel": "良好指标",
+>>>>>>> whats-new
     "xpack.observability.slo.sloEdit.sliType.customMetric.metricField.placeholder": "选择指标字段",
     "xpack.observability.slo.sloEdit.sliType.customMetric.queryFilter": "查询筛选",
     "xpack.observability.slo.sloEdit.sliType.customMetric.sumLabel": "求和",
     "xpack.observability.slo.sloEdit.sliType.customMetric.timestampField.label": "时间戳字段",
     "xpack.observability.slo.sloEdit.sliType.customMetric.timestampField.placeholder": "选择时间戳字段",
+<<<<<<< HEAD
+=======
+    "xpack.observability.slo.sloEdit.sliType.customMetric.totalEquation.tooltip": "这支持基本数学 (A + B / C) 和布尔逻辑 (A < B ?A :B)。",
+    "xpack.observability.slo.sloEdit.sliType.customMetric.totalEquationLabel": "总体方程",
+    "xpack.observability.slo.sloEdit.sliType.customMetric.totalMetric.tooltip": "来自该字段的此类数据将使用“求和”聚合进行汇总。",
+    "xpack.observability.slo.sloEdit.sliType.customMetric.totalMetricLabel": "总指标",
+>>>>>>> whats-new
     "xpack.observability.slo.sloEdit.tags.label": "标签",
     "xpack.observability.slo.sloEdit.tags.placeholder": "添加标签",
     "xpack.observability.slo.sloEdit.targetSlo.label": "目标/SLO (%)",
@@ -27766,6 +28057,10 @@
     "xpack.observability.threshold.rule.alertDetailUrlActionVariableDescription": "链接到告警故障排除视图获取进一步的上下文和详情。如果未配置 server.publicBaseUrl，这将为空字符串。",
     "xpack.observability.threshold.rule.alertDropdownTitle": "告警和规则",
     "xpack.observability.threshold.rule.alertFlyout.addCondition": "添加条件",
+<<<<<<< HEAD
+=======
+    "xpack.observability.threshold.rule.alertFlyout.advancedOptions": "高级选项",
+>>>>>>> whats-new
     "xpack.observability.threshold.rule.alertFlyout.aggregationText.avg": "平均值",
     "xpack.observability.threshold.rule.alertFlyout.aggregationText.cardinality": "基数",
     "xpack.observability.threshold.rule.alertFlyout.aggregationText.count": "文档计数",
@@ -27777,7 +28072,13 @@
     "xpack.observability.threshold.rule.alertFlyout.aggregationText.sum": "求和",
     "xpack.observability.threshold.rule.alertFlyout.alertDescription": "任何 Observability 数据类型到达或超出给定值时告警。",
     "xpack.observability.threshold.rule.alertFlyout.alertOnGroupDisappear": "组停止报告数据时提醒我",
+<<<<<<< HEAD
     "xpack.observability.threshold.rule.alertFlyout.alertPerRedundantFilterError.docsLink": "文档",
+=======
+    "xpack.observability.threshold.rule.alertFlyout.alertOnNoData": "没数据时提醒我",
+    "xpack.observability.threshold.rule.alertFlyout.alertPerRedundantFilterError.docsLink": "文档",
+    "xpack.observability.threshold.rule.alertFlyout.conditions": "条件",
+>>>>>>> whats-new
     "xpack.observability.threshold.rule.alertFlyout.createAlertPerHelpText": "为每个唯一值创建告警。例如：“host.id”或“cloud.region”。",
     "xpack.observability.threshold.rule.alertFlyout.createAlertPerText": "告警分组依据（可选）",
     "xpack.observability.threshold.rule.alertFlyout.customEquation": "定制方程",
@@ -27797,15 +28098,31 @@
     "xpack.observability.threshold.rule.alertFlyout.error.thresholdRequired": "“阈值”必填。",
     "xpack.observability.threshold.rule.alertFlyout.error.thresholdTypeRequired": "阈值必须包含有效数字。",
     "xpack.observability.threshold.rule.alertFlyout.error.timeRequred": "“时间大小”必填。",
+<<<<<<< HEAD
     "xpack.observability.threshold.rule.alertFlyout.groupDisappearHelpText": "启用此选项可在之前检测的组开始不报告任何数据时触发操作。不建议将此选项用于可能会快速自动启动和停止节点的动态扩展基础架构。",
     "xpack.observability.threshold.rule.alertFlyout.outsideRangeLabel": "不介于",
     "xpack.observability.threshold.rule.alertFlyout.removeCondition": "删除条件",
+=======
+    "xpack.observability.threshold.rule.alertFlyout.expandRowLabel": "展开行。",
+    "xpack.observability.threshold.rule.alertFlyout.filterHelpText": "使用 KQL 表达式限制告警触发的范围。",
+    "xpack.observability.threshold.rule.alertFlyout.filterLabel": "筛选（可选）",
+    "xpack.observability.threshold.rule.alertFlyout.groupDisappearHelpText": "启用此选项可在之前检测的组开始不报告任何数据时触发操作。不建议将此选项用于可能会快速自动启动和停止节点的动态扩展基础架构。",
+    "xpack.observability.threshold.rule.alertFlyout.noDataHelpText": "启用此选项可在指标在预期的时间段中未报告任何数据时或告警无法查询 Elasticsearch 时触发操作",
+    "xpack.observability.threshold.rule.alertFlyout.ofExpression.popoverLinkLabel": "了解如何添加更多数据",
+    "xpack.observability.threshold.rule.alertFlyout.outsideRangeLabel": "不介于",
+    "xpack.observability.threshold.rule.alertFlyout.removeCondition": "删除条件",
+    "xpack.observability.threshold.rule.alerting.groupActionVariableDescription": "报告数据的组名称。为了访问每个组密钥，请使用 context.groupByKeys。",
+>>>>>>> whats-new
     "xpack.observability.threshold.rule.alerting.noDataFormattedValue": "[无数据]",
     "xpack.observability.threshold.rule.alerting.threshold.defaultActionMessage": "\\{\\{alertName\\}\\} - \\{\\{context.group\\}\\} 处于 \\{\\{context.alertState\\}\\} 状态\n\n  原因：\n  \\{\\{context.reason\\}\\}\n  ",
     "xpack.observability.threshold.rule.alerting.threshold.fired": "告警",
     "xpack.observability.threshold.rule.alerting.threshold.nodata": "无数据",
     "xpack.observability.threshold.rule.alerting.threshold.noDataFormattedValue": "[无数据]",
     "xpack.observability.threshold.rule.alertsButton": "告警和规则",
+<<<<<<< HEAD
+=======
+    "xpack.observability.threshold.rule.alertStateActionVariableDescription": "告警的当前状态",
+>>>>>>> whats-new
     "xpack.observability.threshold.rule.cloudActionVariableDescription": "ECS 定义的云对象（如果在源中可用）。",
     "xpack.observability.threshold.rule.containerActionVariableDescription": "ECS 定义的容器对象（如果在源中可用）。",
     "xpack.observability.threshold.rule.createInventoryRuleButton": "创建库存规则",
@@ -27817,9 +28134,18 @@
     "xpack.observability.threshold.rule.infrastructureDropdownTitle": "基础设施规则",
     "xpack.observability.threshold.rule.labelsActionVariableDescription": "与在其上触发此告警的实体关联的标签列表。",
     "xpack.observability.threshold.rule.manageRules": "管理规则",
+<<<<<<< HEAD
     "xpack.observability.threshold.rule.metricsDropdownMenu": "指标",
     "xpack.observability.threshold.rule.metricsDropdownTitle": "指标规则",
     "xpack.observability.threshold.rule.orchestratorActionVariableDescription": "ECS 定义的 Orchestrator 对象（如果在源中可用）。",
+=======
+    "xpack.observability.threshold.rule.metricActionVariableDescription": "指定条件中的指标名称。用法：(ctx.metric.condition0, ctx.metric.condition1, 诸如此类)。",
+    "xpack.observability.threshold.rule.metricsDropdownMenu": "指标",
+    "xpack.observability.threshold.rule.metricsDropdownTitle": "指标规则",
+    "xpack.observability.threshold.rule.orchestratorActionVariableDescription": "ECS 定义的 Orchestrator 对象（如果在源中可用）。",
+    "xpack.observability.threshold.rule.originalAlertStateActionVariableDescription": "告警在恢复前的状态。这仅适用于恢复上下文",
+    "xpack.observability.threshold.rule.originalAlertStateWasWARNINGActionVariableDescription": "告警在恢复前的状态的布尔值。这可用于模板条件。这仅适用于恢复上下文",
+>>>>>>> whats-new
     "xpack.observability.threshold.rule.reasonActionVariableDescription": "告警原因的简洁描述",
     "xpack.observability.threshold.rule.sourceConfiguration.missingHttp": "无法加载源：无 HTTP 客户端可用。",
     "xpack.observability.threshold.rule.sourceConfiguration.updateFailureBody": "无法对指标配置应用更改。请稍后重试。",
@@ -27827,16 +28153,31 @@
     "xpack.observability.threshold.rule.sourceConfiguration.updateSuccessTitle": "已成功更新指标设置",
     "xpack.observability.threshold.rule.tagsActionVariableDescription": "与在其上触发此告警的实体关联的标记列表。",
     "xpack.observability.threshold.rule.threshold.aboveRecovery": "高于",
+<<<<<<< HEAD
+=======
+    "xpack.observability.threshold.rule.threshold.alertState": "告警",
+>>>>>>> whats-new
     "xpack.observability.threshold.rule.threshold.belowRecovery": "低于",
     "xpack.observability.threshold.rule.threshold.betweenRecovery": "介于",
     "xpack.observability.threshold.rule.threshold.customEquation": "定制方程",
     "xpack.observability.threshold.rule.threshold.documentCount": "文档计数",
+<<<<<<< HEAD
+=======
+    "xpack.observability.threshold.rule.threshold.errorState": "错误",
+    "xpack.observability.threshold.rule.threshold.noDataState": "无数据",
+    "xpack.observability.threshold.rule.threshold.okState": "正常 [已恢复]",
+    "xpack.observability.threshold.rule.thresholdActionVariableDescription": "指定条件中的指标阈值。用法：(ctx.threshold.condition0, ctx.threshold.condition1, 诸如此类)。",
+>>>>>>> whats-new
     "xpack.observability.threshold.rule.timestampDescription": "检测到告警时的时间戳。",
     "xpack.observability.threshold.rule.valueActionVariableDescription": "指定条件中的指标值。用法：(ctx.value.condition0, ctx.value.condition1, 诸如此类)。",
     "xpack.observability.threshold.rule.viewInAppUrlActionVariableDescription": "链接到告警源",
     "xpack.observability.threshold.ruleExplorer.groupByAriaLabel": "图表绘制依据",
     "xpack.observability.threshold.ruleExplorer.groupByLabel": "所有内容",
     "xpack.observability.threshold.ruleName": "阈值（技术预览）",
+<<<<<<< HEAD
+=======
+    "xpack.observability.thresholdRule.expressionItems.descriptionLabel": "当",
+>>>>>>> whats-new
     "xpack.observability.uiSettings.betaLabel": "公测版",
     "xpack.observability.uiSettings.technicalPreviewLabel": "技术预览",
     "xpack.observability.uiSettings.throttlingDocsLinkText": "在此处阅读通知。",
@@ -28258,6 +28599,10 @@
     "xpack.profiling.functionsView.newLabel": "新建",
     "xpack.profiling.functionsView.rankColumnLabel": "排名",
     "xpack.profiling.functionsView.samplesColumnLabel": "样例（估计）",
+<<<<<<< HEAD
+=======
+    "xpack.profiling.functionsView.showMoreButton": "显示更多信息",
+>>>>>>> whats-new
     "xpack.profiling.functionsView.totalSampleCountLabel": "总样例数估值：",
     "xpack.profiling.header.betaBadgeTooltip": "此模块不是 GA 版。请通过报告错误来帮助我们。",
     "xpack.profiling.header.giveFeedbackLink": "反馈",
@@ -30049,6 +30394,10 @@
     "xpack.securitySolution.flyout.correlations.relatedCasesHeading": "{count} 个相关{count, plural, other {案例}}",
     "xpack.securitySolution.flyout.correlations.sessionAlertsHeading": "{count, plural, other {# 个告警}}与会话相关",
     "xpack.securitySolution.flyout.correlations.sourceAlertsHeading": "{count, plural, other {# 个告警}}与源事件相关",
+<<<<<<< HEAD
+=======
+    "xpack.securitySolution.flyout.documentDetails.overviewTab.viewAllButton": "查看所有 {text}",
+>>>>>>> whats-new
     "xpack.securitySolution.flyout.errorMessage": "显示 {message} 时出现错误",
     "xpack.securitySolution.flyout.errorTitle": "无法显示 {title}",
     "xpack.securitySolution.footer.autoRefreshActiveTooltip": "自动刷新已启用时，时间线将显示匹配查询的最近 {numberOfItems} 个事件。",
@@ -30155,6 +30504,7 @@
     "xpack.securitySolution.responseActionsList.list.item.wasSuccessful": "{command} 已成功完成",
     "xpack.securitySolution.responseActionsList.list.recordRange": "正在显示第 {range} 个（共 {total} 个）{recordsLabel}",
     "xpack.securitySolution.responseActionsList.list.recordRangeLabel": "{records, plural, other {响应操作}}",
+    "xpack.securitySolution.riskEngine.calculateScores.dataViewNotFoundError": "找不到指定数据视图 ({dataViewId})。请使用现有数据视图，或忽略该参数以使用默认风险输入。",
     "xpack.securitySolution.riskInformation.explanation": "此功能利用转换，通过脚本指标聚合基于“开放”状态的检测规则告警来计算 5 天时间窗口内的 {riskEntityLower} 风险分数。该转换每小时运行一次，以根据流入的新检测规则告警更新分数。",
     "xpack.securitySolution.riskInformation.introduction": "{riskEntity} 风险分数功能将显示您环境中存在风险的 {riskEntityLowerPlural}。",
     "xpack.securitySolution.riskInformation.learnMore": "您可以详细了解 {riskEntity} 风险{riskScoreDocumentationLink}",
@@ -32080,6 +32430,13 @@
     "xpack.securitySolution.detectionEngine.ruleManagement.explainThenSummarizeRuleDetails": "请解释上面的选定规则。对于每个规则，重点说明它们为什么相关、在 Elastic 的检测规则存储库中发布的查询并提供深入解释，以及它们通常对组织的影响（如果检测到）。",
     "xpack.securitySolution.detectionEngine.ruleManagement.ruleManagementContextDescription": "选定检测规则",
     "xpack.securitySolution.detectionEngine.ruleManagement.ruleManagementContextTooltip": "将此告警添加为上下文",
+<<<<<<< HEAD
+=======
+    "xpack.securitySolution.detectionEngine.ruleManagementUi.maintenanceWindowCallout.fetchError": "无法检查维护窗口是否处于活动状态",
+    "xpack.securitySolution.detectionEngine.ruleManagementUi.maintenanceWindowCallout.fetchErrorDescription": "维护窗口正在运行时会停止规则通知。",
+    "xpack.securitySolution.detectionEngine.ruleManagementUi.maintenanceWindowCallout.maintenanceWindowActive": "维护窗口正在运行",
+    "xpack.securitySolution.detectionEngine.ruleManagementUi.maintenanceWindowCallout.maintenanceWindowActiveDescription": "维护窗口正在运行时会停止规则通知。",
+>>>>>>> whats-new
     "xpack.securitySolution.detectionEngine.ruleManagementUi.rulesTable.allRules.tabs.addRules": "添加规则",
     "xpack.securitySolution.detectionEngine.ruleManagementUi.rulesTable.allRules.tabs.monitoring": "规则监测",
     "xpack.securitySolution.detectionEngine.ruleManagementUi.rulesTable.allRules.tabs.rules": "已安装规则",
@@ -33321,6 +33678,12 @@
     "xpack.securitySolution.flyout.documentDetails.collapseDetailButton": "折叠告警详情",
     "xpack.securitySolution.flyout.documentDetails.correlationsButton": "相关性",
     "xpack.securitySolution.flyout.documentDetails.correlationsTitle": "相关性",
+<<<<<<< HEAD
+=======
+    "xpack.securitySolution.flyout.documentDetails.descriptionTitle": "描述",
+    "xpack.securitySolution.flyout.documentDetails.documentDescriptionCollapseButton": "折叠",
+    "xpack.securitySolution.flyout.documentDetails.documentDescriptionExpandButton": "展开",
+>>>>>>> whats-new
     "xpack.securitySolution.flyout.documentDetails.documentDescriptionTitle": "文档描述",
     "xpack.securitySolution.flyout.documentDetails.documentReasonTitle": "文档原因",
     "xpack.securitySolution.flyout.documentDetails.entitiesButton": "实体",
@@ -33345,13 +33708,23 @@
     "xpack.securitySolution.flyout.documentDetails.overviewTab.correlations.sameSourceEventAlert": "告警与同一源事件相关",
     "xpack.securitySolution.flyout.documentDetails.overviewTab.correlations.sameSourceEventAlerts": "告警与同一源事件相关",
     "xpack.securitySolution.flyout.documentDetails.overviewTab.correlationsText": "相关性字段",
+<<<<<<< HEAD
     "xpack.securitySolution.flyout.documentDetails.overviewTab.prevalenceRowText": "不常见",
+=======
+    "xpack.securitySolution.flyout.documentDetails.overviewTab.entitiesText": "实体",
+    "xpack.securitySolution.flyout.documentDetails.overviewTab.prevalenceRowText": "不常见",
+    "xpack.securitySolution.flyout.documentDetails.overviewTab.prevalenceText": "普及率字段",
+>>>>>>> whats-new
     "xpack.securitySolution.flyout.documentDetails.overviewTab.threatIntelligence.threatEnrichment": "已使用威胁情报扩充字段",
     "xpack.securitySolution.flyout.documentDetails.overviewTab.threatIntelligence.threatEnrichments": "已使用威胁情报扩充字段",
     "xpack.securitySolution.flyout.documentDetails.overviewTab.threatIntelligence.threatMatch": "检测到威胁匹配",
     "xpack.securitySolution.flyout.documentDetails.overviewTab.threatIntelligence.threatMatches": "检测到威胁匹配",
     "xpack.securitySolution.flyout.documentDetails.prevalenceButton": "普及率",
     "xpack.securitySolution.flyout.documentDetails.prevalenceTitle": "普及率",
+<<<<<<< HEAD
+=======
+    "xpack.securitySolution.flyout.documentDetails.responseButton": "响应",
+>>>>>>> whats-new
     "xpack.securitySolution.flyout.documentDetails.riskScoreTitle": "风险分数",
     "xpack.securitySolution.flyout.documentDetails.ruleDescriptionTitle": "规则描述",
     "xpack.securitySolution.flyout.documentDetails.sessionPreview.commandText": "依据",
@@ -33367,6 +33740,7 @@
     "xpack.securitySolution.flyout.documentDetails.technicalPreviewTitle": "技术预览",
     "xpack.securitySolution.flyout.documentDetails.threatIntelligenceButton": "威胁情报",
     "xpack.securitySolution.flyout.documentDetails.threatIntelligenceTitle": "威胁情报",
+    "xpack.securitySolution.flyout.documentDetails.viewRuleText": "查看规则",
     "xpack.securitySolution.flyout.documentDetails.visualizationsTitle": "可视化",
     "xpack.securitySolution.flyout.documentDetails.visualizeOptions": "Visualize 选项",
     "xpack.securitySolution.flyout.documentDetails.visualizeTab": "Visualize",
@@ -33663,6 +34037,7 @@
     "xpack.securitySolution.lists.valueListsTable.title": "值列表",
     "xpack.securitySolution.lists.valueListsTable.typeColumn": "类型",
     "xpack.securitySolution.lists.valueListsUploadError": "上传值列表时出错。",
+    "xpack.securitySolution.management.landing.pageTitle": "管理",
     "xpack.securitySolution.management.policiesSelector.globalEntries": "全局条目",
     "xpack.securitySolution.management.policiesSelector.label": "策略",
     "xpack.securitySolution.management.policiesSelector.unassignedEntries": "未分配的条目",
@@ -34700,6 +35075,15 @@
     "xpack.securitySolution.zeek.shrDescription": "响应方已发送 SYN ACK，后跟 FIN，发起方未发送 SYN",
     "xpack.serverlessSearch.apiKey.activeKeys": "您有 {number} 个活动密钥。",
     "xpack.serverlessSearch.apiKey.expiresHelpText": "此 API 密钥将于 {expirationDate}到期",
+<<<<<<< HEAD
+=======
+    "xpack.serverlessSearch.header.greeting.title": "{name}您好！",
+    "xpack.serverlessSearch.ingestData.clientDocLink": "{languageName} API 参考",
+    "xpack.serverlessSearch.installClient.clientDocLink": "{languageName} 客户端文档",
+    "xpack.serverlessSearch.selectClient.description": "Elastic 以几种流行语言构建和维护客户端，我们的社区也做出了许多贡献。选择您常用的语言客户端或深入分析 {console} 以开始使用。",
+    "xpack.serverlessSearch.apiCallout.content": "使用 Console，您可以直接调用 Elasticsearch 和 Kibana REST API，而无需安装语言客户端。",
+    "xpack.serverlessSearch.apiCallOut.title": "通过 Console 调用 API",
+>>>>>>> whats-new
     "xpack.serverlessSearch.apiKey.apiKeyStepDescription": "此密钥仅显示一次，因此请将其保存到某个安全位置。我们不存储您的 API 密钥，因此，如果您丢失了密钥，则需要生成替代密钥。",
     "xpack.serverlessSearch.apiKey.apiKeyStepTitle": "存储此 API 密钥",
     "xpack.serverlessSearch.apiKey.description": "您需要这些唯一标识符才能安全连接到 Elasticsearch 项目。",
@@ -34732,6 +35116,11 @@
     "xpack.serverlessSearch.apiKey.userFieldLabel": "用户",
     "xpack.serverlessSearch.back": "返回",
     "xpack.serverlessSearch.cancel": "取消",
+<<<<<<< HEAD
+=======
+    "xpack.serverlessSearch.codeBox.copyButtonLabel": "复制",
+    "xpack.serverlessSearch.codeBox.selectAriaLabel": "选择编程语言",
+>>>>>>> whats-new
     "xpack.serverlessSearch.configureClient.advancedConfigLabel": "高级配置",
     "xpack.serverlessSearch.configureClient.basicConfigLabel": "基本配置",
     "xpack.serverlessSearch.configureClient.description": "使用唯一 API 密钥和云 ID 对客户端进行初始化",
@@ -34752,7 +35141,34 @@
     "xpack.serverlessSearch.footer.searchUI.description": "搜索 UI 是一个由 Elastic 维护的免费开源 JavaScript 库，用于快速打造现代、富于吸引力的搜索体验。",
     "xpack.serverlessSearch.footer.searchUI.title": "通过搜索 UI 构建用户界面",
     "xpack.serverlessSearch.footer.title": "后续操作",
+<<<<<<< HEAD
     "xpack.serverlessSearch.header.title": "Elasticsearch 入门",
+=======
+    "xpack.serverlessSearch.githubLink.curl.label": "curl",
+    "xpack.serverlessSearch.githubLink.javascript.label": "Elasticsearch",
+    "xpack.serverlessSearch.githubLink.ruby.label": "elasticsearch-ruby",
+    "xpack.serverlessSearch.header.description": "设置您的编程语言客户端，采集一些数据，如此即可在数分钟内开始搜索。",
+    "xpack.serverlessSearch.header.title": "Elasticsearch 入门",
+    "xpack.serverlessSearch.ingestData.beatsDescription": "用于 Elasticsearch 的轻量级、单一用途数据采集器。使用 Beats 从您的服务器发送运营数据。",
+    "xpack.serverlessSearch.ingestData.beatsLink": "Beats",
+    "xpack.serverlessSearch.ingestData.beatsTitle": "Beats",
+    "xpack.serverlessSearch.ingestData.connectorsDescription": "用于将数据从第三方源同步到 Elasticsearch 的专用集成。使用 Elastic 连接器同步来自一系列数据库和对象存储的内容。",
+    "xpack.serverlessSearch.ingestData.connectorsPythonLink": "connectors-python",
+    "xpack.serverlessSearch.ingestData.connectorsTitle": "连接器客户端",
+    "xpack.serverlessSearch.ingestData.description": "将数据添加到数据流或索引，使其可进行搜索。选择适合您的应用程序和工作流的集成方法。",
+    "xpack.serverlessSearch.ingestData.ingestApiDescription": "最灵活的数据索引方法，允许您全面控制定制和优化选项。",
+    "xpack.serverlessSearch.ingestData.ingestApiLabel": "通过 API 采集",
+    "xpack.serverlessSearch.ingestData.ingestIntegrationDescription": "针对转换数据并将其传输到 Elasticsearch 而优化的专用采集工具。",
+    "xpack.serverlessSearch.ingestData.ingestIntegrationLabel": "通过集成采集",
+    "xpack.serverlessSearch.ingestData.ingestLegendLabel": "选择采集方法",
+    "xpack.serverlessSearch.ingestData.integrationsLink": "关于集成",
+    "xpack.serverlessSearch.ingestData.logstashDescription": "将数据添加到数据流或索引，使其可进行搜索。选择适合您的应用程序和工作流的集成方法。",
+    "xpack.serverlessSearch.ingestData.logstashLink": "Logstash",
+    "xpack.serverlessSearch.ingestData.logstashTitle": "Logstash",
+    "xpack.serverlessSearch.ingestData.title": "采集数据",
+    "xpack.serverlessSearch.installClient.description": "Elastic 以几种流行语言构建和维护客户端，我们的社区也做出了许多贡献。安装您常用的语言客户端以开始使用。",
+    "xpack.serverlessSearch.installClient.title": "安装客户端",
+>>>>>>> whats-new
     "xpack.serverlessSearch.invalidJsonError": "JSON 无效",
     "xpack.serverlessSearch.languages.cURL": "cURL",
     "xpack.serverlessSearch.languages.javascript": "JavaScript/Node.js",
@@ -34761,6 +35177,10 @@
     "xpack.serverlessSearch.nav.content": "内容",
     "xpack.serverlessSearch.nav.content.indexingApi": "正在索引 API",
     "xpack.serverlessSearch.nav.content.indices": "索引",
+<<<<<<< HEAD
+=======
+    "xpack.serverlessSearch.nav.content.transforms": "转换",
+>>>>>>> whats-new
     "xpack.serverlessSearch.nav.devTools": "开发工具",
     "xpack.serverlessSearch.nav.explore": "浏览",
     "xpack.serverlessSearch.nav.gettingStarted": "入门",
@@ -34770,8 +35190,55 @@
     "xpack.serverlessSearch.required": "必需",
     "xpack.serverlessSearch.searchQuery.description": "现在您已做好准备，可以开始体验搜索并对您的 Elasticsearch 数据执行聚合。",
     "xpack.serverlessSearch.searchQuery.title": "构建您的首个搜索查询",
+<<<<<<< HEAD
     "xpack.serverlessSearch.testConnection.description": "发送测试请求，以确认您的语言客户端和 Elasticsearch 实例已启动并正在运行。",
     "xpack.serverlessSearch.testConnection.title": "测试您的连接",
+=======
+    "xpack.serverlessSearch.selectClient.apiRequestConsoleDocLink": "在 Console 中运行 API 请求 ",
+    "xpack.serverlessSearch.selectClient.callout.description": "借助 Console，您可以立即开始使用我们的 REST API。无需进行安装。",
+    "xpack.serverlessSearch.selectClient.callout.link": "立即试用 Console",
+    "xpack.serverlessSearch.selectClient.callout.title": "立即在 Console 中试用",
+    "xpack.serverlessSearch.selectClient.description.console.link": "控制台",
+    "xpack.serverlessSearch.selectClient.elasticsearchClientDocLink": "Elasticsearch 客户端 ",
+    "xpack.serverlessSearch.selectClient.heading": "选择一个",
+    "xpack.serverlessSearch.selectClient.title": "选择客户端",
+    "xpack.serverlessSearch.testConnection.description": "发送测试请求，以确认您的语言客户端和 Elasticsearch 实例已启动并正在运行。",
+    "xpack.serverlessSearch.testConnection.title": "测试您的连接",
+    "xpack.serverlessSearch.tryInConsoleButton": "在 Console 中试用",
+    "xpack.serverlessSecurity.getStarted.togglePanel.progressTracker.stepsLeft": "剩下 {steps} 个{steps, plural, =1 {步骤} other {步骤}}",
+    "xpack.serverlessSecurity.getStarted.togglePanel.progressTracker.stepTimeMin": "大约 {min} {min, plural, =1 {最小值} other {分钟}}",
+    "xpack.serverlessSecurity.getStarted.description": "设置 Elastic Security 工作区。 使用下面的切换按钮策展最适合您环境的任务列表",
+    "xpack.serverlessSecurity.getStarted.subTitle": "开始使用",
+    "xpack.serverlessSecurity.getStarted.title": "欢迎",
+    "xpack.serverlessSecurity.getStarted.togglePanel.activateAndCreateRules.title": "激活并创建规则",
+    "xpack.serverlessSecurity.getStarted.togglePanel.bringInYourData.title": "纳入您的数据",
+    "xpack.serverlessSecurity.getStarted.togglePanel.empty.description": "打开切换按钮，继续您策展的“开始使用”体验",
+    "xpack.serverlessSecurity.getStarted.togglePanel.empty.title": "嗯，那里似乎没有任何内容",
+    "xpack.serverlessSecurity.getStarted.togglePanel.getMoreFromElasticSecurity.title": "充分利用 Elastic Security",
+    "xpack.serverlessSecurity.getStarted.togglePanel.getSetUp.title": "完成设置",
+    "xpack.serverlessSecurity.getStarted.togglePanel.introduction.title": "introduction",
+    "xpack.serverlessSecurity.getStarted.togglePanel.masterTheInvestigationsWorkflow.title": "掌握调查工作流",
+    "xpack.serverlessSecurity.getStarted.togglePanel.optimizeYourWorkspace.title": "优化工作区",
+    "xpack.serverlessSecurity.getStarted.togglePanel.productBadge.analytics": "分析",
+    "xpack.serverlessSecurity.getStarted.togglePanel.productBadge.cloud": "云",
+    "xpack.serverlessSecurity.getStarted.togglePanel.productBadge.edr": "EDR",
+    "xpack.serverlessSecurity.getStarted.togglePanel.protectYourEnvironmentInRuntime.title": "保护您的运行时环境",
+    "xpack.serverlessSecurity.getStarted.togglePanel.respondToThreatsWithAutomation.title": "自动响应威胁",
+    "xpack.serverlessSecurity.getStarted.togglePanel.switch.analytics.label": "分析",
+    "xpack.serverlessSecurity.getStarted.togglePanel.switch.cloud.label": "云",
+    "xpack.serverlessSecurity.getStarted.togglePanel.switch.endpoint.label": "终端",
+    "xpack.serverlessSecurity.getStarted.togglePanel.watchOverviewVideo.description1": "Elastic Security 可保障您组织数据的安全，使其免受攻击。",
+    "xpack.serverlessSecurity.getStarted.togglePanel.watchOverviewVideo.description2": "我们的统一安全平台将分析、EDR 和云安全功能整合到单一 SaaS 产品中，为组织提供全面的解决方案来防范一系列安全威胁。借助集中式管理、实时威胁检测和响应以及可扩展性，我们的平台可帮助组织改善安全态势并降低数据泄露风险。",
+    "xpack.serverlessSecurity.getStarted.togglePanel.watchOverviewVideo.description3": "观看视频，浏览可帮助您确保数据安全的核心功能。",
+    "xpack.serverlessSecurity.getStarted.togglePanel.watchOverviewVideo.header": "Elastic Security",
+    "xpack.serverlessSecurity.getStarted.togglePanel.watchOverviewVideo.title": "观看概述视频",
+    "xpack.serverlessSecurity.getStarted.welcomePanel.inviteYourTeam.description": "通过协作提高安全性",
+    "xpack.serverlessSecurity.getStarted.welcomePanel.inviteYourTeam.title": "邀请您的团队",
+    "xpack.serverlessSecurity.getStarted.welcomePanel.progressTracker.title": "进度跟踪器",
+    "xpack.serverlessSecurity.getStarted.welcomePanel.projectCreated.description": "在此处查看所有项目。",
+    "xpack.serverlessSecurity.getStarted.welcomePanel.projectCreated.title": "已创建项目",
+    "xpack.serverlessSecurity.getStartedProductLabel.title": "策展您的开始使用体验：",
+>>>>>>> whats-new
     "xpack.sessionView.alertFilteredCountStatusLabel": " 正在显示 {count} 个告警",
     "xpack.sessionView.alertTotalCountStatusLabel": "正在显示 {count} 个告警",
     "xpack.sessionView.processTree.loadMore": "显示 {pageSize} 个后续事件",
@@ -36657,6 +37124,21 @@
     "xpack.stackConnectors.xmatters.title": "xMatters",
     "xpack.stackConnectors.xmatters.unexpectedNullResponseErrorMessage": "来自 xmatters 的异常空响应",
     "xpack.synthetics.alertRules.monitorStatus.reasonMessage": "来自 {location} 的监测“{name}”为 {status}。已于 {checkedAt} 检查。",
+<<<<<<< HEAD
+=======
+    "xpack.synthetics.alerts.durationAnomaly.defaultActionMessage": "{anomalyStartTimestamp} 在 url {monitorUrl} 的 {monitor} 上检测到异常（{severity} 级别）响应时间。异常严重性分数为 {severityScore}。\n从位置 {observerLocation} 检测到高达 {slowestAnomalyResponse} 的响应时间。预期响应时间为 {expectedResponseTime}。",
+    "xpack.synthetics.alerts.durationAnomaly.defaultRecoveryMessage": "{anomalyStartTimestamp} 从位置 {observerLocation} 在 url {monitorUrl} 的监测 {monitor} 上检测到异常（{severity} 级别）响应时间的告警已恢复",
+    "xpack.synthetics.alerts.monitorExpression.label": "移除筛选 {title}",
+    "xpack.synthetics.alerts.monitorStatus.actionVariables.down": "在过去 {interval}中失败 {count} 次。大于 {numTimes} 时告警。",
+    "xpack.synthetics.alerts.monitorStatus.actionVariables.downAndAvailabilityMessage": "{downMonitorsMessage} {availabilityBreachMessage}",
+    "xpack.synthetics.alerts.monitorStatus.defaultActionMessage": "在 {observerLocation}，URL 为 {monitorUrl} 的监测 {monitorName} 是 {statusMessage} 最新错误消息是 {latestErrorMessage}，已于 {checkedAt} 检查",
+    "xpack.synthetics.alerts.monitorStatus.defaultRecoveryMessage": "来自 {observerLocation} 且 url 为 {monitorUrl} 的监测 {monitorName} 的告警已恢复",
+    "xpack.synthetics.alerts.monitorStatus.defaultRecoverySubjectMessage": "URL 为 {monitorUrl} 的监测 {monitorName} 已恢复",
+    "xpack.synthetics.alerts.monitorStatus.defaultSubjectMessage": "URL 为 {monitorUrl} 的监测 {monitorName} 已关闭",
+    "xpack.synthetics.alerts.monitorStatus.monitorCallOut.title": "此告警将应用到大约 {snapshotCount} 个监测。",
+    "xpack.synthetics.alerts.monitorStatus.reasonMessage": "来自 {location} 的监测“{name}”为 {status} 已于 {checkedAt} 检查。",
+    "xpack.synthetics.alerts.monitorStatus.timerangeValueField.value": "最后一个 {value}",
+>>>>>>> whats-new
     "xpack.synthetics.alerts.monitorStatus.upCheck.reasonWithoutDuration": "监测现已再次启动。它于 {checkedAt}成功运行",
     "xpack.synthetics.alerts.syntheticsMonitorStatus.defaultActionMessage": "“{monitorName}”为来自 {locationName} 的 {status} 状态 - Elastic Synthetics\n\n详情：\n\n- 监测名称：{monitorName}  \n- {monitorUrlLabel}：{monitorUrl}  \n- 监测类型：{monitorType}  \n- 检查时间：{checkedAt}  \n- 来自：{locationName}  \n- 收到错误：{lastErrorMessage}  \n{linkMessage}",
     "xpack.synthetics.alerts.syntheticsMonitorStatus.defaultRecoveryMessage": "来自 {locationName} 的“{monitorName}”的告警不再处于活动状态：{recoveryReason} - Elastic Synthetics\n\n详情：\n\n- 监测名称：{monitorName}  \n- {monitorUrlLabel}：{monitorUrl}  \n- 监测类型：{monitorType}  \n- 来自：{locationName}  \n- 收到的上一个错误：{lastErrorMessage}  \n{linkMessage}",
@@ -36664,6 +37146,17 @@
     "xpack.synthetics.alerts.syntheticsMonitorStatus.defaultSubjectMessage": "“{monitorName}”({locationName}) 已关闭 - Elastic Synthetics",
     "xpack.synthetics.alerts.syntheticsMonitorTLS.defaultRecoverySubjectMessage": "告警已解析证书 {commonName} - Elastic Synthetics",
     "xpack.synthetics.alerts.syntheticsMonitorTLS.defaultSubjectMessage": "已针对证书 {commonName} 触发告警 - Elastic Synthetics",
+<<<<<<< HEAD
+=======
+    "xpack.synthetics.alerts.tls.defaultActionMessage": "检测到来自颁发者 {issuer} 的 TLS 证书 {commonName} 的状态为 {status}。证书 {summary}",
+    "xpack.synthetics.alerts.tls.defaultRecoveryMessage": "来自颁发者 {issuer} 的 TLS 证书 {commonName} 的告警已恢复",
+    "xpack.synthetics.alerts.tls.legacy.defaultActionMessage": "检测到 {count} 个 TLS 证书即将过期或即将过时。\n{expiringConditionalOpen}\n即将过期的证书计数：{expiringCount}\n即将过期的证书：{expiringCommonNameAndDate}\n{expiringConditionalClose}\n{agingConditionalOpen}\n过时的证书计数：{agingCount}\n过时的证书：{agingCommonNameAndDate}\n{agingConditionalClose}\n",
+    "xpack.synthetics.alerts.tls.validAfterExpiredString": "已于 {relativeDate} 天前，即 {date}过期。",
+    "xpack.synthetics.alerts.tls.validAfterExpiringString": "将在 {relativeDate} 天后，即 {date}到期。",
+    "xpack.synthetics.alerts.tls.validBeforeExpiredString": "自 {relativeDate} 天前，即 {date}开始生效。",
+    "xpack.synthetics.alerts.tls.validBeforeExpiringString": "从现在到 {date}的 {relativeDate} 天里无效。",
+    "xpack.synthetics.availabilityLabelText": "{value} %",
+>>>>>>> whats-new
     "xpack.synthetics.certificates.heading": "TLS 证书 ({total})",
     "xpack.synthetics.certificatesRoute.title": "证书 | {baseTitle}",
     "xpack.synthetics.certs.status.ok.label": " 对于 {okRelativeDate}",
@@ -36694,6 +37187,10 @@
     "xpack.synthetics.management.monitorList.recordRangeLabel": "{monitorCount, plural, other {监测}}",
     "xpack.synthetics.management.monitorList.recordTotal": "正在显示 {total} 个 {monitorsLabel}",
     "xpack.synthetics.manualTestRun.failedTest.name": "{name} 的手动测试运行失败",
+<<<<<<< HEAD
+=======
+    "xpack.synthetics.ml.enableAnomalyDetectionPanel.manageMLJobDescription": "创建作业后，可以在 {mlJobsPageLink}中管理作业以及查看更多详细信息。",
+>>>>>>> whats-new
     "xpack.synthetics.monitor.stepOfSteps": "第 {stepNumber} 步，共 {totalSteps} 步",
     "xpack.synthetics.monitorAddEdit.throttling.connectionProfile": "（{download} Mbps，{upload} Mbps，{latency} 毫秒）",
     "xpack.synthetics.monitorConfig.monitorScriptEditStep.description": "使用 Elastic Synthetics 记录器生成并上传脚本。或者，您也可以在脚本编辑器中编辑现有 {playwright} 脚本（或粘贴新脚本）。",
@@ -36749,12 +37246,23 @@
     "xpack.synthetics.paramManagement.paramDeleteSuccessMessage.name": "已成功删除参数 {name}。",
     "xpack.synthetics.params.description": "定义可在浏览器和轻量级监测的配置中使用的变量和参数，如凭据或 URL。{learnMore}",
     "xpack.synthetics.params.unprivileged.unprivilegedDescription": "您需要其他权限才能查看 Synthetics 应用数据使用情况和保留设置。{docsLink}",
+<<<<<<< HEAD
+=======
+    "xpack.synthetics.pingist.durationSecondsColumnFormatting": "{seconds} 秒",
+    "xpack.synthetics.pingist.durationSecondsColumnFormatting.singular": "{seconds} 秒",
+    "xpack.synthetics.pingList.durationMsColumnFormatting": "{millis} 毫秒",
+>>>>>>> whats-new
     "xpack.synthetics.pingList.expandedRow.bodySize": "正文大小为 {bodyBytes}。",
     "xpack.synthetics.pingList.expandedRow.truncated": "显示前 {contentBytes} 个字节。",
     "xpack.synthetics.pingList.recencyMessage": "{fromNow}已检查",
     "xpack.synthetics.project.readOnly.callout.content": "已从外部项目添加此监测：{projectId}。在此页面，您只能启用和禁用监测及其告警，或将其移除。要做出配置更改，您必须编辑其源文件，然后从该项目再次推送配置。",
     "xpack.synthetics.projectMonitorApi.validation.invalidUrlOrHosts.description": "`{monitorType}` 项目监测必须在版本 `{version}` 中具有字段 `{key}` 的一个值。未创建或更新您的监测。",
     "xpack.synthetics.prompt.errors.notFound.body": "抱歉，找不到 ID 为 {monitorId} 的监测。它可能已被移除，或您没有查看权限。",
+<<<<<<< HEAD
+=======
+    "xpack.synthetics.public.pages.mappingError.bodyDocsLink": "您可以在 {docsLink} 中了解如何解决此问题。",
+    "xpack.synthetics.public.pages.mappingError.bodyMessage": "检测到不正确的映射！可能您忘记运行 Heartbeat {setup} 命令？",
+>>>>>>> whats-new
     "xpack.synthetics.rules.tls.defaultActionMessage": "检测到的 TLS 证书 {commonName} 为 {status} 状态 - Elastic Synthetics\n\n详情：\n\n- 摘要：{summary}\n- 常见名称：{commonName}\n- 颁发者：{issuer}\n- 监测：{monitorName}  \n- 监测 URL：{monitorUrl}  \n- 监测类型：{monitorType}  \n- 来自：{locationName}",
     "xpack.synthetics.rules.tls.validAfterExpiredString": "已于 {relativeDate} 天前，即 {date}过期。",
     "xpack.synthetics.rules.tls.validAfterExpiringString": "将在 {relativeDate} 天后，即 {date}到期。",
@@ -36798,6 +37306,10 @@
     "xpack.synthetics.addEditMonitor.scriptEditor.label": "脚本编辑器",
     "xpack.synthetics.addEditMonitor.scriptEditor.placeholder": "// 在此处粘贴 Playwright 脚本......",
     "xpack.synthetics.alertDropdown.noPermissions": "您的权限不足，无法执行此操作。",
+<<<<<<< HEAD
+=======
+    "xpack.synthetics.alertDropdown.noWritePermissions": "您需要 Uptime 的读写访问权限才能在此应用中创建告警。",
+>>>>>>> whats-new
     "xpack.synthetics.alerting.noConnectorsCallout.button": "立即配置",
     "xpack.synthetics.alerting.noConnectorsCallout.content": "您具有启用了告警的监测，但未配置默认连接器来发送那些告警。",
     "xpack.synthetics.alerting.noConnectorsCallout.header": "未发送告警",
@@ -36829,6 +37341,7 @@
     "xpack.synthetics.alertRules.monitorStatus.browser.label": "浏览器",
     "xpack.synthetics.alertRules.monitorStatus.host.label": "主机",
     "xpack.synthetics.alertRules.monitorStatus.unavailableUrlLabel": "（不可用）",
+<<<<<<< HEAD
     "xpack.synthetics.alerts.monitorStatus.absoluteLink.label": "- 链接",
     "xpack.synthetics.alerts.monitorStatus.defaultRecovery.status": "已恢复",
     "xpack.synthetics.alerts.monitorStatus.deleteMonitor.reason": "此监测已删除",
@@ -36837,6 +37350,107 @@
     "xpack.synthetics.alerts.monitorStatus.relativeLink.label": "- 相对链接",
     "xpack.synthetics.alerts.monitorStatus.removedLocation.reason": "此位置已从监测中移除",
     "xpack.synthetics.alerts.monitorStatus.removedLocation.status": "已恢复",
+=======
+    "xpack.synthetics.alerts.anomaly.criteriaExpression.ariaLabel": "显示选定监测的条件的表达式。",
+    "xpack.synthetics.alerts.anomaly.criteriaExpression.description": "当监测",
+    "xpack.synthetics.alerts.anomaly.scoreExpression.ariaLabel": "显示异常告警阈值的条件的表达式。",
+    "xpack.synthetics.alerts.anomaly.scoreExpression.description": "具有异常，严重性为",
+    "xpack.synthetics.alerts.createRulesPanel.title": "创建规则",
+    "xpack.synthetics.alerts.durationAnomaly": "Uptime 持续时间异常",
+    "xpack.synthetics.alerts.durationAnomaly.actionVariables.state.anomalyStartTimestamp": "异常开始的 ISO8601 时间戳。",
+    "xpack.synthetics.alerts.durationAnomaly.actionVariables.state.expectedResponseTime": "预期响应时间",
+    "xpack.synthetics.alerts.durationAnomaly.actionVariables.state.monitor": "名称或 ID 的友好呈现，建议类似于 My Monitor 的名称",
+    "xpack.synthetics.alerts.durationAnomaly.actionVariables.state.monitorId": "监测的 ID。",
+    "xpack.synthetics.alerts.durationAnomaly.actionVariables.state.monitorUrl": "监测的 URL。",
+    "xpack.synthetics.alerts.durationAnomaly.actionVariables.state.observerLocation": "执行 Heartbeat 检查的观察者位置。",
+    "xpack.synthetics.alerts.durationAnomaly.actionVariables.state.severity": "异常的严重性。",
+    "xpack.synthetics.alerts.durationAnomaly.actionVariables.state.severityScore": "异常严重性分数",
+    "xpack.synthetics.alerts.durationAnomaly.actionVariables.state.slowestAnomalyResponse": "在附加单位（ms、s）的异常存储桶期间最慢的响应时间。",
+    "xpack.synthetics.alerts.durationAnomaly.clientName": "Uptime 持续时间异常",
+    "xpack.synthetics.alerts.durationAnomaly.description": "运行时间监测持续时间异常时告警。",
+    "xpack.synthetics.alerts.monitorStatus": "运行时间监测状态",
+    "xpack.synthetics.alerts.monitorStatus.absoluteLink.label": "- 链接",
+    "xpack.synthetics.alerts.monitorStatus.actionVariables.context.alertDetailUrl.description": "链接到告警故障排除视图获取进一步的上下文和详情。如果未配置 server.publicBaseUrl，这将为空字符串。",
+    "xpack.synthetics.alerts.monitorStatus.actionVariables.context.alertReasonMessage.description": "告警原因的简洁描述",
+    "xpack.synthetics.alerts.monitorStatus.actionVariables.context.message.description": "生成的消息，汇总当前关闭的监测",
+    "xpack.synthetics.alerts.monitorStatus.actionVariables.context.viewInAppUrl.description": "链接到告警源",
+    "xpack.synthetics.alerts.monitorStatus.actionVariables.state.checkedAt": "监测检查的时间戳。",
+    "xpack.synthetics.alerts.monitorStatus.actionVariables.state.currentTriggerStarted": "表示告警触发时当前触发状况开始的时间戳",
+    "xpack.synthetics.alerts.monitorStatus.actionVariables.state.firstCheckedAt": "表示此告警首次检查的时间戳",
+    "xpack.synthetics.alerts.monitorStatus.actionVariables.state.firstTriggeredAt": "表示告警首次触发的时间戳",
+    "xpack.synthetics.alerts.monitorStatus.actionVariables.state.isTriggered": "表示告警当前是否触发的标志",
+    "xpack.synthetics.alerts.monitorStatus.actionVariables.state.lastCheckedAt": "表示告警最近检查时间的时间戳",
+    "xpack.synthetics.alerts.monitorStatus.actionVariables.state.lastErrorMessage": "监测最新错误消息",
+    "xpack.synthetics.alerts.monitorStatus.actionVariables.state.lastResolvedAt": "表示此告警最近解决时间的时间戳",
+    "xpack.synthetics.alerts.monitorStatus.actionVariables.state.lastTriggeredAt": "表示告警最近触发时间的时间戳",
+    "xpack.synthetics.alerts.monitorStatus.actionVariables.state.monitor": "名称或 ID 的友好呈现，建议类似于 My Monitor 的名称",
+    "xpack.synthetics.alerts.monitorStatus.actionVariables.state.monitorId": "监测的 ID。",
+    "xpack.synthetics.alerts.monitorStatus.actionVariables.state.monitorType": "监测的类型（例如 HTTP/TCP）。",
+    "xpack.synthetics.alerts.monitorStatus.actionVariables.state.monitorUrl": "监测的 URL。",
+    "xpack.synthetics.alerts.monitorStatus.actionVariables.state.observerHostname": "执行 Heartbeat 检查的观察者主机名。",
+    "xpack.synthetics.alerts.monitorStatus.actionVariables.state.observerLocation": "执行 Heartbeat 检查的观察者位置。",
+    "xpack.synthetics.alerts.monitorStatus.actionVariables.state.statusMessage": "状态消息，例如关闭和/或低于可用性阈值（如果执行可用性检查）。",
+    "xpack.synthetics.alerts.monitorStatus.addFilter": "添加筛选",
+    "xpack.synthetics.alerts.monitorStatus.addFilter.location": "位置",
+    "xpack.synthetics.alerts.monitorStatus.addFilter.port": "端口",
+    "xpack.synthetics.alerts.monitorStatus.addFilter.tag": "标签",
+    "xpack.synthetics.alerts.monitorStatus.addFilter.type": "类型",
+    "xpack.synthetics.alerts.monitorStatus.availability.isEnabledCheckbox.label": "可用性",
+    "xpack.synthetics.alerts.monitorStatus.availability.threshold.anyMonitorDescription": "任何监测启动于",
+    "xpack.synthetics.alerts.monitorStatus.availability.threshold.ariaLabel": "指定此告警的可用性阈值",
+    "xpack.synthetics.alerts.monitorStatus.availability.threshold.description": "匹配的监测运行于",
+    "xpack.synthetics.alerts.monitorStatus.availability.threshold.input.ariaLabel": "输入用于检查此告警的可用性阈值",
+    "xpack.synthetics.alerts.monitorStatus.availability.timerangeValueField.ariaLabel": "输入告警可用性检查的单位数。",
+    "xpack.synthetics.alerts.monitorStatus.availability.timerangeValueField.expression": "（之内）过去",
+    "xpack.synthetics.alerts.monitorStatus.availability.timerangeValueField.popover.ariaLabel": "指定跟踪时间范围的可用性",
+    "xpack.synthetics.alerts.monitorStatus.availability.unit.headline": "选择时间范围单位",
+    "xpack.synthetics.alerts.monitorStatus.availability.unit.selectable": "使用此选择来设置此告警的可用性范围单位",
+    "xpack.synthetics.alerts.monitorStatus.clientName": "运行时间监测状态",
+    "xpack.synthetics.alerts.monitorStatus.defaultRecovery.status": "已恢复",
+    "xpack.synthetics.alerts.monitorStatus.deleteMonitor.reason": "此监测已删除",
+    "xpack.synthetics.alerts.monitorStatus.deleteMonitor.status": "已删除",
+    "xpack.synthetics.alerts.monitorStatus.description": "监测关闭或超出可用性阈值时告警。",
+    "xpack.synthetics.alerts.monitorStatus.downLabel": "关闭",
+    "xpack.synthetics.alerts.monitorStatus.filterBar.ariaLabel": "允许对监测状态告警使用筛选条件的输入",
+    "xpack.synthetics.alerts.monitorStatus.filters.anyLocation": "任意位置",
+    "xpack.synthetics.alerts.monitorStatus.filters.anyPort": "任意端口",
+    "xpack.synthetics.alerts.monitorStatus.filters.anyTag": "任意标签",
+    "xpack.synthetics.alerts.monitorStatus.filters.anyType": "任意类型",
+    "xpack.synthetics.alerts.monitorStatus.filters.from": "自",
+    "xpack.synthetics.alerts.monitorStatus.filters.fromLocation": "来源位置",
+    "xpack.synthetics.alerts.monitorStatus.filters.location.label": "选择要应用到告警查询的位置筛选。",
+    "xpack.synthetics.alerts.monitorStatus.filters.of": "的",
+    "xpack.synthetics.alerts.monitorStatus.filters.ofType": "类型",
+    "xpack.synthetics.alerts.monitorStatus.filters.port.label": "选择要应用到告警查询的端口筛选。",
+    "xpack.synthetics.alerts.monitorStatus.filters.scheme.label": "选择要应用到告警查询的协议方案筛选。",
+    "xpack.synthetics.alerts.monitorStatus.filters.tag.label": "选择要应用到告警查询的标签筛选。",
+    "xpack.synthetics.alerts.monitorStatus.filters.using": "使用",
+    "xpack.synthetics.alerts.monitorStatus.filters.usingPort": "使用端口",
+    "xpack.synthetics.alerts.monitorStatus.filters.with": "使用",
+    "xpack.synthetics.alerts.monitorStatus.filters.withTag": "具有标签",
+    "xpack.synthetics.alerts.monitorStatus.numTimesExpression.anyMonitors.description": "任何监测已关闭 >=",
+    "xpack.synthetics.alerts.monitorStatus.numTimesExpression.ariaLabel": "打开弹出框以输入已关闭计数",
+    "xpack.synthetics.alerts.monitorStatus.numTimesExpression.matchingMonitors.description": "匹配的监测已关闭 >=",
+    "xpack.synthetics.alerts.monitorStatus.numTimesField.ariaLabel": "输入触发告警的已关闭计数",
+    "xpack.synthetics.alerts.monitorStatus.oldAlertCallout.title": "您可能正在编辑较旧的告警，某些字段可能不自动填充。",
+    "xpack.synthetics.alerts.monitorStatus.relativeLink.label": "- 相对链接",
+    "xpack.synthetics.alerts.monitorStatus.removedLocation.reason": "此位置已从监测中移除",
+    "xpack.synthetics.alerts.monitorStatus.removedLocation.status": "已恢复",
+    "xpack.synthetics.alerts.monitorStatus.statusEnabledCheck.label": "状态检查",
+    "xpack.synthetics.alerts.monitorStatus.timerangeOption.days": "天",
+    "xpack.synthetics.alerts.monitorStatus.timerangeOption.hours": "小时",
+    "xpack.synthetics.alerts.monitorStatus.timerangeOption.minutes": "分钟",
+    "xpack.synthetics.alerts.monitorStatus.timerangeOption.months": "个月",
+    "xpack.synthetics.alerts.monitorStatus.timerangeOption.seconds": "秒",
+    "xpack.synthetics.alerts.monitorStatus.timerangeOption.weeks": "周",
+    "xpack.synthetics.alerts.monitorStatus.timerangeOption.years": "年",
+    "xpack.synthetics.alerts.monitorStatus.timerangeSelectionHeader": "选择时间范围单位",
+    "xpack.synthetics.alerts.monitorStatus.timerangeUnitExpression.ariaLabel": "打开时间范围单位选择字段的弹出框",
+    "xpack.synthetics.alerts.monitorStatus.timerangeUnitSelectable": "告警应使用的时间范围单位的可选择字段",
+    "xpack.synthetics.alerts.monitorStatus.timerangeValueExpression.ariaLabel": "打开时间范围值字段的弹出框",
+    "xpack.synthetics.alerts.monitorStatus.timerangeValueField.ariaLabel": "输入告警范围的时间单位数目",
+    "xpack.synthetics.alerts.monitorStatus.timerangeValueField.expression": "之内",
+>>>>>>> whats-new
     "xpack.synthetics.alerts.monitorStatus.upCheck.status": "现已打开",
     "xpack.synthetics.alerts.searchPlaceholder.kql": "使用 kql 语法筛选",
     "xpack.synthetics.alerts.settings.addConnector": "添加连接器",
@@ -36945,9 +37559,18 @@
     "xpack.synthetics.durationTrend.percentile75": "第 75 个",
     "xpack.synthetics.editMonitor.errorDetailsRoute.title": "错误详细信息",
     "xpack.synthetics.editMonitor.pageHeader.title": "编辑监测",
+<<<<<<< HEAD
     "xpack.synthetics.emptyState.enablement.contactAdministrator": "仅管理员可以启用此功能。",
     "xpack.synthetics.emptyState.enablement.disabledDescription": "基于真实浏览器模拟和轻量级终端 ping 运行自动检查，以从全球任何位置评估您用户的体验。",
     "xpack.synthetics.emptyState.enablement.title": "通过 Synthetics 监测服务和应用程序的状态",
+=======
+    "xpack.synthetics.editPackagePolicy.inSynthetics": "在 Synthetics 中编辑",
+    "xpack.synthetics.editPackagePolicy.inSyntheticsDesc": "此软件包策略由 Synthetics 应用托管。",
+    "xpack.synthetics.emptyState.enablement.contactAdministrator": "仅管理员可以启用此功能。",
+    "xpack.synthetics.emptyState.enablement.disabledDescription": "基于真实浏览器模拟和轻量级终端 ping 运行自动检查，以从全球任何位置评估您用户的体验。",
+    "xpack.synthetics.emptyState.enablement.title": "通过 Synthetics 监测服务和应用程序的状态",
+    "xpack.synthetics.emptyState.loadingMessage": "正在加载……",
+>>>>>>> whats-new
     "xpack.synthetics.emptyStateError.notAuthorized": "您无权查看 Uptime 数据，请联系系统管理员。",
     "xpack.synthetics.emptyStateError.title": "错误",
     "xpack.synthetics.errorDetails.errorDuration": "错误持续时间",
@@ -36974,6 +37597,17 @@
     "xpack.synthetics.fieldLabels.fcp": "首次内容绘制 (FCP)",
     "xpack.synthetics.fieldLabels.lcp": "最大内容绘制 (LCP)",
     "xpack.synthetics.fieldLabels.transferSize": "transferSize 属性表示提取的资源的大小。该大小包括响应标头字段加上响应有效负载正文",
+<<<<<<< HEAD
+=======
+    "xpack.synthetics.filterBar.ariaLabel": "概览页面的输入筛选条件",
+    "xpack.synthetics.filterBar.filterAllLabel": "全部",
+    "xpack.synthetics.filterBar.options.location.name": "位置",
+    "xpack.synthetics.filterBar.options.portLabel": "端口",
+    "xpack.synthetics.filterBar.options.schemeLabel": "方案",
+    "xpack.synthetics.filterBar.options.tagsLabel": "标签",
+    "xpack.synthetics.fleetIntegration.assets.description": "在 Synthetics 中查看监测",
+    "xpack.synthetics.fleetIntegration.assets.name": "监测",
+>>>>>>> whats-new
     "xpack.synthetics.getCerts.failed": "无法获取 TLS 证书。",
     "xpack.synthetics.gettingStarted.createLocationHeading": "开始使用组合监测",
     "xpack.synthetics.gettingStarted.createLocationLabel": "创建位置",
@@ -36990,6 +37624,13 @@
     "xpack.synthetics.historyPanel.stats": "统计信息",
     "xpack.synthetics.inProgress.label": "手动测试运行正在进行中。",
     "xpack.synthetics.inspectButtonText": "检查",
+<<<<<<< HEAD
+=======
+    "xpack.synthetics.integration.deprecation.dismiss": "关闭",
+    "xpack.synthetics.integration.deprecation.link": "Synthetics 迁移文档",
+    "xpack.synthetics.integration.deprecation.title": "迁移 Elastic Synthetics 集成监测",
+    "xpack.synthetics.integrationLink.missingDataMessage": "未找到此集成的所需数据。",
+>>>>>>> whats-new
     "xpack.synthetics.invalidLicense.licenseManagementLink": "管理您的许可",
     "xpack.synthetics.keyValuePairsField.key.ariaLabel": "钥匙",
     "xpack.synthetics.keyValuePairsField.key.label": "钥匙",
@@ -37001,6 +37642,10 @@
     "xpack.synthetics.leftOver.errors.title": "请单击以下按钮删除集成。通常应该不会出现这种情况。既然已删除监测，应该会自动删除集成。如果经常出现这种情况，请上报 ",
     "xpack.synthetics.license.invalidLicenseDescription": "Synthetics UI 不可用，因为您当前的许可证已过期或不再有效。",
     "xpack.synthetics.license.invalidLicenseTitle": "许可无效",
+<<<<<<< HEAD
+=======
+    "xpack.synthetics.locationName.helpLinkAnnotation": "添加位置",
+>>>>>>> whats-new
     "xpack.synthetics.locations.error.content": "加载测试位置时出错。请稍后重试。",
     "xpack.synthetics.locations.error.label": "无法加载测试位置",
     "xpack.synthetics.management.actions": "操作",
@@ -37278,7 +37923,14 @@
     "xpack.synthetics.monitorList.durationChart.durationSeriesName": "持续时间",
     "xpack.synthetics.monitorList.durationChart.previousPeriodSeriesName": "上一时段",
     "xpack.synthetics.monitorList.durationHeaderText": "持续时间",
+<<<<<<< HEAD
     "xpack.synthetics.monitorList.enabledItemText": "已启用（所有位置）",
+=======
+    "xpack.synthetics.monitorList.enabledAlerts.noAlert": "没有为此监测启用规则。",
+    "xpack.synthetics.monitorList.enabledAlerts.title": "已启用规则",
+    "xpack.synthetics.monitorList.enabledItemText": "已启用（所有位置）",
+    "xpack.synthetics.monitorList.enableDownAlert": "启用状态告警",
+>>>>>>> whats-new
     "xpack.synthetics.monitorList.errorSummary": "错误摘要",
     "xpack.synthetics.monitorList.goToMonitorLinkText": "前往监测",
     "xpack.synthetics.monitorList.lastModified": "最后修改时间",
@@ -37458,6 +38110,12 @@
     "xpack.synthetics.noFindingsStates.unprivileged.unprivilegedTitle": "需要权限",
     "xpack.synthetics.notFoundBody": "抱歉，找不到您要查找的页面。该页面可能已移除、重命名，或可能从不存在。",
     "xpack.synthetics.notFoundTitle": "未找到页面",
+<<<<<<< HEAD
+=======
+    "xpack.synthetics.notFountPage.homeLinkText": "返回主页",
+    "xpack.synthetics.openAlertContextPanel.ariaLabel": "打开规则上下文面板，以便可以选择规则类型",
+    "xpack.synthetics.openAlertContextPanel.label": "创建规则",
+>>>>>>> whats-new
     "xpack.synthetics.overview.actions.disableLabelDisableAlert": "禁用状态告警（所有位置）",
     "xpack.synthetics.overview.actions.disablingLabel": "正在禁用监测",
     "xpack.synthetics.overview.actions.editMonitor.name": "编辑监测",
@@ -37517,6 +38175,10 @@
     "xpack.synthetics.overview.status.pending.description": "待处理",
     "xpack.synthetics.overview.status.up.description": "运行",
     "xpack.synthetics.overview.SyntheticsHeading": "监测",
+<<<<<<< HEAD
+=======
+    "xpack.synthetics.overview.uptimeHeading": "运行时间监测",
+>>>>>>> whats-new
     "xpack.synthetics.overviewPage.overviewCrumb": "概览",
     "xpack.synthetics.page_header.analyzeData.label": "导航到“浏览数据”视图以可视化 Synthetics/用户数据",
     "xpack.synthetics.page_header.settingsLink": "设置",
@@ -37551,6 +38213,10 @@
     "xpack.synthetics.routes.baseTitle": "Synthetics - Kibana",
     "xpack.synthetics.routes.createNewMonitor": "前往主页",
     "xpack.synthetics.routes.goToSynthetics": "前往 Synthetics 主页",
+<<<<<<< HEAD
+=======
+    "xpack.synthetics.routes.legacyBaseTitle": "Uptime - Kibana",
+>>>>>>> whats-new
     "xpack.synthetics.rules.tls.agingLabel": "已过旧",
     "xpack.synthetics.rules.tls.clientName": "Synthetics TLS",
     "xpack.synthetics.rules.tls.criteriaExpression.ariaLabel": "显示正由此告警监视的监测条件的表达式",
@@ -37588,6 +38254,12 @@
     "xpack.synthetics.settings.enablement.fail": "无法启用 Synthetics 应用",
     "xpack.synthetics.settings.error.couldNotSave": "无法保存设置！",
     "xpack.synthetics.settings.getParams.failed": "无法获取全局参数。",
+<<<<<<< HEAD
+=======
+    "xpack.synthetics.settings.heading": "Uptime 设置",
+    "xpack.synthetics.settings.invalid.error": "值必须大于 0。",
+    "xpack.synthetics.settings.invalid.nanError": "值必须为整数。",
+>>>>>>> whats-new
     "xpack.synthetics.settings.noSpace.error": "索引名称不得包含空格",
     "xpack.synthetics.settings.saveSuccess": "设置已保存！",
     "xpack.synthetics.settings.syncGlobalParams": "已成功将全局参数应用到所有监测",
@@ -37630,7 +38302,17 @@
     "xpack.synthetics.settingsTabs.privateLocations": "专用位置",
     "xpack.synthetics.sourceConfiguration.alertConnectors.defaultEmail": "默认电子邮件",
     "xpack.synthetics.sourceConfiguration.alertDefaultForm.emailConnectorPlaceHolder": "到：电子邮件连接器的电子邮件",
+<<<<<<< HEAD
     "xpack.synthetics.sourceConfiguration.alertDefaultForm.selectConnector": "选择一个或多个连接器",
+=======
+    "xpack.synthetics.sourceConfiguration.alertDefaultForm.requiredEmail": "电子邮件连接器需要目标电子邮件",
+    "xpack.synthetics.sourceConfiguration.alertDefaultForm.selectConnector": "选择一个或多个连接器",
+    "xpack.synthetics.sourceConfiguration.alertDefaults": "告警默认值",
+    "xpack.synthetics.sourceConfiguration.applySettingsButtonLabel": "应用更改",
+    "xpack.synthetics.sourceConfiguration.certificateExpirationThresholdInput.ariaLabel": "该输入控制 Kibana 显示警告之前离 TLS 证书到期剩余的最小天数。",
+    "xpack.synthetics.sourceConfiguration.certificateThresholdDescription": "更改显示并告警证书错误的阈值。注意：这会影响任何配置的告警。",
+    "xpack.synthetics.sourceConfiguration.certificationSectionTitle": "证书到期",
+>>>>>>> whats-new
     "xpack.synthetics.sourceConfiguration.defaultConnectors": "默认连接器",
     "xpack.synthetics.sourceConfiguration.defaultConnectors.description.defaultEmail": "选定电子邮件告警连接器需要电子邮件设置。",
     "xpack.synthetics.stackManagement": "Stack Management",
@@ -37728,6 +38410,11 @@
     "xpack.synthetics.toggleAlertButton.content": "监测状态规则",
     "xpack.synthetics.toggleAlertFlyout.ariaLabel": "打开添加规则浮出控件",
     "xpack.synthetics.toggleAlertFlyout.tls.ariaLabel": "打开添加 TLS 规则浮出控件",
+<<<<<<< HEAD
+=======
+    "xpack.synthetics.toggleTlsAlertButton.ariaLabel": "打开 TLS 规则浮出控件",
+    "xpack.synthetics.toggleTlsAlertButton.content": "TLS 规则",
+>>>>>>> whats-new
     "xpack.synthetics.toggleTlsAlertButton.label.content": "TLS 证书规则",
     "xpack.synthetics.totalDuration.metrics": "步骤持续时间",
     "xpack.synthetics.totalDuration.transferSize": "传输大小",
@@ -39869,6 +40556,10 @@
     "defaultNavigation.ml.dataFrameAnalytics": "数据帧分析",
     "defaultNavigation.ml.dataView": "数据视图",
     "defaultNavigation.ml.dataVisualizer": "数据可视化工具",
+<<<<<<< HEAD
+=======
+    "defaultNavigation.ml.explainLogRateSpikes": "解释日志速率峰值",
+>>>>>>> whats-new
     "defaultNavigation.ml.file": "文件",
     "defaultNavigation.ml.jobs": "作业",
     "defaultNavigation.ml.machineLearning": "Machine Learning",
@@ -39878,7 +40569,15 @@
     "devTools.badge.readOnly.tooltip": "无法保存",
     "devTools.breadcrumb.homeLabel": "开发工具",
     "devTools.devToolsTitle": "开发工具",
+<<<<<<< HEAD
     "eventAnnotation.content.name": "标注组",
+=======
+    "eventAnnotation.annotationList.add": "添加注释",
+    "eventAnnotation.content.name": "标注组",
+    "eventAnnotation.edit.back": "返回",
+    "eventAnnotation.edit.cancel": "取消",
+    "eventAnnotation.edit.save": "保存标注组",
+>>>>>>> whats-new
     "eventAnnotation.eventAnnotationGroup.metadata.name": "标注组",
     "eventAnnotation.eventAnnotationGroup.savedObjectFinder.emptyCTA": "创建标注图层",
     "eventAnnotation.eventAnnotationGroup.savedObjectFinder.emptyPromptDescription": "当前没有可供从库中选择的标注。创建新图层以添加标注。",
@@ -39895,6 +40594,17 @@
     "eventAnnotation.group.args.annotationConfigs.ignoreGlobalFilters.help": "进行切换以忽略标注的全局筛选",
     "eventAnnotation.group.args.annotationGroups": "标注组",
     "eventAnnotation.group.description": "事件标注组",
+<<<<<<< HEAD
+=======
+    "eventAnnotation.groupEditor.addAnnotation": "标注",
+    "eventAnnotation.groupEditor.dataView": "数据视图",
+    "eventAnnotation.groupEditor.description": "描述",
+    "eventAnnotation.groupEditor.details": "详情",
+    "eventAnnotation.groupEditor.optional": "可选",
+    "eventAnnotation.groupEditor.title": "标题",
+    "eventAnnotation.groupEditor.titleRequired": "标题必填。",
+    "eventAnnotation.groupEditorFlyout.title": "编辑标注组",
+>>>>>>> whats-new
     "eventAnnotation.listingViewTitle": "标注组",
     "eventAnnotation.manualAnnotation.args.color": "线条的颜色",
     "eventAnnotation.manualAnnotation.args.icon": "用于标注线条的可选图标",
@@ -39926,6 +40636,51 @@
     "eventAnnotation.rangeAnnotation.args.label": "标注的名称",
     "eventAnnotation.rangeAnnotation.args.time": "标注的时间戳",
     "eventAnnotation.rangeAnnotation.description": "配置手动标注",
+    "eventAnnotation.tableList.dataView": "数据视图",
+    "eventAnnotation.tableList.emptyPrompt.body": "您可以创建并保存标注，供在 Lens 可视化编辑器中跨多个可视化使用。",
+    "eventAnnotation.tableList.emptyPrompt.cta": "在 Lens 中创建新标注",
+    "eventAnnotation.tableList.emptyPrompt.title": "在 Lens 中创建您的首个标注",
+    "eventAnnotation.tableList.entityName": "标注组",
+    "eventAnnotation.tableList.entityNamePlural": "标注组",
+    "eventAnnotation.tableList.listTitle": "标注库",
+    "eventAnnotation.xyChart.annotation.hide": "隐藏标注",
+    "eventAnnotation.xyChart.annotation.manual": "静态日期",
+    "eventAnnotation.xyChart.annotation.query": "定制查询",
+    "eventAnnotation.xyChart.annotation.queryField": "目标日期字段",
+    "eventAnnotation.xyChart.annotation.queryInput": "标注查询",
+    "eventAnnotation.xyChart.annotation.tooltip": "显示其他字段",
+    "eventAnnotation.xyChart.annotation.tooltip.addField": "添加字段",
+    "eventAnnotation.xyChart.annotation.tooltip.deleteButtonLabel": "删除",
+    "eventAnnotation.xyChart.annotation.tooltip.noFields": "未选择任何内容",
+    "eventAnnotation.xyChart.annotationDate": "标注日期",
+    "eventAnnotation.xyChart.annotationDate.from": "自",
+    "eventAnnotation.xyChart.annotationDate.placementType": "位置类型",
+    "eventAnnotation.xyChart.annotationDate.to": "至",
+    "eventAnnotation.xyChart.appearance": "外观",
+    "eventAnnotation.xyChart.applyAsRange": "应用为范围",
+    "eventAnnotation.xyChart.defaultAnnotationLabel": "事件",
+    "eventAnnotation.xyChart.defaultRangeAnnotationLabel": "事件范围",
+    "eventAnnotation.xyChart.fillStyle": "填充",
+    "eventAnnotation.xyChart.fillStyle.inside": "内部",
+    "eventAnnotation.xyChart.fillStyle.outside": "外部",
+    "eventAnnotation.xyChart.iconSelect.alertIconLabel": "告警",
+    "eventAnnotation.xyChart.iconSelect.asteriskIconLabel": "星号",
+    "eventAnnotation.xyChart.iconSelect.bellIconLabel": "钟铃",
+    "eventAnnotation.xyChart.iconSelect.boltIconLabel": "闪电",
+    "eventAnnotation.xyChart.iconSelect.bugIconLabel": "昆虫",
+    "eventAnnotation.xyChart.iconSelect.circleIconLabel": "圆形",
+    "eventAnnotation.xyChart.iconSelect.commentIconLabel": "注释",
+    "eventAnnotation.xyChart.iconSelect.flagIconLabel": "旗帜",
+    "eventAnnotation.xyChart.iconSelect.heartLabel": "心形",
+    "eventAnnotation.xyChart.iconSelect.mapMarkerLabel": "地图标记",
+    "eventAnnotation.xyChart.iconSelect.mapPinLabel": "地图图钉",
+    "eventAnnotation.xyChart.iconSelect.starFilledLabel": "星形填充",
+    "eventAnnotation.xyChart.iconSelect.starLabel": "五角星",
+    "eventAnnotation.xyChart.iconSelect.tagIconLabel": "标签",
+    "eventAnnotation.xyChart.iconSelect.triangleIconLabel": "三角形",
+    "eventAnnotation.xyChart.lineColor.label": "颜色",
+    "eventAnnotation.xyChart.placement": "位置",
+    "eventAnnotation.xyChart.tooltip": "工具提示",
     "expandableFlyout.previewSection.backButton": "返回",
     "expandableFlyout.previewSection.closeButton": "关闭",
     "expressionHeatmap.function.args.addTooltipHelpText": "在悬浮时显示工具提示",
@@ -40359,6 +41114,13 @@
     "xpack.painlessLab.showRequestButtonLabel": "显示 API 请求",
     "xpack.painlessLab.title": "Painless 实验室",
     "xpack.painlessLab.walkthroughButtonLabel": "指导",
+<<<<<<< HEAD
     "xpack.serverlessObservability.nav.getStarted": "开始使用"
+=======
+    "xpack.serverlessObservability.nav.getStarted": "开始使用",
+    "xpack.serverlessObservability.nav.infrastructure": "基础设施",
+    "xpack.serverlessObservability.nav.signalsLogs": "日志",
+    "xpack.serverlessObservability.nav.toolBoxVisualization": "可视化"
+>>>>>>> whats-new
   }
 }

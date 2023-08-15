@@ -20,7 +20,11 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { sloFeatureId } from '../../../../common';
 import { SLO_BURN_RATE_RULE_TYPE_ID } from '../../../../common/constants';
+<<<<<<< HEAD
 import { paths } from '../../../../common/locators/paths';
+=======
+import { paths } from '../../../config/paths';
+>>>>>>> whats-new
 import { useCreateSlo } from '../../../hooks/slo/use_create_slo';
 import { useFetchRulesForSlo } from '../../../hooks/slo/use_fetch_rules_for_slo';
 import { useUpdateSlo } from '../../../hooks/slo/use_update_slo';

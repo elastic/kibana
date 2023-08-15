@@ -9,13 +9,17 @@ import React, { useEffect } from 'react';
 
 import { useValues } from 'kea';
 
-import { APPLICATIONS_PLUGIN } from '../../../../common/constants';
+import { APPLICATIONS_PLUGIN, VECTOR_SEARCH_PLUGIN } from '../../../../common/constants';
 
 import { KibanaLogic } from '../kibana';
 
 import {
   useGenerateBreadcrumbs,
+<<<<<<< HEAD
   useSearchBreadcrumbs,
+=======
+  useEnterpriseSearchBreadcrumbs,
+>>>>>>> whats-new
   useEnterpriseSearchApplicationsBreadcrumbs,
   useAnalyticsBreadcrumbs,
   useEnterpriseSearchContentBreadcrumbs,
@@ -217,7 +221,13 @@ export const SetVectorSearchChrome: React.FC<SetChromeProps> = ({ trail = [] }) 
   const title = reverseArray(trail);
   const docTitle = vectorSearchTitle(title);
 
+<<<<<<< HEAD
   const breadcrumbs = useVectorSearchBreadcrumbs(useGenerateBreadcrumbs(trail));
+=======
+  const breadcrumbs = useVectorSearchBreadcrumbs(
+    useGenerateBreadcrumbs([VECTOR_SEARCH_PLUGIN.NAV_TITLE, ...trail])
+  );
+>>>>>>> whats-new
 
   useEffect(() => {
     setBreadcrumbs(breadcrumbs);

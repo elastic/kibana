@@ -14,6 +14,10 @@ import type { CoreStart } from '@kbn/core/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { I18nProvider } from '@kbn/i18n-react';
 import { CellActionsProvider } from '@kbn/cell-actions';
+<<<<<<< HEAD
+=======
+import { MockAssistantProvider } from './mock_assistant_provider';
+>>>>>>> whats-new
 import { createStore } from '../store';
 import { mockGlobalState } from './global_state';
 import { SUB_PLUGINS_REDUCER } from './utils';
@@ -81,7 +85,11 @@ export const StorybookProviders: React.FC = ({ children }) => {
         <CellActionsProvider getTriggerCompatibleActions={() => Promise.resolve([])}>
           <ReduxStoreProvider store={store}>
             <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+<<<<<<< HEAD
               {children}
+=======
+              <MockAssistantProvider>{children}</MockAssistantProvider>
+>>>>>>> whats-new
             </ThemeProvider>
           </ReduxStoreProvider>
         </CellActionsProvider>

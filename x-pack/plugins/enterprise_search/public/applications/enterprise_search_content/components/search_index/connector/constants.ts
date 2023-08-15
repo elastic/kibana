@@ -37,12 +37,15 @@ export const CONNECTORS_DICT: Record<string, ConnectorClientSideDefinition> = {
     externalDocsUrl: '',
     icon: CONNECTOR_ICONS.dropbox,
   },
+<<<<<<< HEAD
   gmail: {
     docsUrl: '', // TODO
     externalAuthDocsUrl: '',
     externalDocsUrl: '',
     icon: CONNECTOR_ICONS.gmail,
   },
+=======
+>>>>>>> whats-new
   google_cloud_storage: {
     docsUrl: docLinks.connectorsGoogleCloudStorage,
     externalAuthDocsUrl: 'https://cloud.google.com/storage/docs/authentication',

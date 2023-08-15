@@ -21,6 +21,7 @@ export function ProfilingHeaderActionMenu() {
   return (
     <EuiHeaderLinks gutterSize="xs">
       <EuiHeaderLink
+<<<<<<< HEAD
         color="text"
         onClick={() => {
           const query = qs.parse(window.location.search);
@@ -47,6 +48,8 @@ export function ProfilingHeaderActionMenu() {
         </EuiFlexGroup>
       </EuiHeaderLink>
       <EuiHeaderLink
+=======
+>>>>>>> whats-new
         href={router.link('/add-data-instructions', {
           query: { selectedTab: NoDataTabs.Kubernetes },
         })}

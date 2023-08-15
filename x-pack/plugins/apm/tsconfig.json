@@ -92,11 +92,15 @@
     "@kbn/dashboard-plugin",
     "@kbn/controls-plugin",
     "@kbn/core-http-server",
+<<<<<<< HEAD
     "@kbn/profiling-plugin",
     "@kbn/logs-shared-plugin",
     "@kbn/unified-field-list",
     "@kbn/discover-plugin",
     "@kbn/observability-ai-assistant-plugin"
+=======
+    "@kbn/discover-plugin"
+>>>>>>> whats-new
   ],
   "exclude": ["target/**/*"]
 }

@@ -663,6 +663,7 @@ class BrowserService extends FtrService {
         return false;
       }
     }
+<<<<<<< HEAD
   }
 
   /**
@@ -725,6 +726,8 @@ class BrowserService extends FtrService {
       this.log.error(message);
       throw new Error(message);
     }
+=======
+>>>>>>> whats-new
   }
 }
 

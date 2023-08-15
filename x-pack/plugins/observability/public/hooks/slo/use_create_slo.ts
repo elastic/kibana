@@ -10,7 +10,12 @@ import { encode } from '@kbn/rison';
 import type { CreateSLOInput, CreateSLOResponse, FindSLOResponse } from '@kbn/slo-schema';
 import { QueryKey, useMutation, useQueryClient } from '@tanstack/react-query';
 import { v1 as uuidv1 } from 'uuid';
+<<<<<<< HEAD
 import { paths } from '../../../common/locators/paths';
+=======
+
+import { paths } from '../../config/paths';
+>>>>>>> whats-new
 import { useKibana } from '../../utils/kibana_react';
 import { sloKeys } from './query_key_factory';
 
@@ -44,7 +49,11 @@ export function useCreateSlo() {
 
         const [queryKey, previousData] = queriesData?.at(0) ?? [];
 
+<<<<<<< HEAD
         const newItem = { ...slo, id: uuidv1(), summary: undefined };
+=======
+        const newItem = { ...slo, id: uuidv1() };
+>>>>>>> whats-new
 
         const optimisticUpdate = {
           page: previousData?.page ?? 1,
@@ -82,6 +91,12 @@ export function useCreateSlo() {
         navigateToUrl(
           http.basePath.prepend(paths.observability.sloCreateWithEncodedForm(encode(slo)))
         );
+<<<<<<< HEAD
+=======
+      },
+      onSettled: () => {
+        queryClient.invalidateQueries({ queryKey: sloKeys.lists(), exact: false });
+>>>>>>> whats-new
       },
     }
   );

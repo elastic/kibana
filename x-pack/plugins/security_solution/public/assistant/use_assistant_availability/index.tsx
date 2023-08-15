@@ -6,8 +6,11 @@
  */
 
 import { useLicense } from '../../common/hooks/use_license';
+<<<<<<< HEAD
 import { useKibana } from '../../common/lib/kibana';
 import { ASSISTANT_FEATURE_ID } from '../../../common/constants';
+=======
+>>>>>>> whats-new
 
 export interface UseAssistantAvailability {
   // True when user is Enterprise. When false, the Assistant is disabled and unavailable
@@ -18,11 +21,20 @@ export interface UseAssistantAvailability {
 
 export const useAssistantAvailability = (): UseAssistantAvailability => {
   const isEnterprise = useLicense().isEnterprise();
+<<<<<<< HEAD
   const capabilities = useKibana().services.application.capabilities;
   const isAssistantEnabled = capabilities[ASSISTANT_FEATURE_ID]?.['ai-assistant'] === true;
 
   return {
     isAssistantEnabled: isEnterprise,
     hasAssistantPrivilege: isAssistantEnabled,
+=======
+  return {
+    isAssistantEnabled: isEnterprise,
+    // TODO: RBAC check (https://github.com/elastic/security-team/issues/6932)
+    // Leaving as a placeholder for RBAC as the same behavior will be required
+    // When false, the Assistant is hidden and unavailable
+    hasAssistantPrivilege: true,
+>>>>>>> whats-new
   };
 };
