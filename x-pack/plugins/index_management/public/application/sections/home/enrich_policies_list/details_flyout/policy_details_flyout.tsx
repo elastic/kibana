@@ -66,7 +66,9 @@ export const PolicyDetailsFlyout: FunctionComponent<Props> = ({ policy, onClose 
                 })}
               </EuiDescriptionListTitle>
               <EuiDescriptionListDescription data-test-subj="policyIndicesValue">
-                {policy.sourceIndices.join(', ')}
+                <span className="eui-textBreakWord">
+                  {policy.sourceIndices.join(', ')}
+                </span>
               </EuiDescriptionListDescription>
             </>
           )}
@@ -94,7 +96,9 @@ export const PolicyDetailsFlyout: FunctionComponent<Props> = ({ policy, onClose 
                 })}
               </EuiDescriptionListTitle>
               <EuiDescriptionListDescription data-test-subj="policyEnrichFieldsValue">
-                {policy.enrichFields.join(', ')}
+                <span className="eui-textBreakWord">
+                  {policy.enrichFields.join(', ')}
+                </span>
               </EuiDescriptionListDescription>
             </>
           )}
@@ -110,6 +114,8 @@ export const PolicyDetailsFlyout: FunctionComponent<Props> = ({ policy, onClose 
               <EuiDescriptionListDescription>
                 <CodeEditor
                   languageId="json"
+                  isCopyable
+                  allowFullScreen
                   value={JSON.stringify(policy.query, null, 2)}
                   data-test-subj="queryEditor"
                   height={250}
