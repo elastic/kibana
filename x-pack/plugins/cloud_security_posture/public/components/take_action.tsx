@@ -19,10 +19,10 @@ import {
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import type { HttpSetup } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useQueryClient } from '@tanstack/react-query';
 import type { RuleResponse } from '../common/types';
 import { CREATE_RULE_ACTION_SUBJ, TAKE_ACTION_SUBJ } from './test_subjects';
 import { useKibana } from '../common/hooks/use_kibana';
-import { useQueryClient } from '@tanstack/react-query';
 import { DETECTION_ENGINE_ALERTS_KEY, DETECTION_ENGINE_RULES_KEY } from '../common/constants';
 
 const RULE_PAGE_PATH = '/app/security/rules/id/';

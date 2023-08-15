@@ -38,7 +38,7 @@ export const DetectionRuleCounter = ({ tags }: { tags: string[] }) => {
     history.push({
       pathname: ALERTS_PAGE_PATH,
     });
-  }, [history, tags]);
+  }, [history]);
 
   return (
     <EuiSkeletonText lines={1} size="m" isLoading={isLoading || alertsIsLoading}>
