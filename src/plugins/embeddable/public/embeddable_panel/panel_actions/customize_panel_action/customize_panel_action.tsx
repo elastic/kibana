@@ -11,9 +11,9 @@ import { i18n } from '@kbn/i18n';
 import { TimeRange } from '@kbn/es-query';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { OverlayStart, ThemeServiceStart } from '@kbn/core/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 
-import { toMountPoint } from '@kbn/react-kibana-mount';
 import { core } from '../../../kibana_services';
 import {
   IEmbeddable,

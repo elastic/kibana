@@ -21,6 +21,10 @@ export const ACTION_GLOBAL_APPLY_FILTER = 'ACTION_GLOBAL_APPLY_FILTER';
 export interface ApplyGlobalFilterActionContext {
   filters: Filter[];
   timeFieldName?: string;
+  // Need to make this unknown to prevent circular dependencies.
+  // Apps using this property will need to cast to `IEmbeddable`.
+  // TODO: We should consider moving these commonly used types into a separate package to avoid circular dependencies
+  embeddable?: unknown;
   // controlledBy is an optional key in filter.meta that identifies the owner of a filter
   // Pass controlledBy to cleanup an existing filter(s) owned by embeddable prior to adding new filters
   controlledBy?: string;
