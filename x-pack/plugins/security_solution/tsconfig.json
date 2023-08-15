@@ -170,5 +170,6 @@
     "@kbn/core-logging-server-mocks",
     "@kbn/core-lifecycle-browser",
     "@kbn/handlebars",
+    "@kbn/stack-connectors-plugin",
   ]
 }
