@@ -883,7 +883,7 @@
             "section": "def-common.Type",
             "text": "Type"
           },
-          "<Readonly<{} & { error: string; message: string; metadata: Readonly<{} & {}>; statusCode: number; }> | undefined>; attributes: ",
+          "<Readonly<{} & { error: string; message: string; statusCode: number; metadata: Readonly<{} & {}>; }> | undefined>; attributes: ",
           {
             "pluginId": "@kbn/config-schema",
             "scope": "common",
@@ -3974,7 +3974,7 @@
                 "section": "def-common.Type",
                 "text": "Type"
               },
-              "<Readonly<{ error?: Readonly<{} & { error: string; message: string; metadata: Readonly<{} & {}>; statusCode: number; }> | undefined; namespaces?: string[] | undefined; createdAt?: string | undefined; updatedAt?: string | undefined; version?: string | undefined; originId?: string | undefined; } & { type: string; id: string; references: Readonly<{ name?: string | undefined; } & { type: string; id: string; }>[]; attributes: Readonly<{ [x: string]: any; } & {}>; }> | undefined>"
+              "<Readonly<{ error?: Readonly<{} & { error: string; message: string; statusCode: number; metadata: Readonly<{} & {}>; }> | undefined; namespaces?: string[] | undefined; createdAt?: string | undefined; updatedAt?: string | undefined; version?: string | undefined; originId?: string | undefined; } & { type: string; id: string; references: Readonly<{ name?: string | undefined; } & { type: string; id: string; }>[]; attributes: Readonly<{ [x: string]: any; } & {}>; }> | undefined>"
             ],
             "path": "packages/kbn-content-management-utils/src/schema.ts",
             "deprecated": false,
