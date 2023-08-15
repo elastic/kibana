@@ -693,26 +693,6 @@
             "path": "src/plugins/share/public/services/share_menu_manager.tsx"
           },
           {
-            "plugin": "share",
-            "path": "src/plugins/share/public/url_service/redirect/components/page.tsx"
-          },
-          {
-            "plugin": "share",
-            "path": "src/plugins/share/public/url_service/redirect/components/page.tsx"
-          },
-          {
-            "plugin": "share",
-            "path": "src/plugins/share/public/url_service/redirect/components/page.tsx"
-          },
-          {
-            "plugin": "share",
-            "path": "src/plugins/share/public/url_service/redirect/components/page.tsx"
-          },
-          {
-            "plugin": "share",
-            "path": "src/plugins/share/public/url_service/redirect/components/page.tsx"
-          },
-          {
             "plugin": "uiActions",
             "path": "src/plugins/ui_actions/public/context_menu/open_context_menu.tsx"
           },
@@ -759,30 +739,6 @@
           {
             "plugin": "management",
             "path": "src/plugins/management/public/components/management_app/management_app.tsx"
-          },
-          {
-            "plugin": "advancedSettings",
-            "path": "src/plugins/advanced_settings/public/management_app/components/form/form.tsx"
-          },
-          {
-            "plugin": "advancedSettings",
-            "path": "src/plugins/advanced_settings/public/management_app/components/form/form.tsx"
-          },
-          {
-            "plugin": "advancedSettings",
-            "path": "src/plugins/advanced_settings/public/management_app/components/form/form.tsx"
-          },
-          {
-            "plugin": "advancedSettings",
-            "path": "src/plugins/advanced_settings/public/management_app/mount_management_section.tsx"
-          },
-          {
-            "plugin": "advancedSettings",
-            "path": "src/plugins/advanced_settings/public/management_app/mount_management_section.tsx"
-          },
-          {
-            "plugin": "advancedSettings",
-            "path": "src/plugins/advanced_settings/public/management_app/mount_management_section.tsx"
           },
           {
             "plugin": "spaces",
@@ -1305,18 +1261,6 @@
             "path": "x-pack/plugins/aiops/public/embeddable/embeddable_change_point_chart.tsx"
           },
           {
-            "plugin": "observabilityAIAssistant",
-            "path": "x-pack/plugins/observability_ai_assistant/public/application.tsx"
-          },
-          {
-            "plugin": "observabilityAIAssistant",
-            "path": "x-pack/plugins/observability_ai_assistant/public/application.tsx"
-          },
-          {
-            "plugin": "observabilityAIAssistant",
-            "path": "x-pack/plugins/observability_ai_assistant/public/application.tsx"
-          },
-          {
             "plugin": "exploratoryView",
             "path": "x-pack/plugins/exploratory_view/public/application/index.tsx"
           },
@@ -1353,28 +1297,16 @@
             "path": "x-pack/plugins/fleet/public/applications/fleet/app.tsx"
           },
           {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx"
+            "plugin": "observability",
+            "path": "x-pack/plugins/observability/public/application/index.tsx"
           },
           {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx"
+            "plugin": "observability",
+            "path": "x-pack/plugins/observability/public/application/index.tsx"
           },
           {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/render_app.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/render_app.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/render_app.tsx"
+            "plugin": "observability",
+            "path": "x-pack/plugins/observability/public/application/index.tsx"
           },
           {
             "plugin": "licenseManagement",
@@ -1393,6 +1325,42 @@
             "path": "x-pack/plugins/license_management/public/application/app_providers.tsx"
           },
           {
+            "plugin": "advancedSettings",
+            "path": "src/plugins/advanced_settings/public/management_app/components/form/form.tsx"
+          },
+          {
+            "plugin": "advancedSettings",
+            "path": "src/plugins/advanced_settings/public/management_app/components/form/form.tsx"
+          },
+          {
+            "plugin": "advancedSettings",
+            "path": "src/plugins/advanced_settings/public/management_app/components/form/form.tsx"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/render_app.tsx"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/render_app.tsx"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/render_app.tsx"
+          },
+          {
             "plugin": "dataVisualizer",
             "path": "x-pack/plugins/data_visualizer/public/application/file_data_visualizer/file_data_visualizer.tsx"
           },
@@ -1487,18 +1455,6 @@
           {
             "plugin": "ml",
             "path": "x-pack/plugins/ml/public/application/management/jobs_list/components/jobs_list_page/jobs_list_page.tsx"
-          },
-          {
-            "plugin": "observability",
-            "path": "x-pack/plugins/observability/public/application/index.tsx"
-          },
-          {
-            "plugin": "observability",
-            "path": "x-pack/plugins/observability/public/application/index.tsx"
-          },
-          {
-            "plugin": "observability",
-            "path": "x-pack/plugins/observability/public/application/index.tsx"
           },
           {
             "plugin": "infra",
@@ -2930,18 +2886,6 @@
             "path": "x-pack/plugins/fleet/public/applications/fleet/app.tsx"
           },
           {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/management/jobs_list/components/jobs_list_page/jobs_list_page.tsx"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/management/jobs_list/components/jobs_list_page/jobs_list_page.tsx"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/management/jobs_list/components/jobs_list_page/jobs_list_page.tsx"
-          },
-          {
             "plugin": "observability",
             "path": "x-pack/plugins/observability/public/application/index.tsx"
           },
@@ -2952,6 +2896,18 @@
           {
             "plugin": "observability",
             "path": "x-pack/plugins/observability/public/application/index.tsx"
+          },
+          {
+            "plugin": "ml",
+            "path": "x-pack/plugins/ml/public/application/management/jobs_list/components/jobs_list_page/jobs_list_page.tsx"
+          },
+          {
+            "plugin": "ml",
+            "path": "x-pack/plugins/ml/public/application/management/jobs_list/components/jobs_list_page/jobs_list_page.tsx"
+          },
+          {
+            "plugin": "ml",
+            "path": "x-pack/plugins/ml/public/application/management/jobs_list/components/jobs_list_page/jobs_list_page.tsx"
           },
           {
             "plugin": "apm",
@@ -3213,14 +3169,6 @@
           {
             "plugin": "data",
             "path": "src/plugins/data/public/search/search_service.ts"
-          },
-          {
-            "plugin": "advancedSettings",
-            "path": "src/plugins/advanced_settings/public/management_app/components/form/form.tsx"
-          },
-          {
-            "plugin": "advancedSettings",
-            "path": "src/plugins/advanced_settings/public/management_app/components/form/form.tsx"
           },
           {
             "plugin": "savedObjects",
@@ -3703,20 +3651,36 @@
             "path": "x-pack/plugins/fleet/public/applications/integrations/components/header/header_portal.tsx"
           },
           {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/render_app.tsx"
+            "plugin": "observability",
+            "path": "x-pack/plugins/observability/public/pages/overview/components/header_menu/header_menu_portal.tsx"
           },
           {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/render_app.tsx"
+            "plugin": "observability",
+            "path": "x-pack/plugins/observability/public/pages/overview/components/header_menu/header_menu_portal.tsx"
+          },
+          {
+            "plugin": "telemetry",
+            "path": "src/plugins/telemetry/public/services/telemetry_notifications/render_opt_in_status_notice_banner.tsx"
           },
           {
             "plugin": "telemetry",
             "path": "src/plugins/telemetry/public/services/telemetry_notifications/render_opt_in_status_notice_banner.tsx"
           },
           {
-            "plugin": "telemetry",
-            "path": "src/plugins/telemetry/public/services/telemetry_notifications/render_opt_in_status_notice_banner.tsx"
+            "plugin": "advancedSettings",
+            "path": "src/plugins/advanced_settings/public/management_app/components/form/form.tsx"
+          },
+          {
+            "plugin": "advancedSettings",
+            "path": "src/plugins/advanced_settings/public/management_app/components/form/form.tsx"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/render_app.tsx"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/render_app.tsx"
           },
           {
             "plugin": "dataVisualizer",
@@ -3821,14 +3785,6 @@
           {
             "plugin": "ml",
             "path": "x-pack/plugins/ml/public/application/app.tsx"
-          },
-          {
-            "plugin": "observability",
-            "path": "x-pack/plugins/observability/public/pages/overview/components/header_menu/header_menu_portal.tsx"
-          },
-          {
-            "plugin": "observability",
-            "path": "x-pack/plugins/observability/public/pages/overview/components/header_menu/header_menu_portal.tsx"
           },
           {
             "plugin": "banners",
@@ -5971,9 +5927,7 @@
           "EuiPageSideBarProps_Deprecated",
           " | undefined; pageHeader?: ",
           "EuiPageHeaderProps",
-          " | undefined; pageBodyProps?: ",
-          "EuiPageBodyProps",
-          "<\"main\"> | undefined; pageContentProps?: ",
+          " | undefined; pageBodyProps?: any; pageContentProps?: ",
           "EuiPageContentProps",
           " | undefined; pageContentBodyProps?: ",
           "EuiPageContentBodyProps",
