@@ -17,6 +17,7 @@ import {
 } from '@elastic/eui';
 import type { EuiSelectableOptionCheckedType } from '@elastic/eui/src/components/selectable/selectable_option';
 import { i18n } from '@kbn/i18n';
+import type { FunctionDefinition } from '../../../common/types';
 import { useObservabilityAIAssistantChatService } from '../../hooks/use_observability_ai_assistant_chat_service';
 
 interface FunctionListOption {
@@ -34,11 +35,13 @@ export function FunctionListPopover({
   disabled: boolean;
 }) {
   const { getFunctions } = useObservabilityAIAssistantChatService();
+  const functions = getFunctions();
+
   const filterRef = useRef<HTMLInputElement | null>(null);
 
   const [functionOptions, setFunctionOptions] = useState<
     Array<EuiSelectableOption<FunctionListOption>>
-  >([]);
+  >(mapFunctions({ functions, selectedFunctionName }));
 
   const [isFunctionListOpen, setIsFunctionListOpen] = useState(false);
 
@@ -72,19 +75,13 @@ export function FunctionListPopover({
   }, [isFunctionListOpen]);
 
   useEffect(() => {
-    const options = getFunctions().map((func) => ({
-      label: func.options.name,
-      searchableLabel: func.options.descriptionForUser,
-      checked:
-        func.options.name === selectedFunctionName
-          ? ('on' as EuiSelectableOptionCheckedType)
-          : ('off' as EuiSelectableOptionCheckedType),
-    }));
+    const options = mapFunctions({ functions, selectedFunctionName });
+    if (options.length !== functionOptions.length) {
+      setFunctionOptions(options);
+    }
+  }, [functionOptions.length, functions, selectedFunctionName]);
 
-    setFunctionOptions(options);
-  }, [getFunctions, selectedFunctionName]);
-
-  const renderCountryOption = (
+  const renderFunctionOption = (
     option: EuiSelectableOption<FunctionListOption>,
     searchValue: string
   ) => {
@@ -142,7 +139,7 @@ export function FunctionListPopover({
           showIcons: false,
         }}
         options={functionOptions}
-        renderOption={renderCountryOption}
+        renderOption={renderFunctionOption}
         searchable
         searchProps={{
           'data-test-subj': 'searchFiltersList',
@@ -152,8 +149,8 @@ export function FunctionListPopover({
           }),
         }}
         singleSelection
-        onChange={(functions) => {
-          const selectedFunction = functions.filter((fn) => fn.checked !== 'off');
+        onChange={(options) => {
+          const selectedFunction = options.filter((fn) => fn.checked !== 'off');
           if (selectedFunction && selectedFunction.length === 1) {
             handleSelectFunction({ ...selectedFunction[0], checked: 'on' });
           }
@@ -168,4 +165,21 @@ export function FunctionListPopover({
       </EuiSelectable>
     </EuiPopover>
   );
+}
+
+function mapFunctions({
+  functions,
+  selectedFunctionName,
+}: {
+  functions: FunctionDefinition[];
+  selectedFunctionName: string | undefined;
+}) {
+  return functions.map((func) => ({
+    label: func.options.name,
+    searchableLabel: func.options.descriptionForUser,
+    checked:
+      func.options.name === selectedFunctionName
+        ? ('on' as EuiSelectableOptionCheckedType)
+        : ('off' as EuiSelectableOptionCheckedType),
+  }));
 }
