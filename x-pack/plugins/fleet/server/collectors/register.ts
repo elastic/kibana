@@ -12,7 +12,7 @@ import type { FleetConfigType } from '..';
 
 import { getIsAgentsEnabled } from './config_collectors';
 import { getAgentUsage, getAgentData } from './agent_collectors';
-import type { AgentUsage } from './agent_collectors';
+import type { AgentUsage, AgentData } from './agent_collectors';
 import { getInternalClients } from './helpers';
 import { getPackageUsage } from './package_collectors';
 import type { PackageUsage } from './package_collectors';
@@ -30,31 +30,12 @@ export interface Usage {
   fleet_server: FleetServerUsage;
 }
 
-export interface FleetUsage extends Usage {
+export interface FleetUsage extends Usage, AgentData {
   fleet_server_config: { policies: Array<{ input_config: any }> };
   agent_policies: { count: number; output_types: string[] };
-  agents_per_version: Array<{
-    version: string;
-    count: number;
-  }>;
-  agent_checkin_status: {
-    error: number;
-    degraded: number;
-  };
-  agents_per_policy: number[];
   agent_logs_panics_last_hour: AgentPanicLogsData['agent_logs_panics_last_hour'];
   agent_logs_top_errors?: string[];
   fleet_server_logs_top_errors?: string[];
-  agents_per_os: Array<{
-    name: string;
-    version: string;
-    count: number;
-  }>;
-  components_status: Array<{
-    id: string;
-    status: string;
-    count: number;
-  }>;
 }
 
 export const fetchFleetUsage = async (
