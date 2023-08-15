@@ -89,6 +89,17 @@ const PageOverlayGlobalStyles = createGlobalStyle<{ theme: EuiTheme }>`
   body.${PAGE_OVERLAY_DOCUMENT_BODY_FULLSCREEN_CLASSNAME} {
     ${FULL_SCREEN_CONTENT_OVERRIDES_CSS_STYLESHEET}
   }
+
+  //-------------------------------------------------------------------------------------------
+  // Style overrides for when Page Overlay is displayed in serverless project
+  //-------------------------------------------------------------------------------------------
+  // With serverless, there is 1 less header displayed, thus the display of the page overlay
+  // need to be adjusted slightly so that it still display below the header
+  //-------------------------------------------------------------------------------------------
+  body.kbnBody.kbnBody--projectLayout:not(.${PAGE_OVERLAY_DOCUMENT_BODY_FULLSCREEN_CLASSNAME}) .${PAGE_OVERLAY_CSS_CLASSNAME} {
+    top: ${({ theme: { eui } }) => eui.euiHeaderHeightCompensation};
+    height: calc(100% - (${({ theme: { eui } }) => eui.euiHeaderHeightCompensation}));
+  }
 `;
 
 const setDocumentBodyOverlayIsVisible = () => {

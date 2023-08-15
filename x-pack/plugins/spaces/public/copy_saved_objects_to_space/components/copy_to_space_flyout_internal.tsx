@@ -25,14 +25,14 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { CopyToSpaceFlyoutFooter } from './copy_to_space_flyout_footer';
+import { CopyToSpaceForm } from './copy_to_space_form';
+import { ProcessingCopyToSpace } from './processing_copy_to_space';
 import { useSpaces } from '../../spaces_context';
 import type { SpacesDataEntry } from '../../types';
 import { processImportResponse } from '../lib';
 import type { ProcessedImportResponse } from '../lib';
 import type { CopyOptions, CopyToSpaceFlyoutProps, ImportRetry } from '../types';
-import { CopyToSpaceFlyoutFooter } from './copy_to_space_flyout_footer';
-import { CopyToSpaceForm } from './copy_to_space_form';
-import { ProcessingCopyToSpace } from './processing_copy_to_space';
 
 const INCLUDE_RELATED_DEFAULT = true;
 const CREATE_NEW_COPIES_DEFAULT = true;

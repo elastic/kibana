@@ -8,7 +8,7 @@
 import React, { useEffect, useState } from 'react';
 import {
   EuiButtonEmpty,
-  EuiContextMenuItem,
+  EuiContextMenu,
   EuiContextMenuPanel,
   EuiPopover,
   EuiSpacer,
@@ -16,16 +16,17 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FunctionDefinition } from '../../../common/types';
+import { useObservabilityAIAssistantChatService } from '../../hooks/use_observability_ai_assistant_chat_service';
 
 export function FunctionListPopover({
-  functions,
-  selectedFunction,
+  selectedFunctionName,
   onSelectFunction,
 }: {
-  functions: FunctionDefinition[];
-  selectedFunction?: FunctionDefinition;
-  onSelectFunction: (func: FunctionDefinition) => void;
+  selectedFunctionName?: string;
+  onSelectFunction: (func: string) => void;
 }) {
+  const chatService = useObservabilityAIAssistantChatService();
+
   const [isFunctionListOpen, setIsFunctionListOpen] = useState(false);
 
   const handleClickFunctionList = () => {
@@ -34,7 +35,7 @@ export function FunctionListPopover({
 
   const handleSelectFunction = (func: FunctionDefinition) => {
     setIsFunctionListOpen(false);
-    onSelectFunction(func);
+    onSelectFunction(func.options.name);
   };
 
   useEffect(() => {
@@ -61,31 +62,44 @@ export function FunctionListPopover({
           size="xs"
           onClick={handleClickFunctionList}
         >
-          {selectedFunction
-            ? selectedFunction.options.name
+          {selectedFunctionName
+            ? selectedFunctionName
             : i18n.translate('xpack.observabilityAiAssistant.prompt.callFunction', {
                 defaultMessage: 'Call function',
               })}
         </EuiButtonEmpty>
       }
       closePopover={handleClickFunctionList}
+      css={{ maxWidth: 400 }}
       panelPaddingSize="none"
       isOpen={isFunctionListOpen}
     >
       <EuiContextMenuPanel size="s">
-        {functions.map((func) => (
-          <EuiContextMenuItem key={func.options.name} onClick={() => handleSelectFunction(func)}>
-            <EuiText size="s">
-              <p>
-                <strong>{func.options.name}</strong>
-              </p>
-            </EuiText>
-            <EuiSpacer size="xs" />
-            <EuiText size="s">
-              <p>{func.options.description}</p>
-            </EuiText>
-          </EuiContextMenuItem>
-        ))}
+        <EuiContextMenu
+          initialPanelId={0}
+          panels={[
+            {
+              id: 0,
+              width: 500,
+              items: chatService.getFunctions().map((func) => ({
+                name: (
+                  <>
+                    <EuiText size="s">
+                      <p>
+                        <strong>{func.options.name}</strong>
+                      </p>
+                    </EuiText>
+                    <EuiSpacer size="xs" />
+                    <EuiText size="s">
+                      <p>{func.options.descriptionForUser}</p>
+                    </EuiText>
+                  </>
+                ),
+                onClick: () => handleSelectFunction(func),
+              })),
+            },
+          ]}
+        />
       </EuiContextMenuPanel>
     </EuiPopover>
   );
