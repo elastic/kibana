@@ -9,6 +9,7 @@ import { InheritedServices } from '../../api_integration/services';
 
 export interface CreateTestConfigOptions {
   serverlessProject: 'es' | 'oblt' | 'security';
+  kbnServerArgs?: string[];
   testFiles: string[];
   junit: { reportName: string };
   suiteTags?: { include?: string[]; exclude?: string[] };

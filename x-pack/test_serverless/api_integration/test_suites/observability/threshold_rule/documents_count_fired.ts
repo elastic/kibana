@@ -11,8 +11,6 @@ import { FIRED_ACTIONS_ID } from '@kbn/observability-plugin/server/lib/rules/thr
 import expect from '@kbn/expect';
 import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/observability-plugin/common/constants';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { createIndexConnector, createRule } from '../helpers/alerting_api_helper';
-import { createDataView, deleteDataView } from '../helpers/data_view';
 
 export default function ({ getService }: FtrProviderContext) {
   const esClient = getService('es');
@@ -20,6 +18,7 @@ export default function ({ getService }: FtrProviderContext) {
   const esDeleteAllIndices = getService('esDeleteAllIndices');
   const logger = getService('log');
   const alertingApi = getService('alertingApi');
+  const dataViewApi = getService('dataViewApi');
 
   describe('Threshold rule - DOCUMENTS_COUNT - FIRED', () => {
     const THRESHOLD_RULE_ALERT_INDEX = '.alerts-observability.threshold.alerts-default';
@@ -31,8 +30,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     before(async () => {
       infraDataIndex = await generate({ esClient, lookback: 'now-15m', logger });
-      await createDataView({
-        supertest,
+      await dataViewApi.create({
         name: 'metrics-fake_hosts',
         id: DATA_VIEW_ID,
         title: 'metrics-fake_hosts',
@@ -56,8 +54,7 @@ export default function ({ getService }: FtrProviderContext) {
         index: '.kibana-event-log-*',
         query: { term: { 'kibana.alert.rule.consumer': 'alerts' } },
       });
-      await deleteDataView({
-        supertest,
+      await dataViewApi.delete({
         id: DATA_VIEW_ID,
       });
       await esDeleteAllIndices([ALERT_ACTION_INDEX, infraDataIndex]);
@@ -66,14 +63,12 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('Rule creation', () => {
       it('creates rule successfully', async () => {
-        actionId = await createIndexConnector({
-          supertest,
+        actionId = await alertingApi.createIndexConnector({
           name: 'Index Connector: Threshold API test',
           indexName: ALERT_ACTION_INDEX,
         });
 
-        const createdRule = await createRule({
-          supertest,
+        const createdRule = await alertingApi.createRule({
           tags: ['observability'],
           consumer: 'alerts',
           name: 'Threshold rule',
