@@ -11,6 +11,10 @@ import { FormattedRelative } from '@kbn/i18n-react';
 import { SentinelOneLogo } from '@kbn/stack-connectors-plugin/public/common';
 import { SentinelOneScriptStatus } from './script_status';
 
+const avatarStyles = {
+  padding: 8,
+};
+
 const SentinelOneActionResultComponent = ({
   timestamp,
   params,
@@ -31,38 +35,51 @@ const SentinelOneActionResultComponent = ({
   };
 }) => {
   const event = useMemo(() => {
-    if (params.subAction === 'killProcess') {
+    if (params?.subAction === 'killProcess') {
       return (
         <>
           {'Terminated process '}
-          <b>{params.subActionParams.processName}</b>
+          <b>{params?.subActionParams?.processName}</b>
           {' on host '}
-          <b>{params.subActionParams.hostname}</b>
+          <b>{params?.subActionParams?.hostname}</b>
         </>
       );
-    } else if (params.subAction === 'isolateAgent') {
+    } else if (params?.subAction === 'isolateAgent') {
       return (
         <>
           {'Isolated host '}
-          <b>{params.subActionParams.hostname}</b>
+          <b>{params?.subActionParams?.hostname}</b>
         </>
       );
-    } else if (params.subAction === 'releaseAgent') {
+    } else if (params?.subAction === 'releaseAgent') {
       return (
         <>
           {'Released host '}
-          <b>{params.subActionParams.hostname}</b>
+          <b>{params?.subActionParams?.hostname}</b>
         </>
       );
     } else {
       return (
         <>
           {`Executed action `}
-          <b>{params.subAction}</b>
+          <b>{params?.subAction}</b>
         </>
       );
     }
-  }, [params.subAction, params.subActionParams.hostname, params.subActionParams.processName]);
+  }, [params?.subAction, params?.subActionParams?.hostname, params?.subActionParams?.processName]);
+
+  const commentBody = useMemo(() => {
+    const parentTaskId = data?.data?.parentTaskId;
+    if (params?.subAction && parentTaskId) {
+      return (
+        !['isolateAgent', 'releaseAgent'].includes(params?.subAction) && (
+          <SentinelOneScriptStatus parentTaskId={parentTaskId} />
+        )
+      );
+    }
+
+    return <></>;
+  }, [data?.data?.parentTaskId, params?.subAction]);
 
   return (
     <EuiComment
@@ -75,13 +92,11 @@ const SentinelOneActionResultComponent = ({
           name="sentinelone"
           iconType={SentinelOneLogo}
           color="subdued"
-          css={{ padding: 8 }}
+          css={avatarStyles}
         />
       }
     >
-      {!['isolateAgent', 'releaseAgent'].includes(params.subAction) && (
-        <SentinelOneScriptStatus parentTaskId={data.data.parentTaskId} />
-      )}
+      {commentBody}
     </EuiComment>
   );
 };
