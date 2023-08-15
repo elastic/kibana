@@ -22,19 +22,15 @@ import {
 import { HelloWorldContainer } from '../../../lib/test_samples/embeddables/hello_world_container';
 import { embeddablePluginMock } from '../../../mocks';
 import { EditPanelAction } from '../edit_panel_action/edit_panel_action';
-import { applicationServiceMock } from '@kbn/core/public/mocks';
 
 let container: Container;
 let embeddable: ContactCardEmbeddable;
 const overlays = overlayServiceMock.createStartContract();
 const theme = themeServiceMock.createStartContract();
-const { setup, doStart } = embeddablePluginMock.createInstance();
-const start = doStart();
-const getFactory = start.getEmbeddableFactory;
-const applicationMock = applicationServiceMock.createStartContract();
-const stateTransferMock = embeddablePluginMock.createStartContract().getStateTransfer();
+const editPanelActionMock = { execute: jest.fn() } as unknown as EditPanelAction;
 
 function createHelloWorldContainer(input = { id: '123', panels: {} }) {
+  const { setup, doStart } = embeddablePluginMock.createInstance();
   setup.registerEmbeddableFactory(
     CONTACT_CARD_EMBEDDABLE,
     new ContactCardEmbeddableFactory((() => {}) as any, {} as any)
@@ -63,8 +59,7 @@ beforeAll(async () => {
 });
 
 test('execute should open flyout', async () => {
-  const editPanelAction = new EditPanelAction(getFactory, applicationMock, stateTransferMock);
-  const customizePanelAction = new CustomizePanelAction(overlays, theme, editPanelAction);
+  const customizePanelAction = new CustomizePanelAction(overlays, theme, editPanelActionMock);
   const spy = jest.spyOn(overlays, 'openFlyout');
   await customizePanelAction.execute({ embeddable });
 
