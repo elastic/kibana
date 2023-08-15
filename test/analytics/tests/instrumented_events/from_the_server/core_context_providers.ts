@@ -48,6 +48,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(event.context.buildNum).to.be.a('number');
       expect(event.context).to.have.property('buildSha');
       expect(event.context.buildSha).to.be.a('string');
+      expect(event.context.buildFlavor).to.be.a('string');
     });
 
     it('should have the properties provided by the "cluster info" context provider', () => {

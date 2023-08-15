@@ -109,6 +109,7 @@ export class AnalyticsService {
         branch: core.env.packageInfo.branch,
         buildNum: core.env.packageInfo.buildNum,
         buildSha: core.env.packageInfo.buildSha,
+        buildFlavor: core.env.packageInfo.buildFlavor,
       }),
       schema: {
         isDev: {
@@ -126,6 +127,10 @@ export class AnalyticsService {
         },
         buildNum: { type: 'long', _meta: { description: 'Build number of the Kibana instance.' } },
         buildSha: { type: 'keyword', _meta: { description: 'Build SHA of the Kibana instance.' } },
+        buildFlavor: {
+          type: 'keyword',
+          _meta: { description: 'Build flavor of the Kibana instance. traditional or serverless' },
+        }
       },
     });
   }

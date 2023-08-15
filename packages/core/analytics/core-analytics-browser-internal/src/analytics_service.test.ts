@@ -34,15 +34,16 @@ describe('AnalyticsService', () => {
     expect(analyticsClientMock.registerContextProvider).toHaveBeenCalledTimes(4);
     expect(await firstValueFrom(findRegisteredContextProviderByName('build info')[0].context$))
       .toMatchInlineSnapshot(`
-        Object {
-          "branch": "branch",
-          "buildNum": 100,
-          "buildSha": "buildSha",
-          "isDev": true,
-          "isDistributable": false,
-          "version": "version",
-        }
-      `);
+      Object {
+        "branch": "branch",
+        "buildFlavor": "traditional",
+        "buildNum": 100,
+        "buildSha": "buildSha",
+        "isDev": true,
+        "isDistributable": false,
+        "version": "version",
+      }
+    `);
     expect(
       await firstValueFrom(findRegisteredContextProviderByName('session-id')[0].context$)
     ).toEqual({ session_id: expect.any(String) });
