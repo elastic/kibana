@@ -40,7 +40,7 @@
     "@kbn/reporting-common",
     "@kbn/saved-search-plugin",
     "@kbn/core-http-router-server-internal",
-    "@kbn/core-http-common",
+    "@kbn/reporting-plugin",
   ],
   "exclude": [
     "target/**/*",
