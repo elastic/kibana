@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import fileSaver from 'file-saver';
 import type { HttpFetchQuery } from '@kbn/core/public';
 import { HttpSetup, IUiSettingsClient } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
@@ -105,9 +106,9 @@ export class ReportingAPIClient implements IReportingAPI {
   }
 
   public downloadReport(jobId: string) {
-    const location = this.getReportURL(jobId);
-
-    window.open(location);
+    this.http.fetch(
+      `${INTERNAL_ROUTES.JOBS.DOWNLOAD_PREFIX}/${jobId}`, { version: '1'}
+    ).then((resp) => { const jsBlob = new Blob([resp as string], { type: 'text/csv'}); fileSaver.saveAs(jsBlob, `${jobId}.csv`); return; });
   }
 
   public async deleteReport(jobId: string) {
