@@ -13,7 +13,7 @@ import {
 import { getCloudSecurityUsageRecord } from './cloud_security_metering_task';
 import type { PostureType, Tier } from './types';
 import type { MeteringCallbackInput, UsageRecord } from '../types';
-import { ProductLine, ProductTier } from '@kbn/security-solution-serverless/common/product';
+import { ProductLine } from '@kbn/security-solution-serverless/common/product';
 import { ServerlessSecurityConfig } from '../config';
 
 export const CLOUD_SECURITY_TASK_TYPE = 'cloud_security';
