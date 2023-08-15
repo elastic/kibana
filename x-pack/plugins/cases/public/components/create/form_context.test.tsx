@@ -306,6 +306,89 @@ describe('Create case', () => {
       });
     });
 
+    it('should post a case on submit click with the trimmed value of title, description', async () => {
+      const titleWithSpace = 'This is a title with spaces                      ';
+      const descriptionWithSpace = 'This is a case description with empty spaces at the end!!                            ';
+
+      useGetConnectorsMock.mockReturnValue({
+        ...sampleConnectorData,
+        data: connectorsMock,
+      });
+
+      appMockRender.render(
+        <FormContext onSuccess={onFormSubmitSuccess}>
+          <CreateCaseFormFields {...defaultCreateCaseForm} />
+          <SubmitCaseButton />
+        </FormContext>
+      );
+
+      await waitForFormToRender(screen);
+      await fillFormReactTestingLib({ renderer: screen });
+
+      const titleInput = within(screen.getByTestId('caseTitle')).getByTestId('input');
+      userEvent.clear(titleInput);
+      userEvent.paste(titleInput, titleWithSpace);
+
+      const descInput = within(screen.getByTestId('caseDescription')).getByTestId('euiMarkdownEditorTextArea');
+      userEvent.clear(descInput);
+      userEvent.type(descInput, descriptionWithSpace);
+
+      userEvent.click(screen.getByTestId('create-case-submit'));
+
+      await waitFor(() => {
+        expect(postCase).toHaveBeenCalled();
+      });
+
+      expect(postCase).toBeCalledWith({
+        request: {
+          ...sampleDataWithoutTags,
+          title: titleWithSpace.trim(),
+          description: descriptionWithSpace.trim(),
+        },
+      });
+    });
+
+    it('should post a case on submit click with the trimmed value of category and tags', async () => {
+      const category = 'security        ';
+      const tags = ['coke     ', 'pepsi']
+
+      useGetConnectorsMock.mockReturnValue({
+        ...sampleConnectorData,
+        data: connectorsMock,
+      });
+
+      appMockRender.render(
+        <FormContext onSuccess={onFormSubmitSuccess}>
+          <CreateCaseFormFields {...defaultCreateCaseForm} />
+          <SubmitCaseButton />
+        </FormContext>
+      );
+
+      await waitForFormToRender(screen);
+      await fillFormReactTestingLib({ renderer: screen });
+
+        const tagsInput = await within(screen.getByTestId('caseTags')).findByTestId('comboBoxInput');
+        userEvent.type(tagsInput, `${tags[0]}{enter}`);
+        userEvent.type(tagsInput, `${tags[1]}{enter}`);
+
+      const categoryInput = await within(screen.getByTestId('categories-list')).findByTestId('comboBoxInput');
+      userEvent.type(categoryInput, category);
+
+      userEvent.click(screen.getByTestId('create-case-submit'));
+
+      await waitFor(() => {
+        expect(postCase).toHaveBeenCalled();
+      });
+
+      expect(postCase).toBeCalledWith({
+        request: {
+          ...sampleDataWithoutTags,
+          tags: ['coke','pepsi'],
+          category: 'security',
+        },
+      });
+    });
+
     it('does not submits the title when the length is longer than 160 characters', async () => {
       const longTitle = 'a'.repeat(161);
 
