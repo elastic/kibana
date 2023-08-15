@@ -5,13 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { Capabilities, IUiSettingsClient } from '@kbn/core/public';
-import { DataViewsContract } from '@kbn/data-plugin/public';
-import { DataView } from '@kbn/data-views-plugin/public';
-import { SORT_DEFAULT_ORDER_SETTING } from '@kbn/discover-utils';
-import { DiscoverAppStateContainer } from '../../../application/main/services/discover_app_state_container';
-import { GetStateReturn as ContextGetStateReturn } from '../../../application/context/services/context_state';
-import { popularizeField } from '../../../utils/popularize_field';
+import { Capabilities } from '@kbn/core/public';
+import type { DataViewsContract } from '@kbn/data-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import { popularizeField } from '../../utils/popularize_field';
 
 /**
  * Helper function to provide a fallback to a single _source column if the given array of columns
@@ -57,29 +54,28 @@ export function moveColumn(columns: string[], columnName: string, newIndex: numb
 
 export function getStateColumnActions({
   capabilities,
-  config,
   dataView,
   dataViews,
   useNewFieldsApi,
   setAppState,
   columns,
   sort,
+  defaultOrder = 'desc',
 }: {
   capabilities: Capabilities;
-  config: IUiSettingsClient;
   dataView: DataView;
   dataViews: DataViewsContract;
   useNewFieldsApi: boolean;
-  setAppState: DiscoverAppStateContainer['update'] | ContextGetStateReturn['setAppState'];
+  setAppState: (columns: string[], sort?: string[][]) => void;
   columns?: string[];
   sort: string[][] | undefined;
+  defaultOrder?: string;
 }) {
   function onAddColumn(columnName: string) {
     popularizeField(dataView, columnName, dataViews, capabilities);
     const nextColumns = addColumn(columns || [], columnName, useNewFieldsApi);
-    const defaultOrder = config.get(SORT_DEFAULT_ORDER_SETTING);
     const nextSort = columnName === '_score' && !sort?.length ? [['_score', defaultOrder]] : sort;
-    setAppState({ columns: nextColumns, sort: nextSort });
+    setAppState(nextColumns, nextSort);
   }
 
   function onRemoveColumn(columnName: string) {
@@ -87,12 +83,12 @@ export function getStateColumnActions({
     const nextColumns = removeColumn(columns || [], columnName, useNewFieldsApi);
     // The state's sort property is an array of [sortByColumn,sortDirection]
     const nextSort = sort && sort.length ? sort.filter((subArr) => subArr[0] !== columnName) : [];
-    setAppState({ columns: nextColumns, sort: nextSort });
+    setAppState(nextColumns, nextSort);
   }
 
   function onMoveColumn(columnName: string, newIndex: number) {
     const nextColumns = moveColumn(columns || [], columnName, newIndex);
-    setAppState({ columns: nextColumns });
+    setAppState(nextColumns);
   }
 
   function onSetColumns(nextColumns: string[], hideTimeColumn: boolean) {
@@ -102,7 +98,7 @@ export function getStateColumnActions({
         ? (nextColumns || []).slice(1)
         : nextColumns;
 
-    setAppState({ columns: actualColumns });
+    setAppState(actualColumns);
   }
   return {
     onAddColumn,

@@ -23,7 +23,12 @@ import classNames from 'classnames';
 import { generateFilters } from '@kbn/data-plugin/public';
 import { useDragDropContext } from '@kbn/dom-drag-drop';
 import { DataViewField, DataViewType } from '@kbn/data-views-plugin/public';
-import { SEARCH_FIELDS_FROM_SOURCE, SHOW_FIELD_STATISTICS } from '@kbn/discover-utils';
+import {
+  SEARCH_FIELDS_FROM_SOURCE,
+  SHOW_FIELD_STATISTICS,
+  SORT_DEFAULT_ORDER_SETTING,
+} from '@kbn/discover-utils';
+import { useColumns } from '@kbn/unified-data-table';
 import { useSavedSearchInitial } from '../../services/discover_state_provider';
 import { DiscoverStateContainer } from '../../services/discover_state';
 import { VIEW_MODE } from '../../../../../common/constants';
@@ -40,7 +45,6 @@ import { DocViewFilterFn } from '../../../../services/doc_views/doc_views_types'
 import { getResultState } from '../../utils/get_result_state';
 import { DiscoverUninitialized } from '../uninitialized/uninitialized';
 import { DataMainMsg, RecordRawType } from '../../services/discover_data_state_container';
-import { useColumns } from '../../../../hooks/use_data_grid_columns';
 import { FetchStatus } from '../../../types';
 import { useDataState } from '../../hooks/use_data_state';
 import { getRawRecordType } from '../../utils/get_raw_record_type';
@@ -126,10 +130,16 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     onRemoveColumn,
   } = useColumns({
     capabilities,
-    config: uiSettings,
+    defaultOrder: uiSettings.get(SORT_DEFAULT_ORDER_SETTING),
     dataView,
     dataViews,
-    setAppState: stateContainer.appState.update,
+    setAppState: (newColumns: string[], newSort?: string[][]) => {
+      if (newSort) {
+        stateContainer.appState.update({ columns: newColumns, sort: newSort });
+      } else {
+        stateContainer.appState.update({ columns: newColumns });
+      }
+    },
     useNewFieldsApi,
     columns,
     sort,

@@ -20,20 +20,20 @@ import { DataView } from '@kbn/data-views-plugin/public';
 import { SortOrder } from '@kbn/saved-search-plugin/public';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
-import { UnifiedDataTable } from '@kbn/unified-data-table';
+import { UnifiedDataTable, useColumns } from '@kbn/unified-data-table';
 import {
   DOC_HIDE_TIME_COLUMN_SETTING,
   DOC_TABLE_LEGACY,
   SAMPLE_SIZE_SETTING,
   SEARCH_FIELDS_FROM_SOURCE,
   HIDE_ANNOUNCEMENTS,
+  SORT_DEFAULT_ORDER_SETTING,
 } from '@kbn/discover-utils';
 import { useInternalStateSelector } from '../../services/discover_internal_state_container';
 import { useAppStateSelector } from '../../services/discover_app_state_container';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DocViewFilterFn } from '../../../../services/doc_views/doc_views_types';
 import { FetchStatus } from '../../../types';
-import { useColumns } from '../../../../hooks/use_data_grid_columns';
 import { RecordRawType } from '../../services/discover_data_state_container';
 import { DiscoverStateContainer } from '../../services/discover_state';
 import { useDataState } from '../../hooks/use_data_state';
@@ -42,7 +42,10 @@ import { DocumentExplorerCallout } from '../document_explorer_callout';
 import { DocumentExplorerUpdateCallout } from '../document_explorer_callout/document_explorer_update_callout';
 import { DiscoverTourProvider } from '../../../../components/discover_tour';
 import { getRawRecordType } from '../../utils/get_raw_record_type';
-import { DiscoverGridFlyout } from '../../../../components/discover_grid_flyout';
+import {
+  DiscoverGridFlyout,
+  DiscoverGridFlyoutProps,
+} from '../../../../components/discover_grid_flyout';
 import { DocViewer } from '../../../../services/doc_views/components/doc_viewer';
 import { useSavedSearchInitial } from '../../services/discover_state_provider';
 
@@ -71,6 +74,25 @@ export const onResize = (
   const newGrid = { ...grid, columns: newColumns };
   stateContainer.appState.update({ grid: newGrid });
 };
+
+function getDiscoverDetails(props: DiscoverGridFlyoutProps) {
+  return (
+    <DiscoverGridFlyout
+      dataView={props.dataView}
+      hit={props.hit}
+      hits={props.hits}
+      // if default columns are used, dont make them part of the URL - the context state handling will take care to restore them
+      columns={props.columns}
+      savedSearchId={props.savedSearchId}
+      onFilter={props.onFilter}
+      onRemoveColumn={props.onRemoveColumn}
+      onAddColumn={props.onAddColumn}
+      onClose={() => props.setExpandedDoc(undefined)}
+      setExpandedDoc={props.setExpandedDoc}
+      query={props.query}
+    />
+  );
+}
 
 function DiscoverDocumentsComponent({
   dataView,
@@ -141,10 +163,16 @@ function DiscoverDocumentsComponent({
     onSetColumns,
   } = useColumns({
     capabilities,
-    config: uiSettings,
+    defaultOrder: uiSettings.get(SORT_DEFAULT_ORDER_SETTING),
     dataView,
     dataViews,
-    setAppState: stateContainer.appState.update,
+    setAppState: (newColumns: string[], newSort?: string[][]) => {
+      if (newSort) {
+        stateContainer.appState.update({ columns: newColumns, sort: newSort });
+      } else {
+        stateContainer.appState.update({ columns: newColumns });
+      }
+    },
     useNewFieldsApi,
     columns,
     sort,
@@ -258,29 +286,26 @@ function DiscoverDocumentsComponent({
                 useNewFieldsApi={useNewFieldsApi}
                 rowHeightState={rowHeight}
                 onUpdateRowHeight={onUpdateRowHeight}
-                isSortEnabled={true}
                 isPlainRecord={isTextBasedQuery}
                 rowsPerPageState={rowsPerPage}
                 onUpdateRowsPerPage={onUpdateRowsPerPage}
                 onFieldEdited={onFieldEdited}
                 getDocumentView={(displayedRows: DataTableRecord[], displayedColumns: string[]) => {
                   return (
-                    expandedDoc && (
-                      <DiscoverGridFlyout
-                        dataView={dataView}
-                        hit={expandedDoc}
-                        hits={displayedRows}
-                        // if default columns are used, dont make them part of the URL - the context state handling will take care to restore them
-                        columns={displayedColumns}
-                        savedSearchId={savedSearch.id}
-                        onFilter={onAddFilter as DocViewFilterFn}
-                        onRemoveColumn={onRemoveColumn}
-                        onAddColumn={onAddColumn}
-                        onClose={() => setExpandedDoc(undefined)}
-                        setExpandedDoc={setExpandedDoc}
-                        query={query}
-                      />
-                    )
+                    expandedDoc &&
+                    getDiscoverDetails({
+                      dataView,
+                      hit: expandedDoc,
+                      hits: displayedRows,
+                      columns: displayedColumns,
+                      savedSearchId: savedSearch.id,
+                      onFilter: onAddFilter as DocViewFilterFn,
+                      onRemoveColumn,
+                      onAddColumn,
+                      onClose: () => setExpandedDoc(undefined),
+                      setExpandedDoc,
+                      query,
+                    })
                   );
                 }}
                 services={services}

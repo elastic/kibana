@@ -13,5 +13,8 @@ export { getDisplayedColumns } from './src/utils/columns';
 export { JsonCodeEditorCommon } from './src/components/json_code_editor/json_code_editor_common';
 
 export * from './src/types';
+export * as columnActions from './src/components/actions/columns';
 
 export { getRowsPerPageOptions } from './src/utils/rows_per_page';
+
+export { useColumns } from './src/hooks/use_data_grid_columns';

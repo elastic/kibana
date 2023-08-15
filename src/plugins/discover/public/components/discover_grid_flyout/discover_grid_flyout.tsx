@@ -45,7 +45,7 @@ export interface DiscoverGridFlyoutProps {
   onClose: () => void;
   onFilter?: DocViewFilterFn;
   onRemoveColumn: (column: string) => void;
-  setExpandedDoc: (doc: DataTableRecord) => void;
+  setExpandedDoc: (doc?: DataTableRecord) => void;
 }
 
 function getIndexByDocId(hits: DataTableRecord[], id: string) {

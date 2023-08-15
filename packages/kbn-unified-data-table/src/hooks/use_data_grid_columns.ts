@@ -9,32 +9,30 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
 
-import { Capabilities, IUiSettingsClient } from '@kbn/core/public';
+import { Capabilities } from '@kbn/core/public';
 import { isEqual } from 'lodash';
-import { DiscoverAppStateContainer } from '../application/main/services/discover_app_state_container';
-import { GetStateReturn as ContextGetStateReturn } from '../application/context/services/context_state';
-import { getStateColumnActions } from '../components/doc_table/actions/columns';
+import { getStateColumnActions } from '../components/actions/columns';
 
 interface UseColumnsProps {
   capabilities: Capabilities;
-  config: IUiSettingsClient;
   dataView: DataView;
   dataViews: DataViewsContract;
   useNewFieldsApi: boolean;
-  setAppState: DiscoverAppStateContainer['update'] | ContextGetStateReturn['setAppState'];
+  setAppState: (columns: string[], sort?: string[][]) => void;
   columns?: string[];
   sort?: string[][];
+  defaultOrder?: string;
 }
 
 export const useColumns = ({
   capabilities,
-  config,
   dataView,
   dataViews,
   setAppState,
   useNewFieldsApi,
   columns,
   sort,
+  defaultOrder,
 }: UseColumnsProps) => {
   const [usedColumns, setUsedColumns] = useState(getColumns(columns, useNewFieldsApi));
   useEffect(() => {
@@ -48,15 +46,24 @@ export const useColumns = ({
     () =>
       getStateColumnActions({
         capabilities,
-        config,
         dataView,
         dataViews,
         setAppState,
         useNewFieldsApi,
         columns: usedColumns,
         sort,
+        defaultOrder,
       }),
-    [capabilities, config, dataView, dataViews, setAppState, sort, useNewFieldsApi, usedColumns]
+    [
+      capabilities,
+      dataView,
+      dataViews,
+      defaultOrder,
+      setAppState,
+      sort,
+      useNewFieldsApi,
+      usedColumns,
+    ]
   );
 
   return {

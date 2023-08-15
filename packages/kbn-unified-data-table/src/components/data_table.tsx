@@ -24,7 +24,8 @@ import {
   EuiIcon,
   EuiDataGridRefProps,
   EuiDataGridInMemory,
-  EuiDataGridProps,
+  EuiDataGridControlColumn,
+  EuiDataGridCustomBodyProps,
 } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DocViewFilterFn } from '@kbn/discover-plugin/public';
@@ -33,13 +34,14 @@ import {
   useDataGridColumnsCellActions,
   type UseDataGridColumnsCellActionsProps,
 } from '@kbn/cell-actions';
-import type { ToastsStart, IUiSettingsClient, HttpStart, CoreStart } from '@kbn/core/public';
+import type { ToastsStart, IUiSettingsClient, HttpStart } from '@kbn/core/public';
 import { Serializable } from '@kbn/utility-types';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { getShouldShowFieldHandler } from '@kbn/discover-utils';
 import { DOC_HIDE_TIME_COLUMN_SETTING } from '@kbn/discover-utils';
 import type { DataViewFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { ThemeServiceStart } from '@kbn/react-kibana-context-common';
 import { UnifiedDataTableSettings, ValueToStringConverter } from '../types';
 import { getDisplayedColumns } from '../utils/columns';
 import { convertValueToString } from '../utils/convert_value_to_string';
@@ -147,7 +149,7 @@ export interface UnifiedDataTableProps {
   /**
    * How the data is fetched
    */
-  useNewFieldsApi: boolean;
+  useNewFieldsApi?: boolean;
   /**
    * Manage pagination control
    */
@@ -188,7 +190,7 @@ export interface UnifiedDataTableProps {
    * Service dependencies
    */
   services: {
-    core: CoreStart;
+    theme: ThemeServiceStart;
     fieldFormats: FieldFormatsStart;
     addBasePath: HttpStart['basePath']['prepend'];
     uiSettings: IUiSettingsClient;
@@ -203,6 +205,22 @@ export interface UnifiedDataTableProps {
   configRowHeight?: number;
   showMultiFields?: boolean;
   maxDocFieldsDisplayed?: number;
+  externalControlColumns?: EuiDataGridControlColumn[];
+  externalAdditionalControls?: React.ReactNode;
+  rowsPerPageOptions?: number[];
+  /**
+   * An optional function called to completely customize and control the rendering of
+   * EuiDataGrid's body and cell placement.  This can be used to, e.g. remove EuiDataGrid's
+   * virtualization library, or roll your own.
+   *
+   * This component is **only** meant as an escape hatch for extremely custom use cases.
+   *
+   * Behind the scenes, this function is treated as a React component,
+   * allowing hooks, context, and other React concepts to be used.
+   * It receives #EuiDataGridCustomBodyProps as its only argument.
+   */
+  renderCustomGridBody?: (args: EuiDataGridCustomBodyProps) => React.ReactNode;
+  trailingControlColumns?: EuiDataGridControlColumn[];
 }
 export const EuiDataGridMemoized = React.memo(EuiDataGrid);
 
@@ -226,7 +244,7 @@ export const UnifiedDataTable = ({
   showTimeCol,
   showFullScreenButton = true,
   sort,
-  useNewFieldsApi,
+  useNewFieldsApi = true,
   isSortEnabled = true,
   isPaginationEnabled = true,
   cellActionsTriggerId,
@@ -238,7 +256,6 @@ export const UnifiedDataTable = ({
   onUpdateRowsPerPage,
   onFieldEdited,
   services,
-  leadingControlColumns,
   renderCustomGridBody,
   trailingControlColumns,
   getDocumentView,
@@ -247,9 +264,12 @@ export const UnifiedDataTable = ({
   configRowHeight,
   showMultiFields = true,
   maxDocFieldsDisplayed = Number.MAX_SAFE_INTEGER,
-}: UnifiedDataTableProps & Partial<EuiDataGridProps>) => {
+  externalControlColumns,
+  externalAdditionalControls,
+  rowsPerPageOptions,
+}: UnifiedDataTableProps) => {
   const { fieldFormats, toastNotifications, dataViewFieldEditor, uiSettings, storage } = services;
-  const { darkMode } = useObservable(services.core.theme?.theme$ ?? of(themeDefault), themeDefault);
+  const { darkMode } = useObservable(services.theme?.theme$ ?? of(themeDefault), themeDefault);
   const dataGridRef = useRef<EuiDataGridRefProps>(null);
   const [selectedDocs, setSelectedDocs] = useState<string[]>([]);
   const [isFilterActive, setIsFilterActive] = useState(false);
@@ -261,7 +281,7 @@ export const UnifiedDataTable = ({
     }
     const idMap = rows.reduce((map, row) => map.set(row.id, true), new Map());
     // filter out selected docs that are no longer part of the current data
-    const result = selectedDocs.filter((docId) => idMap.get(docId));
+    const result = selectedDocs.filter((docId) => !!idMap.get(docId));
     if (result.length === 0 && isFilterActive) {
       setIsFilterActive(false);
     }
@@ -328,10 +348,17 @@ export const UnifiedDataTable = ({
           onChangePage,
           pageIndex: pagination.pageIndex > pageCount - 1 ? 0 : pagination.pageIndex,
           pageSize: pagination.pageSize,
-          pageSizeOptions: getRowsPerPageOptions(pagination.pageSize),
+          pageSizeOptions: rowsPerPageOptions ?? getRowsPerPageOptions(pagination.pageSize),
         }
       : undefined;
-  }, [pagination, pageCount, isPaginationEnabled, onUpdateRowsPerPage]);
+  }, [
+    isPaginationEnabled,
+    pagination.pageIndex,
+    pagination.pageSize,
+    pageCount,
+    rowsPerPageOptions,
+    onUpdateRowsPerPage,
+  ]);
 
   const isOnLastPage = paginationObj ? paginationObj.pageIndex === pageCount - 1 : false;
 
@@ -523,24 +550,28 @@ export const UnifiedDataTable = ({
   const DocumentView = getDocumentView;
   const canSetExpandedDoc = Boolean(setExpandedDoc && !!DocumentView);
 
-  const lead = useMemo(
+  const internalControlColumns = useMemo(
     () =>
       getLeadControlColumns(canSetExpandedDoc).filter(({ id }) => controlColumnIds.includes(id)),
     [controlColumnIds, canSetExpandedDoc]
   );
 
   const additionalControls = useMemo(
-    () =>
-      usedSelectedDocs.length ? (
-        <DataTableDocumentToolbarBtn
-          isFilterActive={isFilterActive}
-          rows={rows!}
-          selectedDocs={usedSelectedDocs}
-          setSelectedDocs={setSelectedDocs}
-          setIsFilterActive={setIsFilterActive}
-        />
-      ) : null,
-    [usedSelectedDocs, isFilterActive, rows, setIsFilterActive]
+    () => (
+      <>
+        {usedSelectedDocs.length ? (
+          <DataTableDocumentToolbarBtn
+            isFilterActive={isFilterActive}
+            rows={rows!}
+            selectedDocs={usedSelectedDocs}
+            setSelectedDocs={setSelectedDocs}
+            setIsFilterActive={setIsFilterActive}
+          />
+        ) : null}
+        {externalAdditionalControls}
+      </>
+    ),
+    [usedSelectedDocs, isFilterActive, rows, externalAdditionalControls]
   );
 
   const showDisplaySelector = useMemo(
@@ -655,7 +686,11 @@ export const UnifiedDataTable = ({
             columns={euiGridColumns}
             columnVisibility={columnsVisibility}
             data-test-subj="docTable"
-            leadingControlColumns={leadingControlColumns ?? lead}
+            leadingControlColumns={
+              externalControlColumns
+                ? [...internalControlColumns, ...externalControlColumns]
+                : internalControlColumns
+            }
             onColumnResize={onResize}
             pagination={paginationObj}
             renderCellValue={renderCellValue}

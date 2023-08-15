@@ -9,7 +9,7 @@
 import { getStateColumnActions } from './columns';
 import { configMock } from '../../../__mocks__/config';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
-import { dataViewsMock } from '../../../__mocks__/data_views';
+import { dataViewsMock } from '../../__mocks__/data_views';
 import { Capabilities } from '@kbn/core/types';
 import { DiscoverAppState } from '../../../application/main/services/discover_app_state_container';
 

@@ -17,11 +17,15 @@ import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { generateFilters } from '@kbn/data-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
-import { DOC_TABLE_LEGACY, SEARCH_FIELDS_FROM_SOURCE } from '@kbn/discover-utils';
+import {
+  DOC_TABLE_LEGACY,
+  SEARCH_FIELDS_FROM_SOURCE,
+  SORT_DEFAULT_ORDER_SETTING,
+} from '@kbn/discover-utils';
+import { useColumns } from '@kbn/unified-data-table';
 import { ContextErrorMessage } from './components/context_error_message';
 import { LoadingStatus } from './services/context_query_state';
 import { AppState, GlobalState, isEqualFilters } from './services/context_state';
-import { useColumns } from '../../hooks/use_data_grid_columns';
 import { useContextAppState } from './hooks/use_context_app_state';
 import { useContextAppFetch } from './hooks/use_context_app_fetch';
 import { popularizeField } from '../../utils/popularize_field';
@@ -67,11 +71,17 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
 
   const { columns, onAddColumn, onRemoveColumn, onSetColumns } = useColumns({
     capabilities,
-    config: uiSettings,
+    defaultOrder: uiSettings.get(SORT_DEFAULT_ORDER_SETTING),
     dataView,
     dataViews,
     useNewFieldsApi,
-    setAppState: stateContainer.setAppState,
+    setAppState: (newColumns: string[], newSort?: string[][]) => {
+      if (newSort) {
+        stateContainer.setAppState({ columns: newColumns, sort: newSort });
+      } else {
+        stateContainer.setAppState({ columns: newColumns });
+      }
+    },
     columns: appState.columns,
     sort: appState.sort,
   });
