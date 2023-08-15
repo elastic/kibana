@@ -9,7 +9,6 @@ import { ComponentMeta, ComponentStoryObj } from '@storybook/react';
 import { FindActionResult } from '@kbn/actions-plugin/server';
 import { EuiPanel } from '@elastic/eui';
 import { ChatHeader as Component } from './chat_header';
-import { AbortableAsyncState } from '../../hooks/use_abortable_async';
 
 const meta: ComponentMeta<typeof Component> = {
   component: Component,
