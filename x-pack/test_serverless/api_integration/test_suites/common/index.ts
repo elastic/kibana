@@ -14,6 +14,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./security_response_headers'));
     loadTestFile(require.resolve('./rollups'));
     loadTestFile(require.resolve('./index_management'));
-    loadTestFile(require.resolve('./alerting/rules'));
+    loadTestFile(require.resolve('./alerting'));
   });
 }
