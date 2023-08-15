@@ -97,6 +97,7 @@ export const renderApp = ({
                       <RedirectAppLinks
                         application={core.application}
                         className={APP_WRAPPER_CLASS}
+                        data-test-subj="exploratoryViewMainContainer"
                       >
                         <App />
                       </RedirectAppLinks>
