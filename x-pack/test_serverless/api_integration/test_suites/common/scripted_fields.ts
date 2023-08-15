@@ -31,8 +31,8 @@ export default function ({ getService }: FtrProviderContext) {
           data_view: {
             title: 'basic_index',
             fields: {
-              foo: {
-                name: 'foo',
+              foo_scripted: {
+                name: 'foo_scripted',
                 type: 'string',
                 scripted: true,
                 script: "doc['field_name'].value",
@@ -42,7 +42,7 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
       expect(response.status).toBe(200);
-      expect(response.body.data_view.fields.foo).toBeUndefined();
+      expect(response.body.data_view.fields.foo_scripted).toBeUndefined();
     });
   });
 }
