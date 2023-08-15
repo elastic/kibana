@@ -130,7 +130,7 @@ export class AnalyticsService {
         buildFlavor: {
           type: 'keyword',
           _meta: { description: 'Build flavor of the Kibana instance. traditional or serverless' },
-        }
+        },
       },
     });
   }
