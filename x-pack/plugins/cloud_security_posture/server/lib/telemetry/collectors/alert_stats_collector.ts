@@ -7,6 +7,7 @@
 import type { Logger } from '@kbn/core/server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { CloudSecurityAlertsStats } from './types';
+import { DETECTION_ENGINE_ALERTS_INDEX_DEFAULT } from '../../../../common/constants';
 
 interface AlertsStats {
   aggregations: {
@@ -173,13 +174,11 @@ const getAlertsStatsQuery = (index: string) => ({
   },
 });
 
-const DEFAULT_ALERTS_INDEX = '.alerts-security.alerts-default' as const;
-
 export const getAlertsStats = async (
   esClient: ElasticsearchClient,
   logger: Logger
 ): Promise<CloudSecurityAlertsStats[]> => {
-  const index = DEFAULT_ALERTS_INDEX;
+  const index = DETECTION_ENGINE_ALERTS_INDEX_DEFAULT;
 
   try {
     const isIndexExists = await esClient.indices.exists({

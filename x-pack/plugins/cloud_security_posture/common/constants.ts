@@ -127,3 +127,5 @@ export const VULNERABILITIES_SEVERITY: Record<VulnSeverity, VulnSeverity> = {
 export const VULNERABILITIES_ENUMERATION = 'CVE';
 export const SETUP_ACCESS_CLOUD_SHELL = 'google_cloud_shell';
 export const SETUP_ACCESS_MANUAL = 'manual';
+
+export const DETECTION_ENGINE_ALERTS_INDEX_DEFAULT = '.alerts-security.alerts-default';
