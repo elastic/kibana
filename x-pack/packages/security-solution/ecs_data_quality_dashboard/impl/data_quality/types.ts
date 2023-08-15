@@ -187,6 +187,7 @@ export type DataQualityIndexCheckedParams = DataQualityCheckAllCompletedParams &
   errorCount?: number;
   ilmPhase?: string;
   indexId: string;
+  indexName: string;
   unallowedMappingFields?: string[];
   unallowedValueFields?: string[];
 };

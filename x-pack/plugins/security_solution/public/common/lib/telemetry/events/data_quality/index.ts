@@ -28,6 +28,13 @@ export const dataQualityIndexCheckedEvent: DataQualityTelemetryIndexCheckedEvent
         optional: false,
       },
     },
+    indexName: {
+      type: 'keyword',
+      _meta: {
+        description: 'Index name',
+        optional: false,
+      },
+    },
     numberOfIndices: {
       type: 'integer',
       _meta: {

@@ -265,6 +265,7 @@ const IndexPropertiesComponent: React.FC<Props> = ({
             errorCount: error ? 1 : 0,
             ilmPhase,
             indexId,
+            indexName,
             isCheckAll: false,
             numberOfDocuments: docsCount,
             numberOfIncompatibleFields: indexIncompatible,
