@@ -39,7 +39,8 @@ import {
 } from '../../../../screens/exceptions';
 import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
 
-describe('Auto populate exception with Alert data', () => {
+// See https://github.com/elastic/kibana/issues/163967
+describe.skip('Auto populate exception with Alert data', () => {
   const ITEM_NAME = 'Sample Exception Item';
   const ITEM_NAME_EDIT = 'Sample Exception Item Edit';
   const ADDITIONAL_ENTRY = 'host.hostname';

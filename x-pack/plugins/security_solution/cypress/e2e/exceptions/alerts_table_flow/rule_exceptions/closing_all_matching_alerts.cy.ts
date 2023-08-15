@@ -27,7 +27,8 @@ import {
   submitNewExceptionItem,
 } from '../../../../tasks/exceptions';
 
-describe('Close matching Alerts ', () => {
+// See https://github.com/elastic/kibana/issues/163967
+describe.skip('Close matching Alerts ', () => {
   const newRule = getNewRule();
   const ITEM_NAME = 'Sample Exception Item';
 
