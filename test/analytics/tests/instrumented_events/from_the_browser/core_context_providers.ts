@@ -44,6 +44,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(event.context.buildNum).to.be.a('number');
       expect(event.context).to.have.property('buildSha');
       expect(event.context.buildSha).to.be.a('string');
+      expect(event.context).to.have.property('buildFlavor');
       expect(event.context.buildFlavor).to.be.a('string');
     });
 
