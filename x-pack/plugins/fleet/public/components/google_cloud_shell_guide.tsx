@@ -26,7 +26,7 @@ const Link = ({ children, url }: { children: React.ReactNode; url: string }) => 
 export const GoogleCloudShellGuide = (props: { commandText: string }) => {
   return (
     <>
-      <EuiSpacer size="m" />
+      <EuiSpacer size="xs" />
       <EuiText size="s" color="subdued">
         <p>
           <FormattedMessage
